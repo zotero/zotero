@@ -29,7 +29,7 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 		);
 	}
 	
-	this.notify = Zotero.Promise.method(function (event, type, ids, extraData) {
+	this.notify = function (event, type, ids, extraData) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(type);
 		if (!syncObjectTypeID) {
 			return;
@@ -94,7 +94,7 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 				}
 			}
 		);
-	});
+	};
 }
 
 

@@ -136,9 +136,9 @@ Zotero.PreferencePanes = {
 			id: options.id || `plugin-pane-${Zotero.Utilities.randomString()}-${options.pluginID}`,
 			pluginID: options.pluginID,
 			parent: options.parent,
-			rawLabel: options.label || await Zotero.Plugins.getName(options.pluginID),
-			image: options.image && await Zotero.Plugins.resolveURI(options.pluginID, options.image)
-				|| await Zotero.Plugins.getIconURI(options.pluginID, 24),
+			rawLabel: options.label || (await Zotero.Plugins.getName(options.pluginID)),
+			image: options.image && (await Zotero.Plugins.resolveURI(options.pluginID, options.image))
+				|| (await Zotero.Plugins.getIconURI(options.pluginID, 24)),
 			src: await Zotero.Plugins.resolveURI(options.pluginID, options.src),
 			scripts: await Promise.all(options.scripts.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
 			stylesheets: await Promise.all(options.stylesheets.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),

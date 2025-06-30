@@ -27,7 +27,7 @@
 /*
  * Constructor for FeedItem object
  */
-Zotero.FeedItem = function(itemTypeOrID, params = {}) {
+Zotero.FeedItem = function (itemTypeOrID, params = {}) {
 	Zotero.FeedItem._super.call(this, itemTypeOrID);
 	
 	this._feedItemReadTime = null;
@@ -46,8 +46,8 @@ Zotero.defineProperty(Zotero.FeedItem.prototype, 'isFeedItem', {
 });
 
 Zotero.defineProperty(Zotero.FeedItem.prototype, 'guid', {
-	get: function() { return this._feedItemGUID; },
-	set: function(val) {
+	get: function () { return this._feedItemGUID; },
+	set: function (val) {
 		if (this.id) throw new Error('Cannot set GUID after item ID is already set');
 		if (typeof val != 'string') throw new Error('GUID must be a non-empty string');
 		this._feedItemGUID = val;
@@ -55,10 +55,10 @@ Zotero.defineProperty(Zotero.FeedItem.prototype, 'guid', {
 });
 
 Zotero.defineProperty(Zotero.FeedItem.prototype, 'isRead', {
-	get: function() {
+	get: function () {
 		return !!this._feedItemReadTime;
 	},
-	set: function(read) {
+	set: function (read) {
 		if (!read != !this._feedItemReadTime) {
 			// changed
 			if (read) {
@@ -72,10 +72,10 @@ Zotero.defineProperty(Zotero.FeedItem.prototype, 'isRead', {
 });
 //
 Zotero.defineProperty(Zotero.FeedItem.prototype, 'isTranslated', {
-	get: function() {
+	get: function () {
 		return !!this._feedItemTranslatedTime;
 	}, 
-	set: function(state) {
+	set: function (state) {
 		if (state != !!this._feedItemTranslatedTime) {
 			if (state) {
 				this._feedItemTranslatedTime = Zotero.Date.dateToSQL(new Date(), true);
@@ -87,15 +87,15 @@ Zotero.defineProperty(Zotero.FeedItem.prototype, 'isTranslated', {
 	}
 });
 
-Zotero.FeedItem.prototype.loadPrimaryData = Zotero.Promise.coroutine(function* (reload, failOnMissing) {
+Zotero.FeedItem.prototype.loadPrimaryData = async function (reload, failOnMissing) {
 	if (this.guid && !this.id) {
 		// fill in item ID
-		this.id = yield this.ObjectsClass.getIDFromGUID(this.guid);
+		this.id = await this.ObjectsClass.getIDFromGUID(this.guid);
 	}
-	yield Zotero.FeedItem._super.prototype.loadPrimaryData.apply(this, arguments);
-});
+	await Zotero.FeedItem._super.prototype.loadPrimaryData.apply(this, arguments);
+};
 
-Zotero.FeedItem.prototype.setField = function(field, value) {
+Zotero.FeedItem.prototype.setField = function (field, value) {
 	if (field == 'libraryID') {
 		// Ensure that it references a feed
 		if (!Zotero.Libraries.get(value).isFeed) {
@@ -106,7 +106,7 @@ Zotero.FeedItem.prototype.setField = function(field, value) {
 	return Zotero.FeedItem._super.prototype.setField.apply(this, arguments);
 }
 
-Zotero.FeedItem.prototype.fromJSON = function(json) {
+Zotero.FeedItem.prototype.fromJSON = function (json) {
 	// Spaghetti to handle weird date formats in feedItems
 	let val = json.date;
 	if (val) {
@@ -133,17 +133,17 @@ Zotero.FeedItem.prototype.fromJSON = function(json) {
 	Zotero.FeedItem._super.prototype.fromJSON.apply(this, arguments);
 }
 
-Zotero.FeedItem.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
+Zotero.FeedItem.prototype._initSave = async function (env) {
 	if (!this.guid) {
 		throw new Error('GUID must be set before saving ' + this._ObjectType);
 	}
 	
-	let proceed = yield Zotero.FeedItem._super.prototype._initSave.apply(this, arguments);
+	let proceed = await Zotero.FeedItem._super.prototype._initSave.apply(this, arguments);
 	if (!proceed) return proceed;
 	
 	if (env.isNew) {
 		// verify that GUID doesn't already exist for a new item
-		var item = yield this.ObjectsClass.getIDFromGUID(this.guid);
+		var item = await this.ObjectsClass.getIDFromGUID(this.guid);
 		if (item) {
 			throw new Error('Cannot create new item with GUID ' + this.guid + '. Item already exists.');
 		}
@@ -158,14 +158,14 @@ Zotero.FeedItem.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	return proceed;
-});
+};
 
-Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
-	yield Zotero.FeedItem._super.prototype._saveData.apply(this, arguments);
+Zotero.FeedItem.prototype._saveData = async function (env) {
+	await Zotero.FeedItem._super.prototype._saveData.apply(this, arguments);
 	
 	if (this._changed.feedItemData || env.isNew) {
 		var sql = "REPLACE INTO feedItems VALUES (?,?,?,?)";
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			[
 				this.id,
@@ -177,27 +177,27 @@ Zotero.FeedItem.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		
 		this._clearChanged('feedItemData');
 	}
-});
+};
 
-Zotero.FeedItem.prototype._finalizeErase = Zotero.Promise.coroutine(function* () {
+Zotero.FeedItem.prototype._finalizeErase = async function () {
 	// Set for syncing
 	let feed = Zotero.Feeds.get(this.libraryID);
 	
 	return Zotero.FeedItem._super.prototype._finalizeErase.apply(this, arguments);
-});
+};
 
-Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state) {
+Zotero.FeedItem.prototype.toggleRead = async function (state) {
 	state = state !== undefined ? !!state : !this.isRead;
 	let changed = this.isRead != state;
 	if (changed) {
 		this.isRead = state;
 		
-		yield this.saveTx();
+		await this.saveTx();
 
 		let feed = Zotero.Feeds.get(this.libraryID);
-		yield feed.updateUnreadCount();
+		await feed.updateUnreadCount();
 	}
-});
+};
 
 /**
  * Uses the item url to translate an existing feed item.
@@ -217,7 +217,7 @@ Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
 		return;
 	}
 
-	let error = function(e) {  };
+	let error = function (e) {  };
 	let translate = new RemoteTranslate();
 	var win = Services.wm.getMostRecentWindow("navigator:browser");
 	let progressWindow = win.ZoteroPane.progressWindow;
@@ -300,23 +300,23 @@ Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
  * @param {Browser} [browser]
  * @return {Promise<FeedItem|Item>} translated feed item
  */
-Zotero.FeedItem.prototype.clone = Zotero.Promise.coroutine(function* (libraryID, collectionID, browser) {
+Zotero.FeedItem.prototype.clone = async function (libraryID, collectionID, browser) {
 	let dbItem = Zotero.Item.prototype.clone.call(this, libraryID);
 	if (collectionID) {
 		dbItem.addToCollection(collectionID);
 	}
-	yield dbItem.saveTx();
+	await dbItem.saveTx();
 	
 	let item = {title: dbItem.getField('title'), itemType: dbItem.itemType, attachments: []};
 	
 	// Add snapshot
 	if (Zotero.Libraries.get(libraryID).filesEditable && browser) {
 		item.attachments = [{title: "Snapshot"}];
-		yield Zotero.Attachments.importFromDocument({
+		await Zotero.Attachments.importFromDocument({
 			browser,
 			parentItemID: dbItem.id
 		});
 	}
 	
 	return item;
-});
+};

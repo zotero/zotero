@@ -24,7 +24,7 @@ Zotero.Sync.Storage.Utilities = {
 	 * @param	{Zotero.Sync.Storage.Request}		request
 	 * @return {Promise<Boolean>} - True if the zip file was created, false otherwise
 	 */
-	createUploadFile: Zotero.Promise.coroutine(function* (request) {
+	createUploadFile: async function (request) {
 		var item = this.getItemFromRequest(request);
 		Zotero.debug("Creating ZIP file for item " + item.libraryKey);
 		
@@ -63,7 +63,7 @@ Zotero.Sync.Storage.Utilities = {
 				}
 			}
 		);
-	}),
+	},
 	
 	
 	/**

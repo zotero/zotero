@@ -27,7 +27,7 @@
  * Functions for reading files
  * @namespace
  */
-Zotero.File = new function(){
+Zotero.File = new function () {
 	Components.utils.import("resource://gre/modules/NetUtil.jsm");
 	Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	
@@ -69,7 +69,7 @@ Zotero.File = new function(){
 	 * @param {String} path File path
 	 * @return {String} Encoded file path
 	 */
-	this.encodeFilePath = function(path) {
+	this.encodeFilePath = function (path) {
 		var parts = path.split(/([\\\/:]+)/);
 		// Every other item is the separator
 		for (var i=0, n=parts.length; i<n; i+=2) {
@@ -109,7 +109,7 @@ Zotero.File = new function(){
 		}
 		
 		var dir = PathUtils.parent(file);
-		while (dir && dir != '/' && !await OS.File.exists(dir)) {
+		while (dir && dir != '/' && !(await OS.File.exists(dir))) {
 			dir = PathUtils.parent(dir);
 		}
 		
@@ -132,7 +132,7 @@ Zotero.File = new function(){
 	/**
 	 * Get contents of a binary file
 	 */
-	this.getBinaryContents = function(file) {
+	this.getBinaryContents = function (file) {
 		Zotero.debug("Zotero.File.getBinaryContents() is deprecated -- "
 			+ "use Zotero.File.getBinaryContentsAsync() when possible", 2);
 		var iStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
@@ -234,7 +234,7 @@ Zotero.File = new function(){
 				|| source instanceof Components.interfaces.nsIChannel) {
 			var deferred = Zotero.Promise.defer();
 			try {
-				NetUtil.asyncFetch(source, function(inputStream, status) {
+				NetUtil.asyncFetch(source, function (inputStream, status) {
 					if (!Components.isSuccessCode(status)) {
 						deferred.reject(new Components.Exception("File read operation failed", status));
 						return;
@@ -310,7 +310,7 @@ Zotero.File = new function(){
 	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes
 	 * @return {Promise<String>} A promise for the contents of the source as a binary string
 	 */
-	this.getBinaryContentsAsync = Zotero.Promise.coroutine(function* (source, maxLength) {
+	this.getBinaryContentsAsync = async function (source, maxLength) {
 		// Use OS.File for files
 		if (source instanceof Components.interfaces.nsIFile) {
 			source = source.path;
@@ -322,9 +322,9 @@ Zotero.File = new function(){
 		if (maxLength) {
 			options.bytes = maxLength;
 		}
-		var buf = yield OS.File.read(source, options);
+		var buf = await OS.File.read(source, options);
 		return [...buf].map(x => String.fromCharCode(x)).join("");
-	});
+	};
 	
 	
 	/*
@@ -365,7 +365,7 @@ Zotero.File = new function(){
 	/*
 	 * Return a promise for the contents of a URL as a string
 	 */
-	function getContentsFromURLAsync (url, options={}) {
+	function getContentsFromURLAsync(url, options={}) {
 		return Zotero.HTTP.request("GET", url, Object.assign(options, { responseType: "text" }))
 		.then(function (xmlhttp) {
 			return xmlhttp.response;
@@ -407,7 +407,7 @@ Zotero.File = new function(){
 		}
 		
 		if (typeof data == 'string') {
-			return Zotero.Promise.resolve(OS.File.writeAtomic(
+			return Promise.resolve(OS.File.writeAtomic(
 				path,
 				data,
 				{
@@ -423,7 +423,7 @@ Zotero.File = new function(){
 		if (typeof data.size != 'undefined' && typeof data.slice == 'function') {
 			let arrayBuffer = await new Zotero.Promise(function (resolve) {
 				let fr = new FileReader();
-				fr.addEventListener("loadend", function() {
+				fr.addEventListener("loadend", function () {
 					resolve(fr.result);
 				});
 				fr.readAsArrayBuffer(data);
@@ -436,7 +436,7 @@ Zotero.File = new function(){
 		
 		await new Zotero.Promise(function (resolve, reject) {
 			var os = FileUtils.openSafeFileOutputStream(new FileUtils.File(path));
-			NetUtil.asyncCopy(data, os, function(inputStream, status) {
+			NetUtil.asyncCopy(data, os, function (inputStream, status) {
 				if (!Components.isSuccessCode(status)) {
 					reject(new Components.Exception("File write operation failed", status));
 					return;
@@ -564,7 +564,7 @@ Zotero.File = new function(){
 			}
 		});
 
-		NetUtil.asyncCopy(pipe.inputStream, outputChannel, function(aResult) {
+		NetUtil.asyncCopy(pipe.inputStream, outputChannel, function (aResult) {
 			deferred.resolve();
 		});
 		inputChannel.asyncOpen(listener, null);
@@ -661,7 +661,7 @@ Zotero.File = new function(){
 	 * @return {Promise<Boolean>} A promise for TRUE if file was deleted, FALSE if missing
 	 */
 	this.removeIfExists = function (path) {
-		return Zotero.Promise.resolve(OS.File.remove(path))
+		return Promise.resolve(OS.File.remove(path))
 		.return(true)
 		.catch(function (e) {
 			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
@@ -737,13 +737,13 @@ Zotero.File = new function(){
 	 * @param {Function} options.noOverwrite - Function that returns true if the file at the given
 	 *     path should throw an error rather than overwrite an existing file in the target
 	 */
-	this.moveDirectory = Zotero.Promise.coroutine(function* (oldDir, newDir, options = {}) {
+	this.moveDirectory = async function (oldDir, newDir, options = {}) {
 		var maxDepth = options.maxDepth || 10;
 		var cmd = "/bin/mv";
 		var useCmd = this.canMoveDirectoryWithCommand();
 		var useFunction = this.canMoveDirectoryWithFunction();
 		
-		if (!options.allowExistingTarget && (yield OS.File.exists(newDir))) {
+		if (!options.allowExistingTarget && ((await OS.File.exists(newDir)))) {
 			throw new Error(newDir + " exists");
 		}
 		
@@ -766,12 +766,12 @@ Zotero.File = new function(){
 		}
 		
 		var rootDir = oldDir;
-		var moveSubdirs = Zotero.Promise.coroutine(function* (oldDir, depth) {
+		var moveSubdirs = async function (oldDir, depth) {
 			if (!depth) return;
 			
 			// Create target directory
 			try {
-				yield Zotero.File.createDirectoryIfMissingAsync(newDir + oldDir.substr(rootDir.length));
+				await Zotero.File.createDirectoryIfMissingAsync(newDir + oldDir.substr(rootDir.length));
 			}
 			catch (e) {
 				addError(e);
@@ -780,7 +780,7 @@ Zotero.File = new function(){
 			
 			Zotero.debug("Moving files in " + oldDir);
 			
-			yield Zotero.File.iterateDirectory(oldDir, async function (entry) {
+			await Zotero.File.iterateDirectory(oldDir, async function (entry) {
 				var dest = newDir + entry.path.substr(rootDir.length);
 				
 				// entry.isDir can be false for some reason on Travis, causing spurious test failures
@@ -830,7 +830,7 @@ Zotero.File = new function(){
 					// If can't use command, try moving with IOUtils.move()
 					if (!moved && useFunction) {
 						Zotero.debug(`Moving ${entry.path} with IOUtils`);
-						if (!await IOUtils.exists(dest)) {
+						if (!(await IOUtils.exists(dest))) {
 							try {
 								await IOUtils.move(entry.path, dest);
 								moved = true;
@@ -862,17 +862,17 @@ Zotero.File = new function(){
 			if (!errors.length || oldDir != rootDir) {
 				Zotero.debug("Removing " + oldDir);
 				try {
-					yield OS.File.removeEmptyDir(oldDir);
+					await OS.File.removeEmptyDir(oldDir);
 				}
 				catch (e) {
 					addError(e);
 				}
 			}
-		});
+		};
 		
-		yield moveSubdirs(oldDir, maxDepth);
+		await moveSubdirs(oldDir, maxDepth);
 		return errors;
-	});
+	};
 	
 	
 	/**
@@ -1075,11 +1075,11 @@ Zotero.File = new function(){
 	 * @param {String|nsIFile} source - Source directory
 	 * @param {String|nsIFile} target - Target directory
 	 */
-	this.copyDirectory = Zotero.Promise.coroutine(function* (source, target) {
+	this.copyDirectory = async function (source, target) {
 		if (source instanceof Ci.nsIFile) source = source.path;
 		if (target instanceof Ci.nsIFile) target = target.path;
 		
-		yield OS.File.makeDir(target, {
+		await OS.File.makeDir(target, {
 			ignoreExisting: true,
 			unixMode: 0o755
 		});
@@ -1089,7 +1089,7 @@ Zotero.File = new function(){
 				? this.copyDirectory(entry.path, OS.Path.join(target, entry.name))
 				: OS.File.copy(entry.path, OS.Path.join(target, entry.name));
 		}.bind(this))
-	});
+	};
 	
 	
 	this.createDirectoryIfMissing = function (dir) {
@@ -1237,15 +1237,15 @@ Zotero.File = new function(){
 	 * @param {nsIRequestObserver} [observer]
 	 * @return {Promise}
 	 */
-	this.zipDirectory = Zotero.Promise.coroutine(function* (dirPath, zipPath, observer) {
+	this.zipDirectory = async function (dirPath, zipPath, observer) {
 		var zw = Components.classes["@mozilla.org/zipwriter;1"]
 			.createInstance(Components.interfaces.nsIZipWriter);
 		zw.open(this.pathToFile(zipPath), 0x04 | 0x08 | 0x20); // open rw, create, truncate
-		var entries = yield _addZipEntries(dirPath, dirPath, zw);
+		var entries = await _addZipEntries(dirPath, dirPath, zw);
 		if (entries.length == 0) {
 			Zotero.debug('No files to add -- removing ZIP file');
 			zw.close();
-			yield OS.File.remove(zipPath);
+			await OS.File.remove(zipPath);
 			return false;
 		}
 		
@@ -1288,17 +1288,17 @@ Zotero.File = new function(){
 			{}
 		);
 		return deferred.promise;
-	});
+	};
 	
 	
-	var _addZipEntries = Zotero.Promise.coroutine(function* (rootPath, path, zipWriter) {
+	var _addZipEntries = async function (rootPath, path, zipWriter) {
 		var entries = [];
 		let iterator;
 		try {
 			iterator = new OS.File.DirectoryIterator(path);
-			yield iterator.forEach(Zotero.Promise.coroutine(function* (entry) {
+			await iterator.forEach(async function (entry) {
 				// entry.isDir can be false for some reason on Travis, causing spurious test failures
-				if (Zotero.automatedTest && !entry.isDir && (yield OS.File.stat(entry.path)).isDir) {
+				if (Zotero.automatedTest && !entry.isDir && ((await OS.File.stat(entry.path))).isDir) {
 					Zotero.debug("Overriding isDir for " + entry.path);
 					entry.isDir = true;
 				}
@@ -1308,7 +1308,7 @@ Zotero.File = new function(){
 					return;
 				}
 				if (entry.isDir) {
-					entries.concat(yield _addZipEntries(rootPath, entry.path, zipWriter));
+					entries.concat(await _addZipEntries(rootPath, entry.path, zipWriter));
 					return;
 				}
 				if (entry.name.startsWith('.')) {
@@ -1328,13 +1328,13 @@ Zotero.File = new function(){
 					name: entry.name,
 					path: entry.path
 				});
-			}));
+			});
 		}
 		finally {
 			iterator.close();
 		}
 		return entries;
-	});
+	};
 	
 	
 	/**
@@ -1528,8 +1528,8 @@ Zotero.File = new function(){
 	};
 	
 	
-	this.reveal = Zotero.Promise.coroutine(function* (file) {
-		if (!(yield OS.File.exists(file))) {
+	this.reveal = async function (file) {
+		if (!((await OS.File.exists(file)))) {
 			throw new Error(file + " does not exist");
 		}
 		
@@ -1546,7 +1546,7 @@ Zotero.File = new function(){
 			let zp = Zotero.getActiveZoteroPane();
 			if (zp) {
 				try {
-					let info = yield OS.File.stat(file);
+					let info = await OS.File.stat(file);
 					// Launch parent directory for files
 					if (!info.isDir) {
 						file = PathUtils.parent(file);
@@ -1562,5 +1562,5 @@ Zotero.File = new function(){
 				Zotero.logError(e);
 			}
 		}
-	});
+	};
 }

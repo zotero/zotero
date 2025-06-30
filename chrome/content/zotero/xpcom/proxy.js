@@ -32,7 +32,7 @@ Components.utils.importGlobalProperties(["URL"]);
  * @property proxies {Zotero.Proxy[]} All loaded proxies
  * @property hosts {Zotero.Proxy{}} Object mapping hosts to proxies
  */
-Zotero.Proxies = new function() {
+Zotero.Proxies = new function () {
 	this.proxies = false;
 	this.transparent = false;
 	this.hosts = {};
@@ -41,10 +41,10 @@ Zotero.Proxies = new function() {
 	/**
 	 * Initializes http-on-examine-response observer to intercept page loads and gets preferences
 	 */
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		if(!this.proxies) {
-			var rows = yield Zotero.DB.queryAsync("SELECT * FROM proxies");
-			Zotero.Proxies.proxies = yield Zotero.Promise.all(
+			var rows = await Zotero.DB.queryAsync("SELECT * FROM proxies");
+			Zotero.Proxies.proxies = await Promise.all(
 				rows.map(row => this.newProxyFromRow(row))
 			);
 			
@@ -66,25 +66,25 @@ Zotero.Proxies = new function() {
 		Zotero.Proxies.disabledByDomain = false;
 		
 		Zotero.Proxies.showRedirectNotification = Zotero.Prefs.get("proxies.showRedirectNotification");
-	});
+	};
 	
 	
 	/**
 	 * @param {Object} row - Database row with proxy data
 	 * @return {Promise<Zotero.Proxy>}
 	 */
-	this.newProxyFromRow = Zotero.Promise.coroutine(function* (row) {
+	this.newProxyFromRow = async function (row) {
 		var proxy = new Zotero.Proxy(row);
-		yield proxy.loadHosts();
+		await proxy.loadHosts();
 		return proxy;
-	});
+	};
 	
 	
 	/**
 	 * Removes a proxy object from the list of proxy objects
 	 * @returns {Boolean} True if the proxy was in the list, false if it was not
 	 */
-	this.remove = function(proxy) {
+	this.remove = function (proxy) {
 		var index = Zotero.Proxies.proxies.indexOf(proxy);
 		if(index == -1) return false;
 		// remove proxy from proxy list
@@ -101,7 +101,7 @@ Zotero.Proxies = new function() {
 	/**
 	 * Inserts a proxy into the host map; necessary when proxies are added
 	 */
-	this.save = function(proxy) {
+	this.save = function (proxy) {
 		// add to list of proxies
 		if(Zotero.Proxies.proxies.indexOf(proxy) == -1) Zotero.Proxies.proxies.push(proxy);
 		
@@ -117,7 +117,7 @@ Zotero.Proxies = new function() {
 	/**
 	 * Refreshes host map; necessary when proxies are changed or deleted
 	 */
-	this.refreshHostMap = function(proxy) {
+	this.refreshHostMap = function (proxy) {
 		// if there is no proxyID, then return immediately, since there is no need to update
 		if(!proxy.proxyID) return;
 		
@@ -139,7 +139,7 @@ Zotero.Proxies = new function() {
 	 *	function will return "false" if the given URL is unproxied.
 	 * @type String
 	 */
-	this.proxyToProper = function(url, onlyReturnIfProxied) {
+	this.proxyToProper = function (url, onlyReturnIfProxied) {
 		// make sure url has a trailing slash
 		url = new URL(url).href;
 		for (let proxy of Zotero.Proxies.proxies) {
@@ -163,7 +163,7 @@ Zotero.Proxies = new function() {
 	 *	function will return "false" if the given URL is unproxied.
 	 * @type String
 	 */
-	this.properToProxy = function(url, onlyReturnIfProxied) {
+	this.properToProxy = function (url, onlyReturnIfProxied) {
 		var uri = Services.io.newURI(url, null, null);
 		if(Zotero.Proxies.hosts[uri.hostPort] && Zotero.Proxies.hosts[uri.hostPort].proxyID) {
 			var toProxy = Zotero.Proxies.hosts[uri.hostPort].toProxy(uri);
@@ -180,7 +180,7 @@ Zotero.Proxies = new function() {
 	 * @param url
 	 * @returns {Object} Unproxied url to proxy object
 	 */
-	this.getPotentialProxies = function(url) {
+	this.getPotentialProxies = function (url) {
 		// make sure url has a trailing slash
 		url = new URL(url).href;
 		var urlToProxy = {};
@@ -260,7 +260,7 @@ Zotero.Proxy.prototype._loadFromRow = function (row) {
 	}
 };
 
-Zotero.Proxy.prototype.toJSON = function() {
+Zotero.Proxy.prototype.toJSON = function () {
 	if (!this.scheme) {
 		throw Error('Cannot convert proxy to JSON - no scheme');
 	}
@@ -294,7 +294,7 @@ const Zotero_Proxy_schemeParameterRegexps = {
  * Compiles the regular expression against which we match URLs to determine if this proxy is in use
  * and saves it in this.regexp
  */
-Zotero.Proxy.prototype.compileRegexp = function() {
+Zotero.Proxy.prototype.compileRegexp = function () {
 	// take host only if flagged as multiHost
 	var parametersToCheck = Zotero_Proxy_schemeParameters;
 	if(this.multiHost) parametersToCheck["%h"] = "([a-zA-Z0-9]+[.\\-][a-zA-Z0-9.\\-]+)";
@@ -317,7 +317,7 @@ Zotero.Proxy.prototype.compileRegexp = function() {
 	}
 	
 	// sort params by index
-	this.parameters = this.parameters.sort(function(a, b) {
+	this.parameters = this.parameters.sort(function (a, b) {
 		return indices[a]-indices[b];
 	})
 	
@@ -341,7 +341,7 @@ Zotero.Proxy.prototype.compileRegexp = function() {
  * @returns {String|Boolean} An error type if a validation error occurred, or "false" if there was
  *	no error.
  */
-Zotero.Proxy.prototype.validate = function() {
+Zotero.Proxy.prototype.validate = function () {
 	if(this.scheme.length < 8 || (this.scheme.substr(0, 7) != "http://" && this.scheme.substr(0, 8) != "https://")) {
 		return ["scheme.noHTTP"];
 	}
@@ -377,7 +377,7 @@ Zotero.Proxy.prototype.validate = function() {
  *
  * @param {Boolean} transparent True if proxy should be saved as a persisting, transparent proxy
  */
-Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
+Zotero.Proxy.prototype.save = async function (transparent) {
 	// ensure this proxy is valid
 	var hasErrors = this.validate();
 	if(hasErrors) throw new Error("Proxy: could not be saved because it is invalid: error "+hasErrors[0]);
@@ -389,7 +389,7 @@ Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
 	this.compileRegexp();
 	
 	if(transparent) {
-		yield Zotero.DB.executeTransaction(async function () {
+		await Zotero.DB.executeTransaction(async function () {
 			if(this.proxyID) {
 				await Zotero.DB.queryAsync(
 					"UPDATE proxies SET multiHost = ?, autoAssociate = ?, scheme = ? WHERE proxyID = ?",
@@ -423,31 +423,31 @@ Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
 		Zotero.Proxies.refreshHostMap(this);
 		if(!transparent) throw new Error("Proxy: cannot save transparent proxy without transparent param");
 	}
-});
+};
 
 /**
  * Reverts to the previously saved version of this proxy
  */
-Zotero.Proxy.prototype.revert = Zotero.Promise.coroutine(function* () {
+Zotero.Proxy.prototype.revert = async function () {
 	if (!this.proxyID) throw new Error("Cannot revert an unsaved proxy");
-	var row = yield Zotero.DB.rowQueryAsync("SELECT * FROM proxies WHERE proxyID = ?", [this.proxyID]);
+	var row = await Zotero.DB.rowQueryAsync("SELECT * FROM proxies WHERE proxyID = ?", [this.proxyID]);
 	this._loadFromRow(row);
-	yield this.loadHosts();
-});
+	await this.loadHosts();
+};
 
 /**
  * Deletes this proxy
  */
-Zotero.Proxy.prototype.erase = Zotero.Promise.coroutine(function* () {
+Zotero.Proxy.prototype.erase = async function () {
 	Zotero.Proxies.remove(this);
 	
 	if(this.proxyID) {
-		yield Zotero.DB.executeTransaction(async function () {
+		await Zotero.DB.executeTransaction(async function () {
 			await Zotero.DB.queryAsync("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
 			await Zotero.DB.queryAsync("DELETE FROM proxies WHERE proxyID = ?", [this.proxyID]);
 		}.bind(this));
 	}
-});
+};
 
 /**
  * Converts a proxied URL to an unproxied URL using this proxy
@@ -455,7 +455,7 @@ Zotero.Proxy.prototype.erase = Zotero.Promise.coroutine(function* () {
  * @param m {String|Array} The URL or the match from running this proxy's regexp against a URL spec
  * @return {String} The unproxified URL if was proxified or the unchanged URL
  */
-Zotero.Proxy.prototype.toProper = function(m) {
+Zotero.Proxy.prototype.toProper = function (m) {
 	if (!Array.isArray(m)) {
 		// make sure url has a trailing slash
 		m = new URL(m).href;
@@ -497,7 +497,7 @@ Zotero.Proxy.prototype.toProper = function(m) {
  * @param {String|nsIURI} uri The URL as a string or the nsIURI corresponding to the unproxied URL
  * @return {String} The proxified URL if was unproxified or the unchanged url
  */
-Zotero.Proxy.prototype.toProxy = function(uri) {
+Zotero.Proxy.prototype.toProxy = function (uri) {
 	if (typeof uri == "string") {
 		uri = Services.io.newURI(uri, null, null);
 	}
@@ -525,26 +525,26 @@ Zotero.Proxy.prototype.toProxy = function(uri) {
 	return proxyURL;
 }
 
-Zotero.Proxy.prototype.loadHosts = Zotero.Promise.coroutine(function* () {
+Zotero.Proxy.prototype.loadHosts = async function () {
 	if (!this.proxyID) {
 		throw Error("Cannot load hosts without a proxyID")
 	}
-	this.hosts = yield Zotero.DB.columnQueryAsync(
+	this.hosts = await Zotero.DB.columnQueryAsync(
 		"SELECT hostname FROM proxyHosts WHERE proxyID = ? ORDER BY hostname", this.proxyID
 	);
-});
+};
 
-Zotero.Proxies.DNS = new function() {
-	this.getHostnames = function() {
-		if (!Zotero.isWin && !Zotero.isMac && !Zotero.isLinux) return Zotero.Promise.resolve([]);
+Zotero.Proxies.DNS = new function () {
+	this.getHostnames = function () {
+		if (!Zotero.isWin && !Zotero.isMac && !Zotero.isLinux) return Promise.resolve([]);
 		var deferred = Zotero.Promise.defer();
 		var worker = new ChromeWorker("chrome://zotero/content/xpcom/dns_worker.js");
 		Zotero.debug("Proxies.DNS: Performing reverse lookup");
-		worker.onmessage = function(e) {
+		worker.onmessage = function (e) {
 			Zotero.debug("Proxies.DNS: Got hostnames "+e.data);
 			deferred.resolve(e.data);
 		};
-		worker.onerror = function(e) {
+		worker.onerror = function (e) {
 			Zotero.debug("Proxies.DNS: Reverse lookup failed");
 			deferred.reject(e.message);
 		};

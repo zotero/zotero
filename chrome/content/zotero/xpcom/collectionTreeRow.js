@@ -91,12 +91,12 @@ Zotero.CollectionTreeRow.prototype.isLibrary = function (includeGlobal)
 	return this.type == 'library';
 }
 
-Zotero.CollectionTreeRow.prototype.isCollection = function()
+Zotero.CollectionTreeRow.prototype.isCollection = function ()
 {
 	return this.type == 'collection';
 }
 
-Zotero.CollectionTreeRow.prototype.isSearch = function()
+Zotero.CollectionTreeRow.prototype.isSearch = function ()
 {
 	return this.type == 'search';
 }
@@ -113,7 +113,7 @@ Zotero.CollectionTreeRow.prototype.isRetracted = function () {
 	return this.type == 'retracted';
 }
 
-Zotero.CollectionTreeRow.prototype.isTrash = function()
+Zotero.CollectionTreeRow.prototype.isTrash = function ()
 {
 	return this.type == 'trash';
 }
@@ -122,23 +122,23 @@ Zotero.CollectionTreeRow.prototype.isHeader = function () {
 	return this.type == 'header';
 }
 
-Zotero.CollectionTreeRow.prototype.isPublications = function() {
+Zotero.CollectionTreeRow.prototype.isPublications = function () {
 	return this.type == 'publications';
 }
 
-Zotero.CollectionTreeRow.prototype.isGroup = function() {
+Zotero.CollectionTreeRow.prototype.isGroup = function () {
 	return this.type == 'group';
 }
 
-Zotero.CollectionTreeRow.prototype.isFeed = function() {
+Zotero.CollectionTreeRow.prototype.isFeed = function () {
 	return this.type == 'feed';
 }
 
-Zotero.CollectionTreeRow.prototype.isFeeds = function() {
+Zotero.CollectionTreeRow.prototype.isFeeds = function () {
 	return this.type == 'feeds';
 }
 
-Zotero.CollectionTreeRow.prototype.isFeedsOrFeed = function() {
+Zotero.CollectionTreeRow.prototype.isFeedsOrFeed = function () {
 	return this.isFeeds() || this.isFeed();
 }
 
@@ -146,17 +146,17 @@ Zotero.CollectionTreeRow.prototype.isSeparator = function () {
 	return this.type == 'separator';
 }
 
-Zotero.CollectionTreeRow.prototype.isBucket = function()
+Zotero.CollectionTreeRow.prototype.isBucket = function ()
 {
 	return this.type == 'bucket';
 }
 
-Zotero.CollectionTreeRow.prototype.isShare = function()
+Zotero.CollectionTreeRow.prototype.isShare = function ()
 {
 	return this.type == 'share';
 }
 
-Zotero.CollectionTreeRow.prototype.isContainer = function() {
+Zotero.CollectionTreeRow.prototype.isContainer = function () {
 	return this.isLibrary(true) || this.isCollection() || this.isPublications() || this.isBucket() || this.isFeeds();
 }
 
@@ -226,12 +226,12 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 Zotero.CollectionTreeRow.visibilityGroups = {'feed': 'feed', 'feeds': 'feeds'};
 
 
-Zotero.CollectionTreeRow.prototype.__defineGetter__('visibilityGroup', function() {
+Zotero.CollectionTreeRow.prototype.__defineGetter__('visibilityGroup', function () {
 	return Zotero.CollectionTreeRow.visibilityGroups[this.type] || 'default';
 });
 
 
-Zotero.CollectionTreeRow.prototype.getName = function()
+Zotero.CollectionTreeRow.prototype.getName = function ()
 {
 	switch (this.type) {
 		case 'library':
@@ -285,8 +285,7 @@ Zotero.CollectionTreeRow.prototype.getTrashedCollections = async function () {
 };
 
 
-Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function* ()
-{
+Zotero.CollectionTreeRow.prototype.getItems = async function () {
 	switch (this.type) {
 		// Fake results if this is a shared library
 		case 'share':
@@ -296,7 +295,7 @@ Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function*
 			return this.ref.getItems();
 	}
 	
-	var ids = yield this.getSearchResults();
+	var ids = await this.getSearchResults();
 	
 	// Filter out items that exist in the items table (where search results come from) but that haven't
 	// yet been registered. This helps prevent unloaded-data crashes when switching collections while
@@ -313,18 +312,18 @@ Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function*
 	}
 	
 	return Zotero.Items.getAsync(ids);
-});
+};
 
-Zotero.CollectionTreeRow.prototype.getSearchResults = Zotero.Promise.coroutine(function* (asTempTable) {
+Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTable) {
 	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
 		Zotero.CollectionTreeCache.clear();
 	}
 	
 	if(!Zotero.CollectionTreeCache.lastResults) {
-		let s = yield this.getSearchObject();
+		let s = await this.getSearchObject();
 		Zotero.CollectionTreeCache.error = false;
 		try {
-			Zotero.CollectionTreeCache.lastResults = yield s.search();
+			Zotero.CollectionTreeCache.lastResults = await s.search();
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -337,19 +336,19 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = Zotero.Promise.coroutine(f
 	
 	if(asTempTable) {
 		if(!Zotero.CollectionTreeCache.lastTempTable) {
-			Zotero.CollectionTreeCache.lastTempTable = yield Zotero.Search.idsToTempTable(Zotero.CollectionTreeCache.lastResults);
+			Zotero.CollectionTreeCache.lastTempTable = await Zotero.Search.idsToTempTable(Zotero.CollectionTreeCache.lastResults);
 		}
 		return Zotero.CollectionTreeCache.lastTempTable;
 	}
 	return Zotero.CollectionTreeCache.lastResults;
-});
+};
 
 /*
  * Returns the search object for the currently display
  *
  * This accounts for the collection, saved search, quicksearch, tags, etc.
  */
-Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(function* () {
+Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
 		Zotero.CollectionTreeCache.clear();
 	}
@@ -365,7 +364,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 		var s = this.ref;
 	}
 	else if (this.isDuplicates()) {
-		var s = yield this.ref.getSearchObject();
+		var s = await this.ref.getSearchObject();
 		let tmpTable;
 		for (let id in s.conditions) {
 			let c = s.conditions[id];
@@ -442,7 +441,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	Zotero.CollectionTreeCache.lastTreeRow = this;
 	Zotero.CollectionTreeCache.lastSearch = s2;
 	return s2;
-});
+};
 
 Zotero.CollectionTreeRow.prototype.getChildTags = function () {
 	Zotero.warn("Zotero.CollectionTreeRow::getChildTags() is deprecated -- use getTags() instead");
@@ -485,7 +484,7 @@ Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
 /*
  * Returns TRUE if saved search, quicksearch or tag filter
  */
-Zotero.CollectionTreeRow.prototype.isSearchMode = function() {
+Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 	switch (this.type) {
 		case 'search':
 		case 'publications':

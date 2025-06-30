@@ -29,11 +29,11 @@ var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 Zotero.Profile = {
 	dir: OS.Constants.Path.profileDir,
 	
-	getDefaultInProfilesDir: Zotero.Promise.coroutine(function* (profilesDir) {
+	getDefaultInProfilesDir: async function (profilesDir) {
 		var profilesIni = OS.Path.join(profilesDir, "profiles.ini");
 		
 		try {
-			var iniContents = yield Zotero.File.getContentsAsync(profilesIni);
+			var iniContents = await Zotero.File.getContentsAsync(profilesIni);
 		}
 		catch (e) {
 			if (e.name == 'NotFoundError') {
@@ -71,7 +71,7 @@ Zotero.Profile = {
 		
 		try {
 			// Note: exists() returns false on no access, so use stat() instead
-			yield OS.File.stat(defaultProfile);
+			await OS.File.stat(defaultProfile);
 		}
 		catch (e) {
 			if (e instanceof OS.File.Error) {
@@ -82,7 +82,7 @@ Zotero.Profile = {
 			}
 		}
 		return [defaultProfile, nSections > 1];
-	}),
+	},
 	
 	
 	getProfilesDir: function () {
@@ -122,13 +122,14 @@ Zotero.Profile = {
 	 * @param {Boolean} [includeOtherApps=false] - Check Firefox profiles
 	 * @return {String[]}
 	 */
-	findOtherProfilesUsingDataDirectory: Zotero.Promise.coroutine(function* (dataDir, includeOtherApps = true) {
-		let otherAppProfiles = includeOtherApps ? (yield this._findOtherAppProfiles()) : [];
-		let otherProfiles = (yield this._findOtherProfiles()).concat(otherAppProfiles);
+	findOtherProfilesUsingDataDirectory: async function (dataDir, includeOtherApps = true) {
+		let otherAppProfiles = includeOtherApps ? ((await this._findOtherAppProfiles())) : [];
+		let otherProfiles = ((await this._findOtherProfiles())).concat(otherAppProfiles);
 		
 		// First get profiles pointing at this directory
-		otherProfiles = yield Zotero.Promise.filter(otherProfiles, Zotero.Promise.coroutine(function* (dir) {
-			let prefs = yield Zotero.File.getContentsAsync(OS.Path.join(dir, "prefs.js"));
+		otherProfiles = await // FIXME: fx140: replace call to Zotero.Promise.filter()
+		Zotero.Promise.filter(otherProfiles, async function (dir) {
+			let prefs = await Zotero.File.getContentsAsync(OS.Path.join(dir, "prefs.js"));
 			prefs = prefs.trim().split(/(?:\r\n|\r|\n)/);
 			
 			return prefs.some(line => {
@@ -136,7 +137,7 @@ Zotero.Profile = {
 			}) && prefs.some(line => {
 				return line.match(/extensions\.zotero\.(lastD|d)ataDir/) && line.includes(dataDir)
 			});
-		}));
+		});
 		
 		// If the parent of the source directory is a profile directory from the other app, add that
 		// to the list, which addresses the situation where the source directory is a custom
@@ -156,14 +157,14 @@ Zotero.Profile = {
 		}
 		
 		return otherProfiles;
-	}),
+	},
 	
 	
-	updateProfileDataDirectory: Zotero.Promise.coroutine(function* (profileDir, oldDir, newDir) {
+	updateProfileDataDirectory: async function (profileDir, oldDir, newDir) {
 		let prefsFile = OS.Path.join(profileDir, "prefs.js");
 		let prefsFileTmp = OS.Path.join(profileDir, "prefs.js.tmp");
 		Zotero.debug("Updating " + prefsFile + " to point to new data directory");
-		let contents = yield Zotero.File.getContentsAsync(prefsFile);
+		let contents = await Zotero.File.getContentsAsync(prefsFile);
 		contents = contents
 			.trim()
 			.split(/(?:\r\n|\r|\n)/)
@@ -178,7 +179,7 @@ Zotero.Profile = {
 		);
 		let lineSep = Zotero.isWin ? "\r\n" : "\n";
 		contents = contents.join(lineSep) + lineSep;
-		yield OS.File.writeAtomic(
+		await OS.File.writeAtomic(
 			prefsFile,
 			contents,
 			{
@@ -186,7 +187,7 @@ Zotero.Profile = {
 				encoding: 'utf-8'
 			}
 		);
-	}),
+	},
 	
 	
 	/**
@@ -274,9 +275,9 @@ Zotero.Profile = {
 	 *
 	 * @return {String[]} - Array of paths
 	 */
-	_getProfilesInDir: Zotero.Promise.coroutine(function* (profilesDir) {
+	_getProfilesInDir: async function (profilesDir) {
 		var dirs = [];
-		yield Zotero.File.iterateDirectory(profilesDir, async function (entry) {
+		await Zotero.File.iterateDirectory(profilesDir, async function (entry) {
 			// entry.isDir can be false for some reason on Travis, causing spurious test failures
 			if (Zotero.automatedTest && !entry.isDir && (await OS.File.stat(entry.path)).isDir) {
 				Zotero.debug("Overriding isDir for " + entry.path);
@@ -287,7 +288,7 @@ Zotero.Profile = {
 			}
 		});
 		return dirs;
-	}),
+	},
 	
 	
 	/**
@@ -295,11 +296,11 @@ Zotero.Profile = {
 	 *
 	 * @return {String[]} - Array of paths
 	 */
-	_findOtherProfiles: Zotero.Promise.coroutine(function* () {
+	_findOtherProfiles: async function () {
 		var profileDir = this.dir;
 		var profilesDir = this.getProfilesDir();
 		return this._getProfilesInDir(profilesDir).filter(dir => dir != profileDir);
-	}),
+	},
 	
 	
 	/**
@@ -309,6 +310,6 @@ Zotero.Profile = {
 	 */
 	_findOtherAppProfiles: async function () {
 		var dir = this.getOtherAppProfilesDir();
-		return dir && await OS.File.exists(dir) ? this._getProfilesInDir(dir) : [];
+		return dir && (await OS.File.exists(dir)) ? this._getProfilesInDir(dir) : [];
 	}
 };

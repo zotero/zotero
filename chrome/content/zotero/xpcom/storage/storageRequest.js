@@ -176,7 +176,7 @@ Zotero.Sync.Storage.Request.prototype.setChannel = function (channel) {
 }
 
 
-Zotero.Sync.Storage.Request.prototype.start = Zotero.Promise.coroutine(function* () {
+Zotero.Sync.Storage.Request.prototype.start = async function () {
 	Zotero.debug("Starting " + this.type + " request " + this.name);
 	
 	if (this._running) {
@@ -194,7 +194,7 @@ Zotero.Sync.Storage.Request.prototype.start = Zotero.Promise.coroutine(function*
 	//
 	// The main sync logic is triggered here.
 	try {
-		var results = yield Zotero.Promise.all(this._onStart.map(f => f(this)));
+		var results = await Promise.all(this._onStart.map(f => f(this)));
 		
 		var result = new Zotero.Sync.Storage.Result;
 		result.updateFromResults(results);
@@ -227,7 +227,7 @@ Zotero.Sync.Storage.Request.prototype.start = Zotero.Promise.coroutine(function*
 			Zotero.Notifier.trigger('download', 'file', item.id);
 		}
 	}
-});
+};
 
 
 Zotero.Sync.Storage.Request.prototype.isRunning = function () {

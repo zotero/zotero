@@ -31,7 +31,7 @@
 // the same database is accessed simultaneously by multiple Zotero instances.
 const DB_LOCK_EXCLUSIVE = true;
 
-Zotero.DBConnection = function(dbNameOrPath) {
+Zotero.DBConnection = function (dbNameOrPath) {
 	if (!dbNameOrPath) {
 		throw ('DB name not provided in Zotero.DBConnection()');
 	}
@@ -508,7 +508,7 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 		// Run temporary commit callbacks
 		var f;
 		while (f = this._callbacks.current.commit.shift()) {
-			await Zotero.Promise.resolve(f(id));
+			await Promise.resolve(f(id));
 		}
 		
 		// Run commit callbacks
@@ -541,13 +541,13 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 		// Run temporary commit callbacks
 		var f;
 		while (f = this._callbacks.current.rollback.shift()) {
-			await Zotero.Promise.resolve(f(id));
+			await Promise.resolve(f(id));
 		}
 		
 		// Run rollback callbacks
 		for (var i=0; i<this._callbacks.rollback.length; i++) {
 			if (this._callbacks.rollback[i]) {
-				await Zotero.Promise.resolve(this._callbacks.rollback[i](id));
+				await Promise.resolve(this._callbacks.rollback[i](id));
 			}
 		}
 		
@@ -569,7 +569,7 @@ Zotero.DBConnection.prototype.inTransaction = function () {
 
 Zotero.DBConnection.prototype.waitForTransaction = function (id) {
 	if (!this._transactionID) {
-		return Zotero.Promise.resolve();
+		return Promise.resolve();
 	}
 	if (Zotero.Debug.enabled) {
 		Zotero.debug(`Waiting for DB transaction ${this._transactionID} to finish`
@@ -646,7 +646,7 @@ Zotero.DBConnection.prototype.queryAsync = async function (sql, params, options 
 			}
 			// Fake an associative array with a proxy
 			let handler = {
-				get: function(target, name) {
+				get: function (target, name) {
 					// Ignore promise check
 					if (name == 'then') {
 						return undefined;
@@ -662,7 +662,7 @@ Zotero.DBConnection.prototype.queryAsync = async function (sql, params, options 
 						throw new Error(msg);
 					}
 				},
-				has: function(target, name) {
+				has: function (target, name) {
 					try {
 						return !!target.getResultByName(name);
 					} catch (e) {
@@ -854,7 +854,7 @@ Zotero.DBConnection.prototype.indexExists = async function (index, db) {
 	await this._getConnectionAsync();
 	var prefix = db ? db + '.' : '';
 	var sql = `SELECT COUNT(*) FROM ${prefix}sqlite_master WHERE type='index' AND name=?`;
-	return !!await this.valueQueryAsync(sql, [index]);
+	return !!(await this.valueQueryAsync(sql, [index]));
 };
 
 
@@ -898,7 +898,7 @@ Zotero.DBConnection.prototype.executeSQLFile = async function (sql) {
 /*
  * Implements nsIObserver
  */
-Zotero.DBConnection.prototype.observe = function(subject, topic, data) {
+Zotero.DBConnection.prototype.observe = function (subject, topic, data) {
 	switch (topic) {
 		case 'idle':
 			this.backUpDatabase({ online: true });
@@ -1243,7 +1243,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 		if (await OS.File.exists(corruptMarker)) {
 			throw new Error(this.DB_CORRUPTION_STRINGS[0]);
 		}
-		this._connection = await Zotero.Promise.resolve(this.Sqlite.openConnection({
+		this._connection = await Promise.resolve(this.Sqlite.openConnection({
 			path: file
 		}));
 	}
@@ -1366,7 +1366,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 	this._debug(`Database file '${fileName}' corrupted`, 1);
 	
 	// No backup file! Eek!
-	if (!await OS.File.exists(backupFile)) {
+	if (!(await OS.File.exists(backupFile))) {
 		this._debug("No backup file for DB '" + this._dbName + "' exists", 1);
 		
 		let damagedFile;
@@ -1383,7 +1383,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 		}
 		
 		// Create new main database
-		this._connection = await Zotero.Promise.resolve(this.Sqlite.openConnection({
+		this._connection = await Promise.resolve(this.Sqlite.openConnection({
 			path: file
 		}));
 		
@@ -1412,7 +1412,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 	// Test the backup file
 	try {
 		Zotero.debug("Asynchronously opening DB connection");
-		this._connection = await Zotero.Promise.resolve(this.Sqlite.openConnection({
+		this._connection = await Promise.resolve(this.Sqlite.openConnection({
 			path: backupFile
 		}));
 		await this.closeDatabase();
@@ -1420,7 +1420,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 	// Can't open backup either
 	catch (e) {
 		// Create new main database
-		this._connection = await Zotero.Promise.resolve(this.Sqlite.openConnection({
+		this._connection = await Promise.resolve(this.Sqlite.openConnection({
 			path: file
 		}));
 		
@@ -1453,7 +1453,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 	}
 	
 	// Open restored database
-	this._connection = await Zotero.Promise.resolve(this.Sqlite.openConnection({
+	this._connection = await Promise.resolve(this.Sqlite.openConnection({
 		path: file
 	}));
 	this._debug('Database restored', 1);

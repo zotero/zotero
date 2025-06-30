@@ -30,8 +30,8 @@
  */
 Zotero.HTTPIntegrationClient = {
 	deferredResponse: null,
-	sendCommandPromise: Zotero.Promise.resolve(),
-	sendCommand: async function(command, args=[]) {
+	sendCommandPromise: Promise.resolve(),
+	sendCommand: async function (command, args=[]) {
 		let payload = JSON.stringify({command, arguments: args});
 		function sendCommand() {
 			Zotero.HTTPIntegrationClient.deferredResponse = Zotero.Promise.defer();
@@ -54,7 +54,7 @@ Zotero.HTTPIntegrationClient = {
 	}
 };
 
-Zotero.HTTPIntegrationClient.Application = function() {
+Zotero.HTTPIntegrationClient.Application = function () {
 	this.primaryFieldType = "Http";
 	this.secondaryFieldType = "Http";
 	this.outputFormat = 'html';
@@ -65,7 +65,7 @@ Zotero.HTTPIntegrationClient.Application = function() {
 	this.processorName = "HTTP Integration";
 };
 Zotero.HTTPIntegrationClient.Application.prototype = {
-	getActiveDocument: async function() {
+	getActiveDocument: async function () {
 		let result = await Zotero.HTTPIntegrationClient.sendCommand('Application.getActiveDocument');
 		this.outputFormat = result.outputFormat || this.outputFormat;
 		this.supportedNotes = result.supportedNotes || this.supportedNotes;
@@ -80,21 +80,21 @@ Zotero.HTTPIntegrationClient.Application.prototype = {
 /**
  * See integrationTests.js
  */
-Zotero.HTTPIntegrationClient.Document = function(documentID, processorName) {
+Zotero.HTTPIntegrationClient.Document = function (documentID, processorName) {
 	this._documentID = documentID;
 	this.processorName = processorName;
 };
 for (let method of ["activate", "canInsertField", "displayAlert", "getDocumentData",
 	"setDocumentData", "setBibliographyStyle", "importDocument", "exportDocument",
 	"insertText"]) {
-	Zotero.HTTPIntegrationClient.Document.prototype[method] = async function() {
+	Zotero.HTTPIntegrationClient.Document.prototype[method] = async function () {
 		return Zotero.HTTPIntegrationClient.sendCommand("Document."+method,
 			[this._documentID].concat(Array.prototype.slice.call(arguments)));
 	};
 }
 
 // @NOTE Currently unused, prompts are done using the connector
-Zotero.HTTPIntegrationClient.Document.prototype._displayAlert = async function(dialogText, icon, buttons) {
+Zotero.HTTPIntegrationClient.Document.prototype._displayAlert = async function (dialogText, icon, buttons) {
 	var ps = Services.prompt;
 	var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_OK)
 		+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
@@ -134,29 +134,29 @@ Zotero.HTTPIntegrationClient.Document.prototype._displayAlert = async function(d
 	await this.activate();
 	return result;
 }
-Zotero.HTTPIntegrationClient.Document.prototype.cleanup = async function() {};
-Zotero.HTTPIntegrationClient.Document.prototype.cursorInField = async function(fieldType) {
+Zotero.HTTPIntegrationClient.Document.prototype.cleanup = async function () {};
+Zotero.HTTPIntegrationClient.Document.prototype.cursorInField = async function (fieldType) {
 	var retVal = await Zotero.HTTPIntegrationClient.sendCommand("Document.cursorInField", [this._documentID, fieldType]);
 	if (!retVal) return null;
 	return new Zotero.HTTPIntegrationClient.Field(this._documentID, retVal);
 };
-Zotero.HTTPIntegrationClient.Document.prototype.insertField = async function(fieldType, noteType) {
+Zotero.HTTPIntegrationClient.Document.prototype.insertField = async function (fieldType, noteType) {
 	var retVal = await Zotero.HTTPIntegrationClient.sendCommand("Document.insertField", [this._documentID, fieldType, parseInt(noteType) || 0]);
 	return new Zotero.HTTPIntegrationClient.Field(this._documentID, retVal);
 };
-Zotero.HTTPIntegrationClient.Document.prototype.getFields = async function(fieldType) {
+Zotero.HTTPIntegrationClient.Document.prototype.getFields = async function (fieldType) {
 	var retVal = await Zotero.HTTPIntegrationClient.sendCommand("Document.getFields", [this._documentID, fieldType]);
 	return retVal.map(field => new Zotero.HTTPIntegrationClient.Field(this._documentID, field));
 };
-Zotero.HTTPIntegrationClient.Document.prototype.convert = async function(fields, fieldType, noteTypes) {
+Zotero.HTTPIntegrationClient.Document.prototype.convert = async function (fields, fieldType, noteTypes) {
 	fields = fields.map((f) => f._id);
 	await Zotero.HTTPIntegrationClient.sendCommand("Document.convert", [this._documentID, fields, fieldType, noteTypes]);
 };
-Zotero.HTTPIntegrationClient.Document.prototype.convertPlaceholdersToFields = async function(codes, placeholderIDs, noteType) {
+Zotero.HTTPIntegrationClient.Document.prototype.convertPlaceholdersToFields = async function (codes, placeholderIDs, noteType) {
 	var retVal = await Zotero.HTTPIntegrationClient.sendCommand("Document.convertPlaceholdersToFields", [this._documentID, codes, placeholderIDs, noteType]);
 	return retVal.map(field => new Zotero.HTTPIntegrationClient.Field(this._documentID, field));
 }
-Zotero.HTTPIntegrationClient.Document.prototype.complete = async function() {
+Zotero.HTTPIntegrationClient.Document.prototype.complete = async function () {
 	Zotero.HTTPIntegrationClient.inProgress = false;
 	Zotero.HTTPIntegrationClient.sendCommand("Document.complete", [this._documentID]);
 };
@@ -164,7 +164,7 @@ Zotero.HTTPIntegrationClient.Document.prototype.complete = async function() {
 /**
  * See integrationTests.js
  */
-Zotero.HTTPIntegrationClient.Field = function(documentID, json) {
+Zotero.HTTPIntegrationClient.Field = function (documentID, json) {
 	this._documentID = documentID; 
 	this._id = json.id;
 	this._code = json.code;
@@ -178,15 +178,15 @@ Zotero.HTTPIntegrationClient.Field = function(documentID, json) {
 Zotero.HTTPIntegrationClient.Field.prototype = {};
 
 for (let method of ["delete", "select", "removeCode"]) {
-	Zotero.HTTPIntegrationClient.Field.prototype[method] = async function() {
+	Zotero.HTTPIntegrationClient.Field.prototype[method] = async function () {
 		return Zotero.HTTPIntegrationClient.sendCommand("Field."+method,
 			[this._documentID, this._id].concat(Array.prototype.slice.call(arguments)));
 	};
 }
-Zotero.HTTPIntegrationClient.Field.prototype.getText = async function() {
+Zotero.HTTPIntegrationClient.Field.prototype.getText = async function () {
 	return this._text;
 };
-Zotero.HTTPIntegrationClient.Field.prototype.setText = async function(text, isRich) {
+Zotero.HTTPIntegrationClient.Field.prototype.setText = async function (text, isRich) {
 	// The HTML will be stripped by Google Docs and and since we're 
 	// caching this value, we need to strip it ourselves
 	var parser = new DOMParser();
@@ -194,19 +194,19 @@ Zotero.HTTPIntegrationClient.Field.prototype.setText = async function(text, isRi
 	this._text = doc.documentElement.textContent;
 	return Zotero.HTTPIntegrationClient.sendCommand("Field.setText", [this._documentID, this._id, text, true]);
 };
-Zotero.HTTPIntegrationClient.Field.prototype.getCode = async function() {
+Zotero.HTTPIntegrationClient.Field.prototype.getCode = async function () {
 	return this._code;
 };
-Zotero.HTTPIntegrationClient.Field.prototype.setCode = async function(code) {
+Zotero.HTTPIntegrationClient.Field.prototype.setCode = async function (code) {
 	this._code = code;
 	return Zotero.HTTPIntegrationClient.sendCommand("Field.setCode", [this._documentID, this._id, code]);
 };
-Zotero.HTTPIntegrationClient.Field.prototype.getNoteIndex = async function() {
+Zotero.HTTPIntegrationClient.Field.prototype.getNoteIndex = async function () {
 	return this._noteIndex;
 };
-Zotero.HTTPIntegrationClient.Field.prototype.equals = async function(arg) {
+Zotero.HTTPIntegrationClient.Field.prototype.equals = async function (arg) {
 	return this._id === arg._id;
 };
-Zotero.HTTPIntegrationClient.Field.prototype._isAdjacentToNextField = async function() {
+Zotero.HTTPIntegrationClient.Field.prototype._isAdjacentToNextField = async function () {
 	return this._adjacent;
 }

@@ -24,16 +24,16 @@
 */
 
 
-Zotero.Creators = new function() {
+Zotero.Creators = new function () {
 	this.fields = ['firstName', 'lastName', 'fieldMode'];
 	this.totes = 0;
 	
 	var _cache = {};
 	
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		var repaired = false;
 		var sql = "SELECT * FROM creators";
-		var rows = yield Zotero.DB.queryAsync(sql);
+		var rows = await Zotero.DB.queryAsync(sql);
 		for (let i = 0; i < rows.length; i++) {
 			let row = rows[i];
 			try {
@@ -49,9 +49,9 @@ Zotero.Creators = new function() {
 				if (!repaired) {
 					Zotero.logError(e);
 					Zotero.logError("Trying integrity check to fix creator error");
-					yield Zotero.Schema.integrityCheck(true);
+					await Zotero.Schema.integrityCheck(true);
 					repaired = true;
-					rows = yield Zotero.DB.queryAsync(sql);
+					rows = await Zotero.DB.queryAsync(sql);
 					i = -1;
 					continue;
 				}
@@ -59,7 +59,7 @@ Zotero.Creators = new function() {
 				throw e;
 			}
 		}
-	});
+	};
 	
 	/*
 	 * Returns creator data in internal format for a given creatorID
@@ -98,29 +98,29 @@ Zotero.Creators = new function() {
 	 * @param {Boolean} [create=false]  If no matching creator, create one
 	 * @return {Promise<Integer>}  creatorID
 	 */
-	this.getIDFromData = Zotero.Promise.coroutine(function* (data, create) {
+	this.getIDFromData = async function (data, create) {
 		Zotero.DB.requireTransaction();
 		data = this.cleanData(data);
 		var sql = "SELECT creatorID FROM creators WHERE "
 			+ "firstName=? AND lastName=? AND fieldMode=?";
-		var id = yield Zotero.DB.valueQueryAsync(
+		var id = await Zotero.DB.valueQueryAsync(
 			sql, [data.firstName, data.lastName, data.fieldMode]
 		);
 		if (!id && create) {
 			id = Zotero.ID.get('creators');
 			let sql = "INSERT INTO creators (creatorID, firstName, lastName, fieldMode) "
 				+ "VALUES (?, ?, ?, ?)";
-			yield Zotero.DB.queryAsync(
+			await Zotero.DB.queryAsync(
 				sql, [id, data.firstName, data.lastName, data.fieldMode]
 			);
 			_cache[id] = data;
 		}
 		return id;
-	});
+	};
 	
 	
-	this.updateCreator = Zotero.Promise.coroutine(function* (creatorID, creatorData) {
-		var creator = yield this.get(creatorID);
+	this.updateCreator = async function (creatorID, creatorData) {
+		var creator = await this.get(creatorID);
 		if (!creator) {
 			throw new Error("Creator " + creatorID + " doesn't exist");
 		}
@@ -128,7 +128,7 @@ Zotero.Creators = new function() {
 		creator.firstName = creatorData.firstName;
 		creator.lastName = creatorData.lastName;
 		return creator.save();
-	});
+	};
 	
 	
 	/**
@@ -136,7 +136,7 @@ Zotero.Creators = new function() {
 	 *
 	 * @return {Promise}
 	 */
-	this.purge = Zotero.Promise.coroutine(function* () {
+	this.purge = async function () {
 		if (!Zotero.Prefs.get('purge.creators')) {
 			return;
 		}
@@ -145,7 +145,7 @@ Zotero.Creators = new function() {
 		
 		var sql = 'SELECT creatorID FROM creators WHERE creatorID NOT IN '
 			+ '(SELECT creatorID FROM itemCreators)';
-		var toDelete = yield Zotero.DB.columnQueryAsync(sql);
+		var toDelete = await Zotero.DB.columnQueryAsync(sql);
 		if (toDelete.length) {
 			// Clear creator entries in internal array
 			for (let i=0; i<toDelete.length; i++) {
@@ -154,11 +154,11 @@ Zotero.Creators = new function() {
 			
 			var sql = "DELETE FROM creators WHERE creatorID NOT IN "
 				+ "(SELECT creatorID FROM itemCreators)";
-			yield Zotero.DB.queryAsync(sql);
+			await Zotero.DB.queryAsync(sql);
 		}
 		
 		Zotero.Prefs.set('purge.creators', false);
-	});
+	};
 	
 	
 	this.equals = function (data1, data2) {

@@ -29,7 +29,7 @@
  * Singleton to handle loading and caching of translators
  * @namespace
  */
-Zotero.Translators = new function() {
+Zotero.Translators = new function () {
 	var _cache, _translators;
 	var _initialized = false;
 	var _initializationDeferred = false;
@@ -48,11 +48,11 @@ Zotero.Translators = new function() {
 	 * @param {Object} [options.metadataCache] - Translator metadata keyed by filename, if already
 	 *     available (e.g., in updateBundledFiles()), to avoid unnecessary file reads
 	 */
-	this.init = Zotero.Promise.coroutine(function* (options = {}) {
+	this.init = async function (options = {}) {
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself
 		if (!options.fromSchemaUpdate) {
-			yield Zotero.Schema.schemaUpdatePromise;
+			await Zotero.Schema.schemaUpdatePromise;
 		}
 		
 		// If an initialization has already started, a regular init() call should return the promise
@@ -61,7 +61,7 @@ Zotero.Translators = new function() {
 		if (_initializationDeferred) {
 			let promise = _initializationDeferred.promise;
 			if (options.reinit) {
-				yield promise;
+				await promise;
 			}
 			else {
 				return promise;
@@ -77,7 +77,7 @@ Zotero.Translators = new function() {
 		_translators = {};
 		
 		var sql = "SELECT rowid, fileName, metadataJSON, lastModifiedTime FROM translatorCache";
-		var dbCacheResults = yield Zotero.DB.queryAsync(sql);
+		var dbCacheResults = await Zotero.DB.queryAsync(sql);
 		var dbCache = {};
 		for (let i = 0; i < dbCacheResults.length; i++) {
 			let entry = dbCacheResults[i];
@@ -90,7 +90,7 @@ Zotero.Translators = new function() {
 		var iterator = new OS.File.DirectoryIterator(translatorsDir);
 		try {
 			while (true) {
-				let entries = yield iterator.nextBatch(5); // TODO: adjust as necessary
+				let entries = await iterator.nextBatch(5); // TODO: adjust as necessary
 				if (!entries.length) break;
 				for (let i = 0; i < entries.length; i++) {
 					let entry = entries[i];
@@ -104,7 +104,7 @@ Zotero.Translators = new function() {
 						lastModifiedTime = entry.winLastWriteDate.getTime();
 					}
 					else {
-						lastModifiedTime = (yield OS.File.stat(path)).lastModificationDate.getTime();
+						lastModifiedTime = ((await OS.File.stat(path))).lastModificationDate.getTime();
 					}
 					
 					// Check passed cache for metadata
@@ -134,7 +134,7 @@ Zotero.Translators = new function() {
 							Zotero.debug(memCacheJSON || dbCacheEntry.metadataJSON, 1);
 							
 							// If JSON is invalid, clear from cache
-							yield Zotero.DB.queryAsync(
+							await Zotero.DB.queryAsync(
 								"DELETE FROM translatorCache WHERE fileName=?",
 								fileName
 							);
@@ -144,7 +144,7 @@ Zotero.Translators = new function() {
 					// Otherwise, load from file
 					else {
 						try {
-							var translator = yield this.loadFromFile(path);
+							var translator = await this.loadFromFile(path);
 						}
 						catch (e) {
 							Zotero.logError(e);
@@ -153,9 +153,9 @@ Zotero.Translators = new function() {
 							// so that the translator is reinstalled the next time it's updated.
 							//
 							// TODO: Reinstall the correct translator immediately
-							yield OS.File.remove(path);
+							await OS.File.remove(path);
 							let sql = "DELETE FROM translatorCache WHERE fileName=?";
-							yield Zotero.DB.queryAsync(sql, fileName);
+							await Zotero.DB.queryAsync(sql, fileName);
 							continue;
 						}
 					}
@@ -174,16 +174,16 @@ Zotero.Translators = new function() {
 							translator.logError("Deleting older translator "
 								+ existingTranslator.fileName + " with same ID as "
 								+ translator.fileName);
-							yield OS.File.remove(existingTranslator.path);
-							yield removeFromCaches(existingTranslator);
+							await OS.File.remove(existingTranslator.path);
+							await removeFromCaches(existingTranslator);
 						}
 						// If cached translator is newer, keep it and discard this one
 						else if (existingTranslator.lastUpdated > translator.lastUpdated) {
 							translator.logError("Deleting older translator "
 								+ translator.fileName + " with same ID as "
 								+ existingTranslator.fileName);
-							yield OS.File.remove(translator.path);
-							yield removeFromDBCache(translator.fileName);
+							await OS.File.remove(translator.path);
+							await removeFromDBCache(translator.fileName);
 							continue;
 						}
 						// If cached translator has the same timestamp and matches the label, keep
@@ -192,8 +192,8 @@ Zotero.Translators = new function() {
 							translator.logError("Translator " + existingTranslator.fileName
 								+ " with same ID is already loaded and matches label -- deleting "
 								+ translator.fileName);
-							yield OS.File.remove(translator.path);
-							yield removeFromDBCache(translator.fileName);
+							await OS.File.remove(translator.path);
+							await removeFromDBCache(translator.fileName);
 							continue;
 						}
 						// Otherwise delete the cached one and install this one
@@ -201,8 +201,8 @@ Zotero.Translators = new function() {
 							translator.logError("Deleting translator " + translator.fileName
 								+ " with same ID as " + existingTranslator.fileName + " but with "
 								+ "mismatched filename");
-							yield OS.File.remove(existingTranslator.path);
-							yield removeFromCaches(existingTranslator);
+							await OS.File.remove(existingTranslator.path);
+							await removeFromCaches(existingTranslator);
 						}
 					}
 					
@@ -219,7 +219,7 @@ Zotero.Translators = new function() {
 					}
 					
 					if (!dbCacheEntry) {
-						yield this.cacheInDB(
+						await this.cacheInDB(
 							fileName,
 							translator.serialize(Zotero.Translator.TRANSLATOR_REQUIRED_PROPERTIES.
 												 concat(Zotero.Translator.TRANSLATOR_OPTIONAL_PROPERTIES)),
@@ -238,7 +238,7 @@ Zotero.Translators = new function() {
 		// Remove translators from DB cache if no file
 		for (let fileName in dbCache) {
 			if (!filesInCache[fileName]) {
-				yield Zotero.DB.queryAsync(
+				await Zotero.DB.queryAsync(
 					"DELETE FROM translatorCache WHERE rowid=?",
 					dbCache[fileName].rowid
 				);
@@ -264,7 +264,7 @@ Zotero.Translators = new function() {
 		_initialized = true;
 		
 		Zotero.debug("Cached " + numCached + " translators in " + ((new Date) - start) + " ms");
-	});
+	};
 	
 	
 	this.reinit = async function (options = {}) {
@@ -363,16 +363,16 @@ Zotero.Translators = new function() {
 		return _translators[id] ? _translators[id] : false;
 	}
 	
-	this.getCodeForTranslator = Zotero.Promise.method(function (translator) {
+	this.getCodeForTranslator = function (translator) {
 		if (translator.code) return translator.code;
-		return Zotero.File.getContentsAsync(translator.path).then(function(code) {
+		return Zotero.File.getContentsAsync(translator.path).then(function (code) {
 			if (translator.cacheCode) {
 				// See Translator.init() for cache rules
 				translator.code = code;
 			}
 			return code;
 		});
-	});
+	};
 	
 	/**
 	 * Gets all translators for a specific type of translation
@@ -397,11 +397,11 @@ Zotero.Translators = new function() {
 	 * @param {String} uri The URI for which to look for translators
 	 * @param {String} rootUri The root URI of the page, different from `uri` if running in an iframe
 	 */
-	this.getWebTranslatorsForLocation = function(URI, rootURI) {
+	this.getWebTranslatorsForLocation = function (URI, rootURI) {
 		var isFrame = URI !== rootURI;
 		var type = isFrame ? "webWithTargetAll" : "web";
 		
-		return this.getAllForType(type).then(function(allTranslators) {
+		return this.getAllForType(type).then(function (allTranslators) {
 			var potentialTranslators = [];
 			var proxies = [];
 			
@@ -445,7 +445,7 @@ Zotero.Translators = new function() {
 	 * 
 	 * @param {String} URI to get searchURIs and converterFunctions for
 	 */
-	this.getSearchURIs = function(URI) {
+	this.getSearchURIs = function (URI) {
 		var properURI = Zotero.Proxies.proxyToProper(URI);
 		if (properURI !== URI) {
 			// if we know this proxy, just use the proper URI for detection
@@ -469,10 +469,10 @@ Zotero.Translators = new function() {
 			for (var i=1; i<hostnames.length-2; i++) {
 				if (TLDS[hostnames[i].toLowerCase()]) {
 					var properHost = hostnames.slice(0, i+1).join(".");
-					searchURIs[m[1]+properHost+URI.substr(m[0].length)] = new function() {
+					searchURIs[m[1]+properHost+URI.substr(m[0].length)] = new function () {
 						var re = new RegExp('^https?://(?:[^/]+\\.)?'+Zotero.Utilities.quotemeta(properHost)+'(?=/)', "gi");
 						var proxyHost = hostnames.slice(i+1).join(".").replace(/\$/g, "$$$$");
-						return function(uri) { return uri.replace(re, "$&."+proxyHost) };
+						return function (uri) { return uri.replace(re, "$&."+proxyHost) };
 					};
 				}
 			}
@@ -488,8 +488,8 @@ Zotero.Translators = new function() {
 	 * @return {Promise<Zotero.Translator[]|true>} - An array of translators if no callback is specified;
 	 *     otherwise true
 	 */
-	this.getImportTranslatorsForLocation = function(location, callback) {	
-		return this.getAllForType("import").then(function(allTranslators) {
+	this.getImportTranslatorsForLocation = function (location, callback) {	
+		return this.getAllForType("import").then(function (allTranslators) {
 			var tier1Translators = [];
 			var tier2Translators = [];
 			
@@ -514,7 +514,7 @@ Zotero.Translators = new function() {
 	 * @param	{String}		label
 	 * @return	{String}
 	 */
-	this.getFileNameFromLabel = function(label, alternative) {
+	this.getFileNameFromLabel = function (label, alternative) {
 		var fileName = Zotero.Utilities.removeDiacritics(
 			Zotero.File.getValidFileName(label)) + ".js";
 		// Use translatorID if name still isn't ASCII (e.g., Cyrillic)
@@ -623,14 +623,14 @@ Zotero.Translators = new function() {
 	 * @param	{String}		code
 	 * @return	{Promise<String>}
 	 */
-	this.save = Zotero.Promise.coroutine(function* (metadata, code) {
+	this.save = async function (metadata, code) {
 		var str = this.stringify(metadata, code);
 		var destFile = this.getSavePath(metadata);
 		
 		var existingTranslator = this.get(metadata.translatorID);
 		var sameFile = existingTranslator && destFile == existingTranslator.path;
 		
-		var exists = yield OS.File.exists(destFile);
+		var exists = await OS.File.exists(destFile);
 		if (!sameFile && exists) {
 			var msg = `Overwriting translator with same filename '${PathUtils.filename(destFile)}'`;
 			Zotero.debug(msg, 1);
@@ -641,9 +641,9 @@ Zotero.Translators = new function() {
 		Zotero.debug("Saving translator '" + metadata.label + "'");
 		Zotero.debug(metadata);
 		return Zotero.File.putContentsAsync(destFile, str).then(() => destFile);
-	});
+	};
 	
-	this.cacheInDB = function(fileName, metadataJSON, lastModifiedTime) {
+	this.cacheInDB = function (fileName, metadataJSON, lastModifiedTime) {
 		return Zotero.DB.queryAsync(
 			"REPLACE INTO translatorCache VALUES (?, ?, ?)",
 			[fileName, JSON.stringify(metadataJSON), lastModifiedTime]

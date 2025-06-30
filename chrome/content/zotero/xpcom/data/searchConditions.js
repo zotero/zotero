@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.SearchConditions = new function(){
+Zotero.SearchConditions = new function () {
 	this.get = get;
 	this.getStandardConditions = getStandardConditions;
 	this.hasOperator = hasOperator;
@@ -69,7 +69,7 @@ Zotero.SearchConditions = new function(){
 	 *  - template (special handling)
 	 *  - noLoad (can't load from saved search)
 	 */
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		var conditions = [
 			//
 			// Special conditions
@@ -462,7 +462,7 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: yield Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined "
+				aliases: await Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined "
 					+ "WHERE fieldName NOT IN ('accessDate', 'date', 'pages', "
 					+ "'section','seriesNumber','issue')"),
 				template: true // mark for special handling
@@ -671,14 +671,14 @@ Zotero.SearchConditions = new function(){
 		}
 		
 		var collation = Zotero.getLocaleCollation();
-		_standardConditions.sort(function(a, b) {
+		_standardConditions.sort(function (a, b) {
 			// Sort Any Field to the top
 			if (a.name == 'anyField') {
 				return -1;
 			}
 			return collation.compareString(1, a.localized, b.localized);
 		});
-	});
+	};
 	
 	
 	/*

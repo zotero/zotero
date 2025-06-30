@@ -42,11 +42,11 @@ Zotero.ID_Tracker = function () {
 	var _nextIDs = {};
 	
 	
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		for (let table of _tables) {
-			_nextIDs[table] = yield _getNext(table);
+			_nextIDs[table] = await _getNext(table);
 		}
-	});
+	};
 	
 	
 	/**

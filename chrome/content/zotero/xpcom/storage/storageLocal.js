@@ -153,7 +153,7 @@ Zotero.Sync.Storage.Local = {
 	 *
 	 * This includes files previously modified or opened externally via Zotero within maxCheckAge
 	 */
-	getFilesToCheck: Zotero.Promise.coroutine(function* (libraryID, maxCheckAge) {
+	getFilesToCheck: async function (libraryID, maxCheckAge) {
 		var minTime = new Date().getTime() - (maxCheckAge * 1000);
 		
 		// Get files modified and synced since maxCheckAge
@@ -167,7 +167,7 @@ Zotero.Sync.Storage.Local = {
 			this.SYNC_STATE_IN_SYNC,
 			minTime
 		];
-		var itemIDs = yield Zotero.DB.columnQueryAsync(sql, params);
+		var itemIDs = await Zotero.DB.columnQueryAsync(sql, params);
 		
 		// Get files opened since maxCheckAge
 		itemIDs = itemIDs.concat(
@@ -175,7 +175,7 @@ Zotero.Sync.Storage.Local = {
 		);
 		
 		return Zotero.Utilities.arrayUnique(itemIDs);
-	}),
+	},
 	
 	
 	/**
@@ -193,7 +193,7 @@ Zotero.Sync.Storage.Local = {
 	 * @return {Promise} Promise resolving to TRUE if any items changed state,
 	 *                   FALSE otherwise
 	 */
-	checkForUpdatedFiles: Zotero.Promise.coroutine(function* (libraryID, itemIDs, itemModTimes) {
+	checkForUpdatedFiles: async function (libraryID, itemIDs, itemModTimes) {
 		var libraryName = Zotero.Libraries.getName(libraryID);
 		var msg = "Checking for locally changed attachment files in " + libraryName;
 		
@@ -248,7 +248,7 @@ Zotero.Sync.Storage.Local = {
 				sql += " AND itemID IN (" + chunk.map(() => '?').join() + ")";
 				params = params.concat(chunk);
 			}
-			let chunkRows = yield Zotero.DB.queryAsync(sql, params);
+			let chunkRows = await Zotero.DB.queryAsync(sql, params);
 			if (chunkRows) {
 				rows = rows.concat(chunkRows);
 			}
@@ -280,7 +280,7 @@ Zotero.Sync.Storage.Local = {
 		rows = null;
 		
 		var t = new Date();
-		var items = yield Zotero.Items.getAsync(itemIDs, { noCache: true });
+		var items = await Zotero.Items.getAsync(itemIDs, { noCache: true });
 		var numItems = items.length;
 		var updatedStates = {};
 		
@@ -290,7 +290,7 @@ Zotero.Sync.Storage.Local = {
 		var statesToSet = {};
 		for (let item of items) {
 			// TODO: Catch error?
-			let state = yield this._checkForUpdatedFile(item, attachmentData[item.id]);
+			let state = await this._checkForUpdatedFile(item, attachmentData[item.id]);
 			if (state !== false) {
 				if (!statesToSet[state]) {
 					statesToSet[state] = [];
@@ -301,7 +301,7 @@ Zotero.Sync.Storage.Local = {
 		}
 		// Update sync states in bulk
 		if (changed) {
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				for (let state in statesToSet) {
 					await this.updateSyncStates(statesToSet[state], parseInt(state));
 				}
@@ -315,10 +315,10 @@ Zotero.Sync.Storage.Local = {
 		Zotero.debug(`Checked ${numItems} files in ${libraryName} in ` + (new Date() - t) + " ms");
 		
 		return changed;
-	}),
+	},
 	
 	
-	_checkForUpdatedFile: Zotero.Promise.coroutine(function* (item, attachmentData) {
+	_checkForUpdatedFile: async function (item, attachmentData) {
 		var lk = item.libraryKey;
 		Zotero.debug("Checking attachment file for item " + lk, 4);
 		
@@ -330,7 +330,7 @@ Zotero.Sync.Storage.Local = {
 		var fileName = PathUtils.filename(path);
 		
 		try {
-			let { lastModified: fmtime } = yield IOUtils.stat(path);
+			let { lastModified: fmtime } = await IOUtils.stat(path);
 			//Zotero.debug("Memory usage: " + memmgr.resident);
 			
 			//Zotero.debug("File modification time for item " + lk + " is " + fmtime);
@@ -361,15 +361,15 @@ Zotero.Sync.Storage.Local = {
 			}
 			
 			// If file hash matches stored hash, only the mod time changed, so skip
-			let fileHash = yield Zotero.Utilities.Internal.md5Async(path);
+			let fileHash = await Zotero.Utilities.Internal.md5Async(path);
 			
-			var hash = attachmentData ? attachmentData.hash : (yield this.getSyncedHash(item.id));
+			var hash = attachmentData ? attachmentData.hash : ((await this.getSyncedHash(item.id)));
 			if (hash && hash == fileHash) {
 				Zotero.debug("Mod time didn't match (" + fmtime + " != " + mtime + ") "
 					+ "but hash did for " + fileName + " for item " + lk
 					+ " -- updating file mod time");
 				try {
-					yield IOUtils.setModificationTime(path, mtime);
+					await IOUtils.setModificationTime(path, mtime);
 				}
 				catch (e) {
 					Zotero.File.checkFileAccessError(e, path, 'update');
@@ -394,7 +394,7 @@ Zotero.Sync.Storage.Local = {
 			}
 			throw e;
 		}
-	}),
+	},
 	
 	/**
 	 *
@@ -429,14 +429,14 @@ Zotero.Sync.Storage.Local = {
 		return false;
 	},
 	
-	checkForForcedDownloads: Zotero.Promise.coroutine(function* (libraryID) {
+	checkForForcedDownloads: async function (libraryID) {
 		// Forced downloads happen even in on-demand mode
 		var sql = "SELECT COUNT(*) FROM items JOIN itemAttachments USING (itemID) "
 			+ "WHERE libraryID=? AND syncState=?";
-		return !!(yield Zotero.DB.valueQueryAsync(
+		return !!((await Zotero.DB.valueQueryAsync(
 			sql, [libraryID, this.SYNC_STATE_FORCE_DOWNLOAD]
-		));
-	}),
+		)));
+	},
 	
 	
 	/**
@@ -567,7 +567,7 @@ Zotero.Sync.Storage.Local = {
 	 * @param {Boolean}     data.compressed
 	 * @return {Promise}
 	 */
-	processDownload: Zotero.Promise.coroutine(function* (data) {
+	processDownload: async function (data) {
 		if (!data) {
 			throw new Error("'data' not set");
 		}
@@ -591,15 +591,15 @@ Zotero.Sync.Storage.Local = {
 		// TODO: Test file hash
 		
 		if (data.compressed) {
-			var newPath = yield this._processZipDownload(item);
+			var newPath = await this._processZipDownload(item);
 		}
 		else {
-			var newPath = yield this._processSingleFileDownload(item);
+			var newPath = await this._processSingleFileDownload(item);
 		}
 		
 		// If newPath is set, the file was renamed, so set item filename to that
 		// and mark for updated
-		var path = yield item.getFilePathAsync();
+		var path = await item.getFilePathAsync();
 		if (newPath && path != newPath) {
 			// If library isn't editable but filename was changed, update
 			// database without updating the item's mod time, which would result
@@ -608,10 +608,10 @@ Zotero.Sync.Storage.Local = {
 				if (!Zotero.Items.isEditable(item)) {
 					Zotero.debug("File renamed without library access -- "
 						+ "updating itemAttachments path", 3);
-					yield item.relinkAttachmentFile(newPath, true);
+					await item.relinkAttachmentFile(newPath, true);
 				}
 				else {
-					yield item.relinkAttachmentFile(newPath);
+					await item.relinkAttachmentFile(newPath);
 				}
 			}
 			catch (e) {
@@ -635,11 +635,11 @@ Zotero.Sync.Storage.Local = {
 		try {
 			// If hash not provided (e.g., WebDAV), calculate it now
 			if (!md5) {
-				md5 = yield item.attachmentHash;
+				md5 = await item.attachmentHash;
 			}
 			
 			// Set the file mtime to the time from the server
-			yield OS.File.setDates(path, null, new Date(parseInt(mtime)));
+			await OS.File.setDates(path, null, new Date(parseInt(mtime)));
 		}
 		catch (e) {
 			Zotero.File.checkFileAccessError(e, path, 'update');
@@ -648,23 +648,23 @@ Zotero.Sync.Storage.Local = {
 		item.attachmentSyncedModificationTime = mtime;
 		item.attachmentSyncedHash = md5;
 		item.attachmentSyncState = "in_sync";
-		yield item.saveTx({ skipAll: true });
+		await item.saveTx({ skipAll: true });
 		
 		return new Zotero.Sync.Storage.Result({
 			localChanges: true
 		});
-	}),
+	},
 	
 	
-	_processSingleFileDownload: Zotero.Promise.coroutine(function* (item) {
+	_processSingleFileDownload: async function (item) {
 		var tempFilePath = OS.Path.join(Zotero.getTempDirectory().path, item.key + '.tmp');
 		
-		if (!(yield OS.File.exists(tempFilePath))) {
+		if (!((await OS.File.exists(tempFilePath)))) {
 			Zotero.debug(tempFilePath, 1);
 			throw new Error("Downloaded file not found");
 		}
 		
-		yield Zotero.Attachments.createDirectoryForItem(item);
+		await Zotero.Attachments.createDirectoryForItem(item);
 		
 		var filename = item.attachmentFilename;
 		if (!filename) {
@@ -708,7 +708,7 @@ Zotero.Sync.Storage.Local = {
 			// Abort if Windows path limitation would cause filenames to be overly truncated
 			if (Zotero.isWin && filename.length < 40) {
 				try {
-					yield OS.File.remove(path);
+					await OS.File.remove(path);
 				}
 				catch (e) {}
 				// TODO: localize
@@ -723,11 +723,11 @@ Zotero.Sync.Storage.Local = {
 		}
 		
 		try {
-			yield OS.File.move(tempFilePath, path);
+			await OS.File.move(tempFilePath, path);
 		}
 		catch (e) {
 			try {
-				yield OS.File.remove(tempFilePath);
+				await OS.File.remove(tempFilePath);
 			}
 			catch (e) {}
 			
@@ -736,10 +736,10 @@ Zotero.Sync.Storage.Local = {
 		
 		// processDownload() needs to know that we're renaming the file
 		return renamed ? path : null;
-	}),
+	},
 	
 	
-	_processZipDownload: Zotero.Promise.coroutine(function* (item) {
+	_processZipDownload: async function (item) {
 		var zipFile = Zotero.getTempDirectory();
 		zipFile.append(item.key + '.tmp');
 		
@@ -781,7 +781,7 @@ Zotero.Sync.Storage.Local = {
 		
 		var parentDir = Zotero.Attachments.getStorageDirectory(item).path;
 		try {
-			yield Zotero.Attachments.createDirectoryForItem(item);
+			await Zotero.Attachments.createDirectoryForItem(item);
 		}
 		catch (e) {
 			zipReader.close();
@@ -857,7 +857,7 @@ Zotero.Sync.Storage.Local = {
 				renamed = true;
 			}
 			
-			if (yield OS.File.exists(destPath)) {
+			if (await OS.File.exists(destPath)) {
 				var msg = "ZIP entry '" + filePath + "' already exists";
 				Zotero.logError(msg);
 				Zotero.debug(destPath);
@@ -886,7 +886,7 @@ Zotero.Sync.Storage.Local = {
 				// Abort if Windows path limitation would cause filenames to be overly truncated
 				if (Zotero.isWin && shortened < 40) {
 					try {
-						yield OS.File.remove(destPath);
+						await OS.File.remove(destPath);
 					}
 					catch (e) {}
 					zipReader.close();
@@ -913,7 +913,7 @@ Zotero.Sync.Storage.Local = {
 			}
 			catch (e) {
 				try {
-					yield OS.File.remove(destPath);
+					await OS.File.remove(destPath);
 				}
 				catch (e) {}
 				
@@ -935,7 +935,7 @@ Zotero.Sync.Storage.Local = {
 				Zotero.File.checkFileAccessError(e, destPath, 'create');
 			}
 			
-			yield Zotero.File.setNormalFilePermissions(destPath);
+			await Zotero.File.setNormalFilePermissions(destPath);
 			
 			// If we're renaming the main file, processDownload() needs to know
 			if (renamed) {
@@ -969,16 +969,16 @@ Zotero.Sync.Storage.Local = {
 		}
 		
 		return returnFile;
-	}),
+	},
 	
 	
 	/**
 	 * @return {Promise<Object[]>} - A promise for an array of conflict objects
 	 */
-	getConflicts: Zotero.Promise.coroutine(function* (libraryID) {
+	getConflicts: async function (libraryID) {
 		var sql = "SELECT itemID, version FROM items JOIN itemAttachments USING (itemID) "
 			+ "WHERE libraryID=? AND syncState=?";
-		var rows = yield Zotero.DB.queryAsync(
+		var rows = await Zotero.DB.queryAsync(
 			sql,
 			[
 				{ int: libraryID },
@@ -989,7 +989,7 @@ Zotero.Sync.Storage.Local = {
 			var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(row.itemID);
 			return [key, row.version];
 		});
-		var cacheObjects = yield Zotero.Sync.Data.Local.getCacheObjects(
+		var cacheObjects = await Zotero.Sync.Data.Local.getCacheObjects(
 			'item', libraryID, keyVersionPairs
 		);
 		if (!cacheObjects.length) return [];
@@ -998,13 +998,13 @@ Zotero.Sync.Storage.Local = {
 		cacheObjects.forEach(obj => cacheObjectsByKey[obj.key] = obj);
 		
 		var items = [];
-		var localItems = yield Zotero.Items.getAsync(rows.map(row => row.itemID));
+		var localItems = await Zotero.Items.getAsync(rows.map(row => row.itemID));
 		for (let localItem of localItems) {
 			// Use the mtime for the dateModified field, since that's all that's shown in the
 			// CR window at the moment
 			let localItemJSON = localItem.toJSON();
 			localItemJSON.dateModified = Zotero.Date.dateToISO(
-				new Date(yield localItem.attachmentModificationTime)
+				new Date(await localItem.attachmentModificationTime)
 			);
 			
 			let remoteItemJSON = cacheObjectsByKey[localItem.key];
@@ -1025,11 +1025,11 @@ Zotero.Sync.Storage.Local = {
 			})
 		}
 		return items;
-	}),
+	},
 	
 	
-	resolveConflicts: Zotero.Promise.coroutine(function* (libraryID) {
-		var conflicts = yield this.getConflicts(libraryID);
+	resolveConflicts: async function (libraryID) {
+		var conflicts = await this.getConflicts(libraryID);
 		if (!conflicts.length) return false;
 		
 		Zotero.debug("Reconciling conflicts for " + Zotero.Libraries.get(libraryID).name);
@@ -1055,7 +1055,7 @@ Zotero.Sync.Storage.Local = {
 			return false;
 		}
 		
-		yield Zotero.DB.executeTransaction(async function () {
+		await Zotero.DB.executeTransaction(async function () {
 			for (let i = 0; i < conflicts.length; i++) {
 				let conflict = conflicts[i];
 				// TEMP
@@ -1087,5 +1087,5 @@ Zotero.Sync.Storage.Local = {
 			}
 		}.bind(this));
 		return true;
-	})
+	}
 }

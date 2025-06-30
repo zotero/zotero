@@ -98,7 +98,7 @@ Zotero.Duplicates.prototype._getObjectFromID = function (id) {
 }
 
 
-Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function* () {
+Zotero.Duplicates.prototype._findDuplicates = async function () {
 	Zotero.debug("Finding duplicates");
 	
 	var start = Date.now();
@@ -196,7 +196,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND itemTypeID=? AND fieldID=? "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-	var rows = yield Zotero.DB.queryAsync(
+	var rows = await Zotero.DB.queryAsync(
 		sql,
 		[
 			this._libraryID,
@@ -226,7 +226,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID=? AND value LIKE ? "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-	var rows = yield Zotero.DB.queryAsync(
+	var rows = await Zotero.DB.queryAsync(
 		sql,
 		[
 			this._libraryID,
@@ -263,7 +263,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 				+ "AND SUBSTR(value, 1, 4) != '0000' "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
 				+ "ORDER BY value";
-	var rows = yield Zotero.DB.queryAsync(sql, [this._libraryID].concat(dateFields));
+	var rows = await Zotero.DB.queryAsync(sql, [this._libraryID].concat(dateFields));
 	var yearCache = {};
 	for (let i = 0; i < rows.length; i++) {
 		let row = rows[i];
@@ -282,10 +282,10 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 				+ "(" + titleIDs.join(', ') + ") "
 				+ `AND itemTypeID NOT IN (${itemTypeAttachment}, ${itemTypeNote}) `
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-	var rows = yield Zotero.DB.queryAsync(sql, [this._libraryID]);
+	var rows = await Zotero.DB.queryAsync(sql, [this._libraryID]);
 	if (rows.length) {
 		//normalize all values ahead of time
-		rows = rows.map(function(row) {
+		rows = rows.map(function (row) {
 			return {
 				itemID: row.itemID,
 				value: normalizeString(row.value)
@@ -305,7 +305,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 			+ `WHERE libraryID=? AND itemTypeID NOT IN (${itemTypeAttachment}, ${itemTypeNote}) AND `
 			+ "itemID NOT IN (SELECT itemID FROM deletedItems)"
 			+ "ORDER BY itemID, orderIndex";
-		let creatorRows = yield Zotero.DB.queryAsync(sql, this._libraryID);
+		let creatorRows = await Zotero.DB.queryAsync(sql, this._libraryID);
 		let lastItemID;
 		let itemCreators = [];
 		for (let i = 0; i < creatorRows.length; i++) {
@@ -414,7 +414,7 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 	}*/
 	
 	Zotero.debug("Found duplicates in " + (Date.now() - start) + " ms");
-});
+};
 
 
 

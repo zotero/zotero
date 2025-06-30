@@ -45,7 +45,7 @@ Zotero.ProgressQueue = function (options) {
 	/**
 	 * @return {Zotero.ProgressQueueDialog}
 	 */
-	this.getDialog = function() {
+	this.getDialog = function () {
 		if(!_dialog) {
 			_dialog = new Zotero.ProgressQueueDialog(_progressQueue);
 		}
@@ -148,7 +148,7 @@ Zotero.ProgressQueue = function (options) {
 	 * Add item for processing
 	 * @param {Zotero.Item} item
 	 */
-	this.addRow = function(item) {
+	this.addRow = function (item) {
 		this.deleteRow(item.id);
 		
 		let row = {
@@ -171,7 +171,7 @@ Zotero.ProgressQueue = function (options) {
 	 * @param {Number} status
 	 * @param {String} message
 	 */
-	this.updateRow = function(itemID, status, message) {
+	this.updateRow = function (itemID, status, message) {
 		Zotero.debug(`ProgressQueue: updating row ${itemID}, ${status}, ${message}`);
 		for (let row of _rows) {
 			if (row.id === itemID) {
@@ -192,7 +192,7 @@ Zotero.ProgressQueue = function (options) {
 	 * Delete row
 	 * @param {Number} itemID
 	 */
-	this.deleteRow = function(itemID) {
+	this.deleteRow = function (itemID) {
 		let row = _rows.find(x => x.id === itemID);
 		if (row) {
 			_rows.splice(_rows.indexOf(row), 1);

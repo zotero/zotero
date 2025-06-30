@@ -25,7 +25,7 @@
 
 "use strict";
 
-Zotero.QuickCopy = new function() {
+Zotero.QuickCopy = new function () {
 	this.lastActiveURL = null;
 	
 	var _initTimeoutID
@@ -35,7 +35,7 @@ Zotero.QuickCopy = new function() {
 	var _siteSettings;
 	var _formattedNames;
 	
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		Zotero.debug("Initializing Quick Copy");
 		
 		if (!_initialized) {
@@ -60,32 +60,31 @@ Zotero.QuickCopy = new function() {
 			// if an export format is selected
 			if (Zotero.test) return;
 			
-			_initPromise = Zotero.Promise.each(
-				[
-					() => _loadOutputFormat(),
-					() => _loadNoteOutputFormat(),
-					() => this.loadSiteSettings()
-				],
-				f => f()
-			);
+			_initPromise = // FIXME: fx140: replace call to Zotero.Promise.each()
+			Zotero.Promise.each([
+				() => _loadOutputFormat(),
+				() => _loadNoteOutputFormat(),
+				() => this.loadSiteSettings()
+			], f => f());
 		}.bind(this));
-	});
+	};
 	
 	
 	this.uninit = function () {
 		_initCancelled = true;
 		// Cancel load if in progress
 		if (_initPromise) {
+			// FIXME: fx140: replace call to Zotero.Promise instance method 'cancel()'
 			_initPromise.cancel();
 		}
 		Zotero.Prefs.unregisterObserver(this._prefObserverID);
 	};
 	
 	
-	this.loadSiteSettings = Zotero.Promise.coroutine(function* () {
+	this.loadSiteSettings = async function () {
 		var sql = "SELECT key AS domainPath, value AS format FROM settings "
 			+ "WHERE setting='quickCopySite'";
-		var rows = yield Zotero.DB.queryAsync(sql);
+		var rows = await Zotero.DB.queryAsync(sql);
 		// Unproxify storage row
 		_siteSettings = rows.map(row => {
 			return {
@@ -93,8 +92,9 @@ Zotero.QuickCopy = new function() {
 				format: row.format 
 			};
 		});
-		yield Zotero.Promise.map(rows, row => _preloadFormat(row.format));
-	});
+		await // FIXME: fx140: replace call to Zotero.Promise.map()
+		Zotero.Promise.map(rows, row => _preloadFormat(row.format));
+	};
 	
 	
 	this.hasSiteSettings = function () {
@@ -140,19 +140,19 @@ Zotero.QuickCopy = new function() {
 	};
 	
 	
-	this.getFormattedNameFromSetting = Zotero.Promise.coroutine(function* (setting) {
+	this.getFormattedNameFromSetting = async function (setting) {
 		if (!_formattedNames) {
-			yield _loadFormattedNames();
+			await _loadFormattedNames();
 		}
 		var format = this.unserializeSetting(setting);
 		
 		var name = _formattedNames[format.mode + "=" + format.id];
 		return name ? name : '';
-	});
+	};
 	
-	this.getSettingFromFormattedName = Zotero.Promise.coroutine(function* (name) {
+	this.getSettingFromFormattedName = async function (name) {
 		if (!_formattedNames) {
-			yield _loadFormattedNames();
+			await _loadFormattedNames();
 		}
 		for (var setting in _formattedNames) {
 			if (_formattedNames[setting] == name) {
@@ -160,7 +160,7 @@ Zotero.QuickCopy = new function() {
 			}
 		}
 		return '';
-	});
+	};
 	
 	this.getNoteFormat = function () {
 		var pref = Zotero.Prefs.get('export.noteQuickCopy.setting');
@@ -168,7 +168,7 @@ Zotero.QuickCopy = new function() {
 		return pref;
 	};
 	
-	this.getFormatFromURL = function(url) {
+	this.getFormatFromURL = function (url) {
 		var quickCopyPref = Zotero.Prefs.get("export.quickCopy.setting");
 		quickCopyPref = JSON.stringify(this.unserializeSetting(quickCopyPref));
 		
@@ -211,7 +211,7 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		// Give priority to longer domains, then longer paths
-		var sort = function(a, b) {
+		var sort = function (a, b) {
 			if (a.domainLength > b.domainLength) {
 				return -1;
 			}
@@ -351,10 +351,10 @@ Zotero.QuickCopy = new function() {
 	 *
 	 * @return {Promise}
 	 */
-	var _loadOutputFormat = Zotero.Promise.coroutine(function* () {
+	var _loadOutputFormat = async function () {
 		var format = Zotero.Prefs.get("export.quickCopy.setting");
 		return _preloadFormat(format);
-	});
+	};
 	
 	
 	var _loadNoteOutputFormat = async function () {
@@ -403,13 +403,12 @@ Zotero.QuickCopy = new function() {
 		return format.locale || Zotero.Prefs.get('export.quickCopy.locale');
 	}
 	
-	
-	var _loadFormattedNames = Zotero.Promise.coroutine(function* () {
+	var _loadFormattedNames = async function () {
 		var t = new Date;
 		Zotero.debug("Loading formatted names for Quick Copy");
 		
 		var translation = new Zotero.Translate.Export;
-		var translators = yield translation.getTranslators();
+		var translators = await translation.getTranslators();
 		
 		// add styles to list
 		_formattedNames = {};
@@ -429,5 +428,5 @@ Zotero.QuickCopy = new function() {
 		}
 		
 		Zotero.debug("Loaded formatted names for Quick Copy in " + (new Date - t) + " ms");
-	});
+	};
 }

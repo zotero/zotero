@@ -191,7 +191,7 @@ Zotero.Debug = new function () {
 	}
 	
 	
-	this.get = Zotero.Promise.method(function(maxChars, maxLineLength) {
+	this.get = function (maxChars, maxLineLength) {
 		var output = _output;
 		var total = output.length;
 		
@@ -218,13 +218,13 @@ Zotero.Debug = new function () {
 			}
 		}
 
-		return Zotero.getSystemInfo().then(function(sysInfo) {
+		return Zotero.getSystemInfo().then(function (sysInfo) {
 			return Zotero.getErrors(true).join('\n\n') +
 				"\n\n" + sysInfo + "\n\n" +
 				"=========================================================\n\n" +
 				output;
 		});
-	});
+	};
 	
 	
 	this.addListener = function (listener) {

@@ -26,7 +26,7 @@
 Zotero.Libraries = new function () {
 	let _userLibraryID;
 	Zotero.defineProperty(this, 'userLibraryID', {
-		get: function() { 
+		get: function () { 
 			if (_userLibraryID === undefined) {
 				throw new Error("Library data not yet loaded");
 			}
@@ -45,22 +45,22 @@ Zotero.Libraries = new function () {
 	 */
 	this._cache = null;
 	
-	this._makeCache = function() {
+	this._makeCache = function () {
 		return {};
 	}
 	
-	this.register = function(library) {
+	this.register = function (library) {
 		if (!this._cache) throw new Error("Zotero.Libraries cache is not initialized");
 		Zotero.debug("Zotero.Libraries: Registering library " + library.libraryID, 5);
 		this._addToCache(this._cache, library);
 	};
 	
-	this._addToCache = function(cache, library) {
+	this._addToCache = function (cache, library) {
 		if (!library.libraryID) throw new Error("Cannot register an unsaved library");
 		cache[library.libraryID] = library;
 	}
 	
-	this.unregister = function(libraryID) {
+	this.unregister = function (libraryID) {
 		if (!this._cache) throw new Error("Zotero.Libraries cache is not initialized");
 		Zotero.debug("Zotero.Libraries: Unregistering library " + libraryID, 5);
 		delete this._cache[libraryID];
@@ -70,7 +70,7 @@ Zotero.Libraries = new function () {
 	 * Loads all libraries from DB. Groups, Feeds, etc. should not maintain an
 	 * independent cache.
 	 */
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		let specialLoading = ['feed', 'group'];
 		
 		// Invalidate caches until we're done loading everything
@@ -87,7 +87,7 @@ Zotero.Libraries = new function () {
 			// Exclude libraries that require special loading
 			+ " WHERE type NOT IN "
 			+ "(" + Array(specialLoading.length).fill('?').join(',') + ")";
-		let rows = yield Zotero.DB.queryAsync(sql, specialLoading);
+		let rows = await Zotero.DB.queryAsync(sql, specialLoading);
 		
 		for (let i=0; i<rows.length; i++) {
 			let row = rows[i];
@@ -114,7 +114,7 @@ Zotero.Libraries = new function () {
 			let libType = specialLoading[i];
 			let LibType = Zotero.Utilities.capitalize(libType);
 			
-			let libs = yield Zotero.DB.queryAsync(Zotero[LibType]._rowSQL);
+			let libs = await Zotero.DB.queryAsync(Zotero[LibType]._rowSQL);
 			for (let j=0; j<libs.length; j++) {
 				let lib = new Zotero[LibType]();
 				lib._loadDataFromRow(libs[j]);
@@ -129,19 +129,19 @@ Zotero.Libraries = new function () {
 			Zotero.DataObjectUtilities.getObjectsClassForObjectType(libType)
 				._cache = newCaches[libType];
 		}
-	});
+	};
 	
 	/**
 	 * @param {Integer} libraryID
 	 * @return {Boolean}
 	 */
-	this.exists = function(libraryID) {
+	this.exists = function (libraryID) {
 		if (!this._cache) throw new Error("Zotero.Libraries cache is not initialized");
 		return this._cache[libraryID] !== undefined;
 	}
 	
 	
-	this._ensureExists = function(libraryID) {
+	this._ensureExists = function (libraryID) {
 		if (!this.exists(libraryID)) {
 			throw new Error("Invalid library ID " + libraryID);
 		}
@@ -171,7 +171,7 @@ Zotero.Libraries = new function () {
 	 * @param {Integer} libraryID
 	 * @return {Zotero.Library[] | Zotero.Library}
 	 */
-	this.get = function(libraryID) {
+	this.get = function (libraryID) {
 		return this._cache[libraryID] || false;
 	}
 	
@@ -216,14 +216,14 @@ Zotero.Libraries = new function () {
 	 * @param {Integer} version
 	 * @return {Promise}
 	 */
-	this.setVersion = Zotero.Promise.method(function(libraryID, version) {
+	this.setVersion = function (libraryID, version) {
 		Zotero.debug("Zotero.Libraries.setVersion() is deprecated. Use Zotero.Library.prototype.libraryVersion instead");
 		this._ensureExists(libraryID);
 		
 		let library = Zotero.Libraries.get(libraryID);
 		library.libraryVersion = version;
 		return library.saveTx();
-	});
+	};
 	
 	/**
 	 * @deprecated
@@ -242,14 +242,14 @@ Zotero.Libraries = new function () {
 	 * @param {Date} lastSyncTime
 	 * @return {Promise}
 	 */
-	this.setLastSyncTime = Zotero.Promise.method(function (libraryID, lastSyncTime) {
+	this.setLastSyncTime = function (libraryID, lastSyncTime) {
 		Zotero.debug("Zotero.Libraries.setLastSyncTime() is deprecated. Use Zotero.Library.prototype.lastSync instead");
 		this._ensureExists(libraryID);
 		
 		let library = Zotero.Libraries.get(libraryID);
 		library.lastSync = lastSyncTime;
 		return library.saveTx();
-	});
+	};
 	
 	/**
 	 * @deprecated
@@ -265,14 +265,14 @@ Zotero.Libraries = new function () {
 	 *
 	 * @return {Promise}
 	 */
-	this.setEditable = Zotero.Promise.method(function(libraryID, editable) {
+	this.setEditable = function (libraryID, editable) {
 		Zotero.debug("Zotero.Libraries.setEditable() is deprecated. Use Zotero.Library.prototype.editable instead");
 		this._ensureExists(libraryID);
 		
 		let library = Zotero.Libraries.get(libraryID);
 		library.editable = editable;
 		return library.saveTx();
-	});
+	};
 	
 	/**
 	 * @deprecated
@@ -288,14 +288,14 @@ Zotero.Libraries = new function () {
 	 * 
 	 * @return {Promise}
 	 */
-	this.setFilesEditable = Zotero.Promise.coroutine(function* (libraryID, filesEditable) {
+	this.setFilesEditable = async function (libraryID, filesEditable) {
 		Zotero.debug("Zotero.Libraries.setFilesEditable() is deprecated. Use Zotero.Library.prototype.filesEditable instead");
 		this._ensureExists(libraryID);
 		
 		let library = Zotero.Libraries.get(libraryID);
 		library.filesEditable = filesEditable;
 		return library.saveTx();
-	});
+	};
 	
 	/**
 	 * @deprecated
@@ -318,7 +318,7 @@ Zotero.Libraries = new function () {
 	/**
 	 * @deprecated
 	 */
-	this.updateLastSyncTime = Zotero.Promise.method(function(libraryID) {
+	this.updateLastSyncTime = function (libraryID) {
 		Zotero.debug("Zotero.Libraries.updateLastSyncTime() is deprecated. Use Zotero.Library.prototype.updateLastSyncTime instead");
 		this._ensureExists(libraryID);
 		
@@ -326,5 +326,5 @@ Zotero.Libraries = new function () {
 		library.updateLastSyncTime();
 		return library.saveTx()
 			.return();
-	})
+	}
 }

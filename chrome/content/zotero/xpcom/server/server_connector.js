@@ -192,7 +192,7 @@ Zotero.Server.Connector = {
  * Returns:
  *		Array of Zotero.Translator objects
  */
-Zotero.Server.Connector.GetTranslators = function() {};
+Zotero.Server.Connector.GetTranslators = function () {};
 Zotero.Server.Endpoints["/connector/getTranslators"] = Zotero.Server.Connector.GetTranslators;
 Zotero.Server.Connector.GetTranslators.prototype = {
 	supportedMethods: ["POST"],
@@ -204,26 +204,26 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 	 * @param {Object} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	init: function(data, sendResponseCallback) {
+	init: function (data, sendResponseCallback) {
 		// Translator data
 		var me = this;
 		if(data.url) {
-			Zotero.Translators.getWebTranslatorsForLocation(data.url, data.url).then(function(data) {
+			Zotero.Translators.getWebTranslatorsForLocation(data.url, data.url).then(function (data) {
 				sendResponseCallback(200, "application/json",
 						JSON.stringify(me._serializeTranslators(data[0])));
 			});
 		} else {
-			Zotero.Translators.getAll().then(function(translators) {
+			Zotero.Translators.getAll().then(function (translators) {
 				var responseData = me._serializeTranslators(translators);
 				sendResponseCallback(200, "application/json", JSON.stringify(responseData));
-			}).catch(function(e) {
+			}).catch(function (e) {
 				sendResponseCallback(500);
 				throw e;
 			});
 		}
 	},
 	
-	_serializeTranslators: function(translators) {
+	_serializeTranslators: function (translators) {
 		var responseData = [];
 		let properties = ["translatorID", "translatorType", "label", "creator", "target", "targetAll",
 			"minVersion", "maxVersion", "priority", "browserSupport", "inRepository", "lastUpdated"];
@@ -244,7 +244,7 @@ Zotero.Server.Connector.GetTranslators.prototype = {
  *
  * Returns a list of available translators as an array
  */
-Zotero.Server.Connector.Detect = function() {};
+Zotero.Server.Connector.Detect = function () {};
 Zotero.Server.Endpoints["/connector/detect"] = Zotero.Server.Connector.Detect;
 Zotero.Server.Connector.Detect.prototype = {
 	supportedMethods: ["POST"],
@@ -254,7 +254,7 @@ Zotero.Server.Connector.Detect.prototype = {
 	/**
 	 * Loads HTML into a hidden browser and initiates translator detection
 	 */
-	init: async function(requestData) {
+	init: async function (requestData) {
 		try {
 			var translators = await this.getTranslators(requestData);
 		} catch (e) {
@@ -262,7 +262,7 @@ Zotero.Server.Connector.Detect.prototype = {
 			return 500;
 		}
 		
-		translators = translators.map(function(translator) {
+		translators = translators.map(function (translator) {
 			return translator.serialize(TRANSLATOR_PASSING_PROPERTIES);
 		});
 		return [200, "application/json", JSON.stringify(translators)];
@@ -299,7 +299,7 @@ Zotero.Server.Connector.Detect.prototype = {
  * Returns:
  *		201 response code with item in body.
  */
-Zotero.Server.Connector.SaveItems = function() {};
+Zotero.Server.Connector.SaveItems = function () {};
 Zotero.Server.Endpoints["/connector/saveItems"] = Zotero.Server.Connector.SaveItems;
 Zotero.Server.Connector.SaveItems.prototype = {
 	supportedMethods: ["POST"],
@@ -606,7 +606,7 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
  * Returns:
  *		Nothing (200 OK response)
  */
-Zotero.Server.Connector.SaveSnapshot = function() {};
+Zotero.Server.Connector.SaveSnapshot = function () {};
 Zotero.Server.Endpoints["/connector/saveSnapshot"] = Zotero.Server.Connector.SaveSnapshot;
 Zotero.Server.Connector.SaveSnapshot.prototype = {
 	supportedMethods: ["POST"],
@@ -737,7 +737,7 @@ Zotero.Server.Connector.SaveAttachmentFromResolver.prototype = {
  *		200 response on successful change
  *		400 on error with 'error' property in JSON
  */
-Zotero.Server.Connector.UpdateSession = function() {};
+Zotero.Server.Connector.UpdateSession = function () {};
 Zotero.Server.Endpoints["/connector/updateSession"] = Zotero.Server.Connector.UpdateSession;
 Zotero.Server.Connector.UpdateSession.prototype = {
 	supportedMethods: ["POST"],
@@ -800,7 +800,7 @@ Zotero.Server.Connector.DelaySync.prototype = {
  * 	- Object[Item] an array of imported items
  */
  
-Zotero.Server.Connector.Import = function() {};
+Zotero.Server.Connector.Import = function () {};
 Zotero.Server.Endpoints["/connector/import"] = Zotero.Server.Connector.Import;
 Zotero.Server.Connector.Import.prototype = {
 	supportedMethods: ["POST"],
@@ -861,27 +861,27 @@ Zotero.Server.Connector.Import.prototype = {
  * 	- {name: styleName}
  */
  
-Zotero.Server.Connector.InstallStyle = function() {};
+Zotero.Server.Connector.InstallStyle = function () {};
 Zotero.Server.Endpoints["/connector/installStyle"] = Zotero.Server.Connector.InstallStyle;
 Zotero.Server.Connector.InstallStyle.prototype = {
 	supportedMethods: ["POST"],
 	supportedDataTypes: '*',
 	permitBookmarklet: false,
 	
-	init: Zotero.Promise.coroutine(function* (requestData) {
+	init: async function (requestData) {
 		let dataString = requestData.data;
 		if (requestData.data instanceof Ci.nsIInputStream) {
 			dataString = Zotero.Server.networkStreamToString(dataString, requestData.headers['content-length']);
 		}
 		try {
-			var { styleTitle } = yield Zotero.Styles.install(
+			var { styleTitle } = await Zotero.Styles.install(
 				dataString, requestData.searchParams.get('origin') || null, true
 			);
 		} catch (e) {
 			return [400, "text/plain", e.message];
 		}
 		return [201, "application/json", JSON.stringify({name: styleTitle})];
-	})
+	}
 };
 
 /**
@@ -892,7 +892,7 @@ Zotero.Server.Connector.InstallStyle.prototype = {
  * Returns:
  *		code - translator code
  */
-Zotero.Server.Connector.GetTranslatorCode = function() {};
+Zotero.Server.Connector.GetTranslatorCode = function () {};
 Zotero.Server.Endpoints["/connector/getTranslatorCode"] = Zotero.Server.Connector.GetTranslatorCode;
 Zotero.Server.Connector.GetTranslatorCode.prototype = {
 	supportedMethods: ["POST"],
@@ -904,9 +904,9 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
 	 * @param {String} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	init: function(postData, sendResponseCallback) {
+	init: function (postData, sendResponseCallback) {
 		var translator = Zotero.Translators.get(postData.translatorID);
-		Zotero.Translators.getCodeForTranslator(translator).then(function(code) {
+		Zotero.Translators.getCodeForTranslator(translator).then(function (code) {
 			sendResponseCallback(200, "application/javascript", code);
 		});
 	}
@@ -924,7 +924,7 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
  *      collectionID
  *      collectionName
  */
-Zotero.Server.Connector.GetSelectedCollection = function() {};
+Zotero.Server.Connector.GetSelectedCollection = function () {};
 Zotero.Server.Endpoints["/connector/getSelectedCollection"] = Zotero.Server.Connector.GetSelectedCollection;
 Zotero.Server.Connector.GetSelectedCollection.prototype = {
 	supportedMethods: ["POST"],
@@ -936,7 +936,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 	 * @param {String} data POST data or GET query string
 	 * @param {Function} sendResponseCallback function to send HTTP response
 	 */
-	init: async function(postData, sendResponseCallback) {
+	init: async function (postData, sendResponseCallback) {
 		let allowReadOnly = (postData.hasOwnProperty("switchToReadableLibrary")) ? !postData.switchToReadableLibrary : true;
 		var { library, collection, editable } = Zotero.Server.Connector.getSaveTarget(allowReadOnly);
 		var response = {
@@ -1030,7 +1030,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
  * 		{Array} hostnames
  */
 Zotero.Server.Connector.GetClientHostnames = {};
-Zotero.Server.Connector.GetClientHostnames = function() {};
+Zotero.Server.Connector.GetClientHostnames = function () {};
 Zotero.Server.Endpoints["/connector/getClientHostnames"] = Zotero.Server.Connector.GetClientHostnames;
 Zotero.Server.Connector.GetClientHostnames.prototype = {
 	supportedMethods: ["POST"],
@@ -1040,14 +1040,14 @@ Zotero.Server.Connector.GetClientHostnames.prototype = {
 	/**
 	 * Returns a 200 response to say the server is alive
 	 */
-	init: Zotero.Promise.coroutine(function* (requestData) {
+	init: async function (requestData) {
 		try {
-			var hostnames = yield Zotero.Proxies.DNS.getHostnames();
+			var hostnames = await Zotero.Proxies.DNS.getHostnames();
 		} catch(e) {
 			return 500;
 		}
 		return [200, "application/json", JSON.stringify(hostnames)];
-	})
+	}
 };
 
 /**
@@ -1059,7 +1059,7 @@ Zotero.Server.Connector.GetClientHostnames.prototype = {
  * 		{Array} hostnames
  */
 Zotero.Server.Connector.Proxies = {};
-Zotero.Server.Connector.Proxies = function() {};
+Zotero.Server.Connector.Proxies = function () {};
 Zotero.Server.Endpoints["/connector/proxies"] = Zotero.Server.Connector.Proxies;
 Zotero.Server.Connector.Proxies.prototype = {
 	supportedMethods: ["POST"],
@@ -1069,10 +1069,10 @@ Zotero.Server.Connector.Proxies.prototype = {
 	/**
 	 * Returns a 200 response to say the server is alive
 	 */
-	init: Zotero.Promise.coroutine(function* () {
+	init: async function () {
 		let proxies = Zotero.Proxies.proxies.map((p) => Object.assign(p.toJSON(), {hosts: p.hosts}));
 		return [200, "application/json", JSON.stringify(proxies)];
-	})
+	}
 };
 
 
@@ -1084,7 +1084,7 @@ Zotero.Server.Connector.Proxies.prototype = {
  * Returns:
  *		Nothing (200 OK response)
  */
-Zotero.Server.Connector.Ping = function() {};
+Zotero.Server.Connector.Ping = function () {};
 Zotero.Server.Endpoints["/connector/ping"] = Zotero.Server.Connector.Ping;
 Zotero.Server.Connector.Ping.prototype = {
 	supportedMethods: ["GET", "POST"],

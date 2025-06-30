@@ -42,7 +42,7 @@ Zotero.Relations = new function () {
 	var _subjectPredicatesByObject = {};
 	
 	
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		// Load relations for different types
 		for (let type of _types) {
 			let t = new Date();
@@ -50,7 +50,7 @@ Zotero.Relations = new function () {
 			
 			let sql = "SELECT * FROM " + type + "Relations "
 				+ "JOIN relationPredicates USING (predicateID)";
-			yield Zotero.DB.queryAsync(
+			await Zotero.DB.queryAsync(
 				sql,
 				false,
 				{
@@ -67,7 +67,7 @@ Zotero.Relations = new function () {
 			
 			Zotero.debug(`Loaded ${type} relations in ${new Date() - t} ms`);
 		}
-	});
+	};
 	
 	
 	this.register = function (objectType, subjectID, predicate, object) {
@@ -148,7 +148,7 @@ Zotero.Relations = new function () {
 	 * @return {Object[]} - An array of objects with a Zotero.DataObject as 'subject'
 	 *     and a predicate string as 'predicate'
 	 */
-	this.getByObject = Zotero.Promise.coroutine(function* (objectType, object) {
+	this.getByObject = async function (objectType, object) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var predicateIDs = [];
 		var o = _subjectPredicatesByObject[objectType]
@@ -159,7 +159,7 @@ Zotero.Relations = new function () {
 		var toReturn = [];
 		for (let predicateID in o) {
 			for (let subjectID of o[predicateID]) {
-				var subject = yield objectsClass.getAsync(subjectID);
+				var subject = await objectsClass.getAsync(subjectID);
 				toReturn.push({
 					subject: subject,
 					predicate: Zotero.RelationPredicates.getName(predicateID)
@@ -167,7 +167,7 @@ Zotero.Relations = new function () {
 			};
 		}
 		return toReturn;
-	});
+	};
 	
 	
 	/**
@@ -199,7 +199,7 @@ Zotero.Relations = new function () {
 	};
 	
 	
-	this.updateUser = Zotero.Promise.coroutine(function* (fromUserID, toUserID) {
+	this.updateUser = async function (fromUserID, toUserID) {
 		if (!fromUserID) {
 			fromUserID = "local/" + Zotero.Users.getLocalUserKey();
 		}
@@ -210,7 +210,7 @@ Zotero.Relations = new function () {
 		Zotero.DB.requireTransaction();
 		for (let type of _types) {
 			let sql = `SELECT DISTINCT object FROM ${type}Relations WHERE object LIKE ?`;
-			let objects = yield Zotero.DB.columnQueryAsync(
+			let objects = await Zotero.DB.columnQueryAsync(
 				sql, 'http://zotero.org/users/' + fromUserID + '/%'
 			);
 			Zotero.DB.addCurrentCallback("commit", function* () {
@@ -230,18 +230,18 @@ Zotero.Relations = new function () {
 			sql = "UPDATE " + type + "Relations SET "
 				+ "object=REPLACE(object, 'zotero.org/users/" + fromUserID + "/', "
 				+ "'zotero.org/users/" + toUserID + "/')";
-			yield Zotero.DB.queryAsync(sql);
+			await Zotero.DB.queryAsync(sql);
 			
 			var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 			let loadedObjects = objectsClass.getLoaded();
 			for (let object of loadedObjects) {
-				yield object.reload(['relations'], true);
+				await object.reload(['relations'], true);
 			}
 		}
-	});
+	};
 	
 	
-	this.purge = Zotero.Promise.coroutine(function* () {
+	this.purge = async function () {
 		Zotero.debug("Purging relations");
 		
 		Zotero.DB.requireTransaction();
@@ -256,7 +256,7 @@ Zotero.Relations = new function () {
 			let sql = "SELECT " + objectsClass.idColumn + " AS id, predicate, object "
 				+ "FROM " + objectsClass.relationsTable
 				+ " JOIN relationPredicates USING (predicateID) WHERE predicate != ?";
-			let rows = yield Zotero.DB.queryAsync(sql, [this.replacedItemPredicate]);
+			let rows = await Zotero.DB.queryAsync(sql, [this.replacedItemPredicate]);
 			for (let i = 0; i < rows.length; i++) {
 				let row = rows[i];
 				let uri = row.object;
@@ -266,23 +266,23 @@ Zotero.Relations = new function () {
 				// removing
 				if (uri.indexOf(prefix) != -1
 						&& uri.indexOf("/" + type + "s/") != -1
-						&& !(yield Zotero.URI[getFunc](uri))) {
+						&& !((await Zotero.URI[getFunc](uri)))) {
 					if (!objects[row.id]) {
-						objects[row.id] = yield objectsClass.getAsync(row.id, { noCache: true });
+						objects[row.id] = await objectsClass.getAsync(row.id, { noCache: true });
 					}
 					objects[row.id].removeRelation(row.predicate, uri);
 				}
 				for (let i in objects) {
-					yield objects[i].save();
+					await objects[i].save();
 				}
 			}
 			
 			Zotero.debug("Purged relations in " + ((new Date) - t) + "ms");
 		}
-	});
+	};
 	
 	
-	this._getPrefixAndValue = function(uri) {
+	this._getPrefixAndValue = function (uri) {
 		var [prefix, value] = uri.split(':');
 		if (prefix && value) {
 			if (!this._namespaces[prefix]) {

@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Schema = new function(){
+Zotero.Schema = new function () {
 	this.dbInitialized = false;
 	this.goToChangeLog = false;
 	
@@ -62,7 +62,7 @@ Zotero.Schema = new function(){
 	 */
 	this.getDBVersion = function (schema) {
 		if (_dbVersions[schema]){
-			return Zotero.Promise.resolve(_dbVersions[schema]);
+			return Promise.resolve(_dbVersions[schema]);
 		}
 		
 		var sql = "SELECT version FROM version WHERE schema='" + schema + "'";
@@ -97,14 +97,14 @@ Zotero.Schema = new function(){
 		//
 		// 'compatibility' is incremented manually by upgrade steps in order to break DB
 		// compatibility with older versions.
-		var versions = await Zotero.Promise.all([
+		var versions = await Promise.all([
 			this.getDBVersion('userdata'), this.getDBVersion('compatibility')
 		]);
 		var [userdata, compatibility] = versions;
 		if (!userdata) {
 			Zotero.debug('Database does not exist -- creating\n');
 			return _initializeSchema()
-			.then(function() {
+			.then(function () {
 				// Don't load bundled files until after UI is ready, unless this is a test run,
 				// in which case tests can run without a window open
 				(!Zotero.test ? Zotero.uiReadyPromise : Zotero.initializationPromise)
@@ -408,7 +408,7 @@ Zotero.Schema = new function(){
 			throw new Error("version not specified");
 		}
 		
-		var dbVersion = await Zotero.Schema.getDBVersion('globalSchema') || null;
+		var dbVersion = (await Zotero.Schema.getDBVersion('globalSchema')) || null;
 		if (dbVersion > version) {
 			Zotero.debug(`Database has newer global schema (${dbVersion} > ${version}) `
 				+ `-- skipping update and using schema from DB`);
@@ -715,7 +715,7 @@ Zotero.Schema = new function(){
 	//
 	// This is mostly temporary
 	// TEMP - NSF
-	this.importSchema = Zotero.Promise.coroutine(function* (str, uri) {
+	this.importSchema = async function (str, uri) {
 		var ps = Services.prompt;
 		
 		if (!uri.match(/https?:\/\/([^\.]+\.)?zotero.org\//)) {
@@ -739,9 +739,9 @@ Zotero.Schema = new function(){
 			
 			var itemTypeID = Zotero.ID.get('customItemTypes');
 			
-			yield Zotero.DB.queryAsync("PRAGMA foreign_keys=OFF");
+			await Zotero.DB.queryAsync("PRAGMA foreign_keys=OFF");
 			try {
-				yield Zotero.DB.executeTransaction(async function () {
+				await Zotero.DB.executeTransaction(async function () {
 					await Zotero.DB.queryAsync("INSERT INTO customItemTypes VALUES (?, 'nsfReviewer', 'NSF Reviewer', 1, 'chrome://zotero/skin/report_user.png')", itemTypeID);
 					
 					var fields = [
@@ -795,7 +795,7 @@ Zotero.Schema = new function(){
 				});
 			}
 			finally {
-				yield Zotero.DB.queryAsync("PRAGMA foreign_keys=ON");
+				await Zotero.DB.queryAsync("PRAGMA foreign_keys=ON");
 			}
 			
 			var s = new Zotero.Search;
@@ -803,7 +803,7 @@ Zotero.Schema = new function(){
 			s.addCondition('itemType', 'is', 'nsfReviewer');
 			s.addCondition('dateDue', 'isBefore', 'today');
 			s.addCondition('tag', 'isNot', 'Completed');
-			yield s.saveTx();
+			await s.saveTx();
 			
 			ps.alert(null, "Zotero Item Type Added", "The 'NSF Reviewer' item type and 'Overdue NSF Reviewers' saved search have been installed.");
 		}
@@ -820,15 +820,15 @@ Zotero.Schema = new function(){
 			var s2 = new Zotero.Search;
 			s2.addCondition('itemType', 'is', 'nsfReviewer');
 			s2.addCondition('deleted', 'true');
-			if ((yield s.search()).length || (yield s2.search()).length) {
+			if (((await s.search())).length || ((await s2.search())).length) {
 				ps.alert(null, "Error", "All 'NSF Reviewer' items must be deleted before the item type can be removed from Zotero.");
 				return;
 			}
 			
 			Zotero.debug("Uninstalling nsfReviewer item type");
-			yield Zotero.DB.queryAsync("PRAGMA foreign_keys=OFF");
+			await Zotero.DB.queryAsync("PRAGMA foreign_keys=OFF");
 			try {
-				yield Zotero.DB.executeTransaction(async function () {
+				await Zotero.DB.executeTransaction(async function () {
 					await Zotero.DB.queryAsync("DELETE FROM customItemTypeFields WHERE customItemTypeID=?", itemTypeID - Zotero.ItemTypes.customIDOffset);
 					await Zotero.DB.queryAsync("DELETE FROM customBaseFieldMappings WHERE customItemTypeID=?", itemTypeID - Zotero.ItemTypes.customIDOffset);
 					var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
@@ -850,12 +850,12 @@ Zotero.Schema = new function(){
 				});
 			}
 			finally {
-				yield Zotero.DB.queryAsync("PRAGMA foreign_keys=ON");
+				await Zotero.DB.queryAsync("PRAGMA foreign_keys=ON");
 			}
 			
 			ps.alert(null, "Zotero Item Type Removed", "The 'NSF Reviewer' item type has been uninstalled.");
 		}
-	});
+	};
 	
 	async function _reloadSchema(options) {
 		await _updateCustomTables(options);
@@ -1670,7 +1670,7 @@ Zotero.Schema = new function(){
 		Zotero.getTranslatorsDirectory();
 		Zotero.getStylesDirectory();
 		
-		await Zotero.Promise.all(Zotero.Translators.reinit(), Zotero.Styles.reinit());
+		await Promise.all(Zotero.Translators.reinit(), Zotero.Styles.reinit());
 		var updated = await this.updateBundledFiles();
 		if (updated && Zotero.Prefs.get('automaticScraperUpdates')) {
 			await Zotero.Schema.updateFromRepository(this.REPO_UPDATE_MANUAL);
@@ -1726,9 +1726,9 @@ Zotero.Schema = new function(){
 	
 	
 	this.integrityCheckRequired = async function () {
-		return !!await Zotero.DB.valueQueryAsync(
+		return !!(await Zotero.DB.valueQueryAsync(
 			"SELECT value FROM settings WHERE setting='db' AND key='integrityCheck'"
-		);
+		));
 	};
 	
 	
@@ -2231,7 +2231,7 @@ Zotero.Schema = new function(){
 	 * Requires a transaction
 	 */
 	var _updateSchema = async function (schema) {
-		var [dbVersion, schemaVersion] = await Zotero.Promise.all(
+		var [dbVersion, schemaVersion] = await Promise.all(
 			[Zotero.Schema.getDBVersion(schema), _getSchemaSQLVersion(schema)]
 		);
 		if (dbVersion == schemaVersion) {
@@ -3448,7 +3448,7 @@ Zotero.Schema = new function(){
 			
 			else if (i == 120) {
 				// Repeat 119 if it didn't go through
-				if (!await Zotero.DB.columnExists('itemAnnotations', 'authorName')) {
+				if (!(await Zotero.DB.columnExists('itemAnnotations', 'authorName'))) {
 					await Zotero.DB.queryAsync("CREATE TABLE itemAnnotationsTemp (\n    itemID INTEGER PRIMARY KEY,\n    parentItemID INT NOT NULL,\n    type INTEGER NOT NULL,\n    authorName TEXT,\n    text TEXT,\n    comment TEXT,\n    color TEXT,\n    pageLabel TEXT,\n    sortIndex TEXT NOT NULL,\n    position TEXT NOT NULL,\n    isExternal INT NOT NULL,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID)\n)");
 					await Zotero.DB.queryAsync("INSERT INTO itemAnnotationsTemp SELECT itemID, parentItemID, type, '', text, comment, color, pageLabel, sortIndex, position, isExternal FROM itemAnnotations");
 					await Zotero.DB.queryAsync("DROP TABLE itemAnnotations");

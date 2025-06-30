@@ -128,7 +128,7 @@ Zotero.Notifier = new function () {
 	*
 	* - New events and types should be added to the order arrays in commit()
 	**/
-	this.trigger = Zotero.Promise.coroutine(function* (event, type, ids, extraData, force) {
+	this.trigger = async function (event, type, ids, extraData, force) {
 		if (_transactionID && !force) {
 			return this.queue(event, type, ids, extraData);
 		}
@@ -163,7 +163,7 @@ Zotero.Notifier = new function () {
 			// one throws an error
 			try {
 				let t = new Date;
-				yield Zotero.Promise.resolve(ref.notify(event, type, ids, extraData));
+				await Promise.resolve(ref.notify(event, type, ids, extraData));
 				t = new Date - t;
 				if (t > 5) {
 					//Zotero.debug(id + " observer finished in " + t + " ms", 5);
@@ -175,7 +175,7 @@ Zotero.Notifier = new function () {
 		}
 		
 		return true;
-	});
+	};
 	
 	
 	/**
@@ -330,7 +330,7 @@ Zotero.Notifier = new function () {
 	 *     instead of the internal queue
 	 * @param {String} [transactionID]
 	 */
-	this.commit = Zotero.Promise.coroutine(function* (queues, transactionID = true) {
+	this.commit = async function (queues, transactionID = true) {
 		let queue;
 		if (queues) {
 			if (!Array.isArray(queues)) {
@@ -405,10 +405,10 @@ Zotero.Notifier = new function () {
 					
 					// Don't send modify on nonexistent items or tags
 					if (event == 'modify') {
-						if (type == 'item' && !(yield Zotero.Items.getAsync(id))) {
+						if (type == 'item' && !((await Zotero.Items.getAsync(id)))) {
 							continue;
 						}
-						else if (type == 'tag' && !(yield Zotero.Tags.getAsync(id))) {
+						else if (type == 'tag' && !((await Zotero.Tags.getAsync(id)))) {
 							continue;
 						}
 					}
@@ -440,7 +440,7 @@ Zotero.Notifier = new function () {
 			for (let type in runQueue) {
 				for (let event in runQueue[type]) {
 					if (runQueue[type][event].ids.length || event == 'refresh') {
-						yield this.trigger(
+						await this.trigger(
 							event,
 							type,
 							runQueue[type][event].ids,
@@ -451,7 +451,7 @@ Zotero.Notifier = new function () {
 				}
 			}
 		}
-	});
+	};
 	
 	
 	/*

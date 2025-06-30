@@ -31,7 +31,7 @@ Zotero.Groups = new function () {
 	
 	this._cache = null;
 	
-	this._makeCache = function() {
+	this._makeCache = function () {
 		return {
 			groupIDByLibraryID: {},
 			libraryIDByGroupID: {}
@@ -57,9 +57,9 @@ Zotero.Groups = new function () {
 		delete this._cache.libraryIDByGroupID[groupID];
 	}
 	
-	this.init = Zotero.Promise.method(function() {
+	this.init = function () {
 		// Cache initialized in Zotero.Libraries
-	})
+	}
 	
 	/**
 	 * @param {Integer} id - Group id
@@ -81,7 +81,7 @@ Zotero.Groups = new function () {
 		var groups = Object.keys(this._cache.groupIDByLibraryID)
 			.map(id => Zotero.Libraries.get(id));
 		var collation = Zotero.getLocaleCollation();
-		groups.sort(function(a, b) {
+		groups.sort(function (a, b) {
 			return collation.compareString(1, a.name, b.name);
 		});
 		return groups;

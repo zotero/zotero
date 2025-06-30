@@ -27,7 +27,7 @@
 /*
  * Same structure as Zotero.Creators -- make changes in both places if possible
  */
-Zotero.Tags = new function() {
+Zotero.Tags = new function () {
 	this.MAX_COLORED_TAGS = 9;
 	this.MAX_SYNC_LENGTH = 255;
 	
@@ -39,8 +39,8 @@ Zotero.Tags = new function() {
 	var _itemsListImagePromises = {};
 	
 	
-	this.init = Zotero.Promise.coroutine(function* () {
-		yield Zotero.DB.queryAsync(
+	this.init = async function () {
+		await Zotero.DB.queryAsync(
 			"SELECT tagID, name FROM tags",
 			false,
 			{
@@ -53,7 +53,7 @@ Zotero.Tags = new function() {
 			}
 		);
 		_initialized = true;
-	});
+	};
 	
 	
 	/**
@@ -102,7 +102,7 @@ Zotero.Tags = new function() {
 	 * @param {String} name - Tag name
 	 * @return {Promise<Integer>} tagID
 	 */
-	this.create = Zotero.Promise.coroutine(function* (name) {
+	this.create = async function (name) {
 		if (!_initialized) {
 			throw new Zotero.Exception.UnloadedDataException("Tags not yet loaded");
 		}
@@ -115,21 +115,21 @@ Zotero.Tags = new function() {
 		if (!id) {
 			id = Zotero.ID.get('tags');
 			let sql = "INSERT INTO tags (tagID, name) VALUES (?, ?)";
-			yield Zotero.DB.queryAsync(sql, [id, data.tag]);
+			await Zotero.DB.queryAsync(sql, [id, data.tag]);
 			_tagsByID.set(id, data.tag);
 			_idsByTag.set(data.tag, id);
 		}
 		return id;
-	});
+	};
 	
 	
-	this.getLongTagsInLibrary = Zotero.Promise.coroutine(function* (libraryID) {
+	this.getLongTagsInLibrary = async function (libraryID) {
 		var sql = "SELECT DISTINCT tagID FROM tags "
 			+ "JOIN itemTags USING (tagID) "
 			+ "JOIN items USING (itemID) "
 			+ "WHERE libraryID=? AND LENGTH(name)>?"
-		return yield Zotero.DB.columnQueryAsync(sql, [libraryID, this.MAX_SYNC_LENGTH]);
-	});
+		return await Zotero.DB.columnQueryAsync(sql, [libraryID, this.MAX_SYNC_LENGTH]);
+	};
 	
 	
 	/**
@@ -211,14 +211,14 @@ Zotero.Tags = new function() {
 	}
 	
 	
-	this.search = Zotero.Promise.coroutine(function* (str) {
+	this.search = async function (str) {
 		var sql = 'SELECT name AS tag, type FROM tags';
 		if (str) {
 			sql += ' WHERE name LIKE ?';
 		}
-		var rows = yield Zotero.DB.queryAsync(sql, str ? '%' + str + '%' : undefined);
+		var rows = await Zotero.DB.queryAsync(sql, str ? '%' + str + '%' : undefined);
 		return rows.map((row) => this.cleanData(row));
-	});
+	};
 
 
 	/**
@@ -274,7 +274,7 @@ Zotero.Tags = new function() {
 	 * @param {String} newName
 	 * @return {Promise}
 	 */
-	this.rename = Zotero.Promise.coroutine(function* (libraryID, oldName, newName) {
+	this.rename = async function (libraryID, oldName, newName) {
 		Zotero.debug("Renaming tag '" + oldName + "' to '" + newName + "' in library " + libraryID);
 		
 		oldName = oldName.trim();
@@ -294,31 +294,31 @@ Zotero.Tags = new function() {
 		// we can assign it to the new name
 		var oldColorData = this.getColor(libraryID, oldName);
 		
-		yield Zotero.DB.executeTransaction(async function () {
+		await Zotero.DB.executeTransaction(async function () {
 			var oldItemIDs = await this.getTagItems(libraryID, oldTagID);
 			var newTagID = await this.create(newName);
 			
 			await Zotero.Utilities.Internal.forEachChunkAsync(
 				oldItemIDs,
 				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
-				Zotero.Promise.coroutine(function* (chunk) {
+				async function (chunk) {
 					let placeholders = chunk.map(() => '?').join(',');
 					
 					// This is ugly, but it's much faster than doing replaceTag() for each item
 					let sql = 'UPDATE OR REPLACE itemTags SET tagID=?, type=0 '
 						+ 'WHERE tagID=? AND itemID IN (' + placeholders + ')';
-					yield Zotero.DB.queryAsync(
+					await Zotero.DB.queryAsync(
 						sql, [newTagID, oldTagID].concat(chunk), { noCache: true }
 					);
 					
 					sql = 'UPDATE items SET synced=0, clientDateModified=? '
 						+ 'WHERE itemID IN (' + placeholders + ')'
-					yield Zotero.DB.queryAsync(
+					await Zotero.DB.queryAsync(
 						sql, [Zotero.DB.transactionDateTime].concat(chunk), { noCache: true }
 					);
 					
-					yield Zotero.Items.reload(oldItemIDs, ['primaryData', 'tags'], true);
-				})
+					await Zotero.Items.reload(oldItemIDs, ['primaryData', 'tags'], true);
+				}
 			);
 			
 			var notifierData = {};
@@ -342,7 +342,7 @@ Zotero.Tags = new function() {
 		}.bind(this));
 		
 		if (oldColorData) {
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				// Remove color from old tag
 				await this.setColor(libraryID, oldName);
 				
@@ -355,7 +355,7 @@ Zotero.Tags = new function() {
 				);
 			}.bind(this));
 		}
-	});
+	};
 	
 	
 	/**
@@ -365,7 +365,7 @@ Zotero.Tags = new function() {
 	 * @param {Integer[]} [types]
 	 * @return {Promise}
 	 */
-	this.removeFromLibrary = Zotero.Promise.coroutine(function* (libraryID, tagIDs, onProgress, types) {
+	this.removeFromLibrary = async function (libraryID, tagIDs, onProgress, types) {
 		var d = new Date();
 		
 		if (!Array.isArray(tagIDs)) {
@@ -378,7 +378,7 @@ Zotero.Tags = new function() {
 		var colors = this.getColors(libraryID);
 		var done = 0;
 		
-		yield Zotero.Utilities.Internal.forEachChunkAsync(
+		await Zotero.Utilities.Internal.forEachChunkAsync(
 			tagIDs,
 			100,
 			async function (chunk) {
@@ -458,7 +458,7 @@ Zotero.Tags = new function() {
 		
 		Zotero.debug(`Removed ${tagIDs.length} ${Zotero.Utilities.pluralize(tagIDs.length, 'tag')} `
 			+ `in ${new Date() - d} ms`);
-	});
+	};
 	
 	
 	/**
@@ -491,7 +491,7 @@ Zotero.Tags = new function() {
 	 * @param {Number|Number[]} [tagIDs] - tagID or array of tagIDs to purge
 	 * @return {Promise}
 	 */
-	this.purge = Zotero.Promise.coroutine(function* (tagIDs) {
+	this.purge = async function (tagIDs) {
 		var d = new Date();
 		
 		if (!_initialized) {
@@ -517,8 +517,8 @@ Zotero.Tags = new function() {
 		// Use given tags, as long as they're orphaned
 		if (tagIDs) {
 			sql = "CREATE TEMPORARY TABLE tagDelete (tagID INT PRIMARY KEY)";
-			yield Zotero.DB.queryAsync(sql);
-			yield Zotero.Utilities.Internal.forEachChunkAsync(
+			await Zotero.DB.queryAsync(sql);
+			await Zotero.Utilities.Internal.forEachChunkAsync(
 				tagIDs,
 				Zotero.DB.MAX_BOUND_PARAMETERS,
 				function (chunk) {
@@ -535,22 +535,22 @@ Zotero.Tags = new function() {
 			
 			// Skip tags that are still linked to items
 			sql = "DELETE FROM tagDelete WHERE tagID IN (SELECT tagID FROM itemTags)";
-			yield Zotero.DB.queryAsync(sql);
+			await Zotero.DB.queryAsync(sql);
 			
 			sql = "SELECT tagID AS id, name FROM tagDelete JOIN tags USING (tagID)";
-			var toDelete = yield Zotero.DB.queryAsync(sql);
+			var toDelete = await Zotero.DB.queryAsync(sql);
 		}
 		// Look for orphaned tags
 		else {
 			sql = "CREATE TEMPORARY TABLE tagDelete AS "
 				+ "SELECT tagID FROM tags WHERE tagID NOT IN (SELECT tagID FROM itemTags)";
-			yield Zotero.DB.queryAsync(sql);
+			await Zotero.DB.queryAsync(sql);
 			
 			sql = "CREATE INDEX tagDelete_tagID ON tagDelete(tagID)";
-			yield Zotero.DB.queryAsync(sql);
+			await Zotero.DB.queryAsync(sql);
 			
 			sql = "SELECT tagID AS id, name FROM tagDelete JOIN tags USING (tagID)";
-			var toDelete = yield Zotero.DB.queryAsync(sql);
+			var toDelete = await Zotero.DB.queryAsync(sql);
 		}
 		
 		if (!toDelete.length) {
@@ -576,10 +576,10 @@ Zotero.Tags = new function() {
 		}
 		
 		sql = "DELETE FROM tags WHERE tagID IN (SELECT tagID FROM tagDelete);";
-		yield Zotero.DB.queryAsync(sql);
+		await Zotero.DB.queryAsync(sql);
 		
 		sql = "DROP TABLE tagDelete";
-		yield Zotero.DB.queryAsync(sql);
+		await Zotero.DB.queryAsync(sql);
 		
 		Zotero.Notifier.queue('delete', 'tag', ids, notifierData);
 		
@@ -587,7 +587,7 @@ Zotero.Tags = new function() {
 		
 		Zotero.debug(`Purged ${toDelete.length} ${Zotero.Utilities.pluralize(toDelete.length, 'tag')} `
 			+ `in ${new Date() - d} ms`);
-	});
+	};
 	
 	
 	//
@@ -660,7 +660,7 @@ Zotero.Tags = new function() {
 	 *
 	 * @return {Promise}
 	 */
-	this.setColor = Zotero.Promise.coroutine(function* (libraryID, name, color, position) {
+	this.setColor = async function (libraryID, name, color, position) {
 		if (!Number.isInteger(libraryID)) {
 			throw new Error("libraryID must be an integer");
 		}
@@ -722,14 +722,14 @@ Zotero.Tags = new function() {
 		else {
 			return Zotero.SyncedSettings.clear(libraryID, 'tagColors');
 		}
-	});
+	};
 	
 	
 	/**
 	 * Update caches and trigger redrawing of items in the items list
 	 * when a 'tagColors' setting is modified
 	 */
-	this.notify = Zotero.Promise.coroutine(function* (event, type, ids, extraData) {
+	this.notify = async function (event, type, ids, extraData) {
 		if (type != 'setting') {
 			return;
 		}
@@ -771,17 +771,17 @@ Zotero.Tags = new function() {
 					// Colored tags may not exist
 					if (tagID) {
 						affectedItems = affectedItems.concat(
-							yield this.getTagItems(libraryID, tagID)
+							await this.getTagItems(libraryID, tagID)
 						);
 					}
 				};
 			}
 			
 			if (affectedItems.length) {
-				yield Zotero.Notifier.trigger('redraw', 'item', affectedItems, { column: 'title' });
+				await Zotero.Notifier.trigger('redraw', 'item', affectedItems, { column: 'title' });
 			}
 		}
-	});
+	};
 	
 	
 	this.toggleItemsListTags = async function (items, tagName) {
@@ -929,7 +929,7 @@ Zotero.Tags = new function() {
 		}
 		
 		if (retracted) {
-			let [img1, img2] = await Zotero.Promise.all([
+			let [img1, img2] = await Promise.all([
 				_itemsListImagePromises[extraImage],
 				_itemsListImagePromises[retractionImage]
 			]);
@@ -949,7 +949,7 @@ Zotero.Tags = new function() {
 		}
 		
 		var dataURI = canvas.toDataURL("image/png");
-		_itemsListImagePromises[hash] = Zotero.Promise.resolve(dataURI);
+		_itemsListImagePromises[hash] = Promise.resolve(dataURI);
 		return dataURI;
 	};
 	

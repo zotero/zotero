@@ -113,7 +113,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			return;
 		}
 		
-		if (password == await this.getPassword()) {
+		if (password == (await this.getPassword())) {
 			Zotero.debug("WebDAV password hasn't changed");
 			return;
 		}
@@ -226,8 +226,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	},
 	
 	
-	cacheCredentials: Zotero.Promise.coroutine(function* () {
-		yield this._init();
+	cacheCredentials: async function () {
+		await this._init();
 		
 		if (this._cachedCredentials) {
 			Zotero.debug("WebDAV credentials are already cached");
@@ -237,7 +237,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		Zotero.debug("Caching WebDAV credentials");
 		
 		try {
-			var req = yield Zotero.HTTP.request(
+			var req = await Zotero.HTTP.request(
 				"OPTIONS",
 				this.rootURI,
 				{
@@ -259,10 +259,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 			throw e;
 		}
-	}),
+	},
 	
 	
-	clearCachedCredentials: function() {
+	clearCachedCredentials: function () {
 		Zotero.debug("WebDAV: Clearing cached credentials");
 		if (this._rootURI) {
 			Zotero.HTTP.CookieBlocker.removeURL(this._rootURI.spec);
@@ -405,16 +405,16 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	},
 	
 	
-	uploadFile: Zotero.Promise.coroutine(function* (request) {
-		yield this._init();
+	uploadFile: async function (request) {
+		await this._init();
 		
 		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
 		var params = {
-			mtime: yield item.attachmentModificationTime,
-			md5: yield item.attachmentHash
+			mtime: await item.attachmentModificationTime,
+			md5: await item.attachmentHash
 		};
 		
-		var metadata = yield this._getStorageFileMetadata(item, request);
+		var metadata = await this._getStorageFileMetadata(item, request);
 		
 		if (!request.isRunning()) {
 			Zotero.debug("Upload request '" + request.name
@@ -427,7 +427,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				!= Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_UPLOAD) {
 			if (metadata.mtime) {
 				// Local file time
-				let fmtime = yield item.attachmentModificationTime;
+				let fmtime = await item.attachmentModificationTime;
 				// Remote prop time
 				let mtime = metadata.mtime;
 				
@@ -437,7 +437,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					let hash = metadata.md5;
 					if (hash) {
 						// Local file hash
-						let fhash = yield item.attachmentHash;
+						let fhash = await item.attachmentHash;
 						if (fhash != hash) {
 							changed = true;
 						}
@@ -450,9 +450,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 							item.attachmentSyncedHash = hash;
 						}
 						item.attachmentSyncState = "in_sync";
-						yield item.saveTx({ skipAll: true });
+						await item.saveTx({ skipAll: true });
 						// skipAll doesn't mark as unsynced, so do that separately
-						yield item.updateSynced(false);
+						await item.updateSynced(false);
 						return new Zotero.Sync.Storage.Result({
 							localChanges: true,
 							syncRequired: true
@@ -476,12 +476,12 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 						Zotero.debug(`Last synced mod time for item ${item.libraryKey} doesn't `
 							+ "match time on storage server but hash does -- using local file mtime");
 						
-						yield this._setStorageFileMetadata(item);
+						await this._setStorageFileMetadata(item);
 						item.attachmentSyncedModificationTime = fmtime;
 						item.attachmentSyncState = "in_sync";
-						yield item.saveTx({ skipAll: true });
+						await item.saveTx({ skipAll: true });
 						// skipAll doesn't mark as unsynced, so do that separately
-						yield item.updateSynced(false);
+						await item.updateSynced(false);
 						
 						return new Zotero.Sync.Storage.Result({
 							localChanges: true,
@@ -497,7 +497,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					// that to the WebDAV value, since that's the one in conflict.
 					item.attachmentSyncedModificationTime = mtime;
 					item.attachmentSyncState = "in_conflict";
-					yield item.saveTx({ skipAll: true });
+					await item.saveTx({ skipAll: true });
 					
 					return new Zotero.Sync.Storage.Result({
 						fileSyncRequired: true
@@ -509,7 +509,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 		}
 		
-		var created = yield Zotero.Sync.Storage.Utilities.createUploadFile(request);
+		var created = await Zotero.Sync.Storage.Utilities.createUploadFile(request);
 		if (!created) {
 			return new Zotero.Sync.Storage.Result;
 		}
@@ -524,7 +524,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		if (metadata) {
 			var propURI = this._getItemPropertyURI(item);
 			try {
-				yield Zotero.HTTP.request(
+				await Zotero.HTTP.request(
 					"DELETE",
 					propURI,
 					{
@@ -550,13 +550,13 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		file = File.createFromFileName ? File.createFromFileName(file.path) : new File(file);
 		// File.createFromFileName() returns a Promise in Fx54+
 		if (file.then) {
-			file = yield file;
+			file = await file;
 		}
 		
 		var uri = this._getItemURI(item);
 		
 		try {
-			var req = yield Zotero.HTTP.request(
+			var req = await Zotero.HTTP.request(
 				"PUT",
 				uri,
 				{
@@ -598,16 +598,16 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		
 		request.setChannel(false);
 		return this._onUploadComplete(req, request, item, params);
-	}),
+	},
 	
 	
 	/**
 	 * @return {Promise}
 	 * @throws {Zotero.Sync.Storage.Mode.WebDAV.VerificationError|Error}
 	 */
-	checkServer: Zotero.Promise.coroutine(function* (options = {}) {
+	checkServer: async function (options = {}) {
 		// Clear URIs
-		yield this._init();
+		await this._init();
 		
 		var parentURI = this.parentURI;
 		var uri = this.rootURI;
@@ -625,7 +625,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		// Test whether URL is WebDAV-enabled
-		var req = yield Zotero.HTTP.request(
+		var req = await Zotero.HTTP.request(
 			"OPTIONS",
 			uri,
 			{
@@ -661,7 +661,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		// Test whether Zotero directory exists
-		req = yield Zotero.HTTP.request("PROPFIND", uri, {
+		req = await Zotero.HTTP.request("PROPFIND", uri, {
 			body: xmlstr,
 			headers: Object.assign({}, headers, contentTypeXML),
 			successCodes: [207, 404],
@@ -674,7 +674,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			// Test if missing files return 404s
 			let missingFileURI = uri.mutate().setSpec(uri.spec + "nonexistent.prop").finalize();
 			try {
-				req = yield Zotero.HTTP.request(
+				req = await Zotero.HTTP.request(
 					"GET",
 					missingFileURI,
 					{
@@ -700,7 +700,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			
 			// Test if Zotero directory is writable
 			let testFileURI = uri.mutate().setSpec(uri.spec + "zotero-test-file.prop").finalize();
-			req = yield Zotero.HTTP.request("PUT", testFileURI, {
+			req = await Zotero.HTTP.request("PUT", testFileURI, {
 				body: " ",
 				successCodes: [200, 201, 204],
 				requestObserver,
@@ -708,7 +708,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				debug: true
 			});
 			
-			req = yield Zotero.HTTP.request(
+			req = await Zotero.HTTP.request(
 				"GET",
 				testFileURI,
 				{
@@ -722,7 +722,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			
 			if (req.status == 200) {
 				// Delete test file
-				yield Zotero.HTTP.request(
+				await Zotero.HTTP.request(
 					"DELETE",
 					testFileURI,
 					{
@@ -754,7 +754,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			
 			// Zotero directory wasn't found, so see if at least
 			// the parent directory exists
-			req = yield Zotero.HTTP.request("PROPFIND", parentURI, {
+			req = await Zotero.HTTP.request("PROPFIND", parentURI, {
 				headers: Object.assign({}, headers, contentTypeXML),
 				body: xmlstr,
 				requestObserver,
@@ -778,7 +778,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		
 		this.verified = true;
 		Zotero.debug(this.name + " file sync is successfully set up");
-	}),
+	},
 	
 	
 	/**
@@ -786,7 +786,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 *
 	 * @return bool True if the verification eventually succeeded, false otherwise
 	 */
-	handleVerificationError: Zotero.Promise.coroutine(function* (err, window, skipSuccessMessage) {
+	handleVerificationError: async function (err, window, skipSuccessMessage) {
 		var promptService = Services.prompt;
 		
 		var errorTitle, errorMsg;
@@ -866,7 +866,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					}
 					
 					try {
-						yield this._createServerDirectory();
+						await this._createServerDirectory();
 					}
 					catch (e) {
 						if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
@@ -885,7 +885,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					}
 					
 					try {
-						yield this.checkServer();
+						await this.checkServer();
 						return true;
 					}
 					catch (e) {
@@ -932,7 +932,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			Zotero.Utilities.Internal.errorPrompt(errorTitle, e);
 		}
 		return false;
-	}),
+	},
 	
 	
 	/**
@@ -940,13 +940,13 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 *
 	 * @param {Integer} libraryID
 	 */
-	purgeDeletedStorageFiles: Zotero.Promise.coroutine(function* (libraryID) {
-		yield this._init();
+	purgeDeletedStorageFiles: async function (libraryID) {
+		await this._init();
 		
 		var d = new Date();
 		
 		Zotero.debug("Purging deleted storage files");
-		var files = yield Zotero.Sync.Storage.Local.getDeletedFiles(libraryID);
+		var files = await Zotero.Sync.Storage.Local.getDeletedFiles(libraryID);
 		if (!files.length) {
 			Zotero.debug("No files to delete remotely");
 			return false;
@@ -955,7 +955,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		// Add .zip extension
 		var files = files.map(file => file + ".zip");
 		
-		var results = yield this._deleteStorageFiles(files)
+		var results = await this._deleteStorageFiles(files)
 		
 		// Remove deleted and nonexistent files from storage delete log
 		var toPurge = Zotero.Utilities.arrayUnique(
@@ -964,7 +964,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			.map(val => val.replace(/\.(prop|zip)$/, ""))
 		);
 		if (toPurge.length > 0) {
-			yield Zotero.Utilities.Internal.forEachChunkAsync(
+			await Zotero.Utilities.Internal.forEachChunkAsync(
 				toPurge,
 				Zotero.DB.MAX_BOUND_PARAMETERS - 1,
 				function (chunk) {
@@ -981,14 +981,14 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		Zotero.debug(results);
 		
 		return results;
-	}),
+	},
 	
 	
 	/**
 	 * Delete orphaned storage files older than a week before last sync time
 	 */
-	purgeOrphanedStorageFiles: Zotero.Promise.coroutine(function* () {
-		yield this._init();
+	purgeOrphanedStorageFiles: async function () {
+		await this._init();
 		
 		var d = new Date();
 		const libraryID = Zotero.Libraries.userLibraryID;
@@ -1025,7 +1025,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			return false;
 		}
 		
-		var req = yield Zotero.HTTP.request(
+		var req = await Zotero.HTTP.request(
 			"PROPFIND",
 			uri,
 			{
@@ -1044,7 +1044,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		};
 		
 		var syncQueueKeys = new Set(
-			yield Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID)
+			await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID)
 		);
 		var deleteFiles = [];
 		var trailingSlash = !!path.match(/\/$/);
@@ -1100,7 +1100,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				}
 				
 				let key = file.replace(/\.(zip|prop)$/, '');
-				let item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+				let item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
 				if (item) {
 					Zotero.debug("Skipping existing file " + file);
 					continue;
@@ -1130,14 +1130,14 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 		}
 		
-		var results = yield this._deleteStorageFiles(deleteFiles);
+		var results = await this._deleteStorageFiles(deleteFiles);
 		Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000));
 		
 		Zotero.debug(`Purged orphaned storage files in ${new Date() - d} ms`);
 		Zotero.debug(results);
 		
 		return results;
-	}),
+	},
 	
 	
 	//
@@ -1150,11 +1150,11 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * @param {Zotero.Sync.Storage.Request} request
 	 * @return {Object} - Object with 'mtime' and 'md5'
 	 */
-	_getStorageFileMetadata: Zotero.Promise.coroutine(function* (item, request) {
+	_getStorageFileMetadata: async function (item, request) {
 		var uri = this._getItemPropertyURI(item);
 		
 		try {
-			var req = yield Zotero.HTTP.request(
+			var req = await Zotero.HTTP.request(
 				"GET",
 				uri,
 				{
@@ -1235,7 +1235,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			let msg = "Invalid mod date '" + Zotero.Utilities.ellipsize(mtime, 20)
 				+ "' for item " + item.libraryKey;
 			Zotero.logError(msg);
-			yield this._deleteStorageFiles([item.key + ".prop"]).catch(function (e) {
+			await this._deleteStorageFiles([item.key + ".prop"]).catch(function (e) {
 				Zotero.logError(e);
 			});
 			throw new Error(Zotero.Sync.Storage.Mode.WebDAV.defaultError);
@@ -1245,7 +1245,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			mtime: parseInt(mtime),
 			md5
 		};
-	}),
+	},
 	
 	
 	/**
@@ -1253,11 +1253,11 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 *
 	 * @param	{Zotero.Item}	item
 	 */
-	_setStorageFileMetadata: Zotero.Promise.coroutine(function* (item) {
+	_setStorageFileMetadata: async function (item) {
 		var uri = this._getItemPropertyURI(item);
 		
-		var mtime = yield item.attachmentModificationTime;
-		var md5 = yield item.attachmentHash;
+		var mtime = await item.attachmentModificationTime;
+		var md5 = await item.attachmentHash;
 		
 		var xmlstr = '<properties version="1">'
 			+ '<mtime>' + mtime + '</mtime>'
@@ -1265,7 +1265,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			+ '</properties>';
 		
 		try {
-			yield Zotero.HTTP.request(
+			await Zotero.HTTP.request(
 				"PUT",
 				uri,
 				{
@@ -1286,25 +1286,25 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 			throw e;
 		}
-	}),
+	},
 	
 	
-	_onUploadComplete: Zotero.Promise.coroutine(function* (req, request, item, params) {
+	_onUploadComplete: async function (req, request, item, params) {
 		Zotero.debug("Upload of attachment " + item.key + " finished with status code " + req.status);
 		Zotero.debug(req.responseText);
 		
 		// Update .prop file on WebDAV server
-		yield this._setStorageFileMetadata(item);
+		await this._setStorageFileMetadata(item);
 		
 		item.attachmentSyncedModificationTime = params.mtime;
 		item.attachmentSyncedHash = params.md5;
 		item.attachmentSyncState = "in_sync";
-		yield item.saveTx({ skipAll: true });
+		await item.saveTx({ skipAll: true });
 		// skipAll doesn't mark as unsynced, so do that separately
-		yield item.updateSynced(false);
+		await item.updateSynced(false);
 		
 		try {
-			yield OS.File.remove(
+			await OS.File.remove(
 				OS.Path.join(Zotero.getTempDirectory().path, item.key + '.zip')
 			);
 		}
@@ -1317,7 +1317,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			remoteChanges: true,
 			syncRequired: true
 		});
-	}),
+	},
 	
 	
 	_onUploadCancel: function (httpRequest, status, data) {
@@ -1397,7 +1397,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * @return {Object} - Object with properties 'deleted', 'missing', and 'error', each
 	 *     each containing filenames
 	 */
-	_deleteStorageFiles: Zotero.Promise.coroutine(function* (files) {
+	_deleteStorageFiles: async function (files) {
 		var results = {
 			deleted: new Set(),
 			missing: new Set(),
@@ -1424,10 +1424,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		var funcs = [];
 		for (let i = 0 ; i < files.length; i++) {
 			let fileName = files[i];
-			funcs.push(Zotero.Promise.coroutine(function* () {
+			funcs.push(async function () {
 				var deleteURI = this.rootURI.mutate().setSpec(this.rootURI.spec + fileName).finalize();
 				try {
-					var req = yield Zotero.HTTP.request(
+					var req = await Zotero.HTTP.request(
 						"DELETE",
 						deleteURI,
 						{
@@ -1469,7 +1469,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				}
 				
 				// Delete property file
-				var req = yield Zotero.HTTP.request(
+				var req = await Zotero.HTTP.request(
 					"DELETE",
 					deletePropURI,
 					{
@@ -1489,7 +1489,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 						results.missing.add(fileName);
 						break;
 				}
-			}.bind(this)));
+			}.bind(this));
 		}
 		
 		Components.utils.import("resource://zotero/concurrentCaller.js");
@@ -1499,14 +1499,14 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			logger: msg => Zotero.debug(msg),
 			onError: e => Zotero.logError(e)
 		});
-		yield caller.start(funcs);
+		await caller.start(funcs);
 		
 		// Convert sets back to arrays
 		for (let i in results) {
 			results[i] = Array.from(results[i]);
 		}
 		return results;
-	}),
+	},
 	
 	
 	_throwFriendlyError: function (method, url, status) {

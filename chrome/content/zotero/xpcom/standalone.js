@@ -23,14 +23,14 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Standalone = new function() {
+Zotero.Standalone = new function () {
 	/**
 	 * Stream listener proxy for AMO requests to replace Firefox's app ID with toolkit@mozilla.org.
 	 * This means add-ons hosted at AMO will update properly for us.
 	 */
-	var AMOStreamListener = function() {};
+	var AMOStreamListener = function () {};
 	AMOStreamListener.prototype = {	
-		"QueryInterface": function(arg) {
+		"QueryInterface": function (arg) {
 			if (!iid.equals(Components.interfaces.nsIStreamListener)
 					&& !iid.equals(Components.interfaces.nsIRequestObserver)
 					&& !iid.equals(Components.interfaces.nsISupports)) {
@@ -39,14 +39,14 @@ Zotero.Standalone = new function() {
 			return this;
 		},
 		
-		"onStartRequest": function(aRequest, aContext) {
+		"onStartRequest": function (aRequest, aContext) {
 			this._stream = Cc["@mozilla.org/binaryinputstream;1"].
 						   createInstance(Ci.nsIBinaryInputStream);
 			this._bytes = "";
 			this.oldListener.onStartRequest(aRequest, aContext);
 		},
 		
-		"onStopRequest": function(aRequest, aContext, aStatusCode) {
+		"onStopRequest": function (aRequest, aContext, aStatusCode) {
 			var requestFailed = !Components.isSuccessCode(aStatusCode);
 			if(!requestFailed && (aRequest instanceof Ci.nsIHttpChannel))
 				requestFailed = !aRequest.requestSucceeded;
@@ -63,13 +63,13 @@ Zotero.Standalone = new function() {
 			this.oldListener.onStopRequest(aRequest, aContext, aStatusCode);
 		},
 		
-		"onDataAvailable": function(aRequest, aContext, aInputStream, aOffset, aCount) {
+		"onDataAvailable": function (aRequest, aContext, aInputStream, aOffset, aCount) {
 			this._stream.setInputStream(aInputStream);
 			this._bytes += this._stream.readBytes(aCount);
 		}
 	};
 	
-	this.init = function() {
+	this.init = function () {
 		// Set not offline
 		Services.io.offline = false;
 		
@@ -77,7 +77,7 @@ Zotero.Standalone = new function() {
 		Components.classes["@mozilla.org/observer-service;1"].
 			getService(Components.interfaces.nsIObserverService).
 			addObserver({
-				"observe":function(ch) {
+				"observe":function (ch) {
 					try {
 						if(ch.QueryInterface(Components.interfaces.nsIRequest).URI.host
 							!== "versioncheck.addons.mozilla.org") return;

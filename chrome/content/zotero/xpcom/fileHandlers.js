@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-/* eslint-disable array-element-newline */
+ 
 
 Zotero.FileHandlers = {
 	async open(item, params) {
@@ -512,7 +512,7 @@ Zotero.FileHandlers = {
 	async _checkAndExecWithoutBlocking(command, args) {
 		// Run the same checks that exec() runs so that we reject if the
 		// executable doesn't exist or isn't actually executable
-		if (!await OS.File.exists(command)) {
+		if (!(await OS.File.exists(command))) {
 			throw new Error(`${command} not found`);
 		}
 		if (!Zotero.File.pathToFile(command).isExecutable()) {

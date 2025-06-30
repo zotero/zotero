@@ -38,7 +38,7 @@
  *         <li>baseURI - URI to which attachment paths should be relative</li>
  *         <li>saveOptions - Options to pass to DataObject::save() (e.g., skipSelect)</li>
  */
-Zotero.Translate.ItemSaver = function(options) {
+Zotero.Translate.ItemSaver = function (options) {
 	// initialize constants
 	this._IDMap = {};
 	
@@ -452,7 +452,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 	
 	
-	"saveCollections": Zotero.Promise.coroutine(function* (collections) {
+	"saveCollections": async function (collections) {
 		var collectionsToProcess = collections.slice();
 		// Use first collection passed to translate process as the root
 		var rootCollectionID = (this._collections && this._collections.length)
@@ -460,7 +460,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		var parentIDs = collections.map(c => null);
 		var topLevelCollections = [];
 
-		yield Zotero.DB.executeTransaction(async function () {
+		await Zotero.DB.executeTransaction(async function () {
 			while(collectionsToProcess.length) {
 				var collection = collectionsToProcess.shift();
 				var parentID = parentIDs.shift();
@@ -503,7 +503,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		}.bind(this));
 
 		return topLevelCollections;
-	}),
+	},
 
 	/**
 	 * Create a copy of item JSON without irrelevant fields to avoid warnings in Item#fromJSON
@@ -577,7 +577,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * @return {Zotero.Promise<Zotero.Item|false} - False is returned if attachment
 	 *   was not saved due to error or user settings.
 	 */
-	_saveAttachment: Zotero.Promise.coroutine(function* (attachment, parentItemID, attachmentCallback) {
+	_saveAttachment: async function (attachment, parentItemID, attachmentCallback) {
 		try {
 			let newAttachment;
 			
@@ -588,13 +588,13 @@ Zotero.Translate.ItemSaver.prototype = {
 				|| attachment.linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL;
 
 			if (isLink || this.attachmentMode === Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE) {
-				newAttachment = yield this._saveAttachmentLink.apply(this, arguments);
+				newAttachment = await this._saveAttachmentLink.apply(this, arguments);
 			}
 			else if (isSinglefileSnapshot || this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_DOWNLOAD) {
-				newAttachment = yield this._saveAttachmentDownload.apply(this, arguments);
+				newAttachment = await this._saveAttachmentDownload.apply(this, arguments);
 			}
 			else if (this.attachmentMode == Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE) {
-				newAttachment = yield this._saveAttachmentFile.apply(this, arguments);
+				newAttachment = await this._saveAttachmentFile.apply(this, arguments);
 			}
 			else {
 				Zotero.debug(`Translate: Ignoring attachment ${attachment.title} due to ATTACHMENT_MODE_IGNORE`);
@@ -612,7 +612,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if (attachment.accessDate) newAttachment.setField("accessDate", attachment.accessDate);
 			if (attachment.tags) newAttachment.setTags(this._cleanTags(attachment.tags));
 			if (attachment.note) newAttachment.setNote(attachment.note);
-			yield newAttachment.saveTx(this._saveOptions);
+			await newAttachment.saveTx(this._saveOptions);
 			this._handleRelated(attachment, newAttachment);
 
 			Zotero.debug("Translate: Created attachment; id is " + newAttachment.id, 4);
@@ -624,9 +624,9 @@ Zotero.Translate.ItemSaver.prototype = {
 			attachmentCallback(attachment, false, e);
 			return false;
 		}
-	}),
+	},
 	
-	_saveAttachmentFile: Zotero.Promise.coroutine(function* (attachment, parentItemID, attachmentCallback) {
+	_saveAttachmentFile: async function (attachment, parentItemID, attachmentCallback) {
 		Zotero.debug("Translate: Adding attachment", 4);
 		attachmentCallback(attachment, 0);
 		
@@ -693,7 +693,7 @@ Zotero.Translate.ItemSaver.prototype = {
 
 			// At this point, must be a valid HTTP/HTTPS url
 			attachment.linkMode = "linked_url";
-			newItem = yield Zotero.Attachments.linkFromURL({
+			newItem = await Zotero.Attachments.linkFromURL({
 				url: attachment.url,
 				parentItemID,
 				contentType: attachment.mimeType || undefined,
@@ -706,7 +706,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				// Don't link if it's a path to the current storage directory
 				&& !Zotero.File.directoryContains(Zotero.DataDirectory.getSubdirectory('storage'), file.path)) {
 			attachment.linkMode = "linked_file";
-			newItem = yield Zotero.Attachments.linkFromFile({
+			newItem = await Zotero.Attachments.linkFromFile({
 				file,
 				parentItemID,
 				collections: !parentItemID ? this._collections : undefined,
@@ -722,7 +722,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		else {
 			if (attachment.url) {
 				attachment.linkMode = "imported_url";
-				newItem = yield Zotero.Attachments.importSnapshotFromFile({
+				newItem = await Zotero.Attachments.importSnapshotFromFile({
 					file: file,
 					url: attachment.url,
 					title: attachment.title,
@@ -736,7 +736,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			}
 			else {
 				attachment.linkMode = "imported_file";
-				newItem = yield Zotero.Attachments.importFromFile({
+				newItem = await Zotero.Attachments.importFromFile({
 					file: file,
 					parentItemID,
 					libraryID: this._libraryID,
@@ -748,9 +748,9 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		
 		return newItem;
-	}),
+	},
 
-	"_parsePathURI":function(path) {
+	"_parsePathURI":function (path) {
 		try {
 			var uri = Services.io.newURI(path, "", this._baseURI);
 		} catch(e) {
@@ -779,7 +779,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return file;
 	},
 
-	"_parseAbsolutePath":function(path) {
+	"_parseAbsolutePath":function (path) {
 		var file;
 		try {
 			file = Zotero.File.pathToFile(path);
@@ -797,7 +797,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return file;
 	},
 
-	"_parseRelativePath":function(path) {
+	"_parseRelativePath":function (path) {
 		if (!this._baseURI) {
 			Zotero.debug("Translate: Cannot parse as relative path. No base URI available.");
 			return false;
@@ -817,7 +817,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return file;
 	},
 
-	"_parsePath":function(path) {
+	"_parsePath":function (path) {
 		Zotero.debug("Translate: Attempting to parse path " + path);
 		
 		var file;
@@ -875,7 +875,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return false;
 	},
 	
-	_saveAttachmentLink: async function(attachment, parentItemID, attachmentCallback) {
+	_saveAttachmentLink: async function (attachment, parentItemID, attachmentCallback) {
 		attachment.linkMode = "linked_url";
 		let url, mimeType;
 		if(attachment.document) {
@@ -919,7 +919,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		});
 	},
 	
-	_saveAttachmentDownload: Zotero.Promise.coroutine(function* (attachment, parentItemID, attachmentCallback) {
+	_saveAttachmentDownload: async function (attachment, parentItemID, attachmentCallback) {
 		Zotero.debug("Translate: Adding attachment", 4);
 		
 		let doc = undefined;
@@ -974,7 +974,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		let mimeType = attachment.mimeType ? attachment.mimeType : null;
 		let fileBaseName;
 		if (parentItemID) {
-			let parentItem = yield Zotero.Items.getAsync(parentItemID);
+			let parentItem = await Zotero.Items.getAsync(parentItemID);
 			fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: title });
 		}
 
@@ -991,9 +991,9 @@ Zotero.Translate.ItemSaver.prototype = {
 			collections: !parentItemID ? this._collections : undefined,
 			saveOptions: this._saveOptions,
 		});
-	}),
+	},
 	
-	"_saveNote":Zotero.Promise.coroutine(function* (note, parentItemID) {
+	"_saveNote":async function (note, parentItemID) {
 		var myNote = new Zotero.Item('note');
 		myNote.libraryID = this._libraryID;
 		if (parentItemID) {
@@ -1009,12 +1009,12 @@ Zotero.Translate.ItemSaver.prototype = {
 		if (!parentItemID && this._collections) {
 			myNote.setCollections(this._collections);
 		}
-		yield myNote.save(this._saveOptions);
+		await myNote.save(this._saveOptions);
 		if (typeof note == "object") {
 			this._handleRelated(note, myNote);
 		}
 		return myNote;
-	}),
+	},
 	
 	_cleanCreators: function (creators) {
 		creators.forEach(creator => {
@@ -1029,7 +1029,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	 * Remove automatic tags if automatic tags pref is on, and set type
 	 * to automatic if forced
 	 */
-	"_cleanTags":function(tags) {
+	"_cleanTags":function (tags) {
 		// If all tags are automatic and automatic tags pref is on, return immediately
 		let tagPref = Zotero.Prefs.get("automaticTags");
 		if(this._forceTagType == 1 && !tagPref) return [];
@@ -1050,7 +1050,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		return newTags;
 	},
 	
-	"_handleRelated":function(item, newItem) {
+	"_handleRelated":function (item, newItem) {
 		// add to ID map
 		if(item.itemID || item.id) {
 			this._IDMap[item.itemID || item.id] = newItem.id;
@@ -1069,7 +1069,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	}
 }
 
-Zotero.Translate.ItemGetter = function() {
+Zotero.Translate.ItemGetter = function () {
 	this._itemsLeft = [];
 	this._collectionsLeft = null;
 	this._exportFileDirectory = null;
@@ -1111,7 +1111,7 @@ Zotero.Translate.ItemGetter.prototype = {
 	 * NOTE: This function should use the Zotero.Promise.method wrapper which adds a
 	 * isResolved property to the returned promise for noWait translation.
 	 */
-	setAll: Zotero.Promise.method(async function (libraryID, getChildCollections) {
+	setAll: async function (libraryID, getChildCollections) {
 		this._itemsLeft = (await Zotero.Items.getAll(libraryID, true))
 			.filter((item) => {
 				// Don't export annotations
@@ -1128,7 +1128,7 @@ Zotero.Translate.ItemGetter.prototype = {
 
 		this._itemsLeft.sort((a, b) => a.id - b.id);
 		this.numItems = this._itemsLeft.length;
-	}),
+	},
 	
 	exportFiles: function (dir, extension, { includeAnnotations }) {
 		// generate directory
@@ -1254,7 +1254,7 @@ Zotero.Translate.ItemGetter.prototype = {
 						//
 						// TODO: Change the below to use OS.File.DirectoryIterator?
 						if (linkMode != Zotero.Attachments.LINK_MODE_LINKED_FILE
-								&& await Zotero.Attachments.hasMultipleFiles(attachment)) {
+								&& (await Zotero.Attachments.hasMultipleFiles(attachment))) {
 							var copySrcs = [];
 							var files = attachment.getFile().parent.directoryEntries;
 							while (files.hasMoreElements()) {
@@ -1347,7 +1347,7 @@ Zotero.Translate.ItemGetter.prototype = {
 		return false;
 	},
 	
-	"nextCollection":function() {
+	"nextCollection":function () {
 		if(!this._collectionsLeft || this._collectionsLeft.length == 0) return false;
 	
 		var returnItem = this._collectionsLeft.shift();
@@ -1357,4 +1357,4 @@ Zotero.Translate.ItemGetter.prototype = {
 		return obj;
 	}
 }
-Zotero.Translate.ItemGetter.prototype.__defineGetter__("numItemsRemaining", function() { return this._itemsLeft.length });
+Zotero.Translate.ItemGetter.prototype.__defineGetter__("numItemsRemaining", function () { return this._itemsLeft.length });

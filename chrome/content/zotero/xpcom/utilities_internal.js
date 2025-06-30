@@ -579,7 +579,7 @@ Zotero.Utilities.Internal = {
 	 * @param {String[]} args Arguments given
 	 * @return {Promise} Promise resolved to true if command succeeds, or an error otherwise
 	 */
-	exec: Zotero.Promise.method(function (cmd, args) {
+	exec: function (cmd, args) {
 		if (typeof cmd == 'string') {
 			Components.utils.import("resource://gre/modules/FileUtils.jsm");
 			cmd = new FileUtils.File(cmd);
@@ -609,7 +609,7 @@ Zotero.Utilities.Internal = {
 		} });
 		
 		return deferred.promise;
-	}),
+	},
 	
 	/**
 	 * Run a short-lived process and return its stdout
@@ -619,12 +619,12 @@ Zotero.Utilities.Internal = {
 	 * @return {Promise<String>}
 	 */
 	subprocess: async function (command, args = []) {
-		// eslint-disable-next-line no-undef
+		 
 		command = PathUtils.isAbsolute(command) ? command : await Subprocess.pathSearch(command);
 		
 		Zotero.debug("Running " + command + " " + args.map(arg => "'" + arg + "'").join(" "));
 		
-		// eslint-disable-next-line no-undef
+		 
 		let proc = await Subprocess.call({
 			command,
 			arguments: args,
@@ -737,12 +737,12 @@ Zotero.Utilities.Internal = {
 			// Be safe
 			if (!delay) {
 				Zotero.logError(`Incorrect delay ${delay} -- stopping`);
-				yield Zotero.Promise.resolve(false);
+				yield Promise.resolve(false);
 			}
 			
 			if (maxTime && (totalTime + delay) > maxTime) {
 				Zotero.debug(`Total delay time exceeds ${maxTime} -- stopping`);
-				yield Zotero.Promise.resolve(false);
+				yield Promise.resolve(false);
 			}
 			
 			totalTime += delay;
@@ -1825,9 +1825,9 @@ Zotero.Utilities.Internal = {
 	
 	spawn: function (generator, thisObject) {
 		if (thisObject) {
-			return Zotero.Promise.coroutine(generator.bind(thisObject))();
+			return generator.bind(thisObject)();
 		}
-		return Zotero.Promise.coroutine(generator)();
+		return generator();
 	},
 
 	/**
@@ -2038,7 +2038,7 @@ Zotero.Utilities.Internal = {
 			// at the time of runListeners() call to prevent triggering listeners that are added right
 			// runListeners() invocation
 			for (let [listener, once] of Array.from(this._events[event].listeners.entries())) {
-				await Zotero.Promise.resolve(listener.call(this));
+				await Promise.resolve(listener.call(this));
 				if (once) {
 					this._events[event].listeners.delete(listener);
 				}
@@ -2612,7 +2612,7 @@ Zotero.Utilities.Internal.executeAppleScript = new function () {
 Zotero.Utilities.Internal.activate = new function () {
 	// For Carbon and X11
 	var _carbon, ProcessSerialNumber, SetFrontProcessWithOptions;
-	// eslint-disable-next-line no-unused-vars
+	 
 	var _x11, _x11Display, _x11RootWindow, XClientMessageEvent, XFetchName, XFree, XQueryTree,
 		XOpenDisplay, XCloseDisplay, XFlush, XDefaultRootWindow, XInternAtom, XSendEvent,
 		XMapRaised, XGetWindowProperty, X11Atom, X11Bool, X11Display, X11Window, X11Status;
@@ -2642,9 +2642,9 @@ Zotero.Utilities.Internal.activate = new function () {
 		var event = new XClientMessageEvent();
 		event.type = 33; /* ClientMessage*/
 		event.serial = 0;
-		// eslint-disable-next-line camelcase
+		 
 		event.send_event = 1;
-		// eslint-disable-next-line camelcase
+		 
 		event.message_type = XInternAtom(_x11Display, "_NET_ACTIVE_WINDOW", 0);
 		event.display = _x11Display;
 		event.window = x11Window;
@@ -2826,11 +2826,11 @@ Zotero.Utilities.Internal.activate = new function () {
 					[
 						{ type: ctypes.int },
 						{ serial: ctypes.unsigned_long },
-						// eslint-disable-next-line camelcase
+						 
 						{ send_event: X11Bool },
 						{ display: X11Display.ptr },
 						{ window: X11Window },
-						// eslint-disable-next-line camelcase
+						 
 						{ message_type: X11Atom },
 						{ format: ctypes.int },
 						{ l0: ctypes.long },

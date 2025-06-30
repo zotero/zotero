@@ -136,7 +136,7 @@ Zotero.Cite = {
 	 * @param {bib} citeproc-js bibliography object
 	 * @param {Set} itemsToRemove Set of items to remove
 	 */
-	"removeFromBibliography":function(bib, itemsToRemove) {
+	"removeFromBibliography":function (bib, itemsToRemove) {
 		var removeItems = [];
 		for(let i in bib[0].entry_ids) {
 			for(let j in bib[0].entry_ids[i]) {
@@ -189,7 +189,7 @@ Zotero.Cite = {
 	 * @param {String} format The format of the output (html, text, or rtf)
 	 * @return {String} Bibliography or item list in specified format
 	 */
-	"makeFormattedBibliographyOrCitationList":function(cslEngine, items, format, asCitationList) {
+	"makeFormattedBibliographyOrCitationList":function (cslEngine, items, format, asCitationList) {
 		cslEngine.setOutputFormat(format);
 		cslEngine.updateItems(items.map(item => item.id));
 		 		
@@ -442,7 +442,7 @@ Zotero.Cite = {
 /**
  * Get a CSL abbreviation in the format expected by citeproc-js
  */
-Zotero.Cite.getAbbreviation = new function() {
+Zotero.Cite.getAbbreviation = new function () {
 	var abbreviations,
 		abbreviationCategories;
 
@@ -618,7 +618,7 @@ Zotero.Cite.System = function ({ automaticJournalAbbreviations, uppercaseSubtitl
 		this.getAbbreviation = Zotero.Cite.getAbbreviation;
 	}
 	if (uppercaseSubtitles) {
-		this.uppercase_subtitles = true; // eslint-disable-line camelcase
+		this.uppercase_subtitles = true;  
 	}
 };
 
