@@ -806,6 +806,7 @@ def run_jscodeshift(script, env, stdin):
         str(npm_prefix / script),
         "--stdin",
         "--verbose=2",
+        '--extensions=js,jsx,mjs,jsm'
     ]
     p = subprocess.Popen(cmd, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     p.stdin.write(stdin)
