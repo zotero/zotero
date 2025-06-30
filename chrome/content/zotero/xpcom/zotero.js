@@ -730,14 +730,13 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			
 			// Load all library data except for items, which are loaded when libraries are first
 			// clicked on or if otherwise necessary
-			await // FIXME: fx140: replace call to Zotero.Promise.each()
-			Zotero.Promise.each(Zotero.Libraries.getAll(), library => (async function () {
+			await Array.fromAsync(Zotero.Libraries.getAll(), async (library) => {
 				await Zotero.SyncedSettings.loadAll(library.libraryID);
 				if (library.libraryType != 'feed') {
 					await Zotero.Collections.loadAll(library.libraryID);
 					await Zotero.Searches.loadAll(library.libraryID);
 				}
-			})());
+			});
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update
 			await Zotero.Schema.migrateExtraFields();

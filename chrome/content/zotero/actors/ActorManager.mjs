@@ -1,6 +1,8 @@
 // Register Mozilla actors
 import "resource://gre/modules/ActorManagerParent.sys.mjs";
 
+// TODO: Fx140: Migrate actors and re-enable
+if(false) {
 ChromeUtils.registerWindowActor("PageData", {
 	child: {
 		moduleURI: "chrome://zotero/content/actors/PageDataChild.jsm"
@@ -90,3 +92,4 @@ ChromeUtils.registerWindowActor("DocumentIsReady", {
 		moduleURI: "chrome://zotero/content/actors/DocumentIsReadyChild.jsm"
 	}
 });
+}

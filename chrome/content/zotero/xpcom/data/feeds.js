@@ -32,11 +32,12 @@ Zotero.Feeds = new function () {
 	
 	this.init = function () {
 		// Delay initialization for tests
-		_initPromise = Zotero.Schema.schemaUpdatePromise.delay(5000)
-		.then(() => {
+		_initPromise = Zotero.Schema.schemaUpdatePromise
+		.then(async () => {
 			// Don't run feed checks randomly during tests
 			if (Zotero.test) return;
 			
+			await Zotero.Promise.delay(5000);
 			return this.scheduleNextFeedCheck();
 		})
 		.then(() => _initPromise = null);
