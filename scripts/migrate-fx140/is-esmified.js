@@ -33,6 +33,10 @@ function generateESMURIMap(jsm_map) {
 }
 
 function isESMifiedSlow(resourceURI) {
+  if (!resourceURI.includes('/zotero/') && resourceURI.endsWith('.jsm')) {
+    return { result: true, jsms: [resourceURI.replace('.jsm', '.sys.mjs')] };
+  }
+  
   if (!(resourceURI in uri_map)) {
     console.log(`WARNING: Unknown module: ${resourceURI}`);
     return { result: false, jsms: [] };
