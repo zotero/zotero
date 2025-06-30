@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+import { BluebirdShimPromise as Promise } from 'chrome://zotero/content/xpcom/bluebirdShim.mjs';
+
 /**
  * Call a fixed number of functions at once, queueing the rest until slots
  * open and returning a promise for the final completion. The functions do
@@ -64,8 +66,7 @@ export var ConcurrentCaller = function (options = {}) {
 	}
 	
 	if (!options.numConcurrent) throw new Error("numConcurrent must be provided");
-	
-	if (options.Promise) Promise = options.Promise;
+	if (options.Promise) throw new Error("promise option is no longer supported");
 	
 	this.stopOnError = options.stopOnError || false;
 	this.onError = options.onError || null;

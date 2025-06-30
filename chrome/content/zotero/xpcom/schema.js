@@ -108,8 +108,9 @@ Zotero.Schema = new function () {
 				// Don't load bundled files until after UI is ready, unless this is a test run,
 				// in which case tests can run without a window open
 				(!Zotero.test ? Zotero.uiReadyPromise : Zotero.initializationPromise)
-				.delay(1000)
 				.then(async function () {
+					await Zotero.Promise.delay(1000);
+					
 					await this.updateBundledFiles();
 					if (Zotero.Prefs.get('automaticScraperUpdates')) {
 						try {
@@ -988,7 +989,7 @@ Zotero.Schema = new function () {
 	 * @param {Boolean} [skipVersionUpdates=false]
 	 */
 	var _updateBundledFilesAtLocation = async function (installLocation, mode, skipVersionUpdates) {
-		Components.utils.import("resource://gre/modules/FileUtils.jsm");
+		ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 		
 		var isUnpacked = (await OS.File.stat(installLocation)).isDir;
 		if(!isUnpacked) {
@@ -3299,7 +3300,7 @@ Zotero.Schema = new function () {
 			}
 			
 			else if (i == 101) {
-				Components.utils.import("chrome://zotero/content/import/mendeley/mendeleyImport.js");
+				Cu.import("chrome://zotero/content/import/mendeley/mendeleyImport.js");
 				let importer = new Zotero_Import_Mendeley();
 				if (await importer.hasImportedFiles()) {
 					await importer.queueFileCleanup();

@@ -1,6 +1,6 @@
-/* eslint-disable no-await-in-loop, camelcase */
+ 
 /* global mendeleyDBMaps:false, mendeleyOnlineMappings:false, mendeleyAPIUtils:false, PathUtils: false */
-var EXPORTED_SYMBOLS = ["Zotero_Import_Mendeley"]; //eslint-disable-line no-unused-vars
+var EXPORTED_SYMBOLS = ["Zotero_Import_Mendeley"];  
 
 var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
@@ -120,7 +120,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 	}
 
 	try {
-		if (this._file && !await this._isValidDatabase()) {
+		if (this._file && !(await this._isValidDatabase())) {
 			throw new Error("Not a valid Mendeley database");
 		}
 
@@ -838,12 +838,11 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 	
 	this._totalSize = 0;
 
-	Components.utils.import("resource://zotero/concurrentCaller.js");
+	const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 	this._caller = new ConcurrentCaller({
 		numConcurrent: 6,
 		onError: e => Zotero.logError(e),
-		logger: Zotero.debug,
-		Promise: Zotero.Promise
+		logger: Zotero.debug
 	});
 
 	for (let doc of documents) {

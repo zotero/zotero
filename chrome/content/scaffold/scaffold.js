@@ -1980,7 +1980,7 @@ var Scaffold = new function () {
 		if (test.type == 'web') {
 			_logOutput("Loading web page from " + test.url);
 			
-			const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+			const { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
 			let browser = new HiddenBrowser({
 				docShell: { allowMetaRedirects: true }
 			});

@@ -1,7 +1,7 @@
 describe("HiddenBrowser", function() {
 	var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");;
-	const { HiddenBrowser } = ChromeUtils.import(
-		"chrome://zotero/content/HiddenBrowser.jsm"
+	const { HiddenBrowser } = ChromeUtils.importESModule(
+		"chrome://zotero/content/HiddenBrowser.mjs"
 	);
 	
 	describe("#create()", function () {

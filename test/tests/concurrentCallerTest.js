@@ -1,7 +1,7 @@
 "use strict";
 
 describe("ConcurrentCaller", function () {
-	Components.utils.import("resource://zotero/concurrentCaller.js");
+	const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 	var logger = null;
 	// Uncomment to get debug output
 	//logger = Zotero.debug;

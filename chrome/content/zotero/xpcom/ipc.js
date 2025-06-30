@@ -68,7 +68,7 @@ Zotero.IPC = new function () {
 	this.getLibcPath = function () {
 		if(_libcPath) return _libcPath;
 		
-		Components.utils.import("resource://gre/modules/ctypes.jsm");
+		ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 		
 		// get possible names for libc
 		if(Zotero.isMac) {

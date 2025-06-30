@@ -1,6 +1,6 @@
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
-// Components.utils.import('resource://zotero/require.js');
+// Cu.import('resource://zotero/require.js');
 // Not using Cu.import here since we don't want the require module to be cached
 // for includes within ZoteroPane or other code, where we want the window
 // instance available to modules.

@@ -27,7 +27,7 @@
 /**
  * This object contains the various functions for the interface
  */
-const ZoteroStandalone = new function() {
+const ZoteroStandalone = new function () {
 	const FONT_SIZES = [
 		"0.77", // 10
 		"0.85", // 11
@@ -232,7 +232,7 @@ const ZoteroStandalone = new function() {
 	/**
 	 * Builds new item menu
 	 */
-	this.buildNewItemMenu = function() {
+	this.buildNewItemMenu = function () {
 		var addMenu = document.getElementById('menu_NewItemPopup');
 		
 		// Remove all nodes so we can regenerate
@@ -252,7 +252,7 @@ const ZoteroStandalone = new function() {
 				});
 			}
 			var collation = Zotero.getLocaleCollation();
-			itemTypes.sort(function(a, b) {
+			itemTypes.sort(function (a, b) {
 				return collation.compareString(1, a.localized, b.localized);
 			});
 			
@@ -261,7 +261,7 @@ const ZoteroStandalone = new function() {
 				menuitem.setAttribute("label", itemTypes[i].localized);
 				menuitem.setAttribute("tooltiptext", "");
 				let type = itemTypes[i].id;
-				menuitem.addEventListener("command", function() {
+				menuitem.addEventListener("command", function () {
 					ZoteroPane_Local.newItem(type, null, null, true);
 				}, false);
 				menuitem.className = "zotero-tb-add";
@@ -739,8 +739,8 @@ const ZoteroStandalone = new function() {
 	/**
 	 * Handles help menu requests
 	 */
-	this.openHelp = function(type) {
-		Components.utils.import("resource://zotero/config.js");
+	this.openHelp = function (type) {
+		Cu.import("resource://zotero/config.js");
 		
 		switch (type) {
 		case "troubleshooting":
@@ -763,7 +763,7 @@ const ZoteroStandalone = new function() {
 	/**
 	 * Checks for updates
 	 */
-	this.checkForUpdates = function() {
+	this.checkForUpdates = function () {
 		Zotero.debug('ZoteroStandalone.checkForUpdates is deprecated -- use Zotero.openCheckForUpdatesWindow() instead');
 		Zotero.openCheckForUpdatesWindow();
 	}
@@ -771,7 +771,7 @@ const ZoteroStandalone = new function() {
 	/**
 	 * Called before standalone window is closed
 	 */
-	this.onUnload = function() {
+	this.onUnload = function () {
 		Zotero.Notifier.unregisterObserver(this._notifierID);
 		ZoteroPane.destroy();
 	}
@@ -821,7 +821,7 @@ ZoteroStandalone.DebugOutput = {
 		return Zotero.Promise.coroutine(function* () {
 			Zotero.debug("Submitting debug output");
 			
-			Components.utils.import("resource://zotero/config.js");
+			Cu.import("resource://zotero/config.js");
 			
 			var url = ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1";
 			var output = yield Zotero.Debug.get(
@@ -858,7 +858,7 @@ ZoteroStandalone.DebugOutput = {
 									}
 								},
 								
-								QueryInterface: function(iid) {
+								QueryInterface: function (iid) {
 									if (iid.equals(Components.interfaces.nsISupports) ||
 											iid.equals(Components.interfaces.nsIInterfaceRequestor) ||
 											iid.equals(Components.interfaces.nsIProgressEventSink)) {
@@ -985,7 +985,7 @@ ZoteroStandalone.DebugOutput = {
 
 async function toJavaScriptConsole() {
 	// We need the DevTools' built-in require() for this
-	const { require } = ChromeUtils.import("resource://devtools/shared/loader/Loader.jsm");
+	const { require } = ChromeUtils.importESModule("resource://devtools/shared/loader/Loader.sys.mjs");
 	const { BrowserConsoleManager } = require("resource://devtools/client/webconsole/browser-console-manager.js");
 	await BrowserConsoleManager.openBrowserConsoleOrFocus();
 	// Add missing aria labels for the the VPAT review
@@ -1057,5 +1057,5 @@ function openUILinkIn(url) {
 	ZoteroPane.loadURI(url);
 }
 
-window.addEventListener("load", function(e) { ZoteroStandalone.onLoad(e); }, false);
-window.addEventListener("unload", function(e) { ZoteroStandalone.onUnload(e); }, false);
+window.addEventListener("load", function (e) { ZoteroStandalone.onLoad(e); }, false);
+window.addEventListener("unload", function (e) { ZoteroStandalone.onUnload(e); }, false);

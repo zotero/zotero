@@ -1,7 +1,5 @@
-var EXPORTED_SYMBOLS = [];
-
 // Register Mozilla actors
-ChromeUtils.importESModule("resource://gre/modules/ActorManagerParent.sys.mjs");
+import "resource://gre/modules/ActorManagerParent.sys.mjs";
 
 ChromeUtils.registerWindowActor("PageData", {
 	child: {

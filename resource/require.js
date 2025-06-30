@@ -122,6 +122,14 @@ function ZoteroLoader({
 	for (const name in injectedGlobals) {
 		this.loader.globals[name] = injectedGlobals[name];
 	}
+	
+	Object.defineProperty(this.loader.globals, "Zotero", {
+		get: () => {
+			const { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+			// TODO: Cache
+			return Zotero;
+		}
+	})
 
 	// Fetch custom pseudo modules and globals
 	const { modules, globals } = {

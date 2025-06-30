@@ -1,4 +1,4 @@
-var ZOTERO_CONFIG = {
+export var ZOTERO_CONFIG = {
 	GUID: 'zotero@zotero.org',
 	ID: 'zotero', // used for db filename, etc.
 	CLIENT_NAME: 'Zotero',
@@ -33,5 +33,3 @@ var ZOTERO_CONFIG = {
 	PLUGINS_URL: 'https://www.zotero.org/support/plugins',
 	NEW_FEATURES_URL: 'https://www.zotero.org/blog/zotero-7/'
 };
-
-export default ZOTERO_CONFIG;

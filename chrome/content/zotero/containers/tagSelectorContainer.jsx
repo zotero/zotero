@@ -40,7 +40,6 @@ const defaults = {
 	searchString: '',
 	loaded: false
 };
-const { Cc, Ci } = require('chrome');
 
 // first n tags will be measured using DOM method for more accurate measurment (at the cost of performance)
 const FORCE_DOM_TAGS_FOR_COUNT = 200;

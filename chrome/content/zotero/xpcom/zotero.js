@@ -23,8 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
-const BluebirdShimPromise = ChromeUtils.importESModule('chrome://zotero/content/xpcom/bluebirdShim.mjs');
-const ZOTERO_CONFIG = ChromeUtils.importESModule('resource://zotero/config.mjs');
+const { BluebirdShimPromise } = ChromeUtils.importESModule('chrome://zotero/content/xpcom/bluebirdShim.mjs');
+const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 
 // Commonly used imports accessible anywhere
 Components.utils.importGlobalProperties(["XMLHttpRequest"]);
@@ -39,7 +39,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 /*
  * Core functions
  */
- (function () {
+(function () {
 	// Privileged (public) methods
 	this.getStorageDirectory = getStorageDirectory;
 	this.debug = debug;
@@ -56,15 +56,15 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		get: () => _startupErrorHandler,
 		enumerable: true,
 		configurable: true
-    });
-    Object.defineProperty(this, 'resourcesDir', {
+	});
+	Object.defineProperty(this, 'resourcesDir', {
 		get: () => {
 			// AChrome is app/chrome
 			return FileUtils.getDir('AChrom', []).parent.parent.path;
 		},
 		enumerable: true,
 		configurable: true
-    });
+	});
 	this.version;
 	this.platform;
 	this.locale;
@@ -231,9 +231,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		this.isSourceBuild = Zotero.version.includes('SOURCE');
 		
 		// OS platform
-		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
-			   .getService(Components.interfaces.nsIAppShellService)
-			   .hiddenDOMWindow;
 		var os = Services.appinfo.OS;
 		this.isMac = os == 'Darwin';
 		this.isWin = os == 'WINNT';
@@ -669,13 +666,13 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				throw e;
 			}
 			
-			const { ZoteroProtocolHandler } = ChromeUtils.import(
-				`chrome://zotero/content/ZoteroProtocolHandler.jsm`
+			const { ZoteroProtocolHandler } = ChromeUtils.importESModule(
+				`chrome://zotero/content/ZoteroProtocolHandler.mjs`
 			);
 			ZoteroProtocolHandler.init();
 
-			const { ZoteroAutoComplete } = ChromeUtils.import(
-				`chrome://zotero/content/zotero-autocomplete.js`
+			const { ZoteroAutoComplete } = ChromeUtils.importESModule(
+				`chrome://zotero/content/zotero-autocomplete.mjs`
 			);
 			ZoteroAutoComplete.init();
 
@@ -1512,7 +1509,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @return {Promise<String[]>} - Promise for an array of extension names and versions
 	 */
 	this.getInstalledExtensions = async function () {
-		var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+		var { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 		var installed = await AddonManager.getAllAddons();
 	
 		installed.sort(function (a, b) {
@@ -1858,7 +1855,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					Zotero.getString("standalone.rootWarning.exit"),
 					Zotero.getString("standalone.rootWarning.continue"),
 					null, null, {}) == 0) {
-				Components.utils.import("resource://gre/modules/ctypes.jsm");
+				ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 				var exit = Zotero.IPC.getLibc().declare("exit", ctypes.default_abi,
 					                                    ctypes.void_t, ctypes.int);
 				// Zap cache files
