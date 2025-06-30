@@ -26,8 +26,7 @@
 
 const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.mjs");
 
-// TODO: Fx140: Migrate actors and re-enable
-// ChromeUtils.importESModule("chrome://zotero/content/actors/ActorManager.mjs");
+ChromeUtils.importESModule("chrome://zotero/content/actors/ActorManager.mjs");
 
 /* global HiddenFrame, E10SUtils */
 ChromeUtils.defineESModuleGetters(globalThis, {
