@@ -29,6 +29,15 @@ const {
 
 module.exports = function (fileInfo, api) {
   const { jscodeshift } = api;
+  
+  // Cheap hack:
+  // Zotero usually calls Components.utils.import(), not Cu.import().
+  // Those are the same thing, but this script can't rewrite the former
+  // to ChromeUtils.importESModule(), because it's unable to handle
+  // changing the number of property accesses in the chain.
+  // Just replace it in the text before parsing!
+  fileInfo.source = fileInfo.source.replace(/Components\.utils\.import\(/g, 'Cu.import(');
+  
   const root = jscodeshift(fileInfo.source);
   doTranslate(fileInfo.path, jscodeshift, root);
   return root.toSource({ useTabs: true, lineTerminator: "\n" });
@@ -59,10 +68,6 @@ function isESMifiedAndTarget(resourceURI) {
 const importCalls = [
   {
     from: ["Cu", "import"],
-    to: ["ChromeUtils", "importESModule"],
-  },
-  {
-    from: ["Components", "utils", "import"],
     to: ["ChromeUtils", "importESModule"],
   },
   {
