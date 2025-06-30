@@ -386,6 +386,7 @@ const TabBar = forwardRef(function (props, ref) {
 					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
 				>
 					<button
+						data-l10n-id="zotero-toolbar-tabs-scroll-backwards"
 						onClick={handleClickScrollStart}
 						onDoubleClick={handleScrollArrowDoubleClick}
 					>
@@ -420,6 +421,7 @@ const TabBar = forwardRef(function (props, ref) {
 					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
 				>
 					<button
+						data-l10n-id="zotero-toolbar-tabs-scroll-forwards"
 						onClick={handleClickScrollEnd}
 						onDoubleClick={handleScrollArrowDoubleClick}
 					>
