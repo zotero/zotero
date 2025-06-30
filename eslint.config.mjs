@@ -101,7 +101,7 @@ export default [
 			"resource/citeproc_rs*",
 			"resource/csl-validator.js",
 			"resource/jspath.js",
-			"resource/loader.jsm",
+			"resource/loader.mjs",
 			"resource/pako.js",
 			"resource/PluralForm.jsm",
 			"resource/prop-types.js",

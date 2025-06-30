@@ -25,7 +25,7 @@
 
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
-const { BlockingObserver } = ChromeUtils.import("chrome://zotero/content/BlockingObserver.jsm");
+const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.sys.mjs");
 
 const ZipReader = Components.Constructor(
 	"@mozilla.org/libjar/zip-reader;1",

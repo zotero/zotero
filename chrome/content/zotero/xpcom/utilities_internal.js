@@ -1810,7 +1810,7 @@ Zotero.Utilities.Internal = {
 	},
 	
 	serial: function (fn) {
-		Components.utils.import("resource://zotero/concurrentCaller.js");
+		const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 		var caller = new ConcurrentCaller({
 			numConcurrent: 1,
 			onError: e => Zotero.logError(e)

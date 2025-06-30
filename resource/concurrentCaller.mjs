@@ -23,20 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-var EXPORTED_SYMBOLS = ["ConcurrentCaller"];
-
-if (!(typeof process === 'object' && process + '' === '[object process]')) {
-	// Components.utils.import('resource://zotero/require.js');
-	// Not using Cu.import here since we don't want the require module to be cached
-	// for includes within ZoteroPane or other code where we want the window instance available to modules.
-	Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-		.getService(Components.interfaces.mozIJSSubScriptLoader)
-		.loadSubScript('resource://zotero/require.js');
-	var Promise = require('resource://zotero/bluebird.js');
-} else {
-	Promise = require('bluebird');
-}
-
 /**
  * Call a fixed number of functions at once, queueing the rest until slots
  * open and returning a promise for the final completion. The functions do
@@ -69,7 +55,7 @@ if (!(typeof process === 'object' && process + '' === '[object process]')) {
  * @param {Object} [options.Promise] The Zotero instance of Promise to allow
  *		stubbing/spying in tests
  */
-var ConcurrentCaller = function (options = {}) {
+export var ConcurrentCaller = function (options = {}) {
 	if (typeof options == 'number') {
 		this._log("ConcurrentCaller now takes an object rather than a number");
 		options = {
@@ -286,20 +272,16 @@ ConcurrentCaller.prototype._getIntervalNeeded = function () {
  * Wait until the specified interval has elapsed or the current pause (if there is one) is over,
  * whichever is longer
  */
-ConcurrentCaller.prototype._waitForPause = Promise.coroutine(function* () {
+ConcurrentCaller.prototype._waitForPause = async function () {
 	var interval = this._getIntervalNeeded();
 	if (interval == 0) return;
 	this._pausing = true;
-	yield Promise.delay(interval);
+	await new Promise(resolve => setTimeout(resolve, interval));
 	this._pausing = false;
-});
+};
 
 ConcurrentCaller.prototype._log = function (msg) {
 	if (this._logger) {
 		this._logger("[ConcurrentCaller] " + (this._id ? `[${this._id}] ` : "") + msg);
 	}
 };
-
-if (typeof process === 'object' && process + '' === '[object process]'){
-    module.exports = ConcurrentCaller;
-}

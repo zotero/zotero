@@ -1,114 +1,164 @@
 'use strict';
 
-var require = (function() {
-	var win, cons, Zotero;
-	Components.utils.import('resource://zotero/loader.jsm');
-	var requirer = Module('/', '/');
-	var _runningTimers = {};
-	if (typeof window != 'undefined') {
-		win = window;
-	} else {
-		win = {};
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-		win.setTimeout = function (func, ms) {
-			var id = Math.floor(Math.random() * (1000000000000 - 1)) + 1
-			var useMethodjit = Components.utils.methodjit;
-			var timer = Components.classes["@mozilla.org/timer;1"]
-				.createInstance(Components.interfaces.nsITimer);
-			timer.initWithCallback({"notify":function() {
-				// Remove timer from object so it can be garbage collected
-				delete _runningTimers[id];
-				
-				// Execute callback function
-				try {
-					func();
-				} catch(err) {
-					// Rethrow errors that occur so that they appear in the error
-					// console with the appropriate name and line numbers. While the
-					// the errors appear without this, the line numbers get eaten.
-					var scriptError = Components.classes["@mozilla.org/scripterror;1"]
-						.createInstance(Components.interfaces.nsIScriptError);
-					scriptError.init(
-						err.message || err.toString(),
-						err.fileName || err.filename || null,
-						null,
-						err.lineNumber || null,
-						null,
-						scriptError.errorFlag,
-						'component javascript'
-					);
-					Components.classes["@mozilla.org/consoleservice;1"]
-						.getService(Components.interfaces.nsIConsoleService)
-						.logMessage(scriptError);
-					typeof Zotero !== 'undefined' && Zotero.debug(err.stack, 1);
-				}
-			}}, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-			_runningTimers[id] = timer;
-			return id;
-		};
-		
-		win.clearTimeout = function (id) {
-			var timer = _runningTimers[id];
-			if (timer) {
-				timer.cancel();
-			}
-			delete _runningTimers[id];
-		};
+/**
+ * Manages the base loader (loader.sys.mjs) instance used to load CJS modules.
+ */
 
-		win.debug = function (msg) {
-			dump(msg + "\n\n");
-		};
-	}
-	
-	function getZotero() {
-		if (win.Zotero) Zotero = win.Zotero;
-		
-		if (typeof Zotero === 'undefined') {
-			try {
-				Zotero = Components.classes["@zotero.org/Zotero;1"]
-					.getService(Components.interfaces.nsISupports).wrappedJSObject;
-			} catch (e) {}
-		}
-		return Zotero || {};
+const {
+	Loader,
+	Require,
+	resolveURI,
+	unload,
+} = ChromeUtils.importESModule("resource://zotero/loader.sys.mjs");
+
+const DEFAULT_SANDBOX_NAME = "Zotero (Module loader)";
+
+var gNextLoaderID = 0;
+
+/**
+ * The main loader API. The standard instance of this loader is exported as
+ * |loader| below, but if a fresh copy of the loader is needed, then a new
+ * one can also be created.
+ *
+ * The two following boolean flags are used to control the sandboxes into
+ * which the modules are loaded.
+ * @param freshCompartment boolean
+ *        If true, the modules will be forced to be loaded in a distinct
+ *        compartment. It is typically used to load the modules in a distinct
+ *        system compartment, different from the main one, which is shared by
+ *        all ESMs, XPCOMs and modules loaded with this flag set to true.
+ *        We use this in order to debug modules loaded in this shared system
+ *        compartment. The debugger actor has to be running in a distinct
+ *        compartment than the context it is debugging.
+ * @param useLoaderGlobal boolean
+ *        If true, the loader will reuse the current global to load other
+ *        modules instead of creating a sandbox with custom options. Cannot be
+ *        used with freshCompartment.
+ */
+function ZoteroLoader({
+	freshCompartment = false,
+	useLoaderGlobal = false,
+} = {}) {
+	if (useLoaderGlobal && freshCompartment) {
+		throw new Error(
+			"Loader cannot use freshCompartment if useLoaderGlobal is true"
+		);
 	}
 
-	if (typeof win.console !== 'undefined') {
-		cons = console;
-	}
-	if (!cons) {
-		cons = {};
-		for (let key of ['log', 'warn', 'error']) {
-			cons[key] = text => {getZotero(); typeof Zotero !== 'undefined' && false && Zotero.debug(`console.${key}: ${text}`)};
-		}
-	}
-	if (!win.console) {
-		win.console = cons;
-	}
-	let globals = {
-		window: win,
-		document: typeof win.document !== 'undefined' && win.document || {},
-		console: cons,
-		navigator: typeof win.navigator !== 'undefined' && win.navigator || {},
-		setTimeout: win.setTimeout,
-		clearTimeout: win.clearTimeout,
-		requestAnimationFrame: win.setTimeout,
-		cancelAnimationFrame: win.clearTimeout,
-		IOUtils: IOUtils,
-		PathUtils: PathUtils,
-		TextEncoder: TextEncoder,
-		TextDecoder: TextDecoder,
+	const paths = {
+		'': 'resource://zotero/',
+		'containers/': 'chrome://zotero/content/containers/',
+		'components/': 'chrome://zotero/content/components/',
+		'zotero/': 'chrome://zotero/content/'
 	};
-	Object.defineProperty(globals, 'Zotero', { get: getZotero });
-	var loader = Loader({
-		id: 'zotero/require',
-		paths: {
-			'': 'resource://zotero/',
-			'containers/': 'chrome://zotero/content/containers/',
-			'components/': 'chrome://zotero/content/components/',
-			'zotero/': 'chrome://zotero/content/',
+
+	// In case the Loader ESM is loaded in the existing global,
+	// also reuse this global for all CommonJS modules.
+	const sharedGlobal =
+		useLoaderGlobal ||
+		// eslint-disable-next-line mozilla/reject-globalThis-modification
+		Cu.getRealmLocation(globalThis) == "Zotero global"
+			? Cu.getGlobalForObject({})
+			: undefined;
+	this.loader = new Loader({
+		paths,
+		sharedGlobal,
+		freshCompartment,
+		sandboxName: useLoaderGlobal
+			? "Zotero (Server Module Loader)"
+			: DEFAULT_SANDBOX_NAME,
+		// Make sure `define` function exists. JSON Viewer needs modules in AMD
+		// format, as it currently uses RequireJS from a content document and
+		// can't access our usual loaders. So, any modules shared with the JSON
+		// Viewer should include a define wrapper:
+		//
+		//   // Make this available to both AMD and CJS environments
+		//   define(function(require, exports, module) {
+		//     ... code ...
+		//   });
+		//
+		supportAMDModules: true,
+		requireHook: (id, require) => {
+			// if (id.startsWith("raw!") || id.startsWith("theme-loader!")) {
+			// 	return requireRawId(id, require);
+			// }
+			return require(id);
 		},
-		globals
 	});
-	let require = Require(loader, requirer);
-	return require;
-})();
+
+	this.require = Require(this.loader, { id: "zotero" });
+
+	// Various globals are available from ESM, but not from sandboxes,
+	// inject them into the globals list.
+	// Changes here should be mirrored to .eslintrc.
+	const injectedGlobals = {
+		BrowsingContext,
+		CanonicalBrowsingContext,
+		ChromeWorker,
+		console,
+		DebuggerNotificationObserver,
+		DOMPoint,
+		DOMQuad,
+		DOMRect,
+		fetch,
+		HeapSnapshot,
+		IOUtils,
+		L10nRegistry,
+		Localization,
+		NamedNodeMap,
+		NodeFilter,
+		PathUtils,
+		Services,
+		StructuredCloneHolder,
+		WebExtensionPolicy,
+		WebSocket,
+		WindowGlobalChild,
+		WindowGlobalParent,
+	};
+	for (const name in injectedGlobals) {
+		this.loader.globals[name] = injectedGlobals[name];
+	}
+
+	// Fetch custom pseudo modules and globals
+	const { modules, globals } = {
+		// TODO: TEMP: Stub this out
+		modules: {},
+		globals: {},
+	}
+
+	// Register custom pseudo modules to the current loader instance
+	for (const id in modules) {
+		const uri = resolveURI(id, this.loader.mapping);
+		this.loader.modules[uri] = {
+			get exports() {
+				return modules[id];
+			},
+		};
+	}
+
+	// Register custom globals to the current loader instance
+	Object.defineProperties(
+		this.loader.sharedGlobal,
+		Object.getOwnPropertyDescriptors(globals)
+	);
+
+	this.id = gNextLoaderID++;
+}
+
+ZoteroLoader.prototype = {
+	destroy(reason = "shutdown") {
+		unload(this.loader, reason);
+		delete this.loader;
+	},
+};
+
+// Export the standard instance of ZoteroLoader used by the tools.
+// TODO: Zotero: Not making require.js an ESM for now, so this isn't exposed
+// Should it be?
+let loader = new ZoteroLoader();
+
+var require = loader.require;
