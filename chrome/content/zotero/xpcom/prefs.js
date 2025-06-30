@@ -22,7 +22,7 @@
 	
 	***** END LICENSE BLOCK *****
 */
-Zotero.Prefs = new function() {
+Zotero.Prefs = new function () {
 	// Privileged methods
 	this.get = get;
 	this.set = set;
@@ -307,7 +307,7 @@ Zotero.Prefs = new function() {
 	
 	// Handlers for some Zotero preferences
 	var _handlers = [
-		[ "automaticScraperUpdates", function(val) {
+		[ "automaticScraperUpdates", function (val) {
 			if (val){
 				Zotero.Schema.updateFromRepository(1);
 			}
@@ -321,18 +321,18 @@ Zotero.Prefs = new function() {
 		["uiDensity", function () {
 			Zotero.UIProperties.setAll();
 		}],
-		["recursiveCollections", function() {
+		["recursiveCollections", function () {
 			Zotero.getActiveZoteroPane().itemsView.refreshAndMaintainSelection();
 		}],
-		[ "layout", function(val) {
+		[ "layout", function (val) {
 			Zotero.getActiveZoteroPane().updateLayout();
 		}],
-		[ "note.fontSize", function(val) {
+		[ "note.fontSize", function (val) {
 			if (val < 6) {
 				Zotero.Prefs.set('note.fontSize', 11);
 			}
 		}],
-		[ "sync.autoSync", function(val) {
+		[ "sync.autoSync", function (val) {
 			if (val) {
 				Zotero.Sync.EventListeners.AutoSyncListener.register();
 				Zotero.Sync.EventListeners.IdleListener.register();
@@ -351,7 +351,7 @@ Zotero.Prefs = new function() {
 				Zotero.logError(e);
 			}
 		}],
-		[ "search.quicksearch-mode", function(val) {
+		[ "search.quicksearch-mode", function (val) {
 			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 						.getService(Components.interfaces.nsIWindowMediator);
 			var enumerator = wm.getEnumerator("navigator:browser");
@@ -368,7 +368,7 @@ Zotero.Prefs = new function() {
 				Zotero.updateQuickSearchBox(win.document);
 			}
 		}],
-		[ "cite.useCiteprocRs", function(val) {
+		[ "cite.useCiteprocRs", function (val) {
 			val && Zotero.CiteprocRs.init();
 		}]
 	];

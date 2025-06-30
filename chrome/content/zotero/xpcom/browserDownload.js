@@ -150,7 +150,7 @@ Zotero.BrowserDownload = {
 			}, Ci.nsIWebProgress.NOTIFY_LOCATION);
 			
 			hiddenBrowser.load(url);
-			let blob = await Zotero.Promise.race([
+			let blob = await Promise.race([
 				onLoadTimeoutDeferred.promise,
 				Zotero.Promise.delay(downloadTimeout).then(() => {
 					if (!pdfLoaded) {
@@ -235,7 +235,7 @@ Zotero.BrowserDownload = {
 			Zotero.MIMETypeHandler.addHandlers("application/pdf", pdfMIMETypeHandler, true);
 			
 			Zotero.debug(`BrowserDownload: Awaiting the user to clear the captcha or timeout after ${downloadTimeout}`);
-			let pdfBlob = await Zotero.Promise.race([
+			let pdfBlob = await Promise.race([
 				Zotero.Promise.delay(downloadTimeout).then(() => {
 					if (!pdfFound) {
 						throw new Error(`BrowserDownload: Loading PDF via document viewer timed out after ${downloadTimeout}ms`);

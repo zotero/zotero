@@ -157,11 +157,11 @@ Zotero.URI = new function () {
 	}
 	
 	
-	this.getFeedItemURI = function(feedItem) {
+	this.getFeedItemURI = function (feedItem) {
 		return this.getItemURI(feedItem);
 	}
 	
-	this.getFeedItemPath = function(feedItem) {
+	this.getFeedItemPath = function (feedItem) {
 		return this.getItemPath(feedItem);
 	}
 	
@@ -180,11 +180,11 @@ Zotero.URI = new function () {
 		return this._getObjectPath(collection);
 	}
 	
-	this.getFeedURI = function(feed) {
+	this.getFeedURI = function (feed) {
 		return this.getLibraryURI(feed);
 	}
 	
-	this.getFeedPath = function(feed) {
+	this.getFeedPath = function (feed) {
 		return this.getLibraryPath(feed);
 	}
 	
@@ -220,7 +220,7 @@ Zotero.URI = new function () {
 		return uri;
 	};
 	
-	this._getObjectPath = function(obj) {
+	this._getObjectPath = function (obj) {
 		let path = this.getLibraryPath(obj.libraryID);
 		if (obj instanceof Zotero.Library) {
 			return path;
@@ -245,7 +245,7 @@ Zotero.URI = new function () {
 	 * @param {Zotero.Item | Zotero.Collection | Zotero.Group | Zotero.Search} obj
 	 * @return {String}
 	 */
-	this.getObjectURI = function(obj) {
+	this.getObjectURI = function (obj) {
 		return this.defaultPrefix + this._getObjectPath(obj);
 	};
 
@@ -264,11 +264,11 @@ Zotero.URI = new function () {
 	 * @param	{String}				itemURI
 	 * @return {Promise<Zotero.Item|false>}
 	 */
-	this.getURIItem = Zotero.Promise.method(function (itemURI) {
+	this.getURIItem = function (itemURI) {
 		var obj = this._getURIObject(itemURI, 'item');
 		if (!obj) return false;
 		return Zotero.Items.getByLibraryAndKeyAsync(obj.libraryID, obj.key);
-	});
+	};
 	
 	
 	/**
@@ -308,11 +308,11 @@ Zotero.URI = new function () {
 	 * @param	{Zotero.Collection|FALSE}
 	 * @return {Promise<Zotero.Collection|false>}
 	 */
-	this.getURICollection = Zotero.Promise.method(function (collectionURI) {
+	this.getURICollection = function (collectionURI) {
 		var obj = this._getURIObject(collectionURI, 'collection');
 		if (!obj) return false;
 		return Zotero.Collections.getByLibraryAndKeyAsync(obj.libraryID, obj.key);
-	});
+	};
 	
 	
 	/**
@@ -455,7 +455,7 @@ Zotero.URI = new function () {
 	 * @return {Promise<Integer|FALSE>} - A promise for either a libraryID or FALSE if a matching
 	 *     library couldn't be found
 	 */
-	this._getURIObjectLibraryID = Zotero.Promise.coroutine(function* (objectURI) {
+	this._getURIObjectLibraryID = async function (objectURI) {
 		let uri = objectURI.replace(/\/+$/, ''); // Drop trailing "/"
 		let uriParts = uri.match(uriPartsRe);
 		
@@ -464,7 +464,7 @@ Zotero.URI = new function () {
 			let type = uriParts[4];
 			// Personal library
 			if (!type || type == 'publications') {
-				libraryID = yield Zotero.DB.valueQueryAsync(
+				libraryID = await Zotero.DB.valueQueryAsync(
 					"SELECT libraryID FROM libraries WHERE type='user'"
 				);
 			}
@@ -475,7 +475,7 @@ Zotero.URI = new function () {
 		}
 		// Group libraries
 		else {
-			libraryID = yield Zotero.DB.valueQueryAsync(
+			libraryID = await Zotero.DB.valueQueryAsync(
 				"SELECT libraryID FROM groups WHERE groupID=?", uriParts[3]
 			);
 		}
@@ -486,7 +486,7 @@ Zotero.URI = new function () {
 		}
 		
 		return libraryID;
-	});
+	};
 	
 	
 	
@@ -500,7 +500,7 @@ Zotero.URI = new function () {
 	 * @return {Promise<Object|FALSE>} - A promise for an object with 'objectType', 'libraryID', 'key'
 	 *     or FALSE if library didn't exist
 	 */
-	this._getURIObjectLibraryKeyFromDB = Zotero.Promise.coroutine(function* (objectURI, type) {
+	this._getURIObjectLibraryKeyFromDB = async function (objectURI, type) {
 		let uri = objectURI.replace(/\/+$/, ''); // Drop trailing /
 		let uriParts = uri.match(uriPartsRe);
 		
@@ -508,7 +508,7 @@ Zotero.URI = new function () {
 			throw new Error("Could not parse object URI " + uri);
 		}
 		
-		let libraryID = yield this._getURIObjectLibraryID(uri);
+		let libraryID = await this._getURIObjectLibraryID(uri);
 		if (!libraryID) {
 			return false;
 		}
@@ -525,5 +525,5 @@ Zotero.URI = new function () {
 		if (type && type != retObj.objectType) return false;
 		
 		return retObj;
-	});
+	};
 }

@@ -26,7 +26,7 @@
 "use strict";
 
 // Mimics Zotero.Libraries
-Zotero.Feeds = new function() {
+Zotero.Feeds = new function () {
 	var _initPromise;
 	var _updating;
 	
@@ -69,13 +69,14 @@ Zotero.Feeds = new function() {
 	this.uninit = function () {
 		// Cancel initialization if in progress
 		if (_initPromise) {
+			// FIXME: fx140: replace call to Zotero.Promise instance method 'cancel()'
 			_initPromise.cancel();
 		}
 	};
 	
 	this._cache = null;
 	
-	this._makeCache = function() {
+	this._makeCache = function () {
 		return {
 			libraryIDByURL: {},
 			urlByLibraryID: {}
@@ -117,7 +118,7 @@ Zotero.Feeds = new function() {
 		delete this._cache.libraryIDByURL[url];
 	}
 
-	this.importFromOPML = Zotero.Promise.coroutine(function* (opmlString) {
+	this.importFromOPML = async function (opmlString) {
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(opmlString, "application/xml");
 		// Per some random spec (https://developer.mozilla.org/en-US/docs/Web/API/DOMParser), 
@@ -145,7 +146,7 @@ Zotero.Feeds = new function() {
 			newFeeds.push(feed);
 		}
 		// This could potentially be a massive list, so we save in a transaction.
-		yield Zotero.DB.executeTransaction(async function () {
+		await Zotero.DB.executeTransaction(async function () {
 			for (let feed of newFeeds) {
 				await feed.save({
 					skipSelect: true
@@ -153,11 +154,11 @@ Zotero.Feeds = new function() {
 			}
 		});
 		// Finally, update
-		yield Zotero.Feeds.updateFeeds();
+		await Zotero.Feeds.updateFeeds();
 		return true;
-	});
+	};
 	
-	this.restoreFromJSON = Zotero.Promise.coroutine(function* (json, merge=false) {
+	this.restoreFromJSON = async function (json, merge=false) {
 		Zotero.debug("Restoring feeds from remote JSON");
 		Zotero.debug(json);
 		if (merge) {
@@ -170,7 +171,7 @@ Zotero.Feeds = new function() {
 			json = syncedFeeds;
 		}
 		json = this._compactifyFeedJSON(json);
-		yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', json);
+		await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'feeds', json);
 		let feeds = Zotero.Feeds.getAll();
 		for (let feed of feeds) {
 			if (json[feed.url]) {
@@ -185,7 +186,7 @@ Zotero.Feeds = new function() {
 				delete json[feed.url];
 			} else {
 				Zotero.debug("Feed " + feed.url + " does not exist in remote JSON. Deleting");
-				yield feed.erase();
+				await feed.erase();
 			}
 		}
 		// Because existing json[feed.url] got deleted, `json` now only contains new feeds
@@ -202,13 +203,13 @@ Zotero.Feeds = new function() {
 				obj.cleanupUnreadAfter = json[url][2];
 			}
 			let feed = new Zotero.Feed(obj);
-			yield feed.saveTx({
+			await feed.saveTx({
 				skipSelect: true
 			});
 		}
-	});
+	};
 	
-	this.getByURL = function(urls) {
+	this.getByURL = function (urls) {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
 		
 		let asArray = true;
@@ -230,25 +231,25 @@ Zotero.Feeds = new function() {
 		return asArray ? feeds : feeds[0];
 	}
 	
-	this.existsByURL = function(url) {
+	this.existsByURL = function (url) {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
 		
 		return this._cache.libraryIDByURL[url] !== undefined;
 	}
 	
-	this.getAll = function() {
+	this.getAll = function () {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
 		
 		return Object.keys(this._cache.urlByLibraryID)
 			.map(id => Zotero.Libraries.get(id));
 	}
 	
-	this.get = function(libraryID) {
+	this.get = function (libraryID) {
 		let library = Zotero.Libraries.get(libraryID);
 		return library.isFeed ? library : undefined;
 	}
 	
-	this.haveFeeds = function() {
+	this.haveFeeds = function () {
 		if (!this._cache) throw new Error("Zotero.Feeds cache is not initialized");
 		
 		return !!Object.keys(this._cache.urlByLibraryID).length
@@ -258,8 +259,8 @@ Zotero.Feeds = new function() {
 		return this.getAll().reduce((prev, feed) => prev + feed.unreadCount, 0);
 	};
 
-	let globalFeedCheckDelay = Zotero.Promise.resolve();
-	this.scheduleNextFeedCheck = Zotero.Promise.coroutine(function* () {
+	let globalFeedCheckDelay = Promise.resolve();
+	this.scheduleNextFeedCheck = async function () {
 		// Don't schedule if already updating, since another check is scheduled at the end
 		if (_updating) {
 			return;
@@ -272,7 +273,7 @@ Zotero.Feeds = new function() {
 			+ "END ) AS nextCheck "
 			+ "FROM feeds WHERE refreshInterval IS NOT NULL "
 			+ "ORDER BY nextCheck ASC LIMIT 1";
-		var nextCheck = yield Zotero.DB.valueQueryAsync(sql);
+		var nextCheck = await Zotero.DB.valueQueryAsync(sql);
 
 		if (this._nextFeedCheck) {
 			this._nextFeedCheck.cancel();
@@ -283,7 +284,7 @@ Zotero.Feeds = new function() {
 			nextCheck = nextCheck > 0 ? nextCheck * 1000 : 0;
 			Zotero.debug("Next feed check in " + (nextCheck / 1000) + " seconds");
 			this._nextFeedCheck = Zotero.Promise.delay(nextCheck);
-			Zotero.Promise.all([this._nextFeedCheck, globalFeedCheckDelay])
+			Promise.all([this._nextFeedCheck, globalFeedCheckDelay])
 			.then(() => {
 				this._nextFeedCheck = null;
 				globalFeedCheckDelay = Zotero.Promise.delay(60000); // Don't perform auto-updates more than once per minute
@@ -299,9 +300,9 @@ Zotero.Feeds = new function() {
 		} else {
 			Zotero.debug("No feeds with auto-update");
 		}
-	});
+	};
 	
-	this.updateFeeds = Zotero.Promise.coroutine(function* () {
+	this.updateFeeds = async function () {
 		if (_updating) {
 			Zotero.debug("Feed update already in progress");
 			return;
@@ -316,12 +317,12 @@ Zotero.Feeds = new function() {
 				+ "WHERE refreshInterval IS NOT NULL "
 				+ "AND ( lastCheck IS NULL "
 					+ "OR (julianday(lastCheck, 'utc') + (refreshInterval/1440.0) - julianday('now', 'utc')) <= 0 )";
-			let needUpdate = (yield Zotero.DB.queryAsync(sql)).map(row => row.id);
+			let needUpdate = ((await Zotero.DB.queryAsync(sql))).map(row => row.id);
 			Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
 			for (let i=0; i<needUpdate.length; i++) {
 				let feed = Zotero.Feeds.get(needUpdate[i]);
-				yield feed.waitForDataLoad('item');
-				yield feed._updateFeed();
+				await feed.waitForDataLoad('item');
+				await feed._updateFeed();
 			}
 		}
 		finally {
@@ -329,11 +330,11 @@ Zotero.Feeds = new function() {
 		}
 		Zotero.debug("All feed updates done");
 		this.scheduleNextFeedCheck();
-	});
+	};
 	
 	// Conversion from expansive to compact format sync json
 	// TODO: Remove after beta
-	this._compactifyFeedJSON = function(json) {
+	this._compactifyFeedJSON = function (json) {
 		for (let url in json) {
 			if(Array.isArray(json[url])) {
 				continue;

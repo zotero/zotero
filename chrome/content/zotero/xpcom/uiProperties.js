@@ -23,7 +23,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-Zotero.UIProperties = new class {
+Zotero.UIProperties = new (class {
 	_roots = new Set();
 	
 	registerRoot(root) {
@@ -84,4 +84,4 @@ Zotero.UIProperties = new class {
 		root.style.setProperty('--zotero-ui-density', density);
 		root.setAttribute('zoteroUIDensity', density);
 	}
-};
+});

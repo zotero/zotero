@@ -80,7 +80,7 @@ Zotero.Sync.Storage.Engine = function (options) {
 	this.maxCheckAge = 10800; // maximum age in seconds for upload modification check (3 hours)
 }
 
-Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* () {
+Zotero.Sync.Storage.Engine.prototype.start = async function () {
 	var libraryID = this.libraryID;
 	if (!Zotero.Sync.Storage.Local.getEnabledForLibrary(libraryID)) {
 		Zotero.debug("File sync is not enabled for " + this.library.name);
@@ -93,14 +93,14 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 		Zotero.debug(`${this.controller.name} file sync is not active -- verifying`);
 		
 		try {
-			yield this.controller.checkServer();
+			await this.controller.checkServer();
 		}
 		catch (e) {
 			let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 			   .getService(Components.interfaces.nsIWindowMediator);
 			let lastWin = wm.getMostRecentWindow("navigator:browser");
 			
-			let success = yield this.controller.handleVerificationError(e, lastWin, true);
+			let success = await this.controller.handleVerificationError(e, lastWin, true);
 			if (!success) {
 				Zotero.debug(this.controller.name + " verification failed", 2);
 				
@@ -122,7 +122,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	}
 	
 	if (this.controller.cacheCredentials) {
-		yield this.controller.cacheCredentials();
+		await this.controller.cacheCredentials();
 	}
 	
 	var lastSyncTime = null;
@@ -156,17 +156,17 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 			&& (this.local.lastFullFileCheck[libraryID]
 				+ (this.maxCheckAge * 1000)) > new Date().getTime()) {
 		let itemIDs = this.local.getFilesToCheck(libraryID, this.maxCheckAge);
-		yield this.local.checkForUpdatedFiles(libraryID, itemIDs);
+		await this.local.checkForUpdatedFiles(libraryID, itemIDs);
 	}
 	// Otherwise check all files in library
 	else {
 		this.local.lastFullFileCheck[libraryID] = new Date().getTime();
-		yield this.local.checkForUpdatedFiles(libraryID);
+		await this.local.checkForUpdatedFiles(libraryID);
 	}
 	
-	yield this.local.resolveConflicts(libraryID);
+	await this.local.resolveConflicts(libraryID);
 	
-	var downloadForced = yield this.local.checkForForcedDownloads(libraryID);
+	var downloadForced = await this.local.checkForForcedDownloads(libraryID);
 	
 	// If we don't have any forced downloads, we can skip downloads if no storage metadata has
 	// changed (meaning nothing else has uploaded files since the last successful file sync)
@@ -180,13 +180,13 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	
 	// Get files to download
 	if (downloadAll || downloadForced) {
-		let itemIDs = yield this.local.getFilesToDownload(libraryID, !downloadAll);
+		let itemIDs = await this.local.getFilesToDownload(libraryID, !downloadAll);
 		if (itemIDs.length) {
 			Zotero.debug(itemIDs.length + " file" + (itemIDs.length == 1 ? '' : 's') + " to "
 				+ "download for " + this.library.name);
 			for (let itemID of itemIDs) {
-				let item = yield Zotero.Items.getAsync(itemID);
-				yield this.queueItem(item);
+				let item = await Zotero.Items.getAsync(itemID);
+				await this.queueItem(item);
 			}
 		}
 		else {
@@ -196,13 +196,13 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	
 	// Get files to upload
 	if (filesEditable) {
-		let itemIDs = yield this.local.getFilesToUpload(libraryID);
+		let itemIDs = await this.local.getFilesToUpload(libraryID);
 		if (itemIDs.length) {
 			Zotero.debug(itemIDs.length + " file" + (itemIDs.length == 1 ? '' : 's') + " to "
 				+ "upload for " + this.library.name);
 			for (let itemID of itemIDs) {
-				let item = yield Zotero.Items.getAsync(itemID, { noCache: true });
-				yield this.queueItem(item);
+				let item = await Zotero.Items.getAsync(itemID, { noCache: true });
+				await this.queueItem(item);
 			}
 		}
 		else {
@@ -222,7 +222,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	var downloadSuccessful = false;
 	var changes = new Zotero.Sync.Storage.Result;
 	for (let type of ['download', 'upload']) {
-		let results = yield promises[type];
+		let results = await promises[type];
 		let succeeded = 0;
 		let failed = 0;
 		
@@ -262,13 +262,13 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	if (downloadSuccessful) {
 		this.library.storageDownloadNeeded = false;
 		this.library.storageVersion = this.library.libraryVersion;
-		yield this.library.saveTx();
+		await this.library.saveTx();
 	}
 	
 	// For ZFS, this purges all files on server based on flag set when switching from ZFS
 	// to WebDAV in prefs. For WebDAV, this purges locally deleted files on server.
 	try {
-		yield this.controller.purgeDeletedStorageFiles(libraryID);
+		await this.controller.purgeDeletedStorageFiles(libraryID);
 	}
 	catch (e) {
 		Zotero.logError(e);
@@ -277,7 +277,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	// If WebDAV sync, purge orphaned files
 	if (downloadSuccessful && this.controller.mode == 'webdav') {
 		try {
-			yield this.controller.purgeOrphanedStorageFiles(libraryID);
+			await this.controller.purgeOrphanedStorageFiles(libraryID);
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -291,7 +291,7 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	Zotero.debug("Done with file sync for " + this.library.name);
 	
 	return changes;
-})
+}
 
 
 /**
@@ -310,7 +310,7 @@ Zotero.Sync.Storage.Engine.prototype.stop = function (queueToStop) {
 	}
 }
 
-Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(function* (item) {
+Zotero.Sync.Storage.Engine.prototype.queueItem = async function (item) {
 	switch (item.attachmentSyncState) {
 		case Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD:
 		case Zotero.Sync.Storage.Local.SYNC_STATE_FORCE_DOWNLOAD:
@@ -334,7 +334,7 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 	}
 	
 	if (type == 'upload') {
-		if (!(yield item.fileExists())) {
+		if (!((await item.fileExists()))) {
 			Zotero.debug("File " + item.libraryKey + " not available to upload -- skipping");
 			return;
 		}
@@ -355,4 +355,4 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 	});
 	this.numRequests++;
 	this.requestsRemaining++;
-})
+}

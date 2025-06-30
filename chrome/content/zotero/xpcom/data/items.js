@@ -27,7 +27,7 @@
 /*
  * Primary interface for accessing Zotero items
  */
-Zotero.Items = function() {
+Zotero.Items = function () {
 	this.constructor = null;
 	
 	this._ZDO_object = 'item';
@@ -102,10 +102,10 @@ Zotero.Items = function() {
 	 * @param {Integer} libraryID
 	 * @return {Promise<Boolean>} - True if library has items in trash, false otherwise
 	 */
-	this.hasDeleted = Zotero.Promise.coroutine(function* (libraryID) {
+	this.hasDeleted = async function (libraryID) {
 		var sql = "SELECT COUNT(*) > 0 FROM items JOIN deletedItems USING (itemID) WHERE libraryID=?";
-		return !!(yield Zotero.DB.valueQueryAsync(sql, [libraryID]));
-	});
+		return !!((await Zotero.DB.valueQueryAsync(sql, [libraryID])));
+	};
 	
 	
 	/**
@@ -117,7 +117,7 @@ Zotero.Items = function() {
 	 * @param  {Boolean}  [asIDs=false] 		 If true, resolves only with IDs
 	 * @return {Promise<Array<Zotero.Item|Integer>>}
 	 */
-	this.getAll = Zotero.Promise.coroutine(function* (libraryID, onlyTopLevel, includeDeleted, asIDs=false) {
+	this.getAll = async function (libraryID, onlyTopLevel, includeDeleted, asIDs=false) {
 		var sql = 'SELECT A.itemID FROM items A';
 		if (onlyTopLevel) {
 			sql += ' LEFT JOIN itemNotes B USING (itemID) '
@@ -131,12 +131,12 @@ Zotero.Items = function() {
 			sql += " AND A.itemID NOT IN (SELECT itemID FROM deletedItems)";
 		}
 		sql += " AND libraryID=?";
-		var ids = yield Zotero.DB.columnQueryAsync(sql, libraryID);
+		var ids = await Zotero.DB.columnQueryAsync(sql, libraryID);
 		if (asIDs) {
 			return ids;
 		}
 		return this.getAsync(ids);
-	});
+	};
 	
 	
 	//
@@ -144,7 +144,7 @@ Zotero.Items = function() {
 	//
 	// These are called by Zotero.DataObjects.prototype._loadDataType().
 	//
-	this._loadItemData = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+	this._loadItemData = async function (libraryID, ids, idSQL) {
 		var missingItems = {};
 		var itemFieldsCached = {};
 		
@@ -152,7 +152,7 @@ Zotero.Items = function() {
 			+ "JOIN itemData USING (itemID) "
 			+ "JOIN itemDataValues USING (valueID) WHERE libraryID=? AND itemTypeID!=?" + idSQL;
 		var params = [libraryID, Zotero.ItemTypes.getID('note')];
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -186,7 +186,7 @@ Zotero.Items = function() {
 		var sql = "SELECT itemID FROM items WHERE libraryID=?" + idSQL;
 		var params = [libraryID];
 		var allItemIDs = [];
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -218,7 +218,7 @@ Zotero.Items = function() {
 			+ "WHERE libraryID=? AND itemID NOT IN (SELECT itemID FROM itemAttachments)" + idSQL;
 		var params = [libraryID];
 		
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -259,9 +259,9 @@ Zotero.Items = function() {
 				// Instead of making updateDisplayTitle() async and loading conditionally, just catch the error
 				// and load on demand
 				if (e instanceof Zotero.Exception.UnloadedDataException) {
-					yield item.loadDataType('creators');
-					yield item.loadDataType('annotation');
-					yield item.loadDataType('tags');
+					await item.loadDataType('creators');
+					await item.loadDataType('annotation');
+					await item.loadDataType('tags');
 					item.updateDisplayTitle()
 				}
 				else {
@@ -269,15 +269,15 @@ Zotero.Items = function() {
 				}
 			}
 		}
-	});
+	};
 	
 	
-	this._loadCreators = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+	this._loadCreators = async function (libraryID, ids, idSQL) {
 		var sql = 'SELECT itemID, creatorID, creatorTypeID, orderIndex '
 			+ 'FROM items LEFT JOIN itemCreators USING (itemID) '
 			+ 'WHERE libraryID=?' + idSQL + " ORDER BY itemID, orderIndex";
 		var params = [libraryID];
-		var rows = yield Zotero.DB.queryAsync(sql, params, { noCache: true });
+		var rows = await Zotero.DB.queryAsync(sql, params, { noCache: true });
 		
 		// Mark creator indexes above the number of creators as changed,
 		// so that they're cleared if the item is saved
@@ -342,17 +342,17 @@ Zotero.Items = function() {
 		if (index <= maxOrderIndex) {
 			fixIncorrectIndexes(item, index, maxOrderIndex);
 		}
-	});
+	};
 	
 	
-	this._loadNotes = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+	this._loadNotes = async function (libraryID, ids, idSQL) {
 		var notesToUpdate = [];
 		
 		var sql = "SELECT itemID, note FROM items "
 			+ "JOIN itemNotes USING (itemID) "
 			+ "WHERE libraryID=?" + idSQL;
 		var params = [libraryID];
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -402,7 +402,7 @@ Zotero.Items = function() {
 		);
 		
 		if (notesToUpdate.length) {
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				for (let i = 0; i < notesToUpdate.length; i++) {
 					let row = notesToUpdate[i];
 					let sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
@@ -415,7 +415,7 @@ Zotero.Items = function() {
 		sql = "SELECT itemID FROM items WHERE libraryID=?" + idSQL
 			+ " AND itemTypeID IN (?, ?) AND itemID NOT IN (SELECT itemID FROM itemNotes)";
 		params = [libraryID, Zotero.ItemTypes.getID('note'), Zotero.ItemTypes.getID('attachment')];
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -433,7 +433,7 @@ Zotero.Items = function() {
 				}.bind(this)
 			}
 		);
-	});
+	};
 	
 	
 	this._loadAnnotations = async function (libraryID, ids, idSQL) {
@@ -506,7 +506,7 @@ Zotero.Items = function() {
 		}
 		catch (e) {
 			if (e.message.includes('no such column: IA.authorName')
-					&& await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM version WHERE schema='userdata' AND version IN (120, 121, 122)")) {
+					&& (await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM version WHERE schema='userdata' AND version IN (120, 121, 122)"))) {
 				await Zotero.DB.queryAsync("UPDATE version SET version=119 WHERE schema='userdata'");
 				Zotero.crash();
 			}
@@ -544,7 +544,7 @@ Zotero.Items = function() {
 	};
 	
 	
-	this._loadChildItems = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+	this._loadChildItems = async function (libraryID, ids, idSQL) {
 		var params = [libraryID];
 		var rows = [];
 		var onRow = function (row, setFunc) {
@@ -598,7 +598,7 @@ Zotero.Items = function() {
 			};
 		}.bind(this);
 		var lastItemID = null;
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -652,7 +652,7 @@ Zotero.Items = function() {
 		}.bind(this);
 		lastItemID = null;
 		rows = [];
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -697,7 +697,7 @@ Zotero.Items = function() {
 		}.bind(this);
 		lastItemID = null;
 		rows = [];
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -721,7 +721,7 @@ Zotero.Items = function() {
 		if (idSQL) {
 			sql += idSQL;
 		}
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -737,10 +737,10 @@ Zotero.Items = function() {
 				}.bind(this)
 			}
 		);
-	});
+	};
 	
 	
-	this._loadTags = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+	this._loadTags = async function (libraryID, ids, idSQL) {
 		var sql = "SELECT itemID, name, type FROM items "
 			+ "LEFT JOIN itemTags USING (itemID) "
 			+ "LEFT JOIN tags USING (tagID) WHERE libraryID=?" + idSQL;
@@ -763,7 +763,7 @@ Zotero.Items = function() {
 			item._loaded.tags = true;
 		}.bind(this);
 		
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -794,10 +794,10 @@ Zotero.Items = function() {
 		if (lastItemID) {
 			setRows(lastItemID, rows);
 		}
-	});
+	};
 	
 	
-	this._loadCollections = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+	this._loadCollections = async function (libraryID, ids, idSQL) {
 		var sql = "SELECT itemID, collectionID FROM items "
 			+ "LEFT JOIN collectionItems USING (itemID) "
 			+ "WHERE libraryID=?" + idSQL;
@@ -816,7 +816,7 @@ Zotero.Items = function() {
 			item._clearChanged('collections');
 		}.bind(this);
 		
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -842,7 +842,7 @@ Zotero.Items = function() {
 		if (lastItemID) {
 			setRows(lastItemID, rows);
 		}
-	});
+	};
 	
 	
 	/**
@@ -1047,7 +1047,7 @@ Zotero.Items = function() {
 					if (!hashesIncludeText) {
 						masterAttachmentHashes = new Map([
 							...masterAttachmentHashes,
-							...await this._hashItem(item, 'text')
+							...(await this._hashItem(item, 'text'))
 						]);
 						hashesIncludeText = true;
 					}
@@ -1369,7 +1369,7 @@ Zotero.Items = function() {
 	};
 
 	
-	this.trash = Zotero.Promise.coroutine(function* (ids) {
+	this.trash = async function (ids) {
 		Zotero.DB.requireTransaction();
 		
 		var libraryIDs = new Set();
@@ -1403,28 +1403,28 @@ Zotero.Items = function() {
 				parentItemIDs.add(item.parentItemID);
 			}
 		});
-		yield Zotero.Utilities.Internal.forEachChunkAsync(ids, 250, Zotero.Promise.coroutine(function* (chunk) {
-			yield Zotero.DB.queryAsync(
+		await Zotero.Utilities.Internal.forEachChunkAsync(ids, 250, async function (chunk) {
+			await Zotero.DB.queryAsync(
 				"UPDATE items SET synced=0, clientDateModified=CURRENT_TIMESTAMP "
 					+ `WHERE itemID IN (${chunk.map(id => parseInt(id)).join(", ")})`
 			);
-			yield Zotero.DB.queryAsync(
+			await Zotero.DB.queryAsync(
 				"INSERT OR IGNORE INTO deletedItems (itemID) VALUES "
 					+ chunk.map(id => "(" + id + ")").join(", ")
 			);
-		}.bind(this)));
+		}.bind(this));
 		
 		// Keep in sync with Zotero.Item::saveData()
 		for (let parentItemID of parentItemIDs) {
-			let parentItem = yield Zotero.Items.getAsync(parentItemID);
-			yield parentItem.reload(['primaryData', 'childItems'], true);
+			let parentItem = await Zotero.Items.getAsync(parentItemID);
+			await parentItem.reload(['primaryData', 'childItems'], true);
 		}
 		Zotero.Notifier.queue('modify', 'item', ids);
 		Zotero.Notifier.queue('trash', 'item', ids);
 		Array.from(libraryIDs).forEach(libraryID => {
 			Zotero.Notifier.queue('refresh', 'trash', libraryID);
 		});
-	});
+	};
 	
 	
 	this.trashTx = function (ids) {
@@ -1599,20 +1599,20 @@ Zotero.Items = function() {
 				}
 			}
 			
-			await Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, Zotero.Promise.coroutine(function* (chunk) {
+			await Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, async function (chunk) {
 				for (let item of chunk) {
 					item.setPublications(true);
 					item.synced = false;
 				}
 				let ids = chunk.map(item => item.id);
-				yield Zotero.DB.queryAsync(
+				await Zotero.DB.queryAsync(
 					`UPDATE items SET synced=0, clientDateModified=? WHERE itemID IN (${ids.join(", ")})`,
 					timestamp
 				);
-				yield Zotero.DB.queryAsync(
+				await Zotero.DB.queryAsync(
 					`INSERT OR IGNORE INTO publicationsItems VALUES (${ids.join("), (")})`
 				);
-			}.bind(this)));
+			}.bind(this));
 			Zotero.Notifier.queue('modify', 'item', allItems.map(item => item.id));
 		}.bind(this));
 	};
@@ -1640,14 +1640,14 @@ Zotero.Items = function() {
 			});
 			
 			var timestamp = Zotero.DB.transactionTimestamp;
-			await Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, Zotero.Promise.coroutine(function* (chunk) {
+			await Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, async function (chunk) {
 				let idStr = chunk.map(item => item.id).join(", ");
-				yield Zotero.DB.queryAsync(
+				await Zotero.DB.queryAsync(
 					`UPDATE items SET synced=0, clientDateModified=? WHERE itemID IN (${idStr})`,
 					timestamp
 				);
-				yield Zotero.DB.queryAsync(`DELETE FROM publicationsItems WHERE itemID IN (${idStr})`);
-			}.bind(this)));
+				await Zotero.DB.queryAsync(`DELETE FROM publicationsItems WHERE itemID IN (${idStr})`);
+			}.bind(this));
 			Zotero.Notifier.queue('modify', 'item', items.map(item => item.id));
 		}.bind(this));
 	};
@@ -2142,7 +2142,7 @@ Zotero.Items = function() {
 		let ids = await Zotero.DB.columnQueryAsync(sql, [Zotero.DB.escapeSQLExpression(pathPrefix) + '%', libraryID]);
 		let items = await this.getAsync(ids);
 		let missingItems = await Promise.all(
-			items.map(async item => (await item.fileExists() ? false : item))
+			items.map(async item => ((await item.fileExists()) ? false : item))
 		);
 		return missingItems.filter(Boolean);
 	};

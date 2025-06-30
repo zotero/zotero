@@ -24,7 +24,7 @@
 */
 
 
-Zotero.ProgressWindowSet = new function() {
+Zotero.ProgressWindowSet = new function () {
 	this.add = add;
 	this.tile = tile;
 	this.remove = remove;
@@ -100,7 +100,7 @@ Zotero.ProgressWindowSet = new function() {
  *
  * Pass the active window into the constructor
  */
-Zotero.ProgressWindow = function(options = {}) {
+Zotero.ProgressWindow = function (options = {}) {
 	var _window = options.window || null;
 	var _closeOnClick = typeof options.closeOnClick == 'undefined' ? true : options.closeOnClick;
 	var self = this,
@@ -282,7 +282,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	 * Creates a new object representing a line in the progressWindow. This is the OO
 	 * version of addLines() above.
 	 */
-	this.ItemProgress = _deferUntilWindowLoad(function(itemType, text, parentItemProgress) {
+	this.ItemProgress = _deferUntilWindowLoad(function (itemType, text, parentItemProgress) {
 		this.setText(text);
 		
 		this._image = _progressWindow.document.createXULElement("hbox");
@@ -322,7 +322,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	 * Sets the current save progress for this item.
 	 * @param {Integer} percent A percentage from 0 to 100.
 	 */
-	this.ItemProgress.prototype.setProgress = _deferUntilWindowLoad(function(percent) {
+	this.ItemProgress.prototype.setProgress = _deferUntilWindowLoad(function (percent) {
 		if(percent != 0 && percent != 100) {
 			// Indication of partial progress, so we will use the circular indicator
 			var nArcs = 20;
@@ -346,7 +346,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	 * @param {String} [itemType]
 	 * @param {String} [cssIcon]
 	 */
-	this.ItemProgress.prototype.setItemTypeAndIcon = _deferUntilWindowLoad(function(itemType, cssIcon = 'item-type') {
+	this.ItemProgress.prototype.setItemTypeAndIcon = _deferUntilWindowLoad(function (itemType, cssIcon = 'item-type') {
 		// No getCSSItemTypeIcon() without a window context
 		this._image.className = this._iconClassName = `icon icon-16 icon-css icon-${cssIcon}`;
 		this._image.dataset.itemType = itemType;
@@ -368,7 +368,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	/**
 	 * Indicates that an error occurred saving this item.
 	 */
-	this.ItemProgress.prototype.setError = _deferUntilWindowLoad(function() {
+	this.ItemProgress.prototype.setError = _deferUntilWindowLoad(function () {
 		this._image.style.backgroundImage = "url('chrome://zotero/skin/cross.png')";
 		this._image.style.backgroundPosition = "";
 		this._itemText.style.color = "red";
@@ -378,7 +378,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	
 	this.Translation = {};
 	
-	this.Translation.operationInProgress = function() {
+	this.Translation.operationInProgress = function () {
 		var desc = [
 			Zotero.getString('general.operationInProgress'),
 			Zotero.getString('general.operationInProgress.waitUntilFinishedAndTryAgain')
@@ -386,7 +386,7 @@ Zotero.ProgressWindow = function(options = {}) {
 		self.Translation._scrapeError(desc);
 	};
 	
-	this.Translation.cannotEditCollection = function() {
+	this.Translation.cannotEditCollection = function () {
 		var desc = Zotero.getString('save.error.cannotMakeChangesToCollection');
 		self.Translation._scrapeError(desc);
 	};
@@ -396,12 +396,12 @@ Zotero.ProgressWindow = function(options = {}) {
 		self.Translation._scrapeError(desc);
 	};
 	
-	this.Translation.cannotAddToFeed = function() {
+	this.Translation.cannotAddToFeed = function () {
 		var desc = Zotero.getString('save.error.cannotAddToFeed');
 		self.Translation._scrapeError(desc);
 	};
 	
-	this.Translation.scrapingTo = function(libraryID, collection) {
+	this.Translation.scrapingTo = function (libraryID, collection) {
 		var name;
 		if(collection) {
 			name = collection.name;
@@ -418,7 +418,7 @@ Zotero.ProgressWindow = function(options = {}) {
 		);
 	};
 	
-	this.Translation.doneHandler = function(obj, returnValue) {		
+	this.Translation.doneHandler = function (obj, returnValue) {		
 		if(!returnValue) {
 			// Include link to translator troubleshooting page
 			var url = "https://www.zotero.org/support/troubleshooting_translator_issues";
@@ -431,9 +431,9 @@ Zotero.ProgressWindow = function(options = {}) {
 		}
 	};
 	
-	this.Translation.itemDoneHandler = function(_attachmentsMap) {
+	this.Translation.itemDoneHandler = function (_attachmentsMap) {
 		_attachmentsMap = _attachmentsMap || new WeakMap();
-		return function(obj, dbItem, item) {
+		return function (obj, dbItem, item) {
 			self.show();
 			var itemProgress = new self.ItemProgress(dbItem?.getItemTypeIconName() ?? item.itemType, item.title);
 			itemProgress.setProgress(100);
@@ -452,7 +452,7 @@ Zotero.ProgressWindow = function(options = {}) {
 		}
 	};
 	
-	this.Translation._scrapeError = function(description) {
+	this.Translation._scrapeError = function (description) {
 		self.changeHeadline(Zotero.getString("ingester.scrapeError"));
 		self.addDescription(description);
 		self.show();
@@ -534,7 +534,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	 * Wraps a function to ensure it isn't called until the window is loaded
 	 */
 	function _deferUntilWindowLoad(fn) {
-		return function() {
+		return function () {
 			if(_window && _window.closed) return;
 			
 			if(_windowLoaded) {

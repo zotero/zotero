@@ -26,7 +26,7 @@
 var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
 
-Zotero.Server = new function() {
+Zotero.Server = new function () {
 	var _onlineObserverRegistered, serv;
 	this.responseCodes = {
 		200:"OK",
@@ -101,7 +101,7 @@ Zotero.Server = new function() {
 	 * Parses a query string into a key => value object
 	 * @param {String} queryString Query string
 	 */
-	this.decodeQueryString = function(queryString) {
+	this.decodeQueryString = function (queryString) {
 		var splitData = queryString.split("&");
 		var decodedData = {};
 		for (let variable of splitData) {
@@ -478,7 +478,7 @@ Zotero.Server.RequestHandler.prototype._requestFinished = function (responseBody
 	}
 }
 
-Zotero.Server.RequestHandler.prototype._decodeMultipartData = function(data) {
+Zotero.Server.RequestHandler.prototype._decodeMultipartData = function (data) {
 	const contentDispositionRe = /^Content-Disposition:\s*(.*)$/i;
 	const contentTypeRe = /^Content-Type:\s*(.*)$/i
 

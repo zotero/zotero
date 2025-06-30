@@ -65,7 +65,7 @@ Zotero.CookieSandbox = function (browser, uri, cookieData, userAgent) {
  * Normalizes the host string: lower-case, remove leading period, some more cleanup
  * @param {String} host;
  */
-Zotero.CookieSandbox.normalizeHost = function(host) {
+Zotero.CookieSandbox.normalizeHost = function (host) {
 	return host.trim().toLowerCase().replace(/^\.+|[:\/].*/g, '');
 }
 
@@ -73,7 +73,7 @@ Zotero.CookieSandbox.normalizeHost = function(host) {
  * Normalizes the path string
  * @param {String} path;
  */
-Zotero.CookieSandbox.normalizePath = function(path) {
+Zotero.CookieSandbox.normalizePath = function (path) {
 	return '/' + path.trim().replace(/^\/+|[?#].*/g, '');
 }
 
@@ -81,7 +81,7 @@ Zotero.CookieSandbox.normalizePath = function(path) {
  * Generates a semicolon-separated string of cookie values from a list of cookies
  * @param {Object} cookies Object containing key: value cookie pairs
  */
-Zotero.CookieSandbox.generateCookieString = function(cookies) {
+Zotero.CookieSandbox.generateCookieString = function (cookies) {
 	var str = '';
 	for(var key in cookies) {
 		str += '; ' + key + '=' + cookies[key];
@@ -103,7 +103,7 @@ Zotero.CookieSandbox.prototype = {
 	 * @param {nsIURI} [uri] URI of the header origin.
 	                   Used to verify same origin. If omitted validation is not performed
 	 */
-	"addCookiesFromHeader":function(cookieString, uri) {
+	"addCookiesFromHeader":function (cookieString, uri) {
 		var cookies = cookieString.split("\n");
 		if(uri) {
 			var validDomain = '.' + Zotero.CookieSandbox.normalizeHost(uri.host);
@@ -161,7 +161,7 @@ Zotero.CookieSandbox.prototype = {
 	 * Attach CookieSandbox to a specific browser
 	 * @param {Browser} browser
 	 */
-	"attachToBrowser":function(browser) {
+	"attachToBrowser":function (browser) {
 		Zotero.CookieSandbox.Observer.trackedBrowsers.set(browser, this);
 	},
 	
@@ -169,7 +169,7 @@ Zotero.CookieSandbox.prototype = {
 	 * Attach CookieSandbox to a specific XMLHttpRequest
 	 * @param {nsIInterfaceRequestor} ir
 	 */
-	"attachToInterfaceRequestor": function(ir) {
+	"attachToInterfaceRequestor": function (ir) {
 		if (typeof ir.QueryInterface === 'function') {
 			ir = ir.QueryInterface(Components.interfaces.nsIInterfaceRequestor);
 		}
@@ -185,7 +185,7 @@ Zotero.CookieSandbox.prototype = {
 	 * @param {Boolean} [secure] Whether the cookie has the secure attribute set
 	 * @param {Boolean} [hostOnly] Whether the cookie is a host-only cookie
 	 */
-	"setCookie": function(cookiePair, host, path, secure, hostOnly) {
+	"setCookie": function (cookiePair, host, path, secure, hostOnly) {
 		var splitAt = cookiePair.indexOf('=');
 		if(splitAt === -1) {
 			Zotero.debug("CookieSandbox: Not setting invalid cookie.");
@@ -227,7 +227,7 @@ Zotero.CookieSandbox.prototype = {
 	 * Returns a list of cookies that should be sent to the given URI
 	 * @param {nsIURI} uri
 	 */
-	"getCookiesForURI": function(uri) {
+	"getCookiesForURI": function (uri) {
 		var hostParts = Zotero.CookieSandbox.normalizeHost(uri.host).split('.'),
 			pathParts = Zotero.CookieSandbox.normalizePath(uri.filePath || uri.pathQueryRef).split('/'),
 			cookies = {}, found = false, secure = uri.scheme.toUpperCase() == 'HTTPS';
@@ -247,7 +247,7 @@ Zotero.CookieSandbox.prototype = {
 		return found ? cookies : null;
 	},
 	
-	"_getCookiesForPath": function(cookies, cookiePaths, pathParts, secure, isHost) {
+	"_getCookiesForPath": function (cookies, cookiePaths, pathParts, secure, isHost) {
 		var found = false;
 		var path = '';
 		for(var i=0, n=pathParts.length; i<n; i++) {
@@ -283,7 +283,7 @@ Zotero.CookieSandbox.prototype = {
 /**
  * nsIObserver implementation for adding, clearing, and slurping cookies
  */
-Zotero.CookieSandbox.Observer = new function() {
+Zotero.CookieSandbox.Observer = new function () {
 	const observeredTopics = ["http-on-examine-response", "http-on-modify-request"];
 	
 	var observerService = Components.classes["@mozilla.org/observer-service;1"].

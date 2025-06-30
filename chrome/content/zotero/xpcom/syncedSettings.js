@@ -42,7 +42,7 @@ Zotero.SyncedSettings = (function () {
 		 */
 		onSyncDownload: {
 			listeners: {},
-			addListener: function(libraryID, setting, fn, bindTarget=null) {
+			addListener: function (libraryID, setting, fn, bindTarget=null) {
 				if (!this.listeners[libraryID]) {
 					this.listeners[libraryID] = {};
 				}
@@ -58,16 +58,16 @@ Zotero.SyncedSettings = (function () {
 			 * @param {Object} newValue
 			 * @param {Boolean} conflict - true if both client and remote values had changed before sync
 			 */
-			trigger: Zotero.Promise.coroutine(function* (libraryID, setting, oldValue, newValue, conflict) {
+			trigger: async function (libraryID, setting, oldValue, newValue, conflict) {
 				var libListeners = this.listeners[libraryID] || {};
 				var settingListeners = libListeners[setting] || [];
 				Array.prototype.splice.call(arguments, 0, 2);
 				if (settingListeners) {
 					for (let listener of settingListeners) {
-						yield Zotero.Promise.resolve(listener[0].apply(listener[1], arguments));
+						await Promise.resolve(listener[0].apply(listener[1], arguments));
 					}
 				}
-			})
+			}
 		},
 		
 		loadAll: async function (libraryID) {
@@ -185,24 +185,24 @@ Zotero.SyncedSettings = (function () {
 			};
 		},
 		
-		getUnsynced: Zotero.Promise.coroutine(function* (libraryID) {
+		getUnsynced: async function (libraryID) {
 			var sql = "SELECT setting, value FROM syncedSettings WHERE synced=0 AND libraryID=?";
-			var rows = yield Zotero.DB.queryAsync(sql, libraryID);
+			var rows = await Zotero.DB.queryAsync(sql, libraryID);
 			var obj = {};
 			rows.forEach(row => obj[row.setting] = JSON.parse(row.value));
 			return obj;
-		}),
+		},
 		
-		markAsSynced: Zotero.Promise.coroutine(function* (libraryID, settings, version) {
+		markAsSynced: async function (libraryID, settings, version) {
 			var sql = "UPDATE syncedSettings SET synced=1, version=? WHERE libraryID=? AND setting IN "
 				+ "(" + settings.map(x => '?').join(', ') + ")";
-			yield Zotero.DB.queryAsync(sql, [version, libraryID].concat(settings));
+			await Zotero.DB.queryAsync(sql, [version, libraryID].concat(settings));
 			for (let key of settings) {
 				let setting = _cache[libraryID][key];
 				setting.synced = true;
 				setting.version = version;
 			}
-		}),
+		},
 		
 		/**
 		 * Used for restore-to-server
@@ -217,7 +217,7 @@ Zotero.SyncedSettings = (function () {
 			}
 		},
 		
-		set: Zotero.Promise.coroutine(function* (libraryID, setting, value, version = 0, synced) {
+		set: async function (libraryID, setting, value, version = 0, synced) {
 			if (typeof value == undefined) {
 				throw new Error("Value not provided");
 			}
@@ -268,12 +268,12 @@ Zotero.SyncedSettings = (function () {
 				if (version > 0) {
 					args.unshift(version)
 				}
-				yield Zotero.DB.queryAsync(sql, args);
+				await Zotero.DB.queryAsync(sql, args);
 			}
 			else {
 				var sql = "INSERT INTO syncedSettings "
 					+ "(setting, libraryID, value, version, synced) VALUES (?, ?, ?, ?, ?)";
-				yield Zotero.DB.queryAsync(
+				await Zotero.DB.queryAsync(
 					sql, [setting, libraryID, JSON.stringify(value), version, synced]
 				);
 			}
@@ -288,13 +288,13 @@ Zotero.SyncedSettings = (function () {
 			
 			var conflict = metadata && !metadata.synced && metadata.version < version;
 			if (version > 0) {
-				yield this.onSyncDownload.trigger(libraryID, setting, currentValue, value, conflict);
+				await this.onSyncDownload.trigger(libraryID, setting, currentValue, value, conflict);
 			}
-			yield Zotero.Notifier.trigger(event, 'setting', [id], extraData);
+			await Zotero.Notifier.trigger(event, 'setting', [id], extraData);
 			return true;
-		}),
+		},
 		
-		clear: Zotero.Promise.coroutine(function* (libraryID, setting, options) {
+		clear: async function (libraryID, setting, options) {
 			options = options || {};
 			
 			var currentValue = this.get(libraryID, setting);
@@ -313,13 +313,13 @@ Zotero.SyncedSettings = (function () {
 			}
 			
 			var sql = "DELETE FROM syncedSettings WHERE setting=? AND libraryID=?";
-			yield Zotero.DB.queryAsync(sql, [setting, libraryID]);
+			await Zotero.DB.queryAsync(sql, [setting, libraryID]);
 			
 			delete _cache[libraryID][setting];
 			
-			yield Zotero.Notifier.trigger('delete', 'setting', [id], extraData);
+			await Zotero.Notifier.trigger('delete', 'setting', [id], extraData);
 			return true;
-		})
+		}
 	};
 	
 	return module;

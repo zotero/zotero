@@ -56,7 +56,7 @@ Zotero.Attachments = new function () {
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
-	this.importFromFile = Zotero.Promise.coroutine(function* (options) {
+	this.importFromFile = async function (options) {
 		Zotero.debug('Importing attachment from file');
 		
 		var libraryID = options.libraryID;
@@ -88,7 +88,7 @@ Zotero.Attachments = new function () {
 		
 		var attachmentItem, newFile, destDir;
 		try {
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
 				if (parentItemID) {
@@ -143,7 +143,7 @@ Zotero.Attachments = new function () {
 				await attachmentItem.save(saveOptions);
 			}.bind(this));
 			try {
-				yield _postProcessFile(attachmentItem);
+				await _postProcessFile(attachmentItem);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -155,8 +155,8 @@ Zotero.Attachments = new function () {
 			
 			// Clean up
 			try {
-				if (destDir && (yield OS.File.exists(destDir))) {
-					yield OS.File.removeDir(destDir);
+				if (destDir && ((await OS.File.exists(destDir)))) {
+					await OS.File.removeDir(destDir);
 				}
 			}
 			catch (e) {
@@ -167,7 +167,7 @@ Zotero.Attachments = new function () {
 		}
 		
 		return attachmentItem;
-	});
+	};
 	
 	
 	/**
@@ -180,14 +180,14 @@ Zotero.Attachments = new function () {
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
-	this.linkFromFile = Zotero.Promise.coroutine(function* (options) {
+	this.linkFromFile = async function (options) {
 		Zotero.debug('Linking attachment from file');
 		
 		var file = Zotero.File.pathToFile(options.file);
 		var parentItemID = options.parentItemID;
 		var title = options.title;
 		var collections = options.collections;
-		var contentType = options.contentType || (yield Zotero.MIME.getMIMETypeFromFile(file));
+		var contentType = options.contentType || ((await Zotero.MIME.getMIMETypeFromFile(file)));
 		var charset = options.charset;
 		var saveOptions = options.saveOptions;
 		
@@ -195,7 +195,7 @@ Zotero.Attachments = new function () {
 			throw new Error("parentItemID and collections cannot both be provided");
 		}
 		
-		var item = yield _addToDB({
+		var item = await _addToDB({
 			file,
 			title,
 			linkMode: this.LINK_MODE_LINKED_FILE,
@@ -206,13 +206,13 @@ Zotero.Attachments = new function () {
 			saveOptions
 		});
 		try {
-			yield _postProcessFile(item);
+			await _postProcessFile(item);
 		}
 		catch (e) {
 			Zotero.logError(e);
 		}
 		return item;
-	});
+	};
 	
 	
 	/**
@@ -268,7 +268,7 @@ Zotero.Attachments = new function () {
 		// If the file is found (which requires a base directory being set and the file existing),
 		// index it
 		var file = this.resolveRelativePath(path);
-		if (file && await OS.File.exists(file)) {
+		if (file && (await OS.File.exists(file))) {
 			try {
 				await _postProcessFile(item);
 			}
@@ -286,7 +286,7 @@ Zotero.Attachments = new function () {
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
-	this.importSnapshotFromFile = Zotero.Promise.coroutine(function* (options) {
+	this.importSnapshotFromFile = async function (options) {
 		Zotero.debug('Importing snapshot from file');
 		
 		var file = Zotero.File.pathToFile(options.file);
@@ -317,7 +317,7 @@ Zotero.Attachments = new function () {
 		
 		var attachmentItem, itemID, destDir, newPath;
 		try {
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
 				if (libraryID) {
@@ -356,7 +356,7 @@ Zotero.Attachments = new function () {
 				}
 			}.bind(this));
 			try {
-				yield _postProcessFile(attachmentItem);
+				await _postProcessFile(attachmentItem);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -378,7 +378,7 @@ Zotero.Attachments = new function () {
 			throw e;
 		}
 		return attachmentItem;
-	});
+	};
 
 
 	/**
@@ -489,7 +489,7 @@ Zotero.Attachments = new function () {
 			throw new Error("'attachment' must be an embedded image");
 		}
 		
-		if (!await attachment.fileExists()) {
+		if (!(await attachment.fileExists())) {
 			throw new Error("Image attachment file doesn't exist");
 		}
 		
@@ -522,7 +522,7 @@ Zotero.Attachments = new function () {
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
-	this.importFromURL = Zotero.Promise.coroutine(function* (options) {
+	this.importFromURL = async function (options) {
 		var libraryID = options.libraryID;
 		var url = options.url;
 		var parentItemID = options.parentItemID;
@@ -654,9 +654,9 @@ Zotero.Attachments = new function () {
 			return process(contentType, Zotero.MIME.hasNativeHandler(contentType));
 		}
 		
-		var args = yield Zotero.MIME.getMIMETypeFromURL(url, cookieSandbox);
+		var args = await Zotero.MIME.getMIMETypeFromURL(url, cookieSandbox);
 		return process(...args);
-	});
+	};
 	
 	
 	/**
@@ -743,7 +743,7 @@ Zotero.Attachments = new function () {
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
-	this.linkFromURL = Zotero.Promise.coroutine(function* (options) {
+	this.linkFromURL = async function (options) {
 		Zotero.debug('Linking attachment from URL');
 	 
 		var url = options.url;
@@ -807,7 +807,7 @@ Zotero.Attachments = new function () {
 			collections,
 			saveOptions,
 		});
-	});
+	};
 	
 	
 	/**
@@ -817,7 +817,7 @@ Zotero.Attachments = new function () {
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
-	this.linkFromDocument = Zotero.Promise.coroutine(function* (options) {
+	this.linkFromDocument = async function (options) {
 		Zotero.debug('Linking attachment from document');
 		
 		var document = options.document;
@@ -833,7 +833,7 @@ Zotero.Attachments = new function () {
 		var title = document.title; // TODO: don't use Mozilla-generated title for images, etc.
 		var contentType = document.contentType;
 		
-		var item = yield _addToDB({
+		var item = await _addToDB({
 			url,
 			title,
 			linkMode: this.LINK_MODE_LINKED_URL,
@@ -845,11 +845,11 @@ Zotero.Attachments = new function () {
 		});
 		
 		if (Zotero.MIME.isTextType(document.contentType)) {
-			yield Zotero.Fulltext.indexDocument(document, item.id);
+			await Zotero.Fulltext.indexDocument(document, item.id);
 		}
 		
 		return item;
-	});
+	};
 	
 	
 	/**
@@ -859,7 +859,7 @@ Zotero.Attachments = new function () {
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
-	this.importFromDocument = Zotero.Promise.coroutine(function* (options) {
+	this.importFromDocument = async function (options) {
 		Zotero.debug('Importing attachment from ' + (options.document ? 'document' : 'browser'));
 		
 		var libraryID = options.libraryID;
@@ -885,7 +885,7 @@ Zotero.Attachments = new function () {
 			contentType = "application/pdf";
 		}
 		
-		var tmpDir = (yield this.createTemporaryStorageDirectory()).path;
+		var tmpDir = ((await this.createTemporaryStorageDirectory())).path;
 		try {
 			var fileName = Zotero.File.truncateFileName(this._getFileNameFromURL(url, contentType), 100);
 			var tmpFile = OS.Path.join(tmpDir, fileName);
@@ -909,24 +909,24 @@ Zotero.Attachments = new function () {
 				if (browser) {
 					// If we have a full hidden browser, use SingleFile
 					Zotero.debug('Getting snapshot with HiddenBrowser.snapshot()');
-					let snapshotContent = yield browser.snapshot();
+					let snapshotContent = await browser.snapshot();
 
 					// Write main HTML file to disk
-					yield Zotero.File.putContentsAsync(tmpFile, snapshotContent);
+					await Zotero.File.putContentsAsync(tmpFile, snapshotContent);
 				}
 				else {
 					// Fallback to nsIWebBrowserPersist
 					Zotero.debug('Saving document with saveDocument()');
-					yield Zotero.Utilities.Internal.saveDocument(document, tmpFile);
+					await Zotero.Utilities.Internal.saveDocument(document, tmpFile);
 				}
 			}
 			else {
-				yield Zotero.HTTP.download(url, tmpFile);
+				await Zotero.HTTP.download(url, tmpFile);
 			}
 			
 			var attachmentItem;
 			var destDir;
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
 				if (libraryID) {
@@ -954,7 +954,7 @@ Zotero.Attachments = new function () {
 				await OS.File.move(tmpDir, destDir);
 			}.bind(this));
 			
-			yield Zotero.FullText.queueItem(attachmentItem);
+			await Zotero.FullText.queueItem(attachmentItem);
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
@@ -962,10 +962,10 @@ Zotero.Attachments = new function () {
 			// Clean up
 			try {
 				if (tmpDir) {
-					yield OS.File.removeDir(tmpDir, { ignoreAbsent: true });
+					await OS.File.removeDir(tmpDir, { ignoreAbsent: true });
 				}
 				if (destDir) {
-					yield OS.File.removeDir(destDir, { ignoreAbsent: true });
+					await OS.File.removeDir(destDir, { ignoreAbsent: true });
 				}
 			}
 			catch (e) {
@@ -976,7 +976,7 @@ Zotero.Attachments = new function () {
 		}
 		
 		return attachmentItem;
-	});
+	};
 
 	/**
 	 * Save an attachment from a nsIInputStream
@@ -1236,7 +1236,7 @@ Zotero.Attachments = new function () {
 	}
 	
 	
-	this.InvalidPDFException = function() {
+	this.InvalidPDFException = function () {
 		this.message = "Downloaded file was not a supported type (PDF or EPUB)";
 		this.stack = new Error().stack;
 	};
@@ -2628,7 +2628,7 @@ Zotero.Attachments = new function () {
 	 * @param {Number} itemID - Item id
 	 * @return {Promise<String>} - Path of new directory
 	 */
-	this.createDirectoryForItem = Zotero.Promise.coroutine(function* (item) {
+	this.createDirectoryForItem = async function (item) {
 		if (!(item instanceof Zotero.Item)) {
 			throw new Error("'item' must be a Zotero.Item");
 		}
@@ -2641,11 +2641,11 @@ Zotero.Attachments = new function () {
 			}
 		}
 		else {
-			yield OS.File.removeDir(dir, { ignoreAbsent: true });
+			await OS.File.removeDir(dir, { ignoreAbsent: true });
 		}
-		yield Zotero.File.createDirectoryIfMissingAsync(dir);
+		await Zotero.File.createDirectoryIfMissingAsync(dir);
 		return dir;
-	});
+	};
 	
 	
 	this.getStorageDirectory = function (item) {
@@ -2684,14 +2684,14 @@ Zotero.Attachments = new function () {
 	}
 	
 	
-	this.createTemporaryStorageDirectory = Zotero.Promise.coroutine(function* () {
+	this.createTemporaryStorageDirectory = async function () {
 		var tmpDir = Zotero.getStorageDirectory();
 		tmpDir.append("tmp-" + Zotero.Utilities.randomString(6));
-		yield OS.File.makeDir(tmpDir.path, {
+		await OS.File.makeDir(tmpDir.path, {
 			unixMode: 0o755
 		});
 		return tmpDir;
-	});
+	};
 	
 	
 	/**
@@ -2756,7 +2756,7 @@ Zotero.Attachments = new function () {
 	}
 	
 	
-	this.hasMultipleFiles = Zotero.Promise.coroutine(function* (item) {
+	this.hasMultipleFiles = async function (item) {
 		if (!item.isAttachment()) {
 			throw new Error("Item is not an attachment");
 		}
@@ -2778,7 +2778,7 @@ Zotero.Attachments = new function () {
 			return false;
 		}
 		
-		var path = yield item.getFilePathAsync();
+		var path = await item.getFilePathAsync();
 		if (!path) {
 			throw new Error("File not found");
 		}
@@ -2787,7 +2787,7 @@ Zotero.Attachments = new function () {
 		var parent = PathUtils.parent(path);
 		var iterator = new OS.File.DirectoryIterator(parent);
 		try {
-			yield iterator.forEach((entry) => {
+			await iterator.forEach((entry) => {
 				if (entry.name.startsWith('.')) {
 					return;
 				}
@@ -2801,7 +2801,7 @@ Zotero.Attachments = new function () {
 			iterator.close();
 		}
 		return numFiles > 1;
-	});
+	};
 	
 	
 	/**
@@ -2811,7 +2811,7 @@ Zotero.Attachments = new function () {
 	 *
 	 * @param	{Zotero.Item}	item	Attachment item
 	 */
-	this.getNumFiles = Zotero.Promise.coroutine(function* (item) {
+	this.getNumFiles = async function (item) {
 		if (!item.isAttachment()) {
 			throw new Error("Item is not an attachment");
 		}
@@ -2830,7 +2830,7 @@ Zotero.Attachments = new function () {
 			return 1;
 		}
 		
-		var path = yield item.getFilePathAsync();
+		var path = await item.getFilePathAsync();
 		if (!path) {
 			throw new Error("File not found");
 		}
@@ -2839,7 +2839,7 @@ Zotero.Attachments = new function () {
 		var parent = PathUtils.parent(path);
 		var iterator = new OS.File.DirectoryIterator(parent);
 		try {
-			yield iterator.forEach(function (entry) {
+			await iterator.forEach(function (entry) {
 				if (entry.name.startsWith('.')) {
 					return;
 				}
@@ -2850,7 +2850,7 @@ Zotero.Attachments = new function () {
 			iterator.close();
 		}
 		return numFiles;
-	});
+	};
 	
 	
 	/**
@@ -2858,7 +2858,7 @@ Zotero.Attachments = new function () {
 	 * @param {Boolean} [skipHidden=true] - Don't count hidden files
 	 * @return {Promise<Integer>} - Promise for the total file size in bytes
 	 */
-	this.getTotalFileSize = Zotero.Promise.coroutine(function* (item, skipHidden = true) {
+	this.getTotalFileSize = async function (item, skipHidden = true) {
 		if (!item.isAttachment()) {
 			throw new Error("Item is not an attachment");
 		}
@@ -2874,20 +2874,20 @@ Zotero.Attachments = new function () {
 				throw new Error("Invalid attachment link mode");
 		}
 		
-		var path = yield item.getFilePathAsync();
+		var path = await item.getFilePathAsync();
 		if (!path) {
 			throw new Error("File not found");
 		}
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			return (yield OS.File.stat(path)).size;
+			return ((await OS.File.stat(path))).size;
 		}
 		
 		var size = 0;
 		var parent = PathUtils.parent(path);
 		let iterator = new OS.File.DirectoryIterator(parent);
 		try {
-			yield iterator.forEach(function (entry) {
+			await iterator.forEach(function (entry) {
 				if (skipHidden && entry.name.startsWith('.')) {
 					return;
 				}
@@ -2912,7 +2912,7 @@ Zotero.Attachments = new function () {
 			iterator.close();
 		}
 		return size;
-	});
+	};
 	
 	
 	/**
@@ -2984,7 +2984,7 @@ Zotero.Attachments = new function () {
 	 *
 	 * @return {Zotero.Item} - The new attachment
 	 */
-	this.copyAttachmentToLibrary = Zotero.Promise.coroutine(function* (attachment, libraryID, parentItemID) {
+	this.copyAttachmentToLibrary = async function (attachment, libraryID, parentItemID) {
 		if (attachment.libraryID == libraryID) {
 			throw new Error("Attachment is already in library " + libraryID);
 		}
@@ -2999,18 +2999,18 @@ Zotero.Attachments = new function () {
 		if (parentItemID) {
 			newAttachment.parentID = parentItemID;
 		}
-		yield newAttachment.save();
+		await newAttachment.save();
 		
 		// Copy over files if they exist
-		if (newAttachment.isStoredFileAttachment() && (yield attachment.fileExists())) {
+		if (newAttachment.isStoredFileAttachment() && ((await attachment.fileExists()))) {
 			let dir = Zotero.Attachments.getStorageDirectory(attachment);
-			let newDir = yield Zotero.Attachments.createDirectoryForItem(newAttachment);
-			yield Zotero.File.copyDirectory(dir, newDir);
+			let newDir = await Zotero.Attachments.createDirectoryForItem(newAttachment);
+			await Zotero.File.copyDirectory(dir, newDir);
 		}
 		
-		yield newAttachment.addLinkedItem(attachment);
+		await newAttachment.addLinkedItem(attachment);
 		return newAttachment;
-	});
+	};
 	
 	
 	this.convertLinkedFileToStoredFile = async function (item, options = {}) {
@@ -3100,7 +3100,7 @@ Zotero.Attachments = new function () {
 	};
 	
 	
-	this._getFileNameFromURL = function(url, contentType) {
+	this._getFileNameFromURL = function (url, contentType) {
 		url = Zotero.Utilities.Internal.parseURL(url);
 		
 		var fileBaseName = url.fileBaseName;
@@ -3241,7 +3241,7 @@ Zotero.Attachments = new function () {
 	 * Determines if a given document is an instance of PDFJS
 	 * @return {Boolean}
 	 */
-	this.isPDFJSDocument = function(doc) {
+	this.isPDFJSDocument = function (doc) {
 		// pdf.js HACK
 		// This may no longer be necessary (as of Fx 23)
 		if(doc.contentType === "text/html") {

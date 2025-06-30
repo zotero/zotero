@@ -291,7 +291,7 @@ class PDFWorker {
 				throw new Error('Item must be a PDF attachment');
 			}
 
-			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
+			let mtime = Math.floor((await attachment.attachmentModificationTime) / 1000);
 			if (!transfer && attachment.attachmentLastProcessedModificationTime === mtime) {
 				Zotero.debug("File hasn't changed since last-processed time -- skipping annotations import");
 				return false;
@@ -364,7 +364,7 @@ class PDFWorker {
 			if (transfer) {
 				if (modifiedBuf) {
 					await IOUtils.write(path, new Uint8Array(modifiedBuf));
-					mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
+					mtime = Math.floor((await attachment.attachmentModificationTime) / 1000);
 				}
 			}
 
@@ -554,7 +554,7 @@ class PDFWorker {
 			await Zotero.Notifier.trigger('modify', 'item', ids, {});
 
 			await IOUtils.write(path, new Uint8Array(modifiedBuf));
-			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
+			let mtime = Math.floor((await attachment.attachmentModificationTime) / 1000);
 			attachment.attachmentLastProcessedModificationTime = mtime;
 			await attachment.saveTx({
 				skipAll: true
@@ -607,7 +607,7 @@ class PDFWorker {
 			}
 
 			await IOUtils.write(path, new Uint8Array(modifiedBuf));
-			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
+			let mtime = Math.floor((await attachment.attachmentModificationTime) / 1000);
 			attachment.attachmentLastProcessedModificationTime = mtime;
 			await attachment.saveTx({
 				skipAll: true
@@ -720,7 +720,7 @@ class PDFWorker {
 			let annotations = [];
 			for (let annotation of attachment.getAnnotations()) {
 				if (['image', 'ink'].includes(annotation.annotationType)
-					&& !await Zotero.Annotations.hasCacheImage(annotation)) {
+					&& !(await Zotero.Annotations.hasCacheImage(annotation))) {
 					annotations.push({
 						id: annotation.key,
 						color: annotation.annotationColor,

@@ -53,7 +53,7 @@ Zotero.DataDirectory = {
 	_warnOnUnsafeLocation: true,
 	
 	
-	init: Zotero.Promise.coroutine(function* () {
+	init: async function () {
 		var dataDir;
 		var dbFilename = this.getDatabaseFilename();
 		// Handle directory specified on command line
@@ -73,7 +73,7 @@ Zotero.DataDirectory = {
 				}
 				
 				// Require parent directory to exist
-				if (!(yield OS.File.exists(PathUtils.parent(dir)))) {
+				if (!((await OS.File.exists(PathUtils.parent(dir))))) {
 					throw `Parent directory of -datadir ${dir} not found`;
 				}
 				
@@ -113,8 +113,8 @@ Zotero.DataDirectory = {
 				let migrationMarker = OS.Path.join(prefVal, this.MIGRATION_MARKER);
 				let dbFile = OS.Path.join(prefVal, dbFilename);
 				
-				if ((yield OS.File.exists(migrationMarker)) && !(yield OS.File.exists(dbFile))) {
-					let contents = yield Zotero.File.getContentsAsync(migrationMarker);
+				if (((await OS.File.exists(migrationMarker))) && !((await OS.File.exists(dbFile)))) {
+					let contents = await Zotero.File.getContentsAsync(migrationMarker);
 					try {
 						let { sourceDir } = JSON.parse(contents);
 						dataDir = OS.Path.normalize(sourceDir);
@@ -139,7 +139,7 @@ Zotero.DataDirectory = {
 				}
 			}
 			
-			if (!(yield OS.File.exists(dataDir)) && dataDir != this.defaultDir) {
+			if (!((await OS.File.exists(dataDir))) && dataDir != this.defaultDir) {
 				// If set to a legacy directory that doesn't exist, forget about it and just use the
 				// new default location, which will either exist or be created below. The most likely
 				// cause of this is a migration, so don't bother looking in other-app profiles.
@@ -161,13 +161,13 @@ Zotero.DataDirectory = {
 			try {
 				if (dataDir != this.defaultDir
 						&& this.isLegacy(dataDir)
-						&& (yield OS.File.exists(OS.Path.join(this.defaultDir, 'move-to-old')))) {
+						&& ((await OS.File.exists(OS.Path.join(this.defaultDir, 'move-to-old'))))) {
 					let newPath = this.defaultDir + '-Old';
-					if (yield OS.File.exists(newPath)) {
+					if (await OS.File.exists(newPath)) {
 						newPath += "-1";
 					}
-					yield Zotero.File.moveDirectory(this.defaultDir, newPath);
-					yield OS.File.remove(OS.Path.join(newPath, 'move-to-old'));
+					await Zotero.File.moveDirectory(this.defaultDir, newPath);
+					await OS.File.remove(OS.Path.join(newPath, 'move-to-old'));
 				}
 			}
 			catch (e) {
@@ -190,11 +190,11 @@ Zotero.DataDirectory = {
 			// data directory named after the profile, as long as one either doesn't exist yet or
 			// one does and it contains a database
 			try {
-				if ((yield Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir, false)).length) {
+				if (((await Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir, false))).length) {
 					let profileName = PathUtils.filename(Zotero.Profile.dir).match(/[^.]+\.(.+)/)[1];
 					let newDataDir = this.defaultDir + ' ' + profileName;
-					if (!(yield OS.File.exists(newDataDir))
-							|| (yield OS.File.exists(OS.Path.join(newDataDir, dbFilename)))) {
+					if (!((await OS.File.exists(newDataDir)))
+							|| ((await OS.File.exists(OS.Path.join(newDataDir, dbFilename))))) {
 						dataDir = newDataDir;
 						dataDirNamedAfterProfile = true;
 					}
@@ -206,7 +206,7 @@ Zotero.DataDirectory = {
 			
 			// Check for ~/Zotero/zotero.sqlite
 			let dbFile = OS.Path.join(dataDir, dbFilename);
-			if (yield OS.File.exists(dbFile)) {
+			if (await OS.File.exists(dbFile)) {
 				Zotero.debug("Using data directory " + dataDir);
 				this._cache(dataDir);
 				
@@ -221,7 +221,7 @@ Zotero.DataDirectory = {
 			try {
 				let dir = OS.Path.join(Zotero.Profile.dir, this.legacyDirName);
 				let dbFile = OS.Path.join(dir, dbFilename);
-				profileSubdirModTime = new Date((yield IOUtils.stat(dbFile)).lastModified);
+				profileSubdirModTime = new Date(((await IOUtils.stat(dbFile))).lastModified);
 				Zotero.debug(`Database found at ${dbFile}, last modified ${profileSubdirModTime}`);
 				dataDir = dir;
 				useProfile = true;
@@ -243,7 +243,7 @@ Zotero.DataDirectory = {
 				if (profilesParent) {
 					Zotero.debug("Looking for Firefox profile in " + profilesParent);
 					try {
-						defProfile = yield Zotero.Profile.getDefaultInProfilesDir(profilesParent);
+						defProfile = await Zotero.Profile.getDefaultInProfilesDir(profilesParent);
 					}
 					catch (e) {
 						Zotero.debug("An error occurred locating the Firefox profile; "
@@ -258,8 +258,8 @@ Zotero.DataDirectory = {
 					
 					// Read in prefs
 					let prefsFile = OS.Path.join(profileDir, "prefs.js");
-					if (yield OS.File.exists(prefsFile)) {
-						let prefs = yield Zotero.Profile.readPrefsFromFile(prefsFile);
+					if (await OS.File.exists(prefsFile)) {
+						let prefs = await Zotero.Profile.readPrefsFromFile(prefsFile);
 						
 						// Check for data dir pref
 						if (prefs['extensions.zotero.dataDir'] && prefs['extensions.zotero.useDataDir']) {
@@ -281,7 +281,7 @@ Zotero.DataDirectory = {
 							}
 							try {
 								let dbFile = OS.Path.join(nsIFile.path, dbFilename);
-								let mtime = new Date((yield IOUtils.stat(dbFile)).lastModified);
+								let mtime = new Date(((await IOUtils.stat(dbFile))).lastModified);
 								Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
 								// If custom location has a newer DB, use that
 								if (!useProfile || mtime > profileSubdirModTime) {
@@ -309,7 +309,7 @@ Zotero.DataDirectory = {
 							try {
 								let dir = OS.Path.join(profileDir, this.legacyDirName);
 								let dbFile = OS.Path.join(dir, dbFilename);
-								let mtime = new Date((yield IOUtils.stat(dbFile)).lastModified);
+								let mtime = new Date(((await IOUtils.stat(dbFile))).lastModified);
 								Zotero.debug(`Database found at ${dbFile}, last modified ${mtime}`);
 								// If newer than Zotero profile directory, use this one
 								if (!useProfile || mtime > profileSubdirModTime) {
@@ -353,7 +353,7 @@ Zotero.DataDirectory = {
 		
 		Zotero.debug("Using data directory " + dataDir);
 		try {
-			yield Zotero.File.createDirectoryIfMissingAsync(dataDir);
+			await Zotero.File.createDirectoryIfMissingAsync(dataDir);
 		}
 		catch (e) {
 			// TEMP: OS.Constants.Win.ERROR_ACCESS_DENIED no longer available, but we should
@@ -386,7 +386,7 @@ Zotero.DataDirectory = {
 						null, null, {}
 					);
 					if (index == 0) {
-						let changed = yield Zotero.DataDirectory.choose(true);
+						let changed = await Zotero.DataDirectory.choose(true);
 						if (!changed) {
 							Zotero.Utilities.Internal.quit();
 						}
@@ -413,7 +413,7 @@ Zotero.DataDirectory = {
 						Zotero.Utilities.Internal.quit();
 					}
 					else if (index == 2) {
-						let changed = yield Zotero.DataDirectory.choose(true);
+						let changed = await Zotero.DataDirectory.choose(true);
 						if (!changed) {
 							Zotero.Utilities.Internal.quit();
 							return;
@@ -424,7 +424,7 @@ Zotero.DataDirectory = {
 			}
 		}
 		this._cache(dataDir);
-	}),
+	},
 	
 	
 	_cache: function (dir) {
@@ -468,7 +468,7 @@ Zotero.DataDirectory = {
 				fp.init(win, Zotero.getString('dataDir.selectDir'), fp.modeGetFolder);
 				fp.displayDirectory = this._dir ? this._dir : PathUtils.parent(this.defaultDir);
 				fp.appendFilters(fp.filterAll);
-				if (await fp.show() == fp.returnOK) {
+				if ((await fp.show()) == fp.returnOK) {
 					let file = Zotero.File.pathToFile(fp.file);
 					let dialogText = '';
 					let dialogTitle = '';
@@ -599,7 +599,7 @@ Zotero.DataDirectory = {
 			fp.init(win, Zotero.getString('dataDir.selectNewDir', Zotero.clientName), fp.modeGetFolder);
 			fp.displayDirectory = this.dir;
 			fp.appendFilters(fp.filterAll);
-			if (await fp.show() == fp.returnOK) {
+			if ((await fp.show()) == fp.returnOK) {
 				let file = Zotero.File.pathToFile(fp.file);
 				
 				if (file.directoryEntries.hasMoreElements()) {
@@ -620,7 +620,7 @@ Zotero.DataDirectory = {
 	},
 	
 	
-	checkForUnsafeLocation: Zotero.Promise.coroutine(function* (path) {
+	checkForUnsafeLocation: async function (path) {
 		if (!this._warnOnUnsafeLocation || !Zotero.Prefs.get('warnOnUnsafeDataDir')) {
 			return;
 		}
@@ -645,7 +645,7 @@ Zotero.DataDirectory = {
 
 			// Yes - display dialog.
 			if (index == 0) {
-				yield this.choose(true);
+				await this.choose(true);
 			}
 			else if (index == 2) {
 				Zotero.launchURL('https://www.zotero.org/support/kb/data_directory_in_cloud_storage_folder');
@@ -654,7 +654,7 @@ Zotero.DataDirectory = {
 				Zotero.Prefs.set('warnOnUnsafeDataDir', false);
 			}
 		}
-	}),
+	},
 	
 	
 	isLegacy: function (dir) {
@@ -667,16 +667,16 @@ Zotero.DataDirectory = {
 	},
 	
 	
-	isNewDirOnDifferentDrive: Zotero.Promise.coroutine(function* (oldDir, newDir) {
+	isNewDirOnDifferentDrive: async function (oldDir, newDir) {
 		var filename = 'zotero-migration.tmp';
 		var tmpFile = OS.Path.join(Zotero.getTempDirectory().path, filename);
-		yield Zotero.File.putContentsAsync(tmpFile, ' ');
+		await Zotero.File.putContentsAsync(tmpFile, ' ');
 		var testPath = OS.Path.normalize(OS.Path.join(newDir, '..', filename));
 		try {
 			// Attempt moving the marker with noCopy
-			yield OS.File.move(tmpFile, testPath, { noCopy: true });
+			await OS.File.move(tmpFile, testPath, { noCopy: true });
 		} catch(e) {
-			yield OS.File.remove(tmpFile);
+			await OS.File.remove(tmpFile);
 			
 			if (e instanceof OS.File.Error) {
 				if (e.unixErrno != undefined && e.unixErrno == ChromeUtils.getLibcConstants().EXDEV) {
@@ -690,9 +690,9 @@ Zotero.DataDirectory = {
 			}
 			throw e;
 		}
-		yield OS.File.remove(testPath);
+		await OS.File.remove(testPath);
 		return false;
-	}),
+	},
 	
 	
 	isStorageDirectory: async function (dir) {
@@ -876,14 +876,14 @@ Zotero.DataDirectory = {
 	 * @param {String} targetDir - Target directory, which may be the same; except in tests, this is
 	 *     the default data directory
 	 */
-	checkForMigration: Zotero.Promise.coroutine(function* (dataDir, newDir) {
+	checkForMigration: async function (dataDir, newDir) {
 		if (!this.canMigrate(dataDir)) {
 			return false;
 		}
 		
 		let migrationMarker = OS.Path.join(dataDir, this.MIGRATION_MARKER);
 		try {
-			var exists = yield OS.File.exists(migrationMarker)
+			var exists = await OS.File.exists(migrationMarker)
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -894,7 +894,7 @@ Zotero.DataDirectory = {
 			
 			// Skip automatic migration if there's a non-empty directory at the new location
 			// TODO: Notify user
-			if ((yield OS.File.exists(newDir)) && !(yield Zotero.File.directoryIsEmpty(newDir))) {
+			if (((await OS.File.exists(newDir))) && !((await Zotero.File.directoryIsEmpty(newDir)))) {
 				Zotero.debug(`${newDir} exists and is non-empty -- skipping migration`);
 				return false;
 			}
@@ -902,7 +902,7 @@ Zotero.DataDirectory = {
 		
 		// Skip migration if new dir on different drive and prompt
 		try {
-			if (yield this.isNewDirOnDifferentDrive(dataDir, newDir)) {
+			if (await this.isNewDirOnDifferentDrive(dataDir, newDir)) {
 				Zotero.debug(`New dataDir ${newDir} is on a different drive from ${dataDir} -- skipping migration`);
 				Zotero.DataDirectory.newDirOnDifferentDrive = true;
 				
@@ -921,11 +921,11 @@ Zotero.DataDirectory = {
 		// If there are other profiles pointing to the old directory, make sure we can edit the prefs.js
 		// file before doing anything, or else we risk orphaning a 4.0 installation
 		try {
-			let otherProfiles = yield Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir);
+			let otherProfiles = await Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir);
 			// 'touch' each prefs.js file to make sure we can access it
 			for (let dir of otherProfiles) {
 				let prefsFile = OS.Path.join(dir, "prefs.js");
-				yield IOUtils.setModificationTime(prefsFile);
+				await IOUtils.setModificationTime(prefsFile);
 			}
 		}
 		catch (e) {
@@ -938,7 +938,7 @@ Zotero.DataDirectory = {
 		}
 		
 		if (automatic) {
-			yield this.markForMigration(dataDir, true);
+			await this.markForMigration(dataDir, true);
 		}
 		
 		let sourceDir;
@@ -948,7 +948,7 @@ Zotero.DataDirectory = {
 		// Check whether this is an automatic or manual migration
 		let contents;
 		try {
-			contents = yield Zotero.File.getContentsAsync(migrationMarker);
+			contents = await Zotero.File.getContentsAsync(migrationMarker);
 			({ sourceDir, automatic } = JSON.parse(contents));
 		}
 		catch (e) {
@@ -992,7 +992,7 @@ Zotero.DataDirectory = {
 			Zotero.logError(e);
 		}
 		try {
-			errors = yield this.migrate(oldDir, newDir, partial, progressHandler);
+			errors = await this.migrate(oldDir, newDir, partial, progressHandler);
 		}
 		catch (e) {
 			// Complete failure (failed to create new directory, copy marker, or move database)
@@ -1004,7 +1004,7 @@ Zotero.DataDirectory = {
 				+ e
 				+ "\n\n"
 				+ Zotero.getString(`dataDir.migration.failure.full.${mode}.text2`, Zotero.appName);
-			yield this.fullMigrationFailurePrompt(oldDir, newDir, error);
+			await this.fullMigrationFailurePrompt(oldDir, newDir, error);
 			
 			// Clear status line from progress meter
 			try {
@@ -1048,15 +1048,15 @@ Zotero.DataDirectory = {
 			else if (index == 2) {
 				try {
 					let firstEntry;
-					yield Zotero.File.iterateDirectory(oldDir, function (entry, index, iterator) {
+					await Zotero.File.iterateDirectory(oldDir, function (entry, index, iterator) {
 						firstEntry = entry;
 						iterator.close();
 					});
 					if (firstEntry) {
-						yield Zotero.File.reveal(firstEntry.path);
+						await Zotero.File.reveal(firstEntry.path);
 					}
 					// Focus the database file in the new directory
-					yield Zotero.File.reveal(OS.Path.join(newDir, this.getDatabaseFilename()));
+					await Zotero.File.reveal(OS.Path.join(newDir, this.getDatabaseFilename()));
 				}
 				catch (e) {
 					Zotero.logError(e);
@@ -1067,10 +1067,10 @@ Zotero.DataDirectory = {
 				return;
 			}
 		}
-	}),
+	},
 	
 	
-	fullMigrationFailurePrompt: Zotero.Promise.coroutine(function* (oldDir, newDir, error) {
+	fullMigrationFailurePrompt: async function (oldDir, newDir, error) {
 		let ps = Services.prompt;
 		let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
@@ -1086,11 +1086,11 @@ Zotero.DataDirectory = {
 			null, null, {}
 		);
 		if (index == 0) {
-			yield Zotero.File.reveal(oldDir);
+			await Zotero.File.reveal(oldDir);
 			Zotero.skipLoading = true;
 			Zotero.Utilities.Internal.quitZotero();
 		}
-	}),
+	},
 	
 	
 	/**
@@ -1104,7 +1104,7 @@ Zotero.DataDirectory = {
 	 * @param {String} newDir
 	 * @return {Error[]}
 	 */
-	migrate: Zotero.Promise.coroutine(function* (oldDir, newDir, partial) {
+	migrate: async function (oldDir, newDir, partial) {
 		var dbName = this.getDatabaseFilename();
 		var errors = [];
 		
@@ -1113,12 +1113,12 @@ Zotero.DataDirectory = {
 			Zotero.logError(e);
 		}
 		
-		if (!(yield OS.File.exists(oldDir))) {
+		if (!((await OS.File.exists(oldDir)))) {
 			Zotero.debug(`Old directory ${oldDir} doesn't exist -- nothing to migrate`);
 			try {
 				let newMigrationMarker = OS.Path.join(newDir, this.MIGRATION_MARKER);
 				Zotero.debug("Removing " + newMigrationMarker);
-				yield OS.File.remove(newMigrationMarker);
+				await OS.File.remove(newMigrationMarker);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -1135,7 +1135,7 @@ Zotero.DataDirectory = {
 		
 		// Create the new directory
 		if (!partial) {
-			yield IOUtils.makeDirectory(
+			await IOUtils.makeDirectory(
 				newDir,
 				{
 					ignoreExisting: false,
@@ -1147,8 +1147,8 @@ Zotero.DataDirectory = {
 		// Copy marker
 		let oldMarkerFile = OS.Path.join(oldDir, this.MIGRATION_MARKER);
 		// Marker won't exist on subsequent attempts after partial failure
-		if (yield OS.File.exists(oldMarkerFile)) {
-			yield OS.File.copy(oldMarkerFile, OS.Path.join(newDir, this.MIGRATION_MARKER));
+		if (await OS.File.exists(oldMarkerFile)) {
+			await OS.File.copy(oldMarkerFile, OS.Path.join(newDir, this.MIGRATION_MARKER));
 		}
 		
 		// Update the data directory setting first so that a failure immediately after the move won't
@@ -1159,7 +1159,7 @@ Zotero.DataDirectory = {
 		if (!partial) {
 			Zotero.debug("Moving " + dbName);
 			try {
-				yield OS.File.move(OS.Path.join(oldDir, dbName), OS.Path.join(newDir, dbName));
+				await OS.File.move(OS.Path.join(oldDir, dbName), OS.Path.join(newDir, dbName));
 			}
 			// If moving the database failed, revert to the old data directory and clear marker files
 			catch (e) {
@@ -1171,14 +1171,14 @@ Zotero.DataDirectory = {
 					this.set(oldDir);
 				}
 				try {
-					yield OS.File.remove(oldMarkerFile, { ignoreAbsent: true });
+					await OS.File.remove(oldMarkerFile, { ignoreAbsent: true });
 				}
 				catch (e) {
 					Zotero.logError(e);
 				}
 				try {
-					yield OS.File.remove(OS.Path.join(newDir, this.MIGRATION_MARKER));
-					yield OS.File.removeEmptyDir(newDir);
+					await OS.File.remove(OS.Path.join(newDir, this.MIGRATION_MARKER));
+					await OS.File.removeEmptyDir(newDir);
 				}
 				catch (e) {
 					Zotero.logError(e);
@@ -1191,13 +1191,13 @@ Zotero.DataDirectory = {
 		// If the migration is interrupted after this, it can be continued later based on the migration
 		// marker in the new directory.
 		try {
-			yield OS.File.remove(OS.Path.join(oldDir, this.MIGRATION_MARKER));
+			await OS.File.remove(OS.Path.join(oldDir, this.MIGRATION_MARKER));
 		}
 		catch (e) {
 			addError(e);
 		}
 		
-		errors = errors.concat(yield Zotero.File.moveDirectory(
+		errors = errors.concat(await Zotero.File.moveDirectory(
 			oldDir,
 			newDir,
 			{
@@ -1216,7 +1216,7 @@ Zotero.DataDirectory = {
 			try {
 				let newMigrationMarker = OS.Path.join(newDir, this.MIGRATION_MARKER);
 				Zotero.debug("Removing " + newMigrationMarker);
-				yield OS.File.remove(newMigrationMarker);
+				await OS.File.remove(newMigrationMarker);
 				
 				Zotero.debug("Migration successful");
 			}
@@ -1227,10 +1227,10 @@ Zotero.DataDirectory = {
 		
 		// Update setting in other profiles that point to this data directory
 		try {
-			let otherProfiles = yield Zotero.Profile.findOtherProfilesUsingDataDirectory(oldDir);
+			let otherProfiles = await Zotero.Profile.findOtherProfilesUsingDataDirectory(oldDir);
 			for (let dir of otherProfiles) {
 				try {
-					yield Zotero.Profile.updateProfileDataDirectory(dir, oldDir, newDir);
+					await Zotero.Profile.updateProfileDataDirectory(dir, oldDir, newDir);
 				}
 				catch (e) {
 					Zotero.logError("Error updating " + OS.Path.join(dir.path, "prefs.js"));
@@ -1243,7 +1243,7 @@ Zotero.DataDirectory = {
 		}
 		
 		return errors;
-	}),
+	},
 	
 	
 	getDatabaseFilename: function (name) {

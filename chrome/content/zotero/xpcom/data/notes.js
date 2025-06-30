@@ -24,10 +24,10 @@
 */
 
 
-Zotero.Notes = new function() {
+Zotero.Notes = new function () {
 	this.AUTO_SYNC_DELAY = 15;
 	// Keep in sync with utilities_item.js::noteToTitle() in zotero/utilities
-	this.__defineGetter__("MAX_TITLE_LENGTH", function() { return 120; });
+	this.__defineGetter__("MAX_TITLE_LENGTH", function () { return 120; });
 	this.__defineGetter__("defaultNote", function () { return '<div class="zotero-note znv1"></div>'; });
 	this.__defineGetter__("notePrefix", function () { return '<div class="zotero-note znv1">'; });
 	this.__defineGetter__("noteSuffix", function () { return '</div>'; });
@@ -35,16 +35,16 @@ Zotero.Notes = new function() {
 	this._editorInstances = [];
 	this._downloadInProgressPromise = null;
 	
-	this.noteToTitle = function(text) {
+	this.noteToTitle = function (text) {
 		Zotero.debug(`Zotero.Note.noteToTitle() is deprecated -- use Zotero.Utilities.Item.noteToTitle() instead`);
 		return Zotero.Utilities.Item.noteToTitle(text);
 	};
 	
-	this.registerEditorInstance = function(instance) {
+	this.registerEditorInstance = function (instance) {
 		this._editorInstances.push(instance);
 	};
 	
-	this.unregisterEditorInstance = async function(instance) {
+	this.unregisterEditorInstance = async function (instance) {
 		// Make sure the editor instance is not unregistered while
 		// Zotero.Notes.updateUser is in progress, otherwise the
 		// instance might not get the`disableSaving` flag set
@@ -126,7 +126,7 @@ Zotero.Notes = new function() {
 		this.replaceAllItemKeys(item, new Map([[fromItemKey, toItemKey]]));
 	};
 
-	this.getExportableNote = async function(item) {
+	this.getExportableNote = async function (item) {
 		if (!item.isNote()) {
 			throw new Error('Item is not a note');
 		}

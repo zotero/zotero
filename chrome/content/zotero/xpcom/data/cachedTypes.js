@@ -48,7 +48,7 @@
  *
  * And add .init() to zotero.js
  */
-Zotero.CachedTypes = function() {
+Zotero.CachedTypes = function () {
 	this._types = null;
 	this._typesArray = null;
 	var self = this;
@@ -63,15 +63,15 @@ Zotero.CachedTypes = function() {
 	this._hasCustom = false;
 	
 	
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		this._types = {};
 		this._typesArray = [];
 		
-		var types = yield this._getTypesFromDB();
+		var types = await this._getTypesFromDB();
 		for (let i=0; i<types.length; i++) {
 			this._cacheTypeData(types[i]);
 		}
-	});
+	};
 	
 	
 	this.getName = function (idOrName) {
@@ -138,7 +138,7 @@ Zotero.CachedTypes = function() {
 	 * @param {String} name - Type name to add
 	 * @return {Integer|False} - The type id (new or existing), or false if invalid type name
 	 */
-	this.add = Zotero.Promise.coroutine(function* (name) {
+	this.add = async function (name) {
 		if (!this._allowAdd) {
 			throw new Error("New " + this._typeDescPlural + " cannot be added");
 		}
@@ -162,10 +162,10 @@ Zotero.CachedTypes = function() {
 		}
 		
 		var sql = "INSERT INTO " + this._table + " (" + this._nameCol + ") VALUES (?)";
-		yield Zotero.DB.queryAsync(sql, name);
+		await Zotero.DB.queryAsync(sql, name);
 		
 		sql = "SELECT " + this._idCol + " FROM " + this._table + " WHERE " + this._nameCol + "=?";
-		var id = yield Zotero.DB.valueQueryAsync(sql, name);
+		var id = await Zotero.DB.valueQueryAsync(sql, name);
 		
 		this._cacheTypeData({
 			id: id,
@@ -173,7 +173,7 @@ Zotero.CachedTypes = function() {
 		});
 		
 		return id;
-	});
+	};
 	
 	
 	this._valueCheck = function (name) {
@@ -215,7 +215,7 @@ Zotero.CachedTypes = function() {
 }
 
 
-Zotero.CreatorTypes = new function() {
+Zotero.CreatorTypes = new function () {
 	Zotero.CachedTypes.apply(this, arguments);
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
@@ -233,12 +233,12 @@ Zotero.CreatorTypes = new function() {
 	var _isValidForItemType = {};
 	
 	
-	this.init = Zotero.Promise.coroutine(function* () {
-		yield this.constructor.prototype.init.apply(this);
+	this.init = async function () {
+		await this.constructor.prototype.init.apply(this);
 		
 		var sql = "SELECT itemTypeID, creatorTypeID AS id, creatorType AS name, primaryField "
 			+ "FROM itemTypeCreatorTypes NATURAL JOIN creatorTypes";
-		var rows = yield Zotero.DB.queryAsync(sql);
+		var rows = await Zotero.DB.queryAsync(sql);
 		_creatorTypesByItemType = {};
 		for (let i=0; i<rows.length; i++) {
 			let row = rows[i];
@@ -269,12 +269,12 @@ Zotero.CreatorTypes = new function() {
 		_primaryIDCache = {};
 		var sql = "SELECT itemTypeID, creatorTypeID FROM itemTypeCreatorTypes "
 			+ "WHERE primaryField=1";
-		var rows = yield Zotero.DB.queryAsync(sql);
+		var rows = await Zotero.DB.queryAsync(sql);
 		for (let i=0; i<rows.length; i++) {
 			let row = rows[i];
 			_primaryIDCache[row.itemTypeID] = row.creatorTypeID;
 		}
-	});
+	};
 	
 	
 	this.getTypesForItemType = function (itemTypeID) {
@@ -307,7 +307,7 @@ Zotero.CreatorTypes = new function() {
 	}
 	
 	
-	this.getLocalizedString = function(idOrName) {
+	this.getLocalizedString = function (idOrName) {
 		var name = this.getName(idOrName);
 		return Zotero.Schema.globalSchemaLocale.creatorTypes[name];
 	}
@@ -338,7 +338,7 @@ Zotero.CreatorTypes = new function() {
 }
 
 
-Zotero.ItemTypes = new function() {
+Zotero.ItemTypes = new function () {
 	Zotero.CachedTypes.apply(this, arguments);
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
@@ -360,24 +360,24 @@ Zotero.ItemTypes = new function() {
 	var _customLabels = {};
 	
 	
-	this.init = Zotero.Promise.coroutine(function* () {
-		yield this.constructor.prototype.init.apply(this);
+	this.init = async function () {
+		await this.constructor.prototype.init.apply(this);
 		
 		// Hidden types
-		_hiddenTypes = yield this._getTypesFromDB(
+		_hiddenTypes = await this._getTypesFromDB(
 			`WHERE typeName IN ('${_hiddenTypeNames.join("', '")}')`
 		);
 		
 		// Custom labels and icons
 		var sql = "SELECT customItemTypeID AS id, label, icon FROM customItemTypes";
-		var rows = yield Zotero.DB.queryAsync(sql);
+		var rows = await Zotero.DB.queryAsync(sql);
 		for (let i=0; i<rows.length; i++) {
 			let row = rows[i];
 			let id = row.id;
 			_customLabels[id] = row.label;
 			_customImages[id] = row.icon;
 		}
-	});
+	};
 	
 	
 	this.getPrimaryTypes = function () {
@@ -513,7 +513,7 @@ Zotero.ItemTypes = new function() {
 }
 
 
-Zotero.FileTypes = new function() {
+Zotero.FileTypes = new function () {
 	Zotero.CachedTypes.apply(this, arguments);
 	this.constructor.prototype = new Zotero.CachedTypes();
 	
@@ -533,7 +533,7 @@ Zotero.FileTypes = new function() {
 }
 
 
-Zotero.CharacterSets = new function() {
+Zotero.CharacterSets = new function () {
 	Zotero.CachedTypes.apply(this, arguments);
 	this.constructor.prototype = new Zotero.CachedTypes();
 	

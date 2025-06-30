@@ -2,7 +2,7 @@
  * Functions for performing HTTP requests, both via XMLHTTPRequest and using a hidden browser
  * @namespace
  */
-Zotero.HTTP = new function() {
+Zotero.HTTP = new function () {
 	this.disableErrorRetry = false;
 	var _errorDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
 	var _errorDelayMax = 60 * 60 * 1000; // 1 hour
@@ -77,7 +77,7 @@ Zotero.HTTP = new function() {
 	 * Exception returned if the browser is offline when promise* is used
 	 * @constructor
 	 */
-	this.BrowserOfflineException = function() {
+	this.BrowserOfflineException = function () {
 		this.message = `Request could not be completed because ${Zotero.appName} is offline`;
 		this.stack = new Error().stack;
 	};
@@ -89,7 +89,7 @@ Zotero.HTTP = new function() {
 	};
 	this.CancelledException.prototype = Object.create(Error.prototype);
 	
-	this.TimeoutException = function(ms) {
+	this.TimeoutException = function (ms) {
 		this.message = "Request timed out" + (ms ? ` after ${ms} ms` : "");
 		this.stack = new Error().stack;
 	};
@@ -166,7 +166,7 @@ Zotero.HTTP = new function() {
 					if (e.is5xx()) {
 						Zotero.logError(e);
 						// Check for Retry-After header on 503 and wait the specified amount of time
-						if (e.xmlhttp.status == 503 && await _checkRetry(e.xmlhttp)) {
+						if (e.xmlhttp.status == 503 && (await _checkRetry(e.xmlhttp))) {
 							continue;
 						}
 						// Don't retry if errorDelayMax is 0
@@ -428,7 +428,7 @@ Zotero.HTTP = new function() {
 		
 		if (requestTimeout) {
 			xmlhttp.timeout = requestTimeout;
-			xmlhttp.ontimeout = function() {
+			xmlhttp.ontimeout = function () {
 				deferred.reject(new Zotero.HTTP.TimeoutException(requestTimeout));
 			};
 		}
@@ -457,7 +457,7 @@ Zotero.HTTP = new function() {
 			};
 		}
 		
-		xmlhttp.onloadend = async function() {
+		xmlhttp.onloadend = async function () {
 			clearConnectTimer();
 			clearTimeout(inactivityTimerID);
 			
@@ -656,7 +656,7 @@ Zotero.HTTP = new function() {
 	 * @param {String} path - Path to save file to
 	 * @param {Object} [options] - See `Zotero.HTTP.request()`
 	 */
-	this.download = async function(uri, path, options = {}) {
+	this.download = async function (uri, path, options = {}) {
 		// TODO: Convert request() to fetch() and use ReadableStream
 		var req = await this.request(
 			'GET',
@@ -687,7 +687,7 @@ Zotero.HTTP = new function() {
 	 *     false if the browser is offline
 	 * @deprecated Use {@link Zotero.HTTP.request}
 	 */
-	this.doGet = function(url, onDone, responseCharset, cookieSandbox, requestHeaders) {
+	this.doGet = function (url, onDone, responseCharset, cookieSandbox, requestHeaders) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var disp = this.getDisplayURI(url);
@@ -729,7 +729,7 @@ Zotero.HTTP = new function() {
 		
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
-		xmlhttp.onreadystatechange = function() {
+		xmlhttp.onreadystatechange = function () {
 			_stateChange(xmlhttp, onDone);
 		};
 		
@@ -752,7 +752,7 @@ Zotero.HTTP = new function() {
 	 *     false if the browser is offline
 	 * @deprecated Use {@link Zotero.HTTP.request}
 	 */
-	this.doPost = function(url, body, onDone, headers, responseCharset, cookieSandbox) {
+	this.doPost = function (url, body, onDone, headers, responseCharset, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var disp = this.getDisplayURI(url);
@@ -812,7 +812,7 @@ Zotero.HTTP = new function() {
 		
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
-		xmlhttp.onreadystatechange = function() {
+		xmlhttp.onreadystatechange = function () {
 			_stateChange(xmlhttp, onDone);
 		};
 		
@@ -833,7 +833,7 @@ Zotero.HTTP = new function() {
 	 *     false if the browser is offline
 	 * @deprecated Use {@link Zotero.HTTP.request}
 	 */
-	this.doHead = function(url, onDone, requestHeaders, cookieSandbox) {
+	this.doHead = function (url, onDone, requestHeaders, cookieSandbox) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var disp = this.getDisplayURI(url);
@@ -871,7 +871,7 @@ Zotero.HTTP = new function() {
 		
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
-		xmlhttp.onreadystatechange = function() {
+		xmlhttp.onreadystatechange = function () {
 			_stateChange(xmlhttp, onDone);
 		};
 		
@@ -905,7 +905,7 @@ Zotero.HTTP = new function() {
 		
 		var useMethodjit = Components.utils.methodjit;
 		/** @ignore */
-		xmlhttp.onreadystatechange = function() {
+		xmlhttp.onreadystatechange = function () {
 			_stateChange(xmlhttp, callback);
 		};
 		xmlhttp.send(null);
@@ -1083,13 +1083,14 @@ Zotero.HTTP = new function() {
 	this.triggerProxyAuth = function () {
 		if (!Zotero.Prefs.get("triggerProxyAuthentication")
 				|| Zotero.HTTP.browserIsOffline()) {
-			Zotero.proxyAuthComplete = Zotero.Promise.resolve();
+			Zotero.proxyAuthComplete = Promise.resolve();
 			return false;
 		}
 		
 		var deferred = Zotero.Promise.defer();
 		Zotero.proxyAuthComplete = deferred.promise;
 		
+		// FIXME: fx140: replace call to Zotero.Promise.try()
 		Zotero.Promise.try(function () {
 			var uris = Zotero.Prefs.get('proxyAuthenticationURLs').split(',');
 			uris = Zotero.Utilities.arrayShuffle(uris);
@@ -1105,7 +1106,8 @@ Zotero.HTTP = new function() {
 					// For non-Zotero URLs, wait for PAC initialization,
 					// in a rather ugly and inefficient manner
 					if (i == 1) {
-						let installed = yield Zotero.Promise.try(_pacInstalled)
+						let installed = yield // FIXME: fx140: replace call to Zotero.Promise.try()
+						Zotero.Promise.try(_pacInstalled)
 						.then(function (installed) {
 							if (installed) throw true;
 						})
@@ -1200,7 +1202,7 @@ Zotero.HTTP = new function() {
 						Components.interfaces.nsIProtocolProxyCallback,
 						Components.interfaces.nsISupports
 					];
-					if (!interfaces.some(function(v) { return iid.equals(v) })) {
+					if (!interfaces.some(function (v) { return iid.equals(v) })) {
 						throw Components.results.NS_ERROR_NO_INTERFACE;
 					}
 					return this;
@@ -1263,7 +1265,7 @@ Zotero.HTTP = new function() {
 	 *
 	 * @type Boolean
 	 */
-	this.browserIsOffline = function() { 
+	this.browserIsOffline = function () { 
 		return Services.io.offline;
 	}
 	
@@ -1455,7 +1457,7 @@ Zotero.HTTP = new function() {
 	 * Mimics the window.location/document.location interface, given an nsIURL
 	 * @param {nsIURL} url
 	 */
-	this.Location = function(url) {
+	this.Location = function (url) {
 		this._url = url;
 		this.hash = url.ref ? "#"+url.ref : "";
 		this.host = url.hostPort;
@@ -1467,7 +1469,7 @@ Zotero.HTTP = new function() {
 		this.search = url.query ? "?"+url.query : "";
 	};
 	this.Location.prototype = {
-		"toString":function() {
+		"toString":function () {
 			return this.href;
 		},
 		"__exposedProps__":{
@@ -1487,7 +1489,7 @@ Zotero.HTTP = new function() {
 	 * Mimics an HTMLWindow given an nsIURL
 	 * @param {nsIURL} url
 	 */
-	this.Window = function(url) {
+	this.Window = function (url) {
 		this._url = url;
 		this.top = this;
 		this.location = Zotero.HTTP.Location(url);
@@ -1503,7 +1505,7 @@ Zotero.HTTP = new function() {
 	 * @param {HTMLDocument} doc Document returned by 
 	 * @param {nsIURL|String} url
 	 */
-	this.wrapDocument = function(doc, url) {
+	this.wrapDocument = function (doc, url) {
 		if(typeof url !== "object") {
 			url = Services.io.newURI(url, null, null).QueryInterface(Components.interfaces.nsIURL);
 		}

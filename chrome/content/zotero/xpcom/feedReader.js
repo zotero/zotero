@@ -117,7 +117,7 @@ Zotero.FeedReader = function (url) {
 	}.bind(this)).catch(function (e) {
 		Zotero.debug("Feed processing failed " + e.message);
 		this._feedProcessed.reject(e);
-	// eslint-disable-next-line newline-per-chained-call
+	 
 	}.bind(this)).finally(function () {
 		// Make sure the last promise gets resolved to null
 		let lastItem = this._feedItems[this._feedItems.length - 1];
@@ -211,9 +211,9 @@ Zotero.FeedReader = function (url) {
  * The constructor initiates async feed processing, but _feedProcessed
  * needs to be resolved before proceeding.
  */
-Zotero.FeedReader.prototype.process = Zotero.Promise.coroutine(function* () {
+Zotero.FeedReader.prototype.process = async function () {
 	return this._feedProcessed.promise;
-});
+};
 
 /*
  * Terminate feed processing at any given time
@@ -261,7 +261,7 @@ Zotero.defineProperty(Zotero.FeedReader.prototype, 'feedProperties', {
 Zotero.defineProperty(Zotero.FeedReader.prototype, 'ItemIterator', {
 	get: function () {
 		let items = this._feedItems;
-		// eslint-disable-next-line consistent-this
+		 
 		let feedReader = this;
 		
 		let iterator = function () {

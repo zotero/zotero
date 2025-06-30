@@ -24,7 +24,7 @@
 */
 
 
-Zotero.ItemFields = new function() {
+Zotero.ItemFields = new function () {
 	// Private members
 	var _fields = {};
 	var _allFields = [];
@@ -56,11 +56,11 @@ Zotero.ItemFields = new function() {
 	/*
 	 * Load all fields into an internal hash array
 	 */
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		_fields = {};
 		_fieldsFormats = [];
 		
-		var result = yield Zotero.DB.queryAsync('SELECT * FROM fieldFormats');
+		var result = await Zotero.DB.queryAsync('SELECT * FROM fieldFormats');
 		
 		for (var i=0; i<result.length; i++) {
 			_fieldFormats[result[i]['fieldFormatID']] = {
@@ -69,12 +69,12 @@ Zotero.ItemFields = new function() {
 			};
 		}
 		
-		var fields = yield Zotero.DB.queryAsync('SELECT * FROM fieldsCombined');
+		var fields = await Zotero.DB.queryAsync('SELECT * FROM fieldsCombined');
 		
-		var fieldItemTypes = yield _getFieldItemTypes();
+		var fieldItemTypes = await _getFieldItemTypes();
 		
 		var sql = "SELECT DISTINCT baseFieldID FROM baseFieldMappingsCombined";
-		var baseFields = yield Zotero.DB.columnQueryAsync(sql);
+		var baseFields = await Zotero.DB.columnQueryAsync(sql);
 		
 		for (let field of fields) {
 			let label = field.label || Zotero.Schema.globalSchemaLocale.fields[field.fieldName];
@@ -102,9 +102,9 @@ Zotero.ItemFields = new function() {
 		}
 		
 		_fieldsLoaded = true;
-		yield _loadBaseTypeFields();
-		yield _loadItemTypeFields();
-	});
+		await _loadBaseTypeFields();
+		await _loadItemTypeFields();
+	};
 	
 	
 	/*
@@ -500,9 +500,9 @@ Zotero.ItemFields = new function() {
 	/*
 	 * Returns hash array of itemTypeIDs for which a given field is valid
 	 */
-	var _getFieldItemTypes = Zotero.Promise.coroutine(function* () {
+	var _getFieldItemTypes = async function () {
 		var sql = 'SELECT fieldID, itemTypeID FROM itemTypeFieldsCombined';
-		var results = yield Zotero.DB.queryAsync(sql);
+		var results = await Zotero.DB.queryAsync(sql);
 		
 		if (!results) {
 			throw ('No fields in itemTypeFields!');
@@ -515,13 +515,13 @@ Zotero.ItemFields = new function() {
 			fields[results[i].fieldID][results[i].itemTypeID] = true;
 		}
 		return fields;
-	});
+	};
 	
 	
 	/*
 	 * Build a lookup table for base field mappings
 	 */
-	var _loadBaseTypeFields = Zotero.Promise.coroutine(function* () {
+	var _loadBaseTypeFields = async function () {
 		_typeFieldIDsByBase = {};
 		_typeFieldNamesByBase = {};
 		
@@ -530,10 +530,10 @@ Zotero.ItemFields = new function() {
 			+ "FROM itemTypesCombined IT LEFT JOIN fieldsCombined F "
 			+ "LEFT JOIN baseFieldMappingsCombined BFM"
 			+ " ON (IT.itemTypeID=BFM.itemTypeID AND F.fieldID=BFM.baseFieldID)";
-		var rows = yield Zotero.DB.queryAsync(sql);
+		var rows = await Zotero.DB.queryAsync(sql);
 		
 		var sql = "SELECT DISTINCT baseFieldID FROM baseFieldMappingsCombined";
-		var baseFields = yield Zotero.DB.columnQueryAsync(sql);
+		var baseFields = await Zotero.DB.columnQueryAsync(sql);
 		
 		var fields = [];
 		for (let row of rows) {
@@ -558,7 +558,7 @@ Zotero.ItemFields = new function() {
 		
 		var sql = "SELECT itemTypeID, baseFieldID, fieldID, fieldName "
 			+ "FROM baseFieldMappingsCombined JOIN fieldsCombined USING (fieldID)";
-		var rows = yield Zotero.DB.queryAsync(sql);
+		var rows = await Zotero.DB.queryAsync(sql);
 		for (let i = 0; i < rows.length; i++) {
 			let row = rows[i];
 			// Type fields by base
@@ -579,15 +579,15 @@ Zotero.ItemFields = new function() {
 		
 		// Get all fields mapped to base types
 		sql = "SELECT DISTINCT fieldID FROM baseFieldMappingsCombined";
-		_baseMappedFields = yield Zotero.DB.columnQueryAsync(sql);
+		_baseMappedFields = await Zotero.DB.columnQueryAsync(sql);
 		
 		_baseTypeFieldsLoaded = true;
-	});
+	};
 	
 	
-	var _loadItemTypeFields = Zotero.Promise.coroutine(function* () {
+	var _loadItemTypeFields = async function () {
 		var sql = 'SELECT itemTypeID, fieldID FROM itemTypeFieldsCombined ORDER BY orderIndex';
-		var rows = yield Zotero.DB.queryAsync(sql);
+		var rows = await Zotero.DB.queryAsync(sql);
 		
 		_itemTypeFields = {
 			// Notes and annotations have no fields
@@ -605,5 +605,5 @@ Zotero.ItemFields = new function() {
 		}
 		
 		_itemTypeFieldsLoaded = true;
-	});
+	};
 }

@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Library = function(params = {}) {
+Zotero.Library = function (params = {}) {
 	let objectType = this._objectType;
 	this._ObjectType = Zotero.Utilities.capitalize(objectType);
 	this._objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
@@ -54,7 +54,7 @@ Zotero.Library = function(params = {}) {
 	
 	// Return a proxy so that we can disable the object once it's deleted
 	return new Proxy(this, {
-		get: function(obj, prop) {
+		get: function (obj, prop) {
 			if (obj._disabled && !(prop == 'libraryID' || prop == 'id' || prop == 'name')) {
 				throw new Error("Library (" + obj.libraryID + ") has been disabled");
 			}
@@ -74,7 +74,7 @@ Zotero.defineProperty(Zotero.Library, '_dbColumns', {
 });
 
 // Converts DB column name to (internal) object property
-Zotero.Library._colToProp = function(c) {
+Zotero.Library._colToProp = function (c) {
 	return "_library" + Zotero.Utilities.capitalize(c);
 }
 
@@ -112,18 +112,18 @@ Zotero.defineProperty(Zotero.Library.prototype, 'fixedLibraries', {
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryID', {
-	get: function() { return this._libraryID; },
-	set: function(id) { throw new Error("Cannot change library ID"); }
+	get: function () { return this._libraryID; },
+	set: function (id) { throw new Error("Cannot change library ID"); }
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'id', {
-	get: function() { return this.libraryID; },
-	set: function(val) { return this.libraryID = val; }
+	get: function () { return this.libraryID; },
+	set: function (val) { return this.libraryID = val; }
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryType', {
-	get: function() { return this._get('_libraryType'); },
-	set: function(v) { return this._set('_libraryType', v); }
+	get: function () { return this._get('_libraryType'); },
+	set: function (v) { return this._set('_libraryType', v); }
 });
 
 /**
@@ -154,8 +154,8 @@ Zotero.defineProperty(Zotero.Library.prototype, 'isGroup', {
 });
 
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryVersion', {
-	get: function() { return this._get('_libraryVersion'); },
-	set: function(v) { return this._set('_libraryVersion', v); }
+	get: function () { return this._get('_libraryVersion'); },
+	set: function (v) { return this._set('_libraryVersion', v); }
 });
 
 
@@ -165,12 +165,12 @@ Zotero.defineProperty(Zotero.Library.prototype, 'syncable', {
 
 
 Zotero.defineProperty(Zotero.Library.prototype, 'lastSync', {
-	get: function() { return this._get('_libraryLastSync'); }
+	get: function () { return this._get('_libraryLastSync'); }
 });
 
 
 Zotero.defineProperty(Zotero.Library.prototype, 'name', {
-	get: function() {
+	get: function () {
 		if (this._libraryType == 'user') {
 			return Zotero.getString('pane.collections.library');
 		}
@@ -201,13 +201,13 @@ Zotero.defineProperty(Zotero.Library.prototype, 'allowsLinkedFiles', {
 });
 
 // Create other accessors
-(function() {
+(function () {
 	let accessors = ['editable', 'filesEditable', 'storageVersion', 'archived'];
 	for (let i=0; i<accessors.length; i++) {
 		let prop = Zotero.Library._colToProp(accessors[i]);
 		Zotero.defineProperty(Zotero.Library.prototype, accessors[i], {
-			get: function() { return this._get(prop); },
-			set: function(v) { return this._set(prop, v); }
+			get: function () { return this._get(prop); },
+			set: function (v) { return this._set(prop, v); }
 		})
 	}
 })()
@@ -217,7 +217,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'storageDownloadNeeded', {
 	set: function (val) { this._storageDownloadNeeded = !!val; },
 })
 
-Zotero.Library.prototype._isValidProp = function(prop) {
+Zotero.Library.prototype._isValidProp = function (prop) {
 	let prefix = '_library';
 	if (prop.indexOf(prefix) !== 0 || prop.length == prefix.length) {
 		return false;
@@ -229,7 +229,7 @@ Zotero.Library.prototype._isValidProp = function(prop) {
 	return Zotero.Library._dbColumns.indexOf(col) != -1;
 }
 
-Zotero.Library.prototype._get = function(prop) {
+Zotero.Library.prototype._get = function (prop) {
 	if (!this._isValidProp(prop)) {
 		throw new Error('Unknown property "' + prop + '"');
 	}
@@ -237,7 +237,7 @@ Zotero.Library.prototype._get = function(prop) {
 	return this[prop];
 }
 
-Zotero.Library.prototype._set = function(prop, val) {
+Zotero.Library.prototype._set = function (prop, val) {
 	if (!this._isValidProp(prop)) {
 		throw new Error('Unknown property "' + prop + '"');
 	}
@@ -332,7 +332,7 @@ Zotero.Library.prototype._set = function(prop, val) {
 	this[prop] = val;
 }
 
-Zotero.Library.prototype._loadDataFromRow = function(row) {
+Zotero.Library.prototype._loadDataFromRow = function (row) {
 	if (this._libraryID !== undefined && this._libraryID !== row.libraryID) {
 		Zotero.debug("Warning: library ID changed in Zotero.Library._loadDataFromRow", 2, true);
 	}
@@ -353,21 +353,21 @@ Zotero.Library.prototype._loadDataFromRow = function(row) {
 	this._changed = {};
 }
 
-Zotero.Library.prototype._reloadFromDB = Zotero.Promise.coroutine(function* () {
+Zotero.Library.prototype._reloadFromDB = async function () {
 	let sql = Zotero.Library._rowSQL + ' WHERE libraryID=?';
-	let row = yield Zotero.DB.rowQueryAsync(sql, [this.libraryID]);
+	let row = await Zotero.DB.rowQueryAsync(sql, [this.libraryID]);
 	this._loadDataFromRow(row);
-});
+};
 
 /**
  * Load object data in this library
  */
-Zotero.Library.prototype.loadAllDataTypes = Zotero.Promise.coroutine(function* () {
-	yield Zotero.SyncedSettings.loadAll(this.libraryID);
-	yield Zotero.Collections.loadAll(this.libraryID);
-	yield Zotero.Searches.loadAll(this.libraryID);
-	yield Zotero.Items.loadAll(this.libraryID);
-});
+Zotero.Library.prototype.loadAllDataTypes = async function () {
+	await Zotero.SyncedSettings.loadAll(this.libraryID);
+	await Zotero.Collections.loadAll(this.libraryID);
+	await Zotero.Searches.loadAll(this.libraryID);
+	await Zotero.Items.loadAll(this.libraryID);
+};
 
 //
 // Methods to handle promises that are resolved when object data is loaded for the library
@@ -396,36 +396,36 @@ Zotero.Library.prototype.setDataLoaded = function (objectType) {
 /**
  * Wait for a given data type to load, loading it now if necessary
  */
-Zotero.Library.prototype.waitForDataLoad = Zotero.Promise.coroutine(function* (objectType) {
+Zotero.Library.prototype.waitForDataLoad = async function (objectType) {
 	if (this.getDataLoaded(objectType)) return;
 	
 	let promise = this.getDataLoadedPromise(objectType);
 	// If items are already being loaded, wait for them
 	if (promise) {
-		yield promise;
+		await promise;
 	}
 	// Otherwise load them now
 	else {
 		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-		yield objectsClass.loadAll(this.libraryID);
+		await objectsClass.loadAll(this.libraryID);
 	}
-});
+};
 
-Zotero.Library.prototype.isChildObjectAllowed = function(type) {
+Zotero.Library.prototype.isChildObjectAllowed = function (type) {
 	return this._childObjectTypes.indexOf(type) != -1;
 };
 
-Zotero.Library.prototype.updateLastSyncTime = function() {
+Zotero.Library.prototype.updateLastSyncTime = function () {
 	this._set('_libraryLastSync', new Date());
 };
 
-Zotero.Library.prototype.saveTx = function(options) {
+Zotero.Library.prototype.saveTx = function (options) {
 	options = options || {};
 	options.tx = true;
 	return this.save(options);
 }
 
-Zotero.Library.prototype.save = Zotero.Promise.coroutine(function* (options) {
+Zotero.Library.prototype.save = async function (options) {
 	options = options || {};
 	var env = {
 		options: options,
@@ -438,14 +438,14 @@ Zotero.Library.prototype.save = Zotero.Promise.coroutine(function* (options) {
 		env.options.tx = true;
 	}
 	
-	var proceed = yield this._initSave(env)
-		.catch(Zotero.Promise.coroutine(function* (e) {
+	var proceed = await this._initSave(env)
+		.catch(async function (e) {
 			if (!env.isNew && Zotero.Libraries.exists(this.libraryID)) {
 				// Reload from DB and reset this._changed, so this is not a permanent failure
-				yield this._reloadFromDB();
+				await this._reloadFromDB();
 			}
 			throw e;
-		}).bind(this));
+		}.bind(this));
 	
 	if (!proceed) return false;
 	
@@ -472,16 +472,16 @@ Zotero.Library.prototype.save = Zotero.Promise.coroutine(function* (options) {
 		// Use existing transaction
 		else {
 			Zotero.DB.requireTransaction();
-			yield this._saveData(env);
-			yield this._finalizeSave(env);
+			await this._saveData(env);
+			await this._finalizeSave(env);
 		}
 	} catch(e) {
 		Zotero.debug(e, 1);
 		throw e;
 	}
-});
+};
 
-Zotero.Library.prototype._initSave = Zotero.Promise.method(function(env) {
+Zotero.Library.prototype._initSave = function (env) {
 	if (this._libraryID === undefined) {
 		env.isNew = true;
 		
@@ -506,9 +506,9 @@ Zotero.Library.prototype._initSave = Zotero.Promise.method(function(env) {
 	}
 	
 	return true;
-});
+};
 
-Zotero.Library.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
+Zotero.Library.prototype._saveData = async function (env) {
 	// Collect changed columns
 	let changedCols = [],
 		params = [];
@@ -539,14 +539,14 @@ Zotero.Library.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		
 		let sql = "INSERT INTO libraries (" + changedCols.join(", ") + ") "
 			+ "VALUES (" + Array(params.length).fill("?").join(", ") + ")";
-		yield Zotero.DB.queryAsync(sql, params);
+		await Zotero.DB.queryAsync(sql, params);
 		
 		this._libraryID = id;
 	} else if (changedCols.length) {
 		params.push(this.libraryID);
 		let sql = "UPDATE libraries SET " + changedCols.map(v => v + "=?").join(", ")
 			+ " WHERE libraryID=?";
-		yield Zotero.DB.queryAsync(sql, params);
+		await Zotero.DB.queryAsync(sql, params);
 		
 		// Since these are Zotero.Library properties, the 'modify' for the inheriting object may not
 		// get triggered, so call it here too
@@ -556,28 +556,28 @@ Zotero.Library.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	} else {
 		Zotero.debug("Library data did not change for " + this._objectType + " " + this.id, 5);
 	}
-});
+};
 
-Zotero.Library.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
+Zotero.Library.prototype._finalizeSave = async function (env) {
 	this._changed = {};
 	
 	if (env.isNew) {
 		// Re-fetch from DB to get auto-filled defaults
-		yield this._reloadFromDB();
+		await this._reloadFromDB();
 		
 		Zotero.Libraries.register(this);
 		
-		yield this.loadAllDataTypes();
+		await this.loadAllDataTypes();
 	}
-});
+};
 
-Zotero.Library.prototype.eraseTx = function(options) {
+Zotero.Library.prototype.eraseTx = function (options) {
 	options = options || {};
 	options.tx = true;
 	return this.erase(options);
 };
 
-Zotero.Library.prototype.erase = Zotero.Promise.coroutine(function* (options) {
+Zotero.Library.prototype.erase = async function (options) {
 	options = options || {};
 	var env = {
 		options: options,
@@ -591,7 +591,7 @@ Zotero.Library.prototype.erase = Zotero.Promise.coroutine(function* (options) {
 		env.options.tx = true;
 	}
 	
-	var proceed = yield this._initErase(env);
+	var proceed = await this._initErase(env);
 	if (!proceed) return false;
 	
 	Zotero.debug('Deleting ' + this._objectType + ' ' + this.id);
@@ -600,22 +600,22 @@ Zotero.Library.prototype.erase = Zotero.Promise.coroutine(function* (options) {
 		env.notifierData = {};
 		
 		if (env.options.tx) {
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				await this._eraseData(env);
 				await this._finalizeErase(env);
 			}.bind(this), env.transactionOptions);
 		} else {
 			Zotero.DB.requireTransaction();
-			yield this._eraseData(env);
-			yield this._finalizeErase(env);
+			await this._eraseData(env);
+			await this._finalizeErase(env);
 		}
 	} catch(e) {
 		Zotero.debug(e, 1);
 		throw e;
 	}
-});
+};
 
-Zotero.Library.prototype._initErase = Zotero.Promise.method(function(env) {
+Zotero.Library.prototype._initErase = function (env) {
 	if (this.libraryID === undefined) {
 		throw new Error("Attempting to erase an unsaved library");
 	}
@@ -627,7 +627,7 @@ Zotero.Library.prototype._initErase = Zotero.Promise.method(function(env) {
 	}
 	
 	return true;
-});
+};
 
 Zotero.Library.prototype._eraseData = async function (env) {
 	// Delete attachment files
@@ -667,7 +667,7 @@ Zotero.Library.prototype._eraseData = async function (env) {
 	await Zotero.Fulltext.clearLibraryVersion(this.libraryID);
 };
 
-Zotero.Library.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
+Zotero.Library.prototype._finalizeErase = async function (env) {
 	Zotero.Libraries.unregister(this.libraryID);
 	
 	// Clear cached child objects
@@ -678,7 +678,7 @@ Zotero.Library.prototype._finalizeErase = Zotero.Promise.coroutine(function* (en
 	}
 	
 	this._disabled = true;
-});
+};
 
 Zotero.Library.prototype.toResponseJSON = function (options = {}) {
 	let uri = Zotero.URI.getLibraryURI(this.libraryID);
@@ -707,10 +707,10 @@ Zotero.Library.prototype.hasCollections = function () {
 	return this._hasCollections;
 }
 
-Zotero.Library.prototype.updateCollections = Zotero.Promise.coroutine(function* () {
+Zotero.Library.prototype.updateCollections = async function () {
 	let sql = 'SELECT COUNT(*)>0 FROM collections WHERE libraryID=?';
-	this._hasCollections = !!(yield Zotero.DB.valueQueryAsync(sql, this.libraryID));
-});
+	this._hasCollections = !!((await Zotero.DB.valueQueryAsync(sql, this.libraryID)));
+};
 
 Zotero.Library.prototype.hasSearches = function () {
 	if (this._hasSearches === null) {
@@ -720,12 +720,12 @@ Zotero.Library.prototype.hasSearches = function () {
 	return this._hasSearches;
 }
 
-Zotero.Library.prototype.updateSearches = Zotero.Promise.coroutine(function* () {
+Zotero.Library.prototype.updateSearches = async function () {
 	let sql = 'SELECT COUNT(*)>0 FROM savedSearches WHERE libraryID=?';
-	this._hasSearches = !!(yield Zotero.DB.valueQueryAsync(sql, this.libraryID));
-});
+	this._hasSearches = !!((await Zotero.DB.valueQueryAsync(sql, this.libraryID)));
+};
 
-Zotero.Library.prototype.hasItems = Zotero.Promise.coroutine(function* () {
+Zotero.Library.prototype.hasItems = async function () {
 	if (!this.id) {
 		throw new Error("Library is not saved yet");
 	}
@@ -734,8 +734,8 @@ Zotero.Library.prototype.hasItems = Zotero.Promise.coroutine(function* () {
 	if (this.libraryID == Zotero.Libraries.userLibraryID) {
 		sql += "AND key NOT IN ('ABCD2345', 'ABCD3456')";
 	}
-	return !!(yield Zotero.DB.valueQueryAsync(sql, this.libraryID));
-});
+	return !!((await Zotero.DB.valueQueryAsync(sql, this.libraryID)));
+};
 
 Zotero.Library.prototype.hasItem = function (item) {
 	if (!(item instanceof Zotero.Item)) {

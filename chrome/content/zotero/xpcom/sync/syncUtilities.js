@@ -30,15 +30,15 @@ if (!Zotero.Sync.Data) {
 Zotero.Sync.Data.Utilities = {
 	_syncObjectTypeIDs: {},
 	
-	init: Zotero.Promise.coroutine(function* () {
+	init: async function () {
 		// If not found, cache all
 		var sql = "SELECT name, syncObjectTypeID AS id FROM syncObjectTypes";
-		var rows = yield Zotero.DB.queryAsync(sql);
+		var rows = await Zotero.DB.queryAsync(sql);
 		for (let i = 0; i < rows.length; i++) {
 			row = rows[i];
 			this._syncObjectTypeIDs[row.name] = row.id;
 		}
-	}),
+	},
 	
 	getSyncObjectTypeID: function (objectType) {
 		if (!this._syncObjectTypeIDs[objectType]) {

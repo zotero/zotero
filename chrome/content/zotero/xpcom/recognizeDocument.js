@@ -224,7 +224,7 @@ Zotero.RecognizeDocument = new function () {
 	this.report = async function (item, description) {
 		var attachment = Zotero.Items.get(item.getAttachments()[0]);
 		var filePath = attachment.getFilePath();
-		if (!filePath || !await OS.File.exists(filePath)) {
+		if (!filePath || !(await OS.File.exists(filePath))) {
 			throw new Error("File not found when reporting metadata");
 		}
 		
@@ -395,7 +395,7 @@ Zotero.RecognizeDocument = new function () {
 	this._recognize = async function (item) {
 		let filePath = await item.getFilePath();
 		
-		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
+		if (!filePath || !(await OS.File.exists(filePath))) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
 
 		if (item.isPDFAttachment()) {
 			return _recognizePDF(item, filePath);
