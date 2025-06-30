@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.History = new function(){
+Zotero.History = new function () {
 	this.begin = begin;
 	this.setAssociatedID = setAssociatedID;
 	this.add = add;

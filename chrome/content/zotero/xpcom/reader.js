@@ -167,7 +167,7 @@ class ReaderInstance {
 		}
 
 		this.annotationItemIDs = annotationItems.map(x => x.id);
-		state = state || await this._getState();
+		state = state || (await this._getState());
 
 
 		await this._waitForReader();
@@ -763,7 +763,7 @@ class ReaderInstance {
 			else if (!path.endsWith('.lua')) {
 				return null;
 			}
-			if (!await IOUtils.exists(path)) {
+			if (!(await IOUtils.exists(path))) {
 				return null;
 			}
 			return Cu.cloneInto(await IOUtils.read(path), this._iframeWindow);
@@ -806,7 +806,7 @@ class ReaderInstance {
 			let fp = new FilePicker();
 			fp.init(this._window, Zotero.ftl.formatValueSync('reader-import-from-epub-prompt-title'), fp.modeOpen);
 			fp.appendFilter('EPUB Data', '*.epub; *.lua; *.opf');
-			if (await fp.show() !== fp.returnOK) {
+			if ((await fp.show()) !== fp.returnOK) {
 				return null;
 			}
 			return fp.file;
@@ -932,7 +932,7 @@ class ReaderInstance {
 				item.setAttachmentLastPageIndex(state.scrollYPercent);
 			}
 			let file = Zotero.Attachments.getStorageDirectory(item);
-			if (!await OS.File.exists(file.path)) {
+			if (!(await OS.File.exists(file.path))) {
 				await Zotero.Attachments.createDirectoryForItem(item);
 			}
 			file.append(this.stateFileName);

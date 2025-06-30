@@ -49,14 +49,14 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Registers nsIObserver to handle MIME types
 	 */
-	this.init = function() {
+	this.init = function () {
 		Zotero.debug("Registering nsIObserver");
 		// register our nsIObserver
 		Components.classes["@mozilla.org/observer-service;1"].
 			getService(Components.interfaces.nsIObserverService).
 			addObserver(_Observer, "http-on-examine-response", false);
 		this.initializeHandlers();
-		Zotero.addShutdownListener(function() {
+		Zotero.addShutdownListener(function () {
 			Components.classes["@mozilla.org/observer-service;1"].
 				getService(Components.interfaces.nsIObserverService).
 				removeObserver(_Observer, "http-on-examine-response", false);
@@ -143,7 +143,7 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Adds an observer to inspect and possibly modify page headers
 	 */
-	this.addObserver = function(fn) {
+	this.addObserver = function (fn) {
 		_observers.push(fn);
 	}
 	
@@ -216,7 +216,7 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Standard QI definition
 	 */
-	_StreamListener.prototype.QueryInterface = function(iid) {
+	_StreamListener.prototype.QueryInterface = function (iid) {
 		if (iid.equals(Components.interfaces.nsISupports)
 		   || iid.equals(Components.interfaces.nsIRequestObserver)
 		   || iid.equals(Components.interfaces.nsIStreamListener)) {
@@ -225,7 +225,7 @@ Zotero.MIMETypeHandler = new function () {
 		throw Components.results.NS_ERROR_NO_INTERFACE;
 	}
 	
-	_StreamListener.prototype.onStartRequest = async function(channel) {
+	_StreamListener.prototype.onStartRequest = async function (channel) {
 		this._onStartRequestCalled = true;
 		this._dataBuffer = new StorageStream(4096, 0xffffffff);
 		this._stream = new BufferedOutputStream(this._dataBuffer.getOutputStream(0), 8192);

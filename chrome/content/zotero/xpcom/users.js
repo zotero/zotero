@@ -69,25 +69,25 @@ Zotero.Users = new function () {
 	};
 	
 	
-	this.getCurrentUserID = function() { return _userID };
-	this.setCurrentUserID = Zotero.Promise.coroutine(function* (val) {
+	this.getCurrentUserID = function () { return _userID };
+	this.setCurrentUserID = async function (val) {
 		val = parseInt(val);
 		if (!(val > 0)) throw new Error("userID must be a positive integer");
 		
 		var sql = "REPLACE INTO settings VALUES ('account', 'userID', ?)";
-		yield Zotero.DB.queryAsync(sql, val);
+		await Zotero.DB.queryAsync(sql, val);
 		_userID = val;
-	});
+	};
 	
 	
 	this.getCurrentUsername = () => _username;
-	this.setCurrentUsername = Zotero.Promise.coroutine(function* (val) {
+	this.setCurrentUsername = async function (val) {
 		if (!val || typeof val != 'string') throw new Error('username must be a non-empty string');
 		
 		var sql = "REPLACE INTO settings VALUES ('account', 'username', ?)";
-		yield Zotero.DB.queryAsync(sql, val);
+		await Zotero.DB.queryAsync(sql, val);
 		_username = val;
-	});
+	};
 	
 	
 	this.getCurrentName = function () {

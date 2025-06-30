@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.MIME = new function(){
+Zotero.MIME = new function () {
 	this.isTextType = isTextType;
 	this.getPrimaryExtension = getPrimaryExtension;
 	this.sniffForBinary = sniffForBinary;
@@ -137,7 +137,7 @@ Zotero.MIME = new function(){
 		return mimeType.substr(0, 5) == 'text/' || mimeType in _textTypes;
 	}
 	
-	this.isWebPageType = function(mimeType) {
+	this.isWebPageType = function (mimeType) {
 		return _webPageTypes.indexOf(mimeType) != -1;
 	}
 	
@@ -330,12 +330,12 @@ Zotero.MIME = new function(){
 	 * Try to determine the MIME type of the file, using a few different
 	 * techniques
 	 */
-	this.getMIMETypeFromFile = Zotero.Promise.coroutine(function* (file) {
-		var str = yield Zotero.File.getSample(file);
+	this.getMIMETypeFromFile = async function (file) {
+		var str = await Zotero.File.getSample(file);
 		var ext = Zotero.File.getExtension(file);
 		
 		return this.getMIMETypeFromData(str, ext);
-	});
+	};
 	
 	
 	/**

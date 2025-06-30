@@ -27,7 +27,7 @@
 /*
  * Primary interface for accessing Zotero collection
  */
-Zotero.Collections = function() {
+Zotero.Collections = function () {
 	this.constructor = null;
 	
 	this._ZDO_object = 'collection';
@@ -159,7 +159,7 @@ Zotero.Collections = function() {
 	}
 	
 	
-	this._loadChildCollections = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+	this._loadChildCollections = async function (libraryID, ids, idSQL) {
 		var sql = "SELECT C1.collectionID, C2.collectionID AS childCollectionID "
 			+ "FROM collections C1 LEFT JOIN collections C2 ON (C1.collectionID=C2.parentCollectionID) "
 			+ "WHERE C1.libraryID=?"
@@ -178,7 +178,7 @@ Zotero.Collections = function() {
 			collection._clearChanged('childCollections');
 		}.bind(this);
 		
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -205,10 +205,10 @@ Zotero.Collections = function() {
 		if (lastID) {
 			setRows(lastID, rows);
 		}
-	});
+	};
 	
 	
-	this._loadChildItems = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+	this._loadChildItems = async function (libraryID, ids, idSQL) {
 		var sql = "SELECT collectionID, itemID FROM collections "
 			+ "LEFT JOIN collectionItems USING (collectionID) "
 			+ "WHERE libraryID=?" + idSQL;
@@ -226,7 +226,7 @@ Zotero.Collections = function() {
 			collection._clearChanged('childItems');
 		}.bind(this);
 		
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -253,7 +253,7 @@ Zotero.Collections = function() {
 		if (lastID) {
 			setRows(lastID, rows);
 		}
-	});
+	};
 	
 	
 	this.registerChildCollection = function (collectionID, childCollectionID) {

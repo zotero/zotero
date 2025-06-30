@@ -201,7 +201,7 @@ Zotero.Dictionaries = new function () {
 	 */
 	this.getAvailableUpdates = async function (dictionaries) {
 		var updates = [];
-		let availableDictionaries = dictionaries || await this.fetchDictionariesList();
+		let availableDictionaries = dictionaries || (await this.fetchDictionariesList());
 		for (let dictionary of _dictionaries) {
 			let availableDictionary = availableDictionaries.find((x) => {
 				return x.id === dictionary.id || x.locale == dictionary.locale;

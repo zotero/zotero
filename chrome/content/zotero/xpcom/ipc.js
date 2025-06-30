@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.IPC = new function() {
+Zotero.IPC = new function () {
 	var _libc, _libcPath, _instancePipe, _user32, open, write, close;
 	
 	/**
@@ -35,7 +35,7 @@ Zotero.IPC = new function() {
 	 * @param {Boolean} [block] Whether we should block. Usually, we don't want this.
 	 * @return {Boolean} True if write succeeded; false otherwise
 	 */
-	this.safePipeWrite = function(pipe, string, block) {
+	this.safePipeWrite = function (pipe, string, block) {
 		if(!open) {
 			// safely write to instance pipes
 			var lib = Zotero.IPC.getLibc();
@@ -65,7 +65,7 @@ Zotero.IPC = new function() {
 	/**
 	 * Gets the path to libc as a string
 	 */
-	this.getLibcPath = function() {
+	this.getLibcPath = function () {
 		if(_libcPath) return _libcPath;
 		
 		Components.utils.import("resource://gre/modules/ctypes.jsm");
@@ -106,7 +106,7 @@ Zotero.IPC = new function() {
 	/**
 	 * Gets standard C library via ctypes
 	 */
-	this.getLibc = function() {
+	this.getLibc = function () {
 		if(!_libc) this.getLibcPath();
 		return _libc;
 	}
@@ -115,7 +115,7 @@ Zotero.IPC = new function() {
 /**
  * Methods for reading from and writing to a pipe
  */
-Zotero.IPC.Pipe = new function() {
+Zotero.IPC.Pipe = new function () {
 	var _mkfifo, _pipeClass;
 	
 	/**
@@ -124,7 +124,7 @@ Zotero.IPC.Pipe = new function() {
 	 * @param {nsIFile} file The location where the pipe should be created
 	 * @param {Function} callback A function to be passed any data received on the pipe
 	 */
-	this.initPipeListener = function(file, callback) {
+	this.initPipeListener = function (file, callback) {
 		Zotero.debug("IPC: Initializing pipe at "+file.path);
 		
 		// make new pipe
@@ -135,7 +135,7 @@ Zotero.IPC.Pipe = new function() {
 	 * Makes a fifo
 	 * @param {nsIFile}		file		Location to create the fifo
 	 */
-	this.mkfifo = function(file) {
+	this.mkfifo = function (file) {
 		// int mkfifo(const char *path, mode_t mode);
 		if(!_mkfifo) {
 			var libc = Zotero.IPC.getLibc();
@@ -152,7 +152,7 @@ Zotero.IPC.Pipe = new function() {
 	 * Adds a shutdown listener for a pipe that writes "Zotero shutdown\n" to the pipe and then
 	 * deletes it
 	 */
-	this.remove = function(pipe, file) {
+	this.remove = function (pipe, file) {
 		// Make sure pipe actually exists
 		if(!file.exists()) {
 			Zotero.debug("IPC: Not closing pipe "+file.path+": already deleted");
@@ -173,7 +173,7 @@ Zotero.IPC.Pipe = new function() {
  * 
  * Used to read from pipe on Gecko 5+
  */
-Zotero.IPC.Pipe.DeferredOpen = function(file, callback) {
+Zotero.IPC.Pipe.DeferredOpen = function (file, callback) {
 	this._file = file;
 	this._callback = callback;
 	
@@ -186,8 +186,8 @@ Zotero.IPC.Pipe.DeferredOpen = function(file, callback) {
 }
 
 Zotero.IPC.Pipe.DeferredOpen.prototype = {
-	"onStartRequest":function() {},
-	"onStopRequest":function() {},
+	"onStartRequest":function () {},
+	"onStopRequest":function () {},
 	onDataAvailable: function (request, inputStream, offset, count) {
 		// read from pipe
 		var converterInputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
@@ -209,7 +209,7 @@ Zotero.IPC.Pipe.DeferredOpen.prototype = {
 	 *
 	 * Used after reading from file on Gecko 5+
 	 */
-	"_initPump":function() {
+	"_initPump":function () {
 		var fifoStream = Components.classes["@mozilla.org/network/file-input-stream;1"].
 			createInstance(Components.interfaces.nsIFileInputStream);
 		fifoStream.QueryInterface(Components.interfaces.nsIFileInputStream);

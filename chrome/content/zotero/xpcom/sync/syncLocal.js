@@ -34,24 +34,24 @@ Zotero.Sync.Data.Local = {
 	_lastSyncTime: null,
 	_lastClassicSyncTime: null,
 	
-	init: Zotero.Promise.coroutine(function* () {
-		yield this._loadLastSyncTime();
+	init: async function () {
+		await this._loadLastSyncTime();
 		if (!_lastSyncTime) {
-			yield this._loadLastClassicSyncTime();
+			await this._loadLastClassicSyncTime();
 		}
-	}),
+	},
 	
 	
 	/**
 	 * @return {Promise}
 	 */
-	getAPIKey: Zotero.Promise.method(function () {
+	getAPIKey: function () {
 		var login = this._getAPIKeyLoginInfo();
 		return login
 			? login.password
 			// Fallback to old username/password
 			: this._getAPIKeyFromLogin();
-	}),
+	},
 	
 	
 	/**
@@ -115,7 +115,7 @@ Zotero.Sync.Data.Local = {
 	 * @param {String} [name] - New display name
 	 * @return {Boolean} - True to continue, false to cancel
 	 */
-	checkUser: Zotero.Promise.coroutine(function* (win, userID, username, name) {
+	checkUser: async function (win, userID, username, name) {
 		var lastUserID = Zotero.Users.getCurrentUserID();
 		var lastUsername = Zotero.Users.getCurrentUsername();
 		var lastName = Zotero.Users.getCurrentName();
@@ -142,7 +142,7 @@ Zotero.Sync.Data.Local = {
 			
 			if (io.accept) {
 				var resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
-				yield Zotero.File.putContentsAsync(resetDataDirFile, '');
+				await Zotero.File.putContentsAsync(resetDataDirFile, '');
 				
 				Zotero.Prefs.clear('sync.storage.downloadMode.groups');
 				Zotero.Prefs.clear('sync.storage.groups.enabled');
@@ -164,7 +164,7 @@ Zotero.Sync.Data.Local = {
 			return false;
 		}
 		
-		yield Zotero.DB.executeTransaction(async function () {
+		await Zotero.DB.executeTransaction(async function () {
 			if (lastUsername != username) {
 				await Zotero.Users.setCurrentUsername(username);
 			}
@@ -183,26 +183,26 @@ Zotero.Sync.Data.Local = {
 		});
 		
 		return true;
-	}),
+	},
 	
 	
 	/**
 	 * @return {Promise<Boolean>} - True if library updated, false to cancel
 	 */
-	checkLibraryForAccess: Zotero.Promise.coroutine(function* (win, libraryID, editable, filesEditable) {
+	checkLibraryForAccess: async function (win, libraryID, editable, filesEditable) {
 		var library = Zotero.Libraries.get(libraryID);
 		
 		// If library is going from editable to non-editable and there's unsynced local data, prompt
-		if (library.editable && !editable && (yield this._libraryHasUnsyncedData(libraryID))) {
+		if (library.editable && !editable && ((await this._libraryHasUnsyncedData(libraryID)))) {
 			let index = Zotero.Sync.Data.Utilities.showWriteAccessLostPrompt(win, library);
 			// Reset library
 			if (index == 0) {
 				// This check happens before item data is loaded for syncing, so do it now,
 				// since the reset requires it
 				if (!library.getDataLoaded('item')) {
-					yield library.waitForDataLoad('item');
+					await library.waitForDataLoad('item');
 				}
-				yield this.resetUnsyncedLibraryData(libraryID);
+				await this.resetUnsyncedLibraryData(libraryID);
 				return true;
 			}
 			
@@ -210,16 +210,16 @@ Zotero.Sync.Data.Local = {
 			return false;
 		}
 		
-		if (library.filesEditable && !filesEditable && (yield this._libraryHasUnsyncedFiles(libraryID))) {
+		if (library.filesEditable && !filesEditable && ((await this._libraryHasUnsyncedFiles(libraryID)))) {
 			let index = Zotero.Sync.Storage.Utilities.showFileWriteAccessLostPrompt(win, library);
 			// Reset library files
 			if (index == 0) {
 				// This check happens before item data is loaded for syncing, so do it now,
 				// since the reset requires it
 				if (!library.getDataLoaded('item')) {
-					yield library.waitForDataLoad('item');
+					await library.waitForDataLoad('item');
 				}
-				yield this.resetUnsyncedLibraryFiles(libraryID);
+				await this.resetUnsyncedLibraryFiles(libraryID);
 				return true;
 			}
 			
@@ -228,60 +228,61 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		return true;
-	}),
+	},
 	
 	
-	_libraryHasUnsyncedData: Zotero.Promise.coroutine(function* (libraryID) {
-		let settings = yield Zotero.SyncedSettings.getUnsynced(libraryID);
+	_libraryHasUnsyncedData: async function (libraryID) {
+		let settings = await Zotero.SyncedSettings.getUnsynced(libraryID);
 		if (Object.keys(settings).length) {
 			return true;
 		}
 		
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(libraryID)) {
-			let ids = yield Zotero.Sync.Data.Local.getUnsynced(objectType, libraryID);
+			let ids = await Zotero.Sync.Data.Local.getUnsynced(objectType, libraryID);
 			if (ids.length) {
 				return true;
 			}
 			
-			let keys = yield Zotero.Sync.Data.Local.getDeleted(objectType, libraryID);
+			let keys = await Zotero.Sync.Data.Local.getDeleted(objectType, libraryID);
 			if (keys.length) {
 				return true;
 			}
 		}
 		
 		return false;
-	}),
+	},
 	
 	
-	_libraryHasUnsyncedFiles: Zotero.Promise.coroutine(function* (libraryID) {
+	_libraryHasUnsyncedFiles: async function (libraryID) {
 		// TODO: Check for modified file attachment items, which also can't be uploaded
 		// (and which are corrected by resetUnsyncedLibraryFiles())
-		yield Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID);
-		return !!(yield Zotero.Sync.Storage.Local.getFilesToUpload(libraryID)).length;
-	}),
+		await Zotero.Sync.Storage.Local.checkForUpdatedFiles(libraryID);
+		return !!((await Zotero.Sync.Storage.Local.getFilesToUpload(libraryID))).length;
+	},
 	
 	
-	resetUnsyncedLibraryData: Zotero.Promise.coroutine(function* (libraryID) {
-		let settings = yield Zotero.SyncedSettings.getUnsynced(libraryID);
+	resetUnsyncedLibraryData: async function (libraryID) {
+		let settings = await Zotero.SyncedSettings.getUnsynced(libraryID);
 		if (Object.keys(settings).length) {
-			yield Zotero.Promise.each(Object.keys(settings), function (key) {
+			await // FIXME: fx140: replace call to Zotero.Promise.each()
+			Zotero.Promise.each(Object.keys(settings), function (key) {
 				return Zotero.SyncedSettings.clear(libraryID, key, { skipDeleteLog: true });
 			});
 		}
 		
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(libraryID)) {
 			// New/modified objects
-			let ids = yield this.getUnsynced(objectType, libraryID);
-			yield this._resetObjects(libraryID, objectType, ids);
+			let ids = await this.getUnsynced(objectType, libraryID);
+			await this._resetObjects(libraryID, objectType, ids);
 		}
 		
 		// Mark library for full sync
 		var library = Zotero.Libraries.get(libraryID);
 		library.libraryVersion = -1;
-		yield library.saveTx();
+		await library.saveTx();
 		
-		yield this.resetUnsyncedLibraryFiles(libraryID);
-	}),
+		await this.resetUnsyncedLibraryFiles(libraryID);
+	},
 	
 	
 	/**
@@ -418,7 +419,7 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	_getAPIKeyFromLogin: Zotero.Promise.coroutine(function* () {
+	_getAPIKeyFromLogin: async function () {
 		let username = Zotero.Prefs.get('sync.server.username');
 		if (username) {
 			// Check for legacy password if no password set in current session
@@ -428,12 +429,12 @@ Zotero.Sync.Data.Local = {
 				return "";
 			}
 			
-			let json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
+			let json = await Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
 			this.removeLegacyLogins();
 			return json.key;
 		}
 		return "";
-	}),
+	},
 	
 	
 	getLegacyPassword: function (username) {
@@ -516,11 +517,11 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	_loadLastSyncTime: Zotero.Promise.coroutine(function* () {
+	_loadLastSyncTime: async function () {
 		var sql = "SELECT version FROM version WHERE schema='lastsync'";
-		var lastsync = yield Zotero.DB.valueQueryAsync(sql);
+		var lastsync = await Zotero.DB.valueQueryAsync(sql);
 		_lastSyncTime = (lastsync ? new Date(lastsync * 1000) : false);
-	}),
+	},
 	
 	
 	/**
@@ -540,7 +541,7 @@ Zotero.Sync.Data.Local = {
 	 * @param {Integer} libraryID
 	 * @return {Promise<Integer[]>} - A promise for an array of object ids
 	 */
-	getUnsynced: Zotero.Promise.coroutine(function* (objectType, libraryID) {
+	getUnsynced: async function (objectType, libraryID) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var sql = "SELECT O." + objectsClass.idColumn + " FROM " + objectsClass.table + " O";
 		if (objectType == 'item') {
@@ -554,7 +555,7 @@ Zotero.Sync.Data.Local = {
 			sql += " AND (IAn.isExternal IS NULL OR IAN.isExternal=0)";
 		}
 		
-		var ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
+		var ids = await Zotero.DB.columnQueryAsync(sql, [libraryID]);
 		
 		// Sort descendent collections last
 		if (objectType == 'collection') {
@@ -568,7 +569,7 @@ Zotero.Sync.Data.Local = {
 					let c = Zotero.Collections.get(e.collectionID);
 					Zotero.debug(`Removing parent collection ${c.parentKey} from collection ${c.key}`);
 					c.parentID = null;
-					yield c.saveTx();
+					await c.saveTx();
 					return this.getUnsynced(...arguments);
 				}
 				else {
@@ -581,7 +582,7 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		return ids;
-	}),
+	},
 	
 	
 	isSyncItem: function (item) {
@@ -601,13 +602,13 @@ Zotero.Sync.Data.Local = {
 	 * @return {Promise<Object>} - A promise for an object with object keys as keys and versions
 	 *                             as properties
 	 */
-	getLatestCacheObjectVersions: Zotero.Promise.coroutine(function* (objectType, libraryID, keys=[]) {
+	getLatestCacheObjectVersions: async function (objectType, libraryID, keys=[]) {
 		var versions = {};
 		
-		yield Zotero.Utilities.Internal.forEachChunkAsync(
+		await Zotero.Utilities.Internal.forEachChunkAsync(
 			keys,
 			Zotero.DB.MAX_BOUND_PARAMETERS - 2,
-			Zotero.Promise.coroutine(function* (chunk) {
+			async function (chunk) {
 				// The MAX(version) ensures we get the data from the most recent version of the object,
 				// thanks to SQLite 3.7.11 (http://www.sqlite.org/releaselog/3_7_11.html)
 				var sql = "SELECT key, MAX(version) AS version FROM syncCache "
@@ -619,17 +620,17 @@ Zotero.Sync.Data.Local = {
 					params = params.concat(chunk);
 				}
 				sql += "GROUP BY libraryID, key";
-				var rows = yield Zotero.DB.queryAsync(sql, params);
+				var rows = await Zotero.DB.queryAsync(sql, params);
 				
 				for (let i = 0; i < rows.length; i++) {
 					let row = rows[i];
 					versions[row.key] = row.version;
 				}
-			})
+			}
 		);
 		
 		return versions;
-	}),
+	},
 	
 	
 	/**
@@ -657,11 +658,11 @@ Zotero.Sync.Data.Local = {
 	/**
 	 * @return {Promise}
 	 */
-	getCacheObject: Zotero.Promise.coroutine(function* (objectType, libraryID, key, version) {
+	getCacheObject: async function (objectType, libraryID, key, version) {
 		var sql = "SELECT data FROM syncCache WHERE libraryID=? AND key=? AND version=? "
 			+ "AND syncObjectTypeID IN (SELECT syncObjectTypeID FROM "
 			+ "syncObjectTypes WHERE name=?)";
-		var data = yield Zotero.DB.valueQueryAsync(sql, [libraryID, key, version, objectType]);
+		var data = await Zotero.DB.valueQueryAsync(sql, [libraryID, key, version, objectType]);
 		if (data) {
 			try {
 				return JSON.parse(data);
@@ -673,13 +674,13 @@ Zotero.Sync.Data.Local = {
 			}
 		}
 		return false;
-	}),
+	},
 	
 	
-	getCacheObjects: Zotero.Promise.coroutine(function* (objectType, libraryID, keyVersionPairs) {
+	getCacheObjects: async function (objectType, libraryID, keyVersionPairs) {
 		if (!keyVersionPairs.length) return [];
 		var rows = [];
-		yield Zotero.Utilities.Internal.forEachChunkAsync(
+		await Zotero.Utilities.Internal.forEachChunkAsync(
 			keyVersionPairs,
 			240, // SQLITE_MAX_COMPOUND_SELECT defaults to 500
 			async function (chunk) {
@@ -691,14 +692,14 @@ Zotero.Sync.Data.Local = {
 					+ ") AS pairs ON (pairs.key=SC.key AND pairs.version=SC.version) "
 					+ "WHERE libraryID=? AND "
 					+ "syncObjectTypeID IN (SELECT syncObjectTypeID FROM syncObjectTypes WHERE name=?)";
-				rows.push(...await Zotero.DB.columnQueryAsync(sql, [libraryID, objectType]));
+				rows.push(...(await Zotero.DB.columnQueryAsync(sql, [libraryID, objectType])));
 			}
 		)
 		return rows.map(row => JSON.parse(row));
-	}),
+	},
 	
 	
-	saveCacheObject: Zotero.Promise.coroutine(function* (objectType, libraryID, json) {
+	saveCacheObject: async function (objectType, libraryID, json) {
 		json = this._checkCacheJSON(json);
 		
 		Zotero.debug("Saving to sync cache:");
@@ -709,10 +710,10 @@ Zotero.Sync.Data.Local = {
 			+ "(libraryID, key, syncObjectTypeID, version, data) VALUES (?, ?, ?, ?, ?)";
 		var params = [libraryID, json.key, syncObjectTypeID, json.version, JSON.stringify(json)];
 		return Zotero.DB.queryAsync(sql, params);
-	}),
+	},
 	
 	
-	saveCacheObjects: Zotero.Promise.coroutine(function* (objectType, libraryID, jsonArray) {
+	saveCacheObjects: async function (objectType, libraryID, jsonArray) {
 		if (!Array.isArray(jsonArray)) {
 			throw new Error("'json' must be an array");
 		}
@@ -735,7 +736,7 @@ Zotero.Sync.Data.Local = {
 		return Zotero.Utilities.Internal.forEachChunkAsync(
 			jsonArray,
 			chunkSize,
-			Zotero.Promise.coroutine(function* (chunk) {
+			async function (chunk) {
 				var params = [];
 				for (let i = 0; i < chunk.length; i++) {
 					let o = chunk[i];
@@ -744,9 +745,9 @@ Zotero.Sync.Data.Local = {
 				return Zotero.DB.queryAsync(
 					sql + chunk.map(() => "(?, ?, ?, ?, ?)").join(", "), params
 				);
-			})
+			}
 		);
-	}),
+	},
 	
 	
 	/**
@@ -765,7 +766,7 @@ Zotero.Sync.Data.Local = {
 	 *             as returned by _reconcileChanges()
 	 *         {Object[]} [conflicts] - An array of conflicting fields that can't be resolved automatically
 	 */
-	processObjectsFromJSON: Zotero.Promise.coroutine(function* (objectType, libraryID, json, options = {}) {
+	processObjectsFromJSON: async function (objectType, libraryID, json, options = {}) {
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 		var ObjectType = Zotero.Utilities.capitalize(objectType);
@@ -809,7 +810,7 @@ Zotero.Sync.Data.Local = {
 			for (let i = 0; i < json.length; i++) {
 				// Batch notifier updates
 				if (notifierQueues.length == batchSize) {
-					yield Zotero.Notifier.commit(notifierQueues);
+					await Zotero.Notifier.commit(notifierQueues);
 					notifierQueues = [];
 					// Get the current batch size, which might have increased
 					if (options.getNotifierBatchSize) {
@@ -840,7 +841,7 @@ Zotero.Sync.Data.Local = {
 					let parentProp = 'parent' + objectType[0].toUpperCase() + objectType.substr(1);
 					let parentKey = jsonData[parentProp];
 					if (parentKey) {
-						let parentObj = yield objectsClass.getByLibraryAndKeyAsync(
+						let parentObj = await objectsClass.getByLibraryAndKeyAsync(
 							libraryID, parentKey, { noCache: true }
 						);
 						if (!parentObj) {
@@ -879,8 +880,8 @@ Zotero.Sync.Data.Local = {
 								// If the collection is in the delete log, the deletion will upload
 								// after downloads are done. Otherwise, we somehow missed
 								// downloading it and should add it to the queue to try again.
-								if (!(yield this.getDateDeleted('collection', libraryID, key))) {
-									yield this.addObjectsToSyncQueue('collection', libraryID, [key]);
+								if (!((await this.getDateDeleted('collection', libraryID, key)))) {
+									await this.addObjectsToSyncQueue('collection', libraryID, [key]);
 								}
 								break;
 							}
@@ -894,7 +895,7 @@ Zotero.Sync.Data.Local = {
 				// Errors have to be thrown in order to roll back the transaction, so catch those here
 				// and continue
 				try {
-					yield Zotero.DB.executeTransaction(async function () {
+					await Zotero.DB.executeTransaction(async function () {
 						let obj = await objectsClass.getByLibraryAndKeyAsync(
 							libraryID, objectKey, { noCache: true }
 						);
@@ -1151,12 +1152,12 @@ Zotero.Sync.Data.Local = {
 					}
 				}
 				
-				yield Zotero.Promise.delay(10);
+				await Zotero.Promise.delay(10);
 			}
 		}
 		finally {
 			if (notifierQueues.length) {
-				yield Zotero.Notifier.commit(notifierQueues);
+				await Zotero.Notifier.commit(notifierQueues);
 			}
 		}
 		
@@ -1170,7 +1171,7 @@ Zotero.Sync.Data.Local = {
 			+ " in " + libraryName);
 		
 		return results;
-	}),
+	},
 	
 	
 	_checkCacheJSON: function (json) {
@@ -1270,7 +1271,7 @@ Zotero.Sync.Data.Local = {
 	/**
 	 * Delete entries from sync cache that don't exist or are less than the current object version
 	 */
-	purgeCache: Zotero.Promise.coroutine(function* (objectType, libraryID) {
+	purgeCache: async function (objectType, libraryID) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var table = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType).table;
 		var sql = "DELETE FROM syncCache WHERE ROWID IN ("
@@ -1278,8 +1279,8 @@ Zotero.Sync.Data.Local = {
 			+ `LEFT JOIN ${table} O USING (libraryID, key, version) `
 			+ "WHERE syncObjectTypeID=? AND SC.libraryID=? AND "
 			+ "(O.libraryID IS NULL OR SC.version < O.version))";
-		yield Zotero.DB.queryAsync(sql, [syncObjectTypeID, libraryID]);
-	}),
+		await Zotero.DB.queryAsync(sql, [syncObjectTypeID, libraryID]);
+	},
 	
 	
 	clearCacheForLibrary: async function (libraryID) {
@@ -1287,7 +1288,7 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	processConflicts: Zotero.Promise.coroutine(function* (objectType, libraryID, conflicts, options = {}) {
+	processConflicts: async function (objectType, libraryID, conflicts, options = {}) {
 		if (!conflicts.length) return [];
 		
 		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
@@ -1330,7 +1331,7 @@ Zotero.Sync.Data.Local = {
 			for (let i = 0; i < mergeData.length; i++) {
 				// Batch notifier updates, despite multiple transactions
 				if (notifierQueues.length == batchSize) {
-					yield Zotero.Notifier.commit(notifierQueues);
+					await Zotero.Notifier.commit(notifierQueues);
 					notifierQueues = [];
 				}
 				let notifierQueue = new Zotero.Notifier.Queue;
@@ -1353,7 +1354,7 @@ Zotero.Sync.Data.Local = {
 				// Errors have to be thrown in order to roll back the transaction, so catch
 				// those here and continue
 				try {
-					yield Zotero.DB.executeTransaction(async function () {
+					await Zotero.DB.executeTransaction(async function () {
 						let obj = await objectsClass.getByLibraryAndKeyAsync(
 							libraryID, json.key, { noCache: true }
 						);
@@ -1430,12 +1431,12 @@ Zotero.Sync.Data.Local = {
 		}
 		finally {
 			if (notifierQueues.length) {
-				yield Zotero.Notifier.commit(notifierQueues);
+				await Zotero.Notifier.commit(notifierQueues);
 			}
 		}
 		
 		return results;
-	}),
+	},
 	
 	
 	showConflictResolutionWindow: function (conflicts) {
@@ -1484,13 +1485,13 @@ Zotero.Sync.Data.Local = {
 		return _lastClassicSyncTime;
 	},
 	
-	_loadLastClassicSyncTime: Zotero.Promise.coroutine(function* () {
+	_loadLastClassicSyncTime: async function () {
 		var sql = "SELECT version FROM version WHERE schema='lastlocalsync'";
-		var lastsync = yield Zotero.DB.valueQueryAsync(sql);
+		var lastsync = await Zotero.DB.valueQueryAsync(sql);
 		_lastClassicSyncTime = (lastsync ? new Date(lastsync * 1000) : false);
-	}),
+	},
 	
-	_saveObjectFromJSON: Zotero.Promise.coroutine(function* (obj, json, options) {
+	_saveObjectFromJSON: async function (obj, json, options) {
 		var results = {};
 		try {
 			results.key = json.key;
@@ -1508,20 +1509,20 @@ Zotero.Sync.Data.Local = {
 						name = name !== '' ? name : username;
 						// Update stored name if it changed
 						if (Zotero.Users.getName(userID) != name) {
-							yield Zotero.Users.setName(userID, name);
+							await Zotero.Users.setName(userID, name);
 						}
 					}
 				}
 				
 				if (obj.isStoredFileAttachment()) {
-					yield this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
+					await this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
 				}
 			}
 			obj.version = json.data.version;
 			if (!options.saveAsUnsynced) {
 				obj.synced = true;
 			}
-			yield obj.save({
+			await obj.save({
 				skipEditCheck: true,
 				skipDateModifiedUpdate: true,
 				skipSelect: true,
@@ -1533,9 +1534,9 @@ Zotero.Sync.Data.Local = {
 				}
 			});
 			let cacheJSON = options.cacheObject ? options.cacheObject : json.data;
-			yield this.saveCacheObject(obj.objectType, obj.libraryID, cacheJSON);
+			await this.saveCacheObject(obj.objectType, obj.libraryID, cacheJSON);
 			// Delete older versions of the object in the cache
-			yield this.deleteCacheObjectVersions(
+			await this.deleteCacheObjectVersions(
 				obj.objectType,
 				obj.libraryID,
 				json.key,
@@ -1545,7 +1546,7 @@ Zotero.Sync.Data.Local = {
 			results.processed = true;
 			
 			// Delete from sync queue
-			yield this._removeObjectFromSyncQueue(obj.objectType, obj.libraryID, json.key);
+			await this._removeObjectFromSyncQueue(obj.objectType, obj.libraryID, json.key);
 			
 			// Mark updated attachments for download
 			if (obj.objectType == 'item' && obj.isStoredFileAttachment()) {
@@ -1562,7 +1563,7 @@ Zotero.Sync.Data.Local = {
 				for (let c of options.newParentItemCollections) {
 					parentItem.addToCollection(c);
 				}
-				yield parentItem.save({
+				await parentItem.save({
 					skipEditCheck: true,
 					skipDateModifiedUpdate: true,
 					skipSelect: true,
@@ -1581,7 +1582,7 @@ Zotero.Sync.Data.Local = {
 			results.retry = false;
 		}
 		return results;
-	}),
+	},
 	
 	
 	/**
@@ -1847,57 +1848,57 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	markObjectAsSynced: Zotero.Promise.method(function (obj) {
+	markObjectAsSynced: function (obj) {
 		obj.synced = true;
 		return obj.saveTx({ skipAll: true });
-	}),
+	},
 	
 	
-	markObjectAsUnsynced: Zotero.Promise.method(function (obj) {
+	markObjectAsUnsynced: function (obj) {
 		obj.synced = false;
 		return obj.saveTx({ skipAll: true });
-	}),
+	},
 	
 	
 	/**
 	 * @return {Promise<Date|false>}
 	 */
-	getDateDeleted: Zotero.Promise.coroutine(function* (objectType, libraryID, key) {
+	getDateDeleted: async function (objectType, libraryID, key) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var sql = "SELECT dateDeleted FROM syncDeleteLog WHERE libraryID=? AND key=? "
 			+ "AND syncObjectTypeID=?";
-		var date = yield Zotero.DB.valueQueryAsync(sql, [libraryID, key, syncObjectTypeID]);
+		var date = await Zotero.DB.valueQueryAsync(sql, [libraryID, key, syncObjectTypeID]);
 		return date ? Zotero.Date.sqlToDate(date, true) : false;
-	}),
+	},
 	
 	
 	/**
 	 * @return {Promise<String[]>} - Promise for array of keys
 	 */
-	getDeleted: Zotero.Promise.coroutine(function* (objectType, libraryID) {
+	getDeleted: async function (objectType, libraryID) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var sql = "SELECT key FROM syncDeleteLog WHERE libraryID=? AND syncObjectTypeID=?";
 		return Zotero.DB.columnQueryAsync(sql, [libraryID, syncObjectTypeID]);
-	}),
+	},
 	
 	
 	/**
 	 * @return {Promise}
 	 */
 	removeObjectsFromDeleteLog: function (objectType, libraryID, keys) {
-		if (!keys.length) Zotero.Promise.resolve();
+		if (!keys.length) Promise.resolve();
 		
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var sql = "DELETE FROM syncDeleteLog WHERE libraryID=? AND syncObjectTypeID=? AND key IN (";
 		return Zotero.Utilities.Internal.forEachChunkAsync(
 			keys,
 			Zotero.DB.MAX_BOUND_PARAMETERS - 2,
-			Zotero.Promise.coroutine(function* (chunk) {
+			async function (chunk) {
 				var params = [libraryID, syncObjectTypeID].concat(chunk);
 				return Zotero.DB.queryAsync(
 					sql + Array(chunk.length).fill('?').join(',') + ")", params
 				);
-			})
+			}
 		);
 	},
 	
@@ -1913,7 +1914,7 @@ Zotero.Sync.Data.Local = {
 	 * @param {String[]} keys
 	 * @param {Boolean} [tryImmediately=false] - Assign lastCheck of 0 so item is retried immediately
 	 */
-	addObjectsToSyncQueue: Zotero.Promise.coroutine(function* (objectType, libraryID, keys, tryImmediately) {
+	addObjectsToSyncQueue: async function (objectType, libraryID, keys, tryImmediately) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
 		var now = tryImmediately ? 0 : Zotero.Date.getUnixTimestamp();
 		
@@ -1923,14 +1924,14 @@ Zotero.Sync.Data.Local = {
 		
 		// Check current try counts
 		var sql = "SELECT key, tries FROM syncQueue WHERE ";
-		yield Zotero.Utilities.Internal.forEachChunkAsync(
+		await Zotero.Utilities.Internal.forEachChunkAsync(
 			keys,
 			Math.floor(Zotero.DB.MAX_BOUND_PARAMETERS / 3),
-			Zotero.Promise.coroutine(function* (chunk) {
+			async function (chunk) {
 				var params = chunk.reduce(
 					(arr, key) => arr.concat([libraryID, key, syncObjectTypeID]), []
 				);
-				var rows = yield Zotero.DB.queryAsync(
+				var rows = await Zotero.DB.queryAsync(
 					sql + Array(chunk.length)
 						.fill('(libraryID=? AND key=? AND syncObjectTypeID=?)')
 						.join(' OR '),
@@ -1939,7 +1940,7 @@ Zotero.Sync.Data.Local = {
 				for (let row of rows) {
 					keyTries[row.key] = row.tries + 1; // increment current count
 				}
-			})
+			}
 		);
 		
 		// Insert or update
@@ -1959,7 +1960,7 @@ Zotero.Sync.Data.Local = {
 				);
 			}
 		);
-	}),
+	},
 	
 	
 	hasObjectsInSyncQueue: function (libraryID) {
@@ -1978,8 +1979,8 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	hasObjectsToTryInSyncQueue: Zotero.Promise.coroutine(function* (libraryID) {
-		var rows = yield Zotero.DB.queryAsync(
+	hasObjectsToTryInSyncQueue: async function (libraryID) {
+		var rows = await Zotero.DB.queryAsync(
 			"SELECT key, lastCheck, tries FROM syncQueue WHERE libraryID=?", libraryID
 		);
 		for (let row of rows) {
@@ -1994,12 +1995,12 @@ Zotero.Sync.Data.Local = {
 			}
 		}
 		return false;
-	}),
+	},
 	
 	
-	getObjectsToTryFromSyncQueue: Zotero.Promise.coroutine(function* (objectType, libraryID) {
+	getObjectsToTryFromSyncQueue: async function (objectType, libraryID) {
 		var syncObjectTypeID = Zotero.Sync.Data.Utilities.getSyncObjectTypeID(objectType);
-		var rows = yield Zotero.DB.queryAsync(
+		var rows = await Zotero.DB.queryAsync(
 			"SELECT key, lastCheck, tries FROM syncQueue WHERE libraryID=? AND syncObjectTypeID=?",
 			[libraryID, syncObjectTypeID]
 		);
@@ -2016,7 +2017,7 @@ Zotero.Sync.Data.Local = {
 			}
 		}
 		return keysToTry;
-	}),
+	},
 	
 	
 	removeObjectsFromSyncQueue: function (objectType, libraryID, keys) {
@@ -2025,12 +2026,12 @@ Zotero.Sync.Data.Local = {
 		return Zotero.Utilities.Internal.forEachChunkAsync(
 			keys,
 			Zotero.DB.MAX_BOUND_PARAMETERS - 2,
-			Zotero.Promise.coroutine(function* (chunk) {
+			async function (chunk) {
 				var params = [libraryID, syncObjectTypeID].concat(chunk);
 				return Zotero.DB.queryAsync(
 					sql + Array(chunk.length).fill('?').join(',') + ")", params
 				);
-			})
+			}
 		);
 	},
 	

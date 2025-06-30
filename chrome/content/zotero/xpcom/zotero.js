@@ -39,7 +39,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 /*
  * Core functions
  */
- (function() {
+ (function () {
 	// Privileged (public) methods
 	this.getStorageDirectory = getStorageDirectory;
 	this.debug = debug;
@@ -90,7 +90,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		return windows;
 	};
 	
-	this.getActiveZoteroPane = function() {
+	this.getActiveZoteroPane = function () {
 		var win = Services.wm.getMostRecentWindow("navigator:browser");
 		return win ? win.ZoteroPane : null;
 	};
@@ -302,7 +302,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 						]
 					)
 					: Zotero.getString('dataDir.notFound', Zotero.clientName);
-				_startupErrorHandler = async function() {
+				_startupErrorHandler = async function () {
 					var ps = Services.prompt;
 					var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
@@ -388,7 +388,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}, "quit-application-granted", false);
 		
 		// Register shutdown handler to call Zotero.shutdown()
-		var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
+		var _shutdownObserver = {observe:function () { Zotero.shutdown().done() }};
 		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
 		
 		// Get startup errors
@@ -402,7 +402,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		Services.console.registerListener(ConsoleListener);
 		
 		// Add shutdown listener to remove quit-application observer and console listener
-		this.addShutdownListener(function() {
+		this.addShutdownListener(function () {
 			Services.obs.removeObserver(_shutdownObserver, "quit-application", false);
 			Services.console.unregisterListener(ConsoleListener);
 		});
@@ -421,7 +421,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	/**
 	 * Triggers events when initialization finishes
 	 */
-	this.initComplete = async function() {
+	this.initComplete = async function () {
 		if(Zotero.initialized) return;
 		
 		Zotero.debug("Running initialization callbacks");
@@ -457,8 +457,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 *
 	 * @return {Promise:Boolean}
 	 */
-	var _initFull = Zotero.Promise.coroutine(function* () {
-		if (!(yield _initDB())) return false;
+	var _initFull = async function () {
+		if (!((await _initDB()))) return false;
 		
 		Zotero.VersionHeader.init();
 		
@@ -467,11 +467,11 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		var restoreFile = OS.Path.join(dataDir, 'restore-from-server');
 		var resetDataDirFile = OS.Path.join(dataDir, 'reset-data-directory');
 		
-		var result = yield Zotero.Promise.all([OS.File.exists(restoreFile), OS.File.exists(resetDataDirFile)]);
+		var result = await Promise.all([OS.File.exists(restoreFile), OS.File.exists(resetDataDirFile)]);
 		if (result.some(r => r)) {
 			[Zotero.restoreFromServer, Zotero.resetDataDir] = result;
 			try {
-				yield Zotero.DB.closeDatabase();
+				await Zotero.DB.closeDatabase();
 				
 				// TODO: better error handling
 				
@@ -484,11 +484,11 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				if (Zotero.restoreFromServer) {
 					let dbfile = Zotero.DataDirectory.getDatabase();
 					Zotero.debug("Deleting " + dbfile);
-					yield OS.File.remove(dbfile, { ignoreAbsent: true });
+					await OS.File.remove(dbfile, { ignoreAbsent: true });
 					let storageDir = OS.Path.join(dataDir, 'storage');
 					Zotero.debug("Deleting " + storageDir.path);
 					OS.File.removeDir(storageDir, { ignoreAbsent: true }),
-					yield OS.File.remove(restoreFile);
+					await OS.File.remove(restoreFile);
 					Zotero.restoreFromServer = true;
 				}
 				else if (Zotero.resetDataDir) {
@@ -505,7 +505,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					let lastError;
 					// Delete all files in directory rather than removing directory, in case it's
 					// a symlink
-					yield Zotero.File.iterateDirectory(dataDir, async function (entry) {
+					await Zotero.File.iterateDirectory(dataDir, async function (entry) {
 						// Don't delete some files
 						if (entry.name == 'pipes') {
 							return;
@@ -531,7 +531,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				}
 				Zotero.debug("Done with reset");
 				
-				if (!(yield _initDB())) return false;
+				if (!((await _initDB()))) return false;
 			}
 			catch (e) {
 				// Restore from backup?
@@ -549,7 +549,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		
 		try {
 			// Require >=2.1b3 database to ensure proper locking
-			let dbSystemVersion = yield Zotero.Schema.getDBVersion('system');
+			let dbSystemVersion = await Zotero.Schema.getDBVersion('system');
 			if (dbSystemVersion > 0 && dbSystemVersion < 31) {
 				let ps = Services.prompt;
 				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
@@ -581,7 +581,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				}
 				// Select new data directory
 				else if (index == 1) {
-					let dir = yield Zotero.DataDirectory.choose(true);
+					let dir = await Zotero.DataDirectory.choose(true);
 					if (!dir) {
 						quit = true;
 					}
@@ -598,7 +598,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			}
 			
 			try {
-				var updated = yield Zotero.Schema.updateSchema({
+				var updated = await Zotero.Schema.updateSchema({
 					onBeforeUpdate: (options = {}) => {
 						if (options.minor) return;
 						try {
@@ -626,7 +626,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 						+ Zotero.getString('startupError.zoteroVersionIsOlder.upgrade',
 							ZOTERO_CONFIG.DOMAIN_NAME);
 					Zotero.startupError = msg;
-					_startupErrorHandler = function() {
+					_startupErrorHandler = function () {
 						var ps = Services.prompt;
 						var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 							+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL)
@@ -679,18 +679,18 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			);
 			ZoteroAutoComplete.init();
 
-			yield Zotero.Users.init();
-			yield Zotero.Libraries.init();
+			await Zotero.Users.init();
+			await Zotero.Libraries.init();
 			
-			yield Zotero.ID.init();
-			yield Zotero.ItemTypes.init();
-			yield Zotero.ItemFields.init();
-			yield Zotero.CreatorTypes.init();
-			yield Zotero.FileTypes.init();
-			yield Zotero.CharacterSets.init();
-			yield Zotero.RelationPredicates.init();
+			await Zotero.ID.init();
+			await Zotero.ItemTypes.init();
+			await Zotero.ItemFields.init();
+			await Zotero.CreatorTypes.init();
+			await Zotero.FileTypes.init();
+			await Zotero.CharacterSets.init();
+			await Zotero.RelationPredicates.init();
 			
-			yield Zotero.Session.init();
+			await Zotero.Session.init();
 			
 			Zotero.locked = false;
 			
@@ -699,12 +699,12 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				Zotero.Server.init();
 			}
 			
-			yield Zotero.Fulltext.init();
+			await Zotero.Fulltext.init();
 			
 			Zotero.Notifier.registerObserver(Zotero.Tags, 'setting', 'tags');
 			
-			yield Zotero.Sync.Data.Local.init();
-			yield Zotero.Sync.Data.Utilities.init();
+			await Zotero.Sync.Data.Local.init();
+			await Zotero.Sync.Data.Utilities.init();
 			Zotero.Sync.Storage.Local.init();
 			Zotero.Sync.Runner = new Zotero.Sync.Runner_Module;
 			Zotero.Sync.EventListeners.init();
@@ -713,43 +713,41 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			
 			Zotero.MIMETypeHandler.init();
 			Zotero.CookieSandbox.init();
-			yield Zotero.Proxies.init();
+			await Zotero.Proxies.init();
 			
 			// Initialize keyboard shortcuts
 			Zotero.Keys.init();
 			
 			Zotero.Date.init();
 			Zotero.LocateManager.init();
-			yield Zotero.Collections.init();
-			yield Zotero.Items.init();
-			yield Zotero.Searches.init();
-			yield Zotero.Tags.init();
-			yield Zotero.Creators.init();
-			yield Zotero.Groups.init();
-			yield Zotero.Relations.init();
-			yield Zotero.Retractions.init();
-			yield Zotero.Dictionaries.init();
+			await Zotero.Collections.init();
+			await Zotero.Items.init();
+			await Zotero.Searches.init();
+			await Zotero.Tags.init();
+			await Zotero.Creators.init();
+			await Zotero.Groups.init();
+			await Zotero.Relations.init();
+			await Zotero.Retractions.init();
+			await Zotero.Dictionaries.init();
 			Zotero.Reader.init();
 			
 			// Load all library data except for items, which are loaded when libraries are first
 			// clicked on or if otherwise necessary
-			yield Zotero.Promise.each(
-				Zotero.Libraries.getAll(),
-				library => Zotero.Promise.coroutine(function* () {
-					yield Zotero.SyncedSettings.loadAll(library.libraryID);
-					if (library.libraryType != 'feed') {
-						yield Zotero.Collections.loadAll(library.libraryID);
-						yield Zotero.Searches.loadAll(library.libraryID);
-					}
-				})()
-			);
+			await // FIXME: fx140: replace call to Zotero.Promise.each()
+			Zotero.Promise.each(Zotero.Libraries.getAll(), library => (async function () {
+				await Zotero.SyncedSettings.loadAll(library.libraryID);
+				if (library.libraryType != 'feed') {
+					await Zotero.Collections.loadAll(library.libraryID);
+					await Zotero.Searches.loadAll(library.libraryID);
+				}
+			})());
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update
-			yield Zotero.Schema.migrateExtraFields();
+			await Zotero.Schema.migrateExtraFields();
 			
 			Zotero.Items.startEmptyTrashTimer();
 			
-			yield Zotero.QuickCopy.init();
+			await Zotero.QuickCopy.init();
 			Zotero.addShutdownListener(() => Zotero.QuickCopy.uninit());
 			
 			Zotero.Feeds.init();
@@ -768,18 +766,18 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			}
 			return false;
 		}
-	});
+	};
 	
 	/**
 	 * Initializes the DB connection
 	 */
-	var _initDB = Zotero.Promise.coroutine(function* (haveReleasedLock) {
+	var _initDB = async function (haveReleasedLock) {
 		// Initialize main database connection
 		Zotero.DB = new Zotero.DBConnection('zotero');
 		
 		try {
 			// Test read access
-			yield Zotero.DB.test();
+			await Zotero.DB.test();
 			
 			let dbfile = Zotero.DataDirectory.getDatabase();
 
@@ -824,7 +822,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}
 		
 		return true;
-	});
+	};
 	
 	
 	function _checkDataDirAccessError(e) {
@@ -859,7 +857,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	}
 	
 	
-	this.shutdown = Zotero.Promise.coroutine(function* () {
+	this.shutdown = async function () {
 		Zotero.debug("Shutting down Zotero");
 		
 		try {
@@ -876,16 +874,16 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					Zotero.logError(e);
 				}
 			}
-			yield Promise.all(shutdownPromises);
+			await Promise.all(shutdownPromises);
 			
 			if (Zotero.DB) {
 				// close DB
-				yield Zotero.DB.closeDatabase(true)
+				await Zotero.DB.closeDatabase(true)
 			}
 		} catch(e) {
 			Zotero.logError(e);
 		}
-	});
+	};
 	
 	
 	this.getProfileDirectory = function () {
@@ -1517,7 +1515,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 		var installed = await AddonManager.getAllAddons();
 	
-		installed.sort(function(a, b) {
+		installed.sort(function (a, b) {
 			return ((a.appDisabled || a.userDisabled) ? 1 : 0) -
 				((b.appDisabled || b.userDisabled) ? 1 : 0);
 		});
@@ -1565,7 +1563,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		return Zotero.Utilities.Internal.getAncestorByTagName(elem, tagName);
 	}
 	
-	this.randomString = function(len, chars) {
+	this.randomString = function (len, chars) {
 		return Zotero.Utilities.randomString(len, chars);
 	}
 	
@@ -1581,7 +1579,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		return file;
 	}
 	
-	this.lazy = function(fn) {
+	this.lazy = function (fn) {
 		return Zotero.Utilities.Internal.lazy(fn);
 	}
 	
@@ -1715,7 +1713,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	/**
 	 * Adds a listener to be called when Zotero shuts down (even if Firefox is not shut down)
 	 */
-	this.addShutdownListener = function(listener) {
+	this.addShutdownListener = function (listener) {
 		_shutdownListeners.push(listener);
 	}
 	
@@ -1750,28 +1748,28 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	/*
 	 * Clear entries that no longer exist from various tables
 	 */
-	this.purgeDataObjects = Zotero.Promise.coroutine(function* () {
+	this.purgeDataObjects = async function () {
 		var d = new Date();
 		
-		yield Zotero.DB.executeTransaction(async function () {
+		await Zotero.DB.executeTransaction(async function () {
 			return Zotero.Creators.purge();
 		});
-		yield Zotero.DB.executeTransaction(async function () {
+		await Zotero.DB.executeTransaction(async function () {
 			return Zotero.Tags.purge();
 		});
-		yield Zotero.Fulltext.purgeUnusedWords();
-		yield Zotero.Items.purge();
+		await Zotero.Fulltext.purgeUnusedWords();
+		await Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		//yield Zotero.DB.executeTransaction(async function () {
 		//	return Zotero.Relations.purge();
 		//});
 		
 		Zotero.debug("Purged data tables in " + (new Date() - d) + " ms");
-	});
+	};
 	
 	
 	this.reloadDataObjects = function () {
-		return Zotero.Promise.all([
+		return Promise.all([
 			Zotero.Collections.reloadAll(),
 			Zotero.Creators.reloadAll(),
 			Zotero.Items.reloadAll()
@@ -1782,7 +1780,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	/**
 	 * Brings Zotero Standalone to the foreground
 	 */
-	this.activateStandalone = function() {
+	this.activateStandalone = function () {
 		var uri = Services.io.newURI('zotero://select', null, null);
 		var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
 					.getService(Components.interfaces.nsIExternalProtocolService)
@@ -1904,7 +1902,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	var ConsoleListener = {
 		"QueryInterface":ChromeUtils.generateQI([Components.interfaces.nsIConsoleMessage,
 			Components.interfaces.nsISupports]),
-		"observe":function(msg) {
+		"observe":function (msg) {
 			if(!_shouldKeepError(msg)) return;
 			if(_recentErrors.length === ERROR_BUFFER_SIZE) _recentErrors.shift();
 			_recentErrors.push(msg);
@@ -1919,7 +1917,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
  *
  * Actions are configured in ZoteroPane.handleKeyPress()
  */
-Zotero.Keys = new function() {
+Zotero.Keys = new function () {
 	this.init = init;
 	this.windowInit = windowInit;
 	this.getCommand = getCommand;
@@ -2160,7 +2158,7 @@ Zotero.DragDrop = {
 /*
  * Implements nsIWebProgressListener
  */
-Zotero.WebProgressFinishListener = function(onFinish) {
+Zotero.WebProgressFinishListener = function (onFinish) {
 	var _request;
 	var _finished = false;
 	
@@ -2168,7 +2166,7 @@ Zotero.WebProgressFinishListener = function(onFinish) {
 		return _request;
 	};
 	
-	this.onStateChange = function(wp, req, stateFlags, status) {
+	this.onStateChange = function (wp, req, stateFlags, status) {
 		//Zotero.debug('onStateChange: ' + stateFlags);
 		if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP
 				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK
@@ -2203,27 +2201,27 @@ Zotero.WebProgressFinishListener = function(onFinish) {
 		}
 	}
 	
-	this.onProgressChange = function(wp, req, curSelfProgress, maxSelfProgress, curTotalProgress, maxTotalProgress) {
+	this.onProgressChange = function (wp, req, curSelfProgress, maxSelfProgress, curTotalProgress, maxTotalProgress) {
 		//Zotero.debug('onProgressChange');
 		//Zotero.debug('Current: ' + curTotalProgress);
 		//Zotero.debug('Max: ' + maxTotalProgress);
 	}
 	
-	this.onLocationChange = function(wp, req, location) {}
-	this.onSecurityChange = function(wp, req, stateFlags, status) {}
-	this.onStatusChange = function(wp, req, status, msg) {}
+	this.onLocationChange = function (wp, req, location) {}
+	this.onSecurityChange = function (wp, req, stateFlags, status) {}
+	this.onStatusChange = function (wp, req, status, msg) {}
 }
 
 /*
  * Saves or loads JSON objects.
  */
-Zotero.JSON = new function() {
-	this.serialize = function(arg) {
+Zotero.JSON = new function () {
+	this.serialize = function (arg) {
 		Zotero.debug("WARNING: Zotero.JSON.serialize() is deprecated; use JSON.stringify()");
 		return JSON.stringify(arg);
 	}
 	
-	this.unserialize = function(arg) {
+	this.unserialize = function (arg) {
 		Zotero.debug("WARNING: Zotero.JSON.unserialize() is deprecated; use JSON.parse()");
 		return JSON.parse(arg);
 	}

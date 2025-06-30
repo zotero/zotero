@@ -237,7 +237,7 @@ class EditorInstance {
 		if (type === 'file' && event === 'download') {
 			let items = await Zotero.Items.getAsync(ids);
 			for (let item of items) {
-				if (item.isAttachment() && await item.getFilePathAsync()) {
+				if (item.isAttachment() && (await item.getFilePathAsync())) {
 					let subscription = this._subscriptions.find(x => x.data.attachmentKey === item.key);
 					if (subscription) {
 						await this._feedSubscription(subscription);
@@ -345,7 +345,7 @@ class EditorInstance {
 		let items = await Zotero.Items.getAsync(ids);
 		for (let item of items) {
 			if (item.isNote()
-				&& !await Zotero.Notes.ensureEmbeddedImagesAreAvailable(item)
+				&& !(await Zotero.Notes.ensureEmbeddedImagesAreAvailable(item))
 				&& !Zotero.Notes.promptToIgnoreMissingImage()) {
 				return null;
 			}
@@ -431,7 +431,7 @@ class EditorInstance {
 				if (!this._filesReadOnly) {
 					let attachments = Zotero.Items.get(item.getAttachments());
 					for (let attachment of attachments) {
-						if (!await attachment.fileExists()) {
+						if (!(await attachment.fileExists())) {
 							continue;
 						}
 						await Zotero.DB.executeTransaction(async () => {
@@ -1028,7 +1028,7 @@ class EditorInstance {
 				u8arr[n] = bstr.charCodeAt(n);
 			}
 
-			return new (Zotero.getMainWindow()).Blob([u8arr], { type: mime });
+			return new ((Zotero.getMainWindow()).Blob)([u8arr], { type: mime });
 		}
 		return null;
 	}
@@ -1331,7 +1331,7 @@ class EditorInstance {
 		
 		for (let annotation of annotations) {
 			if (annotation.annotationType === 'image'
-				&& !await Zotero.Annotations.hasCacheImage(annotation)) {
+				&& !(await Zotero.Annotations.hasCacheImage(annotation))) {
 				try {
 					await Zotero.PDFWorker.renderAttachmentAnnotations(annotation.parentID);
 				}

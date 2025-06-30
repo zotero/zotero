@@ -309,7 +309,7 @@ Zotero.Retractions = {
 				promises.push(zp.setVirtual(libraryID, 'retracted', current));
 				zp.hideRetractionBanner();
 			}
-			await Zotero.Promise.all(promises);
+			await Promise.all(promises);
 		}
 		
 		if (current) {
@@ -925,7 +925,7 @@ Zotero.Retractions = {
 	
 	_loadCacheFile: async function () {
 		var cacheFile = OS.Path.join(Zotero.Profile.dir, 'retractions.json');
-		if (!await OS.File.exists(cacheFile)) {
+		if (!(await OS.File.exists(cacheFile))) {
 			return;
 		}
 		var data = JSON.parse(await Zotero.File.getContentsAsync(cacheFile));

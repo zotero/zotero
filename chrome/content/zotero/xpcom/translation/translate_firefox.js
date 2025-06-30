@@ -36,7 +36,7 @@ const BOMs = {
 
 Components.utils.import("resource://gre/modules/NetUtil.jsm");
 
-Zotero.Translate.DOMWrapper = new function() {
+Zotero.Translate.DOMWrapper = new function () {
 	var Cu = Components.utils;
 	
 	/*
@@ -132,7 +132,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	
 		let dummy;
 		if (typeof obj === "function")
-			dummy = function() {};
+			dummy = function () {};
 		else
 			dummy = Object.create(null);
 	
@@ -167,11 +167,11 @@ Zotero.Translate.DOMWrapper = new function() {
 		// enumerable.
 		var _permit = { value: 'rw', writable: false, configurable: false, enumerable: true };
 		return {
-			getOwnPropertyDescriptor: function(name) { return _permit; },
-			ownKeys: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
-			enumerate: function() { throw Error("Can't enumerate ExposedPropsWaiver"); },
-			defineProperty: function(name) { throw Error("Can't define props on ExposedPropsWaiver"); },
-			deleteProperty: function(name) { throw Error("Can't delete props from ExposedPropsWaiver"); }
+			getOwnPropertyDescriptor: function (name) { return _permit; },
+			ownKeys: function () { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			enumerate: function () { throw Error("Can't enumerate ExposedPropsWaiver"); },
+			defineProperty: function (name) { throw Error("Can't define props on ExposedPropsWaiver"); },
+			deleteProperty: function (name) { throw Error("Can't delete props from ExposedPropsWaiver"); }
 		};
 	};
 	ExposedPropsWaiver = new Proxy({}, ExposedPropsWaiverHandler());
@@ -328,7 +328,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	 * @param {XPCCrossOriginWrapper} obj
 	 * @return {Object} An obj that is no longer Xrayed
 	 */
-	this.wrap = function(obj, overrides) {
+	this.wrap = function (obj, overrides) {
 		if(isWrapper(obj)) return obj;
 		return wrapPrivileged(obj, overrides);
 	};
@@ -336,7 +336,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	/**
 	 * Unwraps an object
 	 */
-	this.unwrap = function(obj) {
+	this.unwrap = function (obj) {
 		if(isWrapper(obj)) {
 			return unwrapPrivileged(obj);
 		} else {
@@ -347,7 +347,7 @@ Zotero.Translate.DOMWrapper = new function() {
 	/**
 	 * Wraps an object in the same sandbox as another object
 	 */
-	this.wrapIn = function(obj, insamebox) {
+	this.wrapIn = function (obj, insamebox) {
 		if(insamebox.__wrappingManager) return insamebox.__wrappingManager.wrap(obj);
 		return this.wrap(obj);
 	}
@@ -365,7 +365,7 @@ Zotero.Translate.DOMWrapper = new function() {
  * @param {Translate} translate
  * @param {String|window} sandboxLocation
  */
-Zotero.Translate.SandboxManager = function(sandboxLocation) {
+Zotero.Translate.SandboxManager = function (sandboxLocation) {
 	this.sandbox = {
 		Zotero: {},
 		// As of Fx60, XPathResult is no longer available as nsIDOMXPathResult in XPCOM, so just
@@ -382,10 +382,10 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			ANY_UNORDERED_NODE_TYPE: 8,
 			FIRST_ORDERED_NODE_TYPE: 9
 		},
-		DOMParser: function() {
+		DOMParser: function () {
 			return new DOMParser();
 		},
-		XMLSerializer: function() {
+		XMLSerializer: function () {
 			return new XMLSerializer();
 		}
 	};
@@ -398,7 +398,7 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * @param {String[]} functions Functions to import into the sandbox (rather than leaving
 	 *                                 as inner functions)
 	 */
-	eval: function(code, functions) {
+	eval: function (code, functions) {
 		// delete functions to import
 		for (var i in functions) {
 			delete this.sandbox[functions[i]];
@@ -418,7 +418,7 @@ Zotero.Translate.SandboxManager.prototype = {
 		}
 
 		// Eval in a closure
-		(function() {
+		(function () {
 			eval(code);
 		}).call(this);
 	},
@@ -430,16 +430,16 @@ Zotero.Translate.SandboxManager.prototype = {
 	 * @param {Boolean} passTranslateAsFirstArgument Whether the translate instance should be passed
 	 *     as the first argument to the function.
 	 */
-	importObject: function(object, passAsFirstArgument, attachTo) {
+	importObject: function (object, passAsFirstArgument, attachTo) {
 		if(!attachTo) attachTo = this.sandbox.Zotero;
 		
 		for(var key in (object.__exposedProps__ ? object.__exposedProps__ : object)) {
 			if(Function.prototype[key]) continue;
 			if(typeof object[key] === "function" || typeof object[key] === "object") {
 				// magic closures
-				attachTo[key] = new function() {
+				attachTo[key] = new function () {
 					var fn = object[key];
-					return function() {
+					return function () {
 						var args = (passAsFirstArgument ? [passAsFirstArgument] : []);
 						for(var i=0; i<arguments.length; i++) {
 							args.push(arguments[i]);
@@ -467,7 +467,7 @@ Zotero.Translate.IO.maintainedInstances = [];
 
 /******* (Native) Read support *******/
 
-Zotero.Translate.IO.Read = function(file, sandboxManager) {
+Zotero.Translate.IO.Read = function (file, sandboxManager) {
 	Zotero.Translate.IO.maintainedInstances.push(this);
 	
 	this.file = file;
@@ -635,14 +635,14 @@ Zotero.Translate.IO.Read.prototype = {
 		"setCharacterSet":"r"
 	},
 	
-	"_openRawStream":function() {
+	"_openRawStream":function () {
 		if(this._rawStream) this._rawStream.close();
 		this._rawStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
 								  .createInstance(Components.interfaces.nsIFileInputStream);
 		this._rawStream.init(this.file, 0x01, 0o664, 0);
 	},
 	
-	"_rewind":function() {
+	"_rewind":function () {
 		this._linesExhausted = false;
 		this._rawStream.QueryInterface(Components.interfaces.nsISeekableStream)
 			.seek(Components.interfaces.nsISeekableStream.NS_SEEK_SET, this._bomLength);
@@ -650,7 +650,7 @@ Zotero.Translate.IO.Read.prototype = {
 		this.bytesRead = this._bomLength;
 	},
 	
-	"_seekToStart":function(charset) {
+	"_seekToStart":function (charset) {
 		this._openRawStream();
 		
 		this._rewind();
@@ -661,7 +661,7 @@ Zotero.Translate.IO.Read.prototype = {
 			Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 	},
 	
-	"_readToString":function() {
+	"_readToString":function () {
 		var str = {};
 		var stringBits = [];
 		this.inputStream.QueryInterface(Components.interfaces.nsIUnicharInputStream);
@@ -673,7 +673,7 @@ Zotero.Translate.IO.Read.prototype = {
 		return stringBits.join("");
 	},
 	
-	"_initRDF":function() {
+	"_initRDF":function () {
 		Zotero.debug("Translate: Initializing RDF data store");
 		this._dataStore = new Zotero.RDF.AJAW.IndexedFormula();
 		var parser = new Zotero.RDF.AJAW.RDFParser(this._dataStore);
@@ -689,7 +689,7 @@ Zotero.Translate.IO.Read.prototype = {
 		}
 	},
 	
-	"setCharacterSet":function(charset) {
+	"setCharacterSet":function (charset) {
 		if(typeof charset !== "string") {
 			throw new Error("Translate: setCharacterSet: charset must be a string");
 		}
@@ -702,7 +702,7 @@ Zotero.Translate.IO.Read.prototype = {
 		}
 	},
 	
-	"read":function(bytes) {
+	"read":function (bytes) {
 		var str = {};
 		
 		if(bytes) {
@@ -722,7 +722,7 @@ Zotero.Translate.IO.Read.prototype = {
 		return str.value;
 	},
 	
-	"getXML":function() {
+	"getXML":function () {
 		if(this.bytesRead !== 0) this._seekToStart(this._charset);
 		try {
 			var xml = Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
@@ -747,7 +747,7 @@ Zotero.Translate.IO.Read.prototype = {
 		}
 	},
 	
-	"close":function() {
+	"close":function () {
 		var myIndex = Zotero.Translate.IO.maintainedInstances.indexOf(this);
 		if(myIndex !== -1) Zotero.Translate.IO.maintainedInstances.splice(myIndex, 1);
 		
@@ -758,13 +758,13 @@ Zotero.Translate.IO.Read.prototype = {
 	}
 }
 Zotero.Translate.IO.Read.prototype.__defineGetter__("contentLength",
-function() {
+function () {
 	return this.file.fileSize;
 });
 
 /******* Write support *******/
 
-Zotero.Translate.IO.Write = function(file) {
+Zotero.Translate.IO.Write = function (file) {
 	Zotero.Translate.IO.maintainedInstances.push(this);
 	this._rawStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
 		.createInstance(Components.interfaces.nsIFileOutputStream);
@@ -779,13 +779,13 @@ Zotero.Translate.IO.Write.prototype = {
 		"setCharacterSet":"r"
 	},
 	
-	"_initRDF":function() {
+	"_initRDF":function () {
 		Zotero.debug("Translate: Initializing RDF data store");
 		this._dataStore = new Zotero.RDF.AJAW.IndexedFormula();
 		this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
 	},
 	
-	"setCharacterSet":function(charset) {
+	"setCharacterSet":function (charset) {
 		if(typeof charset !== "string") {
 			throw new Error("Translate: setCharacterSet: charset must be a string");
 		}
@@ -807,7 +807,7 @@ Zotero.Translate.IO.Write.prototype = {
 		this._processor = processor;
 	},
 	
-	"write":function(data) {
+	"write":function (data) {
 		if(!this._charset) this.setCharacterSet("UTF-8");
 		
 		if (this._processor) {
@@ -847,7 +847,7 @@ Zotero.Translate.IO.Write.prototype = {
 		}
 	},
 	
-	"close":function() {
+	"close":function () {
 		if(Zotero.Translate.IO.rdfDataModes.indexOf(this._mode) !== -1) {
 			this.write(this.RDF.serialize());
 		}

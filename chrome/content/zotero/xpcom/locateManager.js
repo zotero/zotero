@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.LocateManager = new function() {
+Zotero.LocateManager = new function () {
 	const LOCATE_FILE_NAME = "engines.json";
 	const LOCATE_DIR_NAME = "locate";
 	
@@ -34,7 +34,7 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Read locateEngines JSON file to initialize locate manager
 	 */
-	this.init = async function() {
+	this.init = async function () {
 		_jsonFile = _getLocateFile();
 		
 		try {
@@ -60,12 +60,12 @@ Zotero.LocateManager = new function() {
 	 * Adds a new search engine
 	 * confirm parameter is currently ignored
 	 */
-	this.addEngine = function(engineURL, dataType, iconURL, confirm) {
+	this.addEngine = function (engineURL, dataType, iconURL, confirm) {
 		if(dataType !== Components.interfaces.nsISearchEngine.TYPE_OPENSEARCH) {
 			throw new Error("LocateManager supports only OpenSearch engines");
 		}
 		
-		Zotero.HTTP.doGet(engineURL, function(xmlhttp) {
+		Zotero.HTTP.doGet(engineURL, function (xmlhttp) {
 			var engine = new LocateEngine();
 			engine.initWithXML(xmlhttp.responseText, iconURL);
 		});
@@ -82,7 +82,7 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Returns an array of all search engines
 	 */
-	this.getEngines = function() { return _locateEngines.slice(0); }
+	this.getEngines = function () { return _locateEngines.slice(0); }
 	
 	/**
 	 * Returns an array of all search engines visible that should be visible in the dropdown
@@ -94,7 +94,7 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Returns an engine with a specific name
 	 */
-	this.getEngineByName = function(engineName) {
+	this.getEngineByName = function (engineName) {
 		engineName = engineName.toLowerCase();
 		for (let engine of _locateEngines) if(engine.name.toLowerCase() == engineName) return engine;
 		return null;
@@ -103,7 +103,7 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Returns the first engine with a specific alias
 	 */
-	this.getEngineByAlias = function(engineAlias) {
+	this.getEngineByAlias = function (engineAlias) {
 		engineAlias = engineAlias.toLowerCase();
 		for (let engine of _locateEngines) if(engine.alias.toLowerCase() == engineAlias) return engine;
 		return null;
@@ -112,7 +112,7 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Moves an engine in the list
 	 */
-	this.moveEngine = function(engine, newIndex) {
+	this.moveEngine = function (engine, newIndex) {
 		this.removeEngine(engine);
 		_locateEngines.splice(newIndex, engine);
 	}
@@ -120,7 +120,7 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Removes an engine from the list
 	 */
-	this.removeEngine = function(engine) {
+	this.removeEngine = function (engine) {
 		var oldIndex = _locateEngines.indexOf(engine);
 		if(oldIndex === -1) throw new Error("Engine is not currently listed");
 		_locateEngines.splice(oldIndex, 1);
@@ -293,7 +293,7 @@ Zotero.LocateManager = new function() {
 	/**
 	 * Theoretically implements nsISearchSubmission
 	 */
-	var LocateSubmission = function(uri, postData) {
+	var LocateSubmission = function (uri, postData) {
 		this.uri = Services.io.newURI(uri, null, null);
 		this.postData = postData;
 	}
@@ -303,7 +303,7 @@ Zotero.LocateManager = new function() {
 	 * Constructs a new LocateEngine
 	 * @param {Object} [obj] The locate engine, in parsed form, as it was serialized to JSON
 	 */
-	var LocateEngine = function(obj) {
+	var LocateEngine = function (obj) {
 		this._alias = this._name = "Untitled";
 		this._description = null;
 		this._icon = null;
@@ -318,7 +318,7 @@ Zotero.LocateManager = new function() {
 		/**
 		 * Initializes an engine with a string and an iconURL to use if none is defined in the file
 		 */
-		"initWithXML":function(xmlStr, iconURL) {
+		"initWithXML":function (xmlStr, iconURL) {
 			const OPENSEARCH_NAMESPACES = [
 			  // These are the official namespaces
 			  "http://a9.com/-/spec/opensearch/1.1/",
@@ -400,7 +400,7 @@ Zotero.LocateManager = new function() {
 			_serializeLocateEngines();
 		},
 		
-		"getItemSubmission":function(item, responseType) {
+		"getItemSubmission":function (item, responseType) {
 			if(responseType && responseType !== "text/html") {
 				throw new Error("LocateManager supports only responseType text/html");
 			}
@@ -414,7 +414,7 @@ Zotero.LocateManager = new function() {
 			// do substitutions
 			var me = this;
 			var abort = false;
-			var url = this._urlTemplate.replace(/{(?:([^}:]+):)?([^}:?]+)(\?)?}/g, function(all, nsPrefix, param, required) {
+			var url = this._urlTemplate.replace(/{(?:([^}:]+):)?([^}:?]+)(\?)?}/g, function (all, nsPrefix, param, required) {
 				var result = _lookupParam(item, itemAsOpenURL, me, nsPrefix, param, required);
 				if(result) {
 					return result[0];
@@ -464,7 +464,7 @@ Zotero.LocateManager = new function() {
 			return new LocateSubmission(url, postData);
 		},
 		
-		"_removeIcon":function() {
+		"_removeIcon":function () {
 			if(!this.icon) return;
 			var uri = Services.io.newURI(this.icon, null, null);
 			var file = uri.QueryInterface(Components.interfaces.nsIFileURL).file;

@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Searches = function() {
+Zotero.Searches = function () {
 	this.constructor = null;
 	
 	this._ZDO_object = 'search';
@@ -43,10 +43,10 @@ Zotero.Searches = function() {
 	this._primaryDataSQLFrom = "FROM savedSearches O "
 		+ "LEFT JOIN deletedSearches DS ON (O.savedSearchID=DS.savedSearchID)";
 	
-	this.init = Zotero.Promise.coroutine(function* () {
-		yield Zotero.DataObjects.prototype.init.apply(this);
-		yield Zotero.SearchConditions.init();
-	});
+	this.init = async function () {
+		await Zotero.DataObjects.prototype.init.apply(this);
+		await Zotero.SearchConditions.init();
+	};
 	
 	
 	this.getByLibrary = function (libraryID) {
@@ -72,9 +72,9 @@ Zotero.Searches = function() {
 	 *
 	 * @param	{Integer}	[libraryID]
 	 */
-	this.getAll = Zotero.Promise.coroutine(function* (libraryID) {
+	this.getAll = async function (libraryID) {
 		var sql = "SELECT savedSearchID FROM savedSearches WHERE libraryID=?";
-		var ids = yield Zotero.DB.columnQueryAsync(sql, libraryID);
+		var ids = await Zotero.DB.columnQueryAsync(sql, libraryID);
 		if (!ids.length) {
 			return []
 		}
@@ -86,7 +86,7 @@ Zotero.Searches = function() {
 			return collation.compareString(1, a.name, b.name);
 		});
 		return searches;
-	});
+	};
 	
 	
 	this.getPrimaryDataSQL = function () {
@@ -121,7 +121,7 @@ Zotero.Searches = function() {
 	};
 	
 	
-	this._loadConditions = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
+	this._loadConditions = async function (libraryID, ids, idSQL) {
 		var sql = "SELECT savedSearchID, searchConditionID, condition, operator, value, required "
 			+ "FROM savedSearches LEFT JOIN savedSearchConditions USING (savedSearchID) "
 			+ "WHERE libraryID=?" + idSQL
@@ -187,7 +187,7 @@ Zotero.Searches = function() {
 			search._clearChanged('conditions');
 		}.bind(this);
 		
-		yield Zotero.DB.queryAsync(
+		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
@@ -219,7 +219,7 @@ Zotero.Searches = function() {
 		if (lastID) {
 			setRows(lastID, rows);
 		}
-	});
+	};
 	
 	Zotero.DataObjects.call(this);
 	

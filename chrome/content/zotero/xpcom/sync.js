@@ -24,7 +24,7 @@
 */
 
 
-Zotero.Sync = new function() {
+Zotero.Sync = new function () {
 	// Keep in sync with syncObjectTypes table
 	this.__defineGetter__('syncObjects', function () {
 		return {
@@ -398,7 +398,7 @@ Zotero.Sync.Server = new function () {
 }
 
 
-Zotero.Sync.Server.Data = new function() {
+Zotero.Sync.Server.Data = new function () {
 	/**
 	 * @param	{String}	itemTypes
 	 * @param	{String}	localName

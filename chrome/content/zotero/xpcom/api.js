@@ -38,7 +38,7 @@ Zotero.API = {
 	/**
 	 * @return {(Zotero.Collection|Zotero.Search|Zotero.Item)[]}
 	 */
-	getResultsFromParams: Zotero.Promise.coroutine(function* (params) {
+	getResultsFromParams: async function (params) {
 		if (!params.objectType) {
 			throw new Error("objectType not specified");
 		}
@@ -93,7 +93,7 @@ Zotero.API = {
 					
 					var s2 = new Zotero.Search();
 					s2.setScope(s);
-					var ids = yield s2.search();
+					var ids = await s2.search();
 					if (params.objectKey) {
 						let id = Zotero.Items.getIDFromLibraryAndKey(s.libraryID, params.objectKey);
 						ids = ids.includes(id) ? [id] : [];
@@ -128,7 +128,7 @@ Zotero.API = {
 						s.addCondition('noChildren', 'true');
 					}*/
 					
-					var ids = yield s.search();
+					var ids = await s.search();
 			}
 			
 			let itemKeys = new Set(params.itemKey || []);
@@ -146,7 +146,7 @@ Zotero.API = {
 						return itemKeys.has(key);
 					});
 				}
-				results = yield Zotero.Items.getAsync(ids);
+				results = await Zotero.Items.getAsync(ids);
 			}
 		}
 		else {
@@ -154,7 +154,7 @@ Zotero.API = {
 		}
 		
 		return results;
-	}),
+	},
 	
 	
 	getLibraryPrefix: function (libraryID) {
