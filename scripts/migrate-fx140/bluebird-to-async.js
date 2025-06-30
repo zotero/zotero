@@ -39,6 +39,7 @@ function doTranslate(inputFile, root) {
 			'race',
 			'reject',
 			'resolve',
+			'try',
 		]))
 		.forEach(path => {
 			let callee = path.node.callee;

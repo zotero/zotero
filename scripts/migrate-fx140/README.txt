@@ -12,3 +12,6 @@ Zotero modifications:
 
 Run:
   scripts/migrate-fx140/migrate.py <esmify|asyncify> [file_or_dir]
+
+Special notes for esmify:
+  - If the script you're running on is a window/XPCOM script, not an MJS/ESM, pass --imports
