@@ -54,6 +54,9 @@ pref("dom.disable_open_during_load", true);
 // scraping the page, since we don't provide any information to the site.
 pref("security.warn_viewing_mixed", false);
 
+// We do need synchronous XHR
+pref("network.xhr.block_sync_system_requests", false);
+
 // Preferences for add-on discovery
 pref("extensions.getAddons.cache.enabled", false);
 //pref("extensions.getAddons.maxResults", 15);
