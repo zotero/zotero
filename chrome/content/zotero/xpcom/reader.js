@@ -25,7 +25,7 @@
 
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
-const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.sys.mjs");
+const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.mjs");
 
 const ZipReader = Components.Constructor(
 	"@mozilla.org/libjar/zip-reader;1",
@@ -33,7 +33,7 @@ const ZipReader = Components.Constructor(
 	"open"
 );
 
-Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
+ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
 const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit

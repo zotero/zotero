@@ -9,10 +9,10 @@
 /* globals DownloadUtils, Services, AUSTLMY */
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
-const { DownloadUtils } = ChromeUtils.import(
-	"resource://gre/modules/DownloadUtils.jsm"
+const { DownloadUtils } = ChromeUtils.importESModule(
+	"resource://gre/modules/DownloadUtils.sys.mjs"
 );
-const { UpdateUtils } = ChromeUtils.import("resource://gre/modules/UpdateUtils.jsm");
+const { UpdateUtils } = ChromeUtils.importESModule("resource://gre/modules/UpdateUtils.sys.mjs");
 
 const gAUS = Cc["@mozilla.org/updates/update-service;1"].getService(Ci.nsIApplicationUpdateService);
 
@@ -378,7 +378,7 @@ var gUpdates = {
 		for (var i = 0; i < pages.length; ++i) {
 			var page = pages[i];
 			if (page.localName == "wizardpage") {
-				// eslint-disable-next-line no-eval
+				 
 				this._pages[page.pageid] = eval(page.getAttribute("object"));
 			}
 		}
@@ -389,97 +389,97 @@ var gUpdates = {
 		this._cacheButtonStrings("extra1");
 		this._cacheButtonStrings("extra2");
 
-		document.addEventListener("wizardfinish", function() {
+		document.addEventListener("wizardfinish", function () {
 			gUpdates.onWizardFinish();
 		});
-		document.addEventListener("wizardcancel", function() {
+		document.addEventListener("wizardcancel", function () {
 			gUpdates.onWizardCancel();
 		});
-		document.addEventListener("wizardnext", function() {
+		document.addEventListener("wizardnext", function () {
 			gUpdates.onWizardNext();
 		});
 
 		document
 			.getElementById("checking")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gCheckingPage.onPageShow();
 			});
 		document
 			.getElementById("noupdatesfound")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gNoUpdatesPage.onPageShow();
 			});
 		document
 			.getElementById("manualUpdate")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gManualUpdatePage.onPageShow();
 			});
 		document
 			.getElementById("unsupported")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gUnsupportedPage.onPageShow();
 			});
 		document
 			.getElementById("updatesfoundbasic")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gUpdatesFoundBasicPage.onPageShow();
 			});
 		document
 			.getElementById("downloading")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gDownloadingPage.onPageShow();
 			});
-		document.getElementById("errors").addEventListener("pageshow", function() {
+		document.getElementById("errors").addEventListener("pageshow", function () {
 			gErrorsPage.onPageShow();
 		});
 		document
 			.getElementById("errorextra")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gErrorExtraPage.onPageShow();
 			});
 		document
 			.getElementById("errorpatching")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gErrorPatchingPage.onPageShow();
 			});
 		document
 			.getElementById("finished")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gFinishedPage.onPageShow();
 			});
 		document
 			.getElementById("finishedBackground")
-			.addEventListener("pageshow", function() {
+			.addEventListener("pageshow", function () {
 				gFinishedPage.onPageShowBackground();
 			});
 
 		document
 			.getElementById("updatesfoundbasic")
-			.addEventListener("extra1", function() {
+			.addEventListener("extra1", function () {
 				gUpdatesFoundBasicPage.onExtra1();
 			});
 		document
 			.getElementById("downloading")
-			.addEventListener("extra1", function() {
+			.addEventListener("extra1", function () {
 				gDownloadingPage.onHide();
 			});
-		document.getElementById("finished").addEventListener("extra1", function() {
+		document.getElementById("finished").addEventListener("extra1", function () {
 			gFinishedPage.onExtra1();
 		});
 		document
 			.getElementById("finishedBackground")
-			.addEventListener("extra1", function() {
+			.addEventListener("extra1", function () {
 				gFinishedPage.onExtra1();
 			});
 
 		document
 			.getElementById("updatesfoundbasic")
-			.addEventListener("extra2", function() {
+			.addEventListener("extra2", function () {
 				gUpdatesFoundBasicPage.onExtra2();
 			});
 		document
 			.getElementById("finishedBackground")
-			.addEventListener("extra2", function() {
+			.addEventListener("extra2", function () {
 				gFinishedPage.onExtra2();
 			});
 
@@ -487,7 +487,7 @@ var gUpdates = {
 		gUpdates.wiz.shadowRoot.querySelector('.wizard-header').hidden = true;
 
 		// Advance to the Start page.
-		this.getStartPageID(function(startPageID) {
+		this.getStartPageID(function (startPageID) {
 			LOG(
 				"gUpdates",
 				"onLoad - setting current page to startpage " + startPageID
@@ -600,7 +600,7 @@ var gUpdates = {
 			var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 				Ci.nsIUpdateManager
 			);
-			let activeUpdate = await um.getDownloadingUpdate() || await um.getReadyUpdate();
+			let activeUpdate = (await um.getDownloadingUpdate()) || (await um.getReadyUpdate());
 			if (activeUpdate) {
 				this.setUpdate(activeUpdate);
 				aCallback("downloading");
@@ -931,7 +931,7 @@ var gDownloadingPage = {
 		var um = Cc["@mozilla.org/updates/update-manager;1"].getService(
 			Ci.nsIUpdateManager
 		);
-		var activeUpdate = await um.getDownloadingUpdate() || await um.getReadyUpdate();
+		var activeUpdate = (await um.getDownloadingUpdate()) || (await um.getReadyUpdate());
 		if (activeUpdate) {
 			gUpdates.setUpdate(activeUpdate);
 

@@ -30,7 +30,7 @@ Zotero.Styles = new function () {
 	
 	var _renamedStyles = null;
 	
-	Components.utils.import("resource://gre/modules/FileUtils.jsm");
+	ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 	
 	this.xsltProcessor = null;
 	this.ns = {

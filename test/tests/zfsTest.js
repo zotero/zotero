@@ -70,7 +70,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 	})
 	
 	var setup = Zotero.Promise.coroutine(function* (options = {}) {
-		Components.utils.import("resource://zotero/concurrentCaller.js");
+		const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 		var stopOnError = options.stopOnError !== undefined ? options.stopOnError : true;
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));

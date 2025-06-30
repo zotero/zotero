@@ -1492,7 +1492,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}.bind(this));
 		}
 		
-		Components.utils.import("resource://zotero/concurrentCaller.js");
+		const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 		var caller = new ConcurrentCaller({
 			numConcurrent: 4,
 			stopOnError: true,

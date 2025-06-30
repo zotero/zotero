@@ -26,9 +26,8 @@
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 import { ImportCitaviAnnotatons } from 'zotero/import/citavi';
 
-var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-XPCOMUtils.defineLazyModuleGetters(globalThis, {
-	HiddenBrowser: 'chrome://zotero/content/HiddenBrowser.jsm',
+ChromeUtils.defineESModuleGetters(globalThis, {
+	HiddenBrowser: 'chrome://zotero/content/HiddenBrowser.mjs',
 });
 
 /****Zotero_File_Exporter****
@@ -39,7 +38,7 @@ XPCOMUtils.defineLazyModuleGetters(globalThis, {
 /**
  * Constructs a new Zotero_File_Exporter with defaults
  **/
-var Zotero_File_Exporter = function() {
+var Zotero_File_Exporter = function () {
 	this.name = Zotero.getString("fileInterface.exportedItems");
 	this.collection = false;
 	this.items = false;
@@ -176,7 +175,7 @@ Zotero_File_Exporter.prototype.save = async function () {
  * A singleton to interface with ZoteroPane to provide export/bibliography
  * capabilities
  **/
-var Zotero_File_Interface = new function() {
+var Zotero_File_Interface = new function () {
 	var _unlock;
 	
 	this.exportCollection = exportCollection;
@@ -342,7 +341,7 @@ var Zotero_File_Interface = new function() {
 		var dbs = [];
 		try {
 			var dir = this.getMendeleyDirectory();
-			if (!await OS.File.exists(dir)) {
+			if (!(await OS.File.exists(dir))) {
 				Zotero.debug(`${dir} does not exist`);
 				return dbs;
 			}
@@ -407,7 +406,7 @@ var Zotero_File_Interface = new function() {
 	 *     for displaying progress in a different way. This also causes an error to be throw
 	 *     instead of shown in the main window.
 	 */
-	this.importFile = Zotero.Promise.coroutine(function* (options = {}) {
+	this.importFile = async function (options = {}) {
 		if (!options) {
 			options = {};
 		}
@@ -432,7 +431,7 @@ var Zotero_File_Interface = new function() {
 			try {
 				let zp = Zotero.getActiveZoteroPane();
 				if (!zp.canEdit()) {
-					yield zp.collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
+					await zp.collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
 				}
 			}
 			catch (e) {
@@ -445,7 +444,7 @@ var Zotero_File_Interface = new function() {
 		var translation;
 		
 		if (options.mendeleyAuth || options.mendeleyCode) {
-			translation = yield _getMendeleyTranslation();
+			translation = await _getMendeleyTranslation();
 			translation.createNewCollection = createNewCollection;
 			translation.mendeleyAuth = options.mendeleyAuth;
 			translation.mendeleyCode = options.mendeleyCode;
@@ -453,7 +452,7 @@ var Zotero_File_Interface = new function() {
 			translation.relinkOnly = options.relinkOnly;
 		}
 		else if (options.folder) {
-			Components.utils.import("chrome://zotero/content/import/folderImport.js");
+			Cu.import("chrome://zotero/content/import/folderImport.js");
 			translation = new Zotero_Import_Folder({
 				folder: options.folder,
 				recreateStructure: options.recreateStructure,
@@ -463,14 +462,14 @@ var Zotero_File_Interface = new function() {
 		}
 		else {
 			// Check if the file is an SQLite database
-			var sample = yield Zotero.File.getSample(file.path);
+			var sample = await Zotero.File.getSample(file.path);
 			if (file.path == Zotero.DataDirectory.getDatabase()) {
 				// Blacklist the current Zotero database, which would cause a hang
 			}
 			else if (Zotero.MIME.sniffForMIMEType(sample) == 'application/x-sqlite3') {
 				// Mendeley import doesn't use the real translation architecture, but we create a
 				// translation object with the same interface
-				translation = yield _getMendeleyTranslation();
+				translation = await _getMendeleyTranslation();
 				translation.createNewCollection = createNewCollection;
 				defaultNewCollectionPrefix = Zotero.getString(
 					'fileInterface.appImportCollection', 'Mendeley'
@@ -496,13 +495,13 @@ var Zotero_File_Interface = new function() {
 			defaultNewCollectionPrefix,
 			onBeforeImport
 		});
-	});
+	};
 	
 	
 	/**
 	 * Imports from clipboard
 	 */
-	this.importFromClipboard = Zotero.Promise.coroutine(function* () {
+	this.importFromClipboard = async function () {
 		var str = Zotero.Utilities.Internal.getClipboard("text/plain");
 		if(!str) {
 			var ps = Services.prompt;
@@ -518,11 +517,11 @@ var Zotero_File_Interface = new function() {
 	
 		try {
 			if (!ZoteroPane.collectionsView.editable) {
-				yield ZoteroPane.collectionsView.selectLibrary();
+				await ZoteroPane.collectionsView.selectLibrary();
 			}
 		} catch(e) {}
 		
-		yield _finishImport({
+		await _finishImport({
 			translation,
 			createNewCollection: false
 		});
@@ -536,10 +535,10 @@ var Zotero_File_Interface = new function() {
 		catch (e) {
 			Zotero.logError(e, 2);
 		}
-	});
+	};
 	
 	
-	var _finishImport = Zotero.Promise.coroutine(function* (options) {
+	var _finishImport = async function (options) {
 		var t = performance.now();
 		
 		var translation = options.translation;
@@ -555,12 +554,12 @@ var Zotero_File_Interface = new function() {
 		
 		var showProgressWindow = !onBeforeImport;
 		
-		let translators = yield translation.getTranslators();
+		let translators = await translation.getTranslators();
 		
 		// Unrecognized file
 		if (!translators.length) {
 			if (onBeforeImport) {
-				yield onBeforeImport(false);
+				await onBeforeImport(false);
 			}
 			
 			let ps = Services.prompt;
@@ -587,7 +586,7 @@ var Zotero_File_Interface = new function() {
 			let zp = Zotero.getActiveZoteroPane();
 			libraryID = zp.getSelectedLibraryID();
 			if (addToLibraryRoot) {
-				yield zp.collectionsView.selectLibrary(libraryID);
+				await zp.collectionsView.selectLibrary(libraryID);
 			}
 			else if (!createNewCollection) {
 				importCollection = zp.getSelectedCollection();
@@ -618,7 +617,7 @@ var Zotero_File_Interface = new function() {
 			importCollection = new Zotero.Collection;
 			importCollection.libraryID = libraryID;
 			importCollection.name = collectionName;
-			yield importCollection.saveTx();
+			await importCollection.saveTx();
 		}
 
 		translation.setTranslator(translators[0]);
@@ -641,15 +640,15 @@ var Zotero_File_Interface = new function() {
 				progress.setProgress(translation.getProgress());
 			});
 			
-			yield Zotero.Promise.delay(0);
+			await Zotero.Promise.delay(0);
 		}
 		else {
-			yield onBeforeImport(translation);
+			await onBeforeImport(translation);
 		}
 		
 		var notifierQueue = new Zotero.Notifier.Queue;
 		try {
-			yield translation.translate({
+			await translation.translate({
 				libraryID,
 				collections: importCollection ? [importCollection.id] : null,
 				linkFiles,
@@ -672,11 +671,11 @@ var Zotero_File_Interface = new function() {
 			return false;
 		}
 		finally {
-			yield Zotero.Notifier.commit(notifierQueue);
+			await Zotero.Notifier.commit(notifierQueue);
 		}
 
 		if (translators[0].label.match(/^Citavi (?:[56]) XML/i)) {
-			yield ImportCitaviAnnotatons(translation);
+			await ImportCitaviAnnotatons(translation);
 		}
 		
 		var numItems = translation.newItems.length;
@@ -700,16 +699,16 @@ var Zotero_File_Interface = new function() {
 		Zotero.debug(`Imported ${numItems} item(s) in ${performance.now() - t} ms`);
 		
 		return true;
-	});
+	};
 	
 	
 	var _getMendeleyTranslation = async function () {
 		if (true) {
-			Components.utils.import("chrome://zotero/content/import/mendeley/mendeleyImport.js");
+			Cu.import("chrome://zotero/content/import/mendeley/mendeleyImport.js");
 		}
 		// TEMP: Load uncached from ~/zotero-client for development
 		else {
-			Components.utils.import("resource://gre/modules/FileUtils.jsm");
+			ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 			let file = FileUtils.getDir("Home", []);
 			file = OS.Path.join(
 				file.path,
@@ -984,7 +983,7 @@ var Zotero_File_Interface = new function() {
 };
 
 // Handles the display of a progress indicator
-Zotero_File_Interface.Progress = new function() {
+Zotero_File_Interface.Progress = new function () {
 	this.show = show;
 	this.close = close;
 	

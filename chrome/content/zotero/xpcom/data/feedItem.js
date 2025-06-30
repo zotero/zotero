@@ -209,7 +209,7 @@ Zotero.FeedItem.prototype.toggleRead = async function (state) {
  */
 Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
 	const { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTranslate.jsm");
-	const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+	const { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
 
 	Zotero.debug("Translating feed item " + this.id + " with URL " + this.getField('url'), 2);
 	if (Zotero.locked) {

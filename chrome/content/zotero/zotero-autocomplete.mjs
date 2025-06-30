@@ -25,22 +25,21 @@
 
 const ZOTERO_AC_CLASS_ID = Components.ID('{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}');
 const ZOTERO_AC_CONTRACT_ID = "@mozilla.org/autocomplete/search;1?name=zotero";
-const EXPORTED_SYMBOLS = ['ZoteroAutoComplete'];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
-Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
+ChromeUtils.importESModule("resource://gre/modules/ComponentUtils.sys.mjs");
 
-var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
 /*
  * Implements nsIAutoCompleteSearch
  */
-function ZoteroAutoComplete() {}
+export function ZoteroAutoComplete() {}
 
-ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (searchString, searchParams, previousResult, listener) {
+ZoteroAutoComplete.prototype.startSearch = async function (searchString, searchParams, previousResult, listener) {
 	// FIXME
 	//this.stopSearch();
 	
@@ -259,7 +258,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 	}
 	var resultCode;
 	try {
-		let results = yield Zotero.DB.queryAsync(sql, sqlParams, { onRow: onRow });
+		let results = await Zotero.DB.queryAsync(sql, sqlParams, { onRow: onRow });
 		// Post-process the results
 		if (resultsCallback) {
 			resultsCallback(results);
@@ -280,7 +279,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 	finally {
 		this.updateResults(null, null, false, resultCode);
 	};
-});
+};
 
 
 ZoteroAutoComplete.prototype.updateResult = function (value, id) {
@@ -345,7 +344,7 @@ ZoteroAutoComplete.prototype.createInstance = function (iid) {
 };
 
 // FIXME
-ZoteroAutoComplete.prototype.stopSearch = function(){
+ZoteroAutoComplete.prototype.stopSearch = function (){
 	Zotero.debug('Stopping autocomplete search');
 	this._cancelled = true;
 }

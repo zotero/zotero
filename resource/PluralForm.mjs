@@ -2,9 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var EXPORTED_SYMBOLS = ["PluralForm"];
-
-
 /**
  * This module provides the PluralForm object which contains a method to figure
  * out which plural form of a word to use for a given number based on the
@@ -188,7 +185,7 @@ var gFunctions = [
 ];
 /* eslint-enable no-nested-ternary */
 
-var PluralForm = {
+export var PluralForm = {
   /**
    * Get the correct plural form of a word based on the number
    *

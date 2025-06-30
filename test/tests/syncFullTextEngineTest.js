@@ -13,7 +13,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 		server = sinon.fakeServer.create();
 		server.autoRespond = true;
 		
-		Components.utils.import("resource://zotero/concurrentCaller.js");
+		const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
 		caller.stopOnError = true;

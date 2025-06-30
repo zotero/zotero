@@ -34,7 +34,7 @@ const BOMs = {
 	"UTF-32LE":"\xFF\xFE\x00\x00"
 }
 
-Components.utils.import("resource://gre/modules/NetUtil.jsm");
+ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 
 Zotero.Translate.DOMWrapper = new function () {
 	var Cu = Components.utils;

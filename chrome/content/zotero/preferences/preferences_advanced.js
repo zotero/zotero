@@ -96,7 +96,7 @@ Zotero_Preferences.Advanced = {
 			return;
 		}
 		
-		Components.utils.import("resource://zotero/config.js")
+		Cu.import("resource://zotero/config.js")
 		var ps = Services.prompt;
 		
 		// If there's a migration marker, point data directory back to the current location and remove

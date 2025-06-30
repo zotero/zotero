@@ -42,7 +42,9 @@ Zotero.DBConnection = function (dbNameOrPath) {
 		"2152857611"
 	];
 	
-	Components.utils.import("resource://gre/modules/Sqlite.jsm", this);
+	ChromeUtils.defineESModuleGetters(this, {
+		Sqlite: "resource://gre/modules/Sqlite.sys.mjs",
+	});
 	
 	this.closed = false;
 	this.skipBackup = false;

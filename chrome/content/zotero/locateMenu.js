@@ -23,12 +23,12 @@
     ***** END LICENSE BLOCK *****
 */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 
 /*
  * This object contains the various functions for the interface
  */
-var Zotero_LocateMenu = new function() {
+var Zotero_LocateMenu = new function () {
 	XPCOMUtils.defineLazyServiceGetter(this, "ios", "@mozilla.org/network/io-service;1", "nsIIOService");
 	
   	/**
@@ -97,15 +97,15 @@ var Zotero_LocateMenu = new function() {
 	 * @param {Boolean} showIcons Whether menu items should have associated icons
 	 * @return {Promise}
 	 */
-	this.buildContextMenu = Zotero.Promise.coroutine(function* (menu, showIcons) {
+	this.buildContextMenu = async function (menu, showIcons) {
 		// get selected items
-		var selectedItems = yield _getSelectedItems();
+		var selectedItems = await _getSelectedItems();
 		
 		// if no items selected or >20 items selected, stop now
 		if(!selectedItems.length || selectedItems.length > 20) return;
 		
 		// add view options
-		yield _addViewOptions(menu, selectedItems, showIcons);
+		await _addViewOptions(menu, selectedItems, showIcons);
 		
 		/*// look for locate engines
 		var availableEngines = _getAvailableLocateEngines(selectedItems);
@@ -122,8 +122,8 @@ var Zotero_LocateMenu = new function() {
 			menu.appendChild(submenu);
 		}*/
 		
-		yield document.l10n.translateFragment(menu);
-	});
+		await document.l10n.translateFragment(menu);
+	};
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
 		var menuitem;
@@ -234,7 +234,7 @@ var Zotero_LocateMenu = new function() {
 	 * @param {Function|null} items Function to call to locate items
 	 * @param {Boolean} showIcons Whether menu items should have associated icons
 	 */
-	this.addLocateEngines = function(menu, engines, locateFn, showIcons) {
+	this.addLocateEngines = function (menu, engines, locateFn, showIcons) {
 		if(!locateFn) {
 			locateFn = this.locateItem;
 		}
@@ -298,7 +298,7 @@ var Zotero_LocateMenu = new function() {
 	/**
 	 * Locate selected items
 	 */
-	this.locateItem = async function(event, selectedItems) {
+	this.locateItem = async function (event, selectedItems) {
 		if(!selectedItems) {
 			selectedItems = await _getSelectedItems();
 		}
@@ -351,7 +351,7 @@ var Zotero_LocateMenu = new function() {
 			var item = allSelectedItems.shift();
 			if (item.isAnnotation()) {
 				let attachment = item.parentItem;
-				if (attachment.parentItem && attachment === await attachment.parentItem.getBestAttachment()) {
+				if (attachment.parentItem && attachment === (await attachment.parentItem.getBestAttachment())) {
 					selectedItems.push(attachment.parentItem);
 				}
 				else {
@@ -452,19 +452,19 @@ var Zotero_LocateMenu = new function() {
 			this._numAttachments = numAttachments;
 		};
 		
-		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
+		this.handleItems = async function (items, event) {
 			var attachments = [];
 			for (let item of items) {
-				var attachment = yield _getFirstUsableAttachment(item);
+				var attachment = await _getFirstUsableAttachment(item);
 				if (attachment) attachments.push(attachment.id);
 			}
 			
 			ZoteroPane_Local.viewAttachment(attachments, event, false,
 				{ forceAlternateWindowBehavior: alternateWindowBehavior });
-		});
+		};
 		
-		var _getFirstUsableAttachment = Zotero.Promise.coroutine(function* (item) {
-			var attachments = item.isAttachment() ? [item] : (yield item.getBestAttachments());
+		var _getFirstUsableAttachment = async function (item) {
+			var attachments = item.isAttachment() ? [item] : ((await item.getBestAttachments()));
 			for (let i = 0; i < attachments.length; i++) {
 				let attachment = attachments[i];
 				if (attachment.attachmentReaderType
@@ -473,7 +473,7 @@ var Zotero_LocateMenu = new function() {
 				}
 			}
 			return null;
-		});
+		};
 	}
 
 	ViewOptions.viewAttachmentInTab = new ViewAttachment(false);
@@ -484,18 +484,18 @@ var Zotero_LocateMenu = new function() {
 	 *
 	 * Should appear only when an item or an attachment has a URL
 	 */
-	ViewOptions.online = new function() {
+	ViewOptions.online = new function () {
 		this.className = "zotero-menuitem-view-online";
 		
 		this.canHandleItem = function (item) {
 			return _getURL(item).then((val) => val !== false);
 		}
-		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
-			var urls = yield Zotero.Promise.all(items.map(item => _getURL(item)));
+		this.handleItems = async function (items, event) {
+			var urls = await Promise.all(items.map(item => _getURL(item)));
 			ZoteroPane_Local.loadURI(urls.filter(url => !!url), event);
-		});
+		};
 		
-		var _getURL = Zotero.Promise.coroutine(function* (item) {
+		var _getURL = async function (item) {
 			// try url field for item and for attachments
 			var itemURL = item.getField('url');
 			if (itemURL) {
@@ -530,7 +530,7 @@ var Zotero_LocateMenu = new function() {
 			}
 			
 			return false;
-		});
+		};
 	};
 
 	/**
@@ -539,32 +539,32 @@ var Zotero_LocateMenu = new function() {
 	 * Should appear only when an item or a linked or attached file or web attachment can be 
 	 * viewed by an internal non-native handler and "launchNonNativeFiles" pref is disabled
 	 */
-	ViewOptions.externalViewer = new function() {
+	ViewOptions.externalViewer = new function () {
 		this.className = "zotero-menuitem-view-external";
 		this.useExternalViewer = true;
 		
-		this.canHandleItem = Zotero.Promise.coroutine(function* (item) {
+		this.canHandleItem = async function (item) {
 			//return (this.useExternalViewer ^ Zotero.Prefs.get('launchNonNativeFiles'))
 			//	&& (yield _getBestNonNativeAttachment(item));
 			return false;
-		});
+		};
 		
-		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
+		this.handleItems = async function (items, event) {
 			var attachments = [];
 			for (let item of items) {
-				var attachment = yield _getBestNonNativeAttachment(item);
+				var attachment = await _getBestNonNativeAttachment(item);
 				if(attachment) attachments.push(attachment.id);
 			}
 			
 			ZoteroPane_Local.viewAttachment(attachments, event, false, this.useExternalViewer);
-		});
+		};
 		
-		var _getBestNonNativeAttachment = Zotero.Promise.coroutine(function* (item) {
-			var attachments = item.isAttachment() ? [item] : (yield item.getBestAttachments());
+		var _getBestNonNativeAttachment = async function (item) {
+			var attachments = item.isAttachment() ? [item] : ((await item.getBestAttachments()));
 			for (let i = 0; i < attachments.length; i++) {
 				let attachment = attachments[i];
 				if(attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
-					var path = yield attachment.getFilePathAsync();
+					var path = await attachment.getFilePathAsync();
 					if (path) {
 						try {
 							var ext = Zotero.File.getExtension(Zotero.File.pathToFile(path));
@@ -582,7 +582,7 @@ var Zotero_LocateMenu = new function() {
 				}
 			}
 			return false;
-		});
+		};
 	};
 	
 	/**
@@ -591,7 +591,7 @@ var Zotero_LocateMenu = new function() {
 	 * Should appear only when an item or a linked or attached file or web attachment can be 
 	 * viewed by an internal non-native handler and "launchNonNativeFiles" pref is enabled
 	 */
-	ViewOptions.internalViewer = new function() {
+	ViewOptions.internalViewer = new function () {
 		this.icon = "chrome://zotero/skin/locate-internal-viewer.png";
 		this.useExternalViewer = false;
 		this.canHandleItem = ViewOptions.externalViewer.canHandleItem;
@@ -604,7 +604,7 @@ var Zotero_LocateMenu = new function() {
 	 * Should appear only when an item is a file or web attachment, or has a linked or attached
 	 * file or web attachment
 	 */
-	ViewOptions.showFile = new function() {
+	ViewOptions.showFile = new function () {
 		this.className = "zotero-menuitem-show-file";
 		this.hideInToolbar = true;
 		
@@ -633,9 +633,9 @@ var Zotero_LocateMenu = new function() {
 	 *
 	 * Should appear only for regular items
 	 */
-	ViewOptions._libraryLookup = new function() {
+	ViewOptions._libraryLookup = new function () {
 		this.className = "zotero-menuitem-library-lookup";
-		this.canHandleItem = function (item) { return Zotero.Promise.resolve(item.isRegularItem()); };
+		this.canHandleItem = function (item) { return Promise.resolve(item.isRegularItem()); };
 		this.handleItems = async function (items, event) {
 			// If no resolver configured, show error
 			if (!Zotero.Prefs.get('openURL.resolver')) {

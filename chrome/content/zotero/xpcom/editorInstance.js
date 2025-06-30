@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
+ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
 
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 

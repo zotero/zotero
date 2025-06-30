@@ -25,11 +25,12 @@
 
 
 Zotero.Plugins = new function () {
-	var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+	var { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 	var lazy = {};
-	XPCOMUtils.defineLazyModuleGetters(lazy, {
-		XPIDatabase: "resource://gre/modules/addons/XPIDatabase.jsm",
+	ChromeUtils.defineESModuleGetters(lazy, {
+		XPIDatabase: "resource://gre/modules/addons/XPIDatabase.sys.mjs",
 	});
+	const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 	XPCOMUtils.defineLazyServiceGetters(lazy, {
 		aomStartup: [
 			"@mozilla.org/addons/addon-manager-startup;1",

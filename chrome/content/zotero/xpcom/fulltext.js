@@ -93,7 +93,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		_pdfConverter.append(pdfConverterFileName);
 		_pdfInfo.append(pdfInfoFileName);
 		
-		Zotero.uiReadyPromise.delay(30000).then(() => {
+		Zotero.uiReadyPromise.then(async () => {
+			await Zotero.Promise.delay(30000);
+			
 			this.registerContentProcessor();
 			Zotero.addShutdownListener(this.unregisterContentProcessor.bind(this));
 			
@@ -1604,7 +1606,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	
 	
 	async function getPageData(path, contentType) {
-		const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+		const { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
 		var blobURL;
 		var browser;
 		var pageData;

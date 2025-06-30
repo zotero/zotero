@@ -26,8 +26,8 @@
     ***** END LICENSE BLOCK *****
 */
 
-XPCOMUtils.defineLazyModuleGetters(globalThis, {
-	Subprocess: "resource://gre/modules/Subprocess.jsm",
+ChromeUtils.defineESModuleGetters(globalThis, {
+	Subprocess: "resource://gre/modules/Subprocess.sys.mjs",
 });
 
 /**
@@ -280,7 +280,7 @@ Zotero.Utilities.Internal = {
 	gunzip: async function (data) {
 		var deferred = Zotero.Promise.defer();
 		
-		Components.utils.import("resource://gre/modules/NetUtil.jsm");
+		ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 		
 		var is = Components.classes["@mozilla.org/io/string-input-stream;1"]
 			.createInstance(Ci.nsIStringInputStream);
@@ -581,7 +581,7 @@ Zotero.Utilities.Internal = {
 	 */
 	exec: function (cmd, args) {
 		if (typeof cmd == 'string') {
-			Components.utils.import("resource://gre/modules/FileUtils.jsm");
+			ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 			cmd = new FileUtils.File(cmd);
 		}
 		
@@ -2651,7 +2651,7 @@ Zotero.Utilities.Internal.activate = new function () {
 	 * Find an X11 window given a name
 	 */
 	function _X11FindWindow(w, searchName) {
-		Components.utils.import("resource://gre/modules/ctypes.jsm");
+		ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 		
 		var res = _X11GetProperty(w, "_NET_CLIENT_LIST", 33 /** XA_WINDOW **/)
 			|| _X11GetProperty(w, "_WIN_CLIENT_LIST", 6 /** XA_CARDINAL **/);
@@ -2681,7 +2681,7 @@ Zotero.Utilities.Internal.activate = new function () {
 	 * Get a property from an X11 window
 	 */
 	function _X11GetProperty(win, propertyName, propertyType) {
-		Components.utils.import("resource://gre/modules/ctypes.jsm");
+		ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 		
 		var returnType = new X11Atom(),
 			returnFormat = new ctypes.int(),
@@ -2708,7 +2708,7 @@ Zotero.Utilities.Internal.activate = new function () {
 		}
 		if (Zotero.isMac) {
 			if (win) {
-				Components.utils.import("resource://gre/modules/ctypes.jsm");
+				ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 				win.focus();
 				
 				if (!_carbon) {
@@ -2756,7 +2756,7 @@ Zotero.Utilities.Internal.activate = new function () {
 			}
 		}
 		else if (Zotero.isLinux && !isWayland && win) {
-			Components.utils.import("resource://gre/modules/ctypes.jsm");
+			ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 
 			if (_x11 === false) return;
 			if (!_x11) {
@@ -3006,7 +3006,7 @@ Zotero.Utilities.Internal.Environment = {
 	 * Since nsIEnvironment doesn't have an unset method
 	 */
 	unset: function (varName) {
-		Components.utils.import("resource://gre/modules/ctypes.jsm");
+		ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 		
 		let lib;
 		let result;

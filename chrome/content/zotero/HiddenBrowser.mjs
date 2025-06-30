@@ -24,21 +24,17 @@
 */
 
 
-var EXPORTED_SYMBOLS = ["HiddenBrowser"];
+const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.mjs");
 
-const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-const { BlockingObserver } = ChromeUtils.import("chrome://zotero/content/BlockingObserver.jsm");
+// TODO: Fx140: Migrate actors and re-enable
+// ChromeUtils.importESModule("chrome://zotero/content/actors/ActorManager.mjs");
 
-ChromeUtils.import("chrome://zotero/content/actors/ActorManager.jsm");
-
-/* global HiddenFrame, E10SUtils, this */
-XPCOMUtils.defineLazyModuleGetters(this, {
-	E10SUtils: "resource://gre/modules/E10SUtils.jsm",
-	HiddenFrame: "resource://gre/modules/HiddenFrame.jsm",
-	setTimeout: "resource://gre/modules/Timer.jsm",
-});
-ChromeUtils.defineESModuleGetters(this, {
-	Zotero: "chrome://zotero/content/zotero.mjs"
+/* global HiddenFrame, E10SUtils */
+ChromeUtils.defineESModuleGetters(globalThis, {
+    E10SUtils: "resource://gre/modules/E10SUtils.sys.mjs",
+    HiddenFrame: "resource://gre/modules/HiddenFrame.sys.mjs",
+    Zotero: "chrome://zotero/content/zotero.mjs",
+    setTimeout: "resource://gre/modules/Timer.sys.mjs"
 });
 
 const progressListeners = new Set();
@@ -46,7 +42,7 @@ const progressListeners = new Set();
 /**
  * Functions for creating and destroying hidden browser objects
  **/
-class HiddenBrowser {
+export class HiddenBrowser {
 	/**
 	 * @param {Object} options
 	 * @param {Boolean} [options.allowJavaScript]

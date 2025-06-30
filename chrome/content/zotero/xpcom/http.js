@@ -1183,7 +1183,7 @@ Zotero.HTTP = new function () {
 	
 	
 	_proxyAsyncResolve = function (uri) {
-		Components.utils.import("resource://gre/modules/NetUtil.jsm");
+		ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 		var pps = Components.classes["@mozilla.org/network/protocol-proxy-service;1"]
 			.getService(Components.interfaces.nsIProtocolProxyService);
 		var deferred = Zotero.Promise.defer();

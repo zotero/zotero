@@ -157,7 +157,7 @@ const getAll = async (tokens, endPoint, params = {}, headers = {}, options = {},
  * @throws {Error} - Throws an error if login fails, or if the access token cannot be obtained.
  */
 const obtainReferenceManagerToken = async (login, password) => {
-	let { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+	let { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
 	let cookieSandbox = new Zotero.CookieSandbox({});
 	let browser = new HiddenBrowser({
 		cookieSandbox,

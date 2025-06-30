@@ -505,10 +505,9 @@ describe("Zotero.File", function () {
 		it("should concurrently download three large files", async function () {
 			const url = `${baseURL}/file1.txt`;
 			
-			var { ConcurrentCaller } = ChromeUtils.import("resource://zotero/concurrentCaller.js");
+			const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 			var caller = new ConcurrentCaller({
 				numConcurrent: 3,
-				Promise: Zotero.Promise,
 			});
 
 			let failed = false;

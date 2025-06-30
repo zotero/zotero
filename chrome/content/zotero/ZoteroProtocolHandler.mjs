@@ -27,15 +27,13 @@
     ***** END LICENSE BLOCK *****
 */
 
-const EXPORTED_SYMBOLS = ['ZoteroProtocolHandler'];
-
 const ZOTERO_SCHEME = "zotero";
 const ZOTERO_PROTOCOL_CID = Components.ID("{9BC3D762-9038-486A-9D70-C997AF848A7C}");
 const ZOTERO_PROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + ZOTERO_SCHEME;
 const ZOTERO_PROTOCOL_NAME = "Zotero Chrome Extension Protocol";
 
-Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
-const { NetUtil } = ChromeUtils.import("resource://gre/modules/NetUtil.jsm");
+ChromeUtils.importESModule("resource://gre/modules/ComponentUtils.sys.mjs");
+import { NetUtil } from "resource://gre/modules/NetUtil.sys.mjs";
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -45,9 +43,9 @@ const ios = Services.io;
 // Dummy chrome URL used to obtain a valid chrome channel
 const DUMMY_CHROME_URL = "chrome://zotero/content/zoteroPane.xul";
 
-var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
-function ZoteroProtocolHandler() {
+export function ZoteroProtocolHandler() {
 	this.wrappedJSObject = this;
 	this._principal = null;
 	this._extensions = {};
@@ -422,7 +420,7 @@ function ZoteroProtocolHandler() {
 				
 				
 				var collation = Zotero.getLocaleCollation();
-				var compareFunction = function(a, b) {
+				var compareFunction = function (a, b) {
 					var index = 0;
 					
 					// Multidimensional sort
@@ -819,7 +817,7 @@ function ZoteroProtocolHandler() {
 	var SelectExtension = {
 		noContent: true,
 		
-		doAction: Zotero.Promise.coroutine(function* (uri) {
+		doAction: async function (uri) {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
 			
 			var path = uri.pathQueryRef;
@@ -885,7 +883,7 @@ function ZoteroProtocolHandler() {
 				return;
 			}
 			
-			var results = yield Zotero.API.getResultsFromParams(params);
+			var results = await Zotero.API.getResultsFromParams(params);
 			
 			if (!results.length) {
 				var msg = "Objects not found";
@@ -920,7 +918,7 @@ function ZoteroProtocolHandler() {
 					else {
 						col = Zotero.Collections.get(params.scopeObjectID);
 					}
-					yield zp.collectionsView.selectCollection(col.id);
+					await zp.collectionsView.selectCollection(col.id);
 				}
 				else if (params.scopeObject == 'searches') {
 					let s;
@@ -932,15 +930,15 @@ function ZoteroProtocolHandler() {
 					else {
 						s = Zotero.Searches.get(params.scopeObjectID);
 					}
-					yield zp.collectionsView.selectSearch(s.id);
+					await zp.collectionsView.selectSearch(s.id);
 				}
 				// If collection not specified, select library root
 				else {
-					yield zp.collectionsView.selectLibrary(params.libraryID);
+					await zp.collectionsView.selectLibrary(params.libraryID);
 				}
 				return zp.selectItems(results.map(x => x.id));
 			}
-		}),
+		},
 		
 		newChannel: function (uri) {
 			this.doAction(uri);
@@ -1316,7 +1314,7 @@ function AsyncChannel(uri, loadInfo, gen) {
 }
 
 AsyncChannel.prototype = {
-	asyncOpen: Zotero.Promise.coroutine(function* (streamListener) {
+	asyncOpen: async function (streamListener) {
 		if (this.loadGroup) this.loadGroup.addRequest(this, null);
 		
 		var channel = this;
@@ -1361,7 +1359,7 @@ AsyncChannel.prototype = {
 		var data;
 		try {
 			if (!data) {
-				data = yield Zotero.spawn(channel._generator, channel)
+				data = await Zotero.spawn(channel._generator, channel)
 			}
 			if (typeof data == 'string') {
 				//Zotero.debug("AsyncChannel: Got string from generator");
@@ -1402,11 +1400,11 @@ AsyncChannel.prototype = {
 				uri.QueryInterface(Ci.nsIURL);
 				this.contentType = Zotero.MIME.getMIMETypeFromExtension(uri.fileExtension);
 				if (!this.contentType) {
-					let sample = yield Zotero.File.getSample(uri.spec);
+					let sample = await Zotero.File.getSample(uri.spec);
 					this.contentType = Zotero.MIME.getMIMETypeFromData(sample);
 				}
 				
-				Components.utils.import("resource://gre/modules/NetUtil.jsm");
+				ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 				NetUtil.asyncFetch({ uri: data, loadUsingSystemPrincipal: true }, function (inputStream, status) {
 					if (!Components.isSuccessCode(status)) {
 						reject();
@@ -1449,7 +1447,7 @@ AsyncChannel.prototype = {
 			}
 			catch (e) {}
 		}
-	}),
+	},
 	
 	// nsIRequest
 	isPending: function () {

@@ -2,7 +2,7 @@
 /* global Zotero_File_Interface: false */
 
 Services.scriptloader.loadSubScript("chrome://zotero/content/fileInterface.js", window);
-const { E10SUtils } = ChromeUtils.import("resource://gre/modules/E10SUtils.jsm");
+const { E10SUtils } = ChromeUtils.importESModule("resource://gre/modules/E10SUtils.sys.mjs");
 const URI = `https://api.mendeley.com/oauth/authorize?client_id=5907&redirect_uri=https%3A%2F%2Fzotero-static.s3.amazonaws.com%2Fmendeley_oauth_redirect.html&response_type=code&state=&scope=all`;
 var startTime;
 

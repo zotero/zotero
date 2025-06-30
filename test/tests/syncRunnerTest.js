@@ -184,7 +184,7 @@ describe("Zotero.Sync.Runner", function () {
 		
 		runner = new Zotero.Sync.Runner_Module({ baseURL, apiKey });
 		
-		Components.utils.import("resource://zotero/concurrentCaller.js");
+		const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 		caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
 		caller.stopOnError = true;

@@ -23,15 +23,11 @@
     ***** END LICENSE BLOCK *****
 */
 
-const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-
-ChromeUtils.defineESModuleGetters(this, {
+ChromeUtils.defineESModuleGetters(globalThis, {
 	Zotero: "chrome://zotero/content/zotero.mjs",
 });
 
-var EXPORTED_SYMBOLS = ["BlockingObserver"];
-
-class BlockingObserver {
+export class BlockingObserver {
 	shouldBlock;
 	
 	_observerAdded = false;

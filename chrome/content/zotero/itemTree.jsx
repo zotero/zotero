@@ -33,7 +33,6 @@ const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
 const { getCSSIcon, getCSSItemTypeIcon } = Icons;
 const { COLUMNS } = require("zotero/itemTreeColumns");
-const { Cc, Ci, Cu, ChromeUtils } = require('chrome');
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
 

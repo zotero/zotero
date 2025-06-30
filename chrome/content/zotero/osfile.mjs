@@ -1,6 +1,11 @@
 //
 // Compatibility shims from the Mozilla codebase
 //
+
+ChromeUtils.defineESModuleGetters(globalThis, {
+	FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
+});
+
 const isWin = Services.appinfo.OS == 'WINNT';
 
 export let OS = {

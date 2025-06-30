@@ -3,7 +3,7 @@ describe("Zotero.Attachments", function() {
 	var browser;
 	
 	before(function () {
-		HiddenBrowser = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm").HiddenBrowser;
+		HiddenBrowser = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs").HiddenBrowser;
 	});
 	
 	afterEach(function () {
