@@ -1357,7 +1357,7 @@ class ReaderInstance {
 		}
 		let n = 0;
 		while (!this._iframeWindow) {
-			if (n >= 500) {
+			if (n >= 1000) {
 				throw new Error('Waiting for reader failed');
 			}
 			await Zotero.Promise.delay(10);
