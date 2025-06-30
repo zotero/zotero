@@ -1187,10 +1187,18 @@ class ReaderInstance {
 	_handleReaderTextboxContextMenuOpen = (event) => {
 		this._window.goUpdateGlobalEditMenuItems(true);
 
+		function isEditableTextBox(node) {
+			return (
+				node.nodeName === 'TEXTAREA'
+				|| (node.nodeName === 'INPUT' && node.type === 'text' && !node.disabled && !node.readOnly)
+				|| node.isContentEditable === true
+			);
+		}
+
 		if (
-			event.view !== this._iframeWindow
-			// For text annotation box
-			&& (this._type !== 'pdf' || event.target?.nodeName !== 'TEXTAREA')
+			!event.target
+			|| !((event.view === this._iframeWindow || this._type === 'pdf')
+			&& isEditableTextBox(event.target))
 		) {
 			return;
 		}
