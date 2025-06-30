@@ -23,6 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
+const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 /*
@@ -135,7 +136,6 @@ var ZoteroPane = new function () {
 		}
 		
 		// Set the sync tooltip label
-		Cu.import("resource://zotero/config.js");
 		let syncLabel = document.getElementById('zotero-tb-sync-label');
 		syncLabel.value = Zotero.getString('sync.syncWith', ZOTERO_CONFIG.DOMAIN_NAME);
 		let syncButton = document.querySelector("#zotero-tb-sync");

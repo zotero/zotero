@@ -26,7 +26,7 @@
 "use strict";
 
 {
-	ChromeUtils.import("chrome://zotero/content/actors/ActorManager.jsm");
+	ChromeUtils.importESModule("chrome://zotero/content/actors/ActorManager.mjs");
 
 	const SANDBOX_ALL_FLAGS = 0xFFFFF;
 	
