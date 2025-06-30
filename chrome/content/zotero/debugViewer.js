@@ -82,7 +82,7 @@ function submit(button) {
 	button.setAttribute('disabled', '');
 	clearSubmitStatus();
 	
-	Components.utils.import("resource://zotero/config.js");
+	Cu.import("resource://zotero/config.js");
 	var url = ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1";
 	var output = document.getElementById('errors').textContent
 		+ "\n\n" + "=========================================================\n\n"
@@ -120,7 +120,7 @@ function submit(button) {
 						}
 					},
 					
-					QueryInterface: function(iid) {
+					QueryInterface: function (iid) {
 						if (iid.equals(Components.interfaces.nsISupports) ||
 								iid.equals(Components.interfaces.nsIInterfaceRequestor) ||
 								iid.equals(Components.interfaces.nsIProgressEventSink)) {

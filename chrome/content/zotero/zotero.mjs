@@ -166,14 +166,14 @@ var isFirstLoadThisSession = true;
 var zContext = null;
 var initCallbacks = [];
 
-// Components.utils.import('resource://zotero/require.js');
+// Cu.import('resource://zotero/require.js');
 // Not using Cu.import here since we don't want the require module to be cached
 // for includes within ZoteroPane or other code, where we want the window instance available to modules.
 Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Components.interfaces.mozIJSSubScriptLoader)
 	.loadSubScript('resource://zotero/require.js');
 
-var ZoteroContext = function() {}
+var ZoteroContext = function () {}
 ZoteroContext.prototype = {
 	/**
 	 * Shuts down Zotero, calls a callback (that may return a promise),
@@ -182,12 +182,12 @@ ZoteroContext.prototype = {
 	 */
 	reinit: function (cb, options = {}) {
 		Services.obs.notifyObservers(zContext.Zotero, "zotero-before-reload");
-		return zContext.Zotero.shutdown().then(function() {
+		return zContext.Zotero.shutdown().then(function () {
 			// Unregister custom protocol handler
 			Services.io.unregisterProtocolHandler('zotero');
 			
 			return cb ? cb() : false;
-		}).finally(function() {
+		}).finally(function () {
 			makeZoteroContext();
 			var o = {};
 			Object.assign(o, CommandLineOptions);
@@ -227,7 +227,7 @@ function makeZoteroContext() {
 		for(var key in zContext.Zotero) delete zContext.Zotero[key];
 	} else {
 		zContext = new ZoteroContext();
-		zContext.Zotero = function() {};
+		zContext.Zotero = function () {};
 
 		// Override Date prototype to follow Zotero configured locale #3880
 		subscriptLoader.loadSubScript("chrome://zotero/content/dateOverrides.js");
@@ -293,7 +293,7 @@ function makeZoteroContext() {
 	
 	// add connector-related properties
 	zContext.Zotero.instanceID = instanceID;
-	zContext.Zotero.__defineGetter__("isFirstLoadThisSession", function() { return isFirstLoadThisSession; });
+	zContext.Zotero.__defineGetter__("isFirstLoadThisSession", function () { return isFirstLoadThisSession; });
 };
 
 /**

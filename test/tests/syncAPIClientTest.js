@@ -16,7 +16,7 @@ describe("Zotero.Sync.APIClient", function () {
 	});
 	
 	beforeEach(function () {
-		Components.utils.import("resource://zotero/concurrentCaller.js");
+		const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
 		caller.stopOnError = true;

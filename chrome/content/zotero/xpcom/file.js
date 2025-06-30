@@ -28,8 +28,8 @@
  * @namespace
  */
 Zotero.File = new function () {
-	Components.utils.import("resource://gre/modules/NetUtil.jsm");
-	Components.utils.import("resource://gre/modules/FileUtils.jsm");
+	ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
+	ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 	
 	this.getExtension = getExtension;
 	this.getContentsFromURL = getContentsFromURL;

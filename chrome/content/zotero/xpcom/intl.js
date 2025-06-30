@@ -54,7 +54,7 @@ Zotero.Intl = new function () {
 			}
 		}
 		
-		Components.utils.import("resource://zotero/PluralForm.jsm");
+		const { PluralForm } = ChromeUtils.importESModule("resource://zotero/PluralForm.mjs");
 
 		// Exposed for tests
 		this._bundle = bundle = Services.strings.createBundle('chrome://zotero/locale/zotero.properties');

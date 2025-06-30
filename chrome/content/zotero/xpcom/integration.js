@@ -79,7 +79,7 @@ const PLUGIN_PATHS = {
 
 
 Zotero.Integration = new function () {
-	Components.utils.import("resource://gre/modules/AddonManager.jsm");
+	ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 	
 	this.currentWindow = false;
 	this.currentCommandPromise = Promise.resolve();

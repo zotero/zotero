@@ -59,13 +59,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _apiKey = options.apiKey;
 	Zotero.defineProperty(this, 'apiKey', { set: val => _apiKey = val });
 	
-	Components.utils.import("resource://zotero/concurrentCaller.js");
+	const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 	this.caller = new ConcurrentCaller({
 		numConcurrent: 4,
 		stopOnError,
 		logger: msg => Zotero.debug(msg),
-		onError: e => Zotero.logError(e),
-		Promise: Zotero.Promise
+		onError: e => Zotero.logError(e)
 	});
 	
 	var _enabled = false;
