@@ -358,6 +358,21 @@
 			this.resetFocus();
 		}
 
+		cacheFocus() {
+			if (this._selectedIndex === 0) {
+				// The first tab row does not have focusable elements
+				return;
+			}
+			let activeElement = document.activeElement;
+			if (this.contains(activeElement)) {
+				if (activeElement.classList.contains("close")) {
+					this._prevFocusClass = "close";
+					return;
+				}
+			}
+			this._prevFocusClass = null;
+		}
+
 		resetFocus() {
 			let row = this._tabsList.querySelector(".selected");
 			if (this._prevFocusClass) {
@@ -466,14 +481,17 @@
 		_handleKeydown = (event) => {
 			if (["Home", "PageUp"].includes(event.key)) {
 				event.preventDefault();
+				this.cacheFocus();
 				this.moveSelection("first");
 			}
 			else if (["End", "PageDown"].includes(event.key)) {
 				event.preventDefault();
+				this.cacheFocus();
 				this.moveSelection("last");
 			}
 			else if (["ArrowUp", "ArrowDown"].includes(event.key)) {
 				event.preventDefault();
+				this.cacheFocus();
 				if (event.key == "ArrowDown") {
 					this.moveSelection("next");
 				}
@@ -499,8 +517,8 @@
 					event.preventDefault();
 					event.stopPropagation();
 					// Move selection to the next tab to make sure the next tab's close button is focused
+					this.cacheFocus();
 					this.moveSelection("next");
-					this._prevFocusClass = "close";
 					this._handleCloseClick(event);
 				}
 			}
