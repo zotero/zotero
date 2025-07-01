@@ -202,6 +202,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		this.initializationPromise = this.initializationDeferred.promise;
 		this.uiReadyDeferred = Zotero.Promise.defer();
 		this.uiReadyPromise = this.uiReadyDeferred.promise;
+		this.uiReadyPromise.then(() => {
+			Zotero.debug("User interface ready in " + (new Date() - _startupTime) + " ms");
+		});
 		
 		if (options) {
 			let opts = [
@@ -442,10 +445,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	
 	
 	this.uiIsReady = function () {
-		if (this.uiReadyPromise.isPending()) {
-			Zotero.debug("User interface ready in " + (new Date() - _startupTime) + " ms");
-			this.uiReadyDeferred.resolve();
-		}
+		this.uiReadyDeferred.resolve();
 	};
 	
 	
