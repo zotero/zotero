@@ -940,7 +940,8 @@ Zotero.Schema = new function () {
 		_localUpdateInProgress = true;
 		
 		try {
-			await Zotero.proxyAuthComplete.delay(1000);
+			await Zotero.proxyAuthComplete;
+			await Zotero.Promise.delay(1000);
 			
 			Zotero.debug("Updating bundled " + (mode || "files"));
 			
