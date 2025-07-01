@@ -28,6 +28,8 @@
  * This object contains the various functions for the interface
  */
 const ZoteroStandalone = new function () {
+	const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
+
 	const FONT_SIZES = [
 		"0.77", // 10
 		"0.85", // 11
@@ -740,8 +742,6 @@ const ZoteroStandalone = new function () {
 	 * Handles help menu requests
 	 */
 	this.openHelp = function (type) {
-		Cu.import("resource://zotero/config.js");
-		
 		switch (type) {
 		case "troubleshooting":
 			ZoteroPane.loadURI(ZOTERO_CONFIG.TROUBLESHOOTING_URL);
@@ -820,8 +820,6 @@ ZoteroStandalone.DebugOutput = {
 		// 'Zotero' isn't defined yet when this function is created, so do it inline
 		return Zotero.Promise.coroutine(function* () {
 			Zotero.debug("Submitting debug output");
-			
-			Cu.import("resource://zotero/config.js");
 			
 			var url = ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1";
 			var output = yield Zotero.Debug.get(
