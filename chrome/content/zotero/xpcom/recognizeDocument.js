@@ -578,7 +578,7 @@ Zotero.RecognizeDocument = new function () {
 	}
 	
 	async function _recognizeEPUB(item, filePath) {
-		const { EPUB } = ChromeUtils.import('chrome://zotero/content/EPUB.jsm');
+		const { EPUB } = ChromeUtils.importESModule("chrome://zotero/content/EPUB.mjs");
 		
 		let epub = new EPUB(filePath);
 		try {

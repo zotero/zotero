@@ -23,8 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-var EXPORTED_SYMBOLS = ["EPUB"];
-
 ChromeUtils.defineESModuleGetters(this, {
 	Zotero: "chrome://zotero/content/zotero.mjs",
 });
@@ -38,7 +36,7 @@ const ZipReader = Components.Constructor(
 const DC_NS = 'http://purl.org/dc/elements/1.1/';
 const OPF_NS = 'http://www.idpf.org/2007/opf';
 
-class EPUB {
+export class EPUB {
 	_zipReader;
 
 	_contentOPF = null;
