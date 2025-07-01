@@ -79,10 +79,11 @@ function scrollToPageBottom() {
 }
 
 function submit(button) {
+	const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
+	
 	button.setAttribute('disabled', '');
 	clearSubmitStatus();
 	
-	Cu.import("resource://zotero/config.js");
 	var url = ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1";
 	var output = document.getElementById('errors').textContent
 		+ "\n\n" + "=========================================================\n\n"
