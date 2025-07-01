@@ -1,35 +1,33 @@
 // Register Mozilla actors
 import "resource://gre/modules/ActorManagerParent.sys.mjs";
 
-// TODO: Fx140: Migrate actors and re-enable
-if(false) {
 ChromeUtils.registerWindowActor("PageData", {
 	child: {
-		moduleURI: "chrome://zotero/content/actors/PageDataChild.jsm"
+		esModuleURI: "chrome://zotero/content/actors/PageDataChild.mjs"
 	}
 });
 
 ChromeUtils.registerWindowActor("SingleFile", {
 	child: {
-		moduleURI: "chrome://zotero/content/actors/SingleFileChild.jsm"
+		esModuleURI: "chrome://zotero/content/actors/SingleFileChild.mjs"
 	}
 });
 
 ChromeUtils.registerWindowActor("Translation", {
 	parent: {
-		moduleURI: "chrome://zotero/content/actors/TranslationParent.jsm"
+		esModuleURI: "chrome://zotero/content/actors/TranslationParent.mjs"
 	},
 	child: {
-		moduleURI: "chrome://zotero/content/actors/TranslationChild.jsm"
+		esModuleURI: "chrome://zotero/content/actors/TranslationChild.mjs"
 	}
 });
 
 ChromeUtils.registerWindowActor("FeedAbstract", {
 	parent: {
-		moduleURI: "chrome://zotero/content/actors/FeedAbstractParent.jsm",
+		esModuleURI: "chrome://zotero/content/actors/FeedAbstractParent.mjs",
 	},
 	child: {
-		moduleURI: "chrome://zotero/content/actors/FeedAbstractChild.jsm",
+		esModuleURI: "chrome://zotero/content/actors/FeedAbstractChild.mjs",
 		events: {
 			DOMDocElementInserted: {},
 		}
@@ -39,10 +37,10 @@ ChromeUtils.registerWindowActor("FeedAbstract", {
 
 ChromeUtils.registerWindowActor("ZoteroPrint", {
 	parent: {
-		moduleURI: "chrome://zotero/content/actors/ZoteroPrintParent.jsm"
+		esModuleURI: "chrome://zotero/content/actors/ZoteroPrintParent.mjs"
 	},
 	child: {
-		moduleURI: "chrome://zotero/content/actors/ZoteroPrintChild.jsm",
+		esModuleURI: "chrome://zotero/content/actors/ZoteroPrintChild.mjs",
 		events: {
 			pageshow: {}
 		}
@@ -52,10 +50,10 @@ ChromeUtils.registerWindowActor("ZoteroPrint", {
 
 ChromeUtils.registerWindowActor("ExternalLinkHandler", {
 	parent: {
-		moduleURI: "chrome://zotero/content/actors/ExternalLinkHandlerParent.jsm",
+		esModuleURI: "chrome://zotero/content/actors/ExternalLinkHandlerParent.mjs",
 	},
 	child: {
-		moduleURI: "chrome://zotero/content/actors/ExternalLinkHandlerChild.jsm",
+		esModuleURI: "chrome://zotero/content/actors/ExternalLinkHandlerChild.mjs",
 		events: {
 			click: {},
 		}
@@ -68,10 +66,10 @@ ChromeUtils.registerWindowActor("ExternalLinkHandler", {
 if (AppConstants.platform === "macosx") {
 	ChromeUtils.registerWindowActor("SequoiaContextMenu", {
 		parent: {
-			moduleURI: "chrome://zotero/content/actors/SequoiaContextMenuParent.jsm",
+			esModuleURI: "chrome://zotero/content/actors/SequoiaContextMenuParent.mjs",
 		},
 		child: {
-			moduleURI: "chrome://zotero/content/actors/SequoiaContextMenuChild.jsm",
+			esModuleURI: "chrome://zotero/content/actors/SequoiaContextMenuChild.mjs",
 		},
 		allFrames: true,
 		includeChrome: true
@@ -80,16 +78,15 @@ if (AppConstants.platform === "macosx") {
 
 ChromeUtils.registerWindowActor("MendeleyAuth", {
 	parent: {
-		moduleURI: "chrome://zotero/content/actors/MendeleyAuthParent.jsm"
+		esModuleURI: "chrome://zotero/content/actors/MendeleyAuthParent.mjs"
 	},
 	child: {
-		moduleURI: "chrome://zotero/content/actors/MendeleyAuthChild.jsm"
+		esModuleURI: "chrome://zotero/content/actors/MendeleyAuthChild.mjs"
 	}
 });
 
 ChromeUtils.registerWindowActor("DocumentIsReady", {
 	child: {
-		moduleURI: "chrome://zotero/content/actors/DocumentIsReadyChild.jsm"
+		esModuleURI: "chrome://zotero/content/actors/DocumentIsReadyChild.mjs"
 	}
 });
-}

@@ -1,8 +1,6 @@
-var EXPORTED_SYMBOLS = ["TranslationParent", "TranslationManager"];
+import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
-var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
-
-const TranslationManager = new class {
+export const TranslationManager = new (class {
 	_registeredRemoteTranslates = new Map();
 	
 	add(id, remoteTranslate) {
@@ -62,9 +60,9 @@ const TranslationManager = new class {
 		}
 		return returnValue;
 	}
-};
+});
 
-class TranslationParent extends JSWindowActorParent {
+export class TranslationParent extends JSWindowActorParent {
 	async receiveMessage(message) {
 		let { name, data } = message;
 		switch (name) {

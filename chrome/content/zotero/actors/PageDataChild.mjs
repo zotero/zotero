@@ -1,8 +1,6 @@
-var EXPORTED_SYMBOLS = ["PageDataChild"];
+import { documentIsReady } from "chrome://zotero/content/actors/actorUtils.mjs";
 
-let { documentIsReady } = ChromeUtils.importESModule("chrome://zotero/content/actors/actorUtils.mjs");
-
-class PageDataChild extends JSWindowActorChild {
+export class PageDataChild extends JSWindowActorChild {
 	async receiveMessage(message) {
 		// Special case for loadURI: don't wait for document to be ready,
 		// since we haven't loaded anything yet

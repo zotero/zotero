@@ -1,7 +1,4 @@
-var EXPORTED_SYMBOLS = ["ExternalLinkHandlerChild"];
-
-
-class ExternalLinkHandlerChild extends JSWindowActorChild {
+export class ExternalLinkHandlerChild extends JSWindowActorChild {
 	async handleEvent(event) {
 		switch (event.type) {
 			case "click": {
@@ -41,7 +38,7 @@ class ExternalLinkHandlerChild extends JSWindowActorChild {
 		}
 		let currentURL = this.contentWindow.location;
 		
-		// eslint-disable-next-line no-script-url
+		 
 		if (hrefURL.protocol === 'javascript:') {
 			// Link executes a script: open internally
 			return true;

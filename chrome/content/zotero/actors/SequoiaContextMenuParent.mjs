@@ -1,6 +1,4 @@
-var EXPORTED_SYMBOLS = ["SequoiaContextMenuParent"];
-
-class SequoiaContextMenuParent extends JSWindowActorParent {
+export class SequoiaContextMenuParent extends JSWindowActorParent {
 	async receiveMessage({ name, data }) {
 		switch (name) {
 			case "openContextMenuAtScreen": {
