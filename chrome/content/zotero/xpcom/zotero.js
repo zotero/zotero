@@ -385,7 +385,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}, "quit-application-granted", false);
 		
 		// Register shutdown handler to call Zotero.shutdown()
-		var _shutdownObserver = {observe:function () { Zotero.shutdown().done() }};
+		var _shutdownObserver = {observe:function () { Zotero.shutdown() }};
 		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
 		
 		// Get startup errors
