@@ -1,10 +1,8 @@
 /* global JSWindowActorChild:false */
 
-var EXPORTED_SYMBOLS = ["MendeleyAuthChild"]; // eslint-disable-line no-unused-vars
+import { documentIsReady } from "chrome://zotero/content/actors/actorUtils.mjs";  
 
-let { documentIsReady } = ChromeUtils.importESModule("chrome://zotero/content/actors/actorUtils.mjs");
-
-class MendeleyAuthChild extends JSWindowActorChild { // eslint-disable-line no-unused-vars
+export class MendeleyAuthChild extends JSWindowActorChild {  
 	async receiveMessage(message) {
 		let document = this.document;
 

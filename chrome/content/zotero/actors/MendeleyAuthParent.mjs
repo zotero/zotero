@@ -1,12 +1,10 @@
 /* global JSWindowActorParent:false */
 
-var EXPORTED_SYMBOLS = ["MendeleyAuthParent"]; // eslint-disable-line no-unused-vars
-
 ChromeUtils.defineESModuleGetters(this, {
 	Zotero: "chrome://zotero/content/zotero.mjs"
-});
+});  
 
-class MendeleyAuthParent extends JSWindowActorParent { // eslint-disable-line no-unused-vars
+export class MendeleyAuthParent extends JSWindowActorParent {  
 	async receiveMessage({ name, data }) {
 		switch (name) {
 			case "debug": {

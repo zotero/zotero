@@ -1,7 +1,4 @@
-var EXPORTED_SYMBOLS = ["ZoteroPrintChild"];
-
-
-class ZoteroPrintChild extends JSWindowActorChild {
+export class ZoteroPrintChild extends JSWindowActorChild {
 	actorCreated() {
 		Cu.exportFunction(
 			options => new this.contentWindow.Promise(

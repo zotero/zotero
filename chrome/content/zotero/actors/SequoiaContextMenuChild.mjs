@@ -1,12 +1,10 @@
-var { getTargetElement, createContextMenuEvent } = ChromeUtils.importESModule("chrome://zotero/content/contextMenuUtils.sys.mjs");
-
-var EXPORTED_SYMBOLS = ["SequoiaContextMenuChild"];
+import { getTargetElement, createContextMenuEvent } from "chrome://zotero/content/contextMenuUtils.sys.mjs";
 
 /**
  * Child-frame implementation of macOS Sequoia Ctrl-Enter context menu behavior.
  * See platformKeys.js for the chrome implementation.
  */
-class SequoiaContextMenuChild extends JSWindowActorChild {
+export class SequoiaContextMenuChild extends JSWindowActorChild {
 	async receiveMessage({ name }) {
 		switch (name) {
 			case "handleContextMenuEvent": {

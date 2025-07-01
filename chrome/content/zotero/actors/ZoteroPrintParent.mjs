@@ -1,6 +1,4 @@
-var EXPORTED_SYMBOLS = ["ZoteroPrintParent"];
-
-const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 
 XPCOMUtils.defineLazyModuleGetters(this, {
 });
@@ -9,7 +7,7 @@ ChromeUtils.defineESModuleGetters(this, {
 	Zotero: "chrome://zotero/content/zotero.mjs",
 });
 
-class ZoteroPrintParent extends JSWindowActorParent {
+export class ZoteroPrintParent extends JSWindowActorParent {
 	async receiveMessage({ name, data }) {
 		switch (name) {
 			case "zoteroPrint": {
