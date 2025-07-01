@@ -64,8 +64,9 @@
 			// getBoundingClientRect(), offsetWidth, scrollWidth, etc. on an element
 			// in this document from sizeToContent() will, bizarrely, cause things
 			// in the metadata table to overlap
-			// TODO: Revisit after next Fx platform upgrade
-			let doc = Services.appShell.hiddenDOMWindow.document;
+			// TEMP: fx140: Use document
+			// TODO: Check if this bug is still present and restore hiddenDOMWindow if necessary
+			let doc = document; // Services.appShell.hiddenDOMWindow.document;
 			let span = doc.createElement('span');
 			span.style.position = 'absolute';
 			span.style.visibility = 'hidden';
