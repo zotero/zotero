@@ -150,10 +150,7 @@ Zotero.Streamer_Module.prototype = {
 		this._ready = false;
 		this._reconnect = true;
 		
-		var window = Cc["@mozilla.org/appshell/appShellService;1"]
-			.getService(Ci.nsIAppShellService).hiddenDOMWindow;
-		this._socket = new window.WebSocket(url);
-		var deferred = Zotero.Promise.defer();
+		this._socket = new WebSocket(url);
 		
 		this._socket.onopen = () => {
 			Zotero.debug("WebSocket connection opened");
