@@ -14,10 +14,12 @@ collapsible-section {
 		@include focus-ring;
 		@include comfortable {
 			padding-block: 2px;
+			height: 24px;
 		}
 		
 		display: flex;
 		align-items: center;
+		height: 20px;
 		
 		.title-box {
 			flex: 1;
@@ -95,13 +97,25 @@ collapsible-section {
 		fill: var(--fill-tertiary);
 	}
 
-	@each $pane, $color in $item-pane-sections {
+	@each $pane, $data in $item-pane-sections {
+		$color: if(
+			type-of($data) == 'map' and map-has-key($data, 'color'),
+			map-get($data, 'color'),
+			$data
+		);
+
+		$icon: if(
+			type-of($data) == 'map' and map-has-key($data, 'icon'),
+			map-get($data, 'icon'),
+			$pane
+		);
+
 		&[data-pane="#{$pane}"] {
 			& > .head .title::before {
 				content: '';
 				width: 16px;
 				height: 16px;
-				background: icon-url("itempane/16/#{$pane}.svg") no-repeat center;
+				background: icon-url("itempane/16/#{$icon}.svg") no-repeat center;
 				-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
 				fill: $color;
 				stroke: $color;
