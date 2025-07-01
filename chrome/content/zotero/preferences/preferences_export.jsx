@@ -54,13 +54,13 @@ Zotero_Preferences.Export = {
 	/*
 	 * Builds the main Quick Copy drop-down from the current global pref
 	 */
-	populateQuickCopyList: Zotero.Promise.coroutine(function* () {
+	populateQuickCopyList: async function() {
 		// Initialize default format drop-down
 		var format = Zotero.Prefs.get("export.quickCopy.setting");
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		var menulist = document.getElementById("zotero-quickCopy-menu");
-		yield Zotero.Styles.init();
-		var translators = yield this.getQuickCopyTranslators();
+		await Zotero.Styles.init();
+		var translators = await this.getQuickCopyTranslators();
 		this.buildQuickCopyFormatDropDown(
 			menulist, format.contentType, format, translators
 		);
@@ -75,8 +75,8 @@ Zotero_Preferences.Export = {
 		});
 		localeMenulist.setAttribute('preference', "extensions.zotero.export.quickCopy.locale");
 		
-		yield this.refreshQuickCopySiteList();
-	}),
+		await this.refreshQuickCopySiteList();
+	},
 	
 	
 	/*
@@ -517,13 +517,13 @@ Zotero_Preferences.Export = {
 	},
 	
 	
-	deleteSelectedQuickCopySite: Zotero.Promise.coroutine(function* () {
+	deleteSelectedQuickCopySite: async function() {
 		var domainPath = this._rows[this._tree.selection.focused].domain;
-		yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domainPath]);
-		yield Zotero.QuickCopy.loadSiteSettings();
-		yield this.refreshQuickCopySiteList();
+		await Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domainPath]);
+		await Zotero.QuickCopy.loadSiteSettings();
+		await this.refreshQuickCopySiteList();
 		this.updateQuickCopySiteButtons();
-	}),
+	},
 	
 	
 	updateQuickCopyInstructions: function () {
