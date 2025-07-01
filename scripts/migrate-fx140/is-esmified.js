@@ -33,8 +33,12 @@ function generateESMURIMap(jsm_map) {
 }
 
 function isESMifiedSlow(resourceURI) {
-  if (!resourceURI.includes('/zotero/') && resourceURI.endsWith('.jsm')) {
-    return { result: true, jsms: [resourceURI.replace('.jsm', '.sys.mjs')] };
+  if (resourceURI.endsWith('.jsm')) {
+    if (resourceURI.includes('/zotero/')) {
+      return { result: true, jsms: [resourceURI.replace('.jsm', '.mjs')] };
+    } else {
+      return { result: true, jsms: [resourceURI.replace('.jsm', '.sys.mjs')] };
+    }
   }
   
   if (!(resourceURI in uri_map)) {
