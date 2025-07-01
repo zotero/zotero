@@ -181,7 +181,7 @@ Zotero.Plugins = new function () {
 				if (property === 'import') {
 					return function (uri) {
 						let esmURI = uri.replace('.jsm', uri.includes('/zotero/') ? '.mjs' : '.sys.mjs');
-						Zotero.warn('ChromeUtils.import() is deprecated. Use importESModule():\n'
+						Zotero.warn('ChromeUtils.import() has been removed. Use importESModule():\n'
 							+ `  ChromeUtils.importESModule("${esmURI}");`);
 						return receiver.importESModule(esmURI);
 					};
