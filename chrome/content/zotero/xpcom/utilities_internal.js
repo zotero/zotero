@@ -280,7 +280,7 @@ Zotero.Utilities.Internal = {
 	gunzip: async function (data) {
 		var deferred = Zotero.Promise.defer();
 		
-		ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
+		const { NetUtil } = ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 		
 		var is = Components.classes["@mozilla.org/io/string-input-stream;1"]
 			.createInstance(Ci.nsIStringInputStream);
@@ -581,7 +581,7 @@ Zotero.Utilities.Internal = {
 	 */
 	exec: function (cmd, args) {
 		if (typeof cmd == 'string') {
-			ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
+			const { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 			cmd = new FileUtils.File(cmd);
 		}
 		
