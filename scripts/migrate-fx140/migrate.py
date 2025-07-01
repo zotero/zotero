@@ -664,12 +664,12 @@ def try_rename_components_conf(command_context, path, jsm_name, esm_name):
 
 
 def esmify_name(name):
-    return re.sub(r"\.(jsm|js|jsm\.js)$", ".sys.mjs", name)
+    return re.sub(r"\.(jsm|js|jsm\.js)$", ".mjs", name)
 
 
 def esmify_path(jsm_path):
     jsm_name = jsm_path.name
-    esm_name = re.sub(r"\.(jsm|js|jsm\.js)$", ".sys.mjs", jsm_name)
+    esm_name = re.sub(r"\.(jsm|js|jsm\.js)$", ".mjs", jsm_name)
     esm_path = jsm_path.parent / esm_name
     return esm_path
 
@@ -713,7 +713,7 @@ def find_jsm_uri(jsm_path):
 
 
 def rename_single_file(command_context, vcs_utils, jsm_path, summary):
-    """Rename `jsm_path` to .sys.mjs, and fix references to the file in build
+    """Rename `jsm_path` to .mjs, and fix references to the file in build
     and test definitions."""
 
     def info(text):

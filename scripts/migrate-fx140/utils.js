@@ -68,7 +68,11 @@ function isString(node) {
 const jsmExtPattern = /\.(jsm|js|jsm\.js)$/;
 
 function esmifyExtension(path) {
-  return path.replace(jsmExtPattern, ".sys.mjs");
+  if (path.includes('/zotero/')) {
+    return path.replace(jsmExtPattern, ".mjs");
+  } else {
+    return path.replace(jsmExtPattern, ".sys.mjs");
+  }
 }
 
 // Given possible member expression, return the list of Identifier nodes in
