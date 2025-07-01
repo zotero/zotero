@@ -10,6 +10,7 @@
 		// Text is added asynchonously, so set a height for dialog auto-sizing
 		min-height: 1em;
 		margin-bottom: .5em;
+		max-width: 500px; // Avoid expanding the dialog too wide; instead, in some languages, the intro text will wrap.
 	}
 	
 	.body {

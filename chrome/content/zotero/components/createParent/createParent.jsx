@@ -25,14 +25,20 @@
 
 'use strict';
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 
 function CreateParent({ loading, item, toggleAccept }) {
 	// With React 18, this is required for the window's dialog to be properly sized
+	const ref = useRef();
 	useEffect(() => {
-		window.sizeToContent();
+		// Wait for Fluent to inject translated strings before resizing the dialog (fixes #5365).
+		const observer = new MutationObserver(() => window.sizeToContent());
+		observer.observe(ref.current, { childList: true, subtree: true });
+		return () => {
+			observer.disconnect();
+		};
 	}, []);
 
 	// When the input has/does not have characters toggle the accept button on the dialog
@@ -46,7 +52,7 @@ function CreateParent({ loading, item, toggleAccept }) {
 	};
 
 	return (
-		<div className="create-parent-container">
+		<div className="create-parent-container" ref={ ref }>
 			<div className="title">
 				{ item.attachmentFilename }
 			</div>
