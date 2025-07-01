@@ -174,6 +174,22 @@ Zotero.Plugins = new function () {
 			}
 		);
 		
+		// fx140: Shim ChromeUtils.import() in the plugin scope
+		// TODO: Do we want this?
+		scope.ChromeUtils = new Proxy(scope.ChromeUtils, {
+			get(target, property, receiver) {
+				if (property === 'import') {
+					return function (uri) {
+						let esmURI = uri.replace('.jsm', uri.includes('/zotero/') ? '.mjs' : '.sys.mjs');
+						Zotero.warn('ChromeUtils.import() has been removed. Use importESModule():\n'
+							+ `  ChromeUtils.importESModule("${esmURI}");`);
+						return receiver.importESModule(esmURI);
+					};
+				}
+				return Reflect.get(target, property, receiver);
+			}
+		});
+		
 		scopes.set(addon.id, scope);
 		
 		try {
