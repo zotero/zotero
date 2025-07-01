@@ -182,7 +182,7 @@ Zotero_Preferences.Cite = {
 	/**
 	 * Deletes selected styles from the styles pane
 	 **/
-	deleteStyle: Zotero.Promise.coroutine(function* () {
+	deleteStyle: async function() {
 		// get selected cslIDs
 		var styles = Zotero.Styles.getVisible();
 		var cslIDs = [];
@@ -203,16 +203,16 @@ Zotero_Preferences.Cite = {
 		if(ps.confirm(null, '', text)) {
 			// delete if requested
 			if(cslIDs.length == 1) {
-				yield selectedStyle.remove();
+				await selectedStyle.remove();
 			} else {
 				for(var i=0; i<cslIDs.length; i++) {
-					yield Zotero.Styles.get(cslIDs[i]).remove();
+					await Zotero.Styles.get(cslIDs[i]).remove();
 				}
 			}
 			
-			yield this.refreshStylesList();
+			await this.refreshStylesList();
 		}
-	}),
+	},
 	
 	
 	/**
