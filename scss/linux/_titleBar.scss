@@ -16,6 +16,10 @@
 	-moz-appearance: -moz-window-titlebar;
 	// fx128: cover transparent gap between titlebar and window body
 	margin-bottom: -1px;
+	// fx140: Titlebar is transparent by default, so add background and border
+	// TODO: Check these
+	background: var(--material-tabbar);
+	border-bottom: var(--material-panedivider);
 }
 
 #zotero-title-bar {
