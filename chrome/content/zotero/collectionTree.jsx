@@ -2973,7 +2973,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var collections = treeRow.getChildren();
 		
 		if (isLibrary) {
-			var savedSearches = await Zotero.Searches.getAll(libraryID).filter(s => !s.deleted);
+			var savedSearches = (await Zotero.Searches.getAll(libraryID)).filter(s => !s.deleted);
 			// Virtual collections default to showing if not explicitly hidden
 			var showDuplicates = this.props.hideSources.indexOf('duplicates') == -1
 				&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
