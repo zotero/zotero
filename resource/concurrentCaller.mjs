@@ -115,19 +115,21 @@ ConcurrentCaller.prototype.add = function (func) {
 	if (Array.isArray(func)) {
 		let promises = [];
 		for (let i = 0; i < func.length; i++) {
-			promises.push(this.start(func[i]).reflect());
+			promises.push(this.start(func[i]));
 		}
-		return Promise.all(promises);
+		return Promise.allSettled(promises).then(() => promises);
 	}
 	
-	if (!this._deferred || !this._deferred.promise.isPending()) {
+	if (!this._deferred) {
 		this._deferred = Promise.defer();
+		let onResolve = () => this._deferred = null;
+		this._deferred.promise.then(onResolve, onResolve);
 	}
 	
 	var deferred = Promise.defer();
 	this._queue.push({
-		func: Promise.method(func),
-		deferred: deferred
+		func,
+		deferred
 	});
 	return deferred.promise;
 }
@@ -151,7 +153,7 @@ ConcurrentCaller.prototype.start = function (func) {
 /**
  * Start processing if not already running and wait for all tasks to complete
  *
- * @return {Promise[]} - An array of promises for all currently queued tasks
+ * @return {Promise<Promise[]>} - An array of promises for all currently queued tasks
  */
 ConcurrentCaller.prototype.runAll = function () {
 	// If nothing queued, return immediately
@@ -163,7 +165,7 @@ ConcurrentCaller.prototype.runAll = function () {
 		var run = this._processNext();
 	}
 	while (run);
-	return this._deferred.promise.return(promises);
+	return this._deferred.promise.then(() => promises);
 }
 
 

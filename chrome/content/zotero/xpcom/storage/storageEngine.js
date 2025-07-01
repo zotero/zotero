@@ -227,11 +227,11 @@ Zotero.Sync.Storage.Engine.prototype.start = async function () {
 		let failed = 0;
 		
 		for (let p of results) {
-			if (p.isFulfilled()) {
+			try {
+				await p;
 				succeeded++;
 			}
-			else if (!p.isPending()) {
-				let e = p.reason();
+			catch (e) {
 				if (e instanceof Zotero.HTTP.CancelledException) {
 					Zotero.debug(`File ${type} sync cancelled for ${this.library.name} `
 						+ `(${succeeded} succeeded, ${failed} failed)`);
