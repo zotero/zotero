@@ -95,6 +95,10 @@ var Zotero_Preferences = {
 				let event = new Event('unload');
 				child.dispatchEvent(event);
 			}
+			if (pane.sandbox) {
+				Cu.nukeSandbox(pane.sandbox);
+				pane.sandbox = null;
+			}
 		}
 	},
 	
@@ -276,8 +280,12 @@ var Zotero_Preferences = {
 			await Zotero.Promise.delay();
 			
 			if (pane.scripts) {
+				pane.scope = new Cu.Sandbox(window, {
+					sandboxPrototype: window,
+					sandboxName: pane.rawLabel,
+				});
 				for (let script of pane.scripts) {
-					Services.scriptloader.loadSubScript(script, window);
+					Services.scriptloader.loadSubScript(script, pane.scope);
 				}
 			}
 			if (pane.stylesheets) {
