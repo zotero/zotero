@@ -748,7 +748,7 @@ Zotero.Utilities.Internal = {
 			totalTime += delay;
 			
 			Zotero.debug("Delaying " + delay + " ms");
-			yield Zotero.Promise.delay(delay).return(true);
+			yield Zotero.Promise.delay(delay).then(() => true);
 		}
 	},
 	
