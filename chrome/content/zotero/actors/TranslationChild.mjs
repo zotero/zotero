@@ -1,6 +1,4 @@
-var EXPORTED_SYMBOLS = ["TranslationChild"];
-
-let { documentIsReady } = ChromeUtils.importESModule("chrome://zotero/content/actors/actorUtils.mjs");
+import { documentIsReady } from "chrome://zotero/content/actors/actorUtils.mjs";
 
 const TRANSLATE_SCRIPT_PATHS = [
 	'src/zotero.js',
@@ -40,7 +38,7 @@ const OTHER_SCRIPT_URIS = [
 	'chrome://zotero/content/actors/translation/translate_item.js',
 ];
 
-class TranslationChild extends JSWindowActorChild {
+export class TranslationChild extends JSWindowActorChild {
 	_sandbox = null;
 	
 	async receiveMessage(message) {
@@ -161,11 +159,11 @@ class TranslationChild extends JSWindowActorChild {
 	
 	_makeTranslatorProvider(id) {
 		let { Zotero } = this._sandbox;
-		let makeProxy = method => (
+		let makeProxy = method => 
 			(...args) => this._sandbox.Promise.resolve(
 				this.sendQuery('Translators:call', { id, method, args })
 			).then(result => Cu.cloneInto(result, this._sandbox))
-		);
+		;
 		return Cu.cloneInto({
 			...Zotero.Translators,
 			get: makeProxy('get'),

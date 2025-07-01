@@ -1,6 +1,4 @@
-var EXPORTED_SYMBOLS = ["FeedAbstractChild"];
-
-class FeedAbstractChild extends JSWindowActorChild {
+export class FeedAbstractChild extends JSWindowActorChild {
 	_stylesheet;
 	
 	_stylesheetPromise;

@@ -1,10 +1,8 @@
-var EXPORTED_SYMBOLS = ["FeedAbstractParent"];
-
 ChromeUtils.defineESModuleGetters(this, {
 	Zotero: "chrome://zotero/content/zotero.mjs"
 });
 
-class FeedAbstractParent extends JSWindowActorParent {
+export class FeedAbstractParent extends JSWindowActorParent {
 	async receiveMessage({ name, data }) {
 		switch (name) {
 			case "getStylesheet": {

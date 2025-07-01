@@ -25,15 +25,11 @@
 
 var EXPORTED_SYMBOLS = ["RemoteTranslate"];
 
-ChromeUtils.import("chrome://zotero/content/actors/ActorManager.jsm");
 ChromeUtils.defineESModuleGetters(this, {
 	Zotero: "chrome://zotero/content/zotero.mjs",
-});
-
-const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
-XPCOMUtils.defineLazyModuleGetters(this, {
-	TranslationManager: "chrome://zotero/content/actors/TranslationParent.jsm",
-	ZOTERO_CONFIG: "resource://zotero/config.js",
+	ZOTERO_CONFIG: "resource://zotero/config.mjs",
+	ActorManager: "chrome://zotero/content/actors/ActorManager.mjs",
+	TranslationManager: "chrome://zotero/content/actors/TranslationParent.mjs",
 });
 
 class RemoteTranslate {
