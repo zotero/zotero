@@ -23,6 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
+const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 Zotero_Preferences.Advanced = {	
@@ -66,8 +67,8 @@ Zotero_Preferences.Advanced = {
 	},
 	
 	
-	updateTranslators: Zotero.Promise.coroutine(function* () {
-		var updated = yield Zotero.Schema.updateFromRepository(Zotero.Schema.REPO_UPDATE_MANUAL);
+	updateTranslators: async function () {
+		var updated = await Zotero.Schema.updateFromRepository(Zotero.Schema.REPO_UPDATE_MANUAL);
 		var button = document.getElementById('updateButton');
 		if (button) {
 			if (updated===-1) {
@@ -82,13 +83,13 @@ Zotero_Preferences.Advanced = {
 			button.setAttribute('label', label);
 			
 			if (updated && Zotero_Preferences.Cite) {
-				yield Zotero_Preferences.Cite.refreshStylesList();
+				await Zotero_Preferences.Cite.refreshStylesList();
 			}
 		}
-	}),
+	},
 	
 	
-	migrateDataDirectory: Zotero.Promise.coroutine(function* () {
+	migrateDataDirectory: async function () {
 		var currentDir = Zotero.DataDirectory.dir;
 		var defaultDir = Zotero.DataDirectory.defaultDir;
 		if (currentDir == defaultDir) {
@@ -96,24 +97,23 @@ Zotero_Preferences.Advanced = {
 			return;
 		}
 		
-		Cu.import("resource://zotero/config.js")
 		var ps = Services.prompt;
 		
 		// If there's a migration marker, point data directory back to the current location and remove
 		// it to trigger the migration again
 		var marker = PathUtils.join(defaultDir, Zotero.DataDirectory.MIGRATION_MARKER);
-		if (yield IOUtils.exists(marker)) {
+		if (await IOUtils.exists(marker)) {
 			Zotero.Prefs.clear('dataDir');
 			Zotero.Prefs.clear('useDataDir');
-			yield IOUtils.remove(marker);
+			await IOUtils.remove(marker);
 			try {
-				yield IOUtils.remove(PathUtils.join(defaultDir, '.DS_Store'));
+				await IOUtils.remove(PathUtils.join(defaultDir, '.DS_Store'));
 			}
 			catch (e) {}
 		}
 		
 		// ~/Zotero exists and is non-empty
-		if ((yield IOUtils.exists(defaultDir)) && !(yield Zotero.File.directoryIsEmpty(defaultDir))) {
+		if (((await IOUtils.exists(defaultDir))) && !((await Zotero.File.directoryIsEmpty(defaultDir)))) {
 			let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
 			let index = ps.confirmEx(
@@ -127,7 +127,7 @@ Zotero_Preferences.Advanced = {
 				null, null, null, {}
 			);
 			if (index == 0) {
-				yield Zotero.File.reveal(
+				await Zotero.File.reveal(
 					// Windows opens the directory, which might be confusing here, so open parent instead
 					Zotero.isWin ? PathUtils.parent(defaultDir) : defaultDir
 				);
@@ -138,7 +138,7 @@ Zotero_Preferences.Advanced = {
 		var additionalText = '';
 		if (Zotero.isWin) {
 			try {
-				let numItems = yield Zotero.DB.valueQueryAsync(
+				let numItems = await Zotero.DB.valueQueryAsync(
 					"SELECT COUNT(*) FROM itemAttachments WHERE linkMode IN (?, ?)",
 					[Zotero.Attachments.LINK_MODE_IMPORTED_FILE, Zotero.Attachments.LINK_MODE_IMPORTED_URL]
 				);
@@ -172,10 +172,10 @@ Zotero_Preferences.Advanced = {
 		);
 		
 		if (index == 0) {
-			yield Zotero.DataDirectory.markForMigration(currentDir);
+			await Zotero.DataDirectory.markForMigration(currentDir);
 			Zotero.Utilities.Internal.quitZotero(true);
 		}
-	}),
+	},
 	
 	
 	runIntegrityCheck: async function (button) {
@@ -367,23 +367,23 @@ Zotero_Preferences.Advanced = {
 	},
 	
 	
-	dataDirUpdate: Zotero.Promise.coroutine(function* (isCustomSelection) {
+	dataDirUpdate: async function (isCustomSelection) {
 		if (!isCustomSelection && this._usingDefaultDataDir()) return;
 		
 		// This call shows a filepicker if needed, forces a restart if required, and does nothing if
 		// cancel was pressed or value hasn't changed
-		yield Zotero.DataDirectory.choose(
+		await Zotero.DataDirectory.choose(
 			true,
 			!isCustomSelection,
 			() => Zotero.launchURL('https://www.zotero.org/support/zotero_data')
 		);
-	}),
+	},
 	
 	
 	setDataDirInput: async function () {
 		var filefield = document.getElementById('data-dir-path');
 		var path = Zotero.Prefs.get('dataDir');
-		if (path && await IOUtils.exists(path)) {
+		if (path && (await IOUtils.exists(path))) {
 			filefield.style.backgroundImage = 'url(moz-icon://' + Zotero.File.pathToFileURI(path) + '?size=16)';
 			filefield.value = path;
 		}
@@ -422,8 +422,8 @@ Zotero_Preferences.Advanced = {
 		return false;
 	},
 	
-	updateIndexStats: Zotero.Promise.coroutine(function* () {
-		var stats = yield Zotero.Fulltext.getIndexStats();
+	updateIndexStats: async function () {
+		var stats = await Zotero.Fulltext.getIndexStats();
 		document.getElementById('fulltext-stats-indexed')
 			.setAttribute('value', stats.indexed);
 		document.getElementById('fulltext-stats-partial')
@@ -432,7 +432,7 @@ Zotero_Preferences.Advanced = {
 			.setAttribute('value', stats.unindexed);
 		document.getElementById('fulltext-stats-words')
 			.setAttribute('value', stats.words);
-	}),
+	},
 	
 	
 	rebuildIndexPrompt: async function () {
@@ -572,7 +572,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		}
 		fp.init(window, Zotero.getString('attachmentBasePath.selectDir'), fp.modeGetFolder);
 		fp.appendFilters(fp.filterAll);
-		if (await fp.show() != fp.returnOK) {
+		if ((await fp.show()) != fp.returnOK) {
 			return false;
 		}
 		var newPath = PathUtils.normalize(fp.file);
@@ -743,14 +743,14 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	},
 	
 	
-	clearPath: Zotero.Promise.coroutine(function* () {
+	clearPath: async function () {
 		// Find all current attachments with relative paths
 		var sql = "SELECT itemID FROM itemAttachments WHERE linkMode=? AND path LIKE ?";
 		var params = [
 			Zotero.Attachments.LINK_MODE_LINKED_FILE,
 			Zotero.Attachments.BASE_PATH_PLACEHOLDER + "%"
 		];
-		var relativeAttachmentIDs = yield Zotero.DB.columnQueryAsync(sql, params);
+		var relativeAttachmentIDs = await Zotero.DB.columnQueryAsync(sql, params);
 		
 		// Prompt for confirmation
 		var ps = Services.prompt;
@@ -794,7 +794,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		Zotero.debug('Clearing base directory');
 		Zotero.Prefs.set('saveRelativeAttachmentPath', false);
 		
-		yield Zotero.Utilities.Internal.forEachChunkAsync(
+		await Zotero.Utilities.Internal.forEachChunkAsync(
 			relativeAttachmentIDs,
 			100,
 			function (chunk) {
@@ -811,13 +811,13 @@ Zotero_Preferences.Attachment_Base_Directory = {
 		);
 		
 		Zotero.Prefs.set('baseAttachmentPath', '');
-	}),
+	},
 	
 	
 	updateUI: async function () {
 		var filefield = document.getElementById('baseAttachmentPath');
 		var path = Zotero.Prefs.get('baseAttachmentPath');
-		if (path && await IOUtils.exists(path)) {
+		if (path && (await IOUtils.exists(path))) {
 			filefield.style.backgroundImage = 'url(moz-icon://' + Zotero.File.pathToFileURI(path) + '?size=16)';
 			filefield.value = path;
 		}

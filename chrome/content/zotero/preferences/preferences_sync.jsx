@@ -24,8 +24,8 @@
 */
 
 "use strict";
-Components.utils.import("resource://zotero/config.js");
 
+const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var VirtualizedTable = require('components/virtualized-table');
@@ -120,7 +120,7 @@ Zotero_Preferences.Sync = {
 	
 	
 	_secmodDeleted: false,
-	linkAccount: Zotero.Promise.coroutine(function* (event) {
+	linkAccount: async function(event) {
 		this.trimUsername();
 		var username = document.getElementById('sync-username-textbox').value;
 		var password = document.getElementById('sync-password').value;
@@ -133,7 +133,7 @@ Zotero_Preferences.Sync = {
 		// Try to acquire API key with current credentials
 		this.updateSyncIndicator('animated');
 		try {
-			var json = yield Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
+			var json = await Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
 		}
 		catch (e) {
 			// On "User canceled primary password entry", delete secmod.db and restart
@@ -144,7 +144,7 @@ Zotero_Preferences.Sync = {
 				Zotero.logError(e);
 				let profileDir = Zotero.Profile.dir;
 				let secmodPath = PathUtils.join(profileDir, 'secmod.db');
-				if (!this._secmodDeleted && !(yield IOUtils.exists(secmodPath))) {
+				if (!this._secmodDeleted && !((await IOUtils.exists(secmodPath)))) {
 					Zotero.debug("secmod.db doesn't exist");
 					setTimeout(function () {
 						Zotero.Sync.Runner.alert(e);
@@ -152,7 +152,7 @@ Zotero_Preferences.Sync = {
 					throw e;
 				}
 				Zotero.debug("Deleting secmod.db", 2);
-				yield IOUtils.remove(secmodPath);
+				await IOUtils.remove(secmodPath);
 				// Once we've deleted, keep showing the restart message
 				this._secmodDeleted = true;
 				
@@ -189,7 +189,7 @@ Zotero_Preferences.Sync = {
 			return;
 		}
 		
-		var ok = yield Zotero.Sync.Data.Local.checkUser(
+		var ok = await Zotero.Sync.Data.Local.checkUser(
 			window,
 			json.userID,
 			json.username,
@@ -215,7 +215,7 @@ Zotero_Preferences.Sync = {
 		});
 		
 		this.displayFields(json.username);
-	}),
+	},
 
 	/**
 	 * Updates the auth indicator icon, depending on status
@@ -230,7 +230,7 @@ Zotero_Preferences.Sync = {
 		}
 	},
 
-	unlinkAccount: Zotero.Promise.coroutine(function* (showAlert=true) {
+	unlinkAccount: async function(showAlert=true) {
 		if (showAlert) {
 			var check = {value: false};
 			var ps = Services.prompt;
@@ -248,9 +248,9 @@ Zotero_Preferences.Sync = {
 			if (index == 0) {
 				if (check.value) {
 					var resetDataDirFile = PathUtils.join(Zotero.DataDirectory.dir, 'reset-data-directory');
-					yield Zotero.File.putContentsAsync(resetDataDirFile, '');
+					await Zotero.File.putContentsAsync(resetDataDirFile, '');
 
-					yield Zotero.Sync.Runner.deleteAPIKey();
+					await Zotero.Sync.Runner.deleteAPIKey();
 					Zotero.Prefs.clear('sync.server.username');
 					return Zotero.Utilities.Internal.quitZotero(true);
 				}
@@ -261,8 +261,8 @@ Zotero_Preferences.Sync = {
 
 		this.displayFields();
 		Zotero.Prefs.clear('sync.librariesToSync');
-		yield Zotero.Sync.Runner.deleteAPIKey();
-	}),
+		await Zotero.Sync.Runner.deleteAPIKey();
+	},
 	
 	
 	showLibrariesToSyncDialog: function() {
@@ -437,7 +437,7 @@ Zotero_Preferences.Sync = {
 	},
 	
 	
-	updateStorageSettingsUI: Zotero.Promise.coroutine(function* () {
+	updateStorageSettingsUI: async function() {
 		this.unverifyStorageServer();
 		
 		var protocol = Zotero.Prefs.get('sync.storage.protocol');
@@ -459,7 +459,7 @@ Zotero_Preferences.Sync = {
 		
 		document.getElementById('storage-user-download-mode').disabled = !enabled;
 		this.updateStorageTerms();
-	}),
+	},
 	
 	
 	updateStorageSettingsGroupsUI: function () {
@@ -482,19 +482,19 @@ Zotero_Preferences.Sync = {
 	},
 	
 	
-	onStorageSettingsKeyPress: Zotero.Promise.coroutine(function* (event) {
+	onStorageSettingsKeyPress: async function(event) {
 		if (event.keyCode == 13) {
-			yield this.verifyStorageServer();
+			await this.verifyStorageServer();
 		}
-	}),
+	},
 	
 	
-	onStorageSettingsChange: Zotero.Promise.coroutine(function* () {
+	onStorageSettingsChange: async function() {
 		var oldProtocol = this._lastStorageProtocol;
 		var oldURL = this._lastStorageURL;
 		
 		// Necessary for pref to update
-		yield Zotero.Promise.delay(1);
+		await Zotero.Promise.delay(1);
 		var newProtocol = Zotero.Prefs.get('sync.storage.protocol');
 		
 		var newURL = Zotero.Prefs.get('sync.storage.url').trim()
@@ -503,7 +503,7 @@ Zotero_Preferences.Sync = {
 		Zotero.Prefs.set('sync.storage.url', newURL);
 		
 		if (oldProtocol != newProtocol || oldURL != newURL) {
-			yield Zotero.Sync.Storage.Local.resetAllSyncStates(Zotero.Libraries.userLibraryID);
+			await Zotero.Sync.Storage.Local.resetAllSyncStates(Zotero.Libraries.userLibraryID);
 		}
 		
 		if (oldProtocol == 'webdav') {
@@ -517,7 +517,7 @@ Zotero_Preferences.Sync = {
 			var password = document.getElementById('storage-password').value;
 			if (username) {
 				// Get a new controller
-				yield Zotero.Sync.Runner.getStorageController('webdav').setPassword(password);
+				await Zotero.Sync.Runner.getStorageController('webdav').setPassword(password);
 			}
 		}
 		
@@ -536,10 +536,10 @@ Zotero_Preferences.Sync = {
 				
 				if (index == 0) {
 					var sql = "INSERT OR IGNORE INTO settings VALUES (?,?,?)";
-					yield Zotero.DB.queryAsync(sql, ['storage', 'zfsPurge', 'user']);
+					await Zotero.DB.queryAsync(sql, ['storage', 'zfsPurge', 'user']);
 					
 					try {
-						yield Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles();
+						await Zotero.Sync.Storage.ZFS.purgeDeletedStorageFiles();
 						Services.prompt.alert(
 							null,
 							Zotero.getString("general.success"),
@@ -560,14 +560,14 @@ Zotero_Preferences.Sync = {
 		
 		this.updateStorageSettingsUI();
 		this.storeLastStorageSettings();
-	}),
+	},
 	
 	
-	verifyStorageServer: Zotero.Promise.coroutine(function* () {
+	verifyStorageServer: async function() {
 		// onchange weirdly isn't triggered when clicking straight from a field to the button,
 		// so we have to trigger this here (and we don't trigger it for Enter in
 		// onStorageSettingsKeyPress()).
-		yield this.onStorageSettingsChange();
+		await this.onStorageSettingsChange();
 		
 		Zotero.debug("Verifying storage");
 		
@@ -593,7 +593,7 @@ Zotero_Preferences.Sync = {
 		var controller = Zotero.Sync.Runner.getStorageController('webdav');
 		
 		try {
-			yield controller.checkServer({
+			await controller.checkServer({
 				// Get the XMLHttpRequest for possible cancelling
 				onRequest: r => request = r
 			})
@@ -617,7 +617,7 @@ Zotero_Preferences.Sync = {
 					break;
 				}
 			}
-			success = yield controller.handleVerificationError(e);
+			success = await controller.handleVerificationError(e);
 		}
 		finally {
 			verifyButton.hidden = false;
@@ -648,7 +648,7 @@ Zotero_Preferences.Sync = {
 				progressMeter.hidden = true;
 			}
 		}
-	}),
+	},
 	
 	
 	unverifyStorageServer: function () {
