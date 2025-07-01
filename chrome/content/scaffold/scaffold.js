@@ -23,11 +23,10 @@
     ***** END LICENSE BLOCK *****
 */
 
-var { E10SUtils } = ChromeUtils.import("resource://gre/modules/E10SUtils.jsm");
-var { Subprocess } = ChromeUtils.import("resource://gre/modules/Subprocess.jsm");
-var { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTranslate.jsm");
-var { ContentDOMReference } = ChromeUtils.import("resource://gre/modules/ContentDOMReference.jsm");
-
+var { E10SUtils } = ChromeUtils.importESModule("resource://gre/modules/E10SUtils.sys.mjs");
+var { Subprocess } = ChromeUtils.importESModule("resource://gre/modules/Subprocess.sys.mjs");
+var { RemoteTranslate } = ChromeUtils.importESModule("chrome://zotero/content/RemoteTranslate.mjs");
+var { ContentDOMReference } = ChromeUtils.importESModule("resource://gre/modules/ContentDOMReference.sys.mjs");
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
@@ -2147,7 +2146,7 @@ var Scaffold = new function () {
 
 		let eslintPath = getDefaultESLintPath();
 
-		while (!await IOUtils.exists(eslintPath)) {
+		while (!(await IOUtils.exists(eslintPath))) {
 			let ps = Services.prompt;
 			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING

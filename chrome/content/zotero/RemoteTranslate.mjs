@@ -23,16 +23,14 @@
     ***** END LICENSE BLOCK *****
 */
 
-var EXPORTED_SYMBOLS = ["RemoteTranslate"];
-
-ChromeUtils.defineESModuleGetters(this, {
+ChromeUtils.defineESModuleGetters(globalThis, {
 	Zotero: "chrome://zotero/content/zotero.mjs",
 	ZOTERO_CONFIG: "resource://zotero/config.mjs",
 	ActorManager: "chrome://zotero/content/actors/ActorManager.mjs",
 	TranslationManager: "chrome://zotero/content/actors/TranslationParent.mjs",
 });
 
-class RemoteTranslate {
+export class RemoteTranslate {
 	_browser = null;
 
 	_id = Zotero.Utilities.randomString();
