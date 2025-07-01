@@ -208,7 +208,7 @@ Zotero.FeedItem.prototype.toggleRead = async function (state) {
  * @return {Promise<FeedItem|Item>} translated feed item
  */
 Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
-	const { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTranslate.jsm");
+	const { RemoteTranslate } = ChromeUtils.importESModule("chrome://zotero/content/RemoteTranslate.mjs");
 	const { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
 
 	Zotero.debug("Translating feed item " + this.id + " with URL " + this.getField('url'), 2);
