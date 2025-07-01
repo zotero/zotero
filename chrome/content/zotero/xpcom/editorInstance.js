@@ -23,8 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
-
+var { InlineSpellChecker } = ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 // Note: TinyMCE is automatically doing some meaningless corrections to
