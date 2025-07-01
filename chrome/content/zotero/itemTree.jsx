@@ -34,7 +34,8 @@ const Icons = require('components/icons');
 const { getCSSIcon, getCSSItemTypeIcon } = Icons;
 const { COLUMNS } = require("zotero/itemTreeColumns");
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
-const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 
 const lazy = {};
 XPCOMUtils.defineLazyPreferenceGetter(
@@ -3668,9 +3669,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				html = Zotero.Utilities.htmlSpecialChars(html);
 				html = html.replace(
 					/\[([^\]]+)](.+)\[([^\]]+)]/,
-					`<span class="text-link" data-href="${window.ZOTERO_CONFIG.QUICK_START_URL}">$1</span>`
+					`<span class="text-link" data-href="${ZOTERO_CONFIG.QUICK_START_URL}">$1</span>`
 					+ '$2'
-					+ `<span class="text-link" data-href="${window.ZOTERO_CONFIG.CONNECTORS_URL}">$3</span>`
+					+ `<span class="text-link" data-href="${ZOTERO_CONFIG.CONNECTORS_URL}">$3</span>`
 				);
 				p.innerHTML = html;
 				div.appendChild(p);
@@ -3712,7 +3713,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				div = doc.createElement('div');
 				div.className = 'publications';
 				let p = doc.createElement('p');
-				p.textContent = Zotero.getString('publications.intro.text1', window.ZOTERO_CONFIG.DOMAIN_NAME);
+				p.textContent = Zotero.getString('publications.intro.text1', ZOTERO_CONFIG.DOMAIN_NAME);
 				div.appendChild(p);
 
 				p = doc.createElement('p');
