@@ -1,6 +1,7 @@
 /**
  * NOTE: Do not modify this file by hand.
  * Content was generated from xpc.msg and error_list.json.
+ * If you're updating some of the sources, see README for instructions.
  */
 
 interface nsIXPCComponents_Results {
@@ -368,6 +369,9 @@ interface nsIXPCComponents_Results {
   /** User refused navigation to potentially unsafe URL with embedded credentials/superfluos authentication */
   NS_ERROR_SUPERFLUOS_AUTH: 0x804b005b;
 
+  /** User attempted basic HTTP authentication when it is disabled */
+  NS_ERROR_BASIC_HTTP_AUTH_DISABLED: 0x804b005c;
+
   // Error codes return from the proxy
 
   /** The connection to the proxy server was refused */
@@ -411,6 +415,12 @@ interface nsIXPCComponents_Results {
 
   /** The connection was established, but no data was ever received */
   NS_ERROR_NET_RESET: 0x804b0014;
+
+  /** The connection was established, but the browser received an empty page with an error response */
+  NS_ERROR_NET_EMPTY_RESPONSE: 0x804b0024;
+
+  /** The connection was established, but the browser received an error response from the server */
+  NS_ERROR_NET_ERROR_RESPONSE: 0x804b0023;
 
   /** The connection was established, but the data transfer was interrupted */
   NS_ERROR_NET_INTERRUPT: 0x804b0047;
@@ -663,4 +673,11 @@ interface nsIXPCComponents_Results {
 
   /** The existing UserChoice Hash was verified, but we're on an older, unsupported Windows build, so do not attempt to update the UserChoice hash. */
   NS_ERROR_WDBA_BUILD: 0x80720004;
+
+  // Codes related to QuotaManager
+
+  /** Client initialization attempted before origin has been initialized. */
+  NS_ERROR_DOM_QM_CLIENT_INIT_ORIGIN_UNINITIALIZED: 0x80730001;
 }
+
+type nsIXPCComponents_Values = nsIXPCComponents_Results[keyof nsIXPCComponents_Results];
