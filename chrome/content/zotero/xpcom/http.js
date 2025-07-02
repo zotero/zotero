@@ -1104,79 +1104,61 @@ Zotero.HTTP = new function () {
 		var deferred = Zotero.Promise.defer();
 		Zotero.proxyAuthComplete = deferred.promise;
 		
-		// FIXME: fx140: replace call to Zotero.Promise.try()
-		Zotero.Promise.try(function () {
+		(async () => {
 			var uris = Zotero.Prefs.get('proxyAuthenticationURLs').split(',');
 			uris = Zotero.Utilities.arrayShuffle(uris);
 			uris.unshift(ZOTERO_CONFIG.PROXY_AUTH_URL);
 			
-			return Zotero.spawn(function* () {
-				for (let i = 0; i <= uris.length; i++) {
-					let uri = uris.shift();
-					if (!uri) {
-						break;
-					}
-					
-					// For non-Zotero URLs, wait for PAC initialization,
-					// in a rather ugly and inefficient manner
-					if (i == 1) {
-						let installed = yield // FIXME: fx140: replace call to Zotero.Promise.try()
-						Zotero.Promise.try(_pacInstalled)
-						.then(function (installed) {
-							if (installed) throw true;
-						})
-						.delay(500)
-						.then(_pacInstalled)
-						.then(function (installed) {
-							if (installed) throw true;
-						})
-						.delay(1000)
-						.then(_pacInstalled)
-						.then(function (installed) {
-							if (installed) throw true;
-						})
-						.delay(2000)
-						.then(_pacInstalled)
-						.catch(function () {
-							return true;
-						});
-						if (!installed) {
-							Zotero.debug("No general proxy or PAC file found -- assuming direct connection");
+			for (let i = 0; i <= uris.length; i++) {
+				let uri = uris.shift();
+				if (!uri) {
+					break;
+				}
+				
+				// For non-Zotero URLs, wait for PAC initialization
+				if (i == 1 && !_pacInstalled()) {
+					for (let delayIncrement = 0; delayIncrement < 3; delayIncrement++) {
+						await Zotero.Promise.delay(500 * Math.pow(2, delayIncrement));
+						if (_pacInstalled()) {
 							break;
 						}
 					}
-					
-					let proxyInfo = yield _proxyAsyncResolve(uri);
-					if (proxyInfo) {
-						Zotero.debug("Proxy required for " + uri + " -- making HEAD request to trigger auth prompt");
-						yield Zotero.HTTP.request("HEAD", uri, {
-							foreground: true,
-							noCache: true,
-							isProxyAuthRequest: true
-						})
-						.catch(function (e) {
-							Zotero.logError("Error connecting to proxy -- proxied requests may not work");
-							Zotero.logError(e);
-							
-							// Show error icon at startup
-							e.dialogHeader = Zotero.getString('networkError.errorViaProxy');
-							if (!e.dialogButtonText) {
-								e.dialogButtonText = Zotero.getString('general.moreInformation');
-								e.dialogButtonCallback = () => {
-									Zotero.launchURL('https://www.zotero.org/support/kb/connection_error');
-								};
-							}
-							Zotero.proxyFailure = e;
-						});
+					if (!_pacInstalled()) {
+						Zotero.debug("No general proxy or PAC file found -- assuming direct connection");
 						break;
 					}
-					else {
-						Zotero.debug("Proxy not required for " + uri);
-					}
 				}
-				deferred.resolve();
-			});
-		})
+				
+				let proxyInfo = await _proxyAsyncResolve(uri);
+				if (proxyInfo) {
+					Zotero.debug("Proxy required for " + uri + " -- making HEAD request to trigger auth prompt");
+					await Zotero.HTTP.request("HEAD", uri, {
+						foreground: true,
+						noCache: true,
+						isProxyAuthRequest: true
+					})
+					.catch(function (e) {
+						Zotero.logError("Error connecting to proxy -- proxied requests may not work");
+						Zotero.logError(e);
+						
+						// Show error icon at startup
+						e.dialogHeader = Zotero.getString('networkError.errorViaProxy');
+						if (!e.dialogButtonText) {
+							e.dialogButtonText = Zotero.getString('general.moreInformation');
+							e.dialogButtonCallback = () => {
+								Zotero.launchURL('https://www.zotero.org/support/kb/connection_error');
+							};
+						}
+						Zotero.proxyFailure = e;
+					});
+					break;
+				}
+				else {
+					Zotero.debug("Proxy not required for " + uri);
+				}
+			}
+			deferred.resolve();
+		})()
 		.catch(function (e) {
 			Components.utils.reportError(e);
 			Zotero.debug(e, 1);
@@ -1191,12 +1173,12 @@ Zotero.HTTP = new function () {
 	 * There might be a better way to do this that doesn't require stepping
 	 * through the error log and doing a fragile string comparison.
 	 */
-	_pacInstalled = function () {
+	var _pacInstalled = function () {
 		return Zotero.getErrors(true).some(val => val.indexOf("PAC file installed") == 0)
 	}
 	
 	
-	_proxyAsyncResolve = function (uri) {
+	var _proxyAsyncResolve = function (uri) {
 		ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 		var pps = Components.classes["@mozilla.org/network/protocol-proxy-service;1"]
 			.getService(Components.interfaces.nsIProtocolProxyService);
