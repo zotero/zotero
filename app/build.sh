@@ -277,10 +277,10 @@ browser_keep=(
 	# For spellchecking
 	content/browser/built_in_addons.json
 )
-#if [ $BUILD_WIN == 1 ] || [ $BUILD_LINUX == 1 ]; then
-#	# Windows/Linux window controls
-#	browser_keep+=(skin/classic/browser/window-controls)
-#fi
+if [ $BUILD_WIN == 1 ]; then
+	# Windows window controls
+	browser_keep+=(skin/classic/browser/window-controls)
+fi
 for file in "${browser_keep[@]}"; do
 	mkdir -p "$(dirname "chrome/browser-fx/$file")"
 	mv "chrome/browser/$file" "chrome/browser-fx/$file"
