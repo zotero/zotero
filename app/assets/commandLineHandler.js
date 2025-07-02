@@ -68,8 +68,8 @@ if (cmdLine.handleFlag("debugger", false)) {
 		try {
 			let portOrPath = Services.prefs.getBranch('').getIntPref('devtools.debugger.remote-port');
 			
-			const { DevToolsLoader } = ChromeUtils.import(
-				"resource://devtools/shared/loader/Loader.jsm"
+			const { DevToolsLoader } = ChromeUtils.importESModule(
+				"resource://devtools/shared/loader/Loader.sys.mjs"
 			);
 			const loader = new DevToolsLoader({
 				freshCompartment: true,
