@@ -703,27 +703,20 @@ var Zotero_File_Interface = new function () {
 	
 	
 	var _getMendeleyTranslation = async function () {
+		let Zotero_Import_Mendeley;
 		if (true) {
-			Cu.import("chrome://zotero/content/import/mendeley/mendeleyImport.js");
+			({ Zotero_Import_Mendeley } = ChromeUtils.importESModule("chrome://zotero/content/import/mendeley/mendeleyImport.js"));
 		}
 		// TEMP: Load uncached from ~/zotero-client for development
 		else {
-			ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
+			const { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 			let file = FileUtils.getDir("Home", []);
 			file = OS.Path.join(
 				file.path,
 				'zotero-client', 'chrome', 'content', 'zotero', 'import', 'mendeley', 'mendeleyImport.js'
 			);
 			let fileURI = OS.Path.toFileURI(file);
-			let xmlhttp = await Zotero.HTTP.request(
-				'GET',
-				fileURI,
-				{
-					noCache: true,
-					responseType: 'text'
-				}
-			);
-			eval(xmlhttp.response);
+			({ Zotero_Import_Mendeley } = ChromeUtils.importESModule(fileURI));
 		}
 		return new Zotero_Import_Mendeley();
 	};
