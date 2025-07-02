@@ -1,0 +1,25 @@
+# Gecko typelibs
+
+This directory contains generated TypeScript declarations for types and components
+exposed to js on the Gecko platform. The files are generated
+from various sources in the tree using tools/ts/build_*.js scripts.
+
+If you're modifying some of the interfaces or other source files, until we
+find the best way to integrate this process, updating the typelibs is optional.
+If you want to see the result of your changes right away, you can run:
+
+    mach ts build && mach ts update
+
+This will update the typelibs inside your source tree, and you can commit
+them alongside your changes. Because this step is not automated, it's likely
+it will pick up previous updates unrelated to your patch, in which case it
+might be worth splitting out into a separate commit.
+
+There are also other ``mach ts`` commands for generating the files not updated
+with the command above.
+
+If there's an error with the process, updating the typelibs is not a blocker
+for landing your patch, but please file a bug in the Linting and Formatting
+component and ni?zombie.
+
+https://bugzilla.mozilla.org/enter_bug.cgi?product=Developer+Infrastructure&component=Lint+and+Formatting
