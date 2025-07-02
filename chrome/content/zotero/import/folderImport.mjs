@@ -1,5 +1,3 @@
-var EXPORTED_SYMBOLS = ["Zotero_Import_Folder"]; // eslint-disable-line no-unused-vars
-
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
 
 // matches "*" and "?" wildcards of a glob pattern, case-insensitive
@@ -44,7 +42,7 @@ const findItemByHash = async (libraryID, hash) => {
 	return null;
 };
 
-class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
+export class Zotero_Import_Folder {
 	constructor({ mimeTypes = ['application/pdf'], fileTypes, folder, libraryID, recreateStructure }) {
 		this.folder = folder;
 		this.libraryID = libraryID;
@@ -130,7 +128,7 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 						if (prevParentCollectionID) {
 							parentCollection.parentID = prevParentCollectionID;
 						}
-						await parentCollection.saveTx({ skipSelect: true }); //eslint-disable-line no-await-in-loop
+						await parentCollection.saveTx({ skipSelect: true });
 						prevParentCollectionID = parentCollection.id;
 					}
 				}
