@@ -236,7 +236,7 @@ describe("ZoteroPane", function() {
 			await Zotero.Users.setCurrentUsername("testuser");
 		})
 		afterEach(function* () {
-			var defer = new Zotero.Promise.defer();
+			var defer = Zotero.Promise.defer();
 			httpd.stop(() => defer.resolve());
 			yield defer.promise;
 		})

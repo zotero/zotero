@@ -391,7 +391,7 @@ describe("Zotero.Attachments", function() {
 		});
 
 		afterEach(async function () {
-			var defer = new Zotero.Promise.defer();
+			var defer = Zotero.Promise.defer();
 			httpd.stop(() => defer.resolve());
 			await defer.promise;
 		});
