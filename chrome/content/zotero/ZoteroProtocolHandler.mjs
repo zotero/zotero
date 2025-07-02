@@ -69,7 +69,7 @@ export function ZoteroProtocolHandler() {
 					if (!uriPath) {
 						return this._errorChannel('Invalid URL');
 					}
-					uriPath = uriPath.substr('//attachment/'.length);
+					uriPath = uriPath.substring(1);
 					
 					var params = {};
 					var router = new Zotero.Router(params);
@@ -185,7 +185,7 @@ export function ZoteroProtocolHandler() {
 				if (!path) {
 					return 'Invalid URL';
 				}
-				path = path.substr('//report/'.length);
+				path = path.substring(1);
 				
 				// Proxy CSS files
 				if (path.endsWith('.css')) {
@@ -823,8 +823,7 @@ export function ZoteroProtocolHandler() {
 			if (!path) {
 				return 'Invalid URL';
 			}
-			path = path.substr('//select/'.length);
-			var mimeType, content = '';
+			path = path.substring(1);
 			
 			var params = {
 				objectType: 'item'
@@ -1049,7 +1048,7 @@ export function ZoteroProtocolHandler() {
 			if (!uriPath) {
 				return 'Invalid URL';
 			}
-			uriPath = uriPath.replace(/^\/\/open(-pdf)?\//, '');
+			uriPath = uriPath.substring(1);
 			
 			var params = {
 				objectType: 'item'
