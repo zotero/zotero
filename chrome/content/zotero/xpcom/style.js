@@ -768,9 +768,6 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, automaticJournalA
 			let updateXSLT = new DOMParser()
 				.parseFromString(xsl, "application/xml");
 			
-			// XSLTProcessor is no longer available in XPCOM, so get from hidden window
-			let XSLTProcessor = Cc["@mozilla.org/appshell/appShellService;1"]
-				.getService(Ci.nsIAppShellService).hiddenDOMWindow.XSLTProcessor;
 			// load XSLT file into XSLTProcessor
 			Zotero.Styles.xsltProcessor = new XSLTProcessor();
 			Zotero.Styles.xsltProcessor.importStylesheet(updateXSLT);
