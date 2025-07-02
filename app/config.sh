@@ -4,7 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 GECKO_VERSION_MAC="128.7.0esr"
 GECKO_VERSION_LINUX="140.0esr"
 GECKO_VERSION_WIN="128.6.0esr"
-RUST_VERSION=1.78.0
+RUST_VERSION=1.86.0
 
 # URL prefix for custom builds of Firefox components
 custom_components_url="https://download.zotero.org/dev/firefox-components/"
