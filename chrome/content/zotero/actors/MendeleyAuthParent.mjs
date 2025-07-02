@@ -1,6 +1,6 @@
 /* global JSWindowActorParent:false */
 
-ChromeUtils.defineESModuleGetters(this, {
+ChromeUtils.defineESModuleGetters(globalThis, {
 	Zotero: "chrome://zotero/content/zotero.mjs"
 });  
 
