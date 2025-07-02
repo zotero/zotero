@@ -417,6 +417,23 @@
 
 			if (this._isAlreadyRendered()) return;
 			
+			try {
+				// Firefox's grid layout implementation has a bug that causes rows
+				// to overlap due to bad layout invalidation after some synchronous
+				// modifications of the DOM, like the ones made by editable-text's
+				// _getContentWidth() method.
+				// Build our table as a normal block element and then revert to
+				// grid layout at the end to force a single layout recalculation
+				// after everything is stable.
+				this._infoTable.style.display = 'block';
+				this._renderInternal();
+			}
+			finally {
+				this._infoTable.style.display = '';
+			}
+		}
+
+		_renderInternal() {
 			this._saveFieldFocus();
 
 			delete this._linkMenu.dataset.link;
