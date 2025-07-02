@@ -24,9 +24,8 @@
 */
 
 
-const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.mjs");
-
-ChromeUtils.importESModule("chrome://zotero/content/actors/ActorManager.mjs");
+import { BlockingObserver } from "chrome://zotero/content/BlockingObserver.mjs";
+import "chrome://zotero/content/actors/ActorManager.mjs";
 
 /* global HiddenFrame, E10SUtils */
 ChromeUtils.defineESModuleGetters(globalThis, {
