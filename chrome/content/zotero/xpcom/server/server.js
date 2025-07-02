@@ -24,7 +24,7 @@
 */
 
 var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");
-ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
+var { NetUtil } = ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 
 Zotero.Server = new function () {
 	var _onlineObserverRegistered, serv;
