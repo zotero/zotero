@@ -96,23 +96,20 @@ Zotero.Sync.Data.FullTextEngine.prototype._download = async function (libraryVer
 		keys.push(key);
 	}
 	
-	this.requestPromises = [];
-	
-	await // FIXME: fx140: replace call to Zotero.Promise.map()
-	Zotero.Promise.map(keys, (key) => {
-		this._stopCheck();
-		return this.apiClient.getFullTextForItem(
-			this.library.libraryType, this.library.libraryTypeID, key
-		)
-		.then((results) => {
+	// Process batches of 8 keys concurrently
+	await Zotero.Utilities.Internal.forEachChunkAsync(keys, 8, async (keys) => {
+		await Promise.all(keys.map(async (key) => {
+			this._stopCheck();
+			let results = await this.apiClient.getFullTextForItem(
+				this.library.libraryType, this.library.libraryTypeID, key
+			);
 			this._stopCheck();
 			if (!results) return;
-			return Zotero.Fulltext.setItemContent(
+			await Zotero.Fulltext.setItemContent(
 				this.libraryID, key, results.data, results.version
-			)
-		})
-	}, // Prepare twice the number of concurrent requests
-	{ concurrency: 8 });
+			);
+		}));
+	});
 	
 	await Zotero.FullText.setLibraryVersion(this.libraryID, results.libraryVersion);
 };
