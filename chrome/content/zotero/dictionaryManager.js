@@ -39,7 +39,7 @@ var Zotero_Dictionary_Manager = new function () {
 		var availableUpdates = await Zotero.Dictionaries.getAvailableUpdates(availableDictionaries);
 		updateMap = new Map(availableUpdates.map(x => [x.old.id, { id: x.new.id, version: x.new.version }]));
 		
-		var { InlineSpellChecker } = ChromeUtils.import("resource://gre/modules/InlineSpellChecker.jsm", {});
+		var { InlineSpellChecker } = ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
 		var isc = new InlineSpellChecker();
 		
 		// Start with installed dictionaries
