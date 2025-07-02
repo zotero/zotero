@@ -30,10 +30,10 @@ ChromeUtils.importESModule("chrome://zotero/content/actors/ActorManager.mjs");
 
 /* global HiddenFrame, E10SUtils */
 ChromeUtils.defineESModuleGetters(globalThis, {
-    E10SUtils: "resource://gre/modules/E10SUtils.sys.mjs",
-    HiddenFrame: "resource://gre/modules/HiddenFrame.sys.mjs",
-    Zotero: "chrome://zotero/content/zotero.mjs",
-    setTimeout: "resource://gre/modules/Timer.sys.mjs"
+	E10SUtils: "resource://gre/modules/E10SUtils.sys.mjs",
+	HiddenFrame: "resource://gre/modules/HiddenFrame.sys.mjs",
+	Zotero: "chrome://zotero/content/zotero.mjs",
+	setTimeout: "resource://gre/modules/Timer.sys.mjs"
 });
 
 const progressListeners = new Set();
