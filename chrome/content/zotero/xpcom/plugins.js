@@ -339,7 +339,15 @@ Zotero.Plugins = new function () {
 	 */
 	this.getIconURI = async function (id, idealSize) {
 		var addon = await AddonManager.getAddonByID(id);
-		return AddonManager.getPreferredIconURL(addon, idealSize, Services.appShell.hiddenDOMWindow);
+		return AddonManager.getPreferredIconURL(
+			addon,
+			idealSize,
+			// This window argument is optional, only used for determining
+			// whether to get the hiDPI icon.
+			// Use the main window (which we always have, except on non-macOS),
+			// falling back to the hidden window (which we always have on macOS).
+			Zotero.getMainWindow() || Services.appShell.hiddenDOMWindow
+		);
 	};
 	
 	
