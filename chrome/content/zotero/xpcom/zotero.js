@@ -1582,10 +1582,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		return Zotero.Utilities.Internal.serial(fn);
 	}
 	
-	this.spawn = function (generator, thisObject) {
-		return Zotero.Utilities.Internal.spawn(generator, thisObject);
-	}
-	
 	/**
 	 * Show Zotero pane overlay and progress bar in all windows
 	 *

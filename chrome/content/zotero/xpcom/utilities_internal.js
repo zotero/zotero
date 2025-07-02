@@ -1823,13 +1823,6 @@ Zotero.Utilities.Internal = {
 		};
 	},
 	
-	spawn: function (generator, thisObject) {
-		if (thisObject) {
-			return generator.bind(thisObject)();
-		}
-		return generator();
-	},
-
 	/**
 	 * Defines property on the object
 	 * More compact way to do Object.defineProperty
