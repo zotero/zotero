@@ -481,7 +481,7 @@ Zotero.Library.prototype.save = async function (options) {
 	}
 };
 
-Zotero.Library.prototype._initSave = function (env) {
+Zotero.Library.prototype._initSave = async function (env) {
 	if (this._libraryID === undefined) {
 		env.isNew = true;
 		
