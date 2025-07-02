@@ -587,8 +587,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = async function (objectType,
 		var num = 0;
 		
 		// Process batches of object data as they're available, one at a time
-		await // FIXME: fx140: replace call to Zotero.Promise.map()
-		Zotero.Promise.map(results, async function ({ keys: batchKeys, json, error }) {
+		await Array.fromAsync(results, async function ({ keys: batchKeys, json, error }) {
 			this._statusCheck();
 			
 			Zotero.debug(`Processing batch of downloaded ${objectTypePlural} in ${this.library.name}`);
