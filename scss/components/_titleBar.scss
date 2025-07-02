@@ -18,7 +18,7 @@
 
 	/* ::::: Tabs in Titlebar :::::: */
 	
-	&:not([chromemargin]) > #titlebar {
+	&:not([customtitlebar]) > #titlebar {
 		display: none;
 	}
 	
@@ -39,8 +39,8 @@
 		* doesn't reverse the order of the items in the titlebar in RTL mode. */
 		.titlebar-placeholder[type="caption-buttons"],
 		.titlebar-buttonbox {
-			margin-right: 12px;
-			margin-left: 12px;
+			margin-block: 10px;
+			margin-inline: 12px;
 		}
 		
 		.titlebar-buttonbox {
