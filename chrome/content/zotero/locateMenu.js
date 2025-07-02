@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+var { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 
 /*
  * This object contains the various functions for the interface

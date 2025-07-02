@@ -33,7 +33,7 @@ const ZipReader = Components.Constructor(
 	"open"
 );
 
-ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
+var { InlineSpellChecker } = ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
 const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
