@@ -60,18 +60,11 @@
 		];
 		
 		static get _textMeasurementSpan() {
-			// Create our hidden span in the hiddenDOMWindow, because any calls to
-			// getBoundingClientRect(), offsetWidth, scrollWidth, etc. on an element
-			// in this document from sizeToContent() will, bizarrely, cause things
-			// in the metadata table to overlap
-			// TEMP: fx140: Use document
-			// TODO: Check if this bug is still present and restore hiddenDOMWindow if necessary
-			let doc = document; // Services.appShell.hiddenDOMWindow.document;
-			let span = doc.createElement('span');
+			let span = document.createElement('span');
 			span.style.position = 'absolute';
 			span.style.visibility = 'hidden';
 			span.style.whiteSpace = 'pre';
-			doc.documentElement.append(span);
+			document.documentElement.append(span);
 
 			window.addEventListener('unload', () => {
 				span.remove();
