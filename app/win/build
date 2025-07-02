@@ -10,7 +10,7 @@ if [ -z "${1:-}" ]; then
 	exit 1
 fi
 
-gecko_path=/c/mozilla-source/mozilla-unified
+gecko_path=/c/mozilla-source/firefox
 arch=$1
 
 if [ ! -d "$gecko_path" ]; then
