@@ -9,7 +9,7 @@ fx_app_name=Firefox.app
 
 # Get Mozilla source directory from command line
 if [ -z "${1:-}" ]; then
-	echo "Usage: $0 /path/to/mozilla-unified" >&2
+	echo "Usage: $0 /path/to/firefox" >&2
 	exit 1
 fi
 GECKO_PATH=$1
