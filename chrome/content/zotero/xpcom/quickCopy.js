@@ -60,23 +60,19 @@ Zotero.QuickCopy = new function () {
 			// if an export format is selected
 			if (Zotero.test) return;
 			
-			_initPromise = // FIXME: fx140: replace call to Zotero.Promise.each()
-			Zotero.Promise.each([
-				() => _loadOutputFormat(),
-				() => _loadNoteOutputFormat(),
-				() => this.loadSiteSettings()
-			], f => f());
+			_initPromise = (async () => {
+				await _loadOutputFormat();
+				await _loadNoteOutputFormat();
+				await this.loadSiteSettings();
+			})();
 		}.bind(this));
 	};
 	
 	
 	this.uninit = function () {
 		_initCancelled = true;
-		// Cancel load if in progress
-		if (_initPromise) {
-			// FIXME: fx140: replace call to Zotero.Promise instance method 'cancel()'
-			_initPromise.cancel();
-		}
+		// TODO: fx140: We used to explicitly cancel the Bluebird _initPromise here
+		// Is it OK to let it complete?
 		Zotero.Prefs.unregisterObserver(this._prefObserverID);
 	};
 	
