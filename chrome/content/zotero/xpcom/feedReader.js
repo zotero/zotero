@@ -125,11 +125,8 @@ Zotero.FeedReader = function (url) {
 	}.bind(this));
 	
 	// The feed processor and related modules assume a content window environment, so we'll simulate
-	// one via a sandbox in a parent window. You might think we could jump straight to
-	// `hiddenDOMWindow` as a parent window, since it does indeed exist on all platforms...
-	// However, when loading scripts into the `hiddenDOMWindow` on Windows and Linux, they get
-	// stuck in some lazily parsed state which bizarrely drops function prototypes. To avoid this,
-	// we prefer other parent windows first, which work fine on all platforms.
+	// one via a sandbox in a parent window. hiddenDOMWindow doesn't exist outside macOS, so we
+	// prefer other parent windows first, which work fine on all platforms.
 	let parentWindow = Services.wm.getMostRecentWindow("navigator:browser");
 	if (!parentWindow) {
 		parentWindow = Services.ww.activeWindow;
