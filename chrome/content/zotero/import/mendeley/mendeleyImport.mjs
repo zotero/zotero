@@ -1,8 +1,6 @@
- 
-/* global mendeleyDBMaps:false, mendeleyOnlineMappings:false, mendeleyAPIUtils:false, PathUtils: false */
-var EXPORTED_SYMBOLS = ["Zotero_Import_Mendeley"];  
+/* global mendeleyDBMaps:false, mendeleyOnlineMappings:false, mendeleyAPIUtils:false */
+import { OS } from "chrome://zotero/content/osfile.mjs";
 
-var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyOnlineMappings.js");
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyAPIUtils.js");
@@ -24,7 +22,7 @@ colorMap.set('#d3c2ff', '#a28ae5');
 colorMap.set('rgb(220, 255, 176)', '#5fb236');
 colorMap.set('#dcffb0', '#5fb236');
 
-var Zotero_Import_Mendeley = function () {
+export var Zotero_Import_Mendeley = function () {
 	this.createNewCollection = null;
 	this.linkFiles = null;
 	this.newItems = [];
