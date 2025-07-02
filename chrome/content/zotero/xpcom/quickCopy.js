@@ -85,11 +85,12 @@ Zotero.QuickCopy = new function () {
 		_siteSettings = rows.map(row => {
 			return {
 				domainPath: row.domainPath,
-				format: row.format 
+				format: row.format
 			};
 		});
-		await // FIXME: fx140: replace call to Zotero.Promise.map()
-		Zotero.Promise.map(rows, row => _preloadFormat(row.format));
+		for (let row of rows) {
+			await _preloadFormat(row.format);
+		}
 	};
 	
 	
