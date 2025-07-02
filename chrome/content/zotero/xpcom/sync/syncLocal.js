@@ -263,11 +263,8 @@ Zotero.Sync.Data.Local = {
 	
 	resetUnsyncedLibraryData: async function (libraryID) {
 		let settings = await Zotero.SyncedSettings.getUnsynced(libraryID);
-		if (Object.keys(settings).length) {
-			await // FIXME: fx140: replace call to Zotero.Promise.each()
-			Zotero.Promise.each(Object.keys(settings), function (key) {
-				return Zotero.SyncedSettings.clear(libraryID, key, { skipDeleteLog: true });
-			});
+		for (let key of Object.keys(settings)) {
+			await Zotero.SyncedSettings.clear(libraryID, key, { skipDeleteLog: true });
 		}
 		
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(libraryID)) {
