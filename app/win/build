@@ -6,7 +6,7 @@ APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 . "$APP_ROOT_DIR/config.sh"
 
 if [ -z "${1:-}" ]; then
-	echo "Usage: $0 x64|arm64|686" >&2
+	echo "Usage: $0 x64|arm64|win32" >&2
 	exit 1
 fi
 
