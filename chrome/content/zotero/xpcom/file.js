@@ -662,7 +662,7 @@ Zotero.File = new function () {
 	 */
 	this.removeIfExists = function (path) {
 		return Promise.resolve(OS.File.remove(path))
-		.return(true)
+		.then(() => true)
 		.catch(function (e) {
 			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
 				return false;
