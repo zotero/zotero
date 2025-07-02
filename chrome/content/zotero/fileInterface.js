@@ -452,7 +452,7 @@ var Zotero_File_Interface = new function () {
 			translation.relinkOnly = options.relinkOnly;
 		}
 		else if (options.folder) {
-			Cu.import("chrome://zotero/content/import/folderImport.js");
+			const { Zotero_Import_Folder } = ChromeUtils.importESModule("chrome://zotero/content/import/folderImport.js");
 			translation = new Zotero_Import_Folder({
 				folder: options.folder,
 				recreateStructure: options.recreateStructure,
