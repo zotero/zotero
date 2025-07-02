@@ -223,22 +223,18 @@ Zotero.FeedReader.prototype.terminate = function (status) {
 	Zotero.debug("FeedReader: Terminating feed reader (" + status + ")");
 	
 	// Reject feed promise if not resolved yet
-	if (this._feedProcessed.promise.isPending()) {
-		this._feedProcessed.reject(new Error(status));
-	}
+	this._feedProcessed.reject(new Error(status));
 	
 	// Reject feed item promise if not resolved yet
 	let lastItem = this._feedItems[this._feedItems.length - 1];
-	if (lastItem.promise.isPending()) {
-		// It seemed like a good idea to reject the last item but
-		// it's not really been useful yet, aside from bluebird
-		// throwing errors about unhandled rejections in tests
-		// so we suppress them here. TODO: We should probably
-		// rethink whether this code makes sense and make it better.
-		let er = new Error(status);
-		er.handledRejection = true;
-		lastItem.reject(er);
-	}
+	// It seemed like a good idea to reject the last item but
+	// it's not really been useful yet, aside from bluebird
+	// throwing errors about unhandled rejections in tests
+	// so we suppress them here. TODO: We should probably
+	// rethink whether this code makes sense and make it better.
+	// FIXME: fx140: We can no longer "handle" the rejection here
+	let er = new Error(status);
+	lastItem.reject(er);
 };
 
 Zotero.defineProperty(Zotero.FeedReader.prototype, 'feedProperties', {
