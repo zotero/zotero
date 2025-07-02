@@ -59,6 +59,16 @@
 	position: static;
 	// Fix KDE rendering bug
 	z-index: 1;
+
+	// Fix X11 button background rendering bug
+	pointer-events: none;
+	-moz-window-dragging: drag;
+	background: transparent !important;
+
+	.toolbarbutton-icon {
+		pointer-events: all;
+		-moz-window-dragging: no-drag;
+	}
 }
 
 .titlebar-icon-container {
@@ -67,97 +77,135 @@
 
 // Following rules from https://searchfox.org/mozilla-central/source/browser/themes/linux/browser.css
 
+/**
+ * Titlebar drawing:
+ *
+ * GTK windows have both a window radius (exposed via the
+ * `-moz-gtk-csd-titlebar-radius`) environment variable, and a window shadow
+ * (which we can't read back from GTK). Note that the -moz-window-decorations
+ * (in X11) or the compositor (in Wayland) does draw the shadow corners
+ * already.
+ */
+:root[customtitlebar] {
+	background-color: transparent;
+
+	&[sizemode="normal"]:not([gtktiledwindow="true"]) {
+		/* This takes care of drawing our window decorations on X11 */
+		-moz-default-appearance: -moz-window-decorations;
+		appearance: auto;
+
+		#navigator-toolbox,
+		dialog::backdrop {
+			border-top-left-radius: env(-moz-gtk-csd-titlebar-radius);
+			border-top-right-radius: env(-moz-gtk-csd-titlebar-radius);
+		}
+
+		/* stylelint-disable-next-line media-query-no-invalid */
+		// @media -moz-pref("widget.gtk.rounded-bottom-corners.enabled") {
+			#navigator-toolbox {
+				/* The body clip below covers this. */
+				border-radius: 0;
+			}
+
+			body,
+			dialog::backdrop {
+				/* Use an uniform clip to allow WebRender to optimize it better */
+				border-radius: env(-moz-gtk-csd-titlebar-radius);
+			}
+		// }
+	}
+}
+
 /* The button box must appear on top of the navigator-toolbox in order for
  * click and hover mouse events to work properly for the button in the restored
  * window state. Otherwise, elements in the navigator-toolbox, like the menubar,
  * can swallow those events. */
 .titlebar-buttonbox {
 	z-index: 1;
-	display: flex;
-	align-items: center;
-	height: var(--tab-min-height);
-}
-
-/* Render titlebar command buttons according to system config.
- * Use full scale icons here as the Gtk+ does. */
-.titlebar-min {
-	appearance: auto;
-	-moz-default-appearance: -moz-window-button-minimize;
-	order: env(-moz-gtk-csd-minimize-button-position);
-}
-.titlebar-max {
-	appearance: auto;
-	-moz-default-appearance: -moz-window-button-maximize;
-	order: env(-moz-gtk-csd-maximize-button-position);
-}
-.titlebar-restore {
-	appearance: auto;
-	-moz-default-appearance: -moz-window-button-restore;
-	order: env(-moz-gtk-csd-maximize-button-position);
-}
-.titlebar-close {
-	appearance: auto;
-	-moz-default-appearance: -moz-window-button-close;
-	order: env(-moz-gtk-csd-close-button-position);
-}
-
-/* When using lightweight themes, use our own buttons since native ones might
- * assume a native background in order to be visible. */
-.titlebar-button:-moz-lwtheme {
-	appearance: none;
-	border-radius: 100%;
-}
-.titlebar-button > .toolbarbutton-icon:-moz-lwtheme {
-	padding: 6px;
-	-moz-context-properties: stroke;
-	stroke: currentColor;
-}
-.titlebar-min:-moz-lwtheme {
-	list-style-image: url(chrome://browser/skin/window-controls/minimize.svg);
-}
-.titlebar-max:-moz-lwtheme {
-	list-style-image: url(chrome://browser/skin/window-controls/maximize.svg);
-}
-.titlebar-restore:-moz-lwtheme {
-	list-style-image: url(chrome://browser/skin/window-controls/restore.svg);
-}
-.titlebar-close:-moz-lwtheme {
-	list-style-image: url(chrome://browser/skin/window-controls/close.svg);
-}
-.titlebar-button:-moz-lwtheme:hover {
-	background-color: color-mix(in srgb, currentColor 12%, transparent);
-}
-.titlebar-button:-moz-lwtheme:hover:active {
-	background-color: color-mix(in srgb, currentColor 20%, transparent);
-}
-.titlebar-close:-moz-lwtheme:hover {
-	background-color: #d70022;
-	color: white;
-}
-.titlebar-close:-moz-lwtheme:hover:active {
-	background-color: #ff0039;
-}
-
-@media (not (-moz-gtk-csd-minimize-button)) {
-	.titlebar-min {
-	display: none;
-	}
-}
-@media (not (-moz-gtk-csd-maximize-button)) {
-	.titlebar-restore,
-	.titlebar-max {
-	display: none;
-	}
-}
-@media (not (-moz-gtk-csd-close-button)) {
-	.titlebar-close {
-	display: none;
-	}
+	align-items: stretch;
 }
 
 @media (-moz-gtk-csd-reversed-placement) {
-	.titlebar-buttonbox {
+	.titlebar-buttonbox-container {
 		order: -1;
-		margin-right: 0;
+	}
+}
+
+.titlebar-button {
+	appearance: none;
+	color: inherit;
+	align-items: center;
+	padding: 0;
+	padding-inline: calc(env(-moz-gtk-csd-titlebar-button-spacing) / 2);
+
+	> .toolbarbutton-icon {
+		border-radius: 100%;
+		background-position: center center;
+		background-repeat: no-repeat;
+		-moz-context-properties: stroke;
+		stroke: currentColor;
+		/* Roughly the Adwaita size */
+		width: 24px;
+		height: 24px;
+		/* Matches the libadwaita transition */
+		transition: background-color .2s ease;
+	}
+
+	&:hover > .toolbarbutton-icon {
+		background-color: color-mix(in srgb, currentColor 15%, transparent);
+	}
+
+	&:hover:active > .toolbarbutton-icon {
+		background-color: color-mix(in srgb, currentColor 30%, transparent);
+	}
+
+	&:focus-visible > .toolbarbutton-icon {
+		outline: var(--focus-outline);
+		outline-offset: var(--focus-outline-inset);
+	}
+}
+
+.titlebar-max {
+	order: env(-moz-gtk-csd-maximize-button-position);
+	> .toolbarbutton-icon {
+		background-image: -moz-symbolic-icon(window-maximize-symbolic);
+	}
+}
+
+.titlebar-restore {
+	order: env(-moz-gtk-csd-maximize-button-position);
+	> .toolbarbutton-icon {
+		background-image: -moz-symbolic-icon(window-restore-symbolic);
+	}
+}
+
+@media not (-moz-gtk-csd-maximize-button) {
+	.titlebar-restore,
+	.titlebar-max {
+		display: none;
+	}
+}
+
+.titlebar-close {
+	order: env(-moz-gtk-csd-close-button-position);
+
+	> .toolbarbutton-icon {
+		background-image: -moz-symbolic-icon(window-close-symbolic);
+	}
+
+	@media not (-moz-gtk-csd-close-button) {
+		display: none;
+	}
+}
+
+.titlebar-min {
+	order: env(-moz-gtk-csd-minimize-button-position);
+
+	> .toolbarbutton-icon {
+		background-image: -moz-symbolic-icon(window-minimize-symbolic);
+	}
+
+	@media not (-moz-gtk-csd-minimize-button) {
+		display: none;
 	}
 }

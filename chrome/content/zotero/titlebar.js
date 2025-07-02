@@ -37,14 +37,8 @@ if (platforms) {
 // https://searchfox.org/mozilla-central/rev/10f46c9c638e0e5935ed9fa12aadc9d0d4e71ade/xpfe/appshell/AppWindow.cpp#2582-2584
 
 // Create tab bar by default
-document.documentElement.setAttribute('drawintitlebar', true);
-document.documentElement.setAttribute('tabsintitlebar', true);
-if (Zotero.isMac) {
-	document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');
-}
-else {
-	document.documentElement.setAttribute('chromemargin', '0,2,2,2');
-}
+document.documentElement.setAttribute('customtitlebar', true);
+document.documentElement.toggleAttribute("drawtitle", false);
 
 window.addEventListener("load", function () {
 	// Fix window without menubar/titlebar when Zotero is closed in full-screen mode in OS X 10.11+
