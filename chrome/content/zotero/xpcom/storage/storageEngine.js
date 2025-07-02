@@ -23,6 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
+var { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 
 if (!Zotero.Sync.Storage) {
 	Zotero.Sync.Storage = {};
