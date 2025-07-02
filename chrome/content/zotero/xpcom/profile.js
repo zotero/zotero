@@ -123,21 +123,22 @@ Zotero.Profile = {
 	 * @return {String[]}
 	 */
 	findOtherProfilesUsingDataDirectory: async function (dataDir, includeOtherApps = true) {
-		let otherAppProfiles = includeOtherApps ? ((await this._findOtherAppProfiles())) : [];
-		let otherProfiles = ((await this._findOtherProfiles())).concat(otherAppProfiles);
+		let otherAppProfiles = includeOtherApps ? await this._findOtherAppProfiles() : [];
+		let otherProfiles = (await this._findOtherProfiles()).concat(otherAppProfiles);
 		
 		// First get profiles pointing at this directory
-		otherProfiles = await // FIXME: fx140: replace call to Zotero.Promise.filter()
-		Zotero.Promise.filter(otherProfiles, async function (dir) {
+		for (let i = 0; i < otherProfiles.length; i++) {
+			let dir = otherProfiles[i];
 			let prefs = await Zotero.File.getContentsAsync(OS.Path.join(dir, "prefs.js"));
 			prefs = prefs.trim().split(/(?:\r\n|\r|\n)/);
 			
-			return prefs.some(line => {
-				return line.includes("extensions.zotero.useDataDir") && line.includes("true");
-			}) && prefs.some(line => {
-				return line.match(/extensions\.zotero\.(lastD|d)ataDir/) && line.includes(dataDir)
-			});
-		});
+			let keep = prefs.some(line => line.includes("extensions.zotero.useDataDir") && line.includes("true"))
+				&& prefs.some(line => line.match(/extensions\.zotero\.(lastD|d)ataDir/) && line.includes(dataDir));
+			if (!keep) {
+				otherProfiles.splice(i, 1);
+				i--;
+			}
+		}
 		
 		// If the parent of the source directory is a profile directory from the other app, add that
 		// to the list, which addresses the situation where the source directory is a custom
@@ -294,7 +295,7 @@ Zotero.Profile = {
 	/**
 	 * Find other profile directories for this app (Firefox or Zotero)
 	 *
-	 * @return {String[]} - Array of paths
+	 * @return {Promise<String[]>} - Array of paths
 	 */
 	_findOtherProfiles: async function () {
 		var profileDir = this.dir;
@@ -306,7 +307,7 @@ Zotero.Profile = {
 	/**
 	 * Find profile directories for the other app (Firefox or Zotero)
 	 *
-	 * @return {String[]} - Array of paths
+	 * @return {Promise<String[]>} - Array of paths
 	 */
 	_findOtherAppProfiles: async function () {
 		var dir = this.getOtherAppProfilesDir();
