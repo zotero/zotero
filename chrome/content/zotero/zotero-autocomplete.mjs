@@ -30,8 +30,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
-ChromeUtils.importESModule("resource://gre/modules/ComponentUtils.sys.mjs");
-
 import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
 /*
