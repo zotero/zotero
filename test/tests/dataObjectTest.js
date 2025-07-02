@@ -307,7 +307,7 @@ describe("Zotero.DataObject", function() {
 			var item = yield createDataObject('item');
 			item.setTags(['a']);
 			
-			var deferred = new Zotero.Promise.defer();
+			var deferred = Zotero.Promise.defer();
 			var origFunc = Zotero.Notifier.queue.bind(Zotero.Notifier);
 			sinon.stub(Zotero.Notifier, "queue").callsFake(function (event, type, ids, extraData) {
 				// Add a new tag after the first one has been added to the DB and before the save is

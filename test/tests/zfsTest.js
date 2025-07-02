@@ -100,7 +100,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 	
 	afterEach(function* () {
 		Zotero.HTTP.mock = null;
-		var defer = new Zotero.Promise.defer();
+		var defer = Zotero.Promise.defer();
 		httpd.stop(() => defer.resolve());
 		yield defer.promise;
 		win.close();

@@ -52,7 +52,7 @@ describe("Connector HTTP Integration Server", function () {
 	describe('/connector/document/respond', function () {
 		it('should pass along the request body via HTTPIntegrationClient', async function () {
 			try {
-				Zotero.HTTPIntegrationClient.deferredResponse = new Zotero.Promise.defer();
+				Zotero.HTTPIntegrationClient.deferredResponse = Zotero.Promise.defer();
 
 				let postBody = { outputFormat: 'html' };
 				Zotero.HTTP.request(

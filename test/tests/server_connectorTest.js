@@ -47,7 +47,7 @@ describe("Connector Server", function () {
 	});
 	
 	afterEach(function* () {
-		var defer = new Zotero.Promise.defer();
+		var defer = Zotero.Promise.defer();
 		httpd.stop(() => defer.resolve());
 		yield defer.promise;
 	});

@@ -581,7 +581,7 @@
 
 		async _renderMedia() {
 			this.setPreviewStatus("loading");
-			let mediaLoadPromise = new Zotero.Promise.defer();
+			let mediaLoadPromise = Zotero.Promise.defer();
 			let mediaID = `${this.previewType}-preview`;
 			let media = this._id(mediaID);
 			// Create media element when needed to avoid unnecessarily loading libs like libavcodec, libvpx, etc.
