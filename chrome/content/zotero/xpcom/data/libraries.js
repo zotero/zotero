@@ -318,13 +318,12 @@ Zotero.Libraries = new function () {
 	/**
 	 * @deprecated
 	 */
-	this.updateLastSyncTime = function (libraryID) {
+	this.updateLastSyncTime = async function (libraryID) {
 		Zotero.debug("Zotero.Libraries.updateLastSyncTime() is deprecated. Use Zotero.Library.prototype.updateLastSyncTime instead");
 		this._ensureExists(libraryID);
 		
 		let library = Zotero.Libraries.get(libraryID);
 		library.updateLastSyncTime();
-		return library.saveTx()
-			.return();
+		await library.saveTx();
 	}
 }
