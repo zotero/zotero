@@ -55,7 +55,6 @@ Zotero.DataObjects = function () {
 	this._objectKeys = {};
 	this._objectIDs = {};
 	this._loadedLibraries = {};
-	this._loadPromise = null;
 }
 
 Zotero.DataObjects.prototype._ZDO_idOnly = false;
@@ -192,16 +191,8 @@ Zotero.DataObjects.prototype.getAsync = async function (ids, options) {
 	
 	// New object to load
 	if (toLoad.length) {
-		// Serialize loads
-		if (this._loadPromise && this._loadPromise.isPending()) {
-			await this._loadPromise;
-		}
-		let deferred = Zotero.Promise.defer();
-		this._loadPromise = deferred.promise;
-		
-		let loaded = await this._load(null, toLoad, options);
-		for (let i=0; i<toLoad.length; i++) {
-			let id = toLoad[i];
+		let loaded = await this._loadSerial(null, toLoad, options);
+		for (let id of toLoad) {
 			let obj = loaded[id];
 			if (!obj) {
 				Zotero.debug(this._ZDO_Object + " " + id + " doesn't exist", 2);
@@ -209,7 +200,6 @@ Zotero.DataObjects.prototype.getAsync = async function (ids, options) {
 			}
 			toReturn.push(obj);
 		}
-		deferred.resolve();
 	}
 	
 	// If single id, return the object directly
@@ -1208,7 +1198,7 @@ Zotero.DataObjects.prototype._load = async function (libraryID, ids, options) {
 	return loaded;
 };
 
-
+Zotero.DataObjects.prototype._loadSerial = Zotero.Utilities.Internal.serial(Zotero.DataObjects.prototype._load);
 
 Zotero.DataObjects.prototype._getObjectForRow = function (row) {
 	return new Zotero[this._ZDO_Object];
