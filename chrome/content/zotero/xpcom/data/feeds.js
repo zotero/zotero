@@ -68,11 +68,8 @@ Zotero.Feeds = new function () {
 	};
 	
 	this.uninit = function () {
-		// Cancel initialization if in progress
-		if (_initPromise) {
-			// FIXME: fx140: replace call to Zotero.Promise instance method 'cancel()'
-			_initPromise.cancel();
-		}
+		// TODO: fx140: We used to explicitly cancel the Bluebird _initPromise here
+		// Is it OK to let it complete?
 	};
 	
 	this._cache = null;
@@ -277,28 +274,22 @@ Zotero.Feeds = new function () {
 		var nextCheck = await Zotero.DB.valueQueryAsync(sql);
 
 		if (this._nextFeedCheck) {
-			this._nextFeedCheck.cancel();
+			clearTimeout(this._nextFeedCheck);
 			this._nextFeedCheck = null;
 		}
 
 		if (nextCheck !== false) {
 			nextCheck = nextCheck > 0 ? nextCheck * 1000 : 0;
 			Zotero.debug("Next feed check in " + (nextCheck / 1000) + " seconds");
-			this._nextFeedCheck = Zotero.Promise.delay(nextCheck);
-			Promise.all([this._nextFeedCheck, globalFeedCheckDelay])
-			.then(() => {
+			this._nextFeedCheck = setTimeout(async () => {
+				await globalFeedCheckDelay;
+
 				this._nextFeedCheck = null;
 				globalFeedCheckDelay = Zotero.Promise.delay(60000); // Don't perform auto-updates more than once per minute
-				return this.updateFeeds()
-			})
-			.catch(e => {
-				if (e instanceof Zotero.Promise.CancellationError) {
-					Zotero.debug('Next update check cancelled');
-					return;
-				}
-				throw e;
-			});
-		} else {
+				await this.updateFeeds();
+			}, nextCheck);
+		}
+		else {
 			Zotero.debug("No feeds with auto-update");
 		}
 	};
@@ -309,7 +300,7 @@ Zotero.Feeds = new function () {
 			return;
 		}
 		if (this._nextFeedCheck) {
-			this._nextFeedCheck.cancel();
+			clearTimeout(this._nextFeedCheck);
 			this._nextFeedCheck = null;
 		}
 		_updating = true;
