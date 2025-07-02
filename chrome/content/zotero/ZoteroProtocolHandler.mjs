@@ -63,7 +63,7 @@ export function ZoteroProtocolHandler() {
 		loadAsChrome: false,
 		
 		newChannel: function (uri, loadInfo) {
-			return new AsyncChannel(uri, loadInfo, function* () {
+			return new AsyncChannel(uri, loadInfo, async function () {
 				try {
 					var uriPath = uri.pathQueryRef;
 					if (!uriPath) {
@@ -85,7 +85,7 @@ export function ZoteroProtocolHandler() {
 					if (!params.itemKey) {
 						return this._errorChannel("Item key not provided");
 					}
-					var item = yield Zotero.Items.getByLibraryAndKeyAsync(params.libraryID, params.itemKey);
+					var item = await Zotero.Items.getByLibraryAndKeyAsync(params.libraryID, params.itemKey);
 					
 					if (!item) {
 						return this._errorChannel(`No item found for ${uriPath}`);
@@ -94,7 +94,7 @@ export function ZoteroProtocolHandler() {
 						return this._errorChannel(`Item for ${uriPath} is not a file attachment`);
 					}
 					
-					var path = yield item.getFilePathAsync();
+					var path = await item.getFilePathAsync();
 					if (!path) {
 						return this._errorChannel(`${path} not found`);
 					}
@@ -114,7 +114,7 @@ export function ZoteroProtocolHandler() {
 							Zotero.logError(e);
 							return this._errorChannel(`Resource ${resourcePathParts.join('/')} not found`);
 						}
-						if (!(yield IOUtils.exists(path))) {
+						if (!(await IOUtils.exists(path))) {
 							return this._errorChannel(`Resource ${resourcePathParts.join('/')} not found`);
 						}
 					}
@@ -151,7 +151,7 @@ export function ZoteroProtocolHandler() {
 		loadAsChrome: false,
 		
 		newChannel: function (uri, loadInfo) {
-			return new AsyncChannel(uri, loadInfo, function* () {
+			return new AsyncChannel(uri, loadInfo, async function () {
 				this.contentType = 'text/plain';
 				
 				var path = uri.spec.match(/zotero:\/\/[^/]+(.*)/)[1];
@@ -163,7 +163,7 @@ export function ZoteroProtocolHandler() {
 				}
 				catch (e) {
 					if (e instanceof Zotero.Router.InvalidPathException) {
-						return "URL could not be parsed";	
+						return "URL could not be parsed";
 					}
 				}
 			});
@@ -178,7 +178,7 @@ export function ZoteroProtocolHandler() {
 		loadAsChrome: true,
 		
 		newChannel: function (uri, loadInfo) {
-			return new AsyncChannel(uri, loadInfo, function* () {
+			return new AsyncChannel(uri, loadInfo, async function () {
 				var userLibraryID = Zotero.Libraries.userLibraryID;
 				
 				var path = uri.pathQueryRef;
@@ -266,7 +266,7 @@ export function ZoteroProtocolHandler() {
 				
 				try {
 					Zotero.API.parseParams(params);
-					var results = yield Zotero.API.getResultsFromParams(params);
+					var results = await Zotero.API.getResultsFromParams(params);
 				}
 				catch (e) {
 					Zotero.debug(e, 1);
@@ -316,7 +316,7 @@ export function ZoteroProtocolHandler() {
 					for (let id of searchItemIDs) {
 						if (!searchChildIDs.has(id)) {
 							var children = [];
-							var item = yield Zotero.Items.getAsync(id);
+							var item = await Zotero.Items.getAsync(id);
 							if (!item.isRegularItem()) {
 								continue;
 							}
@@ -347,7 +347,7 @@ export function ZoteroProtocolHandler() {
 					// Add parents of matches if parents aren't matches themselves
 					for (let id of searchParentIDs) {
 						if (!searchItemIDs.has(id) && !itemsHash[id]) {
-							var item = yield Zotero.Items.getAsync(id);
+							var item = await Zotero.Items.getAsync(id);
 							itemsHash[id] = items.length;
 							items.push(item.toJSON({ mode: 'full' }));
 						}
@@ -355,7 +355,7 @@ export function ZoteroProtocolHandler() {
 					
 					// Add children to reportChildren property of parents
 					for (let id of searchChildIDs) {
-						let item = yield Zotero.Items.getAsync(id);
+						let item = await Zotero.Items.getAsync(id);
 						var parentID = item.parentID;
 						if (!items[itemsHash[parentID]].reportChildren) {
 							items[itemsHash[parentID]].reportChildren = {
@@ -375,7 +375,7 @@ export function ZoteroProtocolHandler() {
 				// for each matching child
 				else {
 					for (let id of searchChildIDs) {
-						var item = yield Zotero.Items.getAsync(id);
+						var item = await Zotero.Items.getAsync(id);
 						var parentID = item.parentID;
 						var parentItem = Zotero.Items.get(parentID);
 						
@@ -559,7 +559,7 @@ export function ZoteroProtocolHandler() {
 		loadAsChrome: true,
 		
 		newChannel: function (uri, loadInfo) {
-			return new AsyncChannel(uri, loadInfo, function* () {
+			return new AsyncChannel(uri, loadInfo, async function () {
 				var userLibraryID = Zotero.Libraries.userLibraryID;
 				
 				var path = uri.spec.match(/zotero:\/\/[^/]+(.*)/)[1];
@@ -653,12 +653,12 @@ export function ZoteroProtocolHandler() {
 				switch (params.scopeObject) {
 					case 'collections':
 						if (params.scopeObjectKey) {
-							collection = yield Zotero.Collections.getByLibraryAndKeyAsync(
+							collection = await Zotero.Collections.getByLibraryAndKeyAsync(
 								params.libraryID, params.scopeObjectKey
 							);
 						}
 						else {
-							collection = yield Zotero.Collections.getAsync(params.scopeObjectID);
+							collection = await Zotero.Collections.getAsync(params.scopeObjectID);
 						}
 						if (!collection) {
 							this.contentType = 'text/html';
@@ -668,12 +668,12 @@ export function ZoteroProtocolHandler() {
 					
 					case 'searches':
 						if (params.scopeObjectKey) {
-							var s = yield Zotero.Searches.getByLibraryAndKeyAsync(
+							var s = await Zotero.Searches.getByLibraryAndKeyAsync(
 								params.libraryID, params.scopeObjectKey
 							);
 						}
 						else {
-							var s = yield Zotero.Searches.getAsync(params.scopeObjectID);
+							var s = await Zotero.Searches.getAsync(params.scopeObjectID);
 						}
 						if (!s) {
 							return 'Invalid search ID or key';
@@ -699,8 +699,8 @@ export function ZoteroProtocolHandler() {
 							break;
 						
 						case 'searches':
-							var ids = yield search.search();
-							var results = yield Zotero.Items.getAsync(ids);
+							var ids = await search.search();
+							var results = await Zotero.Items.getAsync(ids);
 							break;
 						
 						default:
@@ -711,8 +711,8 @@ export function ZoteroProtocolHandler() {
 							let s = new Zotero.Search();
 							s.addCondition('libraryID', 'is', params.libraryID);
 							s.addCondition('noChildren', 'true');
-							var ids = yield s.search();
-							var results = yield Zotero.Items.getAsync(ids);
+							var ids = await s.search();
+							var results = await Zotero.Items.getAsync(ids);
 					}
 					
 					var items = [];
@@ -951,7 +951,7 @@ export function ZoteroProtocolHandler() {
 		loadAsChrome: false,
 		
 		newChannel: function (uri, loadInfo) {
-			return new AsyncChannel(uri, loadInfo, function* () {
+			return new AsyncChannel(uri, loadInfo, async function () {
 				this.contentType = "text/plain";
 				
 				try {
@@ -973,7 +973,7 @@ export function ZoteroProtocolHandler() {
 		loadAsChrome: true,
 		
 		newChannel: function (uri) {
-			return new AsyncChannel(uri, function* () {
+			return new AsyncChannel(uri, async function () {
 				try {
 					uri = uri.spec;
 					// Proxy PDF.js files
@@ -991,11 +991,11 @@ export function ZoteroProtocolHandler() {
 					var [libraryID, key] = uri.substr(pdfPrefix.length).split('/');
 					libraryID = parseInt(libraryID);
 					
-					var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+					var item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
 					if (!item) {
 						return this._errorChannel("Item not found");
 					}
-					var path = yield item.getFilePathAsync();
+					var path = await item.getFilePathAsync();
 					if (!path) {
 						return this._errorChannel("File not found");
 					}
@@ -1284,14 +1284,14 @@ ZoteroProtocolHandler.init = function () {
 
 
 /**
- * nsIChannel implementation that takes a promise-yielding generator that returns a
+ * nsIChannel implementation that takes an async function that returns a
  * string, nsIAsyncInputStream, or file
  */
-function AsyncChannel(uri, loadInfo, gen) {
+function AsyncChannel(uri, loadInfo, func) {
 	this.URI = this.originalURI = uri;
 	this.loadInfo = loadInfo;
 	
-	this._generator = gen;
+	this._function = func;
 	this._isPending = true;
 	
 	// nsIRequest
@@ -1358,7 +1358,7 @@ AsyncChannel.prototype = {
 		var data;
 		try {
 			if (!data) {
-				data = await Zotero.spawn(channel._generator, channel)
+				data = await channel._function();
 			}
 			if (typeof data == 'string') {
 				//Zotero.debug("AsyncChannel: Got string from generator");
