@@ -23,7 +23,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
 const MIN_QUERY_LENGTH = 2;
 

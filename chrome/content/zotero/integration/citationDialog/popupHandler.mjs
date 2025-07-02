@@ -23,7 +23,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
 // Handle the logic of opening popups and saving/discarding edits to the citation items
 export class CitationDialogPopupsHandler {

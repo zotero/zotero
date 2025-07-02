@@ -23,7 +23,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
 // Helper functions for citationDialog.js
 export class CitationDialogHelpers {

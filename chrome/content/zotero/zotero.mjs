@@ -159,7 +159,7 @@ const xpcomFilesLocal = [
 	'translation/translators',
 ];
 
-const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
+import { CommandLineOptions } from "chrome://zotero/content/modules/commandLineOptions.mjs";
 
 var instanceID = (new Date()).getTime();
 var isFirstLoadThisSession = true;
