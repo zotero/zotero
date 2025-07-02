@@ -42,7 +42,7 @@ Zotero.Utilities.Internal = {
 	 * @param {Array} arr
 	 * @param {Integer} chunkSize
 	 * @param {Function} func - A promise-returning function
-	 * @return {Array} The return values from the successive runs
+	 * @return {Promise<Array>} The return values from the successive runs
 	 */
 	forEachChunkAsync: async function (arr, chunkSize, func) {
 		var retValues = [];
