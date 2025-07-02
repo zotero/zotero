@@ -2,21 +2,21 @@
 
 set -e pipefail
 
+RELEASE=esr140 # Keep in sync with platform version
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+OUTPUT_DIR="$ROOT_DIR/types/gecko"
 
-release=esr128 # TODO: Keep in sync with platform version once platform version >= esr128
-if [ -n "$1" ]; then
-	tag=$1
-fi
-echo Downloading types from release $release
+echo Downloading types from release "$RELEASE"
 
-DIR_REMOTE="https://hg.mozilla.org/releases/mozilla-$release/raw-file/tip/tools/@types"
-DIR_LOCAL="$ROOT_DIR/types/gecko"
+temp_dir="$(mktemp -d)"
+pushd "$temp_dir"
 
-dir_listing=$(curl -fs "$DIR_REMOTE")
-filenames=$(cut -d ' ' -f 3 <<< "$dir_listing")
-for filename in $filenames; do
-	curl -f "$DIR_REMOTE/$filename" > "$DIR_LOCAL/$filename"
-	sed -i '' '/^\/\/\/ <reference no-default-lib="true" \/>/d' "$DIR_LOCAL/$filename"
-done
+curl -L "https://hg.mozilla.org/releases/mozilla-$RELEASE/archive/tip.zip/tools/%40types/" -o types.zip
+unzip types.zip
+mv ./*/tools/@types/* "$OUTPUT_DIR"
+
+popd
+rm -r "$temp_dir"
+
+sed -i '' '/^\/\/\/ <reference no-default-lib="true" \/>/d' "$OUTPUT_DIR/generated/lib.gecko.dom.d.ts"
