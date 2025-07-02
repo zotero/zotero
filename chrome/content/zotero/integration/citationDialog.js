@@ -28,7 +28,7 @@ const ItemTree = require('zotero/itemTree');
 const { getCSSIcon } = require('components/icons');
 const { COLUMNS } = require('zotero/itemTreeColumns');
 
-var doc, io, ioReadyPromise, isCitingNotes, accepted;
+var doc, io, ioReadyPromise, ioIsReady, isCitingNotes, accepted;
 
 // used for tests
 var loaded = false;
@@ -57,6 +57,7 @@ async function onLoad() {
 	if (!ioReadyPromise) {
 		ioReadyPromise = Zotero.Promise.resolve();
 	}
+	ioReadyPromise.then(() => ioIsReady = true);
 	isCitingNotes = !!io.isCitingNotes;
 	window.isPristine = true;
 
@@ -1629,7 +1630,7 @@ const CitationDataManager = {
 		// It can take arbitrarily long time for documents with many cited items to load
 		// all data necessary to run io.sort().
 		// Do nothing if io.sort() is not yet ready to run.
-		if (!ioReadyPromise.isResolved()) return;
+		if (!ioIsReady) return;
 		Zotero.debug("Citation Dialog: sorting items");
 		this.updateCitationObject();
 		await io.sort();
