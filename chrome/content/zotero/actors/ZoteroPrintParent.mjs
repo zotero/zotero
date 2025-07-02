@@ -1,9 +1,4 @@
-import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
-
-XPCOMUtils.defineLazyModuleGetters(this, {
-});
-
-ChromeUtils.defineESModuleGetters(this, {
+ChromeUtils.defineESModuleGetters(globalThis, {
 	Zotero: "chrome://zotero/content/zotero.mjs",
 });
 
