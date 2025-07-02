@@ -1,4 +1,3 @@
-var EventUtils = Components.utils.import("resource://zotero-unit/EventUtils.jsm");
 var { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
