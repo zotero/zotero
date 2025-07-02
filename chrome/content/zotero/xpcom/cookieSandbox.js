@@ -55,10 +55,13 @@ Zotero.CookieSandbox = function (browser, uri, cookieData, userAgent) {
 	this._observerService = Components.classes["@mozilla.org/observer-service;1"].
 	getService(Components.interfaces.nsIObserverService);
 
-	Zotero.CookieSandbox.Observer.register();
 	if (browser) {
 		this.attachToBrowser(browser);
 	}
+};
+
+Zotero.CookieSandbox.init = function () {
+	Zotero.CookieSandbox.Observer.register();
 };
 
 /**
@@ -233,8 +236,8 @@ Zotero.CookieSandbox.prototype = {
 			cookies = {}, found = false, secure = uri.scheme.toUpperCase() == 'HTTPS';
 		
 		// Fetch cookies starting from the highest level domain
-		var cookieHost = '.' + hostParts[hostParts.length-1];
-		for(var i=hostParts.length-2; i>=0; i--) {
+		var cookieHost = '';
+		for(var i=hostParts.length-1; i>=0; i--) {
 			cookieHost = '.' + hostParts[i] + cookieHost;
 			if(this._cookies[cookieHost]) {
 				found = this._getCookiesForPath(cookies, this._cookies[cookieHost], pathParts, secure, i==0) || found;
@@ -343,18 +346,30 @@ Zotero.CookieSandbox.Observer = new function() {
 						// Zotero.debug(`CookieSandbox: Found the browser via doc of load group for ${channelURI}`, 5);
 						trackedBy = this.trackedBrowsers.get(browser);
 					}
-					else if (notificationCallbacks instanceof XMLHttpRequest) {
-						// Zotero.debug(`CookieSandbox: Found the browser via XHR for ${channelURI}`, 5);
-						tested = true;
-					}
 					else {
-						// try getting as an nsIWBP
+						// System XHR created from TranslationChild only has browser identifiers in loadInfo
 						try {
-							notificationCallbacks.QueryInterface(Components.interfaces.nsIWebBrowserPersist);
-							// Zotero.debug(`CookieSandbox: Found the browser via nsIWBP for ${channelURI}`, 5);
-							tested = true;
+							browser = channel.loadInfo.targetBrowsingContext.embedderElement;
 						}
 						catch (e) {}
+						if (browser) {
+							tested = true;
+							// Zotero.debug(`CookieSandbox: Found the browser via load info BrowsingContext for ${channelURI}`, 5);
+							trackedBy = this.trackedBrowsers.get(browser);
+						}
+						else if (notificationCallbacks instanceof XMLHttpRequest) {
+							// Zotero.debug(`CookieSandbox: Found the browser via XHR for ${channelURI}`, 5);
+							tested = true;
+						}
+						else {
+							// try getting as an nsIWBP
+							try {
+								notificationCallbacks.QueryInterface(Components.interfaces.nsIWebBrowserPersist);
+								// Zotero.debug(`CookieSandbox: Found the browser via nsIWBP for ${channelURI}`, 5);
+								tested = true;
+							}
+							catch (e) {}
+						}
 					}
 				}
 			}
