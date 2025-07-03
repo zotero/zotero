@@ -239,7 +239,7 @@
 			:is(:is(#{$selector}) .menuitem-iconic, :is(#{$selector}) .menu-iconic) {
 				list-style-image: none !important;
 
-				.menu-iconic-left {
+				.menu-icon {
 					display: none !important;
 				}
 			}
