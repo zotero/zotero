@@ -223,13 +223,15 @@ Zotero.Sync.Storage.Engine.prototype.start = async function () {
 	var downloadSuccessful = false;
 	var changes = new Zotero.Sync.Storage.Result;
 	for (let type of ['download', 'upload']) {
-		let results = await promises[type];
+		let resultPromises = await promises[type];
 		let succeeded = 0;
 		let failed = 0;
 		
-		for (let p of results) {
+		let results = [];
+		
+		for (let p of resultPromises) {
 			try {
-				await p;
+				results.push(await p);
 				succeeded++;
 			}
 			catch (e) {
@@ -249,13 +251,13 @@ Zotero.Sync.Storage.Engine.prototype.start = async function () {
 		Zotero.debug(`File ${type} sync finished for ${this.library.name} `
 			+ `(${succeeded} succeeded, ${failed} failed)`);
 		
-		changes.updateFromResults(results.filter(p => p.isFulfilled()).map(p => p.value()));
+		changes.updateFromResults(results);
 		
 		if (type == 'download'
 				// Not stopped
 				&& this.requestsRemaining == 0
 				// No errors
-				&& results.every(p => !p.isRejected())) {
+				&& failed === 0) {
 			downloadSuccessful = true;
 		}
 	}
