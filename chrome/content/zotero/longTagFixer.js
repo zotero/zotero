@@ -26,12 +26,12 @@
 const HTML_NS = 'http://www.w3.org/1999/xhtml';
 
 var Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, no-unused-vars
-	const { oldTag, isLongTag } = window.arguments?.[0] ?? { isLongTag: true, oldTag: '' };
-	const dataOut = window.arguments?.[1] || {};
+	let { oldTag, isLongTag, delimiter } = window.arguments?.[0] ?? { isLongTag: true, oldTag: '' };
+	let dataOut = window.arguments?.[1] || {};
 	
 	this.init = function () {
 		const lastMode = Zotero.Prefs.get('lastLongTagMode') || 0;
-		const delimiter = Zotero.Prefs.get('lastLongTagDelimiter');
+		delimiter = delimiter ?? Zotero.Prefs.get('lastLongTagDelimiter');
 
 		this.dialog = document.getElementById('zotero-long-tag-fixer');
 		this.intro = document.getElementById('intro');
