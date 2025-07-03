@@ -536,7 +536,7 @@ def verify_path(command_context, path):
         return False
 
     if path.is_absolute():
-        error("Path must be a relative path from mozilla-central checkout.")
+        error("Path must be a relative path from zotero-client checkout.")
         return False
 
     return True
