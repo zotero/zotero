@@ -436,7 +436,13 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 	
 	try {
 		while (this._transactionID) {
-			await this.waitForTransaction(id).timeout(options.waitTimeout || 30000);
+			await Promise.race([
+				this.waitForTransaction(id),
+				new Promise((resolve, reject) => setTimeout(
+					() => reject(new Zotero.DBConnection.TimeoutError()),
+					options.waitTimeout || 30000
+				))
+			]);
 		}
 		startedTransaction = true;
 		this._transactionID = id;
@@ -523,7 +529,7 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 		return result;
 	}
 	catch (e) {
-		if (e.name == "TimeoutError") {
+		if (e instanceof Zotero.DBConnection.TimeoutError) {
 			Zotero.debug(`Timed out waiting for transaction ${id}`, 1);
 		}
 		else {
@@ -1489,3 +1495,5 @@ Zotero.DBConnection.prototype._debug = function (str, level) {
 	var prefix = this._dbName == 'zotero' ? '' : '[' + this._dbName + '] ';
 	Zotero.debug(prefix + str, level);
 }
+
+Zotero.DBConnection.TimeoutError = class extends Error {};
