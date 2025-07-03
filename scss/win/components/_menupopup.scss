@@ -1,24 +1,11 @@
-menupopup, panel:not(#autoscroller), #search-mode-popup {
-	--panel-border-radius: 8px;
-	--panel-background: var(--material-toolbar);
-	--menuitem-hover-background-color: var(--fill-quinary);
-	--menuitem-disabled-hover-background-color: var(--fill-quinary);
-	@include light-dark(--panel-border-color, #dddddd, #1c1c1c);
-}
-
 menupopup {
 	menu, menuitem {
-		appearance: none !important;
 		border-radius: 4px;
 		fill: currentColor;
 		-moz-context-properties: fill,fill-opacity;
-		&[_moz-menuactive="true"] {
-			background: var(--fill-quinary);
-		}
 	}
 	menu {
 		menupopup {
-			padding-left: 6px;
 			margin-top: -4px;
 		}
 	}
@@ -32,47 +19,36 @@ menupopup {
 	font-size: 11px;
 }
 
-.menu-iconic-left[disabled="true"] {
+.menu-icon[disabled="true"] {
 	opacity: 50%;
 }
 
-@media (-moz-windows-non-native-menus) {
-	menuitem:is([checked="true"]):is([type="radio"]) > .menu-iconic-left {
-		list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
-	}
+menuitem:is([checked="true"]):is([type="radio"]) > .menu-icon {
+	list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
+}
 
-	menulist {
-		menupopup {
-			menu, menuitem {
-				.menu-iconic-left {
-					display: flex;
-				}
+menulist {
+	menupopup {
+		menu:not([icon], .menu-iconic),
+		menuitem:not([checked="true"], [icon], .menuitem-iconic) {
+			padding-inline-start: 36px;
+
+			.menu-icon {
+				display: none;
 			}
+		}
 
-			menu:not([icon], .menu-iconic),
-			menuitem:not([checked="true"], [icon], .menuitem-iconic) {
-				padding-inline-start: 36px;
-
-				.menu-iconic-icon {
-					display: none;
-				}
-			}
-
-			menuitem[selected="true"] {
-				padding-inline-start: 12px !important;
-		
-				& > .menu-iconic-left {
-					-moz-context-properties: fill, fill-opacity;
-					fill: currentColor;
-					fill-opacity: var(--menu-icon-opacity);
-					list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
-					width: 16px;
-					margin-inline-end: 8px;
-		
-					& > .menu-iconic-icon {
-						display: initial;
-					}
-				}
+		menuitem[selected="true"] {
+			padding-inline-start: 12px !important;
+	
+			& > .menu-icon {
+				display: revert;
+				-moz-context-properties: fill, fill-opacity;
+				fill: currentColor;
+				fill-opacity: var(--menu-icon-opacity);
+				list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
+				width: 16px;
+				margin-inline-end: 8px;
 			}
 		}
 	}
