@@ -621,7 +621,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect, onInitWaitChan
 	const [latestMessageId, setLatestMessageId] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [storagePathsState, setStoragePathsState] = useState([]);
-	const [recentSessions, setRecentSessions] = useState(new Map());
+	// const [recentSessions, setRecentSessions] = useState(new Map());
 	const [showSessionPopup, setShowSessionPopup] = useState(false);
 	const MAX_VISIBLE_SESSIONS = 2;
 	const chatLogRef = useRef(null);
@@ -883,23 +883,23 @@ This demonstrates multiple table formats working correctly.
 	}, [inputValue]);
 
 	// Load recent sessions from preferences on component mount
-	useEffect(() => {
-		const loadRecentSessions = () => {
-			try {
-				const storedSessions = Zotero.Prefs.get('deeptutor.recentSessions');
-				if (storedSessions) {
-					const parsedSessions = JSON.parse(storedSessions);
-					const sessionsMap = new Map(Object.entries(parsedSessions));
-					setRecentSessions(sessionsMap);
-					Zotero.debug(`DeepTutorChatBox: Loaded ${sessionsMap.size} recent sessions from preferences`);
-				}
-			}
-			catch (error) {
-				Zotero.debug(`DeepTutorChatBox: Error loading recent sessions from preferences: ${error.message}`);
-			}
-		};
-		loadRecentSessions();
-	}, []);
+	// useEffect(() => {
+	// 	const loadRecentSessions = () => {
+	// 		try {
+	// 			const storedSessions = Zotero.Prefs.get('deeptutor.recentSessions');
+	// 			if (storedSessions) {
+	// 				const parsedSessions = JSON.parse(storedSessions);
+	// 				const sessionsMap = new Map(Object.entries(parsedSessions));
+	// 				setRecentSessions(sessionsMap);
+	// 				Zotero.debug(`DeepTutorChatBox: Loaded ${sessionsMap.size} recent sessions from preferences`);
+	// 			}
+	// 		}
+	// 		catch (error) {
+	// 			Zotero.debug(`DeepTutorChatBox: Error loading recent sessions from preferences: ${error.message}`);
+	// 		}
+	// 	};
+	// 	loadRecentSessions();
+	// }, []);
 
 	// Simple popup component
 	const LoadingPopup = () => (
@@ -958,9 +958,9 @@ This demonstrates multiple table formats working correctly.
 				setDocumentIds(currentSession.documentIds || []);
 
 				// Update recent sessions immediately
-				Zotero.debug(`Current recent sessions TTT: ${JSON.stringify(recentSessions)}`);
-				await updateRecentSessions(currentSession.id);
-				Zotero.debug(`DeepTutorChatBox: Updated recent sessions for session ${currentSession.id}`);
+				// Zotero.debug(`Current recent sessions TTT: ${JSON.stringify(recentSessions)}`);
+				// await updateRecentSessions(currentSession.id);
+				// Zotero.debug(`DeepTutorChatBox: Updated recent sessions for session ${currentSession.id}`);
 				Zotero.debug(`DeepTutorChatBox: Current session type: ${currentSession.type}`);
 
 				// Fetch document information
@@ -1576,9 +1576,53 @@ This demonstrates multiple table formats working correctly.
 			return '';
 		}
 		
-		// Re-enable mathematical symbol processing now that XML parsing is fixed
-		// First, escape problematic mathematical symbols for XML compatibility
-		let formattedText = text
+		// Helper function to remove custom tags from text
+		const removeSubstrings = (originalString, substringsToRemove) => {
+			let currentString = originalString;
+			for (let i = 0; i < substringsToRemove.length; i++) {
+				const substring = substringsToRemove[i];
+				if (typeof substring === 'string') {
+					const index = currentString.indexOf(substring);
+					if (index !== -1) {
+						currentString = currentString.slice(0, index) + 
+							currentString.slice(index + (substring?.length || 0));
+					}
+				}
+			}
+			return currentString;
+		};
+
+		// Extract only the response content, removing custom tags
+		let cleanText = text;
+		
+		// Check if text contains custom tags and extract only the response part
+		if (text.includes('<response>')) {
+			const responseIndex = text.indexOf('<response>') + '<response>'.length;
+			const endResponseIndex = text.indexOf('</response>');
+			if (endResponseIndex !== -1) {
+				cleanText = text.substring(responseIndex, endResponseIndex);
+			} else {
+				cleanText = text.substring(responseIndex);
+			}
+		}
+		
+		// Remove any remaining custom tags that might interfere with XML parsing
+		cleanText = removeSubstrings(cleanText, [
+			'<thinking>', '</thinking>',
+			'<think>', '</think>',
+			'<followup_question>', '</followup_question>',
+			'<source_page>', '</source_page>',
+			'<sources>', '</sources>',
+			'<id>', '</id>',
+			'<appendix>', '</appendix>'
+		]);
+		
+		// Remove any other custom tags that might cause XML issues
+		// This regex removes any remaining custom tags that aren't standard HTML
+		cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a)\b)[^>]*>/gi, '');
+		
+		// Now apply mathematical symbol processing and source processing to the clean text
+		let formattedText = cleanText
 			// Convert Ca$^{2+}$ to Ca<sup>2+</sup>
 			.replace(/Ca\$\^\{?2\+\}\$?/g, 'Ca<sup>2+</sup>')
 			// Convert other LaTeX superscripts: $^{text}$ to <sup>text</sup>
@@ -1607,12 +1651,11 @@ This demonstrates multiple table formats working correctly.
 			// Convert standalone ^ to HTML entity (for any remaining cases)
 			.replace(/\^/g, '&#94;');
 		
-		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Original text length: ${text.length}`);
+		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Original text length: ${text.length}, Clean text length: ${cleanText.length}`);
+		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Removed custom tags and processed for XML compatibility`);
 		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Available sources: ${subMessage?.sources?.length || 0}`);
-		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Applied mathematical symbol escaping and source processing`);
 		
-		// Re-enable source button processing now that XML parsing is fixed
-		// Replace source references with HTML spans directly (table-friendly approach)
+		// Process source button references with clean text
 		formattedText = formattedText.replace(/\[<(\d{1,2})>\]/g, (match, sourceId) => {
 			const sourceIndex = parseInt(sourceId, 10) - 1; // Convert to 0-based index
 			
@@ -1651,10 +1694,6 @@ This demonstrates multiple table formats working correctly.
 		});
 		
 		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: ${formattedText.length}`);
-		if (formattedText !== text) {
-			Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Text was modified, first 500 chars: "${formattedText.substring(0, 500)}"`);
-		}
-		
 		return formattedText;
 	};
 
@@ -2529,47 +2568,47 @@ This demonstrates multiple table formats working correctly.
 		return undefined; // Explicit return for linter
 	}, [showContextPopup]);
 
-	const updateRecentSessions = async (sessionId) => {
-		try {
-			const session = await getSessionById(sessionId);
-			if (!session) {
-				// Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
-				return;
-			}
+	// const updateRecentSessions = async (sessionId) => {
+	// 	try {
+	// 		const session = await getSessionById(sessionId);
+	// 		if (!session) {
+	// 			// Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
+	// 			return;
+	// 		}
 
-			// Zotero.debug(`DeepTutorChatBox: Updating recent sessions with session ${sessionId}`);
-			setRecentSessions((prev) => {
-				const newMap = new Map(prev);
-				// Only add if not already present or if it's a different session
-				if (!newMap.has(sessionId)) {
-					newMap.set(sessionId, {
-						name: session.sessionName || `Session ${sessionId.slice(0, 8)}`,
-						lastUpdatedTime: new Date().toISOString() // Use current time for new sessions
-					});
-					// Zotero.debug(`DeepTutorChatBox: Added new session to recent sessions map, now has ${newMap.size} sessions`);
-				}
-				else {
-					// Update the existing session's lastUpdatedTime with current time
-					const existingSession = newMap.get(sessionId);
-					newMap.set(sessionId, {
-						...existingSession,
-						lastUpdatedTime: new Date().toISOString() // Use current time for updates
-					});
-					// Zotero.debug(`DeepTutorChatBox: Updated existing session in recent sessions map`);
-				}
+	// 		// Zotero.debug(`DeepTutorChatBox: Updating recent sessions with session ${sessionId}`);
+	// 		setRecentSessions((prev) => {
+	// 			const newMap = new Map(prev);
+	// 			// Only add if not already present or if it's a different session
+	// 			if (!newMap.has(sessionId)) {
+	// 				newMap.set(sessionId, {
+	// 					name: session.sessionName || `Session ${sessionId.slice(0, 8)}`,
+	// 					lastUpdatedTime: new Date().toISOString() // Use current time for new sessions
+	// 				});
+	// 				// Zotero.debug(`DeepTutorChatBox: Added new session to recent sessions map, now has ${newMap.size} sessions`);
+	// 			}
+	// 			else {
+	// 				// Update the existing session's lastUpdatedTime with current time
+	// 				const existingSession = newMap.get(sessionId);
+	// 				newMap.set(sessionId, {
+	// 					...existingSession,
+	// 					lastUpdatedTime: new Date().toISOString() // Use current time for updates
+	// 				});
+	// 				// Zotero.debug(`DeepTutorChatBox: Updated existing session in recent sessions map`);
+	// 			}
 
-				// Store in preferences
-				const sessionsObject = Object.fromEntries(newMap);
-				Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(sessionsObject));
-				// Zotero.debug(`DeepTutorChatBox: Stored ${newMap.size} sessions in preferences`);
+	// 			// Store in preferences
+	// 			const sessionsObject = Object.fromEntries(newMap);
+	// 			Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(sessionsObject));
+	// 			// Zotero.debug(`DeepTutorChatBox: Stored ${newMap.size} sessions in preferences`);
 
-				return newMap;
-			});
-		}
-		catch (error) {
-			// Zotero.debug(`DeepTutorChatBox: Error updating recent sessions: ${error.message}`);
-		}
-	};
+	// 			return newMap;
+	// 		});
+	// 	}
+	// 	catch (error) {
+	// 		// Zotero.debug(`DeepTutorChatBox: Error updating recent sessions: ${error.message}`);
+	// 	}
+	// };
 
 	// Add new useEffect after the existing one
 	useEffect(() => {
@@ -2768,150 +2807,150 @@ This demonstrates multiple table formats working correctly.
 	}, [showContextPopup]);
 
 	// Add SessionTabBar component
-	const SessionTabBar = () => {
-		// Convert Map to sorted array and sort by lastUpdatedTime
-		const sortedSessions = Array.from(recentSessions.entries())
-            .sort((a, b) => {
-            	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
-            	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
-            	return timeB - timeA; // Sort in descending order (most recent first)
-            });
+	// const SessionTabBar = () => {
+	// 	// Convert Map to sorted array and sort by lastUpdatedTime
+	// 	const sortedSessions = Array.from(recentSessions.entries())
+	//         .sort((a, b) => {
+	//         	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
+	//         	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
+	//         	return timeB - timeA; // Sort in descending order (most recent first)
+	//         });
 
-		// Zotero.debug(`DeepTutorChatBox: Rendering SessionTabBar with ${sortedSessions.length} sessions`);
-		const visibleSessions = sortedSessions.slice(0, MAX_VISIBLE_SESSIONS);
-		const hiddenSessions = sortedSessions.slice(MAX_VISIBLE_SESSIONS);
+	// 	// Zotero.debug(`DeepTutorChatBox: Rendering SessionTabBar with ${sortedSessions.length} sessions`);
+	// 	const visibleSessions = sortedSessions.slice(0, MAX_VISIBLE_SESSIONS);
+	// 	const hiddenSessions = sortedSessions.slice(MAX_VISIBLE_SESSIONS);
 
-		const truncateSessionName = (name) => {
-			return name.length > 11 ? name.substring(0, 11) + '...' : name;
-		};
+	// 	const truncateSessionName = (name) => {
+	// 		return name.length > 11 ? name.substring(0, 11) + '...' : name;
+	// 	};
 
-		const handleSessionClick = async (sessionId) => {
-			try {
-				// Get the session data
-				const session = await getSessionById(sessionId);
-				if (!session) {
-					// Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
-					return;
-				}
+	// 	const handleSessionClick = async (sessionId) => {
+	// 		try {
+	// 			// Get the session data
+	// 			const session = await getSessionById(sessionId);
+	// 			if (!session) {
+	// 				// Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
+	// 				return;
+	// 			}
 
-				// Update recent sessions with new timestamp
-				await updateRecentSessions(sessionId);
+	// 			// Update recent sessions with new timestamp
+	// 			await updateRecentSessions(sessionId);
 
-				// Update the current session through props
-				if (currentSession?.id !== sessionId) {
-					// Zotero.debug(`DeepTutorChatBox: Switching to session ${sessionId}`);
-					// Use the onSessionSelect prop to switch sessions
-					if (onSessionSelect) {
-						onSessionSelect(session.id);
-					}
-				}
-			}
-			catch (error) {
-				// Zotero.debug(`DeepTutorChatBox: Error handling session click: ${error.message}`);
-			}
-		};
+	// 			// Update the current session through props
+	// 			if (currentSession?.id !== sessionId) {
+	// 				// Zotero.debug(`DeepTutorChatBox: Switching to session ${sessionId}`);
+	// 				// Use the onSessionSelect prop to switch sessions
+	// 				if (onSessionSelect) {
+	// 					onSessionSelect(session.id);
+	// 				}
+	// 			}
+	// 		}
+	// 		catch (error) {
+	// 			// Zotero.debug(`DeepTutorChatBox: Error handling session click: ${error.message}`);
+	// 		}
+	// 	};
 
-		const handleCloseSession = async (sessionId, event) => {
-			event.stopPropagation(); // Prevent session click when closing
-            
-			// Check if we're closing the active session
-			const isActiveSession = sessionId === currentSession?.id;
-            
-			setRecentSessions((prev) => {
-				const newMap = new Map(prev);
-				newMap.delete(sessionId);
-                
-				// Store in preferences
-				const sessionsObject = Object.fromEntries(newMap);
-				Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(sessionsObject));
-                
-				return newMap;
-			});
+	// 	const handleCloseSession = async (sessionId, event) => {
+	// 		event.stopPropagation(); // Prevent session click when closing
+	            
+	// 		// Check if we're closing the active session
+	// 		const isActiveSession = sessionId === currentSession?.id;
+	            
+	// 		setRecentSessions((prev) => {
+	// 			const newMap = new Map(prev);
+	// 			newMap.delete(sessionId);
+	                
+	// 			// Store in preferences
+	// 			const sessionsObject = Object.fromEntries(newMap);
+	// 			Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(sessionsObject));
+	                
+	// 			return newMap;
+	// 		});
 
-			// If we closed the active session and there are other sessions, load the next one
-			if (isActiveSession) {
-				const remainingSessions = Array.from(recentSessions.entries())
-                    .filter(([id]) => id !== sessionId)
-                    .sort((a, b) => {
-                    	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
-                    	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
-                    	return timeB - timeA;
-                    });
+	// 		// If we closed the active session and there are other sessions, load the next one
+	// 		if (isActiveSession) {
+	// 			const remainingSessions = Array.from(recentSessions.entries())
+	//                 .filter(([id]) => id !== sessionId)
+	//                 .sort((a, b) => {
+	//                 	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
+	//                 	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
+	//                 	return timeB - timeA;
+	//                 });
 
-				if (remainingSessions.length > 0) {
-					const [nextSessionId, nextSessionData] = remainingSessions[0];
-					try {
-						const session = await getSessionById(nextSessionId);
-						if (session && onSessionSelect) {
-							onSessionSelect(session.id);
-						}
-					}
-					catch (error) {
-						// Zotero.debug(`DeepTutorChatBox: Error loading next session: ${error.message}`);
-					}
-				}
-			}
-		};
+	// 			if (remainingSessions.length > 0) {
+	// 				const [nextSessionId, nextSessionData] = remainingSessions[0];
+	// 				try {
+	// 					const session = await getSessionById(nextSessionId);
+	// 					if (session && onSessionSelect) {
+	// 						onSessionSelect(session.id);
+	// 					}
+	// 				}
+	// 				catch (error) {
+	// 					// Zotero.debug(`DeepTutorChatBox: Error loading next session: ${error.message}`);
+	// 				}
+	// 			}
+	// 		}
+	// 	};
 
-		return (
-			<div style={styles.sessionTabBar}>
-				{visibleSessions.map(([sessionId, sessionData]) => (
-					<button
-						key={sessionId}
-						style={{
-							...styles.sessionTab,
-							...(sessionId === currentSession?.id ? styles.activeSessionTab : {})
-						}}
-						onClick={() => handleSessionClick(sessionId)}
-					>
-						{truncateSessionName(sessionData.name)}
-						<button
-							style={styles.sessionTabClose}
-							onClick={e => handleCloseSession(sessionId, e)}
-						>
-							<img
-								src={SessionTabClosePath}
-								alt="Close"
-								style={styles.sessionTabCloseIcon}
-							/>
-						</button>
-					</button>
-				))}
-				{hiddenSessions.length > 0 && (
-					<div style={{ position: 'relative' }}>
-						<button
-							style={styles.sessionTab}
-							onClick={() => setShowSessionPopup(!showSessionPopup)}
-						>
-                            More ({hiddenSessions.length})
-						</button>
-						{showSessionPopup && (
-							<div style={styles.sessionPopup}>
-								{hiddenSessions.map(([sessionId, sessionData]) => (
-									<div
-										key={sessionId}
-										style={styles.sessionPopupItem}
-										onClick={() => {
-											handleSessionClick(sessionId);
-											setShowSessionPopup(false);
-										}}
-										onMouseEnter={(e) => {
-											e.target.style.background = '#D9D9D9';
-										}}
-										onMouseLeave={(e) => {
-											e.target.style.background = '#FFFFFF';
-										}}
-									>
-										{truncateSessionName(sessionData.name)}
-									</div>
-								))}
-							</div>
-						)}
-					</div>
-				)}
-			</div>
-		);
-	};
+	// 	return (
+	// 		<div style={styles.sessionTabBar}>
+	// 			{visibleSessions.map(([sessionId, sessionData]) => (
+	// 				<button
+	// 					key={sessionId}
+	// 					style={{
+	// 						...styles.sessionTab,
+	// 						...(sessionId === currentSession?.id ? styles.activeSessionTab : {})
+	// 					}}
+	// 					onClick={() => handleSessionClick(sessionId)}
+	// 				>
+	// 					{truncateSessionName(sessionData.name)}
+	// 					<button
+	// 						style={styles.sessionTabClose}
+	// 						onClick={e => handleCloseSession(sessionId, e)}
+	// 					>
+	// 						<img
+	// 							src={SessionTabClosePath}
+	// 							alt="Close"
+	// 							style={styles.sessionTabCloseIcon}
+	// 						/>
+	// 					</button>
+	// 				</button>
+	// 			))}
+	// 			{hiddenSessions.length > 0 && (
+	// 				<div style={{ position: 'relative' }}>
+	// 					<button
+	// 						style={styles.sessionTab}
+	// 						onClick={() => setShowSessionPopup(!showSessionPopup)}
+	// 					>
+	//                         More ({hiddenSessions.length})
+	// 					</button>
+	// 					{showSessionPopup && (
+	// 						<div style={styles.sessionPopup}>
+	// 							{hiddenSessions.map(([sessionId, sessionData]) => (
+	// 								<div
+	// 									key={sessionId}
+	// 									style={styles.sessionPopupItem}
+	// 									onClick={() => {
+	// 										handleSessionClick(sessionId);
+	// 										setShowSessionPopup(false);
+	// 									}}
+	// 									onMouseEnter={(e) => {
+	// 										e.target.style.background = '#D9D9D9';
+	// 									}}
+	// 									onMouseLeave={(e) => {
+	// 										e.target.style.background = '#FFFFFF';
+	// 									}}
+	// 								>
+	// 									{truncateSessionName(sessionData.name)}
+	// 								</div>
+	// 							))}
+	// 						</div>
+	// 					)}
+	// 				</div>
+	// 			)}
+	// 		</div>
+	// 	);
+	// };
 
 	// Communicate iniWait state changes to parent component
 	useEffect(() => {
