@@ -1409,7 +1409,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			try {
 				const messages = await getMessagesBySessionId(session.id);
 				Zotero.debug(`DeepTutor: Successfully fetched ${messages.length} messages`);
-				Zotero.debug(`DeepTutor: Messages content: ${JSON.stringify(messages)}`);
+				// Zotero.debug(`DeepTutor: Messages content: ${JSON.stringify(messages)}`);
 
 				// Update state with current session and messages
 				await this.setState({

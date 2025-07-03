@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="DO11_files/zotero.css">
+		<title>Debug Output</title>
+		<script src="DO11_files/include.js"></script>
+		<script src="DO11_files/debugViewer.js"></script>
+		
+		<style>
+			body {
+				margin: 0;
+				background: var(--material-background);
+			}
+			
+			a {
+				text-decoration: underline;
+			}
+			
+			header {
+				position: fixed;
+				top: 0;
+				color: var(--fill-primary);
+				background: var(--material-sidepane);
+				display: flex;
+				align-items: center;
+				width: calc(100% - 20px);
+				height: 18px;
+				padding: 10px;
+				margin-bottom: 10px;
+				font-family: sans-serif;
+				font-size: 11pt;
+			}
+			
+			header > * {
+				margin-right: 10px;
+			}
+			
+			progress {
+				width: 125px;
+			}
+			
+			#debug-id {
+				font-weight: 600;
+			}
+			
+			#submit-result {
+				line-height: 1.25em;
+			}
+			
+			#submit-result-copy-id {
+				cursor: pointer;
+				padding-left: 2px;
+			}
+			
+			#submit-error {
+				font-weight: 600;
+				color: var(--accent-red);
+			}
+			
+			#content {
+				margin-top: 38px;
+				padding: 10px 9px;
+				font-family: Monaco, Consolas, Inconsolata, monospace;
+				font-size: 8pt;
+			}
+			
+			#errors {
+				padding-bottom: 12px;
+				border-bottom: var(--material-panedivider);
+				white-space: pre-wrap;
+			}
+			
+			
+			
+			/*
+			   CSS tooltip, adapted from http://stackoverflow.com/a/25836471
+			*/
+			[data-tooltip] {
+				display: inline-block;
+				position: relative;
+				cursor: pointer;
+				padding: 2px;
+			}
+			[data-tooltip]:before {
+				content: attr(data-tooltip);
+				display: none;
+				position: absolute;
+				background: var(--color-menu-opaque);
+				color: var(--fill-primary);
+				padding: 4px 8px;
+				font-size: 12px;
+				font-family: sans-serif;
+				line-height: 1.4;
+				text-align: center;
+				border-radius: 4px;
+				
+				left: 50%;
+				transform: translateX(-50%);
+				
+				top: 100%;
+				margin-top: 6px;
+				
+				white-space: nowrap;
+			}
+			[data-tooltip]:after {
+				content: '';
+				display: none;
+				position: absolute;
+				width: 0;
+				height: 0;
+				border-color: transparent;
+				border-style: solid;
+				
+				left: 50%;
+				margin-left: -6px;
+				
+				top: 100%;
+				border-width: 0 6px 6px;
+				border-bottom-color: var(--color-menu-opaque);
+			}
+			/* Show the tooltip when hovering */
+			[data-tooltip]:hover:before,
+			[data-tooltip]:hover:after {
+				display: block;
+				z-index: 50;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<button id="submit-button" onclick="submit(this)">Submit…</button>
+			<button id="clear-button" onclick="clearOutput(this)">Clear</button>
+			<progress id="submit-progress" hidden=""></progress>
+			<p id="submit-result" hidden="">
+				Submitted with Debug ID <span id="debug-id"></span>
+				<span id="submit-result-copy-id" onclick="copyIDToClipboard(this)">📋</span>
+			</p>
+			<p id="submit-error" hidden=""></p>
+		</header>
+		<div id="content">
+			<div id="errors">[JavaScript Error: "uncaught exception: Object"]
+
+Warning: attempting to write 5654 bytes to preference extensions.zotero.deeptutor.recentSessions. This is bad for general performance and memory usage. Such an amount of data should rather be written to an external file.
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "XML Parsing Error: not well-formed
+Location: 
+Line Number 12, Column 96:"]
+
+Warning: attempting to write 5654 bytes to preference extensions.zotero.deeptutor.recentSessions. This is bad for general performance and memory usage. Such an amount of data should rather be written to an external file.
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "XML Parsing Error: not well-formed
+Location: 
+Line Number 12, Column 96:"]
+
+[JavaScript Error: "SyntaxError: An invalid or illegal string was specified" {file: "resource://zotero/react-dom.js" line: 220}]
+yi&lt;@resource://zotero/react-dom.js:220:94
+xk@resource://zotero/react-dom.js:152:86
+Qi@resource://zotero/react-dom.js:195:356
+Ri@resource://zotero/react-dom.js:195:246
+Ok@resource://zotero/react-dom.js:195:118
+Nd@resource://zotero/react-dom.js:194:492
+Qf@resource://zotero/react-dom.js:187:439
+Ni@resource://zotero/react-dom.js:185:400
+S@resource://zotero/react.js:17:26
+U@resource://zotero/react.js:21:229
+
+
+appName =&gt; Zotero, version =&gt; 7.1.SOURCE.5bef2e121 (x64), os =&gt; Linux 5.15.146.1-microsoft-standard-WSL2 #1 SMP Thu Jan 11 04:09:03 UTC 2024, locale =&gt; en-US, extensions =&gt; </div>
+			<div id="output"><p>(3)(+0028072): Standalone: DeepTutor pane toggle triggered</p><p>(3)(+0000001): Standalone: Opening DeepTutor pane</p><p>(3)(+0000031): Standalone: Layout constraints updated</p><p>(3)(+0000225): itemTree.render(). Displaying Item Tree</p><p>(3)(+0000926): DeepTutor: Fetching messages for session: 686581cf82d71e4a7a408acc</p><p>(3)(+0000107): DeepTutor: Successfully fetched 4 messages</p><p>(3)(+0000002): DeepTutor: Messages loaded successfully</p><p>(3)(+0000003): DeepTutor: Render called</p><p>(3)(+0000032): DeepTutorChatBox: Using minimum height 24px for single-line content</p><p>(3)(+0000001): DeepTutorChatBox: Loaded 50 recent sessions from preferences</p><p>(3)(+0000000): DeepTutorChatBox: Loading session data for session 686581cf82d71e4a7a408acc</p><p>(3)(+0000001): Current recent sessions TTT: {}</p><p>(3)(+0000001): DeepTutorChatBox: loadMessages useEffect - About to call loadMessages() for sessionId: null</p><p>(3)(+0000000): DeepTutorChatBox: loadMessages useEffect triggered - sessionId: null</p><p>(3)(+0000000): DeepTutorChatBox: loadMessages useEffect - No sessionId, returning early</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000000): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000001): DeepTutor: Received iniWait state change: false</p><p>(3)(+0000000): DeepTutor: iniWait became false, but keeping model selection frozen until timer expires</p><p>(3)
+(+0000042): DeepTutorChatBox: Conversation state updated with sessionId:
+ 686581cf82d71e4a7a408acc, userId: 65cf1fed8dba465a018bbc77</p><p>(3)(+0000001): DeepTutorChatBox: loadMessages useEffect - About to call loadMessages() for sessionId: 686581cf82d71e4a7a408acc</p><p>(3)(+0000000): DeepTutorChatBox: loadMessages useEffect triggered - sessionId: 686581cf82d71e4a7a408acc</p><p>(3)(+0000001): DeepTutorChatBox: loadMessages useEffect - Fetching messages for session 686581cf82d71e4a7a408acc</p><p>(3)(+0000006): Opening /home/sherman01/Zotero/storage/G5EEXCS2/A single.pdf</p><p>(3)(+0000001): No external handler for pdf -- opening in Zotero</p><p>(3)(+0000003): Tabs: currentTabIsReader true, prevTabIsReader true</p><p>(3)
+(+0000006): Notifier.trigger('select', 'tab', [tab-J1HxC6lK], 
+{"tab-J1HxC6lK":{"type":"reader-loading"}}) called [observers: 6]</p><p>(4)
+(+0000013): SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I
+ LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=13) LEFT JOIN
+ itemDataValues IDV ON (ID.valueID=IDV.valueID) WHERE parentItemID=? AND
+ linkMode NOT IN (3) AND IA.itemID NOT IN (SELECT itemID FROM 
+deletedItems) ORDER BY contentType='application/pdf' DESC, value=? DESC,
+ dateAdded ASC [46, '']</p><p>(3)(+0000001): Loading synced settings for library 1</p><p>(4)(+0000000): SELECT setting, value, synced, version FROM syncedSettings WHERE libraryID=? [1]</p><p>(3)
+(+0000001): Notifier.trigger('load', 'tab', [tab-J1HxC6lK], 
+{"tab-J1HxC6lK":{"id":"tab-J1HxC6lK","type":"reader","title":"","data":
+{"itemID":47,"icon":"attachmentPDF","secondViewState":null},"timeSelected":1751486237,"prevType":"reader-
+loading"}}) called [observers: 6]</p><p>(4)(+0000027): Registering notifier observer 'paneHeader_HS' for [item]</p><p>(4)(+0000004): Registering notifier observer 'itemBox_KU' for [item,infobox]</p><p>(4)(+0000005): Registering notifier observer 'abstractBox_ia' for [item]</p><p>(4)(+0000003): Registering notifier observer 'attachmentsBox_Mm' for [item]</p><p>(4)(+0000001): Registering notifier observer 'notesBox_ib' for [item]</p><p>(4)(+0000014): Registering notifier observer 'tagsBox_sY' for [item-tag,setting] with priority 101</p><p>(4)(+0000004): Registering notifier observer 'relatedbox_W7' for [item]</p><p>(4)(+0000001): Registering notifier observer 'noteEditor_0j' for [item,file]</p><p>(4)(+0000000): Registering notifier observer 'attachmentbox_5K' for [item]</p><p>(4)(+0000001): Registering notifier observer 'attachmentAnnotationsBox_q2' for [item]</p><p>(4)(+0000001): Registering notifier observer 'librariesCollectionsBox_bu' for [item,collection]</p><p>(4)(+0000001): Registering notifier observer 'tagsBox_i5' for [item-tag,setting] with priority 101</p><p>(4)(+0000002): Registering notifier observer 'relatedbox_TM' for [item]</p><p>(4)(+0000001): Registering notifier observer 'ItemDetails_7f' for [item,itempane,tab]</p><p>(4)(+0000001): Unregistering notifier observer in notifier with id 'relatedbox_TM'</p><p>(4)(+0000001): Registering notifier observer 'relatedbox_Bn' for [item]</p><p>(4)(+0000001): Unregistering notifier observer in notifier with id 'tagsBox_i5'</p><p>(4)(+0000001): Registering notifier observer 'tagsBox_Bz' for [item-tag,setting] with priority 101</p><p>(4)(+0000000): Unregistering notifier observer in notifier with id 'librariesCollectionsBox_bu'</p><p>(4)(+0000002): Registering notifier observer 'librariesCollectionsBox_p6' for [item,collection]</p><p>(4)(+0000000): Unregistering notifier observer in notifier with id 'attachmentsBox_Mm'</p><p>(4)(+0000003): Registering notifier observer 'attachmentsBox_gB' for [item]</p><p>(4)(+0000000): Unregistering notifier observer in notifier with id 'attachmentAnnotationsBox_q2'</p><p>(4)(+0000001): Registering notifier observer 'attachmentAnnotationsBox_ul' for [item]</p><p>(4)(+0000005): Unregistering notifier observer in notifier with id 'noteEditor_0j'</p><p>(4)(+0000002): Registering notifier observer 'noteEditor_t9' for [item,file]</p><p>(4)(+0000001): Unregistering notifier observer in notifier with id 'noteEditor_t9'</p><p>(4)(+0000001): Unregistering notifier observer in notifier with id 'tagsBox_sY'</p><p>(4)(+0000001): Registering notifier observer 'tagsBox_w4' for [item-tag,setting] with priority 101</p><p>(4)(+0000000): Unregistering notifier observer in notifier with id 'tagsBox_w4'</p><p>(4)(+0000001): Unregistering notifier observer in notifier with id 'relatedbox_W7'</p><p>(4)(+0000001): Registering notifier observer 'relatedbox_lO' for [item]</p><p>(4)(+0000000): Unregistering notifier observer in notifier with id 'relatedbox_lO'</p><p>(4)(+0000001): Unregistering notifier observer in notifier with id 'attachmentbox_5K'</p><p>(4)(+0000010): Registering notifier observer 'tagsBox_QM' for [item-tag,setting] with priority 101</p><p>(4)(+0000001): Registering notifier observer 'relatedbox_Vb' for [item]</p><p>(4)(+0000001): Registering notifier observer 'noteEditor_St' for [item,file]</p><p>(4)(+0000000): Registering notifier observer 'attachmentbox_Wm' for [item]</p><p>(4)(+0000001): Unregistering notifier observer in notifier with id 'notesBox_ib'</p><p>(4)(+0000001): Registering notifier observer 'notesBox_HV' for [item]</p><p>(4)(+0000001): Unregistering notifier observer in notifier with id 'abstractBox_ia'</p><p>(4)(+0000003): Registering notifier observer 'abstractBox_cz' for [item]</p><p>(4)(+0000002): Unregistering notifier observer in notifier with id 'itemBox_KU'</p><p>(4)(+0000004): Registering notifier observer 'itemBox_4F' for [item,infobox]</p><p>(3)(+0000002): Viewing item</p><p>(3)(+0000009): Refreshing item box</p><p>(3)(+0000028): Setting mode to 'edit'</p><p>(3)(+0000001): Reloading tags box</p><p>(3)(+0000009): Viewing item</p><p>(3)(+0000000): Refreshing item box</p><p>(3)(+0000001): Setting mode to 'edit'</p><p>(4)
+(+0000076): SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I
+ LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=13) LEFT JOIN
+ itemDataValues IDV ON (ID.valueID=IDV.valueID) WHERE parentItemID=? AND
+ linkMode NOT IN (3) AND IA.itemID NOT IN (SELECT itemID FROM 
+deletedItems) ORDER BY contentType='application/pdf' DESC, value=? DESC,
+ dateAdded ASC [46, '']</p><p>(4)(+0000002): SELECT IA.itemID FROM 
+itemAttachments IA NATURAL JOIN items I LEFT JOIN itemData ID ON 
+(IA.itemID=ID.itemID AND fieldID=13) LEFT JOIN itemDataValues IDV ON 
+(ID.valueID=IDV.valueID) WHERE parentItemID=? AND linkMode NOT IN (3) 
+AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) ORDER BY 
+contentType='application/pdf' DESC, value=? DESC, dateAdded ASC [46, '']</p><p>(3)(+0000052): DeepTutorChatBox: Updated recent sessions for session 686581cf82d71e4a7a408acc</p><p>(3)(+0000001): DeepTutorChatBox: Current session type: ADVANCED</p><p>(3)(+0000009): Getting contents of /home/sherman01/Zotero/storage/G5EEXCS2/.zotero-reader-state</p><p>(3)(+0000002): DeepTutorChatBox: loadMessages useEffect - Retrieved 4 messages for session 686581cf82d71e4a7a408acc</p><p>(3)
+(+0000001): DeepTutorChatBox: loadMessages useEffect - Session 
+686581cf82d71e4a7a408acc has existing messages, processing them</p><p>(3)(+0000000): DeepTutorChatBox: Appending message from You</p><p>(3)(+0000001): DeepTutorChatBox: Processing 1 subMessages for You</p><p>(3)(+0000000): DeepTutorChatBox: Appending message from DeepTutor</p><p>(3)(+0000000): DeepTutorChatBox: Processing 2 subMessages for DeepTutor</p><p>(3)(+0000001): DeepTutorChatBox: Appending message from You</p><p>(3)(+0000000): DeepTutorChatBox: Processing 1 subMessages for You</p><p>(3)(+0000000): DeepTutorChatBox: Appending message from DeepTutor</p><p>(3)(+0000000): DeepTutorChatBox: Processing 2 subMessages for DeepTutor</p><p>(3)
+(+0000000): DeepTutorChatBox: loadMessages useEffect - Finished 
+processing existing messages for session 686581cf82d71e4a7a408acc</p><p>(3)(+0000031): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 0</p><p>(3)(+0000001): DeepTutorChatBox: Markdown render result length: 0</p><p>(3)(+0000002): DeepTutorChatBox: Processed result length: 0</p><p>(3)(+0000002): DeepTutorChatBox: Processed result (first 1000 chars): </p><p>(3)(+0000004): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Original text length: 4244</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Available sources: 0</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - SKIPPED mathematical symbol escaping for testing</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: 4244</p><p>(3)(+0000000): DeepTutorChatBox: About to render markdown for subMessage 1, text length: 4244</p><p>(3)(+0000013): DeepTutorChatBox: Markdown render result length: 4911</p><p>(3)(+0000001): DeepTutorChatBox: Processed result length: 4913</p><p>(3)
+(+0000000): DeepTutorChatBox: Processed result (first 1000 chars): 
+&lt;p&gt;Here is your refined summary with duplicated section titles 
+removed:&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h3&gt;👋 Welcome to DeepTutor!&lt;/h3&gt;
+&lt;p&gt;I’m your AI tutor 🤖 ready to help you understand this 
+document.&lt;/p&gt;
+&lt;h3&gt;💡 Key Takeaway&lt;/h3&gt;
+&lt;p&gt;🧠 &lt;strong&gt;A single fear-inducing stimulus triggers a 
+long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR&lt;/strong&gt; phenotype in cerebellar stellate 
+cells—via noradrenaline, action potential broadening, Ca$^{2+}$ influx, 
+and ERK/MAPK signaling—that increases synaptic incorporation of 
+GluR2-containing, Ca$^{2+}$-impermeable &lt;strong&gt;AMPA 
+receptors&lt;/strong&gt;.&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;📚 Document Overview&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;A single fear-inducing stimulus&lt;/strong&gt; 
+triggers a long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPA receptor (AMPAR) phenotype&lt;/strong&gt; in 
+cerebellar stellate cells.&lt;/li&gt;
+&lt;li&gt;This switch involves increased &lt;strong&gt;GluR2 
+mRNA&lt;/strong&gt; and synaptic incorporation of 
+&lt;strong&gt;GluR2-containing, Ca$^{2+}$-impermeable AMPARs&lt;/strong</p><p>(3)(+0000002): 1234567890  DeepTutorChatBox: XML conversion made changes - HTML vs XML comparison:</p><p>(3)
+(+0000000): 1234567890  DeepTutorChatBox: Original HTML: &lt;p&gt;Here 
+is your refined summary with duplicated section titles 
+removed:&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3&gt;👋 Welcome to DeepTutor!&lt;/h3&gt;
+&lt;p&gt;I’m your AI tutor 🤖 ready to help you understand this 
+document.&lt;/p&gt;
+&lt;h3&gt;💡 Key Takeaway&lt;/h3&gt;
+&lt;p&gt;🧠 &lt;strong&gt;A single fear-inducing stimulus triggers a 
+long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR&lt;/strong&gt; phenotype in cerebellar stellate 
+cells—via noradrenaline, action potential broadening, Ca$^{2+}$ influx, 
+and ERK/MAPK signaling—that increases synaptic incorporation of 
+GluR2-containing, Ca$^{2+}$-impermeable &lt;strong&gt;AMPA 
+receptors&lt;/strong&gt;.&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;📚 Document Overview&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;A single fear-inducing stimulus&lt;/strong&gt; 
+triggers a long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPA receptor (AMPAR) phenotype&lt;/strong&gt; in 
+cerebellar stellate cells.&lt;/li&gt;
+&lt;li&gt;This switch involves increased &lt;strong&gt;GluR2 
+mRNA&lt;/strong&gt; and synaptic incorporation of 
+&lt;strong&gt;GluR2-containing, Ca$^{2+}$-impermeable 
+AMPARs&lt;/strong&gt;, replacing GluR2-lacking, Ca$^{2+}$-permeable 
+receptors.&lt;/li&gt;
+&lt;li&gt;The process is mediated by 
+&lt;strong&gt;noradrenaline&lt;/strong&gt;, which prolongs action 
+potentials, enhances Ca$^{2+}$ entry, and activates 
+&lt;strong&gt;ERK/MAPK signaling&lt;/strong&gt; to drive new GluR2 gene 
+transcription.&lt;/li&gt;
+&lt;li&gt;This &lt;strong&gt;phenotype switch&lt;/strong&gt; alters 
+synaptic efficacy and may reshape inhibitory neural network activity in 
+response to emotional stress.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Fear-induced switch in synaptic AMPAR phenotype&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;A &lt;strong&gt;single fear-inducing stimulus&lt;/strong&gt; 
+triggers a transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR phenotype&lt;/strong&gt; in cerebellar stellate 
+cells, changing from GluR2-lacking (Ca$^{2+}$-permeable) to 
+GluR2-containing (Ca$^{2+}$-impermeable) receptors within 
+hours.&lt;/li&gt;
+&lt;li&gt;This switch is driven by 
+&lt;strong&gt;noradrenaline&lt;/strong&gt;, which prolongs action 
+potentials, increases Ca$^{2+}$ entry, and activates the 
+&lt;strong&gt;ERK/MAPK pathway&lt;/strong&gt; to boost 
+&lt;em&gt;GluR2&lt;/em&gt; gene transcription.&lt;/li&gt;
+&lt;li&gt;The result is a long-lasting change in synaptic function, 
+potentially altering the activity of inhibitory neural networks in 
+response to fear.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Role of noradrenaline and β-adrenergic receptors&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Noradrenaline&lt;/strong&gt; released during 
+emotional arousal activates &lt;strong&gt;β-adrenergic 
+receptors&lt;/strong&gt; in the brain, especially in cerebellar stellate
+ cells.&lt;/li&gt;
+&lt;li&gt;Activation of β-adrenergic receptors increases action 
+potential duration and intracellular $Ca^{2+}$, triggering ERK/MAPK 
+signaling and transcription of GluR2, leading to a switch in synaptic 
+&lt;strong&gt;AMPAR phenotype&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;This process enables a long-lasting change in synaptic 
+strength and may underlie how emotional experiences modify learning and 
+memory.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Mechanism: Action potential broadening, Ca2+ entry, 
+ERK/MAPK signaling, and GluR2 transcription&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Action potential broadening&lt;/strong&gt; 
+increases &lt;strong&gt;Ca$^{2+}$ entry&lt;/strong&gt; through L-type 
+channels, activating the &lt;strong&gt;ERK/MAPK signaling&lt;/strong&gt;
+ pathway.&lt;/li&gt;
+&lt;li&gt;This cascade triggers &lt;strong&gt;GluR2 gene 
+transcription&lt;/strong&gt;, leading to more 
+&lt;strong&gt;GluR2-containing AMPARs&lt;/strong&gt; at synapses and a 
+switch in receptor phenotype.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Transcription-dependent vs. independent synaptic 
+plasticity&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Transcription-dependent synaptic 
+plasticity&lt;/strong&gt; involves long-lasting changes in synaptic 
+strength that require new gene transcription, such as the 
+noradrenaline-triggered switch to GluR2-containing AMPARs after fear 
+stimuli.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transcription-independent synaptic 
+plasticity&lt;/strong&gt; relies on rapid mechanisms like receptor 
+trafficking or local protein synthesis, enabling fast changes in 
+synaptic function without altering gene expression.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key difference:&lt;/strong&gt; 
+Transcription-dependent changes occur over hours and affect the whole 
+neuron, while transcription-independent changes happen within minutes 
+and are often synapse-specific.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Functional consequences for inhibitory neural 
+circuits&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Inhibitory neural circuits&lt;/strong&gt; can 
+undergo long-lasting changes in synaptic strength when a single 
+fear-inducing stimulus triggers transcription-dependent upregulation of 
+GluR2, leading to a switch in AMPAR phenotype.&lt;/li&gt;
+&lt;li&gt;This switch reduces &lt;strong&gt;Ca$^{2+}$ 
+permeability&lt;/strong&gt; at synapses, altering &lt;strong&gt;synaptic
+ efficacy&lt;/strong&gt; and potentially reshaping the activity of the 
+entire inhibitory network.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Noradrenaline&lt;/strong&gt; and 
+&lt;strong&gt;action potential broadening&lt;/strong&gt; are key signals
+ that activate the &lt;strong&gt;ERK/MAPK pathway&lt;/strong&gt;, 
+driving these transcriptional and functional changes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3&gt;💬 Ask Me Anything!&lt;/h3&gt;
+&lt;p&gt;Feel free to ask me any questions about the document! I’m here 
+to help! ✨&lt;/p&gt;
+</p><p>(3)(+0000001): 1234567890DeepTutorChatBox: Converted XML: 
+&lt;p&gt;Here is your refined summary with duplicated section titles 
+removed:&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h3&gt;👋 Welcome to DeepTutor!&lt;/h3&gt;
+&lt;p&gt;I’m your AI tutor 🤖 ready to help you understand this 
+document.&lt;/p&gt;
+&lt;h3&gt;💡 Key Takeaway&lt;/h3&gt;
+&lt;p&gt;🧠 &lt;strong&gt;A single fear-inducing stimulus triggers a 
+long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR&lt;/strong&gt; phenotype in cerebellar stellate 
+cells—via noradrenaline, action potential broadening, Ca$^{2+}$ influx, 
+and ERK/MAPK signaling—that increases synaptic incorporation of 
+GluR2-containing, Ca$^{2+}$-impermeable &lt;strong&gt;AMPA 
+receptors&lt;/strong&gt;.&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;📚 Document Overview&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;A single fear-inducing stimulus&lt;/strong&gt; 
+triggers a long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPA receptor (AMPAR) phenotype&lt;/strong&gt; in 
+cerebellar stellate cells.&lt;/li&gt;
+&lt;li&gt;This switch involves increased &lt;strong&gt;GluR2 
+mRNA&lt;/strong&gt; and synaptic incorporation of 
+&lt;strong&gt;GluR2-containing, Ca$^{2+}$-impermeable 
+AMPARs&lt;/strong&gt;, replacing GluR2-lacking, Ca$^{2+}$-permeable 
+receptors.&lt;/li&gt;
+&lt;li&gt;The process is mediated by 
+&lt;strong&gt;noradrenaline&lt;/strong&gt;, which prolongs action 
+potentials, enhances Ca$^{2+}$ entry, and activates 
+&lt;strong&gt;ERK/MAPK signaling&lt;/strong&gt; to drive new GluR2 gene 
+transcription.&lt;/li&gt;
+&lt;li&gt;This &lt;strong&gt;phenotype switch&lt;/strong&gt; alters 
+synaptic efficacy and may reshape inhibitory neural network activity in 
+response to emotional stress.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Fear-induced switch in synaptic AMPAR phenotype&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;A &lt;strong&gt;single fear-inducing stimulus&lt;/strong&gt; 
+triggers a transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR phenotype&lt;/strong&gt; in cerebellar stellate 
+cells, changing from GluR2-lacking (Ca$^{2+}$-permeable) to 
+GluR2-containing (Ca$^{2+}$-impermeable) receptors within 
+hours.&lt;/li&gt;
+&lt;li&gt;This switch is driven by 
+&lt;strong&gt;noradrenaline&lt;/strong&gt;, which prolongs action 
+potentials, increases Ca$^{2+}$ entry, and activates the 
+&lt;strong&gt;ERK/MAPK pathway&lt;/strong&gt; to boost 
+&lt;em&gt;GluR2&lt;/em&gt; gene transcription.&lt;/li&gt;
+&lt;li&gt;The result is a long-lasting change in synaptic function, 
+potentially altering the activity of inhibitory neural networks in 
+response to fear.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Role of noradrenaline and β-adrenergic receptors&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Noradrenaline&lt;/strong&gt; released during 
+emotional arousal activates &lt;strong&gt;β-adrenergic 
+receptors&lt;/strong&gt; in the brain, especially in cerebellar stellate
+ cells.&lt;/li&gt;
+&lt;li&gt;Activation of β-adrenergic receptors increases action 
+potential duration and intracellular $Ca^{2+}$, triggering ERK/MAPK 
+signaling and transcription of GluR2, leading to a switch in synaptic 
+&lt;strong&gt;AMPAR phenotype&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;This process enables a long-lasting change in synaptic 
+strength and may underlie how emotional experiences modify learning and 
+memory.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Mechanism: Action potential broadening, Ca2+ entry, 
+ERK/MAPK signaling, and GluR2 transcription&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Action potential broadening&lt;/strong&gt; 
+increases &lt;strong&gt;Ca$^{2+}$ entry&lt;/strong&gt; through L-type 
+channels, activating the &lt;strong&gt;ERK/MAPK signaling&lt;/strong&gt;
+ pathway.&lt;/li&gt;
+&lt;li&gt;This cascade triggers &lt;strong&gt;GluR2 gene 
+transcription&lt;/strong&gt;, leading to more 
+&lt;strong&gt;GluR2-containing AMPARs&lt;/strong&gt; at synapses and a 
+switch in receptor phenotype.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Transcription-dependent vs. independent synaptic 
+plasticity&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Transcription-dependent synaptic 
+plasticity&lt;/strong&gt; involves long-lasting changes in synaptic 
+strength that require new gene transcription, such as the 
+noradrenaline-triggered switch to GluR2-containing AMPARs after fear 
+stimuli.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transcription-independent synaptic 
+plasticity&lt;/strong&gt; relies on rapid mechanisms like receptor 
+trafficking or local protein synthesis, enabling fast changes in 
+synaptic function without altering gene expression.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key difference:&lt;/strong&gt; 
+Transcription-dependent changes occur over hours and affect the whole 
+neuron, while transcription-independent changes happen within minutes 
+and are often synapse-specific.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Functional consequences for inhibitory neural 
+circuits&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Inhibitory neural circuits&lt;/strong&gt; can 
+undergo long-lasting changes in synaptic strength when a single 
+fear-inducing stimulus triggers transcription-dependent upregulation of 
+GluR2, leading to a switch in AMPAR phenotype.&lt;/li&gt;
+&lt;li&gt;This switch reduces &lt;strong&gt;Ca$^{2+}$ 
+permeability&lt;/strong&gt; at synapses, altering &lt;strong&gt;synaptic
+ efficacy&lt;/strong&gt; and potentially reshaping the activity of the 
+entire inhibitory network.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Noradrenaline&lt;/strong&gt; and 
+&lt;strong&gt;action potential broadening&lt;/strong&gt; are key signals
+ that activate the &lt;strong&gt;ERK/MAPK pathway&lt;/strong&gt;, 
+driving these transcriptional and functional changes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr/&gt;
+&lt;h3&gt;💬 Ask Me Anything!&lt;/h3&gt;
+&lt;p&gt;Feel free to ask me any questions about the document! I’m here 
+to help! ✨&lt;/p&gt;
+</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Original text length: 44</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Available sources: 0</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - SKIPPED mathematical symbol escaping for testing</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: 44</p><p>(3)(+0000001): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 44</p><p>(3)(+0000001): DeepTutorChatBox: Markdown render result length: 52</p><p>(3)(+0000000): DeepTutorChatBox: Processed result length: 52</p><p>(3)
+(+0000001): DeepTutorChatBox: Processed result (first 1000 chars): 
+&lt;p&gt;Show me the definition of Ca2+ using a table&lt;/p&gt;
+</p><p>(3)(+0000000): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000000): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 0</p><p>(3)(+0000000): DeepTutorChatBox: Markdown render result length: 0</p><p>(3)(+0000000): DeepTutorChatBox: Processed result length: 0</p><p>(3)(+0000000): DeepTutorChatBox: Processed result (first 1000 chars): </p><p>(3)(+0000001): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Original text length: 2699</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Available sources: 15</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - SKIPPED mathematical symbol escaping for testing</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: 2699</p><p>(3)(+0000000): DeepTutorChatBox: About to render markdown for subMessage 1, text length: 2699</p><p>(3)(+0000003): DeepTutorChatBox: Markdown render result length: 2047</p><p>(3)(+0000002): DeepTutorChatBox: Processed result length: 2047</p><p>(3)
+(+0000001): DeepTutorChatBox: Processed result (first 1000 chars): 
+&lt;p&gt;Below is a concise table summarizing the definition of Ca²⁺ and
+ its role in synaptic signaling as described in the paper:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;strong&gt;Aspect&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;Description&lt;/strong&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Definition&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Ca²⁺ (calcium ion) is a divalent cation that carries a 
+positive 2⁺ charge. [&lt;global context&gt;]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Role as Intracellular 
+Messenger&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Ca²⁺ functions as a critical intracellular messenger in 
+neurons, participating in diverse signaling processes that are essential
+ for normal synaptic function and plasticity. [&lt;global 
+context&gt;][&amp;lt;1&amp;gt;]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Mechanism of Ca²⁺ 
+Entry&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Ca²⁺ entry is enhanced by action potential broadening, which 
+increases the influx of Ca²⁺ through L-type calcium channels. 
+[&lt;global context&gt;][&amp;lt;2&amp;gt;]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Downstream Signaling 
+Activation&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;The increase in intracellular Ca²</p><p>(3)(+0000002): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000008): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 0</p><p>(3)(+0000000): DeepTutorChatBox: Markdown render result length: 0</p><p>(3)(+0000001): DeepTutorChatBox: Processed result length: 0</p><p>(3)(+0000000): DeepTutorChatBox: Processed result (first 1000 chars): </p><p>(3)(+0000000): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Original text length: 4244</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Available sources: 0</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - SKIPPED mathematical symbol escaping for testing</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: 4244</p><p>(3)(+0000000): DeepTutorChatBox: About to render markdown for subMessage 1, text length: 4244</p><p>(3)(+0000003): DeepTutorChatBox: Markdown render result length: 4911</p><p>(3)(+0000001): DeepTutorChatBox: Processed result length: 4913</p><p>(3)
+(+0000000): DeepTutorChatBox: Processed result (first 1000 chars): 
+&lt;p&gt;Here is your refined summary with duplicated section titles 
+removed:&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h3&gt;👋 Welcome to DeepTutor!&lt;/h3&gt;
+&lt;p&gt;I’m your AI tutor 🤖 ready to help you understand this 
+document.&lt;/p&gt;
+&lt;h3&gt;💡 Key Takeaway&lt;/h3&gt;
+&lt;p&gt;🧠 &lt;strong&gt;A single fear-inducing stimulus triggers a 
+long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR&lt;/strong&gt; phenotype in cerebellar stellate 
+cells—via noradrenaline, action potential broadening, Ca$^{2+}$ influx, 
+and ERK/MAPK signaling—that increases synaptic incorporation of 
+GluR2-containing, Ca$^{2+}$-impermeable &lt;strong&gt;AMPA 
+receptors&lt;/strong&gt;.&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;📚 Document Overview&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;A single fear-inducing stimulus&lt;/strong&gt; 
+triggers a long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPA receptor (AMPAR) phenotype&lt;/strong&gt; in 
+cerebellar stellate cells.&lt;/li&gt;
+&lt;li&gt;This switch involves increased &lt;strong&gt;GluR2 
+mRNA&lt;/strong&gt; and synaptic incorporation of 
+&lt;strong&gt;GluR2-containing, Ca$^{2+}$-impermeable AMPARs&lt;/strong</p><p>(3)(+0000000): 1234567890  DeepTutorChatBox: XML conversion made changes - HTML vs XML comparison:</p><p>(3)
+(+0000000): 1234567890  DeepTutorChatBox: Original HTML: &lt;p&gt;Here 
+is your refined summary with duplicated section titles 
+removed:&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3&gt;👋 Welcome to DeepTutor!&lt;/h3&gt;
+&lt;p&gt;I’m your AI tutor 🤖 ready to help you understand this 
+document.&lt;/p&gt;
+&lt;h3&gt;💡 Key Takeaway&lt;/h3&gt;
+&lt;p&gt;🧠 &lt;strong&gt;A single fear-inducing stimulus triggers a 
+long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR&lt;/strong&gt; phenotype in cerebellar stellate 
+cells—via noradrenaline, action potential broadening, Ca$^{2+}$ influx, 
+and ERK/MAPK signaling—that increases synaptic incorporation of 
+GluR2-containing, Ca$^{2+}$-impermeable &lt;strong&gt;AMPA 
+receptors&lt;/strong&gt;.&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;📚 Document Overview&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;A single fear-inducing stimulus&lt;/strong&gt; 
+triggers a long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPA receptor (AMPAR) phenotype&lt;/strong&gt; in 
+cerebellar stellate cells.&lt;/li&gt;
+&lt;li&gt;This switch involves increased &lt;strong&gt;GluR2 
+mRNA&lt;/strong&gt; and synaptic incorporation of 
+&lt;strong&gt;GluR2-containing, Ca$^{2+}$-impermeable 
+AMPARs&lt;/strong&gt;, replacing GluR2-lacking, Ca$^{2+}$-permeable 
+receptors.&lt;/li&gt;
+&lt;li&gt;The process is mediated by 
+&lt;strong&gt;noradrenaline&lt;/strong&gt;, which prolongs action 
+potentials, enhances Ca$^{2+}$ entry, and activates 
+&lt;strong&gt;ERK/MAPK signaling&lt;/strong&gt; to drive new GluR2 gene 
+transcription.&lt;/li&gt;
+&lt;li&gt;This &lt;strong&gt;phenotype switch&lt;/strong&gt; alters 
+synaptic efficacy and may reshape inhibitory neural network activity in 
+response to emotional stress.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Fear-induced switch in synaptic AMPAR phenotype&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;A &lt;strong&gt;single fear-inducing stimulus&lt;/strong&gt; 
+triggers a transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR phenotype&lt;/strong&gt; in cerebellar stellate 
+cells, changing from GluR2-lacking (Ca$^{2+}$-permeable) to 
+GluR2-containing (Ca$^{2+}$-impermeable) receptors within 
+hours.&lt;/li&gt;
+&lt;li&gt;This switch is driven by 
+&lt;strong&gt;noradrenaline&lt;/strong&gt;, which prolongs action 
+potentials, increases Ca$^{2+}$ entry, and activates the 
+&lt;strong&gt;ERK/MAPK pathway&lt;/strong&gt; to boost 
+&lt;em&gt;GluR2&lt;/em&gt; gene transcription.&lt;/li&gt;
+&lt;li&gt;The result is a long-lasting change in synaptic function, 
+potentially altering the activity of inhibitory neural networks in 
+response to fear.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Role of noradrenaline and β-adrenergic receptors&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Noradrenaline&lt;/strong&gt; released during 
+emotional arousal activates &lt;strong&gt;β-adrenergic 
+receptors&lt;/strong&gt; in the brain, especially in cerebellar stellate
+ cells.&lt;/li&gt;
+&lt;li&gt;Activation of β-adrenergic receptors increases action 
+potential duration and intracellular $Ca^{2+}$, triggering ERK/MAPK 
+signaling and transcription of GluR2, leading to a switch in synaptic 
+&lt;strong&gt;AMPAR phenotype&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;This process enables a long-lasting change in synaptic 
+strength and may underlie how emotional experiences modify learning and 
+memory.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Mechanism: Action potential broadening, Ca2+ entry, 
+ERK/MAPK signaling, and GluR2 transcription&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Action potential broadening&lt;/strong&gt; 
+increases &lt;strong&gt;Ca$^{2+}$ entry&lt;/strong&gt; through L-type 
+channels, activating the &lt;strong&gt;ERK/MAPK signaling&lt;/strong&gt;
+ pathway.&lt;/li&gt;
+&lt;li&gt;This cascade triggers &lt;strong&gt;GluR2 gene 
+transcription&lt;/strong&gt;, leading to more 
+&lt;strong&gt;GluR2-containing AMPARs&lt;/strong&gt; at synapses and a 
+switch in receptor phenotype.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Transcription-dependent vs. independent synaptic 
+plasticity&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Transcription-dependent synaptic 
+plasticity&lt;/strong&gt; involves long-lasting changes in synaptic 
+strength that require new gene transcription, such as the 
+noradrenaline-triggered switch to GluR2-containing AMPARs after fear 
+stimuli.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transcription-independent synaptic 
+plasticity&lt;/strong&gt; relies on rapid mechanisms like receptor 
+trafficking or local protein synthesis, enabling fast changes in 
+synaptic function without altering gene expression.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key difference:&lt;/strong&gt; 
+Transcription-dependent changes occur over hours and affect the whole 
+neuron, while transcription-independent changes happen within minutes 
+and are often synapse-specific.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Functional consequences for inhibitory neural 
+circuits&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Inhibitory neural circuits&lt;/strong&gt; can 
+undergo long-lasting changes in synaptic strength when a single 
+fear-inducing stimulus triggers transcription-dependent upregulation of 
+GluR2, leading to a switch in AMPAR phenotype.&lt;/li&gt;
+&lt;li&gt;This switch reduces &lt;strong&gt;Ca$^{2+}$ 
+permeability&lt;/strong&gt; at synapses, altering &lt;strong&gt;synaptic
+ efficacy&lt;/strong&gt; and potentially reshaping the activity of the 
+entire inhibitory network.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Noradrenaline&lt;/strong&gt; and 
+&lt;strong&gt;action potential broadening&lt;/strong&gt; are key signals
+ that activate the &lt;strong&gt;ERK/MAPK pathway&lt;/strong&gt;, 
+driving these transcriptional and functional changes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3&gt;💬 Ask Me Anything!&lt;/h3&gt;
+&lt;p&gt;Feel free to ask me any questions about the document! I’m here 
+to help! ✨&lt;/p&gt;
+</p><p>(3)(+0000001): 1234567890DeepTutorChatBox: Converted XML: 
+&lt;p&gt;Here is your refined summary with duplicated section titles 
+removed:&lt;/p&gt;
+&lt;hr/&gt;
+&lt;h3&gt;👋 Welcome to DeepTutor!&lt;/h3&gt;
+&lt;p&gt;I’m your AI tutor 🤖 ready to help you understand this 
+document.&lt;/p&gt;
+&lt;h3&gt;💡 Key Takeaway&lt;/h3&gt;
+&lt;p&gt;🧠 &lt;strong&gt;A single fear-inducing stimulus triggers a 
+long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR&lt;/strong&gt; phenotype in cerebellar stellate 
+cells—via noradrenaline, action potential broadening, Ca$^{2+}$ influx, 
+and ERK/MAPK signaling—that increases synaptic incorporation of 
+GluR2-containing, Ca$^{2+}$-impermeable &lt;strong&gt;AMPA 
+receptors&lt;/strong&gt;.&lt;/strong&gt;&lt;/p&gt;
+&lt;h3&gt;📚 Document Overview&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;A single fear-inducing stimulus&lt;/strong&gt; 
+triggers a long-lasting, transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPA receptor (AMPAR) phenotype&lt;/strong&gt; in 
+cerebellar stellate cells.&lt;/li&gt;
+&lt;li&gt;This switch involves increased &lt;strong&gt;GluR2 
+mRNA&lt;/strong&gt; and synaptic incorporation of 
+&lt;strong&gt;GluR2-containing, Ca$^{2+}$-impermeable 
+AMPARs&lt;/strong&gt;, replacing GluR2-lacking, Ca$^{2+}$-permeable 
+receptors.&lt;/li&gt;
+&lt;li&gt;The process is mediated by 
+&lt;strong&gt;noradrenaline&lt;/strong&gt;, which prolongs action 
+potentials, enhances Ca$^{2+}$ entry, and activates 
+&lt;strong&gt;ERK/MAPK signaling&lt;/strong&gt; to drive new GluR2 gene 
+transcription.&lt;/li&gt;
+&lt;li&gt;This &lt;strong&gt;phenotype switch&lt;/strong&gt; alters 
+synaptic efficacy and may reshape inhibitory neural network activity in 
+response to emotional stress.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Fear-induced switch in synaptic AMPAR phenotype&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;A &lt;strong&gt;single fear-inducing stimulus&lt;/strong&gt; 
+triggers a transcription-dependent switch in synaptic 
+&lt;strong&gt;AMPAR phenotype&lt;/strong&gt; in cerebellar stellate 
+cells, changing from GluR2-lacking (Ca$^{2+}$-permeable) to 
+GluR2-containing (Ca$^{2+}$-impermeable) receptors within 
+hours.&lt;/li&gt;
+&lt;li&gt;This switch is driven by 
+&lt;strong&gt;noradrenaline&lt;/strong&gt;, which prolongs action 
+potentials, increases Ca$^{2+}$ entry, and activates the 
+&lt;strong&gt;ERK/MAPK pathway&lt;/strong&gt; to boost 
+&lt;em&gt;GluR2&lt;/em&gt; gene transcription.&lt;/li&gt;
+&lt;li&gt;The result is a long-lasting change in synaptic function, 
+potentially altering the activity of inhibitory neural networks in 
+response to fear.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Role of noradrenaline and β-adrenergic receptors&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Noradrenaline&lt;/strong&gt; released during 
+emotional arousal activates &lt;strong&gt;β-adrenergic 
+receptors&lt;/strong&gt; in the brain, especially in cerebellar stellate
+ cells.&lt;/li&gt;
+&lt;li&gt;Activation of β-adrenergic receptors increases action 
+potential duration and intracellular $Ca^{2+}$, triggering ERK/MAPK 
+signaling and transcription of GluR2, leading to a switch in synaptic 
+&lt;strong&gt;AMPAR phenotype&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;This process enables a long-lasting change in synaptic 
+strength and may underlie how emotional experiences modify learning and 
+memory.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Mechanism: Action potential broadening, Ca2+ entry, 
+ERK/MAPK signaling, and GluR2 transcription&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Action potential broadening&lt;/strong&gt; 
+increases &lt;strong&gt;Ca$^{2+}$ entry&lt;/strong&gt; through L-type 
+channels, activating the &lt;strong&gt;ERK/MAPK signaling&lt;/strong&gt;
+ pathway.&lt;/li&gt;
+&lt;li&gt;This cascade triggers &lt;strong&gt;GluR2 gene 
+transcription&lt;/strong&gt;, leading to more 
+&lt;strong&gt;GluR2-containing AMPARs&lt;/strong&gt; at synapses and a 
+switch in receptor phenotype.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Transcription-dependent vs. independent synaptic 
+plasticity&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Transcription-dependent synaptic 
+plasticity&lt;/strong&gt; involves long-lasting changes in synaptic 
+strength that require new gene transcription, such as the 
+noradrenaline-triggered switch to GluR2-containing AMPARs after fear 
+stimuli.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Transcription-independent synaptic 
+plasticity&lt;/strong&gt; relies on rapid mechanisms like receptor 
+trafficking or local protein synthesis, enabling fast changes in 
+synaptic function without altering gene expression.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Key difference:&lt;/strong&gt; 
+Transcription-dependent changes occur over hours and affect the whole 
+neuron, while transcription-independent changes happen within minutes 
+and are often synapse-specific.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;📌 Functional consequences for inhibitory neural 
+circuits&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Inhibitory neural circuits&lt;/strong&gt; can 
+undergo long-lasting changes in synaptic strength when a single 
+fear-inducing stimulus triggers transcription-dependent upregulation of 
+GluR2, leading to a switch in AMPAR phenotype.&lt;/li&gt;
+&lt;li&gt;This switch reduces &lt;strong&gt;Ca$^{2+}$ 
+permeability&lt;/strong&gt; at synapses, altering &lt;strong&gt;synaptic
+ efficacy&lt;/strong&gt; and potentially reshaping the activity of the 
+entire inhibitory network.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Noradrenaline&lt;/strong&gt; and 
+&lt;strong&gt;action potential broadening&lt;/strong&gt; are key signals
+ that activate the &lt;strong&gt;ERK/MAPK pathway&lt;/strong&gt;, 
+driving these transcriptional and functional changes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr/&gt;
+&lt;h3&gt;💬 Ask Me Anything!&lt;/h3&gt;
+&lt;p&gt;Feel free to ask me any questions about the document! I’m here 
+to help! ✨&lt;/p&gt;
+</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Original text length: 44</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Available sources: 0</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - SKIPPED mathematical symbol escaping for testing</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: 44</p><p>(3)(+0000001): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 44</p><p>(3)(+0000001): DeepTutorChatBox: Markdown render result length: 52</p><p>(3)(+0000000): DeepTutorChatBox: Processed result length: 52</p><p>(3)
+(+0000000): DeepTutorChatBox: Processed result (first 1000 chars): 
+&lt;p&gt;Show me the definition of Ca2+ using a table&lt;/p&gt;
+</p><p>(3)(+0000001): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000000): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 0</p><p>(3)(+0000001): DeepTutorChatBox: Markdown render result length: 0</p><p>(3)(+0000000): DeepTutorChatBox: Processed result length: 0</p><p>(3)(+0000000): DeepTutorChatBox: Processed result (first 1000 chars): </p><p>(3)(+0000000): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Original text length: 2699</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Available sources: 15</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - SKIPPED mathematical symbol escaping for testing</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: 2699</p><p>(3)(+0000000): DeepTutorChatBox: About to render markdown for subMessage 1, text length: 2699</p><p>(3)(+0000002): DeepTutorChatBox: Markdown render result length: 2047</p><p>(3)(+0000000): DeepTutorChatBox: Processed result length: 2047</p><p>(3)
+(+0000000): DeepTutorChatBox: Processed result (first 1000 chars): 
+&lt;p&gt;Below is a concise table summarizing the definition of Ca²⁺ and
+ its role in synaptic signaling as described in the paper:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;strong&gt;Aspect&lt;/strong&gt;&lt;/th&gt;
+&lt;th&gt;&lt;strong&gt;Description&lt;/strong&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Definition&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Ca²⁺ (calcium ion) is a divalent cation that carries a 
+positive 2⁺ charge. [&lt;global context&gt;]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Role as Intracellular 
+Messenger&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Ca²⁺ functions as a critical intracellular messenger in 
+neurons, participating in diverse signaling processes that are essential
+ for normal synaptic function and plasticity. [&lt;global 
+context&gt;][&amp;lt;1&amp;gt;]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Mechanism of Ca²⁺ 
+Entry&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;Ca²⁺ entry is enhanced by action potential broadening, which 
+increases the influx of Ca²⁺ through L-type calcium channels. 
+[&lt;global context&gt;][&amp;lt;2&amp;gt;]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;strong&gt;Downstream Signaling 
+Activation&lt;/strong&gt;&lt;/td&gt;
+&lt;td&gt;The increase in intracellular Ca²</p><p>(3)(+0000001): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000003): DPTDPTDEBUG!! DeepTutor component mounted</p><p>(3)
+(+0000048): DeepTutorChatBox: ATTENTION New Document Files: 
+[{"id":"686581ce82d71e4a7a408acb","userId":"65cf1fed8dba465a018bbc77","filename":"undefined","storagePath":"tutor/
+materials/686581ce82d71e4a7a408acb/undefined","readUrl":"https://
+knowhiztutorrag.blob.core.windows.net/knowhiztutorrag/tutor/
+materials/686581ce82d71e4a7a408acb/undefined?
+sv=2023-01-03&amp;st=2025-07-02T19%3A00%3A30Z&amp;se=2030-07-02T19%3A00%3A30Z&amp;sr=b&amp;sp=r&amp;sig=02rOGRFjAM4K72wsw7F3IIbNOkquwAsON07DkycPTJE%3D","readExpireTime":"2030-07-01T19:00:30.809Z","md5":null,"extractedText":null,"appendix":null,"creationTime":"2025-07-02T19:00:30.787Z","lastUpdatedTime":"2025-07-02T19:00:30.809Z"}]</p><p>(3)(+0000001): DeepTutorChatBox: ATTENTION Storage Paths: []</p><p>(3)(+0000005): itemTree.render(). Displaying Item Tree</p><p>(3)(+0000191): BlockingObserver: Added observer</p><p>(4)
+(+0000017): SELECT IA.itemID FROM itemAttachments IA NATURAL JOIN items I
+ LEFT JOIN itemData ID ON (IA.itemID=ID.itemID AND fieldID=13) LEFT JOIN
+ itemDataValues IDV ON (ID.valueID=IDV.valueID) WHERE parentItemID=? AND
+ linkMode NOT IN (3) AND IA.itemID NOT IN (SELECT itemID FROM 
+deletedItems) ORDER BY contentType='application/pdf' DESC, value=? DESC,
+ dateAdded ASC [46, '']</p><p>(3)(+0000255): itemTree.render(). Displaying Item Tree</p><p>(3)(+0000148): Got MIME type application/pdf from extension 'pdf'</p><p>(3)(+0002903): Writing reader state to /home/sherman01/Zotero/storage/XDTJI5J6/.zotero-reader-state</p><p>(3)(+0002872): Writing reader state to /home/sherman01/Zotero/storage/G5EEXCS2/.zotero-reader-state</p></div>
+		</div>
+	
+
+</body></html>

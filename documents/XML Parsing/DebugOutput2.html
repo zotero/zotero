@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="DebugOutput2_files/zotero.css">
+		<title>Debug Output</title>
+		<script src="DebugOutput2_files/include.js"></script>
+		<script src="DebugOutput2_files/debugViewer.js"></script>
+		
+		<style>
+			body {
+				margin: 0;
+				background: var(--material-background);
+			}
+			
+			a {
+				text-decoration: underline;
+			}
+			
+			header {
+				position: fixed;
+				top: 0;
+				color: var(--fill-primary);
+				background: var(--material-sidepane);
+				display: flex;
+				align-items: center;
+				width: calc(100% - 20px);
+				height: 18px;
+				padding: 10px;
+				margin-bottom: 10px;
+				font-family: sans-serif;
+				font-size: 11pt;
+			}
+			
+			header > * {
+				margin-right: 10px;
+			}
+			
+			progress {
+				width: 125px;
+			}
+			
+			#debug-id {
+				font-weight: 600;
+			}
+			
+			#submit-result {
+				line-height: 1.25em;
+			}
+			
+			#submit-result-copy-id {
+				cursor: pointer;
+				padding-left: 2px;
+			}
+			
+			#submit-error {
+				font-weight: 600;
+				color: var(--accent-red);
+			}
+			
+			#content {
+				margin-top: 38px;
+				padding: 10px 9px;
+				font-family: Monaco, Consolas, Inconsolata, monospace;
+				font-size: 8pt;
+			}
+			
+			#errors {
+				padding-bottom: 12px;
+				border-bottom: var(--material-panedivider);
+				white-space: pre-wrap;
+			}
+			
+			
+			
+			/*
+			   CSS tooltip, adapted from http://stackoverflow.com/a/25836471
+			*/
+			[data-tooltip] {
+				display: inline-block;
+				position: relative;
+				cursor: pointer;
+				padding: 2px;
+			}
+			[data-tooltip]:before {
+				content: attr(data-tooltip);
+				display: none;
+				position: absolute;
+				background: var(--color-menu-opaque);
+				color: var(--fill-primary);
+				padding: 4px 8px;
+				font-size: 12px;
+				font-family: sans-serif;
+				line-height: 1.4;
+				text-align: center;
+				border-radius: 4px;
+				
+				left: 50%;
+				transform: translateX(-50%);
+				
+				top: 100%;
+				margin-top: 6px;
+				
+				white-space: nowrap;
+			}
+			[data-tooltip]:after {
+				content: '';
+				display: none;
+				position: absolute;
+				width: 0;
+				height: 0;
+				border-color: transparent;
+				border-style: solid;
+				
+				left: 50%;
+				margin-left: -6px;
+				
+				top: 100%;
+				border-width: 0 6px 6px;
+				border-bottom-color: var(--color-menu-opaque);
+			}
+			/* Show the tooltip when hovering */
+			[data-tooltip]:hover:before,
+			[data-tooltip]:hover:after {
+				display: block;
+				z-index: 50;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<button id="submit-button" onclick="submit(this)">Submit…</button>
+			<button id="clear-button" onclick="clearOutput(this)">Clear</button>
+			<progress id="submit-progress" hidden=""></progress>
+			<p id="submit-result" hidden="">
+				Submitted with Debug ID <span id="debug-id"></span>
+				<span id="submit-result-copy-id" onclick="copyIDToClipboard(this)">📋</span>
+			</p>
+			<p id="submit-error" hidden=""></p>
+		</header>
+		<div id="content">
+			<div id="errors">[JavaScript Error: "uncaught exception: Object"]
+
+Warning: attempting to write 5303 bytes to preference extensions.zotero.deeptutor.recentSessions. This is bad for general performance and memory usage. Such an amount of data should rather be written to an external file.
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "chrome://zotero/content/zoteroPane.xhtml : Unable to run script because scripts are blocked internally."]
+
+[JavaScript Error: "XML Parsing Error: mismatched tag. Expected: &lt;/appendix&gt;.
+Location: 
+Line Number 1, Column 16917:"]
+
+[JavaScript Error: "SyntaxError: An invalid or illegal string was specified" {file: "resource://zotero/react-dom.js" line: 220}]
+yi&lt;@resource://zotero/react-dom.js:220:94
+Fi@resource://zotero/react-dom.js:173:118
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:190
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:190
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:190
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:171:496
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:190
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:190
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:190
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:171:496
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:190
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:190
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:190
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:172:131
+Aa@resource://zotero/react-dom.js:171:384
+Fi@resource://zotero/react-dom.js:174:173
+Rk@resource://zotero/react-dom.js:197:268
+xb@resource://zotero/react-dom.js:196:166
+Ni@resource://zotero/react-dom.js:187:248
+S@resource://zotero/react.js:17:26
+U@resource://zotero/react.js:21:229
+
+
+appName =&gt; Zotero, version =&gt; 7.1.SOURCE.1026beb09 (x64), os =&gt; Linux 5.15.146.1-microsoft-standard-WSL2 #1 SMP Thu Jan 11 04:09:03 UTC 2024, locale =&gt; en-US, extensions =&gt; </div>
+			<div id="output"><p>(3)(+0011702): Standalone: DeepTutor pane toggle triggered</p><p>(3)(+0000001): Standalone: Opening DeepTutor pane</p><p>(3)(+0000033): Standalone: Layout constraints updated</p><p>(3)(+0000239): itemTree.render(). Displaying Item Tree</p><p>(3)(+0001030): DeepTutor: Render called</p><p>(3)(+0000021): ModelSelection: External freeze state changed to: false</p><p>(3)(+0000001): ModelSelection: Effective frozen state: false</p><p>(3)(+0000008): ModelSelection: Button width: 99.16667175292969</p><p>(3)(+0000001): ModelSelection: fileList updated - length: 0</p><p>(3)(+0000001): ModelSelection: Reset model name to Default Session</p><p>(3)(+0000000): BBBBB: Loading attachment names</p><p>(3)(+0000000): BBBBB: Using library ID: 1</p><p>(4)(+0000002): SELECT A.itemID FROM items A WHERE 1 AND A.itemID NOT IN (SELECT itemID FROM deletedItems) AND libraryID=? [1]</p><p>(3)(+0000036): BBBBB: Found 46 total items</p><p>(3)(+0000004): BBBBB: Found PDF attachment: MLforGreenhouse</p><p>(3)(+0000001): BBBBB: Found PDF attachment: SurveyofGRAG</p><p>(3)(+0000001): BBBBB: Found PDF attachment: PDF</p><p>(3)(+0000001): BBBBB: Found PDF attachment: QuantumAIandML</p><p>(3)(+0000002): BBBBB: Found PDF attachment: PDF</p><p>(3)(+0000002): BBBBB: Found PDF attachment: PDF</p><p>(3)(+0000000): BBBBB: Found PDF attachment: Attack on Titan Academy - Midterm II Paper - Zhou, Enoch - F'23</p><p>(3)(+0000001): BBBBB: Found PDF attachment: ML_POC_Testing.pdf</p><p>(3)
+(+0000002): BBBBB: Found PDF attachment: The use of social media in 
+different phases of the new product development process_ a systematic 
+literature review - Han - 2025 - R&amp;D Management - Wiley Online 
+Library</p><p>(3)(+0000001): BBBBB: Found PDF attachment: TEst</p><p>(3)(+0000000): BBBBB: Found 19 PDF attachments</p><p>(3)(+0000778): Tabs: currentTabIsReader false, prevTabIsReader true</p><p>(3)(+0000001): Notifier.trigger('select', 'tab', [zotero-pane], {"zotero-pane":{"type":"library"}}) called [observers: 6]</p><p>(3)(+0000255): itemTree.render(). Displaying Item Tree</p><p>(3)(+0001071): itemTree.render(). Displaying Item Tree</p><p>(3)(+0001387): Refreshing item row map</p><p>(3)(+0000952): Adding text/x-moz-url 0</p><p>(3)(+0000000): Adding application/x-moz-file 0</p><p>(3)
+(+0000001): Dragging with format 
+{"mode":"bibliography","contentType":"","id":"http://www.zotero.org/
+styles/chicago-note-bibliography","locale":""}</p><p>(1)(+0000055): Unknown creator type 'false'</p><p>(1)(+0000066): Unknown creator type 'false'</p><p>(3)(+0000103): Writing reader state to /home/sherman01/Zotero/storage/G5EEXCS2/.zotero-reader-state</p><p>(3)(+0000184): BBBBB: DragOver event triggered</p><p>(3)
+(+0000000): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000023): BBBBB: DragOver event triggered</p><p>(3)
+(+0000002): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000000): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000021): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000000): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000006): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000014): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000027): BBBBB: DragOver event triggered</p><p>(3)
+(+0000002): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000018): BBBBB: DragOver event triggered</p><p>(3)
+(+0000002): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000000): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000026): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000033): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000019): BBBBB: DragOver event triggered</p><p>(3)
+(+0000002): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000023): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000000): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000028): BBBBB: DragOver event triggered</p><p>(3)
+(+0000002): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000035): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000012): BBBBB: DragOver event triggered</p><p>(3)
+(+0000000): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000014): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000000): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000022): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000007): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000000): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000017): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000000): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000024): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000004): BBBBB: DragOver event triggered</p><p>(3)
+(+0000000): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000017): BBBBB: DragOver event triggered</p><p>(3)
+(+0000000): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000025): BBBBB: DragOver event triggered</p><p>(3)
+(+0000001): BBBBB: Available dataTransfer types: zotero/item, 
+text/x-moz-url, application/x-moz-file, text/html, text/plain, Files</p><p>(3)(+0000001): BBBBB: Setting dropEffect to 'copy' for Zotero items</p><p>(3)(+0000003): BBBBB: Drop event triggered</p><p>(3)(+0000002): BBBBB: Found 'zotero/item' in dataTransfer types</p><p>(3)(+0000000): BBBBB: Retrieved itemIDs: 47</p><p>(3)(+0000001): BBBBB: Retrieved 1 items from Zotero.Items.get</p><p>(3)(+0000000): BBBBB: Found direct PDF attachment: undefined</p><p>(3)(+0000001): BBBBB: Found 1 total PDF attachments from dropped items</p><p>(3)(+0000000): BBBBB: Current fileList length before update: 0</p><p>(3)(+0000001): BBBBB: Updated originalFileList with PDF attachments</p><p>(3)(+0000000): BBBBB: Processing PDF: undefined</p><p>(3)(+0000004): Getting fulltext content from item 1/G5EEXCS2</p><p>(3)(+0001089): Extracted full text for item 1/G5EEXCS2 in 1089 ms</p><p>(3)(+0000001): BBBBBF: Successfully extracted text from PDF: A single.pdf</p><p>(3)(+0000000): BBBBB: Completed processing 1 PDFs</p><p>(3)(+0000001): BBBBB: Found 1 valid results after processing</p><p>(3)(+0000000): BBBBB: Filtered out 0 duplicate files</p><p>(3)(+0000000): BBBBB: Updated fileList length: 1</p><p>(3)(+0000000): BBBBB: Successfully processed 1 PDFs from dropped items</p><p>(3)(+0000003): ModelSelection: fileList updated - length: 1</p><p>(3)(+0000000): ModelSelection: fileList[0] - id: 47, name: A single.pdf</p><p>(3)(+0000000): ModelSelection: Updated model name to: A single.pdf</p><p>(3)(+0000276): Starting full-text content processor</p><p>(4)(+0000001): Registering notifier observer 'fulltext_ZL' for [sync]</p><p>(3)(+0004162): ModelSelection: Using session name: A single.pdf</p><p>(3)(+0000000): ModelSelection: fileList length: 1</p><p>(3)(+0000001): ModelSelection: originalFileList length: 1</p><p>(3)(+0000000): ModelSelection: Processing file:</p><p>(3)(+0000000): ModelSelection: ========== Starting direct file reading for: undefined ==========</p><p>(3)(+0000001): ModelSelection: Getting file path for item ID: 47</p><p>(3)(+0000002): ModelSelection: External freeze state changed to: false</p><p>(3)(+0000000): ModelSelection: Effective frozen state: true</p><p>(3)(+0000014): ModelSelection: File path retrieved in 16ms: /home/sherman01/Zotero/storage/G5EEXCS2/A single.pdf</p><p>(3)(+0000001): ModelSelection: Checking if file exists: /home/sherman01/Zotero/storage/G5EEXCS2/A single.pdf</p><p>(3)(+0000010): ModelSelection: File existence check completed in 8ms - exists: true</p><p>(3)(+0000003): ModelSelection: Getting file statistics...</p><p>(3)(+0000002): ModelSelection: File stats retrieved in 1ms</p><p>(3)(+0000001): ModelSelection: File size: 1602309 bytes (1.53 MB)</p><p>(3)(+0000000): ModelSelection: File modified: 2025-07-01T04:20:07.522Z</p><p>(3)(+0000001): ModelSelection: Starting direct file read operation...</p><p>(3)(+0000001): ModelSelection: File read completed in 0ms</p><p>(3)(+0000000): ModelSelection: Read 1602309 bytes from disk</p><p>(3)(+0000000): ModelSelection: File data type: Uint8Array</p><p>(3)(+0000001): ModelSelection: Read speed: Infinity MB/s</p><p>(3)(+0000000): ModelSelection: Creating blob from file data...</p><p>(3)(+0000003): ModelSelection: Blob created in 2ms</p><p>(3)(+0000001): ModelSelection: Final blob - size: 1602309 bytes, type: application/pdf</p><p>(3)(+0000000): ModelSelection: Data integrity check - original: 1602309, blob: 1602309, match: true</p><p>(3)(+0000000): ModelSelection: ========== Direct file reading completed in 38ms ==========</p><p>([object Object])(+0000139): ModelSelection: Got pre-signed URL:</p><p>(3)(+0000635): ModelSelection: File uploaded successfully:</p><p>(3)(+0000001): ModelSelection: Uploaded document IDs: 6864590282d71e4a7a408a9e</p><p>(3)(+0000000): ModelSelection0521: Creating session with data: {
+  "userId": "65cf1fed8dba465a018bbc77",
+  "sessionName": "A single.pdf",
+  "type": "ADVANCED",
+  "status": "CREATED",
+  "documentIds": [
+    "6864590282d71e4a7a408a9e"
+  ],
+  "creationTime": "2025-07-01T21:54:10.965Z",
+  "lastUpdatedTime": "2025-07-01T21:54:10.965Z",
+  "statusTimeline": [],
+  "generateHash": null
+}</p><p>([object Object])(+0000111): ModelSelection0521: Session created successfully:</p><p>(3)(+0000001): Creating string pref 'extensions.zotero.deeptutor_mapping_6864590382d71e4a7a408a9f'</p><p>(6864590382d71e4a7a408a9f)(+0000001): ModelSelection0521: Saved mapping to local storage for session:</p><p>({"6864590282d71e4a7a408a9e":47})(+0000000): ModelSelection0521: Get data mapping:</p><p>(3)(+0000194): DeepTutor: No session object found for: 6864590382d71e4a7a408a9f</p><p>(3)(+0000002): DeepTutor: Render called</p><p>(3)(+0000022): DeepTutorChatBox: Using minimum height 24px for single-line content</p><p>(3)(+0000001): DeepTutorChatBox: Loaded 47 recent sessions from preferences</p><p>(3)(+0000001): DeepTutorChatBox: Loading session data for session 6864590382d71e4a7a408a9f</p><p>(3)(+0000001): Current recent sessions TTT: {}</p><p>(3)(+0000002): DeepTutorChatBox: loadMessages useEffect - About to call loadMessages() for sessionId: null</p><p>(3)(+0000002): DeepTutorChatBox: loadMessages useEffect triggered - sessionId: null</p><p>(3)(+0000001): DeepTutorChatBox: loadMessages useEffect - No sessionId, returning early</p><p>(3)(+0000003): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000000): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000001): DeepTutorChatBox: No documentIds or sessionId available for context loading</p><p>(3)(+0000000): DeepTutor: Received iniWait state change: false</p><p>(3)(+0000001): DeepTutor: iniWait became false, but keeping model selection frozen until timer expires</p><p>(3)(+0000000): DeepTutorChatBox: Communicated iniWait state change to parent: false</p><p>(3)
+(+0000009): DeepTutorChatBox: Conversation state updated with sessionId:
+ 6864590382d71e4a7a408a9f, userId: 65cf1fed8dba465a018bbc77</p><p>(3)(+0000001): DeepTutorChatBox: loadMessages useEffect - About to call loadMessages() for sessionId: 6864590382d71e4a7a408a9f</p><p>(3)(+0000001): DeepTutorChatBox: loadMessages useEffect triggered - sessionId: 6864590382d71e4a7a408a9f</p><p>(3)(+0000001): DeepTutorChatBox: loadMessages useEffect - Fetching messages for session 6864590382d71e4a7a408a9f</p><p>(3)(+0000006): DeepTutorChatBox: Opening all documents - sessionId: 6864590382d71e4a7a408a9f, 1 documents</p><p>({"6864590282d71e4a7a408a9e":47})(+0000003): DeepTutorChatBox: Get data mapping:</p><p>(3)(+0000001): DeepTutorChatBox: Found mapping in storage: {"6864590282d71e4a7a408a9e":47}</p><p>(3)(+0000000): DeepTutorChatBox: Using mapped attachment ID: 47 for document 6864590282d71e4a7a408a9e</p><p>(3)(+0000002): DeepTutorChatBox: Loading context documents for 1 documents</p><p>(3)(+0000001): DeepTutorChatBox: Found mapping in storage: {"6864590282d71e4a7a408a9e":47}</p><p>(3)(+0000001): DeepTutorChatBox: Using mapped attachment ID: 47 for document 6864590282d71e4a7a408a9e</p><p>(3)(+0000001): DeepTutorChatBox: Found item title: PDF</p><p>(3)(+0000007): Opening /home/sherman01/Zotero/storage/G5EEXCS2/A single.pdf</p><p>(3)(+0000001): No external handler for pdf -- opening in Zotero</p><p>(3)(+0000001): Tabs: currentTabIsReader true, prevTabIsReader false</p><p>(3)(+0000000): Tabs: Collapsing DeepTutor pane when switching from library to reader mode</p><p>(3)(+0000028): Notifier.trigger('select', 'tab', [tab-acEMoyig], {"tab-acEMoyig":{"type":"reader"}}) called [observers: 6]</p><p>(3)(+0000015): DeepTutorChatBox: Opened document 1/1: 47 in reader</p><p>(3)(+0000002): DeepTutorChatBox: Finished opening all 1 documents</p><p>(3)(+0000006): Viewing item</p><p>(3)(+0000002): Refreshing item box</p><p>(3)(+0000000): Setting mode to 'edit'</p><p>(3)(+0000056): DeepTutorChatBox: Found file path: /home/sherman01/Zotero/storage/G5EEXCS2/A single.pdf</p><p>(3)(+0000002): DeepTutorChatBox: Loaded 1 context documents</p><p>(3)(+0000085): DeepTutorChatBox: Found 0 source placeholders to convert</p><p>(3)(+0000003): DeepTutorChatBox: Updating recent sessions with session 6864590382d71e4a7a408a9f</p><p>(3)(+0000002): DeepTutorChatBox: Updated recent sessions for session 6864590382d71e4a7a408a9f</p><p>(3)(+0000000): DeepTutorChatBox: Current session type: ADVANCED</p><p>(3)(+0000001): DeepTutorChatBox: loadMessages useEffect - Retrieved 0 messages for session 6864590382d71e4a7a408a9f</p><p>(3)
+(+0000001): DeepTutorChatBox: loadMessages useEffect - Session 
+6864590382d71e4a7a408a9f is EMPTY, triggering automatic summary</p><p>(3)(+0000000): DeepTutorChatBox: loadMessages useEffect - Showing loading message for empty session 6864590382d71e4a7a408a9f</p><p>(3)(+0000000): DeepTutorChatBox: Appending message from DeepTutor</p><p>(3)(+0000000): DeepTutorChatBox: Processing 1 subMessages for DeepTutor</p><p>(3)
+(+0000001): DeepTutorChatBox: loadMessages useEffect - Waiting 8 seconds
+ before sending automatic summary for session 6864590382d71e4a7a408a9f</p><p>(3)(+0000001): DeepTutorChatBox: Added new session to recent sessions map, now has 48 sessions</p><p>(3)(+0000001): DeepTutorChatBox: Stored 48 sessions in preferences</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Original text length: 39</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Available sources: 0</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Applied mathematical symbol escaping</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: 39</p><p>(3)(+0000000): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 39</p><p>(3)(+0000001): DeepTutorChatBox: Markdown render result length: 45</p><p>(3)
+(+0000001): DeepTutorChatBox: Markdown render result (first 1000 chars):
+ &lt;p&gt;Loading…Please wait for a few seconds&lt;/p&gt;
+</p><p>(3)(+0000003): DeepTutorChatBox: Processed result length: 45</p><p>(3)(+0000002): DeepTutorChatBox: Processed result (first 1000 chars): &lt;p&gt;Loading…Please wait for a few seconds&lt;/p&gt;
+</p><p>(3)(+0000001): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000066): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000001): DeepTutor: Received iniWait state change: true</p><p>(3)(+0000000): DeepTutor: Model selection frozen due to iniWait=true</p><p>(3)(+0000000): DeepTutorChatBox: Communicated iniWait state change to parent: true</p><p>(3)(+0000001): DeepTutor: Render called</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Original text length: 39</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Available sources: 0</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Applied mathematical symbol escaping</p><p>(3)(+0000000): DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: 39</p><p>(3)(+0000000): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 39</p><p>(3)(+0000001): DeepTutorChatBox: Markdown render result length: 45</p><p>(3)
+(+0000001): DeepTutorChatBox: Markdown render result (first 1000 chars):
+ &lt;p&gt;Loading…Please wait for a few seconds&lt;/p&gt;
+</p><p>(3)(+0000000): DeepTutorChatBox: Processed result length: 45</p><p>(3)(+0000000): DeepTutorChatBox: Processed result (first 1000 chars): &lt;p&gt;Loading…Please wait for a few seconds&lt;/p&gt;
+</p><p>(3)(+0000000): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)
+(+0000028): DeepTutorChatBox: ATTENTION New Document Files: 
+[{"id":"6864590282d71e4a7a408a9e","userId":"65cf1fed8dba465a018bbc77","filename":"undefined","storagePath":"tutor/
+materials/6864590282d71e4a7a408a9e/undefined","readUrl":"https://
+knowhiztutorrag.blob.core.windows.net/knowhiztutorrag/tutor/
+materials/6864590282d71e4a7a408a9e/undefined?
+sv=2023-01-03&amp;st=2025-07-01T21%3A54%3A10Z&amp;se=2030-07-01T21%3A54%3A10Z&amp;sr=b&amp;sp=r&amp;sig=RNjNDlLyo1ZfpupesyPGiJJOC2NTm3s%2BSs%2FG9qL0kmQ%3D","readExpireTime":"2030-06-30T21:54:10.402Z","md5":null,"extractedText":null,"appendix":null,"creationTime":"2025-07-01T21:54:10.338Z","lastUpdatedTime":"2025-07-01T21:54:10.402Z"}]</p><p>(3)(+0000001): DeepTutorChatBox: ATTENTION Storage Paths: []</p><p>(3)(+0000006): DeepTutorChatBox: formatResponseForMarkdown - Original text length: 39</p><p>(3)(+0000002): DeepTutorChatBox: formatResponseForMarkdown - Available sources: 0</p><p>(3)(+0000003): DeepTutorChatBox: formatResponseForMarkdown - Applied mathematical symbol escaping</p><p>(3)(+0000001): DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: 39</p><p>(3)(+0000000): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 39</p><p>(3)(+0000002): DeepTutorChatBox: Markdown render result length: 45</p><p>(3)
+(+0000000): DeepTutorChatBox: Markdown render result (first 1000 chars):
+ &lt;p&gt;Loading…Please wait for a few seconds&lt;/p&gt;
+</p><p>(3)(+0000001): DeepTutorChatBox: Processed result length: 45</p><p>(3)(+0000000): DeepTutorChatBox: Processed result (first 1000 chars): &lt;p&gt;Loading…Please wait for a few seconds&lt;/p&gt;
+</p><p>(3)(+0000000): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000050): DeepTutorChatBox: Found 0 source placeholders to convert</p><p>(3)(+0000022): itemTree.render(). Displaying Item Tree</p><p>(3)(+0004986): Writing reader state to /home/sherman01/Zotero/storage/G5EEXCS2/.zotero-reader-state</p><p>(3)(+0001346): Standalone: DeepTutor pane toggle triggered</p><p>(3)(+0000001): Standalone: Opening DeepTutor pane</p><p>(3)(+0000021): Standalone: Layout constraints updated</p><p>(3)(+0000267): itemTree.render(). Displaying Item Tree</p><p>(3)
+(+0001179): DeepTutorChatBox: loadMessages useEffect - Checking if 
+should send automatic summary: true for session 6864590382d71e4a7a408a9f</p><p>(3)
+(+0000002): DeepTutorChatBox: loadMessages useEffect - SENDING AUTOMATIC
+ SUMMARY MESSAGE for empty session 6864590382d71e4a7a408a9f</p><p>(3)
+(+0000000): DeepTutorChatBox: userSendMessage CALLED with message: "Can 
+you give me a summary of this document?" for session 
+6864590382d71e4a7a408a9f</p><p>(3)(+0000000): DeepTutorChatBox: Auto-scrolling enabled for new user message</p><p>(3)
+(+0000001): DeepTutorChatBox: userSendMessage - Validated sessionId: 
+6864590382d71e4a7a408a9f, userId: 65cf1fed8dba465a018bbc77</p><p>(3)(+0000000): DeepTutorChatBox: userSendMessage - Message content: "Can you give me a summary of this document?"</p><p>(3)(+0000000): DeepTutorChatBox: userSendMessage - Creating message structure for API request</p><p>(3)(+0000000): DeepTutorChatBox: userSendMessage - Appending user message to chat</p><p>(3)(+0000000): DeepTutorChatBox: Appending message from You</p><p>(3)(+0000001): DeepTutorChatBox: Processing 1 subMessages for You</p><p>(3)(+0000000): DeepTutorChatBox: userSendMessage - Sending message to API</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolling FORCE ENABLED for streaming</p><p>(3)
+(+0000008): DeepTutorChatBox: Conversation state updated with sessionId:
+ 6864590382d71e4a7a408a9f, userId: 67f5b836cb8bb15b67a1149e</p><p>(3)(+0000006): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)
+(+0000046): DeepTutorChatBox: Create Message Response from API: 
+{"id":"6864590b82d71e4a7a408aa0","parentMessageId":null,"userId":"65cf1fed8dba465a018bbc77","sessionId":"6864590382d71e4a7a408a9f","subMessages":
+[{"text":"Can you give me a summary of this 
+document?","image":null,"audio":null,"think":null,"creationTime":"2025-07-01T21:54:19.553Z","contentType":"TEXT","sources":
+[]}],"followUpQuestions":
+[],"creationTime":"2025-07-01T21:54:19.997543Z","lastUpdatedTime":"2025-07-01T21:54:19.997543Z","status":"UNVIEW","role":"USER"}</p><p>(3)(+0000047): DeepTutorChatBox: Found 0 source placeholders to convert</p><p>(3)
+(+0000008): DeepTutorChatBox: ATTENTION New Document Files: 
+[{"id":"6864590282d71e4a7a408a9e","userId":"65cf1fed8dba465a018bbc77","filename":"undefined","storagePath":"tutor/
+materials/6864590282d71e4a7a408a9e/undefined","readUrl":"https://
+knowhiztutorrag.blob.core.windows.net/knowhiztutorrag/tutor/
+materials/6864590282d71e4a7a408a9e/undefined?
+sv=2023-01-03&amp;st=2025-07-01T21%3A54%3A10Z&amp;se=2030-07-01T21%3A54%3A10Z&amp;sr=b&amp;sp=r&amp;sig=RNjNDlLyo1ZfpupesyPGiJJOC2NTm3s%2BSs%2FG9qL0kmQ%3D","readExpireTime":"2030-06-30T21:54:10.402Z","md5":null,"extractedText":null,"appendix":null,"creationTime":"2025-07-01T21:54:10.338Z","lastUpdatedTime":"2025-07-01T21:54:10.402Z"}]</p><p>(3)
+(+0000001): DeepTutorChatBox: Subscribing to chat with conversation: 
+{"userId":"65cf1fed8dba465a018bbc77","sessionId":"6864590382d71e4a7a408a9f","ragSessionId":null,"storagePaths":
+["tutor/materials/6864590282d71e4a7a408a9e/undefined"],"history":
+[],"message":
+{"id":"6864590b82d71e4a7a408aa0","parentMessageId":null,"userId":"65cf1fed8dba465a018bbc77","sessionId":"6864590382d71e4a7a408a9f","subMessages":
+[{"text":"Can you give me a summary of this 
+document?","image":null,"audio":null,"think":null,"creationTime":"2025-07-01T21:54:19.553Z","contentType":"TEXT","sources":
+[]}],"followUpQuestions":
+[],"creationTime":"2025-07-01T21:54:19.997543Z","lastUpdatedTime":"2025-07-01T21:54:19.997543Z","status":"UNVIEW","role":"USER"},"streaming":true,"type":"ADVANCED"}</p><p>(3)(+0000415): DeepTutorChatBox: Stream Response from API: {}</p><p>(3)(+0000001): DeepTutorChatBox: Creating initial streaming message for TUTOR</p><p>(3)(+0000002): DeepTutorChatBox: About to render markdown for subMessage 0, text length: 0</p><p>(3)(+0000000): DeepTutorChatBox: Markdown render result length: 0</p><p>(3)(+0000000): DeepTutorChatBox: Markdown render result (first 1000 chars): </p><p>(3)(+0000000): DeepTutorChatBox: Processed result length: 0</p><p>(3)(+0000001): DeepTutorChatBox: Processed result (first 1000 chars): </p><p>(3)(+0000000): DeepTutorChatBox: XML conversion made no changes - HTML was already XML-compatible</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000008): DeepTutorChatBox: Received data: &lt;id&gt;6864590c82d71e4a7a408aa1&lt;/id&gt;</p><p>(3)(+0000001): DeepTutorChatBox: Received data: &lt;thinking&gt;</p><p>(3)(+0000000): DeepTutorChatBox: Received data: 
+
+**📙 Loading documents ...**
+
+</p><p>(3)(+0000006): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000002): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000100): DeepTutorChatBox: Found 0 source placeholders to convert</p><p>(3)(+0000146): DeepTutorChatBox: Received data: 
+
+**📙 Loading documents done ...**
+
+</p><p>(3)(+0000010): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000002): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000102): DeepTutorChatBox: Found 0 source placeholders to convert</p><p>(3)(+0000027): DeepTutorChatBox: Received data: 
+
+**🗺️ Loading GraphRAG embeddings ...**
+
+</p><p>(3)(+0000002): DeepTutorChatBox: Received data: 
+
+**🗺️ Loading GraphRAG embeddings done ...**
+
+</p><p>(3)(+0000005): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000000): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000101): DeepTutorChatBox: Found 0 source placeholders to convert</p><p>(3)(+0001026): DeepTutor: Model selection unfrozen after 10-second timer</p><p>(3)(+0000002): DeepTutor: Render called</p><p>(3)(+0000215): DeepTutorChatBox: Received data: &lt;/thinking&gt;</p><p>(3)(+0000001): DeepTutorChatBox: Received data: 
+
+**🧠 Loading response ...**
+
+</p><p>(3)(+0000003): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000001): DeepTutorChatBox: Received data: &lt;response&gt;
+
+</p><p>(3)(+0000005): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)
+(+0000019): DeepTutorChatBox: Received data: Here is your refined 
+summary with duplicated section titles removed:
+
+---
+
+### 👋 Welcome to DeepTutor!
+
+I'm your AI tutor 🤖 ready to help you understand this document.
+
+### 💡 Key Takeaway
+🧠 **A single fear-inducing stimulus triggers a long-lasting, 
+transcription-dependent switch in synaptic **AMPAR** phenotype in 
+cerebellar stellate cells—via noradrenaline, action potential 
+broadening, Ca$^{2+}$ influx, and ERK/MAPK signaling—that increases 
+synaptic incorporation of GluR2-containing, Ca$^{2+}$-impermeable **AMPA
+ receptors**.**
+
+### 📚 Document Overview
+- **A single fear-inducing stimulus** triggers a long-lasting, 
+transcription-dependent switch in synaptic **AMPA receptor (AMPAR) 
+phenotype** in cerebellar stellate cells.
+- This switch involves increased **GluR2 mRNA** and synaptic 
+incorporation of **GluR2-containing, Ca$^{2+}$-impermeable AMPARs**, 
+replacing GluR2-lacking, Ca$^{2+}$-permeable receptors.
+- The process is mediated by **noradrenaline**, which prolongs action 
+potentials, enhances Ca$^{2+}$ entry, and activates **ERK/MAPK 
+signaling** to drive new GluR2 gene transcription.
+- This **phenotype switch** alters synaptic efficacy and may reshape 
+inhibitory neural network activity in response to emotional stress.
+
+### 📌 Fear-induced switch in synaptic AMPAR phenotype
+- A **single fear-inducing stimulus** triggers a transcription-dependent
+ switch in synaptic **AMPAR phenotype** in cerebellar stellate cells, 
+changing from GluR2-lacking (Ca$^{2+}$-permeable) to GluR2-containing 
+(Ca$^{2+}$-impermeable) receptors within hours.
+- This switch is driven by **noradrenaline**, which prolongs action 
+potentials, increases Ca$^{2+}$ entry, and activates the **ERK/MAPK 
+pathway** to boost *GluR2* gene transcription.
+- The result is a long-lasting change in synaptic function, potentially 
+altering the activity of inhibitory neural networks in response to fear.
+
+### 📌 Role of noradrenaline and β-adrenergic receptors
+- **Noradrenaline** released during emotional arousal activates 
+**β-adrenergic receptors** in the brain, especially in cerebellar 
+stellate cells.
+- Activation of β-adrenergic receptors increases action potential 
+duration and intracellular $Ca^{2+}$, triggering ERK/MAPK signaling and 
+transcription of GluR2, leading to a switch in synaptic **AMPAR 
+phenotype**.
+- This process enables a long-lasting change in synaptic strength and 
+may underlie how emotional experiences modify learning and memory.
+
+### 📌 Mechanism: Action potential broadening, Ca2+ entry, ERK/MAPK 
+signaling, and GluR2 transcription
+- **Action potential broadening** increases **Ca$^{2+}$ entry** through 
+L-type channels, activating the **ERK/MAPK signaling** pathway.
+- This cascade triggers **GluR2 gene transcription**, leading to more 
+**GluR2-containing AMPARs** at synapses and a switch in receptor 
+phenotype.
+
+### 📌 Transcription-dependent vs. independent synaptic plasticity
+- **Transcription-dependent synaptic plasticity** involves long-lasting 
+changes in synaptic strength that require new gene transcription, such 
+as the noradrenaline-triggered switch to GluR2-containing AMPARs after 
+fear stimuli.
+- **Transcription-independent synaptic plasticity** relies on rapid 
+mechanisms like receptor trafficking or local protein synthesis, 
+enabling fast changes in synaptic function without altering gene 
+expression.
+- **Key difference:** Transcription-dependent changes occur over hours 
+and affect the whole neuron, while transcription-independent changes 
+happen within minutes and are often synapse-specific.
+
+### 📌 Functional consequences for inhibitory neural circuits
+- **Inhibitory neural circuits** can undergo long-lasting changes in 
+synaptic strength when a single fear-inducing stimulus triggers 
+transcription-dependent upregulation of GluR2, leading to a switch in 
+AMPAR phenotype.
+- This switch reduces **Ca$^{2+}$ permeability** at synapses, altering 
+**synaptic efficacy** and potentially reshaping the activity of the 
+entire inhibitory network.
+- **Noradrenaline** and **action potential broadening** are key signals 
+that activate the **ERK/MAPK pathway**, driving these transcriptional 
+and functional changes.
+
+---
+### 💬 Ask Me Anything!
+Feel free to ask me any questions about the document! I'm here to help! ✨</p><p>(3)(+0000009): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000002): DeepTutorChatBox: Received data: &lt;appendix&gt;</p><p>(3)(+0000001): DeepTutorChatBox: Received data: 
+
+**💬 Loading follow-up questions ...**
+
+</p><p>(3)(+0000112): DeepTutorChatBox: Auto-scrolled to bottom due to messages change</p><p>(3)(+0000001): DeepTutorChatBox: Auto-scrolled to bottom due to streaming change</p><p>(3)(+0000016): DPTDPTDEBUG!! DeepTutor component mounted</p><p>(3)(+0001462): Writing reader state to /home/sherman01/Zotero/storage/G5EEXCS2/.zotero-reader-state</p><p>(3)(+0001570): DeepTutorChatBox: Received data: &lt;followup_question&gt;</p><p>(3)(+0000001): DeepTutorChatBox: Received data: How does ERK/MAPK signaling specifically regulate GluR2 transcription?</p><p>(3)(+0000000): DeepTutorChatBox: Received data: &lt;/followup_question&gt;
+
+</p><p>(3)(+0000001): DeepTutorChatBox: Received data: &lt;followup_question&gt;</p><p>(3)(+0000000): DeepTutorChatBox: Received data: What are the differences between Ca2+-permeable and impermeable AMPARs?</p><p>(3)(+0000000): DeepTutorChatBox: Received data: &lt;/followup_question&gt;
+
+</p><p>(3)(+0000001): DeepTutorChatBox: Received data: &lt;followup_question&gt;</p><p>(3)(+0000000): DeepTutorChatBox: Received data: How might this AMPAR switch affect learning during emotional stress?</p><p>(3)(+0000068): DeepTutorChatBox: Received data: &lt;/followup_question&gt;
+
+</p><p>(3)(+0000001): DeepTutorChatBox: Received data: 
+
+**💬 Loading follow-up questions done ...**
+
+</p><p>(3)(+0000000): DeepTutorChatBox: Received data: &lt;/appendix&gt;</p><p>(3)(+0000918): DeepTutorChatBox: Waiting 3 seconds before fetching message history</p><p>(3)(+0003012): DeepTutorChatBox: Fetching message history for session 6864590382d71e4a7a408a9f</p><p>(3)
+(+0000047): DeepTutorChatBox: FINAL History Data: 
+[{"id":"6864590b82d71e4a7a408aa0","parentMessageId":null,"userId":"65cf1fed8dba465a018bbc77","sessionId":"6864590382d71e4a7a408a9f","subMessages":
+[{"text":"Can you give me a summary of this 
+document?","image":null,"audio":null,"think":null,"creationTime":"2025-07-01T21:54:19.553Z","contentType":"TEXT","sources":
+[]}],"followUpQuestions":
+[],"creationTime":"2025-07-01T21:54:19.997Z","lastUpdatedTime":"2025-07-01T21:54:19.997Z","status":"UNVIEW","role":"USER"},
+{"id":"6864590c82d71e4a7a408aa1","parentMessageId":"6864590b82d71e4a7a408aa0","userId":"65cf1fed8dba465a018bbc77","sessionId":"6864590382d71e4a7a408a9f","subMessages":
+[{"text":null,"image":null,"audio":null,"think":"**📙 Loading documents 
+...**\n\n\n\n**📙 Loading documents done ...**\n\n\n\n**🗺️ Loading 
+GraphRAG embeddings ...**\n\n\n\n**🗺️ Loading GraphRAG embeddings done 
+...**","creationTime":null,"contentType":"THINK","sources":[]},
+{"text":"Here is your refined summary with duplicated section titles 
+removed:\n\n---\n\n### 👋 Welcome to DeepTutor!\n\nI'm your AI tutor 🤖 
+ready to help you understand this document.\n\n### 💡 Key Takeaway\n🧠 
+**A single fear-inducing stimulus triggers a long-lasting, 
+transcription-dependent switch in synaptic **AMPAR** phenotype in 
+cerebellar stellate cells—via noradrenaline, action potential 
+broadening, Ca$^{2+}$ influx, and ERK/MAPK signaling—that increases 
+synaptic incorporation of GluR2-containing, Ca$^{2+}$-impermeable **AMPA
+ receptors**.**\n\n### 📚 Document Overview\n- **A single fear-inducing 
+stimulus** triggers a long-lasting, transcription-dependent switch in 
+synaptic **AMPA receptor (AMPAR) phenotype** in cerebellar stellate 
+cells.\n- This switch involves increased **GluR2 mRNA** and synaptic 
+incorporation of **GluR2-containing, Ca$^{2+}$-impermeable AMPARs**, 
+replacing GluR2-lacking, Ca$^{2+}$-permeable receptors.\n- The process 
+is mediated by **noradrenaline**, which prolongs action potentials, 
+enhances Ca$^{2+}$ entry, and activates **ERK/MAPK signaling** to drive 
+new GluR2 gene transcription.\n- This **phenotype switch** alters 
+synaptic efficacy and may reshape inhibitory neural network activity in 
+response to emotional stress.\n\n### 📌 Fear-induced switch in synaptic 
+AMPAR phenotype\n- A **single fear-inducing stimulus** triggers a 
+transcription-dependent switch in synaptic **AMPAR phenotype** in 
+cerebellar stellate cells, changing from GluR2-lacking 
+(Ca$^{2+}$-permeable) to GluR2-containing (Ca$^{2+}$-impermeable) 
+receptors within hours.\n- This switch is driven by **noradrenaline**, 
+which prolongs action potentials, increases Ca$^{2+}$ entry, and 
+activates the **ERK/MAPK pathway** to boost *GluR2* gene 
+transcription.\n- The result is a long-lasting change in synaptic 
+function, potentially altering the activity of inhibitory neural 
+networks in response to fear.\n\n### 📌 Role of noradrenaline and 
+β-adrenergic receptors\n- **Noradrenaline** released during emotional 
+arousal activates **β-adrenergic receptors** in the brain, especially in
+ cerebellar stellate cells.\n- Activation of β-adrenergic receptors 
+increases action potential duration and intracellular $Ca^{2+}$, 
+triggering ERK/MAPK signaling and transcription of GluR2, leading to a 
+switch in synaptic **AMPAR phenotype**.\n- This process enables a 
+long-lasting change in synaptic strength and may underlie how emotional 
+experiences modify learning and memory.\n\n### 📌 Mechanism: Action 
+potential broadening, Ca2+ entry, ERK/MAPK signaling, and GluR2 
+transcription\n- **Action potential broadening** increases **Ca$^{2+}$ 
+entry** through L-type channels, activating the **ERK/MAPK signaling** 
+pathway.\n- This cascade triggers **GluR2 gene transcription**, leading 
+to more **GluR2-containing AMPARs** at synapses and a switch in receptor
+ phenotype.\n\n### 📌 Transcription-dependent vs. independent synaptic 
+plasticity\n- **Transcription-dependent synaptic plasticity** involves 
+long-lasting changes in synaptic strength that require new gene 
+transcription, such as the noradrenaline-triggered switch to 
+GluR2-containing AMPARs after fear stimuli.\n- 
+**Transcription-independent synaptic plasticity** relies on rapid 
+mechanisms like receptor trafficking or local protein synthesis, 
+enabling fast changes in synaptic function without altering gene 
+expression.\n- **Key difference:** Transcription-dependent changes occur
+ over hours and affect the whole neuron, while transcription-independent
+ changes happen within minutes and are often synapse-specific.\n\n### 📌
+ Functional consequences for inhibitory neural circuits\n- **Inhibitory 
+neural circuits** can undergo long-lasting changes in synaptic strength 
+when a single fear-inducing stimulus triggers transcription-dependent 
+upregulation of GluR2, leading to a switch in AMPAR phenotype.\n- This 
+switch reduces **Ca$^{2+}$ permeability** at synapses, altering 
+**synaptic efficacy** and potentially reshaping the activity of the 
+entire inhibitory network.\n- **Noradrenaline** and **action potential 
+broadening** are key signals that activate the **ERK/MAPK pathway**, 
+driving these transcriptional and functional changes.\n\n---\n### 💬 Ask
+ Me Anything!\nFeel free to ask me any questions about the document! I'm
+ here to help! 
+✨","image":null,"audio":null,"think":null,"creationTime":null,"contentType":"TEXT","sources":
+[]}],"followUpQuestions":["How does ERK/MAPK signaling specifically 
+regulate GluR2 transcription?","What are the differences between 
+Ca2+-permeable and impermeable AMPARs?","How might this AMPAR switch 
+affect learning during emotional 
+stress?"],"creationTime":"2025-07-01T21:54:26.778Z","lastUpdatedTime":"2025-07-01T21:54:26.778Z","status":"UNVIEW","role":"TUTOR"}]</p><p>(3)(+0000003): DeepTutorChatBox: userSendMessage - Received response from API</p><p>(3)(+0000000): DeepTutorChatBox: loadMessages useEffect - AUTOMATIC SUMMARY MESSAGE SENT for session 6864590382d71e4a7a408a9f</p><p>(3)(+0008134): Getting contents of /home/sherman01/.zotero/zotero/8noubfui.default/treePrefs.json</p><p>(3)(+0000004): Writing column prefs of length 6490 to file /home/sherman01/.zotero/zotero/8noubfui.default/treePrefs.json</p><p>(3)(+0030345): Checking for unprocessed full-text content</p><p>(4)(+0000002): SELECT itemID FROM fulltextItems WHERE synced=2</p><p>(3)(+0000004): No unprocessed full-text content found</p><p>(3)(+0000000): Unregistering full-text content processor idle observer</p><p>(3)(+0000001): Stopping full-text content processor</p><p>(3)(+0276017): Last backup of database 'zotero' was less than 1440 minutes ago -- skipping backup</p><p>(4)
+(+0004920): SELECT itemID FROM items JOIN deletedItems USING (itemID) 
+WHERE libraryID=? AND dateDeleted &lt;= DATE('NOW', '-30 DAYS') [1]</p><p>(3)(+0491957): Standalone: DeepTutor pane toggle triggered</p><p>(3)(+0000002): Standalone: Closing DeepTutor pane</p><p>(3)(+0000077): Standalone: Layout constraints updated</p><p>(3)(+0000340): itemTree.render(). Displaying Item Tree</p><p>(3)(+0000511): Standalone: DeepTutor pane toggle triggered</p><p>(3)(+0000001): Standalone: Opening DeepTutor pane</p><p>(3)(+0000023): Standalone: Layout constraints updated</p><p>(3)(+0000306): itemTree.render(). Displaying Item Tree</p><p>(3)(+0005117): Writing reader state to /home/sherman01/Zotero/storage/G5EEXCS2/.zotero-reader-state</p></div>
+		</div>
+	
+
+</body></html>

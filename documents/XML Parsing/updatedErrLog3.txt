@@ -1,0 +1,170 @@
+HTML TO XML CONVERSION ERROR LOG
+=====================================
+
+CONVERSION #1 - DeepTutor Summary Content
+==========================================
+
+ORIGINAL HTML:
+--------------
+<p>Here is your refined summary with duplicated section titles removed:</p>
+<hr>
+<h3>👋 Welcome to DeepTutor!</h3>
+<p>I'm your AI tutor 🤖 ready to help you understand this document.</p>
+<h3>💡 Key Takeaway</h3>
+<p>🧠 <strong>A single fear-inducing stimulus triggers a long-lasting, transcription-dependent switch in synaptic <strong>AMPAR</strong> phenotype in cerebellar stellate cells—via noradrenaline, action potential broadening, Ca<sup>2+</sup> influx, and ERK/MAPK signaling—that increases synaptic incorporation of GluR2-containing, Ca<sup>2+</sup>-impermeable <strong>AMPA receptors</strong>.</strong></p>
+<h3>📚 Document Overview</h3>
+<ul>
+<li><strong>A single fear-inducing stimulus</strong> triggers a long-lasting, transcription-dependent switch in synaptic <strong>AMPA receptor (AMPAR) phenotype</strong> in cerebellar stellate cells.</li>
+<li>This switch involves increased <strong>GluR2 mRNA</strong> and synaptic incorporation of <strong>GluR2-containing, Ca<sup>2+</sup>-impermeable AMPARs</strong>, replacing GluR2-lacking, Ca<sup>2+</sup>-permeable receptors.</li>
+<li>The process is mediated by <strong>noradrenaline</strong>, which prolongs action potentials, enhances Ca<sup>2+</sup> entry, and activates <strong>ERK/MAPK signaling</strong> to drive new GluR2 gene transcription.</li>
+<li>This <strong>phenotype switch</strong> alters synaptic efficacy and may reshape inhibitory neural network activity in response to emotional stress.</li>
+</ul>
+<h3>📌 Fear-induced switch in synaptic AMPAR phenotype</h3>
+<ul>
+<li>A <strong>single fear-inducing stimulus</strong> triggers a transcription-dependent switch in synaptic <strong>AMPAR phenotype</strong> in cerebellar stellate cells, changing from GluR2-lacking (Ca<sup>2+</sup>-permeable) to GluR2-containing (Ca<sup>2+</sup>-impermeable) receptors within hours.</li>
+<li>This switch is driven by <strong>noradrenaline</strong>, which prolongs action potentials, increases Ca<sup>2+</sup> entry, and activates the <strong>ERK/MAPK pathway</strong> to boost <em>GluR2</em> gene transcription.</li>
+<li>The result is a long-lasting change in synaptic function, potentially altering the activity of inhibitory neural networks in response to fear.</li>
+</ul>
+<h3>📌 Role of noradrenaline and β-adrenergic receptors</h3>
+<ul>
+<li><strong>Noradrenaline</strong> released during emotional arousal activates <strong>β-adrenergic receptors</strong> in the brain, especially in cerebellar stellate cells.</li>
+<li>Activation of β-adrenergic receptors increases action potential duration and intracellular $Ca^{2+}$, triggering ERK/MAPK signaling and transcription of GluR2, leading to a switch in synaptic <strong>AMPAR phenotype</strong>.</li>
+<li>This process enables a long-lasting change in synaptic strength and may underlie how emotional experiences modify learning and memory.</li>
+</ul>
+<h3>📌 Mechanism: Action potential broadening, Ca2+ entry, ERK/MAPK signaling, and GluR2 transcription</h3>
+<ul>
+<li><strong>Action potential broadening</strong> increases <strong>Ca<sup>2+</sup> entry</strong> through L-type channels, activating the <strong>ERK/MAPK signaling</strong> pathway.</li>
+<li>This cascade triggers <strong>GluR2 gene transcription</strong>, leading to more <strong>GluR2-containing AMPARs</strong> at synapses and a switch in receptor phenotype.</li>
+</ul>
+<h3>📌 Transcription-dependent vs. independent synaptic plasticity</h3>
+<ul>
+<li><strong>Transcription-dependent synaptic plasticity</strong> involves long-lasting changes in synaptic strength that require new gene transcription, such as the noradrenaline-triggered switch to GluR2-containing AMPARs after fear stimuli.</li>
+<li><strong>Transcription-independent synaptic plasticity</strong> relies on rapid mechanisms like receptor trafficking or local protein synthesis, enabling fast changes in synaptic function without altering gene expression.</li>
+<li><strong>Key difference:</strong> Transcription-dependent changes occur over hours and affect the whole neuron, while transcription-independent changes happen within minutes and are often synapse-specific.</li>
+</ul>
+<h3>📌 Functional consequences for inhibitory neural circuits</h3>
+<ul>
+<li><strong>Inhibitory neural circuits</strong> can undergo long-lasting changes in synaptic strength when a single fear-inducing stimulus triggers transcription-dependent upregulation of GluR2, leading to a switch in AMPAR phenotype.</li>
+<li>This switch reduces <strong>Ca<sup>2+</sup> permeability</strong> at synapses, altering <strong>synaptic efficacy</strong> and potentially reshaping the activity of the entire inhibitory network.</li>
+<li><strong>Noradrenaline</strong> and <strong>action potential broadening</strong> are key signals that activate the <strong>ERK/MAPK pathway</strong>, driving these transcriptional and functional changes.</li>
+</ul>
+<hr>
+<h3>💬 Ask Me Anything!</h3>
+<p>Feel free to ask me any questions about the document! I'm here to help! ✨</p>
+
+CONVERTED XML:
+--------------
+<p>Here is your refined summary with duplicated section titles removed:</p>
+<hr/>
+<h3>👋 Welcome to DeepTutor!</h3>
+<p>I'm your AI tutor 🤖 ready to help you understand this document.</p>
+<h3>💡 Key Takeaway</h3>
+<p>🧠 <strong>A single fear-inducing stimulus triggers a long-lasting, transcription-dependent switch in synaptic <strong>AMPAR</strong> phenotype in cerebellar stellate cells—via noradrenaline, action potential broadening, Ca<sup>2+</sup> influx, and ERK/MAPK signaling—that increases synaptic incorporation of GluR2-containing, Ca<sup>2+</sup>-impermeable <strong>AMPA receptors</strong>.</strong></p>
+<h3>📚 Document Overview</h3>
+<ul>
+<li><strong>A single fear-inducing stimulus</strong> triggers a long-lasting, transcription-dependent switch in synaptic <strong>AMPA receptor (AMPAR) phenotype</strong> in cerebellar stellate cells.</li>
+<li>This switch involves increased <strong>GluR2 mRNA</strong> and synaptic incorporation of <strong>GluR2-containing, Ca<sup>2+</sup>-impermeable AMPARs</strong>, replacing GluR2-lacking, Ca<sup>2+</sup>-permeable receptors.</li>
+<li>The process is mediated by <strong>noradrenaline</strong>, which prolongs action potentials, enhances Ca<sup>2+</sup> entry, and activates <strong>ERK/MAPK signaling</strong> to drive new GluR2 gene transcription.</li>
+<li>This <strong>phenotype switch</strong> alters synaptic efficacy and may reshape inhibitory neural network activity in response to emotional stress.</li>
+</ul>
+<h3>📌 Fear-induced switch in synaptic AMPAR phenotype</h3>
+<ul>
+<li>A <strong>single fear-inducing stimulus</strong> triggers a transcription-dependent switch in synaptic <strong>AMPAR phenotype</strong> in cerebellar stellate cells, changing from GluR2-lacking (Ca<sup>2+</sup>-permeable) to GluR2-containing (Ca<sup>2+</sup>-impermeable) receptors within hours.</li>
+<li>This switch is driven by <strong>noradrenaline</strong>, which prolongs action potentials, increases Ca<sup>2+</sup> entry, and activates the <strong>ERK/MAPK pathway</strong> to boost <em>GluR2</em> gene transcription.</li>
+<li>The result is a long-lasting change in synaptic function, potentially altering the activity of inhibitory neural networks in response to fear.</li>
+</ul>
+<h3>📌 Role of noradrenaline and β-adrenergic receptors</h3>
+<ul>
+<li><strong>Noradrenaline</strong> released during emotional arousal activates <strong>β-adrenergic receptors</strong> in the brain, especially in cerebellar stellate cells.</li>
+<li>Activation of β-adrenergic receptors increases action potential duration and intracellular $Ca^{2+}$, triggering ERK/MAPK signaling and transcription of GluR2, leading to a switch in synaptic <strong>AMPAR phenotype</strong>.</li>
+<li>This process enables a long-lasting change in synaptic strength and may underlie how emotional experiences modify learning and memory.</li>
+</ul>
+<h3>📌 Mechanism: Action potential broadening, Ca2+ entry, ERK/MAPK signaling, and GluR2 transcription</h3>
+<ul>
+<li><strong>Action potential broadening</strong> increases <strong>Ca<sup>2+</sup> entry</strong> through L-type channels, activating the <strong>ERK/MAPK signaling</strong> pathway.</li>
+<li>This cascade triggers <strong>GluR2 gene transcription</strong>, leading to more <strong>GluR2-containing AMPARs</strong> at synapses and a switch in receptor phenotype.</li>
+</ul>
+<h3>📌 Transcription-dependent vs. independent synaptic plasticity</h3>
+<ul>
+<li><strong>Transcription-dependent synaptic plasticity</strong> involves long-lasting changes in synaptic strength that require new gene transcription, such as the noradrenaline-triggered switch to GluR2-containing AMPARs after fear stimuli.</li>
+<li><strong>Transcription-independent synaptic plasticity</strong> relies on rapid mechanisms like receptor trafficking or local protein synthesis, enabling fast changes in synaptic function without altering gene expression.</li>
+<li><strong>Key difference:</strong> Transcription-dependent changes occur over hours and affect the whole neuron, while transcription-independent changes happen within minutes and are often synapse-specific.</li>
+</ul>
+<h3>📌 Functional consequences for inhibitory neural circuits</h3>
+<ul>
+<li><strong>Inhibitory neural circuits</strong> can undergo long-lasting changes in synaptic strength when a single fear-inducing stimulus triggers transcription-dependent upregulation of GluR2, leading to a switch in AMPAR phenotype.</li>
+<li>This switch reduces <strong>Ca<sup>2+</sup> permeability</strong> at synapses, altering <strong>synaptic efficacy</strong> and potentially reshaping the activity of the entire inhibitory network.</li>
+<li><strong>Noradrenaline</strong> and <strong>action potential broadening</strong> are key signals that activate the <strong>ERK/MAPK pathway</strong>, driving these transcriptional and functional changes.</li>
+</ul>
+<hr/>
+<h3>💬 Ask Me Anything!</h3>
+<p>Feel free to ask me any questions about the document! I'm here to help! ✨</p>
+
+DIFFERENCE SUMMARY:
+------------------
+Line 2: <hr> → <hr/>
+Line 45: <hr> → <hr/>
+
+==========================================
+
+CONVERSION #2 - L-type Calcium Channels List
+=============================================
+
+ORIGINAL HTML:
+--------------
+<ol>
+<li>
+<p><strong>Role of L-type Ca²⁺ Channels:</strong><br>
+In cerebellar stellate cells, L-type Ca²⁺ channels mediate a significant Ca²⁺ influx during action potential broadening, which is crucial for activating the Ca²⁺-sensitive ERK/MAPK signaling pathway that ultimately triggers GluR2 gene transcription and the synaptic switch from Ca²⁺-permeable to Ca²⁺-impermeable AMPARs.</p>
+</li>
+<li>
+<p><strong>Impact of Blocking These Channels:</strong><br>
+Blocking L-type Ca²⁺ channels (e.g., using nifedipine) reduces or prevents the enhanced Ca²⁺ influx normally elicited by action potential broadening, thereby impairing the activation of the ERK/MAPK pathway.</p>
+</li>
+<li>
+<p><strong>Downstream Consequences:</strong><br>
+As a direct consequence of the impaired Ca²⁺ entry, the necessary upregulation of GluR2 gene transcription is not achieved, which prevents the incorporation of GluR2-containing, Ca²⁺-impermeable AMPARs at the synapse.</p>
+</li>
+<li>
+<p><strong>Overall Effect on Synaptic Plasticity:</strong><br>
+Therefore, blocking L-type Ca²⁺ channels disrupts the molecular cascade that links electrical activity to transcriptional changes, ultimately abolishing the long-lasting, transcription-dependent synaptic plasticity that normally underlies the neural adaptations associated with fear-induced stimuli.</p>
+</li>
+</ol>
+
+CONVERTED XML:
+--------------
+<ol>
+<li>
+<p><strong>Role of L-type Ca²⁺ Channels:</strong><br/>
+In cerebellar stellate cells, L-type Ca²⁺ channels mediate a significant Ca²⁺ influx during action potential broadening, which is crucial for activating the Ca²⁺-sensitive ERK/MAPK signaling pathway that ultimately triggers GluR2 gene transcription and the synaptic switch from Ca²⁺-permeable to Ca²⁺-impermeable AMPARs.</p>
+</li>
+<li>
+<p><strong>Impact of Blocking These Channels:</strong><br/>
+Blocking L-type Ca²⁺ channels (e.g., using nifedipine) reduces or prevents the enhanced Ca²⁺ influx normally elicited by action potential broadening, thereby impairing the activation of the ERK/MAPK pathway.</p>
+</li>
+<li>
+<p><strong>Downstream Consequences:</strong><br/>
+As a direct consequence of the impaired Ca²⁺ entry, the necessary upregulation of GluR2 gene transcription is not achieved, which prevents the incorporation of GluR2-containing, Ca²⁺-impermeable AMPARs at the synapse.</p>
+</li>
+<li>
+<p><strong>Overall Effect on Synaptic Plasticity:</strong><br/>
+Therefore, blocking L-type Ca²⁺ channels disrupts the molecular cascade that links electrical activity to transcriptional changes, ultimately abolishing the long-lasting, transcription-dependent synaptic plasticity that normally underlies the neural adaptations associated with fear-induced stimuli.</p>
+</li>
+</ol>
+
+DIFFERENCE SUMMARY:
+------------------
+Line 3: <br> → <br/>
+Line 7: <br> → <br/>
+Line 11: <br> → <br/>
+Line 15: <br> → <br/>
+
+==========================================
+
+OVERALL ANALYSIS:
+=================
+- All differences are self-closing tag conversions for XML compliance
+- <hr> tags converted to <hr/>
+- <br> tags converted to <br/>
+- No content changes, only formatting for XML standards
+- These changes should NOT cause parsing errors - they make the content MORE valid for XML parsing

@@ -18,10 +18,17 @@
   "license": "",
   "dependencies": {
     "@citeproc-rs/wasm": "^0.2.0",
+    "@vscode/markdown-it-katex": "^1.1.1",
     "ace-builds": "^1.4.12",
     "amazon-cognito-identity-js": "^6.3.12",
     "bluebird": "^3.7.2",
     "classnames": "^2.2.6",
+    "html-react-parser": "^5.2.5",
+    "markdown-it": "^14.1.0",
+    "markdown-it-container": "^4.0.0",
+    "markdown-it-katex": "^2.0.3",
+    "markdown-it-table": "^4.1.1",
+    "markdown-it-task-lists": "^2.1.1",
     "monaco-editor": "^0.47.0",
     "monacopilot": "^1.1.15",
     "openai": "^4.96.0",
@@ -30,8 +37,14 @@
     "react-autosuggest": "^10.1.0",
     "react-dom": "^18.3.1",
     "react-intl": "^3.4.0",
+    "react-markdown": "5.0.3",
     "react-select": "^3.0.8",
-    "url": "^0.11.0"
+    "rehype-katex": "^7.0.1",
+    "rehype-raw": "5.1.0",
+    "remark-gfm": "1.0.0",
+    "remark-math": "5.1.1",
+    "url": "^0.11.0",
+    "xmldom": "^0.6.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.26.4",

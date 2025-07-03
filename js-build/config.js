@@ -30,6 +30,7 @@ const symlinkFiles = [
 	// those. Babel transpilation is still disabled in .babelrc.
 	'resource/**/*',
 	'!resource/react-virtualized.js',
+	'!resource/react-markdown.js',
 	// Only include dist directory of singleFile
 	// Also do a little bit of manipulation similar to react-virtualized
 	'!resource/SingleFile/**/*',
@@ -70,6 +71,27 @@ const browserifyConfigs = [
 		}
 	},
 	{
+		src: 'node_modules/react-markdown/react-markdown.min.js',
+		dest: 'resource/react-markdown.js',
+		config: {
+			standalone: 'react-markdown'
+		}
+	},
+	{
+		src: 'node_modules/markdown-it/dist/markdown-it.js',
+		dest: 'resource/markdown-it.js',
+		config: {
+			standalone: 'markdown-it'
+		}
+	},
+	{
+		src: 'node_modules/markdown-it-task-lists/index.js',
+		dest: 'resource/markdown-it-task-lists.js',
+		config: {
+			standalone: 'markdown-it-task-lists'
+		}
+	},
+	{
 		src: 'node_modules/url/url.js',
 		dest: 'resource/url.js',
 		config: {
@@ -95,6 +117,20 @@ const browserifyConfigs = [
 		dest: 'test/resource/chai-as-promised.js',
 		config: {
 			standalone: 'chaiAsPromised'
+		}
+	},
+	{
+		src: 'node_modules/markdown-it-katex/index.js',
+		dest: 'resource/markdown-it-katex.js',
+		config: {
+			standalone: 'markdown-it-katex'
+		}
+	},
+	{
+		src: 'node_modules/xmldom/lib/dom.js',
+		dest: 'resource/xmldom.js',
+		config: {
+			standalone: 'xmldom'
 		}
 	}
 ];
@@ -123,6 +159,7 @@ const jsFiles = [
 	'resource/vs/language/typescript/tsWorker.js',
 	'resource/monacopilot.mjs',
 	'resource/monacopilot-core.mjs',
+	'resource/xmldom.js',
 ];
 
 const scssFiles = [
