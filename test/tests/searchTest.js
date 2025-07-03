@@ -513,6 +513,54 @@ describe("Zotero.Search", function() {
 					var matches = await s.search();
 					assert.lengthOf(matches, 0);
 				});
+
+				it("should include annotations if top-level item matches", async function () {
+					var item = await createDataObject('item', { title: Zotero.Utilities.randomString() });
+					var attachment = await importPDFAttachment(item);
+					var annotation = await createAnnotation('highlight', attachment);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('title', 'contains', item.getDisplayTitle());
+					s.addCondition('includeParentsAndChildren', 'true');
+					var matches = await s.search();
+
+					assert.includeMembers(matches, [item.id, attachment.id, annotation.id]);
+				});
+
+				it("should include annotations if attachment item matches", async function () {
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					var tag = Zotero.Utilities.randomString();
+					attachment.addTag(tag);
+					await attachment.saveTx();
+					var annotation = await createAnnotation('highlight', attachment);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('tag', 'is', tag);
+					s.addCondition('includeParentsAndChildren', 'true');
+					var matches = await s.search();
+
+					assert.includeMembers(matches, [item.id, attachment.id, annotation.id]);
+				});
+
+				it("should include top-level item and attachment if annotation matches", async function () {
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					var annotation = await createAnnotation('highlight', attachment);
+					var tag = Zotero.Utilities.randomString();
+					annotation.addTag(tag);
+					await annotation.saveTx();
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('tag', 'is', tag);
+					s.addCondition('includeParentsAndChildren', 'true');
+					var matches = await s.search();
+
+					assert.includeMembers(matches, [item.id, attachment.id, annotation.id]);
+				});
 			});
 			
 			describe("key", function () {

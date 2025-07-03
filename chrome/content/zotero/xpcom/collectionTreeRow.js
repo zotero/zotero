@@ -294,6 +294,9 @@ Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function*
 		
 		case 'bucket':
 			return this.ref.getItems();
+
+		case 'pseudo-collection':
+			return this.ref.getItems();
 	}
 	
 	var ids = yield this.getSearchResults();

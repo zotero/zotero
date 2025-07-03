@@ -17,6 +17,18 @@ describe("Citation Dialog", function () {
 	};
 	let dialog, win, IOManager, CitationDataManager, SearchHandler;
 
+	let waitForNode = async (doc, selector) => {
+		let maxWaitLoops = 1000;
+		let loopCount = 0;
+		let node = doc.querySelector(selector);
+		while (!node && loopCount < maxWaitLoops) {
+			await Zotero.Promise.delay(5);
+			node = doc.querySelector(selector);
+			loopCount++;
+		}
+		return node;
+	};
+
 	before(async function () {
 		// one of helper functions of searchHandler uses zotero pane
 		win = await loadZoteroPane();
@@ -434,7 +446,7 @@ describe("Citation Dialog", function () {
 			// Make sure actual nodes for search matches are rendered
 			let expectedItemCardIDs = [...selectedIDs, ...openIDs, ...citedIDs, ...libraryIDs];
 			for (let itemID of expectedItemCardIDs) {
-				let node = dialog.document.querySelector(`.item[id="${itemID}"]`);
+				let node = await waitForNode(dialog.document, `.item[id="${itemID}"]`);
 				assert.isOk(node);
 			}
 		});
@@ -505,6 +517,253 @@ describe("Citation Dialog", function () {
 			// verify that the new bubbles was added
 			let addedBubble = newDialog.document.querySelector(".bubble");
 			assert.isOk(addedBubble);
+		});
+	});
+
+	describe("Add note", function () {
+		let noteDialog, noteIOManager, noteSearchHandler, noteIO;
+		let parentItem, childNote, standaloneNote;
+
+		before(async function () {
+			// Create IO for note citing dialog
+			noteIO = {
+				accept: () => {},
+				cancel() {},
+				sort() {},
+				sortable: false,
+				isCitingNotes: true,
+				citation: {
+					citationItems: [],
+					properties: {
+						unsorted: false,
+					}
+				},
+				getItems() {
+					return [];
+				},
+				allCitedDataLoadedPromise: Zotero.Promise.resolve(),
+			};
+
+			// Open note citing dialog
+			let noteDialogPromise = waitForWindow("chrome://zotero/content/integration/citationDialog.xhtml");
+			Services.ww.openWindow(null, "chrome://zotero/content/integration/citationDialog.xhtml", "", "", noteIO);
+			noteDialog = await noteDialogPromise;
+			noteIOManager = noteDialog.IOManager;
+			noteSearchHandler = noteDialog.SearchHandler;
+
+			// Wait for dialog to load
+			while (!noteDialog.loaded) {
+				await Zotero.Promise.delay(10);
+			}
+			// Create items
+			parentItem = await createDataObject('item', { title: "parent_item_title" });
+			childNote = new Zotero.Item('note');
+			childNote.parentID = parentItem.id;
+			childNote.setNote("child note content");
+			await childNote.saveTx();
+			standaloneNote = new Zotero.Item('note');
+			standaloneNote.setNote("standalone note content");
+			await standaloneNote.saveTx();
+		});
+
+		beforeEach(async function () {
+			// Reset search
+			await noteDialog.currentLayout.search("", { skipDebounce: true });
+			
+			// Wait for any ongoing search to complete
+			while (noteSearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+		});
+
+		after(function () {
+			noteDialog.close();
+		});
+
+		it("should find child note by parent item", async function () {
+			// Search for the parent item title
+			await noteDialog.currentLayout.search("parent_item_title", { skipDebounce: true });
+
+			// The note should be the only search result
+			assert.sameMembers(noteSearchHandler.results.found, [childNote]);
+
+			// Check that the note card is rendered in the dialog
+			let noteNode = noteDialog.document.querySelector(`.item[id="${childNote.id}"]`);
+			assert.isOk(noteNode);
+		});
+
+		it("should find child note by its content", async function () {
+			// Search for the note content
+			await noteDialog.currentLayout.search("child note", { skipDebounce: true });
+
+			// The note should be the only search result
+			assert.sameMembers(noteSearchHandler.results.found, [childNote]);
+
+			// Check that the note card is rendered in the dialog
+			assert.isOk(noteDialog.document.querySelector(`.item[id="${childNote.id}"]`));
+		});
+
+		it("should find standalone note by its content", async function () {
+			// Search for the note content
+			await noteDialog.currentLayout.search("standalone note", { skipDebounce: true });
+
+			// The note should be the only search result
+			assert.sameMembers(noteSearchHandler.results.found, [standaloneNote]);
+
+			// Check that the note card is rendered in the dialog
+			assert.isOk(noteDialog.document.querySelector(`.item[id="${standaloneNote.id}"]`));
+		});
+
+		it("should accept only a note", async function () {
+			await noteIOManager.addItemsToCitation([parentItem]);
+			assert.equal(noteDialog.CitationDataManager.items, 0);
+
+			await noteIOManager.addItemsToCitation([childNote]);
+			assert.equal(noteDialog.CitationDataManager.items.length, 1);
+			assert.equal(noteDialog.CitationDataManager.items[0].id, childNote.id);
+		});
+	});
+
+	describe("Add annotations", function () {
+		let annotationDialog, annotationIOManager, annotationSearchHandler, annotationIO;
+		let parentItem, attachment, highlightAnnotation, underlineAnnotation;
+
+		before(async function () {
+			// Create IO for annotation adding dialog
+			annotationIO = {
+				accept: () => {},
+				cancel() {},
+				sort() {},
+				sortable: false,
+				isAddingAnnotations: true,
+				citation: {
+					citationItems: [],
+					properties: {
+						unsorted: false,
+					}
+				},
+				getItems() {
+					return [];
+				},
+				allCitedDataLoadedPromise: Zotero.Promise.resolve(),
+			};
+
+			// Open annotation adding dialog
+			let annotationDialogPromise = waitForWindow("chrome://zotero/content/integration/citationDialog.xhtml");
+			Services.ww.openWindow(null, "chrome://zotero/content/integration/citationDialog.xhtml", "", "", annotationIO);
+			annotationDialog = await annotationDialogPromise;
+			annotationIOManager = annotationDialog.IOManager;
+			annotationSearchHandler = annotationDialog.SearchHandler;
+
+			// Wait for dialog to load
+			while (!annotationDialog.loaded) {
+				await Zotero.Promise.delay(10);
+			}
+
+			// Create items and annotations
+			parentItem = await createDataObject('item', { title: "parent_item_with_annotations" });
+			attachment = await importFileAttachment('test.pdf', { parentID: parentItem.id });
+
+			highlightAnnotation = await createAnnotation('highlight', attachment);
+			highlightAnnotation.annotationText = 'cd_highlighted_text';
+			highlightAnnotation.annotationComment = 'highlight comment';
+			await highlightAnnotation.saveTx();
+
+			underlineAnnotation = await createAnnotation('underline', attachment);
+			underlineAnnotation.annotationText = 'cd_underlined_text';
+			underlineAnnotation.annotationComment = 'underline';
+			await underlineAnnotation.saveTx();
+		});
+
+		beforeEach(async function () {
+			// Reset search
+			await annotationDialog.currentLayout.search("", { skipDebounce: true });
+			
+			// Wait for any ongoing search to complete
+			while (annotationSearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+		});
+
+		after(function () {
+			annotationDialog.close();
+		});
+
+		it("should find annotations by their parent item", async function () {
+			// Search for the parent item title
+			await annotationDialog.currentLayout.search("parent_item_with_annotations", { skipDebounce: true });
+
+			// Both annotations should be found in search results
+			assert.sameMembers(annotationSearchHandler.results.found, [highlightAnnotation, underlineAnnotation]);
+
+			let highlightNode = await waitForNode(annotationDialog.document, `.item[id="${highlightAnnotation.id}"]`);
+			let underlineNode = await waitForNode(annotationDialog.document, `.item[id="${underlineAnnotation.id}"]`);
+			// Check that annotation cards are rendered in the dialog
+			assert.isOk(highlightNode);
+			assert.isOk(underlineNode);
+		});
+
+		it("should find annotations by their content", async function () {
+			// Search for highlight annotation content
+			await annotationDialog.currentLayout.search(highlightAnnotation.annotationText, { skipDebounce: true });
+			assert.sameMembers(annotationSearchHandler.results.found, [highlightAnnotation]);
+
+			// Check that the annotation card is rendered in the dialog
+			assert.isOk(annotationDialog.document.querySelector(`.item[id="${highlightAnnotation.id}"]`));
+
+			// Search for underline annotation content
+			await annotationDialog.currentLayout.search(underlineAnnotation.annotationText, { skipDebounce: true });
+			assert.sameMembers(annotationSearchHandler.results.found, [underlineAnnotation]);
+
+			// Check that the annotation card is rendered in the dialog
+			assert.isOk(annotationDialog.document.querySelector(`.item[id="${underlineAnnotation.id}"]`));
+		});
+
+		it("should only include selected/open/cited items that have annotations", async function () {
+			// 3 top-level items, one attachment per each item, no annotations
+			let itemNoAnnotations1 = await createDataObject('item', { title: "item_no_annotations_1" });
+			let itemNoAnnotations2 = await createDataObject('item', { title: "item_no_annotations_2" });
+			let itemNoAnnotations3 = await createDataObject('item', { title: "item_no_annotations_3" });
+			
+			await importFileAttachment('test.pdf', { parentID: itemNoAnnotations1.id });
+			await importFileAttachment('test.pdf', { parentID: itemNoAnnotations2.id });
+			await importFileAttachment('test.pdf', { parentID: itemNoAnnotations3.id });
+
+			// 3 more top-level items, one attachment per each item, one annotation per attachment
+			let itemWithAnnotations1 = await createDataObject('item', { title: "item_with_annotations_1" });
+			let itemWithAnnotations2 = await createDataObject('item', { title: "item_with_annotations_2" });
+			let itemWithAnnotations3 = await createDataObject('item', { title: "item_with_annotations_3" });
+
+			let attachmentWithAnnotations1 = await importFileAttachment('test.pdf', { parentID: itemWithAnnotations1.id });
+			let attachmentWithAnnotations2 = await importFileAttachment('test.pdf', { parentID: itemWithAnnotations2.id });
+			let attachmentWithAnnotations3 = await importFileAttachment('test.pdf', { parentID: itemWithAnnotations3.id });
+
+			await createAnnotation('highlight', attachmentWithAnnotations1);
+			await createAnnotation('highlight', attachmentWithAnnotations2);
+			await createAnnotation('highlight', attachmentWithAnnotations3);
+
+			// Pretend these are counted as selected/open/cited items
+			await annotationSearchHandler._ensureRelevantItemsAreLoaded(
+				[itemNoAnnotations1, itemNoAnnotations2, itemNoAnnotations3, itemWithAnnotations1, itemWithAnnotations2, itemWithAnnotations3]
+			);
+			annotationSearchHandler.selectedItems = annotationSearchHandler.keepItemsWithAnnotations([itemNoAnnotations1, itemWithAnnotations1]);
+			annotationSearchHandler.openItems = annotationSearchHandler.keepItemsWithAnnotations([itemNoAnnotations2, itemWithAnnotations2]);
+			annotationSearchHandler.citedItems = annotationSearchHandler.keepItemsWithAnnotations([itemNoAnnotations3, itemWithAnnotations3]);
+
+			// Run search
+			await annotationDialog.currentLayout.search("item", { skipDebounce: true });
+
+			// Only 3 items with annotations should be included in the results
+			assert.sameMembers(annotationSearchHandler.selectedItems, [itemWithAnnotations1]);
+			assert.sameMembers(annotationSearchHandler.results.open, [itemWithAnnotations2]);
+			assert.sameMembers(annotationSearchHandler.results.cited, [itemWithAnnotations3]);
+		});
+
+		it("should only include annotations", async function () {
+			let item = await createDataObject('item', { title: "test_item" });
+			await annotationDialog.IOManager.addItemsToCitation([underlineAnnotation, parentItem, item]);
+			addedAnnotationIDs = annotationDialog.CitationDataManager.items.map(item => item.id);
+			assert.sameMembers(addedAnnotationIDs, [underlineAnnotation.id]);
 		});
 	});
 

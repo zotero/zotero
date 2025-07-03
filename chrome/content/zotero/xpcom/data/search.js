@@ -1208,13 +1208,6 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					condSelectSQL += 'IN (';
 					selectOpenParens = 1;
 					
-					// TEMP: Don't match annotations for negation operators, since it would result in
-					// all parent attachments being returned
-					if (isNegationOperator) {
-						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID="
-							+ Zotero.ItemTypes.getID('annotation') + " UNION ";
-					}
-					
 					switch (condition.name) {
 						case 'tag':
 							condSQL += "SELECT itemID FROM itemTags "
@@ -1726,16 +1719,31 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							+ "itemID IN (SELECT parentItemID FROM itemAttachments "
 								+ "WHERE itemID IN (" + condSQL + ")) "
 							+ "OR itemID IN (SELECT parentItemID FROM itemNotes "
-								+ "WHERE itemID IN (" + condSQL + ")) ";
-						var parentSQLParams = condSQLParams.concat(condSQLParams);
+								+ "WHERE itemID IN (" + condSQL + ")) "
+							// include attachment of matching annotations
+							+ "OR itemID IN (SELECT itemID  FROM itemAttachments "
+								+ "WHERE itemID IN (SELECT parentItemID FROM itemAnnotations "
+									+ "WHERE itemID IN (" + condSQL + "))) "
+							// include top-level item of matching annotations
+							+ "OR itemID IN (SELECT parentItemID FROM itemAttachments "
+								+ "WHERE itemID IN (SELECT parentItemID FROM itemAnnotations "
+									+ "WHERE itemID IN (" + condSQL + ")))";
+						var parentSQLParams = condSQLParams.concat(condSQLParams).concat(condSQLParams).concat(condSQLParams);
 					}
 					
 					if (includeParentsAndChildren || includeChildren) {
 						var childrenSQL = "SELECT itemID FROM itemAttachments WHERE "
 							+ "parentItemID IN (" + condSQL + ") UNION "
 							+ "SELECT itemID FROM itemNotes "
-							+ "WHERE parentItemID IN (" + condSQL + ")";
-						var childSQLParams = condSQLParams.concat(condSQLParams);
+							+ "WHERE parentItemID IN (" + condSQL + ") UNION "
+							// include annotations of matching top-level items
+							+ "SELECT itemID FROM itemAnnotations "
+								+ "WHERE parentItemID IN (SELECT itemID FROM itemAttachments "
+								+ "WHERE parentItemID IN (" + condSQL + ")) UNION "
+							// include annotations of matching attachments
+							+ "SELECT itemID FROM itemAnnotations "
+								+ "WHERE parentItemID IN (" + condSQL + ")";
+						var childSQLParams = condSQLParams.concat(condSQLParams).concat(condSQLParams).concat(condSQLParams);
 					}
 					
 					if (includeParentsAndChildren || includeParents) {
@@ -1803,6 +1811,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 			sql = sql.substring(0, sql.length-5); // remove last ' AND '
 		}
 		
+		// Enforce annotation type whenever there is annotation-specific conditions
+		if (conditionsToProcess.some(cond => cond.condition.includes("annotation") && ["isNot", "doesNotContain"].includes(cond.operator))) {
+			sql += " AND itemTypeID=" + Zotero.ItemTypes.getID('annotation');
+		}
 		// Add on quicksearch conditions
 		if (quicksearchSQLSet) {
 			sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "

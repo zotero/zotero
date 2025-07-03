@@ -343,6 +343,7 @@ class VirtualizedTable extends React.Component {
 		}
 		
 		this.onSelection = oncePerAnimationFrame(this._onSelection);
+		this._customRowHeights = [];
 	}
 
 	static defaultProps = {
@@ -1161,7 +1162,13 @@ class VirtualizedTable extends React.Component {
 			node.addEventListener('mouseup', e => this._handleMouseUp(e, index), { passive: true });
 			node.addEventListener('dblclick', e => this._activateNode(e, [index]), { passive: true });
 		}
-		node.style.height = this._rowHeight + 'px';
+		let customRowHeight = this._customRowHeights.find(obj => obj[0] == index);
+		if (customRowHeight) {
+			node.style.height = customRowHeight[1] + 'px';
+		}
+		else {
+			node.style.height = this._rowHeight + 'px';
+		}
 		node.id = this.props.id + "-row-" + index;
 		node.classList.toggle('odd', index % 2 == 1);
 		node.classList.toggle('even', index % 2 == 0);
@@ -1348,6 +1355,7 @@ class VirtualizedTable extends React.Component {
 	 * @param customRowHeights an array of tuples specifying row index and row height: e.g. [[1, 10], [5, 10]]
 	 */
 	updateCustomRowHeights = (customRowHeights=[]) => {
+		this._customRowHeights = customRowHeights;
 		return this._jsWindow.update({customRowHeights});
 	};
 	
