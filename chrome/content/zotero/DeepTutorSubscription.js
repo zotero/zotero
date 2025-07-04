@@ -30,7 +30,7 @@ import DeepTutorSubscriptionConfirm from "./DeepTutorSubscriptionConfirm.js";
 import DeepTutorManageSubscription from "./DeepTutorManageSubscription.js";
 import DeepTutorFreeTrial from "./DeepTutorFreeTrial.js";
 import DeepTutorProcessingSubscription from "./DeepTutorProcessingSubscription.js";
-import { getActiveUserSubscriptionByUserId } from "./api/libs/api.js";
+import { getActiveUserSubscriptionByUserId, DT_BASE_URL } from "./api/libs/api.js";
 
 const PopupClosePath = "chrome://zotero/content/DeepTutorMaterials/Cross.png";
 const SubscriptionConfirmBookPath = 'chrome://zotero/content/DeepTutorMaterials/Subscription/SUB_SUCCESS.svg';
@@ -74,7 +74,7 @@ class DeepTutorSubscription extends React.Component {
 	 * Handles upgrade success and shows confirmation panel
 	 */
 	handleUpgradeSuccess = () => {
-		Zotero.launchURL('https://staging.deeptutor.knowhiz.us/dzSubscription');
+		Zotero.launchURL(`https://${DT_BASE_URL}/dzSubscription`);
 		this.setState({ currentPanel: "confirm" });
 	};
 
@@ -92,7 +92,7 @@ class DeepTutorSubscription extends React.Component {
 	 */
 	handleManageSubscription = () => {
 		this.setState({ currentPanel: "main" });
-		Zotero.launchURL('https://staging.deeptutor.knowhiz.us/dzSubscription?manage=true');
+		Zotero.launchURL(`https://${DT_BASE_URL}/dzSubscription?manage=true`);
 		this.props.toggleSubscriptionPopup();
 	};
 
@@ -111,7 +111,7 @@ class DeepTutorSubscription extends React.Component {
 	};
 
 	handleShowProcessing = () => {
-		const url = 'https://staging.deeptutor.knowhiz.us/dzSubscription';
+		const url = `https://${DT_BASE_URL}/dzSubscription`;
 		
 		try {
 			// Primary: Use Zotero's proper API for opening external URLs

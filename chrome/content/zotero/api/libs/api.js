@@ -1,5 +1,5 @@
 // Access ZOTERO_CONFIG from the global scope
-const DT_BASE_URL = 'staging.deeptutor.knowhiz.us';
+export const DT_BASE_URL = 'staging.deeptutor.knowhiz.us';
 // const DT_BASE_URL = 'deeptutor.knowhiz.us';
 // const DT_BASE_URL = 'localhost:8081';
 
@@ -275,7 +275,7 @@ export const getLatestUserSubscriptionByUserId = async (userId) => {
 	});
 
 	return handledResponse.json();
-}
+};
 
 // Document related API calls
 export const getDocumentById = async (documentId) => {

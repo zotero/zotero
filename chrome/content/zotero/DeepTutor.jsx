@@ -40,6 +40,7 @@ import DeepTutorBottomSection from './DeepTutorBottomSection.js';
 // import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
 import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
 import DeepTutorSessionDelete from './DeepTutorSessionDelete.js';
+import DeepTutorLocalhostServer from './localhostServer.js';
 import {
 	getMessagesBySessionId,
 	getSessionById,
@@ -76,188 +77,6 @@ const SessionType = {
 	BASIC: 'BASIC',
 	ADVANCED: 'ADVANCED'
 };
-
-const ContentType = {
-	THINK: 'THINK',
-	TEXT: 'TEXT',
-	IMAGE: 'IMAGE',
-	AUDIO: 'AUDIO'
-};
-
-const MessageStatus = {
-	UNVIEW: 'UNVIEW',
-	DELETED: 'DELETED',
-	VIEWED: 'VIEWED',
-	PROCESSING_ERROR: 'PROCESSING_ERROR'
-};
-
-const MessageRole = {
-	TUTOR: 'TUTOR',
-	USER: 'USER'
-};
-
-// Utility Classes
-class SessionStatusEvent {
-	constructor(effectiveTime, status) {
-		this.effectiveTime = effectiveTime;
-		this.status = status;
-	}
-}
-
-class PresignedUrl {
-	constructor(preSignedUrl, preSignedReadUrl) {
-		this.preSignedUrl = preSignedUrl;
-		this.preSignedReadUrl = preSignedReadUrl;
-	}
-}
-
-class FileDocumentMap {
-	constructor() {
-		this._map = new Map(); // Maps file name to document ID
-		this._reverseMap = new Map(); // Maps document ID to file name
-		this._fileIdMap = new Map(); // Maps document ID to original file ID
-		this._preSignedUrlDataMap = new Map(); // Maps document ID to preSignedUrlData
-	}
-
-	addMapping(fileName, documentId, fileId, preSignedUrlData) {
-		this._map.set(fileName, documentId);
-		this._reverseMap.set(documentId, fileName);
-		this._fileIdMap.set(documentId, fileId);
-		if (preSignedUrlData) {
-			this._preSignedUrlDataMap.set(documentId, preSignedUrlData);
-		}
-	}
-
-	getDocumentId(fileName) {
-		return this._map.get(fileName);
-	}
-
-	getFileName(documentId) {
-		return this._reverseMap.get(documentId);
-	}
-
-	getFileId(documentId) {
-		return this._fileIdMap.get(documentId);
-	}
-
-	getAllDocumentIds() {
-		return Array.from(this._map.values());
-	}
-
-	getAllFileNames() {
-		return Array.from(this._map.keys());
-	}
-
-	hasFile(fileName) {
-		return this._map.has(fileName);
-	}
-
-	hasDocument(documentId) {
-		return this._reverseMap.has(documentId);
-	}
-
-	removeMapping(fileName) {
-		const documentId = this._map.get(fileName);
-		if (documentId) {
-			this._map.delete(fileName);
-			this._reverseMap.delete(documentId);
-			this._fileIdMap.delete(documentId);
-		}
-	}
-
-	clear() {
-		this._map.clear();
-		this._reverseMap.clear();
-		this._fileIdMap.clear();
-	}
-
-	toJSON() {
-		return {
-			fileToDocument: Object.fromEntries(this._map),
-			documentToFile: Object.fromEntries(this._reverseMap),
-			documentToFileId: Object.fromEntries(this._fileIdMap),
-			documentToPreSignedUrlData: Object.fromEntries(this._preSignedUrlDataMap)
-		};
-	}
-}
-
-class Message {
-	constructor({
-		id = null,
-		parentMessageId = null,
-		userId = null,
-		sessionId = null,
-		subMessages = [],
-		followUpQuestions = [],
-		creationTime = new Date().toISOString(),
-		lastUpdatedTime = new Date().toISOString(),
-		status = MessageStatus.UNVIEW,
-		role = MessageRole.USER
-	} = {}) {
-		this.id = null; // Always set id to null
-		this.parentMessageId = parentMessageId;
-		this.userId = userId;
-		this.sessionId = sessionId;
-		this.subMessages = subMessages;
-		this.followUpQuestions = followUpQuestions;
-		this.creationTime = creationTime;
-		this.lastUpdatedTime = lastUpdatedTime;
-		this.status = status;
-		this.role = role;
-	}
-}
-
-class SubMessage {
-	constructor({
-		text = null,
-		image = null,
-		audio = null,
-		contentType = ContentType.TEXT,
-		creationTime = new Date().toISOString(),
-		sources = []
-	} = {}) {
-		this.text = text;
-		this.image = image;
-		this.audio = audio;
-		this.contentType = contentType;
-		this.creationTime = creationTime;
-		this.sources = sources;
-	}
-}
-
-class MessageSource {
-	constructor({
-		index = 0,
-		page = 0,
-		referenceString = ""
-	} = {}) {
-		this.index = index;
-		this.page = page;
-		this.referenceString = referenceString;
-	}
-}
-
-class Conversation {
-	constructor({
-		userId = null,
-		sessionId = null,
-		ragSessionId = null,
-		storagePaths = [],
-		history = [],
-		message = null,
-		streaming = false,
-		type = SessionType.BASIC
-	} = {}) {
-		this.userId = userId;
-		this.sessionId = sessionId;
-		this.ragSessionId = ragSessionId;
-		this.storagePaths = storagePaths;
-		this.history = history;
-		this.message = message;
-		this.streaming = streaming;
-		this.type = type;
-	}
-}
 
 class DeepTutorSession {
 	constructor({
@@ -304,38 +123,12 @@ class DeepTutorSession {
 	}
 }
 
-class DeepTutorMessage {
-	constructor({
-		id = null,
-		parentMessageId = null,
-		userId = null,
-		sessionId = null,
-		subMessages = [],
-		followUpQuestions = [],
-		creationTime = new Date().toISOString(),
-		lastUpdatedTime = new Date().toISOString(),
-		status = 'active',
-		role = 'user'
-	} = {}) {
-		this.id = id;
-		this.parentMessageId = parentMessageId;
-		this.userId = userId;
-		this.sessionId = sessionId;
-		this.subMessages = subMessages;
-		this.followUpQuestions = followUpQuestions;
-		this.creationTime = creationTime;
-		this.lastUpdatedTime = lastUpdatedTime;
-		this.status = status;
-		this.role = role;
-	}
-}
 
 const logoPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_DPTLOGO.svg';
 const HistoryIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_HISTORY_NEW.svg';
 const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS_NEW.svg';
 const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_FEEDBACK.svg';
 const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_PROFILE.svg';
-const MicroscopeIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_HISTORY_SEARCH.svg';
 const PopupClosePath = 'chrome://zotero/content/DeepTutorMaterials/Main/MAIN_CLOSE.svg';
 
 const styles = {
@@ -541,7 +334,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 		emptyMessage: "No messages",
 		onNewSession: () => {},
 		onSendMessage: () => {},
-		onSwitchComponent: () => {}
+		onSwitchComponent: () => {},
+		onSessionIdUpdate: () => {},
+		onUserIdUpdate: () => {}
 	};
 
 	static propTypes = {
@@ -551,7 +346,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 		emptyMessage: PropTypes.string,
 		onNewSession: PropTypes.func,
 		onSendMessage: PropTypes.func,
-		onSwitchComponent: PropTypes.func
+		onSwitchComponent: PropTypes.func,
+		onSessionIdUpdate: PropTypes.func,
+		onUserIdUpdate: PropTypes.func
 	};
 
 	constructor(props) {
@@ -607,12 +404,46 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 		// Timer reference for model selection freeze
 		this._modelSelectionFreezeTimer = null;
+
+		// Initialize localhost server
+		console.log("🔧 DeepTutor: Initializing localhost server...");
+		this.localhostServer = new DeepTutorLocalhostServer();
+		console.log("📋 DeepTutor: Localhost server instance created");
+
+		// Bind Google OAuth methods
+		this.handleGoogleSignInClose = this.handleGoogleSignInClose.bind(this);
 	}
 
 	async componentDidMount() {
 		this._initialized = true;
 		this._loadingPromiseResolve();
 		Zotero.debug("DeepTutor: Component mounted");
+
+		// Make instance available globally for testing
+		if (typeof window !== "undefined") {
+			window.deepTutorInstance = this;
+			console.log("🌐 DeepTutor: Instance made available globally as window.deepTutorInstance");
+		}
+
+		// Start the localhost server
+		try {
+			console.log("🚀 DeepTutor: Attempting to start localhost server...");
+			const serverStarted = await this.localhostServer.start();
+			if (serverStarted) {
+				console.log("✅ DeepTutor: Localhost server started successfully!");
+				console.log("🌐 Server URL:", this.localhostServer.getServerUrl());
+				Zotero.debug(`DeepTutor: Localhost server started at ${this.localhostServer.getServerUrl()}`);
+
+				// Auth functions are no longer needed since we use the existing completeAuth function
+				console.log("🔧 DeepTutor: Using existing completeAuth function for authentication");
+			} else {
+				console.log("❌ DeepTutor: Failed to start localhost server");
+				Zotero.debug("DeepTutor: Failed to start localhost server");
+			}
+		} catch (error) {
+			console.error("❌ DeepTutor: Error starting localhost server:", error.message);
+			Zotero.debug(`DeepTutor: Error starting localhost server: ${error.message}`);
+		}
 
 		// First, initialize the auth state from storage
 		await initializeAuthState();
@@ -633,6 +464,24 @@ var DeepTutor = class DeepTutor extends React.Component {
 		// Clear any pending timer
 		if (this._modelSelectionFreezeTimer) {
 			clearTimeout(this._modelSelectionFreezeTimer);
+		}
+
+		// Disable Google OAuth endpoint
+		if (this.localhostServer) {
+			this.localhostServer.disableGoogleOAuth();
+		}
+
+		// Stop localhost server
+		if (this.localhostServer) {
+			this.localhostServer.stop().then((stopped) => {
+				if (stopped) {
+					Zotero.debug("DeepTutor: Localhost server stopped successfully");
+				} else {
+					Zotero.debug("DeepTutor: Failed to stop localhost server");
+				}
+			}).catch((error) => {
+				Zotero.debug(`DeepTutor: Error stopping localhost server: ${error.message}`);
+			});
 		}
 	}
 
@@ -681,16 +530,16 @@ var DeepTutor = class DeepTutor extends React.Component {
 					isAuthenticated: true,
 					currentUser: currentUserData.user
 				}, async () => {
-									// Fetch backend user data
-				await this.fetchUserData(currentUserData.user);
-				// Load sessions once userData is available
-				if (!this.state.isLoadingSessions) {
-					await this.loadSession();
-				}
-				// All data loading operations complete - safe to clear protection flags and switch pane
-				// This ensures only one pane switch happens after all async operations finish
-				this._isInitializingData = false;
-				this._blockingAuthStateChanges = false;
+					// Fetch backend user data
+					await this.fetchUserData(currentUserData.user);
+					// Load sessions once userData is available
+					if (!this.state.isLoadingSessions) {
+						await this.loadSession();
+					}
+					// All data loading operations complete - safe to clear protection flags and switch pane
+					// This ensures only one pane switch happens after all async operations finish
+					this._isInitializingData = false;
+					this._blockingAuthStateChanges = false;
 					this.setState({
 						currentPane: this.getSessionHistoryPaneOrNoSession()
 					});
@@ -733,14 +582,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 					isAuthenticated: true,
 					currentUser: refreshedData.user
 				}, async () => {
-									await this.fetchUserData(refreshedData.user);
-				if (!this.state.isLoadingSessions) {
-					await this.loadSession();
-				}
-				// All data loading operations complete - safe to clear protection flags and switch pane
-				// This ensures only one pane switch happens after all async operations finish
-				this._isInitializingData = false;
-				this._blockingAuthStateChanges = false;
+					await this.fetchUserData(refreshedData.user);
+					if (!this.state.isLoadingSessions) {
+						await this.loadSession();
+					}
+					// All data loading operations complete - safe to clear protection flags and switch pane
+					// This ensures only one pane switch happens after all async operations finish
+					this._isInitializingData = false;
+					this._blockingAuthStateChanges = false;
 					this.setState({
 						currentPane: this.getSessionHistoryPaneOrNoSession()
 					});
@@ -785,9 +634,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 		// Layer 3: Skip if same user already authenticated (prevents redundant processing)
 		// Avoids unnecessary re-processing when the same user triggers multiple auth events
-		if (isAuthenticated && this.state.isAuthenticated && 
-			user && this.state.currentUser && 
-			user.username === this.state.currentUser.username) {
+		if (isAuthenticated && this.state.isAuthenticated
+			&& user && this.state.currentUser
+			&& user.username === this.state.currentUser.username) {
 			Zotero.debug("DeepTutor: Skipping auth state change - same user already authenticated");
 			return;
 		}
@@ -830,7 +679,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 					});
 					this.switchPane('welcome');
 				}
-			} finally {
+			}
+			finally {
 				// Always clear the blocking flag when operations complete (success or failure)
 				this._blockingAuthStateChanges = false;
 			}
@@ -881,7 +731,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 	};
 
 	// Add handler for clicking outside profile popup
-	handleContainerClick = (e) => {
+	handleContainerClick = (_e) => {
 		// Only close profile popup if it's open
 		if (this.state.showProfilePopup) {
 			this.setState({ showProfilePopup: false });
@@ -990,19 +840,19 @@ var DeepTutor = class DeepTutor extends React.Component {
 			// If user now has subscription, also update isFreeTrial status
 			if (hasActiveSubscription) {
 				this.setState({ isFreeTrial: false });
-			} else {
-				// If user doesn't have active subscription, check if they have any subscription history
-				if (this.state.userData?.id) {
-					try {
-						const latestSubscription = await getLatestUserSubscriptionByUserId(this.state.userData.id);
-						this.setState({ isFreeTrial: !latestSubscription });
-					} catch (error) {
-						Zotero.debug(`DeepTutor: Error checking latest subscription: ${error.message}`);
-						this.setState({ isFreeTrial: true });
-					}
+			}
+			else if (this.state.userData?.id) {
+				try {
+					const latestSubscription = await getLatestUserSubscriptionByUserId(this.state.userData.id);
+					this.setState({ isFreeTrial: !latestSubscription });
+				}
+				catch (error) {
+					Zotero.debug(`DeepTutor: Error checking latest subscription: ${error.message}`);
+					this.setState({ isFreeTrial: true });
 				}
 			}
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutor: Error handling subscription status change: ${error.message}`);
 		}
 	};
@@ -1025,7 +875,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 				const activeSubscription = await getActiveUserSubscriptionByUserId(this.state.userData.id);
 				userSubscribed = !!activeSubscription;
 				Zotero.debug('DeepTutor: Active subscription status:', userSubscribed);
-			} catch (error) {
+			}
+			catch (error) {
 				Zotero.debug('DeepTutor: Error checking active subscription:', error);
 			}
 
@@ -1035,7 +886,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 				const latestSubscription = await getLatestUserSubscriptionByUserId(this.state.userData.id);
 				isFreeTrial = !latestSubscription;
 				Zotero.debug('DeepTutor: Latest subscription status:', isFreeTrial);
-			} catch (error) {
+			}
+			catch (error) {
 				Zotero.debug('DeepTutor: Error checking latest subscription:', error);
 			}
 
@@ -1046,7 +898,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			});
 
 			Zotero.debug("DeepTutor: Subscription data refreshed successfully");
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutor: Error refreshing subscription data: ${error.message}`);
 		}
 	};
@@ -1077,7 +930,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			Zotero.debug("DeepTutor: Trying primary method - Zotero.launchURL");
 			Zotero.launchURL(url);
 			Zotero.debug("DeepTutor: Successfully called Zotero.launchURL");
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutor: Primary method failed - Zotero.launchURL: ${error.message}`);
 			
 			// Fallback 1: Try Zotero.Utilities.Internal.launchURL
@@ -1086,10 +940,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 					Zotero.debug("DeepTutor: Trying Fallback 1 - Zotero.Utilities.Internal.launchURL");
 					Zotero.Utilities.Internal.launchURL(url);
 					Zotero.debug("DeepTutor: Successfully called Zotero.Utilities.Internal.launchURL");
-				} else {
+				}
+				else {
 					throw new Error("Zotero.Utilities.Internal.launchURL not available");
 				}
-			} catch (fallback1Error) {
+			}
+			catch (fallback1Error) {
 				Zotero.debug(`DeepTutor: Fallback 1 failed - Zotero.Utilities.Internal.launchURL: ${fallback1Error.message}`);
 				
 				// Fallback 2: Try Zotero.HTTP.loadDocuments
@@ -1098,10 +954,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 						Zotero.debug("DeepTutor: Trying Fallback 2 - Zotero.HTTP.loadDocuments");
 						Zotero.HTTP.loadDocuments([url]);
 						Zotero.debug("DeepTutor: Successfully called Zotero.HTTP.loadDocuments");
-					} else {
+					}
+					else {
 						throw new Error("Zotero.HTTP.loadDocuments not available");
 					}
-				} catch (fallback2Error) {
+				}
+				catch (fallback2Error) {
 					Zotero.debug(`DeepTutor: Fallback 2 failed - Zotero.HTTP.loadDocuments: ${fallback2Error.message}`);
 					
 					// Fallback 3: Try XPCOM nsIExternalProtocolService
@@ -1115,10 +973,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 								.newURI(url, null, null);
 							extps.loadURI(uri);
 							Zotero.debug("DeepTutor: Successfully opened URL via XPCOM nsIExternalProtocolService");
-						} else {
+						}
+						else {
 							throw new Error("XPCOM Cc/Ci shortcuts not available");
 						}
-					} catch (fallback3Error) {
+					}
+					catch (fallback3Error) {
 						Zotero.debug(`DeepTutor: Fallback 3 failed - XPCOM nsIExternalProtocolService: ${fallback3Error.message}`);
 						
 						// Final fallback: Copy URL to clipboard
@@ -1133,7 +993,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 									Zotero.debug(`DeepTutor: Failed to copy to clipboard: ${clipboardError.message}`);
 									Zotero.alert(null, "DeepTutor", `Please manually visit this URL:\n${url}`);
 								});
-						} else {
+						}
+						else {
 							Zotero.debug("DeepTutor: Clipboard API not available, showing alert with URL");
 							Zotero.alert(null, "DeepTutor", `Please manually visit this URL:\n${url}`);
 						}
@@ -1208,11 +1069,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 									Zotero.debug(`DeepTutor: Registered user: ${JSON.stringify(registeredUser)}`);
 
 									resolve(registeredUser);
-								} catch (registerError) {
+								}
+								catch (registerError) {
 									Zotero.debug(`DeepTutor: Error registering user: ${registerError.message}`);
 									reject(registerError);
 								}
-							} else {
+							}
+							else {
 								reject(error);
 							}
 						});
@@ -1282,11 +1145,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 									Zotero.debug(`DeepTutor: Registered user: ${JSON.stringify(registeredUser)}`);
 
 									resolve(registeredUser);
-								} catch (registerError) {
+								}
+								catch (registerError) {
 									Zotero.debug(`DeepTutor: Error registering user: ${registerError.message}`);
 									reject(registerError);
 								}
-							} else {
+							}
+							else {
 								reject(error);
 							}
 						});
@@ -1481,15 +1346,16 @@ var DeepTutor = class DeepTutor extends React.Component {
 				if (wasCurrentSession || updatedSessions.length === 0) {
 					if (updatedSessions.length === 0) {
 						this.switchPane('noSession');
-					} else {
+					}
+					else {
 						this.switchPane('sessionHistory');
 					}
 				}
 			});
 
 			Zotero.debug(`DeepTutor: Session ${sessionId} removed from local state`);
-
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutor: Error deleting session ${sessionId}: ${error.message}`);
 			
 			// You might want to show an error message to the user here
@@ -1497,7 +1363,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				error: `Failed to delete session: ${error.message}`
 			});
 		}
-	}
+	};
 
 	// Helper to fetch backend user data using Cognito user object
 	fetchUserData = async (cognitoUser) => {
@@ -1549,7 +1415,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 				providerUserId = subAttr.getValue();
 				Zotero.debug(`DeepTutor: fetchUserData - Using provider user ID from regular Cognito: ${providerUserId}`);
 				Zotero.debug(`DeepTutor: fetchUserData - Fetched attributes: email=${cognitoUser.fetchedAttributes.email}, name=${cognitoUser.fetchedAttributes.name}`);
-			} else {
+			}
+			else {
 				throw new Error('Cannot extract provider user ID from user object');
 			}
 
@@ -1557,7 +1424,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			try {
 				userData = await getUserByProviderUserId(providerUserId);
 				Zotero.debug('DeepTutor: fetchUserData retrieved backend user data:', userData);
-			} catch (getUserError) {
+			}
+			catch (getUserError) {
 				Zotero.debug(`DeepTutor: fetchUserData getUserByProviderUserId error: ${getUserError.message}`);
 
 				// If user not found, try to register them
@@ -1576,11 +1444,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 						userData = await registerUser(newUser);
 						Zotero.debug('DeepTutor: User registration successful in fetchUserData');
 						Zotero.debug(`DeepTutor: Registered user: ${JSON.stringify(userData)}`);
-					} catch (registerError) {
+					}
+					catch (registerError) {
 						Zotero.debug(`DeepTutor: Error registering user in fetchUserData: ${registerError.message}`);
 						throw registerError;
 					}
-				} else {
+				}
+				else {
 					throw getUserError;
 				}
 			}
@@ -1659,9 +1529,82 @@ var DeepTutor = class DeepTutor extends React.Component {
 				Zotero.debug(`DeepTutor: Model selection unfrozen after 10-second timer`);
 				this._modelSelectionFreezeTimer = null;
 			}, 10000);
-		} else {
+		}
+		else {
 			// iniWait became false, but keep frozen until timer expires
 			Zotero.debug(`DeepTutor: iniWait became false, but keeping model selection frozen until timer expires`);
+		}
+	};
+
+
+
+	/**
+	 * Handles Google sign-in popup close
+	 * Disables the OAuth endpoint when popup is closed
+	 */
+	handleGoogleSignInClose = () => {
+		try {
+			console.log("🔐 DeepTutor: Google sign-in popup closed");
+			
+			// Disable the Google OAuth endpoint
+			if (this.localhostServer) {
+				this.localhostServer.disableGoogleOAuth();
+			}
+			
+			Zotero.debug("DeepTutor: Google sign-in popup closed, OAuth endpoint disabled");
+		} catch (error) {
+			console.error("❌ DeepTutor: Error handling Google sign-in close:", error.message);
+			Zotero.debug(`DeepTutor: Error handling Google sign-in close: ${error.message}`);
+		}
+	};
+
+	/**
+	 * Test method for localhost server - can be called from browser console
+	 * Usage: window.deepTutorInstance.testLocalhostServer()
+	 */
+	testLocalhostServer = async () => {
+		try {
+			console.log("🧪 DeepTutor: Testing localhost server...");
+			
+			if (!this.localhostServer) {
+				console.error("❌ DeepTutor: Localhost server not initialized");
+				return;
+			}
+			
+			console.log("📊 DeepTutor: Server status:", {
+				isRunning: this.localhostServer.isServerRunning(),
+				serverUrl: this.localhostServer.getServerUrl(),
+				port: this.localhostServer.port
+			});
+			
+			// Check available endpoints
+			const allEndpoints = this.localhostServer.getAvailableEndpoints();
+			const deeptutorEndpoints = this.localhostServer.getDeepTutorEndpoints();
+			
+			console.log("🔗 DeepTutor: All available endpoints:", allEndpoints);
+			console.log("🎯 DeepTutor: DeepTutor endpoints:", deeptutorEndpoints);
+			
+			// Test sending a message
+			const testMessage = "Test message from DeepTutor console!";
+			console.log("📤 DeepTutor: Sending test message:", testMessage);
+			
+			const result = await this.localhostServer.sendText(testMessage);
+			console.log("📥 DeepTutor: Send result:", result);
+			
+			// Test health endpoint if server is running
+			if (this.localhostServer.isServerRunning()) {
+				try {
+					const healthResponse = await fetch(`${this.localhostServer.getServerUrl()}/deeptutor/health`);
+					const healthData = await healthResponse.json();
+					console.log("🏥 DeepTutor: Health check result:", healthData);
+				} catch (healthError) {
+					console.error("❌ DeepTutor: Health check failed:", healthError.message);
+				}
+			}
+			
+			console.log("✅ DeepTutor: Localhost server test completed");
+		} catch (error) {
+			console.error("❌ DeepTutor: Localhost server test failed:", error.message);
 		}
 	};
 
@@ -1686,7 +1629,6 @@ var DeepTutor = class DeepTutor extends React.Component {
 				ref={this.containerRef}
 				style={containerStyle}
 				id="zotero-deep-tutor-pane"
-				collapsed={this.state.collapsed.toString()}
 				onClick={this.handleContainerClick}
 			>
 				<DeepTutorTopSection
@@ -1760,6 +1702,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								this.switchPane(this.getSessionHistoryPaneOrNoSession());
 								this.toggleSignInPopup();
 							}}
+							localhostServer={this.localhostServer}
 						/>}
 						{this.state.currentPane === 'signUp' && <DeepTutorSignUp onSignUpSignIn={() => {
 							this.toggleSignInPopup();
@@ -1794,7 +1737,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								padding: '0.25rem 0.5rem 0.5rem 0.5rem',
 								overflow: 'auto'
 							}}
-							onClick={(e) => e.stopPropagation()}
+							onClick={e => e.stopPropagation()}
 						>
 							<DeepTutorSubscription
 								userId={this.state.userData?.id}
@@ -1892,6 +1835,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								    this.toggleSignInPopup();
 								    // Auth state change will be handled by the listener
 							    }}
+								localhostServer={this.localhostServer}
 							/>
 						</div>
 					</div>
@@ -2011,7 +1955,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								padding: '1.25rem',
 								overflow: 'auto'
 							}}
-							onClick={(e) => e.stopPropagation()}
+							onClick={e => e.stopPropagation()}
 						>
 							{/* Delete Session Popup header */}
 							<div style={{
