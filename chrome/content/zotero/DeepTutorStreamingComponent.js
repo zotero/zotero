@@ -117,7 +117,57 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 	}, [streamText]);
 
 	const formatResponseForMarkdown = (text) => {
-		let formattedText = text;
+		if (!text || typeof text !== 'string') {
+			return '';
+		}
+		
+		// Helper function to remove custom tags from text
+		const removeSubstrings = (originalString, substringsToRemove) => {
+			let currentString = originalString;
+			for (let i = 0; i < substringsToRemove.length; i++) {
+				const substring = substringsToRemove[i];
+				if (typeof substring === 'string') {
+					const index = currentString.indexOf(substring);
+					if (index !== -1) {
+						currentString = currentString.slice(0, index) + 
+							currentString.slice(index + (substring?.length || 0));
+					}
+				}
+			}
+			return currentString;
+		};
+
+		// Extract only the response content, removing custom tags
+		let cleanText = text;
+		
+		// Check if text contains custom tags and extract only the response part
+		if (text.includes('<response>')) {
+			const responseIndex = text.indexOf('<response>') + '<response>'.length;
+			const endResponseIndex = text.indexOf('</response>');
+			if (endResponseIndex !== -1) {
+				cleanText = text.substring(responseIndex, endResponseIndex);
+			} else {
+				cleanText = text.substring(responseIndex);
+			}
+		}
+		
+		// Remove any remaining custom tags that might interfere with XML parsing
+		cleanText = removeSubstrings(cleanText, [
+			'<thinking>', '</thinking>',
+			'<think>', '</think>',
+			'<followup_question>', '</followup_question>',
+			'<source_page>', '</source_page>',
+			'<sources>', '</sources>',
+			'<id>', '</id>',
+			'<appendix>', '</appendix>'
+		]);
+		
+		// Remove any other custom tags that might cause XML issues
+		// This regex removes any remaining custom tags that aren't standard HTML
+		cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a)\b)[^>]*>/gi, '');
+		
+		// Now apply mathematical symbol processing to the clean text
+		let formattedText = cleanText;
 
 		// Replace inline math-like expressions (e.g., \( u \)) with proper Markdown math
 		formattedText = formattedText.replace(/\\\((.+?)\\\)/g, '$$$1$$');
@@ -128,9 +178,15 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 			'$$$$\n$1\n$$$$',
 		);
 
-		return formattedText.replace(/\[<(\d{1,2})>\]/g, (_, id) => {
+		// Process source references
+		formattedText = formattedText.replace(/\[<(\d{1,2})>\]/g, (_, id) => {
 			return `<Source id="${id}" />`;
 		});
+		
+		Zotero.debug(`DeepTutorStreamingComponent: formatResponseForMarkdown - Original text length: ${text.length}, Clean text length: ${cleanText.length}`);
+		Zotero.debug(`DeepTutorStreamingComponent: formatResponseForMarkdown - Removed custom tags and processed for XML compatibility`);
+		
+		return formattedText;
 	};
 
 	const Source = ({ id }) => React.createElement('div', {
