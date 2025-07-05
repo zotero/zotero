@@ -1536,7 +1536,6 @@ This demonstrates multiple table formats working correctly.
 	const _onNewSession = async (newSession) => {
 		try {
 			Zotero.debug(`DeepTutorChatBox: onNewSession CALLED for session ${newSession?.id || "null"}: ${JSON.stringify(newSession)}`);
-            
 			// Check if session is too recent
 			const sessionCreationTime = new Date(newSession.creationTime);
 			const now = new Date();
@@ -1622,7 +1621,20 @@ This demonstrates multiple table formats working correctly.
 		cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a)\b)[^>]*>/gi, '');
 		
 		// Now apply mathematical symbol processing and source processing to the clean text
-		let formattedText = cleanText
+		let formattedText = cleanText;
+
+		// Replace inline math-like expressions (e.g., \( u \)) with proper Markdown math
+		formattedText = formattedText.replace(/\\\((.+?)\\\)/g, '$$$1$$');
+
+		// Replace block math-like expressions (e.g., \[ ... \]) with proper Markdown math
+		formattedText = formattedText.replace(
+			/\\\[([\s\S]+?)\\\]/g,
+			'$$$$\n$1\n$$$$',
+		);
+
+		// Apply additional mathematical symbol processing for non-KaTeX expressions
+		/*
+		formattedText = formattedText
 			// Convert Ca$^{2+}$ to Ca<sup>2+</sup>
 			.replace(/Ca\$\^\{?2\+\}\$?/g, 'Ca<sup>2+</sup>')
 			// Convert other LaTeX superscripts: $^{text}$ to <sup>text</sup>
@@ -1646,11 +1658,11 @@ This demonstrates multiple table formats working correctly.
 			.replace(/χ/g, '&chi;')
 			.replace(/ψ/g, '&psi;')
 			.replace(/ω/g, '&omega;')
-			// Convert any remaining standalone $ to HTML entity
-			.replace(/\$/g, '&#36;')
+			// Convert any remaining standalone $ to HTML entity (only for non-math expressions)
+			.replace(/\$(?!\$)/g, '&#36;')
 			// Convert standalone ^ to HTML entity (for any remaining cases)
 			.replace(/\^/g, '&#94;');
-		
+		*/
 		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Original text length: ${text.length}, Clean text length: ${cleanText.length}`);
 		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Removed custom tags and processed for XML compatibility`);
 		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Available sources: ${subMessage?.sources?.length || 0}`);
