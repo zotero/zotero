@@ -433,8 +433,8 @@
 			else {
 				fileNameRow.hidden = true;
 			}
-			this._id("title").toggleAttribute("readonly", (!this.editable || !fileExists));
-			this._id("fileName").toggleAttribute("readonly", (!this.editable || !fileExists));
+			this._id("title").toggleAttribute("readonly", !this.editable);
+			this._id("fileName").toggleAttribute("readonly", !this.editable || !fileExists);
 
 			// Page count
 			if (this.displayPages && this._item.isPDFAttachment()) {
