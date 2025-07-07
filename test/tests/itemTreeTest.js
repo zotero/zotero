@@ -58,6 +58,7 @@ describe("Zotero.ItemTree", function() {
 			quicksearch.value = "";
 			quicksearch.doCommand();
 			await itemsView._refreshPromise;
+			Zotero.Prefs.set("hideContextRows", false);
 		});
 		
 		describe("when issuing a Select All command", function () {
@@ -176,6 +177,62 @@ describe("Zotero.ItemTree", function() {
 
 			await itemsView._refreshPromise;
 			assert.equal(quicksearch.value, "test");
+		});
+
+		it("should hide context rows if hideContextRows=true", async function () {
+			Zotero.Prefs.set("hideContextRows", true);
+
+			let item = await createDataObject('item', { title: "Item" });
+			let note = await createDataObject('item', { itemType: 'note', parentID: item.id, note: "te" });
+			// Ensure that non-file attachments that cannot have annotations do not cause any issues
+			await Zotero.Attachments.linkFromURL({
+				url: 'https://example.com',
+				title: 'Example',
+				parentItemID: item.id
+			});
+
+			let attachmentOne = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: item.id });
+			let highlightOne = await createAnnotation('highlight', attachmentOne, { comment: "Highlight te" });
+			let underlineOne = await createAnnotation('underline', attachmentOne, { comment: "Underline testing" });
+
+			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF test', parentItemID: item.id });
+			let highlightTwo = await createAnnotation('highlight', attachmentTwo, { comment: "Highlight te" });
+
+			// "te" search - all rows are visible
+			quicksearch.value = "te";
+			quicksearch.doCommand();
+			await itemsView._refreshPromise;
+
+			assert.isNumber(itemsView.getRowIndexByID(note.id));
+			assert.isNumber(itemsView.getRowIndexByID(attachmentOne.id));
+			assert.isNumber(itemsView.getRowIndexByID(highlightOne.id));
+			assert.isNumber(itemsView.getRowIndexByID(underlineOne.id));
+			assert.isNumber(itemsView.getRowIndexByID(attachmentTwo.id));
+			assert.isNumber(itemsView.getRowIndexByID(highlightTwo.id));
+
+			// "test" search - both attachments are shown, only annotations with "testing" remain, note row is gone
+			quicksearch.value = "test";
+			quicksearch.doCommand();
+			await itemsView._refreshPromise;
+
+			assert.isFalse(itemsView.getRowIndexByID(note.id));
+			assert.isNumber(itemsView.getRowIndexByID(attachmentOne.id));
+			assert.isNumber(itemsView.getRowIndexByID(underlineOne.id));
+			assert.isFalse(itemsView.getRowIndexByID(highlightOne.id));
+			assert.isNumber(itemsView.getRowIndexByID(attachmentTwo.id));
+			assert.isFalse(itemsView.getRowIndexByID(highlightTwo.id));
+
+			quicksearch.value = "testing";
+			quicksearch.doCommand();
+			await itemsView._refreshPromise;
+
+			// "testing" search - only one attachments with "testing" annotation appears
+			assert.isFalse(itemsView.getRowIndexByID(note.id));
+			assert.isNumber(itemsView.getRowIndexByID(attachmentOne.id));
+			assert.isNumber(itemsView.getRowIndexByID(underlineOne.id));
+			assert.isFalse(itemsView.getRowIndexByID(highlightOne.id));
+			assert.isFalse(itemsView.getRowIndexByID(attachmentTwo.id));
+			assert.isFalse(itemsView.getRowIndexByID(highlightTwo.id));
 		});
 	});
 	
