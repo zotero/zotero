@@ -563,7 +563,7 @@ const styles = {
 	},
 	viewContextText: {
 		fontSize: '1rem',
-		fontWeight: 500,
+		fontWeight: 400,
 		color: '#757575',
 		lineHeight: '100%',
 	},
