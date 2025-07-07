@@ -1,26 +1,26 @@
 <?xml version="1.0"?>
 <!--
     ***** BEGIN LICENSE BLOCK *****
-    
+
     Copyright © 2009 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
-    
+
     This file is part of Zotero.
-    
+
     Zotero is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     Zotero is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
-    
+
     You should have received a copy of the GNU Affero General Public License
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     ***** END LICENSE BLOCK *****
 -->
 
@@ -42,31 +42,31 @@
 
 <window id="main-window"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-		windowtype="navigator:browser" 
+		windowtype="navigator:browser"
 		title="&brandShortName;"
 		width="1000" height="600"
 		persist="screenX screenY width height sizemode"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		style="display: flex;"
 		tooltip="html-tooltip">
-	
+
 	<linkset>
 		<html:link rel="localization" href="browser/menubar.ftl"/>
 		<html:link rel="localization" href="browser/browserSets.ftl"/>
 		<html:link rel="localization" href="zotero.ftl"/>
 		<html:link rel="localization" href="reader.ftl"/>
 	</linkset>
-	
+
 	<script>
 		var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
-		
+
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/standalone/standalone.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/browserWindowShim.js", this);
-		
+
 		// Mozilla scripts
 		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
@@ -90,16 +90,16 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/menuAccessKey.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/containers/tagSelectorContainer.js", this);
 	</script>
-	
+
 	<commandset id="mainCommandSet">
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
 		<command id="cmd_close" oncommand="ZoteroPane.handleClose(event)"/>
-		
+
 		<!--EDIT-->
 		<command id="cmd_find"
 			oncommand="document.getElementById('zotero-tb-search-textbox').select()"/>
-			
+
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
 		<command id="cmd_zotero_import" oncommand="Zotero_File_Interface.showImportWizard();"/>
 		<command id="cmd_zotero_importFromClipboard" oncommand="Zotero_File_Interface.importFromClipboard();"/>
@@ -192,7 +192,7 @@
 		<key id="key_findAgain2" keycode="&findAgainCmd.key2;" command="cmd_findAgain"/>
 		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
 	</keyset>
-	
+
 	<keyset id="sortSubmenuKeys">
 		<!-- Attributes are set in initItemsTree(), but these don't work on Windows if they're
 		     created in JS -->
@@ -207,7 +207,7 @@
 		<key id="key_sortCol8"/>
 		<key id="key_sortCol9"/>
 	</keyset>
-	
+
 	<vbox id="titlebar">
 		<hbox class="titlebar-icon-container">
 			<html:div class="titlebar-icon"></html:div>
@@ -226,7 +226,7 @@
 					the children can be modified. All non-menu nodes are ignored
 				-->
 				<menubar id="main-menubar"
-				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">		
+				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">
 					<!-- File menu -->
 					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;"
 							onpopupshowing="ZoteroStandalone.onFileMenuOpen()">
@@ -294,9 +294,9 @@
 									<menuitem id="menu_groupAdd" label="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
 									<menu id="menu_feedAddMenu" label="&zotero.toolbar.feeds.new;">
 										<menupopup>
-											<menuitem id="menu_feedAddFromURL" label="&zotero.toolbar.feeds.new.fromURL;" 
+											<menuitem id="menu_feedAddFromURL" label="&zotero.toolbar.feeds.new.fromURL;"
 												command="cmd_zotero_newFeed_fromURL"/>
-											<menuitem id="menu_feedAddFromOPML" label="&zotero.toolbar.feeds.new.fromOPML;" 
+											<menuitem id="menu_feedAddFromOPML" label="&zotero.toolbar.feeds.new.fromOPML;"
 												oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
 										</menupopup>
 									</menu>
@@ -351,7 +351,7 @@
 									command="cmd_quitApplication"/>
 						</menupopup>
 					</menu>
-					
+
 					<menu id="edit-menu" data-l10n-id="menu-edit">
 						<!-- goUpdateGlobalEditMenuItems(true) is necessary to update Edit menu when contenteditable is focused -->
 						<menupopup id="menu_EditPopup"
@@ -431,7 +431,7 @@
 							<menuseparator/>
 						</menupopup>
 					</menu>
-					
+
 					<menu id="view-menu"
 							label="&viewMenu.label;"
 							accesskey="&viewMenu.accesskey;"
@@ -667,8 +667,8 @@
 							/>
 						</menupopup>
 					</menu>
-					
-					<menu 
+
+					<menu
 						id="go-menu"
 						class="menu-type-reader"
 						label="&goMenu.label;"
@@ -682,20 +682,20 @@
 								label="&zotero.pdfReader.firstPage;"
 								oncommand="ZoteroStandalone.currentReader.navigateToFirstPage()"
 							/>
-							<menuitem 
+							<menuitem
 								id="go-menuitem-last-page"
 								class="menu-type-reader pdf epub"
 								label="&zotero.pdfReader.lastPage;"
 								oncommand="ZoteroStandalone.currentReader.navigateToLastPage()"
 							/>
 							<menuseparator class="menu-type-reader pdf epub"/>
-							<menuitem 
+							<menuitem
 								id="go-menuitem-back"
 								class="menu-type-reader"
 								label="&zotero.pdfReader.back;"
 								oncommand="ZoteroStandalone.currentReader.navigateBack()"
 							/>
-							<menuitem 
+							<menuitem
 								id="go-menuitem-forward"
 								class="menu-type-reader"
 								label="&zotero.pdfReader.forward;"
@@ -703,7 +703,7 @@
 							/>
 						</menupopup>
 					</menu>
-					
+
 					<menu id="toolsMenu" label="&toolsMenu.label;" accesskey="&toolsMenu.accesskey;">
 						<menupopup id="menu_ToolsPopup">
 							<menuitem id="menu_rtfScan" class="menu-type-library" label="&zotero.toolbar.rtfScan.label;"
@@ -736,7 +736,7 @@
 							</menu>
 						</menupopup>
 					</menu>
-				
+
 					 <!-- Only on macOS -->
 					<menu id="windowMenu"
 							data-l10n-id="menu-window-menu">
@@ -750,7 +750,7 @@
 							<menuseparator id="sep-window-list"/>
 						</menupopup>
 					</menu>
-					
+
 					<menu id="helpMenu"
 							label="&helpMenu.label;"
 							accesskey="&helpMenu.accesskey;">
@@ -816,7 +816,7 @@
 				</menubar>
 			</toolbaritem>
 		</html:div>
-		
+
 		<hbox class="titlebar-buttonbox titlebar-color">
 			<toolbarbutton class="titlebar-button titlebar-min"
 				oncommand="window.minimize();"
@@ -840,7 +840,7 @@
 				/>
 		</hbox>
 	</vbox>
-	
+
 	<!-- Keep in sync with Zotero.test conditional block in overlay.js -->
 	<hbox id="zotero-title-bar">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container" />
@@ -848,13 +848,13 @@
 			<toolbarbutton id="zotero-tb-tabs-menu" class="zotero-tb-button" tabindex="-1" data-l10n-id="zotero-toolbar-tabs-menu" type="panel"
 				oncommand="if (this.disabled) { event.preventDefault(); return; } Zotero_Tabs.showTabsMenu(this)"/>
 			<div xmlns="http://www.w3.org/1999/xhtml" class="zotero-tb-separator"></div>
-			<toolbarbutton id="zotero-tb-deeptutor-toggle" class="zotero-tb-button" tabindex="-1" 
+			<toolbarbutton id="zotero-tb-deeptutor-toggle" class="zotero-tb-button" tabindex="-1"
 				oncommand="ZoteroStandalone.onDeepTutorPaneOpen()"
 				tooltip="Toggle DeepTutor"
 				label="DeepTutor">
 				<image src="chrome://zotero/content/DeepTutorMaterials/LightLogo.png" style="width:25px;height:25px;"/>
 			</toolbarbutton>
-			<panel id="zotero-tabs-menu-panel" type="arrow" 
+			<panel id="zotero-tabs-menu-panel" type="arrow"
 					onpopuphiding="Zotero_Tabs.handleTabsMenuHiding(event)"
 					onpopupshowing="Zotero_Tabs.handleTabsMenuShowing(event)"
 					onpopupshown="Zotero_Tabs.handleTabsMenuShown(event)"
@@ -862,7 +862,7 @@
 					tabindex="-1"
 					>
 				<vbox id="zotero-tabs-menu-wrapper">
-					<html:input id="zotero-tabs-menu-filter" 
+					<html:input id="zotero-tabs-menu-filter"
 						oninput="Zotero_Tabs.handleTabsMenuFilterInput(event, this)"
 						onfocus="Zotero_Tabs.resetFocusIndex()"
 						tabindex="0"
@@ -876,7 +876,7 @@
 			</hbox>
 
 			<toolbarbutton tabindex="-1" id="zotero-tb-sync-error" hidden="true" style="-moz-user-focus: normal;" />
-			
+
 			<!--
 				We put this here, but it can be used wherever
 				Zotero.Sync.Runner.updateErrorPanel() puts it
@@ -886,7 +886,7 @@
 			if (buttons[0]) {
 				buttons[0].focus();
 			}" />
-			
+
 			<toolbarbutton id="zotero-tb-sync" tabindex="-1" class="zotero-tb-button" tooltip="_child"
 					oncommand="ZoteroPane.sync()">
 				<tooltip
@@ -902,7 +902,7 @@
 			</toolbarbutton>
 		</hbox>
 	</hbox>
-	
+
 	<tooltip id="dynamic-tooltip" onpopupshowing="ZoteroPane.setDynamicTooltip(event)"></tooltip>
 	<!-- Global popupset for all context menus -->
 	<popupset>
@@ -956,9 +956,9 @@
 			<menuseparator/>
 			<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
 			<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
-			
+
 			<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"/>
-			
+
 			<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
 				<menupopup id="zotero-add-attachment-popup">
 					<menuitem
@@ -1015,7 +1015,7 @@
 			<menuitem id="context-pane-add-standalone-note" label="&zotero.context.addStandaloneNote;"/>
 			<menuitem id="context-pane-add-standalone-note-from-annotations" label="&zotero.context.addStandaloneNoteFromAnnotations;"/>
 		</menupopup>
-		
+
 		<menupopup id="context-pane-list-popup">
 			<menuitem id="context-pane-list-show-in-library" label="&zotero.items.menu.showInLibrary;"/>
 			<menuitem id="context-pane-list-edit-in-window" label="&zotero.context.editInWindow;"/>
@@ -1083,7 +1083,7 @@
 			nomaxresults="true"
 		/>
 	</popupset>
-	
+
 	<hbox flex="1" id="browser">
 		<vbox id="appcontent" flex="1">
 			<stack id="zotero-pane-stack" flex="1">
@@ -1099,7 +1099,7 @@
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 							onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
 							onkeypress="ZoteroPane_Local.handleKeyPress(event)">
-							
+
 							<vbox id="post-upgrade-container" class="banner-container" collapsed="true" role="status">
 								<html:div id="post-upgrade-banner" class="banner">
 									<html:div id="post-upgrade-centered">
@@ -1150,7 +1150,7 @@
 									<label is="text-link" id="sync-reminder-close" class="close-link">×</label>
 								</html:div>
 							</vbox>
-							
+
 							<vbox id="mac-word-plugin-install-container" class="banner-container" collapsed="true" role="status">
 								<html:div id="mac-word-plugin-install-banner" class="banner">
 									<html:div class="message" data-l10n-id="mac-word-plugin-install-message" />
@@ -1167,7 +1167,7 @@
 										id="mac-word-plugin-install-dont-ask-again"/>
 								</html:div>
 							</vbox>
-							
+
 							<vbox id="retracted-items-container" class="banner-container" collapsed="true" role="status">
 								<html:div id="retracted-items-banner" class="banner">
 									<html:div id="retracted-items-message" class="message"/>
@@ -1186,7 +1186,7 @@
 								</html:div>
 							</vbox>
 
-							
+
 							<hbox id="zotero-trees" flex="1">
 								<vbox id="zotero-collections-pane" zotero-persist="width">
 									<toolbar id="zotero-toolbar-collection-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
@@ -1201,7 +1201,7 @@
 													data-l10n-attrs="placeholder"
 													oncommand="ZoteroPane.handleCollectionSearchInput()"/>
 											</html:div>
-										</hbox>									
+										</hbox>
 									</toolbar>
 									<!-- This is used for positioning the sync error icon panel
 											under specific tree cells, which don't exist as
@@ -1224,21 +1224,21 @@
 									<!-- 'collapsed' is no longer necessary here due to the persisted 'state' on
 										 zotero-tags-splitter, but without this an old-style entry for 'collapsed'
 										 in localstore.rdf can cause the pane to always be closed on Zotero open.
-										 
+
 										 TODO: deal with this some other way?
 									-->
 									<vbox id="zotero-tag-selector-container" zotero-persist="height,collapsed" clickthrough="never">
 										<html:div id="zotero-tag-selector" label="&tagSelector.label;"/>
 									</vbox>
 								</vbox>
-								
+
 								<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
 									zotero-persist="state"
 									onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));ZoteroPane_Local.updateLayoutConstraints();"
 									oncommand="ZoteroPane_Local.updateLayoutConstraints()">
 									<grippy id="zotero-collections-grippy"/>
 								</splitter>
-								
+
 								<box id="zotero-layout-switcher" orient="horizontal" flex="1" zotero-persist="orient">
 									<vbox id="zotero-items-pane-container">
 										<toolbar id="zotero-toolbar-item-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
@@ -1253,7 +1253,7 @@
 														onmousedown="if (this.disabled) { event.preventDefault(); return; }">
 													<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()"></menupopup>
 												</toolbarbutton>
-												
+
 												<toolbarbutton
 													id="zotero-tb-lookup"
 													tabindex="-1"
@@ -1262,7 +1262,7 @@
 													type="panel"
 													onmousedown="Zotero_Lookup.handleToolbarButtonMouseDown(event)"
 												/>
-												
+
 												<panel id="zotero-lookup-panel" type="arrow"
 														onpopupshown="Zotero_Lookup.onShown(event)"
 														onpopuphidden="Zotero_Lookup.onHidden(event)"
@@ -1288,7 +1288,7 @@
 														</vbox>
 													</vbox>
 												</panel>
-												
+
 												<toolbarbutton
 														id="zotero-tb-attachment-add"
 														class="zotero-tb-button"
@@ -1337,7 +1337,7 @@
 														/>
 													</menupopup>
 												</toolbarbutton>
-												
+
 												<spacer flex="1"/>
 												<image id="zotero-tb-search-spinner" class="zotero-spinner-16"/>
 												<quick-search-textbox id="zotero-tb-search" timeout="250"
@@ -1345,7 +1345,7 @@
 														oninput="ZoteroPane_Local.handleSearchInput(this, event)"
 														oncommand="ZoteroPane_Local.search()"/>
 											</hbox>
-											
+
 										</toolbar>
 										<hbox id="zotero-items-pane" class="virtualized-table-container" flex="1" clickthrough="never">
 											<html:div id="zotero-items-tree"></html:div>
@@ -1359,7 +1359,7 @@
 											  oncommand="ZoteroPane.updateLayoutConstraints()">
 										<grippy id="zotero-items-grippy"/>
 									</splitter>
-				
+
 									<!-- itemPane.xul -->
 									<item-pane id="zotero-item-pane" zotero-persist="width height"/>
 								</box>
@@ -1367,12 +1367,12 @@
 						</vbox>
 					</deck>
 
-					<splitter id="zotero-deeptutor-splitter" 
+					<splitter id="zotero-deeptutor-splitter"
 						state="collapsed"
-						resizebefore="farthest" 
-						resizeafter="closest" 
-						collapse="after" 
-						orient="horizontal" 
+						resizebefore="farthest"
+						resizeafter="closest"
+						collapse="after"
+						orient="horizontal"
 						zotero-persist="state orient"
 						onmousemove="ZoteroPane.updateLayoutConstraints()"
 						oncommand="ZoteroPane.updateLayoutConstraints()">
@@ -1395,7 +1395,7 @@
 					>
 						<grippy/>
 					</splitter>
-		
+
 					<!-- contextPane -->
 					<box id="zotero-context-pane" collapsed="true" zotero-persist="width">
 						<vbox flex="1" style="min-width: 0; min-height: 0;">
@@ -1418,15 +1418,15 @@
 						<item-pane-sidenav id="zotero-context-pane-sidenav" class="zotero-view-item-sidenav" hidden="true"/>
 					</box>
 				</hbox>
-				
+
 				<!-- Barrier to prevent tabbing into Zotero pane when busy -->
 				<box id="zotero-pane-tab-catcher-bottom" hidden="true" align="center" pack="center" style="opacity: 0">
 					<checkbox/>
 				</box>
-				
+
 				<stack id="zotero-pane-overlay" flex="1" hidden="true">
 					<box flex="1"/>
-					
+
 					<deck id="zotero-pane-overlay-deck" style="display: flex; justify-content: center;">
 						<box id="zotero-pane-progress" flex="1" align="center" pack="center">
 							<box id="zotero-pane-progress-box">
@@ -1439,7 +1439,7 @@
 						</box>
 					</deck>
 				</stack>
-				
+
 			</stack>
 		</vbox>
 	</hbox>

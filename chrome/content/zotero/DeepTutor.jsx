@@ -395,7 +395,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 		// Bind auth state change handler
 		this.handleAuthStateChange = this.handleAuthStateChange.bind(this);
-		
+
 		// Multi-layer protection flags to prevent infinite loops and blinking
 		// Flag 1: Prevents auth state changes during initial component setup
 		this._isInitializingData = false;
@@ -488,7 +488,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 	async initializeAuthState() {
 		try {
 			Zotero.debug("DeepTutor: Initializing auth state");
-			
+
 			// Enable protection flags to prevent auth state change interference during initialization
 			// This prevents the infinite loop where auth state changes trigger more auth state changes
 			this._isInitializingData = true;
@@ -651,7 +651,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 		Zotero.debug("DeepTutor: Processing auth state change");
 		// Enable blocking flag to prevent recursive auth state changes during data operations
 		this._blockingAuthStateChanges = true;
-		
+
 		this.setState({
 			isAuthenticated,
 			currentUser: user,
@@ -779,7 +779,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 	handleShowDeletePopup = (sessionId) => {
 		const session = this.state.sesIdToObj.get(sessionId);
 		const sessionName = session ? session.sessionName || 'Unnamed Session' : 'this session';
-		
+
 		this.setState({
 			sessionToDelete: sessionId,
 			sessionNameToDelete: sessionName,
@@ -833,10 +833,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 	handleSubscriptionStatusChange = async (hasActiveSubscription) => {
 		try {
 			Zotero.debug(`DeepTutor: Subscription status changed to: ${hasActiveSubscription}`);
-			
+
 			// Update the subscription status in state
 			this.setState({ userSubscribed: hasActiveSubscription });
-			
+
 			// If user now has subscription, also update isFreeTrial status
 			if (hasActiveSubscription) {
 				this.setState({ isFreeTrial: false });
@@ -924,7 +924,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 		Zotero.debug("DeepTutor: Sign up button clicked");
 		const url = DT_SIGN_UP_URL;
 		Zotero.debug(`DeepTutor: Attempting to open sign up URL: ${url}`);
-		
+
 		try {
 			// Primary: Use Zotero's proper API for opening external URLs
 			Zotero.debug("DeepTutor: Trying primary method - Zotero.launchURL");
@@ -933,7 +933,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 		catch (error) {
 			Zotero.debug(`DeepTutor: Primary method failed - Zotero.launchURL: ${error.message}`);
-			
+
 			// Fallback 1: Try Zotero.Utilities.Internal.launchURL
 			try {
 				if (Zotero.Utilities && Zotero.Utilities.Internal && Zotero.Utilities.Internal.launchURL) {
@@ -947,7 +947,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			}
 			catch (fallback1Error) {
 				Zotero.debug(`DeepTutor: Fallback 1 failed - Zotero.Utilities.Internal.launchURL: ${fallback1Error.message}`);
-				
+
 				// Fallback 2: Try Zotero.HTTP.loadDocuments
 				try {
 					if (Zotero.HTTP && Zotero.HTTP.loadDocuments) {
@@ -961,7 +961,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				}
 				catch (fallback2Error) {
 					Zotero.debug(`DeepTutor: Fallback 2 failed - Zotero.HTTP.loadDocuments: ${fallback2Error.message}`);
-					
+
 					// Fallback 3: Try XPCOM nsIExternalProtocolService
 					try {
 						if (typeof Cc !== 'undefined' && typeof Ci !== 'undefined') {
@@ -980,7 +980,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					}
 					catch (fallback3Error) {
 						Zotero.debug(`DeepTutor: Fallback 3 failed - XPCOM nsIExternalProtocolService: ${fallback3Error.message}`);
-						
+
 						// Final fallback: Copy URL to clipboard
 						if (navigator.clipboard) {
 							Zotero.debug("DeepTutor: Trying final fallback - copy URL to clipboard");
@@ -1357,7 +1357,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 		catch (error) {
 			Zotero.debug(`DeepTutor: Error deleting session ${sessionId}: ${error.message}`);
-			
+
 			// You might want to show an error message to the user here
 			this.setState({
 				error: `Failed to delete session: ${error.message}`
@@ -1512,17 +1512,17 @@ var DeepTutor = class DeepTutor extends React.Component {
 	// Handle iniWait state changes from DeepTutorChatBox
 	handleInitWaitChange = (iniWait) => {
 		Zotero.debug(`DeepTutor: Received iniWait state change: ${iniWait}`);
-		
+
 		if (iniWait) {
 			// Freeze model selection immediately
 			this.setState({ modelSelectionFrozen: true });
 			Zotero.debug(`DeepTutor: Model selection frozen due to iniWait=true`);
-			
+
 			// Clear any existing timer
 			if (this._modelSelectionFreezeTimer) {
 				clearTimeout(this._modelSelectionFreezeTimer);
 			}
-			
+
 			// Set 10-second timer to unfreeze model selection
 			this._modelSelectionFreezeTimer = setTimeout(() => {
 				this.setState({ modelSelectionFrozen: false });
@@ -1545,12 +1545,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 	handleGoogleSignInClose = () => {
 		try {
 			console.log("🔐 DeepTutor: Google sign-in popup closed");
-			
+
 			// Disable the Google OAuth endpoint
 			if (this.localhostServer) {
 				this.localhostServer.disableGoogleOAuth();
 			}
-			
+
 			Zotero.debug("DeepTutor: Google sign-in popup closed, OAuth endpoint disabled");
 		} catch (error) {
 			console.error("❌ DeepTutor: Error handling Google sign-in close:", error.message);
@@ -1565,32 +1565,32 @@ var DeepTutor = class DeepTutor extends React.Component {
 	testLocalhostServer = async () => {
 		try {
 			console.log("🧪 DeepTutor: Testing localhost server...");
-			
+
 			if (!this.localhostServer) {
 				console.error("❌ DeepTutor: Localhost server not initialized");
 				return;
 			}
-			
+
 			console.log("📊 DeepTutor: Server status:", {
 				isRunning: this.localhostServer.isServerRunning(),
 				serverUrl: this.localhostServer.getServerUrl(),
 				port: this.localhostServer.port
 			});
-			
+
 			// Check available endpoints
 			const allEndpoints = this.localhostServer.getAvailableEndpoints();
 			const deeptutorEndpoints = this.localhostServer.getDeepTutorEndpoints();
-			
+
 			console.log("🔗 DeepTutor: All available endpoints:", allEndpoints);
 			console.log("🎯 DeepTutor: DeepTutor endpoints:", deeptutorEndpoints);
-			
+
 			// Test sending a message
 			const testMessage = "Test message from DeepTutor console!";
 			console.log("📤 DeepTutor: Sending test message:", testMessage);
-			
+
 			const result = await this.localhostServer.sendText(testMessage);
 			console.log("📥 DeepTutor: Send result:", result);
-			
+
 			// Test health endpoint if server is running
 			if (this.localhostServer.isServerRunning()) {
 				try {
@@ -1601,7 +1601,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 					console.error("❌ DeepTutor: Health check failed:", healthError.message);
 				}
 			}
-			
+
 			console.log("✅ DeepTutor: Localhost server test completed");
 		} catch (error) {
 			console.error("❌ DeepTutor: Localhost server test failed:", error.message);
@@ -1611,11 +1611,34 @@ var DeepTutor = class DeepTutor extends React.Component {
 	render() {
 		Zotero.debug("DeepTutor: Render called");
 
+		// Calculate responsive widths for DeepTutor pane
+		let minWidth, maxWidth, defaultWidth;
+		if (this.state.collapsed) {
+			minWidth = '0';
+			maxWidth = '0';
+			defaultWidth = '0';
+		} else {
+			// Maximum width: 1/2 of window width
+			maxWidth = `${window.innerWidth * 0.5}px`;
+
+			// Default width: 1/3 of window width
+			defaultWidth = `${window.innerWidth * 0.33}px`;
+
+			// Minimum width based on window size
+			if (window.innerWidth >= 1200) {
+				// Window width >= 1200px: minimum is 1/4 of window width
+				minWidth = `${window.innerWidth * 0.25}px`;
+			} else {
+				// Window width < 1200px: minimum is 300px
+				minWidth = '300px';
+			}
+		}
+
 		const containerStyle = {
 			...styles.container,
-			width: this.state.collapsed ? '0' : '100%',
-			minWidth: this.state.collapsed ? '0' : '23.75rem',
-			maxWidth: this.state.collapsed ? '0' : `${Math.max(905, window.innerWidth * 0.3)}px`,
+			width: this.state.collapsed ? '0' : defaultWidth,
+			minWidth: minWidth,
+			maxWidth: maxWidth,
 			transition: 'all 0.3s ease-in-out',
 			overflow: 'hidden',
 			display: 'flex',
