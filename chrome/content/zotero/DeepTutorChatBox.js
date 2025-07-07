@@ -563,7 +563,7 @@ const styles = {
 	},
 	viewContextText: {
 		fontSize: '1rem',
-		fontWeight: 500,
+		fontWeight: 400,
 		color: '#757575',
 		lineHeight: '100%',
 	},
@@ -3145,19 +3145,26 @@ This demonstrates multiple table formats working correctly.
 									key={contextDoc.documentId}
 									style={{
 										...styles.contextDocumentButton,
-										...(hoveredContextDoc === index ? styles.contextDocumentButtonHover : {}),
+										...(hoveredContextDoc === index ? {
+											...styles.contextDocumentButtonHover,
+											background: contextDoc.filePath ? '#D9D9D9' : '#E8E8E8',  // Lighter gray for null filePath
+										} : {
+											background: contextDoc.filePath ? '#FFFFFF' : '#F5F5F5'  // Light gray base for null filePath
+										}),
 										borderBottom: index === contextDocuments.length - 1 ? "none" : "0.0625rem solid #E0E0E0",
 										flexDirection: "column",
 										alignItems: "flex-start",
 										padding: "0.75rem 0.9375rem",
 										minHeight: contextDoc.filePath ? "3rem" : "auto",
-										background: "#FFFFFF",
-										gap: "0.3125rem"
+										gap: "0.3125rem",
+										cursor: contextDoc.filePath ? 'pointer' : 'not-allowed',  // Change cursor for null filePath
+										opacity: contextDoc.filePath ? 1 : 0.7,  // Reduce opacity for null filePath
+										filter: contextDoc.filePath ? 'none' : 'grayscale(20%)'  // Add grayscale effect for null filePath
 									}}
-									onClick={() => handleContextDocumentClick(contextDoc)}
+									onClick={() => contextDoc.filePath && handleContextDocumentClick(contextDoc)}  // Only allow click if filePath exists
 									onMouseEnter={() => setHoveredContextDoc(index)}
 									onMouseLeave={() => setHoveredContextDoc(null)}
-									title={contextDoc.filePath ? `${contextDoc.name}\n${contextDoc.filePath}` : contextDoc.name} // Show full info on hover
+									title={contextDoc.filePath ? `${contextDoc.name}\n${contextDoc.filePath}` : `${contextDoc.name} (Not available)`} // Updated tooltip
 								>
 									<div style={{
 										fontSize: "1rem",

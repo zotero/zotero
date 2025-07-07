@@ -55,7 +55,6 @@ const searchSectionStyle = {
   padding: '0.375rem 0.5rem',
   background: '#F8F6F7',
   borderRadius: '0.625rem',
-  boxShadow: '0 0.0625rem 0.1875rem rgba(0,0,0,0.1)',
   display: 'flex',
   alignSelf: 'flex-start',
   alignItems: 'center',

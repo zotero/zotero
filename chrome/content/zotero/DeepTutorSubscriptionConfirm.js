@@ -36,7 +36,7 @@ const styles = {
 		display: 'block',
 	},
 	text: {
-		fontSize: '1.25rem',
+		fontSize: '1rem',
 		color: '#222',
 		textAlign: 'center',
 		margin: '0 0 30px 0',

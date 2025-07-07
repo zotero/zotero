@@ -413,6 +413,9 @@ const styles = {
     fontWeight: 400,
     flex: 1,
     marginRight: '0.625rem',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   newFileListDelete: {
     width: '1.5rem',
@@ -515,8 +518,9 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
   useEffect(() => {
     if (fileList.length > 0) {
       const firstName = fileList[0].name;
-      setBackupModelName(firstName);
-      Zotero.debug(`ModelSelection: Updated model name to: ${firstName}`);
+      const truncatedName = firstName.length > 45 ? `${firstName.substring(0, 42)}...` : firstName;
+      setBackupModelName(truncatedName);
+      Zotero.debug(`ModelSelection: Updated model name to: ${truncatedName}`);
     } else {
       setBackupModelName('Default Session');
       Zotero.debug('ModelSelection: Reset model name to Default Session');
@@ -1102,6 +1106,12 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
     resetInitializingState
   }));
 
+  // Add truncateFileName function
+  const truncateFileName = (fileName) => {
+    const firstLine = fileName.split('\n')[0];
+    return firstLine.length > 45 ? `${firstLine.substring(0, 42)}...` : firstLine;
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.mainSection}>
@@ -1134,7 +1144,17 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
               <div style={styles.newFileList}>
                 {fileList.map(file => (
                   <div key={file.id} style={styles.newFileListItem}>
-                    <span style={styles.newFileListName}>{file.name}</span>
+                    <span 
+                      style={{
+                        ...styles.newFileListName,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }} 
+                      title={file.name}
+                    >
+                      {truncateFileName(file.name)}
+                    </span>
                     <button 
                       style={{
                         ...styles.newFileListDelete,
@@ -1220,6 +1240,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
             <button
               ref={buttonRef}
               style={{
+                all: 'revert',
                 ...getModelTypeButtonStyle(selectedType === 'lite'),
                 opacity: isEffectivelyFrozen ? 0.5 : 1,
                 cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
@@ -1233,6 +1254,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
             <button
               ref={buttonRef}
               style={{
+                all: 'revert',
                 ...getModelTypeButtonStyle(selectedType === 'normal'),
                 opacity: isEffectivelyFrozen ? 0.5 : 1,
                 cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
@@ -1246,6 +1268,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
             <button
               ref={buttonRef}
               style={{
+                all: 'revert',
                 ...getModelTypeButtonStyle(selectedType === 'advanced'),
                 opacity: isEffectivelyFrozen ? 0.5 : 1,
                 cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
