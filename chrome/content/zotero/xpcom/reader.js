@@ -220,6 +220,7 @@ class ReaderInstance {
 			autoDisableNoteTool: Zotero.Prefs.get('reader.autoDisableTool.note'),
 			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
+			readAloudVoices: this._getReadAloudVoices(),
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
 				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
@@ -569,7 +570,10 @@ class ReaderInstance {
 			},
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
-			}
+			},
+			onSetReadAloudVoice: (lang, voice) => {
+				this._setReadAloudVoice(lang, voice);
+			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
@@ -1390,6 +1394,22 @@ class ReaderInstance {
 			Zotero.logError(e);
 			return null;
 		}
+	}
+	
+	_getReadAloudVoices() {
+		try {
+			return JSON.parse(Zotero.Prefs.get('reader.readAloudVoices'));
+		}
+		catch {
+			return {};
+		}
+	}
+	
+	_setReadAloudVoice(lang, voice) {
+		Zotero.Prefs.set('reader.readAloudVoices', JSON.stringify({
+			...this._getReadAloudVoices(),
+			[lang]: voice
+		}));
 	}
 }
 
