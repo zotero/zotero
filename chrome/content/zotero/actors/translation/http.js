@@ -23,6 +23,8 @@
 	***** END LICENSE BLOCK *****
 */
 
+Cu.import("resource://gre/modules/NetUtil.jsm");
+
 /**
  * Functions for performing HTTP requests, both via XMLHTTPRequest and using a hidden browser
  * @namespace
@@ -106,6 +108,15 @@ Zotero.HTTP = new function() {
 		var promise = Zotero.HTTP._attachHandlers(url, xmlhttp, options);
 
 		xmlhttp.open(method, url, true);
+		
+		// Overwrite the system nsILoadInfo with one tied to our document
+		// so CookieSandbox can identify the source of the XHR
+		xmlhttp.channel.loadInfo = NetUtil.newChannel({
+			uri: url,
+			loadingNode: document,
+			securityFlags: Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_INHERITS_SEC_CONTEXT,
+			contentPolicyType: Ci.nsIContentPolicy.TYPE_XMLHTTPREQUEST,
+		}).loadInfo;
 
 		for (let header in options.headers) {
 			xmlhttp.setRequestHeader(header, options.headers[header]);
