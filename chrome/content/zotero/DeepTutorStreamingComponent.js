@@ -256,14 +256,14 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 							dangerouslySetInnerHTML: { __html: processedResult },
 							style: {
 								fontSize: "16px",
-								lineHeight: "1.5",
+								lineHeight: "1.6",
 								wordBreak: "break-word",
 								overflowWrap: "break-word"
 							}
 						}) : React.createElement('div', {
 							style: {
 								fontSize: "16px",
-								lineHeight: "1.5",
+								lineHeight: "1.6",
 								wordBreak: "break-word",
 								overflowWrap: "break-word"
 							}
@@ -273,7 +273,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						return React.createElement('div', {
 							style: {
 								fontSize: "16px",
-								lineHeight: "1.5",
+								lineHeight: "1.6",
 								wordBreak: "break-word",
 								overflowWrap: "break-word"
 							}
@@ -296,14 +296,14 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 							dangerouslySetInnerHTML: { __html: processedResult },
 							style: {
 								fontSize: "16px",
-								lineHeight: "1.5",
+								lineHeight: "1.6",
 								wordBreak: "break-word",
 								overflowWrap: "break-word"
 							}
 						}) : React.createElement('div', {
 							style: {
 								fontSize: "16px",
-								lineHeight: "1.5",
+								lineHeight: "1.6",
 								wordBreak: "break-word",
 								overflowWrap: "break-word"
 							}
@@ -313,7 +313,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						return React.createElement('div', {
 							style: {
 								fontSize: "16px",
-								lineHeight: "1.5",
+								lineHeight: "1.6",
 								wordBreak: "break-word",
 								overflowWrap: "break-word"
 							}

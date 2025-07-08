@@ -1686,10 +1686,20 @@ This demonstrates multiple table formats working correctly.
 		
 		// Remove any other custom tags that might cause XML issues
 		// This regex removes any remaining custom tags that aren't standard HTML
-		cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a)\b)[^>]*>/gi, '');
+		cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a|annotation|semantics|math)\b)[^>]*>/gi, '');
 		
-		// Now apply mathematical symbol processing and source processing to the clean text
+		// Now apply mathematical symbol processing to the clean text
 		let formattedText = cleanText;
+
+		// Extract LaTeX from annotation tags
+		formattedText = formattedText.replace(/<annotation encoding="application\/x-tex">([\s\S]+?)<\/annotation>/g, (_, tex) => {
+			// If it's a multi-line equation, use display math ($$)
+			if (tex.includes('\n')) {
+				return `$$${tex.trim()}$$`;
+			}
+			// Otherwise use inline math ($)
+			return `$${tex.trim()}$`;
+		});
 
 		// Replace inline math-like expressions (e.g., \( u \)) with proper Markdown math
 		formattedText = formattedText.replace(/\\\((.+?)\\\)/g, '$$$1$$');
@@ -2081,6 +2091,7 @@ This demonstrates multiple table formats working correctly.
 					animation: "slideIn 0.3s ease-out"
 				}}>
 					{message.subMessages.map((subMessage, subIndex) => {
+						Zotero.debug(`5TEST TEST TESTDeepTutorChatBox: SubMessage ${subIndex}: ${subMessage.text}`);
 						const text = formatResponseForMarkdown(subMessage.text || "", subMessage);
 						try {
 							Zotero.debug(`DeepTutorChatBox: About to render markdown for subMessage ${subIndex}, text length: ${text.length}`);
@@ -2250,7 +2261,7 @@ This demonstrates multiple table formats working correctly.
 		},
 		messageText: {
 			...styles.messageText,
-			lineHeight: '1.4',
+			lineHeight: '1.6',
 			whiteSpace: 'pre-wrap'
 		}
 	};
@@ -3113,6 +3124,22 @@ This demonstrates multiple table formats working correctly.
 						margin: 0 0.15em !important;
 						vertical-align: middle !important;
 					}
+
+					.markdown sub {
+    					font-size: 75%;
+    					line-height: 0;
+    					position: relative;
+    					vertical-align: baseline;
+    					bottom: -0.25em !important;
+					}
+						
+					.markdown sup {
+						font-size: 75% !important;
+						line-height: 0 !important;
+						position: relative !important;
+						vertical-align: baseline !important;
+						top: -0.5em !important;
+					}					
 					
 					/* Special styling for source placeholders within tables */
 					.markdown table .deeptutor-source-placeholder {
