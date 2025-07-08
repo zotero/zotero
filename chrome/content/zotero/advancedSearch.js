@@ -28,7 +28,7 @@ import ItemTree from 'zotero/itemTree';
 import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
-var ZoteroAdvancedSearch = new function() {
+var ZoteroAdvancedSearch = new function () {
 	this.onLoad = onLoad;
 	this.search = search;
 	this.clear = clear;
@@ -128,14 +128,14 @@ var ZoteroAdvancedSearch = new function() {
 	}
 	
 	
-	this.save = Zotero.Promise.coroutine(function* () {
+	this.save = async function () {
 		_searchBox.updateSearch();
 		
 		var promptService = Services.prompt;
 		
 		var libraryID = _searchBox.search.libraryID;
 		
-		var searches = yield Zotero.Searches.getAll(libraryID)
+		var searches = await Zotero.Searches.getAll(libraryID);
 		var prefix = Zotero.getString('pane.collections.untitled');
 		var name = Zotero.Utilities.Internal.getNextName(
 			prefix,
@@ -157,10 +157,10 @@ var ZoteroAdvancedSearch = new function() {
 		
 		var s = _searchBox.search.clone();
 		s.name = name.value;
-		yield s.saveTx();
+		await s.saveTx();
 		
 		window.close();
-	});
+	};
 	
 	
 	this.onLibraryChange = function (libraryID) {
