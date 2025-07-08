@@ -80,7 +80,7 @@ Zotero_Preferences.Advanced = {
 			else {
 				var label = Zotero.getString('zotero.preferences.update.error');
 			}
-			button.setAttribute('label', label);
+			button.label = label;
 			
 			if (updated && Zotero_Preferences.Cite) {
 				await Zotero_Preferences.Cite.refreshStylesList();
