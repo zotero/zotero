@@ -363,7 +363,7 @@ class DeepTutorBottomSection extends React.Component {
 							}}
 						>
 							<img src={this.props.feedIconPath} alt="Give Us Feedback" style={styles.buttonIcon} />
-                            Give Us Feedback
+                            <span style={{ textDecoration: 'underline' }}>Give Us Feedback</span>
 						</button>
 					</div>
 					<div style={styles.buttonsBox}>
@@ -373,7 +373,7 @@ class DeepTutorBottomSection extends React.Component {
 								this.props.onToggleProfilePopup();
 							}}>
 								<img src={this.props.personIconPath} alt="Profile" style={styles.buttonIcon} />
-                                Profile
+                                <span style={{ textDecoration: 'underline' }}>Profile</span>
 							</button>
 							{this.renderProfilePopup()}
 						</div>

@@ -290,10 +290,10 @@ const styles = {
 		outline: 'none',
 		borderRadius: '0.625rem',
 		background: '#F8F6F7',
-		color: '#1a65b0',
+		color: '#757575',
 		minHeight: '1.5rem',
 		maxHeight: '7rem', // Approximately 5 lines of text at 0.95rem font size
-		fontSize: '0.95rem',
+		fontSize: '1rem',
 		overflowY: 'auto',
 		fontFamily: 'Roboto, sans-serif',
 		resize: 'none',
@@ -439,7 +439,7 @@ const styles = {
 		borderRadius: '0.625rem',
 		padding: '0.625rem 1.25rem',
 		minWidth: '8rem',
-		maxWidth: '100%',
+		maxWidth: '83%',
 		fontWeight: 500,
 		fontSize: '1rem',
 		lineHeight: '1.5',
@@ -621,7 +621,7 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect, onInitWaitChan
 	const [latestMessageId, setLatestMessageId] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [storagePathsState, setStoragePathsState] = useState([]);
-	// const [recentSessions, setRecentSessions] = useState(new Map());
+	const [curSessionType, setcurSessionType] = useState(SessionType.BASIC);
 	const [showSessionPopup, setShowSessionPopup] = useState(false);
 	const MAX_VISIBLE_SESSIONS = 2;
 	const chatLogRef = useRef(null);
@@ -970,6 +970,7 @@ This demonstrates multiple table formats working correctly.
 				setSessionId(currentSession.id);
 				setUserId(currentSession.userId);
 				setDocumentIds(currentSession.documentIds || []);
+				setcurSessionType(currentSession.type || SessionType.BASIC);
 
 				// Update recent sessions immediately
 				// Zotero.debug(`Current recent sessions TTT: ${JSON.stringify(recentSessions)}`);
@@ -1012,11 +1013,11 @@ This demonstrates multiple table formats working correctly.
 			history: [],
 			message: null,
 			streaming: true,
-			type: currentSession?.type || SessionType.BASIC,
+			type: curSessionType,
 			storagePaths: storagePathsState
 		}));
 		Zotero.debug(`DeepTutorChatBox: Conversation state updated with sessionId: ${sessionId}, userId: ${userId}`);
-	}, [sessionId, userId, documentIds, currentSession]);
+	}, [sessionId, userId, documentIds, curSessionType, storagePathsState]);
 
 	// Handle message updates
 	useEffect(() => {
@@ -1131,7 +1132,7 @@ This demonstrates multiple table formats working correctly.
 		history: [],
 		message: null,
 		streaming: true,
-		type: currentSession?.type || SessionType.BASIC
+		type: curSessionType
 	});
 
 	// Auto-scroll when messages change
@@ -1312,7 +1313,7 @@ This demonstrates multiple table formats working correctly.
 				history: messages,
 				message: responseData,
 				streaming: true,
-				type: currentSession?.type || SessionType.BASIC
+				type: curSessionType
 			});
             
 			setConversation(newState);
@@ -3046,6 +3047,19 @@ This demonstrates multiple table formats working correctly.
 		};
 	}, []);
 
+	// Reset conversation when creating new session
+	/*
+	const resetConversation = () => setConversation({
+		userId: userId,
+		sessionId: null,
+		documentIds: [],
+		history: [],
+		message: null,
+		streaming: true,
+		type: sessionType
+	});
+	*/
+
 	return (
 		<div style={styles.container}>
 			{isLoading && <LoadingPopup />}
@@ -3347,7 +3361,7 @@ This demonstrates multiple table formats working correctly.
 						}
 						// Shift+Enter allows new line (default behavior)
 					}}
-					placeholder="Type your message..."
+					placeholder={`Ask DeepTutor ${curSessionType.toLowerCase()}`}
 					rows={1}
 					disabled={isStreaming || iniWait}
 				/>
