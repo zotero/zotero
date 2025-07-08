@@ -1,5 +1,10 @@
 tabbox {
 	tabs {
+		margin-inline-start: 20px;
+		margin-bottom: -8px;
+		z-index: 1;
+		border-bottom: none;
+		
 		tab {
 			appearance: none;
 			// Since the tab with opacity is weird, we just use hard-coded colors
@@ -16,8 +21,9 @@ tabbox {
 				-2px 0px 2px -2px var(--fill-quarternary) inset,
 				-4px 0px 4px -4px var(--fill-quinary) inset;
 			
-			padding-block: 1px;
+			padding: 1px;
 			box-shadow: var(--tabbox-tab-shadow);
+			border-bottom: none;
 
 			&::before {
 				content: "";
@@ -88,7 +94,7 @@ tabbox {
 			}
 
 			.tab-middle {
-				padding: 2px 8px;
+				padding: 2px 12px;
 			}
 		}
 
@@ -102,10 +108,12 @@ tabbox {
 			}
 		}
 	}
+	
 	tabpanels {
 		appearance: none;
 		background: var(--color-sidepane);
 		border: 1px solid var(--fill-quinary);
 		border-radius: 5px;
+		padding: 20px;
 	}
 }
