@@ -173,7 +173,7 @@ const StreamingComponent: React.FC<StreamingComponentProps> = ({
               h3: ({ children }) => (
                 <h3
                   style={{
-                    fontSize: '24px',
+                    fontSize: '1.3125rem',
                   }}
                 >
                   {children}
@@ -182,7 +182,7 @@ const StreamingComponent: React.FC<StreamingComponentProps> = ({
               ul: ({ children }) => (
                 <ul
                   style={{
-                    fontSize: '16px',
+                    fontSize: '0.875rem',
                     marginTop: '0.5em',
                     marginBottom: '0.5em',
                     padding: '5',
@@ -195,7 +195,7 @@ const StreamingComponent: React.FC<StreamingComponentProps> = ({
                 <li
                   style={{
                     marginBottom: '0.2em',
-                    fontSize: '16px',
+                    fontSize: '0.875rem',
                     padding: '0',
                   }}
                 >
@@ -273,7 +273,7 @@ const StreamingComponent: React.FC<StreamingComponentProps> = ({
                 h3: ({ children }) => (
                   <h3
                     style={{
-                      fontSize: '24px',
+                      fontSize: '1.3125rem',
                     }}
                   >
                     {children}
@@ -282,7 +282,7 @@ const StreamingComponent: React.FC<StreamingComponentProps> = ({
                 ul: ({ children }) => (
                   <ul
                     style={{
-                      fontSize: '16px',
+                      fontSize: '0.875rem',
                       marginTop: '0.5em',
                       marginBottom: '0.5em',
                       padding: '5',
@@ -295,7 +295,7 @@ const StreamingComponent: React.FC<StreamingComponentProps> = ({
                   <li
                     style={{
                       marginBottom: '0.2em',
-                      fontSize: '16px',
+                      fontSize: '0.875rem',
                       padding: '0',
                     }}
                   >
