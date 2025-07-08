@@ -1013,7 +1013,7 @@ This demonstrates multiple table formats working correctly.
 			history: [],
 			message: null,
 			streaming: true,
-			type: curSessionType,
+			type: curSessionType || SessionType.BASIC,
 			storagePaths: storagePathsState
 		}));
 		Zotero.debug(`DeepTutorChatBox: Conversation state updated with sessionId: ${sessionId}, userId: ${userId}`);
@@ -1132,7 +1132,7 @@ This demonstrates multiple table formats working correctly.
 		history: [],
 		message: null,
 		streaming: true,
-		type: curSessionType
+		type: curSessionType || SessionType.BASIC
 	});
 
 	// Auto-scroll when messages change
@@ -1313,7 +1313,7 @@ This demonstrates multiple table formats working correctly.
 				history: messages,
 				message: responseData,
 				streaming: true,
-				type: curSessionType
+				type: curSessionType || SessionType.BASIC
 			});
             
 			setConversation(newState);
