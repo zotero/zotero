@@ -394,10 +394,7 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 		//   - Takes an object with 'method', 'pathname', 'pathParams', 'searchParams', 'headers', and 'data'
 		//   - Returns a status code, an array containing [statusCode, contentType, body],
 		//     or a promise for either
-		if (endpoint.init.length === 1
-				// Return value from Zotero.Promise.coroutine()
-				|| endpoint.init.length === 0) {
-			
+		if (endpoint.init.length === 1) {
 			let maybePromise = endpoint.init({
 				method,
 				pathname: this.pathname,
