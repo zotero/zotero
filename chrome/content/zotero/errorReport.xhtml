@@ -35,15 +35,15 @@
 			var diagnosticInfo = false;
 			
 			
-			this.init = Zotero.Promise.coroutine(function* () {
+			this.init = async function () {
 				// Allow Continue button to be populated
-				yield Zotero.Promise.delay(100);
+				await Zotero.Promise.delay(100);
 				
 				var wizard = document.querySelector('wizard');
 				var continueButton = wizard.getButton('next');
 				continueButton.disabled = true;
 				
-				diagnosticInfo = yield Zotero.getSystemInfo();
+				diagnosticInfo = await Zotero.getSystemInfo();
 				var errorDataText = errorData.length
 					? data.errorData.join('\n\n')
 					: Zotero.getString('errorReport.noErrorsLogged', Zotero.appName);
@@ -69,9 +69,9 @@
 				
 				var pageSending = document.querySelector('wizardpage[pageid="report-sending"]');
 				pageSending.addEventListener('pageshow', () => Zotero_Error_Report.sendErrorReport());
-			});
+			};
 			
-			this.sendErrorReport = Zotero.Promise.coroutine(function* () {
+			this.sendErrorReport = async function () {
 				var wizard = document.querySelector('wizard');
 				var continueButton = wizard.getButton('next');
 				continueButton.disabled = true;
@@ -88,7 +88,7 @@
 					body += key + '=' + encodeURIComponent(parts[key]) + '&';
 				}
 				body = body.substr(0, body.length - 1);
-				var req = yield Zotero.HTTP.request(
+				var req = await Zotero.HTTP.request(
 					"POST",
 					ZOTERO_CONFIG.REPOSITORY_URL + "report",
 					{
@@ -98,7 +98,7 @@
 					}
 				);
 				_sendErrorReportCallback(req);
-			});
+			};
 			
 			
 			function _sendErrorReportCallback(xmlhttp) {
