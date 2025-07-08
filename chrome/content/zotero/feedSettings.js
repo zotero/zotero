@@ -29,13 +29,13 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-var Zotero_Feed_Settings = new function() {
+var Zotero_Feed_Settings = new function () {
 	let urlIsValid = true,
 		data = null,
 		feedReader = null,
 		urlTainted = false;
 	
-	let cleanURL = function(url) {
+	let cleanURL = function (url) {
 		let cleanURL = Zotero.Utilities.cleanURL(url, true);
 
 		if (cleanURL) {
@@ -47,7 +47,7 @@ var Zotero_Feed_Settings = new function() {
 		}
 	};
 	
-	this.init = Zotero.Promise.coroutine(function* () {
+	this.init = async function () {
 		document.addEventListener('dialogaccept', this.accept.bind(this));
 		document.addEventListener('dialogcancel', this.cancel.bind(this));
 		
@@ -84,11 +84,11 @@ var Zotero_Feed_Settings = new function() {
 		document.getElementById('feed-cleanupUnreadAfter').value = cleanupUnreadAfter;
 		
 		if (data.url && !data.urlIsValid) {
-			yield this.validateURL();
+			await this.validateURL();
 		}
-	});
+	};
 	
-	this.invalidateURL = function() {
+	this.invalidateURL = function () {
 		urlTainted = true;
 		if (feedReader) {
 			feedReader.terminate();
@@ -105,7 +105,7 @@ var Zotero_Feed_Settings = new function() {
 		document.querySelector('dialog').getButton('accept').disabled = true;
 	};
 	
-	this.validateURL = Zotero.Promise.coroutine(function* () {
+	this.validateURL = async function () {
 		if (feedReader) {
 			feedReader.terminate();
 			feedReader = null;
@@ -117,7 +117,7 @@ var Zotero_Feed_Settings = new function() {
 		
 		try {
 			var fr = feedReader = new Zotero.FeedReader(url);
-			yield fr.process();
+			await fr.process();
 			let feed = fr.feedProperties;
 			// Prevent progress if textbox changes triggered another call to
 			// validateURL / invalidateURL (old session)
@@ -148,9 +148,9 @@ var Zotero_Feed_Settings = new function() {
 		finally {
 			if (feedReader === fr) feedReader = null;
 		}
-	});
+	};
 	
-	this.accept = function() {
+	this.accept = function () {
 		data.url = document.getElementById('feed-url').value;
 		data.title = document.getElementById('feed-title').value;
 		data.ttl = parseInt(document.getElementById('feed-ttl').value);
@@ -162,7 +162,7 @@ var Zotero_Feed_Settings = new function() {
 		return true;
 	};
 	
-	this.cancel = function() {
+	this.cancel = function () {
 		data.cancelled = true;
 		return true;
 	};
@@ -172,7 +172,7 @@ var Zotero_Feed_Settings = new function() {
 	 * @param {Boolean} [show] If set, indicates whether the advanced
 	 *   options should be shown or not. If omitted, the options toggle
 	 */
-	this.toggleAdvancedOptions = function(show) {
+	this.toggleAdvancedOptions = function (show) {
 		var opts = document.getElementById("advanced-options-togglable");
 		opts.hidden = show !== undefined ? !show : !opts.hidden;
 		document.getElementById("advanced-options")
