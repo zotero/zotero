@@ -226,6 +226,10 @@ const styles = {
 		overflow: 'hidden',
 		padding: '1.875rem 1.25rem 0 1.25rem',
 		boxSizing: 'border-box',
+		userSelect: 'text', // Ensure text is selectable
+		WebkitUserSelect: 'text',
+		MozUserSelect: 'text',
+		msUserSelect: 'text',
 	},
 	sessionNameDiv: {
 		width: '100%',
@@ -3060,8 +3064,50 @@ This demonstrates multiple table formats working correctly.
 	});
 	*/
 
+	// Add copy event handler for the chat box
+	useEffect(() => {
+		const handleCopy = (e) => {
+			const selection = window.getSelection();
+			const selectedText = selection.toString();
+			
+			// Check if selection is within our chat box
+			let isWithinChatBox = false;
+			let node = selection.anchorNode;
+			while (node != null) {
+				if (node.classList && node.classList.contains('deeptutor-chat-box')) {
+					isWithinChatBox = true;
+					break;
+				}
+				node = node.parentNode;
+			}
+
+			if (isWithinChatBox && selectedText) {
+				e.preventDefault(); // Prevent Zotero's global copy
+				e.stopPropagation(); // Stop event bubbling
+				
+				// Copy the selected text
+				navigator.clipboard.writeText(selectedText).then(() => {
+					Zotero.debug('DeepTutorChatBox: Text copied successfully');
+				}).catch(err => {
+					Zotero.debug(`DeepTutorChatBox: Copy failed: ${err.message}`);
+				});
+			}
+		};
+
+		// Add event listener for copy events
+		document.addEventListener('copy', handleCopy, true); // true for event capture phase
+
+		return () => {
+			// Cleanup listener on component unmount
+			document.removeEventListener('copy', handleCopy, true);
+		};
+	}, []);
+
 	return (
-		<div style={styles.container}>
+		<div 
+			className="deeptutor-chat-box"
+			style={styles.container}
+		>
 			{isLoading && <LoadingPopup />}
             
 			{/* Add CSS styles for markdown tables and source buttons */}
