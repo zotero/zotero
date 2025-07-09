@@ -1,0 +1,42 @@
+.code-wrapper {
+  position: relative;
+  margin: 1em 0;
+  padding: 1em;
+  background: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+
+  pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+  }
+
+  .code-toolbar {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    display: flex;
+    gap: 0.5em;
+    align-items: center;
+    font-size: 0.9em;
+    
+    button {
+      padding: 0.25em 0.75em;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #eee;
+      }
+
+      &:active {
+        background: #ddd;
+      }
+    }
+  }
+} 
