@@ -199,7 +199,7 @@
 			if (this._item.isAttachment()) {
 				headerMode = 'title';
 			}
-			
+
 			this.title.hidden = true;
 			this.creatorYear.hidden = true;
 			this.bibEntry.hidden = true;

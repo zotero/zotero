@@ -7,6 +7,7 @@ item-pane-header {
 	padding: 8px;
 	border-bottom: 1px solid var(--fill-quinary);
 	
+	min-height: 41px;
 	max-height: 25%;
 	overflow-y: auto;
 	scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
@@ -57,65 +58,10 @@ item-pane-header {
 				overflow-wrap: anywhere;
 			}
 		}
-
-		.custom-head {
-			display: flex;
-			flex-direction: row;
-			align-self: stretch;
-			gap: 8px;
-
-			@media (-moz-platform: macos) {
-				// The extent of the button is about 2px wider than its optical width
-				// need to compensate for that
-				gap: 4px;
-			}
-
-			&:empty {
-				display: none;
-			}
-
-			button {
-				// Allow the button to grow/shrink to fit the container
-				width: 0;
-				margin: 0;
-				flex-grow: 1;
-
-				padding: 2px 6px;
-
-				@media (-moz-platform: macos) {
-					height: 24px;
-					padding: 3px 0px 1px 0px;
-
-					&:is(.split-menu-button) {
-						padding: 3px 2px 1px 3px;
-					}
-				}
-
-				.button-text {
-					width: 0;
-					flex-grow: 1;
-					justify-content: center;
-
-					&::before {
-						overflow: hidden;
-						white-space: nowrap;
-						text-overflow: ellipsis;
-					}
-				}
-
-				&:is(.no-shrink-button) {
-					width: auto;
-					flex-shrink: 0;
-
-					.button-text {
-						width: auto;
-					}
-				}
-			}
-		}
 	}
 
 	&.no-title-head {
+		min-height: auto;
 		&:not(.has-custom-head) {
 			padding: 0;
 			border: none;
@@ -124,5 +70,12 @@ item-pane-header {
 		.title-head {
 			display: none;
 		}
+	}
+
+	@include elements-custom-head;
+	.custom-head {
+		padding: 0;
+		border: none;
+		height: 24px;
 	}
 }
