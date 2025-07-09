@@ -594,6 +594,9 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
       
       if (!item.isPDFAttachment()) {
         Zotero.debug(`BBBBB: Item is not a PDF attachment: ${attachment.name}`);
+        setErrorMessage("Please select a PDF file");
+        setSearchValue('');
+        setShowSearchPopup(false);
         return;
       }
 
@@ -991,6 +994,11 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
         const items = Zotero.Items.get(itemIDs);
         Zotero.debug(`BBBBB: Retrieved ${items.length} items from Zotero.Items.get`);
         
+        // Check for non-PDF attachments and handle different scenarios
+        const attachmentItems = items.filter(item => item.isAttachment());
+        Zotero.debug(`BBBBB: Retrieved ${attachmentItems.length} attachment items`);
+        const nonPdfItems = attachmentItems.filter(item => !item.isPDFAttachment());
+        
         const pdfAttachments = items.reduce((arr, item) => {
           if (item.isPDFAttachment()) {
             Zotero.debug(`BBBBB: Found direct PDF attachment: ${item.name}`);
@@ -1010,6 +1018,9 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
 
         if (!pdfAttachments.length) {
           Zotero.debug("BBBBB: No PDF attachments found in dropped items");
+          if (fileList.length === 0) {
+            setErrorMessage("Only PDF files are supported. Please upload a valid PDF.");
+          }
           return;
         }
 
@@ -1112,6 +1123,11 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
     return firstLine.length > 45 ? `${firstLine.substring(0, 42)}...` : firstLine;
   };
 
+  // Add truncateSearchName function near other utility functions
+  const truncateSearchName = (name) => {
+    return name.length > 32 ? `${name.substring(0, 35)}...` : name;
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.mainSection}>
@@ -1188,7 +1204,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
                 type="text"
                 value={searchValue}
                 onChange={e => !isEffectivelyFrozen && setSearchValue(e.target.value)}
-                placeholder="Search for an Item"
+                placeholder="Search for a PDF file"
                 disabled={isEffectivelyFrozen}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => e.preventDefault()}
@@ -1207,8 +1223,9 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
                       onClick={() => handleSearchItemClick(attachment)}
                       onMouseEnter={() => handleSearchItemMouseEnter(attachment.id)}
                       onMouseLeave={handleSearchItemMouseLeave}
+                      title={attachment.name} // Show full name on hover
                     >
-                      {attachment.name}
+                      {truncateSearchName(attachment.name)}
                     </div>
                   ))
                 ) : (
@@ -1230,7 +1247,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
             onDrop={!isEffectivelyFrozen ? handleDrop : (e) => e.preventDefault()}
           >
             <img src={RegisDragPath} alt="Drag" style={{ width: '2.125rem', height: '2.5rem' }} />
-            {isEffectivelyFrozen ? 'Initializing Session...' : 'Drag an Item Here'}
+            {isEffectivelyFrozen ? 'Initializing Session...' : 'Drag PDF File Here'}
           </div>
         </div>
 

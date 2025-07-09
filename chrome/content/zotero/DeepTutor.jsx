@@ -1823,7 +1823,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									backgroundClip: 'text',
 									color: '#0687E5',
 									fontWeight: 700,
-									fontSize: '2rem',
+									fontSize: '1.5rem',
 									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>
@@ -1914,7 +1914,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									backgroundClip: 'text',
 									color: '#0687E5',
 									fontWeight: 700,
-									fontSize: '2rem',
+									fontSize: '1.5rem',
 									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>
@@ -2002,7 +2002,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 									lineHeight: '1.2',
 									letterSpacing: '0%',
 								}}>
-									Confirm Session Deletion?
+									Confirm Deletion?
 								</div>
 								<button
 									onClick={this.handleCancelDelete}
