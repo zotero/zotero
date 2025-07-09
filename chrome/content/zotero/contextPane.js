@@ -32,6 +32,7 @@ var ZoteroContextPane = new function () {
 	let _librarySidenav;
 	let _readerSidenav;
 
+	// Initialize properties after elements are available
 	Object.defineProperty(this, 'activeEditor', {
 		get: () => _contextPaneInner.activeEditor
 	});
@@ -44,39 +45,46 @@ var ZoteroContextPane = new function () {
 
 	Object.defineProperty(this, 'splitter', {
 		get: () => (_isStacked()
-			? _contextPaneSplitterStacked
-			: _contextPaneSplitter)
+		    ? _contextPaneSplitterStacked
+		    : _contextPaneSplitter)
 	});
 
 	Object.defineProperty(this, 'collapsed', {
 		get: () => {
-			return this.splitter.getAttribute('state') === 'collapsed';
+			return this.splitter && this.splitter.getAttribute('state') === 'collapsed';
 		},
 		set: (collapsed) => {
+			if (!_contextPane || !_contextPaneInner) return;
 			_contextPane.setAttribute('collapsed', !!collapsed);
 			_contextPaneInner.setAttribute('collapsed', !!collapsed);
-			_contextPaneSplitter.setAttribute('state', collapsed ? 'collapsed' : 'open');
-			_contextPaneSplitter.setAttribute('collapse', 'after');
-			_contextPaneSplitterStacked.setAttribute('state', collapsed ? 'collapsed' : 'open');
-			_contextPaneSplitterStacked.setAttribute('collapse', 'after');
+			if (_contextPaneSplitter) {
+				_contextPaneSplitter.setAttribute('state', collapsed ? 'collapsed' : 'open');
+				_contextPaneSplitter.setAttribute('collapse', 'after');
+			}
+			if (_contextPaneSplitterStacked) {
+				_contextPaneSplitterStacked.setAttribute('state', collapsed ? 'collapsed' : 'open');
+				_contextPaneSplitterStacked.setAttribute('collapse', 'after');
+			}
 			_update();
 		}
 	});
 
+	// Add back the methods
 	this.update = _update;
-
+	
 	this.focus = () => {
-		return _contextPaneInner.handleFocus();
+		return _contextPaneInner && _contextPaneInner.handleFocus();
 	};
-
+	
 	this.showLoadingMessage = (isShow) => {
-		_loadingMessageContainer.classList.toggle('hidden', !isShow);
+		_loadingMessageContainer && _loadingMessageContainer.classList.toggle('hidden', !isShow);
 	};
-
+	
 	this.updateAddToNote = _updateAddToNote;
-
+	
 	this.togglePane = _togglePane;
 
+	// Initialize elements first
 	this.init = function () {
 		if (!Zotero) {
 			return;

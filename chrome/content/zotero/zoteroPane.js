@@ -90,19 +90,8 @@ var ZoteroPane = new function()
 				mutations.forEach((mutation) => {
 					if (mutation.attributeName === 'collapsed') {
 						let isCollapsed = this.itemPane.getAttribute('collapsed') === 'true';
-						if (!isCollapsed) {
-							// Item pane is being opened, close DeepTutor pane
-							let deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
-							let deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
-							let isDeepTutorOpen = deepTutorPane && !deepTutorPane.hidden && deepTutorPane.getAttribute('collapsed') !== 'true';
-							if (isDeepTutorOpen) {
-								Zotero.debug('06062025-Standalone: Closing DeepTutor pane due to item pane opening');
-								deepTutorPane.hidden = true;
-								deepTutorPane.setAttribute('collapsed', 'true');
-								deeptutorSplitter.setAttribute('state', 'collapsed');
-								ZoteroPane.updateLayoutConstraints();
-							}
-						}
+						// Remove automatic closing of DeepTutor pane
+						ZoteroPane.updateLayoutConstraints();
 					}
 				});
 			});
@@ -6693,20 +6682,25 @@ var ZoteroPane = new function()
 
 			var elValues = serializedValues[id];
 			for (var attr in elValues) {
-				// Ignore persisted collapsed state for collection and item pane splitters, since
-				// people close them by accident and don't know how to get them back
-				// TODO: Add a hidden pref to allow them to stay closed if people really want that?
-				if ((el.id == 'zotero-collections-splitter' || el.id == 'zotero-items-splitter', el.id == 'zotero-deeptutor-splitter')
+				// Only ignore persisted state for deeptutor splitter
+				// Allow items splitter and context splitter to stay collapsed
+				if ((el.id == 'zotero-deeptutor-splitter')
 						&& attr == 'state'
 						&& Zotero.Prefs.get('reopenPanesOnRestart')) {
+					// For DeepTutor splitter, force it to be open
+					if (el.id == 'zotero-deeptutor-splitter') {
+						elValues[attr] = 'open';
+					}
 					continue;
 				}
+
 				// For some reason, the persisted state of the splitter is empty. This will cause
-				// the splitter to behave unexpectedly. We set it to 'collapsed' here.
-				if (["zotero-context-splitter-stacked", "zotero-context-splitter", "zotero-deeptutor-splitter"].includes(el.id)
+				// the splitter to behave unexpectedly. We set it to appropriate defaults.
+				if (["zotero-context-splitter-stacked", "zotero-context-splitter"].includes(el.id)
 						&& attr === 'state' && elValues[attr] === '') {
 					elValues[attr] = 'collapsed';
 				}
+
 				// Ignore attributes that are no longer persisted for the element
 				if (!allowedAttributes.includes(attr)) {
 					Zotero.debug(`Not restoring '${attr}' for #${id}`);
@@ -6717,6 +6711,23 @@ var ZoteroPane = new function()
 				}
 				el.setAttribute(attr, elValues[attr]);
 			}
+		}
+
+		// Force DeepTutor pane to be open by default
+		var deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
+		var deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
+		if (deepTutorPane && deeptutorSplitter) {
+			deepTutorPane.hidden = false;
+			deepTutorPane.removeAttribute('collapsed');
+			deeptutorSplitter.setAttribute('state', 'open');
+		}
+
+		// Force items pane to be collapsed by default
+		var itemPane = document.getElementById('zotero-item-pane');
+		var itemsSplitter = document.getElementById('zotero-items-splitter');
+		if (itemPane && itemsSplitter) {
+			itemPane.setAttribute('collapsed', 'true');
+			itemsSplitter.setAttribute('state', 'collapsed');
 		}
 
 		if (this.itemsView) {
