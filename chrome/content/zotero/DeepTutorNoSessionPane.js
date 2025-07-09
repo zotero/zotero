@@ -35,7 +35,6 @@ const styles = {
   contentWrapper: {
     position: 'relative',
     width: '100%',
-    maxWidth: '25rem',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
