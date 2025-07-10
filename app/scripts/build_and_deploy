@@ -60,8 +60,8 @@ if [ -z "$VERSION" ]; then
 	exit 1
 fi
 
-# Enforce signing unless a test build
-if [ "$CHANNEL" != "test" ]; then
+# Enforce signing unless a test build or macOS, which doesn't start otherwise
+if [[ "$CHANNEL" != "test" || $PLATFORMS = "m" ]]; then
 	SIGN="-e"
 else
 	SIGN=""
