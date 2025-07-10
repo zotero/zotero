@@ -581,7 +581,7 @@ const styles = {
 		borderRadius: '0.5rem',
 		boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
 		zIndex: 1000,
-		maxHeight: '10rem',
+		maxHeight: '24rem', // 360px = 5 items * (3rem height + 1.5rem padding)
 		overflowY: 'auto',
 		marginTop: '0.25rem',
 		boxSizing: 'border-box',
