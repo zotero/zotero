@@ -31,6 +31,15 @@ function doTranslate(inputFile, root) {
 			return arg;
 		});
 	
+	// Rewrite generator arguments to Mocha it() calls with async functions,
+	// and replace yields with awaits
+	root.find(j.CallExpression)
+		.filter(path => isMochaItMethodCall(path))
+		.forEach(path => {
+			let func = path.node.arguments.at(-1);
+			rewriteGeneratorToAsync(func);
+		});
+
 	// Rewrite Zotero.Promise.*() -> Promise.*(), for methods directly available
 	// on the ES Promise class
 	root.find(j.CallExpression)
@@ -75,6 +84,12 @@ function getContainingGenerator(path) {
 		}
 		path = path.parentPath;
 	}
+}
+
+function isMochaItMethodCall(path) {
+	let callee = path.node.callee;
+	return callee.type === 'Identifier'
+		&& callee.name === 'it';
 }
 
 function isStaticPromiseMethodCall(path, methodFilter) {
