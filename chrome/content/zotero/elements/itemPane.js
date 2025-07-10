@@ -122,8 +122,8 @@
 		render() {
 			if (!this.data) return false;
 			let renderStatus = false;
-			// Only annotations selected
-			if (this.data.length > 0 && this.data.every(item => item.isAnnotation())) {
+			// More than one annotations selected
+			if (this.data.length > 1 && this.data.every(item => item.isAnnotation())) {
 				return renderStatus = this.renderAnnotations(this.data);
 			}
 			// Single item selected
@@ -538,8 +538,8 @@
 		getCurrentPane(mode = undefined) {
 			if (!mode) {
 				// Guess a mode from the current data
-				// Only annotation items selected
-				if (this.data.length > 0 && this.data.every(item => item.isAnnotation())) {
+				// More than one annotation items selected
+				if (this.data.length > 1 && this.data.every(item => item.isAnnotation())) {
 					mode = "annotations";
 				}
 				// No/multiple objects are selected OR selected object is a trashed collection/search
