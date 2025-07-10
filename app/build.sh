@@ -636,6 +636,7 @@ if [ $BUILD_MAC == 1 ]; then
 		# Sign libraries and updater without entitlements
 		/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" \
 			"$APPDIR/Contents/MacOS/XUL" \
+			"$APPDIR/Contents/MacOS/updater.app/Contents/Frameworks/UpdateSettings.framework" \
 			"$APPDIR/Contents/MacOS/updater.app" \
 			"$APPDIR/Contents/Frameworks/ChannelPrefs.framework"
 		find "$APPDIR/Contents" -name '*.dylib' -print0 | xargs -0 /usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID"
