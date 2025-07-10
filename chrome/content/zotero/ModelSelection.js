@@ -309,7 +309,7 @@ const styles = {
     top: '100%',
     left: 0,
     right: 0,
-    maxHeight: '12.5rem',
+    maxHeight: '12.5rem', // Exactly 5 items (5 * 2.5rem = 12.5rem)
     overflowY: 'auto',
     background: '#FFFFFF',
     border: `0.0625rem solid ${LIGHT_GREY2}`,
@@ -324,6 +324,14 @@ const styles = {
     fontSize: '0.9em',
     color: '#292929',
     transition: 'background 0.2s',
+    height: '2.5rem', // Fixed height for each item
+    lineHeight: '1.5rem',
+    display: 'flex',
+    alignItems: 'center',
+    boxSizing: 'border-box',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   searchItemSelected: {
     background: PEARL,

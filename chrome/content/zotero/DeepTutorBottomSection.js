@@ -8,7 +8,6 @@ const styles = {
 		right: 0,
 		height: '0.0625rem',
 		background: '#D9D9D9',
-		marginBottom: '0.625rem',
 	},
 	bottom: {
 		display: 'flex',
@@ -40,6 +39,7 @@ const styles = {
 		alignItems: 'center',
 		gap: '0.3125rem',
 		width: '100%',
+		marginTop: '0.625rem',
 	},
 	feedbackBox: {
 		display: 'flex',
