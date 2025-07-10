@@ -1,0 +1,43 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 <firefox-version>"
+	exit 1
+fi
+
+version="$1"
+
+for arch in x86_64 aarch64 i686; do
+	package="firefox-${version}.en-US.linux-${arch}.tar.xz"
+	if [ $arch = 'aarch64' ]; then
+		arch="arm64"
+	fi
+	
+	if [ ! -f "$package" ]; then
+		echo "Error: Package not found: $package"
+		exit 1
+	fi
+	
+	echo "Extracting updater from $package..."
+	tar --extract --xz --file="$package" --to-stdout "firefox/updater" > "updater-$arch"
+	
+	# Add missing RUNPATH to custom fx140 builds, which is missing for unclear reasons.
+	# Without this, the updater fails looking for libmozsqlite3.so.
+	patchelf --set-rpath '$ORIGIN' "updater-$arch"
+done
+
+echo "Creating updater.tar.xz..."
+if [ `uname` = "Darwin" ]; then
+	tar=gtar
+else
+	tar=tar
+fi
+$tar --owner=0 --group=0 --numeric-owner --no-xattrs --mode=0755 -cJvf updater.tar.xz updater-x86_64 updater-arm64 updater-i686
+
+rm updater-x86_64 updater-arm64 updater-i686
+
+echo "Done: updater.tar.xz created"
