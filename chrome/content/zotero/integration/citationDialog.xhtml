@@ -68,7 +68,7 @@
 		
 		<div id="list-layout" class="layout" hidden="true">
 			<div class="divider"></div>
-			<div id="list-layout-wrapper" class="vbox search-items" data-arrow-nav="vertical" data-multiselectable="true" role="listbox" aria-describedby="item-description"></div>
+			<div id="list-layout-wrapper" data-tabindex="30"/>
 		</div>
 		
 		<div id="library-layout" class="layout" hidden="true">
@@ -84,6 +84,9 @@
 				</div>
 				<div id="item-tree-container" class="hbox virtualized-table-container">
 					<div id="zotero-items-tree" data-tabindex="60" style="--highlight-color: var(--accent-blue30);"/>
+				</div>
+				<div id="annotations-sidebar" hidden="true">
+					<xul:annotation-items-pane id="annotations-list"/>
 				</div>
 			</div>
 		</div>

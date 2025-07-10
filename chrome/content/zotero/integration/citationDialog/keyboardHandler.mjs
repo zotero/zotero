@@ -149,20 +149,23 @@ export class CitationDialogKeyboardHandler {
 		}
 		// arrow up/down from bubble-input in list mode will move selection in the items list
 		else if (!this._id("list-layout").hidden && (event.key == "ArrowDown" || event.key == "ArrowUp") && this._id("bubble-input").contains(event.target) && onlyShiftModifierPossible) {
-			let group = this.doc.querySelector("#list-layout [data-arrow-nav]");
-			let current = group.querySelector(".current");
-			let firstRow = group.querySelector('[data-arrow-nav-enabled="true"][tabindex]');
-			// on arrowUp from the first row, clear selection
-			if (current === firstRow && event.key == "ArrowUp" && !event.shiftKey) {
-				this._selectItems(null);
-				firstRow?.classList.remove("current");
-				group.scrollTo(0, 0);
-				this._multiselectStart = null;
+			this.doc.dispatchEvent(new CustomEvent("list-arrow-keypress", {
+				bubbles: true,
+				detail: {
+					key: event.key
+				}
+			}));
+			handled = true;
+		}
+		// arrow right/left on expandable item will expand/collapse its children
+		else if (!this._id("list-layout").hidden && ["ArrowRight", "ArrowLeft"].includes(event.key) && noModifiers && event.target.parentElement.classList.contains("item-with-children")) {
+			let container = event.target.closest(".item-with-children");
+			let twisty = container.querySelector(".twisty");
+			if (event.key == "ArrowRight" && !container.classList.contains("expanded")) {
+				twisty.click();
 			}
-			else if (current || event.key == "ArrowDown") {
-				// Arrow down from input will just change the selected item without moving focus
-				let multiSelect = event.shiftKey;
-				this._navigateGroup({ group, current, forward: event.key == "ArrowDown", shouldSelect: true, shouldFocus: false, multiSelect });
+			if (event.key == "ArrowLeft" && container.classList.contains("expanded")) {
+				twisty.click();
 			}
 			handled = true;
 		}

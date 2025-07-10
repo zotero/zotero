@@ -586,6 +586,13 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					this._hiddenFocusedRow
 				);
 			}
+			if (this.props.extraPseudoCollections) {
+				for (let { index, collection } of this.props.extraPseudoCollections) {
+					let row = new Zotero.CollectionTreeRow(this, 'pseudo-collection', collection);
+					newRows.splice(index, 0, row);
+					added += 1;
+				}
+			}
 			this._rows = newRows;
 			this._refreshRowMap();
 			if (this._editing) {

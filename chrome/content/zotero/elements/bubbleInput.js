@@ -432,7 +432,6 @@
 			// Handle drag-drop of items from the citationDialog into bubble-input to add them
 			if (itemIDs) {
 				itemIDs = itemIDs.split(",");
-				console.log(itemIDs);
 				let newIndex = 0;
 				if (this.dragOver) {
 					newIndex = [...this.bubbleInput.querySelectorAll(".bubble")].findIndex(node => this.dragOver == node);
