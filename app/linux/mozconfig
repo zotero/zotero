@@ -1,6 +1,3 @@
-# Uncomment to build 32-bit
-#ac_add_options --target=i686
-
 ac_add_options --enable-bootstrap
 
 mk_add_options AUTOCLOBBER=1
@@ -15,7 +12,8 @@ ac_add_options --disable-tests
 ac_add_options --disable-debug
 ac_add_options --disable-debug-symbols
 ac_add_options --disable-webrtc
-ac_add_options --disable-eme
+# This causes aarch64 build of 140.0esr to fail
+#ac_add_options --disable-eme
 
 export MOZILLA_OFFICIAL=1
 export RELEASE_OR_BETA=1
@@ -24,4 +22,4 @@ MOZ_REQUIRE_SIGNING=
 ac_add_options --enable-official-branding
 
 # Build updater without MAR signature verification
-ac_add_options --disable-verify-mar
+ac_add_options --enable-unverified-updates
