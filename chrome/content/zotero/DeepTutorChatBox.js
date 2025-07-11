@@ -5,11 +5,10 @@ import {
 	createMessage,
 	getMessagesBySessionId,
 	getDocumentById,
-	subscribeToChat,
-	getSessionById
+	subscribeToChat
 } from './api/libs/api';
 import DeepTutorStreamingComponent from './DeepTutorStreamingComponent';
-import DeepTutorUserMessage from './DeepTutorUserMessage';
+
 const markdownit = require('markdown-it');
 // Try to require markdown-it-container, fallback to a simpler implementation if not available
 try {
@@ -91,15 +90,7 @@ catch (error) {
 	Zotero.debug(`DeepTutorChatBox: Table test ERROR: ${error.message}`);
 }
 
-// Enums
-const _SessionStatus = {
-	CREATED: 'CREATED',
-	READY: 'READY',
-	PROCESSING_ERROR: 'PROCESSING_ERROR',
-	FINAL_PROCESSING_ERROR: 'FINAL_PROCESSING_ERROR',
-	PROCESSING: 'PROCESSING',
-	DELETED: 'DELETED'
-};
+
 
 class Conversation {
 	constructor({
@@ -162,7 +153,7 @@ const styles = {
 		fontFamily: 'Roboto, sans-serif',
 		position: 'relative',
 		overflow: 'hidden',
-		padding: '1.875rem 1.25rem 0 1.25rem',
+		padding: '1.875rem 0.75rem 0 0.75rem',
 		boxSizing: 'border-box',
 		userSelect: 'text', // Ensure text is selectable
 		WebkitUserSelect: 'text',
@@ -278,7 +269,7 @@ const styles = {
 		flexDirection: 'column',
 	},
 	messageBubble: {
-		padding: '0.625rem 1.25rem',
+		padding: '0.5rem 0.75rem',
 		borderRadius: '0.625rem',
 		maxWidth: '100%',
 		boxShadow: 'none',
@@ -306,9 +297,8 @@ const styles = {
 		width: 'fit-content',
 		fontSize: '0.875rem',
 		lineHeight: '1.35',
-		padding: '0.625rem 1.25rem',
-		gap: '0.625rem',
-		minHeight: '2.4375rem',
+		padding: '0.25rem 1.25rem',
+		
 	},
 	botMessage: {
 		backgroundColor: '#F2F2F2',
@@ -320,11 +310,7 @@ const styles = {
 		fontWeight: 400,
 		alignSelf: 'flex-start',
 	},
-	senderLabel: {
-		fontWeight: 'bold',
-		marginBottom: '0.25rem',
-		display: 'block',
-	},
+
 	messageText: {
 		display: 'block',
 		maxWidth: '100%',
@@ -336,33 +322,7 @@ const styles = {
 		msUserSelect: 'text',
 		cursor: 'text',
 	},
-	sourcesContainer: {
-		marginTop: '0.5rem',
-		display: 'flex',
-		gap: '0.5rem',
-		flexWrap: 'wrap',
-		width: '100%',
-		boxSizing: 'border-box',
-	},
-	sourceButton: {
-		all: 'revert',
-		background: '#0687E5',
-		opacity: 0.4,
-		color: 'white',
-		border: 'none',
-		borderRadius: '50%',
-		width: '2rem',
-		height: '2rem',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		fontWeight: 600,
-		fontSize: '0.875rem',
-		cursor: 'pointer',
-		boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
-		padding: 0,
-		transition: 'background 0.2s',
-	},
+
 	questionContainer: {
 		all: 'revert',
 		width: '100%',
@@ -400,86 +360,7 @@ const styles = {
 		marginLeft: 'auto',
 		marginRight: '0',
 	},
-	sessionTabBar: {
-		height: '1.8125rem',
-		background: '#F2F2F2',
-		display: 'flex',
-		alignItems: 'center',
-		padding: '0 0.5rem',
-		gap: '0.625rem',
-		borderBottom: '0.0625rem solid #E0E0E0',
-		width: '100%',
-		boxSizing: 'border-box',
-	},
-	sessionTab: {
-		all: 'revert',
-		gap: '0.625rem',
-		borderRadius: '0.1875rem',
-		padding: '0.3125rem 0.625rem',
-		minWidth: 'fit-content',
-		background: '#D9D9D9',
-		fontSize: '0.8125rem',
-		fontWeight: 400,
-		color: '#292929',
-		cursor: 'pointer',
-		whiteSpace: 'nowrap',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-		border: 'none',
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		boxSizing: 'border-box'
-	},
-	activeSessionTab: {
-		background: '#FFFFFF',
-		color: '#1C1B1F',
-		border: 'none',
-		boxSizing: 'border-box',
-	},
-	sessionTabClose: {
-		all: 'revert',
-		width: '0.5825rem',
-		height: '0.5825rem',
-		marginLeft: '0.3125rem',
-		cursor: 'pointer',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		padding: '0',
-		background: 'none',
-		border: 'none'
-	},
-	sessionTabCloseIcon: {
-		width: '0.5825rem',
-		height: '0.5825rem',
-		objectFit: 'contain'
-	},
-	sessionPopup: {
-		position: 'absolute',
-		top: '1.8125rem',
-		right: '0.5rem',
-		background: '#FFFFFF',
-		border: '0.0625rem solid #E0E0E0',
-		borderRadius: '0.25rem',
-		boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
-		zIndex: 1000,
-		minWidth: '9.375rem',
-	},
-	sessionPopupItem: {
-		padding: '0.5rem 0.75rem',
-		fontSize: '0.8125rem',
-		color: '#292929',
-		cursor: 'pointer',
-		whiteSpace: 'nowrap',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-		background: '#FFFFFF',
-		border: 'none',
-		width: '100%',
-		textAlign: 'left',
-	},
+
 	viewContextContainer: {
 		position: 'relative',
 		width: '100%',
@@ -563,9 +444,8 @@ const styles = {
 };
 
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
-const SessionTabClosePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_SES_TAB_CLOSE.svg';
 const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
-const DeepTutorChatBox = ({ currentSession, onSessionSelect, onInitWaitChange }) => {
+const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	const [messages, setMessages] = useState([]);
 	const [inputValue, setInputValue] = useState('');
 	const [sessionId, setSessionId] = useState(null);
@@ -575,8 +455,6 @@ const DeepTutorChatBox = ({ currentSession, onSessionSelect, onInitWaitChange })
 	const [isLoading, setIsLoading] = useState(false);
 	const [storagePathsState, setStoragePathsState] = useState([]);
 	const [curSessionType, setcurSessionType] = useState(SessionType.BASIC);
-	const [showSessionPopup, setShowSessionPopup] = useState(false);
-	const MAX_VISIBLE_SESSIONS = 2;
 	const chatLogRef = useRef(null);
 	const contextPopupRef = useRef(null);
 	const textareaRef = useRef(null);
@@ -767,7 +645,7 @@ This demonstrates multiple table formats working correctly.
 			
 			placeholders.forEach((placeholder) => {
 				const sourceId = placeholder.getAttribute('data-source-id');
-				const sourceIndex = parseInt(sourceId, 10) - 1;
+				const sourceIndex = parseInt(sourceId) - 1;
 				const page = placeholder.getAttribute('data-page');
 				
 				// Get source data from Zotero.Prefs
@@ -1074,12 +952,7 @@ This demonstrates multiple table formats working correctly.
 		loadMessages();
 	}, [sessionId]);
 
-	const [_curSessionObj, _setCurSessionObj] = useState(null);
-	const [_pdfDataList, _setPdfDataList] = useState([]);
-	const [_showModelPopup, _setShowModelPopup] = useState(false);
-	const [_showImagePopup, _setShowImagePopup] = useState(false);
 
-	const _modelSelectionRef = useRef(null);
 
 	// Conversation state
 	const [_conversation, setConversation] = useState({
@@ -1441,19 +1314,7 @@ This demonstrates multiple table formats working correctly.
 		}
 	};
 
-	const _handleFileUpload = async (_files) => {
-		// Implementation for file upload
-	};
 
-	const _handleModelSelection = (_modelData) => {
-		// Implementation for model selection
-	};
-
-	const _updateSessionInfo = (newSessionId, newDocumentIds) => {
-		Zotero.debug(`DeepTutorChatBox: Updating session info - Session ID: ${newSessionId}, Document IDs: ${newDocumentIds?.length || 0}`);
-		setSessionId(newSessionId);
-		setDocumentIds(newDocumentIds || []);
-	};
 
 	const _appendMessage = async (sender, message) => {
 		Zotero.debug(`DeepTutorChatBox: Appending message from ${sender}`);
@@ -1531,41 +1392,7 @@ This demonstrates multiple table formats working correctly.
 		}
 	};
 
-	const _onNewSession = async (newSession) => {
-		try {
-			Zotero.debug(`DeepTutorChatBox: onNewSession CALLED for session ${newSession?.id || "null"}: ${JSON.stringify(newSession)}`);
-			// Check if session is too recent
-			const sessionCreationTime = new Date(newSession.creationTime);
-			const now = new Date();
-			const timeDiff = (now - sessionCreationTime) / 1000; // Convert to seconds
-            
-			Zotero.debug(`DeepTutorChatBox: onNewSession - Session ${newSession.id} creation time: ${sessionCreationTime.toISOString()}`);
-			Zotero.debug(`DeepTutorChatBox: onNewSession - Current time: ${now.toISOString()}`);
-			Zotero.debug(`DeepTutorChatBox: onNewSession - Time difference: ${timeDiff} seconds`);
-            
-			if (timeDiff < 15) {
-				// Wait for remaining time
-				const waitTime = Math.ceil(15 - timeDiff) * 1000;
-				Zotero.debug(`DeepTutorChatBox: onNewSession - Session ${newSession.id} is too recent, waiting for ${Math.ceil(15 - timeDiff)} seconds (${waitTime}ms)`);
-				await new Promise(resolve => setTimeout(resolve, waitTime));
-				Zotero.debug(`DeepTutorChatBox: onNewSession - Finished waiting for session ${newSession.id}`);
-			}
-			else {
-				Zotero.debug(`DeepTutorChatBox: onNewSession - Session ${newSession.id} is old enough, no waiting needed`);
-			}
-            
-			// Update userId and sessionId
-			// setUserId(newSession.userId);
-			//setSessionId(newSession.id);
-			Zotero.debug(`DeepTutorChatBox: onNewSession - SENDING AUTOMATIC SUMMARY MESSAGE for session ${newSession.id}`);
-			await userSendMessage("Can you give me a summary of this document?");
-			Zotero.debug(`DeepTutorChatBox: onNewSession - AUTOMATIC SUMMARY MESSAGE SENT for session ${newSession.id}`);
-		}
-		catch (error) {
-			Zotero.debug(`DeepTutorChatBox: onNewSession - ERROR for session ${newSession?.id || "null"}: ${error.message}`);
-			Zotero.debug(`DeepTutorChatBox: onNewSession - ERROR stack: ${error.stack}`);
-		}
-	};
+
 
 	// Format response text for markdown rendering
 	const formatResponseForMarkdown = (text, subMessage) => {
@@ -1606,7 +1433,7 @@ This demonstrates multiple table formats working correctly.
 		// Replacement for source span identifier
 		Zotero.debug(`3TESTTESTTEST DeepTutorChatBox: formatResponseForMarkdown - Replacing source span identifiers ${cleanText}`);
 		cleanText = cleanText.replace(/\[<(\d{1,2})>\]/g, (match, sourceId) => {
-			const sourceIndex = parseInt(sourceId, 10) - 1; // Convert to 0-based index
+			const sourceIndex = parseInt(sourceId) - 1; // Convert to 0-based index
 			
 			Zotero.debug(`DeepTutorChatBox: Processing source reference: ${match}, sourceId: ${sourceId}, sourceIndex: ${sourceIndex}`);
 			
@@ -2181,7 +2008,7 @@ This demonstrates multiple table formats working correctly.
 												})()
 											}}
 											style={{
-												fontSize: "16px",
+												fontSize: "14px",
 												lineHeight: "1.5",
 												wordBreak: "break-word",
 												overflowWrap: "break-word"
@@ -2189,7 +2016,7 @@ This demonstrates multiple table formats working correctly.
 										/>
 									) : (
 										<div style={{
-											fontSize: "16px",
+											fontSize: "14px",
 											lineHeight: "1.5",
 											wordBreak: "break-word",
 											overflowWrap: "break-word"
@@ -2246,61 +2073,7 @@ This demonstrates multiple table formats working correctly.
 		);
 	};
 
-	// Add animation styles
-	const _animationStyles = {
-		"@keyframes fadeIn": {
-			from: { opacity: 0 },
-			to: { opacity: 1 }
-		},
-		"@keyframes slideIn": {
-			from: { transform: "translateY(20px)", opacity: 0 },
-			to: { transform: "translateY(0)", opacity: 1 }
-		}
-	};
 
-	// Update styles object with new styles
-	const _updatedStyles = {
-		...styles,
-		messageContainer: {
-			...styles.messageContainer,
-			margin: "12px 0",
-			opacity: 0,
-			animation: "fadeIn 0.3s ease-in-out forwards"
-		},
-		messageBubble: {
-			...styles.messageBubble,
-			padding: "12px 16px",
-			borderRadius: "16px",
-			maxWidth: "75%",
-			boxShadow: "none",
-			animation: "slideIn 0.3s ease-out forwards"
-		},
-		userMessage: {
-			...styles.userMessage,
-			backgroundColor: "#0AE2FF",
-			color: "white",
-			marginLeft: "auto",
-			borderBottomRightRadius: "4px"
-		},
-		botMessage: {
-			...styles.botMessage,
-			backgroundColor: "#F8F6F7",
-			color: "#212529",
-			marginRight: "auto",
-			borderBottomLeftRadius: "4px"
-		},
-		senderLabel: {
-			...styles.senderLabel,
-			fontSize: "0.85em",
-			opacity: 0.8,
-			marginBottom: "4px"
-		},
-		messageText: {
-			...styles.messageText,
-			lineHeight: '1.4',
-			whiteSpace: 'pre-wrap'
-		}
-	};
 
 	// Add new useEffect after the existing one
 	useEffect(() => {
@@ -2493,151 +2266,7 @@ This demonstrates multiple table formats working correctly.
 		}
 	}, [showContextPopup]);
 
-	// Add SessionTabBar component
-	const _SessionTabBar = () => {
-		// Convert Map to sorted array and sort by lastUpdatedTime
-		const sortedSessions = Array.from(recentSessions.entries())
-            .sort((a, b) => {
-            	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
-            	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
-            	return timeB - timeA; // Sort in descending order (most recent first)
-            });
 
-		Zotero.debug(`DeepTutorChatBox: Rendering SessionTabBar with ${sortedSessions.length} sessions`);
-		const visibleSessions = sortedSessions.slice(0, MAX_VISIBLE_SESSIONS);
-		const hiddenSessions = sortedSessions.slice(MAX_VISIBLE_SESSIONS);
-
-		const truncateSessionName = (name) => {
-			return name.length > 11 ? name.substring(0, 11) + "..." : name;
-		};
-
-		const handleSessionClick = async (sessionId) => {
-			try {
-				// Get the session data
-				const session = await getSessionById(sessionId);
-				if (!session) {
-					Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
-					return;
-				}
-
-				// Update recent sessions with new timestamp
-				await updateRecentSessions(sessionId);
-
-				// Update the current session through props
-				if (currentSession?.id !== sessionId) {
-					Zotero.debug(`DeepTutorChatBox: Switching to session ${sessionId}`);
-					// Use the onSessionSelect prop to switch sessions
-					if (onSessionSelect) {
-						onSessionSelect(session.id);
-					}
-				}
-			}
-			catch (error) {
-				Zotero.debug(`DeepTutorChatBox: Error handling session click: ${error.message}`);
-			}
-		};
-
-		const handleCloseSession = async (sessionId, event) => {
-			event.stopPropagation(); // Prevent session click when closing
-            
-			// Check if we're closing the active session
-			const isActiveSession = sessionId === currentSession?.id;
-            
-			setRecentSessions((prev) => {
-				const newMap = new Map(prev);
-				newMap.delete(sessionId);
-                
-				// Store in preferences
-				const sessionsObject = Object.fromEntries(newMap);
-				Zotero.Prefs.set("deeptutor.recentSessions", JSON.stringify(sessionsObject));
-                
-				return newMap;
-			});
-
-			// If we closed the active session and there are other sessions, load the next one
-			if (isActiveSession) {
-				const remainingSessions = Array.from(recentSessions.entries())
-                    .filter(([id]) => id !== sessionId)
-                    .sort((a, b) => {
-                    	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
-                    	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
-                    	return timeB - timeA;
-                    });
-
-				if (remainingSessions.length > 0) {
-					const [nextSessionId, _nextSessionData] = remainingSessions[0];
-					try {
-						const session = await getSessionById(nextSessionId);
-						if (session && onSessionSelect) {
-							onSessionSelect(session.id);
-						}
-					}
-					catch (error) {
-						Zotero.debug(`DeepTutorChatBox: Error loading next session: ${error.message}`);
-					}
-				}
-			}
-		};
-
-		return (
-			<div style={styles.sessionTabBar}>
-				{visibleSessions.map(([sessionId, sessionData]) => (
-					<button
-						key={sessionId}
-						style={{
-							...styles.sessionTab,
-							...(sessionId === currentSession?.id ? styles.activeSessionTab : {})
-						}}
-						onClick={() => handleSessionClick(sessionId)}
-					>
-						{truncateSessionName(sessionData.name)}
-						<button
-							style={styles.sessionTabClose}
-							onClick={e => handleCloseSession(sessionId, e)}
-						>
-							<img
-								src={SessionTabClosePath}
-								alt="Close"
-								style={styles.sessionTabCloseIcon}
-							/>
-						</button>
-					</button>
-				))}
-				{hiddenSessions.length > 0 && (
-					<div style={{ position: "relative" }}>
-						<button
-							style={styles.sessionTab}
-							onClick={() => setShowSessionPopup(!showSessionPopup)}
-						>
-                            More ({hiddenSessions.length})
-						</button>
-						{showSessionPopup && (
-							<div style={styles.sessionPopup}>
-								{hiddenSessions.map(([sessionId, sessionData]) => (
-									<div
-										key={sessionId}
-										style={styles.sessionPopupItem}
-										onClick={() => {
-											handleSessionClick(sessionId);
-											setShowSessionPopup(false);
-										}}
-										onMouseEnter={(e) => {
-											e.target.style.background = "#D9D9D9";
-										}}
-										onMouseLeave={(e) => {
-											e.target.style.background = "#FFFFFF";
-										}}
-									>
-										{truncateSessionName(sessionData.name)}
-									</div>
-								))}
-							</div>
-						)}
-					</div>
-				)}
-			</div>
-		);
-	};
 
 	// Handle click outside context popup
 	useEffect(() => {
@@ -3095,18 +2724,7 @@ This demonstrates multiple table formats working correctly.
 		};
 	}, []);
 
-	// Reset conversation when creating new session
-	/*
-	const resetConversation = () => setConversation({
-		userId: userId,
-		sessionId: null,
-		documentIds: [],
-		history: [],
-		message: null,
-		streaming: true,
-		type: sessionType
-	});
-	*/
+
 
 	// Add copy event handler for the chat box
 	useEffect(() => {
@@ -3161,7 +2779,7 @@ This demonstrates multiple table formats working correctly.
 						border-collapse: collapse;
 						width: 100%;
 						margin: 1rem 0;
-						font-size: 0.875rem;
+						font-size: 1rem;
 						line-height: 1.4;
 						border: 0.0625rem solid #E0E0E0;
 						border-radius: 0.5rem;
@@ -3185,44 +2803,44 @@ This demonstrates multiple table formats working correctly.
 						background: #F5F5F5;
 					}
 					.markdown th {
-						padding: 0.75rem 1rem;
+						padding: 0.75rem 0.5rem;
 						text-align: left;
 						font-weight: 600;
 						color: #1C1B1F;
 						border-bottom: 0.125rem solid #E0E0E0;
 						background: #F8F6F7;
-						font-size: 0.875rem;
+						font-size: 1.0rem;
 						line-height: 1.6;
 						white-space: normal;
-						min-height: 2em;
 						vertical-align: top;
 					}
 					.markdown td {
-						padding: 0.75rem 1rem;
+						padding: 0.75rem 0.5rem;
 						text-align: left;
 						color: #1C1B1F;
 						border-bottom: 0.0625rem solid #E0E0E0;
-						font-size: 0.875rem;
+						border-right: 0.0625rem solid #E0E0E0;
+						border-left: 0.0625rem solid #E0E0E0;
+						font-size: 1.0rem;
 						line-height: 1.6;
 						word-break: break-word;
 						vertical-align: top;
-						min-height: 2em;
 					}
 					
 					/* Special styling for source buttons within tables */
 					.markdown table .deeptutor-source-button {
-						width: 1.2em !important;
-						height: 1.2em !important;
-						font-size: 0.65em !important;
+						width: 2em !important;
+						height: 2em !important;
+						font-size: 1em !important;
 						margin: 0 0.15em !important;
 						vertical-align: middle !important;
 					}
 					
 					/* Special styling for source placeholders within tables */
 					.markdown table .deeptutor-source-placeholder {
-						width: 1.2em !important;
-						height: 1.2em !important;
-						font-size: 0.65em !important;
+						width: 1.5em !important;
+						height: 1.5em !important;
+						font-size: 0.75em !important;
 						margin: 0 0.15em !important;
 						vertical-align: middle !important;
 					}
@@ -3270,8 +2888,7 @@ This demonstrates multiple table formats working correctly.
 						outline: none !important;
 					}
 					.deeptutor-source-placeholder {
-						background: #0687E5 !important;
-						opacity: 0.4 !important;
+						background: #9E9E9E !important;
 						color: white !important;
 						border: none !important;
 						border-radius: 50% !important;
@@ -3282,11 +2899,10 @@ This demonstrates multiple table formats working correctly.
 						justify-content: center !important;
 						font-weight: 600 !important;
 						font-size: 0.875rem !important;
-						cursor: pointer !important;
+						cursor: default !important;
 						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.08) !important;
 						padding: 0 !important;
 						margin: 0 0.25rem !important;
-						transition: all 0.2s ease !important;
 						vertical-align: middle !important;
 						line-height: 1 !important;
 						text-decoration: none !important;
@@ -3294,7 +2910,6 @@ This demonstrates multiple table formats working correctly.
 						font-family: 'Roboto', sans-serif !important;
 						position: relative !important;
 						overflow: hidden !important;
-						animation: pulse 1s infinite alternate !important;
 					}
 					@keyframes pulse {
 						0% { opacity: 0.3; }
