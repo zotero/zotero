@@ -127,6 +127,13 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		margin-top: 0.5em;
+		
+		button {
+			@media (-moz-platform: macos) {
+				margin: unset; // restore space between buttons 
+			}
+		}
 	}
 
 	#zotero-new-tag-character-count {
