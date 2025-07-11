@@ -53,6 +53,7 @@
 <!ENTITY zotero.toolbar.duplicate.label				"Show Duplicates">
 <!ENTITY zotero.collections.showUnfiledItems			"Show Unfiled Items">
 <!ENTITY zotero.collections.showRetractedItems        "Show Retracted Items">
+<!ENTITY zotero.collections.showPublications            "Show My Publications">
 
 <!ENTITY zotero.items.itemType							"Item Type">
 <!ENTITY zotero.items.creator_column					"Creator">
