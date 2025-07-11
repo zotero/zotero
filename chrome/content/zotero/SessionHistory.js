@@ -115,7 +115,7 @@ const sessionButtonStyle = {
   textAlign: 'left',
   fontWeight: 600,
   fontSize: '1rem',
-  lineHeight: '100%',
+  lineHeight: '1.2', // Increased line height for better text visibility
   letterSpacing: '0%',
   color: '#292929',
   cursor: 'pointer',

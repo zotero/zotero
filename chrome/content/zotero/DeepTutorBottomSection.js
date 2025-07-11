@@ -230,6 +230,7 @@ class DeepTutorBottomSection extends React.Component {
 						>
                             Sign out
 						</button>
+						{/* No Session button commented out
 						<button
 							style={{ ...styles.componentButton, marginTop: '8px', background: '#6c757d', color: '#fff', borderColor: '#6c757d' }}
 							onClick={() => {
@@ -239,6 +240,7 @@ class DeepTutorBottomSection extends React.Component {
 						>
                             No Session
 						</button>
+						*/}
 					</>
 				) : (
 					<div style={styles.profileInfo}>

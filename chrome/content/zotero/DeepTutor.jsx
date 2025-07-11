@@ -1752,13 +1752,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 						<div
 							style={{
 								position: 'relative',
-								width: '80%',
-								maxWidth: '26.875rem',
-								maxHeight: '80%',
+								width: '100%', // 40px (20px * 2) = 2.5rem
+								maxWidth: '26.875rem', // 430px
+								maxHeight: '90%',
 								background: '#FFFFFF',
 								borderRadius: '0.625rem',
 								padding: '0.25rem 0.5rem 0.5rem 0.5rem',
-								overflow: 'auto'
+								overflow: 'auto',
+								margin: '0 1.25rem' // 20px = 1.25rem
 							}}
 							onClick={e => e.stopPropagation()}
 						>
@@ -1794,14 +1795,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 						<div
 							style={{
 								position: 'relative',
-								width: '80%',
+								width: '100%', // 40px (20px * 2) = 2.5rem
 								minWidth: '21.25rem',
-								maxWidth: '30rem',
-								maxHeight: '80%',
+								maxWidth: '26.875rem', // 430px
+								maxHeight: '90%',
 								background: '#FFFFFF',
 								borderRadius: '0.625rem',
 								padding: '1.25rem',
-								overflow: 'auto'
+								overflow: 'auto',
+								margin: '0 1.25rem' // 20px = 1.25rem
 							}}
 							onClick={e => e.stopPropagation()}
 						>
@@ -1885,14 +1887,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 						<div
 							style={{
 								position: 'relative',
-								width: '80%',
+								width: '100%', // 40px (20px * 2) = 2.5rem
 								minWidth: '21.25rem',
-								maxWidth: '30rem',
-								maxHeight: '80%',
+								maxWidth: '26.875rem', // 430px
+								maxHeight: '90%',
 								background: '#FFFFFF',
 								borderRadius: '0.625rem',
 								padding: '1.25rem',
-								overflow: 'auto'
+								overflow: 'auto',
+								margin: '0 1.25rem' // 20px = 1.25rem
 							}}
 							onClick={e => e.stopPropagation()}
 						>
@@ -1969,14 +1972,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 						<div
 							style={{
 								position: 'relative',
-								width: '80%',
+								width: '100%', // 40px (20px * 2) = 2.5rem
 								minWidth: '21.25rem',
-								maxWidth: '26.875rem',
-								maxHeight: '80%',
+								maxWidth: '26.875rem', // 430px
+								maxHeight: '90%',
 								background: '#FFFFFF',
 								borderRadius: '0.625rem',
 								padding: '1.25rem',
-								overflow: 'auto'
+								overflow: 'auto',
+								margin: '0 1.25rem' // 20px = 1.25rem
 							}}
 							onClick={e => e.stopPropagation()}
 						>
@@ -2055,14 +2059,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 						<div
 							style={{
 								position: 'relative',
-								width: '80%',
+								width: '100%', // 40px (20px * 2) = 2.5rem
 								minWidth: '21.25rem',
-								maxWidth: '26.875rem',
-								maxHeight: '99%',
+								maxWidth: '26.875rem', // 430px
+								maxHeight: '90%',
 								background: '#FFFFFF',
 								borderRadius: '0.625rem',
 								padding: '1.25rem',
-								overflow: 'auto'
+								overflow: 'auto',
+								margin: '0 1.25rem' // 20px = 1.25rem
 							}}
 							onClick={e => e.stopPropagation()}
 						>

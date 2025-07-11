@@ -90,8 +90,7 @@ try {
 const md = markdownit({
 	html: true,
 	linkify: true,
-	typographer: true,
-	tables: true,        // Enable built-in table support
+	typographer: true,        // Enable built-in table support
 	breaks: false,       // GFM line breaks (optional)
 	strikethrough: true  // Enable strikethrough support
 });
@@ -430,6 +429,7 @@ const styles = {
 		width: '100%',
 		margin: '0.5rem 0',
 		display: 'flex',
+		flexDirection: 'column',
 		justifyContent: 'flex-start',
 		gap: '0.75rem',
 		flexWrap: 'wrap',
@@ -611,6 +611,16 @@ const styles = {
 	contextDocumentButtonHover: {
 		background: '#FFFFFF',
 	},
+	followUpQuestionText: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'flex-end',
+		fontSize: '1.25rem',
+		fontWeight: 600,
+		color: '#000000',
+		lineHeight: '1.5',
+		cursor: 'pointer',
+	}
 };
 
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
@@ -2183,21 +2193,26 @@ This demonstrates multiple table formats working correctly.
 					})}
 				</div>
 				{index === messages.length - 1 && message.followUpQuestions && message.followUpQuestions.length > 0 && (
-					<div style={styles.questionContainer}>
-						{message.followUpQuestions.map((question, qIndex) => (
-							<button
-								key={qIndex}
-								style={{
-									...styles.questionButton,
-									background: hoveredQuestion === qIndex ? "#D9D9D9" : "#FFFFFF"
-								}}
-								onClick={() => handleQuestionClick(question)}
-								onMouseEnter={() => setHoveredQuestion(qIndex)}
-								onMouseLeave={() => setHoveredQuestion(null)}
-							>
-								{question}
-							</button>
-						))}
+					<div>
+						<div style={styles.followUpQuestionText}>
+							Follow Up Questions:
+						</div>
+						<div style={styles.questionContainer}>
+							{message.followUpQuestions.map((question, qIndex) => (
+								<button
+									key={qIndex}
+									style={{
+										...styles.questionButton,
+										background: hoveredQuestion === qIndex ? "#D9D9D9" : "#FFFFFF"
+									}}
+									onClick={() => handleQuestionClick(question)}
+									onMouseEnter={() => setHoveredQuestion(qIndex)}
+									onMouseLeave={() => setHoveredQuestion(null)}
+								>
+									{question}
+								</button>
+							))}
+						</div>
 					</div>
 				)}
 			</div>
