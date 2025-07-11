@@ -10,7 +10,7 @@ describe("Zotero.Utilities.Internal", function () {
 	
 	
 	describe("#md5()", function () {
-		it("should generate hex string given file path", function* () {
+		it("should generate hex string given file path", async function () {
 			var file = OS.Path.join(getTestDataDirectory().path, 'test.png');
 			assert.equal(
 				Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(file)),
@@ -21,28 +21,28 @@ describe("Zotero.Utilities.Internal", function () {
 	
 	
 	describe("#md5Async()", function () {
-		it("should generate hex string given file path", function* () {
+		it("should generate hex string given file path", async function () {
 			var file = OS.Path.join(getTestDataDirectory().path, 'test.png');
-			yield assert.eventually.equal(
+			await assert.eventually.equal(
 				Zotero.Utilities.Internal.md5Async(file),
 				'93da8f1e5774c599f0942dcecf64b11c'
 			);
 		});
 		
-		it("should generate hex string given file path for file bigger than chunk size", function* () {
+		it("should generate hex string given file path for file bigger than chunk size", async function () {
 			var tmpDir = Zotero.getTempDirectory().path;
 			var file = OS.Path.join(tmpDir, 'md5Async');
 			
 			let encoder = new TextEncoder();
 			let arr = encoder.encode("".padStart(100000, "a"));
-			yield OS.File.writeAtomic(file, arr);
+			await OS.File.writeAtomic(file, arr);
 			
-			yield assert.eventually.equal(
+			await assert.eventually.equal(
 				Zotero.Utilities.Internal.md5Async(file),
 				'1af6d6f2f682f76f80e606aeaaee1680'
 			);
 			
-			yield OS.File.remove(file);
+			await OS.File.remove(file);
 		});
 		
 		it("should return false for a nonexistent file", async function () {
@@ -66,12 +66,12 @@ describe("Zotero.Utilities.Internal", function () {
 	
 	
 	describe("#gzip()/gunzip()", function () {
-		it("should compress and decompress a Unicode text string", function* () {
+		it("should compress and decompress a Unicode text string", async function () {
 			var text = "Voilà! \u1F429";
-			var compstr = yield Zotero.Utilities.Internal.gzip(text);
+			var compstr = await Zotero.Utilities.Internal.gzip(text);
 			assert.isAbove(compstr.length, 0);
 			assert.notEqual(compstr.length, text.length);
-			var str = yield Zotero.Utilities.Internal.gunzip(compstr);
+			var str = await Zotero.Utilities.Internal.gunzip(compstr);
 			assert.equal(str, text);
 		});
 	});
@@ -119,7 +119,7 @@ describe("Zotero.Utilities.Internal", function () {
 			spy.restore();
 		});
 		
-		it("should delay for given amounts of time without limit", function* () {
+		it("should delay for given amounts of time without limit", async function () {
 			var intervals = [1, 2];
 			var gen = Zotero.Utilities.Internal.delayGenerator(intervals);
 			
@@ -128,14 +128,14 @@ describe("Zotero.Utilities.Internal", function () {
 			testIntervals.push(intervals[intervals.length - 1]);
 			
 			for (let i of testIntervals) {
-				let val = yield gen.next().value;
+				let val = await gen.next().value;
 				assert.isTrue(val);
 				assert.isTrue(spy.calledWith(i));
 				spy.resetHistory();
 			}
 		});
 		
-		it("should return false when maxTime is reached", function* () {
+		it("should return false when maxTime is reached", async function () {
 			var intervals = [5, 10];
 			var gen = Zotero.Utilities.Internal.delayGenerator(intervals, 30);
 			
@@ -144,14 +144,14 @@ describe("Zotero.Utilities.Internal", function () {
 			testIntervals.push(intervals[intervals.length - 1]);
 			
 			for (let i of testIntervals) {
-				let val = yield gen.next().value;
+				let val = await gen.next().value;
 				assert.isTrue(val);
 				assert.isTrue(spy.calledWith(i));
 				spy.resetHistory();
 			}
 			
 			// Another interval would put us over maxTime, so return false immediately
-			let val = yield gen.next().value;
+			let val = await gen.next().value;
 			assert.isFalse(val);
 			assert.isFalse(spy.called);
 		});

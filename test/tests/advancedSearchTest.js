@@ -67,13 +67,13 @@ describe("Advanced Search", function () {
 		});
 		
 		describe("Collection", function () {
-			it("should show collections and saved searches", function* () {
-				var col1 = yield createDataObject('collection', { name: "A" });
-				var col2 = yield createDataObject('collection', { name: "C", parentID: col1.id });
-				var col3 = yield createDataObject('collection', { name: "D", parentID: col2.id });
-				var col4 = yield createDataObject('collection', { name: "B" });
-				var search1 = yield createDataObject('search', { name: "A" });
-				var search2 = yield createDataObject('search', { name: "B" });
+			it("should show collections and saved searches", async function () {
+				var col1 = await createDataObject('collection', { name: "A" });
+				var col2 = await createDataObject('collection', { name: "C", parentID: col1.id });
+				var col3 = await createDataObject('collection', { name: "D", parentID: col2.id });
+				var col4 = await createDataObject('collection', { name: "B" });
+				var search1 = await createDataObject('search', { name: "A" });
+				var search2 = await createDataObject('search', { name: "B" });
 				
 				// Add condition
 				var s = new Zotero.Search();
@@ -109,12 +109,12 @@ describe("Advanced Search", function () {
 				assert.equal(valueMenuItem.getAttribute('label'), search2.name);
 				assert.equal(valueMenuItem.getAttribute('value'), "S" + search2.key);
 				
-				yield Zotero.Collections.erase([col1.id, col2.id, col3.id, col4.id]);
-				yield Zotero.Searches.erase([search1.id, search2.id]);
+				await Zotero.Collections.erase([col1.id, col2.id, col3.id, col4.id]);
+				await Zotero.Searches.erase([search1.id, search2.id]);
 			});
 			
-			it("should be selected for 'savedSearch' condition", function* () {
-				var search = yield createDataObject('search', { name: "A" });
+			it("should be selected for 'savedSearch' condition", async function () {
+				var search = await createDataObject('search', { name: "A" });
 				
 				var s = new Zotero.Search();
 				s.addCondition('savedSearch', 'is', search.key);
@@ -128,12 +128,12 @@ describe("Advanced Search", function () {
 				assert.isFalse(valueMenu.hidden);
 				assert.equal(valueMenu.selectedItem.value, "S" + search.key);
 				
-				yield search.eraseTx();
+				await search.eraseTx();
 			});
 			
-			it("should set 'savedSearch' condition when a search is selected", function* () {
-				var collection = yield createDataObject('collection', { name: "A" });
-				var search = yield createDataObject('search', { name: "B" });
+			it("should set 'savedSearch' condition when a search is selected", async function () {
+				var collection = await createDataObject('collection', { name: "A" });
+				var search = await createDataObject('search', { name: "B" });
 				
 				var s = new Zotero.Search();
 				s.addCondition('title', 'is', '');
@@ -164,18 +164,18 @@ describe("Advanced Search", function () {
 				assert.equal(condition.condition, 'savedSearch');
 				assert.equal(condition.value, search.key);
 				
-				yield collection.eraseTx();
-				yield search.eraseTx();
+				await collection.eraseTx();
+				await search.eraseTx();
 			});
 			
-			it("should update when the library is changed", function* () {
-				var group = yield getGroup();
+			it("should update when the library is changed", async function () {
+				var group = await getGroup();
 				var groupLibraryID = group.libraryID;
 				
-				var collection1 = yield createDataObject('collection', { name: "A" });
-				var search1 = yield createDataObject('search', { name: "B" });
-				var collection2 = yield createDataObject('collection', { name: "C", libraryID: groupLibraryID });
-				var search2 = yield createDataObject('search', { name: "D", libraryID: groupLibraryID });
+				var collection1 = await createDataObject('collection', { name: "A" });
+				var search1 = await createDataObject('search', { name: "B" });
+				var collection2 = await createDataObject('collection', { name: "C", libraryID: groupLibraryID });
+				var search2 = await createDataObject('search', { name: "D", libraryID: groupLibraryID });
 				
 				var s = new Zotero.Search();
 				s.addCondition('title', 'is', '');
@@ -224,13 +224,13 @@ describe("Advanced Search", function () {
 				assert.include(values, "C" + collection2.key);
 				assert.include(values, "S" + search2.key);
 				
-				yield Zotero.Collections.erase([collection1.id, collection2.id]);
-				yield Zotero.Searches.erase([search1.id, search2.id]);
+				await Zotero.Collections.erase([collection1.id, collection2.id]);
+				await Zotero.Searches.erase([search1.id, search2.id]);
 			});
 		});
 		
 		describe("Saved Search", function () {
-			it("shouldn't appear", function* () {
+			it("shouldn't appear", async function () {
 				var searchCondition = conditions.firstChild;
 				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
 				

@@ -1,4 +1,4 @@
-new function() {
+new function () {
 var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");;
 
 const { HiddenBrowser } = ChromeUtils.importESModule('chrome://zotero/content/HiddenBrowser.mjs');
@@ -37,7 +37,7 @@ function saveItemsThroughTranslator(translatorType, items, translateOptions = {}
 		"		item.complete();\n"+
 		"	}\n"+
 		"}"));
-	return translate.translate(translateOptions).then(function(items) {
+	return translate.translate(translateOptions).then(function (items) {
 		return items;
 	});
 }
@@ -102,31 +102,31 @@ function getTestPDF() {
  * restarted by resetDB(), which would erase our registered endpoints.
  */
 function setupAttachmentEndpoints() {
-	var SnapshotTest = function() {};
+	var SnapshotTest = function () {};
 	Zotero.Server.Endpoints["/test/translate/test.html"] = SnapshotTest;
 	SnapshotTest.prototype = {
 		"supportedMethods":["GET"],
-		"init":function(data, sendResponseCallback) {
+		"init":function (data, sendResponseCallback) {
 			Zotero.File.getBinaryContentsAsync(getTestSnapshot()).then(function (data) {
 				sendResponseCallback(200, "text/html", data);
 			});
 		}
 	}
-	var PDFTest = function() {};
+	var PDFTest = function () {};
 	Zotero.Server.Endpoints["/test/translate/test.pdf"] = PDFTest;
 	PDFTest.prototype = {
 		"supportedMethods":["GET"],
-		"init":function(data, sendResponseCallback) {
+		"init":function (data, sendResponseCallback) {
 			Zotero.File.getBinaryContentsAsync(getTestPDF()).then(function (data) {
 				sendResponseCallback(200, "application/pdf", data);
 			});
 		}
 	}
-	var NonExistentTest = function() {};
+	var NonExistentTest = function () {};
 	Zotero.Server.Endpoints["/test/translate/does_not_exist.html"] = NonExistentTest;
 	NonExistentTest.prototype = {
 		"supportedMethods":["GET"],
-		"init":function(data, sendResponseCallback) {
+		"init":function (data, sendResponseCallback) {
 			sendResponseCallback(404, "text/html", "File does not exist");
 		}
 	}
@@ -141,7 +141,7 @@ function setupAsyncEndpoints() {
 	Zotero.Server.Endpoints["/test/translate/test.json"] = JSONTest;
 	JSONTest.prototype = {
 		"supportedMethods": ["GET"],
-		"init": function(data, sendResponseCallback) {
+		"init": function (data, sendResponseCallback) {
 			sendResponseCallback(200, "application/json", JSON.stringify({
 				success: true,
 				array: [1, 2, 3]
@@ -150,7 +150,7 @@ function setupAsyncEndpoints() {
 	}
 }
 
-describe("Zotero.Translate", function() {
+describe("Zotero.Translate", function () {
 	let serverURL
 	let htmlURL;
 	
@@ -165,8 +165,8 @@ describe("Zotero.Translate", function() {
 		setupAttachmentEndpoints();
 	});
 
-	describe("Zotero.Item", function() {
-		it('should save ordinary fields and creators', function* () {
+	describe("Zotero.Item", function () {
+		it('should save ordinary fields and creators', async function () {
 			this.timeout(10000);
 			let data = loadSampleData('allTypesAndFields');
 			let trueItems = loadSampleData('itemJSON');
@@ -179,7 +179,7 @@ describe("Zotero.Translate", function() {
 				delete trueItem.key;
 			}
 
-			let newItems = yield saveItemsThroughTranslator("import", saveItems);
+			let newItems = await saveItemsThroughTranslator("import", saveItems);
 			let savedItems = {};
 			for (let i=0; i<newItems.length; i++) {
 				let savedItem = newItems[i].toJSON();
@@ -227,26 +227,26 @@ describe("Zotero.Translate", function() {
 			}
 		});
 
-		it('should accept deprecated SQL accessDates', function* () {
+		it('should accept deprecated SQL accessDates', async function () {
 			let myItem = {
 				"itemType":"webpage",
 				"title":"Test Item",
 				"accessDate":"2015-01-02 03:04:05"
 			}
-			let newItems = yield saveItemsThroughTranslator("import", [myItem]);
+			let newItems = await saveItemsThroughTranslator("import", [myItem]);
 			assert.equal(newItems[0].getField("accessDate"), "2015-01-02 03:04:05");
 		});
 
-		it('should save tags', function* () {
+		it('should save tags', async function () {
 			let myItem = {
 				"itemType":"book",
 				"title":"Test Item",
 				"tags":TEST_TAGS
 			};
-			checkTestTags((yield saveItemsThroughTranslator("import", [myItem]))[0]);
+			checkTestTags(((await saveItemsThroughTranslator("import", [myItem])))[0]);
 		});
 
-		it('should save notes', function* () {
+		it('should save notes', async function () {
 			let myItems = [
 				{
 					"itemType":"book",
@@ -266,12 +266,12 @@ describe("Zotero.Translate", function() {
 				}
 			];
 
-			let newItems = itemsArrayToObject(yield saveItemsThroughTranslator("import", myItems));
+			let newItems = itemsArrayToObject(await saveItemsThroughTranslator("import", myItems));
 			let noteIDs = newItems["Test Item"].getNotes();
-			let note1 = yield Zotero.Items.getAsync(noteIDs[0]);
+			let note1 = await Zotero.Items.getAsync(noteIDs[0]);
 			assert.equal(Zotero.ItemTypes.getName(note1.itemTypeID), "note");
 			assert.equal(note1.note, "1 note as string");
-			let note2 = yield Zotero.Items.getAsync(noteIDs[1]);
+			let note2 = await Zotero.Items.getAsync(noteIDs[1]);
 			assert.equal(Zotero.ItemTypes.getName(note2.itemTypeID), "note");
 			assert.equal(note2.note, "2 note as object");
 			checkTestTags(note2);
@@ -297,7 +297,7 @@ describe("Zotero.Translate", function() {
 			assert.equal(relations["dc:relation"][0], itemURI);
 		});
 		
-		it('should save collections', function* () {
+		it('should save collections', async function () {
 			let translate = new Zotero.Translate.Import();
 			translate.setString("");
 			translate.setTranslator(buildDummyTranslator(4,
@@ -319,27 +319,27 @@ describe("Zotero.Translate", function() {
 				'	collection.children = [{"id":1}, {"type":"collection", "name":"Child Collection", "children":[{"id":2}]}];\n'+
 				'	collection.complete();\n'+
 				'}'));
-			let newItems = yield translate.translate();
+			let newItems = await translate.translate();
 			assert.equal(newItems.length, 3);
 			newItems = itemsArrayToObject(newItems);
 			assert.equal(newItems["Not in Collection"].getCollections().length, 0);
 
 			let parentCollection = newItems["In Parent Collection"].getCollections();
 			assert.equal(parentCollection.length, 1);
-			parentCollection = (yield Zotero.Collections.getAsync(parentCollection))[0];
+			parentCollection = ((await Zotero.Collections.getAsync(parentCollection)))[0];
 			assert.equal(parentCollection.name, "Parent Collection");
 			assert.isTrue(parentCollection.hasChildCollections());
 
 			let childCollection = newItems["In Child Collection"].getCollections();
 			assert.equal(childCollection.length, 1);
-			childCollection = (yield Zotero.Collections.getAsync(childCollection[0]));
+			childCollection = ((await Zotero.Collections.getAsync(childCollection[0])));
 			assert.equal(childCollection.name, "Child Collection");
 			let parentChildren = parentCollection.getChildCollections();
 			assert.equal(parentChildren.length, 1);
 			assert.equal(parentChildren[0], childCollection);
 		});
 
-		it('import translators should save attachments', function* () {
+		it('import translators should save attachments', async function () {
 			let emptyPDF = getTestPDF().path;
 			let snapshot = getTestSnapshot().path;
 			let myItems = [
@@ -373,8 +373,8 @@ describe("Zotero.Translate", function() {
 				"attachments":childAttachments
 			});
 
-			let newItems = itemsArrayToObject(yield saveItemsThroughTranslator("import", myItems));
-			let containedAttachments = yield Zotero.Items.getAsync(newItems["Container Item"].getAttachments());
+			let newItems = itemsArrayToObject(await saveItemsThroughTranslator("import", myItems));
+			let containedAttachments = await Zotero.Items.getAsync(newItems["Container Item"].getAttachments());
 			assert.equal(containedAttachments.length, 3);
 
 			for (let savedAttachments of [[newItems["Empty PDF"], newItems["Link to zotero.org"]],
@@ -398,7 +398,7 @@ describe("Zotero.Translate", function() {
 			checkTestTags(containedAttachments[2]);
 		});
 
-		it('import translators should save missing snapshots as links', function* () {
+		it('import translators should save missing snapshots as links', async function () {
 			let missingFile = getTestDataDirectory();
 			missingFile.append("missing");
 			assert.isFalse(missingFile.exists());
@@ -420,10 +420,10 @@ describe("Zotero.Translate", function() {
 				}
 			];
 
-			let newItems = yield saveItemsThroughTranslator("import", myItems);
+			let newItems = await saveItemsThroughTranslator("import", myItems);
 			assert.equal(newItems.length, 1);
 			assert.equal(newItems[0].getField("title"), "Container Item");
-			let containedAttachments = yield Zotero.Items.getAsync(newItems[0].getAttachments());
+			let containedAttachments = await Zotero.Items.getAsync(newItems[0].getAttachments());
 			assert.equal(containedAttachments.length, 1);
 
 			assert.equal(containedAttachments[0].getField("title"), "Snapshot with missing file");
@@ -433,7 +433,7 @@ describe("Zotero.Translate", function() {
 			checkTestTags(containedAttachments[0]);
 		});
 
-		it('import translators should ignore missing file attachments', function* () {
+		it('import translators should ignore missing file attachments', async function () {
 			let missingFile = getTestDataDirectory();
 			missingFile.append("missing");
 			assert.isFalse(missingFile.exists());
@@ -457,7 +457,7 @@ describe("Zotero.Translate", function() {
 				}
 			];
 
-			let newItems = yield saveItemsThroughTranslator("import", myItems);
+			let newItems = await saveItemsThroughTranslator("import", myItems);
 			assert.equal(newItems.length, 1);
 			assert.equal(newItems[0].getField("title"), "Container Item");
 			assert.equal(newItems[0].getAttachments().length, 0);
@@ -643,34 +643,34 @@ describe("Zotero.Translate", function() {
 			assert.notEqual(newPath, path);
 		});
 		
-		it('web translators should set accessDate to current date', function* () {
+		it('web translators should set accessDate to current date', async function () {
 			let myItem = {
 				"itemType":"webpage",
 				"title":"Test Item",
 				"url":"http://www.zotero.org/"
 			};
-			let newItems = yield saveItemsThroughTranslator("web", [myItem]);
+			let newItems = await saveItemsThroughTranslator("web", [myItem]);
 			let currentDate = new Date();
 			let delta = currentDate - Zotero.Date.sqlToDate(newItems[0].getField("accessDate"), true);
 			assert.isAbove(delta, -500);
 			assert.isBelow(delta, 5000);
 		});
 		
-		it('web translators should set accessDate to current date for CURRENT_TIMESTAMP', function* () {
+		it('web translators should set accessDate to current date for CURRENT_TIMESTAMP', async function () {
 			let myItem = {
 				itemType: "webpage",
 				title: "Test Item",
 				url: "https://www.zotero.org/",
 				accessDate: 'CURRENT_TIMESTAMP'
 			};
-			let newItems = yield saveItemsThroughTranslator("web", [myItem]);
+			let newItems = await saveItemsThroughTranslator("web", [myItem]);
 			let currentDate = new Date();
 			let delta = currentDate - Zotero.Date.sqlToDate(newItems[0].getField("accessDate"), true);
 			assert.isAbove(delta, -500);
 			assert.isBelow(delta, 5000);
 		});
 
-		it('web translators should save attachments', function* () {
+		it('web translators should save attachments', async function () {
 			let myItems = [
 				{
 					"itemType":"book",
@@ -699,9 +699,9 @@ describe("Zotero.Translate", function() {
 				}
 			];
 
-			let newItems = yield saveItemsThroughTranslator("web", myItems);
+			let newItems = await saveItemsThroughTranslator("web", myItems);
 			assert.equal(newItems.length, 1);
-			let containedAttachments = itemsArrayToObject(yield Zotero.Items.getAsync(newItems[0].getAttachments()));
+			let containedAttachments = itemsArrayToObject(await Zotero.Items.getAsync(newItems[0].getAttachments()));
 
 			let link = containedAttachments["Link to zotero.org"];
 			assert.equal(link.getField("url"), "http://www.zotero.org/");
@@ -724,10 +724,10 @@ describe("Zotero.Translate", function() {
 			checkTestTags(pdf, true);
 		});
 
-		it('web translators should save attachment from browser document', function* () {
+		it('web translators should save attachment from browser document', async function () {
 			let browser = new HiddenBrowser();
-			yield browser.load(htmlURL);
-			let doc = yield browser.getDocument();
+			await browser.load(htmlURL);
+			let doc = await browser.getDocument();
 
 			let translate = new Zotero.Translate.Web();
 			translate.setDocument(doc);
@@ -744,7 +744,7 @@ describe("Zotero.Translate", function() {
 				'	}];\n'+
 				'	item.complete();\n'+
 				'}'));
-			let newItems = yield translate.translate();
+			let newItems = await translate.translate();
 			assert.equal(newItems.length, 1);
 			let containedAttachments = Zotero.Items.get(newItems[0].getAttachments());
 			assert.equal(containedAttachments.length, 1);
@@ -759,7 +759,7 @@ describe("Zotero.Translate", function() {
 			browser.destroy();
 		});
 		
-		it('web translators should save attachment from non-browser document', function* () {
+		it('web translators should save attachment from non-browser document', async function () {
 			return Zotero.HTTP.processDocuments(
 				htmlURL,
 				async function (doc) {
@@ -793,7 +793,7 @@ describe("Zotero.Translate", function() {
 			);
 		});
 
-		it('web translators should ignore attachments that return error codes', function* () {
+		it('web translators should ignore attachments that return error codes', async function () {
 			this.timeout(60000);
 			let myItems = [
 				{
@@ -812,13 +812,13 @@ describe("Zotero.Translate", function() {
 				}
 			];
 
-			let newItems = yield saveItemsThroughTranslator("web", myItems);
+			let newItems = await saveItemsThroughTranslator("web", myItems);
 			assert.equal(newItems.length, 1);
-			let containedAttachments = yield Zotero.Items.getAsync(newItems[0].getAttachments());
+			let containedAttachments = await Zotero.Items.getAsync(newItems[0].getAttachments());
 			assert.equal(containedAttachments.length, 0);
 		});
 
-		it('web translators should save PDFs only if the content type matches', function* () {
+		it('web translators should save PDFs only if the content type matches', async function () {
 			this.timeout(60000);
 			let myItems = [
 				{
@@ -841,9 +841,9 @@ describe("Zotero.Translate", function() {
 				}
 			];
 
-			let newItems = yield saveItemsThroughTranslator("web", myItems);
+			let newItems = await saveItemsThroughTranslator("web", myItems);
 			assert.equal(newItems.length, 1);
-			let containedAttachments = yield Zotero.Items.getAsync(newItems[0].getAttachments());
+			let containedAttachments = await Zotero.Items.getAsync(newItems[0].getAttachments());
 			assert.equal(containedAttachments.length, 1);
 
 			let pdf = containedAttachments[0];
@@ -854,7 +854,7 @@ describe("Zotero.Translate", function() {
 			checkTestTags(pdf, true);
 		});
 		
-		it('should not convert tags to canonical form in child translators', function* () {
+		it('should not convert tags to canonical form in child translators', async function () {
 			var childTranslator = buildDummyTranslator(1, 
 				`function detectWeb() {}
 				function doImport() {
@@ -886,10 +886,10 @@ describe("Zotero.Translate", function() {
 			var translate = new Zotero.Translate.Import();
 			translate.setTranslator(parentTranslator);
 			translate.setString("");
-			yield translate._loadTranslator(parentTranslator);
+			await translate._loadTranslator(parentTranslator);
 			translate._sandboxManager.importObject({childItemDone});
 			
-			var items = yield translate.translate();
+			var items = await translate.translate();
 			
 			// Canonicalized tags after parent translator
 			assert.deepEqual([{tag: 'owl'}, {tag: 'tag'}], items[0].getTags());
@@ -1005,7 +1005,7 @@ describe("Zotero.Translate", function() {
 			checkTestTags(snapshot, true);
 		});
 		
-		it("should use loaded document instead of reloading if possible", function* () {
+		it("should use loaded document instead of reloading if possible", async function () {
 			var translate = new Zotero.Translate.Web();
 			translate.setDocument(doc);
 			translate.setTranslator(
@@ -1037,7 +1037,7 @@ describe("Zotero.Translate", function() {
 					}`
 				)
 			);
-			var newItems = yield translate.translate();
+			var newItems = await translate.translate();
 			assert.equal(newItems.length, 1);
 			
 			var item = newItems[0];
@@ -1211,12 +1211,12 @@ describe("Zotero.Translate", function() {
 	
 	
 	describe("Translators", function () {
-		it("should round-trip child attachment via BibTeX", function* () {
-			var item = yield createDataObject('item');
-			yield importFileAttachment('test.png', { parentItemID: item.id });
+		it("should round-trip child attachment via BibTeX", async function () {
+			var item = await createDataObject('item');
+			await importFileAttachment('test.png', { parentItemID: item.id });
 			
 			var translation = new Zotero.Translate.Export();
-			var tmpDir = yield getTempDirectory();
+			var tmpDir = await getTempDirectory();
 			var exportDir = OS.Path.join(tmpDir, 'export');
 			translation.setLocation(Zotero.File.pathToFile(exportDir));
 			translation.setItems([item]);
@@ -1224,17 +1224,17 @@ describe("Zotero.Translate", function() {
 			translation.setDisplayOptions({
 				exportFileData: true
 			});
-			yield translation.translate();
+			await translation.translate();
 			
 			var exportFile = OS.Path.join(exportDir, 'export.bib');
-			assert.isTrue(yield OS.File.exists(exportFile));
+			assert.isTrue(await OS.File.exists(exportFile));
 			
 			var translation = new Zotero.Translate.Import();
 			translation.setLocation(Zotero.File.pathToFile(exportFile));
-			var translators = yield translation.getTranslators();
+			var translators = await translation.getTranslators();
 			translation.setTranslator(translators[0]);
-			var importCollection = yield createDataObject('collection');
-			var items = yield translation.translate({
+			var importCollection = await createDataObject('collection');
+			var items = await translation.translate({
 				libraryID: Zotero.Libraries.userLibraryID,
 				collections: [importCollection.id]
 			});
@@ -1243,7 +1243,7 @@ describe("Zotero.Translate", function() {
 			var attachments = items[0].getAttachments();
 			assert.lengthOf(attachments, 1);
 			var attachment = Zotero.Items.get(attachments[0]);
-			assert.isTrue(yield attachment.fileExists());
+			assert.isTrue(await attachment.fileExists());
 		});
 		
 		it("should round-trip collections via Zotero RDF", async function () {
@@ -1507,8 +1507,8 @@ describe("Zotero.Translate", function() {
 	
 	describe("ItemSaver", function () {
 		describe("#saveCollections()", function () {
-			it("should add top-level collections to specified collection", function* () {
-				var collection = yield createDataObject('collection');
+			it("should add top-level collections to specified collection", async function () {
+				var collection = await createDataObject('collection');
 				var collections = [
 					{
 						name: "Collection",
@@ -1543,7 +1543,7 @@ describe("Zotero.Translate", function() {
 					+ "	}\n"
 					+ "}"
 				));
-				yield translation.translate({
+				await translation.translate({
 					collections: [collection.id]
 				});
 				assert.lengthOf(translation.newCollections, 1);
@@ -1556,8 +1556,8 @@ describe("Zotero.Translate", function() {
 		});
 		
 		describe("#_saveAttachment()", function () {
-			it("should save standalone attachment to collection", function* () {
-				var collection = yield createDataObject('collection');
+			it("should save standalone attachment to collection", async function () {
+				var collection = await createDataObject('collection');
 				var items = [
 					{
 						itemType: "attachment",
@@ -1581,7 +1581,7 @@ describe("Zotero.Translate", function() {
 					+ "	}\n"
 					+ "}"
 				));
-				yield translation.translate({
+				await translation.translate({
 					collections: [collection.id]
 				});
 				assert.lengthOf(translation.newItems, 1);
@@ -1590,8 +1590,8 @@ describe("Zotero.Translate", function() {
 			});
 
 		});
-		describe('#saveItems', function() {
-			it("should deproxify item and attachment urls when proxy provided", function* (){
+		describe('#saveItems', function () {
+			it("should deproxify item and attachment urls when proxy provided", async function () {
 				var itemID;
 				var item = loadSampleData('journalArticle');
 				item = item.journalArticle;
@@ -1607,12 +1607,12 @@ describe("Zotero.Translate", function() {
 				});
 				var itemDeferred = Zotero.Promise.defer();
 				var attachmentDeferred = Zotero.Promise.defer();
-				itemSaver.saveItems([item], Zotero.Promise.coroutine(function* (attachment, progressPercentage) {
+				itemSaver.saveItems([item], async function (attachment, progressPercentage) {
 					// ItemSaver returns immediately without waiting for attachments, so we use the callback
 					// to test attachments
 					if (progressPercentage != 100) return;
 					try {
-						yield itemDeferred.promise;
+						await itemDeferred.promise;
 						let item = Zotero.Items.get(itemID);
 						attachment = Zotero.Items.get(item.getAttachments()[0]);
 						assert.equal(attachment.getField('url'), 'https://www.example.com/pdf.pdf');
@@ -1620,7 +1620,7 @@ describe("Zotero.Translate", function() {
 					} catch (e) {
 						attachmentDeferred.reject(e);
 					}
-				})).then(function(items) {
+				}).then(function (items) {
 					try {
 						assert.equal(items[0].getField('url'), 'https://www.example.com/');
 						itemID = items[0].id;
@@ -1629,14 +1629,14 @@ describe("Zotero.Translate", function() {
 						itemDeferred.reject(e);
 					}
 				});
-				yield Zotero.Promise.all([itemDeferred.promise, attachmentDeferred.promise]);
+				await Promise.all([itemDeferred.promise, attachmentDeferred.promise]);
 			});
 		});
 	});
 	
 	
 	describe("Error Handling", function () {
-		it("should propagate saveItems() errors from synchronous doImport()", function* () {
+		it("should propagate saveItems() errors from synchronous doImport()", async function () {
 			var items = [
 				{
 					// Invalid object
@@ -1668,7 +1668,7 @@ describe("Zotero.Translate", function() {
 				+ "	}"
 				+ "}"
 			));
-			var e = yield getPromiseError(translation.translate());
+			var e = await getPromiseError(translation.translate());
 			Zotero.Notifier.unregisterObserver(notifierID);
 			assert.ok(e);
 			
@@ -1679,7 +1679,7 @@ describe("Zotero.Translate", function() {
 			assert.isNull(translation._currentState);
 		});
 		
-		it("should propagate saveItems() errors from asynchronous doImport()", function* () {
+		it("should propagate saveItems() errors from asynchronous doImport()", async function () {
 			var items = [
 				{
 					// Invalid object
@@ -1724,7 +1724,7 @@ describe("Zotero.Translate", function() {
 					}
 				}
 			));
-			var e = yield getPromiseError(translation.translate());
+			var e = await getPromiseError(translation.translate());
 			Zotero.Notifier.unregisterObserver(notifierID);
 			assert.ok(e);
 			
@@ -1735,9 +1735,9 @@ describe("Zotero.Translate", function() {
 			assert.isNull(translation._currentState);
 		});
 		
-		it("should propagate errors from saveItems with synchronous doSearch()", function* () {
+		it("should propagate errors from saveItems with synchronous doSearch()", async function () {
 			var stub = sinon.stub(Zotero.Translate.ItemSaver.prototype, "saveItems");
-			stub.returns(Zotero.Promise.reject(new Error("Save error")));
+			stub.returns(Promise.reject(new Error("Save error")));
 			
 			var translation = new Zotero.Translate.Search();
 			translation.setTranslator(buildDummyTranslator(
@@ -1751,7 +1751,7 @@ describe("Zotero.Translate", function() {
 					+ "}"
 			));
 			translation.setSearch({ itemType: "journalArticle", DOI: "10.111/Test"});
-			var e = yield getPromiseError(translation.translate({
+			var e = await getPromiseError(translation.translate({
 				libraryID: Zotero.Libraries.userLibraryID,
 				saveAttachments: false
 			}));
@@ -1760,9 +1760,9 @@ describe("Zotero.Translate", function() {
 			stub.restore();
 		});
 		
-		it("should propagate errors from saveItems() with asynchronous doSearch()", function* () {
+		it("should propagate errors from saveItems() with asynchronous doSearch()", async function () {
 			var stub = sinon.stub(Zotero.Translate.ItemSaver.prototype, "saveItems");
-			stub.returns(Zotero.Promise.reject(new Error("Save error")));
+			stub.returns(Promise.reject(new Error("Save error")));
 			
 			var translation = new Zotero.Translate.Search();
 			translation.setTranslator(buildDummyTranslator(
@@ -1783,7 +1783,7 @@ describe("Zotero.Translate", function() {
 				}
 			));
 			translation.setSearch({ itemType: "journalArticle", DOI: "10.111/Test"});
-			var e = yield getPromiseError(translation.translate({
+			var e = await getPromiseError(translation.translate({
 				libraryID: Zotero.Libraries.userLibraryID,
 				saveAttachments: false
 			}));
@@ -1794,17 +1794,17 @@ describe("Zotero.Translate", function() {
 	});
 });
 
-describe("Zotero.Translate.ItemGetter", function() {
-	describe("nextItem", function() {
-		it('should return false for an empty database', Zotero.Promise.coroutine(function* () {
+describe("Zotero.Translate.ItemGetter", function () {
+	describe("nextItem", function () {
+		it('should return false for an empty database', async function () {
 			let getter = new Zotero.Translate.ItemGetter();
 			assert.isFalse(getter.nextItem());
-		}));
-		it('should return items in order they are supplied', Zotero.Promise.coroutine(function* () {
+		});
+		it('should return items in order they are supplied', async function () {
 			let getter = new Zotero.Translate.ItemGetter();
 			let items, itemIDs, itemURIs;
 
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				items = [
 					await new Zotero.Item('journalArticle'),
 					await new Zotero.Item('book')
@@ -1819,12 +1819,12 @@ describe("Zotero.Translate.ItemGetter", function() {
 			assert.equal((getter.nextItem()).uri, itemURIs[0], 'first item comes out first');
 			assert.equal((getter.nextItem()).uri, itemURIs[1], 'second item comes out second');
 			assert.isFalse((getter.nextItem()), 'end of item queue');
-		}));
-		it('should return items with tags in expected format', Zotero.Promise.coroutine(function* () {
+		});
+		it('should return items with tags in expected format', async function () {
 			let getter = new Zotero.Translate.ItemGetter();
 			let itemWithAutomaticTag, itemWithManualTag, itemWithMultipleTags
 			
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				itemWithAutomaticTag = new Zotero.Item('journalArticle');
 				itemWithAutomaticTag.addTag('automatic tag', 0);
 				await itemWithAutomaticTag.save();
@@ -1868,19 +1868,19 @@ describe("Zotero.Translate.ItemGetter", function() {
 				assert.isArray(translatorItem.tags, 'item contains multiple tags in an array' + suffix);
 				assert.lengthOf(translatorItem.tags, 2, 'expected number of tags returned' + suffix);
 			}
-		}));
-		it('should return item collections in expected format', Zotero.Promise.coroutine(function* () {
+		});
+		it('should return item collections in expected format', async function () {
 			let getter = new Zotero.Translate.ItemGetter();
 			let items, collections;
 			
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				items = getter._itemsLeft = [
 					new Zotero.Item('journalArticle'), // Not in collection
 					new Zotero.Item('journalArticle'), // In a single collection
 					new Zotero.Item('journalArticle'), //In two collections
 					new Zotero.Item('journalArticle') // In a nested collection
 				];
-				await Zotero.Promise.all(items.map(item => item.save()));
+				await Promise.all(items.map(item => item.save()));
 				
 				collections = [
 					new Zotero.Collection,
@@ -1926,13 +1926,13 @@ describe("Zotero.Translate.ItemGetter", function() {
 			assert.isArray(translatorItem.collections, 'item in a nested collection has a collections array');
 			assert.equal(translatorItem.collections.length, 1, 'item in a single nested collection lists one collection');
 			assert.equal(translatorItem.collections[0], collections[2].key, 'item in a single collection identifies correct collection');
-		}));
+		});
 		
-		it('should return item relations in expected format', Zotero.Promise.coroutine(function* () {
+		it('should return item relations in expected format', async function () {
 			let getter = new Zotero.Translate.ItemGetter();
 			let items;
 			
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 					items = [
 						new Zotero.Item('journalArticle'), // Item with no relations
 						
@@ -1943,7 +1943,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 						new Zotero.Item('journalArticle'), // But this item is not related to the item below
 						new Zotero.Item('journalArticle')
 					];
-					await Zotero.Promise.all(items.map(item => item.save()));
+					await Promise.all(items.map(item => item.save()));
 					
 					await items[1].addRelatedItem(items[2]);
 					await items[2].addRelatedItem(items[1]);
@@ -1992,12 +1992,12 @@ describe("Zotero.Translate.ItemGetter", function() {
 			assert.isDefined(translatorItem.relations['dc:relation'], 'item that is the object of one relation from item with two relations uses "dc:relation" as the predicate');
 			assert.lengthOf(translatorItem.relations['dc:relation'], 1, 'item that is the object of one relation from item with two relations lists one "dc:relation" object');
 			assert.equal(translatorItem.relations['dc:relation'][0], Zotero.URI.getItemURI(items[3]), 'item that is the object of one relation from item with two relations identifies correct subject URI');
-		}));
+		});
 		
-		it('should return standalone note in expected format', Zotero.Promise.coroutine(function* () {
+		it('should return standalone note in expected format', async function () {
 			let relatedItem, note, collection;
 			
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				relatedItem = new Zotero.Item('journalArticle');
 				await relatedItem.save();
 
@@ -2077,10 +2077,10 @@ describe("Zotero.Translate.ItemGetter", function() {
 					assert.equal(translatorNote.collections[0], collection.key, 'identifies correct collection' + suffix);
 				}
 			}
-		}));
-		it('should return attached note in expected format', Zotero.Promise.coroutine(function* () {
+		});
+		it('should return attached note in expected format', async function () {
 			let relatedItem, items, collection, note;
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				relatedItem = new Zotero.Item('journalArticle');
 				await relatedItem.save();
 				
@@ -2088,7 +2088,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 					new Zotero.Item('journalArticle'),
 					new Zotero.Item('journalArticle')
 				];
-				await Zotero.Promise.all(items.map(item => item.save()));
+				await Promise.all(items.map(item => item.save()));
 				
 				collection = new Zotero.Collection;
 				collection.name = 'test';
@@ -2122,7 +2122,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				assert.equal(translatorItem.notes.length, 0, 'item with no notes contains empty notes array' + suffix);
 				
 				note.parentID = item.id;
-				yield note.saveTx();
+				await note.saveTx();
 				
 				getter = new Zotero.Translate.ItemGetter();
 				getter._itemsLeft = [item];
@@ -2182,14 +2182,14 @@ describe("Zotero.Translate.ItemGetter", function() {
 					assert.isUndefined(translatorNote.collections, 'has no collections array' + suffix);
 				}
 			}
-		}));
+		});
 		
-		it('should return stored/linked file and URI attachments in expected format', Zotero.Promise.coroutine(function* () {
+		it('should return stored/linked file and URI attachments in expected format', async function () {
 			this.timeout(60000);
 			let file = getTestPDF();
 			let item, relatedItem;
 			
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				item = new Zotero.Item('journalArticle');
 				await item.save();
 				relatedItem = new Zotero.Item('journalArticle');
@@ -2198,14 +2198,14 @@ describe("Zotero.Translate.ItemGetter", function() {
 
 			// Attachment items
 			let attachments = [
-				yield Zotero.Attachments.importFromFile({"file":file}), // Standalone stored file
-				yield Zotero.Attachments.linkFromFile({"file":file}), // Standalone link to file
-				yield Zotero.Attachments.importFromFile({"file":file, "parentItemID":item.id}), // Attached stored file
-				yield Zotero.Attachments.linkFromFile({"file":file, "parentItemID":item.id}), // Attached link to file
-				yield Zotero.Attachments.linkFromURL({"url":'http://example.com', "parentItemID":item.id, "contentType":'application/pdf', "title":'empty'}) // Attached link to URL
+				await Zotero.Attachments.importFromFile({"file":file}), // Standalone stored file
+				await Zotero.Attachments.linkFromFile({"file":file}), // Standalone link to file
+				await Zotero.Attachments.importFromFile({"file":file, "parentItemID":item.id}), // Attached stored file
+				await Zotero.Attachments.linkFromFile({"file":file, "parentItemID":item.id}), // Attached link to file
+				await Zotero.Attachments.linkFromURL({"url":'http://example.com', "parentItemID":item.id, "contentType":'application/pdf', "title":'empty'}) // Attached link to URL
 			];
 			
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				// Make sure all fields are populated
 				for (let i=0; i<attachments.length; i++) {
 					let attachment = attachments[i];
@@ -2235,7 +2235,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				let getter = new Zotero.Translate.ItemGetter();
 				getter._itemsLeft = items.slice();
 				
-				let exportDir = yield getTempDirectory();
+				let exportDir = await getTempDirectory();
 				getter._exportFileDirectory = Zotero.File.pathToFile(exportDir);
 				
 				let legacy = getter.legacy = legacyMode[i];
@@ -2349,18 +2349,18 @@ describe("Zotero.Translate.ItemGetter", function() {
 						
 						// saveFile function
 						assert.isFunction(attachment.saveFile, prefix + 'has saveFile function' + suffix);
-						yield attachment.saveFile(attachment.defaultPath);
+						await attachment.saveFile(attachment.defaultPath);
 						assert.equal(attachment.path, OS.Path.join(exportDir, OS.Path.normalize(attachment.defaultPath)), prefix + 'path is set correctly after saveFile call' + suffix);
 						
-						let fileExists = yield OS.File.exists(attachment.path);
+						let fileExists = await OS.File.exists(attachment.path);
 						assert.isTrue(fileExists, prefix + 'file was copied to the correct path by saveFile function' + suffix);
-						fileExists = yield OS.File.exists(attachment.localPath);
+						fileExists = await OS.File.exists(attachment.localPath);
 						assert.isTrue(fileExists, prefix + 'file was not removed from original location' + suffix);
 						
 						let e;
-						e = yield getPromiseError(attachment.saveFile(attachment.defaultPath));
+						e = await getPromiseError(attachment.saveFile(attachment.defaultPath));
 						assert.match(e.message, /^ERROR_FILE_EXISTS /, prefix + 'saveFile does not overwrite existing file by default' + suffix);
-						e = yield getPromiseError(attachment.saveFile('file/../../'));
+						e = await getPromiseError(attachment.saveFile('file/../../'));
 						assert.match(e.message, /./, prefix + 'saveFile does not allow exporting outside export directory' + suffix);
 						/** TODO: check if overwriting existing file works **/
 					}
@@ -2394,15 +2394,15 @@ describe("Zotero.Translate.ItemGetter", function() {
 					/** TODO: test other relations and multiple relations per predicate (should be an array) **/
 				}
 			}
-		}));
+		});
 	});
 	
 	describe("#setCollection()", function () {
-		it("should add collection items", function* () {
-			var col = yield createDataObject('collection');
-			var item1 = yield createDataObject('item', { collections: [col.id] });
-			var item2 = yield createDataObject('item', { collections: [col.id] });
-			var item3 = yield createDataObject('item');
+		it("should add collection items", async function () {
+			var col = await createDataObject('collection');
+			var item1 = await createDataObject('item', { collections: [col.id] });
+			var item2 = await createDataObject('item', { collections: [col.id] });
+			var item3 = await createDataObject('item');
 			
 			let getter = new Zotero.Translate.ItemGetter();
 			getter.setCollection(col);
@@ -2430,14 +2430,14 @@ describe("Zotero.Translate.ItemGetter", function() {
 	});
 	
 	describe("#_attachmentToArray()", function () {
-		it("should handle missing attachment files", function* () {
-			var item = yield importFileAttachment('test.png');
+		it("should handle missing attachment files", async function () {
+			var item = await importFileAttachment('test.png');
 			var path = item.getFilePath();
 			// Delete attachment file
-			yield OS.File.remove(path);
+			await OS.File.remove(path);
 			
 			var translation = new Zotero.Translate.Export();
-			var tmpDir = yield getTempDirectory();
+			var tmpDir = await getTempDirectory();
 			var exportDir = OS.Path.join(tmpDir, 'export');
 			translation.setLocation(Zotero.File.pathToFile(exportDir));
 			translation.setItems([item]);
@@ -2445,19 +2445,19 @@ describe("Zotero.Translate.ItemGetter", function() {
 			translation.setDisplayOptions({
 				exportFileData: true
 			});
-			yield translation.translate();
+			await translation.translate();
 			
 			var exportFile = OS.Path.join(exportDir, 'export.rdf');
-			assert.isAbove((yield OS.File.stat(exportFile)).size, 0);
+			assert.isAbove(((await OS.File.stat(exportFile))).size, 0);
 		});
 		
-		it("should handle empty attachment path", function* () {
-			var item = yield importFileAttachment('test.png');
+		it("should handle empty attachment path", async function () {
+			var item = await importFileAttachment('test.png');
 			item._attachmentPath = '';
 			assert.equal(item.attachmentPath, '');
 			
 			var translation = new Zotero.Translate.Export();
-			var tmpDir = yield getTempDirectory();
+			var tmpDir = await getTempDirectory();
 			var exportDir = OS.Path.join(tmpDir, 'export');
 			translation.setLocation(Zotero.File.pathToFile(exportDir));
 			translation.setItems([item]);
@@ -2465,10 +2465,10 @@ describe("Zotero.Translate.ItemGetter", function() {
 			translation.setDisplayOptions({
 				exportFileData: true
 			});
-			yield translation.translate();
+			await translation.translate();
 			
 			var exportFile = OS.Path.join(exportDir, 'export.rdf');
-			assert.isAbove((yield OS.File.stat(exportFile)).size, 0);
+			assert.isAbove(((await OS.File.stat(exportFile))).size, 0);
 		});
 		
 		it("should handle UNC paths", async function () {

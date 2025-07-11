@@ -116,7 +116,7 @@ describe("Item Tags Box", function () {
 	
 	
 	describe("#notify()", function () {
-		it("should update an existing tag on rename", function* () {
+		it("should update an existing tag on rename", async function () {
 			var tag = Zotero.Utilities.randomString();
 			var newTag = Zotero.Utilities.randomString();
 			
@@ -126,25 +126,25 @@ describe("Item Tags Box", function () {
 					tag: tag
 				}
 			]);
-			yield item.saveTx();
+			await item.saveTx();
 			var tagsbox = doc.querySelector('#zotero-editpane-tags');
 			var rows = tagsbox.querySelectorAll('.row');
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].querySelector("editable-text").value, tag);
 			
-			yield Zotero.Tags.rename(Zotero.Libraries.userLibraryID, tag, newTag);
+			await Zotero.Tags.rename(Zotero.Libraries.userLibraryID, tag, newTag);
 			
 			rows = tagsbox.querySelectorAll('.row');
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].querySelector("editable-text").value, newTag);
 		})
 		
-		it("should update when a tag's color is removed", function* () {
+		it("should update when a tag's color is removed", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var tag = Zotero.Utilities.randomString();
 			
-			yield Zotero.Tags.setColor(libraryID, tag, "#990000");
+			await Zotero.Tags.setColor(libraryID, tag, "#990000");
 			var item = createUnsavedDataObject('item');
 			item.setTags([
 				{
@@ -154,7 +154,7 @@ describe("Item Tags Box", function () {
 					tag: "_A"
 				}
 			]);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var tagsbox = doc.querySelector('#zotero-editpane-tags');
 			var rows = tagsbox.querySelectorAll('.row');
@@ -166,7 +166,7 @@ describe("Item Tags Box", function () {
 			assert.notOk(getComputedStyle(rows[1]).getPropertyValue('--tag-color'));
 			assert.equal(rows[1].querySelector("editable-text").value, "_A");
 			
-			yield Zotero.Tags.setColor(libraryID, tag, false);
+			await Zotero.Tags.setColor(libraryID, tag, false);
 			
 			// No color remains on the tag
 			rows = tagsbox.querySelectorAll('.row');
@@ -174,7 +174,7 @@ describe("Item Tags Box", function () {
 			assert.notOk(getComputedStyle(rows[1]).getPropertyValue('--tag-color'));
 		})
 		
-		it("should update when a tag is removed from the library", function* () {
+		it("should update when a tag is removed from the library", async function () {
 			var tag = Zotero.Utilities.randomString();
 			
 			var item = createUnsavedDataObject('item');
@@ -183,22 +183,22 @@ describe("Item Tags Box", function () {
 					tag: tag
 				}
 			]);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var tagsbox = doc.querySelector('#zotero-editpane-tags');
 			var rows = tagsbox.querySelectorAll('.row');
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].querySelector("editable-text").value, tag);
 			
-			yield Zotero.Tags.removeFromLibrary(Zotero.Libraries.userLibraryID, Zotero.Tags.getID(tag));
+			await Zotero.Tags.removeFromLibrary(Zotero.Libraries.userLibraryID, Zotero.Tags.getID(tag));
 			
 			rows = tagsbox.querySelectorAll('.row');
 			assert.equal(rows.length, 0);
 		})
 	})
 
-	describe("#render", function() {
-		it("should render colored tags followed by emoji tags followed by ordinary tags", async function() {
+	describe("#render", function () {
+		it("should render colored tags followed by emoji tags followed by ordinary tags", async function () {
 			let item = await createDataObject('item', {
 				tags: [
 					{ tag: 'A_usual_tag' },

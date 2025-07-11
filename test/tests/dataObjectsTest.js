@@ -4,7 +4,7 @@ describe("Zotero.DataObjects", function () {
 	var types = ['collection', 'item', 'search'];
 	
 	describe("#get()", function () {
-		it("should return false for nonexistent objects", function* () {
+		it("should return false for nonexistent objects", async function () {
 			assert.isFalse(Zotero.Items.get(3464363));
 		});
 	});
@@ -19,10 +19,10 @@ describe("Zotero.DataObjects", function () {
 	});
 	
 	describe("#getLibraryAndKeyFromID()", function () {
-		it("should return a libraryID and key within a transaction", function* () {
+		it("should return a libraryID and key within a transaction", async function () {
 			for (let type of types) {
 				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
-				yield Zotero.DB.executeTransaction(async function () {
+				await Zotero.DB.executeTransaction(async function () {
 					let obj = createUnsavedDataObject(type);
 					await obj.save();
 					
@@ -37,12 +37,12 @@ describe("Zotero.DataObjects", function () {
 			}
 		});
 		
-		it("should return false after a save failure", function* () {
+		it("should return false after a save failure", async function () {
 			for (let type of types) {
 				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 				var obj;
 				try {
-					yield Zotero.DB.executeTransaction(async function () {
+					await Zotero.DB.executeTransaction(async function () {
 						obj = createUnsavedDataObject(type);
 						await obj.save();
 						throw 'Aborting transaction -- ignore';
@@ -60,12 +60,12 @@ describe("Zotero.DataObjects", function () {
 	})
 	
 	describe("#exists()", function () {
-		it("should return false after object is deleted", function* () {
+		it("should return false after object is deleted", async function () {
 			for (let type of types) {
 				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
-				let obj = yield createDataObject(type);
+				let obj = await createDataObject(type);
 				let id = obj.id;
-				yield obj.eraseTx();
+				await obj.eraseTx();
 				assert.isFalse(objectsClass.exists(id), type + " does not exist");
 			}
 		})
@@ -193,8 +193,8 @@ describe("Zotero.DataObjects", function () {
 	
 	
 	describe("#_setIdentifier", function () {
-		it("should not allow an id change", function* () {
-			var item = yield createDataObject('item');
+		it("should not allow an id change", async function () {
+			var item = await createDataObject('item');
 			try {
 				item.id = item.id + 1;
 			}
@@ -205,8 +205,8 @@ describe("Zotero.DataObjects", function () {
 			assert.fail("ID change allowed");
 		})
 		
-		it("should not allow a key change", function* () {
-			var item = yield createDataObject('item');
+		it("should not allow a key change", async function () {
+			var item = await createDataObject('item');
 			try {
 				item.key = Zotero.DataObjectUtilities.generateKey();
 			}
@@ -217,7 +217,7 @@ describe("Zotero.DataObjects", function () {
 			assert.fail("Key change allowed");
 		})
 		
-		it("should not allow key to be set if id is set", function* () {
+		it("should not allow key to be set if id is set", async function () {
 			var item = createUnsavedDataObject('item');
 			item.id = Zotero.Utilities.rand(100000, 1000000);
 			try {
@@ -231,7 +231,7 @@ describe("Zotero.DataObjects", function () {
 			assert.fail("ID change allowed");
 		})
 		
-		it("should not allow id to be set if key is set", function* () {
+		it("should not allow id to be set if key is set", async function () {
 			var item = createUnsavedDataObject('item');
 			item.libraryID = Zotero.Libraries.userLibraryID;
 			item.key = Zotero.DataObjectUtilities.generateKey();
@@ -245,7 +245,7 @@ describe("Zotero.DataObjects", function () {
 			assert.fail("Key change allowed");
 		})
 		
-		it("should not allow key to be set if library isn't set", function* () {
+		it("should not allow key to be set if library isn't set", async function () {
 			var item = createUnsavedDataObject('item');
 			try {
 				item.key = Zotero.DataObjectUtilities.generateKey();

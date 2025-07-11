@@ -1,5 +1,6 @@
 var { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 
+var { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 var { TestOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 var { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
@@ -51,8 +52,8 @@ if (TestOptions.makeTestData) {
 			args: [false]
 		}
 	];
-	Zotero.Promise.coroutine(function* () {
-		yield Zotero.initializationPromise;
+	(async function () {
+		await Zotero.initializationPromise;
 		for (let i=0; i<dataFiles.length; i++) {
 			let first = !i;
 			let params = dataFiles[i];
@@ -62,7 +63,7 @@ if (TestOptions.makeTestData) {
 			dump('Generating data for ' + params.name + '...');
 
 			let filePath = PathUtils.join(dataPath, params.name + '.js');
-			let exists = yield IOUtils.exists(filePath);
+			let exists = await IOUtils.exists(filePath);
 			let currentData;
 			if (exists) {
 				currentData = loadSampleData(params.name);
@@ -71,12 +72,12 @@ if (TestOptions.makeTestData) {
 			let args = params.args || [];
 			args.push(currentData);
 			let newData = params.func.apply(null, args);
-			if (newData instanceof Zotero.Promise) {
-				newData = yield newData;
+			if (newData instanceof Promise) {
+				newData = await newData;
 			}
 			let str = stableStringify(newData);
 
-			yield IOUtils.writeUTF8(PathUtils.join(dataPath, params.name + '.js'), str);
+			await IOUtils.writeUTF8(PathUtils.join(dataPath, params.name + '.js'), str);
 			dump('\nWritten to ' + PathUtils.join(dataPath, params.name + '.js\n'));
 		}
 		dump("\n");
@@ -169,7 +170,6 @@ coMocha(Mocha);
 
 before(function () {
 	// Store all prefs set in runtests.sh
-	Components.utils.import("resource://zotero/config.js");
 	var prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
 	TestOptions.customPrefs = {};
 	prefBranch.getChildList("", {})
@@ -181,7 +181,6 @@ before(function () {
  * Clear all prefs, and reset those set in runtests.sh to original values
  */
 function resetPrefs() {
-	Components.utils.import("resource://zotero/config.js");
 	var prefBranch = Services.prefs.getBranch(ZOTERO_CONFIG.PREF_BRANCH);
 	prefBranch.getChildList("", {}).forEach(key => {
 		var origVal = TestOptions.customPrefs[key];

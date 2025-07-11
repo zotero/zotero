@@ -1,10 +1,10 @@
 "use strict";
 
 describe("Zotero.Group", function () {
-	describe("#constructor()", function() {
-		it("should accept required parameters", function* () {
+	describe("#constructor()", function () {
+		it("should accept required parameters", async function () {
 			let group = new Zotero.Group();
-			yield assert.isRejected(group.saveTx()); // fails without required parameters
+			await assert.isRejected(group.saveTx()); // fails without required parameters
 			
 			let groupID = Zotero.Utilities.rand(10000, 1000000);
 			let groupName = "Test " + Zotero.Utilities.randomString();
@@ -17,7 +17,7 @@ describe("Zotero.Group", function () {
 				editable: true,
 				filesEditable: true
 			});
-			yield assert.isFulfilled(group.saveTx(), "saves given required parameters");
+			await assert.isFulfilled(group.saveTx(), "saves given required parameters");
 			
 			assert.isTrue(Zotero.Libraries.exists(group.libraryID));
 			assert.equal(group, Zotero.Groups.get(group.groupID));
@@ -28,8 +28,8 @@ describe("Zotero.Group", function () {
 		});
 	});
 	
-	describe("#version", function() {
-		it("should be settable to increasing values", function() {
+	describe("#version", function () {
+		it("should be settable to increasing values", function () {
 			let library = new Zotero.Group();
 			assert.throws(() => library.version = -1);
 			assert.throws(() => library.version = "a");
@@ -37,7 +37,7 @@ describe("Zotero.Group", function () {
 			assert.doesNotThrow(() => library.version = 0);
 			assert.doesNotThrow(() => library.version = 5);
 		});
-		it("should not be possible to decrement", function() {
+		it("should not be possible to decrement", function () {
 			let library = new Zotero.Group();
 			library.version = 5;
 			assert.throws(() => library.version = 0);
@@ -45,15 +45,15 @@ describe("Zotero.Group", function () {
 	});
 	
 	describe("#erase()", function () {
-		it("should unregister group", function* () {
-			var group = yield createGroup();
+		it("should unregister group", async function () {
+			var group = await createGroup();
 			var id = group.id;
-			yield group.eraseTx();
+			await group.eraseTx();
 			assert.isFalse(Zotero.Groups.exists(id));
 		})
 		
-		it("should provide libraryID in extraData", function* () {
-			var group = yield createGroup();
+		it("should provide libraryID in extraData", async function () {
+			var group = await createGroup();
 			var libraryID = group.libraryID;
 			
 			var deferred = Zotero.Promise.defer();
@@ -63,8 +63,8 @@ describe("Zotero.Group", function () {
 				}
 			}, ['group'], "test");
 			try {
-				yield group.eraseTx();
-				let extraData = yield deferred.promise;
+				await group.eraseTx();
+				let extraData = await deferred.promise;
 				assert.equal(extraData.libraryID, libraryID);
 			}
 			finally {
@@ -74,7 +74,7 @@ describe("Zotero.Group", function () {
 	})
 	
 	describe("#fromJSON()", function () {
-		it("should set permissions for owner", function* () {
+		it("should set permissions for owner", async function () {
 			var group = new Zotero.Group;
 			group.fromJSON({
 				owner: 1,
@@ -103,7 +103,7 @@ describe("Zotero.Group", function () {
 			assert.isFalse(group.filesEditable);
 		})
 		
-		it("should set permissions for admin", function* () {
+		it("should set permissions for admin", async function () {
 			var group = new Zotero.Group;
 			group.fromJSON({
 				owner: 1,
@@ -135,7 +135,7 @@ describe("Zotero.Group", function () {
 			assert.isFalse(group.filesEditable);
 		})
 		
-		it("should set permissions for member", function* () {
+		it("should set permissions for member", async function () {
 			var group = new Zotero.Group;
 			group.fromJSON({
 				owner: 1,
@@ -181,7 +181,7 @@ describe("Zotero.Group", function () {
 			assert.isFalse(group.filesEditable);
 		})
 		
-		it("should set permissions for non-member", function* () {
+		it("should set permissions for non-member", async function () {
 			var group = new Zotero.Group;
 			group.fromJSON({
 				owner: 1,

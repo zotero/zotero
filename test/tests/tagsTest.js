@@ -2,22 +2,22 @@
 
 describe("Zotero.Tags", function () {
 	describe("#getID()", function () {
-		it("should return tag id", function* () {
+		it("should return tag id", async function () {
 			var tagName = Zotero.Utilities.randomString();
 			var item = createUnsavedDataObject('item');
 			item.addTag(tagName);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			assert.typeOf(Zotero.Tags.getID(tagName), "number");
 		})
 	})
 	
 	describe("#getName()", function () {
-		it("should return tag id", function* () {
+		it("should return tag id", async function () {
 			var tagName = Zotero.Utilities.randomString();
 			var item = createUnsavedDataObject('item');
 			item.addTag(tagName);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var libraryID = Zotero.Libraries.userLibraryID;
 			var tagID = Zotero.Tags.getID(tagName);
@@ -26,12 +26,12 @@ describe("Zotero.Tags", function () {
 	})
 	
 	describe("#rename()", function () {
-		it("should mark items as changed", function* () {
-			var item1 = yield createDataObject('item', { tags: [{ tag: "A" }], synced: true });
-			var item2 = yield createDataObject('item', { tags: [{ tag: "A" }, { tag: "B" }], synced: true });
-			var item3 = yield createDataObject('item', { tags: [{ tag: "B" }, { tag: "C" }], synced: true });
+		it("should mark items as changed", async function () {
+			var item1 = await createDataObject('item', { tags: [{ tag: "A" }], synced: true });
+			var item2 = await createDataObject('item', { tags: [{ tag: "A" }, { tag: "B" }], synced: true });
+			var item3 = await createDataObject('item', { tags: [{ tag: "B" }, { tag: "C" }], synced: true });
 			
-			yield Zotero.Tags.rename(item1.libraryID, "A", "D");
+			await Zotero.Tags.rename(item1.libraryID, "A", "D");
 			assert.isFalse(item1.synced);
 			assert.isFalse(item2.synced);
 			assert.isTrue(item3.synced);
@@ -127,22 +127,22 @@ describe("Zotero.Tags", function () {
 	})
 	
 	describe("#purge()", function () {
-		it("should remove orphaned tags", function* () {
+		it("should remove orphaned tags", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var tagName = Zotero.Utilities.randomString();
 			var item = createUnsavedDataObject('item');
 			item.addTag(tagName);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var tagID = Zotero.Tags.getID(tagName);
 			assert.typeOf(tagID, "number");
 			
-			yield item.eraseTx();
+			await item.eraseTx();
 			
 			assert.equal(Zotero.Tags.getName(tagID), tagName);
 			
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				await Zotero.Tags.purge();
 			});
 			
@@ -164,11 +164,11 @@ describe("Zotero.Tags", function () {
 			}
 		});
 		
-		it("should set color for a tag", function* () {
+		it("should set color for a tag", async function () {
 			var aColor = '#ABCDEF';
 			var bColor = '#BCDEF0';
-			yield Zotero.Tags.setColor(libraryID, "A", aColor);
-			yield Zotero.Tags.setColor(libraryID, "B", bColor);
+			await Zotero.Tags.setColor(libraryID, "A", aColor);
+			await Zotero.Tags.setColor(libraryID, "B", bColor);
 			
 			var o = Zotero.Tags.getColor(libraryID, "A")
 			assert.equal(o.color, aColor);
@@ -183,14 +183,14 @@ describe("Zotero.Tags", function () {
 			assert.sameMembers(o.map(c => c.color), [aColor, bColor]);
 		});
 		
-		it("should clear color for a tag", function* () {
+		it("should clear color for a tag", async function () {
 			var aColor = '#ABCDEF';
-			yield Zotero.Tags.setColor(libraryID, "A", aColor);
+			await Zotero.Tags.setColor(libraryID, "A", aColor);
 			var o = Zotero.Tags.getColor(libraryID, "A")
 			assert.equal(o.color, aColor);
 			assert.equal(o.position, 0);
 			
-			yield Zotero.Tags.setColor(libraryID, "A", false);
+			await Zotero.Tags.setColor(libraryID, "A", false);
 			assert.equal(Zotero.Tags.getColors(libraryID).size, 0);
 			assert.isFalse(Zotero.Tags.getColor(libraryID, "A"));
 			

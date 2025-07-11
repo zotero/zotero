@@ -1,20 +1,20 @@
 describe("Zotero.File", function () {
 	describe("#getContentsAsync()", function () {
-		it("should handle an empty file", function* () {
+		it("should handle an empty file", async function () {
 			var path = OS.Path.join(getTestDataDirectory().path, "empty");
-			assert.equal((yield Zotero.File.getContentsAsync(path)), "");
+			assert.equal(((await Zotero.File.getContentsAsync(path))), "");
 		})
 		
-		it("should handle an extended character", function* () {
-			var contents = yield Zotero.File.getContentsAsync(
+		it("should handle an extended character", async function () {
+			var contents = await Zotero.File.getContentsAsync(
 				OS.Path.join(getTestDataDirectory().path, "charsets", "utf8.txt")
 			);
 			assert.lengthOf(contents, 3);
 			assert.equal(contents, "A\u72acB");
 		})
 		
-		it("should handle an extended Windows-1252 character", function* () {
-			var contents = yield Zotero.File.getContentsAsync(
+		it("should handle an extended Windows-1252 character", async function () {
+			var contents = await Zotero.File.getContentsAsync(
 				OS.Path.join(getTestDataDirectory().path, "charsets", "windows1252.txt"),
 				"windows-1252"
 			);
@@ -22,8 +22,8 @@ describe("Zotero.File", function () {
 			assert.equal(contents, "\u201C\u00E9\u201D");
 		})
 		
-		it("should handle a GBK character", function* () {
-			var contents = yield Zotero.File.getContentsAsync(
+		it("should handle a GBK character", async function () {
+			var contents = await Zotero.File.getContentsAsync(
 				OS.Path.join(getTestDataDirectory().path, "charsets", "gbk.txt"),
 				"gbk"
 			);
@@ -31,16 +31,16 @@ describe("Zotero.File", function () {
 			assert.equal(contents, "这是一个测试文件。");
 		})
 		
-		it("should handle an invalid character", function* () {
-			var contents = yield Zotero.File.getContentsAsync(
+		it("should handle an invalid character", async function () {
+			var contents = await Zotero.File.getContentsAsync(
 				OS.Path.join(getTestDataDirectory().path, "charsets", "invalid.txt")
 			);
 			assert.lengthOf(contents, 3);
 			assert.equal(contents, "A" + Zotero.File.REPLACEMENT_CHARACTER + "B");
 		})
 		
-		it("should respect maxLength", function* () {
-			var contents = yield Zotero.File.getContentsAsync(
+		it("should respect maxLength", async function () {
+			var contents = await Zotero.File.getContentsAsync(
 				OS.Path.join(getTestDataDirectory().path, "test.txt"),
 				false,
 				6
@@ -49,8 +49,8 @@ describe("Zotero.File", function () {
 			assert.equal(contents, "Zotero");
 		});
 		
-		it("should get a file from a file: URI", function* () {
-			var contents = yield Zotero.File.getContentsAsync(
+		it("should get a file from a file: URI", async function () {
+			var contents = await Zotero.File.getContentsAsync(
 				OS.Path.toFileURI(OS.Path.join(getTestDataDirectory().path, "test.txt"))
 			);
 			assert.isTrue(contents.startsWith('Zotero'));
@@ -60,8 +60,8 @@ describe("Zotero.File", function () {
 	describe("#getBinaryContentsAsync()", function () {
 		var magicPNG = ["89", "50", "4e", "47", "0d", "0a", "1a", "0a"].map(x => parseInt(x, 16));
 		
-		it("should return a binary string", function* () {
-			var contents = yield Zotero.File.getBinaryContentsAsync(
+		it("should return a binary string", async function () {
+			var contents = await Zotero.File.getBinaryContentsAsync(
 				OS.Path.join(getTestDataDirectory().path, "test.png")
 			);
 			assert.isAbove(contents.length, magicPNG.length);
@@ -81,8 +81,8 @@ describe("Zotero.File", function () {
 			}
 		});
 		
-		it("should respect maxLength", function* () {
-			var contents = yield Zotero.File.getBinaryContentsAsync(
+		it("should respect maxLength", async function () {
+			var contents = await Zotero.File.getBinaryContentsAsync(
 				OS.Path.join(getTestDataDirectory().path, "test.png"),
 				magicPNG.length
 			);
@@ -119,16 +119,16 @@ describe("Zotero.File", function () {
 			assert.equal(destContents.substr(0, 4), '%PDF');
 		});
 		
-		it("should save via .tmp file", function* () {
-			var tmpDir = yield getTempDirectory();
+		it("should save via .tmp file", async function () {
+			var tmpDir = await getTempDirectory();
 			var destFile = OS.Path.join(tmpDir, 'test.txt')
 			var tmpFile = destFile + ".tmp";
-			yield Zotero.File.putContentsAsync(tmpFile, 'A');
-			assert.isTrue(yield OS.File.exists(tmpFile));
-			yield Zotero.File.putContentsAsync(destFile, 'B');
-			assert.isFalse(yield OS.File.exists(tmpFile));
+			await Zotero.File.putContentsAsync(tmpFile, 'A');
+			assert.isTrue(await OS.File.exists(tmpFile));
+			await Zotero.File.putContentsAsync(destFile, 'B');
+			assert.isFalse(await OS.File.exists(tmpFile));
 			// Make sure .tmp file was deleted
-			assert.isFalse(yield OS.File.exists(tmpFile + '.tmp'));
+			assert.isFalse(await OS.File.exists(tmpFile + '.tmp'));
 		});
 	});
 	
@@ -181,26 +181,26 @@ describe("Zotero.File", function () {
 	
 	
 	describe("#getClosestDirectory()", function () {
-		it("should return directory for file that exists", function* () {
-			var tmpDir = yield getTempDirectory();
-			var closest = yield Zotero.File.getClosestDirectory(tmpDir);
+		it("should return directory for file that exists", async function () {
+			var tmpDir = await getTempDirectory();
+			var closest = await Zotero.File.getClosestDirectory(tmpDir);
 			assert.equal(closest, tmpDir);
 		});
 		
-		it("should return parent directory for missing file", function* () {
-			var tmpDir = yield getTempDirectory();
-			var closest = yield Zotero.File.getClosestDirectory(OS.Path.join(tmpDir, 'a'));
+		it("should return parent directory for missing file", async function () {
+			var tmpDir = await getTempDirectory();
+			var closest = await Zotero.File.getClosestDirectory(OS.Path.join(tmpDir, 'a'));
 			assert.equal(closest, tmpDir);
 		});
 		
-		it("should find an existing directory three levels up from a missing file", function* () {
-			var tmpDir = yield getTempDirectory();
-			var closest = yield Zotero.File.getClosestDirectory(OS.Path.join(tmpDir, 'a', 'b', 'c'));
+		it("should find an existing directory three levels up from a missing file", async function () {
+			var tmpDir = await getTempDirectory();
+			var closest = await Zotero.File.getClosestDirectory(OS.Path.join(tmpDir, 'a', 'b', 'c'));
 			assert.equal(closest, tmpDir);
 		});
 		
-		it("should return false for a path that doesn't exist at all", function* () {
-			assert.isFalse(yield Zotero.File.getClosestDirectory('/a/b/c'));
+		it("should return false for a path that doesn't exist at all", async function () {
+			assert.isFalse(await Zotero.File.getClosestDirectory('/a/b/c'));
 		});
 	});
 	
@@ -221,30 +221,30 @@ describe("Zotero.File", function () {
 	
 	
 	describe("#copyDirectory()", function () {
-		it("should copy all files within a directory", function* () {
+		it("should copy all files within a directory", async function () {
 			var tmpDir = Zotero.getTempDirectory().path;
 			var tmpCopyDir = OS.Path.join(tmpDir, "copyDirectory")
 			var source = OS.Path.join(tmpCopyDir, "1");
 			var target = OS.Path.join(tmpCopyDir, "2");
-			yield OS.File.makeDir(source, {
+			await OS.File.makeDir(source, {
 				from: tmpDir
 			});
 			
-			yield Zotero.File.putContentsAsync(OS.Path.join(source, "A"), "Test 1");
-			yield Zotero.File.putContentsAsync(OS.Path.join(source, "B"), "Test 2");
+			await Zotero.File.putContentsAsync(OS.Path.join(source, "A"), "Test 1");
+			await Zotero.File.putContentsAsync(OS.Path.join(source, "B"), "Test 2");
 			
-			yield OS.File.removeDir(target, {
+			await OS.File.removeDir(target, {
 				ignoreAbsent: true
 			});
 			
-			yield Zotero.File.copyDirectory(source, target);
+			await Zotero.File.copyDirectory(source, target);
 			
 			assert.equal(
-				(yield Zotero.File.getContentsAsync(OS.Path.join(target, "A"))),
+				((await Zotero.File.getContentsAsync(OS.Path.join(target, "A")))),
 				"Test 1"
 			);
 			assert.equal(
-				(yield Zotero.File.getContentsAsync(OS.Path.join(target, "B"))),
+				((await Zotero.File.getContentsAsync(OS.Path.join(target, "B")))),
 				"Test 2"
 			);
 		})
@@ -336,19 +336,19 @@ describe("Zotero.File", function () {
 	});
 	
 	describe("#zipDirectory()", function () {
-		it("should compress a directory recursively", function* () {
+		it("should compress a directory recursively", async function () {
 			var tmpPath = Zotero.getTempDirectory().path;
 			var path = OS.Path.join(tmpPath, Zotero.Utilities.randomString());
-			yield OS.File.makeDir(path, { unixMode: 0o755 });
-			yield Zotero.File.putContentsAsync(OS.Path.join(path, '.zotero-ft-cache'), '');
-			yield Zotero.File.putContentsAsync(OS.Path.join(path, 'a.txt'), 'A');
+			await OS.File.makeDir(path, { unixMode: 0o755 });
+			await Zotero.File.putContentsAsync(OS.Path.join(path, '.zotero-ft-cache'), '');
+			await Zotero.File.putContentsAsync(OS.Path.join(path, 'a.txt'), 'A');
 			// Create subdirectory
 			var subPath = OS.Path.join(path, 'sub');
-			yield OS.File.makeDir(subPath, { unixMode: 0o755 });
-			yield Zotero.File.putContentsAsync(OS.Path.join(subPath, 'b.txt'), 'B');
+			await OS.File.makeDir(subPath, { unixMode: 0o755 });
+			await Zotero.File.putContentsAsync(OS.Path.join(subPath, 'b.txt'), 'B');
 			
 			var zipFile = OS.Path.join(tmpPath, 'test.zip');
-			yield Zotero.File.zipDirectory(path, zipFile);
+			await Zotero.File.zipDirectory(path, zipFile);
 			
 			var zr = Components.classes["@mozilla.org/libjar/zip-reader;1"]
 				.createInstance(Components.interfaces.nsIZipReader);
@@ -442,7 +442,7 @@ describe("Zotero.File", function () {
 	
 	
 	describe("#checkFileAccessError()", function () {
-		it("should catch OS.File access-denied errors", function* () {
+		it("should catch OS.File access-denied errors", async function () {
 			// We can't modify a real OS.File.Error, but we also don't do an instanceof check in
 			// checkFileAccessError, so just set the expected properties.
 			var e = {

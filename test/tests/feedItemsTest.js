@@ -3,11 +3,11 @@ describe("Zotero.FeedItems", function () {
 	before(function* () {
 		feed = yield createFeed({ name: 'foo', url: 'http://' + Zotero.randomString() + '.com' });
 	});
-	after(function() {
+	after(function () {
 		return clearFeeds();
 	});
 	
-	describe("#getMarkedAsRead", function() {
+	describe("#getMarkedAsRead", function () {
 		var items = [];
 		var result;
 		
@@ -27,18 +27,18 @@ describe("Zotero.FeedItems", function () {
 			result = (await Zotero.FeedItems.getMarkedAsRead(feed.libraryID)).map(x => x.id);
 		});
 		
-		it('should get all marked as read items', function() {
+		it('should get all marked as read items', function () {
 			assert.include(result, items[0].id);
 			assert.include(result, items[2].id);
 		});
 		
-		it('should not include items that were not marked', function() {
+		it('should not include items that were not marked', function () {
 			assert.notInclude(result, items[1].id);
 			assert.notInclude(result, items[3].id);
 		});
 	});
 	
-	describe("#markAsReadByGUID", function() {
+	describe("#markAsReadByGUID", function () {
 		var items = [];
 		var result;
 		before(function* () {
@@ -51,47 +51,47 @@ describe("Zotero.FeedItems", function () {
 			}
 			yield Zotero.FeedItems.markAsReadByGUID([items[0].guid, items[2].guid]);
 		});
-		it('should mark as read only specified guids', function() {
+		it('should mark as read only specified guids', function () {
 			assert.isTrue(items[0].isRead);
 			assert.isTrue(items[2].isRead);
 		});
-		it('should leave other items marked unread', function() {
+		it('should leave other items marked unread', function () {
 			assert.isFalse(items[1].isRead);
 			assert.isFalse(items[3].isRead);
 		});
 	});
 	
-	describe("#getIDFromGUID()", function() {
-		it("should return false for non-existent GUID", function* () {
-			let id = yield Zotero.FeedItems.getIDFromGUID(Zotero.randomString());
+	describe("#getIDFromGUID()", function () {
+		it("should return false for non-existent GUID", async function () {
+			let id = await Zotero.FeedItems.getIDFromGUID(Zotero.randomString());
 			assert.isFalse(id);
 		});
-		it("should return feed item id from GUID", function* () {
-			let feedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
-			yield feedItem.saveTx();
+		it("should return feed item id from GUID", async function () {
+			let feedItem = await createDataObject('feedItem', { libraryID: feed.libraryID });
+			await feedItem.saveTx();
 			
-			let id2 = yield Zotero.FeedItems.getIDFromGUID(feedItem.guid);
+			let id2 = await Zotero.FeedItems.getIDFromGUID(feedItem.guid);
 			assert.equal(id2, feedItem.id);
 		});
 	});
-	describe("#getAsyncByGUID()", function() {
-		it("should return feed item from GUID", function* () {
+	describe("#getAsyncByGUID()", function () {
+		it("should return feed item from GUID", async function () {
 			let guid = Zotero.randomString();
-			let feedItem = yield createDataObject('feedItem', { guid, libraryID: feed.libraryID });
-			yield feedItem.saveTx();
+			let feedItem = await createDataObject('feedItem', { guid, libraryID: feed.libraryID });
+			await feedItem.saveTx();
 			
-			let feedItem2 = yield Zotero.FeedItems.getAsyncByGUID(guid);
+			let feedItem2 = await Zotero.FeedItems.getAsyncByGUID(guid);
 			assert.equal(feedItem2.id, feedItem.id);
 		});
-		it("should return false for non-existent GUID", function* () {
-			let feedItem = yield Zotero.FeedItems.getAsyncByGUID(Zotero.randomString());
+		it("should return false for non-existent GUID", async function () {
+			let feedItem = await Zotero.FeedItems.getAsyncByGUID(Zotero.randomString());
 			assert.isFalse(feedItem);
 		});
 	});
-	describe("#toggleReadByID()", function() {
+	describe("#toggleReadByID()", function () {
 		var save, feed, items, ids;
 		
-		before(function() {
+		before(function () {
 			save = sinon.spy(Zotero.FeedItem.prototype, 'save');
 		});
 		
@@ -114,34 +114,34 @@ describe("Zotero.FeedItems", function () {
 			yield clearFeeds();
 		});
 		
-		after(function() {
+		after(function () {
 			save.restore();
 		});
 		
-		it('should toggle all items read if at least one unread', function* () {
+		it('should toggle all items read if at least one unread', async function () {
 			items[0].isRead = false;
-			yield items[0].saveTx();
+			await items[0].saveTx();
 			
-			yield Zotero.FeedItems.toggleReadByID(ids);
+			await Zotero.FeedItems.toggleReadByID(ids);
 			
 			for(let i = 0; i < 10; i++) {
 				assert.isTrue(save.thisValues[i].isRead, "#toggleRead called with true");
 			}
 		});
 
-		it('should toggle all items unread if all read', function* () {
-			yield Zotero.FeedItems.toggleReadByID(ids);
+		it('should toggle all items unread if all read', async function () {
+			await Zotero.FeedItems.toggleReadByID(ids);
 
 			for(let i = 0; i < 10; i++) {
 				assert.isFalse(save.thisValues[i].isRead, "#toggleRead called with false");
 			}
 		});
 
-		it('should toggle all items unread if unread state specified', function* () {
+		it('should toggle all items unread if unread state specified', async function () {
 			items[0].isRead = false;
-			yield items[0].saveTx();
+			await items[0].saveTx();
 
-			yield Zotero.FeedItems.toggleReadByID(ids, false);
+			await Zotero.FeedItems.toggleReadByID(ids, false);
 
 			for(let i = 0; i < 10; i++) {
 				assert.isFalse(save.thisValues[i].isRead, "#toggleRead called with true");

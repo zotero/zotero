@@ -4,7 +4,7 @@ describe("Zotero.Feeds", function () {
 		yield clearFeeds();
 	});
 	
-	describe('#importFromOPML', function() {
+	describe('#importFromOPML', function () {
 		var opmlUrl = getTestDataUrl("feeds.opml");
 		var opmlString;
 		
@@ -17,11 +17,11 @@ describe("Zotero.Feeds", function () {
 			yield clearFeeds();
 		});
 		
-		after(function() {
+		after(function () {
 			Zotero.Feeds.updateFeeds.restore();
 		});
 		
-		it('imports feeds correctly', function* (){
+		it('imports feeds correctly', async function () {
 			let shouldExist = {
 				"http://example.com/feed1.rss": "A title 1",
 				"http://example.com/feed2.rss": "A title 2",
@@ -29,7 +29,7 @@ describe("Zotero.Feeds", function () {
 				"http://example.com/feed4.rss": "A title 4",
 				"http://example.com/feed5.rss": Zotero.getString('pane.collections.untitled')
 			};
-			yield Zotero.Feeds.importFromOPML(opmlString);
+			await Zotero.Feeds.importFromOPML(opmlString);
 			let feeds = Zotero.Feeds.getAll();
 			for (let feed of feeds) {
 				assert.equal(shouldExist[feed.url], feed.name, "Feed exists and title matches");
@@ -38,13 +38,13 @@ describe("Zotero.Feeds", function () {
 			assert.equal(Object.keys(shouldExist).length, 0, "All feeds from opml have been created");
 		});
 		
-		it("doesn't fail if some feeds already exist", function* (){
-			yield createFeed({url: "http://example.com/feed1.rss"});
-			yield Zotero.Feeds.importFromOPML(opmlString)
+		it("doesn't fail if some feeds already exist", async function () {
+			await createFeed({url: "http://example.com/feed1.rss"});
+			await Zotero.Feeds.importFromOPML(opmlString)
 		});
 	});
 	
-	describe("#restoreFromJSON", function() {
+	describe("#restoreFromJSON", function () {
 		var json, expiredFeedURL, existingFeedURL;
 		
 		beforeEach(function* () {
@@ -68,11 +68,11 @@ describe("Zotero.Feeds", function () {
 			expiredFeedURL = (yield createFeed()).url;
 		});
 		
-		it("restores correctly when merge is true", function* () {
+		it("restores correctly when merge is true", async function () {
 			let feeds = Zotero.Feeds.getAll();
 			assert.equal(feeds.length, 2);
 			
-			yield Zotero.Feeds.restoreFromJSON(json, true);
+			await Zotero.Feeds.restoreFromJSON(json, true);
 			feeds = Zotero.Feeds.getAll();
 			
 			for (let url in json) {
@@ -87,11 +87,11 @@ describe("Zotero.Feeds", function () {
 			assert.ok(existingFeed, "does not remove feeds in database and JSON");
 		});
 		
-		it("restores correctly when merge is false", function* () {
+		it("restores correctly when merge is false", async function () {
 			let feeds = Zotero.Feeds.getAll();
 			assert.equal(feeds.length, 2);
 			
-			yield Zotero.Feeds.restoreFromJSON(json);
+			await Zotero.Feeds.restoreFromJSON(json);
 			feeds = Zotero.Feeds.getAll();
 			
 			for (let url in json) {
@@ -107,36 +107,36 @@ describe("Zotero.Feeds", function () {
 		});
 	});
 
-	describe("#haveFeeds()", function() {
-		it("should return false for a DB without feeds", function* () {
-			yield clearFeeds();
+	describe("#haveFeeds()", function () {
+		it("should return false for a DB without feeds", async function () {
+			await clearFeeds();
 			assert.isFalse(Zotero.Feeds.haveFeeds(), 'no feeds in empty DB');
 			
-			let group = yield createGroup();
+			let group = await createGroup();
 			
 			assert.isFalse(Zotero.Feeds.haveFeeds(), 'no feeds in DB with groups');
 		});
-		it("should return true for a DB containing feeds", function* () {
-			let feed = yield createFeed();
+		it("should return true for a DB containing feeds", async function () {
+			let feed = await createFeed();
 			
 			assert.isTrue(Zotero.Feeds.haveFeeds());
 		});
 	});
-	describe("#getAll()", function() {
-		it("should return an empty array for a DB without feeds", function* () {
-			yield clearFeeds();
+	describe("#getAll()", function () {
+		it("should return an empty array for a DB without feeds", async function () {
+			await clearFeeds();
 			let feeds = Zotero.Feeds.getAll();
 			assert.lengthOf(feeds, 0, 'no feeds in an empty DB');
 			
-			let group = yield createGroup();
+			let group = await createGroup();
 			
 			feeds = Zotero.Feeds.getAll();
 			assert.lengthOf(feeds, 0, 'no feeds in DB with group libraries');
 		});
-		it("should return an array of feeds", function* () {
-			yield clearFeeds();
-			let feed1 = yield createFeed();
-			let feed2 = yield createFeed();
+		it("should return an array of feeds", async function () {
+			await clearFeeds();
+			let feed1 = await createFeed();
+			let feed2 = await createFeed();
 			
 			let feeds = Zotero.Feeds.getAll();
 			assert.lengthOf(feeds, 2);
@@ -144,23 +144,23 @@ describe("Zotero.Feeds", function () {
 		});
 	});
 	
-	describe('#getByURL', function() {
-		it("should return a feed by url", function* () {
+	describe('#getByURL', function () {
+		it("should return a feed by url", async function () {
 			let url = 'http://' + Zotero.Utilities.randomString(10, 'abcdefg') + '.com/feed.rss';
-			yield createFeed({url});
+			await createFeed({url});
 			let feed = Zotero.Feeds.getByURL(url);
 			assert.ok(feed);
 			assert.equal(feed.url, url);
 		});
-		it("should return undefined if feed does not exist", function* () {
+		it("should return undefined if feed does not exist", async function () {
 			var feed;
-			assert.doesNotThrow(function() {
+			assert.doesNotThrow(function () {
 				feed = Zotero.Feeds.getByURL('doesnotexist');
 			});
 			assert.isUndefined(feed);
 		});
 	});
-	describe('#updateFeeds', function() {
+	describe('#updateFeeds', function () {
 		var freshFeed, recentFeed, oldFeed;
 		var _updateFeed;
 	
@@ -190,12 +190,12 @@ describe("Zotero.Feeds", function () {
 			assert.isTrue(_updateFeed.called);
 		});
 		
-		after(function() {
+		after(function () {
 			Zotero.Feeds.scheduleNextFeedCheck.restore();
 			_updateFeed.restore();
 		});
 		
-		it('should update feeds that have never been updated', function() {
+		it('should update feeds that have never been updated', function () {
 			for (var feed of _updateFeed.thisValues) {
 				if (feed.id == freshFeed.id) {
 					break;
@@ -203,7 +203,7 @@ describe("Zotero.Feeds", function () {
 			}
 			assert.isTrue(feed._updateFeed.called);
 		});
-		it('should update feeds that need updating since last check', function() {
+		it('should update feeds that need updating since last check', function () {
 			for (var feed of _updateFeed.thisValues) {
 				if (feed.id == oldFeed.id) {
 					break;
@@ -211,7 +211,7 @@ describe("Zotero.Feeds", function () {
 			}
 			assert.isTrue(feed._updateFeed.called);
 		});
-		it("should not update feeds that don't need updating", function() {
+		it("should not update feeds that don't need updating", function () {
 			for (var feed of _updateFeed.thisValues) {
 				if (feed.id != recentFeed.id) {
 					break;
@@ -221,17 +221,17 @@ describe("Zotero.Feeds", function () {
 			}
 		});
 	});
-	describe('#scheduleNextFeedCheck()', function() {
-		it('schedules next feed check', function* () {
+	describe('#scheduleNextFeedCheck()', function () {
+		it('schedules next feed check', async function () {
 			sinon.spy(Zotero.Feeds, 'scheduleNextFeedCheck');
 			sinon.spy(Zotero.Promise, 'delay');
 			
-			yield clearFeeds();
-			let feed = yield createFeed({refreshInterval: 1});
+			await clearFeeds();
+			let feed = await createFeed({refreshInterval: 1});
 			feed._set('_feedLastCheck', Zotero.Date.dateToSQL(new Date(), true));
-			yield feed.saveTx();
+			await feed.saveTx();
 
-			yield Zotero.Feeds.scheduleNextFeedCheck();
+			await Zotero.Feeds.scheduleNextFeedCheck();
 			
 			// Allow a propagation delay of 5000ms
 			assert.isTrue(Zotero.Promise.delay.args[0][0] - 1000*60*60 <= 5000);

@@ -23,7 +23,8 @@
     
     ***** END LICENSE BLOCK *****
 */
-Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
+
+const { ComponentUtils } = ChromeUtils.importESModule("resource://gre/modules/ComponentUtils.sys.mjs");
 
 function ZoteroUnit() {
 	this.wrappedJSObject = this;

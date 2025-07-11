@@ -1,6 +1,6 @@
 "use strict";
 
-describe("ZoteroPane", function() {
+describe("ZoteroPane", function () {
 	var win, doc, zp, userLibraryID;
 	
 	// Load Zotero pane and select library
@@ -41,38 +41,38 @@ describe("ZoteroPane", function() {
 	});
 	
 	describe("#newItem", function () {
-		it("should create an item and focus the title field", function* () {
-			yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
+		it("should create an item and focus the title field", async function () {
+			await zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
 			assert.equal(doc.activeElement.closest("editable-text").id, "itembox-field-value-title");
 			doc.activeElement.blur();
-			yield Zotero.Promise.delay(1);
+			await Zotero.Promise.delay(1);
 		})
 		
-		it("should save an entered value when New Item is used", function* () {
+		it("should save an entered value when New Item is used", async function () {
 			var value = "Test";
-			var item = yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
+			var item = await zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
 			let header = doc.getElementById('zotero-item-pane-header');
 			let title = header.querySelector("editable-text");
 			title.value = value;
-			yield header.save();
-			item = yield Zotero.Items.getAsync(item.id);
+			await header.save();
+			item = await Zotero.Items.getAsync(item.id);
 			assert.equal(item.getField('title'), value);
 		})
 	});
 	
 	describe("#newNote()", function () {
-		it("should create a child note and select it", function* () {
-			var item = yield createDataObject('item');
-			var noteID = yield zp.newNote(false, item.key, "Test");
+		it("should create a child note and select it", async function () {
+			var item = await createDataObject('item');
+			var noteID = await zp.newNote(false, item.key, "Test");
 			var selected = zp.itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
 			assert.equal(selected, noteID);
 		})
 		
-		it("should create a standalone note within a collection and select it", function* () {
-			var collection = yield createDataObject('collection');
-			yield select(win, collection);
-			var noteID = yield zp.newNote(false, false, "Test");
+		it("should create a standalone note within a collection and select it", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			var noteID = await zp.newNote(false, false, "Test");
 			assert.equal(zp.collectionsView.getSelectedCollection(), collection);
 			var selected = zp.itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
@@ -81,42 +81,42 @@ describe("ZoteroPane", function() {
 	})
 	
 	describe("#newCollection()", function () {
-		it("should create a collection", function* () {
+		it("should create a collection", async function () {
 			var promise = waitForDialog(
 				null,
 				'accept',
 				'chrome://zotero/content/newCollectionDialog.xhtml'
 			);
-			var id = yield zp.newCollection();
-			yield promise;
+			var id = await zp.newCollection();
+			await promise;
 			var collection = Zotero.Collections.get(id);
 			assert.isTrue(collection.name.startsWith(Zotero.getString('pane.collections.untitled')));
 		});
 	});
 	
 	describe("#newSearch()", function () {
-		it("should create a saved search", function* () {
+		it("should create a saved search", async function () {
 			var promise = waitForDialog(
 				// TODO: Test changing a condition
 				function (dialog) {},
 				'accept',
 				'chrome://zotero/content/searchDialog.xhtml'
 			);
-			var id = yield zp.newSearch();
-			yield promise;
+			var id = await zp.newSearch();
+			await promise;
 			var search = Zotero.Searches.get(id);
 			assert.ok(search);
 			assert.isTrue(search.name.startsWith(Zotero.getString('pane.collections.untitled')));
 		});
 		
-		it("should handle clicking Cancel in the search window", function* () {
+		it("should handle clicking Cancel in the search window", async function () {
 			var promise = waitForDialog(
 				function (dialog) {},
 				'cancel',
 				'chrome://zotero/content/searchDialog.xhtml'
 			);
-			var id = yield zp.newSearch();
-			yield promise;
+			var id = await zp.newSearch();
+			await promise;
 			assert.isFalse(id);
 		});
 	});
@@ -244,9 +244,9 @@ describe("ZoteroPane", function() {
 			Zotero.HTTP.mock = null;
 		});
 		
-		it("should download an attachment on-demand in as-needed mode", function* () {
+		it("should download an attachment on-demand in as-needed mode", async function () {
 			Zotero.Sync.Storage.Local.downloadAsNeeded(Zotero.Libraries.userLibraryID, true);
-			yield downloadOnDemand();
+			await downloadOnDemand();
 		});
 		
 		// As noted in viewAttachment(), this is only necessary for files modified before 5.0.85
@@ -341,9 +341,9 @@ describe("ZoteroPane", function() {
 			assert.equal(await Zotero.File.getContentsAsync(path), text);
 		});
 		
-		it("should download an attachment on-demand in at-sync-time mode", function* () {
+		it("should download an attachment on-demand in at-sync-time mode", async function () {
 			Zotero.Sync.Storage.Local.downloadOnSync(Zotero.Libraries.userLibraryID, true);
-			yield downloadOnDemand();
+			await downloadOnDemand();
 		});
 		
 		it("should update a PDF with a blank MIME type", async function () {
@@ -758,7 +758,7 @@ describe("ZoteroPane", function() {
 			});
 		});
 		
-		it("should not copy abstracts", async function() {
+		it("should not copy abstracts", async function () {
 			await selectLibrary(win);
 			var bookItem = await createDataObject('item', { itemType: 'book', title: "Book Title" });
 			bookItem.setField('abstractNote', 'An abstract');
@@ -777,13 +777,13 @@ describe("ZoteroPane", function() {
 			await selectLibrary(win);
 		});
 		
-		it("should remove an item from My Publications", function* () {
+		it("should remove an item from My Publications", async function () {
 			var item = createUnsavedDataObject('item');
 			item.inPublications = true;
-			yield item.saveTx();
+			await item.saveTx();
 			
-			yield zp.collectionsView.selectByID("P" + userLibraryID);
-			yield waitForItemsLoad(win);
+			await zp.collectionsView.selectByID("P" + userLibraryID);
+			await waitForItemsLoad(win);
 			var iv = zp.itemsView;
 			
 			var selected = iv.selectItem(item.id);
@@ -792,7 +792,7 @@ describe("ZoteroPane", function() {
 			var tree = doc.getElementById(iv.id);
 			tree.focus();
 			
-			yield Zotero.Promise.delay(1);
+			await Zotero.Promise.delay(1);
 			
 			var promise = waitForDialog();
 			var modifyPromise = waitForItemEvent('modify');
@@ -808,20 +808,20 @@ describe("ZoteroPane", function() {
 				}
 			);
 			tree.dispatchEvent(event);
-			yield promise;
-			yield modifyPromise;
+			await promise;
+			await modifyPromise;
 			
 			assert.isFalse(item.inPublications);
 			assert.isFalse(item.deleted);
 		});
 		
-		it("should move My Publications item to trash with prompt for modified Delete", function* () {
+		it("should move My Publications item to trash with prompt for modified Delete", async function () {
 			var item = createUnsavedDataObject('item');
 			item.inPublications = true;
-			yield item.saveTx();
+			await item.saveTx();
 			
-			yield zp.collectionsView.selectByID("P" + userLibraryID);
-			yield waitForItemsLoad(win);
+			await zp.collectionsView.selectByID("P" + userLibraryID);
+			await waitForItemsLoad(win);
 			var iv = zp.itemsView;
 			
 			var selected = iv.selectItem(item.id);
@@ -830,7 +830,7 @@ describe("ZoteroPane", function() {
 			var tree = doc.getElementById(iv.id);
 			tree.focus();
 			
-			yield Zotero.Promise.delay(1);
+			await Zotero.Promise.delay(1);
 			
 			var promise = waitForDialog();
 			var modifyPromise = waitForItemEvent('modify');
@@ -848,8 +848,8 @@ describe("ZoteroPane", function() {
 				}
 			);
 			tree.dispatchEvent(event);
-			yield promise;
-			yield modifyPromise;
+			await promise;
+			await modifyPromise;
 			
 			assert.isTrue(item.inPublications);
 			assert.isTrue(item.deleted);
@@ -958,23 +958,23 @@ describe("ZoteroPane", function() {
 	});
 	
 	describe("#deleteSelectedCollection()", function () {
-		it("should move collection to trash but not descendant items by default", function* () {
-			var collection = yield createDataObject('collection');
-			yield select(win, collection);
-			var item = yield createDataObject('item', { collections: [collection.id] });
+		it("should move collection to trash but not descendant items by default", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			var item = await createDataObject('item', { collections: [collection.id] });
 			var promise = waitForDialog();
-			yield zp.deleteSelectedCollection();
+			await zp.deleteSelectedCollection();
 			assert.isTrue(collection.deleted);
 			assert.isTrue(Zotero.Items.exists(item.id));
 			assert.isFalse(item.deleted);
 		});
 		
-		it("should move to trash collection and descendant items when deleteItems=true", function* () {
-			var collection = yield createDataObject('collection');
-			yield select(win, collection);
-			var item = yield createDataObject('item', { collections: [collection.id] });
+		it("should move to trash collection and descendant items when deleteItems=true", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			var item = await createDataObject('item', { collections: [collection.id] });
 			var promise = waitForDialog();
-			yield zp.deleteSelectedCollection(true);
+			await zp.deleteSelectedCollection(true);
 			assert.isTrue(collection.deleted);
 			assert.isTrue(Zotero.Items.exists(item.id));
 			assert.isTrue(item.deleted);
@@ -994,21 +994,21 @@ describe("ZoteroPane", function() {
 			return selectLibrary(win);
 		})
 		
-		it("should show a hidden virtual collection in My Library", function* () {
+		it("should show a hidden virtual collection in My Library", async function () {
 			// Create unfiled, duplicate items
 			var title = Zotero.Utilities.randomString();
-			var item1 = yield createDataObject('item', { title });
-			var item2 = yield createDataObject('item', { title });
+			var item1 = await createDataObject('item', { title });
+			var item2 = await createDataObject('item', { title });
 			
 			// Start hidden (tested in collectionTreeViewTest)
 			Zotero.Prefs.set('duplicateLibraries', `{"${userLibraryID}": false}`);
 			Zotero.Prefs.set('unfiledLibraries', `{"${userLibraryID}": false}`);
-			yield cv.refresh();
+			await cv.refresh();
 			
 			// Show Duplicate Items
 			var id = "D" + userLibraryID;
 			assert.isFalse(cv.getRowIndexByID(id));
-			yield zp.setVirtual(userLibraryID, 'duplicates', true, true);
+			await zp.setVirtual(userLibraryID, 'duplicates', true, true);
 			// Duplicate Items should be selected
 			assert.equal(zp.getCollectionTreeRow().id, id);
 			// Should be missing from pref
@@ -1018,73 +1018,73 @@ describe("ZoteroPane", function() {
 			var row = cv.getRowIndexByID(id);
 			assert.ok(row);
 			assert.equal(cv.selection.pivot, row);
-			yield waitForItemsLoad(win);
+			await waitForItemsLoad(win);
 			var iv = zp.itemsView;
 			row = iv.getRowIndexByID(item1.id);
 			assert.isNumber(row);
 			var promise = iv.waitForSelect();
 			clickOnItemsRow(win, iv, row);
 			assert.equal(iv.selection.count, 2);
-			yield promise;
+			await promise;
 			
 			// Show Unfiled Items
 			id = "U" + userLibraryID;
 			assert.isFalse(cv.getRowIndexByID(id));
-			yield zp.setVirtual(userLibraryID, 'unfiled', true, true);
+			await zp.setVirtual(userLibraryID, 'unfiled', true, true);
 			// Unfiled Items should be selected
 			assert.equal(zp.getCollectionTreeRow().id, id);
 			// Should be missing from pref
 			assert.isUndefined(JSON.parse(Zotero.Prefs.get('unfiledLibraries'))[userLibraryID])
 		});
 		
-		it("should expand library if collapsed when showing virtual collection", function* () {
+		it("should expand library if collapsed when showing virtual collection", async function () {
 			// Start hidden (tested in collectionTreeViewTest)
 			Zotero.Prefs.set('duplicateLibraries', `{"${userLibraryID}": false}`);
-			yield cv.refresh();
+			await cv.refresh();
 			
 			var libraryRow = cv.getRowIndexByID(Zotero.Libraries.userLibrary.treeViewID);
 			if (cv.isContainerOpen(libraryRow)) {
-				yield cv.toggleOpenState(libraryRow);
+				await cv.toggleOpenState(libraryRow);
 				cv._saveOpenStates();
 			}
 			
 			// Show Duplicate Items
 			var id = "D" + userLibraryID;
-			yield zp.setVirtual(userLibraryID, 'duplicates', true, true);
+			await zp.setVirtual(userLibraryID, 'duplicates', true, true);
 			
 			// Library should have been expanded and Duplicate Items selected
 			assert.ok(cv.getRowIndexByID(id));
 			assert.equal(zp.getCollectionTreeRow().id, id);
 		});
 		
-		it("should hide a virtual collection in My Library", function* () {
-			yield cv.refresh();
+		it("should hide a virtual collection in My Library", async function () {
+			await cv.refresh();
 			
 			// Hide Duplicate Items
 			var id = "D" + userLibraryID;
-			assert.ok(yield cv.selectByID(id));
-			yield zp.setVirtual(userLibraryID, 'duplicates', false);
+			assert.ok(await cv.selectByID(id));
+			await zp.setVirtual(userLibraryID, 'duplicates', false);
 			assert.isFalse(cv.getRowIndexByID(id));
 			assert.isFalse(JSON.parse(Zotero.Prefs.get('duplicateLibraries'))[userLibraryID])
 			
 			// Hide Unfiled Items
 			id = "U" + userLibraryID;
-			assert.ok(yield cv.selectByID(id));
-			yield zp.setVirtual(userLibraryID, 'unfiled', false);
+			assert.ok(await cv.selectByID(id));
+			await zp.setVirtual(userLibraryID, 'unfiled', false);
 			assert.isFalse(cv.getRowIndexByID(id));
 			assert.isFalse(JSON.parse(Zotero.Prefs.get('unfiledLibraries'))[userLibraryID])
 		});
 		
-		it("should hide a virtual collection in a group", function* () {
-			yield cv.refresh();
+		it("should hide a virtual collection in a group", async function () {
+			await cv.refresh();
 			
-			var group = yield createGroup();
+			var group = await createGroup();
 			var groupRow = cv.getRowIndexByID(group.treeViewID);
 			var rowCount = cv._rows.length;
 			
 			// Make sure group is open
 			if (!cv.isContainerOpen(groupRow)) {
-				yield cv.toggleOpenState(groupRow);
+				await cv.toggleOpenState(groupRow);
 			}
 			
 			// Make sure Duplicate Items is showing
@@ -1092,8 +1092,8 @@ describe("ZoteroPane", function() {
 			assert.ok(cv.getRowIndexByID(id));
 			
 			// Hide Duplicate Items
-			assert.ok(yield cv.selectByID(id));
-			yield zp.setVirtual(group.libraryID, 'duplicates', false);
+			assert.ok(await cv.selectByID(id));
+			await zp.setVirtual(group.libraryID, 'duplicates', false);
 			// Row should have been removed
 			assert.isFalse(cv.getRowIndexByID(id));
 			// Pref should have been updated
@@ -1108,9 +1108,9 @@ describe("ZoteroPane", function() {
 			
 			// Hide Unfiled Items
 			id = "U" + group.libraryID;
-			assert.ok(yield cv.selectByID(id));
+			assert.ok(await cv.selectByID(id));
 			// Hide Unfiled Items
-			yield zp.setVirtual(group.libraryID, 'unfiled', false);
+			await zp.setVirtual(group.libraryID, 'unfiled', false);
 			// Row should have been removed
 			assert.isFalse(cv.getRowIndexByID(id));
 			// Pref should have been updated
@@ -1125,9 +1125,9 @@ describe("ZoteroPane", function() {
 	});
 	
 	describe("#editSelectedCollection()", function () {
-		it("should edit a saved search", function* () {
-			var search = yield createDataObject('search');
-			yield select(win, search);
+		it("should edit a saved search", async function () {
+			var search = await createDataObject('search');
+			await select(win, search);
 			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
 				let searchBox = win.document.getElementById('search-box');
 				var c = searchBox.search.getCondition(
@@ -1136,16 +1136,16 @@ describe("ZoteroPane", function() {
 				searchBox.addCondition(c);
 				win.document.querySelector('dialog').acceptDialog();
 			});
-			yield zp.editSelectedCollection();
-			yield promise;
+			await zp.editSelectedCollection();
+			await promise;
 			var conditions = search.getConditions();
 			assert.lengthOf(Object.keys(conditions), 3);
 		});
 		
-		it("should edit a saved search in a group", function* () {
-			var group = yield getGroup();
-			var search = yield createDataObject('search', { libraryID: group.libraryID });
-			yield select(win, search);
+		it("should edit a saved search in a group", async function () {
+			var group = await getGroup();
+			var search = await createDataObject('search', { libraryID: group.libraryID });
+			await select(win, search);
 			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
 				let searchBox = win.document.getElementById('search-box');
 				var c = searchBox.search.getCondition(
@@ -1154,8 +1154,8 @@ describe("ZoteroPane", function() {
 				searchBox.addCondition(c);
 				win.document.querySelector('dialog').acceptDialog();
 			});
-			yield zp.editSelectedCollection();
-			yield promise;
+			await zp.editSelectedCollection();
+			await promise;
 			var conditions = search.getConditions();
 			assert.lengthOf(Object.keys(conditions), 3);
 		});
@@ -1804,7 +1804,7 @@ describe("ZoteroPane", function() {
 		});
 	});
 	describe("#changeParentItem", function () {
-		it("should update the parent of selected items", async function() {
+		it("should update the parent of selected items", async function () {
 			// One item has 2 children and the other one - none
 			let oldParent = await createDataObject('item');
 			let newParent = await createDataObject('item');
@@ -1835,7 +1835,7 @@ describe("ZoteroPane", function() {
 			assert.notInclude(oldParent.getAttachments(), attachment.id);
 		});
 
-		it("should allow converting attachments to standalone when applicable", async function() {
+		it("should allow converting attachments to standalone when applicable", async function () {
 			let collection = await createDataObject('collection');
 			let parent = await createDataObject('item', { collections: [collection.id] });
 			var attachment = await importPDFAttachment(parent);

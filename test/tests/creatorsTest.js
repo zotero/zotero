@@ -1,14 +1,14 @@
 "use strict";
 
-describe("Zotero.Creators", function() {
+describe("Zotero.Creators", function () {
 	describe("#getIDFromData()", function () {
-		it("should create creator and cache data", function* () {
+		it("should create creator and cache data", async function () {
 			var data1 = {
 				firstName: "First",
 				lastName: "Last"
 			};
 			var creatorID;
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				creatorID = await Zotero.Creators.getIDFromData(data1, true);
 			});
 			assert.typeOf(creatorID, 'number');
@@ -20,7 +20,7 @@ describe("Zotero.Creators", function() {
 	});
 	
 	describe("#cleanData()", function () {
-		it("should allow firstName to be null for fieldMode 1", function* () {
+		it("should allow firstName to be null for fieldMode 1", async function () {
 			var data = Zotero.Creators.cleanData({
 				firstName: null,
 				lastName: "Test",

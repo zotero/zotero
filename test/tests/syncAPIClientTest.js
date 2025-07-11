@@ -1,8 +1,6 @@
 "use strict";
 
 describe("Zotero.Sync.APIClient", function () {
-	Components.utils.import("resource://zotero/config.js");
-	
 	var apiKey = Zotero.Utilities.randomString(24);
 	var baseURL = "http://local.zotero/";
 	var server, client;
@@ -69,7 +67,7 @@ describe("Zotero.Sync.APIClient", function () {
 	
 	
 	describe("#getGroups()", function () {
-		it("should automatically fetch multiple pages of results", function* () {
+		it("should automatically fetch multiple pages of results", async function () {
 			function groupJSON(groupID) {
 				return {
 					id: groupID,
@@ -130,7 +128,7 @@ describe("Zotero.Sync.APIClient", function () {
 				}
 			});
 			
-			var results = yield client.getGroups(1);
+			var results = await client.getGroups(1);
 			assert.lengthOf(results, 5);
 			assert.sameMembers(results.map(o => o.id), [1, 2, 3, 4, 5]);
 		});

@@ -1,15 +1,13 @@
 "use strict";
 
 describe("Zotero.Sync.Data.FullTextEngine", function () {
-	Components.utils.import("resource://zotero/config.js");
-	
 	var apiKey = Zotero.Utilities.randomString(24);
 	var baseURL = "http://local.zotero/";
 	var engine, server, client, caller, stub, spy;
 	
 	var responses = {};
 	
-	var setup = Zotero.Promise.coroutine(function* (options = {}) {
+	var setup = async function (options = {}) {
 		server = sinon.fakeServer.create();
 		server.autoRespond = true;
 		
@@ -33,7 +31,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 		});
 		
 		return { engine, client, caller };
-	});
+	};
 	
 	function setResponse(response) {
 		setHTTPResponse(server, baseURL, response, responses);
@@ -59,25 +57,25 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 	})
 	
 	describe("Full-Text Syncing", function () {
-		it("should skip full-text download if main library version is the same", function* () {
-			({ engine, client, caller } = yield setup());
+		it("should skip full-text download if main library version is the same", async function () {
+			({ engine, client, caller } = await setup());
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 10;
-			yield library.saveTx();
-			yield Zotero.Fulltext.setLibraryVersion(library.id, 10);
-			yield engine.start();
+			await library.saveTx();
+			await Zotero.Fulltext.setLibraryVersion(library.id, 10);
+			await engine.start();
 		});
 		
-		it("should download full-text into a new library and subsequent updates", function* () {
-			({ engine, client, caller } = yield setup());
+		it("should download full-text into a new library and subsequent updates", async function () {
+			({ engine, client, caller } = await setup());
 			
-			var item = yield createDataObject('item');
+			var item = await createDataObject('item');
 			var attachment = new Zotero.Item('attachment');
 			attachment.parentItemID = item.id;
 			attachment.attachmentLinkMode = 'imported_file';
 			attachment.attachmentContentType = 'application/pdf';
 			attachment.attachmentFilename = 'test.pdf';
-			yield attachment.saveTx();
+			await attachment.saveTx();
 			
 			var content = generateContent()
 			var spy = sinon.spy(Zotero.Fulltext, "registerContentProcessor")
@@ -88,7 +86,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			// Set main library version to new version
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = libraryVersion;
-			yield library.saveTx();
+			await library.saveTx();
 			
 			setResponse({
 				method: "GET",
@@ -114,17 +112,17 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 					totalPages: 1
 				}
 			});
-			yield engine.start();
+			await engine.start();
 			
 			var dir = Zotero.Attachments.getStorageDirectory(attachment).path;
 			var unprocessed = OS.Path.join(dir, '.zotero-ft-unprocessed');
-			assert.isTrue(yield OS.File.exists(unprocessed));
-			var data = JSON.parse(yield Zotero.File.getContentsAsync(unprocessed));
+			assert.isTrue(await OS.File.exists(unprocessed));
+			var data = JSON.parse(await Zotero.File.getContentsAsync(unprocessed));
 			assert.propertyVal(data, 'text', content);
 			assert.propertyVal(data, 'indexedPages', 1);
 			assert.propertyVal(data, 'totalPages', 1);
 			assert.propertyVal(data, 'version', itemFullTextVersion);
-			yield assert.eventually.equal(
+			await assert.eventually.equal(
 				Zotero.FullText.getLibraryVersion(item.libraryID),
 				libraryVersion
 			);
@@ -135,15 +133,15 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			//
 			// Get new content
 			//
-			({ engine, client, caller } = yield setup());
+			({ engine, client, caller } = await setup());
 			
-			item = yield createDataObject('item');
+			item = await createDataObject('item');
 			attachment = new Zotero.Item('attachment');
 			attachment.parentItemID = item.id;
 			attachment.attachmentLinkMode = 'imported_file';
 			attachment.attachmentContentType = 'application/pdf';
 			attachment.attachmentFilename = 'test.pdf';
-			yield attachment.saveTx();
+			await attachment.saveTx();
 			
 			content = generateContent()
 			spy = sinon.spy(Zotero.Fulltext, "registerContentProcessor")
@@ -154,7 +152,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			
 			// Set main library version to new version
 			library.libraryVersion = libraryVersion;
-			yield library.saveTx();
+			await library.saveTx();
 			
 			setResponse({
 				method: "GET",
@@ -180,17 +178,17 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 					totalPages: 1
 				}
 			});
-			yield engine.start();
+			await engine.start();
 			
 			var dir = Zotero.Attachments.getStorageDirectory(attachment).path;
 			var unprocessed = OS.Path.join(dir, '.zotero-ft-unprocessed');
-			assert.isTrue(yield OS.File.exists(unprocessed));
-			var data = JSON.parse(yield Zotero.File.getContentsAsync(unprocessed));
+			assert.isTrue(await OS.File.exists(unprocessed));
+			var data = JSON.parse(await Zotero.File.getContentsAsync(unprocessed));
 			assert.propertyVal(data, 'text', content);
 			assert.propertyVal(data, 'indexedPages', 1);
 			assert.propertyVal(data, 'totalPages', 1);
 			assert.propertyVal(data, 'version', itemFullTextVersion);
-			yield assert.eventually.equal(
+			await assert.eventually.equal(
 				Zotero.FullText.getLibraryVersion(item.libraryID),
 				libraryVersion
 			);
@@ -199,16 +197,16 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			spy.restore();
 		})
 		
-		it("should handle remotely missing full-text content", function* () {
-			({ engine, client, caller } = yield setup());
+		it("should handle remotely missing full-text content", async function () {
+			({ engine, client, caller } = await setup());
 			
-			var item = yield createDataObject('item');
+			var item = await createDataObject('item');
 			var attachment = new Zotero.Item('attachment');
 			attachment.parentItemID = item.id;
 			attachment.attachmentLinkMode = 'imported_file';
 			attachment.attachmentContentType = 'application/pdf';
 			attachment.attachmentFilename = 'test.pdf';
-			yield attachment.saveTx();
+			await attachment.saveTx();
 			
 			var itemFullTextVersion = 10;
 			var libraryVersion = 15;
@@ -232,21 +230,21 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 				},
 				text: ""
 			});
-			yield engine.start();
+			await engine.start();
 		})
 		
-		it("should upload new full-text content and subsequent updates", function* () {
+		it("should upload new full-text content and subsequent updates", async function () {
 			// https://github.com/cjohansen/Sinon.JS/issues/607
 			var fixSinonBug = ";charset=utf-8";
 			
 			var library = Zotero.Libraries.userLibrary;
 			var libraryID = library.id;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			
-			({ engine, client, caller } = yield setup());
+			({ engine, client, caller } = await setup());
 			
-			var item = yield createDataObject('item');
+			var item = await createDataObject('item');
 			
 			var attachment1 = new Zotero.Item('attachment');
 			attachment1.parentItemID = item.id;
@@ -255,11 +253,11 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			attachment1.attachmentFilename = 'test.html';
 			attachment1.attachmentCharset = 'utf-8';
 			attachment1.synced = true;
-			yield attachment1.saveTx();
-			yield Zotero.Attachments.createDirectoryForItem(attachment1);
+			await attachment1.saveTx();
+			await Zotero.Attachments.createDirectoryForItem(attachment1);
 			var path = attachment1.getFilePath();
 			var content1 = "A" + generateContent()
-			yield Zotero.File.putContentsAsync(path, content1);
+			await Zotero.File.putContentsAsync(path, content1);
 			
 			var attachment2 = new Zotero.Item('attachment');
 			attachment2.parentItemID = item.id;
@@ -268,13 +266,13 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			attachment2.attachmentFilename = 'test.html';
 			attachment2.attachmentCharset = 'utf-8';
 			attachment2.synced = true;
-			yield attachment2.saveTx();
-			yield Zotero.Attachments.createDirectoryForItem(attachment2);
+			await attachment2.saveTx();
+			await Zotero.Attachments.createDirectoryForItem(attachment2);
 			path = attachment2.getFilePath();
 			var content2 = "B" + generateContent()
-			yield Zotero.File.putContentsAsync(path, content2);
+			await Zotero.File.putContentsAsync(path, content2);
 			
-			yield Zotero.Fulltext.indexItems([attachment1.id, attachment2.id]);
+			await Zotero.Fulltext.indexItems([attachment1.id, attachment2.id]);
 			
 			var libraryVersion = 15;
 			
@@ -338,19 +336,19 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 				}
 			})
 			
-			yield engine.start();
+			await engine.start();
 			assert.equal(count, 0);
-			yield assert.eventually.equal(Zotero.FullText.getItemVersion(attachment1.id), libraryVersion);
-			yield assert.eventually.equal(Zotero.FullText.getItemVersion(attachment2.id), libraryVersion);
-			yield assert.eventually.equal(Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
+			await assert.eventually.equal(Zotero.FullText.getItemVersion(attachment1.id), libraryVersion);
+			await assert.eventually.equal(Zotero.FullText.getItemVersion(attachment2.id), libraryVersion);
+			await assert.eventually.equal(Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
 			assert.equal(Zotero.Libraries.userLibrary.libraryVersion, libraryVersion);
 			
 			//
 			// Upload new content
 			//
-			({ engine, client, caller } = yield setup());
+			({ engine, client, caller } = await setup());
 			library.libraryVersion = libraryVersion;
-			yield library.saveTx();
+			await library.saveTx();
 			
 			var attachment3 = new Zotero.Item('attachment');
 			attachment3.parentItemID = item.id;
@@ -359,13 +357,13 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			attachment3.attachmentFilename = 'test.html';
 			attachment3.attachmentCharset = 'utf-8';
 			attachment3.synced = true;
-			yield attachment3.saveTx();
-			yield Zotero.Attachments.createDirectoryForItem(attachment3);
+			await attachment3.saveTx();
+			await Zotero.Attachments.createDirectoryForItem(attachment3);
 			
 			path = attachment3.getFilePath();
 			var content3 = generateContent()
-			yield Zotero.File.putContentsAsync(path, content3);
-			yield Zotero.Fulltext.indexItems([attachment3.id]);
+			await Zotero.File.putContentsAsync(path, content3);
+			await Zotero.Fulltext.indexItems([attachment3.id]);
 			
 			count = 1;
 			setResponse({
@@ -418,10 +416,10 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 				}
 			})
 			
-			yield engine.start();
+			await engine.start();
 			assert.equal(count, 0);
-			yield assert.eventually.equal(Zotero.FullText.getItemVersion(attachment3.id), libraryVersion);
-			yield assert.eventually.equal(Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
+			await assert.eventually.equal(Zotero.FullText.getItemVersion(attachment3.id), libraryVersion);
+			await assert.eventually.equal(Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
 			assert.equal(Zotero.Libraries.userLibrary.libraryVersion, libraryVersion);
 		})
 	});

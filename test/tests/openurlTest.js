@@ -1,8 +1,8 @@
 "use strict";
 
-describe("Zotero.OpenURL", function() {
+describe("Zotero.OpenURL", function () {
 	describe("#createContextObject()", function () {
-		it("should use firstCreator for author", function* () {
+		it("should use firstCreator for author", async function () {
 			var item = createUnsavedDataObject('item');
 			item.setCreators([
 				{

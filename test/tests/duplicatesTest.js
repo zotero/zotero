@@ -43,13 +43,13 @@ describe("Duplicate Items", function () {
 	}
 	
 	describe("Merging", function () {
-		it("should merge two items in duplicates view", function* () {
-			var item1 = yield createDataObject('item', { setTitle: true });
+		it("should merge two items in duplicates view", async function () {
+			var item1 = await createDataObject('item', { setTitle: true });
 			var item2 = item1.clone();
-			yield item2.saveTx();
+			await item2.saveTx();
 			var uri2 = Zotero.URI.getItemURI(item2);
 			
-			yield merge(item1.id);
+			await merge(item1.id);
 			
 			// Items should be gone
 			var iv = zp.itemsView;
@@ -62,16 +62,16 @@ describe("Duplicate Items", function () {
 			assert.equal(rels[pred], uri2);
 		});
 		
-		it("should combine collections from all items", function* () {
-			var collection1 = yield createDataObject('collection');
-			var collection2 = yield createDataObject('collection');
+		it("should combine collections from all items", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
 			
-			var item1 = yield createDataObject('item', { setTitle: true, collections: [collection1.id] });
+			var item1 = await createDataObject('item', { setTitle: true, collections: [collection1.id] });
 			var item2 = item1.clone();
 			item2.setCollections([collection2.id]);
-			yield item2.saveTx();
+			await item2.saveTx();
 
-			yield merge(item1.id);
+			await merge(item1.id);
 			
 			// Items should be gone
 			var iv = zp.itemsView;
