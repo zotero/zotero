@@ -1732,10 +1732,13 @@ Zotero.Integration.CitationEditInterface = function (items, sortable, fieldIndex
 	this.wrappedJSObject = this;
 
 	this._acceptDeferred = Zotero.Promise.defer();
+	this._isAccepted = false;
 	this.promise = this._acceptDeferred.promise;
 
 	// Resolve when all data needed to run getItems() or sort() is loaded
 	this.allCitedDataLoadedPromise = Promise.all([fieldIndexPromise, citationsByItemIDPromise]);
+	this.isAllCitedDataLoaded = false;
+	this.allCitedDataLoadedPromise.then(() => this.isAllCitedDataLoaded = true);
 }
 
 Zotero.Integration.CitationEditInterface.prototype = {
@@ -1761,7 +1764,8 @@ Zotero.Integration.CitationEditInterface.prototype = {
 	 *     Receives a number from 0 to 100 indicating current status.
 	 */
 	accept: function (progressCallback) {
-		if (!this._acceptDeferred.promise.isFulfilled()) {
+		if (!this._isAccepted) {
+			this._isAccepted = true;
 			this._acceptDeferred.resolve(progressCallback);
 		}
 	},
