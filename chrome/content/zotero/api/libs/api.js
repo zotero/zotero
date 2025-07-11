@@ -4,8 +4,8 @@ export const DT_BASE_URL = 'staging.deeptutor.knowhiz.us';
 // export const DT_BASE_URL = 'localhost:8081';
 
 const API_BASE_URL = DT_BASE_URL.includes('localhost') ? `http://${DT_BASE_URL}/api` : `https://api.${DT_BASE_URL}/api`;
-export const DT_SIGN_UP_URL = DT_BASE_URL.includes('localhost') ? `http://${DT_BASE_URL}` : `https://${DT_BASE_URL}`;
-
+export const DT_SIGN_UP_URL = `https://${DT_BASE_URL}/dzSignUp`;
+export const DT_FORGOT_PASSWORD_URL = `https://${DT_BASE_URL}/dzForgotPassword`;
 // Import auth state to get access token
 import { authState } from '../../auth/cognitoAuth.js';
 

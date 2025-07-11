@@ -21,6 +21,7 @@ catch (error) {
 }
 
 import { DT_BASE_URL } from './api/libs/api.js';
+
 /**
  * DeepTutor Localhost Server Class
  *
@@ -266,7 +267,6 @@ class DeepTutorLocalhostServer {
 			
 			displayPopup: function (text) {
 				try {
-
 					// Create popup content
 					const popupContent = `
 						<div style="
@@ -403,6 +403,17 @@ class DeepTutorLocalhostServer {
 					const authResult = await this.server.handleOAuthCode(oauthCode);
 
 					if (authResult.success) {
+						// Close sign-in popup if it exists in the global DeepTutor instance
+						if (typeof window !== "undefined" && window.deepTutorInstance) {
+							try {
+								window.deepTutorInstance.setState({ showSignInPopup: false });
+								console.log("🔐 DeepTutor: Sign-in popup closed after successful Google authentication");
+							}
+							catch (error) {
+								console.warn("⚠️ DeepTutor: Could not close sign-in popup:", error.message);
+							}
+						}
+						
 						return [200, "application/json", JSON.stringify({
 							success: true,
 							message: "OAuth authentication successful",

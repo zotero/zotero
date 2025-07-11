@@ -1717,7 +1717,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 								externallyFrozen={this.state.modelSelectionFrozen}
 							/>
 						}
-						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane onWelcomeSignIn={() => this.toggleSignInPopup()} onWelcomeSignUp={this.handleOpenSignUpPage} />}
+						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane
+							onWelcomeSignIn={() => this.toggleSignInPopup()}
+							onSignInSuccess={() => {
+								this.loadSession();
+								this.switchPane(this.getSessionHistoryPaneOrNoSession());
+							}}
+							localhostServer={this.localhostServer}
+						/>}
 						{this.state.currentPane === 'signIn' && <DeepTutorSignIn
 							onSignInSignUp={this.handleOpenSignUpPage}
 							onSignInSuccess={() => {
