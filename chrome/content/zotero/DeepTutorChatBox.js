@@ -615,10 +615,10 @@ const styles = {
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'flex-end',
-		fontSize: '1.25rem',
-		fontWeight: 600,
-		color: '#000000',
-		lineHeight: '1.5',
+		fontSize: '0.875rem',
+		fontWeight: 400,
+		color: '#757575',
+		lineHeight: '1.35',
 		cursor: 'pointer',
 	}
 };
@@ -2195,7 +2195,7 @@ This demonstrates multiple table formats working correctly.
 				{index === messages.length - 1 && message.followUpQuestions && message.followUpQuestions.length > 0 && (
 					<div>
 						<div style={styles.followUpQuestionText}>
-							Follow Up Questions:
+							Follow-up Questions
 						</div>
 						<div style={styles.questionContainer}>
 							{message.followUpQuestions.map((question, qIndex) => (
