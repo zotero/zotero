@@ -16,23 +16,23 @@ describe("Zotero.Items", function () {
 	
 	
 	describe("#addToPublications", function () {
-		it("should add an item to My Publications", function* () {
-			var item = yield createDataObject('item');
-			yield Zotero.Items.addToPublications([item]);
+		it("should add an item to My Publications", async function () {
+			var item = await createDataObject('item');
+			await Zotero.Items.addToPublications([item]);
 			assert.isTrue(item.inPublications);
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				((await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id))),
 				1
 			);
 		});
 		
 		describe("#license", function () {
-			it("should set a license if specified", function* () {
+			it("should set a license if specified", async function () {
 				var item = createUnsavedDataObject('item');
 				item.setField('rights', 'Test');
-				yield item.saveTx();
-				yield Zotero.Items.addToPublications(
+				await item.saveTx();
+				await Zotero.Items.addToPublications(
 					[item],
 					{
 						license: 'reserved',
@@ -43,12 +43,12 @@ describe("Zotero.Items", function () {
 				assert.equal(item.getField('rights'), 'All Rights Reserved');
 			});
 			
-			it("should keep existing Rights field if .keepRights is true", function* () {
+			it("should keep existing Rights field if .keepRights is true", async function () {
 				var item1 = createUnsavedDataObject('item');
 				item1.setField('rights', 'Test');
-				yield item1.saveTx();
-				var item2 = yield createDataObject('item');
-				yield Zotero.Items.addToPublications(
+				await item1.saveTx();
+				var item2 = await createDataObject('item');
+				await Zotero.Items.addToPublications(
 					[item1, item2],
 					{
 						license: 'reserved',
@@ -60,70 +60,70 @@ describe("Zotero.Items", function () {
 				assert.equal(item2.getField('rights'), 'All Rights Reserved');
 			});
 			
-			it("shouldn't set a license if not specified", function* () {
+			it("shouldn't set a license if not specified", async function () {
 				var item = createUnsavedDataObject('item');
 				item.setField('rights', 'Test');
-				yield item.saveTx();
-				yield Zotero.Items.addToPublications([item]);
+				await item.saveTx();
+				await Zotero.Items.addToPublications([item]);
 				assert.equal(item.getField('rights'), 'Test');
 			});
 		});
 		
-		it("should add child notes if .childNotes is true", function* () {
-			var item = yield createDataObject('item');
-			var note = yield createDataObject('item', { itemType: 'note', parentID: item.id });
-			var attachment = yield Zotero.Attachments.linkFromURL({
+		it("should add child notes if .childNotes is true", async function () {
+			var item = await createDataObject('item');
+			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+			var attachment = await Zotero.Attachments.linkFromURL({
 				url: "http://example.com",
 				parentItemID: item.id,
 				title: "Example"
 			});
 			
-			yield Zotero.Items.addToPublications([item], { childNotes: true });
+			await Zotero.Items.addToPublications([item], { childNotes: true });
 			assert.isTrue(note.inPublications);
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", note.id)),
+				((await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", note.id))),
 				1
 			);
 			assert.isFalse(attachment.inPublications);
 		});
 		
-		it("should add child link attachments if .childLinks is true", function* () {
-			var item = yield createDataObject('item');
-			var attachment1 = yield Zotero.Attachments.linkFromURL({
+		it("should add child link attachments if .childLinks is true", async function () {
+			var item = await createDataObject('item');
+			var attachment1 = await Zotero.Attachments.linkFromURL({
 				url: "http://example.com",
 				parentItemID: item.id,
 				title: "Example"
 			});
-			var attachment2 = yield importFileAttachment('test.png', { parentItemID: item.id });
-			var note = yield createDataObject('item', { itemType: 'note', parentID: item.id });
+			var attachment2 = await importFileAttachment('test.png', { parentItemID: item.id });
+			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
 			
-			yield Zotero.Items.addToPublications([item], { childLinks: true });
+			await Zotero.Items.addToPublications([item], { childLinks: true });
 			assert.isTrue(attachment1.inPublications);
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", attachment1.id)),
+				((await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", attachment1.id))),
 				1
 			);
 			assert.isFalse(attachment2.inPublications);
 			assert.isFalse(note.inPublications);
 		});
 		
-		it("should add child file attachments if .childFileAttachments is true", function* () {
-			var item = yield createDataObject('item');
-			var attachment1 = yield importFileAttachment('test.png', { parentItemID: item.id });
-			var attachment2 = yield Zotero.Attachments.linkFromURL({
+		it("should add child file attachments if .childFileAttachments is true", async function () {
+			var item = await createDataObject('item');
+			var attachment1 = await importFileAttachment('test.png', { parentItemID: item.id });
+			var attachment2 = await Zotero.Attachments.linkFromURL({
 				url: "http://example.com",
 				parentItemID: item.id,
 				title: "Example"
 			});
-			var note = yield createDataObject('item', { itemType: 'note', parentID: item.id });
+			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
 			
-			yield Zotero.Items.addToPublications([item], { childFileAttachments: true });
+			await Zotero.Items.addToPublications([item], { childFileAttachments: true });
 			assert.isTrue(attachment1.inPublications);
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", attachment1.id)),
+				((await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", attachment1.id))),
 				1
 			);
 			assert.isFalse(attachment2.inPublications);
@@ -133,20 +133,20 @@ describe("Zotero.Items", function () {
 	
 	
 	describe("#removeFromPublications", function () {
-		it("should remove an item from My Publications", function* () {
-			var item = yield createDataObject('item');
+		it("should remove an item from My Publications", async function () {
+			var item = await createDataObject('item');
 			item.inPublications = true;
-			yield item.saveTx();
+			await item.saveTx();
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				((await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id))),
 				1
 			);
-			yield Zotero.Items.removeFromPublications([item]);
+			await Zotero.Items.removeFromPublications([item]);
 			assert.isFalse(item.inPublications);
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				((await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id))),
 				0
 			);
 		});
@@ -219,12 +219,12 @@ describe("Zotero.Items", function () {
 	
 	
 	describe("#merge()", function () {
-		it("should merge two items", function* () {
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject('item');
+		it("should merge two items", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
 			var item2URI = Zotero.URI.getItemURI(item2);
 			
-			yield Zotero.Items.merge(item1, [item2]);
+			await Zotero.Items.merge(item1, [item2]);
 			
 			assert.isFalse(item1.deleted);
 			assert.isTrue(item2.deleted);
@@ -291,15 +291,15 @@ describe("Zotero.Items", function () {
 			assert.propertyVal(tags[0], 'type', 1);
 		});
 		
-		it("should merge two items when servant is linked to an item absent from cache", function* () {
+		it("should merge two items when servant is linked to an item absent from cache", async function () {
 			// two group libraries
-			var groupOneInfo = yield createGroup({
+			var groupOneInfo = await createGroup({
 				id: 25026,
 				name: "Group One"
 			});
 			var libraryOneID = Zotero.Groups.getLibraryIDFromGroupID(groupOneInfo.id);
 
-			var groupTwoInfo = yield createGroup({
+			var groupTwoInfo = await createGroup({
 				id: 11592,
 				name: "Group Two"
 			});
@@ -308,13 +308,13 @@ describe("Zotero.Items", function () {
 			assert.notEqual(libraryOneID, libraryTwoID);
 
 			// two items in the first library
-			var item1 = yield createDataObject('item', {libraryID: libraryOneID});
-			var item2 = yield createDataObject('item', {libraryID: libraryOneID});
+			var item1 = await createDataObject('item', {libraryID: libraryOneID});
+			var item2 = await createDataObject('item', {libraryID: libraryOneID});
 			var item2URI = Zotero.URI.getItemURI(item2);
 
 			// one item in the second library, linked to item2 as if it dragged and dropped from it
-			var itemX = yield createDataObject('item', {libraryID: libraryTwoID});
-			yield itemX.addLinkedItem(item2);
+			var itemX = await createDataObject('item', {libraryID: libraryTwoID});
+			await itemX.addLinkedItem(item2);
 
 			// check that the owl:sameAs relation has been registered okay
 			var rels = itemX.getRelationsByPredicate(Zotero.Relations.linkedObjectPredicate);
@@ -327,7 +327,7 @@ describe("Zotero.Items", function () {
 			delete Zotero.Items._objectCache[itemX.id];
 
 			// merge the two items in the first library
-			yield Zotero.Items.merge(item1, [item2]);
+			await Zotero.Items.merge(item1, [item2]);
 
 			// check that the merge completed okay
 			assert.isFalse(item1.deleted);
@@ -340,15 +340,15 @@ describe("Zotero.Items", function () {
 			assert.equal(rels[0], item2URI);
 		})
 
-		it("should move merge-tracking relation from replaced item to master", function* () {
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject('item');
+		it("should move merge-tracking relation from replaced item to master", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
 			var item2URI = Zotero.URI.getItemURI(item2);
-			var item3 = yield createDataObject('item');
+			var item3 = await createDataObject('item');
 			var item3URI = Zotero.URI.getItemURI(item3);
 			
-			yield Zotero.Items.merge(item2, [item3]);
-			yield Zotero.Items.merge(item1, [item2]);
+			await Zotero.Items.merge(item2, [item3]);
+			await Zotero.Items.merge(item1, [item2]);
 			
 			// Check for merge-tracking relation from 1 to 3
 			var rels = item1.getRelationsByPredicate(Zotero.Relations.replacedItemPredicate);
@@ -377,37 +377,37 @@ describe("Zotero.Items", function () {
 			);
 		});
 		
-		it("should update relations pointing to replaced item to point to master", function* () {
-			var item1 = yield createDataObject('item');
+		it("should update relations pointing to replaced item to point to master", async function () {
+			var item1 = await createDataObject('item');
 			var item1URI = Zotero.URI.getItemURI(item1);
-			var item2 = yield createDataObject('item');
+			var item2 = await createDataObject('item');
 			var item2URI = Zotero.URI.getItemURI(item2);
 			var item3 = createUnsavedDataObject('item');
 			var predicate = Zotero.Relations.relatedItemPredicate;
 			item3.addRelation(predicate, item2URI);
-			yield item3.saveTx();
+			await item3.saveTx();
 			
-			yield Zotero.Items.merge(item1, [item2]);
+			await Zotero.Items.merge(item1, [item2]);
 			
 			// Check for related-item relation from 3 to 1
 			var rels = item3.getRelationsByPredicate(predicate);
 			assert.deepEqual(rels, [item1URI]);
 		})
 		
-		it("should not update relations pointing to replaced item in other libraries", function* () {
-			var group1 = yield createGroup();
-			var group2 = yield createGroup();
+		it("should not update relations pointing to replaced item in other libraries", async function () {
+			var group1 = await createGroup();
+			var group2 = await createGroup();
 			
-			var item1 = yield createDataObject('item', { libraryID: group1.libraryID });
+			var item1 = await createDataObject('item', { libraryID: group1.libraryID });
 			var item1URI = Zotero.URI.getItemURI(item1);
-			var item2 = yield createDataObject('item', { libraryID: group1.libraryID });
+			var item2 = await createDataObject('item', { libraryID: group1.libraryID });
 			var item2URI = Zotero.URI.getItemURI(item2);
 			var item3 = createUnsavedDataObject('item', { libraryID: group2.libraryID });
 			var predicate = Zotero.Relations.linkedObjectPredicate;
 			item3.addRelation(predicate, item2URI);
-			yield item3.saveTx();
+			await item3.saveTx();
 			
-			yield Zotero.Items.merge(item1, [item2]);
+			await Zotero.Items.merge(item1, [item2]);
 			
 			// Check for related-item relation from 3 to 2
 			var rels = item3.getRelationsByPredicate(predicate);
@@ -1034,69 +1034,69 @@ describe("Zotero.Items", function () {
 	
 	
 	describe("#trash()", function () {
-		it("should send items to the trash", function* () {
+		it("should send items to the trash", async function () {
 			var items = [];
 			items.push(
-				(yield createDataObject('item', { synced: true })),
-				(yield createDataObject('item', { synced: true })),
-				(yield createDataObject('item', { synced: true }))
+				((await createDataObject('item', { synced: true }))),
+				((await createDataObject('item', { synced: true }))),
+				((await createDataObject('item', { synced: true })))
 			);
 			items.forEach(item => {
 				// Sanity-checked as true in itemTest#deleted
 				assert.isUndefined(item._changed.deleted);
 			});
 			var ids = items.map(item => item.id);
-			yield Zotero.Items.trashTx(ids);
+			await Zotero.Items.trashTx(ids);
 			items.forEach(item => {
 				assert.isTrue(item.deleted);
 				// Item should be saved (can't use hasChanged() because that includes .synced)
 				assert.isUndefined(item._changed.deleted);
 				assert.isFalse(item.synced);
 			});
-			assert.equal((yield Zotero.DB.valueQueryAsync(
+			assert.equal(((await Zotero.DB.valueQueryAsync(
 				`SELECT COUNT(*) FROM deletedItems WHERE itemID IN (${ids})`
-			)), 3);
+			))), 3);
 			for (let item of items) {
-				assert.equal((yield Zotero.DB.valueQueryAsync(
+				assert.equal(((await Zotero.DB.valueQueryAsync(
 					`SELECT synced FROM items WHERE itemID=${item.id}`
-				)), 0);
+				))), 0);
 			}
 		});
 		
-		it("should update parent item when trashing child item", function* () {
-			var item = yield createDataObject('item');
-			var note = yield createDataObject('item', { itemType: 'note', parentID: item.id });
+		it("should update parent item when trashing child item", async function () {
+			var item = await createDataObject('item');
+			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
 			assert.lengthOf(item.getNotes(), 1);
-			yield Zotero.Items.trashTx([note.id]);
+			await Zotero.Items.trashTx([note.id]);
 			assert.lengthOf(item.getNotes(), 0);
 		});
 	});
 	
 	
 	describe("#emptyTrash()", function () {
-		it("should delete items in the trash", function* () {
+		it("should delete items in the trash", async function () {
 			var item1 = createUnsavedDataObject('item');
 			item1.setField('title', 'a');
 			item1.deleted = true;
-			var id1 = yield item1.saveTx();
+			var id1 = await item1.saveTx();
 			
 			var item2 = createUnsavedDataObject('item');
 			item2.setField('title', 'b');
 			item2.deleted = true;
-			var id2 = yield item2.saveTx();
+			var id2 = await item2.saveTx();
 			
 			var item3 = createUnsavedDataObject('item', { itemType: 'attachment', parentID: id2 });
 			item3.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
 			item3.deleted = true;
-			var id3 = yield item3.saveTx();
+			var id3 = await item3.saveTx();
 			
-			yield collectionsView.selectTrash(Zotero.Libraries.userLibraryID);
+			await collectionsView.selectTrash(Zotero.Libraries.userLibraryID);
 			
-			yield Zotero.Items.emptyTrash(Zotero.Libraries.userLibraryID);
+			await Zotero.Items.emptyTrash(Zotero.Libraries.userLibraryID);
 			
-			assert.isFalse(yield Zotero.Items.getAsync(id1));
-			assert.isFalse(yield Zotero.Items.getAsync(id2));
-			assert.isFalse(yield Zotero.Items.getAsync(id3));
+			assert.isFalse(await Zotero.Items.getAsync(id1));
+			assert.isFalse(await Zotero.Items.getAsync(id2));
+			assert.isFalse(await Zotero.Items.getAsync(id3));
 			
 			// TEMP: This is failing on Travis due to a race condition
 			//assert.equal(zp.itemsView.rowCount, 0)
@@ -1104,7 +1104,7 @@ describe("Zotero.Items", function () {
 	})
 	
 	describe("#getFirstCreatorFromData()", function () {
-		it("should handle single eligible creator", function* () {
+		it("should handle single eligible creator", async function () {
 			for (let creatorType of ['author', 'editor', 'contributor']) {
 				assert.equal(
 					Zotero.Items.getFirstCreatorFromData(
@@ -1124,7 +1124,7 @@ describe("Zotero.Items", function () {
 			}
 		});
 		
-		it("should ignore single ineligible creator", function* () {
+		it("should ignore single ineligible creator", async function () {
 			assert.strictEqual(
 				Zotero.Items.getFirstCreatorFromData(
 					Zotero.ItemTypes.getID('book'),
@@ -1141,7 +1141,7 @@ describe("Zotero.Items", function () {
 			);
 		});
 		
-		it("should handle single eligible creator after ineligible creator", function* () {
+		it("should handle single eligible creator after ineligible creator", async function () {
 			for (let creatorType of ['author', 'editor', 'contributor']) {
 				assert.equal(
 					Zotero.Items.getFirstCreatorFromData(
@@ -1167,7 +1167,7 @@ describe("Zotero.Items", function () {
 			}
 		});
 		
-		it("should handle two eligible creators", function* () {
+		it("should handle two eligible creators", async function () {
 			for (let creatorType of ['author', 'editor', 'contributor']) {
 				assert.equal(
 					Zotero.Items.getFirstCreatorFromData(
@@ -1196,7 +1196,7 @@ describe("Zotero.Items", function () {
 			}
 		});
 		
-		it("should handle three eligible creators", function* () {
+		it("should handle three eligible creators", async function () {
 			for (let creatorType of ['author', 'editor', 'contributor']) {
 				assert.equal(
 					Zotero.Items.getFirstCreatorFromData(
@@ -1228,7 +1228,7 @@ describe("Zotero.Items", function () {
 			}
 		});
 		
-		it("should handle two eligible creators with intervening creators", function* () {
+		it("should handle two eligible creators with intervening creators", async function () {
 			for (let creatorType of ['author', 'editor', 'contributor']) {
 				assert.equal(
 					Zotero.Items.getFirstCreatorFromData(
@@ -1270,24 +1270,24 @@ describe("Zotero.Items", function () {
 		});
 	});
 	
-	describe("#getAsync()", function() {
-		it("should return Zotero.Item for item ID", function* () {
+	describe("#getAsync()", function () {
+		it("should return Zotero.Item for item ID", async function () {
 			let item = new Zotero.Item('journalArticle');
-			let id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			let id = await item.saveTx();
+			item = await Zotero.Items.getAsync(id);
 			assert.notOk(item.isFeedItem);
 			assert.instanceOf(item, Zotero.Item);
 			assert.notInstanceOf(item, Zotero.FeedItem);
 		});
-		it("should return Zotero.FeedItem for feed item ID", function* () {
+		it("should return Zotero.FeedItem for feed item ID", async function () {
 			let feed = new Zotero.Feed({ name: 'foo', url: 'http://www.' + Zotero.randomString() + '.com' });
-			yield feed.saveTx();
+			await feed.saveTx();
 			
 			let feedItem = new Zotero.FeedItem('journalArticle', { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			let id = yield feedItem.saveTx();
+			let id = await feedItem.saveTx();
 			
-			feedItem = yield Zotero.Items.getAsync(id);
+			feedItem = await Zotero.Items.getAsync(id);
 			
 			assert.isTrue(feedItem.isFeedItem);
 			assert.instanceOf(feedItem, Zotero.FeedItem);

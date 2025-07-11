@@ -20,7 +20,7 @@ describe('Zotero_Import_Mendeley', function () {
 	};
 
 	before(async () => {
-		Components.utils.import('chrome://zotero/content/import/mendeley/mendeleyImport.js');
+		Cu.import('chrome://zotero/content/import/mendeley/mendeleyImport.js');
 
 		// A real HTTP server is used to deliver a Bitcoin PDF so that annotations can be processed during import.
 		var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");;
@@ -51,10 +51,10 @@ describe('Zotero_Import_Mendeley', function () {
 			status: 200,
 			headers: {},
 			json: {
-				access_token: 'ACCESS_TOKEN', // eslint-disable-line camelcase
-				token_type: 'bearer', // eslint-disable-line camelcase
-				expires_in: 3600, // eslint-disable-line camelcase
-				refresh_token: 'REFRESH_TOKEN', // eslint-disable-line camelcase
+				access_token: 'ACCESS_TOKEN',  
+				token_type: 'bearer',  
+				expires_in: 3600,  
+				refresh_token: 'REFRESH_TOKEN',  
 				msso: null,
 				scope: 'all'
 			}

@@ -1,8 +1,6 @@
 "use strict";
 
 describe("Zotero.Sync.Runner", function () {
-	Components.utils.import("resource://zotero/config.js");
-	
 	var apiKey = Zotero.Utilities.randomString(24);
 	var baseURL = "http://local.zotero/";
 	var userLibraryID, runner, caller, server, stub, spy;
@@ -211,9 +209,9 @@ describe("Zotero.Sync.Runner", function () {
 	})
 	
 	describe("#checkAccess()", function () {
-		it("should check key access", function* () {
+		it("should check key access", async function () {
 			setResponse('keyInfo.fullAccess');
-			var json = yield runner.checkAccess(runner.getAPIClient({ apiKey }));
+			var json = await runner.checkAccess(runner.getAPIClient({ apiKey }));
 			var compare = {};
 			Object.assign(compare, responses.keyInfo.fullAccess.json);
 			delete compare.key;
@@ -239,21 +237,21 @@ describe("Zotero.Sync.Runner", function () {
 			}
 		})
 		
-		it("should check library access and versions without library list", function* () {
+		it("should check library access and versions without library list", async function () {
 			// Create group with same id and version as groups response
 			var groupData = responses.groups.ownerGroup;
-			var group1 = yield createGroup({
+			var group1 = await createGroup({
 				id: groupData.json.id,
 				version: groupData.json.version
 			});
 			groupData = responses.groups.memberGroup;
-			var group2 = yield createGroup({
+			var group2 = await createGroup({
 				id: groupData.json.id,
 				version: groupData.json.version
 			});
 			
 			setResponse('userGroups.groupVersions');
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 3);
@@ -263,21 +261,21 @@ describe("Zotero.Sync.Runner", function () {
 			);
 		})
 		
-		it("should check library access and versions with library list", function* () {
+		it("should check library access and versions with library list", async function () {
 			// Create groups with same id and version as groups response
 			var groupData = responses.groups.ownerGroup;
-			var group1 = yield createGroup({
+			var group1 = await createGroup({
 				id: groupData.json.id,
 				version: groupData.json.version
 			});
 			groupData = responses.groups.memberGroup;
-			var group2 = yield createGroup({
+			var group2 = await createGroup({
 				id: groupData.json.id,
 				version: groupData.json.version
 			});
 			
 			setResponse('userGroups.groupVersions');
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json,
@@ -286,7 +284,7 @@ describe("Zotero.Sync.Runner", function () {
 			assert.lengthOf(libraries, 1);
 			assert.sameMembers(libraries, [userLibraryID]);
 			
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json,
@@ -295,7 +293,7 @@ describe("Zotero.Sync.Runner", function () {
 			assert.lengthOf(libraries, 1);
 			assert.sameMembers(libraries, [userLibraryID]);
 			
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json,
@@ -305,7 +303,7 @@ describe("Zotero.Sync.Runner", function () {
 			assert.sameMembers(libraries, [group1.libraryID]);
 		})
 		
-		it("should filter out nonexistent skipped libraries if library list not provided", function* () {
+		it("should filter out nonexistent skipped libraries if library list not provided", async function () {
 			var unskippedGroupID = responses.groups.ownerGroup.json.id;
 			var skippedGroupID = responses.groups.memberGroup.json.id;
 			Zotero.Prefs.set('sync.librariesToSkip', `["L4", "G${skippedGroupID}"]`);
@@ -313,7 +311,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json
@@ -326,12 +324,12 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isFalse(Zotero.Groups.get(skippedGroupID));
 		});
 		
-		it("should filter out existing skipped libraries if library list not provided", function* () {
+		it("should filter out existing skipped libraries if library list not provided", async function () {
 			var unskippedGroupID = responses.groups.ownerGroup.json.id;
 			var skippedGroupID = responses.groups.memberGroup.json.id;
 			Zotero.Prefs.set('sync.librariesToSkip', `["L4", "G${skippedGroupID}"]`);
 			
-			var skippedGroup = yield createGroup({
+			var skippedGroup = await createGroup({
 				id: skippedGroupID,
 				version: responses.groups.memberGroup.json.version - 1
 			});
@@ -339,7 +337,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json
@@ -352,15 +350,15 @@ describe("Zotero.Sync.Runner", function () {
 			assert.equal(skippedGroup.version, responses.groups.memberGroup.json.version - 1);
 		});
 		
-		it("should filter out remotely missing archived libraries if library list not provided", function* () {
+		it("should filter out remotely missing archived libraries if library list not provided", async function () {
 			var ownerGroupID = responses.groups.ownerGroup.json.id;
 			var archivedGroupID = 162512451; // nonexistent group id
 			
-			var ownerGroup = yield createGroup({
+			var ownerGroup = await createGroup({
 				id: ownerGroupID,
 				version: responses.groups.ownerGroup.json.version
 			});
-			var archivedGroup = yield createGroup({
+			var archivedGroup = await createGroup({
 				id: archivedGroupID,
 				editable: false,
 				archived: true
@@ -368,7 +366,7 @@ describe("Zotero.Sync.Runner", function () {
 			
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.memberGroup');
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json
@@ -386,15 +384,15 @@ describe("Zotero.Sync.Runner", function () {
 			);
 		});
 		
-		it("should unarchive library if available remotely", function* () {
+		it("should unarchive library if available remotely", async function () {
 			var syncedGroupID = responses.groups.ownerGroup.json.id;
 			var archivedGroupID = responses.groups.memberGroup.json.id;
 			
-			var syncedGroup = yield createGroup({
+			var syncedGroup = await createGroup({
 				id: syncedGroupID,
 				version: responses.groups.ownerGroup.json.version
 			});
-			var archivedGroup = yield createGroup({
+			var archivedGroup = await createGroup({
 				id: archivedGroupID,
 				version: responses.groups.memberGroup.json.version - 1,
 				editable: false,
@@ -404,7 +402,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json
@@ -418,9 +416,9 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isFalse(archivedGroup.archived);
 		});
 		
-		it("shouldn't filter out skipped libraries if library list is provided", function* () {
+		it("shouldn't filter out skipped libraries if library list is provided", async function () {
 			var groupData = responses.groups.memberGroup;
-			var group = yield createGroup({
+			var group = await createGroup({
 				id: groupData.json.id,
 				version: groupData.json.version
 			});
@@ -430,7 +428,7 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json,
@@ -441,16 +439,16 @@ describe("Zotero.Sync.Runner", function () {
 			assert.sameMembers(libraries, [userLibraryID, group.libraryID]);
 		});
 		
-		it("should update outdated group metadata", function* () {
+		it("should update outdated group metadata", async function () {
 			// Create groups with same id as groups response but earlier versions
 			var groupData1 = responses.groups.ownerGroup;
-			var group1 = yield createGroup({
+			var group1 = await createGroup({
 				id: groupData1.json.id,
 				version: groupData1.json.version - 1,
 				editable: false
 			});
 			var groupData2 = responses.groups.memberGroup;
-			var group2 = yield createGroup({
+			var group2 = await createGroup({
 				id: groupData2.json.id,
 				version: groupData2.json.version - 1,
 				editable: true
@@ -461,9 +459,9 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('groups.memberGroup');
 			// Simulate acceptance of library reset for group 2 editable change
 			var stub = sinon.stub(Zotero.Sync.Data.Local, "checkLibraryForAccess")
-				.returns(Zotero.Promise.resolve(true));
+				.returns(Promise.resolve(true));
 			
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			
@@ -483,24 +481,24 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isFalse(group2.editable);
 		})
 		
-		it("should update outdated group metadata for group created with classic sync", function* () {
+		it("should update outdated group metadata for group created with classic sync", async function () {
 			var groupData1 = responses.groups.ownerGroup;
-			var group1 = yield createGroup({
+			var group1 = await createGroup({
 				id: groupData1.json.id,
 				version: 0,
 				editable: false
 			});
 			var groupData2 = responses.groups.memberGroup;
-			var group2 = yield createGroup({
+			var group2 = await createGroup({
 				id: groupData2.json.id,
 				version: 0,
 				editable: true
 			});
 			
-			yield Zotero.DB.queryAsync(
+			await Zotero.DB.queryAsync(
 				"UPDATE groups SET version=0 WHERE groupID IN (?, ?)", [group1.id, group2.id]
 			);
-			yield Zotero.Libraries.init();
+			await Zotero.Libraries.init();
 			group1 = Zotero.Groups.get(group1.id);
 			group2 = Zotero.Groups.get(group2.id);
 			
@@ -509,9 +507,9 @@ describe("Zotero.Sync.Runner", function () {
 			setResponse('groups.memberGroup');
 			// Simulate acceptance of library reset for group 2 editable change
 			var stub = sinon.stub(Zotero.Sync.Data.Local, "checkLibraryForAccess")
-				.returns(Zotero.Promise.resolve(true));
+				.returns(Promise.resolve(true));
 			
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }),
 				false,
 				responses.keyInfo.fullAccess.json,
@@ -531,11 +529,11 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isFalse(group2.editable);
 		})
 		
-		it("should create locally missing groups", function* () {
+		it("should create locally missing groups", async function () {
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.ownerGroup');
 			setResponse('groups.memberGroup');
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 3);
@@ -555,18 +553,18 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isFalse(group2.editable);
 		})
 		
-		it("should delete remotely missing groups", function* () {
+		it("should delete remotely missing groups", async function () {
 			var groupData1 = responses.groups.ownerGroup;
-			var group1 = yield createGroup({ id: groupData1.json.id, version: groupData1.json.version });
+			var group1 = await createGroup({ id: groupData1.json.id, version: groupData1.json.version });
 			var groupData2 = responses.groups.memberGroup;
-			var group2 = yield createGroup({ id: groupData2.json.id, version: groupData2.json.version });
+			var group2 = await createGroup({ id: groupData2.json.id, version: groupData2.json.version });
 			
 			setResponse('userGroups.groupVersionsOnlyMemberGroup');
 			waitForDialog(function (dialog) {
 				var text = dialog.document.documentElement.textContent;
 				assert.include(text, group1.name);
 			});
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 2);
@@ -575,9 +573,9 @@ describe("Zotero.Sync.Runner", function () {
 			assert.isTrue(Zotero.Groups.exists(groupData2.json.id));
 		})
 		
-		it("should keep remotely missing groups", function* () {
-			var group1 = yield createGroup({ editable: true, filesEditable: true });
-			var group2 = yield createGroup({ editable: true, filesEditable: true });
+		it("should keep remotely missing groups", async function () {
+			var group1 = await createGroup({ editable: true, filesEditable: true });
+			var group2 = await createGroup({ editable: true, filesEditable: true });
 			
 			setResponse('userGroups.groupVersionsEmpty');
 			var called = 0;
@@ -601,7 +599,7 @@ describe("Zotero.Sync.Runner", function () {
 					assert.include(text, otherGroup.name);
 				}, "extra1");
 			}, "extra1");
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.equal(called, 2);
@@ -616,24 +614,24 @@ describe("Zotero.Sync.Runner", function () {
 			});
 		})
 		
-		it("should cancel sync with remotely missing groups", function* () {
+		it("should cancel sync with remotely missing groups", async function () {
 			var groupData = responses.groups.ownerGroup;
-			var group = yield createGroup({ id: groupData.json.id, version: groupData.json.version });
+			var group = await createGroup({ id: groupData.json.id, version: groupData.json.version });
 			
 			setResponse('userGroups.groupVersionsEmpty');
 			waitForDialog(function (dialog) {
 				var text = dialog.document.documentElement.textContent;
 				assert.include(text, group.name);
 			}, "cancel");
-			var libraries = yield runner.checkLibraries(
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.lengthOf(libraries, 0);
 			assert.isTrue(Zotero.Groups.exists(groupData.json.id));
 		})
 		
-		it("should prompt to revert local changes on loss of library write access", function* () {
-			var group = yield createGroup({
+		it("should prompt to revert local changes on loss of library write access", async function () {
+			var group = await createGroup({
 				version: 1,
 				libraryVersion: 2
 			});
@@ -679,8 +677,8 @@ describe("Zotero.Sync.Runner", function () {
 			
 			// First, test cancelling
 			var stub = sinon.stub(Zotero.Sync.Data.Local, "checkLibraryForAccess")
-				.returns(Zotero.Promise.resolve(false));
-			var libraries = yield runner.checkLibraries(
+				.returns(Promise.resolve(false));
+			var libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.notInclude(libraries, group.libraryID);
@@ -689,8 +687,8 @@ describe("Zotero.Sync.Runner", function () {
 			stub.reset();
 			
 			// Next, reset
-			stub.returns(Zotero.Promise.resolve(true));
-			libraries = yield runner.checkLibraries(
+			stub.returns(Promise.resolve(true));
+			libraries = await runner.checkLibraries(
 				runner.getAPIClient({ apiKey }), false, responses.keyInfo.fullAccess.json
 			);
 			assert.include(libraries, group.libraryID);
@@ -702,7 +700,7 @@ describe("Zotero.Sync.Runner", function () {
 	})
 
 	describe("#sync()", function () {
-		it("should perform a sync across all libraries and update library versions", function* () {
+		it("should perform a sync across all libraries and update library versions", async function () {
 			setResponse('keyInfo.fullAccess');
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.ownerGroup');
@@ -903,7 +901,7 @@ describe("Zotero.Sync.Runner", function () {
 			
 			var startTime = new Date().getTime();
 			
-			yield runner.sync({
+			await runner.sync({
 				onError: e => { throw e },
 			});
 			
@@ -928,7 +926,7 @@ describe("Zotero.Sync.Runner", function () {
 		})
 		
 		
-		it("should handle user-initiated cancellation", function* () {
+		it("should handle user-initiated cancellation", async function () {
 			setResponse('keyInfo.fullAccess');
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.ownerGroup');
@@ -936,14 +934,14 @@ describe("Zotero.Sync.Runner", function () {
 			
 			var stub = sinon.stub(Zotero.Sync.Data.Engine.prototype, "start");
 			
-			stub.onCall(0).returns(Zotero.Promise.resolve());
+			stub.onCall(0).returns(Promise.resolve());
 			var e = new Zotero.Sync.UserCancelledException();
 			e.handledRejection = true;
-			stub.onCall(1).returns(Zotero.Promise.reject(e));
+			stub.onCall(1).returns(Promise.reject(e));
 			// Shouldn't be reached
 			stub.onCall(2).throws();
 			
-			yield runner.sync({
+			await runner.sync({
 				onError: e => { throw e },
 			});
 			
@@ -951,7 +949,7 @@ describe("Zotero.Sync.Runner", function () {
 		});
 		
 		
-		it("should handle user-initiated cancellation for current library", function* () {
+		it("should handle user-initiated cancellation for current library", async function () {
 			setResponse('keyInfo.fullAccess');
 			setResponse('userGroups.groupVersions');
 			setResponse('groups.ownerGroup');
@@ -959,12 +957,12 @@ describe("Zotero.Sync.Runner", function () {
 			
 			var stub = sinon.stub(Zotero.Sync.Data.Engine.prototype, "start");
 			
-			stub.returns(Zotero.Promise.resolve());
+			stub.returns(Promise.resolve());
 			var e = new Zotero.Sync.UserCancelledException(true);
 			e.handledRejection = true;
-			stub.onCall(1).returns(Zotero.Promise.reject(e));
+			stub.onCall(1).returns(Promise.reject(e));
 			
-			yield runner.sync({
+			await runner.sync({
 				onError: e => { throw e },
 			});
 			
@@ -974,7 +972,7 @@ describe("Zotero.Sync.Runner", function () {
 	})
 	
 	
-	describe("#createAPIKeyFromCredentials()", function() {
+	describe("#createAPIKeyFromCredentials()", function () {
 		var data = {
 			name: "Automatic Zotero Client Key",
 			username: "Username",
@@ -997,7 +995,7 @@ describe("Zotero.Sync.Runner", function () {
 		var incorrectPostData = Object.assign({password: 'incorrectPassword'}, data);
 		var responseData = Object.assign({userID: 1, key: apiKey}, data);
 
-		it("should return json with key when credentials valid", function* () {
+		it("should return json with key when credentials valid", async function () {
 			server.respond(function (req) {
 				if (req.method == "POST") {
 					var json = JSON.parse(req.requestBody);
@@ -1006,11 +1004,11 @@ describe("Zotero.Sync.Runner", function () {
 				}
 			});
 
-			var json = yield runner.createAPIKeyFromCredentials('Username', 'correctPassword');
+			var json = await runner.createAPIKeyFromCredentials('Username', 'correctPassword');
 			assert.equal(json.key, apiKey);
 		});
 
-		it("should return false when credentials invalid", function* () {
+		it("should return false when credentials invalid", async function () {
 			server.respond(function (req) {
 				if (req.method == "POST") {
 					var json = JSON.parse(req.requestBody);
@@ -1019,13 +1017,13 @@ describe("Zotero.Sync.Runner", function () {
 				}
 			});
 
-			var key = yield runner.createAPIKeyFromCredentials('Username', 'incorrectPassword');
+			var key = await runner.createAPIKeyFromCredentials('Username', 'incorrectPassword');
 			assert.isFalse(key);
 		});
 	});
 
-	describe("#deleteAPIKey()", function() {
-		it("should send DELETE request with correct key", function* (){
+	describe("#deleteAPIKey()", function () {
+		it("should send DELETE request with correct key", async function () {
 			Zotero.Sync.Data.Local.setAPIKey(apiKey);
 
 			server.respond(function (req) {
@@ -1036,7 +1034,7 @@ describe("Zotero.Sync.Runner", function () {
 				req.respond(204);
 			});
 
-			yield runner.deleteAPIKey();
+			await runner.deleteAPIKey();
 		});
 	});
 	
@@ -1071,8 +1069,8 @@ describe("Zotero.Sync.Runner", function () {
 		});
 		
 		
-		it("should show a custom button in the error panel", function* () {
-			win = yield loadZoteroPane();
+		it("should show a custom button in the error panel", async function () {
+			win = await loadZoteroPane();
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			setResponse({
@@ -1082,7 +1080,7 @@ describe("Zotero.Sync.Runner", function () {
 				headers: {},
 				text: "Invalid Key"
 			});
-			yield runner.sync({
+			await runner.sync({
 				background: true
 			});
 			
@@ -1097,12 +1095,12 @@ describe("Zotero.Sync.Runner", function () {
 		});
 		
 		
-		it("should show a button in error panel to select a too-long note", function* () {
-			win = yield loadZoteroPane();
+		it("should show a button in error panel to select a too-long note", async function () {
+			win = await loadZoteroPane();
 			var doc = win.document;
 			
 			var text = "".padStart(256, "a");
-			var item = yield createDataObject('item', { itemType: 'note', note: text });
+			var item = await createDataObject('item', { itemType: 'note', note: text });
 			
 			setResponse('keyInfo.fullAccess');
 			setResponse('userGroups.groupVersions');
@@ -1131,7 +1129,7 @@ describe("Zotero.Sync.Runner", function () {
 				}
 			});
 			
-			yield runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
+			await runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
 			
 			var errorIcon = doc.getElementById('zotero-tb-sync-error');
 			assert.isFalse(errorIcon.hidden);
@@ -1258,13 +1256,13 @@ describe("Zotero.Sync.Runner", function () {
 		
 		// TODO: Test multiple long tags and tags across libraries
 		describe("Long Tag Fixer", function () {
-			it("should split a tag", function* () {
-				win = yield loadZoteroPane();
+			it("should split a tag", async function () {
+				win = await loadZoteroPane();
 				
-				var item = yield createDataObject('item');
+				var item = await createDataObject('item');
 				var tag = "title;feeling;matter;drum;treatment;caring;earthy;shrill;unit;obedient;hover;healthy;cheap;clever;wren;wicked;clip;shoe;jittery;shape;clear;dime;increase;complete;level;milk;false;infamous;lamentable;measure;cuddly;tasteless;peace;top;pencil;caption;unusual;depressed;frantic";
 				item.addTag(tag, 1);
-				yield item.saveTx();
+				await item.saveTx();
 				
 				setResponse('keyInfo.fullAccess');
 				setResponse('userGroups.groupVersions');
@@ -1322,19 +1320,19 @@ describe("Zotero.Sync.Runner", function () {
 				});
 				
 				waitForDialog(null, 'accept', 'chrome://zotero/content/longTagFixer.xhtml');
-				yield runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
+				await runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
 				
 				assert.isFalse(Zotero.Tags.getID(tag));
 				assert.isNumber(Zotero.Tags.getID('feeling'));
 			});
 			
-			it("should delete a tag", function* () {
-				win = yield loadZoteroPane();
+			it("should delete a tag", async function () {
+				win = await loadZoteroPane();
 				
-				var item = yield createDataObject('item');
+				var item = await createDataObject('item');
 				var tag = "title;feeling;matter;drum;treatment;caring;earthy;shrill;unit;obedient;hover;healthy;cheap;clever;wren;wicked;clip;shoe;jittery;shape;clear;dime;increase;complete;level;milk;false;infamous;lamentable;measure;cuddly;tasteless;peace;top;pencil;caption;unusual;depressed;frantic";
 				item.addTag(tag, 1);
-				yield item.saveTx();
+				await item.saveTx();
 				
 				setResponse('keyInfo.fullAccess');
 				setResponse('userGroups.groupVersions');
@@ -1394,7 +1392,7 @@ describe("Zotero.Sync.Runner", function () {
 				waitForDialog(function (window) {
 					window.Zotero_Long_Tag_Fixer.switchMode(2);
 				}, 'accept', 'chrome://zotero/content/longTagFixer.xhtml');
-				yield runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
+				await runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
 				
 				assert.isFalse(Zotero.Tags.getID(tag));
 				assert.isFalse(Zotero.Tags.getID('feeling'));

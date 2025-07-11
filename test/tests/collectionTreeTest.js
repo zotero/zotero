@@ -1,6 +1,6 @@
 "use strict";
 
-describe("Zotero.CollectionTree", function() {
+describe("Zotero.CollectionTree", function () {
 	var win, zp, cv, userLibraryID;
 	
 	before(function* () {
@@ -18,48 +18,48 @@ describe("Zotero.CollectionTree", function() {
 	});
 	
 	describe("#refresh()", function () {
-		it("should show Duplicate Items and Unfiled Items by default and shouldn't show Retracted Items", function* () {
+		it("should show Duplicate Items and Unfiled Items by default and shouldn't show Retracted Items", async function () {
 			Zotero.Prefs.clear('duplicateLibraries');
 			Zotero.Prefs.clear('unfiledLibraries');
 			Zotero.Prefs.clear('retractedLibraries');
-			yield cv.refresh();
+			await cv.refresh();
 			assert.ok(cv.getRowIndexByID("D" + userLibraryID));
 			assert.ok(cv.getRowIndexByID("U" + userLibraryID));
 			assert.isFalse(cv.getRowIndexByID("R" + userLibraryID));
 		});
 		
-		it("shouldn't show virtual collections if hidden", function* () {
+		it("shouldn't show virtual collections if hidden", async function () {
 			Zotero.Prefs.set('duplicateLibraries', `{"${userLibraryID}": false}`);
 			Zotero.Prefs.set('unfiledLibraries', `{"${userLibraryID}": false}`);
 			Zotero.Prefs.set('retractedLibraries', `{"${userLibraryID}": false}`);
-			yield cv.refresh();
+			await cv.refresh();
 			assert.isFalse(cv.getRowIndexByID("D" + userLibraryID));
 			assert.isFalse(cv.getRowIndexByID("U" + userLibraryID));
 			assert.isFalse(cv.getRowIndexByID("R" + userLibraryID));
 		});
 		
-		it("should maintain open state of group", function* () {
-			var group1 = yield createGroup();
-			var group2 = yield createGroup();
+		it("should maintain open state of group", async function () {
+			var group1 = await createGroup();
+			var group2 = await createGroup();
 			var group1Row = cv.getRowIndexByID(group1.treeViewID);
 			var group2Row = cv.getRowIndexByID(group2.treeViewID);
 			
 			// Open group 1 and close group 2
 			if (!cv.isContainerOpen(group1Row)) {
-				yield cv.toggleOpenState(group1Row);
+				await cv.toggleOpenState(group1Row);
 			}
 			if (cv.isContainerOpen(group2Row)) {
-				yield cv.toggleOpenState(group2Row);
+				await cv.toggleOpenState(group2Row);
 			}
 			
 			cv._saveOpenStates();
 			// #_saveOpenStates is debounced
-			yield Zotero.Promise.delay(500);
+			await Zotero.Promise.delay(500);
 			
 			group1Row = cv.getRowIndexByID(group1.treeViewID);
 			group2Row = cv.getRowIndexByID(group2.treeViewID);
 			
-			yield cv.refresh();
+			await cv.refresh();
 			
 			// Group rows shouldn't have changed
 			assert.equal(cv.getRowIndexByID(group1.treeViewID), group1Row);
@@ -69,25 +69,25 @@ describe("Zotero.CollectionTree", function() {
 			assert.isFalse(cv.isContainerOpen(group2Row));
 		});
 		
-		it("should update associated item tree view", function* () {
-			var collection = yield createDataObject('collection');
-			var item = yield createDataObject('item', { collections: [collection.id] });
-			yield cv.reload();
-			yield cv.selectCollection(collection.id);
-			yield cv.selectItem(item.id);
+		it("should update associated item tree view", async function () {
+			var collection = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [collection.id] });
+			await cv.reload();
+			await cv.selectCollection(collection.id);
+			await cv.selectItem(item.id);
 		});
 	});
 	
 	describe("collapse/expand", function () {
-		it("should close and open My Library repeatedly", function* () {
-			yield cv.selectLibrary(userLibraryID);
+		it("should close and open My Library repeatedly", async function () {
+			await cv.selectLibrary(userLibraryID);
 			var row = cv.selection.focused;
 			
 			cv.collapseLibrary(userLibraryID);
 			assert.equal(cv.selection.focused, row);
 			assert.isFalse(cv.isContainerOpen(row));
 			
-			yield cv.expandLibrary(userLibraryID);
+			await cv.expandLibrary(userLibraryID);
 			assert.equal(cv.selection.focused, row);
 			assert.ok(cv.isContainerOpen(row));
 			
@@ -95,7 +95,7 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(cv.selection.focused, row);
 			assert.isFalse(cv.isContainerOpen(row));
 			
-			yield cv.expandLibrary(userLibraryID);
+			await cv.expandLibrary(userLibraryID);
 			assert.equal(cv.selection.focused, row);
 			assert.ok(cv.isContainerOpen(row));
 		})
@@ -120,49 +120,49 @@ describe("Zotero.CollectionTree", function() {
 			yield select(win, col3);
 		});
 		
-		it("should open a library and respect stored container state", function* () {
+		it("should open a library and respect stored container state", async function () {
 			// Collapse B
-			yield cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
+			await cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
 			cv._saveOpenStates();
 			// #_saveOpenStates is debounced
-			yield Zotero.Promise.delay(500);
+			await Zotero.Promise.delay(500);
 			
 			// Close and reopen library
-			yield cv.toggleOpenState(libraryRow);
-			yield cv.expandLibrary(userLibraryID);
+			await cv.toggleOpenState(libraryRow);
+			await cv.expandLibrary(userLibraryID);
 
 			assert.isTrue(cv.isContainerOpen(libraryRow));
 			assert.isTrue(cv.isContainerOpen(cv.getRowIndexByID(col1.treeViewID)));
 			assert.isFalse(cv.isContainerOpen(cv.getRowIndexByID(col2.treeViewID)));
 		});
 		
-		it("should open a library and all subcollections in recursive mode", function* () {
-			yield cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
+		it("should open a library and all subcollections in recursive mode", async function () {
+			await cv.toggleOpenState(cv.getRowIndexByID(col2.treeViewID));
 			cv._saveOpenStates();
 			// #_saveOpenStates is debounced
-			yield Zotero.Promise.delay(500);
+			await Zotero.Promise.delay(500);
 			
 			// Close and reopen library
-			yield cv.toggleOpenState(libraryRow);
-			yield cv.expandLibrary(userLibraryID, true);
+			await cv.toggleOpenState(libraryRow);
+			await cv.expandLibrary(userLibraryID, true);
 
 			assert.isTrue(cv.isContainerOpen(cv.getRowIndexByID(col1.treeViewID)));
 			assert.isTrue(cv.isContainerOpen(cv.getRowIndexByID(col2.treeViewID)));
 		});
 		
-		it("should open a group and show top-level collections", function* () {
-			var group = yield createGroup();
+		it("should open a group and show top-level collections", async function () {
+			var group = await createGroup();
 			var libraryID = group.libraryID;
-			var col1 = yield createDataObject('collection', { libraryID });
-			var col2 = yield createDataObject('collection', { libraryID });
-			var col3 = yield createDataObject('collection', { libraryID });
-			var col4 = yield createDataObject('collection', { libraryID, parentID: col1.id });
-			var col5 = yield createDataObject('collection', { libraryID, parentID: col4.id });
+			var col1 = await createDataObject('collection', { libraryID });
+			var col2 = await createDataObject('collection', { libraryID });
+			var col3 = await createDataObject('collection', { libraryID });
+			var col4 = await createDataObject('collection', { libraryID, parentID: col1.id });
+			var col5 = await createDataObject('collection', { libraryID, parentID: col4.id });
 			
 			// Close group
 			cv.toggleOpenState(cv.getRowIndexByID(group.treeViewID), false);
 			
-			yield cv.expandLibrary(libraryID);
+			await cv.expandLibrary(libraryID);
 			
 			assert.isNumber(cv.getRowIndexByID(col1.treeViewID));
 			assert.isNumber(cv.getRowIndexByID(col2.treeViewID));
@@ -173,13 +173,13 @@ describe("Zotero.CollectionTree", function() {
 	});
 	
 	describe("#expandToCollection()", function () {
-		it("should expand a collection to a subcollection", function* () {
-			var collection1 = yield createDataObject('collection');
-			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
+		it("should expand a collection to a subcollection", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id });
 			var row = cv.getRowIndexByID("C" + collection1.id);
 			assert.isFalse(cv.isContainerOpen(row));
 			
-			yield cv.expandToCollection(collection2.id);
+			await cv.expandToCollection(collection2.id);
 			cv.forceUpdate();
 			
 			// Make sure parent row position hasn't changed
@@ -190,8 +190,8 @@ describe("Zotero.CollectionTree", function() {
 	})
 	
 	describe("#selectByID()", function () {
-		it("should select the trash", function* () {
-			yield cv.selectByID("T1");
+		it("should select the trash", async function () {
+			await cv.selectByID("T1");
 			var row = cv.selection.focused;
 			var treeRow = cv.getRow(row);
 			assert.ok(treeRow.isTrash());
@@ -200,11 +200,11 @@ describe("Zotero.CollectionTree", function() {
 	})
 	
 	describe("#selectWait()", function () {
-		it("shouldn't hang if row is already selected", function* () {
+		it("shouldn't hang if row is already selected", async function () {
 			var row = cv.getRowIndexByID("T" + userLibraryID);
-			yield cv.selectWait(row);
-			yield Zotero.Promise.delay(50);
-			yield cv.selectWait(row);
+			await cv.selectWait(row);
+			await Zotero.Promise.delay(50);
+			await cv.selectWait(row);
 		})
 	})
 	
@@ -312,22 +312,22 @@ describe("Zotero.CollectionTree", function() {
 	});
 	
 	describe("#notify()", function () {
-		it("should select a new collection", function* () {
+		it("should select a new collection", async function () {
 			// Create collection
 			var collection = new Zotero.Collection;
 			collection.name = "Select new collection";
-			var id = yield collection.saveTx();
+			var id = await collection.saveTx();
 			
 			// New collection should be selected
 			var selected = cv.getSelectedCollection(true);
 			assert.equal(selected, id);
 		});
 		
-		it("shouldn't select a new collection if skipNotifier is passed", function* () {
+		it("shouldn't select a new collection if skipNotifier is passed", async function () {
 			// Create collection with skipNotifier flag
 			var collection = new Zotero.Collection;
 			collection.name = "No select on skipNotifier";
-			var id = yield collection.saveTx({
+			var id = await collection.saveTx({
 				skipNotifier: true
 			});
 			
@@ -335,11 +335,11 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		});
 		
-		it("shouldn't select a new collection if skipSelect is passed", function* () {
+		it("shouldn't select a new collection if skipSelect is passed", async function () {
 			// Create collection with skipSelect flag
 			var collection = new Zotero.Collection;
 			collection.name = "No select on skipSelect";
-			var id = yield collection.saveTx({
+			var id = await collection.saveTx({
 				skipSelect: true
 			});
 			
@@ -347,32 +347,32 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		});
 		
-		it("shouldn't select a modified collection", function* () {
+		it("shouldn't select a modified collection", async function () {
 			// Create collection
 			var collection = new Zotero.Collection;
 			collection.name = "No select on modify";
-			var id = yield collection.saveTx();
+			var id = await collection.saveTx();
 			
-			yield selectLibrary(win);
+			await selectLibrary(win);
 			
 			collection.name = "No select on modify 2";
-			yield collection.saveTx();
+			await collection.saveTx();
 			
 			// Modified collection should not be selected
 			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		});
 		
-		it("should maintain selection on a selected modified collection", function* () {
+		it("should maintain selection on a selected modified collection", async function () {
 			// Create collection
 			var collection = new Zotero.Collection;
 			collection.name = "Reselect on modify";
-			var id = yield collection.saveTx();
+			var id = await collection.saveTx();
 			
 			var selected = cv.getSelectedCollection(true);
 			assert.equal(selected, id);
 			
 			collection.name = "Reselect on modify 2";
-			yield collection.saveTx();
+			await collection.saveTx();
 			
 			// Modified collection should still be selected
 			selected = cv.getSelectedCollection(true);
@@ -441,29 +441,29 @@ describe("Zotero.CollectionTree", function() {
 			});
 		}
 		
-		it("should update the editability of the current view", function* () {
-			var group = yield createGroup({
+		it("should update the editability of the current view", async function () {
+			var group = await createGroup({
 				editable: false,
 				filesEditable: false
 			});
-			yield cv.selectLibrary(group.libraryID);
-			yield waitForItemsLoad(win);
+			await cv.selectLibrary(group.libraryID);
+			await waitForItemsLoad(win);
 			
 			assert.isFalse(zp.getCollectionTreeRow().editable);
 			var cmd = win.document.getElementById('cmd_zotero_newStandaloneNote');
 			assert.isTrue(cmd.getAttribute('disabled') == 'true');
 			
 			group.editable = true;
-			yield group.saveTx();
+			await group.saveTx();
 			
 			assert.isTrue(zp.getCollectionTreeRow().editable);
 			assert.isFalse(cmd.getAttribute('disabled') == 'true');
 		});
 		
-		it("should re-sort a modified collection", function* () {
+		it("should re-sort a modified collection", async function () {
 			var prefix = Zotero.Utilities.randomString() + " ";
-			var collectionA = yield createDataObject('collection', { name: prefix + "A" });
-			var collectionB = yield createDataObject('collection', { name: prefix + "B" });
+			var collectionA = await createDataObject('collection', { name: prefix + "A" });
+			var collectionB = await createDataObject('collection', { name: prefix + "B" });
 			
 			var aRow = cv.getRowIndexByID("C" + collectionA.id);
 			var aRowOriginal = aRow;
@@ -471,7 +471,7 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(bRow, aRow + 1);
 			
 			collectionA.name = prefix + "C";
-			yield collectionA.saveTx();
+			await collectionA.saveTx();
 			
 			var aRow = cv.getRowIndexByID("C" + collectionA.id);
 			var bRow = cv.getRowIndexByID("C" + collectionB.id);
@@ -479,10 +479,10 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(aRow, bRow + 1);
 		})
 		
-		it("should re-sort a modified search", function* () {
+		it("should re-sort a modified search", async function () {
 			var prefix = Zotero.Utilities.randomString() + " ";
-			var searchA = yield createDataObject('search', { name: prefix + "A" });
-			var searchB = yield createDataObject('search', { name: prefix + "B" });
+			var searchA = await createDataObject('search', { name: prefix + "A" });
+			var searchB = await createDataObject('search', { name: prefix + "B" });
 			
 			var aRow = cv.getRowIndexByID("S" + searchA.id);
 			var aRowOriginal = aRow;
@@ -490,7 +490,7 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(bRow, aRow + 1);
 			
 			searchA.name = prefix + "C";
-			yield searchA.saveTx();
+			await searchA.saveTx();
 			
 			var aRow = cv.getRowIndexByID("S" + searchA.id);
 			var bRow = cv.getRowIndexByID("S" + searchB.id);
@@ -499,16 +499,16 @@ describe("Zotero.CollectionTree", function() {
 		})
 		
 		
-		it("should add collection after parent's subcollection and before non-sibling", function* () {
-			var c0 = yield createDataObject('collection', { name: "Test" });
+		it("should add collection after parent's subcollection and before non-sibling", async function () {
+			var c0 = await createDataObject('collection', { name: "Test" });
 			var rootRow = cv.getRowIndexByID(c0.treeViewID);
 			
-			var c1 = yield createDataObject('collection', { name: "1", parentID: c0.id });
-			var c2 = yield createDataObject('collection', { name: "2", parentID: c0.id });
-			var c3 = yield createDataObject('collection', { name: "3", parentID: c1.id });
-			var c4 = yield createDataObject('collection', { name: "4", parentID: c3.id });
-			var c5 = yield createDataObject('collection', { name: "5", parentID: c1.id });
-			yield select(win, c4);
+			var c1 = await createDataObject('collection', { name: "1", parentID: c0.id });
+			var c2 = await createDataObject('collection', { name: "2", parentID: c0.id });
+			var c3 = await createDataObject('collection', { name: "3", parentID: c1.id });
+			var c4 = await createDataObject('collection', { name: "4", parentID: c3.id });
+			var c5 = await createDataObject('collection', { name: "5", parentID: c1.id });
+			await select(win, c4);
 			
 			assert.equal(cv.getRowIndexByID(c1.treeViewID), rootRow + 1);
 			
@@ -523,9 +523,9 @@ describe("Zotero.CollectionTree", function() {
 		});
 		
 		
-		it("should add multiple collections", function* () {
+		it("should add multiple collections", async function () {
 			var col1, col2;
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				col1 = createUnsavedDataObject('collection');
 				col2 = createUnsavedDataObject('collection');
 				await col1.save();
@@ -541,27 +541,27 @@ describe("Zotero.CollectionTree", function() {
 		});
 		
 		
-		it("shouldn't refresh the items list when a collection is modified", function* () {
-			var collection = yield createDataObject('collection');
-			yield waitForItemsLoad(win);
+		it("shouldn't refresh the items list when a collection is modified", async function () {
+			var collection = await createDataObject('collection');
+			await waitForItemsLoad(win);
 			var itemsView = zp.itemsView;
 			
 			collection.name = "New Name";
-			yield collection.saveTx();
+			await collection.saveTx();
 			
-			yield waitForItemsLoad(win);
+			await waitForItemsLoad(win);
 			assert.equal(zp.itemsView, itemsView);
 		})
 		
-		it("should add a saved search after collections", function* () {
+		it("should add a saved search after collections", async function () {
 			var collection = new Zotero.Collection;
 			collection.name = "Test";
-			var collectionID = yield collection.saveTx();
+			var collectionID = await collection.saveTx();
 			
 			var search = new Zotero.Search;
 			search.name = "A Test Search";
 			search.addCondition('title', 'contains', 'test');
-			var searchID = yield search.saveTx();
+			var searchID = await search.saveTx();
 			
 			var collectionRow = cv._rowMap["C" + collectionID];
 			var searchRow = cv._rowMap["S" + searchID];
@@ -583,37 +583,37 @@ describe("Zotero.CollectionTree", function() {
 			}
 		})
 		
-		it("shouldn't select a new group", function* () {
-			var group = yield createGroup();
+		it("shouldn't select a new group", async function () {
+			var group = await createGroup();
 			// Library should still be selected
 			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		})
 		
-		it("should remove a group and all children", function* () {
+		it("should remove a group and all children", async function () {
 			// Make sure Group Libraries separator and header exist already,
 			// since otherwise they'll interfere with the count
-			yield getGroup();
+			await getGroup();
 			
 			var originalRowCount = cv._rows.length;
 			
-			var group = yield createGroup();
-			yield createDataObject('collection', { libraryID: group.libraryID });
-			var c = yield createDataObject('collection', { libraryID: group.libraryID });
-			var c2 = yield createDataObject('collection', { libraryID: group.libraryID, parentID: c.id });
-			yield createDataObject('collection', { libraryID: group.libraryID });
-			yield createDataObject('collection', { libraryID: group.libraryID });
-			yield select(win, c2);
+			var group = await createGroup();
+			await createDataObject('collection', { libraryID: group.libraryID });
+			var c = await createDataObject('collection', { libraryID: group.libraryID });
+			var c2 = await createDataObject('collection', { libraryID: group.libraryID, parentID: c.id });
+			await createDataObject('collection', { libraryID: group.libraryID });
+			await createDataObject('collection', { libraryID: group.libraryID });
+			await select(win, c2);
 			
 			// Group, collections, Duplicates, Unfiled, and trash
 			assert.equal(cv._rows.length, originalRowCount + 9);
 			
 			// Select group
-			yield cv.selectLibrary(group.libraryID);
-			yield waitForItemsLoad(win);
+			await cv.selectLibrary(group.libraryID);
+			await waitForItemsLoad(win);
 			
 			var spy = sinon.spy(cv, "refresh");
 			try {
-				yield group.eraseTx();
+				await group.eraseTx();
 				
 				assert.equal(cv._rows.length, originalRowCount);
 				// Make sure the tree wasn't refreshed
@@ -624,14 +624,14 @@ describe("Zotero.CollectionTree", function() {
 			}
 		})
 		
-		it("should select a new feed", function* () {
-			var feed = yield createFeed();
+		it("should select a new feed", async function () {
+			var feed = await createFeed();
 			// Feed should be selected
 			assert.equal(cv.getSelectedLibraryID(), feed.id);
 		});
 		
-		it("shouldn't select a new feed with skipSelect: true", function* () {
-			var feed = yield createFeed({
+		it("shouldn't select a new feed with skipSelect: true", async function () {
+			var feed = await createFeed({
 				saveOptions: {
 					skipSelect: true
 				}
@@ -640,14 +640,14 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(cv.getSelectedLibraryID(), userLibraryID);
 		});
 		
-		it("should remove deleted feed", function* () {
-			var feed = yield createFeed();
-			yield cv.selectLibrary(feed.libraryID);
+		it("should remove deleted feed", async function () {
+			var feed = await createFeed();
+			await cv.selectLibrary(feed.libraryID);
 			waitForDialog();
 			var id = feed.treeViewID;
 			let promise = waitForCollectionTree(win);
-			yield win.ZoteroPane.deleteSelectedCollection();
-			yield promise;
+			await win.ZoteroPane.deleteSelectedCollection();
+			await promise;
 			assert.isFalse(cv.getRowIndexByID(id))
 		})
 		
@@ -721,7 +721,7 @@ describe("Zotero.CollectionTree", function() {
 		 *     value returned after the drag. Otherwise, an 'add' event will be waited for, and
 		 *     an object with 'ids' and 'extraData' will be returned.
 		 */
-		var onDrop = Zotero.Promise.coroutine(function* (objectType, targetRow, ids, promise, action = 'copy') {
+		var onDrop = async function (objectType, targetRow, ids, promise, action = 'copy') {
 			if (typeof targetRow == 'string') {
 				var row = cv.getRowIndexByID(targetRow);
 				var orient = 0;
@@ -737,7 +737,7 @@ describe("Zotero.CollectionTree", function() {
 			if (!promise) {
 				promise = waitForNotifierEvent("add", objectType);
 			}
-			yield cv.onDrop({
+			await cv.onDrop({
 				persist: () => 0,
 				target: {ownerDocument: {defaultView: win}},
 				dataTransfer: {
@@ -753,13 +753,13 @@ describe("Zotero.CollectionTree", function() {
 			}, row);
 			
 			// Add observer to wait for add
-			var result = yield promise;
+			var result = await promise;
 			Zotero.DragDrop.currentDragSource = null;
 			return result;
-		});
+		};
 		
 		
-		var canDrop = Zotero.Promise.coroutine(function* (objectType, targetRowID, ids) {
+		var canDrop = async function (objectType, targetRowID, ids) {
 			var row = cv.getRowIndexByID(targetRowID);
 			
 			Zotero.DragDrop.currentDragSource = objectType == "item"
@@ -777,11 +777,11 @@ describe("Zotero.CollectionTree", function() {
 			};
 			var canDrop = cv.canDropCheck(row, 0, dt);
 			if (canDrop) {
-				canDrop = yield cv.canDropCheckAsync(row, 0, dt);
+				canDrop = await cv.canDropCheckAsync(row, 0, dt);
 			}
 			Zotero.DragDrop.currentDragSource = null;
 			return canDrop;
-		});
+		};
 		
 		describe("with items", function () {
 			it("should add an item to a collection", async function () {
@@ -813,11 +813,11 @@ describe("Zotero.CollectionTree", function() {
 				assert.equal(treeRow.ref.id, item.id);
 			})
 			
-			it("should move an item from one collection to another", function* () {
-				var collection1 = yield createDataObject('collection');
-				yield select(win, collection1);
-				var collection2 = yield createDataObject('collection');
-				var item = yield createDataObject('item', { collections: [collection1.id] });
+			it("should move an item from one collection to another", async function () {
+				var collection1 = await createDataObject('collection');
+				await select(win, collection1);
+				var collection2 = await createDataObject('collection');
+				var item = await createDataObject('item', { collections: [collection1.id] });
 				
 				// Add observer to wait for collection add
 				var deferred = Zotero.Promise.defer();
@@ -833,15 +833,15 @@ describe("Zotero.CollectionTree", function() {
 				}, 'collection-item', 'test');
 				
 				let promise = zp.itemsView.waitForSelect();
-				yield onDrop('item', 'C' + collection2.id, [item.id], deferred.promise, 'move');
-				yield promise;
+				await onDrop('item', 'C' + collection2.id, [item.id], deferred.promise, 'move');
+				await promise;
 				
 				Zotero.Notifier.unregisterObserver(observerID);
 				
 				// Source collection should be empty
 				assert.equal(zp.itemsView.rowCount, 0);
 				
-				yield select(win, collection2);
+				await select(win, collection2);
 				
 				// Target collection should have item
 				assert.equal(zp.itemsView.rowCount, 1);
@@ -1066,23 +1066,23 @@ describe("Zotero.CollectionTree", function() {
 				return group.eraseTx();
 			});
 			
-			it("should not copy an item or its attachment to a group twice", function* () {
-				var group = yield getGroup();
+			it("should not copy an item or its attachment to a group twice", async function () {
+				var group = await getGroup();
 				
 				var itemTitle = Zotero.Utilities.randomString();
-				var item = yield createDataObject('item', false, { skipSelect: true });
+				var item = await createDataObject('item', false, { skipSelect: true });
 				var file = getTestDataDirectory();
 				file.append('test.png');
-				var attachment = yield Zotero.Attachments.importFromFile({
+				var attachment = await Zotero.Attachments.importFromFile({
 					file: file,
 					parentItemID: item.id
 				});
 				var attachmentTitle = Zotero.Utilities.randomString();
 				attachment.setField('title', attachmentTitle);
-				yield attachment.saveTx();
+				await attachment.saveTx();
 				
-				yield onDrop('item', 'L' + group.libraryID, [item.id]);
-				assert.isFalse(yield canDrop('item', 'L' + group.libraryID, [item.id]));
+				await onDrop('item', 'L' + group.libraryID, [item.id]);
+				assert.isFalse(await canDrop('item', 'L' + group.libraryID, [item.id]));
 			})
 			
 			it("should copy an item from a read-only group to an editable group", async function () {
@@ -1136,11 +1136,11 @@ describe("Zotero.CollectionTree", function() {
 		
 		
 		describe("with collections", function () {
-			it("should make a subcollection top-level", function* () {
-				var collection1 = yield createDataObject('collection', { name: "A" }, { skipSelect: true });
-				var collection2 = yield createDataObject('collection', { name: "C" }, { skipSelect: true });
-				var collection3 = yield createDataObject('collection', { name: "D" }, { skipSelect: true });
-				var collection4 = yield createDataObject('collection', { name: "B", parentKey: collection2.key });
+			it("should make a subcollection top-level", async function () {
+				var collection1 = await createDataObject('collection', { name: "A" }, { skipSelect: true });
+				var collection2 = await createDataObject('collection', { name: "C" }, { skipSelect: true });
+				var collection3 = await createDataObject('collection', { name: "D" }, { skipSelect: true });
+				var collection4 = await createDataObject('collection', { name: "B", parentKey: collection2.key });
 				
 				var colIndex1 = cv.getRowIndexByID('C' + collection1.id);
 				var colIndex2 = cv.getRowIndexByID('C' + collection2.id);
@@ -1159,7 +1159,7 @@ describe("Zotero.CollectionTree", function() {
 					}
 				}, 'collection', 'test');
 				
-				yield onDrop(
+				await onDrop(
 					'collection',
 					{
 						row: 0,
@@ -1413,7 +1413,7 @@ describe("Zotero.CollectionTree", function() {
 				await new Promise(resolve => httpd.stop(resolve));
 			});
 			
-			it("should add a translated feed item retrieved from a URL", function* () {
+			it("should add a translated feed item retrieved from a URL", async function () {
 				// Serve the feed entry webpage via localhost
 				const urlPath = "/journalArticle-single.html";
 				const url = `http://localhost:${httpdPort}` + urlPath;
@@ -1424,27 +1424,27 @@ describe("Zotero.CollectionTree", function() {
 					))
 				);
 				
-				var feed = yield createFeed();
-				var collection = yield createDataObject('collection', false, { skipSelect: true });
-				var feedItem = yield createDataObject('feedItem', {libraryID: feed.libraryID}, { skipSelect: true });
+				var feed = await createFeed();
+				var collection = await createDataObject('collection', false, { skipSelect: true });
+				var feedItem = await createDataObject('feedItem', {libraryID: feed.libraryID}, { skipSelect: true });
 				feedItem.setField('url', url);
-				yield feedItem.saveTx();
+				await feedItem.saveTx();
 				var translateFn = sinon.spy(feedItem, 'translate');
 				
 				// Add observer to wait for collection add
 				var deferred = Zotero.Promise.defer();
 				var itemIds;
 
-				var ids = (yield onDrop('item', 'C' + collection.id, [feedItem.id])).ids;
+				var ids = ((await onDrop('item', 'C' + collection.id, [feedItem.id]))).ids;
 				
 				// Check that the translated item was the one that was created after drag
 				var item;
-				yield translateFn.returnValues[0].then(function(i) {
+				await translateFn.returnValues[0].then(function (i) {
 					item = i;
 					assert.equal(item.id, ids[0]);
 				});
 				
-				yield select(win, collection);
+				await select(win, collection);
 				
 				var itemsView = win.ZoteroPane.itemsView;
 				assert.equal(itemsView.rowCount, 1);
@@ -1571,7 +1571,7 @@ describe("Zotero.CollectionTree", function() {
 		});
 
 		for (let type of ['collection', 'search', 'feed']) {
-			// eslint-disable-next-line no-loop-func
+			 
 			it(`should show only ${type} matching the filter`, async function () {
 				await cv.setFilter(type);
 				let displayedRowNames = cv._rows.filter(row => row.type == type).map(row => row.getName());
@@ -1634,7 +1634,7 @@ describe("Zotero.CollectionTree", function() {
 		});
 
 		for (let type of ['collection', 'search']) {
-			// eslint-disable-next-line no-loop-func
+			 
 			it(`should only hide ${type} if it's renamed to not match the filter`, async function () {
 				await cv.setFilter(type);
 				let objectToSelect = type == 'collection' ? collection5 : search2;
@@ -1651,7 +1651,7 @@ describe("Zotero.CollectionTree", function() {
 		}
 
 		for (let type of ['collection', 'search']) {
-			// eslint-disable-next-line no-loop-func
+			 
 			it(`should only add ${type} if its name matches the filter`, async function () {
 				await cv.setFilter(type);
 				let newCollection = await createDataObject(type, { name: `new_${type}`, libraryID: userLibraryID });

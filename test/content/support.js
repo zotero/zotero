@@ -192,7 +192,7 @@ function waitForWindow(uri, callback) {
  * @return {Promise}
  */
 function waitForDialog(onOpen, button='accept', url) {
-	return waitForWindow(url || "chrome://global/content/commonDialog.xhtml", Zotero.Promise.method(function (win) {
+	return waitForWindow(url || "chrome://global/content/commonDialog.xhtml", function (win) {
 		var dialog = win.document.querySelector('dialog');
 		var failure = false;
 		if (onOpen) {
@@ -236,7 +236,7 @@ function waitForDialog(onOpen, button='accept', url) {
 				throw failure;
 			}
 		}
-	}))
+	});
 }
 
 async function select(win, object) {
@@ -278,16 +278,16 @@ async function selectTrash(win, libraryID = Zotero.Libraries.userLibraryID) {
 	await waitForItemsLoad(win);
 }
 
-var waitForItemsLoad = Zotero.Promise.coroutine(function* (win, collectionRowToSelect) {
+var waitForItemsLoad = async function (win, collectionRowToSelect) {
 	var zp = win.ZoteroPane;
 	var cv = zp.collectionsView;
 	
-	yield cv.waitForLoad();
+	await cv.waitForLoad();
 	if (collectionRowToSelect !== undefined) {
-		yield cv.selectWait(collectionRowToSelect);
+		await cv.selectWait(collectionRowToSelect);
 	}
-	yield zp.itemsView.waitForLoad();
-});
+	await zp.itemsView.waitForLoad();
+};
 
 /**
  * Return a promise that resolves once the tag selector has updated
@@ -303,7 +303,7 @@ var waitForTagSelector = function (win, numUpdates = 1) {
 	if (zp.tagSelectorShown()) {
 		let tagSelector = zp.tagSelector;
 		let componentDidUpdate = tagSelector.componentDidUpdate;
-		tagSelector.componentDidUpdate = function() {
+		tagSelector.componentDidUpdate = function () {
 			updates++;
 			if (updates == numUpdates) {
 				deferred.resolve();
@@ -341,7 +341,7 @@ function waitForNotifierEvent(event, type) {
 	if (!event) throw new Error("event not provided");
 	
 	var deferred = Zotero.Promise.defer();
-	var notifierID = Zotero.Notifier.registerObserver({notify:function(ev, type, ids, extraData) {
+	var notifierID = Zotero.Notifier.registerObserver({notify:function (ev, type, ids, extraData) {
 		if(ev == event) {
 			Zotero.Notifier.unregisterObserver(notifierID);
 			deferred.resolve({
@@ -460,7 +460,7 @@ function gunzip(gzdata) {
  * Get a default group used by all tests that want one, creating one if necessary
  */
 var _defaultGroup;
-var getGroup = Zotero.Promise.method(function () {
+var getGroup = function () {
 	// Cleared in resetDB()
 	if (_defaultGroup) {
 		return _defaultGroup;
@@ -468,14 +468,14 @@ var getGroup = Zotero.Promise.method(function () {
 	return _defaultGroup = createGroup({
 		name: "My Group"
 	});
-});
+};
 
 
-var createGroup = Zotero.Promise.coroutine(function* (props = {}) {
+var createGroup = async function (props = {}) {
 	// Create a group item requires the current user to be set
 	if (!Zotero.Users.getCurrentUserID()) {
-		yield Zotero.Users.setCurrentUserID(1);
-		yield Zotero.Users.setName(1, 'Name');
+		await Zotero.Users.setCurrentUserID(1);
+		await Zotero.Users.setName(1, 'Name');
 	}
 	
 	var group = new Zotero.Group;
@@ -489,11 +489,11 @@ var createGroup = Zotero.Promise.coroutine(function* (props = {}) {
 		group.libraryVersion = props.libraryVersion;
 	}
 	group.archived = props.archived === undefined ? false : props.archived;
-	yield group.saveTx();
+	await group.saveTx();
 	return group;
-});
+};
 
-var createFeed = Zotero.Promise.coroutine(function* (props = {}) {
+var createFeed = async function (props = {}) {
 	var feed = new Zotero.Feed;
 	feed.name = props.name || "Test " + Zotero.Utilities.randomString();
 	feed.description = props.description || "";
@@ -501,16 +501,16 @@ var createFeed = Zotero.Promise.coroutine(function* (props = {}) {
 	feed.refreshInterval = props.refreshInterval || 12;
 	feed.cleanupReadAfter = props.cleanupReadAfter || 2;
 	feed.cleanupUnreadAfter = props.cleanupUnreadAfter || 30;
-	yield feed.saveTx(props.saveOptions);
+	await feed.saveTx(props.saveOptions);
 	return feed;
-});
+};
 
-var clearFeeds = Zotero.Promise.coroutine(function* () {
+var clearFeeds = async function () {
 	let feeds = Zotero.Feeds.getAll();
 	for (let i=0; i<feeds.length; i++) {
-		yield feeds[i].eraseTx();
+		await feeds[i].eraseTx();
 	}
-});
+};
 
 //
 // Data objects
@@ -659,14 +659,14 @@ function getTestDataUrl(path) {
 /**
  * Returns an absolute path to an empty temporary directory
  */
-var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
+var getTempDirectory = async function getTempDirectory() {
 	let path,
 		attempts = 3,
 		zoteroTmpDirPath = Zotero.getTempDirectory().path;
 	while (attempts--) {
 		path = PathUtils.join(zoteroTmpDirPath, Zotero.Utilities.randomString());
 		try {
-			yield IOUtils.makeDirectory(path, { ignoreExisting: false });
+			await IOUtils.makeDirectory(path, { ignoreExisting: false });
 			break;
 		} catch (e) {
 			if (!attempts) throw e; // Throw on last attempt
@@ -674,9 +674,9 @@ var getTempDirectory = Zotero.Promise.coroutine(function* getTempDirectory() {
 	}
 	
 	return path;
-});
+};
 
-var removeDir = Zotero.Promise.coroutine(function* (dir) {
+var removeDir = async function (dir) {
 	// OS.File.DirectoryIterator, used by OS.File.removeDir(), isn't reliable on Travis,
 	// returning entry.isDir == false for subdirectories, so use nsIFile instead
 	//yield OS.File.removeDir(zipDir);
@@ -684,7 +684,7 @@ var removeDir = Zotero.Promise.coroutine(function* (dir) {
 	if (dir.exists()) {
 		dir.remove(true);
 	}
-});
+};
 
 /**
  * Resets the Zotero DB and restarts Zotero. Returns a promise resolved
@@ -849,12 +849,12 @@ function populateDBWithSampleData(data) {
 	});
 }
 
-var generateItemJSONData = Zotero.Promise.coroutine(function* generateItemJSONData(options, currentData) {
-	let items = yield populateDBWithSampleData(loadSampleData('allTypesAndFields')),
+var generateItemJSONData = async function generateItemJSONData(options, currentData) {
+	let items = await populateDBWithSampleData(loadSampleData('allTypesAndFields')),
 		jsonData = {};
 	
 	for (let itemName in items) {
-		let zItem = yield Zotero.Items.getAsync(items[itemName].id);
+		let zItem = await Zotero.Items.getAsync(items[itemName].id);
 		jsonData[itemName] = zItem.toJSON(options || {});
 
 		// Don't replace some fields that _always_ change (e.g. item keys)
@@ -884,14 +884,14 @@ var generateItemJSONData = Zotero.Promise.coroutine(function* generateItemJSONDa
 	}
 	
 	return jsonData;
-});
+};
 
-var generateCiteProcJSExportData = Zotero.Promise.coroutine(function* generateCiteProcJSExportData(currentData) {
-	let items = yield populateDBWithSampleData(loadSampleData('allTypesAndFields')),
+var generateCiteProcJSExportData = async function generateCiteProcJSExportData(currentData) {
+	let items = await populateDBWithSampleData(loadSampleData('allTypesAndFields')),
 		cslExportData = {};
 	
 	for (let itemName in items) {
-		let zItem = yield Zotero.Items.getAsync(items[itemName].id);
+		let zItem = await Zotero.Items.getAsync(items[itemName].id);
 		cslExportData[itemName] = Zotero.Cite.System.prototype.retrieveItem(zItem);
 		
 		if (!currentData || !currentData[itemName]) continue;
@@ -905,17 +905,17 @@ var generateCiteProcJSExportData = Zotero.Promise.coroutine(function* generateCi
 	}
 	
 	return cslExportData;
-});
+};
 
-var generateTranslatorExportData = Zotero.Promise.coroutine(function* generateTranslatorExportData(legacy, currentData) {
-	let items = yield populateDBWithSampleData(loadSampleData('allTypesAndFields')),
+var generateTranslatorExportData = async function generateTranslatorExportData(legacy, currentData) {
+	let items = await populateDBWithSampleData(loadSampleData('allTypesAndFields')),
 		translatorExportData = {};
 	
 	let itemGetter = new Zotero.Translate.ItemGetter();
 	itemGetter.legacy = !!legacy;
 	
 	for (let itemName in items) {
-		let zItem = yield Zotero.Items.getAsync(items[itemName].id);
+		let zItem = await Zotero.Items.getAsync(items[itemName].id);
 		itemGetter._itemsLeft = [zItem];
 		translatorExportData[itemName] = itemGetter.nextItem();
 		
@@ -957,7 +957,7 @@ var generateTranslatorExportData = Zotero.Promise.coroutine(function* generateTr
 	}
 	
 	return translatorExportData;
-});
+};
 
 
 /**

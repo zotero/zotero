@@ -56,28 +56,28 @@ describe("Zotero.Sync.EventListeners", function () {
 		});
 		
 		
-		it("should sync only changed library", function* () {
+		it("should sync only changed library", async function () {
 			var mock = sinon.mock(Zotero.Sync.Runner);
 			var expectation = mock.expects("setSyncTimeout").once();
 			
-			var group = yield createGroup();
-			yield createDataObject('item', { libraryID: group.libraryID });
+			var group = await createGroup();
+			await createDataObject('item', { libraryID: group.libraryID });
 			
-			yield Zotero.Promise.delay(10);
+			await Zotero.Promise.delay(10);
 			mock.verify();
 			assert.sameMembers(expectation.getCall(0).args[2].libraries, [group.libraryID]);
 		});
 		
 		
-		it("shouldn't sync skipped library", function* () {
+		it("shouldn't sync skipped library", async function () {
 			var mock = sinon.mock(Zotero.Sync.Runner);
 			var expectation = mock.expects("setSyncTimeout").never();
 			
-			var group = yield createGroup();
+			var group = await createGroup();
 			Zotero.Prefs.set('sync.librariesToSkip', JSON.stringify(["G" + group.groupID]));
-			yield createDataObject('item', { libraryID: group.libraryID });
+			await createDataObject('item', { libraryID: group.libraryID });
 			
-			yield Zotero.Promise.delay(10);
+			await Zotero.Promise.delay(10);
 			mock.verify();
 		});
 		

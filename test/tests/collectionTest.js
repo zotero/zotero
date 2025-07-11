@@ -1,64 +1,64 @@
 "use strict";
 
-describe("Zotero.Collection", function() {
+describe("Zotero.Collection", function () {
 	describe("#save()", function () {
-		it("should save a new collection", function* () {
+		it("should save a new collection", async function () {
 			var name = "Test";
 			var collection = new Zotero.Collection;
 			collection.name = name;
-			var id = yield collection.saveTx();
+			var id = await collection.saveTx();
 			assert.equal(collection.name, name);
-			collection = yield Zotero.Collections.getAsync(id);
+			collection = await Zotero.Collections.getAsync(id);
 			assert.equal(collection.name, name);
 		});
 	})
 	
 	describe("#erase()", function () {
-		it("should delete a collection but not its descendant item by default", function* () {
-			var collection = yield createDataObject('collection');
-			var item = yield createDataObject('item', { collections: [collection.id] });
+		it("should delete a collection but not its descendant item by default", async function () {
+			var collection = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [collection.id] });
 			assert.isTrue(collection.hasItem(item.id));
 			
-			yield collection.eraseTx();
+			await collection.eraseTx();
 			
-			assert.isFalse((yield Zotero.Items.getAsync(item.id)).deleted);
+			assert.isFalse(((await Zotero.Items.getAsync(item.id))).deleted);
 		})
 		
-		it("should delete a collection and trash its descendant items with deleteItems: true", function* () {
-			var collection = yield createDataObject('collection');
-			var item1 = yield createDataObject('item', { collections: [collection.id] });
-			var item2 = yield createDataObject('item', { collections: [collection.id] });
+		it("should delete a collection and trash its descendant items with deleteItems: true", async function () {
+			var collection = await createDataObject('collection');
+			var item1 = await createDataObject('item', { collections: [collection.id] });
+			var item2 = await createDataObject('item', { collections: [collection.id] });
 			assert.isTrue(collection.hasItem(item1.id));
 			assert.isTrue(collection.hasItem(item2.id));
 			
-			yield collection.eraseTx({ deleteItems: true });
+			await collection.eraseTx({ deleteItems: true });
 			
-			assert.isTrue((yield Zotero.Items.getAsync(item1.id)).deleted);
-			assert.isTrue((yield Zotero.Items.getAsync(item2.id)).deleted);
+			assert.isTrue(((await Zotero.Items.getAsync(item1.id))).deleted);
+			assert.isTrue(((await Zotero.Items.getAsync(item2.id))).deleted);
 		});
 		
-		it("should clear collection from item cache", function* () {
-			var collection = yield createDataObject('collection');
-			var item = yield createDataObject('item', { collections: [collection.id] });
+		it("should clear collection from item cache", async function () {
+			var collection = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [collection.id] });
 			assert.lengthOf(item.getCollections(), 1);
-			yield collection.eraseTx();
+			await collection.eraseTx();
 			assert.lengthOf(item.getCollections(), 0);
 		});
 		
-		it("should clear subcollection from descendent item cache", function* () {
-			var collection = yield createDataObject('collection');
-			var subcollection = yield createDataObject('collection', { parentID: collection.id });
-			var item = yield createDataObject('item', { collections: [subcollection.id] });
+		it("should clear subcollection from descendent item cache", async function () {
+			var collection = await createDataObject('collection');
+			var subcollection = await createDataObject('collection', { parentID: collection.id });
+			var item = await createDataObject('item', { collections: [subcollection.id] });
 			assert.lengthOf(item.getCollections(), 1);
-			yield collection.eraseTx();
+			await collection.eraseTx();
 			assert.lengthOf(item.getCollections(), 0);
 		});
 		
-		it("should clear collection from item cache in deleteItems mode", function* () {
-			var collection = yield createDataObject('collection');
-			var item = yield createDataObject('item', { collections: [collection.id] });
+		it("should clear collection from item cache in deleteItems mode", async function () {
+			var collection = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [collection.id] });
 			assert.lengthOf(item.getCollections(), 1);
-			yield collection.eraseTx({ deleteItems: true });
+			await collection.eraseTx({ deleteItems: true });
 			assert.lengthOf(item.getCollections(), 0);
 		});
 		
@@ -139,109 +139,109 @@ describe("Zotero.Collection", function() {
 	})
 	
 	describe("#version", function () {
-		it("should set object version", function* () {
+		it("should set object version", async function () {
 			var version = 100;
 			var collection = new Zotero.Collection
 			collection.version = version;
 			collection.name = "Test";
-			var id = yield collection.saveTx();
+			var id = await collection.saveTx();
 			assert.equal(collection.version, version);
-			collection = yield Zotero.Collections.getAsync(id);
+			collection = await Zotero.Collections.getAsync(id);
 			assert.equal(collection.version, version);
 		});
 	})
 	
 	describe("#parentKey", function () {
-		it("should set parent collection for new collections", function* () {
+		it("should set parent collection for new collections", async function () {
 			var parentCol = new Zotero.Collection
 			parentCol.name = "Parent";
-			var parentID = yield parentCol.saveTx();
+			var parentID = await parentCol.saveTx();
 			var {libraryID, key: parentKey} = Zotero.Collections.getLibraryAndKeyFromID(parentID);
 			
 			var col = new Zotero.Collection
 			col.name = "Child";
 			col.parentKey = parentKey;
-			var id = yield col.saveTx();
+			var id = await col.saveTx();
 			assert.equal(col.parentKey, parentKey);
-			col = yield Zotero.Collections.getAsync(id);
+			col = await Zotero.Collections.getAsync(id);
 			assert.equal(col.parentKey, parentKey);
 		});
 		
-		it("should change parent collection for existing collections", function* () {
+		it("should change parent collection for existing collections", async function () {
 			// Create initial parent collection
 			var parentCol = new Zotero.Collection
 			parentCol.name = "Parent";
-			var parentID = yield parentCol.saveTx();
+			var parentID = await parentCol.saveTx();
 			var {libraryID, key: parentKey} = Zotero.Collections.getLibraryAndKeyFromID(parentID);
 			
 			// Create subcollection
 			var col = new Zotero.Collection
 			col.name = "Child";
 			col.parentKey = parentKey;
-			var id = yield col.saveTx();
+			var id = await col.saveTx();
 			
 			// Create new parent collection
 			var newParentCol = new Zotero.Collection
 			newParentCol.name = "New Parent";
-			var newParentID = yield newParentCol.saveTx();
+			var newParentID = await newParentCol.saveTx();
 			var {libraryID, key: newParentKey} = Zotero.Collections.getLibraryAndKeyFromID(newParentID);
 			
 			// Change parent collection
 			col.parentKey = newParentKey;
-			yield col.saveTx();
+			await col.saveTx();
 			assert.equal(col.parentKey, newParentKey);
-			col = yield Zotero.Collections.getAsync(id);
+			col = await Zotero.Collections.getAsync(id);
 			assert.equal(col.parentKey, newParentKey);
 		});
 		
-		it("should not mark collection as unchanged if set to existing value", function* () {
+		it("should not mark collection as unchanged if set to existing value", async function () {
 			// Create initial parent collection
 			var parentCol = new Zotero.Collection
 			parentCol.name = "Parent";
-			var parentID = yield parentCol.saveTx();
+			var parentID = await parentCol.saveTx();
 			var {libraryID, key: parentKey} = Zotero.Collections.getLibraryAndKeyFromID(parentID);
 			
 			// Create subcollection
 			var col = new Zotero.Collection
 			col.name = "Child";
 			col.parentKey = parentKey;
-			var id = yield col.saveTx();
+			var id = await col.saveTx();
 			
 			// Set to existing parent
 			col.parentKey = parentKey;
 			assert.isFalse(col.hasChanged());
 		});
 		
-		it("should not resave a collection with no parent if set to false", function* () {
+		it("should not resave a collection with no parent if set to false", async function () {
 			var col = new Zotero.Collection
 			col.name = "Test";
-			var id = yield col.saveTx();
+			var id = await col.saveTx();
 			
 			col.parentKey = false;
-			var ret = yield col.saveTx();
+			var ret = await col.saveTx();
 			assert.isFalse(ret);
 		});
 	})
 	
 	describe("#hasChildCollections()", function () {
-		it("should be false if child made top-level", function* () {
-			var collection1 = yield createDataObject('collection');
-			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
+		it("should be false if child made top-level", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id });
 			
 			assert.isTrue(collection1.hasChildCollections());
 			collection2.parentKey = false;
-			yield collection2.saveTx();
+			await collection2.saveTx();
 			assert.isFalse(collection1.hasChildCollections());
 		})
 		
-		it("should be false if child moved to another collection", function* () {
-			var collection1 = yield createDataObject('collection');
-			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
-			var collection3 = yield createDataObject('collection');
+		it("should be false if child moved to another collection", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id });
+			var collection3 = await createDataObject('collection');
 			
 			assert.isTrue(collection1.hasChildCollections());
 			collection2.parentKey = collection3.key;
-			yield collection2.saveTx();
+			await collection2.saveTx();
 			assert.isFalse(collection1.hasChildCollections());
 		});
 		
@@ -271,23 +271,23 @@ describe("Zotero.Collection", function() {
 	})
 	
 	describe("#getChildCollections()", function () {
-		it("should include child collections", function* () {
-			var collection1 = yield createDataObject('collection');
-			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
-			yield collection1.saveTx();
+		it("should include child collections", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id });
+			await collection1.saveTx();
 			
 			var childCollections = collection1.getChildCollections();
 			assert.lengthOf(childCollections, 1);
 			assert.equal(childCollections[0].id, collection2.id);
 		})
 		
-		it("should not include collections that have been removed", function* () {
-			var collection1 = yield createDataObject('collection');
-			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
-			yield collection1.saveTx();
+		it("should not include collections that have been removed", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id });
+			await collection1.saveTx();
 			
 			collection2.parentID = false;
-			yield collection2.save()
+			await collection2.save()
 			
 			var childCollections = collection1.getChildCollections();
 			assert.lengthOf(childCollections, 0);
@@ -309,12 +309,12 @@ describe("Zotero.Collection", function() {
 			assert.lengthOf(childCollections, 1);
 		});
 		
-		it("should not include collections that have been deleted", function* () {
-			var collection1 = yield createDataObject('collection');
-			var collection2 = yield createDataObject('collection', { parentID: collection1.id });
-			yield collection1.saveTx();
+		it("should not include collections that have been deleted", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id });
+			await collection1.saveTx();
 			
-			yield collection2.eraseTx()
+			await collection2.eraseTx()
 			
 			var childCollections = collection1.getChildCollections();
 			assert.lengthOf(childCollections, 0);
@@ -322,57 +322,57 @@ describe("Zotero.Collection", function() {
 	})
 	
 	describe("#getChildItems()", function () {
-		it("should include child items", function* () {
-			var collection = yield createDataObject('collection');
+		it("should include child items", async function () {
+			var collection = await createDataObject('collection');
 			var item = createUnsavedDataObject('item');
 			item.addToCollection(collection.key);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			assert.lengthOf(collection.getChildItems(), 1);
 		})
 		
-		it("should not include items in trash by default", function* () {
-			var collection = yield createDataObject('collection');
+		it("should not include items in trash by default", async function () {
+			var collection = await createDataObject('collection');
 			var item = createUnsavedDataObject('item');
 			item.deleted = true;
 			item.addToCollection(collection.key);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			assert.lengthOf(collection.getChildItems(), 0);
 		})
 		
-		it("should include items in trash if includeTrashed=true", function* () {
-			var collection = yield createDataObject('collection');
+		it("should include items in trash if includeTrashed=true", async function () {
+			var collection = await createDataObject('collection');
 			var item = createUnsavedDataObject('item');
 			item.deleted = true;
 			item.addToCollection(collection.key);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			assert.lengthOf(collection.getChildItems(false, true), 1);
 		})
 		
-		it("should not include removed items", function* () {
-			var col = yield createDataObject('collection');
-			var item = yield createDataObject('item', { collections: [ col.id ] });
+		it("should not include removed items", async function () {
+			var col = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [ col.id ] });
 			assert.lengthOf(col.getChildItems(), 1);
 			item.setCollections([]);
-			yield item.saveTx();
+			await item.saveTx();
 			Zotero.debug(col.getChildItems());
 			assert.lengthOf(col.getChildItems(), 0);
 		});
 		
-		it("should not include deleted items", function* () {
-			var col = yield createDataObject('collection');
-			var item = yield createDataObject('item', { collections: [ col.id ] });
+		it("should not include deleted items", async function () {
+			var col = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [ col.id ] });
 			assert.lengthOf(col.getChildItems(), 1);
-			yield item.erase();
+			await item.erase();
 			assert.lengthOf(col.getChildItems(), 0);
 		});
 		
-		it("should not include items emptied from trash", function* () {
-			var col = yield createDataObject('collection');
-			var item = yield createDataObject('item', { collections: [ col.id ], deleted: true });
-			yield item.erase();
+		it("should not include items emptied from trash", async function () {
+			var col = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [ col.id ], deleted: true });
+			await item.erase();
 			assert.lengthOf(col.getChildItems(), 0);
 		});
 	})
@@ -401,14 +401,14 @@ describe("Zotero.Collection", function() {
 	});
 	
 	describe("#toJSON()", function () {
-		it("should set 'parentCollection' to false when cleared", function* () {
-			var col1 = yield createDataObject('collection');
-			var col2 = yield createDataObject('collection', { parentID: col1.id });
+		it("should set 'parentCollection' to false when cleared", async function () {
+			var col1 = await createDataObject('collection');
+			var col2 = await createDataObject('collection', { parentID: col1.id });
 			// Create initial JSON with parentCollection
 			var patchBase = col2.toJSON();
 			// Clear parent collection and regenerate JSON
 			col2.parentID = false;
-			yield col2.saveTx();
+			await col2.saveTx();
 			var json = col2.toJSON({ patchBase });
 			assert.isFalse(json.parentCollection);
 		});
@@ -429,7 +429,7 @@ describe("Zotero.Collection", function() {
 			yield item3.saveTx();
 		});
 		
-		it("should return a flat array of collections and items", function* () {
+		it("should return a flat array of collections and items", async function () {
 			var desc = collection0.getDescendents();
 			assert.lengthOf(desc, 5);
 			assert.sameMembers(
@@ -444,7 +444,7 @@ describe("Zotero.Collection", function() {
 			);
 		});
 		
-		it("should return nested arrays of collections and items", function* () {
+		it("should return nested arrays of collections and items", async function () {
 			var desc = collection0.getDescendents(true);
 			assert.lengthOf(desc, 2);
 			assert.sameMembers(
@@ -466,11 +466,11 @@ describe("Zotero.Collection", function() {
 			);
 		});
 		
-		it("should not include deleted items", function* () {
-			var col = yield createDataObject('collection');
-			var item = yield createDataObject('item', { collections: [col.id] });
+		it("should not include deleted items", async function () {
+			var col = await createDataObject('collection');
+			var item = await createDataObject('item', { collections: [col.id] });
 			assert.lengthOf(col.getDescendents(), 1);
-			yield item.eraseTx();
+			await item.eraseTx();
 			assert.lengthOf(col.getDescendents(), 0);
 		});
 

@@ -7,7 +7,7 @@ describe("ConcurrentCaller", function () {
 	//logger = Zotero.debug;
 	
 	describe("#start()", function () {
-		it("should run functions as slots open and wait for them to complete", function* () {
+		it("should run functions as slots open and wait for them to complete", async function () {
 			var numConcurrent = 2;
 			var running = 0;
 			var finished = 0;
@@ -15,7 +15,7 @@ describe("ConcurrentCaller", function () {
 			
 			var ids = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 			var funcs = ids.map(function (id) {
-				return Zotero.Promise.coroutine(function* () {
+				return async function () {
 					if (logger) {
 						Zotero.debug("Running " + id);
 					}
@@ -26,7 +26,7 @@ describe("ConcurrentCaller", function () {
 					}
 					var min = 10;
 					var max = 25;
-					yield Zotero.Promise.delay(
+					await Zotero.Promise.delay(
 						Math.floor(Math.random() * (max - min + 1)) + min
 					);
 					if (running > numConcurrent) {
@@ -39,14 +39,14 @@ describe("ConcurrentCaller", function () {
 						Zotero.debug("Finished " + id);
 					}
 					return id;
-				});
+				};
 			})
 			
 			var caller = new ConcurrentCaller({
 				numConcurrent,
 				logger
 			});
-			var results = yield caller.start(funcs);
+			var results = await caller.start(funcs);
 			
 			assert.equal(results.length, ids.length);
 			assert.equal(running, 0);
@@ -54,7 +54,7 @@ describe("ConcurrentCaller", function () {
 			assert.isFalse(failed);
 		})
 		
-		it("should add functions to existing queue and resolve when all are complete (waiting for earlier set)", function* () {
+		it("should add functions to existing queue and resolve when all are complete (waiting for earlier set)", async function () {
 			var numConcurrent = 2;
 			var running = 0;
 			var finished = 0;
@@ -63,7 +63,7 @@ describe("ConcurrentCaller", function () {
 			var ids1 = {"1": 5, "2": 10, "3": 7};
 			var ids2 = {"4": 50, "5": 50};
 			var makeFunc = function (id, delay) {
-				return Zotero.Promise.coroutine(function* () {
+				return async function () {
 					if (logger) {
 						Zotero.debug("Running " + id);
 					}
@@ -72,7 +72,7 @@ describe("ConcurrentCaller", function () {
 						failed = true;
 						throw new Error("Too many concurrent tasks");
 					}
-					yield Zotero.Promise.delay(delay);
+					await Zotero.Promise.delay(delay);
 					if (running > numConcurrent) {
 						failed = true;
 						throw new Error("Too many concurrent tasks");
@@ -83,7 +83,7 @@ describe("ConcurrentCaller", function () {
 						Zotero.debug("Finished " + id);
 					}
 					return id;
-				});
+				};
 			};
 			var keys1 = Object.keys(ids1);
 			var keys2 = Object.keys(ids2);
@@ -95,11 +95,11 @@ describe("ConcurrentCaller", function () {
 				logger
 			});
 			var promise1 = caller.start(funcs1);
-			yield Zotero.Promise.delay(1);
+			await Zotero.Promise.delay(1);
 			var promise2 = caller.start(funcs2);
 			
 			// Wait for first set
-			var results1 = yield promise1;
+			var results1 = await promise1;
 			
 			// Second set shouldn't be done yet
 			assert.isFalse(promise2.isFulfilled());
@@ -109,7 +109,7 @@ describe("ConcurrentCaller", function () {
 			assert.isFalse(failed);
 		})
 		
-		it("should add functions to existing queue and resolve when all are complete (waiting for later set)", function* () {
+		it("should add functions to existing queue and resolve when all are complete (waiting for later set)", async function () {
 			var numConcurrent = 2;
 			var running = 0;
 			var finished = 0;
@@ -118,7 +118,7 @@ describe("ConcurrentCaller", function () {
 			var ids1 = {"1": 100, "2": 45, "3": 200};
 			var ids2 = {"4": 1, "5": 1};
 			var makeFunc = function (id, delay) {
-				return Zotero.Promise.coroutine(function* () {
+				return async function () {
 					if (logger) {
 						Zotero.debug("Running " + id);
 					}
@@ -127,7 +127,7 @@ describe("ConcurrentCaller", function () {
 						failed = true;
 						throw new Error("Too many concurrent tasks");
 					}
-					yield Zotero.Promise.delay(delay);
+					await Zotero.Promise.delay(delay);
 					if (running > numConcurrent) {
 						failed = true;
 						throw new Error("Too many concurrent tasks");
@@ -138,7 +138,7 @@ describe("ConcurrentCaller", function () {
 						Zotero.debug("Finished " + id);
 					}
 					return id;
-				});
+				};
 			};
 			var keys1 = Object.keys(ids1);
 			var keys2 = Object.keys(ids2);
@@ -150,11 +150,11 @@ describe("ConcurrentCaller", function () {
 				logger
 			});
 			var promise1 = caller.start(funcs1);
-			yield Zotero.Promise.delay(10);
+			await Zotero.Promise.delay(10);
 			var promise2 = caller.start(funcs2);
 			
 			// Wait for second set
-			var results2 = yield promise2;
+			var results2 = await promise2;
 			
 			// The second set should finish before the first
 			assert.isFalse(promise1.isFulfilled());
@@ -166,20 +166,20 @@ describe("ConcurrentCaller", function () {
 			assert.isFalse(failed);
 		})
 		
-		it("should return a rejected promise if a single passed function fails", function* () {
+		it("should return a rejected promise if a single passed function fails", async function () {
 			var numConcurrent = 2;
 			
 			var caller = new ConcurrentCaller({
 				numConcurrent,
 				logger
 			});
-			var e = yield getPromiseError(caller.start(function () {
+			var e = await getPromiseError(caller.start(function () {
 				throw new Error("Fail");
 			}));
 			assert.ok(e);
 		})
 		
-		it("should stop on error if stopOnError is set", function* () {
+		it("should stop on error if stopOnError is set", async function () {
 			var numConcurrent = 2;
 			var running = 0;
 			var finished = 0;
@@ -188,7 +188,7 @@ describe("ConcurrentCaller", function () {
 			var ids1 = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm'];
 			var ids2 = ['n', 'o', 'p', 'q'];
 			var makeFunc = function (id) {
-				return Zotero.Promise.coroutine(function* () {
+				return async function () {
 					if (logger) {
 						Zotero.debug("Running " + id);
 					}
@@ -199,7 +199,7 @@ describe("ConcurrentCaller", function () {
 					}
 					var min = 10;
 					var max = 25;
-					yield Zotero.Promise.delay(
+					await Zotero.Promise.delay(
 						Math.floor(Math.random() * (max - min + 1)) + min
 					);
 					if (id == 'g') {
@@ -223,7 +223,7 @@ describe("ConcurrentCaller", function () {
 						Zotero.debug("Finished " + id);
 					}
 					return id;
-				});
+				};
 			};
 			var funcs1 = ids1.map(makeFunc)
 			var funcs2 = ids2.map(makeFunc)
@@ -236,7 +236,7 @@ describe("ConcurrentCaller", function () {
 			var promise1 = caller.start(funcs1);
 			var promise2 = caller.start(funcs2);
 			
-			var results1 = yield promise1;
+			var results1 = await promise1;
 			
 			assert.isTrue(promise2.isFulfilled());
 			assert.equal(running, 0);
@@ -254,7 +254,7 @@ describe("ConcurrentCaller", function () {
 		})
 		
 		
-		it("should not stop on error if stopOnError isn't set", function* () {
+		it("should not stop on error if stopOnError isn't set", async function () {
 			var numConcurrent = 2;
 			var running = 0;
 			var finished = 0;
@@ -263,7 +263,7 @@ describe("ConcurrentCaller", function () {
 			var ids1 = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm'];
 			var ids2 = ['n', 'o', 'p', 'q'];
 			var makeFunc = function (id) {
-				return Zotero.Promise.coroutine(function* () {
+				return async function () {
 					if (logger) {
 						Zotero.debug("Running " + id);
 					}
@@ -274,7 +274,7 @@ describe("ConcurrentCaller", function () {
 					}
 					var min = 10;
 					var max = 25;
-					yield Zotero.Promise.delay(
+					await Zotero.Promise.delay(
 						Math.floor(Math.random() * (max - min + 1)) + min
 					);
 					if (id == 'g') {
@@ -298,7 +298,7 @@ describe("ConcurrentCaller", function () {
 						Zotero.debug("Finished " + id);
 					}
 					return id;
-				});
+				};
 			};
 			var funcs1 = ids1.map(makeFunc)
 			var funcs2 = ids2.map(makeFunc)
@@ -310,7 +310,7 @@ describe("ConcurrentCaller", function () {
 			var promise1 = caller.start(funcs1);
 			var promise2 = caller.start(funcs2);
 			
-			var results2 = yield promise2;
+			var results2 = await promise2;
 			
 			assert.isTrue(promise1.isFulfilled());
 			assert.isTrue(promise2.isFulfilled());
@@ -330,7 +330,7 @@ describe("ConcurrentCaller", function () {
 	})
 	
 	describe("#wait()", function () {
-		it("should return when all tasks are done", function* () {
+		it("should return when all tasks are done", async function () {
 			var numConcurrent = 2;
 			var running = 0;
 			var finished = 0;
@@ -339,7 +339,7 @@ describe("ConcurrentCaller", function () {
 			var ids1 = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm'];
 			var ids2 = ['n', 'o', 'p', 'q'];
 			var makeFunc = function (id) {
-				return Zotero.Promise.coroutine(function* () {
+				return async function () {
 					if (logger) {
 						Zotero.debug("Running " + id);
 					}
@@ -350,7 +350,7 @@ describe("ConcurrentCaller", function () {
 					}
 					var min = 10;
 					var max = 25;
-					yield Zotero.Promise.delay(
+					await Zotero.Promise.delay(
 						Math.floor(Math.random() * (max - min + 1)) + min
 					);
 					if (running > numConcurrent) {
@@ -363,7 +363,7 @@ describe("ConcurrentCaller", function () {
 						Zotero.debug("Finished " + id);
 					}
 					return id;
-				});
+				};
 			};
 			var funcs1 = ids1.map(makeFunc)
 			var funcs2 = ids2.map(makeFunc)
@@ -373,10 +373,10 @@ describe("ConcurrentCaller", function () {
 				logger
 			});
 			var promise1 = caller.start(funcs1);
-			yield Zotero.Promise.delay(10);
+			await Zotero.Promise.delay(10);
 			var promise2 = caller.start(funcs2);
 			
-			yield caller.wait();
+			await caller.wait();
 			
 			assert.isTrue(promise1.isFulfilled());
 			assert.isTrue(promise2.isFulfilled());

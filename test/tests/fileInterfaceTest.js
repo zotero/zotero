@@ -1,4 +1,4 @@
-describe("Zotero_File_Interface", function() {
+describe("Zotero_File_Interface", function () {
     let win;
     before(function* () {
         win = yield loadZoteroPane();
@@ -62,22 +62,22 @@ describe("Zotero_File_Interface", function() {
     });
     
     
-	it('should import an item and snapshot from Zotero RDF', function* () {
-		var tmpDir = yield getTempDirectory();
+	it('should import an item and snapshot from Zotero RDF', async function () {
+		var tmpDir = await getTempDirectory();
 		var rdfFile = OS.Path.join(tmpDir, 'test.rdf');
-		yield OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'book_and_snapshot.rdf'), rdfFile);
-		yield OS.File.makeDir(OS.Path.join(tmpDir, 'files'));
-		yield OS.File.makeDir(OS.Path.join(tmpDir, 'files', '2'));
-		yield OS.File.copy(
+		await OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'book_and_snapshot.rdf'), rdfFile);
+		await OS.File.makeDir(OS.Path.join(tmpDir, 'files'));
+		await OS.File.makeDir(OS.Path.join(tmpDir, 'files', '2'));
+		await OS.File.copy(
 			OS.Path.join(getTestDataDirectory().path, 'test.html'),
 			OS.Path.join(tmpDir, 'files', '2', 'test.html')
 		);
 		
 		var promise = waitForItemEvent('add');
-		yield win.Zotero_File_Interface.importFile({
+		await win.Zotero_File_Interface.importFile({
 			file: rdfFile
 		});
-		var ids = yield promise;
+		var ids = await promise;
 		// Notifications are batched
 		assert.lengthOf(ids, 2);
 		
@@ -92,19 +92,19 @@ describe("Zotero_File_Interface", function() {
 		assert.equal(attachment.attachmentCharset, 'utf-8');
 		
 		// Check indexing
-		var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'test');
+		var matches = await Zotero.Fulltext.findTextInItems([attachment.id], 'test');
 		assert.lengthOf(matches, 1);
 		assert.propertyVal(matches[0], 'id', attachment.id);
 	});
 	
-	it('should import a MODS file', function* () {
+	it('should import a MODS file', async function () {
 		var modsFile = OS.Path.join(getTestDataDirectory().path, "mods.xml");
 		
 		var promise = waitForItemEvent('add');
-		yield win.Zotero_File_Interface.importFile({
+		await win.Zotero_File_Interface.importFile({
 			file: modsFile
 		});
-		var ids = yield promise;
+		var ids = await promise;
 		assert.lengthOf(ids, 1);
 		
 		var item = Zotero.Items.get(ids[0]);
@@ -163,7 +163,7 @@ describe("Zotero_File_Interface", function() {
 		//
 		// Non-"Copy as HTML" mode
 		//
-		it("should copy HTML and text citations to the clipboard", function* () {
+		it("should copy HTML and text citations to the clipboard", async function () {
 			win.Zotero_File_Interface.copyItemsToClipboard(
 				[item1, item2],
 				'http://www.zotero.org/styles/apa',
@@ -181,7 +181,7 @@ describe("Zotero_File_Interface", function() {
 			assert.equal(str, '(A, 2016; B, 2016)');
 		});
 		
-		it("should copy HTML and text bibliography to the clipboard", function* () {
+		it("should copy HTML and text bibliography to the clipboard", async function () {
 			win.Zotero_File_Interface.copyItemsToClipboard(
 				[item1, item2],
 				'http://www.zotero.org/styles/apa',
@@ -201,7 +201,7 @@ describe("Zotero_File_Interface", function() {
 		//
 		// "Copy as HTML" mode
 		//
-		it("should copy HTML and HTML source citations to the clipboard", function* () {
+		it("should copy HTML and HTML source citations to the clipboard", async function () {
 			win.Zotero_File_Interface.copyItemsToClipboard(
 				[item1, item2],
 				'http://www.zotero.org/styles/apa',
@@ -218,7 +218,7 @@ describe("Zotero_File_Interface", function() {
 			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
 		});
 		
-		it("should copy HTML and HTML source bibliography to the clipboard", function* () {
+		it("should copy HTML and HTML source bibliography to the clipboard", async function () {
 			win.Zotero_File_Interface.copyItemsToClipboard(
 				[item1, item2],
 				'http://www.zotero.org/styles/apa',

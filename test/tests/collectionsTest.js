@@ -1,31 +1,31 @@
 describe("Zotero.Collections", function () {
 	describe("#getByLibrary()", function () {
-		it("should get all root collections in a library", function* () {
-			var group = yield createGroup();
+		it("should get all root collections in a library", async function () {
+			var group = await createGroup();
 			var libraryID = group.libraryID;
 			
-			var col1 = yield createDataObject('collection', { libraryID });
-			var col2 = yield createDataObject('collection', { libraryID });
-			var col3 = yield createDataObject('collection', { libraryID, parentID: col2.id });
+			var col1 = await createDataObject('collection', { libraryID });
+			var col2 = await createDataObject('collection', { libraryID });
+			var col3 = await createDataObject('collection', { libraryID, parentID: col2.id });
 			var cols = Zotero.Collections.getByLibrary(libraryID);
 			assert.lengthOf(cols, 2);
 			assert.sameMembers(cols.map(col => col.id), [col1.id, col2.id]);
 		})
 		
-		it("should get all collections in a library in recursive mode", function* () {
-			var group = yield createGroup();
+		it("should get all collections in a library in recursive mode", async function () {
+			var group = await createGroup();
 			var libraryID = group.libraryID;
 			
 			// Create collection in another library
-			yield createDataObject('collection');
+			await createDataObject('collection');
 			
-			var col1 = yield createDataObject('collection', { libraryID, name: "C" });
-			var col2 = yield createDataObject('collection', { libraryID, name: "A" });
-			var col3 = yield createDataObject('collection', { libraryID, name: "D", parentID: col2.id });
-			var col4 = yield createDataObject('collection', { libraryID, name: "B", parentID: col2.id });
-			var col5 = yield createDataObject('collection', { libraryID, name: "E", parentID: col2.id });
-			var col6 = yield createDataObject('collection', { libraryID, name: "G", parentID: col3.id });
-			var col7 = yield createDataObject('collection', { libraryID, name: "F", parentID: col3.id });
+			var col1 = await createDataObject('collection', { libraryID, name: "C" });
+			var col2 = await createDataObject('collection', { libraryID, name: "A" });
+			var col3 = await createDataObject('collection', { libraryID, name: "D", parentID: col2.id });
+			var col4 = await createDataObject('collection', { libraryID, name: "B", parentID: col2.id });
+			var col5 = await createDataObject('collection', { libraryID, name: "E", parentID: col2.id });
+			var col6 = await createDataObject('collection', { libraryID, name: "G", parentID: col3.id });
+			var col7 = await createDataObject('collection', { libraryID, name: "F", parentID: col3.id });
 			var cols = Zotero.Collections.getByLibrary(libraryID, true);
 			assert.lengthOf(cols, 7);
 			var ids = cols.map(col => col.id);
@@ -69,21 +69,21 @@ describe("Zotero.Collections", function () {
 	})
 	
 	describe("#getByParent()", function () {
-		it("should get all direct subcollections of a library", function* () {
-			var col1 = yield createDataObject('collection');
-			var col2 = yield createDataObject('collection');
-			var col3 = yield createDataObject('collection', { parentID: col2.id });
+		it("should get all direct subcollections of a library", async function () {
+			var col1 = await createDataObject('collection');
+			var col2 = await createDataObject('collection');
+			var col3 = await createDataObject('collection', { parentID: col2.id });
 			assert.lengthOf(Zotero.Collections.getByParent(col1.id), 0);
 			var cols = Zotero.Collections.getByParent(col2.id);
 			assert.lengthOf(cols, 1);
 			assert.sameMembers(cols.map(col => col.id), [col3.id]);
 		})
 		
-		it("should get all collections underneath a collection in recursive mode", function* () {
-			var col1 = yield createDataObject('collection');
-			var col2 = yield createDataObject('collection');
-			var col3 = yield createDataObject('collection', { parentID: col2.id });
-			var col4 = yield createDataObject('collection', { parentID: col3.id });
+		it("should get all collections underneath a collection in recursive mode", async function () {
+			var col1 = await createDataObject('collection');
+			var col2 = await createDataObject('collection');
+			var col3 = await createDataObject('collection', { parentID: col2.id });
+			var col4 = await createDataObject('collection', { parentID: col3.id });
 			assert.lengthOf(Zotero.Collections.getByParent(col1.id), 0);
 			var cols = Zotero.Collections.getByParent(col2.id, true);
 			assert.lengthOf(cols, 2);
@@ -91,10 +91,10 @@ describe("Zotero.Collections", function () {
 		})
 	})
 	
-	describe("#getAsync()", function() {
-		it("should return a collection item for a collection ID", function* () {
+	describe("#getAsync()", function () {
+		it("should return a collection item for a collection ID", async function () {
 			let collection = new Zotero.Collection({ name: 'foo' });
-			collection = yield Zotero.Collections.getAsync(yield collection.saveTx());
+			collection = await Zotero.Collections.getAsync(await collection.saveTx());
 			
 			assert.notOk(collection.isFeed);
 			assert.instanceOf(collection, Zotero.Collection);

@@ -38,12 +38,12 @@ describe("Zotero.FeedReader", function () {
 	
 	var win;
 	
-	before(async function() {
+	before(async function () {
 		// Browser window is needed as parent window to load the feed reader scripts.
 		win = await loadZoteroWindow();
 	});
 
-	after(async function() {
+	after(async function () {
 		if (win) {
 			win.close();
 		}
@@ -51,77 +51,77 @@ describe("Zotero.FeedReader", function () {
 	});
 
 	describe('FeedReader()', function () {
-		it('should throw if url not provided', function() {
+		it('should throw if url not provided', function () {
 			assert.throw(() => new Zotero.FeedReader())
 		});
 		
-		it('should throw if url invalid', function() {
+		it('should throw if url invalid', function () {
 			assert.throw(() => new Zotero.FeedReader('invalid url'))
 		});
 	});
 	
-	describe('#process()', function() {
-		it('should reject if the provided url is not a valid feed', function* () {
+	describe('#process()', function () {
+		it('should reject if the provided url is not a valid feed', async function () {
 			let fr = new Zotero.FeedReader(htmlUrl);
-			let e = yield getPromiseError(fr.process());
+			let e = await getPromiseError(fr.process());
 			assert.ok(e);
-			e = yield getPromiseError(fr._feedItems[fr._feedItems.length-1].promise);
+			e = await getPromiseError(fr._feedItems[fr._feedItems.length-1].promise);
 			assert.ok(e);
 		});
 		
-		it('should set #feedProperties on FeedReader object', function* () {
+		it('should set #feedProperties on FeedReader object', async function () {
 			let fr = new Zotero.FeedReader(rssFeedURL);
 			assert.throw(() => fr.feedProperties);
-			yield fr.process();
+			await fr.process();
 			assert.ok(fr.feedProperties);
 		});
 	});
 	
-	describe('#terminate()', function() {
-		it('should reject last feed item and feed processing promise if feed not processed yet', function* () {
+	describe('#terminate()', function () {
+		it('should reject last feed item and feed processing promise if feed not processed yet', async function () {
 			let fr = new Zotero.FeedReader(rssFeedURL);
 			fr.terminate("test");
-			let e = yield getPromiseError(fr.process());
+			let e = await getPromiseError(fr.process());
 			assert.ok(e);
-			e = yield getPromiseError(fr._feedItems[fr._feedItems.length-1].promise);
+			e = await getPromiseError(fr._feedItems[fr._feedItems.length-1].promise);
 			assert.ok(e);
 		});
 		
-		it('should reject last feed item if feed processed', function* () {
+		it('should reject last feed item if feed processed', async function () {
 			let fr = new Zotero.FeedReader(rssFeedURL);
-			yield fr.process();
+			await fr.process();
 			fr.terminate("test");
-			let e = yield getPromiseError(fr._feedItems[fr._feedItems.length-1].promise);
+			let e = await getPromiseError(fr._feedItems[fr._feedItems.length-1].promise);
 			assert.ok(e);
 		});
 	});
 	
-	describe('#feedProperties', function() {
+	describe('#feedProperties', function () {
 		it('should throw if accessed before feed is processed', function () {
 			let fr = new Zotero.FeedReader(rssFeedURL);
 			assert.throw(() => fr.feedProperties);
 		});
 		
-		it('should have correct values for a sparse feed', function* () {
+		it('should have correct values for a sparse feed', async function () {
 			let fr = new Zotero.FeedReader(rssFeedURL);
-			yield fr.process();
+			await fr.process();
 			assert.deepEqual(fr.feedProperties, rssFeedInfo);
 		});
 		
-		it('should have correct values for a detailed feed', function* () {
+		it('should have correct values for a detailed feed', async function () {
 			let fr = new Zotero.FeedReader(detailedRSSFeedURL);
-			yield fr.process();
+			await fr.process();
 			assert.deepEqual(fr.feedProperties, detailedRSSFeedInfo);
 		});
 	});
 	
-	describe('#ItemIterator()', function() {
-		it('should throw if called before feed is resolved', function() {
+	describe('#ItemIterator()', function () {
+		it('should throw if called before feed is resolved', function () {
 			let fr = new Zotero.FeedReader(rssFeedURL);
 			assert.throw(() => new fr.ItemIterator);
 		});
 		
-		it('should parse items correctly for a sparse RSS feed', function* () {
+		it('should parse items correctly for a sparse RSS feed', async function () {
 			let expected = { guid: 'http://liftoff.msfc.nasa.gov/2003/06/03.html#item573',
 				title: 'Star City',
 				abstractNote: 'How do Americans get ready to work with Russians aboard the International Space Station? They take a crash course in culture, language and protocol at Russia\'s <a xmlns="http://www.w3.org/1999/xhtml" href="http://howe.iki.rssi.ru/GCTC/gctc_e.htm">Star City</a>.',
@@ -134,13 +134,13 @@ describe("Zotero.FeedReader", function () {
 			};
 		
 			let fr = new Zotero.FeedReader(rssFeedURL);
-			yield fr.process();
+			await fr.process();
 			let itemIterator = new fr.ItemIterator();
-			let item = yield itemIterator.next().value;
+			let item = await itemIterator.next().value;
 			assert.deepEqual(item, expected);
 		});
 		
-		it('should parse items correctly for a detailed RSS feed', function* () {
+		it('should parse items correctly for a detailed RSS feed', async function () {
 			let expected = {
 				guid: 'http://www.example.com/item1',
 				title: 'Title 1',
@@ -166,13 +166,13 @@ describe("Zotero.FeedReader", function () {
 			};
 		
 			let fr = new Zotero.FeedReader(detailedRSSFeedURL);
-			yield fr.process();
+			await fr.process();
 			let itemIterator = new fr.ItemIterator();
-			let item = yield itemIterator.next().value;
+			let item = await itemIterator.next().value;
 			assert.deepEqual(item, expected);
 		});
 		
-		it('should parse items correctly for an RSS feed with journal article metadata', function* () {
+		it('should parse items correctly for an RSS feed with journal article metadata', async function () {
 			let expected = {
 				guid: 'https://www.mdpi.com/2311-5521/9/6/120',
 				title: 'Environmental Hydraulics, Turbulence, and Sediment Transport, Second Edition',
@@ -198,13 +198,13 @@ describe("Zotero.FeedReader", function () {
 			};
 		
 			let fr = new Zotero.FeedReader(articleMetadataRSSFeedURL);
-			yield fr.process();
+			await fr.process();
 			let itemIterator = new fr.ItemIterator();
-			let item = yield itemIterator.next().value;
+			let item = await itemIterator.next().value;
 			assert.deepEqual(item, expected);
 		});
 		
-		it("should parse item from an Atom feed", function* () {
+		it("should parse item from an Atom feed", async function () {
 			let expected = {
 				guid: 'http://www.example.com/item1',
 				title: 'Title 1',
@@ -222,19 +222,19 @@ describe("Zotero.FeedReader", function () {
 			};
 			
 			let fr = new Zotero.FeedReader(atomFeedURL);
-			yield fr.process();
+			await fr.process();
 			let itemIterator = new fr.ItemIterator();
-			let item = yield itemIterator.next().value;
+			let item = await itemIterator.next().value;
 			
 			assert.deepEqual(item, expected);
 		});
 		
-		it('should resolve last item with null', function* () {
+		it('should resolve last item with null', async function () {
 			let fr = new Zotero.FeedReader(rssFeedURL);
-			yield fr.process();
+			await fr.process();
 			let itemIterator = new fr.ItemIterator();
 			let item;
-			while(item = yield itemIterator.next().value);
+			while(item = await itemIterator.next().value);
 			assert.isNull(item);
 		});
 		
@@ -244,7 +244,7 @@ describe("Zotero.FeedReader", function () {
 			const itemIterator = new fr.ItemIterator();
 			let item;
 			for (let i = 0; i < 2; i++) {
-				// eslint-disable-next-line no-await-in-loop
+				 
 				item = await itemIterator.next().value;
 			}
 			
@@ -270,7 +270,7 @@ describe("Zotero.FeedReader", function () {
 			const itemIterator = new fr.ItemIterator();
 			let item;
 			for (let i = 0; i < 2; i++) {
-				// eslint-disable-next-line no-await-in-loop
+				 
 				item = await itemIterator.next().value;
 			}
 

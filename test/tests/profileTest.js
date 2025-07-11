@@ -41,15 +41,15 @@ Path=Profiles/${profile3}
 	
 	
 	describe("#getDefaultInProfilesDir()", function () {
-		it("should parse a profiles.ini file", function* () {
-			var [dir, multiple] = yield Zotero.Profile.getDefaultInProfilesDir(tmpDir);
+		it("should parse a profiles.ini file", async function () {
+			var [dir, multiple] = await Zotero.Profile.getDefaultInProfilesDir(tmpDir);
 			assert.equal(dir, OS.Path.join(tmpDir, "Profiles", profile1));
 		});
 	});
 	
 	
 	describe("#findOtherProfilesUsingDataDirectory()", function () {
-		it("should find profile with directory as a custom location", function* () {
+		it("should find profile with directory as a custom location", async function () {
 			let dataDir = Zotero.DataDirectory.dir;
 			let contents1 = `user_pref("extensions.lastAppVersion", "49.0");
 user_pref("extensions.shownSelectionUI", true);
@@ -75,14 +75,14 @@ user_pref("loop.copy.ticket", 196);
 			let prefsFile1 = OS.Path.join(tmpDir, "Profiles", profile1, "prefs.js");
 			let prefsFile2 = OS.Path.join(tmpDir, "Profiles", profile2, "prefs.js");
 			let prefsFile3 = OS.Path.join(tmpDir, "Profiles", profile3, "prefs.js");
-			yield Zotero.File.putContentsAsync(prefsFile1, contents1);
-			yield Zotero.File.putContentsAsync(prefsFile2, contents2);
-			yield Zotero.File.putContentsAsync(prefsFile3, contents3);
+			await Zotero.File.putContentsAsync(prefsFile1, contents1);
+			await Zotero.File.putContentsAsync(prefsFile2, contents2);
+			await Zotero.File.putContentsAsync(prefsFile3, contents3);
 			
 			var stub = sinon.stub(Zotero.Profile, "getOtherAppProfilesDir")
 				.returns(OS.Path.join(tmpDir, "Profiles"));
 			
-			var dirs = yield Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir);
+			var dirs = await Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir);
 			
 			stub.restore();
 			
@@ -91,7 +91,7 @@ user_pref("loop.copy.ticket", 196);
 		});
 		
 		
-		it("should find other-app profile with directory as a legacy default location", function* () {
+		it("should find other-app profile with directory as a legacy default location", async function () {
 			let contents1 = `user_pref("extensions.lastAppVersion", "49.0");
 user_pref("extensions.shownSelectionUI", true);
 user_pref("extensions.ui.locale.hidden", true);
@@ -105,14 +105,13 @@ user_pref("loop.copy.ticket", 196);
 			
 			let prefsFile1 = OS.Path.join(tmpDir, "Profiles", profile1, "prefs.js");
 			let prefsFile2 = OS.Path.join(tmpDir, "Profiles", profile2, "prefs.js");
-			yield Zotero.File.putContentsAsync(prefsFile1, contents1);
-			yield Zotero.File.putContentsAsync(prefsFile2, contents2);
+			await Zotero.File.putContentsAsync(prefsFile1, contents1);
+			await Zotero.File.putContentsAsync(prefsFile2, contents2);
 			
 			var stub = sinon.stub(Zotero.Profile, "getOtherAppProfilesDir")
 				.returns(OS.Path.join(tmpDir, "Profiles"));
 			
-			Components.utils.import("resource://zotero/config.js");
-			var dirs = yield Zotero.Profile.findOtherProfilesUsingDataDirectory(
+			var dirs = await Zotero.Profile.findOtherProfilesUsingDataDirectory(
 				OS.Path.join(OS.Path.dirname(prefsFile1), Zotero.DataDirectory.legacyDirName)
 			);
 			
@@ -125,7 +124,7 @@ user_pref("loop.copy.ticket", 196);
 	
 	
 	describe("#updateProfileDataDirectory()", function () {
-		it("should add new lines to prefs.js", function* () {
+		it("should add new lines to prefs.js", async function () {
 			let prefsFile = OS.Path.join(tmpDir, "Profiles", profile1, "prefs.js");
 			let oldDir = OS.Path.join(OS.Path.dirname(tmpDir), "Old", "Zotero");
 			let newDir = OS.Path.join(OS.Path.dirname(tmpDir), "New", "Zotero");
@@ -140,20 +139,20 @@ user_pref("extensions.zotero.lastDataDir", "${newDir}");
 user_pref("extensions.zotero.useDataDir", true);
 `;
 			
-			yield Zotero.File.putContentsAsync(prefsFile, contents);
-			yield Zotero.Profile.updateProfileDataDirectory(
+			await Zotero.File.putContentsAsync(prefsFile, contents);
+			await Zotero.Profile.updateProfileDataDirectory(
 				OS.Path.join(tmpDir, "Profiles", profile1),
 				oldDir,
 				newDir
 			);
 			
-			let newContents = yield Zotero.File.getContentsAsync(prefsFile);
+			let newContents = await Zotero.File.getContentsAsync(prefsFile);
 			
 			assert.equal(newContents, contents + addition);
 		});
 		
 		
-		it("should replace existing lines in prefs.js", function* () {
+		it("should replace existing lines in prefs.js", async function () {
 			let prefsFile = OS.Path.join(tmpDir, "Profiles", profile1, "prefs.js");
 			let oldDir = OS.Path.join(OS.Path.dirname(tmpDir), "Old", "Zotero");
 			let newDir = OS.Path.join(OS.Path.dirname(tmpDir), "New", "Zotero");
@@ -175,14 +174,14 @@ user_pref("extensions.zotero.lastDataDir", "${newDir}");
 user_pref("extensions.zotero.useDataDir", true);
 `;
 			
-			yield Zotero.File.putContentsAsync(prefsFile, contents);
-			yield Zotero.Profile.updateProfileDataDirectory(
+			await Zotero.File.putContentsAsync(prefsFile, contents);
+			await Zotero.Profile.updateProfileDataDirectory(
 				OS.Path.join(tmpDir, "Profiles", profile1),
 				oldDir,
 				newDir
 			);
 			
-			let newContents = yield Zotero.File.getContentsAsync(prefsFile);
+			let newContents = await Zotero.File.getContentsAsync(prefsFile);
 			
 			assert.equal(newContents, expectedContents);
 		});

@@ -19,7 +19,7 @@ describe("Zotero.Item", function () {
 			assert.strictEqual(item.getField('invalid'), "");
 		});
 		
-		it("should return a firstCreator for an unsaved item", function* () {
+		it("should return a firstCreator for an unsaved item", async function () {
 			var item = createUnsavedDataObject('item');
 			item.setCreators([
 				{
@@ -100,11 +100,11 @@ describe("Zotero.Item", function () {
 			assert.isTrue(item.hasChanged());
 		})
 		
-		it("should save an integer as a string", function* () {
+		it("should save an integer as a string", async function () {
 			var val = 1234;
 			var item = new Zotero.Item('book');
 			item.setField('numPages', val);
-			yield item.saveTx();
+			await item.saveTx();
 			assert.strictEqual(item.getField('numPages'), "" + val);
 			// Setting again as string shouldn't register a change
 			assert.isFalse(item.setField('numPages', "" + val));
@@ -112,34 +112,34 @@ describe("Zotero.Item", function () {
 			// Value should be TEXT in the DB
 			var sql = "SELECT TYPEOF(value) FROM itemData JOIN itemDataValues USING (valueID) "
 				+ "WHERE itemID=? AND fieldID=?";
-			var type = yield Zotero.DB.valueQueryAsync(sql, [item.id, Zotero.ItemFields.getID('numPages')]);
+			var type = await Zotero.DB.valueQueryAsync(sql, [item.id, Zotero.ItemFields.getID('numPages')]);
 			assert.equal(type, 'text');
 		});
 		
-		it("should save integer 0 as a string", function* () {
+		it("should save integer 0 as a string", async function () {
 			var val = 0;
 			var item = new Zotero.Item('book');
 			item.setField('numPages', val);
-			yield item.saveTx();
+			await item.saveTx();
 			assert.strictEqual(item.getField('numPages'), "" + val);
 			// Setting again as string shouldn't register a change
 			assert.isFalse(item.setField('numPages', "" + val));
 		});
 		
-		it('should clear an existing field when ""/null/false is passed', function* () {
+		it('should clear an existing field when ""/null/false is passed', async function () {
 			var field = 'title';
 			var val = 'foo';
 			var fieldID = Zotero.ItemFields.getID(field);
 			var item = new Zotero.Item('book');
 			item.setField(field, val);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			item.setField(field, "");
 			assert.ok(item._changed.itemData[fieldID]);
 			assert.isTrue(item.hasChanged());
 			
 			// Reset to original value
-			yield item.reload();
+			await item.reload();
 			assert.isFalse(item.hasChanged());
 			assert.equal(item.getField(field), val);
 			
@@ -149,7 +149,7 @@ describe("Zotero.Item", function () {
 			assert.isTrue(item.hasChanged());
 			
 			// Reset to original value
-			yield item.reload();
+			await item.reload();
 			assert.isFalse(item.hasChanged());
 			assert.equal(item.getField(field), val);
 			
@@ -158,17 +158,17 @@ describe("Zotero.Item", function () {
 			assert.ok(item._changed.itemData[fieldID]);
 			assert.isTrue(item.hasChanged());
 			
-			yield item.saveTx();
+			await item.saveTx();
 			assert.equal(item.getField(field), "");
 		})
 		
-		it('should clear a field set to "0" when a ""/null/false is passed', function* () {
+		it('should clear a field set to "0" when a ""/null/false is passed', async function () {
 			var field = 'title';
 			var val = "0";
 			var fieldID = Zotero.ItemFields.getID(field);
 			var item = new Zotero.Item('book');
 			item.setField(field, val);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			assert.strictEqual(item.getField(field), val);
 			
@@ -178,7 +178,7 @@ describe("Zotero.Item", function () {
 			assert.isTrue(item.hasChanged());
 			
 			// Reset to original value
-			yield item.reload();
+			await item.reload();
 			assert.isFalse(item.hasChanged());
 			assert.strictEqual(item.getField(field), val);
 			
@@ -188,7 +188,7 @@ describe("Zotero.Item", function () {
 			assert.isTrue(item.hasChanged());
 			
 			// Reset to original value
-			yield item.reload();
+			await item.reload();
 			assert.isFalse(item.hasChanged());
 			assert.strictEqual(item.getField(field), val);
 			
@@ -197,7 +197,7 @@ describe("Zotero.Item", function () {
 			assert.ok(item._changed.itemData[fieldID]);
 			assert.isTrue(item.hasChanged());
 			
-			yield item.saveTx();
+			await item.saveTx();
 			assert.strictEqual(item.getField(field), "");
 		})
 		
@@ -212,24 +212,24 @@ describe("Zotero.Item", function () {
 			assert.isUndefined(item._changed.itemData);
 		})
 		
-		it("should save version as object version", function* () {
+		it("should save version as object version", async function () {
 			var item = new Zotero.Item('book');
 			item.setField("version", 1);
-			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			var id = await item.saveTx();
+			item = await Zotero.Items.getAsync(id);
 			assert.equal(item.getField("version"), 1);
 			assert.equal(item.version, 1);
 		});
 		
-		it("should save versionNumber for computerProgram", function* () {
+		it("should save versionNumber for computerProgram", async function () {
 			var item = new Zotero.Item('computerProgram');
 			item.setField("versionNumber", "1.0");
-			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			var id = await item.saveTx();
+			item = await Zotero.Items.getAsync(id);
 			assert.equal(item.getField("versionNumber"), "1.0");
 		});
 		
-		it("should accept ISO 8601 dates", function* () {
+		it("should accept ISO 8601 dates", async function () {
 			var fields = {
 				accessDate: "2015-06-07T20:56:00Z",
 				dateAdded: "2015-06-07T20:57:00Z",
@@ -244,7 +244,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.dateModified, '2015-06-07 20:58:00');
 		})
 		
-		it("should accept SQL dates", function* () {
+		it("should accept SQL dates", async function () {
 			var fields = {
 				accessDate: "2015-06-07 20:56:00",
 				dateAdded: "2015-06-07 20:57:00",
@@ -257,14 +257,14 @@ describe("Zotero.Item", function () {
 			}
 		})
 		
-		it("should accept SQL accessDate without time", function* () {
+		it("should accept SQL accessDate without time", async function () {
 			var item = createUnsavedDataObject('item');
 			var date = "2017-04-05";
 			item.setField("accessDate", date);
 			assert.strictEqual(item.getField('accessDate'), date);
 		});
 		
-		it("should ignore unknown accessDate values", function* () {
+		it("should ignore unknown accessDate values", async function () {
 			var fields = {
 				accessDate: "foo"
 			};
@@ -277,94 +277,94 @@ describe("Zotero.Item", function () {
 	})
 	
 	describe("#dateAdded", function () {
-		it("should use current time if value was not given for a new item", function* () {
+		it("should use current time if value was not given for a new item", async function () {
 			var item = new Zotero.Item('book');
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			item = Zotero.Items.get(id);
 			
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateAdded, true).getTime(), Date.now(), 2000);
 		})
 		
-		it("should use given value for a new item", function* () {
+		it("should use given value for a new item", async function () {
 			var dateAdded = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateAdded = dateAdded;
-			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			var id = await item.saveTx();
+			item = await Zotero.Items.getAsync(id);
 			assert.equal(item.dateAdded, dateAdded);
 		})
 	})
 	
 	describe("#dateModified", function () {
-		it("should use given value for a new item", function* () {
+		it("should use given value for a new item", async function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			assert.equal(item.dateModified, dateModified);
-			item = yield Zotero.Items.getAsync(id);
+			item = await Zotero.Items.getAsync(id);
 			assert.equal(item.dateModified, dateModified);
 		})
 		
-		it("should use given value when skipDateModifiedUpdate is set for a new item", function* () {
+		it("should use given value when skipDateModifiedUpdate is set for a new item", async function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.saveTx({
+			var id = await item.saveTx({
 				skipDateModifiedUpdate: true
 			});
 			assert.equal(item.dateModified, dateModified);
-			item = yield Zotero.Items.getAsync(id);
+			item = await Zotero.Items.getAsync(id);
 			assert.equal(item.dateModified, dateModified);
 		})
 		
-		it("should use current time if value was not given for an existing item", function* () {
+		it("should use current time if value was not given for an existing item", async function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			item = Zotero.Items.get(id);
 			
 			// Save again without changing Date Modified
 			item.setField('title', 'Test');
-			yield item.saveTx()
+			await item.saveTx()
 			
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 2000);
 		})
 		
-		it("should use current time if the existing value was given for an existing item", function* () {
+		it("should use current time if the existing value was given for an existing item", async function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			item = Zotero.Items.get(id);
 			
 			// Set Date Modified to existing value
 			item.setField('title', 'Test');
 			item.dateModified = dateModified;
-			yield item.saveTx()
+			await item.saveTx()
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 2000);
 		})
 		
-		it("should use current time if value is not given when skipDateModifiedUpdate is set for a new item", function* () {
+		it("should use current time if value is not given when skipDateModifiedUpdate is set for a new item", async function () {
 			var item = new Zotero.Item('book');
-			var id = yield item.saveTx({
+			var id = await item.saveTx({
 				skipDateModifiedUpdate: true
 			});
-			item = yield Zotero.Items.getAsync(id);
+			item = await Zotero.Items.getAsync(id);
 			assert.closeTo(Zotero.Date.sqlToDate(item.dateModified, true).getTime(), Date.now(), 2000);
 		})
 		
-		it("should keep original value when skipDateModifiedUpdate is set for an existing item", function* () {
+		it("should keep original value when skipDateModifiedUpdate is set for an existing item", async function () {
 			var dateModified = "2015-05-05 17:18:12";
 			var item = new Zotero.Item('book');
 			item.dateModified = dateModified;
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			item = Zotero.Items.get(id);
 			
 			// Resave with skipDateModifiedUpdate
 			item.setField('title', 'Test');
-			yield item.saveTx({
+			await item.saveTx({
 				skipDateModifiedUpdate: true
 			})
 			assert.equal(item.dateModified, dateModified);
@@ -372,66 +372,66 @@ describe("Zotero.Item", function () {
 	})
 	
 	describe("#inPublications", function () {
-		it("should add item to publications table", function* () {
-			var item = yield createDataObject('item');
+		it("should add item to publications table", async function () {
+			var item = await createDataObject('item');
 			item.inPublications = true;
-			yield item.saveTx();
+			await item.saveTx();
 			assert.ok(item.inPublications);
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				((await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id))),
 				1
 			);
 		})
 		
-		it("should be set to false after save", function* () {
-			var collection = yield createDataObject('collection');
+		it("should be set to false after save", async function () {
+			var collection = await createDataObject('collection');
 			var item = createUnsavedDataObject('item');
 			item.inPublications = false;
-			yield item.saveTx();
+			await item.saveTx();
 			
 			item.inPublications = false;
-			yield item.saveTx();
+			await item.saveTx();
 			assert.isFalse(item.inPublications);
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id)),
+				((await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM publicationsItems WHERE itemID=?", item.id))),
 				0
 			);
 		});
 		
-		it("should be invalid for linked-file attachments", function* () {
-			var item = yield createDataObject('item', { inPublications: true });
-			var attachment = yield Zotero.Attachments.linkFromFile({
+		it("should be invalid for linked-file attachments", async function () {
+			var item = await createDataObject('item', { inPublications: true });
+			var attachment = await Zotero.Attachments.linkFromFile({
 				file: OS.Path.join(getTestDataDirectory().path, 'test.png'),
 				parentItemID: item.id
 			});
 			attachment.inPublications = true;
-			var e = yield getPromiseError(attachment.saveTx());
+			var e = await getPromiseError(attachment.saveTx());
 			assert.ok(e);
 			assert.include(e.message, "Linked-file attachments cannot be added to My Publications");
 		});
 		
-		it("should be invalid for group library items", function* () {
-			var group = yield getGroup();
-			var item = yield createDataObject('item', { libraryID: group.libraryID });
+		it("should be invalid for group library items", async function () {
+			var group = await getGroup();
+			var item = await createDataObject('item', { libraryID: group.libraryID });
 			item.inPublications = true;
-			var e = yield getPromiseError(item.saveTx());
+			var e = await getPromiseError(item.saveTx());
 			assert.ok(e);
 			assert.equal(e.message, "Only items in user libraries can be added to My Publications");
 		});
 	});
 	
 	describe("#parentID", function () {
-		it("should create a child note", function* () {
+		it("should create a child note", async function () {
 			var item = new Zotero.Item('book');
-			var parentItemID = yield item.saveTx();
+			var parentItemID = await item.saveTx();
 			
 			item = new Zotero.Item('note');
 			item.parentID = parentItemID;
-			var childItemID = yield item.saveTx();
+			var childItemID = await item.saveTx();
 			
-			item = yield Zotero.Items.getAsync(childItemID);
+			item = await Zotero.Items.getAsync(childItemID);
 			assert.ok(item.parentID);
 			assert.equal(item.parentID, parentItemID);
 		});
@@ -463,12 +463,12 @@ describe("Zotero.Item", function () {
 			assert.isUndefined(item._changed.parentKey);
 		});
 		
-		it("should not mark item as changed if false and no existing parent", function* () {
+		it("should not mark item as changed if false and no existing parent", async function () {
 			var item = new Zotero.Item('attachment');
 			item.attachmentLinkMode = 'linked_url';
 			item.url = "https://www.zotero.org/";
-			var id = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(id);
+			var id = await item.saveTx();
+			item = await Zotero.Items.getAsync(id);
 			
 			item.parentKey = false;
 			assert.isFalse(item.hasChanged());
@@ -486,38 +486,38 @@ describe("Zotero.Item", function () {
 			assert.isUndefined(attachment._changed.parentKey);
 		});
 		
-		it("should move a top-level note under another item", function* () {
+		it("should move a top-level note under another item", async function () {
 			var noteItem = new Zotero.Item('note');
-			var id = yield noteItem.saveTx()
-			noteItem = yield Zotero.Items.getAsync(id);
+			var id = await noteItem.saveTx()
+			noteItem = await Zotero.Items.getAsync(id);
 			
 			var item = new Zotero.Item('book');
-			id = yield item.saveTx();
+			id = await item.saveTx();
 			var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(id);
 			
 			noteItem.parentKey = key;
-			yield noteItem.saveTx();
+			await noteItem.saveTx();
 			
 			assert.isFalse(noteItem.isTopLevelItem());
 		})
 		
-		it("should remove top-level item from collections when moving it under another item", function* () {
+		it("should remove top-level item from collections when moving it under another item", async function () {
 			// Create a collection
 			var collection = new Zotero.Collection;
 			collection.name = "Test";
-			var collectionID = yield collection.saveTx();
+			var collectionID = await collection.saveTx();
 			
 			// Create a top-level note and add it to a collection
 			var noteItem = new Zotero.Item('note');
 			noteItem.addToCollection(collectionID);
-			var id = yield noteItem.saveTx()
-			noteItem = yield Zotero.Items.getAsync(id);
+			var id = await noteItem.saveTx()
+			noteItem = await Zotero.Items.getAsync(id);
 			
 			var item = new Zotero.Item('book');
-			id = yield item.saveTx();
+			id = await item.saveTx();
 			var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(id);
 			noteItem.parentKey = key;
-			yield noteItem.saveTx();
+			await noteItem.saveTx();
 			
 			assert.isFalse(noteItem.isTopLevelItem());
 		})
@@ -554,7 +554,7 @@ describe("Zotero.Item", function () {
 	});
 	
 	describe("#getCreators()", function () {
-		it("should update after creators are removed", function* () {
+		it("should update after creators are removed", async function () {
 			var item = createUnsavedDataObject('item');
 			item.setCreators([
 				{
@@ -562,19 +562,19 @@ describe("Zotero.Item", function () {
 					name: "A"
 				}
 			]);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			assert.lengthOf(item.getCreators(), 1);
 			
 			item.setCreators([]);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			assert.lengthOf(item.getCreators(), 0);
 		});
 	});
 	
 	describe("#setCreators()", function () {
-		it("should accept an array of creators in API JSON format", function* () {
+		it("should accept an array of creators in API JSON format", async function () {
 			var creators = [
 				{
 					firstName: "First",
@@ -589,12 +589,12 @@ describe("Zotero.Item", function () {
 			
 			var item = new Zotero.Item("journalArticle");
 			item.setCreators(creators);
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			item = Zotero.Items.get(id);
 			assert.sameDeepMembers(item.getCreatorsJSON(), creators);
 		})
 		
-		it("should accept an array of creators in internal format", function* () {
+		it("should accept an array of creators in internal format", async function () {
 			var creators = [
 				{
 					firstName: "First",
@@ -612,7 +612,7 @@ describe("Zotero.Item", function () {
 			
 			var item = new Zotero.Item("journalArticle");
 			item.setCreators(creators);
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			item = Zotero.Items.get(id);
 			assert.sameDeepMembers(item.getCreators(), creators);
 		})
@@ -755,39 +755,39 @@ describe("Zotero.Item", function () {
 	
 	
 	describe("#numAttachments()", function () {
-		it("should include child attachments", function* () {
-			var item = yield createDataObject('item');
-			var attachment = yield importFileAttachment('test.png', { parentID: item.id });
+		it("should include child attachments", async function () {
+			var item = await createDataObject('item');
+			var attachment = await importFileAttachment('test.png', { parentID: item.id });
 			assert.equal(item.numAttachments(), 1);
 		});
 		
-		it("shouldn't include trashed child attachments by default", function* () {
-			var item = yield createDataObject('item');
-			yield importFileAttachment('test.png', { parentID: item.id });
-			var attachment = yield importFileAttachment('test.png', { parentID: item.id });
+		it("shouldn't include trashed child attachments by default", async function () {
+			var item = await createDataObject('item');
+			await importFileAttachment('test.png', { parentID: item.id });
+			var attachment = await importFileAttachment('test.png', { parentID: item.id });
 			attachment.deleted = true;
-			yield attachment.saveTx();
+			await attachment.saveTx();
 			assert.equal(item.numAttachments(), 1);
 		});
 		
-		it("should include trashed child attachments if includeTrashed=true", function* () {
-			var item = yield createDataObject('item');
-			yield importFileAttachment('test.png', { parentID: item.id });
-			var attachment = yield importFileAttachment('test.png', { parentID: item.id });
+		it("should include trashed child attachments if includeTrashed=true", async function () {
+			var item = await createDataObject('item');
+			await importFileAttachment('test.png', { parentID: item.id });
+			var attachment = await importFileAttachment('test.png', { parentID: item.id });
 			attachment.deleted = true;
-			yield attachment.saveTx();
+			await attachment.saveTx();
 			assert.equal(item.numAttachments(true), 2);
 		});
 	});
 	
 	
 	describe("#getAttachments()", function () {
-		it("#should return child attachments", function* () {
-			var item = yield createDataObject('item');
+		it("#should return child attachments", async function () {
+			var item = await createDataObject('item');
 			var attachment = new Zotero.Item("attachment");
 			attachment.parentID = item.id;
 			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
-			yield attachment.saveTx();
+			await attachment.saveTx();
 			
 			var attachments = item.getAttachments();
 			assert.lengthOf(attachments, 1);
@@ -837,25 +837,25 @@ describe("Zotero.Item", function () {
 			assert.equal(attachments[2].getField('title'), 'D');
 		});
 		
-		it("#should ignore trashed child attachments by default", function* () {
-			var item = yield createDataObject('item');
+		it("#should ignore trashed child attachments by default", async function () {
+			var item = await createDataObject('item');
 			var attachment = new Zotero.Item("attachment");
 			attachment.parentID = item.id;
 			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			attachment.deleted = true;
-			yield attachment.saveTx();
+			await attachment.saveTx();
 			
 			var attachments = item.getAttachments();
 			assert.lengthOf(attachments, 0);
 		})
 		
-		it("#should include trashed child attachments if includeTrashed=true", function* () {
-			var item = yield createDataObject('item');
+		it("#should include trashed child attachments if includeTrashed=true", async function () {
+			var item = await createDataObject('item');
 			var attachment = new Zotero.Item("attachment");
 			attachment.parentID = item.id;
 			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			attachment.deleted = true;
-			yield attachment.saveTx();
+			await attachment.saveTx();
 			
 			var attachments = item.getAttachments(true);
 			assert.lengthOf(attachments, 1);
@@ -883,25 +883,25 @@ describe("Zotero.Item", function () {
 			assert.lengthOf(attachments, 0);
 		});
 		
-		it("#should return an empty array for an item with no attachments", function* () {
-			var item = yield createDataObject('item');
+		it("#should return an empty array for an item with no attachments", async function () {
+			var item = await createDataObject('item');
 			assert.lengthOf(item.getAttachments(), 0);
 		})
 		
-		it("should update after an attachment is moved to another item", function* () {
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject('item');
+		it("should update after an attachment is moved to another item", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
 			var item3 = new Zotero.Item('attachment');
 			item3.parentID = item1.id;
 			item3.attachmentLinkMode = 'linked_url';
 			item3.setField('url', 'http://example.com');
-			yield item3.saveTx();
+			await item3.saveTx();
 			
 			assert.lengthOf(item1.getAttachments(), 1);
 			assert.lengthOf(item2.getAttachments(), 0);
 			
 			item3.parentID = item2.id;
-			yield item3.saveTx();
+			await item3.saveTx();
 			
 			assert.lengthOf(item1.getAttachments(), 0);
 			assert.lengthOf(item2.getAttachments(), 1);
@@ -909,41 +909,41 @@ describe("Zotero.Item", function () {
 	})
 	
 	describe("#numNotes()", function () {
-		it("should include child notes", function* () {
-			var item = yield createDataObject('item');
-			yield createDataObject('item', { itemType: 'note', parentID: item.id });
-			yield createDataObject('item', { itemType: 'note', parentID: item.id });
+		it("should include child notes", async function () {
+			var item = await createDataObject('item');
+			await createDataObject('item', { itemType: 'note', parentID: item.id });
+			await createDataObject('item', { itemType: 'note', parentID: item.id });
 			assert.equal(item.numNotes(), 2);
 		});
 		
-		it("shouldn't include trashed child notes by default", function* () {
-			var item = yield createDataObject('item');
-			yield createDataObject('item', { itemType: 'note', parentID: item.id });
-			yield createDataObject('item', { itemType: 'note', parentID: item.id, deleted: true });
+		it("shouldn't include trashed child notes by default", async function () {
+			var item = await createDataObject('item');
+			await createDataObject('item', { itemType: 'note', parentID: item.id });
+			await createDataObject('item', { itemType: 'note', parentID: item.id, deleted: true });
 			assert.equal(item.numNotes(), 1);
 		});
 		
-		it("should include trashed child notes with includeTrashed", function* () {
-			var item = yield createDataObject('item');
-			yield createDataObject('item', { itemType: 'note', parentID: item.id });
-			yield createDataObject('item', { itemType: 'note', parentID: item.id, deleted: true });
+		it("should include trashed child notes with includeTrashed", async function () {
+			var item = await createDataObject('item');
+			await createDataObject('item', { itemType: 'note', parentID: item.id });
+			await createDataObject('item', { itemType: 'note', parentID: item.id, deleted: true });
 			assert.equal(item.numNotes(true), 2);
 		});
 		
-		it("should include child attachment notes with includeEmbedded", function* () {
-			var item = yield createDataObject('item');
-			yield createDataObject('item', { itemType: 'note', parentID: item.id });
-			var attachment = yield importFileAttachment('test.png', { parentID: item.id });
+		it("should include child attachment notes with includeEmbedded", async function () {
+			var item = await createDataObject('item');
+			await createDataObject('item', { itemType: 'note', parentID: item.id });
+			var attachment = await importFileAttachment('test.png', { parentID: item.id });
 			attachment.setNote('test');
-			yield attachment.saveTx();
-			yield item.loadDataType('childItems');
+			await attachment.saveTx();
+			await item.loadDataType('childItems');
 			assert.equal(item.numNotes(false, true), 2);
 		});
 		
-		it("shouldn't include empty child attachment notes with includeEmbedded", function* () {
-			var item = yield createDataObject('item');
-			yield createDataObject('item', { itemType: 'note', parentID: item.id });
-			var attachment = yield importFileAttachment('test.png', { parentID: item.id });
+		it("shouldn't include empty child attachment notes with includeEmbedded", async function () {
+			var item = await createDataObject('item');
+			await createDataObject('item', { itemType: 'note', parentID: item.id });
+			var attachment = await importFileAttachment('test.png', { parentID: item.id });
 			assert.equal(item.numNotes(false, true), 1);
 		});
 		
@@ -952,55 +952,55 @@ describe("Zotero.Item", function () {
 	
 	
 	describe("#getNotes()", function () {
-		it("#should return child notes", function* () {
-			var item = yield createDataObject('item');
+		it("#should return child notes", async function () {
+			var item = await createDataObject('item');
 			var note = new Zotero.Item("note");
 			note.parentID = item.id;
-			yield note.saveTx();
+			await note.saveTx();
 			
 			var notes = item.getNotes();
 			assert.lengthOf(notes, 1);
 			assert.equal(notes[0], note.id);
 		})
 		
-		it("#should ignore trashed child notes by default", function* () {
-			var item = yield createDataObject('item');
+		it("#should ignore trashed child notes by default", async function () {
+			var item = await createDataObject('item');
 			var note = new Zotero.Item("note");
 			note.parentID = item.id;
 			note.deleted = true;
-			yield note.saveTx();
+			await note.saveTx();
 			
 			var notes = item.getNotes();
 			assert.lengthOf(notes, 0);
 		})
 		
-		it("#should include trashed child notes if includeTrashed=true", function* () {
-			var item = yield createDataObject('item');
+		it("#should include trashed child notes if includeTrashed=true", async function () {
+			var item = await createDataObject('item');
 			var note = new Zotero.Item("note");
 			note.parentID = item.id;
 			note.deleted = true;
-			yield note.saveTx();
+			await note.saveTx();
 			
 			var notes = item.getNotes(true);
 			assert.lengthOf(notes, 1);
 			assert.equal(notes[0], note.id);
 		})
 		
-		it("#should return an empty array for an item with no notes", function* () {
-			var item = yield createDataObject('item');
+		it("#should return an empty array for an item with no notes", async function () {
+			var item = await createDataObject('item');
 			assert.lengthOf(item.getNotes(), 0);
 		});
 		
-		it("should update after a note is moved to another item", function* () {
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject('item');
-			var item3 = yield createDataObject('item', { itemType: 'note', parentID: item1.id });
+		it("should update after a note is moved to another item", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
+			var item3 = await createDataObject('item', { itemType: 'note', parentID: item1.id });
 			
 			assert.lengthOf(item1.getNotes(), 1);
 			assert.lengthOf(item2.getNotes(), 0);
 			
 			item3.parentID = item2.id;
-			yield item3.saveTx();
+			await item3.saveTx();
 			
 			assert.lengthOf(item1.getNotes(), 0);
 			assert.lengthOf(item2.getNotes(), 1);
@@ -1035,18 +1035,18 @@ describe("Zotero.Item", function () {
 	
 	
 	describe("#attachmentCharset", function () {
-		it("should get and set a value", function* () {
+		it("should get and set a value", async function () {
 			var charset = 'utf-8';
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			item.attachmentCharset = charset;
-			var itemID = yield item.saveTx();
+			var itemID = await item.saveTx();
 			assert.equal(item.attachmentCharset, charset);
-			item = yield Zotero.Items.getAsync(itemID);
+			item = await Zotero.Items.getAsync(itemID);
 			assert.equal(item.attachmentCharset, charset);
 		})
 		
-		it("should not allow a numerical value", function* () {
+		it("should not allow a numerical value", async function () {
 			var charset = 1;
 			var item = new Zotero.Item("attachment");
 			try {
@@ -1059,13 +1059,13 @@ describe("Zotero.Item", function () {
 			assert.fail("Numerical charset was allowed");
 		})
 		
-		it("should not be marked as changed if not changed", function* () {
+		it("should not be marked as changed if not changed", async function () {
 			var charset = 'utf-8';
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			item.attachmentCharset = charset;
-			var itemID = yield item.saveTx();
-			item = yield Zotero.Items.getAsync(itemID);
+			var itemID = await item.saveTx();
+			item = await Zotero.Items.getAsync(itemID);
 			
 			// Set charset to same value
 			item.attachmentCharset = charset
@@ -1079,26 +1079,26 @@ describe("Zotero.Item", function () {
 			Zotero.Prefs.clear('baseAttachmentPath')
 		});
 		
-		it("should get and set a filename for a stored file", function* () {
+		it("should get and set a filename for a stored file", async function () {
 			var filename = "test.txt";
 			
 			// Create parent item
 			var item = new Zotero.Item("book");
-			var parentItemID = yield item.saveTx();
+			var parentItemID = await item.saveTx();
 			
 			// Create attachment item
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			item.parentID = parentItemID;
-			var itemID = yield item.saveTx();
+			var itemID = await item.saveTx();
 			
 			// Should be empty when unset
 			assert.equal(item.attachmentFilename, '');
 			
 			// Set filename
 			item.attachmentFilename = filename;
-			yield item.saveTx();
-			item = yield Zotero.Items.getAsync(itemID);
+			await item.saveTx();
+			item = await Zotero.Items.getAsync(itemID);
 			
 			// Check filename
 			assert.equal(item.attachmentFilename, filename);
@@ -1159,22 +1159,22 @@ describe("Zotero.Item", function () {
 			Zotero.Prefs.clear('baseAttachmentPath')
 		});
 		
-		it("should return an absolute path for a linked attachment", function* () {
+		it("should return an absolute path for a linked attachment", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.linkFromFile({ file });
+			var item = await Zotero.Attachments.linkFromFile({ file });
 			assert.equal(item.attachmentPath, file.path);
 		})
 		
-		it("should return a prefixed path for an imported file", function* () {
+		it("should return a prefixed path for an imported file", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			
 			assert.equal(item.attachmentPath, "storage:test.png");
 		})
 		
-		it("should set a prefixed relative path for a path within the defined base directory", function* () {
+		it("should set a prefixed relative path for a path within the defined base directory", async function () {
 			var dir = getTestDataDirectory().path;
 			var baseDir = OS.Path.dirname(dir);
 			Zotero.Prefs.set('saveRelativeAttachmentPath', true)
@@ -1189,7 +1189,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.attachmentPath, "attachments:data/test.png");
 		})
 		
-		it("should return a prefixed path for a linked attachment within the defined base directory", function* () {
+		it("should return a prefixed path for a linked attachment within the defined base directory", async function () {
 			var dir = getTestDataDirectory().path;
 			var baseDir = OS.Path.dirname(dir);
 			Zotero.Prefs.set('saveRelativeAttachmentPath', true)
@@ -1197,7 +1197,7 @@ describe("Zotero.Item", function () {
 			
 			var file = OS.Path.join(dir, 'test.png');
 			
-			var item = yield Zotero.Attachments.linkFromFile({
+			var item = await Zotero.Attachments.linkFromFile({
 				file: Zotero.File.pathToFile(file)
 			});
 			
@@ -1206,18 +1206,18 @@ describe("Zotero.Item", function () {
 	})
 	
 	describe("#renameAttachmentFile()", function () {
-		it("should rename an attached file", function* () {
+		it("should rename an attached file", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({
+			var item = await Zotero.Attachments.importFromFile({
 				file: file
 			});
 			var newName = 'test2.png';
-			yield item.renameAttachmentFile(newName);
+			await item.renameAttachmentFile(newName);
 			assert.equal(item.attachmentFilename, newName);
-			var path = yield item.getFilePathAsync();
+			var path = await item.getFilePathAsync();
 			assert.equal(OS.Path.basename(path), newName)
-			yield OS.File.exists(path);
+			await OS.File.exists(path);
 			
 			// File should be flagged for upload
 			// DEBUG: Is this necessary?
@@ -1240,54 +1240,54 @@ describe("Zotero.Item", function () {
 			await OS.File.exists(path);
 		});
 		
-		it("should rename a linked file", function* () {
+		it("should rename a linked file", async function () {
 			var filename = 'test.png';
 			var file = getTestDataDirectory();
 			file.append(filename);
-			var tmpDir = yield getTempDirectory();
+			var tmpDir = await getTempDirectory();
 			var tmpFile = OS.Path.join(tmpDir, filename);
-			yield OS.File.copy(file.path, tmpFile);
+			await OS.File.copy(file.path, tmpFile);
 			
-			var item = yield Zotero.Attachments.linkFromFile({
+			var item = await Zotero.Attachments.linkFromFile({
 				file: tmpFile
 			});
 			var newName = 'test2.png';
-			yield assert.eventually.isTrue(item.renameAttachmentFile(newName));
+			await assert.eventually.isTrue(item.renameAttachmentFile(newName));
 			assert.equal(item.attachmentFilename, newName);
-			var path = yield item.getFilePathAsync();
+			var path = await item.getFilePathAsync();
 			assert.equal(OS.Path.basename(path), newName)
-			yield OS.File.exists(path);
+			await OS.File.exists(path);
 		})
 	})
 	
 	
 	describe("#getBestAttachmentState()", function () {
-		it("should cache state for an existing file", function* () {
-			var parentItem = yield createDataObject('item');
+		it("should cache state for an existing file", async function () {
+			var parentItem = await createDataObject('item');
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var childItem = yield Zotero.Attachments.importFromFile({
+			var childItem = await Zotero.Attachments.importFromFile({
 				file,
 				parentItemID: parentItem.id
 			});
-			yield parentItem.getBestAttachmentState();
+			await parentItem.getBestAttachmentState();
 			assert.deepEqual(
 				parentItem.getBestAttachmentStateCached(),
 				{ type: 'image', exists: true, key: childItem.key }
 			);
 		});
 		
-		it("should cache state for a missing file", function* () {
-			var parentItem = yield createDataObject('item');
+		it("should cache state for a missing file", async function () {
+			var parentItem = await createDataObject('item');
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var childItem = yield Zotero.Attachments.importFromFile({
+			var childItem = await Zotero.Attachments.importFromFile({
 				file,
 				parentItemID: parentItem.id
 			});
-			let path = yield childItem.getFilePathAsync();
-			yield OS.File.remove(path);
-			yield parentItem.getBestAttachmentState();
+			let path = await childItem.getFilePathAsync();
+			await OS.File.remove(path);
+			await parentItem.getBestAttachmentState();
 			assert.deepEqual(
 				parentItem.getBestAttachmentStateCached(),
 				{ type: 'image', exists: false, key: childItem.key }
@@ -1359,51 +1359,51 @@ describe("Zotero.Item", function () {
 	
 	
 	describe("#fileExists()", function () {
-		it("should cache state for an existing file", function* () {
+		it("should cache state for an existing file", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
-			yield item.fileExists();
+			var item = await Zotero.Attachments.importFromFile({ file });
+			await item.fileExists();
 			assert.equal(item.fileExistsCached(), true);
 		})
 		
-		it("should cache state for a missing file", function* () {
+		it("should cache state for a missing file", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
-			let path = yield item.getFilePathAsync();
-			yield OS.File.remove(path);
-			yield item.fileExists();
+			var item = await Zotero.Attachments.importFromFile({ file });
+			let path = await item.getFilePathAsync();
+			await OS.File.remove(path);
+			await item.fileExists();
 			assert.equal(item.fileExistsCached(), false);
 		})
 	})
 	
 	
 	describe("#relinkAttachmentFile", function () {
-		it("should copy a file elsewhere into the storage directory", function* () {
+		it("should copy a file elsewhere into the storage directory", async function () {
 			var filename = 'test.png';
 			var file = getTestDataDirectory();
 			file.append(filename);
-			var tmpDir = yield getTempDirectory();
+			var tmpDir = await getTempDirectory();
 			var tmpFile = OS.Path.join(tmpDir, filename);
-			yield OS.File.copy(file.path, tmpFile);
+			await OS.File.copy(file.path, tmpFile);
 			file = OS.Path.join(tmpDir, filename);
 			
-			var item = yield Zotero.Attachments.importFromFile({ file });
-			let path = yield item.getFilePathAsync();
-			yield OS.File.remove(path);
-			yield OS.File.removeEmptyDir(OS.Path.dirname(path));
+			var item = await Zotero.Attachments.importFromFile({ file });
+			let path = await item.getFilePathAsync();
+			await OS.File.remove(path);
+			await OS.File.removeEmptyDir(OS.Path.dirname(path));
 			
-			assert.isFalse(yield item.fileExists());
-			yield item.relinkAttachmentFile(file);
-			assert.isTrue(yield item.fileExists());
+			assert.isFalse(await item.fileExists());
+			await item.relinkAttachmentFile(file);
+			assert.isTrue(await item.fileExists());
 			
-			assert.isTrue(yield OS.File.exists(tmpFile));
+			assert.isTrue(await OS.File.exists(tmpFile));
 		});
 		
-		it("should handle normalized filenames", function* () {
-			var item = yield importFileAttachment('test.png');
-			var path = yield item.getFilePathAsync();
+		it("should handle normalized filenames", async function () {
+			var item = await importFileAttachment('test.png');
+			var path = await item.getFilePathAsync();
 			var dir = OS.Path.dirname(path);
 			var filename = 'tést.pdf'.normalize('NFKD');
 			
@@ -1412,11 +1412,11 @@ describe("Zotero.Item", function () {
 			assert.notEqual(filename, Zotero.File.getValidFileName(filename));
 			
 			var newPath = OS.Path.join(dir, filename);
-			yield OS.File.move(path, newPath);
+			await OS.File.move(path, newPath);
 			
-			assert.isFalse(yield item.fileExists());
-			yield item.relinkAttachmentFile(newPath);
-			assert.isTrue(yield item.fileExists());
+			assert.isFalse(await item.fileExists());
+			await item.relinkAttachmentFile(newPath);
+			assert.isTrue(await item.fileExists());
 		});
 	});
 	
@@ -1754,7 +1754,7 @@ describe("Zotero.Item", function () {
 	
 	
 	describe("#setTags", function () {
-		it("should save an array of tags in API JSON format", function* () {
+		it("should save an array of tags in API JSON format", async function () {
 			var tags = [
 				{
 					tag: "A"
@@ -1765,12 +1765,12 @@ describe("Zotero.Item", function () {
 			];
 			var item = new Zotero.Item('journalArticle');
 			item.setTags(tags);
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			item = Zotero.Items.get(id);
 			assert.sameDeepMembers(item.getTags(tags), tags);
 		})
 		
-		it("shouldn't mark item as changed if tags haven't changed", function* () {
+		it("shouldn't mark item as changed if tags haven't changed", async function () {
 			var tags = [
 				{
 					tag: "A"
@@ -1781,13 +1781,13 @@ describe("Zotero.Item", function () {
 			];
 			var item = new Zotero.Item('journalArticle');
 			item.setTags(tags);
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			item = Zotero.Items.get(id);
 			item.setTags(tags);
 			assert.isFalse(item.hasChanged());
 		})
 		
-		it("should remove an existing tag", function* () {
+		it("should remove an existing tag", async function () {
 			var tags = [
 				{
 					tag: "A"
@@ -1798,60 +1798,60 @@ describe("Zotero.Item", function () {
 			];
 			var item = new Zotero.Item('journalArticle');
 			item.setTags(tags);
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			item = Zotero.Items.get(id);
 			item.setTags(tags.slice(0));
-			yield item.saveTx();
+			await item.saveTx();
 			assert.sameDeepMembers(item.getTags(tags), tags.slice(0));
 		})
 	})
 	
 	describe("#addTag", function () {
-		it("should add a tag", function* () {
+		it("should add a tag", async function () {
 			var item = createUnsavedDataObject('item');
 			item.addTag('a');
-			yield item.saveTx();
+			await item.saveTx();
 			var tags = item.getTags();
 			assert.deepEqual(tags, [{ tag: 'a' }]);
 		})
 		
-		it("should add two tags", function* () {
+		it("should add two tags", async function () {
 			var item = createUnsavedDataObject('item');
 			item.addTag('a');
 			item.addTag('b');
-			yield item.saveTx();
+			await item.saveTx();
 			var tags = item.getTags();
 			assert.sameDeepMembers(tags, [{ tag: 'a' }, { tag: 'b' }]);
 		})
 		
-		it("should add two tags of different types", function* () {
+		it("should add two tags of different types", async function () {
 			var item = createUnsavedDataObject('item');
 			item.addTag('a');
 			item.addTag('b', 1);
-			yield item.saveTx();
+			await item.saveTx();
 			var tags = item.getTags();
 			assert.sameDeepMembers(tags, [{ tag: 'a' }, { tag: 'b', type: 1 }]);
 		})
 		
-		it("should add a tag to an existing item", function* () {
-			var item = yield createDataObject('item');
+		it("should add a tag to an existing item", async function () {
+			var item = await createDataObject('item');
 			item.addTag('a');
-			yield item.saveTx();
+			await item.saveTx();
 			var tags = item.getTags();
 			assert.deepEqual(tags, [{ tag: 'a' }]);
 		})
 		
-		it("should add two tags to an existing item", function* () {
-			var item = yield createDataObject('item');
+		it("should add two tags to an existing item", async function () {
+			var item = await createDataObject('item');
 			item.addTag('a');
 			item.addTag('b');
-			yield item.saveTx();
+			await item.saveTx();
 			var tags = item.getTags();
 			assert.sameDeepMembers(tags, [{ tag: 'a' }, { tag: 'b' }]);
 		})
 	})
 
-	describe("#getItemsListTags", function() {
+	describe("#getItemsListTags", function () {
 		it("should return tags with emojis after colored tags", async function () {
 			var tags = [
 				{
@@ -1898,32 +1898,32 @@ describe("Zotero.Item", function () {
 	// Relations and related items
 	//
 	describe("#addRelatedItem", function () {
-		it("should add a dc:relation relation to an item", function* () {
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject('item');
+		it("should add a dc:relation relation to an item", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
 			item1.addRelatedItem(item2);
-			yield item1.saveTx();
+			await item1.saveTx();
 			
 			var rels = item1.getRelationsByPredicate(Zotero.Relations.relatedItemPredicate);
 			assert.lengthOf(rels, 1);
 			assert.equal(rels[0], Zotero.URI.getItemURI(item2));
 		})
 		
-		it("should allow an unsaved item to be related to an item in the user library", function* () {
-			var item1 = yield createDataObject('item');
+		it("should allow an unsaved item to be related to an item in the user library", async function () {
+			var item1 = await createDataObject('item');
 			var item2 = createUnsavedDataObject('item');
 			item2.addRelatedItem(item1);
-			yield item2.saveTx();
+			await item2.saveTx();
 			
 			var rels = item2.getRelationsByPredicate(Zotero.Relations.relatedItemPredicate);
 			assert.lengthOf(rels, 1);
 			assert.equal(rels[0], Zotero.URI.getItemURI(item1));
 		})
 		
-		it("should throw an error for a relation in a different library", function* () {
-			var group = yield getGroup();
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject('item', { libraryID: group.libraryID });
+		it("should throw an error for a relation in a different library", async function () {
+			var group = await getGroup();
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item', { libraryID: group.libraryID });
 			try {
 				item1.addRelatedItem(item2)
 			}
@@ -1937,9 +1937,9 @@ describe("Zotero.Item", function () {
 	})
 	
 	describe("#save()", function () {
-		it("should throw an error for an empty item without an item type", function* () {
+		it("should throw an error for an empty item without an item type", async function () {
 			var item = new Zotero.Item;
-			var e = yield getPromiseError(item.saveTx());
+			var e = await getPromiseError(item.saveTx());
 			assert.ok(e);
 			assert.equal(e.message, "Item type must be set before saving");
 		})
@@ -1979,21 +1979,21 @@ describe("Zotero.Item", function () {
 			});
 		});
 		
-		it("should reload child items for parent items", function* () {
-			var item = yield createDataObject('item');
-			var attachment = yield importFileAttachment('test.png', { parentItemID: item.id });
+		it("should reload child items for parent items", async function () {
+			var item = await createDataObject('item');
+			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
 			var note1 = new Zotero.Item('note');
 			note1.parentItemID = item.id;
-			yield note1.saveTx();
+			await note1.saveTx();
 			var note2 = new Zotero.Item('note');
 			note2.parentItemID = item.id;
-			yield note2.saveTx();
+			await note2.saveTx();
 			
 			assert.lengthOf(item.getAttachments(), 1);
 			assert.lengthOf(item.getNotes(), 2);
 			
 			note2.parentItemID = null;
-			yield note2.saveTx();
+			await note2.saveTx();
 			
 			assert.lengthOf(item.getAttachments(), 1);
 			assert.lengthOf(item.getNotes(), 1);
@@ -2086,18 +2086,18 @@ describe("Zotero.Item", function () {
 	
 	
 	describe("#_eraseData()", function () {
-		it("should remove relations pointing to this item", function* () {
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject('item');
+		it("should remove relations pointing to this item", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
 			item1.addRelatedItem(item2);
-			yield item1.saveTx();
+			await item1.saveTx();
 			item2.addRelatedItem(item1);
-			yield item2.saveTx();
+			await item2.saveTx();
 			
-			yield item1.eraseTx();
+			await item1.eraseTx();
 			
 			assert.lengthOf(item2.relatedItems, 0);
-			yield assert.eventually.equal(
+			await assert.eventually.equal(
 				Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM itemRelations WHERE itemID=?", item2.id),
 				0
 			);
@@ -2139,7 +2139,7 @@ describe("Zotero.Item", function () {
 	
 	
 	describe("#multiDiff", function () {
-		it("should return set of alternatives for differing fields in other items", function* () {
+		it("should return set of alternatives for differing fields in other items", async function () {
 			var type = 'item';
 			
 			var dates = ['2016-03-08 17:44:45'];
@@ -2171,7 +2171,7 @@ describe("Zotero.Item", function () {
 	
 	describe("#clone()", function () {
 		// TODO: Expand to other data
-		it("should copy creators", function* () {
+		it("should copy creators", async function () {
 			var item = new Zotero.Item('book');
 			item.setCreators([
 				{
@@ -2180,7 +2180,7 @@ describe("Zotero.Item", function () {
 					creatorType: 'author'
 				}
 			]);
-			yield item.saveTx();
+			await item.saveTx();
 			var newItem = item.clone();
 			assert.sameDeepMembers(item.getCreators(), newItem.getCreators());
 		})
@@ -2271,13 +2271,13 @@ describe("Zotero.Item", function () {
 	
 	describe("#toJSON()", function () {
 		describe("default mode", function () {
-			it("should output only fields with values", function* () {
+			it("should output only fields with values", async function () {
 				var itemType = "book";
 				var title = "Test";
 				
 				var item = new Zotero.Item(itemType);
 				item.setField("title", title);
-				var id = yield item.saveTx();
+				var id = await item.saveTx();
 				item = Zotero.Items.get(id);
 				var json = item.toJSON();
 				
@@ -2310,14 +2310,14 @@ describe("Zotero.Item", function () {
 					assert.equal(json.md5, (yield item.attachmentHash));
 				})
 				
-				it("should omit storage values with .skipStorageProperties", function* () {
+				it("should omit storage values with .skipStorageProperties", async function () {
 					var file = getTestDataDirectory();
 					file.append('test.png');
-					var item = yield Zotero.Attachments.importFromFile({ file });
+					var item = await Zotero.Attachments.importFromFile({ file });
 					
 					item.attachmentSyncedModificationTime = new Date().getTime();
 					item.attachmentSyncedHash = 'b32e33f529942d73bea4ed112310f804';
-					yield item.saveTx({ skipAll: true });
+					await item.saveTx({ skipAll: true });
 					
 					var json = item.toJSON({
 						skipStorageProperties: true
@@ -2326,18 +2326,18 @@ describe("Zotero.Item", function () {
 					assert.isUndefined(json.md5);
 				});
 				
-				it("should output synced storage values with .syncedStorageProperties", function* () {
+				it("should output synced storage values with .syncedStorageProperties", async function () {
 					var item = new Zotero.Item('attachment');
 					item.attachmentLinkMode = 'imported_file';
 					item.fileName = 'test.txt';
-					yield item.saveTx();
+					await item.saveTx();
 					
 					var mtime = new Date().getTime();
 					var md5 = 'b32e33f529942d73bea4ed112310f804';
 					
 					item.attachmentSyncedModificationTime = mtime;
 					item.attachmentSyncedHash = md5;
-					yield item.saveTx({ skipAll: true });
+					await item.saveTx({ skipAll: true });
 					
 					var json = item.toJSON({
 						syncedStorageProperties: true
@@ -2357,7 +2357,7 @@ describe("Zotero.Item", function () {
 					assert.isNull(json.md5);
 				})
 				
-				it("shouldn't include filename, path, or PDF properties for linked_url attachments", function* () {
+				it("shouldn't include filename, path, or PDF properties for linked_url attachments", async function () {
 					var item = new Zotero.Item('attachment');
 					item.attachmentLinkMode = 'linked_url';
 					item.url = "https://www.zotero.org/";
@@ -2467,14 +2467,14 @@ describe("Zotero.Item", function () {
 				});
 			});
 			
-			it("should include inPublications=true for items in My Publications", function* () {
+			it("should include inPublications=true for items in My Publications", async function () {
 				var item = createUnsavedDataObject('item');
 				item.inPublications = true;
 				var json = item.toJSON();
 				assert.propertyVal(json, "inPublications", true);
 			});
 			
-			it("shouldn't include inPublications for items not in My Publications in patch mode", function* () {
+			it("shouldn't include inPublications for items not in My Publications in patch mode", async function () {
 				var item = createUnsavedDataObject('item');
 				var json = item.toJSON();
 				assert.notProperty(json, "inPublications");
@@ -2486,8 +2486,8 @@ describe("Zotero.Item", function () {
 				assert.property(json, "inPublications", false);
 			});
 			
-			it("shouldn't include inPublications=false for group items not in My Publications in full mode", function* () {
-				var group = yield getGroup();
+			it("shouldn't include inPublications=false for group items not in My Publications in full mode", async function () {
+				var group = await getGroup();
 				var item = createUnsavedDataObject('item', { libraryID: group.libraryID });
 				var json = item.toJSON({ mode: 'full' });
 				assert.notProperty(json, "inPublications");
@@ -2495,14 +2495,14 @@ describe("Zotero.Item", function () {
 		})
 		
 		describe("'full' mode", function () {
-			it("should output all fields", function* () {
+			it("should output all fields", async function () {
 				var itemType = "book";
 				var title = "Test";
 				
 				var item = new Zotero.Item(itemType);
 				item.setField("title", title);
-				var id = yield item.saveTx();
-				item = yield Zotero.Items.getAsync(id);
+				var id = await item.saveTx();
+				item = await Zotero.Items.getAsync(id);
 				var json = item.toJSON({ mode: 'full' });
 				assert.equal(json.title, title);
 				assert.equal(json.date, "");
@@ -2511,19 +2511,19 @@ describe("Zotero.Item", function () {
 		})
 		
 		describe("'patch' mode", function () {
-			it("should output only fields that differ", function* () {
+			it("should output only fields that differ", async function () {
 				var itemType = "book";
 				var title = "Test";
 				var date = "2015-05-12";
 				
 				var item = new Zotero.Item(itemType);
 				item.setField("title", title);
-				var id = yield item.saveTx();
-				item = yield Zotero.Items.getAsync(id);
+				var id = await item.saveTx();
+				item = await Zotero.Items.getAsync(id);
 				var patchBase = item.toJSON();
 				
 				item.setField("date", date);
-				yield item.saveTx();
+				await item.saveTx();
 				var json = item.toJSON({
 					patchBase: patchBase
 				})
@@ -2537,8 +2537,8 @@ describe("Zotero.Item", function () {
 				assert.isUndefined(json.tags);
 			})
 			
-			it("should set 'parentItem' to false when cleared", function* () {
-				var item = yield createDataObject('item');
+			it("should set 'parentItem' to false when cleared", async function () {
+				var item = await createDataObject('item');
 				var note = new Zotero.Item('note');
 				note.parentID = item.id;
 				// Create initial JSON with parentItem
@@ -2549,14 +2549,14 @@ describe("Zotero.Item", function () {
 				assert.isFalse(json.parentItem);
 			});
 			
-			it("should include relations if related item was removed", function* () {
-				var item1 = yield createDataObject('item');
-				var item2 = yield createDataObject('item');
-				var item3 = yield createDataObject('item');
-				var item4 = yield createDataObject('item');
+			it("should include relations if related item was removed", async function () {
+				var item1 = await createDataObject('item');
+				var item2 = await createDataObject('item');
+				var item3 = await createDataObject('item');
+				var item4 = await createDataObject('item');
 				
-				var relateItems = Zotero.Promise.coroutine(function* (i1, i2) {
-					yield Zotero.DB.executeTransaction(async function () {
+				var relateItems = async function (i1, i2) {
+					await Zotero.DB.executeTransaction(async function () {
 						i1.addRelatedItem(i2);
 						await i1.save({
 							skipDateModifiedUpdate: true
@@ -2566,24 +2566,24 @@ describe("Zotero.Item", function () {
 							skipDateModifiedUpdate: true
 						});
 					});
-				});
+				};
 				
-				yield relateItems(item1, item2);
-				yield relateItems(item1, item3);
-				yield relateItems(item1, item4);
+				await relateItems(item1, item2);
+				await relateItems(item1, item3);
+				await relateItems(item1, item4);
 				
 				var patchBase = item1.toJSON();
 				
 				item1.removeRelatedItem(item2);
-				yield item1.saveTx();
+				await item1.saveTx();
 				item2.removeRelatedItem(item1);
-				yield item2.saveTx();
+				await item2.saveTx();
 				
 				var json = item1.toJSON({ patchBase });
 				assert.sameMembers(json.relations['dc:relation'], item1.getRelations()['dc:relation']);
 			});
 			
-			it("shouldn't clear storage properties from original in .skipStorageProperties mode", function* () {
+			it("shouldn't clear storage properties from original in .skipStorageProperties mode", async function () {
 				var item = new Zotero.Item('attachment');
 				item.attachmentLinkMode = 'imported_file';
 				item.attachmentFilename = 'test.txt';
@@ -2608,12 +2608,12 @@ describe("Zotero.Item", function () {
 	})
 	
 	describe("#fromJSON()", function () {
-		it("should clear missing fields", function* () {
+		it("should clear missing fields", async function () {
 			var item = new Zotero.Item('book');
 			item.setField('title', 'Test');
 			item.setField('date', '2016');
 			item.setField('accessDate', '2015-06-07T20:56:00Z');
-			yield item.saveTx();
+			await item.saveTx();
 			var json = item.toJSON();
 			// Remove fields, which should cause them to be cleared in fromJSON()
 			delete json.date;
@@ -2657,11 +2657,11 @@ describe("Zotero.Item", function () {
 			assert.sameDeepMembers(item.getCreatorsJSON(), newCreators);
 		});
 		
-		it("should remove item from collection if 'collections' property not provided", function* () {
-			var collection = yield createDataObject('collection');
+		it("should remove item from collection if 'collections' property not provided", async function () {
+			var collection = await createDataObject('collection');
 			// Create standalone attachment in collection
-			var attachment = yield importFileAttachment('test.png', { collections: [collection.id] });
-			var item = yield createDataObject('item', { collections: [collection.id] });
+			var attachment = await importFileAttachment('test.png', { collections: [collection.id] });
+			var item = await createDataObject('item', { collections: [collection.id] });
 			
 			assert.isTrue(collection.hasItem(attachment.id));
 			var json = attachment.toJSON();
@@ -2670,7 +2670,7 @@ describe("Zotero.Item", function () {
 			json.parentItem = item.key;
 			delete json.collections;
 			attachment.fromJSON(json);
-			yield attachment.saveTx();
+			await attachment.saveTx();
 			assert.isFalse(collection.hasItem(attachment.id));
 		});
 		
@@ -3056,7 +3056,7 @@ describe("Zotero.Item", function () {
 			});
 		});
 		
-		it("should accept ISO 8601 dates", function* () {
+		it("should accept ISO 8601 dates", async function () {
 			var json = {
 				itemType: "journalArticle",
 				accessDate: "2015-06-07T20:56:00Z",
@@ -3070,7 +3070,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.dateModified, '2015-06-07 20:58:00');
 		})
 		
-		it("should accept ISO 8601 access date without time", function* () {
+		it("should accept ISO 8601 access date without time", async function () {
 			var json = {
 				itemType: "journalArticle",
 				accessDate: "2015-06-07",
@@ -3084,7 +3084,7 @@ describe("Zotero.Item", function () {
 			assert.equal(item.dateModified, '2015-06-07 20:58:00');
 		})
 		
-		it("should ignore non–ISO 8601 dates", function* () {
+		it("should ignore non–ISO 8601 dates", async function () {
 			var json = {
 				itemType: "journalArticle",
 				accessDate: "2015-06-07 20:56:00",
@@ -3099,7 +3099,7 @@ describe("Zotero.Item", function () {
 			assert.isNull(item.dateModified);
 		})
 		
-		it("should set creators", function* () {
+		it("should set creators", async function () {
 			var json = {
 				itemType: "journalArticle",
 				creators: [
@@ -3117,11 +3117,11 @@ describe("Zotero.Item", function () {
 			
 			var item = new Zotero.Item;
 			item.fromJSON(json);
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			assert.sameDeepMembers(item.getCreatorsJSON(), json.creators);
 		})
 		
-		it("should map a base field to an item-specific field", function* () {
+		it("should map a base field to an item-specific field", async function () {
 			var item = new Zotero.Item("bookSection");
 			item.fromJSON({
 				"itemType":"bookSection",

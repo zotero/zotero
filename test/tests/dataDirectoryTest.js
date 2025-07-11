@@ -92,8 +92,8 @@ describe("Zotero.DataDirectory", function () {
 		}
 	};
 	
-	var populateDataDirectory = Zotero.Promise.coroutine(function* (dir, srcDir, automatic = false) {
-		yield OS.File.makeDir(dir, { unixMode: 0o755 });
+	var populateDataDirectory = async function (dir, srcDir, automatic = false) {
+		await OS.File.makeDir(dir, { unixMode: 0o755 });
 		let storageDir = OS.Path.join(dir, 'storage');
 		let storageDir1 = OS.Path.join(storageDir, 'AAAAAAAA');
 		let storageDir2 = OS.Path.join(storageDir, 'BBBBBBBB');
@@ -101,59 +101,59 @@ describe("Zotero.DataDirectory", function () {
 		let migrationMarker = OS.Path.join(dir, Zotero.DataDirectory.MIGRATION_MARKER);
 		
 		// Database
-		yield Zotero.File.putContentsAsync(OS.Path.join(dir, dbFilename), str1);
+		await Zotero.File.putContentsAsync(OS.Path.join(dir, dbFilename), str1);
 		// Database backup
-		yield Zotero.File.putContentsAsync(OS.Path.join(dir, dbFilename + '.bak'), str2);
+		await Zotero.File.putContentsAsync(OS.Path.join(dir, dbFilename + '.bak'), str2);
 		// 'storage' directory
-		yield OS.File.makeDir(storageDir, { unixMode: 0o755 });
+		await OS.File.makeDir(storageDir, { unixMode: 0o755 });
 		// 'storage' folders
-		yield OS.File.makeDir(storageDir1, { unixMode: 0o755 });
-		yield Zotero.File.putContentsAsync(OS.Path.join(storageDir1, storageFile1), str2);
-		yield OS.File.makeDir(storageDir2, { unixMode: 0o755 });
-		yield Zotero.File.putContentsAsync(OS.Path.join(storageDir2, storageFile2), str3);
+		await OS.File.makeDir(storageDir1, { unixMode: 0o755 });
+		await Zotero.File.putContentsAsync(OS.Path.join(storageDir1, storageFile1), str2);
+		await OS.File.makeDir(storageDir2, { unixMode: 0o755 });
+		await Zotero.File.putContentsAsync(OS.Path.join(storageDir2, storageFile2), str3);
 		// 'translators' and some translators
-		yield OS.File.makeDir(translatorsDir, { unixMode: 0o755 });
-		yield Zotero.File.putContentsAsync(OS.Path.join(translatorsDir, translatorName1), str4);
-		yield Zotero.File.putContentsAsync(OS.Path.join(translatorsDir, translatorName2), str5);
+		await OS.File.makeDir(translatorsDir, { unixMode: 0o755 });
+		await Zotero.File.putContentsAsync(OS.Path.join(translatorsDir, translatorName1), str4);
+		await Zotero.File.putContentsAsync(OS.Path.join(translatorsDir, translatorName2), str5);
 		// Migration marker
-		yield Zotero.File.putContentsAsync(
+		await Zotero.File.putContentsAsync(
 			migrationMarker,
 			JSON.stringify({
 				sourceDir: srcDir || dir,
 				automatic
 			})
 		);
-	});
+	};
 	
-	var checkMigration = Zotero.Promise.coroutine(function* (options = {}) {
+	var checkMigration = async function (options = {}) {
 		if (!options.skipOldDir) {
-			assert.isFalse(yield OS.File.exists(oldDir));
+			assert.isFalse(await OS.File.exists(oldDir));
 		}
-		yield assert.eventually.equal(Zotero.File.getContentsAsync(newDBFile), str1);
-		yield assert.eventually.equal(Zotero.File.getContentsAsync(newDBFile + '.bak'), str2);
+		await assert.eventually.equal(Zotero.File.getContentsAsync(newDBFile), str1);
+		await assert.eventually.equal(Zotero.File.getContentsAsync(newDBFile + '.bak'), str2);
 		if (!options.skipStorageFile1) {
-			yield assert.eventually.equal(
+			await assert.eventually.equal(
 				Zotero.File.getContentsAsync(OS.Path.join(newStorageDir1, storageFile1)), str2
 			);
 		}
-		yield assert.eventually.equal(
+		await assert.eventually.equal(
 			Zotero.File.getContentsAsync(OS.Path.join(newStorageDir2, storageFile2)), str3
 		);
-		yield assert.eventually.equal(
+		await assert.eventually.equal(
 			Zotero.File.getContentsAsync(OS.Path.join(newTranslatorsDir, translatorName1)), str4
 		);
-		yield assert.eventually.equal(
+		await assert.eventually.equal(
 			Zotero.File.getContentsAsync(OS.Path.join(newTranslatorsDir, translatorName2)), str5
 		);
 		if (!options.skipNewMarker) {
-			assert.isFalse(yield OS.File.exists(newMigrationMarker));
+			assert.isFalse(await OS.File.exists(newMigrationMarker));
 		}
 		
 		if (!options.skipSetDataDirectory) {
 			assert.ok(stubs.setDataDir.calledOnce);
 			assert.ok(stubs.setDataDir.calledWith(newDir));
 		}
-	});
+	};
 	
 	
 	describe("#checkForMigration()", function () {
@@ -174,24 +174,24 @@ describe("Zotero.DataDirectory", function () {
 			tests.push([desc, fn]);
 		}
 		
-		it("should skip automatic migration if target directory exists and is non-empty", function* () {
+		it("should skip automatic migration if target directory exists and is non-empty", async function () {
 			resetCommandMode();
 			resetFunctionMode();
 			
-			yield populateDataDirectory(oldDir);
-			yield OS.File.remove(oldMigrationMarker);
-			yield OS.File.makeDir(newDir, { unixMode: 0o755 });
-			yield Zotero.File.putContentsAsync(OS.Path.join(newDir, 'a'), '');
+			await populateDataDirectory(oldDir);
+			await OS.File.remove(oldMigrationMarker);
+			await OS.File.makeDir(newDir, { unixMode: 0o755 });
+			await Zotero.File.putContentsAsync(OS.Path.join(newDir, 'a'), '');
 			
-			yield assert.eventually.isFalse(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
+			await assert.eventually.isFalse(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
 		});
 		
-		it("should skip automatic migration and show prompt if target directory is on a different drive", function* () {
+		it("should skip automatic migration and show prompt if target directory is on a different drive", async function () {
 			resetCommandMode();
 			resetFunctionMode();
 			
-			yield populateDataDirectory(oldDir);
-			yield OS.File.remove(oldMigrationMarker);
+			await populateDataDirectory(oldDir);
+			await OS.File.remove(oldMigrationMarker);
 			
 			stubs.isNewDirOnDifferentDrive.resolves(true);
 			
@@ -202,8 +202,8 @@ describe("Zotero.DataDirectory", function () {
 				);
 			}, 'cancel');
 			
-			yield assert.eventually.isNotOk(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
-			yield promise;
+			await assert.eventually.isNotOk(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
+			await promise;
 
 			stubs.isNewDirOnDifferentDrive.resolves(false);
 		});
@@ -215,13 +215,13 @@ describe("Zotero.DataDirectory", function () {
 				let origFunc = OS.File.move;
 				let fileMoveStub = sinon.stub(OS.File, "move").callsFake(function () {
 					if (OS.Path.basename(arguments[0]) == storageFile1) {
-						return Zotero.Promise.reject(new Error("Error"));
+						return Promise.reject(new Error("Error"));
 					}
 					else {
 						return origFunc(...arguments);
 					}
 				});
-				let stub1 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
+				let stub1 = sinon.stub(Zotero.File, "reveal").returns(Promise.resolve());
 				let stub2 = sinon.stub(Zotero.Utilities.Internal, "quitZotero");
 				
 				var promise2;
@@ -230,7 +230,6 @@ describe("Zotero.DataDirectory", function () {
 					promise2 = waitForDialog(null, 'extra1');
 					
 					// Make sure we're displaying the right message for this mode (automatic or manual)
-					Components.utils.import("resource://zotero/config.js");
 					assert.include(
 						dialog.document.documentElement.textContent,
 						Zotero.getString(
@@ -261,18 +260,17 @@ describe("Zotero.DataDirectory", function () {
 				let origFunc = OS.File.move;
 				let stub1 = sinon.stub(OS.File, "move").callsFake(function () {
 					if (OS.Path.basename(arguments[0]) == dbFilename) {
-						return Zotero.Promise.reject(new Error("Error"));
+						return Promise.reject(new Error("Error"));
 					}
 					else {
 						return origFunc(...arguments);
 					}
 				});
-				let stub2 = sinon.stub(Zotero.File, "reveal").returns(Zotero.Promise.resolve());
+				let stub2 = sinon.stub(Zotero.File, "reveal").returns(Promise.resolve());
 				let stub3 = sinon.stub(Zotero.Utilities.Internal, "quitZotero");
 				
 				var promise = waitForDialog(function (dialog) {
 					// Make sure we're displaying the right message for this mode (automatic or manual)
-					Components.utils.import("resource://zotero/config.js");
 					assert.include(
 						dialog.document.documentElement.textContent,
 						Zotero.getString(
@@ -306,10 +304,10 @@ describe("Zotero.DataDirectory", function () {
 			});
 		});
 		
-		it("should remove marker if old directory doesn't exist", function* () {
-			yield populateDataDirectory(newDir, oldDir);
-			yield Zotero.DataDirectory.checkForMigration(newDir, newDir);
-			yield checkMigration({
+		it("should remove marker if old directory doesn't exist", async function () {
+			await populateDataDirectory(newDir, oldDir);
+			await Zotero.DataDirectory.checkForMigration(newDir, newDir);
+			await checkMigration({
 				skipSetDataDirectory: true
 			});
 		});
@@ -385,33 +383,33 @@ describe("Zotero.DataDirectory", function () {
 				resetFunctionMode();
 			});
 			
-			it("should handle partial failure", function* () {
-				yield populateDataDirectory(oldDir);
+			it("should handle partial failure", async function () {
+				await populateDataDirectory(oldDir);
 				
 				let origFunc = OS.File.move;
 				let stub1 = sinon.stub(OS.File, "move").callsFake(function () {
 					if (OS.Path.basename(arguments[0]) == storageFile1) {
-						return Zotero.Promise.reject(new Error("Error"));
+						return Promise.reject(new Error("Error"));
 					}
 					else {
 						return origFunc(...arguments);
 					}
 				});
 				
-				yield Zotero.DataDirectory.migrate(oldDir, newDir);
+				await Zotero.DataDirectory.migrate(oldDir, newDir);
 				
 				stub1.restore();
 				
-				yield checkMigration({
+				await checkMigration({
 					skipOldDir: true,
 					skipStorageFile1: true,
 					skipNewMarker: true
 				});
 				
-				assert.isTrue(yield OS.File.exists(OS.Path.join(oldStorageDir1, storageFile1)));
-				assert.isFalse(yield OS.File.exists(OS.Path.join(oldStorageDir2, storageFile2)));
-				assert.isFalse(yield OS.File.exists(oldTranslatorsDir));
-				assert.isTrue(yield OS.File.exists(newMigrationMarker));
+				assert.isTrue(await OS.File.exists(OS.Path.join(oldStorageDir1, storageFile1)));
+				assert.isFalse(await OS.File.exists(OS.Path.join(oldStorageDir2, storageFile2)));
+				assert.isFalse(await OS.File.exists(oldTranslatorsDir));
+				assert.isTrue(await OS.File.exists(newMigrationMarker));
 			});
 		});
 	});

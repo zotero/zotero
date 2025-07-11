@@ -1,4 +1,4 @@
-describe("Document Recognition", function() {
+describe("Document Recognition", function () {
 	var win;
 	
 	async function waitForProgressWindow() {
@@ -16,7 +16,7 @@ describe("Document Recognition", function() {
 		
 		this.timeout(60000);
 		// Load Zotero pane and install PDF tools
-		yield Zotero.Promise.all([
+		yield Promise.all([
 			loadZoteroPane().then(w => win = w)
 		]);
 	});
@@ -25,7 +25,7 @@ describe("Document Recognition", function() {
 		yield selectLibrary(win);
 	});
 	
-	afterEach(async function() {
+	afterEach(async function () {
 		for(let win of getWindows("chrome://zotero/content/progressQueueDialog.xhtml")) {
 			win.close();
 		}
@@ -41,7 +41,7 @@ describe("Document Recognition", function() {
 		Zotero.Prefs.clear('autoRenameFiles.linked');
 	});
 	
-	after(function() {
+	after(function () {
 		Zotero.Prefs.clear('fulltext.textMaxLength');
 		
 		if (win) {

@@ -1,4 +1,4 @@
-describe("Zotero.Attachments", function() {
+describe("Zotero.Attachments", function () {
 	var HiddenBrowser;
 	var browser;
 	
@@ -14,83 +14,83 @@ describe("Zotero.Attachments", function() {
 	});
 	
 	describe("#importFromFile()", function () {
-		it("should create a child attachment from a text file", function* () {
+		it("should create a child attachment from a text file", async function () {
 			// Create test file
 			var contents = "Test";
 			var tmpFile = Zotero.getTempDirectory();
 			tmpFile.append('test.txt');
-			yield Zotero.File.putContentsAsync(tmpFile, contents);
+			await Zotero.File.putContentsAsync(tmpFile, contents);
 			
 			// Create parent item
 			var item = new Zotero.Item('book');
-			var parentItemID = yield item.saveTx();
+			var parentItemID = await item.saveTx();
 			
 			// Create attachment and compare content
-			var item = yield Zotero.Attachments.importFromFile({
+			var item = await Zotero.Attachments.importFromFile({
 				file: tmpFile,
 				parentItemID: parentItemID
 			});
 			var storedFile = item.getFile();
-			assert.equal((yield Zotero.File.getContentsAsync(storedFile)), contents);
+			assert.equal(((await Zotero.File.getContentsAsync(storedFile))), contents);
 			
 			// Clean up
-			yield Zotero.Items.erase(item.id);
+			await Zotero.Items.erase(item.id);
 		});
 		
-		it("should create a top-level attachment from a PNG file", function* () {
+		it("should create a top-level attachment from a PNG file", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var contents = yield Zotero.File.getBinaryContentsAsync(file);
+			var contents = await Zotero.File.getBinaryContentsAsync(file);
 			
 			// Create attachment and compare content
-			var item = yield Zotero.Attachments.importFromFile({
+			var item = await Zotero.Attachments.importFromFile({
 				file: file
 			});
 			var storedFile = item.getFile();
-			assert.equal((yield Zotero.File.getBinaryContentsAsync(storedFile)), contents);
+			assert.equal(((await Zotero.File.getBinaryContentsAsync(storedFile))), contents);
 			
 			// Clean up
-			yield Zotero.Items.erase(item.id);
+			await Zotero.Items.erase(item.id);
 		});
 		
-		it("should create a top-level attachment from a PNG file in a collection", function* () {
+		it("should create a top-level attachment from a PNG file in a collection", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var contents = yield Zotero.File.getBinaryContentsAsync(file);
+			var contents = await Zotero.File.getBinaryContentsAsync(file);
 			
-			var collection = yield createDataObject('collection');
+			var collection = await createDataObject('collection');
 			
 			// Create attachment and compare content
-			var item = yield Zotero.Attachments.importFromFile({
+			var item = await Zotero.Attachments.importFromFile({
 				file: file,
 				collections: [collection.id]
 			});
 			var storedFile = item.getFile();
-			assert.equal((yield Zotero.File.getBinaryContentsAsync(storedFile)), contents);
+			assert.equal(((await Zotero.File.getBinaryContentsAsync(storedFile))), contents);
 			
 			// Clean up
-			yield Zotero.Items.erase(item.id);
+			await Zotero.Items.erase(item.id);
 		});
 		
-		it("should create a child attachment from a PNG file", function* () {
+		it("should create a child attachment from a PNG file", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var contents = yield Zotero.File.getBinaryContentsAsync(file);
+			var contents = await Zotero.File.getBinaryContentsAsync(file);
 			
 			// Create parent item
 			var item = new Zotero.Item('book');
-			var parentItemID = yield item.saveTx();
+			var parentItemID = await item.saveTx();
 			
 			// Create attachment and compare content
-			var item = yield Zotero.Attachments.importFromFile({
+			var item = await Zotero.Attachments.importFromFile({
 				file: file,
 				parentItemID: parentItemID
 			});
 			var storedFile = item.getFile();
-			assert.equal((yield Zotero.File.getBinaryContentsAsync(storedFile)), contents);
+			assert.equal(((await Zotero.File.getBinaryContentsAsync(storedFile))), contents);
 			
 			// Clean up
-			yield Zotero.Items.erase(item.id);
+			await Zotero.Items.erase(item.id);
 		});
 
 		it("should set a top-level item's title to the filename, minus its extension", async function () {
@@ -117,12 +117,12 @@ describe("Zotero.Attachments", function() {
 	})
 	
 	describe("#linkFromFile()", function () {
-		it("should link to a file in My Library", function* () {
-			var item = yield createDataObject('item');
+		it("should link to a file in My Library", async function () {
+			var item = await createDataObject('item');
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var attachment = yield Zotero.Attachments.linkFromFile({
+			var attachment = await Zotero.Attachments.linkFromFile({
 				file: file,
 				parentItemID: item.id
 			});
@@ -267,11 +267,11 @@ describe("Zotero.Attachments", function() {
 	
 	
 	describe("#importSnapshotFromFile()", function () {
-		it("should import an HTML file", function* () {
-			var item = yield createDataObject('item');
+		it("should import an HTML file", async function () {
+			var item = await createDataObject('item');
 			var file = getTestDataDirectory();
 			file.append('test.html');
-			var attachment = yield Zotero.Attachments.importSnapshotFromFile({
+			var attachment = await Zotero.Attachments.importSnapshotFromFile({
 				title: 'Snapshot',
 				url: 'http://example.com',
 				file,
@@ -280,16 +280,16 @@ describe("Zotero.Attachments", function() {
 				charset: 'utf-8'
 			});
 			
-			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'test');
+			var matches = await Zotero.Fulltext.findTextInItems([attachment.id], 'test');
 			assert.lengthOf(matches, 1);
 			assert.propertyVal(matches[0], 'id', attachment.id);
 		});
 		
-		it("should detect charset for an HTML file", function* () {
-			var item = yield createDataObject('item');
+		it("should detect charset for an HTML file", async function () {
+			var item = await createDataObject('item');
 			var file = getTestDataDirectory();
 			file.append('test.html');
-			var attachment = yield Zotero.Attachments.importSnapshotFromFile({
+			var attachment = await Zotero.Attachments.importSnapshotFromFile({
 				title: 'Snapshot',
 				url: 'http://example.com',
 				file,
@@ -299,7 +299,7 @@ describe("Zotero.Attachments", function() {
 			
 			assert.equal(attachment.attachmentCharset, 'utf-8');
 			
-			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'test');
+			var matches = await Zotero.Fulltext.findTextInItems([attachment.id], 'test');
 			assert.lengthOf(matches, 1);
 			assert.propertyVal(matches[0], 'id', attachment.id);
 		});
@@ -350,31 +350,31 @@ describe("Zotero.Attachments", function() {
 	
 	
 	describe("#linkFromDocument", function () {
-		it("should add a link attachment for the current webpage", function* () {
-			var item = yield createDataObject('item');
+		it("should add a link attachment for the current webpage", async function () {
+			var item = await createDataObject('item');
 			
 			var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
 			browser = new HiddenBrowser(uri);
-			yield browser.load(uri);
+			await browser.load(uri);
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var attachment = yield Zotero.Attachments.linkFromDocument({
-				document: yield browser.getDocument(),
+			var attachment = await Zotero.Attachments.linkFromDocument({
+				document: await browser.getDocument(),
 				parentItemID: item.id
 			});
 			
 			assert.equal(attachment.getField('url'), "file://" + uri);
 			
 			// Check indexing
-			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'share your research');
+			var matches = await Zotero.Fulltext.findTextInItems([attachment.id], 'share your research');
 			assert.lengthOf(matches, 1);
 			assert.propertyVal(matches[0], 'id', attachment.id);
 		})
 	})
 	
 	describe("#importFromDocument()", function () {
-		Components.utils.import("resource://gre/modules/FileUtils.jsm");
+		ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 		
 		var testServerPath, httpd, prefix;
 		var testServerPort;
@@ -1937,92 +1937,92 @@ describe("Zotero.Attachments", function() {
 	});
 	
 	describe("#getTotalFileSize", function () {
-		it("should return the size for a single-file attachment", function* () {
+		it("should return the size for a single-file attachment", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
 			
 			// Create attachment and compare content
-			var item = yield Zotero.Attachments.importFromFile({
+			var item = await Zotero.Attachments.importFromFile({
 				file: file
 			});
 			
-			assert.equal((yield Zotero.Attachments.getTotalFileSize(item)), file.fileSize);
+			assert.equal(((await Zotero.Attachments.getTotalFileSize(item))), file.fileSize);
 		})
 	})
 	
 	describe("#hasMultipleFiles and #getNumFiles()", function () {
-		it("should return false and 1 for a single file", function* () {
+		it("should return false and 1 for a single file", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.png');
 			
 			// Create attachment and compare content
-			var item = yield Zotero.Attachments.importFromFile({
+			var item = await Zotero.Attachments.importFromFile({
 				file: file
 			});
 			
-			assert.isFalse(yield Zotero.Attachments.hasMultipleFiles(item));
-			assert.equal((yield Zotero.Attachments.getNumFiles(item)), 1);
+			assert.isFalse(await Zotero.Attachments.hasMultipleFiles(item));
+			assert.equal(((await Zotero.Attachments.getNumFiles(item))), 1);
 		})
 		
-		it("should return false and 1 for single HTML file with hidden file", function* () {
+		it("should return false and 1 for single HTML file with hidden file", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.html');
 			
 			// Create attachment and compare content
-			var item = yield Zotero.Attachments.importFromFile({
+			var item = await Zotero.Attachments.importFromFile({
 				file: file
 			});
 			var path = OS.Path.join(OS.Path.dirname(item.getFilePath()), '.zotero-ft-cache');
-			yield Zotero.File.putContentsAsync(path, "");
+			await Zotero.File.putContentsAsync(path, "");
 			
-			assert.isFalse(yield Zotero.Attachments.hasMultipleFiles(item));
-			assert.equal((yield Zotero.Attachments.getNumFiles(item)), 1);
+			assert.isFalse(await Zotero.Attachments.hasMultipleFiles(item));
+			assert.equal(((await Zotero.Attachments.getNumFiles(item))), 1);
 		})
 		
-		it("should return true and 2 for multiple files", function* () {
+		it("should return true and 2 for multiple files", async function () {
 			var file = getTestDataDirectory();
 			file.append('test.html');
 			
 			// Create attachment and compare content
-			var item = yield Zotero.Attachments.importFromFile({
+			var item = await Zotero.Attachments.importFromFile({
 				file: file
 			});
 			var path = OS.Path.join(OS.Path.dirname(item.getFilePath()), 'test.png');
-			yield Zotero.File.putContentsAsync(path, "");
+			await Zotero.File.putContentsAsync(path, "");
 			
-			assert.isTrue(yield Zotero.Attachments.hasMultipleFiles(item));
-			assert.equal((yield Zotero.Attachments.getNumFiles(item)), 2);
+			assert.isTrue(await Zotero.Attachments.hasMultipleFiles(item));
+			assert.equal(((await Zotero.Attachments.getNumFiles(item))), 2);
 		})
 	});
 	
 	describe("#createDirectoryForItem()", function () {
-		it("should create missing directory", function* () {
-			var item = yield importFileAttachment('test.png');
+		it("should create missing directory", async function () {
+			var item = await importFileAttachment('test.png');
 			var path = OS.Path.dirname(item.getFilePath());
-			yield OS.File.removeDir(path);
-			yield Zotero.Attachments.createDirectoryForItem(item);
-			assert.isTrue(yield OS.File.exists(path));
+			await OS.File.removeDir(path);
+			await Zotero.Attachments.createDirectoryForItem(item);
+			assert.isTrue(await OS.File.exists(path));
 		});
 		
-		it("should delete all existing files", function* () {
-			var item = yield importFileAttachment('test.html');
+		it("should delete all existing files", async function () {
+			var item = await importFileAttachment('test.html');
 			var path = OS.Path.dirname(item.getFilePath());
 			var files = ['a', 'b', 'c', 'd'];
 			for (let file of files) {
-				yield Zotero.File.putContentsAsync(OS.Path.join(path, file), file);
+				await Zotero.File.putContentsAsync(OS.Path.join(path, file), file);
 			}
-			yield Zotero.Attachments.createDirectoryForItem(item);
-			assert.isTrue(yield Zotero.File.directoryIsEmpty(path));
-			assert.isTrue(yield OS.File.exists(path));
+			await Zotero.Attachments.createDirectoryForItem(item);
+			assert.isTrue(await Zotero.File.directoryIsEmpty(path));
+			assert.isTrue(await OS.File.exists(path));
 		});
 		
-		it("should handle empty directory", function* () {
-			var item = yield importFileAttachment('test.png');
+		it("should handle empty directory", async function () {
+			var item = await importFileAttachment('test.png');
 			var file = item.getFilePath();
 			var dir = OS.Path.dirname(item.getFilePath());
-			yield OS.File.remove(file);
-			yield Zotero.Attachments.createDirectoryForItem(item);
-			assert.isTrue(yield OS.File.exists(dir));
+			await OS.File.remove(file);
+			await Zotero.Attachments.createDirectoryForItem(item);
+			assert.isTrue(await OS.File.exists(dir));
 		});
 	});
 	

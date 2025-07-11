@@ -5,66 +5,66 @@ describe("Zotero.FeedItem", function () {
 		yield feed.saveTx();
 		libraryID = feed.libraryID;
 	});
-	after(function() {
+	after(function () {
 		return clearFeeds();
 	});
 	
-	it("should be an instance of Zotero.Item", function() {
+	it("should be an instance of Zotero.Item", function () {
 		assert.instanceOf(new Zotero.FeedItem(), Zotero.Item);
 	});
-	describe("#libraryID", function() {
-		it("should reference a feed", function() {
+	describe("#libraryID", function () {
+		it("should reference a feed", function () {
 			let feedItem = new Zotero.FeedItem();
-			assert.doesNotThrow(function() {feedItem.libraryID = feed.libraryID});
-			assert.throws(function() {feedItem.libraryID = Zotero.Libraries.userLibraryID}, /^libraryID must reference a feed$/);
+			assert.doesNotThrow(function () {feedItem.libraryID = feed.libraryID});
+			assert.throws(function () {feedItem.libraryID = Zotero.Libraries.userLibraryID}, /^libraryID must reference a feed$/);
 		});
 	});
 	describe("#constructor()", function* () {
-		it("should accept required fields as arguments", function* () {
+		it("should accept required fields as arguments", async function () {
 			let guid = Zotero.randomString();
 			let feedItem = new Zotero.FeedItem();
-			yield assert.isRejected(feedItem.saveTx());
+			await assert.isRejected(feedItem.saveTx());
 			
 			feedItem = new Zotero.FeedItem('book', { guid });
 			feedItem.libraryID = libraryID;
-			yield assert.isFulfilled(feedItem.saveTx());
+			await assert.isFulfilled(feedItem.saveTx());
 			
 			assert.equal(feedItem.itemTypeID, Zotero.ItemTypes.getID('book'));
 			assert.equal(feedItem.guid, guid);
 			assert.equal(feedItem.libraryID, libraryID);
 		});
 	});
-	describe("#isFeedItem", function() {
-		it("should be true", function() {
+	describe("#isFeedItem", function () {
+		it("should be true", function () {
 			let feedItem = new Zotero.FeedItem();
 			assert.isTrue(feedItem.isFeedItem);
 		});
-		it("should be falsy for regular item", function() {
+		it("should be falsy for regular item", function () {
 			let item = new Zotero.Item();
 			assert.notOk(item.isFeedItem);
 		})
 	});
-	describe("#guid", function() {
-		it("should not be settable to a non-string value", function() {
+	describe("#guid", function () {
+		it("should not be settable to a non-string value", function () {
 			let feedItem = new Zotero.FeedItem();
 			assert.throws(() => feedItem.guid = 1);
 		});
-		it("should be settable to any string", function() {
+		it("should be settable to any string", function () {
 			let feedItem = new Zotero.FeedItem();
 			feedItem.guid = 'foo';
 			assert.equal(feedItem.guid, 'foo');
 		});
-		it("should not be possible to change guid after saving item", function* () {
-			let feedItem = yield createDataObject('feedItem', { libraryID });
+		it("should not be possible to change guid after saving item", async function () {
+			let feedItem = await createDataObject('feedItem', { libraryID });
 			assert.throws(() => feedItem.guid = 'bar');
 		});
 	});
-	describe("#isRead", function() {
-		it("should be false by default", function* () {
-			let feedItem = yield createDataObject('feedItem', { libraryID });
+	describe("#isRead", function () {
+		it("should be false by default", async function () {
+			let feedItem = await createDataObject('feedItem', { libraryID });
 			assert.isFalse(feedItem.isRead);
 		});
-		it("should be settable and persist after saving", function* () {
+		it("should be settable and persist after saving", async function () {
 			this.timeout(5000);
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
@@ -82,16 +82,16 @@ describe("Zotero.FeedItem", function () {
 			
 			expectedTimestamp = Date.now();
 			feedItem.isRead = true;
-			yield Zotero.Promise.delay(2001);
-			yield feedItem.saveTx();
+			await Zotero.Promise.delay(2001);
+			await feedItem.saveTx();
 			
-			readTime = yield Zotero.DB.valueQueryAsync('SELECT readTime FROM feedItems WHERE itemID=?', feedItem.id);
+			readTime = await Zotero.DB.valueQueryAsync('SELECT readTime FROM feedItems WHERE itemID=?', feedItem.id);
 			readTime = Zotero.Date.sqlToDate(readTime, true).getTime();
 			assert.closeTo(readTime, expectedTimestamp, 2000, 'read timestamp is correct in the DB');
 		});
 	});
-	describe("#fromJSON()", function() {
-		it("should attempt to parse non ISO-8601 dates", function* () {
+	describe("#fromJSON()", function () {
+		it("should attempt to parse non ISO-8601 dates", async function () {
 			Zotero.locale = 'en-US';
 			Zotero.Date.init();
 			var data = [
@@ -125,39 +125,39 @@ describe("Zotero.FeedItem", function () {
 			}
 		})
 	});
-	describe("#save()", function() {
-		it("should require feed being set", function* () {
+	describe("#save()", function () {
+		it("should require feed being set", async function () {
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			// Defaults to user library ID
-			yield assert.isRejected(feedItem.saveTx(), /^Cannot add /);
+			await assert.isRejected(feedItem.saveTx(), /^Cannot add /);
 		});
-		it("should require GUID being set", function* () {
+		it("should require GUID being set", async function () {
 			let feedItem = new Zotero.FeedItem('book');
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.saveTx(),  /^GUID must be set before saving FeedItem$/);
+			await assert.isRejected(feedItem.saveTx(),  /^GUID must be set before saving FeedItem$/);
 		});
-		it("should require a unique GUID", function* () {
+		it("should require a unique GUID", async function () {
 			let guid = Zotero.randomString();
-			let feedItem1 = yield createDataObject('feedItem', { libraryID, guid });
+			let feedItem1 = await createDataObject('feedItem', { libraryID, guid });
 			
 			let feedItem2 = createUnsavedDataObject('feedItem', { libraryID, guid });
-			yield assert.isRejected(feedItem2.saveTx());
+			await assert.isRejected(feedItem2.saveTx());
 			
 			// But we should be able to save it after deleting the original feed
-			yield feedItem1.eraseTx();
-			yield assert.isFulfilled(feedItem2.saveTx());
+			await feedItem1.eraseTx();
+			await assert.isFulfilled(feedItem2.saveTx());
 		});
-		it("should require item type being set", function* () {
+		it("should require item type being set", async function () {
 			let feedItem = new Zotero.FeedItem(null, { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			yield assert.isRejected(feedItem.saveTx(),  /^Item type must be set before saving$/);
+			await assert.isRejected(feedItem.saveTx(),  /^Item type must be set before saving$/);
 		});
-		it("should save feed item", function* () {
+		it("should save feed item", async function () {
 			let guid = Zotero.randomString();
 			let feedItem = createUnsavedDataObject('feedItem', { libraryID, guid });
-			yield assert.isFulfilled(feedItem.saveTx());
+			await assert.isFulfilled(feedItem.saveTx());
 			
-			feedItem = yield Zotero.FeedItems.getAsync(feedItem.id);
+			feedItem = await Zotero.FeedItems.getAsync(feedItem.id);
 			assert.ok(feedItem);
 			assert.equal(feedItem.guid, guid);
 		});
@@ -182,51 +182,51 @@ describe("Zotero.FeedItem", function () {
 			
 			assert.deepEqual(feedItemsJSON, allTypesAndFields);
 		});
-		it("should allow saving after editing data", function* () {
-			let feedItem = yield createDataObject('feedItem', { libraryID });
+		it("should allow saving after editing data", async function () {
+			let feedItem = await createDataObject('feedItem', { libraryID });
 			
 			feedItem.setField('title', 'bar');
-			yield assert.isFulfilled(feedItem.saveTx());
+			await assert.isFulfilled(feedItem.saveTx());
 			assert.equal(feedItem.getField('title'), 'bar');
 		});
 	});
-	describe("#erase()", function() {
-		it("should erase an existing feed item", function* () {
-			let feedItem = yield createDataObject('feedItem', { libraryID });
+	describe("#erase()", function () {
+		it("should erase an existing feed item", async function () {
+			let feedItem = await createDataObject('feedItem', { libraryID });
 			
-			yield feedItem.eraseTx();
-			assert.isFalse(yield Zotero.FeedItems.getAsync(feedItem.id));
+			await feedItem.eraseTx();
+			assert.isFalse(await Zotero.FeedItems.getAsync(feedItem.id));
 			
 			//yield assert.isRejected(feedItem.EraseTx(), "does not allow erasing twice");
 		});
 	});
 	
-	describe("#toggleRead()", function() {
-		it('should toggle state', function* () {
-			let item = yield createDataObject('feedItem', { libraryID });
+	describe("#toggleRead()", function () {
+		it('should toggle state', async function () {
+			let item = await createDataObject('feedItem', { libraryID });
 			item.isRead = false;
-			yield item.saveTx();
+			await item.saveTx();
 			
-			yield item.toggleRead();
+			await item.toggleRead();
 			assert.isTrue(item.isRead, "item is toggled to read state");
 		});
-		it('should save if specified state is different from current', function* (){
-			let item = yield createDataObject('feedItem', { libraryID });
+		it('should save if specified state is different from current', async function () {
+			let item = await createDataObject('feedItem', { libraryID });
 			item.isRead = false;
-			yield item.saveTx();
+			await item.saveTx();
 			sinon.spy(item, 'save');
 
-			yield item.toggleRead(true);
+			await item.toggleRead(true);
 			assert.isTrue(item.save.called, "item was saved on toggle read");
 			
 			item.save.resetHistory();
 			
-			yield item.toggleRead(true);
+			await item.toggleRead(true);
 			assert.isFalse(item.save.called, "item was not saved on toggle read to same state");
 		});
 	});
 	
-	describe('#translate()', function() {
+	describe('#translate()', function () {
 		var win;
 		
 		before(function* () {
@@ -242,41 +242,41 @@ describe("Zotero.FeedItem", function () {
 			win.close()
 		});
 		
-		it('should translate and save items', function* () {
-			var feedItem = yield createDataObject('feedItem', {libraryID});
+		it('should translate and save items', async function () {
+			var feedItem = await createDataObject('feedItem', {libraryID});
 			var url = getTestDataUrl('metadata/journalArticle-single.html');
 			feedItem.setField('url', url);
-			yield feedItem.saveTx();
+			await feedItem.saveTx();
 			
-			yield feedItem.translate();
+			await feedItem.translate();
 			
 			assert.equal(feedItem.getField('title'), 'Scarcity or Abundance? Preserving the Past in a Digital Era');
 		});
-		it('should translate and save items to corresponding library and collection', function* () {
-			let group = yield createGroup();
-			let collection = yield createDataObject('collection', {libraryID: group.libraryID});
+		it('should translate and save items to corresponding library and collection', async function () {
+			let group = await createGroup();
+			let collection = await createDataObject('collection', {libraryID: group.libraryID});
 			
-			var feedItem = yield createDataObject('feedItem', {libraryID});
+			var feedItem = await createDataObject('feedItem', {libraryID});
 			var url = getTestDataUrl('metadata/journalArticle-single.html');
 			feedItem.setField('url', url);
-			yield feedItem.saveTx();
+			await feedItem.saveTx();
 			
-			yield feedItem.translate(group.libraryID, collection.id);
+			await feedItem.translate(group.libraryID, collection.id);
 			
 			let item = collection.getChildItems(false, false)[0];
 						
 			assert.equal(item.getField('title'), 'Scarcity or Abundance? Preserving the Past in a Digital Era');	
 		});
-		it('should clone the item to corresponding library and collection if no translators available', function* () {
-			let group = yield createGroup();
-			let collection = yield createDataObject('collection', {libraryID: group.libraryID});
+		it('should clone the item to corresponding library and collection if no translators available', async function () {
+			let group = await createGroup();
+			let collection = await createDataObject('collection', {libraryID: group.libraryID});
 			
-			var feedItem = yield createDataObject('feedItem', {libraryID, title: 'test'});
+			var feedItem = await createDataObject('feedItem', {libraryID, title: 'test'});
 			var url = getTestDataUrl('test.html');
 			feedItem.setField('url', url);
-			yield feedItem.saveTx();
+			await feedItem.saveTx();
 			
-			yield feedItem.translate(group.libraryID, collection.id);
+			await feedItem.translate(group.libraryID, collection.id);
 			
 			let item = collection.getChildItems(false, false)[0];
 						

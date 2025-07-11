@@ -1,4 +1,4 @@
-describe("Zotero.Date", function() {
+describe("Zotero.Date", function () {
 	describe("#getMonths()", function () {
 		var origLocale;
 		var englishShort = [
@@ -50,7 +50,7 @@ describe("Zotero.Date", function() {
 				assert.sameMembers(months, englishShort);
 			});
 			
-			it("should resolve to English from unknown locale", function* () {
+			it("should resolve to English from unknown locale", async function () {
 				Zotero.locale = 'zz';
 				Zotero.Date.init();
 				let months = Zotero.Date.getMonths().short;
@@ -58,7 +58,7 @@ describe("Zotero.Date", function() {
 				assert.sameMembers(months, englishShort);
 			});
 			
-			it("shouldn't repeat English with unknown locale", function* () {
+			it("shouldn't repeat English with unknown locale", async function () {
 				Zotero.locale = 'zz';
 				Zotero.Date.init();
 				let months = Zotero.Date.getMonths(true).short;
@@ -99,7 +99,7 @@ describe("Zotero.Date", function() {
 				assert.sameMembers(months, frenchLong.concat(englishLong));
 			});
 			
-			it("should resolve from two-letter locale", function* () {
+			it("should resolve from two-letter locale", async function () {
 				Zotero.locale = 'fr';
 				Zotero.Date.init();
 				let months = Zotero.Date.getMonths().short;
@@ -107,7 +107,7 @@ describe("Zotero.Date", function() {
 				assert.sameMembers(months, frenchShort);
 			});
 			
-			it("should resolve from unknown four-letter locale with common prefix", function* () {
+			it("should resolve from unknown four-letter locale with common prefix", async function () {
 				Zotero.locale = 'fr-ZZ';
 				Zotero.Date.init();
 				let months = Zotero.Date.getMonths().short;
@@ -118,7 +118,7 @@ describe("Zotero.Date", function() {
 	});
 	
 	describe("#sqlToDate()", function () {
-		it("should convert an SQL local date into a JS Date object", function* () {
+		it("should convert an SQL local date into a JS Date object", async function () {
 			var d1 = new Date();
 			var sqlDate = d1.getFullYear()
 				+ '-'
@@ -139,7 +139,7 @@ describe("Zotero.Date", function() {
 			);
 		})
 		
-		it("should convert an SQL UTC date into a JS Date object", function* () {
+		it("should convert an SQL UTC date into a JS Date object", async function () {
 			var date = "2016-02-27 22:00:00";
 			date = Zotero.Date.sqlToDate(date, true);
 			assert.equal(date.getTime(), 1456610400000);
@@ -282,7 +282,7 @@ describe("Zotero.Date", function() {
 			assert.equal(o.order, 'd');
 		});
 		
-		it("should work in translator sandbox", function* () {
+		it("should work in translator sandbox", async function () {
 			var item = createUnsavedDataObject('item');
 			item.libraryID = Zotero.Libraries.userLibraryID;
 			item.setField('date', '2017-01-17');
@@ -296,13 +296,13 @@ describe("Zotero.Date", function() {
 				assert.isTrue(worked);
 				assert.include(obj.string, "{2017}");
 			});
-			yield translation.translate();
+			await translation.translate();
 			assert.ok(called);
 		});
 	});
 	
-	describe("#isHTTPDate()", function() {
-		it("should determine whether a date is an RFC 2822 compliant date", function() {
+	describe("#isHTTPDate()", function () {
+		it("should determine whether a date is an RFC 2822 compliant date", function () {
 			assert.ok(Zotero.Date.isHTTPDate("Mon, 13 Jun 2016 02:09:08   +4000"));
 			assert.ok(Zotero.Date.isHTTPDate("13 Jun 2016 02:09:08 +4000"));
 			assert.ok(Zotero.Date.isHTTPDate("13 Jun 2016   02:09 +4000"));

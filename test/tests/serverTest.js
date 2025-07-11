@@ -1,6 +1,6 @@
 "use strict";
 
-Components.utils.import("resource://gre/modules/NetUtil.jsm");
+ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 
 describe("Zotero.Server", function () {
 	var serverPath;
@@ -9,10 +9,10 @@ describe("Zotero.Server", function () {
 		serverPath = 'http://127.0.0.1:' + Zotero.Server.port;
 	});
 	
-	describe('DataListener', function() {
+	describe('DataListener', function () {
 		describe("_processEndpoint()", function () {
 			describe("1 argument", function () {
-				it("integer return", function* () {
+				it("integer return", async function () {
 					var called = false;
 					
 					var endpoint = "/test/" + Zotero.Utilities.randomString();
@@ -30,7 +30,7 @@ describe("Zotero.Server", function () {
 					};
 					Zotero.Server.Endpoints[endpoint] = handler;
 					
-					let req = yield Zotero.HTTP.request(
+					let req = await Zotero.HTTP.request(
 						"POST",
 						serverPath + endpoint,
 						{
@@ -49,7 +49,7 @@ describe("Zotero.Server", function () {
 					assert.equal(req.status, 204);
 				});
 				
-				it("array return", function* () {
+				it("array return", async function () {
 					var called = false;
 					
 					var endpoint = "/test/" + Zotero.Utilities.randomString();
@@ -66,7 +66,7 @@ describe("Zotero.Server", function () {
 					};
 					Zotero.Server.Endpoints[endpoint] = handler;
 					
-					let req = yield Zotero.HTTP.request(
+					let req = await Zotero.HTTP.request(
 						"GET",
 						serverPath + endpoint,
 						{
@@ -80,7 +80,7 @@ describe("Zotero.Server", function () {
 					assert.equal(req.responseText, "Test");
 				});
 				
-				it("integer promise return", function* () {
+				it("integer promise return", async function () {
 					var called = false;
 					
 					var endpoint = "/test/" + Zotero.Utilities.randomString();
@@ -89,15 +89,15 @@ describe("Zotero.Server", function () {
 						supportedMethods: ["GET"],
 						supportedDataTypes: "*",
 						
-						init: Zotero.Promise.coroutine(function* (options) {
+						init: async function (options) {
 							called = true;
 							assert.isObject(options);
 							return 204;
-						})
+						}
 					};
 					Zotero.Server.Endpoints[endpoint] = handler;
 					
-					let req = yield Zotero.HTTP.request(
+					let req = await Zotero.HTTP.request(
 						"GET",
 						serverPath + endpoint,
 						{
@@ -109,7 +109,7 @@ describe("Zotero.Server", function () {
 					assert.equal(req.status, 204);
 				});
 				
-				it("array promise return", function* () {
+				it("array promise return", async function () {
 					var called = false;
 					
 					var endpoint = "/test/" + Zotero.Utilities.randomString();
@@ -118,15 +118,15 @@ describe("Zotero.Server", function () {
 						supportedMethods: ["GET"],
 						supportedDataTypes: "*",
 						
-						init: Zotero.Promise.coroutine(function* (options) {
+						init: async function (options) {
 							called = true;
 							assert.isObject(options);
 							return [201, "text/plain", "Test"];
-						})
+						}
 					};
 					Zotero.Server.Endpoints[endpoint] = handler;
 					
-					let req = yield Zotero.HTTP.request(
+					let req = await Zotero.HTTP.request(
 						"GET",
 						serverPath + endpoint,
 						{

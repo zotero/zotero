@@ -1,8 +1,8 @@
 "use strict";
 
-describe("Zotero.DataObjectUtilities", function() {
+describe("Zotero.DataObjectUtilities", function () {
 	describe("#patch()", function () {
-		it("should omit 'collections' if it doesn't exist", function* () {
+		it("should omit 'collections' if it doesn't exist", async function () {
 			var patchBase = {
 				collections: ['AAAAAAAA']
 			};
@@ -11,7 +11,7 @@ describe("Zotero.DataObjectUtilities", function() {
 			assert.notProperty(obj, 'collections');
 		})
 		
-		it("should include modified 'conditions'", function* () {
+		it("should include modified 'conditions'", async function () {
 			var patchBase = {
 				name: "Search",
 				conditions: [
@@ -105,9 +105,9 @@ describe("Zotero.DataObjectUtilities", function() {
 			// Fields
 			//
 			describe("fields", function () {
-				it("should not show empty items as different", function* () {
+				it("should not show empty items as different", async function () {
 					var id1, id2, json1, json2;
-					yield Zotero.DB.executeTransaction(async function () {
+					await Zotero.DB.executeTransaction(async function () {
 						var item = new Zotero.Item('book');
 						id1 = await item.save();
 						json1 = item.toJSON();
@@ -120,7 +120,7 @@ describe("Zotero.DataObjectUtilities", function() {
 					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
 					assert.lengthOf(changes, 0);
 					
-					yield Zotero.Items.erase([id1, id2]);
+					await Zotero.Items.erase([id1, id2]);
 				})
 				
 				it("should not show empty strings as different", function () {
@@ -190,7 +190,7 @@ describe("Zotero.DataObjectUtilities", function() {
 			})
 			
 			describe("notes", function () {
-				it("should ignore sanitization changes", function* () {
+				it("should ignore sanitization changes", async function () {
 					var json1 = {
 						note: "<p>\u00a0</p>"
 					};

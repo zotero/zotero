@@ -1,6 +1,8 @@
 /* global Zotero_Import_Folder: false */
 
 describe('Zotero_Import_Folder', function () {
+	const { Zotero_Import_Folder } = ChromeUtils.importESModule("chrome://zotero/content/import/folderImport.mjs");
+
 	var tmpDir;
 	const uc = name => 'Zotero_Import_Folder_' + name;
 
@@ -39,8 +41,6 @@ describe('Zotero_Import_Folder', function () {
 			OS.Path.join(getTestDataDirectory().path, 'test.txt'),
 			OS.Path.join(tmpDir, uc('dir2'), 'test.txt')
 		);
-
-		Components.utils.import('chrome://zotero/content/import/folderImport.js');
 	});
 
 	describe('#import', () => {
