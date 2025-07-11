@@ -6840,7 +6840,7 @@ var ZoteroPane = new function()
 				deepTutorPaneMinWidth = window.innerWidth * 0.25;
 			} else {
 				// Window width < 1200px: minimum is 300px
-				deepTutorPaneMinWidth = 300;
+				deepTutorPaneMinWidth = 340;
 			}
 		}
 
