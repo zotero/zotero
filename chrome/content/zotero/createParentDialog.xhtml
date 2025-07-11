@@ -14,8 +14,8 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="&zotero.createParent.title;"
 	drawintitlebar-platforms="mac"
-	onload="doLoad();"
-	onunload="doUnload();">
+	onload="ZoteroCreateParentDialog.init()"
+>
 <dialog
 	id="zotero-parent-dialog"
 	orient="vertical"
@@ -31,12 +31,16 @@
 	<script src="editMenuOverlay.js"/>
 	<script src="lookup.js"/>
 	<script src="createParentDialog.js"/>
-	<script src="components/createParent/createParent.js"/>
 	
 	<html:link rel="localization" href="zotero.ftl"/>
 	
-	<vbox id="zotero-create-parent-container" flex="1">
-		<html:div id="create-parent" />
+	<vbox id="zotero-create-parent-container">
+		<html:h1 id="title" class="title" />
+		<html:label for="parent-item-identifier" class="intro" id="intro" data-l10n-id="create-parent-intro"/>
+		<html:div class="body">
+			<html:input type="text" id="parent-item-identifier" aria-labelledby="intro" />
+			<image id="progress" class="zotero-spinner-16" />
+		</html:div>
 	</vbox>
 </dialog>
 </window>
