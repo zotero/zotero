@@ -1,13 +1,14 @@
 diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
+index a85fdbfebe0f..819475717ffb 100644
 --- a/browser/app/nsBrowserApp.cpp
 +++ b/browser/app/nsBrowserApp.cpp
-@@ -154,19 +154,30 @@ static bool IsArg(const char* arg, const
+@@ -156,19 +156,30 @@ static bool IsArg(const char* arg, const char* s) {
  #endif
  
    return false;
  }
  
- Bootstrap::UniquePtr gBootstrap;
+ MOZ_RUNINIT Bootstrap::UniquePtr gBootstrap;
  
  static int do_main(int argc, char* argv[], char* envp[]) {
 +  // Allow profile downgrade for Zotero
@@ -34,9 +35,10 @@ diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
  
      char appEnv[MAXPATHLEN];
 diff --git a/browser/app/winlauncher/LauncherProcessWin.cpp b/browser/app/winlauncher/LauncherProcessWin.cpp
+index 8167d2b81c91..a1ef657232bf 100644
 --- a/browser/app/winlauncher/LauncherProcessWin.cpp
 +++ b/browser/app/winlauncher/LauncherProcessWin.cpp
-@@ -155,17 +155,31 @@ static mozilla::LauncherFlags ProcessCmd
+@@ -156,17 +156,31 @@ static mozilla::LauncherFlags ProcessCmdLine(int& aArgc, wchar_t* aArgv[]) {
                          mozilla::CheckArgFlag::None) == mozilla::ARG_FOUND ||
        mozilla::CheckArg(aArgc, aArgv, "remote-debugging-port", nullptr,
                          mozilla::CheckArgFlag::None) == mozilla::ARG_FOUND ||
@@ -69,7 +71,31 @@ diff --git a/browser/app/winlauncher/LauncherProcessWin.cpp b/browser/app/winlau
      result |= mozilla::LauncherFlags::eDeelevating;
    }
  
+diff --git a/toolkit/mozapps/update/common/commonupdatedir.cpp b/toolkit/mozapps/update/common/commonupdatedir.cpp
+index 0ba9fcef9417..ed286476fec3 100644
+--- a/toolkit/mozapps/update/common/commonupdatedir.cpp
++++ b/toolkit/mozapps/update/common/commonupdatedir.cpp
+@@ -38,17 +38,17 @@
+ // (i.e. C:\ProgramData\<ROOT_UPDATE_DIR_NAME>)
+ // It is really important that we properly set the permissions on this
+ // directory at creation time. Thus, it is really important that this code be
+ // the creator of this directory. We had many problems with the old update
+ // directory having been previously created by old versions of Firefox. To avoid
+ // this problem in the future, we are including a UUID in the root update
+ // directory name to attempt to ensure that it will be created by this code and
+ // won't already exist with the wrong permissions.
+-#  define ROOT_UPDATE_DIR_NAME "Mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38"
++#  define ROOT_UPDATE_DIR_NAME "Zotero"
+ // This describes the directory between the "Mozilla" directory and the install
+ // path hash (i.e. C:\ProgramData\Mozilla\<UPDATE_PATH_MID_DIR_NAME>\<hash>)
+ #  define UPDATE_PATH_MID_DIR_NAME "updates"
+ 
+ enum class WhichUpdateDir {
+   CurrentUpdateDir,
+   UnmigratedUpdateDir,
+ };
 diff --git a/xpcom/build/BinaryPath.h b/xpcom/build/BinaryPath.h
+index 1718caa3c66d..10fa59c0cd80 100644
 --- a/xpcom/build/BinaryPath.h
 +++ b/xpcom/build/BinaryPath.h
 @@ -283,16 +283,43 @@ class BinaryPath {
