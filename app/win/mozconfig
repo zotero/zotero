@@ -23,6 +23,10 @@ ac_add_options --disable-webrtc
 ac_add_options --disable-eme
 ac_add_options --enable-official-branding
 
+ac_add_options --disable-maintenance-service
+ac_add_options --disable-notification-server
+ac_add_options --disable-update-agent
+
 export MOZILLA_OFFICIAL=1
 export RELEASE_OR_BETA=1
 MOZ_REQUIRE_SIGNING=
