@@ -56,6 +56,9 @@ general-and	= and
 general-et-al = et al.
 general-previous = Previous
 general-next = Next
+general-warning = Warning
+general-yes = Yes
+general-no = No
 
 general-red = Red
 general-orange = Orange
