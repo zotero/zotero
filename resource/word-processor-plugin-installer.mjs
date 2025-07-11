@@ -27,10 +27,9 @@
  * installable and available in the cite preferences pane.
  */
 
-var EXPORTED_SYMBOLS = ["ZoteroPluginInstaller"];
+import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
-var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
-var { setTimeout } = ChromeUtils.importESModule("resource://gre/modules/Timer.sys.mjs");
+import { setTimeout } from "resource://gre/modules/Timer.sys.mjs";
 
 
 var installationInProgress = false;
@@ -48,7 +47,7 @@ var installationInProgress = false;
  * @param force {Boolean} force install even if the plugin version is up-to-date
  * @constructor
  */
-var ZoteroPluginInstaller = function (addon, failSilently, force) {
+export var ZoteroPluginInstaller = function (addon, failSilently, force) {
 	this._addon = addon;
 	this.failSilently = failSilently;
 	this.force = force;
