@@ -1949,7 +1949,7 @@ var ZoteroPane = new function()
 			// Check if selection has actually changed. The onselect event that calls this
 			// can be called in various situations where the selection didn't actually change,
 			// such as whenever selectEventsSuppressed is set to false.
-			var ids = selectedItems.map(item => item.id);
+			var ids = selectedItems.map(item => item.treeViewID);
 			ids.sort();
 			if (ids.length && Zotero.Utilities.arrayEquals(_lastSelectedItems, ids)) {
 				return false;
