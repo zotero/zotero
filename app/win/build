@@ -37,6 +37,7 @@ cp "$SCRIPT_DIR/mozconfig" "$gecko_path"
 
 if [[ $arch == "arm64" || $arch == "win32" ]]; then
 	export Z_ARCH=$arch
+	export RUST_TARGET=$rust_target-pc-windows-msvc
 fi
 
 cd "$gecko_path"
