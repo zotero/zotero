@@ -265,7 +265,7 @@ export class CitationDialogSearchHandler {
 	async _getCitedItems() {
 		if (this.isCitingNotes) return [];
 		// Noop until io loads all cited data
-		if (this.io.allCitedDataLoadedPromise && !this.io.allCitedDataLoadedPromise.isResolved()) return null;
+		if (this.io.allCitedDataLoadedPromise && !this.io.isAllCitedDataLoaded) return null;
 		// Fetch all cited items in the document, not just items currently in the dialog
 		let citedItems = await this.io.getItems();
 		return citedItems;
