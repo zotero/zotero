@@ -54,9 +54,10 @@ Zotero_Preferences.Cite = {
 		for (let wordPlugin of wordPlugins) {
 			// This is the weirdest indirect code, but let's not fix what's not broken
 			try {
-				var installer = Components.utils.import(`resource://${this.wordPluginResourcePaths[wordPlugin]}/installer.jsm`).Installer;
-				(new installer(true)).showPreferences(document);
-			} catch(e) {
+				const { Installer } = ChromeUtils.importESModule(`resource://${this.wordPluginResourcePaths[wordPlugin]}/installer.mjs`);
+				(new Installer(true)).showPreferences(document);
+			}
+			catch (e) {
 				Zotero.logError(e);
 			}
 		}
