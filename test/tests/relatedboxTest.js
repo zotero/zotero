@@ -115,9 +115,9 @@ describe("Related Box", function () {
 	});
 	
 	describe("Add button", function () {
-		it("should add a related item", function* () {
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject('item');
+		it("should add a related item", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
 			
 			var relatedbox = doc.getElementById('zotero-editpane-related');
 			assert.lengthOf(relatedbox.querySelectorAll('.row'), 0);
@@ -126,23 +126,23 @@ describe("Related Box", function () {
 			setTimeout(function () {
 				relatedbox.querySelector('collapsible-section .add').click();
 			});
-			var selectWin = yield waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml');
+			var selectWin = await waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml');
 			do {
-				yield Zotero.Promise.delay(50);
+				await Zotero.Promise.delay(50);
 			}
 			while (!selectWin.loaded);
 			var selectCollectionsView = selectWin.collectionsView;
 			var selectItemsView = selectWin.itemsView;
-			yield selectCollectionsView.waitForLoad();
-			yield selectItemsView.waitForLoad();
+			await selectCollectionsView.waitForLoad();
+			await selectItemsView.waitForLoad();
 			
 			// Select the other item
-			yield selectItemsView.selectItem(item1.id);
+			await selectItemsView.selectItem(item1.id);
 			selectWin.document.querySelector('dialog').acceptDialog();
 			
 			// Wait for relations list to populate
 			do {
-				yield Zotero.Promise.delay(50);
+				await Zotero.Promise.delay(50);
 			}
 			while (!relatedbox.querySelectorAll('.row').length);
 			
@@ -160,20 +160,20 @@ describe("Related Box", function () {
 	})
 	
 	describe("Remove button", function () {
-		it("should remove a related item", function* () {
-			var item1 = yield createDataObject('item');
-			var item2 = yield createDataObject('item');
+		it("should remove a related item", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
 			
 			item1.addRelatedItem(item2);
-			yield item1.saveTx();
+			await item1.saveTx();
 			item2.addRelatedItem(item1);
-			yield item2.saveTx();
+			await item2.saveTx();
 			
 			var relatedbox = doc.getElementById('zotero-editpane-related');
 			
 			// Wait for relations list to populate
 			do {
-				yield Zotero.Promise.delay(50);
+				await Zotero.Promise.delay(50);
 			}
 			while (!relatedbox.querySelectorAll('.row').length);
 			
@@ -181,7 +181,7 @@ describe("Related Box", function () {
 			
 			// Wait for relations list to clear
 			do {
-				yield Zotero.Promise.delay(50);
+				await Zotero.Promise.delay(50);
 			}
 			while (relatedbox.querySelectorAll('.row').length);
 		})

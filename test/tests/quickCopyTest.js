@@ -1,4 +1,4 @@
-describe("Zotero.QuickCopy", function() {
+describe("Zotero.QuickCopy", function () {
 	var quickCopyPref;
 	var prefName = "export.quickCopy.setting";
 	
@@ -46,12 +46,12 @@ describe("Zotero.QuickCopy", function() {
 	})
 	
 	describe("#getContentFromItems()", function () {
-		it("should generate BibTeX", function* () {
-			var item = yield createDataObject('item');
+		it("should generate BibTeX", async function () {
+			var item = await createDataObject('item');
 			var content = "";
 			var worked = false;
 			
-			yield Zotero.Translators.init();
+			await Zotero.Translators.init();
 			
 			var translatorID = '9cb70025-a888-4a29-a210-93ec52da40d4'; // BibTeX
 			var format = 'export=' + translatorID;
@@ -59,7 +59,7 @@ describe("Zotero.QuickCopy", function() {
 			// Translator code for selected format is loaded automatically, so wait for it
 			var translator = Zotero.Translators.get(translatorID);
 			while (!translator.code) {
-				yield Zotero.Promise.delay(50);
+				await Zotero.Promise.delay(50);
 			}
 			
 			Zotero.QuickCopy.getContentFromItems(

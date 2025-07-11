@@ -1,27 +1,27 @@
-describe("Zotero.Schema", function() {
+describe("Zotero.Schema", function () {
 	describe("#initializeSchema()", function () {
-		it("should set last client version", function* () {
-			yield resetDB({
+		it("should set last client version", async function () {
+			await resetDB({
 				thisArg: this,
 				skipBundledFiles: true
 			});
 			
 			var sql = "SELECT value FROM settings WHERE setting='client' AND key='lastVersion'";
-			var lastVersion = yield Zotero.DB.valueQueryAsync(sql);
-			yield assert.eventually.equal(Zotero.DB.valueQueryAsync(sql), Zotero.version);
+			var lastVersion = await Zotero.DB.valueQueryAsync(sql);
+			await assert.eventually.equal(Zotero.DB.valueQueryAsync(sql), Zotero.version);
 		});
 	});
 	
 	describe("#updateSchema()", function () {
-		it("should set last client version", function* () {
+		it("should set last client version", async function () {
 			var sql = "REPLACE INTO settings (setting, key, value) VALUES ('client', 'lastVersion', ?)";
-			yield Zotero.DB.queryAsync(sql, "5.0old");
+			await Zotero.DB.queryAsync(sql, "5.0old");
 			
-			yield Zotero.Schema.updateSchema();
+			await Zotero.Schema.updateSchema();
 			
 			var sql = "SELECT value FROM settings WHERE setting='client' AND key='lastVersion'";
-			var lastVersion = yield Zotero.DB.valueQueryAsync(sql);
-			yield assert.eventually.equal(Zotero.DB.valueQueryAsync(sql), Zotero.version);
+			var lastVersion = await Zotero.DB.valueQueryAsync(sql);
+			await assert.eventually.equal(Zotero.DB.valueQueryAsync(sql), Zotero.version);
 		});
 	});
 	
@@ -40,7 +40,7 @@ describe("Zotero.Schema", function() {
 			schema = JSON.parse(schemaJSON);
 		});
 		
-		after(async function() {
+		after(async function () {
 			await resetDB({
 				thisArg: this,
 				skipBundledFiles: true
@@ -430,16 +430,16 @@ describe("Zotero.Schema", function() {
 			assert.isTrue(await Zotero.DB.tableExists('retractedItems'));
 		});
 		
-		it("should repair a foreign key violation", function* () {
-			yield assert.eventually.isTrue(Zotero.Schema.integrityCheck());
+		it("should repair a foreign key violation", async function () {
+			await assert.eventually.isTrue(Zotero.Schema.integrityCheck());
 			
-			yield Zotero.DB.queryAsync("PRAGMA foreign_keys = OFF");
-			yield Zotero.DB.queryAsync("INSERT INTO itemTags VALUES (1234,1234,0)");
-			yield Zotero.DB.queryAsync("PRAGMA foreign_keys = ON");
+			await Zotero.DB.queryAsync("PRAGMA foreign_keys = OFF");
+			await Zotero.DB.queryAsync("INSERT INTO itemTags VALUES (1234,1234,0)");
+			await Zotero.DB.queryAsync("PRAGMA foreign_keys = ON");
 			
-			yield assert.eventually.isFalse(Zotero.Schema.integrityCheck());
-			yield assert.eventually.isTrue(Zotero.Schema.integrityCheck(true));
-			yield assert.eventually.isTrue(Zotero.Schema.integrityCheck());
+			await assert.eventually.isFalse(Zotero.Schema.integrityCheck());
+			await assert.eventually.isTrue(Zotero.Schema.integrityCheck(true));
+			await assert.eventually.isTrue(Zotero.Schema.integrityCheck());
 		})
 		
 		it("should repair invalid nesting between two collections", async function () {

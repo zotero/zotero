@@ -74,7 +74,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		);
 	})
 	
-	var setup = Zotero.Promise.coroutine(function* (options = {}) {
+	var setup = async function (options = {}) {
 		var engine = new Zotero.Sync.Storage.Engine({
 			libraryID: options.libraryID || Zotero.Libraries.userLibraryID,
 			controller,
@@ -110,15 +110,15 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				url: "zotero/zotero-test-file.prop",
 				status: 200
 			})
-			yield controller.checkServer();
+			await controller.checkServer();
 			
-			yield controller.cacheCredentials();
+			await controller.cacheCredentials();
 		}
 		
 		resetRequestCount();
 		
 		return engine;
-	})
+	}
 	
 	afterEach(async function () {
 		await new Promise(request => httpd.stop(request));
@@ -136,14 +136,14 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	// Tests
 	//
 	describe("Syncing", function () {
-		it("should skip downloads if not marked as needed", function* () {
-			var engine = yield setup();
+		it("should skip downloads if not marked as needed", async function () {
+			var engine = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assertRequestCount(0);
 			
@@ -154,26 +154,26 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
 		
-		it("should ignore a remotely missing file", function* () {
-			var engine = yield setup();
+		it("should ignore a remotely missing file", async function () {
+			var engine = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
 			item.attachmentSyncState = "to_download";
-			yield item.saveTx();
+			await item.saveTx();
 			
 			setResponse({
 				method: "GET",
 				url: `zotero/${item.key}.prop`,
 				status: 404
 			});
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assertRequestCount(1);
 			
@@ -185,19 +185,19 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
 		
-		it("should handle a remotely failing .prop file", function* () {
-			var engine = yield setup();
+		it("should handle a remotely failing .prop file", async function () {
+			var engine = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
 			item.attachmentSyncState = "to_download";
-			yield item.saveTx();
+			await item.saveTx();
 			
 			setResponse({
 				method: "GET",
@@ -207,7 +207,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			
 			// TODO: In stopOnError mode, the promise is rejected.
 			// This should probably test with stopOnError mode turned off instead.
-			var e = yield getPromiseError(engine.start());
+			var e = await getPromiseError(engine.start());
 			assert.include(
 				e.message,
 				Zotero.getString('sync.storage.error.webdav.requestError', [500, "GET"])
@@ -222,19 +222,19 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.equal(library.storageVersion, 0);
 		})
 		
-		it("should handle a remotely failing .zip file", function* () {
-			var engine = yield setup();
+		it("should handle a remotely failing .zip file", async function () {
+			var engine = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
 			item.attachmentSyncState = "to_download";
-			yield item.saveTx();
+			await item.saveTx();
 			
 			setResponse({
 				method: "GET",
@@ -255,7 +255,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			);
 			// TODO: In stopOnError mode, the promise is rejected.
 			// This should probably test with stopOnError mode turned off instead.
-			var e = yield getPromiseError(engine.start());
+			var e = await getPromiseError(engine.start());
 			assert.include(
 				e.message,
 				Zotero.getString('sync.storage.error.webdav.requestError', [500, "GET"])
@@ -266,12 +266,12 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		})
 		
 		
-		it("should download a missing file", function* () {
-			var engine = yield setup();
+		it("should download a missing file", async function () {
+			var engine = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var fileName = "test.txt";
@@ -281,24 +281,24 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			// TODO: Test binary data
 			var text = Zotero.Utilities.randomString();
 			item.attachmentSyncState = "to_download";
-			yield item.saveTx();
+			await item.saveTx();
 			
 			// Create ZIP file containing above text file
 			var tmpPath = Zotero.getTempDirectory().path;
 			var tmpID = "webdav_download_" + Zotero.Utilities.randomString();
 			var zipDirPath = OS.Path.join(tmpPath, tmpID);
 			var zipPath = OS.Path.join(tmpPath, tmpID + ".zip");
-			yield OS.File.makeDir(zipDirPath);
-			yield Zotero.File.putContentsAsync(OS.Path.join(zipDirPath, fileName), text);
-			yield Zotero.File.zipDirectory(zipDirPath, zipPath);
-			yield OS.File.removeDir(zipDirPath);
-			yield Zotero.Promise.delay(1000);
-			var zipContents = yield Zotero.File.getBinaryContentsAsync(zipPath);
+			await OS.File.makeDir(zipDirPath);
+			await Zotero.File.putContentsAsync(OS.Path.join(zipDirPath, fileName), text);
+			await Zotero.File.zipDirectory(zipDirPath, zipPath);
+			await OS.File.removeDir(zipDirPath);
+			await Zotero.Promise.delay(1000);
+			var zipContents = await Zotero.File.getBinaryContentsAsync(zipPath);
 			
 			var mtime = "1441252524905";
-			var md5 = yield Zotero.Utilities.Internal.md5Async(zipPath);
+			var md5 = await Zotero.Utilities.Internal.md5Async(zipPath);
 			
-			yield OS.File.remove(zipPath);
+			await OS.File.remove(zipPath);
 			
 			setResponse({
 				method: "GET",
@@ -319,34 +319,34 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 			);
 			
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
 			
-			var contents = yield Zotero.File.getContentsAsync(yield item.getFilePathAsync());
+			var contents = await Zotero.File.getContentsAsync(await item.getFilePathAsync());
 			assert.equal(contents, text);
 			
 			assert.isFalse(library.storageDownloadNeeded);
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
 		
-		it("should upload new files", function* () {
-			var engine = yield setup();
+		it("should upload new files", async function () {
+			var engine = await setup();
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			item.synced = true;
-			yield item.saveTx();
-			var mtime = yield item.attachmentModificationTime;
-			var hash = yield item.attachmentHash;
+			await item.saveTx();
+			var mtime = await item.attachmentModificationTime;
+			var hash = await item.attachmentHash;
 			var path = item.getFilePath();
 			var filename = 'test.png';
-			var size = (yield OS.File.stat(path)).size;
+			var size = ((await OS.File.stat(path))).size;
 			var contentType = 'image/png';
-			var fileContents = yield Zotero.File.getContentsAsync(path);
+			var fileContents = await Zotero.File.getContentsAsync(path);
 			
 			var deferreds = [];
 			
@@ -367,14 +367,14 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					let deferred = Zotero.Promise.defer();
 					deferreds.push(deferred);
 					var reader = new FileReader();
-					reader.addEventListener("loadend", Zotero.Promise.coroutine(function* () {
+					reader.addEventListener("loadend", async function () {
 						try {
 							let tmpZipPath = OS.Path.join(
 								Zotero.getTempDirectory().path,
 								Zotero.Utilities.randomString() + '.zip'
 							);
 							let contents = new Uint8Array(reader.result);
-							yield IOUtils.write(tmpZipPath, contents);
+							await IOUtils.write(tmpZipPath, contents);
 							
 							// Make sure ZIP file contains the necessary entries
 							var zr = Components.classes["@mozilla.org/libjar/zip-reader;1"]
@@ -390,14 +390,14 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 							assert.sameMembers(entryNames, [filename]);
 							assert.equal(zr.getEntry(filename).realSize, size);
 							
-							yield OS.File.remove(tmpZipPath);
+							await OS.File.remove(tmpZipPath);
 							
 							deferred.resolve();
 						}
 						catch (e) {
 							deferred.reject(e);
 						}
-					}));
+					});
 					reader.readAsArrayBuffer(req.requestBody);
 					
 					req.respond(201, { "Fake-Server-Match": 1 }, "");
@@ -416,9 +416,9 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 			});
 			
-			var result = yield engine.start();
+			var result = await engine.start();
 			
-			yield Zotero.Promise.all(deferreds.map(d => d.promise));
+			await Promise.all(deferreds.map(d => d.promise));
 			
 			assertRequestCount(3);
 			
@@ -432,24 +432,24 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.isFalse(item.synced);
 		})
 		
-		it("should upload an updated file", function* () {
-			var engine = yield setup();
+		it("should upload an updated file", async function () {
+			var engine = await setup();
 			
 			var file = getTestDataDirectory();
 			file.append('test.txt');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			item.synced = true;
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var syncedModTime = Date.now() - 10000;
 			var syncedHash = "3a2f092dd62178eb8bbfda42e07e64da";
 			
 			item.attachmentSyncedModificationTime = syncedModTime;
 			item.attachmentSyncedHash = syncedHash;
-			yield item.saveTx({ skipAll: true });
+			await item.saveTx({ skipAll: true });
 			
-			var mtime = yield item.attachmentModificationTime;
-			var hash = yield item.attachmentHash;
+			var mtime = await item.attachmentModificationTime;
+			var hash = await item.attachmentHash;
 			
 			setResponse({
 				method: "GET",
@@ -475,7 +475,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				status: 204
 			});
 			
-			var result = yield engine.start();
+			var result = await engine.start();
 			assertRequestCount(4);
 			
 			assert.isTrue(result.localChanges);
@@ -489,16 +489,16 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.isFalse(item.synced);
 		})
 		
-		it("should skip upload that already exists on the server", function* () {
-			var engine = yield setup();
+		it("should skip upload that already exists on the server", async function () {
+			var engine = await setup();
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			item.synced = true;
-			yield item.saveTx();
-			var mtime = yield item.attachmentModificationTime;
-			var hash = yield item.attachmentHash;
+			await item.saveTx();
+			var mtime = await item.attachmentModificationTime;
+			var hash = await item.attachmentHash;
 			
 			setResponse({
 				method: "GET",
@@ -510,7 +510,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					+ '</properties>'
 			});
 			
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assertRequestCount(1);
 			
@@ -578,15 +578,15 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		// this, we just don't store or send any cookies for WebDAV requests.
 		//
 		// https://forums.zotero.org/discussion/80429/sync-error-in-5-0-80
-		it("shouldn't send cookies", function* () {
+		it("shouldn't send cookies", async function () {
 			// Make real requests so we can test the internal cookie-handling behavior
 			Zotero.HTTP.mock = null;
 			controller.verified = true;
-			var engine = yield setup();
+			var engine = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var fileName = "test.txt";
@@ -595,23 +595,23 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			item.attachmentPath = 'storage:' + fileName;
 			var text = Zotero.Utilities.randomString();
 			item.attachmentSyncState = "to_download";
-			yield item.saveTx();
+			await item.saveTx();
 			
 			// Create ZIP file containing above text file
 			var tmpPath = Zotero.getTempDirectory().path;
 			var tmpID = "webdav_download_" + Zotero.Utilities.randomString();
 			var zipDirPath = OS.Path.join(tmpPath, tmpID);
 			var zipPath = OS.Path.join(tmpPath, tmpID + ".zip");
-			yield OS.File.makeDir(zipDirPath);
-			yield Zotero.File.putContentsAsync(OS.Path.join(zipDirPath, fileName), text);
-			yield Zotero.File.zipDirectory(zipDirPath, zipPath);
-			yield OS.File.removeDir(zipDirPath);
-			var zipContents = yield Zotero.File.getBinaryContentsAsync(zipPath);
+			await OS.File.makeDir(zipDirPath);
+			await Zotero.File.putContentsAsync(OS.Path.join(zipDirPath, fileName), text);
+			await Zotero.File.zipDirectory(zipDirPath, zipPath);
+			await OS.File.removeDir(zipDirPath);
+			var zipContents = await Zotero.File.getBinaryContentsAsync(zipPath);
 			
 			var mtime = "1441252524905";
-			var md5 = yield Zotero.Utilities.Internal.md5Async(zipPath);
+			var md5 = await Zotero.Utilities.Internal.md5Async(zipPath);
 			
-			yield OS.File.remove(zipPath);
+			await OS.File.remove(zipPath);
 			
 			// OPTIONS request to cache credentials
 			httpd.registerPathHandler(
@@ -690,27 +690,27 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 			);
 			
-			yield engine.start();
+			await engine.start();
 			
 			assert.equal(library.storageVersion, library.libraryVersion);
 		});
 		
 		
-		it("should mark item as in conflict if mod time and hash on storage server don't match synced values", function* () {
-			var engine = yield setup();
+		it("should mark item as in conflict if mod time and hash on storage server don't match synced values", async function () {
+			var engine = await setup();
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			item.synced = true;
-			yield item.saveTx();
-			var mtime = yield item.attachmentModificationTime;
-			var hash = yield item.attachmentHash;
+			await item.saveTx();
+			var mtime = await item.attachmentModificationTime;
+			var hash = await item.attachmentHash;
 			var path = item.getFilePath();
 			var filename = 'test.png';
-			var size = (yield OS.File.stat(path)).size;
+			var size = ((await OS.File.stat(path))).size;
 			var contentType = 'image/png';
-			var fileContents = yield Zotero.File.getContentsAsync(path);
+			var fileContents = await Zotero.File.getContentsAsync(path);
 			
 			var newModTime = mtime + 5000;
 			var newHash = "4f69f43d8ac8788190b13ff7f4a0a915";
@@ -725,7 +725,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					+ '</properties>'
 			});
 			
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assertRequestCount(1);
 			
@@ -746,12 +746,12 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	});
 	
 	describe("Verify Server", function () {
-		it("should show an error for a connection error", function* () {
+		it("should show an error for a connection error", async function () {
 			Zotero.HTTP.mock = null;
 			Zotero.Prefs.set("sync.storage.url", "127.0.0.1:9999");
 			
 			// Begin install procedure
-			var win = yield loadPrefPane('sync');
+			var win = await loadPrefPane('sync');
 			var button = win.document.getElementById('storage-verify');
 			
 			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
@@ -762,11 +762,11 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				);
 			});
 			button.click();
-			yield promise1;
+			await promise1;
 			
 			var promise2 = spy.returnValues[0];
 			spy.restore();
-			yield promise2;
+			await promise2;
 			
 			win.close();
 		});
@@ -815,7 +815,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			win.close();
 		});
 		
-		it("should show an error for a 403", function* () {
+		it("should show an error for a 403", async function () {
 			Zotero.HTTP.mock = null;
 			httpd.registerPathHandler(
 				`${davBasePath}zotero/`,
@@ -830,7 +830,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
 			// Begin install procedure
-			var win = yield loadPrefPane('sync');
+			var win = await loadPrefPane('sync');
 			var button = win.document.getElementById('storage-verify');
 			
 			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
@@ -841,17 +841,17 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				);
 			});
 			button.click();
-			yield promise1;
+			await promise1;
 			
 			var promise2 = spy.returnValues[0];
 			spy.restore();
-			yield promise2;
+			await promise2;
 			
 			win.close();
 		});
 		
 		
-		it("should show an error for a 404 for the parent directory", function* () {
+		it("should show an error for a 404 for the parent directory", async function () {
 				// Use httpd.js instead of sinon so we get a real nsIURL with a channel
 			Zotero.HTTP.mock = null;
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
@@ -887,7 +887,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			);
 			
 			// Begin verify procedure
-			var win = yield loadPrefPane('sync');
+			var win = await loadPrefPane('sync');
 			var button = win.document.getElementById('storage-verify');
 			
 			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
@@ -898,11 +898,11 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				);
 			});
 			button.click();
-			yield promise1;
+			await promise1;
 			
 			var promise2 = spy.returnValues[0];
 			spy.restore();
-			yield promise2;
+			await promise2;
 			
 			win.close();
 		});
@@ -970,17 +970,17 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			resetRequestCount();
 		})
 		
-		it("should delete files on storage server that were deleted locally", function* () {
+		it("should delete files on storage server that were deleted locally", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			item.synced = true;
-			yield item.saveTx();
-			yield item.eraseTx();
+			await item.saveTx();
+			await item.eraseTx();
 			
-			assert.lengthOf((yield Zotero.Sync.Storage.Local.getDeletedFiles(libraryID)), 1);
+			assert.lengthOf(((await Zotero.Sync.Storage.Local.getDeletedFiles(libraryID))), 1);
 			
 			setResponse({
 				method: "DELETE",
@@ -992,7 +992,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				url: `zotero/${item.key}.zip`,
 				status: 204
 			});
-			var results = yield controller.purgeDeletedStorageFiles(libraryID);
+			var results = await controller.purgeDeletedStorageFiles(libraryID);
 			assertRequestCount(2);
 			
 			assert.lengthOf(results.deleted, 2);
@@ -1001,7 +1001,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.lengthOf(results.error, 0);
 			
 			// Storage delete log should be empty
-			assert.lengthOf((yield Zotero.Sync.Storage.Local.getDeletedFiles(libraryID)), 0);
+			assert.lengthOf(((await Zotero.Sync.Storage.Local.getDeletedFiles(libraryID))), 0);
 		})
 	})
 	
@@ -1011,17 +1011,17 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			Zotero.Prefs.clear('lastWebDAVOrphanPurge');
 		})
 		
-		it("should delete orphaned files more than a week older than the last sync time", function* () {
+		it("should delete orphaned files more than a week older than the last sync time", async function () {
 			var library = Zotero.Libraries.userLibrary;
 			library.updateLastSyncTime();
-			yield library.saveTx();
+			await library.saveTx();
 			
 			// Create one item
-			var item1 = yield createDataObject('item');
+			var item1 = await createDataObject('item');
 			var item1Key = item1.key;
 			// Add another item to sync queue
 			var item2Key = Zotero.DataObjectUtilities.generateKey();
-			yield Zotero.Sync.Data.Local.addObjectsToSyncQueue('item', library.id, [item2Key]);
+			await Zotero.Sync.Data.Local.addObjectsToSyncQueue('item', library.id, [item2Key]);
 			
 			const daysBeforeSyncTime = 7;
 			
@@ -1195,7 +1195,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				status: 204
 			});
 			
-			var results = yield controller.purgeOrphanedStorageFiles();
+			var results = await controller.purgeOrphanedStorageFiles();
 			assertRequestCount(7);
 			
 			assert.sameMembers(
@@ -1213,17 +1213,17 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assert.lengthOf(results.error, 0);
 		})
 		
-		it("shouldn't purge if purged recently", function* () {
+		it("shouldn't purge if purged recently", async function () {
 			Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000) - 3600);
-			yield assert.eventually.equal(controller.purgeOrphanedStorageFiles(), false);
+			await assert.eventually.equal(controller.purgeOrphanedStorageFiles(), false);
 			assertRequestCount(0);
 		});
 		
 		
-		it("should handle unnormalized Unicode characters", function* () {
+		it("should handle unnormalized Unicode characters", async function () {
 			var library = Zotero.Libraries.userLibrary;
 			library.updateLastSyncTime();
-			yield library.saveTx();
+			await library.saveTx();
 			
 			const daysBeforeSyncTime = 7;
 			
@@ -1285,7 +1285,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			});
 			
 			Zotero.Prefs.set("sync.storage.url", davHostPath + strC + "/");
-			yield controller.purgeOrphanedStorageFiles();
+			await controller.purgeOrphanedStorageFiles();
 		})
 	})
 })

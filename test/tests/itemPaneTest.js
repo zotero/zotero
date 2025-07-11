@@ -249,21 +249,21 @@ describe("Item pane", function () {
 			assert.isTrue(fields[2].startsWith('creator'));
 		});
 		
-		it("should refresh on item update", function* () {
+		it("should refresh on item update", async function () {
 			var item = new Zotero.Item('book');
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			var label = itemBox.querySelectorAll('[fieldname="series"]')[1];
 			assert.equal(label.value, '');
 			
 			item.setField('series', 'Test');
-			yield item.saveTx();
+			await item.saveTx();
 			
 			label = itemBox.querySelectorAll('[fieldname="series"]')[1];
 			assert.equal(label.value, 'Test');
 			
-			yield Zotero.Items.erase(id);
+			await Zotero.Items.erase(id);
 		});
 		
 		
@@ -1388,11 +1388,11 @@ describe("Item pane", function () {
 	
 	
 	describe("Notes pane", function () {
-		it("should refresh on child note change", function* () {
+		it("should refresh on child note change", async function () {
 			var item;
 			var note1;
 			var note2;
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				item = createUnsavedDataObject('item');
 				await item.save();
 				
@@ -1410,26 +1410,26 @@ describe("Item pane", function () {
 			var body = doc.querySelector('#zotero-editpane-notes .body');
 			// Wait for note list to update
 			do {
-				yield Zotero.Promise.delay(1);
+				await Zotero.Promise.delay(1);
 			}
 			while (body.querySelectorAll('.row .label').length !== 2);
 			
 			// Update note text
 			note2.setNote('C');
-			yield note2.saveTx();
+			await note2.saveTx();
 			
 			// Wait for note list to update
 			do {
-				yield Zotero.Promise.delay(1);
+				await Zotero.Promise.delay(1);
 			}
 			while ([...body.querySelectorAll('.row .label')].every(label => label.textContent != 'C'));
 		});
 		
-		it("should refresh on child note trash", function* () {
+		it("should refresh on child note trash", async function () {
 			var item;
 			var note1;
 			var note2;
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				item = createUnsavedDataObject('item');
 				await item.save();
 				
@@ -1447,27 +1447,27 @@ describe("Item pane", function () {
 			var body = doc.querySelector('#zotero-editpane-notes .body');
 			// Wait for note list to update
 			do {
-				yield Zotero.Promise.delay(1);
+				await Zotero.Promise.delay(1);
 			}
 			while (body.querySelectorAll('.row .label').length !== 2);
 			
 			// Click "-" in first note
 			var promise = waitForDialog();
 			body.querySelector(".zotero-clicky-minus").click();
-			yield promise;
+			await promise;
 			
 			// Wait for note list to update
 			do {
-				yield Zotero.Promise.delay(1);
+				await Zotero.Promise.delay(1);
 			}
 			while (body.querySelectorAll('.row .label').length !== 1);
 		});
 		
-		it("should refresh on child note delete", function* () {
+		it("should refresh on child note delete", async function () {
 			var item;
 			var note1;
 			var note2;
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				item = createUnsavedDataObject('item');
 				await item.save();
 				
@@ -1485,15 +1485,15 @@ describe("Item pane", function () {
 			var body = doc.querySelector('#zotero-editpane-notes .body');
 			// Wait for note list to update
 			do {
-				yield Zotero.Promise.delay(1);
+				await Zotero.Promise.delay(1);
 			}
 			while (body.querySelectorAll('.row .label').length !== 2);
 			
-			yield note2.eraseTx();
+			await note2.eraseTx();
 			
 			// Wait for note list to update
 			do {
-				yield Zotero.Promise.delay(1);
+				await Zotero.Promise.delay(1);
 			}
 			while (body.querySelectorAll('.row .label').length !== 1);
 		});
@@ -1703,23 +1703,23 @@ describe("Item pane", function () {
 	
 	
 	describe("Note editor", function () {
-		it("should refresh on note update", function* () {
+		it("should refresh on note update", async function () {
 			var item = new Zotero.Item('note');
-			var id = yield item.saveTx();
+			var id = await item.saveTx();
 			
 			var noteEditor = doc.getElementById('zotero-note-editor');
 			
 			// Wait for the editor
-			yield new Zotero.Promise((resolve, reject) => {
+			await new Zotero.Promise((resolve, reject) => {
 				noteEditor.onInit(() => resolve());
 			});
 			assert.equal(noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync(), null);
 			item.setNote('<p>Test</p>');
-			yield item.saveTx();
+			await item.saveTx();
 			
 			// Wait for asynchronous editor update
 			do {
-				yield Zotero.Promise.delay(10);
+				await Zotero.Promise.delay(10);
 			} while (
 				!/<div data-schema-version=".*"><p>Test<\/p><\/div>/.test(
 					noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync().html.replace(/\n/g, '')
@@ -1728,8 +1728,8 @@ describe("Item pane", function () {
 		});
 	});
 	
-	describe("Feed buttons", function() {
-		describe("Mark as Read/Unread", function() {
+	describe("Feed buttons", function () {
+		describe("Mark as Read/Unread", function () {
 			it("should change an item from unread to read", async function () {
 				var feed = await createFeed();
 				await select(win, feed);
@@ -1758,23 +1758,23 @@ describe("Item pane", function () {
 			});
 			
 			
-			it("should update label when state of an item changes", function* () {
-				let feed = yield createFeed();
-				yield selectLibrary(win, feed.libraryID);
-				yield waitForItemsLoad(win);
+			it("should update label when state of an item changes", async function () {
+				let feed = await createFeed();
+				await selectLibrary(win, feed.libraryID);
+				await waitForItemsLoad(win);
 				
 				var stub = sinon.stub(win.ZoteroPane, 'startItemReadTimeout');
-				var item = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+				var item = await createDataObject('feedItem', { libraryID: feed.libraryID });
 				// Skip timed mark-as-read
 				assert.ok(stub.called);
 				stub.restore();
 				item.isRead = true;
-				yield item.saveTx();
+				await item.saveTx();
 				
 				let button = ZoteroPane.itemPane.getCurrentPane().querySelector('.feed-item-toggleRead-button');
 				
 				assert.equal(button.label, Zotero.getString('pane.item.markAsUnread'));
-				yield item.toggleRead(false);
+				await item.toggleRead(false);
 				// Button is re-created
 				button = ZoteroPane.itemPane.getCurrentPane().querySelector('.feed-item-toggleRead-button');
 				assert.equal(button.label, Zotero.getString('pane.item.markAsRead'));

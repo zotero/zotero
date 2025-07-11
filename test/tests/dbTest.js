@@ -1,4 +1,4 @@
-describe("Zotero.DB", function() {
+describe("Zotero.DB", function () {
 	var tmpTable = "tmpDBTest";
 	
 	before(function* () {
@@ -32,44 +32,44 @@ describe("Zotero.DB", function() {
 			}
 		})
 		
-		it("should throw an error if no parameters are passed for a query with placeholders", function* () {
-			var e = yield getPromiseError(Zotero.DB.queryAsync("SELECT itemID FROM items WHERE itemID=?"));
+		it("should throw an error if no parameters are passed for a query with placeholders", async function () {
+			var e = await getPromiseError(Zotero.DB.queryAsync("SELECT itemID FROM items WHERE itemID=?"));
 			assert.ok(e);
 			assert.include(e.message, "for query containing placeholders");
 		})
 		
-		it("should throw an error if too few parameters are passed", function* () {
-			var e = yield getPromiseError(Zotero.DB.queryAsync("SELECT itemID FROM items WHERE itemID=? OR itemID=?", [1]));
+		it("should throw an error if too few parameters are passed", async function () {
+			var e = await getPromiseError(Zotero.DB.queryAsync("SELECT itemID FROM items WHERE itemID=? OR itemID=?", [1]));
 			assert.ok(e);
 			assert.include(e.message, "Incorrect number of parameters provided for query");
 		})
 		
-		it("should throw an error if too many parameters are passed", function* () {
-			var e = yield getPromiseError(Zotero.DB.queryAsync("SELECT itemID FROM items WHERE itemID=?", [1, 2]));
+		it("should throw an error if too many parameters are passed", async function () {
+			var e = await getPromiseError(Zotero.DB.queryAsync("SELECT itemID FROM items WHERE itemID=?", [1, 2]));
 			assert.ok(e);
 			assert.include(e.message, "Incorrect number of parameters provided for query");
 		})
 		
-		it("should throw an error if too many parameters are passed for numbered placeholders", function* () {
-			var e = yield getPromiseError(Zotero.DB.queryAsync("SELECT itemID FROM items WHERE itemID=?1 OR itemID=?1", [1, 2]));
+		it("should throw an error if too many parameters are passed for numbered placeholders", async function () {
+			var e = await getPromiseError(Zotero.DB.queryAsync("SELECT itemID FROM items WHERE itemID=?1 OR itemID=?1", [1, 2]));
 			assert.ok(e);
 			assert.include(e.message, "Incorrect number of parameters provided for query");
 		})
 		
-		it("should accept a single placeholder given as a value", function* () {
-			var rows = yield Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?", 2);
+		it("should accept a single placeholder given as a value", async function () {
+			var rows = await Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?", 2);
 			assert.lengthOf(rows, 1);
 			assert.equal(rows[0].a, 1);
 		})
 		
-		it("should accept a single placeholder given as an array", function* () {
-			var rows = yield Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?", [2]);
+		it("should accept a single placeholder given as an array", async function () {
+			var rows = await Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?", [2]);
 			assert.lengthOf(rows, 1);
 			assert.equal(rows[0].a, 1);
 		})
 		
-		it("should accept multiple placeholders", function* () {
-			var rows = yield Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=? OR b=?", [2, 4]);
+		it("should accept multiple placeholders", async function () {
+			var rows = await Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=? OR b=?", [2, 4]);
 			assert.lengthOf(rows, 2);
 			assert.equal(rows[0].a, 1);
 			assert.equal(rows[1].a, 3);
@@ -82,64 +82,64 @@ describe("Zotero.DB", function() {
 			assert.equal(rows[1].a, 3);
 		});
 		
-		it("should accept a single placeholder within parentheses", function* () {
-			var rows = yield Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b IN (?)", 2);
+		it("should accept a single placeholder within parentheses", async function () {
+			var rows = await Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b IN (?)", 2);
 			assert.lengthOf(rows, 1);
 			assert.equal(rows[0].a, 1);
 		})
 		
-		it("should accept multiple placeholders within parentheses", function* () {
-			var rows = yield Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b IN (?, ?)", [2, 4]);
+		it("should accept multiple placeholders within parentheses", async function () {
+			var rows = await Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b IN (?, ?)", [2, 4]);
 			assert.lengthOf(rows, 2);
 			assert.equal(rows[0].a, 1);
 			assert.equal(rows[1].a, 3);
 		})
 		
-		it("should replace =? with IS NULL if NULL is passed as a value", function* () {
-			var rows = yield Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?", null);
+		it("should replace =? with IS NULL if NULL is passed as a value", async function () {
+			var rows = await Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?", null);
 			assert.lengthOf(rows, 1);
 			assert.equal(rows[0].a, 5);
 		})
 		
-		it("should replace =? with IS NULL if NULL is passed in an array", function* () {
-			var rows = yield Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?", [null]);
+		it("should replace =? with IS NULL if NULL is passed in an array", async function () {
+			var rows = await Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?", [null]);
 			assert.lengthOf(rows, 1);
 			assert.equal(rows[0].a, 5);
 		})
 		
-		it("should replace ? with NULL for placeholders within parentheses in INSERT statements", function* () {
-			yield Zotero.DB.queryAsync("CREATE TEMPORARY TABLE tmp_srqwnfpwpinss (a, b)");
+		it("should replace ? with NULL for placeholders within parentheses in INSERT statements", async function () {
+			await Zotero.DB.queryAsync("CREATE TEMPORARY TABLE tmp_srqwnfpwpinss (a, b)");
 			// Replace ", ?"
-			yield Zotero.DB.queryAsync("INSERT INTO tmp_srqwnfpwpinss (a, b) VALUES (?, ?)", [1, null]);
+			await Zotero.DB.queryAsync("INSERT INTO tmp_srqwnfpwpinss (a, b) VALUES (?, ?)", [1, null]);
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync("SELECT a FROM tmp_srqwnfpwpinss WHERE b IS NULL")),
+				((await Zotero.DB.valueQueryAsync("SELECT a FROM tmp_srqwnfpwpinss WHERE b IS NULL"))),
 				1
 			);
 			// Replace "(?"
-			yield Zotero.DB.queryAsync("DELETE FROM tmp_srqwnfpwpinss");
-			yield Zotero.DB.queryAsync("INSERT INTO tmp_srqwnfpwpinss (a, b) VALUES (?, ?)", [null, 2]);
+			await Zotero.DB.queryAsync("DELETE FROM tmp_srqwnfpwpinss");
+			await Zotero.DB.queryAsync("INSERT INTO tmp_srqwnfpwpinss (a, b) VALUES (?, ?)", [null, 2]);
 			assert.equal(
-				(yield Zotero.DB.valueQueryAsync("SELECT b FROM tmp_srqwnfpwpinss WHERE a IS NULL")),
+				((await Zotero.DB.valueQueryAsync("SELECT b FROM tmp_srqwnfpwpinss WHERE a IS NULL"))),
 				2
 			);
-			yield Zotero.DB.queryAsync("DROP TABLE tmp_srqwnfpwpinss");
+			await Zotero.DB.queryAsync("DROP TABLE tmp_srqwnfpwpinss");
 		})
 		
-		it("should throw an error if NULL is passed for placeholder within parentheses in a SELECT statement", function* () {
-			var e = yield getPromiseError(Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b IN (?)", null));
+		it("should throw an error if NULL is passed for placeholder within parentheses in a SELECT statement", async function () {
+			var e = await getPromiseError(Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b IN (?)", null));
 			assert.ok(e);
 			assert.include(e.message, "NULL cannot be used for parenthesized placeholders in SELECT queries");
 		})
 		
-		it("should handle numbered parameters", function* () {
-			var rows = yield Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?1 "
+		it("should handle numbered parameters", async function () {
+			var rows = await Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b=?1 "
 				+ "UNION SELECT b FROM " + tmpTable + " WHERE b=?1", 2);
 			assert.lengthOf(rows, 2);
 			assert.equal(rows[0].a, 1);
 			assert.equal(rows[1].a, 2);
 		})
 		
-		it("should throw an error if onRow throws an error", function* () {
+		it("should throw an error if onRow throws an error", async function () {
 			var i = 0;
 			var e = Zotero.DB.queryAsync(
 				"SELECT * FROM " + tmpTable,
@@ -153,15 +153,15 @@ describe("Zotero.DB", function() {
 					}
 				}
 			);
-			e = yield getPromiseError(e)
+			e = await getPromiseError(e)
 			assert.ok(e);
 			assert.equal(e.message, "Failed");
 		});
 		
-		it("should stop gracefully if onRow calls cancel()", function* () {
+		it("should stop gracefully if onRow calls cancel()", async function () {
 			var i = 0;
 			var rows = [];
-			yield Zotero.DB.queryAsync(
+			await Zotero.DB.queryAsync(
 				"SELECT * FROM " + tmpTable,
 				false,
 				{
@@ -181,7 +181,7 @@ describe("Zotero.DB", function() {
 	
 	
 	describe("#executeTransaction()", function () {
-		it("should serialize concurrent transactions", Zotero.Promise.coroutine(function* () {
+		it("should serialize concurrent transactions", async function () {
 			var resolve1, resolve2, reject1, reject2;
 			var promise1 = new Promise(function (resolve, reject) {
 				resolve1 = resolve;
@@ -212,10 +212,10 @@ describe("Zotero.DB", function() {
 			.then(resolve2)
 			.catch(reject2);
 			
-			yield Zotero.Promise.all([promise1, promise2]);
-		}));
+			await Promise.all([promise1, promise2]);
+		});
 		
-		it("should serialize queued transactions", function* () {
+		it("should serialize queued transactions", async function () {
 			var resolve1, resolve2, reject1, reject2, resolve3, reject3;
 			var promise1 = new Promise(function (resolve, reject) {
 				resolve1 = resolve;
@@ -263,13 +263,13 @@ describe("Zotero.DB", function() {
 			.then(resolve3)
 			.catch(reject3);
 			
-			yield Zotero.Promise.all([promise1, promise2, promise3]);
+			await Promise.all([promise1, promise2, promise3]);
 		})
 		
-		it("should roll back on error", function* () {
-			yield Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
+		it("should roll back on error", async function () {
+			await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
 			try {
-				yield Zotero.DB.executeTransaction(async function () {
+				await Zotero.DB.executeTransaction(async function () {
 					await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (2)");
 					throw 'Aborting transaction -- ignore';
 				});
@@ -277,19 +277,19 @@ describe("Zotero.DB", function() {
 			catch (e) {
 				if (typeof e != 'string' || !e.startsWith('Aborting transaction')) throw e;
 			}
-			var count = yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM " + tmpTable + "");
+			var count = await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM " + tmpTable + "");
 			assert.equal(count, 1);
 			
-			var conn = yield Zotero.DB._getConnectionAsync();
+			var conn = await Zotero.DB._getConnectionAsync();
 			assert.isFalse(conn.transactionInProgress);
 			
-			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
+			await Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		});
 		
-		it("should run onRollback callbacks", function* () {
+		it("should run onRollback callbacks", async function () {
 			var callbackRan = false;
 			try {
-				yield Zotero.DB.executeTransaction(
+				await Zotero.DB.executeTransaction(
 					async function () {
 						await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
 						throw 'Aborting transaction -- ignore';
@@ -306,7 +306,7 @@ describe("Zotero.DB", function() {
 			}
 			assert.ok(callbackRan);
 			
-			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
+			await Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		});
 		
 		it("should time out on nested transactions", async function () {
@@ -327,11 +327,11 @@ describe("Zotero.DB", function() {
 			assert.equal(e.name, "TimeoutError");
 		});
 		
-		it("should run onRollback callbacks for timed-out nested transactions", function* () {
+		it("should run onRollback callbacks for timed-out nested transactions", async function () {
 			var callback1Ran = false;
 			var callback2Ran = false;
 			try {
-				yield Zotero.DB.executeTransaction(async function () {
+				await Zotero.DB.executeTransaction(async function () {
 					await Zotero.DB.executeTransaction(
 						async function () {},
 						{

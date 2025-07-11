@@ -28,16 +28,16 @@ describe("Zotero.Relations", function () {
 			yield Zotero.Users.init();
 		})
 		
-		it("should update relations using local user key to use userID", function* () {
-			var item1 = yield createDataObject('item');
+		it("should update relations using local user key to use userID", async function () {
+			var item1 = await createDataObject('item');
 			var item2 = createUnsavedDataObject('item');
 			item2.addRelatedItem(item1);
-			yield item2.save();
+			await item2.save();
 			
 			var rels = item2.getRelationsByPredicate(Zotero.Relations.relatedItemPredicate);
 			assert.include(rels[0], "/users/local");
 			
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				await Zotero.Relations.updateUser(null, 1);
 			})
 			
@@ -45,18 +45,18 @@ describe("Zotero.Relations", function () {
 			assert.include(rels[0], "/users/1");
 		})
 		
-		it("should update relations from one userID to another", function* () {
-			yield Zotero.Users.setCurrentUserID(1);
+		it("should update relations from one userID to another", async function () {
+			await Zotero.Users.setCurrentUserID(1);
 			
-			var item1 = yield createDataObject('item');
+			var item1 = await createDataObject('item');
 			var item2 = createUnsavedDataObject('item');
 			item2.addRelatedItem(item1);
-			yield item2.save();
+			await item2.save();
 			
 			var rels = item2.getRelationsByPredicate(Zotero.Relations.relatedItemPredicate);
 			assert.include(rels[0], "/users/1");
 			
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				await Zotero.Relations.updateUser(1, 2);
 			});
 			

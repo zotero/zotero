@@ -157,7 +157,7 @@ describe("Zotero.HTTP", function () {
 			var delayStub;
 			
 			beforeEach(function () {
-				delayStub = sinon.stub(Zotero.Promise, "delay").returns(Zotero.Promise.resolve());
+				delayStub = sinon.stub(Zotero.Promise, "delay").returns(Promise.resolve());
 			});
 			
 			afterEach(function () {
@@ -249,7 +249,7 @@ describe("Zotero.HTTP", function () {
 				assert.equal(spy.callCount, 3);
 			});
 			
-			it("should obey Retry-After for 503", function* () {
+			it("should obey Retry-After for 503", async function () {
 				var called = 0;
 				server.respond(function (req) {
 					if (req.method == "GET" && req.url == baseURL + "error") {
@@ -282,7 +282,7 @@ describe("Zotero.HTTP", function () {
 					called++;
 				});
 				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
-				yield Zotero.HTTP.request("GET", baseURL + "error");
+				await Zotero.HTTP.request("GET", baseURL + "error");
 				assert.equal(3, spy.callCount);
 				// DEBUG: Why are these slightly off?
 				assert.approximately(delayStub.args[0][0], 5 * 1000, 5);
@@ -320,9 +320,9 @@ describe("Zotero.HTTP", function () {
 			Zotero.HTTP.mock = null;
 		});
 		
-		it("should provide a document object", function* () {
+		it("should provide a document object", async function () {
 			var called = false;
-			yield Zotero.HTTP.processDocuments(
+			await Zotero.HTTP.processDocuments(
 				testURL,
 				function (doc) {
 					assert.equal(doc.location.href, testURL);

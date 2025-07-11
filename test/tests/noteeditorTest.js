@@ -12,15 +12,15 @@ describe("Note Editor", function () {
 		win.close();
 	});
 	
-	var waitForNoteEditor = Zotero.Promise.coroutine(function* (item) {
+	var waitForNoteEditor = async function (item) {
 		var noteEditor = win.document.getElementById('zotero-note-editor');
 		while (noteEditor.item != item) {
 			Zotero.debug("Waiting for note editor");
-			yield Zotero.Promise.delay(50);
+			await Zotero.Promise.delay(50);
 			noteEditor = win.document.getElementById('zotero-note-editor');
 		}
 		return new Zotero.Promise((resolve, reject) => {
 			noteEditor.onInit(() => resolve(noteEditor));
 		});
-	});
+	};
 });

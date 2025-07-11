@@ -2,7 +2,7 @@
 
 describe("Zotero.ItemFields", function () {
 	describe("#getBaseIDFromTypeAndField()", function () {
-		it("should return the base field id for an item type and base-mapped field", function* () {
+		it("should return the base field id for an item type and base-mapped field", async function () {
 			assert.equal(
 				Zotero.ItemFields.getBaseIDFromTypeAndField('audioRecording', 'label'),
 				Zotero.ItemFields.getID('publisher')
@@ -18,7 +18,7 @@ describe("Zotero.ItemFields", function () {
 			);
 		})
 		
-		it("should return the base field id for an item type and base field", function* () {
+		it("should return the base field id for an item type and base field", async function () {
 			assert.equal(
 				Zotero.ItemFields.getBaseIDFromTypeAndField('book', 'publisher'),
 				Zotero.ItemFields.getID('publisher')
@@ -32,7 +32,7 @@ describe("Zotero.ItemFields", function () {
 			);
 		});
 		
-		it("should return false for an item type and non-base-mapped field", function* () {
+		it("should return false for an item type and non-base-mapped field", async function () {
 			assert.isFalse(
 				Zotero.ItemFields.getBaseIDFromTypeAndField('audioRecording', 'runningTime')
 			);

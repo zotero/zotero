@@ -88,7 +88,7 @@ describe.skip("Zotero.CiteprocRs", function () {
 				creatorType: "author"
 			}
 		]);
-		await Zotero.Promise.all([item1.saveTx(), item2SameLastName.saveTx(), item3.saveTx()]);
+		await Promise.all([item1.saveTx(), item2SameLastName.saveTx(), item3.saveTx()]);
 	});
 
 	after(function () {

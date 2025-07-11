@@ -57,13 +57,13 @@ describe("Connector Server", function () {
 	});
 
 
-	describe('/connector/getTranslatorCode', function() {
-		it('should respond with translator code', function* () {
+	describe('/connector/getTranslatorCode', function () {
+		it('should respond with translator code', async function () {
 			var code = 'function detectWeb() {}\nfunction doImport() {}';
 			var translator = buildDummyTranslator(4, code);
 			sinon.stub(Zotero.Translators, 'get').returns(translator);
 
-			var response = yield httpRequest(
+			var response = await httpRequest(
 				'POST',
 				connectorServerPath + "/connector/getTranslatorCode",
 				{
@@ -77,7 +77,7 @@ describe("Connector Server", function () {
 			);
 
 			assert.isTrue(Zotero.Translators.get.calledWith('dummy-translator'));
-			let translatorCode = yield Zotero.Translators.getCodeForTranslator(translator);
+			let translatorCode = await Zotero.Translators.getCodeForTranslator(translator);
 			assert.equal(response.response, translatorCode);
 
 			Zotero.Translators.get.restore();
@@ -85,13 +85,13 @@ describe("Connector Server", function () {
 	});
 	
 	
-	describe("/connector/detect", function() {
-		it("should return relevant translators with proxies", function* () {
+	describe("/connector/detect", function () {
+		it("should return relevant translators with proxies", async function () {
 			var code = 'function detectWeb() {return "newspaperArticle";}\nfunction doWeb() {}';
 			var translator = buildDummyTranslator("web", code, {target: "https://www.example.com/.*"});
 			sinon.stub(Zotero.Translators, 'getAllForType').resolves([translator]);
 			
-			var response = yield httpRequest(
+			var response = await httpRequest(
 				'POST',
 				connectorServerPath + "/connector/detect",
 				{
@@ -113,9 +113,9 @@ describe("Connector Server", function () {
 	
 	
 	describe("/connector/saveItems", function () {
-		it("should save a translated item to the current selected collection", function* () {
-			var collection = yield createDataObject('collection');
-			yield select(win, collection);
+		it("should save a translated item to the current selected collection", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
 			
 			var body = {
 				items: [
@@ -148,22 +148,22 @@ describe("Connector Server", function () {
 			);
 			
 			// Check parent item
-			var ids = yield promise;
+			var ids = await promise;
 			assert.lengthOf(ids, 1);
 			var item = Zotero.Items.get(ids[0]);
 			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'newspaperArticle');
 			assert.isTrue(collection.hasItem(item.id));
 			
-			var req = yield reqPromise;
+			var req = await reqPromise;
 			assert.equal(req.status, 201);
 		});
 		
 		
-		it("should switch to My Library if read-only library is selected", function* () {
-			var group = yield createGroup({
+		it("should switch to My Library if read-only library is selected", async function () {
+			var group = await createGroup({
 				editable: false
 			});
-			yield select(win, group);
+			await select(win, group);
 			
 			var body = {
 				items: [
@@ -197,7 +197,7 @@ describe("Connector Server", function () {
 			);
 			
 			// My Library be selected, and the item should be in it
-			var ids = yield promise;
+			var ids = await promise;
 			assert.equal(
 				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
 				Zotero.Libraries.userLibraryID
@@ -207,13 +207,13 @@ describe("Connector Server", function () {
 			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
 			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'newspaperArticle');
 			
-			var req = yield reqPromise;
+			var req = await reqPromise;
 			assert.equal(req.status, 201);
 		});
 		
-		it("should use the provided proxy to deproxify item url", function* () {
-			yield selectLibrary(win, Zotero.Libraries.userLibraryID);
-			yield waitForItemsLoad(win);
+		it("should use the provided proxy to deproxify item url", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
 			
 			var body = {
 				items: [
@@ -236,7 +236,7 @@ describe("Connector Server", function () {
 			};
 			
 			var promise = waitForItemEvent('add');
-			var req = yield httpRequest(
+			var req = await httpRequest(
 				'POST',
 				connectorServerPath + "/connector/saveItems",
 				{
@@ -248,7 +248,7 @@ describe("Connector Server", function () {
 			);
 			
 			// Check item
-			var ids = yield promise;
+			var ids = await promise;
 			assert.lengthOf(ids, 1);
 			var item = Zotero.Items.get(ids[0]);
 			assert.equal(item.getField('url'), 'https://www.example.com/path');
@@ -418,9 +418,9 @@ describe("Connector Server", function () {
 	});
 
 	describe("/connector/saveSnapshot", function () {
-		it("should save a webpage item to the current selected collection", function* () {
-			var collection = yield createDataObject('collection');
-			yield select(win, collection);
+		it("should save a webpage item to the current selected collection", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
 
 			// saveSnapshot saves parent and child before returning
 			var ids;
@@ -433,7 +433,7 @@ describe("Connector Server", function () {
 			file.append('index.html');
 			httpd.registerFile("/test", file);
 
-			yield httpRequest(
+			await httpRequest(
 				'POST',
 				connectorServerPath + "/connector/saveSnapshot",
 				{
@@ -457,11 +457,11 @@ describe("Connector Server", function () {
 			assert.equal(item.getField('title'), 'Title');
 		});
 
-		it("should switch to My Library if a read-only library is selected", function* () {
-			var group = yield createGroup({
+		it("should switch to My Library if a read-only library is selected", async function () {
+			var group = await createGroup({
 				editable: false
 			});
-			yield select(win, group);
+			await select(win, group);
 			
 			var promise = waitForItemEvent('add');
 			var reqPromise = httpRequest(
@@ -480,7 +480,7 @@ describe("Connector Server", function () {
 			);
 			
 			// My Library be selected, and the item should be in it
-			var ids = yield promise;
+			var ids = await promise;
 			assert.equal(
 				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
 				Zotero.Libraries.userLibraryID
@@ -489,7 +489,7 @@ describe("Connector Server", function () {
 			var item = Zotero.Items.get(ids[0]);
 			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
 			
-			var req = yield reqPromise;
+			var req = await reqPromise;
 			assert.equal(req.status, 201);
 		});
 	});
@@ -1512,11 +1512,11 @@ describe("Connector Server", function () {
 		});
 	});
 	
-	describe('/connector/installStyle', function() {
+	describe('/connector/installStyle', function () {
 		var endpoint;
 		var style;
 		
-		before(function() {
+		before(function () {
 			endpoint = connectorServerPath + "/connector/installStyle";
 			style = `<?xml version="1.0" encoding="utf-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" version="1.0" default-locale="de-DE">
@@ -1529,8 +1529,8 @@ describe("Connector Server", function () {
 `;
 		});
 		
-		it('should reject styles with invalid text', function* () {
-			var error = yield getPromiseError(httpRequest(
+		it('should reject styles with invalid text', async function () {
+			var error = await getPromiseError(httpRequest(
 				'POST',
 				endpoint,
 				{
@@ -1543,12 +1543,12 @@ describe("Connector Server", function () {
 			assert.equal(error.xmlhttp.responseText, Zotero.getString("styles.installError", "(null)"));
 		});
 		
-		it('should import a style with application/vnd.citationstyles.style+xml content-type', function* () {
-			sinon.stub(Zotero.Styles, 'install').callsFake(function(style) {
+		it('should import a style with application/vnd.citationstyles.style+xml content-type', async function () {
+			sinon.stub(Zotero.Styles, 'install').callsFake(function (style) {
 				var parser = new DOMParser(),
 				doc = parser.parseFromString(style, "application/xml");
 				
-				return Zotero.Promise.resolve({
+				return Promise.resolve({
 					styleTitle: Zotero.Utilities.xpathText(
 						doc, '/csl:style/csl:info[1]/csl:title[1]', Zotero.Styles.ns
 					),
@@ -1558,7 +1558,7 @@ describe("Connector Server", function () {
 				});
 			});
 			
-			var response = yield httpRequest(
+			var response = await httpRequest(
 				'POST',
 				endpoint,
 				{
@@ -1572,11 +1572,11 @@ describe("Connector Server", function () {
 		});
 		
 		it('should accept text/plain request with X-Zotero-Connector-API-Version or Zotero-Allowed-Request', async function () {
-			sinon.stub(Zotero.Styles, 'install').callsFake(function(style) {
+			sinon.stub(Zotero.Styles, 'install').callsFake(function (style) {
 				var parser = new DOMParser(),
 				doc = parser.parseFromString(style, "application/xml");
 				
-				return Zotero.Promise.resolve({
+				return Promise.resolve({
 					styleTitle: Zotero.Utilities.xpathText(
 						doc, '/csl:style/csl:info[1]/csl:title[1]', Zotero.Styles.ns
 					),
@@ -1633,16 +1633,16 @@ describe("Connector Server", function () {
 		});
 	});
 	
-	describe('/connector/import', function() {
+	describe('/connector/import', function () {
 		var endpoint;
 		
-		before(function() {
+		before(function () {
 			endpoint = connectorServerPath + "/connector/import";
 		});
 		
-		it('should reject resources that do not contain import data', function* () {
+		it('should reject resources that do not contain import data', async function () {
 			const sessionID = Zotero.Utilities.randomString();
-			var error = yield getPromiseError(httpRequest(
+			var error = await getPromiseError(httpRequest(
 				'POST',
 				endpoint + `?session=${sessionID}`,
 				{

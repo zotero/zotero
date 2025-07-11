@@ -69,14 +69,13 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 		resetRequestCount();
 	})
 	
-	var setup = Zotero.Promise.coroutine(function* (options = {}) {
+	var setup = async function (options = {}) {
 		const { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
 		var stopOnError = options.stopOnError !== undefined ? options.stopOnError : true;
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
 		caller.stopOnError = stopOnError;
 		
-		Components.utils.import("resource://zotero/config.js");
 		var client = new Zotero.Sync.APIClient({
 			baseURL,
 			apiVersion: options.apiVersion || ZOTERO_CONFIG.API_VERSION,
@@ -96,7 +95,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 		});
 		
 		return { engine, client, caller };
-	})
+	}
 	
 	afterEach(function* () {
 		Zotero.HTTP.mock = null;
@@ -115,14 +114,14 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 	
 	
 	describe("Syncing", function () {
-		it("should skip downloads if not marked as needed", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should skip downloads if not marked as needed", async function () {
+			var { engine, client, caller } = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assertRequestCount(0);
 			
@@ -133,19 +132,19 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
 		
-		it("should ignore download for a remotely missing file", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should ignore download for a remotely missing file", async function () {
+			var { engine, client, caller } = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
 			item.attachmentSyncState = "to_download";
-			yield item.saveTx();
+			await item.saveTx();
 			
 			httpd.registerPathHandler(
 				`/users/1/items/${item.key}/file`,
@@ -155,7 +154,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					}
 				}
 			);
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assert.isFalse(result.localChanges);
 			assert.isFalse(result.remoteChanges);
@@ -165,12 +164,12 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
 		
-		it("shouldn't update storageVersion if stopped", function* () {
-			var { engine, client, caller } = yield setup();
+		it("shouldn't update storageVersion if stopped", async function () {
+			var { engine, client, caller } = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var items = [];
@@ -179,7 +178,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				item.attachmentLinkMode = 'imported_file';
 				item.attachmentPath = 'storage:test.txt';
 				item.attachmentSyncState = "to_download";
-				yield item.saveTx();
+				await item.saveTx();
 				items.push(item);
 			}
 			
@@ -192,26 +191,26 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				return new Zotero.Sync.Storage.Result;
 			});
 			
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			stub.restore();
 			
 			assert.equal(library.storageVersion, 0);
 		});
 		
-		it("should handle a remotely failing file", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should handle a remotely failing file", async function () {
+			var { engine, client, caller } = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var item = new Zotero.Item("attachment");
 			item.attachmentLinkMode = 'imported_file';
 			item.attachmentPath = 'storage:test.txt';
 			item.attachmentSyncState = "to_download";
-			yield item.saveTx();
+			await item.saveTx();
 			
 			Zotero.HTTP.disableErrorRetry = true;
 			httpd.registerPathHandler(
@@ -224,19 +223,19 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			);
 			// TODO: In stopOnError mode, this the promise is rejected.
 			// This should probably test with stopOnError mode turned off instead.
-			var e = yield getPromiseError(engine.start());
+			var e = await getPromiseError(engine.start());
 			assert.equal(e.message, Zotero.Sync.Storage.defaultError);
 			
 			assert.isTrue(library.storageDownloadNeeded);
 			assert.equal(library.storageVersion, 0);
 		})
 		
-		it("should download a missing file", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should download a missing file", async function () {
+			var { engine, client, caller } = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var item = new Zotero.Item("attachment");
@@ -245,7 +244,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			// TODO: Test binary data
 			var text = Zotero.Utilities.randomString();
 			item.attachmentSyncState = "to_download";
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var mtime = "1441252524905";
 			var md5 = Zotero.Utilities.Internal.md5(text)
@@ -281,13 +280,13 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					}
 				}
 			);
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
 			
-			var contents = yield Zotero.File.getContentsAsync(yield item.getFilePathAsync());
+			var contents = await Zotero.File.getContentsAsync(await item.getFilePathAsync());
 			assert.equal(contents, text);
 			
 			assert.isFalse(library.storageDownloadNeeded);
@@ -338,7 +337,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var deferred = Zotero.Promise.defer();
 			var observerID = Zotero.Notifier.registerObserver({
 				notify: async function (event, type, ids, extraData) {
-					if (event == 'download' && ids[0] == item.id && await item.getFilePathAsync()) {
+					if (event == 'download' && ids[0] == item.id && (await item.getFilePathAsync())) {
 						deferred.resolve();
 					}
 				}
@@ -349,18 +348,18 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			Zotero.Notifier.unregisterObserver(observerID);
 		});
 		
-		it("should upload new files", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should upload new files", async function () {
+			var { engine, client, caller } = await setup();
 			
 			// Single file
 			var file1 = getTestDataDirectory();
 			file1.append('test.png');
-			var item1 = yield Zotero.Attachments.importFromFile({ file: file1 });
-			var mtime1 = yield item1.attachmentModificationTime;
-			var hash1 = yield item1.attachmentHash;
+			var item1 = await Zotero.Attachments.importFromFile({ file: file1 });
+			var mtime1 = await item1.attachmentModificationTime;
+			var hash1 = await item1.attachmentHash;
 			var path1 = item1.getFilePath();
 			var filename1 = 'test.png';
-			var size1 = (yield OS.File.stat(path1)).size;
+			var size1 = ((await OS.File.stat(path1))).size;
 			var contentType1 = 'image/png';
 			var prefix1 = Zotero.Utilities.randomString();
 			var suffix1 = Zotero.Utilities.randomString();
@@ -368,13 +367,13 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			
 			let file1Blob = File.createFromFileName ? File.createFromFileName(file1.path) : new File(file1);
 			if (file1Blob.then) {
-				file1Blob = yield file1Blob;
+				file1Blob = await file1Blob;
 			}
 			
 			// HTML file with auxiliary image
 			var file2 = OS.Path.join(getTestDataDirectory().path, 'snapshot', 'index.html');
-			var parentItem = yield createDataObject('item');
-			var item2 = yield Zotero.Attachments.importSnapshotFromFile({
+			var parentItem = await createDataObject('item');
+			var item2 = await Zotero.Attachments.importSnapshotFromFile({
 				file: file2,
 				url: 'http://example.com/',
 				parentItemID: parentItem.id,
@@ -382,11 +381,11 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				contentType: 'text/html',
 				charset: 'utf-8'
 			});
-			var mtime2 = yield item2.attachmentModificationTime;
-			var hash2 = yield item2.attachmentHash;
+			var mtime2 = await item2.attachmentModificationTime;
+			var hash2 = await item2.attachmentHash;
 			var path2 = item2.getFilePath();
 			var filename2 = 'index.html';
-			var size2 = (yield OS.File.stat(path2)).size;
+			var size2 = ((await OS.File.stat(path2))).size;
 			var contentType2 = 'text/html';
 			var charset2 = 'utf-8';
 			var prefix2 = Zotero.Utilities.randomString();
@@ -513,11 +512,11 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					let deferred = Zotero.Promise.defer();
 					deferreds.push(deferred);
 					var reader = new FileReader();
-					reader.addEventListener("loadend", Zotero.Promise.coroutine(function* () {
+					reader.addEventListener("loadend", async function () {
 						try {
 							let contents = new Uint8Array(reader.result);
 							contents = contents.slice(prefix2.length, suffix2.length * -1);
-							yield IOUtils.write(tmpZipPath, contents);
+							await IOUtils.write(tmpZipPath, contents);
 							
 							var zr = Components.classes["@mozilla.org/libjar/zip-reader;1"]
 								.createInstance(Components.interfaces.nsIZipReader);
@@ -538,7 +537,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 						catch (e) {
 							deferred.reject(e);
 						}
-					}));
+					});
 					reader.readAsArrayBuffer(req.requestBody);
 					
 					req.respond(201, {}, "");
@@ -640,9 +639,9 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					req.respond(201, {}, "");
 				}
 			})*/
-			var result = yield engine.start();
+			var result = await engine.start();
 			
-			yield Zotero.Promise.all(deferreds.map(d => d.promise));
+			await Promise.all(deferreds.map(d => d.promise));
 			
 			assert.isTrue(result.localChanges);
 			assert.isTrue(result.remoteChanges);
@@ -657,25 +656,25 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(item2.version, 15);
 		})
 		
-		it("should update local info for remotely updated file that matches local file", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should update local info for remotely updated file that matches local file", async function () {
+			var { engine, client, caller } = await setup();
 			
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;
-			yield library.saveTx();
+			await library.saveTx();
 			library.storageDownloadNeeded = true;
 			
 			var file = getTestDataDirectory();
 			file.append('test.txt');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			item.version = 5;
 			item.attachmentSyncState = "to_download";
-			yield item.saveTx();
-			var path = yield item.getFilePathAsync();
-			yield OS.File.setDates(path, null, new Date() - 100000);
+			await item.saveTx();
+			var path = await item.getFilePathAsync();
+			await OS.File.setDates(path, null, new Date() - 100000);
 			
 			var json = item.toJSON();
-			yield Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
+			await Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
 			
 			var mtime = (Math.floor(new Date().getTime() / 1000) * 1000) + "";
 			var md5 = Zotero.Utilities.Internal.md5(file)
@@ -704,10 +703,10 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					}
 				}
 			);
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
-			yield assert.eventually.equal(item.attachmentModificationTime, mtime);
+			await assert.eventually.equal(item.attachmentModificationTime, mtime);
 			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
@@ -716,22 +715,22 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			processDownloadSpy.restore();
 		})
 		
-		it("should update local info for file that already exists on the server", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should update local info for file that already exists on the server", async function () {
+			var { engine, client, caller } = await setup();
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file: file });
+			var item = await Zotero.Attachments.importFromFile({ file: file });
 			item.version = 5;
-			yield item.saveTx();
+			await item.saveTx();
 			var json = item.toJSON();
-			yield Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
+			await Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
 			
-			var mtime = yield item.attachmentModificationTime;
-			var hash = yield item.attachmentHash;
+			var mtime = await item.attachmentModificationTime;
+			var hash = await item.attachmentHash;
 			var path = item.getFilePath();
 			var filename = 'test.png';
-			var size = (yield OS.File.stat(path)).size;
+			var size = ((await OS.File.stat(path))).size;
 			var contentType = 'image/png';
 			
 			var newVersion = 10;
@@ -763,7 +762,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			})
 			
 			// TODO: One-step uploads
-			var result = yield engine.start();
+			var result = await engine.start();
 			
 			assert.isTrue(result.localChanges);
 			assert.isTrue(result.remoteChanges);
@@ -776,20 +775,20 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 		})
 		
 		
-		it("should retry with If-None-Match on 412 with missing remote hash", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should retry with If-None-Match on 412 with missing remote hash", async function () {
+			var { engine, client, caller } = await setup();
 			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
 				apiClient: client
 			})
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			item.version = 5;
 			item.synced = true;
 			item.attachmentSyncedModificationTime = Date.now();
 			item.attachmentSyncedHash = 'bd4c33e03798a7e8bc0b46f8bda74fac'
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var contentType = 'image/png';
 			var prefix = Zotero.Utilities.randomString();
@@ -855,7 +854,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				}
 			});
 			
-			var result = yield engine.start();
+			var result = await engine.start();
 			assert.equal(called, 4);
 		});
 		
@@ -955,7 +954,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			
 			var request = { name: item.libraryKey };
 			
-			var stub = sinon.stub(zfs, '_processUploadFile').returns(Zotero.Promise.resolve());
+			var stub = sinon.stub(zfs, '_processUploadFile').returns(Promise.resolve());
 			await zfs.uploadFile(request);
 			
 			var zipFile = OS.Path.join(Zotero.getTempDirectory().path, item.key + '.zip');
@@ -969,21 +968,21 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 	
 	
 	describe("#_processUploadFile()", function () {
-		it("should handle 404 from upload authorization request", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should handle 404 from upload authorization request", async function () {
+			var { engine, client, caller } = await setup();
 			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
 				apiClient: client
 			})
 			
 			var filePath = OS.Path.join(getTestDataDirectory().path, 'test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file: filePath });
+			var item = await Zotero.Attachments.importFromFile({ file: filePath });
 			item.version = 5;
 			item.synced = true;
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var itemJSON = item.toResponseJSON();
-			itemJSON.data.mtime = yield item.attachmentModificationTime;
-			itemJSON.data.md5 = yield item.attachmentHash;
+			itemJSON.data.mtime = await item.attachmentModificationTime;
+			itemJSON.data.md5 = await item.attachmentHash;
 			
 			server.respond(function (req) {
 				if (req.method == "POST"
@@ -999,27 +998,27 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				}
 			})
 			
-			var result = yield zfs._processUploadFile({
+			var result = await zfs._processUploadFile({
 				name: item.libraryKey
 			});
 			assert.isTrue(result.syncRequired);
 		});
 		
-		it("should handle 412 with matching version and hash matching local file", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should handle 412 with matching version and hash matching local file", async function () {
+			var { engine, client, caller } = await setup();
 			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
 				apiClient: client
 			})
 			
 			var filePath = OS.Path.join(getTestDataDirectory().path, 'test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file: filePath });
+			var item = await Zotero.Attachments.importFromFile({ file: filePath });
 			item.version = 5;
 			item.synced = true;
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var itemJSON = item.toResponseJSON();
-			itemJSON.data.mtime = yield item.attachmentModificationTime;
-			itemJSON.data.md5 = yield item.attachmentHash;
+			itemJSON.data.mtime = await item.attachmentModificationTime;
+			itemJSON.data.md5 = await item.attachmentHash;
 			
 			// Set saved hash to a different value, which should be overwritten
 			//
@@ -1028,7 +1027,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			// never downloaded), but there's no difference in behavior
 			var dbHash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 			item.attachmentSyncedHash = dbHash;
-			yield item.saveTx({ skipAll: true });
+			await item.saveTx({ skipAll: true });
 			
 			server.respond(function (req) {
 				if (req.method == "POST"
@@ -1052,29 +1051,29 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				text: JSON.stringify([itemJSON])
 			});
 			
-			var result = yield zfs._processUploadFile({
+			var result = await zfs._processUploadFile({
 				name: item.libraryKey
 			});
-			assert.equal(item.attachmentSyncedHash, (yield item.attachmentHash));
+			assert.equal(item.attachmentSyncedHash, ((await item.attachmentHash)));
 			assert.isFalse(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
 			assert.isFalse(result.fileSyncRequired);
 		})
 		
-		it("should handle 412 with matching version and hash not matching local file", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should handle 412 with matching version and hash not matching local file", async function () {
+			var { engine, client, caller } = await setup();
 			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
 				apiClient: client
 			})
 			
 			var filePath = OS.Path.join(getTestDataDirectory().path, 'test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file: filePath });
+			var item = await Zotero.Attachments.importFromFile({ file: filePath });
 			item.version = 5;
 			item.synced = true;
-			yield item.saveTx();
+			await item.saveTx();
 			
-			var fileHash = yield item.attachmentHash;
+			var fileHash = await item.attachmentHash;
 			var itemJSON = item.toResponseJSON();
 			itemJSON.data.md5 = 'aaaaaaaaaaaaaaaaaaaaaaaa'
 			
@@ -1100,7 +1099,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				text: JSON.stringify([itemJSON])
 			});
 			
-			var result = yield zfs._processUploadFile({
+			var result = await zfs._processUploadFile({
 				name: item.libraryKey
 			});
 			assert.isNull(item.attachmentSyncedHash);
@@ -1111,18 +1110,18 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isTrue(result.fileSyncRequired);
 		})
 		
-		it("should handle 412 with greater version", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should handle 412 with greater version", async function () {
+			var { engine, client, caller } = await setup();
 			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
 				apiClient: client
 			})
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			item.version = 5;
 			item.synced = true;
-			yield item.saveTx();
+			await item.saveTx();
 			
 			server.respond(function (req) {
 				if (req.method == "POST"
@@ -1140,7 +1139,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				}
 			})
 			
-			var result = yield zfs._processUploadFile({
+			var result = await zfs._processUploadFile({
 				name: item.libraryKey
 			});
 			assert.equal(item.version, 5);
@@ -1149,23 +1148,23 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(result.remoteChanges);
 			assert.isTrue(result.syncRequired);
 			// Item should be marked for redownloading
-			var versions = yield Zotero.Sync.Data.Local.getObjectsToTryFromSyncQueue('item', item.libraryID);
+			var versions = await Zotero.Sync.Data.Local.getObjectsToTryFromSyncQueue('item', item.libraryID);
 			assert.include(versions, item.key);
 		});
 		
 		
-		it("should handle 413 on quota limit", function* () {
-			var { engine, client, caller } = yield setup();
+		it("should handle 413 on quota limit", async function () {
+			var { engine, client, caller } = await setup();
 			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
 				apiClient: client
 			})
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
-			var item = yield Zotero.Attachments.importFromFile({ file });
+			var item = await Zotero.Attachments.importFromFile({ file });
 			item.version = 5;
 			item.synced = true;
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var responses = 0;
 			server.respond(function (req) {
@@ -1187,7 +1186,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				}
 			})
 			
-			var e = yield getPromiseError(zfs._processUploadFile({
+			var e = await getPromiseError(zfs._processUploadFile({
 				name: item.libraryKey
 			}));
 			assert.ok(e);
@@ -1197,7 +1196,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(responses, 1);
 			
 			// Try again
-			var e = yield getPromiseError(zfs.uploadFile({
+			var e = await getPromiseError(zfs.uploadFile({
 				name: item.libraryKey,
 				engine
 			}));

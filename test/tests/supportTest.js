@@ -1,5 +1,5 @@
-describe("Support Functions for Unit Testing", function() {
-	describe("resetDB", function() {
+describe("Support Functions for Unit Testing", function () {
+	describe("resetDB", function () {
 		it("should restore the DB to factory settings", async function () {
 			await Zotero.DB.queryAsync("CREATE TABLE testTable (foo INTEGER PRIMARY KEY)");
 			assert.isTrue(await Zotero.DB.tableExists('testTable'));
@@ -9,18 +9,18 @@ describe("Support Functions for Unit Testing", function() {
 			assert.isFalse(await Zotero.DB.tableExists('testTable'));
 		});
 	});
-	describe("loadSampleData", function() {
-		it("should load data from file", function() {
+	describe("loadSampleData", function () {
+		it("should load data from file", function () {
 			let data = loadSampleData('journalArticle');
 			assert.isObject(data, 'loaded data object');
 			assert.isNotNull(data);
 			assert.isAbove(Object.keys(data).length, 0, 'data object is not empty');
 		});
 	});
-	describe("populateDBWithSampleData", function() {
-		it("should populate database with data", Zotero.Promise.coroutine(function* () {
+	describe("populateDBWithSampleData", function () {
+		it("should populate database with data", async function () {
 			let data = loadSampleData('journalArticle');
-			yield populateDBWithSampleData(data);
+			await populateDBWithSampleData(data);
 			
 			let skipFields = ['id', 'itemType', 'creators']; // Special comparisons
 			
@@ -28,7 +28,7 @@ describe("Support Functions for Unit Testing", function() {
 				let item = data[itemName];
 				assert.isAbove(item.id, 0, 'assigned new item ID');
 				
-				let zItem = yield Zotero.Items.getAsync(item.id);
+				let zItem = await Zotero.Items.getAsync(item.id);
 				assert.ok(zItem, 'inserted item into database');
 				
 				// Compare item type
@@ -56,9 +56,9 @@ describe("Support Functions for Unit Testing", function() {
 					}
 				}
 			}
-		}));
-		it("should populate items with tags", Zotero.Promise.coroutine(function* () {
-			let data = yield populateDBWithSampleData({
+		});
+		it("should populate items with tags", async function () {
+			let data = await populateDBWithSampleData({
 				itemWithTags: {
 					itemType: "journalArticle",
 					tags: [
@@ -68,7 +68,7 @@ describe("Support Functions for Unit Testing", function() {
 				}
 			});
 			
-			let zItem = yield Zotero.Items.getAsync(data.itemWithTags.id);
+			let zItem = await Zotero.Items.getAsync(data.itemWithTags.id);
 			assert.ok(zItem, 'inserted item with tags into database');
 			
 
@@ -78,23 +78,23 @@ describe("Support Functions for Unit Testing", function() {
 				assert.ok(tagID, '"' + tags[i].tag + '" tag was inserted into the database');
 				assert.ok(zItem.hasTag(tags[i].tag), '"' + tags[i].tag + '" tag was assigned to item');
 			}
-		}));
+		});
 	});
-	describe("generateAllTypesAndFieldsData", function() {
-		it("should generate all types and fields data", function() {
+	describe("generateAllTypesAndFieldsData", function () {
+		it("should generate all types and fields data", function () {
 			let data = generateAllTypesAndFieldsData();
 			assert.isObject(data, 'created data object');
 			assert.isNotNull(data);
 			assert.isAbove(Object.keys(data).length, 0, 'data object is not empty');
 		});
-		it("all types and fields sample data should be up to date", function() {
+		it("all types and fields sample data should be up to date", function () {
 			assert.deepEqual(loadSampleData('allTypesAndFields'), generateAllTypesAndFieldsData());
 		});
 	});
-	describe("generateItemJSONData", function() {
-		it("item JSON data should be up to date", Zotero.Promise.coroutine(function* () {
+	describe("generateItemJSONData", function () {
+		it("item JSON data should be up to date", async function () {
 			let oldData = loadSampleData('itemJSON'),
-				newData = yield generateItemJSONData();
+				newData = await generateItemJSONData();
 			
 			assert.isObject(newData, 'created data object');
 			assert.isNotNull(newData);
@@ -114,7 +114,7 @@ describe("Support Functions for Unit Testing", function() {
 			}
 
 			assert.deepEqual(oldData, newData);
-		}));
+		});
 	});
 	// describe("generateCiteProcJSExportData", function() {
 	// 	let citeURL = Zotero.Prefs.get("export.citePaperJournalArticleURL");
@@ -144,10 +144,10 @@ describe("Support Functions for Unit Testing", function() {
 	// 		assert.deepEqual(oldData, newData, 'citeproc-js export data has not changed');
 	// 	}));
 	// });
-	describe("generateTranslatorExportData", function() {
-		it("legacy mode data should be up to date", Zotero.Promise.coroutine(function* () {
+	describe("generateTranslatorExportData", function () {
+		it("legacy mode data should be up to date", async function () {
 			let oldData = loadSampleData('translatorExportLegacy'),
-				newData = yield generateTranslatorExportData(true);
+				newData = await generateTranslatorExportData(true);
 			
 			assert.isObject(newData, 'created data object');
 			assert.isNotNull(newData);
@@ -167,10 +167,10 @@ describe("Support Functions for Unit Testing", function() {
 			}
 			
 			assert.deepEqual(oldData, newData, 'translator export data has not changed');
-		}));
-		it("data should be up to date", Zotero.Promise.coroutine(function* () {
+		});
+		it("data should be up to date", async function () {
 			let oldData = loadSampleData('translatorExport'),
-				newData = yield generateTranslatorExportData();
+				newData = await generateTranslatorExportData();
 			
 			assert.isObject(newData, 'created data object');
 			assert.isNotNull(newData);
@@ -190,6 +190,6 @@ describe("Support Functions for Unit Testing", function() {
 			}
 			
 			assert.deepEqual(oldData, newData, 'translator export data has not changed');
-		}));
+		});
 	});
 });

@@ -1,8 +1,8 @@
 "use strict";
 
-describe("Zotero.Intl", function() {
+describe("Zotero.Intl", function () {
 	describe("#getString()", function () {
-		it("should return the right plural form", function* () {
+		it("should return the right plural form", async function () {
 			if (Zotero.locale != 'en-US') {
 				this.skip();
 			}

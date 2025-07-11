@@ -13,7 +13,7 @@ describe("Citation Dialog", function () {
 		getItems() {
 			return [];
 		},
-		allCitedDataLoadedPromise: Zotero.Promise.resolve(),
+		allCitedDataLoadedPromise: Promise.resolve(),
 	};
 	let dialog, win, IOManager, CitationDataManager, SearchHandler;
 
@@ -511,50 +511,50 @@ describe("Citation Dialog", function () {
 	describe("Helpers.extractLocator", function () {
 		let locator;
 		describe("Invalid locators", function () {
-			it("has no locator label with numeric locator value", function() {
+			it("has no locator label with numeric locator value", function () {
 				locator = dialog.Helpers.extractLocator('history of the US 10-15');
 				assert.isNull(locator);
 				locator = dialog.Helpers.extractLocator('10-15');
 				assert.isNull(locator);
 			});
 
-			it("has no locator label with textual locator value", function() {
+			it("has no locator label with textual locator value", function () {
 				locator = dialog.Helpers.extractLocator('history of the US "test"');
 				assert.isNull(locator);
 				locator = dialog.Helpers.extractLocator('"test"');
 				assert.isNull(locator);
 			});
 			
-			it("has no quotes around textual locator value", function() {
+			it("has no quotes around textual locator value", function () {
 				locator = dialog.Helpers.extractLocator('history of the US chapter something');
 				assert.isNull(locator);
 				locator = dialog.Helpers.extractLocator('chapter search query');
 				assert.isNull(locator);
 			});
 			
-			it("has no locator value", function() {
+			it("has no locator value", function () {
 				locator = dialog.Helpers.extractLocator('history of the US p');
 				assert.isNull(locator);
 				locator = dialog.Helpers.extractLocator('page');
 				assert.isNull(locator);
 			});
 			
-			it("has textual locator value that does not follow locator label", function() {
+			it("has textual locator value that does not follow locator label", function () {
 				locator = dialog.Helpers.extractLocator('history of the US note blank "testing"');
 				assert.isNull(locator);
 			});
 			
-			it("has numeric locator value that does not follow locator label", function() {
+			it("has numeric locator value that does not follow locator label", function () {
 				locator = dialog.Helpers.extractLocator('history of the US p blank 11-12');
 				assert.isNull(locator);
 			});
 			
-			it("has textual locator value not in the end of the string", function() {
+			it("has textual locator value not in the end of the string", function () {
 				locator = dialog.Helpers.extractLocator('history of the US chapter "some quotations" some more text');
 				assert.isNull(locator);
 			});
 			
-			it("has numeric locator value not in the end of the string", function() {
+			it("has numeric locator value not in the end of the string", function () {
 				locator = dialog.Helpers.extractLocator('history of the US page 10-15 some more text');
 				assert.isNull(locator);
 			});

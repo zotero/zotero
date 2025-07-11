@@ -10,54 +10,54 @@ describe("Zotero.FullText", function () {
 		});
 		
 		describe("#indexItems()", function () {
-			it("should index a text file by default", function* () {
-				var item = yield importFileAttachment('test.txt');
+			it("should index a text file by default", async function () {
+				var item = await importFileAttachment('test.txt');
 				assert.equal(
-					(yield Zotero.Fulltext.getIndexedState(item)),
+					((await Zotero.Fulltext.getIndexedState(item))),
 					Zotero.Fulltext.INDEX_STATE_INDEXED
 				);
 			})
 			
-			it("should skip indexing of a text file if fulltext.textMaxLength is 0", function* () {
+			it("should skip indexing of a text file if fulltext.textMaxLength is 0", async function () {
 				Zotero.Prefs.set('fulltext.textMaxLength', 0);
-				var item = yield importFileAttachment('test.txt');
+				var item = await importFileAttachment('test.txt');
 				assert.equal(
-					(yield Zotero.Fulltext.getIndexedState(item)),
+					((await Zotero.Fulltext.getIndexedState(item))),
 					Zotero.Fulltext.INDEX_STATE_UNINDEXED
 				);
 			})
 			
-			it("should index a PDF by default", function* () {
-				var item = yield importFileAttachment('test.pdf');
+			it("should index a PDF by default", async function () {
+				var item = await importFileAttachment('test.pdf');
 				assert.equal(
-					(yield Zotero.Fulltext.getIndexedState(item)),
+					((await Zotero.Fulltext.getIndexedState(item))),
 					Zotero.Fulltext.INDEX_STATE_INDEXED
 				);
 			})
 			
-			it("should skip indexing of a PDF if fulltext.textMaxLength is 0", function* () {
+			it("should skip indexing of a PDF if fulltext.textMaxLength is 0", async function () {
 				Zotero.Prefs.set('fulltext.textMaxLength', 0);
-				var item = yield importFileAttachment('test.pdf');
+				var item = await importFileAttachment('test.pdf');
 				assert.equal(
-					(yield Zotero.Fulltext.getIndexedState(item)),
+					((await Zotero.Fulltext.getIndexedState(item))),
 					Zotero.Fulltext.INDEX_STATE_UNINDEXED
 				);
 			})
 			
-			it("should skip indexing of a PDF if fulltext.pdfMaxPages is 0", function* () {
+			it("should skip indexing of a PDF if fulltext.pdfMaxPages is 0", async function () {
 				Zotero.Prefs.set('fulltext.pdfMaxPages', 0);
-				var item = yield importFileAttachment('test.pdf');
+				var item = await importFileAttachment('test.pdf');
 				assert.equal(
-					(yield Zotero.Fulltext.getIndexedState(item)),
+					((await Zotero.Fulltext.getIndexedState(item))),
 					Zotero.Fulltext.INDEX_STATE_UNINDEXED
 				);
 			})
 
-			it("should skip indexing of an EPUB if fulltext.textMaxLength is 0", function* () {
+			it("should skip indexing of an EPUB if fulltext.textMaxLength is 0", async function () {
 				Zotero.Prefs.set('fulltext.textMaxLength', 0);
-				var item = yield importFileAttachment('recognizeEPUB_test_content.epub');
+				var item = await importFileAttachment('recognizeEPUB_test_content.epub');
 				assert.equal(
-					(yield Zotero.Fulltext.getIndexedState(item)),
+					((await Zotero.Fulltext.getIndexedState(item))),
 					Zotero.Fulltext.INDEX_STATE_UNINDEXED
 				);
 			});
@@ -87,29 +87,29 @@ describe("Zotero.FullText", function () {
 		});
 		
 		describe("#indexPDF()", function () {
-			it("should create cache files for linked attachments in storage directory", function* () {
+			it("should create cache files for linked attachments in storage directory", async function () {
 				var filename = 'test.pdf';
 				var file = OS.Path.join(getTestDataDirectory().path, filename);
-				var tempDir = yield getTempDirectory();
+				var tempDir = await getTempDirectory();
 				var linkedFile = OS.Path.join(tempDir, filename);
-				yield OS.File.copy(file, linkedFile);
+				await OS.File.copy(file, linkedFile);
 				
-				var item = yield Zotero.Attachments.linkFromFile({ file: linkedFile });
+				var item = await Zotero.Attachments.linkFromFile({ file: linkedFile });
 				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
-				assert.isTrue(yield OS.File.exists(storageDir));
-				assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, '.zotero-ft-cache')));
-				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, filename)));
+				assert.isTrue(await OS.File.exists(storageDir));
+				assert.isTrue(await OS.File.exists(OS.Path.join(storageDir, '.zotero-ft-cache')));
+				assert.isFalse(await OS.File.exists(OS.Path.join(storageDir, filename)));
 			});
 		});
 	});
 	
 	describe("#getUnsyncedContent()", function () {
-		it("should get content that hasn't been uploaded", function* () {
+		it("should get content that hasn't been uploaded", async function () {
 			var toSync = [];
-			var group = yield getGroup();
+			var group = await getGroup();
 			
-			var add = Zotero.Promise.coroutine(function* (options = {}) {
-				let item = yield createDataObject('item', { libraryID: options.libraryID });
+			var add = async function (options = {}) {
+				let item = await createDataObject('item', { libraryID: options.libraryID });
 				let attachment = new Zotero.Item('attachment');
 				if (options.libraryID) {
 					attachment.libraryID = options.libraryID;
@@ -122,12 +122,12 @@ describe("Zotero.FullText", function () {
 				if (options.synced) {
 					attachment.synced = true;
 				}
-				yield attachment.saveTx();
-				yield Zotero.Attachments.createDirectoryForItem(attachment);
+				await attachment.saveTx();
+				await Zotero.Attachments.createDirectoryForItem(attachment);
 				
 				let path = attachment.getFilePath();
 				let content = new Array(10).fill("").map(x => Zotero.Utilities.randomString()).join(" ");
-				yield Zotero.File.putContentsAsync(path, content);
+				await Zotero.File.putContentsAsync(path, content);
 				
 				if (!options.skip) {
 					toSync.push({
@@ -137,17 +137,17 @@ describe("Zotero.FullText", function () {
 						indexedPages: 0
 					});
 				}
-			});
-			yield add({ synced: true });
-			yield add({ synced: true });
+			};
+			await add({ synced: true });
+			await add({ synced: true });
 			// Unsynced attachment shouldn't uploaded
-			yield add({ skip: true });
+			await add({ skip: true });
 			// Attachment in another library shouldn't be uploaded
-			yield add({ libraryID: group.libraryID, synced: true, skip: true });
+			await add({ libraryID: group.libraryID, synced: true, skip: true });
 			// PDF attachment
-			var pdfAttachment = yield importFileAttachment('test.pdf');
+			var pdfAttachment = await importFileAttachment('test.pdf');
 			pdfAttachment.synced = true;
-			yield pdfAttachment.saveTx();
+			await pdfAttachment.saveTx();
 			toSync.push({
 				item: pdfAttachment,
 				content: "Zotero [zoh-TAIR-oh] is a free, easy-to-use tool to help you collect, "
@@ -156,9 +156,9 @@ describe("Zotero.FullText", function () {
 				indexedPages: 1
 			});
 			
-			yield Zotero.Fulltext.indexItems(toSync.map(x => x.item.id));
+			await Zotero.Fulltext.indexItems(toSync.map(x => x.item.id));
 			
-			var data = yield Zotero.FullText.getUnsyncedContent(Zotero.Libraries.userLibraryID);
+			var data = await Zotero.FullText.getUnsyncedContent(Zotero.Libraries.userLibraryID);
 			assert.lengthOf(data, 3);
 			let contents = toSync.map(x => x.content);
 			
@@ -170,25 +170,25 @@ describe("Zotero.FullText", function () {
 			}
 		});
 		
-		it("should mark PDF attachment content as missing if cache file doesn't exist", function* () {
-			var item = yield importFileAttachment('test.pdf');
+		it("should mark PDF attachment content as missing if cache file doesn't exist", async function () {
+			var item = await importFileAttachment('test.pdf');
 			item.synced = true;
-			yield item.saveTx();
+			await item.saveTx();
 			
-			yield Zotero.Fulltext.indexItems([item.id]);
-			yield OS.File.remove(Zotero.Fulltext.getItemCacheFile(item).path);
+			await Zotero.Fulltext.indexItems([item.id]);
+			await OS.File.remove(Zotero.Fulltext.getItemCacheFile(item).path);
 			
 			var sql = "SELECT synced FROM fulltextItems WHERE itemID=?";
-			var synced = yield Zotero.DB.valueQueryAsync(sql, item.id);
+			var synced = await Zotero.DB.valueQueryAsync(sql, item.id);
 			assert.equal(synced, Zotero.Fulltext.SYNC_STATE_UNSYNCED);
-			var indexed = yield Zotero.Fulltext.getIndexedState(item);
+			var indexed = await Zotero.Fulltext.getIndexedState(item);
 			assert.equal(indexed, Zotero.Fulltext.INDEX_STATE_INDEXED);
 			
-			yield Zotero.Fulltext.getUnsyncedContent(item.libraryID);
+			await Zotero.Fulltext.getUnsyncedContent(item.libraryID);
 			
-			synced = yield Zotero.DB.valueQueryAsync(sql, item.id);
+			synced = await Zotero.DB.valueQueryAsync(sql, item.id);
 			assert.equal(synced, Zotero.Fulltext.SYNC_STATE_MISSING);
-			indexed = yield Zotero.Fulltext.getIndexedState(item);
+			indexed = await Zotero.Fulltext.getIndexedState(item);
 			assert.equal(indexed, Zotero.Fulltext.INDEX_STATE_UNINDEXED);
 		});
 	})
