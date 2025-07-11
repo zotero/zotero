@@ -12,87 +12,21 @@ import DeepTutorStreamingComponent from './DeepTutorStreamingComponent';
 import DeepTutorUserMessage from './DeepTutorUserMessage';
 const markdownit = require('markdown-it');
 // Try to require markdown-it-container, fallback to a simpler implementation if not available
-let markdownItContainer;
 try {
-	markdownItContainer = require('markdown-it-container');
+	require('markdown-it-container');
 	Zotero.debug(`DeepTutorChatBox: markdown-it-container found, using it`);
-} catch (e) {
+}
+catch {
 	// Fallback implementation for markdown-it-container
 	Zotero.debug(`DeepTutorChatBox: markdown-it-container not found, using fallback implementation`);
-	markdownItContainer = function(md, name, options) {
-		const validate = options.validate || (() => true);
-		const render = options.render || (() => '');
-		
-		md.block.ruler.before('fence', `container_${name}`, function(state, start, end, silent) {
-			const marker = ':::';
-			const markerLen = marker.length;
-			let pos = state.bMarks[start] + state.tShift[start];
-			let max = state.eMarks[start];
-			
-			if (pos + markerLen > max) { return false; }
-			if (state.src.slice(pos, pos + markerLen) !== marker) { return false; }
-			
-			pos += markerLen;
-			const info = state.src.slice(pos, max).trim();
-			
-			if (!validate(info)) { return false; }
-			if (silent) { return true; }
-			
-			let nextLine = start;
-			let haveEndMarker = false;
-			
-			while (nextLine < end) {
-				nextLine++;
-				pos = state.bMarks[nextLine] + state.tShift[nextLine];
-				max = state.eMarks[nextLine];
-				
-				if (pos < max && state.tShift[nextLine] < state.blkIndent) {
-					break;
-				}
-				
-				if (state.src.slice(pos, pos + markerLen) === marker) {
-					haveEndMarker = true;
-					break;
-				}
-			}
-			
-			const oldParent = state.parentType;
-			const oldLineMax = state.lineMax;
-			state.parentType = 'container';
-			
-			const openToken = state.push(`container_${name}_open`, 'div', 1);
-			openToken.markup = marker;
-			openToken.block = true;
-			openToken.info = info;
-			openToken.map = [start, nextLine];
-			
-			state.lineMax = nextLine;
-			state.md.block.tokenize(state, start + 1, nextLine);
-			state.lineMax = oldLineMax;
-			state.parentType = oldParent;
-			
-			const closeToken = state.push(`container_${name}_close`, 'div', -1);
-			closeToken.markup = marker;
-			closeToken.block = true;
-			
-			state.line = nextLine + (haveEndMarker ? 1 : 0);
-			return true;
-		});
-		
-		md.renderer.rules[`container_${name}_open`] = function(tokens, idx) {
-			return render(tokens, idx);
-		};
-		md.renderer.rules[`container_${name}_close`] = function(tokens, idx) {
-			return render(tokens, idx);
-		};
-	};
 }
 const md = markdownit({
 	html: true,
 	linkify: true,
-	typographer: true,        // Enable built-in table support
-	breaks: false,       // GFM line breaks (optional)
-	strikethrough: true  // Enable strikethrough support
+	typographer: true,
+	tables: true, // Enable built-in table support
+	breaks: false, // GFM line breaks (optional)
+	strikethrough: true // Enable strikethrough support
 });
 
 // Re-enable markdown-it-katex plugin now that XML parsing is fixed
@@ -108,15 +42,17 @@ try {
 	const markdownItTable = require('markdown-it-table');
 	md.use(markdownItTable);
 	Zotero.debug(`DeepTutorChatBox: markdown-it-table plugin loaded successfully`);
-} catch (e) {
+}
+catch {
 	Zotero.debug(`DeepTutorChatBox: markdown-it-table plugin not found, using built-in table support`);
-	
+		
 	// Try alternative GFM plugin that includes tables
 	try {
 		const markdownItGfm = require('markdown-it-gfm');
 		md.use(markdownItGfm);
 		Zotero.debug(`DeepTutorChatBox: markdown-it-gfm plugin loaded successfully`);
-	} catch (e2) {
+	}
+	catch {
 		Zotero.debug(`DeepTutorChatBox: markdown-it-gfm plugin not found, using basic table support only`);
 	}
 }
@@ -142,13 +78,16 @@ try {
 		Zotero.debug(`DeepTutorChatBox: Table test PASSED - tables are being rendered correctly`);
 		if (testTableResult.includes('<span>HTML</span>')) {
 			Zotero.debug(`DeepTutorChatBox: HTML support test PASSED - HTML in tables is preserved`);
-		} else {
+		}
+		else {
 			Zotero.debug(`DeepTutorChatBox: HTML support test FAILED - HTML in tables was escaped`);
 		}
-	} else {
+	}
+	else {
 		Zotero.debug(`DeepTutorChatBox: Table test FAILED - no table elements found in output`);
 	}
-} catch (error) {
+}
+catch (error) {
 	Zotero.debug(`DeepTutorChatBox: Table test ERROR: ${error.message}`);
 }
 
@@ -626,7 +565,7 @@ const styles = {
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
 const SessionTabClosePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_SES_TAB_CLOSE.svg';
 const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
-const DeepTutorChatBox = ({ currentSession, key, onSessionSelect, onInitWaitChange }) => {
+const DeepTutorChatBox = ({ currentSession, onSessionSelect, onInitWaitChange }) => {
 	const [messages, setMessages] = useState([]);
 	const [inputValue, setInputValue] = useState('');
 	const [sessionId, setSessionId] = useState(null);
@@ -660,7 +599,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect, onInitWaitChan
 				const sourceData = JSON.parse(decodeURIComponent(encodedSourceData));
 				Zotero.debug(`DeepTutorChatBox: Source button clicked with data:`, sourceData);
 				handleSourceClick(sourceData);
-			} catch (error) {
+			}
+			catch (error) {
 				Zotero.debug(`DeepTutorChatBox: Error parsing source data: ${error.message}`);
 			}
 		};
@@ -674,7 +614,8 @@ const DeepTutorChatBox = ({ currentSession, key, onSessionSelect, onInitWaitChan
 						const decodedData = JSON.parse(decodeURIComponent(sourceData));
 						Zotero.debug(`DeepTutorChatBox: Source button clicked via delegation:`, decodedData);
 						handleSourceClick(decodedData);
-					} catch (error) {
+					}
+					catch (error) {
 						Zotero.debug(`DeepTutorChatBox: Error parsing source data from button: ${error.message}`);
 					}
 				}
@@ -837,7 +778,8 @@ This demonstrates multiple table formats working correctly.
 					if (sourceDataStr) {
 						sourceData = JSON.stringify(JSON.parse(sourceDataStr));
 					}
-				} catch (error) {
+				}
+				catch (error) {
 					Zotero.debug(`DeepTutorChatBox: Error retrieving source data from prefs: ${error.message}`);
 				}
 				
@@ -888,7 +830,8 @@ This demonstrates multiple table formats working correctly.
 				// Use minimum height for empty or short single-line content
 				newHeight = 24; // 1.5rem in pixels
 				Zotero.debug(`DeepTutorChatBox: Using minimum height ${newHeight}px for single-line content`);
-			} else {
+			}
+			else {
 				// Use scrollHeight for multi-line content, but cap at maxHeight
 				newHeight = Math.min(scrollHeight, maxHeight);
 				Zotero.debug(`DeepTutorChatBox: Using scroll height ${newHeight}px for multi-line content`);
@@ -899,7 +842,8 @@ This demonstrates multiple table formats working correctly.
 			// Show/hide scrollbar based on content
 			if (scrollHeight > maxHeight) {
 				textarea.style.overflowY = 'scroll';
-			} else {
+			}
+			else {
 				textarea.style.overflowY = 'hidden';
 			}
 		}
@@ -1291,7 +1235,8 @@ This demonstrates multiple table formats working correctly.
 			// Reset textarea height after clearing
 			setTimeout(adjustTextareaHeight, 0);
 			await userSendMessage(trimmedValue);
-		} else {
+		}
+		else {
 			setInputValue(''); // Clear input even if empty
 			// Reset textarea height after clearing
 			setTimeout(adjustTextareaHeight, 0);
@@ -1612,8 +1557,8 @@ This demonstrates multiple table formats working correctly.
 				if (typeof substring === 'string') {
 					const index = currentString.indexOf(substring);
 					if (index !== -1) {
-						currentString = currentString.slice(0, index) + 
-							currentString.slice(index + (substring?.length || 0));
+						currentString = currentString.slice(0, index)
+							+ currentString.slice(index + (substring?.length || 0));
 					}
 				}
 			}
@@ -1629,11 +1574,12 @@ This demonstrates multiple table formats working correctly.
 			const endResponseIndex = text.indexOf('</response>');
 			if (endResponseIndex !== -1) {
 				cleanText = text.substring(responseIndex, endResponseIndex);
-			} else {
+			}
+			else {
 				cleanText = text.substring(responseIndex);
 			}
 		}
-				// Replacement for source span identifier
+		// Replacement for source span identifier
 		Zotero.debug(`3TESTTESTTEST DeepTutorChatBox: formatResponseForMarkdown - Replacing source span identifiers ${cleanText}`);
 		cleanText = cleanText.replace(/\[<(\d{1,2})>\]/g, (match, sourceId) => {
 			const sourceIndex = parseInt(sourceId, 10) - 1; // Convert to 0-based index
@@ -1664,7 +1610,8 @@ This demonstrates multiple table formats working correctly.
 				const htmlSpan = `<span class="deeptutor-source-placeholder" data-source-id="${sourceId}" data-page="${source.page || 'Unknown'}">[${sourceId}]</span>`;
 				Zotero.debug(`DeepTutorChatBox: Generated HTML span for source ${sourceId}: "${htmlSpan}"`);
 				return htmlSpan;
-			} else {
+			}
+			else {
 				// Fallback if source not found
 				const storageKey = `deeptutor_source_${sessionId}_${sourceIndex}`;
 				const fallbackData = {
@@ -1690,13 +1637,20 @@ This demonstrates multiple table formats working correctly.
 
 		// Remove any remaining custom tags that might interfere with XML parsing
 		cleanText = removeSubstrings(cleanText, [
-			'<thinking>', '</thinking>',
-			'<think>', '</think>',
-			'<followup_question>', '</followup_question>',
-			'<source_page>', '</source_page>',
-			'<sources>', '</sources>',
-			'<id>', '</id>',
-			'<appendix>', '</appendix>'
+			'<thinking>',
+			'</thinking>',
+			'<think>',
+			'</think>',
+			'<followup_question>',
+			'</followup_question>',
+			'<source_page>',
+			'</source_page>',
+			'<sources>',
+			'</sources>',
+			'<id>',
+			'</id>',
+			'<appendix>',
+			'</appendix>'
 		]);
 		
 		// Remove any other custom tags that might cause XML issues
@@ -1772,10 +1726,12 @@ This demonstrates multiple table formats working correctly.
 					parser = new xmldom.DOMParser();
 					serializer = new xmldom.XMLSerializer();
 					Zotero.debug(`DeepTutorChatBox: Successfully loaded and using xmldom package for DOM parsing`);
-				} else {
+				}
+				else {
 					Zotero.debug(`DeepTutorChatBox: xmldom package loaded but missing DOMParser/XMLSerializer`);
 				}
-			} catch (e) {
+			}
+			catch (e) {
 				Zotero.debug(`DeepTutorChatBox: xmldom package not available or failed to load: ${e.message}`);
 			}
 			
@@ -1785,17 +1741,20 @@ This demonstrates multiple table formats working correctly.
 				if (typeof DOMParser !== 'undefined') {
 					parser = new DOMParser();
 					serializer = new XMLSerializer();
-				} else if (typeof window !== 'undefined' && window.DOMParser) {
+				}
+				else if (typeof window !== 'undefined' && window.DOMParser) {
 					parser = new window.DOMParser();
 					serializer = new window.XMLSerializer();
-				} else if (typeof Components !== 'undefined') {
+				}
+				else if (typeof Components !== 'undefined') {
 					// Try Firefox/XUL specific APIs
 					try {
 						parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 							.createInstance(Components.interfaces.nsIDOMParser);
 						serializer = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
 							.createInstance(Components.interfaces.nsIDOMSerializer);
-					} catch (e) {
+					}
+					catch (e) {
 						Zotero.debug(`DeepTutorChatBox: Components.classes DOMParser not available: ${e.message}`);
 					}
 				}
@@ -1823,7 +1782,8 @@ This demonstrates multiple table formats working correctly.
 				// Debug: Show the HTML being parsed (truncated for readability)
 				if (wrappedHtml.length > 500) {
 					Zotero.debug(`DeepTutorChatBox: Parsing HTML content (${wrappedHtml.length} chars, first 500): ${wrappedHtml.substring(0, 500)}...`);
-				} else {
+				}
+				else {
 					Zotero.debug(`DeepTutorChatBox: Parsing HTML content (${wrappedHtml.length} chars): ${wrappedHtml}`);
 				}
 				
@@ -1836,7 +1796,8 @@ This demonstrates multiple table formats working correctly.
 						try {
 							doc = parser.parseFromString(wrappedHtml, 'text/html');
 							Zotero.debug(`DeepTutorChatBox: Successfully parsed as HTML`);
-						} catch (htmlError) {
+						}
+						catch (htmlError) {
 							Zotero.debug(`DeepTutorChatBox: HTML parsing failed: ${htmlError.message}`);
 						}
 					}
@@ -1852,7 +1813,8 @@ This demonstrates multiple table formats working correctly.
 							if (parseError) {
 								throw new Error('XML parsing failed');
 							}
-						} catch (xmlError) {
+						}
+						catch (xmlError) {
 							Zotero.debug(`DeepTutorChatBox: XML parsing also failed: ${xmlError.message}`);
 							throw new Error('Both HTML and XML parsing failed');
 						}
@@ -1865,8 +1827,20 @@ This demonstrates multiple table formats working correctly.
 							
 							// List of self-closing HTML tags
 							const selfClosingTags = [
-								'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
-								'link', 'meta', 'param', 'source', 'track', 'wbr'
+								'area',
+								'base',
+								'br',
+								'col',
+								'embed',
+								'hr',
+								'img',
+								'input',
+								'link',
+								'meta',
+								'param',
+								'source',
+								'track',
+								'wbr'
 							];
 							
 							// For self-closing tags, ensure they have no children
@@ -1889,21 +1863,35 @@ This demonstrates multiple table formats working correctly.
 					
 					// Serialize back to string
 					const serializedXml = serializer.serializeToString(doc.documentElement);
-					const result = serializedXml.replace(/^<root[^>]*>/, '').replace(/<\/root>$/, '');
+					let result = serializedXml.replace(/^<root[^>]*>/, '').replace(/<\/root>$/, '');
 					
-					Zotero.debug(`DeepTutorChatBox: Successfully converted HTML to XML using DOM parser`);
+					// Clean up whitespace: remove spaces around specific HTML tags
+					result = result
+						// Remove spaces before opening tags
+						.replace(/\s+<(ol|ul|li|p|div|span|h[1-6])>/g, '<$1>')
+						// Remove spaces after opening tags
+						.replace(/<(ol|ul|li|p|div|span|h[1-6])>\s+/g, '<$1>')
+						// Remove spaces before closing tags
+						.replace(/\s+<\/(ol|ul|li|p|div|span|h[1-6])>/g, '</$1>')
+						// Remove spaces after closing tags
+						.replace(/<\/(ol|ul|li|p|div|span|h[1-6])>\s+/g, '</$1>')
+						// Remove spaces at the beginning and end of the entire string
+						.trim();
+					
+					Zotero.debug(`DeepTutorChatBox: Successfully converted HTML to XML using DOM parser and cleaned whitespace`);
 					return result;
-					
-				} catch (domError) {
+				}
+				catch (domError) {
 					Zotero.debug(`DeepTutorChatBox: DOM parsing failed: ${domError.message}, falling back to regex`);
 					throw domError;
 				}
-			} else {
+			}
+			else {
 				// No DOM parsing available, skip to regex
 				throw new Error('No DOM parsing APIs available');
 			}
-			
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutorChatBox: DOM parsing failed, using enhanced regex fallback: ${error.message}`);
 			
 			// Enhanced regex-based approach with better XML compatibility
@@ -1934,7 +1922,8 @@ This demonstrates multiple table formats working correctly.
 					// Ensure the tag is self-closed and doesn't already end with />
 					if (match.endsWith('/>')) {
 						return match; // Already self-closed
-					} else {
+					}
+					else {
 						return `<${tag}${attrs}/>`;
 					}
 				});
@@ -1972,8 +1961,8 @@ This demonstrates multiple table formats working correctly.
 				Zotero.debug(`DeepTutorChatBox: Enhanced regex processing made changes to HTML`);
 				const changes = [];
 				selfClosingTagPatterns.forEach(({ tag }) => {
-					if (html.includes(`<${tag}`) && processedHtml.includes(`<${tag}`) && 
-						!html.includes(`<${tag}`) === processedHtml.includes(`<${tag}/>`)) {
+					if (html.includes(`<${tag}`) && processedHtml.includes(`<${tag}`)
+						&& !html.includes(`<${tag}`) === processedHtml.includes(`<${tag}/>`)) {
 						changes.push(`${tag} tags made self-closing`);
 					}
 				});
@@ -1982,6 +1971,20 @@ This demonstrates multiple table formats working correctly.
 				}
 			}
 			
+			// Clean up whitespace: remove spaces around specific HTML tags
+			processedHtml = processedHtml
+				// Remove spaces before opening tags
+				.replace(/\s+<(ol|ul|li|p|div|span|h[1-6])>/g, '<$1>')
+				// Remove spaces after opening tags
+				.replace(/<(ol|ul|li|p|div|span|h[1-6])>\s+/g, '<$1>')
+				// Remove spaces before closing tags
+				.replace(/\s+<\/(ol|ul|li|p|div|span|h[1-6])>/g, '</$1>')
+				// Remove spaces after closing tags
+				.replace(/<\/(ol|ul|li|p|div|span|h[1-6])>\s+/g, '</$1>')
+				// Remove spaces at the beginning and end of the entire string
+				.trim();
+			
+			Zotero.debug(`DeepTutorChatBox: Enhanced regex processing completed with whitespace cleanup`);
 			return processedHtml;
 		}
 	};
@@ -2074,7 +2077,7 @@ This demonstrates multiple table formats working correctly.
 		if (!isUser && message.isStreaming && message.streamText) {
 			return (
 				<div key={message.id || index} style={styles.messageContainer}>
-					<DeepTutorStreamingComponent 
+					<DeepTutorStreamingComponent
 						streamText={message.streamText || ''}
 						hideStreamResponse={false}
 					/>
@@ -2128,7 +2131,8 @@ This demonstrates multiple table formats working correctly.
 								if (differences.length > 0) {
 									Zotero.debug(`1234567890 DeepTutorChatBox: Specific changes detected: ${differences.join(', ')}`);
 								}
-							} else {
+							}
+							else {
 								Zotero.debug(`DeepTutorChatBox: DOM XML conversion made no changes - HTML was already XML-compatible`);
 							}
 							
@@ -2138,7 +2142,7 @@ This demonstrates multiple table formats working correctly.
 									{processedResult ? (
 										<div
 											className="markdown mb-0 flex flex-col"
-											dangerouslySetInnerHTML={{ 
+											dangerouslySetInnerHTML={{
 												__html: (() => {
 													try {
 														// Final validation before rendering
@@ -2148,7 +2152,8 @@ This demonstrates multiple table formats working correctly.
 														}
 														Zotero.debug(`DeepTutorChatBox: Successfully preparing DOM-processed content for React rendering`);
 														return processedResult;
-													} catch (error) {
+													}
+													catch (error) {
 														Zotero.debug(`DeepTutorChatBox: Error preparing content for React: ${error.message}`);
 														return null;
 													}
@@ -2173,9 +2178,10 @@ This demonstrates multiple table formats working correctly.
 									)}
 								</div>
 							);
-						} catch (error) {
-											// Zotero.debug(`DeepTutorChatBox: Error processing markdown: ${error.message}`);
-				// Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
+						}
+						catch (error) {
+							// Zotero.debug(`DeepTutorChatBox: Error processing markdown: ${error.message}`);
+							// Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
 							// Fallback to plain text if markdown processing fails
 							return (
 								<div key={subIndex} style={styles.messageText}>
@@ -3027,14 +3033,15 @@ This demonstrates multiple table formats working correctly.
 		if (!oldSessionId) return;
 		
 		// Clean up source data for previous session
-		currentSourceIndices.forEach(sourceIndex => {
+		currentSourceIndices.forEach((sourceIndex) => {
 			const storageKey = `deeptutor_source_${oldSessionId}_${sourceIndex}`;
 			try {
 				if (Zotero.Prefs.get(storageKey)) {
 					Zotero.Prefs.clear(storageKey);
 					Zotero.debug(`DeepTutorChatBox: Cleaned up source data for ${storageKey}`);
 				}
-			} catch (error) {
+			}
+			catch (error) {
 				Zotero.debug(`DeepTutorChatBox: Error cleaning up source data: ${error.message}`);
 			}
 		});
@@ -3103,7 +3110,7 @@ This demonstrates multiple table formats working correctly.
 				// Copy the selected text
 				navigator.clipboard.writeText(selectedText).then(() => {
 					Zotero.debug('DeepTutorChatBox: Text copied successfully');
-				}).catch(err => {
+				}).catch((err) => {
 					Zotero.debug(`DeepTutorChatBox: Copy failed: ${err.message}`);
 				});
 			}
@@ -3119,7 +3126,7 @@ This demonstrates multiple table formats working correctly.
 	}, []);
 
 	return (
-		<div 
+		<div
 			className="deeptutor-chat-box"
 			style={styles.container}
 		>
@@ -3333,9 +3340,9 @@ This demonstrates multiple table formats working correctly.
 										...styles.contextDocumentButton,
 										...(hoveredContextDoc === index ? {
 											...styles.contextDocumentButtonHover,
-											background: contextDoc.filePath ? '#D9D9D9' : '#E8E8E8',  // Lighter gray for null filePath
+											background: contextDoc.filePath ? '#D9D9D9' : '#E8E8E8', // Lighter gray for null filePath
 										} : {
-											background: contextDoc.filePath ? '#FFFFFF' : '#F5F5F5'  // Light gray base for null filePath
+											background: contextDoc.filePath ? '#FFFFFF' : '#F5F5F5' // Light gray base for null filePath
 										}),
 										borderBottom: index === contextDocuments.length - 1 ? "none" : "0.0625rem solid #E0E0E0",
 										flexDirection: "column",
@@ -3343,11 +3350,11 @@ This demonstrates multiple table formats working correctly.
 										padding: "0.75rem 0.9375rem",
 										minHeight: contextDoc.filePath ? "3rem" : "auto",
 										gap: "0.3125rem",
-										cursor: contextDoc.filePath ? 'pointer' : 'not-allowed',  // Change cursor for null filePath
-										opacity: contextDoc.filePath ? 1 : 0.7,  // Reduce opacity for null filePath
-										filter: contextDoc.filePath ? 'none' : 'grayscale(20%)'  // Add grayscale effect for null filePath
+										cursor: contextDoc.filePath ? 'pointer' : 'not-allowed', // Change cursor for null filePath
+										opacity: contextDoc.filePath ? 1 : 0.7, // Reduce opacity for null filePath
+										filter: contextDoc.filePath ? 'none' : 'grayscale(20%)' // Add grayscale effect for null filePath
 									}}
-									onClick={() => contextDoc.filePath && handleContextDocumentClick(contextDoc)}  // Only allow click if filePath exists
+									onClick={() => contextDoc.filePath && handleContextDocumentClick(contextDoc)} // Only allow click if filePath exists
 									onMouseEnter={() => setHoveredContextDoc(index)}
 									onMouseLeave={() => setHoveredContextDoc(null)}
 									title={contextDoc.filePath ? `${contextDoc.name}\n${contextDoc.filePath}` : `${contextDoc.name} (Not available)`} // Updated tooltip
