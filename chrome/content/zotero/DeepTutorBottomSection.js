@@ -59,7 +59,7 @@ const styles = {
 		border: 'none',
 		color: '#292929',
 		fontWeight: 500,
-		fontSize: '1.25rem',
+		fontSize: '1rem',
 		lineHeight: '100%',
 		letterSpacing: '0%',
 		fontFamily: 'Roboto, sans-serif',
