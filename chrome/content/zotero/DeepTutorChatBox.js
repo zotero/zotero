@@ -174,7 +174,7 @@ const styles = {
 		marginBottom: '1.25rem',
 		color: '#000000',
 		fontWeight: 500,
-		fontSize: '1rem',
+		fontSize: '1.25rem',
 		lineHeight: '100%',
 		fontFamily: 'Roboto, sans-serif',
 	},
@@ -211,7 +211,6 @@ const styles = {
 	bottomBar: {
 		width: '100%',
 		background: '#F8F6F7',
-		boxShadow: '0 -0.0625rem 0.1875rem rgba(0,0,0,0.08)',
 		display: 'flex',
 		alignItems: 'flex-end', // Changed from 'center' to 'flex-end' to align with textarea
 		justifyContent: 'space-between',
@@ -235,7 +234,7 @@ const styles = {
 		color: '#757575',
 		minHeight: '1.5rem',
 		maxHeight: '7rem', // Approximately 5 lines of text at 0.95rem font size
-		fontSize: '1rem',
+		fontSize: '1.25rem',
 		overflowY: 'auto',
 		fontFamily: 'Roboto, sans-serif',
 		resize: 'none',
@@ -303,7 +302,8 @@ const styles = {
 		fontWeight: 400,
 		textAlign: 'left',
 		alignSelf: 'flex-end',
-		maxWidth: '75%',
+		maxWidth: '85%',
+		width: 'fit-content',
 		fontSize: '0.875rem',
 		lineHeight: '1.35',
 		padding: '0.625rem 1.25rem',
@@ -384,7 +384,7 @@ const styles = {
 		minWidth: '8rem',
 		maxWidth: '83%',
 		fontWeight: 500,
-		fontSize: '1rem',
+		fontSize: '1.25rem',
 		lineHeight: '1.5',
 		cursor: 'pointer',
 		boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.04)',
@@ -505,7 +505,7 @@ const styles = {
 		background: '#FFFFFF',
 	},
 	viewContextText: {
-		fontSize: '1rem',
+		fontSize: '1.25rem',
 		fontWeight: 400,
 		color: '#757575',
 		lineHeight: '100%',
@@ -1229,8 +1229,8 @@ This demonstrates multiple table formats working correctly.
 	};
 
 	const handleSend = async () => {
-		const trimmedValue = inputValue.replace(/\s+$/, ''); // Remove trailing spaces
-		if (trimmedValue.trim()) { // Only send if there's actual content after trimming
+		const trimmedValue = inputValue.trim(); // Remove both leading and trailing spaces
+		if (trimmedValue) { // Only send if there's actual content after trimming
 			setInputValue('');
 			// Reset textarea height after clearing
 			setTimeout(adjustTextareaHeight, 0);
@@ -1413,6 +1413,30 @@ This demonstrates multiple table formats working correctly.
 		catch (error) {
 			setIsStreaming(false); // Set streaming to false on any error
 			Zotero.debug(`DeepTutorChatBox: Error in sendToAPI: ${error.message}`);
+			
+			// Even on error, try to fetch message history to ensure UI consistency
+			try {
+				Zotero.debug(`DeepTutorChatBox: Attempting to fetch message history after error`);
+				await new Promise(resolve => setTimeout(resolve, 1000)); // Shorter wait for error case
+				
+				const historyData = await getMessagesBySessionId(sessionId);
+				if (historyData && historyData.length > 0) {
+					setMessages(historyData);
+					setLatestMessageId(historyData[historyData.length - 1].id);
+					Zotero.debug(`DeepTutorChatBox: Successfully fetched message history after error: ${historyData.length} messages`);
+					
+					// Update conversation with the latest history
+					setConversation(prev => ({
+						...prev,
+						history: historyData,
+					}));
+				} else {
+					Zotero.debug(`DeepTutorChatBox: No message history found after error`);
+				}
+			} catch (historyError) {
+				Zotero.debug(`DeepTutorChatBox: Error fetching message history after timeout: ${historyError.message}`);
+			}
+			
 			throw error;
 		}
 	};
@@ -2087,17 +2111,14 @@ This demonstrates multiple table formats working correctly.
         
 		return (
 			<div key={message.id || index} style={styles.messageStyle}>
-				{/* Add user message icon for user messages */}
-				{isUser && (
-					<div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
-						<DeepTutorUserMessage />
-					</div>
-				)}
 				<div style={{
 					...styles.messageBubble,
 					...(isUser ? styles.userMessage : styles.botMessage),
-					animation: "slideIn 0.3s ease-out"
+					animation: "slideIn 0.3s ease-out",
+					...(isUser && { display: 'flex', alignItems: 'flex-start', gap: '0.5rem' })
 				}}>
+					{/* Add user message icon inside the bubble for user messages */}
+					{isUser && <DeepTutorUserMessage />}
 					{message.subMessages.map((subMessage, subIndex) => {
 						const text = formatResponseForMarkdown(subMessage.text || "", subMessage);
 						try {
@@ -2783,22 +2804,23 @@ This demonstrates multiple table formats working correctly.
 						let filePath = null;
 
 						if (item) {
-							// Try to get the title from the item or its parent
-							if (item.getDisplayTitle) {
+							// Prioritize attachment filename first
+							if (item.attachmentFilename) {
+								documentName = item.attachmentFilename;
+								// Zotero.debug(`DeepTutorChatBox: Using attachment filename: ${documentName}`);
+							}
+							// Fall back to display title if no filename
+							else if (item.getDisplayTitle) {
 								documentName = item.getDisplayTitle();
 								// Zotero.debug(`DeepTutorChatBox: Found item title: ${documentName}`);
 							}
+							// Finally try parent item title
 							else if (item.parentItem) {
 								const parentItem = Zotero.Items.get(item.parentItem);
 								if (parentItem && parentItem.getDisplayTitle) {
 									documentName = parentItem.getDisplayTitle();
 									// Zotero.debug(`DeepTutorChatBox: Found parent item title: ${documentName}`);
 								}
-							}
-							// If we still don't have a good name, try using the filename
-							if (documentName === documentId && item.attachmentFilename) {
-								documentName = item.attachmentFilename;
-								// Zotero.debug(`DeepTutorChatBox: Using attachment filename: ${documentName}`);
 							}
 
 							// Get the file path if it's an attachment

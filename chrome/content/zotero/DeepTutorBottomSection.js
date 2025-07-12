@@ -59,7 +59,7 @@ const styles = {
 		border: 'none',
 		color: '#292929',
 		fontWeight: 500,
-		fontSize: '1rem',
+		fontSize: '1.25rem',
 		lineHeight: '100%',
 		letterSpacing: '0%',
 		fontFamily: 'Roboto, sans-serif',
@@ -379,14 +379,14 @@ class DeepTutorBottomSection extends React.Component {
 							</button>
 							{this.renderProfilePopup()}
 						</div>
-						<button
+						{/* <button
 							style={upgradeButtonDynamicStyle}
 							onClick={this.props.onToggleSubscriptionPopup}
 							onMouseEnter={this.handleUpgradeMouseEnter}
 							onMouseLeave={this.handleUpgradeMouseLeave}
 						>
 							{buttonText}
-						</button>
+						</button> */}
 					</div>
 				</div>
 			</div>
