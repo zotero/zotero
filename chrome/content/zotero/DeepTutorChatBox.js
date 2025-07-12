@@ -2944,21 +2944,21 @@ This demonstrates multiple table formats working correctly.
 					}
 					/* KaTeX math expression styles */
 					.katex {
-						font-size: 0.9em !important;
+						font-size: 1.1em !important;
 						line-height: 1.2 !important;
 						vertical-align: baseline !important;
 					}
 					/* Inline math adjustments */
 					.katex:not(.katex-display) {
-						font-size: 0.85em !important;
+						font-size: 1em !important;
 						line-height: 1.1 !important;
 					}
 					/* Display math adjustments */
 					.katex-display {
-						font-size: 1em !important;
+						font-size: 1.2em !important;
 						line-height: 1.4 !important;
-						margin-bottom: 1em !important;
-						margin-top: 0.5em !important;
+						margin-bottom: 0.5em !important;
+						margin-top: 0.25em !important;
 						text-align: center !important;
 					}
 					/* General subscript/superscript positioning */
@@ -2970,7 +2970,7 @@ This demonstrates multiple table formats working correctly.
 					}
 					/* Improved subscript positioning */
 					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sub {
-						font-size: 80% !important;
+						font-size: 70% !important;
 						margin-right: 0.05em !important;
 						margin-left: -0.1667em !important;
 						margin-top: 0.05em !important;
@@ -2978,7 +2978,7 @@ This demonstrates multiple table formats working correctly.
 					}
 					/* Improved superscript positioning */
 					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sup {
-						font-size: 80% !important;
+						font-size: 70% !important;
 						margin-right: 0.05em !important;
 						margin-left: -0.1667em !important;
 						margin-bottom: 0.5em !important;
@@ -2996,11 +2996,35 @@ This demonstrates multiple table formats working correctly.
 						text-align: center !important;
 						vertical-align: middle !important;
 					}
-					/* Radicals - improve positioning */
+					/* Radicals - improve positioning and sizing */
 					.katex .sqrt {
 						vertical-align: baseline !important;
+						position: relative !important;
 					}
 					.katex .sqrt > .sqrt-sign {
+						vertical-align: baseline !important;
+						position: relative !important;
+						height: 1.4em !important;
+						width: 1em !important;
+					}
+					.katex .sqrt > .sqrt-sign > .sqrt-line {
+						border-top-width: 0.1em !important;
+						top: 0.05em !important;
+						height: 0.1em !important;
+					}
+					.katex .sqrt > .sqrt-sign > .sqrt-line:first-child {
+						top: 0.05em !important;
+					}
+					.katex .sqrt > .sqrt-sign > .sqrt-line:last-child {
+						bottom: 0.05em !important;
+					}
+					.katex .sqrt > .sqrt-radicand {
+						vertical-align: baseline !important;
+						margin-left: 0.15em !important;
+					}
+					/* Ensure the radical symbol itself is properly sized */
+					.katex .sqrt > .sqrt-sign > .sqrt-symbol {
+						font-size: 1.2em !important;
 						vertical-align: baseline !important;
 					}
 					/* General vertical alignment for all math elements */
