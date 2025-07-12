@@ -24,7 +24,7 @@ const createSessionButtonStyle = {
   all: 'revert',
   background: '#fff',
   color: SKY,
-  fontWeight: 700,
+  fontWeight: 500,
   fontSize: '1em',
   border: '0.0625rem solid #0687E5',
   borderRadius: '0.625rem',
@@ -113,7 +113,7 @@ const sessionButtonStyle = {
   border: 'none',
   borderRadius: '0.375rem',
   textAlign: 'left',
-  fontWeight: 600,
+  fontWeight: 500,
   fontSize: '1rem',
   lineHeight: '1.2', // Increased line height for better text visibility
   letterSpacing: '0%',
