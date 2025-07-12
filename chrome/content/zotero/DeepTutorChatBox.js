@@ -2944,39 +2944,81 @@ This demonstrates multiple table formats working correctly.
 					}
 					/* KaTeX math expression styles */
 					.katex {
-						font-size: 1em !important;
-						line-height: 0.3 !important;
+						font-size: 0.9em !important;
+						line-height: 1.2 !important;
+						vertical-align: baseline !important;
 					}
+					/* Inline math adjustments */
+					.katex:not(.katex-display) {
+						font-size: 0.85em !important;
+						line-height: 1.1 !important;
+					}
+					/* Display math adjustments */
+					.katex-display {
+						font-size: 1em !important;
+						line-height: 1.4 !important;
+						margin-bottom: 1em !important;
+						margin-top: 0.5em !important;
+						text-align: center !important;
+					}
+					/* General subscript/superscript positioning */
 					.katex .msupsub {
 						text-align: left !important;
 					}
 					.katex .msubsup {
 						text-align: right !important;
 					}
-					/* Adjust subscript positioning */
+					/* Improved subscript positioning */
 					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sub {
-						font-size: 85% !important;
+						font-size: 80% !important;
 						margin-right: 0.05em !important;
 						margin-left: -0.1667em !important;
-						margin-top: 0.1em !important;
-						vertical-align: -0.25em !important;
+						margin-top: 0.05em !important;
+						vertical-align: -0.2em !important;
 					}
-					/* Adjust superscript positioning */
+					/* Improved superscript positioning */
 					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sup {
-						font-size: 85% !important;
+						font-size: 80% !important;
 						margin-right: 0.05em !important;
 						margin-left: -0.1667em !important;
-						margin-bottom: 1em !important;
-						vertical-align: 0.5em !important;
+						margin-bottom: 0.5em !important;
+						vertical-align: 0.4em !important;
 					}
 					/* Adjust spacing between sub/sup and base */
 					.katex .msupsub > .vlist-t2 {
 						margin-right: 0.05em !important;
 					}
-					/* Prevent subscripts from overlapping with the next line */
-					.katex-display {
-						margin-bottom: 1.5em !important;
-						margin-top: 0.5em !important;
+					/* Fractions - reduce size and improve positioning */
+					.katex .frac-line {
+						border-bottom-width: 0.04em !important;
+					}
+					.katex .frac {
+						text-align: center !important;
+						vertical-align: middle !important;
+					}
+					/* Radicals - improve positioning */
+					.katex .sqrt {
+						vertical-align: baseline !important;
+					}
+					.katex .sqrt > .sqrt-sign {
+						vertical-align: baseline !important;
+					}
+					/* General vertical alignment for all math elements */
+					.katex * {
+						vertical-align: baseline !important;
+					}
+					/* Override for specific elements that need different alignment */
+					.katex .sup,
+					.katex .sub {
+						vertical-align: baseline !important;
+					}
+					/* Prevent excessive spacing */
+					.katex .strut {
+						display: inline-block !important;
+					}
+					/* Improve spacing for operators */
+					.katex .mop {
+						vertical-align: baseline !important;
 					}
 				`
 			}} />
