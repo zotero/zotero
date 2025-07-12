@@ -176,6 +176,9 @@ class DeepTutorBottomSection extends React.Component {
 		};
 	}
 
+	// Temporarily hide subscription button - set to true to show it again
+	showSubscriptionButton = false;
+
 	handleUpgradeMouseEnter = () => {
 		this.setState({ isUpgradeHovered: true });
 	};
@@ -375,18 +378,21 @@ class DeepTutorBottomSection extends React.Component {
 								this.props.onToggleProfilePopup();
 							}}>
 								<img src={this.props.personIconPath} alt="Profile" style={styles.buttonIcon} />
-                                <span style={{ textDecoration: 'underline' }}>Profile</span>
+								<span style={{ textDecoration: 'underline' }}>Profile</span>
 							</button>
 							{this.renderProfilePopup()}
 						</div>
-						{/* <button
-							style={upgradeButtonDynamicStyle}
-							onClick={this.props.onToggleSubscriptionPopup}
-							onMouseEnter={this.handleUpgradeMouseEnter}
-							onMouseLeave={this.handleUpgradeMouseLeave}
-						>
-							{buttonText}
-						</button> */}
+						{/* Temporarily hide subscription button - set to true to show it again */}
+						{this.showSubscriptionButton && (
+							<button
+								style={upgradeButtonDynamicStyle}
+								onClick={this.props.onToggleSubscriptionPopup}
+								onMouseEnter={this.handleUpgradeMouseEnter}
+								onMouseLeave={this.handleUpgradeMouseLeave}
+							>
+								{buttonText}
+							</button>
+						)}
 					</div>
 				</div>
 			</div>

@@ -2786,6 +2786,7 @@ This demonstrates multiple table formats working correctly.
 						overflow: hidden;
 						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1);
 						background: #FFFFFF;
+						table-layout: auto;
 					}
 					.markdown thead {
 						background: #F8F6F7;
@@ -2823,8 +2824,25 @@ This demonstrates multiple table formats working correctly.
 						border-left: 0.0625rem solid #E0E0E0;
 						font-size: 1.0rem;
 						line-height: 1.6;
-						word-break: break-word;
+						white-space: normal;
+						word-break: keep-all;
+						overflow-wrap: break-word;
 						vertical-align: top;
+					}
+					/* First column - prevent word breaking but allow line wrapping */
+					.markdown td:first-child {
+						word-break: keep-all;
+						overflow-wrap: break-word;
+						white-space: normal;
+						width: fit-content;
+						min-width: fit-content;
+					}
+					/* Other columns - allow normal word breaking */
+					.markdown td:nth-child(n+2) {
+						word-break: break-word;
+						overflow-wrap: break-word;
+						white-space: normal;
+						width: auto;
 					}
 					
 					/* Special styling for source buttons within tables */
@@ -2843,6 +2861,15 @@ This demonstrates multiple table formats working correctly.
 						font-size: 0.75em !important;
 						margin: 0 0.15em !important;
 						vertical-align: middle !important;
+					}
+					/* First column styling - prevent word breaking but allow line wrapping */
+					.markdown table td:first-child,
+					.markdown table th:first-child {
+						width: fit-content;
+						min-width: fit-content;
+						white-space: normal;
+						word-break: keep-all;
+						overflow-wrap: break-word;
 					}
 					.deeptutor-source-button {
 						background: #0687E5 !important;
