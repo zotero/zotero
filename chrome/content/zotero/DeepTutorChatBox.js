@@ -5,11 +5,10 @@ import {
 	createMessage,
 	getMessagesBySessionId,
 	getDocumentById,
-	subscribeToChat,
-	getSessionById
+	subscribeToChat
 } from './api/libs/api';
 import DeepTutorStreamingComponent from './DeepTutorStreamingComponent';
-import DeepTutorUserMessage from './DeepTutorUserMessage';
+
 const markdownit = require('markdown-it');
 // Try to require markdown-it-container, fallback to a simpler implementation if not available
 try {
@@ -91,15 +90,7 @@ catch (error) {
 	Zotero.debug(`DeepTutorChatBox: Table test ERROR: ${error.message}`);
 }
 
-// Enums
-const _SessionStatus = {
-	CREATED: 'CREATED',
-	READY: 'READY',
-	PROCESSING_ERROR: 'PROCESSING_ERROR',
-	FINAL_PROCESSING_ERROR: 'FINAL_PROCESSING_ERROR',
-	PROCESSING: 'PROCESSING',
-	DELETED: 'DELETED'
-};
+
 
 class Conversation {
 	constructor({
@@ -162,7 +153,7 @@ const styles = {
 		fontFamily: 'Roboto, sans-serif',
 		position: 'relative',
 		overflow: 'hidden',
-		padding: '1.875rem 1.25rem 0 1.25rem',
+		padding: '1.875rem 0.75rem 0 0.75rem',
 		boxSizing: 'border-box',
 		userSelect: 'text', // Ensure text is selectable
 		WebkitUserSelect: 'text',
@@ -278,7 +269,7 @@ const styles = {
 		flexDirection: 'column',
 	},
 	messageBubble: {
-		padding: '0.625rem 1.25rem',
+		padding: '0.5rem 0.75rem',
 		borderRadius: '0.625rem',
 		maxWidth: '100%',
 		boxShadow: 'none',
@@ -297,7 +288,7 @@ const styles = {
 		backgroundColor: 'white',
 		color: '#1C1B1F',
 		marginLeft: 'auto',
-		marginRight: 0,
+		marginRight: '1rem',
 		borderRadius: '0.625rem',
 		fontWeight: 400,
 		textAlign: 'left',
@@ -306,9 +297,8 @@ const styles = {
 		width: 'fit-content',
 		fontSize: '0.875rem',
 		lineHeight: '1.35',
-		padding: '0.625rem 1.25rem',
-		gap: '0.625rem',
-		minHeight: '2.4375rem',
+		padding: '0.25rem 1.25rem',
+		
 	},
 	botMessage: {
 		backgroundColor: '#F2F2F2',
@@ -320,11 +310,7 @@ const styles = {
 		fontWeight: 400,
 		alignSelf: 'flex-start',
 	},
-	senderLabel: {
-		fontWeight: 'bold',
-		marginBottom: '0.25rem',
-		display: 'block',
-	},
+
 	messageText: {
 		display: 'block',
 		maxWidth: '100%',
@@ -336,33 +322,7 @@ const styles = {
 		msUserSelect: 'text',
 		cursor: 'text',
 	},
-	sourcesContainer: {
-		marginTop: '0.5rem',
-		display: 'flex',
-		gap: '0.5rem',
-		flexWrap: 'wrap',
-		width: '100%',
-		boxSizing: 'border-box',
-	},
-	sourceButton: {
-		all: 'revert',
-		background: '#0687E5',
-		opacity: 0.4,
-		color: 'white',
-		border: 'none',
-		borderRadius: '50%',
-		width: '2rem',
-		height: '2rem',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		fontWeight: 600,
-		fontSize: '0.875rem',
-		cursor: 'pointer',
-		boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
-		padding: 0,
-		transition: 'background 0.2s',
-	},
+
 	questionContainer: {
 		all: 'revert',
 		width: '100%',
@@ -398,88 +358,9 @@ const styles = {
 		overflowWrap: 'break-word',
 		alignSelf: 'flex-end',
 		marginLeft: 'auto',
-		marginRight: '0',
+		marginRight: '1rem',
 	},
-	sessionTabBar: {
-		height: '1.8125rem',
-		background: '#F2F2F2',
-		display: 'flex',
-		alignItems: 'center',
-		padding: '0 0.5rem',
-		gap: '0.625rem',
-		borderBottom: '0.0625rem solid #E0E0E0',
-		width: '100%',
-		boxSizing: 'border-box',
-	},
-	sessionTab: {
-		all: 'revert',
-		gap: '0.625rem',
-		borderRadius: '0.1875rem',
-		padding: '0.3125rem 0.625rem',
-		minWidth: 'fit-content',
-		background: '#D9D9D9',
-		fontSize: '0.8125rem',
-		fontWeight: 400,
-		color: '#292929',
-		cursor: 'pointer',
-		whiteSpace: 'nowrap',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-		border: 'none',
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		boxSizing: 'border-box'
-	},
-	activeSessionTab: {
-		background: '#FFFFFF',
-		color: '#1C1B1F',
-		border: 'none',
-		boxSizing: 'border-box',
-	},
-	sessionTabClose: {
-		all: 'revert',
-		width: '0.5825rem',
-		height: '0.5825rem',
-		marginLeft: '0.3125rem',
-		cursor: 'pointer',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		padding: '0',
-		background: 'none',
-		border: 'none'
-	},
-	sessionTabCloseIcon: {
-		width: '0.5825rem',
-		height: '0.5825rem',
-		objectFit: 'contain'
-	},
-	sessionPopup: {
-		position: 'absolute',
-		top: '1.8125rem',
-		right: '0.5rem',
-		background: '#FFFFFF',
-		border: '0.0625rem solid #E0E0E0',
-		borderRadius: '0.25rem',
-		boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
-		zIndex: 1000,
-		minWidth: '9.375rem',
-	},
-	sessionPopupItem: {
-		padding: '0.5rem 0.75rem',
-		fontSize: '0.8125rem',
-		color: '#292929',
-		cursor: 'pointer',
-		whiteSpace: 'nowrap',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-		background: '#FFFFFF',
-		border: 'none',
-		width: '100%',
-		textAlign: 'left',
-	},
+
 	viewContextContainer: {
 		position: 'relative',
 		width: '100%',
@@ -559,13 +440,13 @@ const styles = {
 		color: '#757575',
 		lineHeight: '1.35',
 		cursor: 'pointer',
+		marginRight: '1rem',
 	}
 };
 
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
-const SessionTabClosePath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_SES_TAB_CLOSE.svg';
 const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
-const DeepTutorChatBox = ({ currentSession, onSessionSelect, onInitWaitChange }) => {
+const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	const [messages, setMessages] = useState([]);
 	const [inputValue, setInputValue] = useState('');
 	const [sessionId, setSessionId] = useState(null);
@@ -575,8 +456,6 @@ const DeepTutorChatBox = ({ currentSession, onSessionSelect, onInitWaitChange })
 	const [isLoading, setIsLoading] = useState(false);
 	const [storagePathsState, setStoragePathsState] = useState([]);
 	const [curSessionType, setcurSessionType] = useState(SessionType.BASIC);
-	const [showSessionPopup, setShowSessionPopup] = useState(false);
-	const MAX_VISIBLE_SESSIONS = 2;
 	const chatLogRef = useRef(null);
 	const contextPopupRef = useRef(null);
 	const textareaRef = useRef(null);
@@ -767,7 +646,7 @@ This demonstrates multiple table formats working correctly.
 			
 			placeholders.forEach((placeholder) => {
 				const sourceId = placeholder.getAttribute('data-source-id');
-				const sourceIndex = parseInt(sourceId, 10) - 1;
+				const sourceIndex = parseInt(sourceId) - 1;
 				const page = placeholder.getAttribute('data-page');
 				
 				// Get source data from Zotero.Prefs
@@ -1074,12 +953,7 @@ This demonstrates multiple table formats working correctly.
 		loadMessages();
 	}, [sessionId]);
 
-	const [_curSessionObj, _setCurSessionObj] = useState(null);
-	const [_pdfDataList, _setPdfDataList] = useState([]);
-	const [_showModelPopup, _setShowModelPopup] = useState(false);
-	const [_showImagePopup, _setShowImagePopup] = useState(false);
 
-	const _modelSelectionRef = useRef(null);
 
 	// Conversation state
 	const [_conversation, setConversation] = useState({
@@ -1441,19 +1315,7 @@ This demonstrates multiple table formats working correctly.
 		}
 	};
 
-	const _handleFileUpload = async (_files) => {
-		// Implementation for file upload
-	};
 
-	const _handleModelSelection = (_modelData) => {
-		// Implementation for model selection
-	};
-
-	const _updateSessionInfo = (newSessionId, newDocumentIds) => {
-		Zotero.debug(`DeepTutorChatBox: Updating session info - Session ID: ${newSessionId}, Document IDs: ${newDocumentIds?.length || 0}`);
-		setSessionId(newSessionId);
-		setDocumentIds(newDocumentIds || []);
-	};
 
 	const _appendMessage = async (sender, message) => {
 		Zotero.debug(`DeepTutorChatBox: Appending message from ${sender}`);
@@ -1531,41 +1393,7 @@ This demonstrates multiple table formats working correctly.
 		}
 	};
 
-	const _onNewSession = async (newSession) => {
-		try {
-			Zotero.debug(`DeepTutorChatBox: onNewSession CALLED for session ${newSession?.id || "null"}: ${JSON.stringify(newSession)}`);
-			// Check if session is too recent
-			const sessionCreationTime = new Date(newSession.creationTime);
-			const now = new Date();
-			const timeDiff = (now - sessionCreationTime) / 1000; // Convert to seconds
-            
-			Zotero.debug(`DeepTutorChatBox: onNewSession - Session ${newSession.id} creation time: ${sessionCreationTime.toISOString()}`);
-			Zotero.debug(`DeepTutorChatBox: onNewSession - Current time: ${now.toISOString()}`);
-			Zotero.debug(`DeepTutorChatBox: onNewSession - Time difference: ${timeDiff} seconds`);
-            
-			if (timeDiff < 15) {
-				// Wait for remaining time
-				const waitTime = Math.ceil(15 - timeDiff) * 1000;
-				Zotero.debug(`DeepTutorChatBox: onNewSession - Session ${newSession.id} is too recent, waiting for ${Math.ceil(15 - timeDiff)} seconds (${waitTime}ms)`);
-				await new Promise(resolve => setTimeout(resolve, waitTime));
-				Zotero.debug(`DeepTutorChatBox: onNewSession - Finished waiting for session ${newSession.id}`);
-			}
-			else {
-				Zotero.debug(`DeepTutorChatBox: onNewSession - Session ${newSession.id} is old enough, no waiting needed`);
-			}
-            
-			// Update userId and sessionId
-			// setUserId(newSession.userId);
-			//setSessionId(newSession.id);
-			Zotero.debug(`DeepTutorChatBox: onNewSession - SENDING AUTOMATIC SUMMARY MESSAGE for session ${newSession.id}`);
-			await userSendMessage("Can you give me a summary of this document?");
-			Zotero.debug(`DeepTutorChatBox: onNewSession - AUTOMATIC SUMMARY MESSAGE SENT for session ${newSession.id}`);
-		}
-		catch (error) {
-			Zotero.debug(`DeepTutorChatBox: onNewSession - ERROR for session ${newSession?.id || "null"}: ${error.message}`);
-			Zotero.debug(`DeepTutorChatBox: onNewSession - ERROR stack: ${error.stack}`);
-		}
-	};
+
 
 	// Format response text for markdown rendering
 	const formatResponseForMarkdown = (text, subMessage) => {
@@ -1606,7 +1434,7 @@ This demonstrates multiple table formats working correctly.
 		// Replacement for source span identifier
 		Zotero.debug(`3TESTTESTTEST DeepTutorChatBox: formatResponseForMarkdown - Replacing source span identifiers ${cleanText}`);
 		cleanText = cleanText.replace(/\[<(\d{1,2})>\]/g, (match, sourceId) => {
-			const sourceIndex = parseInt(sourceId, 10) - 1; // Convert to 0-based index
+			const sourceIndex = parseInt(sourceId) - 1; // Convert to 0-based index
 			
 			Zotero.debug(`DeepTutorChatBox: Processing source reference: ${match}, sourceId: ${sourceId}, sourceIndex: ${sourceIndex}`);
 			
@@ -2118,7 +1946,6 @@ This demonstrates multiple table formats working correctly.
 					...(isUser && { display: 'flex', alignItems: 'flex-start', gap: '0.5rem' })
 				}}>
 					{/* Add user message icon inside the bubble for user messages */}
-					{isUser && <DeepTutorUserMessage />}
 					{message.subMessages.map((subMessage, subIndex) => {
 						const text = formatResponseForMarkdown(subMessage.text || "", subMessage);
 						try {
@@ -2160,47 +1987,49 @@ This demonstrates multiple table formats working correctly.
 							return (
 								<div key={subIndex} style={styles.messageText}>
 									{/* Render text content through markdown-it with DOM-processed XML */}
-									{processedResult ? (
-										<div
-											className="markdown mb-0 flex flex-col"
-											dangerouslySetInnerHTML={{
-												__html: (() => {
-													try {
-														// Final validation before rendering
-														if (typeof processedResult !== 'string' || processedResult.trim() === '') {
-															Zotero.debug(`DeepTutorChatBox: Invalid processedResult, falling back to plain text`);
+									{processedResult
+										? (
+											<div
+												className="markdown mb-0 flex flex-col"
+												dangerouslySetInnerHTML={{
+													__html: (() => {
+														try {
+															// Final validation before rendering
+															if (typeof processedResult !== 'string' || processedResult.trim() === '') {
+																Zotero.debug(`DeepTutorChatBox: Invalid processedResult, falling back to plain text`);
+																return null;
+															}
+															Zotero.debug(`DeepTutorChatBox: Successfully preparing DOM-processed content for React rendering`);
+															return processedResult;
+														}
+														catch (error) {
+															Zotero.debug(`DeepTutorChatBox: Error preparing content for React: ${error.message}`);
 															return null;
 														}
-														Zotero.debug(`DeepTutorChatBox: Successfully preparing DOM-processed content for React rendering`);
-														return processedResult;
-													}
-													catch (error) {
-														Zotero.debug(`DeepTutorChatBox: Error preparing content for React: ${error.message}`);
-														return null;
-													}
-												})()
-											}}
-											style={{
-												fontSize: "16px",
+													})()
+												}}
+												style={{
+													fontSize: "14px",
+													lineHeight: "1.5",
+													wordBreak: "break-word",
+													overflowWrap: "break-word"
+												}}
+											/>
+										)
+										: (
+											<div style={{
+												fontSize: "14px",
 												lineHeight: "1.5",
 												wordBreak: "break-word",
 												overflowWrap: "break-word"
-											}}
-										/>
-									) : (
-										<div style={{
-											fontSize: "16px",
-											lineHeight: "1.5",
-											wordBreak: "break-word",
-											overflowWrap: "break-word"
-										}}>
-											{subMessage.text || ""}
-										</div>
-									)}
+											}}>
+												{subMessage.text || ""}
+											</div>
+										)}
 								</div>
 							);
 						}
-						catch (error) {
+						catch {
 							// Zotero.debug(`DeepTutorChatBox: Error processing markdown: ${error.message}`);
 							// Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
 							// Fallback to plain text if markdown processing fails
@@ -2246,61 +2075,7 @@ This demonstrates multiple table formats working correctly.
 		);
 	};
 
-	// Add animation styles
-	const _animationStyles = {
-		"@keyframes fadeIn": {
-			from: { opacity: 0 },
-			to: { opacity: 1 }
-		},
-		"@keyframes slideIn": {
-			from: { transform: "translateY(20px)", opacity: 0 },
-			to: { transform: "translateY(0)", opacity: 1 }
-		}
-	};
 
-	// Update styles object with new styles
-	const _updatedStyles = {
-		...styles,
-		messageContainer: {
-			...styles.messageContainer,
-			margin: "12px 0",
-			opacity: 0,
-			animation: "fadeIn 0.3s ease-in-out forwards"
-		},
-		messageBubble: {
-			...styles.messageBubble,
-			padding: "12px 16px",
-			borderRadius: "16px",
-			maxWidth: "75%",
-			boxShadow: "none",
-			animation: "slideIn 0.3s ease-out forwards"
-		},
-		userMessage: {
-			...styles.userMessage,
-			backgroundColor: "#0AE2FF",
-			color: "white",
-			marginLeft: "auto",
-			borderBottomRightRadius: "4px"
-		},
-		botMessage: {
-			...styles.botMessage,
-			backgroundColor: "#F8F6F7",
-			color: "#212529",
-			marginRight: "auto",
-			borderBottomLeftRadius: "4px"
-		},
-		senderLabel: {
-			...styles.senderLabel,
-			fontSize: "0.85em",
-			opacity: 0.8,
-			marginBottom: "4px"
-		},
-		messageText: {
-			...styles.messageText,
-			lineHeight: '1.4',
-			whiteSpace: 'pre-wrap'
-		}
-	};
 
 	// Add new useEffect after the existing one
 	useEffect(() => {
@@ -2486,169 +2261,6 @@ This demonstrates multiple table formats working correctly.
 		};
 
 		if (showContextPopup) {
-			document.addEventListener('mousedown', handleClickOutside);
-			return () => {
-				document.removeEventListener('mousedown', handleClickOutside);
-			};
-		}
-	}, [showContextPopup]);
-
-	// Add SessionTabBar component
-	const _SessionTabBar = () => {
-		// Convert Map to sorted array and sort by lastUpdatedTime
-		const sortedSessions = Array.from(recentSessions.entries())
-            .sort((a, b) => {
-            	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
-            	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
-            	return timeB - timeA; // Sort in descending order (most recent first)
-            });
-
-		Zotero.debug(`DeepTutorChatBox: Rendering SessionTabBar with ${sortedSessions.length} sessions`);
-		const visibleSessions = sortedSessions.slice(0, MAX_VISIBLE_SESSIONS);
-		const hiddenSessions = sortedSessions.slice(MAX_VISIBLE_SESSIONS);
-
-		const truncateSessionName = (name) => {
-			return name.length > 11 ? name.substring(0, 11) + "..." : name;
-		};
-
-		const handleSessionClick = async (sessionId) => {
-			try {
-				// Get the session data
-				const session = await getSessionById(sessionId);
-				if (!session) {
-					Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
-					return;
-				}
-
-				// Update recent sessions with new timestamp
-				await updateRecentSessions(sessionId);
-
-				// Update the current session through props
-				if (currentSession?.id !== sessionId) {
-					Zotero.debug(`DeepTutorChatBox: Switching to session ${sessionId}`);
-					// Use the onSessionSelect prop to switch sessions
-					if (onSessionSelect) {
-						onSessionSelect(session.id);
-					}
-				}
-			}
-			catch (error) {
-				Zotero.debug(`DeepTutorChatBox: Error handling session click: ${error.message}`);
-			}
-		};
-
-		const handleCloseSession = async (sessionId, event) => {
-			event.stopPropagation(); // Prevent session click when closing
-            
-			// Check if we're closing the active session
-			const isActiveSession = sessionId === currentSession?.id;
-            
-			setRecentSessions((prev) => {
-				const newMap = new Map(prev);
-				newMap.delete(sessionId);
-                
-				// Store in preferences
-				const sessionsObject = Object.fromEntries(newMap);
-				Zotero.Prefs.set("deeptutor.recentSessions", JSON.stringify(sessionsObject));
-                
-				return newMap;
-			});
-
-			// If we closed the active session and there are other sessions, load the next one
-			if (isActiveSession) {
-				const remainingSessions = Array.from(recentSessions.entries())
-                    .filter(([id]) => id !== sessionId)
-                    .sort((a, b) => {
-                    	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
-                    	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
-                    	return timeB - timeA;
-                    });
-
-				if (remainingSessions.length > 0) {
-					const [nextSessionId, _nextSessionData] = remainingSessions[0];
-					try {
-						const session = await getSessionById(nextSessionId);
-						if (session && onSessionSelect) {
-							onSessionSelect(session.id);
-						}
-					}
-					catch (error) {
-						Zotero.debug(`DeepTutorChatBox: Error loading next session: ${error.message}`);
-					}
-				}
-			}
-		};
-
-		return (
-			<div style={styles.sessionTabBar}>
-				{visibleSessions.map(([sessionId, sessionData]) => (
-					<button
-						key={sessionId}
-						style={{
-							...styles.sessionTab,
-							...(sessionId === currentSession?.id ? styles.activeSessionTab : {})
-						}}
-						onClick={() => handleSessionClick(sessionId)}
-					>
-						{truncateSessionName(sessionData.name)}
-						<button
-							style={styles.sessionTabClose}
-							onClick={e => handleCloseSession(sessionId, e)}
-						>
-							<img
-								src={SessionTabClosePath}
-								alt="Close"
-								style={styles.sessionTabCloseIcon}
-							/>
-						</button>
-					</button>
-				))}
-				{hiddenSessions.length > 0 && (
-					<div style={{ position: "relative" }}>
-						<button
-							style={styles.sessionTab}
-							onClick={() => setShowSessionPopup(!showSessionPopup)}
-						>
-                            More ({hiddenSessions.length})
-						</button>
-						{showSessionPopup && (
-							<div style={styles.sessionPopup}>
-								{hiddenSessions.map(([sessionId, sessionData]) => (
-									<div
-										key={sessionId}
-										style={styles.sessionPopupItem}
-										onClick={() => {
-											handleSessionClick(sessionId);
-											setShowSessionPopup(false);
-										}}
-										onMouseEnter={(e) => {
-											e.target.style.background = "#D9D9D9";
-										}}
-										onMouseLeave={(e) => {
-											e.target.style.background = "#FFFFFF";
-										}}
-									>
-										{truncateSessionName(sessionData.name)}
-									</div>
-								))}
-							</div>
-						)}
-					</div>
-				)}
-			</div>
-		);
-	};
-
-	// Handle click outside context popup
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (contextPopupRef.current && !contextPopupRef.current.contains(event.target)) {
-				Zotero.debug(`DeepTutorChatBox: Clicked outside context popup, closing`);
-				setShowContextPopup(false);
-			}
-		};
-
-		if (showContextPopup) {
 			document.addEventListener("mousedown", handleClickOutside);
 			return () => {
 				document.removeEventListener("mousedown", handleClickOutside);
@@ -2656,48 +2268,6 @@ This demonstrates multiple table formats working correctly.
 		}
 		return undefined; // Explicit return for linter
 	}, [showContextPopup]);
-
-	// const updateRecentSessions = async (sessionId) => {
-	// 	try {
-	// 		const session = await getSessionById(sessionId);
-	// 		if (!session) {
-	// 			// Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
-	// 			return;
-	// 		}
-
-	// 		// Zotero.debug(`DeepTutorChatBox: Updating recent sessions with session ${sessionId}`);
-	// 		setRecentSessions((prev) => {
-	// 			const newMap = new Map(prev);
-	// 			// Only add if not already present or if it's a different session
-	// 			if (!newMap.has(sessionId)) {
-	// 				newMap.set(sessionId, {
-	// 					name: session.sessionName || `Session ${sessionId.slice(0, 8)}`,
-	// 					lastUpdatedTime: new Date().toISOString() // Use current time for new sessions
-	// 				});
-	// 				// Zotero.debug(`DeepTutorChatBox: Added new session to recent sessions map, now has ${newMap.size} sessions`);
-	// 			}
-	// 			else {
-	// 				// Update the existing session's lastUpdatedTime with current time
-	// 				const existingSession = newMap.get(sessionId);
-	// 				newMap.set(sessionId, {
-	// 					...existingSession,
-	// 					lastUpdatedTime: new Date().toISOString() // Use current time for updates
-	// 				});
-	// 				// Zotero.debug(`DeepTutorChatBox: Updated existing session in recent sessions map`);
-	// 			}
-
-	// 			// Store in preferences
-	// 			const sessionsObject = Object.fromEntries(newMap);
-	// 			Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(sessionsObject));
-	// 			// Zotero.debug(`DeepTutorChatBox: Stored ${newMap.size} sessions in preferences`);
-
-	// 			return newMap;
-	// 		});
-	// 	}
-	// 	catch (error) {
-	// 		// Zotero.debug(`DeepTutorChatBox: Error updating recent sessions: ${error.message}`);
-	// 	}
-	// };
 
 	// Add new useEffect after the existing one
 	useEffect(() => {
@@ -2749,14 +2319,14 @@ This demonstrates multiple table formats working correctly.
 								await new Promise(resolve => setTimeout(resolve, 500));
 							}
 						}
-						catch (error) {
+						catch {
 							// Zotero.debug(`DeepTutorChatBox: Error opening document ${documentId}: ${error.message}`);
 							// Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
 							// Continue with the next document even if this one fails
 						}
 					}
 				}
-				catch (error) {
+				catch {
 					// Zotero.debug(`DeepTutorChatBox: Error in openAllDocuments: ${error.message}`);
 				}
 				
@@ -2839,7 +2409,7 @@ This demonstrates multiple table formats working correctly.
 										}
 									}
 								}
-								catch (error) {
+								catch {
 									// Zotero.debug(`DeepTutorChatBox: Error getting file path for ${zoteroAttachmentId}: ${error.message}`);
 								}
 							}
@@ -2855,7 +2425,7 @@ This demonstrates multiple table formats working correctly.
 							filePath: filePath // Add file path to the context document object
 						});
 					}
-					catch (error) {
+					catch {
 						// Zotero.debug(`DeepTutorChatBox: Error processing document ${documentId}: ${error.message}`);
 						// Add with fallback name
 						contextDocs.push({
@@ -2870,7 +2440,7 @@ This demonstrates multiple table formats working correctly.
 				// Zotero.debug(`DeepTutorChatBox: Loaded ${contextDocs.length} context documents`);
 				setContextDocuments(contextDocs);
 			}
-			catch (error) {
+			catch {
 				// Zotero.debug(`DeepTutorChatBox: Error loading context documents: ${error.message}`);
 				setContextDocuments([]);
 			}
@@ -2896,151 +2466,6 @@ This demonstrates multiple table formats working correctly.
 		}
 	}, [showContextPopup]);
 
-	// Add SessionTabBar component
-	// const SessionTabBar = () => {
-	// 	// Convert Map to sorted array and sort by lastUpdatedTime
-	// 	const sortedSessions = Array.from(recentSessions.entries())
-	//         .sort((a, b) => {
-	//         	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
-	//         	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
-	//         	return timeB - timeA; // Sort in descending order (most recent first)
-	//         });
-
-	// 	// Zotero.debug(`DeepTutorChatBox: Rendering SessionTabBar with ${sortedSessions.length} sessions`);
-	// 	const visibleSessions = sortedSessions.slice(0, MAX_VISIBLE_SESSIONS);
-	// 	const hiddenSessions = sortedSessions.slice(MAX_VISIBLE_SESSIONS);
-
-	// 	const truncateSessionName = (name) => {
-	// 		return name.length > 11 ? name.substring(0, 11) + '...' : name;
-	// 	};
-
-	// 	const handleSessionClick = async (sessionId) => {
-	// 		try {
-	// 			// Get the session data
-	// 			const session = await getSessionById(sessionId);
-	// 			if (!session) {
-	// 				// Zotero.debug(`DeepTutorChatBox: No session found for ID ${sessionId}`);
-	// 				return;
-	// 			}
-
-	// 			// Update recent sessions with new timestamp
-	// 			await updateRecentSessions(sessionId);
-
-	// 			// Update the current session through props
-	// 			if (currentSession?.id !== sessionId) {
-	// 				// Zotero.debug(`DeepTutorChatBox: Switching to session ${sessionId}`);
-	// 				// Use the onSessionSelect prop to switch sessions
-	// 				if (onSessionSelect) {
-	// 					onSessionSelect(session.id);
-	// 				}
-	// 			}
-	// 		}
-	// 		catch (error) {
-	// 			// Zotero.debug(`DeepTutorChatBox: Error handling session click: ${error.message}`);
-	// 		}
-	// 	};
-
-	// 	const handleCloseSession = async (sessionId, event) => {
-	// 		event.stopPropagation(); // Prevent session click when closing
-	            
-	// 		// Check if we're closing the active session
-	// 		const isActiveSession = sessionId === currentSession?.id;
-	            
-	// 		setRecentSessions((prev) => {
-	// 			const newMap = new Map(prev);
-	// 			newMap.delete(sessionId);
-	                
-	// 			// Store in preferences
-	// 			const sessionsObject = Object.fromEntries(newMap);
-	// 			Zotero.Prefs.set('deeptutor.recentSessions', JSON.stringify(sessionsObject));
-	                
-	// 			return newMap;
-	// 		});
-
-	// 		// If we closed the active session and there are other sessions, load the next one
-	// 		if (isActiveSession) {
-	// 			const remainingSessions = Array.from(recentSessions.entries())
-	//                 .filter(([id]) => id !== sessionId)
-	//                 .sort((a, b) => {
-	//                 	const timeA = new Date(a[1].lastUpdatedTime || 0).getTime();
-	//                 	const timeB = new Date(b[1].lastUpdatedTime || 0).getTime();
-	//                 	return timeB - timeA;
-	//                 });
-
-	// 			if (remainingSessions.length > 0) {
-	// 				const [nextSessionId, nextSessionData] = remainingSessions[0];
-	// 				try {
-	// 					const session = await getSessionById(nextSessionId);
-	// 					if (session && onSessionSelect) {
-	// 						onSessionSelect(session.id);
-	// 					}
-	// 				}
-	// 				catch (error) {
-	// 					// Zotero.debug(`DeepTutorChatBox: Error loading next session: ${error.message}`);
-	// 				}
-	// 			}
-	// 		}
-	// 	};
-
-	// 	return (
-	// 		<div style={styles.sessionTabBar}>
-	// 			{visibleSessions.map(([sessionId, sessionData]) => (
-	// 				<button
-	// 					key={sessionId}
-	// 					style={{
-	// 						...styles.sessionTab,
-	// 						...(sessionId === currentSession?.id ? styles.activeSessionTab : {})
-	// 					}}
-	// 					onClick={() => handleSessionClick(sessionId)}
-	// 				>
-	// 					{truncateSessionName(sessionData.name)}
-	// 					<button
-	// 						style={styles.sessionTabClose}
-	// 						onClick={e => handleCloseSession(sessionId, e)}
-	// 					>
-	// 						<img
-	// 							src={SessionTabClosePath}
-	// 							alt="Close"
-	// 							style={styles.sessionTabCloseIcon}
-	// 						/>
-	// 					</button>
-	// 				</button>
-	// 			))}
-	// 			{hiddenSessions.length > 0 && (
-	// 				<div style={{ position: 'relative' }}>
-	// 					<button
-	// 						style={styles.sessionTab}
-	// 						onClick={() => setShowSessionPopup(!showSessionPopup)}
-	// 					>
-	//                         More ({hiddenSessions.length})
-	// 					</button>
-	// 					{showSessionPopup && (
-	// 						<div style={styles.sessionPopup}>
-	// 							{hiddenSessions.map(([sessionId, sessionData]) => (
-	// 								<div
-	// 									key={sessionId}
-	// 									style={styles.sessionPopupItem}
-	// 									onClick={() => {
-	// 										handleSessionClick(sessionId);
-	// 										setShowSessionPopup(false);
-	// 									}}
-	// 									onMouseEnter={(e) => {
-	// 										e.target.style.background = '#D9D9D9';
-	// 									}}
-	// 									onMouseLeave={(e) => {
-	// 										e.target.style.background = '#FFFFFF';
-	// 									}}
-	// 								>
-	// 									{truncateSessionName(sessionData.name)}
-	// 								</div>
-	// 							))}
-	// 						</div>
-	// 					)}
-	// 				</div>
-	// 			)}
-	// 		</div>
-	// 	);
-	// };
 
 	// Communicate iniWait state changes to parent component
 	useEffect(() => {
@@ -3095,19 +2520,6 @@ This demonstrates multiple table formats working correctly.
 		};
 	}, []);
 
-	// Reset conversation when creating new session
-	/*
-	const resetConversation = () => setConversation({
-		userId: userId,
-		sessionId: null,
-		documentIds: [],
-		history: [],
-		message: null,
-		streaming: true,
-		type: sessionType
-	});
-	*/
-
 	// Add copy event handler for the chat box
 	useEffect(() => {
 		const handleCopy = (e) => {
@@ -3117,7 +2529,7 @@ This demonstrates multiple table formats working correctly.
 			// Check if selection is within our chat box
 			let isWithinChatBox = false;
 			let node = selection.anchorNode;
-			while (node != null) {
+			while (node !== null) {
 				if (node.classList && node.classList.contains('deeptutor-chat-box')) {
 					isWithinChatBox = true;
 					break;
@@ -3161,13 +2573,14 @@ This demonstrates multiple table formats working correctly.
 						border-collapse: collapse;
 						width: 100%;
 						margin: 1rem 0;
-						font-size: 0.875rem;
+						font-size: 1rem;
 						line-height: 1.4;
 						border: 0.0625rem solid #E0E0E0;
 						border-radius: 0.5rem;
 						overflow: hidden;
 						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1);
 						background: #FFFFFF;
+						table-layout: auto;
 					}
 					.markdown thead {
 						background: #F8F6F7;
@@ -3185,46 +2598,72 @@ This demonstrates multiple table formats working correctly.
 						background: #F5F5F5;
 					}
 					.markdown th {
-						padding: 0.75rem 1rem;
+						padding: 0.75rem 0.5rem;
 						text-align: left;
 						font-weight: 600;
 						color: #1C1B1F;
 						border-bottom: 0.125rem solid #E0E0E0;
 						background: #F8F6F7;
-						font-size: 0.875rem;
+						font-size: 1.0rem;
 						line-height: 1.6;
 						white-space: normal;
-						min-height: 2em;
 						vertical-align: top;
 					}
 					.markdown td {
-						padding: 0.75rem 1rem;
+						padding: 0.75rem 0.5rem;
 						text-align: left;
 						color: #1C1B1F;
 						border-bottom: 0.0625rem solid #E0E0E0;
-						font-size: 0.875rem;
+						border-right: 0.0625rem solid #E0E0E0;
+						border-left: 0.0625rem solid #E0E0E0;
+						font-size: 1.0rem;
 						line-height: 1.6;
-						word-break: break-word;
+						white-space: normal;
+						word-break: keep-all;
+						overflow-wrap: break-word;
 						vertical-align: top;
-						min-height: 2em;
+					}
+					/* First column - prevent word breaking but allow line wrapping */
+					.markdown td:first-child {
+						word-break: keep-all;
+						overflow-wrap: break-word;
+						white-space: normal;
+						width: fit-content;
+						min-width: fit-content;
+					}
+					/* Other columns - allow normal word breaking */
+					.markdown td:nth-child(n+2) {
+						word-break: break-word;
+						overflow-wrap: break-word;
+						white-space: normal;
+						width: auto;
 					}
 					
 					/* Special styling for source buttons within tables */
 					.markdown table .deeptutor-source-button {
-						width: 1.2em !important;
-						height: 1.2em !important;
-						font-size: 0.65em !important;
+						width: 2em !important;
+						height: 2em !important;
+						font-size: 1em !important;
 						margin: 0 0.15em !important;
 						vertical-align: middle !important;
 					}
 					
 					/* Special styling for source placeholders within tables */
 					.markdown table .deeptutor-source-placeholder {
-						width: 1.2em !important;
-						height: 1.2em !important;
-						font-size: 0.65em !important;
+						width: 1.5em !important;
+						height: 1.5em !important;
+						font-size: 0.75em !important;
 						margin: 0 0.15em !important;
 						vertical-align: middle !important;
+					}
+					/* First column styling - prevent word breaking but allow line wrapping */
+					.markdown table td:first-child,
+					.markdown table th:first-child {
+						width: fit-content;
+						min-width: fit-content;
+						white-space: normal;
+						word-break: keep-all;
+						overflow-wrap: break-word;
 					}
 					.deeptutor-source-button {
 						background: #0687E5 !important;
@@ -3270,8 +2709,7 @@ This demonstrates multiple table formats working correctly.
 						outline: none !important;
 					}
 					.deeptutor-source-placeholder {
-						background: #0687E5 !important;
-						opacity: 0.4 !important;
+						background: #9E9E9E !important;
 						color: white !important;
 						border: none !important;
 						border-radius: 50% !important;
@@ -3282,11 +2720,10 @@ This demonstrates multiple table formats working correctly.
 						justify-content: center !important;
 						font-weight: 600 !important;
 						font-size: 0.875rem !important;
-						cursor: pointer !important;
+						cursor: default !important;
 						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.08) !important;
 						padding: 0 !important;
 						margin: 0 0.25rem !important;
-						transition: all 0.2s ease !important;
 						vertical-align: middle !important;
 						line-height: 1 !important;
 						text-decoration: none !important;
@@ -3294,7 +2731,6 @@ This demonstrates multiple table formats working correctly.
 						font-family: 'Roboto', sans-serif !important;
 						position: relative !important;
 						overflow: hidden !important;
-						animation: pulse 1s infinite alternate !important;
 					}
 					@keyframes pulse {
 						0% { opacity: 0.3; }
@@ -3302,39 +2738,157 @@ This demonstrates multiple table formats working correctly.
 					}
 					/* KaTeX math expression styles */
 					.katex {
-						font-size: 1em !important;
-						line-height: 0.3 !important;
+						font-size: 1.1em !important;
+						line-height: 1.2 !important;
+						vertical-align: baseline !important;
 					}
+					/* Inline math adjustments */
+					.katex:not(.katex-display) {
+						font-size: 1em !important;
+						line-height: 1.1 !important;
+					}
+					/* Display math adjustments */
+					.katex-display {
+						font-size: 1.2em !important;
+						line-height: 1.4 !important;
+						margin-bottom: 1em !important;
+						margin-top: -1.2em !important;
+						text-align: bottom !important;
+					}
+					/* General subscript/superscript positioning */
 					.katex .msupsub {
 						text-align: left !important;
 					}
 					.katex .msubsup {
 						text-align: right !important;
 					}
-					/* Adjust subscript positioning */
+					/* Improved subscript positioning - reduced to 50% */
 					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sub {
-						font-size: 85% !important;
+						font-size: 50% !important;
 						margin-right: 0.05em !important;
 						margin-left: -0.1667em !important;
-						margin-top: 0.1em !important;
-						vertical-align: -0.25em !important;
+						margin-top: 0.05em !important;
+						vertical-align: -0.2em !important;
 					}
-					/* Adjust superscript positioning */
+					/* Improved superscript positioning - reduced to 50% */
 					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sup {
-						font-size: 85% !important;
+						font-size: 50% !important;
 						margin-right: 0.05em !important;
 						margin-left: -0.1667em !important;
-						margin-bottom: 1em !important;
-						vertical-align: 0.5em !important;
+						margin-bottom: 0.5em !important;
+						vertical-align: 0.4em !important;
 					}
 					/* Adjust spacing between sub/sup and base */
 					.katex .msupsub > .vlist-t2 {
 						margin-right: 0.05em !important;
 					}
-					/* Prevent subscripts from overlapping with the next line */
-					.katex-display {
-						margin-bottom: 1.5em !important;
-						margin-top: 0.5em !important;
+					/* Fractions - improve spacing and positioning */
+					.katex .frac-line {
+						border-bottom-width: 0.04em !important;
+					}
+					.katex .frac {
+						text-align: center !important;
+						vertical-align: middle !important;
+						margin: 0.2em 0 !important;
+					}
+					/* Nested fractions - improve spacing */
+					.katex .frac .frac {
+						margin: 0.1em 0 !important;
+					}
+					.katex .frac .frac .frac {
+						margin: 0.05em 0 !important;
+					}
+					/* Fraction numerator and denominator spacing */
+					.katex .frac > span {
+						padding: 0.1em 0 !important;
+					}
+					.katex .frac .frac > span {
+						padding: 0.05em 0 !important;
+					}
+					/* Radicals - improve positioning and sizing with better coverage */
+					.katex .sqrt {
+						vertical-align: baseline !important;
+						position: relative !important;
+						display: inline-flex !important;
+						align-items: baseline !important;
+					}
+					.katex .sqrt > .sqrt-sign {
+						vertical-align: baseline !important;
+						position: relative !important;
+						height: 1.6em !important;
+						width: 1.2em !important;
+						display: flex !important;
+						align-items: stretch !important;
+					}
+					.katex .sqrt > .sqrt-sign > .sqrt-line {
+						border-top-width: 0.12em !important;
+						top: 0.02em !important;
+						height: 0.12em !important;
+						width: 100% !important;
+					}
+					.katex .sqrt > .sqrt-sign > .sqrt-line:first-child {
+						top: 0.02em !important;
+					}
+					.katex .sqrt > .sqrt-sign > .sqrt-line:last-child {
+						bottom: 0.02em !important;
+					}
+					.katex .sqrt > .sqrt-radicand {
+						vertical-align: baseline !important;
+						margin-left: 0.2em !important;
+						padding-top: 0.1em !important;
+						padding-bottom: 0.1em !important;
+					}
+					/* Ensure the radical symbol itself is properly sized and positioned */
+					.katex .sqrt > .sqrt-sign > .sqrt-symbol {
+						font-size: 1.4em !important;
+						vertical-align: baseline !important;
+						height: 100% !important;
+						display: flex !important;
+						align-items: stretch !important;
+					}
+					/* General vertical alignment for all math elements */
+					.katex * {
+						vertical-align: baseline !important;
+					}
+					/* Override for specific elements that need different alignment */
+					.katex .sup,
+					.katex .sub {
+						vertical-align: baseline !important;
+					}
+					/* Prevent excessive spacing */
+					.katex .strut {
+						display: inline-block !important;
+					}
+					/* Improve spacing for operators */
+					.katex .mop {
+						vertical-align: baseline !important;
+					}
+					/* Add space after inline LaTeX expressions */
+					.katex:not(.katex-display) {
+						margin-right: 0.2em !important;
+					}
+					/* Ensure proper spacing around inline math */
+					.katex:not(.katex-display)::after {
+						content: " " !important;
+						white-space: normal !important;
+					}
+					/* List styling - reduce horizontal spacing */
+					.markdown ul,
+					.markdown ol {
+						margin: 0.5em 0 !important;
+						padding-left: 1.5em !important;
+					}
+					.markdown li {
+						margin: 0.25em 0 !important;
+						padding-left: 0.5em !important;
+					}
+					/* Nested lists */
+					.markdown ul ul,
+					.markdown ol ol,
+					.markdown ul ol,
+					.markdown ol ul {
+						margin: 0.25em 0 !important;
+						padding-left: 1em !important;
 					}
 				`
 			}} />
@@ -3360,12 +2914,14 @@ This demonstrates multiple table formats working correctly.
 									key={contextDoc.documentId}
 									style={{
 										...styles.contextDocumentButton,
-										...(hoveredContextDoc === index ? {
-											...styles.contextDocumentButtonHover,
-											background: contextDoc.filePath ? '#D9D9D9' : '#E8E8E8', // Lighter gray for null filePath
-										} : {
-											background: contextDoc.filePath ? '#FFFFFF' : '#F5F5F5' // Light gray base for null filePath
-										}),
+										...(hoveredContextDoc === index
+											? {
+												...styles.contextDocumentButtonHover,
+												background: contextDoc.filePath ? '#D9D9D9' : '#E8E8E8', // Lighter gray for null filePath
+											}
+											: {
+												background: contextDoc.filePath ? '#FFFFFF' : '#F5F5F5' // Light gray base for null filePath
+											}),
 										borderBottom: index === contextDocuments.length - 1 ? "none" : "0.0625rem solid #E0E0E0",
 										flexDirection: "column",
 										alignItems: "flex-start",
