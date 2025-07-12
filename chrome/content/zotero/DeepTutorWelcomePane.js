@@ -100,7 +100,7 @@ const styles = {
 	subText: {
 		width: '100%',
 		fontWeight: 600,
-		fontSize: '1.25rem',
+		fontSize: '1rem',
 		lineHeight: '100%',
 		letterSpacing: '0%',
 		textAlign: 'center',
@@ -109,7 +109,7 @@ const styles = {
 	descText: {
 		width: '100%',
 		fontWeight: 400,
-		fontSize: '1rem',
+		fontSize: '0.875rem',
 		lineHeight: '135%',
 		letterSpacing: '0%',
 		textAlign: 'center',
