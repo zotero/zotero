@@ -288,7 +288,7 @@ const styles = {
 		backgroundColor: 'white',
 		color: '#1C1B1F',
 		marginLeft: 'auto',
-		marginRight: 0,
+		marginRight: '1rem',
 		borderRadius: '0.625rem',
 		fontWeight: 400,
 		textAlign: 'left',
@@ -358,7 +358,7 @@ const styles = {
 		overflowWrap: 'break-word',
 		alignSelf: 'flex-end',
 		marginLeft: 'auto',
-		marginRight: '0',
+		marginRight: '1rem',
 	},
 
 	viewContextContainer: {
@@ -440,6 +440,7 @@ const styles = {
 		color: '#757575',
 		lineHeight: '1.35',
 		cursor: 'pointer',
+		marginRight: '1rem',
 	}
 };
 
@@ -2958,8 +2959,8 @@ This demonstrates multiple table formats working correctly.
 						font-size: 1.2em !important;
 						line-height: 1.4 !important;
 						margin-bottom: 0.5em !important;
-						margin-top: 0.25em !important;
-						text-align: center !important;
+						margin-top: -1.2em !important;
+						text-align: bottom !important;
 					}
 					/* General subscript/superscript positioning */
 					.katex .msupsub {
@@ -3043,6 +3044,24 @@ This demonstrates multiple table formats working correctly.
 					/* Improve spacing for operators */
 					.katex .mop {
 						vertical-align: baseline !important;
+					}
+					/* List styling - reduce horizontal spacing */
+					.markdown ul,
+					.markdown ol {
+						margin: 0.5em 0 !important;
+						padding-left: 1.5em !important;
+					}
+					.markdown li {
+						margin: 0.25em 0 !important;
+						padding-left: 0.5em !important;
+					}
+					/* Nested lists */
+					.markdown ul ul,
+					.markdown ol ol,
+					.markdown ul ol,
+					.markdown ol ul {
+						margin: 0.25em 0 !important;
+						padding-left: 1em !important;
 					}
 				`
 			}} />
