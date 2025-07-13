@@ -539,7 +539,7 @@ if [ $BUILD_MAC == 1 ]; then
 			
 			# Verify hash
 			if [[ "`uname`" = "Darwin" ]]; then
-				shasum=shasum
+				shasum="shasum -a 256"
 			else
 				shasum=sha256sum
 			fi
