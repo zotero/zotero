@@ -609,7 +609,61 @@ if [ $BUILD_WIN == 1 ]; then
 		rm -rf $xdir
 		mv $xdir-core $xdir
 		
+		# Download custom components, as an architecture-specific ZIP containing xul.dll, etc.
+		echo
+		hash_arch_name="${arch/-/_}"
+		arch_var_name="custom_components_hash_${hash_arch_name}"
+		hash=${!arch_var_name:-}
+		if [ -n "$hash" ]; then
+			zipfile="Firefox $GECKO_VERSION-$arch Components.zip"
+			# ZIP filename doesn't include "esr" or "win-"
+			url="${custom_components_url}win/${GECKO_VERSION//esr}-${arch#win-}-$hash.zip"
+			
+			if [[ "$(uname)" = "Darwin" ]]; then
+				shasum="shasum -a 256"
+			else
+				shasum=sha256sum
+			fi
+			
+			download_zip() {
+				echo "Downloading custom Firefox components"
+				echo
+				echo $url
+				curl -fo "$zipfile" "$url"
+			}
+			
+			verify_hash() {
+				echo "$hash  $zipfile" | $shasum -c -
+			}
+			
+			# Download if file doesn't exist
+			if [ ! -e "$zipfile" ]; then
+				download_zip
+			fi
+			
+			echo
+			if ! verify_hash; then
+				echo "SHA hash mismatch. Redownloading ZIP…"
+				rm -f "$zipfile"
+				download_zip
+				echo
+				if ! verify_hash; then
+					echo "Hash still doesn't match. Aborting."
+					exit 1
+				fi
+			fi
+			echo
+			
+			unzip -o "$zipfile" -d "$xdir"
+			echo
+		fi
+		
 		pushd $xdir
+		
+		#
+		# NOTE: Below is disabled, since the full UTF-16 string no longer appears directly in the DLL
+		# -- it's now truncated after "e594e8d1" for x64/win32 and doesn't appear at all for ARM64
+		#
 		
 		# Replace "Mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38" with "Zotero" for C:\ProgramData directory
 		#
@@ -617,24 +671,26 @@ if [ $BUILD_WIN == 1 ]; then
 		# recreate the folder with correct permissions for security reasons, but we never had a folder in
 		# ProgramData, so we can just create it as "Zotero". Instead of using a custom xul.dll, just
 		# replace the hard-coded string with "Zotero" and add a bunch of NULs.
-		from=$(get_utf16_chars "Mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38")
-		to=$(get_utf16_chars "Zotero" 38)
-		perl -pe "s/$from/$to/" < xul.dll > xul.dll.new
-		mv xul.dll.new xul.dll
-		# We re-sign DLL in build.sh, but presumably this file, which is for the Widevine CDM,
-		# isn't vaid anymore
-		rm xul.dll.sig
+		#
+		#from=$(get_utf16_chars "Mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38")
+		#to=$(get_utf16_chars "Zotero" 38)
+		#perl -pe "s/$from/$to/" < xul.dll > xul.dll.new
+		#mv xul.dll.new xul.dll
 		
 		# Check for UTF-16 "Zotero" in DLL
 		#
-		# (The macOS strings command doesn't have an encoding option, so skip on macOS. We could
-		# require binutils, which has GNU strings, but you need to build on Windows to make an
-		# installer, so a Windows build from macOS likely isn't being deployed, and there's no
-		# reason the Perl command above should fail anyway.)
-		if [[ "`uname`" != "Darwin" ]] && [[ -z "$(strings -e l xul.dll | grep -m 1 Zotero)" ]]; then
-			echo '"Zotero" not found in xul.dll after replacement'
-			exit 1
-		fi
+		# (The macOS strings command doesn't have an encoding option, so skip on macOS. You need to
+		# build on Windows to make an installer, so a Windows build from macOS likely isn't being
+		# deployed.)
+		#
+		#if [[ "`uname`" != "Darwin" ]] && [[ -z "$(strings -e l xul.dll | grep -m 1 Zotero)" ]]; then
+		#	echo '"Zotero" not found in xul.dll after replacement'
+		#	exit 1
+		#fi
+		
+		# We re-sign DLL in build.sh, but presumably this file, which is for the Widevine CDM,
+		# isn't vaid anymore
+		rm xul.dll.sig
 		
 		modify_omni $arch
 		# Disable skeleton UI window
