@@ -382,7 +382,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 			userSubscribed: false,
 			isFreeTrial: true,
 			// Model selection freezing state
-			modelSelectionFrozen: false
+			modelSelectionFrozen: false,
+			// Window dimensions for responsive layout
+			windowWidth: window.innerWidth,
+			windowHeight: window.innerHeight
 		};
 		this._initialized = false;
 		this._selection = null;
@@ -405,6 +408,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 		// Timer reference for model selection freeze
 		this._modelSelectionFreezeTimer = null;
 
+		// Debounced resize handler to prevent excessive re-renders
+		this._resizeDebounceTimer = null;
+		this.handleWindowResize = this.handleWindowResize.bind(this);
+
 		// Initialize localhost server
 		console.log("🔧 DeepTutor: Initializing localhost server...");
 		this.localhostServer = new DeepTutorLocalhostServer();
@@ -424,6 +431,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 			window.deepTutorInstance = this;
 			console.log("🌐 DeepTutor: Instance made available globally as window.deepTutorInstance");
 		}
+
+		// Add window resize listener for responsive layout
+		window.addEventListener('resize', this.handleWindowResize);
 
 		// Start the localhost server
 		try {
@@ -460,6 +470,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 		// Remove auth state listener
 		const authState = useAuthState();
 		authState.removeListener(this.handleAuthStateChange);
+
+		// Remove window resize listener
+		window.removeEventListener('resize', this.handleWindowResize);
+
+		// Clear resize debounce timer
+		if (this._resizeDebounceTimer) {
+			clearTimeout(this._resizeDebounceTimer);
+		}
 
 		// Clear any pending timer
 		if (this._modelSelectionFreezeTimer) {
@@ -1536,7 +1554,33 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 	};
 
+	/**
+	 * Handle window resize events with debouncing for performance
+	 * This ensures the DeepTutor pane adjusts properly when the window size changes
+	 */
+	handleWindowResize = () => {
+		// Clear any existing timer
+		if (this._resizeDebounceTimer) {
+			clearTimeout(this._resizeDebounceTimer);
+		}
 
+		// Debounce the resize handler to prevent excessive re-renders
+		this._resizeDebounceTimer = setTimeout(() => {
+			// Update window dimensions in state to trigger re-render
+			this.setState({
+				windowWidth: window.innerWidth,
+				windowHeight: window.innerHeight
+			});
+
+			// Also trigger ZoteroPane layout update for consistency
+			// This ensures the parent container dimensions are updated
+			if (window.ZoteroPane && typeof window.ZoteroPane.updateLayoutConstraints === 'function') {
+				window.ZoteroPane.updateLayoutConstraints();
+			}
+
+			Zotero.debug(`DeepTutor: Window resized to ${window.innerWidth}x${window.innerHeight}, layout updated`);
+		}, 150); // 150ms debounce for good balance between responsiveness and performance
+	};
 
 	/**
 	 * Handles Google sign-in popup close
@@ -1611,7 +1655,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 	render() {
 		Zotero.debug("DeepTutor: Render called");
 
-		// Calculate responsive widths for DeepTutor pane
+		// Calculate responsive widths for DeepTutor pane using state.windowWidth for reactivity
 		let minWidth, maxWidth, defaultWidth;
 		if (this.state.collapsed) {
 			minWidth = '0';
@@ -1619,15 +1663,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 			defaultWidth = '0';
 		} else {
 			// Maximum width: 1/2 of window width
-			maxWidth = `${window.innerWidth * 0.5}px`;
+			maxWidth = `${this.state.windowWidth * 0.5}px`;
 
 			// Default width: 1/3 of window width
-			defaultWidth = `${window.innerWidth * 0.33}px`;
+			defaultWidth = `${this.state.windowWidth * 0.33}px`;
 
 			// Minimum width based on window size
-			if (window.innerWidth >= 1200) {
+			if (this.state.windowWidth >= 1200) {
 				// Window width >= 1200px: minimum is 1/4 of window width
-				minWidth = `${window.innerWidth * 0.25}px`;
+				minWidth = `${this.state.windowWidth * 0.25}px`;
 			} else {
 				// Window width < 1200px: minimum is 300px
 				minWidth = '300px';
