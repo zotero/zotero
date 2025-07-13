@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Extract xul.dll from custom Firefox build ZIPs in current folder and create a
+# ZIP for each platform with its own SHA256 hash in the filename. The files
+# should then be uploaded and their hashes updated in config.sh so that
+# fetch_xulrunner will download and use the custom xul.dll.
+
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
+if [ $# -ne 1 ]; then
+	echo "Usage: $0 <version>"
+	exit 1
+fi
+
+version="$1"
+
+# Input ZIP filenames
+files=(
+	"firefox-$version.en-US.win32.zip"
+	"firefox-$version.en-US.win64-aarch64.zip"
+	"firefox-$version.en-US.win64.zip"
+)
+
+# Corresponding architecture labels and output names
+arches=(
+	"win32"
+	"arm64"
+	"x64"
+)
+
+# Platform-specific SHA command
+if [[ "$(uname)" = "Darwin" ]]; then
+	shasum_cmd="shasum -a 256"
+else
+	shasum_cmd="sha256sum"
+fi
+
+# Clean up any old artifacts
+rm -f "$version"-*.zip
+
+# Process each architecture
+for i in "${!files[@]}"; do
+	file="${files[$i]}"
+	arch="${arches[$i]}"
+	temp_zip="xul-temp-$arch.zip"
+	
+	if [ ! -f "$file" ]; then
+		echo "Missing file: $file"
+		exit 1
+	fi
+	
+	dlls=(xul.dll)
+	
+	# TEMP: Fix startup error on win32 due to missing export numSamples@RLBoxSoundTouch
+	if [[ $arch == "win32" ]]; then
+		dlls+=(lgpllibs.dll)
+	fi
+	
+	echo "Extracting ${dlls[*]} from $file"
+	for dll in "${dlls[@]}"; do
+		unzip -p "$file" "firefox/$dll" > "$dll"
+	done
+	
+	zip -q "$temp_zip" "${dlls[@]}"
+	
+	# Calculate hash
+	sum=$($shasum_cmd "$temp_zip" | awk '{print $1}')
+	
+	# Rename to final output
+	final_zip="$version-$arch-$sum.zip"
+	mv "$temp_zip" "$final_zip"
+	rm -f xul.dll libgpllibs.dll
+	
+	echo "Created $final_zip"
+done
