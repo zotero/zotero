@@ -2464,6 +2464,7 @@ This demonstrates multiple table formats working correctly.
 				document.removeEventListener('mousedown', handleClickOutside);
 			};
 		}
+		return undefined; // Explicit return for linter
 	}, [showContextPopup]);
 
 
@@ -2758,9 +2759,11 @@ This demonstrates multiple table formats working correctly.
 					/* General subscript/superscript positioning */
 					.katex .msupsub {
 						text-align: left !important;
+						font-size: 50% !important;
 					}
 					.katex .msubsup {
 						text-align: right !important;
+						font-size: 50% !important;
 					}
 					/* Improved subscript positioning - reduced to 50% */
 					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sub {
@@ -2815,26 +2818,36 @@ This demonstrates multiple table formats working correctly.
 					.katex .sqrt > .sqrt-sign {
 						vertical-align: baseline !important;
 						position: relative !important;
-						height: 1.6em !important;
-						width: 1.2em !important;
+						
 						display: flex !important;
 						align-items: stretch !important;
 					}
 					.katex .sqrt > .sqrt-sign > .sqrt-line {
 						border-top-width: 0.12em !important;
-						top: 0.02em !important;
-						height: 0.12em !important;
+						top: 1.2em !important;
+						
+						width: 100% !important;
+					}
+					/* Add explicit CSS to ensure square root vinculum (horizontal line) is visible */
+					.katex .sqrt-line {
+						border-top: 0.04em solid currentColor !important;
+						position: absolute !important;
+						left: 0 !important;
+						right: 0 !important;
+						top: 0.8em !important;
+						display: block !important;
+						
 						width: 100% !important;
 					}
 					.katex .sqrt > .sqrt-sign > .sqrt-line:first-child {
-						top: 0.02em !important;
+						top: 1.2em !important;
 					}
 					.katex .sqrt > .sqrt-sign > .sqrt-line:last-child {
-						bottom: 0.02em !important;
+						bottom: 1.2em !important;
 					}
 					.katex .sqrt > .sqrt-radicand {
 						vertical-align: baseline !important;
-						margin-left: 0.2em !important;
+						margin-left: -0.1em !important;
 						padding-top: 0.1em !important;
 						padding-bottom: 0.1em !important;
 					}
