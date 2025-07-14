@@ -8,36 +8,44 @@ ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 function usage {
 	cat >&2 <<DONE
-Usage: $0 -p platforms
+Usage: $0 [options]
+
+If -p is omitted, platform (and, for Windows/Linux, architecture) default to the host system.
+Architecture is ignored for Mac builds, which are always shipped as universal binaries.
+
 Options
- -p PLATFORMS        Platforms to build (m=Mac, w=Windows, l=Linux)
- -t                  add devtools
- -q                  quick build (skip compression and other optional steps for faster restarts during development)
+ -p PLATFORM        Platform to build (m=Mac, w=Windows, l=Linux)
+ -a ARCH            Target architecture (arm64, x64, i686, win32) — **Windows/Linux only**
+ -t                 add devtools
+ -q                 quick build (skip compression and other optional steps for faster restarts during development)
 DONE
 	exit 1
 }
 
-DEVTOOLS=0
-PLATFORM=""
+platform=""
+arch=""
+devtools=0
 quick_build=0
-while getopts "tp:q" opt; do
+while getopts "tp:a:q" opt; do
 	case $opt in
 		t)
-			DEVTOOLS=1
+			devtools=1
 			;;
 		p)
-			for i in `seq 0 1 $((${#OPTARG}-1))`
-			do
+			for (( i=0; i<${#OPTARG}; i++ )); do
 				case ${OPTARG:i:1} in
-					m) PLATFORM="m";;
-					w) PLATFORM="w";;
-					l) PLATFORM="l";;
+					m) platform="m";;
+					w) platform="w";;
+					l) platform="l";;
 					*)
-						echo "$0: Invalid platform option ${OPTARG:i:1}"
+						echo "$0: Invalid platform option ${OPTARG:i:1}" >&2
 						usage
 						;;
 				esac
 			done
+			;;
+		a)
+			arch="$OPTARG"
 			;;
 		q)
 			quick_build=1
@@ -49,40 +57,48 @@ while getopts "tp:q" opt; do
 	esac
 done
 
-if [[ -z $PLATFORM ]]; then
-	if [ "`uname`" = "Darwin" ]; then
-		PLATFORM="m"
-	elif [ "`uname`" = "Linux" ]; then
-		PLATFORM="l"
-		
-		# If platform not given explicitly, skip 32-bit build if 64-bit system
-		if [ "$(uname -m)" = "x86_64" ]; then
-			export SKIP_32=1
-		fi
-	elif [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
-		PLATFORM="w"
+# Derive platform from host if not provided
+if [[ -z $platform ]]; then
+	case "$(uname -s)" in
+		Darwin)  platform="m" ;;
+		Linux)   platform="l" ;;
+		CYGWIN*|MINGW*) platform="w" ;;
+	esac
+fi
+
+# Handle architecture rules
+if [[ $platform = "m" ]]; then
+	# No arch for Mac — ignore anything provided
+	if [[ -n $arch ]]; then
+		echo "Ignoring -a $arch for Mac build (universal binary)" >&2
+	fi
+	arch=""
+else
+	# Windows / Linux: derive arch if not supplied
+	if [[ -z $arch ]]; then
+		case "$(uname -m)" in
+			arm64|aarch64) arch="arm64" ;;
+			x86_64)         arch="x64"   ;;
+			i?86)           arch="i686"  ;;
+		esac
 	fi
 fi
 
 CHANNEL="source"
 
-PARAMS=""
-if [ $DEVTOOLS -eq 1 ]; then
-	PARAMS+=" -t"
-fi
-if [ $quick_build -eq 1 ]; then
-	PARAMS+=" -q"
-fi
+hash=$(git -C "$ROOT_DIR" rev-parse --short HEAD)
 
-hash=`git -C "$ROOT_DIR" rev-parse --short HEAD`
-
-build_dir=`mktemp -d`
-function cleanup {
-	rm -rf $build_dir
-}
+build_dir=$(mktemp -d)
+cleanup() { rm -rf "$build_dir"; }
 trap cleanup EXIT
 
-"$SCRIPT_DIR/prepare_build" -s "$ROOT_DIR/build" -o "$build_dir" -c $CHANNEL -m $hash
-"$APP_ROOT_DIR/build.sh" -d "$build_dir" -p $PLATFORM -c $CHANNEL -s $PARAMS
+"$SCRIPT_DIR/prepare_build" -s "$ROOT_DIR/build" -o "$build_dir" -c "$CHANNEL" -m "$hash"
+
+build_cmd=("$APP_ROOT_DIR/build.sh" -d "$build_dir" -p "$platform" -c "$CHANNEL" -s)
+[[ -n $arch ]] && build_cmd+=( -a "$arch" )
+[[ $devtools -eq 1 ]] && build_cmd+=( -t )
+[[ $quick_build -eq 1 ]] && build_cmd+=( -q )
+
+"${build_cmd[@]}"
 
 echo Done

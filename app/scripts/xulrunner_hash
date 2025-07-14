@@ -1,4 +1,15 @@
 #!/bin/bash
+# Calculates a hash for the processed Firefox package for a given platform and architecture
+#
+# Usage:
+#   xulrunner_hash.sh -p <m|w|l> [-a ARCH]
+#
+#   * **Mac (m)** ‑a is disallowed (universal build).
+#   * **Windows (w)** ‑a is **required**. Accepted values:
+#         win32 | x64 | arm64
+#   * **Linux (l)**   ‑a is **required**. Accepted values:
+#         x86_64 | i686 | arm64 (alias x64 → x86_64)
+
 set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -6,40 +17,78 @@ APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 . "$APP_ROOT_DIR/config.sh"
 cd "$APP_ROOT_DIR"
 
-platform=""
-while getopts ":p:" opt; do
+platform=""; arch=""
+
+usage() {
+	cat >&2 <<'DONE'
+Usage: xulrunner_hash.sh -p <m|w|l> [-a ARCH]
+
+ -p PLATFORM   m (mac), w (windows), l (linux)        [required]
+ -a ARCH       *required* for Windows & Linux builds
+               Windows:  x64 | arm64 | win32
+               Linux:    x64 (or x86_64) | arm64 | i686
+               Mac:      disallowed – always universal
+DONE
+	exit 1
+}
+
+while getopts ':p:a:' opt; do
 	case $opt in
-		p)
-			platform="$OPTARG"
-			;;
-		\?)
-			echo "Invalid option: -$OPTARG" >&2
-			exit 1
-			;;
-		:)
-			echo "Option -$OPTARG requires an argument." >&2
-			exit 1
-			;;
+		p) platform="$OPTARG";;
+		a) arch="$OPTARG";;
+		:) echo "Option -$OPTARG requires an argument" >&2; usage;;
+		? ) echo "Invalid option: -$OPTARG" >&2; echo; usage;;
 	esac
+	shift $((OPTIND-1)); OPTIND=1
 done
 
+[[ -z $platform ]] && { echo "-p is required" >&2; echo; usage; }
 
-if [ $platform == "m" ]; then
+case $platform in
+	m)
+		[[ -n $arch ]] && { echo "-a is not allowed for Mac (universal build)" >&2; echo; usage; }
+		arch="universal"
 		GECKO_VERSION="$GECKO_VERSION_MAC"
-elif [ $platform == "w" ]; then
+		;;
+	w)
+		[[ -z $arch ]] && { echo "-a is required for Windows builds" >&2; echo; usage; }
+		# Map CLI-friendly aliases → canonical form
+		case $arch in
+			x64)   arch="win-x64"   ;;
+			arm64) arch="win-arm64" ;;
+			win32|win-x64|win-arm64) ;; # already canonical
+			*)     echo "Invalid Windows arch: $arch" >&2; echo; usage;;
+		esac
 		GECKO_VERSION="$GECKO_VERSION_WIN"
-elif [ $platform == "l" ]; then
+		;;
+	l)
+		[[ -z $arch ]] && { echo "-a is required for Linux builds" >&2; echo; usage; }
+		[[ $arch == x64 ]] && arch="x86_64"
+		case $arch in
+			x86_64|i686|arm64) ;;
+			*) echo "Invalid Linux arch: $arch" >&2; echo; usage;;
+		esac
 		GECKO_VERSION="$GECKO_VERSION_LINUX"
-else
-		echo "Platform parameter incorrect. Usage: -p m(mac)/w(windows)/l(linux)"
-		exit 1
-fi
+		;;
+	*)
+		echo "Invalid platform: $platform" >&2; echo; usage;;
 
+esac
+
+# Concatenate scripts that affect the build
 xulrunner_content=$(< "$SCRIPT_DIR/fetch_xulrunner")
 xulrunner_content+=$(< "$SCRIPT_DIR/utils.sh")
 xulrunner_content+=$(< "$APP_ROOT_DIR/assets/multilocale.txt")
-xulrunner_gecko_hash=$(echo -n "$GECKO_VERSION - '$xulrunner_content'" | openssl dgst -sha256)
 
-echo "$xulrunner_gecko_hash"
+# Get custom components hash
+if [[ $platform = "m" ]]; then
+	components_hash="$custom_components_hash_mac"
+else
+	hash_arch_name="${arch/-/_}"
+	arch_var_name="custom_components_hash_${hash_arch_name}"
+	components_hash=${!arch_var_name:-}
+fi
 
+input_string="${platform}-${arch}-${components_hash}|${GECKO_VERSION}|${xulrunner_content}"
 
+printf "%s" "$input_string" | openssl dgst -sha256 | awk '{print $2}'
