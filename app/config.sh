@@ -9,6 +9,9 @@ RUST_VERSION=1.86.0
 # URL prefix for custom builds of Firefox components
 custom_components_url="https://download.zotero.org/dev/firefox-components/"
 custom_components_hash_mac=""
+custom_components_hash_win_x64=""
+custom_components_hash_win_arm64=""
+custom_components_hash_win32=""
 
 APP_NAME="Zotero"
 APP_ID="zotero\@zotero.org"

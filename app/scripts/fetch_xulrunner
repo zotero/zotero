@@ -25,11 +25,18 @@ APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 . "$SCRIPT_DIR/utils.sh"
 cd "$APP_ROOT_DIR"
 
-function usage {
-	cat >&2 <<DONE
-Usage: $0 -p platforms [-s]
-Options
- -p PLATFORMS        Platforms to build (m=Mac, w=Windows, l=Linux)
+usage() {
+	cat >&2 <<'DONE'
+Usage: fetch_xulrunner.sh -p <m|w|l> [-a ARCH]
+
+Required
+ -p PLATFORM   m (Mac), w (Windows), l (Linux)
+
+Optional / Conditional
+ -a ARCH       - Mac:      disallowed (builds are universal)
+               - Windows:  x64 | arm64 | win32
+               - Linux:    x64 (or x86_64) | arm64 | i686
+               If omitted on Windows/Linux, all standard archs are fetched.
 DONE
 	exit 1
 }
@@ -37,22 +44,20 @@ DONE
 BUILD_MAC=0
 BUILD_WIN=0
 BUILD_LINUX=0
-while getopts "p:s" opt; do
+arch=""
+while getopts 'p:a:' opt; do
 	case $opt in
 		p)
-			for i in `seq 0 1 $((${#OPTARG}-1))`
-			do
+			for (( i=0; i<${#OPTARG}; i++ )); do
 				case ${OPTARG:i:1} in
 					m) BUILD_MAC=1;;
 					w) BUILD_WIN=1;;
 					l) BUILD_LINUX=1;;
-					*)
-						echo "$0: Invalid platform option ${OPTARG:i:1}"
-						usage
-						;;
+					*) echo "Invalid platform: ${OPTARG:i:1}"; echo; usage;;
 				esac
-			done
-			;;
+			done;;
+		a) arch="$OPTARG";;
+		*) usage;;
 	esac
 	shift $((OPTIND-1)); OPTIND=1
 done
@@ -60,6 +65,31 @@ done
 # Require at least one platform
 if [[ $BUILD_MAC == 0 ]] && [[ $BUILD_WIN == 0 ]] && [[ $BUILD_LINUX == 0 ]]; then
 	usage
+fi
+
+# Sanity‑check arch flag vs platform selections
+if [[ $BUILD_MAC == 1 ]]; then
+	[[ -n $arch ]] && { echo "-a is not allowed for Mac" >&2; echo; usage; }
+fi
+if [[ $BUILD_WIN == 1 || $BUILD_LINUX == 1 ]]; then
+	# arch optional; if provided validate & map aliases now
+	if [[ -n $arch ]]; then
+		if [[ $BUILD_WIN == 1 && $BUILD_LINUX == 1 ]]; then
+			echo "-a cannot be used when building both Windows and Linux simultaneously" >&2; echo; usage
+		fi
+		if [[ $BUILD_WIN == 1 ]]; then
+			case $arch in
+				x64)   arch="win-x64" ;;
+				arm64) arch="win-arm64" ;;
+				win32|win-x64|win-arm64) ;;
+				*) echo "Invalid Windows arch: $arch" >&2; echo; usage;;
+			esac
+		fi
+		if [[ $BUILD_LINUX == 1 ]]; then
+			[[ $arch == x64 ]] && arch="x86_64"
+			case $arch in x86_64|i686|arm64) ;; *) echo "Invalid Linux arch: $arch" >&2; echo; usage;; esac
+		fi
+	fi
 fi
 
 function get_utf16_chars {
@@ -546,7 +576,12 @@ if [ $BUILD_WIN == 1 ]; then
 	GECKO_VERSION="$GECKO_VERSION_WIN"
 	DOWNLOAD_URL="https://ftp.mozilla.org/pub/firefox/releases/$GECKO_VERSION"
 	
-	for arch in win32 win-x64 win-arm64; do
+	if [[ -n $arch ]]; then
+		arch_list=("$(get_canonical_arch w $arch)")
+	else
+		arch_list=(win-x64 win-arm64 win32)
+	fi
+	for arch in "${arch_list[@]}"; do
 		xdir=firefox-$arch
 		
 		rm -rf $xdir
@@ -612,26 +647,21 @@ if [ $BUILD_WIN == 1 ]; then
 		rm "Firefox%20Setup%20$GECKO_VERSION.exe"
 		echo
 		echo
+		
+		echo "$( "$SCRIPT_DIR/xulrunner_hash" -p w -a "$arch" )" > "hash-$arch"
 	done
-	echo $("$SCRIPT_DIR/xulrunner_hash" -p w) > hash-win
 fi
 
 if [ $BUILD_LINUX == 1 ]; then
 	GECKO_VERSION="$GECKO_VERSION_LINUX"
 	DOWNLOAD_URL="https://ftp.mozilla.org/pub/firefox/releases/$GECKO_VERSION"
-
-
-	# CI only needs x86_64
-	if [[ "${CI:-}" = "1" ]]; then
-		arches="x86_64"
-	# Specific architecture (used by dir_build)
-	elif [[ -n "${ARCH:-}" ]]; then
-		arches="$ARCH"
-	# Not specified; fetch all
+	
+	if [[ -n $arch ]]; then
+		arch_list=("$arch")
 	else
-		arches="i686 x86_64 arm64"
+		arch_list=(x86_64 arm64 i686)
 	fi
-	for arch in $arches; do
+	for arch in "${arch_list[@]}"; do
 		xdir="firefox-$arch"
 		rm -rf $xdir
 		
@@ -651,13 +681,15 @@ if [ $BUILD_LINUX == 1 ]; then
 		fi
 
 		tar xvf firefox-$GECKO_VERSION.tar.xz
-		mv firefox firefox-$arch
+		mv firefox firefox-linux-$arch
 
-		pushd firefox-$arch
+		pushd firefox-linux-$arch
 		modify_omni $arch
 		popd
-		echo $($SCRIPT_DIR/xulrunner_hash -p l) > hash-linux
+		
 		rm "firefox-$GECKO_VERSION.tar.xz"
+		
+		echo "$( $SCRIPT_DIR/xulrunner_hash -p l -a "$arch" )" > "hash-linux-${arch}"
 	done
 fi
 
