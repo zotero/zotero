@@ -64,6 +64,7 @@ $menu-icons: (
 	unpin: "pin-remove",
 	expand-all: "expand-all",
 	collapse-others: "collapse-others",
+	change-top-level-item: "change-top-level-item",
 );
 
 @each $cls, $icon in $menu-icons {
