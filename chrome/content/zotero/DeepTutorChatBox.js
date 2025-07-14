@@ -523,6 +523,24 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			handleSourceClick(testSourceData);
 		};
 		
+		// Debug function for testing source data retrieval
+		window.debugDeepTutorSourceData = (sourceIndex) => {
+			const storageKey = `deeptutor_source_${sessionId}_${sourceIndex}`;
+			const sourceDataStr = Zotero.Prefs.get(storageKey);
+			Zotero.debug(`DeepTutorChatBox: Debug source data for ${storageKey}:`, sourceDataStr);
+			
+			if (sourceDataStr) {
+				try {
+					const sourceData = JSON.parse(sourceDataStr);
+					Zotero.debug(`DeepTutorChatBox: Parsed source data:`, sourceData);
+				} catch (error) {
+					Zotero.debug(`DeepTutorChatBox: Error parsing source data: ${error.message}`);
+				}
+			} else {
+				Zotero.debug(`DeepTutorChatBox: No source data found for ${storageKey}`);
+			}
+		};
+		
 		// Debug function for testing table with source buttons
 		window.testDeepTutorTableWithSources = () => {
 			const testTableWithSources = `
@@ -662,6 +680,33 @@ This demonstrates multiple table formats working correctly.
 					Zotero.debug(`DeepTutorChatBox: Error retrieving source data from prefs: ${error.message}`);
 				}
 				
+				// Fallback: Try to get source data from current messages if not in prefs
+				if (!sourceData) {
+					Zotero.debug(`DeepTutorChatBox: Source data not found in prefs, searching in current messages`);
+					for (const message of messages) {
+						if (message.subMessages) {
+							for (const subMessage of message.subMessages) {
+								if (subMessage.sources && subMessage.sources[sourceIndex]) {
+									const source = subMessage.sources[sourceIndex];
+									sourceData = JSON.stringify({
+										index: source.index || sourceIndex,
+										refinedIndex: source.refinedIndex !== undefined ? source.refinedIndex : source.index || sourceIndex,
+										page: source.page || 1,
+										referenceString: source.referenceString || '',
+										sourceAnnotation: source.sourceAnnotation || {}
+									});
+									
+									// Store it in prefs for future use
+									Zotero.Prefs.set(storageKey, sourceData);
+									Zotero.debug(`DeepTutorChatBox: Retrieved and stored source data from message: ${storageKey}`);
+									break;
+								}
+							}
+						}
+						if (sourceData) break;
+					}
+				}
+				
 				// Create the button element
 				const button = document.createElement('button');
 				button.className = 'deeptutor-source-button';
@@ -685,7 +730,7 @@ This demonstrates multiple table formats working correctly.
 		return () => {
 			clearTimeout(timeoutId);
 		};
-	}, [messages]); // Run after messages update
+	}, [messages, sessionId]); // Added sessionId dependency
 
 	// Function to adjust textarea height based on content
 	const adjustTextareaHeight = () => {
@@ -1330,6 +1375,26 @@ This demonstrates multiple table formats working correctly.
 				subMessages: await Promise.all(message.subMessages.map(async (subMessage) => {
 					// Process sources if they exist
 					if (subMessage.sources && subMessage.sources.length > 0) {
+						// Store source data in Zotero.Prefs for history sessions
+						subMessage.sources.forEach((source, sourceIndex) => {
+							const storageKey = `deeptutor_source_${sessionId}_${sourceIndex}`;
+							const sourceData = {
+								index: source.index || sourceIndex,
+								refinedIndex: source.refinedIndex !== undefined ? source.refinedIndex : source.index || sourceIndex,
+								page: source.page || 1,
+								referenceString: source.referenceString || '',
+								sourceAnnotation: source.sourceAnnotation || {}
+							};
+							Zotero.Prefs.set(storageKey, JSON.stringify(sourceData));
+							
+							// Add sourceIndex to tracking state
+							if (!currentSourceIndices.includes(sourceIndex)) {
+								setCurrentSourceIndices(prev => [...prev, sourceIndex]);
+							}
+							
+							Zotero.debug(`DeepTutorChatBox: Stored source data for history session: ${storageKey}`);
+						});
+						
 						// Annotation workflow removed — simply pass sources through unchanged
 						return {
 							...subMessage,
@@ -2480,7 +2545,7 @@ This demonstrates multiple table formats working correctly.
 	const cleanupSourceData = (oldSessionId) => {
 		if (!oldSessionId) return;
 		
-		// Clean up source data for previous session
+		// Clean up source data for previous session, but preserve current session data
 		currentSourceIndices.forEach((sourceIndex) => {
 			const storageKey = `deeptutor_source_${oldSessionId}_${sourceIndex}`;
 			try {
@@ -2516,6 +2581,9 @@ This demonstrates multiple table formats working correctly.
 	useEffect(() => {
 		return () => {
 			if (sessionIdRef.current) {
+				// Only cleanup if we're actually unmounting, not just switching sessions
+				// This prevents removing source data that might be needed
+				Zotero.debug(`DeepTutorChatBox: Component unmounting, cleaning up source data for session ${sessionIdRef.current}`);
 				cleanupSourceData(sessionIdRef.current);
 			}
 		};
