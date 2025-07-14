@@ -1071,7 +1071,8 @@ This demonstrates multiple table formats working correctly.
 						setIsLoading(false);
 						// Send initial message
 						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - SENDING AUTOMATIC SUMMARY MESSAGE for empty session ${sessionId}`);
-						await userSendMessage("Can you give me a summary of this document?");
+						// "Can you give me a summary of this document?"
+						await userSendMessage('Based on the context provided, make a summary for the document. Begin with \"Summary\"');
 						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - AUTOMATIC SUMMARY MESSAGE SENT for session ${sessionId}`);
 					}
 					else {

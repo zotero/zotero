@@ -1281,11 +1281,11 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
               style={{
                 all: 'revert',
                 ...getModelTypeButtonStyle(selectedType === 'normal'),
-                opacity: isEffectivelyFrozen ? 0.5 : 1,
-                cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
+                opacity: (isEffectivelyFrozen || fileList.length > 1) ? 0.5 : 1,
+                cursor: (isEffectivelyFrozen || fileList.length > 1) ? 'not-allowed' : 'pointer'
               }}
-              onClick={() => !isEffectivelyFrozen && handleTypeSelection('normal')}
-              disabled={isEffectivelyFrozen}
+              onClick={() => !(isEffectivelyFrozen || fileList.length > 1) && handleTypeSelection('normal')}
+              disabled={isEffectivelyFrozen || fileList.length > 1}
             >
               <img src={BasicPath} alt="Basic" style={{ width: '1.5rem', height: '1.5rem' }} />
               STANDARD
@@ -1295,11 +1295,11 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
               style={{
                 all: 'revert',
                 ...getModelTypeButtonStyle(selectedType === 'advanced'),
-                opacity: isEffectivelyFrozen ? 0.5 : 1,
-                cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer'
+                opacity: (isEffectivelyFrozen || fileList.length > 1) ? 0.5 : 1,
+                cursor: (isEffectivelyFrozen || fileList.length > 1) ? 'not-allowed' : 'pointer'
               }}
-              onClick={() => !isEffectivelyFrozen && handleTypeSelection('advanced')}
-              disabled={isEffectivelyFrozen}
+              onClick={() => !(isEffectivelyFrozen || fileList.length > 1) && handleTypeSelection('advanced')}
+              disabled={isEffectivelyFrozen || fileList.length > 1}
             >
               <img src={AdvancedPath} alt="Advanced" style={{ width: '1.5rem', height: '1.5rem' }} />
               ADVANCED
