@@ -13,6 +13,32 @@ get_current_platform() {
 	fi
 }
 
+get_canonical_arch() {
+	local _platform=$1
+	local _arch=$2
+	
+	case $_platform in
+		w)
+			case $_arch in
+				x64)   _arch="win-x64" ;;
+				arm64) _arch="win-arm64" ;;
+				win32|win-x64|win-arm64) ;;
+				*) echo "Invalid Windows archicture: $_arch" >&2;;
+			esac
+			echo $_arch
+			;;
+		
+		l)
+			[[ $_arch == x64 ]] && _arch="x86_64"
+			echo $_arch
+			;;
+		
+		*)
+			echo "Invalid platform '$platform'" 2>&1
+			exit 1
+	esac
+}
+
 function check_line {
 	pattern=$1
 	if ! egrep -q "$pattern" "$file"; then

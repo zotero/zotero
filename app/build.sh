@@ -35,12 +35,16 @@ fi
 
 function usage {
 	cat >&2 <<DONE
-Usage: $0 [-d DIR] [-f FILE] -p PLATFORMS [-c CHANNEL] [-d]
+Usage: $0 [-d DIR] [-f FILE] -p PLATFORMS [-a ARCH] [-c CHANNEL] [options]
+
 Options
  -d DIR              build directory to build from (from build_xpi; cannot be used with -f)
  -f FILE             ZIP file to build from (cannot be used with -d)
  -t                  add devtools
  -p PLATFORMS        build for platforms PLATFORMS (m=Mac, w=Windows, l=Linux)
+ -a ARCH             architecture to build (arm64, x64, i686, win32)
+                     * Ignored for Mac (always universal)
+                     * If omitted on Windows/Linux, all standard archs are built
  -c CHANNEL          use update channel CHANNEL
  -e                  enforce signing
  -s                  don't package; only build binaries in staging/ directory
@@ -74,7 +78,8 @@ BUILD_LINUX=0
 PACKAGE=1
 DEVTOOLS=0
 quick_build=0
-while getopts "d:f:p:c:tseq" opt; do
+arch=""
+while getopts "d:f:p:a:c:tseq" opt; do
 	case $opt in
 		d)
 			SOURCE_DIR="$OPTARG"
@@ -83,18 +88,20 @@ while getopts "d:f:p:c:tseq" opt; do
 			ZIP_FILE="$OPTARG"
 			;;
 		p)
-			for i in `seq 0 1 $((${#OPTARG}-1))`
-			do
+			for (( i=0; i<${#OPTARG}; i++ )); do
 				case ${OPTARG:i:1} in
-					m) BUILD_MAC=1;;
-					w) BUILD_WIN=1;;
-					l) BUILD_LINUX=1;;
+					m) BUILD_MAC=1 ;;
+					w) BUILD_WIN=1 ;;
+					l) BUILD_LINUX=1 ;;
 					*)
-						echo "$0: Invalid platform option ${OPTARG:i:1}"
+						echo "$0: Invalid platform option ${OPTARG:i:1}" >&2
 						usage
 						;;
 				esac
 			done
+			;;
+		a)
+			arch="$OPTARG"
 			;;
 		c)
 			UPDATE_CHANNEL="$OPTARG"
@@ -118,31 +125,46 @@ while getopts "d:f:p:c:tseq" opt; do
 	shift $((OPTIND-1)); OPTIND=1
 done
 
+xul_hash_file() {
+	local _platform=$1
+	local _arch=$2
+	
+	case $_platform in
+		m)
+			echo "hash-mac";;
+		
+		w)
+			[[ $_arch == x64 ]] && _arch="win-x64"
+			[[ $_arch == arm64 ]] && _arch="win-arm64"
+			echo "hash-${_arch}";;
+		
+		l)
+			[[ $arch == x64 ]] && arch="x86_64"
+			echo "hash-linux-${_arch}";;
+		
+		*)
+			echo "Invalid platform '$_platform'" 2>&1
+			exit 1
+	esac
+}
+
 function check_xulrunner_hash {
-	platform=$1
-
-	if [ $platform == "m" ]; then
-		platform_hash_file="hash-mac"
-	elif [ $platform == "w" ]; then
-		platform_hash_file="hash-win"
-	elif [ $platform == "l" ]; then
-		platform_hash_file="hash-linux"
-	else
-		echo "Platform parameter incorrect. Acceptable values: m/w/l"
-		exit 1
-	fi
-
+	local _platform=$1
+	local _arch=$2
+	
+	local platform_hash_file=$(xul_hash_file "$_platform" "${_arch:-universal}")
+	
 	if [ ! -e "$CALLDIR/xulrunner/$platform_hash_file" ]; then
-		echo "xulrunner not found -- downloading"
+		echo "$platform_hash_file not found -- downloading"
 		echo
-		$CALLDIR/scripts/fetch_xulrunner -p $platform
+		$CALLDIR/scripts/fetch_xulrunner -p $_platform ${_arch:+-a $_arch}
 	else
-		recalculated_xulrunner_hash=$("$CALLDIR/scripts/xulrunner_hash" -p $platform)
+		recalculated_xulrunner_hash=$("$CALLDIR/scripts/xulrunner_hash" -p $_platform ${_arch:+-a $_arch})
 		current_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform_hash_file")
-		if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then 
+		if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then
 			echo "xulrunner hashes don't match -- redownloading"
 			echo
-			"$CALLDIR/scripts/fetch_xulrunner" -p $platform
+			"$CALLDIR/scripts/fetch_xulrunner" -p $_platform ${_arch:+-a $_arch}
 			current_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform_hash_file")
 			if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then
 				echo "xulrunner hashes don't match after running fetch_xulrunner!"
@@ -152,15 +174,36 @@ function check_xulrunner_hash {
 	fi
 }
 
-#Check if xulrunner and GECKO_VERSION for each platform match
+# Derive platform flags from host if none provided
+if [[ $BUILD_MAC == 0 ]] && [[ $BUILD_WIN == 0 ]] && [[ $BUILD_LINUX == 0 ]]; then
+	case "$(uname -s)" in
+		Darwin)  BUILD_MAC=1 ;;
+		Linux)   BUILD_LINUX=1 ;;
+		CYGWIN*|MINGW*) BUILD_WIN=1 ;;
+	esac
+fi
+
+# Check xulrunner hashes for requested builds
 if [ $BUILD_MAC == 1 ]; then
 	check_xulrunner_hash m
 fi
 if [ $BUILD_WIN == 1 ]; then
-	check_xulrunner_hash w
+	if [[ -n $arch ]]; then
+		check_xulrunner_hash w $(get_canonical_arch w $arch)
+	else
+		for _a in win-x64 win-arm64 win32; do
+			check_xulrunner_hash w "$_a"
+		done
+	fi
 fi
 if [ $BUILD_LINUX == 1 ]; then
-	check_xulrunner_hash l
+	if [[ -n $arch ]]; then
+		check_xulrunner_hash l $(get_canonical_arch l $arch)
+	else
+		for _a in x64 arm64 i686; do
+			check_xulrunner_hash l "$_a"
+		done
+	fi
 fi
 
 
@@ -193,7 +236,7 @@ BUILD_ID=`date +%Y%m%d%H%M%S`
 # Paths to Gecko runtimes
 MAC_RUNTIME_PATH="$CALLDIR/xulrunner/Firefox.app"
 WIN_RUNTIME_PATH_PREFIX="$CALLDIR/xulrunner/firefox-"
-LINUX_RUNTIME_PATH_PREFIX="$CALLDIR/xulrunner/firefox-"
+LINUX_RUNTIME_PATH_PREFIX="$CALLDIR/xulrunner/firefox-linux-"
 
 base_dir="$BUILD_DIR/base"
 app_dir="$BUILD_DIR/base/app"
@@ -221,14 +264,35 @@ set +e
 if [ $BUILD_MAC == 1 ]; then
 	cp -Rp "$MAC_RUNTIME_PATH"/Contents/Resources/browser/omni "$app_dir"
 	unzip -qj "$MAC_RUNTIME_PATH"/Contents/Resources/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
-elif [ $BUILD_WIN == 1 ]; then
-	# Non-arch-specific files, so just use 64-bit version
-	cp -Rp "${WIN_RUNTIME_PATH_PREFIX}win-x64"/browser/omni "$app_dir"
-	unzip -qj "${WIN_RUNTIME_PATH_PREFIX}win-x64"/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
-elif [ $BUILD_LINUX == 1 ]; then
-	# Non-arch-specific files, so just use 64-bit version
-	cp -Rp "${LINUX_RUNTIME_PATH_PREFIX}x86_64"/browser/omni "$app_dir"
-	unzip -qj "${LINUX_RUNTIME_PATH_PREFIX}x86_64"/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
+
+elif [[ $BUILD_WIN == 1 ]]; then
+	# These are non-arch-specific files, so just find a runtime we fetched:
+	#  - If the caller specified -a, that arch is guaranteed present.
+	#  - Otherwise prefer win-x64 → win-arm64 → win32, falling back to the first
+	#    directory that exists under xulrunner/.
+	if [[ -n $arch ]]; then
+		omni_arch=$(get_canonical_arch w $arch)
+	else
+		for cand in win-x64 win-arm64 win32; do
+			[[ -d "${WIN_RUNTIME_PATH_PREFIX}${cand}" ]] && { omni_arch="$cand"; break; }
+		done
+	fi
+	cp -Rp "${WIN_RUNTIME_PATH_PREFIX}${omni_arch}"/browser/omni "$app_dir"
+	unzip -qj "${WIN_RUNTIME_PATH_PREFIX}${omni_arch}"/omni.ja "hyphenation/*" \
+		-d "$app_dir"/hyphenation/
+
+elif [[ $BUILD_LINUX == 1 ]]; then
+	# Same as above
+	if [[ -n $arch ]]; then
+		omni_arch=$(get_canonical_arch l $arch)
+	else
+		for cand in x86_64 arm64 i686; do
+			[[ -d "${LINUX_RUNTIME_PATH_PREFIX}${cand}" ]] && { omni_arch="$cand"; break; }
+		done
+	fi
+	cp -Rp "${LINUX_RUNTIME_PATH_PREFIX}${omni_arch}"/browser/omni "$app_dir"
+	unzip -qj "${LINUX_RUNTIME_PATH_PREFIX}${omni_arch}"/omni.ja "hyphenation/*" \
+		-d "$app_dir"/hyphenation/
 fi
 set -e
 cd $omni_dir
@@ -741,10 +805,15 @@ if [ $BUILD_WIN == 1 ]; then
 	
 	fi
 	
-	for arch in win32 win-x64 win-arm64; do
+	if [[ -n $arch ]]; then
+		archs=("$(get_canonical_arch w $arch)");
+	else
+		archs=(win-x64 win-arm64 win32);
+	fi
+	for arch in "${archs[@]}"; do
 		echo "Building Zotero_$arch"
 		
-		runtime_path="${WIN_RUNTIME_PATH_PREFIX}${arch}"
+		runtime_path="${WIN_RUNTIME_PATH_PREFIX}$arch"
 		
 		# Set up directory
 		APPDIR="$STAGE_DIR/Zotero_$arch"
@@ -922,14 +991,14 @@ fi
 
 # Linux
 if [ $BUILD_LINUX == 1 ]; then
-	# Skip 32-bit build in tests
-	if [[ "${ZOTERO_TEST:-}" = "1" ]] || [[ "${SKIP_32:-}" = "1" ]]; then
-		archs="x86_64"
+	if [[ -n $arch ]]; then
+		archs=("$(get_canonical_arch w $arch)")
 	else
-		archs="i686 x86_64 arm64"
+		archs=(x64 arm64 i686)
 	fi
-	
 	for arch in $archs; do
+		[[ $arch == x64 ]] && arch="x86_64"
+		
 		runtime_path="${LINUX_RUNTIME_PATH_PREFIX}${arch}"
 		
 		# Set up directory
