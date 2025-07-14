@@ -25,7 +25,7 @@ const md = markdownit({
 	typographer: true,
 	tables: true, // Enable built-in table support
 	breaks: false, // GFM line breaks (optional)
-	strikethrough: true // Enable strikethrough support
+	strikethrough: true, // Enable strikethrough support
 });
 
 // Re-enable markdown-it-katex plugin now that XML parsing is fixed
@@ -2921,31 +2921,67 @@ This demonstrates multiple table formats working correctly.
 					/* General subscript/superscript positioning */
 					.katex .msupsub {
 						text-align: left !important;
-						font-size: 50% !important;
 					}
 					.katex .msubsup {
 						text-align: right !important;
-						font-size: 50% !important;
 					}
-					/* Improved subscript positioning - reduced to 50% */
-					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sub {
-						font-size: 50% !important;
-						margin-right: 0.05em !important;
-						margin-left: -0.1667em !important;
-						margin-top: 0.05em !important;
-						vertical-align: -0.2em !important;
+					/* Proper KaTeX subscript and superscript sizing */
+					.katex .msupsub > .vlist-t {
+						font-size: 0.7em !important;
 					}
-					/* Improved superscript positioning - reduced to 50% */
-					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sup {
-						font-size: 50% !important;
-						margin-right: 0.05em !important;
-						margin-left: -0.1667em !important;
-						margin-bottom: 0.5em !important;
-						vertical-align: 0.4em !important;
+					.katex .msupsub .mord {
+						font-size: 0.7em !important;
 					}
-					/* Adjust spacing between sub/sup and base */
-					.katex .msupsub > .vlist-t2 {
-						margin-right: 0.05em !important;
+					.katex .scriptstyle {
+						font-size: 0.7em !important;
+					}
+					.katex .scriptscriptstyle {
+						font-size: 0.5em !important;
+					}
+					/* Target actual superscript and subscript elements */
+					.katex sup {
+						font-size: 0.7em !important;
+						vertical-align: super !important;
+					}
+					.katex sub {
+						font-size: 0.7em !important;
+						vertical-align: sub !important;
+					}
+					/* More specific KaTeX internal selectors */
+					.katex .vlist .sizing.reset-size6.size3,
+					.katex .vlist .fontsize-ensurer.reset-size6.size3 {
+						font-size: 0.7em !important;
+					}
+					/* Radicals - fix square root positioning issues */
+					.katex .sqrt {
+						vertical-align: baseline !important;
+						display: inline-block !important;
+						position: relative !important;
+					}
+					.katex .sqrt > .vlist-t {
+						display: inline-block !important;
+						vertical-align: baseline !important;
+					}
+					.katex .sqrt-sign {
+						position: relative !important;
+						display: inline-block !important;
+					}
+					.katex .sqrt-line {
+						border-top: 0.08em solid !important;
+						position: relative !important;
+						display: block !important;
+						width: 100% !important;
+						margin-top: -0.3em !important;
+					}
+					/* Fix radical symbol positioning */
+					.katex .sqrt > .vlist-t > .vlist-r > .vlist {
+						display: inline-block !important;
+						vertical-align: baseline !important;
+					}
+					/* Prevent radical content from floating */
+					.katex .sqrt .vlist {
+						position: relative !important;
+						display: inline-block !important;
 					}
 					/* Fractions - improve spacing and positioning */
 					.katex .frac-line {
@@ -2956,91 +2992,13 @@ This demonstrates multiple table formats working correctly.
 						vertical-align: middle !important;
 						margin: 0.2em 0 !important;
 					}
-					/* Nested fractions - improve spacing */
-					.katex .frac .frac {
-						margin: 0.1em 0 !important;
-					}
-					.katex .frac .frac .frac {
-						margin: 0.05em 0 !important;
-					}
-					/* Fraction numerator and denominator spacing */
-					.katex .frac > span {
-						padding: 0.1em 0 !important;
-					}
-					.katex .frac .frac > span {
-						padding: 0.05em 0 !important;
-					}
-					/* Radicals - improve positioning and sizing with better coverage */
-					.katex .sqrt {
-						vertical-align: baseline !important;
-						position: relative !important;
-						display: inline-flex !important;
-						align-items: baseline !important;
-					}
-					.katex .sqrt > .sqrt-sign {
-						vertical-align: baseline !important;
-						position: relative !important;
-						
-						display: flex !important;
-						align-items: stretch !important;
-					}
-					.katex .sqrt > .sqrt-sign > .sqrt-line {
-						border-top-width: 0.12em !important;
-						top: 1.2em !important;
-						
-						width: 100% !important;
-					}
-					/* Add explicit CSS to ensure square root vinculum (horizontal line) is visible */
-					.katex .sqrt-line {
-						border-top: 0.04em solid currentColor !important;
-						position: absolute !important;
-						left: 0 !important;
-						right: 0 !important;
-						top: 0.8em !important;
-						display: block !important;
-						
-						width: 100% !important;
-					}
-					.katex .sqrt > .sqrt-sign > .sqrt-line:first-child {
-						top: 1.2em !important;
-					}
-					.katex .sqrt > .sqrt-sign > .sqrt-line:last-child {
-						bottom: 1.2em !important;
-					}
-					.katex .sqrt > .sqrt-radicand {
-						vertical-align: baseline !important;
-						margin-left: -0.1em !important;
-						padding-top: 0.1em !important;
-						padding-bottom: 0.1em !important;
-					}
-					/* Ensure the radical symbol itself is properly sized and positioned */
-					.katex .sqrt > .sqrt-sign > .sqrt-symbol {
-						font-size: 1.4em !important;
-						vertical-align: baseline !important;
-						height: 100% !important;
-						display: flex !important;
-						align-items: stretch !important;
-					}
 					/* General vertical alignment for all math elements */
 					.katex * {
 						vertical-align: baseline !important;
 					}
-					/* Override for specific elements that need different alignment */
-					.katex .sup,
-					.katex .sub {
-						vertical-align: baseline !important;
-					}
-					/* Prevent excessive spacing */
-					.katex .strut {
-						display: inline-block !important;
-					}
 					/* Improve spacing for operators */
 					.katex .mop {
 						vertical-align: baseline !important;
-					}
-					/* Add space after inline LaTeX expressions */
-					.katex:not(.katex-display) {
-						margin-right: 0.2em !important;
 					}
 					/* Ensure proper spacing around inline math */
 					.katex:not(.katex-display)::after {
