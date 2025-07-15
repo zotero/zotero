@@ -2326,8 +2326,7 @@ var ZoteroPane = new function()
 		var collectionTreeRow = this.getCollectionTreeRow();
 		
 		// Don't allow deleting libraries or My Publications
-		if (collectionTreeRow.isLibrary(true) && !collectionTreeRow.isFeed()
-				|| collectionTreeRow.isPublications()) {
+		if (collectionTreeRow.isLibrary(true) && !collectionTreeRow.isFeed()) {
 			return;
 		}
 		
@@ -2344,6 +2343,11 @@ var ZoteroPane = new function()
 		// Remove virtual retracted collection
 		else if (collectionTreeRow.isRetracted()) {
 			this.setVirtual(collectionTreeRow.ref.libraryID, 'retracted', false);
+			return;
+		}
+		// Hide "My Publications"
+		else if (collectionTreeRow.isPublications()) {
+			this.setVirtual(collectionTreeRow.ref.libraryID, 'publications', false);
 			return;
 		}
 		
@@ -3250,6 +3254,12 @@ var ZoteroPane = new function()
 			}
 		},
 		{
+			id: "showPublications",
+			oncommand: () => {
+				this.setVirtual(this.getSelectedLibraryID(), 'publications', true, true);
+			}
+		},
+		{
 			id: "editSelectedCollection",
 			oncommand: () => this.editSelectedCollection()
 		},
@@ -3477,9 +3487,9 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isHeader()) {
 		}
 		else if (collectionTreeRow.isPublications()) {
-			show = [
-				'exportFile'
-			];
+			show = ['exportFile', 'deleteCollection'];
+			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
+			useHideOrDelete = "hide";
 		}
 		// Library
 		else {
@@ -3503,7 +3513,10 @@ var ZoteroPane = new function()
 			let retracted = Zotero.Prefs.getVirtualCollectionStateForLibrary(
 				libraryID, 'retracted'
 			);
-			if (!duplicates || !unfiled || !retracted) {
+			let publications = Zotero.Prefs.getVirtualCollectionStateForLibrary(
+				libraryID, 'publications'
+			);
+			if (!duplicates || !unfiled || !retracted || !publications) {
 				if (!library.archived) {
 					show.push('sep2');
 				}
@@ -3515,6 +3528,9 @@ var ZoteroPane = new function()
 				}
 				if (!retracted) {
 					show.push('showRetracted');
+				}
+				if (!publications) {
+					show.push('showPublications');
 				}
 			}
 			if (!library.archived) {

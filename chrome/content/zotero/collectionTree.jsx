@@ -515,6 +515,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					Zotero.Prefs.getVirtualCollectionState('unfiled');
 			this._virtualCollectionLibraries.retracted =
 				Zotero.Prefs.getVirtualCollectionState('retracted');
+			this._virtualCollectionLibraries.publications = Zotero.Prefs.getVirtualCollectionState('publications');
 			
 			var newRows = [];
 			var added = 0;
@@ -1263,7 +1264,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		const types = {
 			duplicates: 'D',
 			unfiled: 'U',
-			retracted: 'R'
+			retracted: 'R',
+			publications: 'P'
 		};
 		if (!(type in types)) {
 			throw new Error("Invalid virtual collection type '" + type + "'");
@@ -2981,6 +2983,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				&& this._virtualCollectionLibraries.retracted?.[libraryID] !== false
 				&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
 			var showPublications = this.props.hideSources.indexOf('publications') == -1
+				&& this._virtualCollectionLibraries.publications?.[libraryID] !== false
 				&& libraryID == Zotero.Libraries.userLibraryID;
 			var showTrash = this.props.hideSources.indexOf('trash') == -1;
 		}
