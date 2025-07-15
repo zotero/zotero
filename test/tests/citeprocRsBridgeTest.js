@@ -1,7 +1,7 @@
 "use strict";
 
 describe("Zotero.CiteprocRs", function () {
-	var chicagoNoteStyleID = "http://www.zotero.org/styles/chicago-note-bibliography";
+	var chicagoNoteStyleID = "http://www.zotero.org/styles/chicago-shortened-notes-bibliography";
 	var chicagoAuthorDateStyleID = "http://www.zotero.org/styles/chicago-author-date";
 	var style;
 	function getCiteprocJSEngine(style) {
@@ -106,7 +106,7 @@ describe("Zotero.CiteprocRs", function () {
 		citeprocRS.free();
 	});
 	
-	describe('with chicago-note-bibliography.csl', function () {
+	describe('with chicago-shortened-notes-bibliography.csl', function () {
 		before(function () {
 			style = Zotero.Styles.get(chicagoNoteStyleID);
 		});
