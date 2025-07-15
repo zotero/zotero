@@ -727,7 +727,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	_handleContextMenu = async (e, index) => {
-		if (e.target.nodeName.toLocaleLowerCase() === 'input') {
+		if (e.target.nodeName.toLowerCase() === 'input') {
 			// Do not hijack context menu on inputs, fixes #5374
 			return;
 		}
