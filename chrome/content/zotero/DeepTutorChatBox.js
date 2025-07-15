@@ -1072,7 +1072,7 @@ This demonstrates multiple table formats working correctly.
 						// Send initial message
 						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - SENDING AUTOMATIC SUMMARY MESSAGE for empty session ${sessionId}`);
 						// "Can you give me a summary of this document?"
-						await userSendMessage('Based on the context provided, make a summary for the document. Begin with \"Summary\"');
+						await userSendMessage('Based on the context provided, make a summary for the document. Begin with "Summary"');
 						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - AUTOMATIC SUMMARY MESSAGE SENT for session ${sessionId}`);
 					}
 					else {
@@ -3145,7 +3145,7 @@ This demonstrates multiple table formats working correctly.
 						}
 						// Shift+Enter allows new line (default behavior)
 					}}
-					placeholder={isStreaming ? "Message is streaming, please wait" : `Ask DeepTutor ${curSessionType.toLowerCase()}`}
+					placeholder={isStreaming ? "Message is streaming, please wait" : `Ask DeepTutor ${curSessionType === SessionType.LITE ? "Standard" : curSessionType === SessionType.BASIC ? "Advanced" : curSessionType.toLowerCase()}`}
 					rows={1}
 					disabled={isStreaming || iniWait}
 				/>
