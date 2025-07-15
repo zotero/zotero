@@ -1027,7 +1027,8 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 					id: library.treeViewID,
 					name: library.name,
 					filesEditable: library.filesEditable,
-					level: 0
+					level: 0,
+					isUserLibrary: Zotero.Libraries.userLibraryID == library.libraryID,
 				},
 				...Zotero.Collections.getByLibrary(library.libraryID, true).map(c => ({
 					id: c.treeViewID,
