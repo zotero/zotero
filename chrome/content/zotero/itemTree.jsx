@@ -276,7 +276,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						|| item.isRegularItem();
 				});
 			}
-			let newSearchItemIDs = new Set(newSearchItems.map(item => item.id));
+			let newSearchItemIDs = new Set(newSearchItems.map(item => item.treeViewID));
 			// Find the items that aren't yet in the tree
 			let itemsToAdd = newSearchItems.filter(item => this._rowMap[item.treeViewID] === undefined);
 			// Find the parents of search matches
@@ -318,7 +318,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						skipChildren = false;
 					}
 					// Skip items that don't match the search and don't have children that do
-					if (!newSearchItemIDs.has(row.ref.id) && !isSearchParent) {
+					if (!newSearchItemIDs.has(row.ref.treeViewID) && !isSearchParent) {
 						continue;
 					}
 				}
