@@ -189,6 +189,22 @@ class ReaderInstance {
 		});
 		this._blockingObserver.register(this._iframe);
 
+		// Prepare Fluent data
+		let ftl = [];
+		try {
+			ftl.push(Zotero.File.getContentsFromURL(`chrome://zotero/locale/zotero.ftl`));
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
+		try {
+			ftl.push(Zotero.File.getContentsFromURL(`chrome://zotero/locale/reader.ftl`));
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
 		this._internalReader = this._iframeWindow.wrappedJSObject.createReader(Components.utils.cloneInto({
 			type: this._type,
 			data,
@@ -206,10 +222,7 @@ class ReaderInstance {
 			contextPaneOpen: this._contextPaneOpen,
 			rtl: Zotero.rtl,
 			fontSize: Zotero.Prefs.get('fontSize'),
-			ftl: [
-				Zotero.File.getContentsFromURL('chrome://zotero/locale/zotero.ftl'),
-				Zotero.File.getContentsFromURL('chrome://zotero/locale/reader.ftl'),
-			],
+			ftl,
 			showAnnotations: true,
 			textSelectionAnnotationMode: Zotero.Prefs.get('reader.textSelectionAnnotationMode'),
 			customThemes: Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes') ?? [],

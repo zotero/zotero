@@ -175,6 +175,23 @@ class EditorInstance {
 			Zotero.debug(style);
 		}
 
+		// Prepare Fluent data
+		let ftl = ['-app-name = ' + Zotero.appName];
+
+		try {
+			ftl.push(Zotero.File.getContentsFromURL(`chrome://zotero/locale/zotero.ftl`));
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
+		try {
+			ftl.push(Zotero.File.getContentsFromURL(`chrome://zotero/locale/note-editor.ftl`));
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
 		this._postMessage({
 			action: 'init',
 			value: this._state || this._item.note,
@@ -190,11 +207,7 @@ class EditorInstance {
 			font: this._getFont(),
 			style,
 			smartQuotes: Zotero.Prefs.get('note.smartQuotes'),
-			ftl: [
-				'-app-name = ' + Zotero.appName,
-				Zotero.File.getContentsFromURL(`chrome://zotero/locale/zotero.ftl`),
-				Zotero.File.getContentsFromURL(`chrome://zotero/locale/note-editor.ftl`),
-			]
+			ftl
 		});
 		
 		if (!this._item.isAttachment()) {
