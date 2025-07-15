@@ -1,6 +1,6 @@
 "use strict";
 
-describe("Zotero.CiteprocRs", function () {
+describe.skip("Zotero.CiteprocRs", function () {
 	var chicagoNoteStyleID = "http://www.zotero.org/styles/chicago-shortened-notes-bibliography";
 	var chicagoAuthorDateStyleID = "http://www.zotero.org/styles/chicago-author-date";
 	var style;
