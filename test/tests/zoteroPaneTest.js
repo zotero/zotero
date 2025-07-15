@@ -1731,7 +1731,7 @@ describe("ZoteroPane", function() {
 			let parent;
 			let dialogPromise = waitForDialog(async (win) => {
 				parent = await createDataObject('item', { title: 'Book Title' });
-				win.io.dataOut = { parent };
+				win.arguments[0].dataOut = { parent };
 				win.close();
 			}, false, 'chrome://zotero/content/createParentDialog.xhtml');
 			let createParentPromise = zp.createParentItemsFromSelected();
