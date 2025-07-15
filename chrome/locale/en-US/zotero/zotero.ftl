@@ -613,6 +613,9 @@ new-collection-dialog =
 new-collection-name = Name:
 new-collection-create-in = Create in:
 
+show-publications-menuitem =
+    .label = Show My Publications
+
 attachment-info-title = Title
 attachment-info-filename = Filename
 attachment-info-accessed = Accessed
