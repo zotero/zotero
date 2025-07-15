@@ -26,18 +26,17 @@
 const HTML_NS = 'http://www.w3.org/1999/xhtml';
 
 var Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, no-unused-vars
-	const { oldTag, isLongTag } = window.arguments?.[0] ?? { isLongTag: true, oldTag: '' };
-	const dataOut = window.arguments?.[1] || {};
+	let { oldTag, isLongTag, isTagsBox, delimiter } = window.arguments?.[0] ?? { isLongTag: true, isTagsBox: false, oldTag: '' };
+	let dataOut = window.arguments?.[1] || {};
 	
 	this.init = function () {
 		const lastMode = Zotero.Prefs.get('lastLongTagMode') || 0;
-		const delimiter = Zotero.Prefs.get('lastLongTagDelimiter');
+		delimiter = delimiter ?? Zotero.Prefs.get('lastLongTagDelimiter');
 
 		this.dialog = document.getElementById('zotero-long-tag-fixer');
 		this.intro = document.getElementById('intro');
 		this.tabs = document.getElementById('zotero-new-tag-actions');
 		this.oldTagInput = document.getElementById('zotero-old-tag');
-		this.oldTag = document.getElementById('zotero-old-tag');
 		this.delimiterLabel = document.getElementById('delimiter-label');
 		this.oldTagDelimiter = document.getElementById('zotero-old-tag-delimiter');
 		this.listbox = document.getElementById('zotero-new-tag-list');
@@ -47,6 +46,7 @@ var Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, 
 
 		document.addEventListener('dialogaccept', () => this.accept());
 		document.addEventListener('dialogcancel', () => this.cancel());
+		document.addEventListener('dialogextra1', () => this.acceptWithoutSplitting());
 		this.tabs.addEventListener('select', (ev) => {
 			if (ev.target === this.tabs.querySelector('tabpanels')) {
 				this.switchMode(ev.currentTarget.selectedIndex);
@@ -61,6 +61,7 @@ var Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, 
 		this.oldTagInput.value = oldTag;
 		this.oldTagDelimiter.value = delimiter;
 
+		this.dialog.getButton('extra1').hidden = !isTagsBox;
 		this.updateLabel();
 		this.switchMode(isLongTag ? lastMode : 0);
 	};
@@ -108,14 +109,19 @@ var Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, 
 			const re = new RegExp("\\s*" + delimiter.replace(/([\.\-\[\]\(\)\?\*\+])/g, "\\$1") + "\\s*");
 			tags = [...new Set(oldTag.split(re).filter(t => t.length > 0))];
 		}
+		else {
+			tags = [oldTag.trim()];
+		}
 		
-		const acceptButton = document.getElementById('zotero-long-tag-fixer').getButton('accept');
-		if (!delimiter || tags.length < 2) {
-			acceptButton.disabled = true;
-			// return;
+		const acceptBtnEl = this.dialog.getButton('accept');
+		
+		// When used to intercept paste in the tags box, allow returning just the tag that was
+		// pasted; otherwise, disable the accept button unless at least two tags are produced
+		if (!isTagsBox && (!delimiter || tags.length < 2)) {
+			acceptBtnEl.disabled = true;
 		}
 		else {
-			acceptButton.disabled = false;
+			acceptBtnEl.disabled = false;
 		}
 		
 		tags.sort();
@@ -205,5 +211,10 @@ var Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, 
 			Zotero.debug(e);
 			throw (e);
 		}
+	};
+
+	this.acceptWithoutSplitting	= function () {
+		dataOut.result = { op: 'split', tags: [oldTag.trim()] };
+		window.close();
 	};
 };
