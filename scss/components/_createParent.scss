@@ -1,4 +1,4 @@
-.create-parent-container {
+#zotero-create-parent-container {
 	.title {
 		font-size: 1.4em;
 		font-weight: 700;
@@ -7,39 +7,18 @@
 	}
 	
 	.intro {
-		// Text is added asynchonously, so set a height for dialog auto-sizing
-		min-height: 1em;
 		margin-bottom: .5em;
-		max-width: 500px; // Avoid expanding the dialog too wide; instead, in some languages, the intro text will wrap.
+		max-width: 550px; // Avoid expanding the dialog too wide; instead, in some languages, the intro text will wrap.
 	}
 	
 	.body {
-		position: relative;
+		align-items: center;
 		display: flex;
 		margin-bottom: 1em;
 
 		input {
 			flex: 1;
-			font-size: 14px;
 			margin-left: 0;
-		}
-		
-		.downloadProgress {
-			position: absolute;
-			top: 50%;
-			left: 0;
-			right: -1em;
-			transform: translateY(-100%);
-			
-			&.hidden {
-				display: none;
-			}
-			
-			.progress-bar {
-				width: 100%;
-				height: 100%;
-				opacity: 0.5;
-			}
 		}
 	}
 }
