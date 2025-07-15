@@ -941,7 +941,7 @@ async function citeprocToHTML(itemOrItems, searchParams, asCitationList) {
 	
 	// Filter out attachments, annotations, and notes, which we can't generate citations for
 	items = items.filter(item => item.isRegularItem());
-	let styleIDOrURL = searchParams.get('style') || 'chicago-note-bibliography';
+	let styleIDOrURL = searchParams.get('style') || 'chicago-shortened-notes-bibliography';
 	let locale = searchParams.get('locale') || 'en-US';
 	let linkWrap = searchParams.get('linkwrap') == '1';
 	
