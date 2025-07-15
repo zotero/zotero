@@ -120,7 +120,7 @@ pref("extensions.zotero.export.lastTranslator", "14763d24-8ba0-45df-8f52-b8d1108
 pref("extensions.zotero.export.translatorSettings", "true,false");
 pref("extensions.zotero.export.lastNoteTranslator", "1412e9e2-51e1-42ec-aa35-e036a895534b");
 pref("extensions.zotero.export.noteTranslatorSettings", "");
-pref("extensions.zotero.export.lastStyle", "http://www.zotero.org/styles/chicago-note-bibliography");
+pref("extensions.zotero.export.lastStyle", "http://www.zotero.org/styles/chicago-shortened-notes-bibliography");
 pref("extensions.zotero.export.bibliographySettings", "save-as-rtf");
 pref("extensions.zotero.export.displayCharsetOption", true);
 pref("extensions.zotero.export.citePaperJournalArticleURL", false);
@@ -130,7 +130,7 @@ pref("extensions.zotero.import.createNewCollection.fromFileOpenHandler", true);
 pref("extensions.zotero.rtfScan.lastInputFile", "");
 pref("extensions.zotero.rtfScan.lastOutputFile", "");
 
-pref("extensions.zotero.export.quickCopy.setting", "bibliography=http://www.zotero.org/styles/chicago-note-bibliography");
+pref("extensions.zotero.export.quickCopy.setting", "bibliography=http://www.zotero.org/styles/chicago-shortened-notes-bibliography");
 pref("extensions.zotero.export.quickCopy.dragLimit", 50);
 
 pref("extensions.zotero.export.noteQuickCopy.setting", '{"mode":"export","id":"a45eca67-1ee8-45e5-b4c6-23fb8a852873","markdownOptions":{"includeAppLinks":true},"htmlOptions":{"includeAppLinks":false}}');
