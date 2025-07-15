@@ -598,8 +598,8 @@ class ReaderInstance {
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
 			},
-			onSetReadAloudVoice: (lang, voice) => {
-				this._setReadAloudVoice(lang, voice);
+			onSetReadAloudVoice: (lang, voice, speed) => {
+				this._setReadAloudVoice(lang, voice, speed);
 			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
@@ -1432,10 +1432,10 @@ class ReaderInstance {
 		}
 	}
 	
-	_setReadAloudVoice(lang, voice) {
+	_setReadAloudVoice(lang, voice, speed) {
 		Zotero.Prefs.set('reader.readAloudVoices', JSON.stringify({
 			...this._getReadAloudVoices(),
-			[lang]: voice
+			[lang]: { voice, speed }
 		}));
 	}
 }
