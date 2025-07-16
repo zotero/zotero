@@ -285,7 +285,7 @@ class DeepTutorBottomSection extends React.Component {
 							style={styles.textButton}
 							onClick={() => {
 								Zotero.debug("DeepTutor: Feedback button clicked");
-								const url = 'https://docs.google.com/forms/d/e/1FAIpQLSdOZgoMsM4Th2nAAMv8CvhA2TsqTqWq_psQpdfuadoiVsus6g/viewform';
+								const url = 'https://docs.google.com/forms/d/e/1FAIpQLSfgLdhUz79oBsNTIF_rD3hEw5pCTbXOOGfi1UBKViiVgFjI-A/viewform?usp=dialog';
 								Zotero.debug(`DeepTutor: Attempting to open feedback URL: ${url}`);
                                 
 								try {
