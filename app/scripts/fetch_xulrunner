@@ -718,7 +718,7 @@ if [ $BUILD_LINUX == 1 ]; then
 		arch_list=(x86_64 arm64 i686)
 	fi
 	for arch in "${arch_list[@]}"; do
-		xdir="firefox-$arch"
+		xdir="firefox-linux-$arch"
 		rm -rf $xdir
 		
 		archived_file="firefox-$GECKO_VERSION-$arch.tar.xz"
@@ -737,9 +737,9 @@ if [ $BUILD_LINUX == 1 ]; then
 		fi
 
 		tar xvf firefox-$GECKO_VERSION.tar.xz
-		mv firefox firefox-linux-$arch
+		mv firefox $xdir
 
-		pushd firefox-linux-$arch
+		pushd $xdir
 		modify_omni $arch
 		popd
 		
