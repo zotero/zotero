@@ -3470,6 +3470,8 @@ var ZoteroPane = new function()
 			// Adjust labels
 			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-edit-saved-search');
 			m.duplicate.setAttribute('label', Zotero.getString('pane.collections.menu.duplicate.savedSearch'));
+			m.duplicate.classList.add('zotero-menuitem-duplicate-saved-search');
+			m.duplicate.classList.remove('zotero-menuitem-duplicate-collection');
 			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.savedSearch'));
 			m.exportCollection.setAttribute('label', Zotero.getString('pane.collections.menu.export.savedSearch'));
 			m.createBibCollection.setAttribute('label', Zotero.getString('pane.collections.menu.createBib.savedSearch'));
@@ -4121,6 +4123,7 @@ var ZoteroPane = new function()
 		});
 		// Disable for already top-level collections
 		libraryMenuItem.disabled = !selected.parentID;
+		libraryMenuItem.classList.add('menuitem-iconic');
 		popup.appendChild(libraryMenuItem);
 		popup.appendChild(document.createXULElement("menuseparator"));
 		

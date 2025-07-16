@@ -65,6 +65,10 @@ $menu-icons: (
 	expand-all: "expand-all",
 	collapse-others: "collapse-others",
 	change-top-level-item: "change-top-level-item",
+	show-publications: 'publications',
+	duplicate-saved-search: 'duplicate',
+	copy-collection: 'copy-collection',
+	move-collection: 'move-collection',
 );
 
 @each $cls, $icon in $menu-icons {
