@@ -143,7 +143,7 @@ xul_hash_file() {
 			echo "hash-linux-${_arch}";;
 		
 		*)
-			echo "Invalid platform '$_platform'" 2>&1
+			echo "Invalid platform '$_platform'" >&2
 			exit 1
 	esac
 }
