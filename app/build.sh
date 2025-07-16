@@ -139,7 +139,7 @@ xul_hash_file() {
 			echo "hash-${_arch}";;
 		
 		l)
-			[[ $arch == x64 ]] && arch="x86_64"
+			[[ $_arch == x64 ]] && _arch="x86_64"
 			echo "hash-linux-${_arch}";;
 		
 		*)
@@ -992,11 +992,11 @@ fi
 # Linux
 if [ $BUILD_LINUX == 1 ]; then
 	if [[ -n $arch ]]; then
-		archs=("$(get_canonical_arch w $arch)")
+		archs=("$(get_canonical_arch l $arch)")
 	else
 		archs=(x64 arm64 i686)
 	fi
-	for arch in $archs; do
+	for arch in "${archs[@]}"; do
 		[[ $arch == x64 ]] && arch="x86_64"
 		
 		runtime_path="${LINUX_RUNTIME_PATH_PREFIX}${arch}"
