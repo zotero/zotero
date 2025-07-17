@@ -15,30 +15,285 @@ md.use(mk, {
 	errorColor: "#cc0000"
 });
 
-// Process markdown result to fix JSX compatibility issues
+// Process markdown result to fix JSX compatibility issues using enhanced regex and Zotero-compatible parsing
 const processMarkdownResult = (html) => {
 	if (!html || typeof html !== "string") {
 		return "";
 	}
 	
-	// Fix self-closing tags for XML/XHTML compatibility
-	let processedHtml = html
-		.replace(/<br>/g, "<br/>")
-		.replace(/<hr>/g, "<hr/>")
-		.replace(/<img([^>]*?)>/g, "<img$1/>")
-		.replace(/<input([^>]*?)>/g, "<input$1/>")
-		.replace(/<area([^>]*?)>/g, "<area$1/>")
-		.replace(/<base([^>]*?)>/g, "<base$1/>")
-		.replace(/<col([^>]*?)>/g, "<col$1/>")
-		.replace(/<embed([^>]*?)>/g, "<embed$1/>")
-		.replace(/<link([^>]*?)>/g, "<link$1/>")
-		.replace(/<meta([^>]*?)>/g, "<meta$1/>")
-		.replace(/<source([^>]*?)>/g, "<source$1/>")
-		.replace(/<track([^>]*?)>/g, "<track$1/>")
-		.replace(/<wbr([^>]*?)>/g, "<wbr$1/>")
-		.replace(/\n/g, "");
-	
-	return processedHtml;
+	try {
+		// Try to use available DOM parsing APIs
+		let parser = null;
+		let serializer = null;
+		
+		// Try xmldom package first (if available)
+		try {
+			const xmldom = require('resource://zotero/xmldom.js');
+			if (xmldom && xmldom.DOMParser && xmldom.XMLSerializer) {
+				parser = new xmldom.DOMParser();
+				serializer = new xmldom.XMLSerializer();
+				Zotero.debug(`DeepTutorStreamingComponent: Successfully loaded and using xmldom package for DOM parsing`);
+			}
+			else {
+				Zotero.debug(`DeepTutorStreamingComponent: xmldom package loaded but missing DOMParser/XMLSerializer`);
+			}
+		}
+		catch (e) {
+			Zotero.debug(`DeepTutorStreamingComponent: xmldom package not available or failed to load: ${e.message}`);
+		}
+		
+		// Fallback to native DOM APIs if xmldom not available
+		if (!parser) {
+			// Check for DOMParser availability in different contexts
+			if (typeof DOMParser !== 'undefined') {
+				parser = new DOMParser();
+				serializer = new XMLSerializer();
+			}
+			else if (typeof window !== 'undefined' && window.DOMParser) {
+				parser = new window.DOMParser();
+				serializer = new window.XMLSerializer();
+			}
+			else if (typeof Components !== 'undefined') {
+				// Try Firefox/XUL specific APIs
+				try {
+					parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+						.createInstance(Components.interfaces.nsIDOMParser);
+					serializer = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
+						.createInstance(Components.interfaces.nsIDOMSerializer);
+				}
+				catch (e) {
+					Zotero.debug(`DeepTutorStreamingComponent: Components.classes DOMParser not available: ${e.message}`);
+				}
+			}
+		}
+		
+		if (parser && serializer) {
+			// DOM parsing is available, use it
+			// Pre-process HTML to fix common XML compatibility issues
+			let preprocessedHtml = html
+				// Fix self-closing tags to be XML compliant
+				.replace(/<(br|hr|img|input|area|base|col|embed|link|meta|param|source|track|wbr)(\s[^>]*)?>/gi, '<$1$2/>')
+				// Fix attributes without quotes
+				.replace(/(\w+)=([^"\s>]+)(?=[\s>])/g, '$1="$2"')
+				// Convert HTML entities to XML-safe equivalents
+				.replace(/&nbsp;/g, '&#160;');
+			
+			const wrappedHtml = `<root>${preprocessedHtml}</root>`;
+			Zotero.debug(`DeepTutorStreamingComponent: Preprocessed HTML for XML compatibility`);
+			
+			// Debug: Show what parser type we're using
+			if (parser.constructor && parser.constructor.name) {
+				Zotero.debug(`DeepTutorStreamingComponent: Using parser type: ${parser.constructor.name}`);
+			}
+			
+			// Debug: Show the HTML being parsed (truncated for readability)
+			if (wrappedHtml.length > 500) {
+				Zotero.debug(`DeepTutorStreamingComponent: Parsing HTML content (${wrappedHtml.length} chars, first 500): ${wrappedHtml.substring(0, 500)}...`);
+			}
+			else {
+				Zotero.debug(`DeepTutorStreamingComponent: Parsing HTML content (${wrappedHtml.length} chars): ${wrappedHtml}`);
+			}
+			
+			try {
+				// Try parsing as HTML first, then convert to XML
+				let doc = null;
+				
+				// First attempt: Parse as HTML (if the parser supports it)
+				if (parser.parseFromString) {
+					try {
+						doc = parser.parseFromString(wrappedHtml, 'text/html');
+						Zotero.debug(`DeepTutorStreamingComponent: Successfully parsed as HTML`);
+					}
+					catch (htmlError) {
+						Zotero.debug(`DeepTutorStreamingComponent: HTML parsing failed: ${htmlError.message}`);
+					}
+				}
+				
+				// Second attempt: Parse as XML if HTML parsing failed or not supported
+				if (!doc || !doc.documentElement || doc.documentElement.tagName === 'parsererror') {
+					try {
+						doc = parser.parseFromString(wrappedHtml, 'application/xml');
+						Zotero.debug(`DeepTutorStreamingComponent: Parsed as XML`);
+						
+						// Check if parsing was successful (no parsererror elements)
+						const parseError = doc.querySelector ? doc.querySelector('parsererror') : null;
+						if (parseError) {
+							throw new Error('XML parsing failed');
+						}
+					}
+					catch (xmlError) {
+						Zotero.debug(`DeepTutorStreamingComponent: XML parsing also failed: ${xmlError.message}`);
+						throw new Error('Both HTML and XML parsing failed');
+					}
+				}
+				
+				// Function to recursively fix self-closing tags
+				const fixXmlCompatibility = (node) => {
+					if (node.nodeType === 1) { // ELEMENT_NODE
+						const tagName = node.tagName.toLowerCase();
+						
+						// List of self-closing HTML tags
+						const selfClosingTags = [
+							'area',
+							'base',
+							'br',
+							'col',
+							'embed',
+							'hr',
+							'img',
+							'input',
+							'link',
+							'meta',
+							'param',
+							'source',
+							'track',
+							'wbr'
+						];
+						
+						// For self-closing tags, ensure they have no children
+						if (selfClosingTags.includes(tagName)) {
+							while (node.firstChild) {
+								node.removeChild(node.firstChild);
+							}
+						}
+						
+						// Process child elements
+						const children = Array.from(node.children || []);
+						for (const child of children) {
+							fixXmlCompatibility(child);
+						}
+					}
+				};
+				
+				// Fix XML compatibility
+				fixXmlCompatibility(doc.documentElement);
+				
+				// Serialize back to string
+				const serializedXml = serializer.serializeToString(doc.documentElement);
+				let result = serializedXml.replace(/^<root[^>]*>/, '').replace(/<\/root>$/, '');
+				
+				// Clean up whitespace: remove spaces around specific HTML tags
+				result = result
+					// Remove spaces before opening tags
+					.replace(/\s+<(ol|ul|li|p|div|span|h[1-6])>/g, '<$1>')
+					// Remove spaces after opening tags
+					.replace(/<(ol|ul|li|p|div|span|h[1-6])>\s+/g, '<$1>')
+					// Remove spaces before closing tags
+					.replace(/\s+<\/(ol|ul|li|p|div|span|h[1-6])>/g, '</$1>')
+					// Remove spaces after closing tags
+					.replace(/<\/(ol|ul|li|p|div|span|h[1-6])>\s+/g, '</$1>')
+					// Remove spaces at the beginning and end of the entire string
+					.trim();
+				
+				Zotero.debug(`DeepTutorStreamingComponent: Successfully converted HTML to XML using DOM parser and cleaned whitespace`);
+				return result;
+			}
+			catch (domError) {
+				Zotero.debug(`DeepTutorStreamingComponent: DOM parsing failed: ${domError.message}, falling back to regex`);
+				throw domError;
+			}
+		}
+		else {
+			// No DOM parsing available, skip to regex
+			throw new Error('No DOM parsing APIs available');
+		}
+	}
+	catch (error) {
+		Zotero.debug(`DeepTutorStreamingComponent: DOM parsing failed, using enhanced regex fallback: ${error.message}`);
+		
+		// Enhanced regex-based approach with better XML compatibility
+		let processedHtml = html;
+		
+		// Fix self-closing tags step by step with validation
+		const selfClosingTagPatterns = [
+			{ tag: 'br', pattern: /<br(\s[^>]*)?>/gi },
+			{ tag: 'hr', pattern: /<hr(\s[^>]*)?>/gi },
+			{ tag: 'img', pattern: /<img(\s[^>]*)?>/gi },
+			{ tag: 'input', pattern: /<input(\s[^>]*)?>/gi },
+			{ tag: 'area', pattern: /<area(\s[^>]*)?>/gi },
+			{ tag: 'base', pattern: /<base(\s[^>]*)?>/gi },
+			{ tag: 'col', pattern: /<col(\s[^>]*)?>/gi },
+			{ tag: 'embed', pattern: /<embed(\s[^>]*)?>/gi },
+			{ tag: 'link', pattern: /<link(\s[^>]*)?>/gi },
+			{ tag: 'meta', pattern: /<meta(\s[^>]*)?>/gi },
+			{ tag: 'param', pattern: /<param(\s[^>]*)?>/gi },
+			{ tag: 'source', pattern: /<source(\s[^>]*)?>/gi },
+			{ tag: 'track', pattern: /<track(\s[^>]*)?>/gi },
+			{ tag: 'wbr', pattern: /<wbr(\s[^>]*)?>/gi }
+		];
+		
+		// Process each self-closing tag type
+		for (const { tag, pattern } of selfClosingTagPatterns) {
+			processedHtml = processedHtml.replace(pattern, (match, attributes) => {
+				const attrs = attributes || '';
+				// Ensure the tag is self-closed and doesn't already end with />
+				if (match.endsWith('/>')) {
+					return match; // Already self-closed
+				}
+				else {
+					return `<${tag}${attrs}/>`;
+				}
+			});
+		}
+		
+		// Fix common attribute quoting issues
+		processedHtml = processedHtml.replace(/(\w+)=([^"\s>]+)(?=[\s>])/g, '$1="$2"');
+		
+		// Fix HTML entities that might cause XML parsing issues
+		processedHtml = processedHtml
+			.replace(/&nbsp;/g, '&#160;')
+			.replace(/&amp;/g, '&amp;') // Ensure & is properly escaped
+			.replace(/&lt;/g, '&lt;')
+			.replace(/&gt;/g, '&gt;')
+			.replace(/&quot;/g, '&quot;')
+			.replace(/&apos;/g, '&apos;');
+		
+		// Fix any remaining unclosed tags that could cause issues
+		// This is a basic fix for common markdown-it output issues
+		const unclosedTagPattern = /<(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre)(\s[^>]*)?(?!.*<\/\1>)/gi;
+		const tagMatches = [];
+		let match;
+		
+		// Find unclosed tags (basic detection)
+		while ((match = unclosedTagPattern.exec(processedHtml)) !== null) {
+			tagMatches.push({
+				tag: match[1],
+				fullMatch: match[0],
+				index: match.index
+			});
+		}
+		
+		// Log what changes were made
+		if (html !== processedHtml) {
+			Zotero.debug(`DeepTutorStreamingComponent: Enhanced regex processing made changes to HTML`);
+			const changes = [];
+			selfClosingTagPatterns.forEach(({ tag }) => {
+				if (html.includes(`<${tag}`) && processedHtml.includes(`<${tag}`)
+					&& !html.includes(`<${tag}`) === processedHtml.includes(`<${tag}/>`)) {
+					changes.push(`${tag} tags made self-closing`);
+				}
+			});
+			if (changes.length > 0) {
+				Zotero.debug(`DeepTutorStreamingComponent: Specific changes: ${changes.join(', ')}`);
+			}
+		}
+		
+		// Clean up whitespace: remove spaces around specific HTML tags
+		processedHtml = processedHtml
+			// Remove spaces before opening tags
+			.replace(/\s+<(ol|ul|li|p|div|span|h[1-6])>/g, '<$1>')
+			// Remove spaces after opening tags
+			.replace(/<(ol|ul|li|p|div|span|h[1-6])>\s+/g, '<$1>')
+			// Remove spaces before closing tags
+			.replace(/\s+<\/(ol|ul|li|p|div|span|h[1-6])>/g, '</$1>')
+			// Remove spaces after closing tags
+			.replace(/<\/(ol|ul|li|p|div|span|h[1-6])>\s+/g, '</$1>')
+			// Remove spaces at the beginning and end of the entire string
+			.trim();
+		
+		Zotero.debug(`DeepTutorStreamingComponent: Enhanced regex processing completed with whitespace cleanup`);
+		return processedHtml;
+	}
 };
 
 const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
@@ -125,7 +380,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 		}
 	}, [streamText]);
 
-	const formatResponseForMarkdown = (text) => {
+	const formatResponseForMarkdown = (text, subMessage) => {
 		if (!text || typeof text !== 'string') {
 			return '';
 		}
@@ -196,9 +451,9 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 		
 		// Remove any other custom tags that might cause XML issues
 		// This regex removes any remaining custom tags that aren't standard HTML
-		cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a)\b)[^>]*>/gi, '');
+		// cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a)\b)[^>]*>/gi, '');
 		
-		// Now apply mathematical symbol processing to the clean text
+		// Now apply mathematical symbol processing and source processing to the clean text
 		let formattedText = cleanText;
 
 		// Replace inline math-like expressions (e.g., \( u \)) with proper Markdown math
@@ -212,6 +467,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 		
 		Zotero.debug(`DeepTutorStreamingComponent: formatResponseForMarkdown - Original text length: ${text.length}, Clean text length: ${cleanText.length}`);
 		Zotero.debug(`DeepTutorStreamingComponent: formatResponseForMarkdown - Removed custom tags and processed for XML compatibility`);
+		Zotero.debug(`DeepTutorStreamingComponent: formatResponseForMarkdown - Available sources: ${subMessage?.sources?.length || 0}`);
 		
 		Zotero.debug(`DeepTutorStreamingComponent: formatResponseForMarkdown - Final formatted text length: ${formattedText.length}`);
 		return formattedText;
@@ -459,12 +715,13 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 					.katex {
 						font-size: 1.1em !important;
 						line-height: 1.2 !important;
-						vertical-align: baseline !important;
+						vertical-align: middle !important;
 					}
 					/* Inline math adjustments */
 					.katex:not(.katex-display) {
 						font-size: 1em !important;
 						line-height: 1.1 !important;
+						vertical-align: middle !important;
 					}
 					/* Display math adjustments */
 					.katex-display {
@@ -472,7 +729,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						line-height: 1.4 !important;
 						margin-bottom: 1em !important;
 						margin-top: 0.5em !important;
-						text-align: center !important;
+						
 					}
 					/* General subscript/superscript positioning */
 					.katex .msupsub {
@@ -481,25 +738,63 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 					.katex .msubsup {
 						text-align: right !important;
 					}
-					/* Improved subscript positioning - reduced to 50% */
-					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sub {
-						font-size: 50% !important;
-						margin-right: 0.05em !important;
-						margin-left: -0.1667em !important;
-						margin-top: 0.05em !important;
-						vertical-align: -0.2em !important;
+					/* Proper KaTeX subscript and superscript sizing */
+					.katex .msupsub > .vlist-t {
+						font-size: 0.7em !important;
 					}
-					/* Improved superscript positioning - reduced to 50% */
-					.katex .vlist-t2 > .vlist-r:nth-child(2) > .vlist > span > .sup {
-						font-size: 50% !important;
-						margin-right: 0.05em !important;
-						margin-left: -0.1667em !important;
-						margin-bottom: 0.5em !important;
-						vertical-align: 0.4em !important;
+					.katex .msupsub .mord {
+						font-size: 0.7em !important;
 					}
-					/* Adjust spacing between sub/sup and base */
-					.katex .msupsub > .vlist-t2 {
-						margin-right: 0.05em !important;
+					.katex .scriptstyle {
+						font-size: 0.7em !important;
+					}
+					.katex .scriptscriptstyle {
+						font-size: 0.5em !important;
+					}
+					/* Target actual superscript and subscript elements */
+					.katex sup {
+						font-size: 0.7em !important;
+						vertical-align: super !important;
+					}
+					.katex sub {
+						font-size: 0.7em !important;
+						vertical-align: sub !important;
+					}
+					/* More specific KaTeX internal selectors */
+					.katex .vlist .sizing.reset-size6.size3,
+					.katex .vlist .fontsize-ensurer.reset-size6.size3 {
+						font-size: 0.7em !important;
+					}
+					/* Radicals - fix square root positioning issues */
+					.katex .sqrt {
+						vertical-align: baseline !important;
+						display: inline-block !important;
+						position: relative !important;
+					}
+					.katex .sqrt > .vlist-t {
+						display: inline-block !important;
+						vertical-align: baseline !important;
+					}
+					.katex .sqrt-sign {
+						position: relative !important;
+						display: inline-block !important;
+					}
+					.katex .sqrt-line {
+						border-top: 0.08em solid !important;
+						position: relative !important;
+						display: block !important;
+						width: 100% !important;
+						margin-top: -0.3em !important;
+					}
+					/* Fix radical symbol positioning */
+					.katex .sqrt > .vlist-t > .vlist-r > .vlist {
+						display: inline-block !important;
+						vertical-align: baseline !important;
+					}
+					/* Prevent radical content from floating */
+					.katex .sqrt .vlist {
+						position: relative !important;
+						display: inline-block !important;
 					}
 					/* Fractions - improve spacing and positioning */
 					.katex .frac-line {
@@ -508,86 +803,18 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 					/* Fix outer containers that contain fractions */
 					.katex-display:has(.frac),
 					.katex-display:has(.mfrac) {
-						margin-top: -1.3em !important;
-						margin-bottom: 1em !important;
+						margin-top: -1em !important;
+						margin-bottom: 1.5em !important;
 						vertical-align: middle !important;
 
-					}
-					/* Nested fractions - improve spacing */
-					.katex .frac .frac {
-						margin: 0.1em 0 !important;
-					}
-					.katex .frac .frac .frac {
-						margin: 0.05em 0 !important;
-					}
-					/* Fraction numerator and denominator spacing */
-					.katex .frac > span {
-						padding: 0.1em 0 !important;
-					}
-					.katex .frac .frac > span {
-						padding: 0.05em 0 !important;
-					}
-					/* Radicals - improve positioning and sizing with better coverage */
-					.katex .sqrt {
-						vertical-align: baseline !important;
-						position: relative !important;
-						display: inline-flex !important;
-						align-items: baseline !important;
-					}
-					.katex .sqrt > .sqrt-sign {
-						vertical-align: baseline !important;
-						position: relative !important;
-						height: 1.6em !important;
-						width: 1.2em !important;
-						display: flex !important;
-						align-items: stretch !important;
-					}
-					.katex .sqrt > .sqrt-sign > .sqrt-line {
-						border-top-width: 0.12em !important;
-						top: 0.02em !important;
-						height: 0.12em !important;
-						width: 100% !important;
-					}
-					.katex .sqrt > .sqrt-sign > .sqrt-line:first-child {
-						top: 0.02em !important;
-					}
-					.katex .sqrt > .sqrt-sign > .sqrt-line:last-child {
-						bottom: 0.02em !important;
-					}
-					.katex .sqrt > .sqrt-radicand {
-						vertical-align: baseline !important;
-						margin-left: 0.2em !important;
-						padding-top: 0.1em !important;
-						padding-bottom: 0.1em !important;
-					}
-					/* Ensure the radical symbol itself is properly sized and positioned */
-					.katex .sqrt > .sqrt-sign > .sqrt-symbol {
-						font-size: 1.4em !important;
-						vertical-align: baseline !important;
-						height: 100% !important;
-						display: flex !important;
-						align-items: stretch !important;
 					}
 					/* General vertical alignment for all math elements */
 					.katex * {
 						vertical-align: baseline !important;
 					}
-					/* Override for specific elements that need different alignment */
-					.katex .sup,
-					.katex .sub {
-						vertical-align: baseline !important;
-					}
-					/* Prevent excessive spacing */
-					.katex .strut {
-						display: inline-block !important;
-					}
 					/* Improve spacing for operators */
 					.katex .mop {
 						vertical-align: baseline !important;
-					}
-					/* Add space after inline LaTeX expressions */
-					.katex:not(.katex-display) {
-						margin-right: 0.2em !important;
 					}
 					/* Ensure proper spacing around inline math */
 					.katex:not(.katex-display)::after {
@@ -624,7 +851,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 			React.createElement('div', { style: containerStyle },
 				(() => {
 					try {
-						const text = formatResponseForMarkdown(thinkingText || '');
+						const text = formatResponseForMarkdown(thinkingText || '', null);
 						const result = md.render(text);
 						const processedResult = processMarkdownResult(result);
 						
@@ -667,7 +894,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 			React.createElement('div', { style: containerStyle },
 				(() => {
 					try {
-						const text = formatResponseForMarkdown(responseText || '');
+						const text = formatResponseForMarkdown(responseText || '', null);
 						const result = md.render(text);
 						const processedResult = processMarkdownResult(result);
 						

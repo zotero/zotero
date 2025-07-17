@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-unused-vars
+ 
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -89,7 +89,6 @@ try {
 catch (error) {
 	Zotero.debug(`DeepTutorChatBox: Table test ERROR: ${error.message}`);
 }
-
 
 
 class Conversation {
@@ -520,7 +519,8 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						
 						setIsStreaming(false);
 						Zotero.debug(`DeepTutorChatBox: Streaming stopped - AI response received via periodic check`);
-					} else {
+					}
+					else {
 						Zotero.debug(`EEEEEEEEEEEEEEEEE DeepTutorChatBox: No new messages found in periodic check ${time.toLocaleTimeString()}`);
 						// Start streaming if not already active (waiting for AI response)
 					}
@@ -586,26 +586,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		
 		// Add event listener to document
 		document.addEventListener('click', handleDocumentClick);
-		
-		// Debug function for testing source button functionality
-		window.testDeepTutorSourceButton = (sourceId, page = 1, referenceString = "test") => {
-			const testSourceData = {
-				index: sourceId - 1,
-				refinedIndex: sourceId - 1,
-				page: page,
-				referenceString: referenceString,
-				sourceAnnotation: {
-					pageNum: page,
-					startChar: 0,
-					endChar: referenceString.length,
-					success: true,
-					similarity: 1.0
-				}
-			};
-			Zotero.debug(`DeepTutorChatBox: Testing source button with data:`, testSourceData);
-			handleSourceClick(testSourceData);
-		};
-		
+
 		// Debug function for testing source data retrieval
 		window.debugDeepTutorSourceData = (sourceIndex) => {
 			const storageKey = `deeptutor_source_${sessionId}_${sourceIndex}`;
@@ -616,106 +597,14 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				try {
 					const sourceData = JSON.parse(sourceDataStr);
 					Zotero.debug(`DeepTutorChatBox: Parsed source data:`, sourceData);
-				} catch (error) {
+				}
+				catch (error) {
 					Zotero.debug(`DeepTutorChatBox: Error parsing source data: ${error.message}`);
 				}
-			} else {
+			}
+			else {
 				Zotero.debug(`DeepTutorChatBox: No source data found for ${storageKey}`);
 			}
-		};
-		
-		// Debug function for testing table with source buttons
-		window.testDeepTutorTableWithSources = () => {
-			const testTableWithSources = `
-Here's a comparison table with source references:
-
-| Metric | Value 1 | Value 2 | Reference |
-|--------|---------|---------|-----------|
-| Accuracy | 95.2% [<1>] | 89.7% [<2>] | Study A vs Study B |
-| Precision | 0.92 [<1>] | 0.88 [<2>] | Measurement data |
-| Recall | 0.89 | 0.85 [<3>] | Performance metrics |
-
-The table above shows [<1>] the comparison results.
-`;
-			
-			const testSources = [
-				{
-					index: 0,
-					refinedIndex: 0,
-					page: 15,
-					referenceString: "accuracy measurement",
-					sourceAnnotation: { pageNum: 15, startChar: 100, endChar: 120, success: true, similarity: 0.95 }
-				},
-				{
-					index: 1,
-					refinedIndex: 1,
-					page: 23,
-					referenceString: "precision data",
-					sourceAnnotation: { pageNum: 23, startChar: 200, endChar: 220, success: true, similarity: 0.88 }
-				},
-				{
-					index: 2,
-					refinedIndex: 2,
-					page: 31,
-					referenceString: "recall metrics",
-					sourceAnnotation: { pageNum: 31, startChar: 300, endChar: 320, success: true, similarity: 0.92 }
-				}
-			];
-			
-			const testMessage = {
-				id: 'test-table-message',
-				subMessages: [{
-					text: testTableWithSources,
-					sources: testSources,
-					contentType: ContentType.TEXT
-				}],
-				role: MessageRole.TUTOR,
-				creationTime: new Date().toISOString()
-			};
-			
-			Zotero.debug(`DeepTutorChatBox: Testing table with source buttons using direct HTML approach`);
-			setMessages(prev => [...prev, testMessage]);
-		};
-		
-		// Debug function for testing simple tables without source buttons
-		window.testDeepTutorTable = () => {
-			const testTableText = `
-Here's a comparison table for testing:
-
-| Metric | Value A | Value B | Value C | Status |
-|--------|---------|---------|---------|--------|
-| Accuracy | 95.2% | 89.7% | 92.1% | Good |
-| Precision | 0.92 | 0.88 | 0.90 | Excellent |
-| Recall | 0.89 | 0.85 | 0.87 | Good |
-| F1-Score | 0.905 | 0.865 | 0.885 | Very Good |
-
-The table above shows performance metrics across different models.
-
-## Another Table Example
-
-| Feature | Description | Priority | Estimated Hours |
-|---------|-------------|----------|-----------------|
-| User Authentication | Login/logout functionality | High | 16 |
-| Data Export | Export to CSV/PDF | Medium | 12 |
-| Real-time Updates | Live data synchronization | Low | 24 |
-| Mobile Support | Responsive design | Medium | 20 |
-
-This demonstrates multiple table formats working correctly.
-`;
-			
-			const testMessage = {
-				id: 'test-simple-table-message',
-				subMessages: [{
-					text: testTableText,
-					sources: [],
-					contentType: ContentType.TEXT
-				}],
-				role: MessageRole.TUTOR,
-				creationTime: new Date().toISOString()
-			};
-			
-			Zotero.debug(`DeepTutorChatBox: Testing simple table without source buttons`);
-			setMessages(prev => [...prev, testMessage]);
 		};
 		
 		// Cleanup function
@@ -723,15 +612,6 @@ This demonstrates multiple table formats working correctly.
 			document.removeEventListener('click', handleDocumentClick);
 			if (window.handleDeepTutorSourceClick) {
 				delete window.handleDeepTutorSourceClick;
-			}
-			if (window.testDeepTutorSourceButton) {
-				delete window.testDeepTutorSourceButton;
-			}
-			if (window.testDeepTutorTableWithSources) {
-				delete window.testDeepTutorTableWithSources;
-			}
-			if (window.testDeepTutorTable) {
-				delete window.testDeepTutorTable;
 			}
 		};
 	}, [sessionId, documentIds]); // Re-setup when session or documents change
@@ -861,66 +741,6 @@ This demonstrates multiple table formats working correctly.
 		adjustTextareaHeight();
 	}, [inputValue]);
 
-	// Load recent sessions from preferences on component mount
-	// useEffect(() => {
-	// 	const loadRecentSessions = () => {
-	// 		try {
-	// 			const storedSessions = Zotero.Prefs.get('deeptutor.recentSessions');
-	// 			if (storedSessions) {
-	// 				const parsedSessions = JSON.parse(storedSessions);
-	// 				const sessionsMap = new Map(Object.entries(parsedSessions));
-	// 				setRecentSessions(sessionsMap);
-	// 				Zotero.debug(`DeepTutorChatBox: Loaded ${sessionsMap.size} recent sessions from preferences`);
-	// 			}
-	// 		}
-	// 		catch (error) {
-	// 			Zotero.debug(`DeepTutorChatBox: Error loading recent sessions from preferences: ${error.message}`);
-	// 		}
-	// 	};
-	// 	loadRecentSessions();
-	// }, []);
-
-	// Simple popup component
-	const LoadingPopup = () => (
-		<div style={{
-			position: 'fixed',
-			top: '50%',
-			left: '50%',
-			transform: 'translate(-50%, -50%)',
-			background: 'white',
-			padding: '20px',
-			borderRadius: '8px',
-			boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-			zIndex: 1000,
-			textAlign: 'center',
-			fontFamily: 'Roboto, sans-serif',
-			minWidth: '200px',
-		}}>
-			<div style={{ marginBottom: '15px' }}>
-                Please wait for 10 seconds
-			</div>
-			<button
-				onClick={() => setIsLoading(false)}
-				style={{
-					background: '#0687E5',
-					color: 'white',
-					border: 'none',
-					padding: '8px 16px',
-					borderRadius: '4px',
-					cursor: 'pointer',
-					fontSize: '14px',
-					fontWeight: 500,
-					transition: 'background-color 0.2s',
-					':hover': {
-						background: '#0570c0'
-					}
-				}}
-			>
-                Close
-			</button>
-		</div>
-	);
-
 	// Handle session changes
 	useEffect(() => {
 		const loadSessionData = async () => {
@@ -1021,7 +841,8 @@ This demonstrates multiple table formats working correctly.
 					if (lastMessage && lastMessage.role === MessageRole.USER && checkTime(lastMessage)) {
 						setIsStreaming(true);
 						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Setting streaming to true for recent user message`);
-					} else {
+					}
+					else {
 						setIsStreaming(false);
 						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Setting streaming to false - no recent user message or timeout`);
 					}
@@ -1092,7 +913,6 @@ This demonstrates multiple table formats working correctly.
 		Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - About to call loadMessages() for sessionId: ${sessionId}`);
 		loadMessages();
 	}, [sessionId]);
-
 
 
 	// Conversation state
@@ -1444,17 +1264,18 @@ This demonstrates multiple table formats working correctly.
 						...prev,
 						history: historyData,
 					}));
-				} else {
+				}
+				else {
 					Zotero.debug(`DeepTutorChatBox: No message history found after error`);
 				}
-			} catch (historyError) {
+			}
+			catch (historyError) {
 				Zotero.debug(`DeepTutorChatBox: Error fetching message history after timeout: ${historyError.message}`);
 			}
 			
 			throw error;
 		}
 	};
-
 
 
 	const _appendMessage = async (sender, message) => {
@@ -1552,7 +1373,6 @@ This demonstrates multiple table formats working correctly.
 			Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
 		}
 	};
-
 
 
 	// Format response text for markdown rendering
@@ -1667,7 +1487,7 @@ This demonstrates multiple table formats working correctly.
 		
 		// Remove any other custom tags that might cause XML issues
 		// This regex removes any remaining custom tags that aren't standard HTML
-		cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a)\b)[^>]*>/gi, '');
+		//cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a)\b)[^>]*>/gi, '');
 		
 		// Now apply mathematical symbol processing and source processing to the clean text
 		let formattedText = cleanText;
@@ -2080,10 +1900,6 @@ This demonstrates multiple table formats working correctly.
 		}
         
 		const isUser = message.role === MessageRole.USER;
-		const _messageStyle = {
-			...styles.messageContainer,
-			animation: "fadeIn 0.3s ease-in-out"
-		};
         
 		// Handle streaming messages for TUTOR role
 		if (!isUser && message.isStreaming && message.streamText) {
@@ -2234,7 +2050,6 @@ This demonstrates multiple table formats working correctly.
 			</div>
 		);
 	};
-
 
 
 	// Add new useEffect after the existing one
@@ -2728,8 +2543,6 @@ This demonstrates multiple table formats working correctly.
 			className="deeptutor-chat-box"
 			style={styles.container}
 		>
-			{isLoading && <LoadingPopup />}
-            
 			{/* Add CSS styles for markdown tables and source buttons */}
 			<style dangerouslySetInnerHTML={{
 				__html: `
@@ -3027,6 +2840,17 @@ This demonstrates multiple table formats working correctly.
 					.markdown ol ul {
 						margin: 0.25em 0 !important;
 						padding-left: 1em !important;
+					}
+					/* Hide horizontal rules completely */
+					.markdown hr,
+					hr {
+						display: none !important;
+						border: none !important;
+						margin: 0 !important;
+						padding: 0 !important;
+						height: 0 !important;
+						width: 0 !important;
+						visibility: hidden !important;
 					}
 				`
 			}} />
