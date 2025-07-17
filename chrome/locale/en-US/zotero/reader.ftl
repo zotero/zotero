@@ -195,3 +195,16 @@ reader-selected-pages = { $count ->
     *[other] { $count } pages selected
 }
 reader-page-options = Page Options
+
+reader-read-aloud = Read Aloud
+reader-reader-read-aloud-options = Options
+reader-read-aloud-skip-back = Skip Back
+reader-read-aloud-skip-ahead = Skip Ahead
+reader-read-aloud-play = Play
+reader-read-aloud-pause = Pause
+reader-read-aloud-speed = Reading Speed
+
+reader-tab-audio-play =
+    .title = { reader-read-aloud-play }
+reader-tab-audio-pause =
+    .title = { reader-read-aloud-pause }
