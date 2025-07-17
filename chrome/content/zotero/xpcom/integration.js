@@ -79,6 +79,8 @@ const PLUGIN_PATHS = {
 
 
 Zotero.Integration = new function () {
+	// TODO: fx140: Does this cause a side effect that we need?
+	// AddonManager is not used in this file
 	ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 	
 	this.currentWindow = false;

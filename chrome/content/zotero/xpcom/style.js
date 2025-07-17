@@ -30,8 +30,6 @@ Zotero.Styles = new function () {
 	
 	var _renamedStyles = null;
 	
-	ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
-	
 	this.xsltProcessor = null;
 	this.ns = {
 		"csl":"http://purl.org/net/xbiblio/csl"
