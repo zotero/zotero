@@ -363,7 +363,7 @@ Zotero.Translators = new function () {
 		return _translators[id] ? _translators[id] : false;
 	}
 	
-	this.getCodeForTranslator = function (translator) {
+	this.getCodeForTranslator = Zotero.Promise.method(function (translator) {
 		if (translator.code) return translator.code;
 		return Zotero.File.getContentsAsync(translator.path).then(function (code) {
 			if (translator.cacheCode) {
@@ -372,7 +372,7 @@ Zotero.Translators = new function () {
 			}
 			return code;
 		});
-	};
+	});
 	
 	/**
 	 * Gets all translators for a specific type of translation
