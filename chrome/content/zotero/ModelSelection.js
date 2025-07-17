@@ -144,6 +144,12 @@ const styles = {
     fontFamily: 'Roboto, sans-serif',
     color: '#292929',
   },
+  searchLoadingIndicator: {
+    marginLeft: '0.5rem',
+    fontSize: '0.75rem',
+    color: '#888',
+    fontStyle: 'italic',
+  },
   uploadButton: {
     background: SKY,
     color: '#fff',
@@ -463,6 +469,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
   const [isCreateHovered, setIsCreateHovered] = useState(false);
   const [hoveredSearchItem, setHoveredSearchItem] = useState(null);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   const buttonRef = useRef(null);
 
   // Combine internal initialization state with external freeze state
@@ -552,22 +559,58 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
         const items = await Zotero.Items.getAll(libraryID);
         Zotero.debug(`BBBBB: Found ${items.length} total items`);
         
+        // Use a Set to track unique attachment IDs and prevent duplicates
+        const seenIds = new Set();
         const attachments = items.reduce((arr, item) => {
           if (item.isAttachment() && item.isPDFAttachment()) {
-            const fileName = item.attachmentFilename || item.getField('filename') || item.getField('title') || item.name;
+            // Skip if we've already processed this attachment
+            if (seenIds.has(item.id)) {
+              return arr;
+            }
+            seenIds.add(item.id);
+            
+            // Safe filename resolution with error handling
+            let fileName = '';
+            try {
+              fileName = item.attachmentFilename || item.getField('title') || '';
+            } catch (error) {
+              Zotero.debug(`BBBBB: Error getting filename for attachment ${item.id}: ${error.message}`);
+              fileName = '';
+            }
+            
+            // Ensure we have a valid string and fallback to "Untitled"
+            if (!fileName || typeof fileName !== 'string' || fileName.trim() === '') {
+              fileName = 'Untitled';
+            }
+            
             Zotero.debug(`BBBBB: Found PDF attachment: ${fileName}`);
             return arr.concat([{ id: item.id, name: fileName }]);
           }
           if (item.isRegularItem()) {
-            return arr.concat(
-              item.getAttachments()
-                .map(x => Zotero.Items.get(x))
-                .filter(x => x.isPDFAttachment())
-                .map(x => ({ 
-                  id: x.id, 
-                  name: x.attachmentFilename || x.getField('filename') || x.getField('title') || x.name 
-                }))
-            );
+            const childAttachments = item.getAttachments()
+              .map(x => Zotero.Items.get(x))
+              .filter(x => x && x.isPDFAttachment && x.isPDFAttachment())
+              .filter(x => !seenIds.has(x.id)) // Skip duplicates
+              .map(x => {
+                seenIds.add(x.id); // Mark as seen
+                
+                // Safe filename resolution with error handling
+                let fileName = '';
+                try {
+                  fileName = x.attachmentFilename || x.getField('title') || '';
+                } catch (error) {
+                  Zotero.debug(`BBBBB: Error getting filename for attachment ${x.id}: ${error.message}`);
+                  fileName = '';
+                }
+                
+                // Ensure we have a valid string and fallback to "Untitled"
+                if (!fileName || typeof fileName !== 'string' || fileName.trim() === '') {
+                  fileName = 'Untitled';
+                }
+                
+                return { id: x.id, name: fileName };
+              });
+            return arr.concat(childAttachments);
           }
           return arr;
         }, []);
@@ -583,22 +626,103 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
     loadAttachmentNames();
   }, []);
 
-  // Filter attachments when search value changes
+  // Filter attachments when search value changes with debouncing
   useEffect(() => {
-    if (!searchValue.trim()) {
+    Zotero.debug(`BBBBB: Search filter triggered - searchValue: "${searchValue}", type: ${typeof searchValue}`);
+    
+    // Step 1: Validate searchValue - handle null, undefined, non-string values
+    if (searchValue === null || searchValue === undefined) {
+      Zotero.debug(`BBBBB: Search value is ${searchValue}, clearing results`);
+      setIsSearchLoading(false);
       setFilteredAttachments([]);
       setShowSearchPopup(false);
       return;
     }
-
-    const searchTerm = searchValue.toLowerCase();
-    const filtered = attachmentNames.filter(attachment => 
-      attachment.name.toLowerCase().includes(searchTerm)
-    );
     
-    Zotero.debug(`BBBBB: Filtered ${filtered.length} attachments for search term: ${searchTerm}`);
-    setFilteredAttachments(filtered);
+    // Step 2: Ensure searchValue is a string
+    if (typeof searchValue !== 'string') {
+      Zotero.debug(`BBBBB: Search value is not a string (${typeof searchValue}), clearing results`);
+      setIsSearchLoading(false);
+      setFilteredAttachments([]);
+      setShowSearchPopup(false);
+      return;
+    }
+    
+    // Step 3: Check if searchValue is empty or only whitespace
+    if (!searchValue.trim()) {
+      Zotero.debug(`BBBBB: Search value is empty or whitespace-only, clearing results`);
+      setIsSearchLoading(false);
+      setFilteredAttachments([]);
+      setShowSearchPopup(false);
+      return;
+    }
+    
+    // Step 4: Set loading state immediately and show popup
+    setIsSearchLoading(true);
     setShowSearchPopup(true);
+    
+    // Step 5: Debounce the search to avoid excessive filtering
+    let processTimeoutId = null;
+    const debounceTimeoutId = setTimeout(() => {
+      // Use additional timeout to ensure React processes the loading state
+      processTimeoutId = setTimeout(() => {
+        try {
+          const searchTerm = searchValue.toLowerCase().trim();
+          Zotero.debug(`BBBBB: Processing search term: "${searchTerm}"`);
+          
+          // Filter attachments with comprehensive error handling
+          const filtered = attachmentNames.filter(attachment => {
+            // Check for null/undefined attachment
+            if (!attachment) {
+              Zotero.debug(`BBBBB: Skipping null/undefined attachment`);
+              return false;
+            }
+            
+            // Check for null/undefined attachment name
+            if (!attachment.name) {
+              Zotero.debug(`BBBBB: Skipping attachment ${attachment.id} with null/undefined name`);
+              return false;
+            }
+            
+            // Ensure attachment.name is a string and process safely
+            try {
+              const attachmentName = String(attachment.name).toLowerCase();
+              const matches = attachmentName.includes(searchTerm);
+              
+              if (matches) {
+                Zotero.debug(`BBBBB: Search match found - Term: "${searchTerm}", Name: "${attachment.name}"`);
+              }
+              
+              return matches;
+            } catch (error) {
+              Zotero.debug(`BBBBB: Error processing attachment name for search: ${error.message}`);
+              return false;
+            }
+          });
+          
+          Zotero.debug(`BBBBB: Search completed - Found ${filtered.length} matches out of ${attachmentNames.length} total attachments`);
+          
+          // Update state with results and clear loading
+          setFilteredAttachments(filtered);
+          setIsSearchLoading(false);
+          
+        } catch (error) {
+          Zotero.debug(`BBBBB: Critical error in search filtering: ${error.message}`);
+          Zotero.debug(`BBBBB: Error stack: ${error.stack}`);
+          setFilteredAttachments([]);
+          setIsSearchLoading(false);
+          setShowSearchPopup(false);
+        }
+      }, 10); // Small timeout to ensure React processes loading state first
+    }, 150); // Debounce delay for user typing
+    
+    // Cleanup timeouts on dependency change
+    return () => {
+      clearTimeout(debounceTimeoutId);
+      if (processTimeoutId) {
+        clearTimeout(processTimeoutId);
+      }
+    };
   }, [searchValue, attachmentNames]);
 
   const handleSearchItemClick = async (attachment) => {
@@ -614,8 +738,20 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
         return;
       }
 
-      // Add to fileList with correct name property
-      const fileName = item.attachmentFilename || item.getField('filename') || item.getField('title') || item.name;
+      // Add to fileList with correct name property - safe filename resolution
+      let fileName = '';
+      try {
+        fileName = item.attachmentFilename || item.getField('title') || '';
+      } catch (error) {
+        Zotero.debug(`BBBBB: Error getting filename for attachment ${item.id}: ${error.message}`);
+        fileName = '';
+      }
+      
+      // Ensure we have a valid string and fallback to "Untitled"
+      if (!fileName || typeof fileName !== 'string' || fileName.trim() === '') {
+        fileName = 'Untitled';
+      }
+      
       Zotero.debug(`BBBBB: Using file name: ${fileName}`);
       
       setFileList(prev => {
@@ -708,7 +844,20 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
         try {
           const { text } = await Zotero.PDFWorker.getFullText(pdf.id);
           if (text) {
-            const fileName = pdf.attachmentFilename || pdf.getField('filename') || pdf.getField('title') || pdf.name;
+            // Safe filename resolution with error handling
+            let fileName = '';
+            try {
+              fileName = pdf.attachmentFilename || pdf.getField('title') || '';
+            } catch (error) {
+              Zotero.debug(`NNNNN ModelSelection: Error getting filename for PDF ${pdf.id}: ${error.message}`);
+              fileName = '';
+            }
+            
+            // Ensure we have a valid string and fallback to "Untitled"
+            if (!fileName || typeof fileName !== 'string' || fileName.trim() === '') {
+              fileName = 'Untitled';
+            }
+            
             Zotero.debug(`NNNNN ModelSelection: Using file name: ${fileName}`);
             return {
               id: pdf.id,
@@ -1055,7 +1204,20 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
             Zotero.debug(`BBBBB: Processing PDF: ${pdf.name}`);
             const { text } = await Zotero.PDFWorker.getFullText(pdf.id);
             if (text) {
-              const fileName = pdf.attachmentFilename || pdf.getField('filename') || pdf.getField('title') || pdf.name;
+              // Safe filename resolution with error handling
+              let fileName = '';
+              try {
+                fileName = pdf.attachmentFilename || pdf.getField('title') || '';
+              } catch (error) {
+                Zotero.debug(`BBBBBF: Error getting filename for PDF ${pdf.id}: ${error.message}`);
+                fileName = '';
+              }
+              
+              // Ensure we have a valid string and fallback to "Untitled"
+              if (!fileName || typeof fileName !== 'string' || fileName.trim() === '') {
+                fileName = 'Untitled';
+              }
+              
               Zotero.debug(`BBBBBF: Successfully extracted text from PDF: ${fileName}`);
               return {
                 id: pdf.id,
@@ -1221,10 +1383,17 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => e.preventDefault()}
               />
+              {/* {isSearchLoading && !isEffectivelyFrozen && (
+                <span style={styles.searchLoadingIndicator}>Searching...</span>
+              )} */
+              /*<div style={styles.noResults}>Searching...</div>
+              */}
             </div>
             {showSearchPopup && !isEffectivelyFrozen && (
               <div style={styles.searchPopup}>
-                {filteredAttachments.length > 0 ? (
+                {isSearchLoading ? (
+                  <div style={styles.noResults}>&nbsp;</div>
+                ) : filteredAttachments.length > 0 ? (
                   filteredAttachments.map(attachment => (
                     <div
                       key={attachment.id}
