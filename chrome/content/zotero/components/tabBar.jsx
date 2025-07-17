@@ -33,13 +33,14 @@ const { CSSIcon, CSSItemTypeIcon } = require('./icons');
 const SCROLL_ARROW_SCROLL_BY = 222;
 
 const Tab = memo((props) => {
-	const { icon, id, index, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, selected, title, renderTitle } = props;
+	const { icon, id, index, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, onAudioStatusClick, selected, title, renderTitle, audioStatus } = props;
 	
 	const handleTabMouseDown = useCallback(event => onTabMouseDown(event, id), [onTabMouseDown, id]);
 	const handleContextMenu = useCallback(event => onContextMenu(event, id), [onContextMenu, id]);
 	const handleTabClick = useCallback(event => onTabClick(event, id), [onTabClick, id]);
 	const handleDragStart = useCallback(event => onDragStart(event, id, index), [onDragStart, id, index]);
 	const handleTabClose = useCallback(event => onTabClose(event, id), [onTabClose, id]);
+	const handleAudioStatusClick = useCallback(event => onAudioStatusClick(event, id), [onAudioStatusClick, id]);
 	
 	let titleText;
 	let titleHTML;
@@ -71,6 +72,17 @@ const Tab = memo((props) => {
 				? <CSSItemTypeIcon itemType={icon} className="tab-icon" />
 				: <CSSIcon name={icon} className="tab-icon" />
 			}
+			{audioStatus?.active && (
+				<div
+					className="tab-audio-status"
+					role="button"
+					data-l10n-id={`reader-tab-audio-${audioStatus.paused ? 'play' : 'pause'}`}
+					onClick={handleAudioStatusClick}
+					onMouseDown={e => e.stopPropagation()}
+				>
+					<CSSIcon name={audioStatus.paused ? 'play' : 'pause'} className="icon-16"/>
+				</div>
+			)}
 			{titleHTML
 				? <div className="tab-name" title={titleText} dangerouslySetInnerHTML={{ __html: titleHTML }}/>
 				: <div className="tab-name" title={titleText}>{titleText}</div>}
@@ -97,9 +109,14 @@ Tab.propTypes = {
 	onTabClick: PropTypes.func.isRequired,
 	onTabClose: PropTypes.func.isRequired,
 	onTabMouseDown: PropTypes.func.isRequired,
+	onAudioStatusClick: PropTypes.func.isRequired,
 	selected: PropTypes.bool.isRequired,
 	title: PropTypes.string.isRequired,
 	renderTitle: PropTypes.bool,
+	audioStatus: PropTypes.shape({
+		active: PropTypes.bool.isRequired,
+		paused: PropTypes.bool.isRequired,
+	}),
 };
 
 
@@ -212,6 +229,11 @@ const TabBar = forwardRef(function (props, ref) {
 		props.onTabSelect(id);
 		event.stopPropagation();
 	}, [props.onTabSelect]);
+	
+	const handleAudioStatusClick = useCallback((event, id) => {
+		props.onToggleAudio(id);
+		event.stopPropagation();
+	}, [props.onToggleAudio]);
 
 	const handleContextMenu = useCallback((event, id) => {
 		let { screenX, screenY } = event;
@@ -376,6 +398,7 @@ const TabBar = forwardRef(function (props, ref) {
 								onTabClick={ handleTabClick}
 								onTabClose={ handleTabClose}
 								onTabMouseDown = { handleTabMouseDown }
+								onAudioStatusClick={handleAudioStatusClick}
 							/>
 							: null}
 					</div>
@@ -411,6 +434,7 @@ const TabBar = forwardRef(function (props, ref) {
 							onTabClick={handleTabClick}
 							onTabClose={handleTabClose}
 							onTabMouseDown={handleTabMouseDown}
+							onAudioStatusClick={handleAudioStatusClick}
 						/>)}
 					</div>
 				</div>
@@ -440,6 +464,7 @@ TabBar.propTypes = {
 	onTabMove: PropTypes.func.isRequired,
 	refocusReader: PropTypes.func.isRequired,
 	onContextMenu: PropTypes.func.isRequired,
+	onToggleAudio: PropTypes.func.isRequired,
 	tabs: PropTypes.arrayOf(
 		PropTypes.shape({
 			icon: PropTypes.element.isRequired,
@@ -452,7 +477,12 @@ TabBar.propTypes = {
 			onTabClick: PropTypes.func.isRequired,
 			onTabMouseDown: PropTypes.func.isRequired,
 			selected: PropTypes.bool.isRequired,
-			title: PropTypes.string.isRequired
+			title: PropTypes.string.isRequired,
+			renderTitle: PropTypes.bool.isRequired,
+			audioStatus: PropTypes.shape({
+				active: PropTypes.bool.isRequired,
+				paused: PropTypes.bool.isRequired,
+			}),
 		})
 	).isRequired
 };
