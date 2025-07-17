@@ -8,6 +8,7 @@ Zotero.HTTP = new function () {
 	var _errorDelayMax = 60 * 60 * 1000; // 1 hour
 
 	var { SecurityInfo } = ChromeUtils.importESModule("resource://gre/modules/SecurityInfo.sys.mjs");
+	var { NetUtil } = ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 	
 	/**
 	 * Exception returned for unexpected status when promise* is used
@@ -1165,7 +1166,6 @@ Zotero.HTTP = new function () {
 	
 	
 	var _proxyAsyncResolve = function (uri) {
-		ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 		var pps = Components.classes["@mozilla.org/network/protocol-proxy-service;1"]
 			.getService(Components.interfaces.nsIProtocolProxyService);
 		var deferred = Zotero.Promise.defer();

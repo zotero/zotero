@@ -990,7 +990,7 @@ Zotero.Schema = new function () {
 	 * @param {Boolean} [skipVersionUpdates=false]
 	 */
 	var _updateBundledFilesAtLocation = async function (installLocation, mode, skipVersionUpdates) {
-		ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
+		const { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 		
 		var isUnpacked = (await OS.File.stat(installLocation)).isDir;
 		if(!isUnpacked) {

@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+var { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
+
 Zotero.IPC = new function () {
 	var _libc, _libcPath, _instancePipe, _user32, open, write, close;
 	
@@ -67,8 +69,6 @@ Zotero.IPC = new function () {
 	 */
 	this.getLibcPath = function () {
 		if(_libcPath) return _libcPath;
-		
-		ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 		
 		// get possible names for libc
 		if(Zotero.isMac) {
