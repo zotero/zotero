@@ -374,7 +374,7 @@ describe("Zotero.Attachments", function () {
 	})
 	
 	describe("#importFromDocument()", function () {
-		ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
+		const { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
 		
 		var testServerPath, httpd, prefix;
 		var testServerPort;

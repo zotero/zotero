@@ -1850,7 +1850,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					Zotero.getString("standalone.rootWarning.exit"),
 					Zotero.getString("standalone.rootWarning.continue"),
 					null, null, {}) == 0) {
-				ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
+				const { ctypes } = ChromeUtils.importESModule("resource://gre/modules/ctypes.sys.mjs");
 				var exit = Zotero.IPC.getLibc().declare("exit", ctypes.default_abi,
 					                                    ctypes.void_t, ctypes.int);
 				// Zap cache files

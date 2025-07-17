@@ -1,7 +1,6 @@
 "use strict";
 
 describe("Zotero.Integration", function () {
-	ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 	const INTEGRATION_TYPE_ITEM = 1;
 	const INTEGRATION_TYPE_BIBLIOGRAPHY = 2;
 	const INTEGRATION_TYPE_TEMP = 3;
