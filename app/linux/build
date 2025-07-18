@@ -1,0 +1,48 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$APP_ROOT_DIR/config.sh"
+
+if [ -z "${1:-}" ]; then
+	echo "Usage: $0 x64|arm64|i686" >&2
+	exit 1
+fi
+
+gecko_path=~/src/firefox
+arch=$1
+
+if [ ! -d "$gecko_path" ]; then
+	echo "$gecko_path is not a directory" >&2
+	exit 1
+fi
+
+# Install required Rust version
+rustup toolchain install $RUST_VERSION
+if [ $arch = "x64" ]; then
+	rust_target=x86_64
+elif [ $arch = "arm64" ]; then
+	rust_target=aarch64
+elif [ $arch = "i686" ]; then
+	rust_target=i686
+else
+	echo "Unknown architecture $arch" >&2
+	exit 1
+fi
+rustup target add $rust_target-unknown-linux-gnu
+
+rm "$gecko_path/mozconfig"
+touch "$gecko_path/mozconfig"
+
+if [ $arch == "arm64" ]; then
+	echo "ac_add_options --target=aarch64-linux-gnu" >> "$gecko_path/mozconfig"
+elif [ $arch == "i686" ]; then
+	echo "ac_add_options --target=i686" >> "$gecko_path/mozconfig"
+fi
+
+cat "$SCRIPT_DIR/mozconfig" >> "$gecko_path/mozconfig"
+
+cd "$gecko_path"
+./mach build
+./mach package
