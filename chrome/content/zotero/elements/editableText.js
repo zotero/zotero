@@ -227,7 +227,7 @@
 				}
 				input.rows = 1;
 				input.classList.add('input');
-				input.toggleAttribute("no-windows-native", true);
+				input.toggleAttribute("no-native", true);
 				input.addEventListener('input', this._handleInput);
 				input.addEventListener('change', this._handleChange);
 				input.addEventListener('focus', this._handleFocus);
