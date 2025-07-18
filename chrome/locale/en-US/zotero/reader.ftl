@@ -187,3 +187,16 @@ reader-import-from-epub-no-annotations-other-file =
     
     If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
 reader-import-from-epub-select-other = Select Other File…
+
+reader-read-aloud = Read Aloud
+reader-reader-read-aloud-options = Options
+reader-read-aloud-skip-back = Skip Back
+reader-read-aloud-skip-ahead = Skip Ahead
+reader-read-aloud-play = Play
+reader-read-aloud-pause = Pause
+reader-read-aloud-speed = Reading Speed
+
+reader-tab-audio-play =
+    .title = { reader-read-aloud-play }
+reader-tab-audio-pause =
+    .title = { reader-read-aloud-pause }
