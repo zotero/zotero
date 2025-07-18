@@ -705,7 +705,7 @@ var Zotero_File_Interface = new function () {
 	var _getMendeleyTranslation = async function () {
 		let Zotero_Import_Mendeley;
 		if (true) {
-			({ Zotero_Import_Mendeley } = ChromeUtils.importESModule("chrome://zotero/content/import/mendeley/mendeleyImport.js"));
+			({ Zotero_Import_Mendeley } = ChromeUtils.importESModule("chrome://zotero/content/import/mendeley/mendeleyImport.mjs"));
 		}
 		// TEMP: Load uncached from ~/zotero-client for development
 		else {
