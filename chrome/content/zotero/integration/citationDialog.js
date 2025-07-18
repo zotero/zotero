@@ -1320,13 +1320,13 @@ const IOManager = {
 	resetSelectedAfterFocus(event) {
 		if (currentLayout.type == "list") return;
 		let focused = event.target;
-		let itemsShouldRemainSelected = focused.classList.contains("input") || _id("library-other-items").contains(focused);
-		if (itemsShouldRemainSelected) {
+		if (_id("bubble-input").contains(focused)) {
 			if (!doc.querySelector(".item.selected")) {
 				currentLayout.markPreSelected();
 			}
 			return;
 		}
+		if (_id("library-other-items").contains(focused)) return;
 		for (let item of doc.querySelectorAll(".item")) {
 			item.classList.remove("selected");
 			item.classList.remove("current");
