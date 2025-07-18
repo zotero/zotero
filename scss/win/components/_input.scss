@@ -60,7 +60,7 @@
 	textbox,
 	search-textbox,
 	textarea
-):where(:not([no-windows-native])) {
+):where(:not([no-native])) {
 	appearance: none;
 	height: 26px;
 	padding: 0;
@@ -126,6 +126,6 @@
 	}
 }
 
-textarea:not([no-windows-native]) {
+textarea:not([no-native]) {
 	height: unset;
 }

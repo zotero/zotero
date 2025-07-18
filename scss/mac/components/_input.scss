@@ -1,0 +1,7 @@
+// TODO: Fx140: Give this a border/shadow when not :focus-visible?
+:where(textarea:not([no-native])) {
+	appearance: none;
+	border: none;
+	border-radius: 2px;
+	@include focus-ring;
+}
