@@ -1311,9 +1311,10 @@ class EditorInstance {
 	 * @param {Integer} options.collectionID - Only valid if parentID not provided
 	 * @param {Boolean} options.noSave - If true, note item is not saved and ink/image annotations are
 	 *									embedded as "data:image/..." strings instead of via imageAttachmentKey.
+	 * @param {Boolean} options.noComments - If true, annotation comments are skipped
 	 * @returns {Promise<Zotero.Item>}
 	 */
-	static async createNoteFromAnnotations(annotations, { parentID, collectionID, noSave } = {}) {
+	static async createNoteFromAnnotations(annotations, { parentID, collectionID, noSave, noComments } = {}) {
 		if (!annotations.length) {
 			throw new Error("No annotations provided");
 		}
@@ -1349,6 +1350,9 @@ class EditorInstance {
 		for (let annotation of annotations) {
 			let attachmentItem = Zotero.Items.get(annotation.parentID);
 			let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
+			if (noComments) {
+				jsonAnnotation.comment = null;
+			}
 			jsonAnnotation.attachmentItemID = attachmentItem.id;
 			jsonAnnotation.id = annotation.key;
 			jsonAnnotations.push(jsonAnnotation);

@@ -204,9 +204,17 @@ function modeSpecificInit() {
 		let shouldBeVisible = component.getAttribute("data-dialog-type").includes(dialogType);
 		component.hidden = !shouldBeVisible;
 	}
+	
+	if (isCitingItems) {
+		_id("keepSorted").disabled = !io.sortable || !isCitingItems;
+		_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
+	}
+	
+	if (isAddingAnnotations) {
+		_id("includeComments").checked = Zotero.Prefs.get("integration.annotationDialogIncludeComments");
+	}
+
 	// hide the settings button if there are no settings to show
-	_id("keepSorted").disabled = !io.sortable || !isCitingItems;
-	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
 	let visibleSettings = !!_id("settings-popup").querySelector("div:not([hidden]) input:not([disabled])");
 	_id("settings-button").hidden = !visibleSettings;
 }
@@ -1025,7 +1033,9 @@ const IOManager = {
 		// if keep sorted was unchecked and then checked, resort items and update bubbles
 		_id("keepSorted").addEventListener("change", () => this._resortItems());
 
-		_id("mode-button").addEventListener("click", () => this.toggleDialogMode());
+		_id("keepSorted").addEventListener("change", () => this._resortItems());
+
+		_id("includeComments").addEventListener("click", () => this._toggleIncludeComments());
 
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
@@ -1471,6 +1481,11 @@ const IOManager = {
 		CitationDataManager.sort().then(() => {
 			this.updateBubbleInput();
 		});
+	},
+
+	_toggleIncludeComments() {
+		let includeComments = _id("includeComments").checked;
+		Zotero.Prefs.set("integration.annotationDialogIncludeComments", includeComments);
 	},
 
 	// Return focus to where it was before click moved focus.
