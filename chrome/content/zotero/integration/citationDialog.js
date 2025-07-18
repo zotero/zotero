@@ -1239,13 +1239,6 @@ const IOManager = {
 			IOManager.selectItemNodesRange(firstNode, targetItem);
 			return;
 		}
-		// while adding annotations, clicking on selected non-annotation will select it in itemTree
-		let clickedItem = Zotero.Items.get(targetItem.getAttribute("itemID"));
-		if (isAddingAnnotations && !clickedItem.isAnnotation()) {
-			libraryLayout.itemsView.selectItem(clickedItem.id);
-			_id("zotero-items-tree").querySelector("[tabindex]").focus();
-			return;
-		}
 		// get itemIDs associated with the nodes
 		let itemIDs = new Set([targetItem.getAttribute("itemID")]);
 		// if target item is selected, add all other selected itemIDs
@@ -1256,6 +1249,14 @@ const IOManager = {
 			}
 		}
 		let itemsToAdd = Array.from(itemIDs).map(itemID => SearchHandler.getItem(itemID));
+		console.log(itemsToAdd);
+		// while adding annotations, clicking on selected non-annotation(s) will select them in itemTree
+		if (isAddingAnnotations && !itemsToAdd.every(i => i.isAnnotation())) {
+			console.log([...itemIDs]);
+			libraryLayout.itemsView.selectItems([...itemIDs]);
+			_id("zotero-items-tree").querySelector("[tabindex]").focus();
+			return;
+		}
 		IOManager.addItemsToCitation(itemsToAdd);
 	},
 
