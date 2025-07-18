@@ -154,6 +154,16 @@ function check_xulrunner_hash {
 	
 	local platform_hash_file=$(xul_hash_file "$_platform" "${_arch:-universal}")
 	
+	# TEMP: If previous Windows hash file without architecture is present, force a refresh,
+	# because the Firefox folder might have been changed without the new hash file being
+	# updated, resulting in a broken build (e.g, fx140 using fx128). We'll want to keep this
+	# as long as we're switching back to <=fx128. This isn't an issue on macOS because there's
+	# no architecture and isn't an issue on Linux because the runtime folder names changed.
+	if [[ $_platform = 'w' ]] && [[ -e "$CALLDIR/xulrunner/hash-win" ]]; then
+		echo "Found old hash-win -- forcing redownload"
+		rm "$CALLDIR"/xulrunner/hash-win*
+	fi
+	
 	if [ ! -e "$CALLDIR/xulrunner/$platform_hash_file" ]; then
 		echo "$platform_hash_file not found -- downloading"
 		echo
