@@ -112,10 +112,8 @@
 			let index = 0;
 			let validTabs = Zotero_Tabs._tabs.filter(
 				(tab) => {
-					// Skip tabs whose title wasn't added yet
-					return !!tab.title
 					// Filter tabs that do not match the filter
-					&& tab.title.toLowerCase().includes(this._filterText);
+					return tab.title.toLowerCase().includes(this._filterText);
 				}
 			);
 			let tabsCount = validTabs.length;
