@@ -310,7 +310,7 @@
 			// tabindex for keyboard handling
 			input.setAttribute("tabindex", 0);
 			// hide windows appearance from _input.scss
-			input.setAttribute("no-windows-native", true);
+			input.setAttribute("no-native", true);
 			input.setAttribute("data-arrow-nav-enabled", true);
 			input.className = "input empty";
 			input.setAttribute("data-l10n-id", "integration-citationDialog-input");
