@@ -456,7 +456,7 @@ class LibraryLayout extends Layout {
 			role: "option",
 			"data-tabindex": 30,
 			"data-arrow-nav-enabled": true,
-			draggable: true
+			draggable: isCitingItems
 		}, "item keyboard-clickable");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
