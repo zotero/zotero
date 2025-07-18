@@ -439,7 +439,6 @@
 				border-inline-start: var(--material-panedivider);
 				width: 300px;
 				background: var(--material-sidepane);
-				overflow-y: auto;
 			}
 		}
 
@@ -454,6 +453,10 @@
 					border: 1px solid var(--fill-quarternary);
 					padding: 2px 3px;
 				}
+			}
+
+			#annotations-list-wrapper {
+				overflow-y: auto;
 			}
 		}
 	}
