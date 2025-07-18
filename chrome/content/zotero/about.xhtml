@@ -41,7 +41,7 @@
 				<p id="third-party-software"></p>
 				<p id="get-involved"></p>
 				<script><![CDATA[
-					Components.utils.import("resource://zotero/config.js");
+					const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 					
 					document.getElementById('changelog').href = ZOTERO_CONFIG.CHANGELOG_URL;
 					
