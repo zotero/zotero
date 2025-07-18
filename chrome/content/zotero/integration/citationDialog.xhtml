@@ -86,8 +86,10 @@
 					<div id="zotero-items-tree" data-tabindex="60" style="--highlight-color: var(--accent-blue30);"/>
 				</div>
 				<div id="annotations-sidebar" class="vbox" hidden="true">
-					<div id="annotations-sidebar-filter-wrapper">
+					<!-- Uses styling from _search.scss -->
+					<div id="annotations-sidebar-filter-wrapper" class="search">
 						<input id="annotations-sidebar-filter" data-l10n-id="integration-citationDialog-annotations-filter"/>
+						<div id="annotations-filter-cancel-btn" class="search-cancel-button" hidden="true"/>
 					</div>
 					<div id="annotations-list-wrapper">
 						<xul:annotation-items-pane id="annotations-list"/>

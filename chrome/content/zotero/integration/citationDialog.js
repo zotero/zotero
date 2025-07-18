@@ -429,22 +429,7 @@ class LibraryLayout extends Layout {
 		// on mouse scrollwheel in suggested items, scroll the list horizontally
 		_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
 		if (isAddingAnnotations) {
-			// Annotaiton item cards are taller than regular, so suggested items area needs to be taller
-			_id("library-other-items").classList.add("tall");
-			this.collapsibleGroupID = "selectedAnnotations";
-			_id("annotations-list").annotationsAction = "plus";
-			_id("annotations-list").addEventListener("click", (event) => {
-				if (!event.target.classList.contains("zotero-clicky-plus")) return;
-				let annotationRow = event.target.closest("annotation-row");
-				let item = Zotero.Items.get(annotationRow.annotation.id);
-				IOManager.addItemsToCitation(item);
-			});
-			// Show sidebar with annotations
-			_id("annotations-sidebar").hidden = false;
-			_id("annotations-sidebar-filter").addEventListener("input", (event) => {
-				_id("annotations-list").filter = event.target.value;
-				_id("annotations-list").render();
-			});
+			this._initAnnotationsSidepane();
 		}
 	}
 
@@ -716,6 +701,34 @@ class LibraryLayout extends Layout {
 			doc.l10n.setAttributes(rowsContainer, "integration-citationDialog-collections-table");
 			rowsContainer.setAttribute("role", "group");
 		}
+	}
+
+	_initAnnotationsSidepane() {
+		// Annotaiton item cards are taller than regular, so suggested items area needs to be taller
+		_id("library-other-items").classList.add("tall");
+		this.collapsibleGroupID = "selectedAnnotations";
+		_id("annotations-list").annotationsAction = "plus";
+		// Show sidebar with annotations
+		_id("annotations-sidebar").hidden = false;
+
+		// Click on the + icon of annotion-row will bubbleize the annotation
+		_id("annotations-list").addEventListener("click", (event) => {
+			if (!event.target.classList.contains("zotero-clicky-plus")) return;
+			let annotationRow = event.target.closest("annotation-row");
+			let item = Zotero.Items.get(annotationRow.annotation.id);
+			IOManager.addItemsToCitation(item);
+		});
+		// Handle the actual filtering in itemPane
+		_id("annotations-sidebar-filter").addEventListener("input", (event) => {
+			_id("annotations-filter-cancel-btn").hidden = !event.target.value;
+			_id("annotations-list").filter = event.target.value;
+			_id("annotations-list").render();
+		});
+		// Handle click on X button to clear the filter
+		_id("annotations-filter-cancel-btn").addEventListener("click", () => {
+			_id("annotations-sidebar-filter").value = "";
+			_id("annotations-sidebar-filter").dispatchEvent(new Event('input', { bubbles: true }));
+		});
 	}
 	
 	async _onCollectionSelection() {
