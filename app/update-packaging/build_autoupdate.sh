@@ -220,7 +220,7 @@ for version in "$FROM" "$TO"; do
 			hdiutil detach -quiet /Volumes/Zotero 2>/dev/null
 			set -e
 			hdiutil attach -quiet "$MAC_ARCHIVE"
-			cp -R /Volumes/Zotero/Zotero.app "$versiondir"
+			cp -R /Volumes/Zotero/DeepTutor.app "$versiondir"
 			rm "$MAC_ARCHIVE"
 			hdiutil detach -quiet /Volumes/Zotero
 			INCREMENTALS_FOUND=1
@@ -268,7 +268,7 @@ for build in "mac" "win32" "win-x64" "win-arm64" "linux-i686" "linux-x86_64"; do
 		if [[ $BUILD_MAC == 0 ]]; then
 			continue
 		fi
-		dir="Zotero.app"
+		dir="DeepTutor.app"
 	else
 		if ([[ $build == "win32" ]] || [[ $build == "win-x64" ]] || [[ $build == "win-arm64" ]]) && [[ $BUILD_WIN == 0 ]]; then
 			continue

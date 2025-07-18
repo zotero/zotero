@@ -58,7 +58,7 @@ if [ $REBUILD -eq 1 ]; then
 	
 	if [ "`uname`" = "Darwin" ]; then
 		# Sign the Word dylib so it works on Apple Silicon
-		"$SCRIPT_DIR/codesign_local" "$APP_ROOT_DIR/staging/Zotero.app"
+		"$SCRIPT_DIR/codesign_local" "$APP_ROOT_DIR/staging/DeepTutor.app"
 	fi
 fi
 
@@ -73,7 +73,7 @@ else
 fi
 
 if [ "`uname`" = "Darwin" ]; then
-	command="Zotero.app/Contents/MacOS/zotero"
+	command="DeepTutor.app/Contents/MacOS/zotero"
 elif [ "`uname`" = "Linux" ]; then
 	command="Zotero_linux-x86_64/zotero"
 elif [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then

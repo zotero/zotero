@@ -160,15 +160,17 @@
 	<key>CFBundleExecutable</key>
 	<string>zotero</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Zotero {{VERSION}}, © 2006-2018 Contributors</string>
+	<string>DeepTutor {{VERSION}}, © 2006-2018 Contributors</string>
 	<key>CFBundleIconFile</key>
 	<string>zotero</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.zotero.zotero</string>
+	<string>org.deeptutor.deeptutor</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Zotero</string>
+	<string>DeepTutor</string>
+	<key>CFBundleDisplayName</key>
+	<string>DeepTutor</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

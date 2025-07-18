@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Perform full code signing of Zotero.app for local usage
+# Perform full code signing of DeepTutor.app for local usage
 #
 # This script performs the same signing process as production builds,
 # but uses the configured developer certificate for local development.
@@ -11,7 +11,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 . "$ROOT_DIR/config.sh"
 
 if [ -z "${1:-}" ]; then
-	echo "Usage: $0 path/to/staging/Zotero.app"
+	echo "Usage: $0 path/to/staging/DeepTutor.app"
 	exit 1
 fi
 

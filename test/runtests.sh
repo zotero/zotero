@@ -17,7 +17,7 @@ function makePath {
 
 if [ -z "$Z_EXECUTABLE" ]; then
 	if [ "`uname`" == "Darwin" ]; then
-		Z_EXECUTABLE="$ROOT_DIR/app/staging/Zotero.app/Contents/MacOS/zotero"
+		Z_EXECUTABLE="$ROOT_DIR/app/staging/DeepTutor.app/Contents/MacOS/zotero"
 	else
 		Z_EXECUTABLE="$ROOT_DIR/app/staging/Zotero_linux-x86_64/zotero"
 	fi
