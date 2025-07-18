@@ -74,10 +74,7 @@ async function onLoad() {
 	// Initial height for the dialog (search row with no bubbles)
 	window.resizeTo(window.innerWidth, Helpers.getSearchRowHeight());
 
-	_id("keepSorted").disabled = !io.sortable || isCitingNotes || isAddingAnnotations;
-	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
-	let visibleSettings = !!_id("settings-popup").querySelector("input:not([disabled])");
-	_id("settings-button").hidden = !visibleSettings;
+	modeSpecificInit();
 
 	libraryLayout = new LibraryLayout();
 	listLayout = new ListLayout();
@@ -194,6 +191,24 @@ function dialogNotPristine() {
 // shortcut used for brevity
 function _id(id) {
 	return doc.getElementById(id);
+}
+
+// hide/display components that are specific to different dialog modes
+function modeSpecificInit() {
+	let dialogType = "citation";
+	if (isAddingAnnotations) {
+		dialogType = "annotations";
+	}
+	let modeSpecificComponents = doc.querySelectorAll(`[data-dialog-type]`);
+	for (let component of modeSpecificComponents) {
+		let shouldBeVisible = component.getAttribute("data-dialog-type").includes(dialogType);
+		component.hidden = !shouldBeVisible;
+	}
+	// hide the settings button if there are no settings to show
+	_id("keepSorted").disabled = !io.sortable || !isCitingItems;
+	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
+	let visibleSettings = !!_id("settings-popup").querySelector("div:not([hidden]) input:not([disabled])");
+	_id("settings-button").hidden = !visibleSettings;
 }
 
 
@@ -1312,7 +1327,6 @@ const IOManager = {
 		// For now, only library mode for annotations
 		if (isAddingAnnotations) {
 			this.toggleDialogMode("library");
-			_id("mode-button").hidden = true;
 			return;
 		}
 		let desiredMode = Zotero.Prefs.get("integration.citationDialogMode");

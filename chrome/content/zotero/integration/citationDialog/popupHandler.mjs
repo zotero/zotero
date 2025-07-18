@@ -36,10 +36,6 @@ export class CitationDialogPopupsHandler {
 		this.itemDetailsTimeOpened = null;
 
 		this.isAddingAnnotations = !!io.isAddingAnnotations;
-		if (this.isAddingAnnotations) {
-			this._getNode("#itemDetails").querySelector("[mode='annotation']").hidden = false;
-			this._getNode("#itemDetails").querySelector("[mode='citation']").hidden = true;
-		}
 
 		this.setUpListeners();
 	}
