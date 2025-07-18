@@ -422,7 +422,8 @@ class LibraryLayout extends Layout {
 
 	async init() {
 		// Set initial height of the dialog such that the collection/itemTrees get at least 400px
-		this.lastHeight = Math.max(500, Helpers.getSearchRowHeight() + 400);
+		let initialHeight = isAddingAnnotations ? 650 : 500;
+		this.lastHeight = Math.max(initialHeight, Helpers.getSearchRowHeight() + 400);
 		await this._initItemTree();
 		await this._initCollectionTree();
 		// on mouse scrollwheel in suggested items, scroll the list horizontally
