@@ -15,8 +15,10 @@
 <dialog
 	id="zotero-long-tag-fixer"
 	class="zotero-dialog-window"
-	buttons="cancel,accept"
->	
+	buttons="cancel,accept,extra1"
+	buttonidextra1="long-tag-fixer-button-dont-split"
+>
+	<html:link rel="localization" href="zotero.ftl" />
 	<html:div id="intro">
 		<html:h1>&zotero.sync.longTagFixer.followingTagTooLong;</html:h1>
 		<html:textarea id="zotero-old-tag" readonly="readonly" />

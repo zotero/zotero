@@ -368,6 +368,14 @@
 				});
 				event.preventDefault();
 			}
+			let delimiters = [',', ';', '--'];
+			let interceptRegex = new RegExp(`\\w+\\s*(${delimiters.join('|')})\\s*\\w+`, 'i');
+			let match = str.match(interceptRegex);
+			if (match) {
+				event.preventDefault();
+				textbox.value = str.trim();
+				this.openTagSplitterWindow(str, match[1], textbox);
+			}
 		};
 
 		makeMultiline(editable, value) {
@@ -381,6 +389,31 @@
 		makeSingleLine(editable) {
 			editable.noWrap = true;
 			editable.multiline = false;
+		}
+
+		openTagSplitterWindow(tagString, delimiter, textbox) {
+			const dataIn = {
+				oldTag: tagString,
+				isLongTag: false,
+				isTagsBox: true,
+				delimiter
+			};
+			const dataOut = { result: null };
+
+			window.openDialog(
+				'chrome://zotero/content/longTagFixer.xhtml',
+				'',
+				'chrome,modal,centerscreen',
+				dataIn, dataOut
+			);
+
+			if (!dataOut.result) {
+				textbox.value = '';
+			}
+
+			if (dataOut?.result?.op === 'split') {
+				textbox.value = dataOut.result.tags.join('\n');
+			}
 		}
 
 		saveTag = async (event) => {
