@@ -362,7 +362,9 @@ describe("Citation Dialog", function () {
 			await IOManager.addItemsToCitation([itemOne, itemTwo]);
 
 			// Select row of the first bubble
-			await dialog.libraryLayout.itemsView.selectItem(itemOne.id);
+			var promise = dialog.libraryLayout.itemsView.waitForSelect();
+			dialog.libraryLayout.itemsView.selectItem(itemOne.id);
+			await promise;
 			// Check that the bubble is highlighted
 			let bubbleOne = dialog.document.querySelector(`.bubble[dialogReferenceID="${CitationDataManager.items[0].dialogReferenceID}"]`);
 			assert.isTrue(bubbleOne.classList.contains("has-item-selected"));
