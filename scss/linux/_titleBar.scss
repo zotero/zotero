@@ -14,16 +14,13 @@
 	-moz-box-pack: center;
 	pointer-events: none;
 	-moz-appearance: -moz-window-titlebar;
-	// fx128: cover transparent gap between titlebar and window body
-	margin-bottom: -1px;
 	// fx140: Titlebar is transparent by default, so add background and border
 	// TODO: Check these
 	background: var(--material-tabbar);
 	border-bottom: var(--material-panedivider);
-}
-
-#zotero-title-bar {
-	border-top: 1px solid transparent;
+	// fx140: Add border radius to match window corners
+	border-top-left-radius: env(-moz-gtk-csd-titlebar-radius);
+	border-top-right-radius: env(-moz-gtk-csd-titlebar-radius);
 }
 
 #toolbar-menubar {
