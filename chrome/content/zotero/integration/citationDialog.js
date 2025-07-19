@@ -574,22 +574,22 @@ class LibraryLayout extends Layout {
 			showInColumnPicker: false,
 			renderer: (index, inCitation, column) => {
 				let cell = Helpers.createNode("span", {}, `cell ${column.className} clickable`);
-				let iconWrapper = Helpers.createNode("span", {}, `icon-action`);
-				cell.append(iconWrapper);
-				let icon = getCSSIcon('plus-circle');
 				if (inCitation === null) {
 					// no icon should be shown when an item cannot be added
 					// (e.g. when citing notes, parent items are displayed but not included)
-					icon = getCSSIcon("");
+					return cell;
 				}
+				let iconWrapper = Helpers.createNode("span", {}, `icon-action`);
+				cell.append(iconWrapper);
+				let icon = getCSSIcon('plus-circle');
+				iconWrapper.append(icon);
 				// add aria-label for screen readers to announce if this item is added
-				else if (inCitation) {
+				if (inCitation) {
 					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added")
 				}
 				else {
 					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table");
 				}
-				iconWrapper.append(icon);
 				return cell;
 			}
 		});
