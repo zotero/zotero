@@ -484,13 +484,15 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 		wordWrap: 'break-word',
 		overflowWrap: 'break-word',
 		wordBreak: 'break-word',
+		color: '#000000',
 	};
 
 	const thinkingContainerStyle = {
 		marginTop: '1rem',
 		borderRadius: '0.5rem',
 		backgroundColor: '#F3F4F6',
-		paddingLeft: '1rem'
+		paddingLeft: '1rem',
+		color: '#000000',
 	};
 
 	const responseContainerStyle = {
@@ -503,6 +505,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 		wordWrap: 'break-word',
 		overflowWrap: 'break-word',
 		wordBreak: 'break-word',
+		color: '#000000', // Ensure black text color during streaming
 	};
 
 	return React.createElement('div', null,
@@ -863,7 +866,8 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 									fontSize: "14px", // Match DeepTutorChatBox font size
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
-									overflowWrap: "break-word"
+									overflowWrap: "break-word",
+									color: "#000000" // Ensure black text color during streaming
 								}
 							})
 							: React.createElement('div', {
@@ -871,7 +875,8 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 									fontSize: "14px", // Match DeepTutorChatBox font size
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
-									overflowWrap: "break-word"
+									overflowWrap: "break-word",
+									color: "#000000" // Ensure black text color during streaming
 								}
 							}, thinkingText || '');
 					}
@@ -882,7 +887,8 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 								fontSize: "14px", // Match DeepTutorChatBox font size
 								lineHeight: "1.5", // Match DeepTutorChatBox line height
 								wordBreak: "break-word",
-								overflowWrap: "break-word"
+								overflowWrap: "break-word",
+								color: "#000000" // Ensure black text color during streaming
 							}
 						}, thinkingText || '');
 					}
@@ -906,7 +912,8 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 									fontSize: "14px", // Match DeepTutorChatBox font size
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
-									overflowWrap: "break-word"
+									overflowWrap: "break-word",
+									color: "#000000" // Ensure black text color during streaming
 								}
 							})
 							: React.createElement('div', {
@@ -914,7 +921,8 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 									fontSize: "14px", // Match DeepTutorChatBox font size
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
-									overflowWrap: "break-word"
+									overflowWrap: "break-word",
+									color: "#000000" // Ensure black text color during streaming
 								}
 							}, responseText || '');
 					}
@@ -925,7 +933,8 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 								fontSize: "14px", // Match DeepTutorChatBox font size
 								lineHeight: "1.5", // Match DeepTutorChatBox line height
 								wordBreak: "break-word",
-								overflowWrap: "break-word"
+								overflowWrap: "break-word",
+								color: "#000000" // Ensure black text color during streaming
 							}
 						}, responseText || '');
 					}

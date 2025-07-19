@@ -1277,7 +1277,8 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
 							style={{
 								...styles.input1,
 								opacity: isEffectivelyFrozen ? 0.5 : 1,
-								cursor: isEffectivelyFrozen ? 'not-allowed' : 'text'
+								cursor: isEffectivelyFrozen ? 'not-allowed' : 'text',
+								color: '#000000'
 							}}
 							placeholder={backupModelName}
 							disabled={isEffectivelyFrozen}

@@ -54,6 +54,7 @@ const styles = {
 		fontFamily: 'Roboto, sans-serif',
 		outline: 'none',
 		boxSizing: 'border-box',
+		color: '#000000'
 	},
 	forgot: {
 		display: 'flex',
@@ -72,9 +73,8 @@ const styles = {
 	signInButton: {
 		all: 'revert',
 		width: '100%',
-		minHeight: '2.4375rem',
 		borderRadius: '0.625rem',
-		padding: '0.625rem 1.25rem',
+		padding: '1rem 1.25rem',
 		background: SKY,
 		color: '#fff',
 		fontWeight: 700,
@@ -93,7 +93,7 @@ const styles = {
 		width: '100%',
 		display: 'flex',
 		alignItems: 'center',
-		margin: '1.875rem 0 0',
+		margin: '1.3rem 0 0',
 	},
 	divider: {
 		flex: 1,
@@ -111,7 +111,7 @@ const styles = {
 		width: '100%',
 		display: 'flex',
 		justifyContent: 'center',
-		marginTop: '1.875rem',
+		marginTop: '1.25rem',
 	},
 	googleButton: {
 		all: 'revert',

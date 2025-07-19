@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-unused-vars
+ 
 import React from 'react';
 
 const StreamingStates = {
@@ -14,20 +14,20 @@ const StreamingStates = {
 
 const getLoadingText = (currentStatus) => {
 	switch (currentStatus) {
-	case StreamingStates.THINKING:
-		return 'Thinking ...';
-	case StreamingStates.RESPONSE:
-		return 'Outputting response ...';
-	case StreamingStates.SOURCES:
-		return 'Finding sources ...';
-	case StreamingStates.SOURCE_PAGE:
-		return 'Finding source page numbers ...';
-	case StreamingStates.FOLLOW_UP_QUESTIONS:
-		return 'Generating follow-up questions ...';
-	case StreamingStates.APPENDIX:
-		return 'Formatting response ...';
-	default:
-		return 'Generating ...';
+		case StreamingStates.THINKING:
+			return 'Thinking ...';
+		case StreamingStates.RESPONSE:
+			return 'Outputting response ...';
+		case StreamingStates.SOURCES:
+			return 'Finding sources ...';
+		case StreamingStates.SOURCE_PAGE:
+			return 'Finding source page numbers ...';
+		case StreamingStates.FOLLOW_UP_QUESTIONS:
+			return 'Generating follow-up questions ...';
+		case StreamingStates.APPENDIX:
+			return 'Formatting response ...';
+		default:
+			return 'Generating ...';
 	}
 };
 
@@ -46,7 +46,8 @@ const DeepTutorStreamingTag = ({ streamState, isCurrentTag }) => {
 		marginBottom: '1rem',
 		fontFamily: 'Roboto, sans-serif',
 		fontSize: '0.875rem',
-		alignItems: 'center'
+		alignItems: 'center',
+		color: '#000000'
 	};
 
 	const checkIconStyle = {
