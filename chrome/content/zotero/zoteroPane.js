@@ -430,6 +430,10 @@ var ZoteroPane = new function()
 						if (tagContainer.getAttribute('collapsed') == "true") {
 							return document.getElementById('zotero-tb-add');
 						}
+						if (tagSelector.querySelector('.annotation-color')) {
+							ZoteroPane.tagSelector.focusAnnotationColors();
+							return null;
+						}
 						// If tag selector is collapsed, go to "New item" button, otherwise focus tag selector
 						if (ZoteroPane.tagSelector.isTagListEmpty()) {
 							return tagSelector.querySelector(".search-input");
@@ -454,28 +458,15 @@ var ZoteroPane = new function()
 
 		tagSelector.addEventListener("keydown", (e) => {
 			let actionsMap = {
-				'search-input': {
-					Tab: () => tagSelector.querySelector('.tag-selector-actions'),
-					ShiftTab: () => {
-						if (ZoteroPane.tagSelector.isTagListEmpty()) {
-							return document.getElementById("collection-tree");
-						}
-						ZoteroPane.tagSelector.focusTagList();
-						return null;
-					},
-				},
 				'tag-selector-item': {
-					Tab: () => tagSelector.querySelector(".search-input"),
+					ShiftTab: () => document.getElementById("collection-tree"),
+				},
+				'annotation-color': {
 					ShiftTab: () => document.getElementById("collection-tree"),
 				},
 				'tag-selector-actions': {
-					Tab: () => document.getElementById('zotero-tb-add'),
-					ShiftTab: () => tagSelector.querySelector(".search-input")
+					Tab: () => document.getElementById('zotero-tb-add')
 				},
-				'tag-selector-list': {
-					Tab: () => tagSelector.querySelector(".search-input"),
-					ShiftTab: () => document.getElementById("collection-tree"),
-				}
 			};
 			moveFocus(actionsMap, e);
 		});
@@ -1732,9 +1723,8 @@ var ZoteroPane = new function()
 	 * Sets the tag filter on the items view
 	 */
 	this.updateTagFilter = Zotero.Promise.coroutine(function* () {
-		if (this.itemsView) {
-			yield this.itemsView.setFilter('tags', ZoteroPane_Local.tagSelector.getTagSelection());
-		}
+		if (!this.itemsView) return;
+		yield this.itemsView.setFilter('annotation-tags', ZoteroPane_Local.tagSelector.getSelection());
 	});
 	
 	
@@ -1802,6 +1792,11 @@ var ZoteroPane = new function()
 
 			// Update enabled actions, in case editability has changed
 			this._updateEnabledActionsForRow(collectionTreeRow);
+			// Make sure the itemsView has the most current instanced of
+			// collectionTree, so that annotation color and authors filters
+			// get enabled/disabled in sync with itemTree.
+			this.itemsView.collectionTreeRow = collectionTreeRow;
+			collectionTreeRow.setAnnotationTagFilters(ZoteroPane.tagSelector.getSelection());
 			return;
 		}
 		
@@ -1813,12 +1808,12 @@ var ZoteroPane = new function()
 		// Clear quick search and tag selector when switching views
 		document.getElementById('zotero-tb-search-textbox').value = "";
 		if (ZoteroPane.tagSelector) {
-			ZoteroPane.tagSelector.clearTagSelection();
+			ZoteroPane.tagSelector.clearSelection();
 		}
 		
 		collectionTreeRow.setSearch('');
 		if (ZoteroPane.tagSelector) {
-			collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
+			collectionTreeRow.setAnnotationTagFilters(ZoteroPane.tagSelector.getSelection());
 		}
 		
 		this._updateEnabledActionsForRow(collectionTreeRow);
