@@ -1011,7 +1011,7 @@ function openScaffold() {
 	openWindowByType(
 		'chrome://scaffold/content/scaffold.xhtml',
 		'zotero:scaffold',
-		'chrome,resizable'
+		'chrome,menubar,resizable'
 	);
 }
 
