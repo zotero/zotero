@@ -95,9 +95,9 @@ var Zotero_Preferences = {
 				let event = new Event('unload');
 				child.dispatchEvent(event);
 			}
-			if (pane.sandbox) {
-				Cu.nukeSandbox(pane.sandbox);
-				pane.sandbox = null;
+			if (pane.scope) {
+				Cu.nukeSandbox(pane.scope);
+				pane.scope = null;
 			}
 		}
 	},
