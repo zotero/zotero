@@ -141,7 +141,10 @@
 			this._head = document.createElement('div');
 			this._head.role = 'button';
 			this._head.className = 'head';
-			this._head.setAttribute("tabindex", "0");
+			// remove header from focus order in non-collapsible sections
+			if (!this._disableCollapsing || !this.collapsible) {
+				this._head.setAttribute("tabindex", "0");
+			}
 			this._head.addEventListener('mousedown', this._handleMouseDown);
 			this._head.addEventListener('click', this._handleClick);
 			this._head.addEventListener('keydown', this._handleKeyDown);

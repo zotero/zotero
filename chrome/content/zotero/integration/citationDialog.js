@@ -717,6 +717,15 @@ class LibraryLayout extends Layout {
 			let item = Zotero.Items.get(annotationRow.annotation.id);
 			IOManager.addItemsToCitation(item);
 		});
+		// Space/Enter on annotation row is the same as clicking on the + icon
+		_id("annotations-list").addEventListener("keydown", (event) => {
+			if ([" ", "Enter"].includes(event.key) && event.target.tagName == "annotation-row") {
+				let item = Zotero.Items.get(event.target.annotation.id);
+				IOManager.addItemsToCitation(item);
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		});
 		// Handle the actual filtering in itemPane
 		_id("annotations-sidebar-filter").addEventListener("input", (event) => {
 			_id("annotations-filter-cancel-btn").hidden = !event.target.value;

@@ -88,11 +88,11 @@
 				<div id="annotations-sidebar" class="vbox" hidden="true">
 					<!-- Uses styling from _search.scss -->
 					<div id="annotations-sidebar-filter-wrapper" class="search">
-						<input id="annotations-sidebar-filter" data-l10n-id="integration-citationDialog-annotations-filter"/>
+						<input id="annotations-sidebar-filter" data-l10n-id="integration-citationDialog-annotations-filter" data-tabindex="70" tabindex="-1"/>
 						<div id="annotations-filter-cancel-btn" class="search-cancel-button" hidden="true"/>
 					</div>
 					<div id="annotations-list-wrapper">
-						<xul:annotation-items-pane id="annotations-list"/>
+						<xul:annotation-items-pane id="annotations-list" data-tabindex="71"  data-arrow-nav="vertical"/>
 					</div>
 				</div>
 			</div>
@@ -102,8 +102,8 @@
 			<div id="bottom-area-wrapper" class="hbox">
 				<div class="hbox" style="flex:1"></div>
 				<div id="bottom-btn-group" class="hbox">
-					<button id="mode-button" data-dialog-type="citation,note" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" tabindex="-1" data-tabindex="71"/>
-					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-tabindex="72"/>
+					<button id="mode-button" data-dialog-type="citation,note" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" tabindex="-1" data-tabindex="91"/>
+					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-tabindex="92"/>
 				</div>
 			</div>
 		</div>

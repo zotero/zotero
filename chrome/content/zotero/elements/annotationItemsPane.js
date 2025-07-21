@@ -58,10 +58,12 @@
 		init() {
 			this._body = this.querySelector('.body');
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item']);
+			this._body.addEventListener('keydown', this._handleKeyDown.bind(this));
 		}
 
 		destroy() {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+			this._body.removeEventListener('keydown', this._handleKeyDown.bind(this));
 		}
 
 		notify(action, type, ids) {
@@ -161,6 +163,32 @@
 			let comment = (annotation.annotationComment || "").toLowerCase();
 			let tags = (annotation.getTags() || []).map(tag => tag.tag.toLowerCase()).join(" ");
 			return text.includes(this.filter) || comment.includes(this.filter) || tags.includes(this.filter);
+		}
+
+		// Handle arrowUp/Down navigation between focused annotation rows
+		_handleKeyDown(event) {
+			if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+			
+			let currentRow = event.target.closest('annotation-row');
+			if (!currentRow) return;
+
+			let visibleRows = [...this.querySelectorAll('annotation-row:not([hidden])')];
+			let currentIndex = visibleRows.indexOf(currentRow);
+			
+			if (currentIndex === -1) return;
+
+			let nextIndex;
+			if (event.key === 'ArrowDown') {
+				nextIndex = currentIndex + 1;
+			}
+			else {
+				nextIndex = currentIndex - 1;
+			}
+
+			if (nextIndex >= 0 && nextIndex < visibleRows.length) {
+				visibleRows[nextIndex].focus();
+				event.preventDefault();
+			}
 		}
 	}
 
