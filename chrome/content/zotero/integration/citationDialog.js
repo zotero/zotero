@@ -1696,7 +1696,7 @@ const CitationDataManager = {
 		this.itemAddedCache = new Set();
 		for (let bubbleItem of this.items) {
 			if (!bubbleItem.item.id) continue;
-			this.itemAddedCache.add(bubbleItem.item.id.id);
+			this.itemAddedCache.add(bubbleItem.item.id);
 		}
 	},
  	
