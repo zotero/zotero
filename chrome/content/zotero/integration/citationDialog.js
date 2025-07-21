@@ -502,10 +502,6 @@ class LibraryLayout extends Layout {
 		let selectedItemIDs = this.itemsView.getSelectedItems(true);
 		this.itemsView.selection.selectEventsSuppressed = true;
 		this.itemsView.selection.clearSelection();
-		// Refresh to reset row cache to get latest data of which items are included
-		await this.itemsView.refresh();
-		// Redraw the itemTree
-		this.itemsView.tree.invalidate();
 		// Restore selection without scrolling
 		await this.itemsView.selectItems(selectedItemIDs, true, true);
 		this.itemsView.selection.selectEventsSuppressed = false;
