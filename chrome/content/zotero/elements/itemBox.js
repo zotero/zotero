@@ -1119,7 +1119,8 @@
 			rowLabel.appendChild(labelWrapper);
 			let label = this.createLabelElement({
 				id: 'creator-type-label-inner',
-				text: Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID))
+				text: Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID)),
+				skipEventHandlers: true,
 			});
 			labelWrapper.appendChild(label);
 			
@@ -1562,7 +1563,7 @@
 			return openLink;
 		}
 
-		createLabelElement({ text, id, attributes, classList }) {
+		createLabelElement({ text, id, attributes, classList, skipEventHandlers = false } = {}) {
 			let label = document.createElement('label');
 			label.classList.add('key', ...classList || []);
 			if (text) label.textContent = text;
@@ -1573,7 +1574,7 @@
 				}
 			}
 			// On click of the label, toggle the focus of the value field
-			if (this.editable) {
+			if (this.editable && !skipEventHandlers) {
 				label.addEventListener('mousedown', (event) => {
 					// Prevent default focus/blur behavior - we implement our own below
 					event.preventDefault();
