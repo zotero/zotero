@@ -1,0 +1,46 @@
+I'll redesign the search popup logic to show container names (regular items) instead of individual attachments. When a container is clicked, it will load all PDF attachments from that container.
+
+
+
+Perfect! I've successfully redesigned the search popup logic according to your requirements. Here's what I implemented:
+
+## Changes Made:
+
+### 1. **Created containerNames state and loading logic**
+- Added `containerNames` and `filteredContainers` state variables
+- Created a new `loadContainerNames` useEffect that:
+  - Loads all regular items (containers) from the Zotero library
+  - Filters to only include containers that have at least one PDF attachment
+  - Safely extracts container titles with proper error handling
+
+### 2. **Updated search filtering logic**
+- Modified the search filtering useEffect to process both `attachmentNames` and `containerNames`
+- Now searches through both attachment names and container names simultaneously
+- Results are stored in separate `filteredAttachments` and `filteredContainers` arrays
+
+### 3. **Redesigned handleSearchItemClick function**
+The function now handles two scenarios:
+
+**Container Selection:**
+- Detects when a regular item (container) is clicked
+- Extracts all PDF attachments from that container
+- Processes them using the same robust logic as the drag-and-drop feature
+- Adds all PDF attachments to the file list in one operation
+
+**Direct Attachment Selection:**
+- Maintains the original behavior for direct PDF attachment selection
+- Preserves backward compatibility
+
+### 4. **Updated search popup UI**
+- Shows both attachment results and container results with clear section labels
+- When both types of results exist, displays them in separate sections with an "or" separator
+- Maintains the same styling and interaction patterns
+
+### 5. **Key Benefits**
+- **More Efficient**: Users can now add all PDFs from a paper/book container in one click
+- **Backward Compatible**: Direct PDF attachment selection still works
+- **Robust Error Handling**: Uses the same proven patterns from drag-and-drop logic
+- **Smart Filtering**: Only shows containers that actually contain PDF attachments
+- **Clean UI**: Clear separation between attachment and container results
+
+The implementation leverages your existing successful code patterns (especially from the drag-and-drop functionality) and maintains consistency with the established debugging and error handling approaches. Users can now easily find and add entire collections of PDFs from research papers or books with a single click!
