@@ -1274,10 +1274,8 @@ const IOManager = {
 			}
 		}
 		let itemsToAdd = Array.from(itemIDs).map(itemID => SearchHandler.getItem(itemID));
-		console.log(itemsToAdd);
 		// while adding annotations, clicking on selected non-annotation(s) will select them in itemTree
 		if (isAddingAnnotations && !itemsToAdd.every(i => i.isAnnotation())) {
-			console.log([...itemIDs]);
 			libraryLayout.itemsView.selectItems([...itemIDs]);
 			_id("zotero-items-tree").querySelector("[tabindex]").focus();
 			return;
