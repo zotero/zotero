@@ -1548,7 +1548,7 @@ class EditorInstanceUtilities {
 					imageHTML = `<img data-attachment-key="${annotation.imageAttachmentKey}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
 				}
 				else {
-					imageHTML = `<img src="${annotation.image}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
+					imageHTML = `<img class="${annotation.type}" src="${annotation.image}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
 				}
 			}
 
