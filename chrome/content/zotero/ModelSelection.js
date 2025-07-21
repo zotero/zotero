@@ -449,7 +449,7 @@ const styles = {
 	},
 };
 
-const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false }, ref) => {
+const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, onShowNoPDFWarning }, ref) => {
 	const [fileList, setFileList] = useState([]);
 	const [originalFileList, setOriginalFileList] = useState([]);
 	const [modelName, setModelName] = useState('');
@@ -1228,8 +1228,8 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
 
 				if (!pdfAttachments.length) {
 					Zotero.debug("BBBBB: No PDF attachments found in dropped items");
-					if (fileList.length === 0) {
-						setErrorMessage("Only PDF files are supported. Please upload a valid PDF.");
+					if (onShowNoPDFWarning) {
+						onShowNoPDFWarning();
 					}
 					return;
 				}
@@ -1430,7 +1430,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false },
 								type="text"
 								value={searchValue}
 								onChange={e => !isEffectivelyFrozen && setSearchValue(e.target.value)}
-								placeholder="Search for a container"
+								placeholder="Search for a PDF file"
 								disabled={isEffectivelyFrozen}
 								onDragOver={e => e.preventDefault()}
 								onDrop={e => e.preventDefault()}

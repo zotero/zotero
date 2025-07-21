@@ -40,6 +40,7 @@ import DeepTutorBottomSection from './DeepTutorBottomSection.js';
 // import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
 import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
 import DeepTutorSessionDelete from './DeepTutorSessionDelete.js';
+import DeepTutorNoPDFWarning from './DeepTutorNoPDFWarning.js';
 import DeepTutorLocalhostServer from './localhostServer.js';
 import {
 	getMessagesBySessionId,
@@ -364,6 +365,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showSignUpPopup: false,
 			showModelSelectionPopup: false,
 			showDeletePopup: false,
+			showNoPDFWarningPopup: false,
 			sessionToDelete: null,
 			sessionNameToDelete: '',
 			collapsed: false,
@@ -791,6 +793,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showDeletePopup: !prevState.showDeletePopup,
 			sessionToDelete: prevState.showDeletePopup ? null : prevState.sessionToDelete,
 			sessionNameToDelete: prevState.showDeletePopup ? '' : prevState.sessionNameToDelete
+		}));
+	};
+
+	toggleNoPDFWarningPopup = () => {
+		this.setState(prevState => ({
+			showNoPDFWarningPopup: !prevState.showNoPDFWarningPopup
 		}));
 	};
 
@@ -1732,34 +1740,35 @@ var DeepTutor = class DeepTutor extends React.Component {
 						{this.state.currentPane === 'noSession'
 							&& <DeepTutorNoSessionPane onCreateNewSession={this.toggleModelSelectionPopup} />
 						}
-						{this.state.currentPane === 'modelSelection'
-							&& <ModelSelection
-								onSubmit={async (sessionId) => {
-									try {
-										const sessionData = await getSessionById(sessionId);
-										const session = new DeepTutorSession(sessionData);
-										const newsesIdToObj = new Map(this.state.sesIdToObj);
-										newsesIdToObj.set(session.id, session);
+										{this.state.currentPane === 'modelSelection'
+					&& <ModelSelection
+						onSubmit={async (sessionId) => {
+							try {
+								const sessionData = await getSessionById(sessionId);
+								const session = new DeepTutorSession(sessionData);
+								const newsesIdToObj = new Map(this.state.sesIdToObj);
+								newsesIdToObj.set(session.id, session);
 
-										await this.setState({
-											currentSession: session,
-											messages: [],
-											documentIds: session.documentIds || [],
-											sesIdToObj: newsesIdToObj,
-											sessions: [...this.state.sessions, session]
-										});
+								await this.setState({
+									currentSession: session,
+									messages: [],
+									documentIds: session.documentIds || [],
+									sesIdToObj: newsesIdToObj,
+									sessions: [...this.state.sessions, session]
+								});
 
-										await this.handleSessionSelect(session.id);
-										this.switchPane('main');
-										this.toggleModelSelectionPopup();
-									}
-									catch (error) {
-										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
-									}
-								}}
-								user={this.state.userData}
-								externallyFrozen={this.state.modelSelectionFrozen}
-							/>
+								await this.handleSessionSelect(session.id);
+								this.switchPane('main');
+								this.toggleModelSelectionPopup();
+							}
+							catch (error) {
+								Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
+							}
+						}}
+						user={this.state.userData}
+						externallyFrozen={this.state.modelSelectionFrozen}
+						onShowNoPDFWarning={this.toggleNoPDFWarningPopup}
+					/>
 						}
 						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane
 							onWelcomeSignIn={() => this.toggleSignInPopup()}
@@ -2194,6 +2203,91 @@ var DeepTutor = class DeepTutor extends React.Component {
 								}}
 								user={this.state.userData}
 								externallyFrozen={this.state.modelSelectionFrozen}
+								onShowNoPDFWarning={this.toggleNoPDFWarningPopup}
+							/>
+						</div>
+					</div>
+				)}
+
+				{/* No PDF Warning Popup */}
+				{this.state.showNoPDFWarningPopup && (
+					<div
+						style={{
+							position: 'absolute',
+							top: 0,
+							left: 0,
+							right: 0,
+							bottom: 0,
+							backgroundColor: 'rgba(0, 0, 0, 0.5)',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							zIndex: 1000,
+							overflow: 'hidden',
+						}}
+						onClick={this.toggleNoPDFWarningPopup}
+					>
+						<div
+							style={{
+								position: 'relative',
+								width: '100%',
+								minWidth: '18.75rem',
+								maxWidth: '26.875rem',
+								maxHeight: '90%',
+								background: '#FFFFFF',
+								borderRadius: '0.625rem',
+								padding: '1.25rem',
+								overflow: 'auto',
+								margin: '0 1.25rem'
+							}}
+							onClick={e => e.stopPropagation()}
+						>
+							{/* No PDF Warning Popup header */}
+							<div style={{
+								display: 'flex',
+								width: '100%',
+								alignItems: 'center',
+								marginBottom: '1.25rem',
+								minHeight: '1rem',
+								position: 'relative',
+							}}>
+								<div style={{
+									width: '100%',
+									textAlign: 'center',
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '1.5rem',
+									lineHeight: '1.2',
+									letterSpacing: '0%',
+								}}>
+									Unsupported File Type
+								</div>
+								<button
+									onClick={this.toggleNoPDFWarningPopup}
+									style={{
+										background: 'none',
+										border: 'none',
+										cursor: 'pointer',
+										position: 'absolute',
+										right: 0,
+										top: '50%',
+										transform: 'translateY(-50%)',
+										width: '1rem',
+										height: '1rem',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+									}}
+								>
+									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
+								</button>
+							</div>
+							<DeepTutorNoPDFWarning
+								onClose={this.toggleNoPDFWarningPopup}
 							/>
 						</div>
 					</div>
