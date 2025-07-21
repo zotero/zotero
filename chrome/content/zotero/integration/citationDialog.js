@@ -199,6 +199,9 @@ function modeSpecificInit() {
 	if (isAddingAnnotations) {
 		dialogType = "annotations";
 	}
+	else if (isCitingNotes) {
+		dialogType = "note";
+	}
 	let modeSpecificComponents = doc.querySelectorAll(`[data-dialog-type]`);
 	for (let component of modeSpecificComponents) {
 		let shouldBeVisible = component.getAttribute("data-dialog-type").includes(dialogType);
@@ -1054,6 +1057,8 @@ const IOManager = {
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
 
+		_id("mode-button").addEventListener("click", () => this.toggleDialogMode());
+
 		// some additional logic to keep focus on relevant nodes during mouse interactions
 		this._initFocusRetention();
 		doc.addEventListener("focusin", this.resetSelectedAfterFocus);
@@ -1101,6 +1106,8 @@ const IOManager = {
 		// the trees get rendered no matter what.
 		if (currentLayout.type == "library") {
 			currentLayout.forceUpdateTablesAfterRefresh = true;
+			// highlight items added in list in itemTree
+			currentLayout._refreshItemsViewHighlightedRows();
 		}
 		currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
 	},
