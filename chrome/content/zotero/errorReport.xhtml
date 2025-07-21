@@ -23,7 +23,7 @@
 <wizard title="&zotero.errorReport.title;" width="550" height="450">
 	<script>
 	<![CDATA[
-		Components.utils.import("resource://zotero/config.js");
+		const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 		
 		var Zotero_Error_Report = new function() {
 			var obj = window.arguments[0].wrappedJSObject;
