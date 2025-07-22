@@ -600,22 +600,7 @@ class LibraryLayout extends Layout {
 			onSelectionChange: () => {
 				libraryLayout.updateSelectedItems();
 				if (isAddingAnnotations) {
-					let selectedItems = this.itemsView.getSelectedItems().filter(item => item.isAnnotation() || item.isFileAttachment() || item.isRegularItem());
-					let selectedAnnotations = selectedItems.flatMap(item => SearchHandler.getAllAnnotations(item));
-					let uniqueAnnotations = [];
-					let annotationIDs = new Set();
-					for (let annotation of selectedAnnotations) {
-						if (annotationIDs.has(annotation.id)) continue;
-						uniqueAnnotations.push(annotation);
-						annotationIDs.add(annotation.id);
-					}
-					// Don't re-render if the list has not changed
-					let rendered = new Set(_id("annotations-list").items.map(item => item.id));
-					if (rendered.isSupersetOf(annotationIDs) && rendered.isSubsetOf(annotationIDs)) return;
-					_id("annotations-list").items = uniqueAnnotations;
-					_id("annotations-list").filter = "";
-					_id("annotations-sidebar-filter").value = "";
-					_id("annotations-list").render();
+					this._handleSelectionChangeWithAnnotation();
 				}
 			},
 			regularOnly: isCitingItems,
@@ -844,6 +829,25 @@ class LibraryLayout extends Layout {
 				}
 			}
 		}
+	}
+
+	_handleSelectionChangeWithAnnotation() {
+		let selectedItems = this.itemsView.getSelectedItems().filter(item => item.isAnnotation() || item.isFileAttachment() || item.isRegularItem());
+		let selectedAnnotations = selectedItems.flatMap(item => SearchHandler.getAllAnnotations(item));
+		let uniqueAnnotations = [];
+		let annotationIDs = new Set();
+		for (let annotation of selectedAnnotations) {
+			if (annotationIDs.has(annotation.id)) continue;
+			uniqueAnnotations.push(annotation);
+			annotationIDs.add(annotation.id);
+		}
+		// Don't re-render if the list has not changed
+		let rendered = new Set(_id("annotations-list").items.map(item => item.id));
+		if (rendered.isSupersetOf(annotationIDs) && rendered.isSubsetOf(annotationIDs)) return;
+		_id("annotations-list").items = uniqueAnnotations;
+		_id("annotations-list").filter = "";
+		_id("annotations-sidebar-filter").value = "";
+		_id("annotations-list").render();
 	}
 
 	// Highlight/de-highlight selected rows
