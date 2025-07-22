@@ -107,7 +107,7 @@ const sessionListStyle = {
 const sessionButtonStyle = {
 	all: 'revert',
 	width: '100%',
-	height: '2.5rem', // Fixed height for consistency
+	minHeight: '2.5rem', // Fixed height for consistency
 	fontFamily: 'Roboto, sans-serif',
 	padding: '0.5rem 1.2rem',
 	background: '#F2F2F2',

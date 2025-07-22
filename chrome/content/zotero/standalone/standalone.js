@@ -562,6 +562,17 @@ const ZoteroStandalone = new function() {
 				// Show
 				if (itemPane.getAttribute('collapsed') == 'true') {
 					Zotero.debug('Standalone: Opening item pane');
+					
+					// Close DeepTutor pane when opening items pane
+					var deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
+					var deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
+					if (deepTutorPane && !deepTutorPane.hidden && deepTutorPane.getAttribute('collapsed') !== 'true') {
+						Zotero.debug('Standalone: Closing DeepTutor pane when opening items pane');
+						deepTutorPane.hidden = true;
+						deepTutorPane.setAttribute('collapsed', 'true');
+						deeptutorSplitter.setAttribute('state', 'collapsed');
+					}
+					
 					document.getElementById('zotero-items-splitter').setAttribute('state', 'open');
 					itemPane.setAttribute('collapsed', false);
 				}

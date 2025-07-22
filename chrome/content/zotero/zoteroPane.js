@@ -90,7 +90,19 @@ var ZoteroPane = new function()
 				mutations.forEach((mutation) => {
 					if (mutation.attributeName === 'collapsed') {
 						let isCollapsed = this.itemPane.getAttribute('collapsed') === 'true';
-						// Remove automatic closing of DeepTutor pane
+						
+						// Close DeepTutor pane when items pane opens
+						if (!isCollapsed) {
+							var deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
+							var deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
+							if (deepTutorPane && !deepTutorPane.hidden && deepTutorPane.getAttribute('collapsed') !== 'true') {
+								Zotero.debug('ZoteroPane: Closing DeepTutor pane when items pane opens');
+								deepTutorPane.hidden = true;
+								deepTutorPane.setAttribute('collapsed', 'true');
+								deeptutorSplitter.setAttribute('state', 'collapsed');
+							}
+						}
+						
 						ZoteroPane.updateLayoutConstraints();
 					}
 				});

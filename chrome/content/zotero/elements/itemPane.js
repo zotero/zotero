@@ -586,6 +586,16 @@
 					if (this.previousElementSibling.localName === "splitter") {
 						this.previousElementSibling.setAttribute("state", "open");
 					}
+					
+					// Close DeepTutor pane when opening duplicates view
+					var deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
+					var deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
+					if (deepTutorPane && !deepTutorPane.hidden && deepTutorPane.getAttribute('collapsed') !== 'true') {
+						Zotero.debug('ItemPane: Closing DeepTutor pane when opening duplicates view');
+						deepTutorPane.hidden = true;
+						deepTutorPane.setAttribute('collapsed', 'true');
+						deeptutorSplitter.setAttribute('state', 'collapsed');
+					}
 					break;
 				}
 			}
