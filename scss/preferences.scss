@@ -209,7 +209,8 @@ groupbox:not(:first-of-type) label > h2 {
 	position: absolute;
 	bottom: 24px;
 	background-color: #ffe900;
-	border: 1px solid rgba(0, 0, 0, 40%);
+	color: #000;
+	border: 1px solid #d7b600;
 	padding: 2px 8px;
 	text-align: center;
 
@@ -225,7 +226,7 @@ groupbox:not(:first-of-type) label > h2 {
 
 	&::before {
 		top: calc(100% + 1px);
-		border-top: 6px solid rgba(0, 0, 0, 40%);
+		border-top: 7px solid #d7b600;
 	}
 
 	&::after {
