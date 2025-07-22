@@ -92,6 +92,7 @@ integration-citationDialog-bubble-empty = (no title)
 integration-citationDialog-add-to-citation = Add to Citation
 integration-citationDialog-annotations-filter =
     .placeholder = Filter annotations
+integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
 
 integration-prefs-displayAs-label = Display Citations As:
 integration-prefs-footnotes =

@@ -458,6 +458,16 @@
 			#annotations-list-wrapper {
 				overflow-y: auto;
 			}
+
+			#annotations-message {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100%;
+				#annotations-message-text {
+					text-align: center;
+				}
+			}
 		}
 	}
 

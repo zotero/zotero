@@ -847,6 +847,12 @@ class LibraryLayout extends Layout {
 		// Don't re-render if the list has not changed
 		let rendered = new Set(_id("annotations-list").items.map(item => item.id));
 		if (rendered.isSupersetOf(annotationIDs) && rendered.isSubsetOf(annotationIDs)) return;
+
+		// When no annotations are selected, a message will be shown
+		_id("annotations-list-wrapper").hidden = uniqueAnnotations.length == 0;
+		_id("annotations-sidebar-filter-wrapper").hidden = uniqueAnnotations.length == 0;
+		_id("annotations-message").hidden = uniqueAnnotations.length > 0;
+
 		_id("annotations-list").items = uniqueAnnotations;
 		_id("annotations-list").filter = "";
 		_id("annotations-sidebar-filter").value = "";
