@@ -448,11 +448,13 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 				// Auth functions are no longer needed since we use the existing completeAuth function
 				console.log("🔧 DeepTutor: Using existing completeAuth function for authentication");
-			} else {
+			}
+			else {
 				console.log("❌ DeepTutor: Failed to start localhost server");
 				Zotero.debug("DeepTutor: Failed to start localhost server");
 			}
-		} catch (error) {
+		}
+		catch (error) {
 			console.error("❌ DeepTutor: Error starting localhost server:", error.message);
 			Zotero.debug(`DeepTutor: Error starting localhost server: ${error.message}`);
 		}
@@ -496,7 +498,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			this.localhostServer.stop().then((stopped) => {
 				if (stopped) {
 					Zotero.debug("DeepTutor: Localhost server stopped successfully");
-				} else {
+				}
+				else {
 					Zotero.debug("DeepTutor: Failed to stop localhost server");
 				}
 			}).catch((error) => {
@@ -1604,7 +1607,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			}
 
 			Zotero.debug("DeepTutor: Google sign-in popup closed, OAuth endpoint disabled");
-		} catch (error) {
+		}
+		catch (error) {
 			console.error("❌ DeepTutor: Error handling Google sign-in close:", error.message);
 			Zotero.debug(`DeepTutor: Error handling Google sign-in close: ${error.message}`);
 		}
@@ -1649,13 +1653,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 					const healthResponse = await fetch(`${this.localhostServer.getServerUrl()}/deeptutor/health`);
 					const healthData = await healthResponse.json();
 					console.log("🏥 DeepTutor: Health check result:", healthData);
-				} catch (healthError) {
+				}
+				catch (healthError) {
 					console.error("❌ DeepTutor: Health check failed:", healthError.message);
 				}
 			}
 
 			console.log("✅ DeepTutor: Localhost server test completed");
-		} catch (error) {
+		}
+		catch (error) {
 			console.error("❌ DeepTutor: Localhost server test failed:", error.message);
 		}
 	};
@@ -1669,7 +1675,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			minWidth = '0';
 			maxWidth = '0';
 			defaultWidth = '0';
-		} else {
+		}
+		else {
 			// Maximum width: 1/2 of window width
 			maxWidth = `${this.state.windowWidth * 0.5}px`;
 
@@ -1680,7 +1687,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			if (this.state.windowWidth >= 1200) {
 				// Window width >= 1200px: minimum is 1/4 of window width
 				minWidth = `${this.state.windowWidth * 0.25}px`;
-			} else {
+			}
+			else {
 				// Window width < 1200px: minimum is 300px
 				minWidth = '300px';
 			}
@@ -1740,7 +1748,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 						{this.state.currentPane === 'noSession'
 							&& <DeepTutorNoSessionPane onCreateNewSession={this.toggleModelSelectionPopup} />
 						}
-										{this.state.currentPane === 'modelSelection'
+						{this.state.currentPane === 'modelSelection'
 					&& <ModelSelection
 						onSubmit={async (sessionId) => {
 							try {

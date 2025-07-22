@@ -6,7 +6,7 @@ import {
 } from './api/libs/api';
 
 const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DELETE.svg';
-const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_LITE.svg';
+// const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_LITE.svg';
 const BasicPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_STANDARD.svg';
 const AdvancedPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_ADVANCED.svg';
 const RegisDragPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DRAG.svg';
@@ -49,19 +49,13 @@ const styles = {
 	mainSection: {
 		display: 'flex',
 		flexDirection: 'column',
-		width: '100%',
+		margin: '0 -0.5rem 0 0',
+		padding: '0 0.5rem 0 0',
+		width: '98%',
 		maxHeight: '65vh',
+		height: '100%',
 		overflowY: 'auto',
-		overflowX: 'hidden',
 		boxSizing: 'border-box',
-	},
-	section: {
-		width: '100%',
-		maxWidth: '26rem',
-		display: 'flex',
-		flexDirection: 'column',
-		boxSizing: 'border-box',
-		marginBottom: '1.875rem',
 	},
 	nameSection: {
 		width: '100%',
@@ -93,7 +87,7 @@ const styles = {
 		letterSpacing: '0%',
 		verticalAlign: 'middle',
 		color: '#000000',
-		marginBottom: '0.625rem',
+		marginBottom: '0.5rem',
 	},
 	inputContainer: {
 		width: '100%',
@@ -169,7 +163,6 @@ const styles = {
 		textAlign: 'center',
 		verticalAlign: 'middle',
 		color: '#888',
-		marginBottom: '0.625rem',
 		boxSizing: 'border-box',
 	},
 	dragArea: {
@@ -261,7 +254,6 @@ const styles = {
 		display: 'block',
 	},
 	modelDescription: {
-		marginBottom: '1.25rem',
 		display: 'flex',
 		flexDirection: 'column',
 		gap: '0.625rem',
@@ -314,28 +306,37 @@ const styles = {
 		left: 0,
 		right: 0,
 		maxHeight: '12.5rem', // Exactly 5 items (5 * 2.5rem = 12.5rem)
+		maxWidth: '100%',
 		overflowY: 'auto',
+		overflowX: 'auto',
+		padding: '0 0.75rem 0.75rem 0',
 		background: '#FFFFFF',
 		border: `0.0625rem solid ${LIGHT_GREY2}`,
 		borderRadius: '0.5rem',
 		boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
 		zIndex: 1000,
 		marginTop: '0.25rem',
+
+	},
+	searchPopupInner: {
+		width: 'max-content',
+		minWidth: '100%',
 	},
 	searchItem: {
+		display: 'flex',
 		padding: '0.5rem 0.75rem',
 		cursor: 'pointer',
 		fontSize: '0.9em',
 		color: '#292929',
+		width: '100%',
 		transition: 'background 0.2s',
 		height: '2.5rem', // Fixed height for each item
 		lineHeight: '1.5rem',
-		display: 'flex',
 		alignItems: 'center',
 		boxSizing: 'border-box',
 		whiteSpace: 'nowrap',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
+		margin: 0,
+
 	},
 	searchItemSelected: {
 		background: PEARL,
@@ -454,15 +455,12 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 	const [originalFileList, setOriginalFileList] = useState([]);
 	const [modelName, setModelName] = useState('');
 	const [backupModelName, setBackupModelName] = useState('Default Session');
-	const [selectedType, setSelectedType] = useState('normal');
+	const [selectedType, setSelectedType] = useState('lite');
 	const [searchValue, setSearchValue] = useState('');
 	const [isDragging, setIsDragging] = useState(false);
-	const [attachmentNames, setAttachmentNames] = useState([]);
 	const [containerNames, setContainerNames] = useState([]);
-	const [filteredAttachments, setFilteredAttachments] = useState([]);
 	const [filteredContainers, setFilteredContainers] = useState([]);
 	const [showSearchPopup, setShowSearchPopup] = useState(false);
-	const [showFileList, setShowFileList] = useState(false);
 	const [errorMessage, setErrorMessage] = useState('');
 	const [buttonWidth, setButtonWidth] = useState(null);
 	const [buttonLayout, setButtonLayout] = useState('row');
@@ -533,9 +531,9 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 	useEffect(() => {
 		if (fileList.length > 0) {
 			const firstName = fileList[0].name;
-			const truncatedName = firstName.length > 45 ? `${firstName.substring(0, 42)}...` : firstName;
-			setBackupModelName(truncatedName);
-			Zotero.debug(`ModelSelection: Updated model name to: ${truncatedName}`);
+
+			setBackupModelName(firstName);
+			Zotero.debug(`ModelSelection: Updated model name to: ${firstName}`);
       
 			// Auto-switch to standard mode when 2 or more files are selected
 			if (fileList.length >= 2 && selectedType === 'normal') {
@@ -926,7 +924,8 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 				setFileList(prev => [...prev, ...newFileItems]);
 				setOriginalFileList(prev => [...prev, ...newOriginalItems]);
 				Zotero.debug(`BBBBB: Added ${newFileItems.length} PDF attachments from container: ${container.name}`);
-			} else {
+			}
+			else {
 				Zotero.debug(`BBBBB: No new PDFs to add from container: ${container.name}`);
 			}
 
@@ -937,16 +936,6 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 		catch (error) {
 			Zotero.debug(`BBBBB: Error handling container search item click: ${error.message}`);
 		}
-	};
-
-	// Get model data in the same format as XUL version
-	const getModelData = () => {
-		return {
-			fileList,
-			name: modelName,
-			type: selectedType,
-			originalFileList
-		};
 	};
 
 	const handleRemoveFile = (id) => {
@@ -1207,7 +1196,6 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 				// Check for non-PDF attachments and handle different scenarios
 				const attachmentItems = items.filter(item => item.isAttachment());
 				Zotero.debug(`BBBBB: Retrieved ${attachmentItems.length} attachment items`);
-				const nonPdfItems = attachmentItems.filter(item => !item.isPDFAttachment());
         
 				const pdfAttachments = items.reduce((arr, item) => {
 					if (item.isPDFAttachment()) {
@@ -1342,17 +1330,6 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 		resetInitializingState
 	}));
 
-	// Add truncateFileName function
-	const truncateFileName = (fileName) => {
-		const firstLine = fileName.split('\n')[0];
-		return firstLine.length > 45 ? `${firstLine.substring(0, 42)}...` : firstLine;
-	};
-
-	// Add truncateSearchName function near other utility functions
-	const truncateSearchName = (name) => {
-		return name.length > 32 ? `${name.substring(0, 35)}...` : name;
-	};
-
 	return (
 		<div style={styles.container}>
 			<div style={styles.mainSection}>
@@ -1387,15 +1364,10 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 								{fileList.map(file => (
 									<div key={file.id} style={styles.newFileListItem}>
 										<span
-											style={{
-												...styles.newFileListName,
-												whiteSpace: 'nowrap',
-												overflow: 'hidden',
-												textOverflow: 'ellipsis'
-											}}
+											style={styles.newFileListName}
 											title={file.name}
 										>
-											{truncateFileName(file.name)}
+											{file.name}
 										</span>
 										<button
 											style={{
@@ -1443,27 +1415,28 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 						</div>
 						{showSearchPopup && !isEffectivelyFrozen && (
 							<div style={styles.searchPopup}>
-								{isSearchLoading ? (
-									<div style={styles.noResults}>&nbsp;</div>
-								) : filteredContainers.length > 0 ? (
-									filteredContainers.map(container => (
-										<div
-											key={container.id}
-											style={{
-												...styles.searchItem,
-												background: hoveredSearchItem === container.id ? PEARL : 'transparent',
-											}}
-											onClick={() => handleSearchItemClick(container)}
-											onMouseEnter={() => handleSearchItemMouseEnter(container.id)}
-											onMouseLeave={handleSearchItemMouseLeave}
-											title={container.name} // Show full name on hover
-										>
-											{truncateSearchName(container.name)}
-										</div>
-									))
-								) : (
-									<div style={styles.noResults}>No matching containers found</div>
-								)}
+								<div style={styles.searchPopupInner}>
+									{isSearchLoading
+										? (<div style={styles.noResults}>&nbsp;</div>)
+										: filteredContainers.length > 0
+											? (filteredContainers.map(container => (
+												<div
+													key={container.id}
+													style={{
+														...styles.searchItem,
+														background: hoveredSearchItem === container.id ? PEARL : 'transparent',
+													}}
+													onClick={() => handleSearchItemClick(container)}
+													onMouseEnter={() => handleSearchItemMouseEnter(container.id)}
+													onMouseLeave={handleSearchItemMouseLeave}
+													title={container.name} // Show full name on hover
+												>
+													{container.name}
+												</div>
+											)))
+											: (<div style={styles.noResults}>No matching containers found</div>)
+									}
+								</div>
 							</div>
 						)}
 					</div>
