@@ -630,6 +630,10 @@ Zotero.Plugins = new function () {
 				}
 				await _callMethod(existingAddon, 'uninstall', reason);
 				Services.obs.notifyObservers(null, "startupcache-invalidate");
+				unregisterLocales(existingAddon);
+				clearDefaultPrefs(existingAddon);
+				_unloadScope(existingAddon.id);
+				addonVersions.delete(existingAddon.id);
 			}
 		},
 		
