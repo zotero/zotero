@@ -14,7 +14,7 @@ APP_NAME="Zotero"
 APP_ID="zotero\@zotero.org"
 
 # Whether to sign builds
-SIGN=0
+SIGN=1
 
 # OS X Developer ID certificate information
 DEVELOPER_ID=F0F1FE48DB909B263AC51C8215374D87FDC12121

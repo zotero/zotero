@@ -56,7 +56,7 @@ for arch in win32 win-x64 win-arm64; do
 	
 done
 
-tar -Jcv zotero_win32.exe zotero_win-x64.exe zotero_win-arm64.exe > zotero.exe.tar.xz
+tar -Jcv deeptutor_win32.exe deeptutor_win-x64.exe deeptutor_win-arm64.exe > deeptutor.exe.tar.xz
 tar -Jcv updater-win32.exe updater-win-x64.exe updater-win-arm64.exe > updater.exe.tar.xz
 
-rm firefox-win*.exe updater-win*.exe zotero_win*.exe
+rm firefox-win*.exe updater-win*.exe deeptutor_win*.exe

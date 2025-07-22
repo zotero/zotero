@@ -33,7 +33,7 @@ for file in $files; do
 done
 
 mac_path="$STAGE_DIR/DeepTutor.app/Contents/Resources"
-win_path="$STAGE_DIR/Zotero_win-x64"
+win_path="$STAGE_DIR/Deeptutor_win-x64"
 linux_path="$STAGE_DIR/Zotero_linux-x86_64"
 
 added=0

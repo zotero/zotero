@@ -746,7 +746,7 @@ if [ $BUILD_WIN == 1 ]; then
 		runtime_path="${WIN_RUNTIME_PATH_PREFIX}${arch}"
 		
 		# Set up directory
-		APPDIR="$STAGE_DIR/Zotero_$arch"
+		APPDIR="$STAGE_DIR/Deeptutor_$arch"
 		mkdir "$APPDIR"
 		
 		# Copy relevant assets from Firefox
@@ -865,11 +865,11 @@ if [ $BUILD_WIN == 1 ]; then
 				fi
 				
 				if [ "$arch" = "win32" ]; then
-					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_win32_setup.exe"
+					INSTALLER_PATH="$DIST_DIR/Deeptutor-${VERSION}_win32_setup.exe"
 				elif [ "$arch" = "win-x64" ]; then
-					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_x64_setup.exe"
+					INSTALLER_PATH="$DIST_DIR/Deeptutor-${VERSION}_x64_setup.exe"
 				elif [ "$arch" = "win-arm64" ]; then
-					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_arm64_setup.exe"
+					INSTALLER_PATH="$DIST_DIR/Deeptutor-${VERSION}_arm64_setup.exe"
 				fi
 				
 				# Stage installer

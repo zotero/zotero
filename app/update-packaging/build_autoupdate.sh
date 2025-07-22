@@ -136,12 +136,12 @@ for version in "$FROM" "$TO"; do
 	mkdir -p "$versiondir"
 	cd "$versiondir"
 	
-	MAC_ARCHIVE="Zotero-${version}.dmg"
-	WIN32_ARCHIVE="Zotero-${version}_win32.zip"
-	WIN_X64_ARCHIVE="Zotero-${version}_win-x64.zip"
-	WIN_ARM64_ARCHIVE="Zotero-${version}_win-arm64.zip"
-	LINUX_X86_ARCHIVE="Zotero-${version}_linux-i686.tar.bz2"
-	LINUX_X86_64_ARCHIVE="Zotero-${version}_linux-x86_64.tar.bz2"
+	MAC_ARCHIVE="Deeptutor-${version}.dmg"
+	WIN32_ARCHIVE="Deeptutor-${version}_win32.zip"
+	WIN_X64_ARCHIVE="Deeptutor-${version}_win-x64.zip"
+	WIN_ARM64_ARCHIVE="Deeptutor-${version}_win-arm64.zip"
+	LINUX_X86_ARCHIVE="Deeptutor-${version}_linux-i686.tar.bz2"
+	LINUX_X86_64_ARCHIVE="Deeptutor-${version}_linux-x86_64.tar.bz2"
 	
 	CACHE_DIR="$ROOT_DIR/cache"
 	if [ ! -e "$CACHE_DIR" ]; then
@@ -304,7 +304,7 @@ for build in "mac" "win32" "win-x64" "win-arm64" "linux-i686" "linux-x86_64"; do
 		# We can stop this once we do a waterfall build that all older versions get updated to.
 		if [[ $build != "win-x64" ]] && [[ $build != "win-arm64" ]]; then
 			echo "Building bzip2 version of full $build update for $TO"
-			"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/Zotero-${TO}-full_$build.mar" "$DIST_DIR/Zotero-${TO}-full_bz_${build}.mar"
+			"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/Deeptutor-${TO}-full_$build.mar" "$DIST_DIR/Deeptutor-${TO}-full_bz_${build}.mar"
 		fi
 	fi
 done
