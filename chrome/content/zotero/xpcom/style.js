@@ -213,7 +213,7 @@ Zotero.Styles = new function() {
 	/**
 	 * Gets a style with a given ID
 	 * @param {String} id
-	 * @param {Boolean} skipMappings Don't automatically return renamed style
+	 * @param {Boolean} [skipMappings] Don't automatically return renamed style
 	 */
 	this.get = function (id, skipMappings) {
 		if (!_initialized) {
@@ -699,8 +699,8 @@ Zotero.Style = function (style, path) {
 /**
  * Get a citeproc-js CSL.Engine instance
  * @param {String} locale Locale code
- * @param {String} format Output format one of [rtf, html, text]
- * @param {Boolean} automaticJournalAbbreviations Whether to automatically abbreviate titles
+ * @param {String} [format] Output format one of [rtf, html, text]
+ * @param {Boolean} [automaticJournalAbbreviations] Whether to automatically abbreviate titles
  */
 Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAbbreviations) {
 	locale = locale || Zotero.locale || 'en-US';
