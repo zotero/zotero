@@ -827,7 +827,7 @@ var Zotero_File_Interface = new function() {
 		
 		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
 		
-		Zotero.debug(`Copied bibliography to clipboard in ${new Date() - d} ms}`);
+		Zotero.debug(`Copied bibliography to clipboard in ${new Date() - d} ms`);
 	}
 	
 	
