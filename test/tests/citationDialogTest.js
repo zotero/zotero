@@ -744,6 +744,10 @@ describe("Add annotations dialog", function () {
 		annotationSearchHandler.results.selectedItems = [parentItem];
 		await dialog.currentLayout.refreshItemsList();
 
+		// Due to some kind of race condition with itemTree loading in tests,
+		// sometimes _itemTreeLoadingDeferred won't be resolved.
+		// This ensures collectionTree.selectItems doesn't get stuck.
+		dialog.libraryLayout.itemsView._itemTreeLoadingDeferred.resolve();
 		// Click on selected item
 		doc.querySelector(`.item[id="${parentItem.id}"]`).click();
 		await Zotero.Promise.delay();
