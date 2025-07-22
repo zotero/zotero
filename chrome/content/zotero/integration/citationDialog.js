@@ -431,6 +431,7 @@ class LibraryLayout extends Layout {
 		this.lastHeight = Math.max(initialHeight, Helpers.getSearchRowHeight() + 400);
 		await this._initItemTree();
 		await this._initCollectionTree();
+		this.collectionsView.itemTreeView = this.itemsView;
 		// on mouse scrollwheel in suggested items, scroll the list horizontally
 		_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
 		if (isAddingAnnotations) {
@@ -1282,7 +1283,7 @@ const IOManager = {
 		let itemsToAdd = Array.from(itemIDs).map(itemID => SearchHandler.getItem(itemID));
 		// while adding annotations, clicking on selected non-annotation(s) will select them in itemTree
 		if (isAddingAnnotations && !itemsToAdd.every(i => i.isAnnotation())) {
-			libraryLayout.itemsView.selectItems([...itemIDs]);
+			libraryLayout.collectionsView.selectItems([...itemIDs].map(id => parseInt(id)));
 			_id("zotero-items-tree").querySelector("[tabindex]").focus();
 			return;
 		}
