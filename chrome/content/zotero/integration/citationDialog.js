@@ -61,6 +61,8 @@ async function onLoad() {
 	isAddingAnnotations = !!io.isAddingAnnotations;
 	isCitingItems = !isCitingNotes && !isAddingAnnotations;
 	window.isPristine = true;
+	// set the font-size and density
+	Zotero.UIProperties.set(document.querySelector("body"));
 
 	Zotero.debug("Citation Dialog: initializing");
 	let timer = new Zotero.Integration.Timer();

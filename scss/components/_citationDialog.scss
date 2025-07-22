@@ -225,7 +225,6 @@
 									max-width: 100%;
 									position: relative;
 									.title-text {
-										font-style: italic;
 										padding-inline-end: 6px;
 										&::before {
 											content: attr(q-mark-open);
@@ -241,7 +240,6 @@
 			
 							.description {
 								color: var(--fill-secondary);
-								font-size: 12px;
 								line-height: 16px;
 								overflow: hidden;
 								text-overflow: ellipsis;
@@ -344,7 +342,7 @@
 				align-self: center;
 				width: 100%;
 				text-align: center;
-				font-size: 13px;
+				font-size: 1rem;
 				color: var(--fill-secondary);
 				-moz-user-select: none;
 			}
@@ -445,13 +443,15 @@
 		#annotations-sidebar {
 			#annotations-sidebar-filter-wrapper {
 				display: flex;
-				margin: 3px 5px;
+				margin: 8px 8px 4px 8px;
+				height: auto; // override height set by .search class
 
 				#annotations-sidebar-filter {
 					width: 100%;
 					border-radius: 5px;
 					border: 1px solid var(--fill-quarternary);
 					padding: 2px 3px;
+					margin: 0;
 				}
 			}
 
@@ -482,7 +482,7 @@
 				}
 				.header {
 					font-weight: 700;
-					font-size: 13px;
+					font-size: 1rem;
 					color: var(--fill-secondary);
 					padding: 4px 8px 4px 16px;
 					display: flex;
@@ -628,7 +628,7 @@
 		panel {
 			padding: 0;
 			.popup {
-				padding: 16px;
+				padding: 14px 16px;
 			}
 		}
 		.overlay {
@@ -644,7 +644,7 @@
 			right: 5px;
 
 			.title {
-				font-size: 13px;
+				font-size: 1rem;
 				font-weight: 700;
 				padding-bottom: 8px;
 			}
@@ -700,7 +700,7 @@
 				}
 
 				.annotation-detail {
-					margin: 10px 0;
+					margin: 16px 0;
 				}
 
 				button.done {
@@ -715,7 +715,7 @@
 
 	.description {
 		color: var(--fill-secondary);
-		font-size: 12px;
+		font-size: 0.93rem;
 		// add comma between description <span>s
 		span:not(:last-child):not([no-comma])::after {
 			content: ", ";
