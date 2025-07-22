@@ -2300,8 +2300,7 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function() {
 	if (!Zotero.Prefs.get('cite.useCiteprocRs')) {
 		// Due to a bug in citeproc-js there are disambiguation issues after changing items in Zotero library
 		// and rebuilding the processor state, so we reinitialize the processor altogether
-		let style = Zotero.Styles.get(this.data.style.styleID);
-		this.style = style.getCiteProc(this.data.style.locale, this.outputFormat, this.data.prefs.automaticJournalAbbreviations);
+		this.style.restoreProcessorState();
 	}
 	this.style.rebuildProcessorState(citations, this.outputFormat, uncited);
 }
