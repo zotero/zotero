@@ -279,8 +279,7 @@ Zotero.QuickCopy = new function() {
 		else if (format.mode == 'bibliography') {
 			items = items.filter(item => !item.isNote());
 			
-			// determine locale preference
-			var locale = format.locale ? format.locale : Zotero.Prefs.get('export.quickCopy.locale');
+			var locale = _getLocale(format);
 			
 			// Copy citations if shift key pressed
 			if (modified) {
@@ -390,7 +389,19 @@ Zotero.QuickCopy = new function() {
 			translator.cacheCode = true;
 			await Zotero.Translators.getCodeForTranslator(translator);
 		}
+		else if (format.mode === 'bibliography') {
+			let style = Zotero.Styles.get(format.id);
+			let locale = _getLocale(format);
+			// Cache CiteProc instances for HTML and text
+			style.getCiteProc(locale, 'html');
+			style.getCiteProc(locale, 'text');
+		}
 	};
+	
+	
+	function _getLocale(format) {
+		return format.locale || Zotero.Prefs.get('export.quickCopy.locale');
+	}
 	
 	
 	var _loadFormattedNames = Zotero.Promise.coroutine(function* () {
