@@ -153,11 +153,17 @@ Zotero.Notifier = new function () {
 				continue;
 			}
 			
+			let ref = _observers[id].ref;
+			
+			if (Zotero.Debug.enabled && Zotero.Utilities.Internal.isObjectLeakingWindow(ref)) {
+				Zotero.warn(`Notifier observer with id '${id}' belongs to leaked window`);
+			}
+			
 			// Catch exceptions so all observers get notified even if
 			// one throws an error
 			try {
 				let t = new Date;
-				yield Zotero.Promise.resolve(_observers[id].ref.notify(event, type, ids, extraData));
+				yield Zotero.Promise.resolve(ref.notify(event, type, ids, extraData));
 				t = new Date - t;
 				if (t > 5) {
 					//Zotero.debug(id + " observer finished in " + t + " ms", 5);
