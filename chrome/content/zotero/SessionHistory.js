@@ -184,7 +184,8 @@ const plusIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_
 const searchIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_SEARCH.svg';
 const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DELETE.svg';
 // Temporary: Using search icon as placeholder for edit - replace with proper edit icon
-const EditImg = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_SEARCH.svg';
+const EditImg = 'chrome://zotero/content/DeepTutorMaterials/History/RENAME_SESSION.svg';
+
 
 function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, onCreateNewSession, onShowDeletePopup, onRenameSession }) {
 	const [search, setSearch] = useState('');

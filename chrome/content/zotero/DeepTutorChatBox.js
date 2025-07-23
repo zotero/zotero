@@ -1960,6 +1960,9 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			}
 
 			// Create the note
+			let noteName = '';
+			let containerName = '';
+			
 			await Zotero.DB.executeTransaction(async () => {
 				const noteItem = new Zotero.Item('note');
 				noteItem.libraryID = Zotero.Items.get(noteContainer).libraryID;
@@ -1990,11 +1993,18 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					}
 				});
 				
+				// Get the note name and container name for the success message
+				const savedNote = Zotero.Items.get(noteID);
+				noteName = savedNote.getNoteTitle();
+				
+				const parentItem = Zotero.Items.get(noteContainer);
+				containerName = parentItem.getDisplayTitle();
+				
 				Zotero.debug(`DeepTutorChatBox: Successfully created note with ID ${noteID} for message ${messageIndex}`);
 			});
 			
-			// Show success message
-			// Zotero.alert(null, "Note Created Successfully", "The message has been saved as a note under the document.");
+			// Show success message with actual names
+			Zotero.alert(null, "Note Created Successfully", `Note "${noteName}" created successfully in "${containerName}".`);
 
 		} catch (error) {
 			Zotero.debug(`DeepTutorChatBox: Error creating note for message ${messageIndex}: ${error.message}`);
