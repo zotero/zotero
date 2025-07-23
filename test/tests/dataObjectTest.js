@@ -392,9 +392,7 @@ describe("Zotero.DataObject", function () {
 					skipNotifier: true
 				});
 			}
-			await Promise.all(promises)
-				// Give notifier time to trigger
-				.timeout(100).catch(Zotero.Promise.TimeoutError, (e) => {})
+			await Promise.all(promises);
 			
 			for (let id of observerIDs) {
 				Zotero.Notifier.unregisterObserver(id);
