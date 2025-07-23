@@ -2554,6 +2554,21 @@ Zotero.Utilities.Internal = {
 		}
 
 		return textContent;
+	},
+
+	/**
+	 * Check whether an object belongs to a closed window, and is therefore
+	 * keeping it alive.
+	 *
+	 * @param {any} obj
+	 * @returns {boolean}
+	 */
+	isObjectLeakingWindow(obj) {
+		if (typeof obj !== 'object' || obj === null) {
+			return false;
+		}
+		let global = Cu.getGlobalForObject(obj);
+		return global.constructor.name === 'Window' && global.closed;
 	}
 };
 
