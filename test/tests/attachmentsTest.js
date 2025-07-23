@@ -609,6 +609,58 @@ describe("Zotero.Attachments", function() {
 		});
 	});
 	
+	describe("#downloadFile()", function () {
+		var httpd;
+		var testServerPort;
+		
+		before(async () => {
+			({ httpd, port: testServerPort } = await startHTTPServer());
+		});
+		
+		
+		after(async () => {
+			await new Promise((resolve) => {
+				httpd.stop(() => resolve());
+			});
+		});
+		
+		it("should use BrowserDownload for 403 when enforcing file type", async function () {
+			let prefix = Zotero.Utilities.randomString();
+			let testServerPath = 'http://127.0.0.1:' + testServerPort + '/' + prefix;
+			let pdfURL = testServerPath + '/test.pdf';
+			httpd.registerPathHandler(
+				"/" + prefix + '/test.pdf',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 403, "Forbidden");
+						response.write("Forbidden");
+					}
+				}
+			);
+			
+			let path = OS.Path.join(Zotero.getTempDirectory().path, 'test.pdf');
+			let shouldAttemptStub = sinon.stub(Zotero.BrowserDownload, "shouldAttemptDownloadViaBrowser");
+			let downloadPDFStub = sinon.stub(Zotero.BrowserDownload, "downloadPDF");
+			shouldAttemptStub.returns(true);
+			downloadPDFStub.callsFake(async (_url, path) => {
+				await OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'test.pdf'), path);
+			});
+			var item;
+			try {
+				item = await Zotero.Attachments.downloadFile(pdfURL, path, { enforceFileType: true });
+				
+				assert.isTrue(shouldAttemptStub.calledOnce);
+				assert.isTrue(downloadPDFStub.calledOnce);
+			}
+			finally {
+				// Clean up
+				if (item) await Zotero.Items.erase(item.id);
+				downloadPDFStub.restore();
+				shouldAttemptStub.restore();
+			}
+		});
+	});
+	
 	describe("Find Full Text", function () {
 		var doiPrefix = 'https://doi.org/';
 		var doi1 = '10.1111/abcd';

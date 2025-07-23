@@ -1175,7 +1175,6 @@ Zotero.Attachments = new function () {
 	this.downloadFile = async function (url, path, options = {}) {
 		Zotero.debug(`Downloading file from ${url}`);
 		
-		let enforcingFileType = false;
 		try {
 			let headers = {};
 			if (options.referrer) {
@@ -1189,9 +1188,8 @@ Zotero.Attachments = new function () {
 					cookieSandbox: options.cookieSandbox
 				}
 			);
-			
+			// Check that the downloaded file is the expected type
 			if (options.enforceFileType) {
-				enforcingFileType = true;
 				await _enforceFileType(path);
 			}
 		}
@@ -1202,9 +1200,13 @@ Zotero.Attachments = new function () {
 			catch (e) {
 				Zotero.logError(e);
 			}
-			// Custom handling for PDFs that are bot-guarded
-			// via a JS-redirect
-			if (enforcingFileType && e instanceof this.InvalidPDFException) {
+			// Custom handling for files that are bot-guarded via a JS redirect and/or that require
+			// a CAPTCHA
+			if (options.enforceFileType
+					// Thrown by _enforceFileType()
+					&& (e instanceof this.InvalidPDFException
+						// Thrown by HTTP.download()
+						|| (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 403))) {
 				if (Zotero.BrowserDownload.shouldAttemptDownloadViaBrowser(url)) {
 					return Zotero.BrowserDownload.downloadPDF(url, path, options);
 				}
