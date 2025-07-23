@@ -470,6 +470,55 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 	const [isSearchLoading, setIsSearchLoading] = useState(false);
 	const buttonRef = useRef(null);
 
+	// CSS injection for placeholder styling
+	useEffect(() => {
+		// Inject placeholder CSS
+		const injectPlaceholderCSS = () => {
+			const placeholderColor = '#666';
+			const cssText = `
+					input.model-selection-input::placeholder {
+						color: ${placeholderColor} !important;
+					}
+					input.model-selection-input::-webkit-input-placeholder {
+						color: ${placeholderColor} !important;
+					}
+					input.model-selection-input::-moz-placeholder {
+						color: ${placeholderColor} !important;
+						opacity: 1 !important;
+					}
+					input.model-selection-input:-ms-input-placeholder {
+						color: ${placeholderColor} !important;
+					}
+				`;
+			try {
+				if (window.document) {
+					let existingStyle = window.document.getElementById('model-selection-placeholder-styles');
+					if (existingStyle) {
+						existingStyle.textContent = cssText;
+					}
+					else {
+						const style = window.document.createElement('style');
+						style.id = 'model-selection-placeholder-styles';
+						style.textContent = cssText;
+						if (window.document.head) {
+							window.document.head.appendChild(style);
+						}
+						else if (window.document.documentElement) {
+							window.document.documentElement.appendChild(style);
+						}
+					}
+					Zotero.debug('ModelSelection: Injected CSS via window.document');
+				}
+			}
+			catch (e) {
+				Zotero.debug('ModelSelection: Failed to inject CSS via window.document:', e.message);
+			}
+		};
+			
+		// Inject CSS once
+		injectPlaceholderCSS();
+	}, []); // Run once on mount
+	
 	// Combine internal initialization state with external freeze state
 	const isEffectivelyFrozen = isInitializing || externallyFrozen;
 
@@ -1340,6 +1389,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 							type="text"
 							value={modelName}
 							onChange={e => setModelName(e.target.value)}
+							className="model-selection-input"
 							style={{
 								...styles.input1,
 								opacity: isEffectivelyFrozen ? 0.5 : 1,
@@ -1399,6 +1449,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 									opacity: isEffectivelyFrozen ? 0.5 : 1,
 									cursor: isEffectivelyFrozen ? 'not-allowed' : 'text'
 								}}
+								className="model-selection-input"
 								type="text"
 								value={searchValue}
 								onChange={e => !isEffectivelyFrozen && setSearchValue(e.target.value)}

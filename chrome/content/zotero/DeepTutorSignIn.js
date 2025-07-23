@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { signIn, signInWithGoogle } from './auth/cognitoAuth.js';
 import { DT_FORGOT_PASSWORD_URL } from './api/libs/api.js';
 
@@ -191,6 +191,55 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess, local
 	const [isSignInHovered, setIsSignInHovered] = useState(false);
 	const [isGoogleHovered, setIsGoogleHovered] = useState(false);
 
+	// CSS injection for placeholder styling
+	useEffect(() => {
+		// Inject placeholder CSS
+		const injectPlaceholderCSS = () => {
+			const placeholderColor = '#666';
+			const cssText = `
+					input.signin-input::placeholder {
+						color: ${placeholderColor} !important;
+					}
+					input.signin-input::-webkit-input-placeholder {
+						color: ${placeholderColor} !important;
+					}
+					input.signin-input::-moz-placeholder {
+						color: ${placeholderColor} !important;
+						opacity: 1 !important;
+					}
+					input.signin-input:-ms-input-placeholder {
+						color: ${placeholderColor} !important;
+					}
+				`;
+			try {
+				if (window.document) {
+					let existingStyle = window.document.getElementById('signin-placeholder-styles');
+					if (existingStyle) {
+						existingStyle.textContent = cssText;
+					}
+					else {
+						const style = window.document.createElement('style');
+						style.id = 'signin-placeholder-styles';
+						style.textContent = cssText;
+						if (window.document.head) {
+							window.document.head.appendChild(style);
+						}
+						else if (window.document.documentElement) {
+							window.document.documentElement.appendChild(style);
+						}
+					}
+					Zotero.debug('DeepTutorSignIn: Injected CSS via window.document');
+				}
+			}
+			catch (e) {
+				Zotero.debug('DeepTutorSignIn: Failed to inject CSS via window.document:', e.message);
+			}
+		};
+			
+		// Inject CSS once
+		injectPlaceholderCSS();
+	}, []); // Run once on mount
+
 	const handleSignInMouseEnter = () => setIsSignInHovered(true);
 	const handleSignInMouseLeave = () => setIsSignInHovered(false);
 
@@ -348,6 +397,7 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess, local
 							value={email}
 							onChange={e => setEmail(e.target.value)}
 							disabled={isLoading}
+							className="signin-input"
 						/>
 					</div>
 					<div style={styles.inputGroup}>
@@ -359,6 +409,7 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess, local
 							value={password}
 							onChange={e => setPassword(e.target.value)}
 							disabled={isLoading}
+							className="signin-input"
 						/>
 					</div>
 					<button

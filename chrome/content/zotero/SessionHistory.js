@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 const SKY = '#0687E5';
@@ -191,6 +191,55 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 	const [hoveredButton, setHoveredButton] = useState(null);
 	const [isCreateSessionHovered, setIsCreateSessionHovered] = useState(false);
 
+	// CSS injection for placeholder styling
+	useEffect(() => {
+		// Inject placeholder CSS
+		const injectPlaceholderCSS = () => {
+			const placeholderColor = '#666';
+			const cssText = `
+					input.session-history-input::placeholder {
+						color: ${placeholderColor} !important;
+					}
+					input.session-history-input::-webkit-input-placeholder {
+						color: ${placeholderColor} !important;
+					}
+					input.session-history-input::-moz-placeholder {
+						color: ${placeholderColor} !important;
+						opacity: 1 !important;
+					}
+					input.session-history-input:-ms-input-placeholder {
+						color: ${placeholderColor} !important;
+					}
+				`;
+			try {
+				if (window.document) {
+					let existingStyle = window.document.getElementById('session-history-placeholder-styles');
+					if (existingStyle) {
+						existingStyle.textContent = cssText;
+					}
+					else {
+						const style = window.document.createElement('style');
+						style.id = 'session-history-placeholder-styles';
+						style.textContent = cssText;
+						if (window.document.head) {
+							window.document.head.appendChild(style);
+						}
+						else if (window.document.documentElement) {
+							window.document.documentElement.appendChild(style);
+						}
+					}
+					Zotero.debug('SessionHistory: Injected CSS via window.document');
+				}
+			}
+			catch (e) {
+				Zotero.debug('SessionHistory: Failed to inject CSS via window.document:', e.message);
+			}
+		};
+			
+		// Inject CSS once
+		injectPlaceholderCSS();
+	}, []); // Run once on mount
+
 	const handleCreateSessionMouseEnter = () => setIsCreateSessionHovered(true);
 	const handleCreateSessionMouseLeave = () => setIsCreateSessionHovered(false);
 
@@ -255,6 +304,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 					value={search}
 					onChange={e => setSearch(e.target.value)}
 					style={searchInputStyle}
+					className="session-history-input"
 				/>
 			</div>
 			<div style={sessionListTitleStyle}>Sessions</div>
