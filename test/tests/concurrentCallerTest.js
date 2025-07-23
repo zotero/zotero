@@ -97,15 +97,17 @@ describe("ConcurrentCaller", function () {
 			var promise1 = caller.start(funcs1);
 			await Zotero.Promise.delay(1);
 			var promise2 = caller.start(funcs2);
+			var promise2Fulfilled = false;
+			promise2.then(() => promise2Fulfilled = true);
 			
 			// Wait for first set
 			var results1 = await promise1;
 			
 			// Second set shouldn't be done yet
-			assert.isFalse(promise2.isFulfilled());
+			assert.isFalse(promise2Fulfilled);
 			assert.equal(finished, keys1.length);
 			assert.equal(results1.length, keys1.length);
-			assert.sameMembers(results1.map(p => p.value()), keys1);
+			assert.sameMembers(await Promise.all(results1), keys1);
 			assert.isFalse(failed);
 		})
 		
@@ -150,6 +152,8 @@ describe("ConcurrentCaller", function () {
 				logger
 			});
 			var promise1 = caller.start(funcs1);
+			var promise1Fulfilled = false;
+			promise1.then(() => promise1Fulfilled = true);
 			await Zotero.Promise.delay(10);
 			var promise2 = caller.start(funcs2);
 			
@@ -157,12 +161,12 @@ describe("ConcurrentCaller", function () {
 			var results2 = await promise2;
 			
 			// The second set should finish before the first
-			assert.isFalse(promise1.isFulfilled());
+			assert.isFalse(promise1Fulfilled);
 			assert.equal(running, 1); // 3 should still be running
 			assert.equal(finished, 4); // 1, 2, 4, 5
 			assert.equal(results2.length, keys2.length);
-			assert.equal(results2[0].value(), keys2[0]);
-			assert.equal(results2[1].value(), keys2[1]);
+			assert.equal(await results2[0], keys2[0]);
+			assert.equal(await results2[1], keys2[1]);
 			assert.isFalse(failed);
 		})
 		
@@ -235,22 +239,27 @@ describe("ConcurrentCaller", function () {
 			});
 			var promise1 = caller.start(funcs1);
 			var promise2 = caller.start(funcs2);
+			var promise2Fulfilled = false;
+			promise2.then(() => promise2Fulfilled = true);
 			
 			var results1 = await promise1;
 			
-			assert.isTrue(promise2.isFulfilled());
+			assert.isTrue(promise2Fulfilled);
+			let promise2Value = await promise2;
 			assert.equal(running, 0);
 			assert.isBelow(finished, ids1.length);
+			
+			results1 = await Promise.allSettled(results1);
 			assert.equal(results1.length, ids1.length);
-			assert.equal(promise2.value().length, ids2.length);
+			assert.equal(promise2Value.length, ids2.length);
 			// 'a' should be fulfilled
-			assert.isTrue(results1[0].isFulfilled());
+			assert.isTrue(results1[0].status === 'fulfilled');
 			// 'g' should be rejected
-			assert.isTrue(results1[6].isRejected());
+			assert.isTrue(results1[6].status === 'rejected');
 			// 'm' should be rejected
-			assert.isTrue(results1[12].isRejected());
+			assert.isTrue(results1[12].status === 'rejected');
 			// All promises in second batch should be rejected
-			assert.isTrue(promise2.value().every(p => p.isRejected()));
+			assert.isTrue((await Promise.allSettled(promise2Value)).every(p => p.status === 'rejected'));
 		})
 		
 		
@@ -308,24 +317,29 @@ describe("ConcurrentCaller", function () {
 				logger
 			});
 			var promise1 = caller.start(funcs1);
+			var promise1Fulfilled = false;
+			promise1.then(() => promise1Fulfilled = true);
 			var promise2 = caller.start(funcs2);
+			var promise2Fulfilled = false;
+			promise2.then(() => promise2Fulfilled = true);
 			
-			var results2 = await promise2;
+			var results2 = await Promise.allSettled(await promise2);
+			assert.isTrue(promise1Fulfilled);
+			assert.isTrue(promise2Fulfilled);
+			var results1 = await Promise.allSettled(await promise1);
 			
-			assert.isTrue(promise1.isFulfilled());
-			assert.isTrue(promise2.isFulfilled());
 			assert.equal(running, 0);
 			assert.equal(finished, ids1.length + ids2.length);
-			assert.equal(promise1.value().length, ids1.length);
+			assert.equal(results1.length, ids1.length);
 			assert.equal(results2.length, ids2.length);
 			// 'a' should be fulfilled
-			assert.isTrue(promise1.value()[0].isFulfilled());
+			assert.isTrue(results1[0].status === 'fulfilled');
 			// 'g' should be rejected
-			assert.isTrue(promise1.value()[6].isRejected());
+			assert.isTrue(results1[6].status === 'rejected');
 			// 'm' should be fulfilled
-			assert.isTrue(promise1.value()[12].isFulfilled());
+			assert.isTrue(results1[12].status === 'fulfilled');
 			// All promises in second batch should be fulfilled
-			assert.isTrue(results2.every(p => p.isFulfilled()));
+			assert.isTrue(results2.every(p => p.status === 'fulfilled'));
 		})
 	})
 	
@@ -373,13 +387,18 @@ describe("ConcurrentCaller", function () {
 				logger
 			});
 			var promise1 = caller.start(funcs1);
+			var promise1Fulfilled = false;
+			promise1.then(() => promise1Fulfilled = true);
 			await Zotero.Promise.delay(10);
 			var promise2 = caller.start(funcs2);
+			var promise2Fulfilled = false;
+			promise2.then(() => promise2Fulfilled = true);
 			
 			await caller.wait();
+			await new Promise(resolve => setTimeout(resolve));
 			
-			assert.isTrue(promise1.isFulfilled());
-			assert.isTrue(promise2.isFulfilled());
+			assert.isTrue(promise1Fulfilled);
+			assert.isTrue(promise2Fulfilled);
 			assert.equal(running, 0);
 			assert.equal(finished, ids1.length + ids2.length);
 		})
