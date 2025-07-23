@@ -402,10 +402,14 @@ Zotero.Prefs = new function() {
 			return;
 		}
 		
-		var obs = _observers[data];
-		for (var i=0; i<obs.length; i++) {
+		var observersForPref = _observers[data];
+		for (let observer of observersForPref) {
+			if (Zotero.Debug.enabled && Zotero.Utilities.Internal.isObjectLeakingWindow(observer)) {
+				Zotero.warn(`Pref observer for '${data}' belongs to leaked window`);
+			}
+			
 			try {
-				obs[i](this.get(data, true));
+				observer(this.get(data, true));
 			}
 			catch (e) {
 				Zotero.debug("Error while executing preference observer handler for " + data);
