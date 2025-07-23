@@ -716,6 +716,12 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 		: null;
 	if (cacheKey && this._cachedEngines.has(cacheKey)) {
 		let engine = this._cachedEngines.get(cacheKey);
+		// Due to a bug in citeproc-js there are disambiguation issues after
+		// modifying items in Zotero. The lighter-weight rerebuildProcessorState()
+		// doesn't reset three properties of the processor (registry, tmp, and
+		// disambiguate) used for disambiguation, so we need to call the
+		// deprecated restoreProcessorState(), which resets everything.
+		// Revisit if restoreProcessorState() is removed.
 		engine.restoreProcessorState();
 		return engine;
 	}
