@@ -1,7 +1,7 @@
 describe("Zotero.Feed", function () {
 	// Clean up after after tests
-	after(function* () {
-		yield clearFeeds();
+	after(async function () {
+		await clearFeeds();
 	});
 	
 	it("should be an instance of Zotero.Library", function () {
@@ -246,47 +246,47 @@ describe("Zotero.Feed", function () {
 	describe("#clearExpiredItems()", function () {
 		var feed, readExpiredFI, unreadExpiredFI, readFeedItem, feedItem, readStillInFeed, feedItemIDs;
 		
-		before(function* (){
-			feed = yield createFeed({cleanupReadAfter: 1, cleanupUnreadAfter: 3});
+		before(async function () {
+			feed = await createFeed({cleanupReadAfter: 1, cleanupUnreadAfter: 3});
 			
-			readExpiredFI = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+			readExpiredFI = await createDataObject('feedItem', { libraryID: feed.libraryID });
 			// Read 2 days ago
 			readExpiredFI.isRead = true;
 			readExpiredFI._feedItemReadTime = Zotero.Date.dateToSQL(
 					new Date(Date.now() - 2 * 24*60*60*1000), true);
-			yield readExpiredFI.saveTx();
+			await readExpiredFI.saveTx();
 
 			// Added 5 days ago
-			unreadExpiredFI = yield createDataObject('feedItem', { 
+			unreadExpiredFI = await createDataObject('feedItem', { 
 				libraryID: feed.libraryID,
 				dateAdded: Zotero.Date.dateToSQL(new Date(Date.now() - 5 * 24*60*60*1000), true),
 				dateModified: Zotero.Date.dateToSQL(new Date(Date.now() - 5 * 24*60*60*1000), true)
 			});
-			yield unreadExpiredFI.saveTx();
+			await unreadExpiredFI.saveTx();
 			
-			readStillInFeed = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+			readStillInFeed = await createDataObject('feedItem', { libraryID: feed.libraryID });
 			// Read 2 days ago
 			readStillInFeed.isRead = true;
 			readStillInFeed._feedItemReadTime = Zotero.Date.dateToSQL(
 					new Date(Date.now() - 2 * 24*60*60*1000), true);
-			yield readStillInFeed.saveTx();
+			await readStillInFeed.saveTx();
 			
-			readFeedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+			readFeedItem = await createDataObject('feedItem', { libraryID: feed.libraryID });
 			readFeedItem.isRead = true;
-			yield readFeedItem.saveTx();
+			await readFeedItem.saveTx();
 			
-			feedItem = yield createDataObject('feedItem', { libraryID: feed.libraryID });
+			feedItem = await createDataObject('feedItem', { libraryID: feed.libraryID });
 			
-			feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID).map((row) => row.id);
+			feedItemIDs = (await Zotero.FeedItems.getAll(feed.libraryID)).map((row) => row.id);
 			
 			assert.include(feedItemIDs, feedItem.id, "feed contains unread feed item");
 			assert.include(feedItemIDs, readFeedItem.id, "feed contains read feed item");
 			assert.include(feedItemIDs, readExpiredFI.id, "feed contains expired feed item");
 			assert.include(feedItemIDs, readStillInFeed.id, "feed contains expired but still in rss feed item");
 			
-			yield feed.clearExpiredItems(new Set([readStillInFeed.id]));
+			await feed.clearExpiredItems(new Set([readStillInFeed.id]));
 			
-			feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID).map((row) => row.id);
+			feedItemIDs = (await Zotero.FeedItems.getAll(feed.libraryID)).map((row) => row.id);
 		});
 	
 		it('should clear expired items', function () {
@@ -319,15 +319,15 @@ describe("Zotero.Feed", function () {
 			scheduleNextFeedCheck = sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck').resolves();
 		});
 		
-		beforeEach(function* (){
+		beforeEach(async function () {
 			scheduleNextFeedCheck.resetHistory();
-			feed = yield createFeed();
+			feed = await createFeed();
 			feed._feedUrl = feedUrl;
-			yield feed.updateFeed();
+			await feed.updateFeed();
 		});
 		
-		afterEach(function* () {
-			yield clearFeeds();
+		afterEach(async function () {
+			await clearFeeds();
 		});
 		
 		after(function () {
@@ -412,8 +412,8 @@ describe("Zotero.Feed", function () {
 	
 	describe("Adding items", function () {
 		let feed;
-		before(function* () {
-			feed = yield createFeed();
+		before(async function () {
+			feed = await createFeed();
 		})
 		it("should not allow adding collections", async function () {
 			let collection = new Zotero.Collection({ name: 'test', libraryID: feed.libraryID });
