@@ -31,10 +31,10 @@ function doTranslate(inputFile, root) {
 			return arg;
 		});
 	
-	// Rewrite generator arguments to Mocha it() calls with async functions,
+	// Rewrite generator arguments to Mocha hooks with async functions,
 	// and replace yields with awaits
 	root.find(j.CallExpression)
-		.filter(path => isMochaItMethodCall(path))
+		.filter(path => isMochaHookMethodCall(path))
 		.forEach(path => {
 			let func = path.node.arguments.at(-1);
 			rewriteGeneratorToAsync(func);
@@ -86,10 +86,10 @@ function getContainingGenerator(path) {
 	}
 }
 
-function isMochaItMethodCall(path) {
+function isMochaHookMethodCall(path) {
 	let callee = path.node.callee;
 	return callee.type === 'Identifier'
-		&& callee.name === 'it';
+		&& ['it', 'before', 'beforeAll', 'beforeEach', 'after', 'afterAll', 'afterEach'].includes(callee.name);
 }
 
 function isStaticPromiseMethodCall(path, methodFilter) {
