@@ -443,7 +443,7 @@
 		#annotations-sidebar {
 			#annotations-sidebar-filter-wrapper {
 				display: flex;
-				margin: 8px 8px 4px 8px;
+				margin: 8px;
 				height: auto; // override height set by .search class
 
 				#annotations-sidebar-filter {
@@ -457,6 +457,11 @@
 
 			#annotations-list-wrapper {
 				overflow-y: auto;
+
+				// undo top padding of the first section
+				collapsible-section:first-of-type {
+					padding-top: 0;
+				}
 			}
 
 			#annotations-message {
@@ -464,6 +469,7 @@
 				justify-content: center;
 				align-items: center;
 				height: 100%;
+				margin-inline: 8px;
 				#annotations-message-text {
 					text-align: center;
 				}
