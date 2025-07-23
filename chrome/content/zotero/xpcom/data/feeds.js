@@ -258,6 +258,9 @@ Zotero.Feeds = new function () {
 	};
 
 	let globalFeedCheckDelay = Promise.resolve();
+	
+	this._nextFeedCheckDelay = null; // For tests
+	
 	this.scheduleNextFeedCheck = async function () {
 		// Don't schedule if already updating, since another check is scheduled at the end
 		if (_updating) {
@@ -280,6 +283,7 @@ Zotero.Feeds = new function () {
 
 		if (nextCheck !== false) {
 			nextCheck = nextCheck > 0 ? nextCheck * 1000 : 0;
+			this._nextFeedCheckDelay = nextCheck;
 			Zotero.debug("Next feed check in " + (nextCheck / 1000) + " seconds");
 			this._nextFeedCheck = setTimeout(async () => {
 				await globalFeedCheckDelay;
