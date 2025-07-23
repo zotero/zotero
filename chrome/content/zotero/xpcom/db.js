@@ -1496,4 +1496,9 @@ Zotero.DBConnection.prototype._debug = function (str, level) {
 	Zotero.debug(prefix + str, level);
 }
 
-Zotero.DBConnection.TimeoutError = class extends Error {};
+Zotero.DBConnection.TimeoutError = class TimeoutError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = 'TimeoutError';
+	}
+};
