@@ -1,4 +1,3 @@
- 
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -473,6 +472,12 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	const [currentSourceIndices, setCurrentSourceIndices] = useState([]);
 	const sessionIdRef = useRef(null);
 	const [time, setTime] = useState(new Date());
+
+	// Add state for note container (parent item ID for creating notes)
+	const [noteContainer, setNoteContainer] = useState(null);
+
+	// Add state to track if a note is currently being saved
+	const [isSavingNote, setIsSavingNote] = useState(false);
 
 	// Helper function to check if we should continue checking for responses (within 10 minutes)
 	const checkTime = React.useCallback((lastMessage) => {
@@ -1896,6 +1901,111 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		}
 	};
 
+	// Function to download/save a message as a Zotero note
+	const downloadMessage = async (message, messageIndex) => {
+		if (!message) {
+			Zotero.debug("DeepTutorChatBox: downloadMessage called with empty message");
+			return;
+		}
+
+		if (!noteContainer) {
+			Zotero.debug("DeepTutorChatBox: No noteContainer available for creating note");
+			// Show user-friendly message
+			// Zotero.alert(null, "Cannot Create Note", "Cannot create note: No parent item available. Please ensure documents are loaded.");
+			return;
+		}
+
+		// Set saving state to true
+		setIsSavingNote(true);
+
+		try {
+			Zotero.debug(`DeepTutorChatBox: Creating note for message ${messageIndex} in parent item ${noteContainer}`);
+
+			// Extract and clean the message text
+			let noteText = '';
+			if (message.subMessages && message.subMessages.length > 0) {
+				// Combine all subMessage texts
+				noteText = message.subMessages
+					.filter(subMsg => subMsg.text && subMsg.text.trim())
+					.map(subMsg => subMsg.text.trim())
+					.join('\n\n');
+			}
+
+			// Clean the text - remove source references, follow-up questions, and other UI elements
+			if (noteText) {
+				// Remove source span identifiers like [<1>], [<2>], etc.
+				noteText = noteText.replace(/\[<(\d{1,2})>\]/g, '');
+				
+				// Remove custom tags that might interfere
+				noteText = noteText.replace(/<\/?(?:thinking|think|followup_question|source_page|sources|id|appendix)>/g, '');
+				
+				// Convert markdown-style formatting to basic HTML for better readability
+				noteText = noteText
+					// Convert **bold** to <strong>bold</strong>
+					.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+					// Convert *italic* to <em>italic</em>
+					.replace(/\*(.*?)\*/g, '<em>$1</em>')
+					// Convert line breaks to HTML breaks
+					.replace(/\n/g, '<br>')
+					// Clean up multiple spaces
+					.replace(/\s\s+/g, ' ')
+					.trim();
+			}
+
+			if (!noteText) {
+				Zotero.debug("DeepTutorChatBox: No text content found in message");
+				// Zotero.alert(null, "Cannot Create Note", "Cannot create note: Message appears to be empty.");
+				setIsSavingNote(false);
+				return;
+			}
+
+			// Create the note
+			await Zotero.DB.executeTransaction(async () => {
+				const noteItem = new Zotero.Item('note');
+				noteItem.libraryID = Zotero.Items.get(noteContainer).libraryID;
+				
+				// Set the parent item
+				noteItem.parentID = noteContainer;
+				
+				// Create note title from the first line or a default
+				const titleText = noteText.replace(/<[^>]*>/g, '').substring(0, 100);
+				const noteTitle = titleText.length > 100 ? titleText.substring(0, 97) + '...' : titleText;
+				
+				// Prepare the final note content with proper HTML structure
+				const fullNoteContent = `<div class="zotero-note znv1">
+					<h3>DeepTutor Message ${messageIndex + 1}</h3>
+					<p><strong>Session:</strong> ${currentSession?.sessionName || 'Unknown Session'}</p>
+					<p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+					<hr>
+					<div>${noteText}</div>
+				</div>`;
+				
+				// Set the note content
+				noteItem.setNote(fullNoteContent);
+				
+				// Save the note
+				const noteID = await noteItem.save({
+					notifierData: {
+						autoSyncDelay: Zotero.Notes.AUTO_SYNC_DELAY
+					}
+				});
+				
+				Zotero.debug(`DeepTutorChatBox: Successfully created note with ID ${noteID} for message ${messageIndex}`);
+			});
+			
+			// Show success message
+			// Zotero.alert(null, "Note Created Successfully", "The message has been saved as a note under the document.");
+
+		} catch (error) {
+			Zotero.debug(`DeepTutorChatBox: Error creating note for message ${messageIndex}: ${error.message}`);
+			Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
+			// Zotero.alert(null, "Error Creating Note", `Error creating note: ${error.message}`);
+		} finally {
+			// Always reset the saving state, regardless of success or failure
+			setIsSavingNote(false);
+		}
+	};
+
 	const renderMessage = (message, index) => {
 		// Return nothing if it's the first message and from user
 		if (index === 0 && message.role === MessageRole.USER) {
@@ -2027,6 +2137,43 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						}
 					})}
 				</div>
+				
+				{/* Add download button for tutor messages only */}
+				{!isUser && noteContainer && !isStreaming && !iniWait && !isSavingNote && (
+					<div style={{
+						display: 'flex',
+						justifyContent: 'flex-start',
+						marginTop: '0.5rem',
+						marginLeft: '0'
+					}}>
+						<button
+							style={{
+								all: 'revert',
+								background: '#0687E5',
+								color: 'white',
+								border: 'none',
+								borderRadius: '0.375rem',
+								padding: '0.25rem 0.5rem',
+								fontSize: '0.75rem',
+								fontWeight: 500,
+								cursor: 'pointer',
+								boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.1)',
+								transition: 'background-color 0.2s',
+								fontFamily: 'Roboto, sans-serif',
+								display: 'flex',
+								alignItems: 'center',
+								gap: '0.25rem'
+							}}
+							onClick={() => downloadMessage(message, index)}
+							onMouseEnter={(e) => e.target.style.background = '#0570c0'}
+							onMouseLeave={(e) => e.target.style.background = '#0687E5'}
+							title={`Save message ${index + 1} as Zotero note`}
+						>
+							📝 Save as Note
+						</button>
+					</div>
+				)}
+				
 				{index === messages.length - 1 && message.followUpQuestions && message.followUpQuestions.length > 0 && (
 					<div>
 						<div style={styles.followUpQuestionText}>
@@ -2219,10 +2366,55 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 
 				Zotero.debug(`DeepTutorChatBox: Loaded ${contextDocs.length} context documents`);
 				setContextDocuments(contextDocs);
+				
+				// Set noteContainer to the parent of the first document (or the first document itself if it's a regular item)
+				if (contextDocs.length > 0) {
+					try {
+						const firstDoc = contextDocs[0];
+						const firstItem = Zotero.Items.get(firstDoc.zoteroAttachmentId);
+						
+						if (firstItem) {
+							let parentItemId = null;
+							
+							// If the item is an attachment, get its parent
+							if (firstItem.isAttachment() && firstItem.parentID) {
+								parentItemId = firstItem.parentID;
+								const parentItem = Zotero.Items.get(parentItemId);
+								if (parentItem && parentItem.isRegularItem()) {
+									Zotero.debug(`DeepTutorChatBox: Set noteContainer to parent item ${parentItemId} (${parentItem.getDisplayTitle()})`);
+									setNoteContainer(parentItemId);
+								} else {
+									Zotero.debug(`DeepTutorChatBox: Parent item ${parentItemId} is not a regular item`);
+								}
+							}
+							// If the item is a regular item itself, use it as the container
+							else if (firstItem.isRegularItem()) {
+								parentItemId = firstItem.id;
+								Zotero.debug(`DeepTutorChatBox: Set noteContainer to regular item ${parentItemId} (${firstItem.getDisplayTitle()})`);
+								setNoteContainer(parentItemId);
+							}
+							// If no suitable parent found, log this
+							else {
+								Zotero.debug(`DeepTutorChatBox: No suitable parent item found for noteContainer. First item type: ${firstItem.itemType}`);
+								setNoteContainer(null);
+							}
+						} else {
+							Zotero.debug(`DeepTutorChatBox: First document item not found for noteContainer setup`);
+							setNoteContainer(null);
+						}
+					} catch (error) {
+						Zotero.debug(`DeepTutorChatBox: Error setting up noteContainer: ${error.message}`);
+						setNoteContainer(null);
+					}
+				} else {
+					Zotero.debug(`DeepTutorChatBox: No context documents available for noteContainer setup`);
+					setNoteContainer(null);
+				}
 			}
 			catch (error) {
-				Zotero.debug(`DeepTutorChatBox: Error loading context documents: ${error.message}`);
+				// Zotero.debug(`DeepTutorChatBox: Error loading context documents: ${error.message}`);
 				setContextDocuments([]);
+				setNoteContainer(null);
 			}
 		};
 
@@ -2417,10 +2609,54 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 
 				// Zotero.debug(`DeepTutorChatBox: Loaded ${contextDocs.length} context documents`);
 				setContextDocuments(contextDocs);
-			}
-			catch {
+				
+				// Set noteContainer to the parent of the first document (or the first document itself if it's a regular item)
+				if (contextDocs.length > 0) {
+					try {
+						const firstDoc = contextDocs[0];
+						const firstItem = Zotero.Items.get(firstDoc.zoteroAttachmentId);
+						
+						if (firstItem) {
+							let parentItemId = null;
+							
+							// If the item is an attachment, get its parent
+							if (firstItem.isAttachment() && firstItem.parentID) {
+								parentItemId = firstItem.parentID;
+								const parentItem = Zotero.Items.get(parentItemId);
+								if (parentItem && parentItem.isRegularItem()) {
+									Zotero.debug(`DeepTutorChatBox: Set noteContainer to parent item ${parentItemId} (${parentItem.getDisplayTitle()})`);
+									setNoteContainer(parentItemId);
+								} else {
+									Zotero.debug(`DeepTutorChatBox: Parent item ${parentItemId} is not a regular item`);
+								}
+							}
+							// If the item is a regular item itself, use it as the container
+							else if (firstItem.isRegularItem()) {
+								parentItemId = firstItem.id;
+								Zotero.debug(`DeepTutorChatBox: Set noteContainer to regular item ${parentItemId} (${firstItem.getDisplayTitle()})`);
+								setNoteContainer(parentItemId);
+							}
+							// If no suitable parent found, log this
+							else {
+								Zotero.debug(`DeepTutorChatBox: No suitable parent item found for noteContainer. First item type: ${firstItem.itemType}`);
+								setNoteContainer(null);
+							}
+						} else {
+							Zotero.debug(`DeepTutorChatBox: First document item not found for noteContainer setup`);
+							setNoteContainer(null);
+						}
+					} catch (error) {
+						Zotero.debug(`DeepTutorChatBox: Error setting up noteContainer: ${error.message}`);
+						setNoteContainer(null);
+					}
+				} else {
+					Zotero.debug(`DeepTutorChatBox: No context documents available for noteContainer setup`);
+					setNoteContainer(null);
+				}
+			} catch {
 				// Zotero.debug(`DeepTutorChatBox: Error loading context documents: ${error.message}`);
 				setContextDocuments([]);
+				setNoteContainer(null);
 			}
 		};
 
