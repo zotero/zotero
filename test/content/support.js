@@ -125,6 +125,28 @@ var loadZoteroPane = async function (win) {
 	return win;
 };
 
+/**
+ * Bring the main window to the front, for tests that rely on focus (e.g., editable-text).
+ */
+async function activateZoteroPane() {
+	let win = Zotero.getMainWindow();
+	if (!win) {
+		throw new Error('Main window is not open');
+	}
+	// If the window is already active, we're done.
+	// The main window is active from the start on Linux, but opens in the
+	// background on other platforms.
+	if (Services.focus.activeWindow === win) {
+		return;
+	}
+	let activatePromise = new Promise(
+		resolve => win.addEventListener('activate', resolve, { once: true })
+	);
+	Zotero.Utilities.Internal.activate();
+	Zotero.Utilities.Internal.activate(win);
+	await activatePromise;
+}
+
 var loadPrefPane = async function (paneName) {
 	var id = 'zotero-prefpane-' + paneName;
 	var win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {

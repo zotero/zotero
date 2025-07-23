@@ -237,17 +237,7 @@ describe("Item pane", function () {
 	
 	describe("Info pane", function () {
 		before(async () => {
-			if (!doc.hasFocus()) {
-				// editable-text behavior relies on focus, so we first need to bring the window to the front.
-				// Not required on all platforms. In some cases (e.g. Linux), the window is at the front from the start.
-				let win = Zotero.getMainWindow();
-				let activatePromise = new Promise(
-					resolve => win.addEventListener('activate', resolve, { once: true })
-				);
-				Zotero.Utilities.Internal.activate();
-				Zotero.Utilities.Internal.activate(win);
-				await activatePromise;
-			}
+			await activateZoteroPane();
 		});
 		it("should place Title after Item Type and before creators", async function () {
 			var item = await createDataObject('item');
