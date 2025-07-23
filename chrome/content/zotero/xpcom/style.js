@@ -39,6 +39,19 @@ Zotero.Styles = new function() {
 	};
 
 	this.CSL_VALIDATOR_URL = "resource://zotero/csl-validator.js";
+
+	this._memoryPressureObserver = {
+		observe: (subject, topic) => {
+			if (topic !== 'memory-pressure') {
+				return;
+			}
+			for (let style of Object.values(this.getAll())) {
+				style.clearEngineCache();
+			}
+		},
+		QueryInterface: ChromeUtils.generateQI(['nsISupportsWeakReference']),
+	};
+	Services.obs.addObserver(this._memoryPressureObserver, 'memory-pressure', /* ownsWeak */ true);
 	
 	
 	/**
@@ -201,7 +214,7 @@ Zotero.Styles = new function() {
 	/**
 	 * Gets a style with a given ID
 	 * @param {String} id
-	 * @param {Boolean} skipMappings Don't automatically return renamed style
+	 * @param {Boolean} [skipMappings] Don't automatically return renamed style
 	 */
 	this.get = function (id, skipMappings) {
 		if (!_initialized) {
@@ -681,22 +694,39 @@ Zotero.Style = function (style, path) {
 	if(this.source === this.styleID) {
 		throw new Error("Style with ID "+this.styleID+" references itself as source");
 	}
+	
+	this._cachedEngines = new Map();
 }
 
 /**
  * Get a citeproc-js CSL.Engine instance
  * @param {String} locale Locale code
- * @param {String} format Output format one of [rtf, html, text]
- * @param {Boolean} automaticJournalAbbreviations Whether to automatically abbreviate titles
+ * @param {String} [format] Output format one of [rtf, html, text]
+ * @param {Boolean} [automaticJournalAbbreviations] Whether to automatically abbreviate titles
  */
 Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAbbreviations) {
-	if(!locale) {
-		var locale = Zotero.locale;
-		if(!locale) {
-			var locale = 'en-US';
-		}
-	}
+	locale = locale || Zotero.locale || 'en-US';
 	format = format || 'text';
+	automaticJournalAbbreviations = !!automaticJournalAbbreviations;
+
+	let useCiteprocRs = Zotero.Prefs.get('cite.useCiteprocRs');
+	
+	// We can cache the Engine instance if we aren't using citeproc-rs
+	// and this is an installed style
+	let cacheKey = !useCiteprocRs && this.path
+		? JSON.stringify({ locale, format, automaticJournalAbbreviations })
+		: null;
+	if (cacheKey && this._cachedEngines.has(cacheKey)) {
+		let engine = this._cachedEngines.get(cacheKey);
+		// Due to a bug in citeproc-js there are disambiguation issues after
+		// modifying items in Zotero. The lighter-weight rerebuildProcessorState()
+		// doesn't reset three properties of the processor (registry, tmp, and
+		// disambiguate) used for disambiguation, so we need to call the
+		// deprecated restoreProcessorState(), which resets everything.
+		// Revisit if restoreProcessorState() is removed.
+		engine.restoreProcessorState();
+		return engine;
+	}
 	
 	// APA and some similar styles capitalize the first word of subtitles
 	var uppercaseSubtitlesRE = /^apa($|-)|^academy-of-management($|-)|^(freshwater-science)/;
@@ -763,7 +793,8 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 	
 	try {
 		var citeproc;
-		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
+		var engineDesc;
+		if (useCiteprocRs) {
 			citeproc = new Zotero.CiteprocRs.Engine(
 				new Zotero.Cite.System({
 					automaticJournalAbbreviations,
@@ -775,6 +806,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 				format == 'text' ? 'plain' : format,
 				overrideLocale
 			);
+			engineDesc = 'CiteprocRs';
 		}
 		else {
 			citeproc = new Zotero.CiteProc.CSL.Engine(
@@ -791,13 +823,25 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 			citeproc.opt.development_extensions.wrap_url_and_doi = true;
 			// Don't try to parse author names. We parse them in itemToCSLJSON
 			citeproc.opt.development_extensions.parse_names = false;
+			engineDesc = 'CSL';
 		}
 		
+		// Cache the Engine instance if allowed
+		if (cacheKey) {
+			this._cachedEngines.set(cacheKey, citeproc);
+			Zotero.debug(`Caching ${engineDesc}.Engine instance with ${cacheKey} for ${this.styleID}`);
+		}
+
 		return citeproc;
-	} catch(e) {
+	}
+	catch (e) {
 		Zotero.logError(e);
 		throw e;
 	}
+};
+
+Zotero.Style.prototype.clearEngineCache = function () {
+	this._cachedEngines.clear();
 };
 
 /**
