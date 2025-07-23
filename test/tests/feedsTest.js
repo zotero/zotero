@@ -224,7 +224,6 @@ describe("Zotero.Feeds", function () {
 	describe('#scheduleNextFeedCheck()', function () {
 		it('schedules next feed check', async function () {
 			sinon.spy(Zotero.Feeds, 'scheduleNextFeedCheck');
-			sinon.spy(Zotero.Promise, 'delay');
 			
 			await clearFeeds();
 			let feed = await createFeed({refreshInterval: 1});
@@ -234,10 +233,9 @@ describe("Zotero.Feeds", function () {
 			await Zotero.Feeds.scheduleNextFeedCheck();
 			
 			// Allow a propagation delay of 5000ms
-			assert.isTrue(Zotero.Promise.delay.args[0][0] - 1000*60*60 <= 5000);
+			assert.isTrue(Zotero.Feeds._nextFeedCheckDelay - 1000 * 60 * 60 <= 5000);
 			
 			Zotero.Feeds.scheduleNextFeedCheck.restore();
-			Zotero.Promise.delay.restore();
 		});
 	})
 })
