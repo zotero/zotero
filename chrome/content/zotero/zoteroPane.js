@@ -4197,6 +4197,7 @@ var ZoteroPane = new function()
 			myLibraryMenuItem.setAttribute("label", myLibrary.name);
 			myLibraryMenuItem.setAttribute("image", myLibrary.treeViewImage);
 			myLibraryMenuItem.setAttribute("value", myLibrary.treeViewID);
+			myLibraryMenuItem.classList.add('menuitem-iconic');
 			myLibraryMenuItem.addEventListener("command", (event) => {
 				if (event.target.tagName == 'menuitem') {
 					this.copyCollection(myLibrary);
@@ -4241,6 +4242,8 @@ var ZoteroPane = new function()
 		
 		let newCollectionMenuitem = document.createXULElement('menuitem');
 		document.l10n.setAttributes(newCollectionMenuitem, 'menu-new-collection');
+		newCollectionMenuitem.classList.add('menuitem-iconic');
+		newCollectionMenuitem.classList.add('zotero-menuitem-new-collection');
 		newCollectionMenuitem.addEventListener('command', () => this.addItemsToCollection(items, null, true));
 		let separator = document.createXULElement('menuseparator');
 		popup.replaceChildren(newCollectionMenuitem, separator);
