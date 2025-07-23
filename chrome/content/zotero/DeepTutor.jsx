@@ -40,6 +40,7 @@ import DeepTutorBottomSection from './DeepTutorBottomSection.js';
 // import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
 import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
 import DeepTutorSessionDelete from './DeepTutorSessionDelete.js';
+import DeepTutorRenameSession from './DeepTutorRenameSession.js';
 import DeepTutorNoPDFWarning from './DeepTutorNoPDFWarning.js';
 import DeepTutorLocalhostServer from './localhostServer.js';
 import {
@@ -50,6 +51,7 @@ import {
 	registerUser,
 	createBackendUser,
 	deleteSessionById,
+	updateSessionName,
 	getActiveUserSubscriptionByUserId,
 	getLatestUserSubscriptionByUserId,
 	DT_SIGN_UP_URL
@@ -365,9 +367,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showSignUpPopup: false,
 			showModelSelectionPopup: false,
 			showDeletePopup: false,
+			showRenamePopup: false,
 			showNoPDFWarningPopup: false,
 			sessionToDelete: null,
 			sessionNameToDelete: '',
+			sessionToRename: null,
+			sessionNameToRename: '',
 			collapsed: false,
 			showSubscriptionConfirmPopup: false,
 			showManageSubscriptionPopup: false,
@@ -799,6 +804,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}));
 	};
 
+	toggleRenamePopup = () => {
+		this.setState(prevState => ({
+			showRenamePopup: !prevState.showRenamePopup,
+			sessionToRename: prevState.showRenamePopup ? null : prevState.sessionToRename,
+			sessionNameToRename: prevState.showRenamePopup ? '' : prevState.sessionNameToRename
+		}));
+	};
+
 	toggleNoPDFWarningPopup = () => {
 		this.setState(prevState => ({
 			showNoPDFWarningPopup: !prevState.showNoPDFWarningPopup
@@ -831,6 +844,26 @@ var DeepTutor = class DeepTutor extends React.Component {
 			sessionToDelete: null,
 			sessionNameToDelete: ''
 		});
+	};
+
+	handleShowRenamePopup = (sessionId) => {
+		const session = this.state.sesIdToObj.get(sessionId);
+		const sessionName = session ? session.sessionName || 'Unnamed Session' : 'Unnamed Session';
+
+		this.setState({
+			sessionToRename: sessionId,
+			sessionNameToRename: sessionName,
+			showRenamePopup: true
+		});
+	};
+
+	handleRenameSuccess = async () => {
+		// Reload sessions to get updated session names
+		try {
+			await this.loadSession();
+		} catch (error) {
+			Zotero.debug(`DeepTutor: Error reloading sessions after rename: ${error.message}`);
+		}
 	};
 
 	toggleCollapse = () => {
@@ -1743,6 +1776,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 								error={this.state.error}
 								onCreateNewSession={this.toggleModelSelectionPopup}
 								onShowDeletePopup={this.handleShowDeletePopup}
+								onRenameSession={this.handleShowRenamePopup}
 							/>
 						}
 						{this.state.currentPane === 'noSession'
@@ -2102,6 +2136,90 @@ var DeepTutor = class DeepTutor extends React.Component {
 								sessionName={this.state.sessionNameToDelete}
 								onConfirmDelete={this.handleConfirmDelete}
 								onCancelDelete={this.handleCancelDelete}
+							/>
+						</div>
+					</div>
+				)}
+
+				{/* Rename Session Popup */}
+				{this.state.showRenamePopup && (
+					<div
+						style={{
+							position: 'absolute',
+							top: 0,
+							left: 0,
+							right: 0,
+							bottom: 0,
+							background: 'rgba(0,0,0,0.5)',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							zIndex: 9999
+						}}
+						onClick={this.toggleRenamePopup}
+					>
+						<div
+							style={{
+								width: '90%',
+								maxWidth: '26rem',
+								maxHeight: '90%',
+								background: '#FFFFFF',
+								borderRadius: '0.625rem',
+								padding: '1.25rem',
+								overflow: 'auto',
+								margin: '0 1.25rem'
+							}}
+							onClick={e => e.stopPropagation()}
+						>
+							{/* Rename Session Popup header */}
+							<div style={{
+								display: 'flex',
+								width: '100%',
+								alignItems: 'center',
+								marginBottom: '1.25rem',
+								minHeight: '1rem',
+								position: 'relative',
+							}}>
+								<div style={{
+									width: '100%',
+									textAlign: 'center',
+									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+									WebkitBackgroundClip: 'text',
+									WebkitTextFillColor: 'transparent',
+									backgroundClip: 'text',
+									color: '#0687E5',
+									fontWeight: 700,
+									fontSize: '1.5rem',
+									lineHeight: '1.2',
+									letterSpacing: '0%',
+								}}>
+									Rename
+								</div>
+								<button
+									onClick={this.toggleRenamePopup}
+									style={{
+										background: 'none',
+										border: 'none',
+										cursor: 'pointer',
+										position: 'absolute',
+										right: 0,
+										top: '50%',
+										transform: 'translateY(-50%)',
+										width: '1rem',
+										height: '1rem',
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+									}}
+								>
+									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
+								</button>
+							</div>
+							<DeepTutorRenameSession
+								sessionId={this.state.sessionToRename}
+								currentSessionName={this.state.sessionNameToRename}
+								onClose={this.toggleRenamePopup}
+								onRenameSuccess={this.handleRenameSuccess}
 							/>
 						</div>
 					</div>

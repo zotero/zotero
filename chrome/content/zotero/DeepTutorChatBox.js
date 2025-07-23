@@ -165,8 +165,11 @@ const styles = {
 		color: '#000000',
 		fontWeight: 500,
 		fontSize: '1rem',
-		lineHeight: '100%',
+		lineHeight: '1.2',
 		fontFamily: 'Roboto, sans-serif',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap',
 	},
 	sessionInfo: {
 		width: '90%',
@@ -2147,7 +2150,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 
 						// Try to get the Zotero item to get the document name and path
 						const item = Zotero.Items.get(zoteroAttachmentId);
-						let documentName = documentId; // fallback to documentId
+						let documentName = "Document Not Found"; // fallback to documentId
 						let filePath = null;
 
 						if (item) {
@@ -2208,7 +2211,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						contextDocs.push({
 							documentId: documentId,
 							zoteroAttachmentId: documentId,
-							name: documentId,
+							name: "Document Not Found",
 							filePath: null
 						});
 					}
@@ -2345,26 +2348,26 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 
 						// Try to get the Zotero item to get the document name and path
 						const item = Zotero.Items.get(zoteroAttachmentId);
-						let documentName = documentId; // fallback to documentId
+						let documentName = "Document Not Found"; // fallback to "Document Not Found"
 						let filePath = null;
 
 						if (item) {
 							// Prioritize attachment filename first
 							if (item.attachmentFilename) {
 								documentName = item.attachmentFilename;
-								// Zotero.debug(`DeepTutorChatBox: Using attachment filename: ${documentName}`);
+								Zotero.debug(`DeepTutorChatBox: Using attachment filename: ${documentName}`);
 							}
 							// Fall back to display title if no filename
 							else if (item.getDisplayTitle) {
 								documentName = item.getDisplayTitle();
-								// Zotero.debug(`DeepTutorChatBox: Found item title: ${documentName}`);
+								Zotero.debug(`DeepTutorChatBox: Found item title: ${documentName}`);
 							}
 							// Finally try parent item title
 							else if (item.parentItem) {
 								const parentItem = Zotero.Items.get(item.parentItem);
 								if (parentItem && parentItem.getDisplayTitle) {
 									documentName = parentItem.getDisplayTitle();
-									// Zotero.debug(`DeepTutorChatBox: Found parent item title: ${documentName}`);
+									Zotero.debug(`DeepTutorChatBox: Found parent item title: ${documentName}`);
 								}
 							}
 
@@ -2406,7 +2409,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						contextDocs.push({
 							documentId: documentId,
 							zoteroAttachmentId: documentId,
-							name: documentId,
+							name: "Document Not Found",
 							filePath: null
 						});
 					}

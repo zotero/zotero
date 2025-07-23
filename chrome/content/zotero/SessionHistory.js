@@ -183,8 +183,10 @@ const errorStyle = {
 const plusIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_BLUE_PLUS.svg';
 const searchIconPath = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_SEARCH.svg';
 const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DELETE.svg';
+// Temporary: Using search icon as placeholder for edit - replace with proper edit icon
+const EditImg = 'chrome://zotero/content/DeepTutorMaterials/History/SESHIS_SEARCH.svg';
 
-function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, onCreateNewSession, onShowDeletePopup }) {
+function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, error = null, onCreateNewSession, onShowDeletePopup, onRenameSession }) {
 	const [search, setSearch] = useState('');
 	const [hoveredButton, setHoveredButton] = useState(null);
 	const [isCreateSessionHovered, setIsCreateSessionHovered] = useState(false);
@@ -196,6 +198,13 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		e.stopPropagation();
 		if (onShowDeletePopup) {
 			onShowDeletePopup(sessionId);
+		}
+	};
+
+	const handleEditClick = (e, sessionId) => {
+		e.stopPropagation();
+		if (onRenameSession) {
+			onRenameSession(sessionId);
 		}
 	};
 
@@ -268,16 +277,28 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 						<span style={sessionTextStyle}>
 							{session.sessionName || 'Unnamed Session'}
 						</span>
-						<button
-							style={{
-								...deleteButtonStyle,
-								opacity: hoveredButton === session.id ? 1 : 0,
-								pointerEvents: hoveredButton === session.id ? 'auto' : 'none',
-							}}
-							onClick={e => handleDeleteClick(e, session.id)}
-						>
-							<img src={DeleteImg} alt="Delete" style={deleteIconStyle} />
-						</button>
+						<div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+							<button
+								style={{
+									...deleteButtonStyle,
+									opacity: hoveredButton === session.id ? 1 : 0,
+									pointerEvents: hoveredButton === session.id ? 'auto' : 'none',
+								}}
+								onClick={e => handleEditClick(e, session.id)}
+							>
+								<img src={EditImg} alt="Edit" style={deleteIconStyle} />
+							</button>
+							<button
+								style={{
+									...deleteButtonStyle,
+									opacity: hoveredButton === session.id ? 1 : 0,
+									pointerEvents: hoveredButton === session.id ? 'auto' : 'none',
+								}}
+								onClick={e => handleDeleteClick(e, session.id)}
+							>
+								<img src={DeleteImg} alt="Delete" style={deleteIconStyle} />
+							</button>
+						</div>
 					</button>
 				))}
 			</div>
@@ -297,7 +318,8 @@ SessionHistory.propTypes = {
 	isLoading: PropTypes.bool,
 	error: PropTypes.string,
 	onCreateNewSession: PropTypes.func,
-	onShowDeletePopup: PropTypes.func
+	onShowDeletePopup: PropTypes.func,
+	onRenameSession: PropTypes.func
 };
 
 export default SessionHistory;

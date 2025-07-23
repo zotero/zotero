@@ -143,7 +143,7 @@ export const updateSessionName = async (sessionId, sessionName) => {
 	const requestConfig = {
 		method: 'PUT',
 		headers: getAuthHeaders(),
-		body: JSON.stringify(sessionName)
+		body: sessionName
 	};
 
 	const response = await window.fetch(`${API_BASE_URL}/session/${sessionId}/name`, requestConfig);
