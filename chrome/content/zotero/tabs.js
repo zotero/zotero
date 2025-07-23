@@ -85,16 +85,21 @@ var Zotero_Tabs = new function () {
 	this._tabsMenuIgnoreMouseover = false;
 
 	// Keep track of item modifications to update the title
-	Zotero.Notifier.registerObserver(this, ['item'], 'tabs');
+	this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'tabs');
 
 	// Update the title when pref of title format is changed
-	Zotero.Prefs.registerObserver('tabs.title.reader', async () => {
+	this._prefsObserverID = Zotero.Prefs.registerObserver('tabs.title.reader', async () => {
 		for (let tab of this._tabs) {
 			if (!tab.data.itemID) continue;
 			let item = Zotero.Items.get(tab.data.itemID);
 			let title = await item.getTabTitle();
 			this.rename(tab.id, title);
 		}
+	});
+	
+	window.addEventListener('unload', () => {
+		Zotero.Notifier.unregisterObserver(this._notifierID);
+		Zotero.Prefs.unregisterObserver(this._prefsObserverID);
 	});
 
 	this._unloadInterval = setInterval(() => {
