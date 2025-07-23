@@ -709,7 +709,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 
 	let useCiteprocRs = Zotero.Prefs.get('cite.useCiteprocRs');
 	
-	// We can cache the Engine instance if we aren't using CiteprocRs
+	// We can cache the Engine instance if we aren't using citeproc-rs
 	// and this is an installed style
 	let cacheKey = !useCiteprocRs && this.path
 		? JSON.stringify({ locale, format, automaticJournalAbbreviations })
@@ -785,6 +785,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 	
 	try {
 		var citeproc;
+		var engineDesc;
 		if (useCiteprocRs) {
 			citeproc = new Zotero.CiteprocRs.Engine(
 				new Zotero.Cite.System({
@@ -797,6 +798,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 				format == 'text' ? 'plain' : format,
 				overrideLocale
 			);
+			engineDesc = 'CiteprocRs';
 		}
 		else {
 			citeproc = new Zotero.CiteProc.CSL.Engine(
@@ -813,12 +815,13 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 			citeproc.opt.development_extensions.wrap_url_and_doi = true;
 			// Don't try to parse author names. We parse them in itemToCSLJSON
 			citeproc.opt.development_extensions.parse_names = false;
+			engineDesc = 'CSL';
 		}
 		
 		// Cache the Engine instance if allowed
 		if (cacheKey) {
 			this._cachedEngines.set(cacheKey, citeproc);
-			Zotero.debug(`Caching Engine instance for ${cacheKey} on ${this.styleID}`);
+			Zotero.debug(`Caching ${engineDesc}.Engine instance with ${cacheKey} for ${this.styleID}`);
 		}
 
 		return citeproc;
