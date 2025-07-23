@@ -379,8 +379,8 @@ describe("Zotero.DataObject", function () {
 				promises.push(deferred.promise);
 				observerIDs.push(Zotero.Notifier.registerObserver(
 					{
-						notify: function (event) {
-							if (event == 'delete') {
+						notify: function (event, type, ids) {
+							if (event == 'delete' && ids.includes(obj.id)) {
 								deferred.reject("Notifier called for erase on " + type);
 							}
 						}
@@ -392,7 +392,11 @@ describe("Zotero.DataObject", function () {
 					skipNotifier: true
 				});
 			}
-			await Promise.all(promises);
+			await Promise.race([
+				Promise.all(promises),
+				// Give notifier time to trigger
+				Zotero.Promise.delay(100),
+			]);
 			
 			for (let id of observerIDs) {
 				Zotero.Notifier.unregisterObserver(id);
