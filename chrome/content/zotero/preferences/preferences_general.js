@@ -273,6 +273,9 @@ Zotero_Preferences.General = {
 	
 	setFileHandler: function (type, handler) {
 		var pref = this._getFileHandlerPref(type);
+		if (handler.toLowerCase().includes('zotero')) {
+			handler = '';
+		}
 		Zotero.Prefs.set(pref, handler);
 		this._updateFileHandlerUI();
 	},
