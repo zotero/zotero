@@ -462,13 +462,14 @@ Zotero.HTTP = new function() {
 			clearTimeout(inactivityTimerID);
 			
 			var status = redirectStatus || xmlhttp.status;
+			var success;
 			
 			try {
 				if (!status) {
 					let responseStatus = xmlhttp.channel.responseStatus;
 					// If we cancelled a redirect, get the 3xx status from the channel
 					if (responseStatus >= 300 && responseStatus < 400) {
-						status = responseStatus;
+						status = redirectStatus = responseStatus;
 					}
 					// If an invalid HTTP response includes a 4xx or 5xx HTTP response code, swap it
 					// in, since it might be enough info to do what we need (e.g., verify a 404 from
@@ -488,17 +489,27 @@ Zotero.HTTP = new function() {
 			catch (e) {}
 			
 			if (options.successCodes) {
-				var success = options.successCodes.indexOf(status) != -1;
+				success = options.successCodes.indexOf(status) != -1;
 			}
 			// Explicit FALSE means allow any status code
 			else if (options.successCodes === false) {
-				var success = true;
+				success = true;
+			}
+			// If we got a redirect and didn't follow it, consider that a success
+			else if (options.followRedirects === false && redirectStatus) {
+				success = true;
 			}
 			else if(isFile) {
-				var success = status == 200 || status == 0;
+				success = status == 200 || status == 0;
 			}
-			else if (redirectStatus) {
-				var success = true;
+			else {
+				success = status >= 200 && status < 300;
+			}
+			
+			// Create a fake XMLHttpRequest object for an unfollowed or canceled redirect, since
+			// the real one won't be accurate. Only `status` and `getResponseHeader('Location')`
+			// are available.
+			if (redirectStatus) {
 				let channel = xmlhttp.channel;
 				xmlhttp = {
 					status,
@@ -511,9 +522,6 @@ Zotero.HTTP = new function() {
 						return null;
 					}
 				};
-			}
-			else {
-				var success = status >= 200 && status < 300;
 			}
 			
 			if(success) {
