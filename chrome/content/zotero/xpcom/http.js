@@ -677,8 +677,14 @@ Zotero.HTTP = new function() {
 				noMock: true
 			}
 		);
-		var bytes = await IOUtils.write(path, await req.response.bytes());
-		Zotero.debug(`Saved file to ${path} (${bytes} byte${bytes != 1 ? 's' : ''})`);
+		if (req.status >= 200 && req.status < 300) {
+			var bytes = await IOUtils.write(path, await req.response.bytes());
+			Zotero.debug(`Saved file to ${path} (${bytes} byte${bytes != 1 ? 's' : ''})`);
+		}
+		// Only relevant if status is in successCodes
+		else {
+			Zotero.debug("Not saving file for non-2xx response code");
+		}
 		return req;
 	};
 	
