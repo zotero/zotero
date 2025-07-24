@@ -77,12 +77,13 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		var uri = this.apiClient.buildRequestURI(params);
 		
 		return new Promise(async (resolve, reject) => {
+			var resultOptions = {};
 			try {
 				let req = await Zotero.HTTP.download(
 					uri,
 					destPath,
 					{
-						successCodes: [200, 404],
+						successCodes: [200, 302, 404],
 						headers: this.apiClient.getHeaders(),
 						noCache: true,
 						notificationCallbacks: {
@@ -139,10 +140,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 								}
 								item.attachmentSyncState = "in_sync";
 								await item.saveTx({ skipAll: true });
-								
-								resolve(new Zotero.Sync.Storage.Result({
-									localChanges: true
-								}));
+								resultOptions.localChanges = true;
 								
 								callback.onRedirectVerifyCallback(Cr.NS_ERROR_ABORT);
 							},
@@ -153,6 +151,11 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 						},
 					}
 				);
+				
+				if (req.status == 302) {
+					resolve(new Zotero.Sync.Storage.Result(resultOptions));
+					return;
+				}
 				
 				if (req.status == 404) {
 					Zotero.debug("Remote file not found for item " + item.libraryKey);

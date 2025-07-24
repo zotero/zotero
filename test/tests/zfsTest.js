@@ -679,6 +679,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var mtime = (Math.floor(new Date().getTime() / 1000) * 1000) + "";
 			var md5 = Zotero.Utilities.Internal.md5(file)
 			
+			var processDownloadSpy = sinon.spy(Zotero.Sync.Storage.Local, "processDownload");
+			
 			var s3Path = `pretend-s3/${item.key}`;
 			httpd.registerPathHandler(
 				`/users/1/items/${item.key}/file`,
@@ -708,6 +710,9 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
+			assert.isTrue(processDownloadSpy.notCalled);
+			
+			processDownloadSpy.restore();
 		})
 		
 		it("should update local info for file that already exists on the server", function* () {
