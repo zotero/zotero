@@ -3607,6 +3607,7 @@ var ZoteroPane = new function()
 			'sep3',
 			'toggleRead',
 			'changeParentItem',
+			'markAsPrimaryAttachment',
 			'addToCollection',
 			'removeItems',
 			'duplicateAndConvert',
@@ -3884,6 +3885,17 @@ var ZoteroPane = new function()
 						if (!item.isTopLevelItem() && item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 							show.add(m.renameAttachments);
 							showSep5 = true;
+						}
+
+						// Set/Unset as a Primary Attachment
+						if (!item.isTopLevelItem()) {
+							show.add(m.markAsPrimaryAttachment);
+
+							let parent = Zotero.Items.get(item.parentID);
+							let existingPrimaryAttachmentRelation = parent.getRelationsByPredicate(Zotero.Relations.primaryAttachmentPredicate)[0];
+							let isSelectedPrimaryAttachment = existingPrimaryAttachmentRelation === item.key;
+							let primaryAttachmentMenu = menu.childNodes[m.markAsPrimaryAttachment];
+							primaryAttachmentMenu.dataset.l10nArgs = `{ "type": "${isSelectedPrimaryAttachment ? "unset" : "set"}" }`;
 						}
 						
 						// If not linked URL, show reindex line
@@ -6179,6 +6191,33 @@ var ZoteroPane = new function()
 		}
 	};
 
+	this.toggleSelectedItemAsPrimaryAttachment = async function () {
+		if (!this.canEdit() || !this.canEditFiles()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		var items = this.getSelectedItems();
+
+		if (items.length !== 1 || items[0].isTopLevelItem() || !items[0].isFileAttachment()) {
+			return;
+		}
+		let item = items[0];
+
+		// Check if attachment's parent already has a relation to this item.
+		// If yes - we need to remove it. Otherwise, create a new relation.
+		let parent = await Zotero.Items.getAsync(item.parentItemID);
+		let existingPrimaryAttachment = parent.getRelationsByPredicate(Zotero.Relations.primaryAttachmentPredicate)[0];
+
+		if (existingPrimaryAttachment !== item.key) {
+			let updatedRelations = parent.getRelations();
+			updatedRelations[Zotero.Relations.primaryAttachmentPredicate] = item.key;
+			parent.setRelations(updatedRelations);
+		}
+		else {
+			parent.removeRelation(Zotero.Relations.primaryAttachmentPredicate, item.key);
+		}
+		await parent.saveTx({ skipDateModifiedUpdate: true });
+	};
 
 	/**
 	 * Attempt to find a file in the LABD matching the passed attachment
