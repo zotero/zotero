@@ -273,9 +273,22 @@ Zotero_Preferences.General = {
 	
 	setFileHandler: function (type, handler) {
 		var pref = this._getFileHandlerPref(type);
-		if (handler.toLowerCase().includes('zotero')) {
+		
+		var isZotero = false;
+		if (Zotero.isMac) {
+			isZotero = /Zotero.*\.app/.test(handler);
+		}
+		else if (Zotero.isWindows) {
+			isZotero = handler.endsWith('\\zotero.exe');
+		}
+		else if (Zotero.isLinux) {
+			isZotero = handler.endsWith('/zotero');
+		}
+		// Reset to the internal reader if pointing to Zotero
+		if (isZotero) {
 			handler = '';
 		}
+		
 		Zotero.Prefs.set(pref, handler);
 		this._updateFileHandlerUI();
 	},
