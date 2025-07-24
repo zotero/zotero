@@ -142,6 +142,78 @@ Zotero.Server.networkStreamToString = function (stream, length) {
 	return Zotero.Utilities.Internal.decodeUTF8(data);
 };
 
+/**
+ * Decode RFC 2047 encoded headers
+ * Supports both Q-encoding (quoted-printable) and B-encoding (base64)
+ *
+ * @param {String} value - Header value to decode
+ * @return {String} Decoded header value
+ */
+Zotero.Server.decodeRFC2047 = function (value) {
+	// RFC 2047-decode the result.
+	// Process encoded words anywhere in the header value, as per RFC 2047 section 5
+	// which allows ordinary ASCII text and encoded words to appear together.
+	
+	// Helper function to convert string to bytes
+	function stringToBytes(str) {
+		if (typeof str !== "string") {
+			throw new Error("Invalid argument for stringToBytes");
+		}
+		const length = str.length;
+		const bytes = new Uint8Array(length);
+		for (let i = 0; i < length; ++i) {
+			bytes[i] = str.charCodeAt(i) & 0xff;
+		}
+		return bytes;
+	}
+	
+	// Helper function to decode text with specified encoding
+	function textDecode(encoding, value) {
+		if (encoding) {
+			if (!/^[\x00-\xFF]+$/.test(value)) {
+				return value;
+			}
+			try {
+				const decoder = new TextDecoder(encoding, { fatal: true });
+				const buffer = stringToBytes(value);
+				value = decoder.decode(buffer);
+			}
+			// TextDecoder constructor threw - unrecognized encoding.
+			catch {
+				Zotero.debug(`decodeRFC2047: Unrecognized encoding: ${encoding}`, 1);
+			}
+		}
+		return value;
+	}
+	
+	// RFC 2047, section 2.4
+	// encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
+	// charset = token (but let's restrict to characters that denote a
+	//       possibly valid encoding).
+	// encoding = q or b
+	// encoded-text = any printable ASCII character other than ? or space.
+	return value.replace(
+		/=\?([\w-]+)\?([QqBb])\?((?:[^? ]|\?(?!=))*)\?=/g,
+		(matches, charset, encoding, text) => {
+			if (encoding === "q" || encoding === "Q") {
+				// RFC 2047 section 4.2.
+				text = text.replace(/_/g, " ");
+				text = text.replace(/=([0-9a-fA-F]{2})/g, (match, hex) => {
+					return String.fromCharCode(parseInt(hex, 16));
+				});
+				return textDecode(charset, text);
+			}
+			// else encoding is b or B - base64 (RFC 2047 section 4.1)
+			try {
+				text = atob(text);
+			}
+			catch {
+				Zotero.debug(`decodeRFC2047: Invalid base64: ${text}`, 1);
+			}
+			return textDecode(charset, text);
+		}
+	);
+};
 
 Zotero.Server.RequestHandler = function (request, response) {
 	this.body = "";
@@ -237,8 +309,10 @@ Zotero.Server.RequestHandler.prototype.handleRequest = async function () {
 	// Parse headers into this.headers with lowercase names
 	this.headers = new Zotero.Server.Headers();
 	for (let { data: name } of request.headers) {
-		requestDebug += `${name}: ${request.getHeader(name)}\n`;
-		this.headers[name.toLowerCase()] = request.getHeader(name);
+		let headerValue = request.getHeader(name);
+		requestDebug += `${name}: ${headerValue}\n`;
+		// Decode RFC 2047 encoded header values
+		this.headers[name.toLowerCase()] = Zotero.Server.decodeRFC2047(headerValue);
 	}
 	
 	Zotero.debug(requestDebug, 5);
@@ -531,7 +605,9 @@ Zotero.Server.RequestHandler.prototype._decodeMultipartData = function(data) {
 					contentDisposition.shift();
 					for (let param of contentDisposition) {
 						let nameVal = param.trim().split('=');
-						fieldData.params[nameVal[0]] = nameVal[1].trim().slice(1, -1);
+						// Apply RFC 2047 decoding to parameter values
+						let paramValue = nameVal[1].trim().slice(1, -1);
+						fieldData.params[nameVal[0]] = Zotero.Server.decodeRFC2047(paramValue);
 					}
 				}
 			}
@@ -540,7 +616,8 @@ Zotero.Server.RequestHandler.prototype._decodeMultipartData = function(data) {
 				// Content-Type: image/png
 				let contentType = header.split(':');
 				if (contentType.length > 1) {
-					fieldData.params.contentType = contentType[1].trim();
+					// Apply RFC 2047 decoding to content type
+					fieldData.params.contentType = Zotero.Server.decodeRFC2047(contentType[1].trim());
 				}
 			}
 		}
