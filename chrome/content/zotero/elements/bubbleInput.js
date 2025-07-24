@@ -154,7 +154,7 @@
 		 * Otherwise, return last focused input, if it is still part of the bubbleInput.
 		 */
 		getCurrentInput() {
-			if (Utils.isInput(document.activeElement)) {
+			if (Utils.isInput(document.activeElement) && this.contains(document.activeElement)) {
 				return document.activeElement;
 			}
 			if (this._lastFocusedInput && this.contains(this._lastFocusedInput)) {
