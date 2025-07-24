@@ -26,6 +26,10 @@
 "use strict";
 
 {
+	const PREF_HEADER_MODE = 'itemPaneHeader';
+	const PREF_BIB_ENTRY_STYLE = 'itemPaneHeader.bibEntry.style';
+	const PREF_BIB_ENTRY_LOCALE = 'itemPaneHeader.bibEntry.locale';
+
 	let htmlDoc = document.implementation.createHTMLDocument();
 	
 	class ItemPaneHeader extends ItemPaneSectionElementBase {
@@ -71,12 +75,15 @@
 		init() {
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'paneHeader');
 			this._prefsObserverIDs = [
-				Zotero.Prefs.registerObserver('itemPaneHeader', () => {
+				Zotero.Prefs.registerObserver(PREF_HEADER_MODE, () => {
 					this._forceRenderAll();
 				}),
-				Zotero.Prefs.registerObserver('itemPaneHeader.bibEntry.style', () => this._forceRenderAll()),
-				Zotero.Prefs.registerObserver('itemPaneHeader.bibEntry.locale', () => this._forceRenderAll()),
+				Zotero.Prefs.registerObserver(PREF_BIB_ENTRY_STYLE, () => this._forceRenderAll()),
+				Zotero.Prefs.registerObserver(PREF_BIB_ENTRY_LOCALE, () => this._forceRenderAll()),
 			];
+			
+			this._bibEntryCache = new LRUCache();
+			this._cacheCSLEngine();
 			
 			this.title = this.querySelector('.title');
 			this.titleField = this.title.querySelector('editable-text');
@@ -111,8 +118,6 @@
 			
 			this.viewAsPopup = this.querySelector('.view-as-popup');
 			this.viewAsPopup.addEventListener('popupshowing', () => this._buildViewAsMenu(this.viewAsPopup));
-			
-			this._bibEntryCache = new LRUCache();
 			
 			this.titleField.addEventListener('blur', () => this.save());
 			this.titleField.ariaLabel = Zotero.getString('itemFields.title');
@@ -195,7 +200,7 @@
 			}
 			if (this._isAlreadyRendered()) return;
 
-			let headerMode = Zotero.Prefs.get('itemPaneHeader');
+			let headerMode = Zotero.Prefs.get(PREF_HEADER_MODE);
 			if (this._item.isAttachment()) {
 				headerMode = 'title';
 			}
@@ -273,28 +278,38 @@
 				headerMode === 'titleCreatorYear' && !this.creatorYear.hidden);
 		}
 		
-		_renderBibEntry() {
-			let style = Zotero.Styles.get(Zotero.Prefs.get('itemPaneHeader.bibEntry.style'));
-			if (!style) {
-				Zotero.warn('Style not found: ' + Zotero.Prefs.get('itemPaneHeader.bibEntry.style'));
-				return false;
-			}
-			let locale = Zotero.Prefs.get('itemPaneHeader.bibEntry.locale');
-			
-			// Create engine if not cached (first run with this style)
+		_getCSLEngineParams() {
+			let style = Zotero.Styles.get(Zotero.Prefs.get(PREF_BIB_ENTRY_STYLE));
+			let locale = Zotero.Prefs.get(PREF_BIB_ENTRY_LOCALE);
+			return { style, locale };
+		}
+		
+		_getCSLEngine(style, locale) {
+			// Create Engine if not cached (first run with this style)
 			if (this._cslEngineStyleID !== style.styleID || this._cslEngineLocale !== locale) {
 				this._cslEngine = style.getCiteProc(locale, 'html');
 				this._cslEngineStyleID = style.styleID;
 				this._cslEngineLocale = locale;
 				this._bibEntryCache.clear();
 			}
+			
+			return this._cslEngine;
+		}
+		
+		_renderBibEntry() {
+			let { style, locale } = this._getCSLEngineParams();
+			if (!style) {
+				Zotero.warn('Item pane header style not found: ' + Zotero.Prefs.get(PREF_BIB_ENTRY_STYLE));
+				return false;
+			}
+			let cslEngine = this._getCSLEngine(style, locale);
 
 			// Create bib entry if not cached (first run on this item or item data has changed)
 			if (!this._bibEntryCache.has(this._item.id)) {
 				// Force refresh items - without this, entries won't change when item data changes
-				this._cslEngine.updateItems([]);
+				cslEngine.updateItems([]);
 				this._bibEntryCache.set(this._item.id,
-					Zotero.Cite.makeFormattedBibliographyOrCitationList(this._cslEngine,
+					Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine,
 						[this._item], 'html', false));
 			}
 			
@@ -333,16 +348,26 @@
 			return true;
 		}
 		
+		async _cacheCSLEngine() {
+			await Zotero.Styles.init();
+			let { style, locale } = this._getCSLEngineParams();
+			if (!style) {
+				// We'll warn in _renderBibEntry()
+				return;
+			}
+			this._getCSLEngine(style, locale);
+		}
+
 		_handleSecondaryCopy() {
-			let selectedMode = Zotero.Prefs.get('itemPaneHeader');
+			let selectedMode = Zotero.Prefs.get(PREF_HEADER_MODE);
 			if (selectedMode === 'titleCreatorYear') {
 				Zotero.Utilities.Internal.copyTextToClipboard(this.creatorYear.textContent);
 			}
 			else if (selectedMode === 'bibEntry') {
 				Zotero_File_Interface.copyItemsToClipboard(
 					[this._item],
-					Zotero.Prefs.get('itemPaneHeader.bibEntry.style'),
-					Zotero.Prefs.get('itemPaneHeader.bibEntry.locale'),
+					Zotero.Prefs.get(PREF_BIB_ENTRY_STYLE),
+					Zotero.Prefs.get(PREF_BIB_ENTRY_LOCALE),
 					false,
 					false
 				);
@@ -352,14 +377,14 @@
 		_buildViewAsMenu(menupopup) {
 			menupopup.replaceChildren();
 			
-			let selectedMode = Zotero.Prefs.get('itemPaneHeader');
+			let selectedMode = Zotero.Prefs.get(PREF_HEADER_MODE);
 			for (let headerMode of ['title', 'titleCreatorYear', 'bibEntry']) {
 				let menuitem = document.createXULElement('menuitem');
 				menuitem.setAttribute('data-l10n-id', 'item-pane-header-' + headerMode);
 				menuitem.setAttribute('type', 'radio');
 				menuitem.setAttribute('checked', headerMode === selectedMode);
 				menuitem.addEventListener('command', () => {
-					Zotero.Prefs.set('itemPaneHeader', headerMode);
+					Zotero.Prefs.set(PREF_HEADER_MODE, headerMode);
 				});
 				menupopup.append(menuitem);
 			}
