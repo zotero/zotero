@@ -677,11 +677,16 @@ Zotero.HTTP = new function() {
 				noMock: true
 			}
 		);
-		var bytes = new Uint8Array(await req.response.arrayBuffer());
-		await IOUtils.write(path, bytes);
-		var byteLength = bytes.byteLength;
-		
-		Zotero.debug(`Saved file to ${path} (${byteLength} byte${byteLength != 1 ? 's' : ''})`);
+		if (req.status >= 200 && req.status < 300) {
+			let bytes = new Uint8Array(await req.response.arrayBuffer());
+			await IOUtils.write(path, bytes);
+			let byteLength = bytes.byteLength;
+			Zotero.debug(`Saved file to ${path} (${byteLength} byte${byteLength != 1 ? 's' : ''})`);
+		}
+		// Only relevant if status is in successCodes
+		else {
+			Zotero.debug("Not saving file for non-2xx response code");
+		}
 		return req;
 	};
 	
