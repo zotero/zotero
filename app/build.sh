@@ -439,6 +439,12 @@ export CALLDIR && perl -pi -e 'BEGIN { local $/; open $fh, "$ENV{CALLDIR}/assets
 # Don't try to initialize Places, since we've removed its files
 replace_line 'this._placesInitialized = true;' 'if (true) return; this._placesInitialized = true;' modules/BrowserGlue.sys.mjs
 
+# Make Scaffold console messages unfilterable
+replace_line 'function isUnfilterable\(message\) {' \
+	'function isUnfilterable(message) {
+		if (message.frame?.source === "chrome:\/\/scaffold\/content\/scaffold.xhtml") return true;' \
+	chrome/devtools/modules/devtools/client/webconsole/reducers/messages.js
+
 # Move test files to root directory
 if [ $include_tests -eq 1 ]; then
 	cat test/chrome.manifest >> chrome.manifest
