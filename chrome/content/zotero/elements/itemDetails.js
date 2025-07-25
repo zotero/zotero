@@ -541,19 +541,35 @@
 			}
 		}
 
-		async scrollToPane(paneID, behavior = 'smooth') {
-			let panes = this.getEnabledPanes();
+		/**
+		 * Scroll to a specific pane section.
+		 * @param {string} paneID - ID of the section to scroll to
+		 * @param {'smooth' | 'instant'} behavior - 'smooth' for smooth scrolling, 'instant' for instant scroll
+		 * @param {object} [options]
+		 * @param {boolean} [options.pendingScroll = false] - If true, the pane will be scrolled to when `render` is called.
+		 * @returns {Promise<boolean>} - Returns true if the pane was/will be scrolled to, false otherwise.
+		 */
+		async scrollToPane(paneID, behavior = 'smooth', options = {}) {
+			let { pendingScroll = false } = options;
+			let panes;
+			// For pending scroll, hidden sections are also considered
+			if (pendingScroll) {
+				panes = this.getPanes();
+			}
+			else {
+				panes = this.getEnabledPanes();
+			}
 			let paneIndex = panes.findIndex(elem => elem.dataset.pane == paneID);
 			let pane = panes[paneIndex];
-			if (!pane) return null;
+			if (!pane) return false;
 
 			let scrollPromise;
 
 			// If the itemPane is collapsed, just remember which pane needs to be scrolled to
 			// when itemPane is expanded.
-			if (this._collapsed) {
+			if (this._collapsed || pendingScroll) {
 				this._lastScrollPaneID = paneID;
-				return null;
+				return true;
 			}
 
 			// Temporarily disable intersection observer to prevent unwanted rendering
