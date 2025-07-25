@@ -585,6 +585,28 @@ Zotero.SearchConditions = new function(){
 				field: 'comment',
 				special: false,
 			},
+
+			{
+				name: 'annotationColor',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAnnotations',
+				field: 'color',
+				special: false,
+			},
+
+			{
+				name: 'annotationAuthor',
+				operators: {
+					is: true,
+					isNot: true,
+				},
+				table: 'groupItems',
+				field: 'createdByUserID',
+				special: false,
+			},
 			
 			{
 				name: 'fulltextWord',

@@ -1033,8 +1033,10 @@
 		<menupopup id="tag-selector-view-settings-menu"
 			onpopupshowing="
 				document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
+				document.getElementById('show-annotation-filters').setAttribute('checked', ZoteroPane.tagSelector.showAnnotationFilters);
 				document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
-				document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
+				let numSelectedNode = document.getElementById('num-selected');
+				document.l10n.setAttributes(numSelectedNode, 'tagselector-menu-filters-count',  ZoteroPane.tagSelector.filtersCount);
 				(async function () {
 					var libraryID = ZoteroPane.tagSelector.libraryID;
 					var library = Zotero.Libraries.get(libraryID);
@@ -1049,6 +1051,9 @@
 			<menuitem id="num-selected" disabled="true"/>
 			<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
 				oncommand="ZoteroPane.tagSelector.deselectAll();;"/>
+			<menuseparator/>
+			<menuitem id="show-annotation-filters" data-l10n-id="tagselector-menu-show-annotation-filters" type="checkbox"
+				oncommand="ZoteroPane.tagSelector.toggleShowAnnotationFilters();"/>		
 			<menuseparator/>
 			<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" type="checkbox"
 				oncommand="ZoteroPane.tagSelector.toggleShowAutomatic();"/>
