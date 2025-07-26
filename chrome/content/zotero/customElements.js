@@ -122,6 +122,9 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		// Only handle command events from menupopups
 		if (!event.target.closest("menupopup")) return;
 
+		// Ignore commands from within menulists, since no dialogs are opened from them
+		if (event.target.closest("menulist")) return;
+
 		// If the source event of this 'command' event is another 'command' event,
 		// it must be a delayed event re-dispatched by the code below, so let it propagate
 		if (event.sourceEvent?.type === "command") return;
