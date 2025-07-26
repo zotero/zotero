@@ -488,7 +488,6 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 	};
 
 	const thinkingContainerStyle = {
-		marginTop: '1rem',
 		borderRadius: '0.5rem',
 		backgroundColor: '#F3F4F6',
 		paddingLeft: '1rem',

@@ -1,3 +1,4 @@
+/* eslint-disable no-loop-func */
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -12,11 +13,9 @@ const markdownit = require('markdown-it');
 // Try to require markdown-it-container, fallback to a simpler implementation if not available
 try {
 	require('markdown-it-container');
-	Zotero.debug(`DeepTutorChatBox: markdown-it-container found, using it`);
 }
 catch {
 	// Fallback implementation for markdown-it-container
-	Zotero.debug(`DeepTutorChatBox: markdown-it-container not found, using fallback implementation`);
 }
 const md = markdownit({
 	html: true,
@@ -39,19 +38,15 @@ try {
 	// Try to load markdown-it-table plugin for enhanced table features
 	const markdownItTable = require('markdown-it-table');
 	md.use(markdownItTable);
-	Zotero.debug(`DeepTutorChatBox: markdown-it-table plugin loaded successfully`);
 }
 catch {
-	Zotero.debug(`DeepTutorChatBox: markdown-it-table plugin not found, using built-in table support`);
-		
 	// Try alternative GFM plugin that includes tables
 	try {
 		const markdownItGfm = require('markdown-it-gfm');
 		md.use(markdownItGfm);
-		Zotero.debug(`DeepTutorChatBox: markdown-it-gfm plugin loaded successfully`);
 	}
 	catch {
-		Zotero.debug(`DeepTutorChatBox: markdown-it-gfm plugin not found, using basic table support only`);
+		// Using basic table support only
 	}
 }
 
@@ -60,34 +55,6 @@ catch {
 // The container plugin interferes with table parsing, so we'll use post-processing instead
 
 // Test removed - no longer using container plugin
-
-// Test the markdown-it table setup with HTML support
-try {
-	const testTableSyntax = `
-| Header 1 | Header 2 | Header 3 |
-|----------|----------|----------|
-| Cell 1   | Cell 2   | Cell 3   |
-| Cell A <span>HTML</span> | Cell B | Cell C |
-`;
-	const testTableResult = md.render(testTableSyntax);
-	Zotero.debug(`DeepTutorChatBox: Table test - input: "${testTableSyntax.trim()}"`);
-	Zotero.debug(`DeepTutorChatBox: Table test - output: "${testTableResult}"`);
-	if (testTableResult.includes('<table') && testTableResult.includes('<th') && testTableResult.includes('<td')) {
-		Zotero.debug(`DeepTutorChatBox: Table test PASSED - tables are being rendered correctly`);
-		if (testTableResult.includes('<span>HTML</span>')) {
-			Zotero.debug(`DeepTutorChatBox: HTML support test PASSED - HTML in tables is preserved`);
-		}
-		else {
-			Zotero.debug(`DeepTutorChatBox: HTML support test FAILED - HTML in tables was escaped`);
-		}
-	}
-	else {
-		Zotero.debug(`DeepTutorChatBox: Table test FAILED - no table elements found in output`);
-	}
-}
-catch (error) {
-	Zotero.debug(`DeepTutorChatBox: Table test ERROR: ${error.message}`);
-}
 
 
 class Conversation {
@@ -454,16 +421,12 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	const [userId, setUserId] = useState(null);
 	const [documentIds, setDocumentIds] = useState([]);
 	const [latestMessageId, setLatestMessageId] = useState(null);
-	const [isLoading, setIsLoading] = useState(false);
-	const [storagePathsState, setStoragePathsState] = useState([]);
 	const [curSessionType, setcurSessionType] = useState(SessionType.BASIC);
 	const chatLogRef = useRef(null);
 	const contextPopupRef = useRef(null);
 	const textareaRef = useRef(null);
 	const [hoveredContextDoc, setHoveredContextDoc] = useState(null);
-	// Removed hoveredQuestion and hoveredPopupSession states - these were causing unnecessary re-renders
 	const [hoveredQuestion, setHoveredQuestion] = useState(null);
-	// const [hoveredPopupSession, setHoveredPopupSession] = useState(null);
 	const [iniWait, setInitWait] = useState(false);
 	const [isStreaming, setIsStreaming] = useState(false);
 	const isAutoScrollingRef = useRef(true);
@@ -471,13 +434,24 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	const [contextDocuments, setContextDocuments] = useState([]);
 	const [currentSourceIndices, setCurrentSourceIndices] = useState([]);
 	const sessionIdRef = useRef(null);
-	const [time, setTime] = useState(new Date());
+	const [_time, setTime] = useState(new Date());
 
 	// Add state for note container (parent item ID for creating notes)
 	const [noteContainer, setNoteContainer] = useState(null);
 
 	// Add state to track if a note is currently being saved
 	const [isSavingNote, setIsSavingNote] = useState(false);
+
+	// Add state to track streaming component visibility for each message
+	const [streamingComponentVisibility, setStreamingComponentVisibility] = useState({});
+
+	// Toggle streaming component visibility for a specific message
+	const toggleStreamingComponent = (messageId) => {
+		setStreamingComponentVisibility(prev => ({
+			...prev,
+			[messageId]: prev[messageId] === undefined ? false : !prev[messageId]
+		}));
+	};
 
 	// Helper function to check if we should continue checking for responses (within 10 minutes)
 	const checkTime = React.useCallback((lastMessage) => {
@@ -501,39 +475,22 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			
 			setTime(new Date()); // Update time every 30 seconds
 			
-			Zotero.debug(`DeepTutorChatBox: Periodic check - sessionId: ${sessionId}, messages length: ${messages.length}`);
-			
 			if (
 				sessionId
 				&& messages.length > 0
 				&& messages[messages.length - 1].role === MessageRole.USER
 				&& checkTime(messages[messages.length - 1])
 			) {
-				Zotero.debug(`DeepTutorChatBox: Fetching messages for session ${sessionId} due to periodic check`);
-				
 				getMessagesBySessionId(sessionId).then((response) => {
 					if (response && response.length > messages.length) {
-						Zotero.debug(`DeepTutorChatBox: Found ${response.length - messages.length} new messages, updating state`);
 						setMessages(response);
 						setLatestMessageId(response[response.length - 1].id);
-						
-						// Update conversation with the latest history
-						setConversation(prev => ({
-							...prev,
-							history: response,
-						}));
-						
 						// Stop streaming if it was active (AI response received)
 						
 						setIsStreaming(false);
-						Zotero.debug(`DeepTutorChatBox: Streaming stopped - AI response received via periodic check`);
-					}
-					else {
-						Zotero.debug(`EEEEEEEEEEEEEEEEE DeepTutorChatBox: No new messages found in periodic check ${time.toLocaleTimeString()}`);
-						// Start streaming if not already active (waiting for AI response)
 					}
 				}).catch((error) => {
-					Zotero.debug(`DeepTutorChatBox: Error in periodic message fetch: ${error.message}`);
+					Zotero.debug(error);
 				});
 			}
 			
@@ -567,11 +524,10 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		window.handleDeepTutorSourceClick = (encodedSourceData) => {
 			try {
 				const sourceData = JSON.parse(decodeURIComponent(encodedSourceData));
-				Zotero.debug(`DeepTutorChatBox: Source button clicked with data:`, sourceData);
 				handleSourceClick(sourceData);
 			}
 			catch (error) {
-				Zotero.debug(`DeepTutorChatBox: Error parsing source data: ${error.message}`);
+				Zotero.debug(error);
 			}
 		};
 		
@@ -582,11 +538,10 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				if (sourceData) {
 					try {
 						const decodedData = JSON.parse(decodeURIComponent(sourceData));
-						Zotero.debug(`DeepTutorChatBox: Source button clicked via delegation:`, decodedData);
 						handleSourceClick(decodedData);
 					}
 					catch (error) {
-						Zotero.debug(`DeepTutorChatBox: Error parsing source data from button: ${error.message}`);
+						Zotero.debug(error);
 					}
 				}
 			}
@@ -594,26 +549,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		
 		// Add event listener to document
 		document.addEventListener('click', handleDocumentClick);
-
-		// Debug function for testing source data retrieval
-		window.debugDeepTutorSourceData = (sourceIndex) => {
-			const storageKey = `deeptutor_source_${sessionId}_${sourceIndex}`;
-			const sourceDataStr = Zotero.Prefs.get(storageKey);
-			Zotero.debug(`DeepTutorChatBox: Debug source data for ${storageKey}:`, sourceDataStr);
-			
-			if (sourceDataStr) {
-				try {
-					const sourceData = JSON.parse(sourceDataStr);
-					Zotero.debug(`DeepTutorChatBox: Parsed source data:`, sourceData);
-				}
-				catch (error) {
-					Zotero.debug(`DeepTutorChatBox: Error parsing source data: ${error.message}`);
-				}
-			}
-			else {
-				Zotero.debug(`DeepTutorChatBox: No source data found for ${storageKey}`);
-			}
-		};
 		
 		// Cleanup function
 		return () => {
@@ -631,7 +566,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			if (!chatLogRef.current) return;
 			
 			const placeholders = chatLogRef.current.querySelectorAll('.deeptutor-source-placeholder');
-			Zotero.debug(`DeepTutorChatBox: Found ${placeholders.length} source placeholders to convert`);
 			
 			placeholders.forEach((placeholder) => {
 				const sourceId = placeholder.getAttribute('data-source-id');
@@ -648,12 +582,11 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					}
 				}
 				catch (error) {
-					Zotero.debug(`DeepTutorChatBox: Error retrieving source data from prefs: ${error.message}`);
+					Zotero.debug(error);
 				}
 				
 				// Fallback: Try to get source data from current messages if not in prefs
 				if (!sourceData) {
-					Zotero.debug(`DeepTutorChatBox: Source data not found in prefs, searching in current messages`);
 					for (const message of messages) {
 						if (message.subMessages) {
 							for (const subMessage of message.subMessages) {
@@ -669,7 +602,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 									
 									// Store it in prefs for future use
 									Zotero.Prefs.set(storageKey, sourceData);
-									Zotero.debug(`DeepTutorChatBox: Retrieved and stored source data from message: ${storageKey}`);
 									break;
 								}
 							}
@@ -690,8 +622,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				
 				// Replace the placeholder with the button
 				placeholder.parentNode.replaceChild(button, placeholder);
-				
-				Zotero.debug(`DeepTutorChatBox: Converted placeholder to button for source ${sourceId}`);
 			});
 		};
 		
@@ -724,12 +654,10 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			if (isEmpty || (!hasMultipleLines && scrollHeight <= 50)) {
 				// Use minimum height for empty or short single-line content
 				newHeight = 24; // 1.5rem in pixels
-				Zotero.debug(`DeepTutorChatBox: Using minimum height ${newHeight}px for single-line content`);
 			}
 			else {
 				// Use scrollHeight for multi-line content, but cap at maxHeight
 				newHeight = Math.min(scrollHeight, maxHeight);
-				Zotero.debug(`DeepTutorChatBox: Using scroll height ${newHeight}px for multi-line content`);
 			}
 			
 			textarea.style.height = newHeight + 'px';
@@ -752,197 +680,102 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	// Handle session changes
 	useEffect(() => {
 		const loadSessionData = async () => {
-			if (!currentSession?.id) {
-				Zotero.debug(`DeepTutorChatBox: No current session ID available`);
-				return;
-			}
+			if (!currentSession?.id) return;
 
-			try {
-				Zotero.debug(`DeepTutorChatBox: Loading session data for session ${currentSession.id}`);
-				// Update session and user IDs
-				setSessionId(currentSession.id);
-				setUserId(currentSession.userId);
-				setDocumentIds(currentSession.documentIds || []);
-				setcurSessionType(currentSession.type || SessionType.BASIC);
+			// Update session and user IDs
+			setSessionId(currentSession.id);
+			setUserId(currentSession.userId);
+			setDocumentIds(currentSession.documentIds || []);
+			setcurSessionType(currentSession.type || SessionType.BASIC);
 
-				// Update recent sessions immediately
-				// Zotero.debug(`Current recent sessions TTT: ${JSON.stringify(recentSessions)}`);
-				// await updateRecentSessions(currentSession.id);
-				// Zotero.debug(`DeepTutorChatBox: Updated recent sessions for session ${currentSession.id}`);
-				Zotero.debug(`DeepTutorChatBox: Current session type: ${currentSession.type}`);
-
-				// Fetch document information
-				const newDocumentFiles = [];
-				for (const documentId of currentSession.documentIds || []) {
-					try {
-						const docData = await getDocumentById(documentId);
-						newDocumentFiles.push(docData);
-					}
-					catch (error) {
-						Zotero.debug(`DeepTutorChatBox: Error fetching document ${documentId}: ${error.message}`);
-					}
-				}
-				Zotero.debug(`DeepTutorChatBox: ATTENTION New Document Files: ${JSON.stringify(newDocumentFiles)}`);
-				setStoragePathsState(newDocumentFiles.map(doc => doc.storagePath));
-				Zotero.debug(`DeepTutorChatBox: ATTENTION Storage Paths: ${JSON.stringify(storagePathsState)}`);
-			}
-			catch (error) {
-				Zotero.debug(`DeepTutorChatBox: Error loading session data: ${error.message}`);
-			}
+			// Fetch document information (errors are handled gracefully)
+			const documentIds = currentSession.documentIds || [];
+			const newDocumentFiles = await Promise.allSettled(
+				documentIds.map(id => getDocumentById(id))
+			);
+			
+			// Log any failures
+			newDocumentFiles
+				.filter(result => result.status === "rejected")
+				.forEach(result => Zotero.debug(result.reason));
 		};
 
 		loadSessionData();
 	}, [currentSession]);
 
-	// Handle conversation updates when sessionId changes
-	useEffect(() => {
-		if (!sessionId) return;
-
-		setConversation(prev => ({
-			...prev,
-			userId: userId,
-			sessionId: sessionId,
-			documentIds: documentIds,
-			history: [],
-			message: null,
-			streaming: true,
-			type: curSessionType || SessionType.BASIC,
-			storagePaths: storagePathsState
-		}));
-		Zotero.debug(`DeepTutorChatBox: Conversation state updated with sessionId: ${sessionId}, userId: ${userId}`);
-	}, [sessionId, userId, documentIds, curSessionType, storagePathsState]);
 
 	// Handle message updates
 	useEffect(() => {
 		const loadMessages = async () => {
-			Zotero.debug(`DeepTutorChatBox: loadMessages useEffect triggered - sessionId: ${sessionId}`);
-			if (!sessionId) {
-				Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - No sessionId, returning early`);
-				return;
-			}
+			if (!sessionId) return;
 
 			try {
-				Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Fetching messages for session ${sessionId}`);
 				const sessionMessages = await getMessagesBySessionId(sessionId);
-				Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Retrieved ${sessionMessages.length} messages for session ${sessionId}`);
 				setMessages([]);
                 
-				if (sessionMessages.length > 0) {
-					Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Session ${sessionId} has existing messages, processing them`);
-					setLatestMessageId(sessionMessages[sessionMessages.length - 1].id);
-
-                    
-					// Process and append each message
-					for (const [, message] of sessionMessages.entries()) {
-						const sender = message.role === MessageRole.USER ? "You" : "DeepTutor";
-						await _appendMessage(sender, message);
-					}
-
-					// Update conversation history with loaded messages
-					setConversation(prev => ({
-						...prev,
-						history: sessionMessages
-					}));
-					
-					// Check if we should be streaming (if last message is from user and within 10 minutes)
-					const lastMessage = sessionMessages[sessionMessages.length - 1];
-					if (lastMessage && lastMessage.role === MessageRole.USER && checkTime(lastMessage)) {
-						setIsStreaming(true);
-						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Setting streaming to true for recent user message`);
-					}
-					else {
-						setIsStreaming(false);
-						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Setting streaming to false - no recent user message or timeout`);
-					}
-					
-					Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Finished processing existing messages for session ${sessionId}`);
-				}
-				else {
-					Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Session ${sessionId} is EMPTY, triggering automatic summary`);
-					// Show loading popup
-					setIsLoading(false);
-					let shouldSendInitialMessage = true;
-					setInitWait(true);
-                    
-					// Show loading message
-					const loadingMessage = {
-						id: null,
-						parentMessageId: latestMessageId,
-						userId: userId,
-						sessionId: sessionId,
-						subMessages: [{
-							text: "Loading...Please wait for a few seconds",
-							image: null,
-							audio: null,
-							contentType: ContentType.TEXT,
-							creationTime: new Date().toISOString(),
-							sources: []
-						}],
-						followUpQuestions: [],
-						creationTime: new Date().toISOString(),
-						lastUpdatedTime: new Date().toISOString(),
-						status: MessageStatus.UNVIEW,
-						role: MessageRole.TUTOR
-					};
-					Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Showing loading message for empty session ${sessionId}`);
-					await _appendMessage("DeepTutor", loadingMessage);
-
-					// Wait for 10 seconds
-					Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Waiting 8 seconds before sending automatic summary for session ${sessionId}`);
-					await new Promise(resolve => setTimeout(resolve, 8000));
-                    
-					// Clear messages
-					setMessages([]);
-                    
-					// Check if we should proceed with initial message
-					Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Checking if should send automatic summary: ${shouldSendInitialMessage} for session ${sessionId}`);
-					if (shouldSendInitialMessage) {
-						setIsLoading(false);
-						// Send initial message
-						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - SENDING AUTOMATIC SUMMARY MESSAGE for empty session ${sessionId}`);
-						// "Can you give me a summary of this document?"
-						await userSendMessage('Based on the context provided, make a summary for the document. Begin with "Summary"');
-						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - AUTOMATIC SUMMARY MESSAGE SENT for session ${sessionId}`);
-					}
-					else {
-						Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - Skipping automatic summary for session ${sessionId} (shouldSendInitialMessage=false)`);
-					}
-					setInitWait(false);
+				if (sessionMessages.length === 0) {
+					await handleEmptySession();
+					return;
 				}
 
-				// Auto-scrolling is now handled by useEffect hooks
+				// Process existing messages
+				setLatestMessageId(sessionMessages[sessionMessages.length - 1].id);
+				
+				for (const [, message] of sessionMessages.entries()) {
+					const sender = message.role === MessageRole.USER ? "You" : "DeepTutor";
+					await _appendMessage(sender, message);
+				}
+
+				// Update streaming state based on last message
+				const lastMessage = sessionMessages[sessionMessages.length - 1];
+				const shouldStream = lastMessage?.role === MessageRole.USER && checkTime(lastMessage);
+				setIsStreaming(shouldStream);
 			}
 			catch (error) {
-				Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - ERROR loading messages for session ${sessionId}: ${error.message}`);
-				setIsLoading(false);
+				Zotero.debug(error);
 			}
 		};
 
-		Zotero.debug(`DeepTutorChatBox: loadMessages useEffect - About to call loadMessages() for sessionId: ${sessionId}`);
+		const handleEmptySession = async () => {
+			setInitWait(true);
+			
+			const loadingMessage = {
+				id: null,
+				parentMessageId: latestMessageId,
+				userId: userId,
+				sessionId: sessionId,
+				subMessages: [{
+					text: "Loading...Please wait for a few seconds",
+					image: null,
+					audio: null,
+					contentType: ContentType.TEXT,
+					creationTime: new Date().toISOString(),
+					sources: []
+				}],
+				followUpQuestions: [],
+				creationTime: new Date().toISOString(),
+				lastUpdatedTime: new Date().toISOString(),
+				status: MessageStatus.UNVIEW,
+				role: MessageRole.TUTOR
+			};
+			
+			await _appendMessage("DeepTutor", loadingMessage);
+			await new Promise(resolve => setTimeout(resolve, 8000));
+			setMessages([]);
+			
+			// Send initial message
+			await userSendMessage('Based on the context provided, make a summary for the document. Begin with "Summary"');
+			setInitWait(false);
+		};
+
 		loadMessages();
 	}, [sessionId]);
 
-
-	// Conversation state
-	const [_conversation, setConversation] = useState({
-		userId: null,
-		sessionId: null,
-		ragSessionId: null,
-		storagePaths: [],
-		history: [],
-		message: null,
-		streaming: true,
-		type: curSessionType || SessionType.BASIC
-	});
 
 	// Auto-scroll when messages change
 	useEffect(() => {
 		if (chatLogRef.current && isAutoScrollingRef.current) {
 			chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
-			Zotero.debug(`DeepTutorChatBox: Auto-scrolled to bottom due to messages change`);
-		}
-		else if (chatLogRef.current) {
-			Zotero.debug(`DeepTutorChatBox: Auto-scroll SKIPPED (disabled) on messages change`);
 		}
 	}, [messages]);
 
@@ -950,10 +783,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	useEffect(() => {
 		if (chatLogRef.current && isAutoScrollingRef.current) {
 			chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
-			Zotero.debug(`DeepTutorChatBox: Auto-scrolled to bottom due to streaming change`);
-		}
-		else if (chatLogRef.current) {
-			Zotero.debug(`DeepTutorChatBox: Auto-scroll SKIPPED (disabled) on streaming change`);
 		}
 	}, [messages, isStreaming]);
 
@@ -966,10 +795,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			// Only disable auto-scrolling if user is NOT at bottom
 			if (!isAtBottom && isAutoScrollingRef.current) {
 				isAutoScrollingRef.current = false;
-				Zotero.debug(`DeepTutorChatBox: Auto-scrolling DISABLED by wheel event (not at bottom)`);
-			}
-			else if (isAtBottom) {
-				Zotero.debug(`DeepTutorChatBox: Wheel event ignored - still at bottom`);
 			}
 		}
 	};
@@ -979,19 +804,15 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		if (chatLogRef.current) {
 			const { scrollTop, scrollHeight, clientHeight } = chatLogRef.current;
 			const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 100; // 100px tolerance
-			Zotero.debug(`DeepTutorChatBox: Scroll - scrollHeight: ${scrollHeight}, scrollTop: ${scrollTop}, clientHeight: ${clientHeight}, isAtBottom: ${isAtBottom}, autoScroll: ${isAutoScrollingRef.current}`);
             
 			if (isAtBottom && !isAutoScrollingRef.current) {
 				isAutoScrollingRef.current = true;
-				Zotero.debug(`DeepTutorChatBox: Auto-scrolling RE-ENABLED by scroll to bottom`);
 			}
 		}
 	};
 
 	const userSendMessage = async (messageString) => {
-		Zotero.debug(`DeepTutorChatBox: userSendMessage CALLED with message: "${messageString}" for session ${sessionId}`);
 		if (!messageString.trim()) {
-			Zotero.debug(`DeepTutorChatBox: userSendMessage - Message is empty, returning early`);
 			return;
 		}
 		// TODO_DEEPTUTOR: Get user ID from Cognito user attributes, such as sending user object/userid from DeepTutor.jsx
@@ -999,16 +820,12 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
         
 		// Always enable auto-scrolling when user sends a message (which will trigger streaming)
 		isAutoScrollingRef.current = true;
-		Zotero.debug(`DeepTutorChatBox: Auto-scrolling enabled for new user message`);
 
 		try {
 			if (!sessionId) throw new Error("No active session ID");
 			if (!userId) throw new Error("No active user ID");
-			Zotero.debug(`DeepTutorChatBox: userSendMessage - Validated sessionId: ${sessionId}, userId: ${userId}`);
-			Zotero.debug(`DeepTutorChatBox: userSendMessage - Message content: "${messageString}"`);
 
 			// Create user message with proper structure
-			Zotero.debug(`DeepTutorChatBox: userSendMessage - Creating message structure for API request`);
 			const userMessage = {
 				id: null,
 				parentMessageId: latestMessageId,
@@ -1031,20 +848,17 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 
 			// Add user message to state and append to chatbox
 			// if it is the first message, don't append it to the chatbox
-			Zotero.debug(`DeepTutorChatBox: userSendMessage - Appending user message to chat`);
 			await _appendMessage("You", userMessage);
 			setLatestMessageId(userMessage.id);
 
 			// Send to API and handle response
-			Zotero.debug(`DeepTutorChatBox: userSendMessage - Sending message to API`);
 			const _response = await sendToAPI(userMessage);
-			Zotero.debug(`DeepTutorChatBox: userSendMessage - Received response from API`);
 
 
 			// Auto-scrolling is handled by useEffect hooks
 		}
 		catch (error) {
-			Zotero.debug(`DeepTutorChatBox: userSendMessage - ERROR sending message "${messageString}": ${error.message}`);
+			Zotero.debug(error);
 			// Create error message
 			const errorMessage = {
 				subMessages: [{
@@ -1089,10 +903,8 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		try {
 			setIsStreaming(true); // Set streaming to true at start
 			isAutoScrollingRef.current = true; // Re-enable auto-scrolling for new stream
-			Zotero.debug(`DeepTutorChatBox: Auto-scrolling FORCE ENABLED for streaming`);
 			// Send message to API
 			const responseData = await createMessage(message);
-			Zotero.debug(`DeepTutorChatBox: Create Message Response from API: ${JSON.stringify(responseData)}`);
 			const newDocumentFiles2 = [];
 			for (const documentId of currentSession.documentIds || []) {
 				try {
@@ -1100,10 +912,9 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					newDocumentFiles2.push(docData);
 				}
 				catch (error) {
-					Zotero.debug(`DeepTutorChatBox: Error fetching document ${documentId}: ${error.message}`);
+					Zotero.debug(error);
 				}
 			}
-			Zotero.debug(`DeepTutorChatBox: ATTENTION New Document Files: ${JSON.stringify(newDocumentFiles2)}`);
             
 			// Update conversation state
 			const newState = new Conversation({
@@ -1117,13 +928,8 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				type: curSessionType || SessionType.BASIC
 			});
             
-			setConversation(newState);
-
 			// Subscribe to chat stream with timeout
-			Zotero.debug(`DeepTutorChatBox: Subscribing to chat with conversation: ${JSON.stringify(newState)}`);
-            
 			const streamResponse = await subscribeToChat(newState);
-			Zotero.debug(`DeepTutorChatBox: Stream Response from API: ${JSON.stringify(streamResponse)}`);
 
 			if (!streamResponse.ok) {
 				setIsStreaming(false); // Set streaming to false on error
@@ -1142,7 +948,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			let lastDataTime = Date.now();
 
 			// Create initial streaming message for TUTOR
-			Zotero.debug(`DeepTutorChatBox: Creating initial streaming message for TUTOR`);
 			const initialStreamingMessage = {
 				subMessages: [{
 					text: "",
@@ -1196,7 +1001,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					try {
 						const parsed = JSON.parse(jsonStr);
 						const output = parsed.msg_content;
-						Zotero.debug(`DeepTutorChatBox: Received data: ${output}`);
 						if (output && output.length > 0) {
 							hasReceivedData = true;
 							streamText += output;
@@ -1226,26 +1030,46 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						}
 					}
 					catch (error) {
-						Zotero.debug('DeepTutorChatBox: Error parsing SSE data:', error);
+						Zotero.debug(error);
 					}
 				});
 			}
 
 			// Fetch message history for the session
-			Zotero.debug(`DeepTutorChatBox: Waiting 3 seconds before fetching message history`);
 			await new Promise(resolve => setTimeout(resolve, 3000));
             
-			Zotero.debug(`DeepTutorChatBox: Fetching message history for session ${sessionId}`);
 			const historyData = await getMessagesBySessionId(sessionId);
-			setMessages(historyData);
+			
+			// Preserve streaming message data when updating from server
+			setMessages((prevMessages) => {
+				// Find the streaming message (last message with isStreaming: true)
+				const streamingMessageIndex = prevMessages.findIndex(msg => msg.isStreaming);
+				
+				if (streamingMessageIndex !== -1) {
+					// Replace the streaming message with the final server message, but preserve streamText
+					const streamingMessage = prevMessages[streamingMessageIndex];
+					const finalMessage = historyData[historyData.length - 1];
+					
+					// Create updated message that preserves streamText but uses server data
+					const updatedMessage = {
+						...finalMessage,
+						streamText: streamingMessage.streamText || finalMessage.subMessages?.[0]?.text || '',
+						isStreaming: false
+					};
+					
+					// Replace the streaming message with the updated one
+					const updatedMessages = [...prevMessages];
+					updatedMessages[streamingMessageIndex] = updatedMessage;
+					
+					return updatedMessages;
+				}
+				
+				// If no streaming message found, use server data as is
+				return historyData;
+			});
+			
 			setLatestMessageId(historyData[historyData.length - 1].id);
-			Zotero.debug(`DeepTutorChatBox: FINAL History Data: ${JSON.stringify(historyData)}`);
 
-			// Update conversation with the latest history
-			setConversation(prev => ({
-				...prev,
-				history: historyData,
-			}));
             
 			// Get only the last message from the response
 			const lastMessage = historyData.length > 0 ? historyData[historyData.length - 2] : null;
@@ -1253,32 +1077,21 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			return lastMessage;
 		}
 		catch (error) {
+			Zotero.debug(error);
 			setIsStreaming(false); // Set streaming to false on any error
-			Zotero.debug(`DeepTutorChatBox: Error in sendToAPI: ${error.message}`);
 			
 			// Even on error, try to fetch message history to ensure UI consistency
 			try {
-				Zotero.debug(`DeepTutorChatBox: Attempting to fetch message history after error`);
 				await new Promise(resolve => setTimeout(resolve, 1000)); // Shorter wait for error case
 				
 				const historyData = await getMessagesBySessionId(sessionId);
 				if (historyData && historyData.length > 0) {
 					setMessages(historyData);
 					setLatestMessageId(historyData[historyData.length - 1].id);
-					Zotero.debug(`DeepTutorChatBox: Successfully fetched message history after error: ${historyData.length} messages`);
-					
-					// Update conversation with the latest history
-					setConversation(prev => ({
-						...prev,
-						history: historyData,
-					}));
-				}
-				else {
-					Zotero.debug(`DeepTutorChatBox: No message history found after error`);
 				}
 			}
 			catch (historyError) {
-				Zotero.debug(`DeepTutorChatBox: Error fetching message history after timeout: ${historyError.message}`);
+				Zotero.debug(historyError);
 			}
 			
 			throw error;
@@ -1287,12 +1100,8 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 
 
 	const _appendMessage = async (sender, message) => {
-		Zotero.debug(`DeepTutorChatBox: Appending message from ${sender}`);
-        
 		// Process subMessages
 		if (message.subMessages && message.subMessages.length > 0) {
-			Zotero.debug(`DeepTutorChatBox: Processing ${message.subMessages.length} subMessages for ${sender}`);
-            
 			// Create a new message object with processed subMessages
 			const processedMessage = {
 				...message,
@@ -1315,8 +1124,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 							if (!currentSourceIndices.includes(sourceIndex)) {
 								setCurrentSourceIndices(prev => [...prev, sourceIndex]);
 							}
-							
-							Zotero.debug(`DeepTutorChatBox: Stored source data for history session: ${storageKey}`);
 						});
 						
 						// Annotation workflow removed — simply pass sources through unchanged
@@ -1331,11 +1138,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 
 			// Update messages state with only the new message
 			setMessages(prev => [...prev, processedMessage]);
-			// Update conversation with only the new message
-			setConversation(prev => ({
-				...prev,
-				message: processedMessage
-			}));
+
 
 			// Auto-scrolling is handled by useEffect hooks
 		}
@@ -1343,25 +1146,19 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 
 	const handleQuestionClick = async (question) => {
 		// Set the input value to the question
-		Zotero.debug(`DeepTutorChatBox: Handling question click: ${question}`);
 		// Trigger send
-		Zotero.debug(`DeepTutorChatBox: Triggering send`);
 		await userSendMessage(question);
 	};
 
 	const handleContextButtonClick = () => {
-		Zotero.debug(`DeepTutorChatBox: Context button clicked, current popup state: ${showContextPopup}`);
 		setShowContextPopup(!showContextPopup);
 	};
 
 	const handleContextDocumentClick = async (contextDoc) => {
-		Zotero.debug(`DeepTutorChatBox: Context document clicked: ${contextDoc.name} (ID: ${contextDoc.zoteroAttachmentId})`);
-        
 		try {
 			// Get the item and open it
 			const item = Zotero.Items.get(contextDoc.zoteroAttachmentId);
 			if (!item) {
-				Zotero.debug(`DeepTutorChatBox: No item found for ID ${contextDoc.zoteroAttachmentId}`);
 				return;
 			}
 
@@ -1371,14 +1168,12 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					pageIndex: 0 // Start at first page
 				}
 			});
-			Zotero.debug(`DeepTutorChatBox: Opened document ${contextDoc.name} in reader`);
             
 			// Close the popup after opening document
 			setShowContextPopup(false);
 		}
 		catch (error) {
-			Zotero.debug(`DeepTutorChatBox: Error opening context document: ${error.message}`);
-			Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
+			Zotero.debug(error);
 		}
 	};
 
@@ -1420,11 +1215,8 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			}
 		}
 		// Replacement for source span identifier
-		Zotero.debug(`3TESTTESTTEST DeepTutorChatBox: formatResponseForMarkdown - Replacing source span identifiers ${cleanText}`);
 		cleanText = cleanText.replace(/\[<(\d{1,2})>\]/g, (match, sourceId) => {
 			const sourceIndex = parseInt(sourceId) - 1; // Convert to 0-based index
-			
-			Zotero.debug(`DeepTutorChatBox: Processing source reference: ${match}, sourceId: ${sourceId}, sourceIndex: ${sourceIndex}`);
 			
 			// Get the source data from subMessage.sources
 			if (subMessage && subMessage.sources && subMessage.sources[sourceIndex]) {
@@ -1448,7 +1240,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				
 				// Create HTML span with minimal data
 				const htmlSpan = `<span class="deeptutor-source-placeholder" data-source-id="${sourceId}" data-page="${source.page || 'Unknown'}">[${sourceId}]</span>`;
-				Zotero.debug(`DeepTutorChatBox: Generated HTML span for source ${sourceId}: "${htmlSpan}"`);
 				return htmlSpan;
 			}
 			else {
@@ -1469,11 +1260,9 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				}
 				
 				const htmlSpan = `<span class="deeptutor-source-placeholder" data-source-id="${sourceId}" data-page="Unknown">[${sourceId}]</span>`;
-				Zotero.debug(`DeepTutorChatBox: Generated fallback HTML span for source ${sourceId}: "${htmlSpan}"`);
 				return htmlSpan;
 			}
 		});
-		Zotero.debug(`4TESTTESTTEST DeepTutorChatBox: formatResponseForMarkdown - Clean text after source span replacement: ${cleanText}`);
 
 		// Remove any remaining custom tags that might interfere with XML parsing
 		cleanText = removeSubstrings(cleanText, [
@@ -1492,11 +1281,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			'<appendix>',
 			'</appendix>'
 		]);
-		
-		// Remove any other custom tags that might cause XML issues
-		// This regex removes any remaining custom tags that aren't standard HTML
-		//cleanText = cleanText.replace(/<(?!\/?(p|div|span|strong|em|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|br|hr|img|a)\b)[^>]*>/gi, '');
-		
+			
 		// Now apply mathematical symbol processing and source processing to the clean text
 		let formattedText = cleanText;
 
@@ -1508,43 +1293,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			/\\\[([\s\S]+?)\\\]/g,
 			'$$$$\n$1\n$$$$',
 		);
-
-		// Apply additional mathematical symbol processing for non-KaTeX expressions
-		/*
-		formattedText = formattedText
-			// Convert Ca$^{2+}$ to Ca<sup>2+</sup>
-			.replace(/Ca\$\^\{?2\+\}\$?/g, 'Ca<sup>2+</sup>')
-			// Convert other LaTeX superscripts: $^{text}$ to <sup>text</sup>
-			.replace(/\$\^\{([^}]+)\}\$/g, '<sup>$1</sup>')
-			// Convert standalone superscripts: $^text$ to <sup>text</sup>
-			.replace(/\$\^([a-zA-Z0-9\+\-]+)\$/g, '<sup>$1</sup>')
-			// Convert Greek letters to HTML entities
-			.replace(/β/g, '&beta;')
-			.replace(/α/g, '&alpha;')
-			.replace(/γ/g, '&gamma;')
-			.replace(/δ/g, '&delta;')
-			.replace(/ε/g, '&epsilon;')
-			.replace(/θ/g, '&theta;')
-			.replace(/λ/g, '&lambda;')
-			.replace(/μ/g, '&mu;')
-			.replace(/π/g, '&pi;')
-			.replace(/ρ/g, '&rho;')
-			.replace(/σ/g, '&sigma;')
-			.replace(/τ/g, '&tau;')
-			.replace(/φ/g, '&phi;')
-			.replace(/χ/g, '&chi;')
-			.replace(/ψ/g, '&psi;')
-			.replace(/ω/g, '&omega;')
-			// Convert any remaining standalone $ to HTML entity (only for non-math expressions)
-			.replace(/\$(?!\$)/g, '&#36;')
-			// Convert standalone ^ to HTML entity (for any remaining cases)
-			.replace(/\^/g, '&#94;');
-		*/
-		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Original text length: ${text.length}, Clean text length: ${cleanText.length}`);
-		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Removed custom tags and processed for XML compatibility`);
-		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Available sources: ${subMessage?.sources?.length || 0}`);
-		
-		Zotero.debug(`DeepTutorChatBox: formatResponseForMarkdown - Final formatted text length: ${formattedText.length}`);
 		return formattedText;
 	};
 
@@ -1565,14 +1313,10 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				if (xmldom && xmldom.DOMParser && xmldom.XMLSerializer) {
 					parser = new xmldom.DOMParser();
 					serializer = new xmldom.XMLSerializer();
-					Zotero.debug(`DeepTutorChatBox: Successfully loaded and using xmldom package for DOM parsing`);
-				}
-				else {
-					Zotero.debug(`DeepTutorChatBox: xmldom package loaded but missing DOMParser/XMLSerializer`);
 				}
 			}
 			catch (e) {
-				Zotero.debug(`DeepTutorChatBox: xmldom package not available or failed to load: ${e.message}`);
+				Zotero.debug(e);
 			}
 			
 			// Fallback to native DOM APIs if xmldom not available
@@ -1595,7 +1339,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 							.createInstance(Components.interfaces.nsIDOMSerializer);
 					}
 					catch (e) {
-						Zotero.debug(`DeepTutorChatBox: Components.classes DOMParser not available: ${e.message}`);
+						Zotero.debug(e);
 					}
 				}
 			}
@@ -1612,101 +1356,83 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					.replace(/&nbsp;/g, '&#160;');
 				
 				const wrappedHtml = `<root>${preprocessedHtml}</root>`;
-				Zotero.debug(`DeepTutorChatBox: Preprocessed HTML for XML compatibility`);
-				
-				// Debug: Show what parser type we're using
-				if (parser.constructor && parser.constructor.name) {
-					Zotero.debug(`DeepTutorChatBox: Using parser type: ${parser.constructor.name}`);
-				}
-				
-				// Debug: Show the HTML being parsed (truncated for readability)
-				if (wrappedHtml.length > 500) {
-					Zotero.debug(`DeepTutorChatBox: Parsing HTML content (${wrappedHtml.length} chars, first 500): ${wrappedHtml.substring(0, 500)}...`);
-				}
-				else {
-					Zotero.debug(`DeepTutorChatBox: Parsing HTML content (${wrappedHtml.length} chars): ${wrappedHtml}`);
-				}
-				
-				try {
-					// Try parsing as HTML first, then convert to XML
-					let doc = null;
+				// Try parsing as HTML first, then convert to XML
+				let doc = null;
 					
-					// First attempt: Parse as HTML (if the parser supports it)
-					if (parser.parseFromString) {
-						try {
-							doc = parser.parseFromString(wrappedHtml, 'text/html');
-							Zotero.debug(`DeepTutorChatBox: Successfully parsed as HTML`);
-						}
-						catch (htmlError) {
-							Zotero.debug(`DeepTutorChatBox: HTML parsing failed: ${htmlError.message}`);
+				// First attempt: Parse as HTML (if the parser supports it)
+				if (parser.parseFromString) {
+					try {
+						doc = parser.parseFromString(wrappedHtml, 'text/html');
+					}
+					catch (htmlError) {
+						Zotero.debug(htmlError);
+					}
+				}
+					
+				// Second attempt: Parse as XML if HTML parsing failed or not supported
+				if (!doc || !doc.documentElement || doc.documentElement.tagName === 'parsererror') {
+					try {
+						doc = parser.parseFromString(wrappedHtml, 'application/xml');
+							
+						// Check if parsing was successful (no parsererror elements)
+						const parseError = doc.querySelector ? doc.querySelector('parsererror') : null;
+						if (parseError) {
+							throw new Error('XML parsing failed');
 						}
 					}
+					catch (xmlError) {
+						Zotero.debug(xmlError);
+						throw new Error('Both HTML and XML parsing failed');
+					}
+				}
 					
-					// Second attempt: Parse as XML if HTML parsing failed or not supported
-					if (!doc || !doc.documentElement || doc.documentElement.tagName === 'parsererror') {
-						try {
-							doc = parser.parseFromString(wrappedHtml, 'application/xml');
-							Zotero.debug(`DeepTutorChatBox: Parsed as XML`);
+				// Function to recursively fix self-closing tags
+				const fixXmlCompatibility = (node) => {
+					if (node.nodeType === 1) { // ELEMENT_NODE
+						const tagName = node.tagName.toLowerCase();
 							
-							// Check if parsing was successful (no parsererror elements)
-							const parseError = doc.querySelector ? doc.querySelector('parsererror') : null;
-							if (parseError) {
-								throw new Error('XML parsing failed');
+						// List of self-closing HTML tags
+						const selfClosingTags = [
+							'area',
+							'base',
+							'br',
+							'col',
+							'embed',
+							'hr',
+							'img',
+							'input',
+							'link',
+							'meta',
+							'param',
+							'source',
+							'track',
+							'wbr'
+						];
+							
+						// For self-closing tags, ensure they have no children
+						if (selfClosingTags.includes(tagName)) {
+							while (node.firstChild) {
+								node.removeChild(node.firstChild);
 							}
 						}
-						catch (xmlError) {
-							Zotero.debug(`DeepTutorChatBox: XML parsing also failed: ${xmlError.message}`);
-							throw new Error('Both HTML and XML parsing failed');
+							
+						// Process child elements
+						const children = Array.from(node.children || []);
+						for (const child of children) {
+							fixXmlCompatibility(child);
 						}
 					}
+				};
 					
-					// Function to recursively fix self-closing tags
-					const fixXmlCompatibility = (node) => {
-						if (node.nodeType === 1) { // ELEMENT_NODE
-							const tagName = node.tagName.toLowerCase();
-							
-							// List of self-closing HTML tags
-							const selfClosingTags = [
-								'area',
-								'base',
-								'br',
-								'col',
-								'embed',
-								'hr',
-								'img',
-								'input',
-								'link',
-								'meta',
-								'param',
-								'source',
-								'track',
-								'wbr'
-							];
-							
-							// For self-closing tags, ensure they have no children
-							if (selfClosingTags.includes(tagName)) {
-								while (node.firstChild) {
-									node.removeChild(node.firstChild);
-								}
-							}
-							
-							// Process child elements
-							const children = Array.from(node.children || []);
-							for (const child of children) {
-								fixXmlCompatibility(child);
-							}
-						}
-					};
+				// Fix XML compatibility
+				fixXmlCompatibility(doc.documentElement);
 					
-					// Fix XML compatibility
-					fixXmlCompatibility(doc.documentElement);
+				// Serialize back to string
+				const serializedXml = serializer.serializeToString(doc.documentElement);
+				let result = serializedXml.replace(/^<root[^>]*>/, '').replace(/<\/root>$/, '');
 					
-					// Serialize back to string
-					const serializedXml = serializer.serializeToString(doc.documentElement);
-					let result = serializedXml.replace(/^<root[^>]*>/, '').replace(/<\/root>$/, '');
-					
-					// Clean up whitespace: remove spaces around specific HTML tags
-					result = result
+				// Clean up whitespace: remove spaces around specific HTML tags
+				result = result
 						// Remove spaces before opening tags
 						.replace(/\s+<(ol|ul|li|p|div|span|h[1-6])>/g, '<$1>')
 						// Remove spaces after opening tags
@@ -1718,22 +1444,16 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						// Remove spaces at the beginning and end of the entire string
 						.trim();
 					
-					Zotero.debug(`DeepTutorChatBox: Successfully converted HTML to XML using DOM parser and cleaned whitespace`);
-					return result;
-				}
-				catch (domError) {
-					Zotero.debug(`DeepTutorChatBox: DOM parsing failed: ${domError.message}, falling back to regex`);
-					throw domError;
-				}
+				return result;
 			}
+			
 			else {
 				// No DOM parsing available, skip to regex
 				throw new Error('No DOM parsing APIs available');
 			}
 		}
 		catch (error) {
-			Zotero.debug(`DeepTutorChatBox: DOM parsing failed, using enhanced regex fallback: ${error.message}`);
-			
+			Zotero.debug(error);
 			// Enhanced regex-based approach with better XML compatibility
 			let processedHtml = html;
 			
@@ -1796,21 +1516,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				});
 			}
 			
-			// Log what changes were made
-			if (html !== processedHtml) {
-				Zotero.debug(`DeepTutorChatBox: Enhanced regex processing made changes to HTML`);
-				const changes = [];
-				selfClosingTagPatterns.forEach(({ tag }) => {
-					if (html.includes(`<${tag}`) && processedHtml.includes(`<${tag}`)
-						&& !html.includes(`<${tag}`) === processedHtml.includes(`<${tag}/>`)) {
-						changes.push(`${tag} tags made self-closing`);
-					}
-				});
-				if (changes.length > 0) {
-					Zotero.debug(`DeepTutorChatBox: Specific changes: ${changes.join(', ')}`);
-				}
-			}
-			
 			// Clean up whitespace: remove spaces around specific HTML tags
 			processedHtml = processedHtml
 				// Remove spaces before opening tags
@@ -1824,13 +1529,11 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				// Remove spaces at the beginning and end of the entire string
 				.trim();
 			
-			Zotero.debug(`DeepTutorChatBox: Enhanced regex processing completed with whitespace cleanup`);
 			return processedHtml;
 		}
 	};
 	const handleSourceClick = async (source) => {
 		if (!source) {
-			Zotero.debug("DeepTutorChatBox: Source button clicked with empty source object");
 			return;
 		}
 
@@ -1841,17 +1544,13 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
             	: source.index;
 
 		if (docIdx === undefined || docIdx === null || docIdx < 0 || docIdx >= documentIds.length) {
-			Zotero.debug(`DeepTutorChatBox: Invalid source index (index=${source.index}, refinedIndex=${source.refinedIndex})`);
 			return;
 		}
 
 		const attachmentId = documentIds[docIdx];
 		if (!attachmentId) {
-			Zotero.debug(`DeepTutorChatBox: No attachment ID found for docIdx ${docIdx}`);
 			return;
 		}
-
-		Zotero.debug(`DeepTutorChatBox: Source button clicked for attachment ${attachmentId}, page ${source.page}`);
 
 		try {
 			const storageKey = `deeptutor_mapping_${sessionId}`;
@@ -1867,7 +1566,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 
 			const item = Zotero.Items.get(zoteroAttachmentId);
 			if (!item) {
-				Zotero.debug(`DeepTutorChatBox: No item found for ID ${zoteroAttachmentId}`);
 				return;
 			}
 
@@ -1875,41 +1573,34 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			await Zotero.FileHandlers.open(item, {
 				location: { pageIndex: source.page - 1 }
 			});
-			Zotero.debug(`DeepTutorChatBox: Opened PDF at page ${source.page}`);
 
 			// Get the reader instance for the current tab
 			const reader = Zotero.Reader.getByTabID(Zotero.getMainWindow().Zotero_Tabs.selectedID);
 			if (!reader) {
-				Zotero.debug("DeepTutorChatBox: No reader instance found");
 				return;
 			}
 			
 			// Use the new public setFindQuery method
 			const searchQuery = source.referenceString || "test";
-			Zotero.debug(`DeepTutorChatBox: Setting find query to "${searchQuery}"`);
 			
 			reader._internalReader.setFindQuery(searchQuery, {
 				primary: true,
 				openPopup: false,
 				activateSearch: true
 			});
-			
-			Zotero.debug(`DeepTutorChatBox: Successfully set find query and activated search`);
 		}
 		catch (error) {
-			Zotero.debug(`DeepTutorChatBox: Error handling source click: ${error.message}`);
+			Zotero.debug(error);
 		}
 	};
 
 	// Function to download/save a message as a Zotero note
 	const downloadMessage = async (message, messageIndex) => {
 		if (!message) {
-			Zotero.debug("DeepTutorChatBox: downloadMessage called with empty message");
 			return;
 		}
 
 		if (!noteContainer) {
-			Zotero.debug("DeepTutorChatBox: No noteContainer available for creating note");
 			// Show user-friendly message
 			// Zotero.alert(null, "Cannot Create Note", "Cannot create note: No parent item available. Please ensure documents are loaded.");
 			return;
@@ -1919,8 +1610,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		setIsSavingNote(true);
 
 		try {
-			Zotero.debug(`DeepTutorChatBox: Creating note for message ${messageIndex} in parent item ${noteContainer}`);
-
 			// Extract and clean the message text
 			let noteText = '';
 			if (message.subMessages && message.subMessages.length > 0) {
@@ -1953,7 +1642,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			}
 
 			if (!noteText) {
-				Zotero.debug("DeepTutorChatBox: No text content found in message");
 				// Zotero.alert(null, "Cannot Create Note", "Cannot create note: Message appears to be empty.");
 				setIsSavingNote(false);
 				return;
@@ -1972,7 +1660,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				
 				// Create note title from the first line or a default
 				const titleText = noteText.replace(/<[^>]*>/g, '').substring(0, 100);
-				const noteTitle = titleText.length > 100 ? titleText.substring(0, 97) + '...' : titleText;
+				const _noteTitle = titleText.length > 100 ? titleText.substring(0, 97) + '...' : titleText;
 				
 				// Prepare the final note content with proper HTML structure
 				const fullNoteContent = `<div class="zotero-note znv1">
@@ -1999,18 +1687,15 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				
 				const parentItem = Zotero.Items.get(noteContainer);
 				containerName = parentItem.getDisplayTitle();
-				
-				Zotero.debug(`DeepTutorChatBox: Successfully created note with ID ${noteID} for message ${messageIndex}`);
 			});
 			
 			// Show success message with actual names
 			Zotero.alert(null, "Note Created Successfully", `Note "${noteName}" created successfully in "${containerName}".`);
-
-		} catch (error) {
-			Zotero.debug(`DeepTutorChatBox: Error creating note for message ${messageIndex}: ${error.message}`);
-			Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
-			// Zotero.alert(null, "Error Creating Note", `Error creating note: ${error.message}`);
-		} finally {
+		}
+		catch (error) {
+			 Zotero.alert(null, "Error Creating Note", `Error creating note: ${error.message}`);
+		}
+		finally {
 			// Always reset the saving state, regardless of success or failure
 			setIsSavingNote(false);
 		}
@@ -2023,201 +1708,199 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		}
         
 		const isUser = message.role === MessageRole.USER;
-        
-		// Handle streaming messages for TUTOR role
-		if (!isUser && message.isStreaming && message.streamText) {
-			return (
-				<div key={message.id || index} style={styles.messageContainer}>
-					<DeepTutorStreamingComponent
-						streamText={message.streamText || ''}
-						hideStreamResponse={false}
-					/>
-				</div>
-			);
-		}
-        
+		const messageId = message.id || index;
+		const isStreamingComponentVisible = streamingComponentVisibility[messageId] !== false; // Default to true
+		
 		return (
-			<div key={message.id || index} style={styles.messageStyle}>
-				<div style={{
-					...styles.messageBubble,
-					...(isUser ? styles.userMessage : styles.botMessage),
-					animation: "slideIn 0.3s ease-out",
-					...(isUser && { display: 'flex', alignItems: 'flex-start', gap: '0.5rem' })
-				}}>
-					{/* Add user message icon inside the bubble for user messages */}
-					{message.subMessages.map((subMessage, subIndex) => {
-						const text = formatResponseForMarkdown(subMessage.text || "", subMessage);
-						try {
-							Zotero.debug(`DeepTutorChatBox: About to render markdown for subMessage ${subIndex}, text length: ${text.length}`);
-							var result = md.render(text);
-							Zotero.debug(`DeepTutorChatBox: Markdown render result length: ${result.length}`);
-							// Zotero.debug(`DeepTutorChatBox: Markdown render result (first 1000 chars): ${result.substring(0, 1000)}`);
-							
-							// Process through DOM-based XML conversion
-							const processedResult = processMarkdownResult(result);
-							Zotero.debug(`DeepTutorChatBox: DOM-processed result length: ${processedResult.length}`);
-							Zotero.debug(`DeepTutorChatBox: DOM-processed result (first 1000 chars): ${processedResult.substring(0, 1000)}`);
-							
-							// Compare HTML vs XML conversion with enhanced logging
-							if (result !== processedResult) {
-								Zotero.debug(`1234567890 DeepTutorChatBox: DOM XML conversion made changes - detailed comparison:`);
-								Zotero.debug(`1234567890 DeepTutorChatBox: Original HTML (${result.length} chars): ${result}`);
-								Zotero.debug(`1234567890 DeepTutorChatBox: DOM-converted XML (${processedResult.length} chars): ${processedResult}`);
+			<div>
+				{/* Show streaming component toggle button for non-streaming messages with streamText */}
+				{!message.isStreaming && message.streamText && (
+					<div style={{
+						display: 'flex',
+						justifyContent: 'flex-start',
+						marginTop: '1.5rem',
+						marginLeft: '0.5rem'
+					}}>
+						<button
+							style={{
+								all: 'revert',
+								display: 'flex',
+								width: 'fit-content',
+								borderRadius: '0.375rem',
+								border: '0.25rem solid #E0E0E0',
+								paddingLeft: '1rem',
+								paddingRight: '1rem',
+								paddingTop: '0.5rem',
+								paddingBottom: '0.5rem',
+								marginTop: '0.5rem',
+								marginBottom: '0.5rem',
+								fontFamily: 'Roboto, sans-serif',
+								fontSize: '0.875rem',
+								alignItems: 'center',
+								color: '#000000',
+								background: '#FFFFFF',
+								cursor: 'pointer',
+								transition: 'background-color 0.2s',
+								fontWeight: 500
+							}}
+							onClick={() => toggleStreamingComponent(messageId)}
+							onMouseEnter={e => e.target.style.background = '#F5F5F5'}
+							onMouseLeave={e => e.target.style.background = '#FFFFFF'}
+							title={isStreamingComponentVisible ? "Hide streaming view" : "Show streaming view"}
+						>
+							{isStreamingComponentVisible ? "Hide Thinking Process" : "Show Thinking Process"}
+						</button>
+					</div>
+				)}
+				
+				{/* Show streaming component based on visibility state */}
+				{isStreamingComponentVisible && (
+					<div key={`streaming-${messageId}`} style={styles.messageContainer}>
+						<DeepTutorStreamingComponent
+							streamText={message.streamText || ''}
+							hideStreamResponse={!message.isStreaming}
+						/>
+					</div>
+				)}
+				
+				{/* Show regular message content for non-streaming messages */}
+				{!message.isStreaming && (
+					<div key={`content-${messageId}`} style={styles.messageStyle}>
+						<div style={{
+							...styles.messageBubble,
+							...(isUser ? styles.userMessage : styles.botMessage),
+							animation: "slideIn 0.3s ease-out",
+							...(isUser && { display: 'flex', alignItems: 'flex-start' })
+						}}>
+							{/* Add user message icon inside the bubble for user messages */}
+							{message.subMessages.map((subMessage, subIndex) => {
+								const text = formatResponseForMarkdown(subMessage.text || "", subMessage);
+								try {
+									var result = md.render(text);
 								
-								// Try to identify specific differences
-								const differences = [];
-								if (result.includes('<br>') && processedResult.includes('<br/>')) {
-									differences.push('br tags converted to self-closing');
+									// Process through DOM-based XML conversion
+									const processedResult = processMarkdownResult(result);
+								
+									return (
+										<div key={subIndex} style={styles.messageText}>
+											{/* Render text content through markdown-it with DOM-processed XML */}
+											{processedResult
+												? (
+													<div
+														className="markdown mb-0 flex flex-col"
+														dangerouslySetInnerHTML={{
+															__html: (() => {
+																return processedResult;
+															})()
+														}}
+														style={{
+															fontSize: "14px",
+															lineHeight: "1.5",
+															wordBreak: "break-word",
+															overflowWrap: "break-word"
+														}}
+													/>
+												)
+												: (
+													<div style={{
+														fontSize: "14px",
+														lineHeight: "1.5",
+														wordBreak: "break-word",
+														overflowWrap: "break-word"
+													}}>
+														{subMessage.text || ""}
+													</div>
+												)}
+										</div>
+									);
 								}
-								if (result.includes('<hr>') && processedResult.includes('<hr/>')) {
-									differences.push('hr tags converted to self-closing');
-								}
-								if (result.includes('<img') && !result.includes('/>') && processedResult.includes('/>')) {
-									differences.push('img tags converted to self-closing');
-								}
-								if (differences.length > 0) {
-									Zotero.debug(`1234567890 DeepTutorChatBox: Specific changes detected: ${differences.join(', ')}`);
-								}
-							}
-							else {
-								Zotero.debug(`DeepTutorChatBox: DOM XML conversion made no changes - HTML was already XML-compatible`);
-							}
-							
-							return (
-								<div key={subIndex} style={styles.messageText}>
-									{/* Render text content through markdown-it with DOM-processed XML */}
-									{processedResult
-										? (
-											<div
-												className="markdown mb-0 flex flex-col"
-												dangerouslySetInnerHTML={{
-													__html: (() => {
-														try {
-															// Final validation before rendering
-															if (typeof processedResult !== 'string' || processedResult.trim() === '') {
-																Zotero.debug(`DeepTutorChatBox: Invalid processedResult, falling back to plain text`);
-																return null;
-															}
-															Zotero.debug(`DeepTutorChatBox: Successfully preparing DOM-processed content for React rendering`);
-															return processedResult;
-														}
-														catch (error) {
-															Zotero.debug(`DeepTutorChatBox: Error preparing content for React: ${error.message}`);
-															return null;
-														}
-													})()
-												}}
-												style={{
-													fontSize: "14px",
-													lineHeight: "1.5",
-													wordBreak: "break-word",
-													overflowWrap: "break-word"
-												}}
-											/>
-										)
-										: (
+								catch {
+								// Fallback to plain text if markdown processing fails
+									return (
+										<div key={subIndex} style={styles.messageText}>
 											<div style={{
-												fontSize: "14px",
+												fontSize: "16px",
 												lineHeight: "1.5",
 												wordBreak: "break-word",
 												overflowWrap: "break-word"
 											}}>
 												{subMessage.text || ""}
 											</div>
-										)}
-								</div>
-							);
-						}
-						catch {
-							// Zotero.debug(`DeepTutorChatBox: Error processing markdown: ${error.message}`);
-							// Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
-							// Fallback to plain text if markdown processing fails
-							return (
-								<div key={subIndex} style={styles.messageText}>
-									<div style={{
-										fontSize: "16px",
-										lineHeight: "1.5",
-										wordBreak: "break-word",
-										overflowWrap: "break-word"
-									}}>
-										{subMessage.text || ""}
-									</div>
-								</div>
-							);
-						}
-					})}
-				</div>
-				
-				{/* Add download button for tutor messages only */}
-				{!isUser && noteContainer && !isStreaming && !iniWait && !isSavingNote && (
-					<div style={{
-						display: 'flex',
-						justifyContent: 'flex-start',
-						marginTop: '0.5rem',
-						marginLeft: '0'
-					}}>
-						<button
-							style={{
-								all: 'revert',
-								background: '#0687E5',
-								color: 'white',
-								border: 'none',
-								borderRadius: '0.375rem',
-								padding: '0.25rem 0.5rem',
-								fontSize: '0.75rem',
-								fontWeight: 500,
-								cursor: 'pointer',
-								boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.1)',
-								transition: 'background-color 0.2s',
-								fontFamily: 'Roboto, sans-serif',
+										</div>
+									);
+								}
+							})}
+						</div>
+					
+						{/* Add download button for tutor messages only */}
+						{!isUser && noteContainer && !isStreaming && !iniWait && !isSavingNote && (
+							<div style={{
 								display: 'flex',
-								alignItems: 'center',
-								gap: '0.25rem'
-							}}
-							onClick={() => downloadMessage(message, index)}
-							onMouseEnter={(e) => e.target.style.background = '#0570c0'}
-							onMouseLeave={(e) => e.target.style.background = '#0687E5'}
-							title={`Save message ${index + 1} as Zotero note`}
-						>
-							📝 Save as Note
-						</button>
-					</div>
-				)}
-				
-				{index === messages.length - 1 && message.followUpQuestions && message.followUpQuestions.length > 0 && (
-					<div>
-						<div style={styles.followUpQuestionText}>
-							Follow-up Questions
-						</div>
-						<div style={styles.questionContainer}>
-							{message.followUpQuestions.map((question, qIndex) => (
+								justifyContent: 'flex-start',
+								marginTop: '0.5rem',
+								marginLeft: '0'
+							}}>
 								<button
-									key={qIndex}
 									style={{
-										...styles.questionButton,
-										background: hoveredQuestion === qIndex ? "#D9D9D9" : "#FFFFFF"
+										all: 'revert',
+										background: '#0687E5',
+										color: 'white',
+										border: 'none',
+										borderRadius: '0.375rem',
+										padding: '0.25rem 0.5rem',
+										fontSize: '0.75rem',
+										fontWeight: 500,
+										cursor: 'pointer',
+										boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.1)',
+										transition: 'background-color 0.2s',
+										fontFamily: 'Roboto, sans-serif',
+										display: 'flex',
+										alignItems: 'center',
+										gap: '0.25rem'
 									}}
-									onClick={() => handleQuestionClick(question)}
-									onMouseEnter={() => setHoveredQuestion(qIndex)}
-									onMouseLeave={() => setHoveredQuestion(null)}
+									onClick={() => downloadMessage(message, index)}
+									onMouseEnter={e => e.target.style.background = '#0570c0'}
+									onMouseLeave={e => e.target.style.background = '#0687E5'}
+									title={`Save message ${index + 1} as Zotero note`}
 								>
-									{question}
+									📝 Save as Note
 								</button>
-							))}
-						</div>
+							</div>
+						)}
+					
+						{index === messages.length - 1 && message.followUpQuestions && message.followUpQuestions.length > 0 && (
+							<div>
+								<div style={styles.followUpQuestionText}>
+								Follow-up Questions
+								</div>
+								<div style={styles.questionContainer}>
+									{message.followUpQuestions.map((question, qIndex) => (
+										<button
+											key={qIndex}
+											style={{
+												...styles.questionButton,
+												background: hoveredQuestion === qIndex ? "#D9D9D9" : "#FFFFFF"
+											}}
+											onClick={() => handleQuestionClick(question)}
+											onMouseEnter={() => setHoveredQuestion(qIndex)}
+											onMouseLeave={() => setHoveredQuestion(null)}
+										>
+											{question}
+										</button>
+									))}
+								</div>
+							</div>
+						)}
 					</div>
 				)}
 			</div>
 		);
 	};
 
-
 	// Add new useEffect after the existing one
 	useEffect(() => {
 		const openAllDocuments = async () => {
 			if (documentIds && documentIds.length > 0 && sessionId) {
-				Zotero.debug(`DeepTutorChatBox: Opening all documents - sessionId: ${sessionId}, ${documentIds.length} documents`);
-                
 				// Try to get the mapping from local storage
 				const storageKey = `deeptutor_mapping_${sessionId}`;
 				const mappingStr = Zotero.Prefs.get(storageKey);
@@ -2225,7 +1908,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				
 				if (mappingStr) {
 					mapping = JSON.parse(mappingStr);
-					Zotero.debug(`DeepTutorChatBox: Found mapping in storage: ${JSON.stringify(mapping)}`);
 				}
 
 				// Open all documents in order
@@ -2237,13 +1919,11 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						// If we have a mapping for this document ID, use it
 						if (mapping[documentId]) {
 							zoteroAttachmentId = mapping[documentId];
-							Zotero.debug(`DeepTutorChatBox: Using mapped attachment ID: ${zoteroAttachmentId} for document ${documentId}`);
 						}
 
 						// Get the item and open it
 						const item = Zotero.Items.get(zoteroAttachmentId);
 						if (!item) {
-							Zotero.debug(`DeepTutorChatBox: No item found for ID ${zoteroAttachmentId}`);
 							continue; // Skip this document and continue with the next one
 						}
 
@@ -2253,7 +1933,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 								pageIndex: 0 // Start at first page
 							}
 						});
-						Zotero.debug(`DeepTutorChatBox: Opened document ${i + 1}/${documentIds.length}: ${zoteroAttachmentId} in reader`);
 						
 						// Add a small delay between opening documents to avoid overwhelming the UI
 						if (i < documentIds.length - 1) {
@@ -2261,13 +1940,9 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						}
 					}
 					catch (error) {
-						Zotero.debug(`DeepTutorChatBox: Error opening document ${documentId}: ${error.message}`);
-						Zotero.debug(`DeepTutorChatBox: Error stack: ${error.stack}`);
-						// Continue with the next document even if this one fails
+						Zotero.debug(error);
 					}
 				}
-				
-				Zotero.debug(`DeepTutorChatBox: Finished opening all ${documentIds.length} documents`);
 			}
 		};
 		openAllDocuments();
@@ -2276,154 +1951,127 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	// Load context documents when documentIds change
 	useEffect(() => {
 		const loadContextDocuments = async () => {
-			if (!documentIds || documentIds.length === 0 || !sessionId) {
-				Zotero.debug(`DeepTutorChatBox: No documentIds or sessionId available for context loading`);
+			if (!documentIds?.length || !sessionId) {
 				setContextDocuments([]);
 				return;
 			}
-
-			Zotero.debug(`DeepTutorChatBox: Loading context documents for ${documentIds.length} documents`);
             
 			try {
-				// Try to get the mapping from local storage
-				const storageKey = `deeptutor_mapping_${sessionId}`;
-				const mappingStr = Zotero.Prefs.get(storageKey);
-				let mapping = {};
-                
-				if (mappingStr) {
-					mapping = JSON.parse(mappingStr);
-					Zotero.debug(`DeepTutorChatBox: Found mapping in storage: ${JSON.stringify(mapping)}`);
-				}
-
-				const contextDocs = [];
-				for (const documentId of documentIds) {
-					try {
-						// Get the actual Zotero attachment ID
-						let zoteroAttachmentId = documentId;
-						if (mapping[documentId]) {
-							zoteroAttachmentId = mapping[documentId];
-							Zotero.debug(`DeepTutorChatBox: Using mapped attachment ID: ${zoteroAttachmentId} for document ${documentId}`);
-						}
-
-						// Try to get the Zotero item to get the document name and path
-						const item = Zotero.Items.get(zoteroAttachmentId);
-						let documentName = "Document Not Found"; // fallback to documentId
-						let filePath = null;
-
-						if (item) {
-							// Prioritize attachment filename first
-							if (item.attachmentFilename) {
-								documentName = item.attachmentFilename;
-								Zotero.debug(`DeepTutorChatBox: Using attachment filename: ${documentName}`);
-							}
-							// Fall back to display title if no filename
-							else if (item.getDisplayTitle) {
-								documentName = item.getDisplayTitle();
-								Zotero.debug(`DeepTutorChatBox: Found item title: ${documentName}`);
-							}
-							// Finally try parent item title
-							else if (item.parentItem) {
-								const parentItem = Zotero.Items.get(item.parentItem);
-								if (parentItem && parentItem.getDisplayTitle) {
-									documentName = parentItem.getDisplayTitle();
-									Zotero.debug(`DeepTutorChatBox: Found parent item title: ${documentName}`);
-								}
-							}
-
-							// Get the file path if it's an attachment
-							if (item.isAttachment && item.isAttachment()) {
-								try {
-									filePath = await item.getFilePathAsync();
-									if (filePath) {
-										Zotero.debug(`DeepTutorChatBox: Found file path: ${filePath}`);
-										// Optionally truncate long paths for display
-										const maxPathLength = 60;
-										if (filePath.length > maxPathLength) {
-											const pathParts = filePath.split(/[/\\]/);
-											const filename = pathParts[pathParts.length - 1];
-											const pathPrefix = filePath.substring(0, maxPathLength - filename.length - 3);
-											filePath = pathPrefix + '...' + filename;
-										}
-									}
-								}
-								catch (error) {
-									Zotero.debug(`DeepTutorChatBox: Error getting file path for ${zoteroAttachmentId}: ${error.message}`);
-								}
-							}
-						}
-						else {
-							Zotero.debug(`DeepTutorChatBox: No item found for ID ${zoteroAttachmentId}, using document ID as name`);
-						}
-
-						contextDocs.push({
-							documentId: documentId,
-							zoteroAttachmentId: zoteroAttachmentId,
-							name: documentName,
-							filePath: filePath // Add file path to the context document object
-						});
-					}
-					catch (error) {
-						Zotero.debug(`DeepTutorChatBox: Error processing document ${documentId}: ${error.message}`);
-						// Add with fallback name
-						contextDocs.push({
-							documentId: documentId,
-							zoteroAttachmentId: documentId,
-							name: "Document Not Found",
-							filePath: null
-						});
-					}
-				}
-
-				Zotero.debug(`DeepTutorChatBox: Loaded ${contextDocs.length} context documents`);
-				setContextDocuments(contextDocs);
+				const mapping = getDocumentMapping();
+				const contextDocs = await Promise.allSettled(
+					documentIds.map(id => processDocument(id, mapping))
+				);
 				
-				// Set noteContainer to the parent of the first document (or the first document itself if it's a regular item)
-				if (contextDocs.length > 0) {
-					try {
-						const firstDoc = contextDocs[0];
-						const firstItem = Zotero.Items.get(firstDoc.zoteroAttachmentId);
-						
-						if (firstItem) {
-							let parentItemId = null;
-							
-							// If the item is an attachment, get its parent
-							if (firstItem.isAttachment() && firstItem.parentID) {
-								parentItemId = firstItem.parentID;
-								const parentItem = Zotero.Items.get(parentItemId);
-								if (parentItem && parentItem.isRegularItem()) {
-									Zotero.debug(`DeepTutorChatBox: Set noteContainer to parent item ${parentItemId} (${parentItem.getDisplayTitle()})`);
-									setNoteContainer(parentItemId);
-								} else {
-									Zotero.debug(`DeepTutorChatBox: Parent item ${parentItemId} is not a regular item`);
-								}
-							}
-							// If the item is a regular item itself, use it as the container
-							else if (firstItem.isRegularItem()) {
-								parentItemId = firstItem.id;
-								Zotero.debug(`DeepTutorChatBox: Set noteContainer to regular item ${parentItemId} (${firstItem.getDisplayTitle()})`);
-								setNoteContainer(parentItemId);
-							}
-							// If no suitable parent found, log this
-							else {
-								Zotero.debug(`DeepTutorChatBox: No suitable parent item found for noteContainer. First item type: ${firstItem.itemType}`);
-								setNoteContainer(null);
-							}
-						} else {
-							Zotero.debug(`DeepTutorChatBox: First document item not found for noteContainer setup`);
-							setNoteContainer(null);
-						}
-					} catch (error) {
-						Zotero.debug(`DeepTutorChatBox: Error setting up noteContainer: ${error.message}`);
-						setNoteContainer(null);
-					}
-				} else {
-					Zotero.debug(`DeepTutorChatBox: No context documents available for noteContainer setup`);
-					setNoteContainer(null);
-				}
+				const successfulDocs = contextDocs
+					.filter(result => result.status === "fulfilled")
+					.map(result => result.value);
+				
+				// Log any failures
+				contextDocs
+					.filter(result => result.status === "rejected")
+					.forEach(result => Zotero.debug(result.reason));
+
+				setContextDocuments(successfulDocs);
+				setNoteContainerFromDocuments(successfulDocs);
 			}
 			catch (error) {
-				// Zotero.debug(`DeepTutorChatBox: Error loading context documents: ${error.message}`);
+				Zotero.debug(`DeepTutorChatBox: Error loading context documents: ${error.message}`);
 				setContextDocuments([]);
+				setNoteContainer(null);
+			}
+		};
+
+		const getDocumentMapping = () => {
+			const storageKey = `deeptutor_mapping_${sessionId}`;
+			const mappingStr = Zotero.Prefs.get(storageKey);
+			return mappingStr ? JSON.parse(mappingStr) : {};
+		};
+
+		const processDocument = async (documentId, mapping) => {
+			const zoteroAttachmentId = mapping[documentId] || documentId;
+			const item = Zotero.Items.get(zoteroAttachmentId);
+			
+			if (!item) {
+				return createFallbackDocument(documentId);
+			}
+
+			const documentName = getDocumentName(item);
+			const filePath = await getDocumentFilePath(item);
+
+			return {
+				documentId,
+				zoteroAttachmentId,
+				name: documentName,
+				filePath
+			};
+		};
+
+		const getDocumentName = (item) => {
+			return item.attachmentFilename
+				|| (item.getDisplayTitle && item.getDisplayTitle())
+				|| (item.parentItem && Zotero.Items.get(item.parentItem)?.getDisplayTitle?.())
+				|| "Document Not Found";
+		};
+
+		const getDocumentFilePath = async (item) => {
+			if (!item.isAttachment?.()) return null;
+			
+			try {
+				const filePath = await item.getFilePathAsync();
+				if (!filePath) return null;
+				
+				const maxPathLength = 60;
+				if (filePath.length <= maxPathLength) return filePath;
+				
+				const pathParts = filePath.split(/[/\\]/);
+				const filename = pathParts[pathParts.length - 1];
+				const pathPrefix = filePath.substring(0, maxPathLength - filename.length - 3);
+				return `${pathPrefix}...${filename}`;
+			}
+			catch (error) {
+				Zotero.debug(error);
+				return null;
+			}
+		};
+
+		const createFallbackDocument = documentId => ({
+			documentId,
+			zoteroAttachmentId: documentId,
+			name: "Document Not Found",
+			filePath: null
+		});
+
+		const setNoteContainerFromDocuments = (docs) => {
+			if (!docs.length) {
+				setNoteContainer(null);
+				return;
+			}
+
+			try {
+				const firstDoc = docs[0];
+				const firstItem = Zotero.Items.get(firstDoc.zoteroAttachmentId);
+				
+				if (!firstItem) {
+					setNoteContainer(null);
+					return;
+				}
+
+				let parentItemId = null;
+				
+				if (firstItem.isAttachment() && firstItem.parentID) {
+					const parentItem = Zotero.Items.get(firstItem.parentID);
+					if (parentItem?.isRegularItem()) {
+						parentItemId = firstItem.parentID;
+					}
+				}
+				else if (firstItem.isRegularItem()) {
+					parentItemId = firstItem.id;
+				}
+
+				setNoteContainer(parentItemId);
+			}
+			catch (error) {
+				Zotero.debug(error);
 				setNoteContainer(null);
 			}
 		};
@@ -2435,7 +2083,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	useEffect(() => {
 		const handleClickOutside = (event) => {
 			if (contextPopupRef.current && !contextPopupRef.current.contains(event.target)) {
-				Zotero.debug(`DeepTutorChatBox: Clicked outside context popup, closing`);
 				setShowContextPopup(false);
 			}
 		};
@@ -2535,7 +2182,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
                 
 				if (mappingStr) {
 					mapping = JSON.parse(mappingStr);
-					// Zotero.debug(`DeepTutorChatBox: Found mapping in storage: ${JSON.stringify(mapping)}`);
 				}
 
 				const contextDocs = [];
@@ -2557,19 +2203,16 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 							// Prioritize attachment filename first
 							if (item.attachmentFilename) {
 								documentName = item.attachmentFilename;
-								Zotero.debug(`DeepTutorChatBox: Using attachment filename: ${documentName}`);
 							}
 							// Fall back to display title if no filename
 							else if (item.getDisplayTitle) {
 								documentName = item.getDisplayTitle();
-								Zotero.debug(`DeepTutorChatBox: Found item title: ${documentName}`);
 							}
 							// Finally try parent item title
 							else if (item.parentItem) {
 								const parentItem = Zotero.Items.get(item.parentItem);
 								if (parentItem && parentItem.getDisplayTitle) {
 									documentName = parentItem.getDisplayTitle();
-									Zotero.debug(`DeepTutorChatBox: Found parent item title: ${documentName}`);
 								}
 							}
 
@@ -2634,36 +2277,33 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 								parentItemId = firstItem.parentID;
 								const parentItem = Zotero.Items.get(parentItemId);
 								if (parentItem && parentItem.isRegularItem()) {
-									Zotero.debug(`DeepTutorChatBox: Set noteContainer to parent item ${parentItemId} (${parentItem.getDisplayTitle()})`);
 									setNoteContainer(parentItemId);
-								} else {
-									Zotero.debug(`DeepTutorChatBox: Parent item ${parentItemId} is not a regular item`);
 								}
 							}
 							// If the item is a regular item itself, use it as the container
 							else if (firstItem.isRegularItem()) {
 								parentItemId = firstItem.id;
-								Zotero.debug(`DeepTutorChatBox: Set noteContainer to regular item ${parentItemId} (${firstItem.getDisplayTitle()})`);
 								setNoteContainer(parentItemId);
 							}
 							// If no suitable parent found, log this
 							else {
-								Zotero.debug(`DeepTutorChatBox: No suitable parent item found for noteContainer. First item type: ${firstItem.itemType}`);
 								setNoteContainer(null);
 							}
-						} else {
-							Zotero.debug(`DeepTutorChatBox: First document item not found for noteContainer setup`);
+						}
+						else {
 							setNoteContainer(null);
 						}
-					} catch (error) {
-						Zotero.debug(`DeepTutorChatBox: Error setting up noteContainer: ${error.message}`);
+					}
+					catch (error) {
+						Zotero.debug(error);
 						setNoteContainer(null);
 					}
-				} else {
-					Zotero.debug(`DeepTutorChatBox: No context documents available for noteContainer setup`);
+				}
+				else {
 					setNoteContainer(null);
 				}
-			} catch {
+			}
+			catch {
 				// Zotero.debug(`DeepTutorChatBox: Error loading context documents: ${error.message}`);
 				setContextDocuments([]);
 				setNoteContainer(null);
@@ -2677,7 +2317,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	useEffect(() => {
 		const handleClickOutside = (event) => {
 			if (contextPopupRef.current && !contextPopupRef.current.contains(event.target)) {
-				Zotero.debug(`DeepTutorChatBox: Clicked outside context popup, closing`);
 				setShowContextPopup(false);
 			}
 		};
@@ -2696,7 +2335,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	useEffect(() => {
 		if (onInitWaitChange) {
 			onInitWaitChange(iniWait);
-			// Zotero.debug(`DeepTutorChatBox: Communicated iniWait state change to parent: ${iniWait}`);
 		}
 	}, [iniWait, onInitWaitChange]);
 
@@ -2710,11 +2348,10 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			try {
 				if (Zotero.Prefs.get(storageKey)) {
 					Zotero.Prefs.clear(storageKey);
-					Zotero.debug(`DeepTutorChatBox: Cleaned up source data for ${storageKey}`);
 				}
 			}
 			catch (error) {
-				Zotero.debug(`DeepTutorChatBox: Error cleaning up source data: ${error.message}`);
+				Zotero.debug(error);
 			}
 		});
 		
@@ -2742,7 +2379,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			if (sessionIdRef.current) {
 				// Only cleanup if we're actually unmounting, not just switching sessions
 				// This prevents removing source data that might be needed
-				Zotero.debug(`DeepTutorChatBox: Component unmounting, cleaning up source data for session ${sessionIdRef.current}`);
 				cleanupSourceData(sessionIdRef.current);
 			}
 		};
@@ -2771,9 +2407,9 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				
 				// Copy the selected text
 				navigator.clipboard.writeText(selectedText).then(() => {
-					Zotero.debug('DeepTutorChatBox: Text copied successfully');
+					// Text copied successfully
 				}).catch((err) => {
-					Zotero.debug(`DeepTutorChatBox: Copy failed: ${err.message}`);
+					Zotero.debug(err);
 				});
 			}
 		};
@@ -3100,6 +2736,33 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						height: 0 !important;
 						width: 0 !important;
 						visibility: hidden !important;
+					}
+					
+					/* Image styling - make images fit their parent container */
+					.markdown img {
+						max-width: 100% !important;
+						height: auto !important;
+						display: block !important;
+						margin: 0.5rem auto !important;
+						border-radius: 0.375rem !important;
+						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1) !important;
+						object-fit: contain !important;
+					}
+					
+					/* Ensure images don't overflow their containers */
+					.markdown p img,
+					.markdown div img {
+						max-width: 100% !important;
+						width: auto !important;
+						height: auto !important;
+					}
+					
+					/* Responsive image handling for different screen sizes */
+					@media (max-width: 768px) {
+						.markdown img {
+							max-width: 95% !important;
+							margin: 0.375rem auto !important;
+						}
 					}
 				`
 			}} />
