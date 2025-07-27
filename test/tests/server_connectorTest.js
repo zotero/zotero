@@ -427,6 +427,8 @@ describe("Connector Server", function () {
 			var promise = waitForItemEvent('add').then(function (_ids) {
 				ids = _ids;
 			});
+			var promiseFulfilled = false;
+			promise.then(() => promiseFulfilled = true);
 
 			var file = getTestDataDirectory();
 			file.append('snapshot');
@@ -447,7 +449,7 @@ describe("Connector Server", function () {
 				}
 			);
 
-			assert.isTrue(promise.isFulfilled());
+			assert.isTrue(promiseFulfilled);
 
 			// Check item
 			assert.lengthOf(ids, 1);
@@ -1140,6 +1142,9 @@ describe("Connector Server", function () {
 					ids2 = ids;
 				});
 			});
+			var promiseFulfilled = false;
+			promise.then(() => promiseFulfilled = true);
+			
 			await httpRequest(
 				'POST',
 				connectorServerPath + "/connector/saveSnapshot",
@@ -1171,7 +1176,7 @@ describe("Connector Server", function () {
 				}
 			);
 			
-			assert.isTrue(promise.isFulfilled());
+			assert.isTrue(promiseFulfilled);
 			
 			var item = Zotero.Items.get(ids1[0]);
 			
