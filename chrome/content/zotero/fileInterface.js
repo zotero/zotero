@@ -713,7 +713,7 @@ var Zotero_File_Interface = new function () {
 			let file = FileUtils.getDir("Home", []);
 			file = OS.Path.join(
 				file.path,
-				'zotero-client', 'chrome', 'content', 'zotero', 'import', 'mendeley', 'mendeleyImport.js'
+				'zotero-client', 'chrome', 'content', 'zotero', 'import', 'mendeley', 'mendeleyImport.mjs'
 			);
 			let fileURI = OS.Path.toFileURI(file);
 			({ Zotero_Import_Mendeley } = ChromeUtils.importESModule(fileURI));

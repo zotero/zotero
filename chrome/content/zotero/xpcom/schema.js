@@ -3301,7 +3301,7 @@ Zotero.Schema = new function () {
 			}
 			
 			else if (i == 101) {
-				Cu.import("chrome://zotero/content/import/mendeley/mendeleyImport.js");
+				let { Zotero_Import_Mendeley } = ChromeUtils.importESModule("chrome://zotero/content/import/mendeley/mendeleyImport.mjs");
 				let importer = new Zotero_Import_Mendeley();
 				if (await importer.hasImportedFiles()) {
 					await importer.queueFileCleanup();
