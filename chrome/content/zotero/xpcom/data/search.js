@@ -724,11 +724,11 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 			// Search the full-text content
 			else if (scopeIDs.length) {
 				let found = new Set(
-					await Zotero.Fulltext.findTextInItems(
+					(await Zotero.Fulltext.findTextInItems(
 						scopeIDs,
 						condition.value,
 						condition.mode
-					).map(x => x.id)
+					)).map(x => x.id)
 				);
 				// Either include or exclude the results, depending on the operator
 				filteredIDs = scopeIDs.filter((id) => {
