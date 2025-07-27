@@ -279,7 +279,7 @@ ConcurrentCaller.prototype._waitForPause = async function () {
 	var interval = this._getIntervalNeeded();
 	if (interval == 0) return;
 	this._pausing = true;
-	await new Promise(resolve => setTimeout(resolve, interval));
+	await Promise.delay(interval);
 	this._pausing = false;
 };
 
