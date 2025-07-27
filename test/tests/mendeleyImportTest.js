@@ -1,6 +1,7 @@
 /* global setHTTPResponse:false, sinon: false, Zotero_Import_Mendeley: false, HttpServer: false, createAnnotation: false */
 
 describe('Zotero_Import_Mendeley', function () {
+	var { Zotero_Import_Mendeley } = ChromeUtils.importESModule("chrome://zotero/content/import/mendeley/mendeleyImport.mjs");
 	var server, httpd, httpdURL, importers;
 
 	const getImporter = ({ importNotes = false } = {}) => {
@@ -20,8 +21,6 @@ describe('Zotero_Import_Mendeley', function () {
 	};
 
 	before(async () => {
-		Cu.import('chrome://zotero/content/import/mendeley/mendeleyImport.js');
-
 		// A real HTTP server is used to deliver a Bitcoin PDF so that annotations can be processed during import.
 		var { HttpServer } = ChromeUtils.importESModule("chrome://remote/content/server/httpd.sys.mjs");;
 		const port = 16213;
