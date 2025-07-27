@@ -300,7 +300,7 @@ Zotero.Profile = {
 	_findOtherProfiles: async function () {
 		var profileDir = this.dir;
 		var profilesDir = this.getProfilesDir();
-		return this._getProfilesInDir(profilesDir).filter(dir => dir != profileDir);
+		return (await this._getProfilesInDir(profilesDir)).filter(dir => dir != profileDir);
 	},
 	
 	
