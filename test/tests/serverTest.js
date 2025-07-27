@@ -1,6 +1,6 @@
 "use strict";
 
-ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
+var { NetUtil } = ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 
 describe("Zotero.Server", function () {
 	var serverPath;
