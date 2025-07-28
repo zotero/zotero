@@ -168,21 +168,21 @@ describe("Zotero.Library", function () {
 	describe("#save()", function () {
 		it("should require mandatory parameters to be set", async function () {
 			let library = new Zotero.Library({ editable: true, filesEditable: true });
-			await assert.isRejected(library.saveTx(), /^libraryType must be set before saving/, 'libraryType is mandatory');
+			assert.equal((await getPromiseError(library.saveTx())).message, 'libraryType must be set before saving');
 			
 			// Required group params
 			let groupID = Zotero.Utilities.rand(1000, 10000);
 			let name = 'foo';
 			let description = '';
 			let version = Zotero.Utilities.rand(1000, 10000);
-			library = new Zotero.Group({ filesEditable: true, groupID, name , description, version });
-			await assert.isRejected(library.saveTx(), /^editable must be set before saving/, 'editable is mandatory');
+			library = new Zotero.Group({ filesEditable: true, groupID, name, description, version });
+			assert.equal((await getPromiseError(library.saveTx())).message, 'editable must be set before saving');
 			
-			library = new Zotero.Group({ editable: true, groupID, name , description, version });
-			await assert.isRejected(library.saveTx(), /^filesEditable must be set before saving/, 'filesEditable is mandatory');
+			library = new Zotero.Group({ editable: true, groupID, name, description, version });
+			assert.equal((await getPromiseError(library.saveTx())).message, 'filesEditable must be set before saving');
 			
-			library = new Zotero.Group({ editable: true, filesEditable: true, groupID, name , description, version });
-			await assert.isFulfilled(library.saveTx());
+			library = new Zotero.Group({ editable: true, filesEditable: true, groupID, name, description, version });
+			await library.saveTx();
 		});
 		it("should save new library to DB", async function () {
 			let library = await createGroup({});
@@ -223,17 +223,17 @@ describe("Zotero.Library", function () {
 		it("should erase a read-only library", async function () {
 			let library = await createGroup({ editable:false, filesEditable:false });
 			
-			await assert.isFulfilled(library.eraseTx());
+			await library.eraseTx();
 		});
 		
 		it("should not allow erasing permanent libraries", async function () {
 			let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
-			await assert.isRejected(library.eraseTx(), /^Cannot erase library of type 'user'$/, "does not allow erasing user library");
+			assert.equal((await getPromiseError(library.eraseTx())).message, "Cannot erase library of type 'user'");
 		});
 		
 		it("should not allow erasing unsaved libraries", async function () {
 			let library = new Zotero.Library();
-			await assert.isRejected(library.eraseTx());
+			assert.ok(await getPromiseError(library.eraseTx()));
 		});
 		it("should throw when accessing erased library methods, except for #libraryID and #name", async function () {
 			let library = await createGroup();
