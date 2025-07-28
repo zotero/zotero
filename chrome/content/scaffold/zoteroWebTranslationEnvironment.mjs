@@ -8,7 +8,7 @@ export class ZoteroWebTranslationEnvironment extends AbstractWebTranslationEnvir
 	 * @returns {Promise<HiddenBrowser>}
 	 */
 	async fetchPage(url, { tester }) {
-		const { HiddenBrowser } = ChromeUtils.import('chrome://zotero/content/HiddenBrowser.jsm');
+		const { HiddenBrowser } = ChromeUtils.importESModule('chrome://zotero/content/HiddenBrowser.mjs');
 		let browser = new HiddenBrowser({
 			docShell: { allowMetaRedirects: true },
 			cookieSandbox: tester.cookieSandbox,
@@ -40,7 +40,7 @@ export class ZoteroWebTranslationEnvironment extends AbstractWebTranslationEnvir
 	 * }>}
 	 */
 	async runTranslation(browser, { tester, handlers, signal }) {
-		const { RemoteTranslate } = ChromeUtils.import('chrome://zotero/content/RemoteTranslate.jsm');
+		const { RemoteTranslate } = ChromeUtils.importESModule('chrome://zotero/content/RemoteTranslate.mjs');
 
 		let translate = new RemoteTranslate({ disableErrorReporting: true });
 		try {
