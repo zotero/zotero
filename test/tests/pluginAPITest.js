@@ -186,9 +186,10 @@ describe("Plugin API", function () {
 
 			await ZoteroPane.viewItems([attachment]);
 			let tabID = Zotero_Tabs.selectedID;
-			await Zotero.Reader.getByTabID(tabID)._waitForReader();
+			let reader = Zotero.Reader.getByTabID(tabID);
+			await reader._initPromise;
 			// Ensure context pane is open
-			ZoteroContextPane.splitter.setAttribute("state", "open");
+			ZoteroContextPane.collapsed = false;
 			result = await itemChangePromise;
 
 			let itemDetails = ZoteroContextPane.context._getItemContext(tabID);
