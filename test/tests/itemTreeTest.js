@@ -369,7 +369,7 @@ describe("Zotero.ItemTree", function () {
 			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
 			// in notify()) as a no-op
 			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
-			assert.isFalse(win.ZoteroPane.itemSelected.returnValues[0].value());
+			assert.isFalse(await win.ZoteroPane.itemSelected.returnValues[0]);
 			
 			// Existing item should still be selected
 			selected = itemsView.getSelectedItems(true);
@@ -462,7 +462,7 @@ describe("Zotero.ItemTree", function () {
 			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
 			// in notify()) as a no-op
 			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
-			assert.isFalse(win.ZoteroPane.itemSelected.returnValues[0].value());
+			assert.isFalse(await win.ZoteroPane.itemSelected.returnValues[0]);
 			
 			// Modified item should not be selected
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
@@ -488,7 +488,7 @@ describe("Zotero.ItemTree", function () {
 			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
 			// in notify()) as a no-op
 			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
-			assert.isFalse(win.ZoteroPane.itemSelected.returnValues[0].value());
+			assert.isFalse(await win.ZoteroPane.itemSelected.returnValues[0]);
 			
 			// Modified item should still be selected
 			selected = itemsView.getSelectedItems(true);
