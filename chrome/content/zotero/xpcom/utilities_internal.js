@@ -543,11 +543,9 @@ Zotero.Utilities.Internal = {
 		}
 		const wrapColumn = 80;
 		
-		var deferred = Zotero.Promise.defer();
-		var listener = new Zotero.WebProgressFinishListener(function () {
-			deferred.resolve();
+		let savePromise = new Promise((resolve) => {
+			wbp.progressListener = new Zotero.WebProgressFinishListener(() => resolve());
 		});
-		wbp.progressListener = listener;
 		
 		wbp.saveDocument(
 			Zotero.Translate.DOMWrapper.unwrap(document),
@@ -560,17 +558,19 @@ Zotero.Utilities.Internal = {
 		
 		// Cancel save after timeout has passed, so we return an error to the connector and don't stay
 		// saving forever
-		var timeoutID = setTimeout(function () {
-			if (deferred.promise.isPending()) {
-				Zotero.debug("Stopping save for " + document.location.href, 2);
-				//Zotero.debug(listener.getRequest());
-				deferred.reject("Snapshot save timeout on " + document.location.href);
+		let timeoutID;
+		let timeoutPromise = new Promise((resolve, reject) => {
+			timeoutID = setTimeout(() => {
+				let url = document.location?.href ?? "document without location";
+				Zotero.debug("Stopping save for " + url, 2);
+				// Zotero.debug(listener.getRequest());
+				reject(new Error("Snapshot save timeout on " + url));
 				wbp.cancelSave();
-			}
-		}, this.SNAPSHOT_SAVE_TIMEOUT);
-		deferred.promise.then(() => clearTimeout(timeoutID));
+			}, this.SNAPSHOT_SAVE_TIMEOUT);
+		});
+		savePromise.then(() => clearTimeout(timeoutID));
 		
-		return deferred.promise;
+		return Promise.race([savePromise, timeoutPromise]);
 	},
 
 	/**
