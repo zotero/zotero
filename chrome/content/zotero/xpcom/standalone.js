@@ -57,7 +57,7 @@ Zotero.Standalone = new function () {
 				var nBytes = data.length;
 				var inputStream = Cc["@mozilla.org/io/string-input-stream;1"].
 					createInstance(Ci.nsIStringInputStream);
-				inputStream.setData(data, nBytes);
+				inputStream.setByteStringData(data);
 				this.oldListener.onDataAvailable(aRequest, aContext, inputStream, 0, nBytes);
 			}
 			this.oldListener.onStopRequest(aRequest, aContext, aStatusCode);
