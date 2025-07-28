@@ -284,7 +284,7 @@ Zotero.Utilities.Internal = {
 		
 		var is = Components.classes["@mozilla.org/io/string-input-stream;1"]
 			.createInstance(Ci.nsIStringInputStream);
-		is.setData(data, data.length);
+		is.setByteStringData(data);
 		
 		var bis = Components.classes["@mozilla.org/binaryinputstream;1"]
 			.createInstance(Components.interfaces.nsIBinaryInputStream);
