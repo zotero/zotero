@@ -295,21 +295,24 @@ Zotero.Debug = new function () {
 	this.stackToString = function (stack, lines) {
 		if (!lines) lines = 5;
 		var str = '';
-		while(stack && lines--) {
+		while (stack && lines--) {
 			str += '\n  ' + (stack.name || '') + '@' + stack.filename
 				+ ':' + stack.lineNumber;
 			stack = stack.caller;
 		}
-		return this.filterStack(str).substr(1);
+		return this.filterStack(str).substring(1);
 	};
 	
 	
 	/**
-	 * Strip Bluebird lines from a stack trace
+	 * This method previously filtered Bluebird stack frames out of a stack
+	 * trace. Bluebird has been removed, so this function now only exists for
+	 * compatibility (and in case filtering is necessary in the future).
 	 *
-	 * @param {String} stack
+	 * @param {string} stack An error stack trace string
+	 * @returns {string} The same stack
 	 */
 	this.filterStack = function (stack) {
-		return stack.split(/\n/).filter(line => line.indexOf('zotero/bluebird') == -1).join('\n');
-	}
-}
+		return stack;
+	};
+};
