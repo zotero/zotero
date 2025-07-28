@@ -1,4 +1,15 @@
 describe("Zotero.Feed", function () {
+	async function checkSaveFails(dataObject, message, options = undefined) {
+		let e = await getPromiseError(dataObject.saveTx(options));
+		assert.ok(e);
+		if (typeof message === 'string') {
+			assert.equal(e.message, message);
+		}
+		else {
+			assert.match(e.message, message);
+		}
+	}
+	
 	// Clean up after after tests
 	after(async function () {
 		await clearFeeds();
@@ -12,13 +23,13 @@ describe("Zotero.Feed", function () {
 	describe("#constructor()", function () {
 		it("should accept required fields as arguments", async function () {
 			let feed = new Zotero.Feed();
-			await assert.isRejected(feed.saveTx(), /^Feed name not set$/);
+			await checkSaveFails(feed, 'Feed name not set');
 			
 			feed = new Zotero.Feed({
 				name: 'Test ' + Zotero.randomString(),
 				url: 'http://www.' + Zotero.randomString() + '.com'
 			});
-			await assert.isFulfilled(feed.saveTx());
+			await feed.saveTx();
 		});
 	});
 	
@@ -46,7 +57,7 @@ describe("Zotero.Feed", function () {
 			let feed = await createFeed();
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			await assert.isFulfilled(feedItem.saveTx());
+			await feedItem.saveTx();
 		});
 	});
 	
@@ -100,36 +111,36 @@ describe("Zotero.Feed", function () {
 		});
 		it("should throw if name or url are missing", async function () {
 			let feed = new Zotero.Feed();
-			await assert.isRejected(feed.saveTx(), /^Feed name not set$/);
+			await checkSaveFails(feed, 'Feed name not set');
 			
 			feed.name = 'Test ' + Zotero.randomString();
-			await assert.isRejected(feed.saveTx(), /^Feed URL not set$/);
+			await checkSaveFails(feed, 'Feed URL not set');
 			
 			feed = new Zotero.Feed();
 			feed.url = 'http://' + Zotero.randomString() + '.com';
-			await assert.isRejected(feed.saveTx(), /^Feed name not set$/);
+			await checkSaveFails(feed, 'Feed name not set');
 		});
 		it("should not allow saving a feed with the same url", async function () {
 			let url = 'http://' + Zotero.randomString() + '.com';
 			let feed1 = await createFeed({ url });
 			
 			let feed2 = new Zotero.Feed({ name: 'Test ' + Zotero.randomString(), url });
-			await assert.isRejected(feed2.saveTx(), /^Feed for URL already exists: /);
+			await checkSaveFails(feed2, /^Feed for URL already exists: /);
 			
 			// Perform check with normalized URL
 			feed2.url = url + '/';
-			await assert.isRejected(feed2.saveTx(), /^Feed for URL already exists: /);
+			await checkSaveFails(feed2, /^Feed for URL already exists: /);
 			
 			feed2.url = url.toUpperCase();
-			await assert.isRejected(feed2.saveTx(), /^Feed for URL already exists: /);
+			await checkSaveFails(feed2, /^Feed for URL already exists: /);
 		});
 		it("should allow saving a feed with the same name", async function () {
 			let name = 'Test ' + Zotero.randomString();
 			let feed1 = await createFeed({ name });
 			
-			let feed2 = new Zotero.Feed({ name , url: 'http://' + Zotero.randomString() + '.com' });
+			let feed2 = new Zotero.Feed({ name, url: 'http://' + Zotero.randomString() + '.com' });
 			
-			await assert.isFulfilled(feed2.saveTx(), "allow saving feed with an existing name");
+			await feed2.saveTx();
 			
 			assert.equal(feed1.name, feed2.name, "feed names remain the same");
 		});
@@ -417,16 +428,16 @@ describe("Zotero.Feed", function () {
 		})
 		it("should not allow adding collections", async function () {
 			let collection = new Zotero.Collection({ name: 'test', libraryID: feed.libraryID });
-			await assert.isRejected(collection.saveTx({ skipEditCheck: true }), /^Cannot add /);
+			await checkSaveFails(collection, /^Cannot add /, { skipEditCheck: true });
 		});
 		it("should not allow adding saved search", async function () {
 			let search = new Zotero.Search({ name: 'test', libraryID: feed.libraryID });
-			await assert.isRejected(search.saveTx({ skipEditCheck: true }), /^Cannot add /);
+			await checkSaveFails(search, /^Cannot add /, { skipEditCheck: true });
 		});
 		it("should allow adding feed item", async function () {
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			await assert.isFulfilled(feedItem.saveTx());
+			await feedItem.saveTx();
 		});
 	});
 })
