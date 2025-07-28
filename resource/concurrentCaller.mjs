@@ -209,6 +209,8 @@ ConcurrentCaller.prototype._processNext = function () {
 	}
 	
 	var runFunc = async () => {
+		this._numRunning++;
+		
 		this._log("Running function ("
 			+ this._numRunning + "/" + this.numConcurrent + " running, "
 			+ this._queue.length + " queued)");
@@ -258,8 +260,6 @@ ConcurrentCaller.prototype._processNext = function () {
 		runFunc()
 			.then(() => this._processNext());
 	}
-	
-	this._numRunning++;
 	
 	return true;
 }
