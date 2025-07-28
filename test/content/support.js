@@ -1,7 +1,5 @@
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 
-chai.use(chaiAsPromised);
-
 // Useful "constants"
 var sqlDateTimeRe = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 var isoDateTimeRe = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;

@@ -122,8 +122,8 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			assert.propertyVal(data, 'indexedPages', 1);
 			assert.propertyVal(data, 'totalPages', 1);
 			assert.propertyVal(data, 'version', itemFullTextVersion);
-			await assert.eventually.equal(
-				Zotero.FullText.getLibraryVersion(item.libraryID),
+			assert.equal(
+				await Zotero.FullText.getLibraryVersion(item.libraryID),
 				libraryVersion
 			);
 			
@@ -188,8 +188,8 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			assert.propertyVal(data, 'indexedPages', 1);
 			assert.propertyVal(data, 'totalPages', 1);
 			assert.propertyVal(data, 'version', itemFullTextVersion);
-			await assert.eventually.equal(
-				Zotero.FullText.getLibraryVersion(item.libraryID),
+			assert.equal(
+				await Zotero.FullText.getLibraryVersion(item.libraryID),
 				libraryVersion
 			);
 			
@@ -338,9 +338,9 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			
 			await engine.start();
 			assert.equal(count, 0);
-			await assert.eventually.equal(Zotero.FullText.getItemVersion(attachment1.id), libraryVersion);
-			await assert.eventually.equal(Zotero.FullText.getItemVersion(attachment2.id), libraryVersion);
-			await assert.eventually.equal(Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
+			assert.equal(await Zotero.FullText.getItemVersion(attachment1.id), libraryVersion);
+			assert.equal(await Zotero.FullText.getItemVersion(attachment2.id), libraryVersion);
+			assert.equal(await Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
 			assert.equal(Zotero.Libraries.userLibrary.libraryVersion, libraryVersion);
 			
 			//
@@ -418,8 +418,8 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 			
 			await engine.start();
 			assert.equal(count, 0);
-			await assert.eventually.equal(Zotero.FullText.getItemVersion(attachment3.id), libraryVersion);
-			await assert.eventually.equal(Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
+			assert.equal(await Zotero.FullText.getItemVersion(attachment3.id), libraryVersion);
+			assert.equal(await Zotero.Fulltext.getLibraryVersion(libraryID), libraryVersion);
 			assert.equal(Zotero.Libraries.userLibrary.libraryVersion, libraryVersion);
 		})
 	});

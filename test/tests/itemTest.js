@@ -1252,7 +1252,7 @@ describe("Zotero.Item", function () {
 				file: tmpFile
 			});
 			var newName = 'test2.png';
-			await assert.eventually.isTrue(item.renameAttachmentFile(newName));
+			assert.isTrue(await item.renameAttachmentFile(newName));
 			assert.equal(item.attachmentFilename, newName);
 			var path = await item.getFilePathAsync();
 			assert.equal(OS.Path.basename(path), newName)
@@ -2097,8 +2097,8 @@ describe("Zotero.Item", function () {
 			await item1.eraseTx();
 			
 			assert.lengthOf(item2.relatedItems, 0);
-			await assert.eventually.equal(
-				Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM itemRelations WHERE itemID=?", item2.id),
+			assert.equal(
+				await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM itemRelations WHERE itemID=?", item2.id),
 				0
 			);
 		});
