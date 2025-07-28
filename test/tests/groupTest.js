@@ -4,7 +4,7 @@ describe("Zotero.Group", function () {
 	describe("#constructor()", function () {
 		it("should accept required parameters", async function () {
 			let group = new Zotero.Group();
-			await assert.isRejected(group.saveTx()); // fails without required parameters
+			assert.ok(await getPromiseError(group.saveTx())); // fails without required parameters
 			
 			let groupID = Zotero.Utilities.rand(10000, 1000000);
 			let groupName = "Test " + Zotero.Utilities.randomString();
@@ -17,7 +17,7 @@ describe("Zotero.Group", function () {
 				editable: true,
 				filesEditable: true
 			});
-			await assert.isFulfilled(group.saveTx(), "saves given required parameters");
+			await group.saveTx();
 			
 			assert.isTrue(Zotero.Libraries.exists(group.libraryID));
 			assert.equal(group, Zotero.Groups.get(group.groupID));

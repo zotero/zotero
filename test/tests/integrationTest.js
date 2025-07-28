@@ -974,7 +974,7 @@ describe("Zotero.Integration", function () {
 					let stub2 = sinon.stub(Zotero.Retractions, 'shouldShowCitationWarning').returns(true);
 
 					let promise = execCommand('refresh', docID);
-					await assert.isFulfilled(waitForDialog());
+					await waitForDialog();
 					
 					stub1.restore();
 					stub2.restore();
@@ -995,7 +995,7 @@ describe("Zotero.Integration", function () {
 					let stub = sinon.stub(Zotero.Retractions, 'getRetractionsFromJSON').resolves([0]);
 
 					let promise = execCommand('refresh', docID);
-					await assert.isFulfilled(waitForDialog());
+					await waitForDialog();
 					
 					stub.restore();
 					await promise;
@@ -1012,7 +1012,7 @@ describe("Zotero.Integration", function () {
 					setAddEditItems(testItem);
 					await execCommand('addEditCitation', docID);
 
-					await assert.isFulfilled(execCommand('refresh', docID));
+					await execCommand('refresh', docID);
 					
 					await testItem.eraseTx();
 				});

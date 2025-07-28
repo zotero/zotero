@@ -23,11 +23,11 @@ describe("Zotero.FeedItem", function () {
 		it("should accept required fields as arguments", async function () {
 			let guid = Zotero.randomString();
 			let feedItem = new Zotero.FeedItem();
-			await assert.isRejected(feedItem.saveTx());
+			assert.ok(await getPromiseError(feedItem.saveTx()));
 			
 			feedItem = new Zotero.FeedItem('book', { guid });
 			feedItem.libraryID = libraryID;
-			await assert.isFulfilled(feedItem.saveTx());
+			await feedItem.saveTx();
 			
 			assert.equal(feedItem.itemTypeID, Zotero.ItemTypes.getID('book'));
 			assert.equal(feedItem.guid, guid);
@@ -129,33 +129,33 @@ describe("Zotero.FeedItem", function () {
 		it("should require feed being set", async function () {
 			let feedItem = new Zotero.FeedItem('book', { guid: Zotero.randomString() });
 			// Defaults to user library ID
-			await assert.isRejected(feedItem.saveTx(), /^Cannot add /);
+			assert.match((await getPromiseError(feedItem.saveTx())).message, /^Cannot add /);
 		});
 		it("should require GUID being set", async function () {
 			let feedItem = new Zotero.FeedItem('book');
 			feedItem.libraryID = feed.libraryID;
-			await assert.isRejected(feedItem.saveTx(),  /^GUID must be set before saving FeedItem$/);
+			assert.equal((await getPromiseError(feedItem.saveTx())).message, 'GUID must be set before saving FeedItem');
 		});
 		it("should require a unique GUID", async function () {
 			let guid = Zotero.randomString();
 			let feedItem1 = await createDataObject('feedItem', { libraryID, guid });
 			
 			let feedItem2 = createUnsavedDataObject('feedItem', { libraryID, guid });
-			await assert.isRejected(feedItem2.saveTx());
+			assert.ok(await getPromiseError(feedItem2.saveTx()));
 			
 			// But we should be able to save it after deleting the original feed
 			await feedItem1.eraseTx();
-			await assert.isFulfilled(feedItem2.saveTx());
+			await feedItem2.saveTx();
 		});
 		it("should require item type being set", async function () {
 			let feedItem = new Zotero.FeedItem(null, { guid: Zotero.randomString() });
 			feedItem.libraryID = feed.libraryID;
-			await assert.isRejected(feedItem.saveTx(),  /^Item type must be set before saving$/);
+			assert.equal((await getPromiseError(feedItem.saveTx())).message, 'Item type must be set before saving');
 		});
 		it("should save feed item", async function () {
 			let guid = Zotero.randomString();
 			let feedItem = createUnsavedDataObject('feedItem', { libraryID, guid });
-			await assert.isFulfilled(feedItem.saveTx());
+			await feedItem.saveTx();
 			
 			feedItem = await Zotero.FeedItems.getAsync(feedItem.id);
 			assert.ok(feedItem);
@@ -186,7 +186,7 @@ describe("Zotero.FeedItem", function () {
 			let feedItem = await createDataObject('feedItem', { libraryID });
 			
 			feedItem.setField('title', 'bar');
-			await assert.isFulfilled(feedItem.saveTx());
+			await feedItem.saveTx();
 			assert.equal(feedItem.getField('title'), 'bar');
 		});
 	});
