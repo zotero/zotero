@@ -1,6 +1,6 @@
 [FILENAMES]
 Open=firefox-{{ARCH}}.exe
-Save=zotero_{{ARCH}}.exe
+Save=deeptutor_{{ARCH}}.exe
 Log=CONSOLE
 [COMMANDS]
 -addoverwrite zotero.ico, ICONGROUP,1,

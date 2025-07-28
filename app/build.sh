@@ -692,10 +692,10 @@ if [ $BUILD_MAC == 1 ]; then
 	if [ $PACKAGE == 1 ]; then
 		if [ $MAC_NATIVE == 1 ]; then
 			echo "Creating Mac installer"
-			dmg="$DIST_DIR/Zotero-$VERSION.dmg"
+			dmg="$DIST_DIR/Deeptutor-$VERSION.dmg"
 			"$CALLDIR/mac/pkg-dmg" --source "$STAGE_DIR/DeepTutor.app" \
 				--target "$dmg" \
-				--sourcefile --volname Zotero --copy "$CALLDIR/mac/DSStore:/.DS_Store" \
+				--sourcefile --volname DeepTutor --copy "$CALLDIR/mac/DSStore:/.DS_Store" \
 				--symlink /Applications:"/Drag Here to Install" > /dev/null
 
 			if [ "$UPDATE_CHANNEL" != "test" ]; then
@@ -713,8 +713,8 @@ if [ $BUILD_MAC == 1 ]; then
 			echo
 		else
 			echo 'Not building on Mac; creating Mac distribution as a zip file'
-			rm -f "$DIST_DIR/Zotero_mac.zip"
-			cd "$STAGE_DIR" && zip -rqX "$DIST_DIR/Zotero-${VERSION}_mac.zip" DeepTutor.app
+			rm -f "$DIST_DIR/DeepTutor_mac.zip"
+			cd "$STAGE_DIR" && zip -rqX "$DIST_DIR/DeepTutor-${VERSION}_mac.zip" DeepTutor.app
 		fi
 	fi
 fi
@@ -757,8 +757,8 @@ if [ $BUILD_WIN == 1 ]; then
 
 		# Copy zotero.exe, which is built directly from Firefox source and then modified by
 		# ResourceHacker to add icons
-		check_lfs_file "$CALLDIR/win/zotero.exe.tar.xz"
-		tar xf "$CALLDIR/win/zotero.exe.tar.xz" --to-stdout zotero_$arch.exe > "$APPDIR/zotero.exe"
+		check_lfs_file "$CALLDIR/win/deeptutor.exe.tar.xz"
+		tar xf "$CALLDIR/win/deeptutor.exe.tar.xz" --to-stdout deeptutor_$arch.exe > "$APPDIR/deeptutor.exe"
 		
 		# Use our own updater, because Mozilla's requires updates signed by Mozilla
 		check_lfs_file "$CALLDIR/win/updater.exe.tar.xz"
@@ -769,7 +769,7 @@ if [ $BUILD_WIN == 1 ]; then
 			# FileVersion is limited to four integers, so it won't be properly updated for non-release
 			# builds (e.g., we'll show 5.0.97.0 for 5.0.97-beta.37). ProductVersion will be the full
 			# version string.
-			rcedit "`cygpath -w \"$APPDIR/zotero.exe\"`" \
+			rcedit "`cygpath -w \"$APPDIR/deeptutor.exe\"`" \
 				--set-file-version "$VERSION_NUMERIC" \
 				--set-product-version "$VERSION"
 			rcedit "`cygpath -w \"$APPDIR/updater.exe\"`" \
@@ -825,7 +825,7 @@ if [ $BUILD_WIN == 1 ]; then
 		find "$APPDIR" \( -name '*.exe' -or -name '*.dll' \) -exec chmod 755 {} \;
 		
 		if [[ $PACKAGE -eq 1 ]] && [[ $SIGN -eq 1 ]]; then
-			"$CALLDIR/win/codesign" "$APPDIR/zotero.exe" "$SIGNATURE_DESC"
+			"$CALLDIR/win/codesign" "$APPDIR/deeptutor.exe" "$SIGNATURE_DESC"
 			sleep $SIGNTOOL_DELAY
 			"$CALLDIR/win/codesign" "$APPDIR/updater.exe" "$SIGNATURE_DESC Updater"
 			sleep $SIGNTOOL_DELAY
@@ -912,7 +912,7 @@ if [ $BUILD_WIN == 1 ]; then
 				echo 'Not building on Windows; only building zip file'
 			fi
 			cd "$STAGE_DIR"
-			zip -rqX "$DIST_DIR/Zotero-${VERSION}_$arch.zip" Zotero_$arch
+			zip -rqX "$DIST_DIR/Deeptutor-${VERSION}_$arch.zip" Deeptutor_$arch
 		fi
 	done
 	

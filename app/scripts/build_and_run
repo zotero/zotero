@@ -77,7 +77,7 @@ if [ "`uname`" = "Darwin" ]; then
 elif [ "`uname`" = "Linux" ]; then
 	command="Zotero_linux-x86_64/zotero"
 elif [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
-	command="Deeptutor_win-x64/zotero.exe"
+	command="Deeptutor_win-x64/deeptutor.exe"
 else
 	echo "Unknown platform" >&2
 	exit 1

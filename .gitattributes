@@ -1,5 +1,4 @@
 *.sql text eol=lf
-app/win/zotero.exe.tar.xz filter=lfs diff=lfs merge=lfs -text
 app/mac/updater.tar.xz filter=lfs diff=lfs merge=lfs -text
 app/win/updater.exe.tar.xz filter=lfs diff=lfs merge=lfs -text
 app/linux/updater.tar.xz filter=lfs diff=lfs merge=lfs -text
