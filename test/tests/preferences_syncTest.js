@@ -65,7 +65,7 @@ describe("Sync Preferences", function () {
 			it("should set API key and display full controls with correct credentials", async function () {
 				await setCredentials("Username", "correctPassword");
 				
-				await assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
 				assert.equal(doc.getElementById('sync-unauthorized').getAttribute('hidden'), 'true');
 			});
 
@@ -74,25 +74,25 @@ describe("Sync Preferences", function () {
 				await setCredentials("Username", "incorrectPassword", true);
 
 				assert.isTrue(Zotero.alert.called);
-				await assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), "");
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), "");
 				assert.equal(doc.getElementById('sync-authorized').getAttribute('hidden'), 'true');
 			});
 
 
 			it("should delete API key and display auth form when 'Unlink Account' clicked", async function () {
 				await setCredentials("Username", "correctPassword");
-				await assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
 
 				await win.Zotero_Preferences.Sync.unlinkAccount(false);
 
 				assert.isTrue(deleteAPIKey.called);
-				await assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), "");
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), "");
 				assert.equal(doc.getElementById('sync-authorized').getAttribute('hidden'), 'true');
 			});
 			
 			it("should reset the storage controller when unlinking", async function () {
 				await setCredentials("Username", "correctPassword");
-				await assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
 				
 				var options = {
 					apiClient: Zotero.Sync.Runner.getAPIClient({ apiKey })
@@ -116,7 +116,7 @@ describe("Sync Preferences", function () {
 				waitForDialog(null, 'cancel');
 				
 				await win.Zotero_Preferences.Sync.unlinkAccount();
-				await assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
 				assert.equal(doc.getElementById('sync-unauthorized').getAttribute('hidden'), 'true');
 			});
 			

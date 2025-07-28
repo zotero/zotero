@@ -1393,9 +1393,9 @@ describe("ZoteroPane", function () {
 				parentItemID: item.id
 			});
 
-			await assert.eventually.isTrue(attachment.fileExists());
+			assert.isTrue(await attachment.fileExists());
 			await OS.File.move(outsideFile, labdFile);
-			await assert.eventually.isFalse(attachment.fileExists());
+			assert.isFalse(await attachment.fileExists());
 
 			let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
 				.returns('one');
@@ -1403,7 +1403,7 @@ describe("ZoteroPane", function () {
 			assert.ok(stub.calledOnce);
 			assert.ok(stub.calledWith(attachment, sinon.match.string, 0));
 
-			await assert.eventually.isTrue(attachment.fileExists());
+			assert.isTrue(await attachment.fileExists());
 			assert.equal(attachment.getFilePath(), labdFile);
 			assert.equal(attachment.attachmentPath, 'attachments:test.pdf');
 
@@ -1429,12 +1429,12 @@ describe("ZoteroPane", function () {
 				let attachment1 = await Zotero.Attachments.linkFromFile({ file: outsideFile1 });
 				let attachment2 = await Zotero.Attachments.linkFromFile({ file: outsideFile2 });
 
-				await assert.eventually.isTrue(attachment1.fileExists());
-				await assert.eventually.isTrue(attachment2.fileExists());
+				assert.isTrue(await attachment1.fileExists());
+				assert.isTrue(await attachment2.fileExists());
 				await OS.File.move(outsideFile1, labdFile1);
 				await OS.File.move(outsideFile2, labdFile2);
-				await assert.eventually.isFalse(attachment1.fileExists());
-				await assert.eventually.isFalse(attachment2.fileExists());
+				assert.isFalse(await attachment1.fileExists());
+				assert.isFalse(await attachment2.fileExists());
 
 				let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
 					.returns(choice);
@@ -1442,8 +1442,8 @@ describe("ZoteroPane", function () {
 				assert.ok(stub.calledOnce);
 				assert.ok(stub.calledWith(attachment1, sinon.match.string, 1));
 
-				await assert.eventually.isTrue(attachment1.fileExists());
-				await assert.eventually.equal(attachment2.fileExists(), choice === 'all');
+				assert.isTrue(await attachment1.fileExists());
+				assert.equal(await attachment2.fileExists(), choice === 'all');
 				assert.equal(attachment1.getFilePath(), labdFile1);
 				assert.equal(attachment1.attachmentPath, 'attachments:test.pdf');
 				if (choice === 'all') {
@@ -1473,9 +1473,9 @@ describe("ZoteroPane", function () {
 
 			let attachment = await Zotero.Attachments.linkFromFile({ file: outsideFile });
 
-			await assert.eventually.isTrue(attachment.fileExists());
+			assert.isTrue(await attachment.fileExists());
 			await OS.File.move(outsideFile, labdFile);
-			await assert.eventually.isFalse(attachment.fileExists());
+			assert.isFalse(await attachment.fileExists());
 
 			let dialogStub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
 				.returns('one');
@@ -1488,7 +1488,7 @@ describe("ZoteroPane", function () {
 			//assert.ok(existsSpy.calledWith(OS.Path.join(labdSubdir, 'test.pdf')));
 			//assert.notOk(existsSpy.calledWith(OS.Path.join(labdDir, 'test.pdf'))); // Should never get there
 
-			await assert.eventually.isTrue(attachment.fileExists());
+			assert.isTrue(await attachment.fileExists());
 			assert.equal(attachment.getFilePath(), labdFile);
 			assert.equal(attachment.attachmentPath, 'attachments:subdir/test.pdf');
 
@@ -1515,7 +1515,7 @@ describe("ZoteroPane", function () {
 				await attachment.saveTx();
 				attachments.push(attachment);
 
-				await assert.eventually.isFalse(attachment.fileExists());
+				assert.isFalse(await attachment.fileExists());
 			}
 
 			let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
@@ -1526,7 +1526,7 @@ describe("ZoteroPane", function () {
 
 			for (let i = 0; i < filenames.length; i++) {
 				let attachment = attachments[i];
-				await assert.eventually.isTrue(attachment.fileExists());
+				assert.isTrue(await attachment.fileExists());
 				assert.equal(attachment.getFilePath(), labdFiles[i]);
 				assert.equal(attachment.attachmentPath, 'attachments:' + OS.Path.join(...filenames[i]));
 			}

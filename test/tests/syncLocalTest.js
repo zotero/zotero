@@ -6,9 +6,9 @@ describe("Zotero.Sync.Data.Local", function () {
 			var apiKey1 = Zotero.Utilities.randomString(24);
 			var apiKey2 = Zotero.Utilities.randomString(24);
 			await Zotero.Sync.Data.Local.setAPIKey(apiKey1);
-			await assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(apiKey1), apiKey1);
+			assert.equal(await Zotero.Sync.Data.Local.getAPIKey(apiKey1), apiKey1);
 			await Zotero.Sync.Data.Local.setAPIKey(apiKey2);
-			await assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(apiKey2), apiKey2);
+			assert.equal(await Zotero.Sync.Data.Local.getAPIKey(apiKey2), apiKey2);
 		})
 		
 		
@@ -16,7 +16,7 @@ describe("Zotero.Sync.Data.Local", function () {
 			var apiKey = Zotero.Utilities.randomString(24);
 			await Zotero.Sync.Data.Local.setAPIKey(apiKey);
 			await Zotero.Sync.Data.Local.setAPIKey("");
-			await assert.eventually.strictEqual(Zotero.Sync.Data.Local.getAPIKey(apiKey), "");
+			assert.strictEqual(await Zotero.Sync.Data.Local.getAPIKey(apiKey), "");
 		})
 	})
 	
@@ -1044,11 +1044,11 @@ describe("Zotero.Sync.Data.Local", function () {
 			await Zotero.Sync.Data.Local.processObjectsFromJSON('item', libraryID, json);
 			
 			// Shouldn't roll back the successful item
-			await assert.eventually.equal(Zotero.DB.valueQueryAsync(
+			assert.equal(await Zotero.DB.valueQueryAsync(
 				"SELECT COUNT(*) FROM items WHERE libraryID=? AND key=?", [libraryID, key1]
 			), 1);
 			// Should rollback the unsuccessful item
-			await assert.eventually.equal(Zotero.DB.valueQueryAsync(
+			assert.equal(await Zotero.DB.valueQueryAsync(
 				"SELECT COUNT(*) FROM items WHERE libraryID=? AND key=?", [libraryID, key2]
 			), 0);
 		});

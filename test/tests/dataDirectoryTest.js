@@ -129,21 +129,21 @@ describe("Zotero.DataDirectory", function () {
 		if (!options.skipOldDir) {
 			assert.isFalse(await OS.File.exists(oldDir));
 		}
-		await assert.eventually.equal(Zotero.File.getContentsAsync(newDBFile), str1);
-		await assert.eventually.equal(Zotero.File.getContentsAsync(newDBFile + '.bak'), str2);
+		assert.equal(await Zotero.File.getContentsAsync(newDBFile), str1);
+		assert.equal(await Zotero.File.getContentsAsync(newDBFile + '.bak'), str2);
 		if (!options.skipStorageFile1) {
-			await assert.eventually.equal(
-				Zotero.File.getContentsAsync(OS.Path.join(newStorageDir1, storageFile1)), str2
+			assert.equal(
+				await Zotero.File.getContentsAsync(OS.Path.join(newStorageDir1, storageFile1)), str2
 			);
 		}
-		await assert.eventually.equal(
-			Zotero.File.getContentsAsync(OS.Path.join(newStorageDir2, storageFile2)), str3
+		assert.equal(
+			await Zotero.File.getContentsAsync(OS.Path.join(newStorageDir2, storageFile2)), str3
 		);
-		await assert.eventually.equal(
-			Zotero.File.getContentsAsync(OS.Path.join(newTranslatorsDir, translatorName1)), str4
+		assert.equal(
+			await Zotero.File.getContentsAsync(OS.Path.join(newTranslatorsDir, translatorName1)), str4
 		);
-		await assert.eventually.equal(
-			Zotero.File.getContentsAsync(OS.Path.join(newTranslatorsDir, translatorName2)), str5
+		assert.equal(
+			await Zotero.File.getContentsAsync(OS.Path.join(newTranslatorsDir, translatorName2)), str5
 		);
 		if (!options.skipNewMarker) {
 			assert.isFalse(await OS.File.exists(newMigrationMarker));
@@ -183,7 +183,7 @@ describe("Zotero.DataDirectory", function () {
 			await OS.File.makeDir(newDir, { unixMode: 0o755 });
 			await Zotero.File.putContentsAsync(OS.Path.join(newDir, 'a'), '');
 			
-			await assert.eventually.isFalse(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
+			assert.isFalse(await Zotero.DataDirectory.checkForMigration(oldDir, newDir));
 		});
 		
 		it("should skip automatic migration and show prompt if target directory is on a different drive", async function () {
@@ -202,7 +202,7 @@ describe("Zotero.DataDirectory", function () {
 				);
 			}, 'cancel');
 			
-			await assert.eventually.isNotOk(Zotero.DataDirectory.checkForMigration(oldDir, newDir));
+			assert.isNotOk(await Zotero.DataDirectory.checkForMigration(oldDir, newDir));
 			await promise;
 
 			stubs.isNewDirOnDifferentDrive.resolves(false);

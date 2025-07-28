@@ -23,8 +23,8 @@ describe("Zotero.Utilities.Internal", function () {
 	describe("#md5Async()", function () {
 		it("should generate hex string given file path", async function () {
 			var file = OS.Path.join(getTestDataDirectory().path, 'test.png');
-			await assert.eventually.equal(
-				Zotero.Utilities.Internal.md5Async(file),
+			assert.equal(
+				await Zotero.Utilities.Internal.md5Async(file),
 				'93da8f1e5774c599f0942dcecf64b11c'
 			);
 		});
@@ -37,8 +37,8 @@ describe("Zotero.Utilities.Internal", function () {
 			let arr = encoder.encode("".padStart(100000, "a"));
 			await OS.File.writeAtomic(file, arr);
 			
-			await assert.eventually.equal(
-				Zotero.Utilities.Internal.md5Async(file),
+			assert.equal(
+				await Zotero.Utilities.Internal.md5Async(file),
 				'1af6d6f2f682f76f80e606aeaaee1680'
 			);
 			
@@ -48,7 +48,7 @@ describe("Zotero.Utilities.Internal", function () {
 		it("should return false for a nonexistent file", async function () {
 			var tmpDir = Zotero.getTempDirectory().path;
 			var file = OS.Path.join(tmpDir, 'nonexistent-asawefaweoihafa');
-			await assert.eventually.isFalse(ZUI.md5Async(file));
+			assert.isFalse(await ZUI.md5Async(file));
 		});
 		
 		it("should return hash for an empty file", async function () {
@@ -58,7 +58,7 @@ describe("Zotero.Utilities.Internal", function () {
 			var file = OS.Path.join(tmpDir, 'empty-file');
 			await IOUtils.write(file, new Uint8Array());
 			
-			await assert.eventually.equal(ZUI.md5Async(file), emptyHash);
+			assert.equal(await ZUI.md5Async(file), emptyHash);
 			
 			await IOUtils.remove(file);
 		});

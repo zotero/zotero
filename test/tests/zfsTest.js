@@ -703,7 +703,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var result = await engine.start();
 			
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
-			await assert.eventually.equal(item.attachmentModificationTime, mtime);
+			assert.equal(await item.attachmentModificationTime, mtime);
 			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);

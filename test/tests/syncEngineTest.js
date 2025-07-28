@@ -1640,8 +1640,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			assert.equal(count, 0);
 			for (let type of types) {
-				await assert.eventually.lengthOf(
-					Zotero.Sync.Data.Local.getDeleted(type, library.id), 0
+				assert.lengthOf(
+					await Zotero.Sync.Data.Local.getDeleted(type, library.id), 0
 				);
 			}
 			assert.equal(library.libraryVersion, lastLibraryVersion);
@@ -1852,8 +1852,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(Zotero.Libraries.getVersion(userLibraryID), 3);
 			
 			// Check for saved objects
-			await assert.eventually.ok(Zotero.Collections.getByLibraryAndKeyAsync(userLibraryID, "AAAAAAAA"));
-			await assert.eventually.ok(Zotero.Searches.getByLibraryAndKeyAsync(userLibraryID, "DDDDDDDD"));
+			assert.ok(await Zotero.Collections.getByLibraryAndKeyAsync(userLibraryID, "AAAAAAAA"));
+			assert.ok(await Zotero.Searches.getByLibraryAndKeyAsync(userLibraryID, "DDDDDDDD"));
 			
 			// Check for queued objects
 			var keys = await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('collection', userLibraryID);
