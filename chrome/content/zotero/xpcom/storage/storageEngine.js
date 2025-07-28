@@ -24,6 +24,7 @@
 */
 
 var { ConcurrentCaller } = ChromeUtils.importESModule("resource://zotero/concurrentCaller.mjs");
+var { CanceledException } = ChromeUtils.importESModule("chrome://zotero/content/modules/errors.mjs");
 
 if (!Zotero.Sync.Storage) {
 	Zotero.Sync.Storage = {};
@@ -223,18 +224,21 @@ Zotero.Sync.Storage.Engine.prototype.start = async function () {
 	var downloadSuccessful = false;
 	var changes = new Zotero.Sync.Storage.Result;
 	for (let type of ['download', 'upload']) {
-		let resultPromises = await promises[type];
+		let results = await Promise.allSettled(await promises[type]);
+		let successfulResults = [];
 		let succeeded = 0;
 		let failed = 0;
 		
-		let results = [];
-		
-		for (let p of resultPromises) {
-			try {
-				results.push(await p);
+		for (let r of results) {
+			if (r.status == 'fulfilled') {
 				succeeded++;
+				successfulResults.push(r.value);
 			}
-			catch (e) {
+			else {
+				let e = r.reason;
+				if (e instanceof CanceledException) {
+					continue;
+				}
 				if (e instanceof Zotero.HTTP.CancelledException) {
 					Zotero.debug(`File ${type} sync cancelled for ${this.library.name} `
 						+ `(${succeeded} succeeded, ${failed} failed)`);
@@ -251,7 +255,7 @@ Zotero.Sync.Storage.Engine.prototype.start = async function () {
 		Zotero.debug(`File ${type} sync finished for ${this.library.name} `
 			+ `(${succeeded} succeeded, ${failed} failed)`);
 		
-		changes.updateFromResults(results);
+		changes.updateFromResults(successfulResults);
 		
 		if (type == 'download'
 				// Not stopped

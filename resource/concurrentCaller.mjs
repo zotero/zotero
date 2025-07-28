@@ -24,6 +24,7 @@
 */
 
 import { BluebirdShimPromise as Promise } from 'chrome://zotero/content/xpcom/bluebirdShim.mjs';
+import { CanceledException } from 'chrome://zotero/content/modules/errors.mjs';
 
 /**
  * Call a fixed number of functions at once, queueing the rest until slots
@@ -181,7 +182,10 @@ ConcurrentCaller.prototype.wait = function () {
 
 ConcurrentCaller.prototype.stop = function () {
 	this._log("Clearing queue");
-	this._queue = [];
+	while (this._queue.length) {
+		let task = this._queue.shift();
+		task.deferred.reject(new CanceledException);
+	}
 };
 
 
