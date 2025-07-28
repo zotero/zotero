@@ -265,7 +265,7 @@ Zotero.Libraries = new function () {
 	 *
 	 * @return {Promise}
 	 */
-	this.setEditable = function (libraryID, editable) {
+	this.setEditable = async function (libraryID, editable) {
 		Zotero.debug("Zotero.Libraries.setEditable() is deprecated. Use Zotero.Library.prototype.editable instead");
 		this._ensureExists(libraryID);
 		
