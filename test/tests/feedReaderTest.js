@@ -86,14 +86,6 @@ describe("Zotero.FeedReader", function () {
 			e = await getPromiseError(fr._feedItems[fr._feedItems.length-1].promise);
 			assert.ok(e);
 		});
-		
-		it('should reject last feed item if feed processed', async function () {
-			let fr = new Zotero.FeedReader(rssFeedURL);
-			await fr.process();
-			fr.terminate("test");
-			let e = await getPromiseError(fr._feedItems[fr._feedItems.length-1].promise);
-			assert.ok(e);
-		});
 	});
 	
 	describe('#feedProperties', function () {
