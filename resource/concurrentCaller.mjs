@@ -108,9 +108,9 @@ ConcurrentCaller.prototype.pause = function (ms) {
  * Add a task to the queue without starting it
  *
  * @param {Function|Function[]} - One or more functions to run
- * @return {Promise|Promise<PromiseInspection[]>} - If one function is passed, a promise for the return
- *     value of the passed function; if multiple, a promise for an array of PromiseInspection objects
- *     for those functions, resolved once they have all finished, even if other functions are still running
+ * @return {Promise|Promise[]} - If one function is passed, a promise for the return value of the
+ *     passed function; if multiple, a promise for an array of Promises for those functions,
+ *     resolved once they have all finished, even if other functions are still running
  */
 ConcurrentCaller.prototype.add = function (func) {
 	if (Array.isArray(func)) {
