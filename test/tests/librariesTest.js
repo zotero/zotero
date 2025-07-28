@@ -134,7 +134,7 @@ describe("Zotero.Libraries", function () {
 	describe("#setEditable()", function () {
 		it("should not allow changing editable state of built-in libraries", async function () {
 			for (let i=0; i<builtInLibraries.length; i++) {
-				await assert.isRejected(Zotero.Libraries.setEditable(builtInLibraries[i]));
+				assert.ok(await getPromiseError(Zotero.Libraries.setEditable(builtInLibraries[i])));
 			}
 		});
 		it("should allow changing editable state for group library", async function () {
@@ -145,8 +145,8 @@ describe("Zotero.Libraries", function () {
 			await Zotero.Libraries.setEditable(group.libraryID, startState);
 			assert.equal(Zotero.Libraries.isEditable(group.libraryID), startState, 'reverts state');
 		});
-		it("should throw for invalid library ID", function () {
-			return assert.isRejected(Zotero.Libraries.setEditable(-1), /^Invalid library ID /);
+		it("should throw for invalid library ID", async function () {
+			assert.match((await getPromiseError(Zotero.Libraries.setEditable(-1))).message, /^Invalid library ID /);
 		});
 	});
 	describe("#isFilesEditable()", function () {
@@ -157,7 +157,7 @@ describe("Zotero.Libraries", function () {
 	describe("#setFilesEditable()", function () {
 		it("should not allow changing files editable state of built-in libraries", async function () {
 			for (let i=0; i<builtInLibraries.length; i++) {
-				await assert.isRejected(Zotero.Libraries.setFilesEditable(builtInLibraries[i]));
+				assert.ok(await getPromiseError(Zotero.Libraries.setFilesEditable(builtInLibraries[i])));
 			}
 		});
 		it("should allow changing files editable state for group library", async function () {
@@ -176,7 +176,7 @@ describe("Zotero.Libraries", function () {
 			await Zotero.Libraries.setEditable(group.libraryID, editableStartState);
 		});
 		it("should throw for invalid library ID", async function () {
-			return assert.isRejected(Zotero.Libraries.setFilesEditable(-1), /^Invalid library ID /);
+			assert.match((await getPromiseError(Zotero.Libraries.setFilesEditable(-1))).message, /^Invalid library ID /);
 		});
 	});
 	describe("#isGroupLibrary()", function () {
