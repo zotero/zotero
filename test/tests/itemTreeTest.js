@@ -322,7 +322,7 @@ describe("Zotero.ItemTree", function () {
 			
 			// Item should have been selected once
 			assert.equal(win.ZoteroPane.itemSelected.callCount, 2);
-			await assert.eventually.ok(win.ZoteroPane.itemSelected.returnValues[1]);
+			assert.ok(await win.ZoteroPane.itemSelected.returnValues[1]);
 		});
 		
 		it("shouldn't select a new item if skipNotifier is passed", async function () {

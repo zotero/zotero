@@ -5,7 +5,6 @@ const dirs = [
 	'defaults',
 	'test',
 	'test/resource/chai',
-	'test/resource/chai-as-promised',
 	'test/resource/mocha'
 ];
 
@@ -83,13 +82,6 @@ const browserifyConfigs = [
 			standalone: 'sinon'
 		}
 	},
-	{
-		src: 'node_modules/chai-as-promised/lib/chai-as-promised.js',
-		dest: 'test/resource/chai-as-promised.js',
-		config: {
-			standalone: 'chaiAsPromised'
-		}
-	}
 ];
 
 // exclude mask used for js, copy, symlink and sass tasks

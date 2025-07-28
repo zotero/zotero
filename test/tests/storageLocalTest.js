@@ -202,10 +202,10 @@ describe("Zotero.Sync.Storage.Local", function () {
 				assert.isFalse(await OS.File.exists(OS.Path.join(storageDir, oldFilename)));
 				
 				// Make sure main file matches attachment hash and mtime
-				await assert.eventually.equal(
-					item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
+				assert.equal(
+					await item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
 				);
-				await assert.eventually.equal(item.attachmentModificationTime, mtime);
+				assert.equal(await item.attachmentModificationTime, mtime);
 			});
 			
 			
@@ -265,10 +265,10 @@ describe("Zotero.Sync.Storage.Local", function () {
 				assert.isTrue(await OS.File.exists(OS.Path.join(storageDir, filteredFilename)));
 				
 				// Make sure main file matches attachment hash and mtime
-				await assert.eventually.equal(
-					item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
+				assert.equal(
+					await item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
 				);
-				await assert.eventually.equal(item.attachmentModificationTime, mtime);
+				assert.equal(await item.attachmentModificationTime, mtime);
 			});
 			
 			
@@ -351,10 +351,10 @@ describe("Zotero.Sync.Storage.Local", function () {
 				assert.isTrue(await OS.File.exists(OS.Path.join(storageDir, filteredFilename)));
 				
 				// Make sure main file matches attachment hash and mtime
-				await assert.eventually.equal(
-					item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
+				assert.equal(
+					await item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
 				);
-				await assert.eventually.equal(item.attachmentModificationTime, mtime);
+				assert.equal(await item.attachmentModificationTime, mtime);
 			});
 		});
 		
@@ -432,21 +432,21 @@ describe("Zotero.Sync.Storage.Local", function () {
 				assert.isFalse(await OS.File.exists(OS.Path.join(storageDir, 'subdir', 'B')));
 				
 				// Make sure main file matches attachment hash and mtime
-				await assert.eventually.equal(
-					item.attachmentHash, Zotero.Utilities.Internal.md5(file1Contents)
+				assert.equal(
+					await item.attachmentHash, Zotero.Utilities.Internal.md5(file1Contents)
 				);
-				await assert.eventually.equal(item.attachmentModificationTime, mtime);
+				assert.equal(await item.attachmentModificationTime, mtime);
 				
 				// Check second file
-				await assert.eventually.equal(
-					Zotero.File.getContentsAsync(OS.Path.join(storageDir, file2Name)),
+				assert.equal(
+					await Zotero.File.getContentsAsync(OS.Path.join(storageDir, file2Name)),
 					file2Contents
 				);
 				
 				// Check subdirectory and file
 				assert.isTrue(((await OS.File.stat(OS.Path.join(storageDir, subDirName)))).isDir);
-				await assert.eventually.equal(
-					Zotero.File.getContentsAsync(OS.Path.join(storageDir, subDirName, file3Name)),
+				assert.equal(
+					await Zotero.File.getContentsAsync(OS.Path.join(storageDir, subDirName, file3Name)),
 					file3Contents
 				);
 			});
@@ -544,10 +544,10 @@ describe("Zotero.Sync.Storage.Local", function () {
 				assert.isTrue(await OS.File.exists(OS.Path.join(storageDir, newAuxFilename)));
 				
 				// Make sure main file matches attachment hash and mtime
-				await assert.eventually.equal(
-					item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
+				assert.equal(
+					await item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
 				);
-				await assert.eventually.equal(item.attachmentModificationTime, mtime);
+				assert.equal(await item.attachmentModificationTime, mtime);
 			});
 		});
 	})

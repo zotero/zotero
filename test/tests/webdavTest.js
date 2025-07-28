@@ -1215,7 +1215,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		
 		it("shouldn't purge if purged recently", async function () {
 			Zotero.Prefs.set("lastWebDAVOrphanPurge", Math.round(new Date().getTime() / 1000) - 3600);
-			await assert.eventually.equal(controller.purgeOrphanedStorageFiles(), false);
+			assert.equal(await controller.purgeOrphanedStorageFiles(), false);
 			assertRequestCount(0);
 		});
 		
