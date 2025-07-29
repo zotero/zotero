@@ -51,7 +51,14 @@ export const TranslationManager = new (class {
 		if (handlers) {
 			for (let handler of handlers) {
 				try {
-					returnValue = await handler(remoteTranslate, ...args);
+					// 'select' wants a callback for some reason
+					if (name === 'select') {
+						let items = args[0];
+						returnValue = await new Promise(resolve => handler(remoteTranslate, items, resolve));
+					}
+					else {
+						returnValue = await handler(remoteTranslate, ...args);
+					}
 				}
 				catch (e) {
 					Zotero.logError(e);
