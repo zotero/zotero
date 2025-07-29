@@ -26,9 +26,12 @@
 var { E10SUtils } = ChromeUtils.importESModule("resource://gre/modules/E10SUtils.sys.mjs");
 var { Subprocess } = ChromeUtils.importESModule("resource://gre/modules/Subprocess.sys.mjs");
 var { RemoteTranslate } = ChromeUtils.importESModule("chrome://zotero/content/RemoteTranslate.mjs");
-var { ContentDOMReference } = ChromeUtils.importESModule("resource://gre/modules/ContentDOMReference.sys.mjs");
+
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
+var { TranslatorTester } = ChromeUtils.importESModule('chrome://zotero/content/xpcom/translate/testTranslators/translatorTester.mjs');
+var { Test } = ChromeUtils.importESModule('chrome://zotero/content/xpcom/translate/testTranslators/test.mjs');
+var { ZoteroWebTranslationEnvironment } = ChromeUtils.importESModule('chrome://scaffold/content/zoteroWebTranslationEnvironment.mjs');
 
 var { CompletionCopilot, registerCompletion } = ChromeUtils.importESModule('resource://zotero/monacopilot.mjs');
 
@@ -44,6 +47,7 @@ var Scaffold = new function () {
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
 	var _needRebuildTranslatorSuggestions = true;
+	var _invalidateCodeLenses = null;
 	var _copilot;
 	var _prefsObserverID;
 	
@@ -482,51 +486,37 @@ var Scaffold = new function () {
 	};
 
 	this.createTestCodeLensProvider = function (monaco, editor) {
-		let runTestsCommand = editor.addCommand(
+		let runCommand = editor.addCommand(
 			0,
-			(_ctx, testIndices) => {
-				let tests;
-				try {
-					tests = JSON.parse(editor.getValue());
-				}
-				catch (e) {
-					_logOutput('Error parsing tests:\n' + e);
-				}
-
-				if (testIndices) {
-					tests = testIndices.map(index => tests[index]);
-				}
-
-				this.runTests(tests);
+			async (_ctx, testIndices) => {
+				testIndices = testIndices || [..._loadTestsFromPane().keys()];
+				await this.runTests(testIndices);
 			},
 			'');
 
-		let updateTestsCommand = editor.addCommand(
+		let applyUpdatesCommand = editor.addCommand(
 			0,
 			async (_ctx, testIndices) => {
-				testIndices = testIndices || Object.keys(allTests);
-
-				try {
-					var allTests = JSON.parse(editor.getValue());
-				}
-				catch (e) {
-					_logOutput('Error parsing tests:\n' + e);
-					return;
-				}
-
-				let tests = testIndices.map(index => allTests[index]);
-
-				await this.updateTests(tests,
-					(newTest) => {
-						allTests[testIndices.shift()] = newTest;
-					});
-
-				_writeTestsToPane(allTests);
+				testIndices = testIndices || [..._loadTestsFromPane().keys()];
+				await this.updateTests(testIndices);
 			},
 			'');
 
 		return {
+			onDidChange: (callback) => {
+				_invalidateCodeLenses = callback;
+				return { dispose() {} };
+			},
+			
 			provideCodeLenses: (model, _token) => {
+				let testsWithUpdates = new Set();
+				let testItems = Array.from(document.getElementById('testing-listbox').itemChildren);
+				for (let [testIndex, itemChild] of testItems.entries()) {
+					if (itemChild.dataset.updatedTestString) {
+						testsWithUpdates.add(testIndex);
+					}
+				}
+				
 				let lenses = [];
 
 				let firstChar = {
@@ -538,36 +528,41 @@ var Scaffold = new function () {
 				lenses.push({
 					range: firstChar,
 					command: {
-						id: runTestsCommand,
+						id: runCommand,
 						title: 'Run All'
 					}
 				});
-				lenses.push({
-					range: firstChar,
-					command: {
-						id: updateTestsCommand,
-						title: 'Run and Update All'
-					}
-				});
+				
+				if (testsWithUpdates.size) {
+					lenses.push({
+						range: firstChar,
+						command: {
+							id: applyUpdatesCommand,
+							title: 'Apply All Updates'
+						}
+					});
+				}
 
 				for (let [testIndex, range] of _findTestObjectTops(monaco, model).entries()) {
 					lenses.push({
 						range: range,
 						command: {
-							id: runTestsCommand,
+							id: runCommand,
 							title: 'Run',
 							arguments: [[testIndex]]
 						}
 					});
 
-					lenses.push({
-						range: range,
-						command: {
-							id: updateTestsCommand,
-							title: 'Run and Update',
-							arguments: [[testIndex]]
-						}
-					});
+					if (testsWithUpdates.has(testIndex)) {
+						lenses.push({
+							range: range,
+							command: {
+								id: applyUpdatesCommand,
+								title: 'Apply Updates',
+								arguments: [[testIndex]]
+							}
+						});
+					}
 				}
 
 				return { lenses, dispose() {} };
@@ -935,20 +930,27 @@ var Scaffold = new function () {
 		}
 	};
 
-	this.handleTestSelect = function (event) {
-		let selected = event.target.selectedItems[0];
-		if (!selected) return;
+	this.handleTestingContextMenuShowing = function () {
+		let selectedItems = Array.from(document.getElementById('testing-listbox').selectedItems);
+		if (!selectedItems.length) return;
 
-		let editImport = document.getElementById('testing_editImport');
-		let openURL = document.getElementById('testing_openURL');
-		if (selected.dataset.testType == 'web') {
-			editImport.setAttribute('disabled', true);
-			openURL.removeAttribute('disabled');
+		let editImport = document.getElementById('testing-editImport');
+		let openURL = document.getElementById('testing-openURL');
+		let applyUpdates = document.getElementById('testing-applyUpdates');
+		if (selectedItems.length > 1) {
+			editImport.disabled = true;
+			openURL.disabled = true;
 		}
 		else {
-			editImport.removeAttribute('disabled');
-			openURL.setAttribute('disabled', true);
+			let selectedItem = selectedItems[0];
+			editImport.disabled = selectedItem.dataset.testType === 'web';
+			openURL.disabled = selectedItem.dataset.testType !== 'web';
 		}
+		applyUpdates.disabled = selectedItems.some(item => !item.dataset.updatedTestString);
+	};
+	
+	this.handleTestingListboxDblClick = function () {
+		this.runSelectedTests();
 	};
 
 	// Add special keydown handling for the editors
@@ -1214,12 +1216,11 @@ var Scaffold = new function () {
 	/*
 	 * called to select items
 	 */
-	function _selectItems(obj, itemList) {
+	function _selectItems(obj, itemList, callback) {
 		var io = { dataIn: itemList, dataOut: null };
 		window.openDialog("chrome://scaffold/content/select.xhtml",
 			"_blank", "chrome,modal,centerscreen,resizable=yes", io);
-
-		return io.dataOut;
+		callback(io.dataOut);
 	}
 
 	/*
@@ -1240,18 +1241,8 @@ var Scaffold = new function () {
 	 * logs item output
 	 */
 	function _myItemDone(obj, jsonItem) {
-		// If the pane hasn't been resized, it won't have a fixed width,
-		// so it'll grow when wrapping text is added. Fix its width now.
-		let rightPane = document.querySelector('#right-pane');
-		rightPane.style.width = rightPane.getBoundingClientRect().width + 'px';
-		
 		let itemPreviews = document.querySelector('#item-previews');
-		if (itemPreviews.hidden) {
-			itemPreviews.hidden = false;
-			itemPreviews.jsonItems = [];
-		}
-		itemPreviews.jsonItems.push(jsonItem);
-		itemPreviews.render();
+		itemPreviews.addItemPair(jsonItem, null);
 	}
 
 	/*
@@ -1474,23 +1465,6 @@ var Scaffold = new function () {
 		_writeToEditor(_editors.tests, _stringifyTests(tests));
 	}
 	
-	function _confirmCreateExpectedFailTest() {
-		return Services.prompt.confirm(null,
-			'Detection Failed',
-			'Add test ensuring that detection always fails on this page?');
-	}
-
-	/* sanitizes all items in a test
-	 */
-	function _sanitizeItemsInTest(test) {
-		if (test.items && typeof test.items != 'string' && test.items.length) {
-			for (var i = 0, n = test.items.length; i < n; i++) {
-				test.items[i] = Zotero_TranslatorTester._sanitizeItem(test.items[i]);
-			}
-		}
-		return test;
-	}
-	
 	/* stringifies an array of tests
 	 * Output is the same as JSON.stringify (with pretty print), except that
 	 * Zotero.Item objects are stringified in a deterministic manner (mostly):
@@ -1610,6 +1584,7 @@ var Scaffold = new function () {
 			_writeTestsToPane([..._loadTestsFromPane(), test]);
 		}
 		catch (e) {
+			Zotero.logError(e);
 			_logOutput('Creation failed');
 			return;
 		}
@@ -1626,51 +1601,49 @@ var Scaffold = new function () {
 			|| (type === "import" && !document.getElementById('checkbox-import').checked)
 			|| (type === "search" && !document.getElementById('checkbox-search').checked)) {
 			_logOutput(`Translator does not support ${type} tests`);
-			return Promise.reject(new Error());
+			throw new Error();
 		}
 
 		if (type == 'export') {
-			return Promise.reject(new Error(`Test of type export cannot be created`));
+			throw new Error(`Test of type export cannot be created`);
 		}
 
 		let input = await _getInput(type);
-
-		if (type == "web") {
-			let translate = new RemoteTranslate({ disableErrorReporting: true });
-			try {
-				await translate.setBrowser(_browser);
-				await translate.setTranslatorProvider(_translatorProvider);
-				translate.setTranslator(_getTranslatorFromPane());
-				translate.setHandler("debug", _debug);
-				translate.setHandler("error", _error);
-				translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
-				let newTest = await translate.newTest();
-				if (!newTest) {
-					throw new Error('Creation failed');
-				}
-				newTest = _sanitizeItemsInTest(newTest);
-				return newTest;
-			}
-			finally {
-				translate.dispose();
-			}
+		if (input === _browser) {
+			input = _getCurrentURI(_browser);
 		}
-		else if (type == "import" || type == "search") {
-			let test = { type, input: input, items: [] };
-
-			// TranslatorTester doesn't handle these correctly, so we do it manually
-			return new Promise(
-				resolve => _run(`do${type == 'import' ? 'Import' : 'Search'}`, input, null, function (obj, item) {
-					if (item) {
-						test.items.push(Zotero_TranslatorTester._sanitizeItem(item));
-					}
-				}, null, function () {
-					resolve(test);
-				})
+		
+		let testDraft = new Test({ type, input, items: [] });
+		let [{ updatedTest: test }] = await Array.fromAsync(
+			this.runTestsInternal([testDraft])
+		);
+		
+		// If we didn't get an item the first time, try again with defer: true
+		if (!test) {
+			testDraft.defer = true;
+			let [{ updatedTest }] = await Array.fromAsync(
+				this.runTestsInternal([testDraft])
 			);
+			test = updatedTest;
 		}
-
-		return Promise.reject(new Error('Invalid type: ' + type));
+		
+		// But give up after that
+		if (!test) {
+			if (Services.prompt.confirm(
+				null,
+				'Detection Failed',
+				`Add test ensuring that detection always fails on this ${type === 'web' ? 'page' : 'input'}?`
+			)) {
+				testDraft.detectedItemType = false;
+				testDraft.defer = false;
+				return testDraft.toJSON();
+			}
+			else {
+				throw new Error('Not creating expected-fail test');
+			}
+		}
+		
+		return test.toJSON();
 	};
 
 	/*
@@ -1698,15 +1671,16 @@ var Scaffold = new function () {
 
 		let listBox = document.getElementById("testing-listbox");
 		let count = listBox.getRowCount();
-		let oldStatuses = {};
+		let oldStatusNodes = {};
 		for (let i = 0; i < count; i++) {
 			let item = listBox.getItemAtIndex(i);
-			let [, statusCell] = item.children;
-			oldStatuses[item.dataset.testString] = statusCell.textContent;
+			oldStatusNodes[item.dataset.testString] = item.querySelector('.status');
 		}
 
-		let testIndex = 0;
-		for (let test of tests) {
+		while (listBox.itemChildren.length > tests.length) {
+			listBox.itemChildren[listBox.itemChildren.length - 1].remove();
+		}
+		for (let [testIndex, test] of tests.entries()) {
 			let testString = _stringifyTests(test, 1);
 
 			// try to reuse old rows
@@ -1720,8 +1694,25 @@ var Scaffold = new function () {
 			input.append(getTestLabel(test));
 			item.appendChild(wrapWithHBox(input, { flex: 1 }));
 
-			let status = document.createXULElement('label');
-			status.append(oldStatuses[testString] || 'Not run');
+			let status = oldStatusNodes[testString];
+			if (!status) {
+				status = document.createXULElement('label');
+				status.classList.add('status');
+				status.addEventListener('click', (event) => {
+					if (!status.classList.contains('needs-update')) {
+						return;
+					}
+					event.preventDefault();
+					if (!Services.prompt.confirm(
+						null,
+						'Scaffold',
+						`Apply updates to this test?`
+					)) {
+						return;
+					}
+					this.updateTests([testIndex]);
+				});
+			}
 			item.appendChild(wrapWithHBox(status, { width: 150 }));
 
 			let defer = document.createXULElement('checkbox');
@@ -1738,19 +1729,16 @@ var Scaffold = new function () {
 			});
 			item.appendChild(wrapWithHBox(defer, { pack: 'center', width: 75 }));
 
+			// Remove updatedTestString if the test changed or updates have been applied
+			if (item.dataset.testString !== testString || item.dataset.updatedTestString === testString) {
+				delete item.dataset.updatedTestString;
+			}
 			item.dataset.testString = testString;
 			item.dataset.testType = test.type;
 
 			if (testIndex >= count) {
 				listBox.appendChild(item);
 			}
-
-			testIndex++;
-		}
-
-		// remove old rows that we didn't reuse
-		while (listBox.getItemAtIndex(testIndex)) {
-			listBox.getItemAtIndex(testIndex).remove();
 		}
 	};
 
@@ -1762,7 +1750,7 @@ var Scaffold = new function () {
 		var indicesToRemove = [...listbox.selectedItems].map(item => listbox.getIndexOfItem(item));
 
 		let tests = _loadTestsFromPane();
-		indicesToRemove.forEach(i => tests.splice(i, 1));
+		tests = tests.filter((_, i) => !indicesToRemove.includes(i));
 		_writeTestsToPane(tests);
 
 		this.populateTests();
@@ -1798,7 +1786,7 @@ var Scaffold = new function () {
 	this.copyToClipboard = function () {
 		var listbox = document.getElementById("testing-listbox");
 		var item = listbox.selectedItems[0];
-		var url = item.getElementsByTagName("label")[0].getAttribute("value");
+		var url = item.getElementsByTagName("label")[0].textContent;
 		var test = JSON.parse(item.dataset.testString);
 		var urlOrData = (test.input !== undefined) ? test.input : url;
 		if (typeof urlOrData !== 'string') {
@@ -1826,110 +1814,137 @@ var Scaffold = new function () {
 			_showTab('browser');
 		}
 	};
+	
+	this.runTests = async function (testIndices) {
+		let listbox = document.getElementById('testing-listbox');
+		let items = [...listbox.itemChildren];
+		let itemsToUpdate = testIndices.map(index => items[index]);
 
-	this.runTests = function (tests, callback) {
-		callback = callback || (() => {});
+		let itemPreviews = document.querySelector('#item-previews');
 
-		_clearOutput();
+		let tests = [];
+		for (let listItem of itemsToUpdate) {
+			listItem.querySelector('.status').textContent = 'Running';
 
-		let testsByType = {
-			import: [],
-			export: [],
-			web: [],
-			search: []
-		};
-
-		for (let test of tests) {
-			testsByType[test.type].push(test);
+			let test = new Test(JSON.parse(listItem.dataset.testString));
+			tests.push(test);
 		}
+
+		let numTests = tests.length;
+		let currentTest = 1; // For logging
+		_logOutput(`Running ${numTests} ${Zotero.Utilities.pluralize(numTests, 'test')}`);
+		for await (let { test, status, reason, updatedTest } of this.runTestsInternal(tests)) {
+			let statusText;
+			let needsUpdate = false;
+			
+			let logPrefix = `Test ${currentTest}/${numTests}: `;
+			if (status === 'success') {
+				statusText = 'Succeeded';
+				_logOutput(logPrefix + statusText);
+			}
+			else {
+				statusText = reason;
+				needsUpdate = !!updatedTest;
+				_logOutput(logPrefix + statusText);
+			}
+
+			// Show the preview pane as long as we got new item data,
+			// even if there weren't substantive changes
+			let totalStats = { added: 0, removed: 0 };
+			if (Array.isArray(test.items) && Array.isArray(updatedTest?.items)) {
+				for (let i = 0; i < test.items.length || i < updatedTest.items.length; i++) {
+					let preItem = i < test.items.length ? test.items[i] : {};
+					let postItem = i < updatedTest.items.length ? updatedTest.items[i] : {};
+					
+					let preview = itemPreviews.addItemPair(preItem, postItem);
+					let statsHere = preview.diffStats;
+					totalStats.added += statsHere.added;
+					totalStats.removed += statsHere.removed;
+				}
+			}
+
+			let listItem = itemsToUpdate[tests.indexOf(test)];
+			let statusLabel = listItem.querySelector('.status');
+			statusLabel.classList.toggle('needs-update', needsUpdate);
+			
+			let textElem = document.createElement('span');
+			textElem.classList.add('text');
+			textElem.textContent = statusText;
+			let addedElem = document.createElement('span');
+			addedElem.classList.add('added');
+			addedElem.textContent = `+${totalStats.added}`;
+			let removedElem = document.createElement('span');
+			removedElem.classList.add('removed');
+			removedElem.textContent = `-${totalStats.removed}`;
+
+			statusLabel.replaceChildren(textElem, addedElem, removedElem);
+			
+			if (needsUpdate) {
+				listItem.dataset.updatedTestString = _stringifyTests(updatedTest.toJSON(), 1);
+			}
+			else {
+				delete listItem.dataset.updatedTestString;
+			}
+
+			currentTest++;
+		}
+		
+		_invalidateCodeLenses?.();
+	};
+
+	this.runSelectedTests = async function () {
+		let listbox = document.getElementById('testing-listbox');
+		let selectedItems = [...listbox.selectedItems];
+		await this.runTests(
+			[...selectedItems].map(item => listbox.getIndexOfItem(item))
+		);
+	};
+
+	this.runTestsInternal = async function* (tests) {
+		_clearOutput();
 
 		let rememberCookies = document.getElementById('checkbox-remember-cookies').checked;
-
-		for (let [type, testsOfType] of Object.entries(testsByType)) {
-			if (testsOfType.length) {
-				let tester = new Zotero_TranslatorTester(
-					_getTranslatorFromPane(),
-					type,
-					_debug,
-					_translatorProvider
-				);
-				if (!rememberCookies) {
-					tester.setCookieSandbox(new Zotero.CookieSandbox());
-				}
-				tester.setTests(testsOfType);
-				tester.runTests(callback);
-			}
-		}
-	};
-	
-	/*
-	 * Run selected test(s)
-	 */
-	this.runSelectedTests = function () {
-		var listbox = document.getElementById("testing-listbox");
-		var items = listbox.selectedItems;
-		if (!items || items.length == 0) return; // No action if nothing selected
-		var tests = [];
-		for (let item of items) {
-			item.getElementsByTagName("label")[1].textContent = "Running";
-			var test = JSON.parse(item.dataset.testString);
-			test["ui-item"] = ContentDOMReference.get(item);
-			tests.push(test);
-		}
-
-		this.runTests(tests, (obj, test, status, message) => {
-			ContentDOMReference.resolve(test["ui-item"]).getElementsByTagName("label")[1].textContent = message;
+		let tester = new TranslatorTester(_getTranslatorFromPane(), {
+			translatorProvider: _translatorProvider,
+			cookieSandbox: rememberCookies ? null : new Zotero.CookieSandbox(),
+			debug: _logOutput,
+			webTranslationEnvironment: new ZoteroWebTranslationEnvironment(),
 		});
+
+		for (let test of tests) {
+			yield { test, ...await tester.run(test) };
+		}
 	};
 
-	this.updateTests = function (tests, testUpdatedCallback) {
-		_clearOutput();
+	this.updateTests = async function (testIndices) {
+		let listbox = document.getElementById('testing-listbox');
+		let items = [...listbox.itemChildren];
+		let itemsToUpdate = testIndices.map(index => items[index]);
 
-		var updater = new TestUpdater(tests);
-		return new Promise(resolve => updater.updateTests(
-			testUpdatedCallback,
-			resolve
-		));
+		let tests = _loadTestsFromPane();
+		for (let item of itemsToUpdate) {
+			let updatedTestString = item.dataset.updatedTestString;
+			if (!updatedTestString) {
+				continue;
+			}
+			
+			let updatedTest = JSON.parse(updatedTestString);
+			tests[items.indexOf(item)] = updatedTest;
+			item.dataset.testString = _stringifyTests(updatedTest, 1);
+			let status = item.querySelector('.status');
+			status.textContent = 'Updated';
+			status.classList.remove('needs-update');
+		}
+		_writeTestsToPane(tests);
+		_logOutput('Tests updated.');
 	};
 	
-	/*
-	 * Update selected test(s)
-	 */
 	this.updateSelectedTests = async function () {
-		var listbox = document.getElementById("testing-listbox");
-		var items = [...listbox.selectedItems];
-		if (!items || items.length == 0) return; // No action if nothing selected
-		var itemIndices = items.map(item => listbox.getIndexOfItem(item));
-		var tests = [];
-		for (let item of items) {
-			item.getElementsByTagName("label")[1].textContent = "Updating";
-			var test = JSON.parse(item.dataset.testString);
-			tests.push(test);
-		}
-
-		var testsDone = 0;
-		await this.updateTests(tests,
-			(newTest) => {
-				let message;
-				// Assume sequential. TODO: handle this properly via test ID of some sort
-				if (newTest) {
-					message = "Test updated";
-					items[testsDone].dataset.testString = _stringifyTests(newTest, 1);
-					tests[testsDone] = newTest;
-				}
-				else {
-					message = "Update failed";
-				}
-				items[testsDone].getElementsByTagName("label")[1].textContent = message;
-				testsDone++;
-			});
-
-		let allTests = _loadTestsFromPane();
-		for (let [i, test] of Object.entries(tests)) {
-			allTests[itemIndices[i]] = test;
-		}
-		_writeTestsToPane(allTests);
-		_logOutput("Tests updated.");
+		let listbox = document.getElementById('testing-listbox');
+		let selectedItems = [...listbox.selectedItems];
+		await this.updateTests(
+			[...selectedItems].map(item => listbox.getIndexOfItem(item))
+		);
 	};
 
 	this.populateLinterMenu = function () {
@@ -1954,98 +1969,6 @@ var Scaffold = new function () {
 		tabBox.selectedIndex = tabNumber - 1;
 	};
 	
-	var TestUpdater = function (tests) {
-		this.testsToUpdate = tests.slice();
-		this.numTestsTotal = this.testsToUpdate.length;
-		this.newTests = [];
-	};
-	
-	TestUpdater.prototype.updateTests = function (testDoneCallback, doneCallback) {
-		this.testDoneCallback = testDoneCallback || function () { /* no-op */ };
-		this.doneCallback = doneCallback || function () { /* no-op */ };
-		
-		this._updateTests();
-	};
-	
-	TestUpdater.prototype._updateTests = async function () {
-		if (!this.testsToUpdate.length) {
-			this.doneCallback(this.newTests);
-			return;
-		}
-		
-		var test = this.testsToUpdate.shift();
-		_logOutput("Updating test " + (this.numTestsTotal - this.testsToUpdate.length));
-		
-		if (test.type == 'web') {
-			_logOutput("Loading web page from " + test.url);
-			
-			const { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
-			let browser = new HiddenBrowser({
-				docShell: { allowMetaRedirects: true }
-			});
-			try {
-				await browser.load(test.url, {
-					requireSuccessfulStatus: true
-				});
-
-				let translate = new RemoteTranslate({ disableErrorReporting: true });
-				try {
-					await translate.setBrowser(browser);
-					await translate.setTranslatorProvider(_translatorProvider);
-					translate.setTranslator(_getTranslatorFromPane());
-					translate.setHandler("debug", _debug);
-					translate.setHandler("error", _error);
-					translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
-					
-					let newTest = await translate.newTest({ defer: test.defer });
-					newTest = _sanitizeItemsInTest(newTest);
-
-					if (newTest.url != test.url) {
-						_logOutput("Page URL differs from test. Will be updated. " + newTest.url);
-					}
-					
-					this.newTests.push(newTest);
-					this.testDoneCallback(newTest);
-					this._updateTests();
-				}
-				finally {
-					translate.dispose();
-				}
-			}
-			catch (e) {
-				Zotero.logError(e);
-				this.newTests.push(false);
-				this.testDoneCallback(false);
-				this._updateTests();
-			}
-			finally {
-				if (browser) browser.destroy();
-			}
-		}
-		else {
-			test.items = [];
-
-			const methods = {
-				import: 'doImport',
-				export: 'doExport', // not supported, will error
-				search: 'doSearch'
-			};
-
-			// Re-runs the test.
-			// TranslatorTester doesn't handle these correctly, so we do it manually
-			_run(methods[test.type], test.input, null, (obj, item) => {
-				if (item) {
-					test.items.push(Zotero_TranslatorTester._sanitizeItem(item));
-				}
-			}, null, () => {
-				if (!test.items.length) test = false;
-				this.newTests.push(test);
-				this.testDoneCallback(test);
-				this._updateTests();
-			});
-		}
-	};
-
 	/*
 	 * Normalize whitespace to the Zotero norm of tabs
 	 */
@@ -2060,8 +1983,8 @@ var Scaffold = new function () {
 	 */
 	function _clearOutput() {
 		document.getElementById('output').value = '';
-		let itemPane = document.querySelector('#item-previews');
-		itemPane.hidden = true;
+		let itemPreviews = document.querySelector('#item-previews');
+		itemPreviews.clearItemPairs();
 	}
 
 	/*
