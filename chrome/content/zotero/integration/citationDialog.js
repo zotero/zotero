@@ -197,7 +197,7 @@ function _id(id) {
 class Layout {
 	constructor(type) {
 		this.type = type;
-		this._searchDebouncePromise = null;
+		this._lastSearchTime = null;
 	}
 
 	// Re-render the items based on search results
@@ -319,15 +319,17 @@ class Layout {
 		await this.refreshItemsList({ skipWindowResize: true });
 
 		// debounce to not rerun sql search until typing is probably done
-		if (this._searchDebouncePromise && this._searchDebouncePromise.isPending()) {
-			this._searchDebouncePromise.cancel();
-		}
 		if (!skipDebounce) {
-			this._searchDebouncePromise = Zotero.Promise.delay(SEARCH_TIMEOUT);
-			await this._searchDebouncePromise;
+			// record when the search started
+			let searchStartTime = Date.now();
+			this._lastSearchTime = searchStartTime;
+			
+			// wait a moment
+			await Zotero.Promise.delay(SEARCH_TIMEOUT);
+			
+			// stop if another search started during the delay
+			if (this._lastSearchTime !== searchStartTime) return;
 		}
-		this._searchDebouncePromise = null;
-
 		// in list mode, search for matches across libraries
 		// in library mode, set filter on itemTree
 		if (this.type == "list") {
