@@ -1111,7 +1111,7 @@ Zotero.Translate.ItemGetter.prototype = {
 	 * NOTE: This function should use the Zotero.Promise.method wrapper which adds a
 	 * isResolved property to the returned promise for noWait translation.
 	 */
-	setAll: async function (libraryID, getChildCollections) {
+	setAll: Zotero.Promise.method(async function (libraryID, getChildCollections) {
 		this._itemsLeft = (await Zotero.Items.getAll(libraryID, true))
 			.filter((item) => {
 				// Don't export annotations
@@ -1128,7 +1128,7 @@ Zotero.Translate.ItemGetter.prototype = {
 
 		this._itemsLeft.sort((a, b) => a.id - b.id);
 		this.numItems = this._itemsLeft.length;
-	},
+	}),
 	
 	exportFiles: function (dir, extension, { includeAnnotations }) {
 		// generate directory
