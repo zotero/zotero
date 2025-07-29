@@ -325,7 +325,7 @@ class Layout {
 			this._lastSearchTime = searchStartTime;
 			
 			// wait a moment
-			await new Promise(resolve => setTimeout(resolve, SEARCH_TIMEOUT));
+			await Zotero.Promise.delay(SEARCH_TIMEOUT);
 			
 			// stop if another search started during the delay
 			if (this._lastSearchTime !== searchStartTime) return;
