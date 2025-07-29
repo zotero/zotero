@@ -61,7 +61,6 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
-		Services.scriptloader.loadSubScript("chrome://zotero/content/xpcom/translate/testTranslators/translatorTester.js", this);
 		Services.scriptloader.loadSubScript("chrome://scaffold/content/translators.js", this);
 		Services.scriptloader.loadSubScript("chrome://scaffold/content/scaffold.js", this);
 		
@@ -139,15 +138,19 @@
 	</keyset>
 
 	<popupset>
-		<menupopup id="testing-context-menu">
+		<menupopup id="testing-context-menu" onpopupshowing="Scaffold.handleTestingContextMenuShowing()">
 			<menuitem label="&scaffold.testing.copyToClipboard;" tooltiptext="Copy the URL or data for the current test to the clipboard" oncommand="Scaffold.copyToClipboard()"/>
-			<menuitem id="testing_editImport" label="&scaffold.testing.edit;" tooltiptext="Edit the input data for the current test" oncommand="Scaffold.editImportFromTest()"/>
-			<menu id="testing_openURL" label="&scaffold.testing.openUrl;">
+			<menuitem id="testing-editImport" label="&scaffold.testing.edit;" tooltiptext="Edit the input data for the current test" oncommand="Scaffold.editImportFromTest()"/>
+			<menu id="testing-openURL" label="&scaffold.testing.openUrl;">
 				<menupopup>
 					<menuitem label="&scaffold.testing.openUrl.internally;" tooltiptext="Open the URL for the current test in the Scaffold browser" oncommand="Scaffold.openURL(false)"/>
 					<menuitem label="&scaffold.testing.openUrl.externally;" tooltiptext="Open the URL for the current test in your default browser" oncommand="Scaffold.openURL(true)"/>
 				</menupopup>
 			</menu>
+			<menuseparator/>
+			<menuitem id="testing-delete" label="Delete" oncommand="Scaffold.deleteSelectedTests()"/>
+			<menuitem id="testing-run" label="Run" oncommand="Scaffold.runSelectedTests()"/>
+			<menuitem id="testing-applyUpdates" label="&scaffold.testing.applyUpdates;" oncommand="Scaffold.updateSelectedTests()"/>
 		</menupopup>
 	</popupset>
 
@@ -488,24 +491,18 @@
 									observes="validate-tests"
 									flex="1"
 									seltype="multiple"
-									onselect="Scaffold.handleTestSelect(event)"
 									context="testing-context-menu"
 									focus-on-tab-select="true"
+									ondblclick="Scaffold.handleTestingListboxDblClick()"
 								/>
 							</vbox>
-							<hbox id="testing-buttons">
-								<button observes="validate-tests" label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests" oncommand="Scaffold.deleteSelectedTests()"/>
-								<button observes="validate-tests" label="&scaffold.testing.run;" tooltiptext="Run the selected tests" oncommand="Scaffold.runSelectedTests()"/>
-								<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Run the selected tests and update the test definitions with the latest data" oncommand="Scaffold.updateSelectedTests()"/>
-
-								<hbox flex="1" pack="end">
-									<checkbox
-										id="checkbox-remember-cookies"
-										label="&scaffold.testing.rememberCookies;"
-										native="true"
-										checked="true"
-									/>
-								</hbox>
+							<hbox pack="end">
+								<checkbox
+									id="checkbox-remember-cookies"
+									label="&scaffold.testing.rememberCookies;"
+									native="true"
+									checked="true"
+								/>
 							</hbox>
 							<iframe src="monaco/monaco.html" id="editor-tests" onmousedown="this.focus()"/>
 						</vbox>
