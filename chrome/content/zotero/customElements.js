@@ -129,7 +129,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		// it must be a delayed event re-dispatched by the code below, so let it propagate
 		if (event.sourceEvent?.type === "command") return;
 
-		// Hide the popup and don't let anything else to happen
+		// Hide the popup and don't let anything else happen
 		event.target.closest("menupopup").hidePopup(true);
 		event.stopPropagation();
 		event.preventDefault();
