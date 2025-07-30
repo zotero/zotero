@@ -257,8 +257,10 @@ describe("Item pane", function () {
 			var label = itemBox.querySelectorAll('[fieldname="series"]')[1];
 			assert.equal(label.value, '');
 			
+			let promise = waitForItemEvent('modify');
 			item.setField('series', 'Test');
 			await item.saveTx();
+			await promise;
 			
 			label = itemBox.querySelectorAll('[fieldname="series"]')[1];
 			assert.equal(label.value, 'Test');
@@ -2239,6 +2241,7 @@ describe("Item pane", function () {
 			// Make the window wide enough not to automatically enter Stacked mode
 			win.resizeTo(1000, 800);
 			Zotero.Prefs.set('layout', 'standard');
+			ZoteroPane.updateLayout();
 			
 			Zotero_Tabs.select('zotero-pane');
 			ZoteroPane.itemPane.collapsed = false;
