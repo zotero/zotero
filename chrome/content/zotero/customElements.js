@@ -110,11 +110,12 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 	});
 
 	// Opening a dialog window via a command from a menupopup leads to
-	// unexpected glitched in the dialog's popups (e.g. collections menu
+	// unexpected glitches in the dialog's popups (e.g., collections menu
 	// in newCollection dialog on macOS won't go away when you click away,
-	// and on windows, child collections don't appear when a parent is hovered).
+	// and on Windows, child collections don't appear when a parent is hovered).
 	// This is due to some kind of race condition that arises when the dialog
 	// appears when the popup is still closing.
+	//
 	// This workaround captures command events from menupopups, closes the popup,
 	// stops propagation of those events, and then dispatches a copy of
 	// that event after a delay. This gives the popup enough time to close.
