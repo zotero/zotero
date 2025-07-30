@@ -109,6 +109,54 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		}
 	});
 
+	// Opening a dialog window via a command from a menupopup leads to
+	// unexpected glitches in the dialog's popups (e.g., collections menu
+	// in newCollection dialog on macOS won't go away when you click away,
+	// and on Windows, child collections don't appear when a parent is hovered).
+	// This is due to some kind of race condition that arises when the dialog
+	// appears when the popup is still closing.
+	//
+	// This workaround captures command events from menupopups, closes the popup,
+	// stops propagation of those events, and then dispatches a copy of
+	// that event after a delay. This gives the popup enough time to close.
+	document.addEventListener("command", (event) => {
+		// Only handle command events from menupopups
+		if (!event.target.closest("menupopup")) return;
+
+		// Ignore commands from within menulists, since no dialogs are opened from them
+		if (event.target.closest("menulist")) return;
+
+		// If the source event of this 'command' event is another 'command' event,
+		// it must be a delayed event re-dispatched by the code below, so let it propagate
+		if (event.sourceEvent?.type === "command") return;
+
+		// Hide the popup and don't let anything else happen
+		event.target.closest("menupopup").hidePopup(true);
+		event.stopPropagation();
+		event.preventDefault();
+
+		// Create a copy of the 'command' event and re-dispatch it after a delay
+		let originalTarget = event.target;
+		let delayedEvent = document.createEvent("XULCommandEvent");
+		delayedEvent.initCommandEvent(
+			event.type,
+			event.bubbles,
+			event.cancelable,
+			event.view,
+			event.detail,
+			event.ctrlKey,
+			event.altKey,
+			event.shiftKey,
+			event.metaKey,
+			0,
+			event,
+			0
+		);
+		setTimeout(() => {
+			originalTarget.dispatchEvent(delayedEvent);
+		});
+	}, true);
+
 	// Add MacOS menupopup fade animation to menupopups
 	if (Zotero.isMac) {
 		let MozMenuPopupPrototype = customElements.get("menupopup").prototype;
