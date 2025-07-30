@@ -1,5 +1,6 @@
  
 import React from 'react';
+import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
 const StreamingStates = {
 	DEFAULT: 0,
@@ -32,12 +33,14 @@ const getLoadingText = (currentStatus) => {
 };
 
 const DeepTutorStreamingTag = ({ streamState, isCurrentTag }) => {
+	const { colors, theme } = useDeepTutorTheme();
+	
 	const tagStyle = {
 		display: 'flex',
 		width: 'fit-content',
 		gap: '0.25rem',
 		borderRadius: '0.375rem',
-		border: '0.25rem solid #E0E0E0',
+		border: `0.25rem solid ${theme === 'dark' ? colors.sky : '#E0E0E0'}`,
 		paddingLeft: '1rem',
 		paddingRight: '1rem',
 		paddingTop: '0.5rem',
@@ -47,7 +50,7 @@ const DeepTutorStreamingTag = ({ streamState, isCurrentTag }) => {
 		fontFamily: 'Roboto, sans-serif',
 		fontSize: '0.875rem',
 		alignItems: 'center',
-		color: '#000000'
+		color: colors.text.allText
 	};
 
 	const checkIconStyle = {
@@ -62,7 +65,7 @@ const DeepTutorStreamingTag = ({ streamState, isCurrentTag }) => {
 		height: '1rem',
 		width: '1rem',
 		borderRadius: '50%',
-		border: '0.125rem solid #3B82F6',
+		border: `0.125rem solid ${colors.sky}`,
 		borderTopColor: 'transparent',
 		animation: 'spin 1s linear infinite'
 	};

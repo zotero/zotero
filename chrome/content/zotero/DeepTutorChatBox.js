@@ -8,6 +8,7 @@ import {
 	subscribeToChat
 } from './api/libs/api';
 import DeepTutorStreamingComponent from './DeepTutorStreamingComponent';
+import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
 const markdownit = require('markdown-it');
 // Try to require markdown-it-container, fallback to a simpler implementation if not available
@@ -104,317 +105,319 @@ const MessageRole = {
 	USER: 'USER'
 };
 
-// Styles
-const styles = {
-	container: {
-		width: '100%',
-		minHeight: '80%',
-		background: '#F2F2F2',
-		borderRadius: '0.5rem',
-		boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
-		height: '100%',
-		display: 'flex',
-		flexDirection: 'column',
-		fontFamily: 'Roboto, sans-serif',
-		position: 'relative',
-		overflow: 'hidden',
-		padding: '1.875rem 0.75rem 0 0.75rem',
-		boxSizing: 'border-box',
-		userSelect: 'text', // Ensure text is selectable
-		WebkitUserSelect: 'text',
-		MozUserSelect: 'text',
-		msUserSelect: 'text',
-	},
-	sessionNameDiv: {
-		width: '100%',
-		marginBottom: '1.25rem',
-		color: '#000000',
-		fontWeight: 500,
-		fontSize: '1rem',
-		lineHeight: '1.2',
-		fontFamily: 'Roboto, sans-serif',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap',
-	},
-	sessionInfo: {
-		width: '90%',
-		fontSize: '1em',
-		color: '#495057',
-		marginBottom: '0.25rem',
-		paddingLeft: '0.25rem',
-		fontFamily: 'Roboto, sans-serif',
-		alignSelf: 'flex-start',
-		marginLeft: '5%',
-	},
-	chatLog: {
-		width: '100%',
-		borderRadius: '0.625rem',
-		overflowY: 'auto',
-		overflowX: 'hidden',
-		background: '#F2F2F2',
-		height: '100%',
-		boxShadow: 'none',
-		fontFamily: 'Roboto, sans-serif',
-		flex: 1,
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'stretch',
-		boxSizing: 'border-box',
-		marginBottom: '1.25rem',
-		userSelect: 'text',
-		WebkitUserSelect: 'text',
-		MozUserSelect: 'text',
-		msUserSelect: 'text',
-	},
-	bottomBar: {
-		width: '100%',
-		background: '#F8F6F7',
-		display: 'flex',
-		alignItems: 'flex-end', // Changed from 'center' to 'flex-end' to align with textarea
-		justifyContent: 'space-between',
-		fontFamily: 'Roboto, sans-serif',
-		position: 'relative',
-		zIndex: 1,
-		border: '0.0625rem solid #D9D9D9',
-		borderRadius: '0.5rem',
-		boxSizing: 'border-box',
-		minHeight: '2.5rem',
-		maxHeight: '10rem', // Increased to accommodate larger textarea (7rem + padding)
-		padding: '0.5rem',
-	},
-	textInput: {
-		flex: 1,
-		padding: '0.5rem 0.75rem',
-		border: 'none',
-		outline: 'none',
-		borderRadius: '0.625rem',
-		background: '#F8F6F7',
-		color: '#757575',
-		minHeight: '1.5rem',
-		maxHeight: '7rem', // Approximately 5 lines of text at 0.95rem font size
-		fontSize: '1rem',
-		overflowY: 'auto',
-		fontFamily: 'Roboto, sans-serif',
-		resize: 'none',
-		height: '24px', // Start with minHeight (1.5rem)
-		marginRight: '0.625rem',
-		alignSelf: 'flex-end',
-		lineHeight: '1.4',
-		wordWrap: 'break-word',
-		whiteSpace: 'pre-wrap'
-	},
-	sendButton: {
-		all: 'revert',
-		background: '#F8F6F7',
-		border: 'none',
-		borderRadius: '50%',
-		aspectRatio: '1',
-		height: '1.8rem',
-		width: '1.8rem',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		cursor: 'pointer',
-		padding: '0.125rem',
-		transition: 'background-color 0.2s ease',
-		flexShrink: 0,
-		alignSelf: 'center',
-		':hover': {
-			background: '#D9D9D9'
-		}
-	},
-	sendIcon: {
-		width: '1.5rem',
-		height: '1.5rem',
-		objectFit: 'contain',
-	},
-	messageContainer: {
-		width: '100%',
-		margin: '0.5rem 0',
-		boxSizing: 'border-box',
-		display: 'flex',
-		flexDirection: 'column',
-	},
-	messageBubble: {
-		padding: '0.5rem 0.75rem',
-		borderRadius: '0.625rem',
-		maxWidth: '100%',
-		boxShadow: 'none',
-		animation: 'slideIn 0.3s ease-out forwards',
-		height: 'auto',
-		whiteSpace: 'pre-wrap',
-		wordBreak: 'break-word',
-		boxSizing: 'border-box',
-		overflowWrap: 'break-word',
-		userSelect: 'text',
-		WebkitUserSelect: 'text',
-		MozUserSelect: 'text',
-		msUserSelect: 'text',
-	},
-	userMessage: {
-		backgroundColor: 'white',
-		color: '#1C1B1F',
-		marginLeft: 'auto',
-		marginRight: '1rem',
-		borderRadius: '0.625rem',
-		fontWeight: 400,
-		textAlign: 'left',
-		alignSelf: 'flex-end',
-		maxWidth: '85%',
-		width: 'fit-content',
-		fontSize: '0.875rem',
-		lineHeight: '1.35',
-		padding: '0.25rem 1.25rem',
-		
-	},
-	botMessage: {
-		backgroundColor: '#F2F2F2',
-		color: '#000000',
-		marginRight: 'auto',
-		marginLeft: 0,
-		borderBottomLeftRadius: '0.25rem',
-		borderRadius: '1rem',
-		fontWeight: 400,
-		alignSelf: 'flex-start',
-	},
 
-	messageText: {
-		display: 'block',
-		maxWidth: '100%',
-		overflowWrap: 'break-word',
-		wordBreak: 'break-word',
-		userSelect: 'text',
-		WebkitUserSelect: 'text',
-		MozUserSelect: 'text',
-		msUserSelect: 'text',
-		cursor: 'text',
-	},
-
-	questionContainer: {
-		all: 'revert',
-		width: '100%',
-		margin: '0.5rem 0',
-		display: 'flex',
-		flexDirection: 'column',
-		justifyContent: 'flex-start',
-		gap: '0.75rem',
-		flexWrap: 'wrap',
-		boxSizing: 'border-box',
-	},
-	questionButton: {
-		all: 'revert',
-		background: '#FFFFFF',
-		color: '#000',
-		border: '0.0625rem solid #0687E5',
-		borderRadius: '0.625rem',
-		padding: '0.625rem 1.25rem',
-		minWidth: '8rem',
-		maxWidth: '83%',
-		fontWeight: 500,
-		fontSize: '1rem',
-		lineHeight: '1.5',
-		cursor: 'pointer',
-		boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.04)',
-		textAlign: 'left',
-		fontFamily: 'Roboto, sans-serif',
-		height: 'auto',
-		whiteSpace: 'pre-wrap',
-		wordBreak: 'break-word',
-		transition: 'background 0.2s',
-		boxSizing: 'border-box',
-		overflowWrap: 'break-word',
-		alignSelf: 'flex-end',
-		marginLeft: 'auto',
-		marginRight: '1rem',
-	},
-
-	viewContextContainer: {
-		position: 'relative',
-		width: '100%',
-		marginBottom: '1.25rem',
-	},
-	viewContextButton: {
-		all: 'revert',
-		width: '100%',
-		gap: '0.625rem',
-		padding: '0.625rem 1.25rem',
-		border: '0.0625rem solid #BDBDBD',
-		borderRadius: '0.625rem',
-		height: '3rem',
-		background: '#F8F6F7',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		boxSizing: 'border-box',
-		cursor: 'pointer',
-		transition: 'background-color 0.2s',
-	},
-	viewContextButtonHover: {
-		background: '#FFFFFF',
-	},
-	viewContextText: {
-		fontSize: '1rem',
-		fontWeight: 400,
-		color: '#757575',
-		lineHeight: '100%',
-	},
-	contextPopup: {
-		position: 'absolute',
-		top: '100%',
-		left: 0,
-		right: 0,
-		background: '#F2F2F2',
-		border: '0.0625rem solid #E0E0E0',
-		borderRadius: '0.5rem',
-		boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
-		zIndex: 1000,
-		maxHeight: '24rem', // 360px = 5 items * (3rem height + 1.5rem padding)
-		overflowY: 'auto',
-		marginTop: '0.25rem',
-		boxSizing: 'border-box',
-	},
-	contextDocumentButton: {
-		all: 'revert',
-		width: '100%',
-		padding: '0.75rem',
-		background: '#F8F6F7',
-		border: 'none',
-		borderBottom: '0.0625rem solid #E0E0E0',
-		color: '#292929',
-		fontSize: '0.875rem',
-		fontWeight: 400,
-		cursor: 'pointer',
-		textAlign: 'left',
-		fontFamily: 'Roboto, sans-serif',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'flex-start',
-		transition: 'background-color 0.2s',
-		boxSizing: 'border-box',
-		whiteSpace: 'nowrap',
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-	},
-	contextDocumentButtonHover: {
-		background: '#FFFFFF',
-	},
-	followUpQuestionText: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'flex-end',
-		fontSize: '0.875rem',
-		fontWeight: 400,
-		color: '#757575',
-		lineHeight: '1.35',
-		cursor: 'pointer',
-		marginRight: '1rem',
-	}
-};
 
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
 const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
 const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
+	const { colors, theme } = useDeepTutorTheme();
+	
+	// Theme-aware styles
+	const styles = {
+		container: {
+			width: '100%',
+			minHeight: '80%',
+			background: colors.background.tertiary,
+			boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
+			height: '100%',
+			display: 'flex',
+			flexDirection: 'column',
+			fontFamily: 'Roboto, sans-serif',
+			position: 'relative',
+			overflow: 'hidden',
+			padding: '1.875rem 0.75rem 0 0.75rem',
+			boxSizing: 'border-box',
+			userSelect: 'text', // Ensure text is selectable
+			WebkitUserSelect: 'text',
+			MozUserSelect: 'text',
+			msUserSelect: 'text',
+		},
+		sessionNameDiv: {
+			width: '100%',
+			marginBottom: '1.25rem',
+			color: colors.text.allText,
+			fontWeight: 500,
+			fontSize: '1rem',
+			lineHeight: '1.2',
+			fontFamily: 'Roboto, sans-serif',
+			overflow: 'hidden',
+			textOverflow: 'ellipsis',
+			whiteSpace: 'nowrap',
+		},
+		sessionInfo: {
+			width: '90%',
+			fontSize: '1em',
+			color: colors.text.tertiary,
+			marginBottom: '0.25rem',
+			paddingLeft: '0.25rem',
+			fontFamily: 'Roboto, sans-serif',
+			alignSelf: 'flex-start',
+			marginLeft: '5%',
+		},
+		chatLog: {
+			width: '100%',
+			borderRadius: '0.625rem',
+			overflowY: 'auto',
+			overflowX: 'hidden',
+			background: colors.background.tertiary,
+			height: '100%',
+			boxShadow: 'none',
+			fontFamily: 'Roboto, sans-serif',
+			flex: 1,
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'stretch',
+			boxSizing: 'border-box',
+			marginBottom: '1.25rem',
+			userSelect: 'text',
+			WebkitUserSelect: 'text',
+			MozUserSelect: 'text',
+			msUserSelect: 'text',
+		},
+		bottomBar: {
+			width: '100%',
+			background: colors.background.quaternary,
+			display: 'flex',
+			alignItems: 'flex-end', // Changed from 'center' to 'flex-end' to align with textarea
+			justifyContent: 'space-between',
+			fontFamily: 'Roboto, sans-serif',
+			position: 'relative',
+			zIndex: 1,
+			border: `0.0625rem solid ${colors.border.quaternary}`,
+			borderRadius: '0.5rem',
+			boxSizing: 'border-box',
+			minHeight: '2.5rem',
+			maxHeight: '10rem', // Increased to accommodate larger textarea (7rem + padding)
+			padding: '0.5rem',
+		},
+		textInput: {
+			flex: 1,
+			padding: '0.5rem 0.75rem',
+			border: 'none',
+			outline: 'none',
+			borderRadius: '0.625rem',
+			background: colors.background.quaternary,
+			color: colors.text.tertiary,
+			minHeight: '1.5rem',
+			maxHeight: '7rem', // Approximately 5 lines of text at 0.95rem font size
+			fontSize: '1rem',
+			overflowY: 'auto',
+			fontFamily: 'Roboto, sans-serif',
+			resize: 'none',
+			height: '24px', // Start with minHeight (1.5rem)
+			marginRight: '0.625rem',
+			alignSelf: 'flex-end',
+			lineHeight: '1.4',
+			wordWrap: 'break-word',
+			whiteSpace: 'pre-wrap'
+		},
+		sendButton: {
+			all: 'revert',
+			background: colors.background.quaternary,
+			border: 'none',
+			borderRadius: '50%',
+			aspectRatio: '1',
+			height: '1.8rem',
+			width: '1.8rem',
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			cursor: 'pointer',
+			padding: '0.125rem',
+			transition: 'background-color 0.2s ease',
+			flexShrink: 0,
+			alignSelf: 'center',
+			':hover': {
+				background: colors.border.quaternary
+			}
+		},
+		sendIcon: {
+			width: '1.5rem',
+			height: '1.5rem',
+			objectFit: 'contain',
+		},
+		messageContainer: {
+			width: '100%',
+			margin: '0.5rem 0',
+			boxSizing: 'border-box',
+			display: 'flex',
+			flexDirection: 'column',
+		},
+		messageBubble: {
+			padding: '0.5rem 0.75rem',
+			borderRadius: '0.625rem',
+			maxWidth: '100%',
+			boxShadow: 'none',
+			animation: 'slideIn 0.3s ease-out forwards',
+			height: 'auto',
+			whiteSpace: 'pre-wrap',
+			wordBreak: 'break-word',
+			boxSizing: 'border-box',
+			overflowWrap: 'break-word',
+			userSelect: 'text',
+			WebkitUserSelect: 'text',
+			MozUserSelect: 'text',
+			msUserSelect: 'text',
+		},
+		userMessage: {
+			backgroundColor: colors.message.user,
+			color: colors.message.userText,
+			marginLeft: 'auto',
+			marginRight: '1rem',
+			borderRadius: '0.625rem',
+			fontWeight: 400,
+			textAlign: 'left',
+			alignSelf: 'flex-end',
+			maxWidth: '85%',
+			width: 'fit-content',
+			fontSize: '0.875rem',
+			lineHeight: '1.35',
+			padding: '0.25rem 1.25rem',
+			
+		},
+		botMessage: {
+			backgroundColor: colors.message.bot,
+			color: colors.message.botText,
+			marginRight: 'auto',
+			marginLeft: 0,
+			borderBottomLeftRadius: '0.25rem',
+			borderRadius: '1rem',
+			fontWeight: 400,
+			alignSelf: 'flex-start',
+		},
+
+		messageText: {
+			display: 'block',
+			maxWidth: '100%',
+			overflowWrap: 'break-word',
+			wordBreak: 'break-word',
+			userSelect: 'text',
+			WebkitUserSelect: 'text',
+			MozUserSelect: 'text',
+			msUserSelect: 'text',
+			cursor: 'text',
+		},
+
+		questionContainer: {
+			all: 'revert',
+			width: '100%',
+			margin: '0.5rem 0',
+			display: 'flex',
+			flexDirection: 'column',
+			justifyContent: 'flex-start',
+			gap: '0.75rem',
+			flexWrap: 'wrap',
+			boxSizing: 'border-box',
+		},
+		questionButton: {
+			all: 'revert',
+			background: colors.button.secondary,
+			color: colors.button.secondaryText,
+			border: `0.0625rem solid ${colors.button.secondaryBorder}`,
+			borderRadius: '0.625rem',
+			padding: '0.625rem 1.25rem',
+			minWidth: '8rem',
+			maxWidth: '83%',
+			fontWeight: 500,
+			fontSize: '1rem',
+			lineHeight: '1.5',
+			cursor: 'pointer',
+			boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.04)',
+			textAlign: 'left',
+			fontFamily: 'Roboto, sans-serif',
+			height: 'auto',
+			whiteSpace: 'pre-wrap',
+			wordBreak: 'break-word',
+			transition: 'background 0.2s',
+			boxSizing: 'border-box',
+			overflowWrap: 'break-word',
+			alignSelf: 'flex-end',
+			marginLeft: 'auto',
+			marginRight: '1rem',
+		},
+
+		viewContextContainer: {
+			position: 'relative',
+			width: '100%',
+			marginBottom: '1.25rem',
+		},
+		viewContextButton: {
+			all: 'revert',
+			width: '100%',
+			gap: '0.625rem',
+			padding: '0.625rem 1.25rem',
+			border: `0.0625rem solid ${colors.border.tertiary}`,
+			borderRadius: '0.625rem',
+			height: '3rem',
+			background: colors.background.quaternary,
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			boxSizing: 'border-box',
+			cursor: 'pointer',
+			transition: 'background-color 0.2s',
+		},
+		viewContextButtonHover: {
+			background: colors.background.primary,
+		},
+		viewContextText: {
+			fontSize: '1rem',
+			fontWeight: 400,
+			color: colors.text.tertiary,
+			lineHeight: '100%',
+		},
+		contextPopup: {
+			position: 'absolute',
+			top: '100%',
+			left: 0,
+			right: 0,
+			background: colors.background.tertiary,
+			border: `0.0625rem solid ${colors.border.primary}`,
+			borderRadius: '0.5rem',
+			boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
+			zIndex: 1000,
+			maxHeight: '24rem', // 360px = 5 items * (3rem height + 1.5rem padding)
+			overflowY: 'auto',
+			marginTop: '0.25rem',
+			boxSizing: 'border-box',
+		},
+		contextDocumentButton: {
+			all: 'revert',
+			width: '100%',
+			padding: '0.75rem',
+			background: colors.background.quaternary,
+			border: 'none',
+			borderBottom: `0.0625rem solid ${colors.border.primary}`,
+			color: colors.text.quaternary,
+			fontSize: '0.875rem',
+			fontWeight: 400,
+			cursor: 'pointer',
+			textAlign: 'left',
+			fontFamily: 'Roboto, sans-serif',
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'flex-start',
+			transition: 'background-color 0.2s',
+			boxSizing: 'border-box',
+			whiteSpace: 'nowrap',
+			overflow: 'hidden',
+			textOverflow: 'ellipsis',
+		},
+		contextDocumentButtonHover: {
+			background: colors.background.primary,
+		},
+		followUpQuestionText: {
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'flex-end',
+			fontSize: '0.875rem',
+			fontWeight: 400,
+			color: '#757575',
+			lineHeight: '1.35',
+			cursor: 'pointer',
+			marginRight: '1rem',
+		}
+	};
 	const [messages, setMessages] = useState([]);
 	const [inputValue, setInputValue] = useState('');
 	const [sessionId, setSessionId] = useState(null);
@@ -1727,7 +1730,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 								display: 'flex',
 								width: 'fit-content',
 								borderRadius: '0.375rem',
-								border: '0.25rem solid #E0E0E0',
+								border: `0.25rem solid ${theme === 'dark' ? colors.sky : '#E0E0E0'}`,
 								paddingLeft: '1rem',
 								paddingRight: '1rem',
 								paddingTop: '0.5rem',
@@ -1737,15 +1740,15 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 								fontFamily: 'Roboto, sans-serif',
 								fontSize: '0.875rem',
 								alignItems: 'center',
-								color: '#000000',
-								background: '#FFFFFF',
+								color: colors.text.allText,
+								background: colors.background.quaternary,
 								cursor: 'pointer',
 								transition: 'background-color 0.2s',
 								fontWeight: 500
 							}}
 							onClick={() => toggleStreamingComponent(messageId)}
-							onMouseEnter={e => e.target.style.background = '#F5F5F5'}
-							onMouseLeave={e => e.target.style.background = '#FFFFFF'}
+							onMouseEnter={e => e.target.style.background = colors.background.primary}
+							onMouseLeave={e => e.target.style.background = colors.background.quaternary}
 							title={isStreamingComponentVisible ? "Hide streaming view" : "Show streaming view"}
 						>
 							{isStreamingComponentVisible ? "Hide Thinking Process" : "Show Thinking Process"}
@@ -1879,7 +1882,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 											key={qIndex}
 											style={{
 												...styles.questionButton,
-												background: hoveredQuestion === qIndex ? "#D9D9D9" : "#FFFFFF"
+												background: hoveredQuestion === qIndex ? colors.button.hover : colors.button.secondary
 											}}
 											onClick={() => handleQuestionClick(question)}
 											onMouseEnter={() => setHoveredQuestion(qIndex)}
@@ -2437,35 +2440,35 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						margin: 1rem 0;
 						font-size: 1rem;
 						line-height: 1.4;
-						border: 0.0625rem solid #E0E0E0;
+						border: 0.0625rem solid ${colors.border.primary};
 						border-radius: 0.5rem;
 						overflow: hidden;
 						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1);
-						background: #FFFFFF;
+						background: ${colors.table.background};
 						table-layout: auto;
 					}
 					.markdown thead {
-						background: #F8F6F7;
+						background: ${colors.table.header};
 					}
 					.markdown tbody {
-						background: #FFFFFF;
+						background: ${colors.table.background};
 					}
 					.markdown tr {
-						border-bottom: 0.0625rem solid #E0E0E0;
+						border-bottom: 0.0625rem solid ${colors.table.border};
 					}
 					.markdown tr:last-child {
 						border-bottom: none;
 					}
 					.markdown tr:hover {
-						background: #F5F5F5;
+						background: ${colors.table.hover};
 					}
 					.markdown th {
 						padding: 0.75rem 0.5rem;
 						text-align: left;
 						font-weight: 600;
-						color: #1C1B1F;
-						border-bottom: 0.125rem solid #E0E0E0;
-						background: #F8F6F7;
+						color: ${colors.text.allText};
+						border-bottom: 0.125rem solid ${colors.table.border};
+						background: ${colors.table.header};
 						font-size: 1.0rem;
 						line-height: 1.6;
 						white-space: normal;
@@ -2474,10 +2477,10 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					.markdown td {
 						padding: 0.75rem 0.5rem;
 						text-align: left;
-						color: #1C1B1F;
-						border-bottom: 0.0625rem solid #E0E0E0;
-						border-right: 0.0625rem solid #E0E0E0;
-						border-left: 0.0625rem solid #E0E0E0;
+						color: ${colors.text.allText};
+						border-bottom: 0.0625rem solid ${colors.table.border};
+						border-right: 0.0625rem solid ${colors.table.border};
+						border-left: 0.0625rem solid ${colors.table.border};
 						font-size: 1.0rem;
 						line-height: 1.6;
 						white-space: normal;
@@ -2528,9 +2531,9 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						overflow-wrap: break-word;
 					}
 					.deeptutor-source-button {
-						background: #0687E5 !important;
-						opacity: 0.4 !important;
-						color: white !important;
+						background: ${colors.sourceButton.background} !important;
+						opacity: 1 !important;
+						color: ${colors.sourceButton.text} !important;
 						border: none !important;
 						border-radius: 50% !important;
 						width: 2rem !important;
@@ -2554,7 +2557,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						overflow: hidden !important;
 					}
 					.deeptutor-source-button:hover {
-						background: #0570c0 !important;
+						background: ${colors.button.hover} !important;
 						opacity: 0.8 !important;
 						transform: scale(1.05) !important;
 						box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.15) !important;
@@ -2564,14 +2567,14 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1) !important;
 					}
 					.deeptutor-source-button:focus {
-						outline: 0.125rem solid #0687E5 !important;
+						outline: 0.125rem solid ${colors.sourceButton.background} !important;
 						outline-offset: 0.125rem !important;
 					}
 					.deeptutor-source-button:focus:not(:focus-visible) {
 						outline: none !important;
 					}
 					.deeptutor-source-placeholder {
-						background: #9E9E9E !important;
+						background: ${colors.sourceButton.placeholder} !important;
 						color: white !important;
 						border: none !important;
 						border-radius: 50% !important;
@@ -2791,12 +2794,12 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 										...(hoveredContextDoc === index
 											? {
 												...styles.contextDocumentButtonHover,
-												background: contextDoc.filePath ? '#D9D9D9' : '#E8E8E8', // Lighter gray for null filePath
+												background: contextDoc.filePath ? colors.background.primary : colors.background.secondary, // Theme-aware hover colors
 											}
 											: {
-												background: contextDoc.filePath ? '#FFFFFF' : '#F5F5F5' // Light gray base for null filePath
+												background: contextDoc.filePath ? colors.background.quaternary : colors.background.secondary // Theme-aware normal colors
 											}),
-										borderBottom: index === contextDocuments.length - 1 ? "none" : "0.0625rem solid #E0E0E0",
+										borderBottom: index === contextDocuments.length - 1 ? "none" : `0.0625rem solid ${colors.border.primary}`,
 										flexDirection: "column",
 										alignItems: "flex-start",
 										padding: "0.75rem 0.9375rem",
@@ -2814,7 +2817,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 									<div style={{
 										fontSize: "1rem",
 										fontWeight: 400,
-										color: "#1C1B1F",
+										color: colors.text.primary,
 										lineHeight: "180%",
 										overflow: "hidden",
 										textOverflow: "ellipsis",
@@ -2827,7 +2830,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 										<div style={{
 											fontSize: "0.875rem",
 											fontWeight: 400,
-											color: "#757575",
+											color: colors.text.tertiary,
 											lineHeight: "135%",
 											overflow: "hidden",
 											textOverflow: "ellipsis",
@@ -2843,7 +2846,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 							: (
 								<div style={{
 									padding: "0.75rem",
-									color: "#757575",
+									color: colors.text.tertiary,
 									fontSize: "0.875rem",
 									textAlign: "center",
 									fontStyle: "italic"

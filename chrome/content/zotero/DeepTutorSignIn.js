@@ -1,188 +1,196 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // eslint-disable-line no-unused-vars
+import PropTypes from 'prop-types';
 import { signIn, signInWithGoogle } from './auth/cognitoAuth.js';
 import { DT_FORGOT_PASSWORD_URL } from './api/libs/api.js';
+import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
 const _AQUA = '#0AE2FF';
 const SKY = '#0687E5';
 const PEARL = '#F2F2F2';
-const styles = {
-	container: {
-		width: '100%',
-		minHeight: '80%',
-		background: '#FFFFFF',
-		fontFamily: 'Roboto, sans-serif',
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		justifyContent: 'center',
-		position: 'relative',
-	},
-	form: {
-		position: 'relative',
-		width: '100%',
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		margin: '0 auto',
-	},
-	inputGroup: {
-		width: '100%',
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'flex-start',
-		marginLeft: '0',
-		marginBottom: '1.25rem',
-		boxSizing: 'border-box',
-	},
-	label: {
-		fontWeight: 400,
-		fontSize: '0.875rem',
-		lineHeight: '135%',
-		color: '#222',
-		marginBottom: '0.625rem',
-		marginLeft: '0',
-	},
-	input: {
-		width: '100%',
-		minHeight: '3rem',
-		marginLeft: '0',
-		borderRadius: '0.625rem',
-		border: `1px solid #DADCE0`,
-		padding: '0.375rem 0.5rem',
-		background: PEARL,
-		fontSize: '1rem',
-		fontFamily: 'Roboto, sans-serif',
-		outline: 'none',
-		boxSizing: 'border-box',
-		color: '#000000'
-	},
-	forgot: {
-		display: 'flex',
-		justifyContent: 'center',
-		width: '100%',
-		fontWeight: 500,
-		fontSize: '0.875rem',
-		textDecoration: 'underline',
-		color: '#0687E5',
-		background: 'none',
-		border: 'none',
-		cursor: 'pointer',
-		padding: 0,
-		marginBottom: '1.25rem',
-	},
-	signInButton: {
-		all: 'revert',
-		width: '100%',
-		borderRadius: '0.625rem',
-		padding: '1rem 1.25rem',
-		background: SKY,
-		color: '#fff',
-		fontWeight: 700,
-		fontSize: '1rem',
-		border: 'none',
-		cursor: 'pointer',
-		boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
-		fontFamily: 'Roboto, sans-serif',
-		letterSpacing: 0.2,
-	},
-	signInButtonDisabled: {
-		background: '#ccc',
-		cursor: 'not-allowed',
-	},
-	dividerContainer: {
-		width: '100%',
-		display: 'flex',
-		alignItems: 'center',
-		margin: '1.3rem 0 0',
-	},
-	divider: {
-		flex: 1,
-		height: '0.15rem',
-		background: PEARL,
-		border: 'none',
-	},
-	orText: {
-		margin: '0 0.625rem',
-		color: '#888',
-		fontWeight: 500,
-		fontSize: '1rem',
-	},
-	googleContainer: {
-		width: '100%',
-		display: 'flex',
-		justifyContent: 'center',
-		marginTop: '1.25rem',
-	},
-	googleButton: {
-		all: 'revert',
-		width: '100%',
-		minHeight: '2.75rem',
-		borderRadius: '0.625rem',
-		border: `2px solid ${PEARL}`,
-		padding: '0.625rem 1.25rem',
-		background: '#fff',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		fontWeight: 600,
-		fontSize: '1.05rem',
-		color: '#222',
-		cursor: 'pointer',
-	},
-	googleIcon: {
-		width: '1.375rem',
-		height: '1.375rem',
-		objectFit: 'contain',
-		marginRight: '0.125rem',
-	},
-	bottomContainer: {
-		width: '100%',
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginTop: '1.875rem',
-	},
-	bottomText: {
-		fontWeight: 500,
-		fontSize: '0.875rem',
-		color: '#757575',
-	},
-	signUpLink: {
-		fontWeight: 500,
-		fontSize: '0.875rem',
-		textDecoration: 'underline',
-		color: '#0687E5',
-		background: 'none',
-		border: 'none',
-		cursor: 'pointer',
-		marginLeft: '0.25rem',
-		padding: 0,
-	},
-	errorMessage: {
-		color: '#dc3545',
-		fontSize: '0.875rem',
-		marginTop: '0.625rem',
-		textAlign: 'center',
-		width: '100%',
-	},
-	successMessage: {
-		color: '#28a745',
-		fontSize: '0.875rem',
-		marginTop: '0.625rem',
-		textAlign: 'center',
-		width: '100%',
-	},
-	mainContent: {
-		width: '100%',
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-	},
-};
 
 const GoogleImg = 'chrome://zotero/content/DeepTutorMaterials/SignIn/Google.png';
 
 export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess, localhostServer }) {
+	const { colors } = useDeepTutorTheme();
+	
+	// Theme-aware styles
+	const styles = {
+		container: {
+			width: '100%',
+			minHeight: '80%',
+			background: colors.background.primary,
+			fontFamily: 'Roboto, sans-serif',
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center',
+			justifyContent: 'center',
+			position: 'relative',
+		},
+		form: {
+			position: 'relative',
+			width: '100%',
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center',
+			margin: '0 auto',
+		},
+		inputGroup: {
+			width: '100%',
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			marginLeft: '0',
+			marginBottom: '1.25rem',
+			boxSizing: 'border-box',
+		},
+		label: {
+			fontWeight: 400,
+			fontSize: '0.875rem',
+			lineHeight: '135%',
+			color: colors.text.secondary,
+			marginBottom: '0.625rem',
+			marginLeft: '0',
+		},
+		input: {
+			width: '100%',
+			minHeight: '3rem',
+			marginLeft: '0',
+			borderRadius: '0.625rem',
+			border: `1px solid ${colors.border.primary}`,
+			padding: '0.375rem 0.5rem',
+			background: colors.background.tertiary,
+			fontSize: '1rem',
+			fontFamily: 'Roboto, sans-serif',
+			outline: 'none',
+			boxSizing: 'border-box',
+			color: colors.text.allText
+		},
+		forgot: {
+			display: 'flex',
+			justifyContent: 'center',
+			width: '100%',
+			fontWeight: 500,
+			fontSize: '0.875rem',
+			textDecoration: 'underline',
+			color: colors.button.primary,
+			background: 'none',
+			border: 'none',
+			cursor: 'pointer',
+			padding: 0,
+			marginBottom: '1.25rem',
+		},
+		signInButton: {
+			all: 'revert',
+			width: '100%',
+			borderRadius: '0.625rem',
+			padding: '1rem 1.25rem',
+			background: colors.button.primary,
+			color: colors.button.primaryText,
+			fontWeight: 700,
+			fontSize: '1rem',
+			border: 'none',
+			cursor: 'pointer',
+			boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
+			fontFamily: 'Roboto, sans-serif',
+			letterSpacing: 0.2,
+		},
+		signInButtonDisabled: {
+			background: '#ccc',
+			cursor: 'not-allowed',
+		},
+		dividerContainer: {
+			width: '100%',
+			display: 'flex',
+			alignItems: 'center',
+			margin: '1.3rem 0 0',
+		},
+		divider: {
+			flex: 1,
+			height: '0.15rem',
+			background: PEARL,
+			border: 'none',
+		},
+		orText: {
+			margin: '0 0.625rem',
+			color: '#888',
+			fontWeight: 500,
+			fontSize: '1rem',
+		},
+		googleContainer: {
+			width: '100%',
+			display: 'flex',
+			justifyContent: 'center',
+			marginTop: '1.25rem',
+		},
+		googleButton: {
+			all: 'revert',
+			width: '100%',
+			minHeight: '2.75rem',
+			borderRadius: '0.625rem',
+			border: `1px solid ${colors.button.secondaryBorder}`,
+			padding: '0.625rem 1.25rem',
+			background: colors.button.secondary,
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			fontWeight: 500,
+			fontSize: '1rem',
+			color: colors.button.secondaryText,
+			cursor: 'pointer',
+			fontFamily: 'Roboto, sans-serif',
+			letterSpacing: 0.2,
+			zIndex: 1,
+		},
+		googleIcon: {
+			width: '1.375rem',
+			height: '1.375rem',
+			objectFit: 'contain',
+			marginRight: '0.5rem',
+		},
+		bottomContainer: {
+			width: '100%',
+			display: 'flex',
+			justifyContent: 'center',
+			alignItems: 'center',
+			marginTop: '1.875rem',
+		},
+		bottomText: {
+			fontWeight: 500,
+			fontSize: '0.875rem',
+			color: colors.text.tertiary,
+		},
+		signUpLink: {
+			fontWeight: 500,
+			fontSize: '0.875rem',
+			textDecoration: 'underline',
+			color: colors.button.primary,
+			background: 'none',
+			border: 'none',
+			cursor: 'pointer',
+			marginLeft: '0.25rem',
+			padding: 0,
+		},
+		errorMessage: {
+			color: colors.error,
+			fontSize: '0.875rem',
+			marginTop: '0.625rem',
+			textAlign: 'center',
+			width: '100%',
+		},
+		successMessage: {
+			color: colors.success,
+			fontSize: '0.875rem',
+			marginTop: '0.625rem',
+			textAlign: 'center',
+			width: '100%',
+		},
+		mainContent: {
+			width: '100%',
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center',
+		},
+	};
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
@@ -254,7 +262,7 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess, local
 
 	const googleButtonDynamicStyle = {
 		...styles.googleButton,
-		background: isGoogleHovered ? '#F8F6F7' : '#fff',
+		background: isGoogleHovered ? colors.background.quaternary : colors.button.secondary,
 	};
 
 	const handleSignIn = async (e) => {
@@ -455,7 +463,7 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess, local
 				</div>
 
 				<div style={styles.bottomContainer}>
-					<span style={styles.bottomText}>Don't have an account?</span>
+					<span style={styles.bottomText}>Don&apos;t have an account?</span>
 					<button
 						style={styles.signUpLink}
 						type="button"
@@ -469,3 +477,10 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess, local
 		</div>
 	);
 }
+
+// Add PropTypes for type checking
+DeepTutorSignIn.propTypes = {
+	onSignInSignUp: PropTypes.func.isRequired,
+	onSignInSuccess: PropTypes.func.isRequired,
+	localhostServer: PropTypes.object,
+};

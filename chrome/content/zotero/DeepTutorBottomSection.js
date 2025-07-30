@@ -1,206 +1,207 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
-const styles = {
-	divider: {
-		position: 'absolute',
-		left: 0,
-		right: 0,
-		height: '0.0625rem',
-		background: '#D9D9D9',
-	},
-	bottom: {
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		padding: '1.5rem 1.25rem 1.25rem 1.25rem',
-		background: '#F2F2F2',
-		width: '100%',
-		boxSizing: 'border-box',
-		position: 'relative',
-		bottom: 0,
-		left: 0,
-		right: 0,
-		margin: 0,
-		zIndex: 1,
-	},
-	contentWrapper: {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		justifyContent: 'flex-start',
-		width: '100%',
-		gap: '0.3125rem',
-	},
-	bottomLeft: {
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		gap: '0.3125rem',
-		width: '100%',
-		marginTop: '0.625rem',
-	},
-	feedbackBox: {
-		display: 'flex',
-		alignItems: 'center',
-		width: '100%',
-		marginBottom: '0.3125rem',
-	},
-	buttonsBox: {
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		width: '100%',
-	},
-	textButton: {
-		background: '#F2F2F2',
-		border: 'none',
-		color: '#292929',
-		fontWeight: 500,
-		fontSize: '1rem',
-		lineHeight: '100%',
-		letterSpacing: '0%',
-		fontFamily: 'Roboto, sans-serif',
-		cursor: 'pointer',
-		padding: '0.5rem 1rem',
-		margin: 0,
-		borderRadius: '0.25rem',
-		width: 'fit-content',
-		textAlign: 'left',
-		display: 'flex',
-		alignItems: 'center',
-		gap: '0.5rem',
-		transition: 'background-color 0.2s ease',
-		textDecoration: 'underline',
-		':hover': {
-			background: '#D9D9D9'
-		}
-	},
-	buttonIcon: {
-		width: '1.1rem',
-		height: '1.1rem',
-		objectFit: 'contain',
-	},
-	upgradeButton: {
-		all: 'revert',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		width: '7rem',
-		height: '2.65rem',
-		padding: '0.625rem 1.25rem',
-		background: '#0687E5',
-		border: 'none',
-		borderRadius: '0.625rem',
-		fontWeight: 500,
-		fontSize: '1rem',
-		color: '#ffffff',
-		cursor: 'pointer',
-		boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.03)',
-		transition: 'background 0.2s',
-		fontFamily: 'Roboto, sans-serif',
-	},
-	profilePopup: {
-		position: 'absolute',
-		bottom: '100%',
-		left: 0,
-		background: '#fff',
-		borderRadius: '0.5rem',
-		boxShadow: '0 0.125rem 0.5rem rgba(0,0,0,0.15)',
-		padding: '0.75rem',
-		marginBottom: '0.5rem',
-		zIndex: 1000,
-		minWidth: '12.5rem',
-	},
-	profileButtonContainer: {
-		position: 'relative',
-	},
-	componentButton: {
-		padding: '0.375rem 1.125rem',
-		borderRadius: '0.375rem',
-		border: '0.0625rem solid #0687E5',
-		background: '#fff',
-		color: '#0687E5',
-		fontWeight: 600,
-		cursor: 'pointer',
-		fontFamily: 'Roboto, Inter, Arial, sans-serif',
-		width: '100%',
-		textAlign: 'left',
-		marginBottom: '0.25rem',
-		transition: 'all 0.2s ease',
-	},
-	componentButtonActive: {
-		background: '#0687E5',
-		color: '#fff',
-	},
-	profileInfo: {
-		padding: '0.5rem 0',
-		borderBottom: '0.0625rem solid #e9ecef',
-		marginBottom: '0.5rem',
-	},
-	userEmail: {
-		fontSize: '0.875rem',
-		fontWeight: 500,
-		color: '#333',
-		marginBottom: '0.25rem',
-	},
-	userStatus: {
-		fontSize: '0.75rem',
-		color: '#666',
-	},
-	signOutButton: {
-		background: '#dc3545',
-		color: '#fff',
-		border: 'none',
-		borderRadius: '0.25rem',
-		padding: '0.375rem 0.75rem',
-		fontSize: '0.875rem',
-		fontWeight: 500,
-		cursor: 'pointer',
-		width: '100%',
-		marginTop: '0.5rem',
-		transition: 'background 0.2s',
-		':hover': {
-			background: '#c82333'
-		}
-	},
-};
+// Icon path definitions
+const FEED_ICON_PATH = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_FEEDBACK.svg';
+const FEED_ICON_DARK_PATH = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_FEEDBACK_DARK.svg';
+const PERSON_ICON_PATH = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_PROFILE.svg';
+const PERSON_ICON_DARK_PATH = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_PROFILE_DARK.svg';
 
-class DeepTutorBottomSection extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			isUpgradeHovered: false,
-		};
-	}
+const DeepTutorBottomSection = (props) => {
+	const { colors, isDark } = useDeepTutorTheme();
+	const [isUpgradeHovered, setIsUpgradeHovered] = useState(false);
+
+	// Choose icons based on theme
+	const feedIconPath = isDark ? FEED_ICON_DARK_PATH : FEED_ICON_PATH;
+	const personIconPath = isDark ? PERSON_ICON_DARK_PATH : PERSON_ICON_PATH;
+
+	// Theme-aware styles
+	const styles = {
+		divider: {
+			position: 'absolute',
+			left: 0,
+			right: 0,
+			height: '0.0625rem',
+			background: colors.border.quaternary,
+		},
+		bottom: {
+			display: 'flex',
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			padding: '1.5rem 1.25rem 1.25rem 1.25rem',
+			background: colors.background.tertiary,
+			width: '100%',
+			boxSizing: 'border-box',
+			position: 'relative',
+			bottom: 0,
+			left: 0,
+			right: 0,
+			margin: 0,
+			zIndex: 1,
+		},
+		contentWrapper: {
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center',
+			justifyContent: 'flex-start',
+			width: '100%',
+			gap: '0.3125rem',
+		},
+		bottomLeft: {
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center',
+			gap: '0.3125rem',
+			width: '100%',
+			marginTop: '0.625rem',
+		},
+		feedbackBox: {
+			display: 'flex',
+			alignItems: 'center',
+			width: '100%',
+			marginBottom: '0.3125rem',
+		},
+		buttonsBox: {
+			display: 'flex',
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			width: '100%',
+		},
+		textButton: {
+			background: colors.background.tertiary,
+			border: 'none',
+			color: colors.text.allText,
+			fontWeight: 500,
+			fontSize: '1rem',
+			lineHeight: '100%',
+			letterSpacing: '0%',
+			fontFamily: 'Roboto, sans-serif',
+			cursor: 'pointer',
+			padding: '0.5rem 1rem',
+			margin: 0,
+			borderRadius: '0.25rem',
+			width: 'fit-content',
+			textAlign: 'left',
+			display: 'flex',
+			alignItems: 'center',
+			gap: '0.5rem',
+			transition: 'background-color 0.2s ease',
+			textDecoration: 'underline',
+			':hover': {
+				background: colors.border.quaternary
+			}
+		},
+		buttonIcon: {
+			width: '1.1rem',
+			height: '1.1rem',
+			objectFit: 'contain',
+		},
+		upgradeButton: {
+			all: 'revert',
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			width: '7rem',
+			height: '2.65rem',
+			padding: '0.625rem 1.25rem',
+			background: colors.button.primary,
+			border: 'none',
+			borderRadius: '0.625rem',
+			fontWeight: 500,
+			fontSize: '1rem',
+			color: colors.button.primaryText,
+			cursor: 'pointer',
+			boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.03)',
+			transition: 'background 0.2s',
+			fontFamily: 'Roboto, sans-serif',
+		},
+		profilePopup: {
+			position: 'absolute',
+			bottom: '100%',
+			left: 0,
+			background: colors.background.primary,
+			borderRadius: '0.5rem',
+			boxShadow: '0 0.125rem 0.5rem rgba(0,0,0,0.15)',
+			padding: '0.75rem',
+			marginBottom: '0.5rem',
+			zIndex: 1000,
+			minWidth: '12.5rem',
+		},
+		profileButtonContainer: {
+			position: 'relative',
+		},
+		componentButton: {
+			padding: '0.375rem 1.125rem',
+			borderRadius: '0.375rem',
+			border: `0.0625rem solid ${colors.button.primary}`,
+			background: colors.background.primary,
+			color: colors.button.primary,
+			fontWeight: 600,
+			cursor: 'pointer',
+			fontFamily: 'Roboto, Inter, Arial, sans-serif',
+			width: '100%',
+			textAlign: 'left',
+			marginBottom: '0.25rem',
+			transition: 'all 0.2s ease',
+		},
+		componentButtonActive: {
+			background: colors.button.primary,
+			color: colors.button.primaryText,
+		},
+		profileInfo: {
+			padding: '0.5rem 0',
+			borderBottom: `0.0625rem solid ${colors.border.primary}`,
+			marginBottom: '0.5rem',
+		},
+		userEmail: {
+			fontSize: '0.875rem',
+			fontWeight: 500,
+			color: colors.text.secondary,
+			marginBottom: '0.25rem',
+		},
+		userStatus: {
+			fontSize: '0.75rem',
+			color: colors.text.tertiary,
+		},
+		signOutButton: {
+			background: colors.error,
+			color: colors.text.inverse,
+			border: 'none',
+			borderRadius: '0.25rem',
+			padding: '0.375rem 0.75rem',
+			fontSize: '0.875rem',
+			fontWeight: 500,
+			cursor: 'pointer',
+			width: '100%',
+			marginTop: '0.5rem',
+			transition: 'background 0.2s',
+			':hover': {
+				background: colors.error
+			}
+		},
+	};
 
 	// Temporarily hide subscription button - set to true to show it again
-	showSubscriptionButton = false;
+	const showSubscriptionButton = false;
 
-	handleUpgradeMouseEnter = () => {
-		this.setState({ isUpgradeHovered: true });
+	const handleUpgradeMouseEnter = () => {
+		setIsUpgradeHovered(true);
 	};
 
-	handleUpgradeMouseLeave = () => {
-		this.setState({ isUpgradeHovered: false });
+	const handleUpgradeMouseLeave = () => {
+		setIsUpgradeHovered(false);
 	};
 
-	getComponentButtonStyle(isActive) {
-		return {
-			...styles.componentButton,
-			...(isActive ? styles.componentButtonActive : {})
-		};
-	}
-
-	renderProfilePopup() {
-		if (!this.props.showProfilePopup) return null;
+	const renderProfilePopup = () => {
+		if (!props.showProfilePopup) return null;
 
 		// Determine display name/email - prioritizing email first
 		let displayName = 'User';
-		if (this.props.userData) {
-			const { name, firstName, lastName, email } = this.props.userData;
+		if (props.userData) {
+			const { name, firstName, lastName, email } = props.userData;
 			if (email) {
 				displayName = email;
 			}
@@ -211,68 +212,58 @@ class DeepTutorBottomSection extends React.Component {
 				displayName = `${firstName || ''} ${lastName || ''}`.trim();
 			}
 		}
-		else if (this.props.currentUser) {
+		else if (props.currentUser) {
 			// Cognito user object may expose username/email differently - prioritizing email first
-			displayName = (this.props.currentUser.email
-                || this.props.currentUser.username
-                || (typeof this.props.currentUser.getUsername === 'function' && this.props.currentUser.getUsername())
-                || displayName);
+			displayName = (props.currentUser.email
+                 || props.currentUser.username
+                 || (typeof props.currentUser.getUsername === 'function' && props.currentUser.getUsername())
+                 || displayName);
 		}
 
 		return (
 			<div style={styles.profilePopup} onClick={e => e.stopPropagation()}>
-				{this.props.isAuthenticated ? (
-					<>
+				{props.isAuthenticated
+					? (
+						<>
+							<div style={styles.profileInfo}>
+								<div style={styles.userEmail}>{displayName}</div>
+								<div style={styles.userStatus}>Logged in</div>
+							</div>
+							<button
+								style={styles.signOutButton}
+								onClick={props.onSignOut}
+							>
+                             Sign out
+							</button>
+						</>
+					)
+					: (
 						<div style={styles.profileInfo}>
-							<div style={styles.userEmail}>{displayName}</div>
-							<div style={styles.userStatus}>Logged in</div>
+							<div style={styles.userStatus}>Not logged in</div>
+							<button
+								style={{ ...styles.componentButton, marginTop: '8px' }}
+								onClick={props.onToggleSignInPopup}
+							>
+                             Sign in
+							</button>
 						</div>
-						<button
-							style={styles.signOutButton}
-							onClick={this.props.onSignOut}
-						>
-                            Sign out
-						</button>
-						{/* No Session button commented out
-						<button
-							style={{ ...styles.componentButton, marginTop: '8px', background: '#6c757d', color: '#fff', borderColor: '#6c757d' }}
-							onClick={() => {
-								this.props.onSwitchNoSession();
-								this.props.onToggleProfilePopup(); // Close the popup after switching
-							}}
-						>
-                            No Session
-						</button>
-						*/}
-					</>
-				) : (
-					<div style={styles.profileInfo}>
-						<div style={styles.userStatus}>Not logged in</div>
-						<button
-							style={{ ...styles.componentButton, marginTop: '8px' }}
-							onClick={this.props.onToggleSignInPopup}
-						>
-                            Sign in
-						</button>
-					</div>
-				)}
+					)}
 			</div>
 		);
-	}
+	};
 
-	renderMain() {
-		const { isUpgradeHovered } = this.state;
+	const renderMain = () => {
 		const upgradeButtonDynamicStyle = {
 			...styles.upgradeButton,
-			background: isUpgradeHovered ? '#007BD5' : '#0687E5',
+			background: isUpgradeHovered ? colors.button.hover : colors.button.primary,
 		};
 
 		// Determine button text based on subscription status
 		let buttonText = "Upgrade";
-		if (this.props.userSubscribed) {
+		if (props.userSubscribed) {
 			buttonText = "Premium";
 		}
-		else if (this.props.isFreeTrial) {
+		else if (props.isFreeTrial) {
 			buttonText = "Start Trial";
 		}
 
@@ -287,7 +278,7 @@ class DeepTutorBottomSection extends React.Component {
 								Zotero.debug("DeepTutor: Feedback button clicked");
 								const url = 'https://docs.google.com/forms/d/e/1FAIpQLSfgLdhUz79oBsNTIF_rD3hEw5pCTbXOOGfi1UBKViiVgFjI-A/viewform?usp=dialog';
 								Zotero.debug(`DeepTutor: Attempting to open feedback URL: ${url}`);
-                                
+                                 
 								try {
 									// Primary: Use Zotero's proper API for opening external URLs
 									Zotero.debug("DeepTutor: Trying primary method - Zotero.launchURL");
@@ -296,7 +287,7 @@ class DeepTutorBottomSection extends React.Component {
 								}
 								catch (error) {
 									Zotero.debug(`DeepTutor: Primary method failed - Zotero.launchURL: ${error.message}`);
-                                    
+                                     
 									// Fallback 1: Try Zotero.Utilities.Internal.launchURL
 									try {
 										if (Zotero.Utilities && Zotero.Utilities.Internal && Zotero.Utilities.Internal.launchURL) {
@@ -310,7 +301,7 @@ class DeepTutorBottomSection extends React.Component {
 									}
 									catch (fallback1Error) {
 										Zotero.debug(`DeepTutor: Fallback 1 failed - Zotero.Utilities.Internal.launchURL: ${fallback1Error.message}`);
-                                        
+                                         
 										// Fallback 2: Try Zotero.HTTP.loadDocuments
 										try {
 											if (Zotero.HTTP && Zotero.HTTP.loadDocuments) {
@@ -324,16 +315,16 @@ class DeepTutorBottomSection extends React.Component {
 										}
 										catch (fallback2Error) {
 											Zotero.debug(`DeepTutor: Fallback 2 failed - Zotero.HTTP.loadDocuments: ${fallback2Error.message}`);
-                                            
+                                             
 											// Fallback 3: Try XPCOM nsIExternalProtocolService
 											try {
 												if (typeof Cc !== 'undefined' && typeof Ci !== 'undefined') {
 													Zotero.debug("DeepTutor: Trying Fallback 3 - XPCOM nsIExternalProtocolService (using Cc/Ci shortcuts)");
 													const extps = Cc["@mozilla.org/uriloader/external-protocol-service;1"]
-                                                        .getService(Ci.nsIExternalProtocolService);
+                                                         .getService(Ci.nsIExternalProtocolService);
 													const uri = Cc["@mozilla.org/network/io-service;1"]
-                                                        .getService(Ci.nsIIOService)
-                                                        .newURI(url, null, null);
+                                                         .getService(Ci.nsIIOService)
+                                                         .newURI(url, null, null);
 													extps.loadURI(uri);
 													Zotero.debug("DeepTutor: Successfully opened URL via XPCOM nsIExternalProtocolService");
 												}
@@ -343,19 +334,19 @@ class DeepTutorBottomSection extends React.Component {
 											}
 											catch (fallback3Error) {
 												Zotero.debug(`DeepTutor: Fallback 3 failed - XPCOM nsIExternalProtocolService: ${fallback3Error.message}`);
-                                                
+                                                 
 												// Final fallback: Copy URL to clipboard
 												if (navigator.clipboard) {
 													Zotero.debug("DeepTutor: Trying final fallback - copy URL to clipboard");
 													navigator.clipboard.writeText(url)
-                                                        .then(() => {
-                                                        	Zotero.debug("DeepTutor: Successfully copied feedback URL to clipboard");
-                                                        	Zotero.alert(null, "DeepTutor", 'Feedback form URL copied to clipboard!\nPlease paste it in your browser to access the form.');
-                                                        })
-                                                        .catch((clipboardError) => {
-                                                        	Zotero.debug(`DeepTutor: Failed to copy to clipboard: ${clipboardError.message}`);
-                                                        	Zotero.alert(null, "DeepTutor", `Please manually visit this URL:\n${url}`);
-                                                        });
+                                                         .then(() => {
+                                                         	Zotero.debug("DeepTutor: Successfully copied feedback URL to clipboard");
+                                                         	Zotero.alert(null, "DeepTutor", 'Feedback form URL copied to clipboard!\nPlease paste it in your browser to access the form.');
+                                                         })
+                                                         .catch((clipboardError) => {
+                                                         	Zotero.debug(`DeepTutor: Failed to copy to clipboard: ${clipboardError.message}`);
+                                                         	Zotero.alert(null, "DeepTutor", `Please manually visit this URL:\n${url}`);
+                                                         });
 												}
 												else {
 													Zotero.debug("DeepTutor: Clipboard API not available, showing alert with URL");
@@ -367,28 +358,28 @@ class DeepTutorBottomSection extends React.Component {
 								}
 							}}
 						>
-							<img src={this.props.feedIconPath} alt="Give Us Feedback" style={styles.buttonIcon} />
-                            <span style={{ textDecoration: 'underline' }}>Give Us Feedback</span>
+							<img src={feedIconPath} alt="Give Us Feedback" style={styles.buttonIcon} />
+							<span style={{ textDecoration: 'underline' }}>Give Us Feedback</span>
 						</button>
 					</div>
 					<div style={styles.buttonsBox}>
 						<div style={styles.profileButtonContainer}>
 							<button style={styles.textButton} onClick={(e) => {
 								e.stopPropagation();
-								this.props.onToggleProfilePopup();
+								props.onToggleProfilePopup();
 							}}>
-								<img src={this.props.personIconPath} alt="Profile" style={styles.buttonIcon} />
+								<img src={personIconPath} alt="Profile" style={styles.buttonIcon} />
 								<span style={{ textDecoration: 'underline' }}>Profile</span>
 							</button>
-							{this.renderProfilePopup()}
+							{renderProfilePopup()}
 						</div>
 						{/* Temporarily hide subscription button - set to true to show it again */}
-						{this.showSubscriptionButton && (
+						{showSubscriptionButton && (
 							<button
 								style={upgradeButtonDynamicStyle}
-								onClick={this.props.onToggleSubscriptionPopup}
-								onMouseEnter={this.handleUpgradeMouseEnter}
-								onMouseLeave={this.handleUpgradeMouseLeave}
+								onClick={props.onToggleSubscriptionPopup}
+								onMouseEnter={handleUpgradeMouseEnter}
+								onMouseLeave={handleUpgradeMouseLeave}
 							>
 								{buttonText}
 							</button>
@@ -397,40 +388,38 @@ class DeepTutorBottomSection extends React.Component {
 				</div>
 			</div>
 		);
-	}
+	};
 
-	renderWelcome() {
+	const renderWelcome = () => {
 		return (
 			<div style={styles.contentWrapper}>
 			</div>
 		);
-	}
+	};
 
-	renderSessionHistory() {
-		return this.renderMain();
-	}
+	const renderSessionHistory = () => {
+		return renderMain();
+	};
 
-	render() {
-		let content;
-		if (this.props.currentPane === 'welcome') {
-			content = this.renderWelcome();
-		}
-		else if (this.props.currentPane === 'main') {
-			content = this.renderMain();
-		}
-		else if (this.props.currentPane === 'sessionHistory') {
-			content = this.renderSessionHistory();
-		}
-		else {
-			content = this.renderMain();
-		}
-		return (
-			<div style={styles.bottom}>
-				{content}
-			</div>
-		);
+	let content;
+	if (props.currentPane === 'welcome') {
+		content = renderWelcome();
 	}
-}
+	else if (props.currentPane === 'main') {
+		content = renderMain();
+	}
+	else if (props.currentPane === 'sessionHistory') {
+		content = renderSessionHistory();
+	}
+	else {
+		content = renderMain();
+	}
+	return (
+		<div style={styles.bottom}>
+			{content}
+		</div>
+	);
+};
 
 DeepTutorBottomSection.propTypes = {
 	currentPane: PropTypes.string.isRequired,
@@ -438,10 +427,9 @@ DeepTutorBottomSection.propTypes = {
 	onToggleProfilePopup: PropTypes.func.isRequired,
 	onToggleSignInPopup: PropTypes.func.isRequired,
 	onToggleSignUpPopup: PropTypes.func.isRequired,
+
 	onToggleSubscriptionPopup: PropTypes.func.isRequired,
 	showProfilePopup: PropTypes.bool.isRequired,
-	feedIconPath: PropTypes.string.isRequired,
-	personIconPath: PropTypes.string.isRequired,
 	isAuthenticated: PropTypes.bool,
 	currentUser: PropTypes.object,
 	onSignOut: PropTypes.func,

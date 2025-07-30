@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import DeepTutorStreamingTag, { StreamingStates } from './DeepTutorStreamingTag';
+import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
 const markdownit = require('markdown-it');
 const md = markdownit({
@@ -297,6 +298,7 @@ const processMarkdownResult = (html) => {
 };
 
 const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
+	const { colors } = useDeepTutorTheme();
 	const [streamingState, setStreamingState] = useState(StreamingStates.DEFAULT);
 	const [thinkingText, setThinkingText] = useState('');
 	const [responseText, setResponseText] = useState('');
@@ -484,14 +486,14 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 		wordWrap: 'break-word',
 		overflowWrap: 'break-word',
 		wordBreak: 'break-word',
-		color: '#000000',
+		color: colors.text.primary,
 	};
 
 	const thinkingContainerStyle = {
 		borderRadius: '0.5rem',
-		backgroundColor: '#F3F4F6',
+		backgroundColor: colors.background.quaternary,
 		paddingLeft: '1rem',
-		color: '#000000',
+		color: colors.text.primary,
 	};
 
 	const responseContainerStyle = {
@@ -504,7 +506,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 		wordWrap: 'break-word',
 		overflowWrap: 'break-word',
 		wordBreak: 'break-word',
-		color: '#000000', // Ensure black text color during streaming
+		color: colors.text.primary, // Use theme text color
 	};
 
 	return React.createElement('div', null,
@@ -518,35 +520,35 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						margin: 1rem 0;
 						font-size: 1rem;
 						line-height: 1.4;
-						border: 0.0625rem solid #E0E0E0;
+						border: 0.0625rem solid ${colors.border.primary};
 						border-radius: 0.5rem;
 						overflow: hidden;
 						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1);
-						background: #FFFFFF;
+						background: ${colors.background.primary};
 						table-layout: auto;
 					}
 					.markdown thead {
-						background: #F8F6F7;
+						background: ${colors.background.quaternary};
 					}
 					.markdown tbody {
-						background: #FFFFFF;
+						background: ${colors.background.primary};
 					}
 					.markdown tr {
-						border-bottom: 0.0625rem solid #E0E0E0;
+						border-bottom: 0.0625rem solid ${colors.border.primary};
 					}
 					.markdown tr:last-child {
 						border-bottom: none;
 					}
 					.markdown tr:hover {
-						background: #F5F5F5;
+						background: ${colors.background.quaternary};
 					}
 					.markdown th {
 						padding: 0.75rem 0.5rem;
 						text-align: left;
 						font-weight: 600;
-						color: #1C1B1F;
-						border-bottom: 0.125rem solid #E0E0E0;
-						background: #F8F6F7;
+						color: ${colors.text.primary};
+						border-bottom: 0.125rem solid ${colors.border.primary};
+						background: ${colors.background.quaternary};
 						font-size: 1.0rem;
 						line-height: 1.6;
 						white-space: normal;
@@ -555,10 +557,10 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 					.markdown td {
 						padding: 0.75rem 0.5rem;
 						text-align: left;
-						color: #1C1B1F;
-						border-bottom: 0.0625rem solid #E0E0E0;
-						border-right: 0.0625rem solid #E0E0E0;
-						border-left: 0.0625rem solid #E0E0E0;
+						color: ${colors.text.primary};
+						border-bottom: 0.0625rem solid ${colors.border.primary};
+						border-right: 0.0625rem solid ${colors.border.primary};
+						border-left: 0.0625rem solid ${colors.border.primary};
 						font-size: 1.0rem;
 						line-height: 1.6;
 						white-space: normal;
@@ -866,7 +868,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
 									overflowWrap: "break-word",
-									color: "#000000" // Ensure black text color during streaming
+									color: colors.text.primary // Use theme text color
 								}
 							})
 							: React.createElement('div', {
@@ -875,7 +877,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
 									overflowWrap: "break-word",
-									color: "#000000" // Ensure black text color during streaming
+									color: colors.text.primary // Use theme text color
 								}
 							}, thinkingText || '');
 					}
@@ -887,7 +889,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 								lineHeight: "1.5", // Match DeepTutorChatBox line height
 								wordBreak: "break-word",
 								overflowWrap: "break-word",
-								color: "#000000" // Ensure black text color during streaming
+								color: colors.text.primary // Use theme text color
 							}
 						}, thinkingText || '');
 					}
@@ -912,7 +914,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
 									overflowWrap: "break-word",
-									color: "#000000" // Ensure black text color during streaming
+									color: colors.text.primary // Use theme text color
 								}
 							})
 							: React.createElement('div', {
@@ -921,7 +923,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
 									overflowWrap: "break-word",
-									color: "#000000" // Ensure black text color during streaming
+									color: colors.text.primary // Use theme text color
 								}
 							}, responseText || '');
 					}
@@ -933,7 +935,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 								lineHeight: "1.5", // Match DeepTutorChatBox line height
 								wordBreak: "break-word",
 								overflowWrap: "break-word",
-								color: "#000000" // Ensure black text color during streaming
+								color: colors.text.primary // Use theme text color
 							}
 						}, responseText || '');
 					}

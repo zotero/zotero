@@ -26,22 +26,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-import ModelSelection from './ModelSelection.js';
-import SessionHistory from './SessionHistory.js';
-import DeepTutorChatBox from './DeepTutorChatBox.js';
-import DeepTutorWelcomePane from './DeepTutorWelcomePane.js';
-import DeepTutorSignIn from './DeepTutorSignIn.js';
-import DeepTutorSignUp from './DeepTutorSignUp.js';
-import DeepTutorSubscription from './DeepTutorSubscription.js';
-// import DeepTutorUpgradePremium from './DeepTutorUpgradePremium.js';
-import DeepTutorTopSection from './DeepTutorTopSection.js';
-import DeepTutorBottomSection from './DeepTutorBottomSection.js';
-// import DeepTutorSubscriptionConfirm from './DeepTutorSubscriptionConfirm.js';
-// import DeepTutorManageSubscription from './DeepTutorManageSubscription.js';
-import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
-import DeepTutorSessionDelete from './DeepTutorSessionDelete.js';
-import DeepTutorRenameSession from './DeepTutorRenameSession.js';
-import DeepTutorNoPDFWarning from './DeepTutorNoPDFWarning.js';
+import DeepTutorMain from './DeepTutorMain.js';
 import DeepTutorLocalhostServer from './localhostServer.js';
 import {
 	getMessagesBySessionId,
@@ -51,7 +36,6 @@ import {
 	registerUser,
 	createBackendUser,
 	deleteSessionById,
-	updateSessionName,
 	getActiveUserSubscriptionByUserId,
 	getLatestUserSubscriptionByUserId,
 	DT_SIGN_UP_URL
@@ -127,185 +111,7 @@ class DeepTutorSession {
 }
 
 
-const logoPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_DPTLOGO.svg';
-const HistoryIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_HISTORY_NEW.svg';
-const PlusIconPath = 'chrome://zotero/content/DeepTutorMaterials/Top/TOP_REGIS_NEW.svg';
-const FeedIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_FEEDBACK.svg';
-const PersonIconPath = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_PROFILE.svg';
-const PopupClosePath = 'chrome://zotero/content/DeepTutorMaterials/Main/MAIN_CLOSE.svg';
 
-const styles = {
-	container: {
-		display: 'flex',
-		flexDirection: 'column',
-		height: '100%',
-		width: '100%',
-		background: '#f8f9fa',
-		fontFamily: 'Roboto, Inter, Arial, sans-serif',
-		position: 'relative',
-	},
-	top: {
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		padding: '0.375rem 0.5rem 0.1875rem 0.5rem',
-		minHeight: '4rem',
-		background: '#fff',
-		borderBottom: '0.0625rem solid #e9ecef',
-	},
-	logo: {
-		height: '2rem',
-		width: 'auto',
-		display: 'block',
-	},
-	topRight: {
-		display: 'flex',
-		flexDirection: 'row',
-		gap: '0.75rem',
-	},
-	iconButton: {
-		all: 'revert',
-		width: '2.5rem',
-		height: '2.5rem',
-		background: '#F8F6F7',
-		border: 'none',
-		borderRadius: '0.375rem',
-		cursor: 'pointer',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		transition: 'background-color 0.2s ease',
-		padding: '0.5rem',
-	},
-	iconButtonActive: {
-		background: '#D9D9D9',
-	},
-	iconImage: {
-		width: '1.5rem',
-		height: '1.5rem',
-		objectFit: 'contain',
-	},
-	middle: {
-		flex: 1,
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		justifyContent: 'flex-start',
-		position: 'relative',
-		background: '#f8f9fa',
-		minHeight: 0,
-		width: '100%',
-		padding: '0',
-	},
-	paneList: {
-		width: '100%',
-		height: '100%',
-		display: 'flex',
-		flexDirection: 'column',
-		alignItems: 'center',
-		justifyContent: 'flex-start',
-		position: 'relative',
-		padding: '0',
-	},
-	bottom: {
-		display: 'flex',
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		padding: '1.125rem 2rem 1.5rem 2rem',
-		background: '#fff',
-		borderTop: '0.0625rem solid #e9ecef',
-	},
-	bottomLeft: {
-		display: 'flex',
-		flexDirection: 'column',
-		gap: '0.5rem',
-	},
-	textButton: {
-		all: 'revert',
-		background: '#F8F6F7',
-		border: 'none',
-		color: '#0687E5',
-		fontWeight: 500,
-		fontSize: '1em',
-		fontFamily: 'Roboto, sans-serif',
-		cursor: 'pointer',
-		padding: '0.25rem 0.5rem',
-		margin: 0,
-		borderRadius: '0.25rem',
-		width: 'fit-content',
-		textAlign: 'left',
-		display: 'flex',
-		alignItems: 'center',
-		gap: '0.5rem',
-		transition: 'background-color 0.2s ease',
-		':hover': {
-			background: '#D9D9D9'
-		}
-	},
-	buttonIcon: {
-		width: '1rem',
-		height: '1rem',
-		objectFit: 'contain',
-	},
-	upgradeButton: {
-		all: 'revert',
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
-		height: '2.0625rem',
-		minWidth: '2.0625rem',
-		padding: '0 1.125rem',
-		background: '#0687E5',
-		border: 'none',
-		borderRadius: '0.5rem',
-		fontWeight: 600,
-		fontSize: '1em',
-		color: '#ffffff',
-		cursor: 'pointer',
-		boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.03)',
-		transition: 'background 0.2s',
-		fontFamily: 'Roboto, sans-serif',
-	},
-	profilePopup: {
-		position: 'absolute',
-		bottom: '100%',
-		left: 0,
-		background: '#fff',
-		borderRadius: '0.5rem',
-		boxShadow: '0 0.125rem 0.5rem rgba(0,0,0,0.15)',
-		padding: '0.25rem 0.5rem 0.5rem 0.5rem',
-		marginBottom: '0.5rem',
-		zIndex: 1000,
-		minWidth: '12.5rem',
-	},
-	profileButtonContainer: {
-		position: 'relative',
-	},
-	componentButton: {
-		all: 'revert',
-		padding: '0.375rem 1.125rem',
-		borderRadius: '0.375rem',
-		border: '0.0625rem solid #0687E5',
-		background: '#fff',
-		color: '#0687E5',
-		fontWeight: 600,
-		cursor: 'pointer',
-		fontFamily: 'Roboto, Inter, Arial, sans-serif',
-		width: '100%',
-		textAlign: 'left',
-		marginBottom: '0.25rem',
-		transition: 'all 0.2s ease',
-		'&:hover': {
-			background: '#f0f9ff',
-		},
-	},
-	componentButtonActive: {
-		background: '#0687E5',
-		color: '#fff',
-	},
-};
 
 var DeepTutor = class DeepTutor extends React.Component {
 	/**
@@ -364,7 +170,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			error: null,
 			showProfilePopup: false,
 			showSignInPopup: false,
-			showSignUpPopup: false,
+
 			showModelSelectionPopup: false,
 			showDeletePopup: false,
 			showRenamePopup: false,
@@ -772,11 +578,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}));
 	};
 
-	toggleSignUpPopup = () => {
-		this.setState(prevState => ({
-			showSignUpPopup: !prevState.showSignUpPopup
-		}));
-	};
+
 
 	toggleModelSelectionPopup = () => {
 		this.setState(prevState => ({
@@ -864,6 +666,14 @@ var DeepTutor = class DeepTutor extends React.Component {
 		} catch (error) {
 			Zotero.debug(`DeepTutor: Error reloading sessions after rename: ${error.message}`);
 		}
+	};
+
+	handleCancelRename = () => {
+		this.setState({
+			showRenamePopup: false,
+			sessionToRename: null,
+			sessionNameToRename: ''
+		});
 	};
 
 	toggleCollapse = () => {
@@ -981,6 +791,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 	};
 
+	handleSignInSuccess = () => {
+		Zotero.debug("DeepTutor: Sign in success handler called");
+		
+		// Close the sign-in popup
+		this.setState({ showSignInPopup: false });
+		
+		Zotero.debug("DeepTutor: Sign-in popup closed after successful authentication");
+	};
+
 	handleOpenSignUpPage = () => {
 		// Open sign up page in default browser
 		Zotero.debug("DeepTutor: Sign up button clicked");
@@ -1065,6 +884,8 @@ var DeepTutor = class DeepTutor extends React.Component {
 			}
 		}
 	};
+
+
 
 	async loadSession() {
 		// Only load sessions if user is authenticated
@@ -1647,798 +1468,104 @@ var DeepTutor = class DeepTutor extends React.Component {
 		}
 	};
 
-	/**
-	 * Test method for localhost server - can be called from browser console
-	 * Usage: window.deepTutorInstance.testLocalhostServer()
-	 */
-	testLocalhostServer = async () => {
-		try {
-			console.log("🧪 DeepTutor: Testing localhost server...");
-
-			if (!this.localhostServer) {
-				console.error("❌ DeepTutor: Localhost server not initialized");
-				return;
-			}
-
-			console.log("📊 DeepTutor: Server status:", {
-				isRunning: this.localhostServer.isServerRunning(),
-				serverUrl: this.localhostServer.getServerUrl(),
-				port: this.localhostServer.port
-			});
-
-			// Check available endpoints
-			const allEndpoints = this.localhostServer.getAvailableEndpoints();
-			const deeptutorEndpoints = this.localhostServer.getDeepTutorEndpoints();
-
-			console.log("🔗 DeepTutor: All available endpoints:", allEndpoints);
-			console.log("🎯 DeepTutor: DeepTutor endpoints:", deeptutorEndpoints);
-
-			// Test sending a message
-			const testMessage = "Test message from DeepTutor console!";
-			console.log("📤 DeepTutor: Sending test message:", testMessage);
-
-			const result = await this.localhostServer.sendText(testMessage);
-			console.log("📥 DeepTutor: Send result:", result);
-
-			// Test health endpoint if server is running
-			if (this.localhostServer.isServerRunning()) {
-				try {
-					const healthResponse = await fetch(`${this.localhostServer.getServerUrl()}/deeptutor/health`);
-					const healthData = await healthResponse.json();
-					console.log("🏥 DeepTutor: Health check result:", healthData);
-				}
-				catch (healthError) {
-					console.error("❌ DeepTutor: Health check failed:", healthError.message);
-				}
-			}
-
-			console.log("✅ DeepTutor: Localhost server test completed");
-		}
-		catch (error) {
-			console.error("❌ DeepTutor: Localhost server test failed:", error.message);
-		}
-	};
 
 	render() {
 		Zotero.debug("DeepTutor: Render called");
 
-		// Calculate responsive widths for DeepTutor pane using state.windowWidth for reactivity
-		let minWidth, maxWidth, defaultWidth;
-		if (this.state.collapsed) {
-			minWidth = '0';
-			maxWidth = '0';
-			defaultWidth = '0';
-		}
-		else {
-			// Maximum width: 1/2 of window width
-			maxWidth = `${this.state.windowWidth * 0.5}px`;
-
-			// Default width: 1/3 of window width
-			defaultWidth = `${this.state.windowWidth * 0.33}px`;
-
-			// Minimum width based on window size
-			if (this.state.windowWidth >= 1200) {
-				// Window width >= 1200px: minimum is 1/4 of window width
-				minWidth = `${this.state.windowWidth * 0.25}px`;
-			}
-			else {
-				// Window width < 1200px: minimum is 300px
-				minWidth = '300px';
-			}
-		}
-
-		const containerStyle = {
-			...styles.container,
-			width: this.state.collapsed ? '0' : defaultWidth,
-			minWidth: minWidth,
-			maxWidth: maxWidth,
-			transition: 'all 0.3s ease-in-out',
-			overflow: 'hidden',
-			display: 'flex',
-			flex: '1',
-			flexDirection: 'column',
-			height: '100%'
-		};
-
 		return (
-			<div
-				ref={this.containerRef}
-				style={containerStyle}
-				id="zotero-deep-tutor-pane"
-				onClick={this.handleContainerClick}
-			>
-				<DeepTutorTopSection
-					currentPane={this.state.currentPane}
-					onSwitchPane={this.switchPane}
-					onToggleModelSelectionPopup={this.toggleModelSelectionPopup}
-					logoPath={logoPath}
-					HistoryIconPath={HistoryIconPath}
-					PlusIconPath={PlusIconPath}
-				/>
+			<DeepTutorMain
+				// State props
+				currentPane={this.state.currentPane}
+				currentSession={this.state.currentSession}
+				sessions={this.state.sessions}
+				isLoading={this.state.isLoading}
+				error={this.state.error}
+				collapsed={this.state.collapsed}
+				windowWidth={this.state.windowWidth}
+				windowHeight={this.state.windowHeight}
+				
+				// User props
+				currentUser={this.state.currentUser}
+				userData={this.state.userData}
+				userSubscribed={this.state.userSubscribed}
+				isFreeTrial={this.state.isFreeTrial}
+				
+				// Popup state props
+				showProfilePopup={this.state.showProfilePopup}
+				showSignInPopup={this.state.showSignInPopup}
 
-				{/* Middle Section */}
-				<div style={styles.middle}>
-					<div style={styles.paneList}>
-						{this.state.currentPane === 'main' && (
-							<DeepTutorChatBox
-								ref={ref => this._tutorBox = ref}
-								currentSession={this.state.currentSession}
-								key={this.state.currentSession?.id}
-								onSessionSelect={this.handleSessionSelect}
-								onInitWaitChange={this.handleInitWaitChange}
-							/>
-						)}
-						{this.state.currentPane === 'sessionHistory'
-							&& <SessionHistory
-								sessions={this.state.sessions}
-								onSessionSelect={this.handleSessionSelect}
-								isLoading={this.state.isLoading}
-								error={this.state.error}
-								onCreateNewSession={this.toggleModelSelectionPopup}
-								onShowDeletePopup={this.handleShowDeletePopup}
-								onRenameSession={this.handleShowRenamePopup}
-							/>
-						}
-						{this.state.currentPane === 'noSession'
-							&& <DeepTutorNoSessionPane onCreateNewSession={this.toggleModelSelectionPopup} />
-						}
-						{this.state.currentPane === 'modelSelection'
-					&& <ModelSelection
-						onSubmit={async (sessionId) => {
-							try {
-								const sessionData = await getSessionById(sessionId);
-								const session = new DeepTutorSession(sessionData);
-								const newsesIdToObj = new Map(this.state.sesIdToObj);
-								newsesIdToObj.set(session.id, session);
+				showModelSelectionPopup={this.state.showModelSelectionPopup}
+				showDeletePopup={this.state.showDeletePopup}
+				showRenamePopup={this.state.showRenamePopup}
+				showNoPDFWarningPopup={this.state.showNoPDFWarningPopup}
+				showSubscriptionConfirmPopup={this.state.showSubscriptionConfirmPopup}
+				showManageSubscriptionPopup={this.state.showManageSubscriptionPopup}
+				
+				// Session props
+				sessionToDelete={this.state.sessionToDelete}
+				sessionNameToDelete={this.state.sessionNameToDelete}
+				sessionToRename={this.state.sessionToRename}
+				sessionNameToRename={this.state.sessionNameToRename}
+				
+				// Feature flags
+				modelSelectionFrozen={this.state.modelSelectionFrozen}
+				localhostServer={this.localhostServer}
+				
+				// Refs
+				containerRef={this.containerRef}
+				tutorBoxRef={ref => this._tutorBox = ref}
+				
+				// Event handlers
+				handleContainerClick={this.handleContainerClick}
+				handleSessionSelect={this.handleSessionSelect}
+				handleInitWaitChange={this.handleInitWaitChange}
+				handleModelSelectionSubmit={async (sessionId) => {
+					try {
+						const sessionData = await getSessionById(sessionId);
+						const session = new DeepTutorSession(sessionData);
+						const newsesIdToObj = new Map(this.state.sesIdToObj);
+						newsesIdToObj.set(session.id, session);
 
-								await this.setState({
-									currentSession: session,
-									messages: [],
-									documentIds: session.documentIds || [],
-									sesIdToObj: newsesIdToObj,
-									sessions: [...this.state.sessions, session]
-								});
+						await this.setState({
+							currentSession: session,
+							messages: [],
+							documentIds: session.documentIds || [],
+							sesIdToObj: newsesIdToObj,
+							sessions: [...this.state.sessions, session]
+						});
 
-								await this.handleSessionSelect(session.id);
-								this.switchPane('main');
-								this.toggleModelSelectionPopup();
-							}
-							catch (error) {
-								Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
-							}
-						}}
-						user={this.state.userData}
-						externallyFrozen={this.state.modelSelectionFrozen}
-						onShowNoPDFWarning={this.toggleNoPDFWarningPopup}
-					/>
-						}
-						{this.state.currentPane === 'welcome' && <DeepTutorWelcomePane
-							onWelcomeSignIn={() => this.toggleSignInPopup()}
-							onSignInSuccess={() => {
-								this.loadSession();
-								this.switchPane(this.getSessionHistoryPaneOrNoSession());
-							}}
-							localhostServer={this.localhostServer}
-						/>}
-						{this.state.currentPane === 'signIn' && <DeepTutorSignIn
-							onSignInSignUp={this.handleOpenSignUpPage}
-							onSignInSuccess={() => {
-								this.loadSession();
-								this.switchPane(this.getSessionHistoryPaneOrNoSession());
-								this.toggleSignInPopup();
-							}}
-							localhostServer={this.localhostServer}
-						/>}
-						{this.state.currentPane === 'signUp' && <DeepTutorSignUp onSignUpSignIn={() => {
-							this.toggleSignInPopup();
-						}} />}
-					</div>
-				</div>
-				{/* Subscription Popups */}
-				{this.state.showSubscriptionPopup && (
-					<div
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							backgroundColor: 'rgba(0, 0, 0, 0.5)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							zIndex: 1000,
-						}}
-						onClick={this.toggleSubscriptionPopup}
-					>
-						<div
-							style={{
-								position: 'relative',
-								width: '100%', // 40px (20px * 2) = 2.5rem
-								minWidth: '18.75rem',
-								maxWidth: '26.875rem', // 430px
-								maxHeight: '90%',
-								background: '#FFFFFF',
-								borderRadius: '0.625rem',
-								padding: '0.25rem 0.5rem 0.5rem 0.5rem',
-								overflow: 'auto',
-								margin: '0 1.25rem' // 20px = 1.25rem
-							}}
-							onClick={e => e.stopPropagation()}
-						>
-							<DeepTutorSubscription
-								userId={this.state.userData?.id}
-								userSubscribed={this.state.userSubscribed}
-								isFreeTrial={this.state.isFreeTrial}
-								toggleSubscriptionPopup={this.toggleSubscriptionPopup}
-								onSubscriptionStatusChange={this.handleSubscriptionStatusChange}
-							/>
-						</div>
-					</div>
-				)}
+						await this.handleSessionSelect(session.id);
+						this.switchPane('main');
+						this.toggleModelSelectionPopup();
+					}
+					catch (error) {
+						Zotero.debug("Error creating session:", error);
+					}
+				}}
+				handleSignInSuccess={this.handleSignInSuccess}
 
-				{/* Sign In Popup */}
-				{this.state.showSignInPopup && (
-					<div
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							backgroundColor: 'rgba(0, 0, 0, 0.5)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							zIndex: 1000,
-							overflow: 'hidden',
-						}}
-						onClick={this.toggleSignInPopup}
-					>
-						<div
-							style={{
-								position: 'relative',
-								width: '100%', // 40px (20px * 2) = 2.5rem
-								minWidth: '18.75rem',
-								maxWidth: '26.875rem', // 430px
-								maxHeight: '90%',
-								background: '#FFFFFF',
-								borderRadius: '0.625rem',
-								padding: '1.25rem',
-								overflow: 'auto',
-								margin: '0 1.25rem' // 20px = 1.25rem
-							}}
-							onClick={e => e.stopPropagation()}
-						>
-							{/* Sign In Popup header */}
-							<div style={{
-								display: 'flex',
-								width: '100%',
-								alignItems: 'center',
-								marginBottom: '2rem',
-								minHeight: '1rem',
-								position: 'relative',
-							}}>
-								<div style={{
-									width: '100%',
-									textAlign: 'center',
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5rem',
-									lineHeight: '1.2',
-									letterSpacing: '0%',
-								}}>
-									Sign in
-								</div>
-								<button
-									onClick={this.toggleSignInPopup}
-									style={{
-										background: 'none',
-										border: 'none',
-										cursor: 'pointer',
-										position: 'absolute',
-										right: 0,
-										top: '50%',
-										transform: 'translateY(-50%)',
-										width: '1rem',
-										height: '1rem',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
-								</button>
-							</div>
-							<DeepTutorSignIn
-								onSignInSignUp={() => {
-									this.handleOpenSignUpPage();
-									this.toggleSignInPopup();
-								}}
-								onSignInSuccess={() => {
-								    this.toggleSignInPopup();
-								    // Auth state change will be handled by the listener
-							    }}
-								localhostServer={this.localhostServer}
-							/>
-						</div>
-					</div>
-				)}
+				handleSignOut={this.handleSignOut}
+				handleOpenSignUpPage={this.handleOpenSignUpPage}
 
-				{/* Sign Up Popup */}
-				{this.state.showSignUpPopup && (
-					<div
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							backgroundColor: 'rgba(0, 0, 0, 0.5)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							zIndex: 1000,
-							overflow: 'hidden',
-						}}
-						onClick={this.toggleSignUpPopup}
-					>
-						<div
-							style={{
-								position: 'relative',
-								width: '100%', // 40px (20px * 2) = 2.5rem
-								minWidth: '18.75rem',
-								maxWidth: '26.875rem', // 430px
-								maxHeight: '90%',
-								background: '#FFFFFF',
-								borderRadius: '0.625rem',
-								padding: '1.25rem',
-								overflow: 'auto',
-								margin: '0 1.25rem' // 20px = 1.25rem
-							}}
-							onClick={e => e.stopPropagation()}
-						>
-							{/* Sign Up Popup header */}
-							<div style={{
-								display: 'flex',
-								width: '100%',
-								alignItems: 'center',
-								marginBottom: '2rem',
-								minHeight: '1rem',
-								position: 'relative',
-							}}>
-								<div style={{
-									width: '100%',
-									textAlign: 'center',
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5rem',
-									lineHeight: '1.2',
-									letterSpacing: '0%',
-								}}>
-									Sign up
-								</div>
-								<button
-									onClick={this.toggleSignUpPopup}
-									style={{
-										background: 'none',
-										border: 'none',
-										cursor: 'pointer',
-										position: 'absolute',
-										right: 0,
-										top: '50%',
-										transform: 'translateY(-50%)',
-										width: '1rem',
-										height: '1rem',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
-								</button>
-							</div>
-							<DeepTutorSignUp onSignUpSignIn={() => {
-								this.toggleSignUpPopup();
-								this.toggleSignInPopup();
-							}} />
-						</div>
-					</div>
-				)}
+				handleShowDeletePopup={this.handleShowDeletePopup}
+				handleConfirmDelete={this.handleConfirmDelete}
+				handleCancelDelete={this.handleCancelDelete}
+				handleShowRenamePopup={this.handleShowRenamePopup}
+				handleRenameSuccess={this.handleRenameSuccess}
+				handleCancelRename={this.handleCancelRename}
+				handleSubscriptionStatusChange={this.handleSubscriptionStatusChange}
+				
+				// Toggle handlers
+				switchPane={this.switchPane}
+				toggleModelSelectionPopup={this.toggleModelSelectionPopup}
+				toggleSignInPopup={this.toggleSignInPopup}
 
-				{/* Delete Session Popup */}
-				{this.state.showDeletePopup && (
-					<div
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							backgroundColor: 'rgba(0, 0, 0, 0.5)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							zIndex: 1000,
-							overflow: 'hidden',
-						}}
-						onClick={this.handleCancelDelete}
-					>
-						<div
-							style={{
-								position: 'relative',
-								width: '100%', // 40px (20px * 2) = 2.5rem
-								minWidth: '18.75rem',
-								maxWidth: '26.875rem', // 430px
-								maxHeight: '90%',
-								background: '#FFFFFF',
-								borderRadius: '0.625rem',
-								padding: '1.25rem',
-								overflow: 'auto',
-								margin: '0 1.25rem' // 20px = 1.25rem
-							}}
-							onClick={e => e.stopPropagation()}
-						>
-							{/* Delete Session Popup header */}
-							<div style={{
-								display: 'flex',
-								width: '100%',
-								alignItems: 'center',
-								marginBottom: '1.25rem',
-								minHeight: '1rem',
-								position: 'relative',
-							}}>
-								<div style={{
-									width: '100%',
-									textAlign: 'center',
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5rem',
-									lineHeight: '1.2',
-									letterSpacing: '0%',
-								}}>
-									Confirm Deletion?
-								</div>
-								<button
-									onClick={this.handleCancelDelete}
-									style={{
-										background: 'none',
-										border: 'none',
-										cursor: 'pointer',
-										position: 'absolute',
-										right: 0,
-										top: '50%',
-										transform: 'translateY(-50%)',
-										width: '1rem',
-										height: '1rem',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
-								</button>
-							</div>
-							<DeepTutorSessionDelete
-								sessionToDelete={this.state.sessionToDelete}
-								sessionName={this.state.sessionNameToDelete}
-								onConfirmDelete={this.handleConfirmDelete}
-								onCancelDelete={this.handleCancelDelete}
-							/>
-						</div>
-					</div>
-				)}
-
-				{/* Rename Session Popup */}
-				{this.state.showRenamePopup && (
-					<div
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							background: 'rgba(0,0,0,0.5)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							zIndex: 9999
-						}}
-						onClick={this.toggleRenamePopup}
-					>
-						<div
-							style={{
-								width: '90%',
-								maxWidth: '26rem',
-								maxHeight: '90%',
-								background: '#FFFFFF',
-								borderRadius: '0.625rem',
-								padding: '1.25rem',
-								overflow: 'auto',
-								margin: '0 1.25rem'
-							}}
-							onClick={e => e.stopPropagation()}
-						>
-							{/* Rename Session Popup header */}
-							<div style={{
-								display: 'flex',
-								width: '100%',
-								alignItems: 'center',
-								marginBottom: '1.25rem',
-								minHeight: '1rem',
-								position: 'relative',
-							}}>
-								<div style={{
-									width: '100%',
-									textAlign: 'center',
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5rem',
-									lineHeight: '1.2',
-									letterSpacing: '0%',
-								}}>
-									Rename
-								</div>
-								<button
-									onClick={this.toggleRenamePopup}
-									style={{
-										background: 'none',
-										border: 'none',
-										cursor: 'pointer',
-										position: 'absolute',
-										right: 0,
-										top: '50%',
-										transform: 'translateY(-50%)',
-										width: '1rem',
-										height: '1rem',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
-								</button>
-							</div>
-							<DeepTutorRenameSession
-								sessionId={this.state.sessionToRename}
-								currentSessionName={this.state.sessionNameToRename}
-								onClose={this.toggleRenamePopup}
-								onRenameSuccess={this.handleRenameSuccess}
-							/>
-						</div>
-					</div>
-				)}
-
-				{/* Model Selection Popup */}
-				{this.state.showModelSelectionPopup && (
-					<div
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							backgroundColor: 'rgba(0, 0, 0, 0.5)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							zIndex: 1000,
-							overflow: 'hidden',
-						}}
-						onClick={this.toggleModelSelectionPopup}
-					>
-						<div
-							style={{
-								position: 'relative',
-								width: '100%', // 40px (20px * 2) = 2.5rem
-								minWidth: '18.75rem',
-								maxWidth: '26.875rem', // 430px
-								maxHeight: '90%',
-								background: '#FFFFFF',
-								borderRadius: '0.625rem',
-								padding: '1.25rem',
-								overflow: 'auto',
-								margin: '0 1.25rem' // 20px = 1.25rem
-							}}
-							onClick={e => e.stopPropagation()}
-						>
-							{/* Model Selection Popup header */}
-							<div style={{
-								display: 'flex',
-								width: '100%',
-								alignItems: 'center',
-								marginBottom: '2rem',
-								minHeight: '1rem',
-								position: 'relative',
-							}}>
-								<div style={{
-									width: '100%',
-									textAlign: 'center',
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5rem',
-									lineHeight: '1.2',
-									letterSpacing: '0%',
-								}}>
-									Create a new session
-								</div>
-								<button
-									onClick={this.toggleModelSelectionPopup}
-									style={{
-										all: 'revert',
-										background: 'none',
-										border: 'none',
-										cursor: 'pointer',
-										position: 'absolute',
-										right: 0,
-										top: '50%',
-										transform: 'translateY(-50%)',
-										width: '1rem',
-										height: '1rem',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
-								</button>
-							</div>
-							<ModelSelection
-								onSubmit={async (sessionId) => {
-									try {
-										const sessionData = await getSessionById(sessionId);
-										const session = new DeepTutorSession(sessionData);
-										const newsesIdToObj = new Map(this.state.sesIdToObj);
-										newsesIdToObj.set(session.id, session);
-
-										await this.setState({
-											currentSession: session,
-											messages: [],
-											documentIds: session.documentIds || [],
-											sesIdToObj: newsesIdToObj,
-											sessions: [...this.state.sessions, session]
-										});
-
-										await this.handleSessionSelect(session.id);
-										this.switchPane('main');
-										this.toggleModelSelectionPopup();
-									}
-									catch (error) {
-										Zotero.debug(`DeepTutor: Error handling new session: ${error.message}`);
-									}
-								}}
-								user={this.state.userData}
-								externallyFrozen={this.state.modelSelectionFrozen}
-								onShowNoPDFWarning={this.toggleNoPDFWarningPopup}
-							/>
-						</div>
-					</div>
-				)}
-
-				{/* No PDF Warning Popup */}
-				{this.state.showNoPDFWarningPopup && (
-					<div
-						style={{
-							position: 'absolute',
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							backgroundColor: 'rgba(0, 0, 0, 0.5)',
-							display: 'flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							zIndex: 1000,
-							overflow: 'hidden',
-						}}
-						onClick={this.toggleNoPDFWarningPopup}
-					>
-						<div
-							style={{
-								position: 'relative',
-								width: '100%',
-								minWidth: '18.75rem',
-								maxWidth: '26.875rem',
-								maxHeight: '90%',
-								background: '#FFFFFF',
-								borderRadius: '0.625rem',
-								padding: '1.25rem',
-								overflow: 'auto',
-								margin: '0 1.25rem'
-							}}
-							onClick={e => e.stopPropagation()}
-						>
-							{/* No PDF Warning Popup header */}
-							<div style={{
-								display: 'flex',
-								width: '100%',
-								alignItems: 'center',
-								marginBottom: '1.25rem',
-								minHeight: '1rem',
-								position: 'relative',
-							}}>
-								<div style={{
-									width: '100%',
-									textAlign: 'center',
-									background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
-									WebkitBackgroundClip: 'text',
-									WebkitTextFillColor: 'transparent',
-									backgroundClip: 'text',
-									color: '#0687E5',
-									fontWeight: 700,
-									fontSize: '1.5rem',
-									lineHeight: '1.2',
-									letterSpacing: '0%',
-								}}>
-									Unsupported File Type
-								</div>
-								<button
-									onClick={this.toggleNoPDFWarningPopup}
-									style={{
-										background: 'none',
-										border: 'none',
-										cursor: 'pointer',
-										position: 'absolute',
-										right: 0,
-										top: '50%',
-										transform: 'translateY(-50%)',
-										width: '1rem',
-										height: '1rem',
-										display: 'flex',
-										alignItems: 'center',
-										justifyContent: 'center',
-									}}
-								>
-									<img src={PopupClosePath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
-								</button>
-							</div>
-							<DeepTutorNoPDFWarning
-								onClose={this.toggleNoPDFWarningPopup}
-							/>
-						</div>
-					</div>
-				)}
-
-				{/* Bottom Section */}
-				<DeepTutorBottomSection
-					currentPane={this.state.currentPane}
-					onSwitchPane={this.switchPane}
-					onToggleProfilePopup={this.toggleProfilePopup}
-					onToggleSignInPopup={this.toggleSignInPopup}
-					onToggleSignUpPopup={this.handleOpenSignUpPage}
-					onToggleSubscriptionPopup={this.toggleSubscriptionPopup}
-					showProfilePopup={this.state.showProfilePopup}
-					feedIconPath={FeedIconPath}
-					personIconPath={PersonIconPath}
-					isAuthenticated={this.state.isAuthenticated}
-					currentUser={this.state.currentUser}
-					onSignOut={this.handleSignOut}
-					onSwitchNoSession={() => this.switchPane('noSession')}
-					userData={this.state.userData}
-					userSubscribed={this.state.userSubscribed}
-					isFreeTrial={this.state.isFreeTrial}
-				/>
-			</div>
+				toggleProfilePopup={this.toggleProfilePopup}
+				toggleNoPDFWarningPopup={this.toggleNoPDFWarningPopup}
+				toggleSubscriptionPopup={this.toggleSubscriptionPopup}
+				toggleManageSubscriptionPopup={this.toggleManageSubscriptionPopup}
+				toggleSubscriptionConfirmPopup={this.toggleSubscriptionConfirmPopup}
+			/>
 		);
 	}
 };
