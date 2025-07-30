@@ -594,7 +594,25 @@ tag-field =
     .aria-label = { general-tag }
 
 tagselector-search =
-    .placeholder = Filter Tags
+    .placeholder = { $annotationsFilter ->
+        [yes] Filter Tags and Annotation Authors
+        *[other] Filter Tags
+    }
+tagselector-menu-show-annotation-filters =
+    .label = Show Annotation Filters
+tagselector-menu-filters-count =
+    .label =
+        { $tagCount ->
+            [one] { $tagCount } tag
+            *[other] { $tagCount } tags
+        }{ $annotationsFilterCount ->
+            [-1] {""}
+            *[other] {", "}
+        }{ $annotationsFilterCount ->
+            [-1] {""}
+            [one] { $annotationsFilterCount } annotation filter
+            *[other] { $annotationsFilterCount } annotation filters
+        } selected
 
 context-notes-search =
     .placeholder = Search Notes
