@@ -931,13 +931,10 @@ Zotero.Integration.Interface.prototype.setDocPrefs = async function () {
 		oldData = await this._session.setDocPrefs(true);
 	} else {
 		// Can get fields while dialog is open
-		oldData = await Promise.all([
+		[, oldData] = await Promise.all([
 			this._session.getFields(),
 			this._session.setDocPrefs(true)
-		]).spread(function (fields, setDocPrefs) {
-			// Only return value from setDocPrefs
-			return setDocPrefs;
-		});
+		]);
 	}
 	
 	// If oldData is null, then there was no document data, so we don't need to update
