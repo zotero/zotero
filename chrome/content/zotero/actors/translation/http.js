@@ -23,7 +23,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-Cu.import("resource://gre/modules/NetUtil.jsm");
+var { NetUtil } = ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
 
 /**
  * Functions for performing HTTP requests, both via XMLHTTPRequest and using a hidden browser
