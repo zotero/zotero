@@ -648,7 +648,9 @@ var ZoteroPane = new function () {
 			)
 			if (!needsCleanup) return;
 			
-			Cu.import("chrome://zotero/content/import/mendeley/mendeleyImport.js");
+			var { Zotero_Import_Mendeley } = ChromeUtils.importESModule(
+				"chrome://zotero/content/import/mendeley/mendeleyImport.mjs"
+			);
 			var importer = new Zotero_Import_Mendeley();
 			importer.deleteNonPrimaryFiles();
 		}, 10000)
