@@ -42,6 +42,28 @@ describe("Zotero.FileHandlers", () => {
 			// assert.equal(reader._internalReader._state.primaryViewStats.pageIndex, 2);
 		});
 
+		it("should open an EPUB internally when no handler is set", async function () {
+			let epub = await importFileAttachment('recognizeEPUB_test_content.epub');
+			let annotation = await createAnnotation('highlight', epub);
+			await Zotero.FileHandlers.open(epub, {
+				location: { annotationID: annotation.key }
+			});
+			let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
+			assert.ok(reader);
+			await reader._waitForReader();
+		});
+
+		it("should open a snapshot internally when no handler is set", async function () {
+			let snapshot = await importFileAttachment('test.html');
+			let annotation = await createAnnotation('highlight', snapshot);
+			await Zotero.FileHandlers.open(snapshot, {
+				location: { annotationID: annotation.key }
+			});
+			let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
+			assert.ok(reader);
+			await reader._waitForReader();
+		});
+
 		it("should open a PDF in a new window when no handler is set and openInWindow is passed", async function () {
 			let pdf = await importFileAttachment('wonderland_short.pdf');
 			await Zotero.FileHandlers.open(pdf, {
@@ -69,6 +91,33 @@ describe("Zotero.FileHandlers", () => {
 			Zotero.Prefs.set('fileHandler.pdf', 'mock');
 			
 			await Zotero.FileHandlers.open(pdf);
+			assert.isTrue(wasRun);
+			assert.isFalse(readerOpenSpy.called);
+			assert.notOk(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));
+			assert.isEmpty(Zotero.Reader.getWindowStates());
+
+			readerOpenSpy.restore();
+		});
+
+		it("should infer PDF page number when annotationID is passed", async function () {
+			let pdf = await importFileAttachment('wonderland_short.pdf');
+			let annotation = await createAnnotation('highlight', pdf);
+			let wasRun = false;
+			let readerOpenSpy = sinon.spy(Zotero.Reader, 'open');
+			Zotero.FileHandlers._mockHandlers = {
+				pdf: [
+					{
+						name: /mock/,
+						async open(path, { page }) {
+							assert.equal(page, JSON.parse(annotation.annotationPosition).pageIndex + 1);
+							wasRun = true;
+						}
+					}
+				]
+			};
+			Zotero.Prefs.set('fileHandler.pdf', 'mock');
+			
+			await Zotero.FileHandlers.open(pdf, { location: { annotationID: annotation.key } });
 			assert.isTrue(wasRun);
 			assert.isFalse(readerOpenSpy.called);
 			assert.notOk(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));

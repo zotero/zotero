@@ -81,10 +81,24 @@ Zotero.FileHandlers = {
 			handlers = this._handlersLinux[readerType];
 		}
 		
-		let page = location?.pageIndex ?? undefined;
-		// Add 1 to page index for external readers
-		if (page !== undefined && parseInt(page) == page) {
-			page = parseInt(page) + 1;
+		let page;
+		if (location) {
+			if (location.pageIndex) {
+				page = location.pageIndex;
+			}
+			// If caller didn't pass a pageIndex but passed an annotation,
+			// look up its pageIndex so we can pass that to external readers
+			else if (location.annotationID) {
+				let annotation = Zotero.Items.getByLibraryAndKey(item.libraryID, location.annotationID);
+				if (annotation && annotation.isAnnotation() && annotation.parentItemID === item.id) {
+					page = JSON.parse(annotation.annotationPosition).pageIndex;
+				}
+			}
+			
+			// Add 1 to page index for external readers
+			if (page !== undefined && parseInt(page) == page) {
+				page = parseInt(page) + 1;
+			}
 		}
 		
 		// If there are handlers for this platform and this reader type...

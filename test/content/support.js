@@ -1073,14 +1073,37 @@ async function createAnnotation(type, parentItem, options = {}) {
 	var page = Zotero.Utilities.rand(1, 100);
 	annotation.annotationPageLabel = `${page}`;
 	page = page.toString().padStart(5, '0');
-	var pos = Zotero.Utilities.rand(1, 10000).toString().padStart(6, '0');
-	annotation.annotationSortIndex = `${page}|${pos}|00000`;
-	annotation.annotationPosition = JSON.stringify({
-		pageIndex: 123,
-		rects: [
-			[314.4, 412.8, 556.2, 609.6]
-		]
-	});
+	switch (parentItem.attachmentReaderType) {
+		case 'pdf':
+			var pos = Zotero.Utilities.rand(1, 10000).toString().padStart(6, '0');
+			annotation.annotationSortIndex = `${page}|${pos}|00000`;
+			annotation.annotationPosition = JSON.stringify({
+				pageIndex: 123,
+				rects: [
+					[314.4, 412.8, 556.2, 609.6]
+				]
+			});
+			break;
+		case 'epub':
+			var pos1 = Zotero.Utilities.rand(1, 10000).toString().padStart(5, '0');
+			var pos2 = Zotero.Utilities.rand(1, 10000).toString().padStart(8, '0');
+			annotation.annotationSortIndex = `${pos1}|${pos2}`;
+			annotation.annotationPosition = JSON.stringify({
+				type: 'FragmentSelector',
+				conformsTo: 'http://www.idpf.org/epub/linking/cfi/epub-cfi.html',
+				value: 'epubcfi(/0)',
+			});
+			break;
+		case 'snapshot':
+			annotation.annotationSortIndex = Zotero.Utilities.rand(1, 10000).toString().padStart(7, '0');
+			annotation.annotationPosition = JSON.stringify({
+				type: 'CssSelector',
+				value: 'body',
+			});
+			break;
+		default:
+			throw new Error(`Unknown attachmentReaderType: ${parentItem.attachmentReaderType}`);
+	}
 	if (options.createdByUserID) {
 		annotation.createdByUserID = options.createdByUserID;
 	}
