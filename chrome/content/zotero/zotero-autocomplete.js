@@ -70,7 +70,9 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 		
 		case 'tag':
 			var sql = "SELECT DISTINCT name AS val, NULL AS id FROM tags WHERE name LIKE ? ESCAPE '\\'";
-			var sqlParams = [Zotero.DB.escapeSQLExpression(searchString) + '%'];
+      var isUnboundedSearchEnabled = Zotero.Prefs.get('unboundedTagSearch')
+      var sqlPrefix = isUnboundedSearchEnabled ? '%' : ''
+      var sqlParams = [sqlPrefix + Zotero.DB.escapeSQLExpression(searchString) + '%'];
 			if (searchParams.libraryID) {
 				sql += " AND tagID IN (SELECT tagID FROM itemTags JOIN items USING (itemID) "
 					+ "WHERE libraryID=?)";
