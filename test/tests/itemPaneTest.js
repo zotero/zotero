@@ -708,11 +708,16 @@ describe("Item pane", function () {
 			Zotero.Prefs.set("panes.attachments.open", true);
 			Zotero.Prefs.set("showAttachmentPreview", true);
 			Zotero_Tabs.select("zotero-pane");
+			win.resizeTo(1000, 800);
 		});
 
 		afterEach(function () {
 			Zotero_Tabs.select("zotero-pane");
 			Zotero_Tabs.closeAll();
+		});
+
+		after(function () {
+			win.resizeTo(1000, 800);
 		});
 
 		it("should show attachments pane in library for regular item", async function () {
