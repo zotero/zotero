@@ -668,9 +668,7 @@ Zotero.Sync.Data.Engine.prototype._downloadObjects = async function (objectType,
 			});
 			remainingKeys = Zotero.Utilities.arrayDiff(remainingKeys, processedKeys);
 			conflicts.push(...conflictResults);
-		}.bind(this), {
-			concurrency: 1
-		});
+		}.bind(this));
 		
 		// If any locally deleted collections were restored, either add them back to the collection
 		// (if the items still exist) or remove them from the delete log and add them to the sync queue
