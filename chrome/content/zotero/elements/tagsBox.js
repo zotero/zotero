@@ -368,7 +368,7 @@
 				});
 				event.preventDefault();
 			}
-			let delimiters = [',', ';', '--', '—'];
+			let delimiters = [',', ';'];
 			let interceptRegex = new RegExp(`\\w+\\s*(${delimiters.join('|')})\\s*\\w+`, 'i');
 			let match = str.match(interceptRegex);
 			if (match) {
