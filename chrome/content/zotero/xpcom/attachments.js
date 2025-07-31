@@ -2197,6 +2197,13 @@ Zotero.Attachments = new function () {
 								nextURL = refreshURL;
 								continue;
 							}
+							// ProQuest does a JS redirect back to the original page after authenticating
+							// Simulate that ourselves
+							else if (responseURL === 'https://www.proquest.com/intermediateredirectforezproxy') {
+								doc = null;
+								nextURL = pageURL;
+								continue;
+							}
 						}
 						
 						// Don't try this page URL again
