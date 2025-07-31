@@ -142,3 +142,8 @@ toolbox {
 		appearance: initial;
 	}
 }
+
+#zotero-toolbar-collection-tree {
+	// fx140: override default toolbar color on linux
+	background: var(--material-sidepane);
+}
