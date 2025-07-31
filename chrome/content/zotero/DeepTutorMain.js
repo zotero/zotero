@@ -445,7 +445,7 @@ const DeepTutorMain = (props) => {
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
-					zIndex: 1000,
+					zIndex: 2000,
 				}}>
 					<div style={{
 						background: colors.background.primary,
@@ -463,9 +463,8 @@ const DeepTutorMain = (props) => {
 								border: 'none',
 								cursor: 'pointer',
 								position: 'absolute',
-								right: 0,
-								top: '50%',
-								transform: 'translateY(-50%)',
+								right: '1rem',
+								top: '1rem',
 								width: '1rem',
 								height: '1rem',
 								display: 'flex',

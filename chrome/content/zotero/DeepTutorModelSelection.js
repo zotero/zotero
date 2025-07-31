@@ -7,6 +7,7 @@ import {
 import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
 const DeleteImg = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DELETE.svg';
+const DeleteImgWhite = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_DELETE_WHITE.svg';
 // const LitePath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_LITE.svg';
 const BasicPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_STANDARD.svg';
 const BasicDarkPath = 'chrome://zotero/content/DeepTutorMaterials/Registration/RES_STANDARD_DARK.svg';
@@ -1431,7 +1432,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 											onClick={() => !isEffectivelyFrozen && handleRemoveFile(file.id)}
 											disabled={isEffectivelyFrozen}
 										>
-											<img src={DeleteImg} alt="Delete" width="15" height="17" />
+											<img src={isDark ? DeleteImgWhite : DeleteImg} alt="Delete" width="15" height="17" />
 										</button>
 									</div>
 								))}
