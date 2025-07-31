@@ -28,10 +28,10 @@
  *
  * @constructor
  * @param {browser} [browser] Hidden browser object
- * @param {String|nsIURI} uri URI of page to manage cookies for (cookies for domains that are not
+ * @param {String|nsIURI} [uri] URI of page to manage cookies for (cookies for domains that are not
  *                     subdomains of this URI are ignored)
- * @param {String} cookieData Cookies with which to initiate the sandbox
- * @param {String} userAgent User agent to use for sandboxed requests
+ * @param {String} [cookieData] Cookies with which to initiate the sandbox
+ * @param {String} [userAgent] User agent to use for sandboxed requests
  */
 Zotero.CookieSandbox = function (browser, uri, cookieData, userAgent) {
 	this._cookies = {};
@@ -51,9 +51,6 @@ Zotero.CookieSandbox = function (browser, uri, cookieData, userAgent) {
 	}
 	
 	if (userAgent) this.userAgent = userAgent;
-
-	this._observerService = Components.classes["@mozilla.org/observer-service;1"].
-	getService(Components.interfaces.nsIObserverService);
 
 	if (browser) {
 		this.attachToBrowser(browser);
