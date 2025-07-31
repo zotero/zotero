@@ -39,6 +39,7 @@ Zotero.Attachments = new function () {
 	
 	var _findFileQueue = [];
 	var _findFileQueuePromise = null;
+	var _findFileCookieSandboxes = new Map();
 	
 	var self = this;
 	
@@ -2052,6 +2053,8 @@ Zotero.Attachments = new function () {
 			if (!url && !pageURL) {
 				continue;
 			}
+
+			let cookieSandbox = _getFindFileCookieSandboxForSite(url || pageURL);
 			
 			if (urlResolver.referrer) {
 				options.referrer = urlResolver.referrer;
@@ -2069,7 +2072,7 @@ Zotero.Attachments = new function () {
 				while (tries-- > 0) {
 					try {
 						await beforeRequest(url);
-						await this.downloadFile(url, path, options);
+						await this.downloadFile(url, path, { ...options, cookieSandbox });
 						afterRequest(url);
 						return { url, props: urlResolver };
 					}
@@ -2092,7 +2095,6 @@ Zotero.Attachments = new function () {
 				try {
 					Zotero.debug(`Looking for file on ${pageURL}`);
 					
-					let redirects = 0;
 					let nextURL = pageURL;
 					let req;
 					let blob;
@@ -2125,7 +2127,8 @@ Zotero.Attachments = new function () {
 										responseType: 'blob',
 										followRedirects: false,
 										// Use our own error handling
-										errorDelayMax: 0
+										errorDelayMax: 0,
+										cookieSandbox,
 									}
 								);
 							}
@@ -2223,7 +2226,7 @@ Zotero.Attachments = new function () {
 					}
 					// Otherwise translate the Document we parsed above
 					else if (doc) {
-						({ title, mimeType, url } = await Zotero.Utilities.Internal.getFileFromDocument(doc));
+						({ title, mimeType, url } = await Zotero.Utilities.Internal.getFileFromDocument(doc, { cookieSandbox }));
 					}
 				}
 				catch (e) {
@@ -2242,7 +2245,7 @@ Zotero.Attachments = new function () {
 				addTriedURL(url);
 				
 				// Use the page we loaded as the referrer
-				let downloadOptions = Object.assign({}, options, { referrer: responseURL });
+				let downloadOptions = Object.assign({}, options, { referrer: responseURL, cookieSandbox });
 				// Backoff loop
 				let tries = 3;
 				while (tries-- >= 0) {
@@ -2264,6 +2267,45 @@ Zotero.Attachments = new function () {
 		}
 		return false;
 	};
+
+
+	/**
+	 * Get an ephemeral CookieSandbox based on the URL's site (scheme + eTLD+1).
+	 * Sandboxes expire after 24 hours of inactivity.
+	 * @param {nsIURI | string} url
+	 * @returns {Zotero.CookieSandbox}
+	 */
+	function _getFindFileCookieSandboxForSite(url) {
+		let lastUsedCutoff = Date.now() - 24 * 60 * 60 * 1000;
+		for (let [site, { lastUsed }] of _findFileCookieSandboxes) {
+			if (lastUsed >= lastUsedCutoff) {
+				// The map is kept in order of expiration, so if we've gotten to a non-expired entry,
+				// we're done
+				break;
+			}
+			_findFileCookieSandboxes.delete(site);
+		}
+		
+		if (typeof url === 'string') {
+			url = Services.io.newURI(url);
+		}
+		let site;
+		try {
+			site = Services.eTLD.getSite(url);
+		}
+		catch {
+			// eTLD service can't handle URLs without TLDs (e.g., localhost),
+			// so fall back to the host
+			site = url.hostPort;
+		}
+		
+		let cookieSandbox = _findFileCookieSandboxes.get(site)?.cookieSandbox
+			?? new Zotero.CookieSandbox();
+		// Delete and re-add to keep entries in order of expiration
+		_findFileCookieSandboxes.delete(site);
+		_findFileCookieSandboxes.set(site, { cookieSandbox, lastUsed: Date.now() });
+		return cookieSandbox;
+	}
 	
 	
 	/**

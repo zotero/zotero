@@ -1338,11 +1338,13 @@ Zotero.Utilities.Internal = {
 	 * Run translation on a Document to try to find a PDF URL
 	 *
 	 * @param {doc} Document
+	 * @param {Zotero.CookieSandbox} cookieSandbox
 	 * @return {{ title: string, url: string } | false} - PDF attachment title and URL, or false if none found
 	 */
-	getFileFromDocument: async function (doc) {
+	getFileFromDocument: async function (doc, { cookieSandbox } = {}) {
 		let translate = new Zotero.Translate.Web();
 		translate.setDocument(doc);
+		translate.setCookieSandbox(cookieSandbox);
 		var translators = await translate.getTranslators();
 		// TEMP: Until there's a generic webpage translator
 		if (!translators.length) {
