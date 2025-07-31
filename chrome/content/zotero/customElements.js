@@ -218,7 +218,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 					e.stopPropagation();
 					this.setAttribute("animate", "cancel");
 					// Make the timeout slightly longer than the animation duration (180ms) in _menupopup.scss
-					setTimeout(() => {
+					this._fadeTimeout = setTimeout(() => {
 						this.removeAttribute("animate");
 						this.hidePopup();
 					}, 200);
@@ -231,6 +231,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 					if (this !== e.target || this.parentNode?.closest("menupopup")) {
 						return;
 					}
+					clearTimeout(this._fadeTimeout);
 					this.setAttribute("aria-hidden", true);
 					setTimeout(() => {
 						this.removeAttribute("aria-hidden");
