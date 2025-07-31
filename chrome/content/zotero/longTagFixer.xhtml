@@ -7,16 +7,18 @@
 <window
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
-	title="&zotero.sync.error;"
 	id="zotero-long-tag-fixer-window"
+	data-l10n-id="long-tag-fixer-window-title"
 	class="zotero-dialog"
 	drawintitlebar-platforms="mac"
 	onload="Zotero_Long_Tag_Fixer.init()">
 <dialog
 	id="zotero-long-tag-fixer"
 	class="zotero-dialog-window"
-	buttons="cancel,accept"
->	
+	buttons="cancel,accept,extra1"
+	buttonidextra1="long-tag-fixer-button-dont-split"
+>
+	<html:link rel="localization" href="zotero.ftl" />
 	<html:div id="intro">
 		<html:h1>&zotero.sync.longTagFixer.followingTagTooLong;</html:h1>
 		<html:textarea id="zotero-old-tag" readonly="readonly" />
