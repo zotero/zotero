@@ -22,13 +22,3 @@ tab:where([visuallyselected="true"]) {
 #zotero-prefs .numberbox-input-box{
 	-moz-appearance: textfield;
 }
-
-#zotero-tags-splitter:not([state=collapsed]) {
-	min-height: 5px;
-}
-
-#zotero-context-splitter-stacked {
-	-moz-appearance: none;
-	background-color: #ececec;
-	border-top: 1px solid hsla(0, 0%, 0%, 0.2);
-}
