@@ -823,7 +823,7 @@ Zotero_Import_Mendeley.prototype._fetchFile = async function (fileID, filePath) 
 	await Zotero.File.createDirectoryIfMissingAsync(fileDir);
 	const xhr = await apiFetch(this._tokens, `files/${fileID}`, {}, {}, { responseType: 'blob', followRedirects: false });
 	const uri = xhr.getResponseHeader('location');
-	await Zotero.File.download(uri, filePath);
+	await Zotero.HTTP.download(uri, filePath);
 
 	this._progress += 1;
 	if (this._itemDone) {
