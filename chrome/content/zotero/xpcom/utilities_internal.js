@@ -1342,7 +1342,7 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Run translation on a Document to try to find a PDF URL
 	 *
-	 * @param {doc} Document
+	 * @param {Document} doc
 	 * @param {Zotero.CookieSandbox} cookieSandbox
 	 * @return {{ title: string, url: string } | false} - PDF attachment title and URL, or false if none found
 	 */
