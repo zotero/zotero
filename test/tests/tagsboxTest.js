@@ -4,6 +4,9 @@ describe("Item Tags Box", function () {
 	var win, doc, collectionsView;
 	
 	before(function* () {
+		// Ensure any leftover windows are closed so that nothing stops
+		// the new zoteroPane from becoming the active window
+		closeAllWindows();
 		win = yield loadZoteroPane();
 		doc = win.document;
 		win.Zotero_Tabs.select("zotero-pane")

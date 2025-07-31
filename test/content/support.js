@@ -145,6 +145,21 @@ async function activateZoteroPane() {
 	await activatePromise;
 }
 
+/*
+ * Close all windows except for the test runner
+*/
+function closeAllWindows() {
+	let windowMediator = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+		.getService(Components.interfaces.nsIWindowMediator);
+	let allWindows = windowMediator.getEnumerator(null);
+	while (allWindows.hasMoreElements()) {
+		let win = allWindows.getNext();
+		let href = win.location.href;
+		if (href === "chrome://zotero-unit/content/runtests.html" || href.includes("devtools")) continue;
+		win.close();
+	}
+};
+
 var loadPrefPane = async function (paneName) {
 	var id = 'zotero-prefpane-' + paneName;
 	var win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
