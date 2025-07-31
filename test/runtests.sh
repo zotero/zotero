@@ -19,7 +19,12 @@ if [ -z "$Z_EXECUTABLE" ]; then
 	if [ "`uname`" == "Darwin" ]; then
 		Z_EXECUTABLE="$ROOT_DIR/app/staging/Zotero.app/Contents/MacOS/zotero"
 	else
-		Z_EXECUTABLE="$ROOT_DIR/app/staging/Zotero_linux-x86_64/zotero"
+		ARCH="$(uname -m)"
+		if [ "$ARCH" = "aarch64" ]; then
+			Z_EXECUTABLE="$ROOT_DIR/app/staging/Zotero_linux-arm64/zotero"
+		else
+			Z_EXECUTABLE="$ROOT_DIR/app/staging/Zotero_linux-x86_64/zotero"
+		fi
 	fi
 fi
 
