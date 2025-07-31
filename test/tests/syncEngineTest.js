@@ -2033,7 +2033,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 					if (req.url.startsWith(baseURL + "users/1/settings")) {
 						settingsCalls++;
 						if (settingsCalls == 2) {
-							assert.isAbove(new Date() - t, 75);
+							assert.isAtLeast(new Date() - t, 75);
 						}
 					}
 					req.respond(
@@ -2779,7 +2779,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				if (req.url.startsWith(baseURL + "users/1/settings")) {
 					calls++;
 					if (calls == 2) {
-						assert.isAbove(new Date() - t, 50);
+						assert.isAtLeast(new Date() - t, 50);
 					}
 					t = new Date();
 					req.respond(
