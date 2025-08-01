@@ -1,9 +1,10 @@
 describe("Item pane", function () {
 	var win, doc, ZoteroPane, Zotero_Tabs, ZoteroContextPane, itemsView;
 
-	async function waitForPreviewBoxRender(box) {
+	async function waitForPreviewBoxRender(box, itemID) {
 		let res = await waitForCallback(
-			() => box._asyncRenderItemID && !box._asyncRendering,
+			() => box._asyncRenderItemID && !box._asyncRendering
+				&& (!itemID || box._asyncRenderItemID == itemID),
 			100, 3);
 		if (res instanceof Error) {
 			throw res;
@@ -1292,7 +1293,7 @@ describe("Item pane", function () {
 
 			await ZoteroPane.selectItem(item.id);
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForPreviewBoxRender(attachmentsBox);
+			await waitForPreviewBoxRender(attachmentsBox, item.id);
 
 			assert.isTrue(attachmentsBox._preview._isReaderInitialized);
 			
