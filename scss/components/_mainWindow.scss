@@ -1,5 +1,13 @@
-:is(panel):not(#autoscroller)::part(content) {
-	--panel-background: var(--material-toolbar);
+:is(panel) {
+	&::part(content) {
+		--panel-background: var(--material-toolbar);
+	}
+
+	&#autoscroller {
+		&::part(content) {
+			--panel-background: inherit;
+		}
+	}
 }
 
 #main-window {
