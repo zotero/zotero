@@ -122,9 +122,6 @@ describe("Sync Preferences", function () {
 			
 			it("should clear sync errors from the toolbar after logging in", async function () {
 				let win = await loadZoteroPane();
-				after(function () {
-					win.close();
-				});
 				
 				let syncError = win.document.getElementById('zotero-tb-sync-error');
 				
@@ -134,6 +131,8 @@ describe("Sync Preferences", function () {
 				getAPIKeyFromCredentialsStub.resolves(apiResponse);
 				await setCredentials("Username", "correctPassword");
 				assert.isTrue(syncError.hidden);
+
+				win.close();
 			});
 		})
 	})
