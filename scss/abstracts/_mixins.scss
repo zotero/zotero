@@ -247,10 +247,10 @@
 	}
 }
 
-@mixin macOS-inactive-opacity {
+@mixin inactive-opacity {
 	$selector: &;
 	@at-root {
-		@media (-moz-platform: macos) {
+		@media (-moz-platform: macos) or (-moz-platform: linux) {
 			#{$selector} {
 				&:-moz-window-inactive {
 					opacity: 0.6;

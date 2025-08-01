@@ -119,7 +119,7 @@
 		transition: background-color 0.2s ease;
 		-moz-context-properties: fill, fill-opacity;
 		fill: currentColor;
-		@include macOS-inactive-opacity;
+		@include inactive-opacity;
 
 		&:is([selected="true"], [data-parent-selected="true"]) {
 			@media (-moz-platform: macos) {

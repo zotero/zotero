@@ -9,7 +9,7 @@
 	min-height: var(--tab-min-height);
 	flex: 1;
 
-	@include macOS-inactive-opacity;
+	@include inactive-opacity;
 	
 	&:not([hidden]) {
 		// display: flex overrides the hidden attribute
@@ -174,7 +174,7 @@
 	transition: background-color 0.1s ease-out;
 	-moz-window-dragging: no-drag;
 
-	@include macOS-inactive-opacity;
+	@include inactive-opacity;
 
 	&.selected {
 		background: var(--material-button);
