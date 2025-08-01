@@ -2,7 +2,10 @@ tabs-menu-panel,
 panel[is=tabs-menu-panel] {
 	width: 350px;
 	--panel-padding: 8px;
-	--panel-background: var(--material-sidepane);
+
+	&::part(content) {
+		--panel-background: var(--material-sidepane);
+	}
 
 	& #zotero-tabs-menu-wrapper {
 		width: 100%;
