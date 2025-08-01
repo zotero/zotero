@@ -15,9 +15,13 @@
 	pointer-events: none;
 	-moz-appearance: -moz-window-titlebar;
 	// fx140: Titlebar is transparent by default, so add background and border
-	// TODO: Check these
-	background: var(--material-tabbar);
+	// Use Mozilla titlebar color
+	background-color: ActiveCaption;
+	&:-moz-window-inactive {
+		background-color: InactiveCaption;
+	}
 	border-bottom: var(--material-panedivider);
+
 	// fx140: Add border radius to match window corners
 	border-top-left-radius: env(-moz-gtk-csd-titlebar-radius);
 	border-top-right-radius: env(-moz-gtk-csd-titlebar-radius);
@@ -31,11 +35,8 @@
 	height: var(--tab-min-height);
 	appearance: none;
 	flex: 1;
-	color: CaptionText;
-}
 
-#toolbar-menubar:-moz-window-inactive {
-	color: InactiveCaptionText;
+	@include inactive-opacity;
 }
 
 #menubar-items {
