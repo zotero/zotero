@@ -1419,6 +1419,35 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			return false;
 		}
 	}
+
+	this.isLinux64EmulatedOnArm = async function () {
+		if (!this.isLinux) {
+			return false;
+		}
+
+		if (this.arch !== "x86_64") {
+			// We only check if x86_64 build is running on ARM
+			return false;
+		}
+		
+		try {
+			let uname = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
+			uname.initWithPath("/bin/bash");
+			let process = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess);
+			process.init(uname);
+			let tmpFile = Zotero.getTempDirectory();
+			tmpFile.append('cpu-architecture');
+			let args = ["-c", `uname -m > "${tmpFile.path}"`];
+			await process.run(true, args, args.length);
+			const architecture = await IOUtils.readUTF8(tmpFile.path);
+			await Zotero.File.removeIfExists(tmpFile.path);
+			return ["aarch64", "arm64"].includes(architecture.trim());
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+	};
 	
 	/**
 	 * Get versions, platform, etc.
