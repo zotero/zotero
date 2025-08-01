@@ -47,6 +47,10 @@ describe("Connector Server", function () {
 	});
 	
 	afterEach(function* () {
+		for (let win of getWindows("chrome://zotero/content/progressQueueDialog.xhtml")) {
+			win.close();
+		}
+		
 		var defer = Zotero.Promise.defer();
 		httpd.stop(() => defer.resolve());
 		yield defer.promise;
