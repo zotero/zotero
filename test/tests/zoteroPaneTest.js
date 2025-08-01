@@ -1971,6 +1971,29 @@ describe("ZoteroPane", function () {
 			// Menu of the library with linked sub-collection should be disabled
 			assert.equal(groupMenu.disabled, true);
 		});
+
+		it("should copy subcollection to library root", async function () {
+			let collectionParent = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collectionParent.id });
+			let libraryDestination = Zotero.Libraries.get(collectionChild.libraryID);
+
+			let item = await createDataObject('item', { collections: [collectionChild.id] });
+
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+
+			await zp.copyCollection(libraryDestination);
+			let data = await waitForNotifierEvent("add", "collection");
+			let collectionID = data.ids[0];
+			let newCollection = Zotero.Collections.get(collectionID);
+
+			// Copied collection has the same name as the original
+			assert.equal(newCollection.name, collectionChild.name);
+			// Copied collections contain the same item
+			let items = newCollection.getDescendents(false, 'item').map(item => item.id);
+			assert.sameMembers(items, [item.id]);
+			// Copied collection is a top-level collection
+			assert.notOk(newCollection.parentID);
+		});
 	});
 	describe("#moveCollection", function () {
 		it("should move collection into another collection of the same library", async function () {
