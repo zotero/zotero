@@ -1375,12 +1375,14 @@
 						collapse="after"
 						orient="horizontal"
 						zotero-persist="state orient"
+						onmousedown="document.getElementById('new-deep-tutor-pane-container').setAttribute('data-dragging', 'true')"
+						onmouseup="document.getElementById('new-deep-tutor-pane-container').removeAttribute('data-dragging'); ZoteroPane.updateLayoutConstraints()"
 						onmousemove="ZoteroPane.updateLayoutConstraints()"
 						oncommand="ZoteroPane.updateLayoutConstraints()">
 						<grippy id="zotero-deeptutor-grippy"/>
 					</splitter>
 
-					<box id="new-deep-tutor-pane-container" hidden="false" collapsed="false" zotero-persist="collapsed width" style="display: flex; flex: 1; transition: all 0.3s ease-in-out;">
+					<box id="new-deep-tutor-pane-container" hidden="false" collapsed="false" zotero-persist="collapsed width" style="display: flex; width: 33%; min-width: 360px; max-width: 50%;">
 						<html:div id="zotero-deep-tutor-pane" style="display: flex; flex: 1; width: 100%; height: 100%;"></html:div>
 					</box>
 					<splitter id="zotero-context-splitter"

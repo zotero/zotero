@@ -140,7 +140,7 @@ zoterosearch .menulist-icon {
     overflow: hidden !important;
     opacity: 0 !important;
     flex: 0 0 0 !important;
-    transition: width 0.2s ease-in-out, opacity 0.2s ease-in-out !important;
+    /* Removed transition to eliminate animation */
 }
 
 #new-deep-tutor-pane-container[collapsed="true"] * {
@@ -149,7 +149,12 @@ zoterosearch .menulist-icon {
 
 /* DeepTutor pane open state styles */
 #new-deep-tutor-pane-container:not([collapsed="true"]) {
-    transition: width 0.2s ease-in-out, opacity 0.2s ease-in-out !important;
+    /* Removed transition to eliminate animation */
+}
+
+/* Remove transition during dragging for better responsiveness */
+#new-deep-tutor-pane-container:not([collapsed="true"])[data-dragging="true"] {
+    transition: none !important;
 }
 
 /* Ensure context pane can resize properly when DeepTutor is collapsed */

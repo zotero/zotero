@@ -110,9 +110,6 @@ class DeepTutorSession {
 	}
 }
 
-
-
-
 var DeepTutor = class DeepTutor extends React.Component {
 	/**
 	 * Initialize the DeepTutor React component in the given DOM element.

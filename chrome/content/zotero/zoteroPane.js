@@ -97,9 +97,38 @@ var ZoteroPane = new function()
 							var deeptutorSplitter = document.getElementById('zotero-deeptutor-splitter');
 							if (deepTutorPane && !deepTutorPane.hidden && deepTutorPane.getAttribute('collapsed') !== 'true') {
 								Zotero.debug('ZoteroPane: Closing DeepTutor pane when items pane opens');
+								
+								// Save DeepTutor pane width before closing
+								var deepTutorWidth = deepTutorPane.style.width;
+								if (deepTutorWidth) {
+									Zotero.debug('ZoteroPane: Saving DeepTutor pane width: ' + deepTutorWidth);
+									// Store the width in the item pane for later use
+									this.itemPane.setAttribute('data-shared-width', deepTutorWidth);
+								}
+								
 								deepTutorPane.hidden = true;
 								deepTutorPane.setAttribute('collapsed', 'true');
 								deeptutorSplitter.setAttribute('state', 'collapsed');
+							}
+						}
+						
+						// Save item pane width when closing
+						if (isCollapsed) {
+							var itemPaneWidth = this.itemPane.style.width;
+							if (itemPaneWidth) {
+								Zotero.debug('ZoteroPane: Saving item pane width: ' + itemPaneWidth);
+								// Store the width in the DeepTutor pane for later use
+								deepTutorPane.setAttribute('data-shared-width', itemPaneWidth);
+							}
+						}
+						// Apply shared width if available when item pane opens
+						else {
+							var sharedWidth = this.itemPane.getAttribute('data-shared-width');
+							if (sharedWidth) {
+								// Add sidebar width (37px) to DeepTutor pane width for item pane
+								var adjustedWidth = parseInt(sharedWidth) + 37;
+								Zotero.debug('ZoteroPane: Applying adjusted width to item pane: ' + adjustedWidth + 'px (original: ' + sharedWidth + ')');
+								this.itemPane.style.width = adjustedWidth + 'px';
 							}
 						}
 						
@@ -108,6 +137,45 @@ var ZoteroPane = new function()
 				});
 			});
 			observer.observe(this.itemPane, { attributes: true });
+		}
+
+		// Add observer for DeepTutor pane collapsed state changes
+		var deepTutorPane = document.getElementById('new-deep-tutor-pane-container');
+		if (deepTutorPane) {
+			let deepTutorObserver = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					if (mutation.attributeName === 'collapsed') {
+						let isCollapsed = deepTutorPane.getAttribute('collapsed') === 'true';
+						
+						// Save DeepTutor pane width when closing
+						if (isCollapsed) {
+							var deepTutorWidth = deepTutorPane.style.width;
+							if (deepTutorWidth) {
+								Zotero.debug('ZoteroPane: Saving DeepTutor pane width: ' + deepTutorWidth);
+								// Store the width in the item pane for later use
+								this.itemPane.setAttribute('data-shared-width', deepTutorWidth);
+							}
+						}
+						// Apply shared width if available when DeepTutor pane opens
+						else {
+							var sharedWidth = deepTutorPane.getAttribute('data-shared-width');
+							if (sharedWidth) {
+								// Subtract sidebar width (37px) from item pane width for DeepTutor pane
+								var adjustedWidth = parseInt(sharedWidth) - 37;
+								if (adjustedWidth > 0) {
+									Zotero.debug('ZoteroPane: Applying adjusted width to DeepTutor pane: ' + adjustedWidth + 'px (original: ' + sharedWidth + ')');
+									deepTutorPane.style.width = adjustedWidth + 'px';
+								} else {
+									Zotero.debug('ZoteroPane: Adjusted width too small, using default width');
+								}
+							}
+						}
+						
+						ZoteroPane.updateLayoutConstraints();
+					}
+				});
+			});
+			deepTutorObserver.observe(deepTutorPane, { attributes: true });
 		}
 
 		// Init toolbar buttons for all progress queues
@@ -6864,13 +6932,15 @@ var ZoteroPane = new function()
 		document.documentElement.style.setProperty('--width-of-fixed-components', `${fixedComponentWidth}px`);
 		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
 
-		// Update DeepTutor pane container dimensions
+		// Update DeepTutor pane container dimensions only when needed
 		if (!isDeepTutorPaneCollapsed) {
 			let deepTutorContainer = document.getElementById('new-deep-tutor-pane-container');
 			if (deepTutorContainer) {
-				deepTutorContainer.style.minWidth = `${deepTutorPaneMinWidth}px`;
-				deepTutorContainer.style.maxWidth = `${deepTutorPaneMaxWidth}px`;
-				deepTutorContainer.style.width = `${deepTutorPaneDefaultWidth}px`;
+				// Only set default width if no width is already set (first load)
+				// The splitter will handle width changes naturally during dragging
+				if (!deepTutorContainer.style.width || deepTutorContainer.style.width === '0px') {
+					deepTutorContainer.style.width = `${deepTutorPaneDefaultWidth}px`;
+				}
 			}
 		}
 
