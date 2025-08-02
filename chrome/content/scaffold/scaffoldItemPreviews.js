@@ -40,8 +40,6 @@
 		
 		_switcher;
 
-		_itemPairs = [];
-
 		init() {
 			this._deck = this.querySelector('deck');
 			this._switcher = this.querySelector('.switcher');
@@ -56,13 +54,40 @@
 			});
 		}
 		
-		clearItemPairs() {
-			this._itemPairs = [];
+		/**
+		 * @param {any} preItem JSON item
+		 * @param {any} [postItem] JSON item (defaults to cleaned version of preItem)
+		 * @returns {ScaffoldItemPreview}
+		 */
+		createPreviewForItemPair(preItem, postItem) {
+			let preview = document.createXULElement('scaffold-item-preview');
+			preview.itemPair = [preItem, postItem];
+			return preview;
+		}
+		
+		clearPreviews() {
 			this._deck.selectedIndex = 0;
 			this._deck.replaceChildren();
+			this._updateVisibility();
+		}
+
+		/**
+		 * @param {ScaffoldItemPreview[]} previews
+		 */
+		setPreviews(previews) {
+			this._deck.selectedIndex = 0;
+			this._deck.replaceChildren(...previews);
 			this._renderSwitcher();
-			
-			this.hidden = true;
+			this._updateVisibility();
+		}
+
+		/**
+		 * @param {ScaffoldItemPreview} preview
+		 */
+		addPreview(preview) {
+			this._deck.append(preview);
+			this._renderSwitcher();
+			this._updateVisibility();
 		}
 
 		/**
@@ -71,24 +96,28 @@
 		 * @returns {ScaffoldItemPreview}
 		 */
 		addItemPair(preItem, postItem) {
-			let preview = document.createXULElement('scaffold-item-preview');
-			preview.itemPair = [preItem, postItem];
-			this._deck.append(preview);
-			this._renderSwitcher();
-			
-			if (this.hidden) {
-				let splitterPane = this.closest('splitter + *');
-				if (splitterPane) {
-					// If the pane hasn't been resized, it won't have a fixed width,
-					// so it'll grow when wrapping text is added. Fix its width now.
-					splitterPane.style.width = splitterPane.getBoundingClientRect().width + 'px';
-				}
-				this.hidden = false;
-			}
-			
+			let preview = this.createPreviewForItemPair(preItem, postItem);
+			this.addPreview(preview);
 			return preview;
 		}
 		
+		_updateVisibility() {
+			if (this._deck.childElementCount) {
+				if (this.hidden) {
+					let splitterPane = this.closest('splitter + *');
+					if (splitterPane) {
+						// If the pane hasn't been resized, it won't have a fixed width,
+						// so it'll grow when wrapping text is added. Fix its width now.
+						splitterPane.style.width = splitterPane.getBoundingClientRect().width + 'px';
+					}
+					this.hidden = false;
+				}
+			}
+			else {
+				this.hidden = true;
+			}
+		}
+
 		_renderSwitcher() {
 			let switcher = this.querySelector('.switcher');
 			if (this._deck.children.length > 1) {
