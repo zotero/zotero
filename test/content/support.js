@@ -1027,13 +1027,37 @@ function importFileAttachment(filename, options = {}) {
 }
 
 
-function importTextAttachment() {
-	return importFileAttachment('test.txt', { contentType: 'text/plain', charset: 'utf-8' });
+function importTextAttachment(parentItem, options = {}) {
+	return importFileAttachment('test.txt', {
+		contentType: 'text/plain',
+		charset: 'utf-8',
+		parentID: parentItem ? parentItem.id : null,
+		title: options.title
+	});
 }
 
 
-function importHTMLAttachment() {
-	return importFileAttachment('test.html', { contentType: 'text/html', charset: 'utf-8' });
+function importHTMLAttachment(parentItem, options = {}) {
+	return importFileAttachment('test.html', {
+		contentType: 'text/html',
+		charset: 'utf-8',
+		parentID: parentItem ? parentItem.id : null,
+		title: options.title
+	});
+}
+
+
+function importSnapshotAttachment(parentItem, options = {}) {
+	let file = getTestDataDirectory();
+	file.append('test.html');
+	return Zotero.Attachments.importSnapshotFromFile({
+		title: options.title || 'Snapshot',
+		url: 'http://example.com',
+		file,
+		contentType: 'text/html',
+		charset: 'utf-8',
+		parentItemID: parentItem ? parentItem.id : null,
+	});
 }
 
 
