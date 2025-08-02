@@ -1424,24 +1424,44 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		if (!this.isLinux) {
 			return false;
 		}
-
+		
+		// We only check if x86_64 build is running on ARM
 		if (this.arch !== "x86_64") {
-			// We only check if x86_64 build is running on ARM
 			return false;
 		}
 		
 		try {
-			let uname = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
-			uname.initWithPath("/bin/bash");
-			let process = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess);
-			process.init(uname);
-			let tmpFile = Zotero.getTempDirectory();
-			tmpFile.append('cpu-architecture');
-			let args = ["-c", `uname -m > "${tmpFile.path}"`];
-			await process.run(true, args, args.length);
-			const architecture = await IOUtils.readUTF8(tmpFile.path);
-			await Zotero.File.removeIfExists(tmpFile.path);
-			return ["aarch64", "arm64"].includes(architecture.trim());
+			const { ctypes } = ChromeUtils.importESModule(
+				"resource://gre/modules/ctypes.sys.mjs"
+			);
+			
+			let utsname = ctypes.StructType("utsname", [
+				{ sysname: ctypes.ArrayType(ctypes.char, 65) },
+				{ nodename: ctypes.ArrayType(ctypes.char, 65) },
+				{ release: ctypes.ArrayType(ctypes.char, 65) },
+				{ version: ctypes.ArrayType(ctypes.char, 65) },
+				{ machine: ctypes.ArrayType(ctypes.char, 65) },
+				{ domainname: ctypes.ArrayType(ctypes.char, 65) }
+			]);
+			
+			let libc = ctypes.open("libc.so.6");
+			let unameC = libc.declare(
+				"uname",
+				ctypes.default_abi,
+				ctypes.int,
+				utsname.ptr
+			);
+			
+			let buf = utsname();
+			if (unameC(buf.address()) !== 0) {
+				libc.close();
+				return false;
+			}
+			
+			let machine = buf.machine.readString().trim();	// e.g., "x86_64", "aarch64"
+			libc.close();
+			
+			return ["aarch64", "arm64"].includes(machine.toLowerCase());
 		}
 		catch (e) {
 			Zotero.logError(e);
