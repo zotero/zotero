@@ -517,7 +517,7 @@ describe("Zotero.Items", function () {
 			assert.isFalse(attachment2.deleted);
 		});
 		
-		it("should ignore attachment with missing file", async function () {
+		it("should ignore PDF attachment with missing file", async function () {
 			let item1 = await createDataObject('item');
 			let attachment1 = await importPDFAttachment(item1);
 			
@@ -798,6 +798,50 @@ describe("Zotero.Items", function () {
 			assert.isTrue(attachment3.deleted);
 		});
 
+		it("should keep only snapshot that exists when merging non-master snapshot (missing) with equivalent master snapshot (exists)", async function () {
+			let item1 = await createDataObject('item');
+			let file = getTestDataDirectory();
+			file.append('test.html');
+			let attachment1 = await importSnapshotAttachment(item1);
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importSnapshotAttachment(item2);
+			// Delete the second attachment file
+			await OS.File.remove(await attachment2.getFilePathAsync());
+
+			await Zotero.Items.merge(item1, [item2]);
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.isTrue(await IOUtils.exists(await attachment1.getFilePathAsync()));
+			assert.equal(item1.numAttachments(true), 1);
+			assert.isTrue(item2.deleted);
+			assert.isTrue(attachment2.deleted);
+		});
+
+		it("should both snapshots when merging non-master snapshot (exists) with equivalent master snapshot (missing)", async function () {
+			let item1 = await createDataObject('item');
+			let file = getTestDataDirectory();
+			file.append('test.html');
+			let attachment1 = await importSnapshotAttachment(item1);
+			// Delete the first attachment file
+			await OS.File.remove(await attachment1.getFilePathAsync());
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importSnapshotAttachment(item2);
+
+			await Zotero.Items.merge(item1, [item2]);
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.equal(item1.numAttachments(true), 2);
+			assert.isTrue(item2.deleted);
+			assert.isFalse(attachment2.deleted);
+			assert.isTrue(await IOUtils.exists(await attachment2.getFilePathAsync()));
+		});
+		
 		it("should move related items of merged attachments", async function () {
 			let relatedItem = await createDataObject('item');
 

@@ -1121,6 +1121,11 @@ Zotero.Items = function() {
 
 		let masterAttachments = (await this.getAsync(item.getAttachments(true)))
 			.filter(attachment => attachment.isWebAttachment());
+		let masterAttachmentFilesExist = await Promise.all(masterAttachments.map(
+			attachment => attachment.attachmentLinkMode === Zotero.Attachments.LINK_MODE_LINKED_URL
+				|| attachment.fileExists()
+		));
+		masterAttachments = masterAttachments.filter((_, i) => masterAttachmentFilesExist[i]);
 
 		for (let otherItem of otherItems) {
 			for (let otherAttachment of await this.getAsync(otherItem.getAttachments(true))) {
@@ -1192,6 +1197,7 @@ Zotero.Items = function() {
 			.filter(attachment => attachment.isFileAttachment());
 		let hashes = new Map();
 		await Promise.all(attachments.map(async (attachment) => {
+			// attachmentHash and _hashAttachmentText() implicitly check file existence
 			let hash = hashType === 'bytes'
 				? await attachment.attachmentHash
 				: await this._hashAttachmentText(attachment);
