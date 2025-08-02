@@ -6590,7 +6590,7 @@ var ZoteroPane = new function () {
 		}
 		
 		const isWow64 = (await Services.sysinfo.processInfo).isWow64;
-		const isX64OnArm = Zotero.isWin64EmulatedOnArm() || await Zotero.isLinux64EmulatedOnArm();
+		const isX64OnArm = Zotero.isWin64EmulatedOnArm() || Zotero.isLinux64EmulatedOnArm();
 		
 		if ((Zotero.isWin && isWow64) || isX64OnArm) {
 			let panel = document.getElementById('architecture-warning-container');

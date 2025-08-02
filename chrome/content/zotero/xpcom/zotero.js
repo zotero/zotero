@@ -1420,7 +1420,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}
 	}
 
-	this.isLinux64EmulatedOnArm = async function () {
+	this.isLinux64EmulatedOnArm = function () {
 		if (!this.isLinux) {
 			return false;
 		}
