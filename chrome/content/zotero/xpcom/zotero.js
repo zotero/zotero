@@ -1419,6 +1419,55 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			return false;
 		}
 	}
+
+	this.isLinux64EmulatedOnArm = function () {
+		if (!this.isLinux) {
+			return false;
+		}
+		
+		// We only check if x86_64 build is running on ARM
+		if (this.arch !== "x86_64") {
+			return false;
+		}
+		
+		try {
+			const { ctypes } = ChromeUtils.importESModule(
+				"resource://gre/modules/ctypes.sys.mjs"
+			);
+			
+			let utsname = ctypes.StructType("utsname", [
+				{ sysname: ctypes.ArrayType(ctypes.char, 65) },
+				{ nodename: ctypes.ArrayType(ctypes.char, 65) },
+				{ release: ctypes.ArrayType(ctypes.char, 65) },
+				{ version: ctypes.ArrayType(ctypes.char, 65) },
+				{ machine: ctypes.ArrayType(ctypes.char, 65) },
+				{ domainname: ctypes.ArrayType(ctypes.char, 65) }
+			]);
+			
+			let libc = ctypes.open("libc.so.6");
+			let unameC = libc.declare(
+				"uname",
+				ctypes.default_abi,
+				ctypes.int,
+				utsname.ptr
+			);
+			
+			let buf = utsname();
+			if (unameC(buf.address()) !== 0) {
+				libc.close();
+				return false;
+			}
+			
+			let machine = buf.machine.readString().trim();	// e.g., "x86_64", "aarch64"
+			libc.close();
+			
+			return ["aarch64", "arm64"].includes(machine.toLowerCase());
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+	};
 	
 	/**
 	 * Get versions, platform, etc.
