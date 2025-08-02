@@ -1971,9 +1971,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			if (desc.type == 'collection') {
 				var c = await Zotero.Collections.getAsync(desc.id);
 				let newCollection = c.clone(targetLibraryID);
-				if (parentID) {
-					newCollection.parentID = parentID;
-				}
+				// set the parent collection if provided or null if copying to root library
+				newCollection.parentID = parentID || null;
 				var collectionID = await newCollection.save();
 				
 				// Record link only if copying to a different library
