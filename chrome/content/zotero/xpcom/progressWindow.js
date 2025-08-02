@@ -473,6 +473,8 @@ Zotero.ProgressWindow = function (options = {}) {
 		_deferredUntilWindowLoad = [];
 		_deferredUntilWindowLoadThis = [];
 		_deferredUntilWindowLoadArgs = [];
+
+		_progressWindow.sizeToContent();
 	}
 	
 	function _move() {
