@@ -315,10 +315,12 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			switch (selectedMode) {
 				case 'file':
 					this.folder = null;
+					this.wizard.canAdvance = false;
 					await this.chooseFile();
 					break;
 				case 'folder':
 					this.file = null;
+					this.wizard.canAdvance = false;
 					await this.chooseFolder();
 					break;
 				case 'mendeleyOnline':
