@@ -64,6 +64,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		
 		this.libraryID = libraryID;
 		this.wizard = document.getElementById('import-wizard');
+		let fileHandlingEl = document.getElementById('file-handling');
+		let createCollectionEl = document.getElementById('create-collection');
 
 		// disable "continue" button until everything is ready
 		this.wizard.canAdvance = false;
@@ -111,6 +113,13 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.wizard.addEventListener('pageshow', this.updateFocus.bind(this));
 		this.wizard.addEventListener('wizardcancel', this.onCancel.bind(this));
 
+		fileHandlingEl.addEventListener('command', () => {
+			Zotero.Prefs.set('import.fileHandling', fileHandlingEl.value);
+		});
+		createCollectionEl.addEventListener('command', () => {
+			Zotero.Prefs.set('import.shouldCreateCollection', createCollectionEl.checked);
+		});
+
 		// wizard.shadowRoot content isn't exposed to our css
 		this.wizard.shadowRoot
 			.querySelector('.wizard-header-label').style.fontSize = '16px';
@@ -126,8 +135,13 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.isZotfileInstalled = !!extensions.find(extName => extName.match(/^ZotFile((?!disabled).)*$/));
 		this.mendeleyImporterVersion = parseInt((await Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='mendeleyImport' AND key='version'")) || 0);
 
-		const shouldCreateCollection = await this.getShouldCreateCollection();
-		document.getElementById('create-collection').checked = shouldCreateCollection;
+		// Initialize controls on the options page with default or previously saved values
+		const shouldCreateCollection = Zotero.Prefs.prefHasUserValue('import.shouldCreateCollection')
+			? Zotero.Prefs.get('import.shouldCreateCollection')
+			: await this.getShouldCreateCollection();
+		const fileHandling = Zotero.Prefs.get('import.fileHandling') ?? 'copy';
+		fileHandlingEl.value = fileHandling;
+		createCollectionEl.checked = shouldCreateCollection;
 
 		if (relinkOnly) {
 			document.getElementById('relink-only-checkbox').checked = true;
