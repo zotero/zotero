@@ -187,7 +187,13 @@ class ReaderInstance {
 				return uri.scheme === 'http' || uri.scheme === 'https';
 			}
 		});
-		this._blockingObserver.register(this._iframe);
+		try {
+			this._blockingObserver.register(this._iframe);
+		}
+		catch {
+			// Reader was closed before it could be initialized
+			// No need to log this
+		}
 
 		// Prepare Fluent data
 		let ftl = [];
