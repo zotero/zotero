@@ -193,6 +193,7 @@ class ReaderInstance {
 		catch {
 			// Reader was closed before it could be initialized
 			// No need to log this
+			this._blockingObserver = null;
 		}
 
 		// Prepare Fluent data
