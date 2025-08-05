@@ -189,6 +189,7 @@ class ReaderInstance {
 		catch {
 			// Reader was closed before it could be initialized
 			// No need to log this
+			this._blockingObserver = null;
 		}
 
 		this._internalReader = this._iframeWindow.wrappedJSObject.createReader(Components.utils.cloneInto({
