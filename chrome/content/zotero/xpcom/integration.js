@@ -304,7 +304,7 @@ Zotero.Integration = new function() {
 						await document.setDocumentData(session.data.serialize());
 						// And any citations marked for processing (like retraction warning ignore flag changes)
 						if (Object.keys(session.processIndices).length) {
-							session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
+							await session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 						}
 					// Since user cancelled we can ignore if processor fails here.
 					} catch(e) {}
