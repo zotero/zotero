@@ -432,6 +432,7 @@ scaffold-item-preview {
 		display: flex;
 		flex-direction: column;
 		padding-block: 6px;
+		gap: 6px;
 
 		&:empty {
 			display: none;
