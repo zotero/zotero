@@ -106,8 +106,8 @@ const MessageRole = {
 };
 
 
-
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
+const StopIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_STOP.svg';
 const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
 const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	const { colors, theme } = useDeepTutorTheme();
@@ -432,11 +432,14 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	const [hoveredQuestion, setHoveredQuestion] = useState(null);
 	const [iniWait, setInitWait] = useState(false);
 	const [isStreaming, setIsStreaming] = useState(false);
+	const streamReaderRef = useRef(null);
 	const isAutoScrollingRef = useRef(true);
 	const [showContextPopup, setShowContextPopup] = useState(false);
 	const [contextDocuments, setContextDocuments] = useState([]);
 	const [currentSourceIndices, setCurrentSourceIndices] = useState([]);
 	const sessionIdRef = useRef(null);
+	const [isManuallyStopped, setIsManuallyStopped] = useState(false);
+	const isManuallyStoppedRef = useRef(isManuallyStopped);
 	const [_time, setTime] = useState(new Date());
 
 	// Add state for note container (parent item ID for creating notes)
@@ -452,7 +455,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	const toggleStreamingComponent = (messageId) => {
 		setStreamingComponentVisibility(prev => ({
 			...prev,
-			[messageId]: prev[messageId] === undefined ? false : !prev[messageId]
+			[messageId]: !prev[messageId]
 		}));
 	};
 
@@ -467,6 +470,10 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		// Continue checking if less than 10 minutes have passed since the last message
 		return timeDiff < 600000; // 10 minutes in milliseconds
 	}, []);
+
+	useEffect(() => {
+		isManuallyStoppedRef.current = isManuallyStopped;
+	}, [isManuallyStopped]);
 
 	// Periodic message fetching useEffect
 	useEffect(() => {
@@ -489,7 +496,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						setMessages(response);
 						setLatestMessageId(response[response.length - 1].id);
 						// Stop streaming if it was active (AI response received)
-						
 						setIsStreaming(false);
 					}
 				}).catch((error) => {
@@ -499,13 +505,13 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			
 			// Schedule next check
 			if (isActive) {
-				timeoutId = setTimeout(periodicCheck, 30000);
+				timeoutId = setTimeout(periodicCheck, 60000);
 			}
 		};
 		
 		// Start the periodic check if checkTime is available
 		if (checkTime) {
-			timeoutId = setTimeout(periodicCheck, 30000);
+			timeoutId = setTimeout(periodicCheck, 60000);
 		}
 		
 		// If checkTime is not available, don't start the periodic check
@@ -881,8 +887,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 		if (!messageString.trim()) {
 			return;
 		}
-		// TODO_DEEPTUTOR: Get user ID from Cognito user attributes, such as sending user object/userid from DeepTutor.jsx
-		setUserId("67f5b836cb8bb15b67a1149e");
         
 		// Always enable auto-scrolling when user sends a message (which will trigger streaming)
 		isAutoScrollingRef.current = true;
@@ -951,6 +955,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 	};
 
 	const handleSend = async () => {
+		setIsManuallyStopped(false);
 		const trimmedValue = inputValue.trim(); // Remove both leading and trailing spaces
 		if (trimmedValue) { // Only send if there's actual content after trimming
 			setInputValue('');
@@ -962,6 +967,34 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			setInputValue(''); // Clear input even if empty
 			// Reset textarea height after clearing
 			setTimeout(adjustTextareaHeight, 0);
+		}
+	};
+
+	const handleStopStreaming = async () => {
+		if (streamReaderRef.current) {
+			try {
+				setIsManuallyStopped(true);
+				await streamReaderRef.current.cancel();
+				// Update the last message to show it was stopped
+				setMessages((prev) => {
+					const newMessages = [...prev];
+					const lastMessage = newMessages[newMessages.length - 1];
+					if (lastMessage && lastMessage.isStreaming) {
+						lastMessage.isStreaming = false;
+						lastMessage.subMessages[0].text += '<stopped>';
+						// Hide streaming component by default when streaming is stopped
+						setStreamingComponentVisibility(prevVisibility => ({
+							...prevVisibility,
+							[lastMessage.id || newMessages.length - 1]: false
+						}));
+					}
+					return newMessages;
+				});
+			}
+			catch (error) {
+				Zotero.debug(`Error stopping stream: ${error.message}`);
+				streamReaderRef.current = null; // Clear reader reference even on error
+			}
 		}
 	};
 
@@ -1008,6 +1041,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			}
 
 			const reader = streamResponse.body.getReader();
+			streamReaderRef.current = reader; // Store reader reference for stopping
 			const decoder = new TextDecoder();
 			let streamText = "";
 			let hasReceivedData = false;
@@ -1032,8 +1066,9 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			// Add the streaming message to messages
 			await new Promise((resolve) => {
 				setMessages((prev) => {
+					const newMessages = [...prev, initialStreamingMessage];
 					resolve();
-					return [...prev, initialStreamingMessage];
+					return newMessages;
 				});
 			});
 
@@ -1041,7 +1076,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				const { done, value } = await reader.read();
                 
 				// Check for timeout
-				if (Date.now() - lastDataTime > 300000) {
+				if (Date.now() - lastDataTime > 600000) {
 					setIsStreaming(false); // Set streaming to false on timeout
 					throw new Error('Stream timeout - no data received for 300 seconds');
 				}
@@ -1100,7 +1135,12 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					}
 				});
 			}
-
+			if (isManuallyStoppedRef.current) {
+				setIsStreaming(false);
+				// For manual stop, we need to handle this differently since the message doesn't have an ID yet
+				// We'll set the visibility when the message is processed later
+				return;
+			}
 			// Fetch message history for the session
 			await new Promise(resolve => setTimeout(resolve, 3000));
             
@@ -1127,24 +1167,43 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					const updatedMessages = [...prevMessages];
 					updatedMessages[streamingMessageIndex] = updatedMessage;
 					
+					// Hide streaming component by default when streaming finishes
+					// Use the actual message ID from the server
+					setStreamingComponentVisibility(prevVisibility => ({
+						...prevVisibility,
+						[updatedMessage.id]: false
+					}));
+					
 					return updatedMessages;
 				}
 				
 				// If no streaming message found, use server data as is
+				// Hide streaming component for the last message
+				if (historyData.length > 0) {
+					const lastMessage = historyData[historyData.length - 1];
+					setStreamingComponentVisibility(prevVisibility => ({
+						...prevVisibility,
+						[lastMessage.id]: false
+					}));
+				}
+				
 				return historyData;
 			});
 			
 			setLatestMessageId(historyData[historyData.length - 1].id);
 
             
-			// Get only the last message from the response
-			const lastMessage = historyData.length > 0 ? historyData[historyData.length - 2] : null;
 			setIsStreaming(false); // Set streaming to false when done
-			return lastMessage;
+			streamReaderRef.current = null; // Clear reader reference
+			
+			// Hide streaming component by default when streaming finishes
+			// We need to wait for the messages to be updated with server data
+			// The visibility will be set after the server message is processed
 		}
 		catch (error) {
 			Zotero.debug(error);
 			setIsStreaming(false); // Set streaming to false on any error
+			streamReaderRef.current = null; // Clear reader reference
 			
 			// Even on error, try to fetch message history to ensure UI consistency
 			try {
@@ -1154,6 +1213,13 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				if (historyData && historyData.length > 0) {
 					setMessages(historyData);
 					setLatestMessageId(historyData[historyData.length - 1].id);
+					
+					// Hide streaming component by default when streaming finishes (even on error)
+					const lastMessage = historyData[historyData.length - 1];
+					setStreamingComponentVisibility(prevVisibility => ({
+						...prevVisibility,
+						[lastMessage.id]: false
+					}));
 				}
 			}
 			catch (historyError) {
@@ -1242,9 +1308,6 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			Zotero.debug(error);
 		}
 	};
-
-
-
 
 	const renderMessage = (message, index) => {
 		return (
@@ -1891,6 +1954,14 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						margin: 0 0.15em !important;
 						vertical-align: middle !important;
 					}
+					/* Special styling for streaming source placeholders within tables */
+					.markdown table .deeptutor-source-placeholder-streaming {
+						width: 1.5em !important;
+						height: 1.5em !important;
+						font-size: 0.75em !important;
+						margin: 0 0.15em !important;
+						vertical-align: middle !important;
+					}
 					/* First column styling - prevent word breaking but allow line wrapping */
 					.markdown table td:first-child,
 					.markdown table th:first-child {
@@ -1945,7 +2016,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					}
 					.deeptutor-source-placeholder {
 						background: ${colors.sourceButton.placeholder} !important;
-						color: white !important;
+						color: ${colors.sourceButton.text} !important;
 						border: none !important;
 						border-radius: 50% !important;
 						width: 2rem !important;
@@ -1966,6 +2037,32 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						font-family: 'Roboto', sans-serif !important;
 						position: relative !important;
 						overflow: hidden !important;
+					}
+					/* Streaming-specific source placeholders - use theme colors */
+					.deeptutor-source-placeholder-streaming {
+						background: ${colors.sourceButton.streamingBackground} !important;
+						color: ${colors.sourceButton.streamingText} !important;
+						border: none !important;
+						border-radius: 50% !important;
+						width: 2rem !important;
+						height: 2rem !important;
+						display: inline-flex !important;
+						align-items: center !important;
+						justify-content: center !important;
+						font-weight: 600 !important;
+						font-size: 0.875rem !important;
+						cursor: default !important;
+						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.08) !important;
+						padding: 0 !important;
+						margin: 0 0.25rem !important;
+						vertical-align: middle !important;
+						line-height: 1 !important;
+						text-decoration: none !important;
+						user-select: none !important;
+						font-family: 'Roboto', sans-serif !important;
+						position: relative !important;
+						overflow: hidden !important;
+						opacity: 0.7 !important;
 					}
 					@keyframes pulse {
 						0% { opacity: 0.3; }
@@ -2242,34 +2339,34 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					ref={textareaRef}
 					style={{
 						...styles.textInput,
-						opacity: isStreaming || iniWait ? 0.5 : 1,
-						cursor: isStreaming || iniWait ? "not-allowed" : "text"
+						opacity: iniWait ? 0.5 : 1,
+						cursor: iniWait ? "not-allowed" : "text"
 					}}
 					value={inputValue}
 					onChange={handleInputChange}
 					onKeyDown={(e) => {
-						if (e.key === "Enter" && !e.shiftKey && !isStreaming && !iniWait) {
+						if (e.key === "Enter" && !e.shiftKey && !iniWait && !isStreaming) {
 							e.preventDefault(); // Prevent adding a new line
 							handleSend();
 						}
 						// Shift+Enter allows new line (default behavior)
 					}}
-					placeholder={isStreaming ? "Message is streaming, please wait" : `Ask DeepTutor ${curSessionType === SessionType.LITE ? "Standard" : curSessionType === SessionType.BASIC ? "Advanced" : curSessionType.toLowerCase()}`}
+					placeholder={`Ask DeepTutor ${curSessionType === SessionType.LITE ? "Standard" : curSessionType === SessionType.BASIC ? "Advanced" : curSessionType.toLowerCase()}`}
 					rows={1}
-					disabled={isStreaming || iniWait}
+					disabled={iniWait}
 				/>
 				<button
 					style={{
 						...styles.sendButton,
-						opacity: isStreaming || iniWait ? 0.5 : 1,
-						cursor: isStreaming || iniWait ? "not-allowed" : "pointer"
+						opacity: iniWait ? 0.5 : 1,
+						cursor: iniWait ? "not-allowed" : "pointer"
 					}}
-					onClick={handleSend}
-					disabled={isStreaming || iniWait}
+					onClick={isStreaming ? handleStopStreaming : handleSend}
+					disabled={iniWait}
 				>
 					<img
-						src={SendIconPath}
-						alt="Send"
+						src={isStreaming ? StopIconPath : SendIconPath}
+						alt={isStreaming ? "Stop" : "Send"}
 						style={styles.sendIcon}
 					/>
 				</button>

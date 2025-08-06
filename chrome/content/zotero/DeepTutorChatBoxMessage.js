@@ -2,6 +2,7 @@
 import React from 'react'; // eslint-disable-line no-unused-vars
 import PropTypes from 'prop-types';
 import DeepTutorStreamingComponent from './DeepTutorStreamingComponent';
+import { StoppingTag } from './DeepTutorStreamingTag';
 
 const markdownit = require('markdown-it');
 // Try to require markdown-it-container, fallback to a simpler implementation if not available
@@ -43,8 +44,6 @@ catch {
 		// Using basic table support only
 	}
 }
-
-
 
 const MessageRole = {
 	TUTOR: 'TUTOR',
@@ -531,7 +530,7 @@ const DeepTutorChatBoxMessage = ({
     
 	const isUser = message.role === MessageRole.USER;
 	const messageId = message.id || index;
-	const isStreamingComponentVisible = streamingComponentVisibility[messageId] !== false; // Default to true
+	const isStreamingComponentVisible = streamingComponentVisibility[messageId] === true; // Default to false
 	
 	// Message-related styles
 	const styles = {
@@ -652,7 +651,6 @@ const DeepTutorChatBoxMessage = ({
 					display: 'flex',
 					justifyContent: 'flex-start',
 					marginTop: '1.5rem',
-					marginLeft: '0.5rem'
 				}}>
 					<button
 						style={{
@@ -660,7 +658,7 @@ const DeepTutorChatBoxMessage = ({
 							display: 'flex',
 							width: 'fit-content',
 							borderRadius: '0.375rem',
-							border: `0.25rem solid ${theme === 'dark' ? colors.sky : '#E0E0E0'}`,
+							border: `2px solid ${theme === 'dark' ? colors.sky : '#E0E0E0'}`,
 							paddingLeft: '1rem',
 							paddingRight: '1rem',
 							paddingTop: '0.5rem',
@@ -681,13 +679,13 @@ const DeepTutorChatBoxMessage = ({
 						onMouseLeave={e => e.target.style.background = colors.background.quaternary}
 						title={isStreamingComponentVisible ? "Hide streaming view" : "Show streaming view"}
 					>
-						{isStreamingComponentVisible ? "Hide Thinking Process" : "Show Thinking Process"}
+						{isStreamingComponentVisible ? "Hide Thinking Process" : message.streamText.includes('<stopped>') ? "Show Stopped Thinking Process" : "Show Thinking Process"}
 					</button>
 				</div>
 			)}
 			
-			{/* Show streaming component based on visibility state */}
-			{isStreamingComponentVisible && (
+			{/* Show streaming component during streaming OR when explicitly visible */}
+			{(message.isStreaming || isStreamingComponentVisible) && (
 				<div key={`streaming-${messageId}`} style={styles.messageContainer}>
 					<DeepTutorStreamingComponent
 						streamText={message.streamText || ''}
@@ -764,6 +762,12 @@ const DeepTutorChatBoxMessage = ({
 							}
 						})}
 					</div>
+				
+					{/* Show StoppingTag if message contains <stopped> tag */}
+					{!isUser && (message.subMessages.some(subMsg => subMsg.text && subMsg.text.includes('<stopped>'))
+						|| (message.streamText && message.streamText.includes('<stopped>'))) && (
+						<StoppingTag />
+					)}
 				
 					{/* Add download button for tutor messages only */}
 					{!isUser && noteContainer && !message.isStreaming && !iniWait && !isSavingNote && (

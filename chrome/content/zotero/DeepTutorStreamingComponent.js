@@ -330,6 +330,9 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 		else if (streamText.includes('<id>')) {
 			setStreamingState(StreamingStates.ID);
 		}
+		else if (streamText.includes('<stopped>')) {
+			setStreamingState(StreamingStates.STOPPED);
+		}
 	}, [streamText]);
 
 	const removeSubstrings = (originalString, substringsToRemove) => {
@@ -448,7 +451,9 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 			'<id>',
 			'</id>',
 			'<appendix>',
-			'</appendix>'
+			'</appendix>',
+			'<stopped>',
+			'</stopped>'
 		]);
 		
 		// Remove any other custom tags that might cause XML issues
@@ -611,9 +616,9 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						overflow-wrap: break-word;
 					}
 					.deeptutor-source-button {
-						background: #0687E5 !important;
-						opacity: 0.4 !important;
-						color: white !important;
+						background: ${colors.sourceButton.background} !important;
+						opacity: 1 !important;
+						color: ${colors.sourceButton.text} !important;
 						border: none !important;
 						border-radius: 50% !important;
 						width: 2rem !important;
@@ -637,7 +642,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						overflow: hidden !important;
 					}
 					.deeptutor-source-button:hover {
-						background: #0570c0 !important;
+						background: ${colors.button.hover} !important;
 						opacity: 0.8 !important;
 						transform: scale(1.05) !important;
 						box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.15) !important;
@@ -647,15 +652,15 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						box-shadow: 0 0.0625rem 0.125rem rgba(0,0,0,0.1) !important;
 					}
 					.deeptutor-source-button:focus {
-						outline: 0.125rem solid #0687E5 !important;
+						outline: 0.125rem solid ${colors.sourceButton.background} !important;
 						outline-offset: 0.125rem !important;
 					}
 					.deeptutor-source-button:focus:not(:focus-visible) {
 						outline: none !important;
 					}
 					.deeptutor-source-placeholder {
-						background: #9E9E9E !important;
-						color: white !important;
+						background: ${colors.sourceButton.placeholder} !important;
+						color: ${colors.sourceButton.text} !important;
 						border: none !important;
 						border-radius: 50% !important;
 						width: 2rem !important;
@@ -677,10 +682,10 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						position: relative !important;
 						overflow: hidden !important;
 					}
-					/* Streaming-specific source placeholders - gray and unclickable */
+					/* Streaming-specific source placeholders - use theme colors */
 					.deeptutor-source-placeholder-streaming {
-						background: #9E9E9E !important;
-						color: white !important;
+						background: ${colors.sourceButton.streamingBackground} !important;
+						color: ${colors.sourceButton.streamingText} !important;
 						border: none !important;
 						border-radius: 50% !important;
 						width: 2rem !important;
@@ -947,7 +952,13 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 			key: index,
 			streamState: status,
 			isCurrentTag: pastStatuses[pastStatuses.length - 1] === status
-		}))
+		})),
+		// Show stopped tag if stream text contains stopped tag
+		streamText.includes('<stopped>') && React.createElement(DeepTutorStreamingTag, {
+			key: 'stopped',
+			streamState: StreamingStates.STOPPED,
+			isCurrentTag: false
+		})
 	);
 };
 

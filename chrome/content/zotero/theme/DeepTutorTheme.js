@@ -47,7 +47,7 @@ const DeepTutorColors = {
 			primary: "#0687E5",
 			secondary: "#FFFFFF",
 			disabled: "#CCCCCC",
-			hover: "#0570c0",
+			hover: "#87CEEB",
 			primaryText: "#FFFFFF",
 			secondaryText: "#1C1B1F",
 			secondaryBorder: "#0687E5"
@@ -73,7 +73,9 @@ const DeepTutorColors = {
 		sourceButton: {
 			background: "#0687E5",
 			placeholder: "#9E9E9E",
-			text: "#FFFFFF"
+			text: "#FFFFFF",
+			streamingBackground: "#9E9E9E",
+			streamingText: "#FFFFFF"
 		},
 		
 		// Error and success colors
@@ -140,7 +142,9 @@ const DeepTutorColors = {
 		sourceButton: {
 			background: "#0687E5",
 			placeholder: "#666666",
-			text: "#1C1B1F"
+			text: "#FFFFFF",
+			streamingBackground: "#666666",
+			streamingText: "#FFFFFF"
 		},
 		
 		// Error and success colors
