@@ -96,6 +96,10 @@ editable-text {
 			text-align: inherit;
 		}
 		
+		&:read-only {
+			caret-color: transparent;
+		}
+		
 		&:hover:not(:read-only, :focus) {
 			background: var(--fill-quinary);
 			box-shadow: 0 0 0 1px var(--fill-quinary);
