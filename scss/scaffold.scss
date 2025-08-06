@@ -305,6 +305,14 @@ browser,
 				
 				.update {
 					color: inherit;
+
+					&:hover {
+						background: #ffffff1a;
+					}
+
+					&:active {
+						background: #ffffff33;
+					}
 				}
 			}
 		}
