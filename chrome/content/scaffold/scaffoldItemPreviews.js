@@ -35,6 +35,8 @@
 			</html:div>
 			<deck/>
 		`);
+		
+		_previews = [];
 
 		_deck;
 		
@@ -46,11 +48,11 @@
 			
 			this.querySelector('.previous').addEventListener('command', () => {
 				this._deck.selectedIndex--;
-				this._renderSwitcher();
+				this._renderPreviews();
 			});
 			this.querySelector('.next').addEventListener('command', () => {
 				this._deck.selectedIndex++;
-				this._renderSwitcher();
+				this._renderPreviews();
 			});
 		}
 		
@@ -66,6 +68,7 @@
 		}
 		
 		clearPreviews() {
+			this._previews = [];
 			this._deck.selectedIndex = 0;
 			this._deck.replaceChildren();
 			this._updateVisibility();
@@ -75,9 +78,9 @@
 		 * @param {ScaffoldItemPreview[]} previews
 		 */
 		setPreviews(previews) {
+			this._previews = previews;
 			this._deck.selectedIndex = 0;
-			this._deck.replaceChildren(...previews);
-			this._renderSwitcher();
+			this._renderPreviews();
 			this._updateVisibility();
 		}
 
@@ -85,8 +88,8 @@
 		 * @param {ScaffoldItemPreview} preview
 		 */
 		addPreview(preview) {
-			this._deck.append(preview);
-			this._renderSwitcher();
+			this._previews.push(preview);
+			this._renderPreviews();
 			this._updateVisibility();
 		}
 
@@ -118,15 +121,23 @@
 			}
 		}
 
-		_renderSwitcher() {
-			let switcher = this.querySelector('.switcher');
+		_renderPreviews() {
+			this._deck.replaceChildren(
+				...this._previews.map((preview, i) => {
+					if (i === this._deck.selectedIndex) {
+						return preview;
+					}
+					return document.createXULElement('hbox');
+				})
+			);
+			
 			if (this._deck.children.length > 1) {
-				switcher.hidden = false;
-				switcher.querySelector('.current').textContent = this._deck.selectedIndex + 1;
-				switcher.querySelector('.max').textContent = this._deck.children.length;
+				this._switcher.hidden = false;
+				this._switcher.querySelector('.current').textContent = this._deck.selectedIndex + 1;
+				this._switcher.querySelector('.max').textContent = this._deck.children.length;
 			}
 			else {
-				switcher.hidden = true;
+				this._switcher.hidden = true;
 			}
 		}
 	}
