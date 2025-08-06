@@ -1910,11 +1910,11 @@ var Scaffold = new function () {
 			else {
 				delete testData.updatedTestString;
 			}
+			this.populateTests();
 
 			testIndex++;
 		}
 		
-		this.populateTests();
 		_invalidateCodeLenses?.();
 	};
 
