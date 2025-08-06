@@ -1,0 +1,13 @@
+input {
+	@media (-moz-platform: linux) {
+		// fx140 form element styling fix
+		appearance: none;
+		border-radius: 5px;
+		padding: .3em .5em;
+		border: 1px solid ThreeDShadow;
+		
+		&[type="button"] {
+			padding: .3em 1.5em;
+		}
+	}
+}
