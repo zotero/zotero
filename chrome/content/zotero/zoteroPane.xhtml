@@ -124,7 +124,7 @@
 		<command id="cmd_zotero_newChildFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(false, ZoteroPane.getSelectedItems()[0].id)"/>
 		<command id="cmd_zotero_newChildLinkedFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(true, ZoteroPane.getSelectedItems()[0].id)"/>
 		<command id="cmd_zotero_newChildURLAttachment" oncommand="ZoteroPane.addAttachmentFromURI(true, ZoteroPane.getSelectedItems()[0].id)"/>
-		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
+		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey, undefined, undefined, undefined, true);"/>
 		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
 		
 		<command id="cmd_zotero_showTabsMenu" oncommand="Zotero_Tabs.showTabsMenu()"/>
@@ -954,6 +954,7 @@
 			<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
 			
 			<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"/>
+			<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-items"/>
 			
 			<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
 				<menupopup id="zotero-add-attachment-popup">

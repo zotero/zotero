@@ -1372,7 +1372,7 @@ var ZoteroPane = new function () {
 						}
 					}
 					// Use key that's not the modifier as the popup toggle
-					ZoteroPane_Local.newNote(event.altKey, parentKey);
+					ZoteroPane_Local.newNote(event.altKey, parentKey, undefined, undefined, parentKey);
 					break;
 				case 'sync':
 					Zotero.Sync.Runner.sync();
@@ -3603,6 +3603,7 @@ var ZoteroPane = new function () {
 			'sep1',
 			'addNote',
 			'createNoteFromAnnotations',
+			'createNoteFromItems',
 			'addAttachments',
 			'sep2',
 			'findFile',
@@ -4079,6 +4080,14 @@ var ZoteroPane = new function () {
 		menu.childNodes[m.renameAttachments].setAttribute('label', Zotero.getString('pane.items.menu.renameAttachments' + multiple));
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
 		
+		// Show "Create Note from Items" when any non-feed items are selected
+		if (items.length > 0 && items.some(item => !item.isFeedItem)) {
+			show.add(m.createNoteFromItems);
+			let menuitem = menu.childNodes[m.createNoteFromItems];
+			menuitem.setAttribute('oncommand', 'ZoteroPane_Local.newNote(false)');
+			menuitem.setAttribute('label', 'Create Note from Items');
+		}
+		
 		// Hide and enable all actions by default (so if they're shown they're enabled)
 		for (let i in m) {
 			let pos = m[i];
@@ -4096,6 +4105,7 @@ var ZoteroPane = new function () {
 
 		// No locate menu options if annotations are selected
 		if (annotationsSelected) return;
+
 
 		// add locate menu options
 		await Zotero_LocateMenu.buildContextMenu(menu, true);
@@ -4423,7 +4433,7 @@ var ZoteroPane = new function () {
 	 * @return {Promise<Integer|null|false>} - The id of the new note in non-popup mode, null in
 	 *     popup mode (where a note isn't created immediately), or false if library isn't editable
 	 */
-	this.newNote = async function (popup, parentKey, text, citeURI) {
+	this.newNote = async function (popup, parentKey, text, citeURI, noRelated) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return false;
@@ -4461,6 +4471,16 @@ var ZoteroPane = new function () {
 		else if (this.getCollectionTreeRow().isCollection()) {
 			item.addToCollection(this.getCollectionTreeRow().ref.id);
 		}
+		
+		// Add selected items as related items for standalone notes
+		if (!noRelated) {
+			var selectedItems = this.getSelectedItems();
+			
+			for (let selectedItem of selectedItems) {
+				item.addRelatedItem(selectedItem);
+			}
+		}
+		
 		var itemID = await item.saveTx({
 			notifierData: {
 				autoSyncDelay: Zotero.Notes.AUTO_SYNC_DELAY
