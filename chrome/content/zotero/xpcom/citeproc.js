@@ -301,7 +301,7 @@ var CSL = {
         }
     },
 
-    MULTI_FIELDS: ["event", "publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "authority","genre","title-short","medium","country","jurisdiction","archive","archive-place"],
+    MULTI_FIELDS: ["event", "publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "event-title", "original-title", "part-title", "reviewed-title", "volume-title", "authority","genre","title-short","medium","country","jurisdiction","archive","archive-place"],
 
     LangPrefsMap: {
         "title":"titles",
@@ -15657,6 +15657,11 @@ CSL.Node.text = {
                                                 value = value.replace(/https?:\/\//, "");
                                             }
                                         }
+                                        if (this.variables[0] === "DOI") {
+                                            if (!value.match(/^https?:\/\//) && this.strings.prefix && this.strings.prefix.match(/^.*https:\/\/doi\.org\/$/)) {
+                                                value = CSL.Util.encodeDoiForUrl(value);
+                                            }
+                                        }
                                         // true is for non-suppression of periods
                                         if (state.opt.development_extensions.wrap_url_and_doi) {
                                             if (!this.decorations.length || this.decorations[0][0] !== "@" + this.variables[0]) {
@@ -15671,7 +15676,10 @@ CSL.Node.text = {
                                                     // strip a proper DOI prefix
                                                     var prefix;
                                                     if (this.strings.prefix && this.strings.prefix.match(/^.*https:\/\/doi\.org\/$/)) {
-                                                        value = value.replace(/^https?:\/\/doi\.org\//, "");
+                                                        if (value.match(/^https?:\/\/doi\.org\//)) {
+                                                            value = value.replace(/^https?:\/\/doi\.org\//, "");
+                                                            value = decodeURIComponent(value);
+                                                        }
                                                         if (value.match(/^https?:\/\//)) {
                                                             // Do not tamper with another protocol + domain if already set in field value
                                                             prefix = "";
@@ -15681,6 +15689,9 @@ CSL.Node.text = {
                                                         }
                                                         // set any string prefix on the clone
                                                         clonetoken.strings.prefix = this.strings.prefix.slice(0, clonetoken.strings.prefix.length-16);
+                                                    }
+                                                    if (!value.match(/^https?:\/\//)) {
+                                                        value = CSL.Util.encodeDoiForUrl(value);
                                                     }
                                                     // cast a text blob
                                                     // set the prefix as the content of the blob
@@ -17734,6 +17745,10 @@ CSL.Util.Match = function () {
         };
     };
 
+};
+
+CSL.Util.encodeDoiForUrl = function (doi) {
+    return doi.replace(/[\u0000-\u0020"#%<>?[\\\]^`{|}\u007F-\u009F]/g, encodeURIComponent);
 };
 
 /*global CSL: true */
@@ -22276,7 +22291,7 @@ CSL.Output.Formats.prototype.html = {
     "@DOI/true": function (state, str) {
         var doiurl = str;
         if (!str.match(/^https?:\/\//)) {
-            doiurl = "https://doi.org/" + str;
+            doiurl = "https://doi.org/" + CSL.Util.encodeDoiForUrl(str);
         }
         return "<a href=\"" + doiurl + "\">" + str + "</a>";
     }
@@ -22579,7 +22594,7 @@ CSL.Output.Formats.prototype.asciidoc = {
     "@DOI/true": function (state, str) {
         var doiurl = str;
         if (!str.match(/^https?:\/\//)) {
-            doiurl = "https://doi.org/" + str;
+            doiurl = "https://doi.org/" + CSL.Util.encodeDoiForUrl(str);
         }
         return doiurl + "[" + str + "]";
     }
