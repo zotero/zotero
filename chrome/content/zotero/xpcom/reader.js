@@ -266,6 +266,12 @@ class ReaderInstance {
 						}
 
 						let item = Zotero.Items.getByLibraryAndKey(attachment.libraryID, annotation.key);
+						// If a deleted annotation appears here, it means trashing was undone in Reader.AnnotationManager,
+						// so it should be restored.
+						// Annotations that are actually meant to be trashed don't appear in the annotations array.
+						if (item) {
+							item.deleted = false;
+						}
 						// If annotation isn't editable, only save image to cache.
 						// This is the only case when saving can be triggered for non-editable annotation
 						if (annotation.image && item && !item.isEditable()) {
@@ -308,7 +314,8 @@ class ReaderInstance {
 						// Make sure the annotation actually belongs to the current PDF
 						if (annotation && annotation.isAnnotation() && annotation.parentID === this._item.id) {
 							this.annotationItemIDs = this.annotationItemIDs.filter(id => id !== annotation.id);
-							await annotation.eraseTx({ notifierQueue });
+							annotation.deleted = true;
+							await annotation.saveTx({ notifierQueue });
 						}
 					}
 				}
@@ -2136,12 +2143,16 @@ class Reader {
 					if (event === 'trash' && (ids.includes(item.id) || ids.includes(item.parentItemID))) {
 						reader.close();
 					}
-					else if (event === 'delete') {
-						let disappearedIDs = reader.annotationItemIDs.filter(x => ids.includes(x));
-						if (disappearedIDs.length) {
-							let keys = disappearedIDs.map(id => extraData[id].key);
-							reader.unsetAnnotations(keys);
+					// Remove annotations that are trashed
+					else if (event === "trash") {
+						let disappearedKeys = item.getAnnotations(true).filter(annot => ids.includes(annot.id)).map(annot => annot.key);
+						if (disappearedKeys.length) {
+							reader.unsetAnnotations(disappearedKeys);
 						}
+					}
+					else if (event === 'delete') {
+						// Annotations are removed from the reader when they are trashed
+						// so 'delete' requires no extra handling after
 					}
 					else {
 						if (['add', 'modify'].includes(event)) {

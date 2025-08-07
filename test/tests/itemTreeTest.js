@@ -1809,18 +1809,36 @@ describe("Zotero.ItemTree", function () {
 			assert.deepEqual(rowIDs, zp.itemsView._rows.map(row => row.id));
 		});
 
-		it("should erase annotation on escape when row is selected", async () => {
+		it("should trash annotation row", async () => {
 			zp.itemsView.expandAllRows();
 
-			// Select and delete ink annotation
+			// Select and trash ink annotation
 			let inkID = ink.id;
 			await zp.itemsView.selectItems([inkID]);
-
 			await zp.itemsView.deleteSelection();
 
-			// Make sure it is deleted and the row is gone
-			assert.isFalse(Zotero.Items.get(inkID));
+			// Make sure it is trashed and the row is now gone
+			let inkItem = await Zotero.Items.getAsync(inkID);
+			assert.isTrue(inkItem.deleted);
 			assert.isFalse(zp.itemsView.getRowIndexByID(inkID));
+		});
+
+		it("should restore annotation row from trash", async () => {
+			// Trash ink annotation
+			ink.deleted = true;
+			await ink.saveTx();
+
+			// Select the trash
+			await zp.collectionsView.selectByID("T" + attachment.libraryID);
+
+			// Restore to library
+			await zp.itemsView.selectItems([ink.id]);
+			await zp.restoreSelectedItems();
+
+			// Make sure the row is no longer trashed
+			let inkItem = await Zotero.Items.getAsync(ink.id);
+			assert.isFalse(inkItem.deleted);
+			assert.isFalse(zp.itemsView.getRowIndexByID(ink.id));
 		});
 
 		it("should add note from selected annotation rows of the same parent item", async () => {
