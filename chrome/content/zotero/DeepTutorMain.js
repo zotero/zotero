@@ -209,21 +209,13 @@ const DeepTutorMain = (props) => {
 		defaultWidth = '0';
 	}
 	else {
-		// Maximum width: 1/2 of window width
-		maxWidth = `${props.windowWidth * 0.5}px`;
+		// Maximum width: 80% of window width
+		maxWidth = `${props.windowWidth * 0.8}px`;
 
 		// Default width: 1/3 of window width
 		defaultWidth = `${props.windowWidth * 0.33}px`;
-
-		// Minimum width based on window size
-		if (props.windowWidth >= 1200) {
-			// Window width >= 1200px: minimum is 1/4 of window width
-			minWidth = `${props.windowWidth * 0.25}px`;
-		}
-		else {
-			// Window width < 1200px: minimum is 300px
-			minWidth = '300px';
-		}
+		// Minimum width: 360px
+		minWidth = '360px';
 	}
 
 	const containerStyle = {
