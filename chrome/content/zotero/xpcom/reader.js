@@ -2151,8 +2151,10 @@ class Reader {
 						}
 					}
 					else if (event === 'delete') {
-						// Annotations are removed from the reader when they are trashed
-						// so 'delete' requires no extra handling after
+						// Annotations are already removed from the reader - it happens when they are trashed.
+						// If annotation is erased, just ensure it cannot be restored from the reader.
+						let annotationKeys = Object.keys(extraData || {}).map(id => extraData[id].key);
+						reader.clearAnnotationsEditHistory(Components.utils.cloneInto(annotationKeys, reader._iframeWindow));
 					}
 					else {
 						if (['add', 'modify'].includes(event)) {
