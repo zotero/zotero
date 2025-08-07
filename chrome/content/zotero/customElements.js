@@ -337,7 +337,12 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 				patchedFunction: "connectedCallback",
 			}
 		],
-		linux: [],
+		linux: [
+			{
+				element: "dialog",
+				patchedFunction: "connectedCallback"
+			}
+		],
 	};
 	for (let [key, configs] of Object.entries(InjectCSSConfig)) {
 		if (key == "win" && !Zotero.isWin) continue;

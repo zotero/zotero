@@ -37,4 +37,12 @@ button {
 		max-height: 25px;
 		margin: 0 -2px -1px;
 	}
+	
+	@media (-moz-platform: linux) {
+		// fx140 form element styling fix
+		appearance: none;
+		border-radius: 5px;
+		border-color: ThreeDShadow;
+		padding: 0.3em 1.5em;
+	}
 }

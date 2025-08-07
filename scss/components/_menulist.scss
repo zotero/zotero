@@ -1,0 +1,10 @@
+menulist {
+	@media (-moz-platform: linux) {
+		// fx140 form element styling fix
+		appearance: none;
+		border-radius: 5px;
+		border-color: ThreeDShadow;
+		padding: .3em .5em;
+		background: var(--arrowpanel-background);
+	}
+}
