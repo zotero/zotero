@@ -822,7 +822,7 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, automaticJournalA
 		// Cache the Engine instance if allowed
 		if (cacheKey) {
 			this._cachedEngines.set(cacheKey, citeproc);
-			Zotero.debug(`Caching ${engineDesc}.Engine instance with ${cacheKey} for ${this.styleID}`);
+			Zotero.debug(`Cached ${engineDesc}.Engine instance with ${cacheKey} for ${this.styleID}`);
 		}
 
 		return citeproc;
