@@ -1042,9 +1042,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				);
 			}
 		}
-		finally {
-			Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
-		}
 	};
 	
 	
@@ -1072,9 +1069,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 		
 		// Async, but we don't want to block
-		var promise = Zotero.Utilities.Internal.exec(applicationPath, args);
-		
-		promise.finally(() => Zotero.Utilities.Internal.Environment.restoreMozillaVariables());
+		Zotero.Utilities.Internal.exec(applicationPath, args);
 	};
 	
 	
@@ -1104,27 +1099,18 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 				if (!found.value) {
 					throw new Error(`Handler not found for '${scheme}' URLs`);
 				}
-				try {
-					if (!Zotero.isWin) {
-						Zotero.Utilities.Internal.Environment.clearMozillaVariables();
-					}
-					
-					svc.loadURI(Services.io.newURI(url, null, null));
+				if (!Zotero.isWin) {
+					Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 				}
-				finally {
-					if (!Zotero.isWin) {
-						Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
-					}
-				}
+				
+				svc.loadURI(Services.io.newURI(url, null, null));
 				return;
 			}
 		}
 		
-		var mozCleared = false;
 		try {
 			if (!Zotero.isWin) {
 				Zotero.Utilities.Internal.Environment.clearMozillaVariables();
-				mozCleared = true;
 			}
 			
 			var uri = Services.io.newURI(url, null, null);
@@ -1151,10 +1137,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					+ "check extensions.zotero." + pref + " in about:config");
 			}
 			
-			if (!mozCleared) {
-				Zotero.Utilities.Internal.Environment.clearMozillaVariables();
-				mozCleared = true;
-			}
+			Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 			
 			var proc = Components.classes["@mozilla.org/process/util;1"]
 							.createInstance(Components.interfaces.nsIProcess);
@@ -1162,11 +1145,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			
 			var args = [url];
 			proc.runw(false, args, args.length);
-		}
-		finally {
-			if (mozCleared) {
-				Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
-			}
 		}
 	}
 	
