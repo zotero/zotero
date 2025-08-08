@@ -554,17 +554,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 					let row = this.getRowIndexByID(id);
 					if (row === false) continue;
 					let item = Zotero.Items.get(id);
-					let isParentTrashed = item.parentItemID
-						? Zotero.Items.get(item.parentItemID).deleted
-						: false;
-					// Remove parent row if it isn't deleted, its parent isn't deleted, and it
-					// doesn't have any deleted children (shown by numChildren including deleted
-					// being the same as numChildren not including deleted)
-					if (!item.deleted && !isParentTrashed
-							&& (!item.isRegularItem() || item.numChildren(true) == item.numChildren(false))) {
-						rows.push(row);
+					let topLevelItem = item.topLevelItem;
+					let isAnythingDeleted = topLevelItem.getAllDescendents(true).length > topLevelItem.getAllDescendents(false).length;
+					// Remove top level item row if it is not trashed and has no trashed descendents
+					if (!topLevelItem.deleted && !isAnythingDeleted) {
+						let topLevelRow = this.getRowIndexByID(topLevelItem.id);
+						rows.push(topLevelRow);
 						// And all its children in the tree
-						for (let child = row + 1; child < this.rowCount && this.getLevel(child) > this.getLevel(row); child++) {
+						for (let child = topLevelRow + 1; child < this.rowCount && this.getLevel(child) > this.getLevel(topLevelRow); child++) {
 							rows.push(child);
 						}
 					}
@@ -629,6 +626,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (push && row !== undefined) {
 					// Don't remove child items from collections, because it's handled by 'modify'
 					if (action == 'remove' && this.getParentIndex(row) != -1) {
+						continue;
+					}
+					// Don't remove visible context child rows from trash.
+					// After 'modify', they will be refreshed as non-context rows.
+					if (action == 'trash' && this.collectionTreeRow.isTrash() && this.getParentIndex(row) != -1) {
 						continue;
 					}
 					rows.push(row);
@@ -1723,7 +1725,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var annotations = [];
 
 		if (item.isFileAttachment()) {
-			annotations = item.getAnnotations();
+			let includeTrashed = this.collectionTreeRow.isTrash();
+			annotations = item.getAnnotations(includeTrashed);
 		}
 		var newRows = [];
 		if (attachments.length && notes.length) {
@@ -1905,11 +1908,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 			let collectionTreeRow = this.collectionTreeRow;
 
-			// If all selected items are annotations, for now erase them skipping trash
-			if (selectedItems.length && selectedItems.every(item => item.isAnnotation())) {
-				await Zotero.Items.erase(selectedItemIDs);
-			}
-			else if (collectionTreeRow.isBucket()) {
+			if (collectionTreeRow.isBucket()) {
 				collectionTreeRow.ref.deleteItems(ids);
 			}
 			else if (collectionTreeRow.isTrash()) {
@@ -2100,7 +2099,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		var item = this.getRow(index).ref;
 		if (item.isFileAttachment()) {
-			return item.numAnnotations() == 0;
+			let includeTrashed = this.collectionTreeRow.isTrash();
+			return item.numAnnotations(includeTrashed) == 0;
 		}
 		if (!item.isRegularItem()) {
 			return true;
