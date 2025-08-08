@@ -94,8 +94,8 @@
 
 	<tooltip id="iframeTooltip" page="true"/>
 	<menubar>
-		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;" onpopupshowing="onFileMenuOpen()">
-			<menupopup id="menu_FilePopup">
+		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+			<menupopup id="menu_FilePopup" onpopupshowing="onFileMenuOpen(event, this)">
 				<menuitem
 						id="menu_transferFromPDF"
 						class="menu-type-reader pdf"
@@ -120,7 +120,7 @@
 
 		<menu id="edit-menu"  data-l10n-id="menu-edit">
 			<!-- goUpdateGlobalEditMenuItems(true) is necessary to update Edit menu when contenteditable is focused -->
-			<menupopup id="menu_EditPopup" onpopupshowing="goUpdateGlobalEditMenuItems(true)">
+			<menupopup id="menu_EditPopup" onpopupshowing="onEditMenuOpen(event, this)">
 				<menuitem id="menu_undo"
 						  key="key_undo"
 						  command="cmd_undo" data-l10n-id="text-action-undo"/>
@@ -159,8 +159,8 @@
 				/>
 			</menupopup>
 		</menu>
-		<menu label="&viewMenu.label;" accesskey="&viewMenu.accesskey;" onpopupshowing="onViewMenuOpen()">
-			<menupopup>
+		<menu id="view-menu" label="&viewMenu.label;" accesskey="&viewMenu.accesskey;">
+			<menupopup id="menu_viewPopup" onpopupshowing="onViewMenuOpen(event, this)">
 				<!--
 				To make presentation mode work it's necessary to set
 				full-screen-api.enabled=true
@@ -295,9 +295,8 @@
 			class="menu-type-reader"
 			label="&goMenu.label;"
 			accesskey="&goMenu.accesskey;"
-			onpopupshowing="onGoMenuOpen()"
 		>
-			<menupopup id="menu_goPopup">
+			<menupopup id="menu_goPopup" onpopupshowing="onGoMenuOpen(event, this)">
 				<menuitem 
 					id="go-menuitem-first-page"
 					class="menu-type-reader pdf epub"
@@ -327,7 +326,7 @@
 		</menu>
 		<menu id="windowMenu"
 				data-l10n-id="menu-window-menu">
-			<menupopup id="windowPopup">
+			<menupopup id="windowPopup" onpopupshowing="onWindowMenuOpen(event, this)">
 				<menuseparator/>
 				<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
 				<menuitem command="zoomWindow"/>
