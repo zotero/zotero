@@ -587,6 +587,28 @@ Zotero.SearchConditions = new function () {
 			},
 			
 			{
+				name: 'annotationColor',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAnnotations',
+				field: 'color',
+				special: true,
+			},
+
+			{
+				name: 'annotationAuthor',
+				operators: {
+					is: true,
+					isNot: true,
+				},
+				table: 'groupItems',
+				field: 'createdByUserID',
+				special: true,
+			},
+
+			{
 				name: 'fulltextWord',
 				operators: {
 					contains: true,
