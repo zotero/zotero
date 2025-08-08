@@ -344,7 +344,7 @@ Zotero.Plugins = new function () {
 			idealSize,
 			// This window argument is optional, only used for determining
 			// whether to get the hiDPI icon.
-			// Use the main window (which we always have, except on non-macOS),
+			// Use the main window (which we always have on non-macOS),
 			// falling back to the hidden window (which we always have on macOS).
 			Zotero.getMainWindow() || Services.appShell.hiddenDOMWindow
 		);
