@@ -1929,6 +1929,7 @@ Zotero.Utilities.Internal = {
 		var startup = Services.startup;
 		if (restart) {
 			Zotero.restarting = true;
+			this.Environment.restoreMozillaVariables();
 		}
 		startup.quit(startup.eAttemptQuit | (restart ? startup.eRestart : 0));
 	},
@@ -3066,21 +3067,44 @@ Zotero.Utilities.Internal.Environment = {
 	 * using the wrong Firefox profile when launching URLs or PDFs. On Windows, it's not necessary
 	 * to call this when launching URLs, only processes.
 	 *
+	 * The variables are restored a (debounced) second after this is called. Restoring mostly isn't
+	 * necessary, since most new launches of Zotero would use the modified launcher, but a restart
+	 * on Linux (e.g., during an upgrade) skips our shell script where we set these variables.
+	 *
 	 * https://github.com/zotero/zotero/issues/4981
 	 */
 	clearMozillaVariables: function () {
+		const RESTORE_DEBOUNCE_DELAY = 1000;
+		
 		this.unset("MOZ_ALLOW_DOWNGRADE");
 		this.unset("MOZ_LEGACY_PROFILES");
+		
+		if (this._restoreTimeout) {
+			clearTimeout(this._restoreTimeout);
+			delete this._restoreTimeout;
+		}
+		
+		this._restoreTimeout = setTimeout(() => {
+			delete this._restoreTimeout;
+			this._restoreMozillaVariables();
+		}, RESTORE_DEBOUNCE_DELAY);
 	},
 	
 	/**
-	 * Re-set the Mozilla environment variables that we changed in the launcher
+	 * Immediately restore the Mozilla environment variables
 	 *
-	 * Call this in a finally() after using unsetMozillaVariables(). This mostly isn't necessary,
-	 * since most new launches of Zotero would use the modified launcher, but a restart on Linux
-	 * skips our shell script where we set these variables.
+	 * The variables are automatically restored shortly after they're cleared, but this can be
+	 * called before explicit restarts.
 	 */
 	restoreMozillaVariables: function () {
+		if (this._restoreTimeout) {
+			clearTimeout(this._restoreTimeout);
+			delete this._restoreTimeout;
+		}
+		this._restoreMozillaVariables();
+	},
+	
+	_restoreMozillaVariables: function () {
 		var env = Cc["@mozilla.org/process/environment;1"].getService(Ci.nsIEnvironment);
 		env.set("MOZ_ALLOW_DOWNGRADE", "1");
 		env.set("MOZ_LEGACY_PROFILES", "1");

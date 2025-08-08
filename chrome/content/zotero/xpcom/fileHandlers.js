@@ -171,9 +171,6 @@ Zotero.FileHandlers = {
 				catch (e) {
 					Zotero.logError(e);
 				}
-				finally {
-					Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
-				}
 			}
 			
 			try {
@@ -522,9 +519,7 @@ Zotero.FileHandlers = {
 		Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 		
 		// Do not await
-		var promise = Zotero.Utilities.Internal.exec(command, args);
-		
-		promise.finally(() => Zotero.Utilities.Internal.Environment.restoreMozillaVariables());
+		Zotero.Utilities.Internal.exec(command, args);
 	},
 };
 

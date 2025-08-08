@@ -1032,9 +1032,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				);
 			}
 		}
-		finally {
-			Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
-		}
 	};
 	
 	
@@ -1062,9 +1059,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 		
 		// Async, but we don't want to block
-		var promise = Zotero.Utilities.Internal.exec(applicationPath, args);
-		
-		promise.finally(() => Zotero.Utilities.Internal.Environment.restoreMozillaVariables());
+		Zotero.Utilities.Internal.exec(applicationPath, args);
 	};
 	
 	
@@ -1094,27 +1089,18 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				if (!found.value) {
 					throw new Error(`Handler not found for '${scheme}' URLs`);
 				}
-				try {
-					if (!Zotero.isWin) {
-						Zotero.Utilities.Internal.Environment.clearMozillaVariables();
-					}
-					
-					svc.loadURI(Services.io.newURI(url, null, null));
+				if (!Zotero.isWin) {
+					Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 				}
-				finally {
-					if (!Zotero.isWin) {
-						Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
-					}
-				}
+				
+				svc.loadURI(Services.io.newURI(url, null, null));
 				return;
 			}
 		}
 		
-		var mozCleared = false;
 		try {
 			if (!Zotero.isWin) {
 				Zotero.Utilities.Internal.Environment.clearMozillaVariables();
-				mozCleared = true;
 			}
 			
 			var uri = Services.io.newURI(url, null, null);
@@ -1141,10 +1127,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					+ "check extensions.zotero." + pref + " in about:config");
 			}
 			
-			if (!mozCleared) {
-				Zotero.Utilities.Internal.Environment.clearMozillaVariables();
-				mozCleared = true;
-			}
+			Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 			
 			var proc = Components.classes["@mozilla.org/process/util;1"]
 							.createInstance(Components.interfaces.nsIProcess);
@@ -1152,11 +1135,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			
 			var args = [url];
 			proc.runw(false, args, args.length);
-		}
-		finally {
-			if (mozCleared) {
-				Zotero.Utilities.Internal.Environment.restoreMozillaVariables();
-			}
 		}
 	}
 	
