@@ -1160,6 +1160,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return this.clearItemsPaneMessage();
 		}
 		Zotero.debug(`itemTree.changeCollectionTreeRow(): ${collectionTreeRow.id}`);
+		if (!skipRefresh) {
+			this._itemTreeLoadingDeferred = Zotero.Promise.defer();
+		}
 		this.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		let newId = "item-tree-" + this.props.id;
 		if (collectionTreeRow.visibilityGroup) {
@@ -1180,7 +1183,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Sometimes (e.g. if there is an active quick search), we skip the refresh
 		// to avoid blinking because there will be another one triggered right after.
 		if (skipRefresh) return;
-		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
 
 		this.selection.clearSelection();
 		this.selection.focused = 0;
