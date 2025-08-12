@@ -140,7 +140,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			fontSize: '1.25rem',
 			lineHeight: '100%',
 			letterSpacing: '0%',
-			textAlign: 'center',
+			textAlign: 'left',
 			fontFamily: 'Roboto, sans-serif',
 			overflow: 'hidden',
 			textOverflow: 'ellipsis',
@@ -208,8 +208,8 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			resize: 'none',
 			height: '24px', // Start with minHeight (1.5rem)
 			marginRight: '0.625rem',
-			alignSelf: 'flex-end',
-			lineHeight: '1.4',
+			alignSelf: 'center',
+			lineHeight: '24px',
 			wordWrap: 'break-word',
 			whiteSpace: 'pre-wrap'
 		},
@@ -2341,7 +2341,8 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					style={{
 						...styles.textInput,
 						opacity: iniWait ? 0.5 : 1,
-						cursor: iniWait ? "not-allowed" : "text"
+						cursor: iniWait ? "not-allowed" : "text",
+						color: colors.text.tertiary
 					}}
 					value={inputValue}
 					onChange={handleInputChange}
@@ -2356,6 +2357,14 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					rows={1}
 					disabled={iniWait}
 				/>
+				<style>
+					{`
+					textarea::placeholder {
+						color: ${colors.text.tertiary} !important;
+						opacity: 1;
+					}
+					`}
+				</style>
 				<button
 					style={{
 						...styles.sendButton,
