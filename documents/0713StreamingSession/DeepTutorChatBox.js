@@ -3036,7 +3036,7 @@ This demonstrates multiple table formats working correctly.
 									title={contextDoc.filePath ? `${contextDoc.name}\n${contextDoc.filePath}` : `${contextDoc.name} (Not available)`} // Updated tooltip
 								>
 									<div style={{
-										fontSize: "1rem",
+										fontSize: '1rem',
 										fontWeight: 400,
 										color: "#1C1B1F",
 										lineHeight: "180%",

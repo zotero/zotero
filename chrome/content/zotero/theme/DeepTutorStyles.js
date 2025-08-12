@@ -41,7 +41,7 @@ export function generateDeepTutorStyles(theme = "light") {
 			marginBottom: "1.25rem",
 			color: colors.text.primary,
 			fontWeight: 500,
-			fontSize: "1rem",
+			fontSize: '1rem',
 			lineHeight: "1.2",
 			fontFamily: "Roboto, sans-serif",
 			overflow: "hidden",
@@ -164,7 +164,7 @@ export function generateDeepTutorStyles(theme = "light") {
 			border: `1px solid ${colors.border.primary}`,
 			padding: "0.375rem 0.5rem",
 			background: colors.background.tertiary,
-			fontSize: "1rem",
+			fontSize: '1rem',
 			fontFamily: "Roboto, sans-serif",
 			outline: "none",
 			boxSizing: "border-box",
@@ -180,7 +180,7 @@ export function generateDeepTutorStyles(theme = "light") {
 			background: colors.button.primary,
 			color: colors.text.inverse,
 			fontWeight: 700,
-			fontSize: "1rem",
+			fontSize: '1rem',
 			border: "none",
 			cursor: "pointer",
 			boxShadow: "0 0.0625rem 0.125rem rgba(0,0,0,0.08)",
@@ -194,7 +194,7 @@ export function generateDeepTutorStyles(theme = "light") {
 			background: colors.button.secondary,
 			color: colors.button.primary,
 			fontWeight: 700,
-			fontSize: "1rem",
+			fontSize: '1rem',
 			border: `0.125rem solid ${colors.button.primary}`,
 			boxShadow: "0 0.0625rem 0.125rem rgba(0,0,0,0.08)",
 			borderRadius: "0.625rem",
@@ -294,7 +294,7 @@ export function generateDeepTutorStyles(theme = "light") {
 			border: "none",
 			color: colors.text.quaternary,
 			fontWeight: 500,
-			fontSize: "1rem",
+			fontSize: '1rem',
 			lineHeight: "100%",
 			letterSpacing: "0%",
 			fontFamily: "Roboto, sans-serif",
@@ -353,7 +353,7 @@ export function generateDeepTutorStyles(theme = "light") {
 		
 		// Subscription text styles
 		subscriptionText: {
-			fontSize: "1rem",
+			fontSize: '1rem',
 			color: colors.text.secondary,
 			textAlign: "left",
 			margin: "0 0 1.125rem 0",
@@ -380,7 +380,7 @@ export function generateDeepTutorStyles(theme = "light") {
 		
 		// Error message styles
 		errorMessage: {
-			fontSize: "1rem",
+			fontSize: '1rem',
 			color: colors.text.primary,
 			textAlign: "center",
 			marginBottom: "1.875rem",
@@ -395,7 +395,7 @@ export function generateDeepTutorStyles(theme = "light") {
 			color: colors.text.inverse,
 			minHeight: "3rem",
 			fontWeight: 700,
-			fontSize: "1rem",
+			fontSize: '1rem',
 			border: "none",
 			borderRadius: "0.625rem",
 			padding: "0.625rem 1.25rem",

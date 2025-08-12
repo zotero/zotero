@@ -71,7 +71,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 
 	const sessionListTitleStyle = {
 		width: '100%',
-		fontSize: '0.875rem',
+		fontSize: '0.875rem !important', // 11.375px equivalent with 13px root font size
 		fontWeight: 500,
 		lineHeight: '135%',
 		letterSpacing: '0%',
@@ -90,7 +90,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		borderRadius: '0.625rem',
 		background: colors.background.quaternary,
 		color: colors.text.tertiary,
-		fontSize: '1rem',
+		fontSize: '1rem', // 13px equivalent with 13px root font size
 		fontWeight: 400,
 		lineHeight: '180%',
 		outline: 'none',
@@ -120,8 +120,8 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		border: 'none',
 		borderRadius: '0.375rem',
 		textAlign: 'left',
-		fontWeight: 600,
-		fontSize: '1rem',
+		fontWeight: 500,
+		fontSize: '1rem', // 13px equivalent with 13px root font size
 		lineHeight: '1.2', // Increased line height for better text visibility
 		letterSpacing: '0%',
 		color: colors.text.quaternary,
@@ -170,7 +170,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		justifyContent: 'center',
 		height: '100%',
 		color: colors.text.tertiary,
-		fontSize: '0.875rem',
+		fontSize: '1.077rem', // 14px equivalent with 13px root font size
 	};
 
 	const errorStyle = {
@@ -180,7 +180,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		background: colors.background.primary,
 		borderRadius: '0.375rem',
 		margin: '0.5rem auto',
-		fontSize: '0.8125rem',
+		fontSize: '1rem',
 		alignSelf: 'flex-start',
 		marginLeft: '5%',
 	};
@@ -213,6 +213,11 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 					}
 					input.session-history-input:-ms-input-placeholder {
 						color: ${placeholderColor} !important;
+					}
+					.session-list-title {
+						font-size: 0.875rem !important;
+						font-weight: 500 !important;
+						color: ${colors.text.tertiary} !important;
 					}
 				`;
 			try {
@@ -313,7 +318,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 					className="session-history-input"
 				/>
 			</div>
-			<div style={sessionListTitleStyle}>Sessions</div>
+			<div style={sessionListTitleStyle} className="session-list-title">Sessions</div>
 			{/* Session List Section */}
 			<div style={sessionListStyle}>
 				{filteredSessions.length === 0 && (
@@ -324,7 +329,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 						key={session.id || session.sessionName}
 						style={{
 							...sessionButtonStyle,
-							background: hoveredButton === session.id ? colors.background.quaternary : colors.background.tertiary
+							background: hoveredButton === session.id ? colors.border.quaternary : colors.background.tertiary
 						}}
 						onClick={() => onSessionSelect && onSessionSelect(session.id)}
 						onMouseEnter={() => setHoveredButton(session.id)}

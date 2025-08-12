@@ -869,7 +869,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 								className: "markdown mb-0 flex flex-col",
 								dangerouslySetInnerHTML: { __html: processedResult },
 								style: {
-									fontSize: "14px", // Match DeepTutorChatBox font size
+									fontSize: "1rem", // 13px equivalent with 13px root font size
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
 									overflowWrap: "break-word",
@@ -878,7 +878,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 							})
 							: React.createElement('div', {
 								style: {
-									fontSize: "14px", // Match DeepTutorChatBox font size
+									fontSize: "1rem", // 13px equivalent with 13px root font size
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
 									overflowWrap: "break-word",
@@ -890,7 +890,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						Zotero.debug(`DeepTutorStreamingComponent: Error processing thinking text markdown: ${error.message}`);
 						return React.createElement('div', {
 							style: {
-								fontSize: "14px", // Match DeepTutorChatBox font size
+								fontSize: "1rem", // 13px equivalent with 13px root font size
 								lineHeight: "1.5", // Match DeepTutorChatBox line height
 								wordBreak: "break-word",
 								overflowWrap: "break-word",
@@ -915,7 +915,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 								className: "markdown mb-0 flex flex-col",
 								dangerouslySetInnerHTML: { __html: processedResult },
 								style: {
-									fontSize: "14px", // Match DeepTutorChatBox font size
+									fontSize: "1rem", // 13px equivalent with 13px root font size
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
 									overflowWrap: "break-word",
@@ -924,7 +924,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 							})
 							: React.createElement('div', {
 								style: {
-									fontSize: "14px", // Match DeepTutorChatBox font size
+									fontSize: "1rem", // 13px equivalent with 13px root font size
 									lineHeight: "1.5", // Match DeepTutorChatBox line height
 									wordBreak: "break-word",
 									overflowWrap: "break-word",
@@ -936,7 +936,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						Zotero.debug(`DeepTutorStreamingComponent: Error processing response text markdown: ${error.message}`);
 						return React.createElement('div', {
 							style: {
-								fontSize: "14px", // Match DeepTutorChatBox font size
+								fontSize: "1rem", // 13px equivalent with 13px root font size
 								lineHeight: "1.5", // Match DeepTutorChatBox line height
 								wordBreak: "break-word",
 								overflowWrap: "break-word",

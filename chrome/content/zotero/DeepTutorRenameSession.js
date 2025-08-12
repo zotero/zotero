@@ -26,6 +26,36 @@ export default function DeepTutorRenameSession({
 		}
 	}, []);
 
+	// Inject CSS to ensure 13px base for rem calculations
+	useEffect(() => {
+		const cssText = `
+			.deep-tutor-rename-session-popup {
+				font-size: 13px !important;
+			}
+			.deep-tutor-rename-session-popup * {
+				font-size: inherit;
+			}
+		`;
+		
+		try {
+			if (window.document) {
+				let existingStyle = window.document.getElementById('deep-tutor-rename-session-styles');
+				if (existingStyle) {
+					existingStyle.textContent = cssText;
+				} else {
+					const style = window.document.createElement('style');
+					style.id = 'deep-tutor-rename-session-styles';
+					style.textContent = cssText;
+					if (window.document.head) {
+						window.document.head.appendChild(style);
+					}
+				}
+			}
+		} catch (e) {
+			console.error('Failed to inject CSS:', e.message);
+		}
+	}, []);
+
 	const styles = {
 		container: {
 			width: '24rem',
@@ -210,7 +240,7 @@ export default function DeepTutorRenameSession({
 	};
 
 	return (
-		<div style={styles.container}>
+		<div style={styles.container} className="deep-tutor-rename-session-popup">
 			<div style={styles.header}>
 				<div style={styles.title}>Rename</div>
 				<button

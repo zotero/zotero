@@ -542,7 +542,7 @@ const DeepTutorChatBoxMessage = ({
 			flexDirection: 'column',
 		},
 		messageBubble: {
-			padding: '0rem 0.75rem',
+			padding: '0rem 0rem',
 			borderRadius: '0.625rem',
 			maxWidth: '100%',
 			boxShadow: 'none',
@@ -563,13 +563,13 @@ const DeepTutorChatBoxMessage = ({
 			marginLeft: 'auto',
 			marginRight: '1rem',
 			borderRadius: '0.625rem',
-			fontWeight: 400,
+			fontWeight: 500,
 			textAlign: 'left',
 			alignSelf: 'flex-end',
 			maxWidth: '85%',
 			width: 'fit-content',
-			fontSize: '0.875rem',
-			lineHeight: '1.2',
+			fontSize: '1rem',
+			lineHeight: '1.5',
 			letterSpacing: '0.02em',
 			padding: '0rem 1.25rem',
 		},
@@ -727,7 +727,7 @@ const DeepTutorChatBoxMessage = ({
 														})()
 													}}
 													style={{
-														fontSize: "14px",
+														fontSize: "1rem", // 13px equivalent with 13px root font size
 														lineHeight: "1.5",
 														wordBreak: "break-word",
 														overflowWrap: "break-word"
@@ -736,7 +736,7 @@ const DeepTutorChatBoxMessage = ({
 											)
 											: (
 												<div style={{
-													fontSize: "14px",
+													fontSize: "1rem", // 13px equivalent with 13px root font size
 													lineHeight: "1.5",
 													wordBreak: "break-word",
 													overflowWrap: "break-word"
@@ -752,7 +752,7 @@ const DeepTutorChatBoxMessage = ({
 								return (
 									<div key={subIndex} style={styles.messageText}>
 										<div style={{
-											fontSize: "16px",
+											fontSize: "1.2rem", // 15.6px equivalent with 13px root font size
 											lineHeight: "1.5",
 											wordBreak: "break-word",
 											overflowWrap: "break-word"

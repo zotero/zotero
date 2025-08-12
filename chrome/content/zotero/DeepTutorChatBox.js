@@ -275,7 +275,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			fontSize: '0.875rem',
 			lineHeight: '1.35',
 			padding: '0.25rem 1.25rem',
-			
+			letterSpacing: '0.02em',
 		},
 		botMessage: {
 			backgroundColor: colors.message.bot,
@@ -286,6 +286,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			borderRadius: '1rem',
 			fontWeight: 400,
 			alignSelf: 'flex-start',
+			letterSpacing: '0.02em',
 		},
 
 		messageText: {
@@ -323,6 +324,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			fontWeight: 500,
 			fontSize: '1rem',
 			lineHeight: '1.5',
+			letterSpacing: '0.02em',
 			cursor: 'pointer',
 			boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.04)',
 			textAlign: 'left',

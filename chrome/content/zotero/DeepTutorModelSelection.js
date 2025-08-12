@@ -500,6 +500,12 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 		const injectPlaceholderCSS = () => {
 			const placeholderColor = '#666';
 			const cssText = `
+					.deep-tutor-model-selection-popup {
+						font-size: 13px !important;
+					}
+					.deep-tutor-model-selection-popup * {
+						font-size: inherit;
+					}
 					input.model-selection-input::placeholder {
 						color: ${placeholderColor} !important;
 					}
@@ -1404,7 +1410,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 	}));
 
 	return (
-		<div style={styles.container}>
+		<div style={styles.container} className="deep-tutor-model-selection-popup">
 			<div style={styles.mainSection}>
 				<div style={styles.nameSection}>
 					<label style={styles.label}>Session Name</label>

@@ -65,7 +65,7 @@ const searchSectionStyle = {
 
 const sessionListTitleStyle = {
 	width: '100%',
-	fontSize: '1rem',
+	fontSize: '0.875rem',
 	fontWeight: 500,
 	lineHeight: '135%',
 	letterSpacing: '0%',
@@ -114,7 +114,7 @@ const sessionButtonStyle = {
 	border: 'none',
 	borderRadius: '0.375rem',
 	textAlign: 'left',
-	fontWeight: 600,
+	fontWeight: 500,
 	fontSize: '1rem',
 	lineHeight: '1.2', // Increased line height for better text visibility
 	letterSpacing: '0%',

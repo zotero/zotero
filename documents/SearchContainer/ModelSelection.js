@@ -252,7 +252,7 @@ const styles = {
     background: SKY,
     color: '#fff',
     fontWeight: 700,
-    fontSize: '1.1rem',
+    fontSize: '1rem',
     border: 'none',
     borderRadius: '0.625rem',
     cursor: 'pointer',
