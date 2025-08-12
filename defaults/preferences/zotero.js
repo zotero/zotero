@@ -100,6 +100,7 @@ pref("extensions.zotero.keys.toggleRead", "`");
 pref("extensions.zotero.keys.showTabsMenu", ";");
 
 pref("extensions.zotero.search.quicksearch-mode", "fields");
+pref("extensions.zotero.search.quicksearch-apply-to-all", false);
 
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);
