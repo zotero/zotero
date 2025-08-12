@@ -108,7 +108,7 @@ const DeepTutorNoSessionPane = ({ onCreateNewSession }) => {
 			all: 'revert',
 			background: colors.button.primary,
 			color: colors.button.primaryText,
-			fontWeight: 500,
+			fontWeight: 600,
 			fontSize: '1em',
 			border: 'none',
 			borderRadius: '0.625rem',

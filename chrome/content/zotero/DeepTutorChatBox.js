@@ -390,7 +390,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			borderBottom: `0.0625rem solid ${colors.border.primary}`,
 			color: colors.text.quaternary,
 			fontSize: '0.875rem',
-			fontWeight: 500,
+			fontWeight: 600,
 			cursor: 'pointer',
 			fontFamily: 'Roboto, sans-serif',
 			display: 'flex',

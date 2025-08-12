@@ -536,13 +536,13 @@ const DeepTutorChatBoxMessage = ({
 	const styles = {
 		messageContainer: {
 			width: '100%',
-			margin: '0.5rem 0',
+			margin: '0rem 0',
 			boxSizing: 'border-box',
 			display: 'flex',
 			flexDirection: 'column',
 		},
 		messageBubble: {
-			padding: '0.5rem 0.75rem',
+			padding: '0rem 0.75rem',
 			borderRadius: '0.625rem',
 			maxWidth: '100%',
 			boxShadow: 'none',
@@ -569,8 +569,9 @@ const DeepTutorChatBoxMessage = ({
 			maxWidth: '85%',
 			width: 'fit-content',
 			fontSize: '0.875rem',
-			lineHeight: '1.35',
-			padding: '0.25rem 1.25rem',
+			lineHeight: '1.2',
+			letterSpacing: '0.02em',
+			padding: '0rem 1.25rem',
 		},
 		botMessage: {
 			backgroundColor: colors.message.bot,
@@ -596,7 +597,7 @@ const DeepTutorChatBoxMessage = ({
 		questionContainer: {
 			all: 'revert',
 			width: '100%',
-			margin: '0.5rem 0',
+			margin: '0rem 0 1.5rem 0',
 			display: 'flex',
 			flexDirection: 'column',
 			justifyContent: 'flex-start',
@@ -608,14 +609,15 @@ const DeepTutorChatBoxMessage = ({
 			all: 'revert',
 			background: colors.button.secondary,
 			color: theme === 'dark' ? '#ffffff' : colors.button.secondaryText,
-			border: `0.0625rem solid ${colors.button.secondaryBorder}`,
+			border: `1px solid ${colors.button.secondaryBorder}`,
 			borderRadius: '0.625rem',
 			padding: '0.625rem 1.25rem',
 			minWidth: '8rem',
-			maxWidth: '83%',
+			maxWidth: '85%',
 			fontWeight: 500,
-			fontSize: '1rem',
+			fontSize: '1.1rem',
 			lineHeight: '1.5',
+			letterSpacing: '0.02em',
 			cursor: 'pointer',
 			boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.04)',
 			textAlign: 'left',
@@ -774,18 +776,19 @@ const DeepTutorChatBoxMessage = ({
 						<div style={{
 							display: 'flex',
 							justifyContent: 'flex-start',
-							marginTop: '0.5rem',
+							marginTop: '0rem',
+							marginBottom: '3rem',
 							marginLeft: '0'
 						}}>
 							<button
 								style={{
 									all: 'revert',
-									background: '#0687E5',
-									color: 'white',
-									border: 'none',
-									borderRadius: '0.375rem',
+									background: '#FFFFFF',
+									color: '#0687E5',
+									border: '1px solid #0687E5',
+									borderRadius: '0.625rem',
 									padding: '0.25rem 0.5rem',
-									fontSize: '0.75rem',
+									fontSize: '0.875rem',
 									fontWeight: 500,
 									cursor: 'pointer',
 									boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.1)',
@@ -796,8 +799,8 @@ const DeepTutorChatBoxMessage = ({
 									gap: '0.25rem'
 								}}
 								onClick={() => downloadMessage(message, index)}
-								onMouseEnter={e => e.target.style.background = '#0570c0'}
-								onMouseLeave={e => e.target.style.background = '#0687E5'}
+								onMouseEnter={e => e.target.style.background = '#f0f8ff'}
+								onMouseLeave={e => e.target.style.background = '#FFFFFF'}
 								title={`Save message ${index + 1} as Zotero note`}
 							>
 								📝 Save as Note
@@ -810,7 +813,10 @@ const DeepTutorChatBoxMessage = ({
 							<div style={styles.followUpQuestionText}>
 							Follow-up Questions
 							</div>
-							<div style={styles.questionContainer}>
+							<div style={{
+								...styles.questionContainer,
+								marginTop: '0.3125rem'
+							}}>
 								{message.followUpQuestions.map((question, qIndex) => (
 									<button
 										key={qIndex}

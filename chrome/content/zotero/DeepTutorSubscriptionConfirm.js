@@ -51,7 +51,7 @@ const styles = {
 		color: '#fff',
 		width: '100%',
 		minHeight: '2.4375rem',
-		fontWeight: 500,
+		fontWeight: 600,
 		fontSize: '1rem',
 		border: 'none',
 		borderRadius: '0.625rem',

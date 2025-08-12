@@ -98,7 +98,7 @@ const styles = {
 	button: {
 		background: SKY,
 		color: '#fff',
-		fontWeight: 500,
+		fontWeight: 600,
 		fontSize: '1rem',
 		border: 'none',
 		borderRadius: '0.625rem',

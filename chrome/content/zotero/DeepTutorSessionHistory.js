@@ -30,7 +30,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		all: 'revert',
 		background: isDark ? 'transparent' : 'transparent',
 		color: isDark ? '#33A9FF' : '#0687E5',
-		fontWeight: 500,
+		fontWeight: 600,
 		fontSize: '1em',
 		border: `0.0625rem solid ${isDark ? '#33A9FF' : '#0687E5'}`,
 		borderRadius: '0.625rem',
@@ -120,7 +120,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		border: 'none',
 		borderRadius: '0.375rem',
 		textAlign: 'left',
-		fontWeight: 500,
+		fontWeight: 600,
 		fontSize: '1rem',
 		lineHeight: '1.2', // Increased line height for better text visibility
 		letterSpacing: '0%',
