@@ -28,7 +28,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 
 	const createSessionButtonStyle = {
 		all: 'revert',
-		background: isDark ? 'transparent' : 'transparent',
+		background: '#FFFFFF',
 		color: isDark ? '#33A9FF' : '#0687E5',
 		fontWeight: 600,
 		fontSize: '1em',

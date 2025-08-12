@@ -157,20 +157,20 @@ const DeepTutorBottomSection = (props) => {
 			marginBottom: '0.5rem',
 		},
 		userEmail: {
-			fontSize: '0.875rem',
+			fontSize: '1rem',
 			fontWeight: 500,
 			color: colors.text.secondary,
 			marginBottom: '0.25rem',
 		},
 		userStatus: {
-			fontSize: '0.75rem',
+			fontSize: '0.875rem',
 			color: colors.text.tertiary,
 		},
 		signOutButton: {
 			background: colors.error,
 			color: colors.text.inverse,
 			border: 'none',
-			borderRadius: '0.25rem',
+			borderRadius: '0.375rem',
 			padding: '0.375rem 0.75rem',
 			fontSize: '1rem',
 			fontWeight: 600,

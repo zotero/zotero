@@ -105,7 +105,7 @@ export default function DeepTutorWelcomePane({ onWelcomeSignIn, onSignInSuccess:
 		descText: {
 			width: '100%',
 			fontWeight: 400,
-			fontSize: '1.25rem',
+			fontSize: '1rem',
 			lineHeight: '135%',
 			letterSpacing: '0%',
 			textAlign: 'center',
