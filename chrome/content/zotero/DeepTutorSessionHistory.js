@@ -30,7 +30,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		all: 'revert',
 		background: isDark ? 'transparent' : 'transparent',
 		color: isDark ? '#33A9FF' : '#0687E5',
-		fontWeight: 600,
+		fontWeight: 500,
 		fontSize: '1em',
 		border: `0.0625rem solid ${isDark ? '#33A9FF' : '#0687E5'}`,
 		borderRadius: '0.625rem',
@@ -113,14 +113,14 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 	const sessionButtonStyle = {
 		all: 'revert',
 		width: '100%',
-		minHeight: '2.5rem', // Fixed height for consistency
+		minHeight: '3rem', // Fixed height for consistency
 		fontFamily: 'Roboto, sans-serif',
 		padding: '0.5rem 1.2rem',
 		background: colors.background.tertiary,
 		border: 'none',
 		borderRadius: '0.375rem',
 		textAlign: 'left',
-		fontWeight: 600,
+		fontWeight: 500,
 		fontSize: '1rem',
 		lineHeight: '1.2', // Increased line height for better text visibility
 		letterSpacing: '0%',

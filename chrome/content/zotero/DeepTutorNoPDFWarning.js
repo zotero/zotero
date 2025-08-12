@@ -4,8 +4,6 @@ import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
 const SKY = '#0687E5';
 
-
-
 export default function DeepTutorNoPDFWarning({ onClose }) {
 	const { colors } = useDeepTutorTheme();
 	const [isButtonHovered, setIsButtonHovered] = React.useState(false);
@@ -28,29 +26,45 @@ export default function DeepTutorNoPDFWarning({ onClose }) {
 			flexDirection: 'column',
 			alignItems: 'center',
 		},
+		title: {
+			width: '100%',
+			textAlign: 'center',
+			background: 'linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)',
+			WebkitBackgroundClip: 'text',
+			WebkitTextFillColor: 'transparent',
+			backgroundClip: 'text',
+			color: '#0687E5',
+			fontWeight: 700,
+			fontSize: '1.5rem',
+			lineHeight: '1.2',
+			letterSpacing: '0%',
+			marginBottom: '1.5rem'
+		},
 		message: {
 			fontSize: '1rem',
 			color: colors.text.allText,
-			textAlign: 'center',
+			textAlign: 'left',
 			marginBottom: '1.875rem',
 			fontWeight: 400,
 			lineHeight: '135%',
 		},
 		button: {
 			all: 'revert',
-			background: SKY,
-			color: '#fff',
-			width: '100%',
-			minHeight: '2.4375rem',
-			fontWeight: 700,
-			fontSize: '1rem',
+			background: colors.button.primary,
+			color: colors.button.primaryText,
 			border: 'none',
 			borderRadius: '0.625rem',
-			padding: '0.875rem 0',
+			padding: '0.75rem 1.5rem',
+			minHeight: '3rem',
+			fontWeight: 500,
+			fontSize: '1rem',
 			cursor: 'pointer',
 			boxShadow: '0 0.0625rem 0.125rem rgba(0,0,0,0.08)',
 			fontFamily: 'Roboto, sans-serif',
 			letterSpacing: 0.2,
+			transition: 'background 0.2s',
+			display: 'block',
+			width: '100%',
 		},
 		buttonHover: {
 			background: '#007BD5',
@@ -71,6 +85,9 @@ export default function DeepTutorNoPDFWarning({ onClose }) {
 	return (
 		<div style={styles.container}>
 			<div style={styles.content}>
+				<div style={styles.title}>
+					File Type not Supported
+				</div>
 				<div style={styles.message}>
           Only PDF files are supported. Please make sure the selected item includes a PDF attachment.
 				</div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const AQUA = '#0AE2FF';
 const SKY = '#0687E5';
@@ -50,7 +51,7 @@ const styles = {
 		color: '#fff',
 		width: '100%',
 		minHeight: '2.4375rem',
-		fontWeight: 700,
+		fontWeight: 500,
 		fontSize: '1rem',
 		border: 'none',
 		borderRadius: '0.625rem',

@@ -89,7 +89,7 @@ const DeepTutorNoSessionPane = ({ onCreateNewSession }) => {
 		subText: {
 			width: '100%',
 			fontWeight: 600,
-			fontSize: '1rem',
+			fontSize: '1.25rem',
 			lineHeight: '100%',
 			letterSpacing: '0%',
 			textAlign: 'center',
@@ -98,7 +98,7 @@ const DeepTutorNoSessionPane = ({ onCreateNewSession }) => {
 		descText: {
 			width: '100%',
 			fontWeight: 400,
-			fontSize: '0.875rem',
+			fontSize: '1.25rem',
 			lineHeight: '135%',
 			letterSpacing: '0%',
 			textAlign: 'center',
