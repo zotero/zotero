@@ -32,7 +32,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		color: isDark ? '#33A9FF' : '#0687E5',
 		fontWeight: 600,
 		fontSize: '1em',
-		border: `0.0625rem solid ${isDark ? '#33A9FF' : '#0687E5'}`,
+		border: `1px solid ${isDark ? '#33A9FF' : '#0687E5'}`,
 		borderRadius: '0.625rem',
 		width: '100%',
 		minHeight: '3rem',
@@ -71,7 +71,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 
 	const sessionListTitleStyle = {
 		width: '100%',
-		fontSize: '1rem',
+		fontSize: '0.875rem',
 		fontWeight: 500,
 		lineHeight: '135%',
 		letterSpacing: '0%',
@@ -265,7 +265,7 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 		...createSessionButtonStyle,
 		background: isCreateSessionHovered
 			? (isDark ? '#1A8CD8' : '#E6F3FF')
-			: (isDark ? 'transparent' : 'transparent'),
+			: '#FFFFFF',
 	};
 
 	// Filter and sort sessions

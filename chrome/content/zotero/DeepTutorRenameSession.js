@@ -85,7 +85,7 @@ export default function DeepTutorRenameSession({
 			width: '100%',
 			display: 'flex',
 			flexDirection: 'column',
-			alignItems: 'center',
+			alignItems: 'flex-start',
 			padding: '0 0 1.25rem 0',
 		},
 		textArea: {
@@ -136,8 +136,8 @@ export default function DeepTutorRenameSession({
 		},
 		cancelButton: {
 			background: colors.button.secondary,
-			color: colors.button.secondaryText,
-			border: `0.0625rem solid ${colors.button.secondaryBorder}`,
+			color: colors.button.primary,
+			border: `1px solid ${colors.button.primary}`,
 			borderRadius: '0.625rem',
 			padding: '0.75rem 1.5rem',
 			minHeight: '3rem',

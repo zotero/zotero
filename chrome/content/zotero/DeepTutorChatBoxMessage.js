@@ -615,7 +615,7 @@ const DeepTutorChatBoxMessage = ({
 			minWidth: '8rem',
 			maxWidth: '85%',
 			fontWeight: 500,
-			fontSize: '1.1rem',
+			fontSize: '1rem',
 			lineHeight: '1.5',
 			letterSpacing: '0.02em',
 			cursor: 'pointer',

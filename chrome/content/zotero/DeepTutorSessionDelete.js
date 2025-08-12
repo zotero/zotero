@@ -80,7 +80,7 @@ export default function DeepTutorSessionDelete({
 		message: {
 			fontSize: '1rem',
 			color: colors.text.allText,
-			textAlign: 'center',
+			textAlign: 'left',
 			marginBottom: '1.875rem',
 			fontWeight: 400,
 			lineHeight: '135%',
@@ -114,8 +114,8 @@ export default function DeepTutorSessionDelete({
 		},
 		cancelButton: {
 			background: colors.button.secondary,
-			color: colors.button.secondaryText,
-			border: `0.0625rem solid ${colors.button.secondaryBorder}`,
+			color: colors.button.primary,
+			border: `1px solid ${colors.button.primary}`,
 			borderRadius: '0.625rem',
 			padding: '0.75rem 1.5rem',
 			minHeight: '3rem',

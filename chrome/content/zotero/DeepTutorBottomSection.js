@@ -136,8 +136,8 @@ const DeepTutorBottomSection = (props) => {
 		componentButton: {
 			padding: '0.375rem 1.125rem',
 			borderRadius: '0.375rem',
-			border: `0.0625rem solid ${colors.button.primary}`,
-			background: colors.background.primary,
+			border: `1px solid ${colors.button.primary}`,
+			background: '#FFFFFF',
 			color: colors.button.primary,
 			fontWeight: 500,
 			cursor: 'pointer',
