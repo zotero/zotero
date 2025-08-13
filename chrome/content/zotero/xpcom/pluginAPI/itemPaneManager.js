@@ -568,7 +568,7 @@
 				return false;
 			}
 			return option.sidenav.orderable ?? true;
-		}
+		},
 
 		/**
 		 * Register a custom item pane info section row.
