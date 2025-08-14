@@ -609,7 +609,7 @@ const DeepTutorChatBoxMessage = ({
 			all: 'revert',
 			background: colors.button.secondary,
 			color: theme === 'dark' ? '#ffffff' : colors.button.secondaryText,
-			border: `1px solid ${colors.button.secondaryBorder}`,
+			border: theme === 'dark' ? `1px solid ${colors.button.primary}` : `1px solid ${colors.button.secondaryBorder}`,
 			borderRadius: '0.625rem',
 			padding: '0.625rem 1.25rem',
 			minWidth: '8rem',
@@ -677,7 +677,7 @@ const DeepTutorChatBoxMessage = ({
 							fontWeight: 500
 						}}
 						onClick={() => toggleStreamingComponent(messageId)}
-						onMouseEnter={e => e.target.style.background = colors.background.primary}
+						onMouseEnter={e => e.target.style.background = theme === 'dark' ? colors.button.hover : colors.background.primary}
 						onMouseLeave={e => e.target.style.background = colors.background.quaternary}
 						title={isStreamingComponentVisible ? "Hide streaming view" : "Show streaming view"}
 					>
@@ -783,9 +783,9 @@ const DeepTutorChatBoxMessage = ({
 							<button
 								style={{
 									all: 'revert',
-									background: '#FFFFFF',
-									color: '#0687E5',
-									border: '1px solid #0687E5',
+									background: theme === 'dark' ? colors.button.secondary : '#FFFFFF',
+									color: theme === 'dark' ? colors.button.primary : '#0687E5',
+									border: theme === 'dark' ? `1px solid ${colors.button.primary}` : '1px solid #0687E5',
 									borderRadius: '0.625rem',
 									padding: '0.25rem 0.5rem',
 									fontSize: '0.875rem',
@@ -799,8 +799,8 @@ const DeepTutorChatBoxMessage = ({
 									gap: '0.25rem'
 								}}
 								onClick={() => downloadMessage(message, index)}
-								onMouseEnter={e => e.target.style.background = colors.background.quaternary}
-								onMouseLeave={e => e.target.style.background = '#FFFFFF'}
+								onMouseEnter={e => e.target.style.background = theme === 'dark' ? colors.background.quaternary : colors.background.quaternary}
+								onMouseLeave={e => e.target.style.background = theme === 'dark' ? colors.button.secondary : '#FFFFFF'}
 								title={`Save message ${index + 1} as Zotero note`}
 							>
 								📝 Save as Note
@@ -822,7 +822,7 @@ const DeepTutorChatBoxMessage = ({
 										key={qIndex}
 										style={{
 											...styles.questionButton,
-											background: hoveredQuestion === qIndex ? (theme === 'dark' ? colors.button.hover : colors.background.quaternary) : colors.button.secondary
+											background: hoveredQuestion === qIndex ? colors.background.quaternary : colors.button.secondary
 										}}
 										onClick={() => handleQuestionClick(question)}
 										onMouseEnter={() => setHoveredQuestion(qIndex)}

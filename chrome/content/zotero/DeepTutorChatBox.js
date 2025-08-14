@@ -110,7 +110,7 @@ const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.s
 const StopIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_STOP.svg';
 const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
 const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
-	const { colors, theme } = useDeepTutorTheme();
+	const { colors, theme, isDark } = useDeepTutorTheme();
 	
 	// Theme-aware styles
 	const styles = {
@@ -2001,7 +2001,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						overflow: hidden !important;
 					}
 					.deeptutor-source-button:hover {
-						background: ${colors.button.hover} !important;
+						background: ${colors.button.primaryHover} !important;
 						opacity: 0.8 !important;
 						transform: scale(1.05) !important;
 						box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.15) !important;
@@ -2348,7 +2348,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 						...styles.textInput,
 						opacity: iniWait ? 0.5 : 1,
 						cursor: iniWait ? "not-allowed" : "text",
-						color: colors.text.tertiary
+						color: colors.text.primary
 					}}
 					value={inputValue}
 					onChange={handleInputChange}

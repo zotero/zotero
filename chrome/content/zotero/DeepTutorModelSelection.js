@@ -37,7 +37,7 @@ const SessionType = {
 
 
 const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, onShowNoPDFWarning }, ref) => {
-	const { colors, isDark } = useDeepTutorTheme();
+	const { colors, theme, isDark } = useDeepTutorTheme();
 	
 	// Theme-aware styles
 	const styles = {
@@ -337,7 +337,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 			overflowY: 'auto',
 			overflowX: 'auto',
 			padding: '0 0.75rem 0.75rem 0',
-			background: colors.background.primary,
+			background: theme === 'light' ? '#FFFFFF' : colors.background.tertiary,
 			border: `0.0625rem solid ${colors.border.primary}`,
 			borderRadius: '0.5rem',
 			boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
@@ -394,7 +394,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 			maxHeight: '18.75rem',
 			overflowY: 'auto',
 			background: colors.background.primary,
-			border: `0.0625rem solid ${colors.border.primary}`,
+			border: isDark ? `1px solid ${colors.popup.border}` : `0.0625rem solid ${colors.border.primary}`,
 			borderRadius: '0.5rem',
 			boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
 			zIndex: 1000,
@@ -1393,7 +1393,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 
 	const createButtonDynamicStyle = {
 		...styles.createButton,
-		background: isCreateHovered ? colors.button.hover : colors.button.primary,
+		background: isCreateHovered ? colors.button.primaryHover : colors.button.primary,
 	};
 
 	const handleSearchItemMouseEnter = id => setHoveredSearchItem(id);
@@ -1609,7 +1609,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 					...createButtonDynamicStyle,
 					opacity: isEffectivelyFrozen ? 0.8 : 1,
 					cursor: isEffectivelyFrozen ? 'not-allowed' : 'pointer',
-					background: isEffectivelyFrozen ? '#6B7B84' : (isCreateHovered ? colors.button.hover : colors.button.primary)
+					background: isEffectivelyFrozen ? '#6B7B84' : (isCreateHovered ? colors.button.primaryHover : colors.button.primary)
 				}}
 				onClick={!isEffectivelyFrozen ? handleSubmit : undefined}
 				onMouseEnter={!isEffectivelyFrozen ? handleCreateMouseEnter : undefined}

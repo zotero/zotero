@@ -138,7 +138,7 @@ const DeepTutorNoSessionPane = ({ onCreateNewSession }) => {
 
 	const buttonStyle = {
 		...styles.createSessionButton,
-		background: isHovered ? colors.button.hover : colors.button.primary,
+		background: isHovered ? colors.button.primaryHover : colors.button.primary,
 	};
 
 	const FolderImg = 'chrome://zotero/content/DeepTutorMaterials/Welcome/WELCOME_FOLDER.svg';

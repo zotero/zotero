@@ -328,6 +328,7 @@ const DeepTutorMain = (props) => {
 						maxWidth: '24rem',
 						width: '100%',
 						position: 'relative',
+						border: isDark ? `1px solid ${colors.popup.border}` : 'none',
 					}}>
 						{/* Header */}
 						<div style={{
@@ -392,12 +393,17 @@ const DeepTutorMain = (props) => {
 					justifyContent: 'center',
 					zIndex: 1000,
 				}}>
-					<DeepTutorSessionDelete
-						sessionToDelete={props.sessionToDelete}
-						sessionName={props.sessionNameToDelete}
-						onConfirmDelete={() => props.handleConfirmDelete(props.sessionToDelete)}
-						onCancelDelete={props.handleCancelDelete}
-					/>
+					<div style={{
+						border: isDark ? `1px solid ${colors.popup.border}` : 'none',
+						borderRadius: '0.5rem',
+					}}>
+						<DeepTutorSessionDelete
+							sessionToDelete={props.sessionToDelete}
+							sessionName={props.sessionNameToDelete}
+							onConfirmDelete={() => props.handleConfirmDelete(props.sessionToDelete)}
+							onCancelDelete={props.handleCancelDelete}
+						/>
+					</div>
 				</div>
 			)}
 
@@ -414,15 +420,20 @@ const DeepTutorMain = (props) => {
 					justifyContent: 'center',
 					zIndex: 1000,
 				}}>
-					<DeepTutorRenameSession
-						sessionId={props.sessionToRename}
-						currentSessionName={props.sessionNameToRename}
-						onConfirmRename={(_sessionId) => {
-							props.handleRenameSuccess();
-							props.handleCancelRename();
-						}}
-						onCancelRename={props.handleCancelRename}
-					/>
+					<div style={{
+						border: isDark ? `1px solid ${colors.popup.border}` : 'none',
+						borderRadius: '0.5rem',
+					}}>
+						<DeepTutorRenameSession
+							sessionId={props.sessionToRename}
+							currentSessionName={props.sessionNameToRename}
+							onConfirmRename={(_sessionId) => {
+								props.handleRenameSuccess();
+								props.handleCancelRename();
+							}}
+							onCancelRename={props.handleCancelRename}
+						/>
+					</div>
 				</div>
 			)}
 
@@ -446,6 +457,7 @@ const DeepTutorMain = (props) => {
 						maxWidth: '24rem',
 						width: '100%',
 						position: 'relative',
+						border: isDark ? `1px solid ${colors.popup.border}` : 'none',
 					}}>
 						<button
 							onClick={props.toggleNoPDFWarningPopup}
@@ -493,6 +505,7 @@ const DeepTutorMain = (props) => {
 						maxWidth: '24rem',
 						width: '100%',
 						position: 'relative',
+						border: isDark ? `1px solid ${colors.popup.border}` : 'none',
 					}}>
 						<button
 							onClick={props.toggleSubscriptionConfirmPopup}
@@ -542,6 +555,7 @@ const DeepTutorMain = (props) => {
 						maxWidth: '24rem',
 						width: '100%',
 						position: 'relative',
+						border: isDark ? `1px solid ${colors.popup.border}` : 'none',
 					}}>
 						<button
 							onClick={props.toggleManageSubscriptionPopup}
@@ -593,6 +607,7 @@ const DeepTutorMain = (props) => {
 						maxWidth: '24rem',
 						width: '100%',
 						position: 'relative',
+						border: isDark ? `1px solid ${colors.popup.border}` : 'none',
 					}}>
 						{/* Header */}
 						<div style={{

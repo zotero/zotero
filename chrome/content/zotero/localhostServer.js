@@ -27,7 +27,6 @@ import { DT_BASE_URL } from './api/libs/api.js';
  *
  * Integrates with Zotero's existing HTTP server to provide text messaging functionality.
  */
-
 class DeepTutorLocalhostServer {
 
 	/**
@@ -564,14 +563,17 @@ class DeepTutorLocalhostServer {
 						return;
 					}
 
+					// Check if dark mode is active
+					const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+					const borderColor = isDarkMode ? '#33A9FF' : '#dc3545';
 					const popupContent = `
 						<div style="
 							position: fixed;
 							top: 50%;
 							left: 50%;
 							transform: translate(-50%, -50%);
-							background: white;
-							border: 2px solid #dc3545;
+							background: ${isDarkMode ? '#1E1E1E' : 'white'};
+							border: 1px solid ${borderColor};
 							border-radius: 10px;
 							padding: 20px;
 							box-shadow: 0 4px 20px rgba(0,0,0,0.3);

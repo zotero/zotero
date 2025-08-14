@@ -3,15 +3,13 @@ import PropTypes from 'prop-types';
 import { updateSessionName } from './api/libs/api.js';
 import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
-const SKY = '#0687E5';
-
 export default function DeepTutorRenameSession({
 	sessionId,
 	currentSessionName: _currentSessionName = '',
 	onConfirmRename,
 	onCancelRename
 }) {
-	const { colors, isDark } = useDeepTutorTheme();
+	const { colors } = useDeepTutorTheme();
 	const [newSessionName, setNewSessionName] = useState(_currentSessionName);
 	const [isRenaming, setIsRenaming] = useState(false);
 	const [isCancelHovered, setIsCancelHovered] = useState(false);
@@ -161,7 +159,7 @@ export default function DeepTutorRenameSession({
 			marginBottom: '0.5rem',
 		},
 		confirmButtonHover: {
-			background: isDark ? SKY : colors.button.hover,
+			background: colors.button.primaryHover,
 		},
 		cancelButton: {
 			background: colors.button.secondary,
@@ -181,7 +179,7 @@ export default function DeepTutorRenameSession({
 			width: '100%',
 		},
 		cancelButtonHover: {
-			background: isDark ? '#1A8CD8' : colors.background.quaternary,
+			background: colors.background.quaternary,
 		}
 	};
 

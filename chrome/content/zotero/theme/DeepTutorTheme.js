@@ -47,8 +47,8 @@ const DeepTutorColors = {
 			primary: "#0687E5",
 			secondary: "#FFFFFF",
 			disabled: "#CCCCCC",
-			hover: "#0894F0",
-			primaryHover: "#0570c0",
+			hover: "#f0f8ff",
+			primaryHover: "#2B99E8",
 			primaryText: "#FFFFFF",
 			secondaryText: "#1C1B1F",
 			secondaryBorder: "#0687E5"
@@ -117,17 +117,22 @@ const DeepTutorColors = {
 			primary: "#33A9FF",
 			secondary: "#1C1B1F",
 			disabled: "#666666",
-			hover: "#0570c0",
-			primaryHover: "#0570c0",
+			hover: "#4DB8FF",
+			primaryHover: "#4DB8FF",
 			primaryText: "#1C1B1F",
 			secondaryText: "#BDBDBD",
 			secondaryBorder: "#BDBDBD"
 		},
 		
+		// Popup colors
+		popup: {
+			border: "#33A9FF" // Same as primary button background for consistency
+		},
+		
 		// Message colors
 		message: {
-			user: "#33A9FF",
-			bot: "#2A2A2E",
+			user: "#1C1B1F",
+			bot: "transparent",
 			userText: "#FFFFFF",
 			botText: "#E1E1E1"
 		},
@@ -260,4 +265,4 @@ class DeepTutorThemeManager {
 const themeManager = new DeepTutorThemeManager();
 
 // Export for use in components
-export { DeepTutorColors, DeepTutorThemeManager, themeManager }; 
+export { DeepTutorColors, DeepTutorThemeManager, themeManager };

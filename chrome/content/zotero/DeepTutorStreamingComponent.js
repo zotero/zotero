@@ -642,7 +642,7 @@ const DeepTutorStreamingComponent = ({ streamText, hideStreamResponse }) => {
 						overflow: hidden !important;
 					}
 					.deeptutor-source-button:hover {
-						background: ${colors.button.hover} !important;
+						background: ${colors.button.primaryHover} !important;
 						opacity: 0.8 !important;
 						transform: scale(1.05) !important;
 						box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.15) !important;

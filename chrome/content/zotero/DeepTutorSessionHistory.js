@@ -28,11 +28,11 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 
 	const createSessionButtonStyle = {
 		all: 'revert',
-		background: '#FFFFFF',
-		color: isDark ? '#33A9FF' : '#0687E5',
+		background: isDark ? colors.button.secondary : '#FFFFFF',
+		color: isDark ? colors.button.primary : '#0687E5',
 		fontWeight: 600,
 		fontSize: '1em',
-		border: `1px solid ${isDark ? '#33A9FF' : '#0687E5'}`,
+		border: `1px solid ${isDark ? colors.button.primary : '#0687E5'}`,
 		borderRadius: '0.625rem',
 		width: '100%',
 		minHeight: '3rem',
@@ -269,8 +269,8 @@ function SessionHistory({ sessions = [], onSessionSelect, isLoading = false, err
 	const createSessionButtonDynamicStyle = {
 		...createSessionButtonStyle,
 		background: isCreateSessionHovered
-			? (isDark ? '#1A8CD8' : colors.background.quaternary)
-			: '#FFFFFF',
+			? (isDark ? colors.background.quaternary : colors.background.quaternary)
+			: (isDark ? colors.button.secondary : '#FFFFFF'),
 	};
 
 	// Filter and sort sessions

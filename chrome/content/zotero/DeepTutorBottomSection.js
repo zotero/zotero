@@ -259,7 +259,7 @@ const DeepTutorBottomSection = (props) => {
 	const renderMain = () => {
 		const upgradeButtonDynamicStyle = {
 			...styles.upgradeButton,
-			background: isUpgradeHovered ? colors.button.hover : colors.button.primary,
+			background: isUpgradeHovered ? colors.button.primaryHover : colors.button.primary,
 		};
 
 		// Determine button text based on subscription status

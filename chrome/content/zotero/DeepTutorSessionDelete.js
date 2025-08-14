@@ -2,15 +2,13 @@ import React, { useState } from 'react'; // eslint-disable-line no-unused-vars
 import PropTypes from 'prop-types';
 import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
-const SKY = '#0687E5';
-
 export default function DeepTutorSessionDelete({
 	sessionToDelete,
 	onConfirmDelete,
 	onCancelDelete,
 	sessionName = 'this session'
 }) {
-	const { colors, isDark } = useDeepTutorTheme();
+	const { colors } = useDeepTutorTheme();
 	const [isConfirmHovered, setIsConfirmHovered] = useState(false);
 	const [isCancelHovered, setIsCancelHovered] = useState(false);
 
@@ -130,7 +128,7 @@ export default function DeepTutorSessionDelete({
 			width: '100%',
 		},
 		cancelButtonHover: {
-			background: isDark ? '#1A8CD8' : '#F8F6F7',
+			background: colors.background.quaternary,
 		}
 	};
 

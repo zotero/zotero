@@ -177,7 +177,7 @@ export default function DeepTutorWelcomePane({ onWelcomeSignIn, onSignInSuccess:
 
 	const signInButtonStyle = {
 		...styles.signInButton,
-		background: isSignInHovered ? colors.button.hover : colors.button.primary,
+		background: isSignInHovered ? colors.button.primaryHover : colors.button.primary,
 	};
 
 	const googleButtonStyle = {
