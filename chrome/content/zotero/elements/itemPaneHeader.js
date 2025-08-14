@@ -180,7 +180,13 @@
 		}
 		
 		async save() {
+			if (!this.editable) {
+				return;
+			}
 			if (this._item) {
+				if (!this._item.itemID) {
+					throw new Error('Item has not been added to library');
+				}
 				this._item.setField(this._titleFieldID, this.titleField.value);
 				await this._item.saveTx();
 			}
