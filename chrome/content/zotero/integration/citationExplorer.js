@@ -27,11 +27,11 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const diff = require('diff');
 const VirtualizedTable = require('components/virtualized-table');
-const { getCSSIcon, IconAttachSmall } = require('components/icons');
 // TODO: Create a custom row provider for citationExplorer to use with base ItemTree.
 // Currently uses changeCollectionTreeRow which only exists on CollectionViewItemTree,
 // so this is broken until we either switch to CollectionViewItemTree or create a
 // simple row provider that can display arbitrary items.
+const { getCSSIcon, CSSIcon } = require('components/icons');
 const ItemTree = require('zotero/itemTree');
 const { getColumnDefinitionsByDataKey } = require('zotero/itemTreeColumns');
 const { makeRowRenderer } = VirtualizedTable;
@@ -46,9 +46,14 @@ let selectedTab = 0;
 
 const citationColumns = [
 	{
+		dataKey: 'title',
+		label: "Citation",
+		type: 'html'
+	},
+	{
 		dataKey: 'isLinked',
 		label: 'Is Linked',
-		iconLabel: <IconAttachSmall/>,
+		iconLabel: <CSSIcon name="link" className="icon-16"/>,
 		width: 26,
 		staticWidth: true,
 		fixedWidth: true,
@@ -62,18 +67,13 @@ const citationColumns = [
 			return icon;
 		}
 	},
-	{
-		dataKey: 'title',
-		label: "Citation",
-		type: 'html'
-	},
 ];
 
 let itemColumns = getColumnDefinitionsByDataKey(['title', 'firstCreator', 'date']);
 itemColumns.push({
 	dataKey: 'isLinked',
 	label: 'Is Linked',
-	iconLabel: <IconAttachSmall/>,
+	iconLabel: <CSSIcon name="link" className="icon-16"/>,
 	width: 26,
 	staticWidth: true,
 	fixedWidth: true,
@@ -149,7 +149,8 @@ window.ZoteroDocumentCitations = {
 		// init VirtualizedTable
 		if (!citationList) {
 			await new Promise((resolve) => {
-				ReactDOM.createRoot(document.querySelector('#citation-list')).render(<VirtualizedTable
+				const domElem = document.querySelector('#citation-list-container');
+				ReactDOM.createRoot(domElem).render(<VirtualizedTable
 					id="citation-list"
 					ref={(ref) => {
 						citationList = ref;
@@ -165,6 +166,11 @@ window.ZoteroDocumentCitations = {
 					onSelectionChange={this.onCitationSelectionChange.bind(this)}
 					getRowString={index => this._renderedCitationRows[index].title}
 				/>);
+				domElem.addEventListener("focusout", (event) => {
+					if (event.relatedTarget && !event.relatedTarget.closest("#citation-list-container")) {
+						citationList?.selection.clearSelection()
+					}
+				});
 			});
 		}
 		citationList.invalidate();
@@ -178,7 +184,7 @@ window.ZoteroDocumentCitations = {
 
 		let filteredItems = rows.filter(item => !this._filteredItems.has(item.id));
 		if (!itemList) {
-			let domElem = document.querySelector('#item-list');
+			let domElem = document.querySelector('#item-list-container');
 			itemList = await ItemTree.init(domElem, {
 				id: "document-collections",
 				regularOnly: true,
@@ -186,9 +192,15 @@ window.ZoteroDocumentCitations = {
 				shouldListenForNotifications: false,
 				onSelectionChange: this.onItemSelectionChange.bind(this),
 				onActivate: this.onItemActivate.bind(this),
-				emptyMessage: Zotero.getString('pane.items.loading')
+				emptyMessage: Zotero.getString('pane.items.loading'),
+				firstColumnExtraWidth: 28-16,
 			});
 			await itemList.waitForLoad();
+			domElem.addEventListener("focusout", (event) => {
+				if (event.relatedTarget && !event.relatedTarget.closest("#item-list-container")) {
+					itemList?.selection.clearSelection()
+				}
+			});
 		}
 		await itemList.changeCollectionTreeRow({
 			getItems: async () => filteredItems,
