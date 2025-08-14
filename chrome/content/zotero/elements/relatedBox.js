@@ -86,17 +86,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			body.replaceChildren();
 
 			if (this._item) {
-				let relatedKeys = this._item.relatedItems;
-				
-				let relatedItems = relatedKeys.map((key) => {
-					let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, key);
-					if (!item) {
-						Zotero.debug(`Related item ${this._item.libraryID}/${key} not found `
-							+ `for item ${this._item.libraryKey}`, 2);
-					}
-					return item;
-				}).filter(Boolean);
-				
+				let relatedItems = this._getRelatedItems();
 				// Sort by display title
 				var collation = Zotero.getLocaleCollation();
 				var titles = new Map();
@@ -222,12 +212,31 @@ import { getCSSItemTypeIcon } from 'components/icons';
 		}
 
 		_updateCount() {
-			let count = this._item.relatedItems.length;
+			let count = this._getRelatedItems().length;
 			this._section.setCount(count);
 		}
 
 		_id(id) {
 			return this.querySelector(`[id=${id}]`);
+		}
+
+		_getRelatedItems() {
+			let relatedKeys = this._item.relatedItems;
+			
+			let relatedItems = relatedKeys.map((key) => {
+				let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, key);
+				if (!item) {
+					Zotero.debug(`Related item ${this._item.libraryID}/${key} not found `
+						+ `for item ${this._item.libraryKey}`, 2);
+				}
+				return item;
+			}).filter(Boolean);
+
+			// Unless the item itself is trashed, filter out trashed related items
+			if (!this._item.deleted) {
+				relatedItems = relatedItems.filter(item => !item.deleted);
+			}
+			return relatedItems;
 		}
 
 		receiveKeyboardFocus(_direction) {

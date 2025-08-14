@@ -114,6 +114,32 @@ describe("Related Box", function () {
 		while (relatedbox.querySelector('.body').innerHTML.includes(title1));
 	});
 	
+	it("should exclude trashed related items", async function () {
+		var item1 = await createDataObject('item');
+		var item2 = await createDataObject('item');
+		var item3 = await createDataObject('item');
+		await relateItems(item1, item2, item3);
+
+		item3.deleted = true;
+		await item3.saveTx();
+
+		await win.ZoteroPane.selectItem(item1.id);
+
+		var relatedbox = doc.getElementById('zotero-editpane-related');
+		
+		// Wait for relations list to populate
+		do {
+			await Zotero.Promise.delay(50);
+		}
+		while (!relatedbox.querySelectorAll('.row').length);
+
+		// Ensure only non-trashed item is displayed
+		var rows = [...relatedbox.querySelectorAll('.row')];
+		assert.lengthOf(rows, 1);
+		assert.equal(rows[0].textContent, item2.getDisplayTitle());
+		assert.equal(relatedbox._getRelatedItems().length, 1);
+	});
+	
 	describe("Add button", function () {
 		it("should add a related item", function* () {
 			var item1 = yield createDataObject('item');
