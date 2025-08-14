@@ -375,7 +375,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			top: '100%',
 			left: 0,
 			right: 0,
-			background: colors.background.tertiary,
+			background: theme === 'light' ? '#FFFFFF' : colors.background.tertiary,
 			border: `0.0625rem solid ${colors.border.primary}`,
 			borderRadius: '0.5rem',
 			boxShadow: '0 0.125rem 0.25rem rgba(0,0,0,0.1)',
@@ -389,7 +389,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			all: 'revert',
 			width: '100%',
 			padding: '0.75rem',
-			background: colors.background.quaternary,
+			background: theme === 'light' ? '#FFFFFF' : colors.background.quaternary,
 			border: 'none',
 			borderBottom: `0.0625rem solid ${colors.border.primary}`,
 			color: colors.text.quaternary,
@@ -407,7 +407,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 			textOverflow: 'ellipsis',
 		},
 		contextDocumentButtonHover: {
-			background: colors.background.primary,
+			background: theme === 'light' ? '#F8F6F7' : colors.background.primary,
 		},
 		followUpQuestionText: {
 			display: 'flex',
@@ -2264,10 +2264,14 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 										...(hoveredContextDoc === index
 											? {
 												...styles.contextDocumentButtonHover,
-												background: contextDoc.filePath ? colors.background.primary : colors.background.secondary, // Theme-aware hover colors
+												background: contextDoc.filePath
+													? (theme === 'light' ? '#F8F6F7' : colors.background.primary)
+													: colors.background.secondary, // Light mode pearl hover, dark mode theme-aware
 											}
 											: {
-												background: contextDoc.filePath ? colors.background.quaternary : colors.background.secondary // Theme-aware normal colors
+												background: contextDoc.filePath
+													? (theme === 'light' ? '#FFFFFF' : colors.background.quaternary)
+													: colors.background.secondary // Light mode white, dark mode theme-aware
 											}),
 										borderBottom: index === contextDocuments.length - 1 ? "none" : `0.0625rem solid ${colors.border.primary}`,
 										flexDirection: "column",

@@ -799,7 +799,7 @@ const DeepTutorChatBoxMessage = ({
 									gap: '0.25rem'
 								}}
 								onClick={() => downloadMessage(message, index)}
-								onMouseEnter={e => e.target.style.background = '#f0f8ff'}
+								onMouseEnter={e => e.target.style.background = colors.background.quaternary}
 								onMouseLeave={e => e.target.style.background = '#FFFFFF'}
 								title={`Save message ${index + 1} as Zotero note`}
 							>
@@ -822,7 +822,7 @@ const DeepTutorChatBoxMessage = ({
 										key={qIndex}
 										style={{
 											...styles.questionButton,
-											background: hoveredQuestion === qIndex ? colors.button.hover : colors.button.secondary
+											background: hoveredQuestion === qIndex ? (theme === 'dark' ? colors.button.hover : colors.background.quaternary) : colors.button.secondary
 										}}
 										onClick={() => handleQuestionClick(question)}
 										onMouseEnter={() => setHoveredQuestion(qIndex)}

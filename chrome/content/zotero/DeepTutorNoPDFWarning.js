@@ -5,7 +5,7 @@ import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 const SKY = '#0687E5';
 
 export default function DeepTutorNoPDFWarning({ onClose }) {
-	const { colors } = useDeepTutorTheme();
+	const { colors, isDark } = useDeepTutorTheme();
 	const [isButtonHovered, setIsButtonHovered] = React.useState(false);
 
 	const styles = {
@@ -67,7 +67,7 @@ export default function DeepTutorNoPDFWarning({ onClose }) {
 			width: '100%',
 		},
 		buttonHover: {
-			background: '#007BD5',
+			background: isDark ? '#007BD5' : colors.button.hover,
 		}
 	};
 

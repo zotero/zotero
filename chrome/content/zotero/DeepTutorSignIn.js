@@ -11,7 +11,7 @@ const PEARL = '#F2F2F2';
 const GoogleImg = 'chrome://zotero/content/DeepTutorMaterials/SignIn/Google.png';
 
 export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess, localhostServer }) {
-	const { colors } = useDeepTutorTheme();
+	const { colors, isDark } = useDeepTutorTheme();
 	
 	// Theme-aware styles
 	const styles = {
@@ -256,7 +256,7 @@ export default function DeepTutorSignIn({ onSignInSignUp, onSignInSuccess, local
 
 	const signInButtonDynamicStyle = {
 		...styles.signInButton,
-		background: isSignInHovered ? '#007BD5' : SKY,
+		background: isSignInHovered ? (isDark ? '#007BD5' : colors.button.hover) : SKY,
 		...(isLoading ? styles.signInButtonDisabled : {})
 	};
 

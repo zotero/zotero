@@ -4,7 +4,6 @@ import { updateSessionName } from './api/libs/api.js';
 import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
 
 const SKY = '#0687E5';
-const PEARL = '#F8F6F7';
 
 export default function DeepTutorRenameSession({
 	sessionId,
@@ -162,7 +161,7 @@ export default function DeepTutorRenameSession({
 			marginBottom: '0.5rem',
 		},
 		confirmButtonHover: {
-			background: SKY,
+			background: isDark ? SKY : colors.button.hover,
 		},
 		cancelButton: {
 			background: colors.button.secondary,
@@ -182,7 +181,7 @@ export default function DeepTutorRenameSession({
 			width: '100%',
 		},
 		cancelButtonHover: {
-			background: isDark ? '#1A8CD8' : PEARL,
+			background: isDark ? '#1A8CD8' : colors.background.quaternary,
 		}
 	};
 

@@ -11,6 +11,7 @@ const PERSON_ICON_DARK_PATH = 'chrome://zotero/content/DeepTutorMaterials/Bot/BO
 const DeepTutorBottomSection = (props) => {
 	const { colors, isDark } = useDeepTutorTheme();
 	const [isUpgradeHovered, setIsUpgradeHovered] = useState(false);
+	const [isSignOutHovered, setIsSignOutHovered] = useState(false);
 
 	// Choose icons based on theme
 	const feedIconPath = isDark ? FEED_ICON_DARK_PATH : FEED_ICON_PATH;
@@ -179,9 +180,6 @@ const DeepTutorBottomSection = (props) => {
 			minHeight: '3rem',
 			marginTop: '0.5rem',
 			transition: 'background 0.2s',
-			':hover': {
-				background: colors.error
-			}
 		},
 	};
 
@@ -231,8 +229,13 @@ const DeepTutorBottomSection = (props) => {
 								<div style={styles.userStatus}>Logged in</div>
 							</div>
 							<button
-								style={styles.signOutButton}
+								style={{
+									...styles.signOutButton,
+									background: isSignOutHovered ? '#dc3545' : colors.error
+								}}
 								onClick={props.onSignOut}
+								onMouseEnter={() => setIsSignOutHovered(true)}
+								onMouseLeave={() => setIsSignOutHovered(false)}
 							>
                              Sign out
 							</button>

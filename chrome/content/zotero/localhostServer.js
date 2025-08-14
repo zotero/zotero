@@ -325,14 +325,15 @@ class DeepTutorLocalhostServer {
 								border-top: 1px solid #eee;
 							">
 								<button onclick="this.parentElement.parentElement.remove()" style="
-									background: #0687E5;
+									background: #0894F0;
 									color: white;
 									border: none;
 									padding: 8px 16px;
 									border-radius: 5px;
 									cursor: pointer;
 									font-size: 14px;
-								">Close</button>
+									transition: background 0.2s;
+								" onmouseover="this.style.background='#0687E5'" onmouseout="this.style.background='#0894F0'">Close</button>
 							</div>
 						</div>
 					`;
