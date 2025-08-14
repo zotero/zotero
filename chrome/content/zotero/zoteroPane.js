@@ -5106,12 +5106,15 @@ var ZoteroPane = new function () {
 				return;
 			}
 			let fileExists;
+			let pathIsValid;
 			try {
 				fileExists = await IOUtils.exists(path);
+				pathIsValid = true;
 			}
 			catch (e) {
 				Zotero.logError(e);
 				fileExists = false;
+				pathIsValid = false;
 			}
 			
 			// If the file is an evicted iCloud Drive file, launch that to trigger a download.
@@ -5120,7 +5123,7 @@ var ZoteroPane = new function () {
 			// for the original file to exist and then continue with regular file opening below.
 			//
 			// To trigger eviction for testing, use Cirrus from https://eclecticlight.co/downloads/
-			if (!fileExists && Zotero.isMac && isLinkedFile) {
+			if (!fileExists && pathIsValid && Zotero.isMac && isLinkedFile) {
 				// Get the path to the .icloud file
 				let iCloudPath = Zotero.File.getEvictedICloudPath(path);
 				if (await IOUtils.exists(iCloudPath)) {
@@ -5381,10 +5384,21 @@ var ZoteroPane = new function () {
 		if (attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) return;
 		
 		var path = attachment.getFilePath();
-		var fileExists = await IOUtils.exists(path);
+		
+		let fileExists;
+		let pathIsValid;
+		try {
+			fileExists = await IOUtils.exists(path);
+			pathIsValid = true;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			fileExists = false;
+			pathIsValid = false;
+		}
 		
 		// If file doesn't exist but an evicted iCloud Drive file does, reveal that instead
-		if (!fileExists && Zotero.isMac && !attachment.isStoredFileAttachment()) {
+		if (!fileExists && pathIsValid && Zotero.isMac && !attachment.isStoredFileAttachment()) {
 			let iCloudPath = Zotero.File.getEvictedICloudPath(path);
 			if (await IOUtils.exists(iCloudPath)) {
 				path = iCloudPath;
