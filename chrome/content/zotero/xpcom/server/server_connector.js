@@ -1115,8 +1115,8 @@ Zotero.Server.Connector.Ping.prototype = {
 					supportsAttachmentUpload: true,
 					supportsTagsAutocomplete: true,
 					googleDocsAddNoteEnabled: true,
+					googleDocsCitationExplorerEnabled: Zotero.Prefs.get("integration.googleDocsCitationExplorerEnabled"),
 					canUserAddNote: true,
-					googleDocsCitationExplorerEnabled: false,
 					translatorsHash,
 					sortedTranslatorHash
 				}
