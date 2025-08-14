@@ -90,7 +90,6 @@
 <!ENTITY zotero.toolbar.importFromClipboard "استيراد من الحافظة">
 <!ENTITY zotero.toolbar.export.label "تصدير المكتبة...">
 <!ENTITY zotero.toolbar.rtfScan.label "فحص ملف RTF">
-<!ENTITY zotero.toolbar.timeline.label "إنشاء خط زمني">
 <!ENTITY zotero.toolbar.preferences.label "التفضيلات...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "الدعم و الوثائق">
 <!ENTITY zotero.toolbar.about.label "حول زوتيرو">

@@ -90,7 +90,6 @@
 <!ENTITY zotero.toolbar.importFromClipboard "درون‌برد از حافظه">
 <!ENTITY zotero.toolbar.export.label "صدور کتابخانه...">
 <!ENTITY zotero.toolbar.rtfScan.label "پیمایش RTF">
-<!ENTITY zotero.toolbar.timeline.label "ساخت Time Line">
 <!ENTITY zotero.toolbar.preferences.label "تنظیمات...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "پشتیبانی و راهنما">
 <!ENTITY zotero.toolbar.about.label "درباره زوترو">

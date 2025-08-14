@@ -90,7 +90,6 @@
 <!ENTITY zotero.toolbar.importFromClipboard "Emporzhiañ diwar ar golver">
 <!ENTITY zotero.toolbar.export.label "Ezporzhiañ al levraoueg...">
 <!ENTITY zotero.toolbar.rtfScan.label "Skan RTF">
-<!ENTITY zotero.toolbar.timeline.label "Krouiñ ur red-amzer">
 <!ENTITY zotero.toolbar.preferences.label "Arventennoù...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Skoazellerezh ha titouroù">
 <!ENTITY zotero.toolbar.about.label "Diwar-benn Zotero">

@@ -90,7 +90,6 @@
 <!ENTITY zotero.toolbar.importFromClipboard "இடைநிலைப் பலகையிலிருந்து இறக்குமதி">
 <!ENTITY zotero.toolbar.export.label "ஏற்றுமதி நூலகம்…">
 <!ENTITY zotero.toolbar.rtfScan.label "உஉவ வருடல்">
-<!ENTITY zotero.toolbar.timeline.label "காலவரிசையை உருவாக்கவும்">
 <!ENTITY zotero.toolbar.preferences.label "விருப்பத்தேர்வுகள்…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "உதவி மற்றும் ஆவணங்கள்">
 <!ENTITY zotero.toolbar.about.label "சோட்டெரோ பற்றி">

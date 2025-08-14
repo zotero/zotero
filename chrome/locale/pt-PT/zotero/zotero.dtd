@@ -90,7 +90,6 @@
 <!ENTITY zotero.toolbar.importFromClipboard "Importar dos Recortes">
 <!ENTITY zotero.toolbar.export.label "Exportar Biblioteca...">
 <!ENTITY zotero.toolbar.rtfScan.label "Processar RTF">
-<!ENTITY zotero.toolbar.timeline.label "Criar Linha do Tempo">
 <!ENTITY zotero.toolbar.preferences.label "Preferências...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Suporte e Documentação">
 <!ENTITY zotero.toolbar.about.label "Acerca do Zotero">

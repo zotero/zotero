@@ -90,7 +90,6 @@
 <!ENTITY zotero.toolbar.importFromClipboard "ייבוא מלוח הגזירים">
 <!ENTITY zotero.toolbar.export.label "ייצוא ספרייה…">
 <!ENTITY zotero.toolbar.rtfScan.label "סריקת RTF">
-<!ENTITY zotero.toolbar.timeline.label "יצירת ציר זמן">
 <!ENTITY zotero.toolbar.preferences.label "העדפות…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "תמיכה ותיעוד">
 <!ENTITY zotero.toolbar.about.label "על Zotero">
