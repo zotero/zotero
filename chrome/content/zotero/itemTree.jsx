@@ -3131,22 +3131,26 @@ var ItemTree = class ItemTree extends LibraryTree {
 			indentSpan.className = "cell-indent";
 			indentSpan.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
 
-			let twisty;
-			if (this.isContainerEmpty(index)) {
-				twisty = document.createElement('span');
-				twisty.classList.add("spacer-twisty");
-			}
-			else {
-				twisty = getCSSIcon("twisty");
-				twisty.classList.add('twisty');
-				if (this.isContainerOpen(index)) {
-					twisty.classList.add('open');
+			let twisty = "";
+			// No need to reserve space for a twisty if we're only displaying regular items.
+			if (!this.props.regularOnly) {
+				if (this.isContainerEmpty(index)) {
+					twisty = document.createElement('span');
+					twisty.classList.add("spacer-twisty");
 				}
-				twisty.addEventListener('mousedown', event => event.stopPropagation());
-				twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
-					{ passive: true });
-				twisty.addEventListener('dblclick', event => event.stopImmediatePropagation(),
-					{ passive: true });
+				else {
+					twisty = getCSSIcon("twisty");
+					twisty.classList.add('twisty');
+					if (this.isContainerOpen(index)) {
+						twisty.classList.add('open');
+					}
+					twisty.style.pointerEvents = 'auto';
+					twisty.addEventListener('mousedown', event => event.stopPropagation());
+					twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
+						{ passive: true });
+					twisty.addEventListener('dblclick', event => event.stopImmediatePropagation(),
+						{ passive: true });
+				}
 			}
 
 			const icon = this._getIcon(index);
