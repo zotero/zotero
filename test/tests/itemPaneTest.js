@@ -2217,7 +2217,7 @@ describe("Item pane", function () {
 			
 			if (
 				Zotero.Reader._readers.some(
-					r => isVisible(r._iframe.contentDocument.querySelector('.toolbar-button.context-pane-toggle'))
+					r => isVisible(r._iframe.contentDocument?.querySelector('.toolbar-button.context-pane-toggle'))
 				)
 			) {
 				return 'reader toolbar';
