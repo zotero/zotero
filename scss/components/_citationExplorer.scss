@@ -1,29 +1,72 @@
 #zotero-citation-explorer-dialog {
 	min-height: 500px;
-	
+
 	dialog {
 		max-height: 100vh;
+		padding: 0 0 .3em;
+		background: var(--material-sidepane);
+	}
+
+	search-textbox, input, button {
+		margin: 0;
 	}
 	
-	.virtualized-table-container {
+	.citation-explorer-grid {
+		display: grid;
+		grid-template-columns: 4fr 6fr;
+		grid-template-rows: auto auto minmax(0, 1fr) auto;
 		height: 100%;
-		flex: 1;
-	}
-	
-	.xul-border-div {
-		-moz-box-flex: 1;
+		
+		.citation-explorer-grid-left {
+			border-right: solid 1px ThreeDShadow;
+		}
+
+		.grid-padded-section {
+			padding: 8px 16px;
+		}
 	}
 
 	#citations-label {
-		margin: 5px 0 4px;
+		align-content: center;
 	}
 
-	.panel {
-		border: solid 1px ThreeDShadow;
-		padding: 5px;
+	.tabbox-container {
+		display: flex;
 	}
 	
-	.search-box {
-		margin: 2px -1px;
+	.searchbox-container {
+		border-bottom: 1px solid ThreeDShadow;
+	}
+
+	.virtualized-table-container {
+		height: 100%;
+	}
+
+	.virtualized-table:focus-within .row.highlighted:not(.selected) {
+		background: initial !important;
+	}
+
+	.button-container {
+		border-block: 1px solid ThreeDShadow;
+		display: flex;
+	}
+	
+	@media (-moz-platform: macos) {
+		tab[visuallyselected="true"]:not(:-moz-window-inactive) {
+			color: initial !important;
+		}
+		#citations-label {
+			font-size: 1.2em;
+		}
+	}
+
+	@media (-moz-platform: windows) {
+		tab:focus-visible > .tab-middle {
+			outline: none;
+		}
+
+		input[type="button"], button {
+			margin-top: 7px;
+		}
 	}
 }
