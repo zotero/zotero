@@ -649,6 +649,7 @@ quicksearch-input =
     .aria-label = Quick Search
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
+quicksearch-apply-to-all = Apply to All Collections
 
 item-pane-header-view-as =
     .label = View As
