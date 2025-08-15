@@ -82,6 +82,7 @@ pref("extensions.zotero.itemPaneHeader.bibEntry.locale", "");
 //Tag Selector
 pref("extensions.zotero.tagSelector.showAutomatic", true);
 pref("extensions.zotero.tagSelector.displayAllTags", false);
+pref("extensions.zotero.tagSelector.showAnnotationFilters", false);
 
 pref("extensions.zotero.downloadPDFViaBrowser.onLoadTimeout", 3000);
 pref("extensions.zotero.downloadPDFViaBrowser.downloadTimeout", 60000);
