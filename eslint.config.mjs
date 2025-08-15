@@ -94,8 +94,6 @@ export default [
 			"chrome/content/zotero/xpcom/rdf/*",
 			"chrome/content/zotero/xpcom/xregexp/*",
 			"chrome/content/zotero/xpcom/translation/tlds.js",
-			"chrome/skin/default/zotero/timeline/bundle.js",
-			"chrome/skin/default/zotero/timeline/timeline-api.js",
 			"resource/bluebird/*",
 			"resource/classnames.js",
 			"resource/citeproc_rs*",

@@ -90,7 +90,6 @@
 <!ENTITY zotero.toolbar.importFromClipboard "Importuoti iš iškarpinės">
 <!ENTITY zotero.toolbar.export.label "Eksportuoti biblioteką...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF peržvelgimas">
-<!ENTITY zotero.toolbar.timeline.label "Kurti laiko juostą">
 <!ENTITY zotero.toolbar.preferences.label "Nuostatos...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Palaikymas ir dokumentacija">
 <!ENTITY zotero.toolbar.about.label "Apie Zotero">

@@ -90,7 +90,6 @@
 <!ENTITY zotero.toolbar.importFromClipboard "Importálás a vágólapról">
 <!ENTITY zotero.toolbar.export.label "Könyvtár exportálása...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF átvizsgálása…">
-<!ENTITY zotero.toolbar.timeline.label "Kronológia létrehozása">
 <!ENTITY zotero.toolbar.preferences.label "Beállítások...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Támogatás és dokumentáció">
 <!ENTITY zotero.toolbar.about.label "Névjegy">

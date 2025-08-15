@@ -90,7 +90,6 @@
 <!ENTITY zotero.toolbar.importFromClipboard "Lõikepuhvrist importimine">
 <!ENTITY zotero.toolbar.export.label "Raamatukogu eksport...">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Skänn">
-<!ENTITY zotero.toolbar.timeline.label "Ajajoone loomine">
 <!ENTITY zotero.toolbar.preferences.label "Eelistused...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Abi ja dokumentatsioon">
 <!ENTITY zotero.toolbar.about.label "Zotero kohta">
