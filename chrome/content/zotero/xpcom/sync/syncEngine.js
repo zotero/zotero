@@ -1086,21 +1086,21 @@ Zotero.Sync.Data.Engine.prototype._startUpload = async function () {
 	}
 	
 	try {
-		Zotero.debug(JSON.stringify(objectDeletions));
-		for (let objectType in objectDeletions) {
-			this._statusCheck();
-			
-			libraryVersion = await this._uploadDeletions(
-				objectType, objectDeletions[objectType], libraryVersion
-			);
-		}
-		
 		Zotero.debug(JSON.stringify(objectIDs));
 		for (let objectType in objectIDs) {
 			this._statusCheck();
 			
 			libraryVersion = await this._uploadObjects(
 				objectType, objectIDs[objectType], libraryVersion
+			);
+		}
+		
+		Zotero.debug(JSON.stringify(objectDeletions));
+		for (let objectType in objectDeletions) {
+			this._statusCheck();
+			
+			libraryVersion = await this._uploadDeletions(
+				objectType, objectDeletions[objectType], libraryVersion
 			);
 		}
 	}
