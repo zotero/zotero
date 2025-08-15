@@ -2188,13 +2188,6 @@ var ZoteroPane = new function () {
 		else if (collectionTreeRow.isShare()) {
 			return false;
 		}
-		// If multiple items are selected and only some are annotations, disallow delete unless we
-		// are in the trash, in which case any selected item can be erased
-		let selected = this.itemsView.getSelectedItems();
-		if (!selected.every(item => item.isAnnotation())
-			&& selected.some(item => item.isAnnotation())) {
-			return collectionTreeRow.isTrash();
-		}
 		return true;
 	};
 
@@ -2245,11 +2238,7 @@ var ZoteroPane = new function () {
 			return;
 		}
 		var prompt;
-		// Backspace on annotation items = prompt to erase
-		if (this.itemsView.getSelectedItems().every(item => item.isAnnotation())) {
-			prompt = toDelete;
-		}
-		else if (collectionTreeRow.isPublications()) {
+		if (collectionTreeRow.isPublications()) {
 			let toRemoveFromPublications = {
 				title: Zotero.getString('pane.items.removeFromPublications.title'),
 				text: Zotero.getString(
@@ -2448,7 +2437,16 @@ var ZoteroPane = new function () {
 						childIDs.push(...parent.getNotes(true));
 					}
 					if (!parent.isAttachment()) {
-						childIDs.push(...parent.getAttachments(true));
+						let attachmentIDs = parent.getAttachments(true);
+						childIDs.push(...attachmentIDs);
+						// Include annotations of attachments
+						for (let attachmentID of attachmentIDs) {
+							let attachment = Zotero.Items.get(attachmentID);
+							if (attachment.isFileAttachment()) {
+								let annotations = attachment.getAnnotations(true);
+								childIDs.push(...annotations.map(a => a.id));
+							}
+						}
 					}
 				}
 				let childItems = Zotero.Items.get(childIDs);
@@ -4059,7 +4057,9 @@ var ZoteroPane = new function () {
 		if (annotationsSelected) {
 			let menuItemsForAnnotations = [
 				'createNoteFromAnnotations',
-				'deleteFromLibrary'
+				'deleteFromLibrary',
+				'restoreToLibrary',
+				'moveToTrash'
 			];
 			for (let i in m) {
 				if (menuItemsForAnnotations.includes(i)) continue;
