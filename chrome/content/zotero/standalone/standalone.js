@@ -167,7 +167,7 @@ const ZoteroStandalone = new function () {
 		document.querySelectorAll('.menu-type-reader.' + subtype).forEach(el => el.hidden = false);
 	};
 
-	this.onFileMenuOpen = function () {
+	this.onFileMenuOpen = function (event) {
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		
 		// PDF annotation transfer ("Import Annotation"/"Store Annotations in File")
@@ -228,8 +228,17 @@ const ZoteroStandalone = new function () {
 		catch (e) {
 			Zotero.logError(e);
 		}
+
+		this.onUpdateCustomMenus(event, 'file');
 	};
-	
+
+	this.onEditMenuOpen = function (event) {
+		this.updateQuickCopyOptions();
+		// goUpdateGlobalEditMenuItems(true) is necessary to update Edit menu when contenteditable is focused
+		window.goUpdateGlobalEditMenuItems(true);
+
+		this.onUpdateCustomMenus(event, 'edit');
+	};
 	
 	/**
 	 * Builds new item menu
@@ -369,7 +378,7 @@ const ZoteroStandalone = new function () {
 	};
 	
 	
-	this.onGoMenuOpen = function () {
+	this.onGoMenuOpen = function (event) {
 		var keyBack = document.getElementById('key_back');
 		var keyForward = document.getElementById('key_forward');
 
@@ -402,10 +411,12 @@ const ZoteroStandalone = new function () {
 			this.updateMenuItemEnabled('go-menuitem-back', reader.canNavigateBack);
 			this.updateMenuItemEnabled('go-menuitem-forward', reader.canNavigateForward);
 		}
+
+		this.onUpdateCustomMenus(event, 'go');
 	};
 	
 	
-	this.onViewMenuOpen = function () {
+	this.onViewMenuOpen = function (event) {
 		// PDF Reader
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
@@ -480,8 +491,48 @@ const ZoteroStandalone = new function () {
 			'view-menuitem-recursive-collections',
 			Zotero.Prefs.get('recursiveCollections')
 		);
+
+		this.onUpdateCustomMenus(event, 'view');
 	};
-	
+
+	this.onToolsMenuOpen = function (event) {
+		this.onUpdateCustomMenus(event, 'tools');
+	};
+
+	this.onHelpMenuOpen = function (event) {
+		this.onUpdateCustomMenus(event, 'help');
+	};
+
+	this.onUpdateCustomMenus = function (event, type) {
+		let { type: tabType, subType: tabSubType, id: tabID } = Zotero_Tabs.getTabInfo();
+
+		const POPUP_SELECTOR_MAP = {
+			file: '#menu_FilePopup',
+			edit: '#menu_EditPopup',
+			go: '#menu_goPopup',
+			view: '#menu_viewPopup',
+			tools: '#menu_ToolsPopup',
+			help: '#menu_HelpPopup'
+		};
+		let popup = document.querySelector(POPUP_SELECTOR_MAP[type]);
+		if (event.target !== popup) {
+			return;
+		}
+		Zotero.MenuManager.updateMenuPopup(popup, `main/menubar/${type}`, {
+			event,
+			tabID,
+			tabType,
+			tabSubType,
+			getContext: () => ({
+				items: tabType === 'library'
+					? ZoteroPane.getSelectedItems()
+					: [Zotero.Items.get(Zotero_Tabs._getTab(Zotero_Tabs.selectedID).tab?.data?.itemID)],
+				tabType,
+				tabSubType,
+				tabID: Zotero_Tabs.selectedID
+			})
+		});
+	};
 	
 	this.onViewMenuItemClick = function (event) {
 		var menuitem = event.originalTarget;
