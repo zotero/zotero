@@ -2195,6 +2195,10 @@ var ZoteroPane = new function () {
 			&& selected.some(item => item.isAnnotation())) {
 			return collectionTreeRow.isTrash();
 		}
+		// External annotations cannot be deleted (unless their parent item is deleted )
+		if (selected.every(item => item.isAnnotation() && item.annotationIsExternal)) {
+			return false;
+		}
 		return true;
 	};
 
