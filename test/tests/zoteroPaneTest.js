@@ -368,6 +368,25 @@ describe("ZoteroPane", function() {
 			await zp.viewAttachment(attachment.id);
 			assert.equal(attachment.attachmentContentType, 'application/epub+zip');
 		});
+
+		it("should handle Windows paths on macOS/Linux", async function () {
+			if (!Zotero.isMac && !Zotero.isLinux) {
+				this.skip();
+				return;
+			}
+			
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let attachment = await Zotero.Attachments.linkFromFile({ file });
+			attachment.attachmentPath = 'C:\\some\\windows\\path';
+			await attachment.saveTx();
+
+			let stub = sinon.stub(zp, 'showAttachmentNotFoundDialog');
+			await zp.viewAttachment(attachment.id);
+			assert.ok(stub.calledOnce);
+			assert.ok(stub.calledWith(attachment));
+			stub.restore();
+		});
 	})
 	
 	
