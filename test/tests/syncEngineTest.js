@@ -3537,29 +3537,31 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.ok(Zotero.Items.get(item1.id));
 			assert.isFalse(Zotero.Items.get(item2.id));
 		});
-
-		it("should not return relation to a deleted item in response", async function () {
+		
+		
+		// https://github.com/zotero/zotero/pull/5486
+		it("should not cause server to return relation to a deleted item", async function () {
 			({ engine, client, caller } = await setup());
-
+			
 			let library = Zotero.Libraries.userLibrary;
 			let libraryVersion = 5;
 			library.libraryVersion = libraryVersion;
 			await library.saveTx();
-
-			var itemOne = await createDataObject('item');
-			var itemTwo = await createDataObject('item');
-			itemOne.addRelatedItem(itemTwo);
-			itemTwo.addRelatedItem(itemOne);
-			await itemOne.saveTx();
-			await itemTwo.saveTx();
-
+			
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
+			item1.addRelatedItem(item2);
+			item2.addRelatedItem(item1);
+			await item1.saveTx();
+			await item2.saveTx();
+			
 			// Simulate response object that would come from the dataserver.
 			let responseObj = {};
-			responseObj["0"] = itemOne.toResponseJSON();
+			responseObj["0"] = item1.toResponseJSON();
 			responseObj["0"].version = libraryVersion + 1;
-			responseObj["1"] = itemTwo.toResponseJSON();
+			responseObj["1"] = item2.toResponseJSON();
 			responseObj["1"].version = libraryVersion + 1;
-
+			
 			server.respond(async function (req) {
 				if (req.method == "DELETE") {
 					// On delete, the data for the second item is deleted and it
@@ -3583,7 +3585,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 							responseToSend[index] = responseObj[index];
 						}
 					}
-
+					
 					req.respond(
 						200,
 						{
@@ -3598,16 +3600,16 @@ describe("Zotero.Sync.Data.Engine", function () {
 					);
 				}
 			});
-
+			
 			// Sync to send the items to the dataserver
 			await engine._startUpload();
 			// Erase one item and sync again
-			await itemTwo.eraseTx();
+			await item2.eraseTx();
 			await engine._startUpload();
-
+			
 			// Make sure that the server does not send a relation to the
 			// deleted item in the response
-			assert.equal(itemOne.relatedItems.length, 0);
+			assert.equal(item1.relatedItems.length, 0);
 		});
 	});
 	

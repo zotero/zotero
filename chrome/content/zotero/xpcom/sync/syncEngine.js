@@ -1094,7 +1094,7 @@ Zotero.Sync.Data.Engine.prototype._startUpload = async function () {
 				objectType, objectDeletions[objectType], libraryVersion
 			);
 		}
-
+		
 		Zotero.debug(JSON.stringify(objectIDs));
 		for (let objectType in objectIDs) {
 			this._statusCheck();
