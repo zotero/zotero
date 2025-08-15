@@ -1341,7 +1341,12 @@ Zotero.Items = function () {
 		// Add relations to toItem
 		let oldRelations = fromItem.getRelations();
 		for (let pred in oldRelations) {
-			oldRelations[pred].forEach(obj => toItem.addRelation(pred, obj));
+			oldRelations[pred].forEach((obj) => {
+				// Avoid adding a relation to self
+				if (obj !== toURI) {
+					toItem.addRelation(pred, obj);
+				}
+			});
 		}
 		
 		// Remove merge-tracking relations from fromItem, so that there aren't two
@@ -1362,6 +1367,8 @@ Zotero.Items = function () {
 			// so those will follow the merge-tracking relations and can optimize their
 			// path if they're resaved.
 			if (rel.subject.libraryID != toItem.libraryID) continue;
+			// Do not add a relation to self
+			if (rel.subject.id == toItem.id) continue;
 			rel.subject.removeRelation(rel.predicate, fromURI);
 			rel.subject.addRelation(rel.predicate, toURI);
 			await rel.subject.save();
