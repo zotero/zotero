@@ -77,7 +77,7 @@ which rsync || { $FAIL_CMD; FAILED=1; }
 if [ $platform = "w" ]; then
 	echo -n "Checking for 7z: "
 	which 7z || { $FAIL_CMD; FAILED=1; }
-	
+
 	echo -n "Checking for rcedit: "
 	which rcedit || { $FAIL_CMD; FAILED=1; echo " -- Install with fetch_rcedit"; }
 fi
@@ -86,13 +86,13 @@ if [ $platform = "w" ]; then
 	echo
 	echo "${hdr_start}Checking Windows packaging requirements:${hdr_stop}"
 	echo
-	
+
 	echo -n "Checking for upx: "
 	which upx || { $FAIL_CMD; FAILED=1; }
 
 	echo -n "Checking for uuidgen: "
 	which uuidgen || { $FAIL_CMD; FAILED=1; }
-	
+
 	echo -n "Checking for code-signing script: "
 	if [ -x "$APP_ROOT_DIR/win/codesign" ]; then
 		echo "$APP_ROOT_DIR/win/codesign"
@@ -100,7 +100,7 @@ if [ $platform = "w" ]; then
 		$FAIL_CMD
 		FAILED=1
 	fi
-	
+
 	echo -n "Checking for Unicode NSIS: "
 	if [ -x "`cygpath -u \"${NSIS_DIR}makensis.exe\"`" ]; then
 		echo "`cygpath -u \"${NSIS_DIR}makensis.exe\"`"
@@ -108,7 +108,7 @@ if [ $platform = "w" ]; then
 		$FAIL_CMD
 		FAILED=1
 	fi
-	
+
 	plugin_path=$(cd "$NSIS_DIR\\Plugins\\x86-unicode" && pwd)
 	plugins="AppAssocReg ApplicationID InvokeShellVerb nsProcess ShellLink UAC"
 	echo "Checking for NSIS plugins in $plugin_path"
@@ -127,7 +127,7 @@ if [ $platform = "m" ]; then
 	echo
 	echo "${hdr_start}Checking Mac packaging requirements:${hdr_stop}"
 	echo
-	
+
 	echo -n "Checking for codesign: "
 	which /usr/bin/codesign || { $FAIL_CMD; FAILED=1; }
 fi
@@ -151,11 +151,13 @@ which sha512sum 2>/dev/null || which shasum 2>/dev/null || { $FAIL_CMD; FAILED=1
 echo -n "Checking for AWS CLI: "
 which aws || { $FAIL_CMD; FAILED=1; }
 
-echo -n "Checking for AWS S3 access: "
-aws s3 ls $S3_BUCKET/$S3_DIST_PATH | sed 's/^[[:blank:]]*//' || { $FAIL_CMD; FAILED=1; }
+# echo -n "Checking for AWS S3 access: "
+# aws s3 ls $S3_BUCKET/$S3_DIST_PATH/ | sed 's/^[[:blank:]]*//' || { $FAIL_CMD; FAILED=1; }
 
 echo -n "Checking for deploy host directory access: "
+echo -n "ssh $DEPLOY_HOST ls -d $DEPLOY_PATH || { $FAIL_CMD; FAILED=1; }"
 ssh $DEPLOY_HOST ls -d $DEPLOY_PATH || { $FAIL_CMD; FAILED=1; }
 
+echo -n "Checking done: status: $FAILED"
 
 exit $FAILED

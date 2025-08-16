@@ -8,6 +8,7 @@ import sys
 import shutil
 import json
 import traceback
+import hashlib
 
 MAJOR = None
 
@@ -17,42 +18,148 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument('-f', '--file', required=True, help="path to updates.json")
 parser.add_argument('-v', '--version', required=True, help='version number of build')
-parser.add_argument('-b', '--build_id', required=True, help="build ID ('20160801142343')")
+parser.add_argument('--dist-dir', help='distribution directory containing MAR files')
+parser.add_argument('--mar-file', help='direct path to MAR file')
+# parser.add_argument('-b', '--build_id', required=True, help="build ID ('20160801142343')")
 
 args = parser.parse_args()
+
+def calculate_sha512(file_path):
+    """Calculate SHA512 hash of a file"""
+    sha512_hash = hashlib.sha512()
+    try:
+        with open(file_path, "rb") as f:
+            # Read file in chunks to handle large files efficiently
+            for chunk in iter(lambda: f.read(4096), b""):
+                sha512_hash.update(chunk)
+        return sha512_hash.hexdigest()
+    except FileNotFoundError:
+        print(f"Error: File {file_path} not found", file=sys.stderr)
+        raise
+    except Exception as e:
+        print(f"Error calculating hash for {file_path}: {e}", file=sys.stderr)
+        raise
+
+def get_file_size(file_path):
+    """Get file size in bytes"""
+    try:
+        return os.path.getsize(file_path)
+    except FileNotFoundError:
+        print(f"Error: File {file_path} not found", file=sys.stderr)
+        raise
+    except Exception as e:
+        print(f"Error getting size for {file_path}: {e}", file=sys.stderr)
+        raise
+
+def find_mar_file(version, dist_dir=None, mar_file=None):
+    """Find the MAR file for the given version"""
+    # If direct path provided, use it
+    if mar_file:
+        if os.path.exists(mar_file):
+            print(f"Using provided MAR file: {mar_file}")
+            return os.path.abspath(mar_file)
+        else:
+            print(f"Error: Provided MAR file not found: {mar_file}", file=sys.stderr)
+            return None
+
+    mar_filename = f'DeepTutor-{version}-full_mac.mar'
+
+    # Define search paths in order of preference
+    search_paths = []
+
+    # If dist_dir is provided, use it first
+    if dist_dir:
+        search_paths.append(os.path.join(dist_dir, mar_filename))
+
+    # Default search paths
+    search_paths.extend([
+        mar_filename,  # Current directory
+        f'../dist/{mar_filename}',
+        f'../../dist/{mar_filename}',
+        f'dist/{mar_filename}',
+        f'../../../dist/{mar_filename}',  # For deeper nested scripts
+    ])
+
+    # Try to find the file
+    for path in search_paths:
+        if os.path.exists(path):
+            print(f"Found MAR file: {path}")
+            return os.path.abspath(path)
+
+    print(f"Error: Could not find MAR file for version {version}", file=sys.stderr)
+    print("Searched paths:", file=sys.stderr)
+    for path in search_paths:
+        print(f"  - {path}", file=sys.stderr)
+
+    return None
 
 def main():
     try:
         file = args.file
         version = args.version
+        dist_dir = args.dist_dir
+        mar_file = args.mar_file
         short_version = version[0:3]
-        
+
+        # Construct the URL to the mar file
+        mar_file_url = f'https://deeptutor.s3.us-west-2.amazonaws.com/update/release/{version}/DeepTutor-{version}-full_mac.mar'
+
+        # Find the local MAR file
+        actual_file_path = find_mar_file(version, dist_dir, mar_file)
+
+        if not actual_file_path:
+            print(f"Error: Cannot proceed without MAR file for version {version}", file=sys.stderr)
+            return 1
+
+        # Calculate hash and size
+        hash_value = calculate_sha512(actual_file_path)
+        file_size = get_file_size(actual_file_path)
+
+        print(f"Using file: {actual_file_path}")
+        print(f"SHA512: {hash_value}")
+        print(f"Size: {file_size} bytes")
+
+        # Validate hash length (SHA512 should be 128 characters)
+        if len(hash_value) != 128:
+            print(f"Error: Invalid SHA512 hash length: {len(hash_value)} (expected 128)", file=sys.stderr)
+            return 1
+
         # Back up JSON file
         shutil.copy2(file, file + '.bak')
-        
+
         # Read in existing file
         with open(file) as f:
             updates = json.loads(f.read())
-        
+
         updates.append({
             'version': version,
-            'buildID': args.build_id,
-            'detailsURL': f'https://www.zotero.org/support/{short_version}_changelog',
-            'major': MAJOR
+            # 'buildID': args.build_id,
+            'detailsURL': f'https://deeptutor.knowhiz.us/dzDownload',
+            'major': MAJOR,
+            'patches': [
+                {
+                    'type': 'complete',
+                    'url': mar_file_url,
+                    'hashFunction': 'sha512',
+                    'hashValue': hash_value,
+                    'size': file_size
+                }
+            ]
         })
-        
+
         # Keep last 5 entries
         updates = updates[-5:]
-        
+
         # Write new file
-        updates = json.dumps(updates, indent=2)
+        updates_json = json.dumps(updates, indent=2)
         with open(file, 'w') as f:
-            f.write(updates + "\n")
-        
-        print(updates)
-        
+            f.write(updates_json + "\n")
+
+        print("Updated manifest:")
+        print(updates_json)
+
         return 0
-    
+
     except Exception as err:
         sys.stderr.write("\n" + traceback.format_exc())
         return 1

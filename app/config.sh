@@ -17,14 +17,14 @@ APP_ID="zotero\@zotero.org"
 SIGN=0
 
 # OS X Developer ID certificate information
-DEVELOPER_ID=F0F1FE48DB909B263AC51C8215374D87FDC12121
+DEVELOPER_ID="Developer ID Application: Curastone CORP. (232AGCYZ2Z)"
 # Keychain and keychain password, if not building via the GUI
-KEYCHAIN=""
-KEYCHAIN_PASSWORD=""
-NOTARIZATION_BUNDLE_ID=""
-NOTARIZATION_USER=""
-NOTARIZATION_TEAM_ID=""
-NOTARIZATION_PASSWORD=""
+KEYCHAIN="build"
+KEYCHAIN_PASSWORD="buildzotero"
+NOTARIZATION_BUNDLE_ID="us.knowhiz.deeptutor"
+NOTARIZATION_USER="blrbiran@163.com"
+NOTARIZATION_PASSWORD="xyru-xicf-rmmv-ukez"
+NOTARIZATION_TEAM_ID="232AGCYZ2Z"
 
 # Paths for Windows installer build
 NSIS_DIR='C:\Program Files (x86)\NSIS\'
@@ -37,13 +37,14 @@ STAGE_DIR="$DIR/staging"
 DIST_DIR="$DIR/dist"
 
 SOURCE_REPO_URL="https://github.com/zotero/zotero"
-S3_BUCKET="zotero-download"
+S3_BUCKET="deeptutor"
 S3_CI_ZIP_PATH="ci/client"
-S3_DIST_PATH="client"
+S3_DIST_PATH="update"
 
-DEPLOY_HOST="deploy.zotero"
-DEPLOY_PATH="www/www-production/public/download/client/manifests"
-DEPLOY_CMD="ssh $DEPLOY_HOST update-site-files"
+DEPLOY_HOST="as1"
+DEPLOY_PATH="/home/azureuser/server/client/update"
+# DEPLOY_CMD="ssh $DEPLOY_HOST update-site-files"
+DEPLOY_CMD=""
 
 BUILD_PLATFORMS=""
 NUM_INCREMENTALS=6

@@ -54,6 +54,7 @@ fi
 
 "$SCRIPT_DIR"/check_requirements
 
+
 VERSION="`cat \"$SOURCE_DIR\"/version`"
 if [ -z "$VERSION" ]; then
 	echo "Error getting version from $SOURCE_DIR/version"
@@ -67,14 +68,20 @@ else
 	SIGN=""
 fi
 
-# Build Zotero
-"$ROOT_DIR/build.sh" -d "$SOURCE_DIR" -p $PLATFORMS -c $CHANNEL $SIGN
+echo "test here 1"
 
-BUILD_ID=`cat "$DIST_DIR/build_id"`
-if [ -z "$BUILD_ID" ]; then
-	echo "Error getting build id"
-	exit 1
-fi
+# # Build Zotero
+# "$ROOT_DIR/build.sh" -d "$SOURCE_DIR" -p $PLATFORMS -c $CHANNEL $SIGN
+
+# echo "test here 2"
+
+# BUILD_ID=`cat "$DIST_DIR/build_id"`
+# if [ -z "$BUILD_ID" ]; then
+# 	echo "Error getting build id"
+# 	exit 1
+# fi
+
+echo "test here 5"
 
 TEMP_DIR=`mktemp -d`
 # Clean up on exit
@@ -86,42 +93,42 @@ trap cleanup EXIT
 # Build full update
 "$ROOT_DIR/update-packaging/build_autoupdate.sh" -f -c $CHANNEL -p $PLATFORMS -l $VERSION
 
-# Build incremental updates for each platform
-for i in `seq 0 1 $((${#PLATFORMS}-1))`
-do
-	case ${PLATFORMS:i:1} in
-		m)
-			platform=mac
-			platform_name=Mac
-			;;
-		w)
-			platform=win
-			platform_name=Windows
-			;;
-		l)
-			platform=linux
-			platform_name=Linux
-			;;
-		*)
-			echo "$0: Invalid platform option ${PLATFORMS:i:1}"
-			usage
-			;;
-	esac
-	
-	echo
-	echo "Getting $platform_name incrementals"
-	INCREMENTALS="`\"$SCRIPT_DIR/manage_incrementals\" -c $CHANNEL -p ${PLATFORMS:i:1} -n $NUM_INCREMENTALS`"
-	echo "$INCREMENTALS"
-	echo
-	
-	if [ -n "$INCREMENTALS" ]; then
-		for from in $INCREMENTALS; do
-			echo "Building incremental update for $platform_name from $from to $VERSION"
-			"$ROOT_DIR/update-packaging/build_autoupdate.sh" -i "$from" -c "$CHANNEL" -p ${PLATFORMS:i:1} -l $VERSION
-			echo
-		done
-	fi
-done
+# # Build incremental updates for each platform
+# for i in `seq 0 1 $((${#PLATFORMS}-1))`
+# do
+# 	case ${PLATFORMS:i:1} in
+# 		m)
+# 			platform=mac
+# 			platform_name=Mac
+# 			;;
+# 		w)
+# 			platform=win
+# 			platform_name=Windows
+# 			;;
+# 		l)
+# 			platform=linux
+# 			platform_name=Linux
+# 			;;
+# 		*)
+# 			echo "$0: Invalid platform option ${PLATFORMS:i:1}"
+# 			usage
+# 			;;
+# 	esac
+
+# 	echo
+# 	echo "Getting $platform_name incrementals"
+# 	INCREMENTALS="`\"$SCRIPT_DIR/manage_incrementals\" -c $CHANNEL -p ${PLATFORMS:i:1} -n $NUM_INCREMENTALS`"
+# 	echo "$INCREMENTALS"
+# 	echo
+
+# 	if [ -n "$INCREMENTALS" ]; then
+# 		for from in $INCREMENTALS; do
+# 			echo "Building incremental update for $platform_name from $from to $VERSION"
+# 			"$ROOT_DIR/update-packaging/build_autoupdate.sh" -i "$from" -c "$CHANNEL" -p ${PLATFORMS:i:1} -l $VERSION
+# 			echo
+# 		done
+# 	fi
+# done
 
 # Upload builds to S3
 "$SCRIPT_DIR/upload_builds" $CHANNEL $VERSION
@@ -132,7 +139,7 @@ mkdir "$TEMP_DIR/version_info"
 chmod g+ws "$TEMP_DIR/version_info"
 cp "$DIST_DIR"/files-* "$TEMP_DIR/version_info"
 chmod g+w "$TEMP_DIR"/version_info/files-*
-rsync -rv "$TEMP_DIR/version_info/" $DEPLOY_HOST:"$channel_deploy_path/$VERSION/"
+# rsync -rv "$TEMP_DIR/version_info/" $DEPLOY_HOST:"$channel_deploy_path/$VERSION/"
 
 # Download updates JSON for each platform, update it, and reupload it
 for i in `seq 0 1 $((${#PLATFORMS}-1))`
@@ -148,24 +155,61 @@ do
 			architectures="linux-i686 linux-x86_64"
 			;;
 	esac
-	
+
 	for arch in $architectures;
 	do
 		jsonfile="updates-$arch.json"
-		
+
+		# Determine the MAR file path based on architecture
+		# Note: MAR file names follow the pattern DeepTutor-${VERSION}-full_${build}.mar
+		case $arch in
+			mac)
+				mar_file="$DIST_DIR/DeepTutor-${VERSION}-full_mac.mar"
+				;;
+			win32)
+				mar_file="$DIST_DIR/DeepTutor-${VERSION}-full_win32.mar"
+				;;
+			win-x64)
+				mar_file="$DIST_DIR/DeepTutor-${VERSION}-full_win-x64.mar"
+				;;
+			win-arm64)
+				mar_file="$DIST_DIR/DeepTutor-${VERSION}-full_win-arm64.mar"
+				;;
+			linux-i686)
+				mar_file="$DIST_DIR/DeepTutor-${VERSION}-full_linux-i686.mar"
+				;;
+			linux-x86_64)
+				mar_file="$DIST_DIR/DeepTutor-${VERSION}-full_linux-x86_64.mar"
+				;;
+			*)
+				echo "Warning: Unknown architecture $arch, using mac MAR file"
+				mar_file="$DIST_DIR/DeepTutor-${VERSION}-full_mac.mar"
+				;;
+		esac
+
+		# Check if MAR file exists before proceeding
+		if [ ! -f "$mar_file" ]; then
+			echo "Error: MAR file not found: $mar_file"
+			echo "Skipping $arch update info generation"
+			continue
+		fi
+
+		echo "Using MAR file for $arch: $mar_file"
+
 		scp $DEPLOY_HOST:"$channel_deploy_path/$jsonfile" "$TEMP_DIR/$jsonfile"
-		"$SCRIPT_DIR/add_version_info" -f "$TEMP_DIR/$jsonfile" -v $VERSION -b $BUILD_ID
+		# "$SCRIPT_DIR/add_version_info" -f "$TEMP_DIR/$jsonfile" -v $VERSION -b $BUILD_ID
+		"$SCRIPT_DIR/add_version_info" -f "$TEMP_DIR/$jsonfile" -v $VERSION --mar-file "$mar_file"
 		scp "$TEMP_DIR/$jsonfile" $DEPLOY_HOST:"$channel_deploy_path/$jsonfile"
 	done
 done
 
-# Add version to incremental lists
-echo
-for i in `seq 0 1 $((${#PLATFORMS}-1))`
-do
-	"$SCRIPT_DIR/manage_incrementals" -c $CHANNEL -p ${PLATFORMS:i:1} -a $VERSION
-done
+# # Add version to incremental lists
+# echo
+# for i in `seq 0 1 $((${#PLATFORMS}-1))`
+# do
+# 	"$SCRIPT_DIR/manage_incrementals" -c $CHANNEL -p ${PLATFORMS:i:1} -a $VERSION
+# done
 
 $DEPLOY_CMD
 
-rm -rf "$STAGE_DIR"/*
+# rm -rf "$STAGE_DIR"/*

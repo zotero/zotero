@@ -105,15 +105,15 @@ for version in "$FROM" "$TO"; do
 	if [[ $version == "$TO" ]] && [[ $INCREMENTALS_FOUND == 0 ]] && [[ $BUILD_FULL == 0 ]]; then
 		exit
 	fi
-	
+
 	if [ -z "$version" ]; then
 		continue
 	fi
-	
-	echo "Getting Zotero version $version"
-	
+
+	echo "Getting DeepTutor version $version"
+
 	versiondir="$UPDATE_STAGE_DIR/$version"
-	
+
 	#
 	# If -l passed, use main build script's staging directory for TO files rather than downloading
 	# the given version.
@@ -124,30 +124,30 @@ for version in "$FROM" "$TO"; do
 			echo "Can't find local TO dir $STAGE_DIR"
 			exit 1
 		fi
-		
+
 		echo "Using files from $STAGE_DIR"
 		ln -s "$STAGE_DIR" "$versiondir"
 		continue
 	fi
-	
+
 	#
 	# Otherwise, download version from S3
 	#
 	mkdir -p "$versiondir"
 	cd "$versiondir"
-	
+
 	MAC_ARCHIVE="Deeptutor-${version}.dmg"
 	WIN32_ARCHIVE="Deeptutor-${version}_win32.zip"
 	WIN_X64_ARCHIVE="Deeptutor-${version}_win-x64.zip"
 	WIN_ARM64_ARCHIVE="Deeptutor-${version}_win-arm64.zip"
 	LINUX_X86_ARCHIVE="Deeptutor-${version}_linux-i686.tar.bz2"
 	LINUX_X86_64_ARCHIVE="Deeptutor-${version}_linux-x86_64.tar.bz2"
-	
+
 	CACHE_DIR="$ROOT_DIR/cache"
 	if [ ! -e "$CACHE_DIR" ]; then
 		mkdir "$CACHE_DIR"
 	fi
-	
+
 	for archive in "$MAC_ARCHIVE" "$WIN32_ARCHIVE" "$WIN_X64_ARCHIVE" "$WIN_ARM64_ARCHIVE" "$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE"; do
 		if [[ $archive = "$MAC_ARCHIVE" ]] && [[ $BUILD_MAC != 1 ]]; then
 			continue
@@ -167,27 +167,27 @@ for version in "$FROM" "$TO"; do
 		if [[ $archive = "$LINUX_X86_64_ARCHIVE" ]] && [[ $BUILD_LINUX != 1 ]]; then
 			continue
 		fi
-		
+
 		ETAG_FILE="$CACHE_DIR/$archive.etag"
-		
+
 		# Check cache for archive
 		if [[ -f "$CACHE_DIR/$archive" ]] && [[ -f "$CACHE_DIR/$archive.etag" ]]; then
 			ETAG="`cat $ETAG_FILE | tr '\n' ' '`"
 		else
 			ETAG=""
 		fi
-		
+
 		rm -f $archive
 		# URL-encode '+' in beta version numbers
 		ENCODED_VERSION=`urlencode $version`
 		ENCODED_ARCHIVE=`urlencode $archive`
-		URL="https://$S3_BUCKET.s3.amazonaws.com/$S3_DIST_PATH/$CHANNEL/$ENCODED_VERSION/$ENCODED_ARCHIVE"
+		URL="https://$S3_BUCKET.s3.us-west-2.amazonaws.com/$S3_DIST_PATH/$CHANNEL/$ENCODED_VERSION/$ENCODED_ARCHIVE"
 		echo "Fetching $URL"
 		set +e
 		# Cached version is available
 		if [ -n "$ETAG" ]; then
 			NEW_ETAG=$(wget -nv -S --header "If-None-Match: $ETAG" $URL 2>&1 | awk '/ *ETag: */ {print $2}')
-			
+
 			# If ETag didn't match, cache newly downloaded version
 			if [ -f $archive ]; then
 				echo "ETag for $archive didn't match! -- using new version"
@@ -201,7 +201,7 @@ for version in "$FROM" "$TO"; do
 			fi
 		else
 			NEW_ETAG=$(wget -nv -S $URL 2>&1 | awk '/ *ETag: */ {print $2}')
-			
+
 			# Save archive to cache
 			rm -f "$CACHE_DIR/$archive.etag"
 			cp $archive "$CACHE_DIR/"
@@ -209,26 +209,26 @@ for version in "$FROM" "$TO"; do
 		fi
 		set -e
 	done
-	
+
 	# Delete cached files older than 14 days
 	find "$CACHE_DIR" -ctime +14 -delete
-	
-	# Unpack Zotero.app
+
+	# Unpack DeepTutor.app
 	if [ $BUILD_MAC == 1 ]; then
 		if [ -f "$MAC_ARCHIVE" ]; then
 			set +e
-			hdiutil detach -quiet /Volumes/Zotero 2>/dev/null
+			hdiutil detach -quiet /Volumes/DeepTutor 2>/dev/null
 			set -e
 			hdiutil attach -quiet "$MAC_ARCHIVE"
 			cp -R /Volumes/Zotero/DeepTutor.app "$versiondir"
 			rm "$MAC_ARCHIVE"
-			hdiutil detach -quiet /Volumes/Zotero
+			hdiutil detach -quiet /Volumes/DeepTutor
 			INCREMENTALS_FOUND=1
 		else
 			echo "$MAC_ARCHIVE not found"
 		fi
 	fi
-	
+
 	# Unpack Windows zips
 	if [ $BUILD_WIN == 1 ]; then
 		if [[ -f "$WIN32_ARCHIVE" ]] && [[ -f "$WIN_X64_ARCHIVE" ]] && [[ -f "$WIN_ARM64_ARCHIVE" ]]; then
@@ -241,7 +241,7 @@ for version in "$FROM" "$TO"; do
 			echo "$WIN32_ARCHIVE/$WIN_X64_ARCHIVE/$WIN_ARM64_ARCHIVE not found"
 		fi
 	fi
-	
+
 	# Unpack Linux tarballs
 	if [ $BUILD_LINUX == 1 ]; then
 		if [[ -f "$LINUX_X86_ARCHIVE" ]] && [[ -f "$LINUX_X86_64_ARCHIVE" ]]; then
@@ -254,7 +254,7 @@ for version in "$FROM" "$TO"; do
 			echo "$LINUX_X86_ARCHIVE/$LINUX_X86_64_ARCHIVE not found"
 		fi
 	fi
-	
+
 	echo
 done
 
@@ -276,36 +276,37 @@ for build in "mac" "win32" "win-x64" "win-arm64" "linux-i686" "linux-x86_64"; do
 		if ([[ $build == "linux-i686" ]] || [[ $build == "linux-x86_64" ]]) && [[ $BUILD_LINUX == 0 ]]; then
 			continue
 		fi
-		dir="Zotero_$build"
+		dir="DeepTutor_$build"
 	fi
 	if [[ $BUILD_INCREMENTAL == 1 ]] && [[ -d "$UPDATE_STAGE_DIR/$FROM/$dir" ]]; then
 		echo
 		echo "Building incremental $build update from $FROM to $TO"
-		"$SCRIPT_DIR/make_incremental_update.sh" "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar" "$UPDATE_STAGE_DIR/$FROM/$dir" "$UPDATE_STAGE_DIR/$TO/$dir"
+		"$SCRIPT_DIR/make_incremental_update.sh" "$DIST_DIR/DeepTutor-${TO}-${FROM}_$build.mar" "$UPDATE_STAGE_DIR/$FROM/$dir" "$UPDATE_STAGE_DIR/$TO/$dir"
 		CHANGES_MADE=1
-		
-		# If it's an incremental patch from a 6.0 build, use bzip instead of xz
-		if [[ $FROM = 6.0* ]]; then
-			echo "Building bzip2 version of incremental $build update from $FROM to $TO"
-			"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar" "$DIST_DIR/Zotero-${TO}-${FROM}_${build}_bz.mar"
-			rm "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar"
-			mv "$DIST_DIR/Zotero-${TO}-${FROM}_${build}_bz.mar" "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar"
-		fi
+
+		# # If it's an incremental patch from a 6.0 build, use bzip instead of xz
+		# if [[ $FROM = 6.0* ]]; then
+		# 	echo "Building bzip2 version of incremental $build update from $FROM to $TO"
+		# 	"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/DeepTutor-${TO}-${FROM}_$build.mar" "$DIST_DIR/DeepTutor-${TO}-${FROM}_${build}_bz.mar"
+		# 	rm "$DIST_DIR/DeepTutor-${TO}-${FROM}_$build.mar"
+		# 	mv "$DIST_DIR/DeepTutor-${TO}-${FROM}_${build}_bz.mar" "$DIST_DIR/DeepTutor-${TO}-${FROM}_$build.mar"
+		# fi
 	fi
 	if [[ $BUILD_FULL == 1 ]]; then
 		echo
 		echo "Building full $build update for $TO"
-		"$SCRIPT_DIR/make_full_update.sh" "$DIST_DIR/Zotero-${TO}-full_$build.mar" "$UPDATE_STAGE_DIR/$TO/$dir"
+		"$SCRIPT_DIR/make_full_update.sh" "$DIST_DIR/DeepTutor-${TO}-full_$build.mar" "$UPDATE_STAGE_DIR/$TO/$dir"
 		CHANGES_MADE=1
-			
+
 		# Make a bzip version of all complete patches for serving to <7.0 builds. Don't bother with
 		# architectures that didn't exist in Z6.
 		#
-		# We can stop this once we do a waterfall build that all older versions get updated to.
-		if [[ $build != "win-x64" ]] && [[ $build != "win-arm64" ]]; then
-			echo "Building bzip2 version of full $build update for $TO"
-			"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/Deeptutor-${TO}-full_$build.mar" "$DIST_DIR/Deeptutor-${TO}-full_bz_${build}.mar"
-		fi
+
+		# # We can stop this once we do a waterfall build that all older versions get updated to.
+		# if [[ $build != "win-x64" ]] && [[ $build != "win-arm64" ]]; then
+		# 	echo "Building bzip2 version of full $build update for $TO"
+		# 	"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/Deeptutor-${TO}-full_$build.mar" "$DIST_DIR/Deeptutor-${TO}-full_bz_${build}.mar"
+		# fi
 	fi
 done
 
@@ -319,7 +320,7 @@ if [ $CHANGES_MADE -eq 1 ]; then
 	else
 		SHACMD="shasum -a 512"
 	fi
-	
+
 	cd "$DIST_DIR"
 	for platform in "mac" "win" "linux"; do
 		file=files-$platform
