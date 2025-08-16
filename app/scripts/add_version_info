@@ -20,6 +20,7 @@ parser.add_argument('-f', '--file', required=True, help="path to updates.json")
 parser.add_argument('-v', '--version', required=True, help='version number of build')
 parser.add_argument('--dist-dir', help='distribution directory containing MAR files')
 parser.add_argument('--mar-file', help='direct path to MAR file')
+parser.add_argument('--arch', help='target architecture (mac, win32, win-x64, win-arm64, linux-i686, linux-x86_64)')
 # parser.add_argument('-b', '--build_id', required=True, help="build ID ('20160801142343')")
 
 args = parser.parse_args()
@@ -51,8 +52,8 @@ def get_file_size(file_path):
         print(f"Error getting size for {file_path}: {e}", file=sys.stderr)
         raise
 
-def find_mar_file(version, dist_dir=None, mar_file=None):
-    """Find the MAR file for the given version"""
+def find_mar_file(version, dist_dir=None, mar_file=None, arch='mac'):
+    """Find the MAR file for the given version and architecture"""
     # If direct path provided, use it
     if mar_file:
         if os.path.exists(mar_file):
@@ -62,7 +63,7 @@ def find_mar_file(version, dist_dir=None, mar_file=None):
             print(f"Error: Provided MAR file not found: {mar_file}", file=sys.stderr)
             return None
 
-    mar_filename = f'DeepTutor-{version}-full_mac.mar'
+    mar_filename = f'DeepTutor-{version}-full_{arch}.mar'
 
     # Define search paths in order of preference
     search_paths = []
@@ -99,13 +100,14 @@ def main():
         version = args.version
         dist_dir = args.dist_dir
         mar_file = args.mar_file
+        arch = args.arch or 'mac'  # Default to mac if not specified
         short_version = version[0:3]
 
-        # Construct the URL to the mar file
-        mar_file_url = f'https://deeptutor.s3.us-west-2.amazonaws.com/update/release/{version}/DeepTutor-{version}-full_mac.mar'
+        # Construct the URL to the mar file based on architecture
+        mar_file_url = f'https://deeptutor.s3.us-west-2.amazonaws.com/update/release/{version}/DeepTutor-{version}-full_{arch}.mar'
 
         # Find the local MAR file
-        actual_file_path = find_mar_file(version, dist_dir, mar_file)
+        actual_file_path = find_mar_file(version, dist_dir, mar_file, arch)
 
         if not actual_file_path:
             print(f"Error: Cannot proceed without MAR file for version {version}", file=sys.stderr)

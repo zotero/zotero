@@ -41,7 +41,7 @@ S3_BUCKET="deeptutor"
 S3_CI_ZIP_PATH="ci/client"
 S3_DIST_PATH="update"
 
-DEPLOY_HOST="as1"
+DEPLOY_HOST="atprod2"
 DEPLOY_PATH="/home/azureuser/server/client/update"
 # DEPLOY_CMD="ssh $DEPLOY_HOST update-site-files"
 DEPLOY_CMD=""

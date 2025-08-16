@@ -198,7 +198,7 @@ do
 
 		scp $DEPLOY_HOST:"$channel_deploy_path/$jsonfile" "$TEMP_DIR/$jsonfile"
 		# "$SCRIPT_DIR/add_version_info" -f "$TEMP_DIR/$jsonfile" -v $VERSION -b $BUILD_ID
-		"$SCRIPT_DIR/add_version_info" -f "$TEMP_DIR/$jsonfile" -v $VERSION --mar-file "$mar_file"
+		"$SCRIPT_DIR/add_version_info" -f "$TEMP_DIR/$jsonfile" -v $VERSION --mar-file "$mar_file" --arch "$arch"
 		scp "$TEMP_DIR/$jsonfile" $DEPLOY_HOST:"$channel_deploy_path/$jsonfile"
 	done
 done

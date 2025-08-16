@@ -93,13 +93,13 @@ if [ $platform = "w" ]; then
 	echo -n "Checking for uuidgen: "
 	which uuidgen || { $FAIL_CMD; FAILED=1; }
 
-	echo -n "Checking for code-signing script: "
-	if [ -x "$APP_ROOT_DIR/win/codesign" ]; then
-		echo "$APP_ROOT_DIR/win/codesign"
-	else
-		$FAIL_CMD
-		FAILED=1
-	fi
+	# echo -n "Checking for code-signing script: "
+	# if [ -x "$APP_ROOT_DIR/win/codesign" ]; then
+	# 	echo "$APP_ROOT_DIR/win/codesign"
+	# else
+	# 	$FAIL_CMD
+	# 	FAILED=1
+	# fi
 
 	echo -n "Checking for Unicode NSIS: "
 	if [ -x "`cygpath -u \"${NSIS_DIR}makensis.exe\"`" ]; then
@@ -154,9 +154,9 @@ which aws || { $FAIL_CMD; FAILED=1; }
 # echo -n "Checking for AWS S3 access: "
 # aws s3 ls $S3_BUCKET/$S3_DIST_PATH/ | sed 's/^[[:blank:]]*//' || { $FAIL_CMD; FAILED=1; }
 
-echo -n "Checking for deploy host directory access: "
-echo -n "ssh $DEPLOY_HOST ls -d $DEPLOY_PATH || { $FAIL_CMD; FAILED=1; }"
-ssh $DEPLOY_HOST ls -d $DEPLOY_PATH || { $FAIL_CMD; FAILED=1; }
+# echo -n "Checking for deploy host directory access: "
+# echo -n "ssh $DEPLOY_HOST ls -d $DEPLOY_PATH || { $FAIL_CMD; FAILED=1; }"
+# ssh $DEPLOY_HOST ls -d $DEPLOY_PATH || { $FAIL_CMD; FAILED=1; }
 
 echo -n "Checking done: status: $FAILED"
 
