@@ -1575,12 +1575,10 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 						<div style={styles.modelDescription}>
 							<div style={styles.modelFeature}>
 								<span style={styles.modelIcon}>🙌</span>
-								<span>Our quickest model - for general paper reading.</span>
+								<span>Quick multi - document processing - for broad research</span>
 							</div>
 							<div style={styles.modelLimitations}>
-								<span>✅ Free for all users</span>
 								<span>✅ Process raw text the fastest</span>
-								<span>✅ Source content highlight</span>
 								<span>✅ Multiple files understanding</span>
 							</div>
 						</div>
@@ -1589,14 +1587,13 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 						<div style={styles.modelDescription}>
 							<div style={styles.modelFeature}>
 								<span style={styles.modelIcon}>🙌</span>
-								<span>Our more powerful model - for deeper understanding.</span>
+								<span>Deep single - paper analysis - with visual & formula support</span>
 							</div>
 							<div style={styles.modelLimitations}>
-								<span>✅ Image understanding</span>
-								<span>✅ Inference mode with DeepSeek</span>
-								<span>✅ Higher quality summary</span>
-								<span>✅ Markdown based RAG model</span>
-								<span>✅ Available with Premium Subscription</span>
+								<span>✅ Images visual understanding</span>
+								<span>✅ Latex formulas understanding</span>
+								<span>✅ Latest inference model</span>
+								<span>✅ Markdown based RAG</span>
 							</div>
 						</div>
 					)}
