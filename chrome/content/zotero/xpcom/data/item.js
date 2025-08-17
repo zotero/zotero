@@ -3914,7 +3914,11 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	}
 	var exists = await item.fileExists();
 	let key = item.key;
-	return this._bestAttachmentState = { type, exists, key };
+        let size = 0;
+        if (exists) {
+                 size = await Zotero.Attachments.getTotalFileSize(item);
+        }
+        return this._bestAttachmentState = { type, exists, key, size };
 };
 
 

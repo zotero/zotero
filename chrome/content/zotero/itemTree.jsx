@@ -45,6 +45,11 @@ XPCOMUtils.defineLazyPreferenceGetter(
 	false
 );
 
+function humanFileSize(size) {
+        var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+        return +((size / Math.pow(1024, i)).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}
+
 /**
  * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
  */
@@ -1424,6 +1429,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 					return 0;
 				}
 			
+			case 'attachmentSize':
+				if (this._canGetBestAttachmentState(item)) {
+					return item.getBestAttachmentStateCached().size;
+				}
+				else {
+					return 0;
+				}
+
 			case 'numNotes':
 				return row.numNotes(false, true) || 0;
 			
@@ -1498,6 +1511,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : (order.length - 1));
 					return fieldA - fieldB;
 				}
+                                else if (sortField == 'attachmentSize') {
+                                        return fieldA - fieldB;
+                                }
 
 				if (sortField == 'callNumber') {
 					return Zotero.Utilities.Item.compareCallNumbers(fieldA, fieldB);
@@ -2997,7 +3013,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return span;
 	}
 
-	_renderHasAttachmentCell(index, data, column) {
+	_renderAttachmentCell(dataKey, index, data, column) {
 		let span = document.createElement('span');
 		span.className = `cell ${column.className}`;
 
@@ -3018,55 +3034,58 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
-		// TEMP: For now, we use the blue bullet for all non-PDF attachments, but there's
-		// commented-out code for showing different icons for snapshots, files, and URL/DOI links
 		if (this._canGetBestAttachmentState(item)) {
-			const { type, exists } = item.getBestAttachmentStateCached();
-			let icon = "";
-			let ariaLabel;
-			// If the item has a child attachment
-			if (type !== null && type != 'none') {
-				if (type == 'pdf') {
-					icon = getCSSItemTypeIcon('attachmentPDF', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
-				}
-				else if (type == 'snapshot') {
-					icon = getCSSItemTypeIcon('attachmentSnapshot', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
-				}
-				else if (type == 'epub') {
-					icon = getCSSItemTypeIcon('attachmentEPUB', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
-				}
-				else if (type == 'image') {
-					icon = getCSSItemTypeIcon('attachmentImage', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasImage');
-				}
-				else if (type == 'video') {
-					icon = getCSSItemTypeIcon('attachmentVideo', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasVideo');
-				}
-				else {
-					icon = getCSSItemTypeIcon('attachmentFile', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.has');
-				}
-				
-				if (!exists) {
-					icon.classList.add('icon-missing-file');
-				}
-			}
-			//else if (type == 'none') {
-			//	if (item.getField('url') || item.getField('DOI')) {
-			//		icon = getCSSIcon('IconLink');
-			//		ariaLabel = Zotero.getString('pane.item.attachments.hasLink');
-			//		icon.classList.add('cell-icon');
-			//	}
-			//}
-			if (ariaLabel) {
-				icon.setAttribute('aria-label', ariaLabel + '.');
-				span.setAttribute('title', ariaLabel);
-			}
-			span.append(icon);
+			const { type, exists, size } = item.getBestAttachmentStateCached();
+
+                        if (dataKey === 'hasAttachment') {
+			        let icon = "";
+			        let ariaLabel;
+			        // If the item has a child attachment
+			        if (type !== null && type != 'none') {
+				        if (type == 'pdf') {
+					        icon = getCSSItemTypeIcon('attachmentPDF', 'attachment-type');
+					        ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
+				        }
+				        else if (type == 'snapshot') {
+					        icon = getCSSItemTypeIcon('attachmentSnapshot', 'attachment-type');
+					        ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
+				        }
+				        else if (type == 'epub') {
+					        icon = getCSSItemTypeIcon('attachmentEPUB', 'attachment-type');
+					        ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
+				        }
+				        else if (type == 'image') {
+					        icon = getCSSItemTypeIcon('attachmentImage', 'attachment-type');
+					        ariaLabel = Zotero.getString('pane.item.attachments.hasImage');
+				        }
+				        else if (type == 'video') {
+					        icon = getCSSItemTypeIcon('attachmentVideo', 'attachment-type');
+					        ariaLabel = Zotero.getString('pane.item.attachments.hasVideo');
+				        }
+				        else {
+					        icon = getCSSItemTypeIcon('attachmentFile', 'attachment-type');
+					        ariaLabel = Zotero.getString('pane.item.attachments.has');
+				        }
+				        
+				        if (!exists) {
+					        icon.classList.add('icon-missing-file');
+				        }
+			        }
+			        //else if (type == 'none') {
+			        //	if (item.getField('url') || item.getField('DOI')) {
+			        //		icon = getCSSIcon('IconLink');
+			        //		ariaLabel = Zotero.getString('pane.item.attachments.hasLink');
+			        //		icon.classList.add('cell-icon');
+			        //	}
+			        //}
+			        if (ariaLabel) {
+				        icon.setAttribute('aria-label', ariaLabel + '.');
+				        span.setAttribute('title', ariaLabel);
+			        }
+			        span.append(icon);
+                        } else if (dataKey === 'attachmentSize') {
+                                span.append(humanFileSize(size));
+                        }
 
 			// Don't run this immediately since it might cause a db check and disk access
 			// but delay for some time and see if the item is still visible in the tree
@@ -3091,8 +3110,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (column.primary) {
 			cell = this._renderPrimaryCell(index, data, column);
 		}
-		else if (column.dataKey === 'hasAttachment') {
-			cell = this._renderHasAttachmentCell(index, data, column);
+		else if (column.dataKey === 'attachmentSize'
+                         || column.dataKey === 'hasAttachment') {
+			cell = this._renderAttachmentCell(column.dataKey, index, data, column);
 		}
 		else if (column.renderCell) {
 			try {
@@ -3402,6 +3422,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		row.hasAttachment = "";
+	        row.attachmentSize = "";
 		// Style unread items in feeds
 		if (treeRow.ref.isFeedItem && !treeRow.ref.isRead) {
 			row.unread = true;
