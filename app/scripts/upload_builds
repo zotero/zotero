@@ -26,4 +26,4 @@ if [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
 fi
 url="s3://$S3_BUCKET/$S3_DIST_PATH/$CHANNEL/$VERSION/"
 # aws s3 sync --exclude "files-*" --exclude build_id "$source_dir" $url
-aws s3 sync --exclude "files-*" --exclude build_id "$source_dir" $url
+aws s3 sync --exclude "files-*" --exclude build_id "$source_dir" $url --acl public-read
