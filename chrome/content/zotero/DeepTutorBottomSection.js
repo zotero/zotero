@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; // eslint-disable-line no-unused-vars
 import PropTypes from 'prop-types';
 import { useDeepTutorTheme } from './theme/useDeepTutorTheme.js';
+import DeepTutorProfilePopup from './DeepTutorProfilePopup.js';
+import DeepTutorUsagePopup from './DeepTutorUsagePopup.js';
 
 // Icon path definitions
 const FEED_ICON_PATH = 'chrome://zotero/content/DeepTutorMaterials/Bot/BOT_FEEDBACK.svg';
@@ -11,7 +13,7 @@ const PERSON_ICON_DARK_PATH = 'chrome://zotero/content/DeepTutorMaterials/Bot/BO
 const DeepTutorBottomSection = (props) => {
 	const { colors, isDark } = useDeepTutorTheme();
 	const [isUpgradeHovered, setIsUpgradeHovered] = useState(false);
-	const [isSignOutHovered, setIsSignOutHovered] = useState(false);
+	const [showUsagePopup, setShowUsagePopup] = useState(false);
 
 	// Choose icons based on theme
 	const feedIconPath = isDark ? FEED_ICON_DARK_PATH : FEED_ICON_PATH;
@@ -119,72 +121,13 @@ const DeepTutorBottomSection = (props) => {
 			transition: 'background 0.2s',
 			fontFamily: 'Roboto, sans-serif',
 		},
-		profilePopup: {
-			position: 'absolute',
-			bottom: '100%',
-			left: 0,
-			background: colors.background.primary,
-			borderRadius: '0.5rem',
-			boxShadow: '0 0.125rem 0.5rem rgba(0,0,0,0.15)',
-			padding: '0.75rem',
-			marginBottom: '0.5rem',
-			zIndex: 1000,
-			minWidth: '12.5rem',
-		},
 		profileButtonContainer: {
 			position: 'relative',
 		},
-		componentButton: {
-			padding: '0.375rem 1.125rem',
-			borderRadius: '0.375rem',
-			border: `1px solid ${colors.button.primary}`,
-			background: '#FFFFFF',
-			color: colors.button.primary,
-			fontWeight: 500,
-			cursor: 'pointer',
-			fontFamily: 'Roboto, Inter, Arial, sans-serif',
-			width: '100%',
-			textAlign: 'left',
-			marginBottom: '0.25rem',
-			transition: 'all 0.2s ease',
-		},
-		componentButtonActive: {
-			background: colors.button.primary,
-			color: colors.button.primaryText,
-		},
-		profileInfo: {
-			padding: '0.5rem 0',
-			borderBottom: `0.0625rem solid ${colors.border.primary}`,
-			marginBottom: '0.5rem',
-		},
-		userEmail: {
-			fontSize: '1rem',
-			fontWeight: 500,
-			color: colors.text.secondary,
-			marginBottom: '0.25rem',
-		},
-		userStatus: {
-			fontSize: '0.875rem',
-			color: colors.text.tertiary,
-		},
-		signOutButton: {
-			background: colors.error,
-			color: colors.text.inverse,
-			border: 'none',
-			borderRadius: '0.375rem',
-			padding: '0.375rem 0.75rem',
-			fontSize: '1rem',
-			fontWeight: 600,
-			cursor: 'pointer',
-			width: '100%',
-			minHeight: '3rem',
-			marginTop: '0.5rem',
-			transition: 'background 0.2s',
-		},
 	};
 
-	// Temporarily hide subscription button - set to true to show it again
-	const showSubscriptionButton = false;
+	// Show subscription button
+	const showSubscriptionButton = true;
 
 	const handleUpgradeMouseEnter = () => {
 		setIsUpgradeHovered(true);
@@ -194,66 +137,13 @@ const DeepTutorBottomSection = (props) => {
 		setIsUpgradeHovered(false);
 	};
 
-	const renderProfilePopup = () => {
-		if (!props.showProfilePopup) return null;
+	// Handle usage popup
+	const handleShowUsage = () => {
+		setShowUsagePopup(true);
+	};
 
-		// Determine display name/email - prioritizing email first
-		let displayName = 'User';
-		if (props.userData) {
-			const { name, firstName, lastName, email } = props.userData;
-			if (email) {
-				displayName = email;
-			}
-			else if (name && name.trim()) {
-				displayName = name;
-			}
-			else if ((firstName || lastName)) {
-				displayName = `${firstName || ''} ${lastName || ''}`.trim();
-			}
-		}
-		else if (props.currentUser) {
-			// Cognito user object may expose username/email differently - prioritizing email first
-			displayName = (props.currentUser.email
-                 || props.currentUser.username
-                 || (typeof props.currentUser.getUsername === 'function' && props.currentUser.getUsername())
-                 || displayName);
-		}
-
-		return (
-			<div style={styles.profilePopup} onClick={e => e.stopPropagation()}>
-				{props.isAuthenticated
-					? (
-						<>
-							<div style={styles.profileInfo}>
-								<div style={styles.userEmail}>{displayName}</div>
-								<div style={styles.userStatus}>Logged in</div>
-							</div>
-							<button
-								style={{
-									...styles.signOutButton,
-									background: isSignOutHovered ? '#dc3545' : colors.error
-								}}
-								onClick={props.onSignOut}
-								onMouseEnter={() => setIsSignOutHovered(true)}
-								onMouseLeave={() => setIsSignOutHovered(false)}
-							>
-                             Sign out
-							</button>
-						</>
-					)
-					: (
-						<div style={styles.profileInfo}>
-							<div style={styles.userStatus}>Not logged in</div>
-							<button
-								style={{ ...styles.componentButton, marginTop: '8px' }}
-								onClick={props.onToggleSignInPopup}
-							>
-                             Sign in
-							</button>
-						</div>
-					)}
-			</div>
-		);
+	const handleCloseUsage = () => {
+		setShowUsagePopup(false);
 	};
 
 	const renderMain = () => {
@@ -262,13 +152,31 @@ const DeepTutorBottomSection = (props) => {
 			background: isUpgradeHovered ? colors.button.primaryHover : colors.button.primary,
 		};
 
-		// Determine button text based on subscription status
+		// Determine button text based on subscription type
 		let buttonText = "Upgrade";
-		if (props.userSubscribed) {
-			buttonText = "Premium";
+		if (props.userSubscribed && props.activeSubscription) {
+			// User has an active subscription, show subscription type
+			const subscriptionType = props.activeSubscription.type;
+			if (subscriptionType === "BASIC") {
+				buttonText = "Upgrade";
+			}
+			else if (subscriptionType === "PLUS") {
+				buttonText = "Pro";
+			}
+			else if (subscriptionType === "PREMIUM") {
+				buttonText = "Premium";
+			}
+			else {
+				buttonText = "Manage";
+			}
 		}
-		else if (props.isFreeTrial) {
-			buttonText = "Start Trial";
+		else if (props.userSubscribed) {
+			// User is subscribed but no subscription data available
+			buttonText = "Manage";
+		}
+		else {
+			// User is not subscribed
+			buttonText = "Upgrade";
 		}
 
 		return (
@@ -375,9 +283,24 @@ const DeepTutorBottomSection = (props) => {
 								<img src={personIconPath} alt="Profile" style={styles.buttonIcon} />
 								<span style={{ textDecoration: 'underline' }}>Profile</span>
 							</button>
-							{renderProfilePopup()}
+							{props.showProfilePopup && (
+								<DeepTutorProfilePopup
+									onManageSubscription={props.onToggleSubscriptionPopup}
+									onShowUsage={handleShowUsage}
+									onSignOut={props.onSignOut}
+									userData={props.userData}
+									currentUser={props.currentUser}
+								/>
+							)}
+							{showUsagePopup && (
+								<DeepTutorUsagePopup
+									onClose={handleCloseUsage}
+									userId={props.userData?.id}
+									activeSubscription={props.activeSubscription}
+								/>
+							)}
 						</div>
-						{/* Temporarily hide subscription button - set to true to show it again */}
+						{/* Subscription button */}
 						{showSubscriptionButton && (
 							<button
 								style={upgradeButtonDynamicStyle}
@@ -440,7 +363,8 @@ DeepTutorBottomSection.propTypes = {
 	onSwitchNoSession: PropTypes.func,
 	userData: PropTypes.object,
 	userSubscribed: PropTypes.bool,
-	isFreeTrial: PropTypes.bool
+	isFreeTrial: PropTypes.bool,
+	activeSubscription: PropTypes.object
 };
 
 DeepTutorBottomSection.defaultProps = {

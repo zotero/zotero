@@ -1,6 +1,6 @@
 // Access ZOTERO_CONFIG from the global scope
-// export const DT_BASE_URL = 'staging.deeptutor.knowhiz.us';
-export const DT_BASE_URL = 'deeptutor.knowhiz.us';
+export const DT_BASE_URL = 'staging.deeptutor.knowhiz.us';
+// export const DT_BASE_URL = 'deeptutor.knowhiz.us';
 // export const DT_BASE_URL = 'localhost:8081';
 
 const API_BASE_URL = DT_BASE_URL.includes('localhost') ? `http://${DT_BASE_URL}/api` : DT_BASE_URL.includes('staging') ? `https://api.${DT_BASE_URL}/api` : `https://api.production.${DT_BASE_URL}/api`;
@@ -184,6 +184,22 @@ export const getSessionsByUserId = async (userId) => {
 	});
 
 	return handledResponse.json();
+};
+
+// Usage related API calls
+export const getSessionUsageForUser = async (userId) => {
+    const requestConfig = {
+        method: 'GET',
+        headers: getAuthHeaders()
+    };
+
+    const response = await window.fetch(`${API_BASE_URL}/session/usage/byUser/${userId}`, requestConfig);
+    const handledResponse = await handleApiResponse(response, {
+        url: `${API_BASE_URL}/session/usage/byUser/${userId}`,
+        ...requestConfig
+    });
+
+    return handledResponse.json();
 };
 
 export const deleteSessionById = async (sessionId) => {

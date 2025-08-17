@@ -28,7 +28,6 @@ import PropTypes from "prop-types";
 import DeepTutorUpgradePremium from "./DeepTutorUpgradePremium.js";
 import DeepTutorSubscriptionConfirm from "./DeepTutorSubscriptionConfirm.js";
 import DeepTutorManageSubscription from "./DeepTutorManageSubscription.js";
-import DeepTutorFreeTrial from "./DeepTutorFreeTrial.js";
 import DeepTutorProcessingSubscription from "./DeepTutorProcessingSubscription.js";
 import { getActiveUserSubscriptionByUserId, DT_BASE_URL } from "./api/libs/api.js";
 
@@ -47,7 +46,6 @@ class DeepTutorSubscription extends React.Component {
 		onCancel: PropTypes.func,
 		userId: PropTypes.string,
 		userSubscribed: PropTypes.bool,
-		isFreeTrial: PropTypes.bool,
 		toggleSubscriptionPopup: PropTypes.func,
 		onSubscriptionStatusChange: PropTypes.func
 	};
@@ -58,7 +56,6 @@ class DeepTutorSubscription extends React.Component {
 		onCancel: () => {},
 		userId: null,
 		userSubscribed: false,
-		isFreeTrial: true,
 		toggleSubscriptionPopup: () => {},
 		onSubscriptionStatusChange: () => {}
 	};
@@ -214,12 +211,14 @@ class DeepTutorSubscription extends React.Component {
 				// User has active subscription - proceed to confirmation
 				Zotero.debug("DeepTutorSubscription: User has active subscription, showing confirmation");
 				this.setState({ currentPanel: "confirm" });
-			} else {
+			}
+			else {
 				// User does not have active subscription - return to main panel
 				Zotero.debug("DeepTutorSubscription: User does not have active subscription, returning to main");
 				this.setState({ currentPanel: "main" });
 			}
-		} catch (error) {
+		}
+		catch (error) {
 			Zotero.debug(`DeepTutorSubscription: Error checking subscription status: ${error.message}`);
 			
 			// On error, return to main panel to allow user to try again
@@ -286,7 +285,7 @@ class DeepTutorSubscription extends React.Component {
 	 * @returns {JSX.Element} The main subscription panel
 	 */
 	renderMainPanel() {
-		const { userSubscribed, isFreeTrial } = this.props;
+		const { userSubscribed } = this.props;
 
 		if (userSubscribed) {
 			// User is subscribed - show management panel
@@ -297,17 +296,6 @@ class DeepTutorSubscription extends React.Component {
 						imagePath={SubscriptionManageMarkPath}
 						onManage={this.handleManageSubscription}
 						onCancel={this.handleCancel}
-					/>
-				</div>
-			);
-		}
-		else if (isFreeTrial) {
-			// User is not subscribed but has free trial - show free trial panel
-			return (
-				<div>
-					{this.renderHeader("Free Trial", this.handleCancel)}
-					<DeepTutorFreeTrial
-						onStartTrial={() => this.handleShowProcessing()}
 					/>
 				</div>
 			);

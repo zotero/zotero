@@ -108,7 +108,6 @@ const styles = {
 };
 
 export default function DeepTutorUpgradePremium({ onGetPremium }) {
-
 	return (
 		<div style={styles.container}>
 			<div style={styles.contentFrame}>

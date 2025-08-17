@@ -13,6 +13,9 @@ import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
 import DeepTutorSessionDelete from './DeepTutorSessionDelete.js';
 import DeepTutorRenameSession from './DeepTutorRenameSession.js';
 import DeepTutorNoPDFWarning from './DeepTutorNoPDFWarning.js';
+import DeepTutorFileSizeWarning from './DeepTutorFileSizeWarning.js';
+import DeepTutorSubscriptionPopup from './DeepTutorSubscriptionPopup.js';
+import { DT_BASE_URL } from './api/libs/api.js';
 
 // Icon paths for popup close buttons
 const PopupClosePath = 'chrome://zotero/content/DeepTutorMaterials/Main/MAIN_CLOSE.svg';
@@ -275,7 +278,9 @@ const DeepTutorMain = (props) => {
 							onSubmit={props.handleModelSelectionSubmit}
 							user={props.userData}
 							externallyFrozen={props.modelSelectionFrozen}
-							onShowNoPDFWarning={props.toggleNoPDFWarningPopup}
+							onShowNoPDFWarning={props.openNoPDFWarningPopup}
+							onShowFileSizeWarning={props.openFileSizeWarningPopup}
+							subscriptionType={props.activeSubscription?.type || "BASIC"}
 						/>
 					}
 					{props.currentPane === 'welcome'
@@ -305,6 +310,7 @@ const DeepTutorMain = (props) => {
 				userData={props.userData}
 				userSubscribed={props.userSubscribed}
 				isFreeTrial={props.isFreeTrial}
+				activeSubscription={props.activeSubscription}
 			/>
 
 			{/* Popups */}
@@ -460,7 +466,7 @@ const DeepTutorMain = (props) => {
 						border: isDark ? `1px solid ${colors.popup.border}` : 'none',
 					}}>
 						<button
-							onClick={props.toggleNoPDFWarningPopup}
+							onClick={props.closeNoPDFWarningPopup}
 							style={{
 								all: 'revert',
 								background: 'none',
@@ -479,7 +485,55 @@ const DeepTutorMain = (props) => {
 							<img src={closeButtonPath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
 						</button>
 						<DeepTutorNoPDFWarning
-							onClose={props.toggleNoPDFWarningPopup}
+							onClose={props.closeNoPDFWarningPopup}
+						/>
+					</div>
+				</div>
+			)}
+
+			{props.showFileSizeWarningPopup && (
+				<div style={{
+					position: 'absolute',
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					background: 'rgba(0, 0, 0, 0.5)',
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					zIndex: 2000,
+				}}>
+					<div style={{
+						background: colors.background.primary,
+						borderRadius: '0.5rem',
+						padding: '2rem',
+						maxWidth: '24rem',
+						width: '100%',
+						position: 'relative',
+						border: isDark ? `1px solid ${colors.popup.border}` : 'none',
+					}}>
+						<button
+							onClick={props.closeFileSizeWarningPopup}
+							style={{
+								all: "revert",
+								background: "none",
+								border: "none",
+								cursor: 'pointer',
+								position: 'absolute',
+								right: '1rem',
+								top: '1rem',
+								width: '1rem',
+								height: '1rem',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							<img src={closeButtonPath} alt="Close" style={{ width: '1rem', height: '1rem' }} />
+						</button>
+						<DeepTutorFileSizeWarning
+							onClose={props.closeFileSizeWarningPopup}
 						/>
 					</div>
 				</div>
@@ -535,6 +589,67 @@ const DeepTutorMain = (props) => {
 				</div>
 			)}
 
+			{props.showSubscriptionPopup && (
+				<div style={{
+					position: 'absolute',
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					background: 'rgba(0, 0, 0, 0.5)',
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					zIndex: 1000,
+				}}>
+					<DeepTutorSubscriptionPopup
+						onClose={props.toggleSubscriptionPopup}
+						onAction={(plan) => {
+							// Open different URLs based on selected plan
+							let url = `https://${DT_BASE_URL}/dzSubscription`;
+							if (plan === 'pro') {
+								url = `https://${DT_BASE_URL}/dzSubscription?plan=pro`;
+							}
+							else if (plan === 'free') {
+								// No external action for free; simply close
+								props.toggleSubscriptionPopup();
+								return;
+							}
+
+							try {
+								Zotero.launchURL(url);
+							}
+							catch (error) {
+								Zotero.debug(`DeepTutor: Error opening subscription URL: ${error.message}`);
+								try {
+									if (Zotero.Utilities && Zotero.Utilities.Internal && Zotero.Utilities.Internal.launchURL) {
+										Zotero.Utilities.Internal.launchURL(url);
+									}
+									else {
+										throw new Error('No launchURL available');
+									}
+								}
+								catch (fallbackError) {
+									Zotero.debug(`DeepTutor: Fallback launchURL failed: ${fallbackError.message}`);
+									if (navigator.clipboard) {
+										navigator.clipboard.writeText(url).then(() => {
+											Zotero.alert(null, 'DeepTutor', 'Subscription URL copied to clipboard!');
+										});
+									}
+									else {
+										Zotero.alert(null, 'DeepTutor', `Please manually open this URL:\n${url}`);
+									}
+								}
+							}
+							finally {
+								props.toggleSubscriptionPopup();
+							}
+						}}
+						userId={props.userData && props.userData.id}
+						activeSubscription={props.activeSubscription}
+					/>
+				</div>
+			)}
 			{props.showManageSubscriptionPopup && (
 				<div style={{
 					position: 'absolute',
@@ -652,7 +767,9 @@ const DeepTutorMain = (props) => {
 							onSubmit={props.handleModelSelectionSubmit}
 							user={props.userData}
 							externallyFrozen={props.modelSelectionFrozen}
-							onShowNoPDFWarning={props.toggleNoPDFWarningPopup}
+							onShowNoPDFWarning={props.openNoPDFWarningPopup}
+							onShowFileSizeWarning={props.openFileSizeWarningPopup}
+							subscriptionType={props.activeSubscription?.type || "BASIC"}
 						/>
 					</div>
 				</div>
@@ -677,6 +794,7 @@ DeepTutorMain.propTypes = {
 	userData: PropTypes.object,
 	userSubscribed: PropTypes.bool.isRequired,
 	isFreeTrial: PropTypes.bool.isRequired,
+	activeSubscription: PropTypes.object,
 
 	// Popup state props
 	showProfilePopup: PropTypes.bool.isRequired,
@@ -686,8 +804,10 @@ DeepTutorMain.propTypes = {
 	showDeletePopup: PropTypes.bool.isRequired,
 	showRenamePopup: PropTypes.bool.isRequired,
 	showNoPDFWarningPopup: PropTypes.bool.isRequired,
+	showFileSizeWarningPopup: PropTypes.bool.isRequired,
 	showSubscriptionConfirmPopup: PropTypes.bool.isRequired,
 	showManageSubscriptionPopup: PropTypes.bool.isRequired,
+	showSubscriptionPopup: PropTypes.bool.isRequired,
 
 	// Session props
 	sessionToDelete: PropTypes.string,
@@ -728,7 +848,10 @@ DeepTutorMain.propTypes = {
 
 	toggleProfilePopup: PropTypes.func.isRequired,
 	toggleRenamePopup: PropTypes.func.isRequired,
-	toggleNoPDFWarningPopup: PropTypes.func.isRequired,
+	openNoPDFWarningPopup: PropTypes.func.isRequired,
+	closeNoPDFWarningPopup: PropTypes.func.isRequired,
+	openFileSizeWarningPopup: PropTypes.func.isRequired,
+	closeFileSizeWarningPopup: PropTypes.func.isRequired,
 	toggleSubscriptionPopup: PropTypes.func.isRequired,
 	toggleManageSubscriptionPopup: PropTypes.func.isRequired,
 	toggleSubscriptionConfirmPopup: PropTypes.func.isRequired,
