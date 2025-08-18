@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react"; // eslint-disable-line no-unused-vars
 import PropTypes from "prop-types";
 import { useDeepTutorTheme } from "./theme/useDeepTutorTheme.js";
-import { getActiveUserSubscriptionByUserId } from "./api/libs/api.js";
+import { getActiveUserSubscriptionByUserId, DT_BASE_URL } from "./api/libs/api.js";
+import DeepTutorProcessingSubscription from "./DeepTutorProcessingSubscription.js";
+import DeepTutorSubscriptionConfirm from "./DeepTutorSubscriptionConfirm.js";
 
 // Close icon paths (match other popups)
 const PopupClosePath = "chrome://zotero/content/DeepTutorMaterials/Main/MAIN_CLOSE.svg";
@@ -10,15 +12,17 @@ const PopupCloseDarkPath = "chrome://zotero/content/DeepTutorMaterials/Main/CLOS
 // Arrow icon paths for upgrade buttons
 const ArrowForwardPath = "chrome://zotero/content/DeepTutorMaterials/Subscription/arrow_forward.svg";
 const ArrowForwardDarkPath = "chrome://zotero/content/DeepTutorMaterials/Subscription/arrow_forward_dark.svg";
+const SubscriptionConfirmBookPath = "chrome://zotero/content/DeepTutorMaterials/Subscription/SUB_SUCCESS.svg";
 
 /**
  * DeepTutorSubscriptionPopup
  * Popup to select plan: Free, Pro, Premium. Each tab shows different content and action.
  */
-export default function DeepTutorSubscriptionPopup({ onClose, onAction, userId, activeSubscription }) {
+export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onAction, userId, activeSubscription }) {
 	const { colors, isDark } = useDeepTutorTheme();
 	const closePath = isDark ? PopupCloseDarkPath : PopupClosePath;
 	const [currentPlan, setCurrentPlan] = useState(null); // 'free' | 'pro' | 'premium' | null
+	const [currentPanel, setCurrentPanel] = useState("select"); // "select" | "processing" | "confirm"
 
 	useEffect(() => {
 		let mounted = true;
@@ -66,6 +70,30 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction, userId, 
 		};
 	}, [userId, activeSubscription]);
 	const [activeTab, setActiveTab] = useState("pro"); // "free" | "pro" | "premium"
+
+	// Open external subscription URL
+	const openSubscriptionUrl = (url) => {
+		Zotero.launchURL(url);
+	};
+
+	const handleProcessingContinue = async () => {
+		try {
+			Zotero.debug("DeepTutorSubscriptionPopup: Checking user subscription status after processing");
+			const active = userId ? await getActiveUserSubscriptionByUserId(userId) : null;
+			const hasActiveSubscription = !!active;
+			Zotero.debug(`DeepTutorSubscriptionPopup: Active subscription check result: ${hasActiveSubscription}`);
+			if (hasActiveSubscription) {
+				setCurrentPanel("confirm");
+			}
+			else {
+				setCurrentPanel("select");
+			}
+		}
+		catch (error) {
+			Zotero.debug(`DeepTutorSubscriptionPopup: Error checking subscription status: ${error.message}`);
+			setCurrentPanel("select");
+		}
+	};
 
 	const styles = {
 		container: {
@@ -407,7 +435,8 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction, userId, 
 			
 			if (selectedLevel < currentLevel) {
 				// Downgrade - redirect to manage subscription page
-				const manageUrl = `https://${DT_BASE_URL}/manage-subscription`;
+				const manageUrl = `http://localhost:3000/dzSubscription?manage=true`;
+				//const manageUrl = `https://${DT_BASE_URL}/manage-subscription`;
 				try {
 					Zotero.launchURL(manageUrl);
 				}
@@ -428,43 +457,78 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction, userId, 
 				return;
 			}
 			
-			// Regular upgrade action
-			onAction(activeTab);
+			// Regular upgrade action: open URL and show processing panel (do not delegate to parent)
+			let url = `http://localhost:3000/dzSubscription?plan=premium`;
+			//let url = `https://${DT_BASE_URL}/dzSubscription?plan=premium`;
+			if (activeTab === "pro") {
+				url = `http://localhost:3000/dzSubscription?plan=pro`;
+				//url = `https://${DT_BASE_URL}/dzSubscription?plan=pro`;
+			}
+			openSubscriptionUrl(url);
+			setCurrentPanel("processing");
 		}
 		catch { }
 	};
 
 	return (
 		<div style={styles.container}>
-			<div style={styles.title}>Upgrade Your Plan</div>
-			<button style={styles.closeButton} onClick={onClose}>
-				<img src={closePath} alt="Close" style={{ width: "1rem", height: "1rem" }} />
-			</button>
-			<div style={styles.tabs}>
-				{renderTabButton("free", "Free")}
-				{renderTabButton("pro", "Pro")}
-				{renderTabButton("premium", "Premium")}
-			</div>
+			{currentPanel === "select" && (
+				<>
+					<div style={styles.title}>Upgrade Your Plan</div>
+					<button style={styles.closeButton} onClick={onClose}>
+						<img src={closePath} alt="Close" style={{ width: "1rem", height: "1rem" }} />
+					</button>
+					<div style={styles.tabs}>
+						{renderTabButton("free", "Free")}
+						{renderTabButton("pro", "Pro")}
+						{renderTabButton("premium", "Premium")}
+					</div>
 
-			{activeTab === "free" && renderFree()}
-			{activeTab === "pro" && renderPro()}
-			{activeTab === "premium" && renderPremium()}
+					{activeTab === "free" && renderFree()}
+					{activeTab === "pro" && renderPro()}
+					{activeTab === "premium" && renderPremium()}
 
-			<div style={styles.footer}>
-				<button
-					style={getButtonStyle()}
-					onClick={handlePrimary}
-				>
-					<span>{getButtonText()}</span>
-					{shouldShowArrow() && (
-						<img
-							src={isDark ? ArrowForwardDarkPath : ArrowForwardPath}
-							alt="Forward"
-							style={{ width: "1.25rem", height: "1.25rem" }}
-						/>
-					)}
-				</button>
-			</div>
+					<div style={styles.footer}>
+						<button
+							style={getButtonStyle()}
+							onClick={handlePrimary}
+						>
+							<span>{getButtonText()}</span>
+							{shouldShowArrow() && (
+								<img
+									src={isDark ? ArrowForwardDarkPath : ArrowForwardPath}
+									alt="Forward"
+									style={{ width: "1.25rem", height: "1.25rem" }}
+								/>
+							)}
+						</button>
+					</div>
+				</>
+			)}
+			{currentPanel === "processing" && (
+				<>
+					<div style={styles.title}>Processing Subscription</div>
+					<button style={styles.closeButton} onClick={onClose}>
+						<img src={closePath} alt="Close" style={{ width: "1rem", height: "1rem" }} />
+					</button>
+					<DeepTutorProcessingSubscription
+						onContinue={handleProcessingContinue}
+						onCancel={onClose}
+					/>
+				</>
+			)}
+			{currentPanel === "confirm" && (
+				<>
+					<div style={styles.title}>Upgrade Successfully!</div>
+					<button style={styles.closeButton} onClick={onClose}>
+						<img src={closePath} alt="Close" style={{ width: "1rem", height: "1rem" }} />
+					</button>
+					<DeepTutorSubscriptionConfirm
+						onClose={onClose}
+						imagePath={SubscriptionConfirmBookPath}
+					/>
+				</>
+			)}
 		</div>
 	);
 }
