@@ -49,8 +49,6 @@ function DeepTutorProfilePopup({
 	// Fixed column for leading icons to ensure alignment across rows
 	const leadingIconStyle = { height: "1.25rem", width: "1.25rem", flexShrink: 0 };
 
-
-
 	// Determine display name/email - prioritizing email first
 	const getDisplayName = () => {
 		if (userData) {
@@ -79,9 +77,8 @@ function DeepTutorProfilePopup({
 	const styles = {
 		wrapper: {
 			position: "absolute",
-			bottom: "0",
+			bottom: "calc(100% + 0.5rem)",
 			left: "0",
-			marginTop: "0.5rem",
 			zIndex: 50,
 			width: "auto",
 			minWidth: "14rem",
@@ -111,7 +108,7 @@ function DeepTutorProfilePopup({
 			display: "flex",
 			flexGrow: 1,
 			alignItems: "center",
-			justifyContent: "space-between"
+			justifyContent: "flex-start"
 		},
 		personText: {
 			marginLeft: "0.75rem",
@@ -119,11 +116,6 @@ function DeepTutorProfilePopup({
 			fontSize: "1rem",
 			fontWeight: 400,
 			color: isDark ? colors.text.tertiary : "#6B7280"
-		},
-		checkIcon: {
-			marginLeft: "0.75rem",
-			height: "1.25rem",
-			width: "1.25rem"
 		},
 		// Button styles
 		button: {
@@ -173,11 +165,6 @@ function DeepTutorProfilePopup({
 						<span style={styles.personText}>
 							{getDisplayName()}
 						</span>
-						<img
-							src="chrome://zotero/content/DeepTutorMaterials/Profile/check.svg"
-							alt="Check"
-							style={styles.checkIcon}
-						/>
 					</div>
 				</div>
 
@@ -187,10 +174,10 @@ function DeepTutorProfilePopup({
 					style={styles.button}
 					onClick={onManageSubscription}
 					onMouseEnter={(e) => {
-						e.target.style.background = styles.buttonHover.background;
+						e.currentTarget.style.background = styles.buttonHover.background;
 					}}
 					onMouseLeave={(e) => {
-						e.target.style.background = "transparent";
+						e.currentTarget.style.background = "transparent";
 					}}
 				>
 					<img
@@ -209,10 +196,10 @@ function DeepTutorProfilePopup({
 					style={{ ...styles.button, ...styles.buttonSpacing }}
 					onClick={onShowUsage}
 					onMouseEnter={(e) => {
-						e.target.style.background = styles.buttonHover.background;
+						e.currentTarget.style.background = styles.buttonHover.background;
 					}}
 					onMouseLeave={(e) => {
-						e.target.style.background = "transparent";
+						e.currentTarget.style.background = "transparent";
 					}}
 				>
 					<img
@@ -231,10 +218,10 @@ function DeepTutorProfilePopup({
 					style={{ ...styles.button, ...styles.buttonSpacing }}
 					onClick={onSignOut}
 					onMouseEnter={(e) => {
-						e.target.style.background = styles.buttonHover.background;
+						e.currentTarget.style.background = styles.buttonHover.background;
 					}}
 					onMouseLeave={(e) => {
-						e.target.style.background = "transparent";
+						e.currentTarget.style.background = "transparent";
 					}}
 				>
 					<img

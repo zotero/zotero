@@ -1,6 +1,5 @@
 import React from 'react';
 
-import CheckIcon from './CheckIcon';
 import EmailIcon from './EmailIcon';
 import ManageSubscriptionIcon from './ManageSubscriptionIcon';
 import SignOutIcon from './SignOutIcon';
@@ -64,11 +63,10 @@ const AccountPopup: React.FC<AccountPopupProps> = ({
         {/* Email (non-clickable) */}
         <div className="flex items-center px-2 py-[0.375rem]">
           <EmailIcon className={leadingIconClasses} />
-          <div className="flex grow items-center justify-between">
+          <div className="flex grow items-center justify-start">
             <span className="ml-2 truncate font-roboto text-base font-normal text-neutral-500">
               {email}
             </span>
-            <CheckIcon className="ml-3 h-5 w-5" />
           </div>
         </div>
 

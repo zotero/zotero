@@ -9,6 +9,7 @@ import DeepTutorSignIn from './DeepTutorSignIn.js';
 import DeepTutorSubscription from './DeepTutorSubscription.js';
 import DeepTutorTopSection from './DeepTutorTopSection.js';
 import DeepTutorBottomSection from './DeepTutorBottomSection.js';
+import DeepTutorUsagePopup from './DeepTutorUsagePopup.js';
 import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
 import DeepTutorSessionDelete from './DeepTutorSessionDelete.js';
 import DeepTutorRenameSession from './DeepTutorRenameSession.js';
@@ -302,6 +303,7 @@ const DeepTutorMain = (props) => {
 				onToggleSignUpPopup={props.handleOpenSignUpPage}
 
 				onToggleSubscriptionPopup={props.toggleSubscriptionPopup}
+				onToggleUsagePopup={props.toggleUsagePopup}
 				showProfilePopup={props.showProfilePopup}
 				isAuthenticated={props.currentUser}
 				currentUser={props.currentUser}
@@ -384,6 +386,16 @@ const DeepTutorMain = (props) => {
 					</div>
 				</div>
 			)}
+
+			{props.showUsagePopup && (
+				<DeepTutorUsagePopup
+					onClose={props.toggleUsagePopup}
+					userId={props.userData && props.userData.id}
+					activeSubscription={props.activeSubscription}
+				/>
+			)}
+
+
 
 
 			{props.showDeletePopup && (
@@ -801,6 +813,7 @@ DeepTutorMain.propTypes = {
 	// Popup state props
 	showProfilePopup: PropTypes.bool.isRequired,
 	showSignInPopup: PropTypes.bool.isRequired,
+	showUsagePopup: PropTypes.bool.isRequired,
 
 	showModelSelectionPopup: PropTypes.bool.isRequired,
 	showDeletePopup: PropTypes.bool.isRequired,
@@ -847,6 +860,7 @@ DeepTutorMain.propTypes = {
 	switchPane: PropTypes.func.isRequired,
 	toggleModelSelectionPopup: PropTypes.func.isRequired,
 	toggleSignInPopup: PropTypes.func.isRequired,
+	toggleUsagePopup: PropTypes.func.isRequired,
 
 	toggleProfilePopup: PropTypes.func.isRequired,
 	toggleRenamePopup: PropTypes.func.isRequired,

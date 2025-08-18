@@ -182,6 +182,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showManageSubscriptionPopup: false,
 			showSearch: false,
 			showSubscriptionPopup: false,
+			showUsagePopup: false,
 			// Auth state
 			isAuthenticated: false,
 			currentUser: null,
@@ -231,6 +232,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 
 		// Bind Google OAuth methods
 		this.handleGoogleSignInClose = this.handleGoogleSignInClose.bind(this);
+		this.toggleUsagePopup = this.toggleUsagePopup.bind(this);
 	}
 
 	async componentDidMount() {
@@ -592,6 +594,12 @@ var DeepTutor = class DeepTutor extends React.Component {
 	toggleManageSubscriptionPopup = () => {
 		this.setState(prevState => ({
 			showManageSubscriptionPopup: !prevState.showManageSubscriptionPopup
+		}));
+	};
+
+	toggleUsagePopup = () => {
+		this.setState(prevState => ({
+			showUsagePopup: !prevState.showUsagePopup
 		}));
 	};
 
@@ -1543,6 +1551,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				// Popup state props
 				showProfilePopup={this.state.showProfilePopup}
 				showSignInPopup={this.state.showSignInPopup}
+				showUsagePopup={this.state.showUsagePopup}
 
 				showModelSelectionPopup={this.state.showModelSelectionPopup}
 				showDeletePopup={this.state.showDeletePopup}
@@ -1610,6 +1619,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				switchPane={this.switchPane}
 				toggleModelSelectionPopup={this.toggleModelSelectionPopup}
 				toggleSignInPopup={this.toggleSignInPopup}
+				toggleUsagePopup={this.toggleUsagePopup}
 
 				toggleProfilePopup={this.toggleProfilePopup}
 				openNoPDFWarningPopup={this.openNoPDFWarningPopup}

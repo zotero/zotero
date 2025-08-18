@@ -99,7 +99,7 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 		container: {
 			background: colors.background.primary,
 			borderRadius: "0.5rem",
-			padding: "2rem 2rem 1rem 2rem",
+			padding: "2rem",
 			maxWidth: "28rem",
 			width: "100%",
 			position: "relative",
@@ -141,8 +141,8 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			alignItems: "center",
 			justifyContent: "space-between",
 			gap: 0,
-			marginBottom: "1rem",
-			width: "90%",
+			marginBottom: "1.5rem",
+			width: "100%",
 			marginLeft: "auto",
 			marginRight: "auto"
 		},
@@ -153,22 +153,26 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			borderRadius: "0.375rem",
 			cursor: "pointer",
 			fontWeight: 400,
-			fontSize: "16px",
+			fontSize: "1rem",
 			fontFamily: "Roboto, sans-serif",
 			background: isDark ? "#2B2B2B" : "#F8F6F7",
 			color: isDark ? "#BBBBBB" : "#757575",
 			display: "flex",
 			alignItems: "center",
-			justifyContent: "center"
+			justifyContent: "center",
+			position: "relative",
+			zIndex: 1
 		},
 		tabActive: {
 			background: isDark ? "#4A4A4A" : "#D9D9D9",
-			color: isDark ? "#FFFFFF" : "#000000"
+			color: isDark ? "#FFFFFF" : "#000000",
+			position: "relative",
+			zIndex: 2
 		},
 		content: {
 			display: "flex",
 			flexDirection: "column",
-			gap: "0.75rem",
+			gap: "0rem",
 			marginBottom: "1rem"
 		},
 		planHeaderRow: {
@@ -185,13 +189,14 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			fontSize: "1.25rem",
 			lineHeight: "1.4375rem",
 			textAlign: "left",
-			fontFamily: "Roboto, sans-serif"
+			fontFamily: "Roboto, sans-serif",
+			marginBottom: "0.25rem"
 		},
 		bestDealBadge: {
 			background: "#0687E5",
 			color: "#FFFFFF",
 			fontWeight: 700,
-			fontSize: "12px",
+			fontSize: "0.75rem",
 			padding: "2px 6px",
 			borderRadius: "0.375rem"
 		},
@@ -201,7 +206,7 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			alignItems: "baseline",
 			gap: "0.5rem",
 			marginTop: 0,
-			marginBottom: 0
+			marginBottom: "0.75rem"
 		},
 		price: {
 			fontWeight: 700,
@@ -222,10 +227,11 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 		featureList: {
 			display: "flex",
 			flexDirection: "column",
-			gap: "0.375rem"
+			gap: "0.375rem",
+			marginBottom: "1.5rem"
 		},
 		feature: {
-			fontSize: "0.9rem",
+			fontSize: "1rem",
 			lineHeight: "1.375rem",
 			color: colors.text.allText,
 			fontWeight: 500,
@@ -243,17 +249,21 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			background: colors.button.primary,
 			color: colors.button.primaryText,
 			border: "none",
-			borderRadius: "0.5rem",
-			padding: "0.75rem 1rem",
-			fontWeight: 500,
-			fontSize: "16px",
+			borderRadius: "0.625rem",
+			padding: "0.75rem 1.5rem",
+			minHeight: "3rem",
+			fontWeight: 600,
+			fontSize: "1rem",
 			cursor: "pointer",
 			boxShadow: "0 0.0625rem 0.125rem rgba(0,0,0,0.08)",
 			fontFamily: "Roboto, sans-serif",
+			letterSpacing: 0.2,
+			transition: "background 0.2s",
 			display: "flex",
 			alignItems: "center",
 			justifyContent: "center",
-			gap: "0.5rem"
+			gap: "0.5rem",
+			width: "100%"
 		},
 		currentPlanButton: {
 			all: "revert",
@@ -261,12 +271,17 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			background: "#FFFFFF",
 			color: "#757575",
 			border: "1px solid #757575",
-			borderRadius: "0.5rem",
-			padding: "0.75rem 1rem",
-			fontWeight: 500,
-			fontSize: "16px",
+			borderRadius: "0.625rem",
+			padding: "0.75rem 1.5rem",
+			minHeight: "3rem",
+			fontWeight: 600,
+			fontSize: "1rem",
 			cursor: "default",
-			fontFamily: "Roboto, sans-serif"
+			fontFamily: "Roboto, sans-serif",
+			display: "flex",
+			alignItems: "center",
+			justifyContent: "center",
+			width: "100%"
 		},
 		downgradeButton: {
 			all: "revert",
@@ -274,25 +289,41 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			background: isDark ? "#4A4A4A" : "#9E9E9E",
 			color: "#FFFFFF",
 			border: "none",
-			borderRadius: "0.5rem",
-			padding: "0.75rem 1rem",
-			fontWeight: 500,
-			fontSize: "16px",
+			borderRadius: "0.625rem",
+			padding: "0.75rem 1.5rem",
+			minHeight: "3rem",
+			fontWeight: 600,
+			fontSize: "1rem",
 			cursor: "pointer",
-			fontFamily: "Roboto, sans-serif"
+			boxShadow: "0 0.0625rem 0.125rem rgba(0,0,0,0.04)",
+			fontFamily: "Roboto, sans-serif",
+			letterSpacing: 0.2,
+			transition: "background 0.2s",
+			display: "flex",
+			alignItems: "center",
+			justifyContent: "center",
+			width: "100%"
 		},
 		secondaryButton: {
 			all: "revert",
 			flex: 1,
-			background: colors.background.quaternary,
-			color: colors.text.allText,
-			border: `1px solid ${colors.border.primary}`,
-			borderRadius: "0.5rem",
-			padding: "0.75rem 1rem",
+			background: colors.button.secondary,
+			color: colors.button.primary,
+			border: `1px solid ${colors.button.primary}`,
+			borderRadius: "0.625rem",
+			padding: "0.75rem 1.5rem",
+			minHeight: "3rem",
 			fontWeight: 600,
 			fontSize: "1rem",
 			cursor: "pointer",
-			fontFamily: "Roboto, sans-serif"
+			boxShadow: "0 0.0625rem 0.125rem rgba(0,0,0,0.04)",
+			fontFamily: "Roboto, sans-serif",
+			letterSpacing: 0.2,
+			transition: "background 0.2s",
+			display: "flex",
+			alignItems: "center",
+			justifyContent: "center",
+			width: "100%"
 		}
 	};
 

@@ -64,7 +64,7 @@ export default function DeepTutorUsagePopup({ onClose, onUpgrade, userId, active
 
 	const styles = {
 		overlay: {
-			position: "fixed",
+			position: "absolute",
 			top: 0,
 			left: 0,
 			right: 0,
@@ -135,11 +135,11 @@ export default function DeepTutorUsagePopup({ onClose, onUpgrade, userId, active
 		},
 		labelText: {
 			fontWeight: 600,
-			fontSize: "1rem",
+			fontSize: "1.125rem",
 		},
 		mutedText: {
 			color: colors.text.tertiary,
-			fontSize: "0.9rem",
+			fontSize: "1rem",
 		},
 		separator: {
 			height: "1px",
@@ -232,31 +232,32 @@ export default function DeepTutorUsagePopup({ onClose, onUpgrade, userId, active
 			sessionText = "Not available";
 		}
 		else if (showUnlimited) {
-			sessionText = `${current}/unlimited sessions`;
+			sessionText = `${current} / unlimited sessions`;
 		}
 		else {
-			sessionText = `${current}/${max} sessions`;
+			sessionText = `${current} / ${max} sessions`;
 		}
 
 		const barStyle = { ...styles.progressBar };
+		const useGradient = gradient || showUnlimited;
 		if (disabled) {
 			barStyle.background = isDark ? "#6B7280" : "#9CA3AF"; // gray
 		}
-		else if (gradient) {
-			barStyle.backgroundImage = "linear-gradient(90deg, #3B82F6 0%, #22D3EE 100%)"; // blue->cyan
+		else if (useGradient) {
+			barStyle.backgroundImage = "linear-gradient(90deg, #0AE2FF 0%, #0687E5 100%)"; // aqua -> blue
 		}
 		else if (percentage >= 100) {
 			barStyle.background = "#10B981"; // green
 		}
 		else {
-			barStyle.background = "#3B82F6"; // blue
+			barStyle.background = colors.button.primary; // design system primary blue
 		}
 
 		return (
 			<div style={{ marginBottom: "1rem" }}>
-				<div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.9rem" }}>
-					<span style={{ fontWeight: 600, color: disabled ? colors.text.tertiary : colors.text.primary }}>{label}</span>
-					<span style={{ fontWeight: 600, color: disabled ? colors.text.tertiary : colors.text.primary }}>{sessionText}</span>
+				<div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "1rem" }}>
+					<span style={{ fontWeight: 400, color: disabled ? colors.text.tertiary : colors.text.primary }}>{label}</span>
+					<span style={{ fontWeight: 400, color: colors.text.tertiary }}>{sessionText}</span>
 				</div>
 				<div style={styles.progressContainer}>
 					<div style={{ ...barStyle, width: `${percentage}%` }} />
@@ -336,7 +337,7 @@ export default function DeepTutorUsagePopup({ onClose, onUpgrade, userId, active
 							{/* Free Mode Display */}
 							{(!activeSubscription || !activeSubscription.id) && (
 								<div>
-									{renderProgressBar(weeklyTotal, 5, "Standard Mode", { disabled: false, gradient: true })}
+									{renderProgressBar(weeklyTotal, 5, "Standard Mode", { disabled: false, gradient: false })}
 									{renderProgressBar(0, 0, "Advanced Mode", { disabled: true })}
 									<div style={{ marginTop: "1rem" }}>
 										<span style={{ color: colors.text.primary }}>
@@ -354,25 +355,25 @@ export default function DeepTutorUsagePopup({ onClose, onUpgrade, userId, active
 								<div>
 									{/* Standard Mode (no progress) */}
 									<div style={{ marginBottom: "0.75rem" }}>
-										<div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-											<span style={{ fontWeight: 600, color: colors.text.primary }}>Standard Mode</span>
-											<span style={{ fontWeight: 600, color: colors.text.primary }}>{Number(usageData.liteCount || 0)} sessions</span>
+										<div style={{ display: "flex", justifyContent: "space-between", fontSize: "1rem", marginBottom: "0.25rem" }}>
+											<span style={{ fontWeight: 400, color: colors.text.primary }}>Standard Mode</span>
+											<span style={{ fontWeight: 400, color: colors.text.tertiary }}>{Number(usageData.liteCount || 0)} sessions</span>
 										</div>
 										<div style={styles.separator} />
 									</div>
 
 									{/* Advanced Mode (no progress) */}
 									<div style={{ marginBottom: "0.75rem" }}>
-										<div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-											<span style={{ fontWeight: 600, color: colors.text.primary }}>Advanced Mode</span>
-											<span style={{ fontWeight: 600, color: colors.text.primary }}>{Number(usageData.basicCount || 0)} sessions</span>
+										<div style={{ display: "flex", justifyContent: "space-between", fontSize: "1rem", marginBottom: "0.25rem" }}>
+											<span style={{ fontWeight: 400, color: colors.text.primary }}>Advanced Mode</span>
+											<span style={{ fontWeight: 400, color: colors.text.tertiary }}>{Number(usageData.basicCount || 0)} sessions</span>
 										</div>
 										<div style={styles.separator} />
 									</div>
 
 									{/* Total Sessions Progress Bar */}
 									<div style={{ marginTop: "1rem" }}>
-										{renderProgressBar(cycleTotal, 200, "Total Sessions", { disabled: false, gradient: true })}
+										{renderProgressBar(cycleTotal, 200, "Total Sessions", { disabled: false, gradient: false })}
 									</div>
 
 									{/* Upgrade Message */}
@@ -392,25 +393,25 @@ export default function DeepTutorUsagePopup({ onClose, onUpgrade, userId, active
 								<div>
 									{/* Standard Mode (no progress) */}
 									<div style={{ marginBottom: "0.75rem" }}>
-										<div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-											<span style={{ fontWeight: 600, color: colors.text.primary }}>Standard Mode</span>
-											<span style={{ fontWeight: 600, color: colors.text.primary }}>{Number(usageData.liteCount || 0)} sessions</span>
+										<div style={{ display: "flex", justifyContent: "space-between", fontSize: "1rem", marginBottom: "0.25rem" }}>
+											<span style={{ fontWeight: 400, color: colors.text.primary }}>Standard Mode</span>
+											<span style={{ fontWeight: 400, color: colors.text.tertiary }}>{Number(usageData.liteCount || 0)} sessions</span>
 										</div>
 										<div style={styles.separator} />
 									</div>
 
 									{/* Advanced Mode (no progress) */}
 									<div style={{ marginBottom: "0.75rem" }}>
-										<div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.9rem", marginBottom: "0.25rem" }}>
-											<span style={{ fontWeight: 600, color: colors.text.primary }}>Advanced Mode</span>
-											<span style={{ fontWeight: 600, color: colors.text.primary }}>{Number(usageData.basicCount || 0)} sessions</span>
+										<div style={{ display: "flex", justifyContent: "space-between", fontSize: "1rem", marginBottom: "0.25rem" }}>
+											<span style={{ fontWeight: 400, color: colors.text.primary }}>Advanced Mode</span>
+											<span style={{ fontWeight: 400, color: colors.text.tertiary }}>{Number(usageData.basicCount || 0)} sessions</span>
 										</div>
 										<div style={styles.separator} />
 									</div>
 
 									{/* Total Sessions Progress Bar - unlimited */}
 									<div style={{ marginTop: "1rem" }}>
-										{renderProgressBar(cycleTotal, 200, "Total Sessions", { disabled: false, gradient: true, showUnlimited: true })}
+										{renderProgressBar(cycleTotal, 200, "Total Sessions", { disabled: false, gradient: false, showUnlimited: true })}
 									</div>
 								</div>
 							)}
