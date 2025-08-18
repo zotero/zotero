@@ -163,7 +163,7 @@ const DeepTutorBottomSection = (props) => {
 	};
 
 	const renderMain = () => {
-		const isPremiumLabel = (function() {
+		const isPremiumLabel = (function () {
 			// Determine anticipated label based on current props (mirror logic below)
 			if (props.userSubscribed && props.activeSubscription) {
 				const subscriptionType = props.activeSubscription.type;
@@ -184,7 +184,7 @@ const DeepTutorBottomSection = (props) => {
 
 		// Determine button text based on subscription type
 		let buttonText = "Upgrade";
-		if (props.userSubscribed && props.activeSubscription) {
+		if (props.activeSubscription) {
 			// User has an active subscription, show subscription type
 			const subscriptionType = props.activeSubscription.type;
 			if (subscriptionType === "BASIC") {
@@ -199,10 +199,6 @@ const DeepTutorBottomSection = (props) => {
 			else {
 				buttonText = "Manage";
 			}
-		}
-		else if (props.userSubscribed) {
-			// User is subscribed but no subscription data available
-			buttonText = "Manage";
 		}
 		else {
 			// User is not subscribed
@@ -298,11 +294,11 @@ const DeepTutorBottomSection = (props) => {
 										}
 									}
 								}
-						}}
-					>
-						<img src={feedIconPath} alt="Give Us Feedback" style={styles.buttonIcon} />
-						<span style={{ textDecoration: 'underline' }}>Give Us Feedback</span>
-					</button>
+							}}
+						>
+							<img src={feedIconPath} alt="Give Us Feedback" style={styles.buttonIcon} />
+							<span style={{ textDecoration: 'underline' }}>Give Us Feedback</span>
+						</button>
 					</div>
 					<div style={styles.buttonsBox}>
 						<div style={styles.profileButtonContainer}>
@@ -315,7 +311,6 @@ const DeepTutorBottomSection = (props) => {
 							</button>
 							{props.showProfilePopup && (
 								<DeepTutorProfilePopup
-									onManageSubscription={props.onToggleSubscriptionPopup}
 									onShowUsage={handleShowUsage}
 									onSignOut={props.onSignOut}
 									userData={props.userData}
@@ -387,18 +382,16 @@ DeepTutorBottomSection.propTypes = {
 	onSignOut: PropTypes.func,
 	onSwitchNoSession: PropTypes.func,
 	userData: PropTypes.object,
-	userSubscribed: PropTypes.bool,
-	isFreeTrial: PropTypes.bool,
-	activeSubscription: PropTypes.object
+	activeSubscription: PropTypes.object,
+	usageSummary: PropTypes.object,
+	onRefreshUsageSummary: PropTypes.func
 };
 
 DeepTutorBottomSection.defaultProps = {
 	isAuthenticated: false,
 	currentUser: null,
 	onSignOut: () => {},
-	userData: null,
-	userSubscribed: false,
-	isFreeTrial: true
+	userData: null
 };
 
 export default DeepTutorBottomSection;

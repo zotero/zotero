@@ -18,7 +18,7 @@ const SubscriptionConfirmBookPath = "chrome://zotero/content/DeepTutorMaterials/
  * DeepTutorSubscriptionPopup
  * Popup to select plan: Free, Pro, Premium. Each tab shows different content and action.
  */
-export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onAction, userId, activeSubscription }) {
+export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onAction, userId, activeSubscription, onRefreshSubscription }) {
 	const { colors, isDark } = useDeepTutorTheme();
 	const closePath = isDark ? PopupCloseDarkPath : PopupClosePath;
 	const [currentPlan, setCurrentPlan] = useState(null); // 'free' | 'pro' | 'premium' | null
@@ -78,19 +78,15 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 
 	const handleProcessingContinue = async () => {
 		try {
-			Zotero.debug("DeepTutorSubscriptionPopup: Checking user subscription status after processing");
-			const active = userId ? await getActiveUserSubscriptionByUserId(userId) : null;
-			const hasActiveSubscription = !!active;
-			Zotero.debug(`DeepTutorSubscriptionPopup: Active subscription check result: ${hasActiveSubscription}`);
-			if (hasActiveSubscription) {
-				setCurrentPanel("confirm");
+			Zotero.debug("DeepTutorSubscriptionPopup: Refreshing subscription status after processing via centralized function");
+			if (onRefreshSubscription) {
+				await onRefreshSubscription();
 			}
-			else {
-				setCurrentPanel("select");
-			}
+			// After refresh, proceed to confirmation view
+			setCurrentPanel("confirm");
 		}
 		catch (error) {
-			Zotero.debug(`DeepTutorSubscriptionPopup: Error checking subscription status: ${error.message}`);
+			Zotero.debug(`DeepTutorSubscriptionPopup: Error refreshing subscription status: ${error.message}`);
 			setCurrentPanel("select");
 		}
 	};
@@ -466,8 +462,8 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			
 			if (selectedLevel < currentLevel) {
 				// Downgrade - redirect to manage subscription page
-				const manageUrl = `http://localhost:3000/dzSubscription?manage=true`;
-				//const manageUrl = `https://${DT_BASE_URL}/manage-subscription`;
+				//const manageUrl = `http://localhost:3000/dzSubscription?manage=true`;
+				const manageUrl = `https://${DT_BASE_URL}/manage-subscription`;
 				try {
 					Zotero.launchURL(manageUrl);
 				}
@@ -489,11 +485,11 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			}
 			
 			// Regular upgrade action: open URL and show processing panel (do not delegate to parent)
-			let url = `http://localhost:3000/dzSubscription?plan=premium`;
-			//let url = `https://${DT_BASE_URL}/dzSubscription?plan=premium`;
+			//let url = `http://localhost:3000/dzSubscription?plan=premium`;
+			let url = `https://${DT_BASE_URL}/dzSubscription?plan=premium`;
 			if (activeTab === "pro") {
-				url = `http://localhost:3000/dzSubscription?plan=pro`;
-				//url = `https://${DT_BASE_URL}/dzSubscription?plan=pro`;
+				//url = `http://localhost:3000/dzSubscription?plan=pro`;
+				url = `https://${DT_BASE_URL}/dzSubscription?plan=pro`;
 			}
 			openSubscriptionUrl(url);
 			setCurrentPanel("processing");
@@ -577,7 +573,10 @@ DeepTutorSubscriptionPopup.propTypes = {
 	userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 
 	/** Active subscription object for determining current plan */
-	activeSubscription: PropTypes.object
+	activeSubscription: PropTypes.object,
+
+	/** Centralized refresh function to reload the user's active subscription from the server */
+	onRefreshSubscription: PropTypes.func
 };
 
 DeepTutorSubscriptionPopup.defaultProps = {

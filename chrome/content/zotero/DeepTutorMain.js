@@ -18,6 +18,7 @@ import DeepTutorFileSizeWarning from './DeepTutorFileSizeWarning.js';
 import DeepTutorSubscriptionPopup from './DeepTutorSubscriptionPopup.js';
 import { DT_BASE_URL } from './api/libs/api.js';
 
+
 // Icon paths for popup close buttons
 const PopupClosePath = 'chrome://zotero/content/DeepTutorMaterials/Main/MAIN_CLOSE.svg';
 const PopupCloseDarkPath = 'chrome://zotero/content/DeepTutorMaterials/Main/CLOSE_DARK.svg';
@@ -282,6 +283,10 @@ const DeepTutorMain = (props) => {
 							onShowNoPDFWarning={props.openNoPDFWarningPopup}
 							onShowFileSizeWarning={props.openFileSizeWarningPopup}
 							subscriptionType={props.activeSubscription?.type || "BASIC"}
+							usageSummary={props.usageSummary}
+							hasActiveSubscription={Boolean(props.activeSubscription && props.activeSubscription.id)}
+							onShowSubscriptionPopup={props.toggleSubscriptionPopup}
+							refreshUsageSummary={props.refreshUsageSummary}
 						/>
 					}
 					{props.currentPane === 'welcome'
@@ -310,9 +315,9 @@ const DeepTutorMain = (props) => {
 				onSignOut={props.handleSignOut}
 				onSwitchNoSession={() => props.switchPane('noSession')}
 				userData={props.userData}
-				userSubscribed={props.userSubscribed}
-				isFreeTrial={props.isFreeTrial}
 				activeSubscription={props.activeSubscription}
+				usageSummary={props.usageSummary}
+				onRefreshUsageSummary={props.refreshUsageSummary}
 			/>
 
 			{/* Popups */}
@@ -392,6 +397,9 @@ const DeepTutorMain = (props) => {
 					onClose={props.toggleUsagePopup}
 					userId={props.userData && props.userData.id}
 					activeSubscription={props.activeSubscription}
+					usageSummary={props.usageSummary}
+					onUpgrade={props.toggleSubscriptionPopup}
+					onRefreshUsageSummary={props.refreshUsageSummary}
 				/>
 			)}
 
@@ -612,17 +620,17 @@ const DeepTutorMain = (props) => {
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
-					zIndex: 1000,
+					zIndex: 3000,
 				}}>
 					<DeepTutorSubscriptionPopup
 						onClose={props.toggleSubscriptionPopup}
 						onAction={(plan) => {
 							// Open different URLs based on selected plan
-							let url = `http://localhost:3000/dzSubscription?plan=premium`;
-							//let url = `https://${DT_BASE_URL}/dzSubscription?plan=premium`;
+							//let url = `http://localhost:3000/dzSubscription?plan=premium`;
+							let url = `https://${DT_BASE_URL}/dzSubscription?plan=premium`;
 							if (plan === 'pro') {
-								url = `http://localhost:3000/dzSubscription?plan=pro`;
-								//url = `https://${DT_BASE_URL}/dzSubscription?plan=pro`;
+								//url = `http://localhost:3000/dzSubscription?plan=pro`;
+								url = `https://${DT_BASE_URL}/dzSubscription?plan=pro`;
 							}
 							else if (plan === 'free') {
 								// No external action for free; simply close
@@ -661,6 +669,7 @@ const DeepTutorMain = (props) => {
 						}}
 						userId={props.userData && props.userData.id}
 						activeSubscription={props.activeSubscription}
+						onRefreshSubscription={props.refreshActiveSubscription}
 					/>
 				</div>
 			)}
@@ -784,6 +793,10 @@ const DeepTutorMain = (props) => {
 							onShowNoPDFWarning={props.openNoPDFWarningPopup}
 							onShowFileSizeWarning={props.openFileSizeWarningPopup}
 							subscriptionType={props.activeSubscription?.type || "BASIC"}
+							usageSummary={props.usageSummary}
+							hasActiveSubscription={Boolean(props.activeSubscription && props.activeSubscription.id)}
+							onShowSubscriptionPopup={props.toggleSubscriptionPopup}
+							refreshUsageSummary={props.refreshUsageSummary}
 						/>
 					</div>
 				</div>
@@ -806,9 +819,8 @@ DeepTutorMain.propTypes = {
 	// User props
 	currentUser: PropTypes.object,
 	userData: PropTypes.object,
-	userSubscribed: PropTypes.bool.isRequired,
-	isFreeTrial: PropTypes.bool.isRequired,
 	activeSubscription: PropTypes.object,
+	usageSummary: PropTypes.object,
 
 	// Popup state props
 	showProfilePopup: PropTypes.bool.isRequired,
@@ -855,6 +867,8 @@ DeepTutorMain.propTypes = {
 	handleRenameSuccess: PropTypes.func.isRequired,
 	handleCancelRename: PropTypes.func.isRequired,
 	handleSubscriptionStatusChange: PropTypes.func.isRequired,
+	refreshActiveSubscription: PropTypes.func.isRequired,
+	refreshUsageSummary: PropTypes.func,
 
 	// Toggle handlers
 	switchPane: PropTypes.func.isRequired,

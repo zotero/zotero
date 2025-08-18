@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"; // eslint-disable-line no-unused-vars
 import PropTypes from "prop-types";
 import { useDeepTutorTheme } from "./theme/useDeepTutorTheme.js";
-import { DT_BASE_URL, getSessionUsageForUser } from "./api/libs/api.js";
+import { DT_BASE_URL } from "./api/libs/api.js";
 
 // Close icon paths (match other popups)
 const PopupClosePath = "chrome://zotero/content/DeepTutorMaterials/Main/MAIN_CLOSE.svg";
@@ -12,55 +12,26 @@ const PopupCloseDarkPath = "chrome://zotero/content/DeepTutorMaterials/Main/CLOS
  * Fetches session usage upon open and displays usage statistics.
  * Mirrors logic from documents/libs/usage/usagePopup.tsx in a JS style.
  */
-export default function DeepTutorUsagePopup({ onClose, onUpgrade, userId, activeSubscription }) {
+export default function DeepTutorUsagePopup({ onClose, onUpgrade, userId: _userId, activeSubscription, usageSummary, onRefreshUsageSummary }) {
 	const { colors, isDark } = useDeepTutorTheme();
 	const closePath = isDark ? PopupCloseDarkPath : PopupClosePath;
 
-	// Local state for data fetching
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState(null);
-	const [usageData, setUsageData] = useState(null);
+	// Local state for display
+	const [isLoading] = useState(false);
+	const [error] = useState(null);
+	const [usageData, setUsageData] = useState(usageSummary || null);
 
-	// Fetch usage data when popup opens
+	// Sync incoming pre-fetched summary
 	useEffect(() => {
-		let mounted = true;
-		(async () => {
-			try {
-				console.log("DeepTutor Usage: Starting usage data fetch...");
-				console.log("DeepTutor Usage: User ID:", userId);
-				console.log("DeepTutor Usage: Active subscription:", activeSubscription);
-				
-				setIsLoading(true);
-				setError(null);
+		setUsageData(usageSummary || null);
+	}, [usageSummary]);
 
-				if (!userId) {
-					throw new Error("No user ID provided");
-				}
-
-				// Fetch usage data
-				console.log("DeepTutor Usage: Fetching usage data for user:", userId);
-				const usage = await getSessionUsageForUser(userId);
-				console.log("DeepTutor Usage: Usage data result:", usage);
-
-				if (!mounted) return;
-				setUsageData(usage);
-				console.log("DeepTutor Usage: Usage data fetch completed successfully");
-			}
-			catch (e) {
-				console.error("DeepTutor Usage: Error in usage data fetch:", e);
-				console.error("DeepTutor Usage: Error stack:", e.stack);
-				if (mounted) {
-					setError(e);
-				}
-			}
-			finally {
-				if (mounted) setIsLoading(false);
-			}
-		})();
-		return () => {
-			mounted = false;
-		};
-	}, [userId]);
+	// Refresh usage data when popup opens
+	useEffect(() => {
+		if (onRefreshUsageSummary && typeof onRefreshUsageSummary === "function") {
+			onRefreshUsageSummary();
+		}
+	}, []); // Empty dependency array means this runs once when component mounts
 
 	const styles = {
 		overlay: {
@@ -448,6 +419,12 @@ DeepTutorUsagePopup.propTypes = {
 		endTime: PropTypes.string,
 		type: PropTypes.string,
 	}),
+
+	/** Pre-fetched usage summary object */
+	usageSummary: PropTypes.object,
+
+	/** Trigger a refresh of usage summary from parent */
+	onRefreshUsageSummary: PropTypes.func,
 };
 
 

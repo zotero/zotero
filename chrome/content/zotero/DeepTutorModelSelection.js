@@ -36,7 +36,7 @@ const SessionType = {
 };
 
 
-const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, onShowNoPDFWarning, subscriptionType, onShowFileSizeWarning }, ref) => {
+const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, onShowNoPDFWarning, subscriptionType, onShowFileSizeWarning, usageSummary, hasActiveSubscription, onShowSubscriptionPopup, refreshUsageSummary }, ref) => {
 	const { colors, theme, isDark } = useDeepTutorTheme();
 	
 	// Theme-aware styles
@@ -1093,6 +1093,31 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 			return;
 		}
 
+		// Pre-check usage limit before creating session
+		try {
+			// Refresh latest summary
+			const latest = typeof refreshUsageSummary === 'function' ? await refreshUsageSummary() : usageSummary;
+			const summary = latest || usageSummary || null;
+			const isPro = Boolean(hasActiveSubscription) && ["BASIC", "PLUS"].includes((subscriptionType || "").toUpperCase());
+			const isPremium = Boolean(hasActiveSubscription) && (subscriptionType || "").toUpperCase() === "PREMIUM";
+			if (!isPremium && summary) {
+				const weeklyTotalUsed = Number(summary.weeklyLiteCount || 0) + Number(summary.weeklyBasicCount || 0);
+				const cycleTotalUsed = Number(summary.liteCount || 0) + Number(summary.basicCount || 0);
+				const wouldHitWeeklyLimit = !hasActiveSubscription && weeklyTotalUsed >= 5; // Free: 5/week
+				const wouldHitCycleLimit = isPro && cycleTotalUsed >= 200; // Pro: 200/cycle
+				if (wouldHitWeeklyLimit || wouldHitCycleLimit) {
+					if (typeof onShowSubscriptionPopup === 'function') {
+						onShowSubscriptionPopup();
+					}
+					setErrorMessage("You have reached your usage limit. Please upgrade your plan.");
+					return;
+				}
+			}
+		}
+		catch (limitErr) {
+			Zotero.debug(`ModelSelection: Limit pre-check error: ${limitErr.message}`);
+		}
+
 		// Clear any existing error message and start initializing
 		setErrorMessage('');
 		setIsInitializing(true);
@@ -1272,6 +1297,17 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 			// Call onSubmit with the session ID
 			if (onSubmit) {
 				onSubmit(createdSession.id);
+			}
+
+			// After creating a session, refresh usage summary asynchronously
+			try {
+				if (typeof refreshUsageSummary === 'function') {
+					// Fire-and-forget
+					refreshUsageSummary();
+				}
+			}
+			catch (postErr) {
+				Zotero.debug(`ModelSelection: Post-create usage refresh error: ${postErr.message}`);
 			}
 		}
 		catch (error) {
@@ -1747,7 +1783,19 @@ ModelSelection.propTypes = {
 	onShowFileSizeWarning: PropTypes.func,
 
 	/** User's subscription type (BASIC, PLUS, PREMIUM) */
-	subscriptionType: PropTypes.string
+	subscriptionType: PropTypes.string,
+
+	/** Pre-fetched usage summary to pre-check limits */
+	usageSummary: PropTypes.object,
+
+	/** Whether the user currently has an active subscription */
+	hasActiveSubscription: PropTypes.bool,
+
+	/** Callback to show subscription popup when at limit */
+	onShowSubscriptionPopup: PropTypes.func,
+
+	/** Function to refresh usage summary from parent */
+	refreshUsageSummary: PropTypes.func
 };
 
 ModelSelection.defaultProps = {
@@ -1756,5 +1804,6 @@ ModelSelection.defaultProps = {
 	onShowFileSizeWarning: undefined,
 
 	// Default to BASIC (free) if not provided
-	subscriptionType: "BASIC"
+	subscriptionType: "BASIC",
+	hasActiveSubscription: false
 };

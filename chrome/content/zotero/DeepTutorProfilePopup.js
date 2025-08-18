@@ -1,6 +1,7 @@
 import React from "react"; // eslint-disable-line no-unused-vars
 import PropTypes from "prop-types";
 import { useDeepTutorTheme } from "./theme/useDeepTutorTheme.js";
+import { DT_BASE_URL } from "./api/libs/api.js";
 
 // Icon paths for light and dark themes
 const ICON_PATHS = {
@@ -33,7 +34,6 @@ const ICON_PATHS = {
  * Supports both light and dark themes with reverse colors and SVG icons
  */
 function DeepTutorProfilePopup({
-	onManageSubscription,
 	onShowUsage,
 	onSignOut,
 	userData,
@@ -71,6 +71,29 @@ function DeepTutorProfilePopup({
 				|| "User");
 		}
 		return "User";
+	};
+
+	/**
+	 * Handles manage subscription action by launching the dzSubscription manage page
+	 * Similar to how downgrade buttons work in the subscription popup
+	 */
+	const handleManageSubscription = () => {
+		try {
+			// Launch the manage subscription URL directly
+			const manageUrl = `https://${DT_BASE_URL}/dzSubscription?manage=true`;
+			Zotero.launchURL(manageUrl);
+		} catch (error) {
+			Zotero.debug(`DeepTutor: Error opening manage subscription URL: ${error.message}`);
+			// Fallback to clipboard if URL opening fails
+			const manageUrl = `https://${DT_BASE_URL}/dzSubscription?manage=true`;
+			if (navigator.clipboard) {
+				navigator.clipboard.writeText(manageUrl).then(() => {
+					Zotero.alert(null, "DeepTutor", "Manage subscription URL copied to clipboard!");
+				});
+			} else {
+				Zotero.alert(null, "DeepTutor", `Please manually visit this URL:\n${manageUrl}`);
+			}
+		}
 	};
 
 	// Theme-aware styles
@@ -172,7 +195,7 @@ function DeepTutorProfilePopup({
 				<button
 					type="button"
 					style={styles.button}
-					onClick={onManageSubscription}
+					onClick={handleManageSubscription}
 					onMouseEnter={(e) => {
 						e.currentTarget.style.background = styles.buttonHover.background;
 					}}
@@ -243,9 +266,6 @@ DeepTutorProfilePopup.propTypes = {
 
 	/** Callback to close the popup */
 	onClose: PropTypes.func,
-
-	/** Callback to manage subscription (will redirect to Stripe portal) */
-	onManageSubscription: PropTypes.func.isRequired,
 
 	/** Callback to open usage popup */
 	onShowUsage: PropTypes.func.isRequired,

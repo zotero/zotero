@@ -45,7 +45,7 @@ class DeepTutorSubscription extends React.Component {
 		onManageSubscription: PropTypes.func,
 		onCancel: PropTypes.func,
 		userId: PropTypes.string,
-		userSubscribed: PropTypes.bool,
+		activeSubscription: PropTypes.object,
 		toggleSubscriptionPopup: PropTypes.func,
 		onSubscriptionStatusChange: PropTypes.func
 	};
@@ -55,7 +55,7 @@ class DeepTutorSubscription extends React.Component {
 		onManageSubscription: () => {},
 		onCancel: () => {},
 		userId: null,
-		userSubscribed: false,
+		activeSubscription: null,
 		toggleSubscriptionPopup: () => {},
 		onSubscriptionStatusChange: () => {}
 	};
@@ -285,9 +285,9 @@ class DeepTutorSubscription extends React.Component {
 	 * @returns {JSX.Element} The main subscription panel
 	 */
 	renderMainPanel() {
-		const { userSubscribed } = this.props;
+		const { activeSubscription } = this.props;
 
-		if (userSubscribed) {
+		if (activeSubscription) {
 			// User is subscribed - show management panel
 			return (
 				<div>
@@ -301,7 +301,7 @@ class DeepTutorSubscription extends React.Component {
 			);
 		}
 		else {
-			// User is not subscribed and no free trial - show upgrade premium panel
+			// User is not subscribed - show upgrade premium panel
 			return (
 				<div>
 					{this.renderHeader("Upgrade to Premium", this.handleCancel)}
