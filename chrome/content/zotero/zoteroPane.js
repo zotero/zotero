@@ -6732,14 +6732,6 @@ var ZoteroPane = new function () {
 			
 			var elValues = serializedValues[id];
 			for (var attr in elValues) {
-				// Ignore persisted collapsed state for collection and item pane splitters, since
-				// people close them by accident and don't know how to get them back
-				// TODO: Add a hidden pref to allow them to stay closed if people really want that?
-				if ((el.id == 'zotero-collections-splitter' || el.id == 'zotero-items-splitter')
-						&& attr == 'state'
-						&& Zotero.Prefs.get('reopenPanesOnRestart')) {
-					continue;
-				}
 				// For some reason, the persisted state of the splitter is empty. This will cause
 				// the splitter to behave unexpectedly. We set it to 'collapsed' here.
 				if (["zotero-context-splitter-stacked", "zotero-context-splitter"].includes(el.id)
