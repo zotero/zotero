@@ -202,6 +202,8 @@ item-menu-add-url =
      .label = Web Link
 item-menu-change-parent-item =
      .label = Change Parent Item…
+item-menu-relate-items =
+    .label = Relate Items
 
 view-online = View Online
 item-menu-option-view-online =

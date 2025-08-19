@@ -2324,6 +2324,29 @@ var ZoteroPane = new function () {
 	};
 	
 	
+	this.relateSelectedItems = async function () {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		
+		let selectedItems = this.getSelectedItems();
+		await Zotero.DB.executeTransaction(async () => {
+			for (let index1 = 0; index1 < selectedItems.length; index1++) {
+				for (let index2 = index1 + 1; index2 < selectedItems.length; index2++) {
+					let item1 = selectedItems[index1];
+					let item2 = selectedItems[index2];
+
+					item1.addRelatedItem(item2);
+					item2.addRelatedItem(item1);
+					await item1.save();
+					await item2.save();
+				}
+			}
+		});
+	};
+	
+	
 	this.deleteSelectedCollection = function (deleteItems) {
 		var collectionTreeRow = this.getCollectionTreeRow();
 		
@@ -3617,6 +3640,7 @@ var ZoteroPane = new function () {
 			'moveToTrash',
 			'deleteFromLibrary',
 			'mergeItems',
+			'relateItems',
 			'sep4',
 			'exportItems',
 			'createBib',
@@ -3679,6 +3703,7 @@ var ZoteroPane = new function () {
 				var multiple =  '.multiple';
 				
 				var canMerge = true,
+					showRelate = true, canRelate = true,
 					canIndex = true,
 					canRecognize = true,
 					canUnrecognize = true,
@@ -3686,10 +3711,18 @@ var ZoteroPane = new function () {
 				var canMarkRead = collectionTreeRow.isFeedsOrFeed();
 				var markUnread = true;
 				
-				for (let i = 0; i < items.length; i++) {
-					let item = items[i];
+				for (let item of items) {
 					if (canMerge && (!item.isRegularItem() || item.isFeedItem || collectionTreeRow.isDuplicates())) {
 						canMerge = false;
+					}
+					
+					if (showRelate) {
+						if (item.isFeedItem) {
+							showRelate = false;
+						}
+						else if (canRelate && items.every(otherItem => otherItem === item || otherItem.relatedItems.includes(item.key))) {
+							canRelate = false;
+						}
 					}
 					
 					if (canIndex && !((await Zotero.Fulltext.canReindex(item)))) {
@@ -3716,6 +3749,13 @@ var ZoteroPane = new function () {
 				
 				if (canMerge) {
 					show.add(m.mergeItems);
+				}
+
+				if (showRelate) {
+					show.add(m.relateItems);
+					if (!canRelate) {
+						disable.add(m.relateItems);
+					}
 				}
 				
 				if (canIndex) {
