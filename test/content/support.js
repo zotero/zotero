@@ -81,9 +81,14 @@ function loadWindow(winurl, argument) {
 /**
  * Open a Zotero window and return a promise for the window
  *
+ * @param {boolean} [enablePersist] Load persisted layout values, like pane collapse states
  * @return {Promise<ChromeWindow>}
  */
-function loadZoteroWindow() {
+function loadZoteroWindow({ enablePersist } = {}) {
+	if (!enablePersist) {
+		Zotero.Prefs.clear('pane.persist');
+	}
+	
 	var win = window.openDialog("chrome://zotero/content/zoteroPane.xhtml", "", "all,height=700,width=1000");
 	return waitForDOMEvent(win, "load").then(function() {
 		return new Zotero.Promise((resolve) => {
