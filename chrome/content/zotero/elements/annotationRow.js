@@ -73,7 +73,8 @@
 			this.removeEventListener('keydown', this._handleKeyDown);
 			this._tags.removeEventListener('click', this._handleTagsClick);
 			this._options.removeEventListener('click', this._openMenu);
-			this._comment.removeEventListener('click', this._makeCommentEditable);
+			this._comment.removeEventListener('mousedown', this._createCommentEditor);
+			this._comment.removeEventListener('click', this._makeEditorVisible);
 			this._img.removeEventListener('error', this._handleImageError);
 			this._deleteEditor();
 		}
@@ -98,7 +99,8 @@
 			this.addEventListener('keydown', this._handleKeyDown.bind(this));
 			this._tags.addEventListener('click', this._handleTagsClick.bind(this));
 			this._options.addEventListener('click', this._openMenu.bind(this));
-			this._comment.addEventListener('click', this._makeCommentEditable.bind(this));
+			this._comment.addEventListener('mousedown', this._createCommentEditor.bind(this));
+			this._comment.addEventListener('click', this._makeEditorVisible.bind(this));
 			// show a placeholder text if the image could not be loaded for some reason (e.g. file is not there)
 			this._img.addEventListener('error', this._handleImageError);
 			
@@ -119,11 +121,12 @@
 		}
 
 		// To edit comment, replace the comment div with the simpleEditor.html iframe
-		_makeCommentEditable() {
+		_createCommentEditor() {
 			if (!this.isEditable) return;
 
+			if (this._editorFrame) return;
 			let editorFrameWrapper = document.createElement('div');
-			editorFrameWrapper.className = "comment editable";
+			editorFrameWrapper.className = "comment editable hidden";
 			this._editorFrame = document.createElement('iframe');
 			this._editorFrame.setAttribute('src', 'chrome://zotero/content/integration/simpleEditor.html');
 			this._editorFrame.setAttribute('type', 'content');
@@ -136,12 +139,21 @@
 			// Hide the comment div and insert the editor frame
 			editorFrameWrapper.appendChild(this._editorFrame);
 			this._comment.after(editorFrameWrapper);
-			this._comment.classList.add('hidden');
 
 			this._editorFrame.addEventListener('input', this._handleEditorInput);
 			this._editorFrame.addEventListener('focusout', this._handleEditorFocusOut);
 			this._editorFrame.addEventListener('keydown', this._handleEditorKeyDown);
 			this._editorFrame.contentWindow.addEventListener('load', this._handleEditorIframeLoaded, { once: true });
+		}
+
+		async _makeEditorVisible() {
+			if (!this._editorFrame) {
+				this._createCommentEditor();
+			}
+			this._comment.classList.add('hidden');
+			this._editorFrame.parentNode.classList.remove('hidden');
+			await this._waitForEditorToLoad();
+			this._editorFrame.contentWindow.editor.focusContent();
 		}
 
 		// Adjust the height of the frame as the user types to match
@@ -199,9 +211,8 @@
 		// Set the content of the editor to the current comment and adjust
 		// the height of the editor frame to match the content
 		_handleEditorIframeLoaded = async () => {
-			let editor = this._editorFrame.contentWindow.editor;
+			let editor = await this._waitForEditorToLoad();
 			editor.setContent(this._commentToHTML());
-			editor.focusContent();
 			this._commentInEditor = this._annotation.annotationComment || "";
 			let height = editor.getTotalHeight();
 			this._editorFrame.style.height = height + 'px';
@@ -214,6 +225,17 @@
 			this._editorFrame.removeEventListener('input', this._handleEditorInput);
 			this._editorFrame.removeEventListener('focusout', this._handleEditorFocusOut);
 			this._editorFrame.removeEventListener('keydown', this._handleEditorKeyDown);
+			this._editorFrame = null;
+		}
+
+		async _waitForEditorToLoad() {
+			if (!this._editorFrame) return null;
+			let counter = 0;
+			while (!this._editorFrame.contentWindow.editor && counter < 1000) {
+				await Zotero.Promise.delay(5);
+				counter++;
+			}
+			return this._editorFrame.contentWindow.editor;
 		}
 
 		// Keyboard navigation

@@ -79,7 +79,16 @@ annotation-row {
 				border-radius: 5px;
 				width: 100%;
 			}
-
+			// Special treatment to hide the iframe with the editor
+			// so that it is not visible but still renders the content
+			// properly, so that we know the necessary height before showing the editor
+			&.hidden {
+				display: block;
+				position: absolute;
+				opacity: 0;
+				z-index: -1;
+				pointer-events: none;
+			}
 		}
 	}
 	
