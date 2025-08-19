@@ -60,8 +60,21 @@
 			return this._annotation;
 		}
 
+		set readOnly(val) {
+			if (val) {
+				this.setAttribute("read-only", "true");
+			}
+			else {
+				this.removeAttribute("read-only");
+			}
+		}
+
+		get readOnly() {
+			return this.getAttribute("read-only");
+		}
+
 		get isEditable() {
-			return this._annotation.isEditable() && !this._annotation.annotationIsExternal;
+			return !this.readOnly && this._annotation.isEditable() && !this._annotation.annotationIsExternal;
 		}
 
 		set annotation(annotation) {
@@ -147,6 +160,7 @@
 		}
 
 		async _makeEditorVisible() {
+			if (!this.isEditable) return;
 			if (!this._editorFrame) {
 				this._createCommentEditor();
 			}
@@ -369,6 +383,9 @@
 			this._quote.hidden = true;
 			this._comment.hidden = true;
 			this._tags.hidden = true;
+			this._options.hidden = true;
+			this._comment.removeAttribute("tabindex");
+			this._tags.removeAttribute("tabindex");
 			
 			if (this.isEditable) {
 				document.l10n.setAttributes(this._options, 'annotation-change-color');
@@ -376,7 +393,10 @@
 			else {
 				document.l10n.setAttributes(this._options, 'annotation-not-editable-' + (this.annotation.annotationIsExternal ? 'external' : 'other-user'));
 			}
-			this._options.disabled = !this.isEditable;
+			if (!this.readOnly) {
+				this._options.hidden = false;
+				this._options.disabled = !this.isEditable;
+			}
 
 			let type = this._annotation.annotationType;
 			if (type == 'image') {
@@ -424,7 +444,11 @@
 				this._tags.textContent = Zotero.getString('pdfReader.addTags');
 			}
 			this._tags.setAttribute('aria-description', Zotero.getString('pdfReader.manageTags'));
-			
+
+			if (this.isEditable) {
+				this._comment.setAttribute('tabindex', 0);
+				this._tags.setAttribute('tabindex', 0);
+			}
 			
 			this.style.setProperty('--annotation-color', this._annotation.annotationColor);
 			// A11y - make focusable + add screen reader's labels
