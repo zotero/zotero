@@ -1735,9 +1735,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.purgeDataObjects = Zotero.Promise.coroutine(function* () {
 		var d = new Date();
 		
-		yield Zotero.DB.executeTransaction(async function () {
-			return Zotero.Creators.purge();
-		});
+		yield Zotero.Creators.purge();
 		yield Zotero.DB.executeTransaction(async function () {
 			return Zotero.Tags.purge();
 		});
