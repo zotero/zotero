@@ -7,7 +7,7 @@ annotation-row {
 	background: var(--material-background);
 	@include focus-ring;
 
-	.head {
+	> .head {
 		display: flex;
 		padding: 4px 8px;
 		align-items: center;
@@ -31,7 +31,7 @@ annotation-row {
 		}
 	}
 	
-	.body {
+	> .body {
 		img {
 			max-width: 100%;
 			@media (prefers-color-scheme: dark) {
@@ -92,14 +92,14 @@ annotation-row {
 		}
 	}
 	
-	.tags {
+	> .tags {
 		border-top: 1px solid var(--fill-quinary);
 		padding: 3px 8px;
 		word-break: break-word;
 		font-size: 13px;
 	}
 
-	.tags-popup {
+	> .tags-popup {
 		font-size: 13px;
 		min-width: 300px;
 	}
