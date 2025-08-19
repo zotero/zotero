@@ -46,7 +46,7 @@ Zotero.Prefs = new function () {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 15;
+		var toVersion = 16;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -150,6 +150,7 @@ Zotero.Prefs = new function () {
 					case 13:
 						Zotero.Prefs.clear('ui.popup.disable_autohide', true);
 						break;
+					
 					// Convert from `reader.customThemes` pref to `readerCustomThemes` synced setting
 					case 14: {
 						// Store the pref in a closure and clear it. Migrate to synced setting when ready.
@@ -167,6 +168,7 @@ Zotero.Prefs = new function () {
 						}
 						break;
 					}
+					
 					case 15: {
 						// If classic citation dialog was used before the redesigned citation dialog was implemented,
 						// set new dialog's last used mode to "library"
@@ -181,7 +183,14 @@ Zotero.Prefs = new function () {
 							this.set('integration.citationDialogLastUsedMode', lastClosed);
 							this.clear('integration.citationDialogLastClosedMode');
 						}
+						break;
 					}
+					
+					// Clear removed 'reopenPanesOnRestart' pref
+					// (Panes are no longer reopened on restart)
+					case 16:
+						this.clear('reopenPanesOnRestart');
+						break;
 				}
 			}
 			this.set('prefVersion', toVersion);
