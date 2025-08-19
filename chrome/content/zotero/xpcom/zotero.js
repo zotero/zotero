@@ -1770,9 +1770,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	this.purgeDataObjects = async function () {
 		var d = new Date();
 		
-		await Zotero.DB.executeTransaction(async function () {
-			return Zotero.Creators.purge();
-		});
+		await Zotero.Creators.purge();
 		await Zotero.DB.executeTransaction(async function () {
 			return Zotero.Tags.purge();
 		});

@@ -152,9 +152,11 @@ Zotero.Creators = new function () {
 				delete _cache[toDelete[i]];
 			}
 			
-			var sql = "DELETE FROM creators WHERE creatorID NOT IN "
-				+ "(SELECT creatorID FROM itemCreators)";
-			await Zotero.DB.queryAsync(sql);
+			await Zotero.DB.executeTransaction(async function () {
+				var sql = "DELETE FROM creators WHERE creatorID NOT IN "
+					+ "(SELECT creatorID FROM itemCreators)";
+				await Zotero.DB.queryAsync(sql, [], { ignoreDBLock: true });
+			}, { disableForeignKeys: true });
 		}
 		
 		Zotero.Prefs.set('purge.creators', false);
