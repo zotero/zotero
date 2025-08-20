@@ -2331,16 +2331,18 @@ var ZoteroPane = new function () {
 		}
 		
 		let selectedItems = this.getSelectedItems();
+		let saveOptions = {
+			skipDateModifiedUpdate: true
+		};
 		await Zotero.DB.executeTransaction(async () => {
 			for (let index1 = 0; index1 < selectedItems.length; index1++) {
 				for (let index2 = index1 + 1; index2 < selectedItems.length; index2++) {
 					let item1 = selectedItems[index1];
 					let item2 = selectedItems[index2];
-
 					item1.addRelatedItem(item2);
 					item2.addRelatedItem(item1);
-					await item1.save();
-					await item2.save();
+					await item1.save(saveOptions);
+					await item2.save(saveOptions);
 				}
 			}
 		});
