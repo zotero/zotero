@@ -415,6 +415,10 @@ describe("Citation Dialog", function () {
 		it("should perform search in list mode", async function () {
 			IOManager.toggleDialogMode("list");
 
+			// Wait for search triggered after switching dialog modes to finish
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
 			// Search for "one"
 			await dialog.currentLayout.search("one", { skipDebounce: true });
 			// Selected items should have both "one_selected" and "one_selected_open"
@@ -442,6 +446,10 @@ describe("Citation Dialog", function () {
 		it("should perform search in library mode", async function () {
 			IOManager.toggleDialogMode("library");
 
+			// Wait for search triggered after switching dialog modes to finish
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
 			// Search for "one"
 			await dialog.currentLayout.search("one", { skipDebounce: true });
 			// Selected items should have both "one_selected" and "one_selected_open"

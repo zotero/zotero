@@ -878,6 +878,13 @@ class ListLayout extends Layout {
 		
 		// set min height and resize the window
 		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + bottomHeight + marginOfError;
+		// window.resizeTo(X,Y) resizes the window so that it's outerHeight == Y. On mac and windows,
+		// innerHeight and outerHeight are the same. On linux, the outerHeight > innerHeight, perhaps
+		// outerHeight there includes chrome, borders, etc. This difference is accounted for below, so that the dialog
+		// itself (not the outer window) ends up with the desired height.
+		if (Zotero.isLinux) {
+			autoHeight += (window.outerHeight - window.innerHeight);
+		}
 		let minHeight = bubbleInputHeight + bottomHeight;
 		doc.documentElement.style.minHeight = `${minHeight}px`;
 		
