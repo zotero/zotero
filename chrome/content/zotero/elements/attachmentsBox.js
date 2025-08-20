@@ -266,7 +266,7 @@
 				// Skip only when the section is manually collapsed (when there's attachment),
 				// This is necessary to ensure the rendering of the first added attachment
 				// because the section is force-collapsed if no attachment.
-				|| (this._attachmentIDs.length && !this._section.open)) {
+				|| (this._attachmentIDs.length && !this._section?.open)) {
 				return;
 			}
 			this.previewElem.item = attachment;
