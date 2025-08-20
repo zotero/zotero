@@ -1,0 +1,8 @@
+select {
+    @media (-moz-platform: linux) {
+        border: 1px solid ThreeDShadow;
+        border-radius: 5px;
+        background-color: var(--color-button);
+        height: 28px; // The height of <menulist>
+    }
+}

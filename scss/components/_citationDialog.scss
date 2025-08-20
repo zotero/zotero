@@ -637,6 +637,9 @@
 							border-radius: 3px;
 							height: 25px;
 						}
+						@media (-moz-platform: linux) {
+							height: 24px; // same height as input
+						}
 					}
 				}
 				button.done {
