@@ -4057,8 +4057,8 @@ var ZoteroPane = new function () {
 		}
 
 		// Only keep annotation-specific options if annotations are selected
-		let annotationsSelected = items.some(item => item.isAnnotation());
-		if (annotationsSelected) {
+		let selectedAnnotations = items.filter(item => item.isAnnotation());
+		if (selectedAnnotations.length) {
 			let menuItemsForAnnotations = [
 				'createNoteFromAnnotations',
 				'deleteFromLibrary',
@@ -4068,6 +4068,10 @@ var ZoteroPane = new function () {
 			for (let i in m) {
 				if (menuItemsForAnnotations.includes(i)) continue;
 				show.delete(m[i]);
+			}
+			// Cannot trash external annotations or annotations made by other users
+			if (selectedAnnotations.some(item => !item.isEditable() || item.annotationIsExternal)) {
+				disable.add(m.moveToTrash);
 			}
 		}
 
@@ -4099,7 +4103,7 @@ var ZoteroPane = new function () {
 		}
 
 		// No locate menu options if annotations are selected
-		if (annotationsSelected) return;
+		if (selectedAnnotations.length) return;
 
 		// add locate menu options
 		await Zotero_LocateMenu.buildContextMenu(menu, true);
