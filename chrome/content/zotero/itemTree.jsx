@@ -3887,7 +3887,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				this.selection.select(this._rowMap[itemID]);
 				focusedSet = true;
 			}
-			else {
+			// If the item is already selected (e.g. when expandCollapsedParents == false,
+			// and the item is a collapsed parent of a previously selected item),
+			// do not toggle selection on it, since it would un-select it.
+			else if (!this.selection.isSelected(this._rowMap[itemID])) {
 				this.selection.toggleSelect(this._rowMap[itemID]);
 			}
 		}).bind(this);
@@ -3915,8 +3918,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 							toggleSelect(selection[i].treeViewID);
 						}
 						else {
-							!this.selection.isSelected(this._rowMap[parent]) &&
-								toggleSelect(parent);
+							toggleSelect(parent);
 						}
 					}
 				}

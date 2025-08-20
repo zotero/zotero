@@ -1721,6 +1721,20 @@ describe("Zotero.ItemTree", function () {
 			zp.itemsView._restoreSelection(selection);
 			assert.lengthOf(zp.itemsView.getSelectedObjects(), 2);
 		});
+
+		it("should reselect collapsed parent item if child is selected before parent", async function () {
+			let item = await createDataObject('item');
+			let child = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: item.id });
+			await zp.itemsView.selectItems([child.id, item.id]);
+
+			let itemRowIndex = zp.itemsView.getRowIndexByID(item.id);
+			await zp.itemsView._closeContainer(itemRowIndex, false, true);
+
+			assert.isFalse(zp.itemsView.isContainerOpen(itemRowIndex));
+			let selection = zp.itemsView.getSelectedObjects();
+			let selectedIDs = selection.map(obj => obj.id);
+			assert.sameMembers(selectedIDs, [item.id]);
+		});
 	});
 
 	describe("#_renderPrimaryCell()", function () {
