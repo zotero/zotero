@@ -2046,7 +2046,7 @@ Zotero.VersionHeader = {
 	},
 	
 	/**
-	 * Append Firefox/[version] to the default user agent
+	 * Add Firefox/[version] to the default user agent
 	 *
 	 * @param {String} ua - User Agent
 	 */
@@ -2054,9 +2054,11 @@ Zotero.VersionHeader = {
 		var info = Services.appinfo;
 		var appName = info.name;
 		
+		var pos = ua.indexOf(appName + '/');
+		
 		// Default UA (not a faked UA from the connector)
-		if (ua.includes(appName + '/')) {
-			ua += ` Firefox/${info.platformVersion.match(/^\d+/)[0]}.0`;
+		if (pos != -1) {
+			ua = ua.substring(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0 ` + ua.substring(pos);
 		}
 		
 		return ua;

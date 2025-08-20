@@ -12,7 +12,7 @@ describe("Zotero", function() {
 			it("should replace app name with Firefox", function () {
 				var platformVersion = Services.appinfo.platformVersion.match(/^\d+/)[0] + '.0';
 				var ua1 = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:60.0) Gecko/20100101 ${Zotero.clientName}/${Zotero.version}`;
-				var ua2 = `${ua1} Firefox/${platformVersion}`;
+				var ua2 = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:60.0) Gecko/20100101 Firefox/${platformVersion} ${Zotero.clientName}/${Zotero.version}`;
 				assert.equal(Zotero.VersionHeader.update(ua1), ua2);
 			});
 			
