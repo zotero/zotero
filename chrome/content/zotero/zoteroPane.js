@@ -3671,12 +3671,12 @@ var ZoteroPane = new function () {
 			show.add(m.loadReport);
 		}
 		
-		var items = this.getSelectedObjects();
+		var items = this.getSelectedItems();
 		
 		if (items.length > 0) {
 			// Multiple items selected
 			if (items.length > 1) {
-				var multiple =  '.multiple';
+				multiple = '.multiple';
 				
 				var canMerge = true,
 					canIndex = true,
