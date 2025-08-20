@@ -142,7 +142,7 @@ main-window-key =
     .key = L
 
 zotero-toolbar-tabs-menu =
-    .tooltiptext = List all tabs
+    .tooltiptext = List All Tabs
 filter-collections = Filter Collections
 zotero-collections-search =
     .placeholder = { filter-collections }
