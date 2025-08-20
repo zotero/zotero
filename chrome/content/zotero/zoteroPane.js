@@ -2436,16 +2436,20 @@ var ZoteroPane = new function () {
 					if (!parent.isNote()) {
 						childIDs.push(...parent.getNotes(true));
 					}
-					if (!parent.isAttachment()) {
-						let attachmentIDs = parent.getAttachments(true);
-						childIDs.push(...attachmentIDs);
-						// Include annotations of attachments
-						for (let attachmentID of attachmentIDs) {
-							let attachment = Zotero.Items.get(attachmentID);
-							if (attachment.isFileAttachment()) {
-								let annotations = attachment.getAnnotations(true);
-								childIDs.push(...annotations.map(a => a.id));
-							}
+					let attachmentIDs = [];
+					if (parent.isRegularItem()) {
+						attachmentIDs = parent.getAttachments(true);
+					}
+					else if (parent.isAttachment()) {
+						attachmentIDs = [parent.id];
+					}
+					childIDs.push(...attachmentIDs);
+					// Include annotations of attachments
+					for (let attachmentID of attachmentIDs) {
+						let attachment = Zotero.Items.get(attachmentID);
+						if (attachment.isFileAttachment()) {
+							let annotations = attachment.getAnnotations(true);
+							childIDs.push(...annotations.map(a => a.id));
 						}
 					}
 				}
