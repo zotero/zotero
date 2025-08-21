@@ -120,7 +120,6 @@ export class HiddenBrowser {
 	}
 
 	/**
-	 * 
 	 * @param {String} source - HTTP URL, file: URL, or file path
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.requireSuccessfulStatus]
@@ -225,7 +224,7 @@ export class HiddenBrowser {
 				let response = `${channelInfo.responseStatus} ${channelInfo.responseStatusText}`;
 				Zotero.debug(`HiddenBrowser.load: ${uri} failed with ${response}`, 2);
 				// HiddenBrowser will never get returned so we need to clean it up here
-				this.destroy()
+				this.destroy();
 				throw new Zotero.HTTP.UnexpectedStatusException(
 					{
 						status: channelInfo.responseStatus
@@ -235,6 +234,8 @@ export class HiddenBrowser {
 				);
 			}
 		}
+		
+		return true;
 	}
 
 	/**
