@@ -700,6 +700,11 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			
 			Zotero.Notifier.registerObserver(Zotero.Tags, 'setting', 'tags');
 			
+			const { registerAutoRenameFileFromParent } = ChromeUtils.importESModule(
+				"chrome://zotero/content/renameFiles.mjs"
+			);
+			registerAutoRenameFileFromParent();
+			
 			await Zotero.Sync.Data.Local.init();
 			await Zotero.Sync.Data.Utilities.init();
 			Zotero.Sync.Storage.Local.init();
