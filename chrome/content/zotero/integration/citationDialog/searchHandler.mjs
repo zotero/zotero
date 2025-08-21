@@ -464,7 +464,8 @@ export class CitationDialogSearchHandler {
 		let topLevelItems = items.map(item => item.topLevelItem);
 		// load all data of top-level items and their attachments
 		await Zotero.Items.loadDataTypes(topLevelItems);
-		let attachmentIDs = topLevelItems.flatMap(item => item.getAttachments());
+		let regularItems = topLevelItems.filter(item => item.isRegularItem());
+		let attachmentIDs = regularItems.flatMap(item => item.getAttachments());
 		let attachments = await Zotero.Items.getAsync(attachmentIDs);
 		await Zotero.Items.loadDataTypes(attachments);
 
