@@ -205,8 +205,8 @@ Zotero.Prefs = new function () {
 								this.set('autoRenameFiles.done', false);
 							});
 						}
+						break;
 					}
-
 				}
 			}
 			this.set('prefVersion', toVersion);
