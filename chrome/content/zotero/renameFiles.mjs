@@ -201,7 +201,7 @@ export async function canRenameFileFromParent(attachmentItem) {
 
 export function registerAutoRenameFileFromParent() {
 	Zotero.Notifier.registerObserver({
-		notify: async (event, _type, ids, _extraData) => {
+		notify: async (event, _type, ids, extraData) => {
 			if (!Zotero.Prefs.get('autoRenameFiles.onMetadataChange')) {
 				return;
 			}
@@ -225,11 +225,11 @@ export function registerAutoRenameFileFromParent() {
 					continue;
 				}
 
-				if (!_extraData?.[id]?.changed) {
+				if (!extraData?.[id]?.changed) {
 					continue;
 				}
 
-				let changes = Object.entries(_extraData[id].changed).filter(([key, _value]) => {
+				let changes = Object.entries(extraData[id].changed).filter(([key, _value]) => {
 					if (['tags', 'collections'].includes(key)) {
 						return false; // Don't care about tags or collections
 					}
