@@ -25,7 +25,6 @@
 
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
-const { renameFileFromParent } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
 
 /*
  * This object contains the various functions for the interface
@@ -668,7 +667,6 @@ var ZoteroPane = new function () {
 			Zotero.logError(e);
 		}
 		addFocusHandlers();
-		ZoteroPane.registerAutoRenameFileFromParent();
 	}
 	
 	
@@ -756,9 +754,6 @@ var ZoteroPane = new function () {
 		if(this.itemsView) this.itemsView.unregister();
 		if (_syncRemindersObserverID) {
 			Zotero.Notifier.unregisterObserver(_syncRemindersObserverID);
-		}
-		if (_autoRenameNotifierID) {
-			Zotero.Notifier.unregisterObserver(_autoRenameNotifierID);
 		}
 		
 		this.uninitContainers();
@@ -2946,85 +2941,6 @@ var ZoteroPane = new function () {
 			},
 			'item',
 			'syncReminder');
-	};
-
-	var _autoRenameNotifierID = null;
-	this.registerAutoRenameFileFromParent = function () {
-		if (_autoRenameNotifierID) {
-			return; // Already registered
-		}
-		_autoRenameNotifierID = Zotero.Notifier.registerObserver({
-			notify: async (event, _type, ids, _extraData) => {
-				if (!Zotero.Prefs.get('autoRenameFiles.onMetadataChange')) {
-					return;
-				}
-				if (event !== 'modify') {
-					return;
-				}
-
-				for (let id of ids) {
-					const parentItem = await Zotero.Items.getAsync(id);
-					if (!parentItem.isTopLevelItem() || !parentItem.isRegularItem()) {
-						continue;
-					}
-
-					let attachmentItem = await parentItem.getBestAttachment();
-					
-					if (!attachmentItem) {
-						continue;
-					}
-
-					if (!Zotero.Attachments.shouldAutoRenameAttachment(attachmentItem)) {
-						continue;
-					}
-
-					if (!_extraData?.[id]?.changed) {
-						continue;
-					}
-
-					let changes = Object.entries(_extraData[id].changed).filter(([key, _value]) => {
-						if (['tags', 'collections'].includes(key)) {
-							return false; // Don't care about tags or collections
-						}
-						return true;
-					});
-
-					if (changes.length === 0) {
-						continue; // No relevant changes
-					}
-
-					let parentItemBefore = parentItem.clone(null, { skipTags: true, includeCollections: false });
-					let validFields = Zotero.ItemFields.getItemTypeFields(parentItem.itemTypeID).map(fieldID => Zotero.ItemFields.getName(fieldID));
-					for (let [key, value] of changes) {
-						if (key === 'itemType') {
-							parentItemBefore.setType(value);
-						}
-						else if (key === 'creators') {
-							parentItemBefore.setCreators(value);
-						}
-						else if (validFields.includes(key)) {
-							parentItemBefore.setField(key, value);
-						}
-					}
-
-					let previousMetadataBaseName = Zotero.Attachments.getFileBaseNameFromItem(
-						parentItemBefore, { attachmentTitle: attachmentItem.getField('title') }
-					);
-					let currentBaseName = attachmentItem.attachmentFilename?.replace(/\.[^.]+$/, '') ?? '';
-
-					if (previousMetadataBaseName === currentBaseName) {
-						// Filename appears to be derived from the metadata, so update it to match the latest metadata.
-						renameFileFromParent(attachmentItem);
-					}
-					else {
-						// Filename has most likely been manually changed, so
-						// don’t rename it. Reset `autoRenameFiles.done` so that
-						// "Rename Files Now" appears in Preferences.
-						Zotero.Prefs.set('autoRenameFiles.done', false);
-					}
-				}
-			}
-		}, ['item'], 'autoRenameFileFromParent', 150); // lower priority than the other item observers
 	};
 
 	this.showSetUpSyncReminder = function () {
