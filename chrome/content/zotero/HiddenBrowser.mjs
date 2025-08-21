@@ -87,10 +87,6 @@ export class HiddenBrowser {
 				options.cookieSandbox.attachToBrowser(browser);
 			}
 			
-			if (Zotero.Debug.enabled) {
-				startLeakWarningTimer(browser);
-			}
-			
 			if (options.blockRemoteResources) {
 				this._blockingObserver = new BlockingObserver({
 					shouldBlock(uri) {
@@ -315,22 +311,4 @@ export class HiddenBrowser {
 			})();
 		}
 	}
-}
-
-function startLeakWarningTimer(browser) {
-	const CHECK_AFTER_SECONDS = 60;
-	
-	// We need to use Cu.getWeakReference() to get an xpcIJSWeakReference here -
-	// DOM WeakRefs, paradoxically, keep the browser alive
-	let weakBrowser = Cu.getWeakReference(browser);
-	browser = null;
-	arguments.length = 0;
-	
-	setTimeout(() => {
-		let browser = weakBrowser.get();
-		if (browser) {
-			Zotero.debug(`Browser object still alive after ${CHECK_AFTER_SECONDS} seconds - memory leak?`);
-			Zotero.debug('Viewing URI ' + browser.currentURI?.spec)
-		}
-	}, 1000 * CHECK_AFTER_SECONDS);
 }
