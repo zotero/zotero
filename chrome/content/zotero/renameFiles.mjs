@@ -210,6 +210,10 @@ export function registerAutoRenameFileFromParent() {
 			}
 
 			for (let id of ids) {
+				if (extraData[id]?.skipRenameFile) {
+					continue;
+				}
+				
 				const parentItem = await Zotero.Items.getAsync(id);
 				if (!parentItem.isTopLevelItem() || !parentItem.isRegularItem()) {
 					continue;
