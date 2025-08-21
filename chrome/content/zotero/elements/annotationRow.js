@@ -90,9 +90,23 @@
 			return this._container || this.parentNode;
 		}
 
+		set draggable(val) {
+			if (val) {
+				this.setAttribute('draggable', 'true');
+			}
+			else {
+				this.removeAttribute('draggable');
+			}
+		}
+
+		get draggable() {
+			return this.hasAttribute('draggable');
+		}
+
 		destroy() {
 			this.removeEventListener('keydown', this._handleKeyDown);
 			this.removeEventListener("click", this._handleRowClick, true);
+			this.removeEventListener("dragstart", this._handleItemDragStart);
 			this._tags.removeEventListener('click', this._handleTagsClick);
 			this._options.removeEventListener('click', this._openMenu);
 			this._comment.removeEventListener('mousedown', this._createCommentEditor);
@@ -120,6 +134,7 @@
 
 			this.addEventListener("click", this._handleRowClick.bind(this), true);
 			this.addEventListener('keydown', this._handleKeyDown.bind(this));
+			this.addEventListener("dragstart", this._handleItemDragStart.bind(this));
 			this._tags.addEventListener('click', this._handleTagsClick.bind(this));
 			this._options.addEventListener('click', this._openMenu.bind(this));
 			this._comment.addEventListener('mousedown', this._createCommentEditor.bind(this));
@@ -359,6 +374,35 @@
 				}
 				event.preventDefault();
 			}
+		}
+
+		_handleItemDragStart(event) {
+			let annotationRow = event.target.closest("annotation-row");
+			if (!annotationRow) return;
+			let selectedItems = [annotationRow];
+			if (annotationRow.classList.contains("selected")) {
+				selectedItems = [...this.container.querySelectorAll("annotation-row.selected")];
+			}
+			let draggedItemIDs = selectedItems.map(node => node.getAttribute("annotation-id")).filter(id => id);
+			// Create drag image
+			let dragImage = document.createElement("div");
+			for (let id of draggedItemIDs) {
+				let row = document.createXULElement('annotation-row');
+				row.annotation = Zotero.Items.get(id);
+				dragImage.appendChild(row);
+			}
+			// Make sure it is not visible
+			dragImage.style = "position: absolute; top: -1000px; height: 300px; width: 100%;";
+			this.container.append(dragImage);
+			let rect = annotationRow.getBoundingClientRect();
+			let offsetX = event.clientX - rect.left;
+			let offsetY = event.clientY - rect.top;
+			event.dataTransfer.setDragImage(dragImage, offsetX, offsetY);
+			Zotero.Utilities.Internal.onDragItems(event, draggedItemIDs, dragImage);
+			// Once drag has started, we can delete the drag image node
+			setTimeout(() => {
+				this.container.removeChild(dragImage);
+			});
 		}
 
 		// Generate and open the menu with annotation color options

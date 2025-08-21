@@ -106,6 +106,7 @@
 					let row = document.createXULElement('annotation-row');
 					row.annotation = annotation;
 					row.container = this._body;
+					row.draggable = true;
 					section.querySelector('.body').append(row);
 				}
 			}
