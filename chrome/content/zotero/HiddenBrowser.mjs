@@ -110,9 +110,11 @@ export class HiddenBrowser {
 			set(target, prop, val) {
 				if (prop in target) {
 					target[prop] = val;
+					return true;
 				}
-				Reflect.set(target._browser, prop, val)
-				return true;
+				else {
+					return Reflect.set(target._browser, prop, val);
+				}
 			}
 		});
 	}
