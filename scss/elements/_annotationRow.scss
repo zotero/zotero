@@ -104,6 +104,11 @@ annotation-row {
 		min-width: 300px;
 	}
 
+	&.selected {
+		background: var(--accent-blue10);
+		outline: 3px solid var(--accent-blue50);
+	}
+
 	.annotations-options-popup {
 		width: 150px;
 		padding-inline: 5px;

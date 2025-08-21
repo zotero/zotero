@@ -105,6 +105,7 @@
 					if (this.querySelector(`annotation-row[annotation-id="${annotation.id}"]`)) continue;
 					let row = document.createXULElement('annotation-row');
 					row.annotation = annotation;
+					row.container = this._body;
 					section.querySelector('.body').append(row);
 				}
 			}

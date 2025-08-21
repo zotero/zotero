@@ -82,8 +82,17 @@
 			this.setAttribute('annotation-id', annotation.id);
 		}
 
+		set container(node) {
+			this._container = node;
+		}
+
+		get container() {
+			return this._container || this.parentNode;
+		}
+
 		destroy() {
 			this.removeEventListener('keydown', this._handleKeyDown);
+			this.removeEventListener("click", this._handleRowClick, true);
 			this._tags.removeEventListener('click', this._handleTagsClick);
 			this._options.removeEventListener('click', this._openMenu);
 			this._comment.removeEventListener('mousedown', this._createCommentEditor);
@@ -109,6 +118,7 @@
 			this._comment.setAttribute('role', 'button');
 			this._quote.after(this._comment);
 
+			this.addEventListener("click", this._handleRowClick.bind(this), true);
 			this.addEventListener('keydown', this._handleKeyDown.bind(this));
 			this._tags.addEventListener('click', this._handleTagsClick.bind(this));
 			this._options.addEventListener('click', this._openMenu.bind(this));
@@ -252,25 +262,101 @@
 			return this._editorFrame.contentWindow.editor;
 		}
 
+		_handleRowClick(event) {
+			// Shift-click will select all rows between the anchor and target
+			if (event.shiftKey) {
+				let anchor = this.container.querySelector("annotation-row.anchor");
+				if (!anchor) {
+					anchor = this.container.querySelector("annotation-row");
+					anchor.classList.add("anchor");
+				}
+				this._selectRange(anchor, this);
+				return;
+			}
+			// Ctrl/Cmd click will toggle selection
+			if (event.metaKey || event.ctrlKey) {
+				this.classList.toggle("selected");
+				event.stopPropagation();
+				event.preventDefault();
+				return;
+			}
+			// Ordinary click will select the row, unless a clickable component is the target
+			document.querySelectorAll("annotation-row.selected").forEach((row) => {
+				row.classList.remove("selected");
+			});
+			this.container.querySelector("annotation-row.anchor")?.classList.remove("anchor");
+			let clickable = event.target.classList.contains("keyboard-clickable") || event.target.tagName == "toolbarbutton";
+			if (!clickable) {
+				this.classList.add("selected", "anchor");
+				this.focus();
+			}
+		}
+
+		_selectRange(startRow, endRow) {
+			// Clear all selections first
+			this.container.querySelectorAll("annotation-row.selected").forEach((row) => {
+				row.classList.remove("selected");
+			});
+			
+			// Find all annotation rows and their indices
+			let annotationRows = [...this.container.querySelectorAll("annotation-row")];
+			let startIndex = annotationRows.indexOf(startRow);
+			let endIndex = annotationRows.indexOf(endRow);
+			
+			// Ensure we select from lower to higher index
+			let minIndex = Math.min(startIndex, endIndex);
+			let maxIndex = Math.max(startIndex, endIndex);
+			
+			// Select all rows in the range
+			for (let i = minIndex; i <= maxIndex; i++) {
+				annotationRows[i].classList.add("selected");
+			}
+		}
+
 		// Keyboard navigation
 		// ArrowUp/Down navigate between annotations
 		// Tab/Shift+Tab will move focus through the currently focused annotation
+		// Shift+ArrowUp/Down extends/shrinks selection range
 		_handleKeyDown(event) {
+			// Tab out back from the list of annotation rows
 			if (event.target.tagName == "annotation-row" && event.key == "Tab" && event.shiftKey) {
-				let firstAnnotation = this.parentNode.querySelector("annotation-row");
+				let firstAnnotation = this.container.querySelector("annotation-row");
 				Services.focus.moveFocus(window, firstAnnotation, Services.focus.MOVEFOCUS_BACKWARD, 0);
 				event.preventDefault();
 			}
+			// Tab out to forward from the list of annotation rows
 			if (event.target.classList.contains("tags") && event.key == "Tab" && !event.shiftKey) {
-				let lastTags = this.parentNode.querySelector("annotation-row:last-child .tags");
+				let lastTags = this.container.querySelector("annotation-row:last-child .tags");
 				Services.focus.moveFocus(window, lastTags, Services.focus.MOVEFOCUS_FORWARD, 0);
 				event.preventDefault();
 			}
 			else if (event.target.tagName == "annotation-row" && ["ArrowUp", "ArrowDown"].includes(event.key)) {
-				let annotationRows = [...this.parentNode.querySelectorAll("annotation-row")];
+				let annotationRows = [...this.container.querySelectorAll("annotation-row")];
 				let currentRowIndex = annotationRows.indexOf(event.target);
 				let nextRowIndex = currentRowIndex + (event.key == "ArrowDown" ? 1 : -1);
-				annotationRows[nextRowIndex]?.focus();
+				let nextAnnotation = annotationRows[nextRowIndex];
+				if (nextAnnotation) {
+					nextAnnotation.focus();
+					if (event.shiftKey) {
+						// Range selection mode: set anchor on first shift+arrow, then extend from there
+						let anchorRow = this.container.querySelector("annotation-row.anchor");
+						if (!anchorRow) {
+							event.target.classList.add("anchor");
+							anchorRow = event.target;
+						}
+						this._selectRange(anchorRow, nextAnnotation);
+					}
+					else {
+						// Without shift, clear anchor and select only the next annotation
+						this.container.querySelectorAll("annotation-row.anchor").forEach((row) => {
+							row.classList.remove("anchor");
+						});
+						this.container.querySelectorAll("annotation-row.selected").forEach((row) => {
+							row.classList.remove("selected");
+						});
+						nextAnnotation.classList.add("selected");
+					}
+				}
 				event.preventDefault();
 			}
 		}
