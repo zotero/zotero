@@ -283,6 +283,7 @@ var Zotero_Preferences = {
 				pane.scope = new Cu.Sandbox(window, {
 					sandboxPrototype: window,
 					sandboxName: pane.rawLabel || pane.id,
+					sameZoneAs: window,
 				});
 				for (let script of pane.scripts) {
 					Services.scriptloader.loadSubScript(script, pane.scope);
