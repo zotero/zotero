@@ -3862,6 +3862,10 @@ Zotero.Item.prototype.getBestAttachments = async function () {
 		throw new Error("getBestAttachments() can only be called on regular items");
 	}
 	
+	if (!this.numAttachments()) {
+		return [];
+	}
+	
 	var url = this.getField('url');
 	var urlFieldID = Zotero.ItemFields.getID('url');
 	
