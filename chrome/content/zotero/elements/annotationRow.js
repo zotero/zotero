@@ -287,10 +287,16 @@
 			if (event.shiftKey) {
 				let anchor = this.container.querySelector("annotation-row.anchor");
 				if (!anchor) {
-					anchor = this.container.querySelector("annotation-row");
+					if (document.activeElement.tagName == "annotation-row") {
+						anchor = document.activeElement;
+					}
+					else {
+						anchor = this.container.querySelector("annotation-row");
+					}
 					anchor.classList.add("anchor");
 				}
 				this._selectRange(anchor, this);
+				this.focus();
 				event.stopPropagation();
 				event.preventDefault();
 				return;
@@ -298,6 +304,7 @@
 			// Ctrl/Cmd click will toggle selection
 			if (event.metaKey || event.ctrlKey) {
 				this.classList.toggle("selected");
+				this.focus();
 				event.stopPropagation();
 				event.preventDefault();
 				return;
