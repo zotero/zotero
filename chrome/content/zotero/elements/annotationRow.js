@@ -425,6 +425,7 @@
 				let selectedNodes = this._getSelectedSiblingAnnotations();
 				targets = selectedNodes.map(node => node._annotation);
 			}
+			let withinSameItem = (new Set(targets.map(a => a.topLevelItem.id))).size == 1;
 
 			let colors = [
 				{ color: "#ffd400", label: Zotero.getString('general.yellow') },
@@ -477,13 +478,36 @@
 				});
 			}
 
-			let separator = document.createXULElement('menuseparator');
+			// "Create note / Add to note" menu option
+			let separatorOne = document.createXULElement('menuseparator');
+			let makeNoteOption = document.createXULElement('hbox');
+			makeNoteOption.className = "menu-option make-note keyboard-clickable";
+			makeNoteOption.setAttribute('tabindex', 0);
+			makeNoteOption.setAttribute('index', colors.length);
+			let makeNoteLabel = document.createXULElement('label');
+			makeNoteLabel.textContent = withinSameItem ? Zotero.getString('annotations-add-note') : Zotero.getString('annotations-create-note');
+			makeNoteLabel.classList.add('make-note-label');
+			makeNoteOption.appendChild(makeNoteLabel);
+			makeNoteOption.addEventListener('click', () => {
+				if (withinSameItem) {
+					window.ZoteroPane.addNoteFromAnnotationsFromSelected(targets);
+				}
+				else {
+					window.ZoteroPane.createStandaloneNoteFromAnnotationsFromSelected(targets);
+				}
+				optionsPopup.hidePopup();
+			});
+
+			vboxWrapper.appendChild(separatorOne);
+			vboxWrapper.appendChild(makeNoteOption);
+
+			// "Delete" menu option
+			let separatorTwo = document.createXULElement('menuseparator');
 			let deleteOption = document.createXULElement('hbox');
 			deleteOption.className = "menu-option delete keyboard-clickable";
 			deleteOption.setAttribute('tabindex', 0);
-			deleteOption.setAttribute('index', colors.length);
+			deleteOption.setAttribute('index', colors.length + 1);
 
-			// Add delete menu option
 			let deleteLabel = document.createXULElement('label');
 			deleteLabel.textContent = Zotero.getString('general.delete');
 			deleteLabel.classList.add('delete-label');
@@ -494,7 +518,7 @@
 				}
 				optionsPopup.hidePopup();
 			});
-			vboxWrapper.appendChild(separator);
+			vboxWrapper.appendChild(separatorTwo);
 			vboxWrapper.appendChild(deleteOption);
 			
 			this.append(optionsPopup);
