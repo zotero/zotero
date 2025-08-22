@@ -551,9 +551,15 @@
 				}
 			});
 
+			// Open popup at the position of right-click
+			if (event.type == "contextmenu") {
+				optionsPopup.openPopup(null, 'before_start', event.clientX, event.clientY, true);
+			}
 			// Open popup by the bottom left corner of the button
-			let { x, y, height } = this._options.getBoundingClientRect();
-			optionsPopup.openPopup(null, 'before_start', x, y + height, true);
+			else {
+				let { x, y, height } = this._options.getBoundingClientRect();
+				optionsPopup.openPopup(null, 'before_start', x, y + height, true);
+			}
 		}
 
 		_getSelectedSiblingAnnotations() {
