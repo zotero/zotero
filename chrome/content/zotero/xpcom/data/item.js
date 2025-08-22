@@ -2824,7 +2824,7 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 	}
 	
 	try {
-		var item = this.ObjectsClass.getByLibraryAndKey(this.libraryID, parentKey);
+		var parentItem = this.ObjectsClass.getByLibraryAndKey(this.libraryID, parentKey);
 	}
 	catch (e) {
 		if (e instanceof Zotero.Exception.UnloadedDataException) {
@@ -2834,16 +2834,18 @@ Zotero.Item.prototype._updateAttachmentStates = function (exists) {
 		}
 		throw e;
 	}
-	if (!item) {
+	if (!parentItem) {
 		Zotero.logError(`Attachment parent ${this.libraryID}/${parentKey} doesn't exist`);
 		return;
 	}
 
-	if (!this.deleted && item._bestAttachmentState?.key && this.key === item._bestAttachmentState.key) {
-		item._bestAttachmentState.exists = exists;
+	if (!this.deleted
+			&& parentItem._bestAttachmentState?.key
+			&& this.key === parentItem._bestAttachmentState.key) {
+		parentItem._bestAttachmentState.exists = exists;
 	}
 	else {
-		item.clearBestAttachmentState();
+		parentItem.clearBestAttachmentState();
 	}
 };
 
