@@ -135,6 +135,7 @@
 			this.addEventListener("click", this._handleRowClick.bind(this), true);
 			this.addEventListener('keydown', this._handleKeyDown.bind(this));
 			this.addEventListener("dragstart", this._handleItemDragStart.bind(this));
+			this.addEventListener("contextmenu", this._openMenu.bind(this));
 			this._tags.addEventListener('click', this._handleTagsClick.bind(this));
 			this._options.addEventListener('click', this._openMenu.bind(this));
 			this._comment.addEventListener('mousedown', this._createCommentEditor.bind(this));
@@ -278,6 +279,10 @@
 		}
 
 		_handleRowClick(event) {
+			// Ignore clicks inside of the popup
+			if (event.target.closest("panel")) return;
+			// Only handle left click
+			if (event.button != 0) return;
 			// Shift-click will select all rows between the anchor and target
 			if (event.shiftKey) {
 				let anchor = this.container.querySelector("annotation-row.anchor");
@@ -286,6 +291,8 @@
 					anchor.classList.add("anchor");
 				}
 				this._selectRange(anchor, this);
+				event.stopPropagation();
+				event.preventDefault();
 				return;
 			}
 			// Ctrl/Cmd click will toggle selection
@@ -295,8 +302,10 @@
 				event.preventDefault();
 				return;
 			}
+			// Don't interfere with clicks within the editor
+			if (event.target.ownerDocument.URL.includes("simpleEditor.html")) return;
 			// Ordinary click will select the row, unless a clickable component is the target
-			document.querySelectorAll("annotation-row.selected").forEach((row) => {
+			this._getSelectedSiblingAnnotations().forEach((row) => {
 				row.classList.remove("selected");
 			});
 			this.container.querySelector("annotation-row.anchor")?.classList.remove("anchor");
@@ -309,7 +318,7 @@
 
 		_selectRange(startRow, endRow) {
 			// Clear all selections first
-			this.container.querySelectorAll("annotation-row.selected").forEach((row) => {
+			this._getSelectedSiblingAnnotations().forEach((row) => {
 				row.classList.remove("selected");
 			});
 			
@@ -366,7 +375,7 @@
 						this.container.querySelectorAll("annotation-row.anchor").forEach((row) => {
 							row.classList.remove("anchor");
 						});
-						this.container.querySelectorAll("annotation-row.selected").forEach((row) => {
+						this._getSelectedSiblingAnnotations().forEach((row) => {
 							row.classList.remove("selected");
 						});
 						nextAnnotation.classList.add("selected");
@@ -381,7 +390,7 @@
 			if (!annotationRow) return;
 			let selectedItems = [annotationRow];
 			if (annotationRow.classList.contains("selected")) {
-				selectedItems = [...this.container.querySelectorAll("annotation-row.selected")];
+				selectedItems = this._getSelectedSiblingAnnotations();
 			}
 			let draggedItemIDs = selectedItems.map(node => node.getAttribute("annotation-id")).filter(id => id);
 			// Create drag image
@@ -406,8 +415,16 @@
 		}
 
 		// Generate and open the menu with annotation color options
-		_openMenu() {
+		_openMenu(event) {
 			if (!this.isEditable) return;
+
+			let targets = [this._annotation];
+			// If the menu is opened via right-click on a selected annotation, apply
+			// the change to all of them
+			if (event.type == "contextmenu" && event.target.closest("annotation-row.selected")) {
+				let selectedNodes = this._getSelectedSiblingAnnotations();
+				targets = selectedNodes.map(node => node._annotation);
+			}
 
 			let colors = [
 				{ color: "#ffd400", label: Zotero.getString('general.yellow') },
@@ -449,9 +466,13 @@
 				hbox.appendChild(colorLabel);
 				vboxWrapper.appendChild(hbox);
 
-				hbox.addEventListener('click', () => {
-					this._annotation.annotationColor = colorOption.color;
-					this._annotation.saveTx();
+				hbox.addEventListener('click', async () => {
+					await Zotero.DB.executeTransaction(async () => {
+						for (let annotation of targets) {
+							annotation.annotationColor = colorOption.color;
+							await annotation.save();
+						}
+					});
 					optionsPopup.hidePopup();
 				});
 			}
@@ -468,7 +489,9 @@
 			deleteLabel.classList.add('delete-label');
 			deleteOption.appendChild(deleteLabel);
 			deleteOption.addEventListener('click', () => {
-				this._annotation.eraseTx();
+				for (let annotation of targets) {
+					annotation.eraseTx();
+				}
 				optionsPopup.hidePopup();
 			});
 			vboxWrapper.appendChild(separator);
@@ -500,6 +523,10 @@
 			// Open popup by the bottom left corner of the button
 			let { x, y, height } = this._options.getBoundingClientRect();
 			optionsPopup.openPopup(null, 'before_start', x, y + height, true);
+		}
+
+		_getSelectedSiblingAnnotations() {
+			return [...this.container.querySelectorAll("annotation-row.selected")];
 		}
 		
 
