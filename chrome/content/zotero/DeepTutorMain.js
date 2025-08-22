@@ -10,6 +10,7 @@ import DeepTutorSubscription from './DeepTutorSubscription.js';
 import DeepTutorTopSection from './DeepTutorTopSection.js';
 import DeepTutorBottomSection from './DeepTutorBottomSection.js';
 import DeepTutorUsagePopup from './DeepTutorUsagePopup.js';
+import DeepTutorWorkspaceSetup from './DeepTutorWorkspaceSetup.js';
 import DeepTutorNoSessionPane from './DeepTutorNoSessionPane.js';
 import DeepTutorSessionDelete from './DeepTutorSessionDelete.js';
 import DeepTutorRenameSession from './DeepTutorRenameSession.js';
@@ -403,8 +404,12 @@ const DeepTutorMain = (props) => {
 				/>
 			)}
 
-
-
+			{props.showWorkspaceSetupPopup && (
+				<DeepTutorWorkspaceSetup
+					onClose={props.toggleWorkspaceSetupPopup}
+					onComplete={props.handleWorkspaceSetupComplete}
+				/>
+			)}
 
 			{props.showDeletePopup && (
 				<div style={{
@@ -826,6 +831,7 @@ DeepTutorMain.propTypes = {
 	showProfilePopup: PropTypes.bool.isRequired,
 	showSignInPopup: PropTypes.bool.isRequired,
 	showUsagePopup: PropTypes.bool.isRequired,
+	showWorkspaceSetupPopup: PropTypes.bool,
 
 	showModelSelectionPopup: PropTypes.bool.isRequired,
 	showDeletePopup: PropTypes.bool.isRequired,
@@ -875,6 +881,7 @@ DeepTutorMain.propTypes = {
 	toggleModelSelectionPopup: PropTypes.func.isRequired,
 	toggleSignInPopup: PropTypes.func.isRequired,
 	toggleUsagePopup: PropTypes.func.isRequired,
+	toggleWorkspaceSetupPopup: PropTypes.func,
 
 	toggleProfilePopup: PropTypes.func.isRequired,
 	toggleRenamePopup: PropTypes.func.isRequired,
@@ -885,6 +892,7 @@ DeepTutorMain.propTypes = {
 	toggleSubscriptionPopup: PropTypes.func.isRequired,
 	toggleManageSubscriptionPopup: PropTypes.func.isRequired,
 	toggleSubscriptionConfirmPopup: PropTypes.func.isRequired,
+	handleWorkspaceSetupComplete: PropTypes.func,
 };
 
 export default DeepTutorMain;

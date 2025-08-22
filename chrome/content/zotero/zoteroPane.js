@@ -75,6 +75,18 @@ var ZoteroPane = new function()
 	this.init = function () {
 		Zotero.debug("Initializing Zotero pane");
 
+		// Ensure window starts maximized on first open
+		try {
+			if (window && window.document) {
+				// If not already maximized, maximize
+				if (window.windowState !== window.STATE_MAXIMIZED) {
+					// Use available maximize on platform; fallback to resizeTo
+					try { window.maximize(); } catch (_e) {}
+				}
+			}
+		}
+		catch (_err) {}
+
 		// Set key down handler
 		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown);
 		// Keydown handling that captures events. E.g. tab navigation

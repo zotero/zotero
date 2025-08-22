@@ -166,6 +166,9 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showProfilePopup: false,
 			showSignInPopup: false,
 
+			// First-run workspace setup
+			showWorkspaceSetupPopup: false,
+
 			showModelSelectionPopup: false,
 			showDeletePopup: false,
 			showRenamePopup: false,
@@ -237,6 +240,17 @@ var DeepTutor = class DeepTutor extends React.Component {
 		this._initialized = true;
 		this._loadingPromiseResolve();
 		Zotero.debug("DeepTutor: Component mounted");
+
+		// Show workspace setup only on first run
+		try {
+			const completed = Zotero.Prefs.get('deeptutor.workspaceSetupCompleted');
+			Zotero.debug(`DeepTutor: workspace setup completed flag: ${String(completed)}`);
+			this.setState({ showWorkspaceSetupPopup: !completed });
+		}
+		catch (e) {
+			Zotero.debug(`DeepTutor: error reading workspaceSetupCompleted pref: ${e}`);
+			this.setState({ showWorkspaceSetupPopup: true });
+		}
 
 		// Make instance available globally for testing
 		if (typeof window !== "undefined") {
@@ -1489,6 +1503,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				showProfilePopup={this.state.showProfilePopup}
 				showSignInPopup={this.state.showSignInPopup}
 				showUsagePopup={this.state.showUsagePopup}
+				showWorkspaceSetupPopup={this.state.showWorkspaceSetupPopup}
 
 				showModelSelectionPopup={this.state.showModelSelectionPopup}
 				showDeletePopup={this.state.showDeletePopup}
@@ -1557,6 +1572,7 @@ var DeepTutor = class DeepTutor extends React.Component {
 				toggleModelSelectionPopup={this.toggleModelSelectionPopup}
 				toggleSignInPopup={this.toggleSignInPopup}
 				toggleUsagePopup={this.toggleUsagePopup}
+				toggleWorkspaceSetupPopup={() => this.setState({ showWorkspaceSetupPopup: !this.state.showWorkspaceSetupPopup })}
 
 				toggleProfilePopup={this.toggleProfilePopup}
 				openNoPDFWarningPopup={this.openNoPDFWarningPopup}
@@ -1574,6 +1590,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 				refreshActiveSubscription={this.refreshSubscriptionData}
 				// Usage summary accessors
 				refreshUsageSummary={this.refreshUsageSummary}
+				// Workspace setup completion
+				handleWorkspaceSetupComplete={() => {
+					this.setState({ showWorkspaceSetupPopup: false });
+				}}
 			/>
 		);
 	}
