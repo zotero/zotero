@@ -77,7 +77,7 @@
 					try {
 						localized = Zotero.getString(label);
 					}
-					catch (e) {}
+					catch {}
 					if (!localized || localized == label) {
 						return label;
 					}

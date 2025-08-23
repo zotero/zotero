@@ -301,7 +301,7 @@
 				moveSectionDown.hidden = !canMoveDown;
 				resetSectionOrder.hidden = !canReset;
 
-				reorderSeparator.hidden = !canMoveUp && !canMoveDown && !canReset;				
+				reorderSeparator.hidden = !canMoveUp && !canMoveDown && !canReset;
 			});
 			
 			return contextMenu;

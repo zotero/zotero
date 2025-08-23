@@ -447,7 +447,7 @@
 				try {
 					_reader.uninit();
 				}
-				catch (e) {}
+				catch {}
 			}
 			this._id("preview")?.remove();
 			// Make previously loaded next-preview be current preview browser

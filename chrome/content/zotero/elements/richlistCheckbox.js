@@ -29,6 +29,7 @@
 	if (!customElements.get("richlistitem")) {
 		delete document.createXULElement("richlistitem");
 	}
+
 	/**
 	 * Extend richlistbox for checkbox inputs since we use them in multiple places
 	 */
@@ -37,7 +38,7 @@
 			this._checkbox = document.createXULElement('checkbox');
 			this._checkbox.setAttribute('native', 'true');
 			this._checkbox.setAttribute('checked', this.checked);
-			this._checkbox.addEventListener('focus', () => this.control.focus())
+			this._checkbox.addEventListener('focus', () => this.control.focus());
 			this._label = document.createElement('label');
 			this._label.textContent = this.label;
 			this.append(this._checkbox);
@@ -46,11 +47,11 @@
 			// this.control (parent richlistbox) only available after connecting
 			this.control.addEventListener('keypress', (event) => {
 				if (
-					event.key == " " &&
-					!event.ctrlKey &&
-					!event.shiftKey &&
-					!event.altKey &&
-					!event.metaKey
+					event.key == " "
+					&& !event.ctrlKey
+					&& !event.shiftKey
+					&& !event.altKey
+					&& !event.metaKey
 				) {
 					if (!this.selected) return;
 					this.checked = !this.checked;
@@ -67,17 +68,19 @@
 		get label() {
 			return this.getAttribute('label');
 		}
+
 		set label(val) {
 			this._label.innerText = val;
-			return this.setAttribute('label', 'val');
+			this.setAttribute('label', 'val');
 		}
 		
 		get checked() {
 			return JSON.parse(this.getAttribute('checked'));
 		}
+
 		set checked(val) {
-			this._checkbox.setAttribute('checked', !!val);	
-			return this.setAttribute('checked', !!val);
+			this._checkbox.setAttribute('checked', !!val);
+			this.setAttribute('checked', !!val);
 		}
 	}
 	

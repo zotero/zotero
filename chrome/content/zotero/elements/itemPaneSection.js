@@ -106,7 +106,7 @@ class ItemPaneSectionElementBase extends XULElementBase {
 			this._section.removeEventListener("toggle", this._handleSectionToggle);
 			this._section = null;
 		}
-		this._resetRenderedFlags()
+		this._resetRenderedFlags();
 	}
 
 	initCollapsibleSection() {

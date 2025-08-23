@@ -99,7 +99,7 @@
 				try {
 					shown = Zotero.Prefs.get(pref);
 				}
-				catch (e) {}
+				catch {}
 				if (shown && !force) {
 					return;
 				}

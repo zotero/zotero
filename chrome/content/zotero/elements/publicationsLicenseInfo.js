@@ -23,7 +23,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-/* global XULElementBase: false */
 
 {
 	const links = {

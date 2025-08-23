@@ -2887,7 +2887,7 @@
 
 		_handleCreatorTransformCapitalize = (event) => {
 			this.capitalizeCreatorName(event);
-		}
+		};
 
 		_handleLinkMenuShowing = () => {
 			let menu = this._linkMenu;

@@ -89,8 +89,9 @@
 			this.querySelector('#joinModeMenu').value = 'all';
 
 			var conditionsBox = this.querySelector('#conditions');
-			while (conditionsBox.hasChildNodes())
+			while (conditionsBox.hasChildNodes()) {
 				conditionsBox.removeChild(conditionsBox.firstChild);
+			}
 
 			var conditions = this.search.getConditions();
 			for (let id in conditions) {
@@ -100,10 +101,12 @@
 					case 'recursive':
 					case 'noChildren':
 					case 'includeParentsAndChildren':
+					{
 						let checkbox = condition.condition + 'Checkbox';
 						this.querySelector(`#${checkbox}`).setAttribute('condition', id);
 						this.querySelector(`#${checkbox}`).checked = condition.operator == 'true';
 						continue;
+					}
 				}
 
 				if (condition.condition == 'joinMode') {
@@ -125,15 +128,15 @@
 			
 			// Default to an empty 'title' condition
 			if (!ref) {
-				ref = this.search.getCondition(this.search.addCondition("title","contains",""))
+				ref = this.search.getCondition(this.search.addCondition("title", "contains", ""));
 			}
 			
 			condition.initWithParentAndCondition(this, ref);
 			
-			if (conditionsBox.childNodes.length == 2){
+			if (conditionsBox.childNodes.length == 2) {
 				conditionsBox.childNodes[0].enableRemoveButton();
 			}
-			else if (conditionsBox.childNodes.length == 1){
+			else if (conditionsBox.childNodes.length == 1) {
 				conditionsBox.childNodes[0].disableRemoveButton();
 			}
 		}
@@ -143,14 +146,14 @@
 			
 			this.search.removeCondition(id);
 			
-			for (var i = 0, len=conditionsBox.childNodes.length; i < len; i++){
-				if (conditionsBox.childNodes[i].conditionID == id){
+			for (var i = 0, len = conditionsBox.childNodes.length; i < len; i++) {
+				if (conditionsBox.childNodes[i].conditionID == id) {
 					conditionsBox.removeChild(conditionsBox.childNodes[i]);
 					break;
 				}
 			}
 			
-			if (conditionsBox.childNodes.length == 1){
+			if (conditionsBox.childNodes.length == 1) {
 				conditionsBox.childNodes[0].disableRemoveButton();
 			}
 		}
@@ -171,22 +174,18 @@
 
 		updateJoinMode() {
 			var menu = this.querySelector('#joinModeMenu');
-			if(menu.hasAttribute('condition'))
-				this.search.updateCondition(menu.getAttribute('condition'),'joinMode',menu.value,null);
-			else
-				menu.setAttribute('condition', this.search.addCondition('joinMode',menu.value,null));
+			if (menu.hasAttribute('condition')) this.search.updateCondition(menu.getAttribute('condition'), 'joinMode', menu.value, null);
+			else menu.setAttribute('condition', this.search.addCondition('joinMode', menu.value, null));
 		}
 
 		updateCheckbox(condition) {
 			var checkbox = this.querySelector('#' + condition + 'Checkbox');
 			var value = checkbox.checked ? 'true' : 'false';
-			if(checkbox.hasAttribute('condition'))
-			{
+			if (checkbox.hasAttribute('condition')) {
 				this.search.updateCondition(checkbox.getAttribute('condition'),
 					condition, value, null);
 			}
-			else
-			{
+			else {
 				checkbox.setAttribute('condition',
 					this.search.addCondition(condition, value, null));
 			}
@@ -196,7 +195,7 @@
 		updateSearch() {
 			var conditionsBox = this.querySelector('#conditions');
 			if (conditionsBox.hasChildNodes()) {
-				for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++) {
+				for (var i = 0, len = conditionsBox.childNodes.length; i < len; i++) {
 					conditionsBox.childNodes[i].updateSearch();
 				}
 			}
@@ -295,7 +294,7 @@
 				try {
 					baseFields = Zotero.ItemFields.getTypeFieldsFromBase(condition.name);
 				}
-				catch (e) {}
+				catch {}
 				
 				// Add tooltip, building it if it doesn't exist
 				if (baseFields) {
@@ -304,13 +303,14 @@
 						try {
 							fieldName = Zotero.ItemFields.getLocalizedString(condition.name);
 						}
-						catch (e) {}
+						catch {}
 						
+						let localized;
 						if (fieldName) {
-							var localized = [fieldName];
+							localized = [fieldName];
 						}
 						else {
-							var localized = [];
+							localized = [];
 						}
 						
 						for (let baseField of baseFields) {
@@ -407,13 +407,11 @@
 			
 			// Display appropriate operators for condition
 			var selectThis;
-			for(var i = 0, len = operatorsList.firstChild.childNodes.length; i < len; i++)
-			{
+			for (var i = 0, len = operatorsList.firstChild.childNodes.length; i < len; i++) {
 				var val = operatorsList.firstChild.childNodes[i].getAttribute('value');
 				var hidden = !operators[val];
 				operatorsList.firstChild.childNodes[i].setAttribute('hidden', hidden);
-				if (!hidden && (selectThis == null || this.selectedOperator == val))
-				{
+				if (!hidden && (selectThis === null || this.selectedOperator == val)) {
 					selectThis = i;
 				}
 			}
@@ -425,7 +423,8 @@
 			// Generate drop-down menu instead of textbox for certain conditions
 			switch (conditionName) {
 				case 'collection':
-					var rows = [];
+				{
+					let rows = [];
 					
 					var libraryID = this.parent.search.libraryID;
 					
@@ -460,43 +459,45 @@
 					}
 					this.createValueMenu(rows);
 					break;
-				
+				}
 				case 'itemType':
-					var rows = Zotero.ItemTypes.getTypes().map(type => ({
+				{
+					let rows = Zotero.ItemTypes.getTypes().map(type => ({
 						name: Zotero.ItemTypes.getLocalizedString(type.id),
 						value: type.name
 					}));
 					
 					// Sort by localized name
-					var collation = Zotero.getLocaleCollation();
+					let collation = Zotero.getLocaleCollation();
 					rows.sort((a, b) => collation.compareString(1, a.name, b.name));
 					
 					this.createValueMenu(rows);
 					break;
-				
+				}
 				case 'fileTypeID':
-					var rows = Zotero.FileTypes.getTypes().map(type => ({
+				{
+					let rows = Zotero.FileTypes.getTypes().map(type => ({
 						name: Zotero.getString('file-type-' + type.name),
 						value: type.id
 					}));
 					
 					// Sort by localized name
-					var collation = Zotero.getLocaleCollation();
+					let collation = Zotero.getLocaleCollation();
 					rows.sort((a, b) => collation.compareString(1, a.name, b.name));
 					
 					this.createValueMenu(rows);
 					break;
-				
+				}
 				default:
-					if (operatorsList.value=='isInTheLast')
-					{
+				{
+					if (operatorsList.value == 'isInTheLast') {
 						this.querySelector('#value-date-age').value = this.value;
 					}
 					
 					// Textbox
 					else {
 						// If switching from menu to textbox, clear value
-						if (this.querySelector('#valuefield').hidden){
+						if (this.querySelector('#valuefield').hidden) {
 							this.querySelector('#valuefield').value = '';
 						}
 						// If switching between textbox conditions, get loaded value for new one
@@ -507,6 +508,7 @@
 						// Update field drop-down if applicable
 						this.querySelector('#valuefield').update(conditionName, this.mode);
 					}
+				}
 			}
 			
 			this.onOperatorSelected();
@@ -525,10 +527,9 @@
 			}
 			
 			// Textbox + units dropdown for isInTheLast operator
-			else if (operatorsList.value=='isInTheLast')
-			{
+			else if (operatorsList.value == 'isInTheLast') {
 				// If switching from text field, clear value
-				if (this.querySelector('#value-date-age').hidden){
+				if (this.querySelector('#value-date-age').hidden) {
 					this.value = '';
 				}
 				this.querySelector('#valuefield').hidden = true;
@@ -537,10 +538,9 @@
 			}
 			
 			// Textbox
-			else
-			{
+			else {
 				// If switching from date age, clear value
-				if (this.querySelector('#valuefield').hidden){
+				if (this.querySelector('#valuefield').hidden) {
 					this.value = '';
 				}
 				this.querySelector('#valuefield').hidden = false;
@@ -580,11 +580,10 @@
 
 		initWithParentAndCondition(parent, condition) {
 			this.parent = parent;
-			this.conditionID = condition['id'];
+			this.conditionID = condition.id;
 			var menu = this.querySelector('#conditionsmenu');
 			
-			if(this.parent.search)
-			{
+			if (this.parent.search) {
 				this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
 				var prefix = '';
 				
@@ -610,19 +609,18 @@
 				menu.setAttribute('value', uiCondition);
 				
 				// Convert datetimes from UTC to localtime
-				if ((condition['condition']=='accessDate' ||
-						condition['condition']=='dateAdded' ||
-						condition['condition']=='dateModified') &&
-						Zotero.Date.isSQLDateTime(condition['value'])){
-					
-					condition['value'] =
-						Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(condition['value'], true));
+				if ((condition.condition == 'accessDate'
+						|| condition.condition == 'dateAdded'
+						|| condition.condition == 'dateModified')
+						&& Zotero.Date.isSQLDateTime(condition.value)) {
+					condition.value
+						= Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(condition.value, true));
 				}
 				
-				this.mode = condition['mode'];
-				this.querySelector('#operatorsmenu').value = condition['operator'];
-				this.value = prefix +
-					(condition.value ? condition.value : '');
+				this.mode = condition.mode;
+				this.querySelector('#operatorsmenu').value = condition.operator;
+				this.value = prefix
+					+ (condition.value ? condition.value : '');
 
 				this.dontupdate = false;
 			}
@@ -631,15 +629,14 @@
 		}
 
 		updateSearch() {
-			if(this.parent && this.parent.search && !this.dontupdate)
-			{
+			if (this.parent && this.parent.search && !this.dontupdate) {
 				var condition = this.selectedCondition;
 				var operator = this.querySelector('#operatorsmenu').value;
+				let value;
 				
 				// Regular text field
-				if (!this.querySelector('#valuefield').hidden)
-				{
-					var value = this.querySelector('#valuefield').value;
+				if (!this.querySelector('#valuefield').hidden) {
+					value = this.querySelector('#valuefield').value;
 					
 					// Convert datetimes to UTC before saving
 					switch (condition) {
@@ -647,41 +644,37 @@
 						case 'dateAdded':
 						case 'dateModified':
 							if (Zotero.Date.isSQLDateTime(value)) {
-								var value = Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(value), true);
+								value = Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(value), true);
 							}
 					}
 					
 					// Append mode to condition
-					if (this.querySelector('#valuefield').mode){
+					if (this.querySelector('#valuefield').mode) {
 						condition += '/' + this.querySelector('#valuefield').mode;
 					}
 				}
 				
 				// isInTheLast operator
-				else if (!this.querySelector('#value-date-age').hidden)
-				{
-					var value = this.querySelector('#value-date-age').value;
+				else if (!this.querySelector('#value-date-age').hidden) {
+					value = this.querySelector('#value-date-age').value;
 				}
 				
 				// Handle special C1234 and S5678 form for
 				// collections and searches
 				else if (condition == 'collection') {
-					var letter = this.querySelector('#valuemenu').value.substr(0,1);
-					if (letter=='C')
-					{
+					var letter = this.querySelector('#valuemenu').value.substr(0, 1);
+					if (letter == 'C') {
 						condition = 'collection';
 					}
-					else if (letter=='S')
-					{
+					else if (letter == 'S') {
 						condition = 'savedSearch';
 					}
-					var value = this.querySelector('#valuemenu').value.substr(1);
+					value = this.querySelector('#valuemenu').value.substr(1);
 				}
 				
 				// Regular drop-down menu
-				else
-				{
-					var value = this.querySelector('#valuemenu').value;
+				else {
+					value = this.querySelector('#valuemenu').value;
 				}
 				this.parent.search.updateCondition(this.conditionID, condition, operator, value);
 			}
@@ -706,7 +699,7 @@
 
 		revealSelectedCondition(menu) {
 			if (!this.selectedCondition || this.isPrimaryCondition(this.selectedCondition)) {
-				return;
+				return false;
 			}
 			
 			if (!menu) {
@@ -733,14 +726,14 @@
 
 		onLibraryChange() {
 			switch (this.selectedCondition) {
-			case 'collection':
-				this.onConditionSelected(this.selectedCondition, true);
-				break;
+				case 'collection':
+					this.onConditionSelected(this.selectedCondition, true);
+					break;
 			}
 		}
 
 		onRemoveClicked() {
-			if (this.parent){
+			if (this.parent) {
 				window.resizeBy(0, -1 * this.getBoundingClientRect().height);
 				window.dispatchEvent(new CustomEvent('resize'));
 				this.parent.removeCondition(this.conditionID);
@@ -749,14 +742,14 @@
 
 		onAddClicked(event) {
 			event.preventDefault();
-			if (this.parent){
+			if (this.parent) {
 				let ref = this.parent.search.getCondition(
 					this.parent.search.addCondition(
 						this.querySelector('#conditionsmenu').getAttribute('data-value'),
 						this.querySelector('#operatorsmenu').value,
 						""
 					)
-				)
+				);
 				this.parent.addCondition(ref);
 				window.resizeBy(0, this.getBoundingClientRect().height);
 			}
@@ -814,20 +807,20 @@
 		}
 
 		get mode() {
-			if (this.getAttribute('hasOptions')!='true'){
+			if (this.getAttribute('hasOptions') != 'true') {
 				return false;
 			}
 			
 			var menu = this.querySelector('#textbox-fulltext-menu');
 			
 			var selectedIndex = -1;
-			for (var i=0; i<menu.childNodes.length; i++){
-				if (menu.childNodes[i].getAttribute('checked')=='true'){
+			for (var i = 0; i < menu.childNodes.length; i++) {
+				if (menu.childNodes[i].getAttribute('checked') == 'true') {
 					selectedIndex = i;
 					break;
 				}
 			}
-			switch (selectedIndex){
+			switch (selectedIndex) {
 				case 0:
 					return false;
 				
@@ -848,15 +841,15 @@
 			var textbox = this.querySelector('#search-textbox');
 			var button = this.querySelector('#textbox-button');
 			
-			switch (condition){
+			switch (condition) {
 				case 'fulltextContent':
 					var menu = this.querySelector('#textbox-fulltext-menu');
 					this.setAttribute('hasOptions', true);
 					button.removeAttribute('hidden');
 					
 					var selectedIndex = 0;
-					if (mode){
-						switch (mode){
+					if (mode) {
+						switch (mode) {
 							case 'phrase':
 								selectedIndex = 0;
 								break;
@@ -883,8 +876,7 @@
 					button.setAttribute('hidden', true);
 					
 					// Set textbox to autocomplete mode
-					switch (condition)
-					{
+					switch (condition) {
 						// Skip autocomplete for these fields
 						case 'date':
 						case 'note':
@@ -948,9 +940,8 @@
 			var menupopup = menulist.firstChild;
 			
 			var selectThis = 0;
-			for (var i=0; i<menupopup.childNodes.length; i++){
-				if (menupopup.childNodes[i].value == units)
-				{
+			for (var i = 0; i < menupopup.childNodes.length; i++) {
+				if (menupopup.childNodes[i].value == units) {
 					selectThis = i;
 					break;
 				}

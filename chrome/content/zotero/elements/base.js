@@ -82,4 +82,5 @@ function XULElementMixin(Class) {
 	};
 }
 
+// eslint-disable-next-line no-unused-vars
 var XULElementBase = XULElementMixin(XULElement);

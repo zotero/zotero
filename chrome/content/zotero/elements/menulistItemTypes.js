@@ -33,10 +33,6 @@
 	}
 	
 	class ItemTypeMenuList extends customElements.get("menulist") {
-		constructor() {
-			super();
-		}
-		
 		connectedCallback() {
 			super.connectedCallback();
 			

@@ -48,12 +48,12 @@
 			var uri = null;
 			try {
 				const nsISSM = Components.interfaces.nsIScriptSecurityManager;
-				const secMan =
-					Components.classes["@mozilla.org/scriptsecuritymanager;1"]
+				const secMan
+					= Components.classes["@mozilla.org/scriptsecuritymanager;1"]
 						.getService(nsISSM);
 
-				const ioService =
-					Components.classes["@mozilla.org/network/io-service;1"]
+				const ioService
+					= Components.classes["@mozilla.org/network/io-service;1"]
 						.getService(Components.interfaces.nsIIOService);
 
 				uri = ioService.newURI(href, null, null);
@@ -63,7 +63,7 @@
 					secMan.checkLoadURIWithPrincipal(nullPrincipal, uri,
 						nsISSM.DISALLOW_INHERIT_PRINCIPAL);
 				}
-				catch (ex) {
+				catch {
 					var msg = "Error: Cannot open a " + uri.scheme + ": link using the zotero-text-link CE.";
 					Components.utils.reportError(msg);
 					return;
@@ -83,14 +83,11 @@
 			// otherwise, fall back to opening the anchor directly
 			var win = window;
 			if (win.isChromeWindow) {
-				while (win.opener && !win.opener.closed)
-					win = win.opener;
+				while (win.opener && !win.opener.closed) win = win.opener;
 			}
 
-			if (uri)
-				win.open(uri.spec);
-			else
-				win.open(href);
+			if (uri) win.open(uri.spec);
+			else win.open(href);
 
 			event.preventDefault();
 		}

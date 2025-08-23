@@ -153,7 +153,7 @@
 					return props;
 				}
 			}
-			catch (e) {
+			catch {
 				// Ignore
 			}
 			return null;
