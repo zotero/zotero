@@ -270,12 +270,12 @@
 			// Make <image> focusable. On focus of the image, bounce the focus to the toolbarbutton.
 			// Temporarily remove tabindex from the <image> so that the focus can move past the
 			// reindex button
-			let reindexButton = this._id("indexStatusRow").querySelector(".meta-data toolbarbutton");
-			if (reindexButton) {
-				reindexButton.addEventListener("focusin", this._handleReindexButtonFocus);
-				reindexButton.addEventListener("blur", this._handleReindexButtonBlur);
+			this._reindexButton = this._id("indexStatusRow").querySelector(".meta-data toolbarbutton");
+			if (this._reindexButton) {
+				this._reindexButton.addEventListener("focusin", this._handleReindexButtonFocus);
+				this._reindexButton.addEventListener("blur", this._handleReindexButtonBlur);
 				// Prevents the button from getting stuck in active state
-				reindexButton.addEventListener("keydown", this._handleReindexButtonKeydown);
+				this._reindexButton.addEventListener("keydown", this._handleReindexButtonKeydown);
 			}
 
 			for (let label of this.querySelectorAll(".meta-label")) {
@@ -299,11 +299,10 @@
 			this._id('note-button')?.removeEventListener("command", this._handleNoteButtonCommand);
 			this._id('url-menuitem-copy')?.removeEventListener('command', this._handleCopyURL);
 
-			let reindexButton = this._id("indexStatusRow")?.querySelector(".meta-data toolbarbutton");
-			if (reindexButton) {
-				reindexButton.removeEventListener("focusin", this._handleReindexButtonFocus);
-				reindexButton.removeEventListener("blur", this._handleReindexButtonBlur);
-				reindexButton.removeEventListener("keydown", this._handleReindexButtonKeydown);
+			if (this._reindexButton) {
+				this._reindexButton.removeEventListener("focusin", this._handleReindexButtonFocus);
+				this._reindexButton.removeEventListener("blur", this._handleReindexButtonBlur);
+				this._reindexButton.removeEventListener("keydown", this._handleReindexButtonKeydown);
 			}
 
 			for (let label of this.querySelectorAll(".meta-label")) {
@@ -768,15 +767,15 @@
 
 		_handleReindexButtonFocus = (event) => {
 			if (event.target.tagName == "image") {
-				reindexButton.focus();
-				reindexButton.querySelector("image").removeAttribute("tabindex");
+				this._reindexButton?.focus();
+				this._reindexButton?.querySelector("image").removeAttribute("tabindex");
 			}
 		};
 
 		_handleReindexButtonBlur = () => {
 			setTimeout(() => {
-				if (document.activeElement !== reindexButton) {
-					reindexButton.querySelector("image").setAttribute("tabindex", "0");
+				if (document.activeElement !== this._reindexButton) {
+					this._reindexButton.querySelector("image").setAttribute("tabindex", "0");
 				}
 			});
 		};
@@ -784,7 +783,7 @@
 		_handleReindexButtonKeydown = (event) => {
 			if (event.key == " ") {
 				event.preventDefault();
-				reindexButton.click();
+				this._reindexButton?.click();
 			}
 		};
 
