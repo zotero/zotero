@@ -580,14 +580,16 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				return;
 			}
 			
-			// Use the new public setFindQuery method
+			/* 
+			Search functionality commented out - preserve file opening and page switching only
 			const searchQuery = source.referenceString || "test";
 			
 			reader._internalReader.setFindQuery(searchQuery, {
-				primary: true,
-				openPopup: false,
-				activateSearch: true
-			});
+			primary: true,
+			openPopup: false,
+			activateSearch: true
+			}); 
+			*/
 		}
 		catch (error) {
 			Zotero.debug(error);

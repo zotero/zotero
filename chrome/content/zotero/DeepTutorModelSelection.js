@@ -1129,12 +1129,16 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 		try {
 			// Handle file uploads if fileList exists
 			const uploadedDocumentIds = [];
+			const successfulUploads = []; // Track successfully uploaded files with their info
 			Zotero.debug(`ModelSelection: fileList length: ${fileList.length}`);
 			Zotero.debug(`ModelSelection: originalFileList length: ${originalFileList.length}`);
 			if (fileList.length > 0) {
-				for (const file of originalFileList) {
+				for (let fileIndex = 0; fileIndex < originalFileList.length; fileIndex++) {
+					const file = originalFileList[fileIndex];
 					try {
-						const fileName = file.name;
+						// Find corresponding fileList entry to get the consistent filename
+						const fileListEntry = fileList.find(f => f.id === file.id);
+						const fileName = fileListEntry ? fileListEntry.name : 'Untitled';
 						Zotero.debug('ModelSelection: Processing file:', fileName);
 
 						// Direct file reading approach (more memory-efficient than dataURI + fetch)
@@ -1246,14 +1250,23 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 
 						Zotero.debug('ModelSelection: File uploaded successfully:', fileName);
 						uploadedDocumentIds.push(preSignedUrlData.documentId);
+						successfulUploads.push({
+							originalFileIndex: fileIndex,
+							fileId: file.id,
+							fileName: fileName,
+							documentId: preSignedUrlData.documentId
+						});
 						Zotero.debug(`ModelSelection: Uploaded document IDs: ${uploadedDocumentIds}`);
 					}
 					catch (fileError) {
 						Zotero.debug('ModelSelection: Error uploading file:', fileError);
+						// Don't add failed uploads to successfulUploads array
 						continue;
 					}
 				}
 			}
+
+
 
 			// Create session data
 			const sessionData = {
@@ -1278,15 +1291,17 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 			if (createdSession && createdSession.id) {
 				try {
 					// Create mapping between Azure document IDs and Zotero attachment IDs
+					// Use only successfully uploaded files to create accurate mapping
 					const mapping = {};
-					fileList.forEach((file, index) => {
-						mapping[uploadedDocumentIds[index]] = file.id;
+					successfulUploads.forEach((upload) => {
+						mapping[upload.documentId] = upload.fileId;
 					});
 
 					// Save mapping to Zotero's local storage
 					const storageKey = `deeptutor_mapping_${createdSession.id}`;
 					Zotero.Prefs.set(storageKey, JSON.stringify(mapping));
 					Zotero.debug('ModelSelection0521: Saved mapping to local storage for session:', createdSession.id);
+					Zotero.debug(`ModelSelection0521: Mapping contains ${successfulUploads.length} successfully uploaded files`);
 					Zotero.debug('ModelSelection0521: Get data mapping:', Zotero.Prefs.get(storageKey));
 				}
 				catch (error) {
@@ -1404,14 +1419,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 					setErrorMessage(`${getFileCountLimitMessage()}. Only ${pdfsToAdd} files were added.`);
 				}
         
-				// Store original PDF attachments (append to existing list)
-				setOriginalFileList((prev) => {
-					// Filter out PDFs that already exist in the current originalFileList
-					const newPdfs = pdfAttachments.slice(0, pdfsToAdd).filter(pdf => !prev.some(existingFile => existingFile.id === pdf.id)
-					);
-					return [...prev, ...newPdfs];
-				});
-				Zotero.debug("BBBBB: Updated originalFileList with PDF attachments");
+				// Don't add PDFs to originalFileList immediately - wait for validation in processing loop
 
 				// Process only the allowed number of PDFs concurrently using Promise.all
 				const pdfProcessingPromises = pdfAttachments.slice(0, pdfsToAdd).map(async (pdf) => {
@@ -1461,9 +1469,22 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 				const results = await Promise.all(pdfProcessingPromises);
 				Zotero.debug(`BBBBB: Completed processing ${results.length} PDFs`);
         
-				// Filter out any null results and update fileList
+				// Filter out any null results and update both lists
 				const validResults = results.filter(result => result !== null);
 				Zotero.debug(`BBBBB: Found ${validResults.length} valid results after processing`);
+				
+				// Get the corresponding validated PDF attachments
+				const validPdfAttachments = validResults.map(result => 
+					pdfAttachments.find(pdf => pdf.id === result.id)
+				).filter(pdf => pdf !== undefined);
+        
+				// Update originalFileList with only validated PDFs
+				setOriginalFileList((prev) => {
+					// Filter out PDFs that already exist in the current originalFileList
+					const newPdfs = validPdfAttachments.filter(pdf => !prev.some(existingFile => existingFile.id === pdf.id));
+					return [...prev, ...newPdfs];
+				});
+				Zotero.debug(`BBBBB: Updated originalFileList with ${validPdfAttachments.length} validated PDF attachments`);
         
 				setFileList((prev) => {
 					// Filter out results that already exist in the current fileList

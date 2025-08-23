@@ -87,7 +87,7 @@ export default function DeepTutorFileSizeWarning({ onClose }) {
 					File Size Exceeds Limit
 				</div>
 				<div style={styles.message}>
-					Upgrade to increase your file size limit. Pro plan is 50MB per file and Premium plan is 100MB per file.
+					Upgrade to increase your file size limit. Free plan is 10MB per file, Pro plan is 50MB per file, and Premium plan is 100MB per file.
 				</div>
 				<button
 					style={buttonDynamicStyle}
