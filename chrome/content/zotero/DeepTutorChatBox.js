@@ -109,7 +109,7 @@ const MessageRole = {
 const SendIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_SEND.svg';
 const StopIconPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/RES_STOP.svg';
 const ArrowDownPath = 'chrome://zotero/content/DeepTutorMaterials/Chat/CHAT_ARROWDOWN.svg';
-const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
+const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSavePopup }) => {
 	const { colors, theme, isDark } = useDeepTutorTheme();
 	
 	// Theme-aware styles
@@ -1334,6 +1334,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 				hoveredQuestion={hoveredQuestion}
 				colors={colors}
 				theme={theme}
+				handleShowNoteSavePopup={handleShowNoteSavePopup}
 			/>
 		);
 	};
@@ -2397,7 +2398,8 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 DeepTutorChatBox.propTypes = {
 	currentSession: PropTypes.object,
 	onSessionSelect: PropTypes.func,
-	onInitWaitChange: PropTypes.func
+	onInitWaitChange: PropTypes.func,
+	handleShowNoteSavePopup: PropTypes.func
 };
 
 export default DeepTutorChatBox;

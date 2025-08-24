@@ -174,10 +174,15 @@ var DeepTutor = class DeepTutor extends React.Component {
 			showRenamePopup: false,
 			showNoPDFWarningPopup: false,
 			showFileSizeWarningPopup: false,
+			showNoteSavePopup: false,
 			sessionToDelete: null,
 			sessionNameToDelete: '',
 			sessionToRename: null,
 			sessionNameToRename: '',
+			// Note save popup data
+			noteSaveSuccess: false,
+			noteSaveNoteName: '',
+			noteSaveContainerName: '',
 			collapsed: false,
 			showSubscriptionConfirmPopup: false,
 			showManageSubscriptionPopup: false,
@@ -657,6 +662,24 @@ var DeepTutor = class DeepTutor extends React.Component {
 	closeFileSizeWarningPopup = () => {
 		this.setState({
 			showFileSizeWarningPopup: false,
+		});
+	};
+
+	showNoteSavePopup = (isSuccessful, noteName, containerName) => {
+		this.setState({
+			showNoteSavePopup: true,
+			noteSaveSuccess: isSuccessful,
+			noteSaveNoteName: noteName,
+			noteSaveContainerName: containerName
+		});
+	};
+
+	closeNoteSavePopup = () => {
+		this.setState({
+			showNoteSavePopup: false,
+			noteSaveSuccess: false,
+			noteSaveNoteName: '',
+			noteSaveContainerName: ''
 		});
 	};
 
@@ -1512,12 +1535,17 @@ var DeepTutor = class DeepTutor extends React.Component {
 				showSubscriptionConfirmPopup={this.state.showSubscriptionConfirmPopup}
 				showManageSubscriptionPopup={this.state.showManageSubscriptionPopup}
 				showSubscriptionPopup={this.state.showSubscriptionPopup}
+				showNoteSavePopup={this.state.showNoteSavePopup}
 				
 				// Session props
 				sessionToDelete={this.state.sessionToDelete}
 				sessionNameToDelete={this.state.sessionNameToDelete}
 				sessionToRename={this.state.sessionToRename}
 				sessionNameToRename={this.state.sessionNameToRename}
+				// Note save popup props
+				noteSaveSuccess={this.state.noteSaveSuccess}
+				noteSaveNoteName={this.state.noteSaveNoteName}
+				noteSaveContainerName={this.state.noteSaveContainerName}
 				
 				// Feature flags
 				modelSelectionFrozen={this.state.modelSelectionFrozen}
@@ -1585,6 +1613,10 @@ var DeepTutor = class DeepTutor extends React.Component {
 				showFileSizeWarningPopup={this.state.showFileSizeWarningPopup}
 				openFileSizeWarningPopup={this.openFileSizeWarningPopup}
 				closeFileSizeWarningPopup={this.closeFileSizeWarningPopup}
+				
+				// Note save popup handlers
+				handleShowNoteSavePopup={this.showNoteSavePopup}
+				closeNoteSavePopup={this.closeNoteSavePopup}
 				
 				// Centralized subscription refresh function
 				refreshActiveSubscription={this.refreshSubscriptionData}

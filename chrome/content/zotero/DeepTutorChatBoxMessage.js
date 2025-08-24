@@ -66,7 +66,8 @@ const DeepTutorChatBoxMessage = ({
 	setHoveredQuestion,
 	hoveredQuestion,
 	colors,
-	theme
+	theme,
+	handleShowNoteSavePopup
 }) => {
 	// Format response text for markdown rendering
 	const formatResponseForMarkdown = (text, subMessage) => {
@@ -511,11 +512,16 @@ const DeepTutorChatBoxMessage = ({
 				containerName = parentItem.getDisplayTitle();
 			});
 			
-			// Show success message with actual names
-			Zotero.alert(null, "Note Created Successfully", `Note "${noteName}" created successfully in "${containerName}".`);
+			// Show success message with actual names using popup
+			if (handleShowNoteSavePopup) {
+				handleShowNoteSavePopup(true, noteName, containerName);
+			}
 		}
 		catch (error) {
-			 Zotero.alert(null, "Error Creating Note", `Error creating note: ${error.message}`);
+			// Show error message using popup
+			if (handleShowNoteSavePopup) {
+				handleShowNoteSavePopup(false, '', '');
+			}
 		}
 		finally {
 			// Always reset the saving state, regardless of success or failure
@@ -856,7 +862,8 @@ DeepTutorChatBoxMessage.propTypes = {
 	setHoveredQuestion: PropTypes.func,
 	hoveredQuestion: PropTypes.number,
 	colors: PropTypes.object.isRequired,
-	theme: PropTypes.string.isRequired
+	theme: PropTypes.string.isRequired,
+	handleShowNoteSavePopup: PropTypes.func
 };
 
 export default DeepTutorChatBoxMessage;
