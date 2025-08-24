@@ -2381,6 +2381,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange }) => {
 					}}
 					onClick={isStreaming ? handleStopStreaming : handleSend}
 					disabled={iniWait}
+					title={isStreaming ? "Stop Thinking" : "Send"}
 				>
 					<img
 						src={isStreaming ? StopIconPath : SendIconPath}

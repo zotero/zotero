@@ -125,6 +125,7 @@ const DeepTutorTopSection = (props) => {
 					<button
 						style={getIconButtonStyle(props.currentPane === 'sessionHistory')}
 						onClick={() => props.onSwitchPane('sessionHistory')}
+						title="Session History"
 					>
 						<img
 							src={historyIconPath}
@@ -135,6 +136,7 @@ const DeepTutorTopSection = (props) => {
 					<button
 						style={getIconButtonStyle(props.currentPane === 'modelSelection')}
 						onClick={props.onToggleModelSelectionPopup}
+						title="Create New Session"
 					>
 						<img
 							src={plusIconPath}

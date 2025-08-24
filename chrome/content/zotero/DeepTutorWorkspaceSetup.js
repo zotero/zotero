@@ -26,13 +26,11 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 	const [showHelpPopup, setShowHelpPopup] = useState(false);
 
 
-	// Create a portal container in the top-level Zotero window so we can block the whole UI
 	useEffect(() => {
 		try {
 			const win = (typeof window !== 'undefined' && window.top) ? window.top : window;
 			const doc = win && win.document ? win.document : document;
 			if (!doc) {
-				console.log('[DeepTutor Setup] No document available for portal creation');
 				return;
 			}
 			let container = doc.getElementById('deeptutor-workspace-setup-overlay-root');
@@ -43,13 +41,12 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 			}
 			setPortalEl(container);
 		}
-		catch (_err) {
-			console.log('[DeepTutor Setup] Failed to create portal container:', _err);
+		catch {
+			// Portal creation failed
 		}
 	}, []);
 
 
-	// Styles for the popup container and elements
 	const styles = {
 		overlay: {
 			position: "fixed",
@@ -296,15 +293,13 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 
 
 	const computeDeepTutorDir = () => {
-		// Default DeepTutor location based on Zotero default dir parent
 		try {
 			const base = Zotero.DataDirectory.defaultDir;
 			const parent = PathUtils.parent(base);
-			return PathUtils.join(parent, "DeepTutorData");
+			const deepTutorPath = PathUtils.join(parent, "DeepTutorData");
+			return deepTutorPath;
 		}
-		catch (err) {
-			console.log("[DeepTutor Setup] computeDeepTutorDir failed:", err);
-			// Last resort: use a simple string path
+		catch {
 			return "~/DeepTutorData";
 		}
 	};
@@ -324,16 +319,10 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 		setIsWorking(true);
 		try {
 			if (choice === "start") {
-				// Start New Workspace - create new DeepTutor folder for data storage
 				const deepTutorDir = computeDeepTutorDir();
-				console.log("[DeepTutor Setup] Creating new workspace at:", deepTutorDir);
 				await IOUtils.makeDirectory(deepTutorDir, { ignoreExisting: true, permissions: 0o755 });
-				// Point Zotero to the new DeepTutor data directory
-				const startChanged = Zotero.DataDirectory.set(deepTutorDir);
-				console.log("[DeepTutor Setup] Start New Workspace - Data directory set via Zotero.DataDirectory.set:", { path: deepTutorDir, changed: startChanged });
+				Zotero.DataDirectory.set(deepTutorDir);
 				
-				// Mark setup as completed and finish without forcing a restart
-				// This allows users to continue in-app after creating a new workspace
 				markCompleted();
 				setIsWorking(false);
 				if (onComplete) {
@@ -343,38 +332,37 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 			}
 
 			if (choice === "copy" || choice === "share") {
-				// Check if default Zotero folder exists
 				try {
-					// Get the parent directory of the current Zotero data directory
 					const currentDataDir = Zotero.DataDirectory.defaultDir;
 					const parentDir = PathUtils.parent(currentDataDir);
 					const defaultZoteroPath = PathUtils.join(parentDir, "Zotero");
 					
-					console.log("[DeepTutor Setup] Checking path:", { currentDataDir, parentDir, defaultZoteroPath });
-					
 					await IOUtils.stat(defaultZoteroPath);
-					// Default folder exists, proceed with normal flow
+					
+					const zoteroDbPath = PathUtils.join(defaultZoteroPath, "zotero.sqlite");
+					try {
+						await IOUtils.stat(zoteroDbPath);
+					}
+					catch {
+						throw new Error("Default Zotero path exists but is not a valid Zotero data directory (missing zotero.sqlite)");
+					}
+					
 					if (choice === "copy") {
 						await handleCopyFromZotero(defaultZoteroPath);
 					}
 					else {
-						// Share with Zotero - set the actual data directory to Zotero path and restart
-						const changed = Zotero.DataDirectory.set(defaultZoteroPath);
-						console.log("[DeepTutor Setup] Share with Zotero - Data directory set via Zotero.DataDirectory.set:", { path: defaultZoteroPath, changed });
+						Zotero.DataDirectory.set(defaultZoteroPath);
 						
-						// Mark setup as completed and restart to apply the change
 						markCompleted();
 						try {
 							Zotero.Utilities.Internal.quit(true);
 						}
-						catch (_e) {
-							console.log("[DeepTutor Setup] Failed to initiate restart after sharing with Zotero:", _e);
+						catch {
+							// Restart failed
 						}
 					}
 				}
-				catch (_err) {
-					// Default folder doesn't exist or path construction failed, show path entry page
-					console.log("[DeepTutor Setup] Default Zotero path not accessible, showing path entry page:", _err);
+				catch {
 					setPathPurpose(choice === "copy" ? "copy" : "share");
 					setPage("pathEntry");
 					setIsWorking(false);
@@ -383,54 +371,41 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 		}
 		catch (_err) {
 			setError(_err && _err.message ? _err.message : String(_err));
-			console.log("[DeepTutor Setup] Error during workspace operation:", _err);
 			setIsWorking(false);
 		}
 	};
 
-	/**
-	 * Handle copying data from Zotero to DeepTutor
-	 * @param {string} sourcePath - Path to source Zotero data directory
-	 */
 	const handleCopyFromZotero = async (sourcePath) => {
 		const deepTutorDir = computeDeepTutorDir();
-		console.log("[DeepTutor Setup] Copying from Zotero:", { from: sourcePath, to: deepTutorDir });
 
-		// Create target if missing and ensure not copying into itself
 		if (deepTutorDir === sourcePath) {
 			throw new Error("Computed DeepTutor directory equals source Zotero directory");
 		}
 		await IOUtils.makeDirectory(deepTutorDir, { ignoreExisting: true, permissions: 0o755 });
 		
-		// If target non-empty, abort to avoid unsafe merge
 		const targetEmpty = await Zotero.File.directoryIsEmpty(deepTutorDir);
 		if (!targetEmpty) {
 			throw new Error(`Target DeepTutor directory is not empty: ${deepTutorDir}. Choose 'Start New Workspace' or clear the folder.`);
 		}
 		
-		console.log("[DeepTutor Setup] Copying directory...", { from: sourcePath, to: deepTutorDir });
 		await Zotero.File.copyDirectory(sourcePath, deepTutorDir);
 		
-		// Rename zotero.sqlite to zotero.sqlite if present
 		try {
 			const dbFrom = PathUtils.join(deepTutorDir, "zotero.sqlite");
 			await IOUtils.stat(dbFrom);
 			await IOUtils.move(dbFrom, PathUtils.join(deepTutorDir, "zotero.sqlite"));
 		}
-		catch (_err) {
-			console.log("[DeepTutor Setup] Database rename step (zotero.sqlite -> zotero.sqlite) skipped or failed:", _err);
+		catch {
+			// Database rename skipped
 		}
 		
-		// Point Zotero to the newly copied DeepTutor data directory
-		const copyChanged = Zotero.DataDirectory.set(deepTutorDir);
-		console.log("[DeepTutor Setup] Data directory set via Zotero.DataDirectory.set:", { path: deepTutorDir, changed: copyChanged });
+		Zotero.DataDirectory.set(deepTutorDir);
 		
 		markCompleted();
 		try {
 			Zotero.Utilities.Internal.quit(true);
 		}
-		catch (_e) {
-			console.log("[DeepTutor Setup] Failed to initiate restart after copying from Zotero:", _e);
+		catch {
 			setIsWorking(false);
 			if (onComplete) {
 				onComplete();
@@ -438,29 +413,26 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 		}
 	};
 
-	/**
-	 * Handle continue action from the path entry page
-	 */
 	const handlePathEntryContinue = async () => {
 		if (isWorking) return;
 		setError("");
 		setIsWorking(true);
 		
 		try {
-			if (!customZoteroPath.trim()) {
+			const trimmedPath = customZoteroPath.trim();
+			
+			if (!trimmedPath) {
 				throw new Error("Please enter a valid Zotero data directory path");
 			}
 
-			// Validate the entered path
 			try {
-				await IOUtils.stat(customZoteroPath.trim());
+				await IOUtils.stat(trimmedPath);
 			}
 			catch {
 				throw new Error("The specified path does not exist or is not accessible");
 			}
 
-			// Check if it's actually a Zotero data directory by looking for zotero.sqlite
-			const zoteroDbPath = PathUtils.join(customZoteroPath.trim(), "zotero.sqlite");
+			const zoteroDbPath = PathUtils.join(trimmedPath, "zotero.sqlite");
 			try {
 				await IOUtils.stat(zoteroDbPath);
 			}
@@ -468,19 +440,22 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 				throw new Error("The specified path does not appear to be a valid Zotero data directory (missing zotero.sqlite)");
 			}
 
+			const currentDataDir = Zotero.DataDirectory.defaultDir;
+			if (trimmedPath === currentDataDir) {
+				throw new Error("Cannot share with the current DeepTutor data directory. Please select a different Zotero data directory.");
+			}
+
 			if (pathPurpose === "copy") {
-				await handleCopyFromZotero(customZoteroPath.trim());
+				await handleCopyFromZotero(trimmedPath);
 			}
 			else {
-				// Share with Zotero - set the actual data directory and restart
-				const changed = Zotero.DataDirectory.set(customZoteroPath.trim());
-				console.log("[DeepTutor Setup] Share with Zotero (custom) - Data directory set via Zotero.DataDirectory.set:", { path: customZoteroPath.trim(), changed });
+				Zotero.DataDirectory.set(trimmedPath);
+				
 				markCompleted();
 				try {
 					Zotero.Utilities.Internal.quit(true);
 				}
-				catch (_e) {
-					console.log("[DeepTutor Setup] Failed to initiate restart after custom share path:", _e);
+				catch {
 					setIsWorking(false);
 					if (onComplete) onComplete();
 				}
@@ -488,7 +463,6 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 		}
 		catch (_err) {
 			setError(_err && _err.message ? _err.message : String(_err));
-			console.log("[DeepTutor Setup] Error during path entry operation:", _err);
 			setIsWorking(false);
 		}
 	};
@@ -536,7 +510,7 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 						}}>← Back</button>
 						<h2 style={styles.title}>Find Zotero Data Directory</h2>
 						<div style={{ color: colors.text.primary, fontWeight: 600, marginBottom: "0.75rem", textAlign: 'center', width: '100%' }}>
-                            To {pathPurpose === "copy" ? "copy Zotero's workspace with DeepTutor" : "share Zotero's workspace with DeepTutor"}, please copy your Zotero Data Directory path here:
+							To {pathPurpose === "copy" ? "copy Zotero's workspace with DeepTutor" : "share Zotero's workspace with DeepTutor"}, please copy your Zotero Data Directory path here:
 						</div>
 						<input
 							style={styles.input}
@@ -549,7 +523,13 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 						</div>
 						{error ? <div style={styles.error}>{error}</div> : null}
 						<div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-							<button style={styles.primary} onClick={handlePathEntryContinue} disabled={isWorking}>{isWorking ? "Working..." : "Continue"}</button>
+							<button
+								style={styles.primary}
+								onClick={handlePathEntryContinue}
+								disabled={isWorking || !customZoteroPath.trim()}
+							>
+								{isWorking ? "Working..." : "Continue"}
+							</button>
 						</div>
 						{showHelpPopup && (
 							<div style={styles.helpOverlay}>
@@ -571,7 +551,6 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 	);
 
 	if (!portalEl) {
-		// Container not ready yet; avoid rendering to an invalid portal target
 		return null;
 	}
 	return ReactDOM.createPortal(overlay, portalEl);
