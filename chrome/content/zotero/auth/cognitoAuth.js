@@ -91,7 +91,6 @@ function loadCognitoLibrary() {
 }
 
 import amplifyConfig from './amplifyconfiguration.js';
-import { DT_BASE_URL } from '../api/libs/api.js';
 
 // Initialize Cognito User Pool (will be set after library loads)
 let userPool = null;
@@ -729,7 +728,8 @@ export const completeGoogleOAuth = async (authCode) => {
 async function exchangeCodeForTokens(authCode) {
 	const domain = amplifyConfig.oauth.domain;
 	const clientId = amplifyConfig.aws_user_pools_web_client_id;
-	const redirectUri = `https://${DT_BASE_URL}/`;
+	// Must match the authorize redirect used by the desktop flow
+	const redirectUri = `http://localhost:${Zotero.Server?.port}/deeptutor/oauth-callback`;
 
 	const tokenEndpoint = `https://${domain}/oauth2/token`;
 

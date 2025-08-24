@@ -469,7 +469,9 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 		var whitelistedEndpoints = [
 			'/connector/ping',
 			'/deeptutor/sendText',
-			'/deeptutor/health'
+			'/deeptutor/health',
+			// Allow DeepTutor OAuth callback to be loaded directly in the browser
+			'/deeptutor/oauth-callback'
 		];
 		var simpleRequestContentTypes = [
 			'application/x-www-form-urlencoded',
