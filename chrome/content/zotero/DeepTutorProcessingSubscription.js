@@ -30,7 +30,7 @@ export default function DeepTutorProcessingSubscription({ onContinue, onCancel }
 			flexDirection: "column",
 			alignItems: "center",
 			padding: "0 1.25rem",
-			marginBottom: "1.875rem",
+			marginBottom: "1rem",
 		},
 		text: {
 			fontSize: "1.25rem",
