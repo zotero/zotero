@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Reset">
 
 
-<!ENTITY zotero.errorReport.title "DeepTutor Error Report">
+<!ENTITY zotero.errorReport.title "Zotero Error Report">
 <!ENTITY zotero.errorReport.submissionInProgress "Wag asseblief terwyl die foutboodskap voorgelê word">
 <!ENTITY zotero.errorReport.submitted "Die foutboodskap is voorgelê">
 <!ENTITY zotero.errorReport.reportID "Verslag-ID:">
-<!ENTITY zotero.errorReport.postToForums "Pos asseblief 'n boodskap aan die DeepTutor-forum (forums.zotero.org) met hierdie Verslag-ID, 'n beskrywing van die probleem en enige stappe wat nodig is om dit te reproduseer.">
+<!ENTITY zotero.errorReport.postToForums "Pos asseblief 'n boodskap aan die Zotero-forum (forums.zotero.org) met hierdie Verslag-ID, 'n beskrywing van die probleem en enige stappe wat nodig is om dit te reproduseer.">
 <!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
 
-<!ENTITY zotero.upgrade.title "DeepTutor Upgrade Wizard">
-<!ENTITY zotero.upgrade.newVersionInstalled "'n Nuwe weergawe van DeepTutor in geïnstalleer">
-<!ENTITY zotero.upgrade.upgradeRequired "Die DeepTutor-databasis moet bygewerk word om by die nuwe weergawe aan te pas.">
+<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.newVersionInstalled "'n Nuwe weergawe van Zotero in geïnstalleer">
+<!ENTITY zotero.upgrade.upgradeRequired "Die Zotero-databasis moet bygewerk word om by die nuwe weergawe aan te pas.">
 <!ENTITY zotero.upgrade.autoBackup "Die bestaande databasis sal automaties gerugsteun word voor enige veranderinge gemaak word.">
 <!ENTITY zotero.upgrade.majorUpgrade "Hierdie is 'n major opgradering">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Maak seker dat die">
 <!ENTITY zotero.upgrade.majorUpgradeLink "opgraderingsinstruksies hersien is">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "voordat u aangaan.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Wag asseblief vir die opgraderingsproses om klaar te maak. Dit kan 'n paar minute neem.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Die DeepTutor-databasis is suksesvol opgegradeer.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Die Zotero-databasis is suksesvol opgegradeer.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Sien asseblief">
 <!ENTITY zotero.upgrade.changeLogLink "the changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink "to find out what's new.">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.toolbar.timeline.label "Create Timeline">
 <!ENTITY zotero.toolbar.preferences.label "Preferences...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
-<!ENTITY zotero.toolbar.about.label "About DeepTutor">
+<!ENTITY zotero.toolbar.about.label "About Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "Advanced Search">
 <!ENTITY zotero.toolbar.openURL.label "Locate">
 <!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
@@ -239,7 +239,7 @@
 <!ENTITY zotero.sync.storage.downloads "Aflaaie:">
 <!ENTITY zotero.sync.storage.uploads "Oplaaie:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Die volgende etiket in u DeepTutor-biblioteek is te lank om met die bediener te sinkroniseer:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Die volgende etiket in u Zotero-biblioteek is te lank om met die bediener te sinkroniseer:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Gesinkroniseerde etikette moet korter as 256 karakters wees.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Etiket kan in verskillende etikette verdeel word, per hand verkort word, of geskrap word.">
 <!ENTITY zotero.sync.longTagFixer.split "Verdeel">
@@ -278,15 +278,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
 <!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "DeepTutor can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
 <!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
 <!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "DeepTutor is scanning your document for citations. Please be patient.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that DeepTutor has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
 <!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
 <!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "DeepTutor is processing and formatting your RTF file. Please be patient.">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
 <!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
 <!ENTITY zotero.rtfScan.inputFile.label "Input File">

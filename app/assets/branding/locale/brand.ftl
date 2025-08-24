@@ -1,7 +1,7 @@
--brand-shorter-name = DeepTutor
--brand-short-name = DeepTutor
--brand-full-name = DeepTutor
--brand-product-name = DeepTutor
--vendor-short-name = DeepTutor
--app-name = DeepTutor
-trademarkInfo = DeepTutor
+-brand-shorter-name = Zotero
+-brand-short-name = Zotero
+-brand-full-name = Zotero
+-brand-product-name = Zotero
+-vendor-short-name = Zotero
+-app-name = Zotero
+trademarkInfo = Zotero is a trademark of the Corporation for Digital Scholarship.
