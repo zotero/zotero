@@ -313,8 +313,10 @@ const DeepTutorBottomSection = (props) => {
 								<DeepTutorProfilePopup
 									onShowUsage={handleShowUsage}
 									onSignOut={props.onSignOut}
+									onShowUpgrade={props.onToggleSubscriptionPopup}
 									userData={props.userData}
 									currentUser={props.currentUser}
+									activeSubscription={props.activeSubscription}
 								/>
 							)}
 							{/* Usage popup is rendered at the parent level */}

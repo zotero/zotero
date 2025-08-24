@@ -492,7 +492,7 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 								<input type="radio" name="dt-setup" checked={choice === "share"} onChange={() => setChoice("share")} />
 								<span style={styles.optionLabel}>Share with Zotero</span>
 							</label>
-							<div style={{ ...styles.hint, textAlign: 'center', width: '100%' }}>Note: Sharing database with Zotero means you can’t run both apps at the same time.</div>
+							<div style={{ ...styles.hint, textAlign: 'left', width: '100%' }}>Note: Sharing database with Zotero means you can&apos;t run both apps at the same time.</div>
 						</div>
 
 						{error ? <div style={styles.error}>{error}</div> : null}

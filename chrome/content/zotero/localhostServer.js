@@ -911,7 +911,7 @@ class DeepTutorLocalhostServer {
 						// Clear state and disable endpoint
 						this.server.oauthState = null;
 						this.server.disableGoogleOAuth();
-						return [200, "text/html", this._renderHtmlPage("Google sign-in complete. You can close this tab.")];
+						return [200, "text/html", this._renderHtmlPage("Google sign-in complete.")];
 					}
 					else {
 						this.server._lastOAuthResult = { completed: true, success: false, error: authResult.error, state: state };
@@ -935,9 +935,8 @@ class DeepTutorLocalhostServer {
 					+ "<div class=\"card\">"
 					+ "<h2 class=\"title\">DeepTutor Google Sign-In</h2>"
 					+ `<div>${this._escapeHtml(String(message))}</div>`
-					+ "<div class=\"hint\">This window will attempt to close automatically.</div>"
+					+ "<div class=\"hint\">You can now close this tab safely.</div>"
 					+ "</div>"
-					+ "<script>setTimeout(function(){window.close();}, 600);</script>"
 					+ "</body></html>"
 				);
 			},
