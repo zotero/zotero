@@ -23,6 +23,8 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 	const closePath = isDark ? PopupCloseDarkPath : PopupClosePath;
 	const [currentPlan, setCurrentPlan] = useState(null); // 'free' | 'pro' | 'premium' | null
 	const [currentPanel, setCurrentPanel] = useState("select"); // "select" | "processing" | "confirm"
+	const [isMainButtonHovered, setIsMainButtonHovered] = useState(false);
+	const [hoveredTab, setHoveredTab] = useState(null);
 
 	useEffect(() => {
 		let mounted = true;
@@ -323,15 +325,33 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 		}
 	};
 
-	const renderTabButton = (tabKey, label) => (
-		<button
-			key={tabKey}
-			style={activeTab === tabKey ? { ...styles.tab, ...styles.tabActive, border: 'none' } : { ...styles.tab, border: 'none' }}
-			onClick={() => setActiveTab(tabKey)}
-		>
-			{label}
-		</button>
-	);
+	const renderTabButton = (tabKey, label) => {
+		const isActive = activeTab === tabKey;
+		const isHovered = hoveredTab === tabKey;
+		
+		let tabStyle = { ...styles.tab, border: 'none' };
+		if (isActive) {
+			tabStyle = { ...tabStyle, ...styles.tabActive };
+		} else if (isHovered) {
+			tabStyle = { 
+				...tabStyle, 
+				background: isDark ? "#333333" : "#EEEEEE",
+				color: isDark ? "#DDDDDD" : "#333333"
+			};
+		}
+		
+		return (
+			<button
+				key={tabKey}
+				style={tabStyle}
+				onClick={() => setActiveTab(tabKey)}
+				onMouseEnter={() => setHoveredTab(tabKey)}
+				onMouseLeave={() => setHoveredTab(null)}
+			>
+				{label}
+			</button>
+		);
+	};
 
 	const renderFree = () => (
 		<div style={styles.content}>
@@ -426,12 +446,18 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 		const selectedLevel = planHierarchy[activeTab];
 		
 		if (selectedLevel < currentLevel) {
-			// Downgrade - use gray button
-			return styles.downgradeButton;
+			// Downgrade - use secondary button style with hover
+			return {
+				...styles.secondaryButton,
+				background: isMainButtonHovered ? colors.background.quaternary : colors.button.secondary,
+			};
 		}
 		
-		// Upgrade or same level - use primary button
-		return styles.primaryButton;
+		// Upgrade or same level - use primary button with hover
+		return {
+			...styles.primaryButton,
+			background: isMainButtonHovered ? colors.button.primaryHover : colors.button.primary,
+		};
 	};
 
 	// Helper function to determine if button should show arrow
@@ -519,6 +545,8 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 						<button
 							style={getButtonStyle()}
 							onClick={handlePrimary}
+							onMouseEnter={() => setIsMainButtonHovered(true)}
+							onMouseLeave={() => setIsMainButtonHovered(false)}
 						>
 							<span>{getButtonText()}</span>
 							{shouldShowArrow() && (
