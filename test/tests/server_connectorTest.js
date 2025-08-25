@@ -1937,4 +1937,153 @@ describe("Connector Server", function () {
 			assert.equal(JSON.parse(req.response).status, 200);
 		});
 	});
+
+	describe('/connector/cancelSession', function () {
+		var pdfArrayBuffer;
+		var pdfPath = OS.Path.join(getTestDataDirectory().path, 'test.pdf');
+		before(async () => {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			pdfArrayBuffer = (await OS.File.read(pdfPath)).buffer;
+		});
+
+		it('should delete saved items if called after everything is saved', async function () {
+			var collection = await createDataObject('collection');
+			let sessionID = Zotero.Utilities.randomString();
+			let bookItemID = Zotero.Utilities.randomString();
+			await select(win, collection);
+
+			let body = {
+				sessionID,
+				items: [
+					{
+						id: bookItemID,
+						itemType: "book",
+						title: "Book Title",
+					}
+				]
+			};
+			let itemAddPromise = waitForItemEvent('add');
+			// Save the item as if by the connector
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+			let itemIDs = await itemAddPromise;
+
+			// Add the attachment to the item
+			let attachmentAddPromise = waitForItemEvent('add');
+			let attachmentReq = await httpRequest(
+				'POST',
+				connectorServerPath + "/connector/saveAttachment",
+				{
+					headers: {
+						"Content-Type": "application/pdf",
+						"X-Metadata": JSON.stringify({
+							sessionID,
+							title: "Book Attachment",
+							parentItemID: bookItemID,
+							url: `${testServerPath}/attachment1.pdf`,
+						})
+					},
+					body: pdfArrayBuffer
+				}
+			);
+			assert.equal(attachmentReq.status, 201);
+			let attachmentIds = await attachmentAddPromise;
+			assert.lengthOf(attachmentIds, 1);
+			let attachment1 = Zotero.Items.get(attachmentIds[0]);
+			let bookItem = Zotero.Items.get(itemIDs[0]);
+			assert.equal(attachment1.parentItemID, bookItem.id);
+
+			// Cancel the session
+			let cancelReq = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + '/connector/cancelSession',
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ sessionID })
+				}
+			);
+			assert.equal(cancelReq.status, 200);
+
+			// The item and attachment should be deleted
+			let deletedItem = await Zotero.Items.getAsync(attachment1.parentItemID);
+			let deletedAttachment = await Zotero.Items.getAsync(attachment1.id);
+			assert.isFalse(deletedItem);
+			assert.isFalse(deletedAttachment);
+		});
+
+		it('should not save attachment items if session is cancelled half-way through', async function () {
+			var collection = await createDataObject('collection');
+			let sessionID = Zotero.Utilities.randomString();
+			let bookItemID = Zotero.Utilities.randomString();
+			await select(win, collection);
+
+			let body = {
+				sessionID,
+				items: [
+					{
+						id: bookItemID,
+						itemType: "book",
+						title: "Book Title",
+					}
+				]
+			};
+
+			let itemAddPromise = waitForItemEvent('add');
+			// Save the item as if by the connector
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+			let itemIDs = await itemAddPromise;
+
+			// Cancel the session
+			let cancelReq = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + '/connector/cancelSession',
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ sessionID })
+				}
+			);
+			assert.equal(cancelReq.status, 200);
+
+			// Try to add the attachment to the item
+			let attachmentReq = await getPromiseError(httpRequest(
+				'POST',
+				connectorServerPath + "/connector/saveAttachment",
+				{
+					headers: {
+						"Content-Type": "application/pdf",
+						"X-Metadata": JSON.stringify({
+							sessionID,
+							title: "Book Attachment",
+							parentItemID: bookItemID,
+							url: `${testServerPath}/attachment1.pdf`,
+						})
+					},
+					body: pdfArrayBuffer
+				}
+			));
+			// It should be rejected
+			assert.equal(attachmentReq.status, 409);
+
+			// The parent item should also be removed
+			let bookItem = await Zotero.Items.getAsync(itemIDs[0]);
+			assert.isFalse(bookItem);
+		});
+	});
 });
