@@ -648,6 +648,27 @@ describe("Item pane", function () {
 			await waitForNotifierEvent('modify', 'item');
 			assert.equal(itemOne.getDisplayTitle(), "Updated title");
 		});
+
+		it("should retain unsaved value between refreshes", async function () {
+			let itemOne = new Zotero.Item('book');
+			await ZoteroPane.selectItem(itemOne.id);
+
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let infoBox = itemDetails.getPane("info");
+
+			// Type something into the series field without saving it
+			let seriesField = infoBox.querySelector("#itembox-field-value-series");
+			seriesField.focus();
+			seriesField.value = "Series name";
+			
+			// Trigger a refresh
+			infoBox._renderInternal();
+			await waitForFrame();
+
+			// Ensure the field is still focused AND has the yet-unsaved text
+			assert.equal(doc.activeElement.parentNode.id, "itembox-field-value-series");
+			assert.equal(doc.activeElement.value, "Series name");
+		});
 	});
 
 	describe("Libraries and collections pane", function () {
