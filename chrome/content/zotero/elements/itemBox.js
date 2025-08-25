@@ -60,6 +60,7 @@
 			this._initialVisibleCreators = 5;
 			this._draggedCreator = false;
 			this._selectField = null;
+			this._selectFieldValue = null;
 			this._selectFieldSelection = null;
 			this._addCreatorRow = false;
 			this._switchedModeOfCreator = null;
@@ -2522,7 +2523,7 @@
 			// Save the field ID
 			this._selectField = fieldID;
 
-			// Save selection inside inputs
+			// Save selection and value inside inputs
 			let targetInput = activeElement.closest("input, textarea");
 			if (targetInput) {
 				this._selectFieldSelection = [
@@ -2530,12 +2531,15 @@
 					targetInput.selectionEnd,
 					targetInput.selectionDirection,
 				];
+				// Save the value in case it was changed but not saved
+				this._selectFieldValue = targetInput.value;
 			}
 		}
 		
 		_clearSavedFieldFocus() {
 			this._selectField = null;
 			this._selectFieldSelection = null;
+			this._selectFieldValue = null;
 		}
 
 		_restoreFieldFocus() {
@@ -2565,6 +2569,11 @@
 			if (this._selectFieldSelection) {
 				let input = refocusField.querySelector("input, textarea");
 				if (input) {
+					// Restore the potentially unsaved value
+					if (this._selectFieldValue) {
+						refocusField.value = this._selectFieldValue;
+					}
+					// Restore the selection
 					input.setSelectionRange(...this._selectFieldSelection);
 				}
 			}
