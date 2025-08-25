@@ -132,10 +132,21 @@
 				popup.append(item);
 			}
 			
+			// "Apply to All Collections"
+			let separatorOne = document.createXULElement('menuseparator');
+			popup.append(separatorOne);
+			let retainAcrossCollections = document.createXULElement('menuitem');
+			retainAcrossCollections.label = Zotero.getString("quicksearch-apply-to-all");
+			retainAcrossCollections.addEventListener("command", () => {
+				let current = Zotero.Prefs.get("search.quicksearch-apply-to-all");
+				Zotero.Prefs.set("search.quicksearch-apply-to-all", !current);
+			});
+			popup.append(retainAcrossCollections);
+
 			// Add Advanced Search menu item in main window
 			if (document.documentElement.getAttribute('windowtype') === 'navigator:browser') {
-				let separator = document.createXULElement('menuseparator');
-				popup.append(separator);
+				let separatorTwo = document.createXULElement('menuseparator');
+				popup.append(separatorTwo);
 				let advancedSearchOption = document.createXULElement('menuitem');
 				advancedSearchOption.label = Zotero.getString("zotero.toolbar.advancedSearch");
 				advancedSearchOption.addEventListener("command", () => {
@@ -143,6 +154,11 @@
 				});
 				popup.append(advancedSearchOption);
 			}
+
+			// Set some checked states when the popup appears
+			popup.addEventListener('popupshowing', () => {
+				retainAcrossCollections.setAttribute("checked", Zotero.Prefs.get("search.quicksearch-apply-to-all"));
+			});
 			
 			return this._searchModePopup = popup;
 		}
