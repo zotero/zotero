@@ -61,9 +61,28 @@
 					</vbox>
 					<html:div class="divider"></html:div>
 					<deck class="zotero-context-pane-tab-notes-deck" flex="1"></deck>
-				</vbox>	
+				</vbox>
 			</deck>
-		`);
+			
+			<popupset>
+				<menupopup class="context-pane-add-child-note-button-popup">
+					<menuitem class="context-pane-add-child-note" label="&zotero.context.addChildNote;"/>
+					<menuitem class="context-pane-add-child-note-from-annotations" label="&zotero.context.addChildNoteFromAnnotations;"/>
+				</menupopup>
+		
+				<menupopup class="context-pane-add-standalone-note-button-popup">
+					<menuitem class="context-pane-add-standalone-note" label="&zotero.context.addStandaloneNote;"/>
+					<menuitem class="context-pane-add-standalone-note-from-annotations" label="&zotero.context.addStandaloneNoteFromAnnotations;"/>
+				</menupopup>
+				
+				<menupopup class="context-pane-list-popup">
+					<menuitem class="context-pane-list-show-in-library" label="&zotero.items.menu.showInLibrary;"/>
+					<menuitem class="context-pane-list-edit-in-window" label="&zotero.context.editInWindow;"/>
+					<menuseparator/>
+					<menuitem class="context-pane-list-move-to-trash" label="&zotero.general.moveToTrash;"/>
+				</menupopup>
+			</popupset>
+		`, ['chrome://zotero/locale/zotero.dtd']);
 
 		get editable() {
 			return this._editable;
@@ -173,25 +192,19 @@
 				let { id, screenX, screenY } = event.detail;
 				let item = Zotero.Items.get(id);
 				if (item) {
-					document.getElementById('context-pane-list-move-to-trash').setAttribute('disabled', !this.editable);
-					let popup = document.getElementById('context-pane-list-popup');
-					let handleCommand = event => this._handleListPopupClick(id, event);
-					popup.addEventListener('popupshowing', () => {
-						popup.addEventListener('command', handleCommand, { once: true });
-						popup.addEventListener('popuphiding', () => {
-							popup.removeEventListener('command', handleCommand);
-						}, { once: true });
-					}, { once: true });
+					this.querySelector('.context-pane-list-move-to-trash').setAttribute('disabled', !this.editable);
+					let popup = this.querySelector('.context-pane-list-popup');
+					popup.dataset.itemId = id;
 					popup.openPopupAtScreen(screenX, screenY, true);
 				}
 			});
-			let addChildNotePopup = document.getElementById('context-pane-add-child-note-button-popup');
+			let addChildNotePopup = this.querySelector('.context-pane-add-child-note-button-popup');
 			addChildNotePopup.addEventListener("command", (event) => {
 				this._handleAddChildNotePopupClick(event);
 			});
 			this.notesList.addEventListener('add-child', (event) => {
-				document.getElementById('context-pane-add-child-note').setAttribute('disabled', !this.editable);
-				document.getElementById('context-pane-add-child-note-from-annotations').setAttribute('disabled', !this.editable);
+				this.querySelector('.context-pane-add-child-note').setAttribute('disabled', !this.editable);
+				this.querySelector('.context-pane-add-child-note-from-annotations').setAttribute('disabled', !this.editable);
 				Zotero.MenuManager.updateMenuPopup(addChildNotePopup, "notesPane/addItemNote", {
 					event: undefined,
 					getContext: () => {
@@ -209,13 +222,13 @@
 				});
 				addChildNotePopup.openPopup(event.detail.button, 'after_end');
 			});
-			let addStandaloneNotePopup = document.getElementById('context-pane-add-standalone-note-button-popup');
+			let addStandaloneNotePopup = this.querySelector('.context-pane-add-standalone-note-button-popup');
 			addStandaloneNotePopup.addEventListener("command", (event) => {
 				this._handleAddStandaloneNotePopupClick(event);
 			});
 			this.notesList.addEventListener('add-standalone', (event) => {
-				document.getElementById('context-pane-add-standalone-note').setAttribute('disabled', !this.editable);
-				document.getElementById('context-pane-add-standalone-note-from-annotations').setAttribute('disabled', !this.editable);
+				this.querySelector('.context-pane-add-standalone-note').setAttribute('disabled', !this.editable);
+				this.querySelector('.context-pane-add-standalone-note-from-annotations').setAttribute('disabled', !this.editable);
 				Zotero.MenuManager.updateMenuPopup(addStandaloneNotePopup, "notesPane/addStandaloneNote", {
 					event: undefined,
 					getContext: () => {
@@ -232,6 +245,11 @@
 					}
 				});
 				addStandaloneNotePopup.openPopup(event.detail.button, 'after_end');
+			});
+			let listPopup = this.querySelector('.context-pane-list-popup');
+			listPopup.addEventListener('command', (event) => {
+				let id = parseInt(event.currentTarget.dataset.itemId);
+				this._handleListPopupCommand(id, event);
 			});
 		}
 
@@ -491,8 +509,8 @@
 			}));
 		}
 
-		_handleListPopupClick(id, event) {
-			switch (event.originalTarget.id) {
+		_handleListPopupCommand(id, event) {
+			switch (event.originalTarget.classList[0]) {
 				case 'context-pane-list-show-in-library':
 					ZoteroPane_Local.selectItem(id);
 					Zotero_Tabs.select('zotero-pane');
@@ -518,7 +536,7 @@
 			if (!this.editable) {
 				return;
 			}
-			switch (event.originalTarget.id) {
+			switch (event.originalTarget.classList[0]) {
 				case 'context-pane-add-child-note':
 					this._createNote(true);
 					break;
@@ -535,7 +553,7 @@
 			if (!this.editable) {
 				return;
 			}
-			switch (event.originalTarget.id) {
+			switch (event.originalTarget.classList[0]) {
 				case 'context-pane-add-standalone-note':
 					this._createNote();
 					break;
