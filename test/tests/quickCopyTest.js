@@ -100,4 +100,26 @@ describe("Zotero.QuickCopy", function () {
 		assert.include(html, '<i>Foo</i>');
 		assert.include(html, 'March');
 	});
+
+	it("should use correct punctuation in a Chinese style", async function () {
+		let styleFile = getTestDataDirectory();
+		styleFile.append('handbook-of-legal-citations-zh.csl');
+		await Zotero.Styles.install({ file: styleFile }, '', true);
+		
+		let styleID = 'https://www.zotero-chinese.com/styles/法学引注手册（多语言，重复引用不省略）';
+		let format = `bibliography=${styleID}`;
+
+		Zotero.Prefs.set(prefName, format);
+		
+		let item = createUnsavedDataObject('item', {
+			itemType: 'journalArticle',
+			title: '新型数据财产的行为主义保护：基于财产权理论的分析'
+		});
+		item.setField('language', 'zh');
+		await item.saveTx();
+		
+		// Copy citation, not bibliography
+		let { text } = Zotero.QuickCopy.getContentFromItems([item], format, null, true);
+		assert.equal(text, '《新型数据财产的行为主义保护：基于财产权理论的分析》。');
+	});
 })

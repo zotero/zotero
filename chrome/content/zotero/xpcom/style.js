@@ -445,11 +445,11 @@ Zotero.Styles = new function () {
 		.catch(function (validationErrors) {
 			Zotero.logError("Style from " + origin + " failed to validate:\n\n" + validationErrors);
 			
-			// If validation fails on the parent of a dependent style, ignore it (for now)
-			if(hidden) return;
+			// If this is the parent of a dependent style, or if we're in
+			// silent mode, suppress the prompt
+			if (hidden || silent) return;
 			
-			// If validation fails on a different style, we ask the user if s/he really
-			// wants to install it
+			// Otherwise, ask the user whether to continue installing
 			var shouldInstall = Services.prompt.confirmEx(null,
 				Zotero.getString('styles.install.title'),
 				Zotero.getString('styles.validationWarning', [origin, Zotero.appName]),
@@ -714,13 +714,10 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, automaticJournalA
 		: null;
 	if (cacheKey && this._cachedEngines.has(cacheKey)) {
 		let engine = this._cachedEngines.get(cacheKey);
-		// Due to a bug in citeproc-js there are disambiguation issues after
-		// modifying items in Zotero. The lighter-weight rerebuildProcessorState()
-		// doesn't reset three properties of the processor (registry, tmp, and
-		// disambiguate) used for disambiguation, so we need to call the
-		// deprecated restoreProcessorState(), which resets everything.
-		// Revisit if restoreProcessorState() is removed.
-		engine.restoreProcessorState();
+		// rebuildProcessorState() won't cause disambiguation issues here
+		// because we're passing an empty citation list. See comment in
+		// integration.js.
+		engine.rebuildProcessorState([], format, []);
 		return engine;
 	}
 	
