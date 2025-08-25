@@ -2300,13 +2300,11 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function () {
 		}
 	}
 	if (!Zotero.Prefs.get('cite.useCiteprocRs')) {
-		// Due to a bug in citeproc-js there are disambiguation issues after
-		// modifying items in Zotero, even after calling rebuildProcessorState(),
-		// because rebuildProcessorState() doesn't reset three properties of the
-		// processor (registry, tmp, and disambiguate) used for disambiguation.
-		// Call the deprecated restoreProcessorState(), which resets everything.
-		// Revisit if restoreProcessorState() is removed.
-		this.style.restoreProcessorState();
+		// rebuildProcessorState() doesn't reset the disambiguation cache when
+		// passed a non-empty citation list. This causes items to be disambiguated
+		// even after being modified so they're no longer ambiguous. Work around
+		// this by manually clearing the item list first.
+		this.style.updateItems([]);
 	}
 	this.style.rebuildProcessorState(citations, this.outputFormat, uncited);
 }
