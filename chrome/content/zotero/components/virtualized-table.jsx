@@ -1695,6 +1695,27 @@ function renderCell(index, data, column, dir = null) {
 	return span;
 }
 
+/**
+ * Render button cell (if column.type == "button")
+ * @param {Int} index - index of the row
+ * @param {String} data.iconKey - icon key fetched via getCSSIcon to display the button
+ * @param {Function} data.onClick - click handler of the button
+ * @returns {HTMLElement} - rendered button cell
+ */
+function renderButtonCell(index, data, column) {
+	let cell = document.createElement('span');
+	cell.className = `cell ${column.className} clickable`;
+	let iconWrapper = document.createElement('span');
+	iconWrapper.className = `icon-action`;
+	cell.append(iconWrapper);
+	let icon = getCSSIcon(data.iconKey);
+	iconWrapper.append(icon);
+	iconWrapper.addEventListener("click", (event) => {
+		data.onClick(index, event);
+	});
+	return cell;
+}
+
 function renderCheckboxCell(index, data, column, dir = null) {
 	let span = document.createElement('span');
 	span.className = `cell checkbox ${column.className}`;
@@ -1733,6 +1754,9 @@ function makeRowRenderer(getRowData) {
 
 				if (column.type === 'checkbox') {
 					div.appendChild(renderCheckboxCell(index, rowData[column.dataKey], column));
+				}
+				else if (column.type === 'button') {
+					div.appendChild(renderButtonCell(index, rowData[column.dataKey], column));
 				}
 				else {
 					div.appendChild(renderCell(index, rowData[column.dataKey], column));
