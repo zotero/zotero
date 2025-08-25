@@ -454,6 +454,12 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 	// Add state to track streaming component visibility for each message
 	const [streamingComponentVisibility, setStreamingComponentVisibility] = useState({});
 
+	// Add state to track waiting for AI response (backend processing)
+	const [waitingStreaming, setWaitingStreaming] = useState(false);
+
+	// Add state to track if we have an active stream connection (vs just backend processing)
+	const [hasActiveStream, setHasActiveStream] = useState(false);
+
 	// Toggle streaming component visibility for a specific message
 	const toggleStreamingComponent = (messageId) => {
 		setStreamingComponentVisibility(prev => ({
@@ -478,6 +484,14 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 		isManuallyStoppedRef.current = isManuallyStopped;
 	}, [isManuallyStopped]);
 
+	// Clear waiting state when active streaming starts
+	useEffect(() => {
+		if (hasActiveStream && waitingStreaming) {
+			Zotero.debug(`DeepTutorChatBox: Active streaming started, clearing waiting state`);
+			setWaitingStreaming(false);
+		}
+	}, [hasActiveStream, waitingStreaming]);
+
 	// Periodic message fetching useEffect
 	useEffect(() => {
 		let isActive = true;
@@ -494,16 +508,33 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 				&& messages[messages.length - 1].role === MessageRole.USER
 				&& checkTime(messages[messages.length - 1])
 			) {
+				// Set waiting state to show thinking animation (AI is processing but not yet in history)
+				Zotero.debug(`DeepTutorChatBox: Setting waitingStreaming to true - last message is USER and within time limit`);
+				setWaitingStreaming(true);
+				
 				getMessagesBySessionId(sessionId).then((response) => {
 					if (response && response.length > messages.length) {
+						Zotero.debug(`DeepTutorChatBox: New messages found, stopping waitingStreaming`);
 						setMessages(response);
 						setLatestMessageId(response[response.length - 1].id);
 						// Stop streaming if it was active (AI response received)
 						setIsStreaming(false);
+						setHasActiveStream(false);
+						// Stop waiting since we got a response
+						setWaitingStreaming(false);
+					} else {
+						Zotero.debug(`DeepTutorChatBox: No new messages, keeping waitingStreaming true`);
 					}
+					// If no new messages but we're still checking, keep waiting state true
 				}).catch((error) => {
-					Zotero.debug(error);
+					Zotero.debug(`DeepTutorChatBox: Error checking messages: ${error}`);
+					// Stop waiting state on error
+					setWaitingStreaming(false);
 				});
+			} else {
+				// Not waiting for response
+				Zotero.debug(`DeepTutorChatBox: Not in waiting condition, setting waitingStreaming to false`);
+				setWaitingStreaming(false);
 			}
 			
 			// Schedule next check
@@ -778,7 +809,21 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 		};
 
 		loadSessionData();
-	}, [currentSession]);
+		
+		// Immediately check for waiting state when session changes
+		// This handles the case where user switches back to a session that's waiting for AI response
+		setTimeout(() => {
+			if (
+				currentSession?.id
+				&& messages.length > 0
+				&& messages[messages.length - 1].role === MessageRole.USER
+				&& checkTime(messages[messages.length - 1])
+			) {
+				Zotero.debug(`DeepTutorChatBox: Session changed, immediately checking for waiting state`);
+				setWaitingStreaming(true);
+			}
+		}, 100); // Small delay to ensure state updates are processed
+	}, [currentSession, messages, checkTime]);
 
 
 	// Handle message updates
@@ -1001,11 +1046,22 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 				streamReaderRef.current = null; // Clear reader reference even on error
 			}
 		}
+		
+		// Handle waiting case - just stop the waiting animation
+		if (waitingStreaming) {
+			Zotero.debug(`DeepTutorChatBox: Stopping waiting animation`);
+			setWaitingStreaming(false);
+		}
+		
+		setIsStreaming(false);
+		setHasActiveStream(false);
 	};
 
 	const sendToAPI = async (message) => {
 		try {
 			setIsStreaming(true); // Set streaming to true at start
+			setHasActiveStream(true); // Set active stream flag
+			setWaitingStreaming(false); // Clear waiting state when normal streaming starts
 			isAutoScrollingRef.current = true; // Re-enable auto-scrolling for new stream
 			// Send message to API
 			const responseData = await createMessage(message);
@@ -1037,11 +1093,13 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 
 			if (!streamResponse.ok) {
 				setIsStreaming(false); // Set streaming to false on error
+				setHasActiveStream(false);
 				throw new Error(`Stream request failed: ${streamResponse.status}`);
 			}
             
 			if (!streamResponse.body) {
 				setIsStreaming(false); // Set streaming to false if no body
+				setHasActiveStream(false);
 				throw new Error('Stream response body is null');
 			}
 
@@ -1083,12 +1141,14 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 				// Check for timeout
 				if (Date.now() - lastDataTime > 600000) {
 					setIsStreaming(false); // Set streaming to false on timeout
+					setHasActiveStream(false);
 					throw new Error('Stream timeout - no data received for 300 seconds');
 				}
                 
 				if (done) {
 					if (!hasReceivedData) {
 						setIsStreaming(false); // Set streaming to false if no data received
+						setHasActiveStream(false);
 						throw new Error('Stream closed without receiving any data');
 					}
 					break;
@@ -1142,6 +1202,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 			}
 			if (isManuallyStoppedRef.current) {
 				setIsStreaming(false);
+				setHasActiveStream(false);
 				// For manual stop, we need to handle this differently since the message doesn't have an ID yet
 				// We'll set the visibility when the message is processed later
 				return;
@@ -1199,6 +1260,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 
             
 			setIsStreaming(false); // Set streaming to false when done
+			setHasActiveStream(false);
 			streamReaderRef.current = null; // Clear reader reference
 			
 			// Hide streaming component by default when streaming finishes
@@ -1208,6 +1270,7 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 		catch (error) {
 			Zotero.debug(error);
 			setIsStreaming(false); // Set streaming to false on any error
+			setHasActiveStream(false);
 			streamReaderRef.current = null; // Clear reader reference
 			
 			// Even on error, try to fetch message history to ensure UI consistency
@@ -2342,6 +2405,18 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 				onScroll={handleScroll}
 			>
 				{messages.map((message, index) => renderMessage(message, index))}
+				{/* Show waiting message with thinking animation when backend is processing (but NOT during active streaming) */}
+				{waitingStreaming && !hasActiveStream && (() => {
+					Zotero.debug(`DeepTutorChatBox: Rendering waiting message with thinking animation`);
+					return renderMessage({
+						id: 'waiting-message',
+						role: MessageRole.TUTOR,
+						subMessages: [{ text: '' }],
+						isStreaming: true,
+						streamText: '<thinking></thinking>',
+						creationTime: new Date().toISOString()
+					}, messages.length);
+				})()}
 			</div>
 
 			<div style={styles.bottomBar}>
@@ -2380,13 +2455,13 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 						opacity: iniWait ? 0.5 : 1,
 						cursor: iniWait ? "not-allowed" : "pointer"
 					}}
-					onClick={isStreaming ? handleStopStreaming : handleSend}
+					onClick={(hasActiveStream || waitingStreaming) ? handleStopStreaming : handleSend}
 					disabled={iniWait}
-					title={isStreaming ? "Stop Thinking" : "Send"}
+					title={(hasActiveStream || waitingStreaming) ? "Stop Thinking" : "Send"}
 				>
 					<img
-						src={isStreaming ? StopIconPath : SendIconPath}
-						alt={isStreaming ? "Stop" : "Send"}
+						src={(hasActiveStream || waitingStreaming) ? StopIconPath : SendIconPath}
+						alt={(hasActiveStream || waitingStreaming) ? "Stop" : "Send"}
 						style={styles.sendIcon}
 					/>
 				</button>
