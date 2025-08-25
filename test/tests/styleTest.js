@@ -127,4 +127,41 @@ describe("Zotero.Styles", function() {
 			assert.equal(text, 'Conference - Conference - Place\n');
 		});
 	});
+
+	describe("Cached CSL.Engine instances", function () {
+		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
+			this.skip();
+		}
+		
+		it("should correctly handle disambiguation", async function () {
+			let style = Zotero.Styles.get('http://www.zotero.org/styles/apa');
+			
+			let testItem1 = await createDataObject('item');
+			testItem1.setField('title', `title1`);
+			testItem1.setCreator(0, { creatorType: 'author', firstName: "Foo", lastName: "Bar" });
+			testItem1.setField('date', '2022-01-01');
+			let testItem2 = await createDataObject('item');
+			testItem2.setField('title', `title2`);
+			testItem2.setCreator(0, { creatorType: 'author', firstName: "Foo", lastName: "Bar" });
+			testItem2.setField('date', '2022-01-01');
+
+			function getCitation() {
+				let cslEngine = style.getCiteProc('en-US', 'text');
+				cslEngine.updateItems([testItem1.id, testItem2.id]);
+				var citation = {
+					citationItems: [{ id: testItem1.id }, { id: testItem2.id }],
+					properties: {}
+				};
+				return cslEngine.previewCitationCluster(citation, [], [], 'text');
+			}
+
+			assert.equal(getCitation(), '(Bar, 2022a, 2022b)');
+
+			testItem2.setCreator(0, { creatorType: 'author', firstName: "Foo F", lastName: "Bar" });
+			assert.equal(getCitation(), '(F. Bar, 2022; F. F. Bar, 2022)');
+
+			testItem2.setCreator(0, { creatorType: 'author', firstName: "Foo", lastName: "Bar" });
+			assert.equal(getCitation(), '(Bar, 2022a, 2022b)');
+		});
+	});
 });
