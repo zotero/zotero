@@ -1092,7 +1092,23 @@ const DeepTutorChatBox = ({ currentSession, onInitWaitChange, handleShowNoteSave
 					const lastMessage = newMessages[newMessages.length - 1];
 					if (lastMessage && lastMessage.isStreaming) {
 						lastMessage.isStreaming = false;
-						lastMessage.subMessages[0].text += '<stopped>';
+						
+						// Clean the message text to remove any message ID that might have been added
+						let cleanText = lastMessage.subMessages[0].text || '';
+						
+						// Remove any message ID patterns that might have been added (like long hex strings)
+						cleanText = cleanText.replace(/[a-f0-9]{16,}/gi, ''); // Remove long hex strings
+						cleanText = cleanText.replace(/^\d+/, ''); // Remove leading numbers (index fallbacks)
+						
+						// Add the stopped tag
+						cleanText += '<stopped>';
+						
+						// Update the message text
+						lastMessage.subMessages[0].text = cleanText;
+						
+						// Add flag to indicate this message was manually stopped
+						lastMessage.manuallyStopped = true;
+						
 						// Hide streaming component by default when streaming is stopped
 						setStreamingComponentVisibility(prevVisibility => ({
 							...prevVisibility,

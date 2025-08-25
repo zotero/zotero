@@ -653,8 +653,8 @@ const DeepTutorChatBoxMessage = ({
 	
 	return (
 		<div>
-			{/* Show streaming component toggle button for non-streaming messages with streamText */}
-			{!message.isStreaming && message.streamText && (
+			{/* Show streaming component toggle button for non-streaming messages with streamText, but not for manually stopped messages */}
+			{!message.isStreaming && message.streamText && !message.manuallyStopped ? (
 				<div style={{
 					display: 'flex',
 					justifyContent: 'flex-start',
@@ -690,7 +690,7 @@ const DeepTutorChatBoxMessage = ({
 						{isStreamingComponentVisible ? "Hide Thinking Process" : message.streamText.includes('<stopped>') ? "Show Stopped Thinking Process" : "Show Thinking Process"}
 					</button>
 				</div>
-			)}
+			) : null}
 			
 			{/* Show streaming component during streaming OR when explicitly visible */}
 			{(message.isStreaming || isStreamingComponentVisible) && (
