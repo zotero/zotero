@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Gøym andre">
 <!ENTITY hideOtherAppsCmdMac.commandkey "G">
 <!ENTITY showAllAppsCmdMac.label "Vis alle">
-<!ENTITY quitApplicationCmdMac.label "Avslutt Zotero">
+<!ENTITY quitApplicationCmdMac.label "Avslutt Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Fil">

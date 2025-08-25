@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "ซ่อนอื่น ๆ">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "แสดงทั้งหมด">
-<!ENTITY quitApplicationCmdMac.label "ออกจาก Zotero">
+<!ENTITY quitApplicationCmdMac.label "ออกจาก Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "แฟ้ม">

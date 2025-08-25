@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Sembunyikan yang Lain">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Tunjukkan Semua">
-<!ENTITY quitApplicationCmdMac.label "Berhentikan Zotero">
+<!ENTITY quitApplicationCmdMac.label "Berhentikan Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Berkas">

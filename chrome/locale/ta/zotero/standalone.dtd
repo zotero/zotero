@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "மற்றவை மறை">
 <!ENTITY hideOtherAppsCmdMac.commandkey "க">
 <!ENTITY showAllAppsCmdMac.label "அனைத்தையும் காட்டு">
-<!ENTITY quitApplicationCmdMac.label "சோட்டெரோவை விட்டு வெளியேறு">
+<!ENTITY quitApplicationCmdMac.label "Deeptutor விட்டு வெளியேறு">
 <!ENTITY quitApplicationCmdMac.key "ஆ">
 
 <!ENTITY fileMenu.label "கோப்பு">

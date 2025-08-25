@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Slėpti likusius">
 <!ENTITY hideOtherAppsCmdMac.commandkey "S">
 <!ENTITY showAllAppsCmdMac.label "Rodyti visus">
-<!ENTITY quitApplicationCmdMac.label "Baigti darbą su Zotero">
+<!ENTITY quitApplicationCmdMac.label "Baigti darbą su Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "B">
 
 <!ENTITY fileMenu.label "Rinkmena">

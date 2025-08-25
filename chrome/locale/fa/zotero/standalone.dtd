@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Hide Others">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "نمایش همه">
-<!ENTITY quitApplicationCmdMac.label "بستن زوترو">
+<!ENTITY quitApplicationCmdMac.label "بستن Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "پرونده">

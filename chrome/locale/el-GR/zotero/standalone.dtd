@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Απόκρυψη άλλων">
 <!ENTITY hideOtherAppsCmdMac.commandkey "Η">
 <!ENTITY showAllAppsCmdMac.label "Εμφάνιση όλων">
-<!ENTITY quitApplicationCmdMac.label "Κλείσιμο Zotero">
+<!ENTITY quitApplicationCmdMac.label "Κλείσιμο Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Αρχείο">

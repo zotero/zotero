@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Agochar os outros">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Mostrar todos">
-<!ENTITY quitApplicationCmdMac.label "Pechar Zotero">
+<!ENTITY quitApplicationCmdMac.label "Pechar Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "S">
 
 <!ENTITY fileMenu.label "Ficheiro">

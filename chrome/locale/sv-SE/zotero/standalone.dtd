@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Göm övriga">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Visa alla">
-<!ENTITY quitApplicationCmdMac.label "Avsluta Zotero">
+<!ENTITY quitApplicationCmdMac.label "Avsluta Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Arkiv">

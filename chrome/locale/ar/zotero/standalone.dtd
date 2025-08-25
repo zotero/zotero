@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "اخفاء الأخرى">
 <!ENTITY hideOtherAppsCmdMac.commandkey "ا">
 <!ENTITY showAllAppsCmdMac.label "عرض الكل">
-<!ENTITY quitApplicationCmdMac.label "خروج من زوتيرو">
+<!ENTITY quitApplicationCmdMac.label "خروج من Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "ملف">

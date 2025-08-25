@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Fela annað">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Sýna allt">
-<!ENTITY quitApplicationCmdMac.label "Hætta í Zotero">
+<!ENTITY quitApplicationCmdMac.label "Hætta í Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Skrá">

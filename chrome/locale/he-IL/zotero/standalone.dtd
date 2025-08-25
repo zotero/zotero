@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "הסתרה של אחרים">
 <!ENTITY hideOtherAppsCmdMac.commandkey "ס">
 <!ENTITY showAllAppsCmdMac.label "להציג הכול">
-<!ENTITY quitApplicationCmdMac.label "יציאה מ־Zotero">
+<!ENTITY quitApplicationCmdMac.label "יציאה מ־Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "צ">
 
 <!ENTITY fileMenu.label "קובץ">

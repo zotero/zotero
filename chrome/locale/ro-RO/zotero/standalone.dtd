@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Ascunde celelalte">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Afișează tot">
-<!ENTITY quitApplicationCmdMac.label "Părăsește Zotero">
+<!ENTITY quitApplicationCmdMac.label "Părăsește Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Fișier">

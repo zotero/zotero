@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Ocultar otros">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Mostrar todo">
-<!ENTITY quitApplicationCmdMac.label "Salir de Zotero">
+<!ENTITY quitApplicationCmdMac.label "Salir de Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Archivo">

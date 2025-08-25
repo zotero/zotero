@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Skrij druge">
 <!ENTITY hideOtherAppsCmdMac.commandkey "S">
 <!ENTITY showAllAppsCmdMac.label "Pokaži vse">
-<!ENTITY quitApplicationCmdMac.label "Izhod iz Zotera">
+<!ENTITY quitApplicationCmdMac.label "Izhod iz Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "z">
 
 <!ENTITY fileMenu.label "Datoteka">

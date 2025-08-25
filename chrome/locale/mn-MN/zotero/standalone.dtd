@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Бусдыг нуух">
 <!ENTITY hideOtherAppsCmdMac.commandkey "Х">
 <!ENTITY showAllAppsCmdMac.label "Бүгдийг харуулах">
-<!ENTITY quitApplicationCmdMac.label "Зотерог хаах">
+<!ENTITY quitApplicationCmdMac.label "Deeptutor хаах">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Хавтас">

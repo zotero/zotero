@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "A többi elrejtése">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Összes megjelenítése">
-<!ENTITY quitApplicationCmdMac.label "Zotero bezárása">
+<!ENTITY quitApplicationCmdMac.label "Deeptutor bezárása">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Fájl">

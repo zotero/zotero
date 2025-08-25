@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Oculta els altres">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Mostra-ho tot">
-<!ENTITY quitApplicationCmdMac.label "Surt del Zotero">
+<!ENTITY quitApplicationCmdMac.label "Surt del Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Fitxer">

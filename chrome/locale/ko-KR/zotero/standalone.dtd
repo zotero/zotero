@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "다른 것들은 감추기">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "모두 보이기">
-<!ENTITY quitApplicationCmdMac.label "Zotero 종료">
+<!ENTITY quitApplicationCmdMac.label "Deeptutor 종료">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "파일">

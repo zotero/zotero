@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Скрий &quot;Другите&quot;">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Покажи всички">
-<!ENTITY quitApplicationCmdMac.label "Изход от Зотеро">
+<!ENTITY quitApplicationCmdMac.label "Изход от Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Файл">

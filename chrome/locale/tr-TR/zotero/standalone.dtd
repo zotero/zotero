@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Diğerlerini Sakla">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Hepsini Göster">
-<!ENTITY quitApplicationCmdMac.label "Zotero'dan Ayrıl">
+<!ENTITY quitApplicationCmdMac.label "Deeptutor'dan Ayrıl">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Dosya">

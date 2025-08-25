@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Sakrij ostalo">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Prikaži sve">
-<!ENTITY quitApplicationCmdMac.label "Prekini Zotero">
+<!ENTITY quitApplicationCmdMac.label "Prekini Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Datoteka">

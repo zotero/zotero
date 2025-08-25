@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Skryť ostatné">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Zobraziť všetko">
-<!ENTITY quitApplicationCmdMac.label "Zavrieť Zotero">
+<!ENTITY quitApplicationCmdMac.label "Zavrieť Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Súbor">

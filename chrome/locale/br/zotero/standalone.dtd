@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Kuzhat ar re all">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Diskouez pep-tra">
-<!ENTITY quitApplicationCmdMac.label "Kuitaat Zotero">
+<!ENTITY quitApplicationCmdMac.label "Kuitaat Deeptutor">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Restr">
