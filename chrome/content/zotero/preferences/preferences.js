@@ -140,6 +140,17 @@ var Zotero_Preferences = {
 		}
 	},
 
+	/**
+	 * Get the scope object for a pane by its ID.
+	 * A pane's scope contains the top-level variables defined by its scripts.
+	 *
+	 * @param {string} paneID
+	 * @returns {Cu.Sandbox | null}
+	 */
+	getScope(paneID) {
+		return this.panes.get(paneID)?.scope ?? null;
+	},
+
 	async _handleNavigationMouseOver(event) {
 		if (event.target.tagName === 'richlistitem') {
 			await this._loadPane(event.target.value);
