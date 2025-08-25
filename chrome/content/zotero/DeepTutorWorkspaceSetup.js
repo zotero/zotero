@@ -24,6 +24,26 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 	const [pathPurpose, setPathPurpose] = useState("copy"); // 'copy' | 'share'
 	const [customZoteroPath, setCustomZoteroPath] = useState("");
 	const [showHelpPopup, setShowHelpPopup] = useState(false);
+	
+	// Hover state management
+	const [hoveredButton, setHoveredButton] = useState(null);
+	
+	// Helper function to get button style with hover effect
+	const getButtonStyle = (buttonType, isHovered, isDisabled = false) => {
+		if (buttonType === 'primary') {
+			return {
+				...styles.primary,
+				background: isDisabled 
+					? colors.button.disabled || '#cccccc'
+					: isHovered 
+						? colors.button.primaryHover || '#0575CC'
+						: colors.button.primary,
+				transition: 'background 0.2s ease',
+				opacity: isDisabled ? 0.6 : 1,
+			};
+		}
+		return styles[buttonType];
+	};
 
 
 	useEffect(() => {
@@ -107,7 +127,7 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 		},
 		subtitle: {
 			fontSize: "2rem", // 32px
-			fontWeight: 600,
+			fontWeight: 500,
 			color: colors.text.primary,
 			marginTop: "1rem", // Added padding above subtitle
 			marginBottom: "1.5rem",
@@ -205,6 +225,7 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 			cursor: "pointer",
 			fontWeight: 400, // Changed from 600 to 400 for text-like appearance
 			textDecoration: "underline", // Added underline to make it look like a link
+			fontSize: "1.25rem", // Changed from browser default to 1.25rem (20px)
 		},
 		input: {
 			width: "100%",
@@ -214,6 +235,7 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 			color: colors.text.primary,
 			background: colors.background.primary,
 			fontFamily: "Roboto, sans-serif",
+			fontSize: "1.25rem", // Changed from browser default to 1.25rem (20px)
 		},
 		textButton: {
 			all: "revert",
@@ -223,11 +245,11 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 			cursor: "pointer",
 			textDecoration: "underline",
 			fontFamily: "Roboto, sans-serif",
-			fontSize: "1rem",
+			fontSize: "1.25rem", // Changed from 1rem to 1.25rem (20px)
 			marginTop: "0.75rem",
 		},
 		helpOverlay: {
-			position: "absolute",
+			position: "fixed",
 			top: 0,
 			left: 0,
 			right: 0,
@@ -498,7 +520,15 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 						{error ? <div style={styles.error}>{error}</div> : null}
 
 						<div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-							<button style={styles.primary} onClick={handleContinue} disabled={isWorking}>{isWorking ? "Working..." : "Continue"}</button>
+							<button 
+								style={getButtonStyle('primary', hoveredButton === 'continue-main', isWorking)}
+								onClick={handleContinue} 
+								disabled={isWorking}
+								onMouseEnter={() => setHoveredButton('continue-main')}
+								onMouseLeave={() => setHoveredButton(null)}
+							>
+								{isWorking ? "Working..." : "Continue"}
+							</button>
 						</div>
 					</>
 				)}
@@ -509,7 +539,7 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 							setPage("main"); setError("");
 						}}>← Back</button>
 						<h2 style={styles.title}>Find Zotero Data Directory</h2>
-						<div style={{ color: colors.text.primary, fontWeight: 600, marginBottom: "0.75rem", textAlign: 'center', width: '100%' }}>
+						<div style={{ color: colors.text.primary, fontWeight: 500, marginTop: "1rem", marginBottom: "0.75rem", textAlign: 'center', width: '100%', fontSize: "2rem" }}>
 							To {pathPurpose === "copy" ? "copy Zotero's workspace with DeepTutor" : "share Zotero's workspace with DeepTutor"}, please copy your Zotero Data Directory path here:
 						</div>
 						<input
@@ -524,9 +554,11 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 						{error ? <div style={styles.error}>{error}</div> : null}
 						<div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
 							<button
-								style={styles.primary}
+								style={getButtonStyle('primary', hoveredButton === 'continue-path', isWorking || !customZoteroPath.trim())}
 								onClick={handlePathEntryContinue}
 								disabled={isWorking || !customZoteroPath.trim()}
+								onMouseEnter={() => setHoveredButton('continue-path')}
+								onMouseLeave={() => setHoveredButton(null)}
 							>
 								{isWorking ? "Working..." : "Continue"}
 							</button>
@@ -536,9 +568,7 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 								<div style={styles.helpContent}>
 									<div style={styles.helpTitle}>Find My Zotero Data Directory</div>
 									<div style={styles.helpMessage}>
-										{Zotero.isWin
-											? "On Zotero, on the top left menus, please navigate to Edit > Settings > Data Directory Location. Please copy the path into the input box"
-											: "On Zotero, on the top left menus, please navigate to Zotero > Settings > Data Directory Location. Please copy the path into the input box"}
+										To find your Zotero file path, navigate to Zotero > Settings > Advanced > Data Directory Location. The Data Directory Location is your Zotero file path.
 									</div>
 									<button style={styles.helpButton} onClick={() => setShowHelpPopup(false)}>Got It</button>
 								</div>
