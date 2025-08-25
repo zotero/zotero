@@ -448,11 +448,11 @@ Zotero.Styles = new function() {
 		.catch(function(validationErrors) {
 			Zotero.logError("Style from " + origin + " failed to validate:\n\n" + validationErrors);
 			
-			// If validation fails on the parent of a dependent style, ignore it (for now)
-			if(hidden) return;
+			// If this is the parent of a dependent style, or if we're in
+			// silent mode, suppress the prompt
+			if (hidden || silent) return;
 			
-			// If validation fails on a different style, we ask the user if s/he really
-			// wants to install it
+			// Otherwise, ask the user whether to continue installing
 			Components.utils.import("resource://gre/modules/Services.jsm");
 			var shouldInstall = Services.prompt.confirmEx(null,
 				Zotero.getString('styles.install.title'),
