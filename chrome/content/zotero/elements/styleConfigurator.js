@@ -276,14 +276,23 @@
 				}
 			});
 		}
-
-		handleStyleChanged(style) {
-			this.querySelector('#locale-selector').style = style;
+		
+		toggleNoteTypePicker(style) {
 			const styleData = style ? Zotero.Styles.get(style) : null;
 			const isNoteStyle = (styleData || {}).class === 'note';
 			const noMultipleNotes = this.hasAttribute('no-multi-notes');
 			this.querySelector('.display-as-wrapper').style.display
 				= (isNoteStyle && !noMultipleNotes) ? '' : 'none';
+		}
+		
+		toggleAttribute(name, force) {
+			super.toggleAttribute(name, force);
+			this.toggleNoteTypePicker(this.querySelector('#locale-selector').style);
+		}
+
+		handleStyleChanged(style) {
+			this.querySelector('#locale-selector').style = style;
+			this.toggleNoteTypePicker(style);
 		}
 	}
 
