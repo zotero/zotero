@@ -514,7 +514,7 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 			if (selectedLevel < currentLevel) {
 				// Downgrade - redirect to manage subscription page
 				//const manageUrl = `http://localhost:3000/dzSubscription?manage=true`;
-				const manageUrl = `https://${DT_BASE_URL}/manage-subscription`;
+				const manageUrl = `https://${DT_BASE_URL}/dzSubscription?manage=true`;
 				try {
 					Zotero.launchURL(manageUrl);
 				}
