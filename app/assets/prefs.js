@@ -111,7 +111,7 @@ pref("app.update.url.manual", "https://deeptutor.knowhiz.us/dzDownload");
 
 // A default value for the "More information about this update" link
 // supplied in the "An update is available" page of the update wizard.
-pref("app.update.url.details", "https://www.zotero.org/support/changelog");
+pref("app.update.url.details", "https://flashy-shad-05a.notion.site/What-s-New-25a37bc1a42180018946ea3312a7454c?source=copy_link");
 
 // Interval: Time between checks for a new version (in seconds)
 //           default=1 day

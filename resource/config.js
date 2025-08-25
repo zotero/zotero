@@ -25,7 +25,7 @@ var ZOTERO_CONFIG = {
 	TROUBLESHOOTING_URL: "https://www.zotero.org/support/getting_help",
 	FEEDBACK_URL: "https://forums.zotero.org/",
 	CONNECTORS_URL: "https://www.zotero.org/download/connectors",
-	CHANGELOG_URL: "https://www.zotero.org/support/changelog",
+	CHANGELOG_URL: "https://flashy-shad-05a.notion.site/What-s-New-25a37bc1a42180018946ea3312a7454c?source=copy_link",
 	CREDITS_URL: 'https://www.zotero.org/support/credits_and_acknowledgments',
 	LICENSING_URL: 'https://www.zotero.org/support/licensing',
 	GET_INVOLVED_URL: 'https://www.zotero.org/getinvolved',
