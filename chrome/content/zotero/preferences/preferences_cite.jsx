@@ -82,7 +82,14 @@ Zotero_Preferences.Cite = {
 				var updated = Zotero.Date.sqlToDate(style.updated, true);
 				return {
 					title: style.title,
-					updated: updated ? updated.toLocaleDateString() : ""
+					updated: updated ? updated.toLocaleDateString() : "",
+					remove: {
+						iconKey: "minus-circle",
+						onClick: async (index, _) => {
+							let cslID = Zotero.Styles.getVisible()[index].styleID;
+							this.deleteStyle([cslID]);
+						}
+					}
 				};
 			});
 		
@@ -97,6 +104,14 @@ Zotero_Preferences.Cite = {
 					label: "zotero.preferences.cite.styles.styleManager.updated",
 					fixedWidth: true,
 					width: 100
+				},
+				{
+					dataKey: "remove",
+					label: "",
+					htmlLabel: ' ',
+					fixedWidth: true,
+					width: 24,
+					type: "button"
 				}
 			];
 			var handleKeyDown = (event) => {
@@ -121,7 +136,6 @@ Zotero_Preferences.Cite = {
 						columns={columns}
 						staticColumns={true}
 						disableFontSizeScaling={true}
-						onSelectionChange={selection => document.getElementById('styleManager-delete').disabled = !selection.count}
 						onKeyDown={handleKeyDown}
 						getRowString={index => this.styles[index].title}
 					/>
@@ -182,13 +196,16 @@ Zotero_Preferences.Cite = {
 	
 	/**
 	 * Deletes selected styles from the styles pane
+	 * @param {Array} cslIDs Array of CSL IDs to delete
 	 **/
-	deleteStyle: async function() {
+	deleteStyle: async function (cslIDs = []) {
 		// get selected cslIDs
 		var styles = Zotero.Styles.getVisible();
-		var cslIDs = [];
-		for (let index of this._tree.selection.selected.keys()) {
-			cslIDs.push(styles[index].styleID);
+		// if style ids are not provided, get them from the selection
+		if (cslIDs.length == 0) {
+			for (let index of this._tree.selection.selected.keys()) {
+				cslIDs.push(styles[index].styleID);
+			}
 		}
 		
 		if(cslIDs.length == 0) {
