@@ -34,10 +34,9 @@
 			</hbox>
 			<separator class="thin"/>
 			<hbox id="styleManager-buttons" align="center">
-				<label is="zotero-text-link"
-						value="&zotero.preferences.export.getAdditionalStyles;" flex="1"
-						onclick="Zotero_Preferences.Cite.openStylesPage(); event.preventDefault()"/>
-				<button data-l10n-id="preferences-styleManager-add-button"
+				<button data-l10n-id="preferences-styleManager-add-from-repo"
+					oncommand="Zotero_Preferences.Cite.openStylesPage()"/>
+				<button id="add-from-file-button" data-l10n-id="preferences-styleManager-add-from-file"
 					oncommand="Zotero_Preferences.Cite.addStyle()"/>
 				<button id="reset-styles-button"
 					label="&zotero.preferences.dbMaintenance.resetStyles;"

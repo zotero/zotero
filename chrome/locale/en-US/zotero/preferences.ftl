@@ -66,7 +66,9 @@ preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
 
-preferences-styleManager-add-button =
+preferences-styleManager-add-from-repo =
+    .label = Add from Style Repository…
+preferences-styleManager-add-from-file =
     .tooltiptext = Add a style from a file
     .label = Add from File…
 preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
