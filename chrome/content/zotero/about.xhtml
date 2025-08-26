@@ -24,6 +24,26 @@
 		<div xmlns="http://www.w3.org/1999/xhtml">
 			<img id="logo" src="chrome://zotero/skin/deeptutor_light.png" alt="DeepTutor" />
 		</div>
+		<script>
+			// Theme-aware logo switching
+			function updateLogoForTheme() {
+				const logo = document.getElementById("logo");
+				const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+				
+				// Set logo based on theme preference
+				if (isDarkMode) {
+					logo.src = "chrome://zotero/skin/deeptutor_dark.png";
+				} else {
+					logo.src = "chrome://zotero/skin/deeptutor_light.png";
+				}
+			}
+			
+			// Update logo on page load
+			updateLogoForTheme();
+			
+			// Listen for theme changes
+			window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", updateLogoForTheme);
+		</script>
 		<hbox>
 			<label id="version"/>
 			<label id="changelog" is="zotero-text-link" value="&zotero.whatsNew;"/>

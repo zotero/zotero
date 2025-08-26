@@ -479,11 +479,12 @@ class DeepTutorLocalhostServer {
 							background: white;
 							border: 2px solid #0687E5;
 							border-radius: 10px;
-							padding: 20px;
+							padding: 25px;
 							box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 							z-index: 10000;
-							max-width: 400px;
-							max-height: 300px;
+							width: 500px;
+							max-width: 90vw;
+							max-height: 80vh;
 							overflow: auto;
 							font-family: Arial, sans-serif;
 						">
@@ -491,24 +492,24 @@ class DeepTutorLocalhostServer {
 								display: flex;
 								justify-content: space-between;
 								align-items: center;
-								margin-bottom: 15px;
+								margin-bottom: 20px;
 								border-bottom: 1px solid #eee;
-								padding-bottom: 10px;
+								padding-bottom: 15px;
 							">
 								<h3 style="
 									margin: 0;
 									color: #0687E5;
-									font-size: 18px;
+									font-size: 22px;
 								">DeepTutor Message</h3>
 								<button onclick="this.parentElement.parentElement.remove()" style="
 									background: none;
 									border: none;
-									font-size: 20px;
+									font-size: 24px;
 									cursor: pointer;
 									color: #999;
 									padding: 0;
-									width: 25px;
-									height: 25px;
+									width: 30px;
+									height: 30px;
 									display: flex;
 									align-items: center;
 									justify-content: center;
@@ -519,23 +520,23 @@ class DeepTutorLocalhostServer {
 								line-height: 1.5;
 								white-space: pre-wrap;
 								word-wrap: break-word;
+								font-size: 16px;
 							">${this.escapeHtml(text)}</div>
 							<div style="
 								text-align: center;
-								margin-top: 15px;
-								padding-top: 10px;
+								margin-top: 20px;
+								padding-top: 15px;
 								border-top: 1px solid #eee;
 							">
 								<button onclick="this.parentElement.parentElement.remove()" style="
 									background: #0894F0;
 									color: white;
 									border: none;
-									padding: 8px 16px;
+									padding: 10px 20px;
 									border-radius: 5px;
 									cursor: pointer;
-									font-size: 14px;
-									transition: background 0.2s;
-								" onmouseover="this.style.background='#0687E5'" onmouseout="this.style.background='#0894F0'">Close</button>
+									font-size: 16px;
+								">Close</button>
 							</div>
 						</div>
 					`;
@@ -668,11 +669,12 @@ class DeepTutorLocalhostServer {
 							background: white;
 							border: 2px solid #4285F4;
 							border-radius: 10px;
-							padding: 20px;
+							padding: 25px;
 							box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 							z-index: 10000;
-							max-width: 400px;
-							max-height: 300px;
+							width: 500px;
+							max-width: 90vw;
+							max-height: 80vh;
 							overflow: auto;
 							font-family: Arial, sans-serif;
 						">
@@ -680,24 +682,24 @@ class DeepTutorLocalhostServer {
 								display: flex;
 								justify-content: space-between;
 								align-items: center;
-								margin-bottom: 15px;
+								margin-bottom: 20px;
 								border-bottom: 1px solid #eee;
-								padding-bottom: 10px;
+								padding-bottom: 15px;
 							">
 								<h3 style="
 									margin: 0;
 									color: #4285F4;
-									font-size: 18px;
+									font-size: 22px;
 								">Google Sign-In Success</h3>
 								<button onclick="this.parentElement.parentElement.remove()" style="
 									background: none;
 									border: none;
-									font-size: 20px;
+									font-size: 24px;
 									cursor: pointer;
 									color: #999;
 									padding: 0;
-									width: 25px;
-									height: 25px;
+									width: 30px;
+									height: 30px;
 									display: flex;
 									align-items: center;
 									justify-content: center;
@@ -710,27 +712,28 @@ class DeepTutorLocalhostServer {
 								word-wrap: break-word;
 								font-family: monospace;
 								background: #f5f5f5;
-								padding: 10px;
+								padding: 15px;
 								border-radius: 5px;
 								border: 1px solid #ddd;
+								font-size: 16px;
 							">
 								Signed in as: <b>${user.username}</b><br/>
 								Name: ${user.attributes.name}
 							</div>
 							<div style="
 								text-align: center;
-								margin-top: 15px;
-								padding-top: 10px;
+								margin-top: 20px;
+								padding-top: 15px;
 								border-top: 1px solid #eee;
 							">
 								<button onclick="this.parentElement.parentElement.remove()" style="
 									background: #4285F4;
 									color: white;
 									border: none;
-									padding: 8px 16px;
+									padding: 10px 20px;
 									border-radius: 5px;
 									cursor: pointer;
-									font-size: 14px;
+									font-size: 16px;
 								">Close</button>
 							</div>
 						</div>
@@ -777,13 +780,14 @@ class DeepTutorLocalhostServer {
 							left: 50%;
 							transform: translate(-50%, -50%);
 							background: ${isDarkMode ? '#1E1E1E' : 'white'};
-							border: 1px solid ${borderColor};
+							border: 2px solid ${borderColor};
 							border-radius: 10px;
-							padding: 20px;
+							padding: 25px;
 							box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 							z-index: 10000;
-							max-width: 400px;
-							max-height: 300px;
+							width: 500px;
+							max-width: 90vw;
+							max-height: 80vh;
 							overflow: auto;
 							font-family: Arial, sans-serif;
 						">
@@ -791,24 +795,24 @@ class DeepTutorLocalhostServer {
 								display: flex;
 								justify-content: space-between;
 								align-items: center;
-								margin-bottom: 15px;
+								margin-bottom: 20px;
 								border-bottom: 1px solid #eee;
-								padding-bottom: 10px;
+								padding-bottom: 15px;
 							">
 								<h3 style="
 									margin: 0;
 									color: #dc3545;
-									font-size: 18px;
+									font-size: 22px;
 								">Google Sign-In Failed</h3>
 								<button onclick="this.parentElement.parentElement.remove()" style="
 									background: none;
 									border: none;
-									font-size: 20px;
+									font-size: 24px;
 									cursor: pointer;
 									color: #999;
 									padding: 0;
-									width: 25px;
-									height: 25px;
+									width: 30px;
+									height: 30px;
 									display: flex;
 									align-items: center;
 									justify-content: center;
@@ -821,26 +825,27 @@ class DeepTutorLocalhostServer {
 								word-wrap: break-word;
 								font-family: monospace;
 								background: #f5f5f5;
-								padding: 10px;
+								padding: 15px;
 								border-radius: 5px;
 								border: 1px solid #ddd;
+								font-size: 16px;
 							">
 								Error: ${errorMsg}
 							</div>
 							<div style="
 								text-align: center;
-								margin-top: 15px;
-								padding-top: 10px;
+								margin-top: 20px;
+								padding-top: 15px;
 								border-top: 1px solid #eee;
 							">
 								<button onclick="this.parentElement.parentElement.remove()" style="
 									background: #dc3545;
 									color: white;
 									border: none;
-									padding: 8px 16px;
+									padding: 10px 20px;
 									border-radius: 5px;
 									cursor: pointer;
-									font-size: 14px;
+									font-size: 16px;
 								">Close</button>
 							</div>
 						</div>
@@ -927,15 +932,18 @@ class DeepTutorLocalhostServer {
 				return (
 					"<html><head><meta charset=\"utf-8\"/>"
 					+ "<title>DeepTutor Sign-In</title>"
-					+ "<style>body{font-family:Arial,Helvetica,sans-serif;margin:40px;color:#333}"
-					+ ".card{border:1px solid #ddd;border-radius:8px;padding:20px;max-width:520px}"
-					+ ".title{color:#0687E5;margin-top:0}"
-					+ ".hint{color:#666;font-size:13px;margin-top:10px}</style>"
+					+ "<style>"
+					+ "body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#333;background:#f5f7fa;min-height:100vh;display:flex;align-items:center;justify-content:center;}"
+					+ ".card{border:2px solid #0687E5;border-radius:10px;padding:30px;width:600px;max-width:90vw;background:white;box-shadow:0 4px 20px rgba(0,0,0,0.2);text-align:center;}"
+					+ ".title{color:#0687E5;margin:0 0 25px 0;font-size:28px;font-weight:bold;}"
+					+ ".message{font-size:18px;line-height:1.5;margin:20px 0;padding:20px;background:#f8f9fa;border-radius:8px;border:1px solid #e9ecef;color:#333;}"
+					+ ".hint{color:#666;font-size:14px;margin-top:20px;padding-top:15px;border-top:1px solid #eee;}"
+					+ "</style>"
 					+ "</head><body>"
-					+ "<div class=\"card\">"
-					+ "<h2 class=\"title\">DeepTutor Google Sign-In</h2>"
-					+ `<div>${this._escapeHtml(String(message))}</div>`
-					+ "<div class=\"hint\">You can now close this tab safely.</div>"
+					+ "<div class='card'>"
+					+ "<h2 class='title'>DeepTutor Google Sign-In</h2>"
+					+ `<div class='message'>${this._escapeHtml(String(message))}</div>`
+					+ "<div class='hint'>You can now close this tab safely.</div>"
 					+ "</div>"
 					+ "</body></html>"
 				);

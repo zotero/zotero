@@ -16,7 +16,7 @@ import { useDeepTutorTheme } from "./theme/useDeepTutorTheme.js";
 export default function DeepTutorWorkspaceSetup({ onComplete }) {
 	const { colors, isDark } = useDeepTutorTheme();
 
-	const [choice, setChoice] = useState("start");
+	const [choice, setChoice] = useState("copy");
 	const [isWorking, setIsWorking] = useState(false);
 	const [error, setError] = useState("");
 	const [portalEl, setPortalEl] = useState(null);
@@ -184,7 +184,7 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 			cursor: "pointer"
 		},
 		hint: {
-			fontSize: "1.25rem",
+			fontSize: "1.1rem",
 			color: isDark ? "#CDCDCD" : "#757575",
 			marginLeft: "2.5rem",
 			marginBottom: "1rem",
@@ -500,21 +500,29 @@ export default function DeepTutorWorkspaceSetup({ onComplete }) {
 						<div style={styles.subtitle}>How would you like to set up your DeepTutor workspace?</div>
 
 						<div role="radiogroup" aria-label="Workspace setup options" style={{ width: '100%', marginTop: "1rem" }}>
-							<label style={styles.optionRow} onClick={() => setChoice("start")}>
-								<input type="radio" name="dt-setup" checked={choice === "start"} onChange={() => setChoice("start")} />
-								<span style={styles.optionLabel}>Start New Workspace</span>
-							</label>
+							<div style={{ ...styles.optionRow, flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => setChoice("start")}>
+								<div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+									<input type="radio" name="dt-setup" checked={choice === "start"} onChange={() => setChoice("start")} />
+									<span style={styles.optionLabel}>Start New Workspace</span>
+								</div>
+								<div style={{ ...styles.hint, textAlign: 'left', width: '100%', marginTop: '0.25rem', marginLeft: '1.75rem' }}>DeepTutor will begin with a fresh workspace and won&apos;t use your existing Zotero data.</div>
+							</div>
 
-							<label style={styles.optionRow} onClick={() => setChoice("copy")}>
-								<input type="radio" name="dt-setup" checked={choice === "copy"} onChange={() => setChoice("copy")} />
-								<span style={styles.optionLabel}>Copy from Zotero</span>
-							</label>
+							<div style={{ ...styles.optionRow, flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => setChoice("copy")}>
+								<div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+									<input type="radio" name="dt-setup" checked={choice === "copy"} onChange={() => setChoice("copy")} />
+									<span style={styles.optionLabel}>Copy from Zotero</span>
+								</div>
+								<div style={{ ...styles.hint, textAlign: 'left', width: '100%', marginTop: '0.25rem', marginLeft: '1.75rem' }}>DeepTutor will import your current Zotero data, but changes won&apos;t stay synced afterward.</div>
+							</div>
 
-							<label style={styles.optionRow} onClick={() => setChoice("share")}>
-								<input type="radio" name="dt-setup" checked={choice === "share"} onChange={() => setChoice("share")} />
-								<span style={styles.optionLabel}>Share with Zotero</span>
-							</label>
-							<div style={{ ...styles.hint, textAlign: 'left', width: '100%' }}>Note: Sharing database with Zotero means you can&apos;t run both apps at the same time.</div>
+							<div style={{ ...styles.optionRow, flexDirection: 'column', alignItems: 'flex-start' }} onClick={() => setChoice("share")}>
+								<div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+									<input type="radio" name="dt-setup" checked={choice === "share"} onChange={() => setChoice("share")} />
+									<span style={styles.optionLabel}>Share with Zotero</span>
+								</div>
+								<div style={{ ...styles.hint, textAlign: 'left', width: '100%', marginTop: '0.25rem', marginLeft: '1.75rem' }}>DeepTutor and Zotero will share the same data, so they can&apos;t be used simultaneously.</div>
+							</div>
 						</div>
 
 						{error ? <div style={styles.error}>{error}</div> : null}
