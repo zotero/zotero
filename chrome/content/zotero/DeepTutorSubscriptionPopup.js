@@ -291,9 +291,9 @@ export default function DeepTutorSubscriptionPopup({ onClose, onAction: _onActio
 		currentPlanButton: {
 			all: "revert",
 			flex: 1,
-			background: "#FFFFFF",
-			color: "#757575",
-			border: "1px solid #757575",
+			background: isDark ? "transparent" : "#FFFFFF",
+			color: isDark ? colors.button.secondaryText : "#757575",
+			border: isDark ? `1px solid ${colors.button.secondaryBorder}` : "1px solid #757575",
 			borderRadius: "0.625rem",
 			padding: "0.75rem 1.5rem",
 			minHeight: "3rem",
