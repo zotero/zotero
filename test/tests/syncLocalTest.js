@@ -981,6 +981,38 @@ describe("Zotero.Sync.Data.Local", function () {
 			assert.isTrue(library.storageDownloadNeeded);
 		});
 		
+		it("should rename existing local file on remote filename change", async function () {
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'zfs');
+			
+			var item = await importFileAttachment('test.png');
+			item.version = 5;
+			item.synced = true;
+			await item.saveTx();
+			
+			// Set file as synced
+			item.attachmentSyncedModificationTime = await item.attachmentModificationTime;
+			item.attachmentSyncedHash = await item.attachmentHash;
+			item.attachmentSyncState = "in_sync";
+			await item.saveTx({ skipAll: true });
+			
+			var newFilename = "Title.png";
+			
+			// Simulate download of version with updated attachment
+			var json = item.toResponseJSON();
+			json.version = 10;
+			json.data.version = 10;
+			json.data.filename = newFilename;
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				'item', libraryID, [json], { stopOnError: true }
+			);
+			
+			var newPath = await item.getFilePathAsync();
+			assert.ok(newPath);
+			assert.match(newPath, new RegExp("[\\/]" + newFilename + "$"));
+		});
+		
 		it("should ignore attachment metadata when resolving metadata conflict", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			Zotero.Sync.Storage.Local.setModeForLibrary(libraryID, 'zfs');

@@ -910,6 +910,10 @@ Zotero.Sync.Data.Local = {
 										|| jsonDataLocal.md5 != jsonData.md5) {
 									saveOptions.storageDetailsChanged = true;
 								}
+								if (jsonDataLocal.filename != jsonData.filename) {
+									saveOptions.renameFile = true;
+									saveOptions.previousFilename = obj.attachmentFilename;
+								}
 							}
 							
 							// Local object has been modified since last sync
@@ -1551,6 +1555,17 @@ Zotero.Sync.Data.Local = {
 				// library as requiring download
 				if (options.isNewObject || options.storageDetailsChanged) {
 					Zotero.Libraries.get(obj.libraryID).storageDownloadNeeded = true;
+				}
+				// Rename file to new filename
+				if (options.renameFile) {
+					try {
+						let dir = Zotero.Attachments.getStorageDirectoryByID(obj.id).path;
+						let previousFile = PathUtils.join(dir, options.previousFilename);
+						await Zotero.File.rename(previousFile, obj.attachmentFilename);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 				}
 			}
 			
