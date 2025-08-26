@@ -846,6 +846,8 @@ const ZoteroStandalone = new function() {
 	/**
 	 * Handles help menu requests
 	 */
+
+	// Deeptutor Change: links to deeptutor's URLs
 	this.openHelp = function(type) {
 		Components.utils.import("resource://zotero/config.js");
 		
