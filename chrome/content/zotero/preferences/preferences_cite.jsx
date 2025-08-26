@@ -120,7 +120,7 @@ Zotero_Preferences.Cite = {
 				}
 			];
 			var handleKeyDown = (event) => {
-				if (event.key == 'Delete' || Zotero.isMac && event.key == 'Backspace') {
+				if (event.key == 'Delete' || event.key == 'Backspace') {
 					Zotero_Preferences.Cite.deleteStyle();
 					return false;
 				}
