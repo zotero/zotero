@@ -68,8 +68,7 @@ preferences-quickCopy-plus =
 
 preferences-styleManager-add-button =
     .tooltiptext = Add a style from a file
-    .aria-label = { general-add }
-    .label = { $label }
+    .label = Add from File…
 preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
 preferences-citation-dialog = Citation Dialog
 preferences-citation-dialog-mode = Citation Dialog Mode:
