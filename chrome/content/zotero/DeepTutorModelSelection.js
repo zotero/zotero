@@ -1720,7 +1720,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 						<div style={styles.modelDescription}>
 							<div style={styles.modelFeature}>
 								<span style={styles.modelIcon}>🙌</span>
-								<span>Quick multi - document processing - for broad research</span>
+								<span>Quick multi-document processing - for broad research</span>
 							</div>
 							<div style={styles.modelLimitations}>
 								<span>✅ Process raw text the fastest</span>
@@ -1732,7 +1732,7 @@ const ModelSelection = forwardRef(({ onSubmit, user, externallyFrozen = false, o
 						<div style={styles.modelDescription}>
 							<div style={styles.modelFeature}>
 								<span style={styles.modelIcon}>🙌</span>
-								<span>Deep single - paper analysis - with visual & formula support</span>
+								<span>Deep single-paper analysis - with visual & formula support</span>
 							</div>
 							<div style={styles.modelLimitations}>
 								<span>✅ Images visual understanding</span>
