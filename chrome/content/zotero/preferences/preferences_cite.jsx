@@ -112,7 +112,7 @@ Zotero_Preferences.Cite = {
 				},
 				{
 					dataKey: "remove",
-					label: "",
+					label: Zotero.getString("preferences-styleManager-remove"),
 					htmlLabel: ' ',
 					fixedWidth: true,
 					width: 24,

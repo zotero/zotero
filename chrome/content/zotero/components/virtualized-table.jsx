@@ -1765,7 +1765,12 @@ function makeRowRenderer(getRowData) {
 				if (column.label in Zotero.Intl.strings) {
 					columnName = Zotero.getString(column.label);
 				}
-				ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
+				if (typeof rowData[column.dataKey] === "string") {
+					ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
+				}
+				else {
+					ariaLabel += `${columnName} `;
+				}
 			}
 		}
 		else {

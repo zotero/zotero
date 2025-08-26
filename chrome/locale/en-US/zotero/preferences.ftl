@@ -70,6 +70,7 @@ preferences-styleManager-add-button =
     .tooltiptext = Add a style from a file
     .aria-label = { general-add }
     .label = { $label }
+preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
 preferences-citation-dialog = Citation Dialog
 preferences-citation-dialog-mode = Citation Dialog Mode:
 preferences-citation-dialog-mode-last-used =
