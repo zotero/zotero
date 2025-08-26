@@ -3142,7 +3142,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (this.isContainerOpen(index)) {
 					twisty.classList.add('open');
 				}
-				twisty.style.pointerEvents = 'auto';
 				twisty.addEventListener('mousedown', event => event.stopPropagation());
 				twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
 					{ passive: true });
