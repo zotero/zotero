@@ -39,9 +39,18 @@
 
 #styleManager {
 	.virtualized-table {
+		.row {
+			// transparent border so that when .selected adds the border below, nothing shifts 
+			border: 1px solid transparent;
+			&.odd {
+				background-color: var(--material-stripe);
+			}
+			&.even {
+				background-color: var(--material-background);
+			}
+		}
 		// Override styling of selected rows to not look different from other rows
 		.row.selected {
-			background-color: var(--color-background);
 			color: var(--fill-primary);
 			// Override white background-color above
 			.icon-action {
@@ -59,7 +68,9 @@
 	}
 	.virtualized-table:focus-visible {
 		.row.selected {
-			outline: var(--default-focusring-width) dotted var(--color-accent);
+			// add dotted border during keyboard navigation.
+			// use border vs outline, since outline sometimes gets cut off
+			border: var(--default-focusring-width) dotted var(--color-accent);
 		}
 	}
 }
