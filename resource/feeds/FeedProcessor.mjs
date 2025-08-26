@@ -3,9 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /* eslint-disable quote-props */
-/* globals SAXXMLReader */
 
-"use strict";
+const { SAXXMLReader } = ChromeUtils.importESModule("resource://zotero/feeds/SAXXMLReader.mjs");
 
 function LOG(str) {
 	Zotero.debug("Feed Processor: " + str);
@@ -973,7 +972,7 @@ function WrapperElementInfo(fieldName) {
 /** *** The Processor *****/
 // Implements nsIFeedProcessor, nsISAXContentHandler, nsISAXErrorHandler,
 //            nsIStreamListener, nsIRequestObserver
-function FeedProcessor() {
+export function FeedProcessor() {
 	this._reader = new SAXXMLReader();
 	this._buf = "";
 	this._feed = {};
@@ -1655,7 +1654,3 @@ FeedProcessor.prototype = {
 		this.endElement(uri, localName, qName);
 	},
 };
-
-if (typeof module == "object") {
-	module.exports = FeedProcessor;
-}

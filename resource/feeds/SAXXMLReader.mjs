@@ -23,8 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-"use strict";
-
 /**
  * This implements `nsISAXXMLReader` using content-accessible APIs, such as `DOMParser` and
  * `TreeWalker`. It should be usable in any web platform environment that supports those standard
@@ -39,7 +37,7 @@
  * Higher-level components are notified of XML content via the `nsISAXContentHandler` and
  * `nsISAXErrorHandler` interfaces as this reader walks through the XML content.
  */
-class SAXXMLReader {
+export class SAXXMLReader {
 	constructor() {
 		this.contentHandler = null;
 		this.errorHandler = null;
@@ -145,8 +143,4 @@ class SAXXMLReader {
 			this._walk();
 		}
 	}
-}
-
-if (typeof module == "object") {
-	module.exports = SAXXMLReader;
 }
