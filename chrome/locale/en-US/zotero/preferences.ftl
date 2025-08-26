@@ -66,6 +66,7 @@ preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
 
+preferences-styleManager-description = This table lists your available styles: you can add new styles or remove styles you are not using. Whenever you need to select a style to cite with, these will be presented as available options.
 preferences-styleManager-add-from-repo =
     .label = Add from Style Repository…
 preferences-styleManager-add-from-file =
