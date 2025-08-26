@@ -65,6 +65,11 @@ Zotero_Preferences.Cite = {
 		document.querySelector('#zotero-prefpane-cite').addEventListener('showing', () => {
 			this._tree.invalidate();
 		});
+		
+		// Prevent mouse clicks from selecting the row in style table to not
+		// create an impression that this is where you select the style for citations
+		document.querySelector('#styleManager').addEventListener('mouseup', this.stopMouseEvent, true);
+		document.querySelector('#styleManager').addEventListener('mousedown', this.stopMouseEvent, true);
 	},
 	
 	
@@ -132,7 +137,7 @@ Zotero_Preferences.Cite = {
 						}}
 						renderItem={makeRowRenderer(index => this.styles[index])}
 						showHeader={true}
-						multiSelect={true}
+						multiSelect={false}
 						columns={columns}
 						staticColumns={true}
 						disableFontSizeScaling={true}
@@ -143,7 +148,13 @@ Zotero_Preferences.Cite = {
 			});
 
 			// Fix style manager showing partially blank until scrolled
-			setTimeout(() => this._tree.invalidate());
+			setTimeout(() => {
+				this._tree.invalidate();
+				// Pre-select first item if nothing is selected
+				if (this._tree.selection.selected.size == 0) {
+					this._tree.selection.select(0);
+				}
+			});
 		}
 		else {
 			this._tree.invalidate();
@@ -266,5 +277,10 @@ Zotero_Preferences.Cite = {
 	 **/
 	styleImportError: function () {
 		alert(Zotero.getString('styles.installError', "This"));
+	},
+
+	stopMouseEvent: function (e) {
+		e.preventDefault();
+		e.stopPropagation();
 	}
 }

@@ -35,3 +35,30 @@
 #reset-styles-button {
 	margin-inline-start: 6px;
 }
+
+#styleManager {
+	.virtualized-table {
+		// Override styling of selected rows to not look different from other rows
+		.row.selected {
+			background-color: var(--color-background);
+			color: var(--fill-primary);
+			// Override white background-color above
+			.icon-action {
+				.icon {
+					fill: var(--fill-secondary) !important;
+				}
+				&:hover:not([disabled]) {
+					background-color: var(--fill-quinary);
+				}
+				&:active:not([disabled]) {
+					background-color: var(--fill-quarternary);
+				}
+			}
+		}
+	}
+	.virtualized-table:focus-visible {
+		.row.selected {
+			outline: var(--default-focusring-width) dotted var(--color-accent);
+		}
+	}
+}

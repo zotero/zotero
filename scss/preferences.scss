@@ -382,19 +382,3 @@ button {
 	}
 }
 
-#styleManager {
-	.virtualized-table-body {
-		// Make selected row appear fainter with just an outline
-		// to not make an impression that the selected style will be used
-		// for citations
-		.row.selected {
-			background-color: var(--color-background);
-			color: var(--fill-primary);
-			outline: var(--default-focusring-width) dotted var(--color-accent);
-			// Override white background-color above
-			.cell-button .icon {
-				fill: var(--fill-secondary) !important;
-			}
-		}
-	}
-}
