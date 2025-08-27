@@ -2906,21 +2906,11 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 	
 	try {
 		let origName = PathUtils.filename(origPath);
-		if (this.isStoredFileAttachment()) {
-			var origModDate = (await OS.File.stat(origPath)).lastModificationDate;
-		}
 		
 		// No change
 		if (origName === newName) {
 			Zotero.debug("Filename has not changed");
 			return true;
-		}
-		
-		// Update mod time and clear hash so the file syncs
-		// TODO: use an integer counter instead of mod time for change detection
-		// Update mod time first, because it may fail for read-only files on Windows
-		if (this.isStoredFileAttachment()) {
-			await OS.File.setDates(origPath, null, null);
 		}
 		
 		newName = await Zotero.File.rename(
@@ -2938,26 +2928,10 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 		
 		await this.relinkAttachmentFile(destPath);
 		
-		if (this.isStoredFileAttachment()) {
-			this.attachmentSyncedHash = null;
-			this.attachmentSyncState = "to_upload";
-			await this.saveTx({ skipAll: true });
-		}
-		
 		return true;
 	}
 	catch (e) {
 		Zotero.logError(e);
-		
-		// Restore original modification date in case we managed to change it
-		if (this.isStoredFileAttachment()) {
-			try {
-				OS.File.setDates(origPath, null, origModDate);
-			} catch (e) {
-				Zotero.debug(e, 2);
-			}
-		}
-		
 		return -2;
 	}
 };
