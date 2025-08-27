@@ -638,6 +638,8 @@ attachment-info-convert-note =
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
 
 attachment-preview-placeholder = No attachment to preview
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
 
 toggle-preview =
     .label = {

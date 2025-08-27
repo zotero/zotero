@@ -46,7 +46,7 @@
 							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
 							<html:div class="meta-data">
 								<editable-text id="fileName" aria-labelledby="fileName-label" tight="true"/>
-								<toolbarbutton id="rename-from-parent" tabindex="0" oncommand=""/>
+								<toolbarbutton id="rename-from-parent" data-l10n-id="attachment-rename-from-parent" tabindex="0" oncommand=""/>
 							</html:div>
 						</html:div>
 						<html:div id="accessedRow" class="meta-row">
