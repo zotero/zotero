@@ -1,12 +1,212 @@
-#edit-bibliography-dialog {
+#zotero-edit-bibliography-dialog {
 	min-width: 800px;
-	min-height: 450px;
-	
-	.virtualized-table-container {
-		min-height: 100%;
-	}
-	
-	#zotero-collections-tree-container {
-		min-width: 150px;
+	min-height: 600px;
+	--excluded-color: #FAA7004D; // accent-yellow with 30% opacity
+	--uncited-color: #59ADC44D; // accent-teal with 30% opacity
+
+	#zotero-edit-bibliography-dialog-box {
+		height: 100%;
+		background: var(--material-background);
+
+		#zotero-select-items-trees {
+			min-height: 250px;
+			#zotero-collections-tree-container {
+				min-height: 100%;
+				min-width: 200px;
+		
+				border-inline-end: var(--material-panedivider);
+				& > #zotero-collections-tree {
+					background: var(--material-sidepane) !important;
+				}
+				.virtualized-table-body {
+					padding-top: 8px;
+				}
+			}
+
+			#zotero-item-tree-container {
+				min-width: 0;
+				width: 100%;
+
+				#quick-search-textbox-wrapper {
+					min-height: 30px;
+					margin-bottom: 5px;
+					margin-top: 5px;
+					padding-inline: 5px;
+				}
+
+				#zotero-items-pane-content {
+					min-height: calc(100% - 40px);
+					border-top: var(--material-panedivider);
+					
+					#zotero-items-tree {
+						.row:not(.selected).highlighted[highlighted-class="uncited"] {
+							background-color: var(--uncited-color) !important;
+						}
+						.row:not(.selected).highlighted[highlighted-class="excluded"] {
+							background-color: var(--excluded-color) !important;
+						}
+						.row:not(.selected).highlighted[highlighted-class="bib"] {
+							background-color: var(--accent-blue30) !important;
+						}
+					}
+				}
+			}
+
+			#zotero-tb-search {
+				max-width: 200px;
+			}
+		}
+		
+		#zotero-reference-items-list-wrapper {
+			min-height: 100px;
+			height: 100px;
+			overflow: auto;
+			border-top: var(--material-panedivider);
+
+			#zotero-reference-items-list-header {
+				padding: 5px 12px;
+				border-bottom: 1px solid var(--fill-quinary);
+
+				.style-button {
+					width: 20px;
+					height: 20px;
+					border:none;
+					border-radius: 3px;
+					margin-inline-end: 8px;
+					background-size: 80% !important;
+					color: var(--fill-secondary);
+				}
+				.style-button:not([disabled]):active {
+					background-color: var(--fill-tertiary) !important;
+				}
+				.style-button.selected {
+					background-color: var(--fill-quarternary);
+				}
+				.style-button[disabled] {
+					opacity: 0.5;
+				}
+				[data-action="bold"] {
+					@include svgicon("bold", "universal", "16");
+				}
+				[data-action="italic"] {
+					@include svgicon("italic", "universal", "16");
+				}
+				[data-action="underline"] {
+					@include svgicon("underline", "universal", "16");
+				}
+			}
+			
+			#zotero-reference-items-list {
+				padding: 8px;
+				overflow-y: scroll;
+				gap: 10px;
+
+				.list-item {
+					padding: 0;
+					overflow: visible;
+					border-radius: 5px;
+
+					&.highlighted {
+						outline: 1px dashed var(--accent-blue);
+					}
+					
+					.reference-editor {
+						border: none;
+						width: 100%;
+					}
+					.item-buttons {
+						min-width: 52px;
+						align-items: flex-start;
+						justify-content: flex-end;
+						margin-top: 3px;
+						margin-right: 5px;
+
+						button {
+							white-space: nowrap;
+							width: 20px;
+							height: 20px;
+							border: none;
+							border-radius: 5px;
+							background-size: 80% !important;
+							color: var(--fill-secondary);
+							margin-left: 8px;
+
+							&:hover {
+								background-color: var(--fill-quinary) !important;
+							}
+							&:active {
+								background-color: var(--fill-quarternary) !important;
+							}
+						}
+						
+						.item-revert-button {
+							@include svgicon("revert", "universal", "16");
+						}
+						.remove-button {
+							@include svgicon("minus-circle", "universal", "16");
+						}
+						.add-button {
+							@include svgicon("plus-circle", "universal", "16");
+						}
+					}
+
+					.item-labels {
+						align-items: flex-start;
+						justify-content: flex-end;
+						margin-top: 5px;
+						font-size: 11px;
+
+						.label {
+							padding: 1px 4px;
+							border-radius: 5px;
+							display: none;
+
+							&.excluded {
+								background: var(--excluded-color);
+							}
+							&.uncited {
+								background: var(--uncited-color);
+							}
+						}
+					}
+
+					&.excluded {
+						.label.excluded {
+							display: block;
+						}	
+						.reference-editor {
+							opacity: 0.5;
+						}
+					}
+					&.uncited {
+						.label.uncited {
+							display: block;
+						}	
+					}
+				}
+			}
+
+		}
+
+		#zotero-edit-bib-splitter {
+			cursor: row-resize;
+			margin-bottom: -9px;
+		}
+
+		#zotero-edit-bibliography-dialog-bottom {
+			border-top: var(--material-panedivider);
+			background: var(--material-sidepane);
+			height: 80px !important; // make sure it's not affected by splitter
+			padding: 8px 16px 16px 16px;
+
+			#zotero-editor-warning {
+				margin: 0 0 16px 0;
+				color: var(--fill-secondary);
+			}
+
+			#zotero-edit-bibliography-accept-btn {
+				margin-left: 8px;
+			}
+		}
 	}
 }
