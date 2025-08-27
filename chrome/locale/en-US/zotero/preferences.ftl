@@ -67,6 +67,8 @@ preferences-quickCopy-plus =
     .label = { $label }
 
 preferences-styleManager-description = This table lists your available styles: you can add new styles or remove styles you are not using. Whenever you need to select a style to cite with, these will be presented as available options.
+preferences-styleManager-get-additional-styles =
+    .label = Get Additional Styles…
 preferences-styleManager-restore-default =
     .label = Restore Default Styles…
 preferences-styleManager-add-from-file =

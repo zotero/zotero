@@ -27,6 +27,10 @@
 	margin-inline-end: 6px;
 }
 
+#reset-styles-button {
+	margin-inline-end: auto;
+}
+
 #styleManager-buttons {
 	@media (-moz-platform: windows) {
 		// move "Get Additional Styles" to default primary button position on the left
