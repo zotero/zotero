@@ -24,6 +24,8 @@
 */
 
 
+const { FeedProcessor } = ChromeUtils.importESModule("resource://zotero/feeds/FeedProcessor.mjs");
+
 /**
  * Sample feeds:
  * 
@@ -124,43 +126,12 @@ Zotero.FeedReader = function (url) {
 		lastItem.resolve(null);
 	}.bind(this));
 	
-	// The feed processor and related modules assume a content window environment, so we'll simulate
-	// one via a sandbox in a parent window. hiddenDOMWindow doesn't exist outside macOS, so we
-	// prefer other parent windows first, which work fine on all platforms.
-	let parentWindow = Services.wm.getMostRecentWindow("navigator:browser");
-	if (!parentWindow) {
-		parentWindow = Services.ww.activeWindow;
-	}
-	// Use the hidden DOM window on macOS with the main window closed
-	if (!parentWindow) {
-		parentWindow = Services.appShell.hiddenDOMWindow;
-	}
-	if (!parentWindow) {
-		this.terminate("Parent window not available for feed reader");
-		return;
-	}
-	
-	const sandbox = new Cu.Sandbox(parentWindow, {
-		sandboxPrototype: parentWindow,
-		sandboxName: "Feed Processor",
-	});
-	sandbox.Zotero = {
-		debug: Components.utils.exportFunction(Zotero.debug, sandbox),
-	};
-
-	Services.scriptloader.loadSubScript("resource://zotero/feeds/FeedProcessor.js", sandbox);
-	Services.scriptloader.loadSubScript("resource://zotero/feeds/SAXXMLReader.js", sandbox);
-	
 	// Set up asynchronous feed processor
-	const { FeedProcessor } = sandbox;
 	const feedProcessor = new FeedProcessor();
 	if (!feedProcessor.parseAsync) {
 		this.terminate("Feed processor failed to load in parent window");
 		return;
 	}
-
-	// Borrow web utils to fetch feed content
-	const { fetch, URL } = parentWindow;
 	
 	// Pass along the URL
 	const feedUrl = new URL(url);
