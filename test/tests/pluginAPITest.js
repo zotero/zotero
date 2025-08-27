@@ -1050,7 +1050,7 @@ describe("Plugin API", function () {
 						cancelable: true,
 					});
 					button.dispatchEvent(event);
-					let popup = doc.querySelector("#context-pane-add-child-note-button-popup");
+					let popup = notesContext.querySelector(".context-pane-add-child-note-button-popup");
 					return popup;
 				},
 				"notesPane/addStandaloneNote": async () => {
@@ -1060,7 +1060,7 @@ describe("Plugin API", function () {
 						cancelable: true,
 					});
 					button.dispatchEvent(event);
-					let popup = doc.querySelector("#context-pane-add-standalone-note-button-popup");
+					let popup = notesContext.querySelector(".context-pane-add-standalone-note-button-popup");
 					return popup;
 				}
 			};
