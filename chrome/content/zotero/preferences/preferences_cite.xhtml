@@ -34,13 +34,14 @@
 			</hbox>
 			<separator class="thin"/>
 			<hbox id="styleManager-buttons" align="center">
-				<button data-l10n-id="preferences-styleManager-add-from-repo"
-					oncommand="Zotero_Preferences.Cite.openStylesPage()"/>
+				<button id="reset-styles-button"
+					data-l10n-id="preferences-styleManager-restore-default"
+					oncommand="Zotero_Preferences.Cite.resetStyles()"/>
 				<button id="add-from-file-button" data-l10n-id="preferences-styleManager-add-from-file"
 					oncommand="Zotero_Preferences.Cite.addStyle()"/>
-				<button id="reset-styles-button"
-					label="&zotero.preferences.dbMaintenance.resetStyles;"
-					oncommand="Zotero_Preferences.Cite.resetStyles()"/>
+				<spacer flex="1"/>
+				<button id="get-additional-styles-button" label="&zotero.preferences.export.getAdditionalStyles;"
+					oncommand="Zotero_Preferences.Cite.openStylesPage()"/>
 			</hbox>
 		</groupbox>
 		
