@@ -598,16 +598,15 @@ Zotero.Sync.Storage.Local = {
 		}
 		
 		// If newPath is set, the file was renamed, so set item filename to that
-		// and mark for updated
+		// and mark item for upload
 		var path = await item.getFilePathAsync();
 		if (newPath && path != newPath) {
-			// If library isn't editable but filename was changed, update
-			// database without updating the item's mod time, which would result
-			// in a library access error
+			// If library isn't editable but filename was changed, update database without marking
+			// item as unsynced
 			try {
 				if (!Zotero.Items.isEditable(item)) {
 					Zotero.debug("File renamed without library access -- "
-						+ "updating itemAttachments path", 3);
+						+ "updating attachment path", 3);
 					await item.relinkAttachmentFile(newPath, true);
 				}
 				else {

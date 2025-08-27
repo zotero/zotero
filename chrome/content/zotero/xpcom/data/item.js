@@ -2939,10 +2939,8 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 
 /**
  * @param {string} path  File path
- * @param {Boolean} [skipItemUpdate] Don't update attachment item mod time, so that item doesn't
- *     sync. Used when a file needs to be renamed to be accessible but the user doesn't have
- *     access to modify the attachment metadata. This also allows a save when the library is
- *     read-only.
+ * @param {Boolean} [skipItemUpdate] Don't mark item as unsynced. Used when a file needs to be
+ *     renamed to be accessible but the user doesn't have access to modify the attachment metadata.
  */
 Zotero.Item.prototype.relinkAttachmentFile = async function (path, skipItemUpdate) {
 	if (path instanceof Components.interfaces.nsIFile) {
@@ -3028,7 +3026,7 @@ Zotero.Item.prototype.relinkAttachmentFile = async function (path, skipItemUpdat
 	
 	await this.saveTx({
 		skipDateModifiedUpdate: true,
-		skipClientDateModifiedUpdate: skipItemUpdate,
+		skipSyncedUpdate: skipItemUpdate,
 		skipEditCheck: skipItemUpdate
 	});
 	
