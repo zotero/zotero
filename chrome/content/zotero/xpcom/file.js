@@ -632,7 +632,6 @@ Zotero.File = new function () {
 			
 			try {
 				Zotero.debug(`Renaming ${origPath} to ${PathUtils.filename(destPath)}`);
-				Zotero.debug(destPath);
 				await OS.File.move(origPath, destPath, { noOverwrite: !overwrite })
 			}
 			catch (e) {
