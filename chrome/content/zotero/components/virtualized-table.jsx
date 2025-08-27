@@ -1042,6 +1042,8 @@ class VirtualizedTable extends React.Component {
 		this._updateWidth();
 		this.props.treeboxRef && this.props.treeboxRef(this._jsWindow);
 
+		this._setXulTooltip();
+
 		this._topDiv.style.setProperty("--firstColumnExtraWidth", `${this.props.firstColumnExtraWidth || 0}px`);
 		window.addEventListener("resize", () => {
 			this._debouncedRerender();
@@ -1059,6 +1061,42 @@ class VirtualizedTable extends React.Component {
 		}
 	}
 	
+	/**
+	 * Make HTML [title] attribute display a tooltip. Without this
+	 * HTML [title] attribute when embedded in a XUL window does not
+	 * trigger a tooltip to be displayed
+	 * @private
+	 */
+	_setXulTooltip() {
+		// Make sure container xul element has a tooltip set
+		let xulElem = this._topDiv;
+		while (xulElem && xulElem.namespaceURI !== "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul") {
+			xulElem = xulElem.parentElement;
+		}
+		if (!xulElem) return;
+		if (xulElem.getAttribute('tooltip') != 'html-tooltip') {
+			xulElem.setAttribute('tooltip', 'html-tooltip');
+		}
+		if (document.querySelector('tooltip#html-tooltip')) return;
+		let tooltip = document.createXULElement('tooltip');
+		tooltip.id = 'html-tooltip';
+		tooltip.addEventListener('popupshowing', function(e) {
+			let tooltipTitleNode = tooltip.triggerNode?.closest('div *[title], iframe *[title], browser *[title]');
+			if (tooltipTitleNode) {
+				this.setAttribute('label', tooltipTitleNode.getAttribute('title'));
+				return;
+			}
+			e.preventDefault();
+		});
+
+		let popupset = document.querySelector('popupset');
+		if (!popupset) {
+			popupset = document.createXULElement('popupset');
+			document.documentElement.appendChild(popupset);
+		}
+		popupset.appendChild(tooltip);
+	}
+
 	_getWindowedListOptions() {
 		return {
 			getItemCount: this.props.getRowCount,
