@@ -1205,6 +1205,22 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
+	describe("#attachmentModificationTime", function () {
+		it("should return the modification time in milliseconds", async function () {
+			var item = await importFileAttachment('test.png')
+			var mtime = await item.attachmentModificationTime;
+			assert.approximately(mtime, Date.now(), 500);
+		});
+		
+		it("should return undefined if file doesn't exist", async function () {
+			var item = await importFileAttachment('test.png')
+			var path = await item.getFilePathAsync();
+			await IOUtils.remove(path);
+			assert.isFalse(await item.getFilePathAsync());
+			assert.isUndefined(await item.attachmentModificationTime);
+		})
+	});
+	
 	describe("#renameAttachmentFile()", function () {
 		it("should rename an attached file", async function () {
 			var file = getTestDataDirectory();

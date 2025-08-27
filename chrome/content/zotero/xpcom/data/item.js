@@ -3645,12 +3645,22 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentModificationTime', {
 			return undefined;
 		}
 		
-		var path = await this.getFilePathAsync();
+		var path = await this.getFilePath();
 		if (!path) {
 			return undefined;
 		}
 		
-		var fmtime = (((await OS.File.stat(path))).lastModificationDate).getTime();
+		var fmtime;
+		try {
+			({ lastModified: fmtime } = await IOUtils.stat(path));
+		}
+		catch (e) {
+			if (DOMException.isInstance(e) && e.name == 'NotFoundError') {
+				Zotero.debug(`Attachment file ${path} not found -- can't get modification time`, 2);
+				return undefined;
+			}
+			throw e;
+		}
 		
 		if (fmtime < 1) {
 			Zotero.debug("File mod time " + fmtime + " is less than 1 -- interpreting as 1", 2);
