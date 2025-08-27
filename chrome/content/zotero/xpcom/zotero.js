@@ -2046,26 +2046,19 @@ Zotero.VersionHeader = {
 	},
 	
 	/**
-	 * Replace Zotero/[version] with Firefox/[version] in the default user agent
+	 * Add Firefox/[version] to the default user agent
 	 *
 	 * @param {String} ua - User Agent
-	 * @param {String} [testAppName] - App name to look for (necessary in tests, which are
-	 *     currently run in Firefox)
 	 */
-	update: function (ua, testAppName) {
+	update: function (ua) {
 		var info = Services.appinfo;
-		var appName = testAppName || info.name;
+		var appName = info.name;
 		
 		var pos = ua.indexOf(appName + '/');
-		var appPart = ua.substr(pos);
 		
-		// Default UA (not a faked UA from the connector
+		// Default UA (not a faked UA from the connector)
 		if (pos != -1) {
-			ua = ua.slice(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0`;
-			// To fix cloudflare bot detection. rv frozen to avoid some websites
-			// detecting us as IE11. See https://bugzilla.mozilla.org/show_bug.cgi?id=1806690
-			// For some reason we are note getting this from the Firefox base.
-			ua = ua.replace('rv:115', 'rv:109');
+			ua = ua.substring(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0 ` + ua.substring(pos);
 		}
 		
 		return ua;
