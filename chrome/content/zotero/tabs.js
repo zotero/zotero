@@ -134,7 +134,8 @@ var Zotero_Tabs = new function () {
 				renderTitle: tab.type === 'reader' || tab.type === 'reader-unloaded',
 				selected: tab.id == this._selectedID,
 				isItemType: tab.id !== 'zotero-pane',
-				icon: tab.data?.icon || null
+				icon: tab.data?.icon || null,
+				audioStatus: tab.audioStatus,
 			};
 		}));
 		// Disable File > Close menuitem if multiple tabs are open
@@ -171,6 +172,7 @@ var Zotero_Tabs = new function () {
 				onTabMove={this.move.bind(this)}
 				onTabClose={this.close.bind(this)}
 				onContextMenu={this._openMenu.bind(this)}
+				onToggleAudio={this.toggleAudio.bind(this)}
 				refocusReader={this.refocusReader.bind(this)}
 				onLoad={this._update.bind(this)}
 			/>
@@ -322,6 +324,28 @@ var Zotero_Tabs = new function () {
 		}
 		tab.title = title;
 		this._update();
+	};
+	
+	this.setAudioStatus = function (id, status) {
+		if (typeof title != 'object' || !('active' in status && 'paused' in status)) {
+			throw new Error(`'status' should be an object with { active, paused } properties`);
+		}
+		var { tab } = this._getTab(id);
+		if (!tab) {
+			return;
+		}
+		tab.audioStatus = status;
+		this._update();
+	};
+	
+	this.toggleAudio = function (id) {
+		var { tab } = this._getTab(id);
+		if (!tab) {
+			return;
+		}
+		if (tab.type === 'reader') {
+			Zotero.Reader.getByTabID(id).toggleReadAloudPaused();
+		}
 	};
 
 	/**
@@ -570,12 +594,18 @@ var Zotero_Tabs = new function () {
 		// isn't update synchronously
 		setTimeout(() => this.unloadUnusedTabs());
 	};
+	
+	this.canUnload = function (id) {
+		var { tab } = this._getTab(id);
+		return tab && tab.id !== this._selectedID && tab.type === 'reader'
+			&& !(tab.audioStatus && tab.audioStatus.active && !tab.audioStatus.paused);
+	};
 
 	this.unload = function (id) {
-		var { tab, tabIndex } = this._getTab(id);
-		if (!tab || tab.id === this._selectedID || tab.type !== 'reader') {
+		if (!this.canUnload(id)) {
 			return;
 		}
+		var { tab, tabIndex } = this._getTab(id);
 		this.close(tab.id);
 		this.add({
 			id: tab.id,
