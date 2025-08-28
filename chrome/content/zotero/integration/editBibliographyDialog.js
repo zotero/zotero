@@ -43,7 +43,10 @@ var onLoad = async function () {
 	
 	revertAllButton = document.getElementById("zotero-edit-bibliography-revert-all-btn");
 	revertAllButton.label = Zotero.getString("integration.revertAll.button");
-	revertAllButton.addEventListener('command', () => ReferenceItems.revert());
+	revertAllButton.addEventListener('command', () => {
+		ReferenceItems.revert();
+		BibliographyListUI.refreshBibRows();
+	});
 
 	let quickSearchBox = document.getElementById("zotero-tb-search");
 	quickSearchBox.addEventListener("command", handleQuickSearch);
@@ -64,7 +67,8 @@ var onLoad = async function () {
 	while (!itemsView.tree) {
 		await Zotero.Promise.delay(10);
 	}
-	await ReferenceItems.refreshItems(true);
+	await ReferenceItems.refreshItems();
+	await BibliographyListUI.refreshBibRows({ skipEditorLoad: true });
 
 	EditorActionButtons.updateActionButtons();
 
@@ -110,9 +114,10 @@ var initLibraryTrees = async function () {
 			cell.append(iconWrapper);
 			let icon = inBibliography ? getCSSIcon('minus-circle') : getCSSIcon('plus-circle');
 			iconWrapper.append(icon);
-			iconWrapper.addEventListener('click', (event) => {
+			iconWrapper.addEventListener('click', () => {
 				let item = itemsView.getRow(index).ref;
 				ReferenceItems.toggleItemInBibliography([item.id]);
+				BibliographyListUI.refreshBibRows({ items: [item.id] });
 			});
 			return cell;
 		}
@@ -125,6 +130,7 @@ var initLibraryTrees = async function () {
 		onActivate: (event, items) => {
 			let itemIDs = items.map(item => item.id);
 			ReferenceItems.toggleItemInBibliography(itemIDs);
+			BibliographyListUI.refreshBibRows({ items: itemIDs });
 		},
 		id: "edit-bibliography-items-tree",
 		dragAndDrop: false,
@@ -231,7 +237,11 @@ const BibliographyListUI = {
 	},
 
 	// refresh the recorded items in the bibliography and the itemTrees
-	async refreshBibRows(skipEditorLoad) {
+	// @param items {Array} optional list of itemIDs to update, if not provided, all items are updated
+	// @param skipEditorLoad {Boolean} if true, only placeholders for editors are created
+	async refreshBibRows({ items, skipEditorLoad }) {
+		this.updateItemTree();
+
 		let referenceItemsList = document.getElementById('zotero-reference-items-list');
 		let listEntries = [...referenceItemsList.querySelectorAll('.list-item')];
 
@@ -244,10 +254,11 @@ const BibliographyListUI = {
 			}
 		}
 
+		let itemsToUpdate = items || ReferenceItems.sortedEditorItemIDs;
 		// Create a bibliogrqaphy row for each item in the bibliography
 		// Initially it has a placeholder for the editor, which are replaced with
 		// actual iframes after for better performance
-		for (let itemID of ReferenceItems.sortedEditorItemIDs) {
+		for (let itemID of itemsToUpdate) {
 			// if the row for that item already exists, do not create a new one
 			if (referenceItemsList.querySelector(`.list-item[data-item-id="${itemID}"]`)) {
 				this.setBibRow(itemID);
@@ -259,20 +270,17 @@ const BibliographyListUI = {
 			
 			listItem.querySelector(".add-button").addEventListener('click', () => {
 				ReferenceItems.add([itemID]);
+				this.refreshBibRows({ items: [itemID] });
 			});
 			listItem.querySelector(".remove-button").addEventListener('click', () => {
 				ReferenceItems.remove([itemID]);
+				this.refreshBibRows({ items: [itemID] });
 			});
-
-
-			let revertBtn = listItem.querySelector(".item-revert-button");
-			revertBtn.addEventListener('click', () => {
+			listItem.querySelector(".item-revert-button").addEventListener('click', () => {
 				ReferenceItems.revert(itemID);
+				this.refreshBibRows({ items: [itemID] });
 			});
-			this.updateRevertButtonStatus(itemID);
-			this.setBibRow(itemID);
 		}
-		
 		// Ensure list items are in the correct order
 		for (let i = 0; i < ReferenceItems.sortedEditorItemIDs.length; i++) {
 			let itemID = ReferenceItems.sortedEditorItemIDs[i];
@@ -316,6 +324,8 @@ const BibliographyListUI = {
 		if (!placeholder || this.editorMap.has(itemID)) return;
 		// Wait for the editor to load and then set its content
 		let editorFrame = document.createElement("iframe");
+		// initial height for 2 lines of text
+		editorFrame.style.height = "36px";
 		editorFrame.src = "simpleEditor.html";
 		editorFrame.className = "reference-editor";
 		editorFrame.setAttribute("type", "content");
@@ -359,6 +369,29 @@ const BibliographyListUI = {
 		});
 	},
 
+	// update the itemTree to highlight items that are in bibliography or excluded cited items
+	updateItemTree: async function () {
+		if (!itemsView.tree) return;
+		await itemsView.refresh();
+		let highlightRowObj = {};
+		for (let itemID of ReferenceItems.sortedEditorItemIDs) {
+			let inBibliography = ReferenceItems.isInBibliography(itemID);
+			let excluded = ReferenceItems.isCited(itemID) && !inBibliography;
+			let uncited = !ReferenceItems.isCited(itemID) && inBibliography;
+			if (excluded) {
+				highlightRowObj[itemID] = "excluded";
+			}
+			else if (uncited) {
+				highlightRowObj[itemID] = "uncited";
+			}
+			else if (inBibliography) {
+				highlightRowObj[itemID] = "bib";
+			}
+		}
+		let itemIDs = Object.keys(highlightRowObj).map(id => parseInt(id));
+		await itemsView.setHighlightedRows(itemIDs, highlightRowObj);
+	},
+
 	updateRevertButtonStatus: function (itemID) {
 		let revertBtn = document.querySelector(`.list-item[data-item-id="${itemID}"] .item-revert-button`);
 		let citedNotInBibliography = ReferenceItems.isCited(itemID) && !ReferenceItems.isInBibliography(itemID);
@@ -378,15 +411,10 @@ const BibliographyListUI = {
 	setEditorIframeHeight(editor) {
 		let height = editor.getTotalHeight();
 		let editorIframe = editor.content.ownerGlobal.frameElement;
-		editorIframe.style.height = `${height}px`;
-		// Double-check that the height is right: scrollHeight is always returned as
-		// an integer even if the content's height has a fraction. After the initial
-		// resizing, content may still be scrollable. But on the second attempt,
-		// scrollHeight seems to be always correct.
-		setTimeout(() => {
-			let height = editor.getTotalHeight();
-			editorIframe.style.height = `${height}px`;
-		}, 10);
+		// scrollHeight returned before resizing sometimes is 1px less than the actual
+		// height that we need. In that case, the editor will still be scrollable.
+		// To ensure this never happens, add extra 1px to the height.
+		editorIframe.style.height = `${height + 1}px`;
 	},
 
 	onSplitterDrag: function () {
@@ -491,7 +519,6 @@ const ReferenceItems = {
 		}
 		window.isPristine = false;
 		
-		// remove
 		for (let itemID of itemIDs) {
 			bibEditInterface.remove(itemID);
 		}
@@ -526,11 +553,12 @@ const ReferenceItems = {
 
 		if (revertingItem) {
 			bibEditInterface.revert(itemID);
+			this.refreshItems();
 		}
 		else {
 			bibEditInterface.revertAll();
+			this.refreshItems();
 		}
-		this.refreshItems();
 	},
 
 	// load all relevant items and prepare temp cslEngine
@@ -544,7 +572,7 @@ const ReferenceItems = {
 		this.cslEngine.setOutputFormat("html");
 
 		this.citedItemIDs = new Set(Object.keys(bibEditInterface._citationsByItemID).map(itemID => parseInt(itemID)));
-		await this.refreshItems(true);
+		await this.refreshItems();
 		// load all items included in the bibliography, as well as all cited items
 		let allItems = await Zotero.Items.getAsync([...this.referenceItemIDs, ...this.citedItemIDs]);
 		await Zotero.Items.loadDataTypes(allItems);
@@ -552,7 +580,7 @@ const ReferenceItems = {
 
 	// refresh list of items in the bibliography and create a sorted list
 	// of items in the bibliography + cited but excluded items
-	refreshItems: async function (skipEditorLoad) {
+	refreshItems: async function () {
 		this.referenceItemIDs = new Set(bibEditInterface.bib[0].entry_ids.map((itemID) => {
 			let id = itemID[0];
 			let parsedInt = parseInt(id);
@@ -567,27 +595,6 @@ const ReferenceItems = {
 			let parsedInt = parseInt(id);
 			return parsedInt || id;
 		});
-		BibliographyListUI.refreshBibRows(skipEditorLoad);
-		if (itemsView?.tree) {
-			await itemsView.refresh();
-			let highlightRowObj = {};
-			for (let itemID of this.sortedEditorItemIDs) {
-				let inBibliography = ReferenceItems.isInBibliography(itemID);
-				let excluded = ReferenceItems.isCited(itemID) && !inBibliography;
-				let uncited = !ReferenceItems.isCited(itemID) && inBibliography;
-				if (excluded) {
-					highlightRowObj[itemID] = "excluded";
-				}
-				else if (uncited) {
-					highlightRowObj[itemID] = "uncited";
-				}
-				else if (inBibliography) {
-					highlightRowObj[itemID] = "bib";
-				}
-			}
-			let itemIDs = Object.keys(highlightRowObj).map(id => parseInt(id));
-			await itemsView.setHighlightedRows(itemIDs, highlightRowObj);
-		}
 	},
 
 	getEditorContent: function (itemID) {
