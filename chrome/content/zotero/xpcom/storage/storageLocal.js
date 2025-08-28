@@ -794,6 +794,7 @@ Zotero.Sync.Storage.Local = {
 		var count = 0;
 		
 		var itemFileName = item.attachmentFilename;
+		var filteredItemFileName = Zotero.File.getValidFileName(itemFileName);
 		
 		var createdFiles = new Set();
 		var entries = zipReader.findEntries(null);
@@ -842,13 +843,13 @@ Zotero.Sync.Storage.Local = {
 			// take our chances and use that name
 			if (count == 1 && !entries.hasMore() && itemFileName) {
 				// May not be necessary, but let's be safe
-				itemFileName = Zotero.File.getValidFileName(itemFileName);
-				if (itemFileName != filePath) {
-					let msg = "Renaming single file '" + filePath + "' in ZIP to known filename '" + itemFileName + "'";
+				if (filteredItemFileName != filePath) {
+					let msg = "Renaming single file '" + filePath + "' in ZIP to known filename '"
+						+ filteredItemFileName + "'";
 					Zotero.debug(msg, 2);
 					Components.utils.reportError(msg);
-					filePath = itemFileName;
-					destPath = OS.Path.join(PathUtils.parent(destPath), itemFileName);
+					filePath = filteredItemFileName;
+					destPath = OS.Path.join(PathUtils.parent(destPath), filteredItemFileName);
 					renamed = true;
 					primaryFile = true;
 				}
@@ -970,14 +971,14 @@ Zotero.Sync.Storage.Local = {
 			zipFile.remove(false);
 		}
 		
-		// If multiple files and none match known filename, but there's only one HTML file, rename it
-		if (!createdFiles.has(itemFileName)) {
-			Zotero.debug(`${itemFileName} not found among extracted files`);
+		// If no extracted files match the known filename, but there's only one HTML file, rename it
+		if (!createdFiles.has(filteredItemFileName)) {
+			Zotero.debug(`${filteredItemFileName} not found among extracted files`);
 			let htmlFiles = [...createdFiles].filter(x => /\.html?$/.test(x));
 			if (htmlFiles.length == 1) {
-				let destPath = PathUtils.join(parentDir, itemFileName);
+				let destPath = PathUtils.join(parentDir, filteredItemFileName);
 				try {
-					Zotero.debug(`Renaming ${htmlFiles[0]} to ${itemFileName}`);
+					Zotero.debug(`Renaming ${htmlFiles[0]} to ${filteredItemFileName}`);
 					yield IOUtils.move(PathUtils.join(parentDir, htmlFiles[0]), destPath);
 					returnFile = destPath;
 				}
