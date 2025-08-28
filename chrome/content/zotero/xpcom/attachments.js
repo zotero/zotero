@@ -2386,7 +2386,7 @@ Zotero.Attachments = new function () {
 		};
 
 
-		const common = (value, { start = false, truncate = false, prefix = '', suffix = '', match = '', replaceFrom = '', replaceTo = '', regexOpts = 'i', case: textCase = '' } = {}) => {
+		const common = (value, { start = false, truncate = false, prefix = '', suffix = '', match = '', replaceFrom = '', replaceTo = '', regexOpts = 'ui', case: textCase = '' } = {}) => {
 			if (value === '' || value === null || typeof value === 'undefined') {
 				return '';
 			}

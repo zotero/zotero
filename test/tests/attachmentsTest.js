@@ -1674,7 +1674,7 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
-		it('should preserve unicode characters', async function () {
+		it('should work with unicode characters', async function () {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemUnicode, { formatString: '{{ title case="camel" }}' }),
 				'金毛猎犬GoldenRetriever'
@@ -1686,6 +1686,16 @@ describe("Zotero.Attachments", function() {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemUnicode, { formatString: '{{ title case="hyphen" }}' }),
 				'金毛猎犬-golden-retriever'
+			);
+			// By default we include `u flag` to support unicode features
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemUnicode, { formatString: '{{ title replaceFrom="(\\p{L}+)" replaceTo="Dog" }}' }),
+				'Dog - Golden Retriever'
+			);
+			// But it's possible to override regexOpts and disable unicode features
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemUnicode, { formatString: '{{ title replaceFrom="(\\p{L}+)" replaceTo="Dog" regexOpts="i" }}' }),
+				'金毛猎犬 - Golden Retriever'
 			);
 		});
 
