@@ -557,6 +557,71 @@ describe("Zotero.Sync.Storage.Local", function () {
 				);
 				yield assert.eventually.equal(item.attachmentModificationTime, mtime);
 			});
+			
+			
+			it("should rename a single HTML file in an old multi-file ZIP to match the current primary filename", async function () {
+				var libraryID = Zotero.Libraries.userLibraryID;
+				var parentItem = await createDataObject('item');
+				var key = Zotero.DataObjectUtilities.generateKey();
+				
+				var oldFilename = "a.html";
+				var auxFilename = "a.gif";
+				var newFilename = "b.html";
+				var fileContents = Zotero.Utilities.randomString();
+				var tmpDir = Zotero.getTempDirectory().path;
+				var zipFile = OS.Path.join(tmpDir, key + '.tmp');
+				
+				// Create ZIP file
+				var tmpDir = Zotero.getTempDirectory().path;
+				var zipDir = await getTempDirectory();
+				await Zotero.File.putContentsAsync(PathUtils.join(zipDir, oldFilename), fileContents);
+				await Zotero.File.putContentsAsync(PathUtils.join(zipDir, auxFilename), '');
+				await Zotero.File.zipDirectory(zipDir, zipFile);
+				await removeDir(zipDir);
+				
+				var md5 = Zotero.Utilities.Internal.md5(Zotero.File.pathToFile(zipFile));
+				var mtime = 1445667239000;
+				
+				var json = {
+					key,
+					version: 10,
+					itemType: 'attachment',
+					linkMode: 'imported_url',
+					url: 'https://example.com/foo.html',
+					filename: 'b.html',
+					contentType: 'text/plain',
+					charset: 'utf-8',
+					md5,
+					mtime
+				};
+				await Zotero.Sync.Data.Local.processObjectsFromJSON('item', libraryID, [json]);
+				
+				var item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+				
+				await Zotero.Sync.Storage.Local.processDownload({
+					item,
+					md5,
+					mtime,
+					compressed: true
+				});
+				await OS.File.remove(zipFile);
+				
+				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
+				
+				// Make sure path is set correctly
+				assert.equal(item.getFilePath(), PathUtils.join(storageDir, newFilename));
+				// Make sure previous file doesn't exist
+				assert.isFalse(await IOUtils.exists(PathUtils.join(storageDir, oldFilename)));
+				// And new ones do
+				assert.isTrue(await IOUtils.exists(PathUtils.join(storageDir, newFilename)));
+				assert.isTrue(await IOUtils.exists(PathUtils.join(storageDir, auxFilename)));
+				
+				// Make sure main file matches attachment hash and mtime
+				assert.equal(
+					await item.attachmentHash, Zotero.Utilities.Internal.md5(fileContents)
+				);
+				assert.equal(await item.attachmentModificationTime, mtime);
+			});
 		});
 	})
 	

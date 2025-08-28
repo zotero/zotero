@@ -622,11 +622,11 @@ Zotero.Sync.Storage.Local = {
 		}
 		
 		if (!path) {
-			// This can happen if an HTML snapshot filename was changed and synced
-			// elsewhere but the renamed file wasn't synced, so the ZIP doesn't
-			// contain a file with the known name
-			Components.utils.reportError("File '" + item.attachmentFilename
-				+ "' not found after processing download " + item.libraryKey);
+			// This generally shouldn't happen, since if the ZIP doesn't contain the primary file,
+			// and there's only one HTML file within it, we rename it to the current filename, but
+			// it could occur if there are multiple HTML files or there's an error renaming the file.
+			Zotero.logError("File '" + item.attachmentFilename + "' not found after processing "
+				+ "download " + item.libraryKey);
 			return new Zotero.Sync.Storage.Result({
 				localChanges: false
 			});
@@ -795,6 +795,7 @@ Zotero.Sync.Storage.Local = {
 		
 		var itemFileName = item.attachmentFilename;
 		
+		var createdFiles = new Set();
 		var entries = zipReader.findEntries(null);
 		while (entries.hasMore()) {
 			var entryName = entries.getNext();
@@ -835,7 +836,7 @@ Zotero.Sync.Storage.Local = {
 				filtered = true;
 			}
 			
-			var destPath = OS.Path.join(parentDir, ...filePath.split('/'));
+			let destPath = OS.Path.join(parentDir, ...filePath.split('/'));
 			
 			// If only one file in zip and it doesn't match the known filename,
 			// take our chances and use that name
@@ -910,6 +911,7 @@ Zotero.Sync.Storage.Local = {
 			
 			try {
 				zipReader.extract(entryName, Zotero.File.pathToFile(destPath));
+				createdFiles.add(PathUtils.filename(destPath));
 			}
 			catch (e) {
 				try {
@@ -966,6 +968,23 @@ Zotero.Sync.Storage.Local = {
 		}
 		else {
 			zipFile.remove(false);
+		}
+		
+		// If multiple files and none match known filename, but there's only one HTML file, rename it
+		if (!createdFiles.has(itemFileName)) {
+			Zotero.debug(`${itemFileName} not found among extracted files`);
+			let htmlFiles = [...createdFiles].filter(x => /\.html?$/.test(x));
+			if (htmlFiles.length == 1) {
+				let destPath = PathUtils.join(parentDir, itemFileName);
+				try {
+					Zotero.debug(`Renaming ${htmlFiles[0]} to ${itemFileName}`);
+					yield IOUtils.move(PathUtils.join(parentDir, htmlFiles[0]), destPath);
+					returnFile = destPath;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
 		}
 		
 		return returnFile;
