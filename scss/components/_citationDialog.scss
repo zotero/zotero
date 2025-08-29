@@ -344,61 +344,6 @@
 			#item-tree-container {
 				min-height: 100%;
 				flex: 1; /* expand all the way to the right */
-
-				// the column with the + button
-				.clickable {
-					// make sure the button is centered
-					display: flex;
-					justify-content: center;
-					padding: 0;
-
-					// the actual clickable button
-					.icon-action {
-						display: flex;
-						justify-content: center;
-						width: 20px;
-						height: 20px;
-						align-items: center;
-						border-radius: 6px;
-						.icon {
-							width: 16px;
-							height: 16px;
-						}
-						// class to handle hover and active effect, since :hover is applied to the entire row
-						&.hover:not([disabled]) {
-							background-color: var(--fill-quinary);
-						}
-						&.active:not([disabled]) {
-							background-color: var(--fill-quarternary);
-						}
-						&[disabled] {
-							color: var(--color-gray-50);
-						}
-					}
-				}
-				// lighter hover and active effects on + buttons in selected rows
-				.row.selected {
-					.icon-action {
-						&.hover:not([disabled]) {
-							background-color: #ffffff1a;
-						}
-						&.active:not([disabled]) {
-							background-color: #ffffff33;
-						}
-					}
-				}
-				.row.highlighted {
-					border-radius: 0;
-					
-				}
-				.row.first-highlighted {
-					border-top-left-radius: 5px;
-					border-top-right-radius: 5px;
-				}
-				.row.last-highlighted {
-					border-bottom-left-radius: 5px;
-					border-bottom-right-radius: 5px;
-				}
 			}
 		}
 	}
