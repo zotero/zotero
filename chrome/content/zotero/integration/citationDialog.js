@@ -611,7 +611,7 @@ class LibraryLayout extends Layout {
 		itemsTree.addEventListener("mouseup", event => this._handleItemsViewRowClick(event), true);
 		// manually handle hover effect on +/- icon, since css :hover applies to the entire row
 		itemsTree.addEventListener("mousemove", event => this._handleItemsViewMouseMove(event));
-		// handle backspace to remove an item from citation
+		// handle backspace/delete to remove an item from citation
 		itemsTree.addEventListener("keypress", event => this._handleItemsViewKeyPress(event));
 		// only highlight bubbles of selected rows when the focus is in itemTree
 		// when focus leaves the items table, bubbles highlighting is removed
@@ -733,9 +733,9 @@ class LibraryLayout extends Layout {
 		hoveredOverIcon.classList.add("hover");
 	}
 
-	// backspace in itemsView deletes items from the citation
+	// backspace/delete in itemsView deletes items from the citation
 	_handleItemsViewKeyPress(event) {
-		if (event.key == "Backspace") {
+		if (event.key == "Delete" || Zotero.isMac && event.key == "Backspace") {
 			let itemsToRemove = this.itemsView.getSelectedItems();
 			for (let item of itemsToRemove) {
 				let items = CitationDataManager.getItems({ itemID: item.id });
