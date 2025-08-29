@@ -57,7 +57,7 @@ var onLoad = async function () {
 	document.getElementById("zotero-edit-bibliography-accept-btn").addEventListener('command', accept);
 
 	// initialie collection and item tree
-	initLibraryTrees();
+	await initLibraryTrees();
 	// load all reference and cited items
 	await ReferenceItems.load();
 	// initialize editor buttons
@@ -251,7 +251,7 @@ const BibliographyListUI = {
 
 		// Remove entries that are no longer needed
 		for (let entry of listEntries) {
-			let itemID = parseInt(entry.getAttribute('data-item-id'));
+			let itemID = entry.getAttribute('data-item-id');
 			if (!ReferenceItems.itemsInBibliography.includes(itemID)) {
 				referenceItemsList.removeChild(entry);
 				this.editorMap.delete(itemID);
@@ -431,7 +431,7 @@ const BibliographyListUI = {
 
 	getCurrentEditor: function () {
 		if (document.activeElement.classList.contains("reference-editor")) {
-			let itemID = parseInt(document.activeElement.closest(".list-item").getAttribute("data-item-id"));
+			let itemID = document.activeElement.closest(".list-item").getAttribute("data-item-id");
 			return this.editorMap.get(itemID);
 		}
 		return null;
@@ -587,28 +587,24 @@ const ReferenceItems = {
 
 	// initialize the singleton and load all relevant items
 	load: async function () {
-		this.citedItemIDs = new Set(Object.keys(bibEditInterface._citationsByItemID).map(itemID => parseInt(itemID)));
+		this.citedItemIDs = new Set(Object.keys(bibEditInterface._citationsByItemID));
 		// Cited but omitted items need to appear at their proper position in the bibliography.
 		// For this, we store omittedItemIDs locally, clear all omitted items from the bibliography
 		// and generate the bibliography as if there are no omitted items in it.
 		// Otherwise, omitted items would not appear at all.
 		// When the dialog is accepted, omittedItemIDs are passed back to bibEditInterface
-		this.omittedItemIDs = new Set([...bibEditInterface.bibliography.omittedItemIDs].map(id => parseInt(id)));
+		this.omittedItemIDs = new Set([...bibEditInterface.bibliography.omittedItemIDs]);
 		bibEditInterface.bibliography.omittedItemIDs.clear();
 		bibEditInterface._update();
 		this.refreshBibItems();
 		// load all items included in the bibliography list
-		let allItems = await Zotero.Items.getAsync([...this.itemsInBibliography]);
+		let allItems = await Zotero.Items.getAsync([...this.itemsInBibliography].filter(id => typeof id === 'number'));
 		await Zotero.Items.loadDataTypes(allItems);
 	},
 
 	// refresh items appearing in the bibliography list
 	refreshBibItems: async function () {
-		this.itemsInBibliography = bibEditInterface.bib[0].entry_ids.map((itemID) => {
-			let id = itemID[0];
-			let parsedInt = parseInt(id);
-			return parsedInt || id;
-		});
+		this.itemsInBibliography = bibEditInterface.bib[0].entry_ids.map(itemID => itemID[0]);
 	},
 
 	getEditorContent: function (itemID) {
