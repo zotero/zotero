@@ -106,12 +106,18 @@ export class CitationDialogPopupsHandler {
 
 		// add locator labels if they don't exist yet
 		if (this._getNode("#label").childElementCount == 0) {
-			let locators = Zotero.Cite.labels;
-			for (var locator of locators) {
-				let locatorLabel = Zotero.Cite.getLocatorString(locator);
+			let locators = Zotero.Cite.labels.map((locator) => {
+				return {
+					label: Zotero.Cite.getLocatorString(locator),
+					value: locator
+				};
+			});
+			// Sort locators alphabetically by their label (for non-english locales)
+			locators.sort((a, b) => a.label.localeCompare(b.label));
+			for (var { label, value } of locators) {
 				var option = this.doc.createElement("option");
-				option.value = locator;
-				option.label = locatorLabel;
+				option.value = value;
+				option.label = label;
 				this._getNode("#label").appendChild(option);
 			}
 		}
