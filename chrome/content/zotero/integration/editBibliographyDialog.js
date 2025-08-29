@@ -491,6 +491,9 @@ const ReferenceItems = {
 	itemsInBibliography: [], // including cited items excluded from bibliography to preserve their order
 
 	isInBibliography: function (itemID) {
+		if (typeof itemID !== 'string') {
+			itemID = itemID.toString();
+		}
 		return this.itemsInBibliography.includes(itemID) && !this.omittedItemIDs.has(itemID);
 	},
 
