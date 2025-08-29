@@ -67,13 +67,12 @@ var onLoad = async function () {
 	while (!itemsView.tree) {
 		await Zotero.Promise.delay(10);
 	}
-	await ReferenceItems.refreshItems();
 	await BibliographyListUI.refreshBibRows({ skipEditorLoad: true });
 
 	EditorActionButtons.updateActionButtons();
 
 	// Load the first 10 editors so that they are visible as soon as possible
-	for (let itemID of ReferenceItems.sortedEditorItemIDs.slice(0, 10)) {
+	for (let itemID of ReferenceItems.itemsInBibliography.slice(0, 10)) {
 		BibliographyListUI.loadEditor(itemID);
 	}
 	
@@ -182,6 +181,11 @@ var initLibraryTrees = async function () {
 
 var accept = function () {
 	if (_accepted) return;
+	// Remove any omitted items from the bibliography before accepting
+	bibEditInterface.bibliography.omittedItemIDs = ReferenceItems.omittedItemIDs;
+	for (let itemID of ReferenceItems.omittedItemIDs) {
+		bibEditInterface.remove(itemID);
+	}
 	_accepted = true;
 	window.close();
 };
@@ -215,7 +219,7 @@ const BibliographyListUI = {
 	// set the proper state of a bibliography row's editor and buttons
 	setBibRow: function (itemID) {
 		let listItem = document.querySelector(`.list-item[data-item-id="${itemID}"]`);
-		let itemCitedNotInBibliography = ReferenceItems.isCited(itemID) && !ReferenceItems.isInBibliography(itemID);
+		let itemCitedNotInBibliography = ReferenceItems.isCited(itemID) && ReferenceItems.isOmitted(itemID);
 		listItem.classList.toggle('excluded', itemCitedNotInBibliography);
 		listItem.querySelector(".add-button").hidden = !itemCitedNotInBibliography;
 		listItem.querySelector(".remove-button").hidden = itemCitedNotInBibliography;
@@ -248,13 +252,16 @@ const BibliographyListUI = {
 		// Remove entries that are no longer needed
 		for (let entry of listEntries) {
 			let itemID = parseInt(entry.getAttribute('data-item-id'));
-			if (!ReferenceItems.sortedEditorItemIDs.includes(itemID)) {
+			if (!ReferenceItems.itemsInBibliography.includes(itemID)) {
 				referenceItemsList.removeChild(entry);
 				this.editorMap.delete(itemID);
+				if (items) {
+					items = items.filter(id => id != itemID);
+				}
 			}
 		}
 
-		let itemsToUpdate = items || ReferenceItems.sortedEditorItemIDs;
+		let itemsToUpdate = items || ReferenceItems.itemsInBibliography;
 		// Create a bibliogrqaphy row for each item in the bibliography
 		// Initially it has a placeholder for the editor, which are replaced with
 		// actual iframes after for better performance
@@ -282,8 +289,8 @@ const BibliographyListUI = {
 			});
 		}
 		// Ensure list items are in the correct order
-		for (let i = 0; i < ReferenceItems.sortedEditorItemIDs.length; i++) {
-			let itemID = ReferenceItems.sortedEditorItemIDs[i];
+		for (let i = 0; i < ReferenceItems.itemsInBibliography.length; i++) {
+			let itemID = ReferenceItems.itemsInBibliography[i];
 			let listItem = referenceItemsList.querySelector(`.list-item[data-item-id="${itemID}"]`);
 			let currentIndex = Array.from(referenceItemsList.children).indexOf(listItem);
 			
@@ -296,7 +303,7 @@ const BibliographyListUI = {
 				// If it needs to be in any other position
 				else {
 					let beforeItem = referenceItemsList.querySelector(
-						`.list-item[data-item-id="${ReferenceItems.sortedEditorItemIDs[i-1]}"]`
+						`.list-item[data-item-id="${ReferenceItems.itemsInBibliography[i - 1]}"]`
 					);
 					beforeItem.after(listItem);
 				}
@@ -312,7 +319,7 @@ const BibliographyListUI = {
 	},
 
 	loadAllEditors: function () {
-		for (let itemID of ReferenceItems.sortedEditorItemIDs) {
+		for (let itemID of ReferenceItems.itemsInBibliography) {
 			BibliographyListUI.loadEditor(itemID);
 		}
 	},
@@ -374,7 +381,7 @@ const BibliographyListUI = {
 		if (!itemsView.tree) return;
 		await itemsView.refresh();
 		let highlightRowObj = {};
-		for (let itemID of ReferenceItems.sortedEditorItemIDs) {
+		for (let itemID of ReferenceItems.itemsInBibliography) {
 			let inBibliography = ReferenceItems.isInBibliography(itemID);
 			let excluded = ReferenceItems.isCited(itemID) && !inBibliography;
 			let uncited = !ReferenceItems.isCited(itemID) && inBibliography;
@@ -479,14 +486,16 @@ const EditorActionButtons = {
 
 // Management of items included in the bibliography
 const ReferenceItems = {
-	referenceItemIDs: new Set(),
 	citedItemIDs: new Set(),
-	sortedEditorItemIDs: [],
-	cslEngine: null,
-	mockBibWithCited: null,
+	omittedItemIDs: new Set(),
+	itemsInBibliography: [], // including cited items excluded from bibliography to preserve their order
 
 	isInBibliography: function (itemID) {
-		return this.referenceItemIDs.has(itemID);
+		return this.itemsInBibliography.includes(itemID) && !this.omittedItemIDs.has(itemID);
+	},
+
+	isOmitted: function (itemID) {
+		return this.omittedItemIDs.has(itemID);
 	},
 
 	isCited: function (itemID) {
@@ -496,14 +505,21 @@ const ReferenceItems = {
 	add: function (itemIDs) {
 		window.isPristine = false;
 		for (let itemID of itemIDs) {
-			bibEditInterface.add(itemID);
+			// if the item is cited but was omitted, remove it from omitted list
+			if (this.omittedItemIDs.has(itemID)) {
+				this.omittedItemIDs.delete(itemID);
+			}
+			// add uncited item
+			else {
+				bibEditInterface.add(itemID);
+			}
 		}
-		this.refreshItems();
+		this.refreshBibItems();
 	},
 
 	remove: function (itemIDs) {
 		// if cited in bibliography, warn before removing
-		var isCited = itemIDs.some(itemID => bibEditInterface.isCited(itemID));
+		var isCited = itemIDs.some(itemID => this.isCited(itemID));
 		if (isCited) {
 			var promptService = Services.prompt;
 			
@@ -520,9 +536,18 @@ const ReferenceItems = {
 		window.isPristine = false;
 		
 		for (let itemID of itemIDs) {
-			bibEditInterface.remove(itemID);
+			// if the item is cited, add it to omitted list without actually removing
+			// it from the bibliography. That way, we know what position it should appear
+			// in the editors array as an excluded entry
+			if (this.isCited(itemID)) {
+				this.omittedItemIDs.add(itemID);
+			}
+			// remove uncited item from bibliography completely
+			else {
+				bibEditInterface.remove(itemID);
+			}
 		}
-		this.refreshItems();
+		this.refreshBibItems();
 	},
 
 	toggleItemInBibliography(itemIDs) {
@@ -553,44 +578,33 @@ const ReferenceItems = {
 
 		if (revertingItem) {
 			bibEditInterface.revert(itemID);
-			this.refreshItems();
 		}
 		else {
 			bibEditInterface.revertAll();
-			this.refreshItems();
 		}
+		this.refreshBibItems();
 	},
 
-	// load all relevant items and prepare temp cslEngine
+	// initialize the singleton and load all relevant items
 	load: async function () {
-		// create a temp cslEngine to generate bibliography with all cited items
-		// even if they are not in the bibliography
-		let styleID = bibEditInterface.citeproc.opt.styleID;
-		let locale = bibEditInterface.citeproc.opt["default-locale"][0];
-		let style = Zotero.Styles.get(styleID);
-		this.cslEngine = style.getCiteProc(locale, 'html');
-		this.cslEngine.setOutputFormat("html");
-
 		this.citedItemIDs = new Set(Object.keys(bibEditInterface._citationsByItemID).map(itemID => parseInt(itemID)));
-		await this.refreshItems();
-		// load all items included in the bibliography, as well as all cited items
-		let allItems = await Zotero.Items.getAsync([...this.referenceItemIDs, ...this.citedItemIDs]);
+		// Cited but omitted items need to appear at their proper position in the bibliography.
+		// For this, we store omittedItemIDs locally, clear all omitted items from the bibliography
+		// and generate the bibliography as if there are no omitted items in it.
+		// Otherwise, omitted items would not appear at all.
+		// When the dialog is accepted, omittedItemIDs are passed back to bibEditInterface
+		this.omittedItemIDs = new Set([...bibEditInterface.bibliography.omittedItemIDs].map(id => parseInt(id)));
+		bibEditInterface.bibliography.omittedItemIDs.clear();
+		bibEditInterface._update();
+		this.refreshBibItems();
+		// load all items included in the bibliography list
+		let allItems = await Zotero.Items.getAsync([...this.itemsInBibliography]);
 		await Zotero.Items.loadDataTypes(allItems);
 	},
 
-	// refresh list of items in the bibliography and create a sorted list
-	// of items in the bibliography + cited but excluded items
-	refreshItems: async function () {
-		this.referenceItemIDs = new Set(bibEditInterface.bib[0].entry_ids.map((itemID) => {
-			let id = itemID[0];
-			let parsedInt = parseInt(id);
-			return parsedInt || id;
-		}));
-
-		let combinedItemIDs = [...this.referenceItemIDs, ...this.citedItemIDs];
-		this.cslEngine.updateItems(combinedItemIDs);
-		this.mockBibWithCited = this.cslEngine.makeBibliography();
-		this.sortedEditorItemIDs = this.mockBibWithCited[0].entry_ids.map((itemID) => {
+	// refresh items appearing in the bibliography list
+	refreshBibItems: async function () {
+		this.itemsInBibliography = bibEditInterface.bib[0].entry_ids.map((itemID) => {
 			let id = itemID[0];
 			let parsedInt = parseInt(id);
 			return parsedInt || id;
@@ -602,12 +616,8 @@ const ReferenceItems = {
 		if (existingCustomText) {
 			return existingCustomText;
 		}
-		let bib = bibEditInterface.bib;
-		if (ReferenceItems.isCited(itemID) && !ReferenceItems.isInBibliography(itemID)) {
-			bib = ReferenceItems.mockBibWithCited;
-		}
-		let indexInBibliography = bib[0].entry_ids.findIndex(id => id == itemID);
-		return bib[1][indexInBibliography];
+		let indexInBibliography = bibEditInterface.bib[0].entry_ids.findIndex(id => id == itemID);
+		return bibEditInterface.bib[1][indexInBibliography];
 	}
 };
 
