@@ -41,6 +41,10 @@ var onLoad = async function () {
 	bibEditInterface = window.arguments[0].wrappedJSObject;
 	io = window.arguments[0];
 	
+	// Set initial height of the bottom section with editors
+	let editorListHeight = Zotero.Prefs.get("integration.editBibDialogEditorsHeight") || 200;
+	document.getElementById("zotero-reference-items-list-wrapper").style.height = `${editorListHeight}px`;
+
 	revertAllButton = document.getElementById("zotero-edit-bibliography-revert-all-btn");
 	revertAllButton.label = Zotero.getString("integration.revertAll.button");
 	revertAllButton.addEventListener('command', () => {
@@ -86,6 +90,7 @@ var onUnload = function () {
 	if (!_accepted) {
 		cancel();
 	}
+	BibliographyListUI.cacheSplitterPosition();
 	io.deferred && io.deferred.resolve();
 };
 
@@ -427,6 +432,12 @@ const BibliographyListUI = {
 	onSplitterDrag: function () {
 		collectionsView.tree.invalidate();
 		itemsView.tree.invalidate();
+	},
+
+	// Record the height of the bottom section with editors
+	cacheSplitterPosition: function () {
+		let editorList = document.getElementById("zotero-reference-items-list-wrapper");
+		Zotero.Prefs.set("integration.editBibDialogEditorsHeight", editorList.getBoundingClientRect().height);
 	},
 
 	getCurrentEditor: function () {
