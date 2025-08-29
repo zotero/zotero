@@ -101,7 +101,6 @@ export default [
 			"resource/bluebird/*",
 			"resource/classnames.js",
 			"resource/citeproc_rs*",
-			"resource/csl-validator.js",
 			"resource/jspath.js",
 			"resource/loader.mjs",
 			"resource/pako.js",

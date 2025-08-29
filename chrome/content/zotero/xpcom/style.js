@@ -35,7 +35,7 @@ Zotero.Styles = new function () {
 		"csl":"http://purl.org/net/xbiblio/csl"
 	};
 
-	this.CSL_VALIDATOR_URL = "resource://zotero/csl-validator.js";
+	this.CSL_VALIDATOR_URL = "resource://zotero/csl-validator-wasm/worker.mjs";
 
 	this._memoryPressureObserver = {
 		observe: (subject, topic) => {
@@ -261,18 +261,20 @@ Zotero.Styles = new function () {
 	 *    with the validation error if validation fails, or resolved if it is not.
 	 */
 	this.validate = function (style) {
-		return new Zotero.Promise((resolve, reject) => {
-			let worker = new Worker(this.CSL_VALIDATOR_URL);
+		return new Promise((resolve, reject) => {
+			let worker = new Worker(this.CSL_VALIDATOR_URL, { type: 'module' });
 			worker.onmessage = function (event) {
 				if (event.data) {
 					reject(event.data);
-				} else {
+				}
+				else {
 					resolve();
 				}
+				worker.terminate();
 			};
 			worker.postMessage(style);
 		});
-	}
+	};
 	
 	/**
 	 * Installs a style file, getting the contents of an nsIFile and showing appropriate
