@@ -1745,11 +1745,11 @@ function renderButtonCell(index, data, column, isRowSelected) {
 	let cell = document.createElement('span');
 	cell.className = `cell ${column.className} clickable`;
 	let iconWrapper = document.createElement('span');
-	iconWrapper.setAttribute("aria-label", Zotero.getString("general.remove"));
 	iconWrapper.setAttribute("role", "button");
 	if (data.isFocusable && isRowSelected) {
 		// if specified, make the button of the selected row focusable
 		iconWrapper.setAttribute("tabindex", "0");
+		iconWrapper.setAttribute("aria-label", data.ariaLabel || column.label);
 		iconWrapper.addEventListener("keydown", (event) => {
 			// space/enter will trigger the click
 			if (event.key === "Enter" || event.key === " ") {

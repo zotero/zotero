@@ -98,7 +98,8 @@ Zotero_Preferences.Cite = {
 							let cslID = Zotero.Styles.getVisible()[index].styleID;
 							this.deleteStyle([cslID]);
 						},
-						isFocusable: true
+						isFocusable: true,
+						ariaLabel: Zotero.getString("general.remove")
 					}
 				};
 			});
