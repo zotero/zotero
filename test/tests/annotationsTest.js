@@ -478,4 +478,82 @@ describe("Create a note from annotations from multiple items and attachments", f
 		// Check item URIs count
 		assert.equal(note.note.split('zotero.org').length - 1, 16);
 	});
+
+	it("should create a note from annotations without saving to DB", async function () {
+		// Fetch .png file for image and ink annotations
+		let path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+		let imageData = await Zotero.File.getBinaryContentsAsync(path);
+		let array = new Uint8Array(imageData.length);
+		for (let i = 0; i < imageData.length; i++) {
+			array[i] = imageData.charCodeAt(i);
+		}
+		let blob = new Blob([array], { type: 'image/png' });
+
+		// Create two items with an attachment each
+		let item1 = await createDataObject('item', { setTitle: true });
+		let item2 = await createDataObject('item', { setTitle: true });
+		let attachment1 = await importPDFAttachment(item1);
+		let attachment2 = await importPDFAttachment(item2);
+		
+		// Create an ink and a highlight annotation for the first attachment
+		let inkAnnotation = await createAnnotation('ink', attachment1);
+		let position = {
+			pageIndex: 1,
+			width: 2,
+			paths: []
+		};
+		for (let i = 0; i < 10; i++) {
+			let path = [];
+			for (let j = 0; j < 20; j++) {
+				path.push(100, 200);
+			}
+			position.paths.push(path);
+		}
+		inkAnnotation.annotationPosition = JSON.stringify(position);
+		inkAnnotation.annotationComment = 'ink test';
+		await inkAnnotation.saveTx();
+		await Zotero.Annotations.saveCacheImage(inkAnnotation, blob);
+
+		let highlightAnnotation = await createAnnotation('highlight', attachment1);
+		highlightAnnotation.annotationText = 'highlighted text';
+		highlightAnnotation.annotationComment = 'highlight test';
+		await highlightAnnotation.saveTx();
+		
+		// Create an underline and an image annotation for the second attachment
+		let underlineAnnotation = await createAnnotation('underline', attachment2);
+		underlineAnnotation.annotationText = 'underlined text';
+		underlineAnnotation.annotationComment = 'underline test';
+		await underlineAnnotation.saveTx();
+		
+		let imageAnnotation = await createAnnotation('image', attachment2);
+		imageAnnotation.annotationComment = 'image test';
+		let imagePosition = {
+			pageIndex: 0,
+			rects: [[314.4, 412.8, 556.2, 609.6]],
+			width: 400,
+			height: 200
+		};
+		imageAnnotation.annotationPosition = JSON.stringify(imagePosition);
+		await imageAnnotation.saveTx();
+		await Zotero.Annotations.saveCacheImage(imageAnnotation, blob);
+		
+		// Create a note without saving to DB
+		let annotations = [inkAnnotation, highlightAnnotation, underlineAnnotation, imageAnnotation];
+		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations, { noSave: true });
+		assert.notOk(note.id);
+		
+		// Verify the note contains all annotation texts
+		assert.include(note.note, 'highlighted text');
+		assert.include(note.note, 'underlined text');
+		assert.include(note.note, 'ink test');
+		assert.include(note.note, 'image test');
+
+		// Verify all annotation nodes appear in the note
+		let parser = new DOMParser();
+		let doc = parser.parseFromString(note.note, 'text/html');
+		assert.ok(doc.querySelector('img.image[src]'));
+		assert.ok(doc.querySelector('img.ink[src'));
+		assert.ok(doc.querySelector('span.underline'));
+		assert.ok(doc.querySelector('span.highlight'));
+	});
 });
