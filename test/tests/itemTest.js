@@ -1332,7 +1332,7 @@ describe("Zotero.Item", function () {
 			await parentItem.getBestAttachment();
 			assert.deepEqual(
 				parentItem.getBestAttachmentStateCached(),
-				{ key: childItem.key }
+				{ exists: true, key: childItem.key }
 			);
 			await childItem._updateAttachmentStates(false);
 			assert.deepEqual(

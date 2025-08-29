@@ -1,4 +1,12 @@
 .banner-container > .banner {
+	@media (prefers-color-scheme: light) {
+		--banner-link-active: #4b4b4b;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		--banner-link-active: #b4b4b4;
+	}
+	
 	@include macOS-normalize-controls;
 
 	display: flex;
@@ -42,7 +50,7 @@
 
 	.link {
 		&:active {
-			color: #4b4b4b;
+			color: var(--banner-link-active);
 		}
 	}
 }
@@ -122,7 +130,8 @@
 	}
 }
 
-#mac-word-plugin-install-banner {
+#mac-word-plugin-install-banner,
+#file-renaming-banner-container {
 	background: var(--accent-blue30);
 	color: var(--fill-primary);
 	font-weight: normal;

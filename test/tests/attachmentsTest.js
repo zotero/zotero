@@ -1431,7 +1431,7 @@ describe("Zotero.Attachments", function () {
 			itemNoRepeatedHyphens, itemNoRepeatedUnderscores, itemLowerCase, itemMixedCase, itemUnicode;
 
 		before(() => {
-			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum', itemType: 'journalArticle' });
+			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum', itemType: 'journalArticle', libraryID: 1 });
 			item.setCreators([
 				{ firstName: 'Foocius', lastName: 'Barius', creatorType: 'author' },
 				{ firstName: 'Bazius', lastName: 'Pixelus', creatorType: 'author' }
@@ -1442,10 +1442,10 @@ describe("Zotero.Attachments", function () {
 			item.setField('issue', '42');
 			item.setField('pages', '321');
 
-			itemBookSection = createUnsavedDataObject('item', { title: 'Book Section', itemType: 'bookSection' });
+			itemBookSection = createUnsavedDataObject('item', { title: 'Book Section', itemType: 'bookSection', libraryID: 1 });
 			itemBookSection.setField('bookTitle', 'Book Title');
 
-			itemManyAuthors = createUnsavedDataObject('item', { title: 'Has Many Authors', itemType: 'book' });
+			itemManyAuthors = createUnsavedDataObject('item', { title: 'Has Many Authors', itemType: 'book', libraryID: 1 });
 			itemManyAuthors.setCreators([
 				{ firstName: 'First', lastName: 'Author', creatorType: 'author' },
 				{ firstName: 'Second', lastName: 'Creator', creatorType: 'author' },
@@ -1459,7 +1459,7 @@ describe("Zotero.Attachments", function () {
 			itemManyAuthors.setField('publisher', 'Awesome House');
 			itemManyAuthors.setField('volume', '3');
 
-			itemPatent = createUnsavedDataObject('item', { title: 'Retroencabulator', itemType: 'patent' });
+			itemPatent = createUnsavedDataObject('item', { title: 'Retroencabulator', itemType: 'patent', libraryID: 1 });
 			itemPatent.setCreators([
 				{ name: 'AcmeCorp', creatorType: 'inventor' },
 				{ firstName: 'Wile', lastName: 'E', creatorType: 'contributor' },
@@ -1468,26 +1468,27 @@ describe("Zotero.Attachments", function () {
 			itemPatent.setField('date', '1952-05-10');
 			itemPatent.setField('number', 'HBK-8539b');
 			itemPatent.setField('assignee', 'Fast FooBar');
-			itemIncomplete = createUnsavedDataObject('item', { title: 'Incomplete', itemType: 'preprint' });
+			itemIncomplete = createUnsavedDataObject('item', { title: 'Incomplete', itemType: 'preprint', libraryID: 1 });
 			
-			itemSpaces = createUnsavedDataObject('item', { title: ' Spaces! ', itemType: 'book' });
-			itemSuffixes = createUnsavedDataObject('item', { title: '-Suffixes-', itemType: 'book' });
+			itemSpaces = createUnsavedDataObject('item', { title: ' Spaces! ', itemType: 'book', libraryID: 1 });
+			itemSuffixes = createUnsavedDataObject('item', { title: '-Suffixes-', itemType: 'book', libraryID: 1 });
 			itemSuffixes.setField('date', "1999-07-15");
-			itemKeepHyphens = createUnsavedDataObject('item', { title: 'keep--hyphens', itemType: 'journalArticle' });
+			itemKeepHyphens = createUnsavedDataObject('item', { title: 'keep--hyphens', itemType: 'journalArticle', libraryID: 1 });
 			itemKeepHyphens.setField('publicationTitle', "keep");
 			itemKeepHyphens.setField('issue', 'hyphens');
 			itemKeepHyphens.setField('date', "1999-07-15");
-			itemNoRepeatedHyphens = createUnsavedDataObject('item', { title: 'no - repeated - hyphens', itemType: 'journalArticle' });
+			itemNoRepeatedHyphens = createUnsavedDataObject('item', { title: 'no - repeated - hyphens', itemType: 'journalArticle', libraryID: 1 });
 			itemNoRepeatedHyphens.setField('publicationTitle', "no- repeated- hyphens");
-			itemNoRepeatedUnderscores = createUnsavedDataObject('item', { title: 'no _ repeated _ underscores', itemType: 'journalArticle' });
+			itemNoRepeatedUnderscores = createUnsavedDataObject('item', { title: 'no _ repeated _ underscores', itemType: 'journalArticle', libraryID: 1 });
 			itemNoRepeatedUnderscores.setField('publicationTitle', "no_ repeated_ underscores");
-			itemLowerCase = createUnsavedDataObject('item', { title: 'lower case title', itemType: 'journalArticle' });
-			itemMixedCase = createUnsavedDataObject('item', { title: 'Old MacDonald Had a Farm', itemType: 'journalArticle' });
-			itemUnicode = createUnsavedDataObject('item', { title: '金毛猎犬 - Golden Retriever', itemType: 'journalArticle' });
+			itemLowerCase = createUnsavedDataObject('item', { title: 'lower case title', itemType: 'journalArticle', libraryID: 1 });
+			itemMixedCase = createUnsavedDataObject('item', { title: 'Old MacDonald Had a Farm', itemType: 'journalArticle', libraryID: 1 });
+			itemUnicode = createUnsavedDataObject('item', { title: '金毛猎犬 - Golden Retriever', itemType: 'journalArticle', libraryID: 1 });
 		});
 		
 		it('should strip HTML tags from title', function () {
 			var htmlItem = createUnsavedDataObject('item', { title: 'Foo <i>Bar</i> Foo<br><br/><br />Bar' });
+			htmlItem.libraryID = 1;
 			var str = Zotero.Attachments.getFileBaseNameFromItem(htmlItem, { formatString: '{{ title }}' });
 			assert.equal(str, 'Foo Bar Foo Bar');
 		});
@@ -1978,7 +1979,7 @@ describe("Zotero.Attachments", function () {
 
 		it("should strip bidi isolates from firstCreator", async function () {
 			var item = createUnsavedDataObject('item',
-				{ creators: [{ name: 'Foo', creatorType: 'author' }, { name: 'Bar', creatorType: 'author' }] });
+				{ creators: [{ name: 'Foo', creatorType: 'author' }, { name: 'Bar', creatorType: 'author' }], libraryID: 1 });
 			var str = Zotero.Attachments.getFileBaseNameFromItem(item);
 			assert.equal(str, Zotero.getString('general.andJoiner', ['Foo', 'Bar']) + ' - ');
 		});
@@ -2176,6 +2177,147 @@ describe("Zotero.Attachments", function () {
 			assert.isFalse(await OS.File.exists(originalFile));
 			assert.equal(newAttachment.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_FILE);
 			assert.isTrue(await newAttachment.fileExists());
+		});
+	});
+
+	describe("#renameFile()", function () {
+		let { renameFileFromParent } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+
+		it("should rename a linked file", async function () {
+			var oldFilename = 'old.png';
+			var newFilename = 'Test.png';
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var tmpDir = await getTempDirectory();
+			var oldFile = OS.Path.join(tmpDir, oldFilename);
+			await OS.File.copy(file.path, oldFile);
+
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Test');
+			await item.saveTx();
+
+			var attachment = await Zotero.Attachments.linkFromFile({
+				file: oldFile,
+				parentItemID: item.id
+			});
+
+			await renameFileFromParent(attachment);
+
+			assert.equal(attachment.attachmentFilename, newFilename);
+			var path = await attachment.getFilePathAsync();
+			assert.equal(OS.Path.basename(path), newFilename);
+			await OS.File.exists(path);
+		});
+
+		it("should use unique name for linked file if target name is taken", async function () {
+			var oldFilename = 'old.png';
+			var newFilename = 'Test.png';
+			var uniqueFilename = 'Test 2.png';
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var tmpDir = await getTempDirectory();
+			var oldFile = OS.Path.join(tmpDir, oldFilename);
+			await OS.File.copy(file.path, oldFile);
+			// Create file with target filename
+			await Zotero.File.putContentsAsync(OS.Path.join(tmpDir, newFilename), '');
+
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Test');
+			await item.saveTx();
+
+			var attachment = await Zotero.Attachments.linkFromFile({
+				file: oldFile,
+				parentItemID: item.id
+			});
+			await renameFileFromParent(attachment);
+
+			assert.equal(attachment.attachmentFilename, uniqueFilename);
+			var path = await attachment.getFilePathAsync();
+			assert.equal(OS.Path.basename(path), uniqueFilename)
+			await OS.File.exists(path);
+		});
+
+		it("should use unique name for linked file without extension if target name is taken", async function () {
+			var oldFilename = 'old';
+			var newFilename = 'Test.png';
+			var uniqueFilename = 'Test 2.png';
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var tmpDir = await getTempDirectory();
+			var oldFile = OS.Path.join(tmpDir, oldFilename);
+			await OS.File.copy(file.path, oldFile);
+			// Create file with target filename
+			await Zotero.File.putContentsAsync(OS.Path.join(tmpDir, newFilename), '');
+
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Test');
+			await item.saveTx();
+
+			var attachment = await Zotero.Attachments.linkFromFile({
+				file: oldFile,
+				parentItemID: item.id
+			});
+
+			await renameFileFromParent(attachment);
+
+			assert.equal(attachment.attachmentFilename, uniqueFilename);
+			var path = await attachment.getFilePathAsync();
+			assert.equal(OS.Path.basename(path), uniqueFilename);
+			await OS.File.exists(path);
+		});
+
+		it("shouldn't change attachment title if different from filename", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+
+			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
+			attachment.setField('title', 'Title');
+
+			await attachment.saveTx();
+			await renameFileFromParent(attachment);
+
+			assert.equal(attachment.attachmentFilename, 'Title.png');
+			assert.equal(attachment.getField('title'), 'Title');
+		});
+
+		it("should change attachment title if previously set to the file basename by setAutoAttachmentTitle()", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+
+			var attachment = await importFileAttachment('test.png', {
+				parentItemID: item.id,
+				// Use default setAutoAttachmentTitle() behavior -- the file isn't going to be
+				// renamed because autoRenameFiles.fileTypes doesn't match image/, so the title
+				// becomes the filename minus extension, i.e., "test"
+				title: null
+			});
+			assert.equal(attachment.getField('title'), 'test');
+			await renameFileFromParent(attachment);
+			assert.equal(attachment.attachmentFilename, 'Title.png');
+			// After a manual rename, the title becomes the default for this type
+			assert.equal(attachment.getField('title'), Zotero.getString('file-type-image'));
+		});
+
+		it("should restore an extension when renaming a misnamed file", async function () {
+			let pdfFile = getTestDataDirectory();
+			pdfFile.append('test.pdf');
+			let tmpDir = await getTempDirectory();
+			let tmpFileToImport = OS.Path.join(tmpDir, 'bad name . not an extension');
+			await OS.File.copy(pdfFile.path, tmpFileToImport);
+
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+
+			let attachment = await Zotero.Attachments.importFromFile({
+				file: tmpFileToImport,
+				parentItemID: item.id
+			});
+
+			await renameFileFromParent(attachment);
+			assert.equal(attachment.attachmentFilename, 'Title.pdf');
 		});
 	});
 })
