@@ -243,7 +243,7 @@ const BibliographyListUI = {
 	// refresh the recorded items in the bibliography and the itemTrees
 	// @param items {Array} optional list of itemIDs to update, if not provided, all items are updated
 	// @param skipEditorLoad {Boolean} if true, only placeholders for editors are created
-	async refreshBibRows({ items, skipEditorLoad }) {
+	async refreshBibRows({ items, skipEditorLoad } = {}) {
 		this.updateItemTree();
 
 		let referenceItemsList = document.getElementById('zotero-reference-items-list');
@@ -491,21 +491,22 @@ const ReferenceItems = {
 	itemsInBibliography: [], // including cited items excluded from bibliography to preserve their order
 
 	isInBibliography: function (itemID) {
-		if (typeof itemID !== 'string') {
-			itemID = itemID.toString();
-		}
+		itemID = itemID.toString();
 		return this.itemsInBibliography.includes(itemID) && !this.omittedItemIDs.has(itemID);
 	},
 
 	isOmitted: function (itemID) {
+		itemID = itemID.toString();
 		return this.omittedItemIDs.has(itemID);
 	},
 
 	isCited: function (itemID) {
+		itemID = itemID.toString();
 		return this.citedItemIDs.has(itemID);
 	},
 
 	add: function (itemIDs) {
+		itemIDs = itemIDs.map(id => id.toString());
 		window.isPristine = false;
 		for (let itemID of itemIDs) {
 			// if the item is cited but was omitted, remove it from omitted list
@@ -521,6 +522,7 @@ const ReferenceItems = {
 	},
 
 	remove: function (itemIDs) {
+		itemIDs = itemIDs.map(id => id.toString());
 		// if cited in bibliography, warn before removing
 		var isCited = itemIDs.some(itemID => this.isCited(itemID));
 		if (isCited) {
@@ -580,6 +582,7 @@ const ReferenceItems = {
 		window.isPristine = false;
 
 		if (revertingItem) {
+			itemID = itemID.toString();
 			bibEditInterface.revert(itemID);
 		}
 		else {
