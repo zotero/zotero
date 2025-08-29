@@ -66,7 +66,7 @@ preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
 
-preferences-styleManager-description = This table lists your available styles: you can add new styles or remove styles you are not using. Whenever you need to select a style to cite with, these will be presented as available options.
+preferences-styleManager-intro = { -app-name } can generate citations and bibliographies in over 10,000 citation styles. Add styles here to make them available when selecting styles throughout { -app-name }.
 preferences-styleManager-get-additional-styles =
     .label = Get Additional Styles…
 preferences-styleManager-restore-default =
