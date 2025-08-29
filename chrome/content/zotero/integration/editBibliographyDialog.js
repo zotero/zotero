@@ -533,7 +533,7 @@ const ReferenceItems = {
 				window,
 				Zotero.getString('integration.removeBibEntry.title'),
 				Zotero.getString('integration.removeBibEntry.body'),
-				promptService.STD_OK_CANCEL_BUTTONS + promptService.BUTTON_POS_1_DEFAULT,
+				promptService.STD_OK_CANCEL_BUTTONS + promptService.BUTTON_POS_0_DEFAULT,
 				null, null, null, null, out
 			);
 			if (regenerate != 0) return;
@@ -574,7 +574,7 @@ const ReferenceItems = {
 			window,
 			Zotero.getString(revertingItem ? 'integration.revert.title' : 'integration.revertAll.title'),
 			Zotero.getString(revertingItem ? 'integration.revert.body' : 'integration.revertAll.body'),
-			promptService.STD_OK_CANCEL_BUTTONS + promptService.BUTTON_POS_1_DEFAULT,
+			promptService.STD_OK_CANCEL_BUTTONS + promptService.BUTTON_POS_0_DEFAULT,
 			null, null, null, null, out
 		);
 		
