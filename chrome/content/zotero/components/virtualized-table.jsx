@@ -1738,12 +1738,31 @@ function renderCell(index, data, column, dir = null) {
  * @param {Int} index - index of the row
  * @param {String} data.iconKey - icon key fetched via getCSSIcon to display the button
  * @param {Function} data.onClick - click handler of the button
+ * @param {Boolean} isRowSelected - whether the row is selected
  * @returns {HTMLElement} - rendered button cell
  */
-function renderButtonCell(index, data, column) {
+function renderButtonCell(index, data, column, isRowSelected) {
 	let cell = document.createElement('span');
 	cell.className = `cell ${column.className} clickable`;
 	let iconWrapper = document.createElement('span');
+	iconWrapper.setAttribute("aria-label", Zotero.getString("general.remove"));
+	iconWrapper.setAttribute("role", "button");
+	if (data.isFocusable && isRowSelected) {
+		// if specified, make the button of the selected row focusable
+		iconWrapper.setAttribute("tabindex", "0");
+		iconWrapper.addEventListener("keydown", (event) => {
+			// space/enter will trigger the click
+			if (event.key === "Enter" || event.key === " ") {
+				event.preventDefault();
+				data.onClick(index, event);
+			}
+			// all other keypresses besides tab are ignored and not propagated
+			if (event.key !== "Tab") {
+				event.stopPropagation();
+				event.preventDefault();
+			}
+		});
+	}
 	iconWrapper.className = `icon-action`;
 	cell.append(iconWrapper);
 	let icon = getCSSIcon(data.iconKey);
@@ -1794,7 +1813,7 @@ function makeRowRenderer(getRowData) {
 					div.appendChild(renderCheckboxCell(index, rowData[column.dataKey], column));
 				}
 				else if (column.type === 'button') {
-					div.appendChild(renderButtonCell(index, rowData[column.dataKey], column));
+					div.appendChild(renderButtonCell(index, rowData[column.dataKey], column, selection.isSelected(index)));
 				}
 				else {
 					div.appendChild(renderCell(index, rowData[column.dataKey], column));

@@ -90,10 +90,15 @@ Zotero_Preferences.Cite = {
 					updated: updated ? updated.toLocaleDateString() : "",
 					remove: {
 						iconKey: "minus-circle",
-						onClick: async (index, _) => {
+						onClick: async (index, event) => {
+							// if the clicks happened via keyboard, refocus the next row's button
+							if (event.type == "keydown" && document.activeElement == event.target) {
+								this._tabIntoIcon = true;
+							}
 							let cslID = Zotero.Styles.getVisible()[index].styleID;
 							this.deleteStyle([cslID]);
-						}
+						},
+						isFocusable: true
 					}
 				};
 			});
@@ -167,7 +172,11 @@ Zotero_Preferences.Cite = {
 			}
 		}
 		else if ([...this._tree.selection.selected].some(i => i >= this.styles.length)) {
-			this._tree.selection.clearSelection();
+			this._tree.selection.select(this.styles.length - 1);
+		}
+		if (this._tabIntoIcon) {
+			document.querySelector("#styleManager-table .row.selected .icon-action").focus();
+			this._tabIntoIcon = false;
 		}
 	},
 	

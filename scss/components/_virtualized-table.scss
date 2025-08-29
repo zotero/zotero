@@ -453,6 +453,14 @@
 			&[disabled] {
 				color: var(--color-gray-50);
 			}
+			// show focus ring around the actual icon so that the outline won't overlap with other rows
+			&:focus-visible {
+				outline: none;
+				.icon {
+					border-radius: 5px;
+					outline: var(--default-focusring-width) solid var(--color-accent);
+				}
+			}
 		}
 	}
 
