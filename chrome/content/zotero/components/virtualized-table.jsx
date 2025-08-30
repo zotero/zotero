@@ -336,11 +336,7 @@ class VirtualizedTable extends React.Component {
 		
 		this._isMouseDrag = false;
 
-		this.preventScrollKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", " "]);
-		if (!Zotero.isMac) {
-			['PageUp', 'PageDown'].forEach(key => this.preventScrollKeys.add(key));
-		}
-		
+		this.preventScrollKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", " ", "PageUp", "PageDown"]);
 		this.onSelection = oncePerAnimationFrame(this._onSelection);
 	}
 
