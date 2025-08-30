@@ -310,36 +310,6 @@ Zotero_Preferences.Advanced = {
 		}
 	},
 	
-	
-	resetStyles: async function () {
-		var ps = Services.prompt;
-		
-		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
-		
-		var index = ps.confirmEx(null,
-			Zotero.getString('general.warning'),
-			Zotero.getString('zotero.preferences.advanced.resetStyles.changesLost'),
-			buttonFlags,
-			Zotero.getString('zotero.preferences.advanced.resetStyles'),
-			null, null, null, {});
-		
-		if (index == 0) {
-			let button = document.getElementById('reset-styles-button');
-			button.disabled = true;
-			try {
-				await Zotero.Schema.resetStyles()
-				if (Zotero_Preferences.Export) {
-					Zotero_Preferences.Export.populateQuickCopyList();
-				}
-			}
-			finally {
-				button.disabled = false;
-			}
-		}
-	},
-	
-	
 	onDataDirLoad: function () {
 		var currentDir = Zotero.DataDirectory.dir;
 		

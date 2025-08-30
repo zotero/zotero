@@ -31,7 +31,6 @@ const cx = require('classnames');
 const WindowedList = require('./windowed-list');
 const Draggable = require('./draggable');
 const { CSSIcon, getCSSIcon } = require('components/icons');
-const { Zotero_Tooltip } = require('./tooltip');
 
 const TYPING_TIMEOUT = 1000;
 const MINIMUM_ROW_HEIGHT = 20; // px
@@ -337,11 +336,7 @@ class VirtualizedTable extends React.Component {
 		
 		this._isMouseDrag = false;
 
-		this.preventScrollKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", " "]);
-		if (!Zotero.isMac) {
-			['PageUp', 'PageDown'].forEach(key => this.preventScrollKeys.add(key));
-		}
-		
+		this.preventScrollKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", " ", "PageUp", "PageDown"]);
 		this.onSelection = oncePerAnimationFrame(this._onSelection);
 	}
 
@@ -726,6 +721,14 @@ class VirtualizedTable extends React.Component {
 		this.focus();
 	}
 
+	// Prevent clicks on buttons in cells from selecting the row
+	_captureMouseUpDown = (event) => {
+		let clickableCell = event.target.closest('.cell.clickable');
+		if (clickableCell) {
+			event.stopPropagation();
+		}
+	};
+
 	_handleContextMenu = async (e, index) => {
 		if (e.target.localName === 'input') {
 			// Do not hijack context menu on inputs, fixes #5374
@@ -922,11 +925,9 @@ class VirtualizedTable extends React.Component {
 	 * @param event
 	 */
 	_handleMouseOver = (event) => {
-		// On scroll, mouse position does not change, so _handleMouseMove does not fire
-		// to close the fake tooltip. Make sure it is closed here.
-		Zotero_Tooltip.stop();
 		let elem = event.target;
-		if (!elem.classList.contains('cell') || elem.classList.contains('cell-icon')) return;
+		let cell = elem.closest('.cell');
+		if (!cell || elem.classList.contains('cell-icon')) return;
 		let textElem = elem.querySelector('.label, .cell-text');
 		// .label is used in the header, .cell-text on primary cells,
 		// otherwise the .cell element if its immediate child is a text node
@@ -944,59 +945,6 @@ class VirtualizedTable extends React.Component {
 			elem.removeAttribute('title');
 		}
 	}
-
-	/**
-	 * Manually handle tooltip setting for table cells with overflowing values.
-	 * Temporary, after
-	 * https://github.com/zotero/zotero/commit/8e2790e2d2a1d8b15efbf84935f0a80d58db4e44.
-	 * @param event
-	 */
-	_handleMouseMove = (event) => {
-		let tgt = event.target;
-		// Mouse left the previous cell - close the tooltip
-		if (!tgt.classList.contains("row")
-			|| event.clientX < parseInt(tgt.dataset.mouseLeft)
-			|| event.clientX > parseInt(tgt.dataset.mouseRight)) {
-			delete tgt.dataset.mouseLeft;
-			delete tgt.dataset.mouseRight;
-			Zotero_Tooltip.stop();
-		}
-
-		if (!tgt.classList.contains("row")) return;
-		let cells = tgt.querySelectorAll(".cell");
-		let targetCell;
-		// Find the cell the mouse is over
-		for (let cell of cells) {
-			let rect = cell.getBoundingClientRect();
-			if (event.clientX >= rect.left && event.clientX <= rect.right) {
-				targetCell = cell;
-				tgt.dataset.mouseLeft = rect.left;
-				tgt.dataset.mouseRight = rect.right;
-				break;
-			}
-		}
-		if (!targetCell) return;
-		// Primary cell will .cell-text child node
-		let textCell = targetCell.querySelector(".cell-text") || targetCell;
-		// If the cell has overflowing content, display the fake tooltip
-		if (textCell.offsetWidth < textCell.scrollWidth) {
-			Zotero_Tooltip.stop();
-			Zotero_Tooltip.start(textCell.textContent);
-		}
-	};
-
-	/**
-	 * Remove manually added fake tooltip from _handleMouseMove when the
-	 * mouse leaves the row completely.
-	 */
-	_handleMouseLeave = (_) => {
-		Zotero_Tooltip.stop();
-		let lastRow = document.querySelector("[mouseLeft][mouseRight]");
-		if (lastRow) {
-			delete lastRow.dataset.mouseLeft;
-			delete lastRow.dataset.mouseRight;
-		}
-	};
 
 	_handleResizerDragStop = (event) => {
 		event.stopPropagation();
@@ -1089,7 +1037,7 @@ class VirtualizedTable extends React.Component {
 		this._jsWindow.render();
 		this._updateWidth();
 		this.props.treeboxRef && this.props.treeboxRef(this._jsWindow);
-	
+
 		this._setXulTooltip();
 
 		this._topDiv.style.setProperty("--firstColumnExtraWidth", `${this.props.firstColumnExtraWidth || 0}px`);
@@ -1108,7 +1056,7 @@ class VirtualizedTable extends React.Component {
 			this.forceUpdate();
 		}
 	}
-
+	
 	/**
 	 * Make HTML [title] attribute display a tooltip. Without this
 	 * HTML [title] attribute when embedded in a XUL window does not
@@ -1144,7 +1092,7 @@ class VirtualizedTable extends React.Component {
 		}
 		popupset.appendChild(tooltip);
 	}
-	
+
 	_getWindowedListOptions() {
 		return {
 			getItemCount: this.props.getRowCount,
@@ -1161,6 +1109,8 @@ class VirtualizedTable extends React.Component {
 			node.addEventListener('dragstart', e => this._onDragStart(e, index), { passive: true });
 			node.addEventListener('dragend', e => this._onDragEnd(e, index), { passive: true });
 			node.addEventListener('mousedown', e => this._handleMouseDown(e, index), { passive: true });
+			node.addEventListener('mouseup', this._captureMouseUpDown, { capture: true });
+			node.addEventListener('mousedown', this._captureMouseUpDown, { capture: true });
 			node.addEventListener('contextmenu', e => this._handleContextMenu(e, index), { passive: true });
 			node.addEventListener('mouseup', e => this._handleMouseUp(e, index), { passive: true });
 			node.addEventListener('dblclick', e => this._activateNode(e, [index]), { passive: true });
@@ -1265,8 +1215,6 @@ class VirtualizedTable extends React.Component {
 			onDrop: e => this.props.onDrop && this.props.onDrop(e),
 			onFocus: e => this.props.onFocus && this.props.onFocus(e),
 			onMouseOver: e => this._handleMouseOver(e),
-			onMouseMove: e => this._handleMouseMove(e),
-			onMouseLeave: e => this._handleMouseLeave(e),
 			className: cx(["virtualized-table",
 				// For selected items icon color, see scss mixin svgicon and focus-states
 				"focus-states-target",
@@ -1781,6 +1729,46 @@ function renderCell(index, data, column, dir = null) {
 	return span;
 }
 
+/**
+ * Render button cell (if column.type == "button")
+ * @param {Int} index - index of the row
+ * @param {String} data.iconKey - icon key fetched via getCSSIcon to display the button
+ * @param {Function} data.onClick - click handler of the button
+ * @param {Boolean} isRowSelected - whether the row is selected
+ * @returns {HTMLElement} - rendered button cell
+ */
+function renderButtonCell(index, data, column, isRowSelected) {
+	let cell = document.createElement('span');
+	cell.className = `cell ${column.className} clickable`;
+	let iconWrapper = document.createElement('span');
+	iconWrapper.setAttribute("role", "button");
+	if (data.isFocusable && isRowSelected) {
+		// if specified, make the button of the selected row focusable
+		iconWrapper.setAttribute("tabindex", "0");
+		iconWrapper.setAttribute("aria-label", data.ariaLabel || column.label);
+		iconWrapper.addEventListener("keydown", (event) => {
+			// space/enter will trigger the click
+			if (event.key === "Enter" || event.key === " ") {
+				event.preventDefault();
+				data.onClick(index, event);
+			}
+			// all other keypresses besides tab are ignored and not propagated
+			if (event.key !== "Tab") {
+				event.stopPropagation();
+				event.preventDefault();
+			}
+		});
+	}
+	iconWrapper.className = `icon-action`;
+	cell.append(iconWrapper);
+	let icon = getCSSIcon(data.iconKey);
+	iconWrapper.append(icon);
+	iconWrapper.addEventListener("click", (event) => {
+		data.onClick(index, event);
+	});
+	return cell;
+}
+
 function renderCheckboxCell(index, data, column, dir = null) {
 	let span = document.createElement('span');
 	span.className = `cell checkbox ${column.className}`;
@@ -1820,6 +1808,9 @@ function makeRowRenderer(getRowData) {
 				if (column.type === 'checkbox') {
 					div.appendChild(renderCheckboxCell(index, rowData[column.dataKey], column));
 				}
+				else if (column.type === 'button') {
+					div.appendChild(renderButtonCell(index, rowData[column.dataKey], column, selection.isSelected(index)));
+				}
 				else {
 					div.appendChild(renderCell(index, rowData[column.dataKey], column));
 				}
@@ -1827,7 +1818,12 @@ function makeRowRenderer(getRowData) {
 				if (column.label in Zotero.Intl.strings) {
 					columnName = Zotero.getString(column.label);
 				}
-				ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
+				if (typeof rowData[column.dataKey] === "string") {
+					ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
+				}
+				else {
+					ariaLabel += `${columnName} `;
+				}
 			}
 		}
 		else {
