@@ -31,6 +31,7 @@ var ZoteroContextPane = new function () {
 	let _contextPaneSplitterStacked;
 	let _librarySidenav;
 	let _readerSidenav;
+	let _sidePaneState;
 
 	Object.defineProperty(this, 'activeEditor', {
 		get: () => _contextPaneInner.activeEditor
@@ -69,6 +70,31 @@ var ZoteroContextPane = new function () {
 		_loadingMessageContainer.classList.toggle('hidden', !isShow);
 	};
 
+	this.getSidePaneState = (tabType) => {
+		if (!_sidePaneState) {
+			_loadSidePaneState();
+		}
+		if (!_sidePaneState[tabType]) {
+			_sidePaneState[tabType] = {
+				width: 0,
+				open: false,
+			};
+		}
+		return _sidePaneState[tabType];
+	};
+
+	this.updateSidePaneState = (tabType, state) => {
+		if (!_sidePaneState) {
+			_loadSidePaneState();
+		}
+		if (!_sidePaneState[tabType]) {
+			_sidePaneState[tabType] = {};
+		}
+		state = state || {};
+		Object.assign(_sidePaneState[tabType], state);
+		_saveSidePaneState();
+	};
+
 	this.init = function () {
 		if (!Zotero) {
 			return;
@@ -83,6 +109,8 @@ var ZoteroContextPane = new function () {
 		_librarySidenav = document.querySelector("#zotero-view-item-sidenav");
 		_readerSidenav = document.getElementById('zotero-context-pane-sidenav');
 
+		_loadSidePaneState();
+
 		// Never use default status for the reader sidenav
 		_readerSidenav.toggleDefaultStatus(false);
 		
@@ -91,14 +119,12 @@ var ZoteroContextPane = new function () {
 		this.context = _contextPaneInner;
 
 		window.addEventListener('resize', this.update);
-		Zotero.Reader.onChangeSidebarWidth = this._updatePaneWidth;
-		Zotero.Reader.onToggleSidebar = this._updatePaneWidth;
 	};
 
 	this.destroy = function () {
 		window.removeEventListener('resize', this.update);
-		Zotero.Reader.onChangeSidebarWidth = () => {};
-		Zotero.Reader.onToggleSidebar = () => {};
+
+		_saveSidePaneState();
 	};
 
 	this.updateAddToNote = () => {
@@ -112,20 +138,27 @@ var ZoteroContextPane = new function () {
 		}
 	};
 	
-	this._updatePaneWidth = () => {
+	this._updatePaneWidth = (width) => {
 		let stacked = _isStacked();
-		let readerSidebarWidth = (Zotero.Reader.getSidebarOpen() ? Zotero.Reader.getSidebarWidth() : 0)
-			+ 'px';
+		let tabType = Zotero_Tabs.selectedType.split('-')[0];
+		if (typeof width !== 'number') {
+			width = this.getSidePaneState(tabType).width;
+		}
+		else {
+			this.updateSidePaneState(tabType, { width, open: width > 0 });
+		}
+
+		let sidebarWidth = `${width}px`;
 		let contextPaneWidth = _contextPane.getAttribute("width");
 		if (contextPaneWidth && !_contextPane.style.width) {
 			_contextPane.style.width = `${contextPaneWidth}px`;
 		}
 		if (Zotero.rtl) {
 			_contextPane.style.left = 0;
-			_contextPane.style.right = stacked ? readerSidebarWidth : 'unset';
+			_contextPane.style.right = stacked ? sidebarWidth : 'unset';
 		}
 		else {
-			_contextPane.style.left = stacked ? readerSidebarWidth : 'unset';
+			_contextPane.style.left = stacked ? sidebarWidth : 'unset';
 			_contextPane.style.right = 0;
 		}
 	};
@@ -171,8 +204,6 @@ var ZoteroContextPane = new function () {
 			_contextPaneSplitterStacked.setAttribute('state', this.collapsed ? 'collapsed' : 'open');
 		}
 		
-		Zotero.Reader.setContextPaneOpen(!this.collapsed);
-		
 		var height = null;
 		if (_isStacked()) {
 			height = 0;
@@ -180,7 +211,12 @@ var ZoteroContextPane = new function () {
 				height = _contextPaneInner.getBoundingClientRect().height;
 			}
 		}
-		Zotero.Reader.setBottomPlaceholderHeight(height);
+
+		let tabContent = _getTabContent();
+		if (tabContent) {
+			tabContent.setBottomPlaceholderHeight(height);
+			tabContent.setContextPaneOpen(!this.collapsed);
+		}
 		
 		this._updatePaneWidth();
 		this.updateAddToNote();
@@ -191,6 +227,45 @@ var ZoteroContextPane = new function () {
 	this.togglePane = () => {
 		this.collapsed = !this.collapsed;
 	};
+
+	function _loadSidePaneState() {
+		let sidePaneState = Zotero.Prefs.get('sidePaneState') || "{}";
+		try {
+			sidePaneState = JSON.parse(sidePaneState);
+		}
+		catch {
+			sidePaneState = {};
+		}
+		_sidePaneState = sidePaneState;
+	}
+
+	function _saveSidePaneState() {
+		let sidePaneState;
+		try {
+			sidePaneState = JSON.stringify(_sidePaneState);
+		}
+		catch {
+			// Default status if serialization fails
+			sidePaneState = JSON.stringify({
+				reader: {
+					width: 0,
+					open: false,
+				},
+				note: {
+					width: 0,
+					open: false,
+				},
+			});
+		}
+		Zotero.Prefs.set('sidePaneState', sidePaneState);
+	}
+
+	function _getTabContent(tabID) {
+		if (!tabID) {
+			tabID = Zotero_Tabs.selectedID;
+		}
+		return document.querySelector(`#${tabID}`);
+	}
 
 	function _isStacked() {
 		return Zotero.Prefs.get('layout') == 'stacked';

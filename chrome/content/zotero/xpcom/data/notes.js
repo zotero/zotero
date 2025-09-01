@@ -106,6 +106,7 @@ Zotero.Notes = new function () {
 		else {
 			let id;
 			let container;
+			let select = !openInBackground;
 			if (tabID) {
 				id = tabID;
 				container = win.document.getElementById(tabID);
@@ -120,7 +121,7 @@ Zotero.Notes = new function () {
 					data: {
 						itemID,
 					},
-					select: !openInBackground,
+					select,
 					preventJumpback,
 				}));
 			}
@@ -136,11 +137,24 @@ Zotero.Notes = new function () {
 				noteEditor.tabID = id;
 				noteEditor._id('links-container').hidden = true;
 
+				container.addEventListener('tab-bottom-placeholder-resize', (event) => {
+					noteEditor.setBottomPlaceholderHeight(event.detail.height);
+				});
+
+				container.addEventListener('tab-selection-change', (event) => {
+					if (event.detail.selected) {
+						container.sidePaneWidth = 0;
+					}
+				});
+
 				this._editorInstances.push(noteEditor);
+			}
+
+			if (select) {
+				container.sidePaneWidth = 0;
 			}
 		}
 		return noteEditor;
-		// TODO: shall we use a tab instance mixin for reader and note editors?
 	};
 
 	this.getByTabID = function (tabID) {
