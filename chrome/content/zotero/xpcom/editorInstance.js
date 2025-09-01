@@ -330,6 +330,10 @@ class EditorInstance {
 		}
 	}
 
+	setToggleContextPaneButtonMode(mode) {
+		this._postMessage({ action: 'setToggleContextPaneButtonMode', mode });
+	}
+
 	async importImages(annotations) {
 		for (let annotation of annotations) {
 			if (annotation.image && !this._filesReadOnly) {
@@ -664,6 +668,11 @@ class EditorInstance {
 				case 'openContextMenu': {
 					let { x, y, pos, itemGroups } = message;
 					this._openPopup(x, y, pos, itemGroups);
+					return;
+				}
+				case 'toggleContextPane': {
+					let win = Zotero.getMainWindow();
+					win.ZoteroContextPane.togglePane();
 					return;
 				}
 				case 'return': {
