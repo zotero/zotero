@@ -156,6 +156,20 @@ var Zotero_Tabs = new function () {
 					return true;
 				}
 				return false;
+			},
+			note: async (tab, _tabIndex) => {
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					await Zotero.Notes.open(tab.data.itemID,
+						null,
+						{
+							tabIndex: tab.index,
+							openInBackground: true,
+							allowDuplicate: true
+						}
+					);
+					return true;
+				}
+				return false;
 			}
 		},
 		restoreState: {
@@ -720,6 +734,7 @@ var Zotero_Tabs = new function () {
 				this.unload(tab.id);
 			}
 		}
+		// TODO: also unload note tabs
 		let tabs = this._tabs.slice().filter(x => x.type === 'reader');
 		tabs.sort((a, b) => b.timeUnselected - a.timeUnselected);
 		tabs = tabs.slice(MAX_LOADED_TABS);
@@ -918,7 +933,7 @@ var Zotero_Tabs = new function () {
 			popup.appendChild(menuitem);
 		}
 		// Undo close
-		if (['reader', 'reader-unloaded'].includes(tab.type)) {
+		if (this._hasHook(tabContentType, 'undoClose')) {
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute(
 				'label',
