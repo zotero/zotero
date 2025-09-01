@@ -27,63 +27,78 @@
 	class TabContent extends XULElementBase {
 		content = MozXULElement.parseXULToFragment("");
 
-		_tabID = null;
+		_sidePaneWidth = null;
 
 		get tabID() {
-			return this._tabID;
+			return this.getAttribute("id");
 		}
 
 		set tabID(id) {
-			this._tabID = id;
+			this.setAttribute("id", id);
 		}
 
 		get tabData() {
-			return Zotero_Tabs._getTab(this._tabID);
+			return Zotero_Tabs._getTab(this.tabID);
 		}
 
 		/**
 		 * @returns {number | null}
 		 * @description The width of the sidebar in pixels.
-		 * If the content does not have a sidebar, this will be null.
 		 */
 		get sidePaneWidth() {
-			return this.getAttribute("sidePaneWidth");
+			return this._sidePaneWidth;
 		}
 
 		set sidePaneWidth(width) {
 			this._sidePaneWidth = width;
-		}
+			ZoteroContextPane._updatePaneWidth(width);
 
-		get hasSidePane() {
-			return this.hasAttribute("sidePaneWidth");
+			let placeholder = document.getElementById('zotero-reader-sidebar-pane');
+			placeholder.setAttribute('collapsed', this._sidePaneWidth ? 'false' : 'true');
+			placeholder.setAttribute('width', this._sidePaneWidth);
 		}
 
 		async init() {
-			
 		}
 
 		async destroy() {
 		}
 
-		setSidePaneWidth(width) {
-			this.setAttribute("sidePaneWidth", width);
-			this.dispatchEvent(new CustomEvent("side-pane-resize", {
+		/**
+		 * Notify the tab content that the tab has been selected or deselected.
+		 * Triggered by the Zotero_Tabs when a tab is selected or deselected.
+		 * @param {boolean} selected - Whether this tab is currently selected.
+		 */
+		onTabSelectionChanged(selected) {
+			this.dispatchEvent(new CustomEvent("tab-selection-change", {
 				detail: {
-					width,
+					selected
 				}
 			}));
 		}
 
+		/**
+		 * Notify the tab content that the bottom placeholder height has changed.
+		 * @param {number} height - The new height in pixels.
+		 */
 		setBottomPlaceholderHeight(height) {
-			this.dispatchEvent(new CustomEvent("bottom-placeholder-resize", {
+			this.dispatchEvent(new CustomEvent("tab-bottom-placeholder-resize", {
 				detail: {
 					height,
 				}
 			}));
 		}
 
-		setFocus() {
-			this.dispatchEvent(new CustomEvent("set-focus"));
+		/**
+		 * Notify the tab content that the context pane has been toggled.
+		 * @param {boolean} open - Whether the context pane is open or not.
+		 */
+		setContextPaneOpen(open) {
+			this.dispatchEvent(new CustomEvent("tab-context-pane-toggle", {
+				detail: {
+					open,
+				}
+			}));
 		}
 	}
 
