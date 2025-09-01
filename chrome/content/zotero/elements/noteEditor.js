@@ -302,7 +302,7 @@
 		}
 
 		// TODO: implement this
-		async navigate(location) {}
+		async navigate(_location) {}
 
 		async focus() {
 			let n = 0;
@@ -324,7 +324,7 @@
 				this._iframe.focus();
 				this._editorInstance._iframeWindow.document.querySelector('.toolbar-button-return').focus();
 			}
-			catch (e) {
+			catch {
 			}
 		}
 
