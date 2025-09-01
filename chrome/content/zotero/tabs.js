@@ -163,6 +163,11 @@ var Zotero_Tabs = new function () {
 					let { secondViewState } = tab.data;
 					await Zotero.Reader.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true, secondViewState });
 				}
+			},
+			note: async (tab, tabIndex) => {
+				if (tab.data.itemID) {
+					await Zotero.Notes.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true });
+				}
 			}
 		},
 		undoClose: {
