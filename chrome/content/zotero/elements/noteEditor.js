@@ -301,6 +301,9 @@
 			this._id('links-box').parentItem = val;
 		}
 
+		// TODO: implement this
+		async navigate(location) {}
+
 		async focus() {
 			let n = 0;
 			while (!this._editorInstance && n++ < 100) {
