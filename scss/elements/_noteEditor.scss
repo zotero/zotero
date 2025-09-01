@@ -5,6 +5,12 @@ note-editor {
 	@include elements-custom-head;
 }
 
+tab-content {
+	note-editor.note-tab {
+		width: 100%;
+	}
+}
+
 links-box {
 	display: flex;
 	flex-direction: column;
