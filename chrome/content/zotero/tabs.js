@@ -263,7 +263,10 @@ var Zotero_Tabs = new function () {
 		return !!(this.tabHooks[action] && this.tabHooks[action][type]);
 	};
 
-	this._parseTabType = function (type) {
+	this.parseTabType = function (type) {
+		if (!type) {
+			type = this.selectedType;
+		}
 		if (type === 'zotero-pane') {
 			return {
 				tabContentType: 'library',
@@ -336,7 +339,7 @@ var Zotero_Tabs = new function () {
 		}
 
 		this._tabBarRef.current.setTabs(this._tabs.map((tab) => {
-			let { tabContentType } = this._parseTabType(tab.type);
+			let { tabContentType } = this.parseTabType(tab.type);
 			return {
 				id: tab.id,
 				type: tab.type,
@@ -433,7 +436,7 @@ var Zotero_Tabs = new function () {
 		let itemIDs = [];
 		for (let i = 0; i < tabs.length; i++) {
 			let tab = tabs[i];
-			let { tabContentType } = this._parseTabType(tab.type);
+			let { tabContentType } = this.parseTabType(tab.type);
 			let restoreStateHook = this._getHook(tabContentType, 'restoreState');
 			let { itemID } = await restoreStateHook(tab, i);
 			if (itemID) {
@@ -594,7 +597,7 @@ var Zotero_Tabs = new function () {
 			let maxIndex = -1;
 			let openPromises = [];
 			for (let tab of historyEntry) {
-				let { tabContentType } = this._parseTabType(tab.type);
+				let { tabContentType } = this.parseTabType(tab.type);
 				let undoCloseHook = this._getHook(tabContentType, 'undoClose');
 				openPromises.push(undoCloseHook({ data: tab.data }, tab.index)
 					.then((opened) => {
@@ -644,7 +647,7 @@ var Zotero_Tabs = new function () {
 	 */
 	this.select = function (id, reopening, options = {}) {
 		let { tab, tabIndex } = this._getTab(id);
-		let { tabContentType, tabState } = this._parseTabType(tab.type);
+		let { tabContentType, tabState } = this.parseTabType(tab.type);
 
 		if (!tab || tab.id === this._selectedID) {
 			// Focus on reader or zotero pane when keepTabFocused is explicitly false
@@ -756,7 +759,7 @@ var Zotero_Tabs = new function () {
 	this.markAsLoaded = function (id) {
 		let { tab } = this._getTab(id);
 		if (!tab) return;
-		let { tabContentType, tabState } = this._parseTabType(tab.type);
+		let { tabContentType, tabState } = this.parseTabType(tab.type);
 		if (tabState !== 'loading') {
 			return;
 		}
@@ -809,7 +812,7 @@ var Zotero_Tabs = new function () {
 	 */
 	this.refocus = function () {
 		let { tab, tabIndex } = this._getTab(this._selectedID);
-		let { tabContentType } = this._parseTabType(tab.type);
+		let { tabContentType } = this.parseTabType(tab.type);
 		let focusHook = this._getHook(tabContentType, 'focus');
 		focusHook(tab, tabIndex, this._focusOptions);
 	};
@@ -880,7 +883,7 @@ var Zotero_Tabs = new function () {
 
 	this._openMenu = function (x, y, id) {
 		let { tab, tabIndex } = this._getTab(id);
-		let { tabContentType } = this._parseTabType(tab.type);
+		let { tabContentType } = this.parseTabType(tab.type);
 		let menuitem;
 		let popup = document.createXULElement('menupopup');
 		document.querySelector('popupset').appendChild(popup);
@@ -931,7 +934,7 @@ var Zotero_Tabs = new function () {
 				menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
 				menuitem.setAttribute('disabled', false);
 				menuitem.addEventListener('command', () => {
-					let { tabContentType } = this._parseTabType(tab.type);
+					let { tabContentType } = this.parseTabType(tab.type);
 					let moveHook = this._getHook(tabContentType, 'moveToNewWindow');
 					moveHook(tab, tabIndex);
 				});
@@ -942,7 +945,7 @@ var Zotero_Tabs = new function () {
 				menuitem = document.createXULElement('menuitem');
 				menuitem.setAttribute('label', Zotero.getString('tabs.duplicate'));
 				menuitem.addEventListener('command', () => {
-					let { tabContentType } = this._parseTabType(tab.type);
+					let { tabContentType } = this.parseTabType(tab.type);
 					let duplicateHook = this._getHook(tabContentType, 'duplicate');
 					duplicateHook(tab, tabIndex);
 				});
