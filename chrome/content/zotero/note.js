@@ -70,6 +70,9 @@ async function onLoad() {
 	
 	noteEditor.focus();
 	notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item', 'noteWindow');
+
+	io.noteEditor = noteEditor;
+	io._initPromise?.resolve();
 }
 
 // If there's an error saving a note, close the window and crash the app

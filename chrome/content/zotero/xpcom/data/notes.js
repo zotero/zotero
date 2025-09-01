@@ -34,6 +34,102 @@ Zotero.Notes = new function () {
 	
 	this._editorInstances = [];
 	this._downloadInProgressPromise = null;
+
+	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey } = {}) {
+		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		let library = Zotero.Libraries.get(libraryID);
+		let win = Zotero.getMainWindow();
+
+		if (!win) {
+			openInWindow = true;
+		}
+
+		await library.waitForDataLoad('item');
+
+		let item = Zotero.Items.get(itemID);
+		if (!item) {
+			throw new Error('Item does not exist');
+		}
+
+		// TODO: Use locale
+		title = title || item.getNoteTitle() || "Untitled Note";
+
+		let noteEditor;
+		if (!openInWindow && !allowDuplicate && !this._editorInstances.find(r => r.itemID === itemID)) {
+			if (win) {
+				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
+				if (existingTabID) {
+					win.Zotero_Tabs.select(existingTabID, false, { location });
+					return undefined;
+				}
+			}
+		}
+
+		if (openInWindow) {
+			noteEditor = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'window');
+		}
+		else if (!allowDuplicate) {
+			noteEditor = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'tab');
+		}
+
+		if (noteEditor) {
+			if (noteEditor.viewMode === 'tab') {
+				noteEditor._window.Zotero_Tabs.select(noteEditor.tabID, true);
+			}
+			
+			if (location) {
+				noteEditor.navigate(location);
+			}
+		}
+		else if (openInWindow) {
+			let name = null;
+		
+			if (itemID) {
+				// Create a name for this window so we can focus it later
+				//
+				// Collection is only used on new notes, so we don't need to
+				// include it in the name
+				name = 'zotero-note-' + itemID;
+			}
+			
+			let io = { itemID, parentItemKey, location, _initPromise: Zotero.Promise.defer() };
+			Services.ww.openWindow(
+				win,
+				'chrome://zotero/content/note.xhtml',
+				name,
+				'chrome,resizable,centerscreen,dialog=no',
+				io
+			);
+			await io._initPromise.promise;
+			noteEditor = io.noteEditor;
+		}
+		else {
+			// TODO: implement unloading of the note editor
+			let { id, container } = win.Zotero_Tabs.add({
+				id: tabID,
+				type: 'note',
+				title,
+				index: tabIndex,
+				data: {
+					itemID,
+				},
+				select: !openInBackground,
+				preventJumpback,
+			});
+			noteEditor = win.document.createXULElement('note-editor');
+			noteEditor.classList.add('note-tab');
+			container.appendChild(noteEditor);
+
+			noteEditor.mode = item.isEditable() ? 'edit' : 'view';
+			noteEditor.viewMode = 'tab';
+			noteEditor.item = item;
+			noteEditor.tabID = id;
+
+			this._editorInstances.push(noteEditor);
+		}
+		return noteEditor;
+		// TODO: shall we use a tab instance mixin for reader and note editors?
+	};
 	
 	this.noteToTitle = function (text) {
 		Zotero.debug(`Zotero.Note.noteToTitle() is deprecated -- use Zotero.Utilities.Item.noteToTitle() instead`);

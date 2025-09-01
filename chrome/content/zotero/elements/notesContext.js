@@ -517,7 +517,7 @@
 					break;
 
 				case 'context-pane-list-edit-in-window':
-					ZoteroPane_Local.openNoteWindow(id);
+					ZoteroPane.openNote(id, { openInWindow: true });
 					break;
 
 				case 'context-pane-list-move-to-trash':

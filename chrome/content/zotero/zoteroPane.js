@@ -4533,10 +4533,10 @@ var ZoteroPane = new function () {
 			// TODO: _text_
 			var c = this.getSelectedCollection();
 			if (c) {
-				this.openNoteWindow(null, c.id, parentKey);
+				this.openNote(null, { col: c.id, parentKey });
 			}
 			else {
-				this.openNoteWindow(null, null, parentKey);
+				this.openNote(null, { parentKey });
 			}
 			return null;
 		}
@@ -4628,34 +4628,32 @@ var ZoteroPane = new function () {
 	};
 	
 	
+	this.openNote = function (itemID, options = {
+		col: undefined,
+		parentKey: undefined,
+		openInWindow: undefined
+	}) {
+		let {
+			col,
+			parentKey,
+			openInWindow,
+		} = options;
+		if (openInWindow === undefined) {
+			openInWindow = Zotero.Prefs.get('openNoteInNewWindow');
+		}
+		
+		return Zotero.Notes.open(itemID, {}, {
+			openInWindow,
+		});
+	};
+
+	/**
+	 * Opens a note in a new window
+	 * @deprecated - use openNote() with openInWindow option
+	 */
 	this.openNoteWindow = function (itemID, col, parentKey) {
-		var item = Zotero.Items.get(itemID);
-		var type = Zotero.Libraries.get(item.libraryID).libraryType;
-		if (!this.canEdit()) {
-			this.displayCannotEditLibraryMessage();
-			return;
-		}
-		
-		var name = null;
-		
-		if (itemID) {
-			let w = this.findNoteWindow(itemID);
-			if (w) {
-				w.focus();
-				return;
-			}
-			
-			// Create a name for this window so we can focus it later
-			//
-			// Collection is only used on new notes, so we don't need to
-			// include it in the name
-			name = 'zotero-note-' + itemID;
-		}
-		
-		var io = { itemID: itemID, collectionID: col, parentItemKey: parentKey };
-		window.openDialog('chrome://zotero/content/note.xhtml', name, 'chrome,resizable,centerscreen,dialog=false', io);
-	}
-	
+		return this.openNote(itemID, { col, parentKey, openInWindow: true });
+	};
 	
 	this.findNoteWindow = function (itemID) {
 		var name = 'zotero-note-' + itemID;
@@ -5017,7 +5015,7 @@ var ZoteroPane = new function () {
 				if (!this.collectionsView.editable) {
 					continue;
 				}
-				ZoteroPane.openNoteWindow(item.id);
+				ZoteroPane.openNote(item.id);
 			}
 			else if (item.isAttachment()) {
 				await this.viewAttachment(item.id, event);
