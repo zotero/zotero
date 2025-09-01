@@ -305,6 +305,9 @@ var Zotero_Tabs = new function () {
 	};
 
 	this.getTabContent = function (id) {
+		if (!id) {
+			id = this._selectedID;
+		}
 		return document.getElementById(id);
 	};
 
@@ -700,6 +703,9 @@ var Zotero_Tabs = new function () {
 				this.markAsLoaded(tab.id);
 			});
 		}
+		// Notify previously selected tab content about selection change
+		this.getTabContent(this._selectedID)?.onTabSelectionChanged(false);
+
 		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
@@ -726,6 +732,9 @@ var Zotero_Tabs = new function () {
 		// tabs deck selection index bigger than the deck children count. It feels like something
 		// isn't update synchronously
 		setTimeout(() => this.unloadUnusedTabs());
+
+		// Notify tab content about selection change
+		this.getTabContent(this._selectedID)?.onTabSelectionChanged(true);
 	};
 
 	this.unload = function (id) {
