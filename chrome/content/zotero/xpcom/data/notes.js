@@ -60,7 +60,7 @@ Zotero.Notes = new function () {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
 					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return undefined;
+					return win.Zotero_Tabs.getTabContent(existingTabID).querySelector('note-editor.note-tab');
 				}
 			}
 		}
