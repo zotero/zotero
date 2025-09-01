@@ -342,6 +342,13 @@
 			});
 		}
 
+		setBottomPlaceholderHeight(height) {
+			if (typeof height !== 'number') {
+				height = 0;
+			}
+			this.style.height = `calc(100% - ${height}px)`;
+		};
+
 		_id(id) {
 			return this.querySelector(`#${id}`);
 		}
