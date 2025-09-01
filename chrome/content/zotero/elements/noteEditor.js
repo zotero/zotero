@@ -38,6 +38,8 @@
 			this._initialized = false;
 			this._editorInstance = null;
 			this._destroyed = false;
+			this._bottomPlaceholder = null;
+			this._contextPaneOpen = null;
 
 			this.content = MozXULElement.parseXULToFragment(`
 				<html:div class="custom-head empty"></html:div>
@@ -148,6 +150,7 @@
 			if (this._onInitCallback) {
 				this._onInitCallback();
 			}
+			requestIdleCallback(() => this.setToggleContextPaneButtonMode());
 		};
 
 		onInit = (callback) => {
@@ -340,14 +343,35 @@
 				doc: document,
 				append,
 			});
-		}
+		};
 
 		setBottomPlaceholderHeight(height) {
+			// Store raw value as null/number for toggle contextPane button update
+			this._bottomPlaceholder = height;
 			if (typeof height !== 'number') {
 				height = 0;
 			}
 			this.style.height = `calc(100% - ${height}px)`;
+			this.setToggleContextPaneButtonMode();
 		};
+
+		setContextPaneOpen(open) {
+			this._contextPaneOpen = open;
+			this.setToggleContextPaneButtonMode();
+		}
+
+		setToggleContextPaneButtonMode() {
+			if (!this._editorInstance) return;
+			if (this._bottomPlaceholder === null && this._contextPaneOpen === null) return;
+			let mode = null;
+			if (this._bottomPlaceholder !== null) {
+				mode = "stacked";
+			}
+			else if (!this._contextPaneOpen) {
+				mode = "standard";
+			}
+			this._editorInstance.setToggleContextPaneButtonMode(mode);
+		}
 
 		_id(id) {
 			return this.querySelector(`#${id}`);
