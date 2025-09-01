@@ -47,6 +47,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['item-message-pane', 'chrome://zotero/content/elements/itemMessagePane.js'],
 		['merge-group', 'chrome://zotero/content/elements/mergeGroup.js'],
 		['menulist-item-types', 'chrome://zotero/content/elements/menulistItemTypes.js'],
+		['note-box', 'chrome://zotero/content/elements/noteBox.js'],
 		['note-editor', 'chrome://zotero/content/elements/noteEditor.js'],
 		['notes-box', 'chrome://zotero/content/elements/notesBox.js'],
 		['quick-search-textbox', 'chrome://zotero/content/elements/quickSearchTextbox.js'],
