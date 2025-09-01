@@ -118,11 +118,12 @@
 			if (action === 'modify') {
 				for (let itemDetails of Array.from(this._itemPaneDeck.children)) {
 					let tabID = itemDetails.tabID;
-					let item = Zotero.Items.get(Zotero_Tabs._getTab(tabID)?.tab.data.itemID);
+					let tab = Zotero_Tabs._getTab(tabID).tab;
+					let item = Zotero.Items.get(tab?.data.itemID);
 					if ((item.parentID || itemDetails.parentID)
 						&& item.parentID !== itemDetails.parentID) {
 						this._removeItemContext(tabID);
-						this._addItemContext(tabID, item.itemID);
+						this._addItemContext(tabID, item.itemID, tab?.type);
 					}
 				}
 			}
@@ -210,8 +211,8 @@
 				
 				this._sidenav.hidden = false;
 
-				let data = Zotero_Tabs._tabs.find(tab => tab.id === ids[0]).data;
-				await this._addItemContext(ids[0], data.itemID, data.type);
+				let tab = Zotero_Tabs._getTab(tabID).tab;
+				await this._addItemContext(ids[0], tab.data.itemID, tab.type);
 	
 				this._selectItemContext(tabID);
 			}
@@ -308,7 +309,7 @@
 			}
 		}
 	
-		async _addItemContext(tabID, itemID, _tabType = "") {
+		async _addItemContext(tabID, itemID, tabType = "") {
 			if (this._getItemContext(tabID)) {
 				return;
 			}
@@ -340,7 +341,7 @@
 	
 			itemDetails.editable = editable;
 			itemDetails.tabID = tabID;
-			itemDetails.tabType = "reader";
+			itemDetails.tabType = Zotero_Tabs.parseTabType(tabType).tabContentType;
 			itemDetails.item = targetItem;
 			// Manually cache parentID
 			itemDetails.parentID = parentID;
