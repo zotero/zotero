@@ -22,6 +22,7 @@
 #zotero-pane {
 	min-width: 0;
 	min-height: 0;
+	flex-direction: column;
 }
 
 #zotero-pane-stack > hbox {
