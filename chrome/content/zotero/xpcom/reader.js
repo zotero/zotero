@@ -1470,10 +1470,10 @@ class ReaderTab extends ReaderInstance {
 
 		this._onToggleSidebarCallback = (open) => {
 			if (open) {
-				this._tabContainer.sidePaneWidth = Zotero.Reader._sidebarWidth;
+				this._window.ZoteroContextPane.updateLayout({ sidePaneWidth: true });
 			}
 			else {
-				this._tabContainer.sidePaneWidth = 0;
+				this._window.ZoteroContextPane.updateLayout({ sidePaneWidth: false });
 			}
 
 			if (options.onToggleSidebar) {
@@ -1482,7 +1482,7 @@ class ReaderTab extends ReaderInstance {
 		};
 		
 		this._onChangeSidebarWidthCallback = (width) => {
-			this._tabContainer.sidePaneWidth = width;
+			this._window.ZoteroContextPane.updateLayout({ sidePaneWidth: width });
 
 			if (options.onChangeSidebarWidth) {
 				options.onChangeSidebarWidth(width);
@@ -1500,11 +1500,11 @@ class ReaderTab extends ReaderInstance {
 
 			this._tabContainer.addEventListener('tab-selection-change', (event) => {
 				if (event.detail.selected) {
-					this._updateSidebar();
+					this._updateLayout();
 				}
 			});
 			if (select) {
-				this._updateSidebar();
+				this._updateLayout();
 			}
 		});
 	}
@@ -1590,13 +1590,10 @@ class ReaderTab extends ReaderInstance {
 		}
 	}
 
-	_updateSidebar() {
-		if (Zotero.Reader._sidebarOpen) {
-			this._tabContainer.sidePaneWidth = Zotero.Reader._sidebarWidth;
-		}
-		else {
-			this._tabContainer.sidePaneWidth = 0;
-		}
+	_updateLayout() {
+		let { sidePaneState } = this._window.ZoteroContextPane.updateLayout();
+		this.toggleSidebar(sidePaneState.open);
+		this.setSidebarWidth(sidePaneState.width);
 	}
 }
 

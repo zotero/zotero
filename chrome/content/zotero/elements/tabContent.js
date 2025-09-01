@@ -27,8 +27,6 @@
 	class TabContent extends XULElementBase {
 		content = MozXULElement.parseXULToFragment("");
 
-		_sidePaneWidth = null;
-
 		get tabID() {
 			return this.getAttribute("id");
 		}
@@ -46,16 +44,15 @@
 		 * @description The width of the sidebar in pixels.
 		 */
 		get sidePaneWidth() {
-			return this._sidePaneWidth;
+			let state = ZoteroContextPane.getSidePaneState(this.tabData.type);
+			if (state) {
+				return state.width || 0;
+			}
+			return null;
 		}
 
 		set sidePaneWidth(width) {
-			this._sidePaneWidth = width;
-			ZoteroContextPane._updatePaneWidth(width);
-
-			let placeholder = document.getElementById('zotero-reader-sidebar-pane');
-			placeholder.setAttribute('collapsed', this._sidePaneWidth ? 'false' : 'true');
-			placeholder.setAttribute('width', this._sidePaneWidth);
+			ZoteroContextPane.updateLayout({ sidePaneWidth: width });
 		}
 
 		async init() {

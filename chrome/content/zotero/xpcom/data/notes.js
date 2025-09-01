@@ -138,12 +138,16 @@ Zotero.Notes = new function () {
 				noteEditor._id('links-container').hidden = true;
 
 				container.addEventListener('tab-bottom-placeholder-resize', (event) => {
-					noteEditor.setBottomPlaceholderHeight(event.detail.height);
+					this.setBottomPlaceholderHeight(noteEditor, event.detail.height);
+				});
+
+				container.addEventListener('tab-context-pane-toggle', (event) => {
+					this.setContextPaneOpen(event.detail.open);
 				});
 
 				container.addEventListener('tab-selection-change', (event) => {
 					if (event.detail.selected) {
-						container.sidePaneWidth = 0;
+						this.setSidePaneWidth();
 					}
 				});
 
@@ -151,10 +155,22 @@ Zotero.Notes = new function () {
 			}
 
 			if (select) {
-				container.sidePaneWidth = 0;
+				this.setSidePaneWidth();
 			}
 		}
 		return noteEditor;
+	};
+
+	this.setBottomPlaceholderHeight = function (noteEditor, height) {
+		noteEditor.setBottomPlaceholderHeight(height);
+	};
+
+	this.setSidePaneWidth = function () {
+		Zotero.getMainWindow().ZoteroContextPane.updateLayout();
+	};
+
+	this.setContextPaneOpen = function (_open) {
+		// TODO: Implement this once the note editor supports context pane toggle button
 	};
 
 	this.getByTabID = function (tabID) {
