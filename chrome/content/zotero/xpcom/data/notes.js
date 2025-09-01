@@ -106,10 +106,10 @@ Zotero.Notes = new function () {
 		else {
 			let id;
 			let container;
-			// TODO: implement unloading of the note editor
 			if (tabID) {
 				id = tabID;
 				container = win.document.getElementById(tabID);
+				noteEditor = container.querySelector('note-editor.note-tab');
 			}
  			else {
 				({ id, container } = win.Zotero_Tabs.add({
@@ -125,7 +125,7 @@ Zotero.Notes = new function () {
 				}));
 			}
 
-			if (!openInBackground) {
+			if (!noteEditor && !openInBackground) {
 				noteEditor = win.document.createXULElement('note-editor');
 				noteEditor.classList.add('note-tab');
 				container.appendChild(noteEditor);
