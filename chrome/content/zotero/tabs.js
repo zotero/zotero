@@ -137,6 +137,12 @@ var Zotero_Tabs = new function () {
 				if (reader) {
 					reader.focus();
 				}
+			},
+			note: async (tab, _tabIndex, _options) => {
+				let noteEditor = Zotero.Notes.getByTabID(tab.id);
+				if (noteEditor) {
+					noteEditor.focus();
+				}
 			}
 		},
 		moveToNewWindow: {
