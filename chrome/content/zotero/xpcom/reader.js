@@ -335,7 +335,7 @@ class ReaderInstance {
 				else if (this.tabID) {
 					let win = Zotero.getMainWindow();
 					if (win) {
-						win.Zotero_Tabs.setSecondViewState(this.tabID, state);
+						win.Zotero_Tabs.setTabData(this.tabID, { secondViewState: state });
 					}
 				}
 			},
@@ -1366,7 +1366,7 @@ class ReaderInstance {
 		if (this.tabID) {
 			let win = Zotero.getMainWindow();
 			if (win) {
-				win.Zotero_Tabs.setSecondViewState(this.tabID, this.getSecondViewState());
+				win.Zotero_Tabs.setTabData(this.tabID, { secondViewState: this.getSecondViewState() });
 			}
 		}
 	}
@@ -2343,8 +2343,6 @@ class Reader {
 				}
 			});
 			this._readers.push(reader);
-			// Change tab's type from "reader-unloaded" to "reader" after reader loaded
-			win.Zotero_Tabs.markAsLoaded(tabID);
 		}
 		
 		if (!openInBackground
