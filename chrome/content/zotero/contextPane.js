@@ -204,8 +204,9 @@ var ZoteroContextPane = new function () {
 	};
 
 	this.update = () => {
+		let updatedState = {};
 		if (Zotero_Tabs.selectedType === 'library') {
-			return;
+			return updatedState;
 		}
 		if (_isStacked()) {
 			_contextPaneSplitterStacked.setAttribute('hidden', false);
@@ -257,11 +258,12 @@ var ZoteroContextPane = new function () {
 			tabContent.setBottomPlaceholderHeight(height);
 			tabContent.setContextPaneOpen(!this.collapsed);
 		}
-		
-		this.updateLayout();
+
+		Object.assign(updatedState, this.updateLayout());
 		this.updateAddToNote();
 
 		ZoteroPane.updateLayoutConstraints();
+		return updatedState;
 	};
 
 	this.togglePane = () => {

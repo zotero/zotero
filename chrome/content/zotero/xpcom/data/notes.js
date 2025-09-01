@@ -142,7 +142,7 @@ Zotero.Notes = new function () {
 				});
 
 				container.addEventListener('tab-context-pane-toggle', (event) => {
-					this.setContextPaneOpen(event.detail.open);
+					this.setContextPaneOpen(noteEditor, event.detail.open);
 				});
 
 				container.addEventListener('tab-selection-change', (event) => {
@@ -173,12 +173,12 @@ Zotero.Notes = new function () {
 		// TODO: Implement this once the note editor supports side pane
 	};
 
-	this.setContextPaneOpen = function (_open) {
-		// TODO: Implement this once the note editor supports context pane toggle button
+	this.setContextPaneOpen = function (noteEditor, open) {
+		noteEditor.setContextPaneOpen(open);
 	};
 
 	this._updateLayout = function () {
-		let { sidePaneState } = Zotero.getMainWindow().ZoteroContextPane.updateLayout();
+		let { sidePaneState } = Zotero.getMainWindow().ZoteroContextPane.update();
 		this.toggleSidePane(sidePaneState.open);
 		this.setSidePaneWidth(sidePaneState.width);
 	};
