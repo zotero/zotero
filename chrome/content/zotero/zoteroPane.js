@@ -5015,7 +5015,7 @@ var ZoteroPane = new function () {
 				if (!this.collectionsView.editable) {
 					continue;
 				}
-				ZoteroPane.openNote(item.id);
+				ZoteroPane.openNote(item.id, { openInWindow: event?.shiftKey });
 			}
 			else if (item.isAttachment()) {
 				await this.viewAttachment(item.id, event);
