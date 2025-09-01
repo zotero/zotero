@@ -190,7 +190,7 @@
 				ZoteroContextPane.showLoadingMessage(false);
 				this._sidenav.hidden = true;
 			}
-			else if (tabType == 'reader'
+			else if (Zotero_Tabs.hasContextPane(tabType)
 					// The reader tab load event is triggered asynchronously.
 					// If the tab is no longer selected by the time the event is triggered,
 					// we don't need to update the context pane, since it must already be
@@ -198,7 +198,12 @@
 					&& (action === 'select'
 						|| (action === 'load' && Zotero_Tabs.selectedID == tabID))) {
 				this._handleReaderReady(tabID);
-				this._setupNotesContext(tabID);
+				if (Zotero_Tabs.hasNoteContext(tabType)) {
+					this._setupNotesContext(tabID);
+				}
+				else {
+					this._disableNotesContext();
+				}
 				_contextPaneSplitter.setAttribute('hidden', false);
 
 				_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
@@ -226,6 +231,11 @@
 			let currentNoteContext = this._getCurrentNotesContext();
 			// Always switch to the current selected tab, since the selection might have changed
 			currentNoteContext.switchToTab(Zotero_Tabs.selectedID);
+			this.sidenav.contextNotesPaneEnabled = true;
+		}
+
+		_disableNotesContext() {
+			this.sidenav.contextNotesPaneEnabled = false;
 		}
 
 		async _handleReaderReady(tabID) {

@@ -78,6 +78,18 @@ var Zotero_Tabs = new function () {
 
 	this._loadableTypes = ['reader', 'note'];
 
+	this._hasContextPaneTypes = ['reader', 'note'];
+
+	this._hasNoteContextTypes = ['reader', 'note'];
+
+	this.hasContextPane = function (type) {
+		return this._hasContextPaneTypes.includes(type);
+	};
+
+	this.hasNoteContext = function (type) {
+		return this._hasNoteContextTypes.includes(type);
+	};
+
 	this.tabHooks = {
 		load: {
 			reader: async (tab, tabIndex, options) => {

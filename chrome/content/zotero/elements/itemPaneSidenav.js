@@ -80,6 +80,8 @@
 		_container = null;
 		
 		_contextNotesPane = null;
+
+		_contextNotesPaneEnabled = true;
 		
 		_contextMenuTarget = null;
 
@@ -114,6 +116,16 @@
 		set contextNotesPane(val) {
 			if (this._contextNotesPane == val) return;
 			this._contextNotesPane = val;
+			this.render();
+		}
+
+		get contextNotesPaneEnabled() {
+			return this._contextNotesPaneEnabled;
+		}
+
+		set contextNotesPaneEnabled(val) {
+			if (this._contextNotesPaneEnabled === val) return;
+			this._contextNotesPaneEnabled = val;
 			this.render();
 		}
 		
@@ -330,7 +342,7 @@
 				}
 				
 				if (pane == 'context-notes') {
-					let hidden = !this._contextNotesPane;
+					let hidden = !this.contextNotesPaneEnabled;
 					let selected = contextNotesPaneVisible;
 					
 					button.parentElement.hidden = hidden;
