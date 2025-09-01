@@ -54,6 +54,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['shadow-autocomplete-input', 'chrome://zotero/content/elements/shadowAutocompleteInput.js'],
 		['split-menu-button', 'chrome://zotero/content/elements/splitMenuButton.js'],
 		['tabs-menu-panel', 'chrome://zotero/content/elements/tabsMenuPanel.js'],
+		['tab-content', 'chrome://zotero/content/elements/tabContent.js'],
 		['tags-box', 'chrome://zotero/content/elements/tagsBox.js'],
 		['zotero-text-link', 'chrome://zotero/content/elements/textLink.js'],
 		['zoterosearch', 'chrome://zotero/content/elements/zoteroSearch.js'],
