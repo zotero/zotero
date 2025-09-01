@@ -1425,10 +1425,9 @@ class ReaderTab extends ReaderInstance {
 		this._contextPaneOpen = options.contextPaneOpen;
 		this._bottomPlaceholderHeight = options.bottomPlaceholderHeight;
 		this._showContextPaneToggle = true;
-		this._onToggleSidebarCallback = options.onToggleSidebar;
-		this._onChangeSidebarWidthCallback = options.onChangeSidebarWidth;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let existingTabID = options.tabID;
+		let select = !options.background;
 		// If an unloaded tab for this item already exists, load the reader in it.
 		// Otherwise, create a new tab
 		if (existingTabID) {
@@ -1444,7 +1443,7 @@ class ReaderTab extends ReaderInstance {
 				data: {
 					itemID: this._item.id
 				},
-				select: !options.background,
+				select,
 				preventJumpback: options.preventJumpback
 			});
 			this.tabID = id;
@@ -1469,7 +1468,45 @@ class ReaderTab extends ReaderInstance {
 
 		this._iframe.setAttribute('tooltip', 'html-tooltip');
 
-		this._open({ location: options.location, secondViewState: options.secondViewState });
+		this._onToggleSidebarCallback = (open) => {
+			if (open) {
+				this._tabContainer.sidePaneWidth = Zotero.Reader._sidebarWidth;
+			}
+			else {
+				this._tabContainer.sidePaneWidth = 0;
+			}
+
+			if (options.onToggleSidebar) {
+				options.onToggleSidebar(open);
+			}
+		};
+		
+		this._onChangeSidebarWidthCallback = (width) => {
+			this._tabContainer.sidePaneWidth = width;
+
+			if (options.onChangeSidebarWidth) {
+				options.onChangeSidebarWidth(width);
+			}
+		};
+
+		this._open({ location: options.location, secondViewState: options.secondViewState }).then(() => {
+			this._tabContainer.addEventListener('tab-bottom-placeholder-resize', (event) => {
+				this.setBottomPlaceholderHeight(event.detail.height);
+			});
+
+			this._tabContainer.addEventListener('tab-context-pane-toggle', (event) => {
+				this.setContextPaneOpen(event.detail.open);
+			});
+
+			this._tabContainer.addEventListener('tab-selection-change', (event) => {
+				if (event.detail.selected) {
+					this._updateSidebar();
+				}
+			});
+			if (select) {
+				this._updateSidebar();
+			}
+		});
 	}
 	
 	close() {
@@ -1550,6 +1587,15 @@ class ReaderTab extends ReaderInstance {
 		if (editorInstance) {
 			editorInstance.focus();
 			editorInstance.insertAnnotations(annotations);
+		}
+	}
+
+	_updateSidebar() {
+		if (Zotero.Reader._sidebarOpen) {
+			this._tabContainer.sidePaneWidth = Zotero.Reader._sidebarWidth;
+		}
+		else {
+			this._tabContainer.sidePaneWidth = 0;
 		}
 	}
 }
@@ -2099,62 +2145,14 @@ class Reader {
 	_loadSidebarState() {
 		let win = Zotero.getMainWindow();
 		if (win) {
-			let pane = win.document.getElementById('zotero-reader-sidebar-pane');
-			this._sidebarOpen = pane.getAttribute('collapsed') == 'false';
-			let width = pane.getAttribute('width');
-			if (width) {
-				this._sidebarWidth = parseInt(width);
+			let state = win.ZoteroContextPane.getSidePaneState('reader');
+			this._sidebarOpen = state.open;
+			if (state.width) {
+				this._sidebarWidth = parseInt(state.width);
 			}
 		}
 	}
-
-	_setSidebarState() {
-		let win = Zotero.getMainWindow();
-		if (win) {
-			let pane = win.document.getElementById('zotero-reader-sidebar-pane');
-			pane.setAttribute('collapsed', this._sidebarOpen ? 'false' : 'true');
-			pane.setAttribute('width', this._sidebarWidth);
-		}
-	}
 	
-	getSidebarOpen() {
-		return this._sidebarOpen;
-	}
-	
-	setSidebarWidth(width) {
-		this._sidebarWidth = width;
-		let readers = this._readers.filter(r => r instanceof ReaderTab);
-		for (let reader of readers) {
-			reader.setSidebarWidth(width);
-		}
-		this._setSidebarState();
-	}
-	
-	toggleSidebar(open) {
-		this._sidebarOpen = open;
-		let readers = this._readers.filter(r => r instanceof ReaderTab);
-		for (let reader of readers) {
-			reader.toggleSidebar(open);
-		}
-		this._setSidebarState();
-	}
-
-	setContextPaneOpen(open) {
-		this._contextPaneOpen = open;
-		let readers = this._readers.filter(r => r instanceof ReaderTab);
-		for (let reader of readers) {
-			reader.setContextPaneOpen(open);
-		}
-	}
-	
-	setBottomPlaceholderHeight(height) {
-		this._bottomPlaceholderHeight = height;
-		let readers = this._readers.filter(r => r instanceof ReaderTab);
-		for (let reader of readers) {
-			reader.setBottomPlaceholderHeight(height);
-		}
-	}
-
 	notify(event, type, ids, extraData) {
 		if (type === 'tab') {
 			if (event === 'close') {
@@ -2333,14 +2331,12 @@ class Reader {
 				preventJumpback: preventJumpback,
 				onToggleSidebar: (open) => {
 					this._sidebarOpen = open;
-					this.toggleSidebar(open);
 					if (this.onToggleSidebar) {
 						this.onToggleSidebar(open);
 					}
 				},
 				onChangeSidebarWidth: (width) => {
 					this._sidebarWidth = width;
-					this._debounceSidebarWidthUpdate();
 					if (this.onChangeSidebarWidth) {
 						this.onChangeSidebarWidth(width);
 					}
