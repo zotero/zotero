@@ -140,7 +140,7 @@ var ZoteroContextPane = new function () {
 	
 	this._updatePaneWidth = (width) => {
 		let stacked = _isStacked();
-		let tabType = Zotero_Tabs.selectedType.split('-')[0];
+		let { tabContentType: tabType } = Zotero_Tabs.parseTabType();
 		if (typeof width !== 'number') {
 			width = this.getSidePaneState(tabType).width;
 		}
