@@ -147,7 +147,7 @@ Zotero.Notes = new function () {
 
 				container.addEventListener('tab-selection-change', (event) => {
 					if (event.detail.selected) {
-						this.setSidePaneWidth();
+						this._updateLayout();
 					}
 				});
 
@@ -155,7 +155,7 @@ Zotero.Notes = new function () {
 			}
 
 			if (select) {
-				this.setSidePaneWidth();
+				this._updateLayout();
 			}
 		}
 		return noteEditor;
@@ -165,12 +165,22 @@ Zotero.Notes = new function () {
 		noteEditor.setBottomPlaceholderHeight(height);
 	};
 
+	this.toggleSidePane = function (_open) {
+		// TODO: Implement this once the note editor supports side pane
+	};
+
 	this.setSidePaneWidth = function () {
-		Zotero.getMainWindow().ZoteroContextPane.updateLayout();
+		// TODO: Implement this once the note editor supports side pane
 	};
 
 	this.setContextPaneOpen = function (_open) {
 		// TODO: Implement this once the note editor supports context pane toggle button
+	};
+
+	this._updateLayout = function () {
+		let { sidePaneState } = Zotero.getMainWindow().ZoteroContextPane.updateLayout();
+		this.toggleSidePane(sidePaneState.open);
+		this.setSidePaneWidth(sidePaneState.width);
 	};
 
 	this.getByTabID = function (tabID) {
