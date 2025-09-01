@@ -76,6 +76,8 @@ var Zotero_Tabs = new function () {
 	this._history = [];
 	this._focusOptions = {};
 
+	this._loadableTypes = ['reader', 'note'];
+
 	this.tabHooks = {
 		load: {
 			reader: async (tab, tabIndex, options) => {
@@ -89,7 +91,16 @@ var Zotero_Tabs = new function () {
 				});
 				await reader._initPromise;
 			},
-			note: async (tab, tabIndex, options) => {}
+			note: async (tab, tabIndex, options) => {
+				let noteEditor = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
+					tabID: tab.id,
+					title: tab.title,
+					tabIndex,
+					allowDuplicate: true,
+					preventJumpback: true
+				});
+				await noteEditor;
+			}
 		},
 		focus: {
 			library: async (tab, tabIndex, options) => {
@@ -109,7 +120,7 @@ var Zotero_Tabs = new function () {
 					tab.lastFocusedElement = null;
 				});
 			},
-			reader: async (tab, tabIndex, options) => {
+			reader: async (tab, _tabIndex, _options) => {
 				let reader = Zotero.Reader.getByTabID(tab.id);
 				if (reader) {
 					reader.focus();
@@ -117,7 +128,7 @@ var Zotero_Tabs = new function () {
 			}
 		},
 		moveToNewWindow: {
-			reader: async (tab, tabIndex) => {
+			reader: async (tab, _tabIndex) => {
 				Zotero_Tabs.close(tab.id);
 				let { itemID, secondViewState } = tab.data;
 				await Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState });
@@ -132,7 +143,7 @@ var Zotero_Tabs = new function () {
 			}
 		},
 		undoClose: {
-			reader: async (tab, tabIndex) => {
+			reader: async (tab, _tabIndex) => {
 				if (Zotero.Items.exists(tab.data.itemID)) {
 					await Zotero.Reader.open(tab.data.itemID,
 						null,
@@ -148,7 +159,7 @@ var Zotero_Tabs = new function () {
 			}
 		},
 		restoreState: {
-			library: async (tab, tabIndex) => {
+			library: async (tab, _tabIndex) => {
 				this.rename('zotero-pane', tab.title);
 				// At first, library tab is added without the icon data. We set it here once we know what it is
 				let libraryTab = this._getTab('zotero-pane');
@@ -177,34 +188,52 @@ var Zotero_Tabs = new function () {
 				return {
 					itemID: null,
 				};
+			},
+			note: async (tab, tabIndex) => {
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					let title = tab.title.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+					this.add({
+						type: 'note-unloaded',
+						title,
+						index: tabIndex,
+						data: tab.data,
+						select: tab.selected
+					});
+					return {
+						itemID: tab.data.itemID,
+					};
+				}
+				return {
+					itemID: null,
+				};
 			}
 		}
-	}
+	};
 
 	this._getHook = function (type, action) {
 		if (this.tabHooks[action] && this.tabHooks[action][type]) {
 			return this.tabHooks[action][type];
 		}
 		return async () => {};
-	}
+	};
 
 	this._hasHook = function (type, action) {
 		return !!(this.tabHooks[action] && this.tabHooks[action][type]);
-	}
+	};
 
 	this._parseTabType = function (type) {
 		if (type === 'zotero-pane') {
 			return {
 				tabContentType: 'library',
 				tabState: '',
-			}
+			};
 		}
 		let [tabContentType, tabState] = type.split('-');
 		return {
 			tabContentType,
 			tabState
-		}
-	}
+		};
+	};
 
 	// Keep track of item modifications to update the title
 	this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'tabs');
@@ -237,6 +266,7 @@ var Zotero_Tabs = new function () {
 		return document.getElementById(id);
 	};
 
+	// TODO: update this
 	this._update = function () {
 		// Go through all tabs and try to save their icons to tab.data
 		for (let tab of this._tabs) {
@@ -261,11 +291,12 @@ var Zotero_Tabs = new function () {
 		}
 
 		this._tabBarRef.current.setTabs(this._tabs.map((tab) => {
+			let { tabContentType } = this._parseTabType(tab.type);
 			return {
 				id: tab.id,
 				type: tab.type,
 				title: tab.title,
-				renderTitle: tab.type === 'reader' || tab.type === 'reader-unloaded',
+				renderTitle: tabContentType === 'reader',
 				selected: tab.id == this._selectedID,
 				isItemType: tab.id !== 'zotero-pane',
 				icon: tab.data?.icon || null
@@ -334,8 +365,9 @@ var Zotero_Tabs = new function () {
 	this.getState = function () {
 		return this._tabs.map((tab) => {
 			let type = tab.type;
-			if (type === 'reader-unloaded') {
-				type = 'reader';
+			// If type matches *-unloaded, use the base type
+			if (type.endsWith('-unloaded')) {
+				type = type.replace(/-unloaded$/, '');
 			}
 			var o = {
 				type,
@@ -656,13 +688,13 @@ var Zotero_Tabs = new function () {
 
 	this.unload = function (id) {
 		var { tab, tabIndex } = this._getTab(id);
-		if (!tab || tab.id === this._selectedID || tab.type !== 'reader') {
+		if (!tab || tab.id === this._selectedID || !this._loadableTypes.includes(tab.type)) {
 			return;
 		}
 		this.close(tab.id);
 		this.add({
 			id: tab.id,
-			type: 'reader-unloaded',
+			type: `${tab.type}-unloaded`,
 			title: tab.title,
 			index: tabIndex,
 			data: tab.data

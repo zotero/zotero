@@ -74,7 +74,7 @@ Zotero.Notes = new function () {
 
 		if (noteEditor) {
 			if (noteEditor.viewMode === 'tab') {
-				noteEditor._window.Zotero_Tabs.select(noteEditor.tabID, true);
+				win.Zotero_Tabs.select(noteEditor.tabID, true);
 			}
 			
 			if (location) {
@@ -104,18 +104,27 @@ Zotero.Notes = new function () {
 			noteEditor = io.noteEditor;
 		}
 		else {
+			let id;
+			let container;
 			// TODO: implement unloading of the note editor
-			let { id, container } = win.Zotero_Tabs.add({
-				id: tabID,
-				type: 'note',
-				title,
-				index: tabIndex,
-				data: {
-					itemID,
-				},
-				select: !openInBackground,
-				preventJumpback,
-			});
+			if (tabID) {
+				id = tabID;
+				container = win.document.getElementById(tabID);
+			}
+ 			else {
+				({ id, container } = win.Zotero_Tabs.add({
+					id: tabID,
+					type: 'note',
+					title,
+					index: tabIndex,
+					data: {
+						itemID,
+					},
+					select: !openInBackground,
+					preventJumpback,
+				}));
+			}
+			
 			noteEditor = win.document.createXULElement('note-editor');
 			noteEditor.classList.add('note-tab');
 			container.appendChild(noteEditor);
