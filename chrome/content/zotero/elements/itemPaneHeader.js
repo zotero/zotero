@@ -62,6 +62,8 @@
 		_item = null;
 		
 		_titleFieldID = null;
+
+		_editable = true;
 		
 		get item() {
 			return this._item;
@@ -70,6 +72,18 @@
 		set item(item) {
 			this.blurOpenField();
 			this._item = item;
+			this.titleField.readOnly = !this.editable;
+		}
+
+		get editable() {
+			return this._editable && !this.item.isNote();
+		}
+
+		set editable(editable) {
+			this._editable = editable;
+			if (this.titleField) {
+				this.titleField.readOnly = !editable;
+			}
 		}
 
 		init() {
@@ -243,9 +257,16 @@
 			}
 
 			if (headerMode === 'title' || headerMode === 'titleCreatorYear') {
-				this._titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this._item.itemTypeID, 'title');
-
-				let title = this.item.getField(this._titleFieldID);
+				let title = "";
+				if (!this._item.isNote()) {
+					this._titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this._item.itemTypeID, 'title');
+					title = this.item.getField(this._titleFieldID);
+				}
+				else {
+					this._titleFieldID = "";
+					title = this._item.getNoteTitle();
+				}
+				
 				// If focused, update the value that will be restored on Escape;
 				// otherwise, update the displayed value
 				if (this.titleField.focused) {
