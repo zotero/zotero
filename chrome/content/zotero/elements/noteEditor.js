@@ -328,6 +328,8 @@
 			}
 		}
 
+		refresh() {}
+
 		renderCustomHead(callback) {
 			let customHead = this.querySelector(".custom-head");
 			customHead.replaceChildren();

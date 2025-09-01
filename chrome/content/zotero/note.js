@@ -35,6 +35,9 @@ function showInLibrary() {
 async function onLoad() {
 	if (window.arguments) {
 		var io = window.arguments[0];
+		if (io.wrappedJSObject) {
+			io = io.wrappedJSObject;
+		}
 	}
 	
 	let itemID = parseInt(io.itemID);
