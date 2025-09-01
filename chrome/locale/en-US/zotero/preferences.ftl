@@ -50,6 +50,10 @@ preferences-reader-ebook-font = Ebook font:
 preferences-reader-ebook-hyphenate =
     .label = Enable automatic hyphenation
 
+preferences-note-title = Notes
+preferences-note-open-in-new-window =
+    .label = Open notes in new windows instead of tabs
+
 preferences-color-scheme = Color Scheme:
 preferences-color-scheme-auto =
     .label = Automatic
