@@ -114,7 +114,7 @@ Zotero.Notes = new function () {
  			else {
 				({ id, container } = win.Zotero_Tabs.add({
 					id: tabID,
-					type: 'note',
+					type: 'note-unloaded',
 					title,
 					index: tabIndex,
 					data: {
@@ -133,6 +133,7 @@ Zotero.Notes = new function () {
 			noteEditor.viewMode = 'tab';
 			noteEditor.item = item;
 			noteEditor.tabID = id;
+			noteEditor._id('links-container').hidden = true;
 
 			this._editorInstances.push(noteEditor);
 		}
