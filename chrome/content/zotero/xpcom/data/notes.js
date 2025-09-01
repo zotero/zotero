@@ -124,21 +124,34 @@ Zotero.Notes = new function () {
 					preventJumpback,
 				}));
 			}
-			
-			noteEditor = win.document.createXULElement('note-editor');
-			noteEditor.classList.add('note-tab');
-			container.appendChild(noteEditor);
 
-			noteEditor.mode = item.isEditable() ? 'edit' : 'view';
-			noteEditor.viewMode = 'tab';
-			noteEditor.item = item;
-			noteEditor.tabID = id;
-			noteEditor._id('links-container').hidden = true;
+			if (!openInBackground) {
+				noteEditor = win.document.createXULElement('note-editor');
+				noteEditor.classList.add('note-tab');
+				container.appendChild(noteEditor);
 
-			this._editorInstances.push(noteEditor);
+				noteEditor.mode = item.isEditable() ? 'edit' : 'view';
+				noteEditor.viewMode = 'tab';
+				noteEditor.item = item;
+				noteEditor.tabID = id;
+				noteEditor._id('links-container').hidden = true;
+
+				this._editorInstances.push(noteEditor);
+			}
 		}
 		return noteEditor;
 		// TODO: shall we use a tab instance mixin for reader and note editors?
+	};
+
+	this.getByTabID = function (tabID) {
+		if (!tabID) {
+			return null;
+		}
+		let noteEditor = this._editorInstances.find(x => x.tabID === tabID);
+		if (noteEditor) {
+			return noteEditor;
+		}
+		return null;
 	};
 	
 	this.noteToTitle = function (text) {
