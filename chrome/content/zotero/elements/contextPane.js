@@ -327,7 +327,13 @@
 	
 			let previousPinnedPane = this._sidenav.container?.pinnedPane || "";
 			
-			let targetItem = parentID ? Zotero.Items.get(parentID) : item;
+			let targetItem;
+			if (item.isNote()) {
+				targetItem = item;
+			}
+			else {
+				targetItem = parentID ? Zotero.Items.get(parentID) : item;
+			}
 			
 			let editable = Zotero.Libraries.get(libraryID).editable
 				// If the parent item or the attachment itself is in trash, itemPane is not editable
