@@ -144,6 +144,11 @@ var Zotero_Tabs = new function () {
 				Zotero_Tabs.close(tab.id);
 				let { itemID, secondViewState } = tab.data;
 				await Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState });
+			},
+			note: async (tab, _tabIndex) => {
+				Zotero_Tabs.close(tab.id);
+				let { itemID } = tab.data;
+				await Zotero.Notes.open(itemID, null, { openInWindow: true });
 			}
 		},
 		duplicate: {
