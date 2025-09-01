@@ -177,9 +177,9 @@
 		}
 
 		isPaneOrderable(paneID) {
-			let orderable =
+			let orderable
 				// Built-in or orderable custom sections
-				this._builtInPanes.includes(paneID) || Zotero.ItemPaneManager.isSectionOrderable(paneID);
+				= this._builtInPanes.includes(paneID) || Zotero.ItemPaneManager.isSectionOrderable(paneID);
 			return orderable;
 		}
 
@@ -199,6 +199,7 @@
 			else if (direction === 'down') {
 				return isOrderable && isNextOrderable && !isLast;
 			}
+			return false;
 		}
 
 		isOrderChanged() {
@@ -383,7 +384,7 @@
 			currentOrder = [...currentOrder];
 			// Restore the order from installed plugins but not registered in the current order
 			let prevOrder = this.getPersistedOrder();
-			let installedPluginIDs = undefined;
+			let installedPluginIDs;
 			for (let paneID of prevOrder) {
 				if (currentOrder.includes(paneID)) {
 					continue;
@@ -416,7 +417,7 @@
 			try {
 				return value.split(",");
 			}
-			catch(e) {
+			catch {
 				return this._builtInPanes;
 			}
 		}
@@ -450,7 +451,7 @@
 				try {
 					sidenavOptions = JSON.parse(pane.dataset.sidenavOptions);
 				}
-				catch (e) {}
+				catch {}
 				let { icon, darkIcon, l10nID, l10nArgs } = sidenavOptions;
 				if (!darkIcon) darkIcon = icon;
 				button.setAttribute("custom", "true");
@@ -823,7 +824,7 @@
 			}
 			// Insert at the index of the previous wrapper
 			this.changePaneOrder(paneID, actualIndex);
-		}
+		};
 
 		handleButtonDragStart = (event) => {
 			let wrapper = event.target.closest('.pin-wrapper');
@@ -922,7 +923,7 @@
 			}
 		};
 
-		handleButtonDragLeave = (event) => {
+		handleButtonDragLeave = (_event) => {
 			if (this._dropIndicator) {
 				this._dropIndicator.setAttribute("hidden", "true");
 			}
@@ -950,7 +951,7 @@
 				}
 				this.container?.render();
 			}
-		}
+		};
 	}
 	customElements.define("item-pane-sidenav", ItemPaneSidenav);
 }
