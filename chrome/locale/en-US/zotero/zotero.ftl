@@ -488,6 +488,7 @@ pane-info = Info
 pane-abstract = Abstract
 pane-attachments = Attachments
 pane-notes = Notes
+pane-note-info = Note Info
 pane-libraries-collections = Libraries and Collections
 pane-tags = Tags
 pane-related = Related
@@ -563,6 +564,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -642,6 +645,16 @@ attachment-info-convert-note =
             *[unknown] New
     } Note
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
+
+section-note-info =
+    .label = { pane-note-info }
+
+note-info-title = Title
+note-info-date-created = Date Created
+note-info-date-modified = Date Modified
+note-info-size = Size
+note-info-word-count = Word Count
+note-info-character-count = Character Count
 
 attachment-preview-placeholder = No attachment to preview
 attachment-rename-from-parent =
