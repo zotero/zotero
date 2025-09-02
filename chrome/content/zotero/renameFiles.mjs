@@ -31,27 +31,25 @@ export const DEFAULT_ATTACHMENT_RENAME_TEMPLATE = "{{ firstCreator suffix=\" - \
 export const DEFAULT_AUTO_RENAME_FILE_TYPES = "application/pdf,application/epub+zip";
 
 /**
- * Renames all attachment files in Zotero based on their parent items' metadata.
- *
+ * Rename eligible attachment files based on their parent items' metadata.
  * @async
- * @function
- * @param {Object} [options] - Options for renaming files.
- * @param {boolean} [options.userLibrary=true] - Whether to rename files in the user library.
- * @param {boolean} [options.groupLibrary=false] - Whether to rename files in group libraries.
- * @returns {Promise} Resolves when the renaming process is complete.
+ * @param {Object} [options]
+ * @param {boolean} [options.userLibrary=true] - Process "My Library".
+ * @param {boolean} [options.groupLibrary=false] - Process group libraries.
+ * @param {boolean} [options.pretend=false] - If true, perform a dry run (compile a list of files to rename).
+ * @param {(progress:number)=>void} [options.reportProgress] - Callback for progress updates (0..1).
+ * @returns {Promise<Array<{attachmentId:number,parentItemId:number,oldName:string,newName:string,isFilePresent:boolean}>>}
+ *          Summary of (performed or proposed) rename operations.
  */
-export async function renameFilesFromParent({ userLibrary = true, groupLibrary = false } = {}) {
+export async function renameFilesFromParent({ userLibrary = true, groupLibrary = false, pretend = false, reportProgress = () => {} } = {}) {
 	const t1 = Date.now();
+	let summary = [];
 	let progress = 0;
+
 	let adjustProgressBy = (additionalProgress) => {
 		progress = clamp(progress + additionalProgress);
-		Zotero.updateZoteroPaneProgressMeter(
-			Math.round(progress * 100)
-		);
+		reportProgress(progress);
 	};
-
-	Zotero.showZoteroPaneProgressMeter(null, true);
-	Zotero.updateZoteroPaneProgressMeter(0);
 
 	let libraries = Zotero.Libraries.getAll();
 	adjustProgressBy(0.01); // move progress bar slightly while we load required data
@@ -101,43 +99,58 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 		const ext = path ? Zotero.File.getExtension(path) : attachmentItem.attachmentFilename.split('.').pop();
 
 		let newName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: attachmentItem.getField('title') });
+		let newNameWithExtension = ext.length ? `${newName}.${ext}` : newName;
 		Zotero.debug(`Renaming attachment ${attachmentItem.id} on parent item ${parentItem.id} to ${newName}`);
 
-		if (path) {
-			let out = {};
-			const renamed = await attachmentItem.renameAttachmentFile(ext.length ? `${newName}.${ext}` : newName, { updateTitle: true, out });
-			if (out.noChange) {
-				continue;
-			}
-			if (renamed === true) {
-				count++;
-			}
-			else {
-				Zotero.debug(`Failed to rename attachment ${attachmentItem.id} on parent item ${parentItem.id}`);
-			}
+		if (newNameWithExtension !== attachmentItem.attachmentFilename) {
+			summary.push({
+				attachmentId: attachmentItem.id,
+				parentItemId: parentItem.id,
+				oldName: attachmentItem.attachmentFilename,
+				newName: newNameWithExtension,
+				isFilePresent: !!path
+			});
 		}
-		else if (attachmentItem.attachmentFilename !== newName && attachmentItem.isStoredFileAttachment()) {
-			const oldFileName = attachmentItem.attachmentFilename;
-			const oldBaseName = attachmentItem.attachmentFilename.replace(/\.[^.]+$/, '');
 
-			// file is not present locally but we can still update filename in the database
-			attachmentItem.attachmentFilename = newName;
-
-			// update title if it matches the old filename
-			if (attachmentItem.getField('title') === oldBaseName || attachmentItem.getField('title') === oldFileName) {
-				attachmentItem.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
+		if (!pretend) {
+			if (path) {
+				let out = {};
+				const renamed = await attachmentItem.renameAttachmentFile(newNameWithExtension, { updateTitle: true, out });
+				if (out.noChange) {
+					continue;
+				}
+				if (renamed === true) {
+					count++;
+				}
+				else {
+					Zotero.debug(`Failed to rename attachment ${attachmentItem.id} on parent item ${parentItem.id}`);
+				}
 			}
+			else if (attachmentItem.attachmentFilename !== newName && attachmentItem.isStoredFileAttachment()) {
+				const oldFileName = attachmentItem.attachmentFilename;
+				const oldBaseName = attachmentItem.attachmentFilename.replace(/\.[^.]+$/, '');
 
-			await attachmentItem.saveTx();
-			noFilePresentCount++;
+				// file is not present locally but we can still update filename in the database
+				attachmentItem.attachmentFilename = newName;
+
+				// update title if it matches the old filename
+				if (attachmentItem.getField('title') === oldBaseName || attachmentItem.getField('title') === oldFileName) {
+					attachmentItem.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
+				}
+
+				await attachmentItem.saveTx();
+				noFilePresentCount++;
+			}
 		}
 	}
 	const t2 = Date.now();
-	Zotero.debug(`Renaming ${count + noFilePresentCount} attachments (${noFilePresentCount} with no file present) in ${librariesWithAttachmentsToRename.length} `
-		+ `libraries took ${((t2 - t1) / 1000).toFixed(2)} seconds `
-		+ `(user library: ${userLibrary}, group libraries: ${groupLibrary})`);
-	Zotero.Prefs.set('autoRenameFiles.done', true);
-	Zotero.hideZoteroPaneOverlays();
+	if (!pretend) {
+		Zotero.debug(`Renaming ${count + noFilePresentCount} attachments (${noFilePresentCount} with no file present) in ${librariesWithAttachmentsToRename.length} `
+			+ `libraries took ${((t2 - t1) / 1000).toFixed(2)} seconds `
+			+ `(user library: ${userLibrary}, group libraries: ${groupLibrary})`);
+		Zotero.Prefs.set('autoRenameFiles.done', true);
+	}
+	return summary;
 };
 
 /**
@@ -276,4 +289,30 @@ export function registerAutoRenameFileFromParent() {
 			}
 		}
 	}, ['item'], 'autoRenameFileFromParent', 150); // lower priority than the other item observers
+}
+
+export async function openRenameFilesPreview() {
+	Services.ww.openWindow(null, "chrome://zotero/content/renameFilesPreview.xhtml",
+		"renameFilesPreview", "chrome,dialog=yes,centerscreen,modal", null);
+}
+
+export async function promptAutoRenameFiles() {
+	let [title, description, yes] = await Zotero.getMainWindow().document.l10n.formatValues([
+		'file-renaming-auto-rename-prompt-title',
+		'file-renaming-auto-rename-prompt-body',
+		'file-renaming-auto-rename-prompt-yes'
+	]);
+	let no = Zotero.getString('general.no');
+	let index = Zotero.Prompt.confirm({
+		title,
+		text: description,
+		button0: yes,
+		button1: no
+	});
+	if (index == 0) {
+		openRenameFilesPreview();
+	}
+	else {
+		Zotero.Prefs.set('autoRenameFiles.done', false);
+	}
 }

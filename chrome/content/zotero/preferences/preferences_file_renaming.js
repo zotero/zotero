@@ -24,12 +24,13 @@
 */
 /* global Zotero_Preferences: false */
 
-const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE, openRenameFilesPreview,
+	promptAutoRenameFiles } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
 
 Zotero_Preferences.FileRenaming = {
 	mockItem: null,
 	defaultExt: 'pdf',
-	hasPromptedOrIsRenaming: false,
+	prompted: false,
 
 	init: function () {
 		this.lastFormatString = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate') ?? DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
@@ -51,7 +52,7 @@ Zotero_Preferences.FileRenaming = {
 		this._promptReplace = this.promptReplace.bind(this);
 		this._handleDonePrefChange = this.handleDonePrefChange.bind(this);
 
-		Zotero.Prefs.registerObserver('autoRenameFiles.done', this._handleDonePrefChange);
+		this._renameFilesPrefObserver = Zotero.Prefs.registerObserver('autoRenameFiles.done', this._handleDonePrefChange);
 
 		if (this._itemsView) {
 			this._itemsView.onSelect.addListener(this._updatePreview);
@@ -68,7 +69,7 @@ Zotero_Preferences.FileRenaming = {
 		this._itemsView.onSelect.removeListener(this._updatePreview);
 		this.backButtonEl.removeEventListener('command', this._promptReplace);
 		this.navigationEl.removeEventListener('select', this._promptReplace);
-		Zotero.Prefs.unregisterObserver('autoRenameFiles.done', this._handleDonePrefChange);
+		Zotero.Prefs.unregisterObserver(this._renameFilesPrefObserver);
 		this.promptReplace();
 	},
 
@@ -103,15 +104,15 @@ Zotero_Preferences.FileRenaming = {
 		if (newValue) {
 			this.lastFormatString = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate');
 			this.isTemplateInSync = true;
-			this.hasPromptedOrIsRenaming = false;
+			this.prompted = false;
 		}
 	},
 
 	promptReplace: function () {
-		if (!this.hasPromptedOrIsRenaming && !Zotero.Prefs.get('autoRenameFiles.done')) {
+		if (!this.prompted && !Zotero.Prefs.get('autoRenameFiles.done')) {
 			// Set the flag to avoid repeating the prompt while renaming is in progress or user declined renaming
-			this.hasPromptedOrIsRenaming = true;
-			Zotero_Preferences.General.promptAutoRenameFiles();
+			this.prompted = true;
+			promptAutoRenameFiles();
 		}
 	},
 
@@ -139,10 +140,7 @@ Zotero_Preferences.FileRenaming = {
 	},
 
 	async renameNow() {
-		const { renameFilesFromParent } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
-		this.renameNowBtnEl.setAttribute('disabled', 'true');
-		this.hasPromptedOrIsRenaming = true;
-		await renameFilesFromParent();
+		openRenameFilesPreview();
 	},
 
 	makeMockItem() {

@@ -24,12 +24,8 @@ preferences-file-renaming-file-type-video =
     .label = { file-type-video }
 preferences-file-renaming-customize-button =
     .label = Customize Filename Format…
-preferences-file-renaming-auto-rename-prompt-title = Rename existing files?
-preferences-file-renaming-auto-rename-prompt-body = { -app-name } can rename existing files in your library. Would you like to rename existing files now?
-preferences-file-renaming-auto-rename-prompt-yes = Rename Files
 preferences-file-renaming-rename-now =
-    .label = Rename Files Now
-    
+    .label = Rename Files…
 
 preferences-file-renaming-format-title = Filename Format
 preferences-file-renaming-format-instructions = You can customize the filename pattern { -app-name } uses to rename attachment files from parent metadata.

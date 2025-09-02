@@ -1,0 +1,41 @@
+#rename-files-preview {
+    min-width: 800px;
+    min-height: 500px;
+
+    .virtualized-table-container {
+        flex: 1 1 auto;
+        display: flex;
+        overflow: hidden;
+
+        .virtualized-table-wrapper {
+            width: 100%;
+        }
+
+        .virtualized-table-loading {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .virtualized-table {
+            overflow: hidden;
+
+            .row {
+                &.odd:not(.selected) {
+                    background-color: var(--material-stripe);
+                }
+
+                &.even:not(.selected) {
+                    background-color: var(--material-background);
+                }
+            }
+        }
+    }
+
+    progress {
+        &.hidden {
+            display: none;
+        }
+    }
+}

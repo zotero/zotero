@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!--
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2025 Corporation for Digital Scholarship
+					 Vienna, Virginia, USA
+					http://zotero.org
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+-->
+
+<?xml-stylesheet href="chrome://global/skin/"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" xmlns:html="http://www.w3.org/1999/xhtml"
+    id="rename-files-preview" class="zotero-dialog" drawintitlebar-platforms="mac" onload="RenameFilesPreview.init()">
+    <dialog buttons="cancel,accept" data-l10n-id="rename-files-preview" data-l10n-attrs="buttonlabelaccept">
+        <script>
+            Services.scriptloader.loadSubScript('chrome://zotero/content/include.js', this);
+            Services.scriptloader.loadSubScript('chrome://zotero/content/titlebar.js', this);
+            Services.scriptloader.loadSubScript('chrome://zotero/content/customElements.js', this);
+            Services.scriptloader.loadSubScript('chrome://zotero/content/renameFilesPreview.js', this);
+        </script>
+        <linkset>
+            <html:link rel="localization" href="branding/brand.ftl" />
+            <html:link rel="localization" href="zotero.ftl" />
+            <html:link rel="localization" href="preferences.ftl" />
+        </linkset>
+            <vbox>
+                <html:p id="intro" data-l10n-id="rename-files-preview-intro" />
+            </vbox>
+
+            <vbox class="virtualized-table-container">
+                <html:div id="renamed-files-list" class="virtualized-table-wrapper">
+                    <html:div class="virtualized-table-loading" id="loading">
+                        <html:span data-l10n-id="rename-files-confirmation-loading" />
+                    </html:div>
+                </html:div>
+                <html:progress id="progress" max="1" value="0" />
+            </vbox>
+        </dialog>
+</window>
