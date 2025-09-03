@@ -69,27 +69,22 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 	},
 
 	prepareColumns: async function () {
-		let [oldNameLabel, newNameLabel] = await document.l10n.formatValues([
-			'rename-files-preview-table-old-name',
-			'rename-files-preview-table-new-name',
-		]);
-
 		return [
-			{ dataKey: 'oldName', label: oldNameLabel, primary: true, flex: 1 },
-			{ dataKey: 'newName', label: newNameLabel, primary: true, flex: 1 },
+			{ dataKey: 'name', label: '', primary: true, flex: 1 },
 		];
 	},
 
 	pretendRenameItems: async function () {
 		this.columns = await this.prepareColumns();
-		this.rows = await renameFilesFromParent({ pretend: true });
+		let rows = await renameFilesFromParent({ pretend: true });
 		this.loadingEl.remove();
-		if (this.rows.length === 0) {
+		if (rows.length === 0) {
 			this.introEl.dataset.l10nId = 'rename-files-preview-no-files';
 			this.cancelBtnEl.label = await document.l10n.formatValue('general-done');
 			this.acceptBtnEl.remove();
 		}
 		else {
+			this.rows = rows.flatMap(obj => [{ name: obj.oldName }, { name: obj.newName }]);
 			this.acceptBtnEl.disabled = false;
 			this.render();
 		}
@@ -106,7 +101,7 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 				id="rename-files-confirm-table"
 				ref={ref => this.treeRef = ref}
 				renderItem={VirtualizedTable.makeRowRenderer(this.getRowData.bind(this))}
-				showHeader={true}
+				showHeader={false}
 				columns={this.columns}
 				containerWidth={this.filesListEl.clientWidth}
 				disableFontSizeScaling={true}

@@ -646,8 +646,6 @@ file-renaming-auto-rename-prompt-title = Rename existing files?
 file-renaming-auto-rename-prompt-body = { -app-name } can rename existing files in your library. Would you like to rename existing files now?
 file-renaming-auto-rename-prompt-yes = Preview…
 
-rename-files-preview-table-old-name = Old Name
-rename-files-preview-table-new-name = New Name
 rename-files-preview =
     .buttonlabelaccept = Rename Files
 rename-files-preview-loading = Loading…

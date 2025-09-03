@@ -23,11 +23,11 @@
 
             .row {
                 &.odd:not(.selected) {
-                    background-color: var(--material-stripe);
+                    color: var(--fill-primary);
                 }
 
                 &.even:not(.selected) {
-                    background-color: var(--material-background);
+                    color: var(--fill-secondary);
                 }
             }
         }
