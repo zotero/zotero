@@ -970,6 +970,9 @@ const IOManager = {
 		// some additional logic to keep focus on relevant nodes during mouse interactions
 		this._initFocusRetention();
 		doc.addEventListener("focusin", this.resetSelectedAfterFocus);
+		// clear record of just-added bubbles to which next locator would go
+		doc.addEventListener("keydown", event => this._clearJustAddedBubbles(event));
+		doc.addEventListener("focusout", event => this._clearJustAddedBubbles(event));
 	},
 
 	// switch between list and library modes
@@ -1029,6 +1032,7 @@ const IOManager = {
 				dialogReferenceID: item.dialogReferenceID,
 				bubbleString: item.bubbleString,
 				selected: item.selected,
+				justAdded: this._justAddedBubbles?.includes(item) || false
 			};
 		}));
 		_id("accept-button").disabled = !CitationDataManager.items.length;
@@ -1082,6 +1086,12 @@ const IOManager = {
 				bubbleItem.locator = locator.locator;
 				bubbleItem.label = locator.label;
 			}
+			this._justAddedBubbles = null;
+		}
+		else {
+			// If no locator is provided, record which bubbles were just added.
+			// If a locator is typed next, these bubbles will receive it.
+			this._justAddedBubbles = bubbleItems;
 		}
 		await CitationDataManager.addItems({ bubbleItems, index });
 		// Refresh the itemTree if in library mode
@@ -1291,15 +1301,26 @@ const IOManager = {
 		this.addItemsToCitation(items, { index });
 	},
 
-	// Handle Enter keypress on an input. If a locator has been typed, add it to previous bubble.
+	// Handle Enter keypress on an input. If a locator has been typed, add it to the last-added
+	// bubble if exists or a bubble before the input otherwise.
 	// Otherwise, add pre-selected item if any. Otherwise, accept the dialog.
 	_handleInputEnter(input) {
-		let locator = Helpers.extractLocator(input.value);
-		let bubble = input.previousElementSibling;
-		let item = CitationDataManager.getItem({ dialogReferenceID: bubble?.getAttribute("dialogReferenceID") });
-		if (item && locator && locator.onlyLocator && bubble) {
-			item.locator = locator.locator;
-			item.label = locator.label;
+		let locator = Helpers.extractLocator(input.value, { bubbleJustAdded: !!this._justAddedBubbles });
+		// Apply the locator to the items that were just added OR the bubble before the input if none
+		let items = [];
+		if (locator && locator.onlyLocator && this._justAddedBubbles) {
+			items = this._justAddedBubbles;
+		}
+		else {
+			let bubble = input.previousElementSibling;
+			items = [CitationDataManager.getItem({ dialogReferenceID: bubble?.getAttribute("dialogReferenceID") })];
+		}
+		this._clearJustAddedBubbles();
+		if (items && locator && locator.onlyLocator) {
+			for (let item of items) {
+				item.locator = locator.locator;
+				item.label = locator.label;
+			}
 			input.value = "";
 			input.dispatchEvent(new Event('input', { bubbles: true }));
 			this.updateBubbleInput();
@@ -1358,7 +1379,7 @@ const IOManager = {
 	_handleInput({ query, eventType }) {
 		query = SearchHandler.cleanSearchQuery(query);
 		// If there is a locator typed, exclude it from the query
-		let locator = Helpers.extractLocator(query);
+		let locator = Helpers.extractLocator(query, { bubbleJustAdded: !!this._justAddedBubbles });
 		if (locator) {
 			query = query.replace(locator.fullLocatorString, "");
 		}
@@ -1369,6 +1390,26 @@ const IOManager = {
 		}
 		currentLayout.search(query, { skipDebounce: eventType == "focus" });
 		dialogNotPristine();
+	},
+
+	// Clear the record of which bubbles were just added. If a locator is typed
+	// and Enter is presses, just-added bubbles get that locator.
+	_clearJustAddedBubbles(event) {
+		if (!this._justAddedBubbles) return;
+		// if keydown event is provided, only proceed if it's an arrow key
+		let navigationKeys = ["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft"];
+		if (event && event.type == "keydown" && !navigationKeys.includes(event.key)) return;
+		if (event && event.type == "focusout" && !event.target.closest("#bubble-input")) return;
+		// clear just added bubbles and update bubble input to reflect that
+		this._justAddedBubbles = null;
+		this.updateBubbleInput();
+		// on keydown, rerun the search in case there is numeric input
+		// that should no longer be treated as a locator
+		if (event && event.type == "keydown") {
+			let currentInput = _id("bubble-input").getCurrentInput();
+			if (!currentInput) return;
+			this._handleInput({ query: currentInput.value, eventType: "focus" });
+		}
 	},
 
 	_handleMenuBarAppearance() {
