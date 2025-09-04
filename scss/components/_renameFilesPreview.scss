@@ -22,11 +22,11 @@
             overflow: hidden;
 
             .row {
-                &.odd:not(.selected) {
+                &.new:not(.selected) {
                     color: var(--fill-primary);
                 }
 
-                &.even:not(.selected) {
+                &.old:not(.selected) {
                     color: var(--fill-secondary);
                 }
             }

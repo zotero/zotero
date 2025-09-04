@@ -49,6 +49,7 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 		this.acceptBtnEl = document.querySelector('dialog').getButton('accept');
 		this.cancelBtnEl = document.querySelector('dialog').getButton('cancel');
 		this.acceptBtnEl.disabled = false;
+		this.rowRenderer = VirtualizedTable.makeRowRenderer(this.getRowData.bind(this));
 		document.addEventListener('dialogaccept', this.handleAcceptClick.bind(this));
 		setTimeout(this.pretendRenameItems.bind(this), 0);
 	},
@@ -86,7 +87,7 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 			Zotero.Prefs.set('autoRenameFiles.done', true);
 		}
 		else {
-			this.rows = rows.flatMap(obj => [{ name: obj.oldName }, { name: obj.newName }]);
+			this.rows = rows.flatMap(obj => [{ name: obj.oldName }, { name: obj.newName }, { type: 'separator' }]);
 			this.acceptBtnEl.disabled = false;
 			this.render();
 		}
@@ -97,18 +98,46 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 	},
 
 	render: function () {
+		let customRowHeights = [];
+		this.rows.forEach((row, index) => {
+			if (row.type === 'separator') {
+				customRowHeights.push([index, 8]);
+			}
+		});
+
 		ReactDOM.createRoot(this.filesListEl).render((
 			<VirtualizedTable
-				getRowCount={() => this.rows.length}
-				id="rename-files-confirm-table"
-				ref={ref => this.treeRef = ref}
-				renderItem={VirtualizedTable.makeRowRenderer(this.getRowData.bind(this))}
-				showHeader={false}
 				columns={this.columns}
 				containerWidth={this.filesListEl.clientWidth}
+				customRowHeights={customRowHeights}
 				disableFontSizeScaling={true}
+				getRowCount={() => this.rows.length}
+				id="rename-files-confirm-table"
+				isSelectable={this.getIsSelectable.bind(this)}
+				ref={ref => this.treeRef = ref}
+				renderItem={this.renderItem.bind(this)}
+				showHeader={false}
 			/>
 		));
+	},
+
+	renderItem: function (index, selection, oldDiv, ...args) {
+		if (this.rows[index].type === 'separator') {
+			let div = oldDiv || document.createElement('div');
+			div.innerHTML = '';
+			div.className = 'row separator';
+			return div;
+		}
+		else {
+			let div = this.rowRenderer(index, selection, oldDiv, ...args);
+			div.classList.toggle('old', index % 3 === 0);
+			div.classList.toggle('new', index % 3 === 1);
+			return div;
+		}
+	},
+
+	getIsSelectable: function (index) {
+		return this.rows[index].type !== 'separator';
 	},
 
 	getRowData: function (index) {
