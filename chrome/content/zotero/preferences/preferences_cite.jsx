@@ -82,7 +82,20 @@ Zotero_Preferences.Cite = {
 				var updated = Zotero.Date.sqlToDate(style.updated, true);
 				return {
 					title: style.title,
-					updated: updated ? updated.toLocaleDateString() : ""
+					updated: updated ? updated.toLocaleDateString() : "",
+					remove: {
+						iconKey: "minus-circle",
+						onClick: async (index, event) => {
+							// if the clicks happened via keyboard, refocus the next row's button
+							if (event.type == "keydown" && document.activeElement == event.target) {
+								this._tabIntoIcon = true;
+							}
+							let cslID = Zotero.Styles.getVisible()[index].styleID;
+							this.deleteStyle([cslID]);
+						},
+						isFocusable: true,
+						ariaLabel: Zotero.getString("general.remove")
+					}
 				};
 			});
 		
@@ -97,6 +110,14 @@ Zotero_Preferences.Cite = {
 					label: "zotero.preferences.cite.styles.styleManager.updated",
 					fixedWidth: true,
 					width: 100
+				},
+				{
+					dataKey: "remove",
+					label: Zotero.getString("preferences-styleManager-remove"),
+					htmlLabel: ' ',
+					fixedWidth: true,
+					width: 24,
+					type: "button"
 				}
 			];
 			var handleKeyDown = (event) => {
@@ -117,11 +138,10 @@ Zotero_Preferences.Cite = {
 						}}
 						renderItem={makeRowRenderer(index => this.styles[index])}
 						showHeader={true}
-						multiSelect={true}
+						multiSelect={false}
 						columns={columns}
 						staticColumns={true}
 						disableFontSizeScaling={true}
-						onSelectionChange={selection => document.getElementById('styleManager-delete').disabled = !selection.count}
 						onKeyDown={handleKeyDown}
 						getRowString={index => this.styles[index].title}
 					/>
@@ -129,7 +149,13 @@ Zotero_Preferences.Cite = {
 			});
 
 			// Fix style manager showing partially blank until scrolled
-			setTimeout(() => this._tree.invalidate());
+			setTimeout(() => {
+				this._tree.invalidate();
+				// Pre-select first item if nothing is selected
+				if (this._tree.selection.selected.size == 0) {
+					this._tree.selection.select(0);
+				}
+			});
 		}
 		else {
 			this._tree.invalidate();
@@ -142,7 +168,11 @@ Zotero_Preferences.Cite = {
 			}
 		}
 		else if ([...this._tree.selection.selected].some(i => i >= this.styles.length)) {
-			this._tree.selection.clearSelection();
+			this._tree.selection.select(this.styles.length - 1);
+		}
+		if (this._tabIntoIcon) {
+			document.querySelector("#styleManager-table .row.selected .icon-action").focus();
+			this._tabIntoIcon = false;
 		}
 	},
 	
@@ -182,13 +212,16 @@ Zotero_Preferences.Cite = {
 	
 	/**
 	 * Deletes selected styles from the styles pane
+	 * @param {Array} cslIDs Array of CSL IDs to delete
 	 **/
-	deleteStyle: async function() {
+	deleteStyle: async function (cslIDs = []) {
 		// get selected cslIDs
 		var styles = Zotero.Styles.getVisible();
-		var cslIDs = [];
-		for (let index of this._tree.selection.selected.keys()) {
-			cslIDs.push(styles[index].styleID);
+		// if style ids are not provided, get them from the selection
+		if (cslIDs.length == 0) {
+			for (let index of this._tree.selection.selected.keys()) {
+				cslIDs.push(styles[index].styleID);
+			}
 		}
 		
 		if(cslIDs.length == 0) {
@@ -215,6 +248,34 @@ Zotero_Preferences.Cite = {
 		}
 	},
 	
+	resetStyles: async function () {
+		var ps = Services.prompt;
+		
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+		
+		var index = ps.confirmEx(null,
+			Zotero.getString('general.warning'),
+			Zotero.getString('zotero.preferences.advanced.resetStyles.changesLost'),
+			buttonFlags,
+			Zotero.getString('zotero.preferences.advanced.resetStyles'),
+			null, null, null, {});
+		
+		if (index == 0) {
+			let button = document.getElementById('reset-styles-button');
+			button.disabled = true;
+			try {
+				await Zotero.Schema.resetStyles()
+				if (Zotero_Preferences.Export) {
+					Zotero_Preferences.Export.populateQuickCopyList();
+				}
+			}
+			finally {
+				button.disabled = false;
+			}
+			this.refreshStylesList();
+		}
+	},
 	
 	/**
 	 * Shows an error if import fails

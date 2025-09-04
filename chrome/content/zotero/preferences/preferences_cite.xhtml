@@ -25,24 +25,23 @@
 
 <vbox id="zotero-prefpane-cite" onload="event.waitUntil(Zotero_Preferences.Cite.init())">
 	<vbox class="main-section" id="styles">
-		<groupbox flex="1" aria-label="&zotero.preferences.cite.styles.styleManager;">
+		<groupbox flex="1" aria-label="&zotero.preferences.cite.styles.styleManager;" aria-describedby="styleManager-intro">
 			<!-- HTML needs to be wrapped in an hbox to isolate from XUL box layout -->
 			<hbox><label control="styleManager-table"><html:h2>&zotero.preferences.cite.styles.styleManager;</html:h2></label></hbox>
-			
+			<description id="styleManager-intro" data-l10n-id="preferences-styleManager-intro"/>
+			<separator class="thin"/>
 			<hbox class="virtualized-table-container" flex="1">
 				<html:div id="styleManager"/>
 			</hbox>
 			<separator class="thin"/>
 			<hbox id="styleManager-buttons" align="center">
-				<label is="zotero-text-link"
-						value="&zotero.preferences.export.getAdditionalStyles;" flex="1"
-						onclick="Zotero_Preferences.Cite.openStylesPage(); event.preventDefault()"/>
-				<button id="styleManager-delete"
-					data-l10n-id="preferences-styleManager-delete-button" data-l10n-args='{"label":"-"}'
-					oncommand="Zotero_Preferences.Cite.deleteStyle()"
-					disabled="true"/>
-				<button data-l10n-id="preferences-styleManager-add-button" data-l10n-args='{"label":"+"}'
+				<button id="reset-styles-button"
+					data-l10n-id="preferences-styleManager-restore-default"
+					oncommand="Zotero_Preferences.Cite.resetStyles()"/>
+				<button id="add-from-file-button" data-l10n-id="preferences-styleManager-add-from-file"
 					oncommand="Zotero_Preferences.Cite.addStyle()"/>
+				<button id="get-additional-styles-button" data-l10n-id="preferences-styleManager-get-additional-styles"
+					oncommand="Zotero_Preferences.Cite.openStylesPage()"/>
 			</hbox>
 		</groupbox>
 		
