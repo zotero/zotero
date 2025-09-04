@@ -371,12 +371,6 @@
 		text-overflow: ellipsis;
 		overflow: hidden;
 		max-height: 100%;
-		// TEMP: Disables tooltip display for truncated cells, but without this rule
-		// you cannot drag items before selecting them first because the ondrag event is
-		// not called if any children under the drag element are removed for which 
-		// pointer-events are enabled, and we need to rerender the rows for selection
-		// before dragging.
-		pointer-events: none;
 	}
 }
 
@@ -428,3 +422,50 @@
 		}
 	}
 }
+
+// Styling for clickable button-cells
+.virtualized-table {
+	// the cell with the clickable button
+	.cell.clickable {
+		// make sure the button is centered
+		display: flex;
+		justify-content: center;
+		padding: 0;
+
+		// the actual clickable button
+		.icon-action {
+			display: flex;
+			justify-content: center;
+			width: 20px;
+			height: 20px;
+			align-items: center;
+			border-radius: 6px;
+			.icon {
+				width: 16px;
+				height: 16px;
+			}
+			&:hover:not([disabled]) {
+				background-color: var(--fill-quinary);
+			}
+			&:active:not([disabled]) {
+				background-color: var(--fill-quarternary);
+			}
+			&[disabled] {
+				color: var(--color-gray-50);
+			}
+		}
+	}
+
+	// lighter hover and active effects on clickable buttons in selected rows
+	.row.selected {
+		.icon-action {
+			&:hover:not([disabled]) {
+				background-color: #ffffff1a;
+			}
+			&:active:not([disabled]) {
+				background-color: #ffffff33;
+			}
+		}
+	}
+}
+

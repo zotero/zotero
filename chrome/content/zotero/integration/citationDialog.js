@@ -551,6 +551,9 @@ class LibraryLayout extends Layout {
 					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table");
 				}
 				iconWrapper.append(icon);
+				iconWrapper.addEventListener("click", () => {
+					this._handleItemsViewIconClick(index);
+				});
 				return cell;
 			}
 		});
@@ -606,11 +609,6 @@ class LibraryLayout extends Layout {
 			}
 		});
 		doc.querySelector("item-tree-menu-bar").init(this.itemsView);
-		// handle icon click to add/remove items
-		itemsTree.addEventListener("mousedown", event => this._handleItemsViewRowClick(event), true);
-		itemsTree.addEventListener("mouseup", event => this._handleItemsViewRowClick(event), true);
-		// manually handle hover effect on +/- icon, since css :hover applies to the entire row
-		itemsTree.addEventListener("mousemove", event => this._handleItemsViewMouseMove(event));
 		// handle backspace/delete to remove an item from citation
 		itemsTree.addEventListener("keypress", event => this._handleItemsViewKeyPress(event));
 		// only highlight bubbles of selected rows when the focus is in itemTree
@@ -680,59 +678,6 @@ class LibraryLayout extends Layout {
 		this.itemsView.clearItemsPaneMessage();
 	}
 
-	// Handle mouseup and mousedown events on a row in itemTree to enable clicking on +/- button
-	// On mousedown, add .active effect to the +/- button
-	// On mouseup, add/remove the clicked item from the citation
-	// This specific handling is required, since :active effect fires on the row and not the child button
-	_handleItemsViewRowClick(event) {
-		// only trigger on left mouse click
-		if (event.button !== 0) return;
-		let row = event.target;
-		// find which icon we hovered over
-		let hoveredOverIcon = row.querySelector(".icon-action.hover");
-		if (!hoveredOverIcon) return;
-		if (event.type == "mouseup") {
-			let rowIndex = row.id.split("-")[4];
-			let clickedItem = this.itemsView.getRow(rowIndex).ref;
-			hoveredOverIcon.classList.remove("active");
-			let rowTopBeforeRefresh = row.getBoundingClientRect().top;
-			this.itemsView.selection.clearSelection();
-			IOManager.addItemsToCitation([clickedItem]).then(() => {
-				this._scrollItemTreeToRow(row.id, rowTopBeforeRefresh);
-			});
-		}
-		else if (event.type == "mousedown") {
-			hoveredOverIcon.classList.add("active");
-		}
-		// stop propagation to not select the row
-		event.stopPropagation();
-		// do not move focus into the table
-		event.preventDefault();
-	}
-
-	// Add .hover effect to +/- button when the mouse is above it
-	// This  handling is required, since :hover effect fires on the row and not the actual button
-	_handleItemsViewMouseMove(event) {
-		let { clientY, clientX, target } = event;
-		let actionIcons = [...event.target.querySelectorAll(".icon-action")];
-		if (!actionIcons.length) return;
-		// find which icon we hovered over
-		let hoveredOverIcon = actionIcons.find((icon) => {
-			let iconRect = icon.getBoundingClientRect();
-			// event.target is the actual row, so check if the click happened
-			// within the bounding box of the +/- icon and handle it same as a double click
-			let overIcon = clientX > iconRect.left && clientX < iconRect.right
-				&& clientY > iconRect.top && clientY < iconRect.bottom;
-			return overIcon;
-		});
-		if (!target.classList.contains("row") || !hoveredOverIcon) {
-			_id('zotero-items-tree').querySelector(".icon-action.hover")?.classList.remove("hover");
-			_id('zotero-items-tree').querySelector(".icon-action.active")?.classList.remove("active");
-			return;
-		}
-		hoveredOverIcon.classList.add("hover");
-	}
-
 	// backspace/delete in itemsView deletes items from the citation
 	_handleItemsViewKeyPress(event) {
 		if (event.key == "Delete" || Zotero.isMac && event.key == "Backspace") {
@@ -744,6 +689,18 @@ class LibraryLayout extends Layout {
 				}
 			}
 		}
+	}
+
+	// click on + icon will add the item to the citation
+	_handleItemsViewIconClick(index) {
+		let rowNode = doc.querySelector(`#item-tree-citationDialog-row-${index}`);
+		let rowTopBeforeRefresh = rowNode.getBoundingClientRect().top;
+		this.itemsView.selection.clearSelection();
+		let row = this.itemsView.getRow(index);
+		// after adding the item, try to keep the mouse over it even if the bubble-input gets taller
+		IOManager.addItemsToCitation([row.ref]).then(() => {
+			this._scrollItemTreeToRow(rowNode.id, rowTopBeforeRefresh);
+		});
 	}
 
 	// Highlight/de-highlight selected rows
