@@ -31,7 +31,6 @@ const cx = require('classnames');
 const WindowedList = require('./windowed-list');
 const Draggable = require('./draggable');
 const { CSSIcon, getCSSIcon } = require('components/icons');
-const { Zotero_Tooltip } = require('./tooltip');
 
 const TYPING_TIMEOUT = 1000;
 const MINIMUM_ROW_HEIGHT = 20; // px
@@ -726,6 +725,14 @@ class VirtualizedTable extends React.Component {
 		this.focus();
 	}
 
+	// Prevent clicks on buttons in cells from selecting the row
+	_captureMouseUpDown = (event) => {
+		let clickableCell = event.target.closest('.cell.clickable');
+		if (clickableCell) {
+			event.stopPropagation();
+		}
+	};
+
 	_handleContextMenu = async (e, index) => {
 		if (e.target.localName === 'input') {
 			// Do not hijack context menu on inputs, fixes #5374
@@ -922,11 +929,9 @@ class VirtualizedTable extends React.Component {
 	 * @param event
 	 */
 	_handleMouseOver = (event) => {
-		// On scroll, mouse position does not change, so _handleMouseMove does not fire
-		// to close the fake tooltip. Make sure it is closed here.
-		Zotero_Tooltip.stop();
 		let elem = event.target;
-		if (!elem.classList.contains('cell') || elem.classList.contains('cell-icon')) return;
+		let cell = elem.closest('.cell');
+		if (!cell || elem.classList.contains('cell-icon')) return;
 		let textElem = elem.querySelector('.label, .cell-text');
 		// .label is used in the header, .cell-text on primary cells,
 		// otherwise the .cell element if its immediate child is a text node
@@ -944,59 +949,6 @@ class VirtualizedTable extends React.Component {
 			elem.removeAttribute('title');
 		}
 	}
-
-	/**
-	 * Manually handle tooltip setting for table cells with overflowing values.
-	 * Temporary, after
-	 * https://github.com/zotero/zotero/commit/8e2790e2d2a1d8b15efbf84935f0a80d58db4e44.
-	 * @param event
-	 */
-	_handleMouseMove = (event) => {
-		let tgt = event.target;
-		// Mouse left the previous cell - close the tooltip
-		if (!tgt.classList.contains("row")
-			|| event.clientX < parseInt(tgt.dataset.mouseLeft)
-			|| event.clientX > parseInt(tgt.dataset.mouseRight)) {
-			delete tgt.dataset.mouseLeft;
-			delete tgt.dataset.mouseRight;
-			Zotero_Tooltip.stop();
-		}
-
-		if (!tgt.classList.contains("row")) return;
-		let cells = tgt.querySelectorAll(".cell");
-		let targetCell;
-		// Find the cell the mouse is over
-		for (let cell of cells) {
-			let rect = cell.getBoundingClientRect();
-			if (event.clientX >= rect.left && event.clientX <= rect.right) {
-				targetCell = cell;
-				tgt.dataset.mouseLeft = rect.left;
-				tgt.dataset.mouseRight = rect.right;
-				break;
-			}
-		}
-		if (!targetCell) return;
-		// Primary cell will .cell-text child node
-		let textCell = targetCell.querySelector(".cell-text") || targetCell;
-		// If the cell has overflowing content, display the fake tooltip
-		if (textCell.offsetWidth < textCell.scrollWidth) {
-			Zotero_Tooltip.stop();
-			Zotero_Tooltip.start(textCell.textContent);
-		}
-	};
-
-	/**
-	 * Remove manually added fake tooltip from _handleMouseMove when the
-	 * mouse leaves the row completely.
-	 */
-	_handleMouseLeave = (_) => {
-		Zotero_Tooltip.stop();
-		let lastRow = document.querySelector("[mouseLeft][mouseRight]");
-		if (lastRow) {
-			delete lastRow.dataset.mouseLeft;
-			delete lastRow.dataset.mouseRight;
-		}
-	};
 
 	_handleResizerDragStop = (event) => {
 		event.stopPropagation();
@@ -1161,6 +1113,8 @@ class VirtualizedTable extends React.Component {
 			node.addEventListener('dragstart', e => this._onDragStart(e, index), { passive: true });
 			node.addEventListener('dragend', e => this._onDragEnd(e, index), { passive: true });
 			node.addEventListener('mousedown', e => this._handleMouseDown(e, index), { passive: true });
+			node.addEventListener('mouseup', this._captureMouseUpDown, { capture: true });
+			node.addEventListener('mousedown', this._captureMouseUpDown, { capture: true });
 			node.addEventListener('contextmenu', e => this._handleContextMenu(e, index), { passive: true });
 			node.addEventListener('mouseup', e => this._handleMouseUp(e, index), { passive: true });
 			node.addEventListener('dblclick', e => this._activateNode(e, [index]), { passive: true });
@@ -1265,8 +1219,6 @@ class VirtualizedTable extends React.Component {
 			onDrop: e => this.props.onDrop && this.props.onDrop(e),
 			onFocus: e => this.props.onFocus && this.props.onFocus(e),
 			onMouseOver: e => this._handleMouseOver(e),
-			onMouseMove: e => this._handleMouseMove(e),
-			onMouseLeave: e => this._handleMouseLeave(e),
 			className: cx(["virtualized-table",
 				// For selected items icon color, see scss mixin svgicon and focus-states
 				"focus-states-target",
