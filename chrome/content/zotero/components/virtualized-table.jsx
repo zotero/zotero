@@ -1729,6 +1729,48 @@ function renderCell(index, data, column, dir = null) {
 	return span;
 }
 
+/**
+ * Render button cell (if column.type == "button")
+ * @param {Int} index - index of the row
+ * @param {String} data.iconKey - icon key fetched via getCSSIcon to display the button
+ * @param {Function} data.onClick - click handler of the button
+ * @param {Boolean} data.isFocusable - is the button focusable on Tab
+ * @param {String} data.ariaLabel - aria-label for the button. If not provided,  column label will be used
+ * @param {Boolean} isRowSelected - whether the row is selected
+ * @returns {HTMLElement} - rendered button cell
+ */
+function renderButtonCell(index, data, column, isRowSelected) {
+	let cell = document.createElement('span');
+	cell.className = `cell ${column.className} clickable`;
+	let iconWrapper = document.createElement('span');
+	iconWrapper.setAttribute("role", "button");
+	if (data.isFocusable && isRowSelected) {
+		// if specified, make the button of the selected row focusable
+		iconWrapper.setAttribute("tabindex", "0");
+		iconWrapper.setAttribute("aria-label", data.ariaLabel || column.label);
+		iconWrapper.addEventListener("keydown", (event) => {
+			// space/enter will trigger the click
+			if (event.key === "Enter" || event.key === " ") {
+				event.preventDefault();
+				data.onClick(index, event);
+			}
+			// all other keypresses besides tab are ignored and not propagated
+			if (event.key !== "Tab") {
+				event.stopPropagation();
+				event.preventDefault();
+			}
+		});
+	}
+	iconWrapper.className = `icon-action`;
+	cell.append(iconWrapper);
+	let icon = getCSSIcon(data.iconKey);
+	iconWrapper.append(icon);
+	iconWrapper.addEventListener("click", (event) => {
+		data.onClick(index, event);
+	});
+	return cell;
+}
+
 function renderCheckboxCell(index, data, column, dir = null) {
 	let span = document.createElement('span');
 	span.className = `cell checkbox ${column.className}`;
@@ -1768,6 +1810,9 @@ function makeRowRenderer(getRowData) {
 				if (column.type === 'checkbox') {
 					div.appendChild(renderCheckboxCell(index, rowData[column.dataKey], column));
 				}
+				else if (column.type === 'button') {
+					div.appendChild(renderButtonCell(index, rowData[column.dataKey], column, selection.isSelected(index)));
+				}
 				else {
 					div.appendChild(renderCell(index, rowData[column.dataKey], column));
 				}
@@ -1775,7 +1820,12 @@ function makeRowRenderer(getRowData) {
 				if (column.label in Zotero.Intl.strings) {
 					columnName = Zotero.getString(column.label);
 				}
-				ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
+				if (typeof rowData[column.dataKey] === "string") {
+					ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
+				}
+				else {
+					ariaLabel += `${columnName} `;
+				}
 			}
 		}
 		else {

@@ -22,12 +22,61 @@
 	width: 105px;
 }
 
-/* Get additional styles link should occupy only as much space as needed */
-#styleManager-buttons .zotero-text-link {
-	max-width: fit-content;
-	margin-right: auto;
+
+#openCSLEdit {
+	margin-inline-end: 6px;
 }
 
-#openCSLEdit, #styleManager-delete {
-	margin-inline-end: 6px;
+#reset-styles-button {
+	margin-inline-end: auto;
+}
+
+#styleManager-buttons {
+	@media (-moz-platform: windows) {
+		// move "Get Additional Styles" to default primary button position on the left
+		flex-direction: row-reverse;
+		// undo default button margin
+		#reset-styles-button, #get-additional-styles-button {
+			margin-inline: 0;
+		}
+			
+	}
+}
+
+#add-from-file-button {
+	margin-inline: 6px;
+}
+
+#styleManager {
+	.virtualized-table {
+		.row {
+			// transparent border so that when .selected adds the border below, nothing shifts 
+			border: 1px solid transparent;
+			&.odd {
+				background-color: var(--material-stripe);
+			}
+			&.even {
+				background-color: var(--material-background);
+			}
+		}
+		// Override styling of selected rows
+		.row.selected {
+			// selected rows get a subtle dotted border so that it is less likely
+			// to create an impression that the selected style will be used for citing
+			border: var(--default-focusring-width) dotted var(--color-accent);
+			color: var(--fill-primary);
+			// Override background-colors above
+			.icon-action {
+				.icon {
+					fill: var(--fill-secondary) !important;
+				}
+				&:hover:not([disabled]) {
+					background-color: var(--fill-quinary);
+				}
+				&:active:not([disabled]) {
+					background-color: var(--fill-quarternary);
+				}
+			}
+		}
+	}
 }
