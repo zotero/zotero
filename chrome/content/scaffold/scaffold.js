@@ -45,6 +45,7 @@ var Scaffold = new function () {
 	var _browser;
 	var _translatorsLoadedPromise;
 	var _translatorProvider = null;
+	var _loadedTranslatorPath = null;
 	var _lastModifiedTime = 0;
 	var _needRebuildTranslatorSuggestions = true;
 	var _invalidateCodeLenses = null;
@@ -681,6 +682,10 @@ var Scaffold = new function () {
 
 		document.getElementById('textbox-label').focus();
 		_showTab('metadata');
+		
+		_lastModifiedTime = new Date().getTime();
+		_loadedTranslatorPath = null;
+		
 		_updateTitle();
 	};
 
@@ -776,6 +781,7 @@ var Scaffold = new function () {
 			if (mod) type -= mod;
 		}
 
+		_loadedTranslatorPath = translator.path;
 		_lastModifiedTime = new Date().getTime();
 		
 		Zotero.Prefs.set('scaffold.lastTranslatorID', translator.translatorID);
@@ -861,6 +867,19 @@ var Scaffold = new function () {
 		if (metadata.label === "Untitled") {
 			_logOutput("Can't save an untitled translator.");
 			return;
+		}
+		
+		let newPath = _translatorProvider.getSavePath(metadata);
+		if (_loadedTranslatorPath && newPath !== _loadedTranslatorPath) {
+			try {
+				await Zotero.File.removeIfExists(_loadedTranslatorPath);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			_loadedTranslatorPath = newPath;
+			
+			_logOutput(`Renamed to ${PathUtils.filename(newPath)}.`);
 		}
 		
 		await _translatorProvider.save(metadata, code);
