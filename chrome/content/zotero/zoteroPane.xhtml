@@ -293,19 +293,15 @@
 							<menuitem id="menu_newCollection" class="menu-type-library"
 									data-l10n-id="menu-new-collection"
 									command="cmd_zotero_newCollection"/>
-							<menu id="menu_libraryAdd"
-									class="menu-type-library"
-									label="&zotero.toolbar.newLibrary.label;">
-								<menupopup id="menu_libraryAddPopup">
-									<menuitem id="menu_groupAdd" label="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
-									<menu id="menu_feedAddMenu" label="&zotero.toolbar.feeds.new;">
-										<menupopup>
-											<menuitem id="menu_feedAddFromURL" label="&zotero.toolbar.feeds.new.fromURL;" 
-												command="cmd_zotero_newFeed_fromURL"/>
-											<menuitem id="menu_feedAddFromOPML" label="&zotero.toolbar.feeds.new.fromOPML;" 
-												oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
-										</menupopup>
-									</menu>
+							<menuitem id="menu_groupAdd" class="menu-type-library"
+									label="&zotero.toolbar.newGroup;"
+									oncommand="ZoteroPane_Local.newGroup()"/>
+							<menu id="menu_feedAddMenu" class="menu-type-library" label="&zotero.toolbar.feeds.new;">
+								<menupopup>
+									<menuitem id="menu_feedAddFromURL" label="&zotero.toolbar.feeds.new.fromURL;" 
+										command="cmd_zotero_newFeed_fromURL"/>
+									<menuitem id="menu_feedAddFromOPML" label="&zotero.toolbar.feeds.new.fromOPML;" 
+										oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
 								</menupopup>
 							</menu>
 							<menuitem
