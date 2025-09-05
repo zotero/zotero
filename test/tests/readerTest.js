@@ -200,6 +200,35 @@ describe("Reader", function () {
 			reader.close();
 		});
 
+		it("should trash and restore annotation from the reader", async () => {
+			var attachment = await importFileAttachment('test.pdf');
+
+			// Add highlight annotation
+			let highlight = await createAnnotation('highlight', attachment);
+
+			// Delete annotation from the reader
+			var reader = await Zotero.Reader.open(attachment.itemID);
+			await reader._initPromise;
+			reader._internalReader._annotationManager._skipAnnotationSavingDebounce = true;
+			reader._internalReader._annotationManager.deleteAnnotations(
+				Components.utils.cloneInto([highlight.key], reader._iframeWindow)
+			);
+			await waitForItemEvent("trash");
+
+			// Make sure it is trashed and removed from the reader
+			assert.isTrue(highlight.deleted);
+			let annotationIds = reader._internalReader._annotationManager._annotations.map(x => x.id);
+			assert.notInclude(annotationIds, highlight.key);
+
+			// Undo deletion
+			reader._internalReader._annotationManager.undo();
+			await waitForItemEvent("modify");
+			// Make sure annotation is un-deleted and appears in the reader again
+			assert.isFalse(highlight.deleted);
+			annotationIds = reader._internalReader._annotationManager._annotations.map(x => x.id);
+			assert.include(annotationIds, highlight.key);
+		});
+
 		describe("#importFromEPUB()", function () {
 			let bookEpubPath; // The EPUB itself
 			let bookSdrPath; // The KOReader "sidecar" folder
