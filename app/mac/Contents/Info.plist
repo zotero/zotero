@@ -161,8 +161,8 @@
 	<string>zotero</string>
 	<key>CFBundleGetInfoString</key>
 	<string>Zotero {{VERSION}}, © 2006-2018 Contributors</string>
-	<key>CFBundleIconFile</key>
-	<string>zotero</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.zotero.zotero</string>
 	<key>CFBundleInfoDictionaryVersion</key>
