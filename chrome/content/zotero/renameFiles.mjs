@@ -297,12 +297,12 @@ export async function openRenameFilesPreview() {
 }
 
 export async function promptAutoRenameFiles() {
-	let [title, description, yes] = await Zotero.getMainWindow().document.l10n.formatValues([
+	let [title, description, yes, no] = await Zotero.getMainWindow().document.l10n.formatValues([
 		'file-renaming-auto-rename-prompt-title',
 		'file-renaming-auto-rename-prompt-body',
-		'file-renaming-auto-rename-prompt-yes'
+		'file-renaming-auto-rename-prompt-yes',
+		'file-renaming-auto-rename-prompt-no'
 	]);
-	let no = Zotero.getString('general.no');
 	let index = Zotero.Prompt.confirm({
 		title,
 		text: description,

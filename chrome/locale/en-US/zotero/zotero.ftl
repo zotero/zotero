@@ -642,14 +642,15 @@ attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
 
 
-file-renaming-auto-rename-prompt-title = Rename existing files?
-file-renaming-auto-rename-prompt-body = { -app-name } can rename existing files in your library. Would you like to rename existing files now?
-file-renaming-auto-rename-prompt-yes = Preview…
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
 
 rename-files-preview =
     .buttonlabelaccept = Rename Files
 rename-files-preview-loading = Loading…
-rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items.
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
 rename-files-preview-renaming = Renaming…
 rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 
