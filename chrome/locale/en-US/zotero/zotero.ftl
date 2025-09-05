@@ -649,9 +649,9 @@ file-renaming-auto-rename-prompt-yes = Preview…
 rename-files-preview =
     .buttonlabelaccept = Rename Files
 rename-files-preview-loading = Loading…
-rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items. Rename them now?
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items.
 rename-files-preview-renaming = Renaming…
-rename-files-preview-no-files = All file names are already consistent with parent metadata. No changes required.
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 
 toggle-preview =
     .label = {
