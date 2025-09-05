@@ -101,6 +101,10 @@ bubble-input {
 			background-color: var(--accent-blue10);
 		}
 
+		&.just-added {
+			outline: 1px solid var(--accent-yellow);
+		}
+
 		.dropmarker {
 			margin-inline-start: 4px;
 		}

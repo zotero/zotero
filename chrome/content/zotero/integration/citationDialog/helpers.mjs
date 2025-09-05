@@ -193,8 +193,33 @@ export class CitationDialogHelpers {
 	// p10-15, p.10-15, p. 10-15, p 10-15, page10-15, page 10-15, p."testing testing", page "testing testing"
 	// Locators should always be in the end of the string, to avoid conflicts with actual search terms,
 	// so page10-15 in 'history of the US page10-15 and something else' will not be treated as a locator.
-	extractLocator(string) {
+	// @param {string} string - The string to extract the locator from
+	// @param {Boolean} options.bubbleJustAdded - true if a new bubble was just added
+	extractLocator(string, options = {}) {
 		string = string.trim();
+		// special case: if a bubble was just added, treat plain numbers as a locator for page
+		if (options.bubbleJustAdded && this.isOnlyNumberLocator(string)) {
+			return { locator: string, label: "page", fullLocatorString: string, onlyLocator: true };
+		}
+		// special case: colon followed by numbers (e.g. "History of the US: 10" or just ":10")
+		// counts as a page locator
+		let colonRegex = /^(.*):\s*(\d+(?:[\s,-]+\d+)*)(?:\s*)$/;
+		let colonMatch = colonRegex.exec(string);
+		if (colonMatch) {
+			let beforeColon = colonMatch[1].trim();
+			let pageNumbers = colonMatch[2].trim();
+			// extract the actual colon and whitespace portion from the original string
+			let colonIndex = string.indexOf(':');
+			let pageNumbersIndex = string.indexOf(pageNumbers, colonIndex);
+			let fullLocatorString = string.substring(colonIndex, pageNumbersIndex + pageNumbers.length);
+			return {
+				label: "page",
+				locator: pageNumbers,
+				onlyLocator: beforeColon.length === 0,
+				fullLocatorString
+			};
+		}
+		
 		let words = string.split(" ");
 		let locatorLabel, locatorLabelString, locatorValue;
 		let wordLocatorIndex = 0;
@@ -269,6 +294,11 @@ export class CitationDialogHelpers {
 			onlyLocator: fullLocatorString.length == string.length,
 			fullLocatorString
 		};
+	}
+
+	// Check if a given string is a number, potentially with whitespace, commas, colons, or hyphens
+	isOnlyNumberLocator(string) {
+		return /^[\d\s,:-]+$/.test(string);
 	}
 
 	// calculate the height of the #search-row accounting for margins and border

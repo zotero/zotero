@@ -50,7 +50,7 @@
 		 * are not present, remove bubbles whose citation items were removed, rearrange bubbles
 		 * if the items were moved, update bubble text if locator/prefix/suffix was changed.
 		 * Make sure that there is an input for user to type in before and after every bubble.
-		 * @param {Object[]} bubblesConfig - array of objects { dialogReferenceID, bubbleString, selected}
+		 * @param {Object[]} bubblesConfig - array of objects { dialogReferenceID, bubbleString, selected, justAdded}
 		 * representing each bubble.
 		 */
 		refresh(bubblesConfig) {
@@ -91,12 +91,13 @@
 					bubble.after(input);
 				}
 			}
-			// Highlight bubbles selected in the library view
+			// Highlight selected and just-added bubbles
 			for (let bubble of this.getAllBubbles()) {
 				let bubbleDialogReferenceID = bubble.getAttribute("dialogReferenceID");
 				let itemObj = bubblesConfig.find(({ dialogReferenceID }) => dialogReferenceID == bubbleDialogReferenceID);
 				if (itemObj) {
 					bubble.classList.toggle("has-item-selected", !!itemObj.selected);
+					bubble.classList.toggle("just-added", !!itemObj.justAdded);
 				}
 			}
 			// Prepend first input
@@ -432,7 +433,6 @@
 			// Handle drag-drop of items from the citationDialog into bubble-input to add them
 			if (itemIDs) {
 				itemIDs = itemIDs.split(",");
-				console.log(itemIDs);
 				let newIndex = 0;
 				if (this.dragOver) {
 					newIndex = [...this.bubbleInput.querySelectorAll(".bubble")].findIndex(node => this.dragOver == node);

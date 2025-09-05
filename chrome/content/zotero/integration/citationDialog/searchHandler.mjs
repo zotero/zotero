@@ -191,21 +191,25 @@ export class CitationDialogSearchHandler {
 	}
 
 	cleanSearchQuery(str) {
+		// if the string looks like an identifier, just return it immediately
+		// without removing any punctuation below
+		let isbn = Zotero.Utilities.cleanISBN(`${str}`);
+		let doi = Zotero.Utilities.cleanDOI(`${str}`);
+		if (isbn) return isbn;
+		if (doi) return doi;
+
 		// Remove brackets, some punctuation, "et al", and localized "and" from the search string.
 		// This allows one to paste an existing citation like "(Smith et al., 2020)" and
 		// still get appropriate search results.
-		str = str.replace(/[()]/g, '').replace(/[&,.:;]/g, '');
+		str = str.replace(/[()]/g, '').replace(/[&,.;]/g, '');
 		str = str.replace(" " + Zotero.getString("general.and") + " ", " ");
 		let etAl = Zotero.getString("general.etAl").replace(/\./g, "");
 		str = str.replace(new RegExp(" " + etAl + "(?:.\\s*|\\s+|$)", "g"), " ");
+		// Remove trailing colon. If the colon is in the middle of the string, keep it as it might be
+		// part of a special page locator (e.g. "US history:10-15")
+		str = str.replace(/:\s*$/, '');
 
-		let isbn = Zotero.Utilities.cleanISBN(str);
-		let doi = Zotero.Utilities.cleanDOI(str);
-		// if the string looks like an identifier, do not try to extract the year
-		if (!(isbn || doi)) {
-			str = this._cleanYear(str);
-		}
-		str = str.trim();
+		str = this._cleanYear(str).trim();
 
 		// If the query is very short, treat it as empty
 		if (this.minQueryLengthEnforced && str.trim().length < MIN_QUERY_LENGTH) {
@@ -387,8 +391,8 @@ export class CitationDialogSearchHandler {
 		if (!maybeYear) return string;
 
 		let year = parseInt(maybeYear[1]);
-		let stringNoYear = string.substr(0, maybeYear.index) + string.substring(maybeYear.index + maybeYear[0].length);
-		if (!year) return stringNoYear;
-		return stringNoYear + " " + year;
+		if (!year) return string;
+		let yearIndex = string.indexOf(maybeYear[1]);
+		return string.substr(0, yearIndex) + year;
 	}
 }
