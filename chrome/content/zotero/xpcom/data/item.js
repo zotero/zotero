@@ -2889,15 +2889,25 @@ Zotero.Item.prototype.fileExistsCached = function () {
 /**
  * Rename file associated with an attachment
  *
- * @param {String} newName
- * @param {Boolean} [overwrite=false] - Overwrite file if one exists
- * @param {Boolean} [unique=false] - Add suffix to create unique filename if necessary
- * @return {Number|false} -- true - Rename successful
- *                           -1 - Destination file exists; use _force_ to overwrite
- *                           -2 - Error renaming
- *                           false - Attachment file not found
+ * @param {String} newName - The new name for the file
+ * @param {Object} [options={}] - Options for renaming the file
+ * @param {Boolean} [options.overwrite=false] - Overwrite file if one exists
+ * @param {Boolean} [options.unique=false] - Add suffix to create unique filename if necessary
+ * @param {Boolean} [options.updateTitle=false] - Also update the attachment item title if currently matches filename
+ * @param {Object} [options.out={}] - Output object for additional information about the operation
+ * @return {Number|Boolean} - Returns:
+ *                          - true: Rename successful
+ *                          - -1: Destination file exists; use _force_ to overwrite
+ *                          - -2: Error renaming
+ *                          - false: Attachment file not found
  */
-Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite = false, unique = false) {
+Zotero.Item.prototype.renameAttachmentFile = async function (newName, options = { overwrite: false, unique: false, updateTitle: false, out: {} }, ...rest) {
+	if (typeof options === 'boolean') {
+		Zotero.debug("Zotero.Item.renameAttachmentFile() now takes an options object as a second argument -- update your code", 2);
+		options = { overwrite: options, unique: rest[0], updateTitle: false, out: {} };
+	}
+	let { overwrite, unique, updateTitle, out = {} } = options;
+
 	var origPath = await this.getFilePathAsync();
 	if (!origPath) {
 		Zotero.debug("Attachment file not found in renameAttachmentFile()", 2);
@@ -2905,11 +2915,12 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 	}
 	
 	try {
-		let origName = PathUtils.filename(origPath);
+		let origFilename = PathUtils.filename(origPath);
 		
 		// No change
-		if (origName === newName) {
+		if (origFilename === newName) {
 			Zotero.debug("Filename has not changed");
+			out.noChange = true;
 			return true;
 		}
 		
@@ -2927,6 +2938,22 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 		let destPath = OS.Path.join(PathUtils.parent(origPath), newName);
 		
 		await this.relinkAttachmentFile(destPath);
+		
+		if (updateTitle) {
+			// Update title if it matches the old filename
+			const ext = Zotero.File.getExtension(origPath);
+			let origFilenameNoExt = origFilename;
+			if (ext.length && origFilename.endsWith(ext)) {
+				origFilenameNoExt = origFilename.substring(0, origFilename.length - ext.length - 1);
+			}
+			
+			let origTitle = this.getField('title');
+			if (origTitle === origFilename || origTitle === origFilenameNoExt) {
+				this.setField('title', newName);
+				out.titleUpdated = true;
+				await this.saveTx();
+			}
+		}
 		
 		return true;
 	}

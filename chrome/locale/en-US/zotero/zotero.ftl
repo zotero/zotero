@@ -31,6 +31,7 @@ general-remind-me-later = Remind Me Later
 general-dont-ask-again = Don’t Ask Again
 general-choose-file = Choose File…
 general-open-settings = Open Settings
+general-settings = Settings…
 general-help = Help
 general-tag = Tag
 general-done = Done
@@ -56,6 +57,7 @@ general-and = and
 general-et-al = et al.
 general-previous = Previous
 general-next = Next
+general-learn-more = Learn More
 
 general-red = Red
 general-orange = Orange
@@ -637,6 +639,21 @@ attachment-info-convert-note =
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
 
 attachment-preview-placeholder = No attachment to preview
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+
+
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = Loading…
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 
 toggle-preview =
     .label = {
@@ -775,6 +792,10 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
 
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
 

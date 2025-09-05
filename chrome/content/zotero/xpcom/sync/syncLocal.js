@@ -1494,6 +1494,22 @@ Zotero.Sync.Data.Local = {
 	
 	_saveObjectFromJSON: async function (obj, json, options) {
 		var results = {};
+		var saveOptions = {
+			skipEditCheck: true,
+			skipDateModifiedUpdate: true,
+			skipSelect: true,
+			skipCache: options.skipCache || false,
+			notifierQueue: options.notifierQueue,
+			// Errors are logged elsewhere, so skip in DataObject.save()
+			errorHandler: function (e) {
+				return;
+			}
+		};
+		if (obj.objectType == 'item') {
+			saveOptions.notifierData = {
+				skipRenameFile: true
+			};
+		}
 		try {
 			results.key = json.key;
 			json = this._checkCacheJSON(json);
@@ -1523,17 +1539,7 @@ Zotero.Sync.Data.Local = {
 			if (!options.saveAsUnsynced) {
 				obj.synced = true;
 			}
-			await obj.save({
-				skipEditCheck: true,
-				skipDateModifiedUpdate: true,
-				skipSelect: true,
-				skipCache: options.skipCache || false,
-				notifierQueue: options.notifierQueue,
-				// Errors are logged elsewhere, so skip in DataObject.save()
-				errorHandler: function (e) {
-					return;
-				}
-			});
+			await obj.save(saveOptions);
 			let cacheJSON = options.cacheObject ? options.cacheObject : json.data;
 			await this.saveCacheObject(obj.objectType, obj.libraryID, cacheJSON);
 			// Delete older versions of the object in the cache
@@ -1575,16 +1581,7 @@ Zotero.Sync.Data.Local = {
 				for (let c of options.newParentItemCollections) {
 					parentItem.addToCollection(c);
 				}
-				await parentItem.save({
-					skipEditCheck: true,
-					skipDateModifiedUpdate: true,
-					skipSelect: true,
-					notifierQueue: options.notifierQueue,
-					// Errors are logged elsewhere, so skip in DataObject.save()
-					errorHandler: function (e) {
-						return;
-					}
-				});
+				await parentItem.save(saveOptions);
 			}
 		}
 		catch (e) {

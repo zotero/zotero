@@ -338,6 +338,9 @@ class VirtualizedTable extends React.Component {
 
 		this.preventScrollKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", " ", "PageUp", "PageDown"]);
 		this.onSelection = oncePerAnimationFrame(this._onSelection);
+
+		// Create a map of custom row heights (if provided) so `this._renderItem` can apply the correct per-row height
+		this._customRowHeightMap = Object.fromEntries(props.customRowHeights ?? []);
 	}
 
 	static defaultProps = {
@@ -450,6 +453,8 @@ class VirtualizedTable extends React.Component {
 		onFocus: PropTypes.func,
 
 		onItemContextMenu: PropTypes.func,
+		customRowHeights: PropTypes.array,
+		getRowHeight: PropTypes.func,
 	};
 
 	// ------------------------ Selection Methods ------------------------- //
@@ -1099,6 +1104,7 @@ class VirtualizedTable extends React.Component {
 			itemHeight: this._rowHeight,
 			renderItem: this._renderItem,
 			targetElement: document.getElementById(this._jsWindowID),
+			customRowHeights: this.props.customRowHeights ?? []
 		};
 	}
 	
@@ -1115,7 +1121,7 @@ class VirtualizedTable extends React.Component {
 			node.addEventListener('mouseup', e => this._handleMouseUp(e, index), { passive: true });
 			node.addEventListener('dblclick', e => this._activateNode(e, [index]), { passive: true });
 		}
-		node.style.height = this._rowHeight + 'px';
+		node.style.height = (index in this._customRowHeightMap ? this._customRowHeightMap[index] : this._rowHeight) + 'px';
 		node.id = this.props.id + "-row-" + index;
 		node.classList.toggle('odd', index % 2 == 1);
 		node.classList.toggle('even', index % 2 == 0);
@@ -1300,14 +1306,19 @@ class VirtualizedTable extends React.Component {
 	 * @param customRowHeights an array of tuples specifying row index and row height: e.g. [[1, 10], [5, 10]]
 	 */
 	updateCustomRowHeights = (customRowHeights=[]) => {
+		this._customRowHeightMap = Object.fromEntries(customRowHeights);
 		return this._jsWindow.update({customRowHeights});
 	};
 	
 	_getRowHeight() {
+		if (this.props.getRowHeight) {
+			return this.props.getRowHeight(this);
+		}
 		let rowHeight = this.props.linesPerRow * this._renderedTextHeight;
 		if (!this.props.disableFontSizeScaling) {
 			rowHeight *= Zotero.Prefs.get('fontSize');
 		}
+		
 		rowHeight += Zotero.Prefs.get('uiDensity') === 'comfortable' ? 11 : 5;
 
 		// @TODO: Check row height across platforms and remove commented code below
