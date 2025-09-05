@@ -31,6 +31,7 @@ general-remind-me-later = Remind Me Later
 general-dont-ask-again = Don’t Ask Again
 general-choose-file = Choose File…
 general-open-settings = Open Settings
+general-settings = Settings…
 general-help = Help
 general-tag = Tag
 general-done = Done
@@ -793,7 +794,8 @@ mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
 
 file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
-file-renaming-banner-link = { general-learn-more }
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
 
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
 

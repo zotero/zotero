@@ -6711,10 +6711,16 @@ var ZoteroPane = new function () {
 			return;
 		}
 		
-		document.getElementById('file-renaming-settings-link').onclick = () => {
+		document.getElementById('file-renaming-documentation-link').onclick = () => {
 			Zotero.launchURL("https://www.zotero.org/support/file_renaming");
 		};
-
+		
+		document.getElementById('file-renaming-settings-link').onclick = () => {
+			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-general', {
+				scrollTo: '#zotero-prefpane-file-renaming-groupbox'
+			});
+		};
+		
 		this.document.getElementById('file-renaming-banner-close').onclick = () => {
 			this.hideFileRenamingBanner();
 		};
