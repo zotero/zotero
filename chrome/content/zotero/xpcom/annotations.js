@@ -353,4 +353,68 @@ Zotero.Annotations = new function () {
 			await item.eraseTx();
 		}
 	};
+
+	/**
+	 * Create and open a panel for editing annotation tags.
+	 * @param {Element} targetNode - The node where the panel is inserted.
+	 * @param {Zotero.Item} annotation - Annotation whose tags will be displayed and updated in the panel.
+	 * @param {number} x - The x coordinate where panel will be opened.
+	 * @param {number} y - The y coordinate where panel will be opened.
+	 */
+	this.insertAnnotationsTagsPopup = function (targetNode, annotation, x, y) {
+		let doc = targetNode.ownerDocument;
+		let tagsPopup = doc.createXULElement('panel');
+		tagsPopup.className = 'tags-popup';
+		let tagsbox = doc.createXULElement('tags-box');
+		tagsPopup.appendChild(tagsbox);
+		tagsbox.setAttribute('flex', '1');
+		targetNode.append(tagsPopup);
+		tagsbox.editable = true;
+		tagsbox.item = annotation;
+		tagsbox.render();
+		// remove unnecessary tabstop from the section header
+		tagsbox.querySelector(".head").removeAttribute("tabindex");
+
+		// <panel> completely takes over Escape keydown event, by attaching a capturing keydown
+		// listener to document which just closes the popup. It leads to unwanted edits being saved.
+		// Attach our own listener to document to properly handle Escape on edited tags
+		let handleKeyDown = (event) => {
+			if (event.key !== "Escape") return;
+			let focusedTag = tagsPopup.querySelector("editable-text.focused");
+			if (focusedTag) {
+				if (focusedTag.closest("[isNew]")) {
+					// remove newly added tag
+					focusedTag.closest(".row").remove();
+				}
+				else {
+					// or reset to initial value if the tag is not new
+					focusedTag.value = focusedTag.initialValue;
+				}
+			}
+			// now that all tags values are reset, close the popup
+			tagsPopup.hidePopup();
+		};
+		doc.addEventListener("keydown", handleKeyDown, true);
+		tagsPopup.addEventListener("popupshown", () => {
+			// Ensure tagsbox is open
+			tagsbox.open = true;
+			if (tagsbox.count == 0) {
+				tagsbox.newTag();
+			}
+			else {
+				// Focus + button
+				Services.focus.setFocus(tagsbox.querySelector("toolbarbutton"), Services.focus.FLAG_NOSHOWRING);
+			}
+		});
+		tagsPopup.addEventListener('popuphidden', (event) => {
+			if (event.target !== tagsPopup) {
+				return;
+			}
+			tagsPopup.remove();
+			doc.removeEventListener("keydown", handleKeyDown, true);
+		});
+		
+		tagsPopup.openPopup(null, 'before_start', x, y, true);
+		return tagsPopup;
+	};
 };
