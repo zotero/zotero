@@ -61,9 +61,6 @@
 		}
 		// Override styling of selected rows
 		.row.selected {
-			// selected rows get a subtle dotted border so that it is less likely
-			// to create an impression that the selected style will be used for citing
-			border: var(--default-focusring-width) dotted var(--color-accent);
 			color: var(--fill-primary);
 			// Override background-colors above
 			.icon-action {
@@ -77,6 +74,11 @@
 					background-color: var(--fill-quarternary);
 				}
 			}
+		}
+		&:focus .row.selected {
+			// selected rows get a subtle dotted border only when the table is focused
+			// to not create an impression that the selected style will be used for citing
+			border: var(--default-focusring-width) dotted var(--color-accent);
 		}
 	}
 }
