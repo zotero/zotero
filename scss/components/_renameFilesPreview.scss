@@ -2,10 +2,16 @@
     min-width: 800px;
     min-height: 500px;
 
+    dialog {
+        background-color: var(--color-sidepane);
+        padding: 14px 24px;
+    }
+
     .virtualized-table-container {
         flex: 1 1 auto;
         display: flex;
         overflow: hidden;
+        border: var(--material-panedivider);
 
         .virtualized-table-wrapper {
             width: 100%;

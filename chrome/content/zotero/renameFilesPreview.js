@@ -112,6 +112,7 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 				customRowHeights={customRowHeights}
 				disableFontSizeScaling={true}
 				getRowCount={() => this.rows.length}
+				getRowHeight={this.getRowHeight.bind(this)}
 				id="rename-files-confirm-table"
 				isSelectable={this.getIsSelectable.bind(this)}
 				ref={ref => this.treeRef = ref}
@@ -143,4 +144,8 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 	getRowData: function (index) {
 		return this.rows[index];
 	},
+
+	getRowHeight: function ({ _renderedTextHeight }) {
+		return _renderedTextHeight;
+	}
 };

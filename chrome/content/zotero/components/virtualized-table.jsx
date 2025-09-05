@@ -459,6 +459,7 @@ class VirtualizedTable extends React.Component {
 
 		onItemContextMenu: PropTypes.func,
 		customRowHeights: PropTypes.array,
+		getRowHeight: PropTypes.func,
 	};
 
 	// ------------------------ Selection Methods ------------------------- //
@@ -1362,10 +1363,14 @@ class VirtualizedTable extends React.Component {
 	};
 	
 	_getRowHeight() {
+		if (this.props.getRowHeight) {
+			return this.props.getRowHeight(this);
+		}
 		let rowHeight = this.props.linesPerRow * this._renderedTextHeight;
 		if (!this.props.disableFontSizeScaling) {
 			rowHeight *= Zotero.Prefs.get('fontSize');
 		}
+		
 		rowHeight += Zotero.Prefs.get('uiDensity') === 'comfortable' ? 11 : 5;
 
 		// @TODO: Check row height across platforms and remove commented code below
