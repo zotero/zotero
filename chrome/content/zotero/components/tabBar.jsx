@@ -251,8 +251,8 @@ const TabBar = forwardRef(function (props, ref) {
 	
 	const handleDragEnd = useCallback(() => {
 		setDragging(false);
-		props.refocusReader();
-	}, [props.refocusReader]);
+		props.onRefocus();
+	}, [props.onRefocus]);
 
 	const handleTabBarDragOver = useCallback((event) => {
 		event.preventDefault();
@@ -440,7 +440,7 @@ TabBar.propTypes = {
 	onTabClose: PropTypes.func.isRequired,
 	onLoad: PropTypes.func.isRequired,
 	onTabMove: PropTypes.func.isRequired,
-	refocusReader: PropTypes.func.isRequired,
+	onRefocus: PropTypes.func.isRequired,
 	onContextMenu: PropTypes.func.isRequired,
 	tabs: PropTypes.arrayOf(
 		PropTypes.shape({

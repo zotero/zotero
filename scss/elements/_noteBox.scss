@@ -1,0 +1,18 @@
+note-box {
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
+
+	.body {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	.metadata-table {
+		@include meta-table;
+	}
+}

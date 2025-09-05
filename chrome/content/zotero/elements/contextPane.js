@@ -118,11 +118,12 @@
 			if (action === 'modify') {
 				for (let itemDetails of Array.from(this._itemPaneDeck.children)) {
 					let tabID = itemDetails.tabID;
-					let item = Zotero.Items.get(Zotero_Tabs._getTab(tabID)?.tab.data.itemID);
+					let tab = Zotero_Tabs._getTab(tabID).tab;
+					let item = Zotero.Items.get(tab?.data.itemID);
 					if ((item.parentID || itemDetails.parentID)
 						&& item.parentID !== itemDetails.parentID) {
 						this._removeItemContext(tabID);
-						this._addItemContext(tabID, item.itemID);
+						this._addItemContext(tabID, item.itemID, tab?.type);
 					}
 				}
 			}
@@ -190,7 +191,7 @@
 				ZoteroContextPane.showLoadingMessage(false);
 				this._sidenav.hidden = true;
 			}
-			else if (tabType == 'reader'
+			else if (Zotero_Tabs.hasContextPane(tabType)
 					// The reader tab load event is triggered asynchronously.
 					// If the tab is no longer selected by the time the event is triggered,
 					// we don't need to update the context pane, since it must already be
@@ -198,15 +199,20 @@
 					&& (action === 'select'
 						|| (action === 'load' && Zotero_Tabs.selectedID == tabID))) {
 				this._handleReaderReady(tabID);
-				this._setupNotesContext(tabID);
+				if (Zotero_Tabs.hasNoteContext(tabType)) {
+					this._setupNotesContext(tabID);
+				}
+				else {
+					this._disableNotesContext();
+				}
 				_contextPaneSplitter.setAttribute('hidden', false);
 
 				_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
 				
 				this._sidenav.hidden = false;
 
-				let data = Zotero_Tabs._tabs.find(tab => tab.id === ids[0]).data;
-				await this._addItemContext(ids[0], data.itemID, data.type);
+				let tab = Zotero_Tabs._getTab(tabID).tab;
+				await this._addItemContext(ids[0], tab.data.itemID, tab.type);
 	
 				this._selectItemContext(tabID);
 			}
@@ -226,6 +232,11 @@
 			let currentNoteContext = this._getCurrentNotesContext();
 			// Always switch to the current selected tab, since the selection might have changed
 			currentNoteContext.switchToTab(Zotero_Tabs.selectedID);
+			this.sidenav.contextNotesPaneEnabled = true;
+		}
+
+		_disableNotesContext() {
+			this.sidenav.contextNotesPaneEnabled = false;
 		}
 
 		async _handleReaderReady(tabID) {
@@ -298,7 +309,7 @@
 			}
 		}
 	
-		async _addItemContext(tabID, itemID, _tabType = "") {
+		async _addItemContext(tabID, itemID, tabType = "") {
 			if (this._getItemContext(tabID)) {
 				return;
 			}
@@ -316,7 +327,13 @@
 	
 			let previousPinnedPane = this._sidenav.container?.pinnedPane || "";
 			
-			let targetItem = parentID ? Zotero.Items.get(parentID) : item;
+			let targetItem;
+			if (item.isNote()) {
+				targetItem = item;
+			}
+			else {
+				targetItem = parentID ? Zotero.Items.get(parentID) : item;
+			}
 			
 			let editable = Zotero.Libraries.get(libraryID).editable
 				// If the parent item or the attachment itself is in trash, itemPane is not editable
@@ -330,7 +347,7 @@
 	
 			itemDetails.editable = editable;
 			itemDetails.tabID = tabID;
-			itemDetails.tabType = "reader";
+			itemDetails.tabType = Zotero_Tabs.parseTabType(tabType).tabContentType;
 			itemDetails.item = targetItem;
 			// Manually cache parentID
 			itemDetails.parentID = parentID;
