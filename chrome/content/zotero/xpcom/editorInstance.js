@@ -56,6 +56,7 @@ class EditorInstance {
 		this._item = options.item;
 		this._reloaded = options.reloaded;
 		this._viewMode = options.viewMode;
+		this._tabID = options.tabID;
 		this._readOnly = options.readOnly || this._isReadOnly();
 		this._filesReadOnly = !Zotero.Libraries.get(this._item.libraryID).filesEditable;
 		this._disableUI = options.disableUI;
@@ -244,7 +245,13 @@ class EditorInstance {
 				}
 			}
 		}
-		
+
+		if (type === 'item' && ['delete', 'trash'].includes(event) && this._tabID) {
+			if (this._item && (ids.includes(this._item.id) || ids.includes(this._item.parentItemID))) {
+				Zotero.getMainWindow().Zotero_Tabs.close(this._tabID);
+			}
+		}
+
 		if (this._readOnly || !this._item) {
 			return;
 		}

@@ -147,8 +147,6 @@ Zotero.Notes = new function () {
 						this._updateLayout();
 					}
 				});
-
-				this._editorInstances.push(noteEditor);
 			}
 
 			if (select) {

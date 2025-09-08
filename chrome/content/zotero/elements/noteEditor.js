@@ -142,6 +142,7 @@
 				popup: this._id('editor-menu'),
 				onNavigate: this._navigateHandler,
 				viewMode: this.viewMode,
+				tabID: this.tabID,
 				readOnly: this._mode != 'edit',
 				disableUI: this._mode == 'merge',
 				onReturn: this._returnHandler,
