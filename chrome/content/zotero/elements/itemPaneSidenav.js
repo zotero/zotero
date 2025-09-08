@@ -81,8 +81,6 @@
 		
 		_contextNotesPane = null;
 
-		_contextNotesPaneEnabled = true;
-		
 		_contextMenuTarget = null;
 
 		_draggedWrapper = null;
@@ -90,6 +88,14 @@
 		_dropIndicator = null;
 
 		_prefObserverID = null;
+
+		get observedAttributes() {
+			return ["no-context-notes"];
+		}
+
+		attributeChangedCallback() {
+			this.render();
+		}
 
 		get _defaultPanes() {
 			return ["info", "abstract", "attachments", "notes", "libraries-collections", "tags", "related"];
@@ -120,13 +126,17 @@
 		}
 
 		get contextNotesPaneEnabled() {
-			return this._contextNotesPaneEnabled;
+			return !this.hasAttribute("no-context-notes");
 		}
 
 		set contextNotesPaneEnabled(val) {
-			if (this._contextNotesPaneEnabled === val) return;
-			this._contextNotesPaneEnabled = val;
-			this.render();
+			if (this.contextNotesPaneEnabled === val) return;
+			if (val) {
+				this.removeAttribute("no-context-notes");
+			}
+			else {
+				this.setAttribute("no-context-notes", "true");
+			}
 		}
 		
 		get pinnedPane() {
