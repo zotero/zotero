@@ -189,12 +189,14 @@ item-menu-viewAttachment =
             [pdf] PDF
             [epub] EPUB
             [snapshot] Snapshot
+            [note] Note
             *[other] Attachment
         }
         *[other] { $attachmentType ->
             [pdf] PDFs
             [epub] EPUBs
             [snapshot] Snapshots
+            [note] Notes
             *[other] Attachments
         }
     } {

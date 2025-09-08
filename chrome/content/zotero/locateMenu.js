@@ -358,9 +358,7 @@ var Zotero_LocateMenu = new function () {
 					selectedItems.push(attachment);
 				}
 			}
-			else if (!item.isNote()) {
-				selectedItems.push(item);
-			}
+			selectedItems.push(item);
 		}
 		return selectedItems;
 	}
@@ -368,23 +366,24 @@ var Zotero_LocateMenu = new function () {
 	var ViewOptions = {};
 	
 	/**
-	 * "Open PDF" option
+	 * "Open * in <tab/window>"
 	 *
-	 * Should appear only when the item is a PDF, or a linked or attached file or web attachment is
-	 * a PDF
+	 * Only for built-in tab item types: PDF, EPUB, Snapshot, Note
 	 */
-	function ViewAttachment(alternateWindowBehavior) {
-		this._attachmentType = "mixed";
-		this._numAttachments = 0;
+	function ViewItem(alternateWindowBehavior) {
+		this._viewItemType = "mixed";
+		this._numItems = 0;
 		Object.defineProperty(this, "className", {
 			get() {
-				switch (this._attachmentType) {
+				switch (this._viewItemType) {
 					case "pdf":
 						return "zotero-menuitem-attachments-pdf";
 					case "epub":
 						return "zotero-menuitem-attachments-epub";
 					case "snapshot":
 						return "zotero-menuitem-attachments-snapshot";
+					case "note":
+						return "zotero-menuitem-attach-note";
 					default: {
 						let openInNewWindow = Zotero.Prefs.get("openReaderInNewWindow");
 						if (alternateWindowBehavior) {
@@ -404,7 +403,7 @@ var Zotero_LocateMenu = new function () {
 		Object.defineProperty(this, "l10nArgs", {
 			get: () => {
 				let openIn;
-				if (this._attachmentType !== "mixed" && Zotero.Prefs.get(`fileHandler.${this._attachmentType}`)) {
+				if (this._viewItemType !== "mixed" && Zotero.Prefs.get(`fileHandler.${this._viewItemType}`)) {
 					openIn = "external";
 				}
 				else {
@@ -415,56 +414,65 @@ var Zotero_LocateMenu = new function () {
 					openIn = openInNewWindow ? "window" : "tab";
 				}
 				return {
-					attachmentType: this._attachmentType,
-					numAttachments: this._numAttachments,
+					attachmentType: this._viewItemType,
+					numAttachments: this._numItems,
 					openIn,
 				};
 			}
 		});
 		
 		this.canHandleItem = async function (item) {
-			const attachment = await _getFirstUsableAttachment(item);
+			const usableItem = await _getFirstUsableItem(item);
 			// Don't show alternate-behavior option when using an external PDF viewer
-			return attachment
-				&& !(alternateWindowBehavior && Zotero.Prefs.get(`fileHandler.${attachment.attachmentReaderType}`));
+			return usableItem
+				&& !(alternateWindowBehavior && !item.isNote() && Zotero.Prefs.get(`fileHandler.${usableItem.attachmentReaderType}`));
 		};
 		
 		this.updateMenuItem = async function (items) {
-			let attachmentType = null;
-			let numAttachments = 0;
+			let viewItemType = null;
+			let numItems = 0;
 			for (let item of items) {
-				let attachment = await _getFirstUsableAttachment(item);
-				let thisAttachmentType = attachment?.attachmentReaderType;
-				if (!thisAttachmentType) {
+				let usableItem = await _getFirstUsableItem(item);
+				if (!usableItem) {
+					continue;
+				}
+				let thisViewItemType = usableItem.isNote() ? "note" : usableItem?.attachmentReaderType;
+				if (!thisViewItemType) {
 					continue;
 				}
 				
-				if (attachmentType === null) {
-					attachmentType = thisAttachmentType;
+				if (viewItemType === null) {
+					viewItemType = thisViewItemType;
 				}
-				else if (attachmentType !== thisAttachmentType) {
-					attachmentType = "mixed";
+				else if (viewItemType !== thisViewItemType) {
+					viewItemType = "mixed";
 				}
 				
-				numAttachments++;
+				numItems++;
 			}
-			this._attachmentType = attachmentType;
-			this._numAttachments = numAttachments;
+			this._viewItemType = viewItemType;
+			this._numItems = numItems;
 		};
 		
 		this.handleItems = async function (items, event) {
-			var attachments = [];
+			let usableItems = [];
 			for (let item of items) {
-				var attachment = await _getFirstUsableAttachment(item);
-				if (attachment) attachments.push(attachment.id);
+				let usableItem = await _getFirstUsableItem(item);
+				if (usableItem) usableItems.push(usableItem);
 			}
 			
-			ZoteroPane_Local.viewAttachment(attachments, event, false,
-				{ forceAlternateWindowBehavior: alternateWindowBehavior });
+			ZoteroPane.viewItems(usableItems, event,
+				{
+					noLocateOnMissing: false,
+					forceAlternateWindowBehavior: alternateWindowBehavior
+				});
 		};
 		
-		var _getFirstUsableAttachment = async function (item) {
-			var attachments = item.isAttachment() ? [item] : ((await item.getBestAttachments()));
+		var _getFirstUsableItem = async function (item) {
+			if (item.isNote()) {
+				return item;
+			}
+			let attachments = item.isAttachment() ? [item] : ((await item.getBestAttachments()));
 			for (let i = 0; i < attachments.length; i++) {
 				let attachment = attachments[i];
 				if (attachment.attachmentReaderType
@@ -476,8 +484,8 @@ var Zotero_LocateMenu = new function () {
 		};
 	}
 
-	ViewOptions.viewAttachmentInTab = new ViewAttachment(false);
-	ViewOptions.viewAttachmentInWindow = new ViewAttachment(true);
+	ViewOptions.viewItemInTab = new ViewItem(false);
+	ViewOptions.viewItemInWindow = new ViewItem(true);
 
 	/**
 	 * "View Online" option

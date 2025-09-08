@@ -3183,6 +3183,14 @@ var ZoteroPane = new function () {
 				}
 				return [];
 			}
+			case 'note': {
+				let tab = Zotero_Tabs.getTabInfo(Zotero_Tabs.selectedID);
+				if (tab) {
+					let item = Zotero.Items.get(tab.data.itemID);
+					return asIDs ? [item.id] : [item];
+				}
+				return [];
+			}
 			default:
 				return [];
 		}
@@ -4974,14 +4982,15 @@ var ZoteroPane = new function () {
 	};
 	
 	
-	this.viewItems = async function (items, event) {
+	this.viewItems = async function (items, event, options = {}) {
+		let { noLocateOnMissing } = options;
 		for (let i = 0; i < items.length; i++) {
 			let item = items[i];
 			if (item.isRegularItem()) {
 				// Prefer local file attachments
 				let attachment = await item.getBestAttachment();
 				if (attachment) {
-					await this.viewAttachment(attachment.id, event);
+					await this.viewAttachment(attachment.id, event, noLocateOnMissing, options);
 					continue;
 				}
 				
@@ -5015,13 +5024,17 @@ var ZoteroPane = new function () {
 				if (!this.collectionsView.editable) {
 					continue;
 				}
-				ZoteroPane.openNote(item.id, { openInWindow: event?.shiftKey });
+				let openInWindow = event?.shiftKey || options.forceAlternateWindowBehavior;
+				ZoteroPane.openNote(item.id, { openInWindow });
 			}
 			else if (item.isAttachment()) {
-				await this.viewAttachment(item.id, event);
+				await this.viewAttachment(item.id, event, noLocateOnMissing, options);
 			}
 			else if (item.isAnnotation()) {
-				this.viewAttachment(item.parentItemID, event, false, { location: { annotationID: item.key } });
+				this.viewAttachment(item.parentItemID, event, false,
+					Object.assign(
+						{ location: { annotationID: item.key } }, options
+					));
 			}
 		}
 	};
