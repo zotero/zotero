@@ -650,8 +650,19 @@ section-note-info =
     .label = { pane-note-info }
 
 note-info-title = Title
-note-info-date-created = Date Created
-note-info-date-modified = Date Modified
+note-info-parent-item = Parent Item
+note-info-parent-item-button = {
+        $hasParentItem ->
+            [true] { $parentItemTitle }
+            *[false] No Parent Item
+    }
+    .title = {
+        $hasParentItem ->
+            [true] View parent item in library
+            *[false] View note item in library
+    }
+note-info-date-created = Created
+note-info-date-modified = Modified
 note-info-size = Size
 note-info-word-count = Word Count
 note-info-character-count = Character Count
