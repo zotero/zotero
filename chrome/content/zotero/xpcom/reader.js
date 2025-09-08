@@ -1498,6 +1498,10 @@ class ReaderTab extends ReaderInstance {
 				this.setContextPaneOpen(event.detail.open);
 			});
 
+			this._tabContainer.addEventListener('tab-focus', () => {
+				this.focus();
+			});
+
 			this._tabContainer.addEventListener('tab-selection-change', (event) => {
 				if (event.detail.selected) {
 					this._updateLayout();
