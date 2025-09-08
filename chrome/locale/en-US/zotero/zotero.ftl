@@ -835,3 +835,5 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+
+item-title-empty-note = Untitled Note

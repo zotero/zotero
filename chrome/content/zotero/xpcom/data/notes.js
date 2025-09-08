@@ -51,9 +51,6 @@ Zotero.Notes = new function () {
 			throw new Error('Item does not exist');
 		}
 
-		// TODO: Use locale
-		title = title || item.getNoteTitle() || "Untitled Note";
-
 		let noteEditor;
 		if (!openInWindow && !allowDuplicate && !this._editorInstances.find(r => r.itemID === itemID)) {
 			if (win) {
