@@ -14,5 +14,16 @@ note-box {
 
 	.metadata-table {
 		@include meta-table;
+
+		.clicky-item {
+			@include clicky-item;
+
+			width: 100%;
+			height: 20px;
+			align-items: center;
+			@include comfortable {
+				height: 22px;
+			}
+		}
 	}
 }
