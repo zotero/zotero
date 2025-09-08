@@ -249,6 +249,23 @@ var Zotero_Tabs = new function () {
 					itemID: null,
 				};
 			}
+		},
+		getTitle: {
+			reader: async (tab) => {
+				let item = Zotero.Items.get(tab.data.itemID);
+				return item ? item.getTabTitle() : "";
+			},
+			note: async (tab) => {
+				let item = Zotero.Items.get(tab.data.itemID);
+				if (!item) {
+					return "";
+				}
+				let title = await item.getTabTitle();
+				if (!title) {
+					return Zotero.getString("item-title-empty-note");
+				}
+				return title;
+			}
 		}
 	};
 
@@ -287,9 +304,7 @@ var Zotero_Tabs = new function () {
 	this._prefsObserverID = Zotero.Prefs.registerObserver('tabs.title.reader', async () => {
 		for (let tab of this._tabs) {
 			if (!tab.data.itemID) continue;
-			let item = Zotero.Items.get(tab.data.itemID);
-			let title = await item.getTabTitle();
-			this.rename(tab.id, title);
+			this.rename(tab.id);
 		}
 	});
 	
@@ -332,7 +347,7 @@ var Zotero_Tabs = new function () {
 					let item = Zotero.Items.get(tab.data.itemID);
 					tab.data.icon = item.getItemTypeIconName(true);
 				}
-				catch (e) {
+				catch {
 					// item might not yet be loaded, we will get the right icon on the next update
 				}
 			}
@@ -395,16 +410,23 @@ var Zotero_Tabs = new function () {
 		if (event !== "modify") return;
 		for (let id of ids) {
 			let item = Zotero.Items.get(id);
-			// If a top-level item is updated, update all tabs that have its attachments
+			// If a top-level item is updated, update all tabs that have its attachments and notes
 			// Otherwise, just update the tab with the updated attachment
-			let attachmentIDs = item.isAttachment() ? [id] : item.getAttachments();
-			for (let attachmentID of attachmentIDs) {
-				let attachment = Zotero.Items.get(attachmentID);
-				let relevantTabs = this._tabs.filter(tab => tab.data.itemID == attachmentID);
+			let itemIDs = [];
+			if (item.isAttachment() || item.isNote()) {
+				itemIDs.push(id);
+			}
+			else if (item.isRegularItem()) {
+				itemIDs.push(
+					...item.getAttachments(),
+					...item.getNotes()
+				);
+			}
+			for (let itemID of itemIDs) {
+				let relevantTabs = this._tabs.filter(tab => tab.data.itemID == itemID);
 				if (!relevantTabs.length) continue;
 				for (let tab of relevantTabs) {
-					let title = await attachment.getTabTitle();
-					this.rename(tab.id, title);
+					this.rename(tab.id);
 				}
 			}
 		}
@@ -456,7 +478,7 @@ var Zotero_Tabs = new function () {
 	 * Add a new tab
 	 *
 	 * @param {String} type
-	 * @param {String} title
+	 * @param {String} [title] - Tab title. If empty and data.itemID is set, the title will be fetched automatically
 	 * @param {String} data - Extra data about the tab to pass to notifier and session
 	 * @param {Integer} index
 	 * @param {Boolean} select
@@ -466,8 +488,11 @@ var Zotero_Tabs = new function () {
 	this.add = function ({ id, type, data, title, index, select, onClose, preventJumpback }) {
 		if (typeof type != 'string') {
 		}
-		if (typeof title != 'string') {
-			throw new Error(`'title' should be a string (was ${typeof title})`);
+		if (title && typeof title != 'string') {
+			throw new Error(`'title' should be string or undefined (was ${typeof title})`);
+		}
+		if (!title) {
+			title = "";
 		}
 		if (index !== undefined && (!Number.isInteger(index) || index < 1)) {
 			throw new Error(`'index' should be an integer > 0 (was ${index} (${typeof index})`);
@@ -491,15 +516,9 @@ var Zotero_Tabs = new function () {
 				this._prevSelectedID = previousID;
 			}
 		}
-		// When a new tab is opened synchronously by ReaderTab constructor, the title is empty.
-		// However, { id, container } needs to return immediately, so do not wait for the new title
-		// and construct it in async manner below.
 		if (!title && data.itemID) {
-			(async () => {
-				let item = Zotero.Items.get(data.itemID);
-				title = await item.getTabTitle();
-				this.rename(tab.id, title);
-			})();
+			// Not awaited as the id and container should be returned synchronously
+			this.rename(tab.id);
 		}
 		return { id, container };
 	};
@@ -510,14 +529,21 @@ var Zotero_Tabs = new function () {
 	 * @param {String} id
 	 * @param {String} title
 	 */
-	this.rename = function (id, title) {
-		if (typeof title != 'string') {
-			throw new Error(`'title' should be a string (was ${typeof title})`);
+	this.rename = async function (id, title) {
+		if (title && typeof title != 'string') {
+			throw new Error(`'title' should be string or undefined (was ${typeof title})`);
 		}
-		var { tab } = this._getTab(id);
+		let { tab } = this._getTab(id);
 		if (!tab) {
 			return;
 		}
+		if (!title) {
+			let { tabContentType } = this.parseTabType(tab.type);
+			if (this._hasHook(tabContentType, 'getTitle')) {
+				title = await this._getHook(tabContentType, 'getTitle')(tab);
+			}
+		}
+
 		tab.title = title;
 		this._update();
 	};
