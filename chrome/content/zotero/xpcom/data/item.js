@@ -1026,8 +1026,11 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
  * @returns {String} title for the tab of this item
  */
 Zotero.Item.prototype.getTabTitle = async function () {
-	if (!this.isAttachment()) {
-		throw new Error("Can only get tab title for attachments");
+	if (!this.isAttachment() && !this.isNote()) {
+		throw new Error("Can only get tab title for attachments and notes");
+	}
+	if (this.isNote()) {
+		return this.getDisplayTitle();
 	}
 	let type = Zotero.Prefs.get('tabs.title.reader');
 	let readerTitle = this.getDisplayTitle();

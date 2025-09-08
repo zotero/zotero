@@ -669,6 +669,8 @@ note-info-size = Size
 note-info-word-count = Word Count
 note-info-character-count = Character Count
 
+item-title-empty-note = Untitled Note
+
 attachment-preview-placeholder = No attachment to preview
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item

@@ -264,7 +264,7 @@
 				}
 				else {
 					this._titleFieldID = "";
-					title = this._item.getNoteTitle();
+					title = this._item.getDisplayTitle() || Zotero.getString("item-title-empty-note");
 				}
 				
 				// If focused, update the value that will be restored on Escape;
