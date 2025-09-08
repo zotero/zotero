@@ -654,7 +654,7 @@ note-info-parent-item = Parent Item
 note-info-parent-item-button = {
         $hasParentItem ->
             [true] { $parentItemTitle }
-            *[false] No Parent Item
+            *[false] None
     }
     .title = {
         $hasParentItem ->
