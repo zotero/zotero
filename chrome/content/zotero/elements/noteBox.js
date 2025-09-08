@@ -103,9 +103,16 @@
 		}
 
 		notify(event, _type, ids, _extraData) {
-			if (event != 'modify' || !this.item?.id || !ids.includes(this.item.id)) return;
-			
-			this._forceRenderAll();
+			if (event != 'modify' || !this.item?.id) return;
+
+			if (ids.includes(this.item.id)) {
+				this._forceRenderAll();
+				return;
+			}
+
+			if (ids.includes(this.item.parentItemID)) {
+				this._updateParentItemInfo();
+			}
 		}
 
 		render() {
@@ -119,20 +126,11 @@
 		updateInfo() {
 			if (!this._item || !this._item.isNote()) return;
 
-			let parentItemButton = this._id("parentItem");
 			let dateCreatedField = this._id('dateCreated');
 			let dateModifiedField = this._id('dateModified');
 			let wordCountField = this._id('wordCount');
 
-			// Parent item
-			let parentItemButtonL10nArgs;
-			if (this._item.parentItemID) {
-				parentItemButtonL10nArgs = `{"hasParentItem":true,"parentItemTitle":"${this._item.parentItem.getDisplayTitle()}"}`;
-			}
-			else {
-				parentItemButtonL10nArgs = '{"hasParentItem":false}';
-			}
-			parentItemButton.setAttribute("data-l10n-args", parentItemButtonL10nArgs);
+			this._updateParentItemInfo();
 
 			// Note word counts
 			let noteContent = this._item.getNote();
@@ -153,6 +151,18 @@
 				let date = Zotero.Date.sqlToDate(dateModified, true);
 				dateModifiedField.value = date.toLocaleString();
 			}
+		}
+
+		_updateParentItemInfo() {
+			let parentItemButton = this._id("parentItem");
+			let parentItemButtonL10nArgs;
+			if (this._item.parentItemID) {
+				parentItemButtonL10nArgs = `{"hasParentItem":true,"parentItemTitle":"${this._item.parentItem.getDisplayTitle()}"}`;
+			}
+			else {
+				parentItemButtonL10nArgs = '{"hasParentItem":false}';
+			}
+			parentItemButton.setAttribute("data-l10n-args", parentItemButtonL10nArgs);
 		}
 
 		_calculateWordCounts(noteContent) {
