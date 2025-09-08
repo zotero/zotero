@@ -157,9 +157,7 @@
 
 		_calculateWordCounts(noteContent) {
 			if (!noteContent) {
-				return {
-					wordCount: 0,
-				};
+				return 0;
 			}
 
 			const parser = new DOMParser();
