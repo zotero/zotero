@@ -406,7 +406,7 @@
 			this.updateMenuCheckboxesRecursive(conditionsMenu, this.selectedCondition);
 			
 			// Display appropriate operators for condition
-			var selectThis;
+			var selectThis = null;
 			for (var i = 0, len = operatorsList.firstChild.childNodes.length; i < len; i++) {
 				var val = operatorsList.firstChild.childNodes[i].getAttribute('value');
 				var hidden = !operators[val];
