@@ -19,18 +19,17 @@ note-box {
 			@include clicky-item;
 
 			align-items: center;
-			height: 20px;
+			padding-inline: var(--editable-text-padding-inline);
+			padding-block: var(--editable-text-padding-block);
+			border: 1px solid rgba(0,0,0,0);
+
+			min-height: 20px;
 			@include comfortable {
-				height: 22px;
+				min-height: 22px;
 			}
 
 			.clicky-text {
 				width: 100%;
-				display: inline-block;
-				overflow: hidden;
-				white-space: nowrap;
-				text-overflow: ellipsis;
-				overflow-wrap: anywhere;
 			}
 		}
 	}
