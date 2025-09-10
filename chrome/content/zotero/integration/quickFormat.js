@@ -660,7 +660,9 @@ var Zotero_QuickFormat = new function () {
 		let items = [];
 		for (let itemID of itemIDs) {
 			let item = await Zotero.Items.getAsync(itemID);
-			if (item && item.parentItemID) {
+			// If the item for some reason does not exist, skip it
+			if (!item) continue;
+			if (item.parentItemID) {
 				item = await Zotero.Items.getAsync(item.parentItemID);
 			}
 			// Ignore tabs from libraries that are not specified
