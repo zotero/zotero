@@ -687,6 +687,16 @@ class EditorInstance {
 					win.ZoteroContextPane.togglePane();
 					return;
 				}
+				case 'focusBack': {
+					let win = Zotero.getMainWindow();
+					win.Zotero_Tabs.focusBack();
+					return;
+				}
+				case 'focusForward': {
+					let win = Zotero.getMainWindow();
+					win.Zotero_Tabs.focusForward();
+					return;
+				}
 				case 'return': {
 					this._onReturn();
 					return;
