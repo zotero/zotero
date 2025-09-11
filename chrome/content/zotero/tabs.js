@@ -884,6 +884,26 @@ var Zotero_Tabs = new function () {
 	};
 
 	/**
+	 * Move focus back from the tab content,
+	 * e.g. shift-tab from the first focusable element.
+	 */
+	this.focusBack = function () {
+		document.getElementById("zotero-tb-sync").focus();
+	};
+
+	/**
+	 * Move focus to the next focusable element after the tab content,
+	 * e.g. tab from the last focusable element.
+	 */
+	this.focusForward = function () {
+		let focused = ZoteroContextPane.focus();
+		// If context pane wasn't focused (e.g. it's collapsed), focus the tab bar
+		if (!focused) {
+			this.moveFocus("current");
+		}
+	};
+
+	/**
 	 * Moves focus to a tab in the specified direction.
 	 * @param {String} direction. "first", "last", "previous", "next", or "current"
 	 * If document.activeElement is a tab, "previous" or "next" direction moves focus from that tab.
