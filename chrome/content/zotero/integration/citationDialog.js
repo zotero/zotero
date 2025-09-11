@@ -970,6 +970,11 @@ const IOManager = {
 		// some additional logic to keep focus on relevant nodes during mouse interactions
 		this._initFocusRetention();
 		doc.addEventListener("focusin", this.resetSelectedAfterFocus);
+		// clear record of just-added bubbles to which next locator would go
+		doc.addEventListener("keydown", event => this._clearJustAddedBubbles(event));
+		_id("bubble-input").addEventListener("focusout", event => this._clearJustAddedBubbles(event));
+		// handle cmd/ctrl-z pressed from the input to undo added locator to a just-added bubble
+		_id("bubble-input").addEventListener("keydown", event => this._handleInputUndo(event));
 	},
 
 	// switch between list and library modes
@@ -1029,6 +1034,7 @@ const IOManager = {
 				dialogReferenceID: item.dialogReferenceID,
 				bubbleString: item.bubbleString,
 				selected: item.selected,
+				justAdded: this._justAddedBubbles?.includes(item) || false
 			};
 		}));
 		_id("accept-button").disabled = !CitationDataManager.items.length;
@@ -1082,6 +1088,12 @@ const IOManager = {
 				bubbleItem.locator = locator.locator;
 				bubbleItem.label = locator.label;
 			}
+			this._clearJustAddedBubbles();
+		}
+		else {
+			// If no locator is provided, record which bubbles were just added.
+			// If a locator is typed next, these bubbles will receive it.
+			this._justAddedBubbles = bubbleItems;
 		}
 		await CitationDataManager.addItems({ bubbleItems, index });
 		// Refresh the itemTree if in library mode
@@ -1291,19 +1303,29 @@ const IOManager = {
 		this.addItemsToCitation(items, { index });
 	},
 
-	// Handle Enter keypress on an input. If a locator has been typed, add it to previous bubble.
+	// Handle Enter keypress on an input. If a locator has been typed, add it to the last-added
+	// bubble if exists or a bubble before the input otherwise.
 	// Otherwise, add pre-selected item if any. Otherwise, accept the dialog.
 	_handleInputEnter(input) {
 		let locator = Helpers.extractLocator(input.value);
-		let bubble = input.previousElementSibling;
-		let item = CitationDataManager.getItem({ dialogReferenceID: bubble?.getAttribute("dialogReferenceID") });
-		if (item && locator && locator.onlyLocator && bubble) {
-			item.locator = locator.locator;
-			item.label = locator.label;
-			input.value = "";
-			input.dispatchEvent(new Event('input', { bubbles: true }));
-			this.updateBubbleInput();
-			return;
+		// Enter will always clear the record of just-added bubbles
+		let justAddedBubblesCopy = this._justAddedBubbles ? [...this._justAddedBubbles] : null;
+		this._clearJustAddedBubbles();
+		// Apply the locator to the items that were just added OR the bubble before the input if none
+		if (locator && locator.onlyLocator) {
+			let previousBubble = input.previousElementSibling;
+			let itemOfPreviousBubble = previousBubble ? [CitationDataManager.getItem({ dialogReferenceID: previousBubble.getAttribute("dialogReferenceID") })] : null;
+			let items = justAddedBubblesCopy || itemOfPreviousBubble;
+			if (items) {
+				for (let item of items) {
+					item.locator = locator.locator;
+					item.label = locator.label;
+				}
+				input.value = "";
+				input.dispatchEvent(new Event('input', { bubbles: true }));
+				this.updateBubbleInput();
+				return;
+			}
 		}
 		// add whatever items are selected
 		if (doc.querySelector(".item.selected")) {
@@ -1320,6 +1342,24 @@ const IOManager = {
 		else if (!input.value.length) {
 			accept();
 		}
+	},
+
+	// Handle cmd/ctrl-z pressed from the input to undo added locator to a just-added bubble
+	_handleInputUndo(event) {
+		if (!event.target.classList.contains("input")) return;
+		if (!(event.key == "z" && (event.ctrlKey || (Zotero.isMac && event.metaKey)))) return;
+		if (!this._justAddedBubbles) return;
+		event.preventDefault();
+		let locatorValue = "";
+		for (let bubbleItem of this._justAddedBubbles) {
+			locatorValue = bubbleItem.locator;
+			bubbleItem.locator = null;
+			bubbleItem.label = null;
+		}
+		_id("bubble-input").getCurrentInput().value = locatorValue;
+		this._clearJustAddedBubbles();
+		this._handleInput({ query: locatorValue, eventType: "focus" });
+		this.updateBubbleInput();
 	},
 
 	_deleteItem(dialogReferenceID) {
@@ -1356,6 +1396,28 @@ const IOManager = {
 	},
 
 	_handleInput({ query, eventType }) {
+		// Special case: if one types a number after adding a new item, add that
+		// as a page locator to that item.
+		if (this._justAddedBubbles) {
+			let specialPageLocator = Helpers.isOnlyNumberLocator(query);
+			if (specialPageLocator) {
+				for (let bubbleItem of IOManager._justAddedBubbles) {
+					// Determine the new locator value
+					let newLocator = ((bubbleItem.locator || "") + query).trim();
+					// If one types ":123", treat it as "123", since ":{page}" is another
+					// special locator shortcut for page (see Helpers.extractLocator).
+					if (newLocator[0] == ":") {
+						newLocator = newLocator.slice(1).trim();
+					}
+					bubbleItem.locator = newLocator;
+					bubbleItem.label = "page";
+				}
+				let input = _id("bubble-input").getCurrentInput();
+				input.value = "";
+				IOManager.updateBubbleInput();
+				return;
+			}
+		}
 		query = SearchHandler.cleanSearchQuery(query);
 		// If there is a locator typed, exclude it from the query
 		let locator = Helpers.extractLocator(query);
@@ -1369,6 +1431,18 @@ const IOManager = {
 		}
 		currentLayout.search(query, { skipDebounce: eventType == "focus" });
 		dialogNotPristine();
+	},
+
+	// Clear the record of which bubbles were just added. If a locator is typed
+	// and Enter is presses, just-added bubbles get that locator.
+	_clearJustAddedBubbles(event) {
+		if (!this._justAddedBubbles) return;
+		// on keydown, only proceed if it's an arrow key
+		let navigationKeys = ["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft"];
+		if (event && event.type == "keydown" && !navigationKeys.includes(event.key)) return;
+		// clear just added bubbles and update bubble input to reflect that
+		this._justAddedBubbles = null;
+		this.updateBubbleInput();
 	},
 
 	_handleMenuBarAppearance() {
