@@ -115,6 +115,31 @@ var Zotero_Tabs = new function () {
 			}
 		},
 		focus: {
+			library: async () => {
+				let collectionsPane = document.getElementById("zotero-collections-pane");
+				if (collectionsPane.getAttribute("collapsed")) {
+					document.getElementById('zotero-tb-add').focus();
+					return;
+				}
+				document.getElementById('zotero-tb-collection-add').focus();
+			},
+			reader: async (tab) => {
+				let reader = Zotero.Reader.getByTabID(tab.id);
+				if (reader) {
+					// Move focus to the reader and focus the toolbar
+					reader.focusFirst();
+					reader.focusToolbar();
+				}
+			},
+			note: async (tab) => {
+				let noteEditor = Zotero.Notes.getByTabID(tab.id);
+				if (noteEditor) {
+					// Move focus to the note editor and focus the toolbar
+					noteEditor.focusToolbar();
+				}
+			},
+		},
+		refocus: {
 			library: async (tab, tabIndex, options) => {
 				// Move focus to the last focused element of zoteroPane if any or itemTree otherwise
 				if (options.focusElementID) {
@@ -833,14 +858,29 @@ var Zotero_Tabs = new function () {
 	};
 
 	/**
-	 * Return focus into the reader of the selected tab.
-	 * Required to move focus from the tab into the reader after drag.
+	 * Return focus into the content of the selected tab.
+	 * Required to move focus from the tab into the content after drag.
 	 */
-	this.refocus = function () {
-		let { tab, tabIndex } = this._getTab(this._selectedID);
+	this.refocus = function (id) {
+		if (!id) id = this._selectedID;
+		let { tab, tabIndex } = this._getTab(id);
+		if (!tab) return;
+		let { tabContentType } = this.parseTabType(tab.type);
+		let refocusHook = this._getHook(tabContentType, 'refocus');
+		refocusHook(tab, tabIndex, this._focusOptions);
+	};
+
+	/**
+	 * Move focus into the first element in content of the selected tab.
+	 * Required to move focus from the outside into the tab content.
+	 */
+	this.focusContent = function (id) {
+		if (!id) id = this._selectedID;
+		let { tab, tabIndex } = this._getTab(id);
+		if (!tab) return;
 		let { tabContentType } = this.parseTabType(tab.type);
 		let focusHook = this._getHook(tabContentType, 'focus');
-		focusHook(tab, tabIndex, this._focusOptions);
+		focusHook(tab, tabIndex);
 	};
 
 	/**
@@ -896,7 +936,7 @@ var Zotero_Tabs = new function () {
 			}
 		}
 	};
-	
+
 	/**
 	 * Jump to the tab at a particular index. If the index points beyond the array, jump to the last
 	 * tab.
