@@ -2566,7 +2566,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				let parentItem;
 				if (parentItemID
 					&& data.length == 1
-					&& Zotero.Attachments.shouldAutoRenameFile(dropEffect == 'link')) {
+					&& Zotero.Attachments.shouldAutoRenameFile(dropEffect == 'link', targetLibraryID)) {
 					parentItem = Zotero.Items.get(parentItemID);
 					if (!parentItem.numNonHTMLFileAttachments()) {
 						renameIfAllowedType = true;

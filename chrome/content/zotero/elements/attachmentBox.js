@@ -28,6 +28,7 @@
 
 
 {
+	let { canRenameFileFromParent, renameFileFromParent } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
 	class AttachmentBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-attachment-info" data-pane="attachment-info">
@@ -43,7 +44,10 @@
 						</html:div>
 						<html:div id="fileNameRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="fileName-label" class="key" data-l10n-id="attachment-info-filename"/></html:div>
-							<html:div class="meta-data"><editable-text id="fileName" aria-labelledby="fileName-label" tight="true"/></html:div>
+							<html:div class="meta-data">
+								<editable-text id="fileName" aria-labelledby="fileName-label" tight="true"/>
+								<toolbarbutton id="rename-from-parent" data-l10n-id="attachment-rename-from-parent" tabindex="0" oncommand=""/>
+							</html:div>
 						</html:div>
 						<html:div id="accessedRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="accessed-label" class="key" data-l10n-id="attachment-info-accessed"/></html:div>
@@ -256,6 +260,9 @@
 			let fileName = this._id("fileName");
 			fileName.addEventListener('focus', this._handleFileNameFocus);
 			fileName.addEventListener('blur', this._handleFileNameBlur);
+
+			let renameFromParent = this._id("rename-from-parent");
+			renameFromParent.addEventListener("command", this._handleRenameFromParent);
 
 			let noteButton = this._id('note-button');
 			noteButton.addEventListener("command", this._handleNoteButtonCommand);
@@ -510,6 +517,12 @@
 			else {
 				selectButton.hidden = true;
 			}
+
+
+			const isRenamePossible = this._item.isAttachment() && !this._item.isTopLevelItem();
+
+			// Hide the rename button for cases where it's not possible to rename from parent, not editable, the file does not exist, or the file name would not be changed
+			this._id("rename-from-parent").hidden = !isRenamePossible || !this.editable || !fileExists || !(await canRenameFileFromParent(this._item));
 		}
 
 		async updatePreview() {
@@ -626,7 +639,7 @@
 				}
 				
 				// Force overwrite, but make sure we check that this doesn't fail
-				renamed = await item.renameAttachmentFile(newFilename, true);
+				renamed = await item.renameAttachmentFile(newFilename, { overwrite: true });
 			}
 			
 			if (renamed == -2) {
@@ -785,6 +798,10 @@
 				event.preventDefault();
 				this._reindexButton?.click();
 			}
+		};
+
+		_handleRenameFromParent = async () => {
+			await renameFileFromParent(this.item);
 		};
 
 		_handleMetaLabelMousedown = (event) => {

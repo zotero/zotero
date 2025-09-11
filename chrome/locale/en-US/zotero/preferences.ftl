@@ -7,9 +7,10 @@ preferences-auto-recognize-files =
     .label = Automatically retrieve metadata for PDFs and ebooks
 
 preferences-file-renaming-title = File Renaming
-preferences-file-renaming-intro = { -app-name } automatically renames downloaded files based on the details of the parent item (title, author, etc.). You can choose to rename files added from your computer as well.
+preferences-file-renaming-intro = 
+     { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
 preferences-file-renaming-auto-rename-files =
-    .label = Automatically rename locally added files
+    .label = Automatically rename files
 preferences-file-renaming-file-types = Rename files of these types:
 preferences-file-renaming-file-type-pdf =
     .label = { file-type-pdf }
@@ -23,6 +24,8 @@ preferences-file-renaming-file-type-video =
     .label = { file-type-video }
 preferences-file-renaming-customize-button =
     .label = Customize Filename Format…
+preferences-file-renaming-rename-now =
+    .label = Rename Files…
 
 preferences-file-renaming-format-title = Filename Format
 preferences-file-renaming-format-instructions = You can customize the filename pattern { -app-name } uses to rename attachment files from parent metadata.

@@ -991,7 +991,6 @@
 			<menuitem class="menuitem-iconic zotero-menuitem-retrieve-metadata" oncommand="ZoteroPane.recognizeSelected();"/>
 			<menuitem class="menuitem-iconic zotero-menuitem-unrecognize" label="&zotero.items.menu.unrecognize;" oncommand="ZoteroPane.unrecognizeSelected()"/>
 			<menuitem class="menuitem-iconic zotero-menuitem-create-parent" oncommand="ZoteroPane_Local.createParentItemsFromSelected();"/>
-			<menuitem class="menuitem-iconic zotero-menuitem-rename-from-parent" oncommand="ZoteroPane_Local.renameSelectedAttachmentsFromParents()"/>
 			<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>
 		</menupopup>
 
@@ -1158,6 +1157,15 @@
 								</html:div>
 							</vbox>
 
+							<vbox id="file-renaming-banner-container" class="banner-container" collapsed="true" role="status">
+								<html:div id="file-renaming-banner" class="banner">
+									<html:div id="file-renaming-message" class="message" data-l10n-id="file-renaming-banner-message" />
+									<html:a id="file-renaming-documentation-link" data-l10n-id="file-renaming-banner-documentation-link" class="link" />
+									<html:a id="file-renaming-settings-link" data-l10n-id="file-renaming-banner-settings-link" class="link" />
+									<html:div class="spacer" />
+									<label is="text-link" id="file-renaming-banner-close" class="close-link">×</label>
+								</html:div>
+							</vbox>
 							
 							<hbox id="zotero-trees" flex="1">
 								<vbox id="zotero-collections-pane" zotero-persist="width">
