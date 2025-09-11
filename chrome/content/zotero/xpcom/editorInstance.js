@@ -324,7 +324,7 @@ class EditorInstance {
 		catch (e) {
 			Zotero.logError(e);
 		}
-	}
+	};
 	
 	_showInLibrary(ids) {
 		if (!Array.isArray(ids)) {
@@ -339,6 +339,11 @@ class EditorInstance {
 
 	setToggleContextPaneButtonMode(mode) {
 		this._postMessage({ action: 'setToggleContextPaneButtonMode', mode });
+	}
+
+	focusToolbar() {
+		this._iframeWindow.focus();
+		this._postMessage({ action: 'focusToolbar' });
 	}
 
 	async importImages(annotations) {
