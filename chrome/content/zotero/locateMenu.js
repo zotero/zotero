@@ -34,7 +34,7 @@ var Zotero_LocateMenu = new function () {
   	/**
   	 * Clear and build the locate menu
   	 */
-	this.buildLocateMenu = async function (locateMenu) {
+	this.buildLocateMenu = async function (locateMenu, { locateMode } = {}) {
 		// clear menu
 		while(locateMenu.childElementCount > 0) {
 			locateMenu.removeChild(locateMenu.firstChild);
@@ -43,7 +43,9 @@ var Zotero_LocateMenu = new function () {
 		var selectedItems = await _getSelectedItems();
 		
 		if(selectedItems.length) {
-			await _addViewOptions(locateMenu, selectedItems, true, true, true);
+			await _addViewOptions(locateMenu, selectedItems, true, true, {
+				locateMode, isToolbarMenu: true
+			});
 			
 			var availableEngines = _getAvailableLocateEngines(selectedItems);
 			// add engines that are available for selected items
@@ -158,8 +160,10 @@ var Zotero_LocateMenu = new function () {
 	 * @param {Boolean} addExtraOptions Whether to add options that start with "_" below the separator
 	 * @param {Boolean} isToolbarMenu Whether the menu being populated is displayed in the toolbar
 	 * 		(and not the item tree context menu)
+	 * @param {"tab" | "window"} locateMode Whether the menu being populated is displayed in a tab or window
 	 */
-	var _addViewOptions = async function (locateMenu, selectedItems, showIcons, addExtraOptions, isToolbarMenu) {
+	var _addViewOptions = async function (locateMenu, selectedItems, showIcons, addExtraOptions, options = {}) {
+		let { isToolbarMenu, locateMode } = options;
 		var optionsToShow = {};
 		
 		// check which view options are available
@@ -167,7 +171,7 @@ var Zotero_LocateMenu = new function () {
 			for(var viewOption in ViewOptions) {
 				if (!optionsToShow[viewOption]
 						&& (!isToolbarMenu || !ViewOptions[viewOption].hideInToolbar)) {
-					optionsToShow[viewOption] = await ViewOptions[viewOption].canHandleItem(item);
+					optionsToShow[viewOption] = await ViewOptions[viewOption].canHandleItem(item, { locateMode });
 				}
 			}
 		}
@@ -394,10 +398,6 @@ var Zotero_LocateMenu = new function () {
 				}
 			},
 		});
-
-		// Don't show alternate-behavior option ("in New Window" when openReaderInNewWindow is false,
-		// "in New Tab" when it's true) in toolbar Locate menu
-		this.hideInToolbar = alternateWindowBehavior;
 		
 		this.l10nId = "item-menu-viewAttachment";
 		Object.defineProperty(this, "l10nArgs", {
@@ -421,11 +421,23 @@ var Zotero_LocateMenu = new function () {
 			}
 		});
 		
-		this.canHandleItem = async function (item) {
+		this.canHandleItem = async function (item, { locateMode } = {}) {
 			const usableItem = await _getFirstUsableItem(item);
+			if (!usableItem) {
+				return false;
+			}
 			// Don't show alternate-behavior option when using an external PDF viewer
-			return usableItem
-				&& !(alternateWindowBehavior && !item.isNote() && Zotero.Prefs.get(`fileHandler.${usableItem.attachmentReaderType}`));
+			if (!item.isNote()
+				&& Zotero.Prefs.get(`fileHandler.${usableItem.attachmentReaderType}`)
+				&& alternateWindowBehavior) {
+				return false;
+			}
+			if ((locateMode === "tab" && !alternateWindowBehavior)
+				|| (locateMode === "window" && alternateWindowBehavior)) {
+				// Don't show option if it would open in the same type of the current context
+				return false;
+			}
+			return usableItem;
 		};
 		
 		this.updateMenuItem = async function (items) {
