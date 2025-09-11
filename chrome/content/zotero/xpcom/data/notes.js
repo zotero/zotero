@@ -182,7 +182,7 @@ Zotero.Notes = new function () {
 		if (!tabID) {
 			return null;
 		}
-		let noteEditor = this._editorInstances.find(x => x.tabID === tabID);
+		let noteEditor = this._editorInstances.find(x => x._tabID === tabID);
 		if (noteEditor) {
 			return noteEditor;
 		}
