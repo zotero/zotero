@@ -75,6 +75,26 @@
 			setPaneCollapsed(this, val);
 		}
 
+		static get observedAttributes() {
+			return ['collapsed'];
+		}
+
+		attributeChangedCallback(name, oldValue, newValue) {
+			switch (name) {
+				case "collapsed": {
+					this.handleCollapse(oldValue, newValue);
+					break;
+				}
+			}
+		}
+
+		handleCollapse(prevState, newState) {
+			if (prevState === "true" && (!newState || newState === "false")) {
+				let itemContext = this._getItemContext(Zotero_Tabs.selectedID);
+				itemContext?.render();
+			}
+		}
+
 		init() {
 			this._panesDeck = this.querySelector('#zotero-context-pane-deck');
 			// Item pane deck
