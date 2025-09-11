@@ -262,19 +262,8 @@ var ZoteroPane = new function () {
 					ArrowNext: () => null,
 					ArrowPrevious: () => null,
 					Tab: () => {
-						if (Zotero_Tabs.selectedIndex > 0) {
-							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-							if (reader) {
-								// Move focus to the reader and focus the toolbar
-								reader.focusFirst();
-								reader.focusToolbar();
-							}
-							return null;
-						}
-						if (collectionsPane.getAttribute("collapsed")) {
-							return document.getElementById('zotero-tb-add');
-						}
-						return document.getElementById('zotero-tb-collection-add');
+						Zotero_Tabs.focusContent();
+						return null;
 					},
 					ShiftTab: () => document.getElementById('zotero-tb-sync-error')
 				},
