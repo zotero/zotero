@@ -258,7 +258,19 @@
 						}
 						event.preventDefault();
 						let menu = button.querySelector('menupopup');
-						await Zotero_LocateMenu.buildLocateMenu(menu);
+						let locateMode;
+						// If the container is not set, assume it's a standalone window
+						if (!this.container?.tabType) {
+							locateMode = "window";
+						}
+						// If it's library tab, we can open in either tab or window
+						else if (this.container.tabType === "library") {
+							locateMode = "library";
+						}
+						else {
+							locateMode = "tab";
+						}
+						await Zotero_LocateMenu.buildLocateMenu(menu, { locateMode });
 
 						Zotero.MenuManager.updateMenuPopup(menu, "sidenav/locate", {
 							event: undefined,
