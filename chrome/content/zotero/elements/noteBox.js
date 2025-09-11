@@ -34,7 +34,7 @@
 					<html:div class="metadata-table">
 						<html:div id="parentItemRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="parentItem-label" class="key" data-l10n-id="note-info-parent-item"/></html:div>
-							<html:div class="meta-data clicky-item"><html:span id="parentItem" class="clicky-text" data-l10n-id="note-info-parent-item-button" aria-labelledby="parentItem-label"></html:span></html:div>
+							<html:div class="meta-data clicky-item" tabindex="0"><html:span id="parentItem" class="clicky-text" data-l10n-id="note-info-parent-item-button" aria-labelledby="parentItem-label"></html:span></html:div>
 						</html:div>
 						<html:div id="wordCountRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="wordCount-label" class="key" data-l10n-id="note-info-word-count"/></html:div>

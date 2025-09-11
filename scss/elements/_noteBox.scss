@@ -17,6 +17,7 @@ note-box {
 
 		.clicky-item {
 			@include clicky-item;
+			@include focus-ring;
 
 			align-items: center;
 			padding-inline: var(--editable-text-padding-inline);
