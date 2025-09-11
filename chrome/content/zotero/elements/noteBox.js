@@ -196,7 +196,7 @@
 			event.preventDefault();
 			if (!this._item) return;
 			if (!this._item.parentItemID) {
-				ZoteroPane.selectItem(this._item);
+				ZoteroPane.selectItem(this._item.id);
 			}
 			ZoteroPane.selectItem(this._item.id);
 		};
