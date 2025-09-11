@@ -506,7 +506,9 @@ cd xulrunner
 
 if [ $BUILD_MAC == 1 ]; then
 	GECKO_VERSION="$GECKO_VERSION_MAC"
-	DOWNLOAD_URL="https://ftp.mozilla.org/pub/firefox/releases/$GECKO_VERSION"
+	# TEMP: 140.3.0esr candidate build
+	#DOWNLOAD_URL="https://ftp.mozilla.org/pub/firefox/releases/$GECKO_VERSION"
+	DOWNLOAD_URL="https://ftp.mozilla.org/pub/firefox/candidates/140.3.0esr-candidates/build1"
 	rm -rf Firefox.app
 	
 	if [ -e "Firefox $GECKO_VERSION.app.zip" ]; then
