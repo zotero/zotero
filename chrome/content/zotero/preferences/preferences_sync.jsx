@@ -832,6 +832,8 @@ Zotero_Preferences.Sync = {
 				break;*/
 			
 			case 'restore-to-server': {
+				const CHECKBOX_THRESHOLD = 10;
+				
 				let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 				let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
 				var keyInfo = await Zotero.Sync.Runner.checkAccess(client, { timeout: 5000 });
@@ -844,37 +846,40 @@ Zotero_Preferences.Sync = {
 				let remoteButNotLocal = remoteKeys.difference(localKeys); // NOTE: `difference` requires FF 127
 				let remoteItemsDeletedCount = remoteButNotLocal.size;
 				
-				let [title, text, warning, yes, no] = await document.l10n.formatValues([
+				let [title, text, warning, checkboxLabel, yes] = await document.l10n.formatValues([
 					'general-warning',
 					{ id: 'preferences-sync-reset-restore-to-server-body', args: { libraryName: library.name, domain: ZOTERO_CONFIG.DOMAIN_NAME } },
 					{ id: 'preferences-sync-reset-restore-to-server-warning', args: { remoteItemsDeletedCount } },
+					{ id: 'preferences-sync-reset-restore-to-server-checkbox-label', args: { remoteItemsDeletedCount } },
 					'preferences-sync-reset-restore-to-server-yes',
-					'general-no'
 				]);
-
+				
 				text = remoteItemsDeletedCount > 0 ? `${text}\n\n${warning}` : text;
-				let index = Zotero.Prompt.confirm({ title, text, button0: yes, button1: no });
-				
-				switch (index) {
-					case 0:
-						var resetButton = document.getElementById('sync-reset-button');
-						resetButton.disabled = true;
-						try {
-							await Zotero.Sync.Runner.sync({
-								libraries: [libraryID],
-								resetMode: Zotero.Sync.Runner.RESET_MODE_TO_SERVER
-							});
-						}
-						finally {
-							resetButton.disabled = false;
-						}
-						break;
-					
-					// Cancel
-					case 1:
-						return;
+				if (remoteItemsDeletedCount < CHECKBOX_THRESHOLD) {
+					checkboxLabel = null;
 				}
+				var io = {
+					title,
+					text,
+					acceptLabel: yes,
+					checkboxLabel
+				};
+				window.openDialog("chrome://zotero/content/hardConfirmationDialog.xhtml", "",
+					"chrome,dialog,dependent,modal,centerscreen", io);
 				
+				if (io.accept) {
+					let resetButton = document.getElementById('sync-reset-button');
+					resetButton.disabled = true;
+					try {
+						await Zotero.Sync.Runner.sync({
+							libraries: [libraryID],
+							resetMode: Zotero.Sync.Runner.RESET_MODE_TO_SERVER
+						});
+					}
+					finally {
+						resetButton.disabled = false;
+					}
+				}
 				break;
 			}
 			
