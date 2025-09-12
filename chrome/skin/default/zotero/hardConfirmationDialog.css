@@ -9,3 +9,7 @@
 #infoContainer {
 	margin-bottom: 6px;
 }
+
+#zotero-hardConfirmationDialog-textbox {
+	font-size: 12px;
+}
