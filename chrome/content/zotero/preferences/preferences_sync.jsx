@@ -833,6 +833,7 @@ Zotero_Preferences.Sync = {
 			
 			case 'restore-to-server': {
 				const CHECKBOX_THRESHOLD = 10;
+				const CONFIRMATION_TEXT_MAX_ITEMS = 5;
 				
 				let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 				let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
@@ -840,29 +841,45 @@ Zotero_Preferences.Sync = {
 				let { keys: remoteKeysArray } = await client.getKeys('user', keyInfo.userID, { target: 'items', itemType: '-annotation' });
 				let remoteKeys = new Set(remoteKeysArray);
 				let localItems = await Zotero.Items.getAll(Zotero.Libraries.userLibraryID, false, false, false);
+				let localItemsCount = localItems.length;
 				let localKeys = new Set(localItems
 					.filter(item => item.isRegularItem() || item.isNote() || item.isAttachment())
 					.map(item => item.key));
 				let remoteButNotLocal = remoteKeys.difference(localKeys); // NOTE: `difference` requires FF 127
 				let remoteItemsDeletedCount = remoteButNotLocal.size;
 				
-				let [title, text, warning, checkboxLabel, yes] = await document.l10n.formatValues([
+				let [title, text, warning1, warning2, checkboxLabel, yes] = await document.l10n.formatValues([
 					'general-warning',
 					{ id: 'preferences-sync-reset-restore-to-server-body', args: { libraryName: library.name, domain: ZOTERO_CONFIG.DOMAIN_NAME } },
-					{ id: 'preferences-sync-reset-restore-to-server-warning', args: { remoteItemsDeletedCount } },
+					{ id: 'preferences-sync-reset-restore-to-server-deleted-items-text', args: { remoteItemsDeletedCount } },
+					{ id: 'preferences-sync-reset-restore-to-server-remaining-items-text', args: { localItemsCount } },
 					{ id: 'preferences-sync-reset-restore-to-server-checkbox-label', args: { remoteItemsDeletedCount } },
 					'preferences-sync-reset-restore-to-server-yes',
 				]);
+				let confirmationText;
 				
-				text = remoteItemsDeletedCount > 0 ? `${text}\n\n${warning}` : text;
+				text = remoteItemsDeletedCount > 0 ? `${text}\n\n${warning1}` : text;
+				
 				if (remoteItemsDeletedCount < CHECKBOX_THRESHOLD) {
 					checkboxLabel = null;
+				}
+				else if (localItemsCount < CONFIRMATION_TEXT_MAX_ITEMS) {
+					text += warning2;
+					checkboxLabel = null;
+					confirmationText = await document.l10n.formatValue(
+						'preferences-sync-reset-restore-to-server-confirmation-text',
+					)
+					text += "\n\n" + await document.l10n.formatValue(
+						'general-type-to-continue',
+						{ text: confirmationText}
+					);
 				}
 				var io = {
 					title,
 					text,
 					acceptLabel: yes,
-					checkboxLabel
+					checkboxLabel,
+					confirmationText
 				};
 				window.openDialog("chrome://zotero/content/hardConfirmationDialog.xhtml", "",
 					"chrome,dialog,dependent,modal,centerscreen", io);
