@@ -181,7 +181,7 @@ class TagList extends React.PureComponent {
 		
 		let props = {
 			className,
-			onClick: ev => !tag.disabled && this.props.onSelect(tag.name, ev),
+			onClick: ev => !tag.disabled && this.props.onSelect({ tag: tag.name }, ev),
 			onContextMenu: ev => this.props.onTagContext(tag, ev),
 			onDragOver,
 			onDragExit,
@@ -391,7 +391,6 @@ class TagList extends React.PureComponent {
 			onDrop: PropTypes.func
 		}),
 		onSelect: PropTypes.func,
-		onKeyDown: PropTypes.func,
 		onTagContext: PropTypes.func,
 		loaded: PropTypes.bool,
 		width: PropTypes.number.isRequired,
