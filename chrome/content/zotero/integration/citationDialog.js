@@ -39,6 +39,7 @@ var Helpers, SearchHandler, PopupsHandler, KeyboardHandler;
 
 const ITEM_LIST_MAX_ITEMS = 50;
 const SEARCH_TIMEOUT = 250;
+var NUMERIC_LOCATOR_TIMEOUT = 500; // exposed to tests
 
 var { CitationDialogHelpers } = ChromeUtils.importESModule('chrome://zotero/content/integration/citationDialog/helpers.mjs');
 var { CitationDialogSearchHandler } = ChromeUtils.importESModule('chrome://zotero/content/integration/citationDialog/searchHandler.mjs');
@@ -304,8 +305,7 @@ class Layout {
 		let timer = new Zotero.Integration.Timer();
 		timer.start();
 		Zotero.debug("Citation Dialog: searching");
-		_id("loading-spinner").setAttribute("status", "animate");
-		_id("accept-button").hidden = true;
+		IOManager._showLoadingSpinner();
 		SearchHandler.searching = true;
 		// search for selected/opened items
 		// only enforce min query length in list mode
@@ -346,8 +346,7 @@ class Layout {
 		}
 
 		SearchHandler.searching = false;
-		_id("loading-spinner").removeAttribute("status");
-		_id("accept-button").hidden = false;
+		IOManager._hideLoadingSpinner();
 		let searchTime = timer.stop();
 		Zotero.debug(`Citation Dialog: searching done in ${searchTime}`);
 		if (this.forceUpdateTablesAfterRefresh && this.type == "library") {
@@ -1401,20 +1400,10 @@ const IOManager = {
 		if (this._justAddedBubbles) {
 			let specialPageLocator = Helpers.isOnlyNumberLocator(query);
 			if (specialPageLocator) {
-				for (let bubbleItem of IOManager._justAddedBubbles) {
-					// Determine the new locator value
-					let newLocator = ((bubbleItem.locator || "") + query).trim();
-					// If one types ":123", treat it as "123", since ":{page}" is another
-					// special locator shortcut for page (see Helpers.extractLocator).
-					if (newLocator[0] == ":") {
-						newLocator = newLocator.slice(1).trim();
-					}
-					bubbleItem.locator = newLocator;
-					bubbleItem.label = "page";
-				}
-				let input = _id("bubble-input").getCurrentInput();
-				input.value = "";
-				IOManager.updateBubbleInput();
+				// Show spinner to indicate that locator will be added
+				this._showLoadingSpinner();
+				// Add the locator after debounce to allow one to finish typing
+				this._processNumericLocatorInput();
 				return;
 			}
 		}
@@ -1432,6 +1421,43 @@ const IOManager = {
 		currentLayout.search(query, { skipDebounce: eventType == "focus" });
 		dialogNotPristine();
 	},
+
+	// Add special numeric locator to just-added bubble after debounce
+	_processNumericLocatorInput: Zotero.Utilities.debounce(() => {
+		// If the just-added bubbles were cleared, stop
+		if (!IOManager._justAddedBubbles) {
+			// Unless there is search happening, hide the spinner.
+			// Otherwise, spinner will be hidden when search is done
+			if (!SearchHandler.searching) {
+				IOManager._hideLoadingSpinner();
+			}
+			return;
+		}
+
+		// If one kept typing something past that number, they are probably
+		// not meaning to type a numeric locator, so clear just-added bubbles and stop
+		let input = _id("bubble-input").getCurrentInput();
+		if (input.value && !Helpers.isOnlyNumberLocator(input.value)) {
+			IOManager._justAddedBubbles = null;
+			return;
+		}
+
+		for (let bubbleItem of IOManager._justAddedBubbles) {
+			// Determine the new locator value
+			let newLocator = ((bubbleItem.locator || "") + input.value).trim();
+			// If one types ":123", treat it as "123", since ":{page}" is another
+			// special locator shortcut for page (see Helpers.extractLocator).
+			if (newLocator[0] == ":") {
+				newLocator = newLocator.slice(1).trim();
+			}
+			bubbleItem.locator = newLocator;
+			bubbleItem.label = "page";
+		}
+		IOManager._hideLoadingSpinner();
+		// Clear the input and update bubbles
+		input.value = "";
+		IOManager.updateBubbleInput();
+	}, NUMERIC_LOCATOR_TIMEOUT),
 
 	// Clear the record of which bubbles were just added. If a locator is typed
 	// and Enter is presses, just-added bubbles get that locator.
@@ -1455,6 +1481,16 @@ const IOManager = {
 		if (bottomAreaBox.bottom > window.innerHeight + 1) {
 			window.resizeTo(window.innerWidth, window.innerHeight + 30);
 		}
+	},
+
+	_showLoadingSpinner() {
+		_id("loading-spinner").setAttribute("status", "animate");
+		_id("accept-button").hidden = true;
+	},
+	
+	_hideLoadingSpinner() {
+		_id("loading-spinner").removeAttribute("status");
+		_id("accept-button").hidden = false;
 	},
 
 	// Resort items and update the bubbles

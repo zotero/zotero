@@ -402,6 +402,9 @@ describe("Citation Dialog", function () {
 			currentInput.dispatchEvent(new Event('input', { bubbles: true }));
 			assert.equal(SearchHandler.searchValue, "");
 
+			// Wait for the locator to be added after debounce
+			await Zotero.Promise.delay(dialog.NUMERIC_LOCATOR_TIMEOUT);
+
 			// Make sure it is added as a locator (without pressing Enter);
 			assert.equal(currentInput.value, "");
 			assert.equal(CitationDataManager.items[0].locator, "15-30");
