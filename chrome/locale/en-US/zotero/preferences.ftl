@@ -108,7 +108,7 @@ preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ 
 preferences-sync-reset-restore-to-server-warning = { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
         [one] item
         *[other] items
-} in the online library will be deleted.
+} in the online library will be permanently deleted.
 preferences-sync-reset-restore-to-server-checkbox-label = { $remoteItemsDeletedCount ->
         *[other] Delete { $remoteItemsDeletedCount } items
 }
