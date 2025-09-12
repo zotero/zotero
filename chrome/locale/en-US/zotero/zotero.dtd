@@ -49,6 +49,7 @@
 <!-- Used for columnpicker until the tree supports Fluent strings -->
 <!ENTITY zotero.tabs.notes.label                                               "Notes">
 <!ENTITY zotero.tabs.attachments.label                                 "Attachments">
+<!ENTITY zotero.tabs.attachmentSize.label                                 "Attachment Size">
 
 <!ENTITY zotero.toolbar.duplicate.label				"Show Duplicates">
 <!ENTITY zotero.collections.showUnfiledItems			"Show Unfiled Items">
