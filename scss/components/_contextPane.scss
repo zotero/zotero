@@ -32,7 +32,7 @@
 	}
 
 	.stacked-context-placeholder {
-		min-height: 300px;
+		min-height: $min-height-tab-context - $width-sidenav;
 	}
 
 	&.standard .stacked-context-placeholder {

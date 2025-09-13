@@ -38,6 +38,8 @@
 			this._initialized = false;
 			this._editorInstance = null;
 			this._destroyed = false;
+			this._bottomPlaceholder = null;
+			this._contextPaneOpen = null;
 
 			this.content = MozXULElement.parseXULToFragment(`
 				<html:div class="custom-head empty"></html:div>
@@ -140,6 +142,7 @@
 				popup: this._id('editor-menu'),
 				onNavigate: this._navigateHandler,
 				viewMode: this.viewMode,
+				tabID: this.tabID,
 				readOnly: this._mode != 'edit',
 				disableUI: this._mode == 'merge',
 				onReturn: this._returnHandler,
@@ -148,6 +151,7 @@
 			if (this._onInitCallback) {
 				this._onInitCallback();
 			}
+			requestIdleCallback(() => this.setToggleContextPaneButtonMode());
 		};
 
 		onInit = (callback) => {
@@ -301,6 +305,9 @@
 			this._id('links-box').parentItem = val;
 		}
 
+		// TODO: implement this
+		async navigate(_location) {}
+
 		async focus() {
 			let n = 0;
 			while (!this._editorInstance && n++ < 100) {
@@ -321,9 +328,11 @@
 				this._iframe.focus();
 				this._editorInstance._iframeWindow.document.querySelector('.toolbar-button-return').focus();
 			}
-			catch (e) {
+			catch {
 			}
 		}
+
+		refresh() {}
 
 		renderCustomHead(callback) {
 			let customHead = this.querySelector(".custom-head");
@@ -335,6 +344,34 @@
 				doc: document,
 				append,
 			});
+		};
+
+		setBottomPlaceholderHeight(height) {
+			// Store raw value as null/number for toggle contextPane button update
+			this._bottomPlaceholder = height;
+			if (typeof height !== 'number') {
+				height = 0;
+			}
+			this.style.height = `calc(100% - ${height}px)`;
+			this.setToggleContextPaneButtonMode();
+		};
+
+		setContextPaneOpen(open) {
+			this._contextPaneOpen = open;
+			this.setToggleContextPaneButtonMode();
+		}
+
+		setToggleContextPaneButtonMode() {
+			if (!this._editorInstance) return;
+			if (this._bottomPlaceholder === null && this._contextPaneOpen === null) return;
+			let mode = null;
+			if (this._bottomPlaceholder !== null) {
+				mode = "stacked";
+			}
+			else if (!this._contextPaneOpen) {
+				mode = "standard";
+			}
+			this._editorInstance.setToggleContextPaneButtonMode(mode);
 		}
 
 		_id(id) {

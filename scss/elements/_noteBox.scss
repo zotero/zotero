@@ -1,0 +1,41 @@
+note-box {
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
+
+	.body {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	.metadata-table {
+		@include meta-table;
+
+		.clicky-item {
+			@include clicky-item;
+			@include focus-ring;
+
+			align-items: center;
+			padding: 0;
+			box-sizing: border-box;
+
+			min-height: 20px;
+			@include comfortable {
+				min-height: 22px;
+			}
+
+			.clicky-text {
+				width: 100%;
+				--editable-text-padding-inline: var(--editable-text-tight-padding-inline);
+  				--editable-text-padding-block: var(--editable-text-tight-padding-block);
+				padding-inline: var(--editable-text-padding-inline);
+				padding-block: var(--editable-text-padding-block);
+				border: 1px solid rgba(0,0,0,0);
+			}
+		}
+	}
+}

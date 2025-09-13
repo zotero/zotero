@@ -56,6 +56,7 @@ class EditorInstance {
 		this._item = options.item;
 		this._reloaded = options.reloaded;
 		this._viewMode = options.viewMode;
+		this._tabID = options.tabID;
 		this._readOnly = options.readOnly || this._isReadOnly();
 		this._filesReadOnly = !Zotero.Libraries.get(this._item.libraryID).filesEditable;
 		this._disableUI = options.disableUI;
@@ -244,7 +245,13 @@ class EditorInstance {
 				}
 			}
 		}
-		
+
+		if (type === 'item' && ['delete', 'trash'].includes(event) && this._tabID) {
+			if (this._item && (ids.includes(this._item.id) || ids.includes(this._item.parentItemID))) {
+				Zotero.getMainWindow().Zotero_Tabs.close(this._tabID);
+			}
+		}
+
 		if (this._readOnly || !this._item) {
 			return;
 		}
@@ -317,7 +324,7 @@ class EditorInstance {
 		catch (e) {
 			Zotero.logError(e);
 		}
-	}
+	};
 	
 	_showInLibrary(ids) {
 		if (!Array.isArray(ids)) {
@@ -328,6 +335,15 @@ class EditorInstance {
 			win.ZoteroPane.selectItems(ids);
 			win.focus();
 		}
+	}
+
+	setToggleContextPaneButtonMode(mode) {
+		this._postMessage({ action: 'setToggleContextPaneButtonMode', mode });
+	}
+
+	focusToolbar() {
+		this._iframeWindow.focus();
+		this._postMessage({ action: 'focusToolbar' });
 	}
 
 	async importImages(annotations) {
@@ -664,6 +680,21 @@ class EditorInstance {
 				case 'openContextMenu': {
 					let { x, y, pos, itemGroups } = message;
 					this._openPopup(x, y, pos, itemGroups);
+					return;
+				}
+				case 'toggleContextPane': {
+					let win = Zotero.getMainWindow();
+					win.ZoteroContextPane.togglePane();
+					return;
+				}
+				case 'focusBack': {
+					let win = Zotero.getMainWindow();
+					win.Zotero_Tabs.focusBack();
+					return;
+				}
+				case 'focusForward': {
+					let win = Zotero.getMainWindow();
+					win.Zotero_Tabs.focusForward();
 					return;
 				}
 				case 'return': {

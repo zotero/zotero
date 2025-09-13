@@ -76,6 +76,252 @@ var Zotero_Tabs = new function () {
 	this._history = [];
 	this._focusOptions = {};
 
+	this._loadableTypes = ['reader', 'note'];
+
+	this._hasContextPaneTypes = ['reader', 'note'];
+
+	this._hasNoteContextTypes = ['reader', 'note'];
+
+	this.hasContextPane = function (type) {
+		return this._hasContextPaneTypes.includes(type);
+	};
+
+	this.hasNoteContext = function (type) {
+		return this._hasNoteContextTypes.includes(type);
+	};
+
+	this.tabHooks = {
+		load: {
+			reader: async (tab, tabIndex, options) => {
+				let reader = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
+					tabID: tab.id,
+					title: tab.title,
+					tabIndex,
+					allowDuplicate: true,
+					secondViewState: tab.data.secondViewState,
+					preventJumpback: true
+				});
+				await reader._initPromise;
+			},
+			note: async (tab, tabIndex, options) => {
+				let noteEditor = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
+					tabID: tab.id,
+					title: tab.title,
+					tabIndex,
+					allowDuplicate: true,
+					preventJumpback: true
+				});
+				await noteEditor;
+			}
+		},
+		focus: {
+			library: async () => {
+				let collectionsPane = document.getElementById("zotero-collections-pane");
+				if (collectionsPane.getAttribute("collapsed")) {
+					document.getElementById('zotero-tb-add').focus();
+					return;
+				}
+				document.getElementById('zotero-tb-collection-add').focus();
+			},
+			reader: async (tab) => {
+				let reader = Zotero.Reader.getByTabID(tab.id);
+				if (reader) {
+					// Move focus to the reader and focus the toolbar
+					reader.focusFirst();
+					reader.focusToolbar();
+				}
+			},
+			note: async (tab) => {
+				let noteEditor = Zotero.Notes.getByTabID(tab.id);
+				if (noteEditor) {
+					// Move focus to the note editor and focus the toolbar
+					noteEditor.focusToolbar();
+				}
+			},
+		},
+		refocus: {
+			library: async (tab, tabIndex, options) => {
+				// Move focus to the last focused element of zoteroPane if any or itemTree otherwise
+				if (options.focusElementID) {
+					tab.lastFocusedElement = document.getElementById(options.focusElementID);
+				}
+				// Small delay to make sure the focus does not remain on the actual
+				// tab after mouse click
+				setTimeout(() => {
+					if (tab.lastFocusedElement) {
+						tab.lastFocusedElement.focus();
+					}
+					if (document.activeElement !== tab.lastFocusedElement) {
+						ZoteroPane.itemsView.focus();
+					}
+					tab.lastFocusedElement = null;
+				});
+			},
+			reader: async (tab, _tabIndex, _options) => {
+				let reader = Zotero.Reader.getByTabID(tab.id);
+				if (reader) {
+					reader.focus();
+				}
+			},
+			note: async (tab, _tabIndex, _options) => {
+				let noteEditor = Zotero.Notes.getByTabID(tab.id);
+				if (noteEditor) {
+					noteEditor.focus();
+				}
+			}
+		},
+		moveToNewWindow: {
+			reader: async (tab, _tabIndex) => {
+				Zotero_Tabs.close(tab.id);
+				let { itemID, secondViewState } = tab.data;
+				await Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState });
+			},
+			note: async (tab, _tabIndex) => {
+				Zotero_Tabs.close(tab.id);
+				let { itemID } = tab.data;
+				await Zotero.Notes.open(itemID, null, { openInWindow: true });
+			}
+		},
+		duplicate: {
+			reader: async (tab, tabIndex) => {
+				if (tab.data.itemID) {
+					let { secondViewState } = tab.data;
+					await Zotero.Reader.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true, secondViewState });
+				}
+			},
+			note: async (tab, tabIndex) => {
+				if (tab.data.itemID) {
+					await Zotero.Notes.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true });
+				}
+			}
+		},
+		undoClose: {
+			reader: async (tab, _tabIndex) => {
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					await Zotero.Reader.open(tab.data.itemID,
+						null,
+						{
+							tabIndex: tab.index,
+							openInBackground: true,
+							allowDuplicate: true
+						}
+					);
+					return true;
+				}
+				return false;
+			},
+			note: async (tab, _tabIndex) => {
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					await Zotero.Notes.open(tab.data.itemID,
+						null,
+						{
+							tabIndex: tab.index,
+							openInBackground: true,
+							allowDuplicate: true
+						}
+					);
+					return true;
+				}
+				return false;
+			}
+		},
+		restoreState: {
+			library: async (tab, _tabIndex) => {
+				this.rename('zotero-pane', tab.title);
+				// At first, library tab is added without the icon data. We set it here once we know what it is
+				let libraryTab = this._getTab('zotero-pane');
+				libraryTab.tab.data = tab.data || {};
+				return {
+					itemID: null,
+				};
+			},
+			reader: async (tab, tabIndex) => {
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					// Strip non-printable characters, which can result in DOM syntax errors
+					// ("An invalid or illegal string was specified") -- reproduced with "\u0001"
+					// in a title in session.json
+					let title = tab.title.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+					this.add({
+						type: 'reader-unloaded',
+						title,
+						index: tabIndex,
+						data: tab.data,
+						select: tab.selected
+					});
+					return {
+						itemID: tab.data.itemID,
+					};
+				}
+				return {
+					itemID: null,
+				};
+			},
+			note: async (tab, tabIndex) => {
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					let title = tab.title.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+					this.add({
+						type: 'note-unloaded',
+						title,
+						index: tabIndex,
+						data: tab.data,
+						select: tab.selected
+					});
+					return {
+						itemID: tab.data.itemID,
+					};
+				}
+				return {
+					itemID: null,
+				};
+			}
+		},
+		getTitle: {
+			reader: async (tab) => {
+				let item = Zotero.Items.get(tab.data.itemID);
+				return item ? item.getTabTitle() : "";
+			},
+			note: async (tab) => {
+				let item = Zotero.Items.get(tab.data.itemID);
+				if (!item) {
+					return "";
+				}
+				let title = await item.getTabTitle();
+				if (!title) {
+					return Zotero.getString("item-title-empty-note");
+				}
+				return title;
+			}
+		}
+	};
+
+	this._getHook = function (type, action) {
+		if (this.tabHooks[action] && this.tabHooks[action][type]) {
+			return this.tabHooks[action][type];
+		}
+		return async () => {};
+	};
+
+	this._hasHook = function (type, action) {
+		return !!(this.tabHooks[action] && this.tabHooks[action][type]);
+	};
+
+	this.parseTabType = function (type) {
+		if (!type) {
+			type = this.selectedType;
+		}
+		if (type === 'zotero-pane') {
+			return {
+				tabContentType: 'library',
+				tabState: '',
+			};
+		}
+		let [tabContentType, tabState] = type.split('-');
+		return {
+			tabContentType,
+			tabState
+		};
+	};
+
 	// Keep track of item modifications to update the title
 	this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'tabs');
 
@@ -83,9 +329,7 @@ var Zotero_Tabs = new function () {
 	this._prefsObserverID = Zotero.Prefs.registerObserver('tabs.title.reader', async () => {
 		for (let tab of this._tabs) {
 			if (!tab.data.itemID) continue;
-			let item = Zotero.Items.get(tab.data.itemID);
-			let title = await item.getTabTitle();
-			this.rename(tab.id, title);
+			this.rename(tab.id);
 		}
 	});
 	
@@ -103,6 +347,14 @@ var Zotero_Tabs = new function () {
 		return { tab: this._tabs[tabIndex], tabIndex };
 	};
 
+	this.getTabContent = function (id) {
+		if (!id) {
+			id = this._selectedID;
+		}
+		return document.getElementById(id);
+	};
+
+	// TODO: update this
 	this._update = function () {
 		// Go through all tabs and try to save their icons to tab.data
 		for (let tab of this._tabs) {
@@ -120,18 +372,19 @@ var Zotero_Tabs = new function () {
 					let item = Zotero.Items.get(tab.data.itemID);
 					tab.data.icon = item.getItemTypeIconName(true);
 				}
-				catch (e) {
+				catch {
 					// item might not yet be loaded, we will get the right icon on the next update
 				}
 			}
 		}
 
 		this._tabBarRef.current.setTabs(this._tabs.map((tab) => {
+			let { tabContentType } = this.parseTabType(tab.type);
 			return {
 				id: tab.id,
 				type: tab.type,
 				title: tab.title,
-				renderTitle: tab.type === 'reader' || tab.type === 'reader-unloaded',
+				renderTitle: tabContentType === 'reader',
 				selected: tab.id == this._selectedID,
 				isItemType: tab.id !== 'zotero-pane',
 				icon: tab.data?.icon || null
@@ -157,9 +410,9 @@ var Zotero_Tabs = new function () {
 		return tab && tab.id;
 	};
 
-	this.setSecondViewState = function (tabID, state) {
+	this.setTabData = function (tabID, data) {
 		let { tab } = this._getTab(tabID);
-		tab.data.secondViewState = state;
+		Object.assign(tab.data, data);
 		Zotero.Session.debounceSave();
 	};
 
@@ -171,7 +424,7 @@ var Zotero_Tabs = new function () {
 				onTabMove={this.move.bind(this)}
 				onTabClose={this.close.bind(this)}
 				onContextMenu={this._openMenu.bind(this)}
-				refocusReader={this.refocusReader.bind(this)}
+				onRefocus={this.refocus.bind(this)}
 				onLoad={this._update.bind(this)}
 			/>
 		);
@@ -182,16 +435,23 @@ var Zotero_Tabs = new function () {
 		if (event !== "modify") return;
 		for (let id of ids) {
 			let item = Zotero.Items.get(id);
-			// If a top-level item is updated, update all tabs that have its attachments
+			// If a top-level item is updated, update all tabs that have its attachments and notes
 			// Otherwise, just update the tab with the updated attachment
-			let attachmentIDs = item.isAttachment() ? [id] : item.getAttachments();
-			for (let attachmentID of attachmentIDs) {
-				let attachment = Zotero.Items.get(attachmentID);
-				let relevantTabs = this._tabs.filter(tab => tab.data.itemID == attachmentID);
+			let itemIDs = [];
+			if (item.isAttachment() || item.isNote()) {
+				itemIDs.push(id);
+			}
+			else if (item.isRegularItem()) {
+				itemIDs.push(
+					...item.getAttachments(),
+					...item.getNotes()
+				);
+			}
+			for (let itemID of itemIDs) {
+				let relevantTabs = this._tabs.filter(tab => tab.data.itemID == itemID);
 				if (!relevantTabs.length) continue;
 				for (let tab of relevantTabs) {
-					let title = await attachment.getTabTitle();
-					this.rename(tab.id, title);
+					this.rename(tab.id);
 				}
 			}
 		}
@@ -200,8 +460,9 @@ var Zotero_Tabs = new function () {
 	this.getState = function () {
 		return this._tabs.map((tab) => {
 			let type = tab.type;
-			if (type === 'reader-unloaded') {
-				type = 'reader';
+			// If type matches *-unloaded, use the base type
+			if (type.endsWith('-unloaded')) {
+				type = type.replace(/-unloaded$/, '');
 			}
 			var o = {
 				type,
@@ -222,27 +483,11 @@ var Zotero_Tabs = new function () {
 		let itemIDs = [];
 		for (let i = 0; i < tabs.length; i++) {
 			let tab = tabs[i];
-			if (tab.type === 'library') {
-				this.rename('zotero-pane', tab.title);
-				// At first, library tab is added without the icon data. We set it here once we know what it is
-				let libraryTab = this._getTab('zotero-pane');
-				libraryTab.tab.data = tab.data || {};
-			}
-			else if (tab.type === 'reader') {
-				if (Zotero.Items.exists(tab.data.itemID)) {
-					// Strip non-printable characters, which can result in DOM syntax errors
-					// ("An invalid or illegal string was specified") -- reproduced with "\u0001"
-					// in a title in session.json
-					let title = tab.title.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-					this.add({
-						type: 'reader-unloaded',
-						title,
-						index: i,
-						data: tab.data,
-						select: tab.selected
-					});
-					itemIDs.push(tab.data.itemID);
-				}
+			let { tabContentType } = this.parseTabType(tab.type);
+			let restoreStateHook = this._getHook(tabContentType, 'restoreState');
+			let { itemID } = await restoreStateHook(tab, i);
+			if (itemID) {
+				itemIDs.push(itemID);
 			}
 		}
 		// Unset the previously selected tab id, because it was set when restoring tabs
@@ -258,7 +503,7 @@ var Zotero_Tabs = new function () {
 	 * Add a new tab
 	 *
 	 * @param {String} type
-	 * @param {String} title
+	 * @param {String} [title] - Tab title. If empty and data.itemID is set, the title will be fetched automatically
 	 * @param {String} data - Extra data about the tab to pass to notifier and session
 	 * @param {Integer} index
 	 * @param {Boolean} select
@@ -268,8 +513,11 @@ var Zotero_Tabs = new function () {
 	this.add = function ({ id, type, data, title, index, select, onClose, preventJumpback }) {
 		if (typeof type != 'string') {
 		}
-		if (typeof title != 'string') {
-			throw new Error(`'title' should be a string (was ${typeof title})`);
+		if (title && typeof title != 'string') {
+			throw new Error(`'title' should be string or undefined (was ${typeof title})`);
+		}
+		if (!title) {
+			title = "";
 		}
 		if (index !== undefined && (!Number.isInteger(index) || index < 1)) {
 			throw new Error(`'index' should be an integer > 0 (was ${index} (${typeof index})`);
@@ -278,7 +526,7 @@ var Zotero_Tabs = new function () {
 			throw new Error(`'onClose' should be a function (was ${typeof onClose})`);
 		}
 		id = id || 'tab-' + Zotero.Utilities.randomString();
-		var container = document.createXULElement('vbox');
+		var container = document.createXULElement('tab-content');
 		container.id = id;
 		this.deck.appendChild(container);
 		var tab = { id, type, title, data, onClose };
@@ -293,15 +541,9 @@ var Zotero_Tabs = new function () {
 				this._prevSelectedID = previousID;
 			}
 		}
-		// When a new tab is opened synchronously by ReaderTab constructor, the title is empty.
-		// However, { id, container } needs to return immediately, so do not wait for the new title
-		// and construct it in async manner below.
 		if (!title && data.itemID) {
-			(async () => {
-				let item = Zotero.Items.get(data.itemID);
-				title = await item.getTabTitle();
-				this.rename(tab.id, title);
-			})();
+			// Not awaited as the id and container should be returned synchronously
+			this.rename(tab.id);
 		}
 		return { id, container };
 	};
@@ -312,14 +554,21 @@ var Zotero_Tabs = new function () {
 	 * @param {String} id
 	 * @param {String} title
 	 */
-	this.rename = function (id, title) {
-		if (typeof title != 'string') {
-			throw new Error(`'title' should be a string (was ${typeof title})`);
+	this.rename = async function (id, title) {
+		if (title && typeof title != 'string') {
+			throw new Error(`'title' should be string or undefined (was ${typeof title})`);
 		}
-		var { tab } = this._getTab(id);
+		let { tab } = this._getTab(id);
 		if (!tab) {
 			return;
 		}
+		if (!title) {
+			let { tabContentType } = this.parseTabType(tab.type);
+			if (this._hasHook(tabContentType, 'getTitle')) {
+				title = await this._getHook(tabContentType, 'getTitle')(tab);
+			}
+		}
+
 		tab.title = title;
 		this._update();
 	};
@@ -366,7 +615,7 @@ var Zotero_Tabs = new function () {
 			if (tab.onClose) {
 				tab.onClose();
 			}
-			historyEntry.push({ index: tmpTabs.indexOf(tab), data: tab.data });
+			historyEntry.push({ index: tmpTabs.indexOf(tab), data: tab.data, type: tab.type });
 			closedIDs.push(id);
 
 			setTimeout(() => {
@@ -399,19 +648,14 @@ var Zotero_Tabs = new function () {
 			let maxIndex = -1;
 			let openPromises = [];
 			for (let tab of historyEntry) {
-				if (Zotero.Items.exists(tab.data.itemID)) {
-					openPromises.push(Zotero.Reader.open(tab.data.itemID,
-						null,
-						{
-							tabIndex: tab.index,
-							openInBackground: true,
-							allowDuplicate: true
+				let { tabContentType } = this.parseTabType(tab.type);
+				let undoCloseHook = this._getHook(tabContentType, 'undoClose');
+				openPromises.push(undoCloseHook({ data: tab.data }, tab.index)
+					.then((opened) => {
+						if (opened && tab.index > maxIndex) {
+							maxIndex = tab.index;
 						}
-					));
-					if (tab.index > maxIndex) {
-						maxIndex = tab.index;
-					}
-				}
+					}));
 			}
 			await Promise.all(openPromises);
 			// Select last reopened tab
@@ -453,39 +697,15 @@ var Zotero_Tabs = new function () {
 	 * @param {Boolean} reopening
 	 */
 	this.select = function (id, reopening, options = {}) {
-		var { tab, tabIndex } = this._getTab(id);
-		// Move focus to the last focused element of zoteroPane if any or itemTree otherwise
-		let focusZoteroPane = () => {
-			if (tab.id !== 'zotero-pane') return;
-			if (options.focusElementID) {
-				tab.lastFocusedElement = document.getElementById(options.focusElementID);
-			}
-			// Small delay to make sure the focus does not remain on the actual
-			// tab after mouse click
-			setTimeout(() => {
-				if (this.tabsMenuPanel.visible) {
-					this.tabsMenuPanel.resetFocus();
-				}
-				else if (tab.lastFocusedElement) {
-					tab.lastFocusedElement.focus();
-				}
-				else if (document.activeElement !== tab.lastFocusedElement) {
-					ZoteroPane_Local.itemsView.focus();
-				}
-				tab.lastFocusedElement = null;
-			});
-		};
+		let { tab, tabIndex } = this._getTab(id);
+		let { tabContentType, tabState } = this.parseTabType(tab.type);
+
 		if (!tab || tab.id === this._selectedID) {
 			// Focus on reader or zotero pane when keepTabFocused is explicitly false
 			// E.g. when a tab is selected via Space or Enter
 			if (options.keepTabFocused === false && tab?.id === this._selectedID) {
-				var reader = Zotero.Reader.getByTabID(this._selectedID);
-				if (reader) {
-					reader.focus();
-				}
-				if (tab.id == 'zotero-pane') {
-					focusZoteroPane();
-				}
+				let focusHook = this._getHook(tabContentType, 'focus');
+				focusHook(tab, tabIndex, options);
 			}
 			return;
 		}
@@ -525,32 +745,29 @@ var Zotero_Tabs = new function () {
 			// never return focus to another tab or <window>
 			selectedTab.lastFocusedElement = document.activeElement;
 		}
-		if (tab.type === 'reader-unloaded') {
-			tab.type = "reader-loading";
+
+		if (tabState === 'unloaded') {
+			tab.type = `${tabContentType}-loading`;
 			// Make sure the loading message is displayed first.
 			// Then, open reader and hide the loading message once it has loaded.
 			ZoteroContextPane.showLoadingMessage(true);
-			let hideMessageWhenReaderLoaded = async () => {
-				let reader = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
-					tabID: tab.id,
-					title: tab.title,
-					tabIndex,
-					allowDuplicate: true,
-					secondViewState: tab.data.secondViewState,
-					preventJumpback: true
-				});
-				await reader._initPromise;
+			let loadHook = this._getHook(tabContentType, 'load');
+			loadHook(tab, tabIndex, options).then(() => {
 				ZoteroContextPane.showLoadingMessage(false);
-			};
-			hideMessageWhenReaderLoaded();
+				this.markAsLoaded(tab.id);
+			});
 		}
+		// Notify previously selected tab content about selection change
+		this.getTabContent(this._selectedID)?.onTabSelectionChanged(false);
+
 		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
 		Zotero.Notifier.trigger('select', 'tab', [tab.id], { [tab.id]: { type: tab.type } }, true);
-		if (tab.id === 'zotero-pane' && (options.keepTabFocused !== true)) {
-			focusZoteroPane();
+		if (options.keepTabFocused !== true) {
+			let focusHook = this._getHook(tabContentType, 'focus');
+			focusHook(tab, tabIndex, options);
 		}
 		let tabNode = document.querySelector(`#tab-bar-container .tab[data-id="${tab.id}"]`);
 		if (this._focusOptions.keepTabFocused && document.activeElement.getAttribute('data-id') != tabNode.getAttribute('data-id')) {
@@ -569,17 +786,20 @@ var Zotero_Tabs = new function () {
 		// tabs deck selection index bigger than the deck children count. It feels like something
 		// isn't update synchronously
 		setTimeout(() => this.unloadUnusedTabs());
+
+		// Notify tab content about selection change
+		this.getTabContent(this._selectedID)?.onTabSelectionChanged(true);
 	};
 
 	this.unload = function (id) {
 		var { tab, tabIndex } = this._getTab(id);
-		if (!tab || tab.id === this._selectedID || tab.type !== 'reader') {
+		if (!tab || tab.id === this._selectedID || !this._loadableTypes.includes(tab.type)) {
 			return;
 		}
 		this.close(tab.id);
 		this.add({
 			id: tab.id,
-			type: 'reader-unloaded',
+			type: `${tab.type}-unloaded`,
 			title: tab.title,
 			index: tabIndex,
 			data: tab.data
@@ -589,9 +809,13 @@ var Zotero_Tabs = new function () {
 	// Mark a tab as loaded
 	this.markAsLoaded = function (id) {
 		let { tab } = this._getTab(id);
-		if (!tab || tab.type == "reader") return;
+		if (!tab) return;
+		let { tabContentType, tabState } = this.parseTabType(tab.type);
+		if (tabState !== 'loading') {
+			return;
+		}
 		let prevType = tab.type;
-		tab.type = "reader";
+		tab.type = tabContentType;
 		Zotero.Notifier.trigger("load", "tab", [id], { [id]: Object.assign({}, tab, { prevType }) }, true);
 	};
 
@@ -601,6 +825,7 @@ var Zotero_Tabs = new function () {
 				this.unload(tab.id);
 			}
 		}
+		// TODO: also unload note tabs
 		let tabs = this._tabs.slice().filter(x => x.type === 'reader');
 		tabs.sort((a, b) => b.timeUnselected - a.timeUnselected);
 		tabs = tabs.slice(MAX_LOADED_TABS);
@@ -633,15 +858,49 @@ var Zotero_Tabs = new function () {
 	};
 
 	/**
-	 * Return focus into the reader of the selected tab.
-	 * Required to move focus from the tab into the reader after drag.
+	 * Return focus into the content of the selected tab.
+	 * Required to move focus from the tab into the content after drag.
 	 */
-	this.refocusReader = function () {
-		var reader = Zotero.Reader.getByTabID(this._selectedID);
-		if (!reader) return;
-		setTimeout(() => {
-			reader.focus();
-		});
+	this.refocus = function (id) {
+		if (!id) id = this._selectedID;
+		let { tab, tabIndex } = this._getTab(id);
+		if (!tab) return;
+		let { tabContentType } = this.parseTabType(tab.type);
+		let refocusHook = this._getHook(tabContentType, 'refocus');
+		refocusHook(tab, tabIndex, this._focusOptions);
+	};
+
+	/**
+	 * Move focus into the first element in content of the selected tab.
+	 * Required to move focus from the outside into the tab content.
+	 */
+	this.focusContent = function (id) {
+		if (!id) id = this._selectedID;
+		let { tab, tabIndex } = this._getTab(id);
+		if (!tab) return;
+		let { tabContentType } = this.parseTabType(tab.type);
+		let focusHook = this._getHook(tabContentType, 'focus');
+		focusHook(tab, tabIndex);
+	};
+
+	/**
+	 * Move focus back from the tab content,
+	 * e.g. shift-tab from the first focusable element.
+	 */
+	this.focusBack = function () {
+		document.getElementById("zotero-tb-sync").focus();
+	};
+
+	/**
+	 * Move focus to the next focusable element after the tab content,
+	 * e.g. tab from the last focusable element.
+	 */
+	this.focusForward = function () {
+		let focused = ZoteroContextPane.focus();
+		// If context pane wasn't focused (e.g. it's collapsed), focus the tab bar
+		if (!focused) {
+			this.moveFocus("current");
+		}
 	};
 
 	/**
@@ -697,7 +956,7 @@ var Zotero_Tabs = new function () {
 			}
 		}
 	};
-	
+
 	/**
 	 * Jump to the tab at a particular index. If the index points beyond the array, jump to the last
 	 * tab.
@@ -709,7 +968,8 @@ var Zotero_Tabs = new function () {
 	};
 
 	this._openMenu = function (x, y, id) {
-		var { tab, tabIndex } = this._getTab(id);
+		let { tab, tabIndex } = this._getTab(id);
+		let { tabContentType } = this.parseTabType(tab.type);
 		let menuitem;
 		let popup = document.createXULElement('menupopup');
 		document.querySelector('popupset').appendChild(popup);
@@ -754,30 +1014,26 @@ var Zotero_Tabs = new function () {
 				this.move(id, this._tabs.length);
 			});
 			menupopup.appendChild(menuitem);
-
-			if (tab.type === 'reader' || tab.type === 'reader-unloaded') {
-				// Move to new window
+			// Move to new window
+			if (this._hasHook(tabContentType, 'moveToNewWindow')) {
 				menuitem = document.createXULElement('menuitem');
 				menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
 				menuitem.setAttribute('disabled', false);
 				menuitem.addEventListener('command', () => {
-					let { tab } = this._getTab(id);
-					if (tab && (tab.type === 'reader' || tab.type === 'reader-unloaded')) {
-						this.close(id);
-						let { itemID, secondViewState } = tab.data;
-						Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState });
-					}
+					let { tabContentType } = this.parseTabType(tab.type);
+					let moveHook = this._getHook(tabContentType, 'moveToNewWindow');
+					moveHook(tab, tabIndex);
 				});
 				menupopup.appendChild(menuitem);
-				// Duplicate tab
+			}
+			// Duplicate tab
+			if (this._hasHook(tabContentType, 'duplicate')) {
 				menuitem = document.createXULElement('menuitem');
 				menuitem.setAttribute('label', Zotero.getString('tabs.duplicate'));
 				menuitem.addEventListener('command', () => {
-					if (tab.data.itemID) {
-						tabIndex++;
-						let { secondViewState } = tab.data;
-						Zotero.Reader.open(tab.data.itemID, null, { tabIndex, allowDuplicate: true, secondViewState });
-					}
+					let { tabContentType } = this.parseTabType(tab.type);
+					let duplicateHook = this._getHook(tabContentType, 'duplicate');
+					duplicateHook(tab, tabIndex);
 				});
 				popup.appendChild(menuitem);
 			}
@@ -803,7 +1059,7 @@ var Zotero_Tabs = new function () {
 			popup.appendChild(menuitem);
 		}
 		// Undo close
-		if (['reader', 'reader-unloaded'].includes(tab.type)) {
+		if (this._hasHook(tabContentType, 'undoClose')) {
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute(
 				'label',
