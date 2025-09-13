@@ -2230,6 +2230,10 @@ var ZoteroPane = new function () {
 			&& selected.some(item => item.isAnnotation())) {
 			return collectionTreeRow.isTrash();
 		}
+		// External annotations cannot be deleted (unless their parent item is deleted )
+		if (selected.every(item => item.isAnnotation() && item.annotationIsExternal)) {
+			return false;
+		}
 		return true;
 	};
 
@@ -5898,12 +5902,14 @@ var ZoteroPane = new function () {
 	 *
 	 * Selected items must all have the same top-level item
 	 */
-	this.addNoteFromAnnotationsFromSelected = async function () {
+	this.addNoteFromAnnotationsFromSelected = async function (items = null) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		var items = this.getSelectedItems();
+		if (!items) {
+			items = this.getSelectedItems();
+		}
 		var topLevelItems = [...new Set(Zotero.Items.getTopLevel(items))];
 		if (topLevelItems.length > 1) {
 			throw new Error("Can't create child attachment from different top-level items");
@@ -6010,12 +6016,14 @@ var ZoteroPane = new function () {
 	};
 	
 	
-	this.createStandaloneNoteFromAnnotationsFromSelected = async function () {
+	this.createStandaloneNoteFromAnnotationsFromSelected = async function (items = null) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		var items = this.getSelectedItems();
+		if (!items) {
+			items = this.getSelectedItems();
+		}
 		
 		// Ignore selected top-level items if any descendant items are also selected
 		var topLevelOfSelectedDescendants = new Set();
