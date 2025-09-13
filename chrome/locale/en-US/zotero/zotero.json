@@ -1,4 +1,7 @@
 {
+	"general-sentence-separator": {
+		"string": " "
+	},
 	"general-key-control": {
 		"string": "Control"
 	},
@@ -16,6 +19,9 @@
 	},
 	"return-or-enter": {
 		"string": "{PLATFORM(), select, macos {Return} other {Enter}}"
+	},
+	"delete-or-backspace": {
+		"string": "{PLATFORM(), select, macos {Delete} other {Backspace}}"
 	},
 	"general-print": {
 		"string": "Print"
@@ -38,6 +44,9 @@
 	"general-open-settings": {
 		"string": "Open Settings"
 	},
+	"general-settings": {
+		"string": "Settings…"
+	},
 	"general-help": {
 		"string": "Help"
 	},
@@ -53,11 +62,119 @@
 	"general-go-back": {
 		"string": "Go Back"
 	},
+	"general-accept": {
+		"string": "Accept"
+	},
+	"general-cancel": {
+		"string": "Cancel"
+	},
+	"general-show-in-library": {
+		"string": "Show in Library"
+	},
+	"general-restartApp": {
+		"string": "Restart { app-name }"
+	},
+	"general-restartInTroubleshootingMode": {
+		"string": "Restart in Troubleshooting Mode"
+	},
+	"general-save": {
+		"string": "Save"
+	},
+	"general-clear": {
+		"string": "Clear"
+	},
+	"general-update": {
+		"string": "Update"
+	},
+	"general-back": {
+		"string": "Back"
+	},
+	"general-edit": {
+		"string": "Edit"
+	},
+	"general-cut": {
+		"string": "Cut"
+	},
+	"general-copy": {
+		"string": "Copy"
+	},
+	"general-paste": {
+		"string": "Paste"
+	},
+	"general-find": {
+		"string": "Find"
+	},
+	"general-delete": {
+		"string": "Delete"
+	},
+	"general-insert": {
+		"string": "Insert"
+	},
+	"general-and": {
+		"string": "and"
+	},
+	"general-et-al": {
+		"string": "et al."
+	},
+	"general-previous": {
+		"string": "Previous"
+	},
+	"general-next": {
+		"string": "Next"
+	},
+	"general-learn-more": {
+		"string": "Learn More"
+	},
+	"general-warning": {
+		"string": "Warning"
+	},
+	"general-type-to-continue": {
+		"string": "Type “{ text }” to continue."
+	},
+	"general-red": {
+		"string": "Red"
+	},
+	"general-orange": {
+		"string": "Orange"
+	},
+	"general-yellow": {
+		"string": "Yellow"
+	},
+	"general-green": {
+		"string": "Green"
+	},
+	"general-teal": {
+		"string": "Teal"
+	},
+	"general-blue": {
+		"string": "Blue"
+	},
+	"general-purple": {
+		"string": "Purple"
+	},
+	"general-magenta": {
+		"string": "Magenta"
+	},
+	"general-violet": {
+		"string": "Violet"
+	},
+	"general-maroon": {
+		"string": "Maroon"
+	},
+	"general-gray": {
+		"string": "Gray"
+	},
+	"general-black": {
+		"string": "Black"
+	},
 	"citation-style-label": {
 		"string": "Citation Style:"
 	},
 	"language-label": {
 		"string": "Language:"
+	},
+	"menu-custom-group-submenu.label": {
+		"string": "More Options…"
 	},
 	"menu-file-show-in-finder.label": {
 		"string": "Show in Finder"
@@ -116,6 +233,18 @@
 	"menu-view-columns-move-right.label": {
 		"string": "Move Column Right"
 	},
+	"menu-show-tabs-menu.label": {
+		"string": "Show Tabs Menu"
+	},
+	"menu-edit-copy-annotation.label": {
+		"string": "{count, plural, one {Copy Annotation} other {Copy { count } Annotations}}"
+	},
+	"main-window-command.label": {
+		"string": "Library"
+	},
+	"main-window-key.key": {
+		"string": "L"
+	},
 	"zotero-toolbar-tabs-menu.tooltiptext": {
 		"string": "List all tabs"
 	},
@@ -127,6 +256,12 @@
 	},
 	"zotero-tabs-menu-close-button.title": {
 		"string": "Close Tab"
+	},
+	"zotero-toolbar-tabs-scroll-forwards.title": {
+		"string": "Scroll forwards"
+	},
+	"zotero-toolbar-tabs-scroll-backwards.title": {
+		"string": "Scroll backwards"
 	},
 	"collections-menu-rename-collection.label": {
 		"string": "Rename Collection"
@@ -163,6 +298,9 @@
 	},
 	"item-menu-change-parent-item.label": {
 		"string": "Change Parent Item…"
+	},
+	"item-menu-relate-items.label": {
+		"string": "Relate Items"
 	},
 	"view-online": {
 		"string": "View Online"
@@ -368,6 +506,9 @@
 	"runJS-run": {
 		"string": "Run"
 	},
+	"runJS-completed": {
+		"string": "completed successfully"
+	},
 	"runJS-result": {
 		"string": "{type, select, async {Return value:} other {Result:}}"
 	},
@@ -410,36 +551,6 @@
 	"bibliography-manageStyles-label": {
 		"string": "Manage Styles…"
 	},
-	"integration-docPrefs-window.title": {
-		"string": "{ app-name } - Document Preferences"
-	},
-	"integration-addEditCitation-window.title": {
-		"string": "{ app-name } - Add/Edit Citation"
-	},
-	"integration-editBibliography-window.title": {
-		"string": "{ app-name } - Edit Bibliography"
-	},
-	"integration-editBibliography-editor.aria-label": {
-		"string": "Edit reference"
-	},
-	"-integration-editBibliography-include-uncited": {
-		"string": "To include an uncited item in your bibliography, select it from the items list and press { general-add }."
-	},
-	"-integration-editBibliography-exclude-cited": {
-		"string": "You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }."
-	},
-	"-integration-editBibliography-edit-reference": {
-		"string": "To change how a reference is formatted, use the text editor."
-	},
-	"integration-editBibliography-wrapper.aria-label": {
-		"string": "Edit Bibliography dialog"
-	},
-	"integration-editBibliography-wrapper.aria-description": {
-		"string": "{ integration-editBibliography-include-uncited }\n{ integration-editBibliography-exclude-cited }\n{ integration-editBibliography-edit-reference }"
-	},
-	"integration-quickFormatDialog-window.title": {
-		"string": "{ app-name } - Quick Format Citation"
-	},
 	"styleEditor-locatorType.aria-label": {
 		"string": "Locator type"
 	},
@@ -451,45 +562,6 @@
 	},
 	"styleEditor-preview.aria-label": {
 		"string": "Preview"
-	},
-	"integration-prefs-displayAs-label": {
-		"string": "Display Citations As:"
-	},
-	"integration-prefs-footnotes.label": {
-		"string": "Footnotes"
-	},
-	"integration-prefs-endnotes.label": {
-		"string": "Endnotes"
-	},
-	"integration-prefs-bookmarks.label": {
-		"string": "Store citation as bookmarks"
-	},
-	"integration-prefs-bookmarks-description": {
-		"string": "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes."
-	},
-	"integration-prefs-bookmarks-formatNotice": {
-		"string": "{show, select, true {The document must be saved as .doc or .docx.} other {}}"
-	},
-	"integration-prefs-automaticCitationUpdates.label": {
-		"string": "Automatically update citations"
-	},
-	"integration-prefs-automaticCitationUpdates.tooltip": {
-		"string": "Citations with pending updates will be highlighted in the document"
-	},
-	"integration-prefs-automaticCitationUpdates-description": {
-		"string": "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually."
-	},
-	"integration-prefs-automaticJournalAbbeviations.label": {
-		"string": "Use MEDLINE journal abbreviations"
-	},
-	"integration-prefs-automaticJournalAbbeviations-description": {
-		"string": "The “Journal Abbr” field will be ignored."
-	},
-	"integration-prefs-exportDocument.label": {
-		"string": "Switch to a Different Word Processor…"
-	},
-	"integration-error-unable-to-find-winword": {
-		"string": "{ app-name } could not find a running Word instance."
 	},
 	"publications-intro-page": {
 		"string": "My Publications"
@@ -608,9 +680,6 @@
 	"restart-in-troubleshooting-mode-menuitem.accesskey": {
 		"string": "T"
 	},
-	"restart-in-troubleshooting-mode-dialog-title": {
-		"string": "Restart in Troubleshooting Mode"
-	},
 	"restart-in-troubleshooting-mode-dialog-description": {
 		"string": "{ app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled."
 	},
@@ -665,6 +734,9 @@
 	"section-attachments-annotations.label": {
 		"string": "{count, plural, one {{ count } Annotation} other {{ count } Annotations}}"
 	},
+	"section-attachments-move-to-trash-message": {
+		"string": "Are you sure you want to move “{ title }” to the trash?"
+	},
 	"section-notes.label": {
 		"string": "{count, plural, one {{ count } Note} other {{ count } Notes}}"
 	},
@@ -688,6 +760,21 @@
 	},
 	"annotations-count": {
 		"string": "{count, plural, one {{ count } Annotation} other {{ count } Annotations}}"
+	},
+	"sidenav-reorder-up.label": {
+		"string": "Move Section Up"
+	},
+	"sidenav-reorder-down.label": {
+		"string": "Move Section Down"
+	},
+	"sidenav-reorder-reset.label": {
+		"string": "Reset Section Order"
+	},
+	"toggle-item-pane.tooltiptext": {
+		"string": "Toggle Item Pane"
+	},
+	"toggle-context-pane.tooltiptext": {
+		"string": "Toggle Context Pane"
 	},
 	"pin-section.label": {
 		"string": "Pin Section"
@@ -725,6 +812,9 @@
 	"new-collection-create-in": {
 		"string": "Create in:"
 	},
+	"show-publications-menuitem.label": {
+		"string": "Show My Publications"
+	},
 	"attachment-info-title": {
 		"string": "Title"
 	},
@@ -752,38 +842,41 @@
 	"attachment-preview-placeholder": {
 		"string": "No attachment to preview"
 	},
+	"attachment-rename-from-parent.tooltiptext": {
+		"string": "Rename File to Match Parent Item"
+	},
+	"file-renaming-auto-rename-prompt-title": {
+		"string": "Renaming Settings Changed"
+	},
+	"file-renaming-auto-rename-prompt-body": {
+		"string": "Would you like to rename existing files in your library to match the new settings?"
+	},
+	"file-renaming-auto-rename-prompt-yes": {
+		"string": "Preview Changes…"
+	},
+	"file-renaming-auto-rename-prompt-no": {
+		"string": "Keep Existing Filenames"
+	},
+	"rename-files-preview.buttonlabelaccept": {
+		"string": "Rename Files"
+	},
+	"rename-files-preview-loading": {
+		"string": "Loading…"
+	},
+	"rename-files-preview-intro": {
+		"string": "{ app-name } will rename the following files in your library to match their parent items:"
+	},
+	"rename-files-preview-renaming": {
+		"string": "Renaming…"
+	},
+	"rename-files-preview-no-files": {
+		"string": "All filenames already match parent items. No changes are required."
+	},
 	"toggle-preview.label": {
 		"string": "{type, select, open {Hide} collapsed {Show} unknown {Toggle}} Attachment Preview"
 	},
-	"quickformat-general-instructions": {
-		"string": "Use Left/Right Arrow to navigate the items of this citation. {dialogMenu, select, active {Press Shift-Tab to focus the dialog's menu.} other {}} Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog."
-	},
-	"quickformat-aria-bubble": {
-		"string": "This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }"
-	},
-	"quickformat-aria-input": {
-		"string": "Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }"
-	},
-	"quickformat-aria-item": {
-		"string": "Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field."
-	},
-	"quickformat-accept.tooltiptext": {
-		"string": "Save edits to this citation"
-	},
-	"quickformat-locator-type.aria-label": {
-		"string": "Locator type"
-	},
-	"quickformat-locator-value": {
-		"string": "Locator"
-	},
-	"quickformat-citation-options.tooltiptext": {
-		"string": "Show citation options"
-	},
-	"insert-note-aria-input": {
-		"string": "Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog."
-	},
-	"insert-note-aria-item": {
-		"string": "Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog."
+	"annotation-image-not-available": {
+		"string": "[Image not available]"
 	},
 	"quicksearch-mode.aria-label": {
 		"string": "Quick Search mode"
@@ -845,9 +938,6 @@
 	"architecture-x64-on-arm64-action": {
 		"string": "Download { app-name } for ARM64"
 	},
-	"first-run-guidance-quickFormat": {
-		"string": "Type a title, author, and/or year to search for a reference.\n\nAfter you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.\n\nYou can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }."
-	},
 	"first-run-guidance-authorMenu": {
 		"string": "{ app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu."
 	},
@@ -862,6 +952,9 @@
 	},
 	"find-pdf-files-added": {
 		"string": "{count, plural, one {{ count } file added} other {{ count } files added}}"
+	},
+	"select-items-window.title": {
+		"string": "Select Items"
 	},
 	"select-items-dialog.buttonlabelaccept": {
 		"string": "Select"
@@ -914,6 +1007,21 @@
 	"mac-word-plugin-install-action-button.label": {
 		"string": "Install Word plugin"
 	},
+	"file-renaming-banner-message": {
+		"string": "{ app-name } now automatically keeps attachment filenames in sync as you make changes to items."
+	},
+	"connector-version-warning": {
+		"string": "The { app-name } Connector must be updated to work with this version of { app-name }."
+	},
+	"userjs-pref-warning": {
+		"string": "Some { app-name } settings have been overridden using an unsupported method. { app-name } will revert them and restart."
+	},
+	"long-tag-fixer-window-title.title": {
+		"string": "Split Tags"
+	},
+	"long-tag-fixer-button-dont-split.label": {
+		"string": "Don’t Split"
+	},
 	"preferences-window.title": {
 		"string": "{ app-name } Settings"
 	},
@@ -927,16 +1035,19 @@
 		"string": "File Renaming"
 	},
 	"preferences-file-renaming-intro": {
-		"string": "{ app-name } automatically renames downloaded files based on the details of the parent item (title, author, etc.). You can choose to rename files added from your computer as well."
+		"string": "{ app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item."
 	},
 	"preferences-file-renaming-auto-rename-files.label": {
-		"string": "Automatically rename locally added files"
+		"string": "Automatically rename files"
 	},
 	"preferences-file-renaming-file-types": {
 		"string": "Rename files of these types:"
 	},
 	"preferences-file-renaming-customize-button.label": {
 		"string": "Customize Filename Format…"
+	},
+	"preferences-file-renaming-rename-now.label": {
+		"string": "Rename Files…"
 	},
 	"preferences-file-renaming-format-title": {
 		"string": "Filename Format"
@@ -967,6 +1078,9 @@
 	},
 	"preferences-reader-open-in-new-window.label": {
 		"string": "Open files in new windows instead of tabs"
+	},
+	"preferences-reader-auto-disable-tool.label": {
+		"string": "Turn off note, text, and image annotation tools after each use"
 	},
 	"preferences-reader-ebook-font": {
 		"string": "Ebook font:"
@@ -1007,11 +1121,38 @@
 	"preferences-locate-base-url": {
 		"string": "Base URL:"
 	},
-	"preferences-styleManager-delete-button.tooltiptext": {
-		"string": "Delete the selected style"
+	"preferences-styleManager-intro": {
+		"string": "{ app-name } can generate citations and bibliographies in over 10,000 citation styles. Add styles here to make them available when selecting styles throughout { app-name }."
 	},
-	"preferences-styleManager-add-button.tooltiptext": {
+	"preferences-styleManager-get-additional-styles.label": {
+		"string": "Get Additional Styles…"
+	},
+	"preferences-styleManager-restore-default.label": {
+		"string": "Restore Default Styles…"
+	},
+	"preferences-styleManager-add-from-file.tooltiptext": {
 		"string": "Add a style from a file"
+	},
+	"preferences-styleManager-add-from-file.label": {
+		"string": "Add from File…"
+	},
+	"preferences-styleManager-remove": {
+		"string": "Press { delete-or-backspace } to remove this style."
+	},
+	"preferences-citation-dialog": {
+		"string": "Citation Dialog"
+	},
+	"preferences-citation-dialog-mode": {
+		"string": "Citation Dialog Mode:"
+	},
+	"preferences-citation-dialog-mode-last-used.label": {
+		"string": "Last Used"
+	},
+	"preferences-citation-dialog-mode-list.label": {
+		"string": "List Mode"
+	},
+	"preferences-citation-dialog-mode-library.label": {
+		"string": "Library Mode"
 	},
 	"preferences-advanced-enable-local-api.label": {
 		"string": "Allow other applications on this computer to communicate with { app-name }"
@@ -1043,91 +1184,787 @@
 	"preferences-advanced-default-data-dir.aria-label": {
 		"string": "Default location"
 	},
+	"preferences-sync-reset-restore-to-server-body": {
+		"string": "{ app-name } will replace “{ libraryName }” on { domain } with data from this computer."
+	},
+	"preferences-sync-reset-restore-to-server-deleted-items-text": {
+		"string": "{ remoteItemsDeletedCount } {remoteItemsDeletedCount, plural, one {item} other {items}} in the online library will be permanently deleted."
+	},
+	"preferences-sync-reset-restore-to-server-remaining-items-text": {
+		"string": "{ general-sentence-separator }{localItemsCount, plural, =0 {The library on this computer and the online library will be empty.} one {1 item will remain on this computer and in the online library.} other {{ localItemsCount } items will remain on this computer and in the online library.}}"
+	},
+	"preferences-sync-reset-restore-to-server-checkbox-label": {
+		"string": "{remoteItemsDeletedCount, plural, one {Delete 1 item} other {Delete { remoteItemsDeletedCount } items}}"
+	},
+	"preferences-sync-reset-restore-to-server-confirmation-text": {
+		"string": "delete online library"
+	},
+	"preferences-sync-reset-restore-to-server-yes": {
+		"string": "Replace Data in Online Library"
+	},
 	"scaffold-translator-output.aria-label": {
 		"string": "Console"
 	},
-	"pdfReader-underlineText": {
-		"string": "Underline Text"
+	"reader-annotations": {
+		"string": "Annotations"
 	},
-	"pdfReader-highlightText": {
+	"reader-show-annotations": {
+		"string": "Show Annotations"
+	},
+	"reader-search-annotations": {
+		"string": "Search Annotations"
+	},
+	"reader-search-outline": {
+		"string": "Search Outline"
+	},
+	"reader-no-annotations": {
+		"string": "Create an annotation to see it in the sidebar"
+	},
+	"reader-no-extracted-text": {
+		"string": "No extracted text"
+	},
+	"reader-add-comment": {
+		"string": "Add comment"
+	},
+	"reader-annotation-comment": {
+		"string": "Annotation comment"
+	},
+	"reader-annotation-text": {
+		"string": "Annotation text"
+	},
+	"reader-manage-tags": {
+		"string": "Manage tags for this annotation"
+	},
+	"reader-open-menu": {
+		"string": "Open annotation menu"
+	},
+	"reader-thumbnails": {
+		"string": "Thumbnails"
+	},
+	"reader-tag-selector-message": {
+		"string": "Filter annotations by this tag"
+	},
+	"reader-add-tags": {
+		"string": "Add tags…"
+	},
+	"reader-highlight-text": {
 		"string": "Highlight Text"
 	},
-	"pdfReader-addText": {
+	"reader-underline-text": {
+		"string": "Underline Text"
+	},
+	"reader-add-note": {
+		"string": "Add Note"
+	},
+	"reader-add-text": {
 		"string": "Add Text"
 	},
-	"pdfReader-selectArea": {
+	"reader-select-area": {
 		"string": "Select Area"
 	},
-	"pdfReader-draw": {
-		"string": "Draw"
-	},
-	"pdfReader-highlightAnnotation": {
+	"reader-highlight-annotation": {
 		"string": "Highlight annotation"
 	},
-	"pdfReader-underlineAnnotation": {
+	"reader-underline-annotation": {
 		"string": "Underline annotation"
 	},
-	"pdfReader-noteAnnotation": {
+	"reader-note-annotation": {
 		"string": "Note Annotation"
 	},
-	"pdfReader-textAnnotation": {
+	"reader-text-annotation": {
 		"string": "Text Annotation"
 	},
-	"pdfReader-imageAnnotation": {
+	"reader-image-annotation": {
 		"string": "Image Annotation"
 	},
-	"pdfReader-find-in-document": {
-		"string": "Find in Document"
+	"reader-ink-annotation": {
+		"string": "Ink Annotation"
 	},
-	"pdfReader-a11yMoveAnnotation": {
-		"string": "Use the arrow keys to move the annotation."
+	"reader-search-result-index": {
+		"string": "Search result"
 	},
-	"pdfReader-a11yEditTextAnnotation": {
-		"string": "To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ pdfReader-move-annotation-start-key } and use the arrow keys."
+	"reader-search-result-total": {
+		"string": "Total search results"
 	},
-	"pdfReader-a11yResizeAnnotation": {
-		"string": "To resize the annotation, hold { general-key-shift } and use the arrow keys."
+	"reader-draw": {
+		"string": "Draw"
 	},
-	"pdfReader-a11yAnnotationPopupAppeared": {
-		"string": "Use Tab to navigate the annotation popup."
+	"reader-eraser": {
+		"string": "Eraser"
 	},
-	"pdfReader-a11yAnnotationCreated": {
-		"string": "{ type } created."
+	"reader-pick-color": {
+		"string": "Pick a Color"
 	},
-	"pdfReader-a11yAnnotationSelected": {
-		"string": "{ type } selected."
+	"reader-add-to-note": {
+		"string": "Add to Note"
 	},
-	"-pdfReader-a11yTextualAnnotationInstruction": {
-		"string": "To annotate text via the keyboard, first use “{ pdfReader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ number } to turn the search result into an annotation."
+	"reader-zoom-in": {
+		"string": "Zoom In"
 	},
-	"-pdfReader-a11yAnnotationInstruction": {
-		"string": "To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ number }."
+	"reader-zoom-out": {
+		"string": "Zoom Out"
 	},
-	"pdfReader-toolbar-draw.aria-description": {
-		"string": "This annotation type cannot be created via the keyboard."
+	"reader-zoom-reset": {
+		"string": "Reset Zoom"
 	},
-	"pdfReader-findInDocumentInput.title": {
+	"reader-zoom-auto": {
+		"string": "Automatically Resize"
+	},
+	"reader-zoom-page-width": {
+		"string": "Zoom to Page Width"
+	},
+	"reader-zoom-page-height": {
+		"string": "Zoom to Page Height"
+	},
+	"reader-split-vertically": {
+		"string": "Split Vertically"
+	},
+	"reader-split-horizontally": {
+		"string": "Split Horizontally"
+	},
+	"reader-next-page": {
+		"string": "Next Page"
+	},
+	"reader-previous-page": {
+		"string": "Previous Page"
+	},
+	"reader-page": {
+		"string": "Page"
+	},
+	"reader-location": {
+		"string": "Location"
+	},
+	"reader-read-only": {
+		"string": "Read-only"
+	},
+	"reader-prompt-transfer-from-pdf-title": {
+		"string": "Import Annotations"
+	},
+	"reader-prompt-transfer-from-pdf-text": {
+		"string": "Annotations stored in the PDF file will be moved to { target }."
+	},
+	"reader-prompt-password-protected": {
+		"string": "The operation is not supported for password-protected PDF files."
+	},
+	"reader-prompt-delete-pages-title": {
+		"string": "Delete Pages"
+	},
+	"reader-prompt-delete-pages-text": {
+		"string": "{count, plural, one {Are you sure you want to delete { count } page from the PDF file?} other {Are you sure you want to delete { count } pages from the PDF file?}}"
+	},
+	"reader-prompt-delete-annotations-title": {
+		"string": "Delete Annotations"
+	},
+	"reader-prompt-delete-annotations-text": {
+		"string": "{count, plural, one {Are you sure you want to delete the selected annotation?} other {Are you sure you want to delete the selected annotations?}}"
+	},
+	"reader-rotate-left": {
+		"string": "Rotate Left"
+	},
+	"reader-rotate-right": {
+		"string": "Rotate Right"
+	},
+	"reader-edit-page-number": {
+		"string": "Edit Page Number…"
+	},
+	"reader-edit-annotation-text": {
+		"string": "Edit Annotation Text"
+	},
+	"reader-copy-image": {
+		"string": "Copy Image"
+	},
+	"reader-save-image-as": {
+		"string": "Save Image As…"
+	},
+	"reader-page-number-popup-header": {
+		"string": "Change page number for:"
+	},
+	"reader-this-annotation": {
+		"string": "This annotation"
+	},
+	"reader-selected-annotations": {
+		"string": "Selected annotations"
+	},
+	"reader-this-page": {
+		"string": "This page"
+	},
+	"reader-this-page-and-later-pages": {
+		"string": "This page and later pages"
+	},
+	"reader-all-pages": {
+		"string": "All pages"
+	},
+	"reader-auto-detect": {
+		"string": "Auto-Detect"
+	},
+	"reader-enter-password": {
+		"string": "Enter the password to open this PDF file"
+	},
+	"reader-include-annotations": {
+		"string": "Include annotations"
+	},
+	"reader-preparing-document-for-printing": {
+		"string": "Preparing document for printing…"
+	},
+	"reader-phrase-not-found": {
+		"string": "Phrase not found"
+	},
+	"reader-find": {
 		"string": "Find"
 	},
-	"pdfReader-findInDocumentInput.aria-description": {
+	"reader-close": {
+		"string": "Close"
+	},
+	"reader-show-thumbnails": {
+		"string": "Show Thumbnails"
+	},
+	"reader-show-outline": {
+		"string": "Show Outline"
+	},
+	"reader-find-previous": {
+		"string": "Find the previous occurrence of the phrase"
+	},
+	"reader-find-next": {
+		"string": "Find the next occurrence of the phrase"
+	},
+	"reader-toggle-sidebar": {
+		"string": "Toggle Sidebar"
+	},
+	"reader-find-in-document": {
+		"string": "Find in Document"
+	},
+	"reader-toggle-context-pane": {
+		"string": "Toggle Context Pane"
+	},
+	"reader-highlight-all": {
+		"string": "Highlight all"
+	},
+	"reader-match-case": {
+		"string": "Match case"
+	},
+	"reader-whole-words": {
+		"string": "Whole words"
+	},
+	"reader-appearance": {
+		"string": "Appearance"
+	},
+	"reader-epub-appearance-line-height": {
+		"string": "Line height"
+	},
+	"reader-epub-appearance-word-spacing": {
+		"string": "Word spacing"
+	},
+	"reader-epub-appearance-letter-spacing": {
+		"string": "Letter spacing"
+	},
+	"reader-epub-appearance-page-width": {
+		"string": "Page width"
+	},
+	"reader-epub-appearance-use-original-font": {
+		"string": "Use original font"
+	},
+	"reader-epub-appearance-line-height-revert": {
+		"string": "Use default line height"
+	},
+	"reader-epub-appearance-word-spacing-revert": {
+		"string": "Use default word spacing"
+	},
+	"reader-epub-appearance-letter-spacing-revert": {
+		"string": "Use default letter spacing"
+	},
+	"reader-epub-appearance-page-width-revert": {
+		"string": "Use default page width"
+	},
+	"reader-convert-to-highlight": {
+		"string": "Convert to Highlight"
+	},
+	"reader-convert-to-underline": {
+		"string": "Convert to Underline"
+	},
+	"reader-size": {
+		"string": "Size"
+	},
+	"reader-merge": {
+		"string": "Merge"
+	},
+	"reader-copy-link": {
+		"string": "Copy Link"
+	},
+	"reader-theme-original": {
+		"string": "Original"
+	},
+	"reader-theme-snow": {
+		"string": "Snow"
+	},
+	"reader-theme-sepia": {
+		"string": "Sepia"
+	},
+	"reader-theme-dark": {
+		"string": "Dark"
+	},
+	"reader-add-theme": {
+		"string": "Add Theme"
+	},
+	"reader-scroll-mode": {
+		"string": "Scrolling"
+	},
+	"reader-spread-mode": {
+		"string": "Spreads"
+	},
+	"reader-flow-mode": {
+		"string": "Page Layout"
+	},
+	"reader-columns": {
+		"string": "Columns"
+	},
+	"reader-split-view": {
+		"string": "Split View"
+	},
+	"reader-themes": {
+		"string": "Themes"
+	},
+	"reader-vertical": {
+		"string": "Vertical"
+	},
+	"reader-horizontal": {
+		"string": "Horizontal"
+	},
+	"reader-wrapped": {
+		"string": "Wrapped"
+	},
+	"reader-none": {
+		"string": "None"
+	},
+	"reader-odd": {
+		"string": "Odd"
+	},
+	"reader-even": {
+		"string": "Even"
+	},
+	"reader-paginated": {
+		"string": "Paginated"
+	},
+	"reader-scrolled": {
+		"string": "Scrolled"
+	},
+	"reader-single": {
+		"string": "Single"
+	},
+	"reader-double": {
+		"string": "Double"
+	},
+	"reader-theme-name": {
+		"string": "Theme Name:"
+	},
+	"reader-background": {
+		"string": "Background:"
+	},
+	"reader-foreground": {
+		"string": "Foreground:"
+	},
+	"reader-focus-mode": {
+		"string": "Focus Mode"
+	},
+	"reader-clear-selection": {
+		"string": "Clear Selection"
+	},
+	"reader-a11y-move-annotation": {
+		"string": "Use the arrow keys to move the annotation."
+	},
+	"reader-a11y-edit-text-annotation": {
+		"string": "To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys."
+	},
+	"reader-a11y-resize-annotation": {
+		"string": "To resize the annotation, hold { general-key-shift } and use the arrow keys."
+	},
+	"reader-a11y-annotation-popup-appeared": {
+		"string": "Use Tab to navigate the annotation popup."
+	},
+	"reader-a11y-annotation-created": {
+		"string": "{ type } created."
+	},
+	"reader-a11y-annotation-selected": {
+		"string": "{ type } selected."
+	},
+	"-reader-a11y-textual-annotation-instruction": {
+		"string": "To annotate text via the keyboard, first use “{ reader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ number } to turn the search result into an annotation."
+	},
+	"-reader-a11y-annotation-instruction": {
+		"string": "To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ number }."
+	},
+	"reader-toolbar-draw.aria-description": {
+		"string": "This annotation type cannot be created via the keyboard."
+	},
+	"reader-find-in-document-input.title": {
+		"string": "Find"
+	},
+	"reader-find-in-document-input.aria-description": {
 		"string": "To turn a search result into a highlight annotation, press { general-key-control }-{ option-or-alt }-1. To turn a search result into an underline annotation, press { general-key-control }-{ option-or-alt }-2."
 	},
-	"pdfReader-import-from-epub.label": {
+	"reader-import-from-epub.label": {
 		"string": "Import Ebook Annotations…"
 	},
-	"pdfReader-import-from-epub-prompt-title": {
+	"reader-import-from-epub-prompt-title": {
 		"string": "Import Ebook Annotations"
 	},
-	"pdfReader-import-from-epub-prompt-text": {
-		"string": "{ app-name } found {count, plural, =1 {{ count } { tool } annotation} other {{ count } { tool } annotations}}, last edited { lastModifiedRelative }.\n\nAny { app-name } annotations that were previously imported from this ebook will be updated."
+	"reader-import-from-epub-prompt-text": {
+		"string": "{ app-name } found {count, plural, one {{ count } { tool } annotation} other {{ count } { tool } annotations}}, last edited { lastModifiedRelative }.\n\nAny { app-name } annotations that were previously imported from this ebook will be updated."
 	},
-	"pdfReader-import-from-epub-no-annotations-current-file": {
+	"reader-import-from-epub-no-annotations-current-file": {
 		"string": "This ebook does not appear to contain any importable annotations.\n\n{ app-name } can import ebook annotations created in Calibre and KOReader."
 	},
-	"pdfReader-import-from-epub-no-annotations-other-file": {
+	"reader-import-from-epub-no-annotations-other-file": {
 		"string": "“{ filename }” does not appear to contain any Calibre or KOReader annotations.\n\nIf this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly."
 	},
-	"pdfReader-import-from-epub-select-other": {
+	"reader-import-from-epub-select-other": {
 		"string": "Select Other File…"
+	},
+	"integration-docPrefs-window.title": {
+		"string": "{ app-name } - Document Preferences"
+	},
+	"integration-addEditCitation-window.title": {
+		"string": "{ app-name } - Add/Edit Citation"
+	},
+	"integration-editBibliography-window.title": {
+		"string": "{ app-name } - Edit Bibliography"
+	},
+	"integration-editBibliography-editor.aria-label": {
+		"string": "Edit reference"
+	},
+	"-integration-editBibliography-include-uncited": {
+		"string": "To include an uncited item in your bibliography, select it from the items list and press { general-add }."
+	},
+	"-integration-editBibliography-exclude-cited": {
+		"string": "You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }."
+	},
+	"-integration-editBibliography-edit-reference": {
+		"string": "To change how a reference is formatted, use the text editor."
+	},
+	"integration-editBibliography-wrapper.aria-label": {
+		"string": "Edit Bibliography dialog"
+	},
+	"integration-editBibliography-wrapper.aria-description": {
+		"string": "{ integration-editBibliography-include-uncited }\n{ integration-editBibliography-exclude-cited }\n{ integration-editBibliography-edit-reference }"
+	},
+	"integration-citationDialog": {
+		"string": "Citation Dialog"
+	},
+	"integration-citationDialog-section-open": {
+		"string": "Open Documents ({ count })"
+	},
+	"integration-citationDialog-section-selected": {
+		"string": "Selected Items ({ count }/{ total })"
+	},
+	"integration-citationDialog-section-cited": {
+		"string": "{count, plural, =0 {Cited Items} other {Cited Items ({ count })}}"
+	},
+	"integration-citationDialog-details-suffix": {
+		"string": "Suffix"
+	},
+	"integration-citationDialog-details-prefix": {
+		"string": "Prefix"
+	},
+	"integration-citationDialog-details-suppressAuthor": {
+		"string": "Omit Author"
+	},
+	"integration-citationDialog-settings-title": {
+		"string": "Citation Settings"
+	},
+	"integration-citationDialog-lib-no-items": {
+		"string": "{search, select, true {No selected, open, or cited items match the current search} other {No selected or open items}}"
+	},
+	"integration-citationDialog-settings-keepSorted": {
+		"string": "Keep sources sorted"
+	},
+	"integration-citationDialog-btn-mode.title": {
+		"string": "{mode, select, library {Switch to List Mode} list {Switch to Library Mode} other {Switch Mode}}"
+	},
+	"integration-citationDialog-btn-mode.aria-label": {
+		"string": "{mode, select, library {The dialog is in Library mode. Click to switch to List Mode.} list {The dialog is in List mode. Click to switch to Library Mode.} other {Switch Mode}}"
+	},
+	"integration-citationDialog-general-instructions": {
+		"string": "Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation."
+	},
+	"integration-citationDialog-enter-to-add-item": {
+		"string": "Press { return-or-enter } to add this item to the citation."
+	},
+	"integration-citationDialog-search-for-items": {
+		"string": "Search for items to add to the citation"
+	},
+	"integration-citationDialog-aria-bubble.aria-description": {
+		"string": "This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }"
+	},
+	"integration-citationDialog-single-input.aria-description": {
+		"string": "Press Tab to select items to add to this citation. Press Escape to discard the changes and close the dialog."
+	},
+	"integration-citationDialog-aria-item-list.aria-description": {
+		"string": "Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }"
+	},
+	"integration-citationDialog-aria-item-library.aria-description": {
+		"string": "Use Right/Left Arrow to change item selection. { integration-citationDialog-enter-to-add-item }"
+	},
+	"integration-citationDialog-collections-table.aria-label": {
+		"string": "Collections."
+	},
+	"integration-citationDialog-collections-table.aria-description": {
+		"string": "Select a collection and press Tab to navigate its items."
+	},
+	"integration-citationDialog-items-table-added.aria-label": {
+		"string": "This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it."
+	},
+	"integration-citationDialog-add-all": {
+		"string": "Add all"
+	},
+	"integration-citationDialog-collapse-section.title": {
+		"string": "Collapse section"
+	},
+	"integration-citationDialog-bubble-empty": {
+		"string": "(no title)"
+	},
+	"integration-citationDialog-add-to-citation": {
+		"string": "Add to Citation"
+	},
+	"integration-prefs-displayAs-label": {
+		"string": "Display Citations As:"
+	},
+	"integration-prefs-footnotes.label": {
+		"string": "Footnotes"
+	},
+	"integration-prefs-endnotes.label": {
+		"string": "Endnotes"
+	},
+	"integration-prefs-bookmarks.label": {
+		"string": "Store citation as bookmarks"
+	},
+	"integration-prefs-bookmarks-description": {
+		"string": "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes."
+	},
+	"integration-prefs-bookmarks-formatNotice": {
+		"string": "{show, select, true {The document must be saved as .doc or .docx.} other {}}"
+	},
+	"integration-prefs-automaticCitationUpdates.label": {
+		"string": "Automatically update citations"
+	},
+	"integration-prefs-automaticCitationUpdates.tooltip": {
+		"string": "Citations with pending updates will be highlighted in the document"
+	},
+	"integration-prefs-automaticCitationUpdates-description": {
+		"string": "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually."
+	},
+	"integration-prefs-automaticJournalAbbeviations.label": {
+		"string": "Use MEDLINE journal abbreviations"
+	},
+	"integration-prefs-automaticJournalAbbeviations-description": {
+		"string": "The “Journal Abbr” field will be ignored."
+	},
+	"integration-prefs-exportDocument.label": {
+		"string": "Switch to a Different Word Processor…"
+	},
+	"integration-error-unable-to-find-winword": {
+		"string": "{ app-name } could not find a running Word instance."
+	},
+	"integration-warning-citation-changes-will-be-lost": {
+		"string": "You have made changes to a citation that will be lost if you continue."
+	},
+	"integration-warning-bibliography-changes-will-be-lost": {
+		"string": "You have made changes to the bibliography that will be lost if you continue."
+	},
+	"integration-warning-documentPreferences-changes-will-be-lost": {
+		"string": "You have made changes to the document preferences that will be lost if you continue."
+	},
+	"integration-warning-discard-changes": {
+		"string": "Discard Changes"
+	},
+	"integration-warning-command-is-running": {
+		"string": "A word processor integration command is already running."
+	},
+	"note-editor-set": {
+		"string": "Set"
+	},
+	"note-editor-more": {
+		"string": "More"
+	},
+	"note-editor-replace": {
+		"string": "Replace"
+	},
+	"note-editor-replace-all": {
+		"string": "Replace All"
+	},
+	"note-editor-unlink": {
+		"string": "Unlink"
+	},
+	"note-editor-right-to-left": {
+		"string": "Right to Left"
+	},
+	"note-editor-left-to-right": {
+		"string": "Left to Right"
+	},
+	"note-editor-update-notice": {
+		"string": "This note was edited with a newer version of { app-name }.\nPlease update { app-name } to make changes."
+	},
+	"note-editor-enter-link": {
+		"string": "Enter Link"
+	},
+	"note-editor-heading-1": {
+		"string": "Heading 1"
+	},
+	"note-editor-heading-2": {
+		"string": "Heading 2"
+	},
+	"note-editor-heading-3": {
+		"string": "Heading 3"
+	},
+	"note-editor-paragraph": {
+		"string": "Paragraph"
+	},
+	"note-editor-monospaced": {
+		"string": "Monospaced"
+	},
+	"note-editor-bullet-list": {
+		"string": "Bulleted List"
+	},
+	"note-editor-ordered-list": {
+		"string": "Numbered List"
+	},
+	"note-editor-block-quote": {
+		"string": "Block Quote"
+	},
+	"note-editor-math-block": {
+		"string": "Math Block"
+	},
+	"note-editor-format-text": {
+		"string": "Format Text"
+	},
+	"note-editor-highlight-text": {
+		"string": "Highlight Text"
+	},
+	"note-editor-text-color": {
+		"string": "Text Color"
+	},
+	"note-editor-remove-color": {
+		"string": "Remove Color"
+	},
+	"note-editor-bold": {
+		"string": "Bold"
+	},
+	"note-editor-italic": {
+		"string": "Italic"
+	},
+	"note-editor-underline": {
+		"string": "Underline"
+	},
+	"note-editor-strikethrough": {
+		"string": "Strikethrough"
+	},
+	"note-editor-subscript": {
+		"string": "Subscript"
+	},
+	"note-editor-superscript": {
+		"string": "Superscript"
+	},
+	"note-editor-return-to-notes-list": {
+		"string": "Return to Notes List"
+	},
+	"note-editor-insert-link": {
+		"string": "Insert Link"
+	},
+	"note-editor-clear-formatting": {
+		"string": "Clear Formatting"
+	},
+	"note-editor-align": {
+		"string": "Align"
+	},
+	"note-editor-align-left": {
+		"string": "Align Left"
+	},
+	"note-editor-align-center": {
+		"string": "Align Center"
+	},
+	"note-editor-align-right": {
+		"string": "Align Right"
+	},
+	"note-editor-insert-citation": {
+		"string": "Insert Citation"
+	},
+	"note-editor-go-to-page": {
+		"string": "Go to Page"
+	},
+	"note-editor-show-item": {
+		"string": "Show Item"
+	},
+	"note-editor-edit-citation": {
+		"string": "Edit Citation"
+	},
+	"note-editor-show-on-page": {
+		"string": "Show on Page"
+	},
+	"note-editor-add-citation": {
+		"string": "Add Citation"
+	},
+	"note-editor-remove-citation": {
+		"string": "Hide Citation"
+	},
+	"note-editor-find-and-replace": {
+		"string": "Find and Replace"
+	},
+	"note-editor-edit-in-window": {
+		"string": "Edit in a Separate Window"
+	},
+	"note-editor-apply-annotation-colors": {
+		"string": "Show Annotation Colors"
+	},
+	"note-editor-remove-annotation-colors": {
+		"string": "Hide Annotation Colors"
+	},
+	"note-editor-add-citations": {
+		"string": "Show Annotation Citations"
+	},
+	"note-editor-remove-citations": {
+		"string": "Hide Annotation Citations"
+	},
+	"note-editor-image": {
+		"string": "Image"
+	},
+	"note-editor-math": {
+		"string": "Math"
+	},
+	"note-editor-table": {
+		"string": "Table"
+	},
+	"note-editor-citation": {
+		"string": "Citation"
+	},
+	"note-editor-copy-image": {
+		"string": "Copy Image"
+	},
+	"note-editor-save-image-as": {
+		"string": "Save Image As…"
+	},
+	"note-editor-insert-row-before": {
+		"string": "Insert Row Above"
+	},
+	"note-editor-insert-row-after": {
+		"string": "Insert Row Below"
+	},
+	"note-editor-insert-column-before": {
+		"string": "Insert Column Left"
+	},
+	"note-editor-insert-column-after": {
+		"string": "Insert Column Right"
+	},
+	"note-editor-delete-row": {
+		"string": "Delete Row"
+	},
+	"note-editor-delete-column": {
+		"string": "Delete Column"
+	},
+	"note-editor-delete-table": {
+		"string": "Delete Table"
+	},
+	"note-editor-link-popup-appeared": {
+		"string": "Link popup appeared. Use Shift-Tab to navigate it."
+	},
+	"note-editor-citation-popup-appeared": {
+		"string": "Citation popup appeared. Use Shift-Tab to navigate it."
 	}
 }
