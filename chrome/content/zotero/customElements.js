@@ -241,8 +241,8 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 						this.removeAttribute("aria-hidden");
 					});
 				});
-				// Fx140: set the menulist role to 'combobox' to fix Voiceover no longer announcing
-				// menulist's label. Combobox is already menulist's implicit role, so it's not clear why this helps.
+				// Fx140: set the menulist role to 'combobox' to fix VoiceOver no longer announcing
+				// menulist's label. combobox is already menulist's implicit role, so it's not clear why this helps.
 				// Handle this here instead of connectedCallback of menulist because that doesn't get called
 				// if menulist exists in the initial .xhtml (vs inserted dynamically)
 				if (this.parentElement && this.parentElement.localName == 'menulist') {
