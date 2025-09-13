@@ -115,6 +115,7 @@ preferences-sync-reset-restore-to-server-remaining-items-text = { general-senten
         *[other] { $localItemsCount } items will remain on this computer and in the online library.
     }
 preferences-sync-reset-restore-to-server-checkbox-label = { $remoteItemsDeletedCount ->
+        [one] Delete 1 item
         *[other] Delete { $remoteItemsDeletedCount } items
     }
 preferences-sync-reset-restore-to-server-confirmation-text = delete online library
