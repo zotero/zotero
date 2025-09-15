@@ -49,18 +49,18 @@
 	<vbox flex="1">
 		<vbox class="csl-edit-toolbars">
 			<hbox class="csl-edit-toolbar">
-				<button id="preview-refresh-button" label="&zotero.general.refresh;" oncommand="Zotero_CSL_Editor.refresh()"/>
+				<button id="preview-refresh-button" label="&zotero.general.refresh;" command="cmd_refresh"/>
 				<button id="zotero-csl-save" label="&zotero.general.saveAs;" oncommand="Zotero_CSL_Editor.save()"/>
 				<html:div class="divider" />
-				<menulist id="zotero-csl-page-type" oncommand="Zotero_CSL_Editor.refresh()" native="true" data-l10n-id="styleEditor-locatorType"/>
+				<menulist id="zotero-csl-page-type" oncommand="Zotero_CSL_Editor.generateBibliography()" native="true" data-l10n-id="styleEditor-locatorType"/>
 				<label value=":" />
 				<label id="locator-input" data-l10n-id="styleEditor-locatorInput" hidden="true"/>
-				<html:input size="5" id="preview-pages" oninput="Zotero_CSL_Editor.refreshDebounced()" aria-labelledby="zotero-csl-page-type locator-input"/>
+				<html:input size="5" id="preview-pages" oninput="Zotero_CSL_Editor.generateBibliographyDebounced()" aria-labelledby="zotero-csl-page-type locator-input"/>
 				<html:div class="divider" />
-				<checkbox oncommand="Zotero_CSL_Editor.refresh()" id="preview-suppress-author" label="&zotero.citation.suppressAuthor.label;" native="true" />
+				<checkbox oncommand="Zotero_CSL_Editor.generateBibliography()" id="preview-suppress-author" label="&zotero.citation.suppressAuthor.label;" native="true" />
 				<html:div class="divider" />
 				<label value="&styles.editor.citePosition;" control="zotero-ref-position"/>
-				<menulist id="zotero-ref-position" oncommand="Zotero_CSL_Editor.refresh()" native="true">
+				<menulist id="zotero-ref-position" oncommand="Zotero_CSL_Editor.generateBibliography()" native="true">
 					<menupopup>
 						<menuitem label="first" value="0"/>
 						<menuitem label="subsequent" value="1"/>
@@ -75,7 +75,8 @@
 				<menulist id="zotero-csl-list" oncommand="Zotero_CSL_Editor.onStyleSelected(this.value)" native="true"/>
 				<html:div class="divider" />
 				<label data-l10n-id="styleEditor-locale" control="locale-menu"/>
-				<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Editor.refresh()" native="true" />
+				<menulist id="locale-menu" oncommand="Zotero.Prefs.set('export.lastLocale', this.value); Zotero_CSL_Editor.generateBibliography()" native="true" />
+				
 			</hbox>
 		</vbox>
 		<iframe id="zotero-csl-editor-iframe" src="chrome://scaffold/content/monaco/monaco.html" flex="1"
@@ -88,5 +89,11 @@
 	
 	<keyset>
 		<key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>
+		<key keycode="VK_F5" command="cmd_refresh"/>
+		<key key="R" modifiers="accel" command="cmd_refresh"/>
 	</keyset>
+	
+	<commandset>
+		<command id="cmd_refresh" oncommand="Zotero_CSL_Editor.generateBibliography()"/>
+	</commandset>
 </window>
