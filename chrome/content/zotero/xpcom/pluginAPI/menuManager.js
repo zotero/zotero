@@ -285,8 +285,8 @@
 			};
 		}
 
-		_unregisterByPluginID(pluginID) {
-			let removedKeys = super._unregisterByPluginID(pluginID);
+		async _unregisterByPluginID(pluginID) {
+			let removedKeys = await super._unregisterByPluginID(pluginID);
 			if (!removedKeys) {
 				return [];
 			}
