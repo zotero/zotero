@@ -340,7 +340,7 @@ class PluginAPIBase {
 	/**
 	 * Unregister all stored options by pluginID
 	 * @param {string} pluginID - PluginID
-	 * @returns {string[]} - The mainKeys of the unregistered options
+	 * @returns {Promise<string[]>} - The mainKeys of the unregistered options
 	 */
 	async _unregisterByPluginID(pluginID) {
 		let paneIDs = Object.keys(this._optionsCache).filter(
