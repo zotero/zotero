@@ -929,6 +929,7 @@ class ListLayout extends Layout {
 //
 const IOManager = {
 	sectionExpandedStatus: {},
+	_skipInputAcceptOnEnterUntil: 0,
 
 	// most essential IO functionality that is added immediately on load
 	preInit() {
@@ -1306,6 +1307,16 @@ const IOManager = {
 	// bubble if exists or a bubble before the input otherwise.
 	// Otherwise, add pre-selected item if any. Otherwise, accept the dialog.
 	_handleInputEnter(input) {
+		// Special case: if one typed a number locator after adding a bubble, add it
+		// as a page locator on Enter. The same happens automatically in _handleInput after
+		// debounce - this is just to allow one to skip debounce by pressing Enter.
+		if (this._justAddedBubbles) {
+			let specialPageLocator = Helpers.isOnlyNumberLocator(input.value);
+			if (specialPageLocator) {
+				this._processNumericLocatorInput();
+				return;
+			}
+		}
 		let locator = Helpers.extractLocator(input.value);
 		// Enter will always clear the record of just-added bubbles
 		let justAddedBubblesCopy = this._justAddedBubbles ? [...this._justAddedBubbles] : null;
@@ -1338,7 +1349,7 @@ const IOManager = {
 			IOManager.addItemsToCitation(Zotero.Items.get(firstRowID));
 		}
 		// Enter on an empty input accepts the dialog
-		else if (!input.value.length) {
+		else if (!input.value.length && Date.now() > this._skipInputAcceptOnEnterUntil) {
 			accept();
 		}
 	},
@@ -1403,7 +1414,7 @@ const IOManager = {
 				// Show spinner to indicate that locator will be added
 				this._showLoadingSpinner();
 				// Add the locator after debounce to allow one to finish typing
-				this._processNumericLocatorInput();
+				this._processNumericLocatorInputDebounced();
 				return;
 			}
 		}
@@ -1423,7 +1434,7 @@ const IOManager = {
 	},
 
 	// Add special numeric locator to just-added bubble after debounce
-	_processNumericLocatorInput: Zotero.Utilities.debounce(() => {
+	_processNumericLocatorInput() {
 		// If the just-added bubbles were cleared, stop
 		if (!IOManager._justAddedBubbles) {
 			// Unless there is search happening, hide the spinner.
@@ -1434,9 +1445,14 @@ const IOManager = {
 			return;
 		}
 
+		let input = _id("bubble-input").getCurrentInput();
+		// If the input is empty, hide the spinner and do nothing
+		if (!input.value) {
+			IOManager._hideLoadingSpinner();
+			return;
+		}
 		// If one kept typing something past that number, they are probably
 		// not meaning to type a numeric locator, so clear just-added bubbles and stop
-		let input = _id("bubble-input").getCurrentInput();
 		if (input.value && !Helpers.isOnlyNumberLocator(input.value)) {
 			IOManager._justAddedBubbles = null;
 			return;
@@ -1457,7 +1473,14 @@ const IOManager = {
 		// Clear the input and update bubbles
 		input.value = "";
 		IOManager.updateBubbleInput();
-	}, NUMERIC_LOCATOR_TIMEOUT),
+		// Disable Enter on input from accepting the dialog for the next 500ms;
+		// If one intends to confirmed the numeric locator by pressing Enter (via _handleInputEnter),
+		// we ensure that the Enter keypress won't happen right after when the locator is added to
+		// the bubble, which would accept the dialog unintentionally for the user.
+		this._skipInputAcceptOnEnterUntil = Date.now() + 500;
+	},
+
+	_processNumericLocatorInputDebounced: Zotero.Utilities.debounce(() => IOManager._processNumericLocatorInput(), NUMERIC_LOCATOR_TIMEOUT),
 
 	// Clear the record of which bubbles were just added. If a locator is typed
 	// and Enter is presses, just-added bubbles get that locator.
