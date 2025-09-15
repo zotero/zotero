@@ -319,6 +319,10 @@
 		}
 
 		notify(event, _type, ids, _extraData) {
+			if (ids.includes(this.item?.parentItem?.id)) {
+				// Ensure the "Rename from Parent" button is visible after the parent item changes (#5542)
+				this._resetRenderedFlags();
+			}
 			if (event != 'modify' || !this.item?.id || !ids.includes(this.item.id)) return;
 			
 			// Wait for the render finish and then refresh
