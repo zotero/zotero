@@ -625,7 +625,7 @@
 					if (ev.target !== ev.currentTarget) {
 						return;
 					}
-					menuElem.removeEventListener("command", menuCommandListener);
+					requestIdleCallback(() => menuElem.removeEventListener("command", menuCommandListener));
 					ev.target.removeEventListener("popuphidden", removeMenuCommandListener);
 				};
 				popupElem.addEventListener("popuphidden", removeMenuCommandListener);
