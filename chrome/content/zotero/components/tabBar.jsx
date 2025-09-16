@@ -33,7 +33,7 @@ const { CSSIcon, CSSItemTypeIcon } = require('./icons');
 const SCROLL_ARROW_SCROLL_BY = 222;
 
 const Tab = memo((props) => {
-	const { icon, id, index, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, selected, title, renderTitle } = props;
+	const { icon, id, index, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, selected, title, renderTitle, width } = props;
 	
 	const handleTabMouseDown = useCallback(event => onTabMouseDown(event, id), [onTabMouseDown, id]);
 	const handleContextMenu = useCallback(event => onContextMenu(event, id), [onContextMenu, id]);
@@ -66,6 +66,7 @@ const Tab = memo((props) => {
 			onDragStart={handleDragStart}
 			onDragEnd={onDragEnd}
 			tabIndex="-1"
+			style={ width ? { maxWidth: `${width}px` } : {}}
 		>
 			{ isItemType
 				? <CSSItemTypeIcon itemType={icon} className="tab-icon" />
@@ -100,6 +101,7 @@ Tab.propTypes = {
 	selected: PropTypes.bool.isRequired,
 	title: PropTypes.string.isRequired,
 	renderTitle: PropTypes.bool,
+	width: PropTypes.number
 };
 
 
@@ -107,10 +109,12 @@ const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
 	const [dragging, setDragging] = useState(false);
 	const [dragMouseX, setDragMouseX] = useState(0);
+	const [lockedTabsState, setLockedTabsState] = useState(new Map());
 	const dragIDRef = useRef(null);
 	const dragGrabbedDeltaXRef = useRef();
 	const tabsInnerContainerRef = useRef();
 	const tabsRef = useRef();
+	const spacerRef = useRef();
 	const startArrowRef = useRef();
 	const endArrowRef = useRef();
 	// Used to throttle mouse movement
@@ -133,10 +137,11 @@ const TabBar = forwardRef(function (props, ref) {
 	useEffect(() => {
 		// Scroll selected tab into view
 		let selectedTabNode = tabsInnerContainerRef.current.querySelector(".tab.selected");
-		if (!selectedTabNode || dragging) return;
+		if (!selectedTabNode || dragging || lockedTabsState.size) return;
 		selectedTabNode.scrollIntoView({ behavior: 'smooth' });
 	}, [tabs]);
 
+	useLayoutEffect(preserveScrollPosition, [tabs, lockedTabsState]);
 	useLayoutEffect(updateScrollArrows);
 	useLayoutEffect(updateOverflowing, [tabs]);
 
@@ -170,6 +175,7 @@ const TabBar = forwardRef(function (props, ref) {
 	});
 
 	function updateScrollArrows() {
+		if (lockedTabsState.size) return;
 		let scrollable = tabsRef.current.scrollWidth !== tabsRef.current.clientWidth;
 		if (scrollable) {
 			tabsInnerContainerRef.current.classList.add('scrollable');
@@ -197,6 +203,23 @@ const TabBar = forwardRef(function (props, ref) {
 		tabsInnerContainerRef.current.querySelectorAll('.tab-name').forEach((tabNameDOM) => {
 			tabNameDOM.classList.toggle('overflowing', tabNameDOM.scrollWidth > tabNameDOM.clientWidth);
 		});
+	}
+
+	// Preserve the relative scroll position when tabs are being closed.
+	// (set in handleTabClose)
+	function preserveScrollPosition() {
+		let desiredScrollLeft = lockedTabsState.get("scroll-left");
+		if (!desiredScrollLeft) return;
+		tabsRef.current.scrollLeft = desiredScrollLeft;
+		// If there are not many tabs left, there may be not enough scrollable
+		// space to keep the original scrollLeft position. Add a spacer at the end and try again.
+		if (tabsRef.current.scrollLeft !== desiredScrollLeft) {
+			let spacerWidth = parseInt(spacerRef.current.style.minWidth) || 0;
+			let columnGap = 4;
+			let tabWidth = lockedTabsState.get("tab") || 0;
+			spacerRef.current.style.minWidth = `${spacerWidth + tabWidth + columnGap}px`;
+			tabsRef.current.scrollLeft = desiredScrollLeft;
+		}
 	}
 	
 	const handleTabMouseDown = useCallback((event, id) => {
@@ -313,10 +336,29 @@ const TabBar = forwardRef(function (props, ref) {
 	}, [props.onTabMove]);
 
 	const handleTabClose = useCallback((event, id) => {
+		// When a tab is being closed, lock the widths of tabs and scroll position,
+		// so that the next tab's "X" button also ends up under the mouse
+		if (!lockedTabsState.size) {
+			let tabElements = [...tabsInnerContainerRef.current.querySelectorAll(".tab")].filter(tab => tab.offsetWidth);
+			let zoteroPaneTab = tabElements.find(tab => tab.dataset.id === "zotero-pane");
+			let tab = tabElements.find(tab => tab.dataset.id !== "zotero-pane");
+			setLockedTabsState(new Map([
+				["zotero-pane", zoteroPaneTab.offsetWidth],
+				["tab", tab.offsetWidth],
+				["scroll-left", tabsRef.current.scrollLeft]
+			]));
+		}
 		props.onTabClose(id);
 		event.stopPropagation();
-	}, [props.onTabClose]);
-	
+	}, [props.onTabClose, lockedTabsState]);
+
+	// When the mouse leaves the tab bar, un-freeze the width and positioning
+	// of tabs that are locked when tabs are being closed.
+	const handleTabBarMouseLeave = useCallback(() => {
+		if (!lockedTabsState.size) return;
+		setLockedTabsState(new Map());
+		spacerRef.current.style.removeProperty("min-width");
+	}, [lockedTabsState]);
 
 	const handleWheel = useCallback((event) => {
 		// Normalize wheel speed
@@ -359,6 +401,7 @@ const TabBar = forwardRef(function (props, ref) {
 				ref={tabsInnerContainerRef}
 				className="tab-bar-inner-container"
 				onWheel={handleWheel}
+				onMouseLeave={handleTabBarMouseLeave}
 			>
 				<div className="pinned-tabs">
 					<div
@@ -405,6 +448,7 @@ const TabBar = forwardRef(function (props, ref) {
 							{...tab}
 							key={tab.id}
 							index={index}
+							width={ tab.id === "zotero-pane" ? lockedTabsState.get("zotero-pane") : lockedTabsState.get("tab") }
 							isBeingDragged={dragging && dragIDRef.current === tab.id}
 							onContextMenu={handleContextMenu}
 							onDragEnd={handleDragEnd}
@@ -413,6 +457,7 @@ const TabBar = forwardRef(function (props, ref) {
 							onTabClose={handleTabClose}
 							onTabMouseDown={handleTabMouseDown}
 						/>)}
+						<div ref={spacerRef} className="spacer"></div>
 					</div>
 				</div>
 				<div
