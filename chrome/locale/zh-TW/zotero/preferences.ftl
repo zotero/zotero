@@ -1,13 +1,13 @@
 preferences-window =
     .title = { -app-name } 設定
-preferences-appearance-title = Appearance and Language
+preferences-appearance-title = 外觀和語言
 preferences-auto-recognize-files =
     .label = 自動為 PDF 檔與電子書取得屬性資料
 preferences-file-renaming-title = 文件重新命名
-preferences-file-renaming-intro = { -app-name } 根據父項目的屬性資料(標題、作者等)自動重新命名下載的檔案。您也可以選擇自動重新命名本機新增的檔案。
+preferences-file-renaming-intro = { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
 preferences-file-renaming-auto-rename-files =
-    .label = 自動重新命名本機新增的檔案
-preferences-file-renaming-file-types = Rename files of these types:
+    .label = Automatically rename files
+preferences-file-renaming-file-types = 重新命名這些類型的檔案
 preferences-file-renaming-file-type-pdf =
     .label = { file-type-pdf }
 preferences-file-renaming-file-type-epub =
@@ -20,6 +20,8 @@ preferences-file-renaming-file-type-video =
     .label = { file-type-video }
 preferences-file-renaming-customize-button =
     .label = 自定義檔案名稱格式……
+preferences-file-renaming-rename-now =
+    .label = Rename Files…
 preferences-file-renaming-format-title = 檔案名稱格式
 preferences-file-renaming-format-instructions = 您可以自定義檔案名稱模式，{ -app-name } 根據此模式從父項目屬性資料重新命名附件檔案。
 preferences-file-renaming-format-instructions-example = 例如，模板中的“{ $example }”將替換為父項目的標題，並在第50個字元處截斷。
@@ -56,27 +58,55 @@ preferences-quickCopy-minus =
 preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
-preferences-styleManager-delete-button =
-    .tooltiptext = 刪除所選樣式
-    .aria-label = { general-remove }
-    .label = { $label }
-preferences-styleManager-add-button =
+preferences-styleManager-intro = { -app-name } can generate citations and bibliographies in over 10,000 citation styles. Add styles here to make them available when selecting styles throughout { -app-name }.
+preferences-styleManager-get-additional-styles =
+    .label = Get Additional Styles…
+preferences-styleManager-restore-default =
+    .label = Restore Default Styles…
+preferences-styleManager-add-from-file =
     .tooltiptext = 從檔案新增一個樣式
-    .aria-label = { general-add }
-    .label = { $label }
+    .label = Add from File…
+preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
+preferences-citation-dialog = Citation Dialog
+preferences-citation-dialog-mode = Citation Dialog Mode:
+preferences-citation-dialog-mode-last-used =
+    .label = Last Used
+preferences-citation-dialog-mode-list =
+    .label = List Mode
+preferences-citation-dialog-mode-library =
+    .label = Library Mode
 preferences-advanced-enable-local-api =
     .label = 允許此電腦上的其他應用程式與 { -app-name } 通訊
 preferences-advanced-local-api-available = Available at <code data-l10n-name="url">{ $url }</span>
-preferences-advanced-server-disabled = The { -app-name } HTTP server is disabled.
+preferences-advanced-server-disabled = { -app-name } 的 HTTP 伺服器已停止。
 preferences-advanced-server-enable-and-restart =
-    .label = Enable and Restart
+    .label = 啟用並重新啟動
 preferences-advanced-language-and-region-title = 語言與區域
 preferences-advanced-enable-bidi-ui =
     .label = 啟用雙向文字編輯應用程式
 preferences-advanced-reset-data-dir =
     .label = Revert to Default Location…
 preferences-advanced-custom-data-dir =
-    .label = Use Custom Location…
+    .label = 使用自訂位置...
 preferences-advanced-default-data-dir =
-    .value = (Default: { $directory })
-    .aria-label = Default location
+    .value = （預設： { $directory } ）
+    .aria-label = 預設位置
+preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ $libraryName }” on { $domain } with data from this computer.
+preferences-sync-reset-restore-to-server-deleted-items-text =
+    { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
+        [one] item
+       *[other] items
+    } in the online library will be permanently deleted.
+preferences-sync-reset-restore-to-server-remaining-items-text =
+    { general-sentence-separator }{ $localItemsCount ->
+        [0] The library on this computer and the online library will be empty.
+        [one] 1 item will remain on this computer and in the online library.
+       *[other] { $localItemsCount } items will remain on this computer and in the online library.
+    }
+preferences-sync-reset-restore-to-server-checkbox-label =
+    { $remoteItemsDeletedCount ->
+        [one] Delete 1 item
+       *[other] Delete { $remoteItemsDeletedCount } items
+    }
+preferences-sync-reset-restore-to-server-confirmation-text = delete online library
+preferences-sync-reset-restore-to-server-yes = 換掉線上文獻庫中的資料

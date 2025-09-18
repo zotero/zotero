@@ -4,9 +4,9 @@ preferences-appearance-title = Ulkoasu ja kieli
 preferences-auto-recognize-files =
     .label = Hae metatiedot e-kirjoille ja PDFille automaattisesti
 preferences-file-renaming-title = Tiedoston uudelleennimeäminen
-preferences-file-renaming-intro = { -app-name } nimeää ladatut tiedostot automaattisesti uudelleen nimekkeen tietojen perusteella (otsikko, tekijä jne.). Voit myös nimetä uudelleen tietokoneelta lisätyt tiedostot.
+preferences-file-renaming-intro = { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
 preferences-file-renaming-auto-rename-files =
-    .label = Nimeä paikallisesti lisätyt tiedostot automaattisesti uudelleen
+    .label = Automatically rename files
 preferences-file-renaming-file-types = Nimeä uudelleen nämä tiedostotyypit:
 preferences-file-renaming-file-type-pdf =
     .label = { file-type-pdf }
@@ -20,6 +20,8 @@ preferences-file-renaming-file-type-video =
     .label = { file-type-video }
 preferences-file-renaming-customize-button =
     .label = Muokkaa tiedostonimen muotoa...
+preferences-file-renaming-rename-now =
+    .label = Rename Files…
 preferences-file-renaming-format-title = Tiedostonimen muoto
 preferences-file-renaming-format-instructions = Voit muokata tiedostonimen rakennetta jota { -app-name } käyttää liitetiedostojen uudelleennimeämisessä päänimikkeen metadatan mukaan.
 preferences-file-renaming-format-instructions-example = Esimerkiksi “{ $example }” tässä pohjassa korvataan nimikkeen otsikolla, ja katkaistaan 50 merkin kohdalta.
@@ -56,14 +58,23 @@ preferences-quickCopy-minus =
 preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
-preferences-styleManager-delete-button =
-    .tooltiptext = Poista valittu tyyli
-    .aria-label = { general-remove }
-    .label = { $label }
-preferences-styleManager-add-button =
+preferences-styleManager-intro = { -app-name } can generate citations and bibliographies in over 10,000 citation styles. Add styles here to make them available when selecting styles throughout { -app-name }.
+preferences-styleManager-get-additional-styles =
+    .label = Get Additional Styles…
+preferences-styleManager-restore-default =
+    .label = Restore Default Styles…
+preferences-styleManager-add-from-file =
     .tooltiptext = Lisää tyyli tiedostosta
-    .aria-label = { general-add }
-    .label = { $label }
+    .label = Add from File…
+preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
+preferences-citation-dialog = Citation Dialog
+preferences-citation-dialog-mode = Citation Dialog Mode:
+preferences-citation-dialog-mode-last-used =
+    .label = Last Used
+preferences-citation-dialog-mode-list =
+    .label = List Mode
+preferences-citation-dialog-mode-library =
+    .label = Library Mode
 preferences-advanced-enable-local-api =
     .label = Salli muiden tämän koneen ohjelmien viestiä { -app-name }n kanssa
 preferences-advanced-local-api-available = Saatavilla osoitteessa <code data-l10n-name="url">{ $url }</span>
@@ -80,3 +91,22 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Oletus: { $directory })
     .aria-label = Oletussijainti
+preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ $libraryName }” on { $domain } with data from this computer.
+preferences-sync-reset-restore-to-server-deleted-items-text =
+    { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
+        [one] item
+       *[other] items
+    } in the online library will be permanently deleted.
+preferences-sync-reset-restore-to-server-remaining-items-text =
+    { general-sentence-separator }{ $localItemsCount ->
+        [0] The library on this computer and the online library will be empty.
+        [one] 1 item will remain on this computer and in the online library.
+       *[other] { $localItemsCount } items will remain on this computer and in the online library.
+    }
+preferences-sync-reset-restore-to-server-checkbox-label =
+    { $remoteItemsDeletedCount ->
+        [one] Delete 1 item
+       *[other] Delete { $remoteItemsDeletedCount } items
+    }
+preferences-sync-reset-restore-to-server-confirmation-text = delete online library
+preferences-sync-reset-restore-to-server-yes = Korvaa tiedot verkkokirjastossa

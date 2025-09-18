@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Krmilka (Control)
 general-key-shift = Dvigalka
 general-key-alt = Izmenjalka (Alt)
@@ -8,7 +9,17 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
+    { PLATFORM() ->
+        [macos] Vračalka
+       *[other] Vračalka
+    }
+delete-or-backspace =
     { PLATFORM() ->
         [macos] Vračalka
        *[other] Vračalka
@@ -20,15 +31,53 @@ general-remind-me-later = Spomni me kasneje
 general-dont-ask-again = Ne sprašuj več
 general-choose-file = Izberite datoteko ...
 general-open-settings = Odpri nastavitve
+general-settings = Settings…
 general-help = Pomoč
 general-tag = Značka
 general-done = Opravljeno
 general-view-troubleshooting-instructions = Pokaži navodila za reševanje težav
-general-go-back = Go Back
+general-go-back = Pojdi nazaj
+general-accept = Accept
+general-cancel = Prekliči
+general-show-in-library = Pokaži v knjižnici
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
+general-save = Shrani
+general-clear = Počisti
+general-update = Posodobi
+general-back = Nazaj
+general-edit = Uredi
+general-cut = Izreži
+general-copy = Kopiraj
+general-paste = Prilepi
+general-find = Najdi
+general-delete = Izbriši
+general-insert = Vstavi
+general-and = in
+general-et-al = idr.
+general-previous = Nazaj
+general-next = Naprej
+general-learn-more = Več o tem
+general-warning = Opozorilo
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = Rdeča
+general-orange = Oranžna
+general-yellow = Rumena
+general-green = Zelena
+general-teal = Turkizna
+general-blue = Modra
+general-purple = Škrlatna
+general-magenta = Škrlatna
+general-violet = Vijolična
+general-maroon = Kostanjeva
+general-gray = Siva
+general-black = Črna
 citation-style-label = Slog citiranja:
 language-label = Jezik:
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
-    .label = Show in Finder
+    .label = Pokaži v Finderju
 menu-file-show-file =
     .label = Pokaži datoteko
 menu-file-show-files =
@@ -36,7 +85,7 @@ menu-file-show-files =
 menu-print =
     .label = { general-print }
 menu-density =
-    .label = Density
+    .label = Gostota
 add-attachment = Dodaj priponko
 new-note = Nova opomba
 menu-add-by-identifier =
@@ -46,13 +95,13 @@ menu-add-attachment =
 menu-add-standalone-file-attachment =
     .label = Dodaj datoteko ...
 menu-add-standalone-linked-file-attachment =
-    .label = Add Link to File…
+    .label = Dodaj povezavo do datoteke ...
 menu-add-child-file-attachment =
     .label = Pripni datoteko ...
 menu-add-child-linked-file-attachment =
     .label = Pripni povezavo do datoteke ...
 menu-add-child-linked-url-attachment =
-    .label = Attach Web Link…
+    .label = Pripni spletno povezavo ...
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
@@ -66,15 +115,23 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Vstavki
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Premakni stolpec levo
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Premakni stolpec desno
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = Knjižnica
 main-window-key =
-    .key = L
+    .key = B
 zotero-toolbar-tabs-menu =
-    .tooltiptext = List all tabs
+    .tooltiptext = Izpiši vse zavihke
 filter-collections = Filtriraj zbirke
 zotero-collections-search =
     .placeholder = { filter-collections }
@@ -84,6 +141,10 @@ zotero-tabs-menu-filter =
     .placeholder = Search Tabs
 zotero-tabs-menu-close-button =
     .title = Zapri zavihek
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -129,22 +190,24 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Spletna povezava
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Spremeni nadrejeni vnos ...
+item-menu-relate-items =
+    .label = Relate Items
 view-online = Pokaži na spletu
 item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = Datoteka preimenovana v { $filename }
 itembox-button-options =
-    .tooltiptext = Open context menu
+    .tooltiptext = Odpri kontekstni meni
 itembox-button-merge =
-    .aria-label = Select version of { $field } field
-create-parent-intro = Enter a DOI, ISBN, PMID, arXiv ID, or ADS Bibcode to identify this file:
+    .aria-label = Izberite različico polja { $field }
+create-parent-intro = Vnesite kodo DOI, ISBN, PMID, arXiv ID ali ADS, da identificirate to datoteko:
 reader-use-dark-mode-for-content =
-    .label = Use Dark Mode for Content
-update-updates-found-intro-minor = An update for { -app-name } is available:
-update-updates-found-desc = It is recommended that you apply this update as soon as possible.
+    .label = Uporabi temni način za vsebino
+update-updates-found-intro-minor = Na voljo je posodobitev za { -app-name }:
+update-updates-found-desc = Priporočamo, da to posodobitev uveljavite čim prej.
 import-window =
     .title = Uvozi
 import-where-from = Od kod želite uvoziti?
@@ -163,7 +226,7 @@ import-recreate-structure =
     .label = Recreate folder structure as collections
 import-fileTypes-header = File Types to Import:
 import-fileTypes-pdf =
-    .label = PDFs
+    .label = PDF-ji
 import-fileTypes-other =
     .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
 import-file-handling = Ravnanje z datotekami
@@ -241,6 +304,7 @@ runJS-title = Run JavaScript
 runJS-editor-label = Koda:
 runJS-run = Run
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Return value:
@@ -273,61 +337,15 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Natisni
 bibliography-manageStyles-label = Upravljaj s slogi ...
-integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
-integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
-integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
 styleEditor-locatorType =
     .aria-label = Locator type
 styleEditor-locatorInput = Locator input
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
-    .aria-label = Style editor
+    .aria-label = Urejevalnik sloga
 styleEditor-preview =
     .aria-label = Predogled
-integration-prefs-displayAs-label = Prikaži citate kot:
-integration-prefs-footnotes =
-    .label = sprotne opombe
-integration-prefs-endnotes =
-    .label = končne opombe
-integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
-integration-prefs-bookmarks-description = Zaznamki se lahko skupno rabijo v Microsoft Word in LibreOffice, vendar lahko povzročijo napako, če se ponesreči spremenijo,  ter jih ni mogoče vstavljati v sprotne opombe.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] The document must be saved as .doc or .docx.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Samodejno posodobi navedke
-    .tooltip = Navedki s čakajočimi posodobitvami bodo v dokumentu poudarjeni
-integration-prefs-automaticCitationUpdates-description = Onemogočanje posodobitev lahko pohitri vstavljanje navedkov v večjih dokumentih. Za ročno posodobitev navedkov kliknite Osveži.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Uporabi okrajšave revij MEDLINE
-integration-prefs-automaticJournalAbbeviations-description = Polje »Journal Abbr« bo prezrto.
-integration-prefs-exportDocument =
-    .label = Preklopi v drug urejevalnik besedil ...
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Moje objave
 publications-intro = Vnosi, ki jih dodate med Moje objave, bodo prikazane na strani vašega profila na zotero.org. Če izberete vključitev pripetih datotek, bodo javno objavljene pod pogoji dovoljenja, ki ga izberete. Dodajte le dela, ki ste jih ustvarili sami in za katera imate ustrezne pravice, da jih lahko (in jih tudi želite) razširjati na tak način.
 publications-include-checkbox-files =
@@ -380,13 +398,14 @@ licenses-cc-by-nc-nd = Mednarodno dovoljenje Creative Commons 4.0: priznanje avt
 licenses-cc-by-nc-sa = Mednarodno dovoljenje Creative Commons 4.0: priznanje avtorstva-nekomercialno-deljenje pod podobnimi pogoji
 licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
 licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = Restart in Troubleshooting Mode…
     .accesskey = d
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
 menu-ui-density =
-    .label = Density
+    .label = Gostota
 menu-ui-density-comfortable =
     .label = Comfortable
 menu-ui-density-compact =
@@ -424,6 +443,7 @@ section-attachments-annotations =
             [one] { $count } Annotation
            *[other] { $count } Annotations
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
@@ -484,6 +504,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = Preklopi kontekstno podokno
 pin-section =
     .label = Pin Section
 unpin-section =
@@ -512,6 +542,8 @@ new-collection-dialog =
     .buttonlabelaccept = Ustvari zbirko
 new-collection-name = Ime:
 new-collection-create-in = Create in:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = Naslov
 attachment-info-filename = Ime datoteke
 attachment-info-accessed = Dostopano
@@ -527,6 +559,18 @@ attachment-info-convert-note =
         } Note
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
 attachment-preview-placeholder = No attachment to preview
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = Nalaganje ...
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
@@ -534,31 +578,15 @@ toggle-preview =
             [collapsed] Show
            *[unknown] Toggle
         } Attachment Preview
-quickformat-general-instructions =
-    Use Left/Right Arrow to navigate the items of this citation. { $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
-       *[other] { "" }
-    } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
-quickformat-accept =
-    .tooltiptext = Save edits to this citation
-quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value = Locator
-quickformat-citation-options =
-    .tooltiptext = Show citation options
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
-    .aria-label = Quick Search mode
+    .aria-label = Način hitrega iskanja
 quicksearch-input =
     .aria-label = Hitro iskanje
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 item-pane-header-view-as =
-    .label = View As
+    .label = Pokaži kot
 item-pane-header-none =
     .label = brez
 item-pane-header-title =
@@ -566,7 +594,7 @@ item-pane-header-title =
 item-pane-header-titleCreatorYear =
     .label = Naslov, avtor, leto
 item-pane-header-bibEntry =
-    .label = Bibliography Entry
+    .label = Bibliografski vnos
 item-pane-header-more-options =
     .label = Dodatne možnosti
 item-pane-message-items-selected =
@@ -610,15 +638,9 @@ item-pane-duplicates-merge-items =
         }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
-architecture-warning-action = Download 64-bit { -app-name }
+architecture-warning-action = Prenesi 64-bitni { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
-first-run-guidance-quickFormat =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
-    
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
+architecture-x64-on-arm64-action = Prenesi { -app-name } za ARM64
 first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -638,8 +660,10 @@ find-pdf-files-added =
         [one] { $count } file added
        *[other] { $count } files added
     }
+select-items-window =
+    .title = Izberi vnose
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = Izberi
 select-items-convertToStandalone =
     .label = Convert to Standalone
 select-items-convertToStandaloneAttachment =
@@ -663,17 +687,26 @@ file-type-presentation = Predstavitev
 file-type-document = Dokument
 file-type-ebook = E-knjiga
 post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-density = Izberite želeno gostoto postavitve:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
-    .label = Paste and Search
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+    .label = Prilepi in išči
+mac-word-plugin-install-message = Zotero potrebuje dostop do podatkov Word za namestitev vstavka za Word.
 mac-word-plugin-install-action-button =
     .label = Namesti dodatek za Word
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

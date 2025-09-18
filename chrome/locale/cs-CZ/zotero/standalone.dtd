@@ -56,12 +56,12 @@
 <!ENTITY recursiveCollections.label "Zobrazit položky z podkolekcí">
 <!ENTITY fontSize.label "Velikost písma">
 <!ENTITY noteFontSize.label "Velikost písma poznámek">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Sloupce">
+<!ENTITY sortBy.label "Seřadit podle">
 
 <!ENTITY toolsMenu.label "Nástroje">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "Nainstalovat konektor do prohlížeče...">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Doplňky">
 <!ENTITY developer.label "Vývojář">

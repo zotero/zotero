@@ -4,10 +4,10 @@ preferences-appearance-title = Utseende og språk
 preferences-auto-recognize-files =
     .label = Automatisk innhenting av metadata for PDF-filer og e-bøker
 preferences-file-renaming-title = Endre navn på filer
-preferences-file-renaming-intro = { -app-name } gir automatisk nytt navn til nedlastede filer basert på detaljene i det overordnede elementet (tittel, forfatter osv.). Du kan også velge å gi nytt navn til filer som er lagt til fra datamaskinen.
+preferences-file-renaming-intro = { -app-name } kan automatisk endre navn på filer basert på detaljene til det overordnede elementet (tittel, forfatter osv.) og holde filnavnene synkronisert når du gjør endringer. Nedlastede filer får alltid først navn basert på det overordnede elementet.
 preferences-file-renaming-auto-rename-files =
-    .label = Gi automatisk nytt navn til filer som legges til lokalt
-preferences-file-renaming-file-types = Gi nytt navn til disse filtypene:
+    .label = Automatisk endre navn på filer
+preferences-file-renaming-file-types = Endre navn på disse filtypene:
 preferences-file-renaming-file-type-pdf =
     .label = { file-type-pdf }
 preferences-file-renaming-file-type-epub =
@@ -20,8 +20,10 @@ preferences-file-renaming-file-type-video =
     .label = { file-type-video }
 preferences-file-renaming-customize-button =
     .label = Tilpass format for filnavn...
+preferences-file-renaming-rename-now =
+    .label = Endre navn på filer…
 preferences-file-renaming-format-title = Format for filnavn
-preferences-file-renaming-format-instructions = Du kan tilpasse filnavnmønsteret { -app-name }  bruker til å gi nytt navn til vedleggsfiler fra overordnede metadata.
+preferences-file-renaming-format-instructions = Du kan tilpasse filnavnmønsteret { -app-name }  bruker for å endre navn på vedleggsfiler fra overordnede metadata.
 preferences-file-renaming-format-instructions-example = For eksempel vil "{ $example }" i denne malen bli erstattet med tittelen på det overordnede elementet, avkortet til 50 tegn.
 preferences-file-renaming-format-instructions-more = Se <label data-l10n-name="file-renaming-format-help-link">dokumentasjon</label> for mer informasjon
 preferences-file-renaming-format-template = Mal for filnavn:
@@ -32,7 +34,7 @@ preferences-reader-open-snapshots-using = Åpne øyeblikksbilder ved hjelp av
 preferences-reader-open-in-new-window =
     .label = Åpne filer i nye vinduer i stedet for i faner
 preferences-reader-auto-disable-tool =
-    .label = Turn off note, text, and image annotation tools after each use
+    .label = Slå av verktøyene for notater, tekst og bildekommentarer etter hver bruk.
 preferences-reader-ebook-font = Skrifttype for e-bok:
 preferences-reader-ebook-hyphenate =
     .label = Aktiver automatisk orddeling
@@ -56,14 +58,23 @@ preferences-quickCopy-minus =
 preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
-preferences-styleManager-delete-button =
-    .tooltiptext = Slett den valgte stilen
-    .aria-label = { general-remove }
-    .label = { $label }
-preferences-styleManager-add-button =
+preferences-styleManager-intro = { -app-name } kan generere henvisninger og bibliografier i over 10 000 henvisningsstiler. Legg til stiler her for å gjøre dem tilgjengelige når du velger stiler i { -app-name }.
+preferences-styleManager-get-additional-styles =
+    .label = Hent flere stiler...
+preferences-styleManager-restore-default =
+    .label = Tilbakestill standard stiler...
+preferences-styleManager-add-from-file =
     .tooltiptext = Legg til en stil fra en fil
-    .aria-label = { general-add }
-    .label = { $label }
+    .label = Legg til fra fil…
+preferences-styleManager-remove = Trykk { delete-or-backspace } for å fjerne denne stilen.
+preferences-citation-dialog = Henvisningsdialogboks
+preferences-citation-dialog-mode = Modus for henvisningsdialogboks
+preferences-citation-dialog-mode-last-used =
+    .label = Sist brukt
+preferences-citation-dialog-mode-list =
+    .label = Listemodus
+preferences-citation-dialog-mode-library =
+    .label = Biblioteksmodus
 preferences-advanced-enable-local-api =
     .label = Tillat andre programmer på denne datamaskinen å kommunisere med { -app-name }
 preferences-advanced-local-api-available = Tilgjengelig på <code data-l10n-name="url">{ $url }</span>
@@ -80,3 +91,22 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Standard: { $directory })
     .aria-label = Standard plassering
+preferences-sync-reset-restore-to-server-body = { -app-name } vil erstatte “{ $libraryName }” på { $domain } med data fra denne datamaskinen.
+preferences-sync-reset-restore-to-server-deleted-items-text =
+    { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
+        [one] element
+       *[other] elementer
+    } i nettbiblioteket vil bli slettet permanent.
+preferences-sync-reset-restore-to-server-remaining-items-text =
+    { general-sentence-separator }{ $localItemsCount ->
+        [0] Biblioteket på denne datamaskinen og nettbiblioteket vil være tomt.
+        [one] 1 element vil forbli på denne datamaskinen og i nettbiblioteket.
+       *[other] { $localItemsCount } elementer vil forbli på denne datamaskinen og i nettbiblioteket.
+    }
+preferences-sync-reset-restore-to-server-checkbox-label =
+    { $remoteItemsDeletedCount ->
+        [one] Slett 1 element
+       *[other] Slett  { $remoteItemsDeletedCount } elemeter
+    }
+preferences-sync-reset-restore-to-server-confirmation-text = Slett nettbiblioteket
+preferences-sync-reset-restore-to-server-yes = Erstatt data i ditt bibliotek på nett

@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Název">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualizováno">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Získat další styly...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Uložit do Zotera (ikona v adresním řádku)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Přejít do panelu Knihovny">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Zkontrolovat integritu databáze">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Resetovat překladače a styly">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Resetovat překladače">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Resetovat styly...">
 
 <!ENTITY zotero.preferences.configEditor "Editor předvoleb">

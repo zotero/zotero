@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Pavadinimas">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Atnaujinta">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Parsisiųsti papildomų stilių...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Įrašyti į Zotero (ženkliukas adreso juostoje)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Aktyvuoti bibliotekos skydelį">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tikrinti duomenų bazės vientisumą">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Atkurti transliatorius ir stilius...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Atkurti transliatorius...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Atkurti stilius...">
 
 <!ENTITY zotero.preferences.configEditor "Konfigūracijos rengyklė">

@@ -41,14 +41,62 @@
   "general_copyToClipboard": {
     "message": "Kopírovat do schránky"
   },
+  "itemType_pdf": {
+    "message": "PDF příloha"
+  },
+  "itemType_epub": {
+    "message": "EPUB příloha"
+  },
+  "itemType_snapshot": {
+    "message": "Snímek"
+  },
   "itemType_note": {
     "message": "Poznámka"
+  },
+  "itemType_link": {
+    "message": "Webový odkaz"
   },
   "itemType_attachment": {
     "message": "Příloha"
   },
   "progressWindow_savingTo": {
     "message": "Ukládám do"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "Zobrazit podrobnosti"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Skrýt podrobnosti"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Vybrat cílovou kolekci"
+  },
+  "progressWindow_savingItems": {
+    "message": "Ukládám $1 položky. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Ukládám položku $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Položka $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Uloženo $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Uloženo $1 pro položku  $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Neúspěšné stahování $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Neúspěšné stahování $1 položky $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Ukládání je dokončeno. Dialogové okno se nyní zavře."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Položky z této webové stránky již byly uloženy."
   },
   "progressWindow_tagPlaceholder": {
     "message": "Štítky (oddělené mezerami)"
@@ -76,6 +124,18 @@
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "Poslední verze"
+  },
+  "itemSelector_title": {
+    "message": "Vyberte položky, které chcete přidat do knihovny:"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 Konektor není na této stránce k dispozici"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Konektor není k dispozici na URL souboru"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 Konektor není k dispozici na stránkách rozšíření"
   },
   "appConnector": {
     "message": "$1 konektor"
@@ -143,6 +203,9 @@
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1uzamkne dokument a zabrání tak souběžným úpravám citací více uživateli. Souběžné úpravy citací v dokumentu mohou vést k poškození citací nebo dokumentu. Některé nepředvídatelné okolnosti, například selhání sítě, mohou vést k trvalému uzamčení vašeho dokumentu. Pokud se domníváte, že k tomu došlo, můžete zámek zrušit.<br/><br/>Chcete zrušit uzamčení dokumentu?"
   },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 potřebuje oprávnění k úpravám Dokumentů Google, aby mohl vkládat citace. Zkuste to prosím znovu a nezapomeňte povolit $1 zobrazení, úpravu, vytváření a mazání Dokumentů Google."
+  },
   "integration_googleDocs_documentPermissionError": {
     "message": "Vybraný účet Google nemá oprávnění k úpravám tohoto dokumentu. Zkuste to prosím znovu a nezapomeňte vybrat účet s oprávněním k úpravám."
   },
@@ -157,6 +220,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Tyto citace se <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">odpojily z $1</a>. Než se aktualizují nebo zobrazí v bibliografii, budete je muset znovu propojit."
+  },
+  "copyUnproxiedLink": {
+    "message": "Kopírovat odkaz bez proxy"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Kopírovat adresu stránky URL bez proxy"
+  },
+  "reloadViaProxy": {
+    "message": "Znovu načíst přes proxy server"
+  },
+  "reloadVia": {
+    "message": "Znovu načíst pomocí  $1"
   },
   "general_saveTo": {
     "message": "Uložit do $1"

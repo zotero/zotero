@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "כותרת">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "עודכן">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL (שפת סגנון ציטוטים)">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "משיכת סגנונות נוספים…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "שמירה ל־Zotero (סמל שורת כתובת)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "התמקדות על חלונית הספריות">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "בדיקת שלמות מסד נתונים">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "איפוס מתרגמים וסגנונות…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "איפוס מתרגמים…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "איפוס סגנונות…">
 
 <!ENTITY zotero.preferences.configEditor "עורך הגדרות">

@@ -4,9 +4,9 @@ preferences-appearance-title = Aspetto e lingua
 preferences-auto-recognize-files =
     .label = Recupera automaticamente i metadati di PDF e ebook
 preferences-file-renaming-title = Rinominazione dei file
-preferences-file-renaming-intro = { -app-name } rinomina automaticamente i file scaricati sulla base dei metadati dell'elemento genitore (titolo, autore, ecc.). Puoi scegliere di rinominare anche i file aggiunti dal tuo computer.
+preferences-file-renaming-intro = { -app-name } può rinominare automaticamente i file in accordo con i metadati dell'elemento genitore (titolo, autore, ecc.) e mantenerli sincronizzati con eventuali modifiche. I file scaricati sono sempre rinominati in accordo con l'elemento genitore.
 preferences-file-renaming-auto-rename-files =
-    .label = Rinomina automaticamente i file aggiunti localmente.
+    .label = Rinomina file automaticamente
 preferences-file-renaming-file-types = Rinomina file di questi tipi:
 preferences-file-renaming-file-type-pdf =
     .label = { file-type-pdf }
@@ -20,6 +20,8 @@ preferences-file-renaming-file-type-video =
     .label = { file-type-video }
 preferences-file-renaming-customize-button =
     .label = Personalizza il formato del nome dei file...
+preferences-file-renaming-rename-now =
+    .label = Rinomina file...
 preferences-file-renaming-format-title = Formato del nome dei file
 preferences-file-renaming-format-instructions = È possibile personalizzare lo schema con cui { -app-name } rinomina i file allegati dai metadati dell'elemento genitore.
 preferences-file-renaming-format-instructions-example = Ad esempio, “{ $example }” in questo schema sarà sostituito dal titolo dell'elemento genitore, troncato a 50 caratteri.
@@ -32,7 +34,7 @@ preferences-reader-open-snapshots-using = Apri pagina web con
 preferences-reader-open-in-new-window =
     .label = Apri i file in nuove finestre invece di nuove schede
 preferences-reader-auto-disable-tool =
-    .label = Turn off note, text, and image annotation tools after each use
+    .label = Disattiva le annotazioni testuale e grafiche dopo ciascun uso
 preferences-reader-ebook-font = Font per gli ebook:
 preferences-reader-ebook-hyphenate =
     .label = Attiva sillabazionie automatica
@@ -56,14 +58,23 @@ preferences-quickCopy-minus =
 preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
-preferences-styleManager-delete-button =
-    .tooltiptext = Elimina lo stile selezionato
-    .aria-label = { general-remove }
-    .label = { $label }
-preferences-styleManager-add-button =
+preferences-styleManager-intro = { -app-name } può generare riferimenti bibliografici e bibliografie in più di 10'000 stili citazionali. Aggiungi qui altri stili per renderli disponibili quando selezioni uno stile in  { -app-name }.
+preferences-styleManager-get-additional-styles =
+    .label = Scarica altri stili…
+preferences-styleManager-restore-default =
+    .label = Ripristina gli stili predefiniti...
+preferences-styleManager-add-from-file =
     .tooltiptext = Aggiungi uno stile da file
-    .aria-label = { general-add }
-    .label = { $label }
+    .label = Aggiungi da file…
+preferences-styleManager-remove = Premi { delete-or-backspace } per rimuovere questo stile.
+preferences-citation-dialog = Finestra di citazione
+preferences-citation-dialog-mode = Modalità della finestra di citazione:
+preferences-citation-dialog-mode-last-used =
+    .label = Ultimo usato
+preferences-citation-dialog-mode-list =
+    .label = Modalità lista
+preferences-citation-dialog-mode-library =
+    .label = Modalità biblioteca
 preferences-advanced-enable-local-api =
     .label = Autorizza altre applicazione nel computer a comunicare con { -app-name }
 preferences-advanced-local-api-available = Disponibile sul sito <code data-l10n-name="url">{ $url }</span>
@@ -80,3 +91,23 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Default: { $directory })
     .aria-label = Posizione predefinita
+preferences-sync-reset-restore-to-server-body = { -app-name } sostituirà “{ $libraryName }” su { $domain } con i dati presenti su questo computer.
+preferences-sync-reset-restore-to-server-deleted-items-text =
+    { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
+        [one] elemento
+       *[other] elementi
+    } nella biblioteca online saranno cancellati definitivamente.
+preferences-sync-reset-restore-to-server-remaining-items-text =
+    { general-sentence-separator }{ $localItemsCount ->
+        [0] La biblioteca su questo computer e quella online saranno vuote
+        [one] rimarrà 1 elemento nella biblioteca su questo computer e in quella online.
+       *[other] rimarranno { $localItemsCount } elementi nella biblioteca su questo computer e in quella online.
+    }
+preferences-sync-reset-restore-to-server-checkbox-label =
+    { $remoteItemsDeletedCount ->
+        [one] Cancella 1 elemento
+        [many] Cancella { $remoteItemsDeletedCount } elementi
+       *[other] Cancella { $remoteItemsDeletedCount } elementi
+    }
+preferences-sync-reset-restore-to-server-confirmation-text = cancella biblioteca online
+preferences-sync-reset-restore-to-server-yes = Sostituisci i dati nella biblioteca online

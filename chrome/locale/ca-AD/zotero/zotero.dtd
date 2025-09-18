@@ -79,7 +79,6 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Més">
 <!ENTITY zotero.toolbar.lookup.label "Afegeix un element segons l'identificador">
 <!ENTITY zotero.toolbar.removeItem.label "Esborra l'element...">
-<!ENTITY zotero.toolbar.newLibrary.label "Biblioteca nova">
 <!ENTITY zotero.toolbar.newGroup "Grup nou...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Subcol·lecció nova...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nova cerca desada...">

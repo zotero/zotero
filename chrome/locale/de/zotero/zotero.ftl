@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Steuerung
 general-key-shift = Shift
 general-key-alt = Alt
@@ -8,10 +9,20 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = Drucken
 general-remove = Entfernen
@@ -20,13 +31,51 @@ general-remind-me-later = Später erinnern
 general-dont-ask-again = Nicht erneut fragen
 general-choose-file = Datei auswählen...
 general-open-settings = Einstellungen öffnen
+general-settings = Settings…
 general-help = Hilfe
 general-tag = Tag
 general-done = Erledigt
 general-view-troubleshooting-instructions = Anleitung zur Problembehebung anzeigen
-general-go-back = Go Back
+general-go-back = Zurück
+general-accept = Accept
+general-cancel = Abbrechen
+general-show-in-library = In Bibliothek anzeigen
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = Im Problembehebungsmodus neustarten
+general-save = Speichern
+general-clear = Zurücksetzen
+general-update = Aktualisieren
+general-back = Zurück
+general-edit = Bearbeiten
+general-cut = Ausschneiden
+general-copy = Kopieren
+general-paste = Einfügen
+general-find = Suchen
+general-delete = Löschen
+general-insert = Objekt einfügen
+general-and = und
+general-et-al = et al.
+general-previous = Nächstes
+general-next = Vorheriges
+general-learn-more = Mehr erfahren
+general-warning = Warnung
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = Rot
+general-orange = Orange
+general-yellow = Gelb
+general-green = Grün
+general-teal = Türkis
+general-blue = Blau
+general-purple = Lila
+general-magenta = Magenta
+general-violet = Violett
+general-maroon = Braun
+general-gray = Grau
+general-black = Schwarz
 citation-style-label = Zitierstil:
 language-label = Sprache:
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
     .label = In Finder anzeigen
 menu-file-show-file =
@@ -66,11 +115,19 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Plugins
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Spalte nach links verschieben
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Spalte nach rechts verschieben
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = Bibliothek
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,6 +141,10 @@ zotero-tabs-menu-filter =
     .placeholder = Tabs durchsuchen
 zotero-tabs-menu-close-button =
     .title = Tab schließen
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -130,6 +191,8 @@ item-menu-add-url =
     .label = Weblink
 item-menu-change-parent-item =
     .label = Übergeordneten Eintrag ändern...
+item-menu-relate-items =
+    .label = Relate Items
 view-online = Online anzeigen
 item-menu-option-view-online =
     .label = { view-online }
@@ -241,6 +304,7 @@ runJS-title = JavaScript ausführen
 runJS-editor-label = Code:
 runJS-run = Ausführen
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Rückgabewert:
@@ -273,61 +337,15 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Drucken
 bibliography-manageStyles-label = Stile verwalten...
-integration-docPrefs-window =
-    .title = { -app-name } - Dokumenteinstellungen
-integration-addEditCitation-window =
-    .title = { -app-name } - Zitation hinzufügen/bearbeiten
-integration-editBibliography-window =
-    .title = { -app-name } - Literaturverzeichnis bearbeiten
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Schnellformatierung Zitation
 styleEditor-locatorType =
     .aria-label = Art der Fundstelle
-styleEditor-locatorInput = Fundstellen-Input
+styleEditor-locatorInput = Fundstellen-Eingabe
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
     .aria-label = Zitierstil-Editor
 styleEditor-preview =
     .aria-label = Vorschau
-integration-prefs-displayAs-label = Literaturangaben anzeigen als:
-integration-prefs-footnotes =
-    .label = Fußnoten
-integration-prefs-endnotes =
-    .label = Endnoten
-integration-prefs-bookmarks =
-    .label = Zitation als Lesezeichen speichern
-integration-prefs-bookmarks-description = Lesezeichen können zwischen Microsoft Word und OpenOffice.org geteilt werden, aber dies ist fehleranfällig falls diese versehentlich verändert werden und können nicht als Fußnoten benutzt werden.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] Das Dokument muss als .doc oder .docx gespeichert werden
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Automatisch Zitationen aktualisieren
-    .tooltip = Zitationen mit anstehenden Aktualisierungen werden im Dokument hervorgehoben
-integration-prefs-automaticCitationUpdates-description = Das Deaktivieren von automatischen Aktualisierungen kann das Einfügen von Zitationen in großen Dokumenten beschleunigen. Zitationen können dann manuell aktualisiert werden durch das Klicken Sie auf Aktualisieren.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Abgekürzte Zeitschriftentitel von MEDLINE verwenden
-integration-prefs-automaticJournalAbbeviations-description = Das Feld "Zeitschriften-Abkürzung" wird ignoriert.
-integration-prefs-exportDocument =
-    .label = Textverarbeitungsprogramm wechseln...
-integration-error-unable-to-find-winword = { -app-name } konnte keine laufende Word-Instanz finden.
 publications-intro-page = Meine Veröffentlichungen
 publications-intro = Einträge, die Sie zu Meine Veröffentlichungen hinzufügen, werden auf Ihrer Profilseite auf Zotero.org angezeigt. Wenn Sie die Option "Dateien verfügbar machen" auswählen, werden die Dateianhänge unter der von Ihnen gewählten Lizenz öffentlich verfügbar gemacht. Fügen Sie nur Werke hinzu, die Sie selbst erstellt haben, und laden wählen Sie diese Option nur dann, wenn Sie zur Verbreitung der Dateien berechtigt sind und sie öffentlich verfügbar machen wollen.
 publications-include-checkbox-files =
@@ -380,10 +398,11 @@ licenses-cc-by-nc-nd = Creative Commons Namensnennung - Nicht kommerziell - Kein
 licenses-cc-by-nc-sa = Creative Commons Namensnennung - Nicht kommerziell - Weitergabe unter gleichen Bedingungen 4.0 Internationale Lizenz
 licenses-cc-more-info = Stellen Sie sicher, dass Sie die <a data-l10n-name="license-considerations">Informationen über Creative-Commons-Lizenzen</a> gelesen haben, bevor Sie Ihr Arbeit unter einer CC-Lizenz veröffentlichen. Beachten Sie, dass die verwendete Lizenz unwiderruflich ist, auch wenn sie später eine andere Lizenz verwenden oder die Veröffentlichung einstellen
 licenses-cc0-more-info = Stellen Sie sicher, dass Sie die <a data-l10n-name="license-considerations">CC0-FAQ</a> gelesen haben, bevor Sie Ihre Arbeit unter der CC0-Lizenz veröffentlichen. Beachten Sie, dass Sie die damit erteilte Freigabe nicht widerrufen können, auch wenn sie später eine andere Lizenz verwenden oder die Veröffentlichung einstellen.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = Im Problembehebungsmodus neustarten…
     .accesskey = P
-restart-in-troubleshooting-mode-dialog-title = Im Problembehebungsmodus neustarten
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } wird mit deaktivierten Plugins neu starten. Manche Funktionen funktionieren im Problembehebungsmodus möglicherweise nicht korrekt.
 menu-ui-density =
     .label = Dichte
@@ -391,7 +410,7 @@ menu-ui-density-comfortable =
     .label = Locker
 menu-ui-density-compact =
     .label = Kompakt
-pane-item-details = Item Details
+pane-item-details = Eintragsdetails
 pane-info = Infos
 pane-abstract = Zusammenfassung
 pane-attachments = Anhänge
@@ -424,6 +443,7 @@ section-attachments-annotations =
             [one] { $count } Anmerkung ausgewählt.
            *[other] { $count } Anmerkungen ausgewählt
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
@@ -484,6 +504,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = Kontextbereich umschalten
 pin-section =
     .label = Abschnitt anpinnen
 unpin-section =
@@ -512,6 +542,8 @@ new-collection-dialog =
     .buttonlabelaccept = Sammlung erstellen
 new-collection-name = Name:
 new-collection-create-in = Erstellen in:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = Titel
 attachment-info-filename = Dateiname
 attachment-info-accessed = Zugriffsdatum
@@ -527,6 +559,18 @@ attachment-info-convert-note =
         } migrieren
     .tooltiptext = Es ist nicht mehr möglich, Notizen zu Anhängen hinzuzufügen, aber Sie können diese Notiz bearbeiten, indem Sie diese zu einer separaten Notiz umwandeln.
 attachment-preview-placeholder = Kein Anhang für die Vorschau
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = Lädt...
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         Anhangsvorschau { $type ->
@@ -534,23 +578,7 @@ toggle-preview =
             [collapsed] anzeigen
            *[unknown] umschalten
         }
-quickformat-general-instructions =
-    Die Pfeiltasten verwenden, um zwischen den Einträgen in dieser Zitation zu navigieren. { $dialogMenu ->
-        [active] Shift+Tab drücken, um das Menü des Dialogs zu fokussieren
-       *[other] { "" }
-    } { return-or-enter } drücken, um Änderungen an dieser Zitation zu speichern. Mit Escape die Änderungen verwerfen und den Dialog schließen.
-quickformat-aria-bubble = Dieser Eintrag ist Teil der Zitation. Drücken Sie die Leertaste, um ihn anzupassen. { quickformat-general-instructions }
-quickformat-aria-input = Tippen um einen Eintrag zu suchen, der der Zitation hinzugefügt werden soll. Mit Tab lässt sich die Ergebnisliste navigieren. { quickformat-general-instructions }
-quickformat-aria-item = { return-or-enter } drücken, um dieses Objekt zum Zitat hinzuzufügen. Tab drücken, um zum Suchfeld zurückzukehren.
-quickformat-accept =
-    .tooltiptext = Bearbeitungen für diese Zitation speichern
-quickformat-locator-type =
-    .aria-label = Art der Fundstelle
-quickformat-locator-value = Fundstelle
-quickformat-citation-options =
-    .tooltiptext = Zitations-Optionen anzeigen
-insert-note-aria-input = Tippen um eine Notiz zu finden. Tab drücken, um in der Ergebnisliste zu navigieren. Escape drücken, um den Dialog zu schließen.
-insert-note-aria-item = { return-or-enter } drücken, um diese Notiz auszuwählen. Tab drücken, um zurück ins Suchfeld zu wechseln. Escape, um den Dialog zu schließen.
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
     .aria-label = Schnellsuche-Modus
 quicksearch-input =
@@ -613,12 +641,6 @@ architecture-win32-warning-message = Für die beste Leistung zur 64-Bit-Version 
 architecture-warning-action = 64-Bit { -app-name }-Version herunterladen
 architecture-x64-on-arm64-message = { -app-name } wird aktuell im emulierten Modus ausgeführt. Eine native Version von { -app-name } wird effizienter laufen.
 architecture-x64-on-arm64-action = { -app-name } für ARM64 herunterladen
-first-run-guidance-quickFormat =
-    Einen Titel, Autor und/oder ein Jahr eintippen, um nach einer Literaturangabe zu suchen.
-    
-    Nachdem Sie eine Auswahl getroffen haben, klicken Sie die Blase oder wählen sie diese mit der Tastatur aus und drücken Sie  ↓/Leertaste, um Zitationsoptionen wie Seitenzahl, Präfix oder Suffix anzuzeigen.
-    
-    Sie können auch direkt eine Seitenzahl hinzufügen, wenn Sie diese ihrer Suche hinzufügen oder indem Sie diese hinter der Blase eintragen und { return-or-enter } drücken.
 first-run-guidance-authorMenu = { -app-name } ermöglicht es Ihnen, auch Herausgeber und Übersetzer anzugeben. Sie können einen Autor zum Übersetzer machen, indem Sie in diesem Menü die entsprechende Auswahl treffen.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -638,10 +660,12 @@ find-pdf-files-added =
         [one] { $count } Datei hinzugefügt
        *[other] { $count } Dateien hinzugefügt
     }
+select-items-window =
+    .title = Einträge auswählen
 select-items-dialog =
     .buttonlabelaccept = Auswählen
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = Zu eigenständigem Eintrag umwandeln
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
@@ -651,8 +675,8 @@ select-items-convertToStandaloneAttachment =
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Zu eigenständiger Notiz umwandeln
+           *[other] Zu eigenständigen Notizen umwandeln
         }
 file-type-webpage = Webseite
 file-type-image = Bild
@@ -677,3 +701,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -8,10 +9,20 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = Yazdır
 general-remove = Kaldır
@@ -20,13 +31,51 @@ general-remind-me-later = Daha Sonra Hatırlat
 general-dont-ask-again = Bir Daha Sorma
 general-choose-file = Dosya Seçiniz...
 general-open-settings = Ayarları Aç
+general-settings = Ayarlar...
 general-help = Yardım
 general-tag = Etiket
 general-done = Tamam
 general-view-troubleshooting-instructions = Sorun Giderme Talimatlarını Göster
 general-go-back = Geri Git
+general-accept = Kabul Et
+general-cancel = İptal Et
+general-show-in-library = Kitaplıkta Göster
+general-restartApp = { -app-name } Uygulamasını Yeniden Başlat
+general-restartInTroubleshootingMode = Sorun Giderme Modunda Yeniden Başlat
+general-save = Kaydet
+general-clear = Temizle
+general-update = Güncelle
+general-back = Geri
+general-edit = Düzenle
+general-cut = Kes
+general-copy = Kopyala
+general-paste = Yapıştır
+general-find = Bul
+general-delete = Sil
+general-insert = Ekle
+general-and = ve
+general-et-al = vd.
+general-previous = Önceki
+general-next = Sonraki
+general-learn-more = Daha Öğren
+general-warning = Uyarı
+general-type-to-continue = Devam etmek için “{ $text }” yazın.
+general-red = Kırmızı
+general-orange = Turuncu
+general-yellow = Sarı
+general-green = Yeşil
+general-teal = Ördekbaşı
+general-blue = Mavi
+general-purple = Mor
+general-magenta = Eflatun
+general-violet = Menekşe
+general-maroon = Bordo
+general-gray = Gri
+general-black = Siyah
 citation-style-label = Alıntı Stili:
 language-label = Dil:
+menu-custom-group-submenu =
+    .label = Diğer Seçenekler...
 menu-file-show-in-finder =
     .label = Finder'da Göster
 menu-file-show-file =
@@ -69,8 +118,16 @@ menu-view-columns-move-left =
     .label = Sütunu Sola Taşı
 menu-view-columns-move-right =
     .label = Sütunu Sağa Taşı
+menu-show-tabs-menu =
+    .label = Sekmeler Menüsünü Göster
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Ek Açıklamayı Kopyala
+           *[other] { $count } Ek Açıklamayı Kopyala
+        }
 main-window-command =
-    .label = Library
+    .label = Kitaplık
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,6 +141,10 @@ zotero-tabs-menu-filter =
     .placeholder = Sekmelerde Ara
 zotero-tabs-menu-close-button =
     .title = Sekmeyi Kapat
+zotero-toolbar-tabs-scroll-forwards =
+    .title = İleri kaydır
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Geri kaydır
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -130,6 +191,8 @@ item-menu-add-url =
     .label = Web bağlantısı
 item-menu-change-parent-item =
     .label = Ana Eseri Değiştir...
+item-menu-relate-items =
+    .label = İlişkili Öğeler
 view-online = Çevrimiçi Göster
 item-menu-option-view-online =
     .label = { view-online }
@@ -241,6 +304,7 @@ runJS-title = JavaScript Çalıştır
 runJS-editor-label = Kod:
 runJS-run = Çalıştır
 runJS-help = { general-help }
+runJS-completed = başarıyla tamamlandı
 runJS-result =
     { $type ->
         [async] Dönüş değeri:
@@ -273,29 +337,6 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Yazdır
 bibliography-manageStyles-label = Stilleri Yönet...
-integration-docPrefs-window =
-    .title = { -app-name } - Belge Tercihleri
-integration-addEditCitation-window =
-    .title = { -app-name } - Alıntı Ekle/Düzenle
-integration-editBibliography-window =
-    .title = { -app-name } - Kaynakça Düzenle
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Kaynağı düzenle
--integration-editBibliography-include-uncited = Alıntılanmamış bir eseri kaynakçanıza dahil etmek için bu eseri eserler listesinden seçiniz ve { general-add } üzerine basınız.
--integration-editBibliography-exclude-cited = Alıntılanmış bir eseri kaynakçanızdan çıkarmak için bu eseri kaynaklar listesinden seçiniz ve { general-remove } üzerine basınız.
--integration-editBibliography-edit-reference = Bir kaynağın biçimleniş şeklini değiştirmek için metin düzenleyiciyi kulanınız.
-integration-editBibliography-wrapper =
-    .aria-label = Kaynakça Düzenleme iletişim kutusu
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Alıntıyı Çabuk Biçimle
 styleEditor-locatorType =
     .aria-label = Yer bulucu türü
 styleEditor-locatorInput = Yer bulucu girdisi
@@ -305,29 +346,6 @@ styleEditor-editor =
     .aria-label = Stil Editörü
 styleEditor-preview =
     .aria-label = Önizleme
-integration-prefs-displayAs-label = Alıntıları Böyle Göster:
-integration-prefs-footnotes =
-    .label = Dipnot
-integration-prefs-endnotes =
-    .label = Sonnot
-integration-prefs-bookmarks =
-    .label = Alıntıyı yer imleri/işaretleri olarak depola
-integration-prefs-bookmarks-description = Yer imleri Word ve LibreOffice arasında paylaşılabilirler, ama yanlışlıkla değiştirilirlerse hatalara neden olabilirler ve dipnotlara konulamazlar.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] Belge .doc ya da .docx olarak kaydedilmelidir.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Alıntıları otomatik olarak güncelle
-    .tooltip = Bekleyen güncellemeleri olan alıntılar belgede vurgulanacaktırlar.
-integration-prefs-automaticCitationUpdates-description = Güncellemeleri devre dışı bırakmak, büyük belgelerde alıntı koymayı hızlandırabilir. Alıntıları güncellemek için Yenile'ye tıklayınız.
-integration-prefs-automaticJournalAbbeviations =
-    .label = MEDLINE dergi kısaltmalarını kullan
-integration-prefs-automaticJournalAbbeviations-description = “Dergi Kısaltması” alanı yok sayılacaktır.
-integration-prefs-exportDocument =
-    .label = Başka Bir Sözcük İşlemcisine Geç...
-integration-error-unable-to-find-winword = { -app-name } şu an çalışan bir Word bulamadı.
 publications-intro-page = Yayınlarım
 publications-intro = Yayınlarım'a eklediğiniz eserler zotero.org adresindeki profil sayfanızda gösterilecektir. Eklenti dosyalarını dahil etmeyi seçerseniz, bu dosyalar belirttiğiniz lisans uyarınca halka açık şekilde paylaşılacaktır. Sadece kendi ürettiğiniz eserleri ekleyiniz ve sadece dağıtım hakkına sahip olduğunuz ve paylaşmak istediğiniz dosyaları dahil ediniz.
 publications-include-checkbox-files =
@@ -380,10 +398,11 @@ licenses-cc-by-nc-nd = Creative Commons Alıntı-Gayriticari-Türetilemez eserle
 licenses-cc-by-nc-sa = Creative Commons Alıntı-Gayriticari-LisansDevam 4.0 Uluslararası Lisansı
 licenses-cc-more-info = Çalışmanızı CC lisansı altına almadan önce, Creative Commons <a data-l10n-name="license-considerations">Lisansı Verenleri İçin Dikkat Edilecek Hususlar'ı</a> okuduğunuzdan emin olun. Başvurduğunuz lisansın, daha sonra başka şartlar seçseniz veya eserin yayımını durdursanız bile, iptal edilemeyeceğini unutmayın.
 licenses-cc0-more-info = Çalışmanıza CC0 lisansını uygulamadan önce, Creative Commons <a data-l10n-name="license-considerations">CC0 SSS</a> belgesini okuduğunuzdan emin olun. Çalışmanızı kamuya açık alana adamanın, daha sonra başka şartlar seçseniz veya çalışmayı yayınlamayı bıraksanız bile, geri döndürülemez olduğunu lütfen unutmayın.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = Sorun Giderme Modunda Yeniden Başlat...
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = Sorun Giderme Modunda Yeniden Başlat
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name }, tüm eklentileri devre dışı bırakarak yeniden başlayacak. Sorun Giderme Modu etkinken bazı özellikler düzgün çalışmayabilir.
 menu-ui-density =
     .label = Yoğunluk
@@ -424,6 +443,7 @@ section-attachments-annotations =
             [one] { $count } Ek Açıklama
            *[other] { $count } Ek Açıklama
         }
+section-attachments-move-to-trash-message = “{ $title }” başlıklı eseri çöp sepetine göndermeyi istediğinize emin misiniz?
 section-notes =
     .label =
         { $count ->
@@ -484,6 +504,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Bölmeyi Yukarı Taşı
+sidenav-reorder-down =
+    .label = Bölmeyi Aşağı Taşı
+sidenav-reorder-reset =
+    .label = Bölme Sırasını Sıfırla
+toggle-item-pane =
+    .tooltiptext = Eser Bölmesini Aç/Kapat
+toggle-context-pane =
+    .tooltiptext = Bağlam Bölmesini Aç/Kapat
 pin-section =
     .label = Bölümü Sabitle
 unpin-section =
@@ -512,6 +542,8 @@ new-collection-dialog =
     .buttonlabelaccept = Derme Oluştur
 new-collection-name = Ad:
 new-collection-create-in = Bunun içinde yarat:
+show-publications-menuitem =
+    .label = Yayınlarımı Göster
 attachment-info-title = Başlık
 attachment-info-filename = Dosya adı
 attachment-info-accessed = Erişildi
@@ -527,6 +559,18 @@ attachment-info-convert-note =
         } Taşı
     .tooltiptext = Eklere not eklemek artık desteklenmemektedir. Fakat bu notu ayrı bir nota taşıyarak düzenleyebilirsiniz.
 attachment-preview-placeholder = Önizleyecek bir ek yok
+attachment-rename-from-parent =
+    .tooltiptext = Ana Esere Uymak için Dosyayı Yeniden Adlandır
+file-renaming-auto-rename-prompt-title = Yeniden Adlandırma Ayarları Değiştirildi
+file-renaming-auto-rename-prompt-body = Yeni ayarlarla uyumlu olmaları için, kitaplığınızdaki varolan dosyaları yeniden adlandırmak ister misiniz?
+file-renaming-auto-rename-prompt-yes = Değişiklikleri Önizle...
+file-renaming-auto-rename-prompt-no = Varolan dosyaların Adlarını Tut
+rename-files-preview =
+    .buttonlabelaccept = Dosyaları Yeniden Adlandır
+rename-files-preview-loading = Yükleniyor...
+rename-files-preview-intro = { -app-name }, ana eserleriyle uyumlu yapmak için, kitaplığınızdaki bu dosyaları yeniden adlandıracaktır:
+rename-files-preview-renaming = Yeniden Adlandırıyor...
+rename-files-preview-no-files = Tüm dosya isimleri ana eserlerle zaten uyumlu. Herhangi bir değişikliğe gerek yok.
 toggle-preview =
     .label =
         Ek Önizlemesini { $type ->
@@ -534,23 +578,7 @@ toggle-preview =
             [collapsed] Göster
            *[unknown] Sakla/Göster
         }
-quickformat-general-instructions =
-    Bu alıntının eserleri arasında gezinmek için Sol/Sağ Oklarını kullanın. { $dialogMenu ->
-        [active] İletişim kutusunun menüsüne odaklanmak için Shift-Tab tuşlarına basın.
-       *[other] { "" }
-    } { return-or-enter } tuşuna basarak bu alıntının düzenlemelerini kaydedin. Escape tuşuna basarak yaptığınız değişiklikleri çöpe atın ve iletişim kutusunu kapatın.
-quickformat-aria-bubble = Bu eser alıntıya dahil edildi. Space tuşuna basarak bu eseri özelleştirebilirsiniz. { quickformat-general-instructions }
-quickformat-aria-input = Bu alıntıya dahil edilecek bir eseri aramak için yazın. Arama sonuçları listesinde gezinmek için Tab tuşuna basın. { quickformat-general-instructions }
-quickformat-aria-item = Bu eseri alıntıya eklemek için { return-or-enter } tuşuna basın. Arama alanına geri dönmek için Tab tuşuna basın.
-quickformat-accept =
-    .tooltiptext = Bu alıntıya yapılan düzenlemeleri kaydet
-quickformat-locator-type =
-    .aria-label = Yer bulucu türü
-quickformat-locator-value = Yer bulucu
-quickformat-citation-options =
-    .tooltiptext = Alıntı seçeneklerini göster
-insert-note-aria-input = Bir notu aramak için yazın. Sonuç listesinde gezinmek için Tab tuşuna basın. İletişim kutusunu kapatmak için Escape tuşuna basın.
-insert-note-aria-item = Bu notu seçmek için { return-or-enter } tuşuna basın. Arama alanına geri dönmek için Tab tuşuna basın. İletişim kutusunu kapatmak için Escape tuşuna basın.
+annotation-image-not-available = [Resim mevcut değil]
 quicksearch-mode =
     .aria-label = Hızlı Arama modu
 quicksearch-input =
@@ -613,12 +641,6 @@ architecture-win32-warning-message = En iyi performans için 64-bit { -app-name 
 architecture-warning-action = 64-bit { -app-name } uygulamasını indir
 architecture-x64-on-arm64-message = { -app-name } uygulaması emüle edilmiş modda çalışıyor. { -app-name } uygulamasının yerli bir versiyonu daha verimli çalışacaktır.
 architecture-x64-on-arm64-action = ARM64 için yapılmış { -app-name } uygulamasını indir
-first-run-guidance-quickFormat =
-    Bir referans aramak için bir başlık, yazar ve/veya yıl yazın.
-    
-    Seçiminizi yaptıktan sonra, baloncuğu tıklayın veya klavyeden baloncuğu seçin ve sayfa numarası, önek ve sonek gibi alıntı seçeneklerini göstermek için ↓/Space tuşuna basın.
-    
-    Ayrıca, bir sayfa numarası doğrudan eklemek için sayfa numarasını arama terimlerinize ekleyebilirsiniz veya baloncuğun ardından sayfa numarasını yazıp { return-or-enter } tuşuna basabilirsiniz.
 first-run-guidance-authorMenu = { -app-name }, editörleri ve çevirmenleri belirtmenize de olanak tanır. Bir yazarı, editöre veya çevirmene dönüştürmeyi bu menüden seçebilirsiniz.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -638,6 +660,8 @@ find-pdf-files-added =
         [one] { $count } dosya eklendi
        *[other] { $count } dosya eklendi
     }
+select-items-window =
+    .title = Eser Seç
 select-items-dialog =
     .buttonlabelaccept = Seç
 select-items-convertToStandalone =
@@ -677,3 +701,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } artık eserlerde değişiklik yaptığınızda ek dosya adlarını otomatik olarak uyumlu tutmaktadır.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = { -app-name } Bağlayıcısı, { -app-name } uygulamasının bu sürümüyle çalışabilmesi için güncellenmelidir.
+userjs-pref-warning = Bazı { -app-name } ayarları desteklenmeyen bir yöntem kullanılarak geçersiz kılındı. { -app-name } bu ayarları geri döndürecek ve kendisini yeniden başlatacak.
+long-tag-fixer-window-title =
+    .title = Etiketleri Böl
+long-tag-fixer-button-dont-split =
+    .label = Bölme

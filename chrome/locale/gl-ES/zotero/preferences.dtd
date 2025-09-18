@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Título">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Actualizado">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Obter máis estilos...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Gardar en Zotero (icona na barra de direccións)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Foco no panel de bibliotecas">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Comprobar a integridade da base de datos">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Recuperar tradutores e estilos">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Recuperar tradutores...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Recuperar os estilos">
 
 <!ENTITY zotero.preferences.configEditor "Editor de configuración">

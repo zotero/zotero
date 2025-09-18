@@ -1,65 +1,183 @@
-pdfReader-underlineText = Underline Text
-pdfReader-highlightText = تمييز النص
-pdfReader-addText = Add Text
-pdfReader-selectArea = Select Area
-pdfReader-draw = Draw
-pdfReader-highlightAnnotation = Highlight annotation
-pdfReader-underlineAnnotation = Underline annotation
-pdfReader-noteAnnotation = Note Annotation
-pdfReader-textAnnotation = Text Annotation
-pdfReader-imageAnnotation = Image Annotation
-pdfReader-find-in-document = Find in Document
-pdfReader-move-annotation-start-key =
+reader-annotations = الشروح
+reader-show-annotations = عرض التعليقات
+reader-search-annotations = بحث في التعليقات
+reader-search-outline = موجز البحث
+reader-no-annotations = إنشاء تعليق توضيحي لرؤيته في الشريط الجانبي
+reader-no-extracted-text = لا يوجد نص مستخرج
+reader-add-comment = إضافة تعليق
+reader-annotation-comment = تعليق توضيحي
+reader-annotation-text = نص التعليق التوضيحي
+reader-manage-tags = إدارة العلامات الخاصة بهذا التعليق التوضيحي
+reader-open-menu = فتح قائمة التعليقات التوضيحية
+reader-thumbnails = الصور المصغرة
+reader-tag-selector-message = تصنيف التعليقات التوضيحية حسب هذه العلامة
+reader-add-tags = إضافة علامات...
+reader-highlight-text = تمييز النص
+reader-underline-text = تسطير النص
+reader-add-note = اضافة ملاحظة
+reader-add-text = إضافة نص
+reader-select-area = اختر المنطقة
+reader-highlight-annotation = تسليط الضوء على التعليق التوضيحي
+reader-underline-annotation = تسطير التعليق التوضيحي
+reader-note-annotation = تعليق توضيحي بملاحظة
+reader-text-annotation = تعليق توضيحي بنص
+reader-image-annotation = تعليق توضيحي بصورة
+reader-ink-annotation = Ink Annotation
+reader-search-result-index = نتيجة البحث
+reader-search-result-total = إجمالي نتائج البحث
+reader-draw = ارسم
+reader-eraser = ممحاة
+reader-pick-color = اختر لوناً
+reader-add-to-note = أضف إلى الملاحظة
+reader-zoom-in = تكبير
+reader-zoom-out = تصغير
+reader-zoom-reset = إرجاع التكبير إلى الوضع الأصلي
+reader-zoom-auto = تعديل الحجم تلقائيًا
+reader-zoom-page-width = التكبير ليتناسب مع عرض الصفحة
+reader-zoom-page-height = التكبير ليتناسب مع طول الصفحة
+reader-split-vertically = تقسيم عمودي
+reader-split-horizontally = تقسيم أفقي
+reader-next-page = الصفحة التالية
+reader-previous-page = الصفحة السابقة
+reader-page = صفحة
+reader-location = الموقع
+reader-read-only = للقراءة فقط
+reader-prompt-transfer-from-pdf-title = استيراد التعليقات التوضيحية
+reader-prompt-transfer-from-pdf-text = Annotations stored in the PDF file will be moved to { $target }.
+reader-prompt-password-protected = العملية غير مدعومة لملفات PDF المحمية بكلمة مرور.
+reader-prompt-delete-pages-title = حذف الصفحات
+reader-prompt-delete-pages-text =
+    { $count ->
+        [one] Are you sure you want to delete { $count } page from the PDF file?
+       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+    }
+reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-text =
+    { $count ->
+        [one] Are you sure you want to delete the selected annotation?
+       *[other] Are you sure you want to delete the selected annotations?
+    }
+reader-rotate-left = تدوير لليسار
+reader-rotate-right = تدوير لليمين
+reader-edit-page-number = تحرير رقم الصفحة...
+reader-edit-annotation-text = تحرير نص التعليق التوضيحي
+reader-copy-image = نسخ الصورة
+reader-save-image-as = حفظ الصورة ك...
+reader-page-number-popup-header = تغيير رقم الصفحة لـ:
+reader-this-annotation = هذا التعليق
+reader-selected-annotations = التعليقات التوضيحية المختارة
+reader-this-page = هذه الصفحة
+reader-this-page-and-later-pages = هذه الصفحة والصفحات اللاحقة
+reader-all-pages = جميع الصفحات
+reader-auto-detect = الكشف التلقائي
+reader-enter-password = أدخل كلمة المرور لفتح ملف ال PDF هذا
+reader-include-annotations = تضمين التعليقات التوضيحية
+reader-preparing-document-for-printing = إعداد المستند للطباعة...
+reader-phrase-not-found = العبارة غير موجودة
+reader-find = اعثر
+reader-close = أغلق
+reader-show-thumbnails = إظهار الصور المصغرة
+reader-show-outline = عرض الموجز
+reader-find-previous = ابحث عن التكرار السابق للعبارة
+reader-find-next = أوجد التكرار التالي للعبارة
+reader-toggle-sidebar = تبديل الشريط الجانبي
+reader-find-in-document = البحث في المستند
+reader-toggle-context-pane = تبديل جزء السياق
+reader-highlight-all = تسليط الضوء على الكل
+reader-match-case = تطابق الحالة
+reader-whole-words = كلمات كاملة
+reader-appearance = المظهر
+reader-epub-appearance-line-height = ارتفاع الخط
+reader-epub-appearance-word-spacing = تباعد الكلمات
+reader-epub-appearance-letter-spacing = تباعد الحروف
+reader-epub-appearance-page-width = عرض الصفحة
+reader-epub-appearance-use-original-font = استخدام الخط الأصلي
+reader-epub-appearance-line-height-revert = استخدام الارتفاع الافتراضي للخط
+reader-epub-appearance-word-spacing-revert = استخدام التباعد الافتراضي بين الكلمات
+reader-epub-appearance-letter-spacing-revert = استخدام التباعد الافتراضي بين الحروف
+reader-epub-appearance-page-width-revert = استخدام العرض الافتراضي للصفحة
+reader-convert-to-highlight = التحويل إلى تسليط الضوء
+reader-convert-to-underline = التحويل إلى تسطير
+reader-size = حجم
+reader-merge = الدمج
+reader-copy-link = نسخ الرابط
+reader-theme-original = الأصلي
+reader-theme-snow = الثلج
+reader-theme-sepia = بني داكن
+reader-theme-dark = مظلم
+reader-add-theme = إضافة سمة
+reader-scroll-mode = التمرير
+reader-spread-mode = الفروق
+reader-flow-mode = تصميم الصفحة
+reader-columns = الأعمدة
+reader-split-view = عرض منقسم
+reader-themes = السمات
+reader-vertical = عمودي
+reader-horizontal = أفقي
+reader-wrapped = ملفوف
+reader-none = بدون أيقونة
+reader-odd = فردي
+reader-even = زوجي
+reader-paginated = مقسمة إلى صفحات
+reader-scrolled = تم التمرير
+reader-single = فردي
+reader-double = مزدوج
+reader-theme-name = اسم السمة:
+reader-background = الخلفية:
+reader-foreground = الواجهة:
+reader-focus-mode = Focus Mode
+reader-clear-selection = مسح الاختيار
+reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }
        *[other] { general-key-alt }
     }
-pdfReader-a11yMoveAnnotation = Use the arrow keys to move the annotation.
-pdfReader-a11yEditTextAnnotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ pdfReader-move-annotation-start-key } and use the arrow keys.
-pdfReader-a11yResizeAnnotation = To resize the annotation, hold { general-key-shift } and use the arrow keys.
-pdfReader-a11yAnnotationPopupAppeared = Use Tab to navigate the annotation popup.
-pdfReader-a11yAnnotationCreated = { $type } created.
-pdfReader-a11yAnnotationSelected = { $type } selected.
--pdfReader-a11yTextualAnnotationInstruction = To annotate text via the keyboard, first use “{ pdfReader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
--pdfReader-a11yAnnotationInstruction = To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ $number }.
-pdfReader-toolbar-highlight =
-    .aria-description = { -pdfReader-a11yTextualAnnotationInstruction(number: 1) }
-    .title = { pdfReader-highlightText }
-pdfReader-toolbar-underline =
-    .aria-description = { -pdfReader-a11yTextualAnnotationInstruction(number: 2) }
-    .title = { pdfReader-underlineText }
-pdfReader-toolbar-note =
-    .aria-description = { -pdfReader-a11yAnnotationInstruction(number: 3) }
-    .title = { pdfReader-noteAnnotation }
-pdfReader-toolbar-text =
-    .aria-description = { -pdfReader-a11yAnnotationInstruction(number: 4) }
-    .title = { pdfReader-addText }
-pdfReader-toolbar-area =
-    .aria-description = { -pdfReader-a11yAnnotationInstruction(number: 5) }
-    .title = { pdfReader-selectArea }
-pdfReader-toolbar-draw =
-    .aria-description = This annotation type cannot be created via the keyboard.
-    .title = { pdfReader-draw }
-pdfReader-findInDocumentInput =
+reader-a11y-move-annotation = استخدم مفاتيح الأسهم لتحريك التعليق التوضيحي.
+reader-a11y-edit-text-annotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys.
+reader-a11y-resize-annotation = لتغيير حجم التعليق التوضيحي، اضغط مع الاستمرار على { general-key-shift } واستخدم مفاتيح الأسهم.
+reader-a11y-annotation-popup-appeared = استخدم Tab للتنقل في نافذة التعليقات التوضيحية المنبثقة.
+reader-a11y-annotation-created = تم إنشاء { $type }.
+reader-a11y-annotation-selected = تم تحديد { $type }.
+-reader-a11y-textual-annotation-instruction = To annotate text via the keyboard, first use “{ reader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
+-reader-a11y-annotation-instruction = لإضافة هذا التعليق التوضيحي إلى المستند، ركز على المستند واضغط على { general-key-control }-{ option-or-alt }-{ $number }.
+reader-toolbar-highlight =
+    .aria-description = { -reader-a11y-textual-annotation-instruction(number: 1) }
+    .title = { reader-highlight-text }
+reader-toolbar-underline =
+    .aria-description = { -reader-a11y-textual-annotation-instruction(number: 2) }
+    .title = { reader-underline-text }
+reader-toolbar-note =
+    .aria-description = { -reader-a11y-annotation-instruction(number: 3) }
+    .title = { reader-note-annotation }
+reader-toolbar-text =
+    .aria-description = { -reader-a11y-annotation-instruction(number: 4) }
+    .title = { reader-add-text }
+reader-toolbar-area =
+    .aria-description = { -reader-a11y-annotation-instruction(number: 5) }
+    .title = { reader-select-area }
+reader-toolbar-draw =
+    .aria-description = لا يمكن إنشاء هذا النوع من التعليقات التوضيحية عبر لوحة المفاتيح.
+    .title = { reader-draw }
+reader-find-in-document-input =
     .title = اعثر
-    .placeholder = { pdfReader-find-in-document }
-    .aria-description = To turn a search result into a highlight annotation, press { general-key-control }-{ option-or-alt }-1. To turn a search result into an underline annotation, press { general-key-control }-{ option-or-alt }-2.
-pdfReader-import-from-epub =
-    .label = Import Ebook Annotations…
-pdfReader-import-from-epub-prompt-title = Import Ebook Annotations
-pdfReader-import-from-epub-prompt-text =
+    .placeholder = { reader-find-in-document }
+    .aria-description = لتحويل نتيجة بحث إلى تعليق توضيحي مع تسليط الضوء، اضغط على { general-key-control }-{ option-or-alt }-1. لتحويل نتيجة بحث إلى تعليق توضيحي مسطر، اضغط على { general-key-control }-{ option-or-alt }-2.
+reader-import-from-epub =
+    .label = استيراد التعليقات التوضيحية للكتاب الإلكتروني...
+reader-import-from-epub-prompt-title = استيراد التعليقات التوضيحية للكتاب الإلكتروني
+reader-import-from-epub-prompt-text =
     { -app-name } found { $count ->
-        [1] { $count } { $tool } annotation
+        [one] { $count } { $tool } annotation
        *[other] { $count } { $tool } annotations
     }, last edited { $lastModifiedRelative }.
     
     Any { -app-name } annotations that were previously imported from this ebook will be updated.
-pdfReader-import-from-epub-no-annotations-current-file =
-    This ebook does not appear to contain any importable annotations.
+reader-import-from-epub-no-annotations-current-file =
+    يبدو أن هذا الكتاب الإلكتروني لا يحتوي على أي تعليقات توضيحية قابلة للاستيراد.
     
-    { -app-name } can import ebook annotations created in Calibre and KOReader.
-pdfReader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    يمكن لـ { -app-name } استيراد التعليقات التوضيحية للكتب الإلكترونية التي تم إنشاؤها في Caliber و KOReader.
+reader-import-from-epub-no-annotations-other-file =
+    يبدو أن “{ $filename }” لا يحتوي على أي تعليقات توضيحية من Caliber أو KOReader.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-pdfReader-import-from-epub-select-other = Select Other File…
+    إذا كان هذا الكتاب الإلكتروني قد تم وضع تعليقات توضيحية عليه باستخدام KOReader، حاول تحديد ملف ”metadata.epub.lua“ مباشرة.
+reader-import-from-epub-select-other = اختر ملف آخر...

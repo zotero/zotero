@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -8,10 +9,20 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = Skriv ut
 general-remove = Fjern
@@ -20,13 +31,51 @@ general-remind-me-later = Minn meg på det senere
 general-dont-ask-again = Ikke spør igjen
 general-choose-file = Velg fil…
 general-open-settings = Åpne innstillinger
+general-settings = Innstillinger…
 general-help = Hjelp
 general-tag = Emneord
 general-done = Ferdig
 general-view-troubleshooting-instructions = Se instruksjoner for feilsøking
 general-go-back = Gå tilbake
+general-accept = Aksepter
+general-cancel = Avbryt
+general-show-in-library = Vis i bibliotek
+general-restartApp = Start { -app-name } på nytt
+general-restartInTroubleshootingMode = Start på nytt i feilsøkingsmodus
+general-save = Lagre
+general-clear = Fjern
+general-update = Oppdater
+general-back = Tilbake
+general-edit = Rediger
+general-cut = Klipp
+general-copy = Kopier
+general-paste = Lim inn
+general-find = Finn
+general-delete = Slett
+general-insert = Sett inn
+general-and = og
+general-et-al = et al.
+general-previous = Forrige
+general-next = Neste
+general-learn-more = Lær mer
+general-warning = Advarsel
+general-type-to-continue = Skriv “{ $text }” for å fortsette.
+general-red = Rød
+general-orange = Oransje
+general-yellow = Gul
+general-green = Grønn
+general-teal = Turkis
+general-blue = Blå
+general-purple = Lilla
+general-magenta = Magenta
+general-violet = Fiolett
+general-maroon = Rødbrun
+general-gray = Grå
+general-black = Svart
 citation-style-label = Henvisningsstil:
 language-label = Språk:
+menu-custom-group-submenu =
+    .label = Flere valg…
 menu-file-show-in-finder =
     .label = Vis i Finder
 menu-file-show-file =
@@ -69,8 +118,16 @@ menu-view-columns-move-left =
     .label = Flytt kolonne til venstre
 menu-view-columns-move-right =
     .label = Flytt kolonne til høyre
+menu-show-tabs-menu =
+    .label = Vis meny for faner
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Kopier kommentar
+           *[other] Kopier { $count } kommentarer
+        }
 main-window-command =
-    .label = Library
+    .label = Bibliotek
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,10 +141,14 @@ zotero-tabs-menu-filter =
     .placeholder = Søk faner
 zotero-tabs-menu-close-button =
     .title = Lukk fane
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Rull framover
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Rull bakover
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
-    .label = Gi samlingen nytt navn
+    .label = Endre navn på samlingen
 collections-menu-edit-saved-search =
     .label = Rediger lagret søk
 collections-menu-move-collection =
@@ -130,6 +191,8 @@ item-menu-add-url =
     .label = Nettlenke
 item-menu-change-parent-item =
     .label = Endre overordnet element…
+item-menu-relate-items =
+    .label = Relater elementer
 view-online = Vis på nett
 item-menu-option-view-online =
     .label = { view-online }
@@ -241,6 +304,7 @@ runJS-title = Kjør JavaScript
 runJS-editor-label = Kode:
 runJS-run = Kjør
 runJS-help = { general-help }
+runJS-completed = fullført med et vellykket resultat
 runJS-result =
     { $type ->
         [async] Returverdi:
@@ -273,29 +337,6 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Skriv ut
 bibliography-manageStyles-label = Behandle stiler…
-integration-docPrefs-window =
-    .title = { -app-name } - Innstillinger for dokument
-integration-addEditCitation-window =
-    .title = { -app-name } - Legg til/rediger henvisning
-integration-editBibliography-window =
-    .title = { -app-name } - Rediger bibliografi
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Rediger referanse
--integration-editBibliography-include-uncited = Hvis du vil inkludere et usitert element i bibliografien, velger du det i listen over elementer og trykker på { general-add }.
--integration-editBibliography-exclude-cited = Du kan også ekskludere et sitert element ved å velge det fra referanselisten og trykke { general-remove }.
--integration-editBibliography-edit-reference = For å endre formatering for en referanse, bruk tekstredigerer.
-integration-editBibliography-wrapper =
-    .aria-label = Dialogboks for å rediger bibliografi
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Hurtigformater henvisning
 styleEditor-locatorType =
     .aria-label = Type oppslagsmotor
 styleEditor-locatorInput = Inndata for stedsindikator
@@ -305,29 +346,6 @@ styleEditor-editor =
     .aria-label = Redigeringsprogram for stiler
 styleEditor-preview =
     .aria-label = Forhåndsvisning
-integration-prefs-displayAs-label = Vis henvisninger som:
-integration-prefs-footnotes =
-    .label = Fotnoter
-integration-prefs-endnotes =
-    .label = Sluttnoter
-integration-prefs-bookmarks =
-    .label = Lagre henvisninger som bokmerker
-integration-prefs-bookmarks-description = Bokmerker kan bli delt mellom Word og LibreOffice, men kan forårsake feil dersom de blir endret ved en tilfeldighet og kan ikke settes inn i fotnoter.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] Dokumentet må lagres som .doc eller .docx.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Automatisk oppdater henvisninger
-    .tooltip = Henvisninger som venter på å bli oppdatert er uthevet i dokumentet
-integration-prefs-automaticCitationUpdates-description = Ved å slå av oppdateringer kan du gjøre innsetting av henvisninger raskere i store dokumenter. Klikk på Oppdater for å oppdatere henvisninger manuelt.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Bruk MEDLINE forkortelser for tidsskrift
-integration-prefs-automaticJournalAbbeviations-description = Feltet "Tidsskriftsforkortelse" vil bli ignorert.
-integration-prefs-exportDocument =
-    .label = Bytt til en annen tekstbehandler…
-integration-error-unable-to-find-winword = { -app-name } kunne ikke finne en Word-versjon som kjører.
 publications-intro-page = Mine publikasjoner
 publications-intro = Elementer du legger til Mine publikasjoner vil bli vist på din profilside på zotero.org. Hvis du velger å inkludere vedlegg vil de bli gjort offentlig tilgjengelig under lisensen du angir. Legg kun til arbeid du selv har opprettet og inkluder vedlegg kun dersom du har rettighetene til å distribuere de og ønsker å gjøre det.
 publications-include-checkbox-files =
@@ -380,10 +398,11 @@ licenses-cc-by-nc-nd = Creative Commons Attribution-NonCommercial-NoDerivatives 
 licenses-cc-by-nc-sa = Creative Commons Attribution-NonCommercial-ShareAlike 4.0 internasjonal lisens
 licenses-cc-more-info = Sørg for at du har lest Creative Commons <a data-l10n-name="license-considerations">Betraktninger for lisensgivere</a> før du utgir verket ditt under en CC-lisens. Vær oppmerksom på at lisensen du bruker, ikke kan tilbakekalles, selv om du senere velger andre vilkår eller slutter å publisere verket.
 licenses-cc0-more-info = Sørg for at du har lest Creative Commons  <a data-l10n-name="license-considerations">CC0 FAQ</a> før du dediserer verket ditt under CC0 vilkårene. Vær oppmerksom på at det er irreversibelt å dedisere verket ditt til det fri, selv om du senere velger andre vilkår eller slutter å publisere verket.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = Start på nytt i feilsøkingsmodus…
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = Start på nytt i feilsøkingsmodus
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } vil starte på nytt med alle programtillegg deaktivert. Det kan hende at enkelte funksjoner ikke fungerer som de skal når feilsøkingsmodus er aktivert.
 menu-ui-density =
     .label = Tetthet
@@ -403,7 +422,7 @@ pane-attachment-info = Vedleggsinformasjon
 pane-attachment-preview = Forhåndsvisning
 pane-attachment-annotations = Kommentarer
 pane-header-attachment-associated =
-    .label = Gi nytt navn til tilknyttet fil
+    .label = Endre navn på tilknyttet fil
 item-details-pane =
     .aria-label = { pane-item-details }
 section-info =
@@ -424,6 +443,7 @@ section-attachments-annotations =
             [one] { $count } kommentar
            *[other] { $count } kommentarer
         }
+section-attachments-move-to-trash-message = Er du sikker på at du vil flytte “{ $title }” til søppelkorgen?
 section-notes =
     .label =
         { $count ->
@@ -484,6 +504,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Flytt seksjon opp
+sidenav-reorder-down =
+    .label = Flytt seksjon ned
+sidenav-reorder-reset =
+    .label = Tilbakestill rekkefølge for skejsoner
+toggle-item-pane =
+    .tooltiptext = Slå av/på rute for element
+toggle-context-pane =
+    .tooltiptext = Slå av/på kontekstruten
 pin-section =
     .label = Fest seksjon
 unpin-section =
@@ -512,6 +542,8 @@ new-collection-dialog =
     .buttonlabelaccept = Opprett samling
 new-collection-name = Navn:
 new-collection-create-in = Opprett i:
+show-publications-menuitem =
+    .label = Vis mine publikasjoner
 attachment-info-title = Tittel
 attachment-info-filename = Filnavn
 attachment-info-accessed = Lest
@@ -527,6 +559,18 @@ attachment-info-convert-note =
         } notat
     .tooltiptext = Det er ikke lenger støtte for å legge til notater i vedlegg, men du kan redigere dette notatet ved å migrere det til et eget notat.
 attachment-preview-placeholder = Intet vedlegg å forhåndsvise
+attachment-rename-from-parent =
+    .tooltiptext = Endre navn på fil for å samsvare med overordnet element
+file-renaming-auto-rename-prompt-title = Innstillinger for å endre navn er endret
+file-renaming-auto-rename-prompt-body = Ønsker du å endre navn på eksisterende filer i ditt bibliotek for å samsvare med de nye innstliingene?
+file-renaming-auto-rename-prompt-yes = Forhåndsvis endringer…
+file-renaming-auto-rename-prompt-no = Behold ekisterende filnavn
+rename-files-preview =
+    .buttonlabelaccept = Endre navn på filene
+rename-files-preview-loading = Laster inn...
+rename-files-preview-intro = { -app-name } vil endre navn på de følgende filene i ditt bibliotek for å samsvare med overordnede elementer:
+rename-files-preview-renaming = Endrer navn…
+rename-files-preview-no-files = Alle filnavn samsvarer allerede med overordnede elementer. Ingen endringer er nødvendige.
 toggle-preview =
     .label =
         { $type ->
@@ -534,23 +578,7 @@ toggle-preview =
             [collapsed] Show
            *[unknown] Toggle
         } Forhåndsvisning av vedlegg
-quickformat-general-instructions =
-    Bruk pil venstre/høyre for å navigere mellom elementene i denne henvisningen. { $dialogMenu ->
-        [active] Trykk på Shift-Tab for å fokusere på dialogboksens meny.
-       *[other] { "" }
-    } Trykk på { return-or-enter } for å lagre endringene i henvisningen. Trykk på Escape for å forkaste endringene og lukke dialogboksen.
-quickformat-aria-bubble = Dette elementet er inkludert i henvisningen. Trykk på mellomromstasten for å tilpasse elementet. { quickformat-general-instructions }
-quickformat-aria-input = Skriv inn for å søke etter et element som skal inkluderes i henvisningen. Trykk på Tab for å navigere i listen over søkeresultater. { quickformat-general-instructions }
-quickformat-aria-item = Trykk { return-or-enter } for å legge til dette elementet i henvisningen. Trykk på Tab for å gå tilbake til søkefeltet.
-quickformat-accept =
-    .tooltiptext = Lagre endringer i denne henvisningen
-quickformat-locator-type =
-    .aria-label = Type oppslagsmotor
-quickformat-locator-value = Oppslagsmotor
-quickformat-citation-options =
-    .tooltiptext = Vis alternativer for henvisning
-insert-note-aria-input = Skriv inn for å søke etter et notat. Trykk på Tab for å navigere i listen over resultater. Trykk på Escape for å lukke dialogboksen.
-insert-note-aria-item = Trykk på { return-or-enter } for å velge dette notatet. Trykk på Tab for å gå tilbake til søkefeltet. Trykk på Escape for å lukke dialogboksen.
+annotation-image-not-available = [Bilde ikke tilgjengelig]
 quicksearch-mode =
     .aria-label = Hurtigsøk-modus
 quicksearch-input =
@@ -613,12 +641,6 @@ architecture-win32-warning-message = Bytt til 64-bit { -app-name } for å få be
 architecture-warning-action = Last ned 64-bit { -app-name }
 architecture-x64-on-arm64-message = { -app-name } kjører i emulert modus. En plattformavhengig versjon av { -app-name } vil kjøre mer effektivt.
 architecture-x64-on-arm64-action = Last ned { -app-name } for ARM64
-first-run-guidance-quickFormat =
-    Skriv inn tittel, forfatter og/eller årstall for å søke etter en referanse.
-    
-    Når du har gjort et valg, klikker du på boblen eller velger den via tastaturet og trykker på ↓/mellomrom for å vise henvisningsalternativer som sidetall, prefiks og suffiks.
-    
-    Du kan også legge til et sidetall direkte ved å inkludere det i søkeordene eller skrive det inn etter boblen og trykke { return-or-enter }.
 first-run-guidance-authorMenu = { -app-name } kan du også angi redaktører og oversettere. Du kan gjøre en forfatter om til en redaktør eller oversetter ved å velge fra denne menyen.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -638,6 +660,8 @@ find-pdf-files-added =
         [one] { $count } fil lagt til
        *[other] { $count } filer lagt til
     }
+select-items-window =
+    .title = Velg elementer
 select-items-dialog =
     .buttonlabelaccept = Velg
 select-items-convertToStandalone =
@@ -677,3 +701,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } synkroniserer nå automatisk filnavnene på vedlegg når du gjør endringer i elementene.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = { -app-name } Tilknytter må oppdateres for å fungere med denne versjonen av { -app-name }.
+userjs-pref-warning = Noen { -app-name }-innstillinger er blitt overskrevet ved hjelp av en metode som ikke støttes. { -app-name } vil tilbakestille dem og starte på nytt.
+long-tag-fixer-window-title =
+    .title = Del opp emneord
+long-tag-fixer-button-dont-split =
+    .label = Ikke del opp

@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Judul">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Diperbarui">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Dapatkan gaya tambahan...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Simpan ke Zotero (ikon bilah alamat)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus Jendela Pustaka">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Periksa Integritas Database">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Atur Ulang Penerjemah dan Gaya...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Atur Ulang Penerjemah...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Atur ulang pengayaan...">
 
 <!ENTITY zotero.preferences.configEditor "Editor Konfigurasi">

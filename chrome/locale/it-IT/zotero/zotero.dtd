@@ -79,7 +79,6 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Altro">
 <!ENTITY zotero.toolbar.lookup.label "Aggiungi uno o più elementi usando un identificatore">
 <!ENTITY zotero.toolbar.removeItem.label "Elimina l'elemento...">
-<!ENTITY zotero.toolbar.newLibrary.label "Nuova biblioteca">
 <!ENTITY zotero.toolbar.newGroup "Nuovo gruppo...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nuova sottocollezione…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nuova ricerca salvata...">

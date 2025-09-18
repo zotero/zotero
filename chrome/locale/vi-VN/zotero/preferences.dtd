@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Tiêu đề">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Đã cập nhật">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Lấy các style khác...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Lưu vào Zotero (biểu tượng thanh địa chỉ)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Khung thư viện quan tâm">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Kiểm tra Tính toàn vẹn của Cơ sở dữ liệu">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Thiết lập lại các bộ chuyển đổi và style">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Thiết lập lại bộ chuyển đổi">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Thiết lập lại style">
 
 <!ENTITY zotero.preferences.configEditor "Bộ soạn thảo cấu hình">

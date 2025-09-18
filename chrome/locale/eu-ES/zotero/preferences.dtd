@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Izenburua">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Eguneratua">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Estilo gehiago lortu...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Gorde Zoteron (helbide barrako ikonoa)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfokatu liburutegien panela">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Datu basearen integritatea egiaztatu">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Itzultzaile eta estiloak berrezarri...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Itzultzaileak berrezarri...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Estiloak berrezarri...">
 
 <!ENTITY zotero.preferences.configEditor "Konfigurazio editorea">

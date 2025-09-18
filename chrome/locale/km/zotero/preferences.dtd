@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "ចំណងជើង">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "បានធ្វើទំនើបកម្ម">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "ស៊ីអេសអិល">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "ពិនិត្យដែនទិន្នន័យ">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
 
 <!ENTITY zotero.preferences.configEditor "Config Editor">

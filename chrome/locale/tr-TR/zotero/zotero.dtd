@@ -79,7 +79,6 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Diğer türler">
 <!ENTITY zotero.toolbar.lookup.label "Eser(ler)i Tanımlayıcılarını Kullanarak Ekle">
 <!ENTITY zotero.toolbar.removeItem.label "Eseri Kaldır...">
-<!ENTITY zotero.toolbar.newLibrary.label "Yeni Kitaplık">
 <!ENTITY zotero.toolbar.newGroup "Yeni Grup...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Yeni Alt Derme...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Yeni Kaydedilen Arama...">
@@ -134,7 +133,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Etikete Renk Ata...">
 <!ENTITY zotero.tagSelector.renameTag "Etiketi Yeniden Adlandır...">
 <!ENTITY zotero.tagSelector.deleteTag "Etiketi Sil...">
-<!ENTITY zotero.tagSelector.splitTag "Ayır...">
+<!ENTITY zotero.tagSelector.splitTag "Böl...">
 
 <!ENTITY zotero.tagColorChooser.title "Etiket Rengi ve Konumunu Seç">
 <!ENTITY zotero.tagColorChooser.color "Renk:">

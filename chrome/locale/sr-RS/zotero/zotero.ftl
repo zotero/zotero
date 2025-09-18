@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -8,10 +9,20 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = Штампај
 general-remove = Уклони
@@ -20,13 +31,51 @@ general-remind-me-later = Подсети ме касније
 general-dont-ask-again = Не питај ме поново
 general-choose-file = Изабери датотеку…
 general-open-settings = Отвори подешавања
+general-settings = Settings…
 general-help = Помоћ
 general-tag = Ознака
 general-done = Готово
 general-view-troubleshooting-instructions = Погледај упутства за решавање проблема
 general-go-back = Go Back
+general-accept = Accept
+general-cancel = Откажи
+general-show-in-library = Прикажи у библиотеци
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = Покрени у режиму за тражење проблема
+general-save = Сачувај
+general-clear = Очисти
+general-update = Ажурирање
+general-back = Назад
+general-edit = Уређивање
+general-cut = Исеци
+general-copy = Копирај
+general-paste = Убаци
+general-find = Нађи
+general-delete = Обриши
+general-insert = Уметни
+general-and = и
+general-et-al = и сар.
+general-previous = Претходно
+general-next = Следеће
+general-learn-more = Сазнајте више
+general-warning = Упозорење
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = Црвено
+general-orange = Наранџасто
+general-yellow = Жуто
+general-green = Зелено
+general-teal = Светло плаво
+general-blue = Плаво
+general-purple = Пурпурно
+general-magenta = Магентно
+general-violet = Љубичасто
+general-maroon = Смеђе
+general-gray = Сиво
+general-black = Црно
 citation-style-label = Стил цитата:
 language-label = Језик:
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
     .label = Прикажи у претрази
 menu-file-show-file =
@@ -69,8 +118,16 @@ menu-view-columns-move-left =
     .label = Move Column Left
 menu-view-columns-move-right =
     .label = Move Column Right
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = Библиотека
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,6 +141,10 @@ zotero-tabs-menu-filter =
     .placeholder = Претражи картице
 zotero-tabs-menu-close-button =
     .title = Затвори картицу
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -130,6 +191,8 @@ item-menu-add-url =
     .label = Веза на вебу
 item-menu-change-parent-item =
     .label = Промени родитељску ставку…
+item-menu-relate-items =
+    .label = Relate Items
 view-online = Погледај на мрежи
 item-menu-option-view-online =
     .label = { view-online }
@@ -242,6 +305,7 @@ runJS-title = Покрени ЈаваСкрипт
 runJS-editor-label = Код:
 runJS-run = Покрени
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Враћена вредност:
@@ -274,29 +338,6 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Штампај
 bibliography-manageStyles-label = Уреди стилове…
-integration-docPrefs-window =
-    .title = { -app-name } - поставке документа
-integration-addEditCitation-window =
-    .title = { -app-name } - додавање/уређивање цитата
-integration-editBibliography-window =
-    .title = { -app-name } - уређивање библиографије
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - брзо форматирање цитата
 styleEditor-locatorType =
     .aria-label = Врста локатора
 styleEditor-locatorInput = Унос локатора
@@ -306,29 +347,6 @@ styleEditor-editor =
     .aria-label = Уређивач стилова
 styleEditor-preview =
     .aria-label = Преглед
-integration-prefs-displayAs-label = Прикажи цитате као:
-integration-prefs-footnotes =
-    .label = Фусноте
-integration-prefs-endnotes =
-    .label = Ендноте
-integration-prefs-bookmarks =
-    .label = Сачувај цитат у обележиваче
-integration-prefs-bookmarks-description = Обележивачи се могу делити између програма Word и LibreOffice, али могу направити проблеме уколико их случајно промените и не могу бити уметнути као фусноте.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] Морате да сачувате документ као .doc или .docx.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Аутоматски ажурирај цитате
-    .tooltip = Цитати који чекају на ажурирање ће бити истакнути унутар документа
-integration-prefs-automaticCitationUpdates-description = Онемогућавањем ажурирања можете убрзати додавање цитата када радите са великим документима. Увек можете кликните на „Освежи“ како би ручно ажурирали цитате.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Користи скраћенице часописа из Медлајна
-integration-prefs-automaticJournalAbbeviations-description = Поље „Скраћеница часописа“ ће бити занемарено.
-integration-prefs-exportDocument =
-    .label = Пребаците се на други програм за обраду текста…
-integration-error-unable-to-find-winword = { -app-name } не може да пронађе покренути Word програм.
 publications-intro-page = Моји радови
 publications-intro = Ставке које сте додали у Моји радови ће бити приказане на вашој страници у оквиру сајта zotero.org. Уколико желите да додате и прилоге, они ће бити јавно доступни под лиценцом који изаберете. Додајте само радове које сте сами направили и датотеке за које поседујете одговарајуће правне дозволе за дељење.
 publications-include-checkbox-files =
@@ -381,10 +399,11 @@ licenses-cc-by-nc-nd = Заједничко креативно добро, ау�
 licenses-cc-by-nc-sa = Заједничко креативно добро, ауторство-некомерцијално-дељење под истим условима, 4.0, интернационална лиценца
 licenses-cc-more-info = Прочитајте Заједничко креативно добро, <a data-l10n-name="license-considerations">Разматрања за издаваоце лиценци</a> пре него што поставите рад под CC лиценцом. Уколико примените ову лиценцу, не можете опозвати, чак ни уколико касније изаберете другачије услове или повучете објављени рад.
 licenses-cc0-more-info = Прочитајте Заједничко креативно добро, <a data-l10n-name="license-considerations">CC0 питања и одговори</a> пре него што примените CC0 на ваш рад. Не можете опозвати одлуку да поставите свој рад у на јавни домен, чак ни уколико касније изаберете другачије услове или повучете објављени рад.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = Покрени у режиму за тражење проблема…
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = Покрени у режиму за тражење проблема
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } ће се поново покренути са искљученим додацима. Неке могућности можда неће радити како треба док је режим за тражење проблема укључен.
 menu-ui-density =
     .label = Густина
@@ -427,6 +446,7 @@ section-attachments-annotations =
             [few] { $count } белешке
            *[other] { $count } белешки
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
@@ -490,6 +510,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = Приказ контекстне површи
 pin-section =
     .label = Закачи одељак
 unpin-section =
@@ -518,6 +548,8 @@ new-collection-dialog =
     .buttonlabelaccept = Направи одељак
 new-collection-name = Име:
 new-collection-create-in = Направи у:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = Наслов
 attachment-info-filename = Име датотеке
 attachment-info-accessed = Приступљено
@@ -533,6 +565,18 @@ attachment-info-convert-note =
         }
     .tooltiptext = Више није подржано додавање белешки и прилога, али можете изменити ову белешку тако што ћете је преместити у засебну белешку.
 attachment-preview-placeholder = Нема прилога за преглед
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = Учитавам…
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
@@ -540,23 +584,7 @@ toggle-preview =
             [collapsed] Прикажи
            *[unknown] Укључи/искључи
         } преглед прилога
-quickformat-general-instructions =
-    Користите стрелице за лево/десно да идете кроз ставке овог цитата. { $dialogMenu ->
-        [active] Притисните Shift-Tab за фокус на мени прозорчета.
-       *[other] { "" }
-    } Притисните { return-or-enter } да сачувате измене овог цитата. Притисните Escape да занемарите промене и затворите прозорче.
-quickformat-aria-bubble = Ова ставка је укључена у цитирање. Притисните размак да подесите изглед ставке. { quickformat-general-instructions }
-quickformat-aria-input = Откуцајте текст да потражите ставку која ће бити укључена у овај цитат. Притисните Tab да идете кроз списак резултата претраге. { quickformat-general-instructions }
-quickformat-aria-item = Притисните { return-or-enter } да додате ову ставку у цитат. Притисните Tab да идете назад на поље за претрагу.
-quickformat-accept =
-    .tooltiptext = Сачувај измене овог цитата
-quickformat-locator-type =
-    .aria-label = Врста локатора
-quickformat-locator-value = Локатор
-quickformat-citation-options =
-    .tooltiptext = Прикажи опције цитата
-insert-note-aria-input = Укуцајте текст за претрагу белешке. Притисните Tab да идете кроз списак резултата. Притисните Escape да затворите овај прозорчић.
-insert-note-aria-item = Притисните { return-or-enter } да изаберете ову белешку. Притисните Tab да се вратите назад на поље за претрагу. Притисните Escape да затворите прозорчић.
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
     .aria-label = Режим брзе претраге
 quicksearch-input =
@@ -623,12 +651,6 @@ architecture-win32-warning-message = Пребаците се на 64-творо 
 architecture-warning-action = Преузми 64-творо битни { -app-name }
 architecture-x64-on-arm64-message = { -app-name } је покренут у кроз емулацију. Доступна верзија програма { -app-name } за ваш процесор је много ефикаснија.
 architecture-x64-on-arm64-action = Преузми { -app-name } за АРМ64
-first-run-guidance-quickFormat =
-    Унесите наслов, аутора и/или годину да потражите реферецну.
-    
-    Након што направите избор, кликните на балончић или изаберите ставку преко тастатуре и притисните ↓/размак да прикажете додатне опције цитата као што су број странице, префикс или суфикс.
-    
-    Можете додати број странице и директно, тако што га унесете у поље за претрагу или га откуцате након балончића и притиснете { return-or-enter }.
 first-run-guidance-authorMenu = { -app-name } вам дозвољава да унесете уредника и преводиоца. Можете да поставите аутора за уредника или преводиоца из овог менија.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -649,6 +671,8 @@ find-pdf-files-added =
         [few] { $count } поља су додата
        *[other] { $count } поља је додато
     }
+select-items-window =
+    .title = Изабери ставке
 select-items-dialog =
     .buttonlabelaccept = Изабери
 select-items-convertToStandalone =
@@ -689,3 +713,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

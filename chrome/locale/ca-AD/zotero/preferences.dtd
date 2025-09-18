@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Títol">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Actualitzat">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Aconsegueix estils addicionals…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Desa al Zotero (icona de la barra d'adreces)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfoca la subfinestra de les biblioteques">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Comprova la integritat de la base de dades">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reinicia els traductors i els estils…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reinicia els traductors…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reinicia els estils…">
 
 <!ENTITY zotero.preferences.configEditor "Editor de configuració">

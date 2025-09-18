@@ -1,4 +1,5 @@
-general-key-control = Control
+general-sentence-separator = 
+general-key-control = 控制
 general-key-shift = Shift
 general-key-alt = Alt
 general-key-option = Option
@@ -8,10 +9,20 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = 打印
 general-remove = 移除
@@ -20,13 +31,51 @@ general-remind-me-later = 稍后提醒我
 general-dont-ask-again = 不再询问
 general-choose-file = 选择文件…
 general-open-settings = 打开设置
+general-settings = 设置…
 general-help = 帮助
 general-tag = 标签
 general-done = 完成
 general-view-troubleshooting-instructions = 查看故障排除说明
 general-go-back = 返回
+general-accept = 接受
+general-cancel = 取消
+general-show-in-library = 在文献库中显示
+general-restartApp = 重启 { -app-name }
+general-restartInTroubleshootingMode = 以故障排除模式重启
+general-save = 保存
+general-clear = 清空
+general-update = 更新
+general-back = 后退
+general-edit = 编辑
+general-cut = 剪切
+general-copy = 复制
+general-paste = 粘贴
+general-find = 查找
+general-delete = 删除
+general-insert = 插入
+general-and = 和
+general-et-al = 等
+general-previous = 前一页
+general-next = 下一步
+general-learn-more = 了解更多
+general-warning = 警告
+general-type-to-continue = 输入 “{ $text }” 以继续
+general-red = 红色
+general-orange = 橙色
+general-yellow = 黄色
+general-green = 绿色
+general-teal = 青色
+general-blue = 蓝色
+general-purple = 紫色
+general-magenta = 洋红色
+general-violet = 紫罗兰色
+general-maroon = 深红色
+general-gray = 灰色
+general-black = 黑色
 citation-style-label = 参考文献样式:
 language-label = 语言：
+menu-custom-group-submenu =
+    .label = 更多选项…
 menu-file-show-in-finder =
     .label = 在访达中显示
 menu-file-show-file =
@@ -69,8 +118,15 @@ menu-view-columns-move-left =
     .label = 将列移至左侧
 menu-view-columns-move-right =
     .label = 将列移至右侧
+menu-show-tabs-menu =
+    .label = 显示标签页列表
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+           *[other] 复制 { $count } 个注释
+        }
 main-window-command =
-    .label = Library
+    .label = 文献库
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,6 +140,10 @@ zotero-tabs-menu-filter =
     .placeholder = 搜索标签页
 zotero-tabs-menu-close-button =
     .title = 关闭标签页
+zotero-toolbar-tabs-scroll-forwards =
+    .title = 向前滚动
+zotero-toolbar-tabs-scroll-backwards =
+    .title = 往回滚动
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -129,7 +189,9 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = 网页链接
 item-menu-change-parent-item =
-    .label = 改变父条目...
+    .label = 改变上级条目...
+item-menu-relate-items =
+    .label = 关联条目
 view-online = 在线查看
 item-menu-option-view-online =
     .label = { view-online }
@@ -240,6 +302,7 @@ runJS-title = 执行 JavaScript
 runJS-editor-label = 代码：
 runJS-run = 执行
 runJS-help = { general-help }
+runJS-completed = 成功完成
 runJS-result =
     { $type ->
         [async] 返回值：
@@ -272,61 +335,15 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = 打印
 bibliography-manageStyles-label = 管理样式…
-integration-docPrefs-window =
-    .title = { -app-name } - 文档首选项
-integration-addEditCitation-window =
-    .title = { -app-name } - 添加/编辑引注
-integration-editBibliography-window =
-    .title = { -app-name } - 编辑参考文献表
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = 编辑参考文献表
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - 快速格式化引注
 styleEditor-locatorType =
     .aria-label = 定位符类型
-styleEditor-locatorInput = Locator input
+styleEditor-locatorInput = 定位符输入
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
     .aria-label = 样式编辑器
 styleEditor-preview =
     .aria-label = 预览
-integration-prefs-displayAs-label = 引注显示为:
-integration-prefs-footnotes =
-    .label = 脚注
-integration-prefs-endnotes =
-    .label = 尾注
-integration-prefs-bookmarks =
-    .label = 引注存储为书签
-integration-prefs-bookmarks-description = 书签可以在 Word 与 LibreOffice 之间共享，但如果不小心被修改，可能会导致错误，并且不能插入脚注。
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] 必须将该文档保存为 .doc 或 .docx 格式。
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = 自动更新引注
-    .tooltip = 有待更新的引注将在文档中突出显示
-integration-prefs-automaticCitationUpdates-description = 禁用更新可以加速大文档中的引注的插入。单击刷新手动更新引注。
-integration-prefs-automaticJournalAbbeviations =
-    .label = 使用 MEDLINE 期刊缩写
-integration-prefs-automaticJournalAbbeviations-description = “期刊缩写”字段将被忽略。
-integration-prefs-exportDocument =
-    .label = 改用其他的文档编辑软件…
-integration-error-unable-to-find-winword = { -app-name } 没有找到运行中的 Word 程序。
 publications-intro-page = 我的出版物
 publications-intro = 你添加到我的出版物的条目将在 zotero.org 上你的个人主页上显示。如果你选择加入附件，这些文件将在你指定的许可下向公众开放下载。请仅添加你自己创建的论文，并仅上传你有权并愿意分享的文件。
 publications-include-checkbox-files =
@@ -379,10 +396,11 @@ licenses-cc-by-nc-nd = 知识共享 署名-非商业性使用-禁止演绎 4.0 �
 licenses-cc-by-nc-sa = 知识共享 署名-非商业性使用-相同方式共享 4.0 国际许可协议
 licenses-cc-more-info = 在将您的作品以知识共享协议许可之前，请确保您已阅读 <a data-l10n-name="license-considerations">许可方注意事项</a>。请注意，即使您后来选择不同的条款或停止发布作品，您之前允许的许可也无法撤销。
 licenses-cc0-more-info = 在将 CC0 应用于您的作品之前，请确保您已阅读知识共享 <a data-l10n-name="license-considerations">CC0 常见问题解答</a>。请注意，将您的作品贡献到公有领域是不可逆转的，即使您后来选择不同的条款或停止发布该作品。
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = 以故障排除模式重启...
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = 以故障排除模式重启
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } 将重新启动并禁用所有插件。启用故障排除模式时，某些功能可能无法正常工作。
 menu-ui-density =
     .label = 紧凑度
@@ -390,7 +408,7 @@ menu-ui-density-comfortable =
     .label = 舒适
 menu-ui-density-compact =
     .label = 紧凑
-pane-item-details = Item Details
+pane-item-details = 条目详情
 pane-info = 信息
 pane-abstract = 摘要
 pane-attachments = 附件
@@ -421,6 +439,7 @@ section-attachments-annotations =
         { $count ->
            *[other] { $count } 个注释
         }
+section-attachments-move-to-trash-message = 您确定要将 “{ $title }” 移动到回收站吗？
 section-notes =
     .label =
         { $count ->
@@ -478,6 +497,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = 上移此栏
+sidenav-reorder-down =
+    .label = 下移此栏
+sidenav-reorder-reset =
+    .label = 恢复栏顺序
+toggle-item-pane =
+    .tooltiptext = 开/合条目窗格
+toggle-context-pane =
+    .tooltiptext = 开/合内容窗格
 pin-section =
     .label = 固定此栏
 unpin-section =
@@ -506,6 +535,8 @@ new-collection-dialog =
     .buttonlabelaccept = 创建分类
 new-collection-name = 名称:
 new-collection-create-in = 创建到：
+show-publications-menuitem =
+    .label = 显示我的出版物
 attachment-info-title = 标题
 attachment-info-filename = 文件名
 attachment-info-accessed = 访问时间
@@ -521,6 +552,18 @@ attachment-info-convert-note =
         }笔记
     .tooltiptext = 已不再支持向附件添加笔记，但您可以将其迁移到单独的笔记后进行编辑。
 attachment-preview-placeholder = 无可预览的附件
+attachment-rename-from-parent =
+    .tooltiptext = 重命名文件以匹配上级条目
+file-renaming-auto-rename-prompt-title = 重命名设置已更改
+file-renaming-auto-rename-prompt-body = 是否要重命名你的文库中的现有文件以匹配新设置？
+file-renaming-auto-rename-prompt-yes = 预览修改…
+file-renaming-auto-rename-prompt-no = 保留现有的文件名
+rename-files-preview =
+    .buttonlabelaccept = 重命名文件
+rename-files-preview-loading = 加载中…
+rename-files-preview-intro = { -app-name } 将重命名你的文库中的以下文件以匹配其上级条目：
+rename-files-preview-renaming = 重命名…
+rename-files-preview-no-files = 所有文件名都已与其上级条目匹配，无需修改。
 toggle-preview =
     .label =
         { $type ->
@@ -528,23 +571,7 @@ toggle-preview =
             [collapsed] 显示
            *[unknown] 切换
         }附件预览
-quickformat-general-instructions =
-    使用左/右箭头浏览此引注的条目。{ $dialogMenu ->
-        [active] 按 Shift-Tab 聚焦到对话框菜单。
-       *[other] { "" }
-    } 按 { return-or-enter } 保存对此引注的编辑。按 Esc 键放弃更改并关闭对话框。
-quickformat-aria-bubble = 该条目已包含在引注中。按空格键自定义条目。 { quickformat-general-instructions }
-quickformat-aria-input = 键入以搜索需要引用的条目。按 T​​ab 键转到搜索结果。  { quickformat-general-instructions }
-quickformat-aria-item = 按 { return-or-enter } 将此条目添加到引注中。按 T​​ab 键回到搜索栏。
-quickformat-accept =
-    .tooltiptext = 保存对此引注的编辑
-quickformat-locator-type =
-    .aria-label = 定位符类型
-quickformat-locator-value = 定位符
-quickformat-citation-options =
-    .tooltiptext = 显示引注选项
-insert-note-aria-input = 键入以搜索笔记。按 T​​ab 键转到结果列表。按 Esc 键关闭对话框。
-insert-note-aria-item = 按 { return-or-enter } 选择此笔记。按 T​​ab 键回到搜索栏。按 Esc 键关闭对话框。
+annotation-image-not-available = [图像不可用]
 quicksearch-mode =
     .aria-label = 快速搜索模式
 quicksearch-input =
@@ -603,12 +630,6 @@ architecture-win32-warning-message = 切换到 64 位版本的 { -app-name } 以
 architecture-warning-action = 下载 64 位版本的 { -app-name }
 architecture-x64-on-arm64-message = { -app-name } 目前以模拟模式运行。请使用原生版本的 { -app-name } 以获得最佳性能。
 architecture-x64-on-arm64-action = 下载适配 ARM64 的 { -app-name }
-first-run-guidance-quickFormat =
-    输入标题、作者和/或年份来搜索参考文献。
-    
-    选择条目后，可以单击气泡或使用键盘按下 ↓/空格键，显示页码、前缀和后缀等引注选项。
-    
-    您也可以直接添加页码，方法是在搜索词中包含页码，或在气泡后输入页码并按下 { return-or-enter } 键。
 first-run-guidance-authorMenu = { -app-name } 也允许您指定“编辑”和“译者”。您可以从此菜单中选择，将“作者”更改为“编辑”或“译者”。
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -627,10 +648,12 @@ find-pdf-files-added =
     { $count ->
        *[other] 已添加 { $count } 个文件
     }
+select-items-window =
+    .title = 选择条目
 select-items-dialog =
     .buttonlabelaccept = 选择
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = 转为独立
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
@@ -639,8 +662,7 @@ select-items-convertToStandaloneAttachment =
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+           *[other] 转为独立笔记
         }
 file-type-webpage = 网页
 file-type-image = 图片
@@ -665,3 +687,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } 现在支持在您修改条目时自动保持附件文件名同步。
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = 必须更新 { -app-name } 连接器才能与此版本的 { -app-name } 一起使用。
+userjs-pref-warning = 某些 { -app-name } 设置已被使用不支持的方式覆盖。 { -app-name } 将恢复它们并重新启动。
+long-tag-fixer-window-title =
+    .title = 拆分标签
+long-tag-fixer-button-dont-split =
+    .label = 不要拆分

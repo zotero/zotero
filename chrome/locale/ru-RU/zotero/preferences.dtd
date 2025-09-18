@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Название">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Обновлен">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Загрузить дополнительные стили…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Сохранить в Zotero (значок в адресной строке браузера)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Фокус на панели библиотек">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проверить целостность БД">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Сбросить настройки трансляторов и стилей…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Сбросить настройки трансляторов…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Сбросить настройки стилей…">
 
 <!ENTITY zotero.preferences.configEditor "Редактор конфигурации">

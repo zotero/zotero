@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -8,10 +9,20 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = Afdrukken
 general-remove = Verwijderen
@@ -19,20 +30,58 @@ general-add = Toevoegen
 general-remind-me-later = Herinner mij later
 general-dont-ask-again = Niet meer vragen
 general-choose-file = Kies bestand…
-general-open-settings = Open Settings
+general-open-settings = Instellingen
+general-settings = Settings…
 general-help = Help
 general-tag = Label
 general-done = Klaar
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-accept = Accept
+general-cancel = Annuleren
+general-show-in-library = In bibliotheek tonen
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
+general-save = Opslaan
+general-clear = Wissen
+general-update = Update
+general-back = Terug
+general-edit = Bewerken
+general-cut = Knippen
+general-copy = Kopiëren
+general-paste = Plakken
+general-find = Zoeken
+general-delete = Verwijder
+general-insert = Invoegen
+general-and = en
+general-et-al = e.a.
+general-previous = Previous
+general-next = Next
+general-learn-more = Meer info
+general-warning = Waarschuwing
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = Rood
+general-orange = Oranje
+general-yellow = Geel
+general-green = Groen
+general-teal = Teal
+general-blue = Blauw
+general-purple = Paars
+general-magenta = Magenta
+general-violet = Violet
+general-maroon = Maroon
+general-gray = Grijs
+general-black = Zwart
 citation-style-label = Citation Style:
 language-label = Taal:
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
     .label = Bestand tonen
 menu-file-show-files =
-    .label = Show Files
+    .label = Bestanden tonen
 menu-print =
     .label = { general-print }
 menu-density =
@@ -44,21 +93,21 @@ menu-add-by-identifier =
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
-    .label = Add File…
+    .label = Bestand Toevoegen...
 menu-add-standalone-linked-file-attachment =
-    .label = Add Link to File…
+    .label = Koppeling naar bestand maken…
 menu-add-child-file-attachment =
-    .label = Attach File…
+    .label = Bestand Toevoegen...
 menu-add-child-linked-file-attachment =
     .label = Koppeling naar bestand toevoegen…
 menu-add-child-linked-url-attachment =
-    .label = Attach Web Link…
+    .label = Web Koppeling Toevoegen...
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
     .label = Nieuwe zelfstandige aantekening
 menu-new-item-note =
-    .label = New Item Note
+    .label = Hoofditem maken...
 menu-restoreToLibrary =
     .label = Terugzetten in bibliotheek
 menu-deletePermanently =
@@ -66,34 +115,46 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Plugins
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Kolom Naar Links Verplaatsen
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Kolom Naar Rechts Verplaatsen
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = Bibliotheek
 main-window-key =
-    .key = L
+    .key = b
 zotero-toolbar-tabs-menu =
-    .tooltiptext = List all tabs
-filter-collections = Filter Collections
+    .tooltiptext = Alle tabbladen tonen
+filter-collections = Verzameling Filteren
 zotero-collections-search =
     .placeholder = { filter-collections }
 zotero-collections-search-btn =
     .tooltiptext = { filter-collections }
 zotero-tabs-menu-filter =
-    .placeholder = Search Tabs
+    .placeholder = In Tabbladen Zoeken
 zotero-tabs-menu-close-button =
-    .title = Close Tab
+    .title = Tabblad Sluiten
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
-    .label = Rename Collection
+    .label = Verzameling Hernoemen
 collections-menu-edit-saved-search =
     .label = Bewaarde zoekopdracht bewerken
 collections-menu-move-collection =
-    .label = Move To
+    .label = Verplaats Naar
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Kopieer Naar
 item-creator-moveDown =
     .label = Verplaats naar beneden
 item-creator-moveToTop =
@@ -129,7 +190,9 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Web Link
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Hoofditem wijzigen
+item-menu-relate-items =
+    .label = Relate Items
 view-online = Bekijk online
 item-menu-option-view-online =
     .label = { view-online }
@@ -152,7 +215,7 @@ import-online-intro-title = Introductie
 import-source-file =
     .label = Een bestand (BibTeX, RIS, Zotero RDF, etc.)
 import-source-folder =
-    .label = A folder of PDFs or other files
+    .label = Een map met PDF's of andere bestanden
 import-source-online =
     .label = { $targetApp } online import
 import-options = Opties
@@ -163,7 +226,7 @@ import-recreate-structure =
     .label = Recreate folder structure as collections
 import-fileTypes-header = File Types to Import:
 import-fileTypes-pdf =
-    .label = PDFs
+    .label = PDF Bestanden
 import-fileTypes-other =
     .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
 import-file-handling = Bestandsverwerking
@@ -173,7 +236,7 @@ import-file-handling-link =
     .label = Link to files in original location
 import-fileHandling-description = Linked files cannot be synced by { -app-name }.
 import-online-new =
-    .label = Download new items only; don’t update previously imported items
+    .label = Nieuwe items alleen downloaden; eerder geïmporteerde items niet bijwerken
 import-mendeley-username = Gebruikersnaam
 import-mendeley-password = Wachtwoord
 general-error = Fout
@@ -226,7 +289,7 @@ rtfScan-choose-output-file =
 rtfScan-intro-page = Introductie
 rtfScan-scan-page = Bezig met zoeken naar verwijzingen
 rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
-rtfScan-citations-page = Controleer geciteerde items
+rtfScan-citations-page = Geciteerde items controleren
 rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
 rtfScan-style-page = Opmaken van het document
 rtfScan-format-page = Verwijzingen opmaken
@@ -241,6 +304,7 @@ runJS-title = Run JavaScript
 runJS-editor-label = Code:
 runJS-run = Run
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Return value:
@@ -273,29 +337,6 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Afdrukken
 bibliography-manageStyles-label = Stijlen beheren…
-integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
-integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
-integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
 styleEditor-locatorType =
     .aria-label = Locator type
 styleEditor-locatorInput = Locator input
@@ -305,29 +346,6 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
-integration-prefs-displayAs-label = Toon verwijzingen als:
-integration-prefs-footnotes =
-    .label = Voetnoten
-integration-prefs-endnotes =
-    .label = Eindnoten
-integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
-integration-prefs-bookmarks-description = Bladwijzers worden behouden tussen Microsoft Word en OpenOffice, maar kunnen fouten veroorzaken als deze per ongeluk aangepast worden en kunnen niet toegevoegd worden aan voetnoten.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] The document must be saved as .doc or .docx.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Verwijzingen automatisch bijwerken
-    .tooltip = Verwijzingen die bijgewerkt moeten worden, worden gearceerd in het document
-integration-prefs-automaticCitationUpdates-description = Uitschakelen van updates kan het invoegen van verwijzingen in grote documenten versnellen. Klik op Vernieuwen om verwijzingen handmatig bij te werken.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Gebruik MEDLINE tijdschriftafkortingen
-integration-prefs-automaticJournalAbbeviations-description = Het veld ‘Tijdschrift-afkorting’ wordt genegeerd
-integration-prefs-exportDocument =
-    .label = Verander van tekstverwerker…
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Mijn Publicaties
 publications-intro = Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.
 publications-include-checkbox-files =
@@ -380,10 +398,11 @@ licenses-cc-by-nc-nd = Creative Commons Attribution-NonCommercial-NoDerivatives 
 licenses-cc-by-nc-sa = Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
 licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
 licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = Restart in Troubleshooting Mode…
     .accesskey = O
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
 menu-ui-density =
     .label = Density
@@ -424,6 +443,7 @@ section-attachments-annotations =
             [one] { $count } Annotation
            *[other] { $count } Annotations
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
@@ -484,6 +504,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = Toggle Context Pane
 pin-section =
     .label = Pin Section
 unpin-section =
@@ -512,6 +542,8 @@ new-collection-dialog =
     .buttonlabelaccept = Create Collection
 new-collection-name = Naam:
 new-collection-create-in = Create in:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = Titel
 attachment-info-filename = Bestandsnaam
 attachment-info-accessed = Geraadpleegd
@@ -527,6 +559,18 @@ attachment-info-convert-note =
         } Note
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
 attachment-preview-placeholder = No attachment to preview
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = Laden…
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
@@ -534,23 +578,7 @@ toggle-preview =
             [collapsed] Show
            *[unknown] Toggle
         } Attachment Preview
-quickformat-general-instructions =
-    Use Left/Right Arrow to navigate the items of this citation. { $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
-       *[other] { "" }
-    } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
-quickformat-accept =
-    .tooltiptext = Save edits to this citation
-quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value = Locator
-quickformat-citation-options =
-    .tooltiptext = Show citation options
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
     .aria-label = Quick Search mode
 quicksearch-input =
@@ -613,12 +641,6 @@ architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best
 architecture-warning-action = Download 64-bit { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = Download { -app-name } for ARM64
-first-run-guidance-quickFormat =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
-    
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
 first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -638,6 +660,8 @@ find-pdf-files-added =
         [one] { $count } file added
        *[other] { $count } files added
     }
+select-items-window =
+    .title = Items selecteren
 select-items-dialog =
     .buttonlabelaccept = Select
 select-items-convertToStandalone =
@@ -677,3 +701,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

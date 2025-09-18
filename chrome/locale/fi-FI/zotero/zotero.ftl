@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = control
 general-key-shift = vaihto
 general-key-alt = Alt
@@ -8,7 +9,17 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
+    { PLATFORM() ->
+        [macos] Palauta
+       *[other] Syötä
+    }
+delete-or-backspace =
     { PLATFORM() ->
         [macos] Palauta
        *[other] Syötä
@@ -20,13 +31,51 @@ general-remind-me-later = Muistuta myöhemmin
 general-dont-ask-again = Älä kysy uudelleen
 general-choose-file = Valitse tiedosto...
 general-open-settings = Avaa asetukset
+general-settings = Asetukset…
 general-help = Ohje
 general-tag = Merkki
 general-done = Valmis
 general-view-troubleshooting-instructions = Katso vianhakuohjeet
 general-go-back = Siirry takaisinpäin
+general-accept = Hyväksy
+general-cancel = Peruuta
+general-show-in-library = Näytä kirjastossa
+general-restartApp = Uudelleenkäynnistä { -app-name }
+general-restartInTroubleshootingMode = Käynnistä uudelleen virheenjäljitystilassa
+general-save = Tallenna
+general-clear = Tyhjennä
+general-update = Päivitä
+general-back = Takaisin
+general-edit = Muokkaa
+general-cut = Leikkaa
+general-copy = Kopioi
+general-paste = Liitä
+general-find = Etsi
+general-delete = Poista
+general-insert = Lisää
+general-and = ja
+general-et-al = ym.
+general-previous = Edellinen
+general-next = Seuraava
+general-learn-more = Lisätietoja
+general-warning = Varoitus
+general-type-to-continue = Kirjoita “{ $text }” jatkaaksesi.
+general-red = Punainen
+general-orange = Oranssi
+general-yellow = Keltainen
+general-green = Vihreä
+general-teal = Sinivihreä
+general-blue = Sininen
+general-purple = Purppura
+general-magenta = Magenta
+general-violet = Violetti
+general-maroon = Kastanjanruskea
+general-gray = Harmaa
+general-black = Musta
 citation-style-label = Viittaustyyli:
 language-label = Kieli:
+menu-custom-group-submenu =
+    .label = Lisää asetuksia…
 menu-file-show-in-finder =
     .label = Näytä Finderissa
 menu-file-show-file =
@@ -69,8 +118,16 @@ menu-view-columns-move-left =
     .label = Siirrä sarake vasemmalle
 menu-view-columns-move-right =
     .label = Siirrä sarake oikealle
+menu-show-tabs-menu =
+    .label = Näytä välilehtivalikko
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = Kirjasto
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,6 +141,10 @@ zotero-tabs-menu-filter =
     .placeholder = Etsi välilehdistä
 zotero-tabs-menu-close-button =
     .title = Sulje välilehti
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -130,6 +191,8 @@ item-menu-add-url =
     .label = Verkko-osoite
 item-menu-change-parent-item =
     .label = Vaihda tiedoston isäntänimikettä…
+item-menu-relate-items =
+    .label = Relate Items
 view-online = Katso verkossa
 item-menu-option-view-online =
     .label = { view-online }
@@ -241,6 +304,7 @@ runJS-title = Aja JavaScript
 runJS-editor-label = Koodi:
 runJS-run = Käynnistä
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Paluuarvo:
@@ -273,29 +337,6 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Tulosta
 bibliography-manageStyles-label = Hallitse tyylejä...
-integration-docPrefs-window =
-    .title = { -app-name } - Asiakirjan ominaisuudet
-integration-addEditCitation-window =
-    .title = { -app-name } - Lisää viite tai muokkaa sitä
-integration-editBibliography-window =
-    .title = { -app-name } - Muokkaa lähdeluetteloa
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Vuokkaa viitettä
--integration-editBibliography-include-uncited = Sisällyttääksesi viittaamattoman nimikkeen lähdeluetteloosi, valitse se nimikelistalta ja paina { general-add }.
--integration-editBibliography-exclude-cited = Voit myös jättää pois viitatun nimikkeen lähdeluettelosta valitsemalla sen ja painamalla { general-remove }.
--integration-editBibliography-edit-reference = Muuttaaksesi viitteen muotoilua, käytä tekstieditoria.
-integration-editBibliography-wrapper =
-    .aria-label = Muokkaa lähdeluetteloa -valintaikkuna
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Pikamuotoile viite
 styleEditor-locatorType =
     .aria-label = Täsmenteen tyyppi
 styleEditor-locatorInput = Täsmenteen syöttö
@@ -305,29 +346,6 @@ styleEditor-editor =
     .aria-label = Tyylieditori
 styleEditor-preview =
     .aria-label = Esikatselu
-integration-prefs-displayAs-label = Näytä sitaatit muodossa:
-integration-prefs-footnotes =
-    .label = Alaviitteet
-integration-prefs-endnotes =
-    .label = Loppuviitteet
-integration-prefs-bookmarks =
-    .label = Tallenna viitteet kirjanmerkkeinä
-integration-prefs-bookmarks-description = Kirjanmerkkejä voidaan jakaa Wordin ja LibreOfficen välillä, mutta se saattaa aiheuttaa ongelmia, mikäli niitä muutetaan vahingossa. Kirjanmerkkejä ei voi myöskään lisätä alaviitteisiin.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] Asiakirja tulee tallentaa .doc tai .docx -muodossa.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Päivitä viitteet automaattisesti
-    .tooltip = Viitteet, joilla on odottavia päivityksiä, korostetaan asiakirjassa
-integration-prefs-automaticCitationUpdates-description = Päivittämisen poiskytkentä voi nopeuttaa viitteiden lisäämistä pitkissä asiakirjoissa. Päivitä asiakirjan viitteet käsin valitsemalla Päivitä.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Käytä MEDLINEn lehtilyhenteitä
-integration-prefs-automaticJournalAbbeviations-description = Lehden lyhenne -kenttää ei huomioida.
-integration-prefs-exportDocument =
-    .label = Vaihda eri tekstinkäsittelyohjelmaan…
-integration-error-unable-to-find-winword = { -app-name } ei löydä käynnissä olevaa Word-sovellusta.
 publications-intro-page = Omat julkaisuni
 publications-intro = Omat julkaisuni -kokoelmaan lisätyt nimikkeet näkyvät profiilisivullasi zotero.org:ssa. Jos päätät sisällyttää liitetiedostot, ne julkaistaan sivulla määrittelemälläsi lisenssillä. Lisää vain julkaisuja jotka olet itse tehnyt ja sisällytä vain tiedostot, joiden levittämiseen sinulla on oikeudet ja joita haluat levittää.
 publications-include-checkbox-files =
@@ -380,10 +398,11 @@ licenses-cc-by-nc-nd = Creative Commons Nimeä-EiKaupallinen-EiMuutoksia 4.0 -li
 licenses-cc-by-nc-sa = Creative Commons Nimeä-EiKaupallinen-JaaSamoin 4.0 -lisenssi
 licenses-cc-more-info = Lue ehdottomasti Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> ennen kuin sovellat CC-lisenssiä julkaisuusi. Huomaa, että lisenssin peruuttaminen on mahdotonta, vaikka haluaisit myöhemmin valita toisen lisenssin tai luopua julkaisun julkaisemisesta.
 licenses-cc0-more-info = Lue ehdottomasti Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> ennen kuin sovellat CC0-lisenssiä julkaisuusi. Huomaa, että julkaisun vapauttaminen tekijänoikeudettomaan tilaan (public domain) on peruuttamaton toimenpide, vaikka haluaisit myöhemmin valita toisen lisenssin tai luopua julkaisun julkaisemisesta.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = Käynnistä uudelleen virheenjäljitystilassa...
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = Käynnistä uudelleen virheenjäljitystilassa
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } käynnistyy uudelleen ilman lisäosia. Kaikki ominaisuudet eivät välttämättä toimi virheenjäljitystilassa.
 menu-ui-density =
     .label = Tiheys
@@ -424,6 +443,7 @@ section-attachments-annotations =
             [one] { $count } huomautus
            *[other] { $count } huomautusta
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
@@ -484,6 +504,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = Näytä kontekstiruutu
 pin-section =
     .label = Kiinnitä osa
 unpin-section =
@@ -512,6 +542,8 @@ new-collection-dialog =
     .buttonlabelaccept = Luo kokoelma
 new-collection-name = Nimi:
 new-collection-create-in = Luo kohteeseen:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = Nimi
 attachment-info-filename = Tiedostonimi
 attachment-info-accessed = Viittaus noudettu
@@ -527,6 +559,18 @@ attachment-info-convert-note =
         } muistiinpanoksi
     .tooltiptext = Muistiinpanojen lisäämistä liitteisiin ei enää tueta, mutta voit muokata tätä muistiinpanoa siirtämällä sen erilliseksi muistiinpanoksi.
 attachment-preview-placeholder = Ei liitettä esikatseltavaksi
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Nimeä tiedostot uudelleen
+rename-files-preview-loading = Ladataan...
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
@@ -534,23 +578,7 @@ toggle-preview =
             [collapsed] Näytä
            *[unknown] Vaihda
         } Liitteen esikatselu
-quickformat-general-instructions =
-    Käytä vasenta ja oikeaa nuolta siirtyäksesi eri kenttien välillä.  { $dialogMenu ->
-        [active] Paina shift-tab siirtyäksesi valikkoon
-       *[other] { "" }
-    } Paina { return-or-enter } tallentaaksesi muutokset viitteeseen. Paina Esc hylätäksesi muutokset ja sulkeaksesi valikon.
-quickformat-aria-bubble = Tämä nimike on mukana viittauksessa. Paina välilyöntiä muokataksesi. { quickformat-general-instructions }
-quickformat-aria-input = Kirjoita hakeaksesi kohdetta joka lisätään tähän viittaukseen. Paina tabia siirtyäksesi hakutuloksesta toiseen. { quickformat-general-instructions }
-quickformat-aria-item = Paina { return-or-enter } lisätäksesi tämän nimikkeen viittaukseen. Paina tabia palataksesi hakukenttään.
-quickformat-accept =
-    .tooltiptext = Tallenna muokkaukset tähän viittaukseen
-quickformat-locator-type =
-    .aria-label = Täsmenteen tyyppi
-quickformat-locator-value = Täsmenne
-quickformat-citation-options =
-    .tooltiptext = Näytä viittausasetukset
-insert-note-aria-input = Kirjoita hakeaksesi muistiinpanoa. Paina tabia siirtyäksesi hakuosumasta toiseen. Esc sulkee valikon.
-insert-note-aria-item = Paina { return-or-enter } valitaksesi tämän muistiinpanon. Paina tabia palataksesi hakukenttään. Esc sulkee valikon.
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
     .aria-label = Pikahakutila
 quicksearch-input =
@@ -613,12 +641,6 @@ architecture-win32-warning-message = Vaihda 64-bittiseen { -app-name }on niin sa
 architecture-warning-action = Lataa 64-bittinen { -app-name }
 architecture-x64-on-arm64-message = { -app-name }a ajetaan emulaattoritilassa. Natiiviversio { -app-name }sta toimii paljon tehokkaammin.
 architecture-x64-on-arm64-action = Lataa { -app-name } ARM64-prosessorille
-first-run-guidance-quickFormat =
-    Hae lähdettä kirjoittamalla otsikko, tekijä tai vuosi.
-    
-    Kun olet tehnyt valintasi, klikkaa kuplaa tai valitse se näppäimistöllä ja paina ↓ tai välilyönti niin näet viittausvaihtoehdot kuten sivunumeron ja etu- tai jälkiliitteet.
-    
-    Voit lisätä sivunumeron myös suoraan syöttämällä sen hakutermeihin tai kirjoittamalla sen kuplan jälkeen ja painamalla { return-or-enter }.
 first-run-guidance-authorMenu = { -app-name } antaa sinun määritellä myös toimittajat ja kääntäjät. Voit tehdä kirjoittajasta toimittajan tai kääntäjän tästä valikosta.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -638,6 +660,8 @@ find-pdf-files-added =
         [one] { $count } tiedosto lisätty
        *[other] { $count } tiedostoa lisätty
     }
+select-items-window =
+    .title = Valitse nimikkeet
 select-items-dialog =
     .buttonlabelaccept = Valitse
 select-items-convertToStandalone =
@@ -677,3 +701,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

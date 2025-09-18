@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "제목">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "업데이트됨">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "추가 스타일 받기...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero에 저장 (주소 표시줄 아이콘)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "라이브러리 창에 포커스">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "데이터베이스 무결성 점검">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "중계기 및 스타일 재설정...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "중계기 재설정...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "스타일 재설정...">
 
 <!ENTITY zotero.preferences.configEditor "설정 편집기">

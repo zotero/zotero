@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titlu">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Actualizat">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Obține stiluri adiționale...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvează în Zotero (iconița din bara de adrese)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panou de focalizare biblioteci">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Controlează integritatea bazei de date">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Resetează traducătorii și stilurile...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Resetează traducători...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Resetează stiluri...">
 
 <!ENTITY zotero.preferences.configEditor "Editor de configurare">

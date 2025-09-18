@@ -4,9 +4,9 @@ preferences-appearance-title = Erscheinungsbild und Sprache
 preferences-auto-recognize-files =
     .label = Automatisch Metadaten für PDFs und eBooks abrufen
 preferences-file-renaming-title = Umbenennen von Dateien
-preferences-file-renaming-intro = { -app-name } benennt heruntergeladene Dateien automatisch nach Informationen aus dem übergeordneten Eintrag (Titel, Autor etc.) um. Sie können auswählen, dass auch lokale hinzugefügte Dateien umbenannt werden.
+preferences-file-renaming-intro = { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
 preferences-file-renaming-auto-rename-files =
-    .label = Lokal hinzugefügte Dateien automatisch umbenennen
+    .label = Automatically rename files
 preferences-file-renaming-file-types = Diese Dateitypen umbenennen:
 preferences-file-renaming-file-type-pdf =
     .label = { file-type-pdf }
@@ -20,6 +20,8 @@ preferences-file-renaming-file-type-video =
     .label = { file-type-video }
 preferences-file-renaming-customize-button =
     .label = Dateinamen-Format anpassen…
+preferences-file-renaming-rename-now =
+    .label = Rename Files…
 preferences-file-renaming-format-title = Dateinamen-Format
 preferences-file-renaming-format-instructions = Sie können das Muster anpassen, das { -app-name } verwendet, um Dateien nach den Metadaten des Elterneintrags umzubenennen.
 preferences-file-renaming-format-instructions-example = Zum Beispiel wird „{ $example }“ in dieser Vorlage durch den Titel des übergeordneten Eintrags ersetzt, der nach 50 Zeichen abgeschnitten wird.
@@ -56,14 +58,23 @@ preferences-quickCopy-minus =
 preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
-preferences-styleManager-delete-button =
-    .tooltiptext = Ausgewählten Stil löschen
-    .aria-label = { general-remove }
-    .label = { $label }
-preferences-styleManager-add-button =
+preferences-styleManager-intro = { -app-name } can generate citations and bibliographies in over 10,000 citation styles. Add styles here to make them available when selecting styles throughout { -app-name }.
+preferences-styleManager-get-additional-styles =
+    .label = Get Additional Styles…
+preferences-styleManager-restore-default =
+    .label = Restore Default Styles…
+preferences-styleManager-add-from-file =
     .tooltiptext = Stil aus Datei hinzufügen
-    .aria-label = { general-add }
-    .label = { $label }
+    .label = Add from File…
+preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
+preferences-citation-dialog = Citation Dialog
+preferences-citation-dialog-mode = Citation Dialog Mode:
+preferences-citation-dialog-mode-last-used =
+    .label = Last Used
+preferences-citation-dialog-mode-list =
+    .label = List Mode
+preferences-citation-dialog-mode-library =
+    .label = Library Mode
 preferences-advanced-enable-local-api =
     .label = Anderen Anwendungen auf diesem Computer erlauben, mit { -app-name } zu kommunizieren
 preferences-advanced-local-api-available = Verfügbar unter <code data-l10n-name="url">{ $url } </span>
@@ -74,9 +85,28 @@ preferences-advanced-language-and-region-title = Sprache und Region
 preferences-advanced-enable-bidi-ui =
     .label = Werkzeuge für das Arbeiten mit bidirektionalem Text aktivieren
 preferences-advanced-reset-data-dir =
-    .label = Revert to Default Location…
+    .label = Auf Standardverzeichnis zurücksetzen…
 preferences-advanced-custom-data-dir =
-    .label = Use Custom Location…
+    .label = Benutzerdefiniertes Verzeichnis verwenden...
 preferences-advanced-default-data-dir =
-    .value = (Default: { $directory })
-    .aria-label = Default location
+    .value = (Standard: { $directory })
+    .aria-label = Standardverzeichnis
+preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ $libraryName }” on { $domain } with data from this computer.
+preferences-sync-reset-restore-to-server-deleted-items-text =
+    { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
+        [one] item
+       *[other] items
+    } in the online library will be permanently deleted.
+preferences-sync-reset-restore-to-server-remaining-items-text =
+    { general-sentence-separator }{ $localItemsCount ->
+        [0] The library on this computer and the online library will be empty.
+        [one] 1 item will remain on this computer and in the online library.
+       *[other] { $localItemsCount } items will remain on this computer and in the online library.
+    }
+preferences-sync-reset-restore-to-server-checkbox-label =
+    { $remoteItemsDeletedCount ->
+        [one] Delete 1 item
+       *[other] Delete { $remoteItemsDeletedCount } items
+    }
+preferences-sync-reset-restore-to-server-confirmation-text = delete online library
+preferences-sync-reset-restore-to-server-yes = Daten in Online-Bibliothek ersetzen

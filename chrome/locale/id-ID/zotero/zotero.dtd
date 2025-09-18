@@ -79,7 +79,6 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Lainnya">
 <!ENTITY zotero.toolbar.lookup.label "Tambahkan Item dengan Nomor Pengenal ">
 <!ENTITY zotero.toolbar.removeItem.label "Buang Item...">
-<!ENTITY zotero.toolbar.newLibrary.label "Perpustakaan Baru">
 <!ENTITY zotero.toolbar.newGroup "Grup Baru...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Subkoleksi Baru...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Pencarian Tersimpan Baru...">

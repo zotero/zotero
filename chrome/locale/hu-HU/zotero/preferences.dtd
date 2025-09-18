@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Cím">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Frissítve">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles " További stílusok telepítése...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Mentés Zotero-ba (adress bar icon)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Az adatbázis integritásának ellenőrzése">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Fordítók és stílusok visszaállítása…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Fordítók visszaállítása">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stílusok visszaálllítása">
 
 <!ENTITY zotero.preferences.configEditor "Konfiguráció szerkesztése">

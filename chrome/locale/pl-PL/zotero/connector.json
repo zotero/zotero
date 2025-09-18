@@ -68,6 +68,9 @@
   "progressWindow_detailsBtnHide": {
     "message": "Ukryj szczegóły"
   },
+  "progressWindow_collectionSelector": {
+    "message": "Wybór kolekcji docelowej"
+  },
   "progressWindow_savingItems": {
     "message": "Zapisywanie $1 elementów. $2"
   },

@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -8,10 +9,20 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = Nyomtatás
 general-remove = Eltávolítás
@@ -19,20 +30,58 @@ general-add = Hozzáadás
 general-remind-me-later = Emlékeztessen később
 general-dont-ask-again = Ne kérdezze újra
 general-choose-file = Choose File...
-general-open-settings = Open Settings
+general-open-settings = Beállítások megnyitása
+general-settings = Settings…
 general-help = Súgó
 general-tag = Címke
 general-done = Rendben
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
+general-go-back = Vissza
+general-accept = Accept
+general-cancel = Mégsem
+general-show-in-library = Megjelenítés a könyvtárban
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = Újraindítás hibakereső módban
+general-save = Mentés
+general-clear = Törlés
+general-update = Frissítés
+general-back = Vissza
+general-edit = Szerkesztés
+general-cut = Kivágás
+general-copy = Másolás
+general-paste = Beillesztés
+general-find = Keresés
+general-delete = Törlés
+general-insert = Beillesztés
+general-and = és
+general-et-al = és mtsai.
+general-previous = Előző
+general-next = Következő
+general-learn-more = Bővebben
+general-warning = Figyelmeztetés
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = Piros
+general-orange = Narancssárga
+general-yellow = Sárga
+general-green = Zöld
+general-teal = Kékeszöld
+general-blue = Kék
+general-purple = Lila
+general-magenta = Bíborvörös
+general-violet = Ibolya
+general-maroon = Vörösesbarna
+general-gray = Szürke
+general-black = Fekete
 citation-style-label = Hivatkozási stílus:
 language-label = Nyelv:
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
     .label = Fájl megjelenítése
 menu-file-show-files =
-    .label = Show Files
+    .label = Fájlok megjelenítése
 menu-print =
     .label = { general-print }
 menu-density =
@@ -58,19 +107,27 @@ menu-new-note =
 menu-new-standalone-note =
     .label = Új önálló jegyzet
 menu-new-item-note =
-    .label = New Item Note
+    .label = Új elem jegyzete
 menu-restoreToLibrary =
     .label = Visszaállítás könyvtárba
 menu-deletePermanently =
     .label = Törlés véglegesen…
 menu-tools-plugins =
-    .label = Plugins
+    .label = Pluginek
 menu-view-columns-move-left =
     .label = Move Column Left
 menu-view-columns-move-right =
     .label = Move Column Right
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = Könyvtár
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,16 +141,20 @@ zotero-tabs-menu-filter =
     .placeholder = Search Tabs
 zotero-tabs-menu-close-button =
     .title = Fül bezárása
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
-    .label = Rename Collection
+    .label = Gyűjtemény átnevezése
 collections-menu-edit-saved-search =
     .label = Mentett keresés szerkesztése
 collections-menu-move-collection =
     .label = Move To
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Másolás a(z)
 item-creator-moveDown =
     .label = Mozgatás lefelé
 item-creator-moveToTop =
@@ -130,6 +191,8 @@ item-menu-add-url =
     .label = Web Link
 item-menu-change-parent-item =
     .label = Change Parent Item…
+item-menu-relate-items =
+    .label = Relate Items
 view-online = Online megtekintés
 item-menu-option-view-online =
     .label = { view-online }
@@ -139,12 +202,12 @@ file-renaming-file-renamed-to = File renamed to { $filename }
 itembox-button-options =
     .tooltiptext = Open context menu
 itembox-button-merge =
-    .aria-label = Select version of { $field } field
-create-parent-intro = Enter a DOI, ISBN, PMID, arXiv ID, or ADS Bibcode to identify this file:
+    .aria-label = A { $field } mező verziójának kiválasztása
+create-parent-intro = Adjon meg egy DOI-t, ISBN-t, PMID-t, arXiv ID-t vagy ADS Bibcode-ot a fájl azonosításához:
 reader-use-dark-mode-for-content =
-    .label = Use Dark Mode for Content
-update-updates-found-intro-minor = An update for { -app-name } is available:
-update-updates-found-desc = It is recommended that you apply this update as soon as possible.
+    .label = Sötét mód használata a tartalomhoz
+update-updates-found-intro-minor = A { -app-name } frissítés elérhető:
+update-updates-found-desc = Javasoljuk, hogy a lehető leghamarabb alkalmazza ezt a frissítést.
 import-window =
     .title = Importálás
 import-where-from = Honnét szeretné importálni?
@@ -160,15 +223,15 @@ import-importing = Importálás…
 import-create-collection =
     .label = Importált elemek és gyűjtemények áthelyezése új gyűjteménybe
 import-recreate-structure =
-    .label = Recreate folder structure as collections
+    .label = Mappaszerkezet újra létrehozása gyűjteményekként
 import-fileTypes-header = File Types to Import:
 import-fileTypes-pdf =
     .label = PDF-ek
 import-fileTypes-other =
-    .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
+    .placeholder = Egyéb fájlok minta szerint, vesszővel elválasztva (pl. *.jpg,*.png)
 import-file-handling = Fájlkezelés
 import-file-handling-store =
-    .label = Copy files to the { -app-name } storage folder
+    .label = Fájlok másolása a { -app-name } tároló mappába
 import-file-handling-link =
     .label = Hivatkozás az eredeti helyen található fájlokhoz
 import-fileHandling-description = Linked files cannot be synced by { -app-name }.
@@ -191,17 +254,17 @@ file-interface-items-were-relinked =
         [one] One item was relinked
        *[other] { $numRelinked } items were relinked
     }
-import-mendeley-encrypted = The selected Mendeley database cannot be read, likely because it is encrypted. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-encrypted = A kiválasztott Mendeley-adatbázis nem olvasható, valószínűleg azért, mert titkosítva van. További információkért lásd: <a data-l10n-name="mendeley-import-kb">Hogyan importálhatok egy Mendeley könyvtárat a Zotero programba?</a>
 file-interface-import-error-translator = An error occurred importing the selected file with “{ $translator }”. Please ensure that the file is valid and try again.
 import-online-intro = In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-intro2 = { -app-name } will never see or store your { $targetApp } password.
-import-online-form-intro = Please enter your credentials to log in to { $targetAppOnline }. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
-import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
+import-online-intro2 = { -app-name } soha nem fogja látni vagy tárolni a { $targetApp } jelszavát.
+import-online-form-intro = Kérjük, adja meg hitelesítő adatait a { $targetAppOnline } bejelentkezéshez. Erre azért van szükség, hogy a { $targetApp } könyvtárat importálni tudja a { -app-name }-ba.
+import-online-wrong-credentials = A { $targetApp } bejelentkezés sikertelen. Kérjük, adja meg újra a hitelesítő adatokat, és próbálja meg újra.
+import-online-blocked-by-plugin = Az importálás nem folytatható a telepített { $plugin } esetén. Kérjük, tiltsa le ezt a plugint, és próbálja meg újra.
 import-online-relink-only =
     .label = Relink Mendeley Desktop citations
 import-online-relink-kb = További információ
-import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+import-online-connection-error = { -app-name } nem tudott csatlakozni { $targetApp }. Kérjük, ellenőrizze az internetkapcsolatot, és próbálja meg újra.
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -214,23 +277,23 @@ rtfScan-wizard =
     .title = RTF átvizsgálása…
 rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = A kezdéshez, válasszon egy RTF bemeneti fájlt és egy kimenti fájlt alább:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = Bemeneti fájl:
+rtfScan-output-file = Kimeneti fájl:
 rtfScan-no-file-selected = Nincs fájl kiválasztva
 rtfScan-choose-input-file =
     .label = { general-choose-file }
-    .aria-label = Choose Input File
+    .aria-label = Bemeneti fájl kiválasztása
 rtfScan-choose-output-file =
     .label = { general-choose-file }
-    .aria-label = Choose Output File
+    .aria-label = Kimeneti fájl kiválasztása
 rtfScan-intro-page = Bevezetés
 rtfScan-scan-page = Hivatkozások keresése
-rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
+rtfScan-scanPage-description = A { -app-name }hivatkozásokat keres a dokumentumban. Kérem várjon.
 rtfScan-citations-page = Hivatkozott elemek ellenőrzése
 rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
 rtfScan-style-page = Dokumentum formázása
 rtfScan-format-page = Hivatkozás formázása
-rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
+rtfScan-format-page-description = { -app-name } feldolgozza és formázza RTF fájlját. Kérem várjon.
 rtfScan-complete-page = Az RTF átvizsgálása befejeződött
 rtfScan-complete-page-description = A dokumentum átvizsgálása és feldolgozása megtörtént. Győződjön meg róla, hogy megfelelően van formázva.
 rtfScan-action-find-match =
@@ -241,6 +304,7 @@ runJS-title = JavaScript futtatása
 runJS-editor-label = Code:
 runJS-run = Run
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Return value:
@@ -273,29 +337,6 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Nyomtatás
 bibliography-manageStyles-label = Stílusok kezelése…
-integration-docPrefs-window =
-    .title = { -app-name } - Dokumentum beállításai
-integration-addEditCitation-window =
-    .title = { -app-name } - Hivatkozás hozzáadása/szerkesztése
-integration-editBibliography-window =
-    .title = { -app-name } - Bibliográfia szerkesztése
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
 styleEditor-locatorType =
     .aria-label = Locator type
 styleEditor-locatorInput = Locator input
@@ -305,29 +346,6 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Előnézet
-integration-prefs-displayAs-label = Hivatkozások megjelenítése:
-integration-prefs-footnotes =
-    .label = Lábjegyzetek
-integration-prefs-endnotes =
-    .label = Végjegyzetek
-integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
-integration-prefs-bookmarks-description = A könyvjelzők megoszthatók a Word és a LibreOffice között, de hibákat okozhatnak, ha véletlenül módosítják őket, és nem illeszthetők be lábjegyzetekbe.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] The document must be saved as .doc or .docx.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Hivatkozások automatikus frissítése
-    .tooltip = A függőben lévő, frissítésekkel ellátott idézetek kiemelésre kerülnek a dokumentumban
-integration-prefs-automaticCitationUpdates-description = A frissítések letiltása felgyorsíthatja a hivatkozások beillesztését a nagy dokumentumokba. A hivatkozások manuális frissítéséhez kattintson a Frissítés gombra.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Használja a MEDLINE folyóirat rövidítéseket
-integration-prefs-automaticJournalAbbeviations-description = A "Journal Abbr" mező figyelmen kívül hagyása
-integration-prefs-exportDocument =
-    .label = Váltson egy másik szövegszerkesztőre…
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = Saját publikációk
 publications-intro = A Saját publikációkhoz hozzáadott elemek megjelennek a zotero.org profiloldalán. Ha úgy dönt, hogy fájlokat is csatol, azokat az ön által megadott licenc alapján nyilvánosan elérhetővé teszi. Csak akkor adjon hozzá munkát, amennyiben ön készítette és csak akkor tartalmazzon fájlokat, ha rendelkezik a terjesztési jogokkal, és ezt meg akarja tenni.
 publications-include-checkbox-files =
@@ -353,7 +371,7 @@ publications-sharing-cc =
 publications-sharing-cc0 =
     .label = Igen és tegye a munkám a közkincs (public domain) közé
 publications-license-page = Válasszon egy Creative Commons licencet.
-publications-choose-license-text = A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.
+publications-choose-license-text = A Creative Commons licenc lehetővé teszi mások számára, hogy másolják és továbbadják a munkáját, amennyiben megfelelő módon hivatkoznak az eredeti műre és külön hivatkoznak a licencre is, valamint jelzik, hogy milyen változásokat eszközöltek. Az alábbiakban további feltételek is megadhatók.
 publications-choose-license-adaptations-prompt = Engedélyezi az átdolgozott műveinek megosztását?
 publications-choose-license-yes =
     .label = Igen
@@ -392,10 +410,11 @@ licenses-cc-by-nc-sa =
     (Nevezd meg!-Ne add el!-Így add tovább! 4.0 Nemzetközi Licence)
 licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
 licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
-    .label = Restart in Troubleshooting Mode…
+    .label = Újraindítás hibakereső módban…
     .accesskey = E
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
 menu-ui-density =
     .label = Density
@@ -408,10 +427,10 @@ pane-info = Info
 pane-abstract = Kivonat
 pane-attachments = Csatolmányok
 pane-notes = Jegyzetek
-pane-libraries-collections = Libraries and Collections
+pane-libraries-collections = Könyvtárak és Gyűjtemények
 pane-tags = Címkék
 pane-related = Kapcsolatok
-pane-attachment-info = Attachment Info
+pane-attachment-info = Csatolmány információ
 pane-attachment-preview = Előnézet
 pane-attachment-annotations = Jegyzetek
 pane-header-attachment-associated =
@@ -436,6 +455,7 @@ section-attachments-annotations =
             [one] { $count } Annotation
            *[other] { $count } Annotations
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
@@ -496,6 +516,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = Toggle Context Pane
 pin-section =
     .label = Pin Section
 unpin-section =
@@ -505,7 +535,7 @@ collapse-other-sections =
 expand-all-sections =
     .label = Expand All Sections
 abstract-field =
-    .placeholder = Add abstract…
+    .placeholder = Kivonat hozzáadása…
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
@@ -521,9 +551,11 @@ toolbar-new-collection =
     .tooltiptext = { new-collection }
 new-collection-dialog =
     .title = Új gyűjtemény
-    .buttonlabelaccept = Create Collection
+    .buttonlabelaccept = Létrehozás
 new-collection-name = Név:
 new-collection-create-in = Create in:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = Cím
 attachment-info-filename = Fájlnév
 attachment-info-accessed = Hozzáférés dátuma
@@ -537,8 +569,20 @@ attachment-info-convert-note =
             [child] Item
            *[unknown] New
         } Note
-    .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
-attachment-preview-placeholder = No attachment to preview
+    .tooltiptext = A mellékletekhez megjegyzés hozzáadása már nem támogatott, de ezt a megjegyzést szerkesztheti egy külön jegyzetbe való áthelyezéssel.
+attachment-preview-placeholder = Nincs melléklet az előnézethez
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = Betöltés…
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
@@ -546,23 +590,7 @@ toggle-preview =
             [collapsed] Show
            *[unknown] Toggle
         } Attachment Preview
-quickformat-general-instructions =
-    Use Left/Right Arrow to navigate the items of this citation. { $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
-       *[other] { "" }
-    } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
-quickformat-accept =
-    .tooltiptext = Save edits to this citation
-quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value = Locator
-quickformat-citation-options =
-    .tooltiptext = Show citation options
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
     .aria-label = Quick Search mode
 quicksearch-input =
@@ -570,7 +598,7 @@ quicksearch-input =
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 item-pane-header-view-as =
-    .label = View As
+    .label = Megtekintés
 item-pane-header-none =
     .label = Egyik sem
 item-pane-header-title =
@@ -580,7 +608,7 @@ item-pane-header-titleCreatorYear =
 item-pane-header-bibEntry =
     .label = Bibliography Entry
 item-pane-header-more-options =
-    .label = More Options
+    .label = További lehetőségek
 item-pane-message-items-selected =
     { $count ->
         [0] No items selected
@@ -620,24 +648,18 @@ item-pane-duplicates-merge-items =
             [one] Merge { $count } item
            *[other] Merge { $count } items
         }
-locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
+locate-library-lookup-no-resolver = A { -app-name } beállítások { $pane } ablaktábláján kell kiválasztania a feloldót.
 architecture-win32-warning-message = Váltson 64 bites { -app-name } rendszerre a legjobb teljesítmény érdekében. Ez nem befolyásolja az adatait.
 architecture-warning-action = 64 bites változat letöltése { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = { -app-name } letöltése ARM64-re
-first-run-guidance-quickFormat =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
-    
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
-first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
+first-run-guidance-authorMenu = { -app-name } lehetővé teszi szerkesztők és fordítók megadását is. Ebből a menüből kiválasztva a szerzőt szerkesztővé vagy fordítóvá alakíthatja.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =
     .tooltiptext = { general-add }
 advanced-search-conditions-menu =
-    .aria-label = Search condition
+    .aria-label = Keresési feltételek
     .label = { $label }
 advanced-search-operators-menu =
     .aria-label = Operator
@@ -650,6 +672,8 @@ find-pdf-files-added =
         [one] { $count } file added
        *[other] { $count } files added
     }
+select-items-window =
+    .title = Elemek kiválasztása
 select-items-dialog =
     .buttonlabelaccept = Select
 select-items-convertToStandalone =
@@ -674,18 +698,27 @@ file-type-video = Videó
 file-type-presentation = Előadás
 file-type-document = Dokumentum
 file-type-ebook = Ebook
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
+post-upgrade-message = Ismerje meg a <a data-l10n-name="new-features-link"> { -app-name } új funkcióit. { $version }</a>
 post-upgrade-density = Choose your preferred layout density:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
-    .label = Paste and Search
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+    .label = Beillesztés és keresés
+mac-word-plugin-install-message = A Zotero a Word bővítmény telepítéséhez hozzáférést igényel a Word-fájlokhoz.
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = Word plugin telepítése
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

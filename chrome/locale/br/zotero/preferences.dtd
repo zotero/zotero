@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titl">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Hizivaet">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Kaout stiloù all...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Enrollañ e-barzh Zotero (ikon ar varrenn chomlec'hioù)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus war banell al levraouegoù">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Gwiriañ anterinded an diaz-roadenn">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Adloc'hañ an troierioù hag ar stiloù...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Adloc'hañ an troerioù...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Adloc'hañ ar stiloù...">
 
 <!ENTITY zotero.preferences.configEditor "Aozer kefluniadur">

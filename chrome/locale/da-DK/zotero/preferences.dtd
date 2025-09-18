@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Opdateret">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Hent flere bibliografiske formater...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Gem til Zotero (ikon i adresselinjen)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panel med fokusbiblioteker">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tjek databasens gyldighed">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Nulstil oversættere og bibliografiske formater...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Nulstil oversættere...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Nulstil bibliografiske formater...">
 
 <!ENTITY zotero.preferences.configEditor "Redigering af konfiguration">

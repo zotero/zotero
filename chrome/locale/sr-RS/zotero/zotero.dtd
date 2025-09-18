@@ -79,7 +79,6 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Више">
 <!ENTITY zotero.toolbar.lookup.label "Додај ставку(е) на основу идентификатора">
 <!ENTITY zotero.toolbar.removeItem.label "Уклони ставку…">
-<!ENTITY zotero.toolbar.newLibrary.label "Нова библиотека">
 <!ENTITY zotero.toolbar.newGroup "Нова група…">
 <!ENTITY zotero.toolbar.newSubcollection.label "Нова подзбирка…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Нова сачувана претрага…">

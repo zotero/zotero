@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Başlık">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncellenme">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Ek stiller indir...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero'ya Kaydet (adres çubuğu ikonu)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Dermeler Bölmesine Odaklan">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Veritabanı Bütünlüğünü Denetle">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Çevirmenleri ve Stilleri Sıfırla...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Çevirmenleri Sıfırla...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Stilleri Sıfırla...">
 
 <!ENTITY zotero.preferences.configEditor "Yapılandırma Düzenleyicisi">

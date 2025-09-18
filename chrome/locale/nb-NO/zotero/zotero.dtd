@@ -79,7 +79,6 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "Mer">
 <!ENTITY zotero.toolbar.lookup.label "Legg til element(er) ved hjelp av identifikator">
 <!ENTITY zotero.toolbar.removeItem.label "Fjern element...">
-<!ENTITY zotero.toolbar.newLibrary.label "Nytt bibliotek">
 <!ENTITY zotero.toolbar.newGroup "Ny gruppe...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny under-samling...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nytt lagret søk...">
@@ -132,7 +131,7 @@
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Slett automatiske emneord i dette biblioteket…">
 <!ENTITY zotero.tagSelector.clearAll "Fravelg alle">
 <!ENTITY zotero.tagSelector.assignColor "Tildel farge…">
-<!ENTITY zotero.tagSelector.renameTag "Gi emneord nytt navn...">
+<!ENTITY zotero.tagSelector.renameTag "Endre navn på emneord...">
 <!ENTITY zotero.tagSelector.deleteTag "Slett emneord...">
 <!ENTITY zotero.tagSelector.splitTag "Del opp…">
 
@@ -311,11 +310,11 @@
 <!ENTITY zotero.pdfReader.handTool "Håndverktøy">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertikal rulling">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Horisontal rulling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Sammenhengende rulling">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Sveipet rulling">
 <!ENTITY zotero.pdfReader.noSpreads "Ingen tosidig visning">
 <!ENTITY zotero.pdfReader.oddSpreads "Oddetallssider mot hverandre">
 <!ENTITY zotero.pdfReader.evenSpreads "Partallssider mot hverandre">
-<!ENTITY zotero.pdfReader.scrolled "Kontinuerlig">
+<!ENTITY zotero.pdfReader.scrolled "Rullet">
 <!ENTITY zotero.pdfReader.paginated "Enkeltsider">
 <!ENTITY zotero.pdfReader.zoomIn "Zoom inn">
 <!ENTITY zotero.pdfReader.zoomOut "Zoom ut">

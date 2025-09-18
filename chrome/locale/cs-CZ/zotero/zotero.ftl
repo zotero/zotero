@@ -1,17 +1,28 @@
-general-key-control = Control
+general-sentence-separator = 
+general-key-control = Ctrl
 general-key-shift = Shift
 general-key-alt = Alt
-general-key-option = Option
-general-key-command = Command
+general-key-option = Možnost
+general-key-command = Příkaz
 option-or-alt =
     { PLATFORM() ->
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = Tisknout
 general-remove = Odstranit
@@ -20,13 +31,51 @@ general-remind-me-later = Připomenout později
 general-dont-ask-again = Znovu se již neptat
 general-choose-file = Vybrat soubor...
 general-open-settings = Otevřít nastavení
+general-settings = Settings…
 general-help = Pomoc
 general-tag = Štítek
 general-done = Hotovo
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
+general-view-troubleshooting-instructions = Zobrazit pokyny k řešení problémů
+general-go-back = Vrátit zpět
+general-accept = Accept
+general-cancel = Zrušit
+general-show-in-library = Ukázat v knihovně
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = Restartovat v režimu řešení problémů
+general-save = Uložit
+general-clear = Vyčistit
+general-update = Aktualizovat
+general-back = Zpátky
+general-edit = Upravit
+general-cut = Vyjmout
+general-copy = Kopírovat
+general-paste = Vložit
+general-find = Najít
+general-delete = Smazat
+general-insert = Vložit
+general-and = a
+general-et-al = et al.
+general-previous = Předchozí
+general-next = Následující
+general-learn-more = Zjistit více
+general-warning = Varování
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = Červená
+general-orange = Oranžová
+general-yellow = Žlutá
+general-green = Zelená
+general-teal = Petrolejová
+general-blue = Modrá
+general-purple = Fialová
+general-magenta = Magenta
+general-violet = Fialová
+general-maroon = Kaštanová
+general-gray = Šedá
+general-black = Černá
 citation-style-label = Citační styl:
 language-label = Jazyk:
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
     .label = Zobrazit v hledači
 menu-file-show-file =
@@ -66,11 +115,19 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Rozšíření
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Přesunout sloupce vlevo
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Přesunout sloupce vpravo
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = Knihovna
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,6 +141,10 @@ zotero-tabs-menu-filter =
     .placeholder = Hledat v záložkách
 zotero-tabs-menu-close-button =
     .title = Zavřít záložku
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -91,9 +152,9 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = Editovat Uložené hledání
 collections-menu-move-collection =
-    .label = Move To
+    .label = Přesunout do
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Kopírovat do
 item-creator-moveDown =
     .label = Posunout dolů
 item-creator-moveToTop =
@@ -102,24 +163,24 @@ item-creator-moveUp =
     .label = Posunout nahoru
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        Otevřít { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] Snapshot
+                    [hled] Snapshot
                    *[other] Attachment
                 }
            *[other]
                 { $attachmentType ->
                     [pdf] PDFs
                     [epub] EPUBs
-                    [snapshot] Snapshots
+                    [hledy] Snapshots
                    *[other] Attachments
                 }
         } { $openIn ->
-            [tab] in New Tab
-            [window] in New Window
+            [tab] na nové kartě
+            [window] v novém okně
            *[other] { "" }
         }
 item-menu-add-file =
@@ -129,22 +190,24 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Webový odkaz
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Změnit nadřazenou položku...
+item-menu-relate-items =
+    .label = Relate Items
 view-online = Zobrazit online
 item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = Soubor přejmenován na { $filename }
 itembox-button-options =
     .tooltiptext = Otevřít kontextovou nabídku
 itembox-button-merge =
     .aria-label = Zvolte verzi pole { $field }
-create-parent-intro = Enter a DOI, ISBN, PMID, arXiv ID, or ADS Bibcode to identify this file:
+create-parent-intro = Pro identifikaci tohoto souboru zadejte DOI, ISBN, PMID, arXiv ID nebo ADS Bibcode:
 reader-use-dark-mode-for-content =
-    .label = Use Dark Mode for Content
-update-updates-found-intro-minor = An update for { -app-name } is available:
-update-updates-found-desc = It is recommended that you apply this update as soon as possible.
+    .label = Použít tmavý vzhled pro obsah
+update-updates-found-intro-minor = Je k dispozici aktualizace { -app-name }:
+update-updates-found-desc = Doporučujeme použít tuto aktualizaci co nejdříve.
 import-window =
     .title = Importovat
 import-where-from = Odkud chcete importovat?
@@ -160,18 +223,18 @@ import-importing = Importuje...
 import-create-collection =
     .label = Umístit importované kolekce a položky do nové kolekce
 import-recreate-structure =
-    .label = Recreate folder structure as collections
-import-fileTypes-header = File Types to Import:
+    .label = Znovu vytvořit strukturu složek jako kolekce
+import-fileTypes-header = Typy souborů k importu:
 import-fileTypes-pdf =
     .label = PDFs
 import-fileTypes-other =
-    .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
+    .placeholder = Ostatní soubory podle vzoru, oddělené čárkou (např. *.jpg, *.png)
 import-file-handling = Zpracování souborů
 import-file-handling-store =
-    .label = Copy files to the { -app-name } storage folder
+    .label = Kopírovat soubory do složky úložiště { -app-name }
 import-file-handling-link =
     .label = Propojit se soubory v původním umístění
-import-fileHandling-description = Linked files cannot be synced by { -app-name }.
+import-fileHandling-description = Propojené soubory nelze synchronizovat pomocí { -app-name }.
 import-online-new =
     .label = Stáhnout pouze nové položky; neaktulizovat dříve importované položky
 import-mendeley-username = Uživatelské jméno
@@ -181,77 +244,80 @@ file-interface-import-error = Při importu vybraného souboru došlo k chybě. P
 file-interface-import-complete = Import dokončen
 file-interface-items-were-imported =
     { $numItems ->
-        [0] No items were imported
-        [one] One item was imported
-       *[other] { $numItems } items were imported
+        [0] Žádná položka nebyla importovaná
+        [one] Jedna položka byla importovaná
+       *[other] { $numItems } položek bylo importováno
     }
 file-interface-items-were-relinked =
     { $numRelinked ->
-        [0] No items were relinked
-        [one] One item was relinked
-       *[other] { $numRelinked } items were relinked
+        [0] Žádné položky nebyly znovu propojeny
+        [one] Jedna položka byla znovu propojena
+       *[other] { $numRelinked } položky byly znovu propojeny
     }
-import-mendeley-encrypted = The selected Mendeley database cannot be read, likely because it is encrypted. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
-file-interface-import-error-translator = An error occurred importing the selected file with “{ $translator }”. Please ensure that the file is valid and try again.
-import-online-intro = In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-intro2 = { -app-name } will never see or store your { $targetApp } password.
-import-online-form-intro = Please enter your credentials to log in to { $targetAppOnline }. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
-import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
+import-mendeley-encrypted = Vybranou databázi Mendeley nelze přečíst, pravděpodobně proto, že je zašifrovaná. Viz <a data-l10n-name="mendeley-import-kb">Jak naimportuji knihovnu Mendeley do Zotero?</a> pro další informace.
+file-interface-import-error-translator = Při importu vybraného souboru pomocí “{ $translator }” došlo k chybě. Přesvědčte se, prosím, že je soubor v pořádku, a zkuste import znovu.
+import-online-intro = V dalším kroku budete vyzváni, abyste se přihlásili do { $targetAppOnline } a povolili { -app-name } přístup. Je to nutné pro import vaší knihovny  { $targetApp } do { -app-name }.
+import-online-intro2 = { -app-name } nikdy neuvidí ani neuloží vaše heslo pro { $targetApp }.
+import-online-form-intro = Zadejte prosím své přihlašovací údaje a přihlaste se k { $targetAppOnline }. Je to nutné pro import vaší knihovny  { $targetApp } do  { -app-name }.
+import-online-wrong-credentials = Přihlášení do { $targetApp } se nezdařilo. Zadejte prosím znovu přihlašovací údaje a zkuste to znovu.
+import-online-blocked-by-plugin = Import nemůže pokračovat, pokud je nainstalován { $plugin }. Vypněte prosím tento doplněk a zkuste to znovu.
 import-online-relink-only =
-    .label = Relink Mendeley Desktop citations
+    .label = Znovu propojit citace Mendeley Desktop
 import-online-relink-kb = Více informací
-import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+import-online-connection-error = { -app-name } se nepodařilo připojit k { $targetApp }. Zkontrolujte prosím své internetové připojení a zkuste to znovu.
 items-table-cell-notes =
     .aria-label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } poznámka
+            [few] { $count } poznámky
+            [many] { $count } poznámek
+           *[other] { $count } poznámek
         }
 report-error =
     .label = Zpráva o chybě...
 rtfScan-wizard =
     .title = Prohledávání  RTF
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = { -app-name } dokáže automaticky extrahovat a přeformátovat citace a vložit bibliografii do souborů RTF. V současné době podporuje citace ve variantách následujících formátů:
 rtfScan-introPage-description2 = Začnete vybráním RTF vstupního souboru a výstupního souboru níže:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = Vstupní soubor:
+rtfScan-output-file = Výstupní soubor:
 rtfScan-no-file-selected = Nebyl vybrán žádný soubor
 rtfScan-choose-input-file =
     .label = { general-choose-file }
-    .aria-label = Choose Input File
+    .aria-label = Vybrat vstupní soubor
 rtfScan-choose-output-file =
     .label = { general-choose-file }
-    .aria-label = Choose Output File
+    .aria-label = Vybrat výstupní soubor
 rtfScan-intro-page = Představení
 rtfScan-scan-page = Vyhledávají se citace
-rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
+rtfScan-scanPage-description = { -app-name } hledá citace v dokumentu. Buďte prosím trpěliví.
 rtfScan-citations-page = Ověřit citované položky
-rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
+rtfScan-citations-page-description = Projděte si prosím níže uvedený seznam rozpoznaných citací, abyste se ujistili, že { -app-name } správně vybral odpovídající položky. Případné nezmapované nebo nejednoznačné citace je třeba před přechodem k dalšímu kroku vyřešit.
 rtfScan-style-page = Formátování dokumentu
 rtfScan-format-page = Formátování citací
-rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
+rtfScan-format-page-description = { -app-name } zpracovává a formátuje váš soubor RTF. Buďte prosím trpěliví.
 rtfScan-complete-page = Prohledávání RTF ukončeno
 rtfScan-complete-page-description = Váš dokument byl prohledán a zpracován. Prosím, ujistěte se, že je korektně naformátován.
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = Vyberte odpovídající položku
 rtfScan-action-accept-match =
-    .title = Accept this match
-runJS-title = Run JavaScript
-runJS-editor-label = Code:
-runJS-run = Run
+    .title = Přijmout tuto shodu
+runJS-title = Spustit JavaScript
+runJS-editor-label = Kód:
+runJS-run = Spustit
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Return value:
        *[other] Result:
     }
-runJS-run-async = Run as async function
+runJS-run-async = Spustit jako asynchronní funkci
 bibliography-window =
-    .title = { -app-name } - Create Citation/Bibliography
+    .title = { -app-name } - Vytvořit citaci/bibliografii
 bibliography-style-label = { citation-style-label }
 bibliography-locale-label = { language-label }
-bibliography-displayAs-label = Display citations as:
+bibliography-displayAs-label = Zobrazit citace jako:
 bibliography-advancedOptions-label = Pokročilé možnosti
 bibliography-outputMode-label = Výstupní režim:
 bibliography-outputMode-citations =
@@ -273,61 +339,15 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Tisknout
 bibliography-manageStyles-label = Správa stylů...
-integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
-integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
-integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
 styleEditor-locatorType =
-    .aria-label = Locator type
-styleEditor-locatorInput = Locator input
+    .aria-label = Typ lokátoru
+styleEditor-locatorInput = Vstup lokátoru
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
-    .aria-label = Style editor
+    .aria-label = Editor stylů
 styleEditor-preview =
-    .aria-label = Preview
-integration-prefs-displayAs-label = Zobrazit citaci jako:
-integration-prefs-footnotes =
-    .label = Poznámky pod čarou
-integration-prefs-endnotes =
-    .label = Koncové poznámky
-integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
-integration-prefs-bookmarks-description = Záložky mohou být sdíleny mezi Wordem a LibreOffice, mohou však vést ke vzniku chyby při náhodné úpravě a nemohou být vloženy do poznámek pod čarou.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] The document must be saved as .doc or .docx.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Automaticky aktualizovat citace
-    .tooltip = Citace s nevyřešenými změnami budou v dokumentu zvýrazněny
-integration-prefs-automaticCitationUpdates-description = Vypnutí automatických aktualizací může urychlit vkládání citací v rozsáhlejších dokumentech. Pro manuální aktualizaci citací klikněte na tlačítko Obnovit.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Použít zkrácené názvy časopisů MEDLINE
-integration-prefs-automaticJournalAbbeviations-description = Pole "Zkrácený název časopisu" bude ignorováno
-integration-prefs-exportDocument =
-    .label = Přepnout do jiného textového editoru...
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
+    .aria-label = Náhled
 publications-intro-page = Mé publikace
 publications-intro = Položky přidané do Mých publikací budou zobrazeny na stránce vašeho profilu na zotero.org. Pokud zvolíte, že chcete zahrnout připojené soubory, budou tyto soubory veřejně dostupné pod licencí, kterou určíte. Přidávejte pouze díla, která jste sami vytvořili a zahrňte pouze ty připojené soubory, které chcete šířit a máte k tomu oprávnění.
 publications-include-checkbox-files =
@@ -368,39 +388,40 @@ publications-choose-license-commercial-prompt = Povolit komerční použití va�
 publications-buttons-add-to-my-publications =
     .label = Přidat do Mých publikací
 publications-buttons-next-sharing =
-    .label = Next: Sharing
+    .label = Další: Sdílení
 publications-buttons-next-choose-license =
     .label = Vyberte licenci
-licenses-cc-0 = CC0 1.0 Universal Public Domain Dedication
+licenses-cc-0 = CC0 1.0 Volné dílo. Nejširší možné užití díla i bez uvedení autorství
 licenses-cc-by = Creative Commons Uveďte původ 4.0 Mezinárodní License.
 licenses-cc-by-nd = Creative Commons Uveďte původ-Nezpracovávejte 4.0 Mezinárodní License
 licenses-cc-by-sa = Creative Commons Uveďte původ-Zachovejte licenci 4.0 Mezinárodní License
 licenses-cc-by-nc = Creative Commons Uveďte původ-Neužívejte komerčně 4.0 Mezinárodní License
 licenses-cc-by-nc-nd = Creative Commons Uveďte původ-Neužívejte komerčně-Nezpracovávejte 4.0 Mezinárodní License
 licenses-cc-by-nc-sa = Creative Commons Uveďte původ-Neužívejte dílo komerčně-Zachovejte licenci 4.0 Mezinárodní License
-licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
-licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+licenses-cc-more-info = Ujistěte se, že jste si přečetli nápovědu Creative Commons <a data-l10n-name="license-considerations"> pro poskytovatele licencí </a> před zveřejněním vaší práce pod licencí CC. Berte v potaz, že licenci nelze odvolat, i když později změníte podmínky nebo zakážete zveřejnění díla.
+licenses-cc0-more-info = Ujistěte se, že jste si přečetli  <a data-l10n-name="license-considerations"> časté dotazy týkající se Creative Commons</a>, před zveřejněním vašeho díla s licencí CC0. Uvědomte si, že věnování vašeho díla do veřejného vlastnictví je nevratné, a to i v případě, že později zvolíte jiné podmínky nebo dílo přestanete publikovat.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
-    .label = Restart in Troubleshooting Mode…
+    .label = Restartovat v režimu řešení problémů...
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
-restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
+restart-in-troubleshooting-mode-dialog-description = { -app-name } restartuje se s vypnutými zásuvnými moduly. Některé funkce nemusí fungovat správně, pokud je povolen režim řešení problémů.
 menu-ui-density =
     .label = Hustota
 menu-ui-density-comfortable =
-    .label = Comfortable
+    .label = Komfortní
 menu-ui-density-compact =
-    .label = Compact
-pane-item-details = Item Details
+    .label = Kompaktní
+pane-item-details = Podrobnosti položky
 pane-info = Informace
 pane-abstract = Abstrakt
 pane-attachments = Přílohy
 pane-notes = Poznámky
-pane-libraries-collections = Libraries and Collections
+pane-libraries-collections = Knihovny a kolekce
 pane-tags = Štítky
 pane-related = Související
-pane-attachment-info = Attachment Info
-pane-attachment-preview = Preview
+pane-attachment-info = Informace o příloze
+pane-attachment-preview = Náhled
 pane-attachment-annotations = Anotace
 pane-header-attachment-associated =
     .label = Přejmenovat asociovaný soubor
@@ -413,33 +434,42 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
-           *[other] { $count } Attachments
+            [one] { $count } příloha
+            [few] { $count } přílohy
+            [many] { $count } příloh
+           *[other] { $count } příloh
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } Annotation
-           *[other] { $count } Annotations
+            [one] { $count } anotace
+            [few] { $count } anotace
+            [many] { $count } anotací
+           *[other] { $count } anotace
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } poznámka
+            [few] { $count } poznámky
+            [many] { $count } poznámek
+           *[other] { $count } poznámek
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Tag
-           *[other] { $count } Tags
+            [one] { $count } štítek
+            [few] { $count } štítky
+            [many] { $count } štítků
+           *[other] { $count } štítků
         }
 section-related =
-    .label = { $count } Related
+    .label = { $count } související
 section-attachment-info =
     .label = { pane-attachment-info }
 section-button-remove =
@@ -447,14 +477,16 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .dynamic-tooltiptext = Expand section
-    .label = Expand { $section } section
+    .dynamic-tooltiptext = Rozbalit sekci
+    .label = Rozbalit { $section } sekci
 section-button-collapse =
-    .dynamic-tooltiptext = Collapse section
-    .label = Collapse { $section } section
+    .dynamic-tooltiptext = Sbalit sekci
+    .label = Sbalit  { $section } sekci
 annotations-count =
     { $count ->
-        [one] { $count } Annotation
+        [one] { $count } anotace
+        [few] { $count } anotace
+        [many] { $count } anotací
        *[other] { $count } Annotations
     }
 section-button-annotations =
@@ -484,22 +516,32 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = Přepnout kontextový panel
 pin-section =
-    .label = Pin Section
+    .label = Přišpendlit sekci
 unpin-section =
-    .label = Unpin Section
+    .label = Zrušit přišpendlení sekce
 collapse-other-sections =
-    .label = Collapse Other Sections
+    .label = Sbalit ostatní sekce
 expand-all-sections =
-    .label = Expand All Sections
+    .label = Rozbalit všechny sekce
 abstract-field =
-    .placeholder = Add abstract…
+    .placeholder = Přidat abstrakt...
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
-    .placeholder = Filter Tags
+    .placeholder = Filtrovat štítky
 context-notes-search =
-    .placeholder = Search Notes
+    .placeholder = Vyhledávat v poznámkách
 context-notes-return-button =
     .aria-label = { general-go-back }
 new-collection = Nová kolekce...
@@ -509,9 +551,11 @@ toolbar-new-collection =
     .tooltiptext = { new-collection }
 new-collection-dialog =
     .title = Nová kolekce
-    .buttonlabelaccept = Create Collection
+    .buttonlabelaccept = Vytvořit kolekci
 new-collection-name = Jméno:
-new-collection-create-in = Create in:
+new-collection-create-in = Vytvořit v:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = Název
 attachment-info-filename = Název souboru
 attachment-info-accessed = Přistoupeno
@@ -520,13 +564,25 @@ attachment-info-modified = Upraveno
 attachment-info-index = Indexováno
 attachment-info-convert-note =
     .label =
-        Migrate to { $type ->
+        Změnit na { $type ->
             [standalone] Standalone
             [child] Item
            *[unknown] New
-        } Note
-    .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
-attachment-preview-placeholder = No attachment to preview
+        } poznámku
+    .tooltiptext = Přidávání poznámek k přílohám již není podporováno, ale tuto poznámku můžete upravit tak, že ji přenesete do samostatné poznámky.
+attachment-preview-placeholder = Žádná příloha k náhledu
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = Nahrává se...
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
@@ -534,31 +590,15 @@ toggle-preview =
             [collapsed] Show
            *[unknown] Toggle
         } Attachment Preview
-quickformat-general-instructions =
-    Use Left/Right Arrow to navigate the items of this citation. { $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
-       *[other] { "" }
-    } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
-quickformat-accept =
-    .tooltiptext = Save edits to this citation
-quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value = Locator
-quickformat-citation-options =
-    .tooltiptext = Show citation options
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
-    .aria-label = Quick Search mode
+    .aria-label = Režim rychlého vyhledávání
 quicksearch-input =
     .aria-label = Rychlé hledání
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 item-pane-header-view-as =
-    .label = View As
+    .label = Zobrazit jako
 item-pane-header-none =
     .label = Žádná
 item-pane-header-title =
@@ -566,95 +606,105 @@ item-pane-header-title =
 item-pane-header-titleCreatorYear =
     .label = Název, Tvůrce, Rok
 item-pane-header-bibEntry =
-    .label = Bibliography Entry
+    .label = Položka bibliografie
 item-pane-header-more-options =
-    .label = More Options
+    .label = Další možnosti
 item-pane-message-items-selected =
     { $count ->
-        [0] No items selected
-        [one] { $count } item selected
-       *[other] { $count } items selected
+        [0] Žádné vybrané položky
+        [one] { $count } vybraná položka
+       *[other] { $count } vybraných položek
     }
 item-pane-message-collections-selected =
     { $count ->
-        [one] { $count } collection selected
-       *[other] { $count } collections selected
+        [one] { $count } kolekce vybrána
+        [few] { $count } kolekce vybrány
+        [many] { $count } kolekce vybrány
+       *[other] { $count } kolekce vybrány
     }
 item-pane-message-searches-selected =
     { $count ->
-        [one] { $count } search selected
-       *[other] { $count } searches selected
+        [one] { $count } hledání vybráno
+        [few] { $count } hledání vybrány
+        [many] { $count } hledání vybráno
+       *[other] { $count } hledání vybráno
     }
 item-pane-message-objects-selected =
     { $count ->
-        [one] { $count } object selected
-       *[other] { $count } objects selected
+        [one] { $count } objektů vybráno
+        [few] { $count } objekty vybrány
+        [many] { $count } objektů vybráno
+       *[other] { $count } objektů vybráno
     }
 item-pane-message-unselected =
     { $count ->
-        [0] No items in this view
-        [one] { $count } item in this view
-       *[other] { $count } items in this view
+        [0] V tomto zobrazení nejsou žádné položky
+        [one] { $count } položka v tomto zobrazení
+       *[other] { $count } položek v tomto zobrazení
     }
 item-pane-message-objects-unselected =
     { $count ->
-        [0] No objects in this view
-        [one] { $count } object in this view
-       *[other] { $count } objects in this view
+        [0] V tomto zobrazení nejsou žádné objekty
+        [one] { $count } objekt v tomto zobrazení
+       *[other] { $count } objektů v tomto zobrazení
     }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Merge { $count } item
-           *[other] Merge { $count } items
+            [one] Sloučit { $count } položku
+            [few] Sloučit { $count } položky
+            [many] Sloučit { $count } položek
+           *[other] Sloučit { $count } položky
         }
-locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
-architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
-architecture-warning-action = Download 64-bit { -app-name }
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
-first-run-guidance-quickFormat =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
-    
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
-first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
+locate-library-lookup-no-resolver = Musíte si vybrat resolver z { $pane } panelu nastavení { -app-name }.
+architecture-win32-warning-message = Pro dosažení nejlepšího výkonu přepněte na 64bitové { -app-name }. Vaše data nebudou ovlivněna.
+architecture-warning-action = Stáhnout 64bitové { -app-name }
+architecture-x64-on-arm64-message = { -app-name } běží v emulovaném režimu. Nativní verze { -app-name } poběží efektivněji.
+architecture-x64-on-arm64-action = Stáhnout { -app-name } pro ARM64
+first-run-guidance-authorMenu = { -app-name } umožňuje zadat také editory a překladatele. Výběrem z této nabídky můžete z autora udělat editora nebo překladatele.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =
     .tooltiptext = { general-add }
 advanced-search-conditions-menu =
-    .aria-label = Search condition
+    .aria-label = Vyhledávací podmínka
     .label = { $label }
 advanced-search-operators-menu =
-    .aria-label = Operator
+    .aria-label = Operátor
     .label = { $label }
 advanced-search-condition-input =
-    .aria-label = Value
+    .aria-label = Hodnota
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [one] { $count } soubor přidán
+        [few] { $count } soubory přidány
+        [many] { $count } souborů přidáno
+       *[other] { $count } souborů přidáno
     }
+select-items-window =
+    .title = Označit položky
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = Vybrat
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = Převést na samostatnou
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+            [one] Převést na samostatnou přílohu
+            [few] Převést na samostatné přílohy
+            [many] Převést na samostatné přílohy
+           *[other] Převést na samostatné přílohy
         }
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Převést na samostatnou poznámku
+            [few] Převést na samostatné poznámky
+            [many] Převést na samostatné poznámky
+           *[other] Převést na samostatné poznámky
         }
-file-type-webpage = Webpage
+file-type-webpage = Webová stránka
 file-type-image = Obrázek
 file-type-pdf = PDF
 file-type-audio = Audio
@@ -662,18 +712,27 @@ file-type-video = Video
 file-type-presentation = Prezentace
 file-type-document = Dokument
 file-type-ebook = E-kniha
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = Zjistěte více o <a data-l10n-name="new-features-link">nových funkcí v { -app-name } { $version }</a>
+post-upgrade-density = Zvolte preferovanou hustotu rozložení:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
-    .label = Paste and Search
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+    .label = Vložit a vyhledat
+mac-word-plugin-install-message = K instalaci doplňku pro Word potřebuje Zotero přístup k datům Wordu.
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = Instalovat doplněk pro Word
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

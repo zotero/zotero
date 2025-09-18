@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -8,10 +9,20 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = 인쇄
 general-remove = 제거
@@ -20,13 +31,51 @@ general-remind-me-later = 나중에 알림
 general-dont-ask-again = 다시 묻지 않기
 general-choose-file = 파일 선택...
 general-open-settings = Open Settings
+general-settings = Settings…
 general-help = 도움말
 general-tag = 태그
 general-done = 완료
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-accept = Accept
+general-cancel = 취소
+general-show-in-library = 라이브러리로 표시
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
+general-save = 저장
+general-clear = 결과 삭제
+general-update = 업데이트
+general-back = 뒤로
+general-edit = 편집
+general-cut = 자르기
+general-copy = 복사하기
+general-paste = 붙이기
+general-find = 검색
+general-delete = 삭제
+general-insert = 삽입
+general-and = 그리고
+general-et-al = 등
+general-previous = 이전
+general-next = 다음
+general-learn-more = 더 알아보기
+general-warning = 경고
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = 빨강
+general-orange = 오렌지
+general-yellow = 노랑
+general-green = 초록
+general-teal = 청록
+general-blue = 파랑
+general-purple = 보라
+general-magenta = 마젠타
+general-violet = 바이올렛
+general-maroon = 적갈색
+general-gray = 회색
+general-black = 검정
 citation-style-label = 인용 스타일:
 language-label = 언어:
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
     .label = Show in Finder
 menu-file-show-file =
@@ -69,8 +118,16 @@ menu-view-columns-move-left =
     .label = Move Column Left
 menu-view-columns-move-right =
     .label = Move Column Right
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = 라이브러리
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,6 +141,10 @@ zotero-tabs-menu-filter =
     .placeholder = Search Tabs
 zotero-tabs-menu-close-button =
     .title = Close Tab
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -130,6 +191,8 @@ item-menu-add-url =
     .label = Web Link
 item-menu-change-parent-item =
     .label = Change Parent Item…
+item-menu-relate-items =
+    .label = Relate Items
 view-online = 온라인으로 보기
 item-menu-option-view-online =
     .label = { view-online }
@@ -241,6 +304,7 @@ runJS-title = Run JavaScript
 runJS-editor-label = Code:
 runJS-run = Run
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Return value:
@@ -273,29 +337,6 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = 인쇄
 bibliography-manageStyles-label = 스타일 관리...
-integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
-integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
-integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
 styleEditor-locatorType =
     .aria-label = Locator type
 styleEditor-locatorInput = Locator input
@@ -305,29 +346,6 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
-integration-prefs-displayAs-label = 인용 표시:
-integration-prefs-footnotes =
-    .label = 각주
-integration-prefs-endnotes =
-    .label = 미주
-integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
-integration-prefs-bookmarks-description = 책갈피가 Word와 LibreOffice 사이에 공유될 수 있습니다, 단 우연히 변경될 때 오류를 일으킬 수 있으며 각주로 넣을 수 없습니다.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] The document must be saved as .doc or .docx.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = 인용 항목 자동 업데이트
-    .tooltip = 업데이트 대기 중인 인용 항목이 문서에서 강조 표시됩니다
-integration-prefs-automaticCitationUpdates-description = 큰 문서라면 업데이트를 중지하여 인용 삽입 속도를 높일 수 있습니다. 새로고침을 클릭하여 수동으로 인용 정보를 업데이트하세요.
-integration-prefs-automaticJournalAbbeviations =
-    .label = MEDLINE 저널 약자 사용
-integration-prefs-automaticJournalAbbeviations-description = "저널 약자" 필드가 무시됩니다.
-integration-prefs-exportDocument =
-    .label = 다른 워드 프로세서로 전환...
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = 내 출판물
 publications-intro = 내 출판물에 추가한 항목은 zotero.org 사이트에서 당신의 프로필 페이지에 게시됩니다. 첨부 파일을 포함하기로 결정했다면, 첨부 파일이 지정한 라이선스를 따라 공개 게시됩니다. 스스로 만든 저작물만 추가하시고, 공공 배포 권한이 있으며 그렇게 하기를 희망하는 파일만 포함해주세요.
 publications-include-checkbox-files =
@@ -380,10 +398,11 @@ licenses-cc-by-nc-nd = Creative Commons Attribution-NonCommercial-NoDerivatives 
 licenses-cc-by-nc-sa = Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
 licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
 licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = Restart in Troubleshooting Mode…
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
 menu-ui-density =
     .label = Density
@@ -424,6 +443,7 @@ section-attachments-annotations =
             [one] { $count } Annotation
            *[other] { $count } Annotations
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
@@ -484,6 +504,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = Toggle Context Pane
 pin-section =
     .label = Pin Section
 unpin-section =
@@ -512,6 +542,8 @@ new-collection-dialog =
     .buttonlabelaccept = Create Collection
 new-collection-name = 이름:
 new-collection-create-in = Create in:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = 제목
 attachment-info-filename = 파일 이름
 attachment-info-accessed = 접근일
@@ -527,6 +559,18 @@ attachment-info-convert-note =
         } Note
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
 attachment-preview-placeholder = No attachment to preview
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = 불러오는 중...
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
@@ -534,23 +578,7 @@ toggle-preview =
             [collapsed] Show
            *[unknown] Toggle
         } Attachment Preview
-quickformat-general-instructions =
-    Use Left/Right Arrow to navigate the items of this citation. { $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
-       *[other] { "" }
-    } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
-quickformat-accept =
-    .tooltiptext = Save edits to this citation
-quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value = Locator
-quickformat-citation-options =
-    .tooltiptext = Show citation options
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
     .aria-label = Quick Search mode
 quicksearch-input =
@@ -613,12 +641,6 @@ architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best
 architecture-warning-action = Download 64-bit { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = Download { -app-name } for ARM64
-first-run-guidance-quickFormat =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
-    
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
 first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -638,6 +660,8 @@ find-pdf-files-added =
         [one] { $count } file added
        *[other] { $count } files added
     }
+select-items-window =
+    .title = 항목 선택
 select-items-dialog =
     .buttonlabelaccept = Select
 select-items-convertToStandalone =
@@ -677,3 +701,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

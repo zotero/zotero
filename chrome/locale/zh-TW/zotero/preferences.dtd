@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "標題">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "已更新">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "引用文獻樣式語言 CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "獲得額外的樣式……">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "儲存到 Zotero (網址列圖示)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦到文獻庫窗格">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "檢查資料庫完整性">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重設轉譯器與樣式……">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重設轉譯器……">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "重設樣式……">
 
 <!ENTITY zotero.preferences.configEditor "設定編輯器">

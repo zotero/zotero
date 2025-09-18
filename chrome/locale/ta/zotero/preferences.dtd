@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "தலைப்பு">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "புதுப்பிக்கப்பட்டது">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "சிஎச்எல்">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "கூடுதல் பாணிகளைப் பெறுங்கள்…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "சோட்டெரோவைச் சேமி (முகவரி பட்டி சின்னம்)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "நூலகங்கள் பலகம் மீது கவனம் செலுத்து">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "தரவுத்தள ஒருமைப்பாட்டை சரிபார்">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "மொழிபெயர்ப்பாளர்கள் மற்றும் பாணிகளை மீட்டமை…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "மொழிபெயர்ப்பாளர்களை மீட்டமை…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "பாணிகளை மீட்டமை…">
 
 <!ENTITY zotero.preferences.configEditor "கட்டமைப்பு ஆசிரியர்">

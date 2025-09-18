@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "اسم النمط">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "آخر تحديث">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "لغة نمط الاستشهاد">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "احصل على أنماط إضافية">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "احفظ في زوتيرو (ايقونة شريط العنوان)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "ركز على جزء المكتبات">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "التأكد من سلامة قاعدة البيانات">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "اعادة تعيين المترجمات والأنماط...">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "اعادة تعيين المترجمات...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "اعادة تعيين الانماط">
 
 <!ENTITY zotero.preferences.configEditor "تهيئة المحرر">

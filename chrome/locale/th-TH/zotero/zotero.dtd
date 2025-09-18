@@ -79,7 +79,6 @@
 <!ENTITY zotero.toolbar.moreItemTypes.label "มากกว่า">
 <!ENTITY zotero.toolbar.lookup.label "เพิ่มรายการโดยตัวระบุ">
 <!ENTITY zotero.toolbar.removeItem.label "ลบรายการ...">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library">
 <!ENTITY zotero.toolbar.newGroup "กลุ่มใหม่...">
 <!ENTITY zotero.toolbar.newSubcollection.label "คอลเล็กชั่นย่อยใหม่...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "บันทึกผลการค้นหาใหม่...">

@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titill">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Uppfært">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "Tilvísunarmál - CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Ná í viðbótarstíla…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Vista í Zotero (tákn birt í vefslóðareit)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Áhersla á safnaglugga">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Ahuga ástand gagnagrunns">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Endurræsa þýðendur og stíla…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Endurræsa þýðendur…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Endurstilla stíla…">
 
 <!ENTITY zotero.preferences.configEditor "Stillingarritill">

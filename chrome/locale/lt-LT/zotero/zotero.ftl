@@ -1,16 +1,27 @@
+general-sentence-separator = 
 general-key-control = Vald
 general-key-shift = Lyg2
 general-key-alt = Alt
 general-key-option = Parinktis
-general-key-command = Command
+general-key-command = Komanda
 option-or-alt =
     { PLATFORM() ->
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
+       *[other] Įvesti
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
        *[other] Įvesti
     }
 general-print = Spausdinti
@@ -20,13 +31,51 @@ general-remind-me-later = Priminti vėliau
 general-dont-ask-again = Nebeklausti
 general-choose-file = Rinkmenos pasirinkimas...
 general-open-settings = Atverti nuostatas
+general-settings = Settings…
 general-help = Žinynas
 general-tag = Gairė
 general-done = Atlikta
 general-view-troubleshooting-instructions = Peržiūrėti nesklandumų sprendimo instrukcijas
 general-go-back = Atgal
+general-accept = Accept
+general-cancel = Atsisakyti
+general-show-in-library = Rodyti bibliotekoje
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = Paleisti gedimų nustatymo veiksenoje
+general-save = Įrašyti
+general-clear = Išvalyti
+general-update = Atnaujinti
+general-back = Atgal
+general-edit = Taisa
+general-cut = Iškirpti
+general-copy = Kopijuoti
+general-paste = Įdėti
+general-find = Ieškoti
+general-delete = Pašalinti
+general-insert = Įterpti
+general-and = ir
+general-et-al = ir kt.
+general-previous = Ankstesnis
+general-next = Tolesnis
+general-learn-more = Parodyti išsamiau
+general-warning = Įspėjimas
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = raudona
+general-orange = morkinė
+general-yellow = geltona
+general-green = žalia
+general-teal = žalsvai mėlyna
+general-blue = mėlyna
+general-purple = purpurinė
+general-magenta = rausvai violetinė
+general-violet = violetinė
+general-maroon = kaštoninė
+general-gray = pilka
+general-black = juoda
 citation-style-label = Citavimo stilius:
 language-label = Kalba:
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
     .label = Rodyti ieškyklėje
 menu-file-show-file =
@@ -69,10 +118,18 @@ menu-view-columns-move-left =
     .label = Perkelti stulpelį kairėn
 menu-view-columns-move-right =
     .label = Perkelti stulpelį dešinėn
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = Biblioteka
 main-window-key =
-    .key = L
+    .key = D
 zotero-toolbar-tabs-menu =
     .tooltiptext = Visų kortelių sąrašas
 filter-collections = Rinkinių atranka
@@ -84,6 +141,10 @@ zotero-tabs-menu-filter =
     .placeholder = Kortelių paieška
 zotero-tabs-menu-close-button =
     .title = Užverti kortelę
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -130,6 +191,8 @@ item-menu-add-url =
     .label = Tinklalapio nuoroda
 item-menu-change-parent-item =
     .label = Priskirti kitam aukštesniam įrašui…
+item-menu-relate-items =
+    .label = Relate Items
 view-online = Atverti tinklalapį
 item-menu-option-view-online =
     .label = { view-online }
@@ -243,6 +306,7 @@ runJS-title = Paleisti JavaScript
 runJS-editor-label = Kodas:
 runJS-run = Vykdyti
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Grąžinta reikšmė:
@@ -275,29 +339,6 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = Spausdinti
 bibliography-manageStyles-label = Tvarkyti stilius...
-integration-docPrefs-window =
-    .title = { -app-name } - Dokumento parinktys
-integration-addEditCitation-window =
-    .title = { -app-name } - Pridėti/keisti citatą
-integration-editBibliography-window =
-    .title = { -app-name } - Keisti literatūros sąrašą
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Keisti nuorodą
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Greitasis citatų formatavimas
 styleEditor-locatorType =
     .aria-label = Ieškiklio tipas
 styleEditor-locatorInput = Locator input
@@ -307,29 +348,6 @@ styleEditor-editor =
     .aria-label = Stilių rengyklė
 styleEditor-preview =
     .aria-label = Peržiūra
-integration-prefs-displayAs-label = Citavimo rodymo pavidalas:
-integration-prefs-footnotes =
-    .label = Išnaša
-integration-prefs-endnotes =
-    .label = Galinė išnaša
-integration-prefs-bookmarks =
-    .label = Citatas saugoti kaip žymeles
-integration-prefs-bookmarks-description = Žymelės išlaikomos tiek „Word“, tiek „LibreOffice“ programose, tačiau netyčia jas pakeitus, gali atsirasti klaidų. Žymelių negalite įterpti į išnašas ar galines išnašas.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] Dokumentą reikia įrašyti .doc arba .docx formatu.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = Automatiškai atnaujinti citavimus
-    .tooltip = Citavimai, kurių laukia atnaujinimai, dokumente paryškinsimi
-integration-prefs-automaticCitationUpdates-description = Atnaujinimų išjungimas gali pagreitinti citavimų įterpimą dideliuose dokumentuose. Tuomet spauskite „atnaujinti“, jei norite tą padaryti rankiniu būdu.
-integration-prefs-automaticJournalAbbeviations =
-    .label = Naudoti MEDLINE žurnalų santrumpas
-integration-prefs-automaticJournalAbbeviations-description = Ignoruosima reikšmė „žurnalo santrumpos“ laukelyje
-integration-prefs-exportDocument =
-    .label = Persijungti į kitą raštinės programą...
-integration-error-unable-to-find-winword = { -app-name } negali rasti paleistos Word programos.
 publications-intro-page = Nuosavos publikacijos
 publications-intro = „Nuosavose publikacijose“ patalpinti įrašai rodysimi Zotero.org svetainėje jūsų profilyje. Jei pasirenkate įtraukti prisegtas rinkmenas, jos bus viešai prieinamos pagal jūsų pasirinktą licenciją. „Nuosavoms publikacijoms“ priskirkite tik tuos darbus, kuriuos patys kūrėte, o rinkmenas viešinkite tik jei turite teisę tą daryti.
 publications-include-checkbox-files =
@@ -382,10 +400,11 @@ licenses-cc-by-nc-nd = CC BY-NC-ND 4.0 tarptautinė licencija: priskyrimas, neko
 licenses-cc-by-nc-sa = CC BY-NC-SA 4.0 tarptautinė licencija: priskyrimas, nekomercinis, analogiškas platinimas
 licenses-cc-more-info = Prieš platindami darbą pagal CC licenciją, perskaitykite „Creative Commons“ <a data-l10n-name="license-considerations">licencijos davėjams svarbias aplinkybes</a>. Atminkite, kad pasirinktos licencijos negalėsite atšaukti, net jei vėliau pasirinksite kitokias sąlygas ar apskritai nustosite platinti dokumentą.
 licenses-cc0-more-info = Prieš platindami darbą pagal CC0 licenciją, perskaitykite „Creative Commons“ <a data-l10n-name="license-considerations">CC0 D.U.K.</a>. Atminkite, kad sprendimo, jog darbas bus viešas, negalėsite pakeisti, net jei vėliau pasirinksite kitokias sąlygas ar apskritai nustosite platinti dokumentą.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = Paleisti gedimų nustatymo veiksenoje...
     .accesskey = I
-restart-in-troubleshooting-mode-dialog-title = Paleisti gedimų nustatymo veiksenoje
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } pasileis iš naujo išjungus visus papildinius. Įgalinus gedimų nustatymo veikseną, kai kurios galimybės gali neveikti tinkamai.
 menu-ui-density =
     .label = Tankumas
@@ -430,6 +449,7 @@ section-attachments-annotations =
             [many] { $count } anotacijų
            *[other] { $count } anotacija
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
@@ -496,6 +516,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = Perjungti kontekstinę sritį
 pin-section =
     .label = Prisegti lauką
 unpin-section =
@@ -524,6 +554,8 @@ new-collection-dialog =
     .buttonlabelaccept = Sukurti rinkinį
 new-collection-name = Pavadinimas:
 new-collection-create-in = Kur sukurti:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = Pavadinimas
 attachment-info-filename = Rinkmenos vardas
 attachment-info-accessed = Žiūrėta
@@ -539,6 +571,18 @@ attachment-info-convert-note =
         } pastabą
     .tooltiptext = Pastabų pridėjimas prie priedų nebepalaikomas, tačiau galite redaguoti šią pastabą perkeldami ją kaip atskirą pastabą.
 attachment-preview-placeholder = Nėra peržiūrėtinų priedų
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = Įkeliama...
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
@@ -546,23 +590,7 @@ toggle-preview =
             [collapsed] Rodyti
            *[unknown] Perjungti
         } priedą
-quickformat-general-instructions =
-    Norėdami pereiti per šio citavimo įrašus, judėkite rodyklių klavišais kairėn ir dešinėn. { $dialogMenu ->
-        [active] Norėdami pereiti į lango meniu, spauskite Lyg2+Tab.
-       *[other] { "" }
-    } Norėdami patvirtinti šio citavimo pakeitimus, spauskite { return-or-enter }. Jei atmesti keitimus, spauskite grįžties (Gr, angl. Esc) klavišą.
-quickformat-aria-bubble = Šis įrašas įtrauktas į citavimą. Norėdami jį pataisyti, spauskite tarpo klavišą. { quickformat-general-instructions }
-quickformat-aria-input = Norėdami įtraukti citatą, pradėkite vesti tarsi įrašo paiešką. Norėdami naršyti paieškos rezultatus, spauskite Tab. { quickformat-general-instructions }
-quickformat-aria-item = Paspaudę { return-or-enter } pridėsite šį įrašą prie citavimo. Norėdami grįžti į paieškos lauką, spauskite Tab.
-quickformat-accept =
-    .tooltiptext = Išsaugoti šio citavimo pakeitimus
-quickformat-locator-type =
-    .aria-label = Ieškiklio tipas
-quickformat-locator-value = Ieškiklis
-quickformat-citation-options =
-    .tooltiptext = Rodyti citavimo parinktis
-insert-note-aria-input = Norėdami ieškoti pastabos, tiesiog rašykite čia. Pereiti per rezultatus galėsite naudodami Tab. Norėdami užverti, spauskite Gr(įžties) klavišą.
-insert-note-aria-item = Norėdami pasirinkti šią pastabą, spauskite { return-or-enter }. Paspaudę Tab grįšite į paieškos lauką. Norėdami užverti, spauskite Gr(įžties) klavišą.
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
     .aria-label = Greitosios paieškos veiksena
 quicksearch-input =
@@ -639,12 +667,6 @@ architecture-win32-warning-message = Didžiausias našumas būtų perėjus prie 
 architecture-warning-action = Parsisiųsti 64 bitų { -app-name }
 architecture-x64-on-arm64-message = { -app-name } paleista emuliavimo veiksenoje. Įprasta { -app-name } versija veiktų našiau.
 architecture-x64-on-arm64-action = Parsisiųsti { -app-name } programos ARM64 versiją
-first-run-guidance-quickFormat =
-    Įveskite pavadinimą, autorių ir (arba) metus ir ieškokite informacijos šaltinio.
-    
-    Išsirinkę šaltinius, spustelėkite burbuliuką arba pažymėkite jį klaviatūra ir paspauskite ↓/ tarpą norėdami pamatyti citavimo parinktis, pavyzdžiui, puslapio numerį, priešdėlį ir priesagą.
-    
-    Taip pat galite tiesiogiai pridėti puslapio numerį, įvesdami jį kartu su paieškos žodžiais arba įrašydami jį po burbulu ir paspausdami { return-or-enter }.
 first-run-guidance-authorMenu = { -app-name } leidžia jums dar nurodyti sudarytojus (redaktorius) ir vertėjus. Per šį meniu galite pasirinkto vaidmenį žmogaus, kuris šiuo metu nurodytas esąs autorius, pakeisti į sudarytojo arba vertėjo vaidmenį.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -666,6 +688,8 @@ find-pdf-files-added =
         [many] Pridėta { $count } rinkmenų
        *[other] Pridėta { $count } rinkmena
     }
+select-items-window =
+    .title = Pasirinkti įrašus
 select-items-dialog =
     .buttonlabelaccept = Pasirinkti
 select-items-convertToStandalone =
@@ -683,9 +707,9 @@ select-items-convertToStandaloneNote =
            *[other] Convert to Standalone Notes
         }
 file-type-webpage = Tinklalapis
-file-type-image = paveikslą
+file-type-image = Paveikslas
 file-type-pdf = PDF
-file-type-audio = Garsas
+file-type-audio = Garso įr.
 file-type-video = Vaizdas
 file-type-presentation = Pateiktis
 file-type-document = Dokumentas
@@ -705,3 +729,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

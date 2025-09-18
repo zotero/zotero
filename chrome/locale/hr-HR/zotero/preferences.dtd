@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Naslov">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Nadopunjeno">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Nabavite dodatne stilove...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Spremi u Zotero (ikona adresne trake)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus na knjižnično okno">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Provjera integriteta baze">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Poništi prevoditelje i stilove…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Poništi prevoditelje…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Poništi stilove…">
 
 <!ENTITY zotero.preferences.configEditor "Uređivač postavki">

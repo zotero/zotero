@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -8,10 +9,20 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
+    }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
     }
 general-print = 列印
 general-remove = 移除
@@ -20,13 +31,51 @@ general-remind-me-later = 稍後提醒我
 general-dont-ask-again = 不要再詢問
 general-choose-file = 選擇檔案……
 general-open-settings = 打開設定
+general-settings = Settings…
 general-help = 說明
 general-tag = 標籤
 general-done = 完成
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
+general-view-troubleshooting-instructions = 查看故障排除說明
+general-go-back = 回到上一層
+general-accept = Accept
+general-cancel = 取消
+general-show-in-library = 在文獻庫中顯示
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = 以除錯模式重新啟動
+general-save = 儲存
+general-clear = 清除
+general-update = 更新
+general-back = 後退
+general-edit = 編輯
+general-cut = 剪下
+general-copy = 複製
+general-paste = 貼上
+general-find = 尋找
+general-delete = 刪除
+general-insert = 插入
+general-and = 與
+general-et-al = …等
+general-previous = 上一步
+general-next = 下一步
+general-learn-more = 了解更多
+general-warning = 警告
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = 紅色
+general-orange = 橘色
+general-yellow = 黃色
+general-green = 綠色
+general-teal = 鴨綠色
+general-blue = 藍色
+general-purple = 紫色
+general-magenta = 洋紅色
+general-violet = 紫羅蘭色
+general-maroon = 栗色
+general-gray = 灰色
+general-black = 黑色
 citation-style-label = 引用文獻樣式:
 language-label = 語言：
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
     .label = 在搜尋器中顯示
 menu-file-show-file =
@@ -66,11 +115,19 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = 附加元件
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = 此欄向左移動
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = 此欄向右移動
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = 文獻庫
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
@@ -84,6 +141,10 @@ zotero-tabs-menu-filter =
     .placeholder = 搜尋分頁
 zotero-tabs-menu-close-button =
     .title = 關閉分頁
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -91,9 +152,9 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = 編輯儲存的搜尋結果
 collections-menu-move-collection =
-    .label = Move To
+    .label = 移動到
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = 複製到
 item-creator-moveDown =
     .label = 移至尾端
 item-creator-moveToTop =
@@ -129,7 +190,9 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = 網頁連結
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = 變更上層項目...
+item-menu-relate-items =
+    .label = Relate Items
 view-online = 線上檢視
 item-menu-option-view-online =
     .label = { view-online }
@@ -211,10 +274,10 @@ report-error =
     .label = 回報錯誤…
 rtfScan-wizard =
     .title = RTF 掃描
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = { -app-name } 可以自動取出並且重新格式化引用文獻，並將參考書目插入 RTF 檔中。目前支援以下引用格式變體：
 rtfScan-introPage-description2 = 要開始的話，在下方選一個 RTF 輸入檔及一個輸出檔：
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = 輸入檔案
+rtfScan-output-file = 輸出檔案
 rtfScan-no-file-selected = 未選擇任何檔案
 rtfScan-choose-input-file =
     .label = { general-choose-file }
@@ -233,13 +296,14 @@ rtfScan-format-page-description = { -app-name } 正在處理及格式化你的 R
 rtfScan-complete-page = RTF 掃描完畢
 rtfScan-complete-page-description = 文件已掃描及處理完畢。請確認其格式正確。
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = 選擇符合的項目
 rtfScan-action-accept-match =
-    .title = Accept this match
+    .title = 接受這個匹配
 runJS-title = 執行 JavaScript
 runJS-editor-label = 程式碼：
 runJS-run = 執行
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] 回傳值：
@@ -272,61 +336,15 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = 列印
 bibliography-manageStyles-label = 管理樣式……
-integration-docPrefs-window =
-    .title = { -app-name } - 文件偏好設定
-integration-addEditCitation-window =
-    .title = { -app-name } - 新增/編輯引用文獻
-integration-editBibliography-window =
-    .title = { -app-name } - 編輯參考文獻表
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - 快速格式化引用文獻
 styleEditor-locatorType =
     .aria-label = 定位符類別
-styleEditor-locatorInput = Locator input
+styleEditor-locatorInput = 定位符輸入
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
-    .aria-label = Style editor
+    .aria-label = 樣式編輯器
 styleEditor-preview =
     .aria-label = 預覽
-integration-prefs-displayAs-label = 將引用文獻顯示為:
-integration-prefs-footnotes =
-    .label = 頁末註
-integration-prefs-endnotes =
-    .label = 文末註
-integration-prefs-bookmarks =
-    .label = 引用文獻儲存為書籤
-integration-prefs-bookmarks-description = 在 Word 及 LibreOffice中書籤皆可相互分享，但也可能因為修改意外而產生錯誤；而且啟用此項時，引用文獻無法插入於頁末註或文末註中。
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] 必須將該文件儲存為 .doc 或 .docx 格式。
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = 自動更新引用文獻
-    .tooltip = 等待更新的引用文獻會突顯於文件中
-integration-prefs-automaticCitationUpdates-description = 於大型文件中，停用更新可加快引用文獻的插入。點擊重新整理可手動更新引用文獻。
-integration-prefs-automaticJournalAbbeviations =
-    .label = 使用 MEDLINE 期刊簡寫
-integration-prefs-automaticJournalAbbeviations-description = 「期刊簡寫」欄會被忽略。
-integration-prefs-exportDocument =
-    .label = 切換至另一文件編輯器……
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 publications-intro-page = 我的著作
 publications-intro = 您所新增到我的著作中的項目將在 zotero.org 上您的個人頁面中顯示。如果您選擇包含附件檔案，這些檔案將在您所指定的許可協議下開放存取。請僅新增您自己創作的著作，並僅加入您所擁有著作權且願意分享的檔案。
 publications-include-checkbox-files =
@@ -379,10 +397,11 @@ licenses-cc-by-nc-nd = 創用CC 署名-非商業性使用-禁止改作 4.0 國�
 licenses-cc-by-nc-sa = 創用CC 署名-非商業性使用-相同方式分享 4.0 國際協議
 licenses-cc-more-info = 在使用創用CC<a data-l10n-name="license-considerations">許可方注意事項</a>發布作品前，請確保您已閱讀協議。注意，您一旦採用此協議就無法將其撤銷，即便您後來又選擇了其他條款或取消發布此作品。
 licenses-cc0-more-info = 在使用創用CC0 <a data-l10n-name="license-considerations">CC0 FAQ</a>發布作品前，請確保您已閱讀協議。注意，您一旦將作品發佈到了公有領域，就無法撤回決定，即便您後來又選擇了其他條款或取消發布此作品。
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
     .label = 以除錯模式重新啟動……
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = 以除錯模式重新啟動
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } 將重新啟動並停用所有附加元件。啟用除錯模式時，某些功能可能無法正確運作。
 menu-ui-density =
     .label = 密度
@@ -390,7 +409,7 @@ menu-ui-density-comfortable =
     .label = 舒適
 menu-ui-density-compact =
     .label = 緊緻
-pane-item-details = Item Details
+pane-item-details = 項目詳情
 pane-info = 資訊
 pane-abstract = 摘要
 pane-attachments = 附件
@@ -421,6 +440,7 @@ section-attachments-annotations =
         { $count ->
            *[other] { $count } 個標註
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
@@ -478,6 +498,16 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = 切換上下文窗格
 pin-section =
     .label = 固定此章節
 unpin-section =
@@ -506,6 +536,8 @@ new-collection-dialog =
     .buttonlabelaccept = 建立文獻集
 new-collection-name = 名稱：
 new-collection-create-in = 建立到：
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = 標題
 attachment-info-filename = 檔名
 attachment-info-accessed = 取用
@@ -521,6 +553,18 @@ attachment-info-convert-note =
         }筆記
     .tooltiptext = 已不再支援對附件新增筆記，但您可以將其遷移到單獨的筆記後編輯此筆記。
 attachment-preview-placeholder = 沒有可預覽的附件
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = 載入中……
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
@@ -528,23 +572,7 @@ toggle-preview =
             [collapsed] 顯示
            *[unknown] 切換
         }附件預覽
-quickformat-general-instructions =
-    使用左/右方向鍵切換此引用文獻的項目。{ $dialogMenu ->
-        [active] 按 Shift+Tab 聚焦到對話框選單。
-       *[other] { "" }
-    } 按 { return-or-enter } 儲存對此引用文獻的編輯。按 Esc 鍵放棄更改並關閉對話框。
-quickformat-aria-bubble = 該項目已飽含在引用文獻中。按空白鍵自定義項目。 { quickformat-general-instructions }
-quickformat-aria-input = 輸入以搜尋需要引用的項目。按 T​​ab 切換到搜尋結果。  { quickformat-general-instructions }
-quickformat-aria-item = 按 { return-or-enter } 將此項目新增到引用文獻中。按 T​​ab 回到搜尋欄位。
-quickformat-accept =
-    .tooltiptext = 儲存對此引用文獻的編輯
-quickformat-locator-type =
-    .aria-label = 定位符類別
-quickformat-locator-value = 定位符
-quickformat-citation-options =
-    .tooltiptext = 顯示引用文獻選項
-insert-note-aria-input = 輸入以搜尋筆記。按 T​​ab 切換到結果清單。按 Esc 鍵關閉對話框。
-insert-note-aria-item = 按 { return-or-enter } 選擇此筆記。按 T​​ab 會到搜尋欄位。按 Esc 鍵關閉對話框。
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
     .aria-label = 快速搜尋模式
 quicksearch-input =
@@ -602,13 +630,7 @@ locate-library-lookup-no-resolver = 您必須從 { -app-name } 偏好設定的 {
 architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
 architecture-warning-action = 下載64位元版本的 { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
-first-run-guidance-quickFormat =
-    輸入標題、作者和/或年份來搜尋參考文獻。
-    
-    選擇項目後，可以點擊氣泡或利用鍵盤按下 ↓/空白建，顯示頁碼、前綴和後綴等引用文獻選項。
-    
-    您也可以直接新增頁碼，於搜尋詞語中包含頁碼，或在氣泡後輸入頁碼並按下 { return-or-enter } 鍵即可。
+architecture-x64-on-arm64-action = 下載 ARM 64位元版本的 { -app-name }
 first-run-guidance-authorMenu = { -app-name } 也允許您指定編輯與譯者。您可以從此選單中選擇，將作者更改為編輯或譯者。
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
@@ -625,24 +647,23 @@ advanced-search-condition-input =
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+       *[other] 已新增 { $count } 個檔案
     }
+select-items-window =
+    .title = 選取項目
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = 選擇
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = 轉換成獨立
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+           *[other] 轉換成獨立附件
         }
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+           *[other] 轉換成獨立筆記
         }
 file-type-webpage = 網頁
 file-type-image = 圖片
@@ -652,18 +673,27 @@ file-type-video = 視訊
 file-type-presentation = 簡報
 file-type-document = 文件
 file-type-ebook = 電子書
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = 了解關於 <a data-l10n-name="new-features-link">{ -app-name } { $version } 的新功能</a>
+post-upgrade-density = 選擇你偏好的版面密度：
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
-    .label = Paste and Search
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+    .label = 貼上並搜尋
+mac-word-plugin-install-message = Zotero 需要存取 Word 資料來安裝 Word 外掛
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = 安裝 Word 外掛
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

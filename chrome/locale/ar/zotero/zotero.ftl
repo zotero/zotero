@@ -1,3 +1,4 @@
+general-sentence-separator = 
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -8,25 +9,73 @@ option-or-alt =
         [macos] { general-key-option }
        *[other] { general-key-alt }
     }
+command-or-control =
+    { PLATFORM() ->
+        [macos] { general-key-command }
+       *[other] { general-key-control }
+    }
 return-or-enter =
     { PLATFORM() ->
         [macos] Return
        *[other] Enter
     }
+delete-or-backspace =
+    { PLATFORM() ->
+        [macos] Delete
+       *[other] Backspace
+    }
 general-print = طباعة
 general-remove = إزالة
 general-add = اضافة
 general-remind-me-later = التذكير لاحقاً
-general-dont-ask-again = Don’t Ask Again
+general-dont-ask-again = لا تسأل مرة أخرى
 general-choose-file = اختر الملف...
 general-open-settings = فتح الإعدادات
+general-settings = Settings…
 general-help = مساعدة
 general-tag = وسم
 general-done = تم
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
+general-view-troubleshooting-instructions = عرض تعليمات استكشاف الأخطاء وإصلاحها
+general-go-back = ارجع
+general-accept = Accept
+general-cancel = إلغاء
+general-show-in-library = عرض في المكتبة
+general-restartApp = Restart { -app-name }
+general-restartInTroubleshootingMode = إعادة التشغيل في وضع استكشاف الأخطاء وإصلاحها
+general-save = حفظ
+general-clear = تفريغ
+general-update = تحديث
+general-back = ارجع
+general-edit = تحرير
+general-cut = قص
+general-copy = نسخ
+general-paste = لصق
+general-find = اعثر
+general-delete = مسح
+general-insert = إدراج
+general-and = و
+general-et-al = إلخ.
+general-previous = السابق
+general-next = التالي
+general-learn-more = تعرف على المزيد
+general-warning = تحذير
+general-type-to-continue = Type “{ $text }” to continue.
+general-red = أحمر
+general-orange = برتقالي
+general-yellow = أصفر
+general-green = أخضر
+general-teal = أزرق مخضر
+general-blue = أزرق
+general-purple = البنفسجي
+general-magenta = أرجواني
+general-violet = بنفسجي
+general-maroon = كستنائي
+general-gray = رمادي
+general-black = أسود
 citation-style-label = نمط الاستشهاد:
 language-label = اللغة
+menu-custom-group-submenu =
+    .label = More Options…
 menu-file-show-in-finder =
     .label = العرض في المجلد
 menu-file-show-file =
@@ -36,64 +85,76 @@ menu-file-show-files =
 menu-print =
     .label = { general-print }
 menu-density =
-    .label = Density
+    .label = الكثافة
 add-attachment = اضافة مرفق
 new-note = ملاحظة جديدة
 menu-add-by-identifier =
-    .label = Add by Identifier…
+    .label = إضافة بواسطة معرف...
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
     .label = إضافة ملف
 menu-add-standalone-linked-file-attachment =
-    .label = Add Link to File…
+    .label = إضافة ارتباط لملف...
 menu-add-child-file-attachment =
-    .label = Attach File…
+    .label = إرفاق ملف...
 menu-add-child-linked-file-attachment =
     .label = إرفاق ارتباط لملف...
 menu-add-child-linked-url-attachment =
-    .label = Attach Web Link…
+    .label = إرفاق رابط ويب...
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
     .label = ملاحظة جديدة مستقلة بذاتها
 menu-new-item-note =
-    .label = New Item Note
+    .label = ملاحظة جديدة
 menu-restoreToLibrary =
     .label = استعادة المكتبة
 menu-deletePermanently =
     .label = حذف نهائي...
 menu-tools-plugins =
-    .label = Plugins
+    .label = الإضافات
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = نقل العمود لليسار
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = نقل العمود لليمين
+menu-show-tabs-menu =
+    .label = Show Tabs Menu
+menu-edit-copy-annotation =
+    .label =
+        { $count ->
+            [one] Copy Annotation
+           *[other] Copy { $count } Annotations
+        }
 main-window-command =
-    .label = Library
+    .label = مكتبة
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
-    .tooltiptext = List all tabs
-filter-collections = Filter Collections
+    .tooltiptext = سرد جميع علامات التبويب
+filter-collections = تصفية العناصر
 zotero-collections-search =
     .placeholder = { filter-collections }
 zotero-collections-search-btn =
     .tooltiptext = { filter-collections }
 zotero-tabs-menu-filter =
-    .placeholder = Search Tabs
+    .placeholder = بحث في علامات التبويب
 zotero-tabs-menu-close-button =
-    .title = Close Tab
+    .title = إغلاق علامة التبويب
+zotero-toolbar-tabs-scroll-forwards =
+    .title = Scroll forwards
+zotero-toolbar-tabs-scroll-backwards =
+    .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
-    .label = Rename Collection
+    .label = إعادة تسمية المجموعة
 collections-menu-edit-saved-search =
     .label = تحرير البحث المخزن
 collections-menu-move-collection =
-    .label = Move To
+    .label = الانتقال إلى
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = النسخ إلى
 item-creator-moveDown =
     .label = تحريك لأسفل
 item-creator-moveToTop =
@@ -102,7 +163,7 @@ item-creator-moveUp =
     .label = تحريك لأعلى
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        افتح { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
@@ -125,26 +186,28 @@ item-menu-viewAttachment =
 item-menu-add-file =
     .label = ملف
 item-menu-add-linked-file =
-    .label = Linked File
+    .label = ملف مرتبط
 item-menu-add-url =
-    .label = Web Link
+    .label = رابط الويب
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = تغيير العنصر الأصلي...
+item-menu-relate-items =
+    .label = Relate Items
 view-online = العرض على الانترنت
 item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = تمت إعادة تسمية الملف إلى { $filename }
 itembox-button-options =
-    .tooltiptext = Open context menu
+    .tooltiptext = فتح قائمة السياق
 itembox-button-merge =
-    .aria-label = Select version of { $field } field
-create-parent-intro = Enter a DOI, ISBN, PMID, arXiv ID, or ADS Bibcode to identify this file:
+    .aria-label = حدد إصدار حقل { $field }
+create-parent-intro = أدخل رقم DOI أو ISBN أو PMID أو معرف arXiv أو ADS Bibcode لتحديد هذا الملف:
 reader-use-dark-mode-for-content =
-    .label = Use Dark Mode for Content
-update-updates-found-intro-minor = An update for { -app-name } is available:
-update-updates-found-desc = It is recommended that you apply this update as soon as possible.
+    .label = استخدام الوضع المظلم للمحتوى
+update-updates-found-intro-minor = يتوفر تحديث لـ { -app-name }:
+update-updates-found-desc = يوصى بتطبيق هذا التحديث في أقرب وقت ممكن.
 import-window =
     .title = استيراد
 import-where-from = من أين تريد الاستيراد؟
@@ -152,33 +215,33 @@ import-online-intro-title = المقدمة
 import-source-file =
     .label = ملف (BibTeX, RIS, Zotero RDF, etc.)
 import-source-folder =
-    .label = A folder of PDFs or other files
+    .label = مجلد من ملفات ال PDFs أو ملفات أخرى
 import-source-online =
-    .label = { $targetApp } online import
+    .label = الاستيراد عبر الإنترنت ل { $targetApp }
 import-options = خيارات
 import-importing = استيراد...
 import-create-collection =
     .label = ضع المجموعات المستوردة والمواد في مجموعة جديدة
 import-recreate-structure =
-    .label = Recreate folder structure as collections
-import-fileTypes-header = File Types to Import:
+    .label = إعادة إنشاء بنية المجلد كمجموعات
+import-fileTypes-header = أنواع الملفات المراد استيرادها:
 import-fileTypes-pdf =
     .label = PDFs
 import-fileTypes-other =
-    .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
+    .placeholder = ملفات أخرى حسب النمط، مفصولة بفاصلة (على سبيل المثال، *.jpg,*.png)
 import-file-handling = معاملة الملف
 import-file-handling-store =
-    .label = Copy files to the { -app-name } storage folder
+    .label = انسخ الملفات إلى مجلد تخزين { -app-name }
 import-file-handling-link =
-    .label = Link to files in original location
-import-fileHandling-description = Linked files cannot be synced by { -app-name }.
+    .label = الارتباط بالملفات في الموقع الأصلي
+import-fileHandling-description = لا يمكن مزامنة الملفات المرتبطة بواسطة  { -app-name }.
 import-online-new =
-    .label = Download new items only; don’t update previously imported items
-import-mendeley-username = Username
-import-mendeley-password = Password
+    .label = تحميل العناصر الجديدة فقط؛ لا تقم بتحديث العناصر التي تم استيرادها مسبقاً
+import-mendeley-username = اسم المستخدم
+import-mendeley-password = كلمة المرور
 general-error = خطأ
 file-interface-import-error = حدث خطأ اثناء محاولة استيراد العنصر الذي اخترته. برجاء التأكد من صحة الملف ثم حاول مرة أخرى.
-file-interface-import-complete = Import Complete
+file-interface-import-complete = اكتمل الاستيراد
 file-interface-items-were-imported =
     { $numItems ->
         [0] No items were imported
@@ -191,67 +254,72 @@ file-interface-items-were-relinked =
         [one] One item was relinked
        *[other] { $numRelinked } items were relinked
     }
-import-mendeley-encrypted = The selected Mendeley database cannot be read, likely because it is encrypted. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
-file-interface-import-error-translator = An error occurred importing the selected file with “{ $translator }”. Please ensure that the file is valid and try again.
-import-online-intro = In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-intro2 = { -app-name } will never see or store your { $targetApp } password.
-import-online-form-intro = Please enter your credentials to log in to { $targetAppOnline }. This is necessary to import your { $targetApp } library into { -app-name }.
-import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
-import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
+import-mendeley-encrypted = لا يمكن قراءة قاعدة بيانات مندلي المحددة، على الأرجح لأنها مشفرة. للمزيد من المعلومات راجع <a data-l10n-name="mendeley-import-kb">كيف يمكنني استيراد مكتبة مندلي إلى زوتيرو؟</a>
+file-interface-import-error-translator = حدث خطأ في استيراد الملف المحدد بـ “{ $translator }”. يرجى التأكد من صلاحية الملف والمحاولة مرة أخرى.
+import-online-intro = في الخطوة التالية، سيُطلب منك تسجيل الدخول إلى { $targetAppOnline } ومنح { -app-name } حق الوصول. هذا ضروري لاستيراد مكتبة { $targetApp } الخاصة بك إلى { -app-name }.
+import-online-intro2 = { -app-name }  لن يرى أو يخزن كلمة مرور { $targetApp } أبدًا.
+import-online-form-intro = الرجاء إدخال بيانات الاعتماد الخاصة بك لتسجيل الدخول إلى { $targetAppOnline }. هذا ضروري لاستيراد مكتبة { $targetApp } الخاصة بك إلى { -app-name }.
+import-online-wrong-credentials = لقد فشل تسجيل الدخول إلى { $targetApp }. يرجى إعادة إدخال بيانات الاعتماد والمحاولة مرة أخرى.
+import-online-blocked-by-plugin = لا يمكن متابعة الاستيراد مع تثبيت { $plugin }. يرجى تعطيل هذه الإضافة والمحاولة مرة أخرى.
 import-online-relink-only =
-    .label = Relink Mendeley Desktop citations
+    .label = إعادة ربط استشهادات مندلي المكتبية
 import-online-relink-kb = المزيد من المعلومات
-import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+import-online-connection-error = تعذر على { -app-name } الاتصال ب { $targetApp }. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.
 items-table-cell-notes =
     .aria-label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [zero] { $count } ملاحظات
+            [one] { $count } ملاحظات
+            [two] { $count } ملاحظات
+            [few] { $count } ملاحظات
+            [many] { $count } ملاحظات
+           *[other] { $count } ملاحظات
         }
 report-error =
     .label = الإبلاغ عن خطأ...
 rtfScan-wizard =
     .title = فحص ملف RTF
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = { -app-name } يمكنه استخراج الاقتباسات وإعادة تنسيقها تلقائيًا وإدراج مراجع في ملفات RTF. يدعم حاليًا الاستشهادات بصيغ مختلفة من التنسيقات التالية:
 rtfScan-introPage-description2 = للبدء في العملية، قم بتحديد ملف مدخلات و ملف مخرجات RTF:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = ملف المدخلات:
+rtfScan-output-file = ملف المخرجات:
 rtfScan-no-file-selected = لم يتم تحديد ملف
 rtfScan-choose-input-file =
     .label = { general-choose-file }
-    .aria-label = Choose Input File
+    .aria-label = اختر ملف المدخلات
 rtfScan-choose-output-file =
     .label = { general-choose-file }
-    .aria-label = Choose Output File
+    .aria-label = اختر ملف المخرجات
 rtfScan-intro-page = المقدمة
 rtfScan-scan-page = جاري البحث عن الاستشهادات المرجعية
-rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
+rtfScan-scanPage-description = { -app-name } يقوم بفحص المستند الخاص بك بحثاً عن الاستشهادات. يرجى التحلي بالصبر.
 rtfScan-citations-page = تأكد من صياغة استشهادات العناصر
-rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
+rtfScan-citations-page-description = يُرجى مراجعة قائمة الاستشهادات المعترف بها أدناه للتأكد من أن { -app-name } قد حدد العناصر المقابلة بشكل صحيح. يجب حل أي استشهادات غير محددة أو غامضة قبل الانتقال إلى الخطوة التالية.
 rtfScan-style-page = تنسيق المستند
 rtfScan-format-page = صياغة الاستشهادات
-rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
+rtfScan-format-page-description = { -app-name } يقوم بمعالجة وتنسيق ملف RTF الخاص بك. يرجى التحلي بالصبر.
 rtfScan-complete-page = تمت عملية فحص ملف RTF
 rtfScan-complete-page-description = تم فحص ومعالجة المستند. برجاء التأكد من انه تم تنسيق الصياغات بشكل صحيح .
 rtfScan-action-find-match =
-    .title = Select matching item
+    .title = اختر العنصر المطابق
 rtfScan-action-accept-match =
-    .title = Accept this match
-runJS-title = Run JavaScript
-runJS-editor-label = Code:
-runJS-run = Run
+    .title = اقبل هذا التطابق
+runJS-title = تشغيل جافا سكريبت
+runJS-editor-label = الرمز:
+runJS-run = تشغيل
 runJS-help = { general-help }
+runJS-completed = completed successfully
 runJS-result =
     { $type ->
         [async] Return value:
        *[other] Result:
     }
-runJS-run-async = Run as async function
+runJS-run-async = التشغيل كوظيفة متزامنة
 bibliography-window =
-    .title = { -app-name } - Create Citation/Bibliography
+    .title = { -app-name } - إنشاء استشهاد / مراجع
 bibliography-style-label = { citation-style-label }
 bibliography-locale-label = { language-label }
-bibliography-displayAs-label = Display citations as:
+bibliography-displayAs-label = عرض الاستشهادات على أنها:
 bibliography-advancedOptions-label = خيارات متقدمة
 bibliography-outputMode-label = وضع المخرجات:
 bibliography-outputMode-citations =
@@ -273,61 +341,15 @@ bibliography-outputMethod-copyToClipboard =
 bibliography-outputMethod-print =
     .label = طباعة
 bibliography-manageStyles-label = أدر الأنماط...
-integration-docPrefs-window =
-    .title = { -app-name } - Document Preferences
-integration-addEditCitation-window =
-    .title = { -app-name } - Add/Edit Citation
-integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
-integration-editBibliography-add-button =
-    .aria-label = { general-add }
-integration-editBibliography-remove-button =
-    .aria-label = { general-remove }
-integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
-integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
-integration-quickFormatDialog-window =
-    .title = { -app-name } - Quick Format Citation
 styleEditor-locatorType =
-    .aria-label = Locator type
-styleEditor-locatorInput = Locator input
+    .aria-label = نوع محدد الموقع
+styleEditor-locatorInput = مدخلات محدد الموقع
 styleEditor-citationStyle = { citation-style-label }
 styleEditor-locale = { language-label }
 styleEditor-editor =
-    .aria-label = Style editor
+    .aria-label = محرر الأسلوب
 styleEditor-preview =
-    .aria-label = Preview
-integration-prefs-displayAs-label = عرض الاستشهادات المرجعية كـ:
-integration-prefs-footnotes =
-    .label = حواشي سفلية
-integration-prefs-endnotes =
-    .label = تعليقات ختامية
-integration-prefs-bookmarks =
-    .label = Store citation as bookmarks
-integration-prefs-bookmarks-description = يمكن مشاركة الإشارات المرجعية بين ورد و ليبرأوفيس، ولكن قد تسبب أخطاء إذا تم تعديلها بالخطأ ولا يمكن إدراجها في الحواشي السفلية.
-integration-prefs-bookmarks-formatNotice =
-    { $show ->
-        [true] The document must be saved as .doc or .docx.
-       *[other] { "" }
-    }
-integration-prefs-automaticCitationUpdates =
-    .label = حدث الاستشهادات آلياً
-    .tooltip = سيتم تمييز الاستشهادات ذات التحديثات المعلقة في المستند
-integration-prefs-automaticCitationUpdates-description = يمكن أن يؤدي تعطيل التحديثات إلى تسريع إدراج الاستشهادات في المستندات الكبيرة. انقر على تحديث لتحديث الاستشهادات يدويًا.
-integration-prefs-automaticJournalAbbeviations =
-    .label = استخدام اختصارات دورية ميدلين
-integration-prefs-automaticJournalAbbeviations-description = سيتم تجاهل حقل "اختصار المجلة".
-integration-prefs-exportDocument =
-    .label = التبديل إلى معالج نصوص آخر ...
-integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
+    .aria-label = معاينة
 publications-intro-page = منشوراتي
 publications-intro = سيتم عرض العناصر التي تضيفها إلى منشوراتي على صفحة ملفك الشخصي على zotero.org. إذا اخترت تضمين الملفات المرفقة، سيتم إتاحتها للجمهور تحت الرخصة التي تحددها. أضف الأعمال التي ألفتها فقط، و لا تضمن الملفات إلا إن كان لديك الحق في توزيعها وترغب في القيام بذلك.
 publications-include-checkbox-files =
@@ -336,14 +358,14 @@ publications-include-checkbox-notes =
     .label = تضمين الملاحظات
 publications-include-adjust-at-any-time = يمكنك ضبط ما الذي ترغب بعرضه في أي وقت من خلال مجموعة عناصر منشوراتي.
 publications-intro-authorship =
-    .label = I created this work.
+    .label = أنا من أنشأ هذا العمل.
 publications-intro-authorship-files =
-    .label = I created this work and have the rights to distribute included files.
+    .label = لقد أنشأت هذا العمل ولدي حقوق توزيع الملفات المضمنة فيه.
 publications-sharing-page = اختر الطريقة التي يمكن بها مشاركة عملك
 publications-sharing-keep-rights-field =
-    .label = Keep the existing Rights field
+    .label = الاحتفاظ بحقل الحقوق الحالي
 publications-sharing-keep-rights-field-where-available =
-    .label = Keep the existing Rights field where available
+    .label = الاحتفاظ بحقل الحقوق الحالي حيثما كان متاحاً
 publications-sharing-text = يمكنك حفظ جميع الحقوق لعملك، أو ترخيصها تحت رخصة المشاع الإبداعي، أو هبتها كملكية عامة. في جميع الحالات، سيتاح مؤلفك للجمهور عبر zotero.org.
 publications-sharing-prompt = هل ترغب في السماح للآخرين بمشاركة مؤلفك ؟
 publications-sharing-reserved =
@@ -368,40 +390,41 @@ publications-choose-license-commercial-prompt = السماح بالاستخدا�
 publications-buttons-add-to-my-publications =
     .label = أضف إلى منشوراتي
 publications-buttons-next-sharing =
-    .label = Next: Sharing
+    .label = التالي: المشاركة
 publications-buttons-next-choose-license =
     .label = اختر رخصة
-licenses-cc-0 = CC0 1.0 Universal Public Domain Dedication
-licenses-cc-by = Creative Commons Attribution 4.0 International License
-licenses-cc-by-nd = Creative Commons Attribution-NoDerivatives 4.0 International License
-licenses-cc-by-sa = Creative Commons Attribution-ShareAlike 4.0 International License
-licenses-cc-by-nc = Creative Commons Attribution-NonCommercial 4.0 International License
-licenses-cc-by-nc-nd = Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
-licenses-cc-by-nc-sa = Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
-licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
-licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+licenses-cc-0 = CC0 1.0 إهداء المجال العام العالمي
+licenses-cc-by = رخصة المشاع الإبداعي نَسب المُصنَّف 4.0 دولي
+licenses-cc-by-nd = رخصة المشاع الإبداعي نَسب المُصنَّف - بدون مشتقات 4.0 رخصة دولية
+licenses-cc-by-sa = رخصة المشاع الإبداعي نَسب المُصنَّف - بالمثل 4.0 رخصة دولية
+licenses-cc-by-nc = رخصة المشاع الإبداعي نَسب المُصنَّف - غير تجاري 4.0 رخصة دولية
+licenses-cc-by-nc-nd = رخصة المشاع الإبداعي نَسب المُصنَّف - غير تجاري - غير مشتقات 4.0 رخصة دولية
+licenses-cc-by-nc-sa = رخصة المشاع الإبداعي نَسب المُصنَّف - غير تجاري - بالمثل 4.0 رخصة دولية
+licenses-cc-more-info = تأكد من أنك قد قرأت <a data-l10n-name="license-considerations">اعتبارات مرخِّصي</a> المشاع الإبداعي قبل وضع عملك تحت رخصة المشاع الإبداعي. لاحظ أن الرخصة التي تطبقها لا يمكن إلغاؤها، حتى لو اخترت لاحقًا شروطًا مختلفة أو توقفت عن نشر العمل.
+licenses-cc0-more-info = تأكد من أنك قرأت <a data-l10n-name="license-considerations">الأسئلة الشائعة الخاصة بالمشاع الإبداعي CC0</a> قبل تطبيق CC0 على عملك. يُرجى ملاحظة أن إهداء عملك إلى المجال العام لا رجعة فيه، حتى لو اخترت لاحقًا شروطًا مختلفة أو توقفت عن نشر العمل.
+debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
-    .label = Restart in Troubleshooting Mode…
+    .label = إعادة التشغيل في وضع استكشاف الأخطاء وإصلاحها...
     .accesskey = T
-restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
-restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
+restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
+restart-in-troubleshooting-mode-dialog-description = سيتم إعادة تشغيل { -app-name } مع تعطيل جميع المكونات الإضافية. قد لا تعمل بعض الميزات بشكل صحيح أثناء تمكين وضع استكشاف الأخطاء وإصلاحها.
 menu-ui-density =
-    .label = Density
+    .label = الكثافة
 menu-ui-density-comfortable =
-    .label = Comfortable
+    .label = مريحة
 menu-ui-density-compact =
-    .label = Compact
-pane-item-details = Item Details
+    .label = مدمجة
+pane-item-details = تفاصيل العنصر
 pane-info = معلومات
 pane-abstract = المستخلص
 pane-attachments = مرفقات
 pane-notes = ملاحظات
-pane-libraries-collections = Libraries and Collections
+pane-libraries-collections = المكتبات والمجموعات
 pane-tags = أوسمة
 pane-related = عناصر ذات صلة
-pane-attachment-info = Attachment Info
-pane-attachment-preview = Preview
-pane-attachment-annotations = Annotations
+pane-attachment-info = معلومات المرفقات
+pane-attachment-preview = معاينة
+pane-attachment-annotations = الشروح
 pane-header-attachment-associated =
     .label = إعادة تسمية الملف المرتبط
 item-details-pane =
@@ -413,33 +436,50 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
-           *[other] { $count } Attachments
+            [zero] { $count } مرفق
+            [one] { $count } مرفق
+            [two] { $count } مرفقان
+            [few] { $count } مرفقات
+            [many] { $count } مرفقات
+           *[other] { $count } مرفقات
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } Annotation
-           *[other] { $count } Annotations
+            [zero] { $count } تعليق توضيحي
+            [one] { $count } تعليق توضيحي
+            [two] { $count } تعليق توضيحي
+            [few] { $count } تعليق توضيحي
+            [many] { $count } تعليق توضيحي
+           *[other] { $count } تعليق توضيحي
         }
+section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [zero] { $count } ملاحظات
+            [one] { $count } ملاحظات
+            [two] { $count } ملاحظات
+            [few] { $count } ملاحظات
+            [many] { $count } ملاحظات
+           *[other] { $count } ملاحظات
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Tag
-           *[other] { $count } Tags
+            [zero] { $count } علامة
+            [one] { $count } علامة
+            [two] { $count } علامتان
+            [few] { $count } علامات
+            [many] { $count } علامات
+           *[other] { $count } علامات
         }
 section-related =
-    .label = { $count } Related
+    .label = { $count } ذات الصلة
 section-attachment-info =
     .label = { pane-attachment-info }
 section-button-remove =
@@ -447,15 +487,19 @@ section-button-remove =
 section-button-add =
     .tooltiptext = { general-add }
 section-button-expand =
-    .dynamic-tooltiptext = Expand section
-    .label = Expand { $section } section
+    .dynamic-tooltiptext = توسيع القسم
+    .label = توسيع قسم { $section }
 section-button-collapse =
-    .dynamic-tooltiptext = Collapse section
-    .label = Collapse { $section } section
+    .dynamic-tooltiptext = طي القسم
+    .label = طي قسم { $section }
 annotations-count =
     { $count ->
-        [one] { $count } Annotation
-       *[other] { $count } Annotations
+        [zero] { $count } تعليق توضيحي
+        [one] { $count } تعليق توضيحي
+        [two] { $count } تعليق توضيحي
+        [few] { $count } تعليق توضيحي
+        [many] { $count } تعليق توضيحي
+       *[other] { $count } تعليق توضيحي
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -484,22 +528,32 @@ sidenav-related =
     .tooltiptext = { pane-related }
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
+sidenav-reorder-up =
+    .label = Move Section Up
+sidenav-reorder-down =
+    .label = Move Section Down
+sidenav-reorder-reset =
+    .label = Reset Section Order
+toggle-item-pane =
+    .tooltiptext = Toggle Item Pane
+toggle-context-pane =
+    .tooltiptext = تبديل جزء السياق
 pin-section =
-    .label = Pin Section
+    .label = تثبيت القسم
 unpin-section =
-    .label = Unpin Section
+    .label = إلغاء تثبيت القسم
 collapse-other-sections =
-    .label = Collapse Other Sections
+    .label = طي الأقسام الأخرى
 expand-all-sections =
-    .label = Expand All Sections
+    .label = توسيع جميع الأقسام
 abstract-field =
-    .placeholder = Add abstract…
+    .placeholder = إضافة ملخص...
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
-    .placeholder = Filter Tags
+    .placeholder = علامات التصنيف
 context-notes-search =
-    .placeholder = Search Notes
+    .placeholder = بحث الملاحظات
 context-notes-return-button =
     .aria-label = { general-go-back }
 new-collection = مجموعة عناصر جديدة...
@@ -509,9 +563,11 @@ toolbar-new-collection =
     .tooltiptext = { new-collection }
 new-collection-dialog =
     .title = مجموعة عناصر جديدة
-    .buttonlabelaccept = Create Collection
+    .buttonlabelaccept = إنشاء المجموعة
 new-collection-name = الاسم
-new-collection-create-in = Create in:
+new-collection-create-in = أنشئ في:
+show-publications-menuitem =
+    .label = Show My Publications
 attachment-info-title = العنوان
 attachment-info-filename = اسم الملف
 attachment-info-accessed = تاريخ الدخول
@@ -520,55 +576,51 @@ attachment-info-modified = تاريخ التعديل
 attachment-info-index = مكشف
 attachment-info-convert-note =
     .label =
-        Migrate to { $type ->
+        الترحيل إلى { $type ->
             [standalone] Standalone
             [child] Item
            *[unknown] New
-        } Note
-    .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
-attachment-preview-placeholder = No attachment to preview
+        } ملاحظة
+    .tooltiptext = لم تعد إضافة الملاحظات إلى المرفقات مدعومة، ولكن يمكنك تحرير هذه الملاحظة بترحيلها إلى ملاحظة منفصلة.
+attachment-preview-placeholder = لا يوجد مرفق للمعاينة
+attachment-rename-from-parent =
+    .tooltiptext = Rename File to Match Parent Item
+file-renaming-auto-rename-prompt-title = Renaming Settings Changed
+file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-yes = Preview Changes…
+file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+rename-files-preview =
+    .buttonlabelaccept = Rename Files
+rename-files-preview-loading = التحميل
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-renaming = Renaming…
+rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 toggle-preview =
     .label =
         { $type ->
             [open] Hide
             [collapsed] Show
            *[unknown] Toggle
-        } Attachment Preview
-quickformat-general-instructions =
-    Use Left/Right Arrow to navigate the items of this citation. { $dialogMenu ->
-        [active] Press Shift-Tab to focus the dialog's menu.
-       *[other] { "" }
-    } Press { return-or-enter } to save edits to this citation. Press Escape to discard the changes and close the dialog.
-quickformat-aria-bubble = This item is included in the citation. Press space bar to customize the item. { quickformat-general-instructions }
-quickformat-aria-input = Type to search for an item to include in this citation. Press Tab to navigate the list of search results. { quickformat-general-instructions }
-quickformat-aria-item = Press { return-or-enter } to add this item to the citation. Press Tab to go back to the search field.
-quickformat-accept =
-    .tooltiptext = Save edits to this citation
-quickformat-locator-type =
-    .aria-label = Locator type
-quickformat-locator-value = Locator
-quickformat-citation-options =
-    .tooltiptext = Show citation options
-insert-note-aria-input = Type to search for a note. Press Tab to navigate the list of results. Press Escape to close the dialog.
-insert-note-aria-item = Press { return-or-enter } to select this note. Press Tab to go back to the search field. Press Escape to close the dialog.
+        } معاينة المرفقات
+annotation-image-not-available = [Image not available]
 quicksearch-mode =
-    .aria-label = Quick Search mode
+    .aria-label = وضع البحث السريع
 quicksearch-input =
     .aria-label = البحث السريع
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 item-pane-header-view-as =
-    .label = View As
+    .label = عرض كـ
 item-pane-header-none =
     .label = بدون أيقونة
 item-pane-header-title =
     .label = العنوان
 item-pane-header-titleCreatorYear =
-    .label = Title, Creator, Year
+    .label = العنوان، المؤلف، السنة
 item-pane-header-bibEntry =
-    .label = Bibliography Entry
+    .label = مدخل المراجع
 item-pane-header-more-options =
-    .label = More Options
+    .label = المزيد من الخيارات
 item-pane-message-items-selected =
     { $count ->
         [0] No items selected
@@ -577,18 +629,30 @@ item-pane-message-items-selected =
     }
 item-pane-message-collections-selected =
     { $count ->
-        [one] { $count } collection selected
-       *[other] { $count } collections selected
+        [zero] { $count } مجموعة مختارة
+        [one] { $count } مجموعة مختارة
+        [two] { $count } مجموعتان مختارتان
+        [few] { $count } مجموعات مختارة
+        [many] { $count } مجموعات مختارة
+       *[other] { $count } مجموعات مختارة
     }
 item-pane-message-searches-selected =
     { $count ->
-        [one] { $count } search selected
-       *[other] { $count } searches selected
+        [zero] { $count } عملية بحث محددة
+        [one] { $count } عملية بحث محددة
+        [two] { $count } عمليتا بحث محددة
+        [few] { $count } عمليات بحث محددة
+        [many] { $count } عمليات بحث محددة
+       *[other] { $count }  عمليات بحث محددة
     }
 item-pane-message-objects-selected =
     { $count ->
-        [one] { $count } object selected
-       *[other] { $count } objects selected
+        [zero] { $count } عنصر مختار
+        [one] { $count } عنصر مختار
+        [two] { $count } عنصران مختارة
+        [few] { $count } عناصر مختارة
+        [many] { $count } عناصر مختارة
+       *[other] { $count } عناصر مختارة
     }
 item-pane-message-unselected =
     { $count ->
@@ -605,75 +669,96 @@ item-pane-message-objects-unselected =
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Merge { $count } item
-           *[other] Merge { $count } items
+            [zero] دمج { $count } عنصر
+            [one] دمج عنصر واحد { $count }
+            [two] دمج عنصرين { $count }
+            [few] دمج { $count } عناصر
+            [many] دمج { $count } عناصر
+           *[other] دمج { $count } عناصر
         }
-locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
-architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
-architecture-warning-action = Download 64-bit { -app-name }
-architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
-architecture-x64-on-arm64-action = Download { -app-name } for ARM64
-first-run-guidance-quickFormat =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
-    
-    You can also add a page number directly by including it with your search terms or typing it after the bubble and pressing { return-or-enter }.
-first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
+locate-library-lookup-no-resolver = يجب عليك اختيار محلل من جزء { $pane } من إعدادات { -app-name }.
+architecture-win32-warning-message = قم بالتبديل إلى { -app-name } 64 بت للحصول على أفضل أداء. لن تتأثر بياناتك.
+architecture-warning-action = قم بتنزيل { -app-name } 64-بت
+architecture-x64-on-arm64-message = يعمل { -app-name } في الوضع المحاكي. سيعمل الإصدار الأصلي من { -app-name } بكفاءة أكبر.
+architecture-x64-on-arm64-action = قم بتنزيل  { -app-name } ل ARM64
+first-run-guidance-authorMenu = { -app-name } يتيح لك تحديد المحررين والمترجمين أيضًا. يمكنك تحويل المؤلف إلى محرر أو مترجم عن طريق التحديد من هذه القائمة.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =
     .tooltiptext = { general-add }
 advanced-search-conditions-menu =
-    .aria-label = Search condition
+    .aria-label = شرط البحث
     .label = { $label }
 advanced-search-operators-menu =
-    .aria-label = Operator
+    .aria-label = المشغل
     .label = { $label }
 advanced-search-condition-input =
-    .aria-label = Value
+    .aria-label = القيمة
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [zero] { $count } ملف مضاف
+        [one] { $count } ملف مضاف
+        [two] { $count } ملفان مضافان
+        [few] { $count } ملفات مضافة
+        [many] { $count } ملفات مضافة
+       *[other] { $count } ملفات مضافة
     }
+select-items-window =
+    .title = تحديد العناصر
 select-items-dialog =
-    .buttonlabelaccept = Select
+    .buttonlabelaccept = اختر
 select-items-convertToStandalone =
-    .label = Convert to Standalone
+    .label = التحويل إلى مستقل بذاته
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+            [zero] التحويل إلى مرفق مستقل
+            [one] التحويل إلى مرفق مستقل
+            [two] التحويل إلى مرفقان مستقلان
+            [few] التحويل إلى مرفقات مستقلة
+            [many] التحويل إلى مرفقات مستقلة
+           *[other] التحويل إلى مرفقات مستقلة
         }
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [zero] التحويل إلى ملاحظات مستقلة بذاتها
+            [one] التحويل إلى ملاحظات مستقلة بذاتها
+            [two] التحويل إلى ملاحظات مستقلة بذاتها
+            [few] التحويل إلى ملاحظات مستقلة بذاتها
+            [many] التحويل إلى ملاحظات مستقلة بذاتها
+           *[other] التحويل إلى ملاحظات مستقلة بذاتها
         }
-file-type-webpage = Webpage
+file-type-webpage = صفحة الويب
 file-type-image = صورة
-file-type-pdf = بي دي إف
+file-type-pdf = PDF
 file-type-audio = صوت
 file-type-video = فيديو
 file-type-presentation = عرض تقديمي
 file-type-document = مستند
-file-type-ebook = Ebook
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+file-type-ebook = الكتاب الإلكتروني
+post-upgrade-message = تعرّف على <a data-l10n-name="new-features-link">الميزات الجديدة في { -app-name } { $version }</a>
+post-upgrade-density = اختر كثافة التخطيط المفضل لديك:
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
-    .label = Paste and Search
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+    .label = لصق وبحث
+mac-word-plugin-install-message = يحتاج زوتيرو إلى الوصول إلى بيانات وورد لتثبيت إضافة وورد.
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = تثبيت مكون وورد إضافي
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-documentation-link = { general-learn-more }
+file-renaming-banner-settings-link = { general-settings }
+connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+long-tag-fixer-window-title =
+    .title = Split Tags
+long-tag-fixer-button-dont-split =
+    .label = Don’t Split

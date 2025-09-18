@@ -125,7 +125,6 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "标题">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "最后更新">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "获取更多样式…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "保存到 Zotero (地址栏图标)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦文库窗格">
@@ -196,6 +195,5 @@
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "检查数据库完整性">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重置转换器和样式…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重置转换器…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "重置样式…">
 
 <!ENTITY zotero.preferences.configEditor "设置编辑器">
