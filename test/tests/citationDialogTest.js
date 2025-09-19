@@ -650,3 +650,129 @@ describe("Citation Dialog", function () {
 		});
 	});
 });
+
+describe("Insert Note Dialog", function () {
+	let dialog, insertNoteIO, win;
+	let parentItem, childNoteA, childNoteB, topLevelNote;
+
+	before(async function () {
+		// one of helper functions of searchHandler uses zotero pane
+		win = await loadZoteroPane();
+		// Create IO for insert note dialog
+		insertNoteIO = {
+			accept: () => {},
+			cancel() {},
+			sort() {},
+			sortable: false,
+			isCitingNotes: true,
+			citation: {
+				citationItems: [],
+				properties: {
+					unsorted: false,
+				}
+			},
+			getItems() {
+				return [];
+			},
+			allCitedDataLoadedPromise: Zotero.Promise.resolve(),
+		};
+
+		// Open the dialog
+		let dialogPromise = waitForWindow("chrome://zotero/content/integration/citationDialog.xhtml");
+		Services.ww.openWindow(null, "chrome://zotero/content/integration/citationDialog.xhtml", "", "", insertNoteIO);
+		dialog = await dialogPromise;
+
+		// Wait for dialog to load
+		while (!dialog.loaded) {
+			await Zotero.Promise.delay(10);
+		}
+		doc = dialog.doc;
+
+		// Create items
+		parentItem = await createDataObject('item', { title: "parent_item_with_notes" });
+		childNoteA = await createDataObject('item', { itemType: 'note', parentItemID: parentItem.id });
+		childNoteA.setNote("<p>This is a child note A</p><p>First line.</p><p>Second line.</p>");
+		await childNoteA.saveTx();
+
+		childNoteB = await createDataObject('item', { itemType: 'note', parentItemID: parentItem.id });
+		childNoteB.setNote("<p>This is a child note B</p><p>First line.</p><p>Second line.</p>");
+		await childNoteB.saveTx();
+
+		topLevelNote = await createDataObject('item', { itemType: 'note' });
+		topLevelNote.setNote("<p>This is a top level note</p><p>First line.</p><p>Second line.</p>");
+		await topLevelNote.saveTx();
+	});
+
+	beforeEach(async function () {
+		dialog.IOManager.updateBubbleInput();
+		// Reset search
+		await dialog.currentLayout.search("", { skipDebounce: true });
+		
+		// Wait for any ongoing search to complete
+		while (dialog.SearchHandler.searching) {
+			await Zotero.Promise.delay(10);
+		}
+		dialog.IOManager._lastClickTime = null;
+	});
+
+	it("should match notes by their content", async function () {
+		dialog.IOManager.toggleDialogMode("list");
+		// Wait for search triggered after switching dialog modes to finish
+		while (dialog.SearchHandler.searching) {
+			await Zotero.Promise.delay(10);
+		}
+		// child A is a match
+		await dialog.currentLayout.search("This is a child note A", { skipDebounce: true });
+		let noteIDs = dialog.SearchHandler.results.found.map(item => item.id);
+		assert.sameMembers(noteIDs, [childNoteA.id]);
+		// it appears together with the parent item as the container
+		let itemNodes = [...dialog.doc.querySelectorAll(".item")];
+		assert.equal(itemNodes[0].id, `${parentItem.id}`);
+		assert.isTrue(itemNodes[0].classList.contains("container"));
+		assert.equal(itemNodes[1].id, `${childNoteA.id}`);
+		assert.isTrue(itemNodes[1].classList.contains("child"));
+	});
+
+	it("should match notes by their parent item", async function () {
+		dialog.IOManager.toggleDialogMode("list");
+		// Wait for search triggered after switching dialog modes to finish
+		while (dialog.SearchHandler.searching) {
+			await Zotero.Promise.delay(10);
+		}
+		// child A and child B notes are matches
+		await dialog.currentLayout.search("parent_item_with_notes", { skipDebounce: true });
+		let noteIDs = dialog.SearchHandler.results.found.map(item => item.id);
+		assert.sameMembers(noteIDs, [childNoteA.id, childNoteB.id]);
+		// they appear together with the parent item as the container
+		let itemNodes = [...dialog.doc.querySelectorAll(".item")];
+		assert.equal(itemNodes[0].id, `${parentItem.id}`);
+		assert.isTrue(itemNodes[0].classList.contains("container"));
+		assert.equal(itemNodes[1].id, `${childNoteA.id}`);
+		assert.isTrue(itemNodes[1].classList.contains("child"));
+		assert.equal(itemNodes[2].id, `${childNoteB.id}`);
+		assert.isTrue(itemNodes[2].classList.contains("child"));
+	});
+
+	it("should filter selected notes by their parent item", async function () {
+		dialog.IOManager.toggleDialogMode("library");
+		// Wait for search triggered after switching dialog modes to finish
+		while (dialog.SearchHandler.searching) {
+			await Zotero.Promise.delay(10);
+		}
+		// Present childNoteA and topLevelNote are selected
+		dialog.SearchHandler.selectedItems = [childNoteA, topLevelNote];
+		// child A is a match
+		await dialog.currentLayout.search("parent_item_with_notes", { skipDebounce: true });
+		let noteIDs = dialog.SearchHandler.results.selected.map(item => item.id);
+		assert.sameMembers(noteIDs, [childNoteA.id]);
+		
+		let itemNodes = [...dialog.doc.querySelectorAll(".item")];
+		assert.equal(itemNodes.length, 1);
+		assert.equal(itemNodes[0].id, `${childNoteA.id}`);
+	});
+
+	after(function () {
+		dialog.close();
+		win.close();
+	});
+});

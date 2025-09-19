@@ -68,7 +68,7 @@ export class CitationDialogSearchHandler {
 			let item = this.results[key].find(item => item.id === parseInt(id));
 			if (item) return item;
 		}
-		return null;
+		return Zotero.Items.get(id);
 	}
 
 	// how many selected items there are without applying the filter
@@ -87,7 +87,7 @@ export class CitationDialogSearchHandler {
 	// by the number of results in each library.
 	// Items/notes in the libraries group are sorted via _createItemsSort/_createNotesSort comparators.
 	// Takes citedItems as a parameter to filter them out from Selected, Opened and Cited groups.
-	getOrderedSearchResultGroups(citedItemIDs = new Set()) {
+	getOrderedSearchResultGroups(layoutType, citedItemIDs = new Set()) {
 		let removeItemsIncludedInCitation = (items) => {
 			return items.filter(i => !citedItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 		};
@@ -118,15 +118,23 @@ export class CitationDialogSearchHandler {
 			return acc;
 		}, {}));
 
-		// sort actual items or notes
-		let itemComparator = this.isCitingNotes ? this._createNotesSort() : this._createItemsSort();
-		libraryItems.forEach((library) => {
-			library.group.sort(itemComparator);
-		});
 	
 		// sort libraries by the number of items
 		libraryItems.sort((a, b) => b.group.length - a.group.length);
 		result.push(...libraryItems);
+
+		// When citing notes, include parent items into the array of results
+		// which will appear in the dialog for additional context
+		if (this.isCitingNotes && layoutType === "list") {
+			for (let section of result) {
+				section.group = this._groupNotesWithParents(section.group);
+			}
+			return result;
+		}
+		// Otherwise, just sort the items in each library
+		libraryItems.forEach((library) => {
+			library.group.sort(this._createItemsSort());
+		});
 
 		return result;
 	}
@@ -191,6 +199,12 @@ export class CitationDialogSearchHandler {
 	}
 
 	cleanSearchQuery(str) {
+		// if the string looks like an identifier, just return it without further cleanup
+		let isbn = Zotero.Utilities.cleanISBN(str);
+		let doi = Zotero.Utilities.cleanDOI(str);
+		if (isbn || doi) {
+			return str.trim();
+		}
 		// Remove brackets, some punctuation, "et al", and localized "and" from the search string.
 		// This allows one to paste an existing citation like "(Smith et al., 2020)" and
 		// still get appropriate search results.
@@ -199,12 +213,6 @@ export class CitationDialogSearchHandler {
 		let etAl = Zotero.getString("general.etAl").replace(/\./g, "");
 		str = str.replace(new RegExp(" " + etAl + "(?:.\\s*|\\s+|$)", "g"), " ");
 
-		let isbn = Zotero.Utilities.cleanISBN(str);
-		let doi = Zotero.Utilities.cleanDOI(str);
-		// if the string looks like an identifier, do not try to extract the year
-		if (!(isbn || doi)) {
-			str = this._cleanYear(str);
-		}
 		str = str.trim();
 
 		// If the query is very short, treat it as empty
@@ -230,30 +238,34 @@ export class CitationDialogSearchHandler {
 		
 	// Run the actual search query and find all items matching query across all libraries
 	async _getMatchingLibraryItems() {
+		let realInputRegex = /[\w\u007F-\uFFFF]/;
+		if (!realInputRegex.test(this.searchValue)) return [];
+
 		var s = new Zotero.Search();
 		Zotero.Feeds.getAll().forEach(feed => s.addCondition("libraryID", "isNot", feed.libraryID));
 		if (this.io.filterLibraryIDs) {
 			this.io.filterLibraryIDs.forEach(id => s.addCondition("libraryID", "is", id));
 		}
-		let realInputRegex = /[\w\u007F-\uFFFF]/;
 		if (this.isCitingNotes) {
-			s.addCondition("quicksearch-titleCreatorYearNote", "contains", this.searchValue);
+			let scope = new Zotero.Search;
+			// Allow to search by ISBN/DOI for the top-level item
+			let addedIdentifierCondition = this._addIdentifierConditions(scope, this.searchValue);
+			if (!addedIdentifierCondition) {
+				// If identifier is not provided, search by conditions equivalent to quicksearch-titleCreatorYear
+				this._addQuickSearchEquivalentConditions(scope);
+				scope.addCondition("note", "contains", this.searchValue);
+			}
+			scope.addCondition("includeChildren", "true");
+			s.setScope(scope);
+			s.addCondition("itemType", "is", "note");
 		}
-		else if (realInputRegex.test(this.searchValue)) {
-			// search for the identifier if it is provided,
-			// otherwise look up by title, creator and year
-			let isDOI = Zotero.Utilities.cleanDOI(this.searchValue);
-			let isISBN = Zotero.Utilities.cleanISBN(this.searchValue);
-			if (isDOI) {
-				s.addCondition("DOI", "contains", this.searchValue);
-			}
-			else if (isISBN) {
-				s.addCondition("ISBN", "contains", this.searchValue);
-			}
-			else {
+		else {
+			// search items by the identifier if provided, or by title/creator/year otherwise
+			let addedIdentifierCondition = this._addIdentifierConditions(s, this.searchValue);
+			if (!addedIdentifierCondition) {
 				s.addCondition("quicksearch-titleCreatorYear", "contains", this.searchValue);
-				s.addCondition("itemType", "isNot", "attachment");
 			}
+			s.addCondition("itemType", "isNot", "attachment");
 		}
 		let searchResultIDs = await s.search();
 		// Search results might be in an unloaded library, so get items asynchronously and load necessary data
@@ -321,6 +333,19 @@ export class CitationDialogSearchHandler {
 				.join(" ")
 				.toLowerCase();
 			
+			// Handle searching through selected notes
+			if (this.isCitingNotes) {
+				itemStr += ` ${item.getNote().toLowerCase()}`;
+				if (item.parentItemID) {
+					let parent = item.topLevelItem;
+					let parentStr = parent.getCreators()
+						.map(creator => creator.firstName + " " + creator.lastName)
+						.concat([parent.getField("title"), parent.getField("date", true, true).substr(0, 4)])
+						.join(" ")
+						.toLowerCase();
+					itemStr += ` ${parentStr}`;
+				}
+			}
 			// Include items that match every word that was typed
 			let allMatch = splits.every(split => itemStr.includes(split));
 			if (allMatch) {
@@ -336,6 +361,14 @@ export class CitationDialogSearchHandler {
 		let searchParts = Zotero.SearchConditions.parseSearchString(searchString);
 		var collation = Zotero.getLocaleCollation();
 		return ((a, b) => {
+			// When displaying notes, top level notes may appear among top-level
+			// container items.
+			if (this.isCitingNotes) {
+				if (a.isNote() || b.isNote()) {
+					return collation.compareString(1, a.getDisplayTitle(), b.getDisplayTitle());
+				}
+			}
+			// Sort by left-bound name matches first
 			var firstCreatorA = a.firstCreator, firstCreatorB = b.firstCreator;
 			
 			// Favor left-bound name matches (e.g., "Baum" < "Appelbaum"),
@@ -381,6 +414,31 @@ export class CitationDialogSearchHandler {
 		};
 	}
 
+	_addIdentifierConditions(search, searchValue) {
+		let cleanDOI = Zotero.Utilities.cleanDOI(searchValue);
+		let cleanISBN = Zotero.Utilities.cleanISBN(searchValue);
+		
+		if (cleanDOI) {
+			search.addCondition("DOI", "contains", cleanDOI);
+			return true;
+		}
+		else if (cleanISBN) {
+			search.addCondition("ISBN", "contains", cleanISBN);
+			return true;
+		}
+		return false;
+	}
+
+	_addQuickSearchEquivalentConditions(search) {
+		search.addCondition("title", "contains", this.searchValue);
+		search.addCondition("publicationTitle", "contains", this.searchValue);
+		search.addCondition("shortTitle", "contains", this.searchValue);
+		search.addCondition("court", "contains", this.searchValue);
+		search.addCondition("year", "contains", this.searchValue);
+		search.addCondition("creator", "contains", this.searchValue);
+		search.addCondition("joinMode", "any");
+	}
+
 	_cleanYear(string) {
 		let yearRegex = /,? *([0-9]+(?: *[-–] *[0-9]+)?) *(B[. ]*C[. ]*(?:E[. ]*)?|A[. ]*D[. ]*|C[. ]*E[. ]*)?$/i;
 		let maybeYear = yearRegex.exec(string);
@@ -390,5 +448,32 @@ export class CitationDialogSearchHandler {
 		let stringNoYear = string.substr(0, maybeYear.index) + string.substring(maybeYear.index + maybeYear[0].length);
 		if (!year) return stringNoYear;
 		return stringNoYear + " " + year;
+	}
+
+	// Given an array of note items, construct a new array with the notes'
+	// sorted parent items and all child notes following their respective parents.
+	// For example, given [noteA, noteB, noteC], returned array is
+	// [parentOfNoteA, noteA, parentOfNoteB, noteB, parentOfNoteC, noteC]
+	_groupNotesWithParents(items) {
+		let topLevelItems = {};
+		for (let item of items) {
+			let topLevel = item.topLevelItem;
+			if (!topLevelItems[topLevel.id]) {
+				topLevelItems[topLevel.id] = [];
+			}
+			if (item.parentItemID) {
+				topLevelItems[topLevel.id].push(item);
+			}
+		}
+		let topLevelArray = Object.keys(topLevelItems).map(id => Zotero.Items.get(id));
+		topLevelArray.sort(this._createItemsSort());
+		let result = [];
+		for (let topLevelItem of topLevelArray) {
+			result.push(topLevelItem);
+			let childNotes = topLevelItems[topLevelItem.id];
+			childNotes.sort(this._createNotesSort());
+			result.push(...childNotes);
+		}
+		return result;
 	}
 }

@@ -642,3 +642,53 @@
 		}
 	}
 }
+
+#citation-dialog[dialog-type="note"] {
+	#library-layout {
+		.add-all {
+			display: none;
+		}
+		// when adding a note, the item cards are slightly taller
+		#library-other-items {
+			height: 100px;
+			.item {
+				height: 58px !important;
+			}
+		}
+	}
+	#list-layout {
+		#list-layout-wrapper {
+			.section .item {
+				border-radius: 5px;
+				// special treatment for container parent items of notes that
+				// are not properly selectable
+				&.container {
+					background-color: var(--color-background);
+					&:hover {
+						outline: 2px solid var(--fill-quinary);
+					}
+					.title::before {
+						@include svgicon("chevron-8", "universal", "8");
+						width: 8px;
+						height: 8px;
+						display: inline-block;
+						content: "";
+						margin-inline-end: 4px;
+						vertical-align: middle;
+						margin-bottom: 3px;
+						fill: var(--fill-secondary);
+					}
+					&.collapsed .title::before {
+						transform: rotate(270deg);
+					}
+				}
+				&:not(.container) {
+					padding-inline: 20px;
+				}
+				&.child {
+					padding-inline: 36px;
+				}
+			}
+		}
+	}
+}

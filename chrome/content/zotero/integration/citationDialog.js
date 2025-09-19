@@ -61,6 +61,10 @@ async function onLoad() {
 	isCitingNotes = !!io.isCitingNotes;
 	window.isPristine = true;
 
+	if (isCitingNotes) {
+		document.documentElement.setAttribute("dialog-type", "note");
+	}
+
 	Zotero.debug("Citation Dialog: initializing");
 	let timer = new Zotero.Integration.Timer();
 	timer.start();
@@ -208,7 +212,7 @@ class Layout {
 
 		// Tell SearchHandler which currently cited items are so they are not included in results
 		let citedIDs = CitationDataManager.getCitedLibraryItemIDs();
-		let searchResultGroups = SearchHandler.getOrderedSearchResultGroups(citedIDs);
+		let searchResultGroups = SearchHandler.getOrderedSearchResultGroups(currentLayout.type, citedIDs);
 		for (let { key, group, isLibrary } of searchResultGroups) {
 			// selected items become a collapsible deck/list if there are multiple items
 			let isGroupCollapsible = key == "selected" && group.length > 1;
@@ -220,7 +224,8 @@ class Layout {
 			}
 			// special handling for selected items to display how many total selected items there are
 			else if (key == "selected") {
-				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count: group.length, total: SearchHandler.allSelectedItemsCount() });
+				let count = isCitingNotes ? group.filter(item => item.isNote()).length : group.length;
+				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count, total: SearchHandler.allSelectedItemsCount() });
 			}
 			else {
 				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count: group.length });
@@ -423,6 +428,12 @@ class LibraryLayout extends Layout {
 
 		itemNode.append(title, description);
 
+		// add a parent title to the item card when inserting a note
+		if (isCitingNotes && item.parentItemID) {
+			let parentTitleNode = Helpers.createNode("div", {}, "description");
+			Zotero.Utilities.Internal.renderItemTitle(item.topLevelItem.getDisplayTitle(), parentTitleNode);
+			itemNode.prepend(parentTitleNode);
+		}
 		if (index !== null) {
 			itemNode.style.setProperty('--deck-index', index);
 		}
@@ -762,14 +773,28 @@ class ListLayout extends Layout {
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
+		// When adding a note, parent items appear in the list as collapsible containers
+		if (isCitingNotes) {
+			if (item.isNote()) {
+				if (item.parentItemID) {
+					itemNode.classList.add("child");
+					itemNode.setAttribute("aria-labelledby", `title-${id} description-${id} ${item.parentItemID}`);
+				}
+			}
+			else {
+				itemNode.setAttribute("disabled", true);
+				itemNode.setAttribute("aria-disabled", true);
+				itemNode.classList.add("container");
+			}
+		}
 		itemNode.id = id;
 		let icon = Helpers.createNode("span", {}, "icon icon-css icon-item-type");
 		let dataTypeLabel = item.getItemTypeIconName(true);
 		icon.setAttribute("data-item-type", dataTypeLabel);
 
-		let title = Helpers.createNode("div", {}, "title");
+		let title = Helpers.createNode("div", { id: `title-${id}` }, "title");
 		let titleContent = Helpers.createNode("span", {}, "");
-		let description = Helpers.buildItemDescription(item);
+		let description = Helpers.buildItemDescription(item, { twoLines: isCitingNotes });
 		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), titleContent);
 		title.append(icon, titleContent);
 		itemNode.append(title, description);
@@ -849,6 +874,25 @@ class ListLayout extends Layout {
 		setTimeout(() => {
 			window.resizeTo(window.innerWidth, parseInt(autoHeight));
 		}, 10);
+	}
+
+	// Click on container parent item when inserting a note
+	// will expand/collapse its children.
+	handleClickOnContainerItem(targetItem) {
+		let child = targetItem.nextElementSibling;
+		while (child && child.classList.contains("child")) {
+			child.toggleAttribute("hidden");
+			child = child.nextElementSibling;
+		}
+		targetItem.classList.toggle("collapsed");
+
+		// resize the window if needed
+		let sectionContainer = targetItem.closest(".itemsContainer");
+		sectionContainer.style.removeProperty('height');
+		setTimeout(() => {
+			sectionContainer.style.height = `${sectionContainer.scrollHeight}px`;
+			listLayout.resizeWindow();
+		});
 	}
 
 	_markRoundedCorners() {
@@ -1106,6 +1150,12 @@ const IOManager = {
 			return;
 		}
 		IOManager._lastClickTime = (new Date()).getTime();
+
+		// Clicking on the container in list mode will expand/collapse its children
+		if (isCitingNotes && currentLayout.type == "list" && targetItem.classList.contains("container")) {
+			listLayout.handleClickOnContainerItem(targetItem);
+			return;
+		}
 
 		// Cmd/Ctrl + mouseclick toggles selected item node
 		if (multiselectable && (Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.ctrlKey)) {
