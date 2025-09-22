@@ -361,6 +361,7 @@
 				<html:div id="parent-value" class="value zotero-clicky" hidden="true"/>
 -->
 				<tags-box id="tags"/>
+				<libraries-collections-box id="libraries-collections"/>
 				<related-box id="related"/>
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
@@ -388,6 +389,12 @@
 			this._item = val;
 			this._id('related').item = this._item;
 			this._id('tags').item = this._item;
+			if (this._item.parentItem) {
+				this._id('libraries-collections').hidden = true;
+			}
+			else {
+				this._id('libraries-collections').item = this._item;
+			}
 
 			this.refresh();
 		}
