@@ -123,6 +123,9 @@
 	}
 
 	#library-layout {
+		#sidebar {
+			display: none;
+		}
 		#library-other-items {
 
 			height: 82px;
@@ -647,6 +650,28 @@
 	#library-layout {
 		.add-all {
 			display: none;
+		}
+		#sidebar {
+			display: block;
+			width: 200px;
+			border-inline-start: var(--material-panedivider);
+			background: var(--material-sidepane) !important;
+			#add-note-sidebar {
+				height: 100%;
+				#note-preview {
+					#links-container {
+						display: none;
+					}
+				}
+				#empty-note-preview-message {
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					text-align: center;
+					padding: 8px;
+					height: 100%;
+				}
+			}
 		}
 		// when adding a note, the item cards are slightly taller
 		#library-other-items {

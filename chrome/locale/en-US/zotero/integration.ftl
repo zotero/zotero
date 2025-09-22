@@ -87,6 +87,7 @@ integration-citationDialog-collapse-section =
     .title = Collapse section
 integration-citationDialog-bubble-empty = (no title)
 integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-insertNote-preview-msg = Select a note to see its preview
 
 integration-prefs-displayAs-label = Display Citations As:
 integration-prefs-footnotes =

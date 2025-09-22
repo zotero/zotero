@@ -63,6 +63,7 @@ async function onLoad() {
 
 	if (isCitingNotes) {
 		document.documentElement.setAttribute("dialog-type", "note");
+		_id("note-preview").mode = "merge"; // hides the toolbar
 	}
 
 	Zotero.debug("Citation Dialog: initializing");
@@ -575,6 +576,19 @@ class LibraryLayout extends Layout {
 			columnPicker: true,
 			onSelectionChange: () => {
 				libraryLayout.updateSelectedItems();
+				// Hide/display note preview pane when a note is selected
+				if (isCitingNotes) {
+					let selectedItem = libraryLayout.itemsView.getSelectedItems()[0];
+					if (selectedItem?.isNote()) {
+						_id("note-preview").item = selectedItem;
+						_id("note-preview").hidden = false;
+						_id("empty-note-preview-message").hidden = true;
+					}
+					else {
+						_id("note-preview").hidden = true;
+						_id("empty-note-preview-message").hidden = false;
+					}
+				}
 			},
 			regularOnly: !isCitingNotes,
 			multiSelect: !isCitingNotes,
