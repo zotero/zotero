@@ -27,6 +27,7 @@ const { noop, getDragTargetOrient } = require("components/utils");
 const PropTypes = require("prop-types");
 const React = require('react');
 const ReactDOM = require('react-dom');
+const cx = require('classnames');
 const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { VirtualizedTree, formatColumnName } = VirtualizedTable;
@@ -1445,8 +1446,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				renderItem: this._renderItem.bind(this),
 				hide: showMessage,
 				key: "virtualized-table",
+				className: cx([{ "regular-only": this.props.regularOnly }]),
 
 				showHeader: true,
+				alternateRowColors: true,
 				columns: this._getColumns(),
 				onColumnPickerMenu: this._displayColumnPickerMenu.bind(this),
 				onColumnSort: this.isSortable ? this._handleColumnSort : null,
