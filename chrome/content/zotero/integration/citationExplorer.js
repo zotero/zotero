@@ -155,6 +155,7 @@ window.ZoteroDocumentCitations = {
 					multiSelect={true}
 					getRowCount={() => this._renderedCitationRows.length}
 					showHeader={true}
+					alternateRowColors={true}
 					staticColumns={true}
 					columns={citationColumns}
 					renderItem={makeRowRenderer(index => this._renderedCitationRows[index])}

@@ -349,6 +349,7 @@ class VirtualizedTable extends React.Component {
 		linesPerRow: 1,
 
 		showHeader: false,
+		alternateRowColors: false,
 		// Array of column objects like the ones in itemTreeColumns.js
 		columns: [],
 		onColumnSort: noop,
@@ -356,7 +357,6 @@ class VirtualizedTable extends React.Component {
 		getColumnPrefs: () => ({}),
 		storeColumnPrefs: noop,
 		staticColumns: false,
-		alternatingRowColors: Zotero.isMac ? ['-moz-OddTreeRow', '-moz-EvenTreeRow'] : null,
 
 		// Render with display: none
 		hide: false,
@@ -397,11 +397,11 @@ class VirtualizedTable extends React.Component {
 		linesPerRow: PropTypes.number,
 		// Do not adjust for Zotero-defined font scaling
 		disableFontSizeScaling: PropTypes.bool,
-		// An array of two elements for alternating row colors
-		alternatingRowColors: PropTypes.array,
 		// For screen-readers
 		label: PropTypes.string,
 		role: PropTypes.string,
+		className: PropTypes.string,
+		alternateRowColors: PropTypes.bool,
 
 		showHeader: PropTypes.bool,
 		// Array of column objects like the ones in itemTreeColumns.js
@@ -1123,8 +1123,10 @@ class VirtualizedTable extends React.Component {
 		}
 		node.style.height = (index in this._customRowHeightMap ? this._customRowHeightMap[index] : this._rowHeight) + 'px';
 		node.id = this.props.id + "-row-" + index;
-		node.classList.toggle('odd', index % 2 == 1);
-		node.classList.toggle('even', index % 2 == 0);
+		if (this.props.alternateRowColors) {
+			node.classList.toggle('odd', index % 2 == 1);
+			node.classList.toggle('even', index % 2 == 0);
+		}
 		if (!node.hasAttribute('role')) {
 			node.setAttribute('role', 'row');
 		}
@@ -1225,9 +1227,11 @@ class VirtualizedTable extends React.Component {
 				// For selected items icon color, see scss mixin svgicon and focus-states
 				"focus-states-target",
 				{
-				resizing: this.state.resizing,
-				'multi-select': this.props.multiSelect
-			}]),
+					resizing: this.state.resizing,
+					'multi-select': this.props.multiSelect
+				},
+				this.props.className
+			]),
 			id: this.props.id,
 			ref: ref => this._topDiv = ref,
 			tabIndex: 0,

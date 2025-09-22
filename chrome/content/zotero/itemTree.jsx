@@ -27,6 +27,7 @@ const { noop, getDragTargetOrient } = require("components/utils");
 const PropTypes = require("prop-types");
 const React = require('react');
 const ReactDOM = require('react-dom');
+const cx = require('classnames');
 const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
@@ -1098,8 +1099,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 					renderItem: this._renderItem.bind(this),
 					hide: showMessage,
 					key: "virtualized-table",
+					className: cx([{ "regular-only": this.props.regularOnly }]),
 
 					showHeader: true,
+					alternateRowColors: true,
 					columns: this._getColumns(),
 					onColumnPickerMenu: this._displayColumnPickerMenu,
 					onColumnSort: this.collectionTreeRow.isFeedsOrFeed() ? null : this._handleColumnSort,
@@ -3133,24 +3136,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 			let twisty = "";
 			// No need to reserve space for a twisty if we're only displaying regular items.
-			if (!this.props.regularOnly) {
-				if (this.isContainerEmpty(index)) {
-					twisty = document.createElement('span');
-					twisty.classList.add("spacer-twisty");
+			if (this.isContainerEmpty(index)) {
+				twisty = document.createElement('span');
+				twisty.classList.add("spacer-twisty");
+			}
+			else {
+				twisty = getCSSIcon("twisty");
+				twisty.classList.add('twisty');
+				if (this.isContainerOpen(index)) {
+					twisty.classList.add('open');
 				}
-				else {
-					twisty = getCSSIcon("twisty");
-					twisty.classList.add('twisty');
-					if (this.isContainerOpen(index)) {
-						twisty.classList.add('open');
-					}
-					twisty.style.pointerEvents = 'auto';
-					twisty.addEventListener('mousedown', event => event.stopPropagation());
-					twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
-						{ passive: true });
-					twisty.addEventListener('dblclick', event => event.stopImmediatePropagation(),
-						{ passive: true });
-				}
+				twisty.style.pointerEvents = 'auto';
+				twisty.addEventListener('mousedown', event => event.stopPropagation());
+				twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
+					{ passive: true });
+				twisty.addEventListener('dblclick', event => event.stopImmediatePropagation(),
+					{ passive: true });
 			}
 
 			const icon = this._getIcon(index);

@@ -3,7 +3,6 @@
 
 	dialog {
 		max-height: 100vh;
-		padding: 0 0 .3em;
 		background: var(--material-sidepane);
 	}
 
@@ -16,6 +15,7 @@
 		grid-template-columns: 4fr 6fr;
 		grid-template-rows: auto auto minmax(0, 1fr) auto;
 		height: 100%;
+		margin: -16px;
 		
 		.citation-explorer-grid-left {
 			border-right: solid 1px ThreeDShadow;
@@ -34,12 +34,9 @@
 		display: flex;
 	}
 	
-	.searchbox-container {
-		border-bottom: 1px solid ThreeDShadow;
-	}
-
 	.virtualized-table-container {
 		height: 100%;
+		border-block: 1px solid ThreeDShadow;
 	}
 
 	.virtualized-table:focus-within .row.highlighted:not(.selected) {
@@ -47,16 +44,44 @@
 	}
 
 	.button-container {
-		border-block: 1px solid ThreeDShadow;
+		border-bottom: 1px solid ThreeDShadow;
 		display: flex;
 	}
 	
 	@media (-moz-platform: macos) {
-		tab[visuallyselected="true"]:not(:-moz-window-inactive) {
-			color: initial !important;
+		.tabbox-container, #citations-label {
+			padding-top: 16px !important;
 		}
-		#citations-label {
-			font-size: 1.2em;
+
+		.button-container {
+			padding-bottom: 0px;
+			margin-bottom: -16px;
+		}
+		
+		tabbox {
+			flex: 1;
+			flex-direction: row;
+			
+			tabs {
+				flex: 1;
+				margin-bottom: 0;
+				
+				tab {
+					flex: 1;
+
+					&[visuallyselected="true"]:not(:-moz-window-inactive) {
+						color: initial !important;
+					}
+					label.tab-text {
+						flex-direction: column;
+						align-items: center;
+					}
+				}
+				
+				spacer.tabs-right {
+					flex: 0;
+				}
+			}
 		}
 	}
 
