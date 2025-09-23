@@ -64,6 +64,13 @@ async function onLoad() {
 	if (isCitingNotes) {
 		document.documentElement.setAttribute("dialog-type", "note");
 		_id("note-preview").mode = "merge"; // hides the toolbar
+		// insert a <style> node with a tweak to decrease padding around note preview
+		let iframeDoc = _id("editor-view").contentDocument;
+		if (iframeDoc) {
+			let style = iframeDoc.createElement('style');
+			style.textContent = `.primary-editor { padding: 12px !important; }`;
+			iframeDoc.head.appendChild(style);
+		}
 	}
 
 	Zotero.debug("Citation Dialog: initializing");
