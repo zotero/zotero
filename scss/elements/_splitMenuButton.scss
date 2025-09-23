@@ -48,4 +48,8 @@
 		fill: currentColor;
 		-moz-context-properties: fill,fill-opacity;
 	}
+
+	@media (-moz-platform: windows) {
+		padding-right: 6px;
+	}
 }
