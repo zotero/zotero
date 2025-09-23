@@ -9,13 +9,14 @@
 	search-textbox, input, button {
 		margin: 0;
 	}
+
 	
 	.citation-explorer-grid {
 		display: grid;
 		grid-template-columns: 4fr 6fr;
 		grid-template-rows: auto auto minmax(0, 1fr) auto;
 		height: 100%;
-		margin: -16px;
+		margin: -8px;
 		
 		.citation-explorer-grid-left {
 			border-right: solid 1px ThreeDShadow;
@@ -24,6 +25,10 @@
 		.grid-padded-section {
 			padding: 8px 16px;
 		}
+	}
+
+	.tabbox-container, #citations-label {
+		padding-top: 16px !important;
 	}
 
 	#citations-label {
@@ -49,8 +54,8 @@
 	}
 	
 	@media (-moz-platform: macos) {
-		.tabbox-container, #citations-label {
-			padding-top: 16px !important;
+		.citation-explorer-grid {
+			margin: -16px;
 		}
 
 		.button-container {
@@ -86,12 +91,11 @@
 	}
 
 	@media (-moz-platform: windows) {
-		tab:focus-visible > .tab-middle {
-			outline: none;
-		}
-
-		input[type="button"], button {
-			margin-top: 7px;
+		tabbox tabs {
+			border-bottom: none;
+			tab {
+				margin-bottom: 0;
+			}
 		}
 	}
 }
