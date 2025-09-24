@@ -1,7 +1,7 @@
 .split-menu-button {
 	display: flex;
 	align-items: center;
-	padding-right: 0;
+	padding-right: 6px;
 	gap: 6px;
 	flex-grow: 1;
 
@@ -49,7 +49,7 @@
 		-moz-context-properties: fill,fill-opacity;
 	}
 
-	@media (-moz-platform: windows) {
-		padding-right: 6px;
+	@media (-moz-platform: mac) {
+		padding-right: 0;
 	}
 }
