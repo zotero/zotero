@@ -2747,20 +2747,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 					moreItems.push(columnMenuitemElements[column.dataKey]);
 				}
 			}
+			
+			if (moreItems.length) {
+				// Sort fields and move to submenu
+				var collation = Zotero.getLocaleCollation();
+				moreItems.sort(function (a, b) {
+					return collation.compareString(1, a.getAttribute('label'), b.getAttribute('label'));
+				});
+				moreItems.forEach(function (elem) {
+					moreMenuPopup.appendChild(menupopup.removeChild(elem));
+				});
 
-			// Sort fields and move to submenu
-			var collation = Zotero.getLocaleCollation();
-			moreItems.sort(function (a, b) {
-				return collation.compareString(1, a.getAttribute('label'), b.getAttribute('label'));
-			});
-			moreItems.forEach(function (elem) {
-				moreMenuPopup.appendChild(menupopup.removeChild(elem));
-			});
-
-			let sep = document.createXULElement('menuseparator');
-			menupopup.appendChild(sep);
-			moreMenu.appendChild(moreMenuPopup);
-			menupopup.appendChild(moreMenu);
+				let sep = document.createXULElement('menuseparator');
+				menupopup.appendChild(sep);
+				moreMenu.appendChild(moreMenuPopup);
+				menupopup.appendChild(moreMenu);
+			}
 		}
 		catch (e) {
 			Zotero.logError(e);

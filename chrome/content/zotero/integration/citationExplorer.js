@@ -163,6 +163,8 @@ window.ZoteroDocumentCitations = {
 					onSelectionChange={this.onCitationSelectionChange.bind(this)}
 					getRowString={index => this._renderedCitationRows[index].title}
 				/>);
+				// Remove focus from itemList if focus is on citationList
+				// to prevent highlighting in both lists
 				domElem.addEventListener("focusin", (event) => {
 					itemList?.selection.clearSelection()
 				});
@@ -191,9 +193,12 @@ window.ZoteroDocumentCitations = {
 				firstColumnExtraWidth: 28-16,
 			});
 			await itemList.waitForLoad();
+			// Remove focus from citationList if focus is on itemList
+			// to prevent highlighting in both lists
 			domElem.addEventListener("focusin", (event) => {
 				citationList?.selection.clearSelection()
 			});
+			document.querySelector("item-tree-menu-bar").init(itemList);
 		}
 		await itemList.changeCollectionTreeRow({
 			getItems: async () => filteredItems,
