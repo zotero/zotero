@@ -205,6 +205,7 @@ function modeSpecificInit() {
 	else if (isCitingNotes) {
 		dialogType = "note";
 	}
+	document.documentElement.setAttribute("dialog-type", dialogType);
 	let modeSpecificComponents = doc.querySelectorAll(`[data-dialog-type]`);
 	for (let component of modeSpecificComponents) {
 		let shouldBeVisible = component.getAttribute("data-dialog-type").includes(dialogType);
@@ -222,7 +223,7 @@ function modeSpecificInit() {
 	}
 
 	// hide the settings button if there are no settings to show
-	let visibleSettings = !!_id("settings-popup").querySelector("div:not([hidden]) input:not([disabled])");
+	let visibleSettings = !!_id("settings-popup").querySelector(".popup div:not([hidden]) input:not([disabled])");
 	_id("settings-button").hidden = !visibleSettings;
 }
 
@@ -462,7 +463,6 @@ class LibraryLayout extends Layout {
 		itemNode.append(title, description);
 
 		if (isAddingAnnotations) {
-			itemNode.classList.add("tall");
 			if (item.isAnnotation()) {
 				let attachment = Zotero.Items.get(item.parentItemID);
 				let topLevelItem = attachment.parentItemID ? Zotero.Items.get(attachment.parentItemID) : attachment;

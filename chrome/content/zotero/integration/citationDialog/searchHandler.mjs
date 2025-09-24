@@ -152,9 +152,6 @@ export class CitationDialogSearchHandler {
 		this.results.open = this.searchValue ? this._filterNonMatchingItems(this.openItems) : this.openItems;
 		this.results.selected = this.searchValue ? this._filterNonMatchingItems(this.selectedItems) : this.selectedItems;
 		if (this.isAddingAnnotations) {
-			// filter out items that have no annotations
-			this.results.open = this.keepItemsWithAnnotations(this.results.open);
-			this.results.selected = this.keepItemsWithAnnotations(this.results.selected);
 			// separate selected annotations into its own group which appears in a separate deck
 			this.results.selectedItems = this.results.selected.filter(item => !item.isAnnotation());
 			this.results.selectedAnnotations = this.results.selected.filter(item => item.isAnnotation());
@@ -346,6 +343,7 @@ export class CitationDialogSearchHandler {
 		}
 		if (this.isAddingAnnotations) {
 			await this._ensureRelevantItemsAreLoaded(items);
+			items = this.keepItemsWithAnnotations(items);
 		}
 		// Return deduplicated items since there may be multiple tabs opened for the same
 		// top-level item (duplicate tabs or a multiple attachments belonging to the same item)
@@ -358,7 +356,7 @@ export class CitationDialogSearchHandler {
 			return selected.filter(i => i.isNote());
 		}
 		if (this.isAddingAnnotations) {
-			return selected.filter(i => i.isAnnotation() || i.isRegularItem());
+			return this.keepItemsWithAnnotations(selected);
 		}
 		return selected.filter(i => i.isRegularItem());
 	}

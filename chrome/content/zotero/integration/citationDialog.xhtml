@@ -85,17 +85,19 @@
 				<div id="item-tree-container" class="hbox virtualized-table-container">
 					<div id="zotero-items-tree" data-tabindex="60" style="--highlight-color: var(--accent-blue30);"/>
 				</div>
-				<div id="annotations-sidebar" class="vbox" hidden="true">
-					<!-- Uses styling from _search.scss -->
-					<div id="annotations-sidebar-filter-wrapper" class="search" hidden="true">
-						<input id="annotations-sidebar-filter" data-l10n-id="integration-citationDialog-annotations-filter" data-tabindex="70" tabindex="-1"/>
-						<div id="annotations-filter-cancel-btn" class="search-cancel-button" hidden="true"/>
-					</div>
-					<div id="annotations-list-wrapper" hidden="true">
-						<xul:annotation-items-pane id="annotations-list" data-tabindex="71"  data-arrow-nav="vertical"/>
-					</div>
-					<div id="annotations-message">
-						<span id="annotations-message-text" data-l10n-id="integration-citationDialog-annotations-empty"/>
+				<div id="sidebar" class="vbox">
+					<div id="annotations-sidebar" class="vbox" hidden="true">
+						<!-- Uses styling from _search.scss -->
+						<div id="annotations-sidebar-filter-wrapper" class="search" hidden="true">
+							<input id="annotations-sidebar-filter" data-l10n-id="integration-citationDialog-annotations-filter" data-tabindex="70" tabindex="-1"/>
+							<div id="annotations-filter-cancel-btn" class="search-cancel-button" hidden="true"/>
+						</div>
+						<div id="annotations-list-wrapper" hidden="true">
+							<xul:annotation-items-pane id="annotations-list" data-tabindex="71"  data-arrow-nav="vertical"/>
+						</div>
+						<div id="annotations-message">
+							<span id="annotations-message-text" data-l10n-id="integration-citationDialog-annotations-empty"/>
+						</div>
 					</div>
 				</div>
 			</div>

@@ -123,13 +123,12 @@
 	}
 
 	#library-layout {
+		#sidebar {
+			display: none;
+		}
 		#library-other-items {
 			// constant height is so the message can appear/disappear without shifting the layout
 			height: 82px;
-			&.tall {
-				// to accomodate taller annotation item cards
-				height: 98px;
-			}
 			flex-shrink: 0; // make sure suggested items do not get shrunk when window is resized
 
 			--item-width: 210px;
@@ -217,25 +216,10 @@
 							-moz-window-dragging: no-drag;
 			
 							.title {
+								font-size: 1rem;
 								overflow: hidden;
 								text-overflow: ellipsis;
 
-								&.annotation-quote {
-									width: min-content;
-									max-width: 100%;
-									position: relative;
-									.title-text {
-										padding-inline-end: 6px;
-										&::before {
-											content: attr(q-mark-open);
-										}
-									}
-									&::after {
-										content: attr(q-mark-close);
-										position: absolute;
-										right: 0px;
-									}
-								}
 							}
 			
 							.description {
@@ -252,10 +236,6 @@
 							&.cited-placeholder {
 								border: 1px solid transparent;
 								padding: 0;
-							}
-							&.tall {
-								// annotation item cards are taller
-								height: 58px;
 							}
 						}
 					}
@@ -369,14 +349,6 @@
 				min-height: 100%;
 				flex: 1; /* expand all the way to the right */
 
-				// push +/- icon to the end of the row, since annotations
-				// rows are rendered disregarding the layout of columns
-				.annotation-row {
-					.clickable {
-						margin-inline-start: auto;
-					}
-				}
-
 				// the column with the + button
 				.clickable {
 					// make sure the button is centered
@@ -430,48 +402,6 @@
 				.row.last-highlighted {
 					border-bottom-left-radius: 5px;
 					border-bottom-right-radius: 5px;
-				}
-			}
-
-			#annotations-sidebar {
-				border-inline-start: var(--material-panedivider);
-				width: 300px;
-				background: var(--material-sidepane);
-			}
-		}
-
-		#annotations-sidebar {
-			#annotations-sidebar-filter-wrapper {
-				display: flex;
-				margin: 8px;
-				height: auto; // override height set by .search class
-
-				#annotations-sidebar-filter {
-					width: 100%;
-					border-radius: 5px;
-					border: 1px solid var(--fill-quarternary);
-					padding: 2px 3px;
-					margin: 0;
-				}
-			}
-
-			#annotations-list-wrapper {
-				overflow-y: auto;
-
-				// undo top padding of the first section
-				collapsible-section:first-of-type {
-					padding-top: 0;
-				}
-			}
-
-			#annotations-message {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				height: 100%;
-				margin-inline: 8px;
-				#annotations-message-text {
-					text-align: center;
 				}
 			}
 		}
@@ -552,6 +482,7 @@
   						text-overflow: ellipsis;
 					}
 					.title {
+						font-size: 1rem;
 						overflow: hidden;
 						text-wrap: nowrap;
 						text-overflow: ellipsis;
@@ -770,6 +701,91 @@
 			justify-content: center;
 			#z-icon {
 				margin: 0 !important;
+			}
+		}
+	}
+}
+
+#citation-dialog[dialog-type="annotations"] {
+	#library-layout {
+		#sidebar {
+			display: block;
+			width: 300px;
+			border-inline-start: var(--material-panedivider);
+			background: var(--material-sidepane);
+			
+			#annotations-sidebar {
+				height: 100%;
+				#annotations-sidebar-filter-wrapper {
+					display: flex;
+					margin: 8px;
+					height: auto; // override height set by .search class
+
+					#annotations-sidebar-filter {
+						width: 100%;
+						border-radius: 5px;
+						border: 1px solid var(--fill-quarternary);
+						padding: 2px 3px;
+						margin: 0;
+					}
+				}
+
+				#annotations-list-wrapper {
+					overflow-y: auto;
+
+					// undo top padding of the first section
+					collapsible-section:first-of-type {
+						padding-top: 0;
+					}
+				}
+
+				#annotations-message {
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					height: 100%;
+					margin-inline: 8px;
+					#annotations-message-text {
+						text-align: center;
+					}
+				}
+			}
+		}
+		#library-other-items {
+			height: 98px;
+			.search-items {
+				.item {
+					height: 58px !important;
+					.title {
+						&.annotation-quote {
+							width: min-content;
+							max-width: 100%;
+							position: relative;
+							.title-text {
+								padding-inline-end: 6px;
+								&::before {
+									content: attr(q-mark-open);
+								}
+							}
+							&::after {
+								content: attr(q-mark-close);
+								position: absolute;
+								right: 0px;
+							}
+						}
+					}
+				}
+			}
+		}
+		#library-trees {
+			#item-tree-container {
+				// push +/- icon to the end of the row, since annotations
+				// rows are rendered disregarding the layout of columns
+				.row.annotation-row {
+					.clickable {
+						margin-inline-start: auto;
+					}
+				}
 			}
 		}
 	}
