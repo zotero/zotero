@@ -163,10 +163,8 @@ window.ZoteroDocumentCitations = {
 					onSelectionChange={this.onCitationSelectionChange.bind(this)}
 					getRowString={index => this._renderedCitationRows[index].title}
 				/>);
-				domElem.addEventListener("focusout", (event) => {
-					if (event.relatedTarget && !event.relatedTarget.closest("#citation-list-container")) {
-						citationList?.selection.clearSelection()
-					}
+				domElem.addEventListener("focusin", (event) => {
+					itemList?.selection.clearSelection()
 				});
 			});
 		}
@@ -193,10 +191,8 @@ window.ZoteroDocumentCitations = {
 				firstColumnExtraWidth: 28-16,
 			});
 			await itemList.waitForLoad();
-			domElem.addEventListener("focusout", (event) => {
-				if (event.relatedTarget && !event.relatedTarget.closest("#item-list-container")) {
-					itemList?.selection.clearSelection()
-				}
+			domElem.addEventListener("focusin", (event) => {
+				citationList?.selection.clearSelection()
 			});
 		}
 		await itemList.changeCollectionTreeRow({
