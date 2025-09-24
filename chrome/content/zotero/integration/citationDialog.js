@@ -61,18 +61,6 @@ async function onLoad() {
 	isCitingNotes = !!io.isCitingNotes;
 	window.isPristine = true;
 
-	if (isCitingNotes) {
-		document.documentElement.setAttribute("dialog-type", "note");
-		_id("note-preview").mode = "merge"; // hides the toolbar
-		// insert a <style> node with a tweak to decrease padding around note preview
-		let iframeDoc = _id("editor-view").contentDocument;
-		if (iframeDoc) {
-			let style = iframeDoc.createElement('style');
-			style.textContent = `.primary-editor { padding: 12px !important; }`;
-			iframeDoc.head.appendChild(style);
-		}
-	}
-
 	Zotero.debug("Citation Dialog: initializing");
 	let timer = new Zotero.Integration.Timer();
 	timer.start();
@@ -130,10 +118,22 @@ async function onLoad() {
 		}
 	});
 
-	// Disabled all multiselect when citing notes
+	// Initialize note-specific behavior and styling
 	if (isCitingNotes) {
+		// Disabled all multiselect when citing notes
 		for (let multiselectable of [...doc.querySelectorAll("[data-multiselectable]")]) {
 			delete multiselectable.dataset.multiselectable;
+		}
+		document.documentElement.setAttribute("dialog-type", "note");
+		_id("note-preview").mode = "merge"; // hides the toolbar
+		// insert a <style> node with a few style tweaks only appropriate for the citation dialog
+		let iframeDoc = _id("editor-view").contentDocument;
+		if (iframeDoc) {
+			let style = iframeDoc.createElement('style');
+			// smaller padding, no hover on citations, and use default smaller font size
+			let defaultFontSize = parseInt(getComputedStyle(document.documentElement).fontSize);
+			style.textContent = `.primary-editor { padding: 12px !important; --font-size: ${defaultFontSize}px; } .citation:hover { background-color: transparent !important; }`;
+			iframeDoc.head.appendChild(style);
 		}
 	}
 	loaded = true;

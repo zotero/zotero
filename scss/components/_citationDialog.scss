@@ -706,6 +706,11 @@
 					&.collapsed .title::before {
 						transform: rotate(270deg);
 					}
+					// push description a bit more to the right so that it
+					// aligns with title after twisty is added
+					.description {
+						margin-inline-start: 32px;
+					}
 				}
 				&:not(.container) {
 					padding-inline: 20px;
