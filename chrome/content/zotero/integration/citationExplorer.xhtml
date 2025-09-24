@@ -54,8 +54,24 @@
 	</script>
 	<div class="citation-explorer-grid">
 	
+		<!-- Left Column -->
 		<div class="citation-explorer-grid-left grid-padded-section" id="citations-label">Citations</div>
 
+		<div class="searchbox-container citation-explorer-grid-left grid-padded-section">
+			<xul:search-textbox id="citation-search" placeholder="Citation Content" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onCitationFilter()" dir="reverse"/>
+		</div>
+	
+		<div class="virtualized-table-container citation-explorer-grid-left">
+			<div id="citation-list-container"></div>
+		</div>
+
+		<div class="button-container citation-explorer-grid-left grid-padded-section">
+			<input type="button" id="button-show-in-document" value="Show in Document"/>
+			<div class="spacer"></div>
+			<input type="button" id="button-edit-citation" value="Edit Citation"/>
+		</div>
+
+		<!-- Right Column -->
 		<div class="tabbox-container grid-padded-section">
 			<xul:tabbox onselect="ZoteroDocumentCitations.onSelectTab(this.selectedIndex)">
 				<xul:tabs>
@@ -67,28 +83,14 @@
 			</xul:tabbox>
 		</div>
 
-		<div class="searchbox-container citation-explorer-grid-left grid-padded-section">
-			<xul:search-textbox id="citation-search" placeholder="Citation Content" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onCitationFilter()" dir="reverse"/>
-		</div>
-
 		<div class="searchbox-container grid-padded-section">
 			<xul:search-textbox id="item-search" placeholder="Title, Creator, Year" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onItemFilter()" dir="reverse"/>
-		</div>
-		
-		<div class="virtualized-table-container citation-explorer-grid-left">
-			<div id="citation-list-container"></div>
 		</div>
 		
 		<div class="virtualized-table-container">
 			<div id="item-list-container"></div>
 		</div>
 
-		<div class="button-container citation-explorer-grid-left grid-padded-section">
-			<input type="button" id="button-show-in-document" value="Show in Document"/>
-			<div class="spacer"></div>
-			<input type="button" id="button-edit-citation" value="Edit Citation"/>
-		</div>
-		
 		<div class="button-container grid-padded-section">
 			<input type="button" id="button-show-in-zotero" value="Show in Zotero"/>
 			<div class="spacer"></div>
