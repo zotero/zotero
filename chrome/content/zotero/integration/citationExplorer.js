@@ -318,7 +318,9 @@ window.ZoteroDocumentCitations = {
 				return;
 			}
 		}
-		catch (e) { }
+		catch (e) {
+			Zotero.logError(e);
+		}
 		// An error got thrown or wrong citation got activated, which means that some citations got deleted
 		// and now the citation explorer dialog is not showing correct citations and citation
 		// activation is not going to work right.
