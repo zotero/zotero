@@ -15,6 +15,7 @@
 		display: grid;
 		grid-template-columns: 4fr 6fr;
 		grid-template-rows: auto auto minmax(0, 1fr) auto;
+		grid-auto-flow: column;
 		height: 100%;
 		margin: -8px;
 		
