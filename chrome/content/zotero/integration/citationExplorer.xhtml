@@ -42,9 +42,20 @@
 	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY width height"
 	resizable="true">
+
+<!-- do not wait for itemTree to add the menubar, otherwise it does not appear on the first dialog open -->
+<xul:item-tree-menu-bar/>
+
 <xul:dialog
 	buttons="accept" buttonpack="end">
 
+	<linkset>
+		<link rel="localization" href="browser/menubar.ftl"/>
+		<link rel="localization" href="browser/browserSets.ftl"/>
+		<link rel="localization" href="zotero.ftl"/>
+		<link rel="localization" href="reader.ftl"/>
+	</linkset>
+	
 	<script>
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
@@ -52,6 +63,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/integration/citationExplorer.js", this);
 
 	</script>
+	
 	<div class="citation-explorer-grid">
 	
 		<!-- Left Column -->
