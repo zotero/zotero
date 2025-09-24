@@ -69,7 +69,7 @@ const citationColumns = [
 	},
 ];
 
-let itemColumns = getColumnDefinitionsByDataKey(['title', 'firstCreator', 'date']);
+let itemColumns = getColumnDefinitionsByDataKey(['title', 'firstCreator', 'year']);
 itemColumns.push({
 	dataKey: 'isLinked',
 	label: 'Is Linked',
