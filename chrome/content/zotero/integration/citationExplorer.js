@@ -147,7 +147,7 @@ window.ZoteroDocumentCitations = {
 			await new Promise((resolve) => {
 				const domElem = document.querySelector('#citation-list-container');
 				ReactDOM.createRoot(domElem).render(<VirtualizedTable
-					id="citation-list"
+					id="citation-explorer-citations"
 					ref={(ref) => {
 						citationList = ref;
 						resolve();
@@ -181,9 +181,9 @@ window.ZoteroDocumentCitations = {
 
 		let filteredItems = rows.filter(item => !this._filteredItems.has(item.id));
 		if (!itemList) {
-			let domElem = document.querySelector('#item-list-container');
+			let domElem = document.querySelector('#zotero-items-tree');
 			itemList = await ItemTree.init(domElem, {
-				id: "document-collections",
+				id: "citation-explorer-items",
 				regularOnly: true,
 				columns: itemColumns,
 				shouldListenForNotifications: false,
@@ -293,8 +293,8 @@ window.ZoteroDocumentCitations = {
 					let d = diff(citation.properties.plainCitation, title);
 					title = d.map(([type, text]) => {
 						if (type == 0) return text;
-						if (type == -1) return `<span style="color: red; text-decoration: line-through">${text}</span>`;
-						if (type == 1) return `<span style="color: green">${text}</span>`;
+						if (type == -1) return `<span class="diff-deleted">${text}</span>`;
+						if (type == 1) return `<span class="diff-added">${text}</span>`;
 					}).join('');
 				}
 				return {
