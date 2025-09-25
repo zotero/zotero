@@ -31,11 +31,13 @@ const MIN_QUERY_LENGTH = 2;
 // as the following object: { found: [], cited: [], open: [], selected: []}.
 // Can be refreshed via SearchHandler.refresh or refreshDebounced.
 export class CitationDialogSearchHandler {
-	constructor({ isCitingNotes, io }) {
+	constructor({ isCitingNotes, io, doc }) {
 		this.isCitingNotes = isCitingNotes;
 		this.io = io;
+		this.doc = doc;
 
 		this.searchValue = "";
+		this.dialogMode = ""; // "library" or "list"
 		this.results = {
 			found: [],
 			open: [],
@@ -87,13 +89,17 @@ export class CitationDialogSearchHandler {
 	// by the number of results in each library.
 	// Items/notes in the libraries group are sorted via _createItemsSort/_createNotesSort comparators.
 	// Takes citedItems as a parameter to filter them out from Selected, Opened and Cited groups.
-	getOrderedSearchResultGroups(layoutType, citedItemIDs = new Set()) {
+	async getOrderedSearchResultGroups(citedItemIDs = new Set()) {
 		let removeItemsIncludedInCitation = (items) => {
 			return items.filter(i => !citedItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 		};
 		let result = [];
+		let groupKeys = ["selected", "open", "cited"];
+		if (this.isCitingNotes && this.dialogMode == "library") {
+			groupKeys = ["selectedNotes", "selectedItems", "open", "cited"];
+		}
 		// selected/open/cited go first
-		for (let groupKey of ["selected", "open", "cited"]) {
+		for (let groupKey of groupKeys) {
 			let groupItems = this.results[groupKey];
 			// in selected and opened items, do not display items already in the citation
 			if (groupKey == "selected" || groupKey == "open") {
@@ -112,7 +118,7 @@ export class CitationDialogSearchHandler {
 		// library items go after
 		let libraryItems = Object.values(this.results.found.reduce((acc, item) => {
 			if (!acc[item.libraryID]) {
-				acc[item.libraryID] = { key: item.libraryID, group: [], isLibrary: true };
+				acc[item.libraryID] = { key: item.libraryID, group: [], label: Zotero.Libraries.get(item.libraryID).name };
 			}
 			acc[item.libraryID].group.push(item);
 			return acc;
@@ -123,18 +129,21 @@ export class CitationDialogSearchHandler {
 		libraryItems.sort((a, b) => b.group.length - a.group.length);
 		result.push(...libraryItems);
 
-		// When citing notes, include parent items into the array of results
-		// which will appear in the dialog for additional context
-		if (this.isCitingNotes && layoutType === "list") {
-			for (let section of result) {
+		// post processing of groups
+		for (let section of result) {
+			// in list mode of insertNote, include parent items of child notes
+			if (this.isCitingNotes && this.dialogMode === "list") {
 				section.group = this._groupNotesWithParents(section.group);
 			}
-			return result;
+			// otherwise, just sort the items in each library
+			else {
+				section.group.sort(this._createItemsSort());
+			}
+			// fetch the label for open/selected/cited items
+			if (!section.label) {
+				section.label = await this._getSectionLabel(section.key, section.group);
+			}
 		}
-		// Otherwise, just sort the items in each library
-		libraryItems.forEach((library) => {
-			library.group.sort(this._createItemsSort());
-		});
 
 		return result;
 	}
@@ -154,6 +163,11 @@ export class CitationDialogSearchHandler {
 		// apply filtering to item groups
 		this.results.open = this.searchValue ? this._filterNonMatchingItems(this.openItems) : this.openItems;
 		this.results.selected = this.searchValue ? this._filterNonMatchingItems(this.selectedItems) : this.selectedItems;
+		// when notes are being cited, in lib mode selected items are separated into top-level items and notes
+		if (this.isCitingNotes) {
+			this.results.selectedItems = this.results.selected.filter(item => !item.isNote());
+			this.results.selectedNotes = this.results.selected.filter(item => item.isNote());
+		}
 		// if a specific library ID is specified, only keep items from that library
 		if (this.io.filterLibraryIDs) {
 			this.results.open = this.results.open.filter(item => this.io.filterLibraryIDs.includes(item.libraryID));
@@ -222,6 +236,14 @@ export class CitationDialogSearchHandler {
 		return str;
 	}
 
+	keepItemsWithNotes(items) {
+		return items.filter((item) => {
+			if (item.isNote()) return true;
+			if (item.isRegularItem()) return item.getNotes().length > 0;
+			return false;
+		});
+	}
+
 	// make sure that each item appears only in one group.
 	// Items that are selected are removed from opened.
 	// Items that are selected or opened are removed from cited.
@@ -284,7 +306,6 @@ export class CitationDialogSearchHandler {
 	}
 
 	async _getReaderOpenItems() {
-		if (this.isCitingNotes) return [];
 		let win = Zotero.getMainWindow();
 		let tabs = win.Zotero_Tabs.getState();
 		let itemIDs = tabs.filter(t => t.type === 'reader').sort((a, b) => {
@@ -309,41 +330,58 @@ export class CitationDialogSearchHandler {
 			items.push(item);
 		}
 		await Zotero.Items.loadDataTypes(items);
+		if (this.isCitingNotes) {
+			items = this.keepItemsWithNotes(items);
+			// include notes of the opened items so that filtering
+			// within open items section applies to them as well
+			if (this.dialogMode === "list") {
+				items = this._groupNotesWithParents(items);
+			}
+			return items;
+		}
 		// Return deduplicated items since there may be multiple tabs opened for the same
 		// top-level item (duplicate tabs or a multiple attachments belonging to the same item)
 		return [...new Set(items)];
 	}
 
 	_getSelectedLibraryItems() {
+		let selectedItems = Zotero.getActiveZoteroPane()?.getSelectedItems() || [];
 		if (this.isCitingNotes) {
-			return Zotero.getActiveZoteroPane()?.getSelectedItems().filter(i => i.isNote()) || [];
+			let itemsWithNotes = this.keepItemsWithNotes(selectedItems);
+			// include notes of the selected items so that filtering
+			// within selected items section applies to them as well
+			if (this.dialogMode === "list") {
+				itemsWithNotes = this._groupNotesWithParents(itemsWithNotes);
+			}
+			return itemsWithNotes;
 		}
-		return Zotero.getActiveZoteroPane()?.getSelectedItems().filter(i => i.isRegularItem()) || [];
+		return selectedItems.filter(i => i.isRegularItem()) || [];
 	}
 	
 
 	_filterNonMatchingItems(items) {
 		let matchedItems = new Set();
 		let splits = Zotero.Fulltext.semanticSplitter(this.searchValue);
-		for (let item of items) {
-			// Generate a string to search for each item
-			let itemStr = item.getCreators()
+		let makeSearchString = (item) => {
+			return item.getCreators()
 				.map(creator => creator.firstName + " " + creator.lastName)
 				.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)])
 				.join(" ")
 				.toLowerCase();
+		};
+		
+		for (let item of items) {
+			// Generate a string to search for each item
+			let itemStr = makeSearchString(item);
 			
 			// Handle searching through selected notes
 			if (this.isCitingNotes) {
-				itemStr += ` ${item.getNote().toLowerCase()}`;
-				if (item.parentItemID) {
-					let parent = item.topLevelItem;
-					let parentStr = parent.getCreators()
-						.map(creator => creator.firstName + " " + creator.lastName)
-						.concat([parent.getField("title"), parent.getField("date", true, true).substr(0, 4)])
-						.join(" ")
-						.toLowerCase();
-					itemStr += ` ${parentStr}`;
+				if (item.isNote()) {
+					itemStr += ` ${item.getNote().toLowerCase()}`;
+					if (item.parentItemID) {
+						let parentStr = makeSearchString(item.topLevelItem);
+						itemStr += ` ${parentStr}`;
+					}
 				}
 			}
 			// Include items that match every word that was typed
@@ -450,6 +488,28 @@ export class CitationDialogSearchHandler {
 		return stringNoYear + " " + year;
 	}
 
+	async _getSectionLabel(key, items) {
+		let count = items.length || 0;
+		// in list mode of insertNote, only count top-level items since
+		// child items are nested under their parents
+		if (this.isCitingNotes && this.dialogMode === "list") {
+			count = items.filter(item => !item.parentItemID).length;
+		}
+		if (key == "selected") {
+			// when citing notes, we don't want to use the label
+			// that includes the total count because it is confusing
+			// in list mode when parents on selected notes also appear
+			if (this.isCitingNotes) {
+				return this.doc.l10n.formatValue(`integration-citationDialog-section-selectedItems`, { count });
+			}
+			// when not citing notes, add the total count param
+			else {
+				return this.doc.l10n.formatValue(`integration-citationDialog-section-selected`, { count, total: this.allSelectedItemsCount() });
+			}
+		}
+		return this.doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count });
+	}
+
 	// Given an array of note items, construct a new array with the notes'
 	// sorted parent items and all child notes following their respective parents.
 	// For example, given [noteA, noteB, noteC], returned array is
@@ -471,6 +531,12 @@ export class CitationDialogSearchHandler {
 		for (let topLevelItem of topLevelArray) {
 			result.push(topLevelItem);
 			let childNotes = topLevelItems[topLevelItem.id];
+			// if there is a parent item with no notes, add all of its child notes
+			// (e.g. for an opened item)
+			if (childNotes.length === 0 && topLevelItem.isRegularItem()) {
+				let noteIDs = topLevelItem.getNotes();
+				childNotes = Zotero.Items.get(noteIDs);
+			}
 			childNotes.sort(this._createNotesSort());
 			result.push(...childNotes);
 		}

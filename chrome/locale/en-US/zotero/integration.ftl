@@ -21,6 +21,8 @@ integration-editBibliography-wrapper =
 integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
+integration-citationDialog-section-selectedItems = Selected Items ({ $count })
+integration-citationDialog-section-selectedNotes = Selected Notes ({ $count })
 integration-citationDialog-section-cited = { $count ->
     [0] Cited Items
     *[other] Cited Items ({ $count })

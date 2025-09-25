@@ -66,7 +66,7 @@ async function onLoad() {
 	timer.start();
 
 	Helpers = new CitationDialogHelpers({ doc, io });
-	SearchHandler = new CitationDialogSearchHandler({ isCitingNotes, io });
+	SearchHandler = new CitationDialogSearchHandler({ isCitingNotes, io, doc });
 	PopupsHandler = new CitationDialogPopupsHandler({ doc });
 	KeyboardHandler = new CitationDialogKeyboardHandler({ doc });
 
@@ -220,25 +220,13 @@ class Layout {
 
 		// Tell SearchHandler which currently cited items are so they are not included in results
 		let citedIDs = CitationDataManager.getCitedLibraryItemIDs();
-		let searchResultGroups = SearchHandler.getOrderedSearchResultGroups(currentLayout.type, citedIDs);
-		for (let { key, group, isLibrary } of searchResultGroups) {
+		let searchResultGroups = await SearchHandler.getOrderedSearchResultGroups(citedIDs);
+		for (let { key, group, label } of searchResultGroups) {
 			// selected items become a collapsible deck/list if there are multiple items
 			let isGroupCollapsible = key == "selected" && group.length > 1;
 			
 			// Construct each section and items
-			let sectionHeader = "";
-			if (isLibrary) {
-				sectionHeader = Zotero.Libraries.get(key).name;
-			}
-			// special handling for selected items to display how many total selected items there are
-			else if (key == "selected") {
-				let count = isCitingNotes ? group.filter(item => item.isNote()).length : group.length;
-				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count, total: SearchHandler.allSelectedItemsCount() });
-			}
-			else {
-				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count: group.length });
-			}
-			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader, isGroupCollapsible, group.length, this.type);
+			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, label, isGroupCollapsible, group.length, this.type);
 			let itemContainer = section.querySelector(".itemsContainer");
 	
 			let items = [];
@@ -1007,6 +995,11 @@ const IOManager = {
 		_id("list-layout").hidden = newMode == "library";
 		_id("library-layout").hidden = newMode == "list";
 
+		SearchHandler.dialogMode = newMode;
+		// re-fetch selected/open items cache when dialog mode changes
+		// because of different treatment of selected items in insertNote
+		SearchHandler.clearNonLibraryItemsCache();
+
 		// Delete all item nodes from the old layout
 		for (let itemNode of [...doc.querySelectorAll(".item")]) {
 			itemNode.remove();
@@ -1176,6 +1169,16 @@ const IOManager = {
 		if (isCitingNotes && currentLayout.type == "list" && targetItem.classList.contains("container")) {
 			listLayout.handleClickOnContainerItem(targetItem);
 			return;
+		}
+		// Clicking on a regular item in library mode when inserting a note will select item's first note in the itemTree
+		if (isCitingNotes && currentLayout.type == "library") {
+			let parentItem = Zotero.Items.get(targetItem.getAttribute("itemID"));
+			if (parentItem.isRegularItem()) {
+				let notes = parentItem.getNotes();
+				libraryLayout.itemsView.selectItem(notes[0]);
+				_id("item-tree-citationDialog").focus();
+				return;
+			}
 		}
 
 		// Cmd/Ctrl + mouseclick toggles selected item node

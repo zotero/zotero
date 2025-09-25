@@ -647,10 +647,10 @@
 }
 
 #citation-dialog[dialog-type="note"] {
+	.add-all {
+		display: none !important;
+	}
 	#library-layout {
-		.add-all {
-			display: none;
-		}
 		#sidebar {
 			display: block;
 			width: 200px;

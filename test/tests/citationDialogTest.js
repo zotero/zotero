@@ -400,11 +400,6 @@ describe("Citation Dialog", function () {
 			libraryTwo = await createDataObject('item', { title: "two_library" });
 			citedOne = await createDataObject('item', { title: "one_cited" });
 			citedAndOpenOne = await createDataObject('item', { title: "one_open_cited" });
-
-			// Present these items are selected/open/cited
-			SearchHandler.selectedItems = [selectedOne, selectedTwo, selectedAndOpenOne];
-			SearchHandler.openItems = [openOne, openTwo, selectedAndOpenOne, citedAndOpenOne];
-			SearchHandler.citedItems = [citedOne, citedAndOpenOne];
 		});
 
 		after(function () {
@@ -419,6 +414,10 @@ describe("Citation Dialog", function () {
 			while (SearchHandler.searching) {
 				await Zotero.Promise.delay(10);
 			}
+			// Pretend these items are selected/open/cited
+			SearchHandler.selectedItems = [selectedOne, selectedTwo, selectedAndOpenOne];
+			SearchHandler.openItems = [openOne, openTwo, selectedAndOpenOne, citedAndOpenOne];
+			SearchHandler.citedItems = [citedOne, citedAndOpenOne];
 			// Search for "one"
 			await dialog.currentLayout.search("one", { skipDebounce: true });
 			// Selected items should have both "one_selected" and "one_selected_open"
@@ -450,6 +449,12 @@ describe("Citation Dialog", function () {
 			while (SearchHandler.searching) {
 				await Zotero.Promise.delay(10);
 			}
+
+			// Pretend these items are selected/open/cited
+			SearchHandler.selectedItems = [selectedOne, selectedTwo, selectedAndOpenOne];
+			SearchHandler.openItems = [openOne, openTwo, selectedAndOpenOne, citedAndOpenOne];
+			SearchHandler.citedItems = [citedOne, citedAndOpenOne];
+
 			// Search for "one"
 			await dialog.currentLayout.search("one", { skipDebounce: true });
 			// Selected items should have both "one_selected" and "one_selected_open"
