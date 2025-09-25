@@ -247,9 +247,10 @@ window.ZoteroDocumentCitations = {
 	},
 
 	_initMappings: async function () {
+		const itemMap = {};
 		itemRows = items.map((item) => {
 			let citedIn = [];
-			return new Proxy(item, {
+			let proxyItem = new Proxy(item, {
 				get(target, prop) {
 					if (prop == 'id' && !target.id) {
 						return target.cslItemID;
@@ -260,6 +261,8 @@ window.ZoteroDocumentCitations = {
 					return Reflect.get(...arguments);
 				}
 			});
+			itemMap[item.id || item.cslItemID] = proxyItem;
+			return proxyItem;
 		});
 		uncitedItemRows = uncitedItems.map((item) => {
 			return new Proxy(item, {
@@ -277,16 +280,8 @@ window.ZoteroDocumentCitations = {
 				let citedItems = [];
 				// check if all citation items are linked
 				for (let citationItem of citation.citationItems) {
-					itemRows.forEach((itemRow, itemIndex) => {
-						if ([itemRow.id, itemRow.cslItemID].includes(citationItem.id)) {
-							citedItems.push(itemIndex);
-							itemRow.citedIn.push(citationIndex);
-						}
-					});
-					if (typeof citationItem.id != 'number') {
-						isLinked = false;
-						break;
-					}
+					itemMap[citationItem.id].citedIn.push(citationIndex);
+					isLinked = typeof citationItem.id == 'number';
 				}
 				let title = await citation.field.getText();
 				if (citation.properties.plainCitation != title) {
