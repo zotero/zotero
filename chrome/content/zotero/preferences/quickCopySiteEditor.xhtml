@@ -38,7 +38,7 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	title=""
-	onload="Zotero_QuickCopySiteEditor.onLoad(); Zotero_Preferences.Export.updateQuickCopyUI(); sizeToContent()">
+	onload="Zotero_QuickCopySiteEditor.onLoad(); Zotero_Preferences.QuickCopy.updateQuickCopyUI(); sizeToContent()">
 <dialog 
 	buttons="cancel,accept"
 	id="zotero-quickCopySiteEditor">
@@ -60,13 +60,13 @@
 		
 		<label id="zotero-quickCopy-locale-menu-label" value="&zotero.preferences.quickCopy.siteEditor.locale;" control="zotero-quickCopy-locale-menu"/>
 		<hbox align="center">
-			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value" native="true"/>
+			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.QuickCopy._lastSelectedLocale = this.value" native="true"/>
 		</hbox>
 		
 		<separator class="thin"/>
 		
 		<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
-			oncommand="Zotero_Preferences.Export.buildQuickCopyFormatDropDown(
+			oncommand="Zotero_Preferences.QuickCopy.buildQuickCopyFormatDropDown(
 				document.getElementById('zotero-quickCopy-menu'),
 				this.checked ? 'html' : '',
 				null,
@@ -108,7 +108,7 @@
 				// Auto-select Wikipedia Citation Templates
 				if (event.target.value == 'wikipedia.org') {
 					menu.value = 'export=3f50aaac-7acc-4350-acd0-59cb77faf620';
-					Zotero_Preferences.Export.updateQuickCopyUI();
+					Zotero_Preferences.QuickCopy.updateQuickCopyUI();
 				}
 			};
 		}
@@ -116,7 +116,7 @@
 		var io = window.arguments[0];
 		var contentType = io.asHTML ? 'html' : '';
 		document.getElementById('zotero-quickCopy-domain').value = io.domain ? io.domain : '';
-		Zotero_Preferences.Export.buildQuickCopyFormatDropDown(
+		Zotero_Preferences.QuickCopy.buildQuickCopyFormatDropDown(
 			document.getElementById('zotero-quickCopy-menu'),
 			contentType,
 			io.format,
@@ -126,7 +126,7 @@
 			document.getElementById('zotero-quickCopy-locale-menu')
 		);
 		document.getElementById('zotero-quickCopy-copyAsHTML').checked = io.asHTML;
-		Zotero_Preferences.Export._lastSelectedLocale = io.locale;
+		Zotero_Preferences.QuickCopy._lastSelectedLocale = io.locale;
 	]]>
 	</script>
 </dialog>

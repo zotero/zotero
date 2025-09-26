@@ -45,6 +45,73 @@
 			</hbox>
 		</groupbox>
 		
+		<groupbox id="zotero-prefpane-export-groupbox" aria-label="&zotero.preferences.quickCopy.caption;" aria-describedby="quickCopy-instructions quickCopy-citationInstructions">
+			<vbox>
+				<label><html:h2>&zotero.preferences.quickCopy.caption;</html:h2></label>
+			</vbox>
+			
+			<label id="quickCopy-instructions"/>
+			<separator class="thin"/>
+			<label id="quickCopy-citationInstructions"/>
+			
+			<separator/>
+			
+			<label value="&zotero.preferences.quickCopy.itemFormat;" control="zotero-quickCopy-menu"/>
+			<menulist id="zotero-quickCopy-menu" label="&zotero.general.loading;" native="true"/>
+			
+			<hbox align="center">
+				<label id="zotero-quickCopy-locale-menu-label" value="&zotero.bibliography.locale.label;" control="zotero-quickCopy-locale-menu"/>
+				<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.QuickCopy._lastSelectedLocale = this.value" native="true"/>
+				
+				<separator orient="vertical" width="15px"/>
+				
+				<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
+					oncommand="Zotero_Preferences.QuickCopy.onCopyAsHTMLChange(this.checked)"
+					native="true"/>
+			</hbox>
+			
+			<separator/>
+			
+			<label value="&zotero.preferences.quickCopy.noteFormat;" control="zotero-noteQuickCopy-menu"/>
+			<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;" native="true"/>
+			<box id="noteQuickCopy-wrapper">
+				<vbox id="noteQuickCopy-format-options" hidden="true" align="center">
+					<hbox id="noteQuickCopy-markdown-options" align="center">
+						<label id="noteQuickCopy-markdown-includeAppLinks-label"></label>
+						<checkbox id="noteQuickCopy-markdown-includeAppLinks"
+							oncommand="Zotero_Preferences.QuickCopy.onUpdateNoteExportOptions()"
+							native="true" aria-describedby="noteQuickCopy-markdown-includeAppLinks-label"/>
+					</hbox>
+					<hbox id="noteQuickCopy-html-options" align="center">
+						<label id="noteQuickCopy-html-includeAppLinks-label"></label>
+						<checkbox id="noteQuickCopy-html-includeAppLinks"
+							oncommand="Zotero_Preferences.QuickCopy.onUpdateNoteExportOptions()"
+							native="true" aria-describedby="noteQuickCopy-html-includeAppLinks-label"/>
+					</hbox>
+				</vbox>
+			</box>
+			<separator/>
+			
+			<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings-table"/>
+			<hbox class="virtualized-table-container" flex="1">
+				<html:div id="quickCopy-siteSettings"/>
+			</hbox>
+			<separator class="thin"/>
+			<hbox>
+				<button disabled="true" id="quickCopy-edit" label="&zotero.general.edit;"
+					onclick="if (!this.disabled) Zotero_Preferences.QuickCopy.showQuickCopySiteEditor(true)"/>
+				<spacer flex="1"/>
+				<button disabled="true" id="quickCopy-delete" data-l10n-id="preferences-quickCopy-minus" data-l10n-args='{"label":"-"}' onclick="if (!this.disabled) Zotero_Preferences.QuickCopy.deleteSelectedQuickCopySite()"/>
+				<button data-l10n-id="preferences-quickCopy-plus" data-l10n-args='{"label":"+"}' id="quickCopy-add" onclick="Zotero_Preferences.QuickCopy.showQuickCopySiteEditor()"></button>
+			</hbox>
+			
+			<hbox align="center">
+				<label id="zotero-prefpane-quickcopy-draglimit-label1" value="&zotero.preferences.quickCopy.dragLimit;"/>
+				<html:input aria-labelledby="zotero-prefpane-quickcopy-draglimit-label1 zotero-prefpane-quickcopy-draglimit-label2" type="text" preference="extensions.zotero.export.quickCopy.dragLimit" size="3"/>
+				<label id="zotero-prefpane-quickcopy-draglimit-label2" value="&zotero.preferences.items;" flex="1"/>
+			</hbox>
+		</groupbox>
+
 		<groupbox aria-labelledby="citation-dialog-title">
 			<label><html:h2 id="citation-dialog-title" data-l10n-id="preferences-citation-dialog"></html:h2></label>
 			<groupbox aria-labelledby="citation-dialog-mode-label">

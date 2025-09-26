@@ -30,7 +30,7 @@ var ReactDOM = require('react-dom');
 var VirtualizedTable = require('components/virtualized-table');
 var { makeRowRenderer } = VirtualizedTable;
 
-Zotero_Preferences.Export = {
+Zotero_Preferences.QuickCopy = {
 	init: async function () {
 		this.updateQuickCopyInstructions();
 		await this.populateQuickCopyList();
@@ -292,7 +292,7 @@ Zotero_Preferences.Export = {
 			var itemNode = document.createXULElement("menuitem");
 			itemNode.setAttribute("value", val);
 			itemNode.setAttribute("label", style.title);
-			itemNode.setAttribute("oncommand", 'Zotero_Preferences.Export.updateQuickCopyUI()');
+			itemNode.setAttribute("oncommand", 'Zotero_Preferences.QuickCopy.updateQuickCopyUI()');
 			popup.appendChild(itemNode);
 			
 			if (format.mode == 'bibliography' && format.id == style.styleID) {
@@ -318,7 +318,7 @@ Zotero_Preferences.Export = {
 			var itemNode = document.createXULElement("menuitem");
 			itemNode.setAttribute("value", val);
 			itemNode.setAttribute("label", translator.label);
-			itemNode.setAttribute("oncommand", 'Zotero_Preferences.Export.updateQuickCopyUI()');
+			itemNode.setAttribute("oncommand", 'Zotero_Preferences.QuickCopy.updateQuickCopyUI()');
 			popup.appendChild(itemNode);
 			
 			if (format.mode == 'export' && format.id == translator.translatorID) {
@@ -478,7 +478,7 @@ Zotero_Preferences.Export = {
 			];
 			var handleKeyDown = (event) => {
 				if (event.key == 'Delete' || Zotero.isMac && event.key == 'Backspace') {
-					Zotero_Preferences.Export.deleteSelectedQuickCopySite();
+					Zotero_Preferences.QuickCopy.deleteSelectedQuickCopySite();
 				}
 			};
 			var handleSelectionChange = () => {
@@ -502,7 +502,7 @@ Zotero_Preferences.Export = {
 						onSelectionChange={handleSelectionChange}
 						onKeyDown={handleKeyDown}
 						getRowString={index => this._rows[index].domain}
-						onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor(true)}
+						onActivate={(event, indices) => Zotero_Preferences.QuickCopy.showQuickCopySiteEditor(true)}
 					/>
 				);
 			});

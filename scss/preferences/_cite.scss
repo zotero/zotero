@@ -82,3 +82,41 @@
 		}
 	}
 }
+
+/* Quick Copy */
+#zotero-prefpane-export-groupbox separator:not(.thin)
+{
+	height: 1em;
+}
+
+#quickCopy-instructions, #quickCopy-citationInstructions {
+	font-size: 12px;
+}
+
+#zotero-prefpane-export-groupbox .virtualized-table-container {
+	height: 120px;
+}
+
+#quickCopy-delete {
+	margin-inline-end: 6px;
+}
+
+#noteQuickCopy-wrapper {
+	margin-left: 30px;
+	@media (-moz-platform: windows) {
+		margin-left: 45px;
+	}
+	@media (-moz-platform: linux) {
+		margin-left: 25px;
+	}
+}
+
+#noteQuickCopy-markdown-options > label,
+#noteQuickCopy-html-options > label{
+	margin-inline-end: 8px;
+}
+
+#noteQuickCopy-format-options hbox {
+	justify-content: end;
+	width: 100%;
+}
