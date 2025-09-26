@@ -51,7 +51,7 @@ Zotero.PreferencePanes = {
 			label: 'zotero.preferences.prefpane.cite',
 			image: 'chrome://zotero/skin/20/universal/cite.svg',
 			src: 'chrome://zotero/content/preferences/preferences_cite.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_cite.js', 'chrome://zotero/content/preferences/preferences_export.js'],
+			scripts: ['chrome://zotero/content/preferences/preferences_cite.js', 'chrome://zotero/content/preferences/preferences_quickcopy.js'],
 			defaultXUL: true,
 			helpURL: 'https://www.zotero.org/support/preferences/cite',
 		},
