@@ -84,7 +84,7 @@
 }
 
 /* Quick Copy */
-#zotero-prefpane-export-groupbox separator:not(.thin)
+#zotero-prefpane-quickCopy-groupbox separator:not(.thin)
 {
 	height: 1em;
 }
@@ -93,7 +93,7 @@
 	font-size: 12px;
 }
 
-#zotero-prefpane-export-groupbox .virtualized-table-container {
+#zotero-prefpane-quickCopy-groupbox .virtualized-table-container {
 	height: 120px;
 }
 

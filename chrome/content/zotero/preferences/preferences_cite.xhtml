@@ -62,9 +62,9 @@
 		<groupbox aria-label="&zotero.preferences.citationOptions.caption;">
 			<label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></label>
 			
-			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true" aria-describedby="export-citePaperJournalArticleURL"/>
+			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true" aria-describedby="quickCopy-citePaperJournalArticleURL"/>
 			<!-- This doesn't wrap without an explicit width, for some reason -->
-			<label id="export-citePaperJournalArticleURL" width="45em">
+			<label id="quickCopy-citePaperJournalArticleURL" width="45em">
 				&zotero.preferences.export.citePaperJournalArticleURL.description;
 			</label>
 		</groupbox>
@@ -83,7 +83,7 @@
 		</groupbox>
 	</vbox>
 	<vbox class="main-section" id="quickCopy" aria-label="&zotero.preferences.quickCopy.caption;" role="group">
-		<groupbox id="zotero-prefpane-export-groupbox" aria-label="&zotero.preferences.quickCopy.caption;" aria-describedby="quickCopy-instructions quickCopy-citationInstructions">
+		<groupbox id="zotero-prefpane-quickCopy-groupbox" aria-label="&zotero.preferences.quickCopy.caption;" aria-describedby="quickCopy-instructions quickCopy-citationInstructions">
 			<vbox>
 				<label><html:h1>&zotero.preferences.quickCopy.caption;</html:h1></label>
 			</vbox>
@@ -117,13 +117,13 @@
 					<hbox id="noteQuickCopy-markdown-options" align="center">
 						<label id="noteQuickCopy-markdown-includeAppLinks-label"></label>
 						<checkbox id="noteQuickCopy-markdown-includeAppLinks"
-							oncommand="Zotero_Preferences.QuickCopy.onUpdateNoteExportOptions()"
+							oncommand="Zotero_Preferences.QuickCopy.onUpdateNoteOptions()"
 							native="true" aria-describedby="noteQuickCopy-markdown-includeAppLinks-label"/>
 					</hbox>
 					<hbox id="noteQuickCopy-html-options" align="center">
 						<label id="noteQuickCopy-html-includeAppLinks-label"></label>
 						<checkbox id="noteQuickCopy-html-includeAppLinks"
-							oncommand="Zotero_Preferences.QuickCopy.onUpdateNoteExportOptions()"
+							oncommand="Zotero_Preferences.QuickCopy.onUpdateNoteOptions()"
 							native="true" aria-describedby="noteQuickCopy-html-includeAppLinks-label"/>
 					</hbox>
 				</vbox>

@@ -229,7 +229,7 @@ Zotero_Preferences.QuickCopy = {
 		}
 	},
 
-	onUpdateNoteExportOptions() {
+	onUpdateNoteOptions() {
 		var menulist = document.getElementById("zotero-noteQuickCopy-menu");
 		var markdownIncludeAppLinks = document.getElementById("noteQuickCopy-markdown-includeAppLinks");
 		var htmlIncludeAppLinks = document.getElementById("noteQuickCopy-html-includeAppLinks");
