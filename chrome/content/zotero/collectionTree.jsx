@@ -2327,7 +2327,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 							// Add copied items to target collection
 							if (targetCollectionID) {
 								for (let itemID of createdBatch) {
-									let item = await Zotero.Items.getAsync(itemID);
+									let item = Zotero.Items.get(itemID);
 									if (item.isTopLevelItem()) {
 										item.addToCollection(targetCollectionID);
 										await item.save({ skipSelect: true });
