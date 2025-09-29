@@ -104,6 +104,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		regularOnly: false,
 		multiSelect: true,
 		shouldListenForNotifications: true,
+		autoSelect: true,
 		columns: COLUMNS,
 		onContextMenu: noop,
 		onActivate: noop,
@@ -120,6 +121,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		regularOnly: PropTypes.bool,
 		multiSelect: PropTypes.bool,
 		shouldListenForNotifications: PropTypes.bool,
+		// Whether to automatically select the focused row when the tree is focused via tab key
+		autoSelect: PropTypes.bool,
 		columns: PropTypes.array,
 		firstColumnPrependRenderer: PropTypes.func,
 		onSelectionChange: PropTypes.func,
@@ -1062,7 +1065,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * Select the first row when the tree is focused by the keyboard.
 	 */
 	handleKeyUp = (event) => {
-		if (!Zotero.locked && (event.code === 'Tab' || event.key.includes("Arrow")) && this.selection.count == 0) {
+		if (!Zotero.locked && this.props.autoSelect && (event.code === 'Tab' || event.key.includes("Arrow")) && this.selection.count == 0) {
 			this.selection.select(this.selection.focused);
 		}
 	};

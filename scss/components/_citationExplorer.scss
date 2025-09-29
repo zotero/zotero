@@ -1,5 +1,6 @@
 #zotero-citation-explorer-dialog {
 	min-height: 500px;
+	min-width: 600px;
 	--split-button-icon-color: var(--accent-blue);
 
 	dialog {
@@ -9,10 +10,6 @@
 
 	search-textbox, input, button {
 		margin: 0;
-	}
-
-	input + button {
-		margin-left: 8px;
 	}
 	
 	.citation-explorer-grid {
@@ -67,7 +64,19 @@
 	.button-container {
 		border-bottom: var(--material-border-quarternary);
 		display: flex;
+		gap: 8px;
 		padding: 8px 16px;
+		min-width: 0;
+
+		.split-menu-button {
+			min-width: 0;
+			flex: 0 1 auto;
+
+			[anonid="button-image-and-text-box"] {
+				min-width: 0;
+				width: auto;
+			}
+		}
 	}
 
 	.diff-deleted {

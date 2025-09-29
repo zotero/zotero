@@ -187,6 +187,7 @@ window.ZoteroDocumentCitations = {
 				regularOnly: true,
 				columns: itemColumns,
 				shouldListenForNotifications: false,
+				autoSelect: false,
 				onSelectionChange: this.onItemSelectionChange.bind(this),
 				onActivate: this.onItemActivate.bind(this),
 				emptyMessage: Zotero.getString('pane.items.loading'),
@@ -269,7 +270,7 @@ window.ZoteroDocumentCitations = {
 				// check if all citation items are linked
 				for (let citationItem of citation.citationItems) {
 					itemMap[citationItem.id].citedIn.push(citationIndex);
-					isLinked = typeof citationItem.id == 'number';
+					isLinked = isLinked && typeof citationItem.id == 'number';
 				}
 				let title = await citation.field.getText();
 				if (citation.properties.plainCitation != title) {
@@ -340,6 +341,9 @@ window.ZoteroDocumentCitations = {
 			}
 		}
 		itemList.setHighlightedRows(highlightedItems);
+		const noneSelected = citationList.selection.selected.size === 0;
+		document.querySelector('#button-show-in-document').disabled = noneSelected;
+		document.querySelector('#button-edit-citation').disabled = noneSelected;
 	},
 	
 	onCitationEdit: async function () {
@@ -363,22 +367,22 @@ window.ZoteroDocumentCitations = {
 		}
 		const item = itemList.getRow(itemList.selection.focused).ref;
 		const isUnlinked = typeof item.id != 'number';
-		const isMultiple = itemList.selection.selected.size > 1;
-		document.querySelector('#button-show-in-zotero').hidden = isMultiple || isUnlinked;
-		document.querySelector('#button-relink-item').hidden = isMultiple || !isUnlinked;
-		document.querySelector('#button-addTo-library').style.display = (isMultiple || !isUnlinked) ? 'none' : 'inherit';
+		const noneSelected = itemList.selection.selected.size === 0;
+		document.querySelector('#button-show-in-zotero').disabled = noneSelected || isUnlinked;
+		document.querySelector('#button-relink-item').disabled = noneSelected || !isUnlinked;
+		document.querySelector('#button-addTo-library').disabled = noneSelected || !isUnlinked;
 		
 		await this.refreshCitationList();
 	},
 		
 	onItemActivate: async function () {
-		if (itemList.selection.selected.size > 1) return;
 		const item = itemList.getRow(itemList.selection.focused).ref;
 		if (typeof item.id != 'number') {
 			this.onItemRelink();
 		}
 		else {
-			await Zotero.Utilities.Internal.showInLibrary(item);
+			await Zotero.Utilities.Internal.showInLibrary(
+					Array.from(itemList.selection.selected).map(index => itemList.getRow(index).ref));
 		}
 	},
 

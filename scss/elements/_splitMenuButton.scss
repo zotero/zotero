@@ -34,6 +34,7 @@
 		display: flex;
 		align-items: center;
 		overflow: hidden;
+		min-width: 8px;
 	}
 
 	& [anonid="dropmarker-separator"] {
