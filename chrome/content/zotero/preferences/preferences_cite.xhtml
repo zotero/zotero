@@ -44,10 +44,48 @@
 					oncommand="Zotero_Preferences.Cite.openStylesPage()"/>
 			</hbox>
 		</groupbox>
+
+		<groupbox aria-labelledby="citation-dialog-title">
+			<label><html:h2 id="citation-dialog-title" data-l10n-id="preferences-citation-dialog"></html:h2></label>
+			<groupbox aria-labelledby="citation-dialog-mode-label">
+				<hbox align="center">
+					<label id="citation-dialog-mode-label" data-l10n-id="preferences-citation-dialog-mode">:</label>
+					<radiogroup orient="horizontal" id="citation-dialog-mode" preference="extensions.zotero.integration.citationDialogMode">
+						<radio data-l10n-id="preferences-citation-dialog-mode-last-used" value="last-used"/>
+						<radio data-l10n-id="preferences-citation-dialog-mode-library" value="library"/>
+						<radio data-l10n-id="preferences-citation-dialog-mode-list" value="list"/>
+					</radiogroup>
+				</hbox>
+			</groupbox>
+		</groupbox>
+
+		<groupbox aria-label="&zotero.preferences.citationOptions.caption;">
+			<label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></label>
+			
+			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true" aria-describedby="export-citePaperJournalArticleURL"/>
+			<!-- This doesn't wrap without an explicit width, for some reason -->
+			<label id="export-citePaperJournalArticleURL" width="45em">
+				&zotero.preferences.export.citePaperJournalArticleURL.description;
+			</label>
+		</groupbox>
 		
+		<groupbox aria-label="&zotero.general.tools;">
+			<label><html:h2>&zotero.general.tools;</html:h2></label>
+			
+			<hbox>
+				<button id="openCSLEdit"
+					label="&zotero.preferences.styleEditor;"
+					oncommand="window.open('chrome://zotero/content/tools/csledit.xhtml', '_blank', 'chrome,width=950,height=700,resizable')"/>
+				<button id="openCSLPreview"
+					label="&zotero.preferences.stylePreview;"
+					oncommand="window.open('chrome://zotero/content/tools/cslpreview.xhtml', '_blank', 'chrome,width=950,height=700,resizable')"/>
+			</hbox>
+		</groupbox>
+	</vbox>
+	<vbox class="main-section" id="quickCopy" aria-label="&zotero.preferences.quickCopy.caption;" role="group">
 		<groupbox id="zotero-prefpane-export-groupbox" aria-label="&zotero.preferences.quickCopy.caption;" aria-describedby="quickCopy-instructions quickCopy-citationInstructions">
 			<vbox>
-				<label><html:h2>&zotero.preferences.quickCopy.caption;</html:h2></label>
+				<label><html:h1>&zotero.preferences.quickCopy.caption;</html:h1></label>
 			</vbox>
 			
 			<label id="quickCopy-instructions"/>
@@ -109,43 +147,6 @@
 				<label id="zotero-prefpane-quickcopy-draglimit-label1" value="&zotero.preferences.quickCopy.dragLimit;"/>
 				<html:input aria-labelledby="zotero-prefpane-quickcopy-draglimit-label1 zotero-prefpane-quickcopy-draglimit-label2" type="text" preference="extensions.zotero.export.quickCopy.dragLimit" size="3"/>
 				<label id="zotero-prefpane-quickcopy-draglimit-label2" value="&zotero.preferences.items;" flex="1"/>
-			</hbox>
-		</groupbox>
-
-		<groupbox aria-labelledby="citation-dialog-title">
-			<label><html:h2 id="citation-dialog-title" data-l10n-id="preferences-citation-dialog"></html:h2></label>
-			<groupbox aria-labelledby="citation-dialog-mode-label">
-				<hbox align="center">
-					<label id="citation-dialog-mode-label" data-l10n-id="preferences-citation-dialog-mode">:</label>
-					<radiogroup orient="horizontal" id="citation-dialog-mode" preference="extensions.zotero.integration.citationDialogMode">
-						<radio data-l10n-id="preferences-citation-dialog-mode-last-used" value="last-used"/>
-						<radio data-l10n-id="preferences-citation-dialog-mode-library" value="library"/>
-						<radio data-l10n-id="preferences-citation-dialog-mode-list" value="list"/>
-					</radiogroup>
-				</hbox>
-			</groupbox>
-		</groupbox>
-
-		<groupbox aria-label="&zotero.preferences.citationOptions.caption;">
-			<label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></label>
-			
-			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true" aria-describedby="export-citePaperJournalArticleURL"/>
-			<!-- This doesn't wrap without an explicit width, for some reason -->
-			<label id="export-citePaperJournalArticleURL" width="45em">
-				&zotero.preferences.export.citePaperJournalArticleURL.description;
-			</label>
-		</groupbox>
-		
-		<groupbox aria-label="&zotero.general.tools;">
-			<label><html:h2>&zotero.general.tools;</html:h2></label>
-			
-			<hbox>
-				<button id="openCSLEdit"
-					label="&zotero.preferences.styleEditor;"
-					oncommand="window.open('chrome://zotero/content/tools/csledit.xhtml', '_blank', 'chrome,width=950,height=700,resizable')"/>
-				<button id="openCSLPreview"
-					label="&zotero.preferences.stylePreview;"
-					oncommand="window.open('chrome://zotero/content/tools/cslpreview.xhtml', '_blank', 'chrome,width=950,height=700,resizable')"/>
 			</hbox>
 		</groupbox>
 	</vbox>
