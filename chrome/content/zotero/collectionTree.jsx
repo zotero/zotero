@@ -2310,7 +2310,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					100,
 					function (chunk) {
 						return Zotero.DB.executeTransaction(async () => {
-							let createdBatch = [];
+							let copiedItemIDs = [];
 							for (let item of chunk) {
 								var id = await this._copyItem({
 									item,
@@ -2322,11 +2322,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 								if (!id) {
 									continue;
 								}
-								createdBatch.push(id);
+								copiedItemIDs.push(id);
 							}
 							// Add copied items to target collection
 							if (targetCollectionID) {
-								for (let itemID of createdBatch) {
+								for (let itemID of copiedItemIDs) {
 									let item = Zotero.Items.get(itemID);
 									if (item.isTopLevelItem()) {
 										item.addToCollection(targetCollectionID);
