@@ -84,16 +84,7 @@
 		</div>
 
 		<!-- Right Column -->
-		<div class="tabbox-container grid-padded-section">
-			<xul:tabbox onselect="ZoteroDocumentCitations.onSelectTab(this.selectedIndex)">
-				<xul:tabs>
-					<xul:tab id="tab-cited-items" label="Cited Items"/>
-					<xul:tab id="tab-uncited-items" label="Uncited Items"/>
-				</xul:tabs>
-				<!--We are making our own tabpanel UI, but the onselect event above won't fire without these-->
-				<xul:tabpanels hidden="true"><xul:tabpanel/><xul:tabpanel/></xul:tabpanels>
-			</xul:tabbox>
-		</div>
+		<div class="grid-padded-section" id="items-in-bibliography-label">Items in Bibliography</div>
 
 		<div class="searchbox-container grid-padded-section">
 			<xul:search-textbox id="item-search" placeholder="Title, Creator, Year" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onItemFilter()" dir="reverse"/>
