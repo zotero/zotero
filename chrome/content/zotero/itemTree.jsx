@@ -121,6 +121,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		multiSelect: PropTypes.bool,
 		shouldListenForNotifications: PropTypes.bool,
 		columns: PropTypes.array,
+		firstColumnPrependRenderer: PropTypes.func,
 		onSelectionChange: PropTypes.func,
 		onContextMenu: PropTypes.func,
 		onActivate: PropTypes.func,
@@ -3168,7 +3169,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 				cell.append(textSpan);
 			}
 
-			cell.prepend(indentSpan, twisty, icon);
+			let firstColumnPrepend = [icon];
+			if (this.props.firstColumnPrependRenderer) {
+				firstColumnPrepend = this.props.firstColumnPrependRenderer(index, data, firstColumnPrepend);
+			}
+
+			cell.prepend(indentSpan, twisty, ...firstColumnPrepend);
 			cell.classList.add('first-column');
 		}
 		return cell;

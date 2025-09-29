@@ -32,16 +32,11 @@
 		}
 	}
 
-	.tabbox-container, #citations-label {
+	#citations-label, #items-in-bibliography-label {
 		padding-top: 16px !important;
-	}
-
-	#citations-label {
 		align-content: center;
-	}
-
-	.tabbox-container {
-		display: flex;
+		font-size: 15px;
+		font-weight: 600;
 	}
 	
 	.virtualized-table-container {
@@ -51,6 +46,21 @@
 
 	.virtualized-table:focus-within .row.highlighted:not(.selected) {
 		background: initial !important;
+	}
+
+	.virtualized-table .row {
+		.cell .badge {
+			font-size: 11px;
+			padding: 1px 4px;
+			border-radius: 5px;
+			display: inline-block;
+			background: #59ADC44D;
+		}
+
+		&.selected .cell .badge {
+			background: rgba(255, 255, 255, 0.2);
+			color: --var(accent-white);
+		}
 	}
 
 	.button-container {
@@ -75,41 +85,6 @@
 		.button-container {
 			padding-bottom: 0px;
 			margin-bottom: -16px;
-		}
-		
-		tabbox {
-			flex: 1;
-			flex-direction: row;
-			
-			tabs {
-				flex: 1;
-				margin-bottom: 0;
-				
-				tab {
-					flex: 1;
-
-					&[visuallyselected="true"]:not(:-moz-window-inactive) {
-						color: initial !important;
-					}
-					label.tab-text {
-						flex-direction: column;
-						align-items: center;
-					}
-				}
-				
-				spacer.tabs-right {
-					flex: 0;
-				}
-			}
-		}
-	}
-
-	@media (-moz-platform: windows) {
-		tabbox tabs {
-			border-bottom: none;
-			tab {
-				margin-bottom: 0;
-			}
 		}
 	}
 }

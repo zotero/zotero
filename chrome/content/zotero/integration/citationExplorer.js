@@ -191,6 +191,7 @@ window.ZoteroDocumentCitations = {
 				onActivate: this.onItemActivate.bind(this),
 				emptyMessage: Zotero.getString('pane.items.loading'),
 				firstColumnExtraWidth: 28-16,
+				firstColumnPrependRenderer: this._itemFirstColumnPrependRenderer.bind(this),
 			});
 			await itemList.waitForLoad();
 			// Remove focus from citationList if focus is on itemList
@@ -233,19 +234,6 @@ window.ZoteroDocumentCitations = {
 		await this.refreshItemList();
 	},
 	
-	onSelectTab: async function (selectedIndex) {
-		if (selectedIndex === selectedTab) return;
-		selectedTab = selectedIndex;
-		if (selectedTab) {
-			this._highlightedCitations = new Set();
-			document.querySelector('#button-show-in-zotero').hidden = true;
-			document.querySelector('#button-relink-item').hidden = false;
-			document.querySelector('#button-addTo-library').style.display = 'none';
-		}
-		await this.refreshCitationList();
-		await this.refreshItemList();
-	},
-
 	_initMappings: async function () {
 		const itemMap = {};
 		itemRows = items.map((item) => {
@@ -264,7 +252,7 @@ window.ZoteroDocumentCitations = {
 			itemMap[item.id || item.cslItemID] = proxyItem;
 			return proxyItem;
 		});
-		uncitedItemRows = uncitedItems.map((item) => {
+		itemRows.push(...uncitedItems.map((item) => {
 			return new Proxy(item, {
 				get(target, prop) {
 					if (prop == 'citedIn') {
@@ -273,7 +261,7 @@ window.ZoteroDocumentCitations = {
 					return Reflect.get(...arguments);
 				}
 			});
-		});
+		}));
 		citationRows = await Promise.all(citations
 			.map(async (citation, citationIndex) => {
 				let isLinked = true;
@@ -416,6 +404,16 @@ window.ZoteroDocumentCitations = {
 		await this._initMappings();
 		await this.refreshCitationList();
 		await this.refreshItemList();
+	},
+
+	_itemFirstColumnPrependRenderer: function (index, data, firstColumnPrepend) {
+		if (itemRows[index].citedIn.length === 0) {
+			let span = document.createElement('span');
+			span.classList.add('badge', 'badge-uncited');
+			span.textContent = 'Uncited';
+			firstColumnPrepend.push(span);
+		}
+		return firstColumnPrepend;
 	},
 	
 	async addToLibraryAndLink() {
