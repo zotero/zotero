@@ -26,17 +26,17 @@
 		.citation-explorer-grid-left {
 			border-right: var(--material-border-quarternary);
 		}
-
-		.grid-padded-section {
-			padding: 8px 16px;
-		}
 	}
 
 	#citations-label, #items-in-bibliography-label {
-		padding-top: 16px !important;
+		padding: 16px 16px 8px;
 		align-content: center;
 		font-size: 15px;
 		font-weight: 600;
+	}
+
+	.searchbox-container {
+		padding: 0 16px 8px;
 	}
 	
 	.virtualized-table-container {
@@ -55,6 +55,7 @@
 			border-radius: 5px;
 			display: inline-block;
 			background: #59ADC44D;
+			margin-left: 4px;
 		}
 
 		&.selected .cell .badge {
@@ -66,6 +67,7 @@
 	.button-container {
 		border-bottom: var(--material-border-quarternary);
 		display: flex;
+		padding: 8px 16px;
 	}
 
 	.diff-deleted {
@@ -79,7 +81,7 @@
 	
 	@media (-moz-platform: macos) {
 		.citation-explorer-grid {
-			margin: -16px;
+			margin: -14px;
 		}
 
 		.button-container {
