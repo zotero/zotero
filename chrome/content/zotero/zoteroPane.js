@@ -6713,6 +6713,12 @@ var ZoteroPane = new function () {
 		
 		document.getElementById('file-renaming-documentation-link').onclick = () => {
 			Zotero.launchURL("https://www.zotero.org/support/file_renaming");
+			// Do this in the next loop to avoid a visual glitch in Fx140.3 where the background
+			// color of the banner remains in part of the item pane header until switching to a
+			// different tab and back
+			setTimeout(() => {
+				this.hideFileRenamingBanner();
+			});
 		};
 		
 		this.document.getElementById('file-renaming-banner-close').onclick = () => {
