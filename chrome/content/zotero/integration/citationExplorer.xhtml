@@ -78,9 +78,8 @@
 		</div>
 
 		<div class="button-container citation-explorer-grid-left grid-padded-section">
-			<input type="button" id="button-show-in-document" value="Show in Document"/>
-			<div class="spacer"></div>
-			<input type="button" id="button-edit-citation" value="Edit Citation"/>
+			<input type="button" id="button-show-in-document" value="Show in Document" disabled="true"/>
+			<input type="button" id="button-edit-citation" class="right" value="Edit Citation" disabled="true"/>
 		</div>
 
 		<!-- Right Column -->
@@ -95,12 +94,11 @@
 		</div>
 
 		<div class="button-container grid-padded-section">
-			<input type="button" id="button-show-in-zotero" value="Show in Zotero"/>
-			<div class="spacer"></div>
-			<input type="button" id="button-relink-item" value="Relink Item" hidden="true"/>
+			<input type="button" id="button-show-in-zotero" value="Show in Zotero" disabled="true"/>
+			<input type="button" id="button-relink-item" class="right" value="Relink Item" disabled="true"/>
 			<button is="split-menu-button" id="button-addTo-library"
 					onclick="ZoteroDocumentCitations.addToLibraryAndLink()"
-					popup="item-addTo-menu" style="display: none"/>
+					popup="item-addTo-menu" disabled="true"/>
 			<xul:popupset>
 				<xul:menupopup id="item-addTo-menu" onpopupshowing="ZoteroDocumentCitations.buildAddToLibraryContextMenu(event);"/>
 			</xul:popupset>
