@@ -46,7 +46,10 @@ import { getCSSIcon } from 'components/icons';
 		}
 
 		set item(item) {
-			if (item?.isRegularItem() && !item?.isFeedItem) {
+			let isRegularItem = item?.isRegularItem() && !item?.isFeedItem;
+			let isStandaloneAttachment = item?.isAttachment() && !item.parentItemID;
+			let isStandaloneNote = item?.isNote() && !item.parentItemID;
+			if (isRegularItem || isStandaloneAttachment || isStandaloneNote) {
 				this.hidden = false;
 			}
 			else {
