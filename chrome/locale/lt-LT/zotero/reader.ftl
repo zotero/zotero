@@ -181,3 +181,9 @@ reader-import-from-epub-no-annotations-other-file =
     
     If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
 reader-import-from-epub-select-other = Pasirinkti kitą rinkmeną…
+reader-selected-pages =
+    { $count ->
+        [one] 1 page selected
+       *[other] { $count } pages selected
+    }
+reader-page-options = Page Options

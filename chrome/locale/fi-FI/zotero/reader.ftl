@@ -181,3 +181,9 @@ reader-import-from-epub-no-annotations-other-file =
     
     Jos tämän e-kirjan huomautukset on tehty KOReaderilla, koita valita “metadata.epub.lua”-tiedosto suoraan.
 reader-import-from-epub-select-other = Valitse toinen tiedosto…
+reader-selected-pages =
+    { $count ->
+        [one] 1 page selected
+       *[other] { $count } pages selected
+    }
+reader-page-options = Page Options

@@ -101,20 +101,20 @@ reader-convert-to-underline = 轉換成底線
 reader-size = 大小
 reader-merge = 合併
 reader-copy-link = 複製連結
-reader-theme-original = Original
-reader-theme-snow = Snow
-reader-theme-sepia = Sepia
+reader-theme-original = 原文：%S
+reader-theme-snow = 冰雪
+reader-theme-sepia = 深褐
 reader-theme-dark = 暗色
-reader-add-theme = Add Theme
-reader-scroll-mode = Scrolling
-reader-spread-mode = Spreads
-reader-flow-mode = Page Layout
+reader-add-theme = 新增主題
+reader-scroll-mode = 捲動
+reader-spread-mode = 延展
+reader-flow-mode = 頁面版面
 reader-columns = 直欄
-reader-split-view = Split View
-reader-themes = Themes
-reader-vertical = Vertical
-reader-horizontal = Horizontal
-reader-wrapped = Wrapped
+reader-split-view = 分割檢視
+reader-themes = 主題
+reader-vertical = 垂直
+reader-horizontal = 水平
+reader-wrapped = 換航
 reader-none = 無
 reader-odd = Odd
 reader-even = Even
@@ -181,3 +181,9 @@ reader-import-from-epub-no-annotations-other-file =
     
     If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
 reader-import-from-epub-select-other = 選擇其他檔案...
+reader-selected-pages =
+    { $count ->
+        [one] 1 page selected
+       *[other] { $count } pages selected
+    }
+reader-page-options = Page Options

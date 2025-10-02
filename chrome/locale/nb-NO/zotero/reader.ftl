@@ -181,3 +181,9 @@ reader-import-from-epub-no-annotations-other-file =
     
     Hvis denne e-boken har kommentarer opprettet i KOReader, kan du prøve å velge en "metadata.epub.lua"-fil direkte.
 reader-import-from-epub-select-other = Velg annen fil…
+reader-selected-pages =
+    { $count ->
+        [one] 1 page selected
+       *[other] { $count } pages selected
+    }
+reader-page-options = Page Options

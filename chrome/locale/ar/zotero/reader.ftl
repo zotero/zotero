@@ -181,3 +181,9 @@ reader-import-from-epub-no-annotations-other-file =
     
     إذا كان هذا الكتاب الإلكتروني قد تم وضع تعليقات توضيحية عليه باستخدام KOReader، حاول تحديد ملف ”metadata.epub.lua“ مباشرة.
 reader-import-from-epub-select-other = اختر ملف آخر...
+reader-selected-pages =
+    { $count ->
+        [one] 1 page selected
+       *[other] { $count } pages selected
+    }
+reader-page-options = Page Options

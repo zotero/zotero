@@ -181,3 +181,9 @@ reader-import-from-epub-no-annotations-other-file =
     
     Wenn im eBook Anmerkungen mit KOReader erstellt wurden, bitte direkt eine metadata.epub.lua-Datei öffnen.
 reader-import-from-epub-select-other = Andere Datei auswählen…
+reader-selected-pages =
+    { $count ->
+        [one] 1 page selected
+       *[other] { $count } pages selected
+    }
+reader-page-options = Page Options

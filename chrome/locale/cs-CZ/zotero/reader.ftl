@@ -181,3 +181,9 @@ reader-import-from-epub-no-annotations-other-file =
     
     Pokud byla tato e-kniha opatřena poznámkami pomocí aplikace KOReader, zkuste vybrat přímo soubor “metadata.epub.lua”.
 reader-import-from-epub-select-other = Vyberte jiný soubor...
+reader-selected-pages =
+    { $count ->
+        [one] 1 page selected
+       *[other] { $count } pages selected
+    }
+reader-page-options = Page Options
