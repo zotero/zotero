@@ -7,7 +7,7 @@ annotation-row {
 	background: var(--material-background);
 	@include focus-ring;
 
-	.head {
+	> .head {
 		display: flex;
 		padding: 4px 8px;
 		align-items: center;
@@ -24,9 +24,14 @@ annotation-row {
 		.title {
 			font-weight: 600;
 		}
+
+		// if context menu is disabled, show lock icon
+		.button[disabled] {
+			@include svgicon-menu("lock", "universal", "16");
+		}
 	}
 	
-	.body {
+	> .body {
 		img {
 			max-width: 100%;
 			@media (prefers-color-scheme: dark) {
@@ -59,12 +64,70 @@ annotation-row {
 			@include comfortable {
 				margin-block: 4px;
 			}
+
+			&.hidden {
+				display: none;
+			}
+		}
+
+		.comment.editable {
+			margin-inline: 4px;
+			padding: 2px 0 0 0;
+			max-width: 100%;
+			iframe {
+				border: 1px solid var(--fill-quinary);
+				border-radius: 5px;
+				width: 100%;
+			}
+			// Special treatment to hide the iframe with the editor
+			// so that it is not visible but still renders the content
+			// properly, so that we know the necessary height before showing the editor
+			&.hidden {
+				display: block;
+				position: absolute;
+				opacity: 0;
+				z-index: -1;
+				pointer-events: none;
+			}
 		}
 	}
 	
-	.tags {
+	> .tags {
 		border-top: 1px solid var(--fill-quinary);
 		padding: 3px 8px;
 		word-break: break-word;
+		font-size: 13px;
+	}
+
+	> .tags-popup {
+		font-size: 13px;
+		min-width: 300px;
+	}
+
+	&.selected {
+		background: var(--accent-blue10);
+		outline: 3px solid var(--accent-blue50);
+	}
+
+	.annotations-options-popup {
+		width: 150px;
+		padding-inline: 5px;
+		.menu-option  {
+			height: 30px;
+			padding-inline: 25px;
+			align-items: center;
+			border-radius: 5px;
+			font-size: 12px;
+			&.color {
+				.color-swatch {
+					width: 16px;
+					height: 16px;
+					border-radius: 5px;
+				}
+			}
+			&:hover {
+				background: var(--fill-quinary);
+			}
+		}
 	}
 }
