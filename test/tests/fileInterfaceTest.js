@@ -267,6 +267,8 @@ describe("Zotero_File_Interface", function () {
 				{ pageIndex: 0, rects: [[230.202, 578.879, 275.478, 585.817], [230.202, 578.879, 275.478, 585.817]] }
 			);
 
+			// Note: The third rect not only wraps the first two rects, but also includes extra text,
+			// which makes the current annotation text essentially incorrect
 			assert.deepEqual(
 				JSON.parse(annotation2.annotationPosition),
 				{ pageIndex: 0, rects: [[228.335, 475.341, 461.756, 482.179], [146.3, 463.841, 437.511, 470.679], [146.3, 463.841, 461.756, 482.179]] },
@@ -288,7 +290,7 @@ describe("Zotero_File_Interface", function () {
 			);
 
 			assert.equal(annotation1.annotationSortIndex, '00000|000103|00206');
-			assert.equal(annotation2.annotationSortIndex, '00000|000723|00309');
+			assert.equal(annotation2.annotationSortIndex, '00000|000706|00309');
 			assert.equal(annotation3.annotationSortIndex, '00000|000390|00252');
 			assert.equal(annotation4.annotationSortIndex, '00000|000981|00355');
 			assert.equal(annotation5.annotationSortIndex, '00002|001638|00451');
