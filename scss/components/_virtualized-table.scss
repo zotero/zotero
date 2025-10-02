@@ -27,6 +27,11 @@
 	flex-direction: column;
 	position: relative;
 
+	// Used in virtualized-table.jsx when setting column widths
+	// to reserve extra space for the first column. See onResize()
+	--extra-width: 0px;
+	--first-column-extra-width: 0px;
+
 	&:focus {
 		outline: none;
 	}
@@ -55,12 +60,13 @@
 			padding-inline-end: 4px;
 		}
 
-		&.first-column {
+		&:first-child {
+			--extra-width: var(--first-column-extra-width, 0px);
+			// No padding on the first cell since it's done via twisty and indent
 			padding-inline-start: 0;
-			min-width: calc(var(--firstColumnExtraWidth, 0px) + 30px);
 		}
 
-		&.first-column,
+		&:first-child,
 		&.primary {
 			display: flex;
 			align-items: center;
@@ -73,12 +79,6 @@
 				flex-grow: 1;
 				text-overflow: ellipsis;
 				overflow: hidden;
-
-				&:not(:first-child) {
-					@include state(".cell.first-column:not(.hasAttachment)") {
-						margin-inline-start: 4px;
-					}
-				}
 			}
 
 			.twisty + .cell-text, .spacer-twisty + .cell-text {
@@ -286,11 +286,9 @@
 		text-align: center;
 	}
 
-	.first-column {
-		> :first-child {
-			// offset header's column label/icon to align with the text in the first column, without introducing padding to the cell itself to avoid flexbox issues
-			padding-inline-start: calc(var(--firstColumnExtraWidth, 0px) + 8px);
-		}
+	.cell:first-child > :first-child {
+		// offset header's column label/icon to align with the text in the first column, without introducing padding to the cell itself to avoid flexbox issues
+		padding-inline-start: var(--first-column-extra-width, 0px);
 	}
 
 	.cell {

@@ -369,6 +369,8 @@ class VirtualizedTable extends React.Component {
 		staticColumns: false,
 		alternatingRowColors: Zotero.isMac ? ['-moz-OddTreeRow', '-moz-EvenTreeRow'] : null,
 
+		firstColumnExtraWidth: 0,
+
 		// Render with display: none
 		hide: false,
 
@@ -426,6 +428,8 @@ class VirtualizedTable extends React.Component {
 		staticColumns: PropTypes.bool,
 		// Used for initial column widths calculation
 		containerWidth: PropTypes.number,
+		// If first column is injected with extra stuff, like an item icon
+		// and we need to reserve extra min-width for it, set this prop
 		firstColumnExtraWidth: PropTypes.number,
 
 		// Internal windowed-list ref
@@ -871,10 +875,7 @@ class VirtualizedTable extends React.Component {
 		event.stopPropagation();
 		const result = this._getResizeColumns();
 		if (!result) return;
-		const columns = this._getVisibleColumns();
 		const [aColumn, bColumn, resizingColumn] = result;
-		const isFirstColumn = columns[0].dataKey === aColumn.dataKey;
-		const firstColumnExtraWidth = isFirstColumn ? (this.props.firstColumnExtraWidth || 0) : 0;
 		const a = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(aColumn.dataKey)}`);
 		const b = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(bColumn.dataKey)}`);
 		const resizing = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(resizingColumn.dataKey)}`);
@@ -888,9 +889,12 @@ class VirtualizedTable extends React.Component {
 		const widthSum = aRect.width + bRect.width;
 		const aColumnPadding = aColumn.iconLabel ? 0 : COLUMN_PADDING;
 		const bColumnPadding = bColumn.iconLabel ? 0 : COLUMN_PADDING;
-		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + aColumnPadding + firstColumnExtraWidth;
-		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + bColumnPadding;
-		const aColumnWidth = Math.min(widthSum - bSpacingOffset, Math.max(aSpacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
+		const aMinWidth = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + aColumnPadding;
+		const bMinWidth = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + bColumnPadding;
+		const aMaxWidth = widthSum - bMinWidth;
+		const aDragWidth = event.clientX - (RESIZER_WIDTH / 2) - offset;
+		// Constrain the drag position to the min and max widths
+		const aColumnWidth = Math.min(aMaxWidth, Math.max(aMinWidth, aDragWidth));
 		const bColumnWidth = widthSum - aColumnWidth;
 		let onResizeData = {};
 		onResizeData[aColumn.dataKey] = aColumnWidth;
@@ -1062,7 +1066,7 @@ class VirtualizedTable extends React.Component {
 	
 		this._setXulTooltip();
 
-		this._topDiv.style.setProperty("--firstColumnExtraWidth", `${this.props.firstColumnExtraWidth || 0}px`);
+		this._topDiv.style.setProperty("--first-column-extra-width", `${this.props.firstColumnExtraWidth}px`);
 		window.addEventListener("resize", () => {
 			this._debouncedRerender();
 		});
@@ -1190,7 +1194,7 @@ class VirtualizedTable extends React.Component {
 			if (!column.iconLabel && column.sortDirection) {
 				sortIndicator = <CSSIcon name="sort-indicator" className={"icon-8 sort-indicator " + (column.sortDirection === 1 ? "ascending" : "descending")} />;
 			}
-			const className = cx("cell", column.className, { 'first-column': index === 0, dragging: this.state.draggingColumn == index },
+			const className = cx("cell", column.className, { dragging: this.state.draggingColumn == index },
 				{ "cell-icon": !!column.iconLabel });
 			return (<Draggable
 				onDragStart={this._handleColumnDragStart.bind(this, index)}
@@ -1663,7 +1667,6 @@ var Columns = class {
 		// Storing back persist settings to account for legacy upgrades
 		this._storePrefs(columnsSettings);
 
-		this._adjustColumnWidths();
 		// Set column width CSS rules
 		this.onResize(columnWidths);
 		// Whew, all this just to get a list of columns
@@ -1730,24 +1733,6 @@ var Columns = class {
 		this._virtualizedTable.props.storeColumnPrefs(prefs);
 	}
 
-	_adjustColumnWidths = () => {
-		if (!this._virtualizedTable.props.firstColumnExtraWidth) {
-			return;
-		}
-
-		const extraWidth = this._virtualizedTable.props.firstColumnExtraWidth;
-		this._columns.filter(c => !c.hidden).forEach((column, index) => {
-			const isFirstColumn = index === 0;
-			if (column.fixedWidth) {
-				column.width = isFirstColumn ? parseInt(column.originalWidth) + extraWidth : column.originalWidth;
-			}
-			if (column.staticWidth) {
-				column.minWidth = isFirstColumn ? (column.originalMinWidth ?? 20) + extraWidth : column.originalMinWidth;
-				column.width = isFirstColumn ? Math.max(parseInt(column.width) ?? 0, column.minWidth) : column.width;
-			}
-		});
-	};
-
 	/**
 	 * Programatically sets the injected CSS width rules for each column.
 	 * This is necessary for performance reasons
@@ -1758,6 +1743,8 @@ var Columns = class {
 		if (storePrefs) {
 			var prefs = this._getPrefs();
 		}
+
+		let visibleColumns = this.getAsArray().filter(column => !column.hidden);
 
 		for (let [dataKey, width] of Object.entries(columnWidths)) {
 			if (typeof dataKey == "number") {
@@ -1775,12 +1762,16 @@ var Columns = class {
 			}
 			if (column.fixedWidth && column.width || column.staticWidth) {
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex', `0 0`, `important`);
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `${width}px`, 'important');
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `${width}px`, 'important');
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `calc(var(--extra-width, 0px) + ${width}px`, 'important');
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `calc(var(--extra-width, 0px) + ${width}px`, 'important');
 			} else {
+				// It's set in CSS, so we subtract it here to prevent sliding
+				if (column.dataKey === visibleColumns[0].dataKey) {
+					width -= this._virtualizedTable.props.firstColumnExtraWidth;
+				}
 				width = (width - columnPadding);
 				Zotero.debug(`Columns ${dataKey} width ${width}`);
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `${width}px`);
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `calc(var(--extra-width, 0px) + ${width}px`);
 			}
 		}
 		if (storePrefs) {
@@ -1798,7 +1789,6 @@ var Columns = class {
 			return a.ordinal - b.ordinal;
 		});
 
-		this._adjustColumnWidths();
 		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 
 		let prefs = this._getPrefs();
@@ -1838,7 +1828,6 @@ var Columns = class {
 			this._columns.find(c => c.dataKey === 'title').hidden = false;
 		}
 		
-		this._adjustColumnWidths();
 		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
@@ -1852,6 +1841,7 @@ var Columns = class {
 		if (prefs[column.dataKey]) {
 			prefs[column.dataKey].hidden = column.hidden;
 		}
+		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
