@@ -72,6 +72,9 @@
 
 	const CUSTOM_MENU_CLASS = "zotero-custom-menu-item";
 
+	/**
+	 * @namespace Zotero
+	 */
 
 	/**
 	 * @typedef MenuData
@@ -102,7 +105,6 @@
 	 * @property {string} menuID - The unique ID of the menu
 	 * @property {string} pluginID - The ID of the plugin registering the menu
 	 * @property {string} target - The target for the menu
-	 * @property {string[]} [l10nFiles] - The l10n files to load for the menu
 	 * @property {MenuData[]} [menus] - The menu items to add to the menu
 	 */
 
@@ -241,7 +243,7 @@
 		 * Validate the menu data recursively
 		 * @param {MenuData} menuData - The menu data to validate
 		 * @param {string} [path] - The path to the menu data
-		 * @returns {{obj?: MenuData, valid: boolean}} - The validated menu data and whether it is valid
+		 * @returns {{obj: MenuData | undefined, valid: boolean}} - The validated menu data and whether it is valid
 		 */
 		_validateMenuData(menuData, path = "") {
 			// Validate the menu data itself
@@ -770,16 +772,31 @@
 	}
 
 
-	class MenuManager {
-		_menuManager = new MenuManagerInternal();
+	/**
+	 * Manages menu APIs.
+	 *
+	 * @memberof Zotero
+	 */
+	Zotero.MenuManager = {
+		_menuManager: new MenuManagerInternal(),
 
+		/**
+		 * Register custom menu
+		 * @param {MenuOptions} options
+		 * @returns {string | false}
+		 */
 		registerMenu(options) {
 			return this._menuManager.register(options);
-		}
+		},
 
+		/**
+		 * Unregister custom menu
+		 * @param {string} paneID
+		 * @returns {boolean}
+		 */
 		unregisterMenu(paneID) {
 			return this._menuManager.unregister(paneID);
-		}
+		},
 
 		updateMenuPopup(popupElem, targetType, args) {
 			let options = this._menuManager.getCustomMenuOptions(targetType);
@@ -789,9 +806,6 @@
 				menus.push(...option.menus);
 			}
 			this._menuManager.updateMenuPopup(popupElem, menus, targetType, args);
-		}
-	}
-
-
-	Zotero.MenuManager = new MenuManager();
+		},
+	};
 }
