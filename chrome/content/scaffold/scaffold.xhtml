@@ -482,9 +482,9 @@
 								</keyset>
 
 								<listheader>
-									<treecol label="&scaffold.testing.input.label;" flex="1"/>
-									<treecol label="&scaffold.testing.status.label;" width="150"/>
-									<treecol label="&scaffold.testing.defer.label;" width="75"/>
+									<treecol label="&scaffold.testing.input.label;" class="col-input"/>
+									<treecol label="&scaffold.testing.status.label;" class="col-status"/>
+									<treecol label="&scaffold.testing.defer.label;" class="col-defer"/>
 								</listheader>
 								<richlistbox
 									id="testing-listbox"
@@ -493,6 +493,7 @@
 									seltype="multiple"
 									context="testing-context-menu"
 									focus-on-tab-select="true"
+									onselect="Scaffold.handleTestingListboxSelect()"
 									ondblclick="Scaffold.handleTestingListboxDblClick()"
 								/>
 							</vbox>

@@ -184,6 +184,30 @@ browser,
 	max-width: 100%;
 	gap: 8px;
 	
+	listheader, richlistbox {
+		.col-input {
+			flex: 1;
+		}
+
+		.col-status {
+			width: 175px;
+		}
+
+		.col-defer {
+			width: 60px;
+			
+			& {
+				margin-inline: 0;
+				padding-inline: 0;
+			}
+			
+			.treecol-text {
+				margin-inline-end: 0 !important;
+				padding-inline-end: 0;
+			}
+		}
+	}
+	
 	listheader {
 		// Keep aligned with item columns when scrollbars are visible
 		scrollbar-gutter: stable;
@@ -202,25 +226,34 @@ browser,
 				background: var(--material-stripe);
 			}
 			
-			.status {
+			.cell {
 				display: flex;
 				align-items: center;
 				gap: 0.5em;
-
-				&:not(.needs-update) {
-					.added, .removed {
-						opacity: 0.8;
-					}
+				
+				label {
+					margin: 0 5px;
+					padding: 0 4px;
 				}
-
-				&.needs-update {
-					cursor: pointer;
+			}
+			
+			.cell.col-status {
+				.status {
+					display: flex;
+					gap: 0.5em;
+					width: unset;
+					flex: 1;
 					
 					.text {
-						color: LinkText;
-						text-decoration: underline;
+						flex-shrink: 1;
+						overflow: hidden;
+						text-overflow: ellipsis;
 					}
 					
+					.added, .removed {
+						flex-shrink: 0;
+					}
+
 					.added {
 						color: rgb(40 161 40 / 0.8);
 					}
@@ -229,18 +262,56 @@ browser,
 						color: rgb(210 50 50 / 0.8);
 					}
 				}
+				
+				.update {
+					width: 16px;
+					height: 16px;
+					padding: 0;
+					flex-shrink: 0;
+					
+					@include svgicon-menu('sync-12', 'universal', '16');
+					
+					.toolbarbutton-text {
+						display: none;
+					}
+				}
+
+				&:not(.needs-update) {
+					.status {
+						.added, .removed {
+							color: revert;
+							opacity: 0.8;
+						}
+					}
+
+					.update {
+						display: none;
+					}
+				}
+			}
+			
+			.cell.col-defer {
+				justify-content: center;
 			}
 		}
 		
 		&:focus richlistitem[selected] {
-			.status {
-				&.needs-update {
-					.text {
-						color: var(--color-accent-text);
-					}
-
+			.cell.col-status.needs-update {
+				.status {
 					.added, .removed {
 						filter: brightness(1.5);
+					}
+				}
+				
+				.update {
+					color: inherit;
+
+					&:hover {
+						background: #ffffff1a;
+					}
+
+					&:active {
+						background: #ffffff33;
 					}
 				}
 			}
@@ -361,6 +432,7 @@ scaffold-item-preview {
 		display: flex;
 		flex-direction: column;
 		padding-block: 6px;
+		gap: 6px;
 
 		&:empty {
 			display: none;
