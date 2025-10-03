@@ -35,6 +35,9 @@ function showInLibrary() {
 async function onLoad() {
 	if (window.arguments) {
 		var io = window.arguments[0];
+		if (io.wrappedJSObject) {
+			io = io.wrappedJSObject;
+		}
 	}
 	
 	let itemID = parseInt(io.itemID);
@@ -70,6 +73,9 @@ async function onLoad() {
 	
 	noteEditor.focus();
 	notifierUnregisterID = Zotero.Notifier.registerObserver(NotifyCallback, 'item', 'noteWindow');
+
+	io.noteEditor = noteEditor;
+	io._initPromise?.resolve();
 }
 
 // If there's an error saving a note, close the window and crash the app
