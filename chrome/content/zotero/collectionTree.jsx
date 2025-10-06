@@ -1812,15 +1812,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Check if there's already a copy of this item in the library
 		var linkedItem = await item.getLinkedItem(targetLibraryID, true);
 		if (linkedItem) {
-			// If linked item is in the trash, undelete it and remove it from collections
-			// (since it shouldn't be restored to previous collections)
-			if (linkedItem.deleted) {
-				linkedItem.setCollections();
-				linkedItem.deleted = false;
-				await linkedItem.save({
-					skipSelect: true
-				});
-			}
 			return linkedItem.id;
 			
 			/*
@@ -2186,8 +2177,20 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					toMove.push(item.id);
 				}
 			}
-			
-			if (!sameLibrary) {
+			if (sameLibrary) {
+				// Add items to target container in the same library.
+				if (targetCollectionID) {
+					let ids = newIDs.filter(itemID => Zotero.Items.get(itemID).isTopLevelItem());
+					await Zotero.DB.executeTransaction(async function () {
+						let collection = await Zotero.Collections.getAsync(targetCollectionID);
+						await collection.addItems(ids);
+					}.bind(this));
+				}
+				else if (targetTreeRow.isPublications()) {
+					await Zotero.Items.addToPublications(newItems, copyOptions);
+				}
+			}
+			else {
 				let toReconcile = [];
 				
 				await Zotero.Utilities.Internal.forEachChunkAsync(
@@ -2195,6 +2198,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					100,
 					function (chunk) {
 						return Zotero.DB.executeTransaction(async () => {
+							let copiedItemIDs = [];
 							for (let item of chunk) {
 								var id = await this._copyItem({
 									item,
@@ -2206,7 +2210,17 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 								if (!id) {
 									continue;
 								}
-								newIDs.push(id);
+								copiedItemIDs.push(id);
+							}
+							// Add copied items to target collection
+							if (targetCollectionID) {
+								for (let itemID of copiedItemIDs) {
+									let item = Zotero.Items.get(itemID);
+									if (item.isTopLevelItem()) {
+										item.addToCollection(targetCollectionID);
+										await item.save({ skipSelect: true });
+									}
+								}
 							}
 						});
 					}.bind(this)
@@ -2248,17 +2262,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 			}
 			
-			// Add items to target collection
-			if (targetCollectionID) {
-				let ids = newIDs.filter(itemID => Zotero.Items.get(itemID).isTopLevelItem());
-				await Zotero.DB.executeTransaction(async function () {
-					let collection = await Zotero.Collections.getAsync(targetCollectionID);
-					await collection.addItems(ids);
-				}.bind(this));
-			}
-			else if (targetTreeRow.isPublications()) {
-				await Zotero.Items.addToPublications(newItems, copyOptions);
-			}
 			
 			// If moving, remove items from source collection
 			if (dropEffect == 'move' && toMove.length) {
