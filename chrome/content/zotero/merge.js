@@ -302,7 +302,7 @@ var Zotero_Merge_Window = new function () {
 			_wizard.getButton("finish").setAttribute("hidden", "true");
 		}
 		else {
-			let deck = document.querySelector(".wizard-next-deck");
+			let deck = _wizard.shadowRoot.querySelector(".wizard-next-deck");
 			deck.selectedIndex = 1;
 		}
 		
@@ -317,10 +317,9 @@ var Zotero_Merge_Window = new function () {
 			_wizard.getButton("next").setAttribute("hidden", "true");
 			finishButton.setAttribute("hidden", "false");
 		}
-		// Windows uses a deck to switch between the Next and Finish buttons
-		// TODO: check Linux
+		// Windows and Linux use a deck to switch between the Next and Finish buttons
 		else {
-			let deck = document.querySelector(".wizard-next-deck");
+			let deck = _wizard.shadowRoot.querySelector(".wizard-next-deck");
 			deck.selectedIndex = 0;
 		}
 		
