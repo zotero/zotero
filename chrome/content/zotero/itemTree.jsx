@@ -958,7 +958,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// When 0 is pressed, remove all colored tags
 			if (position == -1) {
 				let items = this.getSelectedItems();
-				return Zotero.Tags.removeColoredTagsFromItems(items);
+				Zotero.Tags.removeColoredTagsFromItems(items);
+				// Disable find-as-you-type for 0 keypress
+				return false;
 			}
 			let colorData = Zotero.Tags.getColorByPosition(libraryID, position);
 			// If a color isn't assigned to this number or any
