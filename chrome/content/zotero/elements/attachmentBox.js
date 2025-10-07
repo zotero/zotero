@@ -706,8 +706,14 @@
 			newNote.libraryID = this.item.libraryID;
 			newNote.parentID = this.item.parentID;
 			newNote.setNote(this.item.note);
+			// Place new note into the same collections as the attachment
+			let collectionIDs = this.item.getCollections();
+			newNote.setCollections(collectionIDs);
+			// Relate new note and the item
+			newNote.addRelatedItem(this.item);
 			await newNote.saveTx();
 			this.item.setNote("");
+			this.item.addRelatedItem(newNote);
 			await this.item.saveTx();
 		}
 

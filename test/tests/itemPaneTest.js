@@ -1804,6 +1804,28 @@ describe("Item pane", function () {
 			await waitForNotifierEvent('modify', 'item');
 			assert.equal(attachmentTwo.getDisplayTitle(), "PDF_two");
 		});
+
+		it("should relate note and its attachment after being converted from embedded to standalone", async function () {
+			let collection = await createDataObject('collection');
+			let attachment = await importFileAttachment('test.pdf', { title: 'PDF_one' });
+			attachment.setNote("Embedded test note");
+			await attachment.saveTx();
+			await ZoteroPane.selectItem(attachment.id);
+
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let attachmentBox = itemDetails.getPane(paneID);
+
+			await attachmentBox.convertAttachmentNote();
+			// Ensure that the standalone note is recorded as a related item of the attachment
+			let relatedItems = attachment.relatedItems.map(key => Zotero.Items.getByLibraryAndKey(attachment.libraryID, key));
+			assert.lengthOf(relatedItems, 1);
+			// Ensure that the note has the correct content
+			let note = relatedItems[0];
+			assert.isTrue(note.isNote());
+			assert.equal(note.getNote(), "Embedded test note");
+			// The note should be added to the same collection(s) as the attachment
+			assert.sameMembers(attachment.getCollections(), note.getCollections());
+		});
 	});
 	
 	
@@ -1814,11 +1836,14 @@ describe("Item pane", function () {
 			
 			var noteEditor = doc.getElementById('zotero-note-editor');
 			
-			// Wait for the editor
-			await new Zotero.Promise((resolve, reject) => {
-				noteEditor.onInit(() => resolve());
-			});
-			assert.equal(noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync(), null);
+			// Wait for the editor if it has not been initialized yet
+			if (!noteEditor.item) {
+				await new Zotero.Promise((resolve, reject) => {
+					noteEditor.onInit(() => resolve());
+				});
+				assert.equal(noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync(), null);
+			}
+
 			item.setNote('<p>Test</p>');
 			await item.saveTx();
 			
