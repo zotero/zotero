@@ -198,7 +198,10 @@ var ZoteroContextPane = new function () {
 
 		let placeholder = document.getElementById('zotero-reader-sidebar-pane');
 		placeholder.setAttribute('collapsed', sidebarWidth ? 'false' : 'true');
-		placeholder.setAttribute('width', sidebarWidth);
+		// Don't set width if 0 to prevent layout issues in older versions
+		if (sidePaneWidth) {
+			placeholder.setAttribute('width', sidebarWidth);
+		}
 
 		return { sidePaneState };
 	};
