@@ -30,6 +30,22 @@ const clamp = (val, min = 0, max = 1.0) => Math.min(Math.max(val, min), max);
 export const DEFAULT_ATTACHMENT_RENAME_TEMPLATE = "{{ firstCreator suffix=\" - \" }}{{ year suffix=\" - \" }}{{ title truncate=\"100\" }}";
 export const DEFAULT_AUTO_RENAME_FILE_TYPES = "application/pdf,application/epub+zip";
 
+const getExtension = filename => filename.match(/\.([^.]+)$/)?.[1] ?? '';
+
+const getNewFileNameData = async (attachmentItem, parentItem) => {
+	const newFileBaseName = Zotero.Attachments.getFileBaseNameFromItem(
+		parentItem, { attachmentTitle: attachmentItem.getField('title') }
+	);
+
+	const path = await attachmentItem.getFilePathAsync();
+	const ext = path
+		? Zotero.Attachments.getCorrectFileExtension(attachmentItem)
+		: getExtension(attachmentItem.attachmentFilename);
+
+	const newName = newFileBaseName + (ext ? '.' + ext : '');
+	return { newName, isFilePresent: !!path };
+};
+
 /**
  * Rename eligible attachment files based on their parent items' metadata.
  * @async
@@ -95,27 +111,23 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 			continue;
 		}
 
-		let path = await attachmentItem.getFilePathAsync();
-		const ext = path ? Zotero.File.getExtension(path) : attachmentItem.attachmentFilename.split('.').pop();
-
-		let newName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: attachmentItem.getField('title') });
-		let newNameWithExtension = ext.length ? `${newName}.${ext}` : newName;
+		const { newName, isFilePresent } = await getNewFileNameData(attachmentItem, parentItem);
 		Zotero.debug(`Renaming attachment ${attachmentItem.id} on parent item ${parentItem.id} to ${newName}`);
 
-		if (newNameWithExtension !== attachmentItem.attachmentFilename) {
+		if (newName !== attachmentItem.attachmentFilename) {
 			summary.push({
 				attachmentId: attachmentItem.id,
 				parentItemId: parentItem.id,
 				oldName: attachmentItem.attachmentFilename,
-				newName: newNameWithExtension,
-				isFilePresent: !!path
+				newName,
+				isFilePresent
 			});
 		}
 
 		if (!pretend) {
-			if (path) {
+			if (isFilePresent) {
 				let out = {};
-				const renamed = await attachmentItem.renameAttachmentFile(newNameWithExtension, { updateTitle: true, out });
+				const renamed = await attachmentItem.renameAttachmentFile(newName, { updateTitle: true, out });
 				if (out.noChange) {
 					continue;
 				}
@@ -129,8 +141,6 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 			else if (attachmentItem.attachmentFilename !== newName && attachmentItem.isStoredFileAttachment()) {
 				const oldFileName = attachmentItem.attachmentFilename;
 				const oldBaseName = attachmentItem.attachmentFilename.replace(/\.[^.]+$/, '');
-
-				// file is not present locally but we can still update filename in the database
 				attachmentItem.attachmentFilename = newName;
 
 				// update title if it matches the old filename
@@ -166,14 +176,15 @@ export async function renameFileFromParent(attachmentItem) {
 		throw new Error('Item ' + attachmentItem.itemID + ' cannot be renamed based on its parent item');
 	}
 
+	const oldBaseName = attachmentItem.attachmentFilename.replace(/\.[^.]+$/, '');
 	const parentItemID = attachmentItem.parentItemID;
 	let parentItem = await Zotero.Items.getAsync(parentItemID);
-	const oldBaseName = attachmentItem.attachmentFilename.replace(/\.[^.]+$/, '');
-	const fileBaseName = Zotero.Attachments.getFileBaseNameFromItem(parentItem, { attachmentTitle: attachmentItem.getField('title') });
-	const ext = Zotero.Attachments.getCorrectFileExtension(attachmentItem);
-	const newName = fileBaseName + (ext ? '.' + ext : '');
+	const { newName } = await getNewFileNameData(attachmentItem, parentItem);
 
-	const renamed = await attachmentItem.renameAttachmentFile(newName, { updateTitle: false, unique: true });
+	const renamed = await attachmentItem.renameAttachmentFile(
+		newName, { updateTitle: false, unique: true }
+	);
+
 	let requiresSave = false;
 	if (!renamed && attachmentItem.isStoredFileAttachment()) {
 		// file is not present locally but we can still update filename in the database

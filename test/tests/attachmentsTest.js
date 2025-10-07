@@ -2320,4 +2320,172 @@ describe("Zotero.Attachments", function () {
 			assert.equal(attachment.attachmentFilename, 'Title.pdf');
 		});
 	});
+	describe("#renameFilesFromParent", function () {
+		let { renameFilesFromParent } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+
+		before(async () => {
+			await resetDB({
+				thisArg: this,
+				skipBundledFiles: true
+			});
+		});
+
+		beforeEach((() => {
+			Zotero.Prefs.clear('autoRenameFiles.onMetadataChange');
+			Zotero.Prefs.set('autoRenameFiles.done', false);
+		}));
+
+		after((() => {
+			Zotero.Prefs.clear('autoRenameFiles.onMetadataChange');
+			Zotero.Prefs.clear('autoRenameFiles.done');
+		}));
+
+		it("should rename primary attachment to match parent item title", async function () {
+			let item = createUnsavedDataObject('item');
+			item.setField('title', 'Lorem');
+			await item.saveTx();
+
+			let attachment1 = await importFileAttachment('test.png', { parentItemID: item.id });
+			let attachment2 = await importFileAttachment('test.pdf', { parentItemID: item.id });
+
+			// Pretend run first
+			let summary = await renameFilesFromParent({ pretend: true });
+			assert.equal(summary.length, 1);
+			assert.equal(summary[0].oldName, attachment2.attachmentFilename);
+			assert.equal(summary[0].newName, 'Lorem.pdf');
+
+			// No files should be renamed yet
+			assert.equal(attachment1.attachmentFilename, 'test.png');
+			let path1pretend = await attachment1.getFilePathAsync();
+			assert.equal(OS.Path.basename(path1pretend), 'test.png');
+			assert.isTrue(await OS.File.exists(path1pretend));
+
+			assert.equal(attachment2.attachmentFilename, 'test.pdf');
+			let path2pretend = await attachment2.getFilePathAsync();
+			assert.equal(OS.Path.basename(path2pretend), 'test.pdf');
+			assert.isTrue(await OS.File.exists(path2pretend));
+
+			// autoRenameFiles.done should still be false
+			assert.isFalse(Zotero.Prefs.get('autoRenameFiles.done'));
+
+			// Actual run
+			await renameFilesFromParent();
+
+			// png is a secondary attachment, so not renamed
+			assert.equal(attachment1.attachmentFilename, 'test.png');
+			let path1 = await attachment1.getFilePathAsync();
+			assert.equal(OS.Path.basename(path1), 'test.png');
+			assert.isTrue(await OS.File.exists(path1));
+
+			// pdf is the primary attachment, so renamed
+			assert.equal(attachment2.attachmentFilename, 'Lorem.pdf');
+			let path2 = await attachment2.getFilePathAsync();
+			assert.equal(OS.Path.basename(path2), 'Lorem.pdf');
+			assert.isTrue(await OS.File.exists(path2));
+
+			assert.isTrue(Zotero.Prefs.get('autoRenameFiles.done'));
+			await attachment1.eraseTx();
+			await attachment2.eraseTx();
+			await item.eraseTx();
+		});
+
+		it('should restore missing extension when renaming a primary attachment with a file present locally', async function () {
+			let item = createUnsavedDataObject('item');
+			item.setField('title', 'Lorem');
+			await item.saveTx();
+
+			let attachment1 = await importFileAttachment('empty', { parentItemID: item.id, contentType: 'application/pdf' });
+
+			// Pretend run first
+			let summary = await renameFilesFromParent({ pretend: true });
+			assert.equal(summary.length, 1);
+			assert.equal(summary[0].oldName, attachment1.attachmentFilename);
+			assert.equal(summary[0].newName, 'Lorem.pdf');
+
+			// No files should be renamed yet
+			assert.equal(attachment1.attachmentFilename, 'empty');
+			let path1 = await attachment1.getFilePathAsync();
+			assert.isTrue(await OS.File.exists(path1));
+			assert.isTrue(Zotero.Prefs.get('autoRenameFiles.done') === false);
+
+			// Actual run
+			await renameFilesFromParent();
+
+			// pdf is the primary attachment, so renamed and extension restored
+			assert.equal(attachment1.attachmentFilename, 'Lorem.pdf');
+			let path2 = await attachment1.getFilePathAsync();
+			assert.equal(OS.Path.basename(path2), 'Lorem.pdf');
+			assert.isTrue(await OS.File.exists(path2));
+			assert.isTrue(Zotero.Prefs.get('autoRenameFiles.done'));
+
+			await attachment1.eraseTx();
+			await item.eraseTx();
+		});
+
+		it("should change file names even if the actual files are missing locally", async function () {
+			let item = createUnsavedDataObject('item');
+			item.setField('title', 'Lorem');
+			await item.saveTx();
+
+			// no extension specifically to test #5562
+			let attachment1 = await importFileAttachment('empty', { parentItemID: item.id, contentType: 'application/pdf' });
+			let path1 = await attachment1.getFilePathAsync();
+			await OS.File.remove(path1);
+			assert.isFalse(await OS.File.exists(path1));
+
+			// Pretend run first
+			let summary = await renameFilesFromParent({ pretend: true });
+			assert.equal(summary.length, 1);
+			assert.equal(summary[0].oldName, attachment1.attachmentFilename);
+			assert.equal(summary[0].newName, 'Lorem');
+
+			// No files should be renamed yet
+			assert.equal(attachment1.attachmentFilename, 'empty');
+			assert.isFalse(Zotero.Prefs.get('autoRenameFiles.done'));
+
+			// Actual run
+			await renameFilesFromParent();
+			
+			// pdf is the primary attachment, so renamed
+			assert.equal(attachment1.attachmentFilename, 'Lorem');
+			assert.isTrue(Zotero.Prefs.get('autoRenameFiles.done'));
+			
+			await item.eraseTx();
+			await attachment1.eraseTx();
+			await item.eraseTx();
+		});
+
+		it("should keep the extension when renaming a file that is missing locally", async function () {
+			let item = createUnsavedDataObject('item');
+			item.setField('title', 'Lorem');
+			await item.saveTx();
+
+			// no extension specifically to test #5562
+			let attachment1 = await importFileAttachment('test.pdf', { parentItemID: item.id });
+			let path1 = await attachment1.getFilePathAsync();
+			await OS.File.remove(path1);
+			assert.isFalse(await OS.File.exists(path1));
+
+			// Pretend run first
+			let summary = await renameFilesFromParent({ pretend: true });
+			assert.equal(summary.length, 1);
+			assert.equal(summary[0].oldName, attachment1.attachmentFilename);
+			assert.equal(summary[0].newName, 'Lorem.pdf');
+
+			// No files should be renamed yet
+			assert.equal(attachment1.attachmentFilename, 'test.pdf');
+			assert.isFalse(Zotero.Prefs.get('autoRenameFiles.done'));
+
+			// Actual run
+			await renameFilesFromParent();
+
+			// pdf is the primary attachment, so renamed
+			assert.equal(attachment1.attachmentFilename, 'Lorem.pdf');
+			assert.isTrue(Zotero.Prefs.get('autoRenameFiles.done'));
+
+			await item.eraseTx();
+			await attachment1.eraseTx();
+			await item.eraseTx();
+		});	
+	});
 })
