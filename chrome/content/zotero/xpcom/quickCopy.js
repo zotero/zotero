@@ -28,51 +28,48 @@
 Zotero.QuickCopy = new function () {
 	this.lastActiveURL = null;
 	
-	var _initTimeoutID
-	var _initPromise;
 	var _initialized = false;
 	var _initCancelled = false;
 	var _siteSettings;
 	var _formattedNames;
 	
-	this.init = async function () {
-		Zotero.debug("Initializing Quick Copy");
-		
-		if (!_initialized) {
-			// Make sure export translator code is loaded whenever the output format changes
-			this._prefObserverID = Zotero.Prefs.registerObserver(
-				"export.quickCopy.setting", _loadOutputFormat
-			);
-			
-			this._prefObserverID = Zotero.Prefs.registerObserver(
-				"export.noteQuickCopy.setting", _loadNoteOutputFormat
-			);
-			_initialized = true;
+	this.init = function () {
+		if (_initialized) {
+			return;
 		}
 		
-		// Load code for selected export translators ahead of time
-		// (in the background, because it requires translator initialization)
-		Zotero.Schema.schemaUpdatePromise
-		.then(function () {
-			if (_initCancelled) return;
-			
-			// Avoid random translator initialization during tests, which can result in timeouts,
+		Zotero.debug("Initializing Quick Copy");
+		
+		_initialized = true;
+
+		// Make sure export translator code is loaded whenever the output format changes
+		this._prefObserverID = Zotero.Prefs.registerObserver(
+			"export.quickCopy.setting", _loadOutputFormat
+		);
+		
+		this._prefObserverID = Zotero.Prefs.registerObserver(
+			"export.noteQuickCopy.setting", _loadNoteOutputFormat
+		);
+		
+		Zotero.Schema.schemaUpdatePromise.then(async () => {
+			// Avoid random translator initialization during tests, which can result in timeouts
 			// if an export format is selected
 			if (Zotero.test) return;
-			
-			_initPromise = (async () => {
-				await _loadOutputFormat();
-				await _loadNoteOutputFormat();
-				await this.loadSiteSettings();
-			})();
-		}.bind(this));
+
+			// Unfortunate, but we need to keep checking this to prevent race conditions
+			if (_initCancelled) return;
+			await _loadOutputFormat();
+			if (_initCancelled) return;
+			await _loadNoteOutputFormat();
+			if (_initCancelled) return;
+			await this.loadSiteSettings();
+		});
 	};
 	
 	
 	this.uninit = function () {
+		_initialized = false;
 		_initCancelled = true;
-		// TODO: fx140: We used to explicitly cancel the Bluebird _initPromise here
-		// Is it OK to let it complete?
 		Zotero.Prefs.unregisterObserver(this._prefObserverID);
 	};
 	

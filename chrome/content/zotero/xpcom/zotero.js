@@ -748,7 +748,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			
 			Zotero.Items.startEmptyTrashTimer();
 			
-			await Zotero.QuickCopy.init();
+			Zotero.QuickCopy.init();
 			Zotero.addShutdownListener(() => Zotero.QuickCopy.uninit());
 			
 			Zotero.Feeds.init();
