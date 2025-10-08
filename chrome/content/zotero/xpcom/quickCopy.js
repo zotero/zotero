@@ -43,13 +43,14 @@ Zotero.QuickCopy = new function () {
 		_initialized = true;
 
 		// Make sure export translator code is loaded whenever the output format changes
-		this._prefObserverID = Zotero.Prefs.registerObserver(
-			"export.quickCopy.setting", _loadOutputFormat
-		);
-		
-		this._prefObserverID = Zotero.Prefs.registerObserver(
-			"export.noteQuickCopy.setting", _loadNoteOutputFormat
-		);
+		this._prefObserverIDs = [
+			Zotero.Prefs.registerObserver(
+				"export.quickCopy.setting", _loadOutputFormat
+			),
+			Zotero.Prefs.registerObserver(
+				"export.noteQuickCopy.setting", _loadNoteOutputFormat
+			),
+		];
 		
 		Zotero.Schema.schemaUpdatePromise.then(async () => {
 			// Avoid random translator initialization during tests, which can result in timeouts
@@ -70,7 +71,7 @@ Zotero.QuickCopy = new function () {
 	this.uninit = function () {
 		_initialized = false;
 		_initCancelled = true;
-		Zotero.Prefs.unregisterObserver(this._prefObserverID);
+		this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 	};
 	
 	
