@@ -978,11 +978,14 @@ async function citeprocToHTML(itemOrItems, searchParams, asCitationList) {
 /**
  * Export items to a string with the given translator.
  *
- * @param {Zotero.Item[]} items
+ * @param {Zotero.Item|Zotero.Item[]} itemOrItems
  * @param {String} translatorID
  * @returns {Promise<String>}
  */
-function exportItems(items, translatorID) {
+function exportItems(itemOrItems, translatorID) {
+	let items = Array.isArray(itemOrItems)
+		? itemOrItems
+		: [itemOrItems];
 	return new Promise((resolve, reject) => {
 		let translation = new Zotero.Translate.Export();
 		translation.setItems(items.slice());
