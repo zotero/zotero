@@ -22,7 +22,7 @@ reader-underline-annotation = Unterstreichungsanmerkung
 reader-note-annotation = Notizanmerkung
 reader-text-annotation = Textanmerkung
 reader-image-annotation = Bildanmerkung
-reader-ink-annotation = Ink Annotation
+reader-ink-annotation = Freihandanmerkung
 reader-search-result-index = Suchergebnis
 reader-search-result-total = Gesamte Suchergebnisse
 reader-draw = Zeichnen
@@ -43,19 +43,19 @@ reader-page = Seite
 reader-location = Speicherort
 reader-read-only = Schreibgeschützt
 reader-prompt-transfer-from-pdf-title = Anmerkungen importieren
-reader-prompt-transfer-from-pdf-text = Annotations stored in the PDF file will be moved to { $target }.
+reader-prompt-transfer-from-pdf-text = In der PDF-Datei gespeicherte Anmerkungen werden zu { $target } übertragen.
 reader-prompt-password-protected = Dieser Vorgang wird für passwortgeschützte PDF-Dateien nicht unterstützt.
 reader-prompt-delete-pages-title = Seiten löschen
 reader-prompt-delete-pages-text =
     { $count ->
-        [one] Are you sure you want to delete { $count } page from the PDF file?
-       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+        [one] Sie Sie sicher, dass Sie 1 Seite aus dieser PDF-Datei entfernen möchten?
+       *[other] Sie Sie sicher, dass Sie { $count } Seiten aus dieser PDF-Datei entfernen möchten?
     }
-reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-title = Anmerkung löschen
 reader-prompt-delete-annotations-text =
     { $count ->
-        [one] Are you sure you want to delete the selected annotation?
-       *[other] Are you sure you want to delete the selected annotations?
+        [one] Sind Sie sicher, dass Sie die ausgewählte Anmerkung löschen möchten?
+       *[other] Sind Sie sicher, dass Sie die ausgewählten Anmerkungen löschen möchten?
     }
 reader-rotate-left = Links drehen
 reader-rotate-right = Rechts drehen
@@ -125,7 +125,7 @@ reader-double = Doppel
 reader-theme-name = Theme-Name:
 reader-background = Hintergrund:
 reader-foreground = Vordergrund:
-reader-focus-mode = Focus Mode
+reader-focus-mode = Fokus-Modus
 reader-clear-selection = Auswahl aufheben
 reader-move-annotation-start-key =
     { PLATFORM() ->

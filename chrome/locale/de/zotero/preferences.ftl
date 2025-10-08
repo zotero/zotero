@@ -105,8 +105,8 @@ preferences-sync-reset-restore-to-server-remaining-items-text =
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->
-        [one] Delete 1 item
-       *[other] Delete { $remoteItemsDeletedCount } items
+        [one] 1 Eintrag löschen
+       *[other] { $remoteItemsDeletedCount } Einträge löschen
     }
-preferences-sync-reset-restore-to-server-confirmation-text = delete online library
+preferences-sync-reset-restore-to-server-confirmation-text = Online-Bibliothek löschen
 preferences-sync-reset-restore-to-server-yes = Daten in Online-Bibliothek ersetzen

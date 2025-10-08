@@ -21,7 +21,7 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-edit-reference }
 integration-citationDialog = Zitations-Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
-integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
+integration-citationDialog-section-selected = Ausgewählte Einträge ({ $count }/{ $total })
 integration-citationDialog-section-cited =
     { $count ->
         [0] Cited Items
@@ -34,13 +34,13 @@ integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
-integration-citationDialog-settings-title = Citation Settings
+integration-citationDialog-settings-title = Zitationseinstellungen
 integration-citationDialog-lib-no-items =
     { $search ->
         [true] No selected, open, or cited items match the current search
        *[other] No selected or open items
     }
-integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-settings-keepSorted = Quellen sortiert lassen
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-btn-mode =
@@ -62,7 +62,7 @@ integration-citationDialog-btn-cancel =
     .title = { general-cancel }
 integration-citationDialog-general-instructions = Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation.
 integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
-integration-citationDialog-search-for-items = Search for items to add to the citation
+integration-citationDialog-search-for-items = Suchen, um Einträge zur Zitation hinzuzufügen
 integration-citationDialog-aria-bubble =
     .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input =
@@ -76,17 +76,17 @@ integration-citationDialog-aria-item-list =
 integration-citationDialog-aria-item-library =
     .aria-description = Use Right/Left Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-collections-table =
-    .aria-label = Collections.
-    .aria-description = Select a collection and press Tab to navigate its items.
+    .aria-label = Sammlungen.
+    .aria-description = Sammlung auswählen und mit Tab durch die Einträge navigieren
 integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
-    .aria-label = This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it.
-integration-citationDialog-add-all = Add all
+    .aria-label = Dieser Eintrag wurde der Zitation hinzugefügt.  { return-or-enter } drücken, um ihn erneut hinzuzufügen oder { delete-or-backspace } drücken, um ihn zu entfernen.
+integration-citationDialog-add-all = Alle hinzufügen
 integration-citationDialog-collapse-section =
     .title = Abschnitt einklappen
-integration-citationDialog-bubble-empty = (no title)
-integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-bubble-empty = (Kein Titel)
+integration-citationDialog-add-to-citation = Zur Zitation hinzufügen
 integration-prefs-displayAs-label = Literaturangaben anzeigen als:
 integration-prefs-footnotes =
     .label = Fußnoten
@@ -113,5 +113,5 @@ integration-error-unable-to-find-winword = { -app-name } konnte keine laufende W
 integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
 integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
 integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
-integration-warning-discard-changes = Discard Changes
+integration-warning-discard-changes = Änderungen verwerfen
 integration-warning-command-is-running = A word processor integration command is already running.

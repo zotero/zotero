@@ -61,5 +61,5 @@ note-editor-insert-column-after = Spalte rechts einfügen
 note-editor-delete-row = Zeile löschen
 note-editor-delete-column = Spalte löschen
 note-editor-delete-table = Tabelle löschen
-note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
-note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-link-popup-appeared = Link-Pop-Up ist erschienen. Shift-Tab benutzen, um darin zu navigieren.
+note-editor-citation-popup-appeared = Zitations-Pop-Up ist erschienen. Shift-Tab benutzen, um darin zu navigieren.
