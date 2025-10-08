@@ -275,7 +275,7 @@ export function registerAutoRenameFileFromParent() {
 						parentItemBefore.setType(value);
 					}
 					else if (key === 'creators') {
-						parentItemBefore.setCreators(value);
+						parentItemBefore.setCreators(Object.values(value));
 					}
 					else if (validFields.includes(key)) {
 						parentItemBefore.setField(key, value);

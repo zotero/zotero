@@ -2486,6 +2486,43 @@ describe("Zotero.Attachments", function () {
 			await item.eraseTx();
 			await attachment1.eraseTx();
 			await item.eraseTx();
-		});	
+		});
+
+		it("should auto-rename a file when parent creators change", async function () {
+			let item = createUnsavedDataObject('item');
+			item.setField('title', 'Lorem');
+			item.setCreators([{ firstName: 'Foo', lastName: 'Bar', creatorType: 'author' }]);
+			await item.saveTx();
+			let attachment1 = await importFileAttachment('test.pdf', { parentItemID: item.id });
+			await renameFilesFromParent();
+			assert.equal(attachment1.attachmentFilename, 'Bar - Lorem.pdf');
+
+			item.setCreators([{ firstName: 'Baz', lastName: 'Bazinga', creatorType: 'author' }]);
+			item.saveTx();
+			assert.include(await waitForItemEvent("modify"), item.id);
+			assert.include(await waitForItemEvent("modify"), attachment1.id);
+
+			assert.equal(attachment1.attachmentFilename, 'Bazinga - Lorem.pdf');
+			await attachment1.eraseTx();
+			await item.eraseTx();
+		});
+
+		it("should auto-rename a file when parent title changes", async function () {
+			let item = createUnsavedDataObject('item');
+			item.setField('title', 'Lorem');
+			await item.saveTx();
+			let attachment1 = await importFileAttachment('test.pdf', { parentItemID: item.id });
+			await renameFilesFromParent();
+			assert.equal(attachment1.attachmentFilename, 'Lorem.pdf');
+
+			item.setField('title', 'Ipsum');
+			item.saveTx();
+			assert.include(await waitForItemEvent("modify"), item.id);
+			assert.include(await waitForItemEvent("modify"), attachment1.id);
+
+			assert.equal(attachment1.attachmentFilename, 'Ipsum.pdf');
+			await attachment1.eraseTx();
+			await item.eraseTx();
+		});
 	});
 })
