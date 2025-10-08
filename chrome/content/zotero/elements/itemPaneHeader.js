@@ -83,7 +83,9 @@
 			];
 			
 			this._bibEntryCache = new LRUCache();
-			this._cacheCSLEngine();
+			if (Zotero.Prefs.get(PREF_HEADER_MODE) === 'bibEntry') {
+				this._cacheCSLEngine();
+			}
 			
 			this.title = this.querySelector('.title');
 			this.titleField = this.title.querySelector('editable-text');
