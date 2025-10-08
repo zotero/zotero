@@ -35,12 +35,12 @@
 			</html:div>
 			<deck/>
 		`);
+		
+		_previews = [];
 
 		_deck;
 		
 		_switcher;
-
-		_itemPairs = [];
 
 		init() {
 			this._deck = this.querySelector('deck');
@@ -48,21 +48,49 @@
 			
 			this.querySelector('.previous').addEventListener('command', () => {
 				this._deck.selectedIndex--;
-				this._renderSwitcher();
+				this._renderPreviews();
 			});
 			this.querySelector('.next').addEventListener('command', () => {
 				this._deck.selectedIndex++;
-				this._renderSwitcher();
+				this._renderPreviews();
 			});
 		}
 		
-		clearItemPairs() {
-			this._itemPairs = [];
+		/**
+		 * @param {any} preItem JSON item
+		 * @param {any} [postItem] JSON item (defaults to cleaned version of preItem)
+		 * @returns {ScaffoldItemPreview}
+		 */
+		createPreviewForItemPair(preItem, postItem) {
+			let preview = document.createXULElement('scaffold-item-preview');
+			preview.itemPair = [preItem, postItem];
+			return preview;
+		}
+		
+		clearPreviews() {
+			this._previews = [];
 			this._deck.selectedIndex = 0;
 			this._deck.replaceChildren();
-			this._renderSwitcher();
-			
-			this.hidden = true;
+			this._updateVisibility();
+		}
+
+		/**
+		 * @param {ScaffoldItemPreview[]} previews
+		 */
+		setPreviews(previews) {
+			this._previews = previews;
+			this._deck.selectedIndex = 0;
+			this._renderPreviews();
+			this._updateVisibility();
+		}
+
+		/**
+		 * @param {ScaffoldItemPreview} preview
+		 */
+		addPreview(preview) {
+			this._previews.push(preview);
+			this._renderPreviews();
+			this._updateVisibility();
 		}
 
 		/**
@@ -71,33 +99,45 @@
 		 * @returns {ScaffoldItemPreview}
 		 */
 		addItemPair(preItem, postItem) {
-			let preview = document.createXULElement('scaffold-item-preview');
-			preview.itemPair = [preItem, postItem];
-			this._deck.append(preview);
-			this._renderSwitcher();
-			
-			if (this.hidden) {
-				let splitterPane = this.closest('splitter + *');
-				if (splitterPane) {
-					// If the pane hasn't been resized, it won't have a fixed width,
-					// so it'll grow when wrapping text is added. Fix its width now.
-					splitterPane.style.width = splitterPane.getBoundingClientRect().width + 'px';
-				}
-				this.hidden = false;
-			}
-			
+			let preview = this.createPreviewForItemPair(preItem, postItem);
+			this.addPreview(preview);
 			return preview;
 		}
 		
-		_renderSwitcher() {
-			let switcher = this.querySelector('.switcher');
-			if (this._deck.children.length > 1) {
-				switcher.hidden = false;
-				switcher.querySelector('.current').textContent = this._deck.selectedIndex + 1;
-				switcher.querySelector('.max').textContent = this._deck.children.length;
+		_updateVisibility() {
+			if (this._deck.childElementCount) {
+				if (this.hidden) {
+					let splitterPane = this.closest('splitter + *');
+					if (splitterPane) {
+						// If the pane hasn't been resized, it won't have a fixed width,
+						// so it'll grow when wrapping text is added. Fix its width now.
+						splitterPane.style.width = splitterPane.getBoundingClientRect().width + 'px';
+					}
+					this.hidden = false;
+				}
 			}
 			else {
-				switcher.hidden = true;
+				this.hidden = true;
+			}
+		}
+
+		_renderPreviews() {
+			this._deck.replaceChildren(
+				...this._previews.map((preview, i) => {
+					if (i === this._deck.selectedIndex) {
+						return preview;
+					}
+					return document.createXULElement('hbox');
+				})
+			);
+			
+			if (this._deck.children.length > 1) {
+				this._switcher.hidden = false;
+				this._switcher.querySelector('.current').textContent = this._deck.selectedIndex + 1;
+				this._switcher.querySelector('.max').textContent = this._deck.children.length;
+			}
+			else {
+				this._switcher.hidden = true;
 			}
 		}
 	}
