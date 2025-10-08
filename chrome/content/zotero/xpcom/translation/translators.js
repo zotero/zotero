@@ -271,7 +271,7 @@ Zotero.Translators = new function () {
 		await this.init(Object.assign({}, options, { reinit: true }));
 		this._translatorsHash = null;
 		this._sortedTranslatorHash = null;
-		await Zotero.QuickCopy.init();
+		Zotero.QuickCopy.init();
 	};
 	
 	
