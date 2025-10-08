@@ -28,10 +28,7 @@ var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules
 var Zotero_CSL_Editor = new function () {
 	let monaco, editor;
 
-	this.init = init;
-	this.loadCSL = loadCSL;
-
-	async function init() {
+	this.init = async function () {
 		await Zotero.Schema.schemaUpdatePromise;
 
 		const isDarkMQL = window.matchMedia('(prefers-color-scheme: dark)');
@@ -74,9 +71,7 @@ var Zotero_CSL_Editor = new function () {
 		monaco = _monaco;
 		editor = _editor;
 
-		editor.getModel().onDidChangeContent(Zotero.Utilities.debounce(() => {
-			this.onStyleModified();
-		}, 250));
+		editor.getModel().onDidChangeContent(this.onStyleModifiedDebounced);
 
 		if (currentStyle) {
 			// Call asynchronously, see note in Zotero.Styles
@@ -87,7 +82,7 @@ var Zotero_CSL_Editor = new function () {
 			monaco.editor.setTheme(ev.matches ? 'vs-dark' : 'vs-light');
 			this.refresh();
 		});
-	}
+	};
 	
 	this.onStyleSelected = function (styleID) {
 		Zotero.Prefs.set('export.lastStyle', styleID);
@@ -98,15 +93,9 @@ var Zotero_CSL_Editor = new function () {
 			Zotero.Prefs.get('export.lastLocale')
 		);
 		
-		loadCSL(style.styleID);
+		this.loadCSL(style.styleID);
 		this.refresh();
 	};
-	
-	this.refresh = function () {
-		this.generateBibliography(this.loadStyleFromEditor());
-	};
-
-	this.refreshDebounced = Zotero.Utilities.debounce(this.refresh, 250);
 	
 	this.save = async function () {
 		var style = editor.getValue();
@@ -131,11 +120,11 @@ var Zotero_CSL_Editor = new function () {
 		}
 	};
 	
-	function loadCSL(cslID) {
+	this.loadCSL = function (cslID) {
 		var style = Zotero.Styles.get(cslID);
 		editor.setValue(style.getXML());
 		document.getElementById('zotero-csl-list').value = cslID;
-	}
+	};
 	
 	this.loadStyleFromEditor = function () {
 		var styleObject;
@@ -174,7 +163,9 @@ var Zotero_CSL_Editor = new function () {
 		Zotero_CSL_Editor.generateBibliography(styleObject);
 	};
 	
-	this.generateBibliography = function (style) {
+	this.onStyleModifiedDebounced = Zotero.Utilities.debounce(this.onStyleModified.bind(this), 250);
+	
+	this.generateBibliography = function (style = this.loadStyleFromEditor()) {
 		var items = Zotero.getActiveZoteroPane().getSelectedItems();
 		if (items.length == 0) {
 			this.updateIframe(Zotero.getString('styles.editor.warning.noItems'), 'warning');
@@ -245,6 +236,8 @@ var Zotero_CSL_Editor = new function () {
 		}
 		styleEngine.free();
 	};
+
+	this.generateBibliographyDebounced = Zotero.Utilities.debounce(this.generateBibliography, 250);
 
 	this.updateMarkers = function (rawErrors) {
 		let model = editor.getModel();
