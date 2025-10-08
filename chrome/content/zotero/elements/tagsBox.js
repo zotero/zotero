@@ -238,7 +238,11 @@
 						this.remove(tagName);
 						try {
 							item.removeTag(tagName);
-							await item.saveTx();
+							// Save item after a debounce to avoid triggering multiple
+							// save operations. If there are many tags in the library,
+							// db transaction may not keep up with UI changes, and cause
+							// some deleted rows to reappear.
+							this._saveItemDebounced(item);
 						}
 						catch (e) {
 							this._forceRenderAll();
@@ -608,6 +612,10 @@
 				});
 			}
 		}
+
+		_saveItemDebounced = Zotero.Utilities.debounce(async (item) => {
+			await item.saveTx();
+		});
 
 		_id(id) {
 			return this.querySelector(`[id=${id}]`);
