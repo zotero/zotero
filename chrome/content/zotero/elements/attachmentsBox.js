@@ -54,6 +54,10 @@
 
 		_previewDiscarded = false;
 
+		_discardTimeoutID = null;
+
+		_pendingDiscardPreviewRenderId = null;
+
 		get item() {
 			return this._item;
 		}
@@ -134,7 +138,11 @@
 		}
 
 		destroy() {
-			this.discard();
+			this._cancelPendingDiscard();
+			if (this._preview) {
+				this._preview._clearPendingTasks();
+				this._preview.discard?.();
+			}
 			this._preview?.remove();
 			delete this._preview;
 
@@ -204,9 +212,17 @@
 			if (this._isAlreadyRendered("async")) {
 				if (this._previewDiscarded) {
 					this._previewDiscarded = false;
-					this.previewElem.render();
+					// Only re-render preview if conditions allow it
+					// This prevents creating preview DOM when box is invisible
+					if (this.initialized && this._renderStage === "final") {
+						let attachment = await this._getPreviewAttachment();
+						if (attachment && this.usePreview && (!this._attachmentIDs.length || this._section?.open)) {
+							this.previewElem.render();
+						}
+					}
 				}
 				this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
+				this._cancelPendingDiscard();
 				return;
 			}
 			this._renderStage = "final";
@@ -223,15 +239,32 @@
 
 		discard() {
 			if (!this._preview) return;
-			let lastPreviewRenderId = this._lastPreviewRenderId;
-			setTimeout(() => {
-				if (!this._asyncRendering && this._lastPreviewRenderId === lastPreviewRenderId) {
+			
+			this._cancelPendingDiscard();
+			
+			this._pendingDiscardPreviewRenderId = this._lastPreviewRenderId;
+			
+			this._discardTimeoutID = setTimeout(() => {
+				this._discardTimeoutID = null;
+				
+				if (!this._asyncRendering
+					&& this._pendingDiscardPreviewRenderId === this._lastPreviewRenderId) {
 					this._preview?.discard();
 					this._previewDiscarded = true;
 				}
+				
+				this._pendingDiscardPreviewRenderId = null;
 			}, this._discardPreviewTimeout);
 		}
-		
+
+		_cancelPendingDiscard() {
+			if (this._discardTimeoutID) {
+				clearTimeout(this._discardTimeoutID);
+				this._discardTimeoutID = null;
+			}
+			this._pendingDiscardPreviewRenderId = null;
+		}
+
 		updateCount() {
 			if (!this._item?.isRegularItem()) {
 				return;
@@ -260,6 +293,7 @@
 			let attachment = await this._getPreviewAttachment();
 			this.toggleAttribute('data-use-preview', !!attachment && Zotero.Prefs.get('showAttachmentPreview'));
 			if (!attachment) {
+				this._cancelPendingDiscard();
 				return;
 			}
 			if (!this.usePreview
@@ -272,6 +306,8 @@
 			this.previewElem.item = attachment;
 			await this.previewElem.render();
 			this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
+			
+			this._cancelPendingDiscard();
 		}
 
 		async _getPreviewAttachment() {

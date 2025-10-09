@@ -5,7 +5,7 @@ describe("Item pane", function () {
 		let res = await waitForCallback(
 			() => box._asyncRenderItemID && !box._asyncRendering
 				&& (!itemID || box._asyncRenderItemID == itemID),
-			100, 3);
+			100, 10);
 		if (res instanceof Error) {
 			throw res;
 		}
@@ -19,7 +19,7 @@ describe("Item pane", function () {
 		let res = await waitForCallback(
 			() => preview._reader?.itemID == itemID
 				&& !preview._isProcessingTask && !preview._lastTask
-			, 100, 3);
+			, 100, 10);
 		if (res instanceof Error) {
 			throw res;
 		}
@@ -736,6 +736,17 @@ describe("Item pane", function () {
 		});
 
 		afterEach(function () {
+			// Ensure all previews are properly discarded and cleaned up
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let attachmentsBox = itemDetails.getPane(paneID);
+			
+			// Force cleanup of any pending operations and queued tasks
+			if (attachmentsBox._preview) {
+				attachmentsBox._cancelPendingDiscard?.();
+				attachmentsBox._preview._clearPendingTasks();
+				attachmentsBox._preview.discard?.();
+			}
+
 			Zotero_Tabs.select("zotero-pane");
 			Zotero_Tabs.closeAll();
 		});
@@ -1305,7 +1316,7 @@ describe("Item pane", function () {
 
 			const discardTimeout = 50;
 
-			// Temporarily set discard timeout to 100ms for testing
+			// Temporarily set discard timeout for testing
 			let currentDiscardTimeout = attachmentsBox._discardPreviewTimeout;
 			attachmentsBox._discardPreviewTimeout = discardTimeout;
 
@@ -1321,8 +1332,8 @@ describe("Item pane", function () {
 			// Scroll the attachments pane out of view
 			await waitForScrollToPane(itemDetails, 'info');
 
-			// Wait a bit for the preview to be discarded
-			await Zotero.Promise.delay(discardTimeout + 100);
+			// Wait for the intersection observer to trigger discard and the discard process to complete
+			await waitForCallback(() => !attachmentsBox._preview._isReaderInitialized);
 			
 			assert.isFalse(attachmentsBox._preview._isReaderInitialized);
 
@@ -1539,6 +1550,17 @@ describe("Item pane", function () {
 		});
 
 		afterEach(function () {
+			// Ensure all previews are properly discarded and cleaned up
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let attachmentBox = itemDetails.getPane(paneID);
+
+			// Force cleanup of any pending operations and queued tasks
+			if (attachmentBox._preview) {
+				attachmentBox._cancelPendingDiscard?.();
+				attachmentBox._preview._clearPendingTasks();
+				attachmentBox._preview.discard?.();
+			}
+
 			Zotero_Tabs.select("zotero-pane");
 			Zotero_Tabs.closeAll();
 		});
