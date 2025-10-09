@@ -113,13 +113,6 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.wizard.addEventListener('pageshow', this.updateFocus.bind(this));
 		this.wizard.addEventListener('wizardcancel', this.onCancel.bind(this));
 
-		fileHandlingEl.addEventListener('command', () => {
-			Zotero.Prefs.set('import.fileHandling', fileHandlingEl.value);
-		});
-		createCollectionEl.addEventListener('command', () => {
-			Zotero.Prefs.set('import.createCollection', createCollectionEl.checked);
-		});
-
 		// wizard.shadowRoot content isn't exposed to our css
 		this.wizard.shadowRoot
 			.querySelector('.wizard-header-label').style.fontSize = '16px';
@@ -443,7 +436,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.wizard.canAdvance = false;
 		this.wizard.canRewind = false;
 
-		const linkFiles = document.getElementById('file-handling').selectedItem.id === 'link';
+		const fileHandling = document.getElementById('file-handling').value;
+		const linkFiles = fileHandling === 'link';
 		const recreateStructure = document.getElementById('recreate-structure').checked;
 		const shouldCreateCollection = document.getElementById('create-collection').checked;
 		const mimeTypes = document.getElementById('import-pdf').checked
@@ -454,6 +448,9 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			: null;
 		const newItemsOnly = document.getElementById('new-items-only-checkbox').checked;
 		const relinkOnly = document.getElementById('relink-only-checkbox').checked;
+
+		Zotero.Prefs.set('import.fileHandling', fileHandling);
+		Zotero.Prefs.set('import.createCollection', shouldCreateCollection);
 		
 		try {
 			const result = await Zotero_File_Interface.importFile({
