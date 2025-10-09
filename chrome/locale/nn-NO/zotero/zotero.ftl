@@ -1,4 +1,4 @@
-general-sentence-separator = 
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt

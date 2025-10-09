@@ -66,7 +66,19 @@ async function getFTL() {
 			}
 
 			try {
-				const ftl = JSONToFtl(Object.fromEntries(translated), baseFTL);
+				let ftl = JSONToFtl(Object.fromEntries(translated), baseFTL);
+				
+				// Special handling for 'general-sentence-separator', which doesn't get uploaded to
+				// Transifex
+				if (sourceFileBaseName == 'zotero') {
+					// Don't include space for Chinese, Japanese, Thai, Burmese, Khmer, or Lao
+					let spaceValue = /^(zh|ja|th|my|km|lo)/.test(locale) ? '' : ' '
+					ftl = ftl.replace(
+						/^general-sentence-separator.+/m,
+						`general-sentence-separator = { "${spaceValue}" }`
+					);
+				}
+				
 				const outFtlPath = join(getLocaleDir(locale), sourceFileBaseName + '.ftl');
 				await fs.outputFile(outFtlPath, ftl);
 				onProgress(`${locale}/${sourceFileBaseName}.ftl`, null, 'localize');

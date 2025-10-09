@@ -1,4 +1,4 @@
-general-sentence-separator = 
+general-sentence-separator = { " " }
 general-key-control = Krmilka (Control)
 general-key-shift = Dvigalka
 general-key-alt = Izmenjalka (Alt)
