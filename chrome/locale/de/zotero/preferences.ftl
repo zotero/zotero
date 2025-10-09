@@ -94,8 +94,8 @@ preferences-advanced-default-data-dir =
 preferences-sync-reset-restore-to-server-body = { -app-name } wird “{ $libraryName }” auf { $domain } mit Daten von diesem Computer ersetzen.
 preferences-sync-reset-restore-to-server-deleted-items-text =
     { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
-        [one] item
-       *[other] items
+        [one] Eintrag
+       *[other] Einträge
     } in der Online-Bibliothek werden dauerhaft gelöscht.
 preferences-sync-reset-restore-to-server-remaining-items-text =
     { general-sentence-separator }{ $localItemsCount ->

@@ -96,7 +96,7 @@ preferences-sync-reset-restore-to-server-deleted-items-text =
     在线文库中 { $remoteItemsDeletedCount } 个 { $remoteItemsDeletedCount ->
         [one] 条目
        *[other] 条目
-    } 将被永久删除
+    } 将被永久删除。
 preferences-sync-reset-restore-to-server-remaining-items-text =
     { general-sentence-separator }{ $localItemsCount ->
         [0] 本地文库和在线文库将被清空。
