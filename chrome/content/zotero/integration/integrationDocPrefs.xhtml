@@ -50,7 +50,10 @@
 			Services.scriptloader.loadSubScript('chrome://zotero/content/elements/styleConfigurator.js', this);
 			Services.scriptloader.loadSubScript("chrome://zotero/content/bibliography.js", this);
 		</script>
-		<html:link rel="localization" href="zotero.ftl"/>
+		<linkset>
+			<html:link rel="localization" href="branding/brand.ftl" />
+			<html:link rel="localization" href="zotero.ftl"/>
+		</linkset>
 
 		<vbox id="zotero-bibliography-container">
 			<style-configurator id="style-configurator" />
