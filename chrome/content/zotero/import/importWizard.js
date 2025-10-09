@@ -117,7 +117,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			Zotero.Prefs.set('import.fileHandling', fileHandlingEl.value);
 		});
 		createCollectionEl.addEventListener('command', () => {
-			Zotero.Prefs.set('import.shouldCreateCollection', createCollectionEl.checked);
+			Zotero.Prefs.set('import.createCollection', createCollectionEl.checked);
 		});
 
 		// wizard.shadowRoot content isn't exposed to our css
@@ -136,8 +136,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.mendeleyImporterVersion = parseInt((await Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='mendeleyImport' AND key='version'")) || 0);
 
 		// Initialize controls on the options page with default or previously saved values
-		const shouldCreateCollection = Zotero.Prefs.prefHasUserValue('import.shouldCreateCollection')
-			? Zotero.Prefs.get('import.shouldCreateCollection')
+		const shouldCreateCollection = Zotero.Prefs.prefHasUserValue('import.createCollection')
+			? Zotero.Prefs.get('import.createCollection')
 			: await this.getShouldCreateCollection();
 		const fileHandling = Zotero.Prefs.get('import.fileHandling') ?? 'copy';
 		fileHandlingEl.value = fileHandling;
