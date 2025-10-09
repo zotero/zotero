@@ -1716,12 +1716,11 @@ var ZoteroPane = new function () {
 	};
 	
 	
-	this.handleTagSelectorResize = Zotero.Utilities.debounce(function () {
+	this.handleTagSelectorResize = Zotero.Utilities.debounce(async function () {
 		if (this.tagSelectorShown()) {
 			// Initialize if dragging open after startup
 			if (!this.tagSelector) {
-				this.initTagSelector();
-				this.setTagScope();
+				await this.setTagScope();
 			}
 			this.tagSelector.handleResize();
 		}
@@ -1742,7 +1741,7 @@ var ZoteroPane = new function () {
 	
 	
 	// Keep in sync with ZoteroStandalone.updateViewOption()
-	this.toggleTagSelector = function () {
+	this.toggleTagSelector = async function () {
 		var container = document.getElementById('zotero-tag-selector-container');
 		var showing = container.getAttribute('collapsed') == 'true';
 		container.setAttribute('collapsed', !showing);
@@ -1750,9 +1749,8 @@ var ZoteroPane = new function () {
 		// If showing, set scope to items in current view
 		// and focus filter textbox
 		if (showing) {
-			this.initTagSelector();
+			await this.setTagScope();
 			ZoteroPane.tagSelector.focusTextbox();
-			this.setTagScope();
 		}
 		// If hiding, clear selection
 		else {
@@ -1776,9 +1774,12 @@ var ZoteroPane = new function () {
 	 *
 	 * Passed to the items tree to trigger on changes
 	 */
-	this.setTagScope = function () {
+	this.setTagScope = async function () {
 		var collectionTreeRow = self.getCollectionTreeRow();
 		if (self.tagSelectorShown()) {
+			if (!ZoteroPane.tagSelector) {
+				await this.initTagSelector();
+			}
 			if (collectionTreeRow.editable) {
 				ZoteroPane_Local.tagSelector.setMode('edit');
 			}
