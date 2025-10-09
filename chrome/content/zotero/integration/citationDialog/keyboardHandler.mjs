@@ -256,7 +256,7 @@ export class CitationDialogKeyboardHandler {
 	// Navigate the group by moving selection or focus between nodes in a group
 	_navigateGroup({ group, current, forward, multiSelect, shouldFocus, shouldSelect }) {
 		// navigable nodes have to be marked with data-arrow-nav-enabled
-		let allFocusableWithinGroup = [...group.querySelectorAll("[tabindex][data-arrow-nav-enabled]")];
+		let allFocusableWithinGroup = [...group.querySelectorAll("[tabindex][data-arrow-nav-enabled]:not([hidden]):not([disabled])")];
 		let nextFocusableIndex = 0;
 		for (let i = 0; i < allFocusableWithinGroup.length; i++) {
 			if (allFocusableWithinGroup[i] == current) {
