@@ -1144,7 +1144,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		];
 	}
 	
-	async changeCollectionTreeRow(collectionTreeRow) {
+	async changeCollectionTreeRow(collectionTreeRow, skipRefresh) {
 		// When used outside the Zotero Pane, "collectionTreeRow" is not an actual
 		// tree row being passed in, but rather a simple object that defines necessary properties.
 		// So we need to supplement other CollectionTreeRow properties so that itemTree code
@@ -1162,7 +1162,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return this.clearItemsPaneMessage();
 		}
 		Zotero.debug(`itemTree.changeCollectionTreeRow(): ${collectionTreeRow.id}`);
-		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
+		if (!skipRefresh) {
+			this._itemTreeLoadingDeferred = Zotero.Promise.defer();
+		}
 		this.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		let newId = "item-tree-" + this.props.id;
 		if (collectionTreeRow.visibilityGroup) {
@@ -1179,6 +1181,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this.collectionTreeRow.view.itemTreeView = this;
 		// Ensures that an up to date this._columns is set
 		this._getColumns();
+
+		// Sometimes (e.g. if there is an active quick search), we skip the refresh
+		// to avoid blinking because there will be another one triggered right after.
+		if (skipRefresh) return;
 
 		this.selection.clearSelection();
 		this.selection.focused = 0;
