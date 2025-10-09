@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -23,8 +24,10 @@ general-open-settings = פתיחת הגדרות
 general-help = עזרה
 general-tag = תגית
 general-done = בוצע
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
+general-view-troubleshooting-instructions = הצגת הנחיות טיפול בתקלות
+general-go-back = חזרה
+general-warning = אזהרה
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = סגנון ציטוט:
 language-label = שפה:
 menu-file-show-in-finder =

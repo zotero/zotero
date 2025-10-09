@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Krmilka (Control)
 general-key-shift = Dvigalka
 general-key-alt = Izmenjalka (Alt)
@@ -24,7 +25,9 @@ general-help = Pomoč
 general-tag = Značka
 general-done = Opravljeno
 general-view-troubleshooting-instructions = Pokaži navodila za reševanje težav
-general-go-back = Go Back
+general-go-back = Pojdi nazaj
+general-warning = Opozorilo
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = Slog citiranja:
 language-label = Jezik:
 menu-file-show-in-finder =

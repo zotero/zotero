@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -25,6 +26,8 @@ general-tag = குறிச்சொல்
 general-done = முடிந்தது
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-warning = எச்சரிக்கை
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = மேற்கோள் நடை:
 language-label = மொழி:
 menu-file-show-in-finder =

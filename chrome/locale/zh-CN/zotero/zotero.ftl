@@ -1,3 +1,4 @@
+general-sentence-separator = { "" }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -25,6 +26,8 @@ general-tag = 标签
 general-done = 完成
 general-view-troubleshooting-instructions = 查看故障排除说明
 general-go-back = 返回
+general-warning = 警告
+general-type-to-continue = 输入 “{ $text }” 以继续
 citation-style-label = 参考文献样式:
 language-label = 语言：
 menu-file-show-in-finder =

@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -24,7 +25,9 @@ general-help = Abi
 general-tag = Lipik
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
+general-go-back = Mine tagasi
+general-warning = Hoiatus
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = Viite stiil:
 language-label = Keel
 menu-file-show-in-finder =

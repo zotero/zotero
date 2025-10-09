@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Vald
 general-key-shift = Lyg2
 general-key-alt = Alt
@@ -25,6 +26,8 @@ general-tag = Gairė
 general-done = Atlikta
 general-view-troubleshooting-instructions = Peržiūrėti nesklandumų sprendimo instrukcijas
 general-go-back = Atgal
+general-warning = Įspėjimas
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = Citavimo stilius:
 language-label = Kalba:
 menu-file-show-in-finder =

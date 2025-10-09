@@ -80,3 +80,21 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Default: { $directory })
     .aria-label = 默认位置
+preferences-sync-reset-restore-to-server-body = { -app-name } 将用此计算机中的数据替换 { $domain } 中 “{ $libraryName }” 中的数据。
+preferences-sync-reset-restore-to-server-deleted-items-text =
+    在线文库中 { $remoteItemsDeletedCount } 个 { $remoteItemsDeletedCount ->
+        [one] 条目
+       *[other] 条目
+    } 将被永久删除
+preferences-sync-reset-restore-to-server-remaining-items-text =
+    { general-sentence-separator }{ $localItemsCount ->
+        [0] 本地文库和在线文库将被清空。
+        [one] 本地文库和在线文库中的1个条目将被保留。
+       *[other] 本地文库和在线文库中的{ $localItemsCount } 个条目将被保留。
+    }
+preferences-sync-reset-restore-to-server-checkbox-label =
+    { $remoteItemsDeletedCount ->
+       *[other] 删除 { $remoteItemsDeletedCount } 个条目
+    }
+preferences-sync-reset-restore-to-server-confirmation-text = 删除在线文献库
+preferences-sync-reset-restore-to-server-yes = 替换在线图书馆中的数据

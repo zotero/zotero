@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = control
 general-key-shift = vaihto
 general-key-alt = Alt
@@ -25,6 +26,8 @@ general-tag = Merkki
 general-done = Valmis
 general-view-troubleshooting-instructions = Katso vianhakuohjeet
 general-go-back = Siirry takaisinpäin
+general-warning = Varoitus
+general-type-to-continue = Kirjoita “{ $text }” jatkaaksesi.
 citation-style-label = Viittaustyyli:
 language-label = Kieli:
 menu-file-show-in-finder =

@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -25,6 +26,8 @@ general-tag = Etiket
 general-done = Tamam
 general-view-troubleshooting-instructions = Sorun Giderme Talimatlarını Göster
 general-go-back = Geri Git
+general-warning = Uyarı
+general-type-to-continue = Devam etmek için “{ $text }” yazın.
 citation-style-label = Alıntı Stili:
 language-label = Dil:
 menu-file-show-in-finder =

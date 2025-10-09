@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -25,6 +26,8 @@ general-tag = 태그
 general-done = 완료
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-warning = 경고
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = 인용 스타일:
 language-label = 언어:
 menu-file-show-in-finder =

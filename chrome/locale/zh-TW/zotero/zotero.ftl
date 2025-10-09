@@ -1,3 +1,5 @@
+# TODO: Fix once restore-to-server strings are translated
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -23,8 +25,10 @@ general-open-settings = 打開設定
 general-help = 說明
 general-tag = 標籤
 general-done = 完成
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
+general-view-troubleshooting-instructions = 查看故障排除說明
+general-go-back = 回到上一層
+general-warning = 警告
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = 引用文獻樣式:
 language-label = 語言：
 menu-file-show-in-finder =

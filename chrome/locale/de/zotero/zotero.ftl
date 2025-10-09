@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Steuerung
 general-key-shift = Shift
 general-key-alt = Alt
@@ -24,7 +25,9 @@ general-help = Hilfe
 general-tag = Tag
 general-done = Erledigt
 general-view-troubleshooting-instructions = Anleitung zur Problembehebung anzeigen
-general-go-back = Go Back
+general-go-back = Zurück
+general-warning = Warnung
+general-type-to-continue = Drücke "{ $text }" um fortzufahren.
 citation-style-label = Zitierstil:
 language-label = Sprache:
 menu-file-show-in-finder =

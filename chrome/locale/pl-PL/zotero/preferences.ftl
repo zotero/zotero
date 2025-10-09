@@ -74,9 +74,28 @@ preferences-advanced-language-and-region-title = Język i region
 preferences-advanced-enable-bidi-ui =
     .label = Włącz narzędzia edytowania tekstu dwukierunkowego
 preferences-advanced-reset-data-dir =
-    .label = Revert to Default Location…
+    .label = Przywróć do domyślnej lokalizacji...
 preferences-advanced-custom-data-dir =
-    .label = Use Custom Location…
+    .label = Użyj własnej lokalizacji...
 preferences-advanced-default-data-dir =
-    .value = (Default: { $directory })
-    .aria-label = Default location
+    .value = (Domyślny: { $directory })
+    .aria-label = Domyślna lokalizacja
+preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ $libraryName }” on { $domain } with data from this computer.
+preferences-sync-reset-restore-to-server-deleted-items-text =
+    { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
+        [one] item
+       *[other] items
+    } in the online library will be permanently deleted.
+preferences-sync-reset-restore-to-server-remaining-items-text =
+    { general-sentence-separator }{ $localItemsCount ->
+        [0] The library on this computer and the online library will be empty.
+        [one] 1 item will remain on this computer and in the online library.
+       *[other] { $localItemsCount } items will remain on this computer and in the online library.
+    }
+preferences-sync-reset-restore-to-server-checkbox-label =
+    { $remoteItemsDeletedCount ->
+        [one] Delete 1 item
+       *[other] Delete { $remoteItemsDeletedCount } items
+    }
+preferences-sync-reset-restore-to-server-confirmation-text = usuń bibliotekę online
+preferences-sync-reset-restore-to-server-yes = Zamień dane w zdalnej bibliotece

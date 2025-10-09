@@ -80,3 +80,23 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Par défaut : { $directory })
     .aria-label = Emplacement par défaut
+preferences-sync-reset-restore-to-server-body = { -app-name } remplacera “{ $libraryName }” sur { $domain } par les données de cet ordinateur.
+preferences-sync-reset-restore-to-server-deleted-items-text =
+    { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
+        [one] document
+       *[other] documents
+    } dans la bibliothèque en ligne seront définitivement supprimés.
+preferences-sync-reset-restore-to-server-remaining-items-text =
+    { general-sentence-separator }{ $localItemsCount ->
+        [0] La bibliothèque sur cet ordinateur et la bibliothèque en ligne seront vides.
+        [one] 1 document restera sur cet ordinateur et dans la bibliothèque en ligne.
+       *[other] { $localItemsCount } documents resteront sur cet ordinateur et dans la bibliothèque en ligne.
+    }
+preferences-sync-reset-restore-to-server-checkbox-label =
+    { $remoteItemsDeletedCount ->
+        [one] Supprimer 1 document
+        [many] Supprimer { $remoteItemsDeletedCount } documents
+       *[other] Supprimer { $remoteItemsDeletedCount } documents
+    }
+preferences-sync-reset-restore-to-server-confirmation-text = Supprimer la bibliothèque en ligne
+preferences-sync-reset-restore-to-server-yes = Remplacer les données dans la bibliothèque en ligne

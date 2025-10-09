@@ -1,3 +1,5 @@
+# TODO: Fix once restore-to-server strings are translated
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -25,6 +27,8 @@ general-tag = แท็ก
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-warning = คำเตือน
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = รูปแบบการอ้างอิง:
 language-label = Language:
 menu-file-show-in-finder =

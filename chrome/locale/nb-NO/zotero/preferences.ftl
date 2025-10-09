@@ -80,3 +80,22 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Standard: { $directory })
     .aria-label = Standard plassering
+preferences-sync-reset-restore-to-server-body = { -app-name } vil erstatte “{ $libraryName }” på { $domain } med data fra denne datamaskinen.
+preferences-sync-reset-restore-to-server-deleted-items-text =
+    { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
+        [one] element
+       *[other] elementer
+    } i nettbiblioteket vil bli slettet permanent.
+preferences-sync-reset-restore-to-server-remaining-items-text =
+    { general-sentence-separator }{ $localItemsCount ->
+        [0] Biblioteket på denne datamaskinen og nettbiblioteket vil være tomt.
+        [one] 1 element vil forbli på denne datamaskinen og i nettbiblioteket.
+       *[other] { $localItemsCount } elementer vil forbli på denne datamaskinen og i nettbiblioteket.
+    }
+preferences-sync-reset-restore-to-server-checkbox-label =
+    { $remoteItemsDeletedCount ->
+        [one] Slett 1 element
+       *[other] Slett  { $remoteItemsDeletedCount } elemeter
+    }
+preferences-sync-reset-restore-to-server-confirmation-text = Slett nettbiblioteket
+preferences-sync-reset-restore-to-server-yes = Erstatt data i ditt bibliotek på nett

@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -25,6 +26,8 @@ general-tag = Baliz
 general-done = Graet
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-warning = Kemenn-diwall
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = Doare arroudenn:
 language-label = Yezh:
 menu-file-show-in-finder =

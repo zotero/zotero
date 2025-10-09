@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -25,6 +26,8 @@ general-tag = Merki
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
+general-warning = Viðvörun
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = Tegund tilvísunar:
 language-label = Tungumál:
 menu-file-show-in-finder =

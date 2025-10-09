@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -25,6 +26,8 @@ general-tag = Emneord
 general-done = Ferdig
 general-view-troubleshooting-instructions = Se instruksjoner for feilsøking
 general-go-back = Gå tilbake
+general-warning = Advarsel
+general-type-to-continue = Skriv “{ $text }” for å fortsette.
 citation-style-label = Henvisningsstil:
 language-label = Språk:
 menu-file-show-in-finder =

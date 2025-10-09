@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -23,8 +24,10 @@ general-open-settings = Obre els paràmetres
 general-help = Ajuda
 general-tag = Etiqueta
 general-done = Fet
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
+general-view-troubleshooting-instructions = Mostra les instruccions de resolució de problemes
+general-go-back = Vés enrere
+general-warning = Avís
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = Estil de la cita:
 language-label = Llengua:
 menu-file-show-in-finder =

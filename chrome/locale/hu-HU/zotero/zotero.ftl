@@ -1,3 +1,4 @@
+general-sentence-separator = { " " }
 general-key-control = Control
 general-key-shift = Shift
 general-key-alt = Alt
@@ -24,7 +25,9 @@ general-help = Súgó
 general-tag = Címke
 general-done = Rendben
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
+general-go-back = Vissza
+general-warning = Figyelmeztetés
+general-type-to-continue = Type “{ $text }” to continue.
 citation-style-label = Hivatkozási stílus:
 language-label = Nyelv:
 menu-file-show-in-finder =
