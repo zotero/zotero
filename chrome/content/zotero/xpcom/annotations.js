@@ -41,6 +41,20 @@ Zotero.Annotations = new function () {
 		value: ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position'],
 		writable: false
 	});
+
+	Zotero.defineProperty(this, 'COLORS', {
+		value: [
+			{ name: 'yellow', color: '#ffd400' },
+			{ name: 'red', color: '#ff6666' },
+			{ name: 'green', color: '#5fb236' },
+			{ name: 'blue', color: '#2ea8e5' },
+			{ name: 'purple', color: '#a28ae5' },
+			{ name: 'magenta', color: '#e56eee' },
+			{ name: 'orange', color: '#f19837' },
+			{ name: 'gray', color: '#aaaaaa' }
+		],
+		writable: false
+	});
 	
 	
 	this.getCacheImagePath = function ({ libraryID, key }) {
