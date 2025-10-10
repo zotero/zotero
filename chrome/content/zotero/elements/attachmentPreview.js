@@ -302,6 +302,22 @@
 		}
 
 		/**
+		 * Clear all pending tasks and reset processing states.
+		 */
+		_clearPendingTasks() {
+			try {
+				this._lastTask = null;
+				this._isProcessingTask = false;
+				this._isRendering = false;
+				this._isDiscarding = false;
+			}
+			catch (e) {
+				// Ignore errors during cleanup to prevent cascading failures
+				this._debug(`Error during task cleanup: ${e.message}`);
+			}
+		}
+
+		/**
 		 * Process the most recent task
 		 * @returns {Promise<void>}
 		 */

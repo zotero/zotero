@@ -93,6 +93,10 @@
 
 		_previewDiscarded = false;
 
+		_discardTimeoutID = null;
+
+		_pendingDiscardPreviewRenderId = null;
+
 		constructor() {
 			super();
 
@@ -293,7 +297,11 @@
 		}
 
 		destroy() {
-			this.discard();
+			this._cancelPendingDiscard();
+			if (this._preview) {
+				this._preview._clearPendingTasks();
+				this._preview.discard?.();
+			}
 			this._preview?.remove();
 			delete this._preview;
 
@@ -325,8 +333,10 @@
 			}
 			if (event != 'modify' || !this.item?.id || !ids.includes(this.item.id)) return;
 			
-			// Wait for the render finish and then refresh
-			this._waitForRender(this._forceRenderAll.bind(this));
+			Promise.all([
+				this.updateInfo(),
+				this.updatePreview()
+			]);
 		}
 
 		async asyncRender() {
@@ -338,6 +348,7 @@
 					this.previewElem.render();
 				}
 				this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
+				this._cancelPendingDiscard();
 				return;
 			}
 
@@ -353,17 +364,35 @@
 			this._asyncRendering = false;
 
 			this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
+			this._cancelPendingDiscard();
 		}
 
 		discard() {
 			if (!this._preview) return;
-			let lastPreviewRenderId = this._lastPreviewRenderId;
-			setTimeout(() => {
-				if (!this._asyncRendering && this._lastPreviewRenderId === lastPreviewRenderId) {
+			
+			this._cancelPendingDiscard();
+			
+			this._pendingDiscardPreviewRenderId = this._lastPreviewRenderId;
+			
+			this._discardTimeoutID = setTimeout(() => {
+				this._discardTimeoutID = null;
+				
+				if (!this._asyncRendering
+					&& this._pendingDiscardPreviewRenderId === this._lastPreviewRenderId) {
 					this._preview?.discard();
 					this._previewDiscarded = true;
 				}
+				
+				this._pendingDiscardPreviewRenderId = null;
 			}, this._discardPreviewTimeout);
+		}
+
+		_cancelPendingDiscard() {
+			if (this._discardTimeoutID) {
+				clearTimeout(this._discardTimeoutID);
+				this._discardTimeoutID = null;
+			}
+			this._pendingDiscardPreviewRenderId = null;
 		}
 
 		onViewClick(event) {
@@ -375,6 +404,7 @@
 		}
 
 		async updateInfo() {
+			if (!this.initialized) return;
 			// Cancel editing filename when refreshing
 			this._isEditingFilename = false;
 			
@@ -530,10 +560,19 @@
 		}
 
 		async updatePreview() {
-			if (this.usePreview) {
-				this.previewElem.item = this.item;
-				await this.previewElem.render();
+			if (!this.initialized) return;
+			if (!this.usePreview
+				// Skip only when the section is manually collapsed (when there's attachment),
+				// This is necessary to ensure the rendering of the first added attachment
+				// because the section is force-collapsed if no attachment.
+				|| !this._section?.open || !this.item) {
+				return;
 			}
+			this.previewElem.item = this.item;
+			await this.previewElem.render();
+			this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
+
+			this._cancelPendingDiscard();
 		}
 
 		updateItemIndexedState() {
@@ -731,27 +770,6 @@
 
 		_id(id) {
 			return this.querySelector(`#${id}`);
-		}
-
-		async _waitForRender(callback) {
-			let resolve, reject;
-			Promise.race([new Promise(((res, rej) => {
-				resolve = res;
-				reject = rej;
-			})), Zotero.Promise.delay(3000)]).then(() => callback());
-			let i = 0;
-			let finished = false;
-			// Wait for render to finish
-			while (i < 100) {
-				if (!this._asyncRendering) {
-					finished = true;
-					break;
-				}
-				await Zotero.Promise.delay(10);
-				i++;
-			}
-			if (finished) resolve();
-			else reject(new Error("AttachmentBox#_waitForRender timeout"));
 		}
 
 		_initPreview() {
