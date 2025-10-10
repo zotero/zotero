@@ -80,7 +80,7 @@
 		_container = null;
 		
 		_contextNotesPane = null;
-		
+
 		_contextMenuTarget = null;
 
 		_draggedWrapper = null;
@@ -89,12 +89,20 @@
 
 		_prefObserverID = null;
 
+		get observedAttributes() {
+			return ["no-context-notes"];
+		}
+
+		attributeChangedCallback() {
+			this.render();
+		}
+
 		get _defaultPanes() {
 			return ["info", "abstract", "attachments", "notes", "libraries-collections", "tags", "related"];
 		}
 
 		get _builtInPanes() {
-			return ["info", "abstract", "attachments", "notes", "attachment-info", "attachment-annotations", "libraries-collections", "tags", "related"];
+			return ["info", "abstract", "attachments", "notes", "note-info", "attachment-info", "attachment-annotations", "libraries-collections", "tags", "related"];
 		}
 
 		get container() {
@@ -115,6 +123,20 @@
 			if (this._contextNotesPane == val) return;
 			this._contextNotesPane = val;
 			this.render();
+		}
+
+		get contextNotesPaneEnabled() {
+			return !this.hasAttribute("no-context-notes");
+		}
+
+		set contextNotesPaneEnabled(val) {
+			if (this.contextNotesPaneEnabled === val) return;
+			if (val) {
+				this.removeAttribute("no-context-notes");
+			}
+			else {
+				this.setAttribute("no-context-notes", "true");
+			}
 		}
 		
 		get pinnedPane() {
@@ -177,9 +199,9 @@
 		}
 
 		isPaneOrderable(paneID) {
-			let orderable =
+			let orderable
 				// Built-in or orderable custom sections
-				this._builtInPanes.includes(paneID) || Zotero.ItemPaneManager.isSectionOrderable(paneID);
+				= this._builtInPanes.includes(paneID) || Zotero.ItemPaneManager.isSectionOrderable(paneID);
 			return orderable;
 		}
 
@@ -199,6 +221,7 @@
 			else if (direction === 'down') {
 				return isOrderable && isNextOrderable && !isLast;
 			}
+			return false;
 		}
 
 		isOrderChanged() {
@@ -235,7 +258,19 @@
 						}
 						event.preventDefault();
 						let menu = button.querySelector('menupopup');
-						await Zotero_LocateMenu.buildLocateMenu(menu);
+						let locateMode;
+						// If the container is not set, assume it's a standalone window
+						if (!this.container?.tabType) {
+							locateMode = "window";
+						}
+						// If it's library tab, we can open in either tab or window
+						else if (this.container.tabType === "library") {
+							locateMode = "library";
+						}
+						else {
+							locateMode = "tab";
+						}
+						await Zotero_LocateMenu.buildLocateMenu(menu, { locateMode });
 
 						Zotero.MenuManager.updateMenuPopup(menu, "sidenav/locate", {
 							event: undefined,
@@ -329,7 +364,7 @@
 				}
 				
 				if (pane == 'context-notes') {
-					let hidden = !this._contextNotesPane;
+					let hidden = !this.contextNotesPaneEnabled;
 					let selected = contextNotesPaneVisible;
 					
 					button.parentElement.hidden = hidden;
@@ -383,7 +418,7 @@
 			currentOrder = [...currentOrder];
 			// Restore the order from installed plugins but not registered in the current order
 			let prevOrder = this.getPersistedOrder();
-			let installedPluginIDs = undefined;
+			let installedPluginIDs;
 			for (let paneID of prevOrder) {
 				if (currentOrder.includes(paneID)) {
 					continue;
@@ -416,7 +451,7 @@
 			try {
 				return value.split(",");
 			}
-			catch(e) {
+			catch {
 				return this._builtInPanes;
 			}
 		}
@@ -450,7 +485,7 @@
 				try {
 					sidenavOptions = JSON.parse(pane.dataset.sidenavOptions);
 				}
-				catch (e) {}
+				catch {}
 				let { icon, darkIcon, l10nID, l10nArgs } = sidenavOptions;
 				if (!darkIcon) darkIcon = icon;
 				button.setAttribute("custom", "true");
@@ -823,7 +858,7 @@
 			}
 			// Insert at the index of the previous wrapper
 			this.changePaneOrder(paneID, actualIndex);
-		}
+		};
 
 		handleButtonDragStart = (event) => {
 			let wrapper = event.target.closest('.pin-wrapper');
@@ -922,7 +957,7 @@
 			}
 		};
 
-		handleButtonDragLeave = (event) => {
+		handleButtonDragLeave = (_event) => {
 			if (this._dropIndicator) {
 				this._dropIndicator.setAttribute("hidden", "true");
 			}
@@ -950,7 +985,7 @@
 				}
 				this.container?.render();
 			}
-		}
+		};
 	}
 	customElements.define("item-pane-sidenav", ItemPaneSidenav);
 }
