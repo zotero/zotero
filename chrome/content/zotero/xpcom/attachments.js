@@ -3075,14 +3075,14 @@ Zotero.Attachments = new function () {
 	 *
 	 * @return {Zotero.Item} - The new attachment
 	 */
-	this.copyAttachmentToLibrary = async function (attachment, libraryID, parentItemID) {
+	this.copyAttachmentToLibrary = async function (attachment, libraryID, parentItemID, skipTags) {
 		if (attachment.libraryID == libraryID) {
 			throw new Error("Attachment is already in library " + libraryID);
 		}
 		
 		Zotero.DB.requireTransaction();
 		
-		var newAttachment = attachment.clone(libraryID);
+		var newAttachment = attachment.clone(libraryID, { skipTags });
 		if (attachment.isStoredFileAttachment()) {
 			// Attachment path isn't copied over by clone() if libraryID is different
 			newAttachment.attachmentPath = attachment.attachmentPath;

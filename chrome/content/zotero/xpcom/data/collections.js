@@ -157,7 +157,178 @@ Zotero.Collections = function () {
 		});
 		
 	}
+
+	/**
+	 * Copy a collection into another collection or another library.
+	 * This operation is purely additive: only new items (including child items) and collections are added
+	 * (except for annotations that we try to merge to avoid duplicates - see Zotero.Items.copyToLibrary).
+	 * @param {Zotero.Collection} collectionToCopy - Collection that will be copied
+	 * @param {Zotero.Collection|Zotero.Library} destination - Destination collection or library
+	 */
+	this.copy = async function (collectionToCopy, destination) {
+		// List of all collections to copy, including subcollections
+		let collectionsToCopy = [
+			collectionToCopy,
+			...Zotero.Collections.getByParent(collectionToCopy.id, true)
+		];
+
+		// Ensure that all items (including annotations) in the destination library are loaded
+		await Zotero.Items.getAll(destination.libraryID);
+
+		let targetLibraryID = destination.libraryID;
+		let sourceToDestinationCollectionIDs = {}; // collectionID -> linkedCollectionID
+		await Zotero.Utilities.Internal.forEachChunkAsync(collectionsToCopy, 50, (chunk) => {
+			return Zotero.DB.executeTransaction(async () => {
+				for (let collection of chunk) {
+					let destinationCollection;
+					// Cross-library copy
+					if (targetLibraryID !== collection.libraryID) {
+						let linkedCollection = await collection.getLinkedCollection(targetLibraryID, true);
+						if (linkedCollection) {
+							// if there is a linked collection but it is in the trash, it is un-linked
+							// and a new linked collection will be created below
+							if (linkedCollection.deleted) {
+								await collection.removeLinkedCollection(linkedCollection);
+								await linkedCollection.removeLinkedCollection(collection);
+							}
+							// if the linked collection exists and is not trashed, use it as the destination
+							else {
+								destinationCollection = linkedCollection;
+							}
+						}
+					}
+					// If the destination collection does not exist (cross-library or within the same library),
+					// create a new collection
+					if (!destinationCollection) {
+						destinationCollection = collection.clone(targetLibraryID);
+						// set the parent collection if provided or null if copying to root library
+						if (collection.id == collectionToCopy.id && destination instanceof Zotero.Collection) {
+							destinationCollection.parentID = destination.id;
+						}
+						else if (collection.parentID) {
+							destinationCollection.parentID = sourceToDestinationCollectionIDs[collection.parentID] || null;
+						}
+						await destinationCollection.save({ skipSelect: true });
+						// Record link only if copying to a different library
+						if (targetLibraryID !== collection.libraryID) {
+							await destinationCollection.addLinkedCollection(collection);
+						}
+					}
+					sourceToDestinationCollectionIDs[collection.id] = destinationCollection.id;
+
+					for (let item of collection.getChildItems()) {
+						// Within the same library, add items to cloned collections
+						if (targetLibraryID === collection.libraryID) {
+							item.addToCollection(destinationCollection.id);
+							await item.save({ skipSelect: true });
+						}
+						// Cross-library copy - create (or update) linked item in the destination library
+						// and add them into cloned collection
+						else {
+							let itemInGroup = await Zotero.Items.copyToLibrary(item, destination.libraryID);
+							// some items (e.g. attachments depending on prefs) may not be copied - skip
+							if (!itemInGroup) continue;
+							// ignore attachments/notes that are child items in another group - they cannot be added into collections
+							if (itemInGroup.parentID) continue;
+							itemInGroup.addToCollection(destinationCollection.id);
+							await itemInGroup.save({ skipSelect: true });
+						}
+					}
+				}
+			});
+		});
+	};
 	
+	/**
+	 * Replicate a collection in another library's linked collection. If the linked
+	 * collection does not exist, it is created.
+	 * This operation is destructive: it replicates the subcollection structure and items in
+	 * destination to match those of the source collection. Unlinked items and collections are moved to trash.
+	 * Metadata of items is updated.
+	 * @param {Zotero.Collection} collectionToCopy - Collection that will be replicated
+	 * @param {Zotero.Collection|Zotero.Library} destination - Destination collection or library
+	 */
+	this.replicate = async function (collectionToCopy, destination) {
+		let targetLibraryID = destination.libraryID;
+		let linkedColToSource = await collectionToCopy.getLinkedCollection(destination.libraryID, true);
+		if (linkedColToSource && destination instanceof Zotero.Collection && destination.id !== linkedColToSource.id) {
+			throw new Error("Cannot copy and replace to a collection that is not currently linked");
+		}
+
+		await this.copy(collectionToCopy, destination);
+
+		linkedColToSource = await collectionToCopy.getLinkedCollection(targetLibraryID, true);
+		if (!linkedColToSource || linkedColToSource.deleted) {
+			throw new Error("Can only replace a non-deleted linked collection");
+		}
+
+		// If source collection is top-level, ensure linked collection is too
+		if (!collectionToCopy.parentID && linkedColToSource.parentID) {
+			linkedColToSource.parentID = null;
+			await linkedColToSource.saveTx();
+		}
+		// Update the name
+		if (linkedColToSource.name !== collectionToCopy.name) {
+			linkedColToSource.name = collectionToCopy.name;
+			await linkedColToSource.saveTx();
+		}
+		
+		// Ensure that linked subcollections are in their place
+		// (in case they had been moved to another parent collection)
+		let childCollectionsOfSelected = Zotero.Collections.getByParent(collectionToCopy.id, true);
+		await Zotero.Utilities.Internal.forEachChunkAsync(childCollectionsOfSelected, 50, (chunk) => {
+			return Zotero.DB.executeTransaction(async () => {
+				for (let childCollection of chunk) {
+					let linkedChildCollection = await childCollection.getLinkedCollection(targetLibraryID, true);
+					let expectedParentOfLinkedChild = null;
+					let shouldSave = false;
+					if (childCollection.parentID) {
+						expectedParentOfLinkedChild = await Zotero.Collections.get(childCollection.parentID).getLinkedCollection(targetLibraryID, true);
+					}
+					if (linkedChildCollection && linkedChildCollection.parentID !== expectedParentOfLinkedChild?.id) {
+						linkedChildCollection.parentID = expectedParentOfLinkedChild?.id || null;
+						shouldSave = true;
+					}
+					if (linkedChildCollection.name !== childCollection.name) {
+						linkedChildCollection.name = childCollection.name;
+						shouldSave = true;
+					}
+					if (shouldSave) {
+						await linkedChildCollection.save();
+					}
+				}
+			});
+		});
+
+		// Delete subcollections that are not linked
+		let childCollectionsOfLinked = Zotero.Collections.getByParent(linkedColToSource.id, true);
+		await Zotero.Utilities.Internal.forEachChunkAsync(childCollectionsOfLinked, 50, (chunk) => {
+			return Zotero.DB.executeTransaction(async () => {
+				for (let childCollection of chunk) {
+					let linkedToSelected = await childCollection.getLinkedCollection(collectionToCopy.libraryID, true);
+					if (!linkedToSelected) {
+						childCollection.deleted = true;
+						await childCollection.save();
+					}
+				}
+			});
+		});
+
+		// Delete items that are not linked and remove items from
+		// collections they should not belong to
+		let itemsOfLinkedCollection = [
+			...linkedColToSource.getChildItems(),
+			...childCollectionsOfLinked.flatMap(c => c.getChildItems())
+		];
+		itemsOfLinkedCollection = itemsOfLinkedCollection.flatMap(item => [item, ...item.getChildren()]);
+		await Zotero.Utilities.Internal.forEachChunkAsync(itemsOfLinkedCollection, 50, (chunk) => {
+			return Zotero.DB.executeTransaction(async () => {
+				for (let itemInLinkedGroup of chunk) {
+					await Zotero.Items.pullLinkedItemData(itemInLinkedGroup, collectionToCopy.libraryID);
+				}
+			});
+		});
+	};
 	
 	this._loadChildCollections = async function (libraryID, ids, idSQL) {
 		var sql = "SELECT C1.collectionID, C2.collectionID AS childCollectionID "

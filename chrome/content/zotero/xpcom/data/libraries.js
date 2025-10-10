@@ -174,6 +174,85 @@ Zotero.Libraries = new function () {
 	this.get = function (libraryID) {
 		return this._cache[libraryID] || false;
 	}
+
+	/**
+	 * Copy items and collections from one library into another
+	 * This is an additive operation - new items and collections are copied over
+	 * but nothing is deleted.
+	 * @param {Zotero.Library} sourceLibrary - library to copy
+	 * @param {Zotero.Library} targetLibrary - library to copy into
+	 */
+	this.copy = async function (sourceLibrary, targetLibrary) {
+		// Load all items in the target library
+		await Zotero.Items.getAll(targetLibrary.libraryID);
+
+		// Copy top-level items
+		let topLevelItems = await Zotero.Items.getAll(sourceLibrary.libraryID, true);
+		await Zotero.Utilities.Internal.forEachChunkAsync(topLevelItems, 100, (chunk) => {
+			return Zotero.DB.executeTransaction(async () => {
+				for (let item of chunk) {
+					await Zotero.Items.copyToLibrary(item, targetLibrary.libraryID);
+				}
+			});
+		});
+		// Copy top-level collections. Child collections and items will be copied recursively.
+		let collections = Zotero.Collections.getByLibrary(sourceLibrary.libraryID);
+		for (let collection of collections) {
+			await Zotero.Collections.copy(collection, targetLibrary);
+		}
+	};
+
+	/**
+	 * Replicate items and collections of one library into another.
+	 * This is a destructive operation - after items and collections are copied over,
+	 * unlinked collections and items in target library are trashed.
+	 * @param {Zotero.Library} sourceLibrary - library to replicate
+	 * @param {Zotero.Library} targetLibrary - library to replicate into
+	 */
+	this.replicate = async function (sourceLibrary, targetLibrary) {
+		let sourceLibraryID = sourceLibrary.libraryID;
+		let targetLibraryID = targetLibrary.libraryID;
+
+		// Load all items in the target library
+		await Zotero.Items.getAll(targetLibrary.libraryID);
+
+		// Copy top-level items
+		let topLevelItems = await Zotero.Items.getAll(sourceLibraryID, true);
+		await Zotero.Utilities.Internal.forEachChunkAsync(topLevelItems, 100, (chunk) => {
+			return Zotero.DB.executeTransaction(async () => {
+				for (let item of chunk) {
+					await Zotero.Items.copyToLibrary(item, targetLibrary.libraryID);
+				}
+			});
+		});
+		// Copy top-level collections. Child collections will be copied recursively.
+		let collections = Zotero.Collections.getByLibrary(sourceLibraryID);
+		for (let collection of collections) {
+			await Zotero.Collections.replicate(collection, targetLibrary);
+		}
+		// Delete collections in target library that are not linked to anything in source library
+		let collectionsInTargetLibrary = Zotero.Collections.getByLibrary(targetLibraryID);
+		await Zotero.Utilities.Internal.forEachChunkAsync(collectionsInTargetLibrary, 50, (chunk) => {
+			return Zotero.DB.executeTransaction(async () => {
+				for (let col of chunk) {
+					let linkedCol = await col.getLinkedCollection(sourceLibraryID);
+					if (!linkedCol) {
+						col.deleted = true;
+						await col.save();
+					}
+				}
+			});
+		});
+		// Ensure that all items in target match their linked items in source library
+		let itemsInTargetLibrary = await Zotero.Items.getAll(targetLibraryID, true);
+		await Zotero.Utilities.Internal.forEachChunkAsync(itemsInTargetLibrary, 100, (chunk) => {
+			return Zotero.DB.executeTransaction(async () => {
+				for (let item of chunk) {
+					await Zotero.Items.pullLinkedItemData(item, sourceLibraryID);
+				}
+			});
+		});
+	};
 	
 	
 	/**

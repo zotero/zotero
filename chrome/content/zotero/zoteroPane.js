@@ -1172,7 +1172,13 @@ var ZoteroPane = new function () {
 			this.highlightTimer.cancel();
 			this.highlightTimer = null;
 		}
-		ZoteroPane_Local.collectionsView.setHighlightedRows();
+		setTimeout(() => {
+			// Wait a tick to see where the focus lands, and clear any highlighted rows
+			// if the focus left collection tree
+			if (!document.activeElement.closest("#zotero-collections-tree")) {
+				ZoteroPane.collectionsView.setHighlightedRows();
+			}
+		});
 	}
 
 	this.hideCollectionSearch = function () {
@@ -1683,6 +1689,7 @@ var ZoteroPane = new function () {
 				dragAndDrop: true
 			});
 			collectionsTree.firstChild.addEventListener("focus", ZoteroPane.collectionsView.recordCollectionTreeFocus);
+			collectionsTree.firstChild.addEventListener("focus", () => ZoteroPane.collectionsView.highlightLinkedCollections());
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -2653,33 +2660,60 @@ var ZoteroPane = new function () {
 	};
 
 	// Copy selected collection into another collection or library.
-	// Partially, a replication of drag-drop mechanism from CollectionTree.onDrop.
 	this.copyCollection = async (target) => {
 		let selected = this.getSelectedCollection();
 		if (!selected) return;
+		// Make sure the row is actually visible
+		await ZoteroPane.collectionsView.expandToCollection(target.id);
+		// Copy collection
+		await Zotero.Collections.copy(selected, target);
+	};
 
-		let targetTreeRowID = `L${target.libraryID}`;
-		if (target instanceof Zotero.Collection) {
-			targetTreeRowID = `C${target.id}`;
-			// Make sure the row is actually visible
-			await ZoteroPane.collectionsView.expandToCollection(target.id);
-		}
-		let targetTreeRowIndex = ZoteroPane.collectionsView.getRowIndexByID(targetTreeRowID);
-		let targetTreeRow = ZoteroPane.collectionsView.getRow(targetTreeRowIndex);
-		let copyOptions = {
-			tags: Zotero.Prefs.get('groups.copyTags'),
-			childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
-			childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
-			childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
-			annotations: Zotero.Prefs.get('groups.copyAnnotations'),
+	/**
+	 * Replicate selected collection in library of target and replace linked target collection with it.
+	 * This is a destructive action that will remove all unlinked items, collections, etc. to
+	 * completely sync the state of two collections.
+	 * A hard confirmation dialog is displayed to confirm.
+	 * @param {Zotero.Collection} - linked collection to selected collection
+	 */
+	this.replicateCollection = async (linkedCollection) => {
+		let selected = this.getSelectedCollection();
+		if (!selected) return;
+		// Display a hard confirmation dialog, since this is a destructive action
+		var io = {
+			title: Zotero.getString("collection-replicate-dialog-title"),
+			text: Zotero.getString("collection-replicate-dialog-text"),
+			acceptLabel: Zotero.getString("collection-replicate-dialog-accept"),
+			checkboxLabel: Zotero.getString("collection-replicate-dialog-checkbox"),
 		};
-		ZoteroPane.collectionsView.executeCollectionCopy({
-			collection: selected,
-			targetCollectionID: target instanceof Zotero.Collection ? target.id : null,
-			targetLibraryID: target.libraryID,
-			targetTreeRow,
-			copyOptions
-		});
+		window.openDialog("chrome://zotero/content/hardConfirmationDialog.xhtml", "",
+			"chrome,dialog,dependent,modal,centerscreen", io);
+		if (!io.accept) return;
+
+		await Zotero.Collections.replicate(selected, linkedCollection);
+	};
+
+	/**
+	 * Replicate selected library in target library.
+	 * This is a destructive action that will remove all unlinked items, collections, etc. to
+	 * completely sync the state of target library with selected.
+	 * A hard confirmation dialog is displayed to confirm.
+	 * @param {Zotero.Library} target - target library
+	 */
+	this.replicateLibrary = async (target) => {
+		let selected = this.getSelectedGroup();
+		if (!selected) return;
+		// Display a hard confirmation dialog, since this is a destructive action
+		var io = {
+			title: Zotero.getString("library-replicate-dialog-title"),
+			text: Zotero.getString("library-replicate-dialog-text"),
+			acceptLabel: Zotero.getString("library-replicate-dialog-accept"),
+			checkboxLabel: Zotero.getString("library-replicate-dialog-checkbox"),
+		};
+		window.openDialog("chrome://zotero/content/hardConfirmationDialog.xhtml", "",
+			"chrome,dialog,dependent,modal,centerscreen", io);
+		if (!io.accept) return;
+		Zotero.Libraries.replicate(selected, target);
 	};
 
 	this.toggleSelectedItemsRead = async function () {
@@ -3398,6 +3432,9 @@ var ZoteroPane = new function () {
 				}
 			}
 		},
+		{
+			id: "copyLibrary"
+		},
 	];
 	
 	this.buildCollectionContextMenu = async function () {
@@ -3563,10 +3600,12 @@ var ZoteroPane = new function () {
 					'sync',
 					'sep1',
 					'newCollection',
-					'newSavedSearch'
+					'newSavedSearch',
+					'copyLibrary'
 				);
 			}
-				// Only show "Show Duplicates", "Show Unfiled Items", and "Show Retracted" if rows are hidden
+			document.l10n.setAttributes(m.copyLibrary, 'collections-menu-copy-collection');
+			// Only show "Show Duplicates", "Show Unfiled Items", and "Show Retracted" if rows are hidden
 			let duplicates = Zotero.Prefs.getVirtualCollectionStateForLibrary(
 				libraryID, 'duplicates'
 			);
@@ -4250,33 +4289,6 @@ var ZoteroPane = new function () {
 
 		// Fetch all libraries
 		let topLevelEntries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
-
-		// Check which libraries have collections linked to the selected collection
-		// and disable their menuitems. Same logic as in CollectionTree.canDropCheckAsync.
-		let linkedCollectionsExist = {};
-		(async () => {
-			for (let library of topLevelEntries) {
-				if (library.libraryID == selected.libraryID) continue;
-				// Check which library has a collection linked to the selected collection
-				let linkedCollection = await selected.getLinkedCollection(library.libraryID, true);
-				linkedCollectionsExist[library.libraryID] = linkedCollection;
-				// Also check which library has collections linked to a subcollection of the selected collection
-				for (let descendent of selected.getDescendents(false, 'collection')) {
-					let subcollection = Zotero.Collections.get(descendent.id);
-					let linkedSubcollection = await subcollection.getLinkedCollection(library.libraryID, true);
-					if (linkedSubcollection) {
-						linkedCollectionsExist[library.libraryID] = linkedSubcollection;
-					}
-				}
-			}
-			// Libraries that have linked collections have their menus disabled
-			for (let libraryMenuItem of [...popup.childNodes]) {
-				let menuItemLibID = libraryMenuItem.getAttribute("value").substring(1);
-				if (linkedCollectionsExist[menuItemLibID]) {
-					libraryMenuItem.disabled = true;
-				}
-			}
-		})();
 		
 		// If there is only one library, display its collections as top-level menuitems
 		if (topLevelEntries.length == 1) {
@@ -4320,6 +4332,63 @@ var ZoteroPane = new function () {
 				}
 			);
 			popup.append(menuItem);
+		}
+		// Special treatment if the selected collection has linked collections
+		(async () => {
+			let linkedCollections = await selected.getAllLinkedCollections(true);
+			for (let linkedCollection of linkedCollections) {
+				// If the linked collection is trashed, ignore it
+				if (linkedCollection.deleted) continue;
+				// Only display the menuitem with the linked collection
+				// under the group
+				let libraryMenuItem = popup.querySelector(`[value="L${linkedCollection.libraryID}"]`);
+				let linkedMenu = Zotero.Utilities.Internal.createIconicMenuNode(document, 'menu', linkedCollection);
+				libraryMenuItem.menupopup.replaceChildren(linkedMenu);
+				// Two options to copy into the linked collection:
+				// - purely additive that will add new items and collections
+				// - destructive that will replace all content of the linked
+				// collection with the content of the selected collection
+				let addMenuItem = document.createXULElement("menuitem");
+				document.l10n.setAttributes(addMenuItem, "collections-menu-copy-collection-additive");
+				addMenuItem.addEventListener("command", () => {
+					this.copyCollection(linkedCollection);
+				});
+				let replaceMenuItem = document.createXULElement("menuitem");
+				document.l10n.setAttributes(replaceMenuItem, "collections-menu-copy-collection-destructive");
+				replaceMenuItem.addEventListener("command", () => {
+					this.replicateCollection(linkedCollection);
+				});
+				linkedMenu.firstChild.appendChild(addMenuItem);
+				linkedMenu.firstChild.appendChild(replaceMenuItem);
+			}
+		})();
+	};
+
+	// Display menu to copy a library into another library
+	this.buildCopyLibraryMenu = function (event) {
+		if (event.target !== event.currentTarget) return;
+		let popup = document.getElementById("zotero-copy-library-popup");
+		popup.replaceChildren();
+		let selected = this.getSelectedGroup();
+		if (!selected) return;
+		
+		let libraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed) && lib.id != selected.id && lib.editable);
+		for (let lib of libraries) {
+			let libMenu = Zotero.Utilities.Internal.createIconicMenuNode(document, 'menu', lib);
+			let addMenuItem = document.createXULElement("menuitem");
+			document.l10n.setAttributes(addMenuItem, "collections-menu-copy-collection-additive");
+			addMenuItem.addEventListener("command", () => {
+				let selectedGroup = this.getSelectedGroup();
+				Zotero.Libraries.copy(selectedGroup, lib);
+			});
+			libMenu.firstChild.appendChild(addMenuItem);
+			let replaceMenuItem = document.createXULElement("menuitem");
+			document.l10n.setAttributes(replaceMenuItem, "collections-menu-copy-collection-destructive");
+			replaceMenuItem.addEventListener("command", () => {
+				this.replicateLibrary(lib);
+			});
+			libMenu.firstChild.appendChild(replaceMenuItem);
+			popup.appendChild(libMenu);
 		}
 	};
 
