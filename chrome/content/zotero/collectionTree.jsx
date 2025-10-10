@@ -1985,9 +1985,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var droppedCollection = await Zotero.Collections.getAsync(data[0]);
 			// Collection drag between libraries
 			if (targetLibraryID != droppedCollection.libraryID) {
-				await Zotero.DB.executeTransaction(async () => {
-					await Zotero.Collections.copy(droppedCollection, targetTreeRow.ref);
-				});
+				await Zotero.Collections.copy(droppedCollection, targetTreeRow.ref);
 			}
 			// Collection drag within a library
 			else {
