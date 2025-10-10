@@ -64,6 +64,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		
 		this.libraryID = libraryID;
 		this.wizard = document.getElementById('import-wizard');
+		let fileHandlingEl = document.getElementById('file-handling');
+		let createCollectionEl = document.getElementById('create-collection');
 
 		// disable "continue" button until everything is ready
 		this.wizard.canAdvance = false;
@@ -126,8 +128,13 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.isZotfileInstalled = !!extensions.find(extName => extName.match(/^ZotFile((?!disabled).)*$/));
 		this.mendeleyImporterVersion = parseInt((await Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='mendeleyImport' AND key='version'")) || 0);
 
-		const shouldCreateCollection = await this.getShouldCreateCollection();
-		document.getElementById('create-collection').checked = shouldCreateCollection;
+		// Initialize controls on the options page with default or previously saved values
+		const shouldCreateCollection = Zotero.Prefs.prefHasUserValue('import.createCollection')
+			? Zotero.Prefs.get('import.createCollection')
+			: await this.getShouldCreateCollection();
+		const fileHandling = Zotero.Prefs.get('import.fileHandling') ?? 'copy';
+		fileHandlingEl.value = fileHandling;
+		createCollectionEl.checked = shouldCreateCollection;
 
 		if (relinkOnly) {
 			document.getElementById('relink-only-checkbox').checked = true;
@@ -301,10 +308,12 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			switch (selectedMode) {
 				case 'file':
 					this.folder = null;
+					this.wizard.canAdvance = false;
 					await this.chooseFile();
 					break;
 				case 'folder':
 					this.file = null;
+					this.wizard.canAdvance = false;
 					await this.chooseFolder();
 					break;
 				case 'mendeleyOnline':
@@ -427,7 +436,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.wizard.canAdvance = false;
 		this.wizard.canRewind = false;
 
-		const linkFiles = document.getElementById('file-handling').selectedItem.id === 'link';
+		const fileHandling = document.getElementById('file-handling').value;
+		const linkFiles = fileHandling === 'link';
 		const recreateStructure = document.getElementById('recreate-structure').checked;
 		const shouldCreateCollection = document.getElementById('create-collection').checked;
 		const mimeTypes = document.getElementById('import-pdf').checked
@@ -438,6 +448,9 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			: null;
 		const newItemsOnly = document.getElementById('new-items-only-checkbox').checked;
 		const relinkOnly = document.getElementById('relink-only-checkbox').checked;
+
+		Zotero.Prefs.set('import.fileHandling', fileHandling);
+		Zotero.Prefs.set('import.createCollection', shouldCreateCollection);
 		
 		try {
 			const result = await Zotero_File_Interface.importFile({
