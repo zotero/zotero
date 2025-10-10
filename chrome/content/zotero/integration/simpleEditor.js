@@ -140,68 +140,85 @@ const defaultActions = {
 			const url = window.prompt('Enter the image URL')
 			if (url) exec('insertImage', url)
 		}
+	},
+	subscript: {
+		icon: 'X<sub>2</sub>',
+		title: 'Subscript',
+		state: () => queryCommandState('subscript'),
+		result: () => exec('subscript')
+	},
+	superscript: {
+		icon: 'X<sup>2</sup>',
+		title: 'Superscript',
+		state: () => queryCommandState('superscript'),
+		result: () => exec('superscript')
+	},
+	removeformat: {
+		icon: 'T<sub>x</sub>',
+		title: 'Remove Format',
+		result: () => exec('removeFormat')
 	}
 }
 
-const defaultClasses = {
-	actionbar: 'zotero-simpleEditor-actionbar',
-	button: 'zotero-simpleEditor-button',
-	content: 'zotero-simpleEditor-content',
-	selected: 'zotero-simpleEditor-button-selected'
-}
-
 /**
- * @param settings
- * settings.actions {Array} - array of action names or objects
- * settings.element {HTMLElement} - element to which attach the editor
- * settings.onChange {Function} - change handler
- * settings.classes {Object} - default classes overrides
- * settings.defaultParagraphSeparator {String} - ["div"] element name for paragraph separator
+ * Initialize the editor based on configuration passed via iframe attributes
  */
-const init = settings => {
-	const actions = settings.actions
-		? (
-			settings.actions.map(action => {
-				if (typeof action === 'string') return defaultActions[action]
-				else if (defaultActions[action.name]) return { ...defaultActions[action.name], ...action }
-				return action
-			})
-		)
-		: Object.keys(defaultActions).map(action => defaultActions[action])
+const init = () => {
+	let config = {
+		actions: ["bold", "italic", "underline"],
+		toolbarBelowEditor: false,
+	};
+	let editorElement = document.querySelector('#simple-editor');
 
-	const classes = { ...defaultClasses, ...settings.classes }
+	if (window.frameElement?.getAttribute('actions')) {
+		config.actions = window.frameElement.getAttribute('actions').split(',');
+	}
+	if (window.frameElement?.getAttribute('toolbar-below-editor')) {
+		config.toolbarBelowEditor = !!window.frameElement.getAttribute('toolbar-below-editor');
+		document.querySelector('#simple-editor').classList.add('toolbar-below-editor');
+	}
+	if (window.frameElement?.getAttribute('tight')) {
+		document.querySelector('#simple-editor').classList.add('tight');
+	}
 
-	const defaultParagraphSeparator = settings[defaultParagraphSeparatorString] || 'div'
+	const actions = config.actions.map(action => defaultActions[action]);
+
+	const defaultParagraphSeparator = config[defaultParagraphSeparatorString] || 'div'
 
 	const actionbar = createElement('div')
-	actionbar.className = classes.actionbar
-	appendChild(settings.element, actionbar)
+	actionbar.className = "actionbar";
+	appendChild(editorElement, actionbar)
 
-	const content = settings.element.content = createElement('div')
+	const content = editorElement.content = createElement('div')
 	content.contentEditable = true
-	content.className = classes.content
+	content.className = "content";
 	content.oninput = ({ target: { firstChild } }) => {
 		if (firstChild && firstChild.nodeType === 3) exec(formatBlock, `<${defaultParagraphSeparator}>`)
 		else if (content.innerHTML === '<br>') content.innerHTML = ''
-		settings.onChange && settings.onChange(content.innerHTML)
 	}
 	content.onkeydown = event => {
 		if (event.key === 'Enter' && queryCommandValue(formatBlock) === 'blockquote') {
 			setTimeout(() => exec(formatBlock, `<${defaultParagraphSeparator}>`), 0)
 		}
 	}
-	appendChild(settings.element, content)
+
+	if (config.toolbarBelowEditor) {
+		editorElement.prepend(content);
+	}
+	else {
+		appendChild(editorElement, content);
+	}
 
 	actions.forEach(action => {
 		const button = createElement('button')
-		button.className = classes.button
+		button.className = "button";
 		button.innerHTML = action.icon
 		button.title = action.title
 		button.setAttribute('type', 'button')
 		button.onclick = () => action.result() && content.focus()
 
 		if (action.state) {
-			const handler = () => button.classList[action.state() ? 'add' : 'remove'](classes.selected)
+			const handler = () => button.classList[action.state() ? 'add' : 'remove']("selected");
 			addEventListener(content, 'keyup', handler)
 			addEventListener(content, 'mouseup', handler)
 			addEventListener(button, 'click', handler)
@@ -210,10 +227,10 @@ const init = settings => {
 		appendChild(actionbar, button)
 	})
 
-	if (settings.styleWithCSS) exec('styleWithCSS')
+	if (config.styleWithCSS) exec('styleWithCSS')
 	exec(defaultParagraphSeparatorString, defaultParagraphSeparator)
 
-	return settings.element
+	return editorElement;
 }
 
 var RTFConverter = new function() {
@@ -545,11 +562,8 @@ var RTFConverter = new function() {
 	}
 }
 
-init({
-	element: document.querySelector('#simple-editor'),
-	actions: ['bold', 'italic', 'underline']
-});
-var editorContents = document.querySelector('.zotero-simpleEditor-content');
+init();
+var editorContents = document.querySelector('.content');
 
 window.editor = {
 	get element() {
@@ -573,6 +587,21 @@ window.editor = {
 	
 	setEnabled(enabled) {
 		editorContents.setAttribute('contenteditable', !!enabled);
+	},
+
+	getTotalHeight() {
+		return editorContents.scrollHeight + document.querySelector(".actionbar").scrollHeight;
+	},
+
+	focusContent() {
+		editorContents.focus();
+		// Move cursor to the end of the content
+		let range = document.createRange();
+		range.selectNodeContents(editorContents);
+		range.collapse(false);
+		let sel = window.getSelection();
+		sel.removeAllRanges();
+		sel.addRange(range);
 	}
 }
 
