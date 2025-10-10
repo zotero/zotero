@@ -802,6 +802,76 @@ describe("Zotero.ItemTree", function () {
 			assert.isFalse(zp.itemsView.getRowIndexByID(attachment.id));
 		});
 
+		it("should keep attachment row open after a sibling note is updated", async function () {
+			// Create a parent item, a child attachment with annotations and a child note
+			let parentItem = await createDataObject('item', { title: "Parent Item" });
+			let attachment = await importFileAttachment('test.pdf', { title: 'Test PDF', parentItemID: parentItem.id });
+			let highlight = await createAnnotation('highlight', attachment);
+			let note = await createDataObject('item', { itemType: 'note', parentID: parentItem.id });
+			
+			
+			// Expand parent row and attachment row
+			let parentRowIndex = itemsView.getRowIndexByID(parentItem.id);
+			await itemsView.toggleOpenState(parentRowIndex);
+			let attachmentRowIndex = itemsView.getRowIndexByID(attachment.id);
+			await itemsView.toggleOpenState(attachmentRowIndex);
+			
+			// Update note
+			note.setNote("New content");
+			await note.saveTx();
+			
+			// Verify that the annotation row exists and attachment row is open
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment.id)));
+			let annotationRowIndex = itemsView.getRowIndexByID(highlight.id);
+			assert.equal(annotationRowIndex, attachmentRowIndex + 1);
+		});
+
+		it("should keep attachment row open if annotation is deleted and then re-added", async function () {
+			// Create a parent item, a child attachment with annotations
+			let parentItem = await createDataObject('item', { title: "Parent Item" });
+			let attachment = await importFileAttachment('test.pdf', { title: 'Test PDF', parentItemID: parentItem.id });
+			let highlight = await createAnnotation('highlight', attachment);
+
+			
+			// Expand parent row and attachment row
+			let parentRowIndex = itemsView.getRowIndexByID(parentItem.id);
+			await itemsView.toggleOpenState(parentRowIndex);
+			let attachmentRowIndex = itemsView.getRowIndexByID(attachment.id);
+			await itemsView.toggleOpenState(attachmentRowIndex);
+			
+			// Replace the annotation with a new one
+			await highlight.eraseTx();
+			let newHighlight = await createAnnotation('highlight', attachment);
+			
+			// Verify that the annotation row exists and attachment row is open
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment.id)));
+			let annotationRowIndex = itemsView.getRowIndexByID(newHighlight.id);
+			assert.equal(annotationRowIndex, attachmentRowIndex + 1);
+		});
+
+		it("should keep attachment row open after parent is collapsed and re-opened", async function () {
+			// Create a parent item, a child attachment with annotations
+			let parentItem = await createDataObject('item', { title: "Parent Item" });
+			let attachment = await importFileAttachment('test.pdf', { title: 'Test PDF', parentItemID: parentItem.id });
+			let highlight = await createAnnotation('highlight', attachment);
+			
+			// Expand parent row and attachment row
+			let parentRowIndex = itemsView.getRowIndexByID(parentItem.id);
+			await itemsView.toggleOpenState(parentRowIndex);
+			let attachmentRowIndex = itemsView.getRowIndexByID(attachment.id);
+			await itemsView.toggleOpenState(attachmentRowIndex);
+			
+			// Collapse and re-open the parent row
+			await itemsView.toggleOpenState(parentRowIndex);
+			await itemsView.toggleOpenState(itemsView.getRowIndexByID(parentItem.id));
+			
+			// Verify that the attachment row is open and the annotation row exists
+			attachmentRowIndex = itemsView.getRowIndexByID(attachment.id);
+			assert.isTrue(itemsView.isContainerOpen(attachmentRowIndex));
+			let annotationRowIndex = itemsView.getRowIndexByID(highlight.id);
+			assert.equal(annotationRowIndex, attachmentRowIndex + 1);
+		});
+
 		describe("Change parent item", function () {
 			let item1, item2, attachment1, highlight1;
 			
@@ -831,8 +901,9 @@ describe("Zotero.ItemTree", function () {
 				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
 				assert.equal(attachmentRowIndex, secondItemRowIndex + 1);
 				assert.equal(itemsView.getRow(attachmentRowIndex).level, 1);
-				// Verify there is no leftover annotation row
-				assert.isFalse(annotationRowIndex);
+				// Verify annotation row is a child of the correct attachment
+				assert.equal(annotationRowIndex, attachmentRowIndex + 1);
+				assert.equal(itemsView.getRow(annotationRowIndex).level, itemsView.getRow(attachmentRowIndex).level + 1);
 			});
 		
 			it("should remove old attachment and annotation rows after a child attachment is moved to top level", async function () {
@@ -845,8 +916,9 @@ describe("Zotero.ItemTree", function () {
 
 				// Verify that the attachment has been moved to top level
 				assert.equal(itemsView.getRow(attachmentRowIndex).level, 0);
-				// Verify there is no leftover annotation row
-				assert.isFalse(annotationRowIndex);
+				// Verify annotation row is a child of the correct attachment
+				assert.equal(annotationRowIndex, attachmentRowIndex + 1);
+				assert.equal(itemsView.getRow(annotationRowIndex).level, itemsView.getRow(attachmentRowIndex).level + 1);
 			});
 		
 			it("should remove old attachment and annotation rows after a top-level attachment is made a child", async function () {
@@ -854,20 +926,25 @@ describe("Zotero.ItemTree", function () {
 				let topLevelAttachment = await importFileAttachment('test.pdf', { title: 'Top Level Attachment', parentItemID: null });
 				let highlightOfTopLevel = await createAnnotation('highlight', topLevelAttachment);
 
+				let attachmentRowIndex = itemsView.getRowIndexByID(topLevelAttachment.id);
+				// Have attachment opened
+				await itemsView.toggleOpenState(attachmentRowIndex);
+
 				// Move top-level attachment into item
 				topLevelAttachment.parentID = item2.id;
 				await topLevelAttachment.saveTx();
 
+				attachmentRowIndex = itemsView.getRowIndexByID(topLevelAttachment.id);
 				let secondItemRowIndex = itemsView.getRowIndexByID(item2.id);
-				let attachmentRowIndex = itemsView.getRowIndexByID(topLevelAttachment.id);
 				let annotationRowIndex = itemsView.getRowIndexByID(highlightOfTopLevel.id);
 
 				// Verify that the attachment has been moved into the item
 				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
 				assert.equal(attachmentRowIndex, secondItemRowIndex + 1);
 				assert.equal(itemsView.getRow(attachmentRowIndex).level, 1);
-				// Verify there is no leftover annotation row
-				assert.isFalse(annotationRowIndex);
+				// Verify annotation row is a child of the correct attachment
+				assert.equal(annotationRowIndex, attachmentRowIndex + 1);
+				assert.equal(itemsView.getRow(annotationRowIndex).level, itemsView.getRow(attachmentRowIndex).level + 1);
 			});
 		
 			it("should handle child note being moved to top level", async function () {
