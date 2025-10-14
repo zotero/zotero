@@ -3586,6 +3586,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (!columnSettings && this.id === 'main') {
 					column = this._setLegacyColumnSettings(column);
 				}
+				// Special handling for some custom columns that must always be visible
+				// (e.g. +/- buttons column in Edit Bibliography dialog)
+				if (column.isAlwaysVisible) {
+					columnSettings.hidden = false;
+				}
 
 				// Also includes a `hidden` pref and overrides the above if available
 				column = Object.assign({}, column, columnSettings || {});

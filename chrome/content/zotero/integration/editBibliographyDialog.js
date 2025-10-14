@@ -99,7 +99,7 @@ var initLibraryTrees = async function () {
 	// +/- buttons will add/remove selected item to/from bibliography
 	let itemViewColumns = COLUMNS.map((column) => {
 		column = Object.assign({}, column);
-		column.hidden = !['title', 'firstCreator', 'date', 'addToBibliography'].includes(column.dataKey);
+		column.hidden = !['title', 'firstCreator', 'date'].includes(column.dataKey);
 		return column;
 	});
 	itemViewColumns.push({
@@ -109,7 +109,8 @@ var initLibraryTrees = async function () {
 		width: 26,
 		staticWidth: true,
 		fixedWidth: true,
-		showInColumnPicker: true,
+		showInColumnPicker: false,
+		isAlwaysVisible: true,
 		renderer: (index, inBibliography, column) => {
 			let cell = document.createElement("span");
 			cell.className = `cell ${column.className} clickable`;
