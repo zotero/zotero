@@ -107,6 +107,15 @@
 		}
 
 		set value(val) {
+			try {
+				// eslint-disable-next-line no-new
+				new Intl.Locale(val);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				val = '';
+			}
+			
 			this._value = val;
 			const styleData = this._style ? Zotero.Styles.get(this._style) : null;
 			this.localeListEl.value = styleData && styleData.locale || this._value;
