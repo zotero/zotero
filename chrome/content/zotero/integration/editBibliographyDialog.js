@@ -118,6 +118,8 @@ var initLibraryTrees = async function () {
 			iconWrapper.className = "icon-action";
 			cell.append(iconWrapper);
 			let icon = inBibliography ? getCSSIcon('minus-circle') : getCSSIcon('plus-circle');
+			let l10nID = `integration-editBibliography-${inBibliography ? 'remove-from' : 'add-to'}-bibliography`;
+			document.l10n.setAttributes(icon, l10nID);
 			iconWrapper.append(icon);
 			iconWrapper.addEventListener('click', () => {
 				let item = itemsView.getRow(index).ref;
