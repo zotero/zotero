@@ -48,7 +48,7 @@ var onLoad = async function () {
 	revertAllButton = document.getElementById("zotero-edit-bibliography-revert-all-btn");
 	revertAllButton.label = Zotero.getString("integration.revertAll.button");
 	revertAllButton.addEventListener('command', () => {
-		ReferenceItems.revert();
+		ReferenceItems.revertAll();
 		BibliographyListUI.refreshBibRows();
 	});
 
@@ -593,28 +593,27 @@ const ReferenceItems = {
 	},
 
 	revert: function (itemID) {
-		let revertingItem = !!itemID;
+		window.isPristine = false;
+		itemID = itemID.toString();
+		bibEditInterface.revert(itemID);
+		this.refreshBibItems();
+	},
+
+	revertAll: function () {
 		var promptService = Services.prompt;
 		
 		var out = {};
 		var regenerate = promptService.confirmEx(
 			window,
-			Zotero.getString(revertingItem ? 'integration.revert.title' : 'integration.revertAll.title'),
-			Zotero.getString(revertingItem ? 'integration.revert.body' : 'integration.revertAll.body'),
+			Zotero.getString('integration.revertAll.title'),
+			Zotero.getString('integration.revertAll.body'),
 			promptService.STD_OK_CANCEL_BUTTONS + promptService.BUTTON_POS_0_DEFAULT,
 			null, null, null, null, out
 		);
 		
 		if (regenerate != 0) return;
 		window.isPristine = false;
-
-		if (revertingItem) {
-			itemID = itemID.toString();
-			bibEditInterface.revert(itemID);
-		}
-		else {
-			bibEditInterface.revertAll();
-		}
+		bibEditInterface.revertAll();
 		this.refreshBibItems();
 	},
 
