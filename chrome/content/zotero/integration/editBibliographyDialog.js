@@ -365,6 +365,12 @@ const BibliographyListUI = {
 			editorFrame.contentDocument.addEventListener("selectionchange", () => {
 				EditorActionButtons.updateActionButtons();
 			});
+			// when focus moves into the editor, highlight it and select the respective
+			// item in the itemTree
+			editorFrame.contentDocument.addEventListener("focusin", () => {
+				this.scrollToRow(itemID);
+				itemsView.selectItem(itemID);
+			});
 			editorFrame.contentDocument.addEventListener("keydown", (event) => {
 				// if Cmd/Ctrl is pressed, keypress could be a shortcut for bold/italic/undeline
 				// actions, so refresh button actions again
