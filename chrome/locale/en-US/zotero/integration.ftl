@@ -20,6 +20,7 @@ integration-editBibliography-wrapper =
     { -integration-editBibliography-edit-reference }
 integration-editBibliography-excluded-item = Excluded
 integration-editBibliography-uncited-item = Uncited
+integration-editBibliography-edited-item = Edited
 integration-editBibliography-remove =
     .title = { general-remove }
 integration-editBibliography-add =

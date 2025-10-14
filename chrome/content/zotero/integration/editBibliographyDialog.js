@@ -425,6 +425,9 @@ const BibliographyListUI = {
 		let citedNotInBibliography = ReferenceItems.isCited(itemID) && !ReferenceItems.isInBibliography(itemID);
 		revertBtn.hidden = !bibEditInterface.isEdited(itemID) || citedNotInBibliography;
 		revertAllButton.disabled = !bibEditInterface.isAnyEdited();
+
+		let isEdited = bibEditInterface.isEdited(itemID);
+		revertBtn.closest(".list-item").classList.toggle('edited', isEdited && !citedNotInBibliography);
 	},
 
 	scrollToRow: function (itemID) {

@@ -3,6 +3,7 @@
 	min-height: 600px;
 	--excluded-color: #FAA7004D; // accent-yellow with 30% opacity
 	--uncited-color: #59ADC44D; // accent-teal with 30% opacity
+	--edited-color: var(--accent-blue10);
 
 	#zotero-edit-bibliography-dialog-box {
 		height: 100%;
@@ -113,9 +114,9 @@
 					.reference-editor {
 						border: none;
 						width: 100%;
+						padding-inline-end: 5px;
 					}
 					.item-buttons {
-						min-width: 52px;
 						align-items: flex-start;
 						justify-content: flex-end;
 						margin-right: 5px;
@@ -166,6 +167,9 @@
 							&.uncited {
 								background: var(--uncited-color);
 							}
+							&.edited {
+								background: var(--edited-color);
+							}
 						}
 					}
 
@@ -179,6 +183,11 @@
 					}
 					&.uncited {
 						.label.uncited {
+							display: block;
+						}	
+					}
+					&.edited {
+						.label.edited {
 							display: block;
 						}	
 					}
