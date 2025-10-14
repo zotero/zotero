@@ -233,6 +233,7 @@ const BibliographyListUI = {
 
 	// set the proper state of a bibliography row's editor and buttons
 	setBibRow: function (itemID) {
+		itemID = itemID.toString();
 		let listItem = document.querySelector(`.list-item[data-item-id="${itemID}"]`);
 		let itemCitedNotInBibliography = ReferenceItems.isCited(itemID) && ReferenceItems.isOmitted(itemID);
 		listItem.classList.toggle('excluded', itemCitedNotInBibliography);
