@@ -63,9 +63,10 @@
 					.replace(/^American Psychological Association/, "American Psychological Association (APA)")
 					.replace(/^American Sociological Association/, "American Sociological Association (ASA)");
 				
-				styleListEl.appendChild(MozXULElement.parseXULToFragment(`
-					<richlistitem value="${value}">${Zotero.Utilities.htmlSpecialChars(label)}</richlistitem>
-				`));
+				let richlistitem = document.createXULElement('richlistitem');
+				richlistitem.value = value;
+				richlistitem.textContent = label;
+				styleListEl.append(richlistitem);
 			});
 			this.value = this.getAttribute('value');
 			this.querySelector('#style-list').addEventListener("select", () => {
@@ -147,9 +148,10 @@
 			menuLocalesKeys.forEach((key) => {
 				const label = menuLocales[key];
 				
-				this.localePopupEl.appendChild(MozXULElement.parseXULToFragment(`
-					<menuitem value="${key}" label="${label}"/>
-				`));
+				let menuitem = document.createXULElement('menuitem');
+				menuitem.value = key;
+				menuitem.label = label;
+				this.localePopupEl.append(menuitem);
 			});
 
 			this.value = this._value;
@@ -172,18 +174,11 @@
 			>
 				<div class="style-list-container">
 					<label for="style-selector" data-l10n-id="bibliography-style-label" />
-					<div class="style-selector-wrapper">
-						<xul:style-selector id="style-selector" value="${this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || ''}" />
-					</div>
+					<div class="style-selector-wrapper"/>
 					<label id="manage-styles" tabindex="0" role="link" class="text-link" data-l10n-id="bibliography-manageStyles-label"></label>
 				</div>
 				<div class="locale-selector-wrapper">
 					<label for="locale-selector" class="locale-selector-label" data-l10n-id="bibliography-locale-label" />
-					<xul:locale-selector
-						id="locale-selector"
-						value="${this.getAttribute('locale') || Zotero.Prefs.get('export.lastLocale') || ''}"
-						style="${this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || ''}"
-					/>
 				</div>
 				<div class="display-as-wrapper">
 					<label for="style-selector" data-l10n-id="bibliography-displayAs-label" />
@@ -225,10 +220,23 @@
 		}
 
 		async init() {
+			let styleSelector = document.createXULElement('style-selector');
+			styleSelector.id = 'style-selector';
+			// value needs to be initialized before the style-selector CE connects
+			styleSelector.setAttribute('value', this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle'));
+			this.querySelector('.style-selector-wrapper').append(styleSelector);
+
+			let localeSelector = document.createXULElement('locale-selector');
+			localeSelector.id = 'locale-selector';
+			// As above - initialize values first to avoid race conditions in LocaleSelector#init()
+			localeSelector.setAttribute('value', this.getAttribute('locale') || Zotero.Prefs.get('export.lastLocale') || '');
+			localeSelector.setAttribute('style', this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || '');
+			this.querySelector('.locale-selector-wrapper').append(localeSelector);
+
 			this.querySelector('.style-configurator').style.display = 'none';
 			await Zotero.Styles.init();
 			this.querySelector('.style-configurator').style.display = '';
-			this.querySelector('#style-selector').addEventListener('select', (_event) => {
+			styleSelector.addEventListener('select', (_event) => {
 				this.handleStyleChanged(_event.target.value);
 
 				const event = new CustomEvent("select", {
@@ -241,7 +249,7 @@
 				this.dispatchEvent(event,);
 			});
 
-			this.querySelector('#locale-selector').addEventListener('select', (_event) => {
+			localeSelector.addEventListener('select', (_event) => {
 				const event = new CustomEvent("select", {
 					detail: {
 						type: "locale",
