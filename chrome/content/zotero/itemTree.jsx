@@ -3588,7 +3588,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 				// Special handling for some custom columns that must always be visible
 				// (e.g. +/- buttons column in Edit Bibliography dialog)
-				if (column.isAlwaysVisible) {
+				if (columnSettings && column.isAlwaysVisible) {
 					columnSettings.hidden = false;
 				}
 

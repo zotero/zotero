@@ -111,6 +111,7 @@ var initLibraryTrees = async function () {
 		fixedWidth: true,
 		showInColumnPicker: false,
 		isAlwaysVisible: true,
+		hidden: false,
 		renderer: (index, inBibliography, column) => {
 			let cell = document.createElement("span");
 			cell.className = `cell ${column.className} clickable`;
