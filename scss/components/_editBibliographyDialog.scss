@@ -120,6 +120,7 @@
 						align-items: flex-start;
 						justify-content: flex-end;
 						margin-right: 5px;
+						gap: 8px;
 
 						button {
 							white-space: nowrap;
@@ -129,7 +130,6 @@
 							border-radius: 5px;
 							background-size: 80% !important;
 							color: var(--fill-secondary);
-							margin-left: 8px;
 
 							&:hover {
 								background-color: var(--fill-quinary) !important;
@@ -155,6 +155,10 @@
 						justify-content: flex-end;
 						margin-top: 1px;
 						font-size: 11px;
+						gap: 8px;
+						margin-inline-end: 8px;
+						// will appear if excluded/uncited/edited class is set below
+						display: none;
 
 						.label {
 							padding: 1px 4px;
@@ -174,6 +178,9 @@
 					}
 
 					&.excluded {
+						.item-labels {
+							display: flex;
+						}
 						.label.excluded {
 							display: block;
 						}	
@@ -182,11 +189,17 @@
 						}
 					}
 					&.uncited {
+						.item-labels {
+							display: flex;
+						}
 						.label.uncited {
 							display: block;
 						}	
 					}
 					&.edited {
+						.item-labels {
+							display: flex;
+						}
 						.label.edited {
 							display: block;
 						}	
