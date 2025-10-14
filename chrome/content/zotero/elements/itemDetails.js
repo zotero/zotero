@@ -64,6 +64,8 @@
 
 						<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" data-pane="notes"/>
 
+						<note-box id="zotero-note-box" data-pane="note-info" hidden="true"/>
+
 						<attachment-box id="zotero-attachment-box" data-pane="attachment-info" data-use-preview="true" hidden="true"/>
 						
 						<attachment-annotations-box id="zotero-editpane-attachment-annotations" data-pane="attachment-annotations" hidden="true"/>
