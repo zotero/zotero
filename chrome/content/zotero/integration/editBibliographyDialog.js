@@ -122,6 +122,11 @@ var initLibraryTrees = async function () {
 				let item = itemsView.getRow(index).ref;
 				ReferenceItems.toggleItemInBibliography([item.id]);
 				BibliographyListUI.refreshBibRows({ items: [item.id] });
+				// select just-added item and scroll its editor into view
+				if (ReferenceItems.isInBibliography(item.id)) {
+					itemsView.selectItem(item.id);
+					BibliographyListUI.scrollToRow(item.id);
+				}
 			});
 			return cell;
 		}
@@ -135,6 +140,11 @@ var initLibraryTrees = async function () {
 			let itemIDs = items.map(item => item.id);
 			ReferenceItems.toggleItemInBibliography(itemIDs);
 			BibliographyListUI.refreshBibRows({ items: itemIDs });
+			// select the first just-added item and scroll its editor into view
+			if (ReferenceItems.isInBibliography(itemIDs[0])) {
+				itemsView.selectItem(itemIDs[0]);
+				BibliographyListUI.scrollToRow(itemIDs[0]);
+			}
 		},
 		id: "edit-bibliography-items-tree",
 		dragAndDrop: false,
