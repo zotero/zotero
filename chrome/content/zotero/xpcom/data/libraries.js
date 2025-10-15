@@ -230,12 +230,26 @@ Zotero.Libraries = new function () {
 		for (let collection of collections) {
 			await Zotero.Collections.replicate(collection, targetLibrary);
 		}
-		// Delete collections in target library that are not linked to anything in source library
-		let collectionsInTargetLibrary = Zotero.Collections.getByLibrary(targetLibraryID);
+		// Move child collections linked to top-level collections to top level
+		let collectionsInTargetLibrary = Zotero.Collections.getByLibrary(targetLibraryID, true);
 		await Zotero.Utilities.Internal.forEachChunkAsync(collectionsInTargetLibrary, 50, (chunk) => {
 			return Zotero.DB.executeTransaction(async () => {
 				for (let col of chunk) {
-					let linkedCol = await col.getLinkedCollection(sourceLibraryID);
+					let linkedCol = await col.getLinkedCollection(sourceLibraryID, true);
+					if (linkedCol && !linkedCol.parentID && col.parentID) {
+						col.parentID = null;
+						await col.save();
+					}
+				}
+			});
+		});
+
+		// Delete top level collections in target library that are not linked to anything in source library
+		let topLevelCollectionsInTargetLibrary = Zotero.Collections.getByLibrary(targetLibraryID);
+		await Zotero.Utilities.Internal.forEachChunkAsync(topLevelCollectionsInTargetLibrary, 50, (chunk) => {
+			return Zotero.DB.executeTransaction(async () => {
+				for (let col of chunk) {
+					let linkedCol = await col.getLinkedCollection(sourceLibraryID, true);
 					if (!linkedCol) {
 						col.deleted = true;
 						await col.save();

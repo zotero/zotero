@@ -1070,15 +1070,31 @@ Zotero.Items = function () {
 		item = linkedItemInLibrary.clone(item.libraryID, { shouldReplaceItem: item, skipTags: !Zotero.Prefs.get('groups.copyTags') });
 		await item.save({ skipSelect: true });
 
+		// Update child items
+		let childItems = item.getChildren();
+		for (let child of childItems) {
+			if (child.isAnnotation()) continue;
+			await Zotero.Items.pullLinkedItemData(child, libraryID);
+		}
+
+
 		let shouldSave = false;
 		// Check all collections of the remaining items, and make sure
 		// all collections this item belong to are linked to collections
 		// that the linked item in source library belongs to
 		for (let col of Zotero.Collections.get(item.getCollections())) {
 			let colInSource = await col.getLinkedCollection(libraryID, true);
-			let isSourceItemInCol = colInSource && linkedItemInLibrary.inCollection(colInSource.id);
-			if (!isSourceItemInCol) {
+			if (!colInSource) continue;
+			if (!linkedItemInLibrary.inCollection(colInSource.id)) {
 				item.removeFromCollection(col.id);
+				shouldSave = true;
+			}
+		}
+		for (let col of Zotero.Collections.get(linkedItemInLibrary.getCollections())) {
+			let colInLibrary = await col.getLinkedCollection(item.libraryID, true);
+			if (!colInLibrary) continue;
+			if (!item.inCollection(colInLibrary.id)) {
+				item.addToCollection(colInLibrary.id);
 				shouldSave = true;
 			}
 		}

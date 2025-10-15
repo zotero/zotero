@@ -101,4 +101,149 @@ describe("Zotero.Collections", function () {
 			assert.notInstanceOf(collection, Zotero.Feed);
 		});
 	});
+
+	describe("#copy()", function () {
+		let group;
+
+		before(async function () {
+			group = await createGroup();
+		});
+
+		it("should copy new collections and items to another library", async function () {
+			let collection = await createDataObject('collection');
+			let subcollection = await createDataObject('collection', { parentID: collection.id });
+			let item = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+
+			await Zotero.Collections.copy(collection, group);
+
+			let linkedCollection = await collection.getLinkedCollection(group.libraryID, true);
+			assert.equal(collection.name, linkedCollection.name);
+			let linkedSubcollection = await subcollection.getLinkedCollection(group.libraryID, true);
+			assert.equal(linkedSubcollection.parentID, linkedCollection.id);
+
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.equal(item.title, linkedItem.title);
+			assert.sameMembers(linkedItem.getCollections(), [linkedCollection.id]);
+		});
+
+		it("should copy new collections and items to a collection in another library", async function () {
+			let collection = await createDataObject('collection');
+			let subcollection = await createDataObject('collection', { parentID: collection.id });
+			let item = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+
+			let groupCollection = await createDataObject('collection', { libraryID: group.libraryID });
+
+			await Zotero.Collections.copy(collection, groupCollection);
+
+			let linkedCollection = await collection.getLinkedCollection(group.libraryID, true);
+			assert.equal(linkedCollection.parentID, groupCollection.id);
+			let linkedSubcollection = await subcollection.getLinkedCollection(group.libraryID, true);
+			assert.equal(linkedSubcollection.parentID, linkedCollection.id);
+
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.equal(item.title, linkedItem.title);
+			assert.sameMembers(linkedItem.getCollections(), [linkedCollection.id]);
+		});
+
+		it("should add items and collections into existing linked collection", async function () {
+			let collection = await createDataObject('collection');
+			let subcollection = await createDataObject('collection', { parentID: collection.id });
+			let item = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+
+			let groupCollection = await createDataObject('collection', { libraryID: group.libraryID });
+			await groupCollection.addLinkedCollection(collection);
+			await collection.addLinkedCollection(groupCollection);
+
+			await Zotero.Collections.copy(collection, groupCollection);
+
+			let linkedCollection = await collection.getLinkedCollection(group.libraryID, true);
+			assert.equal(linkedCollection.id, groupCollection.id);
+			let linkedSubcollection = await subcollection.getLinkedCollection(group.libraryID, true);
+			assert.equal(linkedSubcollection.parentID, linkedCollection.id);
+
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.equal(item.title, linkedItem.title);
+			assert.sameMembers(linkedItem.getCollections(), [linkedCollection.id]);
+		});
+	});
+
+	describe("#replicate()", function () {
+		let group;
+
+		before(async function () {
+			group = await createGroup();
+		});
+
+		it("should replicate collections structure in linked group", async function () {
+			// Collection -> subcollection -> subsubcollection
+			let collection = await createDataObject('collection');
+			let subcollection = await createDataObject('collection', { parentID: collection.id });
+			let subsubcollection = await createDataObject('collection', { parentID: subcollection.id });
+
+			// Linked group collection
+			let groupCollection = await createDataObject('collection', { libraryID: group.libraryID });
+			// Linked group top-level collection that should be a top-collection
+			let groupSubcollection = await createDataObject('collection', { libraryID: group.libraryID });
+			// Group unlinked subcollection that should not be in that collection
+			let unlinkedGroupSubcollection = await createDataObject('collection', { libraryID: group.libraryID, parentID: groupCollection.id });
+
+			await groupCollection.addLinkedCollection(collection);
+			await collection.addLinkedCollection(groupCollection);
+
+			await subcollection.addLinkedCollection(groupSubcollection);
+			await groupSubcollection.addLinkedCollection(subcollection);
+
+			// Replicate collections
+			await Zotero.Collections.replicate(collection, group);
+			let linkedSubSubCollection = await subsubcollection.getLinkedCollection(group.libraryID, true);
+
+			// groupCollection remains top-level
+			assert.notOk(groupCollection.parentID);
+			// groupSubcollection is now a proper child of groupCollection
+			assert.equal(groupSubcollection.parentID, groupCollection.id);
+			// subsubcollection added a linked collection to the group
+			assert.equal(linkedSubSubCollection.parentID, groupSubcollection.id);
+			// unlinked collection is deleted
+			assert.isTrue(unlinkedGroupSubcollection.deleted);
+		});
+
+		it("should replicate items in the linked collection ", async function () {
+			let collection = await createDataObject('collection');
+			let item = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+			let note = await createDataObject('item', { itemType: 'note', parentItemID: item.id });
+			let attachment = await importFileAttachment('test.pdf', { parentItemID: item.id });
+
+			// Create linked items in another group
+			await Zotero.Collections.copy(collection, group);
+
+			// Update the items metadata
+			item.setField('title', 'Updated title');
+			await item.saveTx();
+
+			note.setNote('Updated note');
+			await note.saveTx();
+			
+			attachment.setField('title', 'Updated attachment');
+			await attachment.saveTx();
+
+			// Add a random item to the group collection
+			let linkedCollection = await collection.getLinkedCollection(group.libraryID, true);
+			let randomItem = await createDataObject('item', { libraryID: group.libraryID, collections: [linkedCollection.id] });
+
+			// Replicate the collection
+			await Zotero.Collections.replicate(collection, group);
+
+			// Metadata of items in the group should be updated
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.equal(linkedItem.getField("title"), 'Updated title');
+			let linkedNote = await note.getLinkedItem(group.libraryID, true);
+			assert.equal(linkedNote.parentID, linkedItem.id);
+			assert.equal(linkedNote.getNote(), 'Updated note');
+			let linkedAttachment = await attachment.getLinkedItem(group.libraryID, true);
+			assert.equal(linkedAttachment.getField("title"), 'Updated attachment');
+			assert.equal(linkedAttachment.parentID, linkedItem.id);
+			// The not linked item should be trashed
+			assert.isTrue(randomItem.deleted);
+		});
+	});
 })

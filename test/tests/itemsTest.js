@@ -1514,4 +1514,189 @@ describe("Zotero.Items", function () {
 			}
 		});
 	});
+
+	describe("#copyToLibrary()", function () {
+		let group;
+
+		before(async function () {
+			group = await createGroup();
+		});
+
+		it("should create a new linked item in the target library", async function () {
+			let item = await createDataObject('item', { setTitle: true });
+			let childNote = await createDataObject('item', { itemType: 'note', parentID: item.id });
+
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+			
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.isOk(linkedItem);
+			let linkedChildItem = await childNote.getLinkedItem(group.libraryID, true);
+			assert.isOk(linkedChildItem);
+			assert.equal(linkedChildItem.parentItemID, linkedItem.id);
+		});
+
+		it("should add new child items to existing linked item", async function () {
+			let item = await createDataObject('item', { setTitle: true });
+			// Copy item once
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+
+			// Add attachment to original item and copy it again
+			let newAttachment = await importFileAttachment('test.pdf', { parentItemID: item.id });
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+			
+			// The linked item should have the new linked attachment
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.isOk(linkedItem);
+			let linkedAttachment = await newAttachment.getLinkedItem(group.libraryID, true);
+			assert.isOk(linkedAttachment);
+			assert.equal(linkedAttachment.parentItemID, linkedItem.id);
+		});
+
+		it("should update the parent of linked item if it changed", async function () {
+			let item = await createDataObject('item', { setTitle: true });
+			let note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			let linkedNote = await note.getLinkedItem(group.libraryID, true);
+
+			// After copying, linked note is child item of the regular item
+			assert.ok(linkedNote.parentID);
+			assert.equal(linkedNote.parentID, linkedItem.id);
+
+			// Make the note standalone in the original library and copy again
+			note.parentID = null;
+			await note.saveTx();
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(note, group.libraryID);
+			});
+
+			// Linked note should be standalone
+			linkedNote = await note.getLinkedItem(group.libraryID, true);
+			assert.notOk(linkedNote.parentID);
+		
+			// Make the note a child item again and copy again
+			note.parentID = item.id;
+			await note.saveTx();
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+
+			// Linked note should be child item of linked item again
+			assert.equal(linkedNote.parentID, linkedItem.id);
+		});
+	});
+
+	describe("#pullLinkedItemData()", function () {
+		let group;
+
+		before(async function () {
+			group = await createGroup();
+		});
+
+		it("should update metadata of the item", async function () {
+			let item = await createDataObject('item', { setTitle: true });
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+
+			item.setField('title', 'Updated title');
+			await item.saveTx();
+
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.pullLinkedItemData(linkedItem, item.libraryID);
+			});
+			assert.equal(linkedItem.getField('title'), 'Updated title');
+		});
+
+		it("should update child items based on the linked item", async function () {
+			// Create item with children copied to another library
+			let item = await createDataObject('item', { setTitle: true });
+			let note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+			let attachment = await importFileAttachment('test.pdf', { parentItemID: item.id });
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+
+			// Trash the note and change title of the attachment
+			note.deleted = true;
+			await note.saveTx();
+			attachment.setField('title', 'Updated attachment title');
+			await attachment.saveTx();
+
+			// Pull these changes
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.pullLinkedItemData(linkedItem, item.libraryID);
+			});
+			// Check that linked note is trashed and linked attachment has the new title
+			let linkedNote = Zotero.Items.get(linkedItem.getNotes(true)[0]);
+			assert.isTrue(linkedNote.deleted);
+			let linkedAttachment = Zotero.Items.get(linkedItem.getAttachments()[0]);
+			assert.equal(linkedAttachment.getField('title'), 'Updated attachment title');
+		});
+
+		it("should update collections based on the linked item", async function () {
+			// Create 3 linked collections in two groups
+			let collection = await createDataObject('collection');
+			let subcollection = await createDataObject('collection', { parentID: collection.id });
+			let collectionTwo = await createDataObject('collection');
+
+			let groupCollection = await createDataObject('collection', { libraryID: group.libraryID });
+			let groupSubcollection = await createDataObject('collection', { libraryID: group.libraryID, parentID: groupCollection.id });
+			let groupCollectionTwo = await createDataObject('collection', { libraryID: group.libraryID });
+
+			await collection.addLinkedCollection(groupCollection);
+			await subcollection.addLinkedCollection(groupSubcollection);
+			await collectionTwo.addLinkedCollection(groupCollectionTwo);
+
+			// Create one more collections in each group, unlinked
+			let collectionThree = await createDataObject('collection');
+			let groupCollectionFour = await createDataObject('collection', { libraryID: group.libraryID });
+
+			// Item in My Library is in two linked collections and one unlinked collection
+			let item = await createDataObject('item', { setTitle: true });
+			item.setCollections([collection.id, subcollection.id, collectionThree.id]);
+			await item.saveTx();
+
+			// Create linked item in another group
+			let groupItem = await createDataObject('item', { libraryID: group.libraryID });
+			await groupItem.addLinkedItem(item);
+			// Place it in one of the linked collections and another unlinked collection
+			groupItem.setCollections([groupCollectionTwo.id, groupCollectionFour.id]);
+			await groupItem.saveTx();
+			// Pull the changes
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.pullLinkedItemData(groupItem, item.libraryID);
+			});
+
+			// Linked item should be in the two collections linked to collections the
+			// item in My Library belongs to, and the unlinked collection
+			assert.sameMembers(groupItem.getCollections(), [groupCollection.id, groupSubcollection.id, groupCollectionFour.id])
+		});
+
+		it("should delete item if linked item no longer exists", async function () {
+			let item = await createDataObject('item', { setTitle: true });
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			
+			item.deleted = true;
+			await item.saveTx();
+
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.pullLinkedItemData(linkedItem, item.libraryID);
+			});
+			assert.isTrue(linkedItem.deleted);		
+		});
+	});
 });

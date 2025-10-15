@@ -262,11 +262,6 @@ Zotero.Collections = function () {
 			throw new Error("Can only replace a non-deleted linked collection");
 		}
 
-		// If source collection is top-level, ensure linked collection is too
-		if (!collectionToCopy.parentID && linkedColToSource.parentID) {
-			linkedColToSource.parentID = null;
-			await linkedColToSource.saveTx();
-		}
 		// Update the name
 		if (linkedColToSource.name !== collectionToCopy.name) {
 			linkedColToSource.name = collectionToCopy.name;
@@ -320,7 +315,6 @@ Zotero.Collections = function () {
 			...linkedColToSource.getChildItems(),
 			...childCollectionsOfLinked.flatMap(c => c.getChildItems())
 		];
-		itemsOfLinkedCollection = itemsOfLinkedCollection.flatMap(item => [item, ...item.getChildren()]);
 		await Zotero.Utilities.Internal.forEachChunkAsync(itemsOfLinkedCollection, 50, (chunk) => {
 			return Zotero.DB.executeTransaction(async () => {
 				for (let itemInLinkedGroup of chunk) {
