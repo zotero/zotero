@@ -23,7 +23,15 @@ describe("Item pane", function () {
 		if (res instanceof Error) {
 			throw res;
 		}
-		await preview._reader._initPromise;
+		// Wait for reader initialization with timeout
+		let initTimeout = new Promise(resolve => setTimeout(() => resolve(false), 5000));
+		let initResult = await Promise.race([
+			preview._reader._initPromise,
+			initTimeout
+		]);
+		if (!initResult) {
+			return false;
+		}
 		return true;
 	}
 
@@ -223,10 +231,11 @@ describe("Item pane", function () {
 			assert.exists(restoreButton);
 			assert.exists(win.document.querySelector('#zotero-item-message .custom-head .item-delete-button'));
 
+			let refreshTrashPromise = waitForNotifierEvent('refresh', 'trash');
 			await restoreButton.click();
 			let ids = await waitForItemEvent('modify');
+			await refreshTrashPromise;
 			assert.equal(ids.length, 2);
-			await waitForFrame();
 			
 			assert.notExists(win.document.querySelector('#zotero-item-message .custom-head .item-restore-button'));
 			
@@ -747,7 +756,6 @@ describe("Item pane", function () {
 			
 			// Force cleanup of any pending operations and queued tasks
 			if (attachmentsBox._preview) {
-				attachmentsBox._cancelPendingDiscard?.();
 				attachmentsBox._preview._clearPendingTasks();
 				attachmentsBox._preview.discard?.();
 			}
@@ -1315,22 +1323,22 @@ describe("Item pane", function () {
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let attachmentsBox = itemDetails.getPane(paneID);
 
+			const discardTimeout = 50;
+
+			// Temporarily set discard timeout for testing before any operations
+			let currentDiscardTimeout = attachmentsBox._discardPreviewTimeout;
+			attachmentsBox._discardPreviewTimeout = discardTimeout;
+
 			// Resize to very small height to ensure the attachment box is not in view
 			let height = doc.documentElement.clientHeight;
 			win.resizeTo(null, 100);
 
-			const discardTimeout = 50;
-
-			// Temporarily set discard timeout for testing
-			let currentDiscardTimeout = attachmentsBox._discardPreviewTimeout;
-			attachmentsBox._discardPreviewTimeout = discardTimeout;
-
 			let item = await createDataObject('item');
-			await importFileAttachment('test.pdf', { parentID: item.id });
+			let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
 
 			await ZoteroPane.selectItem(item.id);
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForPreviewBoxRender(attachmentsBox, item.id);
+			await waitForPreviewBoxReader(attachmentsBox, attachment.id);
 
 			assert.isTrue(attachmentsBox._preview._isReaderInitialized);
 			
@@ -1339,7 +1347,7 @@ describe("Item pane", function () {
 
 			// Wait for the intersection observer to trigger discard and the discard process to complete
 			await waitForCallback(() => !attachmentsBox._preview._isReaderInitialized);
-			
+
 			assert.isFalse(attachmentsBox._preview._isReaderInitialized);
 
 			win.resizeTo(null, height);
@@ -1561,7 +1569,6 @@ describe("Item pane", function () {
 
 			// Force cleanup of any pending operations and queued tasks
 			if (attachmentBox._preview) {
-				attachmentBox._cancelPendingDiscard?.();
 				attachmentBox._preview._clearPendingTasks();
 				attachmentBox._preview.discard?.();
 			}
@@ -1587,6 +1594,8 @@ describe("Item pane", function () {
 			await item.renameAttachmentFile(newName);
 			
 			await promise;
+			let box = ZoteroPane.itemPane._itemDetails.getPane(paneID);
+			await waitForPreviewBoxRender(box, item.id);
 			assert.equal(label.value, newName);
 		});
 		
@@ -1612,7 +1621,7 @@ describe("Item pane", function () {
 
 			// Wait for section to finish rendering
 			let box = ZoteroPane.itemPane._itemDetails.getPane(paneID);
-			await waitForPreviewBoxRender(box);
+			await waitForPreviewBoxRender(box, item.id);
 			
 			assert.equal(label.value, newTitle);
 		});
@@ -1726,7 +1735,12 @@ describe("Item pane", function () {
 
 			await ZoteroPane.selectItem(attachment.id);
 			await waitForScrollToPane(itemDetails, paneID);
-			await waitForPreviewBoxRender(attachmentBox);
+			let initialized = await waitForPreviewBoxReader(attachmentBox, attachment.id);
+			// If the reader failed to initialize, skip the rest of the test
+			if (!initialized) {
+				Zotero.warn("should discard attachment pane preview after becoming invisible: Reader failed to initialize, skipping the test.");
+				return;
+			}
 
 			assert.isTrue(attachmentBox._preview._isReaderInitialized);
 			

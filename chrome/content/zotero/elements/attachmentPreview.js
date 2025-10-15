@@ -45,6 +45,7 @@
 
 			this._item = null;
 			this._reader = null;
+			this._initializePromise = Zotero.Promise.defer();
 			this._previewInitializePromise = Zotero.Promise.defer();
 			this._nextPreviewInitializePromise = Zotero.Promise.defer();
 
@@ -63,6 +64,12 @@
 			 * @type {number}
 			 */
 			this._lastRenderID = null;
+
+			/**
+			 * The task UID of the last processed task
+			 * @type {string}
+			 */
+			this._lastTaskUID = null;
 
 			/**
 			 * Whether a task is currently awaiting to be processed
@@ -102,7 +109,10 @@
 			this._resizeOb = new ResizeObserver(this._handleResize.bind(this));
 		}
 
-		content = MozXULElement.parseXULToFragment(`
+		// Do not define content here to avoid eager loading of reader
+		content = null;
+
+		lazyContent = MozXULElement.parseXULToFragment(`
 			<browser id="preview"
 				tooltip="iframeTooltip"
 				type="content"
@@ -217,6 +227,19 @@
 			this.addEventListener("keypress", this._handleKeypress);
 			this.setAttribute("data-preview-type", "unknown");
 			this._notifierID = Zotero.Notifier.registerObserver(this, ["item"], "attachmentPreview");
+
+			// Lazy load content
+			if (this.innerHTML === "") {
+				let content = document.importNode(this.lazyContent, true);
+				this.append(content);
+				// Block any tasks until readers are initialized
+				Promise.all([
+					this._previewInitializePromise.promise,
+					this._nextPreviewInitializePromise.promise
+				]).then(() => {
+					this._initializePromise.resolve();
+				});
+			}
 		}
 
 		destroy() {
@@ -301,6 +324,27 @@
 			await this._processTask();
 		}
 
+		async deferredDiscard(timeout = 3000) {
+			return new Promise((resolve) => {
+				let currentTaskUID = this._lastTaskUID;
+				this._debug(`Deferred discard called, current task: ${this._lastTaskUID}, timeout: ${timeout}ms`);
+				setTimeout(async () => {
+					if (!this.initialized) {
+						resolve(false);
+						return;
+					}
+					if (this._lastTaskUID === currentTaskUID) {
+						this._debug(`Deferred discard executing, no new task queued`);
+						await this.discard();
+						resolve(true);
+						return;
+					}
+					this._debug(`Deferred discard aborted, new task queued: ${this._lastTaskUID}, current task: ${currentTaskUID}`);
+					resolve(false);
+				}, timeout);
+			});
+		}
+
 		/**
 		 * Clear all pending tasks and reset processing states.
 		 */
@@ -327,6 +371,8 @@
 				return;
 			}
 
+			await this._initializePromise.promise;
+
 			this._isWaitingForTask = true;
 
 			// Wait for the current render/discard to finish
@@ -346,6 +392,7 @@
 			}
 
 			let uid = task.uid;
+			this._lastTaskUID = uid;
 			
 			this._isWaitingForTask = false;
 			this._isProcessingTask = true;

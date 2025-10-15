@@ -87,15 +87,9 @@
 
 		_preview = null;
 
-		_lastPreviewRenderId = "";
-
 		_discardPreviewTimeout = 60000;
 
 		_previewDiscarded = false;
-
-		_discardTimeoutID = null;
-
-		_pendingDiscardPreviewRenderId = null;
 
 		constructor() {
 			super();
@@ -297,7 +291,6 @@
 		}
 
 		destroy() {
-			this._cancelPendingDiscard();
 			if (this._preview) {
 				this._preview._clearPendingTasks();
 				this._preview.discard?.();
@@ -347,8 +340,6 @@
 					this._previewDiscarded = false;
 					this.previewElem.render();
 				}
-				this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
-				this._cancelPendingDiscard();
 				return;
 			}
 
@@ -362,37 +353,16 @@
 			]);
 
 			this._asyncRendering = false;
-
-			this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
-			this._cancelPendingDiscard();
 		}
 
 		discard() {
 			if (!this._preview) return;
 			
-			this._cancelPendingDiscard();
-			
-			this._pendingDiscardPreviewRenderId = this._lastPreviewRenderId;
-			
-			this._discardTimeoutID = setTimeout(() => {
-				this._discardTimeoutID = null;
-				
-				if (!this._asyncRendering
-					&& this._pendingDiscardPreviewRenderId === this._lastPreviewRenderId) {
-					this._preview?.discard();
+			this._preview.deferredDiscard(this._discardPreviewTimeout).then((success) => {
+				if (success) {
 					this._previewDiscarded = true;
 				}
-				
-				this._pendingDiscardPreviewRenderId = null;
-			}, this._discardPreviewTimeout);
-		}
-
-		_cancelPendingDiscard() {
-			if (this._discardTimeoutID) {
-				clearTimeout(this._discardTimeoutID);
-				this._discardTimeoutID = null;
-			}
-			this._pendingDiscardPreviewRenderId = null;
+			});
 		}
 
 		onViewClick(event) {
@@ -570,9 +540,6 @@
 			}
 			this.previewElem.item = this.item;
 			await this.previewElem.render();
-			this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
-
-			this._cancelPendingDiscard();
 		}
 
 		updateItemIndexedState() {

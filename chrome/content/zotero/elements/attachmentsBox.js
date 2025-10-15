@@ -48,15 +48,9 @@
 
 		_preview = null;
 
-		_lastPreviewRenderId = "";
-
 		_discardPreviewTimeout = 60000;
 
 		_previewDiscarded = false;
-
-		_discardTimeoutID = null;
-
-		_pendingDiscardPreviewRenderId = null;
 
 		get item() {
 			return this._item;
@@ -138,7 +132,6 @@
 		}
 
 		destroy() {
-			this._cancelPendingDiscard();
 			if (this._preview) {
 				this._preview._clearPendingTasks();
 				this._preview.discard?.();
@@ -221,8 +214,6 @@
 						}
 					}
 				}
-				this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
-				this._cancelPendingDiscard();
 				return;
 			}
 			this._renderStage = "final";
@@ -238,31 +229,15 @@
 		}
 
 		discard() {
-			if (!this._preview) return;
-			
-			this._cancelPendingDiscard();
-			
-			this._pendingDiscardPreviewRenderId = this._lastPreviewRenderId;
-			
-			this._discardTimeoutID = setTimeout(() => {
-				this._discardTimeoutID = null;
-				
-				if (!this._asyncRendering
-					&& this._pendingDiscardPreviewRenderId === this._lastPreviewRenderId) {
-					this._preview?.discard();
+			if (!this._preview) {
+				return;
+			}
+
+			this._preview.deferredDiscard(this._discardPreviewTimeout).then((success) => {
+				if (success) {
 					this._previewDiscarded = true;
 				}
-				
-				this._pendingDiscardPreviewRenderId = null;
-			}, this._discardPreviewTimeout);
-		}
-
-		_cancelPendingDiscard() {
-			if (this._discardTimeoutID) {
-				clearTimeout(this._discardTimeoutID);
-				this._discardTimeoutID = null;
-			}
-			this._pendingDiscardPreviewRenderId = null;
+			});
 		}
 
 		updateCount() {
@@ -293,7 +268,6 @@
 			let attachment = await this._getPreviewAttachment();
 			this.toggleAttribute('data-use-preview', !!attachment && Zotero.Prefs.get('showAttachmentPreview'));
 			if (!attachment) {
-				this._cancelPendingDiscard();
 				return;
 			}
 			if (!this.usePreview
@@ -305,9 +279,6 @@
 			}
 			this.previewElem.item = attachment;
 			await this.previewElem.render();
-			this._lastPreviewRenderId = `${Date.now()}-${Math.random()}`;
-			
-			this._cancelPendingDiscard();
 		}
 
 		async _getPreviewAttachment() {
