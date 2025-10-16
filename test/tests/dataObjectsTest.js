@@ -153,6 +153,7 @@ describe("Zotero.DataObjects", function () {
 			}
 			
 			function title(o) {
+				if (o.isAnnotation()) return o.getTags()[0].tag;
 				return o.getDisplayTitle() || o.getTags()[0].tag;
 			}
 			
