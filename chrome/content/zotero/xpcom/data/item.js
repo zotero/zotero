@@ -894,6 +894,7 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 	var itemTypeLetter = Zotero.ItemTypes.getID('letter');
 	var itemTypeInterview = Zotero.ItemTypes.getID('interview');
 	var itemTypeCase = Zotero.ItemTypes.getID('case');
+	let itemTypeAnnotation = Zotero.ItemTypes.getID('annotation');
 	
 	var creatorTypeAuthor = Zotero.CreatorTypes.getID('author');
 	var creatorTypeRecipient = Zotero.CreatorTypes.getID('recipient');
@@ -986,6 +987,33 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 			}
 			
 			title = '[' + strParts.join(', ') + ']';
+		}
+	}
+	else if (itemTypeID == itemTypeAnnotation) {
+		// Build annotation title from text and comment
+		let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+		let plainText = parserUtils.convertToPlainText(this.annotationText || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
+		let plainComment = parserUtils.convertToPlainText(this.annotationComment || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
+		let maxComponentLength = 50;
+		// "{Annotation-Text}"
+		if (["highlight", "underline"].includes(this.annotationType)) {
+			title = `“${plainText.slice(0, maxComponentLength)}`;
+			if (plainText.length > maxComponentLength) {
+				title += '…';
+			}
+			title += '”';
+		}
+		// "{Annotation-Text}" Comment
+		if (this.annotationComment) {
+			if (title.length) title += ' ';
+			title += `${plainComment.slice(0, maxComponentLength)}`;
+			if (plainComment.length > maxComponentLength) {
+				title += '…';
+			}
+		}
+		// If no comment or text exists: "Ink annotation"/"Image annotation"
+		if (!title.length) {
+			title = Zotero.getString(`pdfReader.${this.annotationType}Annotation`);
 		}
 	}
 	
@@ -2010,6 +2038,11 @@ Zotero.Item.prototype._saveData = async function (env) {
 		
 		// Clear cached child items of the parent attachment
 		reloadParentChildItems[parentItemID] = true;
+
+		// Reload display title of annotations
+		if (this.isAnnotation()) {
+			this.updateDisplayTitle();
+		}
 		
 		// Mark cache image for deletion when image or ink annotation position (or ink color) changes
 		if (!isNew && (
