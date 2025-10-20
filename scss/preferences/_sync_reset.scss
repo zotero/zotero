@@ -46,7 +46,10 @@
 #sync-reset-radiogroup > div radio .radio-label {
 	font-weight: 600;
 	font-size: 15px;
-	margin-bottom: .2em;
+}
+
+#sync-reset-radiogroup radio {
+	margin-block: 6px;
 }
 
 #sync-reset-radiogroup > div .sync-reset-option-desc {
