@@ -1927,7 +1927,10 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
 			if (this.style && this.style.free) {
 				this.style.free();
 			}
-			this.style = getStyle.getCiteProc(data.style.locale, this.outputFormat, data.prefs.automaticJournalAbbreviations);
+			this.style = getStyle.getCiteProc(data.style.locale, this.outputFormat, {
+				automaticJournalAbbreviations: data.prefs.automaticJournalAbbreviations,
+				noCache: true,
+			});
 			this.styleClass = getStyle.class;
 			// We're changing the citeproc instance, so we'll have to reinsert all citations into the registry
 			this.rebuildCiteprocState = true;
