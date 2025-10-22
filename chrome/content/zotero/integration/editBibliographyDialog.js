@@ -658,4 +658,6 @@ const ReferenceItems = {
 };
 
 window.addEventListener('load', onLoad);
-window.addEventListener('unload', onUnload);
+// 'close' runs before 'unload' and cancels any edits
+// before dialog's closure is picked up by Zotero.Integration
+window.addEventListener('close', onUnload);
