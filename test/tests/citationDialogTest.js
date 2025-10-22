@@ -27,7 +27,7 @@ describe("Citation Dialog", function () {
 		CitationDataManager = dialog.CitationDataManager;
 		SearchHandler = dialog.SearchHandler;
 		// wait for everything (e.g. itemTree/collectionTree) inside of the dialog to be loaded.
-		while (!dialog.loaded) {
+		while (!dialog.DIALOG_STATE.loaded) {
 			await Zotero.Promise.delay(10);
 		}
 	});
@@ -505,7 +505,7 @@ describe("Citation Dialog", function () {
 			Services.ww.openWindow(null, "chrome://zotero/content/integration/citationDialog.xhtml", "", "", io);
 			newDialog = await newDialogPromise;
 
-			while (!newDialog.loaded || newDialog.SearchHandler.searching) {
+			while (!newDialog.DIALOG_STATE.loaded || newDialog.SearchHandler.searching) {
 				await Zotero.Promise.delay(10);
 			}
 			let item = await createDataObject('item', { title: "test" });
@@ -513,6 +513,76 @@ describe("Citation Dialog", function () {
 			// verify that the new bubbles was added
 			let addedBubble = newDialog.document.querySelector(".bubble");
 			assert.isOk(addedBubble);
+		});
+	});
+
+	describe("Add Note", function () {
+		let item, note;
+
+		before(async function () {
+			item = await createDataObject('item', { title: "result" });
+			note = await createDataObject('item', { itemType: 'note' });
+			note.setNote("result");
+			await note.saveTx();
+
+			IOManager.toggleDialogMode("list");
+
+			// Wait for search triggered after switching dialog modes to finish
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+			// Search for "result"
+			await dialog.currentLayout.search("result", { skipDebounce: true });
+		});
+		it("should switch dialog from add/edit citation to add note", async function () {
+			// Start from Add/Edit Citation type
+			await dialog.setDialogType("citation");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+
+			// Before switching to add-note, note should not appear in search results
+			let results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group;
+			assert.notIncludeMembers(results, [note]);
+
+			// Switch to add-note type
+			await dialog.setDialogType("add-note");
+			assert.equal(dialog.DIALOG_STATE.type, "add-note");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+
+			// After switching to add-note, the note must appear in search results
+			results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group;
+			assert.includeMembers(results, [note]);
+			// And it's node is rendered
+			let noteNode = dialog.document.querySelector(`.item[id="${note.id}"]`);
+			assert.isOk(noteNode);
+		});
+
+		it("should switch dialog from add note to add/edit citation", async function () {
+			// Start from Add Note type
+			await dialog.setDialogType("citation");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+
+			// Before switching to add/edit citation, item should not appear in search results
+			assert.equal(dialog.DIALOG_STATE.type, "citation");
+			let results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group;
+
+			// Switch to add/edit citation
+			await dialog.setDialogType("citation");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+
+			// Item must now appear in search results
+			results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group;
+			assert.includeMembers(results, [item]);
+			// Item node must be rendered
+			let itemNode = dialog.document.querySelector(`.item[id="${item.id}"]`);
+			assert.isOk(itemNode);
 		});
 	});
 
