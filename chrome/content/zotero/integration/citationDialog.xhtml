@@ -75,7 +75,7 @@
 			<div class="divider"></div>
 			<div id="library-other-items" class="hbox"  data-arrow-nav="horizontal" data-multiselectable="true" role="listbox" aria-orientation="horizontal" aria-describedby="item-description">
 				<div class="search-items"/>
-				<span id="library-no-suggested-items-message" data-l10n-id="integration-citationDialog-lib-no-items"/>
+				<span id="library-no-suggested-items-message"/>
 			</div>
 			<div class="divider"></div>
 			<div id="library-trees" class="hbox">			
@@ -90,10 +90,25 @@
 
 		<div id="bottom-area" class="layout">
 			<div id="bottom-area-wrapper" class="hbox">
+				<div id="dialog-type-setting" class="segmented-switch" data-arrow-nav="horizontal" data-tabindex="61" role="radiogroup" aria-orientation="horizontal">
+					<div id="dialog-type-citation" class="option keyboard-clickable" value="citation" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-btn-type-citation">
+						<span class="icon icon-css icon-item-type" data-item-type="journalArticle"></span>
+					</div>
+					<div id="dialog-type-add-note" class="option keyboard-clickable" value="add-note" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-btn-type-add-note">
+						<span class="icon icon-css icon-item-type" data-item-type="note"></span>
+					</div>
+				</div>
 				<div class="hbox" style="flex:1"></div>
 				<div id="bottom-btn-group" class="hbox">
-					<button id="mode-button" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" tabindex="-1" data-tabindex="71"/>
-					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-tabindex="72"/>
+					<div id="dialog-mode-setting" class="segmented-switch" role="radiogroup" data-arrow-nav="horizontal" data-tabindex="71" aria-orientation="horizontal">
+						<div id="dialog-mode-library" class="option keyboard-clickable" value="library" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true">
+							<span data-l10n-id="integration-citationDialog-mode-library"></span>
+						</div>
+						<div id="dialog-mode-list" class="option keyboard-clickable" value="list" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true">
+							<span data-l10n-id="integration-citationDialog-mode-list"></span>
+						</div>
+					</div>
+					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-tabindex="72"></button>
 				</div>
 			</div>
 		</div>

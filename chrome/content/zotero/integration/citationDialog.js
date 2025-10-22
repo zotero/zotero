@@ -27,11 +27,7 @@
 const ItemTree = require('zotero/itemTree');
 const { getCSSIcon } = require('components/icons');
 const { COLUMNS } = require('zotero/itemTreeColumns');
-
-var doc, io, ioReadyPromise, ioIsReady, isCitingNotes, accepted;
-
-// used for tests
-var loaded = false;
+var doc, io, ioReadyPromise, ioIsReady, accepted;
 
 var currentLayout, libraryLayout, listLayout;
 
@@ -44,6 +40,17 @@ var { CitationDialogHelpers } = ChromeUtils.importESModule('chrome://zotero/cont
 var { CitationDialogSearchHandler } = ChromeUtils.importESModule('chrome://zotero/content/integration/citationDialog/searchHandler.mjs');
 var { CitationDialogPopupsHandler } = ChromeUtils.importESModule('chrome://zotero/content/integration/citationDialog/popupHandler.mjs');
 var { CitationDialogKeyboardHandler } = ChromeUtils.importESModule('chrome://zotero/content/integration/citationDialog/keyboardHandler.mjs');
+
+
+// window.DIALOG_STATE exposed to tests
+var DIALOG_STATE = {
+	type: null, // 'citation' or 'add-note'
+	loaded: false,
+
+	isCitingItems: () => DIALOG_STATE.type == 'citation',
+	isAddingNote: () => DIALOG_STATE.type == 'add-note',
+};
+
 
 //
 // Initialization of all handlers and top-level functions
@@ -58,7 +65,6 @@ async function onLoad() {
 		ioReadyPromise = Zotero.Promise.resolve();
 	}
 	ioReadyPromise.then(() => ioIsReady = true);
-	isCitingNotes = !!io.isCitingNotes;
 	window.isPristine = true;
 
 	Zotero.debug("Citation Dialog: initializing");
@@ -66,17 +72,19 @@ async function onLoad() {
 	timer.start();
 
 	Helpers = new CitationDialogHelpers({ doc, io });
-	SearchHandler = new CitationDialogSearchHandler({ isCitingNotes, io });
+	SearchHandler = new CitationDialogSearchHandler({ dialogState: DIALOG_STATE, io });
 	PopupsHandler = new CitationDialogPopupsHandler({ doc });
 	KeyboardHandler = new CitationDialogKeyboardHandler({ doc });
 
+	// Initialize dialog type before layouts that depend on DIALOG_STATE.type
+	let initialType = 'citation';
+	if (io.isCitingNotes) {
+		initialType = 'add-note';
+	}
+	await setDialogType(initialType);
+
 	// Initial height for the dialog (search row with no bubbles)
 	window.resizeTo(window.innerWidth, Helpers.getSearchRowHeight());
-
-	_id("keepSorted").disabled = !io.sortable || isCitingNotes;
-	_id("keepSorted").checked = io.sortable && !io.citation.properties.unsorted;
-	let visibleSettings = !!_id("settings-popup").querySelector("input:not([disabled])");
-	_id("settings-button").hidden = !visibleSettings;
 
 	libraryLayout = new LibraryLayout();
 	listLayout = new ListLayout();
@@ -118,13 +126,7 @@ async function onLoad() {
 		}
 	});
 
-	// Disabled all multiselect when citing notes
-	if (isCitingNotes) {
-		for (let multiselectable of [...doc.querySelectorAll("[data-multiselectable]")]) {
-			delete multiselectable.dataset.multiselectable;
-		}
-	}
-	loaded = true;
+	DIALOG_STATE.loaded = true;
 	let initTime = timer.stop();
 	Zotero.debug(`Citation Dialog: initialized in ${initTime} s`);
 }
@@ -192,6 +194,56 @@ function _id(id) {
 	return doc.getElementById(id);
 }
 
+// Switch between "Add/Edit Citation" and "Add Note" modes
+async function setDialogType(type) {
+	if (type == DIALOG_STATE.type) return;
+	if (DIALOG_STATE.loaded && io.disableDialogTypeSwitch) return;
+	DIALOG_STATE.type = type;
+	document.documentElement.setAttribute("dialog-type", DIALOG_STATE.type);
+
+	Helpers.setActiveSegmentedControl(_id(`dialog-type-${DIALOG_STATE.type}`));
+
+	// Disabled all multiselect when citing notes, enable when citing regular items
+	for (let multiselectable of [...doc.querySelectorAll("[data-multiselectable]")]) {
+		let shouldBeSelectable = DIALOG_STATE.isCitingItems() ? "true" : "false";
+		multiselectable.dataset.multiselectable = shouldBeSelectable;
+	}
+
+	// Set proper settings availability depending on the type
+	if (DIALOG_STATE.isCitingItems()) {
+		_id("settings-button").hidden = !io.sortable;
+		_id("keepSorted").disabled = !io.sortable;
+		if (!DIALOG_STATE.loaded) {
+			_id("keepSorted").checked = io.sortable && !io.citation.properties.unsorted;
+		}
+	}
+	else if (DIALOG_STATE.isAddingNote()) {
+		_id("settings-button").hidden = true;
+		_id("keepSorted").disabled = true;
+	}
+
+	// After initial loading, hide the dialog type switch if it is not wanted
+	// (e.g. when adding citations in the note editor or when editing existing citation)
+	if (io.disableDialogTypeSwitch || (io.citation.citationItems.length && !DIALOG_STATE.loaded)) {
+		_id("dialog-type-setting").hidden = true;
+		return;
+	}
+	
+	if (DIALOG_STATE.loaded) {
+		// Completely reset itemTree to have right dragAndDrop, regularOnly, multiselect behavior
+		libraryLayout.itemsView.unregister();
+		_id("zotero-items-tree").replaceChildren();
+		libraryLayout.itemsView = null;
+		await libraryLayout._initItemTree();
+		libraryLayout._onCollectionSelection();
+
+		// Rerun the search and update bubble-input
+		SearchHandler.clearNonLibraryItemsCache();
+		currentLayout.search(SearchHandler.searchValue);
+		CitationDataManager.clearAll();
+		IOManager.updateBubbleInput();
+	}
+}
 
 // Template for layout classes.
 class Layout {
@@ -391,12 +443,9 @@ class Layout {
 class LibraryLayout extends Layout {
 	constructor() {
 		super("library");
-		this.lastHeight = null;
 	}
 
 	async init() {
-		// Set initial height of the dialog such that the collection/itemTrees get at least 400px
-		this.lastHeight = Math.max(500, Helpers.getSearchRowHeight() + 400);
 		await this._initItemTree();
 		await this._initCollectionTree();
 		// on mouse scrollwheel in suggested items, scroll the list horizontally
@@ -436,7 +485,7 @@ class LibraryLayout extends Layout {
 		_id("library-no-suggested-items-message").hidden = !_id("library-other-items").querySelector(".search-items").hidden;
 		// When there are no matches, show a message
 		if (!_id("library-no-suggested-items-message").hidden) {
-			doc.l10n.setAttributes(_id("library-no-suggested-items-message"), "integration-citationDialog-lib-no-items", { search: SearchHandler.searchValue.length > 0 });
+			doc.l10n.setAttributes(_id("library-no-suggested-items-message"), `integration-citationDialog-lib-message-${DIALOG_STATE.type}`, { search: SearchHandler.searchValue.length > 0 });
 		}
 		this.resizeWindow();
 		let collapsibleDecks = [..._id("library-other-items").querySelectorAll(".section.expandable")];
@@ -488,16 +537,15 @@ class LibraryLayout extends Layout {
 		// set min-height to make sure suggested items and at least 200px of itemsView is always visible
 		doc.documentElement.style.minHeight = `${minHeight}px`;
 
-		// if there is lastHeight recorded, resize to that
-		if (this.lastHeight) {
-			window.resizeTo(window.innerWidth, this.lastHeight);
-			this.lastHeight = null;
-		}
-		// on linux, the sizing of the window may be off upon initial load
-		// despite the minHeight on relevant components
-		// to handle that, explicitly resize the window to make sure it's not too small
-		else if (Zotero.isLinux && window.outerHeight < minHeight) {
-			window.resizeTo(window.innerWidth, minHeight);
+		// resize the window if it is too small
+		if (window.innerHeight < minHeight) {
+			ignoreWindowResizing = true;
+			// pick the larger of minHeight or last height set by the user
+			let leastNeededHeight = Math.max(minHeight, lastSetWindowHeight);
+			window.resizeTo(window.innerWidth, leastNeededHeight);
+			setTimeout(() => {
+				ignoreWindowResizing = false;
+			}, 100);
 		}
 	}
 
@@ -559,14 +607,14 @@ class LibraryLayout extends Layout {
 		});
 		this.itemsView = await ItemTree.init(itemsTree, {
 			id: "citationDialog",
-			dragAndDrop: !isCitingNotes,
+			dragAndDrop: DIALOG_STATE.isCitingItems(),
 			persistColumns: true,
 			columnPicker: true,
 			onSelectionChange: () => {
 				libraryLayout.updateSelectedItems();
 			},
-			regularOnly: !isCitingNotes,
-			multiSelect: !isCitingNotes,
+			regularOnly: DIALOG_STATE.isCitingItems(),
+			multiSelect: DIALOG_STATE.isCitingItems(),
 			onActivate: (event, items) => {
 				// Prevent Enter event from reaching KeyboardHandler which would accept the dialog
 				event.preventDefault();
@@ -594,8 +642,8 @@ class LibraryLayout extends Layout {
 			getExtraField: (item, key) => {
 				if (key == "addToCitation") {
 					if (!(item instanceof Zotero.Item)) return null;
-					if (isCitingNotes && !item.isNote()) return null;
-					if (!isCitingNotes && !item.isRegularItem()) return null;
+					if (DIALOG_STATE.isAddingNote() && !item.isNote()) return null;
+					if (DIALOG_STATE.isCitingItems() && !item.isRegularItem()) return null;
 					// The returned value needs to be a string due to a call to .toLowerCase()
 					// in _handleTyping of virtualized-table. Otherwise, errors are thrown if you type
 					// when the addToCitation column is used for sorting.
@@ -663,7 +711,7 @@ class LibraryLayout extends Layout {
 			getItems: async () => {
 				let items = await collectionTreeRow.getItems();
 				// when citing notes, only keep notes or note parents
-				if (isCitingNotes) {
+				if (DIALOG_STATE.isAddingNote()) {
 					items = items.filter(item => item.isNote() || item.getNotes().length);
 				}
 				return items;
@@ -817,8 +865,6 @@ class ListLayout extends Layout {
 		for (let section of [..._id("list-layout").querySelectorAll(".section:not([hidden])")]) {
 			sectionsHeight += section.getBoundingClientRect().height;
 		}
-		// cap at 400px
-		sectionsHeight = Math.min(sectionsHeight, 400);
 
 		// account for padding of the items list
 		let sectionsWrapperStyle = getComputedStyle(_id("list-layout-wrapper"));
@@ -844,11 +890,19 @@ class ListLayout extends Layout {
 		}
 		let minHeight = bubbleInputHeight + bottomHeight;
 		doc.documentElement.style.minHeight = `${minHeight}px`;
+
+		// cap window height at the height last set by the user
+		autoHeight = Math.min(autoHeight, lastSetWindowHeight);
+		ignoreWindowResizing = true;
 		
 		// Timeout is required likely to allow minHeight update to settle
 		setTimeout(() => {
 			window.resizeTo(window.innerWidth, parseInt(autoHeight));
 		}, 10);
+
+		setTimeout(() => {
+			ignoreWindowResizing = false;
+		}, 100);
 	}
 
 	_markRoundedCorners() {
@@ -919,7 +973,13 @@ const IOManager = {
 		// if keep sorted was unchecked and then checked, resort items and update bubbles
 		_id("keepSorted").addEventListener("change", () => this._resortItems());
 
-		_id("mode-button").addEventListener("click", () => this.toggleDialogMode());
+		// Switch list/library mode on mouse down
+		_id("dialog-mode-setting").addEventListener("mousedown", event => this.toggleDialogMode(event.target.closest(".option").getAttribute("value")));
+		// Swtich list/library mode on click via keyboard
+		_id("dialog-mode-setting").addEventListener("click", (event) => {
+			if (event.pointerType === "mouse") return;
+			this.toggleDialogMode(event.target.closest(".option").getAttribute("value"));
+		});
 
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
@@ -927,28 +987,30 @@ const IOManager = {
 		// some additional logic to keep focus on relevant nodes during mouse interactions
 		this._initFocusRetention();
 		doc.addEventListener("focusin", this.resetSelectedAfterFocus);
+
+		// Switch dialog type on mouse down
+		_id("dialog-type-setting").addEventListener("mousedown", event => setDialogType(event.target.closest(".option").getAttribute("value")));
+		// Switch dialog type on click via keyboard
+		_id("dialog-type-setting").addEventListener("click", (event) => {
+			if (event.pointerType === "mouse") return;
+			setDialogType(event.target.closest(".option").getAttribute("value"));
+		});
 	},
 
 	// switch between list and library modes
 	toggleDialogMode(newMode) {
-		if (!newMode) {
-			let mode = _id("mode-button").getAttribute("mode");
-			newMode = mode == "library" ? "list" : "library";
-		}
 		// Do nothing if switching to a mode that is already active
-		let currentMode = _id("mode-button").getAttribute("mode");
-		if (currentMode == newMode) return;
+		if (currentLayout?.type == newMode) return;
 		
 		_id("list-layout").hidden = newMode == "library";
 		_id("library-layout").hidden = newMode == "list";
 
+		Helpers.setActiveSegmentedControl(_id(`dialog-mode-${newMode}`));
 		// Delete all item nodes from the old layout
 		for (let itemNode of [...doc.querySelectorAll(".item")]) {
 			itemNode.remove();
 		}
 
-		_id("mode-button").setAttribute("mode", newMode);
-		doc.l10n.setAttributes(_id("mode-button"), "integration-citationDialog-btn-mode", { mode: newMode });
 
 		let isInitialModeSetting = currentLayout === undefined;
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
@@ -959,8 +1021,6 @@ const IOManager = {
 			// when switching from library to list, make sure all selected items are de-selected
 			libraryLayout.itemsView?.selection.clearSelection();
 			currentLayout.updateSelectedItems();
-			// save the library layout's height to restore it if we switch back
-			libraryLayout.lastHeight = window.innerHeight;
 		}
 		// After switchingto list mode, the window is often resized, which causes the virtualized table
 		// to redraw and remove most of .row nodes. Then, if one switches back to library mode, the rows
@@ -987,7 +1047,7 @@ const IOManager = {
 				bubbleString: item.bubbleString,
 				selected: item.selected,
 			};
-		}));
+		}), DIALOG_STATE.type);
 		_id("accept-button").disabled = !CitationDataManager.items.length;
 	},
 
@@ -998,7 +1058,7 @@ const IOManager = {
 			items = [items];
 		}
 		// if selecting a note, add it and immediately accept the dialog
-		if (isCitingNotes) {
+		if (DIALOG_STATE.isAddingNote()) {
 			if (!items[0].isNote()) return;
 			CitationDataManager.items = [];
 			let bubbleItem = BubbleItem.fromItem(items[0]);
@@ -1215,6 +1275,10 @@ const IOManager = {
 		// When the dialog is opened for the very first time, default to list mode
 		if (!desiredMode) {
 			desiredMode = "list";
+		}
+		// If List is the initial mode, move the List type tab to the front
+		if (desiredMode == "list") {
+			_id("dialog-mode-setting").appendChild(_id("dialog-mode-library"));
 		}
 		this.toggleDialogMode(desiredMode);
 	},
@@ -1560,7 +1624,7 @@ const CitationDataManager = {
 			}
 		}
 		// No sorting happens when citing notes, since the dialog is accepted right after
-		if (isCitingNotes) return;
+		if (DIALOG_STATE.isAddingNote()) return;
 		await this.sort();
 		this.updateItemAddedCache();
 	},
@@ -1613,6 +1677,11 @@ const CitationDataManager = {
 		let bubbleItems = io.citation.citationItems.map(item => BubbleItem.fromCitationItem(item));
 		await this.addItems({ bubbleItems });
 	},
+
+	clearAll() {
+		this.items = [];
+		this.itemAddedCache = new Set();
+	}
 };
 
 // Explicitly expose singletons to global window for tests
@@ -1622,18 +1691,23 @@ window.IOManager = IOManager;
 // Top level listeners
 window.addEventListener("load", onLoad);
 window.addEventListener("unload", onUnload);
-// When the dialog is re-focused, run the search again in case selected or opened items changed
-let windowLostFocusOn = 0;
-window.addEventListener("blur", () => {
-	windowLostFocusOn = (new Date()).getTime();
-});
-window.addEventListener("focus", async () => {
-	let now = (new Date()).getTime();
-	// On linux, resizing the dialog causes the window to loose and immediately regain focus.
-	// Do not run the search if the window lost focus less than 100 ms ago.
-	if (Zotero.isLinux && now - windowLostFocusOn < 100) {
-		return;
+
+
+var ignoreWindowResizing = false;
+var lastSetWindowHeight = 500;
+// Remember the size of the window when stretched by the user
+// and use it as a max-height when programically resizing the window
+window.addEventListener("resize", () => {
+	if (ignoreWindowResizing || !DIALOG_STATE.loaded) return;
+	// only remember window height above a reasonable min value
+	if (window.innerHeight > 300) {
+		// window.outerHeight is required for resizing to properly work on Linux
+		lastSetWindowHeight = window.outerHeight;
 	}
+});
+
+// When the dialog is re-focused, run the search again in case selected or opened items changed
+window.addEventListener("focus", async () => {
 	// Wait a moment to allow accept button click event to fire.
 	// Without this, clicking accept button when the dialog is not focused
 	// would refocus the dialog, run the search below,

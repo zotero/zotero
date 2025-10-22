@@ -53,7 +53,7 @@
 		 * @param {Object[]} bubblesConfig - array of objects { dialogReferenceID, bubbleString, selected}
 		 * representing each bubble.
 		 */
-		refresh(bubblesConfig) {
+		refresh(bubblesConfig, dialogType) {
 			// Remove bubbles of items that are no longer in the citations
 			for (let bubble of this.getAllBubbles()) {
 				let bubbleDialogReferenceID = bubble.getAttribute("dialogReferenceID");
@@ -113,12 +113,12 @@
 			let isOnlyInput = this.getAllBubbles().length == 0;
 			this._body.firstChild.classList.toggle("full-width", isOnlyInput);
 			if (isOnlyInput) {
-				document.l10n.setAttributes(this._body.firstChild, "integration-citationDialog-single-input");
+				document.l10n.setAttributes(this._body.firstChild, `integration-citationDialog-single-input-${dialogType}`);
 			}
 			// otherwise, add a regular aria descriptions and placeholders to all inputs
 			else {
 				for (let input of [...this.querySelectorAll(".input")]) {
-					document.l10n.setAttributes(input, "integration-citationDialog-input");
+					document.l10n.setAttributes(input, `integration-citationDialog-input-${dialogType}`);
 				}
 			}
 			// If any two inputs end up next to each other (e.g. after bubble is deleted),
@@ -154,7 +154,7 @@
 		 * Otherwise, return last focused input, if it is still part of the bubbleInput.
 		 */
 		getCurrentInput() {
-			if (Utils.isInput(document.activeElement)) {
+			if (Utils.isInput(document.activeElement) && this.contains(document.activeElement)) {
 				return document.activeElement;
 			}
 			if (this._lastFocusedInput && this.contains(this._lastFocusedInput)) {
@@ -475,7 +475,7 @@
 
 		isInput(node) {
 			if (!node) return false;
-			return node.tagName === "input";
+			return node.tagName === "input" && node.classList.contains("input");
 		},
 
 		isInputEmpty(input) {
