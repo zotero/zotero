@@ -36,7 +36,10 @@ const defaults = {
 	tagColors: new Map(),
 	tags: [],
 	scope: null,
+	annotationColors: new Set(),
+	annotationAuthors: new Set(),
 	showAutomatic: Zotero.Prefs.get('tagSelector.showAutomatic'),
+	showAnnotationFilters: Zotero.Prefs.get('tagSelector.showAnnotationFilters'),
 	searchString: '',
 	loaded: false
 };
@@ -59,12 +62,15 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		
 		this.tagListRef = React.createRef();
 		this.searchBoxRef = React.createRef();
+		this.annotationFiltersSelectorRef = React.createRef();
 		
 		this.displayAllTags = Zotero.Prefs.get('tagSelector.displayAllTags');
 		// Not stored in state to avoid an unnecessary refresh. Instead, when a tag is selected, we
 		// trigger the selection handler, which updates the visible items, which triggers
 		// onItemViewChanged(), which triggers a refresh with the new tags.
 		this.selectedTags = new Set();
+		this.selectedAnnotationColors = new Set();
+		this.selectedAnnotationAuthors = new Set();
 		this.widths = new Map();
 		this.widthsBold = new Map();
 		
@@ -82,6 +88,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 
 	focusTagList() {
 		this.tagListRef.current.focus();
+	}
+
+	focusAnnotationColors() {
+		this.annotationFiltersSelectorRef.current.focusColor();
 	}
 
 	isTagListEmpty() {
@@ -136,6 +146,9 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		var { tags, scope } = await this.getTagsAndScope();
 		newState.tags = tags;
 		newState.scope = scope;
+		newState.annotationColors = await this.collectionTreeRow.getAnnotationColors();
+		newState.annotationAuthors = await this.collectionTreeRow.getAnnotationAuthors();
+
 		this.setState(newState);
 	}
 	
@@ -530,20 +543,50 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			tag.width = this.getWidth(name, forceUseDOM);
 			return tag;
 		});
+		let annotationAuthors = [];
+		let annotationColors = [];
+		// Determine which annotations authors are shown and which colors are enabled
+		if (this.state.showAnnotationFilters) {
+			let matchingAndSelectedAuthors = Array.from(new Set([
+				...this.state.annotationAuthors,
+				...this.selectedAnnotationAuthors // Keep selected authors even if there are no matches in current scope
+			]));
+			annotationAuthors = matchingAndSelectedAuthors.map(userID => ({
+				userID,
+				name: Zotero.Users.getName(userID),
+				selected: this.selectedAnnotationAuthors.has(userID)
+			}));
+			// Filter out authors that don't match the query in the bottom search bar
+			if (this.state.searchString) {
+				annotationAuthors = annotationAuthors.filter(author => author.name.toLowerCase().includes(this.state.searchString.toLowerCase()));
+			}
+			annotationAuthors.sort((a, b) => a.name.localeCompare(b.name));
+			// Display all annotation colors but disabled ones that have no items in scope
+			annotationColors = Zotero.Annotations.COLORS.map(color => ({
+				...color,
+				enabled: this.state.annotationColors.has(color.color),
+				selected: this.selectedAnnotationColors.has(color.color)
+			}));
+		}
+
 		// clean up divMeasure, which might have been used for measuring emoji tags
 		this.divMeasure?.parentNode?.removeChild?.(this.divMeasure);
 		this.divMeasure = null;
 		// Zotero.debug(`Prepared ${tags.length} tags in ${new Date() - d} ms`);
 		return <TagSelector
 			tags={tags}
+			annotationColors={annotationColors}
+			annotationAuthors={annotationAuthors}
 			searchBoxRef={this.searchBoxRef}
 			tagListRef={this.tagListRef}
+			annotationFiltersSelectorRef={this.annotationFiltersSelectorRef}
 			searchString={this.state.searchString}
 			dragObserver={this.dragObserver}
-			onSelect={this.handleTagSelected}
+			onSelect={this.handleSelection}
 			onTagContext={this.handleTagContext}
 			onSearch={this.handleSearch}
 			onSettings={this.handleSettings.bind(this)}
+			container={this.props.container}
 			loaded={this.state.loaded}
 			width={this.state.width}
 			height={this.state.height}
@@ -579,16 +622,35 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		settingsContextMenu.openPopup(ev.target, 'end_before', 0, 0, true);
 	}
 
-	handleTagSelected = (tag) => {
-		let selectedTags = this.selectedTags;
-		if(selectedTags.has(tag)) {
-			selectedTags.delete(tag);
-		} else {
-			selectedTags.add(tag);
+	// Handle selection of objects (tag, color, author) in the tag selector
+	handleSelection = (selectionObj) => {
+		let { tag, color, userID } = selectionObj;
+		let selectionSet = null;
+		let selectedValue = null;
+		if (tag) {
+			selectionSet = this.selectedTags;
+			selectedValue = tag;
+		}
+		else if (color) {
+			selectionSet = this.selectedAnnotationColors;
+			selectedValue = color;
+		}
+		else if (userID) {
+			selectionSet = this.selectedAnnotationAuthors;
+			selectedValue = userID;
+		}
+		if (!selectionSet) return;
+
+		// Selection of entries is toggled
+		if (selectionSet.has(selectedValue)) {
+			selectionSet.delete(selectedValue);
+		}
+		else {
+			selectionSet.add(selectedValue);
 		}
 
-		if (typeof(this.props.onSelection) === 'function') {
-			this.props.onSelection(selectedTags);
+		if (typeof (this.props.onSelection) === 'function') {
+			this.props.onSelection(selectionSet);
 		}
 	}
 
@@ -659,12 +721,18 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		}
 	}
 
-	getTagSelection() {
-		return this.selectedTags;
+	getSelection() {
+		return {
+			tags: [...this.selectedTags],
+			annotationAuthors: [...this.selectedAnnotationAuthors],
+			annotationColors: [...this.selectedAnnotationColors]
+		};
 	}
 
-	clearTagSelection() {
-		this.selectedTags = new Set();
+	clearSelection() {
+		this.selectedTags.clear();
+		this.selectedAnnotationColors.clear();
+		this.selectedAnnotationAuthors.clear();
 	}
 	
 	async openColorPickerWindow() {
@@ -805,8 +873,14 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		this.setState({showAutomatic: newValue});
 	}
 
+	toggleShowAnnotationFilters() {
+		let current = Zotero.Prefs.get('tagSelector.showAnnotationFilters');
+		Zotero.Prefs.set('tagSelector.showAnnotationFilters', !current);
+		this.setState({ showAnnotationFilters: !current });
+	}
+
 	deselectAll() {
-		this.selectedTags = new Set();
+		this.clearSelection();
 		if('onSelection' in this.props && typeof(this.props.onSelection) === 'function') {
 			this.props.onSelection(this.selectedTags);
 		}
@@ -848,15 +922,19 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		}
 	}
 
-	get label() {
-		let count = this.selectedTags.size;
-		let mod = count === 1 ? 'singular' : count === 0 ? 'none' : 'plural';
-
-		return Zotero.getString('pane.tagSelector.numSelected.' + mod, [count]);
+	get filtersCount() {
+		return {
+			tagCount: this.selectedTags.size,
+			annotationsFilterCount: this.selectedAnnotationAuthors.size + this.selectedAnnotationColors.size,
+		};
 	}
 
 	get showAutomatic() {
 		return this.state.showAutomatic;
+	}
+
+	get showAnnotationFilters() {
+		return this.state.showAnnotationFilters;
 	}
 	
 	static async init(domEl, opts) {
