@@ -175,7 +175,7 @@ export class CitationDialogKeyboardHandler {
 		else if (event.key.includes("Arrow") && onlyShiftModifierPossible) {
 			let arrowDirection = event.target.closest("[data-arrow-nav]")?.getAttribute("data-arrow-nav");
 			if (!arrowDirection) return false;
-			let multiSelect = !!event.target.closest("[data-multiselectable]") && event.shiftKey;
+			let multiSelect = !!event.target.closest("[data-multiselectable='true']") && event.shiftKey;
 			let current = this.doc.activeElement;
 			let group = current.closest("[data-arrow-nav]");
 			if (arrowDirection == "horizontal") {

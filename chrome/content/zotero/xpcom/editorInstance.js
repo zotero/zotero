@@ -1060,7 +1060,7 @@ class EditorInstance {
 		let CI = function (citation) {
 			this.citation = citation;
 			this.filterLibraryIDs = filterLibraryIDs;
-			this.disableClassicDialog = true;
+			this.disableDialogTypeSwitch = true;
 			
 			// Cited items updated in `getItems`
 			this.citedItems = [];
