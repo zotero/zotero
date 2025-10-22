@@ -42,9 +42,10 @@ export class CitationDialogHelpers {
 	}
 
 	// build and return a node with the description (e.g. creator/published/date/etc) of an item
-	buildItemDescription(item) {
+	buildItemDescription(item, { twoLines } = {}) {
 		let descriptionWrapper = this.doc.createElement("div");
 		descriptionWrapper.classList = "description";
+		descriptionWrapper.id = `description-${item.id}`;
 		let wrapTextInSpan = (text, styles = {}) => {
 			let span = this.doc.createElement("span");
 			for (let [style, value] of Object.entries(styles)) {
@@ -70,11 +71,21 @@ export class CitationDialogHelpers {
 			text = Zotero.Utilities.unescapeHTML(text);
 			text = text.trim();
 			text = text.slice(0, 500);
+			// Display two lines of the note if specified
 			var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
-			if (parts[1]) {
-				dateLabel.textContent += ` ${parts[1]}.`;
-			}
+			let firstLine = parts[1];
+			let secondLine = parts[2];
+			dateLabel.textContent += " ";
 			descriptionWrapper.appendChild(dateLabel);
+			if (firstLine) {
+				dateLabel.textContent += `${firstLine}`;
+				if (twoLines && secondLine) {
+					let lineBreak = this.doc.createElement("br");
+					descriptionWrapper.appendChild(lineBreak);
+					let secondLineSpan = wrapTextInSpan(secondLine);
+					descriptionWrapper.appendChild(secondLineSpan);
+				}
+			}
 			addPeriodIfNeeded(descriptionWrapper);
 			return descriptionWrapper;
 		}
