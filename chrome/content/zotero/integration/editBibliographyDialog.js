@@ -382,9 +382,17 @@ const BibliographyListUI = {
 			});
 			// when focus moves into the editor, highlight it and select the respective
 			// item in the itemTree
-			editorFrame.contentDocument.addEventListener("focusin", () => {
+			editorFrame.contentDocument.addEventListener("focusin", async () => {
 				this.scrollToRow(itemID);
-				itemsView.selectItem(itemID);
+				let selected = await itemsView.selectItem(itemID);
+				// if the item was not selected in current state of itemTree,
+				// try to select the item in its library
+				if (!selected) {
+					let item = Zotero.Items.get(itemID);
+					if (!item) return;
+					await collectionsView.selectByID(`L${item.libraryID}`);
+					itemsView.selectItem(itemID);
+				}
 			});
 			editorFrame.contentDocument.addEventListener("keydown", (event) => {
 				// if Cmd/Ctrl is pressed, keypress could be a shortcut for bold/italic/undeline
