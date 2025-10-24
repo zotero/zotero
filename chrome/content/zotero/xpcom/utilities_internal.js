@@ -1756,9 +1756,12 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Select an object in the library tab of the main window
 	 *
-	 * @param {Zotero.DataObject} - Data object (e.g., Zotero.Item) to select
+	 * @param {Zotero.DataObject[]} - Data objects (e.g., Zotero.Item) to select
 	 */
-	showInLibrary: async function (dataObject) {
+	showInLibrary: async function (dataObjects) {
+		if (!Array.isArray(dataObjects)) {
+			dataObjects = [dataObjects];
+		}
 		var pane = Zotero.getActiveZoteroPane();
 		// Open main window if it's not open (Mac)
 		if (!pane) {
@@ -1772,12 +1775,12 @@ Zotero.Utilities.Internal = {
 			});
 			pane = win.ZoteroPane;
 		}
-		if (dataObject instanceof Zotero.Item) {
-			pane.selectItem(dataObject.id);
-		}
-		else {
-			throw new Error("Unimplemented");
-		}
+		pane.selectItems(dataObjects.map(dataObject => {
+			if (dataObject instanceof Zotero.Item) {
+				return dataObject.id;
+			}
+			throw new Error(`Unsupported data object: ${dataObject}`);
+		}));
 		
 		// Pull window to foreground
 		Zotero.Utilities.Internal.activate(pane.document.defaultView);
