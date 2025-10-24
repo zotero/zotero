@@ -230,8 +230,13 @@ describe("Item pane", function () {
 			
 			assert.notExists(win.document.querySelector('#zotero-item-message .custom-head .item-restore-button'));
 			
-			await item1.eraseTx();
-			await item2.eraseTx();
+			let promise = waitForItemEvent('delete');
+			await Zotero.DB.executeTransaction(async function () {
+				await item1.erase();
+				await item2.erase();
+			});
+			await promise;
+
 			await selectLibrary(win);
 		});
 	});
