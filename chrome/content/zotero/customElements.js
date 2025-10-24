@@ -120,7 +120,16 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 	// stops propagation of those events, and then dispatches a copy of
 	// that event after a delay. This gives the popup enough time to close.
 	document.addEventListener("command", (event) => {
+		let originalEvent = event;
 		let originalTarget = event.target;
+		// When a 'command' event fires on a <command> node, it will have the original 'command'
+		// event with <menuitem> as target in event.sourceEvent.
+		// This is the event we want to work with, since we do not expect events with .sourceEvent
+		// and <command> has no menupopup ancestor.
+		if (originalTarget.localName === "command" && event.sourceEvent?.type === "command") {
+			event = event.sourceEvent;
+			originalTarget = event.target;
+		}
 
 		// Find the topmost menupopup containing the element that triggered the command
 		let menupopup = originalTarget.closest("menupopup:not(menupopup *)");
@@ -137,8 +146,8 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 
 		// Hide the popup and don't let anything else happen
 		menupopup.hidePopup(true);
-		event.stopPropagation();
-		event.preventDefault();
+		originalEvent.stopPropagation();
+		originalEvent.preventDefault();
 
 		// Create a copy of the 'command' event and re-dispatch it after a delay
 		let delayedEvent = document.createEvent("XULCommandEvent");
