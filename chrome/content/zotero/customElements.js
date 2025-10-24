@@ -126,7 +126,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		// event with <menuitem> as target in event.sourceEvent.
 		// This is the event we want to work with, since we do not expect events with .sourceEvent
 		// and <command> has no menupopup ancestor.
-		if (originalTarget.tagName === "command" && event.sourceEvent?.type === "command") {
+		if (originalTarget.localName === "command" && event.sourceEvent?.type === "command") {
 			event = event.sourceEvent;
 			originalTarget = event.target;
 		}
