@@ -33,6 +33,7 @@ var browser;
 
 window.addEventListener("load", /*async */function () {
 	browser = document.querySelector('browser');
+	window.gBrowser = browser; // For ZoomManager
 	
 	browser.addEventListener('pagetitlechanged', () => {
 		document.title = browser.contentTitle || browser.currentURI.spec;
