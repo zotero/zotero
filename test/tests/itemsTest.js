@@ -1592,6 +1592,31 @@ describe("Zotero.Items", function () {
 			// Linked note should be child item of linked item again
 			assert.equal(linkedNote.parentID, linkedItem.id);
 		});
+
+		it("should add related items to linked items in target library", async function() {
+			Zotero.Prefs.set('groups.copyRelatedItems', true);
+
+			// Create two items and relate them
+			let item = await createDataObject('item', { setTitle: true });
+			let relatedItem = await createDataObject('item', { setTitle: true });
+			item.addRelatedItem(relatedItem);
+			await item.saveTx({ skipSelect: true });
+			relatedItem.addRelatedItem(item);
+			await relatedItem.saveTx({ skipSelect: true });
+
+			// Copy one item to another group
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+
+			// Both items should be copied and related in the target library
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			assert.isOk(linkedItem);
+			let linkedRelatedItem = await relatedItem.getLinkedItem(group.libraryID, true);
+			assert.isOk(linkedRelatedItem);
+			assert.sameMembers(linkedItem.relatedItems, [linkedRelatedItem.key]);
+			assert.sameMembers(linkedRelatedItem.relatedItems, [linkedItem.key]);
+		})
 	});
 
 	describe("#pullLinkedItemData()", function () {
@@ -1698,5 +1723,41 @@ describe("Zotero.Items", function () {
 			});
 			assert.isTrue(linkedItem.deleted);		
 		});
+
+
+		it("should un-related items those linked items are not related", async function() {
+			Zotero.Prefs.set('groups.copyRelatedItems', true);
+			
+			// Create two related items and copy them to another group
+			let item = await createDataObject('item', { setTitle: true });
+			let relatedItem = await createDataObject('item', { setTitle: true });
+			item.addRelatedItem(relatedItem);
+			await item.saveTx({ skipSelect: true });
+			relatedItem.addRelatedItem(item);
+			await relatedItem.saveTx({ skipSelect: true });
+
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+
+			let linkedItem = await item.getLinkedItem(group.libraryID, true);
+			let linkedRelatedItem = await relatedItem.getLinkedItem(group.libraryID, true);
+
+			// Add another related item to the linked item
+			let randomRelatedItem = await createDataObject('item', { setTitle: true, libraryID: group.libraryID });
+			linkedItem.addRelatedItem(randomRelatedItem);
+			await linkedItem.saveTx();
+			randomRelatedItem.addRelatedItem(linkedItem);
+			await randomRelatedItem.saveTx();
+
+			// Pull data from the original items
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.Items.pullLinkedItemData(linkedItem, item.libraryID);
+			});
+
+			// Random related item should be gone
+			assert.sameMembers(linkedItem.relatedItems, [linkedRelatedItem.key]);
+			assert.sameMembers(linkedRelatedItem.relatedItems, [linkedItem.key]);
+		})
 	});
 });

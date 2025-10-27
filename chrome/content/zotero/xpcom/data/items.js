@@ -931,6 +931,7 @@ Zotero.Items = function () {
 			childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
 			childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
 			annotations: Zotero.Prefs.get('groups.copyAnnotations'),
+			relatedItems: Zotero.Prefs.get('groups.copyRelatedItems')
 		};
 
 		let copyAttachment = async (attachment, parentID) => {
@@ -1040,6 +1041,22 @@ Zotero.Items = function () {
 				await copyAttachment(attachment, copiedItem.id);
 			}
 		}
+
+		// Copy related items if needed as well
+		if (copyPrefs.relatedItems) {
+			let relatedItemsToCopy = item.relatedItems.map(key => Zotero.Items.getByLibraryAndKey(item.libraryID, key)).filter(item => item && !item.deleted);
+			for (let relatedItem of relatedItemsToCopy) {
+				let alreadyLinked = await relatedItem.getLinkedItem(targetLibrary.libraryID, true);
+				if (alreadyLinked) {
+					continue;
+				}
+				let copiedRelatedItem = await Zotero.Items.copyToLibrary(relatedItem, targetLibrary.libraryID);
+				copiedRelatedItem.addRelatedItem(copiedItem);
+				await copiedRelatedItem.save({ skipSelect: true });
+				copiedItem.addRelatedItem(copiedRelatedItem);
+				await copiedItem.save({ skipSelect: true });
+			}
+		}
 		
 		return copiedItem;
 	};
@@ -1079,6 +1096,21 @@ Zotero.Items = function () {
 
 
 		let shouldSave = false;
+
+		// Remove related items of this item that don't have a linked related item in source library
+		if (Zotero.Prefs.get('groups.copyRelatedItems')) {
+			let relatedItems = item.relatedItems.map(key => Zotero.Items.getByLibraryAndKey(item.libraryID, key)).filter(item => item && !item.deleted);
+			for (let relatedItem of relatedItems) {
+				let relatedItemInTarget = await relatedItem.getLinkedItem(libraryID, true);
+				if (!relatedItemInTarget || !linkedItemInLibrary.relatedItems.includes(relatedItemInTarget.key)) {
+					item.removeRelatedItem(relatedItem);
+					relatedItem.removeRelatedItem(item);
+					await relatedItem.save({ skipSelect: true });
+					shouldSave = true;
+				}
+			}
+		}
+
 		// Check all collections of the remaining items, and make sure
 		// all collections this item belong to are linked to collections
 		// that the linked item in source library belongs to
