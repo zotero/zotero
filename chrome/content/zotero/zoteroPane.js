@@ -4219,7 +4219,7 @@ var ZoteroPane = new function()
 			}
 			// Only allow targets within the current library for now
 			// TODO: Come back to this once we support copying items between libraries from the Add to Collection menu
-			let id = await this.newCollection();
+			let id = await this.newCollection(this.getSelectedCollection()?.key);
 			if (!id) {
 				return;
 			}
