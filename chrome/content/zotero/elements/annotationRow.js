@@ -31,6 +31,7 @@
 			<html:div class="head">
 				<image class="icon"/>
 				<html:div class="title"/>
+				<html:div class="action"/>
 			</html:div>
 			<html:div class="body"/>
 			<html:div class="tags"/>
@@ -39,13 +40,16 @@
 		_annotation = null;
 
 		static get observedAttributes() {
-			return ['annotation-id'];
+			return ['annotation-id', 'action'];
 		}
 
 		attributeChangedCallback(name, oldValue, newValue) {
 			switch (name) {
 				case 'annotation-id':
 					this._annotation = Zotero.Items.get(newValue);
+					break;
+				case 'action':
+					this.action = newValue;
 					break;
 			}
 			this.render();
@@ -60,6 +64,20 @@
 			this.setAttribute('annotation-id', annotation.id);
 		}
 
+		get action() {
+			return this._action;
+		}
+
+		set action(val) {
+			if (!val) {
+				this._action = null;
+			}
+			if (val !== "plus") {
+				throw new Error("Invalid button value: " + val);
+			}
+			this._action = val;
+		}
+
 		init() {
 			this._head = this.querySelector('.head');
 			this._title = this.querySelector('.title');
@@ -69,7 +87,7 @@
 		}
 
 		render() {
-			if (!this.initialized) return;
+			if (!this.initialized || !this._annotation) return;
 
 			this._title.textContent = Zotero.getString('pdfReader.page') + ' '
 				+ (this._annotation.annotationPageLabel || '-');
@@ -79,6 +97,14 @@
 				type = 'area';
 			}
 			this.querySelector('.icon').src = 'chrome://zotero/skin/16/universal/annotate-' + type + '.svg';
+			this.querySelector('.action').replaceChildren();
+			if (this.action) {
+				let icon = document.createXULElement('toolbarbutton');
+				icon.classList.add('zotero-clicky');
+				icon.classList.add('zotero-clicky-' + this.action);
+				icon.setAttribute('action', this.action);
+				this.querySelector('.action').append(icon);
+			}
 			this._body.replaceChildren();
 			
 			if (['image', 'ink'].includes(this._annotation.annotationType)) {

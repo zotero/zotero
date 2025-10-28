@@ -123,8 +123,11 @@
 	}
 
 	#library-layout {
+		#sidebar {
+			display: none;
+		}
 		#library-other-items {
-
+			// constant height is so the message can appear/disappear without shifting the layout
 			height: 82px;
 			flex-shrink: 0; // make sure suggested items do not get shrunk when window is resized
 
@@ -192,7 +195,7 @@
 							flex-shrink: 0;
 							width: var(--item-width);
 							overflow: hidden;
-							white-space: nowrap;
+							white-space: pre;
 							border: 1px solid var(--fill-quarternary);
 							border-radius: 5px;
 			
@@ -213,13 +216,14 @@
 							-moz-window-dragging: no-drag;
 			
 							.title {
+								font-size: 1rem;
 								overflow: hidden;
 								text-overflow: ellipsis;
+
 							}
 			
 							.description {
 								color: var(--fill-secondary);
-								font-size: 12px;
 								line-height: 16px;
 								overflow: hidden;
 								text-overflow: ellipsis;
@@ -318,7 +322,7 @@
 				align-self: center;
 				width: 100%;
 				text-align: center;
-				font-size: 13px;
+				font-size: 1rem;
 				color: var(--fill-secondary);
 				-moz-user-select: none;
 			}
@@ -369,7 +373,7 @@
 				}
 				.header {
 					font-weight: 700;
-					font-size: 13px;
+					font-size: 1rem;
 					color: var(--fill-secondary);
 					padding: 4px 8px 4px 16px;
 					display: flex;
@@ -423,6 +427,7 @@
   						text-overflow: ellipsis;
 					}
 					.title {
+						font-size: 1rem;
 						overflow: hidden;
 						text-wrap: nowrap;
 						text-overflow: ellipsis;
@@ -493,6 +498,7 @@
 		padding: 4px 8px 4px 12px;
 
 		#bottom-btn-group {
+			height: 28px;
 			gap: 8px;
 			-moz-window-dragging: no-drag;
 			#mode-button {
@@ -514,7 +520,7 @@
 		panel {
 			padding: 0;
 			.popup {
-				padding: 16px;
+				padding: 14px 16px;
 			}
 		}
 		.overlay {
@@ -530,7 +536,7 @@
 			right: 5px;
 
 			.title {
-				font-size: 13px;
+				font-size: 1rem;
 				font-weight: 700;
 				padding-bottom: 8px;
 			}
@@ -587,6 +593,11 @@
 						}
 					}
 				}
+
+				.annotation-detail {
+					margin: 16px 0;
+				}
+
 				button.done {
 					float: right;
 				}
@@ -599,7 +610,7 @@
 
 	.description {
 		color: var(--fill-secondary);
-		font-size: 12px;
+		font-size: 0.93rem;
 		// add comma between description <span>s
 		span:not(:last-child):not([no-comma])::after {
 			content: ", ";
@@ -638,6 +649,91 @@
 			justify-content: center;
 			#z-icon {
 				margin: 0 !important;
+			}
+		}
+	}
+}
+
+#citation-dialog[dialog-type="annotations"] {
+	#library-layout {
+		#sidebar {
+			display: block;
+			width: 300px;
+			border-inline-start: var(--material-panedivider);
+			background: var(--material-sidepane);
+			
+			#annotations-sidebar {
+				height: 100%;
+				#annotations-sidebar-filter-wrapper {
+					display: flex;
+					margin: 8px;
+					height: auto; // override height set by .search class
+
+					#annotations-sidebar-filter {
+						width: 100%;
+						border-radius: 5px;
+						border: 1px solid var(--fill-quarternary);
+						padding: 2px 3px;
+						margin: 0;
+					}
+				}
+
+				#annotations-list-wrapper {
+					overflow-y: auto;
+
+					// undo top padding of the first section
+					collapsible-section:first-of-type {
+						padding-top: 0;
+					}
+				}
+
+				#annotations-message {
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					height: 100%;
+					margin-inline: 8px;
+					#annotations-message-text {
+						text-align: center;
+					}
+				}
+			}
+		}
+		#library-other-items {
+			height: 98px;
+			.search-items {
+				.item {
+					height: 58px !important;
+					.title {
+						&.annotation-quote {
+							width: min-content;
+							max-width: 100%;
+							position: relative;
+							.title-text {
+								padding-inline-end: 6px;
+								&::before {
+									content: attr(q-mark-open);
+								}
+							}
+							&::after {
+								content: attr(q-mark-close);
+								position: absolute;
+								right: 0px;
+							}
+						}
+					}
+				}
+			}
+		}
+		#library-trees {
+			#item-tree-container {
+				// push +/- icon to the end of the row, since annotations
+				// rows are rendered disregarding the layout of columns
+				.row.annotation-row {
+					.clickable {
+						margin-inline-start: auto;
+					}
+				}
 			}
 		}
 	}
