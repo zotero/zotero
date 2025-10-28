@@ -798,9 +798,11 @@ describe("Add annotations dialog", function () {
 
 		// Pretend that these are selected/opened items
 		let selectedStub = sinon.stub(annotationSearchHandler, "_getSelectedLibraryItems");
-		selectedStub.returns([itemNoAnnotations1, itemWithAnnotations1]);
+		let selectedWithAnnotations = annotationSearchHandler.keepItemsWithAnnotations([itemNoAnnotations1, itemWithAnnotations1]);
+		selectedStub.returns(selectedWithAnnotations);
 		let openStub = sinon.stub(annotationSearchHandler, "_getReaderOpenItems");
-		openStub.resolves([itemNoAnnotations2, itemWithAnnotations2]);
+		let openWithAnnotations = annotationSearchHandler.keepItemsWithAnnotations([itemNoAnnotations2, itemWithAnnotations2]);
+		openStub.resolves(openWithAnnotations);
 
 		// Clear the cache so that selected/open items are re-freshed
 		// using the stubs below
