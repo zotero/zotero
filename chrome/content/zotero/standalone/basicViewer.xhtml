@@ -64,6 +64,7 @@
 		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
 		Services.scriptloader.loadSubScript("chrome://global/content/printUtils.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/viewZoomOverlay.js", this);
 		if (Zotero.isMac) {
 			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
 		}
@@ -85,12 +86,25 @@
 		<commandset id="editMenuCommands"/>
 		<command id="cmd_find"
 			oncommand="document.getElementById('zotero-tb-search').focus();"/>
+
+		<!--VIEW-->
+		<command id="cmd_fullZoomReduce" oncommand="ZoomManager.reduce()" />
+		<command id="cmd_fullZoomEnlarge" oncommand="ZoomManager.enlarge()" />
+		<command id="cmd_fullZoomReset" oncommand="ZoomManager.reset()" />
 	</commandset>
 	
 	<keyset id="mainKeyset">
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 		<key id="key_print" key="&printCmd.key;" command="cmd_print" modifiers="accel"/>
 		<key id="key_save" key="&saveCmd.key;" command="cmd_save" modifiers="accel"/>
+		<key id="key_fullZoomReduce" data-l10n-id="full-zoom-reduce-shortcut" command="cmd_fullZoomReduce" modifiers="accel"/>
+		<key data-l10n-id="full-zoom-reduce-shortcut-alt-a" command="cmd_fullZoomReduce" modifiers="accel"/>
+		<key data-l10n-id="full-zoom-reduce-shortcut-alt-b" command="cmd_fullZoomReduce" modifiers="accel"/>
+		<key id="key_fullZoomEnlarge" data-l10n-id="full-zoom-enlarge-shortcut" command="cmd_fullZoomEnlarge" modifiers="accel"/>
+		<key data-l10n-id="full-zoom-enlarge-shortcut-alt" command="cmd_fullZoomEnlarge" modifiers="accel"/>
+		<key data-l10n-id="full-zoom-enlarge-shortcut-alt2" command="cmd_fullZoomEnlarge" modifiers="accel"/>
+		<key id="key_fullZoomReset" data-l10n-id="full-zoom-reset-shortcut" command="cmd_fullZoomReset" modifiers="accel"/>
+		<key data-l10n-id="full-zoom-reset-shortcut-alt" command="cmd_fullZoomReset" modifiers="accel"/>
 	</keyset>
 	
 	<keyset id="editMenuKeys">
@@ -176,6 +190,21 @@
 									command="cmd_switchTextDirection"
 									key="key_switchTextDirection"
 									hidden="true" data-l10n-id="menu-edit-bidi-switch-text-direction"/>
+						</menupopup>
+					</menu>
+					
+					<menu id="view-menu" data-l10n-id="menu-view">
+						<menupopup id="menu_viewPopup">
+							<menuitem id="menu_zoomEnlarge"
+									  key="key_fullZoomEnlarge"
+									  command="cmd_fullZoomEnlarge" data-l10n-id="menu-view-full-zoom-enlarge"/>
+							<menuitem id="menu_zoomReduce"
+									  key="key_fullZoomReduce"
+									  command="cmd_fullZoomReduce" data-l10n-id="menu-view-full-zoom-reduce"/>
+							<menuseparator/>
+							<menuitem id="menu_zoomReset"
+									  key="key_fullZoomReset"
+									  command="cmd_fullZoomReset" data-l10n-id="menu-view-full-zoom-actual-size"/>
 						</menupopup>
 					</menu>
 					
