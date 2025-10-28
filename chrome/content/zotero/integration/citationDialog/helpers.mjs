@@ -343,10 +343,10 @@ export class CitationDialogHelpers {
 		if (segmentedControlOption === currentActive) return;
 		if (currentActive) {
 			currentActive.classList.remove("active");
-			currentActive.setAttribute("aria-selected", "false");
+			currentActive.setAttribute("aria-checked", "false");
 		}
 		if (!segmentedControlOption) return;
 		segmentedControlOption.classList.add("active");
-		segmentedControlOption.setAttribute("aria-selected", "true");
+		segmentedControlOption.setAttribute("aria-checked", "true");
 	}
 }
