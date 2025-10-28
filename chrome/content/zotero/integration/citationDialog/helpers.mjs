@@ -41,6 +41,28 @@ export class CitationDialogHelpers {
 		return node;
 	}
 
+	buildItemTitle(item) {
+		let titleWrapper = this.createNode("div", {}, "title");
+		let titleNode = this.createNode("span", {}, "title-text");
+		titleWrapper.appendChild(titleNode);
+		let title = "";
+		if (!item.isAnnotation()) {
+			title = item.getDisplayTitle();
+		}
+		else if (item.annotationText) {
+			title = Zotero.Utilities.unescapeHTML(item.annotationText.trim().slice(0, 500));
+			titleWrapper.classList.add("annotation-quote");
+			// Add quotation marks around the quoted text
+			titleNode.setAttribute("q-mark-open", Zotero.getString("punctuation.openingQMark"));
+			titleWrapper.setAttribute("q-mark-close", Zotero.getString("punctuation.closingQMark"));
+		}
+		else {
+			title = Zotero.getString(`pdfReader.${item.annotationType}Annotation`);
+		}
+		Zotero.Utilities.Internal.renderItemTitle(title, titleNode);
+		return titleWrapper;
+	}
+
 	// build and return a node with the description (e.g. creator/published/date/etc) of an item
 	buildItemDescription(item) {
 		let descriptionWrapper = this.doc.createElement("div");
@@ -76,6 +98,20 @@ export class CitationDialogHelpers {
 			}
 			descriptionWrapper.appendChild(dateLabel);
 			addPeriodIfNeeded(descriptionWrapper);
+			return descriptionWrapper;
+		}
+
+		if (item.isAnnotation()) {
+			let comment = Zotero.Utilities.unescapeHTML((item.annotationComment || "").trim());
+			comment = comment.slice(0, 500);
+			let parts = comment.split('\n').map(x => x.trim()).filter(x => x.length);
+			if (parts[0]) {
+				let commentSpan = wrapTextInSpan(parts[0]);
+				descriptionWrapper.appendChild(commentSpan);
+			}
+			else {
+				descriptionWrapper.innerText = " ";
+			}
 			return descriptionWrapper;
 		}
 
@@ -283,12 +319,33 @@ export class CitationDialogHelpers {
 	}
 
 	buildBubbleString(bubbleItem) {
+		let item = bubbleItem.item;
+		let annotationContent = "";
+		// Construct annotation string if relevant
+		if (item.isAnnotation()) {
+			let text = item.annotationText || "";
+			let comment = item.annotationComment || "";
+			if (text) {
+				let annotationText = text.substr(0, 32) + (text.length > 32 ? "…" : "");
+				annotationContent = Zotero.getString("punctuation.openingQMark") + annotationText + Zotero.getString("punctuation.closingQMark");
+			}
+			else if (comment) {
+				let annotationCommment = text.substr(0, 32) + (text.length > 32 ? "…" : "");
+				annotationContent = annotationCommment;
+			}
+			else {
+				annotationContent = Zotero.getString(`pdfReader.${item.annotationType}Annotation`);
+			}
+			while (item.parentItem) {
+				item = item.parentItem;
+			}
+		}
 		// Creator
 		var title;
-		var str = bubbleItem.item.getField("firstCreator");
+		var str = item.getField("firstCreator");
 		
 		// Title, if no creator (getDisplayTitle in order to get case, e-mail, statute which don't have a title field)
-		title = bubbleItem.item.getDisplayTitle();
+		title = item.getDisplayTitle();
 		title = title.substr(0, 32) + (title.length > 32 ? "…" : "");
 		if (!str && title) {
 			str = Zotero.getString("punctuation.openingQMark") + title + Zotero.getString("punctuation.closingQMark");
@@ -298,9 +355,14 @@ export class CitationDialogHelpers {
 		}
 		
 		// Date
-		var date = bubbleItem.item.getField("date", true, true);
+		var date = item.getField("date", true, true);
 		if (date && (date = date.substr(0, 4)) !== "0000") {
 			str += ", " + parseInt(date);
+		}
+
+		// If original item is an annotaiton, return the bubble string with the annotation info
+		if (bubbleItem.item.isAnnotation()) {
+			return str + " " + annotationContent;
 		}
 		
 		// Locator

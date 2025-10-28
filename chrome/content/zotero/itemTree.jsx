@@ -3277,6 +3277,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 				title = this._renderCell(index, annotationTypeName, titleRowData, true);
 			}
 			div.prepend(title);
+			// Special handling of icon for the citation dialog. Since annotations are
+			// not rendered within the layout of columns, we have to check for column rendered here.
+			let addToCitationColumn = columns.find(column => column.dataKey == "addToCitation");
+			if (addToCitationColumn) {
+				let data = this.props.getExtraField(item, addToCitationColumn.dataKey);
+				let icon = addToCitationColumn.renderer(index, data, addToCitationColumn);
+				if (icon) {
+					div.append(icon);
+				}
+			}
 		}
 		return div;
 	};

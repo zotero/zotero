@@ -4176,9 +4176,10 @@ Zotero.Item.prototype.numAnnotations = function (includeTrashed) {
  * Returns child annotations for an attachment item
  *
  * @param {Boolean} [includeTrashed=false] - Include annotations in trash
+ * @param {Boolean} [asIDs=false] - Return ids of annootations instead of Zotero.Item objects
  * @return {Zotero.Item[]}
  */
-Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
+Zotero.Item.prototype.getAnnotations = function (includeTrashed, asIDs) {
 	if (!this.isFileAttachment()) {
 		throw new Error("getAnnotations() can only be called on file attachments");
 	}
@@ -4192,6 +4193,7 @@ Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
 	var cacheKey = 'with' + (includeTrashed ? '' : 'out') + 'Trashed';
 	
 	if (this._annotations[cacheKey]) {
+		if (asIDs) return this._annotations[cacheKey];
 		return Zotero.Items.get([...this._annotations[cacheKey]]);
 	}
 	
@@ -4202,6 +4204,7 @@ Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
 	}
 	var ids = rows.map(row => row.itemID);
 	this._annotations[cacheKey] = ids;
+	if (asIDs) return ids;
 	return Zotero.Items.get(ids);
 };
 
