@@ -2409,6 +2409,15 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			else {
 				var parentCollectionID = false;
 			}
+
+
+			if (!targetTreeRow.isDuplicates() && !targetTreeRow.isUnfiled() && !targetTreeRow.isRetracted() && !targetTreeRow.isTrash() && !targetTreeRow.isPublications()) {
+				let { promptToImport } = ChromeUtils.importESModule('chrome://zotero/content/modules/promptToImport.mjs');
+				if (await promptToImport(window, data, { libraryID: targetLibraryID, collectionID: parentCollectionID === false ? undefined : parentCollectionID })) {
+					return;
+				}
+			}
+
 			var addedItems = [];
 			
 			for (var i=0; i<data.length; i++) {
