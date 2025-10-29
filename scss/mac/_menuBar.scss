@@ -1,0 +1,29 @@
+$mac-tahoe-menu-icons: (
+	newItem: "new-item",
+	addByIdentifier: "add-by-identifier",
+	attachmentAdd: "add-attachment",
+	newCollection: "new-collection",
+	close: "xmark",
+	close_tab: "xmark",
+	undo: "arrow.uturn.backward",
+	redo: "arrow.uturn.forward",
+	cut: "scissors",
+	copyCitation: "copy-citation",
+	copyBibliography: "copy-bibliography",
+	paste: "document.on.clipboard",
+	delete: "trash",
+	selectAll: "character.textbox",
+	find: "magnifyingglass",
+	advancedSearch: "sparkle.magnifyingglass",
+);
+
+@media (-moz-platform: macos) {
+	// Added in zoteroPane.js based on OS version
+	:root[macos-tahoe] {
+		@each $cls, $icon in $mac-tahoe-menu-icons {
+			#menu_#{$cls} {
+				list-style-image: url('chrome://zotero/skin/mac/menu/#{$icon}.svg');
+			}
+		}
+	}
+}

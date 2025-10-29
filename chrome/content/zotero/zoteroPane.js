@@ -131,6 +131,12 @@ var ZoteroPane = new function () {
 		
 		if (Zotero.isMac) {
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'mac');
+			Zotero.getOSVersion().then((osVersion) => {
+				let [_, version] = osVersion.split(' ');
+				if (Services.vc.compare(version, '26.0') >= 0) {
+					document.documentElement.setAttribute('macos-tahoe', 'true');
+				}
+			});
 		} else if(Zotero.isWin) {
 			document.getElementById('zotero-pane-stack').setAttribute('platform', 'win');
 		}
