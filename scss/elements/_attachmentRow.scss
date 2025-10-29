@@ -11,6 +11,7 @@ attachment-row {
 		display: flex;
 		align-items: center;
 		gap: 4px;
+		align-items: baseline;
 		
 		.clicky-item {
 			@include clicky-item;
