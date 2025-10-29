@@ -4047,18 +4047,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return icon;
 		}
 		
-		if (item.isAnnotation()) {
-			let img = document.createElement("img");
-			img.className = "annotation-icon";
-			let type = item.annotationType;
-			if (type == 'image') {
-				type = 'area';
-			}
-			img.src = 'chrome://zotero/skin/16/universal/annotate-' + type + '.svg';
-			img.style.fill = item.annotationColor;
-			return img;
-		}
 		var itemType = item.getItemTypeIconName();
+		if (item.isAnnotation()) {
+			return getCSSItemTypeIcon(itemType, `annotation-${item.annotationType}-${item.annotationColor}`);
+		}
 		return getCSSItemTypeIcon(itemType);
 	}
 

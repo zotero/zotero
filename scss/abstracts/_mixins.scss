@@ -133,6 +133,11 @@
 		height: calc(1.3333333333 * var(--zotero-font-size));
 	}
 
+	.annotation-icon {
+		-moz-context-properties: fill;
+		padding-block: 2px;
+	}
+
 	.label {
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
