@@ -66,7 +66,7 @@ async function onLoad() {
 	timer.start();
 
 	Helpers = new CitationDialogHelpers({ doc, io });
-	SearchHandler = new CitationDialogSearchHandler({ isCitingNotes, io });
+	SearchHandler = new CitationDialogSearchHandler({ isCitingNotes, io, doc });
 	PopupsHandler = new CitationDialogPopupsHandler({ doc });
 	KeyboardHandler = new CitationDialogKeyboardHandler({ doc });
 
@@ -118,10 +118,22 @@ async function onLoad() {
 		}
 	});
 
-	// Disabled all multiselect when citing notes
+	// Initialize note-specific behavior and styling
 	if (isCitingNotes) {
+		// Disabled all multiselect when citing notes
 		for (let multiselectable of [...doc.querySelectorAll("[data-multiselectable]")]) {
 			delete multiselectable.dataset.multiselectable;
+		}
+		document.documentElement.setAttribute("dialog-type", "note");
+		_id("note-preview").mode = "merge"; // hides the toolbar
+		// insert a <style> node with a few style tweaks only appropriate for the citation dialog
+		let iframeDoc = _id("editor-view").contentDocument;
+		if (iframeDoc) {
+			let style = iframeDoc.createElement('style');
+			// smaller padding, no hover on citations, and use default smaller font size
+			let defaultFontSize = parseInt(getComputedStyle(document.documentElement).fontSize);
+			style.textContent = `.primary-editor { padding: 12px !important; --font-size: ${defaultFontSize}px; } .citation:hover { background-color: transparent !important; }`;
+			iframeDoc.head.appendChild(style);
 		}
 	}
 	loaded = true;
@@ -208,24 +220,13 @@ class Layout {
 
 		// Tell SearchHandler which currently cited items are so they are not included in results
 		let citedIDs = CitationDataManager.getCitedLibraryItemIDs();
-		let searchResultGroups = SearchHandler.getOrderedSearchResultGroups(citedIDs);
-		for (let { key, group, isLibrary } of searchResultGroups) {
+		let searchResultGroups = await SearchHandler.getOrderedSearchResultGroups(citedIDs);
+		for (let { key, group, label } of searchResultGroups) {
 			// selected items become a collapsible deck/list if there are multiple items
 			let isGroupCollapsible = key == "selected" && group.length > 1;
 			
 			// Construct each section and items
-			let sectionHeader = "";
-			if (isLibrary) {
-				sectionHeader = Zotero.Libraries.get(key).name;
-			}
-			// special handling for selected items to display how many total selected items there are
-			else if (key == "selected") {
-				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count: group.length, total: SearchHandler.allSelectedItemsCount() });
-			}
-			else {
-				sectionHeader = await doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count: group.length });
-			}
-			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, sectionHeader, isGroupCollapsible, group.length, this.type);
+			let section = Helpers.buildItemsSection(`${this.type}-${key}-items`, label, isGroupCollapsible, group.length, this.type);
 			let itemContainer = section.querySelector(".itemsContainer");
 	
 			let items = [];
@@ -423,6 +424,12 @@ class LibraryLayout extends Layout {
 
 		itemNode.append(title, description);
 
+		// add a parent title to the item card when inserting a note
+		if (isCitingNotes && item.parentItemID) {
+			let parentTitleNode = Helpers.createNode("div", {}, "description");
+			Zotero.Utilities.Internal.renderItemTitle(item.topLevelItem.getDisplayTitle(), parentTitleNode);
+			itemNode.prepend(parentTitleNode);
+		}
 		if (index !== null) {
 			itemNode.style.setProperty('--deck-index', index);
 		}
@@ -564,6 +571,19 @@ class LibraryLayout extends Layout {
 			columnPicker: true,
 			onSelectionChange: () => {
 				libraryLayout.updateSelectedItems();
+				// Hide/display note preview pane when a note is selected
+				if (isCitingNotes) {
+					let selectedItem = libraryLayout.itemsView.getSelectedItems()[0];
+					if (selectedItem?.isNote()) {
+						_id("note-preview").item = selectedItem;
+						_id("note-preview").hidden = false;
+						_id("empty-note-preview-message").hidden = true;
+					}
+					else {
+						_id("note-preview").hidden = true;
+						_id("empty-note-preview-message").hidden = false;
+					}
+				}
 			},
 			regularOnly: !isCitingNotes,
 			multiSelect: !isCitingNotes,
@@ -762,14 +782,28 @@ class ListLayout extends Layout {
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
+		// When adding a note, parent items appear in the list as collapsible containers
+		if (isCitingNotes) {
+			if (item.isNote()) {
+				if (item.parentItemID) {
+					itemNode.classList.add("child");
+					itemNode.setAttribute("aria-labelledby", `title-${id} description-${id} ${item.parentItemID}`);
+				}
+			}
+			else {
+				itemNode.setAttribute("disabled", true);
+				itemNode.setAttribute("aria-disabled", true);
+				itemNode.classList.add("container");
+			}
+		}
 		itemNode.id = id;
 		let icon = Helpers.createNode("span", {}, "icon icon-css icon-item-type");
 		let dataTypeLabel = item.getItemTypeIconName(true);
 		icon.setAttribute("data-item-type", dataTypeLabel);
 
-		let title = Helpers.createNode("div", {}, "title");
+		let title = Helpers.createNode("div", { id: `title-${id}` }, "title");
 		let titleContent = Helpers.createNode("span", {}, "");
-		let description = Helpers.buildItemDescription(item);
+		let description = Helpers.buildItemDescription(item, { twoLines: isCitingNotes });
 		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), titleContent);
 		title.append(icon, titleContent);
 		itemNode.append(title, description);
@@ -849,6 +883,25 @@ class ListLayout extends Layout {
 		setTimeout(() => {
 			window.resizeTo(window.innerWidth, parseInt(autoHeight));
 		}, 10);
+	}
+
+	// Click on container parent item when inserting a note
+	// will expand/collapse its children.
+	handleClickOnContainerItem(targetItem) {
+		let child = targetItem.nextElementSibling;
+		while (child && child.classList.contains("child")) {
+			child.toggleAttribute("hidden");
+			child = child.nextElementSibling;
+		}
+		targetItem.classList.toggle("collapsed");
+
+		// resize the window if needed
+		let sectionContainer = targetItem.closest(".itemsContainer");
+		sectionContainer.style.removeProperty('height');
+		setTimeout(() => {
+			sectionContainer.style.height = `${sectionContainer.scrollHeight}px`;
+			listLayout.resizeWindow();
+		});
 	}
 
 	_markRoundedCorners() {
@@ -941,6 +994,11 @@ const IOManager = {
 		
 		_id("list-layout").hidden = newMode == "library";
 		_id("library-layout").hidden = newMode == "list";
+
+		SearchHandler.dialogMode = newMode;
+		// re-fetch selected/open items cache when dialog mode changes
+		// because of different treatment of selected items in insertNote
+		SearchHandler.clearNonLibraryItemsCache();
 
 		// Delete all item nodes from the old layout
 		for (let itemNode of [...doc.querySelectorAll(".item")]) {
@@ -1106,6 +1164,22 @@ const IOManager = {
 			return;
 		}
 		IOManager._lastClickTime = (new Date()).getTime();
+
+		// Clicking on the container in list mode will expand/collapse its children
+		if (isCitingNotes && currentLayout.type == "list" && targetItem.classList.contains("container")) {
+			listLayout.handleClickOnContainerItem(targetItem);
+			return;
+		}
+		// Clicking on a regular item in library mode when inserting a note will select item's first note in the itemTree
+		if (isCitingNotes && currentLayout.type == "library") {
+			let parentItem = Zotero.Items.get(targetItem.getAttribute("itemID"));
+			if (parentItem.isRegularItem()) {
+				let notes = parentItem.getNotes();
+				libraryLayout.itemsView.selectItem(notes[0]);
+				_id("item-tree-citationDialog").focus();
+				return;
+			}
+		}
 
 		// Cmd/Ctrl + mouseclick toggles selected item node
 		if (multiselectable && (Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.ctrlKey)) {
