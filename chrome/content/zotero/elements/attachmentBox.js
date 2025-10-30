@@ -64,7 +64,7 @@
 						<html:div id="indexStatusRow" class="meta-row">
 							<html:div class="meta-label"><html:label id="index-status-label" class="key" data-l10n-id="attachment-info-index"/></html:div>
 							<html:div class="meta-data">
-								<html:label id="index-status"/>
+								<html:span id="index-status"/>
 								<toolbarbutton id="reindex" tabindex="0" oncommand="this.hidden = true; setTimeout(function () { ZoteroPane_Local.reindexItem(); }, 50)"/>
 							</html:div>
 						</html:div>

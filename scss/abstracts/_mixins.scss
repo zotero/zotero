@@ -115,7 +115,7 @@
 
 @mixin clicky-item {
 	display: flex;
-	align-items: flex-start;
+	align-items: baseline;
 	gap: 4px;
 	padding-inline-start: 4px;
 	overflow: hidden;
@@ -130,7 +130,7 @@
 	}
 
 	.icon {
-		height: calc(1.3333333333 * var(--zotero-font-size));
+		line-height: calc(1.3333333333 * var(--zotero-font-size));
 	}
 
 	.label {
@@ -140,9 +140,6 @@
 		width: 0; // Needed to allow the label to shrink for some reason
 		flex: 1;
 		overflow: hidden;
-	}
-	
-	.icon, .label {
 		padding-block: 2px;
 	}
 }
@@ -177,6 +174,8 @@
 			width: 0;
 			min-width: 100%;
 			display: flex;
+			align-items: baseline;
+
 			toolbarbutton {
 				margin-inline-start: 4px;
 			}
