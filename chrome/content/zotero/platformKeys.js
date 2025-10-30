@@ -96,15 +96,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 		var { getTargetElement, createContextMenuEvent } = ChromeUtils.importESModule("chrome://zotero/content/contextMenuUtils.sys.mjs");
 		let lastPreventedContextMenuTime = 0;
 		document.addEventListener('contextmenu', (event) => {
-			if (!(event.button === 2 && event.buttons === 0 && !event.ctrlKey)) {
-				return;
-			}
-			// Two-finger tap (on some machines?) generates an event that looks
-			// identical to the Ctrl-Enter event, except that the Ctrl-Enter event
-			// should always be exactly in the middle of the window.
-			if (event.mozInputSource === MouseEvent.MOZ_SOURCE_MOUSE
-					&& (event.clientX !== Math.floor(window.innerWidth / 2)
-						|| event.clientY !== Math.floor(window.innerHeight / 2))) {
+			if (!(event.button === 0 && event.buttons === 0 && !event.ctrlKey)) {
 				return;
 			}
 			
