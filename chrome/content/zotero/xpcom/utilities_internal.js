@@ -1712,6 +1712,32 @@ Zotero.Utilities.Internal = {
 		return menu;
 	},
 	
+	/**
+	 * Shortcut to create iconic menus or menuitems.
+	 * @param {Document} doc - document to create element in
+	 * @param {String} nodeType - "menu" or "menuitem"
+	 * @param {Zotero.Library|Zotero.Collection} object - library or collection of this menu component
+	 * @returns {XULElement} - the created menu or menuitem
+	 */
+	createIconicMenuNode: function (doc, nodeType, object) {
+		if (!["menu", "menuitem"].includes(nodeType)) {
+			throw new Error("Invalid nodeType -- must be menu menuitem");
+		}
+		if (!(object instanceof Zotero.Library || object instanceof Zotero.Collection)) {
+			throw new Error("Invalid object -- must be Library or Collection");
+		}
+		let node = doc.createXULElement(nodeType);
+		node.classList.add("menuitem-iconic");
+		node.setAttribute("value", object.treeViewID);
+		node.setAttribute("label", object.name);
+		node.setAttribute("image", object.treeViewImage);
+		if (nodeType == "menu") {
+			let menupopup = doc.createXULElement("menupopup");
+			node.appendChild(menupopup);
+		}
+		return node;
+	},
+	
 	openPreferences: function (paneID, options = {}) {
 		if (typeof options == 'string') {
 			throw new Error("openPreferences() now takes an 'options' object -- update your code");

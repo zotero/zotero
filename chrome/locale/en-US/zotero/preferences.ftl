@@ -120,3 +120,6 @@ preferences-sync-reset-restore-to-server-checkbox-label = { $remoteItemsDeletedC
     }
 preferences-sync-reset-restore-to-server-confirmation-text = delete online library
 preferences-sync-reset-restore-to-server-yes = Replace Data in Online Library
+
+preferences-groups-copy-related-items =
+    .label = related items
