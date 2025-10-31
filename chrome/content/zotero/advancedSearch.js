@@ -35,6 +35,7 @@ var ZoteroAdvancedSearch = new function () {
 	this.onItemActivate = onItemActivate;
 	
 	this.itemsView = false;
+	this._loadedDeferred = Zotero.Promise.defer();
 
 	var _searchBox;
 	var _libraryID;
@@ -69,7 +70,7 @@ var ZoteroAdvancedSearch = new function () {
 			columns,
 		});
 
-		this.itemsView.changeCollectionTreeRow({
+		await this.itemsView.changeCollectionTreeRow({
 			ref: _searchBox.search,
 			visibilityGroup: 'default',
 			isSearchMode: () => true,
@@ -89,6 +90,7 @@ var ZoteroAdvancedSearch = new function () {
 
 		// Focus the first field in the window
 		Services.focus.moveFocus(window, null, Services.focus.MOVEFOCUS_FORWARD, 0);
+		this._loadedDeferred.resolve();
 	}
 	
 	this.onUnload = function () {
