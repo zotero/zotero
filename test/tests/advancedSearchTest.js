@@ -16,18 +16,13 @@ describe("Advanced Search", function () {
 		win.close();
 	});
 	
-	// TEMP: React timing issue - figure this out
-	it.skip("should perform a search", function* () {
+	it("should perform a search", function* () {
 		var item = yield createDataObject('item', { setTitle: true });
 		
-		var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml', async (win) => {
-			// Wait for the itemsView to be initialized in the onload listener of the window
-			while (!win.ZoteroAdvancedSearch.itemsView) {
-				await Zotero.Promise.delay(5);
-			}
-		});
+		var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml');
 		zp.openAdvancedSearchWindow();
 		var searchWin = yield promise;
+		yield searchWin.ZoteroAdvancedSearch._loadedDeferred.promise;
 		// Add condition
 		var searchBox = searchWin.document.getElementById('zotero-search-box');
 		
@@ -37,8 +32,9 @@ describe("Advanced Search", function () {
 		
 		// Run search and wait for results
 		var o = searchWin.ZoteroAdvancedSearch;
-		yield o.search();
 		var iv = o.itemsView;
+		yield iv.waitForLoad();
+		yield o.search();
 		yield iv.waitForLoad();
 		
 		// Check results

@@ -200,8 +200,8 @@ var LibraryTree = class LibraryTree extends React.Component {
 			try {
 				await Zotero.Promise.resolve(this.props.onSelectionChange(this.selection));
 			} catch (e) {}
-			this.runListeners('select');
 		}
+		this.runListeners('select');
 	}
 	
 	_onSelectionChangeDebounced = Zotero.Utilities.debounce(this._onSelectionChange, 100)
