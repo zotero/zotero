@@ -1312,9 +1312,12 @@ describe("Item pane", function () {
 			assert.notExists(attachmentsBox.querySelector("#preview"));
 
 			await waitForScrollToPane(itemDetails, paneID);
+			await attachmentsBox._forceRenderAll();
 			await waitForPreviewBoxRender(attachmentsBox);
 			
-			assert.exists(await getBoxPreview(attachmentsBox));
+			let preview = await getBoxPreview(attachmentsBox);
+			assert.exists(preview);
+			await preview._initPromise;
 
 			win.resizeTo(null, height);
 		});
