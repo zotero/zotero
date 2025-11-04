@@ -1729,32 +1729,32 @@ describe("Item pane", function () {
 
 			const discardTimeout = 50;
 
-			// Temporarily set discard timeout to 100ms for testing
+			// Temporarily set discard timeout for testing before any operations
 			let currentDiscardTimeout = attachmentBox._discardPreviewTimeout;
 			attachmentBox._discardPreviewTimeout = discardTimeout;
+
+			// Resize to very small height to ensure the attachment box is not in view
+			let height = doc.documentElement.clientHeight;
+			win.resizeTo(null, 100);
 
 			let item = await createDataObject('item');
 			let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
 
-			await ZoteroPane.selectItem(attachment.id);
+			await ZoteroPane.selectItem(item.id);
 			await waitForScrollToPane(itemDetails, paneID);
-			let initialized = await waitForPreviewBoxReader(attachmentBox, attachment.id);
-			// If the reader failed to initialize, skip the rest of the test
-			if (!initialized) {
-				Zotero.warn("should discard attachment pane preview after becoming invisible: Reader failed to initialize, skipping the test.");
-				return;
-			}
+			await waitForPreviewBoxReader(attachmentBox, attachment.id);
 
 			assert.isTrue(attachmentBox._preview._isReaderInitialized);
 			
-			// Select a regular item to hide the attachment pane
-			await ZoteroPane.selectItem(item.id);
+			// Scroll the attachments pane out of view
+			await waitForScrollToPane(itemDetails, 'info');
 
-			// Wait a bit for the preview to be discarded
-			await Zotero.Promise.delay(discardTimeout + 100);
-			
+			// Wait for the intersection observer to trigger discard and the discard process to complete
+			await waitForCallback(() => !attachmentBox._preview._isReaderInitialized);
+
 			assert.isFalse(attachmentBox._preview._isReaderInitialized);
 
+			win.resizeTo(null, height);
 			attachmentBox._discardPreviewTimeout = currentDiscardTimeout;
 		});
 
