@@ -1733,28 +1733,22 @@ describe("Item pane", function () {
 			let currentDiscardTimeout = attachmentBox._discardPreviewTimeout;
 			attachmentBox._discardPreviewTimeout = discardTimeout;
 
-			// Resize to very small height to ensure the attachment box is not in view
-			let height = doc.documentElement.clientHeight;
-			win.resizeTo(null, 100);
+			let attachment = await importFileAttachment('test.pdf');
 
-			let item = await createDataObject('item');
-			let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-
-			await ZoteroPane.selectItem(item.id);
+			await ZoteroPane.selectItem(attachment.id);
 			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxReader(attachmentBox, attachment.id);
 
 			assert.isTrue(attachmentBox._preview._isReaderInitialized);
 			
 			// Scroll the attachments pane out of view
-			await waitForScrollToPane(itemDetails, 'info');
+			await waitForScrollToPane(itemDetails, 'related');
 
 			// Wait for the intersection observer to trigger discard and the discard process to complete
 			await waitForCallback(() => !attachmentBox._preview._isReaderInitialized);
 
 			assert.isFalse(attachmentBox._preview._isReaderInitialized);
 
-			win.resizeTo(null, height);
 			attachmentBox._discardPreviewTimeout = currentDiscardTimeout;
 		});
 
