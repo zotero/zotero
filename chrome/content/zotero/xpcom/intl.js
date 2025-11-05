@@ -87,6 +87,7 @@ Zotero.Intl = new function () {
 			'integration.ftl',
 			'note-editor.ftl',
 			'preferences.ftl',
+			'scaffold.ftl'
 			// More FTL files can be hardcoded here, or added later with
 			// Zotero.ftl.addResourceIds(['...'])
 		], true);

@@ -318,6 +318,11 @@ browser,
 		}
 	}
 
+	#create-test-button {
+		margin-inline-end: 10px;
+		margin-bottom: -2px;
+	}
+
 	#testing-listbox-container {
 		flex: 1;
 	}
@@ -339,6 +344,10 @@ browser,
 		input {
 			margin: 0;
 		}
+
+		#browser-loading {
+			padding-left: 79px; // retains spacing after load-url-button is hidden
+ 		}
 	}	
 }
 
