@@ -1156,13 +1156,12 @@ var Scaffold = new function () {
 				functionToRun += 'Search';
 			}
 			else {
+				// If no function can be properly run, alert the user
+				// if the translator type is web and no webpage is loaded
+				if (!this.ensureWebpageLoadedIfNeeded()) return;
 				_logOutput('No appropriate detect/do function to run');
 				return;
 			}
-		}
-
-		if (['detectWeb', 'doWeb'].includes(functionToRun)) {
-			if (!this.ensureWebpageLoadedIfNeeded()) return;
 		}
 
 		_logOutput(`Running ${functionToRun}`);
