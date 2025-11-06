@@ -110,7 +110,7 @@ var Scaffold = new function () {
 					_setBrowserLoadingIndicator(false);
 				}
 				// Record if the page has been successfully loaded
-				_browserLoadedURL = done && !failed;
+				_browserLoadedURL = !!(done && !failed && _browser.currentURI.spec !== "about:blank");
 			},
 		};
 		_browser.addProgressListener(_browserProgressListener, Ci.nsIWebProgress.NOTIFY_STATE_ALL);
@@ -1102,7 +1102,6 @@ var Scaffold = new function () {
 	 */
 	this.loadURLInBrowser = async function () {
 		let url = document.getElementById("browser-url").value;
-		if (!url) return;
 		Zotero.debug('Scaffold: Loading URL in browser: ' + url);
 
 		_setBrowserLoadingIndicator(true);
