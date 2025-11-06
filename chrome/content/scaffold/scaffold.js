@@ -1140,7 +1140,7 @@ var Scaffold = new function () {
 
 		// Handle generic call run('detect'), run('do')
 		if (functionToRun == "detect" || functionToRun == "do") {
-			if (document.getElementById('checkbox-web').checked) {
+			if (document.getElementById('checkbox-web').checked && _browserLoadedURL) {
 				functionToRun += 'Web';
 			}
 			else if (document.getElementById('checkbox-import').checked
