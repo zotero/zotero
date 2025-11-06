@@ -61,7 +61,6 @@ var Scaffold = new function () {
 	var _editors = {};
 
 	var _browserProgressListener = null;
-	var _browserLoadedURL = false;
 
 	var _propertyMap = {
 		'textbox-translatorID': 'translatorID',
@@ -104,13 +103,10 @@ var Scaffold = new function () {
 			QueryInterface: ChromeUtils.generateQI(["nsIWebProgressListener", "nsISupportsWeakReference"]),
 			onStateChange(webProgress, request, stateFlags, status) {
 				let done = stateFlags & Ci.nsIWebProgressListener.STATE_STOP;
-				let failed = status && status !== Cr.NS_OK;
 				// Hide the spinner when done
 				if (done) {
 					_setBrowserLoadingIndicator(false);
 				}
-				// Record if the page has been successfully loaded
-				_browserLoadedURL = !!(done && !failed && _browser.currentURI.spec !== "about:blank");
 			},
 		};
 		_browser.addProgressListener(_browserProgressListener, Ci.nsIWebProgress.NOTIFY_STATE_ALL);
@@ -1117,7 +1113,7 @@ var Scaffold = new function () {
 	 * @returns {boolean} True if a webpage is loaded for web translators, false otherwise.
 	 */
 	this.ensureWebpageLoadedIfNeeded = function () {
-		if (!_browserLoadedURL && document.getElementById('checkbox-web').checked) {
+		if (_browser.currentURI.spec == 'about:blank' && document.getElementById('checkbox-web').checked) {
 			Services.prompt.alert(null, "Webpage Not Loaded", "You need to load a webpage in the Browser tab first.");
 			_showTab('browser');
 			document.getElementById('browser-url').focus();
@@ -1139,7 +1135,8 @@ var Scaffold = new function () {
 
 		// Handle generic call run('detect'), run('do')
 		if (functionToRun == "detect" || functionToRun == "do") {
-			if (document.getElementById('checkbox-web').checked && _browserLoadedURL) {
+			if (document.getElementById('checkbox-web').checked
+				&& _browser.currentURI.spec != 'about:blank') {
 				functionToRun += 'Web';
 			}
 			else if (document.getElementById('checkbox-import').checked
