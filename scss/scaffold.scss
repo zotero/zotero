@@ -345,8 +345,12 @@ browser,
 			margin: 0;
 		}
 
+		#load-url-button {
+			min-width: 35px;
+		}
+
 		#browser-loading {
-			padding-left: 79px; // retains spacing after load-url-button is hidden
+			padding-left: 35px; // retains spacing after load-url-button is hidden
  		}
 	}	
 }

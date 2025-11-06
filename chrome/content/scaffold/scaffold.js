@@ -40,6 +40,13 @@ ChromeUtils.defineLazyGetter(lazy, 'shellPathPromise', () => {
 		.then(s => s.trimEnd());
 });
 
+// Text to display in monaco editors when they are empty
+const CODE_TAB_INFO = `1. Use Tools > Insert Template menu option or the "+" icon above to insert a template for the translator.
+2. Use Run detect* and Run do* buttons in the toolbar to run your translator on the URL loaded in the browser tab.
+3. For reference, use Help > List All Item Types to list all available Zotero item types that your translator can create.
+4. For reference, use Help > List all Fields for Item Type to log the fields of the Zotero item(s) your translator is creating.`;
+const TESTS_TAB_INFO = ` After the translator is implemented in the code tab, use "Create Web Test" to run the translator on the URL loaded in the browser and save the expected output here.`;
+
 var Scaffold = new function () {
 	var _browser;
 	var _translatorsLoadedPromise;
@@ -158,7 +165,7 @@ var Scaffold = new function () {
 				_editors.importGlobal = monaco;
 				_editors.import = editor;
 			}),
-			codeWin.loadMonaco({ language: 'javascript', emptyOverlayMessage: Zotero.getString('scaffold-empty-editor-code') }).then(({ monaco, editor }) => {
+			codeWin.loadMonaco({ language: 'javascript', emptyOverlayMessage: CODE_TAB_INFO }).then(({ monaco, editor }) => {
 				_editors.codeGlobal = monaco;
 				_editors.code = editor;
 			}),
@@ -166,7 +173,7 @@ var Scaffold = new function () {
 				language: 'json',
 				// Tests might contain \u2028/\u2029 - don't pop up a warning
 				unusualLineTerminators: 'off',
-				emptyOverlayMessage: Zotero.getString('scaffold-empty-editor-tests')
+				emptyOverlayMessage: TESTS_TAB_INFO
 			}).then(({ monaco, editor }) => {
 				_editors.testsGlobal = monaco;
 				_editors.tests = editor;
@@ -222,7 +229,6 @@ var Scaffold = new function () {
 	
 	this.handleUnload = function () {
 		Zotero.Prefs.unregisterObserver(_prefsObserverID);
-		_browser.removeProgressListener(_browserProgressListener);
 	};
 	
 	this.promptForTranslatorsDirectory = async function () {
@@ -1113,7 +1119,7 @@ var Scaffold = new function () {
 	 */
 	this.ensureWebpageLoadedIfNeeded = function () {
 		if (!_browserLoadedURL && document.getElementById('checkbox-web').checked) {
-			Services.prompt.alert(null, Zotero.getString("scaffold-alert-require-webpage-title"), Zotero.getString("scaffold-alert-require-webpage-msg"));
+			Services.prompt.alert(null, " A loaded webpage is required.", "Load a relevant webpage in the Browser tab to use this feature for the web translator.");
 			_showTab('browser');
 			document.getElementById('browser-url').focus();
 			return false;

@@ -83,7 +83,7 @@
 					let overlayNode = document.createElement('div');
 					overlayNode.className = 'empty-editor-overlay';
 
-					overlayNode.innerHTML = params.emptyOverlayMessage;
+					overlayNode.innerText = params.emptyOverlayMessage;
 					let overlayWidget = {
 						getId: () => `empty-editor-overlay`,
 						getDomNode: () => overlayNode,
