@@ -1119,7 +1119,7 @@ var Scaffold = new function () {
 	 */
 	this.ensureWebpageLoadedIfNeeded = function () {
 		if (!_browserLoadedURL && document.getElementById('checkbox-web').checked) {
-			Services.prompt.alert(null, " A loaded webpage is required.", "Load a relevant webpage in the Browser tab to use this feature for the web translator.");
+			Services.prompt.alert(null, "Webpage Not Loaded", "You need to load a webpage in the Browser tab first.");
 			_showTab('browser');
 			document.getElementById('browser-url').focus();
 			return false;
