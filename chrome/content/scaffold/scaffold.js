@@ -1696,6 +1696,7 @@ var Scaffold = new function () {
 			return;
 		}
 
+		_showTab('tests');
 		let listbox = document.getElementById('testing-listbox');
 		listbox.selectedIndex = listbox.getRowCount() - 1;
 		listbox.focus();
