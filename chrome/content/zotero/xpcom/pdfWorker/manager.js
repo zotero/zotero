@@ -26,6 +26,7 @@
 const WORKER_URL = 'chrome://zotero/content/xpcom/pdfWorker/worker.js';
 const CMAPS_URL = 'resource://zotero/reader/pdf/web/cmaps/';
 const STANDARD_FONTS_URL = 'resource://zotero/reader/pdf/web/standard_fonts/';
+const WASM_URL = 'resource://zotero/reader/pdf/web/wasm/';
 
 class PDFWorker {
 	constructor() {
@@ -126,6 +127,20 @@ class PDFWorker {
 				}
 				catch (e) {
 					Zotero.debug('Failed to fetch standard font data:');
+					Zotero.debug(e);
+				}
+				try {
+					if (message.action === 'FetchWasm') {
+						let response = await Zotero.HTTP.request(
+							'GET',
+							WASM_URL + message.data,
+							{ responseType: 'arraybuffer' }
+						);
+						respData = new Uint8Array(response.response);
+					}
+				}
+				catch (e) {
+					Zotero.debug('Failed to fetch wasm data:');
 					Zotero.debug(e);
 				}
 				try {
