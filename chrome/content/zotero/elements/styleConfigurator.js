@@ -228,6 +228,11 @@
 			return this.querySelector('#display-as').value;
 		}
 
+		connectedCallback() {
+			super.connectedCallback();
+			MozXULElement.insertFTLIfNeeded("integration.ftl");
+		}
+
 		async init() {
 			let styleSelector = document.createXULElement('style-selector');
 			styleSelector.id = 'style-selector';
