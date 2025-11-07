@@ -13,6 +13,17 @@
 			padding: 0;
 			overflow: hidden;
 		}
+		.monaco-editor .empty-editor-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			padding: 0 64px;
+			color: #ffffff8c; /* dark fill-secondary */
+			font-size: 12px;
+			line-height: 1.5;
+			pointer-events: none;
+		}
 	</style>
 </head>
 <body>
@@ -23,6 +34,7 @@
 	<script>
 		/**
 		 * @param {Object} [params = {}]
+		 * @param {string} [params.emptyOverlayMessage] Optional content for the empty overlay
 		 * @return {Promise<void>}
 		 */
 		function loadMonaco(params = {}) {
@@ -63,6 +75,30 @@
 				});
 				
 				editor.getModel().setEOL(monaco.editor.EndOfLineSequence.LF);
+
+
+				// Display overlay message when editor is empty, if specified
+				if (params.emptyOverlayMessage) {
+					let overlayNode = document.createElement('div');
+					overlayNode.className = 'empty-editor-overlay';
+
+					overlayNode.innerText = params.emptyOverlayMessage;
+					let overlayWidget = {
+						getId: () => `empty-editor-overlay`,
+						getDomNode: () => overlayNode,
+						getPosition: () => null
+					};
+					editor.addOverlayWidget(overlayWidget);
+
+					function update() {
+						let overlayShown = editor.getModel().getValue() === "";
+						overlayNode.style.display = overlayShown ? '' : 'none';
+					}
+
+					overlayNode.addEventListener('click', () => editor.focus());
+					editor.onDidChangeModelContent(update)
+					update();
+				}
 
 				window.onresize = function () {
 					editor.layout();

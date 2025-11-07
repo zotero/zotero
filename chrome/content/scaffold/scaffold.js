@@ -40,6 +40,12 @@ ChromeUtils.defineLazyGetter(lazy, 'shellPathPromise', () => {
 		.then(s => s.trimEnd());
 });
 
+// Text to display in monaco editors when they are empty
+const CODE_TAB_INFO = `1. Click the "+" toolbar button above to choose a template for the translator.
+2. Use Run detect* and Run do* buttons in the toolbar to run your translator on the URL loaded in the Browser tab.
+3. Use Help → List All Item Types and Help → List All Fields for Item Type for information on the item types and fields your translator can return.`;
+const TESTS_TAB_INFO = ` After the translator is implemented in the Code tab, create tests from the Browser (web translator) and Test Input (import/search translators) tabs.`;
+
 var Scaffold = new function () {
 	var _browser;
 	var _translatorsLoadedPromise;
@@ -52,6 +58,8 @@ var Scaffold = new function () {
 	var _prefsObserverID;
 	
 	var _editors = {};
+
+	var _browserProgressListener = null;
 
 	var _propertyMap = {
 		'textbox-translatorID': 'translatorID',
@@ -84,14 +92,23 @@ var Scaffold = new function () {
 		window.messageManager.loadFrameScript('chrome://scaffold/content/content.js', true);
 		
 		let browserUrl = document.getElementById("browser-url");
-		browserUrl.addEventListener('keydown', function (e) {
+		browserUrl.addEventListener('keydown', (e) => {
 			if (e.key == 'Enter') {
-				Zotero.debug('Scaffold: Loading URL in browser: ' + browserUrl.value);
-				_browser.fixupAndLoadURIString(browserUrl.value, {
-					triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
-				});
+				this.loadURLInBrowser();
 			}
 		});
+		// Progress listener to record when the webpage is loaded
+		_browserProgressListener = {
+			QueryInterface: ChromeUtils.generateQI(["nsIWebProgressListener", "nsISupportsWeakReference"]),
+			onStateChange(webProgress, request, stateFlags, status) {
+				let done = stateFlags & Ci.nsIWebProgressListener.STATE_STOP;
+				// Hide the spinner when done
+				if (done) {
+					_setBrowserLoadingIndicator(false);
+				}
+			},
+		};
+		_browser.addProgressListener(_browserProgressListener, Ci.nsIWebProgress.NOTIFY_STATE_ALL);
 
 		document.getElementById('tabpanels').addEventListener('select', event => this.handleTabSelect(event));
 		document.getElementById('tabs').addEventListener('mousedown', (event) => {
@@ -143,7 +160,7 @@ var Scaffold = new function () {
 				_editors.importGlobal = monaco;
 				_editors.import = editor;
 			}),
-			codeWin.loadMonaco({ language: 'javascript' }).then(({ monaco, editor }) => {
+			codeWin.loadMonaco({ language: 'javascript', emptyOverlayMessage: CODE_TAB_INFO }).then(({ monaco, editor }) => {
 				_editors.codeGlobal = monaco;
 				_editors.code = editor;
 			}),
@@ -151,6 +168,7 @@ var Scaffold = new function () {
 				language: 'json',
 				// Tests might contain \u2028/\u2029 - don't pop up a warning
 				unusualLineTerminators: 'off',
+				emptyOverlayMessage: TESTS_TAB_INFO
 			}).then(({ monaco, editor }) => {
 				_editors.testsGlobal = monaco;
 				_editors.tests = editor;
@@ -532,13 +550,15 @@ var Scaffold = new function () {
 					endLineNumber: 1,
 					endColumn: 1
 				};
-				lenses.push({
-					range: firstChar,
-					command: {
-						id: runCommand,
-						title: 'Run All'
-					}
-				});
+				if (testsWithUpdates.size) {
+					lenses.push({
+						range: firstChar,
+						command: {
+							id: runCommand,
+							title: 'Run All'
+						}
+					});
+				}
 				
 				if (testsWithUpdates.size) {
 					lenses.push({
@@ -680,6 +700,8 @@ var Scaffold = new function () {
 		document.getElementById('checkbox-export').checked = false;
 		document.getElementById('checkbox-web').checked = true;
 		document.getElementById('checkbox-search').checked = false;
+		// Use a sample regex as a default target
+		document.getElementById("textbox-target").value = "^https?://www\\.example\\.org/";
 
 		_editors.code.setValue('');
 		_editors.tests.setValue('');
@@ -1070,6 +1092,35 @@ var Scaffold = new function () {
 		}
 	};
 
+	/**
+	 * Load the typed URL in the browser tab.
+	 */
+	this.loadURLInBrowser = async function () {
+		let url = document.getElementById("browser-url").value;
+		Zotero.debug('Scaffold: Loading URL in browser: ' + url);
+
+		_setBrowserLoadingIndicator(true);
+
+		_browser.fixupAndLoadURIString(url, {
+			triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
+		});
+	};
+
+	/**
+	 * Check if there is a webpage loaded in the browser tab when translator type is 'web'.
+	 * If not, alert the user and navigate to the browser tab.
+	 * @returns {boolean} True if a webpage is loaded for web translators, false otherwise.
+	 */
+	this.ensureWebpageLoadedIfNeeded = function () {
+		if (_browser.currentURI.spec == 'about:blank' && document.getElementById('checkbox-web').checked) {
+			Services.prompt.alert(null, "Webpage Not Loaded", "You need to load a webpage in the Browser tab first.");
+			_showTab('browser');
+			document.getElementById('browser-url').focus();
+			return false;
+		}
+		return true;
+	};
+
 	/*
 	 * run translator
 	 */
@@ -1100,6 +1151,9 @@ var Scaffold = new function () {
 				functionToRun += 'Search';
 			}
 			else {
+				// If no function can be properly run, alert the user
+				// if the translator type is web and no webpage is loaded
+				if (!this.ensureWebpageLoadedIfNeeded()) return;
 				_logOutput('No appropriate detect/do function to run');
 				return;
 			}
@@ -1236,6 +1290,7 @@ var Scaffold = new function () {
 	 * Test target regular expression against document URL and log the result
 	 */
 	this.logTargetRegex = async function () {
+		if (!this.ensureWebpageLoadedIfNeeded()) return;
 		_logOutput(_testTargetRegex(_browser));
 	};
 	
@@ -1625,6 +1680,10 @@ var Scaffold = new function () {
 	 */
 	this.saveTestFromCurrent = async function (type) {
 		_logOutput(`Creating ${type} test...`);
+
+		if (type === 'web') {
+			if (!this.ensureWebpageLoadedIfNeeded()) return;
+		}
 
 		try {
 			let test = await this.constructTestFromCurrent(type);
@@ -2027,6 +2086,21 @@ var Scaffold = new function () {
 		document.getElementById('output').value = '';
 		let itemPreviews = document.querySelector('#item-previews');
 		itemPreviews.clearPreviews();
+	}
+
+	/**
+	 * Toggle the indicator of browser loading by hiding the load button
+	 * and displaying the spinner, or vice versa.
+	 */
+	function _setBrowserLoadingIndicator(isLoading) {
+		if (isLoading) {
+			document.getElementById("load-url-button").hidden = true;
+			document.getElementById("browser-loading").setAttribute("status", "animate");
+		}
+		else {
+			document.getElementById("load-url-button").hidden = false;
+			document.getElementById("browser-loading").removeAttribute("status");
+		}
 	}
 
 	/*

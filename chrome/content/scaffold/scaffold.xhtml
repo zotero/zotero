@@ -513,7 +513,9 @@
 							<hbox id="browser-url-container" align="center">
 								<label control="browser-url" value="&scaffold.tabUrl.label;"/>
 								<html:input id="browser-url" style="flex: 1;"/>
-								<button observes="validate-tests" label="&scaffold.testing.create.web;" tooltiptext="Create a new test from the current page" oncommand="Scaffold.saveTestFromCurrent('web')"/>
+								<button id="load-url-button" label="→" tooltiptext="Load URL" oncommand="Scaffold.loadURLInBrowser()"/>
+								<image id="browser-loading" class="zotero-spinner-16" />
+								<button id="create-test-button" observes="validate-tests" label="&scaffold.testing.create.web;" tooltiptext="Create a new test from the current page" oncommand="Scaffold.saveTestFromCurrent('web')"/>
 							</hbox>
 							
 							<browser
