@@ -42,7 +42,7 @@ ChromeUtils.defineLazyGetter(lazy, 'shellPathPromise', () => {
 
 // Text to display in monaco editors when they are empty
 const CODE_TAB_INFO = `1. Use Tools > Insert Template menu option or the "+" icon above to insert a template for the translator.
-2. Use Run detect* and Run do* buttons in the toolbar to run your translator on the URL loaded in the browser tab.
+2. Use Run detect* and Run do* buttons in the toolbar to run your translator on the URL loaded in the Browser tab.
 3. For reference, use Help > List All Item Types to list all available Zotero item types that your translator can create.
 4. For reference, use Help > List all Fields for Item Type to log the fields of the Zotero item(s) your translator is creating.`;
 const TESTS_TAB_INFO = ` After the translator is implemented in the Code tab, create tests from the Browser (web translator) and Test Input (import/search translators) tabs.`;
