@@ -23,8 +23,10 @@ attachment-box {
 		@include meta-table;
 
 		#index-status {
+			flex: 1 1 auto;
 			padding-inline: var(--editable-text-padding-inline);
 			margin-top: 2px;
+			
 			@include comfortable {
 				margin-top: 3px;
 			}
@@ -34,9 +36,9 @@ attachment-box {
 		{
 			height: 22px;
 			width: 22px;
-			padding: 1px;
+			padding: 4px;
 			margin-left: 4px;
-			@include svgicon-menu("sync", "universal", "20");
+			@include svgicon-menu("sync", "universal", "16");
 			&:not([disabled='true']) {
 				color: var(--fill-secondary);
 			}
