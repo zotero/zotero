@@ -474,10 +474,6 @@
 				}
 			}
 			finally {
-				// Assume the render is always true to avoid unexpected test failures
-				if (Zotero.TEST) {
-					success = true;
-				}
 				this.setPreviewStatus(success ? "success" : "fail");
 				this._isRendering = false;
 

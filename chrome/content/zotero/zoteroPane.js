@@ -6392,7 +6392,7 @@ var ZoteroPane = new function () {
 			//if(asPaneMessage) {
 			//	ZoteroPane_Local.setItemsPaneMessage(errMsg, true);
 			//} else {
-			if (Zotero.TEST) {
+			if (Zotero.test) {
 				// During testing, throw an error so the actual error message is logged
 				throw new Error(`Startup error: ${errMsg}`);
 			}
