@@ -771,7 +771,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// When an image is pasted into a note, an invisible attachment child
 			// of that note is created. Filter out such items, since they
 			// do not appear in the itemTree and should not cause a refresh.
-			items = items.filter(item => !(item.isEmbeddedImageAttachment()));
+			items = items.filter(item => !item.isEmbeddedImageAttachment());
 			// If there are no other items, just stop.
 			if (items.length == 0) return;
 
