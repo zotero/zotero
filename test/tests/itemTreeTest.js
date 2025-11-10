@@ -802,6 +802,33 @@ describe("Zotero.ItemTree", function () {
 			assert.isFalse(zp.itemsView.getRowIndexByID(attachment.id));
 		});
 
+		it("should not clear quicksearch when embedded attachment is added to a note", async function () {
+			// Create item with a child note
+			let item = await createDataObject('item', { title: "item" });
+			let note = await createDataObject('item', { itemType: 'note', parentItemID: item.id });
+
+			// Run quicksearch
+			let quickSearch = win.document.getElementById('zotero-tb-search-textbox');
+			quickSearch.value = "item";
+			await zp.search();
+
+			// Select the child note
+			await zp.itemsView.selectItem(note.id);
+
+			// Paste an image into the note
+			let notifySpy = sinon.spy(zp.itemsView, 'notify');
+			await createEmbeddedImage(note);
+
+			// Notify should be called twice: 'modify' for note and 'add' for attachment
+			assert.equal(zp.itemsView.notify.callCount, 2);
+			await notifySpy.returnValues[0];
+			notifySpy.restore();
+
+			// Ensure that the note is still selected and quick search is still active
+			assert.equal(zp.itemsView.getSelectedItems(true)[0], note.id);
+			assert.equal(quickSearch.value, "item");
+		});
+
 		describe("Change parent item", function () {
 			let item1, item2, attachment1, highlight1;
 			
