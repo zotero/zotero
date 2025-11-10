@@ -25,6 +25,16 @@
 
 "use strict";
 
+
+const clamp = (number, min, max) => Math.max(min, Math.min(number, max));
+
+const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
+	const anchorRect = anchorEl.getBoundingClientRect();
+	const popoverRect = popoverEl.getBoundingClientRect();
+
+	return clamp(anchorRect.left - popoverRect.left, padding, popoverRect.width - padding);
+};
+
 {
 	class GuidancePanel extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
@@ -135,6 +145,10 @@
 				
 				this.panel.openPopup(forEl, position || "after_start",
 					x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0);
+
+				const anchorOffset = getAnchorOffset(forEl, this.panel);
+				this.panel.style.setProperty('--anchor-x', `${anchorOffset}px`);
+
 				if (pref) {
 					Zotero.Prefs.set(pref, true);
 				}

@@ -1,4 +1,23 @@
 guidance-panel {
+	panel[side="top"] {
+		&::part(content) {
+			margin-top: 9px;
+		}
+		
+		&::before {
+			-moz-context-properties: fill, stroke;
+			background: url("chrome://global/skin/arrow/panelarrow-vertical.svg") no-repeat left 9px;
+			content: "";
+			fill: var(--color-toolbar);
+			height: 20px;
+			position: absolute;
+			stroke: var(--color-border);
+			top: -9px;
+			width: 20px;
+			left: var(--anchor-x);
+		}
+	}
+		
 	.panel-container {
 		width: 400px;
 		display: flex;
@@ -9,7 +28,6 @@ guidance-panel {
 			padding: 8px;
 		}
 	}
-	
 	#nav-buttons {
 		-moz-box-align: end;
 		-moz-box-pack: end;
