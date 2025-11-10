@@ -375,14 +375,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			await this.runListeners('refresh');
 			
-			setTimeout(function () {
-				resolve();
-			});
+			await Zotero.Promise.delay();
+			resolve();
 		}
 		catch (e) {
-			setTimeout(function () {
-				reject(e);
-			});
+			await Zotero.Promise.delay();
+			reject(e);
 			throw e;
 		}
 	})
