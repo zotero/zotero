@@ -223,10 +223,11 @@ describe("Item pane", function () {
 			assert.exists(restoreButton);
 			assert.exists(win.document.querySelector('#zotero-item-message .custom-head .item-delete-button'));
 
+			let refreshTrashPromise = waitForNotifierEvent('refresh', 'trash');
 			await restoreButton.click();
 			let ids = await waitForItemEvent('modify');
+			await refreshTrashPromise;
 			assert.equal(ids.length, 2);
-			await waitForFrame();
 			
 			assert.notExists(win.document.querySelector('#zotero-item-message .custom-head .item-restore-button'));
 			
