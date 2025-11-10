@@ -6604,6 +6604,17 @@ var ZoteroPane = new function () {
 		if (Zotero.Prefs.get('autoRenameFiles.bannerShown')) {
 			return;
 		}
+		if (Zotero.Prefs.prefHasUserValue('autoRenameFiles.bannerDisplayTime')) {
+			const week = 7 * 24 * 60 * 60 * 1000;
+			if (Date.now() > parseInt(Zotero.Prefs.get('autoRenameFiles.bannerDisplayTime')) + week) {
+				Zotero.Prefs.clear('autoRenameFiles.bannerDisplayTime');
+				Zotero.Prefs.set('autoRenameFiles.bannerShown', true);
+				return;
+			}
+		}
+		else {
+			Zotero.Prefs.set('autoRenameFiles.bannerDisplayTime', Date.now().toString());
+		}
 		
 		document.getElementById('file-renaming-documentation-link').onclick = () => {
 			Zotero.launchURL("https://www.zotero.org/support/file_renaming");
@@ -6624,6 +6635,7 @@ var ZoteroPane = new function () {
 
 	this.hideFileRenamingBanner = function () {
 		document.getElementById('file-renaming-banner-container').setAttribute('collapsed', true);
+		Zotero.Prefs.clear('autoRenameFiles.bannerDisplayTime');
 		Zotero.Prefs.set('autoRenameFiles.bannerShown', true);
 	};
 
