@@ -6392,7 +6392,11 @@ var ZoteroPane = new function () {
 			//if(asPaneMessage) {
 			//	ZoteroPane_Local.setItemsPaneMessage(errMsg, true);
 			//} else {
-				Zotero.alert(null, title, errMsg);
+			if (Zotero.test) {
+				// During testing, throw an error so the actual error message is logged
+				throw new Error(`Startup error: ${errMsg}`);
+			}
+			Zotero.alert(null, title, errMsg);
 			//}
 		}
 	}
