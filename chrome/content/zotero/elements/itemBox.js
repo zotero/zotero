@@ -589,25 +589,18 @@
 				rowData.appendChild(valueElement);
 
 				// Called when row's context menu should show up
-				let onContextMenu = (event) => {
-					let menupopup = this._id("zotero-field-menu");
-					Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target.closest('editable-text')?._input);
-					this.handlePopupOpening(event, menupopup, fieldName);
-				};
+				let onContextMenu = this.createContextMenuHandler(fieldName);
 
 				if (openLinkButton) {
 					rowData.appendChild(openLinkButton);
 				}
 				if (addLinkContextMenu) {
-					onContextMenu = (event) => {
+					onContextMenu = this.createContextMenuHandler(fieldName, () => {
 						this._linkMenu.dataset.link = link;
 						this._linkMenu.dataset.val = val;
 						document.popupNode = rowLabel.parentElement;
-						
-						let menupopup = this._id('zotero-link-menu');
-						Zotero.Utilities.Internal.updateEditContextMenu(menupopup, event.target.closest('editable-text')?._input);
-						this.handlePopupOpening(event, menupopup, fieldName);
-					};
+						return this._linkMenu;
+					});
 				}
 				
 				// Add options button for title fields
@@ -618,8 +611,7 @@
 					optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover";
 					optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
 					optionsButton.id = `itembox-field-${fieldName}-options`;
-					// eslint-disable-next-line no-loop-func
-					onContextMenu = (e) => {
+					onContextMenu = this.createContextMenuHandler(fieldName, () => {
 						let menupopup = ZoteroPane.buildFieldTransformMenu({
 							target: valueElement,
 							onTransform: (newValue) => {
@@ -630,8 +622,8 @@
 						menupopup.addEventListener('popuphidden', () => {
 							menupopup.remove();
 						});
-						this.handlePopupOpening(e, menupopup, fieldName);
-					};
+						return menupopup;
+					});
 					// Same popup triggered for right-click and options button click
 					optionsButton.addEventListener("click", onContextMenu);
 					rowData.appendChild(optionsButton);
@@ -880,6 +872,8 @@
 
 				dataElem.appendChild(valueElem);
 
+				dataElem.oncontextmenu = this.createContextMenuHandler(row.rowID);
+
 				rowElem.append(labelElem, dataElem);
 
 				this.insertCustomRow(rowElem, position);
@@ -1051,6 +1045,24 @@
 			row.appendChild(labelWrapper);
 			row.appendChild(rowData);
 			this._infoTable.appendChild(row);
+		}
+		
+		createContextMenuHandler(fieldName, getMenuPopup = null) {
+			return (event) => {
+				let menupopup = null;
+				if (!getMenuPopup) {
+					menupopup = this._id("zotero-field-menu");
+				}
+				else {
+					menupopup = getMenuPopup(event);
+				}
+				let targetInput = event.target.closest('editable-text')?._input;
+				if (!targetInput) {
+					targetInput = event.target.closest('input, textarea');
+				}
+				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, targetInput);
+				this.handlePopupOpening(event, menupopup, fieldName);
+			};
 		}
 		
 		updateItemTypeMenuSelection() {
@@ -1231,19 +1243,19 @@
 			optionsButton.className = "zotero-clicky zotero-clicky-options show-on-hover no-display";
 			optionsButton.setAttribute('id', `creator-${rowIndex}-options`);
 			optionsButton.setAttribute('data-l10n-id', "itembox-button-options");
-			let triggerPopup = (e) => {
-				this._popupNode = firstlast;
-
-				let menupopup = this._id('zotero-creator-transform-menu');
-				Zotero.Utilities.Internal.updateEditContextMenu(menupopup, e.target.closest('input'));
-				
-				this.handlePopupOpening(e, menupopup, fieldName);
-			};
 			rowData.appendChild(optionsButton);
 
 			if (this.editable) {
-				optionsButton.addEventListener("command", triggerPopup);
-				rowData.oncontextmenu = triggerPopup;
+				let onContextMenu = this.createContextMenuHandler(fieldName, () => {
+					this._popupNode = firstlast;
+					let menupopup = this._id('zotero-creator-transform-menu');
+					return menupopup;
+				});
+				optionsButton.addEventListener("command", onContextMenu);
+				rowData.oncontextmenu = onContextMenu;
+			}
+			else {
+				rowData.oncontextmenu = this.createContextMenuHandler(fieldName);
 			}
 			
 			this._creatorCount++;
@@ -1393,6 +1405,8 @@
 			ymd.className = "show-on-hover";
 			rowData.appendChild(elem);
 			rowData.appendChild(ymd);
+			
+			rowData.oncontextmenu = this.createContextMenuHandler(field);
 			
 			this.addDynamicRow(rowLabel, rowData);
 		}
