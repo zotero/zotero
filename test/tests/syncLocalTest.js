@@ -505,6 +505,24 @@ describe("Zotero.Sync.Data.Local", function() {
 				(c1.parentID == c2.id && !c2.parentID) || (c2.parentID == c1.id && !c1.parentID)
 			);
 		});
+		
+		it("should load items if library is unloaded", async function () {
+			var group = await createGroup();
+			var libraryID = group.libraryID;
+			var item = await createDataObject('item', { libraryID });
+			
+			// Simulate an unloaded library
+			// TODO: Make a way to actually unload a library's data, and use it for inactive libraries!
+			Zotero.Items.unload(item.id);
+			assert.isTrue(group._dataLoaded.item);
+			assert.isObject(group._dataLoadedDeferreds.item);
+			group._dataLoaded.item = false;
+			delete group._dataLoadedDeferreds.item;
+			await Zotero.Items._loadIDsAndKeys();
+			
+			var ids = await Zotero.Sync.Data.Local.getUnsynced('item', libraryID);
+			assert.include(ids, item.id);
+		});
 	});
 	
 	

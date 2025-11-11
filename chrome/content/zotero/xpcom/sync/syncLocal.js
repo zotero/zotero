@@ -580,6 +580,9 @@ Zotero.Sync.Data.Local = {
 			}
 		}
 		else if (objectType == 'item') {
+			let library = Zotero.Libraries.get(libraryID);
+			yield library.waitForDataLoad('item');
+			
 			ids = Zotero.Items.sortByParent(ids.map(id => Zotero.Items.get(id))).map(o => o.id);
 		}
 		
