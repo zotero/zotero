@@ -125,6 +125,7 @@
 		<command id="cmd_zotero_newChildURLAttachment" oncommand="ZoteroPane.addAttachmentFromURI(true, ZoteroPane.getSelectedItems()[0].id)"/>
 		<command id="cmd_zotero_newStandaloneNote" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>
 		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
+        <command id="cmd_zotero_selectAll" oncommand="ZoteroPane_Local.selectAll();"/>
 		
 		<command id="cmd_zotero_showTabsMenu" oncommand="Zotero_Tabs.showTabsMenu()"/>
 	</commandset>
@@ -404,7 +405,7 @@
 							<menuseparator/>
 							<menuitem id="menu_selectAll"
 									key="key_selectAll"
-									command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
+									command="cmd_zotero_selectAll" data-l10n-id="text-action-select-all"/>
 							<menuseparator class="menu-type-reader pdf"/>
 							<menuitem
 									id="edit-menuitem-rotate-left"
