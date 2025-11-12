@@ -127,6 +127,12 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		// This is the event we want to work with, since we do not expect events with .sourceEvent
 		// and <command> has no menupopup ancestor.
 		if (originalTarget.localName === "command" && event.sourceEvent?.type === "command") {
+			// Don't touch commands handled internally, like cmd_undo and other Edit menu commands,
+			// because delaying the event would break them
+			if (originalTarget.getAttribute("internal") === "true") {
+				return;
+			}
+			
 			event = event.sourceEvent;
 			originalTarget = event.target;
 		}
