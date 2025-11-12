@@ -199,9 +199,7 @@ describe("Zotero.ItemTree", function () {
 			let highlightTwo = await createAnnotation('highlight', attachmentTwo, { comment: "Highlight te" });
 
 			// "te" search - all rows are visible
-			quicksearch.value = "te";
-			quicksearch.doCommand();
-			await itemsView._refreshPromise;
+			await zp.itemsView.setFilter('search', "te");
 
 			assert.isNumber(itemsView.getRowIndexByID(note.id));
 			assert.isNumber(itemsView.getRowIndexByID(attachmentOne.id));
@@ -211,9 +209,7 @@ describe("Zotero.ItemTree", function () {
 			assert.isNumber(itemsView.getRowIndexByID(highlightTwo.id));
 
 			// "test" search - both attachments are shown, only annotations with "testing" remain, note row is gone
-			quicksearch.value = "test";
-			quicksearch.doCommand();
-			await itemsView._refreshPromise;
+			await zp.itemsView.setFilter('search', "test");
 
 			assert.isFalse(itemsView.getRowIndexByID(note.id));
 			assert.isNumber(itemsView.getRowIndexByID(attachmentOne.id));
@@ -222,9 +218,7 @@ describe("Zotero.ItemTree", function () {
 			assert.isNumber(itemsView.getRowIndexByID(attachmentTwo.id));
 			assert.isFalse(itemsView.getRowIndexByID(highlightTwo.id));
 
-			quicksearch.value = "testing";
-			quicksearch.doCommand();
-			await itemsView._refreshPromise;
+			await zp.itemsView.setFilter('search', "testing");
 
 			// "testing" search - only one attachments with "testing" annotation appears
 			assert.isFalse(itemsView.getRowIndexByID(note.id));
