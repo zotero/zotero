@@ -240,6 +240,7 @@ class ReaderInstance {
 			autoDisableNoteTool: Zotero.Prefs.get('reader.autoDisableTool.note'),
 			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
+			sidebarView: Zotero.Prefs.get('reader.lastSidebarTab'),
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
 				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
@@ -372,6 +373,9 @@ class ReaderInstance {
 				if (this._onChangeSidebarWidthCallback) {
 					this._onChangeSidebarWidthCallback(width);
 				}
+			},
+			onChangeSidebarView: (view) => {
+				Zotero.Prefs.set('reader.lastSidebarTab', view);
 			},
 			onFocusContextPane: () => {
 				if (this instanceof ReaderWindow || !this._window.ZoteroContextPane.focus()) {
