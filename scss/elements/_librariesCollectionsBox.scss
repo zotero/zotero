@@ -41,7 +41,8 @@ libraries-collections-box {
 					width: 16px;
 				}
 			}
-
+			
+			@include contains-toolbarbutton-aligned-to-row;
 			@include contains-toolbarbutton-show-on-hover;
 		}
 	}

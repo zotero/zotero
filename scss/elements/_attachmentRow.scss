@@ -9,9 +9,8 @@ attachment-row {
 
 	& > .head {
 		display: flex;
-		align-items: center;
 		gap: 4px;
-		align-items: baseline;
+		align-items: flex-start;
 		
 		.clicky-item {
 			@include clicky-item;
@@ -45,5 +44,6 @@ attachment-row {
 		}
 	}
 	
+	@include contains-toolbarbutton-aligned-to-row;
 	@include contains-toolbarbutton-show-on-hover;
 }
