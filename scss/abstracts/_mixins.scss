@@ -174,7 +174,6 @@
 			width: 0;
 			min-width: 100%;
 			display: flex;
-			align-items: baseline;
 
 			toolbarbutton {
 				margin-inline-start: 4px;
@@ -218,11 +217,13 @@
 			// needed to have the outline appear on all platforms
 			appearance: none;
 			-moz-appearance: none;
-			// Make all buttons tigher to not stretch the rows
+			// Make all buttons tighter to not stretch the rows
 			height: auto;
 			width: auto;
 			padding: 1px;
 			border-radius: 2px;
+			// Prevent the button from vertically stretching on multi-line fields (e.g., title)
+			align-self: baseline;
 		}
 	}
 }
