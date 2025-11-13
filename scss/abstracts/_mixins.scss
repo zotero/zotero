@@ -115,7 +115,7 @@
 
 @mixin clicky-item {
 	display: flex;
-	align-items: baseline;
+	align-items: flex-start;
 	gap: 4px;
 	padding-inline-start: 4px;
 	overflow: hidden;
@@ -130,7 +130,8 @@
 	}
 
 	.icon {
-		line-height: calc(1.3333333333 * var(--zotero-font-size));
+		height: calc(1.3333333333*var(--zotero-font-size));
+		padding-top: 0.25em; 
 	}
 
 	.label {
@@ -210,21 +211,8 @@
 		.key {
 			width: 100%;
 		}
-	
-		toolbarbutton {
-			@include focus-ring;
-	
-			// needed to have the outline appear on all platforms
-			appearance: none;
-			-moz-appearance: none;
-			// Make all buttons tighter to not stretch the rows
-			height: auto;
-			width: auto;
-			padding: 1px;
-			border-radius: 2px;
-			// Prevent the button from vertically stretching on multi-line fields (e.g., title)
-			align-self: baseline;
-		}
+		
+		@include contains-toolbarbutton-aligned-to-row;
 	}
 }
 
@@ -390,6 +378,24 @@
 	// richlistbox have a min-height: 0 set
 	vbox, hbox, box, groupbox, dialog {
 		min-height: 0;
+	}
+}
+
+@mixin contains-toolbarbutton-aligned-to-row {
+	toolbarbutton {
+		@include focus-ring;
+
+		// needed to have the outline appear on all platforms
+		appearance: none;
+		-moz-appearance: none;
+		// Make all buttons tighter to not stretch the rows
+		height: auto;
+		width: auto;
+		border-radius: 2px;
+		// Prevent the button from vertically stretching on multi-line fields (e.g., title)
+		align-self: baseline;
+		// Align the button to the center of the first line of text
+		padding: 0.25em 1px 1px;
 	}
 }
 
