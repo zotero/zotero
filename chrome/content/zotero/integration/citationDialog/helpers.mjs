@@ -336,4 +336,17 @@ export class CitationDialogHelpers {
 			shortLocatorNoPunctuation: Zotero.Cite.getLocatorString(loc, "short").toLowerCase().replace(/[.,]/g, "")
 		};
 	}
+
+	setActiveSegmentedControl(segmentedControlOption) {
+		let segmentedControl = segmentedControlOption.closest(".segmented-switch");
+		let currentActive = segmentedControl.querySelector(".option.active");
+		if (segmentedControlOption === currentActive) return;
+		if (currentActive) {
+			currentActive.classList.remove("active");
+			currentActive.setAttribute("aria-checked", "false");
+		}
+		if (!segmentedControlOption) return;
+		segmentedControlOption.classList.add("active");
+		segmentedControlOption.setAttribute("aria-checked", "true");
+	}
 }
