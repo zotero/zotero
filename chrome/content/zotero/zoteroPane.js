@@ -3121,6 +3121,18 @@ var ZoteroPane = new function () {
 		return true;
 	};
 	
+	this.selectAll = function () {
+		if (this.itemsView.domEl.contains(document.activeElement)) {
+			this.itemsView.selection.selectAll();
+		}
+		else {
+			const command = "cmd_selectAll";
+			let controller = document.commandDispatcher.getControllerForCommand(command);
+			if (controller && controller.isCommandEnabled(command)) {
+				controller.doCommand(command);
+			}
+		}
+	};
 	
 	this.getSelectedLibraryID = function () {
 		return this.collectionsView.getSelectedLibraryID();

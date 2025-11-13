@@ -194,6 +194,10 @@ class TreeSelection {
 		}
 		this._updateTree();
 	}
+	
+	selectAll() {
+		this.rangedSelect(0, this._tree.props.getRowCount() - 1, false, true);
+	}
 
 	/**
 	 * Performs a shift-select from current pivot to provided index. Updates focused item to index.
@@ -597,7 +601,7 @@ class VirtualizedTable extends React.Component {
 			if (this.props.multiSelect
 					&& !e.shiftKey
 					&& (Zotero.isMac ? (e.metaKey && !e.ctrlKey) : e.ctrlKey)) {
-				this.selection.rangedSelect(0, this.props.getRowCount()-1, false, true);
+				this.selection.selectAll();
 			}
 			break;
 			
