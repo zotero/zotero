@@ -1116,7 +1116,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	this.launchURL = function (url) {
 		if (!Zotero.Utilities.isHTTPURL(url)) {
 			if (Zotero.Utilities.isHTTPURL(url, true)) {
-				url = 'http://' + url;
+				if (!url.startsWith('x-apple.systempreferences:')) {
+					url = 'http://' + url;
+				}
 			}
 			// Launch non-HTTP URLs
 			else {
