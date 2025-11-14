@@ -42,7 +42,8 @@ $-icons: (
 	filter: 16,
 	note: 16,
 	x-8: 16,
-	chevron-tabs: 20
+	chevron-tabs: 20,
+	user-8: 8,
 );
 
 @each $icon, $size in $-icons {
