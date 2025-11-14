@@ -60,12 +60,6 @@
 			padding-inline-end: 4px;
 		}
 
-		&:first-child {
-			--extra-width: var(--first-column-extra-width, 0px);
-			// No padding on the first cell since it's done via twisty and indent
-			padding-inline-start: 0;
-		}
-
 		&:first-child,
 		&.primary {
 			display: flex;
@@ -522,3 +516,10 @@
 	}
 }
 
+.virtualized-tree {
+	.cell:first-child {
+		--extra-width: var(--first-column-extra-width, 0px);
+		// No padding on the first cell since it's done via twisty and indent
+		padding-inline-start: 0;
+	}
+}
