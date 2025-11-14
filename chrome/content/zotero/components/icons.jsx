@@ -53,6 +53,20 @@ let cssIconsCache = new Map();
 
 module.exports.getCSSIcon = function (key) {
 	if (!cssIconsCache.has(key)) {
+		if (key.startsWith('annotation-')) {
+			// key is annotation-{type}-{color}
+			let [annotationType, annotationColor] = key.split('-').slice(1);
+			let img = document.createElement("img");
+			img.className = "annotation-icon";
+			let type = annotationType;
+			if (type == 'image') {
+				type = 'area';
+			}
+			img.src = 'chrome://zotero/skin/16/universal/annotate-' + type + '.svg';
+			img.style.fill = annotationColor;
+			cssIconsCache.set(key, img);
+			return img;
+		}
 		let iconEl = document.createElement('span');
 		iconEl.classList.add('icon');
 		iconEl.classList.add('icon-css');
