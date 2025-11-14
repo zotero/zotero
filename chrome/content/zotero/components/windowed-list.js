@@ -63,6 +63,7 @@ module.exports = class {
 		this.scrollDirection = 0;
 		this.scrollOffset = 0;
 		this.overscanCount = 2;
+		this._invalidating = false;
 		this._lastItemCount = null;
 		this._rowOffsets = [[0, 0]];
 		
@@ -113,6 +114,8 @@ module.exports = class {
 	 * Rerender items within the scrollbox. Call sparingly
 	 */
 	invalidate() {
+		if (this._invalidating) return;
+		this._invalidating = true;
 		// Removes any items out of view and adds the ones not in view
 		let oldRenderedRows = new Set(this._renderedRows.keys());
 		this.render();
@@ -122,6 +125,7 @@ module.exports = class {
 			if (!oldRenderedRows.has(index)) continue;
 			this.rerenderItem(index);
 		}
+		this._invalidating = false;
 	}
 
 	/**
