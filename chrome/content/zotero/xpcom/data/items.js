@@ -122,7 +122,8 @@ Zotero.Items = function () {
 		if (onlyTopLevel) {
 			sql += ' LEFT JOIN itemNotes B USING (itemID) '
 			+ 'LEFT JOIN itemAttachments C ON (C.itemID=A.itemID) '
-			+ 'WHERE B.parentItemID IS NULL AND C.parentItemID IS NULL';
+			+ 'WHERE B.parentItemID IS NULL AND C.parentItemID IS NULL'
+			+ ' AND A.itemID NOT IN (SELECT itemID FROM itemAnnotations)'; // exclude annotations that are never top-level
 		}
 		else {
 			sql += " WHERE 1";
@@ -850,34 +851,288 @@ Zotero.Items = function () {
 	 *
 	 * Requires a transaction
 	 */
-	this.copyChildItems = async function (fromItem, toItem) {
+	this.copyChildItems = async function (fromItem, toItem, options = {}) {
 		Zotero.DB.requireTransaction();
 		
 		var fromGroup = fromItem.library.isGroup;
 		
 		// Annotations on files
 		if (fromItem.isFileAttachment()) {
-			let annotations = fromItem.getAnnotations();
-			for (let annotation of annotations) {
+			let fromAnnotations = fromItem.getAnnotations();
+			let toAnnotations = toItem.getAnnotations();
+			await Zotero.Items.loadDataTypes(toAnnotations);
+			
+			for (let annotation of fromAnnotations) {
 				// Don't copy embedded PDF annotations
 				if (annotation.annotationIsExternal) {
 					continue;
 				}
-				let newAnnotation = annotation.clone(toItem.libraryID);
-				newAnnotation.parentItemID = toItem.id;
+				let targetAnnotation;
+				if (options.mergeAnnotations) {
+					// Try to see if the destination item already has an annotation at the same
+					// position as where this annotation would be added
+					targetAnnotation = toAnnotations.find(a =>
+						a.annotationPosition == annotation.annotationPosition
+						&& a.annotationType == annotation.annotationType
+					);
+					if (targetAnnotation) {
+						// If the annotation exits, update its comment and add tags
+						if (annotation.annotationComment) {
+							targetAnnotation.annotationComment = annotation.annotationComment;
+						}
+						for (let { tag } of annotation.getTags()) {
+							targetAnnotation.addTag(tag);
+						}
+					}
+				}
+				// If the target annotation wasn't found above, create a copy
+				if (!targetAnnotation) {
+					targetAnnotation = annotation.clone(toItem.libraryID);
+					targetAnnotation.parentItemID = toItem.id;
+				}
+
 				// If there's no explicit author and we're copying an annotation created by another
 				// user from a group, set the author to the creating user
 				if (fromGroup
 						&& !annotation.annotationAuthorName
 						&& annotation.createdByUserID != Zotero.Users.getCurrentUserID()) {
-					newAnnotation.annotationAuthorName =
+					targetAnnotation.annotationAuthorName =
 						Zotero.Users.getName(annotation.createdByUserID);
 				}
-				await newAnnotation.save();
+				await targetAnnotation.save();
 			}
 		}
 		
 		// TODO: Other things as necessary
+	};
+
+	/**
+	 * Copy a given item and its descendants into another library, and link the
+	 * copy to the new item.
+	 * If the linked item already exists, it will not be updated but not-linked child items
+	 * will still be added (including annotations).
+	 * This is a purely additive operation that does not overwrite any data or delete anything.
+	 * When annotations are copied, we try to merge them based on their position and type to avoid
+	 * creating unnecessary duplicates. See copyChildItems above for details.
+	 * @param {Zotero.Item} item - Item to copy
+	 * @param {Number} targetLibraryID - Library where item is copied
+	 * @return {Zotero.Item} - Item in target library linked to given item
+	 */
+	this.copyToLibrary = async function (item, targetLibraryID) {
+		if (!(item.isRegularItem() || item.isNote() || item.isAttachment())) {
+			throw new Error("Can only copy regular items, notes, or attachments");
+		}
+		let targetLibrary = Zotero.Libraries.get(targetLibraryID);
+		Zotero.DB.requireTransaction();
+		
+		let copyPrefs = {
+			tags: Zotero.Prefs.get('groups.copyTags'),
+			childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
+			childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
+			childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
+			annotations: Zotero.Prefs.get('groups.copyAnnotations'),
+			relatedItems: Zotero.Prefs.get('groups.copyRelatedItems')
+		};
+
+		let copyAttachment = async (attachment, parentID) => {
+			var linkMode = attachment.attachmentLinkMode;
+
+			// Skip linked files
+			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				Zotero.debug("Cross-library item copy: Skipping linked file attachment");
+				return false;
+			}
+			// Skip imported files if we don't have pref and permissions
+			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL && !copyPrefs.childLinks) {
+				Zotero.debug("Cross-library item copy: Skipping imported file attachment");
+				return false;
+			}
+			// Skip if target library doesn't allow file editing
+			if (!(targetLibrary.editable && targetLibrary.filesEditable)) {
+				Zotero.debug("Cross-library item copy: Skipping attachment - not editable target");
+				return false;
+			}
+			// Skip child file attachments if pref not set
+			if (!copyPrefs.childFileAttachments && attachment.parentItemID) {
+				Zotero.debug("Cross-library item copy: Skipping child file attachment");
+				return false;
+			}
+
+			// Check if the attachment already has a linked item in the library
+			let copiedAttachment = await attachment.getLinkedItem(targetLibrary.libraryID, true);
+			if (copiedAttachment) {
+				// Ensure parent item is correct
+				if (copiedAttachment.parentID !== parentID) {
+					copiedAttachment.parentID = parentID;
+					await copiedAttachment.save();
+				}
+			}
+			else {
+				// If not - create a new copy
+				copiedAttachment = await Zotero.Attachments.copyAttachmentToLibrary(
+					attachment, targetLibrary.libraryID, parentID, !copyPrefs.tags
+				);
+			}
+			// If specified, copy annotations
+			if (copyPrefs.annotations) {
+				await Zotero.Items.copyChildItems(attachment, copiedAttachment, { mergeAnnotations: true });
+			}
+			return copiedAttachment;
+		};
+
+		let copyNote = async (note, parentID) => {
+			// Skip if the note already has a linked item in the library
+			// and we are not updating its content
+			let copiedNote = await note.getLinkedItem(targetLibrary.libraryID, true);
+			if (copiedNote) {
+				// Ensure parent item is correct
+				if (copiedNote.parentID !== parentID) {
+					copiedNote.parentID = parentID;
+					await copiedNote.save();
+				}
+				return copiedNote;
+			}
+			// Create new copy of note and record the link
+			let newNote = note.clone(targetLibrary.libraryID, { skipTags: !copyPrefs.tags, shouldReplaceItem: copiedNote });
+			newNote.parentID = parentID;
+			await newNote.save({ skipSelect: true });
+			if (Zotero.Libraries.get(newNote.libraryID).filesEditable) {
+				await Zotero.Notes.copyEmbeddedImages(note, newNote);
+			}
+			await newNote.addLinkedItem(note);
+			return newNote;
+		};
+
+		// Copy standalone file attachments
+		if (item.isAttachment()) {
+			let result = await copyAttachment(item, false);
+			return result;
+		}
+
+		// Copy standalone notes
+		if (item.isNote()) {
+			let result = await copyNote(item);
+			return result;
+		}
+		
+		// Check if linked item already exists
+		let copiedItem = await item.getLinkedItem(targetLibrary.libraryID, true);
+		if (!copiedItem) {
+			// Create a linked item if it does not yet exist
+			copiedItem = item.clone(targetLibrary.libraryID, { skipTags: !copyPrefs.tags });
+			await copiedItem.save({ skipSelect: true });
+			await copiedItem.addLinkedItem(item);
+		}
+		
+		// Child notes of the regular item
+		if (copyPrefs.childNotes) {
+			var noteIDs = item.getNotes();
+			var notes = Zotero.Items.get(noteIDs);
+			for (let note of notes) {
+				await copyNote(note, copiedItem.id);
+			}
+		}
+		
+		// Child attachments of the regular item
+		if (copyPrefs.childLinks || copyPrefs.childFileAttachments) {
+			var attachmentIDs = item.getAttachments();
+			var attachments = Zotero.Items.get(attachmentIDs);
+			for (let attachment of attachments) {
+				await copyAttachment(attachment, copiedItem.id);
+			}
+		}
+
+		// Copy related items if needed as well
+		if (copyPrefs.relatedItems) {
+			let relatedItemsToCopy = item.relatedItems.map(key => Zotero.Items.getByLibraryAndKey(item.libraryID, key)).filter(item => item && !item.deleted);
+			for (let relatedItem of relatedItemsToCopy) {
+				let alreadyLinked = await relatedItem.getLinkedItem(targetLibrary.libraryID, true);
+				if (alreadyLinked) {
+					continue;
+				}
+				let copiedRelatedItem = await Zotero.Items.copyToLibrary(relatedItem, targetLibrary.libraryID);
+				copiedRelatedItem.addRelatedItem(copiedItem);
+				await copiedRelatedItem.save({ skipSelect: true });
+				copiedItem.addRelatedItem(copiedRelatedItem);
+				await copiedItem.save({ skipSelect: true });
+			}
+		}
+		
+		return copiedItem;
+	};
+
+
+	/**
+	 * Make a given item with its descendants in target library have the same data
+	 * as its linked item in another library. This operation is destructive: it can change
+	 * item's metadata, remove child items, add/remove item from collections, etc.
+	 * The goal is to have this item identical to the linked item.
+	 * If the linked item does not exist, this item is trashed.
+	 * @param {Zotero.Item} item - Item to change
+	 * @param {Number} libraryID - Library with linked item whose state needs to be replicated
+	 */
+	this.pullLinkedItemData = async function (item, libraryID) {
+		Zotero.DB.requireTransaction();
+		
+		let linkedItemInLibrary = await item.getLinkedItem(libraryID, true);
+		// If an item in the collection is not linked is not linked to source
+		// library, send it to trash
+		if (!linkedItemInLibrary) {
+			item.deleted = true;
+			await item.save();
+			return;
+		}
+
+		// Update metadata
+		item = linkedItemInLibrary.clone(item.libraryID, { shouldReplaceItem: item, skipTags: !Zotero.Prefs.get('groups.copyTags') });
+		await item.save({ skipSelect: true });
+
+		// Update child items
+		let childItems = item.getChildren();
+		for (let child of childItems) {
+			if (child.isAnnotation()) continue;
+			await Zotero.Items.pullLinkedItemData(child, libraryID);
+		}
+
+
+		let shouldSave = false;
+
+		// Remove related items of this item that don't have a linked related item in source library
+		if (Zotero.Prefs.get('groups.copyRelatedItems')) {
+			let relatedItems = item.relatedItems.map(key => Zotero.Items.getByLibraryAndKey(item.libraryID, key)).filter(item => item && !item.deleted);
+			for (let relatedItem of relatedItems) {
+				let relatedItemInTarget = await relatedItem.getLinkedItem(libraryID, true);
+				if (!relatedItemInTarget || !linkedItemInLibrary.relatedItems.includes(relatedItemInTarget.key)) {
+					item.removeRelatedItem(relatedItem);
+					relatedItem.removeRelatedItem(item);
+					await relatedItem.save({ skipSelect: true });
+					shouldSave = true;
+				}
+			}
+		}
+
+		// Check all collections of the remaining items, and make sure
+		// all collections this item belong to are linked to collections
+		// that the linked item in source library belongs to
+		for (let col of Zotero.Collections.get(item.getCollections())) {
+			let colInSource = await col.getLinkedCollection(libraryID, true);
+			if (!colInSource) continue;
+			if (!linkedItemInLibrary.inCollection(colInSource.id)) {
+				item.removeFromCollection(col.id);
+				shouldSave = true;
+			}
+		}
+		for (let col of Zotero.Collections.get(linkedItemInLibrary.getCollections())) {
+			let colInLibrary = await col.getLinkedCollection(item.libraryID, true);
+			if (!colInLibrary) continue;
+			if (!item.inCollection(colInLibrary.id)) {
+				item.addToCollection(colInLibrary.id);
+				shouldSave = true;
+			}
+		}
+		if (shouldSave) {
+			await item.save();
+		}
 	};
 	
 	
