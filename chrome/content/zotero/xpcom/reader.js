@@ -241,6 +241,7 @@ class ReaderInstance {
 			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
 			sidebarView: Zotero.Prefs.get('reader.lastSidebarTab'),
+			readAloudVoices: this._getReadAloudVoices(),
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
 				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
@@ -593,6 +594,12 @@ class ReaderInstance {
 			},
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
+			},
+			onSetReadAloudVoice: (lang, voice, speed) => {
+				this._setReadAloudVoice(lang, voice, speed);
+			},
+			onSetReadAloudStatus: (status) => {
+				this._setReadAloudStatus(status);
 			}
 		}, this._iframeWindow, { cloneFunctions: true }));
 
@@ -1415,6 +1422,26 @@ class ReaderInstance {
 			return null;
 		}
 	}
+	
+	_getReadAloudVoices() {
+		try {
+			return JSON.parse(Zotero.Prefs.get('reader.readAloudVoices'));
+		}
+		catch {
+			return {};
+		}
+	}
+	
+	_setReadAloudVoice(lang, voice, speed) {
+		Zotero.Prefs.set('reader.readAloudVoices', JSON.stringify({
+			...this._getReadAloudVoices(),
+			[lang]: { voice, speed }
+		}));
+	}
+	
+	_setReadAloudStatus(_status) {
+		// Do nothing in the base class -- instance types override this
+	}
 }
 
 class ReaderTab extends ReaderInstance {
@@ -1551,6 +1578,26 @@ class ReaderTab extends ReaderInstance {
 			editorInstance.focus();
 			editorInstance.insertAnnotations(annotations);
 		}
+	}
+
+	_setReadAloudStatus(status) {
+		if (status.active && !status.paused) {
+			// Wake up the docShell even if this tab is in the background,
+			// so event-loop tasks run immediately. Without this, playing
+			// sometimes doesn't take effect immediately.
+			this._iframe.docShellIsActive = true;
+
+			// If this tab was unpaused, pause all others
+			for (let reader of Zotero.Reader._readers) {
+				if (reader === this || !['epub', 'snapshot'].includes(reader._type)) continue;
+				reader.toggleReadAloudPaused(true);
+			}
+		}
+		this._window.Zotero_Tabs.setAudioStatus(this.tabID, status);
+	}
+	
+	toggleReadAloudPaused(paused = undefined) {
+		this._internalReader.toggleReadAloudPaused(paused);
 	}
 }
 
@@ -2168,7 +2215,7 @@ class Reader {
 			}
 			else if (event === 'select') {
 				for (let reader of this._readers) {
-					if (reader instanceof ReaderTab) {
+					if (reader instanceof ReaderTab && reader._window.Zotero_Tabs.canUnload(reader.tabID)) {
 						reader._iframe.docShellIsActive = false;
 					}
 				}
