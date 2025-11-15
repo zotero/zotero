@@ -6135,6 +6135,65 @@ var ZoteroPane = new function () {
 		}
 	};
 
+	this.convertAttachmentEmbeddedNotesToChildNotes = async function () {
+		if (!this.canEdit() || !this.canEditFiles()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		
+		var items = this.getSelectedItems();
+		var attachments = new Set();
+		for (let item of items) {
+			// Add all child link attachments of regular items
+			if (item.isRegularItem()) {
+				for (let id of item.getAttachments()) {
+					let attachment = await Zotero.Items.getAsync(id);
+					if (attachment.parentItem?.isRegularItem() && !!attachment.getNote()) {
+						attachments.add(attachment);
+					}
+				}
+			}
+			// And all selected link attachments
+			else if (item.isAttachment() && item.parentItem?.isRegularItem() && !!item.getNote()) {
+				attachments.add(item);
+			}
+		}
+		var num = attachments.size;
+		
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		var index = ps.confirmEx(null,
+			Zotero.getString('attachment.convertEmbeddedNoteToChild.title', [num], num),
+			`${Zotero.getString('attachment.convertEmbeddedNoteToChild.explaination')}
+${Zotero.getString('attachment.convertEmbeddedNoteToChild.confirmation', [num], num)}`,
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null,
+			null,
+			null,
+			{},
+		);
+		if (index != 0) {
+			return;
+		}
+		for (let item of attachments) {
+			try {
+				let newNote = new Zotero.Item('note');
+				newNote.libraryID = item.libraryID;
+				newNote.parentID = item.parentID;
+				newNote.setNote(item.note);
+				await newNote.saveTx();
+				item.setNote("");
+				await item.saveTx();
+			}
+			catch (e) {
+				Zotero.logError(e);
+				continue;
+			}
+		}
+	};
+
 
 	/**
 	 * Attempt to find a file in the LABD matching the passed attachment
