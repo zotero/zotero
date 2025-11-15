@@ -47,37 +47,36 @@
 
 // Simple WYSIWYG editor using contenteditable
 
-(function() {
 var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
 	
 const defaultParagraphSeparatorString = 'defaultParagraphSeparator'
 const formatBlock = 'formatBlock'
-const addEventListener = (parent, type, listener) => parent.addEventListener(type, listener)
-const appendChild = (parent, child) => parent.appendChild(child)
-const createElement = tag => document.createElement(tag)
 const queryCommandState = command => document.queryCommandState(command)
 const queryCommandValue = command => document.queryCommandValue(command)
 
 const exec = (command, value = null) => document.execCommand(command, false, value)
 
-const defaultActions = {
+const availableActions = {
 	bold: {
 		icon: '<b>B</b>',
 		title: 'Bold',
 		state: () => queryCommandState('bold'),
-		result: () => exec('bold')
+		result: () => exec('bold'),
+		shortcut: "b"
 	},
 	italic: {
 		icon: '<i>I</i>',
 		title: 'Italic',
 		state: () => queryCommandState('italic'),
-		result: () => exec('italic')
+		result: () => exec('italic'),
+		shortcut: "i"
 	},
 	underline: {
 		icon: '<u>U</u>',
 		title: 'Underline',
 		state: () => queryCommandState('underline'),
-		result: () => exec('underline')
+		result: () => exec('underline'),
+		shortcut: "u"
 	},
 	strikethrough: {
 		icon: '<strike>S</strike>',
@@ -143,77 +142,82 @@ const defaultActions = {
 	}
 }
 
-const defaultClasses = {
-	actionbar: 'zotero-simpleEditor-actionbar',
-	button: 'zotero-simpleEditor-button',
-	content: 'zotero-simpleEditor-content',
-	selected: 'zotero-simpleEditor-button-selected'
-}
+let config = {
+	actions: ["bold", "italic", "underline"],
+	hideActionBar: false,
+};
 
 /**
- * @param settings
- * settings.actions {Array} - array of action names or objects
- * settings.element {HTMLElement} - element to which attach the editor
- * settings.onChange {Function} - change handler
- * settings.classes {Object} - default classes overrides
- * settings.defaultParagraphSeparator {String} - ["div"] element name for paragraph separator
+ * Initialize the editor based on configuration passed via iframe attributes
  */
-const init = settings => {
-	const actions = settings.actions
-		? (
-			settings.actions.map(action => {
-				if (typeof action === 'string') return defaultActions[action]
-				else if (defaultActions[action.name]) return { ...defaultActions[action.name], ...action }
-				return action
-			})
-		)
-		: Object.keys(defaultActions).map(action => defaultActions[action])
+const init = () => {
+	let editorElement = document.querySelector('#simple-editor');
 
-	const classes = { ...defaultClasses, ...settings.classes }
+	if (window.frameElement?.getAttribute('actions')) {
+		config.actions = window.frameElement.getAttribute('actions').split(',');
+	}
+	if (window.frameElement?.getAttribute('hide-actionbar')) {
+		config.hideActionBar = true;
+	}
 
-	const defaultParagraphSeparator = settings[defaultParagraphSeparatorString] || 'div'
+	const actions = config.actions.map(action => availableActions[action]);
 
-	const actionbar = createElement('div')
-	actionbar.className = classes.actionbar
-	appendChild(settings.element, actionbar)
+	const defaultParagraphSeparator = config[defaultParagraphSeparatorString] || 'div'
 
-	const content = settings.element.content = createElement('div')
+	const actionbar = document.createElement('div');
+	actionbar.className = "actionbar";
+	if (config.hideActionBar) {
+		actionbar.classList.add("hidden");
+	}
+	editorElement.appendChild(actionbar);
+
+	const content = editorElement.content = document.createElement('div');
 	content.contentEditable = true
-	content.className = classes.content
+	content.className = "content";
 	content.oninput = ({ target: { firstChild } }) => {
 		if (firstChild && firstChild.nodeType === 3) exec(formatBlock, `<${defaultParagraphSeparator}>`)
 		else if (content.innerHTML === '<br>') content.innerHTML = ''
-		settings.onChange && settings.onChange(content.innerHTML)
 	}
 	content.onkeydown = event => {
 		if (event.key === 'Enter' && queryCommandValue(formatBlock) === 'blockquote') {
 			setTimeout(() => exec(formatBlock, `<${defaultParagraphSeparator}>`), 0)
 		}
+		else if (event.metaKey || event.ctrlKey) {
+			let shortcutFor = Object.values(availableActions).find(action => action.shortcut === event.key);
+			if (shortcutFor) {
+				event.preventDefault();
+				shortcutFor.result();
+			}
+		}
 	}
-	appendChild(settings.element, content)
+
+	editorElement.appendChild(content);
 
 	actions.forEach(action => {
-		const button = createElement('button')
-		button.className = classes.button
+		const button = document.createElement('button');
+		button.className = "button";
 		button.innerHTML = action.icon
 		button.title = action.title
 		button.setAttribute('type', 'button')
 		button.onclick = () => action.result() && content.focus()
 
 		if (action.state) {
-			const handler = () => button.classList[action.state() ? 'add' : 'remove'](classes.selected)
-			addEventListener(content, 'keyup', handler)
-			addEventListener(content, 'mouseup', handler)
-			addEventListener(button, 'click', handler)
+			const handler = () => {
+				let isButtonStateActive = action.state();
+				button.classList.toggle("selected", isButtonStateActive);
+			};
+			content.addEventListener('keyup', handler);
+			content.addEventListener('mouseup', handler);
+			button.addEventListener('click', handler);
 		}
 
-		appendChild(actionbar, button)
-	})
+		actionbar.appendChild(button);
+	});
 
-	if (settings.styleWithCSS) exec('styleWithCSS')
+	if (config.styleWithCSS) exec('styleWithCSS')
 	exec(defaultParagraphSeparatorString, defaultParagraphSeparator)
 
-	return settings.element
+	return editorElement;
 }
 
 var RTFConverter = new function() {
@@ -545,26 +549,22 @@ var RTFConverter = new function() {
 	}
 }
 
-init({
-	element: document.querySelector('#simple-editor'),
-	actions: ['bold', 'italic', 'underline']
-});
-var editorContents = document.querySelector('.zotero-simpleEditor-content');
+init();
 
 window.editor = {
-	get element() {
-		document.querySelector('#simple-editor');
+	get content() {
+		return document.querySelector('.content');
 	},
 	
 	setContent(content, isRTF) {
 		if (isRTF) {
 			content = RTFConverter.rtfToHTML(content);
 		}
-		editorContents.innerHTML = content;
+		this.content.innerHTML = content;
 	},
 	
 	getContent(asRTF) {
-		let content = editorContents.innerHTML;
+		let content = this.content.innerHTML;
 		if (asRTF) {
 			return RTFConverter.htmlToRTF(content);
 		}
@@ -572,8 +572,40 @@ window.editor = {
 	},
 	
 	setEnabled(enabled) {
-		editorContents.setAttribute('contenteditable', !!enabled);
+		this.content.setAttribute('contenteditable', !!enabled);
+	},
+
+	getTotalHeight() {
+		return this.content.scrollHeight + document.querySelector(".actionbar").offsetHeight;
+	},
+
+	getActionStates() {
+		return config.actions.map((actionKey) => {
+			let action = availableActions[actionKey];
+			return {
+				action: actionKey,
+				active: action?.state() || false
+			};
+		});
+	},
+
+	setActionStates(actions) {
+		for (let { action, active } of actions) {
+			let actionObj = availableActions[action];
+			if (active !== actionObj.state()) {
+				actionObj.result();
+			}
+		}
+	},
+
+	focusContent() {
+		this.content.focus();
+		// Move cursor to the end of the content
+		let range = document.createRange();
+		range.selectNodeContents(this.content);
+		range.collapse(false);
+		let sel = window.getSelection();
+		sel.removeAllRanges();
+		sel.addRange(range);
 	}
 }
-
-})();
