@@ -31,8 +31,9 @@ const MIN_QUERY_LENGTH = 2;
 // as the following object: { found: [], cited: [], open: [], selected: []}.
 // Can be refreshed via SearchHandler.refresh or refreshDebounced.
 export class CitationDialogSearchHandler {
-	constructor({ isCitingNotes, io }) {
-		this.isCitingNotes = isCitingNotes;
+	constructor({ io }) {
+		this.isCitingNotes = !!io.isCitingNotes;
+		this.isAddingAnnotations = !!io.isAddingAnnotations;
 		this.io = io;
 
 		this.searchValue = "";
@@ -63,12 +64,12 @@ export class CitationDialogSearchHandler {
 		if (typeof id == "string" && (id.includes("cited") || id.includes("/"))) {
 			return this.results.cited.find(item => item.cslItemID === id);
 		}
-		// otherwise, it will be a item with an ordinary id from the database (still potentially cited)
+		// otherwise, it may be a item with an ordinary id from the database (still potentially cited)
 		for (let key of ['selected', 'open', 'found', 'cited']) {
 			let item = this.results[key].find(item => item.id === parseInt(id));
 			if (item) return item;
 		}
-		return null;
+		return Zotero.Items.get(id);
 	}
 
 	// how many selected items there are without applying the filter
@@ -92,11 +93,15 @@ export class CitationDialogSearchHandler {
 			return items.filter(i => !citedItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
 		};
 		let result = [];
+		let groupKeys = ["selected", "open", "cited"];
+		if (this.isAddingAnnotations) {
+			groupKeys = ["selectedAnnotations", "selectedItems", "open", "cited"];
+		}
 		// selected/open/cited go first
-		for (let groupKey of ["selected", "open", "cited"]) {
+		for (let groupKey of groupKeys) {
 			let groupItems = this.results[groupKey];
 			// in selected and opened items, do not display items already in the citation
-			if (groupKey == "selected" || groupKey == "open") {
+			if (["selected", "selectedAnnotations", "selectedItems", "open"].includes(groupKey)) {
 				groupItems = removeItemsIncludedInCitation(groupItems);
 			}
 			if (groupItems.length) {
@@ -146,6 +151,11 @@ export class CitationDialogSearchHandler {
 		// apply filtering to item groups
 		this.results.open = this.searchValue ? this._filterNonMatchingItems(this.openItems) : this.openItems;
 		this.results.selected = this.searchValue ? this._filterNonMatchingItems(this.selectedItems) : this.selectedItems;
+		if (this.isAddingAnnotations) {
+			// separate selected annotations into its own group which appears in a separate deck
+			this.results.selectedItems = this.results.selected.filter(item => !item.isAnnotation());
+			this.results.selectedAnnotations = this.results.selected.filter(item => item.isAnnotation());
+		}
 		// if a specific library ID is specified, only keep items from that library
 		if (this.io.filterLibraryIDs) {
 			this.results.open = this.results.open.filter(item => this.io.filterLibraryIDs.includes(item.libraryID));
@@ -191,6 +201,13 @@ export class CitationDialogSearchHandler {
 	}
 
 	cleanSearchQuery(str) {
+		let isbn = Zotero.Utilities.cleanISBN(str);
+		let doi = Zotero.Utilities.cleanDOI(str);
+		// if the string looks like an identifier, do not try to clean it further
+		// to not remove any punctuation that are legitimate parts of the identifier
+		if (isbn || doi) {
+			return str.trim();
+		}
 		// Remove brackets, some punctuation, "et al", and localized "and" from the search string.
 		// This allows one to paste an existing citation like "(Smith et al., 2020)" and
 		// still get appropriate search results.
@@ -198,20 +215,39 @@ export class CitationDialogSearchHandler {
 		str = str.replace(" " + Zotero.getString("general.and") + " ", " ");
 		let etAl = Zotero.getString("general.etAl").replace(/\./g, "");
 		str = str.replace(new RegExp(" " + etAl + "(?:.\\s*|\\s+|$)", "g"), " ");
-
-		let isbn = Zotero.Utilities.cleanISBN(str);
-		let doi = Zotero.Utilities.cleanDOI(str);
-		// if the string looks like an identifier, do not try to extract the year
-		if (!(isbn || doi)) {
-			str = this._cleanYear(str);
-		}
-		str = str.trim();
+		str = this._cleanYear(str);
 
 		// If the query is very short, treat it as empty
 		if (this.minQueryLengthEnforced && str.trim().length < MIN_QUERY_LENGTH) {
 			str = "";
 		}
 		return str;
+	}
+
+	// Return items that are either annotations or are ancestors of annotations
+	keepItemsWithAnnotations(items) {
+		return items.filter((item) => {
+			if (item.isAnnotation()) return true;
+			if (item.isFileAttachment() && item.getAnnotations().length) return true;
+			if (item.isRegularItem()) {
+				let attachments = Zotero.Items.get(item.getAttachments());
+				return attachments.some(att => att.isFileAttachment() && att.getAnnotations().length);
+			}
+			return false;
+		});
+	}
+
+	getAllAnnotations(item) {
+		if (item.isAnnotation()) return [item];
+		if (item.isFileAttachment()) return item.getAnnotations();
+		let attachmentIDs = item.getAttachments();
+		let attachments = Zotero.Items.get(attachmentIDs).filter(item => item.isFileAttachment());
+		let annotations = attachments.flatMap(attachment => attachment.getAnnotations());
+		annotations.sort((a, b) => {
+			if (a.parentItemID !== b.parentItemID) return 0;
+			return (a.annotationSortIndex > b.annotationSortIndex) - (a.annotationSortIndex < b.annotationSortIndex);
+		});
+		return annotations;
 	}
 
 	// make sure that each item appears only in one group.
@@ -264,6 +300,7 @@ export class CitationDialogSearchHandler {
 
 	async _getCitedItems() {
 		if (this.isCitingNotes) return [];
+		if (this.isAddingAnnotations) return [];
 		// Noop until io loads all cited data
 		if (this.io.allCitedDataLoadedPromise && !this.io.isAllCitedDataLoaded) return null;
 		// Fetch all cited items in the document, not just items currently in the dialog
@@ -296,31 +333,52 @@ export class CitationDialogSearchHandler {
 			}
 			items.push(item);
 		}
-		await Zotero.Items.loadDataTypes(items);
+		if (this.isAddingAnnotations) {
+			// Make sure annotations are loaded on unloaded tabs from unloaded libraries
+			await this._ensureRelevantItemsAreLoaded(items);
+			items = this.keepItemsWithAnnotations(items);
+		}
 		// Return deduplicated items since there may be multiple tabs opened for the same
 		// top-level item (duplicate tabs or a multiple attachments belonging to the same item)
 		return [...new Set(items)];
 	}
 
 	_getSelectedLibraryItems() {
+		let selected = Zotero.getActiveZoteroPane()?.getSelectedItems() || [];
 		if (this.isCitingNotes) {
-			return Zotero.getActiveZoteroPane()?.getSelectedItems().filter(i => i.isNote()) || [];
+			return selected.filter(i => i.isNote());
 		}
-		return Zotero.getActiveZoteroPane()?.getSelectedItems().filter(i => i.isRegularItem()) || [];
+		if (this.isAddingAnnotations) {
+			return this.keepItemsWithAnnotations(selected);
+		}
+		return selected.filter(i => i.isRegularItem());
 	}
 	
 
 	_filterNonMatchingItems(items) {
 		let matchedItems = new Set();
 		let splits = Zotero.Fulltext.semanticSplitter(this.searchValue);
-		for (let item of items) {
-			// Generate a string to search for each item
-			let itemStr = item.getCreators()
+
+		let makeSearchString = (item) => {
+			return item.getCreators()
 				.map(creator => creator.firstName + " " + creator.lastName)
 				.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)])
 				.join(" ")
 				.toLowerCase();
-			
+		};
+		for (let item of items) {
+			// Generate a string to search for each item
+			let itemStr = makeSearchString(item);
+
+			if (this.isAddingAnnotations) {
+				if (item.isAnnotation()) {
+					// Include annotation text and comment
+					itemStr += " " + (item.annotationText || "").toLowerCase();
+					itemStr += " " + (item.annotationComment || "").toLowerCase();
+					// Also allow to search by the parent item's info
+					itemStr += " " + makeSearchString(item.topLevelItem);
+				}
+			}
 			// Include items that match every word that was typed
 			let allMatch = splits.every(split => itemStr.includes(split));
 			if (allMatch) {
@@ -390,5 +448,25 @@ export class CitationDialogSearchHandler {
 		let stringNoYear = string.substr(0, maybeYear.index) + string.substring(maybeYear.index + maybeYear[0].length);
 		if (!year) return stringNoYear;
 		return stringNoYear + " " + year;
+	}
+
+	// load all ancestors,descendants, and siblings of provided items
+	async _ensureRelevantItemsAreLoaded(items) {
+		let topLevelItems = items.map(item => item.topLevelItem);
+		// load all data of top-level items and their attachments
+		await Zotero.Items.loadDataTypes(topLevelItems);
+		let regularItems = topLevelItems.filter(item => item.isRegularItem());
+		let attachmentIDs = regularItems.flatMap(item => item.getAttachments());
+		let attachments = await Zotero.Items.getAsync(attachmentIDs);
+		await Zotero.Items.loadDataTypes(attachments);
+
+		// Load annotations.
+		// Zotero.Items.loadDataTypes on parent items will set the
+		// _annotations cache on attachments but not load the annotations themselves.
+		// So fetch annotationIDs from the cache and load annotations separately.
+		attachments = attachments.filter(attachment => attachment.isFileAttachment());
+		let annotationIDs = attachments.flatMap(attachment => attachment.getAnnotations(false, true));
+		let annotations = await Zotero.Items.getAsync(annotationIDs);
+		await Zotero.Items.loadDataTypes(annotations);
 	}
 }

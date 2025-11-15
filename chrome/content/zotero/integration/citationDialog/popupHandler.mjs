@@ -27,13 +27,15 @@ import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
 // Handle the logic of opening popups and saving/discarding edits to the citation items
 export class CitationDialogPopupsHandler {
-	constructor({ doc }) {
+	constructor({ doc, io }) {
 		this.doc = doc;
 
 		this.bubbleItem = null;
 		this.discardItemDetailsEdits = false;
 		this.itemDetailsWhenOpened = {};
 		this.itemDetailsTimeOpened = null;
+
+		this.isAddingAnnotations = !!io.isAddingAnnotations;
 
 		this.setUpListeners();
 	}
@@ -87,14 +89,6 @@ export class CitationDialogPopupsHandler {
 
 	openItemDetails(bubbleItem, itemDescription) {
 		this.bubbleItem = bubbleItem;
-		// record initial properties when popup is opened to be able to discard edits on Escape
-		this.itemDetailsWhenOpened = {
-			label: bubbleItem.label,
-			locator: bubbleItem.locator,
-			prefix: bubbleItem.prefix,
-			suffix: bubbleItem.suffix,
-			suppressAuthor: bubbleItem.suppressAuthor
-		};
 
 		let bubble = this._getNode(`[dialogReferenceID='${this.bubbleItem.dialogReferenceID}']`);
 		let bubbleRect = bubble.getBoundingClientRect();
@@ -104,6 +98,33 @@ export class CitationDialogPopupsHandler {
 		popup.style.left = `${Math.max(10, bubbleRect.left + (bubbleRect.width / 2) - (popup.offsetWidth / 2))}px`;
 		popup.style.top = `${bubbleRect.bottom + 10}px`;
 
+		this._getNode("#itemDetails .show").hidden = !this.bubbleItem.item.id;
+		let topLevelItem = this.bubbleItem.item.topLevelItem;
+
+		// Add header and fill inputs with their values
+		let description = itemDescription;
+		this._getNode("#itemDetails").querySelector(".description")?.remove();
+		this._getNode("#itemTitle").textContent = topLevelItem.getDisplayTitle();
+		this._getNode("#itemTitle").after(description);
+		let dataTypeLabel = topLevelItem.getItemTypeIconName(true);
+		this._getNode("#itemDetails").querySelector(".icon").setAttribute("data-item-type", dataTypeLabel);
+
+		bubble.classList.add("showingDetails");
+		this.itemDetailsTimeOpened = (new Date()).getTime();
+
+		if (this.isAddingAnnotations) {
+			let annotationRow = this._getNode("#itemDetails").querySelector("annotation-row");
+			annotationRow.annotation = this.bubbleItem.item;
+			return;
+		}
+		// record initial properties when popup is opened to be able to discard edits on Escape
+		this.itemDetailsWhenOpened = {
+			label: bubbleItem.label,
+			locator: bubbleItem.locator,
+			prefix: bubbleItem.prefix,
+			suffix: bubbleItem.suffix,
+			suppressAuthor: bubbleItem.suppressAuthor
+		};
 		// add locator labels if they don't exist yet
 		if (this._getNode("#label").childElementCount == 0) {
 			let locators = Zotero.Cite.labels.map((locator) => {
@@ -121,23 +142,11 @@ export class CitationDialogPopupsHandler {
 				this._getNode("#label").appendChild(option);
 			}
 		}
-		this._getNode("#itemDetails .show").hidden = !this.bubbleItem.item.id;
-
-		// Add header and fill inputs with their values
-		let description = itemDescription;
-		this._getNode("#itemDetails").querySelector(".description")?.remove();
-		this._getNode("#itemTitle").textContent = this.bubbleItem.item.getDisplayTitle();
-		this._getNode("#itemTitle").after(description);
-		let dataTypeLabel = this.bubbleItem.item.getItemTypeIconName(true);
-		this._getNode("#itemDetails").querySelector(".icon").setAttribute("data-item-type", dataTypeLabel);
-
 		this._getNode("#label").value = this.bubbleItem.label || "page";
 		this._getNode("#locator").value = this.bubbleItem.locator || "";
 		this._getNode("#prefix").value = this.bubbleItem.prefix || "";
 		this._getNode("#suffix").value = this.bubbleItem.suffix || "";
 		this._getNode("#suppress-author").checked = !!this.bubbleItem.suppressAuthor;
-		bubble.classList.add("showingDetails");
-		this.itemDetailsTimeOpened = (new Date()).getTime();
 	}
 
 	// do not close the popup within 300ms of opening to account for potential double clicking

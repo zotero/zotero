@@ -362,7 +362,9 @@ describe("Citation Dialog", function () {
 			await IOManager.addItemsToCitation([itemOne, itemTwo]);
 
 			// Select row of the first bubble
-			await dialog.libraryLayout.itemsView.selectItem(itemOne.id);
+			var promise = dialog.libraryLayout.itemsView.waitForSelect();
+			dialog.libraryLayout.itemsView.selectItem(itemOne.id);
+			await promise;
 			// Check that the bubble is highlighted
 			let bubbleOne = dialog.document.querySelector(`.bubble[dialogReferenceID="${CitationDataManager.items[0].dialogReferenceID}"]`);
 			assert.isTrue(bubbleOne.classList.contains("has-item-selected"));
@@ -648,5 +650,206 @@ describe("Citation Dialog", function () {
 				}
 			});
 		});
+	});
+});
+
+describe("Add annotations dialog", function () {
+	let dialog, annotationIOManager, annotationSearchHandler, annotationIO, win, doc;
+	let parentItem, attachment, highlightAnnotation, underlineAnnotation;
+
+	before(async function () {
+		// one of helper functions of searchHandler uses zotero pane
+		win = await loadZoteroPane();
+		// Create IO for annotation adding dialog
+		annotationIO = {
+			accept: () => {},
+			cancel() {},
+			sort() {},
+			sortable: false,
+			isAddingAnnotations: true,
+			citation: {
+				citationItems: [],
+				properties: {
+					unsorted: false,
+				}
+			},
+			getItems() {
+				return [];
+			},
+			allCitedDataLoadedPromise: Zotero.Promise.resolve(),
+		};
+
+		// Open annotation adding dialog
+		let dialogPromise = waitForWindow("chrome://zotero/content/integration/citationDialog.xhtml");
+		Services.ww.openWindow(null, "chrome://zotero/content/integration/citationDialog.xhtml", "", "", annotationIO);
+		dialog = await dialogPromise;
+		annotationIOManager = dialog.IOManager;
+		annotationSearchHandler = dialog.SearchHandler;
+
+		// Wait for dialog to load
+		while (!dialog.loaded) {
+			await Zotero.Promise.delay(10);
+		}
+		doc = dialog.doc;
+
+		// Create items and annotations
+		parentItem = await createDataObject('item', { title: "parent_item_with_annotations" });
+		parentItem.setCreators([
+			{
+				firstName: "First_One",
+				lastName: "Last_One",
+				creatorType: "author"
+			}
+		]);
+		await parentItem.saveTx();
+		attachment = await importFileAttachment('test.pdf', { parentID: parentItem.id });
+
+		highlightAnnotation = await createAnnotation('highlight', attachment);
+		highlightAnnotation.annotationText = 'highlighted text';
+		highlightAnnotation.annotationComment = 'highlight comment';
+		await highlightAnnotation.saveTx();
+
+		underlineAnnotation = await createAnnotation('underline', attachment);
+		underlineAnnotation.annotationText = 'underlined text';
+		underlineAnnotation.annotationComment = 'underline';
+		await underlineAnnotation.saveTx();
+	});
+
+	beforeEach(async function () {
+		dialog.CitationDataManager.items = [];
+		dialog.IOManager.updateBubbleInput();
+		// Reset search
+		await dialog.currentLayout.search("", { skipDebounce: true });
+		
+		// Wait for any ongoing search to complete
+		while (annotationSearchHandler.searching) {
+			await Zotero.Promise.delay(10);
+		}
+		dialog.IOManager._lastClickTime = null;
+	});
+
+	after(function () {
+		dialog.close();
+		win.close();
+	});
+
+	it("should bubbleize selected annotations", async function () {
+		// Pretend that highlight annotation is selected
+		annotationSearchHandler.results.selectedAnnotations = [highlightAnnotation];
+		await dialog.currentLayout.refreshItemsList();
+
+		// Click on selected annotation
+		doc.querySelector(`.item[id="${highlightAnnotation.id}"]`).click();
+		await Zotero.Promise.delay();
+		// Expect that it becomes a bubble
+		let bubbles = doc.querySelector("bubble-input").getAllBubbles();
+		assert.equal(bubbles.length, 1);
+		assert.equal(bubbles[0].textContent, `Last_One “highlighted text”`);
+	});
+
+	it("should select itemTree row on click of selected non-annotation item", async function () {
+		// Pretend that highlight annotation is selected
+		annotationSearchHandler.results.selectedItems = [parentItem];
+		await dialog.currentLayout.refreshItemsList();
+
+		// Due to some kind of race condition with itemTree loading in tests,
+		// sometimes _itemTreeLoadingDeferred won't be resolved.
+		// This ensures collectionTree.selectItems doesn't get stuck.
+		dialog.libraryLayout.itemsView._itemTreeLoadingDeferred.resolve();
+		// Click on selected item
+		doc.querySelector(`.item[id="${parentItem.id}"]`).click();
+		await Zotero.Promise.delay();
+		// Expect that itemTree row is selected and itemTree is focused
+		assert.equal(dialog.libraryLayout.itemsView.getSelectedItems(true)[0], parentItem.id);
+		assert.equal(doc.activeElement.id, "item-tree-citationDialog");
+	});
+
+	it("should display selected items and selected annotations in separate decks", async function () {
+		annotationSearchHandler.results.selectedAnnotations = [highlightAnnotation];
+		annotationSearchHandler.results.selectedItems = [parentItem];
+
+		await dialog.currentLayout.refreshItemsList();
+
+		let selectedAnnotationsDeck = doc.getElementById("library-selectedAnnotations-items");
+		let selectedItemsDeck = doc.getElementById("library-selectedItems-items");
+		assert.equal(selectedAnnotationsDeck.querySelectorAll(".item").length, 1);
+		assert.equal(selectedAnnotationsDeck.querySelector(".item").id, highlightAnnotation.id);
+		assert.equal(selectedItemsDeck.querySelectorAll(".item").length, 1);
+		assert.equal(selectedItemsDeck.querySelector(".item").id, parentItem.id);
+	});
+
+	it("should only include selected/open items that have annotations", async function () {
+		// 2 top-level items, one attachment per each item, no annotations
+		let itemNoAnnotations1 = await createDataObject('item', { title: "item_no_annotations_1" });
+		let itemNoAnnotations2 = await createDataObject('item', { title: "item_no_annotations_2" });
+		
+		await importFileAttachment('test.pdf', { parentID: itemNoAnnotations1.id });
+		await importFileAttachment('test.pdf', { parentID: itemNoAnnotations2.id });
+
+		// 2 more top-level items, one attachment per each item, one annotation per attachment
+		let itemWithAnnotations1 = await createDataObject('item', { title: "item_with_annotations_1" });
+		let itemWithAnnotations2 = await createDataObject('item', { title: "item_with_annotations_2" });
+
+		let attachmentWithAnnotations1 = await importFileAttachment('test.pdf', { parentID: itemWithAnnotations1.id });
+		let attachmentWithAnnotations2 = await importFileAttachment('test.pdf', { parentID: itemWithAnnotations2.id });
+
+		await createAnnotation('highlight', attachmentWithAnnotations1);
+		await createAnnotation('highlight', attachmentWithAnnotations2);
+
+		// Pretend that these are selected/opened items
+		let selectedStub = sinon.stub(annotationSearchHandler, "_getSelectedLibraryItems");
+		let selectedWithAnnotations = annotationSearchHandler.keepItemsWithAnnotations([itemNoAnnotations1, itemWithAnnotations1]);
+		selectedStub.returns(selectedWithAnnotations);
+		let openStub = sinon.stub(annotationSearchHandler, "_getReaderOpenItems");
+		let openWithAnnotations = annotationSearchHandler.keepItemsWithAnnotations([itemNoAnnotations2, itemWithAnnotations2]);
+		openStub.resolves(openWithAnnotations);
+
+		// Clear the cache so that selected/open items are re-freshed
+		// using the stubs below
+		annotationSearchHandler.selectedItems = null;
+		annotationSearchHandler.openItems = null;
+		
+		// Refresh all items
+		await annotationSearchHandler.refreshSelectedAndOpenItems();
+
+		// Restore all stubs
+		selectedStub.restore();
+		openStub.restore();
+
+		// Only 2 items with annotations should be included in the results
+		assert.sameMembers(annotationSearchHandler.results.selected, [itemWithAnnotations1]);
+		assert.sameMembers(annotationSearchHandler.results.open, [itemWithAnnotations2]);
+	});
+
+	it("should display all selected annotations in side pane", async function () {
+		// Actual annotations are selected
+		await dialog.currentLayout.itemsView.selectItems([highlightAnnotation.id, underlineAnnotation.id]);
+		let annotationPreviews = doc.querySelectorAll("#annotations-list annotation-row");
+		assert.equal(annotationPreviews.length, 2);
+		let annotationRowIDs = [annotationPreviews[0]._annotation.id, annotationPreviews[1]._annotation.id];
+		assert.sameMembers(annotationRowIDs, [highlightAnnotation.id, underlineAnnotation.id]);
+
+		// A top-level item is selected
+		await dialog.currentLayout.itemsView.selectItems([parentItem.id]);
+		annotationPreviews = doc.querySelectorAll("#annotations-list annotation-row");
+		assert.equal(annotationPreviews.length, 2);
+		annotationRowIDs = [annotationPreviews[0]._annotation.id, annotationPreviews[1]._annotation.id];
+		assert.sameMembers(annotationRowIDs, [highlightAnnotation.id, underlineAnnotation.id]);
+	});
+
+	it("should display preview popup on bubble click", async function () {
+		await dialog.IOManager.addItemsToCitation([highlightAnnotation]);
+		let bubble = doc.querySelector("bubble-input .bubble");
+		let popup = dialog.document.getElementById("itemDetails");
+
+		bubble.click();
+		// give the popup time to open
+		await Zotero.Promise.delay(50);
+		assert.equal(popup.state, "open");
+
+		// make sure the annotation-row preview is visible in the popup
+		let annotationPreview = popup.querySelector("annotation-row");
+		assert.isOk(annotationPreview);
+		assert.notOk(annotationPreview.closest("[hidden]"));
 	});
 });

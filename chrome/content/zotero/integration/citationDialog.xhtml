@@ -85,6 +85,21 @@
 				<div id="item-tree-container" class="hbox virtualized-table-container">
 					<div id="zotero-items-tree" data-tabindex="60" style="--highlight-color: var(--accent-blue30);"/>
 				</div>
+				<div id="sidebar" class="vbox">
+					<div id="annotations-sidebar" class="vbox" hidden="true">
+						<!-- Uses styling from _search.scss -->
+						<div id="annotations-sidebar-filter-wrapper" class="search" hidden="true">
+							<input id="annotations-sidebar-filter" data-l10n-id="integration-citationDialog-annotations-filter" data-tabindex="70" tabindex="-1"/>
+							<div id="annotations-filter-cancel-btn" class="search-cancel-button" hidden="true"/>
+						</div>
+						<div id="annotations-list-wrapper" hidden="true">
+							<xul:annotation-items-pane id="annotations-list" data-tabindex="71"  data-arrow-nav="vertical"/>
+						</div>
+						<div id="annotations-message">
+							<span id="annotations-message-text" data-l10n-id="integration-citationDialog-annotations-empty"/>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -92,8 +107,8 @@
 			<div id="bottom-area-wrapper" class="hbox">
 				<div class="hbox" style="flex:1"></div>
 				<div id="bottom-btn-group" class="hbox">
-					<button id="mode-button" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" tabindex="-1" data-tabindex="71"/>
-					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-tabindex="72"/>
+					<button id="mode-button" data-dialog-type="citation,note" class="btn-icon icon-citation-dialog-library" data-l10n-id="integration-citationDialog-btn-mode" tabindex="-1" data-tabindex="91"/>
+					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-tabindex="92"/>
 				</div>
 			</div>
 		</div>
@@ -107,7 +122,7 @@
 							<div id="itemTitle"></div>
 						</div>
 					</div>
-					<div class="details" role="group">
+					<div class="details" role="group" data-dialog-type="citation">
 							<!--fx128: size="0" forces select have default native style -->
 							<select name="locator" id="label" class="details-label" size="0"></select>
 							<input id="locator" class="details-data" aria-labelledby="label" aria-describedby="itemDetails-combinedInfo"/>
@@ -125,6 +140,9 @@
 								<label for="suppress-author" data-l10n-id="integration-citationDialog-details-suppressAuthor"></label>
 							</div>
 					</div>
+					<div class="annotation-detail" data-dialog-type="annotations" hidden="true">
+						<xul:annotation-row/>
+					</div>
 					<div class="buttons">
 						<button class="remove" data-l10n-id="integration-citationDialog-details-remove"></button>
 						<button class="show" data-l10n-id="integration-citationDialog-details-showInLibrary"></button>
@@ -136,9 +154,13 @@
 			<xul:panel id="settings-popup">
 				<div class="vbox popup">
 					<div class="title" data-l10n-id="integration-citationDialog-settings-title"></div>
-					<div class="hbox">
+					<div class="hbox" data-dialog-type="citation">
 						<input id="keepSorted" type="checkbox"/>
 						<label for="keepSorted" data-l10n-id="integration-citationDialog-settings-keepSorted"></label>
+					</div>
+					<div class="hbox" data-dialog-type="annotations">
+						<input id="includeComments" type="checkbox"/>
+						<label for="includeComments" data-l10n-id="integration-citationDialog-details-includeComments"></label>
 					</div>
 				</div>
 			</xul:panel>
