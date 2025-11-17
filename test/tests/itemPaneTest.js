@@ -1745,9 +1745,9 @@ describe("Item pane", function () {
 			await waitForScrollToPane(itemDetails, 'related');
 
 			// Wait for the intersection observer to trigger discard and the discard process to complete
-			await waitForCallback(() => !attachmentBox._preview._isReaderInitialized);
+			await waitForCallback(() => !attachmentBox._preview?._isReaderInitialized);
 
-			assert.isFalse(attachmentBox._preview._isReaderInitialized);
+			assert.isFalse(!!attachmentBox._preview?._isReaderInitialized);
 
 			attachmentBox._discardPreviewTimeout = currentDiscardTimeout;
 		});
