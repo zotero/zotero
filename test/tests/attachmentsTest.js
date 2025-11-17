@@ -2298,6 +2298,55 @@ describe("Zotero.Attachments", function () {
 			assert.equal(attachment.attachmentFilename, 'Title.png');
 			// After a manual rename, the title becomes the default for this type
 			assert.equal(attachment.getField('title'), Zotero.getString('file-type-image'));
+			
+		});
+
+		it("should change attachment title if file basename matches the title", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+
+			var attachment = await importFileAttachment('test.pdf', {
+				parentItemID: item.id,
+				title: "test"
+			});
+			assert.equal(attachment.attachmentFilename, 'test.pdf');
+			assert.equal(attachment.getField('title'), 'test');
+			await renameFileFromParent(attachment);
+			assert.equal(attachment.attachmentFilename, 'Title.pdf');
+			assert.equal(attachment.getField('title'), Zotero.getString('file-type-pdf'));
+		});
+
+		it("should change attachment title if file matches the title exactly", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+
+			var attachment = await importFileAttachment('test.pdf', {
+				parentItemID: item.id,
+				title: "test.pdf"
+			});
+			assert.equal(attachment.attachmentFilename, 'test.pdf');
+			assert.equal(attachment.getField('title'), 'test.pdf');
+			await renameFileFromParent(attachment);
+			assert.equal(attachment.attachmentFilename, 'Title.pdf');
+			assert.equal(attachment.getField('title'), Zotero.getString('file-type-pdf'));
+		});
+
+		it("should change attachment title if file matches the title, case-insensitive", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+
+			var attachment = await importFileAttachment('test.pdf', {
+				parentItemID: item.id,
+				title: "tESt.PDF"
+			});
+			assert.equal(attachment.attachmentFilename, 'test.pdf');
+			assert.equal(attachment.getField('title'), 'tESt.PDF');
+			await renameFileFromParent(attachment);
+			assert.equal(attachment.attachmentFilename, 'Title.pdf');
+			assert.equal(attachment.getField('title'), Zotero.getString('file-type-pdf'));
 		});
 
 		it("should restore an extension when renaming a misnamed file", async function () {
@@ -2377,7 +2426,7 @@ describe("Zotero.Attachments", function () {
 			assert.equal(OS.Path.basename(path1), 'test.png');
 			assert.isTrue(await OS.File.exists(path1));
 
-			// pdf is the primary attachment, so renamed
+			// PDF is the primary attachment, so renamed
 			assert.equal(attachment2.attachmentFilename, 'Lorem.pdf');
 			let path2 = await attachment2.getFilePathAsync();
 			assert.equal(OS.Path.basename(path2), 'Lorem.pdf');
