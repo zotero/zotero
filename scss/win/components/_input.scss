@@ -126,6 +126,10 @@
 	}
 }
 
+search-textbox:not([no-native]) {
+	padding-inline-start: 0;
+}
+
 textarea:not([no-native]) {
 	height: unset;
 }
