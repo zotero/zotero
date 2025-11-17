@@ -939,6 +939,10 @@
 			<menuitem class="zotero-menuitem-create-report"/>
 			<menuitem class="zotero-menuitem-delete-from-lib" label="&zotero.toolbar.emptyTrash.label;"/>
 			<menuitem class="zotero-menuitem-removeLibrary"/>
+			<menu class="menu-iconic zotero-menuitem-copy-library">
+				<menupopup id="zotero-copy-library-popup" onpopupshowing="ZoteroPane_Local.buildCopyLibraryMenu(event)">
+				</menupopup>
+			</menu>
 		</menupopup>
 		<menupopup id="zotero-itemmenu">
 			<!-- Keep order in sync with buildItemContextMenu -->
