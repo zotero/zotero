@@ -143,8 +143,9 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 				const oldBaseName = attachmentItem.attachmentFilename.replace(/\.[^.]+$/, '');
 				attachmentItem.attachmentFilename = newName;
 
-				// update title if it matches the old filename
-				if (attachmentItem.getField('title') === oldBaseName || attachmentItem.getField('title') === oldFileName) {
+				// update the title if it matches the old filename
+				const newTitleLC = attachmentItem.getField('title').toLowerCase();
+				if (newTitleLC === oldBaseName.toLowerCase() || newTitleLC === oldFileName.toLowerCase()) {
 					attachmentItem.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
 				}
 
@@ -164,7 +165,7 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 };
 
 /**
- * Renames an invidual attachment file based on its parent item's metadata.
+ * Renames an individual attachment file based on its parent item's metadata.
  *
  * @async
  * @param {Zotero.Item} attachmentItem - The attachment item to be renamed.
@@ -176,6 +177,7 @@ export async function renameFileFromParent(attachmentItem) {
 		throw new Error('Item ' + attachmentItem.itemID + ' cannot be renamed based on its parent item');
 	}
 
+	const oldName = attachmentItem.attachmentFilename;
 	const oldBaseName = attachmentItem.attachmentFilename.replace(/\.[^.]+$/, '');
 	const parentItemID = attachmentItem.parentItemID;
 	let parentItem = await Zotero.Items.getAsync(parentItemID);
@@ -187,12 +189,13 @@ export async function renameFileFromParent(attachmentItem) {
 
 	let requiresSave = false;
 	if (!renamed && attachmentItem.isStoredFileAttachment()) {
-		// file is not present locally but we can still update filename in the database
+		// the file is not present locally, but we can still update the filename in the database
 		attachmentItem.attachmentFilename = newName;
 		requiresSave = true;
 	}
-
-	if (attachmentItem.getField('title') === oldBaseName) {
+	
+	const newTitleLC = attachmentItem.getField('title').toLowerCase();
+	if (newTitleLC === oldBaseName.toLowerCase() || newTitleLC === oldName.toLowerCase()) {
 		attachmentItem.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
 		requiresSave = true;
 	}
