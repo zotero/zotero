@@ -109,7 +109,8 @@ import { getCSSItemTypeIcon } from 'components/icons';
 					let row = document.createElement('div');
 					row.className = 'row';
 
-					let icon = getCSSItemTypeIcon(relatedItem.getItemTypeIconName());
+					let iconKey = relatedItem.isAnnotation() ? `annotation-${relatedItem.annotationType}-${relatedItem.annotationColor}` : undefined;
+					let icon = getCSSItemTypeIcon(relatedItem.getItemTypeIconName(), iconKey);
 
 					let label = document.createElement("span");
 					label.className = 'label';
