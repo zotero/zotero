@@ -57,7 +57,11 @@ window.Zotero_File_Interface_Bibliography = new function () {
 	this.init = async function (args = {}) {
 		window.addEventListener('dialogaccept', () => this.acceptSelection());
 		window.addEventListener('dialoghelp', () => this.openHelpLink());
-
+		styleConfigurator = document.querySelector("#style-configurator");
+		
+		// Disable accept button until CE is initialized
+		document.querySelector("dialog").getButton('accept').setAttribute('disabled', true);
+		
 		// Set font size from pref
 		// Affects bibliography.xhtml and integrationDocPrefs.xhtml
 		var bibContainer = document.getElementById("zotero-bibliography-container");
@@ -81,7 +85,6 @@ window.Zotero_File_Interface_Bibliography = new function () {
 			"bibliography-window": "bibliography"
 		}[document.querySelector("window").id];
 		
-		styleConfigurator = document.querySelector("#style-configurator");
 		
 		// if no style is requested, get the last style used
 		if (!_io.style) {
@@ -95,13 +98,10 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		}
 		
 		// Wait for CE initialization
-		let i = 0;
-		while (!styleConfigurator.initialized && i < 300) {
-			await Zotero.Promise.delay(10);
-			i++;
-		}
+		await styleConfigurator.ready;
+		document.querySelector("dialog").getButton('accept').setAttribute('disabled', false);
 
-		// Select supplied style and locale
+		// Select the supplied style and locale
 		if (_io.style) {
 			styleConfigurator.style = _io.style;
 			if (styleConfigurator.style !== _io.style) {
@@ -117,8 +117,6 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		}
 
 		styleConfigurator.addEventListener("select", event => this.styleChanged(event));
-
-		styleConfigurator.toggleAttribute("show-manage-styles", true);
 		styleConfigurator.addEventListener("manage-styles", this.manageStyles.bind(this));
 		
 		this.initBibWindow();

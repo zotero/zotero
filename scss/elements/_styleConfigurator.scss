@@ -20,7 +20,7 @@ style-configurator {
 	
 	richlistbox {
 		padding: var(--style-configurator-richlistbox-padding, 4px 8px);
-		max-height: var(--style-configurator-richlistitem-max-height, 260px);
+		height: var(--style-configurator-richlistitem-max-height, 260px);
 		overflow: var(--style-configurator-richlistitem-overflow, hidden auto);
 		margin: var(--style-configurator-richlistbox-margin, 0);
 		
