@@ -347,15 +347,21 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTabl
  * Returns the search object for the currently display
  *
  * This accounts for the collection, saved search, quicksearch, tags, etc.
+ * Optionally, annotations authors and colors conditions can be skipped. It allows tag selector to
+ * know which colors/authors are available in the current scope even if some colors/annotations
+ * are filtered out by another color/author condition.
+ * @param options.skipAnnotationAuthors {Boolean} - If true, do not add condition for selected annotation authors
+ * @param options.skipAnnotationColors {Boolean} - If true, do not add condition for selected annotation colors
  */
-Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
+Zotero.CollectionTreeRow.prototype.getSearchObject = async function (options = {}) {
 	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
 		Zotero.CollectionTreeCache.clear();
 	}
-	
-	if(Zotero.CollectionTreeCache.lastSearch) {
+
+	// Do not use cache to get search object if some conditions are being skipped
+	if (Zotero.CollectionTreeCache.lastSearch && !options.skipAnnotationAuthors && !options.skipAnnotationColors) {
 		return Zotero.CollectionTreeCache.lastSearch;
-	}	
+	}
 	
 	var includeScopeChildren = false;
 	
@@ -438,8 +444,29 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 		}
 	}
 	
+	// Add annotation authors conditions unless explicitly skipped
+	if (!options.skipAnnotationAuthors && this.annotationAuthors?.length) {
+		s2.addCondition('blockStart');
+		for (let annotationAuthor of this.annotationAuthors) {
+			s2.addCondition('annotationAuthor', 'is', annotationAuthor);
+		}
+		s2.addCondition('blockEnd');
+	}
+
+	// Add annotation colors conditions unless explicitly skipped
+	if (!options.skipAnnotationColors && this.annotationColors?.length) {
+		s2.addCondition('blockStart');
+		for (let annotationColor of this.annotationColors) {
+			s2.addCondition('annotationColor', 'is', annotationColor);
+		}
+		s2.addCondition('blockEnd');
+	}
 	Zotero.CollectionTreeCache.lastTreeRow = this;
-	Zotero.CollectionTreeCache.lastSearch = s2;
+	
+	// Do not save search object in the cache if some conditions are skipped
+	if (!options.skipAnnotationAuthors && !options.skipAnnotationColors) {
+		Zotero.CollectionTreeCache.lastSearch = s2;
+	}
 	return s2;
 };
 
@@ -469,6 +496,22 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 	return Zotero.Tags.getAllWithin({ tmpTable: results, types, tagIDs });
 };
 
+// Get annotation colors in the current search scope EXCLUDING other annotation colors conditions
+Zotero.CollectionTreeRow.prototype.getAnnotationColors = async function () {
+	let searchObject = await this.getSearchObject({ skipAnnotationAuthors: false, skipAnnotationColors: true });
+	let searchResultIDs = await searchObject.search();
+	let annotations = Zotero.Items.get(searchResultIDs).filter(item => item.isAnnotation());
+	let usedColors = new Set(annotations.map(annotation => annotation.annotationColor));
+	return new Set(Zotero.Annotations.COLORS.filter(c => usedColors.has(c.color)).map(c => c.color));
+};
+
+// Get annotation authors in the current search scope EXCLUDING other annotation authors conditions
+Zotero.CollectionTreeRow.prototype.getAnnotationAuthors = async function () {
+	let searchObject = await this.getSearchObject({ skipAnnotationAuthors: true, skipAnnotationColors: false });
+	let searchResultIDs = await searchObject.search();
+	let annotations = Zotero.Items.get(searchResultIDs).filter(item => item.isAnnotation());
+	return new Set(annotations.map(annotation => annotation.createdByUserID).filter(userID => userID !== null));
+};
 
 Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null) {
 	Zotero.CollectionTreeCache.clear();
@@ -476,10 +519,12 @@ Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null
 	this.searchMode = mode;
 }
 
-Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
+Zotero.CollectionTreeRow.prototype.setAnnotationTagFilters = function ({ annotationAuthors, annotationColors, tags } = {}) {
 	Zotero.CollectionTreeCache.clear();
-	this.tags = tags;
-}
+	this.tags = tags || this.tags;
+	this.annotationAuthors = annotationAuthors || this.annotationAuthors;
+	this.annotationColors = annotationColors || this.annotationColors;
+};
 
 /*
  * Returns TRUE if saved search, quicksearch or tag filter
@@ -493,12 +538,19 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 	}
 	
 	// Quicksearch
-	if (this.searchText != '') {
+	if (this.searchText && this.searchText != '') {
 		return true;
 	}
 	
 	// Tag filter
-	if (this.tags && this.tags.size) {
+	if (this.tags && this.tags.length) {
+		return true;
+	}
+
+	if (this.annotationAuthors && this.annotationAuthors.length) {
+		return true;
+	}
+	if (this.annotationColors && this.annotationColors.length) {
 		return true;
 	}
 }

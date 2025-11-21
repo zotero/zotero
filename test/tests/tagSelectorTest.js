@@ -139,7 +139,7 @@ describe("Tag Selector", function () {
 		});
 	});
 	
-	describe("#handleTagSelected()", function () {
+	describe("#handleSelection()", function () {
 		it("should remove tags not on matching items on tag click", async function () {
 			var collection = await createDataObject('collection');
 			await select(win, collection);
@@ -172,7 +172,7 @@ describe("Tag Selector", function () {
 			});
 			await promise;
 			
-			tagSelector.handleTagSelected('A');
+			tagSelector.handleSelection({ tag: 'A' });
 			await waitForTagSelector(win);
 			
 			var tags = getRegularTags();
@@ -610,7 +610,7 @@ describe("Tag Selector", function () {
 			});
 			await promise;
 			
-			tagSelector.handleTagSelected(tag1);
+			tagSelector.handleSelection({ tag: tag1 });
 			await waitForTagSelector(win);
 			
 			// Tag selector should show the selected tag
@@ -619,14 +619,14 @@ describe("Tag Selector", function () {
 			assert.notInclude(getRegularTags(), tag2);
 			
 			// Remove tag from item
-			promise = waitForTagSelector(win, 2);
+			promise = waitForTagSelector(win, 3);
 			item1.removeTag(tag1);
 			await item1.saveTx();
 			await promise;
 			
 			// Removed tag should no longer be shown or selected
 			assert.notInclude(getRegularTags(), tag1);
-			assert.notInclude(Array.from(tagSelector.getTagSelection()), tag1);
+			assert.notInclude(tagSelector.getSelection().tags, tag1);
 			// Other tags should be shown again
 			assert.include(getRegularTags(), tag2);
 		});
@@ -645,7 +645,7 @@ describe("Tag Selector", function () {
 			});
 			await promise;
 			
-			tagSelector.handleTagSelected(tag1);
+			tagSelector.handleSelection({ tag: tag1 });
 			await waitForTagSelector(win);
 			
 			// Tag selector should show the selected tag
@@ -660,7 +660,7 @@ describe("Tag Selector", function () {
 			
 			// Deleted tag should no longer be shown or selected
 			assert.notInclude(getRegularTags(), tag1);
-			assert.notInclude(Array.from(tagSelector.getTagSelection()), tag1);
+			assert.notInclude(tagSelector.getSelection().tags, tag1);
 			// Other tags should be shown again
 			assert.include(getRegularTags(), tag2);
 		});
@@ -780,6 +780,133 @@ describe("Tag Selector", function () {
 			
 			assert.include(getRegularTags(), 'manual');
 			assert.notInclude(getRegularTags(), 'automatic');
+		});
+	});
+
+	describe("annotation filters", function () {
+		var group, collection, item1, item2, attachment1, attachment2;
+		var otherUserID = 92624235;
+		
+		before(async function () {
+			await Zotero.Users.setCurrentUserID(1);
+			await Zotero.Users.setName(1, 'this-user');
+			await Zotero.Users.setName(otherUserID, 'another-user');
+			Zotero.Prefs.set('tagSelector.showAnnotationFilters', false);
+			
+			// Create a group
+			group = await createGroup();
+			collection = await createDataObject('collection', { libraryID: group.libraryID, name: 'Collection A' });
+			
+			// Create two items
+			item1 = await createDataObject('item',
+				{
+					libraryID: group.libraryID,
+					collections: [collection.id],
+					title: 'Item 1'
+				});
+			item2 = await createDataObject('item',
+				{
+					libraryID: group.libraryID,
+					collections: [collection.id],
+					title: 'Item 2'
+				});
+			
+			// Create attachments for each item
+			attachment1 = await importPDFAttachment(item1);
+			attachment2 = await importPDFAttachment(item2);
+			
+			// Create 2 annotations for the first attachment with #ffd400 and #ff6666 colors
+			await createAnnotation('highlight', attachment1, { color: '#ffd400', createdByUserID: 1 });
+			await createAnnotation('highlight', attachment1, { color: '#ff6666', createdByUserID: 1 });
+			
+			// Create one annotation for the second attachment with #5fb236 color by another user
+			await createAnnotation('highlight', attachment2, { color: '#5fb236', createdByUserID: otherUserID });
+		});
+		
+		after(async function () {
+			await group.eraseTx();
+		});
+
+		beforeEach(async function () {
+			if (win.ZoteroPane.getSelectedCollection()?.id !== collection.id) {
+				let promise = waitForTagSelector(win);
+				await select(win, collection);
+				await promise;
+			}
+			tagSelector.deselectAll();
+			if (!Zotero.Prefs.get('tagSelector.showAnnotationFilters')) {
+				tagSelector.toggleShowAnnotationFilters();
+				await waitForTagSelector(win);
+			}
+		});
+
+		it("should display and hide annotation filters on menu toggle", async function () {
+			// Annotation filters should be visible at first
+			assert.ok(tagSelectorElem.querySelector('.annotation-data'));
+			
+			// Toggle to hide annotation filters
+			tagSelector.toggleShowAnnotationFilters();
+			await waitForTagSelector(win);
+			
+			// Annotation filters should be hidden
+			assert.notOk(tagSelectorElem.querySelector('.annotation-data'));
+
+			// Toggle to show annotation filters
+			tagSelector.toggleShowAnnotationFilters();
+			await waitForTagSelector(win);
+
+			// Annotation filters should be visible again
+			assert.ok(tagSelectorElem.querySelector('.annotation-data'));
+		});
+		
+		it("should display annotation colors and authors of visible items", async function () {
+			// Get all annotation color nodes
+			var colorNodes = tagSelectorElem.querySelectorAll('.annotation-color');
+			assert.equal(colorNodes.length, 8); // All 8 annotation colors from Zotero.Annotations.COLORS
+			
+			// Check that only the used colors are enabled
+			var enabledColors = [...colorNodes].filter(node => !node.classList.contains('disabled'));
+			var enabledColorValues = enabledColors.map(node => node.dataset.color);
+			assert.sameMembers(enabledColorValues, ['#ffd400', '#ff6666', '#5fb236']);
+			
+			// Check that unused colors are disabled
+			var disabledColors = [...colorNodes].filter(node => node.classList.contains('disabled'));
+			assert.equal(disabledColors.length, 5); // 8 total - 3 enabled
+			
+			// Get all annotation author nodes
+			var authorNodes = tagSelectorElem.querySelectorAll('.annotation-author');
+			assert.equal(authorNodes.length, 2); // this-user and another-user
+			
+			var authorNames = [...authorNodes].map(node => node.textContent);
+			assert.includeMembers(authorNames, ['this-user', 'another-user']);
+		});
+		
+		it("should be able to select multiple annotation filters", async function () {
+			// Click on annotation colors
+			var yellowColor = tagSelectorElem.querySelector('.annotation-color[data-color="#ffd400"]');
+			var redColor = tagSelectorElem.querySelector('.annotation-color[data-color="#ff6666"]');
+			var greenColor = tagSelectorElem.querySelector('.annotation-color[data-color="#5fb236"]');
+			
+			yellowColor.click();
+			await waitForTagSelector(win);
+			redColor.click();
+			await waitForTagSelector(win);
+			greenColor.click();
+			await waitForTagSelector(win);
+			
+			// Check that they have selected class
+			assert.isTrue(yellowColor.classList.contains('selected'));
+			assert.isTrue(redColor.classList.contains('selected'));
+			assert.isTrue(greenColor.classList.contains('selected'));
+			
+			// Click on all annotation author nodes
+			tagSelectorElem.querySelector('.annotation-author[data-user-id="1"]').click();
+			await waitForTagSelector(win);
+			tagSelectorElem.querySelector(`.annotation-author[data-user-id="${otherUserID}"]`).click();
+			await waitForTagSelector(win);
+
+			assert.isTrue(tagSelectorElem.querySelector('.annotation-author[data-user-id="1"]').classList.contains('selected'));
+			assert.isTrue(tagSelectorElem.querySelector(`.annotation-author[data-user-id="${otherUserID}"]`).classList.contains('selected'));
 		});
 	});
 })
