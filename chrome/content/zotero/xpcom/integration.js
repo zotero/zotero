@@ -2687,12 +2687,11 @@ Zotero.Integration.DocumentData.prototype.serialize = function () {
 	}
 	// Store cited libraries URI and their group name separated by '='
 	// See refreshCitedLibraries comments for info on why both are needed.
-	let citedLibraries = Object.entries(this.citedLibraryURIs).map(([uri, name]) => `${uri}=${name}`);
-	
+	let citedLibraries = Object.entries(this.citedLibraryURIs).map(([uri, name]) => `${uri}=${name}`).join(",");
 	return '<data data-version="'+Zotero.Utilities.htmlSpecialChars(`${DATA_VERSION}`)+'" '+
-		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'"'+
-		' cited-libraries="' + Zotero.Utilities.htmlSpecialChars(citedLibraries.join(',')) + '"' + '>'
-			+ '<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
+		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'">'+
+		'<cited libraries="' + Zotero.Utilities.htmlSpecialChars(citedLibraries) + '"/>' +
+		'<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
 		'<style id="'+Zotero.Utilities.htmlSpecialChars(this.style.styleID)+'" '+
 			(this.style.locale ? 'locale="' + Zotero.Utilities.htmlSpecialChars(this.style.locale) + '" ': '') +
 			'hasBibliography="'+(this.style.hasBibliography ? "1" : "0")+'" '+
@@ -2708,8 +2707,8 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function (xmlData) {
 		doc = parser.parseFromString(xmlData, "application/xml");
 	
 	this.sessionID = Zotero.Utilities.xpathText(doc, '/data/session[1]/@id');
-	let citedLibraryURIsAttr = Zotero.Utilities.xpathText(doc, '/data/@cited-libraries');
-	this.citedLibraryURIs = citedLibraryURIsAttr.split(",").reduce((obj, pair) => {
+	let citedLibraryURIsAttr = Zotero.Utilities.xpathText(doc, '/data/cited/@libraries');
+	this.citedLibraryURIs = (citedLibraryURIsAttr || "").split(",").reduce((obj, pair) => {
 		let [uri, name] = pair.split("=");
 		obj[uri] = name;
 		return obj;
