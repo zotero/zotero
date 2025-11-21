@@ -1090,7 +1090,7 @@ describe("Zotero.Integration", function () {
 	
 	describe("DocumentData", function () {
 		it('should properly unserialize old XML document data', function () {
-			var serializedXMLData = `<data data-version="3" zotero-version="5.0.SOURCE"><session id="F0NFmZ32"/><style id="${styleID}" hasBibliography="1" bibliographyStyleHasBeenSet="1"/><prefs><pref name="fieldType" value="ReferenceMark"/><pref name="automaticJournalAbbreviations" value="true"/><pref name="noteType" value="0"/></prefs></data>`;
+			var serializedXMLData = `<data data-version="3" zotero-version="5.0.SOURCE"><cited libraries="http://zotero.org/groups/6295613=sample-zoter0-group"/><session id="F0NFmZ32"/><style id="${styleID}" hasBibliography="1" bibliographyStyleHasBeenSet="1"/><prefs><pref name="fieldType" value="ReferenceMark"/><pref name="automaticJournalAbbreviations" value="true"/><pref name="noteType" value="0"/></prefs></data>`;
 			var data = new Zotero.Integration.DocumentData(serializedXMLData);
 			var expectedData = {
 				style: {
@@ -1103,6 +1103,9 @@ describe("Zotero.Integration", function () {
 					fieldType: 'ReferenceMark',
 					automaticJournalAbbreviations: true,
 					noteType: 0
+				},
+				citedLibraryURIs: {
+					'http://zotero.org/groups/6295613': 'sample-zoter0-group'
 				},
 				sessionID: 'F0NFmZ32',
 				zoteroVersion: '5.0.SOURCE',
@@ -1125,6 +1128,9 @@ describe("Zotero.Integration", function () {
 					automaticJournalAbbreviations: false,
 					noteType: 0
 				},
+				citedLibraryURIs: {
+					'http://zotero.org/groups/6295613': 'sample-zoter0-group'
+				},
 				sessionID: 'owl-sesh',
 				zoteroVersion: '5.0.SOURCE',
 				dataVersion: 4
@@ -1135,6 +1141,7 @@ describe("Zotero.Integration", function () {
 		});
 		
 		it('should properly serialize document data to XML (data ver 3)', function () {
+			console.log(" ---- ");
 			sinon.spy(Zotero, 'debug');
 			var data = new Zotero.Integration.DocumentData();
 			data.sessionID = "owl-sesh";
@@ -1150,6 +1157,9 @@ describe("Zotero.Integration", function () {
 				noteType: 1,
 				fieldType: "Field",
 				automaticJournalAbbreviations: true
+			};
+			data.citedLibraryURIs = {
+				'http://zotero.org/groups/6295613': 'sample-zoter0-group'
 			};
 			
 			var serializedData = data.serialize();

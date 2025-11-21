@@ -124,6 +124,11 @@ $icons: (
 		.cell-icon {
 			min-width: 16px;
 		}
+
+		&.bottom-border {
+			border-bottom: 1px solid var(--color-panedivider);
+			margin-bottom: 4px;
+		}
 	}
 }
 

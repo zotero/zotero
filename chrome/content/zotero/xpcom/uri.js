@@ -375,6 +375,31 @@ Zotero.URI = new function () {
 	};
 	
 	
+	// Fetch library and its name based on the provided URL.
+	// If url is for a group, return group and its name.
+	// If url is for a user, user's name and, if it is the current user, "My Library"
+	this.getLibraryInfoFromURI = function (uri) {
+		if (uri.includes("/groups/")) {
+			let groupID = uri.split("/groups/")[1];
+			let group = Zotero.Groups.get(groupID);
+			if (group) {
+				return { name: group.name, library: group };
+			}
+		}
+		else if (uri.includes("/users/")) {
+			let userID = uri.split("/users/")[1];
+			let result = {
+				name: Zotero.Users.getName(userID),
+				library: null
+			};
+			if (userID == `${Zotero.Users.getCurrentUserID()}`) {
+				result.library = Zotero.Libraries.userLibrary;
+			}
+			return result;
+		}
+		return null;
+	};
+	
 	/**
 	 * Convert an object URI into an object containing libraryID and key
 	 *

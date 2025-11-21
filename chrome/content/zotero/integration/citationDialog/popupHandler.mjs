@@ -235,6 +235,32 @@ export class CitationDialogPopupsHandler {
 		return true;
 	}
 
+	// Display a warning when citing from a new library
+	showCrossLibraryCitationWarning = function (citedLibraryNames) {
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		var title = Zotero.getString("integration-citationDialog-cross-lib-warning-title");
+		var text = Zotero.getString("integration-citationDialog-cross-lib-warning-line1") + ` ${citedLibraryNames.join(",")}.`;
+		text += `\n\n${Zotero.getString("integration-citationDialog-cross-lib-warning-line2")}`;
+		var result = ps.confirmEx(
+			null,
+			title,
+			text,
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null, null, null, {}
+		);
+
+		// Cancel
+		if (result == 1) {
+			return false;
+		}
+
+		// Cross-library citations allowed
+		return true;
+	};
+
 	_getNode(selector) {
 		return this.doc.querySelector(selector);
 	}

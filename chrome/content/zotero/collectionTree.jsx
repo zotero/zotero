@@ -51,6 +51,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		filterLibraryIDs: false,
 		hideSources: [],
 		onContextMenu: noop,
+		topGroupConfig: null,
 	};
 
 	static propTypes = {
@@ -60,6 +61,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		filterLibraryIDs: PropTypes.array,
 		hideSources: PropTypes.array,
 		onContextMenu: PropTypes.func,
+		topGroupConfig: PropTypes.object, // { libraryIDs: [number], headerLabel: string }
 	};
 
 	constructor(props) {
@@ -330,12 +332,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// The arrow on macOS is a full icon's width.
 		// For non-userLibrary/feed items that are drawn under headers
 		// we do not draw the arrow and need to move all items 1 level up
-		if (Zotero.isMac && !treeRow.isHeader() && !treeRow.isFeed()
-				&& treeRow.ref && treeRow.ref.libraryID != Zotero.Libraries.userLibraryID) {
+		if (Zotero.isMac && !treeRow.isHeader() && !treeRow.isFeed() && treeRow.ref
+			&& (treeRow.ref.libraryID != Zotero.Libraries.userLibraryID || this.props.topGroupConfig?.libraryIDs.includes(treeRow.ref.libraryID))) {
 			depth--;
 		}
-		// Ensures the feeds row has no padding
-		if (treeRow.isFeeds()) {
+		// Ensures the feeds and separator rows have no padding
+		if (treeRow.isFeeds() || treeRow.isSeparator()) {
 			depth = 0;
 		}
 		div.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
@@ -414,6 +416,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		cell.appendChild(icon);
 		cell.appendChild(label);
 		div.appendChild(cell);
+
+		if (treeRow.isSeparator() && treeRow.ref?.bottomBorder) {
+			cell.classList.add("bottom-border");
+		}
 		
 		// Accessibility
 		div.setAttribute('aria-level', depth+1);
@@ -521,19 +527,43 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var added = 0;
 			this._filterResultsCache = {};
 			let libraryIncluded, groupsIncluded, feedsIncluded;
+
+			//
+			// Selected groups moved to the top (e.g. in citation dialog)
+			//
+			if (this.props.topGroupConfig) {
+				let groupHeader = new Zotero.CollectionTreeRow(this, 'header', {
+					id: "top-group-header",
+					label: this.props.topGroupConfig.headerLabel,
+					libraryID: -1
+				});
+				newRows.splice(added++, 0, groupHeader);
+				for (let groupID of this.props.topGroupConfig.libraryIDs) {
+					let type = groupID == Zotero.Libraries.userLibraryID ? 'library' : 'group';
+					newRows.splice(added++, 0, new Zotero.CollectionTreeRow(this, type, Zotero.Libraries.get(groupID), 1, true));
+					added += await this._expandRow(newRows, added - 1);
+				}
+				newRows.splice(added++, 0, new Zotero.CollectionTreeRow(this, 'separator', { bottomBorder: true }, 0));
+			}
+
 			//
 			// Add "My Library"
 			//
 			libraryIncluded = this._includedInTree({ libraryID: Zotero.Libraries.userLibraryID });
-			if (libraryIncluded) {
+			let libraryInTopGroup = this.props.topGroupConfig?.libraryIDs.includes(Zotero.Libraries.userLibraryID);
+			if (libraryIncluded && !libraryInTopGroup) {
 				newRows.splice(added++, 0,
 					new Zotero.CollectionTreeRow(this, 'library', Zotero.Libraries.userLibrary));
-				newRows[0].isOpen = true;
-				added += await this._expandRow(newRows, 0);
+				newRows[added - 1].isOpen = true;
+				added += await this._expandRow(newRows, added ? added - 1 : 0);
 			}
 			
 			// Add groups
 			var groups = Zotero.Groups.getAll();
+			// Don't include special groups already placed at the top
+			if (this.props.topGroupConfig) {
+				groups = groups.filter(group => !this.props.topGroupConfig.libraryIDs.includes(group.libraryID));
+			}
 			groupsIncluded = groups.some(group => this._includedInTree(group));
 			if (groups.length && groupsIncluded) {
 				if (libraryIncluded) {
@@ -1426,6 +1456,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			case 'header':
 				if (treeRow.ref.id == 'group-libraries-header') {
 					icon = 'groups';
+				}
+				if (treeRow.ref.id == 'top-group-header') {
+					icon = 'groups'; // to change
 				}
 				break;
 			case 'separator':
