@@ -134,17 +134,12 @@ async function accept() {
 	if (accepted || SearchHandler.searching || !CitationDataManager.items.length) return;
 	accepted = true;
 	Zotero.debug("Citation Dialog: accepted");
-	_id("library-layout").hidden = true;
-	_id("list-layout").hidden = true;
-	_id("bubble-input").hidden = true;
-	_id("bottom-area").hidden = true;
-	_id("progress").hidden = false;
+	changeProgressDisplay(true);
 	let progressHeight = Helpers.getSearchRowHeight();
 	// The minHeight is not just removed so that windows doesn't make the window too small
 	document.documentElement.style.minHeight = progressHeight + "px";
-	setTimeout(() => {
-		window.resizeTo(window.innerWidth, progressHeight);
-	});
+	await Zotero.Promise.delay();
+	window.resizeTo(window.innerWidth, progressHeight);
 	// If items were added before sorting was ready, we must wait to sort them here.
 	// Otherwise, if the dialog is opened again, bubbles will not be in the correct
 	// order, even though the citation itself will look right.
@@ -152,6 +147,24 @@ async function accept() {
 		await ioReadyPromise;
 		await CitationDataManager.sort();
 	}
+	// Refresh cited libraries and check if cross-library citation warning
+	// needs to be shown again. Needed to handle rare cases when
+	// recorded cited libraries in document prefs get outdated.
+	await Zotero.Integration.currentSession.refreshCitedLibraries(true);
+	let canProceed = IOManager.checkCrossLibraryCitations(CitationDataManager.items.map(obj => obj.item));
+	if (!canProceed) {
+		// Remove added items and un-accept the dialog
+		let { citedLibrariesIDs } = io.getCitedLibraryInfo();
+		for (let item of CitationDataManager.items) {
+			if (!citedLibrariesIDs.includes(item.item.libraryID)) {
+				await IOManager._deleteItem(item.dialogReferenceID);
+			}
+		}
+		changeProgressDisplay(false);
+		accepted = false;
+		return;
+	}
+	
 	CitationDataManager.updateCitationObject(true);
 	cleanupBeforeDialogClosing();
 	io.accept((percent) => {
@@ -190,6 +203,20 @@ function dialogNotPristine() {
 // shortcut used for brevity
 function _id(id) {
 	return doc.getElementById(id);
+}
+
+// Switch from displaying the actual citation dialog to loading indicator, or the other way around.
+function changeProgressDisplay(progressVisible) {
+	_id(`${currentLayout.type}-layout`).hidden = progressVisible;
+	_id("bubble-input").hidden = progressVisible;
+	_id("bottom-area").hidden = progressVisible;
+	_id("progress").hidden = !progressVisible;
+	if (!progressVisible) {
+		_id("zotero-collections-tree").replaceChildren();
+		libraryLayout.collectionsView = null;
+		libraryLayout._initCollectionTree();
+		_id("bubble-input").refocusInput();
+	}
 }
 
 
@@ -620,12 +647,20 @@ class LibraryLayout extends Layout {
 	
 	async _initCollectionTree() {
 		const CollectionTree = require('zotero/collectionTree');
+		// Display cited libraries at the top of collection tree, separate
+		// from all other ones
+		let topGroupConfig = null;
+		let { citedLibrariesIDs } = io.getCitedLibraryInfo();
+		if (citedLibrariesIDs.length) {
+			topGroupConfig = { libraryIDs: citedLibrariesIDs, headerLabel: "Cited in this document" };
+		}
 		this.collectionsView = await CollectionTree.init(_id('zotero-collections-tree'), {
 			onSelectionChange: this._onCollectionSelection.bind(this),
 			hideSources: ['duplicates', 'trash', 'feeds'],
 			initialFolder: Zotero.Prefs.get("integration.citationDialogCollectionLastSelected"),
 			onActivate: () => {},
-			filterLibraryIDs: io.filterLibraryIDs
+			filterLibraryIDs: io.filterLibraryIDs,
+			topGroupConfig: topGroupConfig
 		});
 		// Add aria-description with instructions on what this collection tree is for
 		// Voiceover announces the description placed on the actual tree when focus enters it
@@ -887,6 +922,7 @@ class ListLayout extends Layout {
 //
 const IOManager = {
 	sectionExpandedStatus: {},
+	crossLibraryCitationsAllowed: false,
 
 	// most essential IO functionality that is added immediately on load
 	preInit() {
@@ -1017,6 +1053,13 @@ const IOManager = {
 		// If multiple items are being added, only add ones that are not included in the citation
 		if (items.length > 1) {
 			items = items.filter(item => !(item.id && CitationDataManager.getItems({ itemID: item.id }).length));
+		}
+
+		// Potentially show an alert if the user is attempting a cross-library citation
+		let canProceed = this.checkCrossLibraryCitations(items);
+		if (!canProceed) {
+			_id("bubble-input").refocusInput();
+			return;
 		}
 
 		// If the last input has a locator, add it into the item
@@ -1217,6 +1260,28 @@ const IOManager = {
 			desiredMode = "list";
 		}
 		this.toggleDialogMode(desiredMode);
+	},
+
+	// Check if provided items belong to a library different from
+	// the library of all other cited items. If so, show a warning message.
+	checkCrossLibraryCitations(items) {
+		let { citedLibrariesURIs, citedLibrariesNames } = io.getCitedLibraryInfo();
+		// If there is no single group that all cited items belong to, do nothing
+		if (!citedLibrariesURIs.length) return true;
+		// If the dialog was already shown and confirmed, do nothing
+		if (IOManager.crossLibraryCitationsAllowed) return true;
+		let itemGroups = items.map(item => Zotero.Libraries.get(item.libraryID)).filter(Boolean);
+		let notCitedGroups = itemGroups.filter(group => !citedLibrariesURIs.includes(Zotero.URI.getGroupURI(group)));
+		if (notCitedGroups.length === 0) return true;
+		Zotero.debug("Citation Dialog: show dialog to confirm cross-library citations");
+		// Show a confirmation dialog
+		let canProceed = PopupsHandler.showCrossLibraryCitationWarning(citedLibrariesNames);
+		if (canProceed) {
+			// If confirmed, set a flag to not show this warning again on Zotero.Integration level
+			IOManager.crossLibraryCitationsAllowed = true;
+		}
+		Zotero.debug(`Citation Dialog: Allow cross-library citations - ${canProceed}`);
+		return canProceed;
 	},
 	
 	// handle drag start of item nodes into bubble-input

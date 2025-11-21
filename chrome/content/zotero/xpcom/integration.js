@@ -1152,6 +1152,7 @@ Zotero.Integration.Session.prototype.updateFromDocument = async function (forceU
 		}
 	}
 	await this._processFields();
+	await this.refreshCitedLibraries();
 	try {
 		await this.handleRetractedItems();
 	}
@@ -1478,6 +1479,40 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 	this.processIndices = {}
 }
 
+// Update the record of cited libraries based on currently cited items
+Zotero.Integration.Session.prototype.refreshCitedLibraries = async function () {
+	let citationsByItemID = await this.citationsByItemID;
+	let allCitedItems = Object.keys(citationsByItemID).map(id => Zotero.Cite.getItem(id));
+	let allCitedLibraries = new Set();
+	for (let citedItem of allCitedItems) {
+		// Linked citation - get library URI from the libraryID
+		if (citedItem.libraryID) {
+			allCitedLibraries.add(Zotero.URI.getLibraryURI(citedItem.libraryID));
+		}
+		// Unlinked citation - fetch the groupURI from the cslURIs field
+		else if (citedItem.cslURIs?.length) {
+			// example: http://zotero.org/groups/{groupID}/items/{itemKey}
+			let citedURI = citedItem.cslURIs[0];
+			if (citedURI) {
+				let groupURI = citedURI.split("/items/")[0];
+				if (groupURI) {
+					allCitedLibraries.add(citedURI.split("/items/")[0]);
+				}
+			}
+		}
+	}
+	// Build new citedLibraryURIs record in the form { URI: groupName/userName }.
+	// Use URI instead of groupID to ensure there is no confusion between
+	// different instances of "My Library" from different users.
+	// groupName is stored as well so that we can display it to users who do not
+	// have access to that group.
+	let newCitedLibsRecord = {};
+	for (let uri of [...allCitedLibraries]) {
+		newCitedLibsRecord[uri] = this.data.citedLibraryURIs[uri] || Zotero.URI.getLibraryInfoFromURI(uri)?.name;
+	}
+	this.data.citedLibraryURIs = newCitedLibsRecord;
+};
+
 /**
  * Insert a citation at cursor location or edit the existing one,
  * display the citation dialog and perform any field/text inserts after
@@ -1559,6 +1594,14 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		fieldIndexPromise, citationsByItemIDPromise, previewFn
 	);
 	io.isCitingNotes = addNote;
+	io.getCitedLibraryInfo = () => {
+		return {
+			citedLibrariesURIs: Object.keys(this.data.citedLibraryURIs),
+			citedLibrariesNames: Object.keys(this.data.citedLibraryURIs).map(uri => this.data.citedLibraryURIs[uri] || Zotero.getString("integration-citationDialog-cross-lib-warning-unknown-lib")),
+			citedLibrariesIDs: Object.keys(this.data.citedLibraryURIs).map(uri => Zotero.URI.getLibraryInfoFromURI(uri)?.library?.libraryID).filter(Boolean)
+		};
+	};
+
 	Zotero.debug(`Editing citation:`);
 	Zotero.debug(JSON.stringify(citation.toJSON()));
 
@@ -1607,6 +1650,7 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		}
 		await this.addCitation(citation.fieldIndex, await citation.field.getNoteIndex(), citation);
 	}
+	await this.refreshCitedLibraries();
 	return citations;
 };
 
@@ -2607,6 +2651,7 @@ Zotero.Integration.BibliographyEditInterface.prototype.setCustomText = function 
 Zotero.Integration.DocumentData = function (string) {
 	this.style = {};
 	this.prefs = {};
+	this.citedLibraryURIs = {};
 	this.sessionID = null;
 	if (string) {
 		this.unserialize(string);
@@ -2627,6 +2672,7 @@ Zotero.Integration.DocumentData.prototype.serialize = function () {
 		return JSON.stringify({
 			style,
 			prefs: this.prefs,
+			citedLibraryURIs: this.citedLibraryURIs,
 			sessionID: this.sessionID,
 			zoteroVersion: Zotero.version,
 			dataVersion: 4
@@ -2639,10 +2685,14 @@ Zotero.Integration.DocumentData.prototype.serialize = function () {
 		prefs += `<pref name="${Zotero.Utilities.htmlSpecialChars(pref)}" `+
 			`value="${Zotero.Utilities.htmlSpecialChars(this.prefs[pref].toString())}"/>`;
 	}
+	// Store cited libraries URI and their group name separated by '='
+	// See refreshCitedLibraries comments for info on why both are needed.
+	let citedLibraries = Object.entries(this.citedLibraryURIs).map(([uri, name]) => `${uri}=${name}`);
 	
 	return '<data data-version="'+Zotero.Utilities.htmlSpecialChars(`${DATA_VERSION}`)+'" '+
-		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'">'+
-			'<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
+		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'"'+
+		' cited-libraries="' + Zotero.Utilities.htmlSpecialChars(citedLibraries.join(',')) + '"' + '>'
+			+ '<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
 		'<style id="'+Zotero.Utilities.htmlSpecialChars(this.style.styleID)+'" '+
 			(this.style.locale ? 'locale="' + Zotero.Utilities.htmlSpecialChars(this.style.locale) + '" ': '') +
 			'hasBibliography="'+(this.style.hasBibliography ? "1" : "0")+'" '+
@@ -2658,6 +2708,12 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function (xmlData) {
 		doc = parser.parseFromString(xmlData, "application/xml");
 	
 	this.sessionID = Zotero.Utilities.xpathText(doc, '/data/session[1]/@id');
+	let citedLibraryURIsAttr = Zotero.Utilities.xpathText(doc, '/data/@cited-libraries');
+	this.citedLibraryURIs = citedLibraryURIsAttr.split(",").reduce((obj, pair) => {
+		let [uri, name] = pair.split("=");
+		obj[uri] = name;
+		return obj;
+	}, {});
 	this.style = {"styleID":Zotero.Utilities.xpathText(doc, '/data/style[1]/@id'),
 		"locale":Zotero.Utilities.xpathText(doc, '/data/style[1]/@locale'),
 		"hasBibliography":(Zotero.Utilities.xpathText(doc, '/data/style[1]/@hasBibliography') == 1),
