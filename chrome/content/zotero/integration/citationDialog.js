@@ -120,6 +120,12 @@ async function onLoad() {
 	// wait to call functions that rely on io.getItems() or io.sort() till all cited data is loaded
 	ioReadyPromise.then(async () => {
 		if (accepted) return;
+		// Move cited collections to the top, when ready
+		await Zotero.Integration.currentSession.refreshCitedLibraries(true);
+		let { citedLibrariesIDs } = io.getCitedLibraryInfo();
+		if (citedLibrariesIDs.length) {
+			await libraryLayout.collectionsView.setTopGroup(citedLibrariesIDs, "Cited in this document");
+		}
 		Zotero.debug("Citation Dialog: io loaded cited data");
 		await SearchHandler.refreshCitedItems();
 		currentLayout.refreshItemsList({ retainItemsState: true });
@@ -657,21 +663,24 @@ class LibraryLayout extends Layout {
 	
 	async _initCollectionTree() {
 		const CollectionTree = require('zotero/collectionTree');
-		// Display cited libraries at the top of collection tree, separate
-		// from all other ones
-		let topGroupConfig = null;
-		let { citedLibrariesIDs } = io.getCitedLibraryInfo();
-		if (citedLibrariesIDs.length) {
-			topGroupConfig = { libraryIDs: citedLibrariesIDs, headerLabel: "Cited in this document" };
-		}
 		this.collectionsView = await CollectionTree.init(_id('zotero-collections-tree'), {
 			onSelectionChange: this._onCollectionSelection.bind(this),
 			hideSources: ['duplicates', 'trash', 'feeds'],
 			initialFolder: Zotero.Prefs.get("integration.citationDialogCollectionLastSelected"),
 			onActivate: () => {},
-			filterLibraryIDs: io.filterLibraryIDs,
-			topGroupConfig: topGroupConfig
+			filterLibraryIDs: io.filterLibraryIDs
 		});
+		// Wait for collectionTree to get fully loaded before moving cited libraries to the top
+		let waitCount = 10;
+		while (!this.collectionsView.getSelectedLibraryID() && waitCount < 50) {
+			await Zotero.Promise.delay(10);
+			waitCount++; // sanity check to avoid infinite loop if something goes wrong
+		}
+		// Move cited libraries to the top of the collection tree
+		let { citedLibrariesIDs } = io.getCitedLibraryInfo();
+		if (citedLibrariesIDs.length) {
+			await libraryLayout.collectionsView.setTopGroup(citedLibrariesIDs, "Cited in this document");
+		}
 		// Add aria-description with instructions on what this collection tree is for
 		// Voiceover announces the description placed on the actual tree when focus enters it
 		if (Zotero.isMac) {

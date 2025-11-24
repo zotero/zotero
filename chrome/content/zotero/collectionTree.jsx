@@ -51,7 +51,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		filterLibraryIDs: false,
 		hideSources: [],
 		onContextMenu: noop,
-		topGroupConfig: null,
 	};
 
 	static propTypes = {
@@ -61,7 +60,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		filterLibraryIDs: PropTypes.array,
 		hideSources: PropTypes.array,
 		onContextMenu: PropTypes.func,
-		topGroupConfig: PropTypes.object, // { libraryIDs: [number], headerLabel: string }
 	};
 
 	constructor(props) {
@@ -115,6 +113,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._expandRowOnHoverTimer = null;
 		this._collapseExpandedRowsTimer = null;
 		
+		this._topGroupConfig = null;
+		
 		this.onLoad = this.createEventBinding('load', true, true);
 	}
 	
@@ -137,6 +137,24 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		await this.runListeners('load');
 		Zotero.debug("React CollectionTree loaded");
+	}
+
+	/**
+	 * Set libraries to display at the top of the tree
+	 *
+	 * @param {Array<number>} libraryIDs - Array of library IDs to show at the top
+	 * @param {string} headerLabel - Label for the header row
+	 */
+	async setTopGroup(libraryIDs, headerLabel) {
+		this._topGroupConfig = { libraryIDs, headerLabel };
+		let selected = this.getRow(this.selection.focused);
+		console.log(this.selection.focused, selected);
+		await this.refresh();
+		if (selected) {
+			await this.selectByID(selected.id);
+			this.tree.invalidate();
+		}
+		this.selection.selectEventsSuppressed = false;
 	}
 
 	componentDidMount() {
@@ -333,7 +351,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// For non-userLibrary/feed items that are drawn under headers
 		// we do not draw the arrow and need to move all items 1 level up
 		if (Zotero.isMac && !treeRow.isHeader() && !treeRow.isFeed() && treeRow.ref
-			&& (treeRow.ref.libraryID != Zotero.Libraries.userLibraryID || this.props.topGroupConfig?.libraryIDs.includes(treeRow.ref.libraryID))) {
+			&& (treeRow.ref.libraryID != Zotero.Libraries.userLibraryID || this._topGroupConfig?.libraryIDs.includes(treeRow.ref.libraryID))) {
 			depth--;
 		}
 		// Ensures the feeds and separator rows have no padding
@@ -531,14 +549,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			//
 			// Selected groups moved to the top (e.g. in citation dialog)
 			//
-			if (this.props.topGroupConfig) {
+			if (this._topGroupConfig) {
 				let groupHeader = new Zotero.CollectionTreeRow(this, 'header', {
 					id: "top-group-header",
-					label: this.props.topGroupConfig.headerLabel,
+					label: this._topGroupConfig.headerLabel,
 					libraryID: -1
 				});
 				newRows.splice(added++, 0, groupHeader);
-				for (let groupID of this.props.topGroupConfig.libraryIDs) {
+				for (let groupID of this._topGroupConfig.libraryIDs) {
 					let type = groupID == Zotero.Libraries.userLibraryID ? 'library' : 'group';
 					newRows.splice(added++, 0, new Zotero.CollectionTreeRow(this, type, Zotero.Libraries.get(groupID), 1, true));
 					added += await this._expandRow(newRows, added - 1);
@@ -550,7 +568,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			// Add "My Library"
 			//
 			libraryIncluded = this._includedInTree({ libraryID: Zotero.Libraries.userLibraryID });
-			let libraryInTopGroup = this.props.topGroupConfig?.libraryIDs.includes(Zotero.Libraries.userLibraryID);
+			let libraryInTopGroup = this._topGroupConfig?.libraryIDs.includes(Zotero.Libraries.userLibraryID);
 			if (libraryIncluded && !libraryInTopGroup) {
 				newRows.splice(added++, 0,
 					new Zotero.CollectionTreeRow(this, 'library', Zotero.Libraries.userLibrary));
@@ -561,8 +579,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			// Add groups
 			var groups = Zotero.Groups.getAll();
 			// Don't include special groups already placed at the top
-			if (this.props.topGroupConfig) {
-				groups = groups.filter(group => !this.props.topGroupConfig.libraryIDs.includes(group.libraryID));
+			if (this._topGroupConfig) {
+				groups = groups.filter(group => !this._topGroupConfig.libraryIDs.includes(group.libraryID));
 			}
 			groupsIncluded = groups.some(group => this._includedInTree(group));
 			if (groups.length && groupsIncluded) {
