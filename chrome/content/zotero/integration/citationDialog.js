@@ -59,6 +59,16 @@ async function onLoad() {
 	}
 	ioReadyPromise.then(() => ioIsReady = true);
 	isCitingNotes = !!io.isCitingNotes;
+	// set default cited libraries info, if not provided
+	if (!io.getCitedLibraryInfo) {
+		io.getCitedLibraryInfo = () => {
+			return {
+				citedLibrariesURIs: [],
+				citedLibrariesNames: [],
+				citedLibrariesIDs: []
+			};
+		};
+	}
 	window.isPristine = true;
 
 	Zotero.debug("Citation Dialog: initializing");
