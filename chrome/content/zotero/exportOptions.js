@@ -31,7 +31,7 @@
 
 const OPTION_PREFIX = "export-option-";
 
-const IGNORE_IMPORT_ONLY = [
+const IGNORE_EXPORT_ONLY_TRANSLATORS = [
 	'b6e39b57-8942-4d11-8259-342c46ce395f', // BibLaTeX: Imported by BibTeX
 	'14763d25-8ba0-45df-8f52-b8d1108e7ac9', // Bibliontology RDF: Imported by RDF
 	'14763d24-8ba0-45df-8f52-b8d1108e7ac9', // Zotero RDF: Imported by RDF
@@ -228,7 +228,7 @@ var Zotero_File_Interface_Export = new function() {
 		
 		let warningCannotImport = document.getElementById('warning-cannot-import');
 		warningCannotImport.hidden = translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES.import
-			|| IGNORE_IMPORT_ONLY.includes(translator.translatorID);
+			|| IGNORE_EXPORT_ONLY_TRANSLATORS.includes(translator.translatorID);
 		document.l10n.setArgs(warningCannotImport, { format: translator.label });
 		document.l10n.translateRoots().then(() => window.sizeToContent());
 		
