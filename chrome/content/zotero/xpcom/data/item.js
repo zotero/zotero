@@ -4075,11 +4075,30 @@ for (let name of ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel',
 					}
 					break;
 				
-				case 'sortIndex':
-					if (!/^(\d{5}\|\d{6}\|\d{5}|\d{5}\|\d{8}|\d{7,8})$/.test(value)) {
+				case 'sortIndex': {
+					let parentItem = this.parentItem;
+					if (parentItem?.isPDFAttachment()) {
+						if (!/^\d{5}\|\d{6}\|\d{5}$/.test(value)) {
+							throw new Error(`Invalid sortIndex '${value}'`);
+						}
+					}
+					else if (parentItem?.isEPUBAttachment()) {
+						if (!/^\d{5}\|\d{8}$/.test(value)) {
+							throw new Error(`Invalid sortIndex '${value}' for EPUB annotation`);
+						}
+					}
+					// TODO: Use isSnapshotAttachment() once that matches all annotatable HTML attachments
+					else if (parentItem?.attachmentContentType === 'text/html') {
+						if (!/^\d{7,8}$/.test(value)) {
+							throw new Error(`Invalid sortIndex '${value}' for HTML annotation`);
+						}
+					}
+					// Otherwise, allow any supported sortIndex format
+					else if (!/^(\d{5}\|\d{6}\|\d{5}|\d{5}\|\d{8}|\d{7,8})$/.test(value)) {
 						throw new Error(`Invalid sortIndex '${value}'`);
 					}
 					break;
+				}
 				
 				case 'isExternal':
 					if (typeof value != 'boolean') {

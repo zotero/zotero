@@ -1556,6 +1556,47 @@ describe("Zotero.Item", function () {
 			});
 		});
 		
+		describe("#annotationSortIndex", function () {
+			let sortIndexPDF = '12345|123456|12345';
+			let sortIndexEPUB = '12345|12345678';
+			let sortIndexHTML = '1234567';
+			let sortIndexInvalid = '1';
+
+			it("should enforce the parent attachment's sortIndex format", async function () {
+				let file = getTestDataDirectory();
+				file.append('stub.epub');
+				let attachmentEPUB = await Zotero.Attachments.linkFromFile({ file });
+
+				file = getTestDataDirectory();
+				file.append('test.html');
+				let attachmentHTML = await Zotero.Attachments.linkFromFile({ file });
+
+				let annotation = await createAnnotation('highlight', attachment);
+				assert.doesNotThrow(() => annotation.annotationSortIndex = sortIndexPDF);
+				assert.throws(() => annotation.annotationSortIndex = sortIndexEPUB);
+				assert.throws(() => annotation.annotationSortIndex = sortIndexHTML);
+
+				annotation = await createAnnotation('highlight', attachmentEPUB);
+				assert.throws(() => annotation.annotationSortIndex = sortIndexPDF);
+				assert.doesNotThrow(() => annotation.annotationSortIndex = sortIndexEPUB);
+				assert.throws(() => annotation.annotationSortIndex = sortIndexHTML);
+
+				annotation = await createAnnotation('highlight', attachmentHTML);
+				assert.throws(() => annotation.annotationSortIndex = sortIndexPDF);
+				assert.throws(() => annotation.annotationSortIndex = sortIndexEPUB);
+				assert.doesNotThrow(() => annotation.annotationSortIndex = sortIndexHTML);
+			});
+			
+			it("should allow any sortIndex format when there is no parent attachment", async function () {
+				let annotation = await createAnnotation('highlight', attachment);
+				annotation.parentItemID = null;
+				for (let sortIndex of [sortIndexPDF, sortIndexEPUB, sortIndexHTML]) {
+					assert.doesNotThrow(() => annotation.annotationSortIndex = sortIndex);
+				}
+				assert.throws(() => annotation.annotationSortIndex = sortIndexInvalid);
+			});
+		});
+		
 		describe("#saveTx()", function () {
 			it("should save a highlight annotation", async function () {
 				var annotation = new Zotero.Item('annotation');
