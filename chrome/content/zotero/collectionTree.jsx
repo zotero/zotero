@@ -26,7 +26,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 const LibraryTree = require('./libraryTree');
-const VirtualizedTable = require('components/virtualized-table');
+const VirtualizedTree = require('components/virtualized-table').VirtualizedTree;
 const { getCSSIcon } = require('components/icons');
 const { getDragTargetOrient } = require('components/utils');
 const { noop } = require("./components/utils");
@@ -463,7 +463,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	render() {
-		return React.createElement(VirtualizedTable,
+		return React.createElement(VirtualizedTree,
 			{
 				getRowCount: () => this._rows.length,
 				id: this.id,
@@ -478,7 +478,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				isContainer: this.isContainer,
 				isContainerEmpty: this.isContainerEmpty,
 				isContainerOpen: this.isContainerOpen,
-				toggleOpenState: this.toggleOpenState,
+				onToggleOpenState: this.toggleOpenState,
 				getRowString: this.getRowString.bind(this),
 				
 				onItemContextMenu: (...args) => this.props.onContextMenu && this.props.onContextMenu(...args),
@@ -486,7 +486,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				onKeyDown: this.handleKeyDown,
 				onActivate: (...args) => (this.props.onActivate ? this.props.onActivate(...args) : this.handleActivate(...args)),
 
-				role: 'tree',
 				label: Zotero.getString('pane.collections.title')
 			}
 		);
