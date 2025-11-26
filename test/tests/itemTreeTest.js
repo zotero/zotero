@@ -179,7 +179,7 @@ describe("Zotero.ItemTree", function () {
 			assert.equal(quicksearch.value, "test");
 		});
 
-		it("should hide context annotation rows if hideContextAnnotationRows=true", async function () {
+		it("should keep attachment rows collapsed unless search matches annotation text when hideContextAnnotationRows=true", async function () {
 			Zotero.Prefs.set("hideContextAnnotationRows", true);
 
 			let item = await createDataObject('item', { title: "Item" });
@@ -197,22 +197,22 @@ describe("Zotero.ItemTree", function () {
 			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF test', parentItemID: item.id });
 			let highlightTwo = await createAnnotation('highlight', attachmentTwo, { comment: "Highlight te" });
 
-			// "te" search - all rows are visible
-			await zp.itemsView.setFilter('search', "te");
+			// Search matching attachment title only should keep attachment rows collapsed
+			await zp.itemsView.setFilter('search', "PDF test");
 
-			assert.isNumber(itemsView.getRowIndexByID(attachmentOne.id));
-			assert.isNumber(itemsView.getRowIndexByID(highlightOne.id));
-			assert.isNumber(itemsView.getRowIndexByID(underlineOne.id));
-			assert.isNumber(itemsView.getRowIndexByID(attachmentTwo.id));
-			assert.isNumber(itemsView.getRowIndexByID(highlightTwo.id));
+			let attachmentTwoRow = itemsView.getRowIndexByID(attachmentTwo.id);
+			assert.isNumber(attachmentTwoRow);
+			assert.isFalse(itemsView.isContainerOpen(attachmentTwoRow));
+			assert.isFalse(itemsView.getRowIndexByID(highlightTwo.id));
 
-			// "test" search - only annotations with "testing" remain
-			await zp.itemsView.setFilter('search', "test");
+			// Search matching annotation text should reveal matching annotation rows
+			await zp.itemsView.setFilter('search', "testing");
 
-			assert.isNumber(itemsView.getRowIndexByID(attachmentOne.id));
+			let attachmentOneRow = itemsView.getRowIndexByID(attachmentOne.id);
+			assert.isNumber(attachmentOneRow);
+			assert.isTrue(itemsView.isContainerOpen(attachmentOneRow));
 			assert.isNumber(itemsView.getRowIndexByID(underlineOne.id));
 			assert.isFalse(itemsView.getRowIndexByID(highlightOne.id));
-			assert.isNumber(itemsView.getRowIndexByID(attachmentTwo.id));
 			assert.isFalse(itemsView.getRowIndexByID(highlightTwo.id));
 		});
 	});
