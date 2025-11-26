@@ -27,22 +27,263 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const diff = require('diff');
 const VirtualizedTable = require('components/virtualized-table');
-// TODO: Create a custom row provider for citationExplorer to use with base ItemTree.
-// Currently uses changeCollectionTreeRow which only exists on CollectionViewItemTree,
-// so this is broken until we either switch to CollectionViewItemTree or create a
-// simple row provider that can display arbitrary items.
 const { getCSSIcon, CSSIcon } = require('components/icons');
 const ItemTree = require('zotero/itemTree');
-const { getColumnDefinitionsByDataKey } = require('zotero/itemTreeColumns');
+const { ItemTreeRowProvider } = ItemTree;
+const { ItemTreeRow, ZoteroItemTreeRow } = require('zotero/itemTreeRow');
+const { COLUMNS, getColumnDefinitionsByDataKey } = require('zotero/itemTreeColumns');
 const { makeRowRenderer } = VirtualizedTable;
+
+// ////////////////////////////////////////////////////////////////////////////
+//
+//  Citation Explorer Row Classes
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Container row wrapping a Zotero.Library.
+ * Follows the CollectionItemTreeRow pattern — uses the default renderRow()
+ * from ItemTreeRow base, which loops through all columns and calls
+ * renderCtx.renderCell() for each. Non-title fields return '' from getField(),
+ * so those cells render empty naturally.
+ */
+class LibraryItemTreeRow extends ItemTreeRow {
+	constructor(library, items, isOpen = true) {
+		super(library, 0, isOpen); // library has treeViewID = "L<id>"
+		this._items = items; // raw item refs for getChildItems()
+	}
+
+	get type() {
+		return 'library';
+	}
+
+	get isDraggable() {
+		return false;
+	}
+
+	get sortChildren() {
+		return true;
+	}
+
+	isContainer() {
+		return true;
+	}
+
+	isContainerOpen() {
+		return this.isOpen;
+	}
+
+	isContainerEmpty() {
+		return this._items.length === 0;
+	}
+
+	getChildItems() {
+		return this._items;
+	}
+
+	getField(field) {
+		if (field === 'title') return this.ref.name;
+		return '';
+	}
+
+	getDisplayTitle() {
+		return this.ref.name;
+	}
+
+	getTypeLabel() {
+		return '';
+	}
+
+	getIcon() {
+		let library = this.ref;
+		let iconKey = 'library';
+		if (library.libraryType === 'group') iconKey = 'library-group';
+		else if (library.libraryType === 'publications') iconKey = 'publications';
+		let icon = getCSSIcon(iconKey);
+		icon.classList.add('icon-item-type');
+		return icon;
+	}
+}
+
+/**
+ * Item row with citation-tracking metadata and "Uncited" badge.
+ */
+class CitationExplorerItemTreeRow extends ZoteroItemTreeRow {
+	constructor(ref, level, isOpen, { citedIn = [], cslItemID = null } = {}) {
+		let id = ref.treeViewID ?? cslItemID ?? 'csl-' + Zotero.Utilities.randomString(8);
+		super(ref, level, isOpen, id);
+		this.citedIn = citedIn;
+		this.cslItemID = cslItemID;
+	}
+
+	get isLinked() {
+		return !this.cslItemID;
+	}
+
+	isContainer() {
+		return false;
+	}
+
+	isContainerEmpty() {
+		return true;
+	}
+
+	renderPrimaryCell(index, data, column) {
+		let cell = super.renderPrimaryCell(index, data, column);
+		if (this.citedIn.length === 0) {
+			let badge = document.createElement('span');
+			badge.classList.add('badge', 'badge-uncited');
+			badge.textContent = 'Uncited';
+			let textSpan = cell.querySelector('.cell-text');
+			if (textSpan) textSpan.after(badge);
+			else cell.appendChild(badge);
+		}
+		return cell;
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+//
+//  Citation Explorer Row Provider
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Row provider that groups items by library with expandable containers.
+ * Maintains lookup maps so row metadata survives collapse/re-expand.
+ */
+class CitationExplorerRowProvider extends ItemTreeRowProvider {
+	constructor(itemTree) {
+		super(itemTree);
+		this._sourceItems = [];
+		this._citedInByID = new Map();
+		this._cslItemIDByID = new Map();
+	}
+
+	/**
+	 * Override createRow() — the factory hook.
+	 * Called by _toggleOpenState() on collapse/re-expand.
+	 * Reconstructs rows with metadata from lookup maps.
+	 */
+	createRow(ref, level, isOpen) {
+		if (ref instanceof Zotero.Library) {
+			let items = this._sourceItems.filter(
+				item => (item.libraryID ?? Zotero.Libraries.userLibraryID) === ref.libraryID
+			);
+			return new LibraryItemTreeRow(ref, items, isOpen);
+		}
+
+		let key = ref.treeViewID;
+		return new CitationExplorerItemTreeRow(ref, level, isOpen, {
+			citedIn: this._citedInByID.get(key) || [],
+			cslItemID: this._cslItemIDByID.get(key) || null,
+		});
+	}
+
+	/**
+	 * Replace displayed items. Groups by library, sorts, and updates view.
+	 * @param {CitationExplorerItemTreeRow[]} itemRows
+	 */
+	async setItems(itemRows) {
+		this._citedInByID = new Map();
+		this._cslItemIDByID = new Map();
+		this._sourceItems = [];
+		for (let row of itemRows) {
+			let key = row.ref.treeViewID;
+			this._citedInByID.set(key, row.citedIn);
+			if (row.cslItemID) this._cslItemIDByID.set(key, row.cslItemID);
+			this._sourceItems.push(row.ref);
+		}
+
+		this._rebuildRows();
+		await this.itemTree._ensureSortContextReady();
+		// _sort() builds the comparator, sorts top-level rows, then
+		// _restoreOpenState() reopens library containers with children
+		// sorted by the same comparator via _toggleOpenState()
+		this._sort(null);
+		await this.runListeners('update', true, { restoreSelection: false });
+	}
+
+	/**
+	 * Build _rows from _sourceItems. Library containers at level 0
+	 * when multiple libraries, flat list when single library.
+	 */
+	_rebuildRows() {
+		const byLibrary = new Map();
+		for (const item of this._sourceItems) {
+			const libID = item.libraryID ?? Zotero.Libraries.userLibraryID;
+			if (!byLibrary.has(libID)) byLibrary.set(libID, []);
+			byLibrary.get(libID).push(item);
+		}
+
+		const sortedLibIDs = [...byLibrary.keys()].sort((a, b) => a - b);
+		const showContainers = sortedLibIDs.length > 1;
+
+		this._rows = [];
+		if (showContainers) {
+			for (const libID of sortedLibIDs) {
+				let library = Zotero.Libraries.get(libID);
+				let items = byLibrary.get(libID);
+				this._rows.push(new LibraryItemTreeRow(library, items, true));
+				// Children will be added by _sort() → _restoreOpenState() →
+				// _toggleOpenState(), which sorts them using the cached comparator
+			}
+		}
+		else {
+			for (const item of this._sourceItems) {
+				this._rows.push(this.createRow(item, 0, false));
+			}
+		}
+		this.refreshRowMap();
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+//
+//  Citation Explorer Item Tree
+//
+// ////////////////////////////////////////////////////////////////////////////
+
+/**
+ * ItemTree subclass that uses CitationExplorerRowProvider and makes
+ * library container rows non-selectable.
+ */
+class CitationExplorerItemTree extends ItemTree {
+	constructor(props) {
+		super(props);
+		this.rowProvider = new CitationExplorerRowProvider(this);
+		this._setRowProviderUpdateHandler();
+	}
+
+	async setItems(items) {
+		await this.rowProvider.setItems(items);
+		return this.waitForLoad();
+	}
+
+	isSelectable(index, _selectAll = false) {
+		let row = this.getRow(index);
+		return !!row && row.type !== 'library';
+	}
+
+	_renderItem(index, selection, oldDiv = null, columns = []) {
+		let div = super._renderItem(index, selection, oldDiv, columns);
+		let row = this.getRow(index);
+		div.classList.toggle('library-container-row', row?.type === 'library');
+		return div;
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////
+//
+//  Citation Explorer UI
+//
+// ////////////////////////////////////////////////////////////////////////////
 
 let io, citations, items, uncitedItems, citationList, itemList;
 let citationRows = [];
 let itemRows = [];
-let uncitedItemRows = [];
 let _addToTarget;
 let disableCitationActivate;
-let selectedTab = 0;
 
 const citationColumns = [
 	{
@@ -69,14 +310,23 @@ const citationColumns = [
 	},
 ];
 
-let itemColumns = getColumnDefinitionsByDataKey(['title', 'firstCreator', 'year']);
+// All standard Zotero columns, with only title/firstCreator/year visible by default.
+// The isLinked column is CE-specific and cannot be hidden.
+const defaultVisibleColumns = new Set(['title', 'firstCreator', 'year']);
+let itemColumns = COLUMNS
+	.filter(col => col.dataKey !== 'feed')
+	.map(col => Object.assign({}, col, {
+		hidden: !defaultVisibleColumns.has(col.dataKey),
+	}));
 itemColumns.push({
 	dataKey: 'isLinked',
 	label: 'Is Linked',
 	iconLabel: <CSSIcon name="link" className="icon-16"/>,
+	hidden: false,
 	width: 26,
 	staticWidth: true,
 	fixedWidth: true,
+	showInColumnPicker: false,
 	renderCell: (index, data, column) => {
 		let icon = getCSSIcon('cross');
 		if (data) {
@@ -86,7 +336,9 @@ itemColumns.push({
 		return icon;
 	}
 });
-itemColumns[1].sortDirection = 1;
+// Default sort by creator ascending
+let creatorCol = itemColumns.find(c => c.dataKey === 'firstCreator');
+if (creatorCol) creatorCol.sortDirection = 1;
 
 window.ZoteroDocumentCitations = {
 	init: async function () {
@@ -177,39 +429,40 @@ window.ZoteroDocumentCitations = {
 	},
 	
 	refreshItemList: async function () {
-		let rows = selectedTab === 0 ? itemRows : uncitedItemRows;
-		rows.forEach((item) => {
-			item.isLinked = !item.cslItemID;
-		});
+		let filteredRows = itemRows.filter(row => !this._filteredItems.has(row.id));
 
-		let filteredItems = rows.filter(item => !this._filteredItems.has(item.id));
 		if (!itemList) {
 			let domElem = document.querySelector('#zotero-items-tree');
-			itemList = await ItemTree.init(domElem, {
+			itemList = await CitationExplorerItemTree.init(domElem, {
 				id: "citation-explorer-items",
-				regularOnly: true,
+				regularOnly: false,
 				columns: itemColumns,
+				columnPicker: true,
 				shouldListenForNotifications: false,
-				autoSelect: false,
 				onSelectionChange: this.onItemSelectionChange.bind(this),
 				onActivate: this.onItemActivate.bind(this),
 				emptyMessage: Zotero.getString('pane.items.loading'),
-				firstColumnExtraWidth: 28-16,
-				firstColumnPrependRenderer: this._itemFirstColumnPrependRenderer.bind(this),
+				compareItems: (a, b) => {
+					let libA = a.ref.libraryID ?? Zotero.Libraries.userLibraryID;
+					let libB = b.ref.libraryID ?? Zotero.Libraries.userLibraryID;
+					return libA - libB;
+				},
+				getExtraField: (ref, field) => {
+					if (field === 'isLinked') {
+						return !ref.cslItemID;
+					}
+				},
 			});
 			await itemList.waitForLoad();
 			// Remove focus from citationList if focus is on itemList
 			// to prevent highlighting in both lists
-			domElem.addEventListener("focusin", (event) => {
-				citationList?.selection.clearSelection()
+			domElem.addEventListener("focusin", () => {
+				citationList?.selection.clearSelection();
 			});
 			document.querySelector("item-tree-menu-bar").init(itemList);
 		}
-		await itemList.changeCollectionTreeRow({
-			getItems: async () => filteredItems,
-			isSearch: () => true,
-			isSearchMode: () => true,
-		});
+
+		await itemList.setItems(filteredRows);
 	},
 	
 	onCitationFilter: async function () {
@@ -226,8 +479,8 @@ window.ZoteroDocumentCitations = {
 	
 	onItemFilter: async function () {
 		let searchString = this._normalizeSearch(document.querySelector('#item-search').value);
-		let itemStrings = itemRows.map((item) => {
-			return [item.getField('title'), item.getField('firstCreator'), item.getField('date')].join(' ');
+		let itemStrings = itemRows.map((row) => {
+			return [row.ref.getField('title'), row.ref.getField('firstCreator'), row.ref.getField('date')].join(' ');
 		});
 		this._filteredItems = new Set();
 		itemStrings.forEach((str, index) => {
@@ -241,38 +494,28 @@ window.ZoteroDocumentCitations = {
 	_initMappings: async function () {
 		const itemMap = {};
 		itemRows = items.map((item) => {
-			let citedIn = [];
-			let proxyItem = new Proxy(item, {
-				get(target, prop) {
-					if (prop == 'id' && !target.id) {
-						return target.cslItemID;
-					}
-					if (prop == 'citedIn') {
-						return citedIn;
-					}
-					return Reflect.get(...arguments);
-				}
-			});
-			itemMap[item.id || item.cslItemID] = proxyItem;
-			return proxyItem;
+			let cslItemID = item.id ? null : item.cslItemID;
+			let row = new CitationExplorerItemTreeRow(item, 0, false, { cslItemID });
+			itemMap[item.id || item.cslItemID] = row;
+			return row;
 		});
-		itemRows.push(...uncitedItems.map((item) => {
-			return new Proxy(item, {
-				get(target, prop) {
-					if (prop == 'citedIn') {
-						return [];
-					}
-					return Reflect.get(...arguments);
-				}
-			});
-		}));
+		// Add uncited items
+		for (let item of uncitedItems) {
+			let cslItemID = item.id ? null : item.cslItemID;
+			let row = new CitationExplorerItemTreeRow(item, 0, false, { citedIn: [], cslItemID });
+			itemRows.push(row);
+		}
+		// Build citation rows and populate citedIn
 		citationRows = await Promise.all(citations
 			.map(async (citation, citationIndex) => {
 				let isLinked = true;
 				let citedItems = [];
-				// check if all citation items are linked
 				for (let citationItem of citation.citationItems) {
-					itemMap[citationItem.id].citedIn.push(citationIndex);
+					let key = citationItem.id || citationItem.cslItemID;
+					let row = itemMap[key];
+					if (row) {
+						row.citedIn.push(citationIndex);
+					}
 					isLinked = isLinked && typeof citationItem.id == 'number';
 				}
 				let title = await citation.field.getText();
@@ -361,17 +604,23 @@ window.ZoteroDocumentCitations = {
 	 * @private
 	 */
 	onItemSelectionChange: async function () {
-		if (selectedTab === 1) return;
+		let selectedRows = [...itemList.selection.selected]
+			.map(index => itemList.getRow(index))
+			.filter(row => row && row.type !== 'library');
+
 		this._highlightedCitations = new Set();
-		for (let selectedItemIndex of itemList.selection.selected) {
-			for (let citationIndex of itemRows[selectedItemIndex].citedIn) {
+		for (let row of selectedRows) {
+			for (let citationIndex of row.citedIn) {
 				this._highlightedCitations.add(citations[citationIndex].citationID);
 			}
 		}
-		const item = itemList.getRow(itemList.selection.focused).ref;
-		const isUnlinked = typeof item.id != 'number';
-		const noneSelected = itemList.selection.selected.size === 0;
-		document.querySelector('#button-show-in-zotero').disabled = noneSelected || isUnlinked;
+
+		let focusedRow = itemList.getRow(itemList.selection.focused);
+		let isItemRow = focusedRow && focusedRow.type !== 'library';
+		let isUnlinked = isItemRow && !focusedRow.isLinked;
+		let noneSelected = selectedRows.length === 0;
+
+		document.querySelector('#button-show-in-zotero').disabled = noneSelected || !isItemRow || isUnlinked;
 		document.querySelector('#button-relink-item').disabled = noneSelected || !isUnlinked;
 		document.querySelector('#button-addTo-library').disabled = noneSelected || !isUnlinked;
 		
@@ -379,13 +628,18 @@ window.ZoteroDocumentCitations = {
 	},
 		
 	onItemActivate: async function () {
-		const item = itemList.getRow(itemList.selection.focused).ref;
-		if (typeof item.id != 'number') {
+		let focusedRow = itemList.getRow(itemList.selection.focused);
+		if (!focusedRow || focusedRow.type === 'library') return;
+
+		if (!focusedRow.isLinked) {
 			this.onItemRelink();
 		}
 		else {
-			await Zotero.Utilities.Internal.showInLibrary(
-					Array.from(itemList.selection.selected).map(index => itemList.getRow(index).ref));
+			let selectedItems = [...itemList.selection.selected]
+				.map(index => itemList.getRow(index))
+				.filter(row => row && row.type !== 'library')
+				.map(row => row.ref);
+			await Zotero.Utilities.Internal.showInLibrary(selectedItems);
 		}
 	},
 
@@ -404,8 +658,9 @@ window.ZoteroDocumentCitations = {
 			return;
 		}
 		let treeRow = itemList.getRow(itemList.selection.focused);
+		if (!treeRow || treeRow.type === 'library') return;
 		const oldItemID = treeRow.id;
-		const itemIdx = itemRows.findIndex(row => row.id === treeRow.id);
+		const itemIdx = itemRows.findIndex(row => row.id === oldItemID);
 		this._linkItem(items[0], oldItemID, itemIdx);
 
 		await this._initMappings();
@@ -413,16 +668,6 @@ window.ZoteroDocumentCitations = {
 		await this.refreshItemList();
 	},
 
-	_itemFirstColumnPrependRenderer: function (index, data, firstColumnPrepend) {
-		if (itemRows[index].citedIn.length === 0) {
-			let span = document.createElement('span');
-			span.classList.add('badge', 'badge-uncited');
-			span.textContent = 'Uncited';
-			firstColumnPrepend.push(span);
-		}
-		return firstColumnPrepend;
-	},
-	
 	async addToLibraryAndLink() {
 		var collectionID = _addToTarget.objectType == 'collection' ? _addToTarget.id : undefined;
 		
@@ -436,8 +681,9 @@ window.ZoteroDocumentCitations = {
 		
 		for (let index of itemList.selection.selected) {
 			let treeRow = itemList.getRow(index);
+			if (treeRow.type === 'library') continue;
 			const oldItemID = treeRow.id;
-			const itemIdx = itemRows.findIndex(row => row.id === treeRow.id);
+			const itemIdx = itemRows.findIndex(row => row.id === oldItemID);
 			
 			// Save item
 			let item = treeRow.ref.clone(_addToTarget.libraryID);

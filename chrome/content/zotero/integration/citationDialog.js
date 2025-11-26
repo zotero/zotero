@@ -703,7 +703,6 @@ class LibraryLayout extends Layout {
 		this.itemsView = await CollectionViewItemTree.init(itemsTree, {
 			id: "citationDialog",
 			dragAndDrop: DIALOG_STATE.isCitingItems(),
-			persistColumns: true,
 			columnPicker: true,
 			onSelectionChange: () => {
 				libraryLayout.updateSelectedItems();
