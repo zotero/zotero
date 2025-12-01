@@ -124,7 +124,7 @@ async function onLoad() {
 		await Zotero.Integration.currentSession.refreshCitedLibraries(true);
 		let { citedLibrariesIDs } = io.getCitedLibraryInfo();
 		if (citedLibrariesIDs.length) {
-			await libraryLayout.collectionsView.setTopGroup(citedLibrariesIDs, "Cited in this document");
+			await libraryLayout.collectionsView.setCitedGroup(citedLibrariesIDs);
 		}
 		Zotero.debug("Citation Dialog: io loaded cited data");
 		await SearchHandler.refreshCitedItems();
@@ -670,16 +670,16 @@ class LibraryLayout extends Layout {
 			onActivate: () => {},
 			filterLibraryIDs: io.filterLibraryIDs
 		});
-		// Wait for collectionTree to get fully loaded before moving cited libraries to the top
+		// Wait for collectionTree to get fully loaded before setting cited groups
 		let waitCount = 10;
 		while (!this.collectionsView.getSelectedLibraryID() && waitCount < 50) {
 			await Zotero.Promise.delay(10);
 			waitCount++; // sanity check to avoid infinite loop if something goes wrong
 		}
-		// Move cited libraries to the top of the collection tree
+		// Move cited groups to the top
 		let { citedLibrariesIDs } = io.getCitedLibraryInfo();
 		if (citedLibrariesIDs.length) {
-			await libraryLayout.collectionsView.setTopGroup(citedLibrariesIDs, "Cited in this document");
+			await libraryLayout.collectionsView.setCitedGroup(citedLibrariesIDs);
 		}
 		// Add aria-description with instructions on what this collection tree is for
 		// Voiceover announces the description placed on the actual tree when focus enters it
@@ -849,6 +849,19 @@ class ListLayout extends Layout {
 		let collapsibleSection = doc.querySelector(".section.expandable");
 		if (collapsibleSection) {
 			collapsibleSection.querySelector(".header-label").addEventListener("click", () => IOManager.toggleSectionCollapse(collapsibleSection, null, true));
+		}
+
+		// Add "Cited" badge to headers of cited libraries
+		for (let section of [..._id("list-layout").querySelectorAll(".section")]) {
+			let id = section.id;
+			let libraryID = id.match(/^list-(\d+)-items$/)?.[1];
+			if (!libraryID) continue;
+			let { citedLibrariesIDs } = io.getCitedLibraryInfo();
+			if (citedLibrariesIDs.includes(parseInt(libraryID))) {
+				let citedBadge = Helpers.createNode("span", {}, "cited-badge");
+				document.l10n.setAttributes(citedBadge, "integration-citationDialog-cited-label");
+				section.querySelector(".header").appendChild(citedBadge);
+			}
 		}
 		if (!options.skipWindowResize) {
 			this.resizeWindow();

@@ -135,6 +135,12 @@ export class CitationDialogSearchHandler {
 			if (!aIsCited && bIsCited) return 1;
 			return b.group.length - a.group.length;
 		});
+		// record which libraries are cited
+		for (let libraryItem of libraryItems) {
+			if (citedLibrariesIDs.includes(libraryItem.libraryID)) {
+				libraryItem.isCited = true;
+			}
+		}
 		result.push(...libraryItems);
 
 		return result;

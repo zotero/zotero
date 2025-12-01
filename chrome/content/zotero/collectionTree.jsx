@@ -113,7 +113,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._expandRowOnHoverTimer = null;
 		this._collapseExpandedRowsTimer = null;
 		
-		this._topGroupConfig = null;
+		this._citedGroupLibraryIDs = new Set();
 		
 		this.onLoad = this.createEventBinding('load', true, true);
 	}
@@ -140,20 +140,18 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	/**
-	 * Set libraries to display at the top of the tree
+	 * Set cited groups to display at the top of the groups section
 	 *
-	 * @param {Array<number>} libraryIDs - Array of library IDs to show at the top
-	 * @param {string} headerLabel - Label for the header row
+	 * @param {Array<number>} groupLibraryIDs - Array of group library IDs to show at the top of groups
 	 */
-	async setTopGroup(libraryIDs, headerLabel) {
-		this._topGroupConfig = { libraryIDs, headerLabel };
-		let selected = this.getRow(this.selection.focused);
-		console.log(this.selection.focused, selected);
-		await this.refresh();
-		if (selected) {
-			await this.selectByID(selected.id);
-			this.tree.invalidate();
+	async setCitedGroup(groupLibraryIDs) {
+		this._citedGroupLibraryIDs = new Set(groupLibraryIDs);
+		for (let [index, row] of this._rows.entries()) {
+			if (row.isLibrary(true) && !this._citedGroupLibraryIDs.has(row.ref.libraryID) && row.isOpen) {
+				await this.toggleOpenState(index);
+			}
 		}
+		await this.refresh();
 		this.selection.selectEventsSuppressed = false;
 	}
 
@@ -351,7 +349,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// For non-userLibrary/feed items that are drawn under headers
 		// we do not draw the arrow and need to move all items 1 level up
 		if (Zotero.isMac && !treeRow.isHeader() && !treeRow.isFeed() && treeRow.ref
-			&& (treeRow.ref.libraryID != Zotero.Libraries.userLibraryID || this._topGroupConfig?.libraryIDs.includes(treeRow.ref.libraryID))) {
+			&& treeRow.ref.libraryID != Zotero.Libraries.userLibraryID) {
 			depth--;
 		}
 		// Ensures the feeds and separator rows have no padding
@@ -433,11 +431,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		cell.appendChild(twisty);
 		cell.appendChild(icon);
 		cell.appendChild(label);
-		div.appendChild(cell);
-
-		if (treeRow.isSeparator() && treeRow.ref?.bottomBorder) {
-			cell.classList.add("bottom-border");
+		
+		// Add "Cited" badge for cited groups
+		if (treeRow.isLibrary(true) && treeRow.ref && this._citedGroupLibraryIDs.has(treeRow.ref.libraryID)) {
+			let citedBadge = document.createElement('span');
+			citedBadge.className = 'cited-badge';
+			document.l10n.setAttributes(citedBadge, 'integration-citationDialog-cited-label');
+			cell.appendChild(citedBadge);
 		}
+		
+		div.appendChild(cell);
 		
 		// Accessibility
 		div.setAttribute('aria-level', depth+1);
@@ -547,29 +550,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			let libraryIncluded, groupsIncluded, feedsIncluded;
 
 			//
-			// Selected groups moved to the top (e.g. in citation dialog)
-			//
-			if (this._topGroupConfig) {
-				let groupHeader = new Zotero.CollectionTreeRow(this, 'header', {
-					id: "top-group-header",
-					label: this._topGroupConfig.headerLabel,
-					libraryID: -1
-				});
-				newRows.splice(added++, 0, groupHeader);
-				for (let groupID of this._topGroupConfig.libraryIDs) {
-					let type = groupID == Zotero.Libraries.userLibraryID ? 'library' : 'group';
-					newRows.splice(added++, 0, new Zotero.CollectionTreeRow(this, type, Zotero.Libraries.get(groupID), 1, true));
-					added += await this._expandRow(newRows, added - 1);
-				}
-				newRows.splice(added++, 0, new Zotero.CollectionTreeRow(this, 'separator', { bottomBorder: true }, 0));
-			}
-
-			//
 			// Add "My Library"
 			//
 			libraryIncluded = this._includedInTree({ libraryID: Zotero.Libraries.userLibraryID });
-			let libraryInTopGroup = this._topGroupConfig?.libraryIDs.includes(Zotero.Libraries.userLibraryID);
-			if (libraryIncluded && !libraryInTopGroup) {
+			if (libraryIncluded) {
 				newRows.splice(added++, 0,
 					new Zotero.CollectionTreeRow(this, 'library', Zotero.Libraries.userLibrary));
 				newRows[added - 1].isOpen = true;
@@ -578,9 +562,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			
 			// Add groups
 			var groups = Zotero.Groups.getAll();
-			// Don't include special groups already placed at the top
-			if (this._topGroupConfig) {
-				groups = groups.filter(group => !this._topGroupConfig.libraryIDs.includes(group.libraryID));
+			// Sort cited groups to the top if configured
+			if (this._citedGroupLibraryIDs.size > 0) {
+				groups.sort((a, b) => {
+					let aIsCited = this._citedGroupLibraryIDs.has(a.libraryID);
+					let bIsCited = this._citedGroupLibraryIDs.has(b.libraryID);
+					if (aIsCited && !bIsCited) return -1;
+					if (!aIsCited && bIsCited) return 1;
+					// Both cited or both not cited - sort alphabetically
+					return a.name.localeCompare(b.name);
+				});
 			}
 			groupsIncluded = groups.some(group => this._includedInTree(group));
 			if (groups.length && groupsIncluded) {

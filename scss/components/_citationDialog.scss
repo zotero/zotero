@@ -378,6 +378,16 @@
 						align-items: center;
 						height: 17px;
 					}
+					.cited-badge {
+						margin-left: 8px;
+						padding: 1px 4px;
+						border-radius: 5px;
+						background: var(--accent-blue50);
+						white-space: nowrap;
+						font-size: 0.85em;
+						font-weight: 500;
+						color: var(--fill-primary);
+					}
 				}
 				.item {
 					@include focus-ring(true);

@@ -87,6 +87,7 @@ integration-citationDialog-collapse-section =
     .title = Collapse section
 integration-citationDialog-bubble-empty = (no title)
 integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-cited-label = Cited
 integration-citationDialog-cross-lib-warning-title = Confirm citation from a new group?
 integration-citationDialog-cross-lib-warning-line1 = All items currently cited in this document belong to:
 integration-citationDialog-cross-lib-warning-line2 = You are about to cite an item from a different library. It is generally not recommended and may cause issues if some collaborators do not have access to all libraries cited in the document.
