@@ -5472,20 +5472,22 @@ var ZoteroPane = new function () {
 	this.canEdit = function (row) {
 		switch (Zotero_Tabs.selectedType) {
 			case 'library':
+			{
 				// Currently selected row
 				if (row === undefined) {
 					row = this.collectionsView.selection.focused;
 				}
 				return this.collectionsView.getRow(row).editable;
-			case 'reader': {
-				let itemID = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)?.itemID;
-				if (!itemID) {
-					throw new Error('Reader tab has no itemID');
-				}
-				return Zotero.Items.get(itemID).library.editable;
 			}
 			default:
+			{
+				let tabInfo = Zotero_Tabs.getTabInfo();
+				let item = Zotero.Items.get(tabInfo.data?.itemID);
+				if (item) {
+					return item.isEditable();
+				}
 				return false;
+			}
 		}
 	};
 	
