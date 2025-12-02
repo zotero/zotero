@@ -1600,6 +1600,7 @@ describe("Zotero.Item", function () {
 		describe("#saveTx()", function () {
 			it("should save a highlight annotation", async function () {
 				var annotation = new Zotero.Item('annotation');
+				annotation.libraryID = attachment.libraryID;
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'highlight';
 				annotation.annotationText = "This is highlighted text.";
@@ -1617,6 +1618,7 @@ describe("Zotero.Item", function () {
 			
 			it("should assign a default color", async function () {
 				var annotation = new Zotero.Item('annotation');
+				annotation.libraryID = attachment.libraryID;
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'highlight';
 				annotation.annotationText = "This is highlighted text.";
@@ -1633,6 +1635,7 @@ describe("Zotero.Item", function () {
 			
 			it("should save a note annotation", async function () {
 				var annotation = new Zotero.Item('annotation');
+				annotation.libraryID = attachment.libraryID;
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'note';
 				annotation.annotationComment = "This is a comment.";
@@ -1657,6 +1660,7 @@ describe("Zotero.Item", function () {
 				}
 				
 				var annotation = new Zotero.Item('annotation');
+				annotation.libraryID = attachment.libraryID;
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'image';
 				annotation.annotationSortIndex = '00015|002431|00000';
@@ -2450,6 +2454,7 @@ describe("Zotero.Item", function () {
 					var item = createUnsavedDataObject(
 						'item', { itemType: 'annotation', parentKey: attachment.key }
 					);
+					item.libraryID = attachment.libraryID;
 					item.annotationType = 'highlight';
 					item.annotationText = "This is an <b>extracted</b> text with rich-text\nAnd a new line";
 					item.annotationComment = "This is a comment with <i>rich-text</i>\nAnd a new line";
@@ -2482,6 +2487,7 @@ describe("Zotero.Item", function () {
 					var item = createUnsavedDataObject(
 						'item', { itemType: 'annotation', parentKey: attachment.key }
 					);
+					item.libraryID = attachment.libraryID;
 					item.annotationType = 'highlight';
 					item.annotationText = "Foo";
 					item.annotationComment = "";
