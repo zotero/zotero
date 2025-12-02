@@ -570,7 +570,8 @@ Zotero.Integration = new function () {
 			// Make sure we don't maintain the session if agent changes (i.e. LO -> Word)
 			// and display wrong field types in doc preferences.
 			if (!session || session.agent != agent) {
-				session = new Zotero.Integration.Session(doc, app);
+				let sessionID = (session && session.agent != agent) ? null : data.sessionID;
+				session = new Zotero.Integration.Session(doc, app, sessionID);
 				session.rebuildCiteprocState = true;
 			}
 			session.agent = agent;
@@ -1010,7 +1011,7 @@ Zotero.Integration.JSEnumerator.prototype.getNext = function () {
 /**
  * Keeps track of all session-specific variables
  */
-Zotero.Integration.Session = function (doc, app) {
+Zotero.Integration.Session = function (doc, app, sessionID) {
 	this.embeddedItems = {};
 	this.embeddedZoteroItems = {};
 	this.embeddedItemsByURI = {};
@@ -1043,7 +1044,7 @@ Zotero.Integration.Session = function (doc, app) {
 	this._deleteFields = {};
 	this._bibliographyFields = [];
 
-	this.sessionID = Zotero.randomString();
+	this.sessionID = sessionID || Zotero.randomString();
 	Zotero.Integration.sessions[this.sessionID] = this;
 }
 
@@ -1961,6 +1962,7 @@ Zotero.Integration.Session.prototype.displayAlert = async function () {
  */
 Zotero.Integration.Session.prototype.setData = async function (data, resetStyle) {
 	var oldStyle = (this.data && this.data.style ? this.data.style : false);
+	let oldCitedLibraryURIs = this.data ? this.data.citedLibraryURIs : {};
 	this.data = data;
 	this.data.sessionID = this.sessionID;
 	if (data.style.styleID && (!oldStyle || oldStyle.styleID != data.style.styleID || resetStyle)) {
@@ -1987,6 +1989,11 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
 		return true;
 	} else if (oldStyle) {
 		data.style = oldStyle;
+	}
+	// If there is an old cited library URI record but no new one, it could have been deleted
+	// from doc data by a collaborator with older version of Zotero. In that case, retain the old record.
+	if (Object.keys(oldCitedLibraryURIs).length && !Object.keys(data.citedLibraryURIs).length) {
+		this.data.citedLibraryURIs = oldCitedLibraryURIs;
 	}
 	return false;
 };
@@ -2710,7 +2717,9 @@ Zotero.Integration.DocumentData.prototype.unserializeXML = function (xmlData) {
 	let citedLibraryURIsAttr = Zotero.Utilities.xpathText(doc, '/data/cited/@libraries');
 	this.citedLibraryURIs = (citedLibraryURIsAttr || "").split(",").reduce((obj, pair) => {
 		let [uri, name] = pair.split("=");
-		obj[uri] = name;
+		if (uri && name) {
+			obj[uri] = name;
+		}
 		return obj;
 	}, {});
 	this.style = {"styleID":Zotero.Utilities.xpathText(doc, '/data/style[1]/@id'),

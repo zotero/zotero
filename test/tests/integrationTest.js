@@ -1141,7 +1141,6 @@ describe("Zotero.Integration", function () {
 		});
 		
 		it('should properly serialize document data to XML (data ver 3)', function () {
-			console.log(" ---- ");
 			sinon.spy(Zotero, 'debug');
 			var data = new Zotero.Integration.DocumentData();
 			data.sessionID = "owl-sesh";
@@ -1206,6 +1205,61 @@ describe("Zotero.Integration", function () {
 			
 			// Convert to JSON to remove functions from DocumentData objects
 			assert.deepEqual(JSON.parse(JSON.stringify(processedData)), JSON.parse(JSON.stringify(data)));
+		});
+		
+		it('should use old citedLibraryURIs if document data was updated without them', async function () {
+			var docID = this.test.fullTitle();
+			await initDoc(docID);
+			var doc = applications[docID].doc;
+			let application = Zotero.Integration.getApplication('dummy', 'addEditCitation', docID);
+			// Save document data with citedLibraryURIs
+			let [session, _] = await Zotero.Integration.getSession(application, doc, 'dummy', 'addEditCitation');
+			session.data.citedLibraryURIs = {
+				'http://zotero.org/users/12345': 'My Library',
+				'http://zotero.org/groups/67890': 'Test Group'
+			};
+			await doc.setDocumentData(session.data.serialize());
+
+			// Save document data without citedLibraryURIs
+			var newData = new Zotero.Integration.DocumentData();
+			newData.prefs = {
+				noteType: 0,
+				fieldType: "Field",
+				automaticJournalAbbreviations: true
+			};
+			// Use the same sessionID
+			newData.sessionID = session.sessionID;
+			await doc.setDocumentData(newData.serialize());
+
+			// Fetch the session again, and ensure that empty citedLibraryURIs from
+			// document data don't override citedLibraryURIs from before
+			[session, _] = await Zotero.Integration.getSession(application, doc, 'dummy', 'addEditCitation');
+			assert.deepEqual(session.data.citedLibraryURIs, {
+				'http://zotero.org/users/12345': 'My Library',
+				'http://zotero.org/groups/67890': 'Test Group'
+			});
+		});
+
+		it('should use sessionID from document data when creating a new session', async function () {
+			var docID = this.test.fullTitle();
+			await initDoc(docID);
+			var doc = applications[docID].doc;
+			let application = Zotero.Integration.getApplication('dummy', 'addEditCitation', docID);
+
+			// Save document data
+			var newData = new Zotero.Integration.DocumentData();
+			newData.prefs = {
+				noteType: 0,
+				fieldType: "Field",
+				automaticJournalAbbreviations: true
+			};
+			newData.sessionID = Zotero.randomString();
+			await doc.setDocumentData(newData.serialize());
+
+			// Fetch session that does not yet exist
+			let [session, _] = await Zotero.Integration.getSession(application, doc, 'dummy', 'addEditCitation');
+			// Ensure the sessionID is taken from document data
+			assert.equal(session.sessionID, newData.sessionID);
 		});
 	})
 });
