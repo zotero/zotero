@@ -436,7 +436,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (treeRow.isLibrary(true) && treeRow.ref && this._citedGroupLibraryIDs.has(treeRow.ref.libraryID)) {
 			let citedBadge = document.createElement('span');
 			citedBadge.className = 'cited-badge';
-			document.l10n.setAttributes(citedBadge, 'integration-citationDialog-cited-label');
+			citedBadge.textContent = Zotero.getString('integration-citationDialog-cited-label');
 			cell.appendChild(citedBadge);
 		}
 		
