@@ -547,8 +547,29 @@ Zotero.Sync.APIClient.prototype = {
 	deleteAPIKey: async function () {
 		await this.makeRequest("DELETE", this.baseURL + "keys/current");
 	},
-	
-	
+
+
+	async getReadAloudVoices() {
+		let uri = this.baseURL + "tts/voices";
+		let xmlhttp = await this.makeRequest("GET", uri, {
+			responseType: "json",
+		});
+		return { data: xmlhttp.response };
+	},
+
+
+	async getReadAloudAudio(text, voiceID) {
+		let params = new URLSearchParams();
+		params.set('text', text);
+		params.set('voice', voiceID);
+		let uri = this.baseURL + "tts/speak?" + params;
+		let xmlhttp = await this.makeRequest("GET", uri, {
+			responseType: "blob",
+		});
+		return { data: xmlhttp.response };
+	},
+
+
 	buildRequestURI: function (params) {
 		var uri = this.baseURL;
 		

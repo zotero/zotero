@@ -242,6 +242,25 @@ class ReaderInstance {
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
 			sidebarView: Zotero.Prefs.get('reader.lastSidebarTab'),
 			readAloudVoices: this._getReadAloudVoices(),
+			readAloudRemoteInterface: {
+				// Wrap return values in child window Promises to avoid permissions errors
+
+				getVoices: () => {
+					return new this._iframeWindow.Promise(async (resolve) => {
+						let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+						resolve(Cu.cloneInto(await client.getReadAloudVoices(), this._iframeWindow));
+					});
+				},
+
+				getAudio: (segment, voice) => {
+					return new this._iframeWindow.Promise(async (resolve) => {
+						let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+						resolve(Cu.cloneInto(await client.getReadAloudAudio(segment.text, voice.id), this._iframeWindow));
+					});
+				},
+			},
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
 				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
