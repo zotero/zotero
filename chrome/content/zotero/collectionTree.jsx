@@ -348,12 +348,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// The arrow on macOS is a full icon's width.
 		// For non-userLibrary/feed items that are drawn under headers
 		// we do not draw the arrow and need to move all items 1 level up
-		if (Zotero.isMac && !treeRow.isHeader() && !treeRow.isFeed() && treeRow.ref
-			&& treeRow.ref.libraryID != Zotero.Libraries.userLibraryID) {
+		if (Zotero.isMac && !treeRow.isHeader() && !treeRow.isFeed()
+			&& treeRow.ref && treeRow.ref.libraryID != Zotero.Libraries.userLibraryID) {
 			depth--;
 		}
-		// Ensures the feeds and separator rows have no padding
-		if (treeRow.isFeeds() || treeRow.isSeparator()) {
+		// Ensures the feeds row has no padding
+		if (treeRow.isFeeds()) {
 			depth = 0;
 		}
 		div.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
@@ -548,7 +548,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var added = 0;
 			this._filterResultsCache = {};
 			let libraryIncluded, groupsIncluded, feedsIncluded;
-
 			//
 			// Add "My Library"
 			//
@@ -556,8 +555,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			if (libraryIncluded) {
 				newRows.splice(added++, 0,
 					new Zotero.CollectionTreeRow(this, 'library', Zotero.Libraries.userLibrary));
-				newRows[added - 1].isOpen = true;
-				added += await this._expandRow(newRows, added ? added - 1 : 0);
+				newRows[0].isOpen = true;
+				added += await this._expandRow(newRows, 0);
 			}
 			
 			// Add groups
@@ -1465,9 +1464,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			case 'header':
 				if (treeRow.ref.id == 'group-libraries-header') {
 					icon = 'groups';
-				}
-				if (treeRow.ref.id == 'top-group-header') {
-					icon = 'groups'; // to change
 				}
 				break;
 			case 'separator':
