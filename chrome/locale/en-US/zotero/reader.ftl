@@ -195,7 +195,7 @@ reader-selected-pages = { $count ->
 reader-page-options = Page Options
 
 reader-read-aloud = Read Aloud
-reader-reader-read-aloud-options = Options
+reader-read-aloud-options = Options
 reader-read-aloud-skip-back = Skip Back
 reader-read-aloud-skip-ahead = Skip Ahead
 reader-read-aloud-play = Play
