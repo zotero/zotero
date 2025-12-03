@@ -554,7 +554,7 @@ Zotero.Sync.APIClient.prototype = {
 		let xmlhttp = await this.makeRequest("GET", uri, {
 			responseType: "json",
 		});
-		return { data: xmlhttp.response };
+		return xmlhttp.response;
 	},
 
 
@@ -563,10 +563,24 @@ Zotero.Sync.APIClient.prototype = {
 		params.set('text', text);
 		params.set('voice', voiceID);
 		let uri = this.baseURL + "tts/speak?" + params;
-		let xmlhttp = await this.makeRequest("GET", uri, {
-			responseType: "blob",
-		});
-		return { data: xmlhttp.response };
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "blob",
+			});
+			return {
+				audio: xmlhttp.response,
+				secondsRemaining: parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Seconds-Remaining')),
+			};
+		}
+		catch (e) {
+			if (!(e instanceof Zotero.HTTP.UnexpectedStatusException) || e.status !== 402) {
+				throw e;
+			}
+			return {
+				audio: null,
+				secondsRemaining: parseInt(e.xmlhttp.getResponseHeader('Zotero-TTS-Seconds-Remaining')),
+			};
+		}
 	},
 
 
