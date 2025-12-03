@@ -358,6 +358,11 @@ Zotero.Prefs = new function () {
 				Zotero.Prefs.set('note.fontSize', 11);
 			}
 		}],
+		[ "note.tabFontSize", function (val) {
+			if (val < 6) {
+				Zotero.Prefs.set('note.tabFontSize', 11);
+			}
+		}],
 		[ "sync.autoSync", function (val) {
 			if (val) {
 				Zotero.Sync.EventListeners.AutoSyncListener.register();

@@ -45,6 +45,7 @@ const ZoteroStandalone = new function () {
 	
 	//const NOTE_FONT_SIZES = ["11", "12", "13", "14", "18", "24", "36", "48", "64", "72", "96"];
 	const NOTE_FONT_SIZE_DEFAULT = "14";
+	const NOTE_TAB_FONT_SIZE_DEFAULT = "16";
 
 	Object.defineProperty(this, 'currentReader', {
 		get: () => Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)
@@ -495,7 +496,21 @@ const ZoteroStandalone = new function () {
 			'view-menuitem-note-font-size-reset',
 			noteFontSize != NOTE_FONT_SIZE_DEFAULT
 		);
-		
+
+		let noteTabFontSize = Zotero.Prefs.get('note.tabFontSize');
+		for (let menuitem of document.querySelectorAll(`#note-tab-font-size-menu menuitem`)) {
+			if (parseInt(menuitem.getAttribute('label')) == noteTabFontSize) {
+				menuitem.setAttribute('checked', true);
+			}
+			else {
+				menuitem.removeAttribute('checked');
+			}
+		}
+		this.updateMenuItemEnabled(
+			'view-menuitem-note-tab-font-size-reset',
+			noteTabFontSize != NOTE_TAB_FONT_SIZE_DEFAULT
+		);
+
 		// Recursive collections
 		this.updateMenuItemCheckmark(
 			'view-menuitem-recursive-collections',
@@ -694,7 +709,11 @@ const ZoteroStandalone = new function () {
 		var size = event.originalTarget.getAttribute('label');
 		Zotero.Prefs.set('note.fontSize', size);
 	};
-	
+
+	this.updateNoteTabFontSize = function (event) {
+		var size = event.originalTarget.getAttribute('label');
+		Zotero.Prefs.set('note.tabFontSize', size);
+	};
 	
 	this.promptForRestart = function () {
 		// Prompt to restart

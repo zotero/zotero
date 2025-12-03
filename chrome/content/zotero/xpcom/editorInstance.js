@@ -74,6 +74,7 @@ class EditorInstance {
 		});
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('note.fontSize', this._handleFontChange),
+			Zotero.Prefs.registerObserver('note.tabFontSize', this._handleFontChange),
 			Zotero.Prefs.registerObserver('note.fontFamily', this._handleFontChange),
 			Zotero.Prefs.registerObserver('note.css', this._handleStyleChange),
 			Zotero.Prefs.registerObserver('layout.spellcheckDefault', this._handleSpellCheckChange, true)
@@ -295,7 +296,14 @@ class EditorInstance {
 	}
 
 	_getFont() {
-		let fontSize = Zotero.Prefs.get('note.fontSize');
+		let fontSizePrefKey;
+		if (this._tabID) {
+			fontSizePrefKey = `note.tabFontSize`;
+		}
+		else {
+			fontSizePrefKey = `note.fontSize`;
+		}
+		let fontSize = Zotero.Prefs.get(fontSizePrefKey);
 		// Fix empty old font prefs before a value was enforced
 		if (fontSize < 6) {
 			fontSize = 11;

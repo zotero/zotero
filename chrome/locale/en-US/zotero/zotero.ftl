@@ -134,6 +134,12 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Move Column Right
 
+menu-view-note-font-size =
+    .label = Note Font Size
+
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
+
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 

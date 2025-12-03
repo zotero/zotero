@@ -111,6 +111,7 @@ pref("extensions.zotero.search.useLeftBound", true);
 // Notes
 pref("extensions.zotero.note.fontFamily", "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Helvetica, Arial, sans-serif");
 pref("extensions.zotero.note.fontSize", "14");
+pref("extensions.zotero.note.tabFontSize", "16");
 pref("extensions.zotero.note.css", "");
 pref("extensions.zotero.note.smartQuotes", true);
 
