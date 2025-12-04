@@ -205,6 +205,7 @@ reader-read-aloud-speed = Reading Speed
 reader-read-aloud-voice-mode = Voice Mode
 reader-read-aloud-voice-mode-remote = Zotero Voices
 reader-read-aloud-voice-mode-browser = Local Voices
+reader-read-aloud-more-voices = More Voices…
 
 reader-read-aloud-language = Language
 
