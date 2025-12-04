@@ -204,6 +204,12 @@ reader-read-aloud-play = Play
 reader-read-aloud-pause = Pause
 reader-read-aloud-speed = Reading Speed
 
+reader-read-aloud-voice-mode = Voice Mode
+reader-read-aloud-voice-mode-remote = Zotero Voices
+reader-read-aloud-voice-mode-browser = Local Voices
+
+reader-read-aloud-language = Language
+
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }
 reader-tab-audio-pause =
