@@ -1713,7 +1713,11 @@ var Columns = class {
 	}
 
 	toggleHidden(index) {
-		const column = this._columns[index];
+		// accept numeric index as well as dataKey
+		let column = (typeof index === "number")
+   		 ? this._columns[index]
+  		 : this._columns.find(c => c.dataKey === index);
+	
 		column.hidden = !column.hidden;
 
 		let prefs = this._getPrefs();
