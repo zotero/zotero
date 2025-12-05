@@ -936,7 +936,7 @@ class VirtualizedTable extends React.Component {
 	_handleMouseOver = (event) => {
 		let elem = event.target;
 		let cell = elem.closest('.cell');
-		if (!cell || elem.classList.contains('cell-icon')) return;
+		if (!cell || elem.classList.contains('cell-icon') || elem.classList.contains('has-title')) return;
 		let textElem = elem.querySelector('.label, .cell-text');
 		// .label is used in the header, .cell-text on primary cells,
 		// otherwise the .cell element if its immediate child is a text node

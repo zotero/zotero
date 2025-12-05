@@ -679,7 +679,7 @@ class LibraryLayout extends Layout {
 		// Move cited groups to the top
 		let { citedLibrariesIDs } = io.getCitedLibraryInfo();
 		if (citedLibrariesIDs.length) {
-			await libraryLayout.collectionsView.setCitedGroup(citedLibrariesIDs);
+			await libraryLayout.collectionsView.setCitedGroup(citedLibrariesIDs, !ioIsReady);
 		}
 		// Add aria-description with instructions on what this collection tree is for
 		// Voiceover announces the description placed on the actual tree when focus enters it
@@ -859,7 +859,13 @@ class ListLayout extends Layout {
 			let { citedLibrariesIDs } = io.getCitedLibraryInfo();
 			if (citedLibrariesIDs.includes(parseInt(libraryID))) {
 				let citedBadge = Helpers.createNode("span", {}, "cited-badge");
-				document.l10n.setAttributes(citedBadge, "integration-citationDialog-cited-label");
+				citedBadge.textContent = Zotero.getString('integration-citationDialog-cited-label');
+				// Untill the cited items are fetched, add a spinner to the cited badge to indicate
+				// that the library is not confirmed as cited
+				if (!ioIsReady) {
+					citedBadge.classList.add("loading");
+					citedBadge.setAttribute('title', Zotero.getString('integration-citationDialog-cited-title-loading'));
+				}
 				section.querySelector(".header").appendChild(citedBadge);
 			}
 		}

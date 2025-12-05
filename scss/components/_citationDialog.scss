@@ -379,14 +379,7 @@
 						height: 17px;
 					}
 					.cited-badge {
-						margin-left: 8px;
-						padding: 1px 4px;
-						border-radius: 5px;
-						background: var(--accent-blue50);
-						white-space: nowrap;
-						font-size: 0.85em;
 						font-weight: 500;
-						color: var(--fill-primary);
 					}
 				}
 				.item {
@@ -649,6 +642,33 @@
 			#z-icon {
 				margin: 0 !important;
 			}
+		}
+	}
+}
+
+.cited-badge {
+	display: flex;
+	align-items: center;
+	margin-left: 8px;
+	padding: 1px 4px;
+	border-radius: 5px;
+	background: var(--accent-blue30);
+	white-space: nowrap;
+	font-size: 0.85em;
+	&.loading {
+		background-color: var(--fill-tertiary);
+		color: var(--fill-secondary);
+		&::before {
+			background: url("chrome://zotero/skin/8/universal/spinner-8.svg");
+			fill: currentColor;
+			-moz-context-properties: fill,fill-opacity;
+			width: 8px;
+			height: 8px;
+			content: "";
+			display: inline-block;
+			animation: rotating 1s linear infinite;
+			margin-inline-end: 3px;
+			color: var(--fill-tertiary);
 		}
 	}
 }

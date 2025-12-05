@@ -114,6 +114,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._collapseExpandedRowsTimer = null;
 		
 		this._citedGroupLibraryIDs = new Set();
+		this._citedGroupsLoading = false;
 		
 		this.onLoad = this.createEventBinding('load', true, true);
 	}
@@ -143,9 +144,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * Set cited groups to display at the top of the groups section
 	 *
 	 * @param {Array<number>} groupLibraryIDs - Array of group library IDs to show at the top of groups
+	 * @param {boolean} isLoading - If true, cited badge on group rows will display a spinner
 	 */
-	async setCitedGroup(groupLibraryIDs) {
+	async setCitedGroup(groupLibraryIDs, isLoading = false) {
 		this._citedGroupLibraryIDs = new Set(groupLibraryIDs);
+		this._citedGroupsLoading = !!isLoading;
 		for (let [index, row] of this._rows.entries()) {
 			if (row.isLibrary(true) && !this._citedGroupLibraryIDs.has(row.ref.libraryID) && row.isOpen) {
 				await this.toggleOpenState(index);
@@ -435,7 +438,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Add "Cited" badge for cited groups
 		if (treeRow.isLibrary(true) && treeRow.ref && this._citedGroupLibraryIDs.has(treeRow.ref.libraryID)) {
 			let citedBadge = document.createElement('span');
-			citedBadge.className = 'cited-badge';
+			citedBadge.className = 'cited-badge has-title';
+			// Add a spinner and tooltip explaining that the library is not confirmed as cited
+			if (this._citedGroupsLoading) {
+				citedBadge.classList.add('loading');
+				citedBadge.setAttribute('title', Zotero.getString('integration-citationDialog-cited-title-loading'));
+			}
 			citedBadge.textContent = Zotero.getString('integration-citationDialog-cited-label');
 			cell.appendChild(citedBadge);
 		}
