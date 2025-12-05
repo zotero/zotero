@@ -2592,7 +2592,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			menuitem.setAttribute('type', 'checkbox');
 			menuitem.setAttribute('label', label);
 			menuitem.setAttribute('colindex', i);
-			menuitem.addEventListener('command', () => this.tree._columns.toggleHidden(i));
+			menuitem.addEventListener('command', () => this.tree._columns.toggleHidden(column.dataKey));
 			if (!column.hidden) {
 				menuitem.setAttribute('checked', true);
 			}
