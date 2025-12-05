@@ -209,6 +209,14 @@ reader-read-aloud-more-voices = More Voices…
 
 reader-read-aloud-language = Language
 
+reader-read-aloud-remaining-time = Remaining reading time
+reader-read-aloud-learn-more = Learn more
+reader-read-aloud-low-credit-message = When your credits run out, Read Aloud will continue with a local voice.
+
+reader-read-aloud-error = Error
+reader-read-aloud-error-unknown = An unknown error occurred.
+reader-read-aloud-error-connection = Unable to connect to the text-to-speech service. Please check your internet connection.
+
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }
 reader-tab-audio-pause =
