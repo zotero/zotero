@@ -256,6 +256,8 @@ var ZoteroContextPane = new function () {
 			}
 		}
 
+		_contextPaneInner.setAttribute('collapsed', this.collapsed ? 'true' : 'false');
+
 		let tabContent = _getTabContent();
 		if (tabContent) {
 			tabContent.setBottomPlaceholderHeight(height);
