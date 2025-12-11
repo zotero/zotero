@@ -1081,7 +1081,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 		// If the highlighted rows are the same as before, do nothing
 		let toHighlight = new Set(ids);
-		if (!toHighlight.difference(this._highlightedRows).size && !this._highlightedRows.difference(toHighlight).size) return;
+		if (!toHighlight.symmetricDifference(this._highlightedRows).size) return;
 
 		try {
 			this._highlightedRows = new Set();
