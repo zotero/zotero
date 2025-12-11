@@ -1722,4 +1722,16 @@ describe("Zotero.CollectionTree", function () {
 			assert.equal(cv.getSelectedCollection(true), collection2.id);
 		});
 	});
+
+	describe("#setHighlightedRows", function () {
+		it("should not invalidate collectionTree if nothing was changed", async function () {
+			let collection = await createDataObject('collection');
+			let invalidateSpy = sinon.spy(cv.tree, 'invalidate');
+			await cv.setHighlightedRows(['C' + collection.id]);
+			await cv.setHighlightedRows(['C' + collection.id]);
+			// Only the first call should invalidate the tree
+			assert.isTrue(invalidateSpy.calledOnce);
+			invalidateSpy.restore();
+		});
+	})
 })

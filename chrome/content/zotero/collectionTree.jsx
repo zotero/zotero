@@ -1076,12 +1076,17 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 *
 	 * @param ids {String[]} list of row ids to be highlighted
 	 */
-	async setHighlightedRows(ids) {
+	async setHighlightedRows(ids = []) {
 		if (this._editing) return;
+
+		// If the highlighted rows are the same as before, do nothing
+		let toHighlight = new Set(ids);
+		if (!toHighlight.difference(this._highlightedRows).size && !this._highlightedRows.difference(toHighlight).size) return;
+
 		try {
 			this._highlightedRows = new Set();
 			
-			if (!ids || !ids.length) {
+			if (!ids.length) {
 				return;
 			}
 			
