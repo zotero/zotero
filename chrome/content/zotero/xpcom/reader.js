@@ -1648,7 +1648,7 @@ class ReaderTab extends ReaderInstance {
 
 			// If this tab was unpaused, pause all others
 			for (let reader of Zotero.Reader._readers) {
-				if (reader === this || !['epub', 'snapshot'].includes(reader._type)) continue;
+				if (reader === this) continue;
 				reader.toggleReadAloudPaused(true);
 			}
 		}
