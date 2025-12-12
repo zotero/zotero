@@ -107,6 +107,7 @@
 				this._search = new Zotero.Search();
 				this._search.addCondition('title', 'contains', '');
 			}
+			this._searchElem.search = this._search;
 		}
 		
 		_ensureSearch() {
@@ -134,7 +135,7 @@
 				throw new Error('submit() is unsupported for saved search');
 			}
 			
-			this._ensureSearch();
+			this._searchElem.updateSearch();
 			await ZoteroPane.itemsView.setFilter('advanced-search', this._search);
 			ZoteroPane.itemsView.focus();
 		}
@@ -149,6 +150,8 @@
 		}
 
 		async save() {
+			this._searchElem.updateSearch();
+			
 			if (this.type === 'saved') {
 				let search = Zotero.Searches.get(this._searchID);
 				if (!search) {
