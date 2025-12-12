@@ -596,8 +596,9 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 		
 		// Run a subsearch to define the superset of possible results
 		if (this._scope) {
-			// If subsearch has post-search filter, run and insert ids into temp table
-			if (this._scope.hasPostSearchFilter()) {
+			// If subsearch has post-search filter or a recursive scope,
+			// run and insert ids into temp table
+			if (this._scope.hasPostSearchFilter() || this._scope._scope) {
 				var ids = await this._scope.search();
 				if (!ids) {
 					return [];

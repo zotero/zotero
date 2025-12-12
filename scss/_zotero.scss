@@ -21,7 +21,6 @@
 // Components
 // --------------------------------------------------
 
-@import "components/advancedSearch";
 @import "components/annotation";
 @import "components/autosuggest";
 @import "components/banners";
@@ -76,6 +75,7 @@
 // Elements
 // --------------------------------------------------
 
+@import "elements/advancedSearchPane";
 @import "elements/attachmentBox";
 @import "elements/attachmentPreview";
 @import "elements/attachmentPreviewBox";

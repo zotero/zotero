@@ -28,6 +28,10 @@ quick-search-textbox {
 	}
 }
 
+#zotero-tb-search {
+	height: 100%;
+}
+
 #zotero-tb-search-dropmarker {
 	position: relative;
 	// 6px padding + 16px icon width + 2px padding + 8px dropmarker width + 4px padding
@@ -79,6 +83,59 @@ quick-search-textbox {
 	visibility: hidden;
 }
 
-#search-wrapper {
+#search-deck {
 	width: 100%;
+}
+
+#search-wrapper {
+	align-items: center;
+}
+
+#advanced-search-indicator {
+	gap: 8px;
+	align-items: center;
+	
+	// Cover the inline-end toolbar padding and the existing bottom border
+	margin-inline-end: -$toolbar-padding-inline;
+	padding-inline: $toolbar-padding-inline;
+	margin-bottom: -1px;
+	
+	background: var(--material-toolbar);
+	border-inline-start: var(--material-border);
+
+	// Prevent text from shifting when border shows after panel is collapsed
+	border-block: var(--material-border-transparent);
+	
+	// This is styled like it's part of the Advanced Search panel, which can't drag the window,
+	// so match that behavior
+	-moz-window-dragging: no-drag;
+
+	& > label {
+		flex: 1;
+		padding-inline: 4px;
+		font-weight: 700;
+	}
+
+	.zotero-clicky {
+		width: 28px;
+		height: 28px;
+		margin: 0;
+		padding: 4px;
+	}
+	
+	.advanced-collapse-button {
+		@include svgicon-menu("minimize", "universal", "20");
+	}
+	
+	.advanced-close-button {
+		@include svgicon-menu("x", "universal", "20");
+	}
+
+	&[data-collapsed="true"] {
+		border-bottom: var(--material-border);
+		
+		.advanced-collapse-button {
+			@include svgicon-menu("maximize", "universal", "20");
+		}
+	}
 }

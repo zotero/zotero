@@ -102,7 +102,7 @@
 		<command id="cmd_zotero_import" oncommand="Zotero_File_Interface.showImportWizard();"/>
 		<command id="cmd_zotero_importFromClipboard" oncommand="Zotero_File_Interface.importFromClipboard();"/>
 		<command id="cmd_zotero_exportLibrary" oncommand="Zotero_File_Interface.exportFile();"/>
-		<command id="cmd_zotero_advancedSearch" oncommand="ZoteroPane_Local.openAdvancedSearchWindow();"/>
+		<command id="cmd_zotero_advancedSearch" oncommand="ZoteroPane.toggleAdvancedSearchState('open');"/>
 		<command id="cmd_zotero_copyCitation"
 				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true);"
 				 disabled="true"/>
@@ -116,7 +116,6 @@
 		<command id="cmd_zotero_rtfScan" oncommand="window.openDialog('chrome://zotero/content/rtfScan.xhtml', 'rtfScan', 'chrome,centerscreen')"/>
 		<command id="cmd_zotero_newCollection" oncommand="ZoteroPane_Local.newCollection(ZoteroPane_Local.getSelectedCollection()?.key)"/>
 		<command id="cmd_zotero_newFeed_fromURL" oncommand="ZoteroPane_Local.newFeedFromURL()"/>
-		<command id="cmd_zotero_newSavedSearch" oncommand="ZoteroPane_Local.newSearch()"/>
 		<command id="cmd_zotero_addByIdentifier" oncommand="Zotero_Lookup.showPanel()"/>
 		<command id="cmd_zotero_newStandaloneFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog()"/>
 		<command id="cmd_zotero_newStandaloneLinkedFileAttachment" oncommand="ZoteroPane.addAttachmentFromDialog(true)"/>
@@ -424,7 +423,7 @@
 									key="key_find" accesskey="&findCmd.accesskey;"
 									command="cmd_find"/>
 							<menuitem id="menu_advancedSearch"
-									label="&zotero.toolbar.advancedSearch;"
+									data-l10n-id="menuitem-advanced-search"
 									key="key_advancedSearch"
 									command="cmd_zotero_advancedSearch"/>
 							<menuseparator hidden="true" id="textfieldDirection-separator"/>
@@ -902,7 +901,6 @@
 			<menuitem class="zotero-menuitem-sync"/>
 			<menuseparator/>
 			<menuitem class="zotero-menuitem-new-collection" data-l10n-id="menu-new-collection"/>
-			<menuitem class="zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;"/>
 			<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newSubcollection.label;"/>
 			<menuitem class="zotero-menuitem-refresh-feed"/>
 			<menuseparator/>
@@ -1322,8 +1320,7 @@
 												<image id="zotero-tb-search-spinner" class="zotero-spinner-16"/>
 												<quick-search-textbox id="zotero-tb-search" timeout="250"
 														onkeydown="ZoteroPane_Local.handleSearchKeypress(this, event)"
-														oninput="ZoteroPane_Local.handleSearchInput(this, event)"
-														oncommand="ZoteroPane_Local.search()"/>
+														oninput="ZoteroPane_Local.handleSearchInput(this, event)"/>
 												
 												<!-- Stacked mode only: Toggle Item Pane button -->
 												<toolbarbutton
@@ -1336,6 +1333,7 @@
 											</hbox>
 											
 										</toolbar>
+										<advanced-search-deck id="zotero-advanced-search-pane-deck"/>
 										<hbox id="zotero-items-pane" class="virtualized-table-container" flex="1" clickthrough="never">
 											<html:div id="zotero-items-tree"></html:div>
 										</hbox>

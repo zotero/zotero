@@ -41,11 +41,15 @@ general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
 general-accept = Accept
 general-cancel = Cancel
+cancel-button =
+    .label = { general-cancel }
 general-show-in-library = Show in Library
 general-restartApp = Restart { -app-name }
 general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
 general-save = Save
 general-clear = Clear
+clear-button =
+    .label = { general-clear }
 general-update = Update
 general-back = Back
 general-edit = Edit
@@ -168,8 +172,9 @@ toolbar-add-attachment =
 
 collections-menu-rename-collection =
     .label = Rename Collection
+edit-saved-search = Edit Saved Search
 collections-menu-edit-saved-search =
-    .label = Edit Saved Search
+    .label = { edit-saved-search }
 collections-menu-move-collection =
     .label = Move To
 collections-menu-copy-collection =
@@ -676,6 +681,10 @@ quicksearch-input =
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 
+advanced-search = Advanced Search
+menuitem-advanced-search =
+    .label = { advanced-search }
+
 item-pane-header-view-as =
     .label = View As
 item-pane-header-none =
@@ -809,3 +818,11 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+
+search-button =
+    .label = Search
+save-search-button =
+    .label = Save Search
+
+saved-search-close-confirmation-title = Editing Saved Search
+saved-search-close-confirmation-body = Do you want to save changes you made to this saved search?
