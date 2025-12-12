@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Stumm:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Dibarzhioù troer">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Enkodiñ an arouezioù">
 <!ENTITY zotero.moreEncodings.label "Muioc'h a engodurioù">
 

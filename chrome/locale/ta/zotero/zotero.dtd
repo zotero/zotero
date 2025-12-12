@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "வடிவம்:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "மொழிபெயர்ப்பாளர் விருப்பங்கள்">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "எழுத்து குறியாக்கம்">
 <!ENTITY zotero.moreEncodings.label "மேலும் குறியாக்கங்கள்">
 

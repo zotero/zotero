@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Formaat:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Vertaler-opties">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Kopieer naar klembord">
+
 <!ENTITY zotero.charset.label "Tekensetcodering">
 <!ENTITY zotero.moreEncodings.label "Meer coderingen">
 

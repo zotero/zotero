@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Muoto:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Kääntäjän asetukset">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Merkistökoodaus">
 <!ENTITY zotero.moreEncodings.label "Lisää koodauksia">
 

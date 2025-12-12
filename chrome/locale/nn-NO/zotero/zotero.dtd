@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Omsetjarval">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Teiknsett">
 <!ENTITY zotero.moreEncodings.label "Fleire teiknsett">
 

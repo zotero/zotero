@@ -36,6 +36,21 @@ const OPTION_PREFIX = "export-option-";
 var Zotero_File_Interface_Export = new function() {
 	this.accept = accept;
 	this.cancel = cancel;
+
+	/*
+	 * Copy current export to clipboard: populate the io object, mark copy flag,
+	 * and close with accept so the caller can handle the request.
+	 */
+	this.copyToClipboard = function() {
+		try {
+			accept();
+			window.arguments[0].copyToClipboard = true;
+			document.querySelector('dialog').acceptDialog();
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	};
 	
 	var _charsets = false;
 	

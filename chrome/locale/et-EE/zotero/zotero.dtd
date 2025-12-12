@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Formaat:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Tõlkija seaded">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Märgikodeering">
 <!ENTITY zotero.moreEncodings.label "Rohkem kodeeringud">
 

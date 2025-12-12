@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "フォーマット:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "トランスレータのオプション">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "文字コード">
 <!ENTITY zotero.moreEncodings.label "その他の文字コード">
 

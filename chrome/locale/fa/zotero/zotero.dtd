@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "قالب:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "گزینه‌های مترجم">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "کدبندی نویسه‌ها">
 <!ENTITY zotero.moreEncodings.label "کدبندی‌های بیشتر">
 

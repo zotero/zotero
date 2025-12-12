@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Formát:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti konvertorov">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Kódovanie">
 <!ENTITY zotero.moreEncodings.label "Viac">
 

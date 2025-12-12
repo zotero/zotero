@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Biçim">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Çevirmen Seçenekleri">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Karakter Kodlaması">
 <!ENTITY zotero.moreEncodings.label "Diğer Kodlamalar">
 

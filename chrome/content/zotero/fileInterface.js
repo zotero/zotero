@@ -109,6 +109,44 @@ Zotero_File_Exporter.prototype.save = async function () {
 	if(!io.selectedTranslator) {
 		return false;
 	}
+
+	// If user requested copy-to-clipboard from the dialog, perform translation
+	// and copy directly without showing a file picker
+	if (io.copyToClipboard) {
+		var translation = new Zotero.Translate.Export();
+		if (this.collection) {
+			translation.setCollection(this.collection);
+		} else if (this.items) {
+			// copy the provided items array
+			translation.setItems(this.items.slice());
+		} else if (this.libraryID !== undefined) {
+			translation.setLibraryID(this.libraryID);
+		}
+		translation.setTranslator(io.selectedTranslator);
+		translation.setDisplayOptions(io.displayOptions);
+		translation.setHandler("done", function (obj, worked) {
+			if (!worked) {
+				Zotero.alert(
+					null,
+					Zotero.getString('general.error'),
+					Zotero.getString('fileInterface.exportError')
+				);
+				return;
+			}
+			let text = obj.string.replace(/\r\n/g, '\n');
+			// For Note HTML translator use body content only
+			if (io.selectedTranslator.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+				let parser = new DOMParser();
+				let doc = parser.parseFromString(text, 'text/html');
+				text = doc.body.innerHTML;
+			}
+			Components.classes['@mozilla.org/widget/clipboardhelper;1']
+				.getService(Components.interfaces.nsIClipboardHelper)
+				.copyString(text);
+		});
+		translation.translate();
+		return;
+	}
 	
 	var fp = new FilePicker();
 	fp.init(window, Zotero.getString("fileInterface.export"), fp.modeSave);

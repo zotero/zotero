@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "양식:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "중계기 옵션">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "문자 인코딩">
 <!ENTITY zotero.moreEncodings.label "추가 인코딩">
 

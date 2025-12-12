@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Định dạng:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Các tùy chọn cho Bộ-biến-đổi">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Sao chép vào Clipboard">
+
 <!ENTITY zotero.charset.label "Mã hóa ký tự">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 

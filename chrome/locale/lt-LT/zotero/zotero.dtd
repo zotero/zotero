@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Formatas:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Vertimo parinktys">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Kopijuoti į iškaprinę">
+
 <!ENTITY zotero.charset.label "Rašmenų koduotė">
 <!ENTITY zotero.moreEncodings.label "Daugiau koduočių">
 

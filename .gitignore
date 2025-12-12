@@ -4,3 +4,4 @@ build/
 .signatures.json
 tmp
 app/win/codesign
+.build-cache

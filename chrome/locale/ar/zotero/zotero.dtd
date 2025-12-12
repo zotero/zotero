@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "الصياغة:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "خيارات المترجم">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "نسخ للحافظة">
+
 <!ENTITY zotero.charset.label "ترميز الأحرف">
 <!ENTITY zotero.moreEncodings.label "المزيد من الترميزات">
 

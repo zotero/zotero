@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Μορφή:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Επιλογές μεταφραστή">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Κωδικοποίηση χαρακτήρων">
 <!ENTITY zotero.moreEncodings.label "Περισσότερες κωδικοποιησεις">
 

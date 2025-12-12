@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "格式:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "转换器选项">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "字符编码">
 <!ENTITY zotero.moreEncodings.label "更多编码">
 

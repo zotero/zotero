@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "עיצוב:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "אפשרויות תרגום">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "קידוד תווים">
 <!ENTITY zotero.moreEncodings.label "קידודים נוספים">
 

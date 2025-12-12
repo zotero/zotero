@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Formatare:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Opțiuni translator">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Codificare caractere">
 <!ENTITY zotero.moreEncodings.label "Mai multe codificări">
 

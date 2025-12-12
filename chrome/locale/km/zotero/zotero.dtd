@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "ទ្រង់ទ្រាយ:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "ជម្រើសកូដចម្លង">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "បញ្ចូលកូដតួអក្សរ">
 <!ENTITY zotero.moreEncodings.label "បញ្ចូលកូដបន្ថែម">
 

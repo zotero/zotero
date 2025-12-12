@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "格式：">
 <!ENTITY zotero.exportOptions.translatorOptions.label "翻譯器選項">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "複製到剪貼簿">
+
 <!ENTITY zotero.charset.label "字元編碼">
 <!ENTITY zotero.moreEncodings.label "更多編碼">
 

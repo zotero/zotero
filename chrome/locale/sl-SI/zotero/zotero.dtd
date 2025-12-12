@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Možnosti prevajanja">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Kodiranje znakov">
 <!ENTITY zotero.moreEncodings.label "Dodatna kodiranja">
 

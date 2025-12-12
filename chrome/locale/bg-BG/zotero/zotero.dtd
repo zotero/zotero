@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Формат:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Параметри на извличащите данни програми">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Кодиране на символите">
 <!ENTITY zotero.moreEncodings.label "Повече кодирания">
 

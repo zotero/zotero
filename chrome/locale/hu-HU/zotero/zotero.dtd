@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Formátum:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Adatkonverter beállításai">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Karakterkódolás">
 <!ENTITY zotero.moreEncodings.label "További karakterkódolások">
 

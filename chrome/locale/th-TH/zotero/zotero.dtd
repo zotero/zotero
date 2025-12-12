@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "รูปแบบ:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "ตัวเลือกของโปรแกรมแปลข้อมูลเมทา">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "การเข้ารหัสอักษร">
 <!ENTITY zotero.moreEncodings.label "การเข้ารหัสอื่นๆ">
 

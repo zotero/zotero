@@ -187,6 +187,8 @@
 <!ENTITY zotero.exportOptions.format.label "Format:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "Translator Options">
 
+<!ENTITY zotero.exportOptions.copyToClipboard.label "Copy to Clipboard">
+
 <!ENTITY zotero.charset.label "Character Encoding">
 <!ENTITY zotero.moreEncodings.label "More Encodings">
 
