@@ -464,7 +464,8 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	}
 	s2.setScope(s, includeScopeChildren);
 	
-	if (this.searchText) {
+	// Add Quick Search unless advanced search is enabled
+	if (this.searchText && !this.advancedSearch) {
 		let cond = 'quicksearch-'
 			+ (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode'));
 		s2.addCondition(cond, 'contains', this.searchText);
@@ -476,8 +477,17 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 		}
 	}
 	
-	this._cachedSearch = s2;
-	return s2;
+	let s3;
+	if (this.advancedSearch) {
+		s3 = this.advancedSearch.clone();
+		s3.setScope(s2, includeScopeChildren);
+	}
+	else {
+		s3 = s2;
+	}
+
+	this._cachedSearch = s3;
+	return s3;
 };
 
 Zotero.CollectionTreeRow.prototype.getChildTags = function () {
@@ -537,6 +547,12 @@ Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null
 	return true;
 }
 
+Zotero.CollectionTreeRow.prototype.setAdvancedSearch = function (advancedSearch) {
+	this.clearCache();
+	this.advancedSearch = advancedSearch?.clone(this.ref.libraryID);
+	return true;
+};
+
 Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
 	let oldTags = this.tags instanceof Set ? this.tags : new Set(this.tags || []);
 	let newTags = tags instanceof Set ? new Set(tags) : new Set(tags || []);
@@ -570,8 +586,8 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 			return true;
 	}
 	
-	// Quicksearch
-	if (this.searchText != '') {
+	// Search filters
+	if (this.advancedSearch || this.searchText != '') {
 		return true;
 	}
 	

@@ -1,8 +1,10 @@
+$toolbar-padding-inline: 8px;
+
 .toolbar {
 	height: $height-toolbar !important; /* Hard-code this to fix toolbar icon compression on Linux */
 	min-height: $height-toolbar; /* Needed to prevent squashing by stretched tag selector */
 	margin: 0;
-	padding: 0px 8px 0px 8px;
+	padding: 0 $toolbar-padding-inline;
 	min-width: 1px;
 }
 

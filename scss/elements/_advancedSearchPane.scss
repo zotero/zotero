@@ -1,0 +1,54 @@
+advanced-search-deck {
+	flex-direction: column;
+	
+	> advanced-search-pane:not(.deck-selected) {
+		display: none;
+	}
+}
+
+advanced-search-pane {
+	@include inactive-opacity;
+	
+	flex-direction: column;
+	// Inline padding is further down the tree so focus rings work with overflow: auto
+	padding-block: 8px;
+	gap: 8px;
+	background: var(--material-toolbar);
+
+	.saved-search-name-row {
+		align-items: center;
+	}
+
+	.advanced-search-buttons {
+		padding-inline: 8px;
+		gap: 8px;
+
+		button {
+			min-width: 100px;
+		}
+	}
+	
+	&[type="temporary"] {
+		.saved-search-name-row {
+			display: none;
+		}
+		
+		.advanced-search-buttons {
+			.cancel-button {
+				display: none;
+			}
+		}
+	}
+	
+	&[type="saved"] {
+		.advanced-search-buttons {
+			.search-button {
+				display: none;
+			}
+			
+			.clear-button {
+				display: none;
+			}
+		}
+	}
+}

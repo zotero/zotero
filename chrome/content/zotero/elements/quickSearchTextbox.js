@@ -33,8 +33,15 @@
 			this.searchTextbox = null;
 			MozXULElement.insertFTLIfNeeded("zotero.ftl");
 			this.content = MozXULElement.parseXULToFragment(`
-				<hbox id="search-wrapper" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-				</hbox>
+				<deck id="search-deck">
+					<hbox id="search-wrapper">
+					</hbox>
+					<hbox id="advanced-search-indicator">
+						<label id="advanced-search-label"/>
+						<toolbarbutton class="zotero-clicky advanced-collapse-button" tabindex="0"/>
+						<toolbarbutton class="zotero-clicky advanced-close-button" tabindex="0"/>
+					</hbox>
+				</deck>
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 
@@ -95,6 +102,14 @@
 			wrapper.appendChild(dropmarkerHost);
 			wrapper.appendChild(searchBox);
 			
+			this.deck = this.firstElementChild;
+			
+			this.querySelector('.advanced-collapse-button').addEventListener('command', () => {
+				ZoteroPane.toggleAdvancedSearchState('collapsed');
+			});
+			this.querySelector('.advanced-close-button').addEventListener('command', () => {
+				ZoteroPane.toggleAdvancedSearchState('closed');
+			});
 			
 			// If Alt-Up/Down, show popup
 			this.addEventListener('keypress', (event) => {
@@ -137,14 +152,19 @@
 				let separator = document.createXULElement('menuseparator');
 				popup.append(separator);
 				let advancedSearchOption = document.createXULElement('menuitem');
-				advancedSearchOption.label = Zotero.getString("zotero.toolbar.advancedSearch");
-				advancedSearchOption.addEventListener("command", () => {
-					ZoteroPane.openAdvancedSearchWindow();
+				document.l10n.setAttributes(advancedSearchOption, 'menuitem-advanced-search');
+				advancedSearchOption.addEventListener('command', () => {
+					ZoteroPane.toggleAdvancedSearchState('open');
 				});
 				popup.append(advancedSearchOption);
 			}
 			
 			return this._searchModePopup = popup;
+		}
+		
+		onCollectionSelected() {
+			this.searchTextbox.value = '';
+			this.updateMode();
 		}
 
 		updateMode() {
@@ -158,6 +178,29 @@
 			this.searchModePopup.querySelector(`menuitem[value="${mode}"]`)
 				.setAttribute('checked', 'true');
 			document.l10n.setAttributes(this.searchTextbox.inputField, "quicksearch-input", { placeholder: this._searchModes[mode] });
+
+			let advancedSearchDeck = document.getElementById('zotero-advanced-search-pane-deck');
+			if (advancedSearchDeck) {
+				let state = advancedSearchDeck.state;
+				let selectedSearchType = advancedSearchDeck.selectedSearchType;
+				
+				document.l10n.setAttributes(
+					this.querySelector('#advanced-search-label'),
+					selectedSearchType === 'temporary' ? 'advanced-search' : 'edit-saved-search',
+				);
+				this.deck.selectedIndex = state === 'closed' ? 0 : 1;
+				this.querySelector('#advanced-search-indicator').dataset.collapsed = state === 'collapsed';
+				this.querySelector('.advanced-collapse-button').hidden = selectedSearchType === 'saved';
+			}
+		}
+		
+		focus(options) {
+			if (this.deck.selectedIndex === 0) {
+				this._searchModePopup.flattenedTreeParentNode.focus(options);
+			}
+			else {
+				Services.focus.moveFocus(window, this.deck.selectedPanel, Services.focus.MOVEFOCUS_FORWARD, 0);
+			}
 		}
 
 		_id(id) {

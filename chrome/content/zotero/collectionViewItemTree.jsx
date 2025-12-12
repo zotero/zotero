@@ -152,6 +152,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			case 'citation-search':
 				changed = this.collectionTreeRow.setSearch(data, 'fields');
 				break;
+			case 'advanced-search':
+				changed = this.collectionTreeRow.setAdvancedSearch(data);
+				break;
 			case 'tags':
 				changed = this.collectionTreeRow.setTags(data);
 				break;
