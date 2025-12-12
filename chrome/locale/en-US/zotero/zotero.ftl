@@ -48,11 +48,15 @@ general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
 general-accept = Accept
 general-cancel = Cancel
+cancel-button =
+    .label = { general-cancel }
 general-show-in-library = Show in Library
 general-restartApp = Restart { -app-name }
 general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
 general-save = Save
 general-clear = Clear
+clear-button =
+    .label = { general-clear }
 general-update = Update
 general-back = Back
 general-edit = Edit
@@ -193,8 +197,9 @@ item-menu-remove-from-recently-read =
     .label = Remove from { recently-read }…
 collections-menu-rename-collection =
     .label = Rename Collection
+edit-saved-search = Edit Saved Search
 collections-menu-edit-saved-search =
-    .label = Edit Saved Search
+    .label = { edit-saved-search }
 collections-menu-move-collection =
     .label = Move To
 collections-menu-copy-collection =
@@ -725,6 +730,13 @@ quicksearch-input =
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 
+advanced-search = Advanced Search
+menuitem-advanced-search =
+    .label = { advanced-search }
+quicksearch-advanced-search-button =
+    .tooltiptext = { advanced-search }
+    .aria-label = { advanced-search }
+
 item-pane-header-view-as =
     .label = View As
 item-pane-header-none =
@@ -926,3 +938,11 @@ os-keystore-migrate-failed =
         [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
        *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
     }
+
+search-button =
+    .label = Search
+save-search-button =
+    .label = Save Search
+
+saved-search-close-confirmation-title = Editing Saved Search
+saved-search-close-confirmation-body = Do you want to save changes you made to this saved search?

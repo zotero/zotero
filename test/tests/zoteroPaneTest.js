@@ -117,30 +117,22 @@ describe("ZoteroPane", function () {
 		});
 	});
 	
-	describe("#newSearch()", function () {
+	describe("Advanced Search", function () {
 		it("should create a saved search", async function () {
-			var promise = waitForDialog(
-				// TODO: Test changing a condition
-				function (dialog) {},
-				'accept',
-				'chrome://zotero/content/searchDialog.xhtml'
-			);
-			var id = await zp.newSearch();
-			await promise;
-			var search = Zotero.Searches.get(id);
-			assert.ok(search);
-			assert.isTrue(search.name.startsWith(Zotero.getString('pane.collections.untitled')));
-		});
-		
-		it("should handle clicking Cancel in the search window", async function () {
-			var promise = waitForDialog(
-				function (dialog) {},
-				'cancel',
-				'chrome://zotero/content/searchDialog.xhtml'
-			);
-			var id = await zp.newSearch();
-			await promise;
-			assert.isFalse(id);
+			await selectLibrary(win);
+			await zp.toggleAdvancedSearchState('open');
+			var deck = doc.getElementById('zotero-advanced-search-pane-deck');
+			
+			var searchIDs = (await Zotero.Searches.getAll(userLibraryID)).map(s => s.id);
+			await deck.pane.save();
+			
+			var newSearches = (await Zotero.Searches.getAll(userLibraryID))
+				.filter(s => !searchIDs.includes(s.id));
+			assert.lengthOf(newSearches, 1);
+			assert.isTrue(newSearches[0].name.startsWith(Zotero.getString('pane.collections.untitled')));
+			assert.equal(deck.state, 'closed');
+			
+			await newSearches[0].eraseTx();
 		});
 	});
 	
@@ -1007,19 +999,26 @@ describe("ZoteroPane", function () {
 	});
 	
 	describe("#editSelectedCollection()", function () {
+		async function editSearchAddCondition(search) {
+			await select(win, search);
+			await zp.editSelectedCollection();
+			
+			var deck = doc.getElementById('zotero-advanced-search-pane-deck');
+			assert.equal(deck.state, 'open');
+			assert.equal(deck.selectedSearchType, 'saved');
+			
+			var pane = deck.pane;
+			var searchBox = pane.querySelector('zoterosearch');
+			var c = searchBox.search.getCondition(
+				searchBox.search.addCondition("title", "contains", "foo")
+			);
+			searchBox.addCondition(c);
+			await pane.save();
+		}
+		
 		it("should edit a saved search", async function () {
 			var search = await createDataObject('search');
-			await select(win, search);
-			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
-				let searchBox = win.document.getElementById('search-box');
-				var c = searchBox.search.getCondition(
-					searchBox.search.addCondition("title", "contains", "foo")
-				);
-				searchBox.addCondition(c);
-				win.document.querySelector('dialog').acceptDialog();
-			});
-			await zp.editSelectedCollection();
-			await promise;
+			await editSearchAddCondition(search);
 			var conditions = search.getConditions();
 			assert.lengthOf(Object.keys(conditions), 3);
 		});
@@ -1027,17 +1026,7 @@ describe("ZoteroPane", function () {
 		it("should edit a saved search in a group", async function () {
 			var group = await getGroup();
 			var search = await createDataObject('search', { libraryID: group.libraryID });
-			await select(win, search);
-			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
-				let searchBox = win.document.getElementById('search-box');
-				var c = searchBox.search.getCondition(
-					searchBox.search.addCondition("title", "contains", "foo")
-				);
-				searchBox.addCondition(c);
-				win.document.querySelector('dialog').acceptDialog();
-			});
-			await zp.editSelectedCollection();
-			await promise;
+			await editSearchAddCondition(search);
 			var conditions = search.getConditions();
 			assert.lengthOf(Object.keys(conditions), 3);
 		});

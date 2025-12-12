@@ -464,7 +464,8 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	}
 	s2.setScope(s, includeScopeChildren);
 	
-	if (this.searchText) {
+	// Add Quick Search unless advanced search is enabled
+	if (this.searchText && !this.advancedSearch) {
 		let cond = 'quicksearch-'
 			+ (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode'));
 		s2.addCondition(cond, 'contains', this.searchText);
@@ -476,8 +477,37 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 		}
 	}
 	
-	this._cachedSearch = s2;
-	return s2;
+	let s3;
+	if (this.advancedSearch) {
+		if (this.advancedSearch.libraryID === null) {
+			// A library-less search (Feeds pseudo-library) can't be clone()d
+			s3 = new Zotero.Search();
+			s3.fromJSON(this.advancedSearch.toJSON());
+		}
+		else {
+			s3 = this.advancedSearch.clone();
+		}
+		// Show matches in the trash too. includeDeleted has to be set on the
+		// scope searches as well, since a search's scope defines the superset
+		// of possible results. Special condition - unaffected by joinMode.
+		if (!this.isTrash()) {
+			if (s == this.ref) {
+				// Don't modify a saved search object
+				s = s.clone(this.ref.libraryID);
+				s2.setScope(s, includeScopeChildren);
+			}
+			s.addCondition('includeDeleted', 'true');
+			s2.addCondition('includeDeleted', 'true');
+		}
+		s3.addCondition('includeDeleted', 'true');
+		s3.setScope(s2, includeScopeChildren);
+	}
+	else {
+		s3 = s2;
+	}
+	
+	this._cachedSearch = s3;
+	return s3;
 };
 
 Zotero.CollectionTreeRow.prototype.getChildTags = function () {
@@ -537,6 +567,23 @@ Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null
 	return true;
 }
 
+Zotero.CollectionTreeRow.prototype.setAdvancedSearch = function (advancedSearch) {
+	this.clearCache();
+	if (!advancedSearch) {
+		this.advancedSearch = undefined;
+	}
+	else if (this.ref.libraryID === undefined) {
+		// Feeds pseudo-library -- leave the library unset so that the search
+		// spans all feed libraries
+		this.advancedSearch = new Zotero.Search();
+		this.advancedSearch.fromJSON(advancedSearch.toJSON());
+	}
+	else {
+		this.advancedSearch = advancedSearch.clone(this.ref.libraryID);
+	}
+	return true;
+};
+
 Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
 	let oldTags = this.tags instanceof Set ? this.tags : new Set(this.tags || []);
 	let newTags = tags instanceof Set ? new Set(tags) : new Set(tags || []);
@@ -570,8 +617,8 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 			return true;
 	}
 	
-	// Quicksearch
-	if (this.searchText != '') {
+	// Search filters
+	if (this.advancedSearch || this.searchText != '') {
 		return true;
 	}
 	

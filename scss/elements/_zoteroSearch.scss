@@ -1,15 +1,31 @@
 zoterosearch {
-	#search-box > hbox, #search-box > groupbox {
-		margin: 0 6px;
-	}
+	flex-direction: column;
+	padding-inline: 8px;
+	gap: 8px;
+	overflow: auto;
+	max-height: 33vh;
+	@include macOS-normalize-controls;
 
 	groupbox {
-		margin-top: 0;
-		padding-top: 0;
+		gap: 8px;
 
 		& > #conditions {
-			-moz-appearance: groupbox;
-			padding: 6px;
+			min-width: fit-content; // Grow with content, don't overflow
+			padding: 8px;
+			gap: 8px;
+			background: var(--fill-senary);
+			border: var(--material-border-quinary);
+			border-radius: 6px;
+		}
+	}
+	
+	#search-option-checkboxes {
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 8px;
+		
+		checkbox {
+			margin: 0;
 		}
 	}
 
@@ -21,10 +37,6 @@ zoterosearch {
 	label:first-child:not(tooltip label), checkbox:first-child {
 		margin-left: 0 !important;
 		padding-left: 0 !important;
-	}
-
-	checkbox {
-		margin-right: .5em;
 	}
 
 	input {

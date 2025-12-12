@@ -1,7 +1,7 @@
 "use strict";
 
 describe("Advanced Search", function () {
-	var win, zp;
+	var win, zp, deck;
 	
 	before(function* () {
 		yield resetDB({
@@ -10,56 +10,170 @@ describe("Advanced Search", function () {
 		});
 		win = yield loadZoteroPane();
 		zp = win.ZoteroPane;
+		deck = win.document.getElementById('zotero-advanced-search-pane-deck');
 	});
 	
 	after(function () {
 		win.close();
 	});
 	
-	it("should perform a search", function* () {
-		var item = yield createDataObject('item', { setTitle: true });
+	it("should perform a search", async function () {
+		var item = await createDataObject('item', { setTitle: true });
+		var otherItem = await createDataObject('item', { setTitle: true });
 		
-		var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml');
-		zp.openAdvancedSearchWindow();
-		var searchWin = yield promise;
-		yield searchWin.ZoteroAdvancedSearch._loadedDeferred.promise;
+		await zp.toggleAdvancedSearchState('open');
+		var pane = deck.pane;
+		
+		// Opening the pane shouldn't filter the items list
+		await zp.itemsView.waitForLoad();
+		assert.equal(zp.itemsView.rowCount, 2);
+		
 		// Add condition
-		var searchBox = searchWin.document.getElementById('zotero-search-box');
-		
 		var s = new Zotero.Search();
-		s.addCondition('title', 'is', item.getField('title'))
-		searchBox.search = s;
+		s.libraryID = item.libraryID;
+		s.addCondition('title', 'is', item.getField('title'));
+		pane.search = s;
 		
 		// Run search and wait for results
-		var o = searchWin.ZoteroAdvancedSearch;
-		var iv = o.itemsView;
-		yield iv.waitForLoad();
-		yield o.search();
-		yield iv.waitForLoad();
+		var iv = zp.itemsView;
+		await pane.submit();
+		await iv.waitForLoad();
 		
 		// Check results
 		assert.equal(iv.rowCount, 1);
 		var index = iv.getRowIndexByID(item.id);
 		assert.isNumber(index);
 		
-		searchWin.close();
+		// Closing should restore the unfiltered view
+		await zp.setAdvancedSearchState('closed');
+		assert.equal(iv.rowCount, 2);
 		
-		yield item.eraseTx();
+		await item.eraseTx();
+		await otherItem.eraseTx();
+	});
+	
+	it("should show results in trash", async function () {
+		var item = await createDataObject('item', { setTitle: true });
+		item.deleted = true;
+		await item.saveTx();
+		
+		await zp.toggleAdvancedSearchState('open');
+		var pane = deck.pane;
+		
+		var s = new Zotero.Search();
+		s.libraryID = item.libraryID;
+		s.addCondition('title', 'is', item.getField('title'));
+		pane.search = s;
+		
+		var iv = zp.itemsView;
+		await pane.submit();
+		await iv.waitForLoad();
+		
+		assert.isNumber(iv.getRowIndexByID(item.id));
+		
+		await zp.setAdvancedSearchState('closed');
+		
+		await item.eraseTx();
+	});
+	
+	it("shouldn't reapply previous search when reopened while closing", async function () {
+		var item = await createDataObject('item', { setTitle: true });
+		
+		await zp.toggleAdvancedSearchState('open');
+		var s = new Zotero.Search();
+		s.libraryID = item.libraryID;
+		s.addCondition('title', 'is', 'nomatch');
+		deck.pane.search = s;
+		await deck.pane.submit();
+		await zp.itemsView.waitForLoad();
+		assert.equal(zp.itemsView.rowCount, 0);
+		
+		// Close and immediately reopen, without waiting, as with UI clicks
+		zp.toggleAdvancedSearchState('closed');
+		await zp.toggleAdvancedSearchState('open');
+		await zp.itemsView.waitForLoad();
+		
+		// The previous search shouldn't have been reapplied
+		assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+		
+		await zp.setAdvancedSearchState('closed');
+		await item.eraseTx();
+	});
+	
+	it("should scope results to the selected saved search", async function () {
+		var inBoth = await createDataObject('item', { title: "foo bar" });
+		var inSavedOnly = await createDataObject('item', { title: "foo baz" });
+		var inAdvancedOnly = await createDataObject('item', { title: "bar qux" });
+		
+		var saved = new Zotero.Search();
+		saved.libraryID = Zotero.Libraries.userLibraryID;
+		saved.name = "Scope Test";
+		saved.addCondition('title', 'contains', 'foo');
+		await saved.saveTx();
+		await select(win, saved);
+		
+		await zp.toggleAdvancedSearchState('open');
+		var s = new Zotero.Search();
+		s.libraryID = saved.libraryID;
+		s.addCondition('title', 'contains', 'bar');
+		deck.pane.search = s;
+		
+		var iv = zp.itemsView;
+		await deck.pane.submit();
+		await iv.waitForLoad();
+		
+		// Only the item matching both the saved search and the advanced search
+		assert.equal(iv.rowCount, 1);
+		assert.isNumber(iv.getRowIndexByID(inBoth.id));
+		
+		// The saved search itself shouldn't have been modified
+		assert.lengthOf(Object.keys(saved.getConditions()), 1);
+		
+		await zp.setAdvancedSearchState('closed');
+		
+		await Zotero.Items.erase([inBoth.id, inSavedOnly.id, inAdvancedOnly.id]);
+		await saved.eraseTx();
+	});
+	
+	it("should search across feeds in Feeds view", async function () {
+		let feed = await createFeed();
+		let feedItem = await createDataObject('feedItem', { libraryID: feed.libraryID, setTitle: true }, { skipSelect: true });
+		let otherFeedItem = await createDataObject('feedItem', { libraryID: feed.libraryID, setTitle: true }, { skipSelect: true });
+		
+		await zp.collectionsView.selectFeeds();
+		await waitForItemsLoad(win);
+		
+		await zp.toggleAdvancedSearchState('open');
+		var s = new Zotero.Search();
+		s.libraryID = Zotero.Libraries.userLibraryID;
+		s.addCondition('title', 'is', feedItem.getField('title'));
+		deck.pane.search = s;
+		
+		var iv = zp.itemsView;
+		await deck.pane.submit();
+		await iv.waitForLoad();
+		
+		assert.equal(iv.rowCount, 1);
+		assert.isNumber(iv.getRowIndexByID(feedItem.id));
+		
+		await zp.setAdvancedSearchState('closed');
+		await selectLibrary(win);
+		
+		await feed.eraseTx();
 	});
 	
 	describe("Conditions", function () {
-		var searchWin, searchBox, conditions;
+		var pane, searchBox, conditions;
 		
-		before(function* () {
-			var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml');
-			zp.openAdvancedSearchWindow();
-			searchWin = yield promise;
-			searchBox = searchWin.document.getElementById('zotero-search-box');
+		before(async function () {
+			await zp.toggleAdvancedSearchState('open');
+			pane = deck.pane;
+			searchBox = pane.querySelector('zoterosearch');
 			conditions = searchBox.querySelector('#conditions');
 		});
 		
-		after(function () {
-			searchWin.close();
+		after(async function () {
+			await zp.setAdvancedSearchState('closed');
 		});
 		
 		describe("Collection", function () {
@@ -73,8 +187,9 @@ describe("Advanced Search", function () {
 				
 				// Add condition
 				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
 				s.addCondition('title', 'is', '');
-				searchBox.search = s;
+				pane.search = s;
 				
 				var searchCondition = conditions.firstChild;
 				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
@@ -113,8 +228,9 @@ describe("Advanced Search", function () {
 				var search = await createDataObject('search', { name: "A" });
 				
 				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
 				s.addCondition('savedSearch', 'is', search.key);
-				searchBox.search = s;
+				pane.search = s;
 				
 				var searchCondition = conditions.firstChild;
 				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
@@ -132,8 +248,9 @@ describe("Advanced Search", function () {
 				var search = await createDataObject('search', { name: "B" });
 				
 				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
 				s.addCondition('title', 'is', '');
-				searchBox.search = s;
+				pane.search = s;
 				
 				var searchCondition = conditions.firstChild;
 				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
@@ -174,8 +291,9 @@ describe("Advanced Search", function () {
 				var search2 = await createDataObject('search', { name: "D", libraryID: groupLibraryID });
 				
 				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
 				s.addCondition('title', 'is', '');
-				searchBox.search = s;
+				pane.search = s;
 				
 				var searchCondition = conditions.firstChild;
 				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
@@ -198,18 +316,13 @@ describe("Advanced Search", function () {
 				}
 				assert.equal(valueMenu.value, "S" + search1.key);
 				
-				var libraryMenu = searchWin.document.getElementById('libraryMenu');
-				for (let i = 0; i < libraryMenu.itemCount; i++) {
-					let menuitem = libraryMenu.getItemAtIndex(i);
-					// Switch to group library
-					if (menuitem.value == groupLibraryID) {
-						menuitem.click();
-						break;
-					}
-				}
+				// Switch to the group library in the collection tree, which changes
+				// the search library and re-renders the conditions
+				await selectLibrary(win, groupLibraryID);
 				
 				var values = [];
-				valueMenu = searchCondition.querySelector('#valuemenu')
+				searchCondition = conditions.firstChild;
+				valueMenu = searchCondition.querySelector('#valuemenu');
 				assert.equal(valueMenu.value, "C" + collection2.key);
 				for (let i = 0; i < valueMenu.itemCount; i++) {
 					let menuitem = valueMenu.getItemAtIndex(i);
@@ -219,6 +332,8 @@ describe("Advanced Search", function () {
 				assert.notInclude(values, "S" + search1.key);
 				assert.include(values, "C" + collection2.key);
 				assert.include(values, "S" + search2.key);
+				
+				await selectLibrary(win);
 				
 				await Zotero.Collections.erase([collection1.id, collection2.id]);
 				await Zotero.Searches.erase([search1.id, search2.id]);

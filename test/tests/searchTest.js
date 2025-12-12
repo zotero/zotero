@@ -236,6 +236,9 @@ describe("Zotero.Search", function () {
 					matches = await s.search();
 					// Result should be the same
 					assert.sameMembers(matches, [itemOne.id, itemTwo.id]);
+					
+					await itemOne.eraseTx();
+					await itemTwo.eraseTx();
 				});
 			});
 			
