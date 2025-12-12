@@ -117,6 +117,7 @@
 
 		refresh() {
 			this._ensureSearch();
+			this._search.libraryID = ZoteroPane.getSelectedLibraryID();
 			this._searchElem.search = this._search;
 			// There would be no way to scope a saved search to anything but the library root,
 			// so disable the option to save.
