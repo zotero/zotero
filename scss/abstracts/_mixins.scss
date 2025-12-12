@@ -134,6 +134,11 @@
 		padding-top: 0.25em; 
 	}
 
+	.annotation-icon {
+		-moz-context-properties: fill;
+		padding-block: 2px;
+	}
+
 	.label {
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
