@@ -154,6 +154,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				'itemTreeView',
 				50
 			);
+			this._prefsObserverID = Zotero.Prefs.registerObserver('hideContextRows', async () => {
+				await this.refresh();
+				this.tree.invalidate();
+			});
 		}
 		
 		this._itemsPaneMessage = null;
@@ -170,6 +174,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	unregister() {
 		this._uninitialized = true;
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
+		Zotero.Prefs.unregisterObserver(this._prefsObserverID);
 		this._writeColumnPrefsToFile(true);
 	}
 
@@ -381,6 +386,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// a sorted list of items for a given column configuration and restore items from that.
 			await this.sort([...addedItemIDs]);
 			
+			// Update search results before collapse/expand of containers so that
+			// if hideContextRows pref is true, child rows appear/disappear properly
+			this._searchItemIDs = newSearchItemIDs; // items matching the search
+			this._searchMode = newSearchMode;
 			// Toggle all open containers closed and open to refresh child items
 			//
 			// This could be avoided by making sure that items in notify() that aren't present are always
@@ -396,8 +405,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			this._refreshRowMap();
 			
-			this._searchMode = newSearchMode;
-			this._searchItemIDs = newSearchItemIDs; // items matching the search
 			this._rowCache = {};
 				
 			if (!this.collectionTreeRow.isPublications()) {
@@ -1732,6 +1739,18 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (item.isFileAttachment()) {
 			annotations = item.getAnnotations();
 		}
+		// Optionally, only keep child rows that match the search query (or have children that do)
+		if (Zotero.Prefs.get("hideContextRows") && this._searchMode) {
+			annotations = annotations.filter(annotation => this._searchItemIDs.has(annotation.id));
+			notes = notes.filter(note => this._searchItemIDs.has(note));
+			attachments = attachments.filter((attachmentID) => {
+				let attachment = Zotero.Items.get(attachmentID);
+				let attachmentMatchesSearch = this._searchItemIDs.has(attachmentID);
+				if (!attachment.isFileAttachment()) return attachmentMatchesSearch;
+				let annotationsMatchSearch = attachment.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
+				return attachmentMatchesSearch || annotationsMatchSearch;
+			});
+		}
 		var newRows = [];
 		if (attachments.length && notes.length) {
 			newRows = notes.concat(attachments);
@@ -2107,12 +2126,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		var item = this.getRow(index).ref;
 		if (item.isFileAttachment()) {
+			if (Zotero.Prefs.get("hideContextRows") && this._searchMode) {
+				return !item.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
+			}
 			return item.numAnnotations() == 0;
 		}
 		if (!item.isRegularItem()) {
 			return true;
 		}
 		var includeTrashed = this.collectionTreeRow.isTrash();
+		if (Zotero.Prefs.get("hideContextRows") && this._searchMode) {
+			let hasMatchingNotes = item.getNotes(includeTrashed).some(note => this._searchItemIDs.has(note));
+			let hasMatchingAttachments = item.getAttachments(includeTrashed).some(attachment => this._searchItemIDs.has(attachment));
+			let hasMatchingAnnotations = item.getAttachments(includeTrashed).some((attachmentID) => {
+				let attachment = Zotero.Items.get(attachmentID);
+				if (!attachment.isFileAttachment()) return false;
+				return attachment.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
+			});
+			return !(hasMatchingNotes || hasMatchingAttachments || hasMatchingAnnotations);
+		}
 		return item.numNotes(includeTrashed) === 0 && item.numAttachments(includeTrashed) == 0;
 	};
 
