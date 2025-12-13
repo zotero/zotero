@@ -174,6 +174,19 @@ collections-menu-move-collection =
     .label = Move To
 collections-menu-copy-collection =
     .label = Copy To
+collections-menu-copy-collection-additive =
+    .label = Transfer New Items and Collections
+collections-menu-copy-collection-destructive =
+    .label = Replace Existing Items and Collections
+collection-replicate-dialog-title = Replace linked collection's content?
+collection-replicate-dialog-text = This will delete all items and subcollections in the linked collection and replace them with copies of subcollections and items in the selected collection.
+collection-replicate-dialog-checkbox = I understand
+collection-replicate-dialog-accept = Accept
+
+library-replicate-dialog-title = Replace all content of the target library?
+library-replicate-dialog-text = This will completely replace all items and collections in the selected library and replace them with data from the selected collection.
+library-replicate-dialog-checkbox = I understand
+library-replicate-dialog-accept = Accept
 
 item-creator-moveDown =
     .label = Move Down

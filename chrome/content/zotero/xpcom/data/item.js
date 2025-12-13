@@ -3871,6 +3871,25 @@ Zotero.Item.prototype.getAttachments = function (includeTrashed) {
 	return ids;
 }
 
+/**
+ * Return all descendant items of this item, including annotations.
+ */
+Zotero.Item.prototype.getChildren = function () {
+	this._requireData('childItems');
+
+	if (this.isFileAttachment()) {
+		return Zotero.Items.get(this.getAnnotations());
+	}
+
+	if (this.isRegularItem()) {
+		let notes = Zotero.Items.get(this.getNotes());
+		let attachments = Zotero.Items.get(this.getAttachments());
+		let annotations = attachments.filter(att => att.isFileAttachment()).flatMap(att => Zotero.Items.get(att.getAnnotations()));
+		return [...notes, ...attachments, ...annotations];
+	}
+	return [];
+};
+
 
 /**
  * Looks for attachment in the following order: oldest PDF attachment matching parent URL,
@@ -4896,6 +4915,8 @@ Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
  * @param {Number} [libraryID] - libraryID of the new item, or the same as original if omitted
  * @param {Boolean} [options.skipTags=false] - Skip tags
  * @param {Boolean} [options.includeCollections=false] - Add new item to all collections
+ * @param {Zotero.Item} [options.shouldReplaceItem] - If provided, data will be cloned INTO this item, instead of creating a new one.
+ * This is used to "sync" data of item in one library with linked item in another library.
  * @return {Zotero.Item}
  */
 Zotero.Item.prototype.clone = function (libraryID, options = {}) {
@@ -4910,7 +4931,7 @@ Zotero.Item.prototype.clone = function (libraryID, options = {}) {
 	}
 	var sameLibrary = libraryID == this.libraryID;
 	
-	var newItem = new Zotero.Item;
+	var newItem = options.shouldReplaceItem || (new Zotero.Item);
 	newItem.libraryID = libraryID;
 	newItem.setType(this.itemTypeID);
 	

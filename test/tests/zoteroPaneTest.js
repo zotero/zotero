@@ -1769,7 +1769,7 @@ describe("ZoteroPane", function () {
 
 			await zp.collectionsView.selectByID("C" + collectionParent.id);
 
-			await zp.copyCollection(collectionDestination);
+			zp.copyCollection(collectionDestination);
 			await waitForNotifierEvent("add", "collection");
 
 			// Newly created collections have the same names as the original ones
@@ -1789,7 +1789,7 @@ describe("ZoteroPane", function () {
 
 			await zp.collectionsView.selectByID("C" + collection.id);
 
-			await zp.copyCollection(mylibrary);
+			zp.copyCollection(mylibrary);
 			await waitForNotifierEvent("add", "collection");
 
 			// Find the duplicated collection and make sure it exists
@@ -1814,7 +1814,7 @@ describe("ZoteroPane", function () {
 
 			await zp.collectionsView.selectByID("C" + collectionParent.id);
 
-			await zp.copyCollection(groupCollection);
+			zp.copyCollection(groupCollection);
 
 			await waitForNotifierEvent("add", "collection");
 
@@ -1827,7 +1827,7 @@ describe("ZoteroPane", function () {
 			assert.sameMembers(items, [itemOne.getDisplayTitle(), itemTwo.getDisplayTitle()]);
 		});
 
-		it("should not allow copying between libraries if there is a linked collection", async function () {
+		it("should allow copying between libraries only into linked collection if one exists", async function () {
 			let groupDestination = await createGroup();
 			let groupCollection = await createDataObject('collection', { libraryID: groupDestination.libraryID });
 
@@ -1836,7 +1836,7 @@ describe("ZoteroPane", function () {
 
 			await zp.collectionsView.selectByID("C" + collectionChild.id);
 
-			await zp.copyCollection(groupCollection);
+			zp.copyCollection(groupCollection);
 
 			await waitForNotifierEvent("add", "collection");
 
@@ -1852,18 +1852,10 @@ describe("ZoteroPane", function () {
 
 			// Delay for menus to get disabled
 			await Zotero.Promise.delay();
+			// Ensure that the only destination for copying is the linked collection 
 			let groupMenu = doc.querySelector(`#zotero-copy-collection-popup menu[value="L${groupDestination.libraryID}"]`);
-			// Menu of the library with linked collection should be disabled
-			assert.equal(groupMenu.disabled, true);
-
-			// Right click on the parent of the copies collection
-			await zp.collectionsView.selectByID("C" + collection.id);
-			zp.buildCopyCollectionMenu({});
-			// Delay for menus to get disabled
-			await Zotero.Promise.delay();
-			groupMenu = doc.querySelector(`#zotero-copy-collection-popup menu[value="L${groupDestination.libraryID}"]`);
-			// Menu of the library with linked sub-collection should be disabled
-			assert.equal(groupMenu.disabled, true);
+			assert.equal(groupMenu.menupopup.childElementCount, 1);
+			assert.equal(groupMenu.menupopup.firstChild.label, newCollection.name);
 		});
 
 		it("should copy subcollection to library root", async function () {
@@ -1875,7 +1867,7 @@ describe("ZoteroPane", function () {
 
 			await zp.collectionsView.selectByID("C" + collectionChild.id);
 
-			await zp.copyCollection(libraryDestination);
+			zp.copyCollection(libraryDestination);
 			let data = await waitForNotifierEvent("add", "collection");
 			let collectionID = data.ids[0];
 			let newCollection = Zotero.Collections.get(collectionID);
@@ -1887,6 +1879,80 @@ describe("ZoteroPane", function () {
 			assert.sameMembers(items, [item.id]);
 			// Copied collection is a top-level collection
 			assert.notOk(newCollection.parentID);
+		});
+
+		it("should add new items and collections into a linked collection", async function () {
+			let collection = await createDataObject('collection');
+			let itemOne = await createDataObject('item', { collections: [collection.id] });
+
+			let groupDestination = await createGroup();
+
+			// Copy collection to a group
+			await zp.collectionsView.selectByID("C" + collection.id);
+			zp.copyCollection(groupDestination);
+			await waitForNotifierEvent("add", "collection");
+
+			let groupCollection = await collection.getLinkedCollection(groupDestination.libraryID, true);
+			assert.isOk(groupCollection);
+			assert.equal(groupCollection.getChildItems().length, 1);
+
+			// Add a subcollection to the collection
+			let collectionChild = await createDataObject('collection', { parentID: collection.id });
+			let itemTwo = await createDataObject('item', { collections: [collectionChild.id] });
+			// Add child note to previously copied item
+			let newChildNote = await createDataObject('item', { note: "Note", itemType: 'note', parentID: itemOne.id });
+
+			// Copy collection to the group again
+			await zp.collectionsView.selectByID("C" + collection.id);
+			zp.copyCollection(groupDestination);
+			await waitForNotifierEvent("add", "collection");
+
+			// Group should have a linked item from the first copy
+			assert.equal(groupCollection.getChildItems().length, 1);
+			let linkedGroupItem = await itemOne.getLinkedItem(groupDestination.libraryID, true);
+			assert.equal(linkedGroupItem.getDisplayTitle(), itemOne.getDisplayTitle());
+			assert.sameMembers(linkedGroupItem.getCollections(), [groupCollection.id]);
+			// That item should also have a copy of the new child note
+			let linkedNote = await newChildNote.getLinkedItem(groupDestination.libraryID, true);
+			assert.equal(linkedNote.parentID, linkedGroupItem.id);
+
+			// Group collection should have a subcollection linked to subcollection in My Library
+			let linkedSubCollection = await collectionChild.getLinkedCollection(groupDestination.libraryID, true);
+			assert.equal(linkedSubCollection.parentID, groupCollection.id);
+			assert.equal(linkedSubCollection.name, collectionChild.name);
+			// That subcollection should contain the linked added item
+			let groupItemTwo = await itemTwo.getLinkedItem(groupDestination.libraryID, true);
+			assert.equal(groupItemTwo.getDisplayTitle(), itemTwo.getDisplayTitle());
+			assert.sameMembers(groupItemTwo.getCollections(), [linkedSubCollection.id]);
+		});
+
+		it("should unlink trashed linked collection on copy", async function () {
+			let groupDestination = await createGroup();
+
+			let collection = await createDataObject('collection');
+			let subcollection = await createDataObject('collection', { parentID: collection.id });
+
+			// Copy collection to a group
+			await zp.collectionsView.selectByID("C" + collection.id);
+			zp.copyCollection(groupDestination);
+			await waitForNotifierEvent("add", "collection");
+
+
+			// Trash linked subcollection
+			let linkedSubcollection = await subcollection.getLinkedCollection(groupDestination.libraryID, true);
+			linkedSubcollection.deleted = true;
+			await linkedSubcollection.saveTx();
+			
+			// Copy collection to the group again
+			await zp.collectionsView.selectByID("C" + collection.id);
+			zp.copyCollection(groupDestination);
+			await waitForNotifierEvent("add", "collection");
+
+			// Trashed collection should be unlinked
+			let linkedCollectionOfTrashed = await linkedSubcollection.getLinkedCollection(subcollection.libraryID, true);
+			assert.isNotOk(linkedCollectionOfTrashed);
+			let newLinkedSubcollection = await subcollection.getLinkedCollection(groupDestination.libraryID, true);
+			assert.notEqual(linkedSubcollection, newLinkedSubcollection);
 		});
 	});
 	describe("#moveCollection", function () {

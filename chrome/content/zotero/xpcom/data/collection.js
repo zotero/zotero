@@ -579,6 +579,8 @@ Zotero.Collection.prototype.clone = function (libraryID) {
 	newCollection.libraryID = libraryID;
 	
 	var json = this.toJSON();
+	// record of linked collection should never be copied
+	delete json.relations[Zotero.Relations.linkedObjectPredicate];
 	if (!sameLibrary) {
 		delete json.parentCollection;
 		delete json.relations;
@@ -714,6 +716,11 @@ Zotero.Collection.prototype._eraseData = async function (env) {
 		Zotero.DB.addCurrentCallback("commit", function () {
 			this.ObjectsClass.unregisterChildCollection(parentCollectionID, this.id);
 		}.bind(this));
+	}
+	// Unlink this collection from all other collections
+	let linkedCollections = await this.getAllLinkedCollections(true);
+	for (let linkedCollection of linkedCollections) {
+		await linkedCollection.removeLinkedCollection(this);
 	}
 	
 	// Remove erased collection from collection cache of descendant items
@@ -929,6 +936,18 @@ Zotero.Collection.prototype.getLinkedCollection = function (libraryID, bidrectio
 	return this._getLinkedObject(libraryID, bidrectional);
 }
 
+/**
+ * Fetch and return all linked collections across all groups
+ * @param {Boolean} bidrectional if true, returns collections this collection links to, as well as collections that link to this collection
+ * @returns {Zotero.Collection[]} array of linked collections
+ */
+Zotero.Collection.prototype.getAllLinkedCollections = async function (bidrectional) {
+	let libraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed) && lib.libraryID !== this.libraryID);
+	let allLinkedPromises = libraries.map(lib => this.getLinkedCollection(lib.libraryID, bidrectional));
+	let linkedCollections = await Promise.all(allLinkedPromises);
+	return linkedCollections.filter(col => col);
+};
+
 
 /**
  * Add a linked-object relation pointing to the given collection
@@ -939,6 +958,22 @@ Zotero.Collection.prototype.addLinkedCollection = async function (collection) {
 	return this._addLinkedObject(collection);
 };
 
+
+/**
+ * Unlink a previously linked collection.
+ */
+Zotero.Collection.prototype.removeLinkedCollection = async function (collection) {
+	Zotero.DB.requireTransaction();
+	let linkedColURI = Zotero.URI.getCollectionURI(collection);
+	let removed = this.removeRelation(Zotero.Relations.linkedObjectPredicate, linkedColURI);
+	if (removed) {
+		await this.save({
+			skipDateModifiedUpdate: true,
+			skipSelect: true
+		});
+	}
+	return removed;
+};
 
 //
 // Private methods
