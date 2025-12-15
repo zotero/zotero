@@ -558,6 +558,11 @@
 				return null;
 			}
 
+			// If the pane is already at the top, no need to scroll
+			if (Math.abs(pane.getBoundingClientRect().top - this._paneParent.getBoundingClientRect().top) < 1) {
+				return true;
+			}
+
 			// Temporarily disable intersection observer to prevent unwanted rendering
 			this._toggleIntersectionObserver(false);
 
