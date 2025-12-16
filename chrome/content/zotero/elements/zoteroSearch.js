@@ -720,8 +720,6 @@
 
 		onRemoveClicked() {
 			if (this.parent) {
-				window.resizeBy(0, -1 * this.getBoundingClientRect().height);
-				window.dispatchEvent(new CustomEvent('resize'));
 				this.parent.removeCondition(this.conditionID);
 			}
 		}
@@ -737,7 +735,6 @@
 					)
 				);
 				this.parent.addCondition(ref);
-				window.resizeBy(0, this.getBoundingClientRect().height);
 			}
 		}
 
