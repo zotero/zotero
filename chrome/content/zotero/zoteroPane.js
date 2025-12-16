@@ -1837,6 +1837,7 @@ var ZoteroPane = new function () {
 			advancedSearchPane.search = null;
 		}
 		else if (state === 'open') {
+			Zotero_Tabs.select('zotero-pane');
 			advancedSearchPane.focus();
 		}
 	};
