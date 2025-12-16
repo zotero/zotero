@@ -1883,13 +1883,13 @@ var ZoteroPane = new function () {
 	/**
 	 * @param {'open' | 'collapsed' | 'closed'} state
 	 */
-	this.toggleAdvancedSearchState = function (state) {
+	this.toggleAdvancedSearchState = async function (state) {
 		let deck = document.getElementById('zotero-advanced-search-pane-deck');
 		if (state === deck.state && deck.selectedSearchType !== 'saved') {
 			// If we're trying to open the pane, and it's already open but not focused,
 			// focus it
-			if (state === 'open' && !deck.matches(':focus-within')) {
-				deck.focus();
+			if (state === 'open' && !deck.pane.matches(':focus-within')) {
+				deck.pane.focus();
 				return;
 			}
 			
