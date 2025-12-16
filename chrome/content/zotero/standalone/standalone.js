@@ -288,12 +288,12 @@ const ZoteroStandalone = new function () {
 	
 	
 	this.onManageAttachmentsMenuOpen = function () {
+		let zp = Zotero.getActiveZoteroPane();
 		// Convert Linked Files to Stored Files
-		var active = false;
+		let convertToStoredActive = false;
 		try {
-			let zp = Zotero.getActiveZoteroPane();
 			if (zp) {
-				active = !!zp.getSelectedItems().filter((item) => {
+				convertToStoredActive = !!zp.getSelectedItems().filter((item) => {
 					return item.isLinkedFileAttachment()
 						|| (item.isRegularItem()
 							&& item.getAttachments()
@@ -303,7 +303,25 @@ const ZoteroStandalone = new function () {
 			}
 		}
 		catch (e) {}
-		this.updateMenuItemEnabled('file-menuitem-convert-to-stored', active);
+		this.updateMenuItemEnabled('file-menuitem-convert-to-stored', convertToStoredActive);
+
+		// Migrate embedded attachment note to child note
+		let migrateToChildNoteActive = false;
+		try {
+			if (zp) {
+				migrateToChildNoteActive = !!zp.getSelectedItems().some((item) => {
+					return (item.isAttachment()
+							&& item.parentItem?.isRegularItem()
+							&& !!item.getNote())
+						|| (item.isRegularItem()
+							&& item.getAttachments()
+								.map(id => Zotero.Items.get(id))
+								.some(att => !!att.getNote()));
+				});
+			}
+		}
+		catch (e) {}
+		this.updateMenuItemEnabled('file-menuitem-convert-embedded-note-to-child', migrateToChildNoteActive);
 	};
 	
 	
@@ -320,6 +338,8 @@ const ZoteroStandalone = new function () {
 			case 'convert-to-stored':
 				ZoteroPane.convertLinkedFilesToStoredFiles();
 				break;
+			case 'convert-embedded-note-to-child':
+				ZoteroPane.convertAttachmentEmbeddedNotesToChildNotes();
 		}
 	};
 	

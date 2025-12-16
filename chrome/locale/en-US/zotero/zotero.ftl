@@ -127,6 +127,8 @@ menu-deletePermanently =
 
 menu-tools-plugins =
     .label = Plugins
+menu-tools-attachments-convert-embedded-note-to-child =
+    .label = Migrate Embedded Attachment Notes…
 
 menu-view-columns-move-left =
     .label = Move Column Left
