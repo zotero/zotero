@@ -34,6 +34,9 @@
 
 window.isPristine = true;
 
+window.isLoadedDeferred = Zotero.Promise.defer();
+window.isLoadedPromise = window.isLoadedDeferred.promise;
+
 window.Zotero_File_Interface_Bibliography = new function () {
 	var _io;
 	
@@ -105,7 +108,18 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		if (_io.style) {
 			styleConfigurator.style = _io.style;
 			if (styleConfigurator.style !== _io.style) {
-				styleConfigurator.style = styleConfigurator.styles[0];
+				// Get style with potentially remapped styleID
+				let style;
+				try {
+					style = Zotero.Styles.get(_io.style);
+					if (style) {
+						styleConfigurator.style = style.styleID;
+					}
+				}
+				catch (e) {}
+				if (styleConfigurator.style !== style?.styleID) {
+					styleConfigurator.style = styleConfigurator.styles[0];
+				}
 			}
 			else if (_io.locale) {
 				styleConfigurator.locale = _io.locale;
@@ -129,6 +143,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		
 		// set style to false, in case this is cancelled
 		_io.style = false;
+		isLoadedDeferred.resolve();
 	};
 
 	this.initBibWindow = function () {

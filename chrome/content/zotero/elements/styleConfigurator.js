@@ -37,7 +37,21 @@
 		`);
 
 		set value(val) {
-			if (!this.values.includes(val)) return;
+			if (!this.values.includes(val)) {
+				try {
+					let style = Zotero.Styles.get(val);
+					// Check for remapped style id
+					if (style) {
+						val = style.styleID;
+					}
+					else {
+						return;
+					}
+				}
+				catch (e) {
+					return;
+				}
+			}
 			let styleList = this.querySelector('#style-list');
 			styleList.value = val;
 			this._scrollToSelected();
