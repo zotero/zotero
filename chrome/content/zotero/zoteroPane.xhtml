@@ -1074,28 +1074,16 @@
 							
 							<vbox id="post-upgrade-container" class="banner-container" collapsed="true" role="status">
 								<html:div id="post-upgrade-banner" class="banner">
-									<html:div id="post-upgrade-centered">
-										<html:div
-												data-l10n-id="post-upgrade-message"
-												data-l10n-args='{"version": "7"}'>
-											<html:a
-												data-l10n-name="new-features-link"
-												id="post-upgrade-new-features-link"
-												class="link"
-												onclick="Zotero.launchURL(ZOTERO_CONFIG.NEW_FEATURES_URL)"
-												tabindex="0"
-											/>
-										</html:div>
-										<html:div>•</html:div>
-										<html:div data-l10n-id="post-upgrade-density"/>
-										<radiogroup
-											id="post-upgrade-density"
-											orient="horizontal"
-											oncommand="Zotero.Prefs.set('uiDensity', this.value)"
-										>
-											<radio value="comfortable" data-l10n-id="menu-ui-density-comfortable"/>
-											<radio value="compact" data-l10n-id="menu-ui-density-compact"/>
-										</radiogroup>
+									<html:div
+											id="post-upgrade-message"
+											data-l10n-id="post-upgrade-message">
+										<html:a
+											id="post-upgrade-new-features-link"
+											data-l10n-name="new-features-link"
+											class="link"
+											onclick="Zotero.launchURL(this.href)"
+											tabindex="0"
+										/>
 									</html:div>
 									<html:div id="post-upgrade-buttons">
 										<button

@@ -79,26 +79,11 @@
 		cursor: pointer;
 	}
 	
-	#post-upgrade-centered {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-wrap: wrap;
-		gap: 8px;
-		flex: 1 auto;
-
-		#post-upgrade-density {
-			@media (-moz-platform: windows) {
-				radio {
-					height: 24px;
-					margin: 0;
-				}
-			}
-		}
+	#post-upgrade-message {
+		font-weight: 600;
 	}
 	
 	#post-upgrade-new-features-link {
-		font-weight: bold;
 		padding-inline: unset;
 	}
 	

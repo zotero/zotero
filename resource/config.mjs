@@ -31,5 +31,5 @@ export var ZOTERO_CONFIG = {
 	GET_INVOLVED_URL: 'https://www.zotero.org/getinvolved',
 	DICTIONARIES_URL: 'https://download.zotero.org/dictionaries/',
 	PLUGINS_URL: 'https://www.zotero.org/support/plugins',
-	NEW_FEATURES_URL: 'https://www.zotero.org/blog/zotero-7/'
+	NEW_FEATURES_URL: 'https://www.zotero.org/blog/zotero-{version}/'
 };

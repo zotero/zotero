@@ -6589,30 +6589,36 @@ var ZoteroPane = new function () {
 
 	
 	this.showPostUpgradeBanner = function () {
-		if (Zotero.isBetaBuild || Zotero.Prefs.get('firstRunGuidanceShown.z7Banner')) {
+		// Don't show for beta builds or if disabled
+		if (Zotero.isBetaBuild || !Zotero.Prefs.get('showPostUpgradeBanner')) {
 			return;
 		}
+		// Don't show if we've already shown a banner for this or a higher major version
+		let versionShown = Zotero.Prefs.get('postUpgradeBannerVersionShown') || 0;
+		let majorVersion = parseInt(Zotero.version.split('.')[0]);
+		if (versionShown >= majorVersion) {
+			return;
+		}
+		
+		// Set message and link to current version
+		let div = document.getElementById('post-upgrade-message');
+		document.l10n.setArgs(div, { version: "8" });
+		let link = document.getElementById('post-upgrade-new-features-link');
+		link.href = ZOTERO_CONFIG.NEW_FEATURES_URL.replace('{version}', majorVersion);
 		document.getElementById('post-upgrade-container').removeAttribute('collapsed');
-		this.updatePostUpgradeBanner();
-	};
-	
-	
-	this.updatePostUpgradeBanner = function () {
-		document.getElementById('post-upgrade-density').value = Zotero.Prefs.get('uiDensity');
 	};
 	
 	
 	this.hidePostUpgradeBanner = function (remindMeLater = false) {
 		document.getElementById('post-upgrade-container').setAttribute('collapsed', true);
 		if (remindMeLater) {
-			// The pref should already be false if the banner was showing, but just in case
-			Zotero.Prefs.set('firstRunGuidanceShown.z7Banner', false);
 			setTimeout(() => {
 				this.showPostUpgradeBanner();
 			}, 1000 * 60 * 60 * 24); // 24 hours
 		}
 		else {
-			Zotero.Prefs.set('firstRunGuidanceShown.z7Banner', true);
+			let majorVersion = parseInt(Zotero.version.split('.')[0]);
+			Zotero.Prefs.set('postUpgradeBannerVersionShown', majorVersion);
 		}
 	};
 
