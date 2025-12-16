@@ -779,7 +779,7 @@ file-type-presentation = Presentation
 file-type-document = Document
 file-type-ebook = Ebook
 
-post-upgrade-message = You’ve been upgraded to { -app-name } { $version }! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
