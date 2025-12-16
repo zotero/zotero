@@ -119,12 +119,14 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Przesuń kolumnę w prawo
 menu-show-tabs-menu =
-    .label = Show Tabs Menu
+    .label = Pokaż menu zakładek
 menu-edit-copy-annotation =
     .label =
         { $count ->
-            [one] Copy Annotation
-           *[other] Copy { $count } Annotations
+            [one] Kopiuj { $count } adnotację
+            [few] Kopiuj { $count } adnotacje
+            [many] Kopiuj { $count } adnotacji
+           *[other] Kopiuj { $count } adnotacji
         }
 main-window-command =
     .label = Biblioteka
@@ -142,9 +144,9 @@ zotero-tabs-menu-filter =
 zotero-tabs-menu-close-button =
     .title = Zamknij kartę
 zotero-toolbar-tabs-scroll-forwards =
-    .title = Scroll forwards
+    .title = Przewiń do przodu
 zotero-toolbar-tabs-scroll-backwards =
-    .title = Scroll backwards
+    .title = Przewiń wstecz
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -268,8 +270,10 @@ import-online-connection-error = { -app-name } nie może się połączyć z  { $
 items-table-cell-notes =
     .aria-label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } notatka
+            [few] { $count } notatki
+            [many] { $count } notatek
+           *[other] { $count } notatek
         }
 report-error =
     .label = Zgłoś błąd...
@@ -304,7 +308,7 @@ runJS-title = Uruchom JavaScript
 runJS-editor-label = Kod:
 runJS-run = Uruchom
 runJS-help = { general-help }
-runJS-completed = completed successfully
+runJS-completed = zakończono pomyślnie
 runJS-result =
     { $type ->
         [async] Return value:
@@ -432,23 +436,29 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
-           *[other] { $count } Attachments
+            [one] { $count } załącznik
+            [few] { $count } załączniki
+            [many] { $count } załączników
+           *[other] { $count } załączników
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } Annotation
-           *[other] { $count } Annotations
+            [one] { $count } adnotacja
+            [few] { $count } adnotacje
+            [many] { $count } adnotacji
+           *[other] { $count } adnotacji
         }
 section-attachments-move-to-trash-message = Czy na pewno przenieść “{ $title }” do kosza?
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } notatka
+            [few] { $count } notatki
+            [many] { $count } notatek
+           *[other] { $count } notatek
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
@@ -474,8 +484,10 @@ section-button-collapse =
     .label = Zwiń sekcję { $section }
 annotations-count =
     { $count ->
-        [one] { $count } Annotation
-       *[other] { $count } Annotations
+        [one] { $count } adnotacja
+        [few] { $count } adnotacje
+        [many] { $count } adnotacji
+       *[other] { $count } adnotacji
     }
 section-button-annotations =
     .title = { annotations-count }

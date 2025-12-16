@@ -19,28 +19,28 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
         { -integration-editBibliography-edit-reference }
-integration-citationDialog = Citation Dialog
-integration-citationDialog-section-open = Open Documents ({ $count })
-integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
+integration-citationDialog = مربع حوار الاقتباس
+integration-citationDialog-section-open = فتح المستندات ({ $count })
+integration-citationDialog-section-selected = العناصر المحددة ({ $count }/{ $total })
 integration-citationDialog-section-cited =
     { $count ->
         [0] Cited Items
        *[other] Cited Items ({ $count })
     }
-integration-citationDialog-details-suffix = Suffix
-integration-citationDialog-details-prefix = Prefix
+integration-citationDialog-details-suffix = ملحق
+integration-citationDialog-details-prefix = بداية
 integration-citationDialog-details-suppressAuthor = حذف المؤلف
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
-integration-citationDialog-settings-title = Citation Settings
+integration-citationDialog-settings-title = إعدادات الاقتباس
 integration-citationDialog-lib-no-items =
     { $search ->
         [true] No selected, open, or cited items match the current search
        *[other] No selected or open items
     }
-integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-settings-keepSorted = الحفاظ على ترتيب المصادر
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-btn-mode =
@@ -60,33 +60,33 @@ integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
     .title = { general-cancel }
-integration-citationDialog-general-instructions = Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation.
-integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
-integration-citationDialog-search-for-items = Search for items to add to the citation
+integration-citationDialog-general-instructions = استخدم السهم الأيمن/الأيسر للتنقل بين عناصر هذا الاستشهاد. اضغط على مفتاح Tab لتحديد العناصر المراد إضافتها إلى هذا الاستشهاد.
+integration-citationDialog-enter-to-add-item = اضغط على { return-or-enter } لإضافة هذا العنصر إلى الاستشهاد.
+integration-citationDialog-search-for-items = البحث عن عناصر لإضافتها إلى الاستشهاد
 integration-citationDialog-aria-bubble =
-    .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
+    .aria-description = هذا العنصر مدرج في الاقتباس. اضغط على مفتاح المسافة لتخصيص العنصر. { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input =
     .placeholder = { integration-citationDialog-search-for-items }
-    .aria-description = Press Tab to select items to add to this citation. Press Escape to discard the changes and close the dialog.
+    .aria-description = اضغط على Tab لتحديد العناصر المراد إضافتها إلى هذا الاستشهاد. اضغط على Escape لإلغاء التغييرات وإغلاق مربع الحوار.
 integration-citationDialog-input =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-aria-item-list =
-    .aria-description = Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = استخدم السهم لأعلى/لأسفل لتغيير اختيار العنصر. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
-    .aria-description = Use Right/Left Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = استخدم السهم الأيمن/الأيسر لتغيير اختيار العنصر. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-collections-table =
-    .aria-label = Collections.
-    .aria-description = Select a collection and press Tab to navigate its items.
+    .aria-label = المجموعات.
+    .aria-description = حدد مجموعة واضغط على Tab للتنقل بين عناصرها.
 integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
-    .aria-label = This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it.
-integration-citationDialog-add-all = Add all
+    .aria-label = تمت إضافة هذا العنصر إلى الاستشهاد. اضغط على { return-or-enter } لإضافته مرة أخرى أو { delete-or-backspace } لإزالته.
+integration-citationDialog-add-all = إضافة الكل
 integration-citationDialog-collapse-section =
     .title = طي القسم
-integration-citationDialog-bubble-empty = (no title)
-integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-bubble-empty = (بدون عنوان)
+integration-citationDialog-add-to-citation = أضف إلى الاستشهاد
 integration-prefs-displayAs-label = عرض الاستشهادات المرجعية كـ:
 integration-prefs-footnotes =
     .label = حواشي سفلية
@@ -110,8 +110,8 @@ integration-prefs-automaticJournalAbbeviations-description = سيتم تجاهل
 integration-prefs-exportDocument =
     .label = التبديل إلى معالج نصوص آخر ...
 integration-error-unable-to-find-winword = تعذر على { -app-name } العثور على نسخة وورد قيد التشغيل.
-integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
-integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
-integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
-integration-warning-discard-changes = Discard Changes
-integration-warning-command-is-running = A word processor integration command is already running.
+integration-warning-citation-changes-will-be-lost = لقد أجريت تغييرات على الاستشهاد ستفقدها إذا واصلت.
+integration-warning-bibliography-changes-will-be-lost = لقد أجريت تغييرات على قائمة المراجع ستفقدها إذا واصلت.
+integration-warning-documentPreferences-changes-will-be-lost = لقد أجريت تغييرات على تفضيلات المستند ستفقدها إذا واصلت.
+integration-warning-discard-changes = تجاهل التغييرات
+integration-warning-command-is-running = يتم الآن تشغيل أمر دمج معالج النصوص.

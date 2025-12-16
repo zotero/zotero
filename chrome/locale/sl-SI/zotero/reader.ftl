@@ -125,7 +125,8 @@ reader-double = Dvojne
 reader-theme-name = Ime teme:
 reader-background = Ozadje:
 reader-foreground = Ospredje:
-reader-focus-mode = Focus Mode
+reader-reading-mode = Reading Mode
+reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Počisti izbor
 reader-move-annotation-start-key =
     { PLATFORM() ->

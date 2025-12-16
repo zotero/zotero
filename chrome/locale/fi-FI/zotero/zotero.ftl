@@ -123,8 +123,8 @@ menu-show-tabs-menu =
 menu-edit-copy-annotation =
     .label =
         { $count ->
-            [one] Copy Annotation
-           *[other] Copy { $count } Annotations
+            [one] Kopioi huomautus
+           *[other] Kopioi { $count } huomautusta
         }
 main-window-command =
     .label = Kirjasto
@@ -142,9 +142,9 @@ zotero-tabs-menu-filter =
 zotero-tabs-menu-close-button =
     .title = Sulje välilehti
 zotero-toolbar-tabs-scroll-forwards =
-    .title = Scroll forwards
+    .title = Vieritä eteenpäin
 zotero-toolbar-tabs-scroll-backwards =
-    .title = Scroll backwards
+    .title = Vieritä taaksepäin
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -192,7 +192,7 @@ item-menu-add-url =
 item-menu-change-parent-item =
     .label = Vaihda tiedoston isäntänimikettä…
 item-menu-relate-items =
-    .label = Relate Items
+    .label = Tee nimikkeistä toisiinsa liittyviä
 view-online = Katso verkossa
 item-menu-option-view-online =
     .label = { view-online }
@@ -304,7 +304,7 @@ runJS-title = Aja JavaScript
 runJS-editor-label = Koodi:
 runJS-run = Käynnistä
 runJS-help = { general-help }
-runJS-completed = completed successfully
+runJS-completed = suoritettu onnistuneesti
 runJS-result =
     { $type ->
         [async] Paluuarvo:
@@ -443,7 +443,7 @@ section-attachments-annotations =
             [one] { $count } huomautus
            *[other] { $count } huomautusta
         }
-section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
+section-attachments-move-to-trash-message = Haluatko varmasti siirtää nimikkeen “{ $title }” roskakoriin?
 section-notes =
     .label =
         { $count ->
@@ -505,13 +505,13 @@ sidenav-related =
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
 sidenav-reorder-up =
-    .label = Move Section Up
+    .label = Siirrä osa ylöspäin
 sidenav-reorder-down =
-    .label = Move Section Down
+    .label = Siirrä osa alaspäin
 sidenav-reorder-reset =
-    .label = Reset Section Order
+    .label = Nollaa osien järjestys
 toggle-item-pane =
-    .tooltiptext = Toggle Item Pane
+    .tooltiptext = Nimikeruutu päälle/pois
 toggle-context-pane =
     .tooltiptext = Näytä kontekstiruutu
 pin-section =
@@ -543,7 +543,7 @@ new-collection-dialog =
 new-collection-name = Nimi:
 new-collection-create-in = Luo kohteeseen:
 show-publications-menuitem =
-    .label = Show My Publications
+    .label = Näytä Omat julkaisuni
 attachment-info-title = Nimi
 attachment-info-filename = Tiedostonimi
 attachment-info-accessed = Viittaus noudettu
@@ -560,17 +560,17 @@ attachment-info-convert-note =
     .tooltiptext = Muistiinpanojen lisäämistä liitteisiin ei enää tueta, mutta voit muokata tätä muistiinpanoa siirtämällä sen erilliseksi muistiinpanoksi.
 attachment-preview-placeholder = Ei liitettä esikatseltavaksi
 attachment-rename-from-parent =
-    .tooltiptext = Rename File to Match Parent Item
-file-renaming-auto-rename-prompt-title = Renaming Settings Changed
-file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
-file-renaming-auto-rename-prompt-yes = Preview Changes…
-file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+    .tooltiptext = Uudelleennimeä tiedosto täsmäämään päänimikkeeseen
+file-renaming-auto-rename-prompt-title = Uudelleennimeämisasetukset muutettu
+file-renaming-auto-rename-prompt-body = Haluatko uudelleennimetä olemassaolevat tiedostot kirjastossasi täsmäämään uusiin asetuksiin?
+file-renaming-auto-rename-prompt-yes = Esikatsele muutoksia…
+file-renaming-auto-rename-prompt-no = Pidä olemassaolevat tiedostonnimet
 rename-files-preview =
     .buttonlabelaccept = Nimeä tiedostot uudelleen
 rename-files-preview-loading = Ladataan...
 rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
-rename-files-preview-renaming = Renaming…
-rename-files-preview-no-files = All filenames already match parent items. No changes are required.
+rename-files-preview-renaming = Uudelleennimeäminen…
+rename-files-preview-no-files = Kaikki tiedostonimet täsmäävät jo nimikkeisiinsä. Muutoksia ei tarvittu.
 toggle-preview =
     .label =
         { $type ->
@@ -578,7 +578,7 @@ toggle-preview =
             [collapsed] Näytä
            *[unknown] Vaihda
         } Liitteen esikatselu
-annotation-image-not-available = [Image not available]
+annotation-image-not-available = [Kuva ei saatavilla]
 quicksearch-mode =
     .aria-label = Pikahakutila
 quicksearch-input =
@@ -707,6 +707,6 @@ file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
 userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
 long-tag-fixer-window-title =
-    .title = Split Tags
+    .title = Jaa avainsanat
 long-tag-fixer-button-dont-split =
-    .label = Don’t Split
+    .label = Älä jaa

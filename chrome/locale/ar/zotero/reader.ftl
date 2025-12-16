@@ -22,7 +22,7 @@ reader-underline-annotation = تسطير التعليق التوضيحي
 reader-note-annotation = تعليق توضيحي بملاحظة
 reader-text-annotation = تعليق توضيحي بنص
 reader-image-annotation = تعليق توضيحي بصورة
-reader-ink-annotation = Ink Annotation
+reader-ink-annotation = تعليق بالحبر
 reader-search-result-index = نتيجة البحث
 reader-search-result-total = إجمالي نتائج البحث
 reader-draw = ارسم
@@ -43,19 +43,27 @@ reader-page = صفحة
 reader-location = الموقع
 reader-read-only = للقراءة فقط
 reader-prompt-transfer-from-pdf-title = استيراد التعليقات التوضيحية
-reader-prompt-transfer-from-pdf-text = Annotations stored in the PDF file will be moved to { $target }.
+reader-prompt-transfer-from-pdf-text = سيتم نقل التعليقات التوضيحية المخزنة في ملف PDF إلى { $target }.
 reader-prompt-password-protected = العملية غير مدعومة لملفات PDF المحمية بكلمة مرور.
 reader-prompt-delete-pages-title = حذف الصفحات
 reader-prompt-delete-pages-text =
     { $count ->
-        [one] Are you sure you want to delete { $count } page from the PDF file?
-       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+        [zero] هل أنت متأكد من أنك تريد حذف { $count } صفحة من ملف PDF؟
+        [one] هل أنت متأكد من أنك تريد حذف { $count } صفحة من ملف PDF؟
+        [two] هل أنت متأكد من أنك تريد حذف { $count } صفحات من ملف PDF؟
+        [few] هل أنت متأكد من أنك تريد حذف { $count } صفحات من ملف PDF؟
+        [many] هل أنت متأكد من أنك تريد حذف { $count } صفحات من ملف PDF؟
+       *[other] هل أنت متأكد من أنك تريد حذف { $count } صفحات من ملف PDF؟
     }
-reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-title = حذف التعليقات التوضيحية
 reader-prompt-delete-annotations-text =
     { $count ->
-        [one] Are you sure you want to delete the selected annotation?
-       *[other] Are you sure you want to delete the selected annotations?
+        [zero] هل أنت متأكد من أنك تريد حذف التعليق التوضيحي المحدد؟
+        [one] هل أنت متأكد من أنك تريد حذف التعليق التوضيحي المحدد؟
+        [two] هل أنت متأكد من أنك تريد حذف التعليقات التوضيحية المحددة؟
+        [few] هل أنت متأكد من أنك تريد حذف التعليقات التوضيحية المحددة؟
+        [many] هل أنت متأكد من أنك تريد حذف التعليقات التوضيحية المحددة؟
+       *[other] هل أنت متأكد من أنك تريد حذف التعليقات التوضيحية المحددة؟
     }
 reader-rotate-left = تدوير لليسار
 reader-rotate-right = تدوير لليمين
@@ -125,7 +133,8 @@ reader-double = مزدوج
 reader-theme-name = اسم السمة:
 reader-background = الخلفية:
 reader-foreground = الواجهة:
-reader-focus-mode = Focus Mode
+reader-reading-mode = Reading Mode
+reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = مسح الاختيار
 reader-move-annotation-start-key =
     { PLATFORM() ->
@@ -133,12 +142,12 @@ reader-move-annotation-start-key =
        *[other] { general-key-alt }
     }
 reader-a11y-move-annotation = استخدم مفاتيح الأسهم لتحريك التعليق التوضيحي.
-reader-a11y-edit-text-annotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys.
+reader-a11y-edit-text-annotation = لنقل نهاية التعليق التوضيحي للنص، اضغط مع الاستمرار على { general-key-shift } واستخدم مفاتيح الأسهم اليمنى/اليسرى. لنقل بداية التعليق التوضيحي، اضغط مع الاستمرار على { general-key-shift }-{ reader-move-annotation-start-key } واستخدم مفاتيح الأسهم.
 reader-a11y-resize-annotation = لتغيير حجم التعليق التوضيحي، اضغط مع الاستمرار على { general-key-shift } واستخدم مفاتيح الأسهم.
 reader-a11y-annotation-popup-appeared = استخدم Tab للتنقل في نافذة التعليقات التوضيحية المنبثقة.
 reader-a11y-annotation-created = تم إنشاء { $type }.
 reader-a11y-annotation-selected = تم تحديد { $type }.
--reader-a11y-textual-annotation-instruction = To annotate text via the keyboard, first use “{ reader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
+-reader-a11y-textual-annotation-instruction = لإضافة تعليق توضيحي على النص باستخدام لوحة المفاتيح، استخدم أولاً ”{ reader-find-in-document }“ لتحديد موقع العبارة، ثم اضغط على { general-key-control }-{ option-or-alt }-{ $number } لتحويل نتيجة البحث إلى تعليق توضيحي.
 -reader-a11y-annotation-instruction = لإضافة هذا التعليق التوضيحي إلى المستند، ركز على المستند واضغط على { general-key-control }-{ option-or-alt }-{ $number }.
 reader-toolbar-highlight =
     .aria-description = { -reader-a11y-textual-annotation-instruction(number: 1) }
@@ -166,12 +175,11 @@ reader-import-from-epub =
     .label = استيراد التعليقات التوضيحية للكتاب الإلكتروني...
 reader-import-from-epub-prompt-title = استيراد التعليقات التوضيحية للكتاب الإلكتروني
 reader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [one] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } عثر على { $count ->
+       *[one] { $count } { $tool } annotation
+    }، تم تعديله آخر مرة في { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    سيتم تحديث أي تعليقات { -app-name } تم استيرادها مسبقًا من هذا الكتاب الإلكتروني.
 reader-import-from-epub-no-annotations-current-file =
     يبدو أن هذا الكتاب الإلكتروني لا يحتوي على أي تعليقات توضيحية قابلة للاستيراد.
     

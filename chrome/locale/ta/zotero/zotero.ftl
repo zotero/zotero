@@ -1,9 +1,9 @@
 general-sentence-separator = { " " }
-general-key-control = Control
-general-key-shift = Shift
-general-key-alt = Alt
-general-key-option = Option
-general-key-command = Command
+general-key-control = கட்டுப்பாடு
+general-key-shift = உயர்த்து
+general-key-alt = மாற்று
+general-key-option = விருப்பம்
+general-key-command = கட்டளை
 option-or-alt =
     { PLATFORM() ->
         [macos] { general-key-option }
@@ -16,32 +16,32 @@ command-or-control =
     }
 return-or-enter =
     { PLATFORM() ->
-        [macos] Return
-       *[other] Enter
+        [macos] திரும்பு
+       *[other] நுழை
     }
 delete-or-backspace =
     { PLATFORM() ->
-        [macos] Delete
-       *[other] Backspace
+        [macos] நீக்கு
+       *[other] பின்வெளி
     }
-general-print = அச்சிடுக
+general-print = அச்சிடு
 general-remove = அகற்று
 general-add = கூட்டு
 general-remind-me-later = பின்னர் நினைவூட்டு
 general-dont-ask-again = மீண்டும் கேட்க வேண்டாம்
 general-choose-file = கோப்பை தேர்ந்தெடு…
-general-open-settings = Open Settings
-general-settings = Settings…
+general-open-settings = அமைப்புகள் திற
+general-settings = அமைப்புகள்…
 general-help = உதவி
 general-tag = குறிச்சொல்
 general-done = முடிந்தது
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
-general-accept = Accept
-general-cancel = ரத்துசெய்
+general-view-troubleshooting-instructions = பிழைகண்டறியும் வழிமுறைகளைப் பார்
+general-go-back = பின் செல்
+general-accept = ஏற்பு
+general-cancel = நீக்கறல்
 general-show-in-library = நூலகத்தில் காண்பி
-general-restartApp = Restart { -app-name }
-general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
+general-restartApp = மறுதொடக்கம் { -app-name }
+general-restartInTroubleshootingMode = பிழைகண்டறியும் முறையில் மறுதொடக்கம்
 general-save = சேமி
 general-clear = அழி
 general-update = புதுப்பிப்பு
@@ -58,8 +58,8 @@ general-et-al = மற்றும் பலர்.
 general-previous = முந்தையது
 general-next = அடுத்தது
 general-learn-more = மேலும் அறிக
-general-warning = எச்சரிக்கை
-general-type-to-continue = Type “{ $text }” to continue.
+general-warning = முன்னறிவிப்பு
+general-type-to-continue = தொடர “{ $text }” எனத் தட்டச்சு செய்.
 general-red = சிவப்பு
 general-orange = ஆரஞ்சு
 general-yellow = மஞ்சள்
@@ -75,86 +75,86 @@ general-black = கருப்பு
 citation-style-label = மேற்கோள் நடை:
 language-label = மொழி:
 menu-custom-group-submenu =
-    .label = More Options…
+    .label = மேலும் விருப்பங்கள்...
 menu-file-show-in-finder =
-    .label = Show in Finder
+    .label = உலாவியில் காட்டு
 menu-file-show-file =
     .label = கோப்பைக் காட்டு
 menu-file-show-files =
-    .label = Show Files
+    .label = கோப்புகள் காட்டு
 menu-print =
     .label = { general-print }
 menu-density =
-    .label = Density
+    .label = அடர்த்தி
 add-attachment = இணைப்பை சேர்
 new-note = புதிய குறிப்பு
 menu-add-by-identifier =
-    .label = Add by Identifier…
+    .label = அடையாளங்காட்டியால் சேர்க்கப்பட்டது…
 menu-add-attachment =
     .label = { add-attachment }
 menu-add-standalone-file-attachment =
-    .label = Add File…
+    .label = கோப்பு சேர்…
 menu-add-standalone-linked-file-attachment =
-    .label = Add Link to File…
+    .label = கோப்பின் இணைப்பைச் சேர்…
 menu-add-child-file-attachment =
-    .label = Attach File…
+    .label = கோப்பை இணை…
 menu-add-child-linked-file-attachment =
-    .label = கோப்பில் இணைப்பை இணைக்கவும்…
+    .label = கோப்பில் இணைப்பை இணை…
 menu-add-child-linked-url-attachment =
-    .label = Attach Web Link…
+    .label = இணைய இணைப்பை இணை...
 menu-new-note =
     .label = { new-note }
 menu-new-standalone-note =
     .label = புதிய முழுமையான குறிப்பு
 menu-new-item-note =
-    .label = New Item Note
+    .label = புதிய உருப்படி குறிப்பு
 menu-restoreToLibrary =
-    .label = நூலகத்திற்கு மீட்டமைக்கவும்
+    .label = நூலகத்திற்கு மீட்டமை
 menu-deletePermanently =
     .label = நிரந்தரமாக நீக்கு…
 menu-tools-plugins =
-    .label = Plugins
+    .label = செருகுநிரல்கள்
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = நெடுவரிசையை இடது பக்கம் நகர்த்து
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = நெடுவரிசையை வலது பக்கம் நகர்த்து
 menu-show-tabs-menu =
-    .label = Show Tabs Menu
+    .label = தாவல்கள் பட்டியலைக் காட்டு
 menu-edit-copy-annotation =
     .label =
         { $count ->
-            [one] Copy Annotation
-           *[other] Copy { $count } Annotations
+            [one] சிறுகுறிப்பு நகல்
+           *[other] { $count } சிறுகுறிப்புகள் நகல்
         }
 main-window-command =
     .label = நூலகம்
 main-window-key =
     .key = த
 zotero-toolbar-tabs-menu =
-    .tooltiptext = List all tabs
-filter-collections = Filter Collections
+    .tooltiptext = அனைத்து தாவல்களையும் பட்டியலிடு
+filter-collections = சேகரிப்புகளை வடிகட்டு
 zotero-collections-search =
     .placeholder = { filter-collections }
 zotero-collections-search-btn =
     .tooltiptext = { filter-collections }
 zotero-tabs-menu-filter =
-    .placeholder = Search Tabs
+    .placeholder = தாவல்களில் தேடு
 zotero-tabs-menu-close-button =
-    .title = Close Tab
+    .title = தாவலை மூடு
 zotero-toolbar-tabs-scroll-forwards =
-    .title = Scroll forwards
+    .title = முன்னோக்கி உருட்டு
 zotero-toolbar-tabs-scroll-backwards =
-    .title = Scroll backwards
+    .title = பின்னோக்கி உருட்டு
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
-    .label = Rename Collection
+    .label = சேகரிப்பை மறுபெயரிடு
 collections-menu-edit-saved-search =
-    .label = Edit Saved Search
+    .label = சேமித்த தேடலைத் திருத்து
 collections-menu-move-collection =
-    .label = Move To
+    .label = இதற்கு நகர்த்து
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = இதற்கு நகலெடு
 item-creator-moveDown =
     .label = கீழே இறங்கு
 item-creator-moveToTop =
@@ -163,26 +163,26 @@ item-creator-moveUp =
     .label = மேலே நகர்த்து
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        { $numAttachments ->
             [one]
                 { $attachmentType ->
-                    [pdf] PDF
-                    [epub] EPUB
-                    [snapshot] Snapshot
-                   *[other] Attachment
+                    [pdf] எசெஆ
+                    [epub] மிநூல்
+                    [snapshot] திரைபிடிப்பு
+                   *[other] இணைப்பு
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDFs
-                    [epub] EPUBs
-                    [snapshot] Snapshots
-                   *[other] Attachments
+                    [pdf] எசெஆகள்
+                    [epub] மிநூல்கள்
+                    [snapshot] திரைபிடிப்புகள்
+                   *[other] இணைப்புகள்
                 }
         } { $openIn ->
-            [tab] in New Tab
-            [window] in New Window
+            [tab] புதிய தாவலில்
+            [window] புதிய சாளரத்தில்
            *[other] { "" }
-        }
+        } திற
 item-menu-add-file =
     .label = கோப்பு
 item-menu-add-linked-file =
@@ -213,7 +213,7 @@ import-window =
 import-where-from = நீங்கள் எங்கிருந்து இறக்குமதி செய்ய விரும்புகிறீர்கள்?
 import-online-intro-title = அறிமுகம்
 import-source-file =
-    .label = ஒரு கோப்பு (பிப்டெக்ச், ரிச், சோட்டெரோ ஆர்டிஃப், முதலியன)
+    .label = ஒரு கோப்பு (பிப்உரை, ரிச், சோட்டெரோ ஆர்டிஃப், முதலியன)
 import-source-folder =
     .label = எஆவகள் அல்லது பிற கோப்புகளின் கோப்புறை
 import-source-online =
@@ -335,7 +335,7 @@ bibliography-outputMethod-saveAsHTML =
 bibliography-outputMethod-copyToClipboard =
     .label = இடைநிலைப் பலகைக்கு நகலெடு
 bibliography-outputMethod-print =
-    .label = அச்சிடுக
+    .label = அச்சிடு
 bibliography-manageStyles-label = பாணிகளை நிர்வகி…
 styleEditor-locatorType =
     .aria-label = Locator type
@@ -405,7 +405,7 @@ restart-in-troubleshooting-mode-menuitem =
 restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
 menu-ui-density =
-    .label = Density
+    .label = அடர்த்தி
 menu-ui-density-comfortable =
     .label = Comfortable
 menu-ui-density-compact =

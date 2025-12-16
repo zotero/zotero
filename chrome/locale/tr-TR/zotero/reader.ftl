@@ -125,7 +125,8 @@ reader-double = Çift
 reader-theme-name = Tema Adı:
 reader-background = Arka Plan:
 reader-foreground = Ön Plan:
-reader-focus-mode = Focus Mode
+reader-reading-mode = Reading Mode
+reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Seçilenleri Temizle
 reader-move-annotation-start-key =
     { PLATFORM() ->

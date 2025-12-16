@@ -19,7 +19,7 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
         { -integration-editBibliography-edit-reference }
-integration-citationDialog = Citation Dialog
+integration-citationDialog = Okno cytowania
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
 integration-citationDialog-section-cited =
@@ -40,7 +40,7 @@ integration-citationDialog-lib-no-items =
         [true] No selected, open, or cited items match the current search
        *[other] No selected or open items
     }
-integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-settings-keepSorted = Utrzymaj źródła posortowane
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-btn-mode =
@@ -62,7 +62,7 @@ integration-citationDialog-btn-cancel =
     .title = { general-cancel }
 integration-citationDialog-general-instructions = Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation.
 integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
-integration-citationDialog-search-for-items = Search for items to add to the citation
+integration-citationDialog-search-for-items = Wyszukaj elementy aby dodać je do cytowania
 integration-citationDialog-aria-bubble =
     .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input =
@@ -85,7 +85,7 @@ integration-citationDialog-items-table-added =
 integration-citationDialog-add-all = Dodaj wszystko
 integration-citationDialog-collapse-section =
     .title = Zwiń sekcję
-integration-citationDialog-bubble-empty = (no title)
+integration-citationDialog-bubble-empty = (brak tytułu)
 integration-citationDialog-add-to-citation = Dodaj do cytowania
 integration-prefs-displayAs-label = Wyświetl cytowania jako:
 integration-prefs-footnotes =
@@ -114,4 +114,4 @@ integration-warning-citation-changes-will-be-lost = Dokonano zmian w cytowaniu, 
 integration-warning-bibliography-changes-will-be-lost = Dokonano zmian w bibliografii, które zostaną utracone, jeśli będziesz kontynuować.
 integration-warning-documentPreferences-changes-will-be-lost = Dokonano zmian w ustawieniach dokumentu, które zostaną utracone, jeśli będziesz kontynuować.
 integration-warning-discard-changes = Porzuć zmiany
-integration-warning-command-is-running = A word processor integration command is already running.
+integration-warning-command-is-running = Polecenie integracji z edytorem tekstów jest już uruchomione.

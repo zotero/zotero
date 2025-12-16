@@ -6,7 +6,7 @@ preferences-auto-recognize-files =
 preferences-file-renaming-title = Tiedoston uudelleennimeäminen
 preferences-file-renaming-intro = { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
 preferences-file-renaming-auto-rename-files =
-    .label = Automatically rename files
+    .label = Nimeä tiedostot automaattisesti
 preferences-file-renaming-file-types = Nimeä uudelleen nämä tiedostotyypit:
 preferences-file-renaming-file-type-pdf =
     .label = { file-type-pdf }
@@ -21,7 +21,7 @@ preferences-file-renaming-file-type-video =
 preferences-file-renaming-customize-button =
     .label = Muokkaa tiedostonimen muotoa...
 preferences-file-renaming-rename-now =
-    .label = Rename Files…
+    .label = Uudelleennimeä tiedostot…
 preferences-file-renaming-format-title = Tiedostonimen muoto
 preferences-file-renaming-format-instructions = Voit muokata tiedostonimen rakennetta jota { -app-name } käyttää liitetiedostojen uudelleennimeämisessä päänimikkeen metadatan mukaan.
 preferences-file-renaming-format-instructions-example = Esimerkiksi “{ $example }” tässä pohjassa korvataan nimikkeen otsikolla, ja katkaistaan 50 merkin kohdalta.
@@ -60,21 +60,21 @@ preferences-quickCopy-plus =
     .label = { $label }
 preferences-styleManager-intro = { -app-name } can generate citations and bibliographies in over 10,000 citation styles. Add styles here to make them available when selecting styles throughout { -app-name }.
 preferences-styleManager-get-additional-styles =
-    .label = Get Additional Styles…
+    .label = Hae uusia tyylejä…
 preferences-styleManager-restore-default =
-    .label = Restore Default Styles…
+    .label = Palauta oletustyylit…
 preferences-styleManager-add-from-file =
     .tooltiptext = Lisää tyyli tiedostosta
-    .label = Add from File…
+    .label = Lisää tiedostosta…
 preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
-preferences-citation-dialog = Citation Dialog
-preferences-citation-dialog-mode = Citation Dialog Mode:
+preferences-citation-dialog = Viittausikkuna
+preferences-citation-dialog-mode = Viittausikkunan tyyppi:
 preferences-citation-dialog-mode-last-used =
-    .label = Last Used
+    .label = Viimeksi käytetty
 preferences-citation-dialog-mode-list =
-    .label = List Mode
+    .label = Listatila
 preferences-citation-dialog-mode-library =
-    .label = Library Mode
+    .label = Kirjastotila
 preferences-advanced-enable-local-api =
     .label = Salli muiden tämän koneen ohjelmien viestiä { -app-name }n kanssa
 preferences-advanced-local-api-available = Saatavilla osoitteessa <code data-l10n-name="url">{ $url }</span>
@@ -105,8 +105,8 @@ preferences-sync-reset-restore-to-server-remaining-items-text =
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->
-        [one] Delete 1 item
-       *[other] Delete { $remoteItemsDeletedCount } items
+        [one] Poista 1 kohde
+       *[other] Poista { $remoteItemsDeletedCount } kohdetta
     }
-preferences-sync-reset-restore-to-server-confirmation-text = delete online library
+preferences-sync-reset-restore-to-server-confirmation-text = poista verkkokirjasto
 preferences-sync-reset-restore-to-server-yes = Korvaa tiedot verkkokirjastossa

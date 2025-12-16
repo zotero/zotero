@@ -125,7 +125,8 @@ reader-double = Dvigubas
 reader-theme-name = Apipavidalinimo pavadinimas:
 reader-background = Fonas:
 reader-foreground = Priekinis planas:
-reader-focus-mode = Focus Mode
+reader-reading-mode = Reading Mode
+reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Nieko nežymėti
 reader-move-annotation-start-key =
     { PLATFORM() ->

@@ -19,28 +19,28 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
         { -integration-editBibliography-edit-reference }
-integration-citationDialog = Citation Dialog
-integration-citationDialog-section-open = Open Documents ({ $count })
-integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
+integration-citationDialog = Viittausikkuna
+integration-citationDialog-section-open = Avoimia asiakirjoja: ({ $count })
+integration-citationDialog-section-selected = Valittuja nimikkeitä ({ $count }/{ $total })
 integration-citationDialog-section-cited =
     { $count ->
         [0] Cited Items
        *[other] Cited Items ({ $count })
     }
-integration-citationDialog-details-suffix = Suffix
-integration-citationDialog-details-prefix = Prefix
+integration-citationDialog-details-suffix = Jälkiliite
+integration-citationDialog-details-prefix = Etuliite
 integration-citationDialog-details-suppressAuthor = Piilota tekijä
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
-integration-citationDialog-settings-title = Citation Settings
+integration-citationDialog-settings-title = Viittausasetukset
 integration-citationDialog-lib-no-items =
     { $search ->
         [true] No selected, open, or cited items match the current search
        *[other] No selected or open items
     }
-integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-settings-keepSorted = Pidä lähteet lajiteltuna
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-btn-mode =
@@ -82,11 +82,11 @@ integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
     .aria-label = This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it.
-integration-citationDialog-add-all = Add all
+integration-citationDialog-add-all = Lisää kaikki
 integration-citationDialog-collapse-section =
     .title = Kutista osa
-integration-citationDialog-bubble-empty = (no title)
-integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-bubble-empty = (ei otsikkoa)
+integration-citationDialog-add-to-citation = Lisää viittaukseen
 integration-prefs-displayAs-label = Näytä sitaatit muodossa:
 integration-prefs-footnotes =
     .label = Alaviitteet
@@ -114,4 +114,4 @@ integration-warning-citation-changes-will-be-lost = You have made changes to a c
 integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
 integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
 integration-warning-discard-changes = Hylkää muutokset
-integration-warning-command-is-running = A word processor integration command is already running.
+integration-warning-command-is-running = Tekstinkäsittelyohjelman integrointikomento on jo käynnissä.

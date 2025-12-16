@@ -156,7 +156,7 @@
 <!ENTITY zotero.bibliography.style.label "Alıntı Stili:">
 <!ENTITY zotero.bibliography.manageStyles "Stilleri Yönet...">
 <!ENTITY zotero.bibliography.locale.label "Dil:">
-<!ENTITY zotero.bibliography.outputMode "Çıktı Biçimi">
+<!ENTITY zotero.bibliography.outputMode "Çıktı Modu:">
 <!ENTITY zotero.bibliography.bibliography "Kaynakça">
 <!ENTITY zotero.bibliography.outputMethod "Çıktı Metodu:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "RTF Olarak Kaydet">

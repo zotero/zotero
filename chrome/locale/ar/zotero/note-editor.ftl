@@ -6,8 +6,8 @@ note-editor-unlink = فك الارتباط
 note-editor-right-to-left = من اليمين إلى اليسار
 note-editor-left-to-right = من اليسار إلى اليمين
 note-editor-update-notice =
-    This note was edited with a newer version of { -app-name }.
-    Please update { -app-name } to make changes.
+    تم تحرير هذه الملاحظة باستخدام إصدار أحدث من { -app-name }.
+    يرجى تحديث { -app-name } لإجراء التغييرات.
 note-editor-enter-link = أدخل الرابط
 note-editor-heading-1 = العنوان 1
 note-editor-heading-2 = العنوان 2
@@ -61,5 +61,5 @@ note-editor-insert-column-after = إدراج عمود إلى اليمين
 note-editor-delete-row = حذف الصف
 note-editor-delete-column = حذف العمود
 note-editor-delete-table = حذف الجدول
-note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
-note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-link-popup-appeared = ظهرت نافذة منبثقة للرابط. استخدم Shift-Tab للتنقل فيها.
+note-editor-citation-popup-appeared = ظهرت نافذة منبثقة للاستشهاد. استخدم Shift-Tab للتنقل فيها.

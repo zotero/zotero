@@ -34,7 +34,7 @@ integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
-integration-citationDialog-settings-title = Citation Settings
+integration-citationDialog-settings-title = Hivatkozás beállításai
 integration-citationDialog-lib-no-items =
     { $search ->
         [true] No selected, open, or cited items match the current search
@@ -76,7 +76,7 @@ integration-citationDialog-aria-item-list =
 integration-citationDialog-aria-item-library =
     .aria-description = Use Right/Left Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-collections-table =
-    .aria-label = Collections.
+    .aria-label = Gyűjtemények.
     .aria-description = Select a collection and press Tab to navigate its items.
 integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }

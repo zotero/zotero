@@ -61,5 +61,5 @@ note-editor-insert-column-after = Lisää sarake oikealle
 note-editor-delete-row = Poista rivi
 note-editor-delete-column = Poista sarake
 note-editor-delete-table = Poista taulukko
-note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
-note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-link-popup-appeared = Linkkiponnahdusikkuna ilmestyi. Paina Shift-Tab navigoidaksesi siellä.
+note-editor-citation-popup-appeared = Viittausponnahdusikkuna ilmestyi. Paina Shift-Tab navigoidaksesi siellä.

@@ -127,7 +127,8 @@ reader-double = Double
 reader-theme-name = Nom du thème :
 reader-background = Arrière-plan :
 reader-foreground = Avant-plan :
-reader-focus-mode = Mode sans distraction
+reader-reading-mode = Reading Mode
+reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Effacer la sélection
 reader-move-annotation-start-key =
     { PLATFORM() ->

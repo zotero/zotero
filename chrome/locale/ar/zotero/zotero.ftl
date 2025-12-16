@@ -31,16 +31,16 @@ general-remind-me-later = التذكير لاحقاً
 general-dont-ask-again = لا تسأل مرة أخرى
 general-choose-file = اختر الملف...
 general-open-settings = فتح الإعدادات
-general-settings = Settings…
+general-settings = الإعدادات...
 general-help = مساعدة
 general-tag = وسم
 general-done = تم
 general-view-troubleshooting-instructions = عرض تعليمات استكشاف الأخطاء وإصلاحها
 general-go-back = ارجع
-general-accept = Accept
+general-accept = قبول
 general-cancel = إلغاء
 general-show-in-library = عرض في المكتبة
-general-restartApp = Restart { -app-name }
+general-restartApp = إعادة تشغيل { -app-name }
 general-restartInTroubleshootingMode = إعادة التشغيل في وضع استكشاف الأخطاء وإصلاحها
 general-save = حفظ
 general-clear = تفريغ
@@ -59,7 +59,7 @@ general-previous = السابق
 general-next = التالي
 general-learn-more = تعرف على المزيد
 general-warning = تحذير
-general-type-to-continue = Type “{ $text }” to continue.
+general-type-to-continue = اكتب ”{ $text }“ للمتابعة.
 general-red = أحمر
 general-orange = برتقالي
 general-yellow = أصفر
@@ -75,7 +75,7 @@ general-black = أسود
 citation-style-label = نمط الاستشهاد:
 language-label = اللغة
 menu-custom-group-submenu =
-    .label = More Options…
+    .label = المزيد من الخيارات...
 menu-file-show-in-finder =
     .label = العرض في المجلد
 menu-file-show-file =
@@ -119,12 +119,16 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = نقل العمود لليمين
 menu-show-tabs-menu =
-    .label = Show Tabs Menu
+    .label = عرض قائمة علامات التبويب
 menu-edit-copy-annotation =
     .label =
         { $count ->
-            [one] Copy Annotation
-           *[other] Copy { $count } Annotations
+            [zero] نسخ { $count } تعليق توضيحي
+            [one] نسخ { $count } تعليق توضيحي
+            [two] نسخ { $count } تعليقات توضيحية
+            [few] نسخ { $count } تعليقات توضيحية
+            [many] نسخ { $count } تعليقات توضيحية
+           *[other] نسخ { $count } تعليقات توضيحية
         }
 main-window-command =
     .label = مكتبة
@@ -142,9 +146,9 @@ zotero-tabs-menu-filter =
 zotero-tabs-menu-close-button =
     .title = إغلاق علامة التبويب
 zotero-toolbar-tabs-scroll-forwards =
-    .title = Scroll forwards
+    .title = التمرير للأمام
 zotero-toolbar-tabs-scroll-backwards =
-    .title = Scroll backwards
+    .title = التمرير للخلف
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -192,7 +196,7 @@ item-menu-add-url =
 item-menu-change-parent-item =
     .label = تغيير العنصر الأصلي...
 item-menu-relate-items =
-    .label = Relate Items
+    .label = ربط العناصر
 view-online = العرض على الانترنت
 item-menu-option-view-online =
     .label = { view-online }
@@ -308,7 +312,7 @@ runJS-title = تشغيل جافا سكريبت
 runJS-editor-label = الرمز:
 runJS-run = تشغيل
 runJS-help = { general-help }
-runJS-completed = completed successfully
+runJS-completed = تم بنجاح
 runJS-result =
     { $type ->
         [async] Return value:
@@ -455,7 +459,7 @@ section-attachments-annotations =
             [many] { $count } تعليق توضيحي
            *[other] { $count } تعليق توضيحي
         }
-section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
+section-attachments-move-to-trash-message = هل تريد حقا نقل ”{ $title }“ إلى سلة المهملات؟
 section-notes =
     .label =
         { $count ->
@@ -529,13 +533,13 @@ sidenav-related =
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
 sidenav-reorder-up =
-    .label = Move Section Up
+    .label = نقل القسم لأعلى
 sidenav-reorder-down =
-    .label = Move Section Down
+    .label = نقل القسم لأسفل
 sidenav-reorder-reset =
-    .label = Reset Section Order
+    .label = إعادة ترتيب الأقسام
 toggle-item-pane =
-    .tooltiptext = Toggle Item Pane
+    .tooltiptext = تحويل لوحة العناصر
 toggle-context-pane =
     .tooltiptext = تبديل جزء السياق
 pin-section =
@@ -567,7 +571,7 @@ new-collection-dialog =
 new-collection-name = الاسم
 new-collection-create-in = أنشئ في:
 show-publications-menuitem =
-    .label = Show My Publications
+    .label = عرض منشوراتي
 attachment-info-title = العنوان
 attachment-info-filename = اسم الملف
 attachment-info-accessed = تاريخ الدخول
@@ -584,17 +588,17 @@ attachment-info-convert-note =
     .tooltiptext = لم تعد إضافة الملاحظات إلى المرفقات مدعومة، ولكن يمكنك تحرير هذه الملاحظة بترحيلها إلى ملاحظة منفصلة.
 attachment-preview-placeholder = لا يوجد مرفق للمعاينة
 attachment-rename-from-parent =
-    .tooltiptext = Rename File to Match Parent Item
-file-renaming-auto-rename-prompt-title = Renaming Settings Changed
-file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
-file-renaming-auto-rename-prompt-yes = Preview Changes…
-file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+    .tooltiptext = إعادة تسمية الملف ليتطابق مع العنصر الأصلي
+file-renaming-auto-rename-prompt-title = تم تغيير إعدادات إعادة التسمية
+file-renaming-auto-rename-prompt-body = هل ترغب في إعادة تسمية الملفات الموجودة في مكتبتك لتتوافق مع الإعدادات الجديدة؟
+file-renaming-auto-rename-prompt-yes = معاينة التغييرات...
+file-renaming-auto-rename-prompt-no = الحفاظ على أسماء الملفات الحالية
 rename-files-preview =
-    .buttonlabelaccept = Rename Files
+    .buttonlabelaccept = إعادة تسمية الملفات
 rename-files-preview-loading = التحميل
-rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
-rename-files-preview-renaming = Renaming…
-rename-files-preview-no-files = All filenames already match parent items. No changes are required.
+rename-files-preview-intro = { -app-name } سيعيد تسمية الملفات التالية في مكتبتك لتتطابق مع العناصر الأصلية:
+rename-files-preview-renaming = إعادة التسمية...
+rename-files-preview-no-files = جميع أسماء الملفات تتطابق مسبقاً مع العناصر الأصلية. لا توجد حاجة لإجراء أي تغييرات.
 toggle-preview =
     .label =
         { $type ->
@@ -753,12 +757,12 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
-file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-message = { -app-name } يقوم الآن تلقائيًا بمزامنة أسماء ملفات المرفقات عند إجراء تغييرات على العناصر.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
-connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
-userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+connector-version-warning = يجب تحديث موصل { -app-name } لكي يعمل مع هذا الإصدار من { -app-name }.
+userjs-pref-warning = تم تجاوز بعض إعدادات { -app-name } باستخدام طريقة غير مدعومة. سيقوم { -app-name } بإعادتها وإعادة التشغيل.
 long-tag-fixer-window-title =
-    .title = Split Tags
+    .title = علامات التقسيم
 long-tag-fixer-button-dont-split =
-    .label = Don’t Split
+    .label = لا تقسم

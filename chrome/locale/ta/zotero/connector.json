@@ -53,6 +53,9 @@
   "progressWindow_tagPlaceholder": {
     "message": "குறிச்சொற்கள் (காற்புள்ளிகளால் பிரிக்கப்பட்டன)"
   },
+  "progressWindow_filterPlaceholder": {
+    "message": "சேகரிப்புகளை வடிகட்டு"
+  },
   "progressWindow_error_translation": {
     "message": "இந்த உருப்படியைச் சேமிக்கும்போது பிழை ஏற்பட்டது. மேலும் தகவலுக்கு 1$1 ஐப் பார்க்கவும்."
   },

@@ -6,8 +6,8 @@ note-editor-unlink = Desvincular
 note-editor-right-to-left = Direita para esquerda
 note-editor-left-to-right = Esquerda para direita
 note-editor-update-notice =
-    This note was edited with a newer version of { -app-name }.
-    Please update { -app-name } to make changes.
+    Esta nota foi editada com uma nova versão de { -app-name }.
+    Por favor, atualize { -app-name } para fazer alterações.
 note-editor-enter-link = Incluir link
 note-editor-heading-1 = Cabeçalho 1
 note-editor-heading-2 = Cabeçalho 2
@@ -61,5 +61,5 @@ note-editor-insert-column-after = Inserir Coluna à Direita
 note-editor-delete-row = Eliminar Linha
 note-editor-delete-column = Eliminar Coluna
 note-editor-delete-table = Eliminar Tabela
-note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
-note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-link-popup-appeared = Pop-up de link apareceu. Use Shift-Tab para navegá-lo.
+note-editor-citation-popup-appeared = Pop-up de citação apareceu. Use Shift-Tab para navegá-lo.

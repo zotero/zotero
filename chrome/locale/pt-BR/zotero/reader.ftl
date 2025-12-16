@@ -22,7 +22,7 @@ reader-underline-annotation = Sublinhar anotação
 reader-note-annotation = Anotar Anotação
 reader-text-annotation = Anotação em Texto
 reader-image-annotation = Anotação de Imagem
-reader-ink-annotation = Ink Annotation
+reader-ink-annotation = Anotação Manuscrita
 reader-search-result-index = Buscar resultado
 reader-search-result-total = Resultado total da busca
 reader-draw = Desenhar forma livre
@@ -43,13 +43,14 @@ reader-page = Página
 reader-location = Localização
 reader-read-only = Apenas leitura
 reader-prompt-transfer-from-pdf-title = Importar anotações
-reader-prompt-transfer-from-pdf-text = Annotations stored in the PDF file will be moved to { $target }.
+reader-prompt-transfer-from-pdf-text = Notas armazenadas no arquivo de PDF serão movidas para { $target }.
 reader-prompt-password-protected = A operação não é permitida em arquivos PDF protegidos por senha.
 reader-prompt-delete-pages-title = Excluir páginas
 reader-prompt-delete-pages-text =
     { $count ->
-        [one] Are you sure you want to delete { $count } page from the PDF file?
-       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+        [one] Tem certeza que quer excluir { $count } página do arquivo PDF?
+        [many] Tem certeza que quer excluir { $count } páginas do arquivo PDF?
+       *[other] Tem certeza que quer excluir { $count } páginas do arquivo PDF?
     }
 reader-prompt-delete-annotations-title = Excluir anotações
 reader-prompt-delete-annotations-text =
@@ -126,7 +127,8 @@ reader-double = Dupla
 reader-theme-name = Nome do tema:
 reader-background = Fundo:
 reader-foreground = Primeiro plano:
-reader-focus-mode = Modo foco
+reader-reading-mode = Reading Mode
+reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Limpar seleção
 reader-move-annotation-start-key =
     { PLATFORM() ->
@@ -134,12 +136,12 @@ reader-move-annotation-start-key =
        *[other] { general-key-alt }
     }
 reader-a11y-move-annotation = Use as setas para mover a anotação.
-reader-a11y-edit-text-annotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys.
+reader-a11y-edit-text-annotation = Para mover para o fim do texto da anotação, segure { general-key-shift } e use as setas direcionais de direita e esquerda. Para mover para o início da anotação, segure { general-key-shift }-{ reader-move-annotation-start-key } e use as setas direcionais.
 reader-a11y-resize-annotation = Para redimensionar a anotação, segure { general-key-shift } e use as setas direcionais.
 reader-a11y-annotation-popup-appeared = Use Tab para navegar na anotação.
 reader-a11y-annotation-created = { $type } criado.
 reader-a11y-annotation-selected = { $type } selecionado.
--reader-a11y-textual-annotation-instruction = To annotate text via the keyboard, first use “{ reader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
+-reader-a11y-textual-annotation-instruction = Para anotar texto pelo teclado, primeiro use “{ reader-find-in-document }” para localizar a frase e depois pressione { general-key-control }-{ option-or-alt }-{ $number } para transformar o resultado de busca em uma anotação.
 -reader-a11y-annotation-instruction = Para adicionar esta anotação em um documento, selecione o documento e pressione { general-key-control }-{ option-or-alt }-{ $number }.
 reader-toolbar-highlight =
     .aria-description = { -reader-a11y-textual-annotation-instruction(number: 1) }
@@ -167,12 +169,12 @@ reader-import-from-epub =
     .label = Importar anotações de Ebook…
 reader-import-from-epub-prompt-title = Importar anotações de Ebook
 reader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [one] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } encontrou { $count ->
+        [one] { $count } { $tool } anotação
+       *[other] { $count } { $tool } anotações
+    }, modificadas por último { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    Anotações de { -app-name } importadas anteriormente deste e-book serão atualizadas.
 reader-import-from-epub-no-annotations-current-file =
     Este e-book parece não possuir nenhuma anotação importável.
     

@@ -123,7 +123,8 @@ reader-double = 双页
 reader-theme-name = 主题名称：
 reader-background = 背景色
 reader-foreground = 前景色：
-reader-focus-mode = 专注模式
+reader-reading-mode = Reading Mode
+reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = 清除选择
 reader-move-annotation-start-key =
     { PLATFORM() ->

@@ -74,6 +74,9 @@
   "progressWindow_savingItems": {
     "message": "アイテム $1 件を保存中 $2"
   },
+  "progressWindow_downloadFailed": {
+    "message": "$1のダウンロードに失敗しました。"
+  },
   "progressWindow_tagPlaceholder": {
     "message": "タグ（コンマで区切り）"
   },
@@ -169,6 +172,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 は、複数のユーザーが同時に引用を編集できないように、文書をロックします。文書内で引用編集を同時に行うと、引用や文書の破損につながる可能性があります。ネットワーク障害など、予期せぬ事態により、文書が永久にロックされる場合があります。このようなことが起こったと思われる場合は、ロックを無効にすることができます。<br/><br/>文書のロックを無効にしますか？"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1は引用を挿入するために、あなたの Google Docs 文書を編集する権限が必要です。 $1にあなたの Google Docs 文書の閲覧と編集と作成、削除が許可されていることを確認し、再度お試しください。"
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "選択した Google アカウントには、この文書を編集する権限がありません。編集権限のあるアカウントを選択し、再度お試しください。"

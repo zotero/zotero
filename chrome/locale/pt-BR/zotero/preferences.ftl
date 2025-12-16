@@ -67,14 +67,14 @@ preferences-styleManager-add-from-file =
     .tooltiptext = Adicionar estilo de arquivo
     .label = Adicionar a partir de arquivo...
 preferences-styleManager-remove = Pressione { delete-or-backspace } para remover este estilo.
-preferences-citation-dialog = Citation Dialog
-preferences-citation-dialog-mode = Citation Dialog Mode:
+preferences-citation-dialog = Caixa de citação
+preferences-citation-dialog-mode = Modo de caixa de citação:
 preferences-citation-dialog-mode-last-used =
-    .label = Last Used
+    .label = Último uso
 preferences-citation-dialog-mode-list =
-    .label = List Mode
+    .label = Modo de lista
 preferences-citation-dialog-mode-library =
-    .label = Library Mode
+    .label = Modo biblioteca
 preferences-advanced-enable-local-api =
     .label = Permitir que outros aplicativos neste computador se comuniquem com o { -app-name }
 preferences-advanced-local-api-available = Disponível em <code data-l10n-name="url">{ $url }</span>
@@ -91,17 +91,17 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Padrão: { $directory })
     .aria-label = Localização predefinida
-preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ $libraryName }” on { $domain } with data from this computer.
+preferences-sync-reset-restore-to-server-body = { -app-name } substituirá “{ $libraryName }” em { $domain } com dados deste computador.
 preferences-sync-reset-restore-to-server-deleted-items-text =
     { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
-        [one] item
-       *[other] items
-    } in the online library will be permanently deleted.
+        [one] item na biblioteca online será excluído
+       *[other] itens na biblioteca online serão excluídos
+    } permanentemente.
 preferences-sync-reset-restore-to-server-remaining-items-text =
     { general-sentence-separator }{ $localItemsCount ->
-        [0] The library on this computer and the online library will be empty.
-        [one] 1 item will remain on this computer and in the online library.
-       *[other] { $localItemsCount } items will remain on this computer and in the online library.
+        [0] A biblioteca neste computador e a biblioteca online serão esvaziadas.
+        [one] 1 item permanecerá neste computador e na biblioteca online.
+       *[other] { $localItemsCount } itens permanecerão neste computador e na biblioteca online.
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->
@@ -109,5 +109,5 @@ preferences-sync-reset-restore-to-server-checkbox-label =
         [many] Excluir { $remoteItemsDeletedCount } itens
        *[other] Excluir { $remoteItemsDeletedCount } itens
     }
-preferences-sync-reset-restore-to-server-confirmation-text = delete online library
+preferences-sync-reset-restore-to-server-confirmation-text = excluir biblioteca online
 preferences-sync-reset-restore-to-server-yes = Substituir dados na Biblioteca Online

@@ -22,7 +22,7 @@ reader-underline-annotation = Alleviivaa huomautus
 reader-note-annotation = Muistilappu
 reader-text-annotation = Tekstihuomautus
 reader-image-annotation = Kuvahuomautus
-reader-ink-annotation = Ink Annotation
+reader-ink-annotation = Piirretty huomautus
 reader-search-result-index = Hakutulos
 reader-search-result-total = Hakutuloksia yhteensä
 reader-draw = Piirrä
@@ -51,11 +51,11 @@ reader-prompt-delete-pages-text =
         [one] Are you sure you want to delete { $count } page from the PDF file?
        *[other] Are you sure you want to delete { $count } pages from the PDF file?
     }
-reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-title = Poista huomautukset
 reader-prompt-delete-annotations-text =
     { $count ->
-        [one] Are you sure you want to delete the selected annotation?
-       *[other] Are you sure you want to delete the selected annotations?
+        [one] Oletko varma että haluat poistaa valitun huomautuksen?
+       *[other] Oletko varma että haluat poistaa valitut huomautukset?
     }
 reader-rotate-left = Kierrä vasemmalle
 reader-rotate-right = Kierrä oikealle
@@ -125,7 +125,8 @@ reader-double = Kaksois
 reader-theme-name = Teeman nimi:
 reader-background = Tausta:
 reader-foreground = Etuala:
-reader-focus-mode = Keskittymistila
+reader-reading-mode = Reading Mode
+reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Tyhjennä valinta
 reader-move-annotation-start-key =
     { PLATFORM() ->

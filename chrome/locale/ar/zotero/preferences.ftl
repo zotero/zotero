@@ -4,9 +4,9 @@ preferences-appearance-title = المظهر واللغة
 preferences-auto-recognize-files =
     .label = استرداد البيانات الوصفية لملفات PDF والكتب الإلكترونية تلقائياً
 preferences-file-renaming-title = إعادة تسمية الملف
-preferences-file-renaming-intro = { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
+preferences-file-renaming-intro = يمكن لـ { -app-name } إعادة تسمية الملفات تلقائيًا استنادًا إلى تفاصيل العنصر الأصلي (العنوان والمؤلف وما إلى ذلك) والحفاظ على مزامنة أسماء الملفات أثناء إجراء التغييرات. يتم دائمًا تسمية الملفات التي تم تنزيلها في البداية استنادًا إلى العنصر الأصلي.
 preferences-file-renaming-auto-rename-files =
-    .label = Automatically rename files
+    .label = إعادة تسمية الملفات تلقائيًا
 preferences-file-renaming-file-types = إعادة تسمية الملفات من هذه الأنواع:
 preferences-file-renaming-file-type-pdf =
     .label = { file-type-pdf }
@@ -21,7 +21,7 @@ preferences-file-renaming-file-type-video =
 preferences-file-renaming-customize-button =
     .label = تخصيص صيغة اسم الملف...
 preferences-file-renaming-rename-now =
-    .label = Rename Files…
+    .label = إعادة تسمية الملفات...
 preferences-file-renaming-format-title = صيغة اسم الملف
 preferences-file-renaming-format-instructions = يمكنك تخصيص نمط اسم الملف الذي يستخدمه { -app-name } لإعادة تسمية الملفات المرفقة من البيانات الوصفية الأصلية.
 preferences-file-renaming-format-instructions-example = على سبيل المثال، سيتم استبدال “{ $example }”  في هذا القالب بعنوان العنصر الرئيسي، مقتطعًا من 50 حرفًا.
@@ -34,7 +34,7 @@ preferences-reader-open-snapshots-using = فتح اللقطات باستخدام
 preferences-reader-open-in-new-window =
     .label = فتح الملفات في نوافذ جديدة بدلاً من علامات التبويب
 preferences-reader-auto-disable-tool =
-    .label = Turn off note, text, and image annotation tools after each use
+    .label = قم بإيقاف تشغيل أدوات التعليقات التوضيحية والملاحظات النصية والصور بعد كل استخدام
 preferences-reader-ebook-font = خط الكتاب الإلكتروني:
 preferences-reader-ebook-hyphenate =
     .label = تفعيل الوصل التلقائي
@@ -58,23 +58,23 @@ preferences-quickCopy-minus =
 preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
-preferences-styleManager-intro = { -app-name } can generate citations and bibliographies in over 10,000 citation styles. Add styles here to make them available when selecting styles throughout { -app-name }.
+preferences-styleManager-intro = يمكن لـ { -app-name } إنشاء استشهادات ومراجع في أكثر من 10,000 نمط استشهاد. أضف الأنماط هنا لتكون متاحة عند اختيار الأنماط في جميع أنحاء { -app-name }.
 preferences-styleManager-get-additional-styles =
-    .label = Get Additional Styles…
+    .label = احصل على أنماط إضافية...
 preferences-styleManager-restore-default =
-    .label = Restore Default Styles…
+    .label = استعادة الأنماط الافتراضية...
 preferences-styleManager-add-from-file =
     .tooltiptext = إضافة نمط من ملف
-    .label = Add from File…
-preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
-preferences-citation-dialog = Citation Dialog
-preferences-citation-dialog-mode = Citation Dialog Mode:
+    .label = إضافة من ملف...
+preferences-styleManager-remove = اضغط على { delete-or-backspace } لإزالة هذا النمط.
+preferences-citation-dialog = مربع حوار الاقتباس
+preferences-citation-dialog-mode = وضع مربع الحوار للاقتباس:
 preferences-citation-dialog-mode-last-used =
-    .label = Last Used
+    .label = آخر استخدام
 preferences-citation-dialog-mode-list =
-    .label = List Mode
+    .label = وضع القائمة
 preferences-citation-dialog-mode-library =
-    .label = Library Mode
+    .label = وضع المكتبة
 preferences-advanced-enable-local-api =
     .label = السماح للتطبيقات الأخرى على هذا الحاسوب بالاتصال ب  { -app-name }
 preferences-advanced-local-api-available = متاح على <code data-l10n-name="url">{ $url }</span>
@@ -91,12 +91,12 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Default: { $directory })
     .aria-label = الموقع الافتراضي
-preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ $libraryName }” on { $domain } with data from this computer.
+preferences-sync-reset-restore-to-server-body = { -app-name } سيحل محل ”{ $libraryName }“ على { $domain } ببيانات من هذا الحاسوب.
 preferences-sync-reset-restore-to-server-deleted-items-text =
     { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
         [one] item
        *[other] items
-    } in the online library will be permanently deleted.
+    } في المكتبة الإلكترونية سيتم حذفها نهائياً.
 preferences-sync-reset-restore-to-server-remaining-items-text =
     { general-sentence-separator }{ $localItemsCount ->
         [0] The library on this computer and the online library will be empty.
@@ -105,8 +105,12 @@ preferences-sync-reset-restore-to-server-remaining-items-text =
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->
-        [one] Delete 1 item
-       *[other] Delete { $remoteItemsDeletedCount } items
+        [zero] حذف { $remoteItemsDeletedCount } عنصر
+        [one] حذف { $remoteItemsDeletedCount } عنصر
+        [two] حذف { $remoteItemsDeletedCount } عناصر
+        [few] حذف { $remoteItemsDeletedCount } عناصر
+        [many] حذف { $remoteItemsDeletedCount } عناصر
+       *[other] حذف { $remoteItemsDeletedCount } عناصر
     }
-preferences-sync-reset-restore-to-server-confirmation-text = delete online library
+preferences-sync-reset-restore-to-server-confirmation-text = حذف المكتبة الإلكترونية
 preferences-sync-reset-restore-to-server-yes = استبدال البيانات في المكتبة الإلكترونية
