@@ -3422,6 +3422,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
 		
 		if (treeRow.ref.isFileAttachment()
+				// TODO: Adjust this if we localize "Snapshot"
 				&& !(treeRow.ref.isSnapshotAttachment() && /snapshot/i.test(treeRow.ref.getField('title')))
 				&& Zotero.Prefs.get('showAttachmentFilenames')) {
 			row.title = treeRow.ref.attachmentFilename;
