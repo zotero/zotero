@@ -443,6 +443,8 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	let s3;
 	if (this.advancedSearch) {
 		s3 = this.advancedSearch.clone();
+		// Special condition - unaffected by joinMode
+		s3.addCondition('deleted', 'true');
 		s3.setScope(s2, includeScopeChildren);
 	}
 	else {
