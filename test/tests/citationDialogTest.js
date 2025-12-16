@@ -14,6 +14,13 @@ describe("Citation Dialog", function () {
 			return [];
 		},
 		allCitedDataLoadedPromise: Promise.resolve(),
+		getCitedLibraryInfo() {
+			return {
+				citedLibrariesURIs: [],
+				citedLibrariesNames: [],
+				citedLibrariesIDs: []
+			};
+		}
 	};
 	let dialog, win, IOManager, CitationDataManager, SearchHandler;
 
@@ -385,6 +392,43 @@ describe("Citation Dialog", function () {
 			let rowNode = dialog.document.getElementById(rowID);
 			assert.isTrue(rowNode.classList.contains("highlighted"));
 		});
+
+		it("should warn about cross-library citations", async function () {
+			let group = await createGroup();
+			let libraryItem = await createDataObject('item');
+			let groupItem = await createDataObject('item', { libraryID: group.libraryID });
+			// Pretend that libraryItem is cited in the document
+			io.getCitedLibraryInfo = () => {
+				return {
+					citedLibrariesURIs: [Zotero.URI.getGroupURI(Zotero.Libraries.userLibrary)],
+					citedLibrariesNames: [Zotero.Libraries.userLibrary.name],
+					citedLibrariesIDs: [Zotero.Libraries.userLibrary.libraryID]
+				};
+			};
+
+			// Try to add an item from another group to the citation
+			// Warning should appear - do not allow to proceed
+			let promise = waitForDialog(null, 'cancel');
+			IOManager.addItemsToCitation([groupItem]);
+			console.log(1);
+			await promise;
+
+			// Try again, this time accept
+			promise = waitForDialog(null, 'accept');
+			IOManager.addItemsToCitation([groupItem]);
+			await promise;
+
+			// Group item should appear in the citation
+			assert.equal(CitationDataManager.items.length, 1);
+			assert.equal(CitationDataManager.items[0].id, groupItem.id);
+			io.getCitedLibraryInfo = () => {
+				return {
+					citedLibrariesURIs: [],
+					citedLibrariesNames: [],
+					citedLibrariesIDs: []
+				};
+			};
+		});
 	});
 
 	describe("Search", function () {
@@ -497,6 +541,13 @@ describe("Citation Dialog", function () {
 				},
 				getItems() {
 					return new Zotero.Promise(() => {});
+				},
+				getCitedLibraryInfo() {
+					return {
+						citedLibrariesURIs: [],
+						citedLibrariesNames: [],
+						citedLibrariesIDs: []
+					};
 				},
 				allCitedDataLoadedPromise: new Zotero.Promise(() => {}),
 			};

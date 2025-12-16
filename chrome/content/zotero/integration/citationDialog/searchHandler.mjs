@@ -124,8 +124,23 @@ export class CitationDialogSearchHandler {
 			library.group.sort(itemComparator);
 		});
 	
-		// sort libraries by the number of items
-		libraryItems.sort((a, b) => b.group.length - a.group.length);
+		// sort libraries by the number of items, placing cited libraries first
+		let { citedLibrariesIDs } = this.io.getCitedLibraryInfo();
+		libraryItems.sort((a, b) => {
+			let aGroupID = Zotero.Libraries.get(a.key).libraryID;
+			let bGroupID = Zotero.Libraries.get(b.key).libraryID;
+			let aIsCited = citedLibrariesIDs.includes(aGroupID);
+			let bIsCited = citedLibrariesIDs.includes(bGroupID);
+			if (aIsCited && !bIsCited) return -1;
+			if (!aIsCited && bIsCited) return 1;
+			return b.group.length - a.group.length;
+		});
+		// record which libraries are cited
+		for (let libraryItem of libraryItems) {
+			if (citedLibrariesIDs.includes(libraryItem.libraryID)) {
+				libraryItem.isCited = true;
+			}
+		}
 		result.push(...libraryItems);
 
 		return result;

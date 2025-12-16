@@ -1090,7 +1090,7 @@ describe("Zotero.Integration", function () {
 	
 	describe("DocumentData", function () {
 		it('should properly unserialize old XML document data', function () {
-			var serializedXMLData = `<data data-version="3" zotero-version="5.0.SOURCE"><session id="F0NFmZ32"/><style id="${styleID}" hasBibliography="1" bibliographyStyleHasBeenSet="1"/><prefs><pref name="fieldType" value="ReferenceMark"/><pref name="automaticJournalAbbreviations" value="true"/><pref name="noteType" value="0"/></prefs></data>`;
+			var serializedXMLData = `<data data-version="3" zotero-version="5.0.SOURCE"><cited libraries="http://zotero.org/groups/6295613=sample-zoter0-group"/><session id="F0NFmZ32"/><style id="${styleID}" hasBibliography="1" bibliographyStyleHasBeenSet="1"/><prefs><pref name="fieldType" value="ReferenceMark"/><pref name="automaticJournalAbbreviations" value="true"/><pref name="noteType" value="0"/></prefs></data>`;
 			var data = new Zotero.Integration.DocumentData(serializedXMLData);
 			var expectedData = {
 				style: {
@@ -1103,6 +1103,9 @@ describe("Zotero.Integration", function () {
 					fieldType: 'ReferenceMark',
 					automaticJournalAbbreviations: true,
 					noteType: 0
+				},
+				citedLibraryURIs: {
+					'http://zotero.org/groups/6295613': 'sample-zoter0-group'
 				},
 				sessionID: 'F0NFmZ32',
 				zoteroVersion: '5.0.SOURCE',
@@ -1124,6 +1127,9 @@ describe("Zotero.Integration", function () {
 					fieldType: 'ReferenceMark',
 					automaticJournalAbbreviations: false,
 					noteType: 0
+				},
+				citedLibraryURIs: {
+					'http://zotero.org/groups/6295613': 'sample-zoter0-group'
 				},
 				sessionID: 'owl-sesh',
 				zoteroVersion: '5.0.SOURCE',
@@ -1150,6 +1156,9 @@ describe("Zotero.Integration", function () {
 				noteType: 1,
 				fieldType: "Field",
 				automaticJournalAbbreviations: true
+			};
+			data.citedLibraryURIs = {
+				'http://zotero.org/groups/6295613': 'sample-zoter0-group'
 			};
 			
 			var serializedData = data.serialize();
@@ -1196,6 +1205,61 @@ describe("Zotero.Integration", function () {
 			
 			// Convert to JSON to remove functions from DocumentData objects
 			assert.deepEqual(JSON.parse(JSON.stringify(processedData)), JSON.parse(JSON.stringify(data)));
+		});
+		
+		it('should use old citedLibraryURIs if document data was updated without them', async function () {
+			var docID = this.test.fullTitle();
+			await initDoc(docID);
+			var doc = applications[docID].doc;
+			let application = Zotero.Integration.getApplication('dummy', 'addEditCitation', docID);
+			// Save document data with citedLibraryURIs
+			let [session, _] = await Zotero.Integration.getSession(application, doc, 'dummy', 'addEditCitation');
+			session.data.citedLibraryURIs = {
+				'http://zotero.org/users/12345': 'My Library',
+				'http://zotero.org/groups/67890': 'Test Group'
+			};
+			await doc.setDocumentData(session.data.serialize());
+
+			// Save document data without citedLibraryURIs
+			var newData = new Zotero.Integration.DocumentData();
+			newData.prefs = {
+				noteType: 0,
+				fieldType: "Field",
+				automaticJournalAbbreviations: true
+			};
+			// Use the same sessionID
+			newData.sessionID = session.sessionID;
+			await doc.setDocumentData(newData.serialize());
+
+			// Fetch the session again, and ensure that empty citedLibraryURIs from
+			// document data don't override citedLibraryURIs from before
+			[session, _] = await Zotero.Integration.getSession(application, doc, 'dummy', 'addEditCitation');
+			assert.deepEqual(session.data.citedLibraryURIs, {
+				'http://zotero.org/users/12345': 'My Library',
+				'http://zotero.org/groups/67890': 'Test Group'
+			});
+		});
+
+		it('should use sessionID from document data when creating a new session', async function () {
+			var docID = this.test.fullTitle();
+			await initDoc(docID);
+			var doc = applications[docID].doc;
+			let application = Zotero.Integration.getApplication('dummy', 'addEditCitation', docID);
+
+			// Save document data
+			var newData = new Zotero.Integration.DocumentData();
+			newData.prefs = {
+				noteType: 0,
+				fieldType: "Field",
+				automaticJournalAbbreviations: true
+			};
+			newData.sessionID = Zotero.randomString();
+			await doc.setDocumentData(newData.serialize());
+
+			// Fetch session that does not yet exist
+			let [session, _] = await Zotero.Integration.getSession(application, doc, 'dummy', 'addEditCitation');
+			// Ensure the sessionID is taken from document data
+			assert.equal(session.sessionID, newData.sessionID);
 		});
 	})
 });
