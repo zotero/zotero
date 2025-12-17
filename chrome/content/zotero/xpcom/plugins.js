@@ -358,7 +358,7 @@ Zotero.Plugins = new function () {
 		var obj = {
 			pref(pref, _value) {
 				if (!branch.prefHasUserValue(pref)) {
-					branch.deleteBranch(pref);
+					branch.clearUserPref(pref);
 				}
 			}
 		};
