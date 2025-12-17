@@ -6326,15 +6326,20 @@ var ZoteroPane = new function () {
 	};
 	
 	this.normalizeAttachmentTitles = async function () {
-		let result = Services.prompt.confirm(
-			null,
-			Zotero.getString('normalize-attachment-titles-title'),
-			Zotero.getString('normalize-attachment-titles-message'),
-		);
-		if (!result) {
+		let result = Zotero.Prompt.confirm({
+			title: Zotero.getString('normalize-attachment-titles-title'),
+			text: Zotero.getString('normalize-attachment-titles-text'),
+			button0: Zotero.getString('general-continue'),
+			button1: Zotero.Prompt.BUTTON_TITLE_CANCEL,
+			button2: Zotero.getString('general.moreInformation'),
+		});
+		if (result == 1) {
 			return;
 		}
-		
+		if (result == 2) {
+			Zotero.launchURL('https://www.zotero.org/support/kb/attachment_title_vs_filename');
+			return;
+		}
 		let attachments = new Set(this.getSelectedItems().flatMap((item) => {
 			if (item.isRegularItem()) {
 				return Zotero.Items.get(item.getAttachments());

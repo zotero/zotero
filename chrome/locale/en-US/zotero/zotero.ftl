@@ -62,6 +62,7 @@ general-next = Next
 general-learn-more = Learn More
 general-warning = Warning
 general-type-to-continue = Type “{ $text }” to continue.
+general-continue = Continue
 
 general-red = Red
 general-orange = Orange
@@ -813,6 +814,8 @@ long-tag-fixer-button-dont-split =
 menu-normalize-attachment-titles =
     .label = Normalize Attachment Titles…
 normalize-attachment-titles-title = Normalize Attachment Titles
-normalize-attachment-titles-message = Older versions of { -app-name }, as well as certain plugins, may have set attachments’ titles based on their filenames unnecessarily. Newly added attachments are titled using an improved set of rules.
+normalize-attachment-titles-text = { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF” or “Preprint PDF” for the attachment titles.
     
-    Update selected attachments to use the new title format? Attachments with custom titles will not be affected.
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Attachment titles that have been manually changed will not be affected.
