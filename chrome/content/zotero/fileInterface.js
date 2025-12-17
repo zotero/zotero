@@ -403,6 +403,8 @@ var Zotero_File_Interface = new function () {
 	 * @param {Boolean} [options.createNewCollection=true] - Put items in a new collection
 	 * @param {Boolean} [options.linkFiles=false] - Link to files instead of storing them
 	 * @param {Function} [options.onBeforeImport] - Callback to receive translation object, useful
+	 * @param {Number} [options.libraryID] - Library ID to import into
+	 * @param {Number} [options.collectionID] - Collection ID to import into
 	 *     for displaying progress in a different way. This also causes an error to be throw
 	 *     instead of shown in the main window.
 	 */
@@ -489,8 +491,10 @@ var Zotero_File_Interface = new function () {
 
 		return _finishImport({
 			translation,
+			collectionID: options.collectionID,
 			createNewCollection,
 			addToLibraryRoot,
+			libraryID: options.libraryID,
 			linkFiles,
 			defaultNewCollectionPrefix,
 			onBeforeImport
@@ -547,11 +551,17 @@ var Zotero_File_Interface = new function () {
 		var linkFiles = options.linkFiles;
 		var defaultNewCollectionPrefix = options.defaultNewCollectionPrefix;
 		var onBeforeImport = options.onBeforeImport;
-		
+		var libraryID = options.libraryID;
+		var collectionID = options.collectionID;
+
 		if (addToLibraryRoot && createNewCollection) {
 			throw new Error("Can't add to library root and create new collection");
 		}
-		
+
+		if ((addToLibraryRoot || createNewCollection) && (libraryID !== undefined || collectionID !== undefined)) {
+			throw new Error("Can't specify libraryID/collectionID when adding to library root or creating new collection");
+		}
+
 		var showProgressWindow = !onBeforeImport;
 		
 		let translators = await translation.getTranslators();
@@ -579,21 +589,23 @@ var Zotero_File_Interface = new function () {
 			}
 			return false;
 		}
-		
-		var libraryID = Zotero.Libraries.userLibraryID;
-		var importCollection = null;
-		try {
-			let zp = Zotero.getActiveZoteroPane();
-			libraryID = zp.getSelectedLibraryID();
-			if (addToLibraryRoot) {
-				await zp.collectionsView.selectLibrary(libraryID);
+
+		if (libraryID === undefined) {
+			libraryID = Zotero.Libraries.userLibraryID;
+			collectionID = undefined;
+			try {
+				let zp = Zotero.getActiveZoteroPane();
+				libraryID = zp.getSelectedLibraryID();
+				if (addToLibraryRoot) {
+					await zp.collectionsView.selectLibrary(libraryID);
+				}
+				else if (!createNewCollection) {
+					collectionID = zp.getSelectedCollection().id;
+				}
 			}
-			else if (!createNewCollection) {
-				importCollection = zp.getSelectedCollection();
+			catch (e) {
+				Zotero.logError(e);
 			}
-		}
-		catch (e) {
-			Zotero.logError(e);
 		}
 		
 		if(createNewCollection) {
@@ -614,10 +626,11 @@ var Zotero_File_Interface = new function () {
 			else {
 				collectionName = defaultNewCollectionPrefix + " " + (new Date()).toLocaleString();
 			}
-			importCollection = new Zotero.Collection;
+			let importCollection = new Zotero.Collection;
 			importCollection.libraryID = libraryID;
 			importCollection.name = collectionName;
 			await importCollection.saveTx();
+			collectionID = importCollection.id;
 		}
 
 		translation.setTranslator(translators[0]);
@@ -650,7 +663,7 @@ var Zotero_File_Interface = new function () {
 		try {
 			await translation.translate({
 				libraryID,
-				collections: importCollection ? [importCollection.id] : null,
+				collections: collectionID !== undefined ? [collectionID] : null,
 				linkFiles,
 				saveOptions: {
 					notifierQueue

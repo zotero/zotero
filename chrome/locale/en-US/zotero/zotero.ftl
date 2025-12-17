@@ -808,3 +808,17 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+
+import-dropped-files-dialog-title =   { $count ->
+    [one] Import Dropped File
+    *[other] Import Dropped Files
+}
+import-dropped-files-dialog-description = { $count ->
+    [one] Would you like { -app-name } to import the dropped file or add it as an attachment?
+    *[other] Would you like { -app-name } to import the dropped files or add them as attachments?
+}
+import-dropped-files-dialog-confirm = Import
+import-dropped-files-dialog-reject =  { $count ->
+    [one] Create Attachment
+    *[other] Create Attachments
+}

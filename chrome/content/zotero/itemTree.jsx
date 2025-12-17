@@ -2562,6 +2562,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 				var parentCollectionID = collectionTreeRow.ref.id;
 			}
 
+			if (orient !== 0) {
+				let { promptToImport } = ChromeUtils.importESModule('chrome://zotero/content/modules/promptToImport.mjs');
+				if (await promptToImport(window, data)) {
+					return;
+				}
+			}
+
 			let addedItems = [];
 			var notifierQueue = new Zotero.Notifier.Queue;
 			try {
