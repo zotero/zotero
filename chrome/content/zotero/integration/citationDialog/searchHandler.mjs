@@ -273,8 +273,18 @@ export class CitationDialogSearchHandler {
 
 	async _getReaderOpenItems() {
 		if (this.isCitingNotes) return [];
+		let tabs = [];
 		let win = Zotero.getMainWindow();
-		let tabs = win.Zotero_Tabs.getState();
+		// If the main window is open, use it to get open tabs
+		if (win) {
+			tabs = win.Zotero_Tabs.getState();
+		}
+		// If the main window is closed, try to get tabs from the last saved session
+		else {
+			let mainWindowLastState = Zotero.Session.state.windows.find(w => w.type === 'pane');
+			if (!mainWindowLastState) return [];
+			tabs = mainWindowLastState.tabs;
+		}
 		let itemIDs = tabs.filter(t => t.type === 'reader').sort((a, b) => {
 			// Sort selected tab first
 			if (a.selected) return -1;
