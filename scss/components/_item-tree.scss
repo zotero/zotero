@@ -186,11 +186,6 @@
 				}
 			}
 		}
-		
-		.cell {
-			// Do not italicize CJK characters
-			font-synthesis-style: none;
-		}
 	
 		.cell.hasAttachment {
 			height: 100%;
@@ -202,10 +197,6 @@
 			.retracted {
 				width: 12px;
 				margin-inline-start: 3px;
-			}
-			
-			.cell-text.filename {
-				font-style: italic;
 			}
 		}
 		
@@ -228,6 +219,8 @@
 			.cell {
 				font-size: $font-size-small;
 				max-width: fit-content;
+				// Do not italicize CJK characters
+				font-synthesis: none;
 				&.title {
 					flex-grow: 1;
 					flex-basis: 0;

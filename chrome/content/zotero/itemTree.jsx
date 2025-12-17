@@ -2974,9 +2974,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
 		textSpan.className = "cell-text";
-		if (this._rowCache[item.id].titleIsFilename) {
-			textSpan.classList.add('filename');
-		}
 		if (lazy.BIDI_BROWSER_UI) {
 			textSpan.dir = Zotero.ItemFields.getDirection(
 				item.itemTypeID, column.dataKey, item.getField('language')
@@ -3426,11 +3423,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				&& !(treeRow.ref.isSnapshotAttachment() && /snapshot/i.test(treeRow.ref.getField('title')))
 				&& Zotero.Prefs.get('showAttachmentFilenames')) {
 			row.title = treeRow.ref.attachmentFilename;
-			row.titleIsFilename = true;
 		}
 		else {
 			row.title = treeRow.ref.getDisplayTitle();
-			row.titleIsFilename = false;
 		}
 		
 		const columns = this.getColumns();
