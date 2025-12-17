@@ -315,7 +315,8 @@ Zotero.CollectionTreeRow.prototype.getItems = async function () {
 };
 
 Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTable) {
-	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
+	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id
+			|| this.advancedSearch) {
 		Zotero.CollectionTreeCache.clear();
 	}
 	
@@ -426,7 +427,8 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	}
 	s2.setScope(s, includeScopeChildren);
 	
-	if (this.searchText) {
+	// Add Quick Search unless advanced search is enabled
+	if (this.searchText && !this.advancedSearch) {
 		let cond = 'quicksearch-'
 			+ (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode'));
 		s2.addCondition(cond, 'contains', this.searchText);
@@ -438,9 +440,20 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 		}
 	}
 	
+	let s3;
+	if (this.advancedSearch) {
+		s3 = this.advancedSearch.clone();
+		// Special condition - unaffected by joinMode
+		s3.addCondition('deleted', 'true');
+		s3.setScope(s2, includeScopeChildren);
+	}
+	else {
+		s3 = s2;
+	}
+
 	Zotero.CollectionTreeCache.lastTreeRow = this;
-	Zotero.CollectionTreeCache.lastSearch = s2;
-	return s2;
+	Zotero.CollectionTreeCache.lastSearch = s3;
+	return s3;
 };
 
 Zotero.CollectionTreeRow.prototype.getChildTags = function () {
@@ -476,6 +489,11 @@ Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null
 	this.searchMode = mode;
 }
 
+Zotero.CollectionTreeRow.prototype.setAdvancedSearch = function (advancedSearch) {
+	Zotero.CollectionTreeCache.clear();
+	this.advancedSearch = advancedSearch?.clone(this.ref.libraryID);
+};
+
 Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
 	Zotero.CollectionTreeCache.clear();
 	this.tags = tags;
@@ -492,8 +510,8 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 			return true;
 	}
 	
-	// Quicksearch
-	if (this.searchText != '') {
+	// Search filters
+	if (this.advancedSearch || this.searchText != '') {
 		return true;
 	}
 	

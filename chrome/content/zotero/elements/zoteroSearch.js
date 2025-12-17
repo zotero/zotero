@@ -37,35 +37,24 @@
 
 	class ZoteroSearch extends SearchElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-					id="search-box" flex="1" onkeypress="this.closest('zoterosearch').handleKeyPress(event)">
-				<hbox align="center">
-					<label id="libraryMenu-label" value="&zotero.search.searchInLibrary;" control="libraryMenu"/>
-					<menulist id="libraryMenu" aria-labelledby="libraryMenu-label" oncommand="this.closest('zoterosearch').updateLibrary();" native="true">
-						<menupopup/>
+			<groupbox>
+				<caption align="center">
+					<label id="joinModeMenu-label" value="&zotero.search.joinMode.prefix;"/>
+					<menulist id="joinModeMenu" aria-labelledby="joinModeMenu-label" oncommand="this.closest('zoterosearch').updateJoinMode();" native="true">
+						<menupopup>
+							<menuitem label="&zotero.search.joinMode.any;" value="any"/>
+							<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
+						</menupopup>
 					</menulist>
-				</hbox>
-				<groupbox>
-					<caption align="center">
-						<label id="joinModeMenu-label" value="&zotero.search.joinMode.prefix;"/>
-						<menulist id="joinModeMenu" aria-labelledby="joinModeMenu-label" oncommand="this.closest('zoterosearch').updateJoinMode();" native="true">
-							<menupopup>
-								<menuitem label="&zotero.search.joinMode.any;" value="any"/>
-								<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
-							</menupopup>
-						</menulist>
-						<label value="&zotero.search.joinMode.suffix;"/>
-					</caption>
-					<vbox id="conditions"/>
-				</groupbox>
-				<hbox>
-					<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.closest('zoterosearch').updateCheckbox('recursive');" native="true"/>
-					<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.closest('zoterosearch').updateCheckbox('noChildren');" native="true"/>
-				</hbox>
-				<hbox>
-					<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="this.closest('zoterosearch').updateCheckbox('includeParentsAndChildren');" native="true"/>
-				</hbox>
-			</vbox>
+					<label value="&zotero.search.joinMode.suffix;"/>
+				</caption>
+				<vbox id="conditions"/>
+			</groupbox>
+			<hbox id="search-option-checkboxes">
+				<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.closest('zoterosearch').updateCheckbox('recursive');" native="true"/>
+				<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.closest('zoterosearch').updateCheckbox('noChildren');" native="true"/>
+				<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="this.closest('zoterosearch').updateCheckbox('includeParentsAndChildren');" native="true"/>
+			</hbox>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
 		get search() {
@@ -75,18 +64,12 @@
 		set search(val) {
 			this.searchRef = val;
 
-			var libraryMenu = this.querySelector('#libraryMenu');
-			var libraries = Zotero.Libraries.getAll();
-			Zotero.Utilities.Internal.buildLibraryMenu(
-				libraryMenu, libraries, this.searchRef.libraryID
-			);
-			if (this.searchRef.id) {
-				libraryMenu.disabled = true;
-			}
-			this.updateLibrary();
-
 			this.querySelector('#joinModeMenu').removeAttribute('condition');
 			this.querySelector('#joinModeMenu').value = 'all';
+			
+			this.querySelector('#recursiveCheckbox').checked = false;
+			this.querySelector('#noChildrenCheckbox').checked = false;
+			this.querySelector('#includeParentsAndChildrenCheckbox').checked = false;
 
 			var conditionsBox = this.querySelector('#conditions');
 			while (conditionsBox.hasChildNodes()) {
@@ -118,6 +101,10 @@
 				}
 			}
 		}
+		
+		init() {
+			this.addEventListener('keypress', event => this.handleKeyPress(event));
+		}
 
 		addCondition(ref) {
 			var conditionsBox = this.querySelector('#conditions');
@@ -145,31 +132,26 @@
 			var conditionsBox = this.querySelector('#conditions');
 			
 			this.search.removeCondition(id);
-			
+			let found = false;
 			for (var i = 0, len = conditionsBox.childNodes.length; i < len; i++) {
 				if (conditionsBox.childNodes[i].conditionID == id) {
 					conditionsBox.removeChild(conditionsBox.childNodes[i]);
-					break;
+					found = true;
+					i--;
+					len--;
+					continue;
+				}
+				// When a condition is removed, ids of remaining conditions
+				// are shifted to remain in arithmetic sequence. The conditionID
+				// of the nodes need to be updated accordingly
+				if (found) {
+					conditionsBox.childNodes[i].conditionID--;
 				}
 			}
 			
 			if (conditionsBox.childNodes.length == 1) {
 				conditionsBox.childNodes[0].disableRemoveButton();
 			}
-		}
-
-		updateLibrary() {
-			var menu = this.querySelector('#libraryMenu');
-			var libraryID = parseInt(menu.selectedItem.value);
-			
-			if (this.onLibraryChange) {
-				this.onLibraryChange(libraryID);
-			}
-			if (!this.searchRef.id) {
-				this.searchRef.libraryID = libraryID;
-			}
-			
-			[...this.querySelector('#conditions').childNodes].forEach(x => x.onLibraryChange());
 		}
 
 		updateJoinMode() {
@@ -734,8 +716,6 @@
 
 		onRemoveClicked() {
 			if (this.parent) {
-				window.resizeBy(0, -1 * this.getBoundingClientRect().height);
-				window.dispatchEvent(new CustomEvent('resize'));
 				this.parent.removeCondition(this.conditionID);
 			}
 		}
@@ -751,7 +731,6 @@
 					)
 				);
 				this.parent.addCondition(ref);
-				window.resizeBy(0, this.getBoundingClientRect().height);
 			}
 		}
 

@@ -370,7 +370,7 @@ var ZoteroPane = new function () {
 				'zotero-tb-add': {
 					ArrowNext: () => document.getElementById("zotero-tb-lookup"),
 					ArrowPrevious: () => null,
-					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
+					Tab: () => document.getElementById("zotero-tb-search").focus(),
 					ShiftTab: () => {
 						if (collectionsPane.getAttribute("collapsed")) {
 							return document.getElementById('zotero-tb-sync');
@@ -384,7 +384,7 @@ var ZoteroPane = new function () {
 				'zotero-tb-lookup': {
 					ArrowNext: () => document.getElementById("zotero-tb-attachment-add"),
 					ArrowPrevious: () => document.getElementById("zotero-tb-add"),
-					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
+					Tab: () => document.getElementById("zotero-tb-search").focus(),
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click(),
 					Enter: () => Zotero_Lookup.showPanel(event.target),
 					' ': () => Zotero_Lookup.showPanel(event.target)
@@ -392,13 +392,13 @@ var ZoteroPane = new function () {
 				'zotero-tb-attachment-add': {
 					ArrowNext: () => document.getElementById("zotero-tb-note-add"),
 					ArrowPrevious: () => document.getElementById("zotero-tb-lookup"),
-					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
+					Tab: () => document.getElementById("zotero-tb-search").focus(),
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
 				'zotero-tb-note-add': {
 					ArrowNext: () => null,
 					ArrowPrevious: () => document.getElementById("zotero-tb-attachment-add"),
-					Tab: () => document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus(),
+					Tab: () => document.getElementById("zotero-tb-search").focus(),
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
 				'zotero-tb-search-dropmarker': {
@@ -409,9 +409,7 @@ var ZoteroPane = new function () {
 				},
 				'zotero-tb-search-textbox': {
 					Tab: () => document.getElementById("zotero-tb-toggle-item-pane-stacked"),
-					ShiftTab: () => {
-						document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
-					}
+					ShiftTab: () => document.getElementById("zotero-tb-search").focus()
 				},
 				'zotero-tb-toggle-item-pane-stacked': {
 					Tab: () => itemTree.querySelector(".virtualized-table"),
@@ -1594,58 +1592,8 @@ var ZoteroPane = new function () {
 		this.loadURI(Zotero.Groups.addGroupURL);
 	}
 	
-	
-	this.newSearch = async function () {
-		if (Zotero.DB.inTransaction()) {
-			await Zotero.DB.waitForTransaction();
-		}
-		
-		var libraryID = this.getSelectedLibraryID();
-		
-		var s = new Zotero.Search();
-		s.libraryID = libraryID;
-		s.addCondition('title', 'contains', '');
-		
-		var searches = await Zotero.Searches.getAll(libraryID)
-		var prefix = Zotero.getString('pane.collections.untitled');
-		var name = Zotero.Utilities.Internal.getNextName(
-			prefix,
-			searches.map(s => s.name).filter(n => n.startsWith(prefix))
-		);
-		
-		var io = { dataIn: { search: s, name }, dataOut: null };
-		window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal,centerscreen',io);
-		if (!io.dataOut) {
-			return false;
-		}
-		s.fromJSON(io.dataOut.json);
-		await s.saveTx();
-		return s.id;
-	};
-	
 	this.setVirtual = function (libraryID, type, show, select) {
 		return this.collectionsView.toggleVirtualCollection(libraryID, type, show, select);
-	};
-	
-	this.openAdvancedSearchWindow = function () {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-					.getService(Components.interfaces.nsIWindowMediator);
-		var enumerator = wm.getEnumerator('zotero:search');
-		while (enumerator.hasMoreElements()) {
-			var win = enumerator.getNext();
-		}
-		
-		if (win) {
-			win.focus();
-			return;
-		}
-		
-		var s = new Zotero.Search();
-		s.libraryID = this.getSelectedLibraryID();
-		s.addCondition('title', 'contains', '');
-		
-		var io = {dataIn: {search: s}, dataOut: null};
-		window.openDialog('chrome://zotero/content/advancedSearch.xhtml', '', 'chrome,dialog=no,centerscreen', io);
 	};
 
 	this.initItemsTree = async function () {
@@ -1725,7 +1673,7 @@ var ZoteroPane = new function () {
 			this.tagSelector.handleResize();
 		}
 		if (this.collectionsView) {
-			this.collectionsView.updateHeight();
+			this.collectionsView.updateHeightDebounced();
 		}
 	}, 100);
 	
@@ -1793,7 +1741,6 @@ var ZoteroPane = new function () {
 		}
 	};
 	
-	
 	this.onCollectionSelected = Zotero.serial(async function () {
 		var collectionTreeRow = this.getCollectionTreeRow();
 		if (!collectionTreeRow) {
@@ -1809,13 +1756,43 @@ var ZoteroPane = new function () {
 			return;
 		}
 		
+		let advancedSearchDeck = document.getElementById('zotero-advanced-search-pane-deck');
+		if (this.itemsView.collectionTreeRow?.isSearch()
+				&& advancedSearchDeck.state === 'open'
+				&& advancedSearchDeck.selectedSearchType === 'saved') {
+			let result = Services.prompt.confirmEx(window,
+				Zotero.getString('saved-search-close-confirmation-title'),
+				Zotero.getString('saved-search-close-confirmation-body'),
+				Ci.nsIPromptService.BUTTON_POS_0_DEFAULT
+					| Ci.nsIPrompt.BUTTON_TITLE_SAVE * Ci.nsIPrompt.BUTTON_POS_0
+					| Ci.nsIPrompt.BUTTON_TITLE_CANCEL * Ci.nsIPrompt.BUTTON_POS_1
+					| Ci.nsIPrompt.BUTTON_TITLE_DONT_SAVE * Ci.nsIPrompt.BUTTON_POS_2,
+				null, null, null,
+				null, {});
+			switch (result) {
+				case 0:
+					await advancedSearchDeck.pane.save();
+					return;
+				case 1:
+					this.collectionsView.selection.selectEventsSuppressed = true;
+					try {
+						await this.collectionsView.selectByID(this.itemsView.collectionTreeRow.id);
+					}
+					finally {
+						this.collectionsView.selection.selectEventsSuppressed = false;
+					}
+					return;
+				case 2:
+					await advancedSearchDeck.pane.cancel();
+					break;
+			}
+		}
+		
 		// Rename tab
 		Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
 		
-		let type = Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType;
-		
 		// Clear quick search and tag selector when switching views
-		document.getElementById('zotero-tb-search-textbox').value = "";
+		document.getElementById('zotero-tb-search').onCollectionSelected();
 		if (ZoteroPane.tagSelector) {
 			ZoteroPane.tagSelector.clearTagSelection();
 		}
@@ -1825,6 +1802,7 @@ var ZoteroPane = new function () {
 			collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
 		}
 		
+		this._refreshAdvancedSearchPane();
 		this._updateEnabledActionsForRow(collectionTreeRow);
 
 		// If item data not yet loaded for library, load it now.
@@ -1852,6 +1830,112 @@ var ZoteroPane = new function () {
 		
 		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 	});
+
+
+	this._refreshAdvancedSearchPane = function () {
+		let collectionTreeRow = this.getCollectionTreeRow();
+		let deck = document.getElementById('zotero-advanced-search-pane-deck');
+
+		deck.pane.refresh();
+
+		if (deck.state === 'closed' || deck.selectedSearchType !== 'temporary') {
+			collectionTreeRow.setAdvancedSearch(null);
+		}
+		else {
+			collectionTreeRow.setAdvancedSearch(deck.pane.search);
+		}
+	};
+
+
+	/**
+	 * @param {'open' | 'collapsed' | 'closed'} state
+	 */
+	this.setAdvancedSearchState = function (state) {
+		let deck = document.getElementById('zotero-advanced-search-pane-deck');
+		let oldState = deck.state;
+		deck.selectedSearchType = 'temporary';
+		deck.state = state;
+		
+		let advancedSearchPane = deck.pane;
+
+		document.getElementById('zotero-tb-search').updateMode();
+		if (state === 'open' && oldState === 'collapsed'
+				|| state === 'collapsed' && oldState === 'open') {
+			// State change only causes visual refresh - update the tree height
+			this.itemsView.updateHeight();
+		}
+		else {
+			// State change changes displayed items - refresh the tree
+			this._refreshAdvancedSearchPane();
+			this.itemsView.changeCollectionTreeRow(this.getCollectionTreeRow());
+		}
+
+		if (state === 'closed') {
+			advancedSearchPane.search = null;
+		}
+		else if (state === 'open') {
+			Zotero_Tabs.select('zotero-pane');
+			advancedSearchPane.focus();
+		}
+	};
+
+
+	/**
+	 * @param {'open' | 'collapsed' | 'closed'} state
+	 */
+	this.toggleAdvancedSearchState = async function (state) {
+		let deck = document.getElementById('zotero-advanced-search-pane-deck');
+		if (state === deck.state && deck.selectedSearchType !== 'saved') {
+			// If we're trying to open the pane, and it's already open but not focused,
+			// focus it
+			if (state === 'open' && !deck.pane.matches(':focus-within')) {
+				deck.pane.focus();
+				return;
+			}
+			
+			// Flip the state
+			switch (state) {
+				case 'open':
+					state = 'closed';
+					break;
+				case 'collapsed':
+				case 'closed':
+					state = 'open';
+					break;
+			}
+		}
+		this.setAdvancedSearchState(state);
+	};
+	
+	
+	/**
+	 * @param {'open' | 'closed'} state
+	 */
+	this.setSavedSearchEditorState = async function (state) {
+		let collectionTreeRow = this.getCollectionTreeRow();
+		if (state === 'open' && !collectionTreeRow.isSearch()) {
+			throw new Error('Cannot show saved search editor outside search row');
+		}
+		
+		let deck = document.getElementById('zotero-advanced-search-pane-deck');
+		deck.selectedSearchType = 'saved';
+		deck.state = state;
+		
+		if (state === 'open') {
+			deck.pane.search = collectionTreeRow.ref;
+			this._refreshAdvancedSearchPane();
+			deck.pane.focus();
+		}
+
+		document.getElementById('zotero-tb-search').updateMode();
+		await this.itemsView.refreshAndMaintainSelection();
+	};
+
+
+	this.openAdvancedSearchWindow = function () {
+		Zotero.debug(`ZoteroPane.openAdvancedSearchWindow() is deprecated -- use ZoteroPane.toggleAdvancedSearchState() instead`);
+		this.toggleAdvancedSearchState('open');
+	};
 	
 	
 	/**
@@ -1865,7 +1949,6 @@ var ZoteroPane = new function () {
 			"menu_noteAdd",
 			
 			"cmd_zotero_newCollection",
-			"cmd_zotero_newSavedSearch",
 			"cmd_zotero_import",
 			"cmd_zotero_importFromClipboard",
 			
@@ -2608,28 +2691,7 @@ var ZoteroPane = new function () {
 				this.collectionsView.startEditing(row);
 			}
 			else {
-				let s = row.ref.clone();
-				let groups = [];
-				// Promises don't work in the modal dialog, so get the group name here, if
-				// applicable, and pass it in. We only need the group that this search belongs
-				// to, if any, since the library drop-down is disabled for saved searches.
-				if (Zotero.Libraries.get(s.libraryID).libraryType == 'group') {
-					groups.push(Zotero.Groups.getByLibraryID(s.libraryID));
-				}
-				var io = {
-					dataIn: {
-						search: s,
-						name: row.getName(),
-						groups: groups
-					},
-					dataOut: null
-				};
-				window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal,centerscreen',io);
-				if (io.dataOut) {
-					row.ref.fromJSON(io.dataOut.json);
-					await row.ref.saveTx();
-					Zotero_Tabs.rename("zotero-pane", row.ref.name);
-				}
+				this.setSavedSearchEditorState('open');
 			}
 		}
 	};
@@ -2838,10 +2900,13 @@ var ZoteroPane = new function () {
 	
 	
 	this.handleSearchInput = function (textbox, event) {
-		if (textbox.searchTextbox.value.indexOf('"') != -1) {
+		if (textbox.searchTextbox.value.includes('"')) {
 			this.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
 		}
-	}
+		else {
+			this.search();
+		}
+	};
 	
 	
 	/**
@@ -3293,10 +3358,6 @@ var ZoteroPane = new function () {
 			command: "cmd_zotero_newCollection"
 		},
 		{
-			id: "newSavedSearch",
-			command: "cmd_zotero_newSavedSearch"
-		},
-		{
 			id: "newSubcollection",
 			oncommand: () => {
 				this.newCollection(this.getSelectedCollection().key);
@@ -3575,8 +3636,7 @@ var ZoteroPane = new function () {
 				show.push(
 					'sync',
 					'sep1',
-					'newCollection',
-					'newSavedSearch'
+					'newCollection'
 				);
 			}
 				// Only show "Show Duplicates", "Show Unfiled Items", and "Show Retracted" if rows are hidden
@@ -6688,7 +6748,7 @@ var ZoteroPane = new function () {
 		if (ZoteroPane.itemsView) {
 			// Need to immediately rerender the items here without any debouncing
 			// since tree height will have changed
-			ZoteroPane.itemsView._updateHeight();
+			ZoteroPane.itemsView.updateHeight();
 		}
 		ZoteroContextPane.update();
 	}
@@ -6873,7 +6933,7 @@ var ZoteroPane = new function () {
 		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
 		if (ZoteroPane.itemsView) {
-			ZoteroPane.itemsView.updateHeight();
+			ZoteroPane.itemsView.updateHeightDebounced();
 		}
 
 		this.handleTagSelectorResize();

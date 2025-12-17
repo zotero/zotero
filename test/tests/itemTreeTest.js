@@ -1891,42 +1891,4 @@ describe("Zotero.ItemTree", function () {
 			assert.include(text, toplevelItemTwo.getDisplayTitle());
 		});
 	});
-	
-	describe('Advanced Search', function () {
-		describe('#notify', function () {
-			it('should resolve the returned promise when an item is selected', async function() {
-				var item = await createDataObject('item', { setTitle: true });
-				var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml');
-				zp.openAdvancedSearchWindow();
-				var searchWin = await promise;
-				await searchWin.ZoteroAdvancedSearch._loadedDeferred.promise;
-				// Add condition
-				var searchBox = searchWin.document.getElementById('zotero-search-box');
-				
-				var s = new Zotero.Search();
-				s.addCondition('title', 'is', item.getField('title'))
-				searchBox.search = s;
-				
-				// Run search and wait for results
-				var o = searchWin.ZoteroAdvancedSearch;
-				var iv = o.itemsView;
-				await iv.waitForLoad();
-				await o.search();
-				await iv.waitForLoad();
-				
-				// Check results
-				assert.equal(iv.rowCount, 1);
-				
-				// Make sure an item is selected (otherwise notify resolves fine)
-				await iv.selectItem(item.id);
-				assert.equal(iv.selection.count, 1);
-
-				let notifySpy = sinon.spy(iv, 'notify');
-				await createDataObject('item');
-				assert.isTrue(notifySpy.calledOnce);
-				await notifySpy.returnValues[0];
-				notifySpy.restore();
-			});
-		});
-	});
 })

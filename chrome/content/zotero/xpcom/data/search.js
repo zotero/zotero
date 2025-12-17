@@ -481,7 +481,20 @@ Zotero.Search.prototype.removeCondition = function (searchConditionID) {
 		throw new Error('Invalid searchConditionID ' + searchConditionID + ' in removeCondition()');
 	}
 	
-	delete this._conditions[searchConditionID];
+	searchConditionID = String(searchConditionID);
+	// Decrement the id of all conditions following
+	// the condition to be deleted. It ensures that
+	// all conditions remain in stict arithmetic sequence and prevents
+	// conditionIDs from colliding
+	let conditionIDs = Object.keys(this._conditions);
+	let conditionIndex = conditionIDs.indexOf(searchConditionID);
+	for (let i = conditionIndex + 1; i < conditionIDs.length; i++) {
+		let conditionID = conditionIDs[i];
+		this._conditions[conditionID - 1] = this._conditions[conditionID];
+		this._conditions[conditionID - 1].id = conditionID - 1;
+	}
+	// After all conditions are shifted, delete the last, empty one
+	delete this._conditions[this._maxSearchConditionID];
 	this._maxSearchConditionID--;
 	this._markFieldChange('conditions', this._conditions);
 	this._changed.conditions = true;
@@ -583,8 +596,9 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 		
 		// Run a subsearch to define the superset of possible results
 		if (this._scope) {
-			// If subsearch has post-search filter, run and insert ids into temp table
-			if (this._scope.hasPostSearchFilter()) {
+			// If subsearch has post-search filter or a recursive scope,
+			// run and insert ids into temp table
+			if (this._scope.hasPostSearchFilter() || this._scope._scope) {
 				var ids = await this._scope.search();
 				if (!ids) {
 					return [];
@@ -859,7 +873,10 @@ Zotero.Search.prototype.fromJSON = function (json, options = {}) {
 		this.name = json.name;
 	}
 	
-	Object.keys(this.getConditions()).forEach(id => this.removeCondition(id));
+	// Remove all conditions
+	while (Object.keys(this._conditions).length) {
+		this.removeCondition(Object.keys(this._conditions)[0]);
+	}
 	for (let i = 0; i < json.conditions.length; i++) {
 		let condition = json.conditions[i];
 		this.addCondition(

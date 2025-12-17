@@ -1618,6 +1618,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			case 'citation-search':
 				this.collectionTreeRow.setSearch(data, 'fields');
 				break;
+			case 'advanced-search':
+				this.collectionTreeRow.setAdvancedSearch(data);
+				break;
 			case 'tags':
 				this.collectionTreeRow.setTags(data);
 				break;

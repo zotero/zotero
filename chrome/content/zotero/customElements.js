@@ -34,6 +34,8 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 {
 	// https://searchfox.org/mozilla-central/rev/8e885f04a0a4ff6d64ea59741c10d9b8e45d9ff8/toolkit/content/customElements.js#826-832
 	for (let [tag, script] of [
+		['advanced-search-deck', 'chrome://zotero/content/elements/advancedSearchDeck.js'],
+		['advanced-search-pane', 'chrome://zotero/content/elements/advancedSearchPane.js'],
 		['attachment-box', 'chrome://zotero/content/elements/attachmentBox.js'],
 		['attachment-preview', 'chrome://zotero/content/elements/attachmentPreview.js'],
 		['attachment-preview-box', 'chrome://zotero/content/elements/attachmentPreviewBox.js'],
