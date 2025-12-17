@@ -74,6 +74,7 @@ bubble-input {
 		position: relative;
 		cursor: pointer;
 		background-color: var(--fill-quinary);
+		overflow-x: hidden;
 		
 		&:hover:not(.showingDetails) {
 			background-color: var(--fill-quarternary);
