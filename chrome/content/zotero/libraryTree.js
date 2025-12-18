@@ -33,8 +33,6 @@ const React = require('react');
 var LibraryTree = class LibraryTree extends React.Component {
 	constructor(props) {
 		super(props);
-		this._rows = [];
-		this._rowMap = {};
 
 		this.domEl = props.domEl;
 		this._ownerDocument = props.domEl.ownerDocument;

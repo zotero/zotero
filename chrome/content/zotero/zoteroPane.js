@@ -1654,9 +1654,9 @@ var ZoteroPane = new function () {
 
 	this.initItemsTree = async function () {
 		try {
-			const ItemTree = require('zotero/itemTree');
+			const CollectionViewItemTree = require('zotero/collectionViewItemTree');
 			var itemsTree = document.getElementById('zotero-items-tree');
-			ZoteroPane.itemsView = await ItemTree.init(itemsTree, {
+			ZoteroPane.itemsView = await CollectionViewItemTree.init(itemsTree, {
 				id: "main",
 				dragAndDrop: true,
 				persistColumns: true,
