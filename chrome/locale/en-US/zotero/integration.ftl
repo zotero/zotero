@@ -39,7 +39,7 @@ integration-citationDialog-lib-message-citation = { $search ->
 }
 integration-citationDialog-lib-message-add-note = { $search ->
     [true] No selected notes match the current search
-   *[other] No notes are selected.
+   *[other] No notes are selected
 }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
 integration-citationDialog-btn-settings =
