@@ -24,7 +24,7 @@
 */
 
 
-const ItemTree = require('zotero/itemTree');
+const CollectionViewItemTree = require('zotero/collectionViewItemTree');
 const { getCSSIcon } = require('components/icons');
 const { COLUMNS } = require('zotero/itemTreeColumns');
 var doc, io, ioReadyPromise, ioIsReady, accepted;
@@ -616,7 +616,7 @@ class LibraryLayout extends Layout {
 				return cell;
 			}
 		});
-		this.itemsView = await ItemTree.init(itemsTree, {
+		this.itemsView = await CollectionViewItemTree.init(itemsTree, {
 			id: "citationDialog",
 			dragAndDrop: DIALOG_STATE.isCitingItems(),
 			persistColumns: true,

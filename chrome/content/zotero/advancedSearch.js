@@ -24,7 +24,7 @@
 */
 
 
-import ItemTree from 'zotero/itemTree';
+import CollectionViewItemTree from 'zotero/collectionViewItemTree';
 import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
@@ -61,7 +61,7 @@ var ZoteroAdvancedSearch = new function () {
 			column.hidden = !['title', 'firstCreator', 'year', 'hasAttachment'].includes(column.dataKey);
 			return column;
 		});
-		this.itemsView = await ItemTree.init(elem, {
+		this.itemsView = await CollectionViewItemTree.init(elem, {
 			id: "advanced-search",
 			dragAndDrop: true,
 			persistColumns: true,
