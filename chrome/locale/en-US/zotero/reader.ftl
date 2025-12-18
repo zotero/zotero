@@ -210,6 +210,7 @@ reader-read-aloud-more-voices = More Voices…
 reader-read-aloud-language = Language
 
 reader-read-aloud-remaining-time = Remaining reading time
+reader-read-aloud-log-in = <log-in>Log in</log-in> to access Zotero Voices.
 reader-read-aloud-learn-more = Learn more
 reader-read-aloud-low-credit-message = When your credits run out, Read Aloud will continue with a local voice.
 
