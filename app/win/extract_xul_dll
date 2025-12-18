@@ -72,7 +72,7 @@ for i in "${!files[@]}"; do
 	# Rename to final output
 	final_zip="$version-$arch-$sum.zip"
 	mv "$temp_zip" "$final_zip"
-	rm -f xul.dll libgpllibs.dll
+	rm -f xul.dll lgpllibs.dll
 	
 	echo "Created $final_zip"
 done
