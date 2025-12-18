@@ -109,6 +109,12 @@ preferences-advanced-default-data-dir =
     .value = (Default: { $directory })
     .aria-label = Default location
 
+-preferences-sync-data-syncing = Data Syncing & Read Aloud
+preferences-sync-data-syncing-groupbox =
+    .aria-label = { -preferences-sync-data-syncing }
+preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
+preferences-sync-data-syncing-description = Log in with your zotero.org account to sync your data between devices, collaborate with others, listen to your documents using AI voices, and more.
+
 preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ $libraryName }” on { $domain } with data from this computer.
 preferences-sync-reset-restore-to-server-deleted-items-text = { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
         [one] item

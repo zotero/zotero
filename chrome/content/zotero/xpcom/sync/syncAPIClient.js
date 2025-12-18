@@ -547,8 +547,65 @@ Zotero.Sync.APIClient.prototype = {
 	deleteAPIKey: async function () {
 		await this.makeRequest("DELETE", this.baseURL + "keys/current");
 	},
-	
-	
+
+
+	async getReadAloudVoices() {
+		let uri = this.baseURL + "tts/voices";
+		let xmlhttp = await this.makeRequest("GET", uri, {
+			responseType: "json",
+		});
+		return {
+			voices: xmlhttp.response,
+			creditsRemaining: parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining')),
+		};
+	},
+
+
+	async getReadAloudAudio(text, voiceID) {
+		let params = new URLSearchParams();
+		params.set('text', text);
+		params.set('voice', voiceID);
+		let uri = this.baseURL + "tts/speak?" + params;
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "blob",
+			});
+
+			let creditsRemaining = parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
+			if (isNaN(creditsRemaining)) {
+				creditsRemaining = null;
+			}
+
+			return {
+				audio: xmlhttp.response,
+				creditsRemaining,
+			};
+		}
+		catch (e) {
+			let creditsRemaining = parseInt(e.xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
+			if (isNaN(creditsRemaining)) {
+				creditsRemaining = null;
+			}
+
+			let error;
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status === 402) {
+				error = 'quota-exceeded';
+			}
+			else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				error = 'network';
+			}
+			else {
+				error = 'unknown';
+			}
+			return {
+				audio: null,
+				creditsRemaining,
+				error,
+			};
+		}
+	},
+
+
 	buildRequestURI: function (params) {
 		var uri = this.baseURL;
 		
