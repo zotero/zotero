@@ -236,7 +236,7 @@ class ReaderInstance {
 			lightTheme: Zotero.Prefs.get('reader.lightTheme'),
 			darkTheme: Zotero.Prefs.get('reader.darkTheme'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
-			hyphenation: Zotero.Prefs.get('reader.ebookHyphenate'),
+			hyphenate: Zotero.Prefs.get('reader.ebookHyphenate'),
 			autoDisableNoteTool: Zotero.Prefs.get('reader.autoDisableTool.note'),
 			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
