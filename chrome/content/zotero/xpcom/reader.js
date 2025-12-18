@@ -216,7 +216,7 @@ class ReaderInstance {
 			textSelectionAnnotationMode: Zotero.Prefs.get('reader.textSelectionAnnotationMode'),
 			useDarkModeForContent: Zotero.Prefs.get('reader.contentDarkMode'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
-			hyphenation: Zotero.Prefs.get('reader.ebookHyphenate'),
+			hyphenate: Zotero.Prefs.get('reader.ebookHyphenate'),
 			autoDisableNoteTool: Zotero.Prefs.get('reader.autoDisableTool.note'),
 			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
