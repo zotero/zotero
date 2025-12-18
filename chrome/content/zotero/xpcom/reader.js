@@ -261,6 +261,7 @@ class ReaderInstance {
 					});
 				},
 			},
+			loggedIn: true, // FIXME
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
 				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
@@ -622,7 +623,10 @@ class ReaderInstance {
 			},
 			onSetReadAloudStatus: (status) => {
 				this._setReadAloudStatus(status);
-			}
+			},
+			onLogIn: () => {
+				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
