@@ -70,6 +70,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this.type = 'collection';
 		this.name = "CollectionTree";
 		this.id = "collection-tree";
+		this._rows = [];
+		this._rowMap = {};
 		this._highlightedRows = new Set();
 		this._unregisterID = Zotero.Notifier.registerObserver(
 			this,

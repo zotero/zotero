@@ -26,7 +26,6 @@
 "use strict";
 
 Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, isOpen) {
-	this.view = collectionTreeView;
 	this.type = type;
 	this.ref = ref;
 	this.level = level || 0;
@@ -489,6 +488,7 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 		case 'search':
 		case 'publications':
 		case 'trash':
+		case 'unfiled':
 			return true;
 	}
 	
