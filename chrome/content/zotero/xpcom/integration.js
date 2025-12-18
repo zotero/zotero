@@ -1590,7 +1590,20 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 	// Make sure session is updated
 	await citationsByItemIDPromise;
 	
-	let citations = await this._insertCitingResult(fieldIndex, field, io.citation);
+	let citations;
+	try {
+		citations = await this._insertCitingResult(fieldIndex, field, io.citation);
+	}
+	catch (e) {
+		if (e instanceof Zotero.Exception.UserCancelled) {
+			if (newField) {
+				try {
+					await field.delete();
+				} catch(e) {}
+			}
+		}
+		throw e;
+	}
 	if (!this.data.prefs.delayCitationUpdates) {
 		if (citations.length != 1) {
 			// We need to refetch fields because we've inserted multiple.
@@ -1679,7 +1692,11 @@ Zotero.Integration.Session.prototype._processNote = async function (item) {
 		let code = char.codePointAt(0);
 		value += code > 127 ? '&#' + code + ';' : char;
 	}
-	text = value;
+	text = value.trim();
+	
+	if (text.length == 0) {
+		throw new Zotero.Exception.UserCancelled("inserted empty note, cancelling");
+	}
 	
 	if (!text.startsWith('<html>')) {
 		text = `<html><body>${text}</body></html>`;
