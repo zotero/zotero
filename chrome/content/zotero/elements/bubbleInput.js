@@ -41,6 +41,14 @@
 			DragDropHandler.init(this);
 		}
 
+		set sortable(value) {
+			this.setAttribute("sortable", !!value);
+		}
+
+		get sortable() {
+			return this.getAttribute("sortable") == "true";
+		}
+
 		focus() {
 			this.refocusInput();
 		}
@@ -154,7 +162,7 @@
 		 * Otherwise, return last focused input, if it is still part of the bubbleInput.
 		 */
 		getCurrentInput() {
-			if (Utils.isInput(document.activeElement)) {
+			if (Utils.isInput(document.activeElement) && this.contains(document.activeElement)) {
 				return document.activeElement;
 			}
 			if (this._lastFocusedInput && this.contains(this._lastFocusedInput)) {
@@ -212,7 +220,7 @@
 		 */
 		_createBubble(content, dialogReferenceID) {
 			let bubble = document.createElement("div");
-			bubble.setAttribute("draggable", "true");
+			bubble.setAttribute("draggable", this.sortable);
 			bubble.setAttribute("role", "button");
 			bubble.setAttribute("tabindex", "0");
 			bubble.setAttribute("data-l10n-id", "integration-citationDialog-aria-bubble");
@@ -245,7 +253,7 @@
 		 */
 		_onBubbleKeydown(event) {
 			let bubble = event.target;
-			if (["ArrowLeft", "ArrowRight"].includes(event.key) && event.shiftKey) {
+			if (["ArrowLeft", "ArrowRight"].includes(event.key) && event.shiftKey && this.sortable) {
 				// On Shift-Left/Right swap focused bubble with it's neighbor
 				event.preventDefault();
 				event.stopPropagation();
@@ -390,9 +398,11 @@
 		},
 
 		handleDragStart(event) {
+			if (!this.bubbleInput.sortable) return false;
 			this.dragBubble = event.target;
 			event.dataTransfer.setData("text/plain", '<span id="zotero-drag"/>');
 			event.stopPropagation();
+			return true;
 		},
 
 		handleDragEnter(event) {

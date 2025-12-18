@@ -39,13 +39,31 @@
 			return this._items || [];
 		}
 
+		get filter() {
+			return (this._filter || "").toLowerCase();
+		}
+
+		set filter(val) {
+			this._filter = val;
+		}
+
+		get annotationsAction() {
+			return this._annotationsAction;
+		}
+
+		set annotationsAction(val) {
+			this._annotationsAction = val;
+		}
+
 		init() {
 			this._body = this.querySelector('.body');
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item']);
+			this._body.addEventListener('keydown', this._handleKeyDown.bind(this));
 		}
 
 		destroy() {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
+			this._body.removeEventListener('keydown', this._handleKeyDown.bind(this));
 		}
 
 		notify(action, type, ids) {
@@ -75,7 +93,7 @@
 
 			let topLevelItems = Zotero.Items.getTopLevel(this.items);
 
-			// Remove collapsible sections for top-level items whose annotations are no longer selected
+			// Remove collapsible sections for top-level items that no longer have any annotations
 			for (let section of [...this.querySelectorAll("collapsible-section")]) {
 				let parentID = section.dataset.pane.split("-")[1];
 				if (!topLevelItems.some(item => item.id == parentID)) {
@@ -83,7 +101,8 @@
 				}
 			}
 			for (let parentItem of topLevelItems) {
-				let selectedAnnotations = this.items.filter(item => item.topLevelItem.id == parentItem.id);
+				let allAnnotations = this.items.filter(item => item.topLevelItem.id == parentItem.id);
+				let visibleAnnotations = allAnnotations.filter(item => this._passesFilter(item));
 				// Create a collapsible section for each top-level item if it does not exist yet
 				let section = this.querySelector(`[data-pane="annotations-${parentItem.id}"]`);
 				if (!section) {
@@ -98,17 +117,26 @@
 					section.appendChild(sectionBody);
 					this._body.append(section);
 				}
-				document.l10n.setArgs(section, { count: selectedAnnotations.length });
-				// Add annotations into this collapsible section
-				for (let annotation of selectedAnnotations) {
-					// Skip rows that already exist
-					if (this.querySelector(`annotation-row[annotation-id="${annotation.id}"]`)) continue;
-					let row = document.createXULElement('annotation-row');
-					row.annotation = annotation;
-					section.querySelector('.body').append(row);
+				document.l10n.setArgs(section, { count: visibleAnnotations.length });
+				// Hide section if all of its annotations are filtered out
+				section.toggleAttribute("hidden", visibleAnnotations.length === 0);
+				// Add annotations into this collapsible section (create if they don't exist)
+				for (let annotation of allAnnotations) {
+					let row = this.querySelector(`annotation-row[annotation-id="${annotation.id}"]`);
+					if (!row) {
+						row = document.createXULElement('annotation-row');
+						row.annotation = annotation;
+						if (this.annotationsAction) {
+							row.action = this.annotationsAction;
+						}
+						section.querySelector('.body').append(row);
+					}
+					// Hide annotation rows that are filtered out
+					row.toggleAttribute("hidden", !this._passesFilter(annotation));
 				}
 			}
-			// Remove annotation rows for annotations that are no longer selected
+			
+			// Remove annotation rows for annotations that are no longer in this.items
 			for (let row of [...this.querySelectorAll("annotation-row")]) {
 				let rowID = row.getAttribute("annotation-id");
 				if (!this.items.some(obj => obj.id == rowID)) {
@@ -127,6 +155,40 @@
 				doc: document,
 				append,
 			});
+		}
+
+		_passesFilter(annotation) {
+			if (!this.filter) return true;
+			let text = (annotation.annotationText || "").toLowerCase();
+			let comment = (annotation.annotationComment || "").toLowerCase();
+			let tags = (annotation.getTags() || []).map(tag => tag.tag.toLowerCase()).join(" ");
+			return text.includes(this.filter) || comment.includes(this.filter) || tags.includes(this.filter);
+		}
+
+		// Handle arrowUp/Down navigation between focused annotation rows
+		_handleKeyDown(event) {
+			if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+			
+			let currentRow = event.target.closest('annotation-row');
+			if (!currentRow) return;
+
+			let visibleRows = [...this.querySelectorAll('annotation-row:not([hidden])')];
+			let currentIndex = visibleRows.indexOf(currentRow);
+			
+			if (currentIndex === -1) return;
+
+			let nextIndex;
+			if (event.key === 'ArrowDown') {
+				nextIndex = currentIndex + 1;
+			}
+			else {
+				nextIndex = currentIndex - 1;
+			}
+
+			if (nextIndex >= 0 && nextIndex < visibleRows.length) {
+				visibleRows[nextIndex].focus();
+				event.preventDefault();
+			}
 		}
 	}
 
