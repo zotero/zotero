@@ -21,6 +21,8 @@ integration-editBibliography-wrapper =
 integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
+integration-citationDialog-section-selectedItems = Selected Items ({ $count })
+integration-citationDialog-section-selectedNotes = Selected Notes ({ $count })
 integration-citationDialog-section-cited = { $count ->
     [0] Cited Items
     *[other] Cited Items ({ $count })
@@ -87,6 +89,7 @@ integration-citationDialog-collapse-section =
     .title = Collapse section
 integration-citationDialog-bubble-empty = (no title)
 integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-insertNote-preview-msg = Select a note to see its preview
 
 integration-prefs-displayAs-label = Display Citations As:
 integration-prefs-footnotes =

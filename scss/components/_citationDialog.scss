@@ -123,6 +123,9 @@
 	}
 
 	#library-layout {
+		#sidebar {
+			display: none;
+		}
 		#library-other-items {
 
 			height: 82px;
@@ -638,6 +641,83 @@
 			justify-content: center;
 			#z-icon {
 				margin: 0 !important;
+			}
+		}
+	}
+}
+
+#citation-dialog[dialog-type="note"] {
+	.add-all {
+		display: none !important;
+	}
+	#library-layout {
+		#sidebar {
+			display: block;
+			width: 250px;
+			border-inline-start: var(--material-panedivider);
+			background: var(--material-sidepane) !important;
+			#add-note-sidebar {
+				height: 100%;
+				#note-preview {
+					#links-container {
+						display: none;
+					}
+				}
+				#empty-note-preview-message {
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					text-align: center;
+					padding: 8px;
+					height: 100%;
+				}
+			}
+		}
+		// when adding a note, the item cards are slightly taller
+		#library-other-items {
+			height: 100px;
+			.item {
+				height: 58px !important;
+			}
+		}
+	}
+	#list-layout {
+		#list-layout-wrapper {
+			.section .item {
+				border-radius: 5px;
+				// special treatment for container parent items of notes that
+				// are not properly selectable
+				&.container {
+					background-color: var(--color-background);
+					&:hover {
+						outline: 2px solid var(--fill-quinary);
+					}
+					.title::before {
+						@include svgicon("chevron-8", "universal", "8");
+						width: 8px;
+						height: 8px;
+						display: inline-block;
+						content: "";
+						margin-inline-end: 4px;
+						vertical-align: middle;
+						margin-bottom: 3px;
+						fill: var(--fill-secondary);
+					}
+					&.collapsed .title::before {
+						transform: rotate(270deg);
+					}
+					// push description a bit more to the right so that it
+					// aligns with title after twisty is added
+					.description {
+						margin-inline-start: 32px;
+					}
+				}
+				&:not(.container) {
+					padding-inline: 20px;
+				}
+				&.child {
+					padding-inline: 36px;
+				}
 			}
 		}
 	}
