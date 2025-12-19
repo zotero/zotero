@@ -131,6 +131,9 @@
 	"general-type-to-continue": {
 		"string": "Type “{ text }” to continue."
 	},
+	"general-continue": {
+		"string": "Continue"
+	},
 	"general-red": {
 		"string": "Red"
 	},
@@ -233,6 +236,12 @@
 	"menu-view-columns-move-right.label": {
 		"string": "Move Column Right"
 	},
+	"menu-view-note-font-size.label": {
+		"string": "Note Font Size"
+	},
+	"menu-view-note-tab-font-size.label": {
+		"string": "Note Tab Font Size"
+	},
 	"menu-show-tabs-menu.label": {
 		"string": "Show Tabs Menu"
 	},
@@ -285,7 +294,7 @@
 		"string": "Move Up"
 	},
 	"item-menu-viewAttachment.label": {
-		"string": "Open {numAttachments, plural, one {{attachmentType, select, pdf {PDF} epub {EPUB} snapshot {Snapshot} other {Attachment}}} other {{attachmentType, select, pdf {PDFs} epub {EPUBs} snapshot {Snapshots} other {Attachments}}}} {openIn, select, tab {in New Tab} window {in New Window} other {}}"
+		"string": "Open {numAttachments, plural, one {{attachmentType, select, pdf {PDF} epub {EPUB} snapshot {Snapshot} note {Note} other {Attachment}}} other {{attachmentType, select, pdf {PDFs} epub {EPUBs} snapshot {Snapshots} note {Notes} other {Attachments}}}} {openIn, select, tab {in New Tab} window {in New Window} other {}}"
 	},
 	"item-menu-add-file.label": {
 		"string": "File"
@@ -707,6 +716,9 @@
 	"pane-notes": {
 		"string": "Notes"
 	},
+	"pane-note-info": {
+		"string": "Note Info"
+	},
 	"pane-libraries-collections": {
 		"string": "Libraries and Collections"
 	},
@@ -838,6 +850,36 @@
 	},
 	"attachment-info-convert-note.tooltiptext": {
 		"string": "Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note."
+	},
+	"note-info-title": {
+		"string": "Title"
+	},
+	"note-info-parent-item": {
+		"string": "Parent Item"
+	},
+	"note-info-parent-item-button": {
+		"string": "{hasParentItem, select, true {{ parentItemTitle }} false {None}}"
+	},
+	"note-info-parent-item-button.title": {
+		"string": "{hasParentItem, select, true {View parent item in library} false {View note item in library}}"
+	},
+	"note-info-date-created": {
+		"string": "Created"
+	},
+	"note-info-date-modified": {
+		"string": "Modified"
+	},
+	"note-info-size": {
+		"string": "Size"
+	},
+	"note-info-word-count": {
+		"string": "Word Count"
+	},
+	"note-info-character-count": {
+		"string": "Character Count"
+	},
+	"item-title-empty-note": {
+		"string": "Untitled Note"
 	},
 	"attachment-preview-placeholder": {
 		"string": "No attachment to preview"
@@ -993,10 +1035,7 @@
 		"string": "Ebook"
 	},
 	"post-upgrade-message": {
-		"string": "Learn about the <a data-l10n-name=\"new-features-link\">new features in { app-name } { version }</a>"
-	},
-	"post-upgrade-density": {
-		"string": "Choose your preferred layout density:"
+		"string": "You’ve been upgraded to <span data-l10n-name=\"post-upgrade-appver\">{ app-name } { version }</span>! Learn about <a data-l10n-name=\"new-features-link\">what’s new</a>."
 	},
 	"text-action-paste-and-search.label": {
 		"string": "Paste and Search"
@@ -1021,6 +1060,15 @@
 	},
 	"long-tag-fixer-button-dont-split.label": {
 		"string": "Don’t Split"
+	},
+	"menu-normalize-attachment-titles.label": {
+		"string": "Normalize Attachment Titles…"
+	},
+	"normalize-attachment-titles-title": {
+		"string": "Normalize Attachment Titles"
+	},
+	"normalize-attachment-titles-text": {
+		"string": "{ app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.\n\nIn older versions of { app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.\n\nWould you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed."
 	},
 	"preferences-window.title": {
 		"string": "{ app-name } Settings"
@@ -1067,6 +1115,15 @@
 	"preferences-file-renaming-format-preview": {
 		"string": "Preview:"
 	},
+	"preferences-attachment-titles-title": {
+		"string": "Attachment Titles"
+	},
+	"preferences-attachment-titles-intro": {
+		"string": "Attachment titles are <label data-l10n-name=\"wiki-link\">different from filenames</label>. To support some workflows, { app-name } can show filenames instead of attachment titles in the items list."
+	},
+	"preferences-attachment-titles-show-filenames.label": {
+		"string": "Show attachment filenames in the items list"
+	},
 	"preferences-reader-title": {
 		"string": "Reader"
 	},
@@ -1087,6 +1144,12 @@
 	},
 	"preferences-reader-ebook-hyphenate.label": {
 		"string": "Enable automatic hyphenation"
+	},
+	"preferences-note-title": {
+		"string": "Notes"
+	},
+	"preferences-note-open-in-new-window.label": {
+		"string": "Open notes in new windows instead of tabs"
 	},
 	"preferences-color-scheme": {
 		"string": "Color Scheme:"
@@ -1562,8 +1625,11 @@
 	"reader-foreground": {
 		"string": "Foreground:"
 	},
-	"reader-focus-mode": {
-		"string": "Focus Mode"
+	"reader-reading-mode": {
+		"string": "Reading Mode"
+	},
+	"reader-reading-mode-not-supported": {
+		"string": "Reading Mode is not supported in this document."
 	},
 	"reader-clear-selection": {
 		"string": "Clear Selection"
@@ -1619,6 +1685,12 @@
 	"reader-import-from-epub-select-other": {
 		"string": "Select Other File…"
 	},
+	"reader-selected-pages": {
+		"string": "{count, plural, one {1 page selected} other {{ count } pages selected}}"
+	},
+	"reader-page-options": {
+		"string": "Page Options"
+	},
 	"integration-docPrefs-window.title": {
 		"string": "{ app-name } - Document Preferences"
 	},
@@ -1670,17 +1742,26 @@
 	"integration-citationDialog-settings-title": {
 		"string": "Citation Settings"
 	},
-	"integration-citationDialog-lib-no-items": {
+	"integration-citationDialog-lib-message-citation": {
 		"string": "{search, select, true {No selected, open, or cited items match the current search} other {No selected or open items}}"
+	},
+	"integration-citationDialog-lib-message-add-note": {
+		"string": "{search, select, true {No selected notes match the current search} other {No notes are selected}}"
 	},
 	"integration-citationDialog-settings-keepSorted": {
 		"string": "Keep sources sorted"
 	},
-	"integration-citationDialog-btn-mode.title": {
-		"string": "{mode, select, library {Switch to List Mode} list {Switch to Library Mode} other {Switch Mode}}"
+	"integration-citationDialog-mode-library": {
+		"string": "Library"
 	},
-	"integration-citationDialog-btn-mode.aria-label": {
-		"string": "{mode, select, library {The dialog is in Library mode. Click to switch to List Mode.} list {The dialog is in List mode. Click to switch to Library Mode.} other {Switch Mode}}"
+	"integration-citationDialog-mode-list": {
+		"string": "List"
+	},
+	"integration-citationDialog-btn-type-citation.title": {
+		"string": "Add/Edit Citation"
+	},
+	"integration-citationDialog-btn-type-add-note.title": {
+		"string": "Add Note"
 	},
 	"integration-citationDialog-general-instructions": {
 		"string": "Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation."
@@ -1694,8 +1775,11 @@
 	"integration-citationDialog-aria-bubble.aria-description": {
 		"string": "This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }"
 	},
-	"integration-citationDialog-single-input.aria-description": {
+	"integration-citationDialog-single-input-citation.aria-description": {
 		"string": "Press Tab to select items to add to this citation. Press Escape to discard the changes and close the dialog."
+	},
+	"integration-citationDialog-single-input-add-note.placeholder": {
+		"string": "Search for a note to insert into the document"
 	},
 	"integration-citationDialog-aria-item-list.aria-description": {
 		"string": "Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }"
@@ -1966,5 +2050,62 @@
 	},
 	"note-editor-citation-popup-appeared": {
 		"string": "Citation popup appeared. Use Shift-Tab to navigate it."
+	},
+	"note-editor-toggle-context-pane": {
+		"string": "Toggle Context Pane"
+	},
+	"itemFields-arXivID": {
+		"string": "arXiv ID"
+	},
+	"itemFields-eventPlace": {
+		"string": "Event Place"
+	},
+	"itemFields-originalDate": {
+		"string": "Original Date"
+	},
+	"itemFields-originalPlace": {
+		"string": "Original Place"
+	},
+	"itemFields-originalPublisher": {
+		"string": "Original Publisher"
+	},
+	"itemFields-partNumber": {
+		"string": "Part Number"
+	},
+	"itemFields-partTitle": {
+		"string": "Part Title"
+	},
+	"itemFields-priorityDate": {
+		"string": "Priority Date"
+	},
+	"itemFields-sessionTitle": {
+		"string": "Session Title"
+	},
+	"creatorTypes-chair": {
+		"string": "Chair"
+	},
+	"creatorTypes-creator": {
+		"string": "Creator"
+	},
+	"creatorTypes-executiveProducer": {
+		"string": "Executive Producer"
+	},
+	"creatorTypes-host": {
+		"string": "Host"
+	},
+	"creatorTypes-narrator": {
+		"string": "Narrator"
+	},
+	"creatorTypes-originalCreator": {
+		"string": "Original Creator"
+	},
+	"creatorTypes-organizer": {
+		"string": "Organizer"
+	},
+	"creatorTypes-seriesCreator": {
+		"string": "Series Creator"
+	},
+	"creatorTypes-uploader": {
+		"string": "Uploader"
 	}
 }
