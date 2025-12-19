@@ -243,6 +243,7 @@
 										onpopupshowing="ZoteroStandalone.buildNewItemMenu()"/>
 							</menu>
 							<menuitem
+								id="menu_addByIdentifier"
 								class="menu-type-library"
 								data-l10n-id="menu-add-by-identifier"
 								command="cmd_zotero_addByIdentifier"
@@ -322,8 +323,8 @@
 									label="&zotero.general.saveAs;"
 									oncommand="ZoteroStandalone.currentReader.export()"/>
 							<menuseparator class="menu-type-reader pdf"/>
-							<menuitem data-l10n-id="menu-print" class="menu-type-reader" oncommand="ZoteroStandalone.currentReader.print()"/>
-							<menuitem label="&zotero.items.menu.showInLibrary;" class="menu-type-reader" oncommand="ZoteroStandalone.currentReader.showInLibrary()"/>
+							<menuitem id="menu_print" data-l10n-id="menu-print" class="menu-type-reader" oncommand="ZoteroStandalone.currentReader.print()"/>
+							<menuitem id="menu_showInLibrary" label="&zotero.items.menu.showInLibrary;" class="menu-type-reader" oncommand="ZoteroStandalone.currentReader.showInLibrary()"/>
 							<menuseparator/>
 							<menuitem id="menu_close" class="menu-type-library" label="&closeCmd.label;" key="key_close"
 									accesskey="&closeCmd.accesskey;" command="cmd_close"/>
@@ -408,13 +409,13 @@
 									command="cmd_zotero_selectAll" data-l10n-id="text-action-select-all"/>
 							<menuseparator class="menu-type-reader pdf"/>
 							<menuitem
-									id="edit-menuitem-rotate-left"
+									id="menu_rotateLeft"
 									class="menu-type-reader pdf"
 									label="&zotero.pdfReader.rotatePageLeft;"
 									oncommand="ZoteroStandalone.currentReader.rotatePageLeft()"
 							/>
 							<menuitem
-									id="edit-menuitem-rotate-right"
+									id="menu_rotateRight"
 									class="menu-type-reader pdf"
 									label="&zotero.pdfReader.rotatePageRight;"
 									oncommand="ZoteroStandalone.currentReader.rotatePageRight()"
