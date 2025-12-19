@@ -31,8 +31,8 @@ const MIN_QUERY_LENGTH = 2;
 // as the following object: { found: [], cited: [], open: [], selected: []}.
 // Can be refreshed via SearchHandler.refresh or refreshDebounced.
 export class CitationDialogSearchHandler {
-	constructor({ isCitingNotes, io }) {
-		this.isCitingNotes = isCitingNotes;
+	constructor({ dialogState, io }) {
+		this.dialogState = dialogState;
 		this.io = io;
 
 		this.searchValue = "";
@@ -119,7 +119,7 @@ export class CitationDialogSearchHandler {
 		}, {}));
 
 		// sort actual items or notes
-		let itemComparator = this.isCitingNotes ? this._createNotesSort() : this._createItemsSort();
+		let itemComparator = this.dialogState.isAddingNote() ? this._createNotesSort() : this._createItemsSort();
 		libraryItems.forEach((library) => {
 			library.group.sort(itemComparator);
 		});
@@ -159,7 +159,7 @@ export class CitationDialogSearchHandler {
 
 	// Refresh the list of matching library items for the list mode.
 	async refreshLibraryItems() {
-		if (!this.searchValue && !this.isCitingNotes) {
+		if (!this.searchValue && !this.dialogState.isAddingNote()) {
 			this.results.found = [];
 			return;
 		}
@@ -173,6 +173,12 @@ export class CitationDialogSearchHandler {
 			this.citedItems = await this._getCitedItems();
 		}
 		if (!this.citedItems) return;
+
+		// Cited items are not relevant when adding a note
+		if (this.dialogState.isAddingNote()) {
+			this.results.cited = [];
+			return;
+		}
 		// if "ibid" is typed, return all cited items
 		if (this.searchValue.toLowerCase() === Zotero.getString("integration.ibid").toLowerCase()) {
 			this.results.cited = this.citedItems;
@@ -236,7 +242,7 @@ export class CitationDialogSearchHandler {
 			this.io.filterLibraryIDs.forEach(id => s.addCondition("libraryID", "is", id));
 		}
 		let realInputRegex = /[\w\u007F-\uFFFF]/;
-		if (this.isCitingNotes) {
+		if (this.dialogState.isAddingNote()) {
 			s.addCondition("quicksearch-titleCreatorYearNote", "contains", this.searchValue);
 		}
 		else if (realInputRegex.test(this.searchValue)) {
@@ -263,7 +269,6 @@ export class CitationDialogSearchHandler {
 	}
 
 	async _getCitedItems() {
-		if (this.isCitingNotes) return [];
 		// Noop until io loads all cited data
 		if (this.io.allCitedDataLoadedPromise && !this.io.isAllCitedDataLoaded) return null;
 		// Fetch all cited items in the document, not just items currently in the dialog
@@ -272,7 +277,7 @@ export class CitationDialogSearchHandler {
 	}
 
 	async _getReaderOpenItems() {
-		if (this.isCitingNotes) return [];
+		if (this.dialogState.isAddingNote()) return [];
 		let tabs = [];
 		let win = Zotero.getMainWindow();
 		// If the main window is open, use it to get open tabs
@@ -313,7 +318,7 @@ export class CitationDialogSearchHandler {
 	}
 
 	_getSelectedLibraryItems() {
-		if (this.isCitingNotes) {
+		if (this.dialogState.isAddingNote()) {
 			return Zotero.getActiveZoteroPane()?.getSelectedItems().filter(i => i.isNote()) || [];
 		}
 		return Zotero.getActiveZoteroPane()?.getSelectedItems().filter(i => i.isRegularItem()) || [];
