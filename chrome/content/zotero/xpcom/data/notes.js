@@ -34,6 +34,164 @@ Zotero.Notes = new function () {
 	
 	this._editorInstances = [];
 	this._downloadInProgressPromise = null;
+
+	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey } = {}) {
+		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		let library = Zotero.Libraries.get(libraryID);
+		let win = Zotero.getMainWindow();
+
+		if (!win) {
+			openInWindow = true;
+		}
+
+		await library.waitForDataLoad('item');
+
+		let item = Zotero.Items.get(itemID);
+		if (!item) {
+			throw new Error('Item does not exist');
+		}
+
+		let noteEditor;
+		if (!openInWindow && !allowDuplicate && !this._editorInstances.find(r => r.itemID === itemID)) {
+			if (win) {
+				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
+				if (existingTabID) {
+					win.Zotero_Tabs.select(existingTabID, false, { location });
+					return win.Zotero_Tabs.getTabContent(existingTabID).querySelector('note-editor.note-tab');
+				}
+			}
+		}
+
+		if (openInWindow) {
+			noteEditor = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'window');
+		}
+		else if (!allowDuplicate) {
+			noteEditor = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'tab');
+		}
+
+		if (noteEditor) {
+			if (noteEditor.viewMode === 'tab') {
+				win.Zotero_Tabs.select(noteEditor.tabID, true);
+			}
+			
+			if (location) {
+				noteEditor.navigate(location);
+			}
+		}
+		else if (openInWindow) {
+			let name = null;
+		
+			if (itemID) {
+				// Create a name for this window so we can focus it later
+				//
+				// Collection is only used on new notes, so we don't need to
+				// include it in the name
+				name = 'zotero-note-' + itemID;
+			}
+			
+			let io = { itemID, parentItemKey, location, _initPromise: Zotero.Promise.defer() };
+			Services.ww.openWindow(
+				win,
+				'chrome://zotero/content/note.xhtml',
+				name,
+				'chrome,resizable,centerscreen,dialog=no',
+				io
+			);
+			await io._initPromise.promise;
+			noteEditor = io.noteEditor;
+		}
+		else {
+			let id;
+			let container;
+			let select = !openInBackground;
+			if (tabID) {
+				id = tabID;
+				container = win.document.getElementById(tabID);
+				noteEditor = container.querySelector('note-editor.note-tab');
+			}
+ 			else {
+				({ id, container } = win.Zotero_Tabs.add({
+					id: tabID,
+					type: 'note-unloaded',
+					title,
+					index: tabIndex,
+					data: {
+						itemID,
+					},
+					select,
+					preventJumpback,
+				}));
+			}
+
+			if (!noteEditor && !openInBackground) {
+				noteEditor = win.document.createXULElement('note-editor');
+				noteEditor.classList.add('note-tab');
+				container.appendChild(noteEditor);
+
+				noteEditor.mode = item.isEditable() ? 'edit' : 'view';
+				noteEditor.viewMode = 'tab';
+				noteEditor.item = item;
+				noteEditor.tabID = id;
+				noteEditor._id('links-container').hidden = true;
+
+				container.addEventListener('tab-bottom-placeholder-resize', (event) => {
+					this.setBottomPlaceholderHeight(noteEditor, event.detail.height);
+				});
+
+				container.addEventListener('tab-context-pane-toggle', (event) => {
+					this.setContextPaneOpen(noteEditor, event.detail.open);
+				});
+
+				container.addEventListener('tab-focus', () => {
+					noteEditor.focus();
+				});
+
+				container.addEventListener('tab-selection-change', (event) => {
+					if (event.detail.selected) {
+						this._updateLayout();
+					}
+				});
+			}
+
+			if (select) {
+				this._updateLayout();
+			}
+		}
+		return noteEditor;
+	};
+
+	this.setBottomPlaceholderHeight = function (noteEditor, height) {
+		noteEditor.setBottomPlaceholderHeight(height);
+	};
+
+	this.toggleSidePane = function (_open) {
+		// TODO: Implement this once the note editor supports side pane
+	};
+
+	this.setSidePaneWidth = function () {
+		// TODO: Implement this once the note editor supports side pane
+	};
+
+	this.setContextPaneOpen = function (noteEditor, open) {
+		noteEditor.setContextPaneOpen(open);
+	};
+
+	this._updateLayout = function () {
+		let { sidePaneState } = Zotero.getMainWindow().ZoteroContextPane.update();
+		this.toggleSidePane(sidePaneState.open);
+		this.setSidePaneWidth(sidePaneState.width);
+	};
+
+	this.getByTabID = function (tabID) {
+		if (!tabID) {
+			return null;
+		}
+		let noteEditor = this._editorInstances.find(x => x._tabID === tabID);
+		if (noteEditor) {
+			return noteEditor;
+		}
+		return null;
+	};
 	
 	this.noteToTitle = function (text) {
 		Zotero.debug(`Zotero.Note.noteToTitle() is deprecated -- use Zotero.Utilities.Item.noteToTitle() instead`);

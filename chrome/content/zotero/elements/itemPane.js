@@ -43,7 +43,7 @@
 
 				<annotation-items-pane id="zotero-annotations-pane" />
 			</deck>
-			<item-pane-sidenav id="zotero-view-item-sidenav" class="zotero-view-item-sidenav"/>
+			<item-pane-sidenav id="zotero-view-item-sidenav" no-context-notes="true" class="zotero-view-item-sidenav"/>
 		`);
 
 		init() {

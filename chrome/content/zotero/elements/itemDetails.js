@@ -64,6 +64,8 @@
 
 						<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" data-pane="notes"/>
 
+						<note-box id="zotero-note-box" data-pane="note-info" hidden="true"/>
+
 						<attachment-box id="zotero-attachment-box" data-pane="attachment-info" data-use-preview="true" hidden="true"/>
 						
 						<attachment-annotations-box id="zotero-editpane-attachment-annotations" data-pane="attachment-annotations" hidden="true"/>
@@ -554,6 +556,11 @@
 			if (this._collapsed) {
 				this._lastScrollPaneID = paneID;
 				return null;
+			}
+
+			// If the pane is already at the top, no need to scroll
+			if (Math.abs(pane.getBoundingClientRect().top - this._paneParent.getBoundingClientRect().top) < 1) {
+				return true;
 			}
 
 			// Temporarily disable intersection observer to prevent unwanted rendering

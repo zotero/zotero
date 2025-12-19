@@ -134,6 +134,12 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Move Column Right
 
+menu-view-note-font-size =
+    .label = Note Font Size
+
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
+
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 
@@ -189,12 +195,14 @@ item-menu-viewAttachment =
             [pdf] PDF
             [epub] EPUB
             [snapshot] Snapshot
+            [note] Note
             *[other] Attachment
         }
         *[other] { $attachmentType ->
             [pdf] PDFs
             [epub] EPUBs
             [snapshot] Snapshots
+            [note] Notes
             *[other] Attachments
         }
     } {
@@ -488,6 +496,7 @@ pane-info = Info
 pane-abstract = Abstract
 pane-attachments = Attachments
 pane-notes = Notes
+pane-note-info = Note Info
 pane-libraries-collections = Libraries and Collections
 pane-tags = Tags
 pane-related = Related
@@ -563,6 +572,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -642,6 +653,29 @@ attachment-info-convert-note =
             *[unknown] New
     } Note
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
+
+section-note-info =
+    .label = { pane-note-info }
+
+note-info-title = Title
+note-info-parent-item = Parent Item
+note-info-parent-item-button = {
+        $hasParentItem ->
+            [true] { $parentItemTitle }
+            *[false] None
+    }
+    .title = {
+        $hasParentItem ->
+            [true] View parent item in library
+            *[false] View note item in library
+    }
+note-info-date-created = Created
+note-info-date-modified = Modified
+note-info-size = Size
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+
+item-title-empty-note = Untitled Note
 
 attachment-preview-placeholder = No attachment to preview
 attachment-rename-from-parent =

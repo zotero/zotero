@@ -262,19 +262,8 @@ var ZoteroPane = new function () {
 					ArrowNext: () => null,
 					ArrowPrevious: () => null,
 					Tab: () => {
-						if (Zotero_Tabs.selectedIndex > 0) {
-							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-							if (reader) {
-								// Move focus to the reader and focus the toolbar
-								reader.focusFirst();
-								reader.focusToolbar();
-							}
-							return null;
-						}
-						if (collectionsPane.getAttribute("collapsed")) {
-							return document.getElementById('zotero-tb-add');
-						}
-						return document.getElementById('zotero-tb-collection-add');
+						Zotero_Tabs.focusContent();
+						return null;
 					},
 					ShiftTab: () => document.getElementById('zotero-tb-sync-error')
 				},
@@ -3183,6 +3172,14 @@ var ZoteroPane = new function () {
 				}
 				return [];
 			}
+			case 'note': {
+				let tab = Zotero_Tabs.getTabInfo(Zotero_Tabs.selectedID);
+				if (tab) {
+					let item = Zotero.Items.get(tab.data.itemID);
+					return asIDs ? [item.id] : [item];
+				}
+				return [];
+			}
 			default:
 				return [];
 		}
@@ -4533,10 +4530,10 @@ var ZoteroPane = new function () {
 			// TODO: _text_
 			var c = this.getSelectedCollection();
 			if (c) {
-				this.openNoteWindow(null, c.id, parentKey);
+				this.openNote(null, { col: c.id, parentKey });
 			}
 			else {
-				this.openNoteWindow(null, null, parentKey);
+				this.openNote(null, { parentKey });
 			}
 			return null;
 		}
@@ -4628,34 +4625,32 @@ var ZoteroPane = new function () {
 	};
 	
 	
+	this.openNote = function (itemID, options = {
+		col: undefined,
+		parentKey: undefined,
+		openInWindow: undefined
+	}) {
+		let {
+			col,
+			parentKey,
+			openInWindow,
+		} = options;
+		if (openInWindow === undefined) {
+			openInWindow = Zotero.Prefs.get('openNoteInNewWindow');
+		}
+		
+		return Zotero.Notes.open(itemID, {}, {
+			openInWindow,
+		});
+	};
+
+	/**
+	 * Opens a note in a new window
+	 * @deprecated - use openNote() with openInWindow option
+	 */
 	this.openNoteWindow = function (itemID, col, parentKey) {
-		var item = Zotero.Items.get(itemID);
-		var type = Zotero.Libraries.get(item.libraryID).libraryType;
-		if (!this.canEdit()) {
-			this.displayCannotEditLibraryMessage();
-			return;
-		}
-		
-		var name = null;
-		
-		if (itemID) {
-			let w = this.findNoteWindow(itemID);
-			if (w) {
-				w.focus();
-				return;
-			}
-			
-			// Create a name for this window so we can focus it later
-			//
-			// Collection is only used on new notes, so we don't need to
-			// include it in the name
-			name = 'zotero-note-' + itemID;
-		}
-		
-		var io = { itemID: itemID, collectionID: col, parentItemKey: parentKey };
-		window.openDialog('chrome://zotero/content/note.xhtml', name, 'chrome,resizable,centerscreen,dialog=false', io);
-	}
-	
+		return this.openNote(itemID, { col, parentKey, openInWindow: true });
+	};
 	
 	this.findNoteWindow = function (itemID) {
 		var name = 'zotero-note-' + itemID;
@@ -4976,14 +4971,15 @@ var ZoteroPane = new function () {
 	};
 	
 	
-	this.viewItems = async function (items, event) {
+	this.viewItems = async function (items, event, options = {}) {
+		let { noLocateOnMissing } = options;
 		for (let i = 0; i < items.length; i++) {
 			let item = items[i];
 			if (item.isRegularItem()) {
 				// Prefer local file attachments
 				let attachment = await item.getBestAttachment();
 				if (attachment) {
-					await this.viewAttachment(attachment.id, event);
+					await this.viewAttachment(attachment.id, event, noLocateOnMissing, options);
 					continue;
 				}
 				
@@ -5017,13 +5013,17 @@ var ZoteroPane = new function () {
 				if (!this.collectionsView.editable) {
 					continue;
 				}
-				ZoteroPane.openNoteWindow(item.id);
+				let openInWindow = event?.shiftKey || options.forceAlternateWindowBehavior;
+				ZoteroPane.openNote(item.id, { openInWindow });
 			}
 			else if (item.isAttachment()) {
-				await this.viewAttachment(item.id, event);
+				await this.viewAttachment(item.id, event, noLocateOnMissing, options);
 			}
 			else if (item.isAnnotation()) {
-				this.viewAttachment(item.parentItemID, event, false, { location: { annotationID: item.key } });
+				this.viewAttachment(item.parentItemID, event, false,
+					Object.assign(
+						{ location: { annotationID: item.key } }, options
+					));
 			}
 		}
 	};
@@ -5472,20 +5472,22 @@ var ZoteroPane = new function () {
 	this.canEdit = function (row) {
 		switch (Zotero_Tabs.selectedType) {
 			case 'library':
+			{
 				// Currently selected row
 				if (row === undefined) {
 					row = this.collectionsView.selection.focused;
 				}
 				return this.collectionsView.getRow(row).editable;
-			case 'reader': {
-				let itemID = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)?.itemID;
-				if (!itemID) {
-					throw new Error('Reader tab has no itemID');
-				}
-				return Zotero.Items.get(itemID).library.editable;
 			}
 			default:
+			{
+				let tabInfo = Zotero_Tabs.getTabInfo();
+				let item = Zotero.Items.get(tabInfo.data?.itemID);
+				if (item) {
+					return item.isEditable();
+				}
 				return false;
+			}
 		}
 	};
 	

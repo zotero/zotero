@@ -111,6 +111,7 @@ pref("extensions.zotero.search.useLeftBound", true);
 // Notes
 pref("extensions.zotero.note.fontFamily", "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Helvetica, Arial, sans-serif");
 pref("extensions.zotero.note.fontSize", "14");
+pref("extensions.zotero.note.tabFontSize", "16");
 pref("extensions.zotero.note.css", "");
 pref("extensions.zotero.note.smartQuotes", true);
 
@@ -201,6 +202,8 @@ pref("extensions.zotero.fileHandler.pdf", "");
 pref("extensions.zotero.fileHandler.epub", "");
 pref("extensions.zotero.fileHandler.snapshot", "");
 pref("extensions.zotero.openReaderInNewWindow", false);
+
+pref("extensions.zotero.openNoteInNewWindow", false);
 
 // File/URL opening executable if launch() fails
 pref("extensions.zotero.fallbackLauncher.unix", "/usr/bin/xdg-open");

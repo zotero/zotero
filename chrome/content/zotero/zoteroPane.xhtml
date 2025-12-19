@@ -622,8 +622,7 @@
 									<menuitem id="view-menuitem-font-size-reset" label="&zotero.general.reset;"/>
 								</menupopup>
 							</menu>
-							<menu id="note-font-size-menu"
-									label="&noteFontSize.label;">
+							<menu id="note-font-size-menu" data-l10n-id="menu-view-note-font-size">
 								<!-- TODO: Maybe switch to Bigger/Smaller once we can update without restarting -->
 								<!--<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
 									<menuitem id="view-menuitem-note-font-size-bigger" label="&zotero.general.bigger;"/>
@@ -647,6 +646,28 @@
 									<menuseparator/>
 									<menuitem
 										id="view-menuitem-note-font-size-reset"
+										label="&zotero.general.reset;"
+										oncommand="ZoteroStandalone.onViewMenuItemClick(event); event.stopPropagation();"/>
+								</menupopup>
+							</menu>
+							<menu id="note-tab-font-size-menu" data-l10n-id="menu-view-note-tab-font-size">
+								<menupopup oncommand="ZoteroStandalone.updateNoteTabFontSize(event)">
+									<menuitem label="11" type="checkbox"/>
+									<menuitem label="12" type="checkbox"/>
+									<menuitem label="13" type="checkbox"/>
+									<menuitem label="14" type="checkbox"/>
+									<menuitem label="15" type="checkbox"/>
+									<menuitem label="16" type="checkbox"/>
+									<menuitem label="18" type="checkbox"/>
+									<menuitem label="24" type="checkbox"/>
+									<menuitem label="36" type="checkbox"/>
+									<menuitem label="48" type="checkbox"/>
+									<menuitem label="64" type="checkbox"/>
+									<menuitem label="72" type="checkbox"/>
+									<menuitem label="96" type="checkbox"/>
+									<menuseparator/>
+									<menuitem
+										id="view-menuitem-note-tab-font-size-reset"
 										label="&zotero.general.reset;"
 										oncommand="ZoteroStandalone.onViewMenuItemClick(event); event.stopPropagation();"/>
 								</menupopup>
@@ -1070,7 +1091,7 @@
 						<label>&zotero.general.loading;</label>
 					</div>
 					<deck id="tabs-deck">
-						<vbox id="zotero-pane"
+						<tab-content id="zotero-pane"
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 							onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
 							onkeypress="ZoteroPane_Local.handleKeyPress(event)">
@@ -1346,7 +1367,7 @@
 									<item-pane id="zotero-item-pane" zotero-persist="width height"/>
 								</box>
 							</hbox>
-						</vbox>
+						</tab-content>
 					</deck>
 		
 					<splitter id="zotero-context-splitter"
