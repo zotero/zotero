@@ -261,7 +261,7 @@ class ReaderInstance {
 					});
 				},
 			},
-			loggedIn: true, // FIXME
+			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
 				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
@@ -2135,7 +2135,7 @@ class Reader {
 		this._contextPaneOpen = false;
 		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
-		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'setting', 'tab'], 'reader');
+		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'setting', 'tab', 'api-key'], 'reader');
 		this._registeredListeners = [];
 		this.onChangeSidebarWidth = null;
 		this.onToggleSidebar = null;
@@ -2342,6 +2342,11 @@ class Reader {
 						Components.utils.cloneInto(newCustomThemes, reader._iframeWindow)
 					);
 				});
+			}
+		}
+		else if (type === 'api-key') {
+			for (let reader of this._readers) {
+				reader._internalReader.setLoggedIn(Zotero.Sync.Runner.enabled);
 			}
 		}
 	}
