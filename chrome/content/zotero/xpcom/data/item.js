@@ -3921,7 +3921,7 @@ Zotero.Item.prototype.getBestAttachments = async function () {
 		+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
 		+ "ORDER BY contentType='application/pdf' DESC, value=? DESC, dateAdded ASC";
 	var itemIDs = await Zotero.DB.columnQueryAsync(sql, [this.id, url]);
-	return this.ObjectsClass.get(itemIDs);
+	return await this.ObjectsClass.getAsync(itemIDs);
 };
 
 

@@ -285,6 +285,7 @@ export function registerAutoRenameFileFromParent() {
 					}
 				}
 
+				await attachmentItem.loadDataType('itemData');
 				let previousMetadataBaseName = Zotero.Attachments.getFileBaseNameFromItem(
 					parentItemBefore, { attachmentTitle: attachmentItem.getField('title') }
 				);
