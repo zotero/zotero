@@ -25,6 +25,10 @@
 
 {
 	class StyleSelector extends XULElementBase {
+		ready = new Promise((resolve) => {
+			this._readyResolve = resolve;
+		});
+		
 		content = MozXULElement.parseXULToFragment(`
 			<div id="style-selector"
 				xmlns="http://www.w3.org/1999/xhtml"
@@ -83,11 +87,13 @@
 				styleListEl.append(richlistitem);
 			});
 			this.value = this.getAttribute('value');
-			this.querySelector('#style-list').addEventListener("select", () => {
+			styleListEl.addEventListener("select", () => {
 				const event = document.createEvent("Events");
 				event.initEvent("select", true, true);
 				this.dispatchEvent(event);
 			});
+			
+			this._readyResolve();
 		}
 
 		_scrollToSelected() {
@@ -260,10 +266,8 @@
 			localeSelector.setAttribute('value', this.getAttribute('locale') || Zotero.Prefs.get('export.lastLocale') || '');
 			localeSelector.setAttribute('style', this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || '');
 			this.querySelector('.locale-selector-wrapper').append(localeSelector);
-
-			this.querySelector('.style-configurator').style.display = 'none';
+			
 			await Zotero.Styles.init();
-			this.querySelector('.style-configurator').style.display = '';
 			styleSelector.addEventListener('select', (_event) => {
 				this.handleStyleChanged(_event.target.value);
 
