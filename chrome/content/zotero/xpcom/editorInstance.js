@@ -230,6 +230,25 @@ class EditorInstance {
 		}
 	}
 
+	async reinit(state = null) {
+		let currentOptions = {
+			state: state || this._state,
+			item: this._item,
+			reloaded: true,
+			iframeWindow: this._iframeWindow,
+			popup: this._popup,
+			onNavigate: this.onNavigate,
+			viewMode: this._viewMode,
+			readOnly: this._readOnly,
+			disableUI: this._disableUI,
+			onReturn: this._onReturn,
+			placeholder: this._placeholder
+		};
+
+		await this.uninit();
+		await this.init(currentOptions);
+	}
+
 	focus() {
 		this._postMessage({ action: 'focus' });
 	}
@@ -282,6 +301,26 @@ class EditorInstance {
 		if (html) {
 			this._postMessage({ action: 'insertHTML', pos: null, html });
 		}
+	}
+
+	/**
+	 * Apply external changes incrementally instead of reinitializing the entire editor
+	 * @param {Object} noteData - The note data containing state and html
+	 * @param {Object} [noteData.state] - state object of editor
+	 * @param {String} noteData.html - html for fallback update
+	 * @param {boolean} preserveSelection - Whether to preserve the current selection
+	 */
+	applyIncrementalUpdate(noteData, preserveSelection = true) {
+		if (this._readOnly || !this._iframeWindow) {
+			this.reinit(noteData.state || null);
+			return;
+		}
+
+		this._postMessage({
+			action: 'updateIncrementally',
+			noteData,
+			preserveSelection
+		});
 	}
 	
 	_postMessage(message) {
@@ -707,6 +746,11 @@ class EditorInstance {
 				}
 				case 'return': {
 					this._onReturn();
+					return;
+				}
+				case 'incrementalUpdateFailed': {
+					// Incremental update failed, do full reinitialize
+					this.reinit();
 					return;
 				}
 			}

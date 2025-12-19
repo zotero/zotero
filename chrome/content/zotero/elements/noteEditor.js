@@ -182,13 +182,15 @@
 					let state = extraData && extraData[id] && extraData[id].state;
 					if (state) {
 						if (extraData[id].noteEditorID !== this._editorInstance.instanceID) {
-							this.initEditor(state, true);
+							let noteData = { state, html: this._item.note };
+							this._editorInstance.applyIncrementalUpdate(noteData, true);
 						}
 					}
 					else {
 						let curValue = this._item.note;
 						if (curValue !== this._lastHtmlValue) {
-							this.initEditor(null, true);
+							let noteData = { html: curValue };
+							this._editorInstance.applyIncrementalUpdate(noteData, true);
 						}
 					}
 					this._lastHtmlValue = this._item.note;
