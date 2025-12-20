@@ -51,7 +51,7 @@
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-react-hooks": "^5.1.0",
     "fs-extra": "^3.0.1",
-    "ftl-tx": "^0.16.0",
+    "ftl-tx": "^0.17.0",
     "globals": "^15.14.0",
     "globby": "^6.1.0",
     "jspath": "^0.4.0",
