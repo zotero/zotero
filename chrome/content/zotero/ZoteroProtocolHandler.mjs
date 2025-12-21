@@ -637,6 +637,14 @@ export function ZoteroProtocolHandler() {
 			}
 			
 			win.Zotero_Tabs.select('zotero-pane');
+			if (zp.collectionsView?.waitForLoad) {
+				await zp.collectionsView.waitForLoad();
+			}
+			// Wait for itemTreeView to be ready with a 10 second timeout
+			await Promise.race([
+				zp.collectionsView.itemTreeViewReady,
+				Zotero.Promise.delay(10000).then(() => Promise.reject(new Error('itemTreeView ready timeout')))
+			]);
 			if (params.objectType == 'collection') {
 				return zp.collectionsView.selectCollection(results[0].id);
 			}
