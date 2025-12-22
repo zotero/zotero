@@ -177,6 +177,79 @@ describe("Zotero.ItemTree", function () {
 			await itemsView._refreshPromise;
 			assert.equal(quicksearch.value, "test");
 		});
+
+		it("should clear quick search on collection change by default", async function () {
+			let col1 = await createDataObject('collection');
+			let col2 = await createDataObject('collection');
+			
+			let itemA = await createDataObject('item', { title: "A", collections: [col1.id] });
+			let itemB = await createDataObject('item', { title: "B", collections: [col2.id] });
+			let itemAB = await createDataObject('item', { title: "AB", collections: [col1.id, col2.id] });
+			
+			// select collection with "A" and "AB"
+			await selectCollection(win, col1.id);
+
+			// set quick search to be "A"
+			quicksearch.value = "A";
+			quicksearch.doCommand();
+			await itemsView._refreshPromise;
+			
+			// ensure that the itemTree has "A" and "AB"
+			assert.equal(itemsView.rowCount, 2);
+			let rowItemIDs = itemsView._rows.map(row => row.ref.id);
+			assert.sameMembers(rowItemIDs, [itemA.id, itemAB.id]);
+			
+			// select collection with "B" and "AB"
+			await selectCollection(win, col2.id);
+			
+			// ensure that quickSearch is cleared
+			assert.equal(quicksearch.value, "");
+			assert.equal(itemsView.collectionTreeRow.searchText, "");
+			
+			// ensure that the itemTree has "B" and "AB"
+			assert.equal(itemsView.rowCount, 2);
+			rowItemIDs = itemsView._rows.map(row => row.ref.id);
+			assert.sameMembers(rowItemIDs, [itemB.id, itemAB.id]);
+		});
+
+		it("should not clear quick search on collection change if search.quicksearch-apply-to-all=true", async function () {
+			Zotero.Prefs.set("search.quicksearch-apply-to-all", true);
+
+			let col1 = await createDataObject('collection');
+			let col2 = await createDataObject('collection');
+			
+			let itemA = await createDataObject('item', { title: "A", collections: [col1.id] });
+			let itemB = await createDataObject('item', { title: "B", collections: [col2.id] });
+			let itemAB = await createDataObject('item', { title: "AB", collections: [col1.id, col2.id] });
+			
+			// select collection with "A" and "AB"
+			await selectCollection(win, col1.id);
+
+			// set quick search to be "A"
+			quicksearch.value = "A";
+			quicksearch.doCommand();
+			await itemsView._refreshPromise;
+
+			// ensure that the itemTree has "A" and "AB"
+			assert.equal(itemsView.rowCount, 2);
+			let rowItemIDs = itemsView._rows.map(row => row.ref.id);
+			assert.sameMembers(rowItemIDs, [itemA.id, itemAB.id]);
+			
+			// select collection with "B" and "AB"
+			await selectCollection(win, col2.id);
+			// need to wait for itemTree to refresh after the search
+			await itemsView._refreshPromise;
+	
+			// ensure that quickSearch is still "A"
+			assert.equal(quicksearch.value, "A");
+			assert.equal(itemsView.collectionTreeRow.searchText, "A");
+
+			// ensure that the itemTree has only "AB"
+			assert.equal(itemsView.rowCount, 1);
+			assert.equal(itemsView._rows[0].ref.id, itemAB.id);
+
+			Zotero.Prefs.set("search.quicksearch-apply-to-all", false);
+		});
 	});
 	
 	describe("#selectItem()", function () {
