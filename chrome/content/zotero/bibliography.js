@@ -64,6 +64,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		
 		// Disable accept button until CE is initialized
 		document.querySelector("dialog").getButton('accept').setAttribute('disabled', true);
+		document.querySelector("dialog").getButton('cancel').focus();
 		
 		// Set font size from pref
 		// Affects bibliography.xhtml and integrationDocPrefs.xhtml
@@ -103,6 +104,15 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		// Wait for CE initialization
 		await styleConfigurator.ready;
 		document.querySelector("dialog").getButton('accept').setAttribute('disabled', false);
+		// reset focus to the first focusable element (requestAnimationFrame to make sure richlistbox has already appeared)
+		requestAnimationFrame(() => {
+			Services.focus.moveFocus(
+				window,
+				null,
+				Services.focus.MOVEFOCUS_FIRST,
+				0
+			);
+		});
 
 		// Select the supplied style and locale
 		if (_io.style) {
