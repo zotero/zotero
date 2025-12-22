@@ -1,29 +1,101 @@
 #zotero-citation-explorer-dialog {
 	min-height: 500px;
-	
+	min-width: 600px;
+	--split-button-icon-color: var(--accent-blue);
+
 	dialog {
 		max-height: 100vh;
+		background: var(--material-sidepane);
+	}
+
+	search-textbox, input, button {
+		margin: 0;
+	}
+	
+	.citation-explorer-grid {
+		display: grid;
+		grid-template-columns: 4fr 6fr;
+		grid-template-rows: auto auto minmax(0, 1fr) auto;
+		grid-auto-flow: column;
+		height: 100%;
+		margin: -8px;
+		
+		.citation-explorer-grid-left {
+			border-right: var(--material-border-quarternary);
+		}
+	}
+
+	#citations-label, #items-in-bibliography-label {
+		padding: 16px 16px 8px;
+		align-content: center;
+		font-size: 15px;
+		font-weight: 600;
+	}
+
+	.searchbox-container {
+		padding: 0 16px 8px;
 	}
 	
 	.virtualized-table-container {
 		height: 100%;
-		flex: 1;
-	}
-	
-	.xul-border-div {
-		-moz-box-flex: 1;
+		border-block: var(--material-border-quarternary);
 	}
 
-	#citations-label {
-		margin: 5px 0 4px;
+	.virtualized-table:focus-within .row.highlighted:not(.selected) {
+		background: initial !important;
 	}
 
-	.panel {
-		border: solid 1px ThreeDShadow;
-		padding: 5px;
+	.virtualized-table .row {
+		.cell .badge {
+			font-size: 11px;
+			padding: 1px 4px;
+			border-radius: 5px;
+			display: inline-block;
+			background: #59ADC44D;
+			margin-left: 4px;
+		}
+
+		&.selected .cell .badge {
+			background: rgba(255, 255, 255, 0.2);
+			color: --var(accent-white);
+		}
+	}
+
+	.button-container {
+		border-bottom: var(--material-border-quarternary);
+		display: flex;
+		gap: 8px;
+		padding: 8px 16px;
+		min-width: 0;
+
+		.split-menu-button {
+			min-width: 0;
+			flex: 0 1 auto;
+
+			[anonid="button-image-and-text-box"] {
+				min-width: 0;
+				width: auto;
+			}
+		}
+	}
+
+	.diff-deleted {
+		color: var(--accent-red);
+		text-decoration: line-through;
+	}
+
+	.diff-added {
+		color: green;
 	}
 	
-	.search-box {
-		margin: 2px -1px;
+	@media (-moz-platform: macos) {
+		.citation-explorer-grid {
+			margin: -14px;
+		}
+
+		.button-container {
+			padding-bottom: 0px;
+			margin-bottom: -16px;
+		}
 	}
 }
