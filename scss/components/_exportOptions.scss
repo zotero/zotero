@@ -13,4 +13,23 @@
 	checkbox[native][disabled="true"] {
 		color: unset;
 	}
+	
+	#warning-cannot-import, #warning-backup {
+		max-width: 300px;
+		white-space: wrap;
+	}
+	
+	#warning-cannot-import {
+		color: var(--fill-secondary);
+		padding-inline-start: 8px;
+		padding-bottom: 2px;
+	}
+	
+	#warning-backup {
+		color: var(--accent-red);
+		
+		.zotero-text-link {
+			margin: 0;
+		}
+	}
 }
