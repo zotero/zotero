@@ -43,16 +43,16 @@
 		 * @returns {number | null}
 		 * @description The width of the sidebar in pixels.
 		 */
-		get sidePaneWidth() {
-			let state = ZoteroContextPane.getSidePaneState(this.tabData.type);
+		get sidebarWidth() {
+			let state = Zotero_Tabs.getSidebarState(this.tabData.type);
 			if (state) {
 				return state.width || 0;
 			}
 			return null;
 		}
 
-		set sidePaneWidth(width) {
-			ZoteroContextPane.updateLayout({ sidePaneWidth: width });
+		set sidebarWidth(width) {
+			Zotero_Tabs.updateSidebarLayout({ width });
 		}
 
 		async init() {

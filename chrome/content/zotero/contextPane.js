@@ -31,7 +31,6 @@ var ZoteroContextPane = new function () {
 	let _contextPaneSplitterStacked;
 	let _librarySidenav;
 	let _readerSidenav;
-	let _sidePaneState;
 
 	Object.defineProperty(this, 'activeEditor', {
 		get: () => _contextPaneInner.activeEditor
@@ -70,42 +69,6 @@ var ZoteroContextPane = new function () {
 		_loadingMessageContainer.classList.toggle('hidden', !isShow);
 	};
 
-	this.getSidePaneState = (tabType) => {
-		if (!_sidePaneState) {
-			_loadSidePaneState();
-		}
-		if (!_sidePaneState[tabType]) {
-			_sidePaneState[tabType] = {
-				width: 0,
-				open: false,
-			};
-		}
-		return _sidePaneState[tabType];
-	};
-
-	this.updateSidePaneState = (tabType, state) => {
-		if (!_sidePaneState) {
-			_loadSidePaneState();
-		}
-		if (!_sidePaneState[tabType]) {
-			_sidePaneState[tabType] = {};
-		}
-		state = state || {};
-		let hasChanges = false;
-		for (let key in state) {
-			if (_sidePaneState[tabType][key] !== state[key]) {
-				hasChanges = true;
-				break;
-			}
-		}
-		if (!hasChanges) {
-			return _sidePaneState[tabType];
-		}
-		Object.assign(_sidePaneState[tabType], state);
-		_saveSidePaneState();
-		return _sidePaneState[tabType];
-	};
-
 	this.init = function () {
 		if (!Zotero) {
 			return;
@@ -120,8 +83,6 @@ var ZoteroContextPane = new function () {
 		_librarySidenav = document.querySelector("#zotero-view-item-sidenav");
 		_readerSidenav = document.getElementById('zotero-context-pane-sidenav');
 
-		_loadSidePaneState();
-
 		// Never use default status for the reader sidenav
 		_readerSidenav.toggleDefaultStatus(false);
 		
@@ -134,8 +95,6 @@ var ZoteroContextPane = new function () {
 
 	this.destroy = function () {
 		window.removeEventListener('resize', this.update);
-
-		_saveSidePaneState();
 	};
 
 	this.updateAddToNote = () => {
@@ -150,66 +109,36 @@ var ZoteroContextPane = new function () {
 	};
 
 	/**
-	 * Update the layout of the context pane and side pane.
-	 * @param {Object} options - Options for updating the layout.
-	 * @param {number | boolean} [options.sidePaneWidth] - The width of the side pane in pixels.
-	 * If boolean, it indicates whether the side pane is open (true) or collapsed (false).
-	 * @param {number} [options.contextPaneWidth] - The width of the context pane in pixels.
-	 * @returns {Object} An object containing the updated layout state.
+	 * Update the layout of the context pane
 	 */
-	this.updateLayout = ({ sidePaneWidth, contextPaneWidth } = {}) => {
+	this.updateLayout = ({ width } = {}) => {
 		let stacked = _isStacked();
+		if (typeof width !== 'number') {
+			width = _contextPane.getAttribute("width");
+		}
+		if (width && !_contextPane.style.width) {
+			_contextPane.style.width = `${width}px`;
+		}
 		let { tabContentType: tabType } = Zotero_Tabs.parseTabType();
-		let sidePaneState;
-		if (typeof sidePaneWidth === 'number') {
-			// If sidePaneWidth is a number, update the width and open state
-			sidePaneState = this.updateSidePaneState(tabType, { width: sidePaneWidth, open: sidePaneWidth > 0 });
+		let sidebarState = Zotero_Tabs.getSidebarState(tabType);
+		let sidebarWidth = sidebarState?.width;
+		if (!sidebarState?.open) {
+			sidebarWidth = 0;
 		}
-		else if (typeof sidePaneWidth === 'boolean') {
-			// If sidePaneWidth is a boolean, update the open state only
-			sidePaneState = this.updateSidePaneState(tabType, { open: sidePaneWidth });
-			sidePaneWidth = sidePaneState.width || 0;
-		}
-		else {
-			// If sidePaneWidth is not provided, use the saved state
-			sidePaneState = this.getSidePaneState(tabType);
-			sidePaneWidth = sidePaneState.width || 0;
-			if (sidePaneState.open === false) {
-				sidePaneWidth = 0;
-			}
-		}
-
-		if (typeof contextPaneWidth !== 'number') {
-			contextPaneWidth = _contextPane.getAttribute("width");
-		}
-
-		let sidebarWidth = `${sidePaneWidth}px`;
-		if (contextPaneWidth && !_contextPane.style.width) {
-			_contextPane.style.width = `${contextPaneWidth}px`;
-		}
+		// Reserve space for sidebar
 		if (Zotero.rtl) {
 			_contextPane.style.left = 0;
-			_contextPane.style.right = stacked ? sidebarWidth : 'unset';
+			_contextPane.style.right = stacked ? `${sidebarWidth}px` : 'unset';
 		}
 		else {
-			_contextPane.style.left = stacked ? sidebarWidth : 'unset';
+			_contextPane.style.left = stacked ? `${sidebarWidth}px` : 'unset';
 			_contextPane.style.right = 0;
 		}
-
-		let placeholder = document.getElementById('zotero-reader-sidebar-pane');
-		placeholder.setAttribute('collapsed', sidebarWidth ? 'false' : 'true');
-		// Don't set width if 0 to prevent layout issues in older versions
-		if (sidePaneWidth) {
-			placeholder.setAttribute('width', sidebarWidth);
-		}
-
-		return { sidePaneState };
 	};
 
 	this.update = () => {
-		let updatedState = {};
 		if (Zotero_Tabs.selectedType === 'library') {
-			return updatedState;
+			return;
 		}
 		if (_isStacked()) {
 			_contextPaneSplitterStacked.setAttribute('hidden', false);
@@ -264,48 +193,15 @@ var ZoteroContextPane = new function () {
 			tabContent.setContextPaneOpen(!this.collapsed);
 		}
 
-		Object.assign(updatedState, this.updateLayout());
+		this.updateLayout();
 		this.updateAddToNote();
 
 		ZoteroPane.updateLayoutConstraints();
-		return updatedState;
 	};
 
 	this.togglePane = () => {
 		this.collapsed = !this.collapsed;
 	};
-
-	function _loadSidePaneState() {
-		let sidePaneState = Zotero.Prefs.get('sidePaneState') || "{}";
-		try {
-			sidePaneState = JSON.parse(sidePaneState);
-		}
-		catch {
-			sidePaneState = {};
-		}
-		_sidePaneState = sidePaneState;
-	}
-
-	function _saveSidePaneState() {
-		let sidePaneState;
-		try {
-			sidePaneState = JSON.stringify(_sidePaneState);
-		}
-		catch {
-			// Default status if serialization fails
-			sidePaneState = JSON.stringify({
-				reader: {
-					width: 0,
-					open: false,
-				},
-				note: {
-					width: 0,
-					open: false,
-				},
-			});
-		}
-		Zotero.Prefs.set('sidePaneState', sidePaneState);
-	}
 
 	function _getTabContent(tabID) {
 		if (!tabID) {

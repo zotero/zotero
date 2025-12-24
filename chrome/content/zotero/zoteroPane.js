@@ -756,6 +756,7 @@ var ZoteroPane = new function () {
 		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
 		
 		ZoteroContextPane.destroy();
+		Zotero_Tabs.destroy();
 
 		if (!Zotero.getZoteroPanes().length) {
 			Zotero.Session.setLastClosedZoteroPaneState(this.getState());
@@ -6738,7 +6739,8 @@ var ZoteroPane = new function () {
 			ZoteroPane.itemsView._updateHeight();
 		}
 		ZoteroContextPane.update();
-	}
+		Zotero_Tabs.updateSidebarLayout();
+	};
 	
 	
 	this.getState = function () {
