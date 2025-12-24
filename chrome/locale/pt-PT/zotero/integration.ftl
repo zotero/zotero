@@ -35,27 +35,25 @@ integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = Configurações de citação
-integration-citationDialog-lib-no-items =
+integration-citationDialog-lib-message-citation =
     { $search ->
         [true] Nenum item selecionado, aberto ou citado corresponde a busca
        *[other] Nenhum item selecionado ou aberto
     }
+integration-citationDialog-lib-message-add-note =
+    { $search ->
+        [true] No selected notes match the current search
+       *[other] No notes are selected
+    }
 integration-citationDialog-settings-keepSorted = Manter as fontes ordenadas
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
-integration-citationDialog-btn-mode =
-    .title =
-        { $mode ->
-            [library] Alterar para modo lista
-            [list] Alterar para modo biblioteca
-           *[other] Switch Mode
-        }
-    .aria-label =
-        { $mode ->
-            [library] A caixa está em modo biblioteca. Clique para alternar para modo lista.
-            [list] A caixa está em modo lista. Clique para alternar para modo biblioteca.
-           *[other] Alternar modo
-        }
+integration-citationDialog-mode-library = Biblioteca
+integration-citationDialog-mode-list = List
+integration-citationDialog-btn-type-citation =
+    .title = Adicionar/Editar Citação
+integration-citationDialog-btn-type-add-note =
+    .title = Adicionar Nota
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -65,12 +63,14 @@ integration-citationDialog-enter-to-add-item = Pressione { return-or-enter } par
 integration-citationDialog-search-for-items = Buscar itens para adicionar à citação
 integration-citationDialog-aria-bubble =
     .aria-description = Este item está incluído na citação. Pressione a barra de espaço para customizar o item. { integration-citationDialog-general-instructions }
-integration-citationDialog-single-input =
+integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Pressione Tab para selecionar itens e adicionar a esta citação. Pressione Escape para descartar as alterações e fechar a caixa.
-integration-citationDialog-input =
+integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
+integration-citationDialog-single-input-add-note =
+    .placeholder = Search for a note to insert into the document
 integration-citationDialog-aria-item-list =
     .aria-description = Utilize as setas direcionais para cima/para baixo para mudar a seleção. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =

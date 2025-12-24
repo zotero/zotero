@@ -63,3 +63,4 @@ note-editor-delete-column = நெடுவரிசையை நீக்கு
 note-editor-delete-table = அட்டவணையை நீக்கு
 note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
 note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-toggle-context-pane = Toggle Context Pane

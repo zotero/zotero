@@ -1,0 +1,17 @@
+itemFields-eventPlace = Sted for begivenhet
+itemFields-originalDate = Opprinnelig dato
+itemFields-originalPlace = Opprinnelig sted
+itemFields-originalPublisher = Opprinnelig utgiver
+itemFields-partNumber = Delnummer
+itemFields-partTitle = Deltittel
+itemFields-priorityDate = Prioriteringsdato
+itemFields-sessionTitle = Tittel for sesjon
+creatorTypes-chair = Leder
+creatorTypes-creator = Opphaver
+creatorTypes-executiveProducer = Utøvende produsent
+creatorTypes-host = Vert
+creatorTypes-narrator = Forteller
+creatorTypes-originalCreator = Opprinnelig skaper
+creatorTypes-organizer = Organisator
+creatorTypes-seriesCreator = Serieskaper
+creatorTypes-uploader = Opplaster

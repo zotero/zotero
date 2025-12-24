@@ -60,6 +60,7 @@ general-next = التالي
 general-learn-more = تعرف على المزيد
 general-warning = تحذير
 general-type-to-continue = اكتب ”{ $text }“ للمتابعة.
+general-continue = استمر
 general-red = أحمر
 general-orange = برتقالي
 general-yellow = أصفر
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = نقل العمود لليسار
 menu-view-columns-move-right =
     .label = نقل العمود لليمين
+menu-view-note-font-size =
+    .label = حجم خط الملاحظات
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
 menu-show-tabs-menu =
     .label = عرض قائمة علامات التبويب
 menu-edit-copy-annotation =
@@ -167,12 +172,13 @@ item-creator-moveUp =
     .label = تحريك لأعلى
 item-menu-viewAttachment =
     .label =
-        افتح { $numAttachments ->
+        Open { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
                     [snapshot] Snapshot
+                    [note] Note
                    *[other] Attachment
                 }
            *[other]
@@ -180,6 +186,7 @@ item-menu-viewAttachment =
                     [pdf] PDFs
                     [epub] EPUBs
                     [snapshot] Snapshots
+                    [note] Notes
                    *[other] Attachments
                 }
         } { $openIn ->
@@ -423,6 +430,7 @@ pane-info = معلومات
 pane-abstract = المستخلص
 pane-attachments = مرفقات
 pane-notes = ملاحظات
+pane-note-info = Note Info
 pane-libraries-collections = المكتبات والمجموعات
 pane-tags = أوسمة
 pane-related = عناصر ذات صلة
@@ -518,6 +526,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -586,6 +596,26 @@ attachment-info-convert-note =
            *[unknown] New
         } ملاحظة
     .tooltiptext = لم تعد إضافة الملاحظات إلى المرفقات مدعومة، ولكن يمكنك تحرير هذه الملاحظة بترحيلها إلى ملاحظة منفصلة.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = العنوان
+note-info-parent-item = Parent Item
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Created
+note-info-date-modified = تاريخ التعديل
+note-info-size = حجم
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+item-title-empty-note = ملاحظة بدون عنوان
 attachment-preview-placeholder = لا يوجد مرفق للمعاينة
 attachment-rename-from-parent =
     .tooltiptext = إعادة تسمية الملف ليتطابق مع العنصر الأصلي
@@ -742,8 +772,7 @@ file-type-video = فيديو
 file-type-presentation = عرض تقديمي
 file-type-document = مستند
 file-type-ebook = الكتاب الإلكتروني
-post-upgrade-message = تعرّف على <a data-l10n-name="new-features-link">الميزات الجديدة في { -app-name } { $version }</a>
-post-upgrade-density = اختر كثافة التخطيط المفضل لديك:
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -766,3 +795,12 @@ long-tag-fixer-window-title =
     .title = علامات التقسيم
 long-tag-fixer-button-dont-split =
     .label = لا تقسم
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

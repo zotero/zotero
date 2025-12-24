@@ -28,6 +28,10 @@ preferences-file-renaming-format-instructions-example = For example, “{ $examp
 preferences-file-renaming-format-instructions-more = További információkért lásd a <label data-l10n-name="file-renaming-format-help-link">dokumentációt</label>.
 preferences-file-renaming-format-template = Filenév sablon:
 preferences-file-renaming-format-preview = Előnézet:
+preferences-attachment-titles-title = Attachment Titles
+preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-show-filenames =
+    .label = Show attachment filenames in the items list
 preferences-reader-title = Olvasó
 preferences-reader-open-epubs-using = Open EPUBs using
 preferences-reader-open-snapshots-using = Open snapshots using
@@ -38,6 +42,9 @@ preferences-reader-auto-disable-tool =
 preferences-reader-ebook-font = Ebook font:
 preferences-reader-ebook-hyphenate =
     .label = Enable automatic hyphenation
+preferences-note-title = Jegyzetek
+preferences-note-open-in-new-window =
+    .label = Open notes in new windows instead of tabs
 preferences-color-scheme = Színséma:
 preferences-color-scheme-auto =
     .label = Automatikus

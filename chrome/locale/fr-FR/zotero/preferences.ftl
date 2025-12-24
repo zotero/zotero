@@ -28,6 +28,10 @@ preferences-file-renaming-format-instructions-example = Par exemple, “{ $examp
 preferences-file-renaming-format-instructions-more = Consulter la <label data-l10n-name="file-renaming-format-help-link">documentation</label> pour plus d'information.
 preferences-file-renaming-format-template = Modèle de nom de fichier :
 preferences-file-renaming-format-preview = Aperçu :
+preferences-attachment-titles-title = Titres de pièces jointes
+preferences-attachment-titles-intro = Les titres de pièces jointes <label data-l10n-name="wiki-link">sont différents des noms de fichiers</label>. Pour prendre en charge certains flux de travail, { -app-name } peut afficher les noms de fichiers au lieu des titres de pièces jointes dans la liste des documents.
+preferences-attachment-titles-show-filenames =
+    .label = Afficher les noms de fichiers des pièces jointes dans la liste des documents
 preferences-reader-title = Lecteur
 preferences-reader-open-epubs-using = Ouvrir les EPUBs avec
 preferences-reader-open-snapshots-using = Ouvrir les captures avec
@@ -38,6 +42,9 @@ preferences-reader-auto-disable-tool =
 preferences-reader-ebook-font = Police de caractère des livres numériques :
 preferences-reader-ebook-hyphenate =
     .label = Activer la césure automatique
+preferences-note-title = Notes
+preferences-note-open-in-new-window =
+    .label = Ouvrir les notes dans de nouvelles fenêtres plutôt que dans des onglets
 preferences-color-scheme = Schéma de couleurs :
 preferences-color-scheme-auto =
     .label = Automatique

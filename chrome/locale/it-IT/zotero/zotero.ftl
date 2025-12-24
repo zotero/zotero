@@ -60,6 +60,7 @@ general-next = Successivo
 general-learn-more = Approfondisci
 general-warning = Attenzione
 general-type-to-continue = Digita “{ $text }” per continuare.
+general-continue = Continua
 general-red = Rosso
 general-orange = Arancione
 general-yellow = Giallo
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Sposta colonna a sinistra
 menu-view-columns-move-right =
     .label = Sposta colonna a destra
+menu-view-note-font-size =
+    .label = Dimensione del font nelle note
+menu-view-note-tab-font-size =
+    .label = Dimensione font nella scheda delle note
 menu-show-tabs-menu =
     .label = Mostra menù delle schede
 menu-edit-copy-annotation =
@@ -170,6 +175,7 @@ item-menu-viewAttachment =
                     [pdf] PDF
                     [epub] EPUB
                     [snapshot] Pagina web
+                    [note] Nota
                    *[other] Allegato
                 }
            *[other]
@@ -177,6 +183,7 @@ item-menu-viewAttachment =
                     [pdf] PDF
                     [epub] EPUB
                     [snapshot] Pagine web
+                    [note] Note
                    *[other] Allegati
                 }
         } { $openIn ->
@@ -417,6 +424,7 @@ pane-info = Informazioni
 pane-abstract = Abstract
 pane-attachments = Allegati
 pane-notes = Note
+pane-note-info = Informazioni sulla nota
 pane-libraries-collections = Biblioteche e Collezioni
 pane-tags = Tag
 pane-related = Correlazioni
@@ -497,6 +505,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -565,6 +575,26 @@ attachment-info-convert-note =
            *[unknown] nuova
         }
     .tooltiptext = Non è più possibile aggiungere note agli allegati, ma puoi modificare la nota corrente convertendola in una separata.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Titolo
+note-info-parent-item = Elemento genitore
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] Nessuno
+    }
+    .title =
+        { $hasParentItem ->
+            [true] Vedi elemento genitore nella biblioteca
+           *[false] Vedi la nota nella biblioteca
+        }
+note-info-date-created = Creato
+note-info-date-modified = Data ultima modifica
+note-info-size = Dimensione
+note-info-word-count = Numero di parole
+note-info-character-count = Numero di caratteri
+item-title-empty-note = Nota senza titolo
 attachment-preview-placeholder = Nessun allegato da mostrare
 attachment-rename-from-parent =
     .tooltiptext = Rinominare il file in base ai metadati dell'elemento genitore
@@ -700,8 +730,7 @@ file-type-video = File video
 file-type-presentation = Presentazione
 file-type-document = Documento
 file-type-ebook = Ebook
-post-upgrade-message = Scopri le  <a data-l10n-name="new-features-link">nuove  funzioni in { -app-name } { $version }</a>
-post-upgrade-density = Scegli la densità del layout che preferisci:
+post-upgrade-message = È stato effettuato l'aggiornamento a <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Scopri le <a data-l10n-name="new-features-link">novità</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -724,3 +753,7 @@ long-tag-fixer-window-title =
     .title = Dividi tag
 long-tag-fixer-button-dont-split =
     .label = Non dividere
+menu-normalize-attachment-titles =
+    .label = Normalizza i titoli degli allegati...
+normalize-attachment-titles-title = Normalizza i titoli degli allegati
+normalize-attachment-titles-text = { -app-name } rinomina automaticamente i file sul disco usando i metadati dell'elemento genitore; tuttavia, usa dei titoli semplificati come “Full Text PDF”, “Preprint PDF”, o “PDF” per gli allegati principali per mantenere una lista degli allegati più pulita, senza duplicare le informazioni. Nelle vecchie versioni di { -app-name }, o tramite l'uso di certi plugin, era possibile cambiare i titoli degli allegati così da renderli uguali ai nomi dei file.Vuoi aggiornare i titoli degli allegati selezionati usando il nuovo schema semplificato? Verranno modificati solo gli allegati principali il cui titolo corrisponde al nome del file.

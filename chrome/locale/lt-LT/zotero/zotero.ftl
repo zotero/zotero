@@ -60,6 +60,7 @@ general-next = Tolesnis
 general-learn-more = Parodyti išsamiau
 general-warning = Įspėjimas
 general-type-to-continue = Type “{ $text }” to continue.
+general-continue = Tęsti
 general-red = raudona
 general-orange = morkinė
 general-yellow = geltona
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Perkelti stulpelį kairėn
 menu-view-columns-move-right =
     .label = Perkelti stulpelį dešinėn
+menu-view-note-font-size =
+    .label = Pastabos šrifto dydis
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 menu-edit-copy-annotation =
@@ -163,24 +168,26 @@ item-creator-moveUp =
     .label = Kelti aukštyn
 item-menu-viewAttachment =
     .label =
-        Atverti { $numAttachments ->
+        Open { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] momentinę kopiją
-                   *[other] priedą
+                    [snapshot] Snapshot
+                    [note] Note
+                   *[other] Attachment
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDF
-                    [epub] EPUB
-                    [snapshot] momentines kopijas
-                   *[other] priedus
+                    [pdf] PDFs
+                    [epub] EPUBs
+                    [snapshot] Snapshots
+                    [note] Notes
+                   *[other] Attachments
                 }
         } { $openIn ->
-            [tab] naujoje kortelėje
-            [window] naujame lange
+            [tab] in New Tab
+            [window] in New Window
            *[other] { "" }
         }
 item-menu-add-file =
@@ -417,6 +424,7 @@ pane-info = Informacija
 pane-abstract = Santrauka
 pane-attachments = Priedai
 pane-notes = Pastabos
+pane-note-info = Note Info
 pane-libraries-collections = Bibliotekos ir rinkiniai
 pane-tags = Gairės
 pane-related = Susiję
@@ -502,6 +510,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -570,6 +580,26 @@ attachment-info-convert-note =
            *[unknown] naują
         } pastabą
     .tooltiptext = Pastabų pridėjimas prie priedų nebepalaikomas, tačiau galite redaguoti šią pastabą perkeldami ją kaip atskirą pastabą.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Pavadinimas
+note-info-parent-item = Parent Item
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Created
+note-info-date-modified = Pakeista
+note-info-size = Dydis
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+item-title-empty-note = Bevardė pastaba
 attachment-preview-placeholder = Nėra peržiūrėtinų priedų
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
@@ -714,8 +744,7 @@ file-type-video = Vaizdas
 file-type-presentation = Pateiktis
 file-type-document = Dokumentas
 file-type-ebook = El. knyga
-post-upgrade-message = Sužinokite apie <a data-l10n-name="new-features-link">naujas { -app-name } { $version } galimybes</a>
-post-upgrade-density = Pasirinkite pageidaujamą išdėstymo tankumą:
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -738,3 +767,12 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

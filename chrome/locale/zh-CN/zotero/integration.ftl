@@ -19,8 +19,8 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
         { -integration-editBibliography-edit-reference }
-integration-citationDialog = 引用对话框
-integration-citationDialog-section-open = 打开 ({ $count }) 文件
+integration-citationDialog = 引注对话框
+integration-citationDialog-section-open = 已打开的文档 ({ $count })
 integration-citationDialog-section-selected = 已选中 ({ $count }/{ $total }) 条目
 integration-citationDialog-section-cited =
     { $count ->
@@ -35,27 +35,25 @@ integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = 引用设置
-integration-citationDialog-lib-no-items =
+integration-citationDialog-lib-message-citation =
     { $search ->
         [true] 没有选中、打开或引用的条目与当前搜索匹配
        *[other] 没有选中或打开的条目
     }
+integration-citationDialog-lib-message-add-note =
+    { $search ->
+        [true] 无匹配的笔记
+       *[other] 未选中笔记
+    }
 integration-citationDialog-settings-keepSorted = 保持文献自动排序
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
-integration-citationDialog-btn-mode =
-    .title =
-        { $mode ->
-            [library] 切换至列表模式
-            [list] 切换至文库模式
-           *[other] 切换模式
-        }
-    .aria-label =
-        { $mode ->
-            [library] 当前对话框为文库模式，点击以切换列表模式。
-            [list] 当前对话框为列表模式，点击以切换文库模式。
-           *[other] 切换模式
-        }
+integration-citationDialog-mode-library = 文献库
+integration-citationDialog-mode-list = List
+integration-citationDialog-btn-type-citation =
+    .title = 添加/编辑引注
+integration-citationDialog-btn-type-add-note =
+    .title = 添加笔记
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -65,12 +63,14 @@ integration-citationDialog-enter-to-add-item = 按 { return-or-enter } 将此条
 integration-citationDialog-search-for-items = 搜索要添加到引注中的条目
 integration-citationDialog-aria-bubble =
     .aria-description = 该条目已包含在引注中。按空格键自定义条目。{ integration-citationDialog-general-instructions }
-integration-citationDialog-single-input =
+integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = 按Tab键选择要添加到此引注中的条目。按Esc键放弃修改并关闭对话框。
-integration-citationDialog-input =
+integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
+integration-citationDialog-single-input-add-note =
+    .placeholder = 搜索要添加到文档中的笔记
 integration-citationDialog-aria-item-list =
     .aria-description = 使用向上/向下箭头修改条目选择。 { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =

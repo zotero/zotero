@@ -48,8 +48,10 @@ reader-prompt-password-protected = Ta operacja nie jest obsługiwana dla plików
 reader-prompt-delete-pages-title = Usuń strony
 reader-prompt-delete-pages-text =
     { $count ->
-        [one] Are you sure you want to delete { $count } page from the PDF file?
-       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+        [one] Czy na pewno chcesz usunąć { $count } stronę z pliku PDF?
+        [few] Czy na pewno chcesz usunąć { $count } strony z pliku PDF?
+        [many] Czy na pewno chcesz usunąć { $count } stron z pliku PDF?
+       *[other] Czy na pewno chcesz usunąć { $count } stron z pliku PDF?
     }
 reader-prompt-delete-annotations-title = Usuń adnotacje
 reader-prompt-delete-annotations-text =
@@ -125,8 +127,8 @@ reader-double = Podwójny
 reader-theme-name = Nazwa stylu:
 reader-background = Tło:
 reader-foreground = Pierwszy plan:
-reader-reading-mode = Reading Mode
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode = Tryb czytania
+reader-reading-mode-not-supported = Tryb czytania nie jest obsługiwany przez ten dokument.
 reader-clear-selection = Wyczyść zaznaczenie
 reader-move-annotation-start-key =
     { PLATFORM() ->
@@ -134,12 +136,12 @@ reader-move-annotation-start-key =
        *[other] { general-key-alt }
     }
 reader-a11y-move-annotation = Użyj klawiszy strzałek, aby przenieść adnotację.
-reader-a11y-edit-text-annotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys.
+reader-a11y-edit-text-annotation = Aby przejść na koniec adnotacji tekstowej, przytrzymaj { general-key-shift } i użyj klawiszy strzałki w lewo/prawo. Aby przejść na początek adnotacji, przytrzymaj { general-key-shift }-{ reader-move-annotation-start-key } i użyj klawiszy strzałek.
 reader-a11y-resize-annotation = Aby zmienić rozmiar adnotacji, przytrzymaj { general-key-shift } i użyj klawiszy strzałek.
 reader-a11y-annotation-popup-appeared = Użyj klawisza tabulacji, aby nawigować po dymkach adnotacji.
 reader-a11y-annotation-created = { $type } utworzono.
 reader-a11y-annotation-selected = { $type } wybrano.
--reader-a11y-textual-annotation-instruction = To annotate text via the keyboard, first use “{ reader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
+-reader-a11y-textual-annotation-instruction = Aby dodać adnotacje do tekstu za pomocą klawiatury, najpierw użyj "{ reader-find-in-document }", aby znaleźć frazę, a następnie naciśnij { general-key-control }-{ option-or-alt }-{ $number }, aby przekształcić wynik wyszukiwania w adnotację.
 -reader-a11y-annotation-instruction = Aby dodać tę adnotację do dokumentu, przejdź do dokumentu i wciśnij { general-key-control }-{ option-or-alt }-{ $number }.
 reader-toolbar-highlight =
     .aria-description = { -reader-a11y-textual-annotation-instruction(number: 1) }
@@ -162,7 +164,7 @@ reader-toolbar-draw =
 reader-find-in-document-input =
     .title = Znajdź
     .placeholder = { reader-find-in-document }
-    .aria-description = To turn a search result into a highlight annotation, press { general-key-control }-{ option-or-alt }-1. To turn a search result into an underline annotation, press { general-key-control }-{ option-or-alt }-2.
+    .aria-description = Aby przekształcić wynik wyszukiwania w adnotację wyróżnienia, naciśnij { general-key-control }-{ option-or-alt }-1. Aby przekształcić wynik wyszukiwania w adnotację podkreślenia, naciśnij { general-key-control }-{ option-or-alt }-2.
 reader-import-from-epub =
     .label = Importuj adnotacje ebooka...
 reader-import-from-epub-prompt-title = Importuj adnotacje ebooka
@@ -184,7 +186,9 @@ reader-import-from-epub-no-annotations-other-file =
 reader-import-from-epub-select-other = Wybierz inny plik...
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [one] 1 wybrana strona
+        [few] { $count } wybrane strony
+        [many] { $count } wybranych stron
+       *[other] { $count } wybranych stron
     }
-reader-page-options = Page Options
+reader-page-options = Ustawienia strony

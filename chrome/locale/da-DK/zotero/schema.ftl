@@ -1,0 +1,17 @@
+itemFields-eventPlace = Event Place
+itemFields-originalDate = Original Date
+itemFields-originalPlace = Original Place
+itemFields-originalPublisher = Original Publisher
+itemFields-partNumber = Part Number
+itemFields-partTitle = Part Title
+itemFields-priorityDate = Priority Date
+itemFields-sessionTitle = Session Title
+creatorTypes-chair = Chair
+creatorTypes-creator = Ophav
+creatorTypes-executiveProducer = Executive Producer
+creatorTypes-host = Host
+creatorTypes-narrator = Narrator
+creatorTypes-originalCreator = Original Creator
+creatorTypes-organizer = Organizer
+creatorTypes-seriesCreator = Series Creator
+creatorTypes-uploader = Uploader

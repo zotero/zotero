@@ -63,3 +63,4 @@ note-editor-delete-column = حذف العمود
 note-editor-delete-table = حذف الجدول
 note-editor-link-popup-appeared = ظهرت نافذة منبثقة للرابط. استخدم Shift-Tab للتنقل فيها.
 note-editor-citation-popup-appeared = ظهرت نافذة منبثقة للاستشهاد. استخدم Shift-Tab للتنقل فيها.
+note-editor-toggle-context-pane = تبديل جزء السياق

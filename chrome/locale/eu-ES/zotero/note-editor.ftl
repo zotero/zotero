@@ -63,3 +63,4 @@ note-editor-delete-column = Ezabatu zutabea
 note-editor-delete-table = Ezabatu taula
 note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
 note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-toggle-context-pane = Toggle Context Pane

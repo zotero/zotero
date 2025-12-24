@@ -60,6 +60,7 @@ general-next = Suivant
 general-learn-more = En savoir plus
 general-warning = Avertissement
 general-type-to-continue = Tapez “{ $text }” pour continuer.
+general-continue = Continuer
 general-red = Rouge
 general-orange = Orange
 general-yellow = Jaune
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Déplacer la colonne à gauche
 menu-view-columns-move-right =
     .label = Déplacer la colonne à droite
+menu-view-note-font-size =
+    .label = Taille des caractères des notes
+menu-view-note-tab-font-size =
+    .label = Taille des caractères de l'onglet des notes
 menu-show-tabs-menu =
     .label = Afficher le menu des onglets
 menu-edit-copy-annotation =
@@ -169,14 +174,16 @@ item-menu-viewAttachment =
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] capture
+                    [snapshot] Snapshot
+                    [note] Note
                    *[other] Attachment
                 }
            *[other]
                 { $attachmentType ->
                     [pdf] PDFs
                     [epub] EPUBs
-                    [snapshot] captures
+                    [snapshot] Snapshots
+                    [note] Notes
                    *[other] Attachments
                 }
         } { $openIn ->
@@ -417,6 +424,7 @@ pane-info = Info
 pane-abstract = Résumé
 pane-attachments = Fichiers joints
 pane-notes = Notes
+pane-note-info = Info de la note
 pane-libraries-collections = Bibliothèques et collections
 pane-tags = Marqueurs
 pane-related = Connexe
@@ -497,6 +505,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -565,6 +575,26 @@ attachment-info-convert-note =
            *[unknown] nouvelle note
         }
     .tooltiptext = L'ajout de notes à une pièce jointe n'est plus pris en charge, mais vous pouvez modifier cette note en la convertissant en une note séparée.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Titre
+note-info-parent-item = Document parent
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] Voir le document parent dans la bibliothèque
+           *[false] Voir la note dans la bibliothèque
+        }
+note-info-date-created = Créé
+note-info-date-modified = Modifié le
+note-info-size = Taille
+note-info-word-count = Nombre de mots
+note-info-character-count = Nombre de caractères
+item-title-empty-note = Note sans titre
 attachment-preview-placeholder = Aucune pièce jointe à prévisualiser
 attachment-rename-from-parent =
     .tooltiptext = Renommer le fichier pour correspondre au document parent
@@ -700,8 +730,7 @@ file-type-video = Vidéo
 file-type-presentation = Présentation
 file-type-document = Document
 file-type-ebook = Livre numérique
-post-upgrade-message = En savoir plus sur <a data-l10n-name="new-features-link">les nouveautés de { -app-name } { $version }</a>
-post-upgrade-density = Choisir une densité de mise en page préférée :
+post-upgrade-message = Vous avez été mis à niveau vers <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Découvrez <a data-l10n-name="new-features-link">les nouveautés</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -724,3 +753,7 @@ long-tag-fixer-window-title =
     .title = Scinder les marqueurs
 long-tag-fixer-button-dont-split =
     .label = Ne pas scinder
+menu-normalize-attachment-titles =
+    .label = Normaliser les titres de pièces jointes...
+normalize-attachment-titles-title = Normaliser les titres de pièces jointes
+normalize-attachment-titles-text = { -app-name } renomme automatiquement les fichiers sur le disque à l'aide des métadonnées du document parent, mais il utilise des titres distincts et plus simples tels que « Full Text PDF », « Preprint PDF » ou « PDF » pour les pièces jointes principales. La liste des documents reste ainsi plus claire et les informations ne sont pas dupliquées. Dans les anciennes versions de { -app-name }, de même que lors de l'utilisation de certaines extensions, les titres des pièces jointes pouvaient être modifiés inutilement pour correspondre aux noms de fichiers. Souhaitez-vous mettre à jour les pièces jointes sélectionnées afin d'utiliser des titres plus simples ? Seules les pièces jointes principales dont les titres correspondent aux noms de fichier seront modifiées.

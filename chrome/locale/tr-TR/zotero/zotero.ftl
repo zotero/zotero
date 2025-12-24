@@ -60,6 +60,7 @@ general-next = Sonraki
 general-learn-more = Daha Öğren
 general-warning = Uyarı
 general-type-to-continue = Devam etmek için “{ $text }” yazın.
+general-continue = Devam et
 general-red = Kırmızı
 general-orange = Turuncu
 general-yellow = Sarı
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Sütunu Sola Taşı
 menu-view-columns-move-right =
     .label = Sütunu Sağa Taşı
+menu-view-note-font-size =
+    .label = Not Yazı Tipi Boyutu
+menu-view-note-tab-font-size =
+    .label = Not Sekmesi Yazı Tipi Boyutu
 menu-show-tabs-menu =
     .label = Sekmeler Menüsünü Göster
 menu-edit-copy-annotation =
@@ -163,26 +168,28 @@ item-creator-moveUp =
     .label = Bir Yukarı Taşı
 item-menu-viewAttachment =
     .label =
-        { $numAttachments ->
+        Open { $numAttachments ->
             [one]
                 { $attachmentType ->
-                    [pdf] PDF'i
-                    [epub] EPUB'ı
-                    [snapshot] Anlık Görüntüyü
-                   *[other] Eki
+                    [pdf] PDF
+                    [epub] EPUB
+                    [snapshot] Snapshot
+                    [note] Note
+                   *[other] Attachment
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDF'i
-                    [epub] EPUB'ı
-                    [snapshot] Anlık Görüntüyü
-                   *[other] Eki
+                    [pdf] PDFs
+                    [epub] EPUBs
+                    [snapshot] Snapshots
+                    [note] Notes
+                   *[other] Attachments
                 }
         } { $openIn ->
-            [tab] Yeni Sekmede
-            [window] Yeni Pencerede
+            [tab] in New Tab
+            [window] in New Window
            *[other] { "" }
-        } Aç
+        }
 item-menu-add-file =
     .label = Dosya
 item-menu-add-linked-file =
@@ -415,6 +422,7 @@ pane-info = Bilgi
 pane-abstract = Özet
 pane-attachments = Ekler
 pane-notes = Notlar
+pane-note-info = Not Bilgisi
 pane-libraries-collections = Kitaplıklar ve Dermeler
 pane-tags = Etiketler
 pane-related = İlişkili
@@ -490,6 +498,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -558,6 +568,26 @@ attachment-info-convert-note =
            *[unknown] Yeni Nota
         } Taşı
     .tooltiptext = Eklere not eklemek artık desteklenmemektedir. Fakat bu notu ayrı bir nota taşıyarak düzenleyebilirsiniz.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Başlık
+note-info-parent-item = Ana Eser
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Oluşturuldu
+note-info-date-modified = Değiştirme
+note-info-size = Boyut
+note-info-word-count = Kelime Sayısı
+note-info-character-count = Karakter Sayısı
+item-title-empty-note = Başlıksız Not
 attachment-preview-placeholder = Önizleyecek bir ek yok
 attachment-rename-from-parent =
     .tooltiptext = Ana Esere Uymak için Dosyayı Yeniden Adlandır
@@ -686,8 +716,7 @@ file-type-video = Video
 file-type-presentation = Sunum
 file-type-document = Doküman
 file-type-ebook = E-kitap
-post-upgrade-message = <a data-l10n-name="new-features-link">{ -app-name } { $version } sürümündeki yeni özellikleri</a>öğrenin
-post-upgrade-density = Tercih ettiğiniz düzen yoğunluğunu seçin:
+post-upgrade-message = Programınızı <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>sürümüne yükselttiniz! Bu sürümdeki <a data-l10n-name="new-features-link">yenilikleri</a>öğrenin.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -710,3 +739,12 @@ long-tag-fixer-window-title =
     .title = Etiketleri Böl
 long-tag-fixer-button-dont-split =
     .label = Bölme
+menu-normalize-attachment-titles =
+    .label = Ek Dosya Başlıklarını Normalleştir...
+normalize-attachment-titles-title = Ek Dosya Başlıklarını Normalleştir
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

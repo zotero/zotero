@@ -35,27 +35,25 @@ integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = إعدادات الاقتباس
-integration-citationDialog-lib-no-items =
+integration-citationDialog-lib-message-citation =
     { $search ->
         [true] No selected, open, or cited items match the current search
        *[other] No selected or open items
     }
+integration-citationDialog-lib-message-add-note =
+    { $search ->
+        [true] No selected notes match the current search
+       *[other] No notes are selected
+    }
 integration-citationDialog-settings-keepSorted = الحفاظ على ترتيب المصادر
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
-integration-citationDialog-btn-mode =
-    .title =
-        { $mode ->
-            [library] Switch to List Mode
-            [list] Switch to Library Mode
-           *[other] Switch Mode
-        }
-    .aria-label =
-        { $mode ->
-            [library] The dialog is in Library mode. Click to switch to List Mode.
-            [list] The dialog is in List mode. Click to switch to Library Mode.
-           *[other] Switch Mode
-        }
+integration-citationDialog-mode-library = مكتبة
+integration-citationDialog-mode-list = List
+integration-citationDialog-btn-type-citation =
+    .title = اضافة/تحرير استشهاد مرجعي
+integration-citationDialog-btn-type-add-note =
+    .title = اضافة ملاحظة
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -65,12 +63,14 @@ integration-citationDialog-enter-to-add-item = اضغط على { return-or-enter
 integration-citationDialog-search-for-items = البحث عن عناصر لإضافتها إلى الاستشهاد
 integration-citationDialog-aria-bubble =
     .aria-description = هذا العنصر مدرج في الاقتباس. اضغط على مفتاح المسافة لتخصيص العنصر. { integration-citationDialog-general-instructions }
-integration-citationDialog-single-input =
+integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = اضغط على Tab لتحديد العناصر المراد إضافتها إلى هذا الاستشهاد. اضغط على Escape لإلغاء التغييرات وإغلاق مربع الحوار.
-integration-citationDialog-input =
+integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
+integration-citationDialog-single-input-add-note =
+    .placeholder = Search for a note to insert into the document
 integration-citationDialog-aria-item-list =
     .aria-description = استخدم السهم لأعلى/لأسفل لتغيير اختيار العنصر. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =

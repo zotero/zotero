@@ -60,6 +60,7 @@ general-next = Następny
 general-learn-more = Dowiedz się więcej
 general-warning = Ostrzeżenie
 general-type-to-continue = Wpisz “{ $text }”, aby kontynuować.
+general-continue = Dalej
 general-red = Czerwony
 general-orange = Pomarańczowy
 general-yellow = Żółty
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Przesuń kolumnę w lewo
 menu-view-columns-move-right =
     .label = Przesuń kolumnę w prawo
+menu-view-note-font-size =
+    .label = Rozmiar czcionki notatek
+menu-view-note-tab-font-size =
+    .label = Rozmiar czcionki zakładki notatek
 menu-show-tabs-menu =
     .label = Pokaż menu zakładek
 menu-edit-copy-annotation =
@@ -171,6 +176,7 @@ item-menu-viewAttachment =
                     [pdf] PDF
                     [epub] EPUB
                     [snapshot] Snapshot
+                    [note] Note
                    *[other] Attachment
                 }
            *[other]
@@ -178,6 +184,7 @@ item-menu-viewAttachment =
                     [pdf] PDFs
                     [epub] EPUBs
                     [snapshot] Snapshots
+                    [note] Notes
                    *[other] Attachments
                 }
         } { $openIn ->
@@ -258,7 +265,7 @@ file-interface-items-were-relinked =
     }
 import-mendeley-encrypted = Nie można odczytać wybranej bazy danych Mendeley, ponieważ jest zaszyfrowana. Aby uzyskać więcej informacji, zobacz <a data-l10n-name="mendeley-import-kb">Jak zaimportować bibliotekę Mendeley do Zotero?</a>.
 file-interface-import-error-translator = Podczas importowania wybranego pliku z “{ $translator }” pojawił się błąd. Proszę, upewnij się, że ten plik jest poprawny i spróbuj ponownie.
-import-online-intro = In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
+import-online-intro = W następnym kroku zostaniesz poproszony(a), aby zalogować się do { $targetAppOnline } i udzielić dostępu { -app-name }. Jest to niezbędne, aby zaimportować twoją bibliotekę { $targetApp } do { -app-name }.
 import-online-intro2 = { -app-name } nigdy nie zobaczy ani nie zapisze twojego { $targetApp } hasła.
 import-online-form-intro = Proszę, wprowadź twoje dane dostępowe, aby zalogować się do { $targetAppOnline }. Jest to niezbędne, aby zaimportować twoją bibliotekę { $targetApp } do { -app-name }.
 import-online-wrong-credentials = Logowanie do { $targetApp } nie powiodło się. Proszę, wprowadź dane logowania ponownie i spróbuj jeszcze raz.
@@ -294,7 +301,7 @@ rtfScan-intro-page = Wstęp
 rtfScan-scan-page = Skanowanie cytowań
 rtfScan-scanPage-description = { -app-name } skanuje twój dokument w poszukiwaniu cytowań. Prosimy o cierpliwość.
 rtfScan-citations-page = Sprawdzenie cytowanych elementów
-rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
+rtfScan-citations-page-description = Proszę, przejrzyj listę poniższych rozpoznanych cytowań, aby upewnić się, że { -app-name } wybrał poprawnie odpowiednie elementy. Przed przejściem do następnego kroku należy rozwiązać wszelkie niezmapowane lub niejednoznaczne cytowania.
 rtfScan-style-page = Formatowanie dokumentu
 rtfScan-format-page = Formatowanie cytowań
 rtfScan-format-page-description = { -app-name } przetwarza i formatuje twój plik RTF. Proszę czekać.
@@ -419,6 +426,7 @@ pane-info = Informacje
 pane-abstract = Krótki opis
 pane-attachments = Załączniki
 pane-notes = Notatki
+pane-note-info = Informacja o notatce
 pane-libraries-collections = Biblioteki i kolekcje
 pane-tags = Etykiety
 pane-related = Powiązane
@@ -465,8 +473,10 @@ section-libraries-collections =
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Tag
-           *[other] { $count } Tags
+            [one] { $count } Etykieta
+            [few] { $count } Etykiety
+            [many] { $count } Etykiet
+           *[other] { $count } Etykiet
         }
 section-related =
     .label = { $count } Related
@@ -502,6 +512,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -570,6 +582,26 @@ attachment-info-convert-note =
            *[unknown] New
         } Note
     .tooltiptext = Dodawanie notatek do załączników nie jest już wspierane, ale możesz edytować tę notatkę, przekształcając ją do osobnej notatki.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Tytuł
+note-info-parent-item = Element nadrzędny
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Utworzony
+note-info-date-modified = Zmodyfikowany
+note-info-size = Rozmiar
+note-info-word-count = Liczba słów
+note-info-character-count = Liczba znaków
+item-title-empty-note = Notatka bez tytułu
 attachment-preview-placeholder = Brak załącznika do pokazania w podglądzie
 attachment-rename-from-parent =
     .tooltiptext = Zmień nazwę pliku tak, aby odpowiadał elementowi nadrzędnemu
@@ -580,7 +612,7 @@ file-renaming-auto-rename-prompt-no = Zachowaj istniejące nazwy plików
 rename-files-preview =
     .buttonlabelaccept = Zmień nazwy plików
 rename-files-preview-loading = Wczytywanie...
-rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-intro = { -app-name } zmieni nazwy następujących plików w Twojej bibliotece tak, aby odpowiadały nazwom ich elementów nadrzędnych:
 rename-files-preview-renaming = Zmiana nazw...
 rename-files-preview-no-files = Wszystkie nazwy plików obecnie odpowiadają elementom nadrzędnym. Nie są wymagane żadne zmiany.
 toggle-preview =
@@ -617,18 +649,24 @@ item-pane-message-items-selected =
     }
 item-pane-message-collections-selected =
     { $count ->
-        [one] { $count } collection selected
-       *[other] { $count } collections selected
+        [one] { $count } wybrana kolekcja
+        [few] { $count } wybrane kolekcje
+        [many] { $count } wybranych kolekcji
+       *[other] { $count } wybranych kolekcji
     }
 item-pane-message-searches-selected =
     { $count ->
-        [one] { $count } search selected
-       *[other] { $count } searches selected
+        [one] { $count } wybrane wyszukiwanie
+        [few] { $count } wybrane wyszukiwania
+        [many] { $count } wybranych wyszukiwań
+       *[other] { $count } wybranych wyszukiwań
     }
 item-pane-message-objects-selected =
     { $count ->
-        [one] { $count } object selected
-       *[other] { $count } objects selected
+        [one] { $count } wybrany obiekt
+        [few] { $count } wybrane obiekty
+        [many] { $count } wybranych obiektów
+       *[other] { $count } wybranych obiektów
     }
 item-pane-message-unselected =
     { $count ->
@@ -645,8 +683,10 @@ item-pane-message-objects-unselected =
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Merge { $count } item
-           *[other] Merge { $count } items
+            [one] Złącz { $count } element
+            [few] Złącz { $count } elementy
+            [many] Złącz { $count } elementów
+           *[other] Złącz { $count } elementów
         }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 architecture-win32-warning-message = Dla lepszej wydajności zmień { -app-name } na wersję 64-bitową. Twoje dane nie będą naruszone.
@@ -669,8 +709,10 @@ advanced-search-condition-input =
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [one] { $count } plik dodany
+        [few] { $count } pliki dodane
+        [many] { $count } plików dodanych
+       *[other] { $count } plików dodanych
     }
 select-items-window =
     .title = Zaznacz elementy
@@ -698,8 +740,7 @@ file-type-video = Wideo
 file-type-presentation = Prezentacja
 file-type-document = Dokument
 file-type-ebook = Ebook
-post-upgrade-message = Poznaj <a data-l10n-name="new-features-link">nowe funkcje w { -app-name } { $version }</a>
-post-upgrade-density = Wybierz swoją preferowaną gęstość widoku:
+post-upgrade-message = <span data-l10n-name="post-upgrade-appver">{ -app-name } został zaktualizowany do wersji { $version }</span>! Dowiedz się <a data-l10n-name="new-features-link">co nowego?</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -716,9 +757,13 @@ mac-word-plugin-install-dont-ask-again-button =
 file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
-connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+connector-version-warning = Łącznik { -app-name } musi zostać zaktualizowany, aby działać z tą wersją { -app-name }.
 userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
 long-tag-fixer-window-title =
     .title = Podziel znaczniki
 long-tag-fixer-button-dont-split =
     .label = Nie dziel
+menu-normalize-attachment-titles =
+    .label = Normalizuj nazwy załączników...
+normalize-attachment-titles-title = Normalizuj nazwy załączników
+normalize-attachment-titles-text = { -app-name } automatycznie zmienia nazwy plików na dysku z użyciem metadanych elementu nadrzędnego, ale używa osobnych, prostszych nazw jak “Full Text PDF”, “Preprint PDF”, or “PDF” dla głównych załączników, aby utrzymać bardziej klarowną listę elementów i zapobiec duplikowaniu informacji.W starszych wersjach { -app-name }, podobnie jak używając różnych wtyczek, nazwy plików załączników mogą być niepotrzebnie zmieniane, aby odpowiadały nazwom plików.Czy chcesz zaktualizować wybrane załączniki, aby użyć ich prostszych nazw? Zostaną zmienione tylko główne załączniki z nazwami, które odpowiadają nazwie pliku.

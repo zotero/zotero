@@ -123,8 +123,8 @@ reader-double = 双页
 reader-theme-name = 主题名称：
 reader-background = 背景色
 reader-foreground = 前景色：
-reader-reading-mode = Reading Mode
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode = 阅读模式
+reader-reading-mode-not-supported = 此文件不支持阅读模式。
 reader-clear-selection = 清除选择
 reader-move-annotation-start-key =
     { PLATFORM() ->
@@ -182,7 +182,6 @@ reader-import-from-epub-no-annotations-other-file =
 reader-import-from-epub-select-other = 选择其他文件…
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+       *[other] { $count } 页面已选中
     }
-reader-page-options = Page Options
+reader-page-options = 页面选项

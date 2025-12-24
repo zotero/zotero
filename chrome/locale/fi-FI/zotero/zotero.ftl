@@ -60,6 +60,7 @@ general-next = Seuraava
 general-learn-more = Lisätietoja
 general-warning = Varoitus
 general-type-to-continue = Kirjoita “{ $text }” jatkaaksesi.
+general-continue = Jatka
 general-red = Punainen
 general-orange = Oranssi
 general-yellow = Keltainen
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Siirrä sarake vasemmalle
 menu-view-columns-move-right =
     .label = Siirrä sarake oikealle
+menu-view-note-font-size =
+    .label = Muistiinpanojen fonttikoko
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
 menu-show-tabs-menu =
     .label = Näytä välilehtivalikko
 menu-edit-copy-annotation =
@@ -168,19 +173,21 @@ item-menu-viewAttachment =
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] tilannevedos
-                   *[other] liite
+                    [snapshot] Snapshot
+                    [note] Note
+                   *[other] Attachment
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDFää
-                    [epub] EPUBia
-                    [snapshot] tilannevedosta
-                   *[other] liitettä
+                    [pdf] PDFs
+                    [epub] EPUBs
+                    [snapshot] Snapshots
+                    [note] Notes
+                   *[other] Attachments
                 }
         } { $openIn ->
-            [tab] Uudella välilehdellä
-            [window] Uudessa ikkunassa
+            [tab] in New Tab
+            [window] in New Window
            *[other] { "" }
         }
 item-menu-add-file =
@@ -415,6 +422,7 @@ pane-info = Tiedot
 pane-abstract = Tiivistelmä
 pane-attachments = Liitteet
 pane-notes = Muistiinpanot
+pane-note-info = Note Info
 pane-libraries-collections = Kirjastot ja kokoelmat
 pane-tags = Avainsanat
 pane-related = Liittyvät
@@ -490,6 +498,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -558,6 +568,26 @@ attachment-info-convert-note =
            *[unknown] uudeksi
         } muistiinpanoksi
     .tooltiptext = Muistiinpanojen lisäämistä liitteisiin ei enää tueta, mutta voit muokata tätä muistiinpanoa siirtämällä sen erilliseksi muistiinpanoksi.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Nimi
+note-info-parent-item = Parent Item
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Created
+note-info-date-modified = Muokattu
+note-info-size = Koko
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+item-title-empty-note = Otsikoimaton muistiinpano
 attachment-preview-placeholder = Ei liitettä esikatseltavaksi
 attachment-rename-from-parent =
     .tooltiptext = Uudelleennimeä tiedosto täsmäämään päänimikkeeseen
@@ -686,8 +716,7 @@ file-type-video = Video
 file-type-presentation = Esitelmä
 file-type-document = Asiakirja
 file-type-ebook = E-kirja
-post-upgrade-message = Lue <a data-l10n-name="new-features-link">uusista ominaisuuksista { -app-name }n versiossa { $version }</a>
-post-upgrade-density = Valitse haluamasi ulkoasun tiheys:
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -710,3 +739,12 @@ long-tag-fixer-window-title =
     .title = Jaa avainsanat
 long-tag-fixer-button-dont-split =
     .label = Älä jaa
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

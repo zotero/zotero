@@ -127,8 +127,8 @@ reader-double = Double
 reader-theme-name = Nom du thème :
 reader-background = Arrière-plan :
 reader-foreground = Avant-plan :
-reader-reading-mode = Reading Mode
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode = Mode de lecture
+reader-reading-mode-not-supported = Le mode de lecture n'est pas pris en charge dans ce document.
 reader-clear-selection = Effacer la sélection
 reader-move-annotation-start-key =
     { PLATFORM() ->
@@ -186,7 +186,8 @@ reader-import-from-epub-no-annotations-other-file =
 reader-import-from-epub-select-other = Sélectionner un autre fichier…
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [one] 1 page sélectionnée
+        [many] { $count } pages sélectionnées
+       *[other] { $count } pages sélectionnées
     }
-reader-page-options = Page Options
+reader-page-options = Options de page

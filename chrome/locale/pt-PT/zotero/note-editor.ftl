@@ -63,3 +63,4 @@ note-editor-delete-column = Eliminar Coluna
 note-editor-delete-table = Eliminar Tabela
 note-editor-link-popup-appeared = Pop-up de link apareceu. Use Shift-Tab para navegá-lo.
 note-editor-citation-popup-appeared = Pop-up de citação apareceu. Use Shift-Tab para navegá-lo.
+note-editor-toggle-context-pane = Ativar Painel de Contexto

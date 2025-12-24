@@ -60,6 +60,7 @@ general-next = 下一步
 general-learn-more = 了解更多
 general-warning = 警告
 general-type-to-continue = 输入 “{ $text }” 以继续
+general-continue = 继续
 general-red = 红色
 general-orange = 橙色
 general-yellow = 黄色
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = 将列移至左侧
 menu-view-columns-move-right =
     .label = 将列移至右侧
+menu-view-note-font-size =
+    .label = 笔记字体大小
+menu-view-note-tab-font-size =
+    .label = 笔记选项卡字体大小
 menu-show-tabs-menu =
     .label = 显示标签页列表
 menu-edit-copy-annotation =
@@ -167,14 +172,16 @@ item-menu-viewAttachment =
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] 快照
+                    [snapshot] 网页快照
+                    [note] 笔记
                    *[other] 附件
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDF
-                    [epub] EPUB
-                    [snapshot] 快照
+                    [pdf] PDFs
+                    [epub] EPUBs
+                    [snapshot] 网页快照
+                    [note] 笔记
                    *[other] 附件
                 }
         } { $openIn ->
@@ -413,6 +420,7 @@ pane-info = 信息
 pane-abstract = 摘要
 pane-attachments = 附件
 pane-notes = 笔记
+pane-note-info = 笔记信息
 pane-libraries-collections = 文库和分类
 pane-tags = 标签
 pane-related = 相关
@@ -483,6 +491,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -551,6 +561,26 @@ attachment-info-convert-note =
            *[unknow] 新
         }笔记
     .tooltiptext = 已不再支持向附件添加笔记，但您可以将其迁移到单独的笔记后进行编辑。
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = 标题
+note-info-parent-item = 上级条目
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] 无
+    }
+    .title =
+        { $hasParentItem ->
+            [true] 在文献库中查看上级条目
+           *[false] 在文献库中查看笔记
+        }
+note-info-date-created = 创建
+note-info-date-modified = 修改日期
+note-info-size = 大小
+note-info-word-count = 字数
+note-info-character-count = 字符数
+item-title-empty-note = 未命名笔记
 attachment-preview-placeholder = 无可预览的附件
 attachment-rename-from-parent =
     .tooltiptext = 重命名文件以匹配上级条目
@@ -672,8 +702,7 @@ file-type-video = 视频
 file-type-presentation = 演示文档
 file-type-document = 文档
 file-type-ebook = 电子书
-post-upgrade-message = 了解 <a data-l10n-name="new-features-link">{ -app-name } { $version } 的新特性</a>
-post-upgrade-density = 选择你喜欢的布局密度：
+post-upgrade-message = 你已升级到 <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version } </span>！了解一下<a data-l10n-name="new-features-link">新特性</a>。
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -690,9 +719,18 @@ mac-word-plugin-install-dont-ask-again-button =
 file-renaming-banner-message = { -app-name } 现在支持在您修改条目时自动保持附件文件名同步。
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
-connector-version-warning = 必须更新 { -app-name } 连接器才能与此版本的 { -app-name } 一起使用。
-userjs-pref-warning = 某些 { -app-name } 设置已被使用不支持的方式覆盖。 { -app-name } 将恢复它们并重新启动。
+connector-version-warning = { -app-name } Connector 必须更新才能与该版本的 { -app-name } 兼容。
+userjs-pref-warning = 某些 { -app-name } 设置已通过不支持的方法被覆盖。{ -app-name } 将恢复这些设置并重新启动。
 long-tag-fixer-window-title =
     .title = 拆分标签
 long-tag-fixer-button-dont-split =
     .label = 不要拆分
+menu-normalize-attachment-titles =
+    .label = 规范附件标题…
+normalize-attachment-titles-title = 规范附件标题
+normalize-attachment-titles-text =
+    { -app-name } 使用上级条目元数据自动重命名磁盘上的文件，但它对主要附件使用单独的、更简单的标题，如“Full Text PDF”、“Preprint PDF”或“PDF”，以保持条目列表的整洁，避免重复信息。
+    
+    在旧版本的 { -app-name } 中以及使用某些插件时，附件标题可能会被不必要地修改以匹配文件名。
+    
+    是否要更新所选附件以使用更简单的标题？只有标题与文件名匹配的主要附件才会被更改。

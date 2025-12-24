@@ -28,6 +28,10 @@ preferences-file-renaming-format-instructions-example = Esimerkiksi “{ $exampl
 preferences-file-renaming-format-instructions-more = Lisää tietoa saat tutustumalla <label data-l10n-name="file-renaming-format-help-link">ohjeisiin </label>.
 preferences-file-renaming-format-template = Tiedostonimen pohja:
 preferences-file-renaming-format-preview = Esikatselu:
+preferences-attachment-titles-title = Attachment Titles
+preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-show-filenames =
+    .label = Show attachment filenames in the items list
 preferences-reader-title = Lukija
 preferences-reader-open-epubs-using = Avaa EPUB-tiedostot ohjelmalla
 preferences-reader-open-snapshots-using = Avaa tilannekuvat ohjelmalla
@@ -38,6 +42,9 @@ preferences-reader-auto-disable-tool =
 preferences-reader-ebook-font = E-kirjan fontti:
 preferences-reader-ebook-hyphenate =
     .label = Käytä automaattista tavutusta
+preferences-note-title = Muistiinpanot
+preferences-note-open-in-new-window =
+    .label = Open notes in new windows instead of tabs
 preferences-color-scheme = Väriteema:
 preferences-color-scheme-auto =
     .label = Automaattinen

@@ -10,18 +10,15 @@ integration-editBibliography-remove-button =
     .aria-label = { general-remove }
 integration-editBibliography-editor =
     .aria-label = Edytuj cytowanie
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
+-integration-editBibliography-include-uncited = Aby dołączyć niezacytowany element do Twojej bibliografii, wybierz go z listy elementów i wciśnij { general-add }.
+-integration-editBibliography-exclude-cited = Możesz również usunąć zacytowany element, wybierając go z listy cytowań i wciskając { general-remove }.
 -integration-editBibliography-edit-reference = Aby zmienić formatowanie cytowania, użyj edytora tekstu.
 integration-editBibliography-wrapper =
     .aria-label = Edytuj bibliografię
-    .aria-description =
-        { -integration-editBibliography-include-uncited }
-        { -integration-editBibliography-exclude-cited }
-        { -integration-editBibliography-edit-reference }
+    .aria-description = { -integration-editBibliography-include-uncited }{ -integration-editBibliography-exclude-cited }{ -integration-editBibliography-edit-reference }
 integration-citationDialog = Okno cytowania
 integration-citationDialog-section-open = Open Documents ({ $count })
-integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
+integration-citationDialog-section-selected = Wybrane elementy ({ $count }/{ $total })
 integration-citationDialog-section-cited =
     { $count ->
         [0] Cited Items
@@ -35,53 +32,53 @@ integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = Ustawienia cytowania
-integration-citationDialog-lib-no-items =
+integration-citationDialog-lib-message-citation =
     { $search ->
         [true] No selected, open, or cited items match the current search
        *[other] No selected or open items
     }
+integration-citationDialog-lib-message-add-note =
+    { $search ->
+        [true] No selected notes match the current search
+       *[other] No notes are selected
+    }
 integration-citationDialog-settings-keepSorted = Utrzymaj źródła posortowane
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
-integration-citationDialog-btn-mode =
-    .title =
-        { $mode ->
-            [library] Switch to List Mode
-            [list] Switch to Library Mode
-           *[other] Switch Mode
-        }
-    .aria-label =
-        { $mode ->
-            [library] The dialog is in Library mode. Click to switch to List Mode.
-            [list] The dialog is in List mode. Click to switch to Library Mode.
-           *[other] Switch Mode
-        }
+integration-citationDialog-mode-library = Biblioteka
+integration-citationDialog-mode-list = Lista
+integration-citationDialog-btn-type-citation =
+    .title = Dodaj/Edytuj cytowanie
+integration-citationDialog-btn-type-add-note =
+    .title = Dodaj notatkę
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
     .title = { general-cancel }
-integration-citationDialog-general-instructions = Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation.
-integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
+integration-citationDialog-general-instructions = Użyj klawiszy strzałki w lewo/prawo, aby nawigować między elementami tego cytowania. Wciśnij Tab, aby wybrać elementy do dodania do tego cytowania.
+integration-citationDialog-enter-to-add-item = Wciśnij { return-or-enter }, aby dodać ten element do cytowania.
 integration-citationDialog-search-for-items = Wyszukaj elementy aby dodać je do cytowania
 integration-citationDialog-aria-bubble =
-    .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
-integration-citationDialog-single-input =
+    .aria-description = Ten element jest już zawarty w cytowaniu. Wciśnij spację, aby dostosować ten element. { integration-citationDialog-general-instructions }
+integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
-    .aria-description = Press Tab to select items to add to this citation. Press Escape to discard the changes and close the dialog.
-integration-citationDialog-input =
+    .aria-description = Wciśnij Tab, aby wybrać elementy, które mają być dodane do tego cytowania. Wciśnij Escape, aby zapobiec zmianom i zamknąć ten komunikat.
+integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
+integration-citationDialog-single-input-add-note =
+    .placeholder = Wyszukaj notatkę, aby wstawić ją do dokumentu
 integration-citationDialog-aria-item-list =
-    .aria-description = Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Użyj klawiszy strzałki w górę/w dół, aby zmienić wybór elementu. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
-    .aria-description = Use Right/Left Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Użyj klawiszy strzałki w lewo/prawo, aby zmienić wybór elementu. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-collections-table =
     .aria-label = Kolekcje.
     .aria-description = Wybierz kolekcję i wciśnij Tab, aby nawigować po jego elementach.
 integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
-    .aria-label = This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it.
+    .aria-label = Ten element został dodany do cytowania. Wciśnij { return-or-enter }, aby dodać go ponownie lub { delete-or-backspace }, aby go usunąć.
 integration-citationDialog-add-all = Dodaj wszystko
 integration-citationDialog-collapse-section =
     .title = Zwiń sekcję
@@ -97,7 +94,7 @@ integration-prefs-bookmarks =
 integration-prefs-bookmarks-description = Zakładki mogą być współdzielone między edytorami Word i LibreOffice Writer, ale w razie ich przypadkowej modyfikacji mogą wystąpić błędy i nie mogą być one wstawiane do przypisów dolnych.
 integration-prefs-bookmarks-formatNotice =
     { $show ->
-        [true] The document must be saved as .doc or .docx.
+        [true] Dokument musi być zapisany jako .doc or .docx.
        *[other] { "" }
     }
 integration-prefs-automaticCitationUpdates =

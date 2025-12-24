@@ -60,6 +60,7 @@ general-next = Následující
 general-learn-more = Zjistit více
 general-warning = Varování
 general-type-to-continue = Type “{ $text }” to continue.
+general-continue = Pokračovat
 general-red = Červená
 general-orange = Oranžová
 general-yellow = Žlutá
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Přesunout sloupce vlevo
 menu-view-columns-move-right =
     .label = Přesunout sloupce vpravo
+menu-view-note-font-size =
+    .label = Velikost písma poznámek
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 menu-edit-copy-annotation =
@@ -163,24 +168,26 @@ item-creator-moveUp =
     .label = Posunout nahoru
 item-menu-viewAttachment =
     .label =
-        Otevřít { $numAttachments ->
+        Open { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [hled] Snapshot
+                    [snapshot] Snapshot
+                    [note] Note
                    *[other] Attachment
                 }
            *[other]
                 { $attachmentType ->
                     [pdf] PDFs
                     [epub] EPUBs
-                    [hledy] Snapshots
+                    [snapshot] Snapshots
+                    [note] Notes
                    *[other] Attachments
                 }
         } { $openIn ->
-            [tab] na nové kartě
-            [window] v novém okně
+            [tab] in New Tab
+            [window] in New Window
            *[other] { "" }
         }
 item-menu-add-file =
@@ -417,6 +424,7 @@ pane-info = Informace
 pane-abstract = Abstrakt
 pane-attachments = Přílohy
 pane-notes = Poznámky
+pane-note-info = Note Info
 pane-libraries-collections = Knihovny a kolekce
 pane-tags = Štítky
 pane-related = Související
@@ -502,6 +510,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -570,6 +580,26 @@ attachment-info-convert-note =
            *[unknown] New
         } poznámku
     .tooltiptext = Přidávání poznámek k přílohám již není podporováno, ale tuto poznámku můžete upravit tak, že ji přenesete do samostatné poznámky.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Název
+note-info-parent-item = Parent Item
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Created
+note-info-date-modified = Upraveno
+note-info-size = Velikost
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+item-title-empty-note = Nepojmenovaná poznámka
 attachment-preview-placeholder = Žádná příloha k náhledu
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
@@ -712,8 +742,7 @@ file-type-video = Video
 file-type-presentation = Prezentace
 file-type-document = Dokument
 file-type-ebook = E-kniha
-post-upgrade-message = Zjistěte více o <a data-l10n-name="new-features-link">nových funkcí v { -app-name } { $version }</a>
-post-upgrade-density = Zvolte preferovanou hustotu rozložení:
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -736,3 +765,12 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

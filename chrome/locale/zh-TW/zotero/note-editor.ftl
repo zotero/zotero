@@ -63,3 +63,4 @@ note-editor-delete-column = 刪除欄
 note-editor-delete-table = 刪除表格
 note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
 note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-toggle-context-pane = 切換上下文窗格

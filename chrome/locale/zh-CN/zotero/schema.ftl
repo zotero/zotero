@@ -1,0 +1,17 @@
+itemFields-eventPlace = Event Place
+itemFields-originalDate = Original Date
+itemFields-originalPlace = Original Place
+itemFields-originalPublisher = Original Publisher
+itemFields-partNumber = Part Number
+itemFields-partTitle = Part Title
+itemFields-priorityDate = 优先权日
+itemFields-sessionTitle = Session Title
+creatorTypes-chair = Chair
+creatorTypes-creator = 创建者
+creatorTypes-executiveProducer = Executive Producer
+creatorTypes-host = 主持人
+creatorTypes-narrator = Narrator
+creatorTypes-originalCreator = Original Creator
+creatorTypes-organizer = 组织者
+creatorTypes-seriesCreator = 系列创作者
+creatorTypes-uploader = 上传者

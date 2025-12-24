@@ -60,6 +60,7 @@ general-next = அடுத்தது
 general-learn-more = மேலும் அறிக
 general-warning = முன்னறிவிப்பு
 general-type-to-continue = தொடர “{ $text }” எனத் தட்டச்சு செய்.
+general-continue = தொடரவும்
 general-red = சிவப்பு
 general-orange = ஆரஞ்சு
 general-yellow = மஞ்சள்
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = நெடுவரிசையை இடது பக்கம் நகர்த்து
 menu-view-columns-move-right =
     .label = நெடுவரிசையை வலது பக்கம் நகர்த்து
+menu-view-note-font-size =
+    .label = குறிப்பு எழுத்துரு அளவு
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
 menu-show-tabs-menu =
     .label = தாவல்கள் பட்டியலைக் காட்டு
 menu-edit-copy-annotation =
@@ -163,26 +168,28 @@ item-creator-moveUp =
     .label = மேலே நகர்த்து
 item-menu-viewAttachment =
     .label =
-        { $numAttachments ->
+        Open { $numAttachments ->
             [one]
                 { $attachmentType ->
-                    [pdf] எசெஆ
-                    [epub] மிநூல்
-                    [snapshot] திரைபிடிப்பு
-                   *[other] இணைப்பு
+                    [pdf] PDF
+                    [epub] EPUB
+                    [snapshot] Snapshot
+                    [note] Note
+                   *[other] Attachment
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] எசெஆகள்
-                    [epub] மிநூல்கள்
-                    [snapshot] திரைபிடிப்புகள்
-                   *[other] இணைப்புகள்
+                    [pdf] PDFs
+                    [epub] EPUBs
+                    [snapshot] Snapshots
+                    [note] Notes
+                   *[other] Attachments
                 }
         } { $openIn ->
-            [tab] புதிய தாவலில்
-            [window] புதிய சாளரத்தில்
+            [tab] in New Tab
+            [window] in New Window
            *[other] { "" }
-        } திற
+        }
 item-menu-add-file =
     .label = கோப்பு
 item-menu-add-linked-file =
@@ -415,6 +422,7 @@ pane-info = தகவல்
 pane-abstract = சுருக்கம்
 pane-attachments = இணைப்புகள்
 pane-notes = குறிப்புகள்
+pane-note-info = Note Info
 pane-libraries-collections = Libraries and Collections
 pane-tags = குறிச்சொற்கள்
 pane-related = தொடர்புடைய
@@ -490,6 +498,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -558,6 +568,26 @@ attachment-info-convert-note =
            *[unknown] New
         } Note
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = தலைப்பு
+note-info-parent-item = Parent Item
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Created
+note-info-date-modified = மாற்றப்பட்டது
+note-info-size = அளவு
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+item-title-empty-note = பெயரிடப்படாத குறிப்பு
 attachment-preview-placeholder = No attachment to preview
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
@@ -686,8 +716,7 @@ file-type-video = நிகழ்படம்
 file-type-presentation = விளக்கக்காட்சி
 file-type-document = ஆவணம்
 file-type-ebook = மின்புத்தகம்
-post-upgrade-message = Learn about the <a data-l10n-name="new-features-link">new features in { -app-name } { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -710,3 +739,12 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

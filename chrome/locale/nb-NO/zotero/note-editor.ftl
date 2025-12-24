@@ -63,3 +63,4 @@ note-editor-delete-column = Slett kolonne
 note-editor-delete-table = Slett tabell
 note-editor-link-popup-appeared = Popup-vinduet med lenker vises. Bruk Shift-Tab til å navigere i det.
 note-editor-citation-popup-appeared = Henvisnings-popup-vinduet vises. Bruk Shift-Tab til å navigere det.
+note-editor-toggle-context-pane = Slå av/på kontekstruten

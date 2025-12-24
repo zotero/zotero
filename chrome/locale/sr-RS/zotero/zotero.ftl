@@ -60,6 +60,7 @@ general-next = Следеће
 general-learn-more = Сазнајте више
 general-warning = Упозорење
 general-type-to-continue = Type “{ $text }” to continue.
+general-continue = Настави
 general-red = Црвено
 general-orange = Наранџасто
 general-yellow = Жуто
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Move Column Left
 menu-view-columns-move-right =
     .label = Move Column Right
+menu-view-note-font-size =
+    .label = Величина фонта за белешке
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 menu-edit-copy-annotation =
@@ -163,24 +168,26 @@ item-creator-moveUp =
     .label = Премести горе
 item-menu-viewAttachment =
     .label =
-        Отвори { $numAttachments ->
+        Open { $numAttachments ->
             [one]
                 { $attachmentType ->
-                    [pdf] ПДФ датотеку
-                    [epub] ЕПУБ датотеку
-                    [snapshot] сличицу
-                   *[other] прилог
+                    [pdf] PDF
+                    [epub] EPUB
+                    [snapshot] Snapshot
+                    [note] Note
+                   *[other] Attachment
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] ПДФ датотеке
-                    [epub] ЕПУБ датотеке
-                    [snapshot] сличице
-                   *[other] прилоге
+                    [pdf] PDFs
+                    [epub] EPUBs
+                    [snapshot] Snapshots
+                    [note] Notes
+                   *[other] Attachments
                 }
         } { $openIn ->
-            [tab] у новој картици
-            [window] у новом прозору
+            [tab] in New Tab
+            [window] in New Window
            *[other] { "" }
         }
 item-menu-add-file =
@@ -416,6 +423,7 @@ pane-info = Подаци
 pane-abstract = Сажетак
 pane-attachments = Прилози
 pane-notes = Белешке
+pane-note-info = Note Info
 pane-libraries-collections = Библиотеке и збирке
 pane-tags = Ознаке
 pane-related = Сродно
@@ -496,6 +504,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -564,6 +574,26 @@ attachment-info-convert-note =
            *[unknown] нову белешку
         }
     .tooltiptext = Више није подржано додавање белешки и прилога, али можете изменити ову белешку тако што ћете је преместити у засебну белешку.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Наслов
+note-info-parent-item = Parent Item
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Created
+note-info-date-modified = Измењено
+note-info-size = Величина
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+item-title-empty-note = Безимена белешка
 attachment-preview-placeholder = Нема прилога за преглед
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
@@ -698,8 +728,7 @@ file-type-video = Видео
 file-type-presentation = Презентација
 file-type-document = Документ
 file-type-ebook = Е-књига
-post-upgrade-message = Сазнајте више о <a data-l10n-name="new-features-link">новим могућности програма { -app-name } { $version }</a>
-post-upgrade-density = Изаберите жељену густину приказа:
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -722,3 +751,12 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

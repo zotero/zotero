@@ -35,27 +35,25 @@ integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = Innstillinger for henvisnger
-integration-citationDialog-lib-no-items =
+integration-citationDialog-lib-message-citation =
     { $search ->
         [true] Ingen valgte, åpne eller henviste elementer samsvarer med det aktuelle søket
        *[other] Ingen valgte eller åpne elementer
     }
+integration-citationDialog-lib-message-add-note =
+    { $search ->
+        [true] Ingen valgte notater samsvarer med det aktuelle søket
+       *[other] ingen notater er valgt
+    }
 integration-citationDialog-settings-keepSorted = Behold sortering av kildene
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
-integration-citationDialog-btn-mode =
-    .title =
-        { $mode ->
-            [library] Bytt til listemodus
-            [list] Bytt til biblioteksmodus
-           *[other] Bytt modus
-        }
-    .aria-label =
-        { $mode ->
-            [library] Dialogboksen er i biblioteksmodus. Klikk for å bytte til listemodus.
-            [list] Dialogboksen er i listemodus. Klikk for å bytte til biblioteksmodus.
-           *[other] Bytt modus
-        }
+integration-citationDialog-mode-library = Bibliotek
+integration-citationDialog-mode-list = Liste
+integration-citationDialog-btn-type-citation =
+    .title = Legg til/endre henvisning
+integration-citationDialog-btn-type-add-note =
+    .title = Legg til notat
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -65,12 +63,14 @@ integration-citationDialog-enter-to-add-item = Trykk { return-or-enter } for å 
 integration-citationDialog-search-for-items = Søk etter elementer for å legge til henvisningen
 integration-citationDialog-aria-bubble =
     .aria-description = Dette elementet er inkludert i referansen. Trykk mellomromstasten for å tilpasse elementet. { integration-citationDialog-general-instructions }
-integration-citationDialog-single-input =
+integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Trykk på Tab for å velge elementer som skal legges til i denne henvisningen. Trykk på Escape for å forkaste endringene og lukke dialogboksen.
-integration-citationDialog-input =
+integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
+integration-citationDialog-single-input-add-note =
+    .placeholder = Søk etter notat for å legge det inn i dokumentet
 integration-citationDialog-aria-item-list =
     .aria-description = Bruk opp-/nedpilen for å endre valg av element. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =

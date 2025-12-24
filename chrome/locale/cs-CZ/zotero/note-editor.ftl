@@ -63,3 +63,4 @@ note-editor-delete-column = Smazat sloupec
 note-editor-delete-table = Smazat tabulku
 note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
 note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-toggle-context-pane = Přepnout kontextový panel

@@ -28,6 +28,10 @@ preferences-file-renaming-format-instructions-example = For example, “{ $examp
 preferences-file-renaming-format-instructions-more = See the <label data-l10n-name="file-renaming-format-help-link">documentation</label> for more information.
 preferences-file-renaming-format-template = Predloga imena datoteke:
 preferences-file-renaming-format-preview = Predogled:
+preferences-attachment-titles-title = Attachment Titles
+preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-show-filenames =
+    .label = Show attachment filenames in the items list
 preferences-reader-title = Bralnik
 preferences-reader-open-epubs-using = Dokumente EPUB odpri s/z
 preferences-reader-open-snapshots-using = Open snapshots using
@@ -38,6 +42,9 @@ preferences-reader-auto-disable-tool =
 preferences-reader-ebook-font = Pisava e-knjige:
 preferences-reader-ebook-hyphenate =
     .label = Omogoči samodejno deljenje besed
+preferences-note-title = Opombe
+preferences-note-open-in-new-window =
+    .label = Open notes in new windows instead of tabs
 preferences-color-scheme = Barvna shema:
 preferences-color-scheme-auto =
     .label = Samodejno

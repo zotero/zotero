@@ -63,3 +63,4 @@ note-editor-delete-column = Oszlop törlése
 note-editor-delete-table = Táblázat törlése
 note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
 note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-toggle-context-pane = Toggle Context Pane

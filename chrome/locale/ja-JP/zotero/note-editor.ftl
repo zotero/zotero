@@ -63,3 +63,4 @@ note-editor-delete-column = 縦の欄を削除する
 note-editor-delete-table = 表を削除する
 note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
 note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-toggle-context-pane = Toggle Context Pane

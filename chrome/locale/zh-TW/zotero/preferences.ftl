@@ -28,6 +28,10 @@ preferences-file-renaming-format-instructions-example = 例如，模板中的“
 preferences-file-renaming-format-instructions-more = 請參閱<label data-l10n-name="file-renaming-format-help-link">文件</label>以獲得更多資訊。
 preferences-file-renaming-format-template = 檔案名稱模板：
 preferences-file-renaming-format-preview = 預覽:
+preferences-attachment-titles-title = Attachment Titles
+preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-show-filenames =
+    .label = Show attachment filenames in the items list
 preferences-reader-title = 閱讀器
 preferences-reader-open-epubs-using = 開啟 EPUBs 使用
 preferences-reader-open-snapshots-using = 開啟網頁快照使用
@@ -38,6 +42,9 @@ preferences-reader-auto-disable-tool =
 preferences-reader-ebook-font = Ebook字體:
 preferences-reader-ebook-hyphenate =
     .label = 啟用自動連字
+preferences-note-title = 筆記
+preferences-note-open-in-new-window =
+    .label = Open notes in new windows instead of tabs
 preferences-color-scheme = 配色方案:
 preferences-color-scheme-auto =
     .label = 自動

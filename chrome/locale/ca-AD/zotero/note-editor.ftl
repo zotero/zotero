@@ -63,3 +63,4 @@ note-editor-delete-column = Suprimeix la columna
 note-editor-delete-table = Suprimeix la taula
 note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
 note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-toggle-context-pane = Commuta la subfinestra contextual

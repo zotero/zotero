@@ -60,6 +60,7 @@ general-next = Hurrengoa
 general-learn-more = Gehiago jakin
 general-warning = Kontuz!
 general-type-to-continue = Type “{ $text }” to continue.
+general-continue = Jarraitu
 general-red = Gorria
 general-orange = Laranja
 general-yellow = Horia
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Move Column Left
 menu-view-columns-move-right =
     .label = Move Column Right
+menu-view-note-font-size =
+    .label = Oharraren letra-tamaina
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 menu-edit-copy-annotation =
@@ -169,6 +174,7 @@ item-menu-viewAttachment =
                     [pdf] PDF
                     [epub] EPUB
                     [snapshot] Snapshot
+                    [note] Note
                    *[other] Attachment
                 }
            *[other]
@@ -176,6 +182,7 @@ item-menu-viewAttachment =
                     [pdf] PDFs
                     [epub] EPUBs
                     [snapshot] Snapshots
+                    [note] Notes
                    *[other] Attachments
                 }
         } { $openIn ->
@@ -415,6 +422,7 @@ pane-info = Info
 pane-abstract = Laburpena
 pane-attachments = Eranskinak
 pane-notes = Oharrak
+pane-note-info = Note Info
 pane-libraries-collections = Libraries and Collections
 pane-tags = Etiketak
 pane-related = Erlazionatutakoak
@@ -490,6 +498,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -558,6 +568,26 @@ attachment-info-convert-note =
            *[unknown] New
         } Note
     .tooltiptext = Adding notes to attachments is no longer supported, but you can edit this note by migrating it to a separate note.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Izenburua
+note-info-parent-item = Parent Item
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Created
+note-info-date-modified = Noiz aldatua
+note-info-size = Tamaina
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+item-title-empty-note = Izengabeko oharra
 attachment-preview-placeholder = Ez dago eranskinik aurreikusteko
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
@@ -686,8 +716,7 @@ file-type-video = Bideoa
 file-type-presentation = Aurkezpen
 file-type-document = Dokumentua
 file-type-ebook = Ebook
-post-upgrade-message = Ezagutu <a data-l10n-name="new-features-link">{ -app-name } { $version }ren ezaugarri berriak</a>
-post-upgrade-density = Hautatu diseinuarentzat nahiago duzun dentsitatea:
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -710,3 +739,12 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

@@ -28,6 +28,10 @@ preferences-file-renaming-format-instructions-example = Pavyzdžiui, „{ $examp
 preferences-file-renaming-format-instructions-more = Išsamiau skaitykite <label data-l10n-name="file-renaming-format-help-link">dokumentacijoje</label>.
 preferences-file-renaming-format-template = Rinkmenos vardo šablonas:
 preferences-file-renaming-format-preview = Peržiūra:
+preferences-attachment-titles-title = Attachment Titles
+preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-show-filenames =
+    .label = Show attachment filenames in the items list
 preferences-reader-title = Skaityklė
 preferences-reader-open-epubs-using = EPUB atverti su
 preferences-reader-open-snapshots-using = Momentines kopijas atverti su
@@ -38,6 +42,9 @@ preferences-reader-auto-disable-tool =
 preferences-reader-ebook-font = El. knygos šriftas:
 preferences-reader-ebook-hyphenate =
     .label = Įgalinti automatinį žodžių kėlimą
+preferences-note-title = Pastabos
+preferences-note-open-in-new-window =
+    .label = Open notes in new windows instead of tabs
 preferences-color-scheme = Spalvų derinys:
 preferences-color-scheme-auto =
     .label = Automatinis

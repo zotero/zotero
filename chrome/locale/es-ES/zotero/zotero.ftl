@@ -60,6 +60,7 @@ general-next = Siguiente
 general-learn-more = Más información
 general-warning = Advertencia
 general-type-to-continue = Introduzca “{ $text }” para continuar.
+general-continue = Continuar
 general-red = Rojo
 general-orange = Naranja
 general-yellow = Amarillo
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Mover columna a la izquierda
 menu-view-columns-move-right =
     .label = Mover columna a la derecha
+menu-view-note-font-size =
+    .label = Tamaño de fuente de notas
+menu-view-note-tab-font-size =
+    .label = Tamaño de fuente de la pestaña Nota
 menu-show-tabs-menu =
     .label = Mostrar menú de pestañas
 menu-edit-copy-annotation =
@@ -169,14 +174,16 @@ item-menu-viewAttachment =
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] instantánea
+                    [snapshot] captura
+                    [note] nota
                    *[other] adjunto
                 }
            *[other]
                 { $attachmentType ->
                     [pdf] PDFs
                     [epub] EPUBs
-                    [snapshot] instantáneas
+                    [snapshot] capturas
+                    [note] notas
                    *[other] adjuntos
                 }
         } { $openIn ->
@@ -417,6 +424,7 @@ pane-info = Información
 pane-abstract = Resumen
 pane-attachments = Adjuntos
 pane-notes = Notas
+pane-note-info = Información de la nota
 pane-libraries-collections = Bibliotecas y colecciones
 pane-tags = Etiquetas
 pane-related = Relacionado
@@ -497,6 +505,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -565,6 +575,26 @@ attachment-info-convert-note =
            *[unknown] nuevo
         }
     .tooltiptext = Ya no es posible añadir notas a los archivos adjuntos, pero puedes editar esta nota migrándola a una nota independiente.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Título
+note-info-parent-item = Elemento principal
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] Ninguno
+    }
+    .title =
+        { $hasParentItem ->
+            [true] Ver elemento principal en la biblioteca
+           *[false] Ver elemento de nota en la biblioteca
+        }
+note-info-date-created = Creado
+note-info-date-modified = Modificado
+note-info-size = Tamaño
+note-info-word-count = Recuento de palabras
+note-info-character-count = Recuento de caracteres
+item-title-empty-note = Nota sin título
 attachment-preview-placeholder = No hay archivos adjuntos para la vista previa
 attachment-rename-from-parent =
     .tooltiptext = Renombrar el archivo para que coincida con el elemento principal
@@ -700,8 +730,7 @@ file-type-video = Vídeo
 file-type-presentation = Presentación
 file-type-document = Documento
 file-type-ebook = Libro electrónico
-post-upgrade-message = Más información sobre las <a data-l10n-name="new-features-link">nuevas funciones de en { -app-name } { $version }</a>
-post-upgrade-density = Elija la densidad de diseño que prefiera:
+post-upgrade-message = ¡Se le ha actualizado a <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Descubra <a data-l10n-name="new-features-link">las novedades</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -724,3 +753,7 @@ long-tag-fixer-window-title =
     .title = Dividir etiquetas
 long-tag-fixer-button-dont-split =
     .label = No dividir
+menu-normalize-attachment-titles =
+    .label = Normalizar los títulos de los archivos adjuntos...
+normalize-attachment-titles-title = Normalizar los títulos de los archivos adjuntos
+normalize-attachment-titles-text = { -app-name } renombra automáticamente los archivos en el disco utilizando los metadatos del elemento principal, pero utiliza títulos separados y más sencillos, como «PDF con texto completo», «PDF preimpreso» o «PDF» para los archivos adjuntos principales, con el fin de mantener la lista de elementos más limpia y evitar la duplicación de información.En versiones anteriores de { -app-name }, así como al utilizar determinados complementos, los títulos de los archivos adjuntos podían cambiarse innecesariamente para que coincidieran con los nombres de los archivos.¿Desea actualizar los archivos adjuntos seleccionados para utilizar títulos más sencillos? Solo se cambiarán los archivos adjuntos principales cuyos títulos coincidan con el nombre del archivo.

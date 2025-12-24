@@ -63,3 +63,4 @@ note-editor-delete-column = Borrar columna
 note-editor-delete-table = Borrar tabla
 note-editor-link-popup-appeared = Apareció una ventana emergente con enlaces. Use Shift-Tab para navegar por ella.
 note-editor-citation-popup-appeared = Apareció una ventana emergente con la cita. Use Shift-Tab para navegar por ella.
+note-editor-toggle-context-pane = Alternar panel contextual

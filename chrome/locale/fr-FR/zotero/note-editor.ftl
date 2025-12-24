@@ -63,3 +63,4 @@ note-editor-delete-column = Supprimer la colonne
 note-editor-delete-table = Supprimer le tableau
 note-editor-link-popup-appeared = Une fenêtre contextuelle de lien s'est affichée. Utilisez les touches Maj-Tab pour la parcourir.
 note-editor-citation-popup-appeared = Une fenêtre contextuelle de citation s'est affichée. Utilisez les touches Maj-Tab pour la parcourir.
+note-editor-toggle-context-pane = Masquer/afficher le panneau de contexte

@@ -60,6 +60,7 @@ general-next = Neste
 general-learn-more = Lær mer
 general-warning = Advarsel
 general-type-to-continue = Skriv “{ $text }” for å fortsette.
+general-continue = Fortsett
 general-red = Rød
 general-orange = Oransje
 general-yellow = Gul
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Flytt kolonne til venstre
 menu-view-columns-move-right =
     .label = Flytt kolonne til høyre
+menu-view-note-font-size =
+    .label = Skriftstørrelse for notat
+menu-view-note-tab-font-size =
+    .label = Fontstørrelse for notatfane
 menu-show-tabs-menu =
     .label = Vis meny for faner
 menu-edit-copy-annotation =
@@ -169,13 +174,15 @@ item-menu-viewAttachment =
                     [pdf] PDF
                     [epub] EPUB
                     [snapshot] Øyeblikksbilde
+                    [note] Notat
                    *[other] Vedlegg
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDF-filer
-                    [epub] EPUB-filer
-                    [snapshot] Øyeblikksbilder
+                    [pdf] PDFs
+                    [epub] EPUBs
+                    [snapshot] Øyeblikksbilde
+                    [note] Notater
                    *[other] Vedlegg
                 }
         } { $openIn ->
@@ -415,6 +422,7 @@ pane-info = Info
 pane-abstract = Sammendrag
 pane-attachments = Vedlegg
 pane-notes = Notater
+pane-note-info = Notat info
 pane-libraries-collections = Biblioteker og samlinger
 pane-tags = Emneord
 pane-related = Relatert
@@ -490,6 +498,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -558,6 +568,26 @@ attachment-info-convert-note =
            *[unknown] New
         } notat
     .tooltiptext = Det er ikke lenger støtte for å legge til notater i vedlegg, men du kan redigere dette notatet ved å migrere det til et eget notat.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Tittel
+note-info-parent-item = Overordnet element
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] Ingen
+    }
+    .title =
+        { $hasParentItem ->
+            [true] Vis overordnet element i biblioteket
+           *[false] Vis notat i biblioteket
+        }
+note-info-date-created = Opprettet
+note-info-date-modified = Endret
+note-info-size = Størrelse
+note-info-word-count = Ordtelling
+note-info-character-count = Tegntelling
+item-title-empty-note = Notat uten tittel
 attachment-preview-placeholder = Intet vedlegg å forhåndsvise
 attachment-rename-from-parent =
     .tooltiptext = Endre navn på fil for å samsvare med overordnet element
@@ -686,8 +716,7 @@ file-type-video = Video
 file-type-presentation = Presentasjon
 file-type-document = Dokument
 file-type-ebook = E-bok
-post-upgrade-message = Lær om de <a data-l10n-name="new-features-link">nye funksjonene i { -app-name } { $version }</a>
-post-upgrade-density = Velg ønsket tetthet på oppsettet:
+post-upgrade-message = Du har blitt oppgradert til <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Lær om <a data-l10n-name="new-features-link">hva som er nytt </a>
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -710,3 +739,12 @@ long-tag-fixer-window-title =
     .title = Del opp emneord
 long-tag-fixer-button-dont-split =
     .label = Ikke del opp
+menu-normalize-attachment-titles =
+    .label = Normaliser vedleggstitler…
+normalize-attachment-titles-title = Normaliser vedleggstitler
+normalize-attachment-titles-text =
+    { -app-name } endrer automatisk navn på filer på disken ved hjelp av metadata fra overordnet element, men bruker separate, enklere titler som «Fulltekst-PDF», «Preprint-PDF» eller «PDF» for primære vedlegg for å holde elementlisten ryddigere og unngå duplisering av informasjon.
+    
+    I eldre versjoner av { -app-name }, samt ved bruk av visse plugins, kunne vedleggstitler endres unødvendig for å samsvare med filnavnene.
+    
+    Ønsker du å oppdatere de valgte vedleggene for å bruke enklere titler? Bare primære vedlegg med titler som samsvarer med filnavnet vil bli endret.

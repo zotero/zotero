@@ -63,3 +63,4 @@ note-editor-delete-column = Poista sarake
 note-editor-delete-table = Poista taulukko
 note-editor-link-popup-appeared = Linkkiponnahdusikkuna ilmestyi. Paina Shift-Tab navigoidaksesi siellä.
 note-editor-citation-popup-appeared = Viittausponnahdusikkuna ilmestyi. Paina Shift-Tab navigoidaksesi siellä.
+note-editor-toggle-context-pane = Näytä kontekstiruutu

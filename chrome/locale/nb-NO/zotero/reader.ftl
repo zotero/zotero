@@ -125,8 +125,8 @@ reader-double = Dobbel
 reader-theme-name = Navn på tema:
 reader-background = Bakgrunn:
 reader-foreground = Forgrunn:
-reader-reading-mode = Reading Mode
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode = Lesemodus
+reader-reading-mode-not-supported = Lesemodus er ikke støttet i dette dokumentet.
 reader-clear-selection = Opphev utvalg
 reader-move-annotation-start-key =
     { PLATFORM() ->
@@ -184,7 +184,7 @@ reader-import-from-epub-no-annotations-other-file =
 reader-import-from-epub-select-other = Velg annen fil…
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [one] 1 side valgt
+       *[other] { $count } sider valgt
     }
-reader-page-options = Page Options
+reader-page-options = Side valg

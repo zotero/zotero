@@ -60,6 +60,7 @@ general-next = Következő
 general-learn-more = Bővebben
 general-warning = Figyelmeztetés
 general-type-to-continue = Type “{ $text }” to continue.
+general-continue = Folytatás
 general-red = Piros
 general-orange = Narancssárga
 general-yellow = Sárga
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = Move Column Left
 menu-view-columns-move-right =
     .label = Move Column Right
+menu-view-note-font-size =
+    .label = Jegyzet betűmérete
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 menu-edit-copy-annotation =
@@ -169,6 +174,7 @@ item-menu-viewAttachment =
                     [pdf] PDF
                     [epub] EPUB
                     [snapshot] Snapshot
+                    [note] Note
                    *[other] Attachment
                 }
            *[other]
@@ -176,6 +182,7 @@ item-menu-viewAttachment =
                     [pdf] PDFs
                     [epub] EPUBs
                     [snapshot] Snapshots
+                    [note] Notes
                    *[other] Attachments
                 }
         } { $openIn ->
@@ -427,6 +434,7 @@ pane-info = Info
 pane-abstract = Kivonat
 pane-attachments = Csatolmányok
 pane-notes = Jegyzetek
+pane-note-info = Note Info
 pane-libraries-collections = Könyvtárak és Gyűjtemények
 pane-tags = Címkék
 pane-related = Kapcsolatok
@@ -502,6 +510,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -570,6 +580,26 @@ attachment-info-convert-note =
            *[unknown] New
         } Note
     .tooltiptext = A mellékletekhez megjegyzés hozzáadása már nem támogatott, de ezt a megjegyzést szerkesztheti egy külön jegyzetbe való áthelyezéssel.
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = Cím
+note-info-parent-item = Parent Item
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Created
+note-info-date-modified = Módosítás dátuma
+note-info-size = Méret
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+item-title-empty-note = Cím nélküli jegyzet
 attachment-preview-placeholder = Nincs melléklet az előnézethez
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
@@ -698,8 +728,7 @@ file-type-video = Videó
 file-type-presentation = Előadás
 file-type-document = Dokumentum
 file-type-ebook = Ebook
-post-upgrade-message = Ismerje meg a <a data-l10n-name="new-features-link"> { -app-name } új funkcióit. { $version }</a>
-post-upgrade-density = Choose your preferred layout density:
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -722,3 +751,12 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

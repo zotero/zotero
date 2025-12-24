@@ -28,6 +28,10 @@ preferences-file-renaming-format-instructions-example = For eksempel vil "{ $exa
 preferences-file-renaming-format-instructions-more = Se <label data-l10n-name="file-renaming-format-help-link">dokumentasjon</label> for mer informasjon
 preferences-file-renaming-format-template = Mal for filnavn:
 preferences-file-renaming-format-preview = Forhåndsvisning:
+preferences-attachment-titles-title = Vedleggstitler
+preferences-attachment-titles-intro = Vedleggstitler er <label data-l10n-name="wiki-link">forskjellige fra filnavn</label>. For å støtte enkelte arbeidsflyter kan { -app-name } vise filnavn i stedet for vedleggstitler i elementlisten.
+preferences-attachment-titles-show-filenames =
+    .label = Vis filnavnene på vedleggene i elementlisten
 preferences-reader-title = Leser
 preferences-reader-open-epubs-using = Åpne EPUB-filer ved hjelp av
 preferences-reader-open-snapshots-using = Åpne øyeblikksbilder ved hjelp av
@@ -38,6 +42,9 @@ preferences-reader-auto-disable-tool =
 preferences-reader-ebook-font = Skrifttype for e-bok:
 preferences-reader-ebook-hyphenate =
     .label = Aktiver automatisk orddeling
+preferences-note-title = Notater
+preferences-note-open-in-new-window =
+    .label = Åpne notater i nytt vindu i stedet for faner
 preferences-color-scheme = Fargeskjema:
 preferences-color-scheme-auto =
     .label = Automatisk

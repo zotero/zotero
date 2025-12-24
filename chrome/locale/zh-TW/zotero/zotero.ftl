@@ -60,6 +60,7 @@ general-next = 下一步
 general-learn-more = 了解更多
 general-warning = 警告
 general-type-to-continue = Type “{ $text }” to continue.
+general-continue = 繼續
 general-red = 紅色
 general-orange = 橘色
 general-yellow = 黃色
@@ -118,6 +119,10 @@ menu-view-columns-move-left =
     .label = 此欄向左移動
 menu-view-columns-move-right =
     .label = 此欄向右移動
+menu-view-note-font-size =
+    .label = 筆記字型大小
+menu-view-note-tab-font-size =
+    .label = Note Tab Font Size
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 menu-edit-copy-annotation =
@@ -163,24 +168,26 @@ item-creator-moveUp =
     .label = 往上移
 item-menu-viewAttachment =
     .label =
-        開啟 { $numAttachments ->
+        Open { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] 快照
-                   *[other] 附件
+                    [snapshot] Snapshot
+                    [note] Note
+                   *[other] Attachment
                 }
            *[other]
                 { $attachmentType ->
                     [pdf] PDFs
                     [epub] EPUBs
-                    [snapshot] 快照
-                   *[other] 附件
+                    [snapshot] Snapshots
+                    [note] Notes
+                   *[other] Attachments
                 }
         } { $openIn ->
-            [tab] 到新分頁
-            [window] 到新視窗
+            [tab] in New Tab
+            [window] in New Window
            *[other] { "" }
         }
 item-menu-add-file =
@@ -414,6 +421,7 @@ pane-info = 資訊
 pane-abstract = 摘要
 pane-attachments = 附件
 pane-notes = 筆記
+pane-note-info = Note Info
 pane-libraries-collections = 文獻庫及文獻集
 pane-tags = 標籤
 pane-related = 相關
@@ -484,6 +492,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-note-info =
+    .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
     .tooltiptext = { pane-attachment-info }
 sidenav-attachment-preview =
@@ -552,6 +562,26 @@ attachment-info-convert-note =
            *[unknow] 新
         }筆記
     .tooltiptext = 已不再支援對附件新增筆記，但您可以將其遷移到單獨的筆記後編輯此筆記。
+section-note-info =
+    .label = { pane-note-info }
+note-info-title = 標題
+note-info-parent-item = Parent Item
+note-info-parent-item-button =
+    { $hasParentItem ->
+        [true] { $parentItemTitle }
+       *[false] None
+    }
+    .title =
+        { $hasParentItem ->
+            [true] View parent item in library
+           *[false] View note item in library
+        }
+note-info-date-created = Created
+note-info-date-modified = 修改日期
+note-info-size = 大小
+note-info-word-count = Word Count
+note-info-character-count = Character Count
+item-title-empty-note = 未命名的筆記
 attachment-preview-placeholder = 沒有可預覽的附件
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
@@ -673,8 +703,7 @@ file-type-video = 視訊
 file-type-presentation = 簡報
 file-type-document = 文件
 file-type-ebook = 電子書
-post-upgrade-message = 了解關於 <a data-l10n-name="new-features-link">{ -app-name } { $version } 的新功能</a>
-post-upgrade-density = 選擇你偏好的版面密度：
+post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -697,3 +726,12 @@ long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
     .label = Don’t Split
+menu-normalize-attachment-titles =
+    .label = Normalize Attachment Titles…
+normalize-attachment-titles-title = Normalize Attachment Titles
+normalize-attachment-titles-text =
+    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    
+    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    
+    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.

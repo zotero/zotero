@@ -28,6 +28,10 @@ preferences-file-renaming-format-instructions-example = Por ejemplo, "{ $example
 preferences-file-renaming-format-instructions-more = Consulte la <label data-l10n-name="file-renaming-format-help-link">documentación</label> para obtener más información.
 preferences-file-renaming-format-template = Plantilla de nombre de archivo:
 preferences-file-renaming-format-preview = Vista previa:
+preferences-attachment-titles-title = Títulos de los archivos adjuntos
+preferences-attachment-titles-intro = Los títulos de los archivos adjuntos son <label data-l10n-name="wiki-link">diferentes de los nombres de los archivos</label>. Para admitir algunos flujos de trabajo, { -app-name }  puede mostrar los nombres de los archivos en lugar de los títulos de los archivos adjuntos en la lista de elementos.
+preferences-attachment-titles-show-filenames =
+    .label = Mostrar los nombres de los archivos adjuntos en la lista de elementos
 preferences-reader-title = Lector
 preferences-reader-open-epubs-using = Abrir EPUB con
 preferences-reader-open-snapshots-using = Abrir instantáneas con
@@ -38,6 +42,9 @@ preferences-reader-auto-disable-tool =
 preferences-reader-ebook-font = Fuente del libro electrónico:
 preferences-reader-ebook-hyphenate =
     .label = Activar la separación silábica automática
+preferences-note-title = Notas
+preferences-note-open-in-new-window =
+    .label = Abrir notas en ventanas nuevas en lugar de pestañas
 preferences-color-scheme = Esquema de color:
 preferences-color-scheme-auto =
     .label = Automático
