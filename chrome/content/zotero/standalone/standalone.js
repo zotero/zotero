@@ -644,6 +644,10 @@ const ZoteroStandalone = new function () {
 				Zotero.Prefs.clear('note.fontSize');
 				break;
 			
+			case 'note-tab-font-size-reset':
+				Zotero.Prefs.clear('note.tabFontSize');
+				break;
+
 			case 'recursive-collections':
 				this.toggleBooleanPref('recursiveCollections');
 				break;
