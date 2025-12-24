@@ -35,6 +35,10 @@ import TabBar from 'components/tabBar';
 const MAX_LOADED_TABS = Services.sysinfo.getProperty("memsize") / 1024 / 1024 / 1024 <= 8 ? 3 : 5;
 const UNLOAD_UNUSED_AFTER = 86400; // 24h
 
+// Keep in sync with reader/src/common/components/sidebar/sidebar-resizer.js
+const SIDEBAR_DEFAULT_WIDTH = 240; // Pixels
+const SIDEBAR_MIN_WIDTH = 180; // Pixels
+
 var Zotero_Tabs = new function () {
 	Object.defineProperty(this, 'selectedID', {
 		get: () => this._selectedID
@@ -81,6 +85,8 @@ var Zotero_Tabs = new function () {
 	this._hasContextPaneTypes = ['reader', 'note'];
 
 	this._hasNoteContextTypes = ['reader', 'note'];
+
+	this._sidebarState = null;
 
 	this.hasContextPane = function (type) {
 		return this._hasContextPaneTypes.includes(type);
@@ -405,6 +411,110 @@ var Zotero_Tabs = new function () {
 		}
 	};
 
+	this.updateSidebarLayout = ({ width } = {}) => {
+		let { tabContentType: tabType } = Zotero_Tabs.parseTabType();
+		let sidebarState;
+		if (typeof width === 'number') {
+			// If width is a number, update the width and open state
+			sidebarState = this.updateSidebarState(tabType, { width: width, open: width > 0 });
+		}
+		else if (typeof width === 'boolean') {
+			// If width is a boolean, update the open state only
+			sidebarState = this.updateSidebarState(tabType, { open: width });
+			width = sidebarState.width || 0;
+		}
+		else {
+			// If width is not provided, use the saved state
+			sidebarState = this.getSidebarState(tabType);
+			width = sidebarState.width || 0;
+			if (sidebarState.open === false) {
+				width = 0;
+			}
+		}
+
+		if (width) {
+			let sidebarWidth = `${width}px`;
+			let placeholder = document.getElementById('zotero-reader-sidebar-pane');
+			placeholder.setAttribute('collapsed', sidebarWidth ? 'false' : 'true');
+			placeholder.setAttribute('width', sidebarWidth);
+		}
+
+		return { sidebarState };
+	};
+
+	this.getSidebarState = (tabType) => {
+		if (!this._sidebarState) {
+			this._loadSidebarState();
+		}
+		if (!this._sidebarState[tabType]) {
+			this._sidebarState[tabType] = {
+				width: SIDEBAR_DEFAULT_WIDTH,
+				open: false,
+			};
+		}
+		return this._sidebarState[tabType];
+	};
+
+	this.updateSidebarState = (tabType, state) => {
+		if (!this._sidebarState) {
+			this._loadSidebarState();
+		}
+		if (!this._sidebarState[tabType]) {
+			this._sidebarState[tabType] = {};
+		}
+		state = state || {};
+		let hasChanges = false;
+		for (let key in state) {
+			if (this._sidebarState[tabType][key] !== state[key]) {
+				hasChanges = true;
+				break;
+			}
+		}
+		if (!hasChanges) {
+			return this._sidebarState[tabType];
+		}
+		Object.assign(this._sidebarState[tabType], state);
+		this._saveSidebarState();
+		return this._sidebarState[tabType];
+	};
+
+	this._loadSidebarState = () => {
+		let sidebarState = Zotero.Prefs.get('sidebarState') || "{}";
+		try {
+			sidebarState = JSON.parse(sidebarState);
+			for (let tabType in sidebarState) {
+				if (typeof sidebarState[tabType].width !== 'number' || sidebarState[tabType].width < SIDEBAR_MIN_WIDTH) {
+					sidebarState[tabType].width = SIDEBAR_DEFAULT_WIDTH;
+				}
+			}
+		}
+		catch {
+			sidebarState = {};
+		}
+		this._sidebarState = sidebarState;
+	};
+
+	this._saveSidebarState = () => {
+		let sidebarState;
+		try {
+			sidebarState = JSON.stringify(this._sidebarState);
+		}
+		catch {
+			// Default status if serialization fails
+			sidebarState = JSON.stringify({
+				reader: {
+					width: SIDEBAR_DEFAULT_WIDTH,
+					open: false,
+				},
+				note: {
+					width: SIDEBAR_DEFAULT_WIDTH,
+					open: false,
+				},
+			});
+		}
+		Zotero.Prefs.set('sidebarState', sidebarState);
+	};
+
 	this.getTabIDByItemID = function (itemID) {
 		let tab = this._tabs.find(tab => tab.data && tab.data.itemID === itemID);
 		return tab && tab.id;
@@ -428,6 +538,12 @@ var Zotero_Tabs = new function () {
 				onLoad={this._update.bind(this)}
 			/>
 		);
+
+		this._loadSidebarState();
+	};
+
+	this.destroy = function () {
+		this._saveSidebarState();
 	};
 
 	// When an item is modified, update the title accordingly

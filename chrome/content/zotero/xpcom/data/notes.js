@@ -164,12 +164,12 @@ Zotero.Notes = new function () {
 		noteEditor.setBottomPlaceholderHeight(height);
 	};
 
-	this.toggleSidePane = function (_open) {
-		// TODO: Implement this once the note editor supports side pane
+	this.toggleSidebar = function (_open) {
+		// TODO: Implement this once the note editor supports side bar
 	};
 
-	this.setSidePaneWidth = function () {
-		// TODO: Implement this once the note editor supports side pane
+	this.setSidebarWidth = function () {
+		// TODO: Implement this once the note editor supports side bar
 	};
 
 	this.setContextPaneOpen = function (noteEditor, open) {
@@ -177,9 +177,11 @@ Zotero.Notes = new function () {
 	};
 
 	this._updateLayout = function () {
-		let { sidePaneState } = Zotero.getMainWindow().ZoteroContextPane.update();
-		this.toggleSidePane(sidePaneState.open);
-		this.setSidePaneWidth(sidePaneState.width);
+		let win = Zotero.getMainWindow();
+		win.ZoteroContextPane.update();
+		let { sidebarState } = win.Zotero_Tabs.updateSidebarLayout();
+		this.toggleSidebar(sidebarState.open);
+		this.setSidebarWidth(sidebarState.width);
 	};
 
 	this.getByTabID = function (tabID) {

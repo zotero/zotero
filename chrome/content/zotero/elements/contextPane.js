@@ -238,6 +238,7 @@
 			}
 
 			ZoteroContextPane.update();
+			Zotero_Tabs.updateSidebarLayout();
 		}
 
 		async _setupNotesContext(tabID) {

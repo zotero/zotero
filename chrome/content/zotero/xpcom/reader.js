@@ -1466,10 +1466,10 @@ class ReaderTab extends ReaderInstance {
 
 		this._onToggleSidebarCallback = (open) => {
 			if (open) {
-				this._window.ZoteroContextPane.updateLayout({ sidePaneWidth: true });
+				this._window.Zotero_Tabs.updateSidebarLayout({ width: true });
 			}
 			else {
-				this._window.ZoteroContextPane.updateLayout({ sidePaneWidth: false });
+				this._window.Zotero_Tabs.updateSidebarLayout({ width: false });
 			}
 
 			if (options.onToggleSidebar) {
@@ -1478,7 +1478,7 @@ class ReaderTab extends ReaderInstance {
 		};
 		
 		this._onChangeSidebarWidthCallback = (width) => {
-			this._window.ZoteroContextPane.updateLayout({ sidePaneWidth: width });
+			this._window.Zotero_Tabs.updateSidebarLayout({ width });
 
 			if (options.onChangeSidebarWidth) {
 				options.onChangeSidebarWidth(width);
@@ -1591,9 +1591,9 @@ class ReaderTab extends ReaderInstance {
 	}
 
 	_updateLayout() {
-		let { sidePaneState } = this._window.ZoteroContextPane.updateLayout();
-		this.toggleSidebar(sidePaneState.open);
-		this.setSidebarWidth(sidePaneState.width);
+		let { sidebarState } = this._window.Zotero_Tabs.updateSidebarLayout();
+		this.toggleSidebar(sidebarState.open);
+		this.setSidebarWidth(sidebarState.width);
 	}
 }
 
@@ -2183,7 +2183,7 @@ class Reader {
 	_loadSidebarState() {
 		let win = Zotero.getMainWindow();
 		if (win) {
-			let state = win.ZoteroContextPane.getSidePaneState('reader');
+			let state = win.Zotero_Tabs.getSidebarState('reader');
 			this._sidebarOpen = state.open;
 			if (state.width) {
 				this._sidebarWidth = parseInt(state.width);
