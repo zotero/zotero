@@ -18,6 +18,19 @@ style-configurator {
 		display: block;
 	}
 	
+	.style-list-container {
+		position: relative;
+	}
+	
+	.placeholder {
+		height: var(--style-configurator-richlistitem-max-height, 260px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: absolute;
+		inset: 0;
+	}
+	
 	richlistbox {
 		padding: var(--style-configurator-richlistbox-padding, 4px 8px);
 		height: var(--style-configurator-richlistitem-max-height, 260px);

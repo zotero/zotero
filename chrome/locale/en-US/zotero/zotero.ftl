@@ -77,6 +77,8 @@ general-maroon = Maroon
 general-gray = Gray
 general-black = Black
 
+general-loading = Loading…
+
 citation-style-label = Citation Style:
 language-label = Language:
 

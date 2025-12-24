@@ -34,8 +34,11 @@
 				xmlns="http://www.w3.org/1999/xhtml"
 				xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 			>
-				<div>
+				<div class="style-list-container">
 					<xul:richlistbox id="style-list" tabindex="0" />
+					<div class="placeholder">
+						<span data-l10n-id="general-loading" />
+					</div>
 				</div>
 			</div>
 		`);
@@ -70,8 +73,9 @@
 		}
 
 		async init() {
-			await Zotero.Styles.init();
 			const styleListEl = this.querySelector('#style-list');
+			const placeholderEl = this.querySelector('.placeholder');
+			await Zotero.Styles.init();
 
 			Zotero.Styles.getVisible().forEach((so) => {
 				const value = so.styleID;
@@ -93,6 +97,7 @@
 				this.dispatchEvent(event);
 			});
 			
+			placeholderEl.style.display = 'none';
 			this._readyResolve();
 		}
 
