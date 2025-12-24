@@ -479,7 +479,7 @@ var Zotero_Tabs = new function () {
 	};
 
 	this._loadSidebarState = () => {
-		let sidebarState = Zotero.Prefs.get('sidebarState') || "{}";
+		let sidebarState = Zotero.Prefs.get('sidebarState') || '{}';
 		try {
 			sidebarState = JSON.parse(sidebarState);
 			for (let tabType in sidebarState) {
