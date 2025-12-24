@@ -1,12 +1,9 @@
-itemFields-arXivID = arXiv ID
 itemFields-eventPlace = Event Place
 itemFields-originalDate = Original Date
 itemFields-originalPlace = Original Place
 itemFields-originalPublisher = Original Publisher
 itemFields-partNumber = Part Number
 itemFields-partTitle = Part Title
-itemFields-PMCID = { "PMCID" }
-itemFields-PMID = { "PMID" }
 itemFields-priorityDate = Priority Date
 itemFields-sessionTitle = Session Title
 
