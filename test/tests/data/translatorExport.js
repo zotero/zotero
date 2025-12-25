@@ -1,5 +1,6 @@
 {
 	"artwork": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
@@ -8,6 +9,7 @@
 		"artworkSize": "Artwork size",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -28,6 +30,7 @@
 		"date": "1999-12-31",
 		"dateAdded": "2015-04-12T05:45:15Z",
 		"dateModified": "2015-04-12T05:45:15Z",
+		"eventPlace": "Event place",
 		"extra": "Extra",
 		"itemType": "artwork",
 		"language": "en-US",
@@ -43,6 +46,7 @@
 		"version": 0
 	},
 	"audioRecording": {
+		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
@@ -51,6 +55,7 @@
 		"attachments": [],
 		"audioRecordingFormat": "Medium",
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -67,6 +72,21 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "creator",
+				"firstName": "creatorFirst",
+				"lastName": "creatorLast"
+			},
+			{
+				"creatorType": "originalCreator",
+				"firstName": "originalCreatorFirst",
+				"lastName": "originalCreatorLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
 			},
 			{
 				"creatorType": "wordsBy",
@@ -102,10 +122,12 @@
 		"volume": "6"
 	},
 	"bill": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"billNumber": "3",
+		"citationKey": "Citation key",
 		"code": "Code",
 		"codePages": "1-10",
 		"codeVolume": "6",
@@ -152,10 +174,13 @@
 		"version": 0
 	},
 	"blogPost": {
+		"DOI": "10.1234/example.doi",
+		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"blogTitle": "Publication title",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -172,6 +197,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
 			},
 			{
 				"creatorType": "author",
@@ -196,13 +226,16 @@
 		"websiteType": "Type"
 	},
 	"book": {
+		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
+		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -240,12 +273,16 @@
 		"dateModified": "2015-04-12T05:45:15Z",
 		"edition": "8",
 		"extra": "Extra",
+		"format": "Medium",
 		"itemType": "book",
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
 		"notes": [],
 		"numPages": "4",
 		"numberOfVolumes": "7",
+		"originalDate": "Original date",
+		"originalPlace": "Original place",
+		"originalPublisher": "Original publisher",
 		"place": "Place",
 		"publisher": "Publisher",
 		"relations": {},
@@ -261,7 +298,9 @@
 		"volume": "6"
 	},
 	"bookSection": {
+		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
+		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
@@ -269,6 +308,7 @@
 		"attachments": [],
 		"bookTitle": "Publication title",
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -311,11 +351,15 @@
 		"dateModified": "2015-04-12T05:45:15Z",
 		"edition": "8",
 		"extra": "Extra",
+		"format": "Medium",
 		"itemType": "bookSection",
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
 		"notes": [],
 		"numberOfVolumes": "7",
+		"originalDate": "Original date",
+		"originalPlace": "Original place",
+		"originalPublisher": "Original publisher",
 		"pages": "1-10",
 		"place": "Place",
 		"publisher": "Publisher",
@@ -332,10 +376,12 @@
 		"volume": "6"
 	},
 	"case": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"caseName": "Title",
+		"citationKey": "Citation key",
 		"collections": [],
 		"court": "Authority",
 		"creators": [
@@ -380,6 +426,7 @@
 		"version": 0
 	},
 	"computerProgram": {
+		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
@@ -387,6 +434,7 @@
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"company": "Publisher",
 		"creators": [
@@ -429,12 +477,14 @@
 	"conferencePaper": {
 		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
+		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"conferenceName": "Conference name",
 		"creators": [
@@ -541,6 +591,7 @@
 		"versionNumber": "Version number"
 	},
 	"dictionaryEntry": {
+		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
@@ -548,6 +599,7 @@
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -607,12 +659,14 @@
 		"volume": "6"
 	},
 	"document": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -653,20 +707,24 @@
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
 		"notes": [],
+		"place": "Place",
 		"publisher": "Publisher",
 		"relations": {},
 		"rights": "Rights",
 		"shortTitle": "Short title",
 		"tags": [],
 		"title": "Title",
+		"type": "Type",
 		"uri": "http://zotero.org/users/local/riiZoBgm/items/JC3ZJTHP",
 		"url": "http://www.example.com",
 		"version": 0
 	},
 	"email": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -683,6 +741,11 @@
 				"creatorType": "recipient",
 				"firstName": "recipientFirst",
 				"lastName": "recipientLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
 			},
 			{
 				"creatorType": "author",
@@ -706,6 +769,7 @@
 		"version": 0
 	},
 	"encyclopediaArticle": {
+		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
@@ -713,6 +777,7 @@
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -772,12 +837,14 @@
 		"volume": "6"
 	},
 	"film": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -786,9 +853,29 @@
 				"lastName": "directorLast"
 			},
 			{
+				"creatorType": "castMember",
+				"firstName": "castMemberFirst",
+				"lastName": "castMemberLast"
+			},
+			{
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "guest",
+				"firstName": "guestFirst",
+				"lastName": "guestLast"
+			},
+			{
+				"creatorType": "host",
+				"firstName": "hostFirst",
+				"lastName": "hostLast"
+			},
+			{
+				"creatorType": "narrator",
+				"firstName": "narratorFirst",
+				"lastName": "narratorLast"
 			},
 			{
 				"creatorType": "producer",
@@ -799,6 +886,11 @@
 				"creatorType": "scriptwriter",
 				"firstName": "scriptwriterFirst",
 				"lastName": "scriptwriterLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
 			},
 			{
 				"creatorType": "director",
@@ -815,6 +907,7 @@
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
 		"notes": [],
+		"place": "Place",
 		"relations": {},
 		"rights": "Rights",
 		"runningTime": "1:22:33",
@@ -827,9 +920,11 @@
 		"videoRecordingFormat": "Medium"
 	},
 	"forumPost": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -866,9 +961,11 @@
 		"version": 0
 	},
 	"hearing": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
+		"citationKey": "Citation key",
 		"collections": [],
 		"committee": "Committee",
 		"creators": [
@@ -907,9 +1004,11 @@
 		"version": 0
 	},
 	"instantMessage": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -949,12 +1048,14 @@
 		"version": 0
 	},
 	"interview": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -991,6 +1092,8 @@
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
 		"notes": [],
+		"place": "Place",
+		"publisher": "Publisher",
 		"relations": {},
 		"rights": "Rights",
 		"shortTitle": "Short title",
@@ -1003,12 +1106,16 @@
 	"journalArticle": {
 		"DOI": "10.1234/example.doi",
 		"ISSN": "1234-5679",
+		"PMCID": "PMCID",
+		"PMID": "PMID",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
+		"arXivID": "Ar xiv ID",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1052,9 +1159,14 @@
 		"libraryCatalog": "Library catalog",
 		"notes": [],
 		"pages": "1-10",
+		"partNumber": "Part number",
+		"partTitle": "Part title",
+		"place": "Place",
 		"publicationTitle": "Publication title",
+		"publisher": "Publisher",
 		"relations": {},
 		"rights": "Rights",
+		"section": "Section",
 		"series": "Series",
 		"seriesText": "Series text",
 		"seriesTitle": "Series title",
@@ -1067,12 +1179,14 @@
 		"volume": "6"
 	},
 	"letter": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1091,6 +1205,11 @@
 				"lastName": "recipientLast"
 			},
 			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
+			},
+			{
 				"creatorType": "author",
 				"name": "Institutional Author"
 			}
@@ -1098,6 +1217,7 @@
 		"date": "1999-12-31",
 		"dateAdded": "2015-04-12T05:45:15Z",
 		"dateModified": "2015-04-12T05:45:15Z",
+		"eventPlace": "Event place",
 		"extra": "Extra",
 		"itemType": "letter",
 		"language": "en-US",
@@ -1114,6 +1234,7 @@
 		"version": 0
 	},
 	"magazineArticle": {
+		"DOI": "10.1234/example.doi",
 		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
@@ -1121,6 +1242,7 @@
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1158,7 +1280,9 @@
 		"libraryCatalog": "Library catalog",
 		"notes": [],
 		"pages": "1-10",
+		"place": "Place",
 		"publicationTitle": "Publication title",
+		"publisher": "Publisher",
 		"relations": {},
 		"rights": "Rights",
 		"shortTitle": "Short title",
@@ -1170,12 +1294,14 @@
 		"volume": "6"
 	},
 	"manuscript": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1202,12 +1328,14 @@
 		"dateAdded": "2015-04-12T05:45:15Z",
 		"dateModified": "2015-04-12T05:45:15Z",
 		"extra": "Extra",
+		"institution": "Publisher",
 		"itemType": "manuscript",
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
 		"manuscriptType": "Type",
 		"notes": [],
 		"numPages": "4",
+		"number": "3",
 		"place": "Place",
 		"relations": {},
 		"rights": "Rights",
@@ -1219,6 +1347,7 @@
 		"version": 0
 	},
 	"map": {
+		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
@@ -1226,6 +1355,7 @@
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1272,6 +1402,7 @@
 		"version": 0
 	},
 	"newspaperArticle": {
+		"DOI": "10.1234/example.doi",
 		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
@@ -1279,6 +1410,7 @@
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1311,6 +1443,7 @@
 		"dateModified": "2015-04-12T05:45:15Z",
 		"edition": "8",
 		"extra": "Extra",
+		"issue": "5",
 		"itemType": "newspaperArticle",
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
@@ -1318,6 +1451,7 @@
 		"pages": "1-10",
 		"place": "Place",
 		"publicationTitle": "Publication title",
+		"publisher": "Publisher",
 		"relations": {},
 		"rights": "Rights",
 		"section": "Section",
@@ -1326,14 +1460,17 @@
 		"title": "Title",
 		"uri": "http://zotero.org/users/local/riiZoBgm/items/AF7D3DBU",
 		"url": "http://www.example.com",
-		"version": 0
+		"version": 0,
+		"volume": "6"
 	},
 	"patent": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"applicationNumber": "Application number",
 		"assignee": "Assignee",
 		"attachments": [],
+		"citationKey": "Citation key",
 		"collections": [],
 		"country": "Country",
 		"creators": [
@@ -1370,6 +1507,7 @@
 		"pages": "1-10",
 		"patentNumber": "3",
 		"place": "Place",
+		"priorityDate": "Original date",
 		"priorityNumbers": "Priority numbers",
 		"references": "References",
 		"relations": {},
@@ -1382,10 +1520,12 @@
 		"version": 0
 	},
 	"podcast": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
 		"audioFileType": "Medium",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1394,14 +1534,49 @@
 				"lastName": "podcasterLast"
 			},
 			{
+				"creatorType": "castMember",
+				"firstName": "castMemberFirst",
+				"lastName": "castMemberLast"
+			},
+			{
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
 			},
 			{
+				"creatorType": "director",
+				"firstName": "directorFirst",
+				"lastName": "directorLast"
+			},
+			{
+				"creatorType": "executiveProducer",
+				"firstName": "executiveProducerFirst",
+				"lastName": "executiveProducerLast"
+			},
+			{
 				"creatorType": "guest",
 				"firstName": "guestFirst",
 				"lastName": "guestLast"
+			},
+			{
+				"creatorType": "producer",
+				"firstName": "producerFirst",
+				"lastName": "producerLast"
+			},
+			{
+				"creatorType": "scriptwriter",
+				"firstName": "scriptwriterFirst",
+				"lastName": "scriptwriterLast"
+			},
+			{
+				"creatorType": "seriesCreator",
+				"firstName": "seriesCreatorFirst",
+				"lastName": "seriesCreatorLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
 			},
 			{
 				"creatorType": "podcaster",
@@ -1416,6 +1591,8 @@
 		"itemType": "podcast",
 		"language": "en-US",
 		"notes": [],
+		"place": "Place",
+		"publisher": "Publisher",
 		"relations": {},
 		"rights": "Rights",
 		"runningTime": "1:22:33",
@@ -1492,9 +1669,11 @@
 		"version": 0
 	},
 	"presentation": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1503,9 +1682,24 @@
 				"lastName": "presenterLast"
 			},
 			{
+				"creatorType": "chair",
+				"firstName": "chairFirst",
+				"lastName": "chairLast"
+			},
+			{
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "organizer",
+				"firstName": "organizerFirst",
+				"lastName": "organizerLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
 			},
 			{
 				"creatorType": "presenter",
@@ -1524,6 +1718,8 @@
 		"presentationType": "Type",
 		"relations": {},
 		"rights": "Rights",
+		"series": "Series",
+		"sessionTitle": "Publication title",
 		"shortTitle": "Short title",
 		"tags": [],
 		"title": "Title",
@@ -1532,6 +1728,7 @@
 		"version": 0
 	},
 	"radioBroadcast": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
@@ -1539,12 +1736,13 @@
 		"attachments": [],
 		"audioRecordingFormat": "Medium",
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
-				"creatorType": "director",
-				"firstName": "directorFirst",
-				"lastName": "directorLast"
+				"creatorType": "creator",
+				"firstName": "creatorFirst",
+				"lastName": "creatorLast"
 			},
 			{
 				"creatorType": "castMember",
@@ -1557,9 +1755,24 @@
 				"lastName": "contributorLast"
 			},
 			{
+				"creatorType": "director",
+				"firstName": "directorFirst",
+				"lastName": "directorLast"
+			},
+			{
+				"creatorType": "executiveProducer",
+				"firstName": "executiveProducerFirst",
+				"lastName": "executiveProducerLast"
+			},
+			{
 				"creatorType": "guest",
 				"firstName": "guestFirst",
 				"lastName": "guestLast"
+			},
+			{
+				"creatorType": "host",
+				"firstName": "hostFirst",
+				"lastName": "hostLast"
 			},
 			{
 				"creatorType": "producer",
@@ -1572,7 +1785,17 @@
 				"lastName": "scriptwriterLast"
 			},
 			{
-				"creatorType": "director",
+				"creatorType": "seriesCreator",
+				"firstName": "seriesCreatorFirst",
+				"lastName": "seriesCreatorLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "creator",
 				"name": "Institutional Author"
 			}
 		],
@@ -1599,12 +1822,16 @@
 		"version": 0
 	},
 	"report": {
+		"DOI": "10.1234/example.doi",
+		"ISBN": "978-1-234-56789-7",
+		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1616,6 +1843,11 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "editor",
+				"firstName": "editorFirst",
+				"lastName": "editorLast"
 			},
 			{
 				"creatorType": "seriesEditor",
@@ -1647,6 +1879,7 @@
 		"reportNumber": "3",
 		"reportType": "Type",
 		"rights": "Rights",
+		"seriesNumber": "9",
 		"seriesTitle": "Series title",
 		"shortTitle": "Short title",
 		"tags": [],
@@ -1708,9 +1941,11 @@
 		"versionNumber": "Version number"
 	},
 	"statute": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
+		"citationKey": "Citation key",
 		"code": "Code",
 		"codeNumber": "Code number",
 		"collections": [],
@@ -1752,12 +1987,16 @@
 		"version": 0
 	},
 	"thesis": {
+		"DOI": "10.1234/example.doi",
+		"ISBN": "978-1-234-56789-7",
+		"ISSN": "1234-5679",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1787,6 +2026,8 @@
 		"place": "Place",
 		"relations": {},
 		"rights": "Rights",
+		"series": "Series",
+		"seriesNumber": "9",
 		"shortTitle": "Short title",
 		"tags": [],
 		"thesisType": "Type",
@@ -1797,12 +2038,14 @@
 		"version": 0
 	},
 	"tvBroadcast": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1821,9 +2064,24 @@
 				"lastName": "contributorLast"
 			},
 			{
+				"creatorType": "executiveProducer",
+				"firstName": "executiveProducerFirst",
+				"lastName": "executiveProducerLast"
+			},
+			{
 				"creatorType": "guest",
 				"firstName": "guestFirst",
 				"lastName": "guestLast"
+			},
+			{
+				"creatorType": "host",
+				"firstName": "hostFirst",
+				"lastName": "hostLast"
+			},
+			{
+				"creatorType": "narrator",
+				"firstName": "narratorFirst",
+				"lastName": "narratorLast"
 			},
 			{
 				"creatorType": "producer",
@@ -1834,6 +2092,16 @@
 				"creatorType": "scriptwriter",
 				"firstName": "scriptwriterFirst",
 				"lastName": "scriptwriterLast"
+			},
+			{
+				"creatorType": "seriesCreator",
+				"firstName": "seriesCreatorFirst",
+				"lastName": "seriesCreatorLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
 			},
 			{
 				"creatorType": "director",
@@ -1864,6 +2132,7 @@
 		"videoRecordingFormat": "Medium"
 	},
 	"videoRecording": {
+		"DOI": "10.1234/example.doi",
 		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
@@ -1871,12 +2140,13 @@
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
-				"creatorType": "director",
-				"firstName": "directorFirst",
-				"lastName": "directorLast"
+				"creatorType": "uploader",
+				"firstName": "uploaderFirst",
+				"lastName": "uploaderLast"
 			},
 			{
 				"creatorType": "castMember",
@@ -1889,6 +2159,36 @@
 				"lastName": "contributorLast"
 			},
 			{
+				"creatorType": "creator",
+				"firstName": "creatorFirst",
+				"lastName": "creatorLast"
+			},
+			{
+				"creatorType": "director",
+				"firstName": "directorFirst",
+				"lastName": "directorLast"
+			},
+			{
+				"creatorType": "executiveProducer",
+				"firstName": "executiveProducerFirst",
+				"lastName": "executiveProducerLast"
+			},
+			{
+				"creatorType": "guest",
+				"firstName": "guestFirst",
+				"lastName": "guestLast"
+			},
+			{
+				"creatorType": "host",
+				"firstName": "hostFirst",
+				"lastName": "hostLast"
+			},
+			{
+				"creatorType": "narrator",
+				"firstName": "narratorFirst",
+				"lastName": "narratorLast"
+			},
+			{
 				"creatorType": "producer",
 				"firstName": "producerFirst",
 				"lastName": "producerLast"
@@ -1899,7 +2199,12 @@
 				"lastName": "scriptwriterLast"
 			},
 			{
-				"creatorType": "director",
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "uploader",
 				"name": "Institutional Author"
 			}
 		],
@@ -1928,9 +2233,11 @@
 		"volume": "6"
 	},
 	"webpage": {
+		"DOI": "10.1234/example.doi",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"attachments": [],
+		"citationKey": "Citation key",
 		"collections": [],
 		"creators": [
 			{
@@ -1960,6 +2267,8 @@
 		"itemType": "webpage",
 		"language": "en-US",
 		"notes": [],
+		"place": "Place",
+		"publisher": "Publisher",
 		"relations": {},
 		"rights": "Rights",
 		"shortTitle": "Short title",
