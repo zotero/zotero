@@ -99,6 +99,7 @@
 				return;
 			}
 			this._destroyed = true;
+			this._editorInstance?.uninit();
 			
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
