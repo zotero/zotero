@@ -260,8 +260,14 @@ Zotero.DataObjectUtilities = {
 	
 	_tagsChanged: function (data1, data2) {
 		if (!data2 || data1.length != data2.length) return true;
-		for (let i = 0; i < data1.length; i++) {
-			if (!Zotero.Tags.equals(data1[i], data2[i])) {
+		let cmp = (a, b) => {
+			if (a.tag == b.tag) return b.type - a.type;
+			return a.tag > b.tag ? 1 : -1;
+		};
+		let sorted1 = [...data1].sort(cmp);
+		let sorted2 = [...data2].sort(cmp);
+		for (let i = 0; i < sorted1.length; i++) {
+			if (!Zotero.Tags.equals(sorted1[i], sorted2[i])) {
 				return true;
 			}
 		}
