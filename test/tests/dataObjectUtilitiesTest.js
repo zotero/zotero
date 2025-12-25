@@ -60,6 +60,34 @@ describe("Zotero.DataObjectUtilities", function () {
 			assert.notProperty(obj, 'place');
 		});
 		
+		it("shouldn't include tags in different order that haven't changed", function () {
+			var patchBase = {
+				title: "Old Title",
+				tags: [
+					{
+						tag: 'A'
+					},
+					{
+						tag: 'B'
+					}
+				]
+			};
+			var obj = {
+				title: "New Title",
+				tags: [
+					{
+						tag: 'B'
+					},
+					{
+						tag: 'A'
+					}
+				]
+			}
+			obj = Zotero.DataObjectUtilities.patch(patchBase, obj);
+			Zotero.debug(obj);
+			assert.notProperty(obj, 'tags');
+		});
+		
 		it("shouldn't include relations that haven't changed", function () {
 			var patchBase = {
 				title: "Old Title",
