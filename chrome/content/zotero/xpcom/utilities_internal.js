@@ -1283,6 +1283,8 @@ Zotero.Utilities.Internal = {
 	_normalizeExtraKey: function (key) {
 		return key
 			.trim()
+			// Accept "arXiv" for "arXiv ID"
+			.replace(/^arxiv$/i, 'arXiv ID')
 			// Convert fooBar to foo-bar
 			.replace(/([a-z])([A-Z])/g, '$1-$2')
 			.toLowerCase()
