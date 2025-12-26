@@ -1204,11 +1204,11 @@ Zotero.Utilities.Internal = {
 					c.name = value;
 				}
 				if (item) {
-					let creatorTypeID = Zotero.CreatorTypes.getID(possibleCreatorType);
-					if (Zotero.CreatorTypes.isValidForItemType(creatorTypeID, itemTypeID)
+					let possibleCreatorTypeID = Zotero.CreatorTypes.getID(possibleCreatorType);
+					if (Zotero.CreatorTypes.isValidForItemType(possibleCreatorTypeID, itemTypeID)
 							// Ignore if there are any creators of this type on the item already,
 							// to follow citeproc-js behavior
-							&& !item.getCreators().some(x => x.creatorType == possibleCreatorType)) {
+							&& !item.getCreators().some(x => x.creatorTypeID == possibleCreatorTypeID)) {
 						creators.push(c);
 						return false;
 					}

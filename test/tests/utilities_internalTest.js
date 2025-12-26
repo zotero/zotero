@@ -265,17 +265,6 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(fields.size, 0);
 		});
 		
-		it("should extract an author and add it to existing creators", function () {
-			var item = createUnsavedDataObject('item', { itemType: 'book' });
-			item.setCreator(0, { creatorType: 'author', name: 'Foo' });
-			var str = 'author: Bar';
-			var { fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
-			assert.equal(fields.size, 0);
-			assert.lengthOf(creators, 1);
-			assert.equal(creators[0].creatorType, 'author');
-			assert.equal(creators[0].name, 'Bar');
-		});
-		
 		it("should extract a CSL date field", function () {
 			var str = 'issued: 2000';
 			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
@@ -311,6 +300,26 @@ describe("Zotero.Utilities.Internal", function () {
 			var { creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
 			assert.lengthOf(creators, 0);
 			assert.strictEqual(extra, str);
+		});
+		
+		it("shouldn't extract a creator if creators of same type already exist", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			item.setCreator(0, { creatorType: 'author', name: 'Foo' });
+			var str = 'author: Bar';
+			var { fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.equal(fields.size, 0);
+			assert.lengthOf(creators, 0);
+		});
+		
+		it("should extract a creator if creators of the same type don't exist", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			item.setCreator(0, { creatorType: 'author', name: 'Foo' });
+			var str = 'editor: Bar';
+			var { fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.equal(fields.size, 0);
+			assert.lengthOf(creators, 1);
+			assert.equal(creators[0].creatorType, 'editor');
+			assert.equal(creators[0].name, 'Bar');
 		});
 		
 		it("should extract the citeproc-js cheater syntax", function () {
