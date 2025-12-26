@@ -208,7 +208,8 @@ describe('Zotero_Import_Mendeley', function () {
 
 			// identifiers
 			assert.equal(journal.getField('DOI'), '10.1111');
-			assert.sameMembers(journal.getField('extra').split('\n'), ['PMID: 11111111', 'arXiv: 1111.2222']);
+			assert.equal(journal.getField('PMID'), '11111111');
+			assert.equal(journal.getField('arXivID'), '1111.2222');
 
 			// tags
 			assert.equal(withTags.getTags().length, 4);
