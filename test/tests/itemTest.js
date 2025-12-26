@@ -2820,14 +2820,14 @@ describe("Zotero.Item", function () {
 			
 			it("should remove invalid-for-type base-mapped Type fields when storing in Extra", function () {
 				var json = {
-					itemType: "document",
+					itemType: "audioRecording",
 					reportType: "Foo", // Invalid base-mapped field
 					websiteType: "Foo" // Invaid base-mapped field
 				};
 				// Confirm that 'type' is still invalid for 'document', in case this changes
 				assert.isFalse(Zotero.ItemFields.isValidForType(
 					Zotero.ItemFields.getID('type'),
-					Zotero.ItemTypes.getID('document')
+					Zotero.ItemTypes.getID('audioRecording')
 				));
 				var item = new Zotero.Item;
 				item.fromJSON(json);
