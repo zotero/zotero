@@ -1110,7 +1110,6 @@
 		"PMID": "PMID",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
-		"arXivID": "Ar xiv ID",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"attachments": [],

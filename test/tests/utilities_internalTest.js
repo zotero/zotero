@@ -337,12 +337,6 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(fields.size, 0);
 			assert.strictEqual(extra, str);
 		});
-		
-		it("should accept 'arXiv' for arXiv IDs", function () {
-			var str = 'arXiv: 2405.00208';
-			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
-			assert.equal(fields.get('arXivID'), '2405.00208');
-		});
 	});
 	
 	describe("#combineExtraFields", function () {
