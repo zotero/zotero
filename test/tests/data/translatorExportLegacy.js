@@ -3142,9 +3142,9 @@
 		"collections": [],
 		"creators": [
 			{
-				"creatorType": "uploader",
-				"firstName": "uploaderFirst",
-				"lastName": "uploaderLast"
+				"creatorType": "creator",
+				"firstName": "creatorFirst",
+				"lastName": "creatorLast"
 			},
 			{
 				"creatorType": "castMember",
@@ -3155,11 +3155,6 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
-			},
-			{
-				"creatorType": "creator",
-				"firstName": "creatorFirst",
-				"lastName": "creatorLast"
 			},
 			{
 				"creatorType": "director",
@@ -3202,7 +3197,7 @@
 				"lastName": "translatorLast"
 			},
 			{
-				"creatorType": "uploader",
+				"creatorType": "creator",
 				"fieldMode": 1,
 				"lastName": "Institutional Author"
 			}
