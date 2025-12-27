@@ -1,29 +1,29 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
-    
+
     Copyright © 2009 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
-    
+
     This file is part of Zotero.
-    
+
     Zotero is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     Zotero is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
-    
+
     You should have received a copy of the GNU Affero General Public License
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
-	
+
+
 	Based on nsChromeExtensionHandler example code by Ed Anuff at
 	http://kb.mozillazine.org/Dev_:_Extending_the_Chrome_Protocol
-	
+
     ***** END LICENSE BLOCK *****
 */
 
@@ -31,17 +31,14 @@ Zotero.CommandLineIngester = {
 	ingest: async function () {
 		const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 
-		var mainWindow = Zotero.getMainWindow();
+		var mainWindow = await Zotero.getMainWindowPromise();
 		var fileToOpen;
 		// Handle zotero:// and file URIs
 		var uri = CommandLineOptions.url;
 		if (uri) {
 			if (uri.schemeIs("zotero")) {
-				// Check for existing window and focus it
-				if (mainWindow) {
-					mainWindow.focus();
-					mainWindow.ZoteroPane.loadURI(uri.spec);
-				}
+				mainWindow.focus();
+				mainWindow.ZoteroPane.loadURI(uri.spec);
 			}
 			// See below
 			else if (uri.schemeIs("file")) {
@@ -105,17 +102,17 @@ var ZoteroCommandLineHandler = {
 			var docId = cmdLine.handleFlagWithParam("ZoteroIntegrationDocument", false);
 			var templateVersion = parseInt(cmdLine.handleFlagWithParam("ZoteroIntegrationTemplateVersion", false));
 			templateVersion = isNaN(templateVersion) ? 0 : templateVersion;
-			
+
 			Zotero.Integration.execCommand(agent, command, docId, templateVersion);
 		}
 		// Only open main window if we aren't handling an integration command
 		else if (!Zotero.getMainWindow()) {
 			Zotero.openMainWindow();
 		}
-		
+
 		await Zotero.CommandLineIngester.ingest();
 	},
-	
+
 	classID: Components.ID("{531828f8-a16c-46be-b9aa-14845c3b010f}"),
 	contractID: "@zotero.org/command-line-handler;1",
 	QueryInterface: ChromeUtils.generateQI(["nsISupports", "nsICommandLineHandler"]),
@@ -134,7 +131,7 @@ if (!Cm.isCIDRegistered(ZoteroCommandLineHandler.classID)) {
 		ZoteroCommandLineHandler
 	);
 	const catman = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
-	
+
 	catman.addCategoryEntry("command-line-handler",
 		"m-zotero",
 		ZoteroCommandLineHandler.contractID, false, true);
