@@ -74,11 +74,6 @@
 				"lastName": "contributorLast"
 			},
 			{
-				"creatorType": "creator",
-				"firstName": "creatorFirst",
-				"lastName": "creatorLast"
-			},
-			{
 				"creatorType": "originalCreator",
 				"firstName": "originalCreatorFirst",
 				"lastName": "originalCreatorLast"
