@@ -112,8 +112,11 @@ describe("Support Functions for Unit Testing", function () {
 					}
 				}
 			}
-
-			assert.deepEqual(oldData, newData);
+			
+			assert.sameMembers(Object.keys(oldData), Object.keys(newData));
+			for (let i in oldData) {
+				assert.deepEqual(oldData[i], newData[i]);
+			}
 		});
 	});
 	// describe("generateCiteProcJSExportData", function() {
