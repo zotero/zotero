@@ -242,7 +242,7 @@ export function registerAutoRenameFileFromParent() {
 				}
 				
 				const parentItem = await Zotero.Items.getAsync(id);
-				if (!parentItem.isTopLevelItem() || !parentItem.isRegularItem()) {
+				if (!parentItem.isRegularItem()) {
 					continue;
 				}
 
