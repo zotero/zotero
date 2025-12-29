@@ -372,7 +372,7 @@ Zotero.Feeds = new function () {
 			_nextFeedCheck = null;
 		}
 		_updating = true;
-		_updatePromise = new Promise(async (resolve) => {
+		_updatePromise = await new Promise(async (resolve) => {
 			try {
 				let sql = "SELECT libraryID AS id FROM feeds "
 					+ "WHERE refreshInterval IS NOT NULL "
