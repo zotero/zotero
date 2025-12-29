@@ -206,6 +206,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		this.initializationPromise = this.initializationDeferred.promise;
 		this.uiReadyDeferred = Zotero.Promise.defer();
 		this.uiReadyPromise = this.uiReadyDeferred.promise;
+		this.startupSyncDeferred = Zotero.Promise.defer();
+		this.startupSyncPromise = this.startupSyncDeferred.promise;
 		
 		if (options) {
 			let opts = [
