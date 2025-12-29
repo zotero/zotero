@@ -745,9 +745,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				}
 			});
 			
-			// Migrate fields from Extra that can be moved to item fields after a schema update
-			await Zotero.Schema.migrateExtraFields();
-			
 			Zotero.Items.startEmptyTrashTimer();
 			
 			Zotero.QuickCopy.init();
@@ -757,6 +754,49 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			Zotero.addShutdownListener(() => Zotero.Feeds.uninit());
 			
 			Zotero.Schema.schemaUpdatePromise.then(Zotero.purgeDataObjects.bind(Zotero));
+			
+			// Migrate fields from Extra that can be moved to item fields after a schema update
+			//
+			// To test migration after the server has been updated, disable auto-sync and uncomment
+			// this line instead of the following one
+			//Zotero.Schema.schemaUpdatePromise.then(async () => {
+			Zotero.startupSyncPromise.then(async () => {
+				let progressWin;
+				let itemProgress;
+				// Feed updates (e.g., deleting old items) can interfere with this, so pause them
+				// until we're done
+				let feedPauser = await Zotero.Feeds.pause();
+				try {
+					await Zotero.Schema.migrateExtraFields({
+						onProgress: ({ progress, progressMax }) => {
+							if (!progressWin) {
+								progressWin = new Zotero.ProgressWindow({
+									closeOnClick: false
+								});
+								let title = Zotero.getString('upgrade.status');
+								progressWin.changeHeadline(title);
+								itemProgress = new progressWin.ItemProgress(
+									'journalArticle',
+									Zotero.getString('migrate-extra-fields-progress-message')
+								);
+								progressWin.show();
+							}
+							
+							itemProgress.setProgress(progress / progressMax * 100);
+						}
+					});
+				}
+				catch (e) {
+					Zotero.logError(e);
+					itemProgress.setError();
+				}
+				finally {
+					feedPauser.resume();
+				}
+				if (progressWin) {
+					progressWin.startCloseTimer(3000);
+				}
+			});
 			
 			return true;
 		}
