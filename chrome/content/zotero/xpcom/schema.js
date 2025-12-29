@@ -670,7 +670,7 @@ Zotero.Schema = new function(){
 	 * This needs the data object architecture to be initialized, so it's called from zotero.js
 	 * rather than in _updateGlobalSchema().
 	 */
-	this.migrateExtraFields = async function () {
+	this.migrateExtraFields = async function ({ onProgress }) {
 		// Check for a flag set by _updateGlobalSchema()
 		var needsUpdate = await Zotero.DB.valueQueryAsync(
 			"SELECT COUNT(*) FROM settings WHERE setting='globalSchema' AND key='migrateExtra'"
@@ -679,11 +679,14 @@ Zotero.Schema = new function(){
 			return;
 		}
 		
+		Zotero.debug("Migrating fields from Extra");
+		
 		var fieldID = Zotero.ItemFields.getID('extra');
 		var sql = "SELECT itemID, value FROM itemData "
 			+ "JOIN itemDataValues USING (valueID) "
 			+ "WHERE fieldID=?";
 		var rows = await Zotero.DB.queryAsync(sql, fieldID);
+		
 		var itemIDs = [];
 		for (let row of rows) {
 			let { itemType, fields, creators } = Zotero.Utilities.Internal.extractExtraFields(
@@ -695,14 +698,35 @@ Zotero.Schema = new function(){
 		}
 		
 		var items = await Zotero.Items.getAsync(itemIDs);
-		await Zotero.Items.loadDataTypes(items);
-		for (let item of items) {
-			let changed = item.migrateExtraFields();
-			if (!changed) continue;
-			await item.saveTx({
-				skipDateModifiedUpdate: true,
-				skipSelect: true
-			});
+		
+		Zotero.debug(`${items.length} items to migrate`);
+		
+		if (items.length) {
+			await Zotero.Items.loadDataTypes(items);
+			
+			let progress = 0;
+			let progressMax = items.length;
+			if (onProgress) {
+				onProgress({ progress, progressMax });
+			}
+			
+			let notifierQueue = new Zotero.Notifier.Queue;
+			try {
+				for (let item of items) {
+					let changed = item.migrateExtraFields();
+					if (changed) {
+						await item.saveTx({
+							skipDateModifiedUpdate: true,
+							skipSelect: true,
+							notifierQueue
+						});
+					}
+					onProgress({ progress: ++progress, progressMax });
+				}
+			}
+			finally {
+				await Zotero.Notifier.commit(notifierQueue);
+			}
 		}
 		
 		await Zotero.DB.queryAsync(
