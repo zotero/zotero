@@ -28,7 +28,11 @@
 // Mimics Zotero.Libraries
 Zotero.Feeds = new function () {
 	var _initPromise;
+	var _nextFeedCheck;
 	var _updating;
+	var _updatePromise;
+	var _pauseTokens = new Set();
+	var _paused = false;
 	
 	this.init = function () {
 		// Delay initialization for tests
@@ -65,6 +69,61 @@ Zotero.Feeds = new function () {
 			['sync'],
 			'feedsUpdate'
 		);
+	};
+	
+	this.pause = async function () {
+		// Wait for any current updates to stop
+		if (_updatePromise) {
+			await _updatePromise;
+		}
+		
+		let token = Symbol();
+		_pauseTokens.add(token);
+		_applyPausedState();
+		
+		let resumed = false;
+		return {
+			resume() {
+				if (resumed) {
+					return;
+				}
+				resumed = true;
+				_pauseTokens.delete(token);
+				_applyPausedState();
+			}
+		}
+	};
+	
+	function _applyPausedState() {
+		let shouldPause = _pauseTokens.size > 0;
+		if (shouldPause == _paused) {
+			return;
+		}
+		_paused = shouldPause;
+		
+		if (_paused) {
+			_pauseInternal();
+		}
+		else {
+			_resumeInternal();
+		}
+	}
+	
+	function _isPaused() {
+		return _pauseTokens.size > 0;
+	}
+	
+	function _pauseInternal() {
+		Zotero.debug("Pausing feed updating");
+		if (_nextFeedCheck) {
+			clearTimeout(_nextFeedCheck);
+			_nextFeedCheck = null;
+		}
+	}
+	
+	function _resumeInternal() {
+		Zotero.debug("Resuming feed updating");
+		Zotero.Feeds.scheduleNextFeedCheck();
 	};
 	
 	this.uninit = function () {
@@ -262,8 +321,9 @@ Zotero.Feeds = new function () {
 	this._nextFeedCheckDelay = null; // For tests
 	
 	this.scheduleNextFeedCheck = async function () {
-		// Don't schedule if already updating, since another check is scheduled at the end
-		if (_updating) {
+		// Don't schedule if already updating, since another check is scheduled at the end, or if
+		// paused
+		if (_updating || _paused) {
 			return;
 		}
 		
@@ -276,19 +336,19 @@ Zotero.Feeds = new function () {
 			+ "ORDER BY nextCheck ASC LIMIT 1";
 		var nextCheck = await Zotero.DB.valueQueryAsync(sql);
 
-		if (this._nextFeedCheck) {
-			clearTimeout(this._nextFeedCheck);
-			this._nextFeedCheck = null;
+		if (_nextFeedCheck) {
+			clearTimeout(_nextFeedCheck);
+			_nextFeedCheck = null;
 		}
 
 		if (nextCheck !== false) {
 			nextCheck = nextCheck > 0 ? nextCheck * 1000 : 0;
 			this._nextFeedCheckDelay = nextCheck;
 			Zotero.debug("Next feed check in " + (nextCheck / 1000) + " seconds");
-			this._nextFeedCheck = setTimeout(async () => {
+			_nextFeedCheck = setTimeout(async () => {
 				await globalFeedCheckDelay;
 
-				this._nextFeedCheck = null;
+				_nextFeedCheck = null;
 				globalFeedCheckDelay = Zotero.Promise.delay(60000); // Don't perform auto-updates more than once per minute
 				await this.updateFeeds();
 			}, nextCheck);
@@ -303,29 +363,42 @@ Zotero.Feeds = new function () {
 			Zotero.debug("Feed update already in progress");
 			return;
 		}
-		if (this._nextFeedCheck) {
-			clearTimeout(this._nextFeedCheck);
-			this._nextFeedCheck = null;
+		if (_paused) {
+			Zotero.debug("Feed updating is paused");
+			return;
+		}
+		if (_nextFeedCheck) {
+			clearTimeout(_nextFeedCheck);
+			_nextFeedCheck = null;
 		}
 		_updating = true;
-		try {
-			let sql = "SELECT libraryID AS id FROM feeds "
-				+ "WHERE refreshInterval IS NOT NULL "
-				+ "AND ( lastCheck IS NULL "
-					+ "OR (julianday(lastCheck, 'utc') + (refreshInterval/1440.0) - julianday('now', 'utc')) <= 0 )";
-			let needUpdate = ((await Zotero.DB.queryAsync(sql))).map(row => row.id);
-			Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
-			for (let i=0; i<needUpdate.length; i++) {
-				let feed = Zotero.Feeds.get(needUpdate[i]);
-				await feed.waitForDataLoad('item');
-				await feed._updateFeed();
+		_updatePromise = new Promise(async (resolve) => {
+			try {
+				let sql = "SELECT libraryID AS id FROM feeds "
+					+ "WHERE refreshInterval IS NOT NULL "
+					+ "AND ( lastCheck IS NULL "
+						+ "OR (julianday(lastCheck, 'utc') + (refreshInterval/1440.0) - julianday('now', 'utc')) <= 0 )";
+				let needUpdate = ((await Zotero.DB.queryAsync(sql))).map(row => row.id);
+				Zotero.debug("Running update for feeds: " + needUpdate.join(', '));
+				for (let i=0; i<needUpdate.length; i++) {
+					if (_paused) {
+						Zotero.debug("Stopping feed updates due to pause");
+						break;
+					}
+					let feed = Zotero.Feeds.get(needUpdate[i]);
+					await feed.waitForDataLoad('item');
+					await feed._updateFeed();
+				}
 			}
-		}
-		finally {
-			_updating = false;
-		}
-		Zotero.debug("All feed updates done");
-		this.scheduleNextFeedCheck();
+			finally {
+				_updating = false;
+				resolve();
+				_updatePromise = null;
+			}
+			
+			Zotero.debug("All feed updates done");
+			this.scheduleNextFeedCheck();
+		});
 	};
 	
 	// Conversion from expansive to compact format sync json
