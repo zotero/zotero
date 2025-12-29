@@ -671,7 +671,7 @@ Zotero.Schema = new function () {
 	 * This needs the data object architecture to be initialized, so it's called from zotero.js
 	 * rather than in _updateGlobalSchema().
 	 */
-	this.migrateExtraFields = async function ({ onProgress }) {
+	this.migrateExtraFields = async function ({ onProgress } = {}) {
 		// Check for a flag set by _updateGlobalSchema()
 		var needsUpdate = await Zotero.DB.valueQueryAsync(
 			"SELECT COUNT(*) FROM settings WHERE setting='globalSchema' AND key='migrateExtra'"
@@ -722,7 +722,9 @@ Zotero.Schema = new function () {
 							notifierQueue
 						});
 					}
-					onProgress({ progress: ++progress, progressMax });
+					if (onProgress) {
+						onProgress({ progress: ++progress, progressMax });
+					}
 				}
 			}
 			finally {
