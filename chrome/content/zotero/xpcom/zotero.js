@@ -757,9 +757,12 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update
 			//
-			// To test migration after the server has been updated, disable auto-sync and uncomment
-			// this line instead of the following one
+			// By default this won't run until after the initial auto-sync, to allow the same
+			// changes from elsewhere to be synced down. To test migration after the online library
+			// has been updated by a previous run, disable auto-sync and uncomment this line
+			// instead of the following one
 			//Zotero.Schema.schemaUpdatePromise.then(async () => {
+			//
 			Zotero.startupSyncPromise.then(async () => {
 				let progressWin;
 				let itemProgress;
