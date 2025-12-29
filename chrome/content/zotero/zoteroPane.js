@@ -862,6 +862,7 @@ var ZoteroPane = new function () {
 		}
 		
 		// Auto-sync on pane open or if new account
+		let startupSync = false;
 		if (Zotero.Prefs.get('sync.autoSync') || Zotero.initAutoSync) {
 			await Zotero.proxyAuthComplete;
 			await Zotero.uiReadyPromise;
@@ -879,10 +880,18 @@ var ZoteroPane = new function () {
 				Zotero.debug('Firefox profile access error -- skipping initial auto-sync', 4);
 			}
 			else {
+				startupSync = true;
 				Zotero.Sync.Runner.sync({
 					background: true
-				}).then(() => Zotero.initAutoSync = false);
+				})
+				.then(() => {
+					Zotero.initAutoSync = false;
+					Zotero.startupSyncDeferred.resolve();
+				});
 			}
+		}
+		if (!startupSync) {
+			Zotero.startupSyncDeferred.resolve();
 		}
 		
 		// Set sync icon to spinning if there's an existing sync

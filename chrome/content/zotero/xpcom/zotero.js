@@ -205,6 +205,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		this.uiReadyPromise.then(() => {
 			Zotero.debug("User interface ready in " + (new Date() - _startupTime) + " ms");
 		});
+		this.startupSyncDeferred = Zotero.Promise.defer();
+		this.startupSyncPromise = this.startupSyncDeferred.promise;
 		
 		if (options) {
 			let opts = [
