@@ -40,7 +40,7 @@ groupbox > label > h2, groupbox > * > label > h2 {
 
 .zotero-progress-item-label
 {
-	width: 210px;
+	width: 250px;
 	margin-inline: 5px 0;
 	margin-block: 0;
 }
