@@ -167,7 +167,7 @@ Zotero.Report.HTML = new function () {
 				
 				content += '\t\t\t\t\t<tr>\n';
 				content += '\t\t\t\t\t\t<th class="' + creator.creatorType + '">'
-					+ escapeXML(Zotero.getString('creatorTypes.' + creator.creatorType))
+					+ escapeXML(Zotero.CreatorTypes.getLocalizedString(creator.creatorType))
 					+ '</th>\n';
 				content += '\t\t\t\t\t\t<td>' + escapeXML(displayText) + '</td>\n';
 				content += '\t\t\t\t\t</tr>\n';

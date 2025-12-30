@@ -688,7 +688,7 @@
 				var localized = {};
 				for (let i = 0; i < creatorTypes.length; i++) {
 					localized[creatorTypes[i].name]
-						= Zotero.getString('creatorTypes.' + creatorTypes[i].name);
+						= Zotero.CreatorTypes.getLocalizedString(creatorTypes[i].name);
 				}
 				
 				for (let i in localized) {
@@ -1159,7 +1159,7 @@
 			rowLabel.appendChild(labelWrapper);
 			let label = this.createLabelElement({
 				id: 'creator-type-label-inner',
-				text: Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID)),
+				text: Zotero.CreatorTypes.getLocalizedString(typeID),
 				skipEventHandlers: true,
 			});
 			labelWrapper.appendChild(label);
@@ -2845,9 +2845,8 @@
 			var row = typeBox.parentNode;
 			var fields = this.getCreatorFields(row);
 			fields.creatorTypeID = typeID;
-			typeBox.querySelector("#creator-type-label-inner").textContent = Zotero.getString(
-				'creatorTypes.' + Zotero.CreatorTypes.getName(typeID)
-			);
+			typeBox.querySelector("#creator-type-label-inner").textContent
+				= Zotero.CreatorTypes.getLocalizedString(typeID);
 			typeBox.setAttribute('typeid', typeID);
 			
 			this.modifyCreator(index, fields);
