@@ -14,4 +14,3 @@ creatorTypes-narrator = Narratore
 creatorTypes-originalCreator = Autore originale
 creatorTypes-organizer = Organizzatore
 creatorTypes-seriesCreator = Autore della serie
-creatorTypes-uploader = Uploader

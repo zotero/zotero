@@ -6,7 +6,7 @@ note-editor-unlink = 断开链接
 note-editor-right-to-left = 从右到左
 note-editor-left-to-right = 从左到右
 note-editor-update-notice =
-    此笔记是由更新版本的 { -app-name } 编辑的。.
+    此笔记是由更新版本的 { -app-name } 编辑的。
     请更新 { -app-name } 以进行修改。
 note-editor-enter-link = 输入链接
 note-editor-heading-1 = 标题1

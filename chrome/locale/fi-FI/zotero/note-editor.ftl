@@ -6,8 +6,8 @@ note-editor-unlink = Poista linkki
 note-editor-right-to-left = Oikealta vasemmalle
 note-editor-left-to-right = Vasemmalta oikealle
 note-editor-update-notice =
-    This note was edited with a newer version of { -app-name }.
-    Please update { -app-name } to make changes.
+    Tätä muistiinpanoa on muokattu { -app-name }n uudemmalla versiolla.
+    Päivitä { -app-name } tehdäksesi siihen muutoksia.
 note-editor-enter-link = Syötä linkki
 note-editor-heading-1 = Otsikko 1
 note-editor-heading-2 = Otsikko 2

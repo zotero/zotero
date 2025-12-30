@@ -12,7 +12,7 @@
 <!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Gestion des fichiers">
 <!ENTITY zotero.preferences.automaticSnapshots "Faire une capture automatique de la page lors de la création de documents à partir de pages Web">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichiers PDF associés lors de l'enregistrement d'un document">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Joindre automatiquement les fichiers PDF et les autres fichiers associés lors de l'enregistrement des documents">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Renommer les fichiers liés">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Ouvrir les PDF avec">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Par défaut">

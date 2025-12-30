@@ -126,7 +126,7 @@ reader-theme-name = Theme-Name:
 reader-background = Hintergrund:
 reader-foreground = Vordergrund:
 reader-reading-mode = Leseansicht
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode-not-supported = Der Lesemodus wird in diesem Dokument nicht unterstützt
 reader-clear-selection = Auswahl aufheben
 reader-move-annotation-start-key =
     { PLATFORM() ->
@@ -184,7 +184,7 @@ reader-import-from-epub-no-annotations-other-file =
 reader-import-from-epub-select-other = Andere Datei auswählen…
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [one] 1 Seite ausgewählt
+       *[other] { $count } Seiten ausgewählt
     }
-reader-page-options = Page Options
+reader-page-options = Seitenoptionen

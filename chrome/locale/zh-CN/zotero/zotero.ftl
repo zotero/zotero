@@ -73,6 +73,7 @@ general-violet = 紫罗兰色
 general-maroon = 深红色
 general-gray = 灰色
 general-black = 黑色
+general-loading = Loading…
 citation-style-label = 参考文献样式:
 language-label = 语言：
 menu-custom-group-submenu =
@@ -447,7 +448,7 @@ section-attachments-annotations =
         { $count ->
            *[other] { $count } 个注释
         }
-section-attachments-move-to-trash-message = 您确定要将 “{ $title }” 移动到回收站吗？
+section-attachments-move-to-trash-message = 您确定要将 “{ $title }” 移动到回收站吗？
 section-notes =
     .label =
         { $count ->
@@ -721,6 +722,7 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = { -app-name } Connector 必须更新才能与该版本的 { -app-name } 兼容。
 userjs-pref-warning = 某些 { -app-name } 设置已通过不支持的方法被覆盖。{ -app-name } 将恢复这些设置并重新启动。
+migrate-extra-fields-progress-message = Migrating new fields from Extra field
 long-tag-fixer-window-title =
     .title = 拆分标签
 long-tag-fixer-button-dont-split =

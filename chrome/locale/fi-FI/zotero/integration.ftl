@@ -24,8 +24,8 @@ integration-citationDialog-section-open = Avoimia asiakirjoja: ({ $count })
 integration-citationDialog-section-selected = Valittuja nimikkeitä ({ $count }/{ $total })
 integration-citationDialog-section-cited =
     { $count ->
-        [0] Cited Items
-       *[other] Cited Items ({ $count })
+        [0] Viitatut nimikkeet
+       *[other] Viitatut nimikkeet ({ $count })
     }
 integration-citationDialog-details-suffix = Jälkiliite
 integration-citationDialog-details-prefix = Etuliite
@@ -37,19 +37,19 @@ integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = Viittausasetukset
 integration-citationDialog-lib-message-citation =
     { $search ->
-        [true] No selected, open, or cited items match the current search
-       *[other] No selected or open items
+        [true] Ei tämänhetkiseen hakuun täsmääviä valittuja, avoimia tai viitattuja nimikkeitä
+       *[other] Ei valittuja eikä avoimia nimikkeitä
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] No selected notes match the current search
-       *[other] No notes are selected
+        [true] Yksikään valituista muistiinpanoista ei täsmää tämänhetkiseen hakuun
+       *[other] Ei muistiinpanoja valittuna
     }
 integration-citationDialog-settings-keepSorted = Pidä lähteet lajiteltuna
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Kirjasto
-integration-citationDialog-mode-list = List
+integration-citationDialog-mode-list = Lista
 integration-citationDialog-btn-type-citation =
     .title = Lisää/muokkaa viitettä
 integration-citationDialog-btn-type-add-note =
@@ -58,30 +58,30 @@ integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
     .title = { general-cancel }
-integration-citationDialog-general-instructions = Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation.
-integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
-integration-citationDialog-search-for-items = Search for items to add to the citation
+integration-citationDialog-general-instructions = Käytä vasenta ja oikeaa nuolinäppäintä siirtyäksesi tämän viittauksen nimikkeissä. Valitse lisättäviä nimikkeitä painamalla sarkainta.
+integration-citationDialog-enter-to-add-item = Lisää tämä nimike viittaukseen painamalla { return-or-enter }.
+integration-citationDialog-search-for-items = Etsi lisättäviä nimikkeitä tähän viittaukseen
 integration-citationDialog-aria-bubble =
-    .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
+    .aria-description = Tämä nimike sisältyy viittaukseeen. Paina välilyöntiä muokataksesi nimikettä. { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
-    .aria-description = Press Tab to select items to add to this citation. Press Escape to discard the changes and close the dialog.
+    .aria-description = Paina sarkainnäppäintä valitaksesi nimikkeitä tähän viittaukseen lisättävaäksi. Paina Esc hylätäksesi muutokset ja sulkeaksesi valintaikkunan.
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
-    .placeholder = Search for a note to insert into the document
+    .placeholder = Etsi muistiinpanoa lisättäväksi tähän asiakirjaan
 integration-citationDialog-aria-item-list =
-    .aria-description = Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Muuta nimikkeen valintaa ylä- ja alanuolinäppäimellä. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
-    .aria-description = Use Right/Left Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Muuta nimikkeen valintaa vasemmalla ja oikealla nuolinäppäimellä. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-collections-table =
     .aria-label = Kokoelmat.
-    .aria-description = Select a collection and press Tab to navigate its items.
+    .aria-description = Valitse kokoelma ja paina sarkainnäppäintä selataksesi nimikkeitä.
 integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
-    .aria-label = This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it.
+    .aria-label = Tämä nimike on lisätty viittaukseen. Paina { return-or-enter } lisätäksesi sen uudestaan tai { delete-or-backspace } poistaaksesi sen.
 integration-citationDialog-add-all = Lisää kaikki
 integration-citationDialog-collapse-section =
     .title = Kutista osa
@@ -110,8 +110,8 @@ integration-prefs-automaticJournalAbbeviations-description = Lehden lyhenne -ken
 integration-prefs-exportDocument =
     .label = Vaihda eri tekstinkäsittelyohjelmaan…
 integration-error-unable-to-find-winword = { -app-name } ei löydä käynnissä olevaa Word-sovellusta.
-integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
-integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
-integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
+integration-warning-citation-changes-will-be-lost = Viittaukseen tekemäsi muutokset menetetään jos jatkat.
+integration-warning-bibliography-changes-will-be-lost = Lähdeluetteloon tekemäsi muutokset menetetään jos jatkat.
+integration-warning-documentPreferences-changes-will-be-lost = Asiakirjan ominaisuuksiin tekemäsi muutokset menetetään jos jatkat.
 integration-warning-discard-changes = Hylkää muutokset
 integration-warning-command-is-running = Tekstinkäsittelyohjelman integrointikomento on jo käynnissä.

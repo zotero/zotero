@@ -43,13 +43,13 @@ reader-page = Sivu
 reader-location = Sijainti
 reader-read-only = Vain luku
 reader-prompt-transfer-from-pdf-title = Tuo huomautukset
-reader-prompt-transfer-from-pdf-text = Annotations stored in the PDF file will be moved to { $target }.
+reader-prompt-transfer-from-pdf-text = PDF-tiedostoon tallennetut huomautukset siirretään nyt kohteeseen { $target }.
 reader-prompt-password-protected = Toimenpidettä ei tueta salasanasuojatuilla PDF-tiedostoilla.
 reader-prompt-delete-pages-title = Poista sivut
 reader-prompt-delete-pages-text =
     { $count ->
-        [one] Are you sure you want to delete { $count } page from the PDF file?
-       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+        [one] Haluatko varmasti poistaa { $count } sivun tästä PDF-tiedostosta?
+       *[other] Haluatko varmasti poistaa { $count } sivua tästä PDF-tiedostosta?
     }
 reader-prompt-delete-annotations-title = Poista huomautukset
 reader-prompt-delete-annotations-text =
@@ -126,7 +126,7 @@ reader-theme-name = Teeman nimi:
 reader-background = Tausta:
 reader-foreground = Etuala:
 reader-reading-mode = Lukutila
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode-not-supported = Lukutilaa ei tueta tälle asiakirjatyypille.
 reader-clear-selection = Tyhjennä valinta
 reader-move-annotation-start-key =
     { PLATFORM() ->
@@ -134,12 +134,12 @@ reader-move-annotation-start-key =
        *[other] { general-key-alt }
     }
 reader-a11y-move-annotation = Voit siirtää huomautusta käyttämällä nuolinäppäimiä.
-reader-a11y-edit-text-annotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys.
+reader-a11y-edit-text-annotation = Siirtääksesi tekstihuomautuksen loppua, pidä pohjassa { general-key-shift } ja paina vasenta tai oikeaa nuolinäppäintä. iirtääksesi huomautuksen alkua, pidä { general-key-shift }-{ reader-move-annotation-start-key } ja käytä nuolinäppäimiä.
 reader-a11y-resize-annotation = Muuttaaksesi huomautuksen kokoa, pidä pohjassa { general-key-shift } ja käytä nuolinäppäimiä.
 reader-a11y-annotation-popup-appeared = Käytä sarkainnäppäintä siirtyäksesi huomautusponnahdusikkunassa.
 reader-a11y-annotation-created = { $type } luotu.
 reader-a11y-annotation-selected = { $type } valittu.
--reader-a11y-textual-annotation-instruction = To annotate text via the keyboard, first use “{ reader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
+-reader-a11y-textual-annotation-instruction = Lisätäksesi huomautuksia näppäimistöltä, käytä ensin “{ reader-find-in-document }” löytääksesi hakusanan tai -lauseen, ja paina sitten { general-key-control }-{ option-or-alt }-{ $number } muuttaaksesi hakutuloksen huomautukseksi.
 -reader-a11y-annotation-instruction = Lisätäksesi tämän huomautuksen asiakirjaan, aktivoi asiakirja ja paina { general-key-control }-{ option-or-alt }-{ $number }.
 reader-toolbar-highlight =
     .aria-description = { -reader-a11y-textual-annotation-instruction(number: 1) }
@@ -167,12 +167,12 @@ reader-import-from-epub =
     .label = Tuo e-kirjan huomautukset...
 reader-import-from-epub-prompt-title = Tuo e-kirjan huomautukset
 reader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [one] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } löysi { $count ->
+        [one] { $count } { $tool } huomautuksen
+       *[other] { $count } { $tool } huomautusta
+    }, viimeksi muokattu { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    Kaikki { -app-name }n huomautukset jotka on tuotu aiemmin tästä e-kirjasta päivitetään.
 reader-import-from-epub-no-annotations-current-file =
     Tämä e-kirja ei vaikuta sisältävän tuotavia huomautuksia.
     
@@ -184,7 +184,7 @@ reader-import-from-epub-no-annotations-other-file =
 reader-import-from-epub-select-other = Valitse toinen tiedosto…
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [one] 1 sivu valittuna
+       *[other] { $count } sivua valittuna
     }
-reader-page-options = Page Options
+reader-page-options = Sivun asetukset

@@ -73,6 +73,7 @@ general-violet = Violetti
 general-maroon = Kastanjanruskea
 general-gray = Harmaa
 general-black = Musta
+general-loading = Loading…
 citation-style-label = Viittaustyyli:
 language-label = Kieli:
 menu-custom-group-submenu =
@@ -122,7 +123,7 @@ menu-view-columns-move-right =
 menu-view-note-font-size =
     .label = Muistiinpanojen fonttikoko
 menu-view-note-tab-font-size =
-    .label = Note Tab Font Size
+    .label = Muistilapun kirjasinkoko
 menu-show-tabs-menu =
     .label = Näytä välilehtivalikko
 menu-edit-copy-annotation =
@@ -168,26 +169,26 @@ item-creator-moveUp =
     .label = Siirrä ylös
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        Avaa { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
                     [snapshot] Snapshot
-                    [note] Note
-                   *[other] Attachment
+                    [note] Muistiinpano
+                   *[other] Liite
                 }
            *[other]
                 { $attachmentType ->
                     [pdf] PDFs
-                    [epub] EPUBs
-                    [snapshot] Snapshots
-                    [note] Notes
-                   *[other] Attachments
+                    [epub] EPUBit
+                    [snapshot] Snapshotit
+                    [note] Muistiinpanot
+                   *[other] Liitteet
                 }
         } { $openIn ->
-            [tab] in New Tab
-            [window] in New Window
+            [tab] Uudessa välilehdessä
+            [window] Uudessa ikkunassa
            *[other] { "" }
         }
 item-menu-add-file =
@@ -422,7 +423,7 @@ pane-info = Tiedot
 pane-abstract = Tiivistelmä
 pane-attachments = Liitteet
 pane-notes = Muistiinpanot
-pane-note-info = Note Info
+pane-note-info = Muistiinpanon tiedot
 pane-libraries-collections = Kirjastot ja kokoelmat
 pane-tags = Avainsanat
 pane-related = Liittyvät
@@ -571,7 +572,7 @@ attachment-info-convert-note =
 section-note-info =
     .label = { pane-note-info }
 note-info-title = Nimi
-note-info-parent-item = Parent Item
+note-info-parent-item = Ylänimike
 note-info-parent-item-button =
     { $hasParentItem ->
         [true] { $parentItemTitle }
@@ -579,14 +580,14 @@ note-info-parent-item-button =
     }
     .title =
         { $hasParentItem ->
-            [true] View parent item in library
-           *[false] View note item in library
+            [true] Näytä ylänimike kirjastossa
+           *[false] Näytä muistiinpano kirjastossa
         }
-note-info-date-created = Created
+note-info-date-created = Luotu
 note-info-date-modified = Muokattu
 note-info-size = Koko
-note-info-word-count = Word Count
-note-info-character-count = Character Count
+note-info-word-count = Sanamäärä
+note-info-character-count = Merkkimäärä
 item-title-empty-note = Otsikoimaton muistiinpano
 attachment-preview-placeholder = Ei liitettä esikatseltavaksi
 attachment-rename-from-parent =
@@ -598,7 +599,7 @@ file-renaming-auto-rename-prompt-no = Pidä olemassaolevat tiedostonnimet
 rename-files-preview =
     .buttonlabelaccept = Nimeä tiedostot uudelleen
 rename-files-preview-loading = Ladataan...
-rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-intro = { -app-name } uudelleennimeää seuraavat tiedostot kirjastossasi täsmäämään päänimikkeihinsä:
 rename-files-preview-renaming = Uudelleennimeäminen…
 rename-files-preview-no-files = Kaikki tiedostonimet täsmäävät jo nimikkeisiinsä. Muutoksia ei tarvittu.
 toggle-preview =
@@ -716,7 +717,7 @@ file-type-video = Video
 file-type-presentation = Esitelmä
 file-type-document = Asiakirja
 file-type-ebook = E-kirja
-post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
+post-upgrade-message = Olet päivittänyt versioon <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Tutustu <a data-l10n-name="new-features-link">uusiin ominaisuuksiin </a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -730,21 +731,22 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
-file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-message = { -app-name } pitää nyt automaattisesti tiedostonnimet ajan tasalla kun teet muutoksia nimikkeisiin.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
-connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
-userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+connector-version-warning = { -app-name } Connector jotta se toimii tämän { -app-name }n version kanssa.
+userjs-pref-warning = Jotkus { -app-name }n asetukset on ohitettu käyttämällä ei-tuettua menetelmää. { -app-name } palauttaa ne ja käynnistyy uudelleen.
+migrate-extra-fields-progress-message = Migrating new fields from Extra field
 long-tag-fixer-window-title =
     .title = Jaa avainsanat
 long-tag-fixer-button-dont-split =
     .label = Älä jaa
 menu-normalize-attachment-titles =
-    .label = Normalize Attachment Titles…
-normalize-attachment-titles-title = Normalize Attachment Titles
+    .label = Normalisoi liitteiden otsikot...
+normalize-attachment-titles-title = Normalisoi liitteiden otsikot
 normalize-attachment-titles-text =
-    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    { -app-name } uudelleennimeää automaattisesti tiedostot levyllä nimikkeen metatietojen mukaan käyttämällä yksinkertaisia otsikoita kuten “Full Text PDF”, “Preprint PDF”, tai “PDF” pääliitteille, jotta liiteluettelo pysyy siistinä.
     
-    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    Aikaisemmissa { -app-name }n versioissa, kuten myös tiettyjä liitännäisiä käytettäessä, liitetiedostojen otsikot saattoivat tarpeettomasti muuttua täsmäämään tiedostonimiin.
     
-    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
+    Haluatko päivittää valitut liitteet käyttämään yksinkertaisempia otsikoita? Vain ensisijaiset liitteet, joiden nimet vastaavat tiedostonimeä, muutetaan.

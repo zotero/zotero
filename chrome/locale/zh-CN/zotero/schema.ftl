@@ -14,4 +14,3 @@ creatorTypes-narrator = Narrator
 creatorTypes-originalCreator = Original Creator
 creatorTypes-organizer = 组织者
 creatorTypes-seriesCreator = 系列创作者
-creatorTypes-uploader = 上传者

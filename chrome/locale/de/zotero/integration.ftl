@@ -20,7 +20,7 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-exclude-cited }
         { -integration-editBibliography-edit-reference }
 integration-citationDialog = Zitations-Dialog
-integration-citationDialog-section-open = Open Documents ({ $count })
+integration-citationDialog-section-open = Öffne Dokumente  ({ $count })
 integration-citationDialog-section-selected = Ausgewählte Einträge ({ $count }/{ $total })
 integration-citationDialog-section-cited =
     { $count ->
@@ -28,7 +28,7 @@ integration-citationDialog-section-cited =
        *[other] Cited Items ({ $count })
     }
 integration-citationDialog-details-suffix = Suffix
-integration-citationDialog-details-prefix = Prefix
+integration-citationDialog-details-prefix = Präfix
 integration-citationDialog-details-suppressAuthor = Autor auslassen
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
@@ -49,7 +49,7 @@ integration-citationDialog-settings-keepSorted = Quellen sortiert lassen
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Bibliothek
-integration-citationDialog-mode-list = List
+integration-citationDialog-mode-list = Liste
 integration-citationDialog-btn-type-citation =
     .title = Zitation hinzufügen/ändern
 integration-citationDialog-btn-type-add-note =
@@ -58,8 +58,8 @@ integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
     .title = { general-cancel }
-integration-citationDialog-general-instructions = Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation.
-integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
+integration-citationDialog-general-instructions = Pfeiltasten verwenden, um zwischen den Einträgen in dieser Zitation zu navigieren. Einträge können mit Tab ausgewählt werden, um sie der Zitation hinzuzufügen.
+integration-citationDialog-enter-to-add-item = { return-or-enter } drücken, um den Eintrag zur Zitation hinzuzufügen
 integration-citationDialog-search-for-items = Suchen, um Einträge zur Zitation hinzuzufügen
 integration-citationDialog-aria-bubble =
     .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }

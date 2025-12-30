@@ -14,4 +14,3 @@ creatorTypes-narrator = Forteller
 creatorTypes-originalCreator = Opprinnelig skaper
 creatorTypes-organizer = Organisator
 creatorTypes-seriesCreator = Serieskaper
-creatorTypes-uploader = Opplaster

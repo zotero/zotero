@@ -4,7 +4,7 @@ preferences-appearance-title = Ulkoasu ja kieli
 preferences-auto-recognize-files =
     .label = Hae metatiedot e-kirjoille ja PDFille automaattisesti
 preferences-file-renaming-title = Tiedoston uudelleennimeäminen
-preferences-file-renaming-intro = { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
+preferences-file-renaming-intro = { -app-name } voi uudelleennimetä tiedostot automaattisesti päänimikkeen mukaan (otsikko, tekijä jne.) ja pitää tiedostot synkronoituna vaikka teet muutoksia. Ladatut tiedostot nimetään aina aluksi päänimikkeen mukaan.
 preferences-file-renaming-auto-rename-files =
     .label = Nimeä tiedostot automaattisesti
 preferences-file-renaming-file-types = Nimeä uudelleen nämä tiedostotyypit:
@@ -28,23 +28,23 @@ preferences-file-renaming-format-instructions-example = Esimerkiksi “{ $exampl
 preferences-file-renaming-format-instructions-more = Lisää tietoa saat tutustumalla <label data-l10n-name="file-renaming-format-help-link">ohjeisiin </label>.
 preferences-file-renaming-format-template = Tiedostonimen pohja:
 preferences-file-renaming-format-preview = Esikatselu:
-preferences-attachment-titles-title = Attachment Titles
-preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-title = Liitteiden otsikot
+preferences-attachment-titles-intro = Liitteiden otsikot ovat <label data-l10n-name="wiki-link">erilaisia kuin tiedostonimet </label>. Jotta tietynlaiset työnkulut ovat mahdollisia, { -app-name } voi näyttää tiedostonimet liitteiden otsikoiden sijaan.
 preferences-attachment-titles-show-filenames =
-    .label = Show attachment filenames in the items list
+    .label = Näytä liitteiden tiedostonimet nimikeluettelossa
 preferences-reader-title = Lukija
 preferences-reader-open-epubs-using = Avaa EPUB-tiedostot ohjelmalla
 preferences-reader-open-snapshots-using = Avaa tilannekuvat ohjelmalla
 preferences-reader-open-in-new-window =
     .label = Avaa tiedostot uusissa ikkunoissa välilehtien sijaan
 preferences-reader-auto-disable-tool =
-    .label = Turn off note, text, and image annotation tools after each use
+    .label = Kytke muistilappu-, teksti-, ja kuvahuomautustyökalut pois päältä joka käyttökerran jälkeen
 preferences-reader-ebook-font = E-kirjan fontti:
 preferences-reader-ebook-hyphenate =
     .label = Käytä automaattista tavutusta
 preferences-note-title = Muistiinpanot
 preferences-note-open-in-new-window =
-    .label = Open notes in new windows instead of tabs
+    .label = Avaa muistiinpanot uusissa ikkunoissa välilehtien sijaan
 preferences-color-scheme = Väriteema:
 preferences-color-scheme-auto =
     .label = Automaattinen
@@ -65,7 +65,7 @@ preferences-quickCopy-minus =
 preferences-quickCopy-plus =
     .aria-label = { general-add }
     .label = { $label }
-preferences-styleManager-intro = { -app-name } can generate citations and bibliographies in over 10,000 citation styles. Add styles here to make them available when selecting styles throughout { -app-name }.
+preferences-styleManager-intro = { -app-name } voi luoda viitteitä ja lähdeluetteloita yli 10 000 viittaustyylillä. Lisää tyylit tänne niin ne ovat käytettävissä { -app-name }n tyylivalikoimassa.
 preferences-styleManager-get-additional-styles =
     .label = Hae uusia tyylejä…
 preferences-styleManager-restore-default =
@@ -73,7 +73,7 @@ preferences-styleManager-restore-default =
 preferences-styleManager-add-from-file =
     .tooltiptext = Lisää tyyli tiedostosta
     .label = Lisää tiedostosta…
-preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
+preferences-styleManager-remove = Poista tyyli painamalla { delete-or-backspace }.
 preferences-citation-dialog = Viittausikkuna
 preferences-citation-dialog-mode = Viittausikkunan tyyppi:
 preferences-citation-dialog-mode-last-used =
@@ -98,17 +98,17 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Oletus: { $directory })
     .aria-label = Oletussijainti
-preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ $libraryName }” on { $domain } with data from this computer.
+preferences-sync-reset-restore-to-server-body = { -app-name } korvaa “{ $libraryName }”  { $domain }ssa tällä tietokoneella olevilla tiedoilla.
 preferences-sync-reset-restore-to-server-deleted-items-text =
     { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
-        [one] item
-       *[other] items
-    } in the online library will be permanently deleted.
+        [one] nimike
+       *[other] nimikettä
+    } poistetaan pysyvästi verkkokirjastosta.
 preferences-sync-reset-restore-to-server-remaining-items-text =
     { general-sentence-separator }{ $localItemsCount ->
-        [0] The library on this computer and the online library will be empty.
-        [one] 1 item will remain on this computer and in the online library.
-       *[other] { $localItemsCount } items will remain on this computer and in the online library.
+        [0] Sekä kirjasto tällä tietokoneella että verkkokirjasto tulevat olemaan tyhjiä.
+        [one] 1 nimike jää tälle tietokoneelle ja verkkokirjastoon.
+       *[other] { $localItemsCount } nimikettä jää tälle tietokoneelle ja verkkokirjastoon.
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->

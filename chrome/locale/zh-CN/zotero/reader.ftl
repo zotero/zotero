@@ -48,7 +48,7 @@ reader-prompt-password-protected = 受到密码保护的 PDF 文件不支持此�
 reader-prompt-delete-pages-title = 删除页面
 reader-prompt-delete-pages-text =
     { $count ->
-       *[other] 确定要从PDF文件中删除 { $count } 个页面吗？
+       *[other] 确定要从 PDF 文件中删除 { $count } 个页面吗？
     }
 reader-prompt-delete-annotations-title = 删除注释
 reader-prompt-delete-annotations-text =
