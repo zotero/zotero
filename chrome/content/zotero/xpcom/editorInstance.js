@@ -49,6 +49,18 @@ class EditorInstance {
 		this.instanceID = Zotero.Utilities.randomString();
 	}
 
+	get itemID() {
+		return this._item.id;
+	}
+
+	get viewMode() {
+		return this._viewMode;
+	}
+
+	set viewMode(mode) {
+		this._viewMode = mode;
+	}
+
 	async init(options) {
 		Zotero.Notes.registerEditorInstance(this);
 		this.onNavigate = options.onNavigate;
@@ -250,6 +262,7 @@ class EditorInstance {
 	}
 
 	focus() {
+		this._iframeWindow.focus();
 		this._postMessage({ action: 'focus' });
 	}
 
@@ -322,6 +335,9 @@ class EditorInstance {
 			preserveSelection
 		});
 	}
+
+	// TODO: implement navigating to note editor location
+	navigate(_location) {}
 	
 	_postMessage(message) {
 		this._iframeWindow.postMessage({ instanceID: this.instanceID, message }, '*');

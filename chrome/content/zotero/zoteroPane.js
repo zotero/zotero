@@ -4655,7 +4655,7 @@ var ZoteroPane = new function () {
 			openInWindow = Zotero.Prefs.get('openNoteInNewWindow');
 		}
 		
-		return Zotero.Notes.open(itemID, {}, {
+		return Zotero.Notes.open(itemID, undefined, {
 			openInWindow,
 		});
 	};

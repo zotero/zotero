@@ -73,12 +73,18 @@ Zotero.Notes = new function () {
 			if (noteEditor.viewMode === 'tab') {
 				win.Zotero_Tabs.select(noteEditor.tabID, true);
 			}
+			else {
+				noteEditor.focus();
+			}
 			
 			if (location) {
+				// TODO: implement this
 				noteEditor.navigate(location);
 			}
+			return noteEditor;
 		}
-		else if (openInWindow) {
+
+		if (openInWindow) {
 			let name = null;
 		
 			if (itemID) {
