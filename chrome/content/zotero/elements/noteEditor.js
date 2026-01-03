@@ -459,6 +459,7 @@
 		refresh() {
 			this._id('related')?.render();
 			this._id('tags')?.render();
+			this._id('libraries-collections')?.render();
 		}
 
 		_id(id) {
