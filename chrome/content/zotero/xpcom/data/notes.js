@@ -148,10 +148,6 @@ Zotero.Notes = new function () {
 					this.setContextPaneOpen(noteEditor, event.detail.open);
 				});
 
-				container.addEventListener('tab-focus', () => {
-					noteEditor.focus();
-				});
-
 				container.addEventListener('tab-selection-change', (event) => {
 					if (event.detail.selected) {
 						this._updateLayout();
@@ -161,6 +157,7 @@ Zotero.Notes = new function () {
 
 			if (select) {
 				this._updateLayout();
+				noteEditor.focus();
 			}
 		}
 		return noteEditor;

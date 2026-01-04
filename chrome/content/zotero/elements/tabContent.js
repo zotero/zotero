@@ -97,18 +97,6 @@
 				}
 			}));
 		}
-
-		/**
-		 * Notify the tab content that it has received focus.
-		 * Used by the context pane to move focus.
-		 */
-		setFocus() {
-			this.dispatchEvent(new CustomEvent("tab-focus", {
-				detail: {
-					tabID: this.tabID
-				}
-			}));
-		}
 	}
 
 	customElements.define("tab-content", TabContent);
