@@ -120,7 +120,7 @@ var Zotero_Tabs = new function () {
 				await noteEditor;
 			}
 		},
-		focus: {
+		focusFirst: {
 			library: async () => {
 				let collectionsPane = document.getElementById("zotero-collections-pane");
 				if (collectionsPane.getAttribute("collapsed")) {
@@ -811,17 +811,41 @@ var Zotero_Tabs = new function () {
 	 *
 	 * @param {String} id
 	 * @param {Boolean} reopening
+	 * @param {Object} options - Additional options for selecting the tab. Passed to tab hooks
+	 * @param {Boolean} options.keepTabFocused
+	 * @return {Promise}
 	 */
 	this.select = function (id, reopening, options = {}) {
 		let { tab, tabIndex } = this._getTab(id);
 		let { tabContentType, tabState } = this.parseTabType(tab.type);
 
+		let isEditorFocused = false;
+
+		if (
+			// Tab focus can change
+			!options.keepTabFocused
+			// Has note context
+			&& this.hasNoteContext(tabContentType)
+			// Tabs menu popup is not open
+			&& !this.tabsMenuPanel.visible
+			// Note context editor is active
+			&& ZoteroContextPane.activeEditor?.contains(document.activeElement)
+			// Opened as a child note of the tab
+			&& ZoteroContextPane.activeEditor?.closest(".context-note-standalone")) {
+			let currentItem = Zotero.Items.get(tab.data.itemID);
+			let editorItem = ZoteroContextPane.activeEditor.item;
+			// In the same library
+			if (!currentItem || editorItem.libraryID === currentItem.libraryID) {
+				isEditorFocused = true;
+			}
+		}
+
 		if (!tab || tab.id === this._selectedID) {
 			// Focus on reader or zotero pane when keepTabFocused is explicitly false
 			// E.g. when a tab is selected via Space or Enter
-			if (options.keepTabFocused === false && tab?.id === this._selectedID) {
-				let focusHook = this._getHook(tabContentType, 'focus');
-				focusHook(tab, tabIndex, options);
+			if (!isEditorFocused && options.keepTabFocused === false && tab?.id === this._selectedID) {
+				let refocusHook = this._getHook(tabContentType, 'refocus');
+				setTimeout(() => refocusHook(tab, tabIndex, options), 0);
 			}
 			return;
 		}
@@ -874,29 +898,41 @@ var Zotero_Tabs = new function () {
 			});
 		}
 		// Notify previously selected tab content about selection change
-		this.getTabContent(this._selectedID)?.onTabSelectionChanged(false);
+		let prevTabContent = this.getTabContent(this._selectedID);
+		prevTabContent?.onTabSelectionChanged(false);
 
 		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
 		Zotero.Notifier.trigger('select', 'tab', [tab.id], { [tab.id]: { type: tab.type } }, true);
-		if (options.keepTabFocused !== true) {
-			let focusHook = this._getHook(tabContentType, 'focus');
-			focusHook(tab, tabIndex, options);
-		}
-		let tabNode = document.querySelector(`#tab-bar-container .tab[data-id="${tab.id}"]`);
-		if (this._focusOptions.keepTabFocused && document.activeElement.getAttribute('data-id') != tabNode.getAttribute('data-id')) {
-			// Keep focus on the currently selected tab during keyboard navigation
-			if (tab.id == 'zotero-pane') {
-				// Since there is more than one zotero-pane tab (pinned and not pinned),
-				// use moveFocus() to focus on the visible one
-				this.moveFocus('first');
+
+		let currentTabContent = this.getTabContent(id);
+
+		if (!isEditorFocused) {
+			if (options.keepTabFocused !== true) {
+				let refocusHook = this._getHook(tabContentType, 'refocus');
+				setTimeout(() => refocusHook(tab, tabIndex, options), 0);
 			}
 			else {
-				tabNode.focus();
+				let tabNode = document.querySelector(`#tab-bar-container .tab[data-id="${tab.id}"]`);
+				if (document.activeElement.getAttribute('data-id') != tabNode.getAttribute('data-id')) {
+					// Keep focus on the currently selected tab during keyboard navigation
+					if (tab.id == 'zotero-pane') {
+						// Since there is more than one zotero-pane tab (pinned and not pinned),
+						// use moveFocus() to focus on the visible one
+						this.moveFocus('first');
+					}
+					else {
+						tabNode.focus();
+					}
+				}
 			}
 		}
+		else {
+			setTimeout(() => ZoteroContextPane.activeEditor?.focus(), 0);
+		}
+		
 		tab.timeSelected = Zotero.Date.getUnixTimestamp();
 		// Without `setTimeout` the tab closing that happens in `unloadUnusedTabs` results in
 		// tabs deck selection index bigger than the deck children count. It feels like something
@@ -904,7 +940,7 @@ var Zotero_Tabs = new function () {
 		setTimeout(() => this.unloadUnusedTabs());
 
 		// Notify tab content about selection change
-		this.getTabContent(this._selectedID)?.onTabSelectionChanged(true);
+		currentTabContent?.onTabSelectionChanged(true);
 	};
 
 	this.unload = function (id) {
@@ -990,13 +1026,13 @@ var Zotero_Tabs = new function () {
 	 * Move focus into the first element in content of the selected tab.
 	 * Required to move focus from the outside into the tab content.
 	 */
-	this.focusContent = function (id) {
+	this.focusFirst = function (id) {
 		if (!id) id = this._selectedID;
 		let { tab, tabIndex } = this._getTab(id);
 		if (!tab) return;
 		let { tabContentType } = this.parseTabType(tab.type);
-		let focusHook = this._getHook(tabContentType, 'focus');
-		focusHook(tab, tabIndex);
+		let focusFirstHook = this._getHook(tabContentType, 'focusFirst');
+		focusFirstHook(tab, tabIndex);
 	};
 
 	/**

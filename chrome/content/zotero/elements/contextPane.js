@@ -218,7 +218,6 @@
 					// updated by another select tab event.
 					&& (action === 'select'
 						|| (action === 'load' && Zotero_Tabs.selectedID == tabID))) {
-				this._handleTabReady(tabID);
 				if (Zotero_Tabs.hasNoteContext(tabType)) {
 					this._setupNotesContext(tabID);
 				}
@@ -258,27 +257,6 @@
 
 		_disableNotesContext() {
 			this.sidenav.contextNotesPaneEnabled = false;
-		}
-
-		async _handleTabReady(tabID) {
-			let tabContent = Zotero_Tabs.getTabContent(tabID);
-			if (!tabContent) {
-				return;
-			}
-			// Focus tab content (e.g. reader pages view) if context pane note editor is not selected
-			if (Zotero_Tabs.selectedID == tabID
-				&& !Zotero_Tabs.tabsMenuPanel.visible
-				&& (!document.activeElement
-					|| !document.activeElement.closest('.context-node iframe[id="editor-view"]'))) {
-				if (!Zotero_Tabs.focusOptions?.keepTabFocused) {
-					// Do not move focus to the reader during keyboard navigation
-					setTimeout(() => {
-						// Timeout to make sure focus does not stick to the tab
-						// after click on windows
-						tabContent.setFocus();
-					});
-				}
-			}
 		}
 
 		_getCurrentNotesContext() {

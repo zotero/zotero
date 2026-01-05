@@ -268,7 +268,7 @@ var ZoteroPane = new function () {
 					ArrowNext: () => null,
 					ArrowPrevious: () => null,
 					Tab: () => {
-						Zotero_Tabs.focusContent();
+						Zotero_Tabs.focusFirst();
 						return null;
 					},
 					ShiftTab: () => document.getElementById('zotero-tb-sync-error')
