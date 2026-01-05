@@ -477,7 +477,7 @@ class ReaderInstance {
 					this.displayError(e);
 				}
 			},
-			onSaveImageAs: async (dataURL) => {
+			onSaveImageAs: async (dataURLOrBlob) => {
 				try {
 					let fp = new FilePicker();
 					fp.init(this._iframeWindow, Zotero.getString('reader-save-image-as'), fp.modeSave);
@@ -486,15 +486,22 @@ class ReaderInstance {
 					let rv = await fp.show();
 					if (rv === fp.returnOK || rv === fp.returnReplace) {
 						let outputPath = fp.file;
-						let parts = dataURL.split(',');
-						if (parts[0].includes('base64')) {
-							let bstr = atob(parts[1]);
-							let n = bstr.length;
-							let u8arr = new Uint8Array(n);
-							while (n--) {
-								u8arr[n] = bstr.charCodeAt(n);
+						if (typeof dataURLOrBlob === 'string') {
+							let parts = dataURLOrBlob.split(',');
+							if (parts[0].includes('base64')) {
+								let bstr = atob(parts[1]);
+								let n = bstr.length;
+								let u8arr = new Uint8Array(n);
+								while (n--) {
+									u8arr[n] = bstr.charCodeAt(n);
+								}
+								await IOUtils.write(outputPath, u8arr);
 							}
-							await OS.File.writeAtomic(outputPath, u8arr);
+						}
+						else {
+							let arrayBuffer = await dataURLOrBlob.arrayBuffer();
+							let u8arr = new Uint8Array(arrayBuffer);
+							await IOUtils.write(outputPath, u8arr);
 						}
 					}
 				}
