@@ -682,6 +682,8 @@ Zotero.Schema = new function () {
 		
 		Zotero.debug("Migrating fields from Extra");
 		
+		var t = new Date();
+		
 		var fieldID = Zotero.ItemFields.getID('extra');
 		var sql = "SELECT itemID, value FROM itemData "
 			+ "JOIN itemDataValues USING (valueID) "
@@ -735,6 +737,8 @@ Zotero.Schema = new function () {
 		await Zotero.DB.queryAsync(
 			"DELETE FROM settings WHERE setting='globalSchema' AND key='migrateExtra'"
 		);
+		
+		Zotero.debug(`Migrated fields from Extra for ${items.length} items in ${new Date() - t} ms`);
 	};
 	
 	
