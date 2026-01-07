@@ -715,19 +715,27 @@ Zotero.Schema = new function () {
 			
 			let notifierQueue = new Zotero.Notifier.Queue;
 			try {
-				for (let item of items) {
-					let changed = item.migrateExtraFields();
-					if (changed) {
-						await item.saveTx({
-							skipDateModifiedUpdate: true,
-							skipSelect: true,
-							notifierQueue
+				await Zotero.Utilities.Internal.forEachChunkAsync(
+					items,
+					100,
+					async function (chunk) {
+						await Zotero.DB.executeTransaction(async function () {
+							for (let item of chunk) {
+								let changed = item.migrateExtraFields();
+								if (changed) {
+									await item.save({
+										skipDateModifiedUpdate: true,
+										skipSelect: true,
+										notifierQueue
+									});
+								}
+								if (onProgress) {
+									onProgress({ progress: ++progress, progressMax });
+								}
+							}
 						});
 					}
-					if (onProgress) {
-						onProgress({ progress: ++progress, progressMax });
-					}
-				}
+				);
 			}
 			finally {
 				await Zotero.Notifier.commit(notifierQueue);
