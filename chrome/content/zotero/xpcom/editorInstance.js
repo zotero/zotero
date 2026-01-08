@@ -751,8 +751,20 @@ class EditorInstance {
 					return;
 				}
 				case 'focusBack': {
-					let win = Zotero.getMainWindow();
-					win.Zotero_Tabs.focusBack();
+					// If editor is in a tab, let Zotero_Tabs handle the focus
+					if (this._tabID) {
+						let win = Zotero.getMainWindow();
+						win.Zotero_Tabs.focusBack();
+					}
+					// If the editor is in a standalone window, itemPane, or contextPane,
+					// move focus back from the iframe
+					else {
+						let iframe = this._iframeWindow.browsingContext.embedderElement;
+						// Forget the previously focused element within the iframe to avoid
+						// it receiving focus for a moment if you later tab back into the editor
+						iframe.ownerDocument.activeElement.blur();
+						Services.focus.moveFocus(iframe.ownerGlobal, iframe, Services.focus.MOVEFOCUS_BACKWARD, Services.focus.FLAG_SHOWRING);
+					};
 					return;
 				}
 				case 'focusForward': {
