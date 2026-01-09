@@ -644,6 +644,7 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.note', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.text', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.image', this._handleAutoDisableToolPrefChange),
+			Zotero.Prefs.registerObserver('reader.readAloudVoices', this._handleReadAloudVoicesPrefChange),
 		];
 
 		return true;
@@ -1112,6 +1113,10 @@ class ReaderInstance {
 		this._internalReader.setAutoDisableNoteTool(Zotero.Prefs.get('reader.autoDisableTool.note'));
 		this._internalReader.setAutoDisableTextTool(Zotero.Prefs.get('reader.autoDisableTool.text'));
 		this._internalReader.setAutoDisableImageTool(Zotero.Prefs.get('reader.autoDisableTool.image'));
+	};
+	
+	_handleReadAloudVoicesPrefChange = () => {
+		this._internalReader.setReadAloudVoices(Cu.cloneInto(this._getReadAloudVoices(), this._iframeWindow));
 	};
 
 	_dataURLtoBlob(dataurl) {
