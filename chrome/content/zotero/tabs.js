@@ -201,10 +201,10 @@ var Zotero_Tabs = new function () {
 			// Otherwise, just update the tab with the updated attachment
 			let attachmentIDs = item.isAttachment() ? [id] : item.getAttachments();
 			for (let attachmentID of attachmentIDs) {
-				let attachment = Zotero.Items.get(attachmentID);
 				let relevantTabs = this._tabs.filter(tab => tab.data.itemID == attachmentID);
 				if (!relevantTabs.length) continue;
 				for (let tab of relevantTabs) {
+					let attachment = Zotero.Items.get(attachmentID);
 					let title = await attachment.getTabTitle();
 					this.rename(tab.id, title);
 				}
