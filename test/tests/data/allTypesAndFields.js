@@ -63,11 +63,6 @@
 				"lastName": "contributorLast"
 			},
 			{
-				"creatorType": "creator",
-				"firstName": "creatorFirst",
-				"lastName": "creatorLast"
-			},
-			{
 				"creatorType": "originalCreator",
 				"firstName": "originalCreatorFirst",
 				"lastName": "originalCreatorLast"
@@ -958,7 +953,6 @@
 		"PMID": "PMID",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
-		"arXivID": "Ar xiv ID",
 		"archive": "Archive",
 		"archiveLocation": "Archive location",
 		"callNumber": "Call number",
@@ -1862,9 +1856,9 @@
 		"citationKey": "Citation key",
 		"creators": [
 			{
-				"creatorType": "uploader",
-				"firstName": "uploaderFirst",
-				"lastName": "uploaderLast"
+				"creatorType": "creator",
+				"firstName": "creatorFirst",
+				"lastName": "creatorLast"
 			},
 			{
 				"creatorType": "castMember",
@@ -1875,11 +1869,6 @@
 				"creatorType": "contributor",
 				"firstName": "contributorFirst",
 				"lastName": "contributorLast"
-			},
-			{
-				"creatorType": "creator",
-				"firstName": "creatorFirst",
-				"lastName": "creatorLast"
 			},
 			{
 				"creatorType": "director",
@@ -1922,7 +1911,7 @@
 				"lastName": "translatorLast"
 			},
 			{
-				"creatorType": "uploader",
+				"creatorType": "creator",
 				"fieldMode": 1,
 				"lastName": "Institutional Author"
 			}
