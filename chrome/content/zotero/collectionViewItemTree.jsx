@@ -62,10 +62,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		this._collectionTreeRow = val;
 	}
 
-	get visibilityGroup() {
-		return this._collectionTreeRow?.visibilityGroup || super.visibilityGroup;
-	}
-
 	/**
 	 * Check if the quick search box has a search term.
 	 * @returns {boolean}
@@ -116,9 +112,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	refresh = Zotero.serial(async function (skipExpandMatchParents, restoreSelection=false) {
 		Zotero.debug('Refreshing items list for ' + this.itemTree.id);
 
-		// Emit loading state before refresh with ID postfix (visibilityGroup)
-		let idPostfix = this.visibilityGroup;
-		this.runListeners('update', null, { loading: true, idPostfix });
+		// Emit loading state before refresh
+		this.runListeners('update', null, { loading: true });
 		
 		var resolve, reject;
 		this.itemTree._refreshPromise = new Zotero.Promise(function () {
@@ -242,7 +237,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			}
 			
 			this._rows = newRows;
-			this._refreshRowMap();
+			this.refreshRowMap();
 			// Sort only the new items
 			await this.itemTree.sort([...addedItemIDs]);
 			
@@ -255,8 +250,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				}
 			}
 			Zotero.debug(`Refreshed open parents in ${new Date() - t} ms`);
-			
-			this._refreshRowMap();
+
+			this.refreshRowMap();
 			
 			this._searchMode = newSearchMode;
 			this._searchItemIDs = newSearchItemIDs; // items matching the search
@@ -552,7 +547,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		}
 
 		if (madeChanges) {
-			this._refreshRowMap();
+			this.refreshRowMap();
 
 			// If we refreshed, we have to clear the cache
 			if (!refreshed) {
@@ -615,12 +610,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				restoreSelection = true; // Fallback if not active
 			}
 			// On removal of a selected row, select item at previous position
-			else if (savedSelection.length) {
+			else if (cachedSelection.length) {
 				if ((action == 'remove'
 						|| action == 'trash'
 						|| action == 'delete'
 						|| action == 'removeDuplicatesMaster')
-					&& savedSelection.some(o => this.getRowIndexByID(o.id) === false)) {
+					&& cachedSelection.some(o => this.getRowIndexByID(o.id) === false)) {
 					// In duplicates view, select the next set on delete
 					if (collectionTreeRow.isDuplicates()) {
 						if (this._rows[firstAffectedRowIdx]) {
@@ -678,15 +673,19 @@ class CollectionViewItemTree extends ItemTree {
 	constructor(props) {
 		super(props);
 		// Set on changeCollectionTreeRow();
-		this.id = null;
+		this._id = null;
 		this.rowProvider = new CollectionViewItemTreeRowProvider(this);
 		this.duplicateMouseSelection = false;
 
-		this.rowProvider.onUpdate.addListener(this.handleRowModelUpdate);
+		this.rowProvider.onUpdate.addListener(this.handleRowModelUpdate.bind(this));
 	}
 
 	get collectionTreeRow() { return this.rowProvider.collectionTreeRow; }
 	set collectionTreeRow(val) { this.rowProvider._collectionTreeRow = val; }
+
+	get visibilityGroup() {
+		return this.collectionTreeRow?.visibilityGroup || 'default';
+	}
 
 	async changeCollectionTreeRow(collectionTreeRow) {
 		if (this._locked) return;
@@ -696,6 +695,11 @@ class CollectionViewItemTree extends ItemTree {
 			return this.clearItemsPaneMessage();
 		}
 		Zotero.debug(`CollectionViewItemTree.changeCollectionTreeRow(): ${collectionTreeRow.id}`);
+
+		// Set ID based on visibilityGroup
+		const visibilityGroup = collectionTreeRow.visibilityGroup || 'default';
+		await this.setId("item-tree-" + this.props.id + "-" + visibilityGroup);
+
 		await this.rowProvider.setCollectionTreeRow(collectionTreeRow);
 		// Wait for loading to complete (deferred is created/resolved by handleRowModelUpdate)
 		await this._itemTreeLoadingDeferred.promise;
@@ -721,7 +725,7 @@ class CollectionViewItemTree extends ItemTree {
 		return super.render();
 	}
 
-	async handleRowModelUpdate(rows, options) {
+	async handleRowModelUpdate(rows, options = {}) {
 		if (options.clearSearch) {
 			window.ZoteroPane?.clearQuicksearch();
 		}
@@ -1493,7 +1497,7 @@ class CollectionViewItemTree extends ItemTree {
 					await this.closeContainer(i, false);
 				}
 			}
-			this._refreshRowMap();
+			this.rowProvider.refreshRowMap();
 			this.tree.invalidate();
 
 			let selectedObjects = [...this.selection.selected].map(index => this.getRow(index).ref);
