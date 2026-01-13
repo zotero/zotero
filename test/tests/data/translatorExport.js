@@ -516,11 +516,14 @@
 		"date": "1999-12-31",
 		"dateAdded": "2015-04-12T05:45:15Z",
 		"dateModified": "2015-04-12T05:45:15Z",
+		"eventPlace": "Event place",
 		"extra": "Extra",
+		"issue": "5",
 		"itemType": "conferencePaper",
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
 		"notes": [],
+		"numberOfVolumes": "7",
 		"pages": "1-10",
 		"place": "Place",
 		"proceedingsTitle": "Publication title",
@@ -528,6 +531,7 @@
 		"relations": {},
 		"rights": "Rights",
 		"series": "Series",
+		"seriesNumber": "9",
 		"shortTitle": "Short title",
 		"tags": [],
 		"title": "Title",
@@ -1884,6 +1888,7 @@
 	},
 	"standard": {
 		"DOI": "10.1234/example.doi",
+		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
@@ -1905,6 +1910,11 @@
 				"lastName": "contributorLast"
 			},
 			{
+				"creatorType": "editor",
+				"firstName": "editorFirst",
+				"lastName": "editorLast"
+			},
+			{
 				"creatorType": "author",
 				"name": "Institutional Author"
 			}
@@ -1912,6 +1922,7 @@
 		"date": "1999-12-31",
 		"dateAdded": "2023-03-23T05:19:51Z",
 		"dateModified": "2023-03-23T05:19:51Z",
+		"edition": "8",
 		"extra": "Extra",
 		"itemType": "standard",
 		"language": "en-US",
@@ -1920,6 +1931,8 @@
 		"numPages": "4",
 		"number": "3",
 		"organization": "Authority",
+		"partNumber": "Part number",
+		"partTitle": "Part title",
 		"place": "Place",
 		"publisher": "Publisher",
 		"relations": {},
