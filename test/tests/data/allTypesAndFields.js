@@ -449,16 +449,20 @@
 			}
 		],
 		"date": "1999-12-31",
+		"eventPlace": "Event place",
 		"extra": "Extra",
+		"issue": 5,
 		"itemType": "conferencePaper",
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
+		"numberOfVolumes": 7,
 		"pages": "1-10",
 		"place": "Place",
 		"publicationTitle": "Publication title",
 		"publisher": "Publisher",
 		"rights": "Rights",
 		"series": "Series",
+		"seriesNumber": 9,
 		"shortTitle": "Short title",
 		"title": "Title",
 		"url": "http://www.example.com",
@@ -1636,6 +1640,7 @@
 	},
 	"standard": {
 		"DOI": "10.1234/example.doi",
+		"ISBN": "978-1-234-56789-7",
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
@@ -1656,18 +1661,26 @@
 				"lastName": "contributorLast"
 			},
 			{
+				"creatorType": "editor",
+				"firstName": "editorFirst",
+				"lastName": "editorLast"
+			},
+			{
 				"creatorType": "author",
 				"fieldMode": 1,
 				"lastName": "Institutional Author"
 			}
 		],
 		"date": "1999-12-31",
+		"edition": 8,
 		"extra": "Extra",
 		"itemType": "standard",
 		"language": "en-US",
 		"libraryCatalog": "Library catalog",
 		"numPages": 4,
 		"number": 3,
+		"partNumber": "Part number",
+		"partTitle": "Part title",
 		"place": "Place",
 		"publisher": "Publisher",
 		"rights": "Rights",
