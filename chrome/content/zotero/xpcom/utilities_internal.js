@@ -1170,7 +1170,7 @@ Zotero.Utilities.Internal = {
 					// have values
 					if (item) {
 						let fieldID = Zotero.ItemFields.getID(possibleField);
-						if (!Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
+						if (!Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID)
 								|| item.getField(fieldID)
 								|| additionalFields.has(possibleField)) {
 							return true;
