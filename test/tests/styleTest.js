@@ -115,7 +115,7 @@ describe("Zotero.Styles", function () {
 				}
 			);
 			item.setField('conferenceName', 'Conference');
-			item.setField('place', 'Place');
+			item.setField('eventPlace', 'Place');
 			await item.saveTx();
 		});
 		
