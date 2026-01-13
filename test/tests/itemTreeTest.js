@@ -261,12 +261,12 @@ describe("Zotero.ItemTree", function () {
 			assert.notEqual(itemsView.getCellText(row, 'title'), str);
 		});
 
-		it("should parse dates", async function () {
+		it("should parse dates permissively", async function () {
 			let testCases = {
 				'15th May, 2024': '5/15/2024',
-				'15th of May, 2024': '15th of May, 2024',
+				'15th of May, 2024': '5/15/2024',
 				'2013': '2013',
-				'Published 2013': 'Published 2013',
+				'Published 2013': '2013',
 				'12 AD, January 10': '12 AD, January 10',
 				'Jan 1, 2020': '1/1/2020',
 				'March 11, 076': '3/11/76',
