@@ -140,10 +140,6 @@ class ItemTreeRowProvider {
 		return this._searchParentIDs;
 	}
 
-	get visibilityGroup() {
-		return 'default';
-	}
-
 	getRow(index) {
 		return this._rows[index];
 	}
@@ -162,7 +158,9 @@ class ItemTreeRowProvider {
 	}
 
 	isContainer(index) {
-		let item = this.getRow(index).ref;
+		let row = this.getRow(index);
+		if (!row) return false;
+		let item = row.ref;
 		return item.isRegularItem() || item.isFileAttachment();
 	}
 
@@ -260,7 +258,7 @@ class ItemTreeRowProvider {
 			this._rows[index].isOpen = true;
 		}
 		if (!skipRowMapRefresh && count > 0) {
-			this._refreshRowMap();
+			this.refreshRowMap();
 		}
 	}
 
@@ -276,17 +274,17 @@ class ItemTreeRowProvider {
 				this._toggleOpenState(i, true);
 			}
 		}
-		this._refreshRowMap();
+		this.refreshRowMap();
 		this.runListeners('update', true, { restoreSelection: true, ensureRowsAreVisible: true });
 	}
 
 	collapseAllRows() {
 		for (var i=0; i<this.getRowCount(); i++) {
 			if (this.isContainerOpen(i)) {
-				this.toggleOpenState(i, true);
+				this._toggleOpenState(i, true);
 			}
 		}
-		this._refreshRowMap();
+		this.refreshRowMap();
 		this.runListeners('update', true, { restoreSelection: true });
 	}
 
@@ -298,7 +296,7 @@ class ItemTreeRowProvider {
 				this._toggleOpenState(index, true);
 			}
 		}
-		this._refreshRowMap();
+		this.refreshRowMap();
 		this.runListeners('update', true, { restoreSelection: true, ensureRowsAreVisible: true });
 	}
 
@@ -309,28 +307,34 @@ class ItemTreeRowProvider {
 				this._toggleOpenState(index, true);
 			}
 		}
-		this._refreshRowMap();
+		this.refreshRowMap();
 		this.runListeners('update', true, { restoreSelection: true });
 	}
 
-	_refreshRowMap() {
-		this._rowMap = {};
+	refreshRowMap() {
+		var rowMap = {};
 		for (let i = 0; i < this._rows.length; i++) {
-			this._rowMap[this._rows[i].id] = i;
+			let id = this._rows[i].id;
+			if (rowMap[id] !== undefined) {
+				Zotero.debug(`WARNING: refreshRowMap(): item row ${rowMap[id]} already found for item ${id} at ${i}`, 2);
+				Zotero.debug(new Error().stack, 2);
+			}
+			rowMap[id] = i;
 		}
+		this._rowMap = rowMap;
 	}
 
 	_addRow(row, index, skipRowMapRefresh = false) {
 		this._rows.splice(index, 0, row);
 		if (!skipRowMapRefresh) {
-			this._refreshRowMap();
+			this.refreshRowMap();
 		}
 	}
 
 	_removeRow(index, skipRowMapRefresh = false) {
 		this._rows.splice(index, 1);
 		if (!skipRowMapRefresh) {
-			this._refreshRowMap();
+			this.refreshRowMap();
 		}
 	}
 
@@ -339,7 +343,7 @@ class ItemTreeRowProvider {
 		for (let index of indices) {
 			this._rows.splice(index, 1);
 		}
-		this._refreshRowMap();
+		this.refreshRowMap();
 	}
 
 	/*
@@ -865,11 +869,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	constructor(props) {
 		super(props);
-		
+
 		this.type = 'item';
 		this.name = 'ItemTree';
-		// Set default ID - CollectionViewItemTree will update via idPostfix when collectionTreeRow is set
-		this.id = "item-tree-" + props.id;
+		this._id = "item-tree-" + props.id;
 		
 		this._skipKeypress = false;
 		this._initialized = false;
@@ -920,6 +923,30 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this.rowProvider.onUpdate.addListener(this.handleRowModelUpdate.bind(this));
 		
 		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
+	}
+
+	get id() {
+		return this._id;
+	}
+
+	async setId(newId) {
+		if (this._id === newId) return;
+
+		// Save current columns (only if we have an existing id)
+		if (this._id != null && this.props.persistColumns) {
+			await this._writeColumnPrefsToFile(true);
+		}
+
+		this._id = newId;
+
+		// Load columns for new id
+		if (this.props.persistColumns) {
+			await this._loadColumnPrefsFromFile();
+		}
+	}
+
+	get visibilityGroup() {
+		return 'default';
 	}
 
 	// Backward compatibility proxies
@@ -1045,7 +1072,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @param {boolean} options.restoreScroll - Whether to restore the cached scroll position.
 	 * @param {boolean} options.loading - Whether to show loading state (hides tree, shows message).
 	 * @param {string} options.message - Optional message to display (for loading, errors, intro text).
-	 * @param {string} options.idPostfix - Optional postfix for tree ID (e.g., visibilityGroup).
 	 * @param {boolean} options.sort - Whether to resort the tree.
 	 */
 	async handleRowModelUpdate(rows, options = {
@@ -1057,27 +1083,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		restoreScroll: false,
 		loading: false,
 		message: null,
-		idPostfix: undefined,
 	}) {
-		// Handle tree ID change (before 'loading' state handling)
-		if (options.idPostfix) {
-			let newId = "item-tree-" + this.props.id;
-			if (options.idPostfix) {
-				newId += "-" + options.idPostfix;
-			}
-			if (this.id != newId) {
-				// Handle column prefs and tree setup (async operations run in background)
-				(async () => {
-					if (this.props.persistColumns) {
-						await this._writeColumnPrefsToFile(true);
-						await this._loadColumnPrefsFromFile();
-					}
-					this.id = newId;
-					this._getColumns();
-				})();
-			}
-		}
-
 		// Handle loading/message state
 		if (options.loading) {
 			options.message ||= Zotero.getString('pane.items.loading');
@@ -1085,13 +1091,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.selection.clearSelection();
 			this.selection.focused = 0;
 		}
-		Zotero.debug(`handleRowModelUpdate: loading=${options.loading}, message=${options.message}, _itemsPaneMessage=${!!this._itemsPaneMessage}`);
 		if (options.message) {
 			this.setItemsPaneMessage(options.message);
 			return;
 		}
 		else if (this._itemsPaneMessage) {
-			Zotero.debug('handleRowModelUpdate: clearing message and resolving deferred');
 			await this.clearItemsPaneMessage();
 			// Reset scrollbar to top (at end of loading/showing message)
 			this._treebox && this._treebox.scrollTo(0);
@@ -1115,7 +1119,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		if (rows === true) {
-			Zotero.debug('handleRowModelUpdate: invalidating all rows, tree=' + !!this.tree);
 			if (this.tree) {
 				this.tree.invalidate();
 			}
@@ -1220,12 +1223,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.expandMatchParents(this._searchParentIDs);
 		}
 		else if (event.key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
-			this.expandAllRows();
+			this.rowProvider.expandAllRows();
 			return false;
 		}
 		else if (event.key == '-' && !(event.shiftKey || event.ctrlKey
 			|| event.altKey || event.metaKey)) {
-			this.collapseAllRows();
+			this.rowProvider.collapseAllRows();
 			return false;
 		}
 		return true;
@@ -1292,7 +1295,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				isContainer: this.isContainer,
 				isContainerEmpty: this.isContainerEmpty,
 				isContainerOpen: this.isContainerOpen,
-				onToggleOpenState: this.onToggleOpenState,
+				onToggleOpenState: this.onToggleOpenState.bind(this),
 
 				getRowString: this.getRowString.bind(this),
 
@@ -1481,7 +1484,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				await this.closeContainer(row, true, true);
 				await this.openContainer(row, true, true);
 			}
-			this.rowProvider._refreshRowMap();
+			this.rowProvider.refreshRowMap();
 			
 			let numSorted = itemIDs.length - skipped.length;
 			if (numSorted) {
@@ -1702,7 +1705,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.Prefs.clear('fallbackSort');
 		}
 		
-		this.rowProvider._refreshRowMap();
+		this.rowProvider.refreshRowMap();
 		
 		this._rememberOpenState(openItemIDs);
 		this._restoreSelection(savedSelection);
@@ -1848,6 +1851,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	expandSelectedRows() {
 		this._cacheState();
+		const indices = this.getSelectedItems(true).sort((a, b) => b - a);
 		let rowsToOpen = [];
 		for (const index of indices) {
 			if (this.isContainer(index) && !this.isContainerOpen(index)) {
@@ -1859,7 +1863,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	collapseSelectedRows() {
 		this._cacheState();
-		const selectedItems = this.getSelectedObjects();
+		const indices = this.getSelectedItems(true).sort((a, b) => b - a);
 		let rowsToClose = [];
 		for (const index of indices) {
 			if (this.isContainer(index)) {
@@ -2115,7 +2119,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			if (!column.hidden) {
 				menuitem.setAttribute('checked', true);
 			}
-			if (column.disabledIn && column.disabledIn.includes(this.rowProvider.visibilityGroup)) {
+			if (column.disabledIn && column.disabledIn.includes(this.visibilityGroup)) {
 				menuitem.setAttribute('disabled', true);
 			}
 			columnMenuitemElements[column.dataKey] = menuitem;
@@ -2562,7 +2566,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return this._columns;
 		}
 		
-		const visibilityGroup = this.rowProvider.visibilityGroup;
+		const visibilityGroup = this.visibilityGroup;
 		const prefKey = this.id;
 		if (this._columnsId == prefKey) {
 			return this._columns;
@@ -2690,7 +2694,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				let row = this._rowMap[toClose[i]];
 				this.closeContainer(row, true);
 			}
-			this.rowProvider._refreshRowMap();
+			this.rowProvider.refreshRowMap();
 			if (unsuppress) {
 				this.selection.selectEventsSuppressed = false;
 			}
@@ -2724,7 +2728,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		for (var i=rowsToOpen.length-1; i>=0; i--) {
 			this.toggleOpenState(rowsToOpen[i], true);
 		}
-		this.rowProvider._refreshRowMap();
+		this.rowProvider.refreshRowMap();
 
 		if (nextLevelToOpen.length) {
 			this._rememberOpenState(nextLevelToOpen, true);
