@@ -299,6 +299,107 @@ describe("Zotero.Date", function () {
 			await translation.translate();
 			assert.ok(called);
 		});
+
+		describe("Time parsing", function () {
+			it("should parse simple AM/PM time", function () {
+				let o = Zotero.Date.strToDate('2pm');
+				assert.equal(o.hour, 14);
+				assert.isUndefined(o.minute);
+				assert.isUndefined(o.second);
+			});
+
+			it("should parse AM/PM time with minutes", function () {
+				let o = Zotero.Date.strToDate('2:30pm');
+				assert.equal(o.hour, 14);
+				assert.equal(o.minute, 30);
+				assert.isUndefined(o.second);
+			});
+
+			it("should parse AM/PM time with minutes and seconds", function () {
+				let o = Zotero.Date.strToDate('2:30:45 pm');
+				assert.equal(o.hour, 14);
+				assert.equal(o.minute, 30);
+				assert.equal(o.second, 45);
+			});
+
+			it("should parse uppercase AM/PM", function () {
+				let o = Zotero.Date.strToDate('3:15 PM');
+				assert.equal(o.hour, 15);
+				assert.equal(o.minute, 15);
+			});
+
+			it("should parse AM time", function () {
+				let o = Zotero.Date.strToDate('9:30am');
+				assert.equal(o.hour, 9);
+				assert.equal(o.minute, 30);
+			});
+
+			it("should parse 12am as midnight (hour 0)", function () {
+				let o = Zotero.Date.strToDate('12am');
+				assert.equal(o.hour, 0);
+			});
+
+			it("should parse 12pm as noon (hour 12)", function () {
+				let o = Zotero.Date.strToDate('12pm');
+				assert.equal(o.hour, 12);
+			});
+
+			it("should parse 12:30am as 00:30", function () {
+				let o = Zotero.Date.strToDate('12:30am');
+				assert.equal(o.hour, 0);
+				assert.equal(o.minute, 30);
+			});
+
+			it("should parse 24-hour time", function () {
+				let o = Zotero.Date.strToDate('14:00');
+				assert.equal(o.hour, 14);
+				assert.equal(o.minute, 0);
+				assert.isUndefined(o.second);
+			});
+
+			it("should parse 24-hour time with seconds", function () {
+				let o = Zotero.Date.strToDate('14:30:45');
+				assert.equal(o.hour, 14);
+				assert.equal(o.minute, 30);
+				assert.equal(o.second, 45);
+			});
+
+			it("should parse midnight in 24-hour format", function () {
+				let o = Zotero.Date.strToDate('00:00');
+				assert.equal(o.hour, 0);
+				assert.equal(o.minute, 0);
+			});
+
+			it("should parse time with a.m./p.m. format", function () {
+				let o = Zotero.Date.strToDate('3:30 p.m.');
+				assert.equal(o.hour, 15);
+				assert.equal(o.minute, 30);
+			});
+
+			it("should parse date with time", function () {
+				let o = Zotero.Date.strToDate('June 26, 2010 2:30pm');
+				assert.equal(o.month, 5);
+				assert.equal(o.day, 26);
+				assert.equal(o.year, 2010);
+				assert.equal(o.hour, 14);
+				assert.equal(o.minute, 30);
+			});
+
+			it("should parse date with 24-hour time", function () {
+				let o = Zotero.Date.strToDate('2010-06-26 14:30');
+				assert.equal(o.year, 2010);
+				assert.equal(o.month, 5);
+				assert.equal(o.day, 26);
+				assert.equal(o.hour, 14);
+				assert.equal(o.minute, 30);
+			});
+
+			it("should not confuse AM/PM time hour with day", function () {
+				let o = Zotero.Date.strToDate('2pm');
+				assert.equal(o.hour, 14);
+				assert.isUndefined(o.day);
+			});
+		});
 	});
 	
 	describe("#isHTTPDate()", function () {
