@@ -677,6 +677,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 class CollectionViewItemTree extends ItemTree {
 	constructor(props) {
 		super(props);
+		// Set on changeCollectionTreeRow();
+		this.id = null;
 		this.rowProvider = new CollectionViewItemTreeRowProvider(this);
 		this.duplicateMouseSelection = false;
 
@@ -694,16 +696,36 @@ class CollectionViewItemTree extends ItemTree {
 			return this.clearItemsPaneMessage();
 		}
 		Zotero.debug(`CollectionViewItemTree.changeCollectionTreeRow(): ${collectionTreeRow.id}`);
-		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
 		await this.rowProvider.setCollectionTreeRow(collectionTreeRow);
+		// Wait for loading to complete (deferred is created/resolved by handleRowModelUpdate)
 		await this._itemTreeLoadingDeferred.promise;
 	}
 
-	handleRowModelUpdate(rows, options) {
+	render() {
+		const showMessage = !this.collectionTreeRow || this._itemsPaneMessage;
+
+		// If no collectionTreeRow yet, render stub div instead of VirtualizedTable.
+		// This prevents VirtualizedTable from trying to use undefined ID.
+		if (!this.collectionTreeRow) {
+			return [
+				this._renderItemsPaneMessage(showMessage),
+				<div
+					style={{ display: 'none' }}
+					className="virtualized-table focus-states-target"
+					key="virtualized-table-stub"
+				/>
+			];
+		}
+
+		// Otherwise, use parent render which creates full VirtualizedTable
+		return super.render();
+	}
+
+	async handleRowModelUpdate(rows, options) {
 		if (options.clearSearch) {
 			window.ZoteroPane?.clearQuicksearch();
 		}
-		super.handleRowModelUpdate(rows, options);
+		await super.handleRowModelUpdate(rows, options);
 
 		this._updateIntroText();
 	}
@@ -1468,7 +1490,7 @@ class CollectionViewItemTree extends ItemTree {
 			// Collapse open items
 			for (var i = 0; i < this.rowCount; i++) {
 				if (this.selection.isSelected(i) && this.isContainer(i)) {
-					await this._closeContainer(i, false, true);
+					await this.closeContainer(i, false);
 				}
 			}
 			this._refreshRowMap();

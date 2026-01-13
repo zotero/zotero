@@ -753,7 +753,7 @@ class ItemTreeRowRenderer {
 	}
 
 	_getIcon(index) {
-		var item = this.getRow(index).ref;
+		var item = this.itemTree.getRow(index).ref;
 		
 		// Non-item objects that can be appear in the trash
 		if (item instanceof Zotero.Collection || item instanceof Zotero.Search) {
@@ -804,7 +804,7 @@ class ItemTreeRowRenderer {
 
 var ItemTree = class ItemTree extends LibraryTree {
 	static async init(domEl, opts={}) {
-		Zotero.debug(`Initializing React ItemTree ${opts.id}`);
+		Zotero.debug(`Initializing React ${this.name} ${opts.id}`);
 		var ref;
 		opts.domEl = domEl;
 		let itemTreeMenuBar = null;
@@ -814,7 +814,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			document.documentElement.prepend(itemTreeMenuBar);
 		}
 		await new Promise((resolve) => {
-			ReactDOM.createRoot(domEl).render(<ItemTree ref={(c) => {
+			ReactDOM.createRoot(domEl).render(<this ref={(c) => {
 				ref = c;
 				resolve();
 			} } {...opts} />);
@@ -823,7 +823,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (itemTreeMenuBar) {
 			itemTreeMenuBar.init(ref);
 		}
-		Zotero.debug(`React ItemTree ${opts.id} initialized`);
+		Zotero.debug(`React ${this.name} ${opts.id} initialized`);
 		return ref;
 	}
 	
@@ -868,6 +868,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		this.type = 'item';
 		this.name = 'ItemTree';
+		// Set default ID - CollectionViewItemTree will update via idPostfix when collectionTreeRow is set
+		this.id = "item-tree-" + props.id;
 		
 		this._skipKeypress = false;
 		this._initialized = false;
@@ -922,17 +924,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	// Backward compatibility proxies
 	get _rows() { return this.rowProvider.rows; }
-	set _rows(val) { this.rowProvider._rows = val; } // Should not be set directly usually
 	get _rowMap() { return this.rowProvider.rowMap; }
-	set _rowMap(val) { this.rowProvider._rowMap = val; }
 	get _rowCache() { return this.rowProvider.rowCache; }
-	set _rowCache(val) { this.rowProvider._rowCache = val; }
 	get _searchMode() { return this.rowProvider.searchMode; }
-	set _searchMode(val) { this.rowProvider._searchMode = val; }
 	get _searchItemIDs() { return this.rowProvider.searchItemIDs; }
-	set _searchItemIDs(val) { this.rowProvider._searchItemIDs = val; }
 	get _searchParentIDs() { return this.rowProvider.searchParentIDs; }
-	set _searchParentIDs(val) { this.rowProvider._searchParentIDs = val; }
+
+	// Row access proxies
+	getRow(index) { return this.rowProvider.getRow(index); }
+	getRowCount() { return this.rowProvider.getRowCount(); }
+	getRowIndexByID(id) { return this.rowProvider.getRowIndexByID(id); }
+	getLevel(index) { return this.rowProvider.getLevel(index); }
+	isContainer(index) { return this.rowProvider.isContainer(index); }
+	isContainerOpen(index) { return this.rowProvider.isContainerOpen(index); }
+	isContainerEmpty(index) { return this.rowProvider.isContainerEmpty(index); }
+	getParentIndex(index) { return this.rowProvider.getParentIndex(index); }
 
 	unregister() {
 		this._uninitialized = true;
@@ -1013,8 +1019,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	async clearItemsPaneMessage() {
+		Zotero.debug('clearItemsPaneMessage called, current message: ' + !!this._itemsPaneMessage);
 		const shouldRerender = this._itemsPaneMessage;
 		this._itemsPaneMessage = null;
+		Zotero.debug('clearItemsPaneMessage: shouldRerender=' + !!shouldRerender);
 		return shouldRerender && new Promise(resolve => this.forceUpdate(resolve));
 	}
 	
@@ -1077,12 +1085,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.selection.clearSelection();
 			this.selection.focused = 0;
 		}
+		Zotero.debug(`handleRowModelUpdate: loading=${options.loading}, message=${options.message}, _itemsPaneMessage=${!!this._itemsPaneMessage}`);
 		if (options.message) {
 			this.setItemsPaneMessage(options.message);
 			return;
 		}
 		else if (this._itemsPaneMessage) {
-			this.clearItemsPaneMessage();
+			Zotero.debug('handleRowModelUpdate: clearing message and resolving deferred');
+			await this.clearItemsPaneMessage();
 			// Reset scrollbar to top (at end of loading/showing message)
 			this._treebox && this._treebox.scrollTo(0);
 			this._itemTreeLoadingDeferred.resolve();
@@ -1105,8 +1115,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		if (rows === true) {
-			Zotero.debug(new Error().stack);
-			this.tree.invalidate();
+			Zotero.debug('handleRowModelUpdate: invalidating all rows, tree=' + !!this.tree);
+			if (this.tree) {
+				this.tree.invalidate();
+			}
 		}
 		else if (Array.isArray(rows)) {
 			rows.forEach(row => this.tree.invalidateRow(row));
@@ -1228,11 +1240,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	};
 
-	render() {
+	_renderItemsPaneMessage(showMessage) {
 		const itemsPaneMessageHTML = this._itemsPaneMessage || this.props.emptyMessage;
-		const showMessage = !this.collectionTreeRow || this._itemsPaneMessage;
-		
-		const itemsPaneMessage = (<div
+		return (<div
 			key="items-pane-message"
 			onDragOver={e => this.props.dragAndDrop && this.onDragOver(e, -1)}
 			onDrop={e => this.props.dragAndDrop && this.onDrop(e, -1)}
@@ -1248,6 +1258,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			style={{ display: showMessage ? "flex" : "none" }}
 			dangerouslySetInnerHTML={{ __html: itemsPaneMessageHTML }}>
 		</div>);
+	}
+
+	render() {
+		const showMessage = !!this._itemsPaneMessage;
+		const itemsPaneMessage = this._renderItemsPaneMessage(showMessage);
 
 		let virtualizedTable = React.createElement(VirtualizedTree,
 			{
@@ -1271,7 +1286,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 				multiSelect: this.props.multiSelect,
 
-				onSelectionChange: this._handleSelectionChange,
+				onSelectionChange: this._handleSelectionChange.bind(this),
 				isSelectable: this.isSelectable.bind(this),
 				getParentIndex: this.getParentIndex,
 				isContainer: this.isContainer,
@@ -2318,7 +2333,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Base implementation - override in subclasses for special behavior
 	}
 
-	_handleSelectionChange = (selection, shouldDebounce) => {
+	_handleSelectionChange(selection, shouldDebounce) {
 		if (shouldDebounce) {
 			this._onSelectionChangeDebounced();
 		}
