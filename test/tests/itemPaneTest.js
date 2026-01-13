@@ -683,6 +683,36 @@ describe("Item pane", function () {
 			assert.equal(doc.activeElement.parentNode.id, "itembox-field-value-series");
 			assert.equal(doc.activeElement.value, "Series name");
 		});
+
+		it("should parse dates strictly", async function () {
+			let testCases = {
+				'15th May, 2024': '5/15/2024',
+				'15th of May, 2024': '15th of May, 2024',
+				'2013': '2013',
+				'Published 2013': 'Published 2013',
+				'12 AD, January 10': '12 AD, January 10',
+				'Jan 1, 2020': '1/1/2020',
+				'March 11, 076': '3/11/76',
+				'11 March, 1000': '3/11/1000',
+				'2013-12-05 03:30:01': '12/5/2013',
+				'xyz': 'xyz',
+			};
+
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			let infoBox = itemDetails.getPane("info");
+
+			let origLocale = Zotero.locale;
+			Zotero.locale = 'en-US';
+
+			for (let [unparsed, parsed] of Object.entries(testCases)) {
+				let item = await createDataObject('item');
+				item.setField('date', unparsed);
+				await item.saveTx();
+				assert.equal(infoBox.querySelectorAll('[fieldname="date"]')[1].value, parsed);
+			}
+
+			Zotero.locale = origLocale;
+		});
 	});
 
 	describe("Libraries and collections pane", function () {
