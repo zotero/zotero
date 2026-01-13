@@ -202,6 +202,16 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.strictEqual(extra, '');
 		});
 		
+		it("should extract a base-mapped field for a given item", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			var val = 'Foo';
+			var str = `medium: ${val}`;
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('medium'), val);
+			assert.strictEqual(extra, '');
+		});
+		
 		it("should extract a CSL field", function () {
 			var val = '10.1234/abcdef';
 			var str = `container-title: ${val}`;
