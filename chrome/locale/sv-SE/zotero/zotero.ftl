@@ -1,6 +1,6 @@
 general-sentence-separator = { " " }
 general-key-control = Control
-general-key-shift = Shift
+general-key-shift = Skift
 general-key-alt = Alt
 general-key-option = Alternativ
 general-key-command = Kommando
@@ -31,7 +31,7 @@ general-remind-me-later = Påminn mig senare
 general-dont-ask-again = Fråga inte igen
 general-choose-file = Välj fil...
 general-open-settings = Öppna inställningar
-general-settings = Settings…
+general-settings = Inställningar…
 general-help = Hjälp
 general-tag = Etikett
 general-done = Klar
@@ -44,7 +44,7 @@ general-restartApp = Restart { -app-name }
 general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
 general-save = Spara
 general-clear = Rensa
-general-update = Update
+general-update = Uppdatera
 general-back = Bakåt
 general-edit = Redigera
 general-cut = Klipp ut
@@ -57,7 +57,7 @@ general-and = och
 general-et-al = m. fl.
 general-previous = Föregående
 general-next = Nästa
-general-learn-more = Learn More
+general-learn-more = Läs mer
 general-warning = Varning
 general-type-to-continue = Type “{ $text }” to continue.
 general-continue = Fortsätt
@@ -71,7 +71,7 @@ general-purple = Lila
 general-magenta = Magenta
 general-violet = Violet
 general-maroon = Maroon
-general-gray = Gray
+general-gray = Grå
 general-black = Black
 general-loading = Loading…
 citation-style-label = Referensstil
@@ -117,9 +117,9 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Tillägg
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Flytta kolumn till vänster
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Flytta kolumn till höger
 menu-view-note-font-size =
     .label = Teckenstorlek för anteckning
 menu-view-note-tab-font-size =
@@ -160,7 +160,7 @@ collections-menu-edit-saved-search =
 collections-menu-move-collection =
     .label = Move To
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Kopiera till
 item-creator-moveDown =
     .label = Flytta ner
 item-creator-moveToTop =
@@ -194,9 +194,9 @@ item-menu-viewAttachment =
 item-menu-add-file =
     .label = Arkiv
 item-menu-add-linked-file =
-    .label = Linked File
+    .label = Länkad fil
 item-menu-add-url =
-    .label = Web Link
+    .label = Webblänk
 item-menu-change-parent-item =
     .label = Change Parent Item…
 item-menu-relate-items =
@@ -234,7 +234,7 @@ import-recreate-structure =
     .label = Recreate folder structure as collections
 import-fileTypes-header = File Types to Import:
 import-fileTypes-pdf =
-    .label = PDFs
+    .label = PDF:er
 import-fileTypes-other =
     .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
 import-file-handling = Filhantering
@@ -276,8 +276,8 @@ import-online-connection-error = { -app-name } could not connect to { $targetApp
 items-table-cell-notes =
     .aria-label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } anteckning
+           *[other] { $count } anteckningar
         }
 report-error =
     .label = Rapportera felet...
@@ -310,7 +310,7 @@ rtfScan-action-accept-match =
     .title = Accept this match
 runJS-title = Run JavaScript
 runJS-editor-label = Code:
-runJS-run = Run
+runJS-run = Kör
 runJS-help = { general-help }
 runJS-completed = completed successfully
 runJS-result =
@@ -424,10 +424,10 @@ pane-abstract = Sammanfattning
 pane-attachments = Bilagor
 pane-notes = Anteckningar
 pane-note-info = Note Info
-pane-libraries-collections = Libraries and Collections
+pane-libraries-collections = Bibliotek och samlingar
 pane-tags = Etiketter
 pane-related = Liknande källor
-pane-attachment-info = Attachment Info
+pane-attachment-info = Information om bilaga
 pane-attachment-preview = Preview
 pane-attachment-annotations = Anteckningar
 pane-header-attachment-associated =
@@ -441,8 +441,8 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
-           *[other] { $count } Attachments
+            [one] { $count } bilaga
+           *[other] { $count } bilagor
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
@@ -456,19 +456,19 @@ section-attachments-move-to-trash-message = Are you sure you want to move “{ $
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } anteckning
+           *[other] { $count } anteckningar
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Tag
-           *[other] { $count } Tags
+            [one] { $count } etikett
+           *[other] { $count } etiketter
         }
 section-related =
-    .label = { $count } Related
+    .label = { $count } liknande
 section-attachment-info =
     .label = { pane-attachment-info }
 section-button-remove =
@@ -479,8 +479,8 @@ section-button-expand =
     .dynamic-tooltiptext = Expand section
     .label = Expand { $section } section
 section-button-collapse =
-    .dynamic-tooltiptext = Collapse section
-    .label = Collapse { $section } section
+    .dynamic-tooltiptext = Stäng avsnitt
+    .label = Stäng { $section } avsnitt
 annotations-count =
     { $count ->
         [one] { $count } Annotation
@@ -530,15 +530,15 @@ pin-section =
 unpin-section =
     .label = Unpin Section
 collapse-other-sections =
-    .label = Collapse Other Sections
+    .label = Stäng övriga avsnitt
 expand-all-sections =
     .label = Expand All Sections
 abstract-field =
-    .placeholder = Add abstract…
+    .placeholder = Lägg till sammanfattning …
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
-    .placeholder = Filter Tags
+    .placeholder = Filtrera etiketter
 context-notes-search =
     .placeholder = Search Notes
 context-notes-return-button =
@@ -589,7 +589,7 @@ note-info-size = Storlek
 note-info-word-count = Word Count
 note-info-character-count = Character Count
 item-title-empty-note = Anteckning utan titel
-attachment-preview-placeholder = No attachment to preview
+attachment-preview-placeholder = Ingen bilaga att förhandsvisa
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
 file-renaming-auto-rename-prompt-title = Renaming Settings Changed
@@ -716,7 +716,7 @@ file-type-audio = Ljud
 file-type-video = Video
 file-type-presentation = Presentation
 file-type-document = Dokument
-file-type-ebook = Ebook
+file-type-ebook = E-bok
 post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }

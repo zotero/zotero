@@ -141,7 +141,7 @@
     "message": "El connector de $1 us permet <a href=\"$2\">desar elements al $1</a> des del vostre navegador amb un sol clic."
   },
   "firstRun_text2": {
-    "message": "Si no ho heu fet encara, <a href=\"$2\">baixeu</a> la versió d'escriptori del $1 per a gaudir d'una millor experiència."
+    "message": "Si no ho heu fet encara, <a href=\"$2\">baixeu</a> l'aplicació $1 per a una millor experiència."
   },
   "firstRun_acceptButton": {
     "message": "Entesos"
@@ -194,6 +194,9 @@
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "El $1 bloqueja el vostre document per a evitar que diferents usuaris puguin editar-hi cites al mateix moment. L'edició concurrent de cites en un mateix document pot portar a la seva corrupció. Circumstàncies no esperades, com ara problemes de  xarxa, poden provocar que el document quedi bloquejat de forma permanent. Si creieu que ha passat això, podeu sobreescriure el bloqueig. <br/><br/>Voleu sobreescriure el bloqueig del document?"
   },
+  "integration_googleDocs_authScopeError": {
+    "message": "El $1necessita permisos per a editar els documents de Google Docs per tal d'inserir citacions. Torneu-ho a provar i assegureu-vos que el $1pot veure, modificar, crear i suprimir documents de Google Docs. "
+  },
   "integration_googleDocs_documentPermissionError": {
     "message": "El compte de Google que heu seleccionat no té permisos per a editar el document. Torneu-ho a provar i assegureu-vos que trieu el compte amb accessos d'edició."
   },
@@ -208,6 +211,9 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Les cites <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">s'han desenllaçat de $1</a>. Caldrà que les torneu a enllaçar abans que s'actualitzin o apareguin a la vostra bibilografia."
+  },
+  "reloadVia": {
+    "message": "Recarrega a través de $1"
   },
   "general_saveTo": {
     "message": "Desa a $1"

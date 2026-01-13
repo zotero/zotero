@@ -128,6 +128,7 @@ reader-foreground = Popředí:
 reader-reading-mode = Režim čtení
 reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Vymazat sekci
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

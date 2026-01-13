@@ -128,6 +128,7 @@ reader-foreground = Priekinis planas:
 reader-reading-mode = Reading Mode
 reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Nieko nežymėti
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

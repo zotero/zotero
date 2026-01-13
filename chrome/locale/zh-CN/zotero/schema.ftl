@@ -1,11 +1,11 @@
 itemFields-eventPlace = Event Place
-itemFields-originalDate = Original Date
-itemFields-originalPlace = Original Place
-itemFields-originalPublisher = Original Publisher
-itemFields-partNumber = Part Number
-itemFields-partTitle = Part Title
+itemFields-originalDate = 原出版日期
+itemFields-originalPlace = 原出版地
+itemFields-originalPublisher = 原出版社
+itemFields-partNumber = 分册号
+itemFields-partTitle = 分册标题
 itemFields-priorityDate = 优先权日
-itemFields-sessionTitle = Session Title
+itemFields-sessionTitle = 分会场标题
 creatorTypes-chair = Chair
 creatorTypes-creator = 创建者
 creatorTypes-executiveProducer = Executive Producer

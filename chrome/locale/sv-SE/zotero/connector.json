@@ -38,8 +38,17 @@
   "general_copyToClipboard": {
     "message": "Kopiera till urklipp"
   },
+  "itemType_pdf": {
+    "message": "PDF-bilaga"
+  },
+  "itemType_epub": {
+    "message": "EPUB-bilaga"
+  },
   "itemType_note": {
     "message": "Anteckning"
+  },
+  "itemType_link": {
+    "message": "Webblänk"
   },
   "itemType_attachment": {
     "message": "Bilaga"

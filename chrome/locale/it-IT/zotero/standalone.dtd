@@ -29,7 +29,7 @@
 <!ENTITY importFromClipboardCmd.label "Importa dagli appunti">
 <!ENTITY quitApplicationCmdWin.label "Esci">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Abbandona">
+<!ENTITY quitApplicationCmd.label "Esci">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 <!ENTITY copyCitationCmd.label "Copia la citazione">
@@ -53,7 +53,7 @@
 <!ENTITY collectionsPane.label "Riquadro delle collezioni">
 <!ENTITY itemPane.label "Riquadro degli elementi">
 <!ENTITY tagSelector.label "Riquadro dei tag">
-<!ENTITY recursiveCollections.label "Mostra gli oggetti delle sottocollezioni">
+<!ENTITY recursiveCollections.label "Mostra gli elementi dalle sottocollezioni">
 <!ENTITY fontSize.label "Dimensione del font">
 <!ENTITY noteFontSize.label "Dimensione del font nelle note">
 <!ENTITY columns.label "Colonne">

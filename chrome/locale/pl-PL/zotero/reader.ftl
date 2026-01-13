@@ -130,6 +130,7 @@ reader-foreground = Pierwszy plan:
 reader-reading-mode = Tryb czytania
 reader-reading-mode-not-supported = Tryb czytania nie jest obsługiwany przez ten dokument.
 reader-clear-selection = Wyczyść zaznaczenie
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

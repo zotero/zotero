@@ -175,17 +175,17 @@ item-menu-viewAttachment =
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] Snapshot
-                    [note] Note
-                   *[other] Attachment
+                    [snapshot] capture
+                    [note] note
+                   *[other] pièce jointe
                 }
            *[other]
                 { $attachmentType ->
                     [pdf] PDFs
                     [epub] EPUBs
-                    [snapshot] Snapshots
-                    [note] Notes
-                   *[other] Attachments
+                    [snapshot] captures
+                    [note] notes
+                   *[other] pièces jointes
                 }
         } { $openIn ->
             [tab] dans un nouvel onglet

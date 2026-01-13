@@ -134,8 +134,9 @@ reader-theme-name = اسم السمة:
 reader-background = الخلفية:
 reader-foreground = الواجهة:
 reader-reading-mode = وضع القراءة
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode-not-supported = لا يدعم هذا المستند وضع القراءة.
 reader-clear-selection = مسح الاختيار
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }
@@ -191,7 +192,11 @@ reader-import-from-epub-no-annotations-other-file =
 reader-import-from-epub-select-other = اختر ملف آخر...
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [zero] { $count } صفحة مختارة
+        [one] 1 صفحة مختارة
+        [two] { $count } صفحات مختارة
+        [few] { $count } صفحات مختارة
+        [many] { $count } صفحات مختارة
+       *[other] { $count } صفحات مختارة
     }
-reader-page-options = Page Options
+reader-page-options = خيارات الصفحة

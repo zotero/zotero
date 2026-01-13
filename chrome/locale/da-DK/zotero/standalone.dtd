@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopier reference">
 <!ENTITY copyBibliographyCmd.label "Kopier referenceliste">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Kopier note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Byt sideorientering">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -53,18 +53,18 @@
 <!ENTITY collectionsPane.label "Collections Pane">
 <!ENTITY itemPane.label "Item Pane">
 <!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY recursiveCollections.label "Vis emner fra delsamlinger">
+<!ENTITY fontSize.label "Skriftstørrelse">
+<!ENTITY noteFontSize.label "Noteskriftstørrelse">
+<!ENTITY columns.label "Kolonner">
+<!ENTITY sortBy.label "Sorter efter">
 
 <!ENTITY toolsMenu.label "Værktøj">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Tilføjelser">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Udvikler">
 
 <!ENTITY bringAllToFront.label "Før alle op foran">
 

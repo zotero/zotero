@@ -1,24 +1,24 @@
-<!ENTITY zotero.search.name "Ime:">
+<!ENTITY zotero.search.name "Naziv:">
 
 <!ENTITY zotero.search.searchInLibrary "Traži u biblioteci:">
 
-<!ENTITY zotero.search.joinMode.prefix "Podudaranje">
+<!ENTITY zotero.search.joinMode.prefix "Podudaraj">
 <!ENTITY zotero.search.joinMode.any "bilo koji">
-<!ENTITY zotero.search.joinMode.all "svi">
+<!ENTITY zotero.search.joinMode.all "sve">
 <!ENTITY zotero.search.joinMode.suffix "od sljedećeg:">
 
-<!ENTITY zotero.search.recursive.label "Pretraživanje podzbirki">
+<!ENTITY zotero.search.recursive.label "Pretraži podzbirke">
 <!ENTITY zotero.search.noChildren "Prikaži samo stavke najviše razine">
-<!ENTITY zotero.search.includeParentsAndChildren "Uključi roditeljske i podređene stavke podudarnih stavki">
+<!ENTITY zotero.search.includeParentsAndChildren "Uključi nadređene i podređene stavke podudarnih stavki">
 
 <!ENTITY zotero.search.textModes.phrase "Fraza">
 <!ENTITY zotero.search.textModes.phraseBinary "Fraza (uključujući binarne datoteke)">
 <!ENTITY zotero.search.textModes.regexp "Regexp">
-<!ENTITY zotero.search.textModes.regexpCS "Regexp (velika i mala slova)">
+<!ENTITY zotero.search.textModes.regexpCS "Regexp (osjetljivo na velika i mala slova)">
 
-<!ENTITY zotero.search.date.units.days "dani">
+<!ENTITY zotero.search.date.units.days "dana">
 <!ENTITY zotero.search.date.units.months "mjeseci">
-<!ENTITY zotero.search.date.units.years "godine">
+<!ENTITY zotero.search.date.units.years "godina">
 
 <!ENTITY zotero.search.search "Pretraživanje">
 <!ENTITY zotero.search.clear "Očisti">

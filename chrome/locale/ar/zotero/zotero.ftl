@@ -123,7 +123,7 @@ menu-view-columns-move-right =
 menu-view-note-font-size =
     .label = حجم خط الملاحظات
 menu-view-note-tab-font-size =
-    .label = Note Tab Font Size
+    .label = حجم خط علامة التبويب
 menu-show-tabs-menu =
     .label = عرض قائمة علامات التبويب
 menu-edit-copy-annotation =
@@ -173,7 +173,7 @@ item-creator-moveUp =
     .label = تحريك لأعلى
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        فتح { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
@@ -431,7 +431,7 @@ pane-info = معلومات
 pane-abstract = المستخلص
 pane-attachments = مرفقات
 pane-notes = ملاحظات
-pane-note-info = Note Info
+pane-note-info = تفاصيل الملاحظة
 pane-libraries-collections = المكتبات والمجموعات
 pane-tags = أوسمة
 pane-related = عناصر ذات صلة
@@ -600,7 +600,7 @@ attachment-info-convert-note =
 section-note-info =
     .label = { pane-note-info }
 note-info-title = العنوان
-note-info-parent-item = Parent Item
+note-info-parent-item = العنصر الأصلي
 note-info-parent-item-button =
     { $hasParentItem ->
         [true] { $parentItemTitle }
@@ -611,11 +611,11 @@ note-info-parent-item-button =
             [true] View parent item in library
            *[false] View note item in library
         }
-note-info-date-created = Created
+note-info-date-created = تم إنشاؤه
 note-info-date-modified = تاريخ التعديل
 note-info-size = حجم
-note-info-word-count = Word Count
-note-info-character-count = Character Count
+note-info-word-count = عدد الكلمات
+note-info-character-count = عدد الأحرف
 item-title-empty-note = ملاحظة بدون عنوان
 attachment-preview-placeholder = لا يوجد مرفق للمعاينة
 attachment-rename-from-parent =
@@ -773,7 +773,7 @@ file-type-video = فيديو
 file-type-presentation = عرض تقديمي
 file-type-document = مستند
 file-type-ebook = الكتاب الإلكتروني
-post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
+post-upgrade-message = لقد تمت ترقيتك إلى <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! تعرف على <a data-l10n-name="new-features-link">ما الجديد</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -798,11 +798,11 @@ long-tag-fixer-window-title =
 long-tag-fixer-button-dont-split =
     .label = لا تقسم
 menu-normalize-attachment-titles =
-    .label = Normalize Attachment Titles…
-normalize-attachment-titles-title = Normalize Attachment Titles
+    .label = توحيد عناوين المرفقات...
+normalize-attachment-titles-title = توحيد عناوين المرفقات
 normalize-attachment-titles-text =
-    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    يقوم { -app-name } تلقائيًا بإعادة تسمية الملفات الموجودة على القرص باستخدام بيانات تعريف العنصر الأصلي، ولكنه يستخدم عناوين منفصلة وأبسط مثل ”Full Text PDF” أو ”Preprint PDF” أو ”PDF” للمرفقات الأساسية للحفاظ على قائمة العناصر أكثر نظافة وتجنب تكرار المعلومات.
     
-    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    في الإصدارات القديمة من { -app-name }، وكذلك عند استخدام بعض المكونات الإضافية، يمكن تغيير عناوين المرفقات دون داعٍ لتتطابق مع أسماء الملفات.
     
-    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
+    هل ترغب في تحديث المرفقات المحددة لاستخدام عناوين أبسط؟ سيتم تغيير المرفقات الأساسية التي تتطابق عناوينها مع اسم الملف فقط.

@@ -128,6 +128,7 @@ reader-foreground = Forgrunn:
 reader-reading-mode = Lesemodus
 reader-reading-mode-not-supported = Lesemodus er ikke støttet i dette dokumentet.
 reader-clear-selection = Opphev utvalg
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

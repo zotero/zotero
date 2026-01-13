@@ -1,7 +1,7 @@
-<!ENTITY zotero.version "inačica">
+<!ENTITY zotero.version "verzija">
 <!ENTITY zotero.whatsNew "Što je novo">
 <!ENTITY zotero.createdby "Izradili:">
-<!ENTITY zotero.director "Ravnatelj">
+<!ENTITY zotero.director "Ravnatelj:">
 <!ENTITY zotero.directors "Ravnatelji:">
 <!ENTITY zotero.developers "Razvojni tim:">
 <!ENTITY zotero.alumni "Alumni:">
@@ -9,5 +9,5 @@
 <!ENTITY zotero.about.additionalSoftware "Programi treće strane:">
 <!ENTITY zotero.thanks "Posebna zahvala:">
 <!ENTITY zotero.about.close "Zatvori">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "Još o kreditima i zahvalama">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Više zasluga i zahvala">
 <!ENTITY zotero.citationProcessing "Citiranje i bibliografska obrada">

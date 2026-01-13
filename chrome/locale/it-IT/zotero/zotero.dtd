@@ -141,7 +141,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Imposta il colore">
 <!ENTITY zotero.tagColorChooser.removeColor "Elimina il colore">
 
-<!ENTITY zotero.lookup.description "Inserisci uno o più ISBN, DOI, PMID, arXiv ID o ADS Bibcode per aggiungere alla tua biblioteca:">
+<!ENTITY zotero.lookup.description "Inserisci uno o più ISBN, DOI, PMID, arXiv ID o ADS Bibcode per aggiungere elementi alla tua biblioteca:">
 <!ENTITY zotero.lookup.button.search "Cerca">
 
 <!ENTITY zotero.createParent.title "Crea un elemento genitore">
@@ -245,7 +245,7 @@
 <!ENTITY zotero.sync.longTagFixer.character "carattere">
 <!ENTITY zotero.sync.longTagFixer.characters "caratteri">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "I tag non selezionati non verranno salvati.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Il tag sarà eliminato da tutti gli oggetti.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Il tag sarà eliminato da tutti gli elementi.">
 
 <!ENTITY zotero.merge.title "Risoluzione dei conflitti">
 <!ENTITY zotero.merge.of "di">
@@ -280,7 +280,7 @@
 <!ENTITY zotero.rtfScan.introPage.description2 "Per iniziare, seleziona un file RTF e un file di destinazione qui sotto:">
 <!ENTITY zotero.rtfScan.scanPage.label "Sto cercando citazioni">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero sta esaminando il documento per individuare citazioni. Ti preghiamo di attendere.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verifica gli oggetti citati.">
+<!ENTITY zotero.rtfScan.citationsPage.label "Verifica gli elementi citati.">
 <!ENTITY zotero.rtfScan.citationsPage.description "Ti preghiamo di controllare la lista qui sotto delle citazioni individuate e di assicurarti che Zotero abbia selezionato correttamente gli elementi corrispondenti. Le citazioni senza corrispondenza o ambigue devono essere corrette prima di procedere al passaggio successivo.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formattazione del documento">
 <!ENTITY zotero.rtfScan.formatPage.label "Formattazione delle citazioni">

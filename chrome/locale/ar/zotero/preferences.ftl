@@ -28,10 +28,10 @@ preferences-file-renaming-format-instructions-example = على سبيل المث
 preferences-file-renaming-format-instructions-more = راجع <label data-l10n-name="file-renaming-format-help-link">الوثائق</label> لمزيد من المعلومات.
 preferences-file-renaming-format-template = قالب اسم الملف:
 preferences-file-renaming-format-preview = معاينة:
-preferences-attachment-titles-title = Attachment Titles
-preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-title = عناوين المرفقات
+preferences-attachment-titles-intro = عناوين المرفقات <label data-l10n-name="wiki-link">مختلفة عن أسماء الملفات </label>. لدعم بعض مهام سير العمل, { -app-name } يمكن عرض أسماء الملفات بدلاً من عناوين المرفقات في قائمة العناصر..
 preferences-attachment-titles-show-filenames =
-    .label = Show attachment filenames in the items list
+    .label = إظهار أسماء ملفات المرفقات في قائمة العناصر
 preferences-reader-title = القارئ
 preferences-reader-open-epubs-using = فتح ملفات EPUBs باستخدام
 preferences-reader-open-snapshots-using = فتح اللقطات باستخدام
@@ -44,7 +44,7 @@ preferences-reader-ebook-hyphenate =
     .label = تفعيل الوصل التلقائي
 preferences-note-title = ملاحظات
 preferences-note-open-in-new-window =
-    .label = Open notes in new windows instead of tabs
+    .label = فتح الملاحظات في نوافذ جديدة بدلاً من علامات التبويب
 preferences-color-scheme = نظام الألوان:
 preferences-color-scheme-auto =
     .label = تلقائي

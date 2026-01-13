@@ -79,9 +79,9 @@ preferences-citation-dialog-mode = Citation Dialog Mode:
 preferences-citation-dialog-mode-last-used =
     .label = Last Used
 preferences-citation-dialog-mode-list =
-    .label = List Mode
+    .label = Mode llista
 preferences-citation-dialog-mode-library =
-    .label = Library Mode
+    .label = Mode biblioteca
 preferences-advanced-enable-local-api =
     .label = Allow other applications on this computer to communicate with { -app-name }
 preferences-advanced-local-api-available = Disponible a <code data-l10n-name="url">{ $url }</span>

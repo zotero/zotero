@@ -56,6 +56,18 @@
   "progressWindow_detailsBtnHide": {
     "message": "Skjul detaljer"
   },
+  "progressWindow_savingItems": {
+    "message": "Arkiverer $1 emner. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Arkiverer emnet $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Emne $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Arkiveret $1"
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Mærker (adskilt af komma)"
   },

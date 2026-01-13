@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.setUpSync "Régler la synchronisation">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Dissocier le compte…">
 <!ENTITY zotero.preferences.sync.createAccount "Créer un compte">
-<!ENTITY zotero.preferences.sync.lostPassword "Mot de passe oublié ?">
+<!ENTITY zotero.preferences.sync.lostPassword "Mot de passe oublié ?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchroniser automatiquement">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synchroniser le texte intégral des pièces jointes indexées">
 <!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero peut synchroniser l'intégralité du texte des pièces jointes indexées (PDF et HTML) de vos bibliothèques Zotero avec zotero.org et, ainsi, avec vos autres appareils connectés. Cela vous permet de rechercher facilement dans le contenu de vos fichiers où que vous soyez. Le texte intégral de vos fichiers ne sera pas partagé publiquement.">

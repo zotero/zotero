@@ -128,6 +128,7 @@ reader-foreground = Foreground:
 reader-reading-mode = Режим чтения
 reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Отменить выбор
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

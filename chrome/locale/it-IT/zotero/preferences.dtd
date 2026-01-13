@@ -132,7 +132,7 @@
 <!ENTITY zotero.preferences.keys.newItem "Crea un nuovo elemento">
 <!ENTITY zotero.preferences.keys.newNote "Crea una nuova nota">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Segna tutti i feed come letti/non letti">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copia la citazione diretta (autore-titolo) degli elementi selezionati negli appunti">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copia la citazione diretta degli elementi selezionati negli appunti">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copia negli appunti il riferimento bibliografico completo degli elementi selezionati">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importa dagli appunti">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Le modifiche avranno effetto dopo il riavvio">

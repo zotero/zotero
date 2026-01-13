@@ -128,6 +128,7 @@ reader-foreground = Ön Plan:
 reader-reading-mode = Okuma Modu
 reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Seçilenleri Temizle
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

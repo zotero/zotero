@@ -109,7 +109,7 @@ reader-add-theme = Add Theme
 reader-scroll-mode = Scrolling
 reader-spread-mode = Spreads
 reader-flow-mode = Page Layout
-reader-columns = Columns
+reader-columns = Kolonner
 reader-split-view = Split View
 reader-themes = Themes
 reader-vertical = Vertical
@@ -128,6 +128,7 @@ reader-foreground = Foreground:
 reader-reading-mode = Reading Mode
 reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Clear Selection
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

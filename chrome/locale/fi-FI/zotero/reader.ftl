@@ -128,6 +128,7 @@ reader-foreground = Etuala:
 reader-reading-mode = Lukutila
 reader-reading-mode-not-supported = Lukutilaa ei tueta tälle asiakirjatyypille.
 reader-clear-selection = Tyhjennä valinta
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

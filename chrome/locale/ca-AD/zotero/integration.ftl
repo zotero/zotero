@@ -27,7 +27,7 @@ integration-citationDialog-section-cited =
         [0] Cited Items
        *[other] Cited Items ({ $count })
     }
-integration-citationDialog-details-suffix = Suffix
+integration-citationDialog-details-suffix = Sufix
 integration-citationDialog-details-prefix = Prefix
 integration-citationDialog-details-suppressAuthor = Omet l'autor
 integration-citationDialog-details-remove = { general-remove }
