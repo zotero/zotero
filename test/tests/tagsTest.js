@@ -238,6 +238,14 @@ describe("Zotero.Tags", function () {
 		it("should return first emoji span for text with an emoji made up of multiple characters with ZWJ", function () {
 			assert.equal(Zotero.Tags.extractEmojiForItemsList("We are 👨‍🌾👨‍🌾. And I am a 👨‍🏫."), "👨‍🌾👨‍🌾");
 		});
+		
+		it("should return first emoji span that contains RGI country flags", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("Hello country flags 🇱🇺🇮🇪"), "🇱🇺🇮🇪");
+		});
+
+		it("should return first emoji span that contains regional flags", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("Hello England and Scotland: 🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁧󠁢󠁳󠁣󠁴󠁿"), "🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁧󠁢󠁳󠁣󠁴󠁿");
+		});
 	});
 
 	describe("#compareTagsOrder()", function () {
