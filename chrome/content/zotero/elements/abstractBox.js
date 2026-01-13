@@ -67,7 +67,7 @@
 		}
 
 		init() {
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'abstractBox');
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'tab'], 'abstractBox');
 
 			this.initCollapsibleSection();
 
@@ -85,6 +85,9 @@
 		notify(action, type, ids) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
 				this._forceRenderAll();
+			}
+			if (action === 'select' && type === 'tab' && ids.length > 0) {
+				this._handleTabSelect(ids[0]);
 			}
 		}
 		
@@ -202,6 +205,20 @@
 
 		_handleFieldBlur = () => {
 			this.save();
+		};
+
+		_handleTabSelect = (tabID) => {
+			if (!this.tabID || typeof Zotero_Tabs === 'undefined') {
+				return;
+			}
+			if (tabID !== this.tabID) {
+				return;
+			}
+
+			if (this._syncRenderPending) {
+				this._syncRenderPending = false;
+				this.render();
+			}
 		};
 	}
 	customElements.define("abstract-box", AbstractBox);

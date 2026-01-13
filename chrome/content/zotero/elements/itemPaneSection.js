@@ -167,12 +167,12 @@ class ItemPaneSectionElementBase extends XULElementBase {
 	}
 
 	async _forceRenderAll() {
+		this._resetRenderedFlags();
 		if (this.hidden || this.skipRender) {
 			this._syncRenderPending = true;
 			this._asyncRenderPending = true;
 			return;
 		}
-		this._resetRenderedFlags();
 		if (this.render) this.render();
 		if (this.asyncRender) await this.asyncRender();
 	}

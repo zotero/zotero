@@ -153,7 +153,7 @@
 			// Ensure no button is forced to stay visible once the menu is closed
 			this.addEventListener('popuphidden', this._handlePopupHidden);
 
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'infobox'], 'itemBox');
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'infobox', 'tab'], 'itemBox');
 			this._prefsObserverID = Zotero.Prefs.registerObserver('fontSize', () => {
 				this._forceRenderAll();
 			});
@@ -402,6 +402,9 @@
 			}
 			if (event == 'modify' && this.item?.id && ids.includes(this.item.id)) {
 				this._forceRenderAll();
+			}
+			if (event === 'select' && type === 'tab' && ids.length > 0) {
+				this._handleTabSelect(ids[0]);
 			}
 		}
 		
@@ -2965,6 +2968,20 @@
 			let focusLeftUnsavedCreatorRow = !unsavedCreatorRow.contains(focused);
 			if (focusLeftUnsavedCreatorRow) {
 				this.removeUnsavedCreatorRow(true);
+			}
+		};
+
+		_handleTabSelect = (tabID) => {
+			if (!this.tabID || typeof Zotero_Tabs === 'undefined') {
+				return;
+			}
+			if (tabID !== this.tabID) {
+				return;
+			}
+			
+			if (this._syncRenderPending) {
+				this._syncRenderPending = false;
+				this.render();
 			}
 		};
 	}
