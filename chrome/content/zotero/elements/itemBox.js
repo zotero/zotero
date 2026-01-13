@@ -1733,7 +1733,7 @@
 				case 'dateDue':
 				case 'accepted':
 					if (fieldName == 'date' && this.item._objectType != 'feedItem') {
-						valueText = this.item.getDisplayDate();
+						valueText = this.item.getDisplayDate({ strict: true });
 					}
 					else {
 						valueText = this.dateTimeFromUTC(valueText);
@@ -2244,7 +2244,7 @@
 							if (Zotero.ItemFields.isFieldOfBase(fieldName, 'date')) {
 								// Parse 'yesterday'/'today'/'tomorrow'
 								value = Zotero.Date.parseDescriptiveString(value);
-								textbox.value = this.item.getDisplayDate();
+								textbox.value = this.item.getDisplayDate({ strict: true });
 							}
 					}
 				}

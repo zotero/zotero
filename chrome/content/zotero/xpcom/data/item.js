@@ -1076,7 +1076,11 @@ Zotero.Item.prototype.getTabTitle = async function () {
 };
 
 
-Zotero.Item.prototype.getDisplayDate = function () {
+/**
+ * @param {boolean} [strict] Return the input string unchanged if it contains unparseable components
+ * @returns {string}
+ */
+Zotero.Item.prototype.getDisplayDate = function ({ strict } = {}) {
 	let rawDate = this.getField('date', false, true);
 	if (!rawDate) {
 		return '';
@@ -1090,8 +1094,9 @@ Zotero.Item.prototype.getDisplayDate = function () {
 	if (isNaN(year)) {
 		year = undefined;
 	}
-	// Use parsed value as long as we got a year and one other part
-	if (year !== undefined && !part && (month !== undefined || day !== undefined)) {
+	// Use parsed value as long as we got a year and, in strict mode,
+	// there were no unparseable components
+	if (year !== undefined && (!part || !strict)) {
 		try {
 			let date = new Date();
 			// Passing two-digit year to Date constructor parses it as 1900-1999,
