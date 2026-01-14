@@ -1845,8 +1845,6 @@ var Columns = class {
 		if (prefs[column.dataKey]) {
 			prefs[column.dataKey].hidden = column.hidden;
 		}
-		this._adjustColumnWidths();
-		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
