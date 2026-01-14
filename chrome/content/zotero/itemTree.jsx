@@ -1087,6 +1087,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Handle loading/message state
 		if (options.loading) {
 			options.message ||= Zotero.getString('pane.items.loading');
+			if (this._itemTreeLoadingDeferred) this._itemTreeLoadingDeferred.resolve();
 			this._itemTreeLoadingDeferred = Zotero.Promise.defer();
 			this.selection.clearSelection();
 			this.selection.focused = 0;
@@ -1190,7 +1191,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		await this.rowProvider.notify(action, type, ids, extraData);
 	}
 	
-	handleActivate = (event, indices) => {
+	handleActivate(event, indices) {
 		let items = indices.map(index => this.getRow(index).ref);
 		this.props.onActivate(event, items);
 	}
@@ -1851,9 +1852,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	expandSelectedRows() {
 		this._cacheState();
-		const indices = this.getSelectedItems(true).sort((a, b) => b - a);
 		let rowsToOpen = [];
-		for (const index of indices) {
+		for (const index of this.selection.selected) {
 			if (this.isContainer(index) && !this.isContainerOpen(index)) {
 				rowsToOpen.push(index);
 			}
@@ -1863,9 +1863,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	collapseSelectedRows() {
 		this._cacheState();
-		const indices = this.getSelectedItems(true).sort((a, b) => b - a);
 		let rowsToClose = [];
-		for (const index of indices) {
+		for (const index of this.selection.selected) {
 			if (this.isContainer(index)) {
 				rowsToClose.push(index);
 			}
