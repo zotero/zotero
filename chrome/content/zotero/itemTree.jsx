@@ -2947,3 +2947,4 @@ module.exports = ItemTree;
 module.exports.ItemTreeRow = ItemTreeRow;
 module.exports.ItemTreeRowProvider = ItemTreeRowProvider;
 module.exports.ItemTreeRowRenderer = ItemTreeRowRenderer;
+module.exports.STUB_COLLECTION_TREE_ROW = STUB_COLLECTION_TREE_ROW;
