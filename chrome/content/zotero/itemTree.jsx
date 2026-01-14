@@ -2908,8 +2908,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		popupset.appendChild(menupopup);
 		menupopup.openPopupAtScreen(
-			window.screenX + event.clientX + 2,
-			window.screenY + event.clientY + 2,
+			event.screenX + 1,
+			event.screenY + 1,
 			true
 		);
 	}
