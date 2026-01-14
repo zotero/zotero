@@ -38,7 +38,6 @@ var LibraryTree = class LibraryTree extends React.Component {
 		this._ownerDocument = props.domEl.ownerDocument;
 		
 		this.onSelect = this.createEventBinding('select');
-		this.onRefresh = this.createEventBinding('refresh');
 	}
 	
 	get window() {
