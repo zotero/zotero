@@ -51,15 +51,7 @@ const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COL
 class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	constructor(itemTree) {
 		super(itemTree);
-		this._collectionTreeRow = null;
-	}
-
-	get collectionTreeRow() {
-		return this._collectionTreeRow;
-	}
-
-	set collectionTreeRow(val) {
-		this._collectionTreeRow = val;
+		this.collectionTreeRow = null;
 	}
 
 	/**
@@ -81,7 +73,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		if (collectionTreeRow.constructor.name == "Object") {
 			collectionTreeRow = Object.assign({}, STUB_COLLECTION_TREE_ROW, collectionTreeRow);
 		}
-		this._collectionTreeRow = collectionTreeRow;
+		this.collectionTreeRow = collectionTreeRow;
 		await this.refresh();
 	}
 
@@ -273,7 +265,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			else {
 				this.runListeners('update', true, { restoreSelection });
 			}
-			
+
+			// Notify listeners that the item tree has been refreshed
+			this.itemTree.runListeners('refresh');
+
 			resolve();
 		}
 		catch (e) {
@@ -678,10 +673,15 @@ class CollectionViewItemTree extends ItemTree {
 		this.duplicateMouseSelection = false;
 
 		this.rowProvider.onUpdate.addListener(this.handleRowModelUpdate.bind(this));
+
+		// Triggered when the item tree is refreshed:
+		// - Collection/view changed (changeCollectionTreeRow)
+		// - Search/filter updated (setFilter)
+		// - Items added/removed/modified (notify -> refresh)
+		this.onRefresh = this.createEventBinding('refresh');
 	}
 
 	get collectionTreeRow() { return this.rowProvider.collectionTreeRow; }
-	set collectionTreeRow(val) { this.rowProvider._collectionTreeRow = val; }
 
 	get visibilityGroup() {
 		return this.collectionTreeRow?.visibilityGroup || 'default';
@@ -1338,15 +1338,16 @@ class CollectionViewItemTree extends ItemTree {
 	//
 	// ///////////////////////////////////////////////////////////////////////////
 
-	handleActivate = (event, indices) => {
+	handleActivate(event, indices) {
+		let items = indices.map(index => this.getRow(index).ref);
 		// Ignore double-clicks in duplicates view on everything except attachments
 		if (event.button == 0 && this.collectionTreeRow?.isDuplicates()) {
 			if (items.length != 1 || !items[0].isAttachment()) {
 				return false;
 			}
 		}
-		super.handleActivate(event, indices);
-	};
+		return super.handleActivate(event, indices);
+	}
 
 	_handleRowMouseUpDown(event) {
 		const modifierIsPressed = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'].some(key => event[key]);
