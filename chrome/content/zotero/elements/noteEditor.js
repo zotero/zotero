@@ -88,6 +88,7 @@
 				this._initialized = true;
 			});
 			this.append(content);
+			this._iframe.docShell.windowDraggingAllowed = true;
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'file'], 'noteEditor');
 			this.notitle = !!this.getAttribute('notitle');
