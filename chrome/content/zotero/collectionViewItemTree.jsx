@@ -42,7 +42,7 @@ const { getDragTargetOrient } = require("components/utils");
 const React = require('react');
 const ReactDOM = require('react-dom');
 const ItemTree = require('zotero/itemTree');
-const { ItemTreeRowProvider, ItemTreeRow } = ItemTree;
+const { ItemTreeRowProvider, ItemTreeRow, STUB_COLLECTION_TREE_ROW } = ItemTree;
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 
