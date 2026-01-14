@@ -15,16 +15,15 @@ links-box {
 	display: flex;
 	flex-direction: column;
 	padding-inline: 8px;
+	line-height: normal;
 
 	border-top: 1px solid var(--fill-quinary);
 	
-	tags-box, related-box {
-		> collapsible-section > .body {
-			max-height: 25vh;
-			overflow-y: auto;
-			scrollbar-width: thin;
-			scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
-			padding-bottom: 1px; // Leave room for the editable-text focus ring
-		}
+	collapsible-section > .body {
+		max-height: 25vh;
+		overflow-y: auto;
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+		padding-block: 1px; // Leave room for the editable-text focus ring
 	}
 }
