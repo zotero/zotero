@@ -470,14 +470,22 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 
 
 Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null) {
+	if (this.searchText === searchText && this.searchMode === mode) {
+		return false;
+	}
 	Zotero.CollectionTreeCache.clear();
 	this.searchText = searchText;
 	this.searchMode = mode;
+	return true;
 }
 
 Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
+	if (this.tags === tags) {
+		return false;
+	}
 	Zotero.CollectionTreeCache.clear();
 	this.tags = tags;
+	return true;
 }
 
 /*
