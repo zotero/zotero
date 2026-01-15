@@ -1054,7 +1054,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		Zotero.debug('clearItemsPaneMessage called, current message: ' + !!this._itemsPaneMessage);
 		const shouldRerender = this._itemsPaneMessage;
 		this._itemsPaneMessage = null;
-		Zotero.debug('clearItemsPaneMessage: shouldRerender=' + !!shouldRerender);
 		return shouldRerender && new Promise(resolve => this.forceUpdate(resolve));
 	}
 	

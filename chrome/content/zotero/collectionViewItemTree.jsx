@@ -73,6 +73,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		if (collectionTreeRow.constructor.name == "Object") {
 			collectionTreeRow = Object.assign({}, STUB_COLLECTION_TREE_ROW, collectionTreeRow);
 		}
+		// No-op if same collection
+		if (this.collectionTreeRow && this.collectionTreeRow.id === collectionTreeRow.id) {
+			return;
+		}
 		this.collectionTreeRow = collectionTreeRow;
 		await this.refresh();
 	}
@@ -85,20 +89,23 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 * @returns {Promise<void>}
 	 */
 	async setFilter(type, data) {
+		let changed;
 		switch (type) {
 			case 'search':
-				this.collectionTreeRow.setSearch(data);
+				changed = this.collectionTreeRow.setSearch(data);
 				break;
 			case 'citation-search':
-				this.collectionTreeRow.setSearch(data, 'fields');
+				changed = this.collectionTreeRow.setSearch(data, 'fields');
 				break;
 			case 'tags':
-				this.collectionTreeRow.setTags(data);
+				changed = this.collectionTreeRow.setTags(data);
 				break;
 			default:
 				throw ('Invalid filter type in setFilter');
 		}
-		await this.refresh(false, true);
+		if (changed) {
+			await this.refresh(false, true);
+		}
 	}
 
 	refresh = Zotero.serial(async function (skipExpandMatchParents, restoreSelection=false) {
