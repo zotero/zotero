@@ -241,6 +241,7 @@ class ReaderInstance {
 			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
 			sidebarView: Zotero.Prefs.get('reader.lastSidebarTab'),
+			enableReadAloud: Zotero.isBetaBuild || Zotero.isDevBuild || Zotero.isSourceBuild,
 			readAloudVoices: this._getReadAloudVoices(),
 			readAloudRemoteInterface: {
 				// Wrap return values in child window Promises to avoid permissions errors
