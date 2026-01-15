@@ -285,10 +285,11 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 *  Called by Zotero.Notifier on any changes to items in the data layer.
 	 *  ZoteroPane-specific implementation with full add/remove/modify handling.
 	 */
-	async notify(action, type, ids, extraData, cachedSelection) {
+	async notify(action, type, ids, extraData) {
 		// Call base class for basic redraw handling
 		await super.notify(action, type, ids, extraData);
 
+		const cachedSelection = this.itemTree._cachedSelection;
 		const collectionTreeRow = this.collectionTreeRow;
 
 		var madeChanges = false;
@@ -759,7 +760,7 @@ class CollectionViewItemTree extends ItemTree {
 			let rowsToInvalidate = ids.map(id => this._rowMap[id]).filter(row => row !== undefined);
 			rowsToInvalidate.forEach(row => this.tree.invalidateRow(row));
 		}
-		super.notify(action, type, ids, extraData, this._cachedSelection);
+		super.notify(action, type, ids, extraData);
 	}
 
 	async selectItems(ids, noRecurse, noScroll) {

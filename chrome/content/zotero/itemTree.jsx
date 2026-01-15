@@ -263,12 +263,14 @@ class ItemTreeRowProvider {
 	}
 
 	toggleOpenState(index, skipRowMapRefresh = false) {
+		this.itemTree._cacheState();
 		this._toggleOpenState(index, skipRowMapRefresh);
 		// Don't jump to container when collapsing.
 		this.runListeners('update', true, { restoreSelection: true, ensureRowsAreVisible: this.isContainerOpen(index) });
 	}
 
 	expandAllRows() {
+		this.itemTree._cacheState();
 		for (var i=0; i<this.getRowCount(); i++) {
 			if (!this.isContainerOpen(i)) {
 				this._toggleOpenState(i, true);
@@ -279,6 +281,7 @@ class ItemTreeRowProvider {
 	}
 
 	collapseAllRows() {
+		this.itemTree._cacheState();
 		for (var i=0; i<this.getRowCount(); i++) {
 			if (this.isContainerOpen(i)) {
 				this._toggleOpenState(i, true);
@@ -289,6 +292,7 @@ class ItemTreeRowProvider {
 	}
 
 	expandRows(indices) {
+		this.itemTree._cacheState();
 		// Reverse sort so that as we open indices don't change.
 		indices.sort((a, b) => b - a);
 		for (let index of indices) {
@@ -301,6 +305,7 @@ class ItemTreeRowProvider {
 	}
 
 	collapseRows(indices) {
+		this.itemTree._cacheState();
 		indices.sort((a, b) => b - a);
 		for (let index of indices) {
 			if (this.isContainerOpen(index)) {
@@ -1132,7 +1137,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		const prioritizeRestore = !options.selectInActiveWindow || itemsViewInActiveWindow;
 
 		if (prioritizeRestore && options.restoreSelection) {
-			this._restoreSelection(this._cachedSelection, false, options.ensureRowsAreVisible);
+			this._restoreSelection(null, false, options.ensureRowsAreVisible);
 		}
 		else if (options.selection) {
 			if (Array.isArray(options.selection)) {
@@ -1142,7 +1147,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		if (options.restoreScroll) {
-			this._rememberScrollPosition(this._cachedScrollPosition);
+			this._restoreScrollPosition();
 		}
 
 		// Allow selection events to propagate and redraw the needed rows
@@ -2622,9 +2627,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 
 	/**
-	 * Restore a scroll position returned from _saveScrollPosition()
+	 * Restore scroll position from either a provided object or the cached scroll position.
+	 * If scrollPosition is null, restores from cache and clears it.
+	 * If scrollPosition is provided, restores from it without touching the cache.
+	 *
+	 * @param {Object|null} scrollPosition - Scroll position to restore, or null to use cached
 	 */
-	_rememberScrollPosition(scrollPosition) {
+	_restoreScrollPosition(scrollPosition = null) {
+		if (scrollPosition === null) {
+			scrollPosition = this._cachedScrollPosition;
+			this._cachedScrollPosition = null;
+		}
 		if (!scrollPosition || !scrollPosition.id || !this._treebox) {
 			return;
 		}
@@ -2738,15 +2751,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	/**
+	 * Restore selection from either a provided array or the cached selection.
+	 * If selection is null, restores from cache and clears it.
+	 * If selection is provided, restores from it without touching the cache.
 	 *
-	 * @param selection
+	 * @param {Array|null} selection - Selection to restore, or null to use cached selection
 	 * @param {Boolean} expandCollapsedParents - if an item to select is in a collapsed parent
 	 * 					will expand the parent, otherwise the item is ignored
 	 * @param {Boolean}	dontEnsureRowsVisible - do not scroll the item tree after restoring selection
 	 * 					to ensure restored selection is visible
 	 * @private
 	 */
-	async _restoreSelection(selection, expandCollapsedParents=true, dontEnsureRowsVisible=false) {
+	async _restoreSelection(selection = null, expandCollapsedParents = true, dontEnsureRowsVisible = false) {
+		if (selection === null) {
+			selection = this._cachedSelection;
+			this._cachedSelection = [];
+		}
 		if (!selection.length || !this._treebox) {
 			return;
 		}
