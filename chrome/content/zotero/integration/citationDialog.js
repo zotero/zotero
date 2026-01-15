@@ -732,7 +732,7 @@ class LibraryLayout extends Layout {
 			setSearch: (searchText, mode) => collectionTreeRow.setSearch(searchText, mode),
 			ref: collectionTreeRow.ref
 		});
-		await this.itemsView.setFilter('search', SearchHandler.searchValue);
+		await this.itemsView.setFilter('citation-search', SearchHandler.searchValue);
 		
 		this.itemsView.clearItemsPaneMessage();
 	}
