@@ -568,10 +568,11 @@ Zotero.Sync.APIClient.prototype = {
 		params.set('text', text);
 		params.set('voice', voiceID);
 		params.set('lang', lang);
+		params.set('timepoints', '1');
 		let uri = this.baseURL + "tts/speak?" + params;
 		try {
 			let xmlhttp = await this.makeRequest("GET", uri, {
-				responseType: "blob",
+				responseType: "json",
 			});
 
 			let creditsRemaining = parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
@@ -579,8 +580,9 @@ Zotero.Sync.APIClient.prototype = {
 				creditsRemaining = null;
 			}
 
+			let { audio, timepoints } = xmlhttp.response;
 			return {
-				audio: xmlhttp.response,
+				audio,
 				creditsRemaining,
 			};
 		}
@@ -616,11 +618,13 @@ Zotero.Sync.APIClient.prototype = {
 		let uri = this.baseURL + "tts/sample?" + params;
 		try {
 			let xmlhttp = await this.makeRequest("GET", uri, {
-				responseType: "blob",
+				responseType: "json",
 				noAPIKey: true,
 			});
+			
+			let { audio } = xmlhttp.response;
 			return {
-				audio: xmlhttp.response,
+				audio,
 			};
 		}
 		catch (e) {
