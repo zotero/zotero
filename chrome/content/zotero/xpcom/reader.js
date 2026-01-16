@@ -254,11 +254,18 @@ class ReaderInstance {
 					});
 				},
 
-				getAudio: (segment, voice) => {
+				getAudio: (segment, voice, lang) => {
 					return new this._iframeWindow.Promise(async (resolve) => {
 						let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-						resolve(Cu.cloneInto(await client.getReadAloudAudio(segment.text, voice.id), this._iframeWindow));
+						resolve(Cu.cloneInto(await client.getReadAloudAudio(segment.text, voice.id, lang), this._iframeWindow));
+					});
+				},
+
+				getSampleAudio: (voice, lang) => {
+					return new this._iframeWindow.Promise(async (resolve) => {
+						let client = Zotero.Sync.Runner.getAPIClient();
+						resolve(Cu.cloneInto(await client.getReadAloudSampleAudio(voice.id, lang), this._iframeWindow));
 					});
 				},
 			},
@@ -626,7 +633,8 @@ class ReaderInstance {
 				this._setReadAloudStatus(status);
 			},
 			onLogIn: () => {
-				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+				// This causes a segfault without the timeout...
+				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync'));
 			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 

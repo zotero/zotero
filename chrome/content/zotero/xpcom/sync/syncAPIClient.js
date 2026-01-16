@@ -551,20 +551,23 @@ Zotero.Sync.APIClient.prototype = {
 
 	async getReadAloudVoices() {
 		let uri = this.baseURL + "tts/voices";
+		let noAPIKey = !this.apiKey;
 		let xmlhttp = await this.makeRequest("GET", uri, {
 			responseType: "json",
+			noAPIKey,
 		});
 		return {
 			voices: xmlhttp.response,
-			creditsRemaining: parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining')),
+			creditsRemaining: noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining')),
 		};
 	},
 
 
-	async getReadAloudAudio(text, voiceID) {
+	async getReadAloudAudio(text, voiceID, lang) {
 		let params = new URLSearchParams();
 		params.set('text', text);
 		params.set('voice', voiceID);
+		params.set('lang', lang);
 		let uri = this.baseURL + "tts/speak?" + params;
 		try {
 			let xmlhttp = await this.makeRequest("GET", uri, {
@@ -600,6 +603,36 @@ Zotero.Sync.APIClient.prototype = {
 			return {
 				audio: null,
 				creditsRemaining,
+				error,
+			};
+		}
+	},
+
+
+	async getReadAloudSampleAudio(voiceID, lang) {
+		let params = new URLSearchParams();
+		params.set('voice', voiceID);
+		params.set('lang', lang);
+		let uri = this.baseURL + "tts/sample?" + params;
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "blob",
+				noAPIKey: true,
+			});
+			return {
+				audio: xmlhttp.response,
+			};
+		}
+		catch (e) {
+			let error;
+			if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				error = 'network';
+			}
+			else {
+				error = 'unknown';
+			}
+			return {
+				audio: null,
 				error,
 			};
 		}
