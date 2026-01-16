@@ -246,6 +246,13 @@ describe("Zotero.Tags", function () {
 		it("should return first emoji span that contains regional flags", function () {
 			assert.equal(Zotero.Tags.extractEmojiForItemsList("Hello England and Scotland: 🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁧󠁢󠁳󠁣󠁴󠁿"), "🏴󠁧󠁢󠁥󠁮󠁧󠁿🏴󠁧󠁢󠁳󠁣󠁴󠁿");
 		});
+
+		it("should return first symbol span ", function () {
+			console.assert(Zotero.Tags.extractEmojiForItemsList("Hello weather symbols ☼☁☂", "☼☁☂"));
+		});
+		it("should return first span of mixed symbols, emojis and flags ", function () {
+			console.assert(Zotero.Tags.extractEmojiForItemsList("Hello weather, flags and cats ☼☁☂🇱🇺🏴󠁧󠁢󠁥󠁮󠁧󠁿🐈", "☼☁☂🇱🇺🏴󠁧󠁢󠁥󠁮󠁧󠁿🐈"));
+		});
 	});
 
 	describe("#compareTagsOrder()", function () {
