@@ -1441,6 +1441,7 @@ describe("Zotero.Attachments", function () {
 			item.setField('journalAbbreviation', 'BPP');
 			item.setField('issue', '42');
 			item.setField('pages', '321');
+			item.setField('accessDate', '2009-02-07T06:15:10Z');
 
 			itemBookSection = createUnsavedDataObject('item', { title: 'Book Section', itemType: 'bookSection', libraryID: 1 });
 			itemBookSection.setField('bookTitle', 'Book Title');
@@ -1939,6 +1940,26 @@ describe("Zotero.Attachments", function () {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: '{{ title replaceFrom="lorem" replaceTo="foobar" regexOpts="" }}' }),
 				'Lorem Ipsum'
+			);
+		});
+
+		it('should output the accessDate according to the declared timezone', async function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: '{{ accessDate timeZone="America/New_York" replaceFrom=":" replaceTo="-" regexOpts="g" }}' }),
+				'2009-02-07 01-15-10'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: '{{ accessDate timeZone="Europe/Berlin" replaceFrom=":" replaceTo="-" regexOpts="g" }}' }),
+				'2009-02-07 07-15-10'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: '{{ accessDate timeZone="America/Los_Angeles" truncate="10" }}' }),
+				'2009-02-06'
+			);
+			// timeZone is optional; UTC date, as stored, is returned if not specified
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: '{{ accessDate replaceFrom=":" replaceTo="-" regexOpts="g" }}' }),
+				'2009-02-07 06-15-10'
 			);
 		});
 
