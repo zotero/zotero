@@ -36,6 +36,10 @@
 			this._parentItem = null;
 			this._iframe = null;
 			this._initialized = false;
+			this._initPromise = new Promise((resolve, reject) => {
+				this._resolveInitPromise = resolve;
+				this._rejectInitPromise = reject;
+			});
 			this._editorInstance = null;
 			this._destroyed = false;
 			this._bottomPlaceholder = null;
@@ -154,6 +158,9 @@
 				this._onInitCallback();
 			}
 			requestIdleCallback(() => this.setToggleContextPaneButtonMode());
+
+			await this._editorInstance._initPromise;
+			this._resolveInitPromise();
 		};
 
 		onInit = (callback) => {
