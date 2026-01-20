@@ -556,9 +556,15 @@ Zotero.Sync.APIClient.prototype = {
 			responseType: "json",
 			noAPIKey,
 		});
+		
+		let creditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
+		if (isNaN(creditsRemaining)) {
+			creditsRemaining = null;
+		}
+		
 		return {
 			voices: xmlhttp.response,
-			creditsRemaining: noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining')),
+			creditsRemaining,
 		};
 	},
 
