@@ -451,6 +451,7 @@
 			this._mode = val;
 			this._id('related').editable = val == "edit";
 			this._id('tags').editable = val == "edit";
+			this._id('libraries-collections').editable = val == "edit";
 			this.refresh();
 		}
 
