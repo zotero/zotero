@@ -35,6 +35,14 @@ Zotero.Notes = new function () {
 	this._editorInstances = [];
 	this._downloadInProgressPromise = null;
 
+	/**
+	 * Open note in tab or window
+	 * @param {number} itemID
+	 * @param {Object} location - Not implemented yet
+	 * @param {Object} options
+	 * @returns {Promise<Zotero.EditorInstance | null>} Instance of Zotero.EditorInstance for the note.
+	 * If the note tab is opened in background (unloaded), returns null.
+	 */
 	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
@@ -44,6 +52,11 @@ Zotero.Notes = new function () {
 			openInWindow = true;
 		}
 
+		// Never duplicate when opening in window
+		if (openInWindow) {
+			allowDuplicate = false;
+		}
+
 		await library.waitForDataLoad('item');
 
 		let item = Zotero.Items.get(itemID);
@@ -51,37 +64,52 @@ Zotero.Notes = new function () {
 			throw new Error('Item does not exist');
 		}
 
+		// Instance of EditorInstance
+		let editorInstance;
+		// Instance of note-editor CE
 		let noteEditor;
-		if (!openInWindow && !allowDuplicate && !this._editorInstances.find(r => r.itemID === itemID)) {
-			if (win) {
-				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
-				if (existingTabID) {
-					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return win.Zotero_Tabs.getTabContent(existingTabID).querySelector('note-editor.note-tab');
+
+		if (!allowDuplicate) {
+			if (openInWindow) {
+				editorInstance = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'window');
+			}
+			else {
+				editorInstance = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'tab');
+			}
+		}
+
+		if (win && !openInWindow && !allowDuplicate && !editorInstance) {
+			let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
+			if (existingTabID) {
+				win.Zotero_Tabs.select(existingTabID, false, { location });
+				// Wait for the note editor to load
+				let timeout = 3000;
+				for (let i = 0; i < timeout; i += 100) {
+					editorInstance = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'tab');
+					if (editorInstance) {
+						return editorInstance;
+					}
+					await new Promise(resolve => setTimeout(resolve, 100));
+				}
+				if (!editorInstance) {
+					throw new Error('Timed out waiting for note editor to load');
 				}
 			}
 		}
 
-		if (openInWindow) {
-			noteEditor = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'window');
-		}
-		else if (!allowDuplicate) {
-			noteEditor = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'tab');
-		}
-
-		if (noteEditor) {
-			if (noteEditor.viewMode === 'tab') {
-				win.Zotero_Tabs.select(noteEditor.tabID, true);
+		if (editorInstance) {
+			if (openInWindow) {
+				editorInstance.focus();
 			}
 			else {
-				noteEditor.focus();
+				win.Zotero_Tabs.select(editorInstance.tabID, true);
 			}
 			
 			if (location) {
 				// TODO: implement this
-				noteEditor.navigate(location);
+				editorInstance.navigate(location);
 			}
-			return noteEditor;
+			return editorInstance;
 		}
 
 		if (openInWindow) {
@@ -129,7 +157,11 @@ Zotero.Notes = new function () {
 				}));
 			}
 
-			if (!noteEditor && !openInBackground) {
+			if (openInBackground) {
+				return null;
+			}
+
+			if (!noteEditor) {
 				noteEditor = win.document.createXULElement('note-editor');
 				noteEditor.classList.add('note-tab');
 				container.appendChild(noteEditor);
@@ -160,7 +192,8 @@ Zotero.Notes = new function () {
 				noteEditor.focus();
 			}
 		}
-		return noteEditor;
+		await noteEditor._initPromise;
+		return noteEditor._editorInstance;
 	};
 
 	this.setBottomPlaceholderHeight = function (noteEditor, height) {
@@ -191,9 +224,9 @@ Zotero.Notes = new function () {
 		if (!tabID) {
 			return null;
 		}
-		let noteEditor = this._editorInstances.find(x => x._tabID === tabID);
-		if (noteEditor) {
-			return noteEditor;
+		let editorInstance = this._editorInstances.find(x => x.tabID === tabID);
+		if (editorInstance) {
+			return editorInstance;
 		}
 		return null;
 	};

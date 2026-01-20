@@ -110,14 +110,14 @@ var Zotero_Tabs = new function () {
 				await reader._initPromise;
 			},
 			note: async (tab, tabIndex, options) => {
-				let noteEditor = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
+				let editorInstance = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
 					tabID: tab.id,
 					title: tab.title,
 					tabIndex,
 					allowDuplicate: true,
 					preventJumpback: true
 				});
-				await noteEditor;
+				await editorInstance._initPromise;
 			}
 		},
 		focusFirst: {

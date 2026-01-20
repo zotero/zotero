@@ -61,6 +61,10 @@ class EditorInstance {
 		this._viewMode = mode;
 	}
 
+	get tabID() {
+		return this._tabID;
+	}
+
 	async init(options) {
 		Zotero.Notes.registerEditorInstance(this);
 		this.onNavigate = options.onNavigate;
