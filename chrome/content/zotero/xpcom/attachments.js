@@ -2521,6 +2521,7 @@ Zotero.Attachments = new function () {
 
 		const fields = Zotero.ItemFields.getAll()
 			.map(f => f.name)
+			.filter(f => f !== 'accessDate')
 			.reduce((obj, name) => {
 				obj[name] = (args) => {
 					return common(item.getField(name, false, true), args);
@@ -2559,8 +2560,28 @@ Zotero.Attachments = new function () {
 		);
 
 		const attachmentTitleFn = args => common(attachmentTitle ?? '', args);
+		
+		const accessDate = ({ timeZone = null, ...rest }) => {
+			let value = item.getField('accessDate', true, true);
+			if (!timeZone) {
+				return common(value, rest);
+			}
+			try {
+				// Append "Z" to explicitly mark this as a UTC date for Temporal
+				let instant = Temporal.Instant.from(`${value}Z`); // eslint-disable-line no-undef
+				let zdt = instant.toZonedDateTimeISO(timeZone);
 
-		const vars = { ...fields, ...creatorFields, attachmentTitle: attachmentTitleFn, firstCreator, itemType, year };
+				// Remove "T" from the ISO string to match the output of `item.getField('accessDate')`
+				let stringDate = zdt.toPlainDateTime().toString({ fractionalSecondDigits: 0 }).replace('T', ' ');
+				return common(stringDate, rest);
+			}
+			catch (e) {
+				Zotero.warn(`Error converting date "${value}" to timezone "${timeZone}" for ${item.key}: ${e}`);
+				return common(value, rest);
+			}
+		};
+
+		const vars = { ...fields, ...creatorFields, attachmentTitle: attachmentTitleFn, firstCreator, itemType, year, accessDate };
 
 		// Final name is generated twice. In the first pass we collect all affixed values and determine protected literals.
 		// This is done in order to remove repeated suffixes, except if these appear in the value or the format string itself.
