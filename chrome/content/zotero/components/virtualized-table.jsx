@@ -758,6 +758,12 @@ class VirtualizedTable extends React.Component {
 			this._isMouseDrag = false;
 			return;
 		}
+
+		// Double-click with shift does not trigger dblclick event, so we handle it here
+		if (shiftSelect && e.detail === 2) {
+			this._activateNode(e, [index]);
+		}
+
 		this._onSelection(index, shiftSelect, augment);
 		this.focus();
 	}
