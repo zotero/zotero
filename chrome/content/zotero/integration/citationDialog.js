@@ -1276,10 +1276,6 @@ const IOManager = {
 		if (!desiredMode) {
 			desiredMode = "list";
 		}
-		// If List is the initial mode, move the List type tab to the front
-		if (desiredMode == "list") {
-			_id("dialog-mode-setting").appendChild(_id("dialog-mode-library"));
-		}
 		this.toggleDialogMode(desiredMode);
 	},
 	
