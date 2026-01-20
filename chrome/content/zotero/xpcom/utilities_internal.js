@@ -2481,6 +2481,14 @@ Zotero.Utilities.Internal = {
 		}
 	},
 
+	get _titleMarkupRe() {
+		let re = new RegExp(
+			'(' + Object.keys(this._titleMarkup).map(tag => Zotero.Utilities.quotemeta(tag)).join('|') + ')'
+		);
+		Object.defineProperty(this, '_titleMarkupRe', { value: re });
+		return re;
+	},
+
 	/**
 	 * Render Citeproc.js HTML-style markup in a title
 	 *
@@ -2500,7 +2508,7 @@ Zotero.Utilities.Internal = {
 		// https://forums.zotero.org/discussion/118779/special-characters-in-item-title-breaks-the-tab-bar
 		title = title.replace(/[\x00-\x1F\x7F]/g, '');
 
-		for (let token of title.split(/(<[^>]+>)/)) {
+		for (let token of title.split(this._titleMarkupRe)) {
 			if (this._titleMarkup.hasOwnProperty(token)) {
 				let markup = this._titleMarkup[token];
 				if (markup.beginsTag) {

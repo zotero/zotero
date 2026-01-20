@@ -858,6 +858,17 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(renderToHTML('<<ATTENTION>> READ THIS'), '&lt;&lt;ATTENTION&gt;&gt; READ THIS');
 		});
 
+		it("should preserve non-tag angle brackets", function () {
+			assert.equal(renderToHTML('<i>0 < p ≤ 1</i>'), '<i>0 &lt; p ≤ 1</i>');
+			assert.equal(renderToText('<i>0 < p ≤ 1</i>'), '0 < p ≤ 1');
+			assert.equal(
+				renderToHTML('Restricted isometry constants where <i>ℓ<sup>p</sup></i> sparse recovery can fail for <i>0 < p ≤ 1</i>'),
+				'Restricted isometry constants where <i>ℓ<sup>p</sup></i> sparse recovery can fail for <i>0 &lt; p ≤ 1</i>'
+			);
+			assert.equal(renderToHTML('1<x <i>abc</i>'), '1&lt;x <i>abc</i>');
+			assert.equal(renderToHTML('<i>f(x) for x<1</i>'), '<i>f(x) for x&lt;1</i>');
+		});
+
 		it("should render single-level tags", function () {
 			let examples = [
 				'My <i>Title</i> XYZ',
