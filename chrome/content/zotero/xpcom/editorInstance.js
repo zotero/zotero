@@ -192,6 +192,8 @@ class EditorInstance {
 			Zotero.debug(style);
 		}
 
+		let contentViewMode = this._getContentViewMode();
+
 		// Prepare Fluent data
 		let ftl = ['-app-name = ' + Zotero.appName];
 
@@ -222,6 +224,7 @@ class EditorInstance {
 			placeholder: options.placeholder,
 			dir: Zotero.dir,
 			font: this._getFont(),
+			contentViewMode,
 			style,
 			smartQuotes: Zotero.Prefs.get('note.smartQuotes'),
 			ftl
@@ -370,9 +373,18 @@ class EditorInstance {
 		let fontFamily = Zotero.Prefs.get('note.fontFamily');
 		return { fontSize, fontFamily };
 	}
+
+	_getContentViewMode() {
+		// TODO: Use prefs
+		return this._tabID ? 'comfortable' : 'wide';
+	}
 	
 	_handleFontChange = () => {
 		this._postMessage({ action: 'setFont', font: this._getFont() });
+	};
+
+	_handleContentViewModeChange = () => {
+		this._postMessage({ action: 'setContentViewMode', contentViewMode: this._getContentViewMode() });
 	};
 
 	_handleStyleChange = () => {
