@@ -261,7 +261,7 @@
 <!ENTITY zotero.feedSettings.saveButton.label "Mentés">
 <!ENTITY zotero.feedSettings.url.label "URL">
 <!ENTITY zotero.feedSettings.title.label "Cím:">
-<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
+<!ENTITY zotero.feedSettings.refresh.label1 "Feed frissítése minden">
 <!ENTITY zotero.feedSettings.refresh.label2 "óra">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Az olvasatlan hírcsatorna elemek eltávolítása után">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "nap(ok)">

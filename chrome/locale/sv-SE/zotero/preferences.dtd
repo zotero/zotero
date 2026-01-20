@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Allmänt">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Gränssnitt">
 <!ENTITY zotero.preferences.fileHandling "Filhantering">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF:er och andra filer när källor sparas">

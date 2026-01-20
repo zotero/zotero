@@ -318,12 +318,12 @@
 <!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Zooma in">
 <!ENTITY zotero.pdfReader.zoomOut "Zooma ut">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Återställ zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Anpassa storlek automatiskt">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Anpassa till sidbredd">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zooma till sidhöjd">
+<!ENTITY zotero.pdfReader.splitVertically "Dela vertikalt">
+<!ENTITY zotero.pdfReader.splitHorizontally "Dela horisontellt">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
 <!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">

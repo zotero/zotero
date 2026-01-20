@@ -57,7 +57,7 @@
 <!ENTITY fontSize.label "Teckenstorlek">
 <!ENTITY noteFontSize.label "Teckenstorlek för anteckning">
 <!ENTITY columns.label "Kolumner">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY sortBy.label "Sortera efter">
 
 <!ENTITY toolsMenu.label "Verktyg">
 <!ENTITY toolsMenu.accesskey "T">

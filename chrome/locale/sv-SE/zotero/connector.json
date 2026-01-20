@@ -5,6 +5,9 @@
   "general_moreInfo": {
     "message": "Mer info…"
   },
+  "general_needHelp": {
+    "message": "Behöver du hjälp?"
+  },
   "general_done": {
     "message": "Klar"
   },
@@ -56,8 +59,20 @@
   "progressWindow_savingTo": {
     "message": "Spara till"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Visa detaljer"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Dölj detaljer"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Sparade $1"
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Etiketter (avdelade med kommatecken)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtrera samlingar"
   },
   "progressWindow_error_translation": {
     "message": "Ett fel uppstod när källan skulle sparas.  Se $1 för mer information."
