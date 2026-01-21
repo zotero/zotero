@@ -136,20 +136,41 @@ for version in "$FROM" "$TO"; do
 	mkdir -p "$versiondir"
 	cd "$versiondir"
 	
+	# Determine Linux archive extension by major Zotero version
+	MAJOR_VERSION="${version%%.*}"
+	if [ "$MAJOR_VERSION" -lt 8 ]; then
+		LINUX_EXT="tar.bz2"
+	else
+		LINUX_EXT="tar.xz"
+	fi
+	
 	MAC_ARCHIVE="Zotero-${version}.dmg"
 	WIN32_ARCHIVE="Zotero-${version}_win32.zip"
 	WIN_X64_ARCHIVE="Zotero-${version}_win-x64.zip"
 	WIN_ARM64_ARCHIVE="Zotero-${version}_win-arm64.zip"
-	LINUX_X86_ARCHIVE="Zotero-${version}_linux-i686.tar.xz"
-	LINUX_X86_64_ARCHIVE="Zotero-${version}_linux-x86_64.tar.xz"
-	LINUX_ARM64_ARCHIVE="Zotero-${version}_linux-arm64.tar.xz"
+	LINUX_X86_ARCHIVE="Zotero-${version}_linux-i686.${LINUX_EXT}"
+	LINUX_X86_64_ARCHIVE="Zotero-${version}_linux-x86_64.${LINUX_EXT}"
+	LINUX_ARM64_ARCHIVE="Zotero-${version}_linux-arm64.${LINUX_EXT}"
 	
 	CACHE_DIR="$ROOT_DIR/cache"
 	if [ ! -e "$CACHE_DIR" ]; then
 		mkdir "$CACHE_DIR"
 	fi
 	
-	for archive in "$MAC_ARCHIVE" "$WIN32_ARCHIVE" "$WIN_X64_ARCHIVE" "$WIN_ARM64_ARCHIVE" "$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE" "$LINUX_ARM64_ARCHIVE"; do
+	# Build archive list (no Linux arm64 for Zotero 7)
+	ARCHIVES=(
+		"$MAC_ARCHIVE"
+		"$WIN32_ARCHIVE"
+		"$WIN_X64_ARCHIVE"
+		"$WIN_ARM64_ARCHIVE"
+		"$LINUX_X86_ARCHIVE"
+		"$LINUX_X86_64_ARCHIVE"
+	)
+	if [ "$MAJOR_VERSION" -ge 8 ]; then
+		ARCHIVES+=("$LINUX_ARM64_ARCHIVE")
+	fi
+	
+	for archive in "${ARCHIVES[@]}"; do
 		if [[ $archive = "$MAC_ARCHIVE" ]] && [[ $BUILD_MAC != 1 ]]; then
 			continue
 		fi
@@ -248,14 +269,28 @@ for version in "$FROM" "$TO"; do
 	
 	# Unpack Linux tarballs
 	if [ $BUILD_LINUX == 1 ]; then
-		if [[ -f "$LINUX_X86_ARCHIVE" ]] && [[ -f "$LINUX_X86_64_ARCHIVE" ]] && [[ -f "$LINUX_ARM64_ARCHIVE" ]]; then
-			for build in "$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE" "$LINUX_ARM64_ARCHIVE"; do
+		# Zotero 7 has no Linux arm64 build
+		LINUX_BUILDS_TO_UNPACK=("$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE")
+		if [ "$MAJOR_VERSION" -ge 8 ]; then
+			LINUX_BUILDS_TO_UNPACK+=("$LINUX_ARM64_ARCHIVE")
+		fi
+		
+		MISSING=0
+		for build in "${LINUX_BUILDS_TO_UNPACK[@]}"; do
+			if [ ! -f "$build" ]; then
+				MISSING=1
+				break
+			fi
+		done
+		
+		if [ "$MISSING" -eq 0 ]; then
+			for build in "${LINUX_BUILDS_TO_UNPACK[@]}"; do
 				tar -xf "$build"
 				rm "$build"
 			done
 			INCREMENTALS_FOUND=1
 		else
-			echo "$LINUX_X86_ARCHIVE/$LINUX_X86_64_ARCHIVE/$LINUX_ARM64_ARCHIVE not found"
+			echo "Linux tarballs not found: ${LINUX_BUILDS_TO_UNPACK[*]}"
 		fi
 	fi
 	
@@ -268,6 +303,10 @@ export MAR_CHANNEL_ID="$CHANNEL"
 
 CHANGES_MADE=0
 for build in "mac" "win32" "win-x64" "win-arm64" "linux-i686" "linux-x86_64" "linux-arm64"; do
+	# Zotero 7 has no Linux arm64 builds
+	if [[ $build == "linux-arm64" ]] && [[ $FROM == 7.* ]]; then
+		continue
+	fi
 	if [[ $build == "mac" ]]; then
 		if [[ $BUILD_MAC == 0 ]]; then
 			continue
