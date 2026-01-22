@@ -6962,7 +6962,11 @@ var ZoteroPane = new function () {
 	 * Opens the about dialog
 	 */
 	this.openAboutDialog = function () {
-		window.openDialog('chrome://zotero/content/about.xhtml', 'about', 'chrome,centerscreen');
+		let flags = 'chrome,centerscreen';
+		if (Zotero.isMac) {
+			flags += ',dialog=yes';
+		}
+		window.openDialog('chrome://zotero/content/about.xhtml', 'about', flags);
 	}
 	
 	/**
