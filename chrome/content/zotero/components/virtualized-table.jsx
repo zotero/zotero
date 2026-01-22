@@ -1526,16 +1526,17 @@ var Columns = class {
 		if (this._stylesheet) {
 			this._columnStyleMap = {};
 			for (let i = 0; i < this._stylesheet.sheet.cssRules.length; i++) {
-				const cssText = this._stylesheet.sheet.cssRules[i].cssText;
-				const dataKey = cssText.slice(1, cssText.indexOf('-'));
+				const selector = this._stylesheet.sheet.cssRules[i].selectorText;
+				const dataKey = selector.slice(1, selector.length - this._cssSuffix.length);
 				this._columnStyleMap[dataKey] = i;
 			}
 			for (let i = 0; i < this._virtualizedTable.props.columns.length; i++) {
 				let column = this._virtualizedTable.props.columns[i];
-				if (column.dataKey in this._columnStyleMap) continue;
+				let escapedDataKey = window.CSS.escape(column.dataKey);
+				if (escapedDataKey in this._columnStyleMap) continue;
 				const ruleIndex = Object.keys(this._columnStyleMap).length;
-				this._stylesheet.sheet.insertRule(`.${window.CSS.escape(column.dataKey) + this._cssSuffix} {flex-basis: 100px}`, ruleIndex);
-				this._columnStyleMap[column.dataKey] = ruleIndex;
+				this._stylesheet.sheet.insertRule(`.${escapedDataKey + this._cssSuffix} {flex-basis: 100px}`, ruleIndex);
+				this._columnStyleMap[escapedDataKey] = ruleIndex;
 			}
 		} else {
 			this._stylesheet = document.createElement('style');
@@ -1544,8 +1545,9 @@ var Columns = class {
 			this._columnStyleMap = {};
 			for (let i = 0; i < this._virtualizedTable.props.columns.length; i++) {
 				let column = this._virtualizedTable.props.columns[i];
-				this._stylesheet.sheet.insertRule(`.${window.CSS.escape(column.dataKey) + this._cssSuffix} {flex-basis: 100px}`, i);
-				this._columnStyleMap[column.dataKey] = i;
+				let escapedDataKey = window.CSS.escape(column.dataKey);
+				this._stylesheet.sheet.insertRule(`.${escapedDataKey + this._cssSuffix} {flex-basis: 100px}`, i);
+				this._columnStyleMap[escapedDataKey] = i;
 			}
 		}
 	}
@@ -1612,7 +1614,7 @@ var Columns = class {
 				dataKey = this._columns[dataKey].dataKey;
 			}
 			const column = this._columns.find(column => column.dataKey == dataKey);
-			const styleIndex = this._columnStyleMap[dataKey];
+			const styleIndex = this._columnStyleMap[window.CSS.escape(dataKey)];
 			const columnPadding = column.iconLabel ? 0 : COLUMN_PADDING;
 			if (storePrefs && !column.fixedWidth) {
 				column.width = width;
