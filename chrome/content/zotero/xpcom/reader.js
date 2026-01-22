@@ -2062,7 +2062,6 @@ class Reader {
 	constructor() {
 		this._sidebarWidth = 240;
 		this._sidebarOpen = false;
-		this._contextPaneOpen = false;
 		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
 		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'setting', 'tab'], 'reader');
@@ -2367,7 +2366,7 @@ class Reader {
 				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
-				contextPaneOpen: this._contextPaneOpen,
+				contextPaneOpen: !win.ZoteroContextPane.collapsed,
 				bottomPlaceholderHeight: this._bottomPlaceholderHeight,
 				preventJumpback: preventJumpback,
 				onToggleSidebar: (open) => {
