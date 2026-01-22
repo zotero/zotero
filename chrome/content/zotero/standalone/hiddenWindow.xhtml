@@ -46,10 +46,12 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
 	</script>
 	<script>
+		// Equivalent to ZoteroPane.openAboutDialog(), but hiddenWindow.xhtml
+		// is only used on macOS
 		function openAbout() {
 			var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 				.getService(Components.interfaces.nsIWindowWatcher);
-			ww.openWindow(null, 'chrome://zotero/content/about.xhtml', 'about', 'chrome,dialog=yes', null);
+			ww.openWindow(null, 'chrome://zotero/content/about.xhtml', 'about', 'chrome,centerscreen,dialog=yes', null);
 		}
 		
 		// Equivalent to Zotero.Utilities.Internal.openPreferences()
