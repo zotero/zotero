@@ -474,15 +474,15 @@ class ItemTreeRowRenderer {
 				div.setAttribute('draggable', true);
 				div.addEventListener('dragstart', e => this.itemTree.onDragStart(e, index), { passive: true });
 				div.addEventListener('dragover', e => this.itemTree.onDragOver(e, index));
-				div.addEventListener('dragend', this.itemTree.onDragEnd.bind(this), { passive: true });
-				div.addEventListener('dragleave', this.itemTree.onDragLeave.bind(this), { passive: true });
+				div.addEventListener('dragend', this.itemTree.onDragEnd.bind(this.itemTree), { passive: true });
+				div.addEventListener('dragleave', this.itemTree.onDragLeave.bind(this.itemTree), { passive: true });
 				div.addEventListener('drop', (e) => {
 					e.stopPropagation();
 					this.itemTree.onDrop(e, index);
 				}, { passive: true });
 			}
-			div.addEventListener('mousedown', this.itemTree._handleRowMouseUpDown.bind(this), { passive: true });
-			div.addEventListener('mouseup', this.itemTree._handleRowMouseUpDown.bind(this), { passive: true });
+			div.addEventListener('mousedown', this.itemTree._handleRowMouseUpDown.bind(this.itemTree), { passive: true });
+			div.addEventListener('mouseup', this.itemTree._handleRowMouseUpDown.bind(this.itemTree), { passive: true });
 		}
 
 		if (rowData.contextRow) {
