@@ -3422,7 +3422,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 				// TODO: Adjust this if we localize "Snapshot"
 				&& !(treeRow.ref.isSnapshotAttachment() && /snapshot/i.test(treeRow.ref.getField('title')))
 				&& Zotero.Prefs.get('showAttachmentFilenames')) {
-			row.title = treeRow.ref.attachmentFilename;
+			try {
+				row.title = treeRow.ref.attachmentFilename;
+			}
+			catch {
+				// Path wasn't parseable - it could be truly invalid, or just
+				// invalid for this platform (e.g., Windows path on macOS/Linux)
+				row.title = treeRow.ref.attachmentPath;
+			}
 		}
 		else {
 			row.title = treeRow.ref.getDisplayTitle();
