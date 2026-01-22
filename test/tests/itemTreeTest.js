@@ -1745,6 +1745,16 @@ describe("Zotero.ItemTree", function () {
 	});
 
 	describe("#_renderPrimaryCell()", function () {
+		async function getPrimaryCellContent(asHTML = false) {
+			let cellText;
+			do {
+				await Zotero.Promise.delay(10);
+				cellText = win.document.querySelector('#zotero-items-tree .row.selected .cell.title .cell-text');
+			}
+			while (!cellText);
+			return asHTML ? cellText.innerHTML : cellText.innerText;
+		}
+		
 		before(async function () {
 			await waitForItemsLoad(win);
 		});
@@ -1753,13 +1763,36 @@ describe("Zotero.ItemTree", function () {
 			await createDataObject('item', {
 				title: 'Review of <i>Review of <i>B<sub>oo</sub>k</i> <another-tag/></i>'
 			});
-			let cellText;
-			do {
-				await Zotero.Promise.delay(10);
-				cellText = win.document.querySelector('#zotero-items-tree .row.selected .cell.title .cell-text');
-			}
-			while (!cellText);
-			assert.equal(cellText.innerHTML, 'Review of <i xmlns="http://www.w3.org/1999/xhtml">Review of <span style="font-style: normal;">B<sub>oo</sub>k</span> &lt;another-tag/&gt;</i>');
+			assert.equal(await getPrimaryCellContent(true), 'Review of <i xmlns="http://www.w3.org/1999/xhtml">Review of <span style="font-style: normal;">B<sub>oo</sub>k</span> &lt;another-tag/&gt;</i>');
+		});
+
+		describe("showAttachmentFilenames pref", function () {
+			beforeEach(function () {
+				Zotero.Prefs.set('showAttachmentFilenames', true);
+			});
+			
+			after(function () {
+				Zotero.Prefs.clear('showAttachmentFilenames');
+			});
+			
+			it("should display attachment filenames instead of titles", async function () {
+				await importPDFAttachment(null, { title: 'Title' });
+				assert.equal(await getPrimaryCellContent(), 'test.pdf');
+			});
+			
+			it("should display full path when it can't be parsed", async function () {
+				if (Zotero.isWin) this.skip();
+				
+				let file = getTestDataDirectory();
+				file.append('test.pdf');
+				let attachment = await Zotero.Attachments.linkFromFile({
+					file,
+					title: 'Title'
+				});
+				attachment.attachmentPath = 'C:\\a\\b\\c\\test.pdf';
+				await attachment.saveTx();
+				assert.equal(await getPrimaryCellContent(), attachment.attachmentPath);
+			});
 		});
 	});
 	
