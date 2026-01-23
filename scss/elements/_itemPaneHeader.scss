@@ -78,4 +78,13 @@ item-pane-header {
 		border: none;
 		height: 24px;
 	}
+
+	&.batch-edit.has-custom-head .custom-head {
+		description {
+			font-weight: 600;
+			line-height: 1.333;
+			margin: 0;
+			padding-inline: calc(var(--editable-text-tight-padding-inline) + 1px);
+		}
+	}
 }
