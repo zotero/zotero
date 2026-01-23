@@ -862,3 +862,12 @@ normalize-attachment-titles-text = { -app-name } automatically renames files on 
 
 banner-close-button = 
     .aria-label = Dismiss notification
+
+
+item-pane-batch-editing-enable =
+    .label = Enter Batch Edit Mode
+
+item-pane-batch-editing-disable =
+    .label = Exit Batch Edit Mode
+
+item-pane-batch-editing-warning = Edit meta data for all selected items.<br/>Caution: edits to fields with multiple values will change the field for all items.

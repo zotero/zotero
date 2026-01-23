@@ -40,8 +40,12 @@
 					previousfocus="zotero-items-tree" />
 				
 				<duplicates-merge-pane id="zotero-duplicates-merge-pane" />
-
 				<annotation-items-pane id="zotero-annotations-pane" />
+				<groupbox id="batch-edit-prompt" pack="center" align="center">
+					<description id="batch-edit-prompt-message" />
+					<button id="batch-edit-prompt-enable" data-l10n-id="item-pane-batch-editing-enable" />
+					<description id="batch-edit-prompt-warning" data-l10n-id="item-pane-batch-editing-warning" />
+				</groupbox>
 			</deck>
 			<item-pane-sidenav id="zotero-view-item-sidenav" no-context-notes="true" class="zotero-view-item-sidenav"/>
 		`);
@@ -52,6 +56,8 @@
 			this._duplicatesPane = this.querySelector("#zotero-duplicates-merge-pane");
 			this._messagePane = this.querySelector("#zotero-item-message");
 			this._annotationsPane = this.querySelector("#zotero-annotations-pane");
+			this._batchEditEnableBtn = this.querySelector("#batch-edit-prompt button");
+			this._batchEditPromptMessage = this.querySelector("#batch-edit-prompt-message");
 			this._sidenav = this.querySelector("#zotero-view-item-sidenav");
 			this._deck = this.querySelector("#zotero-item-pane-content");
 
@@ -59,6 +65,13 @@
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item']);
 
+			this._batchEditEnableBtn.addEventListener("command", () => {
+				this._isBatchEditEnabled = true;
+				this.render();
+				this.updateItemPaneButtons();
+			});
+			
+			this._isBatchEditEnabled = false;
 			this._translationTarget = null;
 		}
 
@@ -100,12 +113,12 @@
 		}
 
 		get mode() {
-			return ["message", "item", "note", "duplicates"][this._deck.selectedIndex];
+			return ["message", "item", "note", "duplicates", "annotations", "batch-edit-prompt"][this._deck.selectedIndex];
 		}
 
 		/**
 		 * Set mode of item pane
-		 * @param {"message" | "item" | "note" | "duplicates"} type view type
+		 * @param {"message" | "item" | "note" | "duplicates" | "batch-edit-prompt"} type view type
 		 */
 		set mode(type) {
 			this.setAttribute("view-type", type);
@@ -126,10 +139,23 @@
 			if (this.data.length > 0 && this.data.every(item => item.isAnnotation())) {
 				return renderStatus = this.renderAnnotations(this.data);
 			}
+			
+			// reset the batch editing flag
+			let IDs = this.data.map(item => item.id);
+			if (!(IDs.length === this._prevIDs?.length && IDs.every((id, i) => id === this._prevIDs?.[i]))) {
+				this._isBatchEditEnabled = false;
+				this._prevIDs = IDs;
+			}
+			
+			// Multiple items selected (not duplicates)
+			if (!this.collectionTreeRow.isDuplicates() && this.data.length > 1 && this.data.every(item => item.isRegularItem() && !item.isFeedItem)) {
+				// Hide the batch editing UI until the user opts-in
+				renderStatus = this._isBatchEditEnabled ? this.renderItemPane(this.data) : this.renderBatchEditorPrompt();
+			}
 			// Single item selected
-			if (this.data.length == 1) {
+			else if (this.data.length === 1) {
 				let item = this.data[0];
-				
+
 				// If a collection or search is selected, it must be in the trash.
 				if (item instanceof Zotero.Collection || item instanceof Zotero.Search) {
 					renderStatus = this.renderMessage();
@@ -141,7 +167,7 @@
 					renderStatus = this.renderItemPane(item);
 				}
 			}
-			// Zero or multiple items selected
+			// No items selected or multiple, but includes some irregular items
 			else {
 				renderStatus = this.renderMessage();
 			}
@@ -175,9 +201,12 @@
 			return true;
 		}
 
-		async renderItemPane(item) {
+		async renderItemPane(items) {
 			let previousMode = this.mode;
 			this.mode = "item";
+			if (!Array.isArray(items)) {
+				items = [items];
+			}
 
 			// Fix https://forums.zotero.org/discussion/115450/zotero-7-beta-wrong-vertical-position-in-the-item-pane-after-switching-from-a-note
 			if (previousMode === "note") {
@@ -186,11 +215,12 @@
 					requestIdleCallback(resolve, { timeout: 50 });
 				});
 			}
-			
+
 			this._itemDetails.editable = this.editable;
 			this._itemDetails.tabID = "zotero-pane";
 			this._itemDetails.tabType = "library";
-			this._itemDetails.item = item;
+			this._itemDetails.item = items[0];
+			this._itemDetails.extraItems = items.slice(1);
 			this._itemDetails.collectionTreeRow = this.collectionTreeRow;
 
 			this._itemDetails.render();
@@ -198,8 +228,8 @@
 			if (this.getAttribute("collapsed") == "true") {
 				return true;
 			}
-			
-			if (item.isFeedItem) {
+
+			if (items[0].isFeedItem) {
 				let lastTranslationTarget = Zotero.Prefs.get('feeds.lastTranslationTarget');
 				if (lastTranslationTarget) {
 					let id = parseInt(lastTranslationTarget.substr(1));
@@ -218,7 +248,7 @@
 				// if (!item.isTranslated) {
 				// 	item.translate();
 				// }
-				ZoteroPane.startItemReadTimeout(item.id);
+				ZoteroPane.startItemReadTimeout(items[0].id);
 			}
 			return true;
 		}
@@ -298,6 +328,16 @@
 			return true;
 		}
 
+		renderBatchEditorPrompt() {
+			this.mode = 'batch-edit-prompt';
+			document.l10n.setAttributes(
+				this._batchEditPromptMessage,
+				'item-pane-message-items-selected',
+				{ count: this.data.length }
+			);
+			return true;
+		}
+
 		setItemPaneMessage(msg) {
 			this.mode = "message";
 			this._messagePane.render(msg);
@@ -348,6 +388,11 @@
 				return;
 			}
 
+			if (this._isBatchEditEnabled && this.data.length > 1) {
+				container.renderCustomHead(this.renderBatchEditHead.bind(this));
+				return;
+			}
+			
 			container.renderCustomHead();
 		}
 
@@ -424,6 +469,26 @@
 				button.addEventListener("command", () => ZoteroPane.createStandaloneNoteFromAnnotationsFromSelected());
 			}
 			append(button);
+		}
+
+		renderBatchEditHead(data) {
+			let { doc, append } = data;
+			let description = doc.createXULElement("description");
+			let button = doc.createXULElement("button");
+			button.disabled = !this.collectionTreeRow.editable;
+			button.id = 'item-pane-batch-editing-disable';
+			document.l10n.setAttributes(
+				description,
+				'item-pane-message-items-selected',
+				{ count: this.data.length }
+			);
+			document.l10n.setAttributes(button, 'item-pane-batch-editing-disable');
+			button.addEventListener("command", () => {
+				this._isBatchEditEnabled = false;
+				this.render();
+				this.updateItemPaneButtons();
+			});
+			append(description, button);
 		}
 
 		updateReadLabel() {
@@ -543,7 +608,7 @@
 					mode = "annotations";
 				}
 				// No/multiple objects are selected OR selected object is a trashed collection/search
-				else if (!this.data.length || this.data.length > 1
+				else if (!this.data.length || (this.data.length > 1 && !this._isBatchEditEnabled)
 					|| this.data[0] instanceof Zotero.Collection || this.data[0] instanceof Zotero.Search) {
 					mode = "message";
 				}
@@ -640,6 +705,10 @@
 				}
 				case "annotations": {
 					this._deck.selectedIndex = 4;
+					break;
+				}
+				case "batch-edit-prompt": {
+					this._deck.selectedIndex = 5;
 					break;
 				}
 			}
