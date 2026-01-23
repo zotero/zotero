@@ -112,7 +112,6 @@ var ZoteroPane = new function () {
 		zp.addEventListener('UIPropertiesChanged', () => {
 			this.collectionsView?.updateFontSize();
 			this.itemsView?.updateFontSize();
-			this.updatePostUpgradeBanner();
 		});
 		Zotero.UIProperties.registerRoot(document.getElementById('zotero-context-pane'));
 		this.itemPane = document.querySelector("#zotero-item-pane");
