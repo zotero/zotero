@@ -63,7 +63,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		styleConfigurator = document.querySelector("#style-configurator");
 		
 		// Disable accept button until CE is initialized
-		document.querySelector("dialog").getButton('accept').setAttribute('disabled', 'disabled');
+		document.querySelector("dialog").getButton('accept').setAttribute('disabled', 'true');
 		document.querySelector("dialog").getButton('cancel').focus();
 		
 		// Set font size from pref
