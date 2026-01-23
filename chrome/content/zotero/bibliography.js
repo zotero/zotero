@@ -63,7 +63,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		styleConfigurator = document.querySelector("#style-configurator");
 		
 		// Disable accept button until CE is initialized
-		document.querySelector("dialog").getButton('accept').setAttribute('disabled', true);
+		document.querySelector("dialog").getButton('accept').setAttribute('disabled', 'disabled');
 		document.querySelector("dialog").getButton('cancel').focus();
 		
 		// Set font size from pref
@@ -103,7 +103,7 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		
 		// Wait for CE initialization
 		await styleConfigurator.ready;
-		document.querySelector("dialog").getButton('accept').setAttribute('disabled', false);
+		document.querySelector("dialog").getButton('accept').removeAttribute('disabled');
 		// reset focus to the first focusable element (requestAnimationFrame to make sure richlistbox has already appeared)
 		requestAnimationFrame(() => {
 			Services.focus.moveFocus(
