@@ -88,6 +88,18 @@
 			this._item = item;
 		}
 
+		get extraItems() {
+			return this._extraItems ?? [];
+		}
+
+		set extraItems(val) {
+			if (!Array.isArray(val)) {
+				return;
+			}
+
+			this._extraItems = val.filter(item => item instanceof Zotero.Item && item.isRegularItem());
+		}
+
 		/*
 		 * For contextPane update
 		 */
@@ -293,7 +305,12 @@
 				box.tabID = this.tabID;
 				box.tabType = this.tabType;
 				box.item = item;
+				box.extraItems = this.extraItems;
 				box.collectionTreeRow = this.collectionTreeRow;
+				if (this.extraItems.length > 0) {
+					// mark everything, except the header and the info pane, as hidden
+					box.hidden = box.dataset.pane !== 'info' && box !== this._header;
+				}
 				// Discard hidden panes
 				if (box.hidden && box.discard) {
 					box.discard();
