@@ -1948,6 +1948,9 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
 				automaticJournalAbbreviations: data.prefs.automaticJournalAbbreviations,
 				noCache: true,
 			});
+			// Disable wrap_url_and_doi to prevent double-encoding of special characters in DOIs
+			// https://github.com/zotero/zotero/issues/5557
+			this.style.opt.development_extensions.wrap_url_and_doi = false;
 			this.styleClass = getStyle.class;
 			// We're changing the citeproc instance, so we'll have to reinsert all citations into the registry
 			this.rebuildCiteprocState = true;
