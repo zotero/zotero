@@ -742,7 +742,7 @@ class CollectionViewItemTree extends ItemTree {
 		this._updateIntroText();
 	}
 
-	notify(action, type, ids, extraData) {
+	async notify(action, type, ids, extraData) {
 		// If a collection with subcollections is deleted/restored, ids will include subcollections
 		// though they are not showing in itemTree.
 		// Filter subcollections out to treat it as single selected row
@@ -767,7 +767,7 @@ class CollectionViewItemTree extends ItemTree {
 			let rowsToInvalidate = ids.map(id => this._rowMap[id]).filter(row => row !== undefined);
 			rowsToInvalidate.forEach(row => this.tree.invalidateRow(row));
 		}
-		super.notify(action, type, ids, extraData);
+		return super.notify(action, type, ids, extraData);
 	}
 
 	async selectItems(ids, noRecurse, noScroll) {

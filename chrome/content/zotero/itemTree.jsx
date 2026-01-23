@@ -971,6 +971,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 	isContainerOpen(index) { return this.rowProvider.isContainerOpen(index); }
 	isContainerEmpty(index) { return this.rowProvider.isContainerEmpty(index); }
 	getParentIndex(index) { return this.rowProvider.getParentIndex(index); }
+	expandAllRows() { return this.rowProvider.expandAllRows(); }
+	collapseAllRows() { return this.rowProvider.collapseAllRows(); }
 
 	unregister() {
 		this._uninitialized = true;
