@@ -65,6 +65,10 @@
 
 		_editable = true;
 		
+		get _renderDependencies() {
+			return [this._tabID, this._item?.id, this.extraItems?.length ?? 0];
+		}
+
 		get item() {
 			return this._item;
 		}
@@ -145,8 +149,8 @@
 				event.preventDefault();
 				let menupopup = ZoteroPane.buildFieldTransformMenu({
 					target: this.titleField,
-					onTransform: (newValue) => {
-						this._setTransformedValue(newValue);
+					onTransform: (newValues) => {
+						this._setTransformedValue(newValues[0]);
 					},
 				});
 				
@@ -225,6 +229,10 @@
 			let headerMode = Zotero.Prefs.get(PREF_HEADER_MODE);
 			if (this._item.isAttachment()) {
 				headerMode = 'title';
+			}
+			
+			if (this.extraItems?.length) {
+				headerMode = 'none';
 			}
 
 			this.title.hidden = true;

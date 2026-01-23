@@ -865,3 +865,17 @@ banner-close-button =
 
 plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
+
+item-pane-batch-editing-prompt =
+    .aria-label = Batch editing
+
+item-pane-batch-editing-enable =
+    .label = Enter Batch Edit Mode
+
+item-pane-batch-editing-disable =
+    .label = Exit Batch Edit Mode
+
+item-pane-batch-editing-warning = Edit meta data for all selected items.
+item-pane-batch-editing-caution = Caution: edits to fields with multiple values will change the field for all items.
+
+item-pane-batch-editing-multiple-values-placeholder = Multiple
