@@ -43,7 +43,8 @@
 		set open(newOpen) {
 			newOpen = !!newOpen;
 			let oldOpen = this.open;
-			if (oldOpen === newOpen || this.empty || !this.collapsible) return;
+			if (oldOpen === newOpen || this.empty) return;
+			if (!newOpen && !this.collapsible) return;
 			this.render();
 			
 			// Force open before getting scrollHeight, so we get the right value
@@ -118,9 +119,22 @@
 				this.setAttribute('no-collapse', val);
 			}
 		}
-		
+
+		get showContextMenu() {
+			return !this.getAttribute("no-context-menu");
+		}
+
+		set showContextMenu(val) {
+			if (val) {
+				this.removeAttribute('no-context-menu');
+			}
+			else {
+				this.setAttribute('no-context-menu', val);
+			}
+		}
+
 		static get observedAttributes() {
-			return ['open', 'empty', 'label', 'summary', 'extra-buttons'];
+			return ['open', 'empty', 'label', 'summary', 'extra-buttons', 'no-collapse'];
 		}
 		
 		attributeChangedCallback(name) {
@@ -345,7 +359,7 @@
 		}
 		
 		_saveOpenState() {
-			if (this._disableSavingOpenState) return;
+			if (this._disableSavingOpenState || this._skipSaveOpenState) return;
 			Zotero.Prefs.set(`panes.${this.dataset.pane}.open`, this.open);
 		}
 		
@@ -380,11 +394,11 @@
 		}
 
 		get _disableContextMenu() {
-			return !this._getSidenav() || !!this.closest('annotation-items-pane');
+			return !this._getSidenav() || !this.showContextMenu || !!this.closest('annotation-items-pane');
 		}
 
 		_handleClick = (event) => {
-			if (this._disableCollapsing) return;
+			if (this._disableCollapsing || !this.collapsible) return;
 			if (event.target.closest('.section-custom-button, menupopup')) return;
 			this.open = !this.open;
 		};
@@ -414,7 +428,7 @@
 			}
 			// Space/Enter toggle section open/closed.
 			// ArrowLeft/ArrowRight on actual header will close/open (depending on locale direction)
-			if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key) && !this._disableCollapsing) {
+			if (["ArrowLeft", "ArrowRight", " ", "Enter"].includes(event.key) && !this._disableCollapsing && this.collapsible) {
 				stopEvent();
 				this.open = ([" ", "Enter"].includes(event.key)) ? !this.open : (event.key == Zotero.arrowNextKey);
 				event.target.focus();
@@ -477,7 +491,7 @@
 			this._title.textContent = this.label;
 			this._summary.textContent = this.summary;
 			let twisty = this._head.querySelector('.twisty');
-			twisty.hidden = this._disableCollapsing;
+			twisty.hidden = this._disableCollapsing || !this.collapsible;
 			document.l10n.setAttributes(twisty, `section-button-${this.open ? "collapse" : "expand"}`, { section: this._paneName || "" });
 		}
 	}

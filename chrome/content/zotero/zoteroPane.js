@@ -7009,30 +7009,30 @@ var ZoteroPane = new function () {
 
 	this.buildFieldTransformMenu = function ({ target, onTransform }) {
 		let doc = target.ownerDocument;
-		let value = target.value;
-		let valueTitleCased = Zotero.Utilities.capitalizeTitle(value, true);
-		let valueSentenceCased = Zotero.Utilities.sentenceCase(value);
+		let values = target.values;
+		let valuesTitleCased = values.map(v => Zotero.Utilities.capitalizeTitle(v, true));
+		let valuesSentenceCased = values.map(v => Zotero.Utilities.sentenceCase(v));
 
 		let menupopup = doc.createXULElement('menupopup');
 
 		let titleCase = doc.createXULElement('menuitem');
 		titleCase.setAttribute('label', Zotero.getString('zotero.item.textTransform.titlecase'));
 		titleCase.addEventListener('command', () => {
-			onTransform(valueTitleCased);
+			onTransform(valuesTitleCased);
 		});
-		titleCase.disabled = valueTitleCased == value;
+		titleCase.disabled = values.every((v, i) => valuesTitleCased[i] === v);
 		menupopup.append(titleCase);
 
 		let sentenceCase = doc.createXULElement('menuitem');
 		sentenceCase.setAttribute('label', Zotero.getString('zotero.item.textTransform.sentencecase'));
 		sentenceCase.addEventListener('command', () => {
-			onTransform(valueSentenceCased);
+			onTransform(valuesSentenceCased);
 		});
-		sentenceCase.disabled = valueSentenceCased == value;
+		sentenceCase.disabled = values.every((v, i) => valuesSentenceCased[i] === v);
 		menupopup.append(sentenceCase);
 
 		Zotero.Utilities.Internal.updateEditContextMenu(menupopup, target);
-
+	
 		return menupopup;
 	};
 };
