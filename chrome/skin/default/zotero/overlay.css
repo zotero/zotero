@@ -181,3 +181,26 @@
 	background-color: Highlight;
 	color: HighlightText;
 }
+
+.autocomplete-richlistitem[type="options-ac-value"],
+.autocomplete-richlistitem[type="options-ac-no-value"] {
+	height: auto;
+	min-height: auto;
+}
+
+.autocomplete-richlistitem[type="options-ac-value"] > .ac-title,
+.autocomplete-richlistitem[type="options-ac-no-value"] > .ac-title {
+	height: 2em;
+	min-height: 2em;
+	padding-inline: 8px;
+}
+
+.autocomplete-richlistitem[type="options-ac-value"] > .ac-title > .ac-text-overflow-container,
+.autocomplete-richlistitem[type="options-ac-no-value"] > .ac-title > .ac-text-overflow-container {
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.autocomplete-richlistitem[type="options-ac-no-value"] {
+	color: var(--fill-secondary);
+}
