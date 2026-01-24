@@ -6,8 +6,8 @@ note-editor-unlink = Отвязать
 note-editor-right-to-left = Справа налево
 note-editor-left-to-right = Слева направо
 note-editor-update-notice =
-    This note was edited with a newer version of { -app-name }.
-    Please update { -app-name } to make changes.
+    Эта заметка была отредактирована в более новой версии { -app-name }.
+    Пожалуйста, обновите { -app-name }, чтобы внести изменения.
 note-editor-enter-link = Ввести ссылку
 note-editor-heading-1 = Заголовок 1
 note-editor-heading-2 = Заголовок 2
@@ -61,6 +61,6 @@ note-editor-insert-column-after = Вставить колонку справа
 note-editor-delete-row = Удалить строку
 note-editor-delete-column = Удалить колонку
 note-editor-delete-table = Удалить таблицу
-note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
-note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
-note-editor-toggle-context-pane = Toggle Context Pane
+note-editor-link-popup-appeared =  Всплывающее окно ссылки появилось. Используйте Shift-Tab для навигации по нему.
+note-editor-citation-popup-appeared = Всплывающее окнов цитирования появилось. Используйте Shift-Tab для навигации по нему.
+note-editor-toggle-context-pane = Переключить контекстную панель
