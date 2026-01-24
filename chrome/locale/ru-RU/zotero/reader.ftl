@@ -9,24 +9,24 @@ reader-annotation-comment = Комментарий к аннотации
 reader-annotation-text = Текст аннотации
 reader-manage-tags = Управление тегами аннотации
 reader-open-menu = Открыть меню аннотации
-reader-thumbnails = Thumbnails
-reader-tag-selector-message = Filter annotations by this tag
+reader-thumbnails = Превью
+reader-tag-selector-message = Фильтровать аннотации по этому тегу
 reader-add-tags = Добавить теги…
 reader-highlight-text = Цветовыделить текст
 reader-underline-text = Подчеркнуть текст
 reader-add-note = Добавить заметку
 reader-add-text = Добавить текст
 reader-select-area = Выбрать область
-reader-highlight-annotation = Highlight annotation
-reader-underline-annotation = Underline annotation
-reader-note-annotation = Note Annotation
-reader-text-annotation = Text Annotation
-reader-image-annotation = Image Annotation
+reader-highlight-annotation = Выделение
+reader-underline-annotation = Подчёркивание
+reader-note-annotation = Заметка
+reader-text-annotation = Текстовая аннотация
+reader-image-annotation = Аннотация изображением
 reader-ink-annotation = Ink Annotation
-reader-search-result-index = Search result
-reader-search-result-total = Total search results
+reader-search-result-index = Результат поиска
+reader-search-result-total = Всего резульатов поиска
 reader-draw = Рисовать
-reader-eraser = Eraser
+reader-eraser = Ластик
 reader-pick-color = Выбрать цвет
 reader-add-to-note = Добавить в заметку
 reader-zoom-in = Увеличить
@@ -43,19 +43,19 @@ reader-page = Страница
 reader-location = Положение
 reader-read-only = Только чтение
 reader-prompt-transfer-from-pdf-title = Импорт аннотаций
-reader-prompt-transfer-from-pdf-text = Annotations stored in the PDF file will be moved to { $target }.
+reader-prompt-transfer-from-pdf-text = Аннотации, содержащиеся в PDF-файле будут перемещены в { $target }.
 reader-prompt-password-protected = Операция не поддерживается для файлов PDF, защищённых паролем.
 reader-prompt-delete-pages-title = Удалить страницы
 reader-prompt-delete-pages-text =
     { $count ->
-        [one] Are you sure you want to delete { $count } page from the PDF file?
-       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+        [one] Вы уверены, что хотите удалить { $count } страницу из PDF-файла?
+       *[other] Вы уверены, что хотите удалить { $count } страниц из PDF-файла?
     }
-reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-title = Удалить аннотации
 reader-prompt-delete-annotations-text =
     { $count ->
-        [one] Are you sure you want to delete the selected annotation?
-       *[other] Are you sure you want to delete the selected annotations?
+        [one] Вы уверены, что хотите удалить выбарнную аннотацию?
+       *[other] Вы уверены, что хотите удалить выбранные аннотации?
     }
 reader-rotate-left = Повернуть влево
 reader-rotate-right = Повернуть вправо
@@ -76,48 +76,48 @@ reader-preparing-document-for-printing = Подготовка документа
 reader-phrase-not-found = Фраза не найдена
 reader-find = Найти
 reader-close = Закрыть
-reader-show-thumbnails = Show Thumbnails
+reader-show-thumbnails = Показать превью
 reader-show-outline = Show Outline
-reader-find-previous = Find the previous occurrence of the phrase
-reader-find-next = Find the next occurrence of the phrase
-reader-toggle-sidebar = Toggle Sidebar
-reader-find-in-document = Find in Document
-reader-toggle-context-pane = Toggle Context Pane
-reader-highlight-all = Highlight all
+reader-find-previous = Найти предыдущее появление фразы
+reader-find-next = Найти следующее появление фразы
+reader-toggle-sidebar = Переключить боковую панель
+reader-find-in-document = Найти в документе
+reader-toggle-context-pane = Переключить контекстную панель
+reader-highlight-all = Выделить всё
 reader-match-case = Match case
 reader-whole-words = Whole words
-reader-appearance = Внешни вид
+reader-appearance = Внешний вид
 reader-epub-appearance-line-height = Межстрочный интервал
-reader-epub-appearance-word-spacing = Интервалы между словами
-reader-epub-appearance-letter-spacing = Межбуквенные интервалы
+reader-epub-appearance-word-spacing = Межсловный интервал
+reader-epub-appearance-letter-spacing = Межбуквенный интервал
 reader-epub-appearance-page-width = Ширина страницы
 reader-epub-appearance-use-original-font = Использовать шрифт оригинала
-reader-epub-appearance-line-height-revert = Use default line height
-reader-epub-appearance-word-spacing-revert = Use default word spacing
-reader-epub-appearance-letter-spacing-revert = Use default letter spacing
-reader-epub-appearance-page-width-revert = Use default page width
-reader-convert-to-highlight = Convert to Highlight
-reader-convert-to-underline = Convert to Underline
+reader-epub-appearance-line-height-revert = Использовать межстрочный интервал по умолчанию
+reader-epub-appearance-word-spacing-revert = Использовать межсловный интервал по умолчанию
+reader-epub-appearance-letter-spacing-revert = Использовать межбуквенный интервал по умолчанию
+reader-epub-appearance-page-width-revert = Использовать ширину страницы по умолчанию
+reader-convert-to-highlight = Преобразовать в выделение
+reader-convert-to-underline = Преобразовать в подчёркивание
 reader-size = Размер
-reader-merge = Слить
+reader-merge = Объединить
 reader-copy-link = Копировать ссылку
 reader-theme-original = Оригинал
-reader-theme-snow = Снег
+reader-theme-snow = Снежная
 reader-theme-sepia = Сепия
 reader-theme-dark = Темная
-reader-add-theme = Добавить вариант оформления
+reader-add-theme = Добавить тему оформления
 reader-scroll-mode = Прокрутка
 reader-spread-mode = Spreads
 reader-flow-mode = Расположение страниц
 reader-columns = Колонки
-reader-split-view = Колонками
+reader-split-view = Раздельный просмотр
 reader-themes = Оформление
 reader-vertical = Вертикально
 reader-horizontal = Горизонтально
 reader-wrapped = Wrapped
 reader-none = Нет
-reader-odd = Нечетные
-reader-even = Четные
+reader-odd = Нечётные
+reader-even = Чётные
 reader-paginated = Постранично
 reader-scrolled = С прокруткой
 reader-single = Single
@@ -126,15 +126,15 @@ reader-theme-name = Название темы:
 reader-background = Фон:
 reader-foreground = Foreground:
 reader-reading-mode = Режим чтения
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode-not-supported = Режим чтения не поддерживается в этом документе.
 reader-clear-selection = Отменить выбор
-reader-epub-encrypted = This ebook is encrypted and cannot be opened.
+reader-epub-encrypted = Файл зашифрован и не может быть открыт.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }
        *[other] { general-key-alt }
     }
-reader-a11y-move-annotation = Use the arrow keys to move the annotation.
+reader-a11y-move-annotation = Используйте клавиши стрелок, чтобы двигать аннотации.
 reader-a11y-edit-text-annotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys.
 reader-a11y-resize-annotation = To resize the annotation, hold { general-key-shift } and use the arrow keys.
 reader-a11y-annotation-popup-appeared = Use Tab to navigate the annotation popup.
