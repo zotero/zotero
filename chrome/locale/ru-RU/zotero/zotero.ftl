@@ -31,17 +31,17 @@ general-remind-me-later = Напомнить позже
 general-dont-ask-again = Не спрашивать больше
 general-choose-file = Выберите файл…
 general-open-settings = Открыть настройки
-general-settings = Settings…
+general-settings = Настройки…
 general-help = Справка
 general-tag = Тег
 general-done = Завершено
-general-view-troubleshooting-instructions = View Troubleshooting Instructions
-general-go-back = Go Back
-general-accept = Accept
+general-view-troubleshooting-instructions = Показать инструкции по отладке
+general-go-back = Вернуться
+general-accept = Принять
 general-cancel = Отменить
 general-show-in-library = Показать в библиотеке
-general-restartApp = Restart { -app-name }
-general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
+general-restartApp = Перезапустить { -app-name }
+general-restartInTroubleshootingMode = Перезапустить в режиме отладки
 general-save = Сохранить:
 general-clear = Очистить
 general-update = Обновить
@@ -59,7 +59,7 @@ general-previous = Предыдущий
 general-next = Следующий
 general-learn-more = Узнать больше
 general-warning = Внимание
-general-type-to-continue = Type “{ $text }” to continue.
+general-type-to-continue = Введите “{ $text }”, чтобы продолжить.
 general-continue = Продолжить
 general-red = Красный
 general-orange = Оранжевый
@@ -73,7 +73,7 @@ general-violet = Фиолетовый
 general-maroon = Темно-бордовый
 general-gray = Серый
 general-black = Черный
-general-loading = Loading…
+general-loading = Загрузка…
 citation-style-label = Стиль цитирования:
 language-label = Язык:
 menu-custom-group-submenu =
@@ -87,7 +87,7 @@ menu-file-show-files =
 menu-print =
     .label = { general-print }
 menu-density =
-    .label = Плотность
+    .label = Плотность интерфейса
 add-attachment = Добавить вложение
 new-note = Новая заметка
 menu-add-by-identifier =
@@ -117,28 +117,28 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Плагины
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Переместить колонку влево
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Переместить колонку вправо
 menu-view-note-font-size =
     .label = Размер шрифта заметок
 menu-view-note-tab-font-size =
     .label = Note Tab Font Size
 menu-show-tabs-menu =
-    .label = Show Tabs Menu
+    .label = Показать меню вкладок
 menu-edit-copy-annotation =
     .label =
         { $count ->
-            [one] Copy Annotation
-           *[other] Copy { $count } Annotations
+            [one] Скопировать аннотацию
+           *[other] Copy { $count } Аннотации
         }
 main-window-command =
     .label = Библиотека
 main-window-key =
     .key = L
 zotero-toolbar-tabs-menu =
-    .tooltiptext = Список все вкладки
-filter-collections = Отфильтровать коллекции
+    .tooltiptext = Список всех вкладок
+filter-collections = Фильтровать коллекции
 zotero-collections-search =
     .placeholder = { filter-collections }
 zotero-collections-search-btn =
@@ -148,9 +148,9 @@ zotero-tabs-menu-filter =
 zotero-tabs-menu-close-button =
     .title = Закрыть вкладку
 zotero-toolbar-tabs-scroll-forwards =
-    .title = Scroll forwards
+    .title = Прокрутить вперёд
 zotero-toolbar-tabs-scroll-backwards =
-    .title = Scroll backwards
+    .title = Прокрутить назад
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 collections-menu-rename-collection =
@@ -158,9 +158,9 @@ collections-menu-rename-collection =
 collections-menu-edit-saved-search =
     .label = Редактировать сохраненный поиск
 collections-menu-move-collection =
-    .label = Move To
+    .label = Переместить в
 collections-menu-copy-collection =
-    .label = Copy To
+    .label = Копировать в
 item-creator-moveDown =
     .label = Переместить вниз
 item-creator-moveToTop =
@@ -174,21 +174,21 @@ item-menu-viewAttachment =
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] Snapshot
-                    [note] Note
-                   *[other] Attachment
+                    [snapshot] Снапшот
+                    [note] Заметка
+                   *[other] Вложение
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDFs
-                    [epub] EPUBs
-                    [snapshot] Snapshots
-                    [note] Notes
-                   *[other] Attachments
+                    [pdf] PDF
+                    [epub] EPUB
+                    [snapshot] Снапшоты
+                    [note] Заметки
+                   *[other] Вложения
                 }
         } { $openIn ->
-            [tab] in New Tab
-            [window] in New Window
+            [tab] в новой вкладке
+            [window] в новом окне
            *[other] { "" }
         }
 item-menu-add-file =
@@ -198,7 +198,7 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Web-ссылка
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Изменить родительский элемент…
 item-menu-relate-items =
     .label = Relate Items
 view-online = Просмотреть онлайн
@@ -206,7 +206,7 @@ item-menu-option-view-online =
     .label = { view-online }
 item-button-view-online =
     .tooltiptext = { view-online }
-file-renaming-file-renamed-to = File renamed to { $filename }
+file-renaming-file-renamed-to = Файл переименован в { $filename }
 itembox-button-options =
     .tooltiptext = Открыть контекстное меню
 itembox-button-merge =
@@ -214,8 +214,8 @@ itembox-button-merge =
 create-parent-intro = Введите DOI, ISBN, PMID, arXiv ID, или ADS Bibcode для идентификации этого файла:
 reader-use-dark-mode-for-content =
     .label = Использовать темную тему для содержимого
-update-updates-found-intro-minor = An update for { -app-name } is available:
-update-updates-found-desc = It is recommended that you apply this update as soon as possible.
+update-updates-found-intro-minor = Обновление для { -app-name } доступно:
+update-updates-found-desc = Рекомендуется применение обновления как можно скорее.
 import-window =
     .title = Импорт
 import-where-from = Откуда вы хотите импортировать?
@@ -225,21 +225,21 @@ import-source-file =
 import-source-folder =
     .label = Каталог файлов PDF и прочих
 import-source-online =
-    .label = { $targetApp } online import
+    .label = { $targetApp } онлайн импорт
 import-options = Настройки
 import-importing = Идёт импортирование…
 import-create-collection =
     .label = Поместить импортированные коллекции и записи в новую коллекцию
 import-recreate-structure =
-    .label = Recreate folder structure as collections
-import-fileTypes-header = File Types to Import:
+    .label = Повторить структуру папок как коллекций
+import-fileTypes-header = Типы файлов для импорта:
 import-fileTypes-pdf =
     .label = PDF-файлы
 import-fileTypes-other =
     .placeholder = Other files by pattern, comma-separated (e.g., *.jpg,*.png)
 import-file-handling = Обработка файлов
 import-file-handling-store =
-    .label = Copy files to the { -app-name } storage folder
+    .label = Скопировать файлы в папку { -app-name }
 import-file-handling-link =
     .label = Link to files in original location
 import-fileHandling-description = Linked files cannot be synced by { -app-name }.
@@ -252,9 +252,9 @@ file-interface-import-error = Произошла ошибка во время и
 file-interface-import-complete = Импорт завершен
 file-interface-items-were-imported =
     { $numItems ->
-        [0] No items were imported
-        [one] One item was imported
-       *[other] { $numItems } items were imported
+        [0] Файлы не были импортированы
+        [one] Импортирован один файл
+       *[other] { $numItems } файлов было импортировано
     }
 file-interface-items-were-relinked =
     { $numRelinked ->
@@ -272,12 +272,12 @@ import-online-blocked-by-plugin = The import cannot continue with { $plugin } in
 import-online-relink-only =
     .label = Заменить ссылки на цитирования из Mendeley Desktop
 import-online-relink-kb = Дополнительные сведения
-import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+import-online-connection-error = { -app-name } не смог подсоединиться к { $targetApp }. Пожалуйста, проверьте своё подключение к интернету и попробуйте снова.
 items-table-cell-notes =
     .aria-label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } Заметка
+           *[other] { $count } Заметки
         }
 report-error =
     .label = Сообщить об ошибке…
@@ -285,34 +285,34 @@ rtfScan-wizard =
     .title = Поиск ссылок в RTF-документе
 rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
 rtfScan-introPage-description2 = Чтобы начать, выберите ниже входной файл RTF и выходной файл:
-rtfScan-input-file = Input File:
-rtfScan-output-file = Output File:
+rtfScan-input-file = Входной файл:
+rtfScan-output-file = Выходной файл:
 rtfScan-no-file-selected = Файл не выбран
 rtfScan-choose-input-file =
     .label = { general-choose-file }
-    .aria-label = Choose Input File
+    .aria-label = Выберите входной файл
 rtfScan-choose-output-file =
     .label = { general-choose-file }
-    .aria-label = Choose Output File
+    .aria-label = Выберите выходной файл
 rtfScan-intro-page = Введение
 rtfScan-scan-page = Сканирование на наличие цитат
-rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
+rtfScan-scanPage-description = { -app-name } сканирует цитирования в документе. Пожалуйста подождите.
 rtfScan-citations-page = Проверить цитированные записи
 rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
 rtfScan-style-page = Форматирование документа
 rtfScan-format-page = Форматирование цитат
 rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
 rtfScan-complete-page = Сканирование RTF завершено
-rtfScan-complete-page-description = Ваш документ был сканирован и обработан. Пожалуйста, проверьте, что он отформатирован правильно.
+rtfScan-complete-page-description = Ваш документ был сканирован и обработан. Пожалуйста, проверьте корректность форматирования.
 rtfScan-action-find-match =
     .title = Select matching item
 rtfScan-action-accept-match =
     .title = Accept this match
-runJS-title = Run JavaScript
+runJS-title = Запустить JavaScript
 runJS-editor-label = Code:
-runJS-run = Run
+runJS-run = Запустить
 runJS-help = { general-help }
-runJS-completed = completed successfully
+runJS-completed = завершено успешно
 runJS-result =
     { $type ->
         [async] Return value:
@@ -353,7 +353,7 @@ styleEditor-locale = { language-label }
 styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
-    .aria-label = Preview
+    .aria-label = Предпросмотр
 publications-intro-page = Мои публикации
 publications-intro = Записи, добавленные в раздел «Мои публикации», будут показаны на странице вашего профиля в zotero.org. Если вы присоединили файлы, они также станут доступны публично под указанной вами лицензией. Добавляйте только ваши собственные работы и размещайте только те файлы, для которых у вас есть разрешение на распространение.
 publications-include-checkbox-files =
@@ -362,16 +362,16 @@ publications-include-checkbox-notes =
     .label = Включая заметки
 publications-include-adjust-at-any-time = Вы можете настроить отображение в любой момент из коллекции «Мои публикации»
 publications-intro-authorship =
-    .label = Я создал эту работу.
+    .label = Я автор этой работы.
 publications-intro-authorship-files =
-    .label = Я создал эту работу и владею правами на распространение вложенных файлов.
-publications-sharing-page = Выберите как ваша работа будет распространяться
+    .label = Я автор этой работы и владею правами на распространение вложений.
+publications-sharing-page = Выберите, как ваша работа будет распространяться
 publications-sharing-keep-rights-field =
     .label = Сохранить существующее поле «Права»
 publications-sharing-keep-rights-field-where-available =
     .label = Сохранить существующее поле «Права», если оно доступно.
 publications-sharing-text = Вы можете защитить все права на свою работу, лицензировав её по лицензии «Creative Commons» или передать её в общественное достояние. В любом случае, работа будет опубликована на сайте zotero.org.
-publications-sharing-prompt = Вы хотите разрешить распространять вашу работу третьим лицам?
+publications-sharing-prompt = Вы хотите разрешить распространение работы третьими лицами?
 publications-sharing-reserved =
     .label = Нет, опубликовать только на zotero.org
 publications-sharing-cc =
@@ -392,9 +392,9 @@ publications-choose-license-sharealike =
     .accesskey = S
 publications-choose-license-commercial-prompt = Разрешить коммерческое использование вашей работы?
 publications-buttons-add-to-my-publications =
-    .label = Add to My Publications
+    .label = Добавить в Мои публикации
 publications-buttons-next-sharing =
-    .label = Next: Sharing
+    .label = Далее: Распространение
 publications-buttons-next-choose-license =
     .label = Выбрать лицензию
 licenses-cc-0 = CC0 1.0 Universal Public Domain Dedication
@@ -408,16 +408,16 @@ licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-
 licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
 debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-menuitem =
-    .label = Restart in Troubleshooting Mode…
+    .label = Перезапустить в режиме отладки…
     .accesskey = T
 restart-in-troubleshooting-mode-dialog-title = { general-restartInTroubleshootingMode }
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
 menu-ui-density =
-    .label = Плотность
+    .label = Плотность интерфейса
 menu-ui-density-comfortable =
-    .label = Comfortable
+    .label = Комфортная
 menu-ui-density-compact =
-    .label = Compact
+    .label = Компактная
 pane-item-details = Item Details
 pane-info = Информация
 pane-abstract = Аннотация
@@ -428,7 +428,7 @@ pane-libraries-collections = Libraries and Collections
 pane-tags = Теги
 pane-related = Связанные
 pane-attachment-info = Attachment Info
-pane-attachment-preview = Preview
+pane-attachment-preview = Предпросмотр
 pane-attachment-annotations = Аннотации
 pane-header-attachment-associated =
     .label = Переименовать связанный файл
@@ -441,31 +441,31 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Attachment
-           *[other] { $count } Attachments
+            [one] { $count } Вложение
+           *[other] { $count } Вложений
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } Annotation
-           *[other] { $count } Annotations
+            [one] { $count } Аннотация
+           *[other] { $count } Аннотаций
         }
-section-attachments-move-to-trash-message = Are you sure you want to move “{ $title }” to the trash?
+section-attachments-move-to-trash-message = Вы уверены, что хотите переместить “{ $title }” в корзину?
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Note
-           *[other] { $count } Notes
+            [one] { $count } Заметка
+           *[other] { $count } Заметок
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Tag
-           *[other] { $count } Tags
+            [one] { $count } Тэг
+           *[other] { $count } Тэгов
         }
 section-related =
     .label = { $count } Related
@@ -483,8 +483,8 @@ section-button-collapse =
     .label = Collapse { $section } section
 annotations-count =
     { $count ->
-        [one] { $count } Annotation
-       *[other] { $count } Annotations
+        [one] { $count } Аннотация
+       *[other] { $count } Аннотаций
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -516,31 +516,31 @@ sidenav-related =
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
 sidenav-reorder-up =
-    .label = Move Section Up
+    .label = Переместить блок вверх
 sidenav-reorder-down =
-    .label = Move Section Down
+    .label = Переместить блок вниз
 sidenav-reorder-reset =
-    .label = Reset Section Order
+    .label = Сбросить порядок блоков
 toggle-item-pane =
-    .tooltiptext = Toggle Item Pane
+    .tooltiptext = Переключить панель элемента
 toggle-context-pane =
-    .tooltiptext = Toggle Context Pane
+    .tooltiptext = Переключить контекстную панель
 pin-section =
-    .label = Pin Section
+    .label = Закрепить блок
 unpin-section =
-    .label = Unpin Section
+    .label = Открепить блок
 collapse-other-sections =
-    .label = Collapse Other Sections
+    .label = Свернуть другие блоки
 expand-all-sections =
-    .label = Expand All Sections
+    .label = Развернуть все блоки
 abstract-field =
-    .placeholder = Add abstract…
+    .placeholder = Добавить аннотацию…
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
-    .placeholder = Filter Tags
+    .placeholder = Фитровать теги
 context-notes-search =
-    .placeholder = Search Notes
+    .placeholder = Искать заметки
 context-notes-return-button =
     .aria-label = { general-go-back }
 new-collection = Новая коллекция…
@@ -552,14 +552,14 @@ new-collection-dialog =
     .title = Новая коллекция
     .buttonlabelaccept = Create Collection
 new-collection-name = Название:
-new-collection-create-in = Create in:
+new-collection-create-in = Создать в:
 show-publications-menuitem =
-    .label = Show My Publications
+    .label = Показать Мои публикации
 attachment-info-title = Название
 attachment-info-filename = Имя файла
 attachment-info-accessed = Дата доступа
 attachment-info-pages = Страницы
-attachment-info-modified = Modified
+attachment-info-modified = Изменено
 attachment-info-index = Проиндексировано
 attachment-info-convert-note =
     .label =
@@ -572,7 +572,7 @@ attachment-info-convert-note =
 section-note-info =
     .label = { pane-note-info }
 note-info-title = Название
-note-info-parent-item = Parent Item
+note-info-parent-item = Родительский элемент
 note-info-parent-item-button =
     { $hasParentItem ->
         [true] { $parentItemTitle }
@@ -580,24 +580,24 @@ note-info-parent-item-button =
     }
     .title =
         { $hasParentItem ->
-            [true] View parent item in library
+            [true] Показать родительский элемент в библиотеке
            *[false] View note item in library
         }
-note-info-date-created = Created
-note-info-date-modified = Modified
+note-info-date-created = Создана
+note-info-date-modified = Изменена
 note-info-size = Размер
-note-info-word-count = Word Count
-note-info-character-count = Character Count
+note-info-word-count = Количество слов
+note-info-character-count = Количество символов
 item-title-empty-note = Заметка без названия
-attachment-preview-placeholder = No attachment to preview
+attachment-preview-placeholder = Нет вложений для предпросмотра
 attachment-rename-from-parent =
-    .tooltiptext = Rename File to Match Parent Item
-file-renaming-auto-rename-prompt-title = Renaming Settings Changed
-file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
-file-renaming-auto-rename-prompt-yes = Preview Changes…
-file-renaming-auto-rename-prompt-no = Keep Existing Filenames
+    .tooltiptext = Переименовать файл в соответствии с родительским элементом
+file-renaming-auto-rename-prompt-title = Настройки переимнования изменены
+file-renaming-auto-rename-prompt-body = Хотите переименовать существующие файлы в вашей библиотеке в соответствии с новыми настройками?
+file-renaming-auto-rename-prompt-yes = Предпросмотр изменений…
+file-renaming-auto-rename-prompt-no = Сохранить существующие имена файлов
 rename-files-preview =
-    .buttonlabelaccept = Rename Files
+    .buttonlabelaccept = Переименовать файлы
 rename-files-preview-loading = Загрузка...
 rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
 rename-files-preview-renaming = Renaming…
@@ -611,13 +611,13 @@ toggle-preview =
         } Attachment Preview
 annotation-image-not-available = [Image not available]
 quicksearch-mode =
-    .aria-label = Quick Search mode
+    .aria-label = Режим быстрого поиска
 quicksearch-input =
     .aria-label = Быстрый поиск
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 item-pane-header-view-as =
-    .label = View As
+    .label = Показать как
 item-pane-header-none =
     .label = Нет
 item-pane-header-title =
@@ -625,19 +625,19 @@ item-pane-header-title =
 item-pane-header-titleCreatorYear =
     .label = Заглавие, Автор, Год
 item-pane-header-bibEntry =
-    .label = Bibliography Entry
+    .label = Библиографическая запись
 item-pane-header-more-options =
-    .label = More Options
+    .label = Больше опций
 item-pane-message-items-selected =
     { $count ->
-        [0] No items selected
-        [one] { $count } item selected
-       *[other] { $count } items selected
+        [0] Не выбран ни один элемент
+        [one] { $count } элемент выбран
+       *[other] { $count } элементов выбрано
     }
 item-pane-message-collections-selected =
     { $count ->
-        [one] { $count } collection selected
-       *[other] { $count } collections selected
+        [one] { $count } коллекция выбрана
+       *[other] { $count } коллекций выбрано
     }
 item-pane-message-searches-selected =
     { $count ->
@@ -724,9 +724,9 @@ post-upgrade-done =
     .label = { general-done }
 text-action-paste-and-search =
     .label = Paste and Search
-mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+mac-word-plugin-install-message = Zotero необходим доступ к данным Word для установки плагина для Word.
 mac-word-plugin-install-action-button =
-    .label = Install Word plugin
+    .label = Установить плагин для Word
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
@@ -734,16 +734,16 @@ mac-word-plugin-install-dont-ask-again-button =
 file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
-connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
+connector-version-warning = The { -app-name } Connector должен быть обновлён для работы с этой версией { -app-name }.
 userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
 migrate-extra-fields-progress-message = Migrating new fields from Extra field
 long-tag-fixer-window-title =
-    .title = Split Tags
+    .title = Разделить теги
 long-tag-fixer-button-dont-split =
-    .label = Don’t Split
+    .label = Не разделять
 menu-normalize-attachment-titles =
-    .label = Normalize Attachment Titles…
-normalize-attachment-titles-title = Normalize Attachment Titles
+    .label = Нормализовать заголовки вложений…
+normalize-attachment-titles-title = Нормализовать заголовки вложений
 normalize-attachment-titles-text =
     { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
     
