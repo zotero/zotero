@@ -259,6 +259,7 @@ Zotero.Items = function () {
 				// Instead of making updateDisplayTitle() async and loading conditionally, just catch the error
 				// and load on demand
 				if (e instanceof Zotero.Exception.UnloadedDataException) {
+					Zotero.debug(`Unloaded data for item ${item.libraryKey} updating display title`);
 					if (item.isRegularItem()) {
 						await item.loadDataType('creators');
 						await item.loadDataType('tags');

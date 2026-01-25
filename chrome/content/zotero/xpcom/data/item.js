@@ -101,14 +101,16 @@ Zotero.defineProperty(Zotero.Item.prototype, 'ContainerObjectsClass', {
 });
 
 Zotero.Item.prototype._dataTypes = Zotero.Item._super.prototype._dataTypes.concat([
+	// Load creators/tags/annotations before itemData. _loadItemData() updates the cached display
+	// title, which needs that data for some item types.
 	'creators',
+	'tags',
+	'annotation',
 	'itemData',
 	'note',
-	'annotation',
 	'annotationDeferred',
 	'childItems',
 //	'relatedItems', // TODO: remove
-	'tags',
 	'collections',
 	'relations'
 ]);
