@@ -78,7 +78,7 @@ describe("Zotero.Styles", function () {
 		it("shouldn't capitalize subtitles in Vancouver", async function () {
 			var o = Zotero.QuickCopy.getContentFromItems(
 				[item],
-				'bibliography=http://www.zotero.org/styles/vancouver'
+				'bibliography=http://www.zotero.org/styles/nlm-citation-sequence'
 			);
 			assert.equal(o.text, '1. Foo bar: baz qux. 2019; \n');
 		});
