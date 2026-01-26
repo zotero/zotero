@@ -103,7 +103,30 @@ Zotero.Styles = new function () {
 		if (await OS.File.exists(hiddenDir)) {
 			num += await _readStylesFromDirectory(hiddenDir, true);
 		}
-		
+
+		// Load renamed styles
+		_renamedStyles = JSON.parse(
+			await Zotero.File.getResourceAsync("resource://zotero/schema/renamed-styles.json")
+		);
+
+		// Delete installed styles that have been renamed if the new style is also installed
+		var prefix = "http://www.zotero.org/styles/";
+		for (let oldName in _renamedStyles) {
+			let oldID = prefix + oldName;
+			let newID = prefix + _renamedStyles[oldName];
+			if (_styles[oldID] && _styles[newID]) {
+				Zotero.debug("Deleting renamed style '" + oldID + "'");
+				try {
+					await OS.File.remove(_styles[oldID].path);
+					delete _styles[oldID];
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+		}
+		_visibleStyles = _visibleStyles.filter(s => _styles[s.styleID]);
+
 		// Sort visible styles by title
 		_visibleStyles.sort(function (a, b) {
 			return a.title.localeCompare(b.title);
@@ -130,11 +153,6 @@ Zotero.Styles = new function () {
 		
 		this.locales = locales;
 		this.primaryDialects = primaryDialects;
-		
-		// Load renamed styles
-		_renamedStyles = JSON.parse(
-			await Zotero.File.getResourceAsync("resource://zotero/schema/renamed-styles.json")
-		);
 
 		_initializationDeferred.resolve();
 		_initialized = true;
