@@ -684,6 +684,16 @@ Zotero.Cite.System.prototype = {
 	 * @return {String|Boolean} The locale as a string if it exists, or false if it doesn't
 	 */
 	"retrieveLocale":function retrieveLocale(lang) {
+		switch (lang) {
+			// citeproc-js limitation -- see https://github.com/zotero/zotero/issues/5741
+			case 'sr-CYRL':
+				lang = 'sr-Cyrl-RS';
+				break;
+			
+			case 'sr-LATN':
+				lang = 'sr-Latn-RS';
+				break;
+		}
 		return Zotero.Cite.Locale.get(lang);
 	}
 };

@@ -25,6 +25,24 @@ describe("Zotero.Cite", function () {
 		});
 	});
 	
+	describe("#retrieveLocale()", function () {
+		it("should handle locale with script code", async function () {
+			var item = new Zotero.Item;
+			item.fromJSON({
+				itemType: "book",
+				title: "Test Book",
+				edition: "2"
+			});
+			await item.saveTx();
+			
+			var style = Zotero.Styles.get('http://www.zotero.org/styles/chicago-notes-bibliography');
+			var cslEngine = style.getCiteProc('sr-Latn-RS');
+			
+			var output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
+			assert.include(output, 'izd');
+		});
+	});
+	
 	describe("#extraToCSL()", function () {
 		it("should convert Extra field values to the more restrictive citeproc-js cheater syntax", function () {
 			var str1 = 'Original Date: 2017\n' // uppercase/spaces converted to lowercase/hyphens
