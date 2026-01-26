@@ -39,10 +39,16 @@ style-configurator {
 		
 		richlistitem {
 			line-height: var(--style-configurator-richlistitem-line-height, 1.66666666em);
-			overflow: hidden;
-			text-overflow: ellipsis;
 			padding: var(--style-configurator-richlistitem-padding, 0px 8px 0px 4px);
 			border-radius: var(--style-configurator-richlistitem-border-radius, 5px);
+
+			> label {
+				// XUL renders the label text as generated content in ::before, so we need to apply text-overflow styles there
+				&::before {
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+			}
 		}
 		
 		@media (-moz-platform: macos) {
