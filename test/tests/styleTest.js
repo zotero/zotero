@@ -146,7 +146,7 @@ describe("Zotero.Styles", function () {
 			testItem2.setField('date', '2022-01-01');
 
 			function getCitation() {
-				let cslEngine = style.getCiteProc('en-US', 'text');
+				let cslEngine = style.getCiteProc('en-US', 'text', { cache: true });
 				cslEngine.updateItems([testItem1.id, testItem2.id]);
 				var citation = {
 					citationItems: [{ id: testItem1.id }, { id: testItem2.id }],
