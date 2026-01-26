@@ -165,13 +165,12 @@ describe("Zotero.Styles", function () {
 		});
 	});
 
-	// Tests for our own RENAMED_STYLES overrides in style.js (beyond CSL repo's renamed-styles.json)
 	describe("renamed styles", function () {
 		var oldName = "vancouver";
 		var newName = "nlm-citation-sequence";
 		var prefix = "http://www.zotero.org/styles/";
 
-		it("should map a RENAMED_STYLES entry to its new ID via get()", function () {
+		it("should map a renamed style to its new ID via get()", function () {
 			var style = Zotero.Styles.get(prefix + oldName);
 			assert.isOk(style);
 			assert.equal(style.styleID, prefix + newName);
