@@ -86,8 +86,11 @@
 					.replace(/^American Sociological Association/, "American Sociological Association (ASA)");
 				
 				let richlistitem = document.createXULElement('richlistitem');
+				let labelEL = document.createXULElement("label");
+				labelEL.setAttribute("value", label);
+				labelEL.setAttribute("tooltiptext", label);
+				richlistitem.appendChild(labelEL);
 				richlistitem.value = value;
-				richlistitem.textContent = label;
 				styleListEl.append(richlistitem);
 			});
 			this.value = this.getAttribute('value');
