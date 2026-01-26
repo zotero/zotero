@@ -977,7 +977,7 @@ async function citeprocToHTML(itemOrItems, searchParams, asCitationList) {
 		throw new Error(`Unable to install style: ${styleIDOrURL}`);
 	}
 	
-	let cslEngine = style.getCiteProc(locale, 'html');
+	let cslEngine = style.getCiteProc(locale, 'html', { cache: true });
 	cslEngine.opt.development_extensions.wrap_url_and_doi = linkWrap;
 	return Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, 'html', asCitationList);
 }

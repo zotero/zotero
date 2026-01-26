@@ -1946,7 +1946,6 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
 			}
 			this.style = getStyle.getCiteProc(data.style.locale, this.outputFormat, {
 				automaticJournalAbbreviations: data.prefs.automaticJournalAbbreviations,
-				noCache: true,
 			});
 			// Disable wrap_url_and_doi to prevent double-encoding of special characters in DOIs
 			// https://github.com/zotero/zotero/issues/5557

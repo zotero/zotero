@@ -291,6 +291,14 @@ describe("Local API Server", function () {
 					assert.isTrue(response[0].citation.startsWith('<ol>'));
 				});
 				
+				it("should not accumulate citations on subsequent calls", async function () {
+					let { response: r1 } = await apiGet('/users/0/items?include=citation');
+					// Be sure generating a bibliography in the middle *also* doesn't affect the state
+					await apiGet('/users/0/items?include=bib');
+					let { response: r2 } = await apiGet('/users/0/items?include=citation');
+					assert.equal(r1[0].citation, r2[0].citation);
+				});
+				
 				describe("&style", function () {
 					for (let [styleID, type] of [['cell', 'name'], ['https://www.zotero.org/styles/cell', 'URL']]) {
 						it(`should install the given citation style by ${type} if not yet installed`, async function () {

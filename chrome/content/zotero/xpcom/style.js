@@ -720,20 +720,19 @@ Zotero.Style = function (style, path) {
  * @param {String} [format] Output format one of [rtf, html, text]
  * @param {GetCiteProcOptions | boolean} [options] If passed as a boolean, sets automaticJournalAbbreviations
  * @param {boolean} [options.automaticJournalAbbreviations] Abbreviate publication titles automatically
- * @param {boolean} [options.noCache] Don't read or write the CSL.Engine cache. This should only be used in code that
- * 		relies on the CSL.Engine's internal state to persist properties between citation/bibliography generations.
- * 		Callers that will only use the CSL.Engine instance once should always take advantage of the cache.
+ * @param {boolean} [options.cache] Use the global CSL.Engine cache. CSL.Engine is highly stateful,
+ * 		so this should only be used if you're aware of the pitfalls of reusing CSL.Engine instances.
  *
  * @typedef {{
  *     automaticJournalAbbreviations?: boolean;
- *     noCache?: boolean;
+ *     cache?: boolean;
  * }} GetCiteProcOptions
  */
 Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 	if (typeof options === 'boolean') {
 		options = { automaticJournalAbbreviations: options };
 	}
-	let { automaticJournalAbbreviations, noCache } = options;
+	let { automaticJournalAbbreviations, cache } = options;
 	
 	locale = locale || Zotero.locale || 'en-US';
 	format = format || 'text';
@@ -743,7 +742,7 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 	
 	// We can cache the Engine instance if we aren't using citeproc-rs
 	// and this is an installed style
-	let cacheKey = !noCache && !useCiteprocRs && this.path
+	let cacheKey = cache && !useCiteprocRs && this.path
 		? JSON.stringify({ locale, format, automaticJournalAbbreviations })
 		: null;
 	if (cacheKey && this._cachedEngines.has(cacheKey)) {

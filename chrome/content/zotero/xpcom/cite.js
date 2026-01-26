@@ -182,12 +182,13 @@ Zotero.Cite = {
 	},
 
 	/**
-	 * Makes a formatted bibliography, if the style defines one; otherwise makes a 
-	 * formatted list of items
+	 * Makes a formatted bibliography, if the style defines one; otherwise makes a
+	 * formatted list of citations for the items.
 	 * @param {Zotero.Style} style The style to use
 	 * @param {Zotero.Item[]} items An array of items
 	 * @param {String} format The format of the output (html, text, or rtf)
-	 * @return {String} Bibliography or item list in specified format
+	 * @param {boolean} [asCitationList]
+	 * @return {String} Bibliography or citation list in specified format
 	 */
 	"makeFormattedBibliographyOrCitationList":function (cslEngine, items, format, asCitationList) {
 		cslEngine.setOutputFormat(format);
@@ -200,13 +201,13 @@ Zotero.Cite = {
 		
 		var styleClass = cslEngine.opt.class;
 		var citations=[];
-		for (var i=0, ilen=items.length; i<ilen; i++) {
-			var item = items[i];
-			var outList = cslEngine.appendCitationCluster({"citationItems":[{"id":item.id}], "properties":{}}, true);
-			for (var j=0, jlen=outList.length; j<jlen; j++) {
-				var citationPos = outList[j][0];
-				citations[citationPos] = outList[j][1];
-			}
+		for (let item of items) {
+			citations.push(cslEngine.previewCitationCluster(
+				{ citationItems: [{ id: item.id }], properties: {} },
+				[],
+				[],
+				format,
+			));
 		}
 		
 		if(styleClass == "note") {
