@@ -802,10 +802,6 @@ var Zotero_File_Interface = new function () {
 				output = cslEngine.previewCitationCluster(citation, [], [], "text");
 			}
 			else {
-				// Generate engine again to work around citeproc-js problem:
-				// https://github.com/zotero/zotero/commit/4a475ff3
-				cslEngine.free();
-				cslEngine = style.getCiteProc(locale, 'text');
 				output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, 'text');
 			}
 		}
