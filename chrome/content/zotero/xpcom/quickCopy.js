@@ -287,7 +287,8 @@ Zotero.QuickCopy = new function () {
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
 				var text = csl.previewCitationCluster(citation, [], [], "text");
 				csl.free();
-			} else {
+			}
+			else {
 				var style = Zotero.Styles.get(format.id);
 				var cslEngine = style.getCiteProc(locale, 'html', { cache: true });
  				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
@@ -297,7 +298,10 @@ Zotero.QuickCopy = new function () {
 				cslEngine.free();
 			}
 			
-			return {text:(format.contentType == "html" ? html : text), html:html};
+			return {
+				text: format.contentType == "html" ? html : text,
+				html,
+			};
 		}
 		
 		throw ("Invalid mode '" + format.mode + "' in Zotero.QuickCopy.getContentFromItems()");
