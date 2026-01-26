@@ -164,4 +164,44 @@ describe("Zotero.Styles", function () {
 			assert.equal(getCitation(), '(Bar, 2022a, 2022b)');
 		});
 	});
+
+	// Tests for our own RENAMED_STYLES overrides in style.js (beyond CSL repo's renamed-styles.json)
+	describe("renamed styles", function () {
+		var oldName = "vancouver";
+		var newName = "nlm-citation-sequence";
+		var prefix = "http://www.zotero.org/styles/";
+
+		it("should map a RENAMED_STYLES entry to its new ID via get()", function () {
+			var style = Zotero.Styles.get(prefix + oldName);
+			assert.isOk(style);
+			assert.equal(style.styleID, prefix + newName);
+		});
+
+		it("should delete a renamed style on init if the new style is also installed", async function () {
+			var oldCSL = `<?xml version="1.0" encoding="utf-8"?>
+			<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0">
+			  <info>
+				<title>${oldName}</title>
+				<id>${prefix}${oldName}</id>
+				<link href="${prefix}${oldName}" rel="self"/>
+				<updated>2024-01-01T00:00:00+00:00</updated>
+			  </info>
+			  <citation><layout><text variable="title"/></layout></citation>
+			  <bibliography><layout><text variable="title"/></layout></bibliography>
+			</style>`;
+
+			var stylesDir = Zotero.getStylesDirectory().path;
+			var oldPath = OS.Path.join(stylesDir, oldName + '.csl');
+			await Zotero.File.putContentsAsync(oldPath, oldCSL);
+
+			await Zotero.Styles.reinit();
+
+			assert.isFalse(await OS.File.exists(oldPath));
+			var style = Zotero.Styles.get(prefix + oldName);
+			assert.isOk(style);
+			assert.equal(style.styleID, prefix + newName);
+			var visible = Zotero.Styles.getVisible();
+			assert.isFalse(visible.some(s => s.styleID === prefix + oldName));
+		});
+	});
 });

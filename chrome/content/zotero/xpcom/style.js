@@ -29,7 +29,13 @@ Zotero.Styles = new function () {
 	var _styles, _visibleStyles;
 	
 	var _renamedStyles = null;
-	
+
+	// Overrides for styles that we have renamed unilaterally besides CSL repo
+	// https://github.com/citation-style-language/styles/pull/7928
+	const RENAMED_STYLES = {
+		vancouver: "nlm-citation-sequence",
+	};
+
 	this.xsltProcessor = null;
 	this.ns = {
 		"csl":"http://purl.org/net/xbiblio/csl"
@@ -103,7 +109,26 @@ Zotero.Styles = new function () {
 		if (await OS.File.exists(hiddenDir)) {
 			num += await _readStylesFromDirectory(hiddenDir, true);
 		}
-		
+
+		// Load renamed styles
+		_renamedStyles = JSON.parse(
+			await Zotero.File.getResourceAsync("resource://zotero/schema/renamed-styles.json")
+		);
+		Object.assign(_renamedStyles, RENAMED_STYLES);
+
+		// Delete installed styles that have been renamed if the new style is also installed
+		var prefix = "http://www.zotero.org/styles/";
+		for (let oldName in _renamedStyles) {
+			let oldID = prefix + oldName;
+			let newID = prefix + _renamedStyles[oldName];
+			if (_styles[oldID] && _styles[newID]) {
+				Zotero.debug("Deleting renamed style '" + oldID + "'");
+				await OS.File.remove(_styles[oldID].path);
+				delete _styles[oldID];
+			}
+		}
+		_visibleStyles = _visibleStyles.filter(s => _styles[s.styleID]);
+
 		// Sort visible styles by title
 		_visibleStyles.sort(function (a, b) {
 			return a.title.localeCompare(b.title);
@@ -130,11 +155,6 @@ Zotero.Styles = new function () {
 		
 		this.locales = locales;
 		this.primaryDialects = primaryDialects;
-		
-		// Load renamed styles
-		_renamedStyles = JSON.parse(
-			await Zotero.File.getResourceAsync("resource://zotero/schema/renamed-styles.json")
-		);
 
 		_initializationDeferred.resolve();
 		_initialized = true;
