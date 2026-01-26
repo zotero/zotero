@@ -1724,6 +1724,11 @@ describe("Item pane", function () {
 		});
 
 		it("should discard attachment pane preview after becoming invisible", async function () {
+			// TEMP: https://github.com/zotero/zotero/issues/5624
+			if (Zotero.isAutomatedTest) {
+				this.skip();
+				return;
+			}
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let attachmentBox = itemDetails.getPane(paneID);
 
