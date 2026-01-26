@@ -1,0 +1,20 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+
+cd $ROOT_DIR/chrome/locale
+for i in `ls -d */`; do
+	if [ $i = 'en-US' ]; then
+		continue
+	fi
+	touch ${i}zotero/zotero.json
+done
+
+cd $ROOT_DIR
+tx pull -t -f -m sourceastranslation -r zotero.zoterojson
+
+npm run localize-ftl
+
+find $ROOT_DIR/chrome/locale -type f -name 'zotero.json' -not -path '*/en-US/*' -delete
