@@ -316,7 +316,7 @@
 		_getCSLEngine(style, locale) {
 			// Create Engine if not cached (first run with this style)
 			if (this._cslEngineStyleID !== style.styleID || this._cslEngineLocale !== locale) {
-				this._cslEngine = style.getCiteProc(locale, 'html');
+				this._cslEngine = style.getCiteProc(locale, 'html', { cache: true });
 				this._cslEngineStyleID = style.styleID;
 				this._cslEngineLocale = locale;
 				this._bibEntryCache.clear();

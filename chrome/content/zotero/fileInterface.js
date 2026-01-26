@@ -775,7 +775,7 @@ var Zotero_File_Interface = new function () {
 		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
 							   getService(Components.interfaces.nsIClipboard);
 		style = Zotero.Styles.get(style);
-		var cslEngine = style.getCiteProc(locale, 'html');
+		var cslEngine = style.getCiteProc(locale, 'html', { cache: true });
 		
 		if (asCitations) {
 			cslEngine.updateItems(items.map(item => item.id));
@@ -860,7 +860,7 @@ var Zotero_File_Interface = new function () {
 			}
 			else {
 				var style = Zotero.Styles.get(io.style);
-				var cslEngine = style.getCiteProc(locale, format);
+				var cslEngine = style.getCiteProc(locale, format, { cache: true });
 				var bibliography = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine,
 					items, format, io.mode === "citations");
 			}

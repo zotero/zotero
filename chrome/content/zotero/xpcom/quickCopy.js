@@ -278,7 +278,7 @@ Zotero.QuickCopy = new function () {
 			
 			// Copy citations if shift key pressed
 			if (modified) {
-				var csl = Zotero.Styles.get(format.id).getCiteProc(locale);
+				var csl = Zotero.Styles.get(format.id).getCiteProc(locale, "text", { cache: true });
 				csl.updateItems(items.map(item => item.id));
 				var citation = {
 					citationItems: items.map(item => ({ id: item.id })),
@@ -289,10 +289,10 @@ Zotero.QuickCopy = new function () {
 				csl.free();
 			} else {
 				var style = Zotero.Styles.get(format.id);
-				var cslEngine = style.getCiteProc(locale, 'html');
+				var cslEngine = style.getCiteProc(locale, 'html', { cache: true });
  				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
  				cslEngine.free();
-				cslEngine = style.getCiteProc(locale, 'text');
+				cslEngine = style.getCiteProc(locale, 'text', { cache: true });
 				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
 				cslEngine.free();
 			}
@@ -388,8 +388,8 @@ Zotero.QuickCopy = new function () {
 			let style = Zotero.Styles.get(format.id);
 			let locale = _getLocale(format);
 			// Cache CiteProc instances for HTML and text
-			style.getCiteProc(locale, 'html');
-			style.getCiteProc(locale, 'text');
+			style.getCiteProc(locale, 'html', { cache: true });
+			style.getCiteProc(locale, 'text', { cache: true });
 		}
 	};
 	
