@@ -187,7 +187,7 @@ Zotero.CiteprocRs = {
 			return this._driver.previewCluster(cluster, allClusterOrder, outputFormat);
 		}
 		
-		// This is an undocumented citeproc-js endpoint that is used by Zotero from way back
+		// This is an undocumented citeproc-js endpoint that used to be used by Zotero
 		// when generating citations for clipboard or export.
 		appendCitationCluster(citation) {
 			this.insertCluster(citation);
