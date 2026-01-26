@@ -116,8 +116,13 @@ Zotero.Styles = new function () {
 			let newID = prefix + _renamedStyles[oldName];
 			if (_styles[oldID] && _styles[newID]) {
 				Zotero.debug("Deleting renamed style '" + oldID + "'");
-				await OS.File.remove(_styles[oldID].path);
-				delete _styles[oldID];
+				try {
+					await OS.File.remove(_styles[oldID].path);
+					delete _styles[oldID];
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 		}
 		_visibleStyles = _visibleStyles.filter(s => _styles[s.styleID]);
