@@ -3456,23 +3456,26 @@ var ItemTree = class ItemTree extends LibraryTree {
 			case 'dateModified':
 			case 'accessDate':
 			case 'date':
-				if (key == 'date' && !this.collectionTreeRow.isFeedsOrFeed()) {
-					break;
-				}
 				if (val) {
-					let date = Zotero.Date.sqlToDate(val, true);
-					if (date) {
-						// If no time, interpret as local, not UTC
-						if (Zotero.Date.isSQLDate(val)) {
-							date = Zotero.Date.sqlToDate(val);
-							val = date.toLocaleDateString();
+					if (key != 'date' || this.collectionTreeRow.isFeedsOrFeed()) {
+						let date = Zotero.Date.sqlToDate(val, true);
+						if (date) {
+							// If no time, interpret as local, not UTC
+							if (Zotero.Date.isSQLDate(val)) {
+								date = Zotero.Date.sqlToDate(val);
+								val = date.toLocaleDateString();
+							}
+							else {
+								val = date.toLocaleString();
+							}
 						}
 						else {
-							val = date.toLocaleString();
+							val = '';
 						}
 					}
 					else {
-						val = '';
+						// key == 'date' and we aren't in a feed - use human-readable date
+						val = treeRow.ref.getDisplayDate();
 					}
 				}
 			}
