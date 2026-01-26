@@ -105,6 +105,7 @@ reader-theme-original = Original
 reader-theme-snow = Snow
 reader-theme-sepia = Sepia
 reader-theme-dark = Dark
+reader-theme-black = Black
 reader-add-theme = Add Theme
 reader-theme-invert-images = Invert Images
 reader-scroll-mode = Scrolling
