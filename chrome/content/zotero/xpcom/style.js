@@ -29,13 +29,7 @@ Zotero.Styles = new function () {
 	var _styles, _visibleStyles;
 	
 	var _renamedStyles = null;
-
-	// Overrides for styles that we have renamed unilaterally besides CSL repo
-	// https://github.com/citation-style-language/styles/pull/7928
-	const RENAMED_STYLES = {
-		vancouver: "nlm-citation-sequence",
-	};
-
+	
 	this.xsltProcessor = null;
 	this.ns = {
 		"csl":"http://purl.org/net/xbiblio/csl"
@@ -114,7 +108,6 @@ Zotero.Styles = new function () {
 		_renamedStyles = JSON.parse(
 			await Zotero.File.getResourceAsync("resource://zotero/schema/renamed-styles.json")
 		);
-		Object.assign(_renamedStyles, RENAMED_STYLES);
 
 		// Delete installed styles that have been renamed if the new style is also installed
 		var prefix = "http://www.zotero.org/styles/";
