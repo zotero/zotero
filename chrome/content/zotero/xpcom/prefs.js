@@ -216,7 +216,7 @@ Zotero.Prefs = new function () {
 						// QuickFormat dialog no longer exists
 						this.clear("firstRunGuidanceShown.quickFormat");
 						// Replaced by citation dialog
-						this.set("firstRunGuidanceShown.citation-dialog", false);
+						this.set("firstRunGuidanceShown.citationDialog", false);
 						break;
 				}
 			}
