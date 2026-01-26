@@ -146,7 +146,9 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 				this.panel.openPopup(forEl, position || "after_start",
 					x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0);
 
-				const anchorOffset = getAnchorOffset(forEl, this.panel);
+				// On Win/Linux, the arrow appears disconnected from the panel if too close to the edge
+				const padding = Zotero.isMac ? 5 : 10;
+				const anchorOffset = getAnchorOffset(forEl, this.panel, padding);
 				this.panel.style.setProperty('--anchor-x', `${anchorOffset}px`);
 
 				if (pref) {

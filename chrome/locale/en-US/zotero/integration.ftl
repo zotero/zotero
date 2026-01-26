@@ -118,3 +118,10 @@ integration-warning-documentPreferences-changes-will-be-lost = You have made cha
 integration-warning-discard-changes = Discard Changes
 
 integration-warning-command-is-running = A word processor integration command is already running.
+
+first-run-guidance-citationDialog = Type a title, author, and/or year to search for a reference.
+    
+    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    
+    You can also add a page number or other locator by including it with your search terms (e.g., “history p10”) or by typing it after the bubble and pressing { return-or-enter }.
+
