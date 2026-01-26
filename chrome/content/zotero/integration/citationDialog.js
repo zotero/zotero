@@ -126,6 +126,11 @@ async function onLoad() {
 		}
 	});
 
+	// Show guidance panel on the first run. Noop on subsequent runs.
+	doc.querySelector("guidance-panel").show();
+	// Hide guidance panel on any keypress
+	doc.addEventListener("keydown", () => doc.querySelector("guidance-panel").hide(), { capture: true, once: true });
+
 	DIALOG_STATE.loaded = true;
 	let initTime = timer.stop();
 	Zotero.debug(`Citation Dialog: initialized in ${initTime} s`);
