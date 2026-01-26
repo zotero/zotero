@@ -119,7 +119,7 @@ integration-warning-discard-changes = Discard Changes
 
 integration-warning-command-is-running = A word processor integration command is already running.
 
-first-run-guidance-citation-dialog = Type a title, author, and/or year to search for a reference.
+first-run-guidance-citationDialog = Type a title, author, and/or year to search for a reference.
     
     After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
     
