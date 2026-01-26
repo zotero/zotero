@@ -106,6 +106,7 @@ reader-theme-snow = Snow
 reader-theme-sepia = Sepia
 reader-theme-dark = Dark
 reader-add-theme = Add Theme
+reader-theme-invert-images = Invert Images
 reader-scroll-mode = Scrolling
 reader-spread-mode = Spreads
 reader-flow-mode = Page Layout
