@@ -432,7 +432,6 @@
 			// Handle drag-drop of items from the citationDialog into bubble-input to add them
 			if (itemIDs) {
 				itemIDs = itemIDs.split(",");
-				console.log(itemIDs);
 				let newIndex = 0;
 				if (this.dragOver) {
 					newIndex = [...this.bubbleInput.querySelectorAll(".bubble")].findIndex(node => this.dragOver == node);
@@ -587,6 +586,11 @@
 			this.bubbleInput._body.appendChild(span);
 			let spanWidth = span.getBoundingClientRect().width;
 			span.remove();
+			// set min-width of 1px if the input is focused to ensure
+			// that the cursor is always visible
+			if (document.activeElement == input && !spanWidth) {
+				spanWidth = 1;
+			}
 			return spanWidth;
 		},
 
