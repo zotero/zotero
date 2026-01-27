@@ -700,6 +700,25 @@ class ReaderInstance {
 
 	async setContextPaneOpen(open) {
 		await this._initPromise;
+
+		// There are two toggle-pane buttons: in the reader and in the sidenav. Closing/opening
+		// the context pane may display one and hide the other. If a focused toggle-pane btn is being hidden,
+		// try to focus the other toggle-pane btn so that focus is not just lost.
+		if (!open && this._window.document.activeElement.dataset.action == "toggle-pane") {
+			// Context pane collapsed when sidenav button is focused - try to focus btn in reader toolbar
+			setTimeout(() => {
+				this._iframeWindow.document.querySelector(".context-pane-toggle").focus({ focusVisible: true });
+			});
+		}
+		else if (open && this._iframeWindow.document.activeElement.classList.contains("context-pane-toggle")) {
+			// Context pane expanded when toggle-pane in reader toolbar is focused.
+			// Try to focus the sidenav button, if reader's button was hidden
+			setTimeout(() => {
+				if (this._iframeWindow.document.querySelector("context-pane-toggle")) return;
+				this._window.document.querySelector("#zotero-context-pane-sidenav .btn[data-action='toggle-pane']").focus({ focusVisible: true });
+			});
+		}
+
 		this._internalReader.setContextPaneOpen(open);
 	}
 
