@@ -1,13 +1,13 @@
 <!ENTITY zotero.version "версия">
 <!ENTITY zotero.whatsNew "Что нового">
-<!ENTITY zotero.createdby "Авторы:">
+<!ENTITY zotero.createdby "Создатели:">
 <!ENTITY zotero.director "Директор:">
 <!ENTITY zotero.directors "Руководители:">
 <!ENTITY zotero.developers "Разработчики:">
 <!ENTITY zotero.alumni "Бывшие разработчики:">
-<!ENTITY zotero.about.localizations "Перевод:">
+<!ENTITY zotero.about.localizations "Локализации:">
 <!ENTITY zotero.about.additionalSoftware "ПО третьих сторон:">
 <!ENTITY zotero.thanks "Особая благодарность:">
 <!ENTITY zotero.about.close "Закрыть">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "Дополнительные сведения об участниках и источниках">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Больше сведений об участниках и благодарности">
 <!ENTITY zotero.citationProcessing "Обработка цитат и библиографии">

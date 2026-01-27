@@ -6,8 +6,8 @@ note-editor-unlink = Trennen
 note-editor-right-to-left = Rechts nach links
 note-editor-left-to-right = Links nach rechts
 note-editor-update-notice =
-    This note was edited with a newer version of { -app-name }.
-    Please update { -app-name } to make changes.
+    Diese Notiz wurde mit einer neuren Version von { -app-name } bearbeitet.
+    Bitte aktualisieren Sie { -app-name }, um Änderungen vorzunehmen.
 note-editor-enter-link = Link eingeben
 note-editor-heading-1 = Überschrift 1
 note-editor-heading-2 = Überschrift 2

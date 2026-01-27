@@ -43,7 +43,7 @@ reader-page = Sayfa
 reader-location = Yer
 reader-read-only = Salt Okunur
 reader-prompt-transfer-from-pdf-title = Ek Açıklamaları İçeri Aktar
-reader-prompt-transfer-from-pdf-text = Annotations stored in the PDF file will be moved to { $target }.
+reader-prompt-transfer-from-pdf-text = PDF dosyasında saklanan açıklamalar { $target } konumuna taşınacaktır.
 reader-prompt-password-protected = İşlem, parola korumalı PDF dosyaları için desteklenmemektedir.
 reader-prompt-delete-pages-title = Sayfaları Sil
 reader-prompt-delete-pages-text =
@@ -51,7 +51,7 @@ reader-prompt-delete-pages-text =
         [one] Are you sure you want to delete { $count } page from the PDF file?
        *[other] Are you sure you want to delete { $count } pages from the PDF file?
     }
-reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-title = Açıklamaları Sil
 reader-prompt-delete-annotations-text =
     { $count ->
         [one] Are you sure you want to delete the selected annotation?
@@ -105,7 +105,9 @@ reader-theme-original = Orijinal
 reader-theme-snow = Kar
 reader-theme-sepia = Sepya
 reader-theme-dark = Koyu
+reader-theme-black = Siyah
 reader-add-theme = Tema ekle
+reader-theme-invert-images = Invert Images
 reader-scroll-mode = Sayfa Kaydırma
 reader-spread-mode = İki sayfalı görünüm
 reader-flow-mode = Sayfa Düzeni
@@ -126,9 +128,9 @@ reader-theme-name = Tema Adı:
 reader-background = Arka Plan:
 reader-foreground = Ön Plan:
 reader-reading-mode = Okuma Modu
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode-not-supported = Okuma Modu bu dosyada desteklenmemektedir.
 reader-clear-selection = Seçilenleri Temizle
-reader-epub-encrypted = This ebook is encrypted and cannot be opened.
+reader-epub-encrypted = Bu e-kitap şifrelidir ve açılamamaktadır.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

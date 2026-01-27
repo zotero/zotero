@@ -20,8 +20,8 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-exclude-cited }
         { -integration-editBibliography-edit-reference }
 integration-citationDialog = Alıntı İletişim Kutusu
-integration-citationDialog-section-open = Open Documents ({ $count })
-integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
+integration-citationDialog-section-open = ({ $count }) Açık Dosya
+integration-citationDialog-section-selected = ({ $count }/{ $total }) Seçili Öğe
 integration-citationDialog-section-cited =
     { $count ->
         [0] Cited Items
@@ -34,7 +34,7 @@ integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
-integration-citationDialog-settings-title = Citation Settings
+integration-citationDialog-settings-title = Atıf Ayarları
 integration-citationDialog-lib-message-citation =
     { $search ->
         [true] No selected, open, or cited items match the current search
@@ -49,7 +49,7 @@ integration-citationDialog-settings-keepSorted = Keep sources sorted
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Kitaplık
-integration-citationDialog-mode-list = List
+integration-citationDialog-mode-list = Liste
 integration-citationDialog-btn-type-citation =
     .title = Alıntı Ekle/Düzenle
 integration-citationDialog-btn-type-add-note =
@@ -82,11 +82,11 @@ integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
     .aria-label = This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it.
-integration-citationDialog-add-all = Add all
+integration-citationDialog-add-all = Hepsini ekle
 integration-citationDialog-collapse-section =
     .title = Bölümü daralt
-integration-citationDialog-bubble-empty = (no title)
-integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-bubble-empty = (başlık yok)
+integration-citationDialog-add-to-citation = Atıfa Ekle
 integration-prefs-displayAs-label = Alıntıları Böyle Göster:
 integration-prefs-footnotes =
     .label = Dipnot
@@ -115,3 +115,9 @@ integration-warning-bibliography-changes-will-be-lost = You have made changes to
 integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
 integration-warning-discard-changes = Discard Changes
 integration-warning-command-is-running = A word processor integration command is already running.
+first-run-guidance-citationDialog =
+    Type a title, author, and/or year to search for a reference.
+    
+    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    
+    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

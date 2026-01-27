@@ -73,7 +73,7 @@ general-violet = 紫罗兰色
 general-maroon = 深红色
 general-gray = 灰色
 general-black = 黑色
-general-loading = Loading…
+general-loading = 加载中…
 citation-style-label = 参考文献样式:
 language-label = 语言：
 menu-custom-group-submenu =
@@ -179,8 +179,8 @@ item-menu-viewAttachment =
                 }
            *[other]
                 { $attachmentType ->
-                    [pdf] PDFs
-                    [epub] EPUBs
+                    [pdf] PDF
+                    [epub] EPUB
                     [snapshot] 网页快照
                     [note] 笔记
                    *[other] 附件
@@ -722,7 +722,7 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = { -app-name } Connector 必须更新才能与该版本的 { -app-name } 兼容。
 userjs-pref-warning = 某些 { -app-name } 设置已通过不支持的方法被覆盖。{ -app-name } 将恢复这些设置并重新启动。
-migrate-extra-fields-progress-message = Migrating new fields from Extra field
+migrate-extra-fields-progress-message = 从其他字段迁移至新字段
 long-tag-fixer-window-title =
     .title = 拆分标签
 long-tag-fixer-button-dont-split =

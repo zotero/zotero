@@ -73,7 +73,7 @@ general-violet = Violett
 general-maroon = Braun
 general-gray = Grau
 general-black = Schwarz
-general-loading = Loading…
+general-loading = Lädt...
 citation-style-label = Zitierstil:
 language-label = Sprache:
 menu-custom-group-submenu =
@@ -123,7 +123,7 @@ menu-view-columns-move-right =
 menu-view-note-font-size =
     .label = Schriftgröße Notizen
 menu-view-note-tab-font-size =
-    .label = Note Tab Font Size
+    .label = Schriftgröße des Notizen-Tabs
 menu-show-tabs-menu =
     .label = Zeige Tabs-Menü
 menu-edit-copy-annotation =
@@ -580,10 +580,10 @@ note-info-parent-item-button =
     }
     .title =
         { $hasParentItem ->
-            [true] View parent item in library
-           *[false] View note item in library
+            [true] Übergeordneten Eintrag in der Bibliothek ansehen
+           *[false] Notiz in der Bibliothek ansehen
         }
-note-info-date-created = Created
+note-info-date-created = Erstellt
 note-info-date-modified = Geändert am
 note-info-size = Größe
 note-info-word-count = Wortzahl
@@ -717,7 +717,7 @@ file-type-video = Video
 file-type-presentation = Vortrag
 file-type-document = Dokument
 file-type-ebook = eBook
-post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
+post-upgrade-message = Es wurde ein Update auf <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span> vorgenommen! Erfahren Sie mehr über die <a data-l10n-name="new-features-link">Änderungen</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -742,11 +742,11 @@ long-tag-fixer-window-title =
 long-tag-fixer-button-dont-split =
     .label = Nicht aufteilen
 menu-normalize-attachment-titles =
-    .label = Normalize Attachment Titles…
-normalize-attachment-titles-title = Normalize Attachment Titles
+    .label = Bezeichnungen von Anhängen normalisieren…
+normalize-attachment-titles-title = Bezeichnungen von Anhängen normalisieren
 normalize-attachment-titles-text =
-    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    { -app-name } benennt Dateien auf der Festplatte automatisch anhand der Metadaten des übergeordneten Eintrags um. Innerhalb des Programms werden aber davon unabhängige, einfachere Bezeichnungen wie "Full Text PDF" oder "Preprint PDF" für die primären Anhänge verwendet, um die Liste übersichtlicher zu halten und redundante Informationen zu vermeiden.
     
-    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    In vorangegangenen Versionen von { -app-name } und bei der Verwendung bestimmter Plugins konnte es vorgenommen, dass die Bezeichnung von Anhängen unnötigerweise geändert worden sind, um den Dateinamen zu entsprechen.
     
-    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
+    Sollen die ausgewählten Anhänge mit vereinfachten Bezeichnungen aktualisiert werden? Nur die primären Anhänge mit Bezeichnungen, die dem Dateinamen entsprechen, werden geändert.

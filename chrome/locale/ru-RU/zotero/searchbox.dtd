@@ -2,19 +2,19 @@
 
 <!ENTITY zotero.search.searchInLibrary "Искать в библиотеке:">
 
-<!ENTITY zotero.search.joinMode.prefix "Совпадающее с">
-<!ENTITY zotero.search.joinMode.any "любым">
-<!ENTITY zotero.search.joinMode.all "всеми">
-<!ENTITY zotero.search.joinMode.suffix "из нижеследующего:">
+<!ENTITY zotero.search.joinMode.prefix "Совпадения">
+<!ENTITY zotero.search.joinMode.any "любые">
+<!ENTITY zotero.search.joinMode.all "все">
+<!ENTITY zotero.search.joinMode.suffix "из следующих:">
 
 <!ENTITY zotero.search.recursive.label "Искать в подпапках">
-<!ENTITY zotero.search.noChildren "Показывать записи только верхнего уровня">
-<!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочерние записи совпадений">
+<!ENTITY zotero.search.noChildren "Показывать только записи верхнего уровня">
+<!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочерние элементы совпадающих записей">
 
 <!ENTITY zotero.search.textModes.phrase "Фраза">
 <!ENTITY zotero.search.textModes.phraseBinary "Фраза (вкл. двоичные файлы)">
 <!ENTITY zotero.search.textModes.regexp "Регулярное выражение">
-<!ENTITY zotero.search.textModes.regexpCS "Регулярное выражение (с учётом регистра)">
+<!ENTITY zotero.search.textModes.regexpCS "Регулярное выражение (чувствительное к регистру)">
 
 <!ENTITY zotero.search.date.units.days "дни">
 <!ENTITY zotero.search.date.units.months "месяцы">

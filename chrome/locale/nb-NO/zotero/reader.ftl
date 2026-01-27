@@ -105,7 +105,9 @@ reader-theme-original = Original
 reader-theme-snow = Snø
 reader-theme-sepia = Sepia
 reader-theme-dark = Mørk
+reader-theme-black = Svart
 reader-add-theme = Legg til tema
+reader-theme-invert-images = Inverter bilder
 reader-scroll-mode = Rulling
 reader-spread-mode = Tosidig visning
 reader-flow-mode = Sideoppsett
@@ -128,7 +130,7 @@ reader-foreground = Forgrunn:
 reader-reading-mode = Lesemodus
 reader-reading-mode-not-supported = Lesemodus er ikke støttet i dette dokumentet.
 reader-clear-selection = Opphev utvalg
-reader-epub-encrypted = This ebook is encrypted and cannot be opened.
+reader-epub-encrypted = Denne eboken er kryptert og kan ikke åpnes.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

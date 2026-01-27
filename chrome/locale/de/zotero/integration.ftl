@@ -70,11 +70,11 @@ integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
-    .placeholder = Search for a note to insert into the document
+    .placeholder = Eine Notiz suchen, um sie ins Dokument einzufügen
 integration-citationDialog-aria-item-list =
-    .aria-description = Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Mit Aufwärts-/Abwärts-Pfeiltaste die Eintragsauswahl wechseln. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
-    .aria-description = Use Right/Left Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Mit den Links-/Rechts-Pfeiltasten die Eintragsauswahl ändern. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-collections-table =
     .aria-label = Sammlungen.
     .aria-description = Sammlung auswählen und mit Tab durch die Einträge navigieren
@@ -110,8 +110,14 @@ integration-prefs-automaticJournalAbbeviations-description = Das Feld "Zeitschri
 integration-prefs-exportDocument =
     .label = Textverarbeitungsprogramm wechseln...
 integration-error-unable-to-find-winword = { -app-name } konnte keine laufende Word-Instanz finden.
-integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
-integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
-integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
+integration-warning-citation-changes-will-be-lost = Sie haben Änderungen an einer Zitation vorgenommen, die beim Fortfahren verloren gehen werden.
+integration-warning-bibliography-changes-will-be-lost = Sie haben Änderungen am Literaturverzeichnis vorgenommen, die beim Fortfahren verloren gehen werden.
+integration-warning-documentPreferences-changes-will-be-lost = An den Dokumenteneinstellungen vorgenommene Änderungen gehen beim Fortfahren verloren.
 integration-warning-discard-changes = Änderungen verwerfen
 integration-warning-command-is-running = A word processor integration command is already running.
+first-run-guidance-citationDialog =
+    Type a title, author, and/or year to search for a reference.
+    
+    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    
+    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

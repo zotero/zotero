@@ -107,7 +107,9 @@ reader-theme-original = Originale
 reader-theme-snow = Neve
 reader-theme-sepia = Seppia
 reader-theme-dark = Scuro
+reader-theme-black = Nero
 reader-add-theme = Aggiungi tema
+reader-theme-invert-images = Inverti colori immagine
 reader-scroll-mode = Scorrimento
 reader-spread-mode = Disposizione
 reader-flow-mode = Layout di pagina
@@ -130,7 +132,7 @@ reader-foreground = Primo piano:
 reader-reading-mode = Modalità lettura
 reader-reading-mode-not-supported = La modalità lettura non è supportata in questo documento.
 reader-clear-selection = Cancella la selezione
-reader-epub-encrypted = This ebook is encrypted and cannot be opened.
+reader-epub-encrypted = Questo ebook è criptato e non può essere aperto.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

@@ -103,7 +103,9 @@ reader-theme-original = 原始
 reader-theme-snow = 雪色
 reader-theme-sepia = 棕褐
 reader-theme-dark = 深色
+reader-theme-black = 黑色
 reader-add-theme = 新增主题
+reader-theme-invert-images = 图片反色
 reader-scroll-mode = 滚动
 reader-spread-mode = 平铺
 reader-flow-mode = 页面布局
@@ -126,7 +128,7 @@ reader-foreground = 前景色：
 reader-reading-mode = 阅读模式
 reader-reading-mode-not-supported = 此文件不支持阅读模式。
 reader-clear-selection = 清除选择
-reader-epub-encrypted = This ebook is encrypted and cannot be opened.
+reader-epub-encrypted = 此电子书已加密，无法打开。
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

@@ -112,8 +112,10 @@ preferences-sync-reset-restore-to-server-remaining-items-text =
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->
-        [one] Delete 1 item
-       *[other] Delete { $remoteItemsDeletedCount } items
+        [one] Удалить { $remoteItemsDeletedCount } элемент
+        [few] Удалить { $remoteItemsDeletedCount } элемента
+        [many] Удалить { $remoteItemsDeletedCount } элементов
+       *[other] Удалить { $remoteItemsDeletedCount } элемента
     }
 preferences-sync-reset-restore-to-server-confirmation-text = delete online library
 preferences-sync-reset-restore-to-server-yes = Перезаписать данные в сетевой библиотеке

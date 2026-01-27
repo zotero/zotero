@@ -115,3 +115,9 @@ integration-warning-bibliography-changes-will-be-lost = Du har gjort endringer i
 integration-warning-documentPreferences-changes-will-be-lost = Du har gjort endringer i innstillingene for dokumentet som vil gå tapt hvis du fortsetter.
 integration-warning-discard-changes = Forkast endringer
 integration-warning-command-is-running = En kommando for tekstbehandlingsintegrasjon kjører allerede.
+first-run-guidance-citationDialog =
+    Skriv inn en tittel, forfatter og/eller år for å søke etter en referanse.
+    
+    Når du har gjort ditt valg, klikker du på boblen eller velger den via tastaturet og trykker ↓/Mellomromstasten for å vise siteringsalternativer som sidetall, prefiks og suffiks.
+    
+    Du kan også legge til et sidetall eller en annen stedsreferanse ved å inkludere det i søkeordene dine (f.eks. «historikk { $locator }») eller ved å skrive det inn etter boblen og trykke på { return-or-enter }.

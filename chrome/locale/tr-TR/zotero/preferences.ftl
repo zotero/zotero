@@ -31,7 +31,7 @@ preferences-file-renaming-format-preview = Önizleme:
 preferences-attachment-titles-title = Attachment Titles
 preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
 preferences-attachment-titles-show-filenames =
-    .label = Show attachment filenames in the items list
+    .label = Öğe listesindeki eklenti dosya adlarını göster
 preferences-reader-title = Okuyucu
 preferences-reader-open-epubs-using = EPUB dosyalarını bunu kullanarak aç:
 preferences-reader-open-snapshots-using = Anlık görüntüleri bunu kullanarak aç:
@@ -44,7 +44,7 @@ preferences-reader-ebook-hyphenate =
     .label = Otomatik tire ile ayırmayı etkinleştir
 preferences-note-title = Notlar
 preferences-note-open-in-new-window =
-    .label = Open notes in new windows instead of tabs
+    .label = Notları sekmeler yerine yeni pencerelerde aç
 preferences-color-scheme = Renk Düzeni:
 preferences-color-scheme-auto =
     .label = Otomatik

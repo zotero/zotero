@@ -21,7 +21,7 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-edit-reference }
 integration-citationDialog = 引注对话框
 integration-citationDialog-section-open = 已打开的文档 ({ $count })
-integration-citationDialog-section-selected = 已选中 ({ $count }/{ $total }) 条目
+integration-citationDialog-section-selected = 已选中的条目 ({ $count }/{ $total })
 integration-citationDialog-section-cited =
     { $count ->
         [0] 已引用条目
@@ -115,3 +115,9 @@ integration-warning-bibliography-changes-will-be-lost = 您已修改参考文献
 integration-warning-documentPreferences-changes-will-be-lost = 您已修改文档首选项，继续将丢失这些修改。
 integration-warning-discard-changes = 放弃修改
 integration-warning-command-is-running = 文字处理器集成命令已在运行。
+first-run-guidance-citationDialog =
+    键入标题、作者和/或年份以搜索参考文献。
+    
+    完成选择后点击气泡或使用键盘选中它，然后按下↓/空格键显示引用选项，如页码、前缀和后缀等。
+    
+    您还可以通过以下两种方式添加页码或其他定位符 ① 将其与搜索词（例如："history { $locator }"）一并输入；② 在气泡框后直接输入并按 { return-or-enter }。

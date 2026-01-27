@@ -28,8 +28,8 @@ preferences-file-renaming-format-instructions-example = Zum Beispiel wird „{ $
 preferences-file-renaming-format-instructions-more = Lesen Sie die <label data-l10n-name="file-renaming-format-help-link">Hilfe</label> für mehr Informationen.
 preferences-file-renaming-format-template = Dateinamen-Vorlage:
 preferences-file-renaming-format-preview = Vorschau:
-preferences-attachment-titles-title = Attachment Titles
-preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-title = Bezeichnungen von Anhängen
+preferences-attachment-titles-intro = Die Bezeichnung von Anhängen <label data-l10n-name="wiki-link">unterscheidet sich von Dateinamen.</label> Um verschiedene Arbeitsweisen zu unterstüzen kann { -app-name } in der Eintragsliste auch die Dateinamen statt der Anhangsbezeichnung anzeigen.
 preferences-attachment-titles-show-filenames =
     .label = Dateinamen von Anhängen in der Eintragsliste anzeigen
 preferences-reader-title = Reader

@@ -115,3 +115,9 @@ integration-warning-bibliography-changes-will-be-lost = Se continui le modifiche
 integration-warning-documentPreferences-changes-will-be-lost = Se continui le modifiche effettuate alle preferenze del documento verranno perse.
 integration-warning-discard-changes = Scarta modifiche
 integration-warning-command-is-running = Un comando dell'estensione del word processor è già in esecuzione
+first-run-guidance-citationDialog =
+    Digita un titolo, un autore e/o un anno per cercare un riferimento.
+    
+    Dopo aver scelto il riferimento desiderato, clicca sulla bolla o selezionala con la tastiere quindi premi ↓/Spazio per mostrare le opzioni di citazione come il numero di pagina, prefisso e suffisso.
+    
+    È anche possibile aggiungere il numero di pagina o un altro locatore  includendolo tra i termini di ricerca (es. “storia { $locator }”) o digitandolo dopo la bolla e premendo { return-or-enter }.

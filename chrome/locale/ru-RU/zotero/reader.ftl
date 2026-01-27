@@ -49,12 +49,16 @@ reader-prompt-delete-pages-title = Удалить страницы
 reader-prompt-delete-pages-text =
     { $count ->
         [one] Вы уверены, что хотите удалить { $count } страницу из PDF-файла?
-       *[other] Вы уверены, что хотите удалить { $count } страниц из PDF-файла?
+        [few] Вы уверены, что хотите удалить { $count } страницы из PDF-файла?
+        [many] Вы уверены, что хотите удалить { $count } страниц из PDF-файла?
+       *[other] Вы уверены, что хотите удалить { $count } страницы из PDF-файла?
     }
 reader-prompt-delete-annotations-title = Удалить аннотации
 reader-prompt-delete-annotations-text =
     { $count ->
-        [one] Вы уверены, что хотите удалить выбарнную аннотацию?
+        [one] Вы уверены, что хотите удалить выбранную аннотацию?
+        [few] Вы уверены, что хотите удалить выбранные аннотации?
+        [many] Вы уверены, что хотите удалить выбранные аннотации?
        *[other] Вы уверены, что хотите удалить выбранные аннотации?
     }
 reader-rotate-left = Повернуть влево
@@ -105,7 +109,9 @@ reader-theme-original = Оригинал
 reader-theme-snow = Снежная
 reader-theme-sepia = Сепия
 reader-theme-dark = Темная
+reader-theme-black = Черный
 reader-add-theme = Добавить тему оформления
+reader-theme-invert-images = Invert Images
 reader-scroll-mode = Прокрутка
 reader-spread-mode = Spreads
 reader-flow-mode = Расположение страниц
@@ -128,7 +134,7 @@ reader-foreground = Foreground:
 reader-reading-mode = Режим чтения
 reader-reading-mode-not-supported = Режим чтения не поддерживается в этом документе.
 reader-clear-selection = Отменить выбор
-reader-epub-encrypted = Файл зашифрован и не может быть открыт.
+reader-epub-encrypted = This ebook is encrypted and cannot be opened.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }
@@ -185,7 +191,9 @@ reader-import-from-epub-no-annotations-other-file =
 reader-import-from-epub-select-other = Select Other File…
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [one] Выбрана { $count } страница
+        [few] Выбрано { $count } страницы
+        [many] Выбрано { $count } страниц
+       *[other] Выбрано { $count } страницы
     }
 reader-page-options = Page Options

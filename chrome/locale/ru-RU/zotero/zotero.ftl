@@ -73,7 +73,7 @@ general-violet = Фиолетовый
 general-maroon = Темно-бордовый
 general-gray = Серый
 general-black = Черный
-general-loading = Загрузка…
+general-loading = Загрузка...
 citation-style-label = Стиль цитирования:
 language-label = Язык:
 menu-custom-group-submenu =
@@ -130,7 +130,9 @@ menu-edit-copy-annotation =
     .label =
         { $count ->
             [one] Скопировать аннотацию
-           *[other] Copy { $count } Аннотации
+            [few] Скопировать { $count } аннотации
+            [many] Скопировать { $count } аннотаций
+           *[other] Скопировать { $count } аннотации
         }
 main-window-command =
     .label = Библиотека
@@ -276,8 +278,10 @@ import-online-connection-error = { -app-name } не смог подсоедин�
 items-table-cell-notes =
     .aria-label =
         { $count ->
-            [one] { $count } Заметка
-           *[other] { $count } Заметки
+            [one] { $count } заметка
+            [few] { $count } заметки
+            [many] { $count } заметок
+           *[other] { $count } заметки
         }
 report-error =
     .label = Сообщить об ошибке…
@@ -441,31 +445,39 @@ section-abstract =
 section-attachments =
     .label =
         { $count ->
-            [one] { $count } Вложение
-           *[other] { $count } Вложений
+            [one] { $count } вложение
+            [few] { $count } вложения
+            [many] { $count } вложений
+           *[other] { $count } вложения
         }
 section-attachment-preview =
     .label = { pane-attachment-preview }
 section-attachments-annotations =
     .label =
         { $count ->
-            [one] { $count } Аннотация
-           *[other] { $count } Аннотаций
+            [one] { $count } аннотация
+            [few] { $count } аннотации
+            [many] { $count } аннотаций
+           *[other] { $count } аннотации
         }
 section-attachments-move-to-trash-message = Вы уверены, что хотите переместить “{ $title }” в корзину?
 section-notes =
     .label =
         { $count ->
-            [one] { $count } Заметка
-           *[other] { $count } Заметок
+            [one] { $count } заметка
+            [few] { $count } заметки
+            [many] { $count } заметок
+           *[other] { $count } заметки
         }
 section-libraries-collections =
     .label = { pane-libraries-collections }
 section-tags =
     .label =
         { $count ->
-            [one] { $count } Тэг
-           *[other] { $count } Тэгов
+            [one] { $count } тег
+            [few] { $count } тега
+            [many] { $count } тегов
+           *[other] { $count } тега
         }
 section-related =
     .label = { $count } Related
@@ -483,8 +495,10 @@ section-button-collapse =
     .label = Collapse { $section } section
 annotations-count =
     { $count ->
-        [one] { $count } Аннотация
-       *[other] { $count } Аннотаций
+        [one] { $count } аннотация
+        [few] { $count } аннотации
+        [many] { $count } аннотаций
+       *[other] { $count } аннотации
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -637,35 +651,47 @@ item-pane-message-items-selected =
 item-pane-message-collections-selected =
     { $count ->
         [one] { $count } коллекция выбрана
-       *[other] { $count } коллекций выбрано
+        [few] { $count } коллекции выбрано
+        [many] { $count } коллекций выбрано
+       *[other] { $count } коллекции выбрано
     }
 item-pane-message-searches-selected =
     { $count ->
-        [one] { $count } search selected
-       *[other] { $count } searches selected
+        [one] { $count } поиск выбран
+        [few] { $count } поиска выбрано
+        [many] { $count } поисков выбрано
+       *[other] { $count } поиска выбрано
     }
 item-pane-message-objects-selected =
     { $count ->
-        [one] { $count } object selected
-       *[other] { $count } objects selected
+        [one] { $count } объект выбран
+        [few] { $count } объекта выбрано
+        [many] { $count } объектов выбрано
+       *[other] { $count } объекта выбрано
     }
 item-pane-message-unselected =
     { $count ->
-        [0] No items in this view
-        [one] { $count } item in this view
-       *[other] { $count } items in this view
+        [0] В этом представлении нет элементов
+        [one] { $count } элемент в этом представлении
+        [few] { $count } элемента в этом представлении
+        [many] { $count } элементов в этом представлении
+       *[other] { $count } элемента в этом представлении
     }
 item-pane-message-objects-unselected =
     { $count ->
-        [0] No objects in this view
-        [one] { $count } object in this view
-       *[other] { $count } objects in this view
+        [0] В этом представлении нет объектов
+        [one] { $count } объект в этом представлении
+        [few] { $count } объекта в этом представлении
+        [many] { $count } объектов в этом представлении
+       *[other] { $count } объекта в этом представлении
     }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Merge { $count } item
-           *[other] Merge { $count } items
+            [one] Объединить { $count } элемент
+            [few] Объединить { $count } элемента
+            [many] Объединить { $count } элементов
+           *[other] Объединить { $count } элемента
         }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
@@ -688,8 +714,10 @@ advanced-search-condition-input =
     .label = { $label }
 find-pdf-files-added =
     { $count ->
-        [one] { $count } file added
-       *[other] { $count } files added
+        [one] Добавлен { $count } файл
+        [few] Добавлено { $count } файла
+        [many] Добавлено { $count } файлов
+       *[other] Добавлено { $count } файла
     }
 select-items-window =
     .title = Выбрать записи
@@ -700,14 +728,18 @@ select-items-convertToStandalone =
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+            [one] Преобразовать в отдельное вложение
+            [few] Преобразовать в отдельные вложения
+            [many] Преобразовать в отдельные вложения
+           *[other] Преобразовать в отдельные вложения
         }
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Преобразовать в отдельную заметку
+            [few] Преобразовать в отдельные заметки
+            [many] Преобразовать в отдельные заметки
+           *[other] Преобразовать в отдельные заметки
         }
 file-type-webpage = Webpage
 file-type-image = Изображение

@@ -61,6 +61,6 @@ note-editor-insert-column-after = Вставить колонку справа
 note-editor-delete-row = Удалить строку
 note-editor-delete-column = Удалить колонку
 note-editor-delete-table = Удалить таблицу
-note-editor-link-popup-appeared =  Всплывающее окно ссылки появилось. Используйте Shift-Tab для навигации по нему.
+note-editor-link-popup-appeared = Всплывающее окно ссылки появилось. Используйте Shift-Tab для навигации по нему.
 note-editor-citation-popup-appeared = Всплывающее окнов цитирования появилось. Используйте Shift-Tab для навигации по нему.
 note-editor-toggle-context-pane = Переключить контекстную панель

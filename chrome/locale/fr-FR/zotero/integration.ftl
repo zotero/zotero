@@ -115,3 +115,9 @@ integration-warning-bibliography-changes-will-be-lost = Certaines des modificati
 integration-warning-documentPreferences-changes-will-be-lost = Certaines des modifications que vous avez apportées aux préférence du document seront perdues si vous continuez.
 integration-warning-discard-changes = Ignorer les modifications
 integration-warning-command-is-running = Une commande de l'intégration de traitement de texte est déjà en cours d'exécution.
+first-run-guidance-citationDialog =
+    Type a title, author, and/or year to search for a reference.
+    
+    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    
+    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

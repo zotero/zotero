@@ -115,3 +115,9 @@ integration-warning-bibliography-changes-will-be-lost = Ha realizado cambios en 
 integration-warning-documentPreferences-changes-will-be-lost = Ha realizado cambios en las preferencias del documento que se perderán si continúa.
 integration-warning-discard-changes = Descartar cambios
 integration-warning-command-is-running = Ya se está ejecutando un comando de integración del procesador de textos.
+first-run-guidance-citationDialog =
+    Escriba un título, autor o año para buscar una referencia.
+    
+    Una vez realizada la selección, haga clic en la burbuja o selecciónela con el teclado y pulse ↓/Espacio para mostrar las opciones de cita, como el número de página, el prefijo y el sufijo.
+    
+    También puede añadir un número de página u otro localizador incluyéndolo en los términos de búsqueda (p. ej., «historia { $locator }») o escribiéndolo después de la burbuja y pulsando { return-or-enter }.
