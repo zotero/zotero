@@ -127,8 +127,14 @@ async function onLoad() {
 		}
 	});
 
+	//
 	// Show guidance panel on the first run. Noop on subsequent runs.
-	let locatorString = Zotero.Cite.getLocatorString("page", "short").toLowerCase() + "10"; //e.g. "p10" localized
+	//
+	// Use localized locator string (e.g., "p10")
+	let locatorString = Zotero.Cite.getLocatorString("page", "short").toLowerCase()
+		// Strip trailing period ("p." → "p")
+		.replace(/\.$/, '')
+		+ "10";
 	doc.querySelector("guidance-panel").show({ l10nArgs: { locator: locatorString } });
 	// Hide guidance panel on any keypress
 	doc.addEventListener("keydown", () => doc.querySelector("guidance-panel").hide(), { capture: true, once: true });
