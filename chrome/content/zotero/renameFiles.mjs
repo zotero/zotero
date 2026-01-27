@@ -76,8 +76,8 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 		let shouldRename = userLibrary && library.libraryType === 'user';
 		
 		if (!shouldRename) {
-			// for group libraries, check `autoRenameFiles` synced setting
-			shouldRename = groupLibrary && Zotero.SyncedSettings.get(library.libraryID, 'autoRenameFiles');
+			// for group libraries, this checks `autoRenameFiles` synced setting
+			shouldRename = groupLibrary && Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(library.libraryID);
 		}
 
 		if (shouldRename) {
