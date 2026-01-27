@@ -909,13 +909,29 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			// On removal of a selected row, select item at previous position
 			else if (savedSelection.length) {
+				// TEMP: trashing an item emits two events: modify and trash.
+				// When not in search mode, on 'modify', we attempt to process rows manually, which does nothing.
+				// The next 'trash' event reaches here and the selection is properly handled.
+				// In search mode, however, trashing an item reruns the search and sets madeChanges=true,
+				// which brings us here on the first 'modify' event. If not handled below, it will try
+				// to restore the selection, which may select the parent of the trashed item instead of the previous/next row.
+				// To avoid losing row selection, for now, assume that a 'modify' event in search
+				// could also represent item deletion/removal.
+				let potentialDeletionInSearch = collectionTreeRow.isSearchMode() && action == 'modify';
 				if ((action == 'remove'
 						|| action == 'trash'
 						|| action == 'delete'
-						|| action == 'removeDuplicatesMaster')
+						|| action == 'removeDuplicatesMaster'
+						|| potentialDeletionInSearch)
 					&& savedSelection.some(o => this.getRowIndexByID(o.id) === false)) {
+					// TEMP: see note above. If this is a 'modify' event that could be a deletion but is not,
+					// just restore selection, the same way it would have happened outside of this conditional.
+					if (potentialDeletionInSearch && Zotero.Items.get(ids).every(item => !item.deleted)) {
+						await this._restoreSelection(savedSelection);
+						reselect = true;
+					}
 					// In duplicates view, select the next set on delete
-					if (collectionTreeRow.isDuplicates()) {
+					else if (collectionTreeRow.isDuplicates()) {
 						if (this._rows[previousFirstSelectedRow]) {
 							var itemID = this._rows[previousFirstSelectedRow].ref.id;
 							var setItemIDs = collectionTreeRow.ref.getSetItemsByItemID(itemID);
@@ -3921,7 +3937,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 						if (expandCollapsedParents) {
 							await this._closeContainer(this._rowMap[parent]);
 							await this.toggleOpenState(this._rowMap[parent]);
-							toggleSelect(selection[i].treeViewID);
+							// Re-select original row if it exists
+							if (this._rowMap[selection[i].treeViewID] != null) {
+								toggleSelect(selection[i].treeViewID);
+							}
+							// If it does not (e.g. child item moved to trash), select the parent
+							else {
+								toggleSelect(parent);
+							}
 						}
 						else {
 							!this.selection.isSelected(this._rowMap[parent]) &&
