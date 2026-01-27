@@ -1816,15 +1816,10 @@ var ZoteroPane = new function () {
 		// Rename tab
 		Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
 		
-		let type = Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType;
-		
-		// Clear quick search and tag selector when switching views
-		document.getElementById('zotero-tb-search-textbox').value = "";
 		if (ZoteroPane.tagSelector) {
 			ZoteroPane.tagSelector.clearTagSelection();
 		}
 		
-		collectionTreeRow.setSearch('');
 		if (ZoteroPane.tagSelector) {
 			collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
 		}
@@ -1852,7 +1847,20 @@ var ZoteroPane = new function () {
 			}
 		}
 		
-		this.itemsView.changeCollectionTreeRow(collectionTreeRow);
+		let hasSearch = document.getElementById('zotero-tb-search-textbox').value;
+		if (Zotero.Prefs.get("search.quicksearch-apply-to-all") && hasSearch) {
+			// If there is an active search, change collection tree row without refreshing.
+			// Then rerun the search in the new collection which will refresh the itemTree.
+			this.itemsView.changeCollectionTreeRow(collectionTreeRow, true);
+			this.search();
+		}
+		else {
+			// If there is no search persisting across collections, clear the quickSearch
+			// and change collectionRow with refresh.
+			document.getElementById('zotero-tb-search-textbox').value = "";
+			collectionTreeRow.setSearch('');
+			this.itemsView.changeCollectionTreeRow(collectionTreeRow);
+		}
 		
 		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 	});

@@ -155,7 +155,15 @@ var onCollectionSelected = async function () {
 		await library.waitForDataLoad('item');
 	}
 	
-	await itemsView.changeCollectionTreeRow(collectionTreeRow);
+	let searchValue = document.getElementById('zotero-tb-search-textbox').value;
+	await itemsView.changeCollectionTreeRow(collectionTreeRow, true);
+	if (Zotero.Prefs.get("search.quicksearch-apply-to-all") && searchValue) {
+		itemsView.setFilter('search', searchValue);
+	}
+	else {
+		document.getElementById('zotero-tb-search-textbox').value = "";
+		itemsView.setFilter('search', "");
+	}
 	
 	itemsView.clearItemsPaneMessage();
 };
