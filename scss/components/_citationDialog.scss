@@ -510,7 +510,8 @@
 				position: relative; // anchor separators
 				box-sizing: border-box;
 
-				width: 56px;
+				min-width: 56px;
+				padding-inline: 5px;
 				height: 26px; // match 28px height of all other buttons minus 2 px for container border
 				border-radius: 5px;
 
