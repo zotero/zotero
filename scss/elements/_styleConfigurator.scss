@@ -71,6 +71,7 @@ style-configurator {
 	.display-as-wrapper {
 		display: flex;
 		flex-direction: row;
+		align-items: center;
 		gap: var(--style-configurator-display-as-wrapper-gap, 8px);
 
 		radiogroup {
