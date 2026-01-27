@@ -642,6 +642,21 @@ describe("ZoteroPane", function () {
 			var bookSectionItem = await zp.duplicateAndConvertSelectedItem();
 			assert.isEmpty(bookSectionItem.getField('abstractNote'));
 		});
+		
+		it("should not copy DOIs", async function () {
+			await selectLibrary(win);
+			var bookItem = await createDataObject('item', { itemType: 'book', title: "Book Title" });
+			bookItem.setField('DOI', '10.1515/9783111453750');
+			bookItem.saveTx();
+
+			var bookSectionItem = await zp.duplicateAndConvertSelectedItem();
+			assert.isEmpty(bookSectionItem.getField('DOI'));
+			
+			bookSectionItem.setField('DOI', '10.1515/9783111453750-003');
+			await bookSectionItem.saveTx();
+			bookItem = await zp.duplicateAndConvertSelectedItem();
+			assert.isEmpty(bookItem.getField('DOI'));
+		});
 	});
 	
 	

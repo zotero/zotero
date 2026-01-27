@@ -2195,6 +2195,7 @@ var ZoteroPane = new function () {
 		}
 		
 		duplicate.setField('abstractNote', '');
+		duplicate.setField('DOI', '');
 
 		duplicate.addRelatedItem(original);
 		original.addRelatedItem(duplicate);
