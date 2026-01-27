@@ -1725,7 +1725,7 @@ describe("Item pane", function () {
 
 		it("should discard attachment pane preview after becoming invisible", async function () {
 			// TEMP: https://github.com/zotero/zotero/issues/5624
-			if (Zotero.isAutomatedTest) {
+			if (Zotero.automatedTest) {
 				this.skip();
 				return;
 			}
