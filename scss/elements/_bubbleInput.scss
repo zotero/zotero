@@ -74,6 +74,8 @@ bubble-input {
 		position: relative;
 		cursor: pointer;
 		background-color: var(--fill-quinary);
+		// don't let the bubble with a very long locator stretch bubble-input
+		overflow-x: hidden;
 		
 		&:hover:not(.showingDetails) {
 			background-color: var(--fill-quarternary);

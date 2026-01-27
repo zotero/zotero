@@ -337,6 +337,94 @@ describe("Citation Dialog", function () {
 			];
 			assert.deepEqual(io.citation.citationItems, expected);
 		});
+
+		it("should add a locator to a just added bubble", async function () {
+			let itemOne = await createDataObject('item');
+			await IOManager.addItemsToCitation([itemOne]);
+
+			let itemTwo = await createDataObject('item');
+			await IOManager.addItemsToCitation([itemTwo], { index: 0 });
+
+			// Make sure item two is marked as just-added
+			assert.sameMembers([CitationDataManager.items[0].dialogReferenceID], IOManager._justAddedBubbles.map(b => b.dialogReferenceID));
+
+			// Type a locator and press Enter
+			let currentInput = dialog.document.getElementById("bubble-input").getCurrentInput();
+			currentInput.value = "p. 10-15";
+			currentInput.dispatchEvent(new KeyboardEvent('keydown', { key: "Enter", bubbles: true }));
+
+			// Locator added to just-added itemTwo (at the start)
+			assert.equal(CitationDataManager.items[0].locator, "10-15");
+			assert.equal(CitationDataManager.items[0].label, "page");
+
+			// Locator not added to the item right before the input
+			assert.notOk(CitationDataManager.items[1].locator);
+			assert.notOk(CitationDataManager.items[1].label);
+		});
+
+		it("should add a locator to a bubble before the input", async function () {
+			let itemOne = await createDataObject('item');
+			let itemTwo = await createDataObject('item');
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+
+			// Both items should be counted as just-added
+			assert.sameMembers(CitationDataManager.items.map(i => i.dialogReferenceID), IOManager._justAddedBubbles.map(b => b.dialogReferenceID));
+
+			// Clear just-added bubbles, as if the user did it themselves
+			IOManager._clearJustAddedBubbles();
+
+			// Type a locator and press Enter
+			let currentInput = dialog.document.getElementById("bubble-input").getCurrentInput();
+			currentInput.value = "p. 10-15";
+			currentInput.dispatchEvent(new KeyboardEvent('keydown', { key: "Enter", bubbles: true }));
+
+			// Locator added to the last bubble (to the left of the input)
+			assert.equal(CitationDataManager.items[1].locator, "10-15");
+			assert.equal(CitationDataManager.items[1].label, "page");
+
+			// Locator not added to the first item
+			assert.notOk(CitationDataManager.items[0].locator);
+			assert.notOk(CitationDataManager.items[0].label);
+		});
+
+		it("should count numeric value as a locator only after a bubble is added", async function () {
+			let itemOne = await createDataObject('item');
+			let itemTwo = await createDataObject('item', { title: "60" });
+			await IOManager.addItemsToCitation([itemOne]);
+
+			// Type a locator and make sure it didn't trigger search
+			let currentInput = dialog.document.getElementById("bubble-input").getCurrentInput();
+			currentInput.value = "15-30";
+			currentInput.dispatchEvent(new Event('input', { bubbles: true }));
+			assert.equal(SearchHandler.searchValue, "");
+
+			// Wait for the locator to be added after debounce
+			await Zotero.Promise.delay(dialog.NUMERIC_LOCATOR_TIMEOUT);
+
+			// Make sure it is added as a locator (without pressing Enter);
+			assert.equal(currentInput.value, "");
+			assert.equal(CitationDataManager.items[0].locator, "15-30");
+			assert.equal(CitationDataManager.items[0].label, "page");
+
+			// Clear just-added bubbles and repeat
+			IOManager._clearJustAddedBubbles();
+
+			// Now, numeric entry should be part of the query
+			currentInput = dialog.document.getElementById("bubble-input").getCurrentInput();
+			currentInput.value = "60";
+			currentInput.dispatchEvent(new Event('input', { bubbles: true }));
+			assert.equal(SearchHandler.searchValue, "60");
+			// Wait for search to finish
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+			// An new item matching the query should be added to citation on Enter
+			currentInput.dispatchEvent(new KeyboardEvent('keydown', { key: "Enter", bubbles: true }));
+			assert.equal(CitationDataManager.items[1].id, itemTwo.id);
+			
+			// Cleanup
+			SearchHandler.searchValue = "";
+		});
 	});
 
 	describe("UI", function () {
@@ -636,6 +724,16 @@ describe("Citation Dialog", function () {
 				locator = dialog.Helpers.extractLocator('history of the US page 10-15 some more text');
 				assert.isNull(locator);
 			});
+
+			it("is an invalid special page locator with a colon in the middle", function () {
+				locator = dialog.Helpers.extractLocator('history of the US: 10 something else');
+				assert.isNull(locator);
+			});
+
+			it("is an invalid special page locator with a colon and non-numeric value", function () {
+				locator = dialog.Helpers.extractLocator('history of the US:"not a locator"');
+				assert.isNull(locator);
+			});
 		});
 
 		describe("Valid locator labels", function () {
@@ -717,6 +815,32 @@ describe("Citation Dialog", function () {
 					assert.equal(locator.fullLocatorString, locatorObj.locatorStr);
 				}
 			});
+
+			it("is a valid special page locator with a colon and a query before it", function () {
+				let locator = dialog.Helpers.extractLocator('history of the US: 10-15');
+				assert.isOk(locator);
+				assert.equal(locator.label, 'page');
+				assert.equal(locator.locator, '10-15');
+				assert.equal(locator.onlyLocator, false);
+				assert.equal(locator.fullLocatorString, ': 10-15');
+			});
+
+			it("is a valid special page locator with a colon and no query before it", function () {
+				let locator = dialog.Helpers.extractLocator(':10');
+				assert.isOk(locator);
+				assert.equal(locator.label, 'page');
+				assert.equal(locator.locator, '10');
+				assert.equal(locator.onlyLocator, true);
+				assert.equal(locator.fullLocatorString, ':10');
+			});
+		});
+	});
+
+	describe("SearchHandler.cleanSearchQuery", function () {
+		it("should not override numeric locator in the end of the string", function () {
+			let query = 'US history p10-15';
+			let cleanedQuery = dialog.SearchHandler.cleanSearchQuery(query);
+			assert.equal(cleanedQuery, query);
 		});
 	});
 });
