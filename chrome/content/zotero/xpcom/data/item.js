@@ -5862,7 +5862,7 @@ Zotero.Item.prototype.migrateExtraFields = function () {
 Zotero.Item.prototype.getLinkedItem = async function (libraryID, bidirectional) {
 	var item = await this._getLinkedObject(libraryID, bidirectional);
 	if (item) {
-		await item.loadAllData();
+		await Zotero.Items.loadDataTypes([item]);
 	}
 	return item;
 };
