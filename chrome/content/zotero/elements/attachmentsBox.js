@@ -214,6 +214,9 @@
 						}
 					}
 				}
+				else {
+					this.previewElem.keepAlive();
+				}
 				return;
 			}
 			this._renderStage = "final";
