@@ -2640,16 +2640,29 @@ Zotero.Attachments = new function () {
 		return ext;
 	};
 	
+	this.isAutoRenameFilesEnabledForLibrary = function (libraryID) {
+		// For user library, check preference
+		if (libraryID === Zotero.Libraries.userLibraryID) {
+			return Zotero.Prefs.get('autoRenameFiles');
+		}
+		// For other libraries, check synced setting
+		const syncedSettingValue = Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles');
+		
+		// To preserve automatic file renaming ON by default in 8.0, where it is controlled by a synced setting, return true if the synced setting is unset
+		if (syncedSettingValue === null) {
+			return true;
+		}
+		
+		return syncedSettingValue;
+	};
+	
 	this.shouldAutoRenameFile = function (isLink, libraryID = null) {
 		if (libraryID === null) {
 			Zotero.debug('Calling Zotero.Attachments.shouldAutoRenameFile without a libraryID is deprecated. Assuming user library.');
 			libraryID = Zotero.Libraries.userLibraryID;
 		}
-		if (libraryID === Zotero.Libraries.userLibraryID && !Zotero.Prefs.get('autoRenameFiles')) {
-			return false;
-		}
-
-		if (libraryID !== Zotero.Libraries.userLibraryID && !Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles')) {
+		
+		if (!this.isAutoRenameFilesEnabledForLibrary(libraryID)) {
 			return false;
 		}
 
