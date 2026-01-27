@@ -84,6 +84,7 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 		 * @param {Object} [options]
 		 * @param {String} [options.text] Text to use in place of firstRunGuidance.<about>
 		 * @param {DOMElement} [options.forEl] Anchor node
+		 * @param {Object} [options.l10nArgs] Localization arguments for text in the panel
 		 * @param {Boolean} [options.force] Show even if already shown
 		 */
 		async show(options) {
@@ -121,7 +122,7 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 			
 			if (!useLastText) {
 				if (!text) {
-					text = await document.l10n.formatValue("first-run-guidance-" + about);
+					text = await document.l10n.formatValue("first-run-guidance-" + about, options.l10nArgs || {});
 				}
 				text = text.split("\n");
 				var descriptionNode = document.querySelector('.panel-text');

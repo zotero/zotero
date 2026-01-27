@@ -128,7 +128,8 @@ async function onLoad() {
 	});
 
 	// Show guidance panel on the first run. Noop on subsequent runs.
-	doc.querySelector("guidance-panel").show();
+	let locatorString = Zotero.Cite.getLocatorString("page", "short").toLowerCase() + "10"; //e.g. "p10" localized
+	doc.querySelector("guidance-panel").show({ l10nArgs: { locator: locatorString } });
 	// Hide guidance panel on any keypress
 	doc.addEventListener("keydown", () => doc.querySelector("guidance-panel").hide(), { capture: true, once: true });
 
