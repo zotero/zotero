@@ -4014,7 +4014,7 @@ Zotero.Item.prototype._getDefaultTitleForAttachmentContentType = function () {
 };
 
 
-Zotero.Item.prototype.setAutoAttachmentTitle = function ({ ignoreAutoRenamePrefs, forceFirstOfType } = {}) {
+Zotero.Item.prototype.setAutoAttachmentTitle = function ({ forceFirstOfType } = {}) {
 	if (!this.isAttachment()) {
 		throw new Error("setAutoAttachmentTitle() can only be called on attachment items");
 	}
@@ -4030,8 +4030,7 @@ Zotero.Item.prototype.setAutoAttachmentTitle = function ({ ignoreAutoRenamePrefs
 				.every(item => item === this)
 		)
 		: forceFirstOfType;
-	let isBeingRenamed = ignoreAutoRenamePrefs || Zotero.Attachments.shouldAutoRenameAttachment(this);
-	if (isFirstOfType && isBeingRenamed) {
+	if (isFirstOfType) {
 		let defaultTitle = this._getDefaultTitleForAttachmentContentType();
 		if (defaultTitle !== null) {
 			this.setField('title', defaultTitle);

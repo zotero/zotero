@@ -108,7 +108,7 @@ describe("Document Recognition", function () {
 			assert.lengthOf(addedIDs, 2);
 			var item = Zotero.Items.get(addedIDs[0]);
 			assert.equal(item.getField("title"), "Scaling study of an improved fermion action on quenched lattices");
-			assert.lengthOf(modifiedIDs, 1);
+			assert.lengthOf(modifiedIDs, 2);
 			
 			await waitForProgressWindow();
 
@@ -139,7 +139,7 @@ describe("Document Recognition", function () {
 			// Item and note
 			assert.lengthOf(addedIDs, 2);
 			var item = Zotero.Items.get(addedIDs[0]);
-			assert.lengthOf(modifiedIDs, 1);
+			assert.lengthOf(modifiedIDs, 2);
 			
 			await waitForProgressWindow();
 			
@@ -167,7 +167,7 @@ describe("Document Recognition", function () {
 			// Item and note
 			assert.lengthOf(addedIDs, 2);
 			var item = Zotero.Items.get(addedIDs[0]);
-			assert.lengthOf(modifiedIDs, 1);
+			assert.lengthOf(modifiedIDs, 2);
 			
 			await waitForProgressWindow();
 			
