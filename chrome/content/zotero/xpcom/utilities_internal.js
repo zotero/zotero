@@ -3402,9 +3402,12 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 	}
 
 	// If all items are annotations, wrap them in a note object for translation
+	// And set zotero/annotation data, which is used by note-editor to add a citation
 	if (items.every(item => item.isAnnotation())) {
+		let jsonAnnotations = items.map(item => Zotero.Annotations.toJSONSync(item, true));
+		event.dataTransfer.setData('zotero/annotation', JSON.stringify(jsonAnnotations));
 		format = Zotero.QuickCopy.getNoteFormat();
-		items = [Zotero.QuickCopy.annotationsToNote(items)];
+		items = [Zotero.QuickCopy.annotationsToNote(jsonAnnotations)];
 	}
 
 	Zotero.debug("Dragging with format " + format);
