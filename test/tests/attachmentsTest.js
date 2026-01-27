@@ -103,7 +103,7 @@ describe("Zotero.Attachments", function () {
 			await attachment.eraseTx();
 		});
 
-		it("should set a child item's title to the filename, minus its extension", async function () {
+		it("should set a child item's title based on its type", async function () {
 			let file = getTestDataDirectory();
 			file.append('test.pdf');
 			let parent = await createDataObject('item');
@@ -144,7 +144,7 @@ describe("Zotero.Attachments", function () {
 			await attachment.eraseTx();
 		});
 
-		it("should set a child item's title to the filename, minus its extension", async function () {
+		it("should set a child item's title based on its type", async function () {
 			let file = getTestDataDirectory();
 			file.append('test.pdf');
 			let parent = await createDataObject('item');
@@ -152,7 +152,7 @@ describe("Zotero.Attachments", function () {
 				file: file,
 				parentItemID: parent.id,
 			});
-			assert.equal(attachment.getField('title'), 'test');
+			assert.equal(attachment.getField('title'), Zotero.getString('file-type-pdf'));
 			await parent.eraseTx();
 		});
 	})
@@ -2309,17 +2309,15 @@ describe("Zotero.Attachments", function () {
 
 			var attachment = await importFileAttachment('test.png', {
 				parentItemID: item.id,
-				// Use default setAutoAttachmentTitle() behavior -- the file isn't going to be
-				// renamed because autoRenameFiles.fileTypes doesn't match image/, so the title
-				// becomes the filename minus extension, i.e., "test"
-				title: null
+				// Pretend this was, e.g., a secondary attachment before, and it got titled
+				// after the file basename
+				title: 'test'
 			});
 			assert.equal(attachment.getField('title'), 'test');
 			await renameFileFromParent(attachment);
 			assert.equal(attachment.attachmentFilename, 'Title.png');
 			// After a manual rename, the title becomes the default for this type
 			assert.equal(attachment.getField('title'), Zotero.getString('file-type-image'));
-			
 		});
 
 		it("should change attachment title if file basename matches the title", async function () {

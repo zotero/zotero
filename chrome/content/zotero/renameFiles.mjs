@@ -146,7 +146,7 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 				// update the title if it matches the old filename
 				const newTitleLC = attachmentItem.getField('title').toLowerCase();
 				if (newTitleLC === oldBaseName.toLowerCase() || newTitleLC === oldFileName.toLowerCase()) {
-					attachmentItem.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
+					attachmentItem.setAutoAttachmentTitle();
 				}
 
 				await attachmentItem.saveTx();
@@ -196,7 +196,7 @@ export async function renameFileFromParent(attachmentItem) {
 	
 	const newTitleLC = attachmentItem.getField('title').toLowerCase();
 	if (newTitleLC === oldBaseName.toLowerCase() || newTitleLC === oldName.toLowerCase()) {
-		attachmentItem.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
+		attachmentItem.setAutoAttachmentTitle();
 		requiresSave = true;
 	}
 

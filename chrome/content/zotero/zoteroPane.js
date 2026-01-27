@@ -5783,7 +5783,7 @@ var ZoteroPane = new function () {
 				if (result !== true) {
 					throw new Error('Error renaming ' + path);
 				}
-				item.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
+				item.setAutoAttachmentTitle();
 				await item.saveTx();
 			}
 		}

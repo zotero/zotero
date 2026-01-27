@@ -305,7 +305,7 @@ Zotero.RecognizeDocument = new function () {
 			if (result !== true) {
 				throw new Error("Error renaming " + path);
 			}
-			attachment.setAutoAttachmentTitle({ ignoreAutoRenamePrefs: true });
+			attachment.setAutoAttachmentTitle();
 			await attachment.saveTx();
 		}
 
