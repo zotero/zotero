@@ -887,6 +887,12 @@ describe("Zotero.CollectionTree", function () {
 				}
 				
 				it("should add an item to My Publications", async function () {
+					// TEMP: Disabled due to spurious errors
+					// https://github.com/zotero/zotero/issues/5749
+					if (Zotero.isAutomatedTest) {
+						this.skip();
+						return;
+					}
 					// Remove other items in My Publications
 					var s = new Zotero.Search();
 					s.addCondition('libraryID', 'is', Zotero.Libraries.userLibraryID);
