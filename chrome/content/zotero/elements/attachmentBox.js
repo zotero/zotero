@@ -340,6 +340,9 @@
 					this._previewDiscarded = false;
 					this.previewElem.render();
 				}
+				else {
+					this.previewElem.keepAlive();
+				}
 				return;
 			}
 

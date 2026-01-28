@@ -346,6 +346,19 @@
 		}
 
 		/**
+		 * Update the last task UID to keep the preview alive. This prevents deferred discard when
+		 * the preview is still in use. Useful when the preview moves out of view but later enters
+		 * the view again before the discard timeout.
+		 */
+		async keepAlive() {
+			if (!this._lastTaskUID || this._isProcessingTask) {
+				return;
+			}
+			let newUID = `${Date.now()}-${Math.random()}`;
+			this._lastTaskUID = newUID;
+		}
+
+		/**
 		 * Clear all pending tasks and reset processing states.
 		 */
 		_clearPendingTasks() {
