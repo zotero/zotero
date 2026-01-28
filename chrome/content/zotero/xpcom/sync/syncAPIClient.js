@@ -552,20 +552,30 @@ Zotero.Sync.APIClient.prototype = {
 	async getReadAloudVoices() {
 		let uri = this.baseURL + "tts/voices";
 		let noAPIKey = !this.apiKey;
-		let xmlhttp = await this.makeRequest("GET", uri, {
-			responseType: "json",
-			noAPIKey,
-		});
-		
-		let creditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
-		if (isNaN(creditsRemaining)) {
-			creditsRemaining = null;
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "json",
+				noAPIKey,
+			});
+
+			let creditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
+			if (isNaN(creditsRemaining)) {
+				creditsRemaining = null;
+			}
+
+			return {
+				voices: xmlhttp.response ?? [],
+				creditsRemaining,
+			};
 		}
-		
-		return {
-			voices: xmlhttp.response,
-			creditsRemaining,
-		};
+		catch (e) {
+			Zotero.logError(e);
+			
+			return {
+				voices: [],
+				creditsRemaining: null,
+			};
+		}
 	},
 
 
@@ -592,9 +602,16 @@ Zotero.Sync.APIClient.prototype = {
 			};
 		}
 		catch (e) {
-			let creditsRemaining = parseInt(e.xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
-			if (isNaN(creditsRemaining)) {
-				creditsRemaining = null;
+			Zotero.logError(e);
+			
+			let creditsRemaining = null;
+			try {
+				creditsRemaining = parseInt(e.xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
+				if (isNaN(creditsRemaining)) {
+					creditsRemaining = null;
+				}
+			}
+			catch {
 			}
 
 			let error;
