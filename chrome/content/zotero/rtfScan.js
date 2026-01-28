@@ -1,80 +1,13 @@
-import React from 'react';
+import React from 'react'; // eslint-disable-line no-unused-vars
 import ReactDOM from 'react-dom';
-
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
-import VirtualizedTable from 'components/virtualized-table';
-import { getCSSIcon } from 'components/icons';
+
+import VirtualizedTable from 'zotero/components/virtualized-table';
+import { getCSSIcon } from 'zotero/components/icons';
+import { removeKeys } from 'zotero/modules/immutable';
+import { decodeRTF, encodeRTF, parseCitations, processCitations, replaceCitations, UNMAPPED, AMBIGUOUS, MAPPED } from 'zotero/modules/rtf.mjs';
 
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/styleConfigurator.js', this);
-
-function _generateItem(citationString, itemName, action) {
-	return {
-		rtf: citationString,
-		item: itemName,
-		action
-	};
-}
-
-function _matchesItemCreators(creators, item, etAl) {
-	var itemCreators = item.getCreators();
-	var primaryCreators = [];
-	var primaryCreatorTypeID = Zotero.CreatorTypes.getPrimaryIDForType(item.itemTypeID);
-
-	// use only primary creators if primary creators exist
-	for (let i = 0; i < itemCreators.length; i++) {
-		if (itemCreators[i].creatorTypeID == primaryCreatorTypeID) {
-			primaryCreators.push(itemCreators[i]);
-		}
-	}
-	// if primaryCreators matches the creator list length, or if et al is being used, use only
-	// primary creators
-	if (primaryCreators.length == creators.length || etAl) itemCreators = primaryCreators;
-
-	// for us to have an exact match, either the citation creator list length has to match the
-	// item creator list length, or et al has to be used
-	if (itemCreators.length == creators.length || (etAl && itemCreators.length > creators.length)) {
-		var matched = true;
-		for (let i = 0; i < creators.length; i++) {
-			// check each item creator to see if it matches
-			matched = matched && _matchesItemCreator(creators[i], itemCreators[i]);
-			if (!matched) break;
-		}
-		return matched;
-	}
-
-	return false;
-}
-
-function _matchesItemCreator(creator, itemCreator) {
-	// make sure last name matches
-	var lowerLast = itemCreator.lastName.toLowerCase();
-	if (lowerLast != creator.substr(-lowerLast.length).toLowerCase()) return false;
-
-	// make sure first name matches, if it exists
-	if (creator.length > lowerLast.length) {
-		var firstName = Zotero.Utilities.trim(creator.substr(0, creator.length - lowerLast.length));
-		if (firstName.length) {
-			// check to see whether the first name is all initials
-			const initialRe = /^(?:[A-Z]\.? ?)+$/;
-			var m = initialRe.exec(firstName);
-			if (m) {
-				var initials = firstName.replace(/[^A-Z]/g, "");
-				var itemInitials = itemCreator.firstName.split(/ +/g)
-					.map(name => name[0].toUpperCase())
-					.join("");
-				if (initials != itemInitials) return false;
-			}
-			else {
-				// not all initials; verify that the first name matches
-				var firstWord = firstName.substr(0, itemCreator.firstName).toLowerCase();
-				var itemFirstWord = itemCreator.firstName.substr(0, itemCreator.firstName.indexOf(" ")).toLowerCase();
-				if (firstWord != itemFirstWord) return false;
-			}
-		}
-	}
-
-	return true;
-}
 
 
 const columns = [
@@ -82,8 +15,6 @@ const columns = [
 	{ dataKey: 'item', label: "zotero.rtfScan.itemName.label", flex: 5 },
 	{ dataKey: 'action', label: "", fixedWidth: true, width: "32px" },
 ];
-
-const BIBLIOGRAPHY_PLACEHOLDER = "\\{Bibliography\\}";
 
 const initialRows = [
 	{ id: 'unmapped', rtf: Zotero.Intl.strings['zotero.rtfScan.unmappedCitations.label'], collapsed: false },
@@ -116,6 +47,7 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 
 
 	async init() {
+		this.citationItemIDs = {};
 		this.wizard = document.getElementById('rtfscan-wizard');
 		
 		this.wizard.getPageById('page-start')
@@ -380,259 +312,53 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 		this.tree.invalidate();
 		this.refreshCanAdvanceIfCitationsReady();
 	},
-
+	
 	async scanRTF() {
-		// set up globals
-		this.citations = [];
-		this.citationItemIDs = {};
-
 		let unmappedRow = this.rows[this.rowMap.unmapped];
 		let ambiguousRow = this.rows[this.rowMap.ambiguous];
 		let mappedRow = this.rows[this.rowMap.mapped];
 
-		// set up regular expressions
-		// this assumes that names are >=2 chars or only capital initials and that there are no
-		// more than 4 names
-		const nameRe = "(?:[^ .,;]{2,} |[A-Z].? ?){0,3}[A-Z][^ .,;]+";
-		const creatorRe = '((?:(?:' + nameRe + ', )*' + nameRe + '(?:,? and|,? \\&|,) )?' + nameRe + ')(,? et al\\.?)?';
-		// TODO: localize "and" term
-		const creatorSplitRe = /(?:,| *(?:and|&)) +/g;
-		var citationRe = new RegExp('(\\\\\\{|; )(' + creatorRe + ',? (?:"([^"]+)(?:,"|",) )?([0-9]{4})[a-z]?)(?:,(?: pp?.?)? ([^ )]+))?(?=;|\\\\\\})|(([A-Z][^ .,;]+)(,? et al\\.?)? (\\\\\\{([0-9]{4})[a-z]?\\\\\\}))', "gm");
-
-		// read through RTF file and display items as they're found
-		// we could read the file in chunks, but unless people start having memory issues, it's
-		// probably faster and definitely simpler if we don't
-		this.contents = Zotero.File.getContents(this.inputFile)
-			.replace(/([^\\\r])\r?\n/, "$1 ")
-			.replace("\\'92", "'", "g")
-			.replace("\\rquote ", "’");
-		var m;
-		var lastCitation = false;
-		while ((m = citationRe.exec(this.contents))) {
-			// determine whether suppressed or standard regular expression was used
-			if (m[2]) {	// standard parenthetical
-				var citationString = m[2];
-				var creators = m[3];
-				// var etAl = !!m[4];
-				var title = m[5];
-				var date = m[6];
-				var pages = m[7];
-				var start = citationRe.lastIndex - m[0].length;
-				var end = citationRe.lastIndex + 2;
-			}
-			else {	// suppressed
-				citationString = m[8];
-				creators = m[9];
-				// etAl = !!m[10];
-				title = false;
-				date = m[12];
-				pages = false;
-				start = citationRe.lastIndex - m[11].length;
-				end = citationRe.lastIndex;
-			}
-			citationString = citationString.replace("\\{", "{", "g").replace("\\}", "}", "g");
-			var suppressAuthor = !m[2];
-
-			if (lastCitation && lastCitation.end >= start) {
-				// if this citation is just an extension of the last, add items to it
-				lastCitation.citationStrings.push(citationString);
-				lastCitation.pages.push(pages);
-				lastCitation.end = end;
-			}
-			else {
-				// otherwise, add another citation
-				lastCitation = {
-					citationStrings: [citationString], pages: [pages],
-					start, end, suppressAuthor
-				};
-				this.citations.push(lastCitation);
-			}
-
-			// only add each citation once
-			if (this.citationItemIDs[citationString]) continue;
-			Zotero.debug("Found citation " + citationString);
-
-			// for each individual match, look for an item in the database
-			var s = new Zotero.Search;
-			creators = creators.replace(".", "");
-			// TODO: localize "et al." term
-			creators = creators.split(creatorSplitRe);
-
-			for (let i = 0; i < creators.length; i++) {
-				if (!creators[i]) {
-					if (i == creators.length - 1) {
-						break;
-					}
-					else {
-						creators.splice(i, 1);
-					}
-				}
-
-				var spaceIndex = creators[i].lastIndexOf(" ");
-				var lastName = spaceIndex == -1 ? creators[i] : creators[i].substr(spaceIndex + 1);
-				s.addCondition("lastName", "contains", lastName);
-			}
-			if (title) s.addCondition("title", "contains", title);
-			s.addCondition("date", "is", date);
-			var ids = await s.search(); // eslint-disable-line no-await-in-loop
-			Zotero.debug("Mapped to " + ids);
-			this.citationItemIDs[citationString] = ids;
-
-			if (!ids.length) {	// no mapping found
-				let row = _generateItem(citationString, "");
-				row.parent = unmappedRow;
-				this.insertRows(row, this.rowMap.ambiguous);
-			}
-			else {	// some mapping found
-				var items = await Zotero.Items.getAsync(ids); // eslint-disable-line no-await-in-loop
-				if (items.length > 1) {
-					// check to see how well the author list matches the citation
-					var matchedItems = [];
-					for (let item of items) {
-						await item.loadAllData(); // eslint-disable-line no-await-in-loop
-						if (_matchesItemCreators(creators, item)) matchedItems.push(item);
-					}
-
-					if (matchedItems.length != 0) items = matchedItems;
-				}
-
-				if (items.length == 1) {	// only one mapping
-					await items[0].loadAllData(); // eslint-disable-line no-await-in-loop
-					let row = _generateItem(citationString, items[0].getField("title"));
-					row.parent = mappedRow;
-					this.insertRows(row, this.rows.length);
-					this.citationItemIDs[citationString] = [items[0].id];
-				}
-				else {				// ambiguous mapping
-					let row = _generateItem(citationString, "");
-					row.parent = ambiguousRow;
+		this.contents = decodeRTF(await Zotero.File.getContentsAsync(this.inputFile));
+		this.citations = parseCitations(this.contents);
+		let mappings = await processCitations(this.citations);
+		for (let mapping of mappings) {
+			const mappingType = mapping.type;
+			let items = mapping.items;
+			let row = removeKeys(mapping, ['type', 'items']);
+			removeKeys(mapping, ['type', 'items']);
+			
+			switch (mappingType) {
+				default:
+				case UNMAPPED:
+					// create a new "unmapped" row and add it just before the "ambiguous" row (which means it appears as the last "unmapped" row, regardless of how many there already are
+					this.insertRows({ ...row, item: '', parent: unmappedRow }, this.rowMap.ambiguous);
+					this.citationItemIDs[row.rtf] = [];
+					break;
+				case AMBIGUOUS:
+					// create a new "ambiguous" row and position it just before the "mapped" row.
+					row = { ...row, parent: ambiguousRow };
 					this.insertRows(row, this.rowMap.mapped);
-
-					// generate child items
-					let children = [];
-					for (let item of items) {
-						let childRow = _generateItem("", item.getField("title"), true);
-						childRow.parent = row;
-						children.push(childRow);
-					}
-					this.insertRows(children, this.rowMap[row.id] + 1);
-				}
+					this.insertRows(
+						items.map(item => ({ rtf: '', item: item.getField('title'), parent: row })),
+						this.rowMap[row.id] + 1
+					);
+					this.citationItemIDs[row.rtf] = items.map(item => item.id);
+					break;
+				case MAPPED:
+					this.insertRows({ ...row, item: items[0].getField('title'), parent: mappedRow }, this.rows.length);
+					this.citationItemIDs[row.rtf] = [items[0].id];
+					break;
 			}
 		}
 	},
-
-	formatRTF() {
-		// load style and create ItemSet with all items
-		var zStyle = Zotero.Styles.get(this.styleConfig.style);
-		var cslEngine = zStyle.getCiteProc(this.styleConfig.locale, 'rtf');
-		var isNote = zStyle.class == "note";
-
-		// create citations
-		// var k = 0;
-		var cslCitations = [];
-		var itemIDs = {};
-		// var shouldBeSubsequent = {};
-		for (let i = 0; i < this.citations.length; i++) {
-			let citation = this.citations[i];
-			var cslCitation = { citationItems: [], properties: {} };
-			if (isNote) {
-				cslCitation.properties.noteIndex = i;
-			}
-
-			// create citation items
-			for (var j = 0; j < citation.citationStrings.length; j++) {
-				var citationItem = {};
-				citationItem.id = this.citationItemIDs[citation.citationStrings[j]][0];
-				itemIDs[citationItem.id] = true;
-				citationItem.locator = citation.pages[j];
-				citationItem.label = "page";
-				citationItem["suppress-author"] = citation.suppressAuthor && !isNote;
-				cslCitation.citationItems.push(citationItem);
-			}
-
-			cslCitations.push(cslCitation);
-		}
-		Zotero.debug(cslCitations);
-
-		itemIDs = Object.keys(itemIDs);
-		Zotero.debug(itemIDs);
-
-		// prepare the list of rendered citations
-		var citationResults = cslEngine.rebuildProcessorState(cslCitations, "rtf");
-
-		// format citations
-		var contentArray = [];
-		var lastEnd = 0;
-		for (let i = 0; i < this.citations.length; i++) {
-			let citation = citationResults[i][2];
-			Zotero.debug("Formatted " + citation);
-
-			// if using notes, we might have to move the note after the punctuation
-			if (isNote && this.citations[i].start != 0 && this.contents[this.citations[i].start - 1] == " ") {
-				contentArray.push(this.contents.substring(lastEnd, this.citations[i].start - 1));
-			}
-			else {
-				contentArray.push(this.contents.substring(lastEnd, this.citations[i].start));
-			}
-
-			lastEnd = this.citations[i].end;
-			if (isNote && this.citations[i].end < this.contents.length && ".,!?".indexOf(this.contents[this.citations[i].end]) !== -1) {
-				contentArray.push(this.contents[this.citations[i].end]);
-				lastEnd++;
-			}
-
-			if (isNote) {
-				if (this.styleConfig.displayAs === 'endnotes') {
-					contentArray.push("{\\super\\chftn}\\ftnbj {\\footnote\\ftnalt {\\super\\chftn } " + citation + "}");
-				}
-				else {	// footnotes
-					contentArray.push("{\\super\\chftn}\\ftnbj {\\footnote {\\super\\chftn } " + citation + "}");
-				}
-			}
-			else {
-				contentArray.push(citation);
-			}
-		}
-		contentArray.push(this.contents.substring(lastEnd));
-		this.contents = contentArray.join("");
-
-		// add bibliography
-		if (zStyle.hasBibliography) {
-			var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, "rtf");
-			bibliography = bibliography.substring(5, bibliography.length - 1);
-			// fix line breaks
-			var linebreak = "\r\n";
-			if (this.contents.indexOf("\r\n") == -1) {
-				bibliography = bibliography.replace("\r\n", "\n", "g");
-				linebreak = "\n";
-			}
-
-			if (this.contents.indexOf(BIBLIOGRAPHY_PLACEHOLDER) !== -1) {
-				this.contents = this.contents.replace(BIBLIOGRAPHY_PLACEHOLDER, bibliography);
-			}
-			else {
-				// add two newlines before bibliography
-				bibliography = linebreak + "\\" + linebreak + "\\" + linebreak + bibliography;
-
-				// add bibliography automatically inside last set of brackets closed
-				const bracketRe = /^\{+/;
-				var m = bracketRe.exec(this.contents);
-				if (m) {
-					var closeBracketRe = new RegExp("(\\}{" + m[0].length + "}\\s*)$");
-					this.contents = this.contents.replace(closeBracketRe, bibliography + "$1");
-				}
-				else {
-					this.contents += bibliography;
-				}
-			}
-		}
-
-		cslEngine.free();
-
-		Zotero.File.putContents(this.outputFile, this.contents);
+	
+	async formatRTF() {
+		const content = await replaceCitations(this.contents, this.citations, this.citationItemIDs, this.styleConfig.style, this.styleConfig.locale, this.styleConfig.displayAs);
+		Zotero.File.putContents(this.outputFile, encodeRTF(content));
 
 		// save locale
-		if (!zStyle.locale && this.styleConfig.locale) {
+		const styleHasFixedLocale = Zotero.Styles.get(this.styleConfig.style).locale;
+		if (!styleHasFixedLocale && this.styleConfig.locale) {
 			Zotero.Prefs.set("export.lastLocale", this.styleConfig.locale);
 		}
 	},
