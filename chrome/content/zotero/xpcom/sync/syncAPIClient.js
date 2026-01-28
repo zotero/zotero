@@ -556,6 +556,7 @@ Zotero.Sync.APIClient.prototype = {
 			let xmlhttp = await this.makeRequest("GET", uri, {
 				responseType: "json",
 				noAPIKey,
+				errorDelayMax: 8000,
 			});
 
 			let creditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
@@ -588,6 +589,7 @@ Zotero.Sync.APIClient.prototype = {
 		try {
 			let xmlhttp = await this.makeRequest("GET", uri, {
 				responseType: "json",
+				errorDelayMax: 8000,
 			});
 
 			let creditsRemaining = parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
@@ -637,6 +639,7 @@ Zotero.Sync.APIClient.prototype = {
 			let xmlhttp = await this.makeRequest("GET", uri, {
 				responseType: "json",
 				noAPIKey: true,
+				errorDelayMax: 8000,
 			});
 			
 			let { audio } = xmlhttp.response;
