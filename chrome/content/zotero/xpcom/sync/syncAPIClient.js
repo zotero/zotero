@@ -604,14 +604,9 @@ Zotero.Sync.APIClient.prototype = {
 		catch (e) {
 			Zotero.logError(e);
 			
-			let creditsRemaining = null;
-			try {
-				creditsRemaining = parseInt(e.xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
-				if (isNaN(creditsRemaining)) {
-					creditsRemaining = null;
-				}
-			}
-			catch {
+			let creditsRemaining = parseInt(e.xmlhttp?.getResponseHeader('Zotero-TTS-Credits-Remaining'));
+			if (isNaN(creditsRemaining)) {
+				creditsRemaining = null;
 			}
 
 			let error;
