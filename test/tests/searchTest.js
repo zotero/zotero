@@ -612,7 +612,7 @@ describe("Zotero.Search", function () {
 			
 			describe("Quick search", function () {
 				describe("All Fields & Tags", function () {
-					it("should match parent attachment for annotation tag", async function () {
+					it("should match annotation for tag search", async function () {
 						var attachment = await importPDFAttachment();
 						var annotation = await createAnnotation('highlight', attachment);
 						var tag = Zotero.Utilities.randomString();
@@ -622,6 +622,65 @@ describe("Zotero.Search", function () {
 						var s = new Zotero.Search();
 						s.libraryID = userLibraryID;
 						s.addCondition('quicksearch-fields', 'contains', tag);
+						var matches = await s.search();
+						assert.sameMembers(matches, [annotation.id]);
+					});
+
+					it("should match annotation of top-level attachment within scope", async function () {
+						// Create collection with an attachment
+						var collection = await createDataObject('collection');
+						var attachment = await importPDFAttachment();
+						attachment.addToCollection(collection.id);
+						await attachment.saveTx();
+
+						// Add annotation with a tag to that attachment
+						var annotation = await createAnnotation('highlight', attachment);
+						var tag = Zotero.Utilities.randomString();
+						annotation.addTag(tag);
+						await annotation.saveTx();
+
+						// Search within the scope of that collection by tag
+						var scope = new Zotero.Search();
+						scope.libraryID = userLibraryID;
+						scope.addCondition('noChildren', 'true');
+						scope.addCondition('collectionID', 'is', collection.id);
+
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('quicksearch-fields', 'contains', tag);
+						s.setScope(scope, true);
+
+						// Expect child annotation to be found
+						var matches = await s.search();
+						assert.sameMembers(matches, [annotation.id]);
+					});
+
+					it("should match annotation of a child attachment of an item within scope", async function () {
+						// Create collection with a top-level item and an attachment
+						var collection = await createDataObject('collection');
+						var item = await createDataObject('item');
+						var attachment = await importPDFAttachment(item);
+						item.addToCollection(collection.id);
+						await item.saveTx();
+
+						// Add annotation with a tag to the attachment
+						var annotation = await createAnnotation('highlight', attachment);
+						var tag = Zotero.Utilities.randomString();
+						annotation.addTag(tag);
+						await annotation.saveTx();
+
+						// Search within the scope of that collection by tag
+						var scope = new Zotero.Search();
+						scope.libraryID = userLibraryID;
+						scope.addCondition('noChildren', 'true');
+						scope.addCondition('collectionID', 'is', collection.id);
+
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('quicksearch-fields', 'contains', tag);
+						s.setScope(scope, true);
+
+						// Expect child annotation to be found
 						var matches = await s.search();
 						assert.sameMembers(matches, [annotation.id]);
 					});

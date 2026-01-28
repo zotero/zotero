@@ -611,9 +611,13 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + ")) OR "
 				+ "itemID IN (SELECT itemID FROM itemNotes"
 				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + "))"
+				// Match annotations of attachments of top-level items in scope
 				+ " OR itemID IN ( SELECT itemID FROM itemAnnotations WHERE "
 				+ " parentItemID IN ( SELECT itemID FROM itemAttachments WHERE "
-				+ " parentItemID IN ( SELECT itemID FROM " + tmpTable + ")))";
+				+ " parentItemID IN ( SELECT itemID FROM " + tmpTable + ")))"
+				// Match annotations of top-level attachments in scope
+				+ " OR itemID IN (SELECT itemID FROM itemAnnotations"
+				+ " WHERE parentItemID IN (SELECT itemID FROM " + tmpTable + "))";
 			}
 			sql += ")";
 			
