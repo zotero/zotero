@@ -1159,7 +1159,7 @@ async function createEmbeddedImage(parentItem, options = {}) {
 	});
 	if (options.tags) {
 		attachment.setTags(options.tags);
-		await attachment.saveTx();
+		await attachment.saveTx(options.saveOptions);
 	}
 	return attachment;
 }

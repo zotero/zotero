@@ -383,6 +383,14 @@ describe("Zotero.Sync.Data.Local", function () {
 			// File attachment that's unsynced -- delete item and file
 			var attachment3 = await importFileAttachment('test.pdf', { libraryID });
 			
+			// Embedded image that's in synced with changed file -- delete file and mark for download
+			var note = await createDataObject('item', { libraryID, itemType: 'note' });
+			var embeddedImage = await createEmbeddedImage(note);
+			embeddedImage.synced = true;
+			await embeddedImage.saveTx({
+				skipSyncedUpdate: true
+			});
+			
 			// Has to be called before resetUnsyncedLibraryFiles()
 			assert.isTrue(await Zotero.Sync.Data.Local._libraryHasUnsyncedFiles(libraryID));
 			
@@ -391,6 +399,7 @@ describe("Zotero.Sync.Data.Local", function () {
 			assert.isTrue(await attachment1.fileExists());
 			assert.isFalse(await attachment2.fileExists());
 			assert.isFalse(await attachment3.fileExists());
+			assert.isFalse(await embeddedImage.fileExists());
 			assert.equal(
 				attachment1.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
 			);
@@ -398,6 +407,7 @@ describe("Zotero.Sync.Data.Local", function () {
 				attachment2.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 			);
 			assert.isFalse(Zotero.Items.get(attachment3.id));
+			assert.ok(Zotero.Items.get(embeddedImage.id));
 		});
 	});
 	

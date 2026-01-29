@@ -3103,7 +3103,7 @@ Zotero.Item.prototype.relinkAttachmentFile = async function (path, skipItemUpdat
 
 
 Zotero.Item.prototype.deleteAttachmentFile = async function () {
-	if (!this.isImportedAttachment()) {
+	if (!this.isStoredFileAttachment()) {
 		throw new Error("deleteAttachmentFile() can only be called on imported attachment items");
 	}
 	
