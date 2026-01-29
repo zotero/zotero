@@ -230,6 +230,8 @@ reader-read-aloud-first-run-voice-mode-browser-bullets = Voices provided by your
     Free to use
 reader-read-aloud-first-run-sample-text = Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share research.
 reader-read-aloud-manage-voices = Manage voices…
+reader-read-aloud-region = Region
+reader-read-aloud-region-auto = Automatic
 
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }

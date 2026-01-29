@@ -626,12 +626,8 @@ class ReaderInstance {
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
 			},
-			onSetReadAloudVoice: (lang, voice, speed) => {
-				this._setReadAloudVoice(lang, voice, speed);
-			},
-			onSetReadAloudStatus: (status) => {
-				this._setReadAloudStatus(status);
-			},
+			onSetReadAloudVoice: this._setReadAloudVoice.bind(this),
+			onSetReadAloudStatus: this._setReadAloudStatus.bind(this),
 			onLogIn: () => {
 				// This causes a segfault without the timeout...
 				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync'));
@@ -1472,10 +1468,10 @@ class ReaderInstance {
 		}
 	}
 	
-	_setReadAloudVoice(lang, voice, speed) {
+	_setReadAloudVoice(lang, region, voice, speed) {
 		Zotero.Prefs.set('reader.readAloudVoices', JSON.stringify({
 			...this._getReadAloudVoices(),
-			[lang]: { voice, speed }
+			[lang]: { region, voice, speed }
 		}));
 	}
 	
