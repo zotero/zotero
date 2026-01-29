@@ -111,7 +111,7 @@ reader-theme-sepia = Сепия
 reader-theme-dark = Темная
 reader-theme-black = Черный
 reader-add-theme = Добавить тему оформления
-reader-theme-invert-images = Invert Images
+reader-theme-invert-images = Инвертировать изображения
 reader-scroll-mode = Прокрутка
 reader-spread-mode = Spreads
 reader-flow-mode = Расположение страниц
@@ -134,7 +134,7 @@ reader-foreground = Foreground:
 reader-reading-mode = Режим чтения
 reader-reading-mode-not-supported = Режим чтения не поддерживается в этом документе.
 reader-clear-selection = Отменить выбор
-reader-epub-encrypted = This ebook is encrypted and cannot be opened.
+reader-epub-encrypted = Этот файл зашифрован и не может быть открыт
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }

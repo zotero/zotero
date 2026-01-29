@@ -29,7 +29,7 @@ general-remove = Eltávolítás
 general-add = Hozzáadás
 general-remind-me-later = Emlékeztessen később
 general-dont-ask-again = Ne kérdezze újra
-general-choose-file = Choose File...
+general-choose-file = Fájl kiválasztása...
 general-open-settings = Beállítások megnyitása
 general-settings = Beállítások…
 general-help = Súgó
@@ -283,7 +283,7 @@ report-error =
     .label = Hiba bejelentése...
 rtfScan-wizard =
     .title = RTF átvizsgálása…
-rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. It currently supports citations in variations of the following formats:
+rtfScan-introPage-description = A { -app-name } automatikusan képes kinyerni és újraformázni a hivatkozásokat és bibliográfiát beilleszteni RTF fájlokba. Jelenleg az alábbi változatokban támogatja a hivatkozásokat:
 rtfScan-introPage-description2 = A kezdéshez, válasszon egy RTF bemeneti fájlt és egy kimenti fájlt alább:
 rtfScan-input-file = Bemeneti fájl:
 rtfScan-output-file = Kimeneti fájl:
@@ -729,7 +729,7 @@ file-type-video = Videó
 file-type-presentation = Előadás
 file-type-document = Dokumentum
 file-type-ebook = Ebook
-post-upgrade-message = Frissítve lett az <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span> verzióra! Ismerje meg az <a data-l10n-name="new-features-link">újdonságokat</a>.
+post-upgrade-message = Frissítve lett a <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span> verzióra! Ismerje meg az <a data-l10n-name="new-features-link">újdonságokat</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =

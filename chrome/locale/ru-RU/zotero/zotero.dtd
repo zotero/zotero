@@ -324,6 +324,6 @@
 <!ENTITY zotero.pdfReader.zoomPageHeight "По высоте страницы">
 <!ENTITY zotero.pdfReader.splitVertically "Разделить вертикально">
 <!ENTITY zotero.pdfReader.splitHorizontally "Разделить горизонтально">
-<!ENTITY zotero.pdfReader.transferFromPDF "Импортировать аннотации…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Повернуть страницу налево">
-<!ENTITY zotero.pdfReader.rotatePageRight "Повернуть страницу направо">
+<!ENTITY zotero.pdfReader.transferFromPDF "Импорт аннотаций…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Повернуть страницу влево">
+<!ENTITY zotero.pdfReader.rotatePageRight "Повернуть страницу вправо">

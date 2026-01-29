@@ -290,7 +290,7 @@
 <!ENTITY zotero.rtfScan.inputFile.label "Bemeneti fájl">
 <!ENTITY zotero.rtfScan.outputFile.label "Kimeneti fájl">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
+<!ENTITY zotero.file.choose.label "Fájl kiválasztása...">
 <!ENTITY zotero.file.noneSelected.label "Nincs fájl kiválasztva">
 
 <!ENTITY zotero.attachLink.title "Link csatolása az URI-hoz">

@@ -116,8 +116,8 @@ integration-warning-documentPreferences-changes-will-be-lost = Certaines des mod
 integration-warning-discard-changes = Ignorer les modifications
 integration-warning-command-is-running = Une commande de l'intégration de traitement de texte est déjà en cours d'exécution.
 first-run-guidance-citationDialog =
-    Type a title, author, and/or year to search for a reference.
+    Tapez un titre, un auteur et/ou une année pour rechercher une référence.
     
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    Une fois votre sélection effectuée, cliquez sur la bulle ou sélectionnez-la à l'aide du clavier, puis appuyez sur ↓/Espace pour afficher les options de citation telles que le numéro de page, le préfixe et le suffixe.
     
-    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.
+    Vous pouvez aussi ajouter un numéro de page ou un autre localisateur en l'incluant dans vos termes de recherche (par exemple, « histoire { $locator } ») ou en le saisissant après la bulle et en appuyant sur { return-or-enter }.

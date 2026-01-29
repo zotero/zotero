@@ -1,19 +1,19 @@
 <!ENTITY zotero.publications.my_publications "Мои публикации">
 
-<!ENTITY zotero.publications.intro "Записи, добавленные в раздел «Мои публикации», будут показаны на странице вашего профиля в zotero.org. Если вы присоединили файлы, они также станут доступны публично под указанной вами лицензией. Добавляйте только ваши собственные работы и размещайте только те файлы, для которых у вас есть разрешение на распространение.">
-<!ENTITY zotero.publications.include.checkbox.files "Включая файлы">
-<!ENTITY zotero.publications.include.checkbox.notes "Включая заметки">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "Вы можете настроить отображение в любой момент из коллекции «Мои публикации»">
+<!ENTITY zotero.publications.intro "Записи, добавленные в Мои публикации, будут отображаться на странице вашего профиля на zotero.org. Если вы выберите включить в публикацию прикреплённые файлы, они будут доступны под указанной вами лицензией. Добавляйте только ваши собственные работы и включайте только те файлы, на которые у вас есть права на распространение.">
+<!ENTITY zotero.publications.include.checkbox.files "Включить файлы">
+<!ENTITY zotero.publications.include.checkbox.notes "Включить заметки">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Вы можете настроить отображение файлов в любой момент, находясь в коллекции Мои публикации.">
 
-<!ENTITY zotero.publications.sharing.title "Выберите как ваша работа будет распространяться">
-<!ENTITY zotero.publications.sharing.text "Вы можете защитить все права на свою работу, лицензировав её по лицензии «Creative Commons» или передать её в общественное достояние. В любом случае, работа будет опубликована на сайте zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Вы хотите разрешить распространять вашу работу третьим лицам?">
-<!ENTITY zotero.publications.sharing.cc "Да, под лицензией «Creative Commons»">
-<!ENTITY zotero.publications.sharing.cc0 "Да, и разрешить свободное обращение">
-<!ENTITY zotero.publications.sharing.reserved "Нет, опубликовать только на zotero.org">
+<!ENTITY zotero.publications.sharing.title "Выберите, как ваша работа будет распространяться">
+<!ENTITY zotero.publications.sharing.text "Вы можете сохранить все права на вашу работу, лицензировать её под лицензией Creative Commons или сделать её общественным достоянием. Во всех случаях работа будет опубликована на zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Хотите ли вы разрешить распространять вашу работу третьим лицам?">
+<!ENTITY zotero.publications.sharing.cc "Да, под лицензией Creative Commons">
+<!ENTITY zotero.publications.sharing.cc0 "Да, и сделать мою работу общественным достоянием">
+<!ENTITY zotero.publications.sharing.reserved "Нет, только опубликовать мою работу на zotero.org">
 
-<!ENTITY zotero.publications.chooseLicense.title "Выбрать лицензию «Creative Commons»">
-<!ENTITY zotero.publications.chooseLicense.text "Лицензия «Creative Commons» разрешает третьей стороне копирование и распространение производных работ при указании ссылки на первоисточник, ссылки на лицензию и внесённых изменений. Дополнительные условия могут быть указаны ниже.">
+<!ENTITY zotero.publications.chooseLicense.title "Выбрать лицензию Creative Commons">
+<!ENTITY zotero.publications.chooseLicense.text "Лицензия Creative Commons разрешает копирование и распространение вашей работы третьими лицами, если они должным образом указывают автора, дают ссылку на лицензию и сообщают, если были внесены изменения в работу. Дополнительные условия можно указать ниже.">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Разрешить распространение производных работ?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Да, если третья сторона не ограничивает распространение">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Да, если третьи лица распространяют по той же лицензии">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "Разрешить коммерческое использование вашей работы?">
