@@ -200,6 +200,7 @@ reader-read-aloud = Read Aloud
 reader-read-aloud-options = Options
 reader-read-aloud-skip-back = Skip Back
 reader-read-aloud-skip-ahead = Skip Ahead
+reader-read-aloud-add-annotation = Annotate Last Sentence
 reader-read-aloud-play = Play
 reader-read-aloud-pause = Pause
 reader-read-aloud-speed = Reading Speed
