@@ -3886,7 +3886,7 @@ Zotero.Item.prototype.getAttachments = function (includeTrashed) {
  */
 Zotero.Item.prototype.getBestAttachment = async function () {
 	if (!this.isRegularItem()) {
-		throw ("getBestAttachment() can only be called on regular items");
+		throw new Error(`getBestAttachment() can only be called on regular items. Called on ${this.attachmentContentType}`);
 	}
 	var attachments = await this.getBestAttachments();
 	let bestAttachment = attachments ? attachments[0] : false;
@@ -3938,7 +3938,7 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	if (this._bestAttachmentState !== null && this._bestAttachmentState.type) {
 		return this._bestAttachmentState;
 	}
-	var item = this.isAttachment() && this.isTopLevelItem()
+	var item = !this.isRegularItem()
 		? this
 		: await this.getBestAttachment();
 	if (!item) {
