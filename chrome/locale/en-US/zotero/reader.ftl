@@ -240,6 +240,7 @@ reader-read-aloud-annotation-popup-extend = Extend/Shrink
 reader-read-aloud-annotation-popup-delete = Delete
 reader-read-aloud-annotation-popup-done = Done
 reader-read-aloud-annotation-popup-change-color = Change Color
+reader-read-aloud-annotation-popup-change-type = Highlight/Underline
 
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }
