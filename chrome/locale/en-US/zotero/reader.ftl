@@ -233,9 +233,10 @@ reader-read-aloud-first-run-sample-text = Zotero is a free, easy-to-use tool to 
 reader-read-aloud-manage-voices = Manage voices…
 reader-read-aloud-region = Region
 reader-read-aloud-region-auto = Automatic
-reader-read-aloud-annotation-popup-hint = ←→ Move Annotation
-    ⌫ Delete
-    ⏎ Done
+reader-read-aloud-annotation-popup-move = Move Annotation
+reader-read-aloud-annotation-popup-delete = Delete
+reader-read-aloud-annotation-popup-done = Done
+reader-read-aloud-annotation-popup-change-color = Change Color
 
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }
