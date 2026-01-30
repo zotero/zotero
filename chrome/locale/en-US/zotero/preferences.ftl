@@ -26,6 +26,8 @@ preferences-file-renaming-customize-button =
     .label = Customize Filename Format…
 preferences-file-renaming-rename-now =
     .label = Rename Files…
+preferences-file-renaming-rename-linked =
+    .label = Rename linked files
 
 preferences-file-renaming-format-title = Filename Format
 preferences-file-renaming-format-instructions = You can customize the filename pattern { -app-name } uses to rename attachment files from parent metadata.
