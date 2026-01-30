@@ -30,48 +30,5 @@
 	<hbox class="header">
 		<html:h1 data-l10n-id="preferences-file-renaming-format-title" />
 	</hbox>
-	
-	<label data-l10n-id="preferences-file-renaming-format-instructions" />
-	<separator class="thin" />
-	<label data-l10n-id="preferences-file-renaming-format-instructions-example"
-		data-l10n-args='{"example": "{{ title truncate=\"50\" }}"}' />
-	<separator class="thin" />
-	<label data-l10n-id="preferences-file-renaming-format-instructions-more">
-		<label
-			is="zotero-text-link"
-			href="https://www.zotero.org/support/file_renaming"
-			data-l10n-name="file-renaming-format-help-link"
-		/>
-	</label>
-	
-	<separator class="thin" />
-	
-	<groupbox>
-		<html:label
-			for="file-renaming-format-template"
-			id="file-renaming-format-template-label"
-		>
-			<html:h2 data-l10n-id="preferences-file-renaming-format-template" />
-		</html:label>
-		<html:textarea
-			aria-labelledby="file-renaming-format-template-label"
-			id="file-renaming-format-template"
-			rows="8"
-		/>
-		<html:label id="file-renaming-format-preview-label">
-			<html:h2
-				data-l10n-id="preferences-file-renaming-format-preview"
-			/>
-		</html:label>
-		<html:label
-			aria-labelledby="file-renaming-format-preview-label"
-			id="file-renaming-format-preview"
-		/>
-		<hbox id="file-renaming-format-preview-buttons">
-			<button
-				id="file-renaming-rename-now"
-				data-l10n-id="preferences-file-renaming-rename-now"
-			/>
-		</hbox>
-	</groupbox>
+	<file-renaming-settings id="file-renaming-template" main-hidden="true" />
 </vbox>
