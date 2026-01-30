@@ -234,6 +234,7 @@ reader-read-aloud-manage-voices = Manage voices…
 reader-read-aloud-region = Region
 reader-read-aloud-region-auto = Automatic
 reader-read-aloud-annotation-popup-move = Move Annotation
+reader-read-aloud-annotation-popup-extend = Extend/Shrink
 reader-read-aloud-annotation-popup-delete = Delete
 reader-read-aloud-annotation-popup-done = Done
 reader-read-aloud-annotation-popup-change-color = Change Color
