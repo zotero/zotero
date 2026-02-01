@@ -63,7 +63,16 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		return { Authorization: this._channelAuthorization };
 	},
-	
+
+	/**
+	 * Clear cached credentials when auth fails (e.g., password changed on server)
+	 */
+	_onAuthError() {
+		Zotero.debug("Clearing cached WebDAV credentials due to auth error");
+		this._channelAuthorization = false;
+		this.verified = false;
+	},
+
 	_loginManagerHost: 'chrome://zotero',
 	_loginManagerRealm: 'Zotero Storage Server',
 	
@@ -407,7 +416,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 					try {
 						let dispURL = Zotero.HTTP.getDisplayURI(uri).spec;
-						this._throwFriendlyError("GET", dispURL, e.xmlhttp.status);
+						this._handleUnexpectedStatus("GET", dispURL, e.xmlhttp.status);
 					}
 					catch (e) {
 						reject(e);
@@ -555,7 +564,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 			catch (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					this._throwFriendlyError("DELETE", Zotero.HTTP.getDisplayURI(propURI).spec, e.status);
+					this._handleUnexpectedStatus("DELETE", Zotero.HTTP.getDisplayURI(propURI).spec, e.status);
 				}
 				throw e;
 			}
@@ -607,7 +616,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					);
 				}
 				
-				this._throwFriendlyError("PUT", Zotero.HTTP.getDisplayURI(uri).spec, e.status);
+				this._handleUnexpectedStatus("PUT", Zotero.HTTP.getDisplayURI(uri).spec, e.status);
 			}
 			throw e;
 			
@@ -808,6 +817,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				break;
 				
 			case 401:
+				this._onAuthError();
 				errorTitle = Zotero.getString('general.permissionDenied');
 				errorMsg = Zotero.getString('sync.storage.error.webdav.invalidLogin') + "\n\n"
 					+ Zotero.getString('sync.storage.error.checkFileSyncSettings');
@@ -1187,7 +1197,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		catch (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				this._throwFriendlyError("GET", Zotero.HTTP.getDisplayURI(uri).spec, e.status);
+				this._handleUnexpectedStatus("GET", Zotero.HTTP.getDisplayURI(uri).spec, e.status);
 			}
 			throw e;
 		}
@@ -1302,7 +1312,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		catch (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-				this._throwFriendlyError("PUT", Zotero.HTTP.getDisplayURI(uri).spec, e.status);
+				this._handleUnexpectedStatus("PUT", Zotero.HTTP.getDisplayURI(uri).spec, e.status);
 			}
 			throw e;
 		}
@@ -1531,7 +1541,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	},
 	
 	
-	_throwFriendlyError: function (method, url, status) {
+	_handleUnexpectedStatus: function (method, url, status) {
+		if (status == 401) {
+			this._onAuthError();
+		}
 		throw new Error(
 			Zotero.getString('sync.storage.error.webdav.requestError', [status, method])
 			+ "\n\n"
