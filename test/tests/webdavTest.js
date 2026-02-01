@@ -9,22 +9,129 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	const davUsername = "user";
 	const davPassword = "password";
 	
-	var win, controller, server, requestCount, httpd, davHostPath, davURL;
-	var responses = {};
+	var win, controller, httpd, davHostPath, davURL;
+	var requestCount = 0;
+	var registeredPaths = new Set();
+	// Map of path -> { method -> handler }
+	var pathHandlers = {};
 	
-	function setResponse(response) {
-		setHTTPResponse(server, davURL, response, responses, davUsername, davPassword);
+	/**
+	 * Check Basic Auth credentials from request
+	 */
+	function checkAuth(request) {
+		if (!request.hasHeader('Authorization')) {
+			return false;
+		}
+		let auth = request.getHeader('Authorization');
+		let expected = 'Basic ' + btoa(davUsername + ':' + davPassword);
+		return auth == expected;
+	}
+	
+	/**
+	 * Send 401 response requiring Basic Auth
+	 */
+	function send401(response) {
+		response.setStatusLine(null, 401, "Unauthorized");
+		response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
+	}
+	
+	/**
+	 * Register an httpd handler for a given method/path with optional auth
+	 */
+	function setResponse(options) {
+		let { method, url, status = 200, text = "", headers = {}, handler } = options;
+		let path = `${davBasePath}${url}`;
+		
+		// Store the handler info for this method
+		if (!pathHandlers[path]) {
+			pathHandlers[path] = {};
+		}
+		if (pathHandlers[path][method]) {
+			throw new Error(`Handler for ${method} ${path} already registered`);
+		}
+		pathHandlers[path][method] = { status, text, headers, handler };
+		
+		// Only register the path handler once -- additional methods on the same path
+		// reuse the existing handler, which dispatches by method
+		if (registeredPaths.has(path)) {
+			return;
+		}
+		registeredPaths.add(path);
+		
+		httpd.registerPathHandler(path, {
+			handle: function (request, response) {
+				// Always handle OPTIONS with auth (for cacheCredentials calls)
+				if (request.method == 'OPTIONS') {
+					if (!checkAuth(request)) {
+						send401(response);
+						return;
+					}
+					response.setHeader('DAV', '1', false);
+					response.setStatusLine(null, 200, "OK");
+					return;
+				}
+				
+				let methodHandlers = pathHandlers[path];
+				let methodHandler = methodHandlers && methodHandlers[request.method];
+				
+				if (!methodHandler) {
+					// No handler for this method -- return 405
+					response.setStatusLine(null, 405, "Method Not Allowed");
+					return;
+				}
+				
+				// If Authorization not present, send 401 to trigger retry
+				if (!checkAuth(request)) {
+					send401(response);
+					return;
+				}
+				
+				requestCount++;
+				
+				// Custom handler takes precedence
+				if (methodHandler.handler) {
+					methodHandler.handler(request, response);
+					return;
+				}
+				
+				// Set status
+				response.setStatusLine(null, methodHandler.status, null);
+				
+				// Set headers
+				for (let [key, value] of Object.entries(methodHandler.headers)) {
+					response.setHeader(key, String(value), false);
+				}
+				
+				// Write body
+				if (methodHandler.text) {
+					response.write(methodHandler.text);
+				}
+			}
+		});
 	}
 	
 	function resetRequestCount() {
-		requestCount = server.requests.filter(r => r.responseHeaders["Fake-Server-Match"]).length;
+		requestCount = 0;
 	}
 	
 	function assertRequestCount(count) {
-		assert.equal(
-			server.requests.filter(r => r.responseHeaders["Fake-Server-Match"]).length - requestCount,
-			count
-		);
+		assert.equal(requestCount, count);
+	}
+	
+	/**
+	 * Unregister all handlers registered via setResponse
+	 */
+	function clearRegisteredPaths() {
+		for (let path of registeredPaths) {
+			try {
+				httpd.registerPathHandler(path, null);
+			}
+			catch (e) {
+				// Ignore errors from unregistering paths that weren't registered
+			}
+		}
+		registeredPaths = new Set();
+		pathHandlers = {};
 	}
 	
 	function generateLastSyncID() {
@@ -46,10 +153,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			thisArg: this,
 			skipBundledFiles: true
 		});
-		
-		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
-		server = sinon.fakeServer.create();
-		server.autoRespond = true;
 		
 		var port;
 		({ httpd, port } = await startHTTPServer());
@@ -82,34 +185,27 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		});
 		
 		if (!controller.verified) {
-			setResponse({
-				method: "OPTIONS",
-				url: "zotero/",
-				headers: {
-					DAV: 1
-				},
-				status: 200
-			})
+			// Register handlers for server verification
 			setResponse({
 				method: "PROPFIND",
 				url: "zotero/",
 				status: 207
-			})
+			});
 			setResponse({
 				method: "PUT",
 				url: "zotero/zotero-test-file.prop",
 				status: 201
-			})
+			});
 			setResponse({
 				method: "GET",
 				url: "zotero/zotero-test-file.prop",
 				status: 200
-			})
+			});
 			setResponse({
 				method: "DELETE",
 				url: "zotero/zotero-test-file.prop",
 				status: 200
-			})
+			});
 			await controller.checkServer();
 			
 			await controller.cacheCredentials();
@@ -121,11 +217,11 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	}
 	
 	afterEach(async function () {
+		clearRegisteredPaths();
 		await new Promise(request => httpd.stop(request));
 	})
 	
-	after(function* () {
-		Zotero.HTTP.mock = null;
+	after(function () {
 		if (win) {
 			win.close();
 		}
@@ -213,10 +309,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				Zotero.getString('sync.storage.error.webdav.requestError', [500, "GET"])
 			);
 			
-			assert.isAbove(
-				server.requests.filter(r => r.responseHeaders["Fake-Server-Match"]).length - requestCount,
-				1
-			);
+			assert.isAbove(requestCount, 1);
 			
 			assert.isTrue(library.storageDownloadNeeded);
 			assert.equal(library.storageVersion, 0);
@@ -348,63 +441,86 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			var contentType = 'image/png';
 			var fileContents = await Zotero.File.getContentsAsync(path);
 			
-			var deferreds = [];
+			var zipVerifyDeferred = Zotero.Promise.defer();
 			
 			setResponse({
 				method: "GET",
 				url: `zotero/${item.key}.prop`,
 				status: 404
 			});
-			// https://github.com/cjohansen/Sinon.JS/issues/607
-			let fixSinonBug = ";charset=utf-8";
-			server.respond(function (req) {
-				if (req.username != davUsername) return;
-				if (req.password != davPassword) return;
-				
-				if (req.method == "PUT" && req.url == `${davURL}zotero/${item.key}.zip`) {
-					assert.equal(req.requestHeaders["Content-Type"], "application/zip" + fixSinonBug);
-					
-					let deferred = Zotero.Promise.defer();
-					deferreds.push(deferred);
-					var reader = new FileReader();
-					reader.addEventListener("loadend", async function () {
-						try {
-							let tmpZipPath = OS.Path.join(
-								Zotero.getTempDirectory().path,
-								Zotero.Utilities.randomString() + '.zip'
-							);
-							let contents = new Uint8Array(reader.result);
-							await IOUtils.write(tmpZipPath, contents);
-							
-							// Make sure ZIP file contains the necessary entries
-							var zr = Components.classes["@mozilla.org/libjar/zip-reader;1"]
-								.createInstance(Components.interfaces.nsIZipReader);
-							zr.open(Zotero.File.pathToFile(tmpZipPath));
-							zr.test(null);
-							var entries = zr.findEntries('*');
-							var entryNames = [];
-							while (entries.hasMore()) {
-								entryNames.push(entries.getNext());
+			
+			// Handler for PUT .zip
+			httpd.registerPathHandler(
+				`${davBasePath}zotero/${item.key}.zip`,
+				{
+					handle: function (request, response) {
+						if (request.method !== 'PUT') return;
+						if (!checkAuth(request)) {
+							send401(response);
+							return;
+						}
+						requestCount++;
+						
+						// Read request body and verify it's a valid ZIP
+						let start = async () => {
+							try {
+								let bodyStream = request.bodyInputStream;
+								let bis = Cc["@mozilla.org/binaryinputstream;1"]
+									.createInstance(Ci.nsIBinaryInputStream);
+								bis.setInputStream(bodyStream);
+								let bytes = bis.readByteArray(bis.available());
+								bis.close();
+								
+								let tmpZipPath = OS.Path.join(
+									Zotero.getTempDirectory().path,
+									Zotero.Utilities.randomString() + '.zip'
+								);
+								await IOUtils.write(tmpZipPath, new Uint8Array(bytes));
+								
+								// Make sure ZIP file contains the necessary entries
+								var zr = Components.classes["@mozilla.org/libjar/zip-reader;1"]
+									.createInstance(Components.interfaces.nsIZipReader);
+								zr.open(Zotero.File.pathToFile(tmpZipPath));
+								zr.test(null);
+								var entries = zr.findEntries('*');
+								var entryNames = [];
+								while (entries.hasMore()) {
+									entryNames.push(entries.getNext());
+								}
+								assert.equal(entryNames.length, 1);
+								assert.sameMembers(entryNames, [filename]);
+								assert.equal(zr.getEntry(filename).realSize, size);
+								
+								await OS.File.remove(tmpZipPath);
+								
+								zipVerifyDeferred.resolve();
 							}
-							assert.equal(entryNames.length, 1);
-							assert.sameMembers(entryNames, [filename]);
-							assert.equal(zr.getEntry(filename).realSize, size);
-							
-							await OS.File.remove(tmpZipPath);
-							
-							deferred.resolve();
-						}
-						catch (e) {
-							deferred.reject(e);
-						}
-					});
-					reader.readAsArrayBuffer(req.requestBody);
-					
-					req.respond(201, { "Fake-Server-Match": 1 }, "");
+							catch (e) {
+								zipVerifyDeferred.reject(e);
+							}
+						};
+						start();
+						
+						response.setStatusLine(null, 201, null);
+					}
 				}
-				else if (req.method == "PUT" && req.url == `${davURL}zotero/${item.key}.prop`) {
+			);
+			
+			// Handler for PUT .prop
+			setResponse({
+				method: "PUT",
+				url: `zotero/${item.key}.prop`,
+				handler: function (request, response) {
+					// Read and verify request body
+					let bodyStream = request.bodyInputStream;
+					let sis = Cc["@mozilla.org/scriptableinputstream;1"]
+						.createInstance(Ci.nsIScriptableInputStream);
+					sis.init(bodyStream);
+					let body = sis.read(sis.available());
+					sis.close();
+					
 					var parser = new DOMParser();
-					var doc = parser.parseFromString(req.requestBody, "text/xml");
+					var doc = parser.parseFromString(body, "text/xml");
 					assert.equal(
 						doc.documentElement.getElementsByTagName('mtime')[0].textContent, mtime
 					);
@@ -412,13 +528,13 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 						doc.documentElement.getElementsByTagName('hash')[0].textContent, hash
 					);
 					
-					req.respond(204, { "Fake-Server-Match": 1 }, "");
+					response.setStatusLine(null, 204, null);
 				}
 			});
 			
 			var result = await engine.start();
 			
-			await Promise.all(deferreds.map(d => d.promise));
+			await zipVerifyDeferred.promise;
 			
 			assertRequestCount(3);
 			
@@ -579,8 +695,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		//
 		// https://forums.zotero.org/discussion/80429/sync-error-in-5-0-80
 		it("shouldn't send cookies", async function () {
-			// Make real requests so we can test the internal cookie-handling behavior
-			Zotero.HTTP.mock = null;
+			// Skip initial verification for this test
 			controller.verified = true;
 			var engine = await setup();
 			
@@ -645,12 +760,9 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 							response.setStatusLine(null, 400, "Bad Request");
 							return;
 						}
-						// Authorization used to already be cached here, but that's no longer the
-						// case as of fx128, so send 401
+						// Should already include Authorization
 						if (!request.hasHeader('Authorization')) {
-							//response.setStatusLine(null, 400, "");
-							response.setStatusLine(null, 401, null);
-							response.setHeader('WWW-Authenticate', 'Basic realm="WebDAV"', false);
+							response.setStatusLine(null, 400, "");
 							return;
 						}
 						// Cookie shouldn't be passed
@@ -747,7 +859,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	
 	describe("Verify Server", function () {
 		it("should show an error for a connection error", async function () {
-			Zotero.HTTP.mock = null;
 			Zotero.Prefs.set("sync.storage.url", "127.0.0.1:9999");
 			
 			// Begin install procedure
@@ -772,7 +883,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		});
 		
 		it("should show an error for a non-DAV URL", async function () {
-			Zotero.HTTP.mock = null;
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
 			httpd.registerPathHandler(
@@ -816,7 +926,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		});
 		
 		it("should show an error for a 403", async function () {
-			Zotero.HTTP.mock = null;
 			httpd.registerPathHandler(
 				`${davBasePath}zotero/`,
 				{
@@ -826,7 +935,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 			);
 			
-			// Use httpd.js instead of sinon so we get a real nsIURL with a channel
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
 			// Begin install procedure
@@ -852,8 +960,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		
 		
 		it("should show an error for a 404 for the parent directory", async function () {
-				// Use httpd.js instead of sinon so we get a real nsIURL with a channel
-			Zotero.HTTP.mock = null;
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
 			httpd.registerPathHandler(
@@ -909,7 +1015,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		
 		
 		it("should show an error for a 200 for a nonexistent file", async function () {
-			Zotero.HTTP.mock = null;
 			httpd.registerPathHandler(
 				`${davBasePath}zotero/`,
 				{
@@ -940,7 +1045,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 			);
 			
-			// Use httpd.js instead of sinon so we get a real nsIURL with a channel
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
 			// Begin install procedure

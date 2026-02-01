@@ -136,6 +136,7 @@ Zotero.HTTP = new function () {
 	 * @param {Function} [options.requestObserver] - Callback to receive XMLHttpRequest after open()
 	 * @param {Function} [options.cancellerReceiver] - Callback to receive a function to cancel
 	 *     the operation
+	 * @param {Function} [options.onAuthorizationHeader]
 	 * @param {String} [options.responseType] - The type of the response. See XHR 2 documentation
 	 *     for legal values
 	 * @param {String} [options.responseCharset] - The charset the response should be interpreted as
@@ -463,6 +464,10 @@ Zotero.HTTP = new function () {
 			
 			var status = redirectStatus || xmlhttp.status;
 			var success;
+			
+			if (options.onAuthorizationHeader) {
+				options.onAuthorizationHeader(this.getChannelAuthorization(xmlhttp.channel));
+			}
 			
 			try {
 				if (!status) {
@@ -1249,7 +1254,7 @@ Zotero.HTTP = new function () {
 			return authHeader;
 		}
 		catch (e) {
-			Zotero.debug(e);
+			//Zotero.debug(e);
 			return false;
 		}
 	}

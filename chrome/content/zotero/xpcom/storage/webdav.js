@@ -54,7 +54,15 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	
 	_parentURI: null,
 	_rootURI: null,	
-	_cachedCredentials: false,
+	_channelAuthorization: null,
+	
+	_getAuthorizationHeaders() {
+		if (!this._channelAuthorization) {
+			Zotero.debug("Authorization header not cached");
+			return {};
+		}
+		return { Authorization: this._channelAuthorization };
+	},
 	
 	_loginManagerHost: 'chrome://zotero',
 	_loginManagerRealm: 'Zotero Storage Server',
@@ -118,7 +126,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			return;
 		}
 		
-		_cachedCredentials = false;
+		this._channelAuthorization = false;
 		
 		var logins = await Services.logins.searchLoginsAsync({
 			origin: this._loginManagerHost,
@@ -229,7 +237,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	cacheCredentials: async function () {
 		await this._init();
 		
-		if (this._cachedCredentials) {
+		if (this._channelAuthorization) {
 			Zotero.debug("WebDAV credentials are already cached");
 			return;
 		}
@@ -244,11 +252,19 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					successCodes: [200, 204, 404],
 					errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
 					errorDelayMax: this.ERROR_DELAY_MAX,
+					onAuthorizationHeader: (authorization) => {
+						// Capture whatever auth it ended up using, if any
+						this._channelAuthorization = authorization;
+					},
 				}
 			);
 			
-			Zotero.debug("WebDAV credentials cached");
-			this._cachedCredentials = true;
+			if (this._channelAuthorization) {
+				Zotero.debug("Authorization header cached");
+			}
+			else {
+				Zotero.debug("No Authorization header to cache");
+			}
 		}
 		catch (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
@@ -268,7 +284,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			Zotero.HTTP.CookieBlocker.removeURL(this._rootURI.spec);
 		}
 		this._rootURI = this._parentURI = undefined;
-		this._cachedCredentials = false;
+		this._channelAuthorization = false;
 	},
 	
 	
@@ -528,6 +544,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					"DELETE",
 					propURI,
 					{
+						headers: this._getAuthorizationHeaders(),
 						successCodes: [200, 204, 404],
 						requestObserver: xmlhttp => request.setChannel(xmlhttp.channel),
 						errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
@@ -560,9 +577,12 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				"PUT",
 				uri,
 				{
-					headers: {
-						"Content-Type": "application/zip"
-					},
+					headers: Object.assign(
+						this._getAuthorizationHeaders(),
+						{
+							"Content-Type": "application/zip"
+						},
+					),
 					body: file,
 					requestObserver: function (req) {
 						request.setChannel(req.channel);
@@ -617,7 +637,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			+ "<getcontentlength/>"
 			+ "</prop></propfind>";
 		
-		var channel;
 		var requestObserver = function (req) {
 			if (options.onRequest) {
 				options.onRequest(req);
@@ -630,13 +649,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			uri,
 			{
 				successCodes: [200, 204, 404],
-				requestObserver: function (req) {
-					if (req.channel) {
-						channel = req.channel;
-					}
-					if (options.onRequest) {
-						options.onRequest(req);
-					}
+				requestObserver,
+				onAuthorizationHeader: (authorization) => {
+					// Capture whatever auth it ended up using, if any
+					this._channelAuthorization = authorization;
 				},
 				errorDelayMax: 0,
 				debug: true
@@ -650,20 +666,16 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			throw new this.VerificationError("NOT_DAV", Zotero.HTTP.getDisplayURI(uri, true).spec);
 		}
 		
-		var headers = { Depth: 0 };
-		var contentTypeXML = { "Content-Type": "text/xml; charset=utf-8" };
-		
-		// Get the Authorization header used in case we need to do a request
-		// on the parent below
-		if (channel) {
-			var channelAuthorization = Zotero.HTTP.getChannelAuthorization(channel);
-			channel = null;
-		}
+		var headers = this._getAuthorizationHeaders();
+		var propfindHeaders = {
+			Depth: 0,
+			"Content-Type": "text/xml; charset=utf-8"
+		};
 		
 		// Test whether Zotero directory exists
 		req = await Zotero.HTTP.request("PROPFIND", uri, {
 			body: xmlstr,
-			headers: Object.assign({}, headers, contentTypeXML),
+			headers: Object.assign({}, headers, propfindHeaders),
 			successCodes: [207, 404],
 			requestObserver,
 			errorDelayMax: 0,
@@ -678,6 +690,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					"GET",
 					missingFileURI,
 					{
+						headers,
 						successCodes: [404],
 						responseType: 'text',
 						requestObserver,
@@ -701,6 +714,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			// Test if Zotero directory is writable
 			let testFileURI = uri.mutate().setSpec(uri.spec + "zotero-test-file.prop").finalize();
 			req = await Zotero.HTTP.request("PUT", testFileURI, {
+				headers,
 				body: " ",
 				successCodes: [200, 201, 204],
 				requestObserver,
@@ -712,6 +726,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				"GET",
 				testFileURI,
 				{
+					headers,
 					successCodes: [200, 404],
 					responseType: 'text',
 					requestObserver,
@@ -726,6 +741,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					"DELETE",
 					testFileURI,
 					{
+						headers,
 						successCodes: [200, 204],
 						requestObserver,
 						errorDelayMax: 0,
@@ -746,16 +762,10 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 		}
 		else if (req.status == 404) {
-			// Include Authorization header from /zotero request,
-			// since Firefox probably won't apply it to the parent request
-			if (channelAuthorization) {
-				headers.Authorization = channelAuthorization;
-			}
-			
 			// Zotero directory wasn't found, so see if at least
 			// the parent directory exists
 			req = await Zotero.HTTP.request("PROPFIND", parentURI, {
-				headers: Object.assign({}, headers, contentTypeXML),
+				headers: Object.assign({}, headers, propfindHeaders),
 				body: xmlstr,
 				requestObserver,
 				successCodes: [207, 404],
@@ -1011,6 +1021,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		
 		Zotero.debug("Purging orphaned storage files");
 		
+		await this.cacheCredentials();
+		
 		var uri = this.rootURI;
 		var path = uri.pathQueryRef;
 		
@@ -1030,7 +1042,11 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			uri,
 			{
 				body: xmlstr,
-				headers: Object.assign({ Depth: 1 }, contentTypeXML),
+				headers: Object.assign(
+					this._getAuthorizationHeaders(),
+					{ Depth: 1 },
+					contentTypeXML
+				),
 				successCodes: [207],
 				errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
 				errorDelayMax: this.ERROR_DELAY_MAX,
@@ -1158,6 +1174,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				"GET",
 				uri,
 				{
+					headers: this._getAuthorizationHeaders(),
 					successCodes: [200, 300, 404],
 					responseType: 'text',
 					requestObserver: xmlhttp => request.setChannel(xmlhttp.channel),
@@ -1269,9 +1286,12 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				"PUT",
 				uri,
 				{
-					headers: {
-						"Content-Type": "text/xml"
-					},
+					headers: Object.assign(
+						{
+							"Content-Type": "text/xml"
+						},
+						this._getAuthorizationHeaders(),
+					),
 					body: xmlstr,
 					successCodes: [200, 201, 204],
 					errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
@@ -1431,6 +1451,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 						"DELETE",
 						deleteURI,
 						{
+							headers: this._getAuthorizationHeaders(),
 							successCodes: [200, 204, 404],
 							errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
 							errorDelayMax: this.ERROR_DELAY_MAX,
@@ -1473,6 +1494,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					"DELETE",
 					deletePropURI,
 					{
+						headers: this._getAuthorizationHeaders(),
 						successCodes: [200, 204, 404],
 						errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
 						errorDelayMax: this.ERROR_DELAY_MAX,
