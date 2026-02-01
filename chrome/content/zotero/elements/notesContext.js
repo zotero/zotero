@@ -175,7 +175,7 @@
 				return true;
 			}
 			else {
-				this._getCurrentEditor().focusFirst();
+				this._getCurrentEditor()?.focusFirst();
 				return true;
 			}
 		}
@@ -314,7 +314,7 @@
 			if (splitter.getAttribute('state') == 'collapsed' || ZoteroContextPane.context.mode != "notes") return null;
 			switch (this.mode) {
 				case "childNote": {
-					return this.tabNotesDeck.selectedPanel.querySelector("note-editor");
+					return this.tabNotesDeck.selectedPanel?.querySelector("note-editor");
 				}
 				case "standaloneNote": {
 					return this.standaloneEditor;
@@ -568,6 +568,9 @@
 
 		_handleNoteEditorReturn = () => {
 			let editor = this._getCurrentEditor();
+			if (!editor) {
+				return;
+			}
 			// Immediately save note content before vbox with note-editor iframe is destroyed below
 			editor.saveSync();
 			ZoteroContextPane.context.mode = "notes";
