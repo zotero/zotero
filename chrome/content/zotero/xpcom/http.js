@@ -377,14 +377,13 @@ Zotero.HTTP = new function () {
 			}
 		}
 		if (options.debug) {
-			if (headers.has("Zotero-API-Key")) {
-				let dispHeaders = new Zotero.HTTP.CasePreservingHeaders(headers);
-				dispHeaders.set("Zotero-API-Key", "[Not shown]");
-				Zotero.debug(Object.fromEntries(dispHeaders.entries()));
-			}
-			else {
-				Zotero.debug(Object.fromEntries(headers.entries()));
-			}
+			let dispHeaders = new Zotero.HTTP.CasePreservingHeaders(headers);
+			["Zotero-API-Key", "Authorization"].forEach((header) => {
+				if (headers.has(header)) {
+					dispHeaders.set(header, "[Not shown]");
+				}
+			});
+			Zotero.debug(Object.fromEntries(dispHeaders.entries()));
 		}
 		for (var [header, value] of headers) {
 			// Convert numbers to string to make Sinon happy
