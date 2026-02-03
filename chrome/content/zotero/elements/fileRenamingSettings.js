@@ -23,9 +23,9 @@
 	***** END LICENSE BLOCK *****
 */
 
-const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
-
 {
+	const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+	const DEFAULT_EXT = 'pdf';
 	class FileRenameSettings extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<vbox>
@@ -129,6 +129,7 @@ const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrom
 				'instructions-hidden',
 				'main-hidden',
 				'rename-linked-enabled',
+				'rename-linked-hidden',
 				'rename-now-disabled',
 				'rename-now-hidden',
 				'template-hidden',
@@ -247,8 +248,8 @@ const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrom
 				return;
 			}
 			
-			const [item, ext, attachmentTitle] = this.getActiveItem() ?? [this.mockItem ?? this.makeMockItem(), 'pdf', ''];
-			const formatString = this.formatTemplateTextarea.value;
+			const [item, ext, attachmentTitle] = this.getActiveItem() ?? [this.mockItem ?? this.makeMockItem(), DEFAULT_EXT, ''];
+			const formatString = this.formatTemplate;
 			const preview = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString, attachmentTitle });
 			this.querySelector('#file-renaming-format-preview').innerText = `${preview}.${ext}`;
 		};
@@ -269,6 +270,7 @@ const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrom
 			this.formatTemplate = this.getAttribute('format-template') ?? '';
 			this.sectionMain.hidden = this.getAttribute('main-hidden') === 'true';
 			this.sectionInstructions.hidden = this.getAttribute('instructions-hidden') === 'true';
+			this.renameLinkedCheckbox.hidden = this.getAttribute('rename-linked-hidden') === 'true';
 			this.sectionTemplate.hidden = this.getAttribute('template-hidden') === 'true';
 			this.renameNowButton.hidden = this.getAttribute('rename-now-hidden') === 'true';
 			this.renameNowButton.disabled = this.getAttribute('rename-now-disabled') === 'true';
@@ -285,9 +287,7 @@ const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrom
 				this._itemsView.onSelect.addListener(this.updatePreview);
 			}
 			
-			if (this.getAttribute('template-hidden') !== 'true') {
-				this.updatePreview();
-			}
+			this.updatePreview();
 		}
 
 		disconnectedCallback() {
@@ -302,32 +302,36 @@ const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrom
 				case 'auto-rename-enabled':
 					this.autoRenameEnabled = newValue === 'true';
 					break;
-				case 'rename-linked-enabled':
-					this.renameLinkedCheckbox.checked = newValue === 'true';
-					break;
 				case 'file-types':
 					this.enabledFileTypes = newValue ?? '';
 					break;
 				case 'format-template':
-					this.formatTemplateTextarea.value = newValue ?? '';
-					break;
-				case 'main-hidden':
-					this.sectionMain.hidden = newValue === 'true';
+					this.formatTemplate = newValue ?? '';
+					this.updatePreview();
 					break;
 				case 'instructions-hidden':
 					this.sectionInstructions.hidden = newValue === 'true';
 					break;
-				case 'template-hidden':
-					this.sectionTemplate.hidden = newValue === 'true';
-					if (newValue !== 'true') {
-						this.updatePreview();
-					}
+				case 'main-hidden':
+					this.sectionMain.hidden = newValue === 'true';
+					break;
+				case 'rename-linked-enabled':
+					this.renameLinkedCheckbox.checked = newValue === 'true';
+					break;
+				case 'rename-linked-hidden':
+					this.renameLinkedCheckbox.hidden = newValue === 'true';
+					break;
+				case 'rename-now-disabled':
+					this.renameNowButton.disabled = newValue === 'true';
 					break;
 				case 'rename-now-hidden':
 					this.renameNowButton.hidden = newValue === 'true';
 					break;
-				case 'rename-now-disabled':
-					this.renameNowButton.disabled = newValue === 'true';
+				case 'template-hidden':
+					this.sectionTemplate.hidden = newValue === 'true';
+					if (!this.sectionTemplate.hidden) {
+						this.updatePreview();
+					}
 					break;
 			}
 		}
@@ -336,12 +340,12 @@ const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrom
 			let selectedItem = Zotero.getActiveZoteroPane()?.getSelectedItems()?.[0];
 			if (selectedItem) {
 				if (selectedItem.isRegularItem() && !selectedItem.parentKey) {
-					return [selectedItem, this.defaultExt, ''];
+					return [selectedItem, DEFAULT_EXT, ''];
 				}
 				if (selectedItem.isFileAttachment() && selectedItem.parentKey) {
 					let ext = Zotero.Attachments.getCorrectFileExtension(selectedItem);
 					let parentItem = Zotero.Items.getByLibraryAndKey(selectedItem.libraryID, selectedItem.parentKey);
-					return [parentItem, ext ?? this.defaultExt, selectedItem.getField('title')];
+					return [parentItem, ext ?? DEFAULT_EXT, selectedItem.getField('title')];
 				}
 			}
 
