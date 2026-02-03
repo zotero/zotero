@@ -224,10 +224,10 @@ Zotero_Preferences.General = {
 	}),
 	
 	updateAutoRenameFilesUI: function () {
-		this.fileRenamingSettingsEl = document.getElementById('file-renaming-settings');
-		this.fileRenamingSettingsEl.setAttribute('auto-rename-enabled', Zotero.Prefs.get('autoRenameFiles'));
-		this.fileRenamingSettingsEl.setAttribute('file-types', Zotero.Prefs.get('autoRenameFiles.fileTypes'));
-		this.fileRenamingSettingsEl.addEventListener('change', this._handleFileRenamingSettingsChange.bind(this));
+		this.settingsEl = document.getElementById('file-renaming-settings');
+		this.settingsEl.setAttribute('auto-rename-enabled', Zotero.Prefs.get('autoRenameFiles'));
+		this.settingsEl.setAttribute('file-types', Zotero.Prefs.get('autoRenameFiles.fileTypes'));
+		this.settingsEl.addEventListener('change', this._handleFileRenamingSettingsChange.bind(this));
 		document.getElementById('file-renaming-general-rename-now').setAttribute('hidden', Zotero.Prefs.get('autoRenameFiles.done'));
 	},
 

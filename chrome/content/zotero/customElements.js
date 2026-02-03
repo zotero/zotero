@@ -78,6 +78,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['libraries-collections-box', 'chrome://zotero/content/elements/librariesCollectionsBox.js'],
 		['autocomplete-textarea', 'chrome://zotero/content/elements/autocompleteTextArea.js'],
 		['bubble-input', 'chrome://zotero/content/elements/bubbleInput.js'],
+		['file-renaming-settings', 'chrome://zotero/content/elements/fileRenamingSettings.js']
 	]) {
 		customElements.setElementCreationCallback(tag, () => {
 			Services.scriptloader.loadSubScript(script, window);
