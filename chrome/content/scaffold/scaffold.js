@@ -290,6 +290,8 @@ var Scaffold = new function () {
 		let translatorID = document.getElementById('textbox-translatorID').value;
 		let modifiedTime = Scaffold_Translators.getModifiedTime(translatorID);
 		if (modifiedTime && modifiedTime > _lastModifiedTime) {
+			_lastModifiedTime = modifiedTime;
+			
 			let ps = Services.prompt;
 			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
@@ -303,9 +305,6 @@ var Scaffold = new function () {
 			);
 			if (index == 1) {
 				await this.load(translatorID);
-			}
-			else {
-				_lastModifiedTime = modifiedTime;
 			}
 		}
 		
