@@ -5,6 +5,10 @@ menuitem {
 	}
 }
 
+menulist {
+	@include focus-ring;
+}
+
 @each $cls, $icon in $menu-icons {
 	.zotero-menuitem-#{$cls} {
 		// If icon starts with "light-dark:", use light and dark icon
