@@ -41,6 +41,7 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 	cancelBtnEl: null,
 
 	init: function () {
+		this.libraryID = window.arguments[0].wrappedJSObject.libraryID;
 		this.introEl = document.getElementById('intro');
 		this.filesListEl = document.getElementById('renamed-files-list');
 		this.loadingEl = document.getElementById('loading');
@@ -62,7 +63,7 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 		this.acceptBtnEl.disabled = true;
 		this.cancelBtnEl.disabled = true;
 		
-		await renameFilesFromParent({ reportProgress: this.updateProgress.bind(this) });
+		await renameFilesFromParent({ libraryID: this.libraryID, reportProgress: this.updateProgress.bind(this) });
 		setTimeout(() => {
 			// remain open for a moment longer so that user can see 100% complete
 			window.close();
@@ -77,7 +78,7 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 
 	pretendRenameItems: async function () {
 		this.columns = await this.prepareColumns();
-		let rows = await renameFilesFromParent({ pretend: true });
+		let rows = await renameFilesFromParent({ libraryID: this.libraryID, pretend: true });
 		this.loadingEl.remove();
 		if (rows.length === 0) {
 			this.introEl.dataset.l10nId = 'rename-files-preview-no-files';

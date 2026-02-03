@@ -42,3 +42,15 @@
 		visibility: hidden;
 	}
 }
+
+#file-renaming-buttons {
+	margin-top: .6em;
+
+	> button + button {
+		margin-left: 0.5em;
+	}
+}
+
+#zotero-prefpane-file-renaming-format label:not([is=zotero-text-link]) {
+	display: block;
+}

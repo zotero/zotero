@@ -1,0 +1,27 @@
+file-renaming-settings {
+	#file-renaming-format-template {
+		min-height: 3.25em;
+		padding: 0.4em;
+		/* Match label margins */
+		margin-block: 1px 2px;
+		margin-inline: 6px 5px;
+	}
+
+	#file-renaming-format-preview {
+		padding: 0.4em;
+	}
+
+	#file-renaming-format-preview-buttons {
+		justify-content: flex-end;
+		margin-top: 0.5em;
+		margin-inline: 6px 5px;
+	}
+
+	#file-renaming-rename-now {
+		margin-top: 1em;
+	}
+
+	.indented-pref {
+		margin-inline-start: 2em;
+	}
+}
