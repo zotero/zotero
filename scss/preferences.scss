@@ -381,3 +381,9 @@ button {
 		margin-block: 4px;
 	}
 }
+
+@media (-moz-platform: linux) {
+	menulist {
+		@include focus-ring;
+	}
+}

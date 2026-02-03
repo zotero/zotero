@@ -379,6 +379,9 @@
 			
 			// Skip if no condition or correct condition already selected
 			if (!conditionName || (conditionName == this.selectedCondition && !reload)) {
+				// When "More" option is selected, the condition value remains unchanged,
+				// so make sure that it still has the checkbox.
+				this.updateMenuCheckboxesRecursive(conditionsMenu, this.selectedCondition);
 				return;
 			}
 			
@@ -416,8 +419,6 @@
 				}
 			}
 			operatorsList.selectedIndex = selectThis;
-			// Setting `selected` does not change `checked`. Should explicitly set it.
-			operatorsList.selectedItem.setAttribute('checked', true);
 			this.updateMenuCheckboxesRecursive(operatorsList, operatorsList.selectedItem.getAttribute('value'));
 			
 			// Generate drop-down menu instead of textbox for certain conditions
@@ -686,9 +687,11 @@
 				if (item.localName == 'menuitem') {
 					if (item.getAttribute('value') == value) {
 						item.setAttribute('checked', true);
+						item.setAttribute('selected', true);
 					}
 					else {
 						item.removeAttribute('checked');
+						item.removeAttribute('selected');
 					}
 				}
 				else {

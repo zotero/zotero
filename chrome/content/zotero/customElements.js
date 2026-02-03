@@ -335,6 +335,57 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		delete document.createXULElement("menulist");
 	}
 
+
+	// Space should open the popup of menulist
+	document.addEventListener("keydown", (event) => {
+		let target = event.originalTarget;
+		if (target.tagName !== "menulist") return;
+		if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+		if (event.key === " ") {
+			target.open = true;
+		}
+	});
+	if (Zotero.isWin) {
+		// ArrowUp/ArrowDown should change the active menuitem without triggering the command event.
+		// Otherwise navigating menulist options via keyboard triggers alerts meant to fire after
+		// a confirmed selection (e.g. language change alert in preferences). Only relevant to Windows.
+		document.addEventListener("keydown", (event) => {
+			let target = event.originalTarget;
+			if (target.tagName !== "menulist") return;
+			if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+			if (!(["ArrowUp", "ArrowDown"].includes(event.key) && target.open)) return;
+			
+			// Locate the deepest open menu
+			let currentMenu = target;
+			while (currentMenu.activeChild?.tagName === "menu" && currentMenu.activeChild.open) {
+				currentMenu = currentMenu.activeChild;
+			}
+
+			// Determine which menu item should be marked as selected
+			let nextItem;
+			// If the menu has no active child, arrowDown will select the first item
+			if (!currentMenu.activeChild) {
+				if (event.key !== "ArrowDown") return;
+				nextItem = currentMenu.querySelector("menuitem,menu");
+			}
+			// If there is an active child, arrowUp/Down will move to the previous/next item
+			else {
+				let node = currentMenu.activeChild;
+				do {
+					node = event.key === "ArrowUp" ? node.previousElementSibling : node.nextElementSibling;
+				} while (node && !["menu", "menuitem"].includes(node.tagName));
+				nextItem = node;
+			}
+
+			// Set the item as active to highlight it
+			if (nextItem) {
+				currentMenu.activeChild = nextItem;
+			}
+			// Prevent the default event handling which fires the 'command' event
+			event.stopImmediatePropagation();
+		}, true);
+	}
+
 	// inject custom CSS into FF built-in custom elements
 	const InjectCSSConfig = {
 		global: [
