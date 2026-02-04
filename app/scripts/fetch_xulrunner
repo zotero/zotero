@@ -41,8 +41,6 @@ DONE
 	exit 1
 }
 
-VERSION=$(cat "$APP_ROOT_DIR/../version")
-
 BUILD_MAC=0
 BUILD_WIN=0
 BUILD_LINUX=0
@@ -248,9 +246,15 @@ function modify_omni {
 	replace_line "id: TOOLKIT_ID," "id: '$APP_ID'," modules/addons/XPIInstall.sys.mjs
 
 	# Set strictCompatibility to false on beta/dev/source builds to skip strict_max_version check
-	if [[ "$VERSION" == *"-beta"* ]] || [[ "$VERSION" == *"-dev"* ]] || [[ "$VERSION" == *"SOURCE"* ]]; then
-		replace_line 'addon.strictCompatibility = true;' 'addon.strictCompatibility = false;' modules/addons/XPIInstall.sys.mjs
-	fi
+	replace_line 'addon.strictCompatibility = true;' \
+		'let version = Services.appinfo.version;
+		addon.strictCompatibility = !version.includes("-beta") && !version.includes("-dev") && !version.includes("SOURCE");' modules/addons/XPIInstall.sys.mjs
+	replace_line 'return gStrictCompatibility;' \
+		'let version = Services.appinfo.version;
+		if (version.includes("-beta") || version.includes("-dev") || version.includes("SOURCE")) {
+			return false;
+		}
+		return gStrictCompatibility;' modules/AddonManager.sys.mjs
 	
 	# Accept zotero@chnm.gmu.edu for target application to allow Zotero 6 plugins to remain
 	# installed in Zotero 7
