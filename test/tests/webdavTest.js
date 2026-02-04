@@ -60,7 +60,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		
 		httpd.registerPathHandler(path, {
 			handle: function (request, response) {
-				// Always handle OPTIONS with auth (for cacheCredentials calls)
+				// Always handle OPTIONS with auth (for checkServer calls)
 				if (request.method == 'OPTIONS') {
 					if (!checkAuth(request)) {
 						send401(response);
@@ -70,7 +70,29 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					response.setStatusLine(null, 200, "OK");
 					return;
 				}
-				
+
+				// Handle PROPFIND with auth (for cacheCredentials() calls) unless a
+				// custom handler is registered
+				if (request.method == 'PROPFIND' && !pathHandlers[path]?.PROPFIND) {
+					if (!checkAuth(request)) {
+						send401(response);
+						return;
+					}
+					response.setHeader('Content-Type', 'text/xml; charset="utf-8"', false);
+					response.setStatusLine(null, 207, "Multi-Status");
+					response.write('<?xml version="1.0" encoding="utf-8"?>'
+						+ '<D:multistatus xmlns:D="DAV:">'
+						+ '<D:response>'
+						+ `<D:href>${path}</D:href>`
+						+ '<D:propstat>'
+						+ '<D:prop><D:getcontentlength/></D:prop>'
+						+ '<D:status>HTTP/1.1 200 OK</D:status>'
+						+ '</D:propstat>'
+						+ '</D:response>'
+						+ '</D:multistatus>');
+					return;
+				}
+
 				let methodHandlers = pathHandlers[path];
 				let methodHandler = methodHandlers && methodHandlers[request.method];
 				
@@ -728,12 +750,12 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			
 			await OS.File.remove(zipPath);
 			
-			// OPTIONS request to cache credentials
+			// PROPFIND request to cache credentials
 			httpd.registerPathHandler(
 				`${davBasePath}zotero/`,
 				{
 					handle: function (request, response) {
-						if (request.method == 'OPTIONS') {
+						if (request.method == 'PROPFIND') {
 							// Force Basic Auth
 							if (!request.hasHeader('Authorization')) {
 								response.setStatusLine(null, 401, null);
@@ -746,8 +768,18 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 								return;
 							}
 							response.setHeader('Set-Cookie', 'foo=bar', false);
-							response.setHeader('DAV', '1', false);
-							response.setStatusLine(null, 200, "OK");
+							response.setHeader('Content-Type', 'text/xml; charset="utf-8"', false);
+							response.setStatusLine(null, 207, "Multi-Status");
+							response.write('<?xml version="1.0" encoding="utf-8"?>'
+								+ '<D:multistatus xmlns:D="DAV:">'
+								+ '<D:response>'
+								+ `<D:href>${davBasePath}zotero/</D:href>`
+								+ '<D:propstat>'
+								+ '<D:prop><D:getcontentlength/></D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+								+ '</D:propstat>'
+								+ '</D:response>'
+								+ '</D:multistatus>');
 						}
 					}
 				}
@@ -1300,7 +1332,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			});
 			
 			var results = await controller.purgeOrphanedStorageFiles();
-			assertRequestCount(7);
+			assertRequestCount(8);
 			
 			assert.sameMembers(
 				results.deleted,

@@ -253,12 +253,20 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		
 		Zotero.debug("Caching WebDAV credentials");
 		
+		let xmlstr = "<propfind xmlns='DAV:'><prop>"
+			+ "<getcontentlength/>"
+			+ "</prop></propfind>";
 		try {
-			var req = await Zotero.HTTP.request(
-				"OPTIONS",
+			await Zotero.HTTP.request(
+				"PROPFIND",
 				this.rootURI,
 				{
-					successCodes: [200, 204, 404],
+					body: xmlstr,
+					headers: {
+						Depth: 0,
+						"Content-Type": "text/xml; charset=utf-8"
+					},
+					successCodes: [207, 404],
 					errorDelayIntervals: this.ERROR_DELAY_INTERVALS,
 					errorDelayMax: this.ERROR_DELAY_MAX,
 					onAuthorizationHeader: (authorization) => {
@@ -267,7 +275,6 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					},
 				}
 			);
-			
 			if (this._channelAuthorization) {
 				Zotero.debug("Authorization header cached");
 			}
@@ -278,7 +285,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		catch (e) {
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 				let msg = "HTTP " + e.status + " error from WebDAV server "
-					+ "for OPTIONS request";
+					+ "for PROPFIND request";
 				Zotero.logError(msg);
 				throw new Error(this.defaultErrorRestart);
 			}
