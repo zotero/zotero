@@ -336,15 +336,29 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 	}
 
 
-	// Space should open the popup of menulist
+	// Space on menulist should open the popup
+	// Space on menulist option will select it, same as Enter
 	document.addEventListener("keydown", (event) => {
 		let target = event.originalTarget;
 		if (target.tagName !== "menulist") return;
 		if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
-		if (event.key === " ") {
+		if (event.key !== " ") return;
+
+		if (target.open) {
+			target.activeChild.doCommand();
+			// Timeout to avoid empty context menu behind an alert or dialog if one
+			// appears on 'command' event on windows (https://github.com/zotero/zotero/issues/5633)
+			setTimeout(() => {
+				target.open = false;
+			});
+		}
+		else {
 			target.open = true;
 		}
-	});
+		event.stopPropagation();
+		event.preventDefault();
+	}, true);
+
 	if (Zotero.isWin) {
 		// ArrowUp/ArrowDown should change the active menuitem without triggering the command event.
 		// Otherwise navigating menulist options via keyboard triggers alerts meant to fire after
