@@ -2205,6 +2205,29 @@ Zotero.Item.prototype.numChildren = function (includeTrashed) {
 	return this.numNotes(includeTrashed) + this.numAttachments(includeTrashed);
 }
 
+/**
+ * Get all descendents of an item.
+ * @param	{Boolean}	includeTrashed		Include trashed items
+ * @return	{Zotero.Item[]} Array of Zotero.Item objects, whose parent, or parent's parent, is this item
+ */
+Zotero.Item.prototype.getAllDescendents = function (includeTrashed) {
+	let attachments = [];
+	let notes = [];
+	let annotations = [];
+	if (this.isRegularItem()) {
+		attachments = Zotero.Items.get(this.getAttachments(includeTrashed));
+		notes = Zotero.Items.get(this.getNotes(includeTrashed));
+		for (let attachment of attachments) {
+			if (!attachment.isFileAttachment()) continue;
+			annotations = annotations.concat(attachment.getAnnotations(includeTrashed));
+		}
+	}
+	else if (this.isFileAttachment()) {
+		annotations = this.getAnnotations(includeTrashed);
+	}
+	return [...attachments, ...notes, ...annotations];
+};
+
 
 /**
  * @return	{String|FALSE}	 Key of the parent item for an attachment or note, or FALSE if none
