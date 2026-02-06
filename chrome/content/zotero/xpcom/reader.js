@@ -272,7 +272,7 @@ class ReaderInstance {
 			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
-				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
+				return this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
 			},
 			onAddToNote: (annotations) => {
 				this._addToNote(annotations);
@@ -1207,10 +1207,12 @@ class ReaderInstance {
 	}
 
 	async _openContextMenu({ x, y, itemGroups }) {
+		let { resolve, promise } = Zotero.Promise.defer();
 		let popup = this._window.document.createXULElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
 			popup.remove();
+			resolve();
 		});
 		let appendItems = (parentNode, itemGroups) => {
 			for (let itemGroup of itemGroups) {
@@ -1249,6 +1251,7 @@ class ReaderInstance {
 		let rect = this._iframe.getBoundingClientRect();
 		rect = this._window.windowUtils.toScreenRectInCSSUnits(rect.x + x, rect.y + y, 0, 0);
 		setTimeout(() => popup.openPopupAtScreen(rect.x, rect.y, true));
+		return promise;
 	}
 
 	_handleReaderTextboxContextMenuOpen = (event) => {
