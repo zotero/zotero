@@ -690,6 +690,7 @@ class ReaderInstance {
 	async updateTitle() {
 		this._title = await this._item.getTabTitle();
 		this._setTitleValue(this._title);
+		this._internalReader?.setTitle(this._title);
 	}
 
 	async setAnnotations(items) {
