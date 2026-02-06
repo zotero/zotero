@@ -32,6 +32,9 @@ Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, isOpe
 	this.level = level || 0;
 	this.isOpen = isOpen || false;
 	this.onUnload = null;
+	this.searchText = "";
+	this.searchMode = "search";
+	this.tags = [];
 }
 
 Zotero.CollectionTreeRow.IDCounter = 0;

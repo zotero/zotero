@@ -52,27 +52,6 @@ XPCOMUtils.defineLazyPreferenceGetter(
 const CHILD_INDENT = 16;
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
-const STUB_COLLECTION_TREE_ROW = {
-	view: {},
-	ref: {},
-	visibilityGroup: "",
-	isSearchMode: () => false,
-	getItems: async () => [],
-	isLibrary: () => false,
-	isCollection: () => false,
-	isSearch: () => false,
-	isPublications: () => false,
-	isDuplicates: () => false,
-	isFeed: () => false,
-	isFeeds: () => false,
-	isFeedsOrFeed: () => false,
-	isShare: () => false,
-	isTrash: () => false,
-	isBucket: () => false,
-	isUnfiled: () => false,
-	isRetracted: () => false,
-	setSearch: () => {}
-};
 
 class ItemTreeRow {
 	constructor(ref, level, isOpen) {
@@ -2985,4 +2964,3 @@ module.exports = ItemTree;
 module.exports.ItemTreeRow = ItemTreeRow;
 module.exports.ItemTreeRowProvider = ItemTreeRowProvider;
 module.exports.ItemTreeRowRenderer = ItemTreeRowRenderer;
-module.exports.STUB_COLLECTION_TREE_ROW = STUB_COLLECTION_TREE_ROW;

@@ -42,11 +42,46 @@ const { getDragTargetOrient } = require("components/utils");
 const React = require('react');
 const ReactDOM = require('react-dom');
 const ItemTree = require('zotero/itemTree');
-const { ItemTreeRowProvider, ItemTreeRow, STUB_COLLECTION_TREE_ROW } = ItemTree;
+const { ItemTreeRowProvider, ItemTreeRow } = ItemTree;
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
+
+// Minimal CollectionTreeRow-like object for callers that pass plain objects to
+// changeCollectionTreeRow()/setCollectionTreeRow() (e.g. advanced search).
+const STUB_COLLECTION_TREE_ROW = {
+	// Properties set by CollectionTreeRow constructor
+	view: null,
+	type: null,
+	ref: {},
+	level: 0,
+	isOpen: false,
+	onUnload: null,
+	searchText: "",
+	searchMode: "search",
+	tags: [],
+	
+	// Extra props/methods expected by CollectionViewItemTree
+	visibilityGroup: "",
+	getItems: async () => [],
+	isSearchMode: () => false,
+	isLibrary: () => false,
+	isCollection: () => false,
+	isSearch: () => false,
+	isPublications: () => false,
+	isDuplicates: () => false,
+	isFeed: () => false,
+	isFeeds: () => false,
+	isFeedsOrFeed: () => false,
+	isShare: () => false,
+	isTrash: () => false,
+	isBucket: () => false,
+	isUnfiled: () => false,
+	isRetracted: () => false,
+	setSearch: () => false,
+	setTags: () => false
+};
 
 class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	constructor(itemTree) {
@@ -59,7 +94,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 * @returns {boolean}
 	 */
 	hasQuickSearch() {
-		return this.collectionTreeRow.searchText.length > 0;
+		return this.collectionTreeRow?.searchText.length > 0;
 	}
 
 	/**
