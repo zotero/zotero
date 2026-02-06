@@ -658,11 +658,16 @@ class EditorInstance {
 					this._showInLibrary(this._item.id);
 					return;
 				}
+				case 'openTab': {
+					let zp = Zotero.getActiveZoteroPane();
+					zp.openNote(this._item.id, { openInWindow: false });
+					return;
+				}
 				case 'openWindow': {
 					// TODO: Can we can avoid creating empty note just to open it in a new window?
 					await this._ensureNoteCreated();
 					let zp = Zotero.getActiveZoteroPane();
-					zp.openNoteWindow(this._item.id);
+					zp.openNote(this._item.id, { openInWindow: true });
 					return;
 				}
 				case 'update': {
