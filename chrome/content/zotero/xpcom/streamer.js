@@ -49,16 +49,69 @@ Zotero.Streamer_Module.prototype = {
 	_reconnect: true,
 	_retry: null,
 	_subscriptions: new Set(),
-	
-	
+	_topicListeners: new Map(),
+
+
 	init: function () {
 		Zotero.Prefs.registerObserver('streaming.enabled', (val) => this._update());
 		Zotero.Prefs.registerObserver('automaticScraperUpdates', (val) => this._update());
 		Zotero.Prefs.registerObserver('sync.autoSync', (val) => this._update());
 		Zotero.uiReadyPromise.then(() => this._update());
 	},
-	
-	
+
+
+	/**
+	 * Subscribe to one or more topics with a callback
+	 *
+	 * @param {String[]} topics
+	 * @param {Function} callback
+	 * @return {Boolean} - true if subscriptions were sent immediately, false if they will be
+	 *     sent on connect/reconnect
+	 */
+	subscribe: function (topics, callback) {
+		for (let topic of topics) {
+			this._topicListeners.set(topic, callback);
+		}
+		if (!this._socket || this._socket.readyState !== this._socket.OPEN || !this._ready) {
+			return false;
+		}
+		this._sendSubscriptions(topics);
+		return true;
+	},
+
+
+	/**
+	 * Unsubscribe from one or more topics
+	 *
+	 * @param {String[]} topics
+	 */
+	unsubscribe: function (topics) {
+		for (let topic of topics) {
+			this._topicListeners.delete(topic);
+		}
+		if (!this._socket || this._socket.readyState !== this._socket.OPEN) {
+			return;
+		}
+		let subscriptions = topics.map(t => ({ topic: t }));
+		let data = JSON.stringify({
+			action: "deleteSubscriptions",
+			subscriptions
+		});
+		Zotero.debug("WebSocket message send: " + data);
+		this._socket.send(data);
+	},
+
+
+	_sendSubscriptions: function (topics) {
+		let data = JSON.stringify({
+			action: "createSubscriptions",
+			subscriptions: [{ topics }]
+		});
+		Zotero.debug("WebSocket message send: " + data);
+		this._socket.send(data);
+	},
+
+
 	_update: async function () {
 		if (!this._isEnabled()) {
 			this._disconnect();
@@ -125,6 +178,11 @@ Zotero.Streamer_Module.prototype = {
 			});
 			Zotero.debug("WebSocket message send: " + this._hideAPIKey(data));
 			this._socket.send(data);
+		}
+
+		// Re-subscribe any topic listeners (handles initial connect and reconnect)
+		if (this._topicListeners.size) {
+			this._sendSubscriptions([...this._topicListeners.keys()]);
 		}
 	},
 	
@@ -228,6 +286,16 @@ Zotero.Streamer_Module.prototype = {
 								libraries: [library.libraryID]
 							});
 						}
+					}
+				}
+				// Topic-specific listener
+				else if (data.topic && this._topicListeners.has(data.topic)) {
+					let callback = this._topicListeners.get(data.topic);
+					try {
+						callback(data);
+					}
+					catch (e) {
+						Zotero.logError(e);
 					}
 				}
 				// TODO: Handle this in other ways?
