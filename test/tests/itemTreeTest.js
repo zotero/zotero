@@ -497,10 +497,8 @@ describe("Zotero.ItemTree", function () {
 			item.setField('title', 'no select on modify');
 			await item.saveTx();
 			
-			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
-			// in notify()) as a no-op
-			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
-			assert.isFalse(await win.ZoteroPane.itemSelected.returnValues[0]);
+			// itemSelected should not have been called
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 0);
 			
 			// Modified item should not be selected
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
@@ -523,8 +521,8 @@ describe("Zotero.ItemTree", function () {
 			item.setField('title', 'maintain selection on modify');
 			await item.saveTx();
 			
-			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
-			// in notify()) as a no-op
+			// itemSelected should have been called once from restoreSelection
+			// due to potential resort on modification
 			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
 			assert.isFalse(await win.ZoteroPane.itemSelected.returnValues[0]);
 			
@@ -982,6 +980,18 @@ describe("Zotero.ItemTree", function () {
 				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
 				assert.equal(noteRowIndex, secondItemRowIndex + 1);
 			});
+
+			it("should not expand an empty parent item when attachment is added", async function () {
+				let item2RowIndex = itemsView.getRowIndexByID(item2.id);
+				assert.isFalse(itemsView.isContainerOpen(item2RowIndex));
+
+				// Add attachment to item2
+				await importFileAttachment('test.png', { parentItemID: item2.id });
+
+				// Verify item2 is still collapsed
+				item2RowIndex = itemsView.getRowIndexByID(item2.id);
+				assert.isFalse(itemsView.isContainerOpen(item2RowIndex));
+			});
 		});
 		
 		describe("Trash", function () {
@@ -1289,8 +1299,6 @@ describe("Zotero.ItemTree", function () {
 			})
 			
 			await promise;
-			// Attachment add triggers multiple notifications and multiple select events
-			await itemsView.waitForSelect();
 			var items = itemsView.getSelectedItems();
 			var path = await items[0].getFilePathAsync();
 			assert.equal(
