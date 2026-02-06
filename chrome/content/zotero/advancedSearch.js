@@ -39,6 +39,7 @@ var ZoteroAdvancedSearch = new function () {
 
 	var _searchBox;
 	var _libraryID;
+	var _searchCounter = 0;
 	
 	async function onLoad() {
 		_searchBox = document.getElementById('zotero-search-box');
@@ -71,6 +72,7 @@ var ZoteroAdvancedSearch = new function () {
 		});
 
 		await this.itemsView.changeCollectionTreeRow({
+			id: 'advanced-search-' + _searchCounter++,
 			ref: _searchBox.search,
 			visibilityGroup: 'default',
 			isSearchMode: () => true,
@@ -102,6 +104,7 @@ var ZoteroAdvancedSearch = new function () {
 		_searchBox.active = true;
 		
 		return this.itemsView.changeCollectionTreeRow({
+			id: 'advanced-search-' + _searchCounter++,
 			ref: _searchBox.search,
 			visibilityGroup: 'default',
 			isSearchMode: () => true,
