@@ -302,8 +302,8 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations			"Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote					"Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations	"Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInTab "Open Note in New Tab">
-<!ENTITY zotero.context.editInWindow "Open Note in New Window">
+<!ENTITY zotero.context.editInTab							"Open Note in New Tab">
+<!ENTITY zotero.context.editInWindow						"Open Note in New Window">
 
 <!ENTITY zotero.pdfReader.firstPage							"First Page">
 <!ENTITY zotero.pdfReader.lastPage							"Last Page">
