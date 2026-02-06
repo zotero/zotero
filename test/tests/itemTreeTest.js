@@ -300,8 +300,61 @@ describe("Zotero.ItemTree", function () {
 		})
 	})
 	
-	describe.skip("#sort()", function () {
-		it("should ignore invalid secondary-sort field", async function () {
+	describe("#_saveOpenState() / #_restoreOpenState()", function () {
+		it("should restore open containers and keep closed containers closed", async function () {
+			let item1 = await createDataObject('item', { title: 'Item 1' });
+			let att1 = await importFileAttachment('test.pdf', { parentItemID: item1.id });
+			let ann1 = await createAnnotation('highlight', att1);
+			
+			let item2 = await createDataObject('item', { title: 'Item 2' });
+			await importFileAttachment('test.png', { parentItemID: item2.id });
+			
+			let item3 = await createDataObject('item', { title: 'Item 3' });
+			let att3 = await importFileAttachment('test.png', { parentItemID: item3.id });
+			
+			await waitForItemsLoad(win);
+			
+			let rowProvider = itemsView.rowProvider;
+			// Deep nesting for item1: open item1 -> attachment -> annotation path
+			assert.isTrue(rowProvider._expandToItem(ann1.id));
+			// Open item3 only
+			assert.isTrue(rowProvider._expandToItem(att3.id));
+			
+			let item1Row = itemsView.getRowIndexByID(item1.id);
+			let att1Row = itemsView.getRowIndexByID(att1.id);
+			let item2Row = itemsView.getRowIndexByID(item2.id);
+			let item3Row = itemsView.getRowIndexByID(item3.id);
+			assert.isTrue(itemsView.isContainerOpen(item1Row));
+			assert.isTrue(itemsView.isContainerOpen(att1Row));
+			assert.isFalse(itemsView.isContainerOpen(item2Row));
+			assert.isTrue(itemsView.isContainerOpen(item3Row));
+			
+			let openItemIDs = rowProvider._saveOpenState();
+			
+			// _saveOpenState closes top-level open containers
+			item1Row = itemsView.getRowIndexByID(item1.id);
+			item2Row = itemsView.getRowIndexByID(item2.id);
+			item3Row = itemsView.getRowIndexByID(item3.id);
+			assert.isFalse(itemsView.isContainerOpen(item1Row));
+			assert.isFalse(itemsView.isContainerOpen(item2Row));
+			assert.isFalse(itemsView.isContainerOpen(item3Row));
+			assert.isFalse(itemsView.getRowIndexByID(att1.id));
+			
+			rowProvider._restoreOpenState(openItemIDs);
+			
+			item1Row = itemsView.getRowIndexByID(item1.id);
+			att1Row = itemsView.getRowIndexByID(att1.id);
+			item2Row = itemsView.getRowIndexByID(item2.id);
+			item3Row = itemsView.getRowIndexByID(item3.id);
+			assert.isTrue(itemsView.isContainerOpen(item1Row));
+			assert.isTrue(itemsView.isContainerOpen(att1Row));
+			assert.isFalse(itemsView.isContainerOpen(item2Row));
+			assert.isTrue(itemsView.isContainerOpen(item3Row));
+		});
+	});
+	
+	describe("#sort()", function () {
+		it.skip("should ignore invalid secondary-sort field", async function () {
 			await createDataObject('item', { title: 'A' });
 			await createDataObject('item', { title: 'A' });
 			
@@ -317,7 +370,7 @@ describe("Zotero.ItemTree", function () {
 			assert.isUndefined(Zotero.Prefs.get('secondarySort.title'));
 		});
 		
-		it("should ignore invalid fallback-sort field", async function () {
+		it.skip("should ignore invalid fallback-sort field", async function () {
 			Zotero.Prefs.clear('fallbackSort');
 			var originalFallback = Zotero.Prefs.get('fallbackSort');
 			Zotero.Prefs.set('fallbackSort', 'invalidField,' + originalFallback);
@@ -329,6 +382,28 @@ describe("Zotero.ItemTree", function () {
 			var e = await getPromiseError(zp.itemsView.sort());
 			assert.isFalse(e);
 			assert.equal(Zotero.Prefs.get('fallbackSort'), originalFallback);
+		});
+		
+		it.skip("should preserve open container state when sorting", async function () {
+			let parentItem = await createDataObject('item', { title: 'Parent' });
+			let attachment = await importFileAttachment('test.pdf', { parentItemID: parentItem.id });
+			await createAnnotation('highlight', attachment);
+			
+			await waitForItemsLoad(win);
+			itemsView.expandAllRows();
+			await waitForItemsLoad(win);
+			
+			let parentRow = itemsView.getRowIndexByID(parentItem.id);
+			let attachmentRow = itemsView.getRowIndexByID(attachment.id);
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			assert.isTrue(itemsView.isContainerOpen(attachmentRow));
+			
+			await itemsView.sort();
+			
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			attachmentRow = itemsView.getRowIndexByID(attachment.id);
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			assert.isTrue(itemsView.isContainerOpen(attachmentRow));
 		});
 	});
 	
@@ -1767,6 +1842,111 @@ describe("Zotero.ItemTree", function () {
 		});
 	});
 	
+	describe("#_expandToItem()", function () {
+		it("should expand all ancestors for a nested annotation", async function () {
+			let parentItem = await createDataObject('item', { title: 'Parent Item' });
+			let attachment = await importFileAttachment('test.pdf', { parentItemID: parentItem.id });
+			let annotation = await createAnnotation('highlight', attachment);
+			await waitForItemsLoad(win);
+			
+			itemsView.collapseAllRows();
+			await waitForItemsLoad(win);
+			
+			let collapsedParentRow = itemsView.getRowIndexByID(parentItem.id);
+			assert.isNumber(collapsedParentRow);
+			assert.isFalse(itemsView.isContainerOpen(collapsedParentRow));
+			assert.isFalse(itemsView.getRowIndexByID(attachment.id));
+			assert.isFalse(itemsView.getRowIndexByID(annotation.id));
+			
+			let expanded = itemsView.rowProvider._expandToItem(annotation.id);
+			assert.isTrue(expanded);
+			
+			let parentRow = itemsView.getRowIndexByID(parentItem.id);
+			let attachmentRow = itemsView.getRowIndexByID(attachment.id);
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			assert.isTrue(itemsView.isContainerOpen(attachmentRow));
+			assert.isNumber(itemsView.getRowIndexByID(annotation.id));
+		});
+	});
+	
+	describe("#setCollectionTreeRow()", function () {
+		it("should no-op when setting the same row", async function () {
+			let rowProvider = itemsView.rowProvider;
+			let currentRow = rowProvider.collectionTreeRow;
+			assert.ok(currentRow);
+			
+			let refreshSpy = sinon.spy(rowProvider, 'refresh');
+			
+			try {
+				await rowProvider.setCollectionTreeRow(currentRow);
+				assert.equal(refreshSpy.callCount, 0);
+			}
+			finally {
+				refreshSpy.restore();
+			}
+		});
+	});
+	
+	describe("#setFilter()", function () {
+		it("should refresh when search filter value changes", async function () {
+			let rowProvider = itemsView.rowProvider;
+			let refreshSpy = sinon.spy(rowProvider, 'refresh');
+			let setSearchStub = sinon.stub(rowProvider.collectionTreeRow, 'setSearch').returns(true);
+			
+			try {
+				await rowProvider.setFilter('search', 'changed-search');
+				assert.isTrue(setSearchStub.calledOnceWithExactly('changed-search'));
+				assert.isTrue(refreshSpy.calledOnceWithExactly(false, true));
+			}
+			finally {
+				setSearchStub.restore();
+				refreshSpy.restore();
+			}
+		});
+		
+		it("should not refresh when filter value is unchanged", async function () {
+			let rowProvider = itemsView.rowProvider;
+			let refreshSpy = sinon.spy(rowProvider, 'refresh');
+			let setSearchStub = sinon.stub(rowProvider.collectionTreeRow, 'setSearch').returns(false);
+			
+			try {
+				await rowProvider.setFilter('search', 'unchanged-search');
+				assert.equal(refreshSpy.callCount, 0);
+			}
+			finally {
+				setSearchStub.restore();
+				refreshSpy.restore();
+			}
+		});
+	});
+	
+	describe("#handleRowModelUpdate()", function () {
+		it("should clear selection and return false when loading is true", async function () {
+			await itemsView.waitForLoad();
+			let item = await createDataObject('item');
+			await waitForItemsLoad(win);
+			
+			let row = itemsView.getRowIndexByID(item.id);
+			assert.isNumber(row);
+			itemsView.selection.select(row);
+			assert.equal(itemsView.selection.count, 1);
+			
+			let setMessageSpy = sinon.spy(itemsView, 'setItemsPaneMessage');
+			
+			try {
+				let done = await itemsView.handleRowModelUpdate([], { loading: true });
+				assert.isFalse(done);
+				assert.equal(itemsView.selection.count, 0);
+				assert.equal(itemsView.selection.focused, 0);
+				assert.isTrue(setMessageSpy.calledOnce);
+				assert.equal(setMessageSpy.firstCall.args[0], Zotero.getString('pane.items.loading'));
+			}
+			finally {
+				setMessageSpy.restore();
+				await itemsView.clearItemsPaneMessage();
+			}
+		});
+	});
 	
 	describe("#_restoreSelection()", function () {
 		it("should reselect collection in trash", async function () {
@@ -1787,6 +1967,28 @@ describe("Zotero.ItemTree", function () {
 			assert.lengthOf(zp.itemsView.getSelectedObjects(), 0);
 			zp.itemsView._restoreSelection(selection);
 			assert.lengthOf(zp.itemsView.getSelectedObjects(), 2);
+		});
+		
+		it("should not expand collapsed parents when expandCollapsedParents is false", async function () {
+			let parentItem = await createDataObject('item', { title: 'Parent Item' });
+			let childAttachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			await waitForItemsLoad(win);
+			
+			await itemsView.selectItem(childAttachment.id);
+			let parentRow = itemsView.getRowIndexByID(parentItem.id);
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			
+			itemsView.rowProvider._closeContainer(parentRow);
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			assert.isFalse(itemsView.isContainerOpen(parentRow));
+			
+			itemsView.selection.clearSelection();
+			await itemsView._restoreSelection([childAttachment], false, false);
+			
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			assert.isFalse(itemsView.isContainerOpen(parentRow));
+			assert.isFalse(itemsView.getRowIndexByID(childAttachment.id));
+			assert.sameMembers(itemsView.getSelectedItems(true), [parentItem.id]);
 		});
 	});
 
