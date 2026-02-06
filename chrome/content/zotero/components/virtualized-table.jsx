@@ -272,8 +272,9 @@ class TreeSelection {
 	}
 
 	set selectEventsSuppressed(val) {
+		let valChanged = val !== this._selectEventsSuppressed;
 		this._selectEventsSuppressed = val;
-		if (!val) {
+		if (!val && valChanged) {
 			this._updateTree();
 			if (this._tree.invalidate) {
 				this._tree.invalidate();
