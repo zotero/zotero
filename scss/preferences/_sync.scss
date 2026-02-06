@@ -29,8 +29,20 @@
 	margin-inline-end: 10px;
 }
 
-#zotero-prefpane-sync #sync-auth-button {
+#zotero-prefpane-sync #sync-login-button {
 	margin-inline-start: 0;
+}
+
+#zotero-prefpane-sync #sync-login-pending {
+	gap: 6px;
+
+	button {
+		margin-block: 0;
+	}
+}
+
+#zotero-prefpane-sync #sync-login-status {
+	font-style: italic;
 }
 
 #zotero-prefpane-sync #sync-status-indicator
