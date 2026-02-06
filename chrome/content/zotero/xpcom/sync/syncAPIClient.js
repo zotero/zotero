@@ -547,8 +547,122 @@ Zotero.Sync.APIClient.prototype = {
 	deleteAPIKey: async function () {
 		await this.makeRequest("DELETE", this.baseURL + "keys/current");
 	},
-	
-	
+
+
+	async getReadAloudVoices() {
+		let uri = this.baseURL + "tts/voices";
+		let noAPIKey = !this.apiKey;
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "json",
+				noAPIKey,
+				errorDelayMax: 8000,
+			});
+
+			let creditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
+			if (isNaN(creditsRemaining)) {
+				creditsRemaining = null;
+			}
+
+			return {
+				voices: xmlhttp.response ?? [],
+				creditsRemaining,
+			};
+		}
+		catch (e) {
+			Zotero.logError(e);
+			
+			return {
+				voices: [],
+				creditsRemaining: null,
+			};
+		}
+	},
+
+
+	async getReadAloudAudio(text, voiceID, lang) {
+		let params = new URLSearchParams();
+		params.set('text', text);
+		params.set('voice', voiceID);
+		params.set('lang', lang);
+		let uri = this.baseURL + "tts/speak?" + params;
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "json",
+				errorDelayMax: 8000,
+			});
+
+			let creditsRemaining = parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
+			if (isNaN(creditsRemaining)) {
+				creditsRemaining = null;
+			}
+
+			let { audio, timepoints } = xmlhttp.response;
+			return {
+				audio,
+				creditsRemaining,
+			};
+		}
+		catch (e) {
+			Zotero.logError(e);
+			
+			let creditsRemaining = parseInt(e.xmlhttp?.getResponseHeader('Zotero-TTS-Credits-Remaining'));
+			if (isNaN(creditsRemaining)) {
+				creditsRemaining = null;
+			}
+
+			let error;
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status === 402) {
+				error = 'quota-exceeded';
+			}
+			else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				error = 'network';
+			}
+			else {
+				error = 'unknown';
+			}
+			return {
+				audio: null,
+				creditsRemaining,
+				error,
+			};
+		}
+	},
+
+
+	async getReadAloudSampleAudio(voiceID, lang) {
+		let params = new URLSearchParams();
+		params.set('voice', voiceID);
+		params.set('lang', lang);
+		let uri = this.baseURL + "tts/sample?" + params;
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "json",
+				noAPIKey: true,
+				errorDelayMax: 8000,
+			});
+			
+			let { audio } = xmlhttp.response;
+			return {
+				audio,
+			};
+		}
+		catch (e) {
+			let error;
+			if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				error = 'network';
+			}
+			else {
+				error = 'unknown';
+			}
+			return {
+				audio: null,
+				error,
+			};
+		}
+	},
+
+
 	buildRequestURI: function (params) {
 		var uri = this.baseURL;
 		

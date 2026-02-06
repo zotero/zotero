@@ -241,9 +241,38 @@ class ReaderInstance {
 			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
 			sidebarView: Zotero.Prefs.get('reader.lastSidebarTab'),
+			enableReadAloud: Zotero.isBetaBuild || Zotero.isDevBuild || Zotero.isSourceBuild,
+			readAloudVoices: this._getReadAloudVoices(),
+			readAloudRemoteInterface: {
+				// Wrap return values in child window Promises to avoid permissions errors
+
+				getVoices: () => {
+					return new this._iframeWindow.Promise(async (resolve) => {
+						let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+						resolve(Cu.cloneInto(await client.getReadAloudVoices(), this._iframeWindow));
+					});
+				},
+
+				getAudio: (segment, voice, lang) => {
+					return new this._iframeWindow.Promise(async (resolve) => {
+						let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+						resolve(Cu.cloneInto(await client.getReadAloudAudio(segment.text, voice.id, lang), this._iframeWindow));
+					});
+				},
+
+				getSampleAudio: (voice, lang) => {
+					return new this._iframeWindow.Promise(async (resolve) => {
+						let client = Zotero.Sync.Runner.getAPIClient();
+						resolve(Cu.cloneInto(await client.getReadAloudSampleAudio(voice.id, lang), this._iframeWindow));
+					});
+				},
+			},
+			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
-				this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
+				return this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
 			},
 			onAddToNote: (annotations) => {
 				this._addToNote(annotations);
@@ -596,7 +625,13 @@ class ReaderInstance {
 			},
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
-			}
+			},
+			onSetReadAloudVoice: this._setReadAloudVoice.bind(this),
+			onSetReadAloudStatus: this._setReadAloudStatus.bind(this),
+			onLogIn: () => {
+				// This causes a segfault without the timeout...
+				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync'));
+			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
@@ -614,6 +649,7 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.note', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.text', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.image', this._handleAutoDisableToolPrefChange),
+			Zotero.Prefs.registerObserver('reader.readAloudVoices', this._handleReadAloudVoicesPrefChange),
 		];
 
 		return true;
@@ -1083,6 +1119,10 @@ class ReaderInstance {
 		this._internalReader.setAutoDisableTextTool(Zotero.Prefs.get('reader.autoDisableTool.text'));
 		this._internalReader.setAutoDisableImageTool(Zotero.Prefs.get('reader.autoDisableTool.image'));
 	};
+	
+	_handleReadAloudVoicesPrefChange = () => {
+		this._internalReader.setReadAloudVoices(Cu.cloneInto(this._getReadAloudVoices(), this._iframeWindow));
+	};
 
 	_dataURLtoBlob(dataurl) {
 		let parts = dataurl.split(',');
@@ -1167,10 +1207,12 @@ class ReaderInstance {
 	}
 
 	async _openContextMenu({ x, y, itemGroups }) {
+		let { resolve, promise } = Zotero.Promise.defer();
 		let popup = this._window.document.createXULElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
 			popup.remove();
+			resolve();
 		});
 		let appendItems = (parentNode, itemGroups) => {
 			for (let itemGroup of itemGroups) {
@@ -1209,6 +1251,7 @@ class ReaderInstance {
 		let rect = this._iframe.getBoundingClientRect();
 		rect = this._window.windowUtils.toScreenRectInCSSUnits(rect.x + x, rect.y + y, 0, 0);
 		setTimeout(() => popup.openPopupAtScreen(rect.x, rect.y, true));
+		return promise;
 	}
 
 	_handleReaderTextboxContextMenuOpen = (event) => {
@@ -1418,6 +1461,26 @@ class ReaderInstance {
 			return null;
 		}
 	}
+	
+	_getReadAloudVoices() {
+		try {
+			return JSON.parse(Zotero.Prefs.get('reader.readAloudVoices'));
+		}
+		catch {
+			return {};
+		}
+	}
+	
+	_setReadAloudVoice(lang, region, voice, speed) {
+		Zotero.Prefs.set('reader.readAloudVoices', JSON.stringify({
+			...this._getReadAloudVoices(),
+			[lang]: { region, voice, speed }
+		}));
+	}
+	
+	_setReadAloudStatus(_status) {
+		// Do nothing in the base class -- instance types override this
+	}
 }
 
 class ReaderTab extends ReaderInstance {
@@ -1591,6 +1654,26 @@ class ReaderTab extends ReaderInstance {
 			editorInstance.focus();
 			editorInstance.insertAnnotations(annotations);
 		}
+	}
+
+	_setReadAloudStatus(status) {
+		if (status.active && !status.paused) {
+			// Wake up the docShell even if this tab is in the background,
+			// so event-loop tasks run immediately. Without this, playing
+			// sometimes doesn't take effect immediately.
+			this._iframe.docShellIsActive = true;
+
+			// If this tab was unpaused, pause all others
+			for (let reader of Zotero.Reader._readers) {
+				if (reader === this) continue;
+				reader.toggleReadAloudPaused(true);
+			}
+		}
+		this._window.Zotero_Tabs.setAudioStatus(this.tabID, status);
+	}
+	
+	toggleReadAloudPaused(paused = undefined) {
+		this._internalReader.toggleReadAloudPaused(paused);
 	}
 
 	_updateLayout() {
@@ -2064,7 +2147,7 @@ class Reader {
 		this._sidebarOpen = false;
 		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
-		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'setting', 'tab'], 'reader');
+		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'setting', 'tab', 'api-key'], 'reader');
 		this._registeredListeners = [];
 		this.onChangeSidebarWidth = null;
 		this.onToggleSidebar = null;
@@ -2206,7 +2289,7 @@ class Reader {
 			}
 			else if (event === 'select') {
 				for (let reader of this._readers) {
-					if (reader instanceof ReaderTab) {
+					if (reader instanceof ReaderTab && reader._window.Zotero_Tabs.canUnload(reader.tabID)) {
 						reader._iframe.docShellIsActive = false;
 					}
 				}
@@ -2271,6 +2354,11 @@ class Reader {
 						Components.utils.cloneInto(newCustomThemes, reader._iframeWindow)
 					);
 				});
+			}
+		}
+		else if (type === 'api-key') {
+			for (let reader of this._readers) {
+				reader._internalReader.setLoggedIn(Zotero.Sync.Runner.enabled);
 			}
 		}
 	}
