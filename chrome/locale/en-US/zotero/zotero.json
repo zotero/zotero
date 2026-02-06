@@ -170,6 +170,9 @@
 	"general-black": {
 		"string": "Black"
 	},
+	"general-loading": {
+		"string": "Loading…"
+	},
 	"citation-style-label": {
 		"string": "Citation Style:"
 	},
@@ -235,6 +238,9 @@
 	},
 	"menu-view-columns-move-right.label": {
 		"string": "Move Column Right"
+	},
+	"menu-view-hide-context-annotation-rows.label": {
+		"string": "Hide Non-Matching Annotations"
 	},
 	"menu-view-note-font-size.label": {
 		"string": "Note Font Size"
@@ -1055,6 +1061,9 @@
 	"userjs-pref-warning": {
 		"string": "Some { app-name } settings have been overridden using an unsupported method. { app-name } will revert them and restart."
 	},
+	"migrate-extra-fields-progress-message": {
+		"string": "Migrating new fields from Extra field"
+	},
 	"long-tag-fixer-window-title.title": {
 		"string": "Split Tags"
 	},
@@ -1069,6 +1078,9 @@
 	},
 	"normalize-attachment-titles-text": {
 		"string": "{ app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.\n\nIn older versions of { app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.\n\nWould you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed."
+	},
+	"banner-close-button.aria-label": {
+		"string": "Dismiss notification"
 	},
 	"preferences-window.title": {
 		"string": "{ app-name } Settings"
@@ -1565,8 +1577,14 @@
 	"reader-theme-dark": {
 		"string": "Dark"
 	},
+	"reader-theme-black": {
+		"string": "Black"
+	},
 	"reader-add-theme": {
 		"string": "Add Theme"
+	},
+	"reader-theme-invert-images": {
+		"string": "Invert Images"
 	},
 	"reader-scroll-mode": {
 		"string": "Scrolling"
@@ -1633,6 +1651,9 @@
 	},
 	"reader-clear-selection": {
 		"string": "Clear Selection"
+	},
+	"reader-epub-encrypted": {
+		"string": "This ebook is encrypted and cannot be opened."
 	},
 	"reader-a11y-move-annotation": {
 		"string": "Use the arrow keys to move the annotation."
@@ -1862,6 +1883,9 @@
 	"integration-warning-command-is-running": {
 		"string": "A word processor integration command is already running."
 	},
+	"first-run-guidance-citationDialog": {
+		"string": "Type a title, author, and/or year to search for a reference.\n\nAfter you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.\n\nYou can also add a page number or other locator by including it with your search terms (e.g., “history { locator }”) or by typing it after the bubble and pressing { return-or-enter }."
+	},
 	"note-editor-set": {
 		"string": "Set"
 	},
@@ -2054,9 +2078,6 @@
 	"note-editor-toggle-context-pane": {
 		"string": "Toggle Context Pane"
 	},
-	"itemFields-arXivID": {
-		"string": "arXiv ID"
-	},
 	"itemFields-eventPlace": {
 		"string": "Event Place"
 	},
@@ -2104,8 +2125,5 @@
 	},
 	"creatorTypes-seriesCreator": {
 		"string": "Series Creator"
-	},
-	"creatorTypes-uploader": {
-		"string": "Uploader"
 	}
 }
