@@ -68,7 +68,10 @@ var Zotero_Preferences = {
 			io = io.wrappedJSObject || io;
 
 			if (io.pane) {
-				this.navigateToPane(io.pane, { scrollTo: io.scrollTo });
+				this.navigateToPane(io.pane, {
+					scrollTo: io.scrollTo,
+					action: io.action,
+				});
 			}
 		}
 		else if (document.location.hash == "#cite") {
@@ -119,10 +122,13 @@ var Zotero_Preferences = {
 	 * @param {String} [options.scrollTo] Selector to scroll to after displaying the pane
 	 * @returns {Promise<void>}
 	 */
-	async navigateToPane(paneID, { scrollTo } = {}) {
-		let oldPaneID = this.navigation.value;
+	async navigateToPane(paneID, { scrollTo, action } = {}) {
+		let isNewPane = this.navigation.value !== paneID;
+		if (action) {
+			this._pendingAction = action;
+		}
 		this.navigation.value = paneID;
-		if (oldPaneID !== paneID) {
+		if (isNewPane) {
 			await this.waitForPaneSelect();
 		}
 		if (scrollTo) {
@@ -131,6 +137,20 @@ var Zotero_Preferences = {
 				elem.scrollIntoView({ block: 'start' });
 			}
 		}
+		// If the pane is already loaded, it won't call consumePendingAction()
+		// again from init(), so dispatch an event
+		if (action && !isNewPane) {
+			let container = this.panes.get(paneID)?.container;
+			if (container) {
+				container.dispatchEvent(new Event('action'));
+			}
+		}
+	},
+
+	consumePendingAction: function () {
+		let action = this._pendingAction;
+		this._pendingAction = null;
+		return action;
 	},
 
 	openHelpLink: function () {

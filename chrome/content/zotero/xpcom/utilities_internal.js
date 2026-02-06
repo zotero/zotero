@@ -1725,7 +1725,10 @@ Zotero.Utilities.Internal = {
 			let win = enumerator.getNext();
 			win.focus();
 			if (paneID) {
-				win.Zotero_Preferences.navigateToPane(paneID, { scrollTo: options.scrollTo });
+				win.Zotero_Preferences.navigateToPane(paneID, {
+					scrollTo: options.scrollTo,
+					action: options.action,
+				});
 			}
 			return win;
 		}
@@ -1733,6 +1736,7 @@ Zotero.Utilities.Internal = {
 		let io = {
 			pane: paneID,
 			scrollTo: options.scrollTo,
+			action: options.action,
 		};
 		let args = [
 			'chrome://zotero/content/preferences/preferences.xhtml',

@@ -39,7 +39,7 @@ var Zotero_Read_Aloud_First_Run = new function () {
 				// TODO
 			},
 			onLogIn: () => {
-				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync'));
+				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync', { action: 'logIn' }));
 			},
 			onSetDoneMode: ({ enabled, needsLogIn }) => {
 				let acceptButton = this._dialog.getButton('accept');
@@ -67,7 +67,7 @@ var Zotero_Read_Aloud_First_Run = new function () {
 	this.accept = function (event) {
 		if (this._needsLogIn) {
 			this.cancel();
-			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync', { action: 'logIn' });
 			return;
 		}
 

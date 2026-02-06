@@ -695,6 +695,9 @@ attachment-preview-placeholder = No attachment to preview
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
 
+account-log-in = Log In
+account-not-logged-in-text = Log in to your Zotero account to sync your data.
+account-error-login-session-expired = Your login session has expired. Please try again.
 
 file-renaming-auto-rename-prompt-title = Renaming Settings Changed
 file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
@@ -899,7 +902,7 @@ normalize-attachment-titles-text = { -app-name } automatically renames files on 
     
     Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
 
-banner-close-button = 
+banner-close-button =
     .aria-label = Dismiss notification
 
 plugins-blocked-plugin =

@@ -118,8 +118,6 @@ preferences-sync-data-syncing-groupbox =
     .aria-label = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-description = Log in with your { -app-name } account to sync your data between devices, collaborate with others, and more.
-preferences-account-log-in =
-    .label = Log In
 preferences-account-log-out =
     .label = Log Out…
 
@@ -139,3 +137,10 @@ preferences-sync-reset-restore-to-server-checkbox-label = { $remoteItemsDeletedC
     }
 preferences-sync-reset-restore-to-server-confirmation-text = delete online library
 preferences-sync-reset-restore-to-server-yes = Replace Data in Online Library
+
+preferences-account-log-in =
+    .label = Log In
+preferences-account-waiting-for-login =
+    .value = Waiting for login…
+preferences-account-cancel-button =
+    .label = { general-cancel }
