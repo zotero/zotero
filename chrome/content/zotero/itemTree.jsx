@@ -161,6 +161,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				this._rowCache = {};
 				this.tree.invalidate();
 			}),
+			Zotero.Prefs.registerObserver('hideContextAnnotationRows', async () => {
+				await this.refresh();
+				this.tree.invalidate();
+			})
 		];
 		
 		this._itemsPaneMessage = null;
@@ -391,6 +395,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// a sorted list of items for a given column configuration and restore items from that.
 			await this.sort([...addedItemIDs]);
 			
+			// Update search results before collapse/expand of containers so that
+			// if hideContextAnnotationRows pref is true, child rows appear/disappear properly
+			this._searchItemIDs = newSearchItemIDs; // items matching the search
+			this._searchMode = newSearchMode;
 			// Toggle all open containers closed and open to refresh child items
 			//
 			// This could be avoided by making sure that items in notify() that aren't present are always
@@ -406,8 +414,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			this._refreshRowMap();
 			
-			this._searchMode = newSearchMode;
-			this._searchItemIDs = newSearchItemIDs; // items matching the search
 			this._rowCache = {};
 				
 			if (!this.collectionTreeRow.isPublications()) {
@@ -1742,6 +1748,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (item.isFileAttachment()) {
 			annotations = item.getAnnotations();
 		}
+		// Optionally, only keep annotation rows that match the search query
+		if (Zotero.Prefs.get("hideContextAnnotationRows") && this._searchMode) {
+			annotations = annotations.filter(annotation => this._searchItemIDs.has(annotation.id));
+		}
 		var newRows = [];
 		if (attachments.length && notes.length) {
 			newRows = notes.concat(attachments);
@@ -2117,6 +2127,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		var item = this.getRow(index).ref;
 		if (item.isFileAttachment()) {
+			// Consider attachments with non-matching annotation rows as empty when pref is set
+			if (Zotero.Prefs.get("hideContextAnnotationRows") && this._searchMode) {
+				return !item.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
+			}
 			return item.numAnnotations() == 0;
 		}
 		if (!item.isRegularItem()) {
