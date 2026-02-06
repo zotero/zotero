@@ -7,9 +7,9 @@
 <!ENTITY zotero.search.joinMode.all "все">
 <!ENTITY zotero.search.joinMode.suffix "из следующих:">
 
-<!ENTITY zotero.search.recursive.label "Искать в подпапках">
+<!ENTITY zotero.search.recursive.label "Искать во вложенных коллекциях">
 <!ENTITY zotero.search.noChildren "Показывать только записи верхнего уровня">
-<!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочерние элементы совпадающих записей">
+<!ENTITY zotero.search.includeParentsAndChildren "Включать родительские и дочерние записи совпадающих записей">
 
 <!ENTITY zotero.search.textModes.phrase "Фраза">
 <!ENTITY zotero.search.textModes.phraseBinary "Фраза (включ. двоичные файлы)">

@@ -166,7 +166,7 @@
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration " Haladó beállítások">
 
-<!ENTITY zotero.preferences.prefpane.locate "Elhelyezni">
+<!ENTITY zotero.preferences.prefpane.locate "Hely megadása">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
 <!ENTITY zotero.preferences.locate.description "Leírás">
 <!ENTITY zotero.preferences.locate.name "Név">
