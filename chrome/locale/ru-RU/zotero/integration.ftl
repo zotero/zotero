@@ -21,11 +21,11 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-edit-reference }
 integration-citationDialog = Диалог цитирования
 integration-citationDialog-section-open = Открыть документы ({ $count })
-integration-citationDialog-section-selected = Выбрано элементов ({ $count }/{ $total })
+integration-citationDialog-section-selected = Выбрано ({ $count }/{ $total }) записей
 integration-citationDialog-section-cited =
     { $count ->
-        [0] Процитированных элементов
-       *[other] Cited Items ({ $count })
+        [0] записей процитированно
+       *[other] ({ $count })
     }
 integration-citationDialog-details-suffix = Суффикс
 integration-citationDialog-details-prefix = Префикс
@@ -51,7 +51,7 @@ integration-citationDialog-btn-settings =
 integration-citationDialog-mode-library = Библиотека
 integration-citationDialog-mode-list = Список
 integration-citationDialog-btn-type-citation =
-    .title = Добавить/редактировать цитату
+    .title = Добавить/редактировать цитирование
 integration-citationDialog-btn-type-add-note =
     .title = Добавить заметку
 integration-citationDialog-btn-accept =
@@ -65,19 +65,19 @@ integration-citationDialog-aria-bubble =
     .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
-    .aria-description = Нажмите Tab для выбора элементов и добавления к этому цитирования. Нажмите Escape для отмены изменений и закрытия диалога.
+    .aria-description = Нажмите Tab для выбора записей, которые будут добавлены к цитированию. Нажмите Escape, чтобы отменить изменения и закрыть диалог.
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
     .placeholder = Найти заметку для вставки в документ
 integration-citationDialog-aria-item-list =
-    .aria-description = Используйте клавиши стрелок вверх/вниз для изменения выбора элемента. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Используйте клавиши стрелок вверх/вниз для изменения выбора записей. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
-    .aria-description = Используйте клавиши стрелок вправо/влево для изменения выбора элемента. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Используйте клавиши стрелок вправо/влево для изменения выбора записей. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-collections-table =
     .aria-label = Collections.
-    .aria-description = Выберите коллекцию и нажмите Tab для навигации по её элементам.
+    .aria-description = Выберите коллекцию и нажмите Tab для навигации по её записям.
 integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =

@@ -10,7 +10,7 @@
 <!ENTITY zotero.general.ok "ОК">
 <!ENTITY zotero.general.cancel "Отменить">
 <!ENTITY zotero.general.refresh "Обновить">
-<!ENTITY zotero.general.saveAs "Сохранить как">
+<!ENTITY zotero.general.saveAs "Сохранить как...">
 <!ENTITY zotero.general.options "Настройки">
 <!ENTITY zotero.general.advancedOptions.label "Расширенные настройки">
 <!ENTITY zotero.general.tools "Инструменты">
@@ -144,7 +144,7 @@
 <!ENTITY zotero.lookup.description "Введите ISBN, DOI, PMID, arXiv ID, или ADS Bibcode чтобы пополнить вашу ими библиотеку:">
 <!ENTITY zotero.lookup.button.search "Поиск">
 
-<!ENTITY zotero.createParent.title "Создать родительский элемент">
+<!ENTITY zotero.createParent.title "Создать родительскую запись">
 <!ENTITY zotero.createParent.button.manual "Ввести вручную">
 
 <!ENTITY zotero.selectitems.title "Выбрать записи">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.bibliography.print.label "Распечатать">
 
 <!ENTITY zotero.integration.docPrefs.title "Параметры документа">
-<!ENTITY zotero.integration.addEditCitation.title "Добавить/редактировать цитату">
+<!ENTITY zotero.integration.addEditCitation.title "Добавить/редактировать цитирование">
 <!ENTITY zotero.integration.editBibliography.title "Редактировать библиографию">
 
 <!ENTITY zotero.progress.title "Ход выполнения">
@@ -195,7 +195,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "Не выводить автора">
 <!ENTITY zotero.citation.prefix.label "Префикс:">
 <!ENTITY zotero.citation.suffix.label "Суффикс:">
-<!ENTITY zotero.citation.editorWarning.label "Предупреждение: Если вы измените цитату в редакторе, она больше не будет обновляться в соответствии с изменениями в базе данных или стиле цитирования">
+<!ENTITY zotero.citation.editorWarning.label "Предупреждение: Если вы измените цитирование в редакторе, оно перестанет отражать изменения в вашей базе данных или стиля цитирования.">
 
 <!ENTITY zotero.richText.italic.label "Курсив">
 <!ENTITY zotero.richText.bold.label "Полужирный">

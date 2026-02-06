@@ -120,6 +120,8 @@ menu-view-columns-move-left =
     .label = Переместить колонку влево
 menu-view-columns-move-right =
     .label = Переместить колонку вправо
+menu-view-hide-context-annotation-rows =
+    .label = Скрыть неподходящие аннотации
 menu-view-note-font-size =
     .label = Размер шрифта заметок
 menu-view-note-tab-font-size =
@@ -200,7 +202,7 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Web-ссылка
 item-menu-change-parent-item =
-    .label = Изменить родительский элемент…
+    .label = Изменить родительскую запись…
 item-menu-relate-items =
     .label = Relate Items
 view-online = Просмотреть онлайн
@@ -364,7 +366,7 @@ publications-include-checkbox-files =
     .label = Включая файлы
 publications-include-checkbox-notes =
     .label = Включая заметки
-publications-include-adjust-at-any-time = Вы можете настроить отображение в любой момент из коллекции «Мои публикации»
+publications-include-adjust-at-any-time = Вы можете настроить отображение в любой момент из коллекции Мои публикации.
 publications-intro-authorship =
     .label = Я автор этой работы.
 publications-intro-authorship-files =
@@ -428,7 +430,7 @@ pane-abstract = Аннотация
 pane-attachments = Вложения
 pane-notes = Заметки
 pane-note-info = Note Info
-pane-libraries-collections = Libraries and Collections
+pane-libraries-collections = Библиотеки и коллекции
 pane-tags = Теги
 pane-related = Связанные
 pane-attachment-info = Attachment Info
@@ -536,7 +538,7 @@ sidenav-reorder-down =
 sidenav-reorder-reset =
     .label = Сбросить порядок блоков
 toggle-item-pane =
-    .tooltiptext = Переключить панель элемента
+    .tooltiptext = Переключить панель записи
 toggle-context-pane =
     .tooltiptext = Переключить контекстную панель
 pin-section =
@@ -564,7 +566,7 @@ toolbar-new-collection =
     .tooltiptext = { new-collection }
 new-collection-dialog =
     .title = Новая коллекция
-    .buttonlabelaccept = Create Collection
+    .buttonlabelaccept = Создать коллекцию
 new-collection-name = Название:
 new-collection-create-in = Создать в:
 show-publications-menuitem =
@@ -586,7 +588,7 @@ attachment-info-convert-note =
 section-note-info =
     .label = { pane-note-info }
 note-info-title = Название
-note-info-parent-item = Родительский элемент
+note-info-parent-item = Родительская запись
 note-info-parent-item-button =
     { $hasParentItem ->
         [true] { $parentItemTitle }
@@ -594,8 +596,8 @@ note-info-parent-item-button =
     }
     .title =
         { $hasParentItem ->
-            [true] Показать родительский элемент в библиотеке
-           *[false] View note item in library
+            [true] Показать родительскую запись в библиотеке
+           *[false] Показать заметку записи в библиотеке
         }
 note-info-date-created = Создана
 note-info-date-modified = Изменена
@@ -605,7 +607,7 @@ note-info-character-count = Количество символов
 item-title-empty-note = Заметка без названия
 attachment-preview-placeholder = Нет вложений для предпросмотра
 attachment-rename-from-parent =
-    .tooltiptext = Переименовать файл в соответствии с родительским элементом
+    .tooltiptext = Переименовать файл в соответствии с родительской записью
 file-renaming-auto-rename-prompt-title = Настройки переимнования изменены
 file-renaming-auto-rename-prompt-body = Хотите переименовать существующие файлы в вашей библиотеке в соответствии с новыми настройками?
 file-renaming-auto-rename-prompt-yes = Предпросмотр изменений…
@@ -644,16 +646,16 @@ item-pane-header-more-options =
     .label = Больше опций
 item-pane-message-items-selected =
     { $count ->
-        [0] Не выбран ни один элемент
-        [one] { $count } элемент выбран
-       *[other] { $count } элементов выбрано
+        [0] Не выбрана ни одна запись
+        [one] { $count } запись выбрана
+       *[other] { $count } записей выбрано
     }
 item-pane-message-collections-selected =
     { $count ->
         [one] { $count } коллекция выбрана
         [few] { $count } коллекции выбрано
         [many] { $count } коллекций выбрано
-       *[other] { $count } коллекции выбрано
+       *[other] { $count } коллекций выбрано
     }
 item-pane-message-searches-selected =
     { $count ->
@@ -671,11 +673,11 @@ item-pane-message-objects-selected =
     }
 item-pane-message-unselected =
     { $count ->
-        [0] В этом представлении нет элементов
-        [one] { $count } элемент в этом представлении
-        [few] { $count } элемента в этом представлении
-        [many] { $count } элементов в этом представлении
-       *[other] { $count } элемента в этом представлении
+        [0] В этом представлении нет записей
+        [one] { $count } запись в этом представлении
+        [few] { $count } записей в этом представлении
+        [many] { $count } записей в этом представлении
+       *[other] { $count } записей в этом представлении
     }
 item-pane-message-objects-unselected =
     { $count ->
@@ -688,10 +690,10 @@ item-pane-message-objects-unselected =
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Объединить { $count } элемент
+            [one] Объединить { $count } запись
             [few] Объединить { $count } элемента
-            [many] Объединить { $count } элементов
-           *[other] Объединить { $count } элемента
+            [many] Объединить { $count } записей
+           *[other] Объединить { $count } записей
         }
 locate-library-lookup-no-resolver = You must choose a resolver from the { $pane } pane of the { -app-name } settings.
 architecture-win32-warning-message = Switch to 64-bit { -app-name } for the best performance. Your data won’t be affected.
@@ -774,11 +776,11 @@ long-tag-fixer-window-title =
 long-tag-fixer-button-dont-split =
     .label = Не разделять
 menu-normalize-attachment-titles =
-    .label = Нормализовать заголовки вложений…
-normalize-attachment-titles-title = Нормализовать заголовки вложений
+    .label = Нормализовать названия вложений…
+normalize-attachment-titles-title = Нормализовать названия вложений
 normalize-attachment-titles-text =
-    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    { -app-name } автоматически переименовывает файлы на диске, используя метаданные родительской записи, но использует отдельные, более простые названия, такие как “Полный текст PDF”, “Препринт PDF”, или “PDF” для первичных вложений, для поддержания визуальной чистоты списка записей и избежания повторения информации.
     
-    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    В более старых версиях { -app-name }, а также при использовании определённых плагинов, названия вложений могут быть изменены без необходимости в соответствии с именами файлов.
     
-    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
+    Хотите сделать названия выбранных вложений более простыми? Только первичные вложения с названиями, которые совпадают с именами файлов, будут изменены.

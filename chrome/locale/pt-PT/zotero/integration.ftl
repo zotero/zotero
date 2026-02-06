@@ -42,14 +42,14 @@ integration-citationDialog-lib-message-citation =
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] No selected notes match the current search
-       *[other] No notes are selected
+        [true] Nenhuma nota selecionada corresponde a busca
+       *[other] Nenhuma nota selecionada
     }
 integration-citationDialog-settings-keepSorted = Manter as fontes ordenadas
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Biblioteca
-integration-citationDialog-mode-list = List
+integration-citationDialog-mode-list = Lista
 integration-citationDialog-btn-type-citation =
     .title = Adicionar/Editar Citação
 integration-citationDialog-btn-type-add-note =
@@ -70,7 +70,7 @@ integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
-    .placeholder = Search for a note to insert into the document
+    .placeholder = Busque por nota para inserir no documento
 integration-citationDialog-aria-item-list =
     .aria-description = Utilize as setas direcionais para cima/para baixo para mudar a seleção. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
@@ -116,8 +116,8 @@ integration-warning-documentPreferences-changes-will-be-lost = Você fez altera�
 integration-warning-discard-changes = Descartar alterações
 integration-warning-command-is-running = Um comando de integração de processador de texto já está em funcionamento.
 first-run-guidance-citationDialog =
-    Type a title, author, and/or year to search for a reference.
+    Digite um título, autor e/ou ano para buscar por uma referência.
     
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    Depois que tiver feito sua seleção, clique no balão e selecione pelo teclado e pressione ↓/Espaço para mostrar as opções de citação como número de página, prefixo e sufixo.
     
-    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.
+    Você também pode adicionar o número da página ou outro localizador ao incluir com os termos da busca (ex.: “história { $locator }”) ou digitando depois do balão e pressionando { return-or-enter }.

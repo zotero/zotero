@@ -109,7 +109,7 @@ reader-theme-sepia = Sepia
 reader-theme-dark = Escuro
 reader-theme-black = Preto
 reader-add-theme = Adicionar Tema
-reader-theme-invert-images = Invert Images
+reader-theme-invert-images = Inverter imagens
 reader-scroll-mode = Rolagem
 reader-spread-mode = Lado a lado
 reader-flow-mode = Layout da página
@@ -130,9 +130,9 @@ reader-theme-name = Nome do tema:
 reader-background = Fundo:
 reader-foreground = Primeiro plano:
 reader-reading-mode = Modo de leitura
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode-not-supported = Modo de leitura não é compatível com este documento.
 reader-clear-selection = Limpar Seleção
-reader-epub-encrypted = This ebook is encrypted and cannot be opened.
+reader-epub-encrypted = Este e-book está criptografado e não pode ser aberto.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }
@@ -189,7 +189,8 @@ reader-import-from-epub-no-annotations-other-file =
 reader-import-from-epub-select-other = Selecionar outro arquivo...
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [one] 1 página selecionada
+        [many] { $count } páginas selecionadas
+       *[other] { $count } páginas selecionadas
     }
-reader-page-options = Page Options
+reader-page-options = Opções de página

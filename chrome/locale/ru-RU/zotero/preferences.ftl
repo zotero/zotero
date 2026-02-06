@@ -28,10 +28,10 @@ preferences-file-renaming-format-instructions-example = For example, “{ $examp
 preferences-file-renaming-format-instructions-more = Смотрите <label data-l10n-name="file-renaming-format-help-link">документацию</label> для дополнительного информирования.
 preferences-file-renaming-format-template = Шаблон имени файла:
 preferences-file-renaming-format-preview = Предварительный просмотр:
-preferences-attachment-titles-title = Attachment Titles
-preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
+preferences-attachment-titles-title = Названия вложений
+preferences-attachment-titles-intro = Названия вложений <label data-l10n-name="wiki-link">отличаются от имён файлов</label>. Для поддержания некоторых рабочих процессов, { -app-name } может показывать имена файлов, вместо названий вложений в списке записей.
 preferences-attachment-titles-show-filenames =
-    .label = Show attachment filenames in the items list
+    .label = Показывать имена вложенных файлов в списке записей
 preferences-reader-title = Reader
 preferences-reader-open-epubs-using = Open EPUBs using
 preferences-reader-open-snapshots-using = Open snapshots using
@@ -112,10 +112,10 @@ preferences-sync-reset-restore-to-server-remaining-items-text =
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->
-        [one] Удалить { $remoteItemsDeletedCount } элемент
-        [few] Удалить { $remoteItemsDeletedCount } элемента
-        [many] Удалить { $remoteItemsDeletedCount } элементов
-       *[other] Удалить { $remoteItemsDeletedCount } элемента
+        [one] Удалить { $remoteItemsDeletedCount } запись
+        [few] Удалить { $remoteItemsDeletedCount } записи
+        [many] Удалить { $remoteItemsDeletedCount } записей
+       *[other] Удалить { $remoteItemsDeletedCount } записей
     }
 preferences-sync-reset-restore-to-server-confirmation-text = delete online library
 preferences-sync-reset-restore-to-server-yes = Перезаписать данные в сетевой библиотеке

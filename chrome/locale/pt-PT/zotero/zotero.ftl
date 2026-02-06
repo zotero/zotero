@@ -120,10 +120,12 @@ menu-view-columns-move-left =
     .label = Mover Coluna à Esquerda
 menu-view-columns-move-right =
     .label = Mover Coluna à Direita
+menu-view-hide-context-annotation-rows =
+    .label = Hide Non-Matching Annotations
 menu-view-note-font-size =
     .label = Tamanho da Fonte Tipográfica das Notas
 menu-view-note-tab-font-size =
-    .label = Note Tab Font Size
+    .label = Tamanho da fonte das notas em Aba
 menu-show-tabs-menu =
     .label = Mostrar menu de abas
 menu-edit-copy-annotation =
@@ -170,26 +172,26 @@ item-creator-moveUp =
     .label = Mover Para Cima
 item-menu-viewAttachment =
     .label =
-        Open { $numAttachments ->
+        Abrir { $numAttachments ->
             [one]
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] Snapshot
-                    [note] Note
-                   *[other] Attachment
+                    [snapshot] captura
+                    [note] nota
+                   *[other] anexo
                 }
            *[other]
                 { $attachmentType ->
                     [pdf] PDFs
                     [epub] EPUBs
-                    [snapshot] Snapshots
-                    [note] Notes
-                   *[other] Attachments
+                    [snapshot] capturas
+                    [note] notas
+                   *[other] anexos
                 }
         } { $openIn ->
-            [tab] in New Tab
-            [window] in New Window
+            [tab] em nova aba
+            [window] em nova janela
            *[other] { "" }
         }
 item-menu-add-file =
@@ -425,7 +427,7 @@ pane-info = Informação
 pane-abstract = Resumo
 pane-attachments = Anexos
 pane-notes = Notas
-pane-note-info = Note Info
+pane-note-info = Informações da nota
 pane-libraries-collections = Bibliotecas e Coleções
 pane-tags = Etiquetas
 pane-related = Relações
@@ -579,22 +581,22 @@ attachment-info-convert-note =
 section-note-info =
     .label = { pane-note-info }
 note-info-title = Título
-note-info-parent-item = Parent Item
+note-info-parent-item = Item pai
 note-info-parent-item-button =
     { $hasParentItem ->
         [true] { $parentItemTitle }
-       *[false] None
+       *[false] Nenhum
     }
     .title =
         { $hasParentItem ->
-            [true] View parent item in library
-           *[false] View note item in library
+            [true] Ver item pai na biblioteca
+           *[false] Ver nota na biblioteca
         }
-note-info-date-created = Created
+note-info-date-created = Criado
 note-info-date-modified = Modificado
 note-info-size = Tamanho
-note-info-word-count = Word Count
-note-info-character-count = Character Count
+note-info-word-count = Contagem de palavras
+note-info-character-count = Contagem de caracteres
 item-title-empty-note = Nota Sem Título
 attachment-preview-placeholder = Sem anexo para visualizar
 attachment-rename-from-parent =
@@ -731,7 +733,7 @@ file-type-video = Vídeo
 file-type-presentation = Apresentação
 file-type-document = Documento
 file-type-ebook = e-book
-post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
+post-upgrade-message = Foi atualizado para { -app-name } { $version }! Descubra as novidades.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
 post-upgrade-done =
@@ -750,17 +752,17 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = O conector do { -app-name } deve ser atualizado para funcionar com esta versão do { -app-name }.
 userjs-pref-warning = Algumas configurações do { -app-name } foram substituídas utilizando um método sem suporte. { -app-name } irá revertê-las e reiniciar.
-migrate-extra-fields-progress-message = Migrating new fields from Extra field
+migrate-extra-fields-progress-message = Migrando novos campos a partir do campo Extra
 long-tag-fixer-window-title =
     .title = Dividir etiquetas
 long-tag-fixer-button-dont-split =
     .label = Não dividir
 menu-normalize-attachment-titles =
-    .label = Normalize Attachment Titles…
-normalize-attachment-titles-title = Normalize Attachment Titles
+    .label = Padronizar títulos de anexos...
+normalize-attachment-titles-title = Padronizar títulos de anexos
 normalize-attachment-titles-text =
-    { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
+    { -app-name } renomeia automaticamente os arquivos salvos usando os metadados do item pai, mas utiliza títulos mais simples como “Full Text PDF”, “Preprint PDF”, ou “PDF” para anexos principais visando manter a lista de itens mais limpa e evitar duplicação de informação.
     
-    In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
+    Em versões mais antigas do { -app-name }, assim como no uso de algumas extensões, títulos dos anexos podiam ser alterados, desnecessariamente, para coincidir com o nome dos arquivos.
     
-    Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
+    Gostaria de atualizar os anexos selecionados para usar títulos mais simples? Apenas anexos principais com títulos que correspondem ao nome do arquivo serão alterados.
