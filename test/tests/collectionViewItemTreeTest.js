@@ -1,6 +1,9 @@
+// Integration tests for CollectionViewItemTree via ZoteroPane.itemsView.
+// Inherited ItemTree/ItemTreeRowProvider behavior is also tested through
+// the CVIT instance.
 "use strict";
 
-describe("Zotero.ItemTree", function () {
+describe("CollectionViewItemTree", function () {
 	var win, zp, cv, itemsView;
 	var existingItemID;
 	var existingItemID2;
