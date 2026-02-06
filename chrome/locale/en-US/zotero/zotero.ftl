@@ -136,7 +136,7 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Move Column Right
 menu-view-hide-context-annotation-rows =
-    .label = Hide Non-Matching Annotation Rows
+    .label = Hide Non-Matching Annotations
 
 
 menu-view-note-font-size =
