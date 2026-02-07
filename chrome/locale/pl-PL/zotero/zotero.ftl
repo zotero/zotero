@@ -121,7 +121,7 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Przesuń kolumnę w prawo
 menu-view-hide-context-annotation-rows =
-    .label = Hide Non-Matching Annotations
+    .label = Ukryj niepasujące adnotacje
 menu-view-note-font-size =
     .label = Rozmiar czcionki notatek
 menu-view-note-tab-font-size =
@@ -482,7 +482,7 @@ section-tags =
            *[other] { $count } Etykiet
         }
 section-related =
-    .label = { $count } Related
+    .label = { $count } powiązanych
 section-attachment-info =
     .label = { pane-attachment-info }
 section-button-remove =
@@ -726,14 +726,18 @@ select-items-convertToStandalone =
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+            [one] Przekształć na samodzielny załącznik
+            [few] Przekształć na samodzielne załączniki
+            [many] Przekształć na samodzielne załączniki
+           *[other] Przekształć na samodzielne załączniki
         }
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Przekształć na samodzielną notatkę
+            [few] Przekształć na samodzielne notatki
+            [many] Przekształć na samodzielne notatki
+           *[other] Przekształć na samodzielne notatki
         }
 file-type-webpage = Strona internetowa
 file-type-image = Obraz
@@ -757,7 +761,7 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
-file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-message = { -app-name } teraz automatycznie synchronizuje nazwy plików załączników podczas dokonywania zmian w elementach.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = Łącznik { -app-name } musi zostać zaktualizowany, aby działać z tą wersją { -app-name }.

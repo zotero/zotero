@@ -112,8 +112,10 @@ preferences-sync-reset-restore-to-server-remaining-items-text =
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->
-        [one] Delete 1 item
-       *[other] Delete { $remoteItemsDeletedCount } items
+        [one] Usuń { $remoteItemsDeletedCount } element
+        [few] Usuń { $remoteItemsDeletedCount } elementy
+        [many] Usuń { $remoteItemsDeletedCount } elementów
+       *[other] Usuń { $remoteItemsDeletedCount } elementów
     }
 preferences-sync-reset-restore-to-server-confirmation-text = usuń bibliotekę online
 preferences-sync-reset-restore-to-server-yes = Zamień dane w zdalnej bibliotece

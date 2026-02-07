@@ -56,8 +56,10 @@ reader-prompt-delete-pages-text =
 reader-prompt-delete-annotations-title = Usuń adnotacje
 reader-prompt-delete-annotations-text =
     { $count ->
-        [one] Are you sure you want to delete the selected annotation?
-       *[other] Are you sure you want to delete the selected annotations?
+        [one] Czy na pewno chcesz usunąć wybraną adnotację?
+        [few] Czy na pewno chcesz usunąć wybrane adnotacje?
+        [many] Czy na pewno chcesz usunąć wybrane adnotacje?
+       *[other] Czy na pewno chcesz usunąć wybrane adnotacje?
     }
 reader-rotate-left = Obróć w lewo
 reader-rotate-right = Obróć w prawo
