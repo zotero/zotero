@@ -1085,6 +1085,35 @@ async function toJavaScriptConsole() {
 	win.document.querySelector(".flexible-output-input textarea").setAttribute("aria-label", "Input line");
 }
 
+function launchDeveloperToolbox() {
+	let prefs = ['devtools.chrome.enabled', 'devtools.debugger.remote-enabled'];
+	let enabled = prefs.every(pref => !!Zotero.Prefs.get(pref, true));
+	if (!enabled) {
+		let ps = Services.prompt;
+		let shouldEnable = ps.confirm(
+			null,
+			'Remote Debugging Disabled',
+			'Enable remote debugging? This will allow Firefox instances on this machine to control ' + Zotero.appName + '.'
+				+ '\n\nThis is inherently a security risk and is NOT RECOMMENDED for normal use.'
+		);
+		if (shouldEnable) {
+			for (let pref of prefs) {
+				Zotero.Prefs.set(pref, true, /* global */ true);
+			}
+		}
+		else {
+			return;
+		}
+	}
+	
+	const { BrowserToolboxLauncher } = ChromeUtils.import("resource://devtools/client/framework/browser-toolbox/Launcher.jsm");
+	// Don't launch if already open
+	// (Can we focus the existing toolbox process?)
+	if (!BrowserToolboxLauncher.getBrowserToolboxSessionState()) {
+		BrowserToolboxLauncher.init();
+	}
+}
+
 function openRunJSWindow() {
 	openWindowByType(
 		'chrome://zotero/content/runJS.html',
