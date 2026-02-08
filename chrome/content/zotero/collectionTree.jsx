@@ -67,6 +67,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this.itemTreeView = null;
 		this.itemToSelect = null;
 
+		// Promise that resolves when itemTreeView is set and ready
+		this._itemTreeViewReadyDeferred = Zotero.Promise.defer();
+		this.itemTreeViewReady = this._itemTreeViewReadyDeferred.promise;
+
 		this.type = 'collection';
 		this.name = "CollectionTree";
 		this.id = "collection-tree";
