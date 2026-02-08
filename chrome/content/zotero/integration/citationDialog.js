@@ -111,7 +111,7 @@ async function onLoad() {
 	await SearchHandler.refreshSelectedAndOpenItems();
 	// some nodes (e.g. item-tree-menu-bar) are expected to be present to switch modes
 	// so this has to go after all layouts are loaded
-	IOManager.setInitialDialogMode();
+	await IOManager.setInitialDialogMode();
 	// most of IO handling relies on currentLayout being defined so it must follow setInitialDialogMode
 	IOManager.init();
 	// explicitly focus bubble input so one can begin typing right away
@@ -779,6 +779,15 @@ class LibraryLayout extends Layout {
 		}
 	}
 
+	async _ensureFirstCitedRowVisible() {
+		// If the itemTree is still loading, wait for it to finish
+		await this.itemsView._itemTreeLoadingDeferred.promise;
+		// Scroll to the first cited item
+		let firstCitedRow = this.itemsView._rows.findIndex(row => CitationDataManager.itemAddedCache.has(row.ref.id));
+		if (firstCitedRow == -1) return;
+		this.itemsView.ensureRowIsVisible(firstCitedRow);
+	}
+
 	// after an item is added, bubble-input's height may increase and push the itemTree down
 	// scroll it back up so that the mouse remains over the same row as before click
 	// do not do it on click of the first row, since then the mouse will be on a header
@@ -1015,7 +1024,7 @@ const IOManager = {
 	},
 
 	// switch between list and library modes
-	toggleDialogMode(newMode) {
+	async toggleDialogMode(newMode) {
 		// Do nothing if switching to a mode that is already active
 		if (currentLayout?.type == newMode) return;
 		
@@ -1049,7 +1058,7 @@ const IOManager = {
 		if (currentLayout.type == "library") {
 			currentLayout.forceUpdateTablesAfterRefresh = true;
 		}
-		currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
+		await currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
 	},
 
 	// pass current items in the citation to bubble-input to have it update the bubbles
@@ -1291,7 +1300,7 @@ const IOManager = {
 	},
 
 	// Set the initial dialog mode per user's preference
-	setInitialDialogMode() {
+	async setInitialDialogMode() {
 		let desiredMode = Zotero.Prefs.get("integration.citationDialogMode");
 		if (desiredMode == "last-used") {
 			desiredMode = Zotero.Prefs.get("integration.citationDialogLastUsedMode");
@@ -1300,7 +1309,10 @@ const IOManager = {
 		if (!desiredMode) {
 			desiredMode = "list";
 		}
-		this.toggleDialogMode(desiredMode);
+		await this.toggleDialogMode(desiredMode);
+		if (desiredMode == "library") {
+			libraryLayout._ensureFirstCitedRowVisible();
+		}
 	},
 	
 	// handle drag start of item nodes into bubble-input
@@ -1746,7 +1758,7 @@ const CitationDataManager = {
 		this.itemAddedCache = new Set();
 		for (let bubbleItem of this.items) {
 			if (!bubbleItem.item.id) continue;
-			this.itemAddedCache.add(bubbleItem.item.id.id);
+			this.itemAddedCache.add(bubbleItem.item.id);
 		}
 	},
  	
