@@ -71,6 +71,7 @@
 @import "components/window";
 @import "components/newCollectionDialog";
 @import "components/reader";
+@import "components/groupFileRenaming";
 
 
 // Elements
@@ -112,3 +113,4 @@
 @import "elements/itemPane";
 @import "elements/itemPaneCustomSection";
 @import "elements/contextPane";
+@import "elements/fileRenamingSettings";
