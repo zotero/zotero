@@ -345,7 +345,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		if (event.key !== " ") return;
 
 		if (target.open) {
-			// Simulate blinking of the selected menuitem on macOS (same as on Enter keypress)
+			// Simulate blinking of the selected menuitem on macOS (same as on Return keypress)
 			if (Zotero.isMac) {
 				let interval = 70;
 				target.activeChild.removeAttribute("_moz-menuactive");
