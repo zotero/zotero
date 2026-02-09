@@ -336,15 +336,47 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 	}
 
 
-	// Space should open the popup of menulist
-	document.addEventListener("keydown", (event) => {
+	// Space on menulist should open the popup
+	// Space on menulist option will select it, same as Enter
+	document.addEventListener("keydown", async (event) => {
 		let target = event.originalTarget;
 		if (target.tagName !== "menulist") return;
 		if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
-		if (event.key === " ") {
+		if (event.key !== " ") return;
+
+		if (target.open) {
+			// Simulate blinking of the selected menuitem on macOS (same as on Return keypress)
+			if (Zotero.isMac) {
+				let interval = 70;
+				target.activeChild.removeAttribute("_moz-menuactive");
+				await Zotero.Promise.delay(interval);
+				target.activeChild.setAttribute("_moz-menuactive", true);
+				await Zotero.Promise.delay(interval);
+				target.activeChild.removeAttribute("_moz-menuactive");
+				await Zotero.Promise.delay(interval);
+				target.activeChild.doCommand();
+				target.addEventListener("popuphiding", () => {
+					target.selectedItem.setAttribute("selected", true);
+				}, { once: true });
+				target.open = false;
+			}
+			// No blinking happens on Linux or Windows
+			else {
+				target.activeChild.doCommand();
+				// Timeout to avoid empty context menu behind an alert or dialog if one
+				// appears on 'command' event on Windows (https://github.com/zotero/zotero/issues/5633)
+				setTimeout(() => {
+					target.open = false;
+				});
+			}
+		}
+		else {
 			target.open = true;
 		}
-	});
+		event.stopPropagation();
+		event.preventDefault();
+	}, true);
+
 	if (Zotero.isWin) {
 		// ArrowUp/ArrowDown should change the active menuitem without triggering the command event.
 		// Otherwise navigating menulist options via keyboard triggers alerts meant to fire after
