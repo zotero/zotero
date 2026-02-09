@@ -28,10 +28,19 @@ test/runtests.sh -s item           # Start at a specific test file
 test/runtests.sh -e item           # End at a specific test file
 test/runtests.sh -c                # Open JS console, don't quit on completion
 test/runtests.sh -b                # Skip bundled translator/style installation (for faster startup when not necessary)
-test/runtests.sh -d 5              # Enable debug logging (level 1-5)
+test/runtests.sh -d 5              # Enable debug logging (level 1-5; default is 3)
 ```
 
-The test runner automatically triggers `npm run build` if the watch process isn't running, so it's not necessary to manually run a build before running tests. Tests use Mocha + Chai (assert style) + Sinon. Test files live in `test/tests/` and follow the naming convention `<module>Test.js`. Test helpers are in `test/content/support.js`.
+Tests use Mocha + Chai (assert style) + Sinon. Test files live in `test/tests/` and follow the naming convention `<module>Test.js`. Test helpers are in `test/content/support.js`.
+
+The test runner automatically triggers `npm run build` if the watch process isn't running, so it's not necessary to manually run a build before running tests.
+
+Tips:
+
+- Pass flags before test names (e.g., `test/runtests.sh -f item`).
+- `-f` should almost always be used, since test failures can cause later spurious test failures.
+- To view debug logging for a specific test when running multiple tests, add `Zotero.Debug.init(1)` at the beginning of the test and run with `-d 5`.
+
 
 ### Linting
 
