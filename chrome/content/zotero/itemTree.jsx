@@ -1516,19 +1516,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		const itemsViewInActiveWindow = Zotero.getActiveZoteroPane()?.itemsView == this;
 		const prioritizeRestore = !(options.selectInActiveWindow && itemsViewInActiveWindow);
+		const ensureVisible = options.restoreScroll ? false : options.ensureRowsAreVisible;
 
 		if (prioritizeRestore && options.restoreSelection) {
-			this._restoreSelection(null, options.expandCollapsedParents, options.ensureRowsAreVisible);
+			this._restoreSelection(null, options.expandCollapsedParents, ensureVisible);
 		}
 		else if (options.selection) {
 			if (Array.isArray(options.selection)) {
-				this.selectItems(options.selection, options.expandCollapsedParents, !options.ensureRowsAreVisible);
+				this.selectItems(options.selection, options.expandCollapsedParents, !ensureVisible);
 			}
 			else {
-				this.selectItem(options.selection, options.expandCollapsedParents, !options.ensureRowsAreVisible);
+				this.selectItem(options.selection, options.expandCollapsedParents, !ensureVisible);
 			}
 		}
-		else if (options.restoreScroll) {
+
+		if (options.restoreScroll) {
 			this._restoreScrollPosition();
 		}
 

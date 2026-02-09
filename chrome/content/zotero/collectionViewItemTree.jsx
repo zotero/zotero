@@ -684,6 +684,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					selectInActiveWindow = true;
 					rowsToSelect = singleSelect;
 					restoreSelection = false;
+					restoreScroll = false;
 				}
 			}
 			// If a single item was selected, got modified, and still belongs in this view
