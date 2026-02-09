@@ -338,19 +338,37 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 
 	// Space on menulist should open the popup
 	// Space on menulist option will select it, same as Enter
-	document.addEventListener("keydown", (event) => {
+	document.addEventListener("keydown", async (event) => {
 		let target = event.originalTarget;
 		if (target.tagName !== "menulist") return;
 		if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
 		if (event.key !== " ") return;
 
 		if (target.open) {
-			target.activeChild.doCommand();
-			// Timeout to avoid empty context menu behind an alert or dialog if one
-			// appears on 'command' event on windows (https://github.com/zotero/zotero/issues/5633)
-			setTimeout(() => {
+			// Simulate blinking of the selected menuitem on macOS (same as on Enter keypress)
+			if (Zotero.isMac) {
+				let interval = 70;
+				target.activeChild.removeAttribute("_moz-menuactive");
+				await Zotero.Promise.delay(interval);
+				target.activeChild.setAttribute("_moz-menuactive", true);
+				await Zotero.Promise.delay(interval);
+				target.activeChild.removeAttribute("_moz-menuactive");
+				await Zotero.Promise.delay(interval);
+				target.activeChild.doCommand();
+				target.addEventListener("popuphiding", () => {
+					target.selectedItem.setAttribute("selected", true);
+				}, { once: true });
 				target.open = false;
-			});
+			}
+			// No blinking happens on linux or windows
+			else {
+				target.activeChild.doCommand();
+				// Timeout to avoid empty context menu behind an alert or dialog if one
+				// appears on 'command' event on windows (https://github.com/zotero/zotero/issues/5633)
+				setTimeout(() => {
+					target.open = false;
+				});
+			}
 		}
 		else {
 			target.open = true;
