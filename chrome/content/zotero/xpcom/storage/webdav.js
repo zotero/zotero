@@ -666,37 +666,44 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			{
 				successCodes: [200, 204, 404],
 				requestObserver,
-				onAuthorizationHeader: (authorization) => {
-					// Capture whatever auth it ended up using, if any
-					this._channelAuthorization = authorization;
-				},
 				errorDelayMax: 0,
 				debug: true
 			}
 		);
-		
+
 		Zotero.debug(req.getAllResponseHeaders());
-		
+
 		var dav = req.getResponseHeader("DAV");
 		if (dav == null) {
 			throw new this.VerificationError("NOT_DAV", Zotero.HTTP.getDisplayURI(uri, true).spec);
 		}
-		
-		var headers = this._getAuthorizationHeaders();
+
 		var propfindHeaders = {
 			Depth: 0,
 			"Content-Type": "text/xml; charset=utf-8"
 		};
-		
+
 		// Test whether Zotero directory exists
+		//
+		// Don't include an explicit Authorization header from OPTIONS here --
+		// if the auth type captured from OPTIONS doesn't match what the server
+		// requires for PROPFIND (e.g., Basic vs. Digest), setting it explicitly
+		// via setRequestHeader can prevent Firefox from negotiating the correct
+		// auth scheme on a 401 challenge. By omitting it, we let Firefox handle
+		// the auth transparently.
 		req = await Zotero.HTTP.request("PROPFIND", uri, {
 			body: xmlstr,
-			headers: Object.assign({}, headers, propfindHeaders),
+			headers: propfindHeaders,
 			successCodes: [207, 404],
 			requestObserver,
+			onAuthorizationHeader: (authorization) => {
+				this._channelAuthorization = authorization;
+			},
 			errorDelayMax: 0,
 			debug: true
 		});
+
+		var headers = this._getAuthorizationHeaders();
 		
 		if (req.status == 207) {
 			// Test if missing files return 404s

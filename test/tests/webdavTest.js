@@ -1099,8 +1099,111 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			
 			win.close();
 		});
+
+		it("should succeed when OPTIONS uses Basic auth but server requires Digest for other methods", async function () {
+			// Some WebDAV servers may use a different auth scheme for different
+			// methods. Previously, checkServer would capture the Authorization
+			// header from OPTIONS and explicitly set it on PROPFIND via
+			// setRequestHeader, which could prevent Firefox from negotiating
+			// the correct auth scheme on a 401 challenge.
+			let digestNonce = 'test' + Zotero.Utilities.randomString(16);
+			let digestRealm = 'WebDAV-Digest';
+
+			function sendDigest401(response) {
+				response.setStatusLine(null, 401, "Unauthorized");
+				response.setHeader(
+					'WWW-Authenticate',
+					`Digest realm="${digestRealm}", nonce="${digestNonce}", qop="auth"`,
+					false
+				);
+			}
+
+			function checkDigestAuth(request) {
+				if (!request.hasHeader('Authorization')) return false;
+				let auth = request.getHeader('Authorization');
+				return auth.startsWith('Digest ');
+			}
+
+			function handleDigestAuth(request, response) {
+				if (!checkDigestAuth(request)) {
+					sendDigest401(response);
+					return false;
+				}
+				return true;
+			}
+
+			httpd.registerPathHandler(
+				`${davBasePath}zotero/`,
+				{
+					handle: function (request, response) {
+						// OPTIONS uses Basic auth (which Firefox will negotiate
+						// and checkServer will capture)
+						if (request.method == 'OPTIONS') {
+							if (!checkAuth(request)) {
+								send401(response);
+								return;
+							}
+							response.setHeader('DAV', '1', false);
+							response.setStatusLine(null, 200, "OK");
+							return;
+						}
+						// All other methods require Digest auth --
+						// reject Basic auth
+						if (!handleDigestAuth(request, response)) return;
+
+						if (request.method == 'PROPFIND') {
+							response.setHeader('Content-Type', 'text/xml; charset="utf-8"', false);
+							response.setStatusLine(null, 207, "Multi-Status");
+							response.write('<?xml version="1.0" encoding="utf-8"?>'
+								+ '<D:multistatus xmlns:D="DAV:">'
+								+ '<D:response>'
+								+ `<D:href>${davBasePath}zotero/</D:href>`
+								+ '<D:propstat>'
+								+ '<D:prop><D:getcontentlength/></D:prop>'
+								+ '<D:status>HTTP/1.1 200 OK</D:status>'
+								+ '</D:propstat>'
+								+ '</D:response>'
+								+ '</D:multistatus>');
+							return;
+						}
+						response.setStatusLine(null, 200, "OK");
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				`${davBasePath}zotero/nonexistent.prop`,
+				{
+					handle: function (request, response) {
+						if (!handleDigestAuth(request, response)) return;
+						response.setStatusLine(null, 404, "Not Found");
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				`${davBasePath}zotero/zotero-test-file.prop`,
+				{
+					handle: function (request, response) {
+						if (!handleDigestAuth(request, response)) return;
+						if (request.method == 'PUT') {
+							response.setStatusLine(null, 201, "Created");
+						}
+						else if (request.method == 'GET') {
+							response.setStatusLine(null, 200, "OK");
+						}
+						else if (request.method == 'DELETE') {
+							response.setStatusLine(null, 204, "No Content");
+						}
+					}
+				}
+			);
+
+			Zotero.Prefs.set("sync.storage.url", davHostPath);
+
+			await controller.checkServer();
+			assert.isTrue(controller.verified);
+		});
 	});
-	
+
 	describe("#purgeDeletedStorageFiles()", function () {
 		beforeEach(function () {
 			resetRequestCount();
