@@ -520,6 +520,26 @@ describe("Item merging", function () {
 		assert.isTrue(attachment2.deleted);
 	});
 
+	it("should keep a non-master snapshot that matches a trashed master snapshot", async function () {
+		let item1 = await createDataObject('item');
+		let attachment1 = await importSnapshotAttachment(item1);
+		attachment1.deleted = true;
+		await attachment1.saveTx();
+
+		let item2 = item1.clone();
+		await item2.saveTx();
+		let attachment2 = await importSnapshotAttachment(item2);
+
+		await mergeItems(item1, [item2]);
+
+		assert.isFalse(item1.deleted);
+		assert.isTrue(attachment1.deleted);
+		assert.equal(item1.numAttachments(true), 2);
+		assert.isTrue(item2.deleted);
+		assert.isFalse(attachment2.deleted);
+		assert.equal(attachment2.parentItemID, item1.id);
+	});
+
 	it("should merge linked URLs", async function () {
 		let item1 = await createDataObject('item', { setTitle: true });
 		let attachment1 = await Zotero.Attachments.linkFromURL({
@@ -757,6 +777,70 @@ describe("Item merging", function () {
 		assert.isTrue(item2.deleted);
 		assert.isFalse(attachment2.deleted);
 		assert.equal(attachment2.parentItemID, item1.id);
+	});
+
+	it("should move but not merge a trashed non-master PDF attachment", async function () {
+		let item1 = await createDataObject('item', { setTitle: true });
+		let attachment1 = await importPDFAttachment(item1);
+
+		let item2 = item1.clone();
+		await item2.saveTx();
+		let attachment2 = await importPDFAttachment(item2);
+		let annotation = await createAnnotation('highlight', attachment2);
+		attachment2.deleted = true;
+		await attachment2.saveTx();
+
+		await mergeItems(item1, [item2]);
+
+		assert.isFalse(item1.deleted);
+		assert.isFalse(attachment1.deleted);
+		assert.isTrue(attachment2.deleted);
+		assert.equal(attachment2.parentItemID, item1.id);
+		assert.equal(item1.numAttachments(true), 2);
+		assert.isTrue(item2.deleted);
+		// Annotation should not have been moved to attachment1
+		assert.equal(annotation.parentItemID, attachment2.id);
+	});
+
+	it("should move but not merge a trashed non-master snapshot", async function () {
+		let item1 = await createDataObject('item');
+		let attachment1 = await importSnapshotAttachment(item1);
+
+		let item2 = item1.clone();
+		await item2.saveTx();
+		let attachment2 = await importSnapshotAttachment(item2);
+		attachment2.deleted = true;
+		await attachment2.saveTx();
+
+		await mergeItems(item1, [item2]);
+
+		assert.isFalse(item1.deleted);
+		assert.isFalse(attachment1.deleted);
+		assert.isTrue(attachment2.deleted);
+		assert.equal(attachment2.parentItemID, item1.id);
+		assert.equal(item1.numAttachments(true), 2);
+		assert.isTrue(item2.deleted);
+		// No replaced-item relation should have been added
+		let rels = attachment1.getRelationsByPredicate(Zotero.Relations.replacedItemPredicate);
+		assert.lengthOf(rels, 0);
+	});
+
+	it("should move a trashed non-master non-PDF/non-web attachment", async function () {
+		let item1 = await createDataObject('item');
+
+		let item2 = await createDataObject('item');
+		let attachment = await importPDFAttachment(item2);
+		attachment.attachmentContentType = 'text/plain';
+		attachment.deleted = true;
+		await attachment.saveTx();
+
+		await mergeItems(item1, [item2]);
+
+		assert.isFalse(item1.deleted);
+		assert.isTrue(attachment.deleted);
+		assert.equal(attachment.parentItemID, item1.id);
+		assert.equal(item1.numAttachments(true), 1);
+		assert.isTrue(item2.deleted);
 	});
 
 	it("should not merge two matching PDF attachments with embedded annotations", async function () {
