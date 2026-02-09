@@ -126,12 +126,26 @@ done
 # Upload builds to S3
 "$SCRIPT_DIR/upload_builds" $CHANNEL $VERSION
 
-# Upload file lists for each platform
+# Upload file lists and build info for each platform
 channel_deploy_path="$DEPLOY_PATH/$CHANNEL"
 mkdir "$TEMP_DIR/version_info"
 chmod g+ws "$TEMP_DIR/version_info"
 cp "$DIST_DIR"/files-* "$TEMP_DIR/version_info"
 chmod g+w "$TEMP_DIR"/version_info/files-*
+# Generate build-{os}.json for each platform
+SHORT_VERSION="${VERSION:0:3}"
+DETAILS_URL="https://www.zotero.org/support/${SHORT_VERSION}_changelog"
+for i in `seq 0 1 $((${#PLATFORMS}-1))`
+do
+	case ${PLATFORMS:i:1} in
+		m) os_name="mac" ;;
+		w) os_name="win" ;;
+		l) os_name="linux" ;;
+	esac
+	printf '{\n  "buildID": "%s",\n  "detailsURL": "%s"\n}\n' "$BUILD_ID" "$DETAILS_URL" \
+		> "$TEMP_DIR/version_info/build-${os_name}.json"
+	chmod g+w "$TEMP_DIR/version_info/build-${os_name}.json"
+done
 rsync -rv "$TEMP_DIR/version_info/" $DEPLOY_HOST:"$channel_deploy_path/$VERSION/"
 
 # Download updates JSON for each platform, update it, and reupload it
