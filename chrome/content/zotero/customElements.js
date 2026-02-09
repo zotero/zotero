@@ -360,11 +360,11 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 				}, { once: true });
 				target.open = false;
 			}
-			// No blinking happens on linux or windows
+			// No blinking happens on Linux or Windows
 			else {
 				target.activeChild.doCommand();
 				// Timeout to avoid empty context menu behind an alert or dialog if one
-				// appears on 'command' event on windows (https://github.com/zotero/zotero/issues/5633)
+				// appears on 'command' event on Windows (https://github.com/zotero/zotero/issues/5633)
 				setTimeout(() => {
 					target.open = false;
 				});
