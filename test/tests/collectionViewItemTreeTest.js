@@ -357,7 +357,7 @@ describe("CollectionViewItemTree", function () {
 	});
 	
 	describe("#sort()", function () {
-		it.skip("should ignore invalid secondary-sort field", async function () {
+		it("should ignore invalid secondary-sort field", async function () {
 			await createDataObject('item', { title: 'A' });
 			await createDataObject('item', { title: 'A' });
 			
@@ -373,7 +373,7 @@ describe("CollectionViewItemTree", function () {
 			assert.isUndefined(Zotero.Prefs.get('secondarySort.title'));
 		});
 		
-		it.skip("should ignore invalid fallback-sort field", async function () {
+		it("should ignore invalid fallback-sort field", async function () {
 			Zotero.Prefs.clear('fallbackSort');
 			var originalFallback = Zotero.Prefs.get('fallbackSort');
 			Zotero.Prefs.set('fallbackSort', 'invalidField,' + originalFallback);
@@ -387,7 +387,7 @@ describe("CollectionViewItemTree", function () {
 			assert.equal(Zotero.Prefs.get('fallbackSort'), originalFallback);
 		});
 		
-		it.skip("should preserve open container state when sorting", async function () {
+		it("should preserve open container state when sorting", async function () {
 			let parentItem = await createDataObject('item', { title: 'Parent' });
 			let attachment = await importFileAttachment('test.pdf', { parentItemID: parentItem.id });
 			await createAnnotation('highlight', attachment);
@@ -708,9 +708,9 @@ describe("CollectionViewItemTree", function () {
 			assert.equal(itemsView.getRow(treebox.getFirstVisibleRow()).ref.id, firstVisibleItemID);
 		});
 		
-		it.skip("should keep first visible selected item in position when other items are added with skipSelect", function* () {
-			var collection = yield createDataObject('collection');
-			yield select(win, collection);
+		it("should keep first visible selected item in position when other items are added with skipSelect", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
 			itemsView = zp.itemsView;
 			
 			var treebox = itemsView._treebox;
@@ -722,14 +722,14 @@ describe("CollectionViewItemTree", function () {
 			}
 			
 			var num = numVisibleRows + 10;
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				for (let i = 0; i < num; i++) {
 					let title = getTitle(i, num);
 					let item = createUnsavedDataObject('item', { title });
 					item.addToCollection(collection.id);
 					await item.save();
 				}
-			}.bind(this));
+			});
 			
 			// Scroll halfway
 			treebox.scrollToRow(Math.round(num / 2) - Math.round(numVisibleRows / 2));
@@ -743,11 +743,11 @@ describe("CollectionViewItemTree", function () {
 			var item = createUnsavedDataObject(
 				'item', { title: getTitle(0, num), collections: [collection.id] }
 			);
-			yield item.saveTx({
+			await item.saveTx({
 				skipSelect: true
 			});
 			// Then add a few more in a transaction
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				for (let i = 0; i < 3; i++) {
 					var item = createUnsavedDataObject(
 						'item', { title: getTitle(0, num), collections: [collection.id] }
@@ -756,7 +756,7 @@ describe("CollectionViewItemTree", function () {
 						skipSelect: true
 					});
 				}
-			}.bind(this));
+			});
 			
 			// Make sure the selected item is still at the same position
 			assert.equal(itemsView.getSelectedItems()[0], selectedItem);
