@@ -123,6 +123,13 @@ async function mergePDFAttachments(item, otherItems) {
 				continue;
 			}
 
+			// Don't merge trashed attachments, just move them
+			if (otherAttachment.deleted) {
+				otherAttachment.parentItemID = item.id;
+				await otherAttachment.save();
+				continue;
+			}
+
 			// First check if master has an attachment with identical MD5 hash
 			let matchingHash = await otherAttachment.attachmentHash;
 			let masterAttachmentID = masterAttachmentHashes.get(matchingHash);
@@ -207,7 +214,7 @@ async function mergePDFAttachments(item, otherItems) {
 async function mergeWebAttachments(item, otherItems) {
 	Zotero.DB.requireTransaction();
 
-	let masterAttachments = (await Zotero.Items.getAsync(item.getAttachments(true)))
+	let masterAttachments = (await Zotero.Items.getAsync(item.getAttachments()))
 		.filter(attachment => attachment.isWebAttachment());
 	let masterAttachmentFilesExist = await Promise.all(masterAttachments.map(
 		attachment => attachment.attachmentLinkMode === Zotero.Attachments.LINK_MODE_LINKED_URL
@@ -218,6 +225,13 @@ async function mergeWebAttachments(item, otherItems) {
 	for (let otherItem of otherItems) {
 		for (let otherAttachment of await Zotero.Items.getAsync(otherItem.getAttachments(true))) {
 			if (!otherAttachment.isWebAttachment()) {
+				continue;
+			}
+
+			// Don't merge trashed attachments, just move them
+			if (otherAttachment.deleted) {
+				otherAttachment.parentItemID = item.id;
+				await otherAttachment.save();
 				continue;
 			}
 
