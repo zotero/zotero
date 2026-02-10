@@ -788,7 +788,7 @@ class LibraryLayout extends Layout {
 		// Scroll to the first cited item
 		let firstCitedRow = this.itemsView._rows.findIndex(row => CitationDataManager.itemAddedCache.has(row.ref.id));
 		if (firstCitedRow == -1) return;
-		this.itemsView.ensureRowIsVisible(firstCitedRow);
+		this.itemsView.ensureRowsAreVisible([firstCitedRow]);
 	}
 
 	// after an item is added, bubble-input's height may increase and push the itemTree down
