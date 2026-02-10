@@ -115,6 +115,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		this.collectionTreeRow = collectionTreeRow;
 		// Emit loading state - only setCollectionTreeRow shows loading UI
 		await this.runListeners('update', null, { loading: true });
+		await this.itemTree._ensureSortContextReady();
+		this.itemTree._getColumns();
 		await this.refresh();
 	}
 
@@ -273,6 +275,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			
 			this._rows = newRows;
 			this.refreshRowMap();
+			await this.itemTree._ensureSortContextReady();
 			this._sort([...addedItemIDs]);
 			
 			// Toggle all open containers closed and open to refresh child items
@@ -630,6 +633,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			await this._refresh();
 		}
 		if (sort) {
+			await this.itemTree._ensureSortContextReady();
 			this._sort(typeof sort == 'number' ? [sort] : false);
 		}
 
