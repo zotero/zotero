@@ -2252,7 +2252,7 @@ var ZoteroPane = new function () {
 	 *                                      or trash without prompt in library
 	 * @param  {Boolean}  [fromMenu=false]  If triggered from context menu, which always prompts for deletes
 	 */
-	this.deleteSelectedItems = function (force, fromMenu) {
+	this.deleteSelectedItems = async function (force, fromMenu) {
 		if (!this.itemsView || !this.itemsView.selection.count) {
 			return;
 		}
@@ -2347,7 +2347,7 @@ var ZoteroPane = new function () {
 		}
 		
 		if (!prompt || Services.prompt.confirm(window, prompt.title, prompt.text)) {
-			this.itemsView.deleteSelection(force);
+			await this.itemsView.deleteSelection(force);
 		}
 	}
 	

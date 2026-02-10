@@ -661,46 +661,70 @@ describe("ZoteroPane", function () {
 	
 	
 	describe("#deleteSelectedItems()", function () {
-		const DELETE_KEY_CODE = 46;
-		
 		afterEach(async function () {
 			await selectLibrary(win);
 		});
-		
-		it("should remove an item from My Publications", async function () {
-			var item = createUnsavedDataObject('item');
-			item.inPublications = true;
-			await item.saveTx();
-			
-			await zp.collectionsView.selectByID("P" + userLibraryID);
-			await waitForItemsLoad(win);
+
+		it("should be called on Delete key", async function () {
+			var item = await createDataObject('item');
 			var iv = zp.itemsView;
-			
-			var selected = iv.selectItem(item.id);
-			assert.ok(selected);
-			
+			iv.selectItem(item.id);
+
 			var tree = doc.getElementById(iv.id);
 			tree.focus();
-			
-			await Zotero.Promise.delay(1);
-			
-			var promise = waitForDialog();
-			var modifyPromise = waitForItemEvent('modify');
-			
-			var event = new KeyboardEvent(
+
+			var stub = sinon.stub(zp, 'deleteSelectedItems');
+
+			// Unmodified Delete -- force should be false
+			tree.dispatchEvent(new KeyboardEvent(
 				"keypress",
 				{
 					key: 'Delete',
 					code: 'Delete',
-					keyCode: DELETE_KEY_CODE,
+					keyCode: 46,
 					bubbles: true,
-					cancelable: true
+					cancelable: true,
 				}
-			);
-			tree.dispatchEvent(event);
+			));
+			assert.isTrue(stub.calledOnce);
+			assert.isFalse(stub.firstCall.args[0]);
+			stub.resetHistory();
+
+			// Modified Delete -- force should be true
+			tree.dispatchEvent(new KeyboardEvent(
+				"keypress",
+				{
+					key: 'Delete',
+					code: 'Delete',
+					keyCode: 46,
+					bubbles: true,
+					cancelable: true,
+					metaKey: Zotero.isMac,
+					shiftKey: !Zotero.isMac,
+				}
+			));
+			assert.isTrue(stub.calledOnce);
+			assert.isTrue(stub.firstCall.args[0]);
+
+			stub.restore();
+		});
+
+		it("should remove an item from My Publications", async function () {
+			var item = createUnsavedDataObject('item');
+			item.inPublications = true;
+			await item.saveTx();
+
+			await zp.collectionsView.selectByID("P" + userLibraryID);
+			await waitForItemsLoad(win);
+			var iv = zp.itemsView;
+
+			var selected = iv.selectItem(item.id);
+			assert.ok(selected);
+
+			var promise = waitForDialog();
+			await zp.deleteSelectedItems();
 			await promise;
-			await modifyPromise;
-			
+
 			assert.isFalse(item.inPublications);
 			assert.isFalse(item.deleted);
 		});
@@ -709,38 +733,18 @@ describe("ZoteroPane", function () {
 			var item = createUnsavedDataObject('item');
 			item.inPublications = true;
 			await item.saveTx();
-			
+
 			await zp.collectionsView.selectByID("P" + userLibraryID);
 			await waitForItemsLoad(win);
 			var iv = zp.itemsView;
-			
+
 			var selected = iv.selectItem(item.id);
 			assert.ok(selected);
-			
-			var tree = doc.getElementById(iv.id);
-			tree.focus();
-			
-			await Zotero.Promise.delay(1);
-			
+
 			var promise = waitForDialog();
-			var modifyPromise = waitForItemEvent('modify');
-			
-			var event = new KeyboardEvent(
-				"keypress",
-				{
-					key: 'Delete',
-					code: 'Delete',
-					keyCode: DELETE_KEY_CODE,
-					bubbles: true,
-					cancelable: true,
-					shiftKey: !Zotero.isMac,
-					metaKey: Zotero.isMac,
-				}
-			);
-			tree.dispatchEvent(event);
+			await zp.deleteSelectedItems(true);
 			await promise;
-			await modifyPromise;
-			
+
 			assert.isTrue(item.inPublications);
 			assert.isTrue(item.deleted);
 		});
@@ -750,35 +754,17 @@ describe("ZoteroPane", function () {
 			var title = [...Object.values(search.conditions)]
 				.filter(x => x.condition == 'title' && x.operator == 'contains')[0].value;
 			var item = await createDataObject('item', { title });
-			
+
 			await select(win, search);
 			var iv = zp.itemsView;
-			
+
 			var selected = iv.selectItem(item.id);
 			assert.ok(selected);
-			
-			var tree = doc.getElementById(iv.id);
-			tree.focus();
-			
-			await Zotero.Promise.delay(1);
-			
+
 			var promise = waitForDialog();
-			var modifyPromise = waitForItemEvent('modify');
-			
-			var event = new KeyboardEvent(
-				"keypress",
-				{
-					key: 'Delete',
-					code: 'Delete',
-					keyCode: DELETE_KEY_CODE,
-					bubbles: true,
-					cancelable: true
-				}
-			);
-			tree.dispatchEvent(event);
+			await zp.deleteSelectedItems();
 			await promise;
-			await modifyPromise;
-			
+
 			assert.isTrue(item.deleted);
 		});
 		
@@ -787,35 +773,15 @@ describe("ZoteroPane", function () {
 			var title = [...Object.values(search.conditions)]
 				.filter(x => x.condition == 'title' && x.operator == 'contains')[0].value;
 			var item = await createDataObject('item', { title });
-			
+
 			await select(win, search);
 			var iv = zp.itemsView;
-			
+
 			var selected = iv.selectItem(item.id);
 			assert.ok(selected);
-			
-			var tree = doc.getElementById(iv.id);
-			tree.focus();
-			
-			await Zotero.Promise.delay(1);
-			
-			var modifyPromise = waitForItemEvent('modify');
-			
-			var event = new KeyboardEvent(
-				"keypress",
-				{
-					key: 'Delete',
-					code: 'Delete',
-					keyCode: DELETE_KEY_CODE,
-					metaKey: Zotero.isMac,
-					shiftKey: !Zotero.isMac,
-					bubbles: true,
-					cancelable: true
-				}
-			);
-			tree.dispatchEvent(event);
-			await modifyPromise;
-			
+
+			await zp.deleteSelectedItems(true);
+
 			assert.isTrue(item.deleted);
 		});
 
@@ -1088,21 +1054,25 @@ describe("ZoteroPane", function () {
 
 			var userLibraryID = Zotero.Libraries.userLibraryID;
 			await zp.collectionsView.selectByID('T' + userLibraryID);
-			
+
+			// Enable for attachment of item in trash
 			await zp.selectItems([attachment1.id]);
 			await zp.buildItemContextMenu();
 			var menu = win.document.getElementById('zotero-itemmenu');
 			var deleteMenuItem = menu.querySelector('.zotero-menuitem-delete-from-lib');
 			assert.isFalse(deleteMenuItem.disabled);
 
+			// Enable for parent and attachment
 			await zp.selectItems([item1.id, attachment1.id]);
 			await zp.buildItemContextMenu();
 			assert.isFalse(deleteMenuItem.disabled);
 
+			// Disable for non-trashed parent shown as container of trashed attachment
 			item1.deleted = false;
 			attachment1.deleted = true;
 			await item1.saveTx();
 			await attachment1.saveTx();
+			await zp.selectItems([item1.id]);
 			await zp.buildItemContextMenu();
 			assert.isTrue(deleteMenuItem.disabled);
 		});
