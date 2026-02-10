@@ -472,6 +472,25 @@ describe("CollectionViewItemTree", function () {
 			assert.isTrue(itemsView.isContainerOpen(parentRow));
 			assert.isTrue(itemsView.isContainerOpen(attachmentRow));
 		});
+		
+		it("should await sort context readiness before sorting", async function () {
+			let deferred = Zotero.Promise.defer();
+			let ensureStub = sinon.stub(itemsView, '_ensureSortContextReady').returns(deferred.promise);
+			let sortStub = sinon.stub(itemsView.rowProvider, 'sort');
+			
+			try {
+				let sortPromise = itemsView.sort();
+				await Zotero.Promise.delay(20);
+				assert.equal(sortStub.callCount, 0);
+				deferred.resolve();
+				await sortPromise;
+				assert.equal(sortStub.callCount, 1);
+			}
+			finally {
+				sortStub.restore();
+				ensureStub.restore();
+			}
+		});
 	});
 	
 	describe("#notify()", function () {
@@ -1987,6 +2006,28 @@ describe("CollectionViewItemTree", function () {
 		});
 	});
 	
+	describe("#_refresh()", function () {
+		it("should await sort context readiness before sorting", async function () {
+			let rowProvider = itemsView.rowProvider;
+			let deferred = Zotero.Promise.defer();
+			let ensureStub = sinon.stub(itemsView, '_ensureSortContextReady').returns(deferred.promise);
+			let sortSpy = sinon.spy(rowProvider, '_sort');
+			
+			try {
+				let refreshPromise = rowProvider._refresh();
+				await Zotero.Promise.delay(20);
+				assert.equal(sortSpy.callCount, 0);
+				deferred.resolve();
+				await refreshPromise;
+				assert.isTrue(sortSpy.called);
+			}
+			finally {
+				sortSpy.restore();
+				ensureStub.restore();
+			}
+		});
+	});
+	
 	describe("#handleRowModelUpdate()", function () {
 		it("should clear selection and return false when loading is true", async function () {
 			await itemsView.waitForLoad();
@@ -2147,9 +2188,17 @@ describe("CollectionViewItemTree", function () {
 			let itemAboveTwo = await createDataObject('item', { title: "BBB" });
 			let itemBelowOne = await createDataObject('item', { title: "ZZZ" });
 
-			// Initially, everything is sorted by title
+			// Ensure known starting state: primary sort by title ascending
 			var colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
-			await zp.itemsView.tree._columns.toggleSort(colIndex);
+			for (let i = 0; i < 3; i++) {
+				let sortFields = itemsView.getSortFields();
+				if (sortFields[0] == 'title' && itemsView.getSortDirection(sortFields) == 1) {
+					break;
+				}
+				await zp.itemsView.tree._columns.toggleSort(colIndex);
+			}
+			assert.equal(itemsView.getSortField(), 'title');
+			assert.equal(itemsView.getSortDirection(itemsView.getSortFields()), 1);
 
 			// Expand annotations
 			var itemRowIndex = zp.itemsView.getRowIndexByID(toplevelItem.id);

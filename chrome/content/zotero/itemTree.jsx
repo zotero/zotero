@@ -1304,6 +1304,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._itemsPaneMessage = null;
 		
 		this._columnsId = null;
+		this._sortContextReadyPromise = Zotero.Promise.resolve();
 
 		// Initial deferred to be resolved on componentDidMount()
 		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
@@ -1317,7 +1318,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	async setId(newId) {
-		if (this._id === newId) return;
+		if (this._id === newId) {
+			await this._ensureSortContextReady();
+			return;
+		}
 
 		// Save current columns (only if we have an existing id)
 		if (this._id != null && this.props.persistColumns) {
@@ -1326,10 +1330,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		this._id = newId;
 
-		// Load columns for new id
-		if (this.props.persistColumns) {
-			await this._loadColumnPrefsFromFile();
+		if (!this.props.persistColumns) {
+			this._sortContextReadyPromise = Zotero.Promise.resolve();
+			return;
 		}
+
+		this._sortContextReadyPromise = (async () => {
+			await this._loadColumnPrefsFromFile();
+			// Force columns/sort metadata to be rebuilt from newly loaded prefs
+			this._columnsId = null;
+			this._sortedColumn = null;
+			// Initialize columns once so _sortedColumn is ready before first sort
+			this._getColumns();
+		})();
+		await this._sortContextReadyPromise;
+	}
+
+	async _ensureSortContextReady() {
+		await this._sortContextReadyPromise;
 	}
 
 	get visibilityGroup() {
@@ -1852,6 +1870,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	async sort(itemIDs) {
 		var t = new Date();
 
+		await this._ensureSortContextReady();
 		this.rowProvider.sort(itemIDs);
 		await this.waitForLoad();
 
