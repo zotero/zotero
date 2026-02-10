@@ -1292,7 +1292,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._prefsObserverIDs = [
 			Zotero.Prefs.registerObserver('recursiveCollections', this.refreshAndMaintainSelection.bind(this)),
 			Zotero.Prefs.registerObserver('showAttachmentFilenames', () => {
-				this._rowCache = {};
+				this.rowProvider._rowCache = {};
 				this.tree.invalidate();
 			}),
 			Zotero.Prefs.registerObserver('hideContextAnnotationRows', async () => {
