@@ -295,8 +295,12 @@ class ItemTreeRowProvider {
 	toggleOpenState(index, skipRowMapRefresh = false) {
 		this.itemTree._cacheState();
 		this._toggleOpenState(index, skipRowMapRefresh);
-		// Don't jump to container when collapsing.
-		this.runListeners('update', true, { restoreSelection: true, expandCollapsedParents: false, ensureRowsAreVisible: this.isContainerOpen(index) });
+		// Preserve viewport when toggling a container instead of jumping to the current selection.
+		this.runListeners('update', true, {
+			restoreSelection: true,
+			expandCollapsedParents: false,
+			restoreScroll: true,
+		});
 	}
 
 	expandAllRows() {

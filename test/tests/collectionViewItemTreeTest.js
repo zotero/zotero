@@ -356,6 +356,70 @@ describe("CollectionViewItemTree", function () {
 		});
 	});
 	
+	describe("#toggleOpenState()", function () {
+		it("shouldn't scroll back to selected row when opening another container", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
+			
+			function getTitle(i, max) {
+				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
+			}
+			
+			var num = numVisibleRows * 2 + 10;
+			var parentItem = await createDataObject('item', {
+				title: getTitle(0, num + 1),
+				collections: [collection.id]
+			});
+			await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			
+			var itemIDs = [];
+			await Zotero.DB.executeTransaction(async function () {
+				for (let i = 1; i <= num; i++) {
+					let item = createUnsavedDataObject('item', {
+						title: getTitle(i, num + 1),
+						collections: [collection.id]
+					});
+					await item.save();
+					itemIDs.push(item.id);
+				}
+			});
+			await waitForItemsLoad(win);
+			
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			var selectedItemID;
+			var maxDistance = -1;
+			for (let id of itemIDs) {
+				let row = itemsView.getRowIndexByID(id);
+				let distance = Math.abs(row - parentRow);
+				if (distance > maxDistance) {
+					maxDistance = distance;
+					selectedItemID = id;
+				}
+			}
+			assert.isAbove(maxDistance, numVisibleRows);
+			
+			await itemsView.selectItem(selectedItemID);
+			assert.sameMembers(itemsView.getSelectedItems(true), [selectedItemID]);
+			
+			treebox.scrollToRow(parentRow);
+			var firstVisibleBefore = treebox.getFirstVisibleRow();
+			assert.isFalse(itemsView.tree.rowIsVisible(itemsView.getRowIndexByID(selectedItemID)));
+			assert.isFalse(itemsView.isContainerOpen(parentRow));
+			
+			await itemsView.toggleOpenState(parentRow);
+			await itemsView.waitForLoad();
+			
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(parentItem.id)));
+			assert.sameMembers(itemsView.getSelectedItems(true), [selectedItemID]);
+			assert.equal(treebox.getFirstVisibleRow(), firstVisibleBefore);
+			assert.isFalse(itemsView.tree.rowIsVisible(itemsView.getRowIndexByID(selectedItemID)));
+		});
+	});
+	
 	describe("#sort()", function () {
 		it("should ignore invalid secondary-sort field", async function () {
 			await createDataObject('item', { title: 'A' });
