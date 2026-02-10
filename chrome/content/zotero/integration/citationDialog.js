@@ -454,6 +454,7 @@ class Layout {
 class LibraryLayout extends Layout {
 	constructor() {
 		super("library");
+		this._scrolledToFirstCitedOnInit = false;
 	}
 
 	async init() {
@@ -779,9 +780,11 @@ class LibraryLayout extends Layout {
 		}
 	}
 
-	async _ensureFirstCitedRowVisible() {
+	async _tryToScrollToFirstCitedRow() {
+		if (this._scrolledToFirstCitedOnInit) return;
+		this._scrolledToFirstCitedOnInit = true;
 		// If the itemTree is still loading, wait for it to finish
-		await this.itemsView._itemTreeLoadingDeferred.promise;
+		await this.itemsView.waitForLoad();
 		// Scroll to the first cited item
 		let firstCitedRow = this.itemsView._rows.findIndex(row => CitationDataManager.itemAddedCache.has(row.ref.id));
 		if (firstCitedRow == -1) return;
@@ -1059,6 +1062,11 @@ const IOManager = {
 			currentLayout.forceUpdateTablesAfterRefresh = true;
 		}
 		await currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
+		// When library layout is opened for the first time (initial state or first switch from list mode),
+		// try to scroll to the first cited row in the itemTree to preserve behavior from classic citation dialog.
+		if (currentLayout.type == "library") {
+			currentLayout._tryToScrollToFirstCitedRow();
+		}
 	},
 
 	// pass current items in the citation to bubble-input to have it update the bubbles
@@ -1310,9 +1318,6 @@ const IOManager = {
 			desiredMode = "list";
 		}
 		await this.toggleDialogMode(desiredMode);
-		if (desiredMode == "library") {
-			libraryLayout._ensureFirstCitedRowVisible();
-		}
 	},
 	
 	// handle drag start of item nodes into bubble-input
