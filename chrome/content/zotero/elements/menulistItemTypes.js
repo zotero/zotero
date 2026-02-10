@@ -70,6 +70,10 @@
 			}
 		}
 		
+		get value() {
+			return super.value;
+		}
+		
 		set value(value) {
 			if (!this.itemCount) {
 				this._preconnectedValue = value;
