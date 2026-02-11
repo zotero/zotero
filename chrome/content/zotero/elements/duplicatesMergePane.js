@@ -24,6 +24,11 @@
 */
 
 {
+	let lazy = {};
+	ChromeUtils.defineESModuleGetters(lazy, {
+		mergeItems: "chrome://zotero/content/mergeItems.mjs",
+	});
+
 	class DuplicatesMergePane extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<groupbox>
@@ -182,7 +187,7 @@
 			Object.assign(json, keep);
 			
 			this._masterItem.fromJSON(json);
-			Zotero.Items.merge(this._masterItem, this._otherItems);
+			await lazy.mergeItems(this._masterItem, this._otherItems);
 		}
 	}
 	customElements.define("duplicates-merge-pane", DuplicatesMergePane);
