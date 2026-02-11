@@ -288,6 +288,108 @@ describe("Zotero.ItemTree", function () {
 			assert.sameMembers(selected, toSelect);
 		});
 	});
+
+	describe("Expand/Collapse all rows", function () {
+		let item1, item2, attachment1, attachment2;
+
+		before(async () => {
+			// Top-level items, attachment child per each, one annotation per attachment
+			item1 = await createDataObject('item', { title: 'Item 1' });
+			item2 = await createDataObject('item', { title: 'Item 2' });
+			attachment1 = await importFileAttachment('test.pdf', { title: 'Attachment 1', parentItemID: item1.id });
+			attachment2 = await importFileAttachment('test.pdf', { title: 'Attachment 2', parentItemID: item2.id });
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment2);
+		});
+		
+		it("should expand all top-level rows when all rows are collapsed", async function () {
+			itemsView.collapseAllRows(true);
+
+			itemsView.expandAllRows();
+
+			// Top-level items should be expanded
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item1.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+
+			// Attachments should be collapsed
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment1.id)));
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment2.id)));
+		});
+
+		it("should expand only collapsed top-level rows when some are already expanded", async function () {
+			itemsView.collapseAllRows(true);
+
+			let item1Index = itemsView.getRowIndexByID(item1.id);
+			await itemsView.toggleOpenState(item1Index);
+
+			itemsView.expandAllRows();
+
+			// Top-level items should be expanded
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item1.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+
+			// Attachments should be collapsed
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment1.id)));
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment2.id)));
+		});
+
+		it("should expand attachment rows when all regular items are expanded", async function () {
+			itemsView.collapseAllRows(true);
+
+			let item1Index = itemsView.getRowIndexByID(item1.id);
+			let item2Index = itemsView.getRowIndexByID(item2.id);
+			await itemsView.toggleOpenState(item1Index);
+			await itemsView.toggleOpenState(item2Index);
+
+			itemsView.expandAllRows();
+
+			// All rows should be expanded
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item1.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment1.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment2.id)));
+		});
+
+		it("should expand all rows when some attachments are expanded", async function () {
+			itemsView.collapseAllRows(true);
+
+			// Expand item1 and its attachment
+			await itemsView.toggleOpenState(itemsView.getRowIndexByID(item1.id));
+			await itemsView.toggleOpenState(itemsView.getRowIndexByID(attachment1.id));
+
+			// item2 should still be collapsed at this point
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+
+			itemsView.expandAllRows();
+
+			// All rows should be expanded
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item1.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment1.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment2.id)));
+		});
+
+		it("should collapse rows up one level", async function () {
+			itemsView.expandAllRows(true);
+
+			// All rows should be expanded
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item1.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment1.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment2.id)));
+
+			itemsView.collapseAllRows();
+
+
+			// All top-level items should be expanded
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item1.id)));
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
+
+			// But attachments should be collapsed
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment1.id)));
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment2.id)));
+		});
+	});
 	
 	describe("#getCellText()", function () {
 		it("should return new value after edit", async function () {
@@ -880,7 +982,7 @@ describe("Zotero.ItemTree", function () {
 				highlight1 = await createAnnotation('highlight', attachment1);
 				
 				// Make sure tree is expanded to show all items
-				zp.itemsView.expandAllRows();
+				zp.itemsView.expandAllRows(true);
 			});
 			
 			it("should remove old attachment and annotation rows on attachment parent change", async function () {
@@ -1853,7 +1955,7 @@ describe("Zotero.ItemTree", function () {
 		});
 
 		it("should display annotations as child rows of attachments", async () => {
-			zp.itemsView.expandAllRows();
+			zp.itemsView.expandAllRows(true);
 
 			var attachmentRowIndex = zp.itemsView.getRowIndexByID(attachment.id);
 
@@ -1902,7 +2004,7 @@ describe("Zotero.ItemTree", function () {
 		});
 
 		it("should erase annotation on escape when row is selected", async () => {
-			zp.itemsView.expandAllRows();
+			zp.itemsView.expandAllRows(true);
 
 			// Select and delete ink annotation
 			let inkID = ink.id;
@@ -1916,7 +2018,7 @@ describe("Zotero.ItemTree", function () {
 		});
 
 		it("should add note from selected annotation rows of the same parent item", async () => {
-			zp.itemsView.expandAllRows();
+			zp.itemsView.expandAllRows(true);
 
 			// make sure underline has some text, just like highlight
 			underline.annotationText = "underline";
@@ -1941,7 +2043,7 @@ describe("Zotero.ItemTree", function () {
 			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF two', parentItemID: toplevelItemTwo.id });
 			let highlightTwo = await createAnnotation('highlight', attachmentTwo);
 
-			zp.itemsView.expandAllRows();
+			zp.itemsView.expandAllRows(true);
 
 			await zp.itemsView.selectItems([highlight.id, highlightTwo.id]);
 

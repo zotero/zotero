@@ -1822,11 +1822,39 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._restoreSelection(savedSelection);
 	}
 
-	expandAllRows() {
+	/**
+	 *  Expand rows level by level.
+	 * 	If all regular items are collapsed, they are toggled open to reveal attachments.
+	 *	If some regular items are expanded, only remaining collapsed regular items are toggled open.
+	 *	If all regular items are expanded, their attachments' rows will be expanded to reveal annotations.
+	 *	If there are expanded attachments rows, all rows on all levels are expanded.
+	 *  @param {Boolean} acrossAllLevels - Expand rows across all levels
+	 */
+	expandAllRows(acrossAllLevels) {
 		this.selection.selectEventsSuppressed = true;
 		var selectedItems = this.getSelectedObjects();
-		for (var i=0; i<this.rowCount; i++) {
-			if (this.isContainer(i) && !this.isContainerOpen(i)) {
+		let deepestExpandedLevel = 0;
+		// Find the deepest expanded container level
+		for (let i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && this.isContainerOpen(i) && this.getLevel(i) > deepestExpandedLevel) {
+            	deepestExpandedLevel = this.getLevel(i);
+       		}
+		}
+		// Check if there are any remaining rows on that level to expand
+		let rowsToExpandAtThatLevel = false;
+		for (let i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && !this.isContainerOpen(i) && this.getLevel(i) == deepestExpandedLevel) {
+				rowsToExpandAtThatLevel = true;
+				break;
+			}
+		}
+		// If not, move to the next level
+		if (!rowsToExpandAtThatLevel) {
+			deepestExpandedLevel++;
+		}
+		// Expand containers
+		for (var i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && !this.isContainerOpen(i) && (acrossAllLevels || this.getLevel(i) <= deepestExpandedLevel)) {
 				this.toggleOpenState(i, true);
 			}
 		}
@@ -1837,11 +1865,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 
-	collapseAllRows() {
+	/**
+	 * Collapse all rows up one level.
+	 * If there are expanded attachment container rows, only they are collapsed.
+	 * Otherwise, expanded regular items are collapsed.
+	 * @param {Boolean} acrossAllLevels - Collapse rows across all levels
+	 */
+	collapseAllRows(acrossAllLevels = false) {
 		this.selection.selectEventsSuppressed = true;
 		const selectedItems = this.getSelectedObjects();
-		for (var i=0; i<this.rowCount; i++) {
-			if (this.isContainer(i)) {
+		// Find the deepest level that has expanded containers
+		let maxLevelWithCollapsed = -1;
+		for (let i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && this.isContainerOpen(i) && this.getLevel(i) > maxLevelWithCollapsed) {
+				maxLevelWithCollapsed = this.getLevel(i);
+			}
+		}
+		// Collapse containers at that level
+		for (var i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && this.isContainerOpen(i) && (acrossAllLevels || this.getLevel(i) === maxLevelWithCollapsed)) {
 				this._closeContainer(i, true);
 			}
 		}
