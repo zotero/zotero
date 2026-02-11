@@ -372,13 +372,25 @@
 				});
 				event.preventDefault();
 			}
+			
 			let delimiters = [',', ';'];
-			let interceptRegex = new RegExp(`\\w+\\s*(${delimiters.join('|')})\\s*\\w+`, 'i');
-			let match = str.match(interceptRegex);
-			if (match) {
-				event.preventDefault();
-				textbox.value = str.trim();
-				this.openTagSplitterWindow(str, match[1], textbox);
+			if (Zotero.Prefs.prefHasUserValue('tags.splitting.detection.delimiters')) {
+				try {
+					delimiters = Zotero.Prefs.get('tags.splitting.detection.delimiters').split('');
+				}
+				catch {
+					// Do nothing, we fall back to the default value
+				}
+			}
+
+			if (delimiters.length) {
+				let interceptRegex = new RegExp(`\\w+\\s*(${delimiters.join('|')})\\s*\\w+`, 'i');
+				let match = str.match(interceptRegex);
+				if (match) {
+					event.preventDefault();
+					textbox.value = str.trim();
+					this.openTagSplitterWindow(str, match[1], textbox);
+				}
 			}
 		};
 
