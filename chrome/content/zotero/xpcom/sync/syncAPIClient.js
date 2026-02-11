@@ -543,6 +543,45 @@ Zotero.Sync.APIClient.prototype = {
 	},
 
 
+	createLoginSession: async function (userID) {
+		let body = userID ? JSON.stringify({ userID }) : undefined;
+		let headers = {};
+		if (body) {
+			headers["Content-Type"] = "application/json";
+		}
+		let uri = this.baseURL + "keys/sessions";
+		let response = await this.makeRequest("POST", uri, {
+			body, headers, successCodes: [201], noAPIKey: true
+		});
+		return this._parseJSON(response.responseText);
+	},
+
+
+	checkLoginSession: async function (token) {
+		let uri = this.baseURL + "keys/sessions/" + encodeURIComponent(token);
+		let response = await this.makeRequest("GET", uri, {
+			successCodes: [200, 404, 410], noAPIKey: true
+		});
+		if (response.status == 404) {
+			throw new Error("Login session not found");
+		}
+		if (response.status == 410) {
+			let e = new Error("Login session expired");
+			e.expired = true;
+			throw e;
+		}
+		return this._parseJSON(response.responseText);
+	},
+
+
+	cancelLoginSession: async function (token) {
+		let uri = this.baseURL + "keys/sessions/" + encodeURIComponent(token);
+		await this.makeRequest("DELETE", uri, {
+			successCodes: [204, 404, 409], noAPIKey: true
+		});
+	},
+
+
 	// Deletes current API key
 	deleteAPIKey: async function () {
 		await this.makeRequest("DELETE", this.baseURL + "keys/current");
