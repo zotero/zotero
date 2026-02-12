@@ -629,6 +629,7 @@ context-notes-search =
     .placeholder = Search Notes
 context-notes-return-button =
     .aria-label = { general-go-back }
+    .tooltiptext = Return to Notes List
 
 new-collection = New Collection…
 menu-new-collection =
