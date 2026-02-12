@@ -782,4 +782,25 @@ describe("Tag Selector", function () {
 			assert.notInclude(getRegularTags(), 'automatic');
 		});
 	});
+
+	describe("Search error handling", function () {
+		it("should degrade gracefully when getTags() throws SearchError", async function () {
+			// _safeGetTags wraps collectionTreeRow.getTags(), which calls getSearchResults().
+			// If the underlying search query fails, getSearchResults() throws SearchError.
+			// The tag selector should catch this and return [] rather than throwing upwards and breaking the UI.
+			var collectionTreeRow = win.ZoteroPane.getCollectionTreeRow();
+			collectionTreeRow.clearCache();
+			var stub = sinon.stub(collectionTreeRow, 'getSearchObject').resolves({
+				search: () => { throw new Error('simulated search failure'); }
+			});
+			try {
+				var tags = await tagSelector._safeGetTags();
+				assert.isArray(tags);
+				assert.equal(tags.length, 0);
+			}
+			finally {
+				stub.restore();
+			}
+		});
+	});
 })

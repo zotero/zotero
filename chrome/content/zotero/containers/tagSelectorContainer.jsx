@@ -114,6 +114,27 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		return null;
 	}
 	
+	/**
+	 * Safely fetch tags from the current collection tree row, returning [] on search error.
+	 * CollectionTreeRow.getTags() calls getSearchResults() under the hood, which throws
+	 * Zotero.CollectionTreeRow.SearchError if the underlying search query fails (e.g., a
+	 * saved search with invalid conditions). The tag selector should degrade gracefully in
+	 * that case — showing no tags — rather than throwing upwards and breaking the UI.
+	 * Real bugs (TypeError, etc.) are re-thrown so they surface in tests and logs.
+	 */
+	async _safeGetTags(...args) {
+		try {
+			return await this.collectionTreeRow.getTags(...args);
+		}
+		catch (e) {
+			if (e instanceof Zotero.CollectionTreeRow.SearchError) {
+				Zotero.logError(e);
+				return [];
+			}
+			throw e;
+		}
+	}
+
 	// Update trigger #1 (triggered by ZoteroPane)
 	async onItemViewChanged({ collectionTreeRow, libraryID }) {
 		Zotero.debug('Updating tag selector from current view');
@@ -192,7 +213,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			}
 			// Check tags for each tag type to see if they're in view/scope
 			for (let [type, tagIDs] of tagsByType) {
-				changedTagsInScope.push(...await this.collectionTreeRow.getTags([type], tagIDs));
+				changedTagsInScope.push(...await this._safeGetTags([type], tagIDs));
 				if (this.displayAllTags) {
 					changedTagsInView.push(
 						...await Zotero.Tags.getAllWithin({ libraryID: this.libraryID, tagIDs })
@@ -315,7 +336,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 	
 	async getTagsAndScope() {
-		var tags = await this.collectionTreeRow.getTags();
+		var tags = await this._safeGetTags();
 		// The scope is all visible tags, not all tags in the library
 		var scope = new Set(tags.map(t => t.tag));
 		if (this.displayAllTags) {
