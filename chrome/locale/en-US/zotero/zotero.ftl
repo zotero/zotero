@@ -577,6 +577,7 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+    .title = { pane-notes }
 sidenav-note-info =
     .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
