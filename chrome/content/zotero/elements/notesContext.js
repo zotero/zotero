@@ -66,19 +66,19 @@
 			
 			<popupset>
 				<menupopup class="context-pane-add-child-note-button-popup">
-					<menuitem class="context-pane-add-child-note" label="&zotero.context.addChildNote;"/>
-					<menuitem class="context-pane-add-child-note-from-annotations" label="&zotero.context.addChildNoteFromAnnotations;"/>
+					<menuitem class="context-pane-add-child-note" data-l10n-id="context-notes-add-child-note"/>
+					<menuitem class="context-pane-add-child-note-from-annotations" data-l10n-id="context-notes-add-child-note-from-annotations"/>
 				</menupopup>
 		
 				<menupopup class="context-pane-add-standalone-note-button-popup">
-					<menuitem class="context-pane-add-standalone-note" label="&zotero.context.addStandaloneNote;"/>
-					<menuitem class="context-pane-add-standalone-note-from-annotations" label="&zotero.context.addStandaloneNoteFromAnnotations;"/>
+					<menuitem class="context-pane-add-standalone-note" data-l10n-id="context-notes-add-standalone-note"/>
+					<menuitem class="context-pane-add-standalone-note-from-annotations" data-l10n-id="context-notes-add-standalone-note-from-annotations"/>
 				</menupopup>
 				
 				<menupopup class="context-pane-list-popup">
 					<menuitem class="context-pane-list-show-in-library" label="&zotero.items.menu.showInLibrary;"/>
-					<menuitem class="context-pane-list-edit-in-tab" label="&zotero.context.editInTab;"/>
-					<menuitem class="context-pane-list-edit-in-window" label="&zotero.context.editInWindow;"/>
+					<menuitem class="context-pane-list-edit-in-tab" data-l10n-id="context-notes-edit-in-tab"/>
+					<menuitem class="context-pane-list-edit-in-window" data-l10n-id="context-notes-edit-in-window"/>
 					<menuseparator/>
 					<menuitem class="context-pane-list-move-to-trash" label="&zotero.general.moveToTrash;"/>
 				</menupopup>

@@ -659,6 +659,7 @@ class EditorInstance {
 					return;
 				}
 				case 'openTab': {
+					await this._ensureNoteCreated();
 					let zp = Zotero.getActiveZoteroPane();
 					zp.openNote(this._item.id, { openInWindow: false });
 					return;
