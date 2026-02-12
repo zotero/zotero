@@ -580,36 +580,30 @@ Zotero.Sync.APIClient.prototype = {
 	},
 
 
-	async getReadAloudAudio(text, voiceID, lang) {
+	async getReadAloudAudio(segment, voiceID, lang) {
+		let url;
 		let params = new URLSearchParams();
-		params.set('text', text);
+		if (segment === 'sample') {
+			url = this.baseURL + "tts/sample";
+		}
+		else {
+			url = this.baseURL + "tts/speak";
+			params.set('text', segment.text);
+		}
 		params.set('voice', voiceID);
 		params.set('lang', lang);
-		let uri = this.baseURL + "tts/speak?" + params;
+		let uri = url + "?" + params;
 		try {
 			let xmlhttp = await this.makeRequest("GET", uri, {
-				responseType: "json",
+				responseType: "blob",
+				noAPIKey: segment === 'sample',
 				errorDelayMax: 8000,
 			});
 
-			let creditsRemaining = parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
-			if (isNaN(creditsRemaining)) {
-				creditsRemaining = null;
-			}
-
-			let { audio, timepoints } = xmlhttp.response;
-			return {
-				audio,
-				creditsRemaining,
-			};
+			return { audio: xmlhttp.response };
 		}
 		catch (e) {
 			Zotero.logError(e);
-			
-			let creditsRemaining = parseInt(e.xmlhttp?.getResponseHeader('Zotero-TTS-Credits-Remaining'));
-			if (isNaN(creditsRemaining)) {
-				creditsRemaining = null;
-			}
 
 			let error;
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status === 402) {
@@ -623,42 +617,24 @@ Zotero.Sync.APIClient.prototype = {
 			}
 			return {
 				audio: null,
-				creditsRemaining,
 				error,
 			};
 		}
 	},
 
 
-	async getReadAloudSampleAudio(voiceID, lang) {
-		let params = new URLSearchParams();
-		params.set('voice', voiceID);
-		params.set('lang', lang);
-		let uri = this.baseURL + "tts/sample?" + params;
+	async getReadAloudCreditsRemaining() {
+		let uri = this.baseURL + "tts/credits";
 		try {
 			let xmlhttp = await this.makeRequest("GET", uri, {
 				responseType: "json",
-				noAPIKey: true,
 				errorDelayMax: 8000,
 			});
-			
-			let { audio } = xmlhttp.response;
-			return {
-				audio,
-			};
+			return xmlhttp.response.creditsRemaining;
 		}
 		catch (e) {
-			let error;
-			if (e instanceof Zotero.HTTP.BrowserOfflineException) {
-				error = 'network';
-			}
-			else {
-				error = 'unknown';
-			}
-			return {
-				audio: null,
-				error,
-			};
+			Zotero.logError('Failed to fetch creditsRemaining from API');
+			return null;
 		}
 	},
 

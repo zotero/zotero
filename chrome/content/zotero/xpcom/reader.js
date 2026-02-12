@@ -256,16 +256,17 @@ class ReaderInstance {
 
 				getAudio: (segment, voice, lang) => {
 					return new this._iframeWindow.Promise(async (resolve) => {
-						let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+						let apiKey = segment === 'sample' ? null : await Zotero.Sync.Data.Local.getAPIKey();
 						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-						resolve(Cu.cloneInto(await client.getReadAloudAudio(segment.text, voice.id, lang), this._iframeWindow));
+						resolve(Cu.cloneInto(await client.getReadAloudAudio(segment, voice.id, lang), this._iframeWindow));
 					});
 				},
 
-				getSampleAudio: (voice, lang) => {
+				getCreditsRemaining: () => {
 					return new this._iframeWindow.Promise(async (resolve) => {
-						let client = Zotero.Sync.Runner.getAPIClient();
-						resolve(Cu.cloneInto(await client.getReadAloudSampleAudio(voice.id, lang), this._iframeWindow));
+						let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+						resolve(await client.getReadAloudCreditsRemaining());
 					});
 				},
 			},
