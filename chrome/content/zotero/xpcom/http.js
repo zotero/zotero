@@ -532,7 +532,7 @@ Zotero.HTTP = new function () {
 			if(success) {
 				Zotero.debug("HTTP " + method + " " + dispURL
 					+ " succeeded with " + status);
-				if (options.debug) {
+				if (options.debug && (xmlhttp.responseType == '' || xmlhttp.responseType == 'text')) {
 					Zotero.debug(xmlhttp.responseText);
 				}
 				
