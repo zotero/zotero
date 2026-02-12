@@ -80,7 +80,8 @@ const STUB_COLLECTION_TREE_ROW = {
 	isUnfiled: () => false,
 	isRetracted: () => false,
 	setSearch: () => false,
-	setTags: () => false
+	setTags: () => false,
+	clearCache: () => {}
 };
 
 class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
@@ -159,7 +160,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		this.itemTree._refreshPromise = deferred.promise;
 		
 		try {
-			Zotero.CollectionTreeCache.clear();
+			this.collectionTreeRow.clearCache();
 			// Get the full set of items we want to show
 			let newSearchItems = await this.collectionTreeRow.getItems();
 			if (this.collectionTreeRow.isTrash()) {
@@ -299,6 +300,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			deferred.resolve();
 		}
 		catch (e) {
+			this._rows = [];
+			this.refreshRowMap();
 			deferred.reject(e);
 			throw e;
 		}
@@ -341,21 +344,23 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		try {
 			await this._refresh(skipExpandMatchParents);
 
-			// Emit onUpdate to refresh the view
-			// Check for error state
-			// TODO need to check if this is still needed and what its purpose is
-			if (Zotero.CollectionTreeCache.error) {
+			this.runListeners('update', true, { restoreSelection });
+			await this.itemTree.waitForLoad();
+			this.itemTree.runListeners('refresh');
+		}
+		catch (e) {
+			// SearchError is thrown by CollectionTreeRow.getSearchResults() when the
+			// underlying search query fails (e.g., a saved search with invalid conditions like
+			// "too many SQL variables"). We show a load-error message but don't re-throw, so
+			// the UI stays functional and the user can still edit/delete the broken search
+			// from the collection tree. See Zotero.CollectionTreeRow.SearchError and the
+			// constructor comment in CollectionTreeRow for the full caching/error design.
+			if (e instanceof Zotero.CollectionTreeRow.SearchError) {
 				this.runListeners('update', true, {
 					message: Zotero.getString('pane.items.loadError')
 				});
+				return;
 			}
-			else {
-				this.runListeners('update', true, { restoreSelection });
-				await this.itemTree.waitForLoad();
-				this.itemTree.runListeners('refresh');
-			}
-		}
-		catch (e) {
 			await Zotero.Promise.delay();
 			this.runListeners('update', true, {
 				message: Zotero.getString('pane.items.loadError')
@@ -642,7 +647,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 
 			// If we refreshed, we have to clear the cache
 			if (!refresh) {
-				Zotero.CollectionTreeCache.clear();
+				this.collectionTreeRow.clearCache();
 			}
 
 			var singleSelect = false;
@@ -755,7 +760,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 }
 
 
-// TODO rename CollectionViewItemTree
 class CollectionViewItemTree extends ItemTree {
 	constructor(props) {
 		super(props);
