@@ -291,7 +291,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			
 			this._searchMode = newSearchMode;
 			this._searchItemIDs = newSearchItemIDs; // items matching the search
-			this._rowCache = {};
+			this.itemTree.invalidateRowCache(true);
 				
 			if (!this.collectionTreeRow.isPublications()) {
 				this._expandMatchParents(newSearchParentIDs);
@@ -858,10 +858,6 @@ class CollectionViewItemTree extends ItemTree {
 			ids = ids.map(id => prefix + id);
 		}
 
-		if (type === 'item' && this.collectionTreeRow.isFeedsOrFeed() && action == 'modify') {
-			let rowsToInvalidate = ids.map(id => this.getRowIndexByID(id)).filter(row => row !== false);
-			this.runListeners('update', rowsToInvalidate);
-		}
 		return super.notify(action, type, ids, extraData);
 	}
 
