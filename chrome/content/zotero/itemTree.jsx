@@ -101,7 +101,6 @@ class ItemTreeRowProvider {
 		this.itemTree = itemTree;
 		this._rows = [];
 		this._rowMap = {};
-		this._rowCache = {};
 		this._searchMode = false;
 		this._searchItemIDs = new Set();
 		this._searchParentIDs = new Set();
@@ -118,10 +117,6 @@ class ItemTreeRowProvider {
 
 	get rowMap() {
 		return this._rowMap;
-	}
-
-	get rowCache() {
-		return this._rowCache;
 	}
 
 	get searchMode() {
@@ -747,23 +742,23 @@ class ItemTreeRowProvider {
 	 */
 	async notify(action, type, ids, extraData) {
 		if (action == 'refresh') {
-			// Clear caches and invalidate rows for refreshed items
+			// Clear row display cache and invalidate rows for refreshed items
 			let rowsToInvalidate = [];
+			let idsToInvalidate = [];
 			for (let id of ids) {
 				let row = this._rowMap[id];
 				if (row === undefined) continue;
-				delete this._rowCache[id];
+				idsToInvalidate.push(id);
 				rowsToInvalidate.push(row);
 			}
+			this.itemTree.invalidateRowCache(idsToInvalidate);
 			await this.runListeners('update', rowsToInvalidate);
 			return;
 		}
 
 		if (['item', 'collection', 'search'].includes(type) && action == 'modify') {
-			// Clear row caches and redraw modified items that are displayed
-			for (const id of ids) {
-				delete this._rowCache[id];
-			}
+			// Clear row display cache and redraw modified items that are displayed
+			this.itemTree.invalidateRowCache(ids);
 			let rowsToInvalidate = ids
 				.map(id => this._rowMap[id])
 				.filter(row => row !== undefined);
@@ -1277,6 +1272,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		this._modificationLock = Zotero.Promise.resolve();
 		this._dropRow = null;
+		this._rowCache = {};
 		
 		this.rowProvider = new ItemTreeRowProvider(this);
 		this.renderer = new ItemTreeRowRenderer(this);
@@ -1292,7 +1288,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._prefsObserverIDs = [
 			Zotero.Prefs.registerObserver('recursiveCollections', this.refreshAndMaintainSelection.bind(this)),
 			Zotero.Prefs.registerObserver('showAttachmentFilenames', () => {
-				this.rowProvider._rowCache = {};
+				this.invalidateRowCache(true);
 				this.tree.invalidate();
 			}),
 			Zotero.Prefs.registerObserver('hideContextAnnotationRows', async () => {
@@ -1354,10 +1350,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return 'default';
 	}
 
+	/**
+	 * Invalidate cached row display data.
+	 * @param {number[]|boolean} ids - Array of item IDs to invalidate,
+	 *   or `true` to clear the entire cache.
+	 */
+	invalidateRowCache(ids) {
+		if (ids === true) {
+			this._rowCache = {};
+		}
+		else {
+			for (let id of ids) {
+				delete this._rowCache[id];
+			}
+		}
+	}
+
 	// Backward compatibility proxies
 	get _rows() { return this.rowProvider.rows; }
 	get _rowMap() { return this.rowProvider.rowMap; }
-	get _rowCache() { return this.rowProvider.rowCache; }
 	get _searchMode() { return this.rowProvider.searchMode; }
 	get _searchItemIDs() { return this.rowProvider.searchItemIDs; }
 
@@ -2564,7 +2575,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			row[key] = val;
 		}
-		return this.rowProvider.rowCache[itemID] = row;
+		return this._rowCache[itemID] = row;
 	}
 
 	_getColumnPrefs = () => {
