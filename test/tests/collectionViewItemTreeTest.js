@@ -2326,4 +2326,60 @@ describe("CollectionViewItemTree", function () {
 			});
 		});
 	});
+
+	describe("Search error handling", function () {
+		var rowProvider;
+
+		// Stub getSearchObject on a collectionTreeRow so that the search's .search() throws,
+		// simulating a broken saved search (e.g., "too many SQL variables").
+		function stubBrokenSearch(ctr) {
+			return sinon.stub(ctr, 'getSearchObject').resolves({
+				search: () => { throw new Error('simulated search failure'); }
+			});
+		}
+
+		beforeEach(async function () {
+			var search = await createDataObject('search');
+			await select(win, search);
+			itemsView = zp.itemsView;
+			rowProvider = itemsView.rowProvider;
+		});
+
+		it("should show load error message on search failure", async function () {
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			var setMessageSpy = sinon.spy(itemsView, 'setItemsPaneMessage');
+			try {
+				await rowProvider.refresh();
+				assert.isTrue(setMessageSpy.called);
+				assert.include(setMessageSpy.lastCall.args[0], Zotero.getString('pane.items.loadError'));
+				assert.equal(itemsView.rowCount, 0);
+			}
+			finally {
+				stub.restore();
+				setMessageSpy.restore();
+			}
+		});
+
+		it("should recover after switching to a working collection", async function () {
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			await rowProvider.refresh();
+			stub.restore();
+
+			await selectLibrary(win);
+			itemsView = zp.itemsView;
+			assert.isAbove(itemsView.rowCount, 0);
+			assert.isFalse(!!itemsView._itemsPaneMessage);
+		});
+
+		it("should not re-throw SearchError from refresh()", async function () {
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			try {
+				// refresh() should resolve, not reject
+				await rowProvider.refresh();
+			}
+			finally {
+				stub.restore();
+			}
+		});
+	});
 })
