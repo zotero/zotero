@@ -2504,4 +2504,154 @@ describe("Item pane", function () {
 			await waitForToggle('reader toolbar');
 		});
 	});
+	
+	describe("Batch Edit", function () {
+		it("should enter and exit batch edit mode", async function () {
+			let item1 = await createDataObject('item', { itemType: 'journalArticle' });
+			let item2 = await createDataObject('item', { itemType: 'journalArticle' });
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+			await waitForFrame();
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			// Enter batch edit mode
+			assert.equal(itemPane.mode, "batch-edit-prompt");
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			assert.ok(batchEditEnableBtn, "Enter Batch Edit Mode button should exist");
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			// Should now be in item mode with batch editing enabled
+			assert.equal(itemPane.mode, "item");
+
+			// Exit batch edit mode
+			let batchEditDisableBtn = itemPane.querySelector('#item-pane-batch-editing-disable');
+			assert.ok(batchEditDisableBtn, "Exit Batch Edit Mode button should exist");
+			batchEditDisableBtn.click();
+			await itemDetails._renderPromise;
+
+			// Should be back in batch-edit-prompt mode
+			assert.equal(itemPane.mode, "batch-edit-prompt");
+		});
+		it("should apply autocomplete value to all items in batch edit mode", async function () {
+			let sharedTitle = "Journal of Shared Research";
+			let differentTitle = "Journal of Different Research";
+
+			let item1 = await createDataObject('item', { itemType: 'journalArticle' });
+			item1.setField('publicationTitle', sharedTitle);
+			await item1.saveTx();
+
+			let item2 = await createDataObject('item', { itemType: 'journalArticle' });
+			item2.setField('publicationTitle', sharedTitle);
+			await item2.saveTx();
+
+			let item3 = await createDataObject('item', { itemType: 'journalArticle' });
+			item3.setField('publicationTitle', differentTitle);
+			await item3.saveTx();
+
+			let item4 = await createDataObject('item', { itemType: 'journalArticle' });
+			await item4.saveTx();
+
+			await ZoteroPane.selectItems([item1.id, item2.id, item3.id, item4.id]);
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+			
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+			let pubTitleField = itemBox.querySelector('editable-text[fieldname="publicationTitle"]');
+			assert.ok(pubTitleField, "publicationTitle field should exist");
+			
+			pubTitleField._ignoredWindowInactiveBlur = false;
+			await activateZoteroPane();
+			await Zotero.Promise.delay(50);
+			pubTitleField.focus();
+
+			await waitForCallback(() => pubTitleField.ref.mController.matchCount === 2, 100, 500);
+			// options should be sorted alphabetically, empty values are ignored
+			assert.equal(pubTitleField.ref.mController.matchCount, 2);
+			assert.equal(pubTitleField.ref.mController.getValueAt(0), differentTitle);
+			assert.equal(pubTitleField.ref.mController.getValueAt(1), sharedTitle);
+
+			let modifyPromise = waitForItemEvent('modify');
+			pubTitleField.ref.dispatchEvent(new KeyboardEvent(
+				'keydown', { key: "ArrowDown", code: 'ArrowDown', keyCode: KeyboardEvent.DOM_VK_DOWN, bubbles: true, }
+			));
+			await Zotero.Promise.delay(50);
+			pubTitleField.ref.dispatchEvent(new KeyboardEvent(
+				'keydown', { key: "Enter", code: "Enter", keyCode: KeyboardEvent.DOM_VK_RETURN, bubbles: true }
+			));
+			await modifyPromise;
+
+			assert.equal(item1.getField('publicationTitle'), differentTitle);
+			assert.equal(item2.getField('publicationTitle'), differentTitle);
+			assert.equal(item3.getField('publicationTitle'), differentTitle);
+			assert.equal(item4.getField('publicationTitle'), differentTitle);
+		});
+
+		it("should transform title case for all items in batch edit mode", async function () {
+			let titleCaseTitle = "The Great Gatsby";
+			let sentenceCaseTitle = "to kill a mockingbird";
+
+			// Create two books with different titles in different cases
+			let item1 = await createDataObject('item', { itemType: 'book' });
+			item1.setField('title', titleCaseTitle);
+			await item1.saveTx();
+
+			let item2 = await createDataObject('item', { itemType: 'book' });
+			item2.setField('title', sentenceCaseTitle);
+			await item2.saveTx();
+
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			// Find the title field
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+			let titleField = itemBox.querySelector('editable-text[fieldname="title"]');
+			assert.ok(titleField, "title field should exist");
+
+			// Find and click the options button for the title field
+			let optionsButton = itemBox.querySelector('#itembox-field-title-options');
+			assert.ok(optionsButton, "options button should exist");
+
+			// Click the options button to open the context menu
+			let menuPromise = new Promise((resolve) => {
+				let observer = new MutationObserver((mutations) => {
+					for (let mutation of mutations) {
+						for (let node of mutation.addedNodes) {
+							if (node.tagName === 'menupopup') {
+								observer.disconnect();
+								resolve(node);
+							}
+						}
+					}
+				});
+				observer.observe(itemBox.querySelector('#info-box > popupset'), { childList: true });
+			});
+
+			optionsButton.click();
+			let menupopup = await menuPromise;
+
+			let titleCaseMenuItem = Array.from(menupopup.querySelectorAll('menuitem'))
+				.find(item => item.getAttribute('label') === Zotero.getString('zotero.item.textTransform.titlecase'));
+			assert.ok(titleCaseMenuItem, "title case menu item should exist");
+
+			let modifyPromise = waitForItemEvent('modify');
+			titleCaseMenuItem.click();
+			await modifyPromise;
+
+			assert.equal(item1.getField('title'), "The Great Gatsby", "item1 should remain in title case");
+			assert.equal(item2.getField('title'), "To Kill a Mockingbird", "item2 should be transformed to title case");
+		});
+	});
 });
