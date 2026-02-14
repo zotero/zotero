@@ -18,7 +18,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	/**
 	 * Check Basic Auth credentials from request
 	 */
-	function checkAuth(request) {
+	function checkBasicAuth(request) {
 		if (!request.hasHeader('Authorization')) {
 			return false;
 		}
@@ -62,7 +62,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			handle: function (request, response) {
 				// Always handle OPTIONS with auth (for checkServer calls)
 				if (request.method == 'OPTIONS') {
-					if (!checkAuth(request)) {
+					if (!checkBasicAuth(request)) {
 						send401(response);
 						return;
 					}
@@ -74,7 +74,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				// Handle PROPFIND with auth (for cacheCredentials() calls) unless a
 				// custom handler is registered
 				if (request.method == 'PROPFIND' && !pathHandlers[path]?.PROPFIND) {
-					if (!checkAuth(request)) {
+					if (!checkBasicAuth(request)) {
 						send401(response);
 						return;
 					}
@@ -103,7 +103,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 				
 				// If Authorization not present, send 401 to trigger retry
-				if (!checkAuth(request)) {
+				if (!checkBasicAuth(request)) {
 					send401(response);
 					return;
 				}
@@ -477,7 +477,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				{
 					handle: function (request, response) {
 						if (request.method !== 'PUT') return;
-						if (!checkAuth(request)) {
+						if (!checkBasicAuth(request)) {
 							send401(response);
 							return;
 						}
@@ -1101,13 +1101,14 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		});
 
 		it("should succeed when OPTIONS uses Basic auth but server requires Digest for other methods", async function () {
-			// Some WebDAV servers may use a different auth scheme for different
-			// methods. Previously, checkServer would capture the Authorization
-			// header from OPTIONS and explicitly set it on PROPFIND via
-			// setRequestHeader, which could prevent Firefox from negotiating
-			// the correct auth scheme on a 401 challenge.
+			// Test that checkServer works with Digest auth end-to-end:
+			// 1. OPTIONS uses Basic auth
+			// 2. PROPFIND triggers Digest 401, Firefox negotiates, we cache params
+			// 3. Subsequent GET/PUT/DELETE use our computed Digest auth headers
+			//    with correct method/URI hashes that the server validates
 			let digestNonce = 'test' + Zotero.Utilities.randomString(16);
 			let digestRealm = 'WebDAV-Digest';
+			let md5 = Zotero.Utilities.Internal.md5;
 
 			function sendDigest401(response) {
 				response.setStatusLine(null, 401, "Unauthorized");
@@ -1118,28 +1119,63 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				);
 			}
 
-			function checkDigestAuth(request) {
-				if (!request.hasHeader('Authorization')) return false;
-				let auth = request.getHeader('Authorization');
-				return auth.startsWith('Digest ');
+			// Parse a Digest Authorization header into its parameters
+			function parseDigestAuth(header) {
+				if (!header || !header.startsWith('Digest ')) return null;
+				let params = {};
+				let regex = /(\w+)=(?:"([^"]*)"|([\w]+))/g;
+				let match;
+				while ((match = regex.exec(header)) !== null) {
+					params[match[1]] = match[2] !== undefined ? match[2] : match[3];
+				}
+				return params;
 			}
 
-			function handleDigestAuth(request, response) {
-				if (!checkDigestAuth(request)) {
+			// Validate Digest auth by recomputing the expected response hash
+			function validateDigestAuth(request, response) {
+				if (!request.hasHeader('Authorization')) {
+					sendDigest401(response);
+					return false;
+				}
+				let auth = request.getHeader('Authorization');
+				let params = parseDigestAuth(auth);
+				if (!params || !params.response) {
+					sendDigest401(response);
+					return false;
+				}
+
+				// Recompute the expected response
+				let ha1 = md5(`${params.username}:${params.realm}:${davPassword}`);
+				let ha2 = md5(`${request.method}:${params.uri}`);
+				let expected;
+				if (params.qop) {
+					expected = md5(
+						`${ha1}:${params.nonce}:${params.nc}:${params.cnonce}:${params.qop}:${ha2}`
+					);
+				}
+				else {
+					expected = md5(`${ha1}:${params.nonce}:${ha2}`);
+				}
+
+				if (params.response !== expected) {
 					sendDigest401(response);
 					return false;
 				}
 				return true;
 			}
 
+			// Track which methods used computed Digest auth (as opposed to
+			// Firefox's internal 401 negotiation). A request that arrives
+			// with a valid Digest auth on the first try (without us sending
+			// a 401 first) used our computed auth.
+			let computedDigestMethods = [];
+
 			httpd.registerPathHandler(
 				`${davBasePath}zotero/`,
 				{
 					handle: function (request, response) {
-						// OPTIONS uses Basic auth (which Firefox will negotiate
-						// and checkServer will capture)
 						if (request.method == 'OPTIONS') {
-							if (!checkAuth(request)) {
+							if (!checkBasicAuth(request)) {
 								send401(response);
 								return;
 							}
@@ -1147,9 +1183,11 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 							response.setStatusLine(null, 200, "OK");
 							return;
 						}
-						// All other methods require Digest auth --
-						// reject Basic auth
-						if (!handleDigestAuth(request, response)) return;
+						if (!validateDigestAuth(request, response)) return;
+
+						// If we got here without sending a 401, this request
+						// used our computed auth
+						computedDigestMethods.push('PROPFIND');
 
 						if (request.method == 'PROPFIND') {
 							response.setHeader('Content-Type', 'text/xml; charset="utf-8"', false);
@@ -1174,7 +1212,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				`${davBasePath}zotero/nonexistent.prop`,
 				{
 					handle: function (request, response) {
-						if (!handleDigestAuth(request, response)) return;
+						if (!validateDigestAuth(request, response)) return;
+						computedDigestMethods.push(request.method);
 						response.setStatusLine(null, 404, "Not Found");
 					}
 				}
@@ -1183,7 +1222,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				`${davBasePath}zotero/zotero-test-file.prop`,
 				{
 					handle: function (request, response) {
-						if (!handleDigestAuth(request, response)) return;
+						if (!validateDigestAuth(request, response)) return;
+						computedDigestMethods.push(request.method);
 						if (request.method == 'PUT') {
 							response.setStatusLine(null, 201, "Created");
 						}
@@ -1201,6 +1241,15 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 
 			await controller.checkServer();
 			assert.isTrue(controller.verified);
+
+			// The PROPFIND is handled by Firefox's 401 negotiation, but
+			// subsequent requests should use our computed Digest auth.
+			// Verify that GET, PUT, GET, DELETE all used computed auth.
+			assert.includeMembers(
+				computedDigestMethods,
+				['GET', 'PUT', 'GET', 'DELETE'],
+				"Subsequent requests should use computed Digest auth"
+			);
 		});
 	});
 
