@@ -741,15 +741,17 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 	let useCiteprocRs = Zotero.Prefs.get('cite.useCiteprocRs');
 	
 	// We can cache the Engine instance if we aren't using citeproc-rs
-	// and this is an installed style
+	// and this is an installed style. The output format is excluded from
+	// the cache key because setOutputFormat() can switch it cheaply.
 	let cacheKey = cache && !useCiteprocRs && this.path
-		? JSON.stringify({ locale, format, automaticJournalAbbreviations })
+		? JSON.stringify({ locale, automaticJournalAbbreviations })
 		: null;
 	if (cacheKey && this._cachedEngines.has(cacheKey)) {
 		let engine = this._cachedEngines.get(cacheKey);
 		// rebuildProcessorState() won't cause disambiguation issues here
 		// because we're passing an empty citation list. See comment in
 		// integration.js.
+		engine.setOutputFormat(format);
 		engine.rebuildProcessorState([], format, []);
 		return engine;
 	}
