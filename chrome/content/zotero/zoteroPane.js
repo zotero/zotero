@@ -795,7 +795,10 @@ var ZoteroPane = new function () {
 		this.unserializePersist();
 		this.updateLayout();
 		this.initContainers();
-		
+
+		// Signal that main window is ready to handle loadURI() and other operations
+		Zotero.mainWindowReady(window);
+
 		// Focus the quicksearch on pane open
 		var searchBar = document.getElementById('zotero-tb-search');
 		setTimeout(function () {
