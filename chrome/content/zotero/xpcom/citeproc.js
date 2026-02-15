@@ -2993,7 +2993,19 @@ CSL.expandMacro = function (macro_key_token, target) {
         CSL.buildMacro.call(this, mytarget, macro_nodes);
         CSL.configureMacro.call(this, mytarget);
     }
-    if (!this.build.extension) {
+    if (this.build.extension) {
+        var func = (function(macro_name) {
+            return function (state, Item, item) {
+                var next = 0;
+                while (next < state.sort_macros[macro_name].length) {
+                    next = CSL.tokenExec.call(state, state.sort_macros[macro_name][next], Item, item);
+                }
+            };
+        }(mkey));
+        var text_node = new CSL.Token("text", CSL.SINGLETON);
+        text_node.execs.push(func);
+        target.push(text_node);
+    } else {
         var func = (function(macro_name) {
             return function (state, Item, item) {
                 var next = 0;
@@ -3031,7 +3043,16 @@ CSL.expandMacro = function (macro_key_token, target) {
 CSL.getMacroTarget = function (mkey) {
     var mytarget = false;
     if (this.build.extension) {
-        mytarget = this[this.build.root + this.build.extension].tokens;
+        // Cache sort-mode macro expansions separately, just like non-sort macros.
+        // This avoids duplicating tokens when the same macro is referenced by
+        // multiple sort keys.
+        if (!this.sort_macros) {
+            this.sort_macros = {};
+        }
+        if (!this.sort_macros[mkey]) {
+            mytarget = [];
+            this.sort_macros[mkey] = mytarget;
+        }
     } else if (!this.macros[mkey]) {
         mytarget = [];
         this.macros[mkey] = mytarget;
@@ -3051,9 +3072,7 @@ CSL.buildMacro = function (mytarget, macro_nodes) {
 };
 
 CSL.configureMacro = function (mytarget) {
-    if (!this.build.extension) {
-        this.configureTokenList(mytarget);
-    }
+    this.configureTokenList(mytarget);
 };
 
 
