@@ -391,9 +391,8 @@ Zotero.QuickCopy = new function () {
 		else if (format.mode === 'bibliography') {
 			let style = Zotero.Styles.get(format.id);
 			let locale = _getLocale(format);
-			// Cache CiteProc instances for HTML and text
+			// Cache a single CiteProc instance (format-independent)
 			style.getCiteProc(locale, 'html', { cache: true });
-			style.getCiteProc(locale, 'text', { cache: true });
 		}
 	};
 	
