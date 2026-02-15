@@ -103,7 +103,7 @@ item-pane-sidenav {
 
 		// Notes context pane button
 		&[data-pane="context-notes"] {
-			background-image: url("chrome://zotero/skin/itempane/20/notes-pane.svg");
+			background-image: url("chrome://zotero/skin/itempane/20/multi-notes.svg");
 			fill: map.get($item-pane-sections, "notes");
 			stroke: map.get($item-pane-sections, "notes");
 		}
