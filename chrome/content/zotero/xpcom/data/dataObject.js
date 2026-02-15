@@ -33,12 +33,17 @@
  */
 
 Zotero.DataObject = function () {
-	let objectType = this._objectType;
-	this._ObjectType = objectType[0].toUpperCase() + objectType.substr(1);
-	this._objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
-	this._ObjectTypePlural = this._objectTypePlural[0].toUpperCase() + this._objectTypePlural.substr(1);
-	this._ObjectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
-	
+	// Set type-derived properties on the prototype (once per subclass) rather than
+	// on each instance, to avoid duplicating identical strings across all instances
+	let proto = Object.getPrototypeOf(this);
+	if (!proto.hasOwnProperty('_ObjectType')) {
+		let objectType = this._objectType;
+		proto._ObjectType = objectType[0].toUpperCase() + objectType.substr(1);
+		proto._objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
+		proto._ObjectTypePlural = proto._objectTypePlural[0].toUpperCase() + proto._objectTypePlural.substr(1);
+		proto._ObjectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+	}
+
 	this._id = null;
 	this._libraryID = null;
 	this._key = null;
