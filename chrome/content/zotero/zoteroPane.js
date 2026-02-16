@@ -4244,6 +4244,8 @@ var ZoteroPane = new function () {
 		
 		// Build menus for each top-level collection of this library
 		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
+		let children = selected.getDescendents(false, "collection");
+		let childIDs = new Set(children.map(col => col.id));
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
@@ -4260,10 +4262,13 @@ var ZoteroPane = new function () {
 					// can't move collection into itself, its parent or its children
 					return selected == target
 						|| selected.parentKey == target.key
-						|| selected.hasDescendent('collection', target.id);
+						|| childIDs.has(target.id);
 				}
 			);
 			popup.append(menuItem);
+		}
+		if (Zotero.isMac) {
+			Zotero.Utilities.Internal.showMenuIconsOnIdle(popup);
 		}
 	};
 
@@ -4347,6 +4352,9 @@ var ZoteroPane = new function () {
 			);
 			popup.append(menuItem);
 		}
+		if (Zotero.isMac) {
+			Zotero.Utilities.Internal.showMenuIconsOnIdle(popup);
+		}
 	};
 
 	this.buildAddItemToCollectionMenu = function (event, items = this.getSelectedItems()) {
@@ -4355,11 +4363,17 @@ var ZoteroPane = new function () {
 
 		items = Zotero.Items.keepTopLevel(items);
 		
+		let existingNewCollectionMenuItem = popup.querySelector(`[data-l10n-id="menu-new-collection"]`);
 		let newCollectionMenuitem = document.createXULElement('menuitem');
 		document.l10n.setAttributes(newCollectionMenuitem, 'menu-new-collection');
 		newCollectionMenuitem.classList.add('menuitem-iconic');
 		newCollectionMenuitem.classList.add('zotero-menuitem-new-collection');
 		newCollectionMenuitem.addEventListener('command', () => this.addItemsToCollection(items, null, true));
+		// If the "New Collection..." menuitem already exists, copy over its label so it
+		// appears immediately and not after the icons are rendered
+		if (existingNewCollectionMenuItem) {
+			newCollectionMenuitem.label = existingNewCollectionMenuItem.label;
+		}
 		let separator = document.createXULElement('menuseparator');
 		popup.replaceChildren(newCollectionMenuitem, separator);
 		
@@ -4390,6 +4404,9 @@ var ZoteroPane = new function () {
 			popup.append(menuItem);
 		}
 
+		if (Zotero.isMac) {
+			Zotero.Utilities.Internal.showMenuIconsOnIdle(popup);
+		}
 		separator.hidden = !collections.length;
 	};
 
