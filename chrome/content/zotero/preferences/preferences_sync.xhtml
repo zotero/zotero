@@ -29,35 +29,24 @@
 				<label><html:h2>&zotero.preferences.sync.syncServer;</html:h2></label>
 
 				<hbox>
-					<html:div class="form-grid">
-						<label id="username-label" value="&zotero.preferences.sync.username;"/>
-						<html:input id="sync-username-textbox" aria-labelledby="username-label"
-							onblur="Zotero_Preferences.Sync.trimUsername()"
-							oninput="Zotero_Preferences.Sync.credentialsChange(event)"
-							onchange="Zotero_Preferences.Sync.credentialsChange(event)"
-							onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
-
-						<label id="password-label" value="&zotero.preferences.sync.password;"/>
-						<html:input id="sync-password" type="password" aria-labelledby="password-label"
-							oninput="Zotero_Preferences.Sync.credentialsChange(event)"
-							onchange="Zotero_Preferences.Sync.credentialsChange(event)"
-							onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
-
-						<box/>
-						<hbox>
-							<button id="sync-auth-button"
-								label="&zotero.preferences.sync.setUpSync;"
-								oncommand="Zotero_Preferences.Sync.linkAccount(event)"
-								disabled="true"/>
-							<label id="sync-status-indicator"/>
+					<vbox>
+						<hbox id="sync-login-default">
+							<button id="sync-login-button"
+								data-l10n-id="preferences-sync-login-button"
+								oncommand="Zotero_Preferences.Sync.linkAccount(event)"/>
 						</hbox>
-					</html:div>
+						<hbox id="sync-login-pending" hidden="true" align="center">
+							<label id="sync-status-indicator"/>
+							<label id="sync-login-status"
+								data-l10n-id="preferences-sync-waiting-for-login"/>
+							<button data-l10n-id="preferences-sync-cancel-button"
+								oncommand="Zotero_Preferences.Sync.cancelLogin()"/>
+						</hbox>
+					</vbox>
 
 					<vbox style="width:2em"/>
 					<vbox>
 						<label is="zotero-text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
-						<separator class="thin"/>
-						<label is="zotero-text-link" value="&zotero.preferences.sync.lostPassword;" href="http://zotero.org/user/lostpassword"/>
 						<separator class="thin"/>
 						<label is="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
 					</vbox>
