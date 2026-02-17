@@ -736,8 +736,9 @@ class ItemTreeRowProvider {
 	 * (redraws, tag color changes, column resets) are handled by ItemTree.notify()
 	 * directly.
 	 *
-	 * Base implementation handles cache clearing and row invalidation for
-	 * refresh/modify actions. Subclasses should override to handle adds,
+	 * Base implementation handles cache clearing for refresh/modify actions,
+	 * and on modify also re-sorts changed rows and invalidates the whole view.
+	 * Subclasses should override to handle adds,
 	 * removes, and collection-specific logic if required.
 	 */
 	async notify(action, type, ids, extraData) {
@@ -757,14 +758,15 @@ class ItemTreeRowProvider {
 		}
 
 		if (['item', 'collection', 'search'].includes(type) && action == 'modify') {
-			// Clear row display cache and redraw modified items that are displayed
+			// Clear row display cache, re-sort modified rows, and redraw the whole tree.
+			// A modified row can move, which shifts many surrounding rows.
 			this.itemTree.invalidateRowCache(ids);
-			let rowsToInvalidate = ids
-				.map(id => this._rowMap[id])
-				.filter(row => row !== undefined);
-			if (rowsToInvalidate.length) {
-				await this.runListeners('update', rowsToInvalidate);
-			}
+			await this.itemTree._ensureSortContextReady();
+			this._sort(ids);
+			await this.runListeners('update', true, {
+				restoreSelection: true,
+				restoreScroll: true
+			});
 			return;
 		}
 
@@ -2771,7 +2773,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!this._treebox) return false;
 		var treebox = this._treebox;
 		var first = treebox.getFirstVisibleRow();
-		if (!first) {
+		if (!first && first !== 0) {
 			return false;
 		}
 		var last = treebox.getLastVisibleRow();
