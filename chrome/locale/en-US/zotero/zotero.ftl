@@ -623,6 +623,12 @@ tag-field =
 
 tagselector-search =
     .placeholder = Filter Tags
+tagselector-exclude-tag =
+    .label = Hide Items with Tag
+tagselector-include-tag =
+    .label = Keep Items with Tag
+tag-excluded = 
+    .aria-description = This tag is excluded from item's list.
 
 context-notes-search =
     .placeholder = Search Notes
