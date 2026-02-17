@@ -597,6 +597,7 @@ Zotero.Sync.APIClient.prototype = {
 			let xmlhttp = await this.makeRequest("GET", uri, {
 				responseType: "blob",
 				noAPIKey: segment === 'sample',
+				noCache: false,
 				errorDelayMax: 8000,
 			});
 
@@ -744,7 +745,7 @@ Zotero.Sync.APIClient.prototype = {
 		let opts = {}
 		Object.assign(opts, options);
 		opts.headers = this.getHeaders(options.headers);
-		opts.noCache = true;
+		opts.noCache ??= true;
 		opts.foreground = !options.background;
 		opts.responseType = options.responseType || 'text';
 		if (options.body && options.body.length >= this.MIN_GZIP_SIZE
