@@ -669,10 +669,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 
 			// If saved search, publications, or trash, just re-run search
-			if (collectionTreeRow.isSearch()
-				|| collectionTreeRow.isPublications()
-				|| collectionTreeRow.isTrash()
-				|| hasQuickSearch) {
+			if (collectionTreeRow.isSearchMode()) {
 				await this.refresh();
 				refreshed = true;
 				madeChanges = true;
@@ -1280,7 +1277,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					if (!noRecurse && window.ZoteroPane) {
 						let cleared1 = await window.ZoteroPane.clearQuicksearch();
 						let cleared2 = window.ZoteroPane.tagSelector
-							&& window.ZoteroPane.tagSelector.clearTagSelection();
+							&& window.ZoteroPane.tagSelector.clearSelection();
 						if (cleared1 || cleared2) {
 							return this.selectItems(ids, true);
 						}
@@ -1634,8 +1631,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			case 'citation-search':
 				this.collectionTreeRow.setSearch(data, 'fields');
 				break;
-			case 'tags':
-				this.collectionTreeRow.setTags(data);
+			case 'annotation-tags':
+				this.collectionTreeRow.setAnnotationTagFilters(data);
 				break;
 			default:
 				throw ('Invalid filter type in setFilter');

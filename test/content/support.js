@@ -1096,7 +1096,7 @@ async function createAnnotation(type, parentItem, options = {}) {
 	else {
 		annotation.annotationComment = Zotero.Utilities.randomString();
 	}
-	annotation.annotationColor = '#ffd400';
+	annotation.annotationColor = options.color || '#ffd400';
 	var page = Zotero.Utilities.rand(1, 100);
 	annotation.annotationPageLabel = `${page}`;
 	page = page.toString().padStart(5, '0');

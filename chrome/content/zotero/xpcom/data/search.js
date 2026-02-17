@@ -1223,14 +1223,9 @@ Zotero.Search.prototype._buildQuery = async function () {
 					}
 					
 					switch (condition.name) {
-						case 'tag':
-							condSQL += "SELECT itemID FROM itemTags "
-								+ "LEFT JOIN itemAnnotations IAnT USING (itemID) WHERE (";
-							break;
-						
-						case 'annotationText':
-						case 'annotationComment':
-							condSQL += `SELECT itemID FROM ${condition.table} WHERE (`
+						case 'annotationAuthor':
+							condSQL += "SELECT itemID FROM itemAnnotations "
+								+ "LEFT JOIN groupItems USING (itemID) WHERE (";
 							break;
 							
 						default:

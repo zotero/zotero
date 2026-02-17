@@ -405,6 +405,53 @@ describe("Zotero.Search", function () {
 					assert.sameMembers(matches, [annotation.id]);
 				});
 			});
+
+			describe("annotationColor", function () {
+				it("should return matches for annotation colors", async function () {
+					var attachment = await importPDFAttachment();
+					var annotationOne = await createAnnotation('highlight', attachment, { color: '#ffd400' });
+					var annotationTwo = await createAnnotation('highlight', attachment, { color: '#ff6666' });
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('annotationColor', 'is', '#ffd400');
+					var matches = await s.search();
+					assert.include(matches, annotationOne.id);
+				});
+			});
+
+			describe("annotationAuthor", function () {
+				let group;
+
+				before(async function () {
+					group = await createGroup();
+				});
+
+				after(async function () {
+					await group.eraseTx();
+				});
+
+				it("should return matches for annotation author", async function () {
+					await Zotero.Users.setCurrentUserID(1);
+					var otherUserID = 92624235;
+					await Zotero.Users.setName(1, 'this-user');
+					await Zotero.Users.setName(otherUserID, 'another-user');
+
+					// One annotation created by the current user, one by another user
+					let item = await createDataObject('item', { libraryID: group.libraryID });
+					var attachment = await importPDFAttachment(item);
+					var annotationOne = await createAnnotation('highlight', attachment, { color: '#ffd400', createdByUserID: 1 });
+					var annotationTwo = await createAnnotation('highlight', attachment, { color: '#ffd400', createdByUserID: otherUserID });
+					
+					var s = new Zotero.Search();
+					s.libraryID = group.libraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('annotationAuthor', 'is', otherUserID);
+					var matches = await s.search();
+					assert.include(matches, annotationTwo.id);
+				});
+			});
 			
 			describe("fulltextWord", function () {
 				it("should return matches with full-text conditions", async function () {
