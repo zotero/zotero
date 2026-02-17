@@ -243,33 +243,7 @@ class ReaderInstance {
 			sidebarView: Zotero.Prefs.get('reader.lastSidebarTab'),
 			enableReadAloud: Zotero.isBetaBuild || Zotero.isDevBuild || Zotero.isSourceBuild,
 			readAloudVoices: this._getReadAloudVoices(),
-			readAloudRemoteInterface: {
-				// Wrap return values in child window Promises to avoid permissions errors
-
-				getVoices: () => {
-					return new this._iframeWindow.Promise(async (resolve) => {
-						let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
-						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-						resolve(Cu.cloneInto(await client.getReadAloudVoices(), this._iframeWindow));
-					});
-				},
-
-				getAudio: (segment, voice, lang) => {
-					return new this._iframeWindow.Promise(async (resolve) => {
-						let apiKey = segment === 'sample' ? null : await Zotero.Sync.Data.Local.getAPIKey();
-						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-						resolve(Cu.cloneInto(await client.getReadAloudAudio(segment, voice.id, lang), this._iframeWindow));
-					});
-				},
-
-				getCreditsRemaining: () => {
-					return new this._iframeWindow.Promise(async (resolve) => {
-						let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
-						let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-						resolve(await client.getReadAloudCreditsRemaining());
-					});
-				},
-			},
+			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
 			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
@@ -629,9 +603,9 @@ class ReaderInstance {
 			},
 			onSetReadAloudVoice: this._setReadAloudVoice.bind(this),
 			onSetReadAloudStatus: this._setReadAloudStatus.bind(this),
-			onLogIn: () => {
+			onOpenReadAloudFirstRunPopup: ({ lang }) => {
 				// This causes a segfault without the timeout...
-				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync'));
+				setTimeout(() => this._openReadAloudFirstRunDialog({ lang, ftl }));
 			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
@@ -1482,6 +1456,57 @@ class ReaderInstance {
 	
 	_setReadAloudStatus(_status) {
 		// Do nothing in the base class -- instance types override this
+	}
+
+	_getReadAloudRemoteInterface(targetWindow) {
+		// Wrap return values in child window Promises to avoid permissions errors
+		return {
+			getVoices: () => {
+				return new targetWindow.Promise(async (resolve) => {
+					let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+					resolve(Cu.cloneInto(await client.getReadAloudVoices(), targetWindow));
+				});
+			},
+
+			getAudio: (segment, voice, lang) => {
+				return new targetWindow.Promise(async (resolve) => {
+					let apiKey = segment === 'sample' ? null : await Zotero.Sync.Data.Local.getAPIKey();
+					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+					resolve(Cu.cloneInto(await client.getReadAloudAudio(segment, voice.id, lang), targetWindow));
+				});
+			},
+
+			getCreditsRemaining: () => {
+				return new targetWindow.Promise(async (resolve) => {
+					let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+					resolve(await client.getReadAloudCreditsRemaining());
+				});
+			},
+		};
+	}
+
+	_openReadAloudFirstRunDialog({ lang, ftl }) {
+		let io = {
+			dataIn: {
+				lang,
+				ftl,
+				getReadAloudRemoteInterface: win => this._getReadAloudRemoteInterface(win),
+			},
+			dataOut: null,
+		};
+		this._window.openDialog(
+			'chrome://zotero/content/readAloudFirstRunDialog.xhtml',
+			'',
+			'chrome,modal,centerscreen,resizable=no',
+			io,
+		);
+		if (io.dataOut) {
+			let { lang, region, voiceId, speed } = io.dataOut;
+			this._setReadAloudVoice(lang, region, voiceId, speed);
+			this._internalReader.toggleReadAloudPopup(true);
+		}
 	}
 }
 

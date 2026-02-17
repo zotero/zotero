@@ -218,6 +218,7 @@ reader-read-aloud-language = Language
 reader-read-aloud-remaining-time = Remaining reading time
 reader-read-aloud-log-in-link = <log-in>Log in</log-in> to access Zotero Voices.
 reader-read-aloud-log-in-button = Log In
+reader-read-aloud-done-button = { general-done }
 reader-read-aloud-learn-more = Learn more
 reader-read-aloud-low-credit-message = When your credits run out, Read Aloud will continue with a local voice.
 reader-read-aloud-error = Error
