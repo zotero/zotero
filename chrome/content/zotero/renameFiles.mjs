@@ -50,14 +50,13 @@ const getNewFileNameData = async (attachmentItem, parentItem) => {
  * Rename eligible attachment files based on their parent items' metadata.
  * @async
  * @param {Object} [options]
- * @param {boolean} [options.userLibrary=true] - Process "My Library".
- * @param {boolean} [options.groupLibrary=false] - Process group libraries.
+ * @param {number} [options.libraryID=null] - The ID of the library to process. If null, the user library is used.
  * @param {boolean} [options.pretend=false] - If true, perform a dry run (compile a list of files to rename).
  * @param {(progress:number)=>void} [options.reportProgress] - Callback for progress updates (0..1).
  * @returns {Promise<Array<{attachmentId:number,parentItemId:number,oldName:string,newName:string,isFilePresent:boolean}>>}
  *          Summary of (performed or proposed) rename operations.
  */
-export async function renameFilesFromParent({ userLibrary = true, groupLibrary = false, pretend = false, reportProgress = () => {} } = {}) {
+export async function renameFilesFromParent({ libraryID = null, pretend = false, reportProgress = () => {} } = {}) {
 	const t1 = Date.now();
 	let summary = [];
 	let progress = 0;
@@ -66,33 +65,16 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 		progress = clamp(progress + additionalProgress);
 		reportProgress(progress);
 	};
+	
+	libraryID = libraryID ?? Zotero.Libraries.userLibraryID;
+	let items = await Zotero.Items.getAll(libraryID, false, true);
+	adjustProgressBy(0.01); // move the progress bar slightly while we load required data
 
-	let libraries = Zotero.Libraries.getAll();
-	adjustProgressBy(0.01); // move progress bar slightly while we load required data
-	let items = [];
-	let librariesWithAttachmentsToRename = [];
-
-	for (let library of libraries) {
-		let shouldRename = userLibrary && library.libraryType === 'user';
-		
-		if (!shouldRename) {
-			// for group libraries, this checks `autoRenameFiles` synced setting
-			shouldRename = groupLibrary && Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(library.libraryID);
-		}
-
-		if (shouldRename) {
-			items.push(...await Zotero.Items.getAll(library.libraryID, false, true));
-			librariesWithAttachmentsToRename.push(library);
-		}
-	}
-
+	await Zotero.Items.loadDataTypes(items, ['itemData', 'childItems']);
 	adjustProgressBy(0.01);
 
-	await Zotero.Items.loadDataTypes(items, ['itemData']);
-	adjustProgressBy(0.01);
-
-	// use remaining 97% of progress bar for renaming attachments
-	let perItemProgress = 0.97 / items.length;
+	// use remaining 98% of progress bar for renaming attachments
+	let perItemProgress = 0.98 / items.length;
 	let count = 0;
 	let noFilePresentCount = 0;
 
@@ -156,13 +138,11 @@ export async function renameFilesFromParent({ userLibrary = true, groupLibrary =
 	}
 	const t2 = Date.now();
 	if (!pretend) {
-		Zotero.debug(`Renaming ${count + noFilePresentCount} attachments (${noFilePresentCount} with no file present) in ${librariesWithAttachmentsToRename.length} `
-			+ `libraries took ${((t2 - t1) / 1000).toFixed(2)} seconds `
-			+ `(user library: ${userLibrary}, group libraries: ${groupLibrary})`);
+		Zotero.debug(`Renaming ${count + noFilePresentCount} attachments (${noFilePresentCount} with no file present) took ${((t2 - t1) / 1000).toFixed(2)} seconds (Processed ${items.length} items in library: ${libraryID}`);
 		Zotero.Prefs.set('autoRenameFiles.done', true);
 	}
 	return summary;
-};
+}
 
 /**
  * Renames an individual attachment file based on its parent item's metadata.
@@ -306,9 +286,11 @@ export function registerAutoRenameFileFromParent() {
 	}, ['item'], 'autoRenameFileFromParent', 150); // lower priority than the other item observers
 }
 
-export async function openRenameFilesPreview() {
+export async function openRenameFilesPreview(libraryID) {
+	libraryID = libraryID ?? Zotero.Libraries.userLibraryID;
+	const args = { libraryID };
 	Services.ww.openWindow(null, "chrome://zotero/content/renameFilesPreview.xhtml",
-		"renameFilesPreview", "chrome,dialog=yes,centerscreen,modal", null);
+		"renameFilesPreview", "chrome,dialog=yes,centerscreen,modal", args);
 }
 
 export async function promptAutoRenameFiles() {
