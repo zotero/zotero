@@ -377,9 +377,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// Wait for any in-progress refresh to complete (including view update)
 		await this.itemTree._refreshPromise;
 
-		// Call base class for basic redraw handling
-		await super.notify(action, type, ids, extraData);
-
 		const cachedSelection = this.itemTree._cachedSelection;
 		const collectionTreeRow = this.collectionTreeRow;
 
@@ -433,6 +430,14 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		}
 
 		if (action == 'refresh') {
+			// Clear row display cache and invalidate rows for refreshed items
+			let rowsToInvalidate = [];
+			for (let id of ids) {
+				let row = this._rowMap[id];
+				if (row === undefined) continue;
+				rowsToInvalidate.push(row);
+			}
+
 			// For a refresh on an item in the trash, check if the item hadn't been restored
 			if (type == 'item' && collectionTreeRow.isTrash()) {
 				let rows = [];
@@ -457,8 +462,14 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				}
 				if (rows.length) {
 					this._removeRows(rows);
+					rowsToInvalidate = true; // all rows
 					this.runListeners('update', true);
 				}
+			}
+
+			this.itemTree.invalidateRowCache(ids);
+			if (rowsToInvalidate) {
+				await this.runListeners('update', rowsToInvalidate);
 			}
 			return;
 		}
@@ -519,6 +530,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					this.collectionTreeRow.setSearch('');
 				}
 			}
+			this.itemTree.invalidateRowCache(ids);
 			refresh = true;
 			madeChanges = true;
 			// refresh automatically sorts newly added items, so only need to sort on modify
@@ -613,6 +625,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					sort = true;
 				}
 			}
+			
+			this.itemTree.invalidateRowCache(ids);
 		}
 		else if (type == 'item' && action == 'add') {
 			for (let item of items) {
@@ -752,8 +766,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				restoreSelection,
 				restoreScroll,
 				selectInActiveWindow,
-				selection: rowsToSelect,
-				sort
+				selection: rowsToSelect
 			});
 		}
 	}
