@@ -633,7 +633,8 @@ Zotero.Sync.APIClient.prototype = {
 			return xmlhttp.response.creditsRemaining;
 		}
 		catch (e) {
-			Zotero.logError('Failed to fetch creditsRemaining from API');
+			Zotero.debug('Failed to fetch creditsRemaining');
+			Zotero.logError(e);
 			return null;
 		}
 	},
