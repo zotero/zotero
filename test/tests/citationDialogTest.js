@@ -434,10 +434,10 @@ describe("Citation Dialog", function () {
 		});
 
 		it("should switch dialog mode", async function () {
-			IOManager.toggleDialogMode("list");
+			await IOManager.toggleDialogMode("list");
 			assert.isFalse(dialog.document.getElementById("list-layout").hidden);
 			assert.isTrue(dialog.document.getElementById("library-layout").hidden);
-			IOManager.toggleDialogMode("library");
+			await IOManager.toggleDialogMode("library");
 			assert.isFalse(dialog.document.getElementById("library-layout").hidden);
 			assert.isTrue(dialog.document.getElementById("list-layout").hidden);
 		});
@@ -446,7 +446,7 @@ describe("Citation Dialog", function () {
 			let itemOne = await createDataObject('item');
 			let itemTwo = await createDataObject('item');
 
-			IOManager.toggleDialogMode("library");
+			await IOManager.toggleDialogMode("library");
 			await IOManager.addItemsToCitation([itemOne, itemTwo]);
 
 			// Select row of the first bubble
@@ -461,7 +461,7 @@ describe("Citation Dialog", function () {
 
 		it("should highlight rows of items in the citation", async function () {
 			let itemOne = await createDataObject('item');
-			IOManager.toggleDialogMode("library");
+			await IOManager.toggleDialogMode("library");
 
 			// Add the item to citation
 			await IOManager.addItemsToCitation([itemOne]);
@@ -469,7 +469,7 @@ describe("Citation Dialog", function () {
 			await dialog.libraryLayout.itemsView.selectItem(itemOne.id);
 			// Make sure the row node is highlighted
 			let rowIndex = dialog.libraryLayout.itemsView.getRowIndexByID(itemOne.id);
-			let rowID = "item-tree-citationDialog-row-" + rowIndex;
+			let rowID = `${dialog.libraryLayout.itemsView.id}-row-${rowIndex}`;
 			let rowNode = dialog.document.getElementById(rowID);
 			assert.isTrue(rowNode.classList.contains("highlighted"));
 		});
@@ -501,7 +501,7 @@ describe("Citation Dialog", function () {
 		});
 
 		it("should perform search in list mode", async function () {
-			IOManager.toggleDialogMode("list");
+			await IOManager.toggleDialogMode("list");
 
 			// Wait for search triggered after switching dialog modes to finish
 			while (SearchHandler.searching) {
@@ -532,7 +532,7 @@ describe("Citation Dialog", function () {
 		});
 
 		it("should perform search in library mode", async function () {
-			IOManager.toggleDialogMode("library");
+			await IOManager.toggleDialogMode("library");
 
 			// Wait for search triggered after switching dialog modes to finish
 			while (SearchHandler.searching) {
@@ -613,7 +613,7 @@ describe("Citation Dialog", function () {
 			note.setNote("result");
 			await note.saveTx();
 
-			IOManager.toggleDialogMode("list");
+			await IOManager.toggleDialogMode("list");
 
 			// Wait for search triggered after switching dialog modes to finish
 			while (SearchHandler.searching) {

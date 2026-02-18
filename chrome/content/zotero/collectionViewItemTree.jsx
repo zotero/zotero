@@ -209,7 +209,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					if (row.ref instanceof Zotero.Item && row.ref.parentID) {
 						continue;
 					}
-					let attachments = row.ref.isRegularItem() ? row.ref.getAttachments() : [];
+					let attachments = (!this.itemTree.props.regularOnly && row.ref.isRegularItem())
+						? row.ref.getAttachments()
+						: [];
 					let isSearchParent = newSearchParentIDs.has(row.ref.treeViewID) || attachments.some(id => newSearchParentIDs.has(id));
 					// If not showing children or no children match the search, close
 					if (this.itemTree.props.regularOnly || !isSearchParent) {
@@ -310,7 +312,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	_expandMatchParents() {
 		const searchParentIDs = this.searchParentIDs;
 		// Expand parents of child matches
-		if (!this._searchMode) {
+		if (!this._searchMode || this.itemTree.props.regularOnly) {
 			return;
 		}
 
