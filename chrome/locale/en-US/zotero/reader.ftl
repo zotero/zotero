@@ -244,7 +244,7 @@ reader-read-aloud-first-run-voice-mode-advanced-bullets = Natural-sounding voice
     Only available when you are logged into your Zotero account
     <purchase-credits>Purchase credits</purchase-credits> for Read Aloud minutes
     If you subscribe to Zotero Storage, you get 60 credits each month
-reader-read-aloud-first-run-sample-text = Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share research.
+reader-read-aloud-sample-text = I'm { $name }.
 reader-read-aloud-manage-voices = Manage voices…
 reader-read-aloud-region = Region
 reader-read-aloud-region-auto = Automatic
