@@ -640,7 +640,7 @@ class LibraryLayout extends Layout {
 				if (!isClick) {
 					let lastItemID = items[items.length - 1].id;
 					let rowIndex = this.itemsView.getRowIndexByID(lastItemID);
-					row = doc.querySelector(`#item-tree-citationDialog-row-${rowIndex}`) || row;
+					row = doc.getElementById(`${this.itemsView.id}-row-${rowIndex}`) || row;
 				}
 				let rowTopBeforeRefresh = row.getBoundingClientRect().top;
 				IOManager.addItemsToCitation(items, { noInputRefocus: true }).then(() => {
@@ -727,8 +727,13 @@ class LibraryLayout extends Layout {
 			id: collectionTreeRow.id,
 			getItems: async () => {
 				let items = await collectionTreeRow.getItems();
-				// when citing notes, only keep notes or note parents
+				// In add-note mode, note parent checks call item.getNotes(), which requires childItems
 				if (DIALOG_STATE.isAddingNote()) {
+					let regularItems = items.filter(item => item instanceof Zotero.Item && item.isRegularItem());
+					if (regularItems.length) {
+						await Zotero.Items.loadDataTypes(regularItems, ['childItems']);
+					}
+					// when citing notes, only keep notes or note parents
 					items = items.filter(item => item.isNote() || item.getNotes().length);
 				}
 				return items;
@@ -736,6 +741,7 @@ class LibraryLayout extends Layout {
 			isSearch: () => true,
 			isSearchMode: () => true,
 			setSearch: (searchText, mode) => collectionTreeRow.setSearch(searchText, mode),
+			clearCache: () => collectionTreeRow.clearCache(),
 			ref: collectionTreeRow.ref
 		});
 		await this.itemsView.setFilter('citation-search', SearchHandler.searchValue);
@@ -758,7 +764,7 @@ class LibraryLayout extends Layout {
 
 	// click on + icon will add the item to the citation
 	_handleItemsViewIconClick(index) {
-		let rowNode = doc.querySelector(`#item-tree-citationDialog-row-${index}`);
+		let rowNode = doc.getElementById(`${this.itemsView.id}-row-${index}`);
 		let rowTopBeforeRefresh = rowNode.getBoundingClientRect().top;
 		this.itemsView.selection.clearSelection();
 		let row = this.itemsView.getRow(index);
