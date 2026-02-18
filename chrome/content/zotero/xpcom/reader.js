@@ -603,8 +603,12 @@ class ReaderInstance {
 			},
 			onSetReadAloudVoice: this._setReadAloudVoice.bind(this),
 			onSetReadAloudStatus: this._setReadAloudStatus.bind(this),
-			onOpenReadAloudFirstRunPopup: ({ lang }) => {
+			onLogIn: () => {
 				// This causes a segfault without the timeout...
+				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync'));
+			},
+			onOpenReadAloudFirstRunPopup: ({ lang }) => {
+				// As above
 				setTimeout(() => this._openReadAloudFirstRunDialog({ lang, ftl }));
 			},
 		}, this._iframeWindow, { cloneFunctions: true }));
