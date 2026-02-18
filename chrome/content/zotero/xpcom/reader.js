@@ -1484,6 +1484,14 @@ class ReaderInstance {
 					resolve(await client.getReadAloudCreditsRemaining());
 				});
 			},
+
+			resetCredits: () => {
+				return new targetWindow.Promise(async (resolve) => {
+					let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
+					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+					resolve(await client.resetReadAloudCredits());
+				});
+			},
 		};
 	}
 

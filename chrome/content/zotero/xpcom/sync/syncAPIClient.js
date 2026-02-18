@@ -564,14 +564,17 @@ Zotero.Sync.APIClient.prototype = {
 				creditsRemaining = null;
 			}
 
+			let devMode = xmlhttp.getResponseHeader('Zotero-TTS-Dev') === '1';
+
 			return {
 				voices: xmlhttp.response ?? [],
 				creditsRemaining,
+				devMode,
 			};
 		}
 		catch (e) {
 			Zotero.logError(e);
-			
+
 			return {
 				voices: [],
 				creditsRemaining: null,
@@ -635,6 +638,23 @@ Zotero.Sync.APIClient.prototype = {
 		}
 		catch (e) {
 			Zotero.debug('Failed to fetch creditsRemaining');
+			Zotero.logError(e);
+			return null;
+		}
+	},
+
+
+	async resetReadAloudCredits() {
+		let uri = this.baseURL + "tts/reset";
+		try {
+			let xmlhttp = await this.makeRequest("POST", uri, {
+				responseType: "json",
+				errorDelayMax: 8000,
+			});
+			return xmlhttp.response.creditsRemaining;
+		}
+		catch (e) {
+			Zotero.debug('Failed to reset credits');
 			Zotero.logError(e);
 			return null;
 		}
