@@ -222,6 +222,7 @@ reader-read-aloud-low-credit-message = When your credits run out, Read Aloud wil
 reader-read-aloud-error = Error
 reader-read-aloud-error-unknown = An unknown error occurred.
 reader-read-aloud-error-connection = Unable to connect to the text-to-speech service. Please check your internet connection.
+reader-read-aloud-error-daily-limit-exceeded = You have exceeded your daily limit for Zotero Voices.
 reader-read-aloud-retry = Retry
 reader-read-aloud-first-run-title = Choose your preferred Read Aloud voice:
 reader-read-aloud-first-run-voice-tier-local-bullets = Voices provided by your operating system
