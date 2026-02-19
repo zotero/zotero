@@ -550,7 +550,10 @@ Zotero.Sync.APIClient.prototype = {
 
 
 	async getReadAloudVoices() {
-		let uri = this.baseURL + "tts/voices";
+		let url = this.baseURL + "tts/voices";
+		let params = new URLSearchParams();
+		params.set("lang", Services.locale.appLocaleAsBCP47);
+		let uri = url + "?" + params;
 		let noAPIKey = !this.apiKey;
 		try {
 			let xmlhttp = await this.makeRequest("GET", uri, {
