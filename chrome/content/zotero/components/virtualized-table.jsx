@@ -146,6 +146,7 @@ class TreeSelection {
 		index = Math.max(0, index);
 		if (!this._tree.props.isSelectable(index)) return;
 		if (this.selected.size == 1 && this.isSelected(index)) {
+			this._updateTree(shouldDebounce);
 			return false;
 		}
 
