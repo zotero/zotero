@@ -1852,7 +1852,7 @@ var ZoteroPane = new function () {
 			}
 		}
 		
-		this.itemsView.changeCollectionTreeRow(collectionTreeRow);
+		await this.itemsView.changeCollectionTreeRow(collectionTreeRow);
 		
 		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 	});
