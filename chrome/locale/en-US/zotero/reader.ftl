@@ -217,8 +217,8 @@ reader-read-aloud-remaining-time = Remaining reading time
 reader-read-aloud-log-in-link = <log-in>Log in</log-in> to access Zotero Voices.
 reader-read-aloud-log-in-button = Log In
 reader-read-aloud-done-button = { general-done }
-reader-read-aloud-learn-more = Learn more
-reader-read-aloud-low-time-message = When time runs out, you can continue reading with { $tier ->
+reader-read-aloud-add-more-time = Add more time
+reader-read-aloud-quota-exceeded-message = <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with { $tier ->
     [basic] Basic Voices
     *[local] Local Voices
 }.
