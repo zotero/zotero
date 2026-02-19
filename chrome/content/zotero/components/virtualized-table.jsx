@@ -143,8 +143,8 @@ class TreeSelection {
 	 * @returns {boolean} False if nothing to select and select handlers won't be called
 	 */
 	select(index, shouldDebounce) {
-		if (!this._tree.props.isSelectable(index)) return;
 		index = Math.max(0, index);
+		if (!this._tree.props.isSelectable(index)) return;
 		if (this.selected.size == 1 && this.isSelected(index)) {
 			return false;
 		}
@@ -161,7 +161,12 @@ class TreeSelection {
 		this._tree.scrollToRow(index);
 		this._updateTree(shouldDebounce);
 		if (this._tree.invalidate) {
-			toInvalidate.forEach(this._tree.invalidateRow.bind(this._tree));
+			const rowCount = this._tree.props.getRowCount();
+			toInvalidate.forEach((idx) => {
+				// this._updateTree() may change row count
+				if (idx >= rowCount) return;
+				this._tree.invalidateRow(idx);
+			});
 		}
 		return true;
 	}

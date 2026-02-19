@@ -302,12 +302,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Div creation and content
 		let div = oldDiv || document.createElement('div');
 		div.innerHTML = "";
-		// When a hidden focused row is added last during filtering, it
-		// is removed on focus change, which can happen at the same time as rendering.
-		// In this case, just return empty div.
-		if (index >= this._rows.length) {
-			return div;
-		}
 		
 		// Classes
 		div.className = "row";
