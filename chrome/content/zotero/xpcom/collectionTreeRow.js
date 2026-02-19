@@ -34,7 +34,7 @@ Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, isOpe
 	this.onUnload = null;
 	this.searchText = "";
 	this.searchMode = "search";
-	this.tags = [];
+	this.tags = new Set();
 	
 	// Per-instance search cache. Within a single refresh cycle, multiple consumers need the
 	// same search results — getItems() for the items pane and getTags() for the tag selector
@@ -520,11 +520,22 @@ Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null
 }
 
 Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
-	if (this.tags === tags) {
-		return false;
+	let oldTags = this.tags instanceof Set ? this.tags : new Set(this.tags || []);
+	let newTags = tags instanceof Set ? new Set(tags) : new Set(tags || []);
+	if (oldTags.size === newTags.size) {
+		let hasChanges = false;
+		for (let tag of newTags) {
+			if (!oldTags.has(tag)) {
+				hasChanges = true;
+				break;
+			}
+		}
+		if (!hasChanges) {
+			return false;
+		}
 	}
 	this.clearCache();
-	this.tags = tags;
+	this.tags = newTags;
 	return true;
 }
 
