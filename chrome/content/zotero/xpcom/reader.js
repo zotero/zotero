@@ -1493,7 +1493,7 @@ class ReaderInstance {
 				return new targetWindow.Promise(async (resolve) => {
 					let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-					resolve(await client.resetReadAloudCredits());
+					resolve(Cu.cloneInto(await client.resetReadAloudCredits(), targetWindow));
 				});
 			},
 		};
