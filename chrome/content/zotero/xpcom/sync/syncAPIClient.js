@@ -559,16 +559,22 @@ Zotero.Sync.APIClient.prototype = {
 				errorDelayMax: 8000,
 			});
 
-			let creditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Credits-Remaining'));
-			if (isNaN(creditsRemaining)) {
-				creditsRemaining = null;
+			let basicCreditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Basic-Credits-Remaining'));
+			if (isNaN(basicCreditsRemaining)) {
+				basicCreditsRemaining = null;
+			}
+			let advancedCreditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Advanced-Credits-Remaining'));
+			if (isNaN(advancedCreditsRemaining)) {
+				advancedCreditsRemaining = null;
 			}
 
 			let devMode = xmlhttp.getResponseHeader('Zotero-TTS-Dev') === '1';
 
 			return {
 				voices: xmlhttp.response ?? [],
-				creditsRemaining,
+				basicCreditsRemaining,
+				basicCreditsRemaining,
+				advancedCreditsRemaining,
 				devMode,
 			};
 		}
@@ -577,7 +583,8 @@ Zotero.Sync.APIClient.prototype = {
 
 			return {
 				voices: [],
-				creditsRemaining: null,
+				basicCreditsRemaining: null,
+				advancedCreditsRemaining: null,
 			};
 		}
 	},
@@ -611,7 +618,8 @@ Zotero.Sync.APIClient.prototype = {
 
 			let error;
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status === 402) {
-				error = 'quota-exceeded';
+				let body = await e.xmlhttp.response?.text();
+				error = body === 'daily_limit_exceeded' ? 'daily-limit-exceeded' : 'quota-exceeded';
 			}
 			else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
 				error = 'network';
@@ -634,12 +642,15 @@ Zotero.Sync.APIClient.prototype = {
 				responseType: "json",
 				errorDelayMax: 8000,
 			});
-			return xmlhttp.response.creditsRemaining;
+			return {
+				basicCreditsRemaining: xmlhttp.response.basicCreditsRemaining ?? null,
+				advancedCreditsRemaining: xmlhttp.response.advancedCreditsRemaining ?? null,
+			};
 		}
 		catch (e) {
-			Zotero.debug('Failed to fetch creditsRemaining');
+			Zotero.debug('Failed to fetch credits');
 			Zotero.logError(e);
-			return null;
+			return { basicCreditsRemaining: null, advancedCreditsRemaining: null };
 		}
 	},
 
@@ -651,12 +662,15 @@ Zotero.Sync.APIClient.prototype = {
 				responseType: "json",
 				errorDelayMax: 8000,
 			});
-			return xmlhttp.response.creditsRemaining;
+			return {
+				basicCreditsRemaining: xmlhttp.response.basicCreditsRemaining ?? null,
+				advancedCreditsRemaining: xmlhttp.response.advancedCreditsRemaining ?? null,
+			};
 		}
 		catch (e) {
 			Zotero.debug('Failed to reset credits');
 			Zotero.logError(e);
-			return null;
+			return { basicCreditsRemaining: null, advancedCreditsRemaining: null };
 		}
 	},
 
