@@ -197,19 +197,20 @@ class ReaderInstance {
 		}
 
 		// Prepare Fluent data
+		// Reverse app locales so primary overrides fallbacks
+		let locales = Services.locale.appLocalesAsBCP47.reverse();
+		let ftlURLs = locales.flatMap(locale => [
+			`resource://app/localization/${locale}/zotero.ftl`,
+			`resource://app/localization/${locale}/reader.ftl`,
+		]);
 		let ftl = [];
-		try {
-			ftl.push(Zotero.File.getContentsFromURL(`chrome://zotero/locale/zotero.ftl`));
-		}
-		catch (e) {
-			Zotero.logError(e);
-		}
-
-		try {
-			ftl.push(Zotero.File.getContentsFromURL(`chrome://zotero/locale/reader.ftl`));
-		}
-		catch (e) {
-			Zotero.logError(e);
+		for (let ftlURL of ftlURLs) {
+			try {
+				ftl.push(Zotero.File.getContentsFromURL(ftlURL));
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 
 		this._internalReader = this._iframeWindow.wrappedJSObject.createReader(Components.utils.cloneInto({
