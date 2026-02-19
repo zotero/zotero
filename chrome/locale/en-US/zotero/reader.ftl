@@ -218,8 +218,10 @@ reader-read-aloud-log-in-link = <log-in>Log in</log-in> to access Zotero Voices.
 reader-read-aloud-log-in-button = Log In
 reader-read-aloud-done-button = { general-done }
 reader-read-aloud-learn-more = Learn more
-reader-read-aloud-low-time-message-basic = When time runs out, you can continue reading with a Basic Voice.
-reader-read-aloud-low-time-message-local = When time runs out, you can continue reading with local voices.
+reader-read-aloud-low-time-message = When time runs out, you can continue reading with { $tier ->
+    [basic] Basic Voices
+    *[local] Local Voices
+}.
 reader-read-aloud-error = Error
 reader-read-aloud-error-unknown = An unknown error occurred.
 reader-read-aloud-error-connection = Unable to connect to the text-to-speech service. Please check your internet connection.
