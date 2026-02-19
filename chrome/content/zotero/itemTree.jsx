@@ -104,7 +104,12 @@ class ItemTreeRowProvider {
 		this._searchMode = false;
 		this._searchItemIDs = new Set();
 		this._searchParentIDs = new Set();
+		this._includeTrashed = false;
 		this.onUpdate = this.createEventBinding('update');
+	}
+
+	get includeTrashed() {
+		return this._includeTrashed;
 	}
 
 	get rows() {
@@ -192,7 +197,7 @@ class ItemTreeRowProvider {
 		if (!item.isRegularItem()) {
 			return true;
 		}
-		var includeTrashed = this.itemTree.collectionTreeRow.isTrash();
+		var includeTrashed = this._includeTrashed;
 		return item.numNotes(includeTrashed) === 0 && item.numAttachments(includeTrashed) == 0;
 	}
 	
@@ -237,10 +242,8 @@ class ItemTreeRowProvider {
 			// Open
 			let item = this.getRow(index).ref;
 			let level = this.getLevel(index);
-			let collectionTreeRow = this.itemTree.collectionTreeRow;
-
 			// Get children
-			let includeTrashed = collectionTreeRow.isTrash();
+			let includeTrashed = this._includeTrashed;
 			let attachments = item.isRegularItem() ? item.getAttachments(includeTrashed) : [];
 			let notes = item.isRegularItem() ? item.getNotes(includeTrashed) : [];
 			let annotations = [];
@@ -1025,7 +1028,7 @@ class ItemTreeRowRenderer {
 		let span = document.createElement('span');
 		span.className = `cell ${column.className}`;
 
-		if (this.itemTree.collectionTreeRow.isTrash()) return span;
+		if (this.itemTree.rowProvider.includeTrashed) return span;
 
 		const item = this.itemTree.getRow(index).ref;
 
@@ -1350,6 +1353,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	get visibilityGroup() {
 		return 'default';
+	}
+
+	get isSortable() {
+		return true;
 	}
 
 	/**
@@ -1701,7 +1708,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				showHeader: true,
 				columns: this._getColumns(),
 				onColumnPickerMenu: this._displayColumnPickerMenu,
-				onColumnSort: this.collectionTreeRow?.isFeedsOrFeed() ? null : this._handleColumnSort,
+				onColumnSort: this.isSortable ? this._handleColumnSort : null,
 				getColumnPrefs: this._getColumnPrefs,
 				storeColumnPrefs: this._storeColumnPrefs,
 				getDefaultColumnOrder: this._getDefaultColumnOrder,
@@ -1768,20 +1775,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	async selectItems(ids, noRecurse, noScroll) {
 		if (!ids.length) return 0;
-		
-		// If no row map, we're probably in the process of switching collections,
-		// so store the items to select on the item group for later
-		// TODO: check if this still works and also move to CVIT
-		if (!this._rowMap) {
-			if (this.collectionTreeRow) {
-				this.collectionTreeRow.itemsToSelect = ids;
-				Zotero.debug("_rowMap not yet set; not selecting items");
-				return 0;
-			}
-
-			Zotero.debug('Item group not found and no row map in ItemTree.selectItem() -- discarding select', 2);
-			return 0;
-		}
 		
 		var idsToSelect = [];
 		for (let id of ids) {
@@ -1896,7 +1889,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	/**
 	 * Set a filter on the item tree.
-	 * Requires collectionTreeRow to be set for filtering to work.
 	 * @param {string} type - Filter type ('search', 'citation-search', 'tags')
 	 * @param {*} data - Filter data
 	 */
@@ -2683,11 +2675,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_getColumns() {
-		if (!this.collectionTreeRow) {
-			this._columns = [];
-			return this._columns;
-		}
-		
 		const visibilityGroup = this.visibilityGroup;
 		const prefKey = this.id;
 		if (this._columnsId == prefKey) {

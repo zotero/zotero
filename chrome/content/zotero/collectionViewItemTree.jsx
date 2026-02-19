@@ -114,6 +114,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			return;
 		}
 		this.collectionTreeRow = collectionTreeRow;
+		this._includeTrashed = collectionTreeRow.isTrash();
 		// Emit loading state - only setCollectionTreeRow shows loading UI
 		await this.runListeners('update', null, { loading: true });
 		await this.itemTree._ensureSortContextReady();
@@ -799,6 +800,18 @@ class CollectionViewItemTree extends ItemTree {
 		return this.collectionTreeRow?.visibilityGroup || 'default';
 	}
 
+	get isSortable() {
+		return !this.collectionTreeRow?.isFeedsOrFeed();
+	}
+
+	_getColumns() {
+		if (!this.collectionTreeRow) {
+			this._columns = [];
+			return this._columns;
+		}
+		return super._getColumns();
+	}
+
 	async changeCollectionTreeRow(collectionTreeRow) {
 		if (this._locked) return;
 		if (!collectionTreeRow) {
@@ -877,6 +890,14 @@ class CollectionViewItemTree extends ItemTree {
 	}
 
 	async selectItems(ids, noRecurse, noScroll) {
+		if (!ids.length) return 0;
+		// If no row map, we're probably in the process of switching collections,
+		// so store the items to select on the collectionTreeRow for later
+		if (!this._rowMap && this.collectionTreeRow) {
+			this.collectionTreeRow.itemsToSelect = ids;
+			Zotero.debug("_rowMap not yet set; not selecting items");
+			return 0;
+		}
 		// Filter out deleted items if not in trash
 		if (!this.collectionTreeRow.isTrash()) {
 			ids = ids.filter(id => !Zotero.Items.get(id).deleted);
