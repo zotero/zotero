@@ -1771,6 +1771,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		// If no row map, we're probably in the process of switching collections,
 		// so store the items to select on the item group for later
+		// TODO: check if this still works and also move to CVIT
 		if (!this._rowMap) {
 			if (this.collectionTreeRow) {
 				this.collectionTreeRow.itemsToSelect = ids;
@@ -1828,6 +1829,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var selectedRows = this.selection.selected;
 		if (rowsToSelect.length == selectedRows.size && rowsToSelect.every(row => selectedRows.has(row))) {
 			this.ensureRowsAreVisible(rowsToSelect);
+			this._handleSelectionChange(this.selection, false);
 			return rowsToSelect.length;
 		}
 		
