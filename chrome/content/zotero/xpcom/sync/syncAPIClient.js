@@ -566,9 +566,9 @@ Zotero.Sync.APIClient.prototype = {
 			if (isNaN(standardCreditsRemaining)) {
 				standardCreditsRemaining = null;
 			}
-			let advancedCreditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Advanced-Credits-Remaining'));
-			if (isNaN(advancedCreditsRemaining)) {
-				advancedCreditsRemaining = null;
+			let premiumCreditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Premium-Credits-Remaining'));
+			if (isNaN(premiumCreditsRemaining)) {
+				premiumCreditsRemaining = null;
 			}
 
 			let devMode = xmlhttp.getResponseHeader('Zotero-TTS-Dev') === '1';
@@ -576,7 +576,7 @@ Zotero.Sync.APIClient.prototype = {
 			return {
 				voices: xmlhttp.response ?? [],
 				standardCreditsRemaining,
-				advancedCreditsRemaining,
+				premiumCreditsRemaining,
 				devMode,
 			};
 		}
@@ -586,7 +586,7 @@ Zotero.Sync.APIClient.prototype = {
 			return {
 				voices: [],
 				standardCreditsRemaining: null,
-				advancedCreditsRemaining: null,
+				premiumCreditsRemaining: null,
 			};
 		}
 	},
@@ -646,13 +646,13 @@ Zotero.Sync.APIClient.prototype = {
 			});
 			return {
 				standardCreditsRemaining: xmlhttp.response.standardCreditsRemaining ?? null,
-				advancedCreditsRemaining: xmlhttp.response.advancedCreditsRemaining ?? null,
+				premiumCreditsRemaining: xmlhttp.response.premiumCreditsRemaining ?? null,
 			};
 		}
 		catch (e) {
 			Zotero.debug('Failed to fetch credits');
 			Zotero.logError(e);
-			return { standardCreditsRemaining: null, advancedCreditsRemaining: null };
+			return { standardCreditsRemaining: null, premiumCreditsRemaining: null };
 		}
 	},
 
@@ -666,13 +666,13 @@ Zotero.Sync.APIClient.prototype = {
 			});
 			return {
 				standardCreditsRemaining: xmlhttp.response.standardCreditsRemaining ?? null,
-				advancedCreditsRemaining: xmlhttp.response.advancedCreditsRemaining ?? null,
+				premiumCreditsRemaining: xmlhttp.response.premiumCreditsRemaining ?? null,
 			};
 		}
 		catch (e) {
 			Zotero.debug('Failed to reset credits');
 			Zotero.logError(e);
-			return { standardCreditsRemaining: null, advancedCreditsRemaining: null };
+			return { standardCreditsRemaining: null, premiumCreditsRemaining: null };
 		}
 	},
 
