@@ -247,7 +247,7 @@ reader-read-aloud-first-run-voice-tier-premium-bullets = Highest-quality voices 
     Source text is processed by third-party text-to-speech providers
     { -subscription-name } plans include a monthly allotment of Premium Voice minutes
     <purchase-credits>Purchase credits</purchase-credits> for additional minutes
-reader-read-aloud-sample-text = I am local voice { $name }
+reader-read-aloud-sample-text = I am the local voice { $name }
 reader-read-aloud-manage-voices = Manage voices…
 reader-read-aloud-region = Region
 reader-read-aloud-region-auto = Automatic
