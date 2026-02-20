@@ -174,7 +174,6 @@
 		
 		async merge() {
 			let itembox = document.getElementById('zotero-duplicates-merge-info-box');
-			Zotero.CollectionTreeCache.clear();
 			// Update master item with any field alternatives from the item box
 			let json = this._masterItem.toJSON();
 			// Exclude certain properties that are empty in the cloned object, so we don't clobber them

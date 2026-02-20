@@ -143,9 +143,10 @@ class TreeSelection {
 	 * @returns {boolean} False if nothing to select and select handlers won't be called
 	 */
 	select(index, shouldDebounce) {
-		if (!this._tree.props.isSelectable(index)) return;
 		index = Math.max(0, index);
+		if (!this._tree.props.isSelectable(index)) return;
 		if (this.selected.size == 1 && this.isSelected(index)) {
+			this._updateTree(shouldDebounce);
 			return false;
 		}
 
@@ -161,7 +162,12 @@ class TreeSelection {
 		this._tree.scrollToRow(index);
 		this._updateTree(shouldDebounce);
 		if (this._tree.invalidate) {
-			toInvalidate.forEach(this._tree.invalidateRow.bind(this._tree));
+			const rowCount = this._tree.props.getRowCount();
+			toInvalidate.forEach((idx) => {
+				// this._updateTree() may change row count
+				if (idx >= rowCount) return;
+				this._tree.invalidateRow(idx);
+			});
 		}
 		return true;
 	}
@@ -272,8 +278,9 @@ class TreeSelection {
 	}
 
 	set selectEventsSuppressed(val) {
+		let valChanged = val !== this._selectEventsSuppressed;
 		this._selectEventsSuppressed = val;
-		if (!val) {
+		if (!val && valChanged) {
 			this._updateTree();
 			if (this._tree.invalidate) {
 				this._tree.invalidate();
@@ -640,7 +647,7 @@ class VirtualizedTable extends React.Component {
 			if (this.props.isContainer(this.selection.focused)
 					&& !this.props.isContainerEmpty(this.selection.focused)
 					&& this.props.isContainerOpen(this.selection.focused)) {
-				this.props.toggleOpenState(this.selection.focused);
+				this.toggleOpenState(this.selection.focused);
 			}
 			else if (parentIndex != -1) {
 				this.onSelection(parentIndex);
@@ -651,7 +658,7 @@ class VirtualizedTable extends React.Component {
 			if (this.props.isContainer(this.selection.focused)
 					&& !this.props.isContainerEmpty(this.selection.focused)) {
 				if (!this.props.isContainerOpen(this.selection.focused)) {
-					this.props.toggleOpenState(this.selection.focused);
+					this.toggleOpenState(this.selection.focused);
 				}
 				else {
 					this.onSelection(this.selection.focused + 1);
@@ -1112,13 +1119,13 @@ class VirtualizedTable extends React.Component {
 		return {
 			getItemCount: this.props.getRowCount,
 			itemHeight: this._rowHeight,
-			renderItem: this._renderItem,
+			renderItem: this._renderItem.bind(this),
 			targetElement: document.getElementById(this._jsWindowID),
 			customRowHeights: this.props.customRowHeights ?? []
 		};
 	}
-	
-	_renderItem = (index, oldElem = null) => {
+
+	_renderItem(index, oldElem = null) {
 		let node = this.props.renderItem(index, this.selection, oldElem, this._getColumns());
 		if (!node.dataset.eventHandlersAttached) {
 			node.dataset.eventHandlersAttached = true;
@@ -1407,6 +1414,11 @@ class VirtualizedTable extends React.Component {
 			&& row <= this._jsWindow.getLastVisibleRow();
 	}
 
+	toggleOpenState(index, ...args) {
+		let onToggleOpenState = this.props.toggleOpenState;
+		if (typeof onToggleOpenState == 'function') return onToggleOpenState(index, ...args);
+	}
+
 	async _resetColumns() {
 		this.invalidate();
 		this._columns = new Columns(this);
@@ -1422,6 +1434,144 @@ class VirtualizedTable extends React.Component {
 		}
 	}
 }
+
+/**
+ * VirtualizedTree wraps VirtualizedTable to provide common tree affordances:
+ * - Adds an indent spacer based on depth to the first visible cell
+ * - Adds a twisty for non-empty containers
+ * - Sets tree-specific ARIA attributes on rows and the container
+ * - Wires twisty mouse handlers to toggle container open state
+ *
+ * Consumers should provide isContainer/isContainerEmpty/isContainerOpen/onToggleOpenState
+ * and getParentIndex(index) to compute ancestry.
+ */
+class VirtualizedTree extends VirtualizedTable {
+	static propTypes = { ...VirtualizedTable.propTypes,
+		getParentIndex: PropTypes.func.isRequired,
+		isContainer: PropTypes.func.isRequired,
+		isContainerEmpty: PropTypes.func.isRequired,
+		isContainerOpen: PropTypes.func.isRequired,
+		onToggleOpenState: PropTypes.func.isRequired,
+	}
+
+	_toggledOpenStateIndex = null;
+
+	constructor(props) {
+		props.firstColumnExtraWidth += 16; // 16px for twisty
+		if (!props.className) props.className = "";
+		props.className += " virtualized-tree";
+		super(props);
+	}
+
+	toggleOpenState(index, ...args) {
+		this._toggledOpenStateIndex = index;
+		return this.props.onToggleOpenState(index, ...args);
+	}
+
+	_renderItem(index, oldElem=null) {
+		let node = super._renderItem(index, oldElem);
+		if (!(node instanceof (node?.ownerDocument?.defaultView || window).Element)) {
+			return node;
+		}
+		node = this._addIndentAndTwisty(node, index);
+		this._setRowAria(node, index);
+		return node;
+	}
+
+	_getDepth(index) {
+		let depth = 0;
+		try {
+			let parent = typeof this.props.getParentIndex == 'function' ? this.props.getParentIndex(index) : -1;
+			while (parent != -1 && typeof parent == 'number') {
+				depth++;
+				parent = this.props.getParentIndex(parent);
+			}
+		}
+		catch (e) {}
+		return depth;
+	}
+	
+	/**
+	 * Adds an indent spacer and twisty to the first cell of the node
+	 * 
+	 * We add it to the first cell instead of as a separate pseudo-cell or just elements before
+	 * the first cell because otherwise it messes with column spacing.
+	 * 
+	 * @param node {HTMLElement} The rendered item row
+	 * @param index {number} The index of the node being rendered
+	 * @returns {HTMLElement}
+	 */
+	_addIndentAndTwisty(node, index) {
+		let firstCell = node.querySelector('.cell');
+		if (!firstCell) return node;
+
+		let twisty;
+		if (this.props.isContainerEmpty(index)) {
+			twisty = firstCell.querySelector('.spacer-twisty');
+			if (!twisty) {
+				twisty = node.ownerDocument.createElement('span');
+				firstCell.prepend(twisty);
+				twisty.classList.add('spacer-twisty');
+			}
+			firstCell.querySelector(`:scope > .twisty`)?.remove();
+		}
+		else {
+			twisty = firstCell.querySelector('.twisty');
+			if (!twisty) {
+				twisty = getCSSIcon('twisty');
+				twisty.classList.add('twisty');
+				twisty.style.pointerEvents = 'auto';
+				twisty.addEventListener('mousedown', (event) => event.stopPropagation());
+				twisty.addEventListener('mouseup', (event) => {
+					this.toggleOpenState(index);
+					event.stopPropagation();
+				}, { passive: true });
+				twisty.addEventListener('dblclick', (event) => event.stopImmediatePropagation(), { passive: true });
+				firstCell.prepend(twisty);
+			}
+			firstCell.querySelector(`:scope > .spacer-twisty`)?.remove();
+
+			// Apply the twisty animation
+			if (this._toggledOpenStateIndex == index) {
+				twisty.classList.toggle('open', !this.props.isContainerOpen(index));
+				requestAnimationFrame(() => {
+					twisty.classList.toggle('open', this.props.isContainerOpen(index));
+					this._toggledOpenStateIndex = null;
+				});
+			}
+			else {
+				twisty.classList.toggle('open', this.props.isContainerOpen(index));
+			}
+		}
+
+		let indentSpan = firstCell.querySelector('.cell-indent');
+		if (!indentSpan) {
+			indentSpan = node.ownerDocument.createElement('span');
+			indentSpan.className = 'cell-indent';
+			firstCell.prepend(indentSpan);
+		}
+		// Use padding for indent similar to ItemTree
+		const CHILD_INDENT = 16;
+		indentSpan.style.paddingInlineStart = (CHILD_INDENT * this._getDepth(index)) + 'px';
+
+		return node;
+	}
+
+	_setRowAria(node, index) {
+		const depth = this._getDepth(index);
+		node.setAttribute('role', 'treeitem');
+		node.setAttribute('aria-level', depth + 1);
+		if (!this.props.isContainerEmpty(index)) {
+			node.setAttribute('aria-expanded', !!this.props.isContainerOpen(index));
+		}
+		else {
+			node.removeAttribute('aria-expanded');
+		}
+	}
+}
+
+VirtualizedTree.propTypes = Object.assign({}, VirtualizedTable.propTypes);
+VirtualizedTree.defaultProps = Object.assign({}, VirtualizedTable.defaultProps, { role: 'tree' });
 
 /**
  * Create a function that calls the given function `fn` only once per animation
@@ -1702,8 +1852,6 @@ var Columns = class {
 		if (prefs[column.dataKey]) {
 			prefs[column.dataKey].hidden = column.hidden;
 		}
-		this._adjustColumnWidths();
-		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}
@@ -1879,6 +2027,8 @@ function formatColumnName(column) {
 }
 
 module.exports = VirtualizedTable;
+module.exports.VirtualizedTree = VirtualizedTree;
+
 module.exports.TreeSelection = TreeSelection;
 module.exports.TreeSelectionStub = TreeSelectionStub;
 module.exports.renderCell = renderCell;
