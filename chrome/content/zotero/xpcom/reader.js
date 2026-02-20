@@ -1453,10 +1453,15 @@ class ReaderInstance {
 		}
 	}
 	
-	_setReadAloudVoice(lang, region, voice, speed) {
+	_setReadAloudVoice({ lang, region, voice, speed, tier }) {
+		let existing = this._getReadAloudVoices()[lang] || {};
+		let tierVoices = { ...existing.tierVoices };
+		if (tier) {
+			tierVoices[tier] = voice;
+		}
 		Zotero.Prefs.set('reader.readAloudVoices', JSON.stringify({
 			...this._getReadAloudVoices(),
-			[lang]: { region, voice, speed }
+			[lang]: { region, voice, speed, tierVoices }
 		}));
 	}
 	
@@ -1517,8 +1522,8 @@ class ReaderInstance {
 			io,
 		);
 		if (io.dataOut) {
-			let { lang, region, voiceId, speed } = io.dataOut;
-			this._setReadAloudVoice(lang, region, voiceId, speed);
+			let { lang, region, voice, speed, tier } = io.dataOut;
+			this._setReadAloudVoice({ lang, region, voice, speed, tier });
 			this._internalReader.toggleReadAloudPopup(true);
 		}
 	}
