@@ -562,9 +562,9 @@ Zotero.Sync.APIClient.prototype = {
 				errorDelayMax: 8000,
 			});
 
-			let basicCreditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Basic-Credits-Remaining'));
-			if (isNaN(basicCreditsRemaining)) {
-				basicCreditsRemaining = null;
+			let standardCreditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Standard-Credits-Remaining'));
+			if (isNaN(standardCreditsRemaining)) {
+				standardCreditsRemaining = null;
 			}
 			let advancedCreditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Advanced-Credits-Remaining'));
 			if (isNaN(advancedCreditsRemaining)) {
@@ -575,8 +575,7 @@ Zotero.Sync.APIClient.prototype = {
 
 			return {
 				voices: xmlhttp.response ?? [],
-				basicCreditsRemaining,
-				basicCreditsRemaining,
+				standardCreditsRemaining,
 				advancedCreditsRemaining,
 				devMode,
 			};
@@ -586,7 +585,7 @@ Zotero.Sync.APIClient.prototype = {
 
 			return {
 				voices: [],
-				basicCreditsRemaining: null,
+				standardCreditsRemaining: null,
 				advancedCreditsRemaining: null,
 			};
 		}
@@ -646,14 +645,14 @@ Zotero.Sync.APIClient.prototype = {
 				errorDelayMax: 8000,
 			});
 			return {
-				basicCreditsRemaining: xmlhttp.response.basicCreditsRemaining ?? null,
+				standardCreditsRemaining: xmlhttp.response.standardCreditsRemaining ?? null,
 				advancedCreditsRemaining: xmlhttp.response.advancedCreditsRemaining ?? null,
 			};
 		}
 		catch (e) {
 			Zotero.debug('Failed to fetch credits');
 			Zotero.logError(e);
-			return { basicCreditsRemaining: null, advancedCreditsRemaining: null };
+			return { standardCreditsRemaining: null, advancedCreditsRemaining: null };
 		}
 	},
 
@@ -666,14 +665,14 @@ Zotero.Sync.APIClient.prototype = {
 				errorDelayMax: 8000,
 			});
 			return {
-				basicCreditsRemaining: xmlhttp.response.basicCreditsRemaining ?? null,
+				standardCreditsRemaining: xmlhttp.response.standardCreditsRemaining ?? null,
 				advancedCreditsRemaining: xmlhttp.response.advancedCreditsRemaining ?? null,
 			};
 		}
 		catch (e) {
 			Zotero.debug('Failed to reset credits');
 			Zotero.logError(e);
-			return { basicCreditsRemaining: null, advancedCreditsRemaining: null };
+			return { standardCreditsRemaining: null, advancedCreditsRemaining: null };
 		}
 	},
 
