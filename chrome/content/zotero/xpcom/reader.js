@@ -200,6 +200,7 @@ class ReaderInstance {
 		// Reverse app locales so primary overrides fallbacks
 		let locales = Services.locale.appLocalesAsBCP47.reverse();
 		let ftlURLs = locales.flatMap(locale => [
+			`resource://app/localization/${locale}/branding/brand.ftl`,
 			`resource://app/localization/${locale}/zotero.ftl`,
 			`resource://app/localization/${locale}/reader.ftl`,
 		]);
