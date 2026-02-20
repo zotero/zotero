@@ -458,6 +458,21 @@ if [ $DEVTOOLS -eq 1 ]; then
 	replace_line 'let command = Services.dirsvc.get\("XREExeF", Ci.nsIFile\).path;' \
 		'let command = Services.dirsvc.get("XREExeF", Ci.nsIFile).path; command = command.replace("zotero-bin", "zotero");' \
 		chrome/devtools/modules/devtools/client/framework/browser-toolbox/Launcher.sys.mjs
+	
+	# Fix source display breaking when switching windows in the Browser Toolbox.
+	# When the user switches which chrome window is being inspected (via the frame
+	# picker), the thread actor's _onWindowReady handler clears all debuggees and
+	# source actors, then re-adds debuggees. But it never calls addAllSources() to
+	# re-emit the existing scripts — it only does that for BFCache navigations.
+	# Since the scripts already exist (they're not new), onNewScript won't fire,
+	# so the debugger's source list stays empty. Fix: also call addAllSources()
+	# after frame switching, just like BFCache.
+	replace_line '_onWindowReady\(\{ isTopLevel, isBFCache \}\)' \
+		'_onWindowReady({ isTopLevel, isBFCache, isFrameSwitching })' \
+		chrome/devtools/modules/devtools/server/actors/thread.js
+	replace_line 'if \(isBFCache\) {' \
+		'if (isBFCache || isFrameSwitching) {' \
+		chrome/devtools/modules/devtools/server/actors/thread.js
 fi
 
 # 5.0.96.3 / 5.0.97-beta.37+ddc7be75c
