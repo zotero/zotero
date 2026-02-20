@@ -676,7 +676,14 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			const { ZoteroAutoComplete } = ChromeUtils.importESModule(
 				`chrome://zotero/content/zotero-autocomplete.mjs`
 			);
+			
 			ZoteroAutoComplete.init();
+
+			const { OptionsAutoComplete } = ChromeUtils.importESModule(
+				`chrome://zotero/content/modules/optionsAutoComplete.mjs`
+			);
+			
+			OptionsAutoComplete.init();
 
 			await Zotero.Users.init();
 			await Zotero.Libraries.init();
