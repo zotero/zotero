@@ -244,8 +244,8 @@ reader-read-aloud-first-run-voice-tier-premium-bullets = Highest-quality voices 
     Requires a { -app-name } account
     Broad language selection
     Multilingual support
-    Source text is processed by third-party text-to-speech providers
-    { -subscription-name } plans include a monthly allotment of Premium Voice minutes
+    Source text is processed by external text-to-speech providers
+    { -subscription-name } plans include monthly Premium Voice minutes
     <purchase-credits>Purchase credits</purchase-credits> for additional minutes
 reader-read-aloud-sample-text = I am the local voice { $name }
 reader-read-aloud-manage-voices = Manage voices…
