@@ -162,6 +162,10 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			
 			assert.isFalse(library.storageDownloadNeeded);
 			assert.equal(library.storageVersion, library.libraryVersion);
+			assert.equal(
+				item.attachmentSyncState,
+				Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
+			);
 		})
 		
 		it("shouldn't update storageVersion if stopped", async function () {

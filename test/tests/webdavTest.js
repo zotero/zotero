@@ -301,6 +301,10 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			
 			assert.isFalse(library.storageDownloadNeeded);
 			assert.equal(library.storageVersion, library.libraryVersion);
+			assert.equal(
+				item.attachmentSyncState,
+				Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
+			);
 		})
 		
 		it("should handle a remotely failing .prop file", async function () {

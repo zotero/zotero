@@ -159,6 +159,8 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				
 				if (req.status == 404) {
 					Zotero.debug("Remote file not found for item " + item.libraryKey);
+					item.attachmentSyncState = "in_sync";
+					await item.saveTx({ skipAll: true });
 					// Don't refresh item pane rows when nothing happened
 					request.skipProgressBarUpdate = true;
 					resolve(new Zotero.Sync.Storage.Result);

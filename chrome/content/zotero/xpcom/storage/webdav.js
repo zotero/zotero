@@ -477,6 +477,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		
 		if (!metadata) {
 			Zotero.debug("Remote file not found for item " + item.libraryKey);
+			item.attachmentSyncState = "in_sync";
+			await item.saveTx({ skipAll: true });
 			return new Zotero.Sync.Storage.Result;
 		}
 		
@@ -541,7 +543,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					catch (e) {
 						Zotero.logError(e);
 					}
-					
+
+					item.attachmentSyncState = "in_sync";
+					await item.saveTx({ skipAll: true });
 					resolve(new Zotero.Sync.Storage.Result);
 					return;
 				}

@@ -1207,6 +1207,12 @@ Zotero.Sync.Data.Local = {
 	 * for download if not (or if this is a new attachment)
 	 */
 	_checkAttachmentForDownload: async function (item, mtime, isNewObject) {
+		// If there's no mtime in the item data from the server, there's no
+		// file on the server -- nothing to download
+		if (!mtime) {
+			return;
+		}
+
 		var markToDownload = true;
 		var fileExists = false;
 		if (!isNewObject) {
