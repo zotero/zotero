@@ -147,6 +147,7 @@ const xpcomFilesLocal = [
 	'storage',
 	'storage/storageEngine',
 	'storage/storageLocal',
+	'storage/fileChangeWatcher',
 	'storage/storageRequest',
 	'storage/storageResult',
 	'storage/storageUtilities',
@@ -274,6 +275,27 @@ function makeZoteroContext() {
 		}
 	}
 	
+	// Load platform-specific FileChangeWatcher backend
+	{
+		let os = Services.appinfo.OS;
+		let backendFile = os == "Darwin" ? "storage/fileChangeWatcher_fsevents"
+			: os == "WINNT" ? "storage/fileChangeWatcher_rdcw"
+			: os == "Linux" ? "storage/fileChangeWatcher_inotify"
+			: null;
+		if (backendFile) {
+			try {
+				subscriptLoader.loadSubScript(
+					"chrome://zotero/content/xpcom/" + backendFile + ".js", zContext, "utf-8"
+				);
+			}
+			catch (e) {
+				dump("Error loading " + backendFile + ".js\n\n");
+				dump(e + "\n\n");
+				Components.utils.reportError("Error loading " + backendFile + ".js");
+			}
+		}
+	}
+
 	// Load RDF files into Zotero.RDF.AJAW namespace (easier than modifying all of the references)
 	const rdfXpcomFiles = [
 		'rdf/init',
