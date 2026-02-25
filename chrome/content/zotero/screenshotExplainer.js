@@ -349,6 +349,7 @@ var Zotero_Screenshot_Explainer = {
 		let inputRow = doc.createElementNS('http://www.w3.org/1999/xhtml', 'div');
 		Object.assign(inputRow.style, {
 			display: 'flex',
+			alignItems: 'center',
 			gap: '8px',
 			padding: '10px 14px',
 			borderTop: '1px solid rgba(255,255,255,0.08)',
@@ -379,6 +380,10 @@ var Zotero_Screenshot_Explainer = {
 			fontWeight: '600',
 			cursor: 'pointer',
 			flexShrink: '0',
+			display: 'inline-flex',
+			alignItems: 'center',
+			justifyContent: 'center',
+			minHeight: '34px',
 		});
 		inputRow.appendChild(input);
 		inputRow.appendChild(sendBtn);
@@ -464,17 +469,41 @@ var Zotero_Screenshot_Explainer = {
 		let lines = text.replace(/\r\n/g, '\n').split('\n');
 		let i = 0;
 		let inList = false;
+		let paragraphLines = [];
 		function flushList() {
 			if (inList) { out.push('</ul>'); inList = false; }
 		}
+		function flushParagraph() {
+			if (!paragraphLines.length) return;
+			let paragraph = paragraphLines.join(' ').trim();
+			if (paragraph) {
+				out.push('<p class="zotero-explain-p">' + parseInline(paragraph) + '</p>');
+			}
+			paragraphLines = [];
+		}
 		function escape(s) {
 			return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+		}
+		function parseInline(s) {
+			return escape(s).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+		}
+		function splitTableRow(line) {
+			let row = line.trim();
+			if (row.startsWith('|')) row = row.slice(1);
+			if (row.endsWith('|')) row = row.slice(0, -1);
+			return row.split('|').map(cell => cell.trim());
+		}
+		function isTableSeparator(line) {
+			let cells = splitTableRow(line);
+			if (!cells.length) return false;
+			return cells.every(cell => /^:?-{3,}:?$/.test(cell));
 		}
 		while (i < lines.length) {
 			let line = lines[i];
 			let trimmed = line.trim();
 			// Display math block \[ ... \] (may span multiple lines)
 			if (trimmed === '\\[') {
+				flushParagraph();
 				flushList();
 				let mathLines = [];
 				i++;
@@ -488,35 +517,81 @@ var Zotero_Screenshot_Explainer = {
 				continue;
 			}
 			if (/^###\s/.test(trimmed)) {
+				flushParagraph();
 				flushList();
 				out.push('<h3 class="zotero-explain-h3">' + escape(trimmed.slice(3).trim()) + '</h3>');
 			}
 			else if (/^##\s/.test(trimmed)) {
+				flushParagraph();
 				flushList();
 				out.push('<h2 class="zotero-explain-h2">' + escape(trimmed.slice(2).trim()) + '</h2>');
 			}
 			else if (/^#\s/.test(trimmed)) {
+				flushParagraph();
 				flushList();
 				out.push('<h1 class="zotero-explain-h1">' + escape(trimmed.slice(1).trim()) + '</h1>');
 			}
+			else if (
+				/\|/.test(trimmed)
+				&& i + 1 < lines.length
+				&& isTableSeparator(lines[i + 1].trim())
+			) {
+				flushParagraph();
+				flushList();
+				let headers = splitTableRow(trimmed);
+				let separators = splitTableRow(lines[i + 1].trim());
+				let aligns = separators.map(cell => {
+					let left = cell.startsWith(':');
+					let right = cell.endsWith(':');
+					if (left && right) return 'center';
+					if (right) return 'right';
+					return 'left';
+				});
+				out.push('<div class="zotero-explain-table-wrap"><table class="zotero-explain-table"><thead><tr>');
+				for (let c = 0; c < headers.length; c++) {
+					out.push('<th style="text-align:' + aligns[c] + ';">' + parseInline(headers[c]) + '</th>');
+				}
+				out.push('</tr></thead><tbody>');
+				i += 2;
+				while (i < lines.length) {
+					let rowLine = lines[i].trim();
+					if (!rowLine || !/\|/.test(rowLine) || /^[-*]\s+/.test(rowLine) || /^#{1,3}\s/.test(rowLine)) {
+						break;
+					}
+					let cells = splitTableRow(rowLine);
+					out.push('<tr>');
+					for (let c = 0; c < headers.length; c++) {
+						let cell = cells[c] || '';
+						let align = aligns[c] || 'left';
+						out.push('<td style="text-align:' + align + ';">' + parseInline(cell) + '</td>');
+					}
+					out.push('</tr>');
+					i++;
+				}
+				out.push('</tbody></table></div>');
+				continue;
+			}
 			else if (/^-\s+/.test(trimmed) || /^\*\s+/.test(trimmed)) {
+				flushParagraph();
 				if (!inList) { out.push('<ul class="zotero-explain-ul">'); inList = true; }
 				let item = trimmed.replace(/^[-*]\s+/, '');
-				item = escape(item).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+				item = parseInline(item);
 				out.push('<li>' + item + '</li>');
 			}
 			else if (trimmed === '') {
 				flushList();
-				out.push('<p class="zotero-explain-p">\u200b</p>');
+				flushParagraph();
 			}
 			else {
-				flushList();
-				let span = escape(trimmed).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-				out.push('<p class="zotero-explain-p">' + span + '</p>');
+				if (inList) {
+					flushList();
+				}
+				paragraphLines.push(trimmed);
 			}
 			i++;
 		}
 		flushList();
+		flushParagraph();
 		return out.join('');
 	},
 

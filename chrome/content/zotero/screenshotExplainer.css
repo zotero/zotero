@@ -57,21 +57,21 @@
 
 /* Paragraphs */
 #zotero-explanation-content .zotero-explain-p {
-	margin: 0.32em 0;
-	line-height: 1.65;
+	margin: 0.18em 0;
+	line-height: 1.55;
 	color: #cdd3f0;
 }
 
 /* Lists */
 #zotero-explanation-content .zotero-explain-ul {
-	margin: 0.5em 0;
+	margin: 0.32em 0;
 	padding-left: 1.5em;
 	color: #cdd3f0;
-	line-height: 1.6;
+	line-height: 1.5;
 }
 
 #zotero-explanation-content .zotero-explain-ul li {
-	margin: 0.25em 0;
+	margin: 0.16em 0;
 }
 
 /* Math */
@@ -95,4 +95,38 @@
 	margin: 0.32em 0;
 	padding: 0.1em 0;
 	overflow-x: auto;
+}
+
+/* Tables */
+#zotero-explanation-content .zotero-explain-table-wrap {
+	margin: 0.35em 0;
+	overflow-x: auto;
+}
+
+#zotero-explanation-content .zotero-explain-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 13px;
+	color: #d8ddf2;
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+#zotero-explanation-content .zotero-explain-table th,
+#zotero-explanation-content .zotero-explain-table td {
+	padding: 7px 9px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	vertical-align: top;
+}
+
+#zotero-explanation-content .zotero-explain-table th {
+	font-weight: 600;
+	color: #edf0fb;
+	background: rgba(124, 140, 248, 0.15);
+}
+
+#zotero-explanation-content .zotero-explain-table tr:last-child td {
+	border-bottom: none;
 }
