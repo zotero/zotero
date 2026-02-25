@@ -270,4 +270,48 @@ describe("Item Tags Box", function () {
 			assert.equal(tagRows[2].querySelector("editable-text").value, "a_colored_tag");
 		});
 	});
+
+	describe("Paste Handling", function () {
+		before(async () => {
+			await activateZoteroPane();
+		});
+
+		function createPasteEvent(text) {
+			let event = new Event('paste', { cancelable: true });
+			event.clipboardData = {
+				getData: () => text
+			};
+			return event;
+		}
+
+		it("should trigger tag splitter when pasting tags with comma delimiter", async function () {
+			let testCases = [
+				// English
+				{ str: 'History, Science', delimiter: ',' },
+				// Greek
+				{ str: 'Ιστορία, Επιστήμη', delimiter: ',' },
+				// Korean
+				{ str: '역사, 과학', delimiter: ',' },
+			];
+
+			for (let { str, delimiter } of testCases) {
+				let item = await createDataObject('item');
+				let tagsbox = doc.querySelector('#zotero-editpane-tags');
+				let stub = sinon.stub(tagsbox, 'openTagSplitterWindow');
+
+				let row = tagsbox.newTag();
+				let editable = row.querySelector('editable-text');
+				let event = createPasteEvent(str);
+				editable.dispatchEvent(event);
+
+				assert.isTrue(event.defaultPrevented, `paste should be intercepted for "${str}"`);
+				assert.isTrue(stub.calledOnce, `tag splitter should open for "${str}"`);
+				assert.equal(stub.args[0][0], str, `tag string should be passed for "${str}"`);
+				assert.equal(stub.args[0][1], delimiter, `delimiter should be "${delimiter}" for "${str}"`);
+
+				stub.restore();
+				await item.eraseTx();
+			}
+		});
+	});
 })
