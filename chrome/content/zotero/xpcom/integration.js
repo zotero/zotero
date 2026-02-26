@@ -3033,6 +3033,45 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 				}
 			}
 
+			// Fix for Mac Word "All Caps" formatting corrupting field codes.
+			// All text including JSON keys and string values gets uppercased,
+			// but numbers/booleans are unaffected. We recover items via their
+			// integer ID and discard corrupted URIs/itemData.
+			// Distinct from old Zotero 2.x uppercase which only affected CITATIONITEMS.
+			if (citation.CITATIONID) {
+				Zotero.debug("Integration: Recovering citation field corrupted by All Caps formatting");
+				citation.citationID = citation.CITATIONID;
+				delete citation.CITATIONID;
+				
+				if (citation.PROPERTIES) {
+					if (!citation.properties) {
+						citation.properties = {};
+					}
+					// Preserve non-string values (unaffected by All Caps).
+					// Don't preserve dontUpdate -- we need to update since the
+					// presentation is corrupted.
+					if ('NOTEINDEX' in citation.PROPERTIES) {
+						citation.properties.noteIndex = citation.PROPERTIES.NOTEINDEX;
+					}
+					if ('UNSORTED' in citation.PROPERTIES) {
+						citation.properties.unsorted = citation.PROPERTIES.UNSORTED;
+					}
+					delete citation.PROPERTIES;
+				}
+				
+				// Delete corrupted URIs and itemData from citation items.
+				// loadItemData() will fall through to Zotero.Items.get(citationItem.id)
+				// for resolution, or handleMissingItem() if the item isn't found.
+				for (let citationItem of citation.citationItems) {
+					delete citationItem.uris;
+					// Existing CITATIONITEMS handling lowercases ITEMDATA to 'itemdata'
+					delete citationItem.itemdata;
+					delete citationItem.itemData;
+				}
+				
+				delete citation.SCHEMA;
+			}
+
 			if(!citation.properties) citation.properties = {};
 
 			for (let citationItem of citation.citationItems) {
