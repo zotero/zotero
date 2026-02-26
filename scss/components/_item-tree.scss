@@ -75,8 +75,10 @@
 	
 	.virtualized-table, .drag-image-container {
 		.row {
-			&.odd:not(.selected) {
-				background-color: var(--material-stripe);
+			@include state(".virtualized-table:not(.no-alternating-rows)") {
+				&.odd:not(.selected) {
+					background-color: var(--material-stripe);
+				}
 			}
 
 			&.even:not(.selected) {
