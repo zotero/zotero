@@ -1088,6 +1088,92 @@ describe("Zotero.Integration", function () {
 		});
 	});
 	
+	describe("CitationField", function () {
+		describe('#unserialize', function () {
+			it('should recover All Caps corrupted citation field', async function () {
+				// Simulate Mac Word "All Caps" formatting corrupting field code JSON.
+				// All text (keys and string values) is uppercased; numbers/booleans unaffected.
+				let testItem = testItems[0];
+				let allCapsCode = 'ITEM CSL_CITATION '
+					+ JSON.stringify({
+						CITATIONID: "ABCD1234",
+						PROPERTIES: {
+							FORMATTEDCITATION: "(AUTHOR 2025)",
+							PLAINCITATION: "(AUTHOR 2025)",
+							NOTEINDEX: 0
+						},
+						CITATIONITEMS: [{
+							ID: testItem.id,
+							URIS: ["HTTP://ZOTERO.ORG/USERS/12345/ITEMS/XXXXXXXX"],
+							ITEMDATA: {
+								ID: testItem.id,
+								TYPE: "ARTICLE-JOURNAL",
+								TITLE: "SOME TITLE"
+							}
+						}],
+						SCHEMA: "HTTPS://GITHUB.COM/CITATION-STYLE-LANGUAGE/SCHEMA/RAW/MASTER/CSL-CITATION.JSON"
+					});
+				
+				let field = new DocumentPluginDummy.Field(
+					new DocumentPluginDummy.Document()
+				);
+				field.code = allCapsCode;
+				field.text = "(Author 2025)";
+				
+				let citationField = new Zotero.Integration.CitationField(field, allCapsCode);
+				let citation = await citationField.unserialize();
+				
+				// citationID recovered
+				assert.equal(citation.citationID, "ABCD1234");
+				// properties recovered
+				assert.equal(citation.properties.noteIndex, 0);
+				// plainCitation and formattedCitation deleted to avoid changed-citation dialog
+				assert.notProperty(citation.properties, 'plainCitation');
+				assert.notProperty(citation.properties, 'formattedCitation');
+				// citationItems recovered with integer id
+				assert.equal(citation.citationItems.length, 1);
+				assert.equal(citation.citationItems[0].id, testItem.id);
+				// Corrupted URIs and itemData removed
+				assert.notProperty(citation.citationItems[0], 'uris');
+				assert.notProperty(citation.citationItems[0], 'itemData');
+				assert.notProperty(citation.citationItems[0], 'itemdata');
+			});
+			
+			it('should preserve non-string properties in All Caps corrupted citation', async function () {
+				let testItem = testItems[0];
+				let allCapsCode = 'ITEM CSL_CITATION '
+					+ JSON.stringify({
+						CITATIONID: "EFGH5678",
+						PROPERTIES: {
+							NOTEINDEX: 3,
+							UNSORTED: true,
+							DONTUPDDATE: true
+						},
+						CITATIONITEMS: [{
+							ID: testItem.id,
+							URIS: ["HTTP://ZOTERO.ORG/USERS/12345/ITEMS/XXXXXXXX"]
+						}],
+						SCHEMA: "HTTPS://GITHUB.COM/CITATION-STYLE-LANGUAGE/SCHEMA/RAW/MASTER/CSL-CITATION.JSON"
+					});
+				
+				let field = new DocumentPluginDummy.Field(
+					new DocumentPluginDummy.Document()
+				);
+				field.code = allCapsCode;
+				field.text = "(Author 2025)";
+				
+				let citationField = new Zotero.Integration.CitationField(field, allCapsCode);
+				let citation = await citationField.unserialize();
+				
+				assert.equal(citation.properties.noteIndex, 3);
+				assert.isTrue(citation.properties.unsorted);
+				// dontUpdate should NOT be preserved -- we need to update since
+				// the presentation is corrupted
+				assert.notProperty(citation.properties, 'dontUpdate');
+			});
+		});
+	});
+	
 	describe("DocumentData", function () {
 		it('should properly unserialize old XML document data', function () {
 			var serializedXMLData = `<data data-version="3" zotero-version="5.0.SOURCE"><session id="F0NFmZ32"/><style id="${styleID}" hasBibliography="1" bibliographyStyleHasBeenSet="1"/><prefs><pref name="fieldType" value="ReferenceMark"/><pref name="automaticJournalAbbreviations" value="true"/><pref name="noteType" value="0"/></prefs></data>`;
