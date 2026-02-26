@@ -32,25 +32,86 @@ const Cr = Components.results;
 
 import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
+const MAX_RESULTS = 50;
+
+let searchResultsCache = {};
+let currentSearchConfig = null;
+let currentQuery = null;
+let nextQuery = null;
+let lastQueryTs = 0;
+
 /*
  * Implements nsIAutoCompleteSearch
  */
 export function ZoteroAutoComplete() {}
 
+// Entrypoint to autocomplete search called on each input change
 ZoteroAutoComplete.prototype.startSearch = async function (searchString, searchParams, previousResult, listener) {
-	// FIXME
-	//this.stopSearch();
-	
+	// stopSearch is not always called before startSearch. We could
+	// ensure that any ongoing queries are cancelled here. But instead,
+	// we let the old query finish, in hope that some query results will
+	// match the new search string, since they will be added faster.
+	// this.stopSearch();
+
 	var result = Cc["@mozilla.org/autocomplete/simple-result;1"]
 					.createInstance(Ci.nsIAutoCompleteSimpleResult);
 	result.setSearchString(searchString);
-	
+
 	this._result = result;
-	this._results = [];
+	this._includedSearchResults = new Set();
 	this._listener = listener;
-	this._cancelled = false;
-	
-	Zotero.debug("Starting autocomplete search with data '"
+
+	let queryID = Zotero.Utilities.randomString();
+
+	Zotero.debug("Start autocomplete query " + queryID + " with data '"
+		+ searchParams + "'" + " and string '" + searchString + "'");
+
+	// startSearch is called on each typed character. We don't want to start running
+	// a new query unless the old one finished to avoid spamming many queries running
+	// at the same time, which poorly affects performance.
+	// We maintain a record of the current query and the next query that should run
+	// after the first one finished.
+	// Suppose we get "t", "te", "tes", and "test" searches, and queries take a somewhat long time.
+	// "t" query will be started, "te" and "tes" will be  skipped, and we'll only run "test"
+	// after "t" finishes.
+	nextQuery = { queryID, searchString, searchParams, cancelled: false };
+	if (!currentQuery) {
+		this._processQueries();
+	}
+};
+
+// Fetch search results one query at a time
+ZoteroAutoComplete.prototype._processQueries = async function () {
+	while (nextQuery) {
+		// Move next query to current
+		currentQuery = nextQuery;
+		nextQuery = null;
+		let currentTime = (new Date()).getTime();
+		
+		let { queryID, searchString, searchParams } = currentQuery;
+
+		// If the search config has not changed since last search, see if any
+		// earlier search results match this query
+		let searchConfig = JSON.stringify(searchParams);
+		let isExpired = currentTime - lastQueryTs > 10 * 1000;
+		if (currentSearchConfig === searchConfig && !isExpired) {
+			this._applyCachedResults(searchString);
+		}
+		// If the search config has changed, clear the cache
+		else {
+			searchResultsCache = {};
+			currentSearchConfig = searchConfig;
+		}
+		lastQueryTs = currentTime;
+
+		await this.executeQuery(queryID, searchString, searchParams);
+
+		currentQuery = null;
+	}
+};
+
+ZoteroAutoComplete.prototype.executeQuery = async function (queryID, searchString, searchParams) {
+	Zotero.debug("Execute autocomplete query with data '"
 		+ searchParams + "'" + " and string '" + searchString + "'");
 	
 	searchParams = JSON.parse(searchParams);
@@ -59,15 +120,13 @@ ZoteroAutoComplete.prototype.startSearch = async function (searchString, searchP
 	}
 	var [fieldName, , subField] = searchParams.fieldName.split("-");
 	
-	var resultsCallback;
-	
 	switch (fieldName) {
 		case '':
 			break;
 		
 		case 'tag':
 			var sql = "SELECT DISTINCT name AS val, NULL AS id FROM tags WHERE name LIKE ? ESCAPE '\\'";
-			var sqlParams = [Zotero.DB.escapeSQLExpression(searchString) + '%'];
+			var sqlParams = ["%" + Zotero.DB.escapeSQLExpression(searchString) + '%'];
 			if (searchParams.libraryID) {
 				sql += " AND tagID IN (SELECT tagID FROM itemTags JOIN items USING (itemID) "
 					+ "WHERE libraryID=?)";
@@ -208,7 +267,7 @@ ZoteroAutoComplete.prototype.startSearch = async function (searchString, searchP
 			var fieldID = Zotero.ItemFields.getID(fieldName);
 			if (!fieldID) {
 				Zotero.debug("'" + fieldName + "' is not a valid autocomplete scope", 1);
-				this.updateResults([], false, Ci.nsIAutoCompleteResult.RESULT_IGNORED);
+				this._notifyResult(false, Ci.nsIAutoCompleteResult.RESULT_IGNORED);
 				return;
 			}
 			
@@ -238,98 +297,109 @@ ZoteroAutoComplete.prototype.startSearch = async function (searchString, searchP
 			sql += "ORDER BY value";
 	}
 	
-	sql += " LIMIT 50";
+	// Limit search results to 1000, even though we only display 50 results at a time.
+	// If the user types "t" first, we'll save 1000 records to searchResultsCache,
+	// so that if they type "est" after, we are more likely to find some "test" results
+	// in the 1000 matches for "t".
+	sql += " LIMIT 1000";
 	
-	var onRow = null;
-	// If there's a result callback (e.g., for sorting), don't use a row handler
-	if (!resultsCallback) {
-		onRow = function (row, cancel) {
-			if (this._cancelled) {
-				Zotero.debug("Cancelling query");
+	try {
+		// Process matching row results
+		let onRow = (row, cancel) => {
+			if (currentQuery?.cancelled) {
 				cancel();
 				return;
 			}
 			var value = row.getResultByIndex(0);
 			var id = row.getResultByIndex(1);
-			this.updateResult(value, id);
-		}.bind(this);
-	}
-	var resultCode;
-	try {
-		let results = await Zotero.DB.queryAsync(sql, sqlParams, { onRow: onRow });
-		// Post-process the results
-		if (resultsCallback) {
-			resultsCallback(results);
-			this.updateResults(
-				Object.values(results).map(x => x.val),
-				Object.values(results).map(x => x.id),
-				false
-			);
-		}
-		resultCode = null;
+			this.updateResult(searchString, value, id);
+		};
+		await Zotero.DB.queryAsync(sql, sqlParams, { onRow });
 		Zotero.debug("Autocomplete query completed");
+		this._notifyResult(false);
 	}
 	catch (e) {
 		Zotero.debug(e, 1);
-		resultCode = Ci.nsIAutoCompleteResult.RESULT_FAILURE;
+		this._notifyResult(false, Ci.nsIAutoCompleteResult.RESULT_FAILURE);
 		Zotero.debug("Autocomplete query aborted");
 	}
-	finally {
-		this.updateResults(null, null, false, resultCode);
-	};
 };
 
 
-ZoteroAutoComplete.prototype.updateResult = function (value, id) {
+// Add an autocomplete value to the result set and save it in the cache
+ZoteroAutoComplete.prototype.updateResult = function (searchString, value, id) {
+	// A value can be added either during the initial check for cached results
+	// or after the actual SQL query run. Don't add the same value twice.
+	if (this._includedSearchResults.has(value)) return false;
+
+	// Record the search result in the cache
+	if (searchResultsCache[searchString] === undefined) {
+		searchResultsCache[searchString] = [];
+	}
+	if (!searchResultsCache[searchString].find(r => r.value === value && r.id === id)) {
+		searchResultsCache[searchString].push({ value, id });
+	}
+
+	// updateResult can be called by the handler of a query for an old searchString
+	// (e.g. "t" while typing "test"). In that case, don't display it in the popup.
+	let doesMatchCurrentQuery = value.toLowerCase().includes(this._result.searchString.toLowerCase());
+	if (!doesMatchCurrentQuery) return false;
+
+	// Don't show too many results
+	if (this._result.matchCount > MAX_RESULTS) return false;
+
 	Zotero.debug(`Appending autocomplete value '${value}'` + (id ? " (" + id + ")" : ''));
 	// Add to nsIAutoCompleteResult
 	this._result.appendMatch(value, id, null, null, null, value);
-	// Add to our own list
-	this._results.push(value);
+
 	// Only update the UI every 10 records
 	if (this._result.matchCount % 10 == 0) {
-		this._result.setSearchResult(Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING);
-		this._listener.onSearchResult(this, this._result);
+		this._notifyResult(true);
 	}
-}
+	this._includedSearchResults.add(value);
+	return true;
+};
+
+// Add to search results cached results from earlier searches that still match
+ZoteroAutoComplete.prototype._applyCachedResults = function (searchString) {
+	// Fetch cached queries that are a part of the current search string
+	// (e.g. "t" and "te" queries if "test" is being searched for)
+	let queries = Object.keys(searchResultsCache)
+		.filter(q => searchString.toLowerCase().includes(q.toLowerCase()))
+		.sort((a, b) => b.length - a.length);
+	let addedResults = 0;
+	// Find among cached query results those that match the current search string
+	// and add them to the result set
+	for (let query of queries) {
+		let queryResults = searchResultsCache[query];
+		for (let { value, id } of queryResults) {
+			if (addedResults >= MAX_RESULTS) break;
+			let matches = value.toLowerCase().includes(searchString.toLowerCase());
+			if (!matches) continue;
+			Zotero.debug(`Found cached autocomplete value '${value}' and id ${id} for query '${searchString}'`);
+			this.updateResult(searchString, value, id);
+			addedResults++;
+		}
+	}
+	Zotero.debug("Found " + addedResults + " cached result for query" + searchString);
+	this._notifyResult(true, null);
+	return addedResults;
+};
 
 
-ZoteroAutoComplete.prototype.updateResults = function (values, ids, ongoing, resultCode) {
-	if (!values) {
-		values = [];
-	}
-	if (!ids) {
-		ids = [];
-	}
-	
-	for (let i = 0; i < values.length; i++) {
-		let value = values[i];
-		
-		if (!this._results.includes(value)) {
-			let id = ids[i] || null;
-			Zotero.debug("Adding autocomplete value '" + value + "'" + (id ? " (" + id + ")" : ""));
-			this._result.appendMatch(value, id, null, null, null, value);
-			this._results.push(value);
-		}
-		else {
-			//Zotero.debug("Skipping existing value '" + result + "'");
-		}
-	}
-	
+ZoteroAutoComplete.prototype._notifyResult = function (ongoing, resultCode) {
 	if (!resultCode) {
-		resultCode = "RESULT_";
 		if (!this._result.matchCount) {
-			resultCode += "NOMATCH";
+			resultCode = "RESULT_NOMATCH";
 		}
 		else {
-			resultCode += "SUCCESS";
+			resultCode = "RESULT_SUCCESS";
 		}
 		if (ongoing) {
 			resultCode += "_ONGOING";
 		}
 		resultCode = Ci.nsIAutoCompleteResult[resultCode];
 	}
-	
 	Zotero.debug("Found " + this._result.matchCount
 		+ " result" + (this._result.matchCount != 1 ? "s" : ""));
 	
@@ -341,10 +411,12 @@ ZoteroAutoComplete.prototype.createInstance = function (iid) {
 	return this.QueryInterface(iid);
 };
 
-// FIXME
-ZoteroAutoComplete.prototype.stopSearch = function (){
+ZoteroAutoComplete.prototype.stopSearch = function () {
 	Zotero.debug('Stopping autocomplete search');
-	this._cancelled = true;
+	if (currentQuery) {
+		currentQuery.cancelled = true;
+	}
+	nextQuery = null;
 }
 
 // Static
