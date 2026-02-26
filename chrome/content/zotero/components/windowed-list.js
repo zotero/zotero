@@ -214,11 +214,18 @@ module.exports = class {
 		index = Math.max(0, Math.min(index, itemCount - 1));
 		let startPosition = this._getItemPosition(index);
 		let endPosition = this._getItemPosition(index + 1);
+		// If forceScrollToTop is set, always scroll to the start position even if the row is
+		// already visible. This is used when restoring scroll position, where we need an exact
+		// first-visible-row rather than just ensuring the row is within view.
+		if (forceScrollToTop) {
+			this.scrollTo(startPosition);
+			return;
+		}
 		if (startPosition < scrollOffset) {
 			this.scrollTo(startPosition);
 		}
 		else if (endPosition > scrollOffset + height) {
-			this.scrollTo(forceScrollToTop ? startPosition : endPosition - height - 1);
+			this.scrollTo(endPosition - height - 1);
 		}
 	}
 	

@@ -1,6 +1,9 @@
+// Integration tests for CollectionViewItemTree via ZoteroPane.itemsView.
+// Inherited ItemTree/ItemTreeRowProvider behavior is also tested through
+// the CVIT instance.
 "use strict";
 
-describe("Zotero.ItemTree", function () {
+describe("CollectionViewItemTree", function () {
 	var win, zp, cv, itemsView;
 	var existingItemID;
 	var existingItemID2;
@@ -179,7 +182,7 @@ describe("Zotero.ItemTree", function () {
 			assert.equal(quicksearch.value, "test");
 		});
 
-		it("should hide context annotation rows if hideContextAnnotationRows=true", async function () {
+		it("should keep attachment rows collapsed unless search matches annotation text when hideContextAnnotationRows=true", async function () {
 			Zotero.Prefs.set("hideContextAnnotationRows", true);
 
 			let item = await createDataObject('item', { title: "Item" });
@@ -197,22 +200,22 @@ describe("Zotero.ItemTree", function () {
 			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF test', parentItemID: item.id });
 			let highlightTwo = await createAnnotation('highlight', attachmentTwo, { comment: "Highlight te" });
 
-			// "te" search - all rows are visible
-			await zp.itemsView.setFilter('search', "te");
+			// Search matching attachment title only should keep attachment rows collapsed
+			await zp.itemsView.setFilter('search', "PDF test");
 
-			assert.isNumber(itemsView.getRowIndexByID(attachmentOne.id));
-			assert.isNumber(itemsView.getRowIndexByID(highlightOne.id));
-			assert.isNumber(itemsView.getRowIndexByID(underlineOne.id));
-			assert.isNumber(itemsView.getRowIndexByID(attachmentTwo.id));
-			assert.isNumber(itemsView.getRowIndexByID(highlightTwo.id));
+			let attachmentTwoRow = itemsView.getRowIndexByID(attachmentTwo.id);
+			assert.isNumber(attachmentTwoRow);
+			assert.isFalse(itemsView.isContainerOpen(attachmentTwoRow));
+			assert.isFalse(itemsView.getRowIndexByID(highlightTwo.id));
 
-			// "test" search - only annotations with "testing" remain
-			await zp.itemsView.setFilter('search', "test");
+			// Search matching annotation text should reveal matching annotation rows
+			await zp.itemsView.setFilter('search', "testing");
 
-			assert.isNumber(itemsView.getRowIndexByID(attachmentOne.id));
+			let attachmentOneRow = itemsView.getRowIndexByID(attachmentOne.id);
+			assert.isNumber(attachmentOneRow);
+			assert.isTrue(itemsView.isContainerOpen(attachmentOneRow));
 			assert.isNumber(itemsView.getRowIndexByID(underlineOne.id));
 			assert.isFalse(itemsView.getRowIndexByID(highlightOne.id));
-			assert.isNumber(itemsView.getRowIndexByID(attachmentTwo.id));
 			assert.isFalse(itemsView.getRowIndexByID(highlightTwo.id));
 		});
 	});
@@ -300,7 +303,124 @@ describe("Zotero.ItemTree", function () {
 		})
 	})
 	
-	describe.skip("#sort()", function () {
+	describe("#_saveOpenState() / #_restoreOpenState()", function () {
+		it("should restore open containers and keep closed containers closed", async function () {
+			let item1 = await createDataObject('item', { title: 'Item 1' });
+			let att1 = await importFileAttachment('test.pdf', { parentItemID: item1.id });
+			let ann1 = await createAnnotation('highlight', att1);
+			
+			let item2 = await createDataObject('item', { title: 'Item 2' });
+			await importFileAttachment('test.png', { parentItemID: item2.id });
+			
+			let item3 = await createDataObject('item', { title: 'Item 3' });
+			let att3 = await importFileAttachment('test.png', { parentItemID: item3.id });
+			
+			await waitForItemsLoad(win);
+			
+			let rowProvider = itemsView.rowProvider;
+			// Deep nesting for item1: open item1 -> attachment -> annotation path
+			assert.isTrue(rowProvider._expandToItem(ann1.id));
+			// Open item3 only
+			assert.isTrue(rowProvider._expandToItem(att3.id));
+			
+			let item1Row = itemsView.getRowIndexByID(item1.id);
+			let att1Row = itemsView.getRowIndexByID(att1.id);
+			let item2Row = itemsView.getRowIndexByID(item2.id);
+			let item3Row = itemsView.getRowIndexByID(item3.id);
+			assert.isTrue(itemsView.isContainerOpen(item1Row));
+			assert.isTrue(itemsView.isContainerOpen(att1Row));
+			assert.isFalse(itemsView.isContainerOpen(item2Row));
+			assert.isTrue(itemsView.isContainerOpen(item3Row));
+			
+			let openItemIDs = rowProvider._saveOpenState();
+			
+			// _saveOpenState closes top-level open containers
+			item1Row = itemsView.getRowIndexByID(item1.id);
+			item2Row = itemsView.getRowIndexByID(item2.id);
+			item3Row = itemsView.getRowIndexByID(item3.id);
+			assert.isFalse(itemsView.isContainerOpen(item1Row));
+			assert.isFalse(itemsView.isContainerOpen(item2Row));
+			assert.isFalse(itemsView.isContainerOpen(item3Row));
+			assert.isFalse(itemsView.getRowIndexByID(att1.id));
+			
+			rowProvider._restoreOpenState(openItemIDs);
+			
+			item1Row = itemsView.getRowIndexByID(item1.id);
+			att1Row = itemsView.getRowIndexByID(att1.id);
+			item2Row = itemsView.getRowIndexByID(item2.id);
+			item3Row = itemsView.getRowIndexByID(item3.id);
+			assert.isTrue(itemsView.isContainerOpen(item1Row));
+			assert.isTrue(itemsView.isContainerOpen(att1Row));
+			assert.isFalse(itemsView.isContainerOpen(item2Row));
+			assert.isTrue(itemsView.isContainerOpen(item3Row));
+		});
+	});
+	
+	describe("#toggleOpenState()", function () {
+		it("shouldn't scroll back to selected row when opening another container", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
+			
+			function getTitle(i, max) {
+				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
+			}
+			
+			var num = numVisibleRows * 2 + 10;
+			var parentItem = await createDataObject('item', {
+				title: getTitle(0, num + 1),
+				collections: [collection.id]
+			});
+			await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			
+			var itemIDs = [];
+			await Zotero.DB.executeTransaction(async function () {
+				for (let i = 1; i <= num; i++) {
+					let item = createUnsavedDataObject('item', {
+						title: getTitle(i, num + 1),
+						collections: [collection.id]
+					});
+					await item.save();
+					itemIDs.push(item.id);
+				}
+			});
+			await waitForItemsLoad(win);
+			
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			var selectedItemID;
+			var maxDistance = -1;
+			for (let id of itemIDs) {
+				let row = itemsView.getRowIndexByID(id);
+				let distance = Math.abs(row - parentRow);
+				if (distance > maxDistance) {
+					maxDistance = distance;
+					selectedItemID = id;
+				}
+			}
+			assert.isAbove(maxDistance, numVisibleRows);
+			
+			await itemsView.selectItem(selectedItemID);
+			assert.sameMembers(itemsView.getSelectedItems(true), [selectedItemID]);
+			
+			treebox.scrollToRow(parentRow);
+			var firstVisibleBefore = treebox.getFirstVisibleRow();
+			assert.isFalse(itemsView.tree.rowIsVisible(itemsView.getRowIndexByID(selectedItemID)));
+			assert.isFalse(itemsView.isContainerOpen(parentRow));
+			
+			await itemsView.toggleOpenState(parentRow);
+			await itemsView.waitForLoad();
+			
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(parentItem.id)));
+			assert.sameMembers(itemsView.getSelectedItems(true), [selectedItemID]);
+			assert.equal(treebox.getFirstVisibleRow(), firstVisibleBefore);
+			assert.isFalse(itemsView.tree.rowIsVisible(itemsView.getRowIndexByID(selectedItemID)));
+		});
+	});
+	
+	describe("#sort()", function () {
 		it("should ignore invalid secondary-sort field", async function () {
 			await createDataObject('item', { title: 'A' });
 			await createDataObject('item', { title: 'A' });
@@ -329,6 +449,47 @@ describe("Zotero.ItemTree", function () {
 			var e = await getPromiseError(zp.itemsView.sort());
 			assert.isFalse(e);
 			assert.equal(Zotero.Prefs.get('fallbackSort'), originalFallback);
+		});
+		
+		it("should preserve open container state when sorting", async function () {
+			let parentItem = await createDataObject('item', { title: 'Parent' });
+			let attachment = await importFileAttachment('test.pdf', { parentItemID: parentItem.id });
+			await createAnnotation('highlight', attachment);
+			
+			await waitForItemsLoad(win);
+			itemsView.expandAllRows();
+			await waitForItemsLoad(win);
+			
+			let parentRow = itemsView.getRowIndexByID(parentItem.id);
+			let attachmentRow = itemsView.getRowIndexByID(attachment.id);
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			assert.isTrue(itemsView.isContainerOpen(attachmentRow));
+			
+			await itemsView.sort();
+			
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			attachmentRow = itemsView.getRowIndexByID(attachment.id);
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			assert.isTrue(itemsView.isContainerOpen(attachmentRow));
+		});
+		
+		it("should await sort context readiness before sorting", async function () {
+			let deferred = Zotero.Promise.defer();
+			let ensureStub = sinon.stub(itemsView, '_ensureSortContextReady').returns(deferred.promise);
+			let sortStub = sinon.stub(itemsView.rowProvider, 'sort');
+			
+			try {
+				let sortPromise = itemsView.sort();
+				await Zotero.Promise.delay(20);
+				assert.equal(sortStub.callCount, 0);
+				deferred.resolve();
+				await sortPromise;
+				assert.equal(sortStub.callCount, 1);
+			}
+			finally {
+				sortStub.restore();
+				ensureStub.restore();
+			}
 		});
 	});
 	
@@ -497,10 +658,8 @@ describe("Zotero.ItemTree", function () {
 			item.setField('title', 'no select on modify');
 			await item.saveTx();
 			
-			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
-			// in notify()) as a no-op
-			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
-			assert.isFalse(await win.ZoteroPane.itemSelected.returnValues[0]);
+			// itemSelected should not have been called
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 0);
 			
 			// Modified item should not be selected
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
@@ -523,8 +682,8 @@ describe("Zotero.ItemTree", function () {
 			item.setField('title', 'maintain selection on modify');
 			await item.saveTx();
 			
-			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
-			// in notify()) as a no-op
+			// itemSelected should have been called once from restoreSelection
+			// due to potential resort on modification
 			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
 			assert.isFalse(await win.ZoteroPane.itemSelected.returnValues[0]);
 			
@@ -632,9 +791,9 @@ describe("Zotero.ItemTree", function () {
 			assert.equal(itemsView.getRow(treebox.getFirstVisibleRow()).ref.id, firstVisibleItemID);
 		});
 		
-		it.skip("should keep first visible selected item in position when other items are added with skipSelect", function* () {
-			var collection = yield createDataObject('collection');
-			yield select(win, collection);
+		it("should keep first visible selected item in position when other items are added with skipSelect", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
 			itemsView = zp.itemsView;
 			
 			var treebox = itemsView._treebox;
@@ -646,14 +805,14 @@ describe("Zotero.ItemTree", function () {
 			}
 			
 			var num = numVisibleRows + 10;
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				for (let i = 0; i < num; i++) {
 					let title = getTitle(i, num);
 					let item = createUnsavedDataObject('item', { title });
 					item.addToCollection(collection.id);
 					await item.save();
 				}
-			}.bind(this));
+			});
 			
 			// Scroll halfway
 			treebox.scrollToRow(Math.round(num / 2) - Math.round(numVisibleRows / 2));
@@ -667,11 +826,11 @@ describe("Zotero.ItemTree", function () {
 			var item = createUnsavedDataObject(
 				'item', { title: getTitle(0, num), collections: [collection.id] }
 			);
-			yield item.saveTx({
+			await item.saveTx({
 				skipSelect: true
 			});
 			// Then add a few more in a transaction
-			yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.executeTransaction(async function () {
 				for (let i = 0; i < 3; i++) {
 					var item = createUnsavedDataObject(
 						'item', { title: getTitle(0, num), collections: [collection.id] }
@@ -680,7 +839,7 @@ describe("Zotero.ItemTree", function () {
 						skipSelect: true
 					});
 				}
-			}.bind(this));
+			});
 			
 			// Make sure the selected item is still at the same position
 			assert.equal(itemsView.getSelectedItems()[0], selectedItem);
@@ -981,6 +1140,18 @@ describe("Zotero.ItemTree", function () {
 				// Verify that the note row has been moved into the item
 				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item2.id)));
 				assert.equal(noteRowIndex, secondItemRowIndex + 1);
+			});
+
+			it("should not expand an empty parent item when attachment is added", async function () {
+				let item2RowIndex = itemsView.getRowIndexByID(item2.id);
+				assert.isFalse(itemsView.isContainerOpen(item2RowIndex));
+
+				// Add attachment to item2
+				await importFileAttachment('test.png', { parentItemID: item2.id });
+
+				// Verify item2 is still collapsed
+				item2RowIndex = itemsView.getRowIndexByID(item2.id);
+				assert.isFalse(itemsView.isContainerOpen(item2RowIndex));
 			});
 		});
 		
@@ -1289,8 +1460,6 @@ describe("Zotero.ItemTree", function () {
 			})
 			
 			await promise;
-			// Attachment add triggers multiple notifications and multiple select events
-			await itemsView.waitForSelect();
 			var items = itemsView.getSelectedItems();
 			var path = await items[0].getFilePathAsync();
 			assert.equal(
@@ -1759,6 +1928,133 @@ describe("Zotero.ItemTree", function () {
 		});
 	});
 	
+	describe("#_expandToItem()", function () {
+		it("should expand all ancestors for a nested annotation", async function () {
+			let parentItem = await createDataObject('item', { title: 'Parent Item' });
+			let attachment = await importFileAttachment('test.pdf', { parentItemID: parentItem.id });
+			let annotation = await createAnnotation('highlight', attachment);
+			await waitForItemsLoad(win);
+			
+			itemsView.collapseAllRows();
+			await waitForItemsLoad(win);
+			
+			let collapsedParentRow = itemsView.getRowIndexByID(parentItem.id);
+			assert.isNumber(collapsedParentRow);
+			assert.isFalse(itemsView.isContainerOpen(collapsedParentRow));
+			assert.isFalse(itemsView.getRowIndexByID(attachment.id));
+			assert.isFalse(itemsView.getRowIndexByID(annotation.id));
+			
+			let expanded = itemsView.rowProvider._expandToItem(annotation.id);
+			assert.isTrue(expanded);
+			
+			let parentRow = itemsView.getRowIndexByID(parentItem.id);
+			let attachmentRow = itemsView.getRowIndexByID(attachment.id);
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			assert.isTrue(itemsView.isContainerOpen(attachmentRow));
+			assert.isNumber(itemsView.getRowIndexByID(annotation.id));
+		});
+	});
+	
+	describe("#setCollectionTreeRow()", function () {
+		it("should no-op when setting the same row", async function () {
+			let rowProvider = itemsView.rowProvider;
+			let currentRow = rowProvider.collectionTreeRow;
+			assert.ok(currentRow);
+			
+			let refreshSpy = sinon.spy(rowProvider, 'refresh');
+			
+			try {
+				await rowProvider.setCollectionTreeRow(currentRow);
+				assert.equal(refreshSpy.callCount, 0);
+			}
+			finally {
+				refreshSpy.restore();
+			}
+		});
+	});
+	
+	describe("#setFilter()", function () {
+		it("should refresh when search filter value changes", async function () {
+			let rowProvider = itemsView.rowProvider;
+			let refreshSpy = sinon.spy(rowProvider, 'refresh');
+			let setSearchStub = sinon.stub(rowProvider.collectionTreeRow, 'setSearch').returns(true);
+			
+			try {
+				await rowProvider.setFilter('search', 'changed-search');
+				assert.isTrue(setSearchStub.calledOnceWithExactly('changed-search'));
+				assert.isTrue(refreshSpy.calledOnceWithExactly(false, true));
+			}
+			finally {
+				setSearchStub.restore();
+				refreshSpy.restore();
+			}
+		});
+		
+		it("should not refresh when filter value is unchanged", async function () {
+			let rowProvider = itemsView.rowProvider;
+			let refreshSpy = sinon.spy(rowProvider, 'refresh');
+			let setSearchStub = sinon.stub(rowProvider.collectionTreeRow, 'setSearch').returns(false);
+			
+			try {
+				await rowProvider.setFilter('search', 'unchanged-search');
+				assert.equal(refreshSpy.callCount, 0);
+			}
+			finally {
+				setSearchStub.restore();
+				refreshSpy.restore();
+			}
+		});
+	});
+	
+	describe("#_refresh()", function () {
+		it("should await sort context readiness before sorting", async function () {
+			let rowProvider = itemsView.rowProvider;
+			let deferred = Zotero.Promise.defer();
+			let ensureStub = sinon.stub(itemsView, '_ensureSortContextReady').returns(deferred.promise);
+			let sortSpy = sinon.spy(rowProvider, '_sort');
+			
+			try {
+				let refreshPromise = rowProvider._refresh();
+				await Zotero.Promise.delay(20);
+				assert.equal(sortSpy.callCount, 0);
+				deferred.resolve();
+				await refreshPromise;
+				assert.isTrue(sortSpy.called);
+			}
+			finally {
+				sortSpy.restore();
+				ensureStub.restore();
+			}
+		});
+	});
+	
+	describe("#handleRowModelUpdate()", function () {
+		it("should clear selection and return false when loading is true", async function () {
+			await itemsView.waitForLoad();
+			let item = await createDataObject('item');
+			await waitForItemsLoad(win);
+			
+			let row = itemsView.getRowIndexByID(item.id);
+			assert.isNumber(row);
+			itemsView.selection.select(row);
+			assert.equal(itemsView.selection.count, 1);
+			
+			let setMessageSpy = sinon.spy(itemsView, 'setItemsPaneMessage');
+			
+			try {
+				let done = await itemsView.handleRowModelUpdate([], { loading: true });
+				assert.isFalse(done);
+				assert.equal(itemsView.selection.count, 0);
+				assert.equal(itemsView.selection.focused, 0);
+				assert.isTrue(setMessageSpy.calledOnce);
+				assert.equal(setMessageSpy.firstCall.args[0], Zotero.getString('pane.items.loading'));
+			}
+			finally {
+				setMessageSpy.restore();
+				await itemsView.clearItemsPaneMessage();
+			}
+		});
+	});
 	
 	describe("#_restoreSelection()", function () {
 		it("should reselect collection in trash", async function () {
@@ -1779,6 +2075,28 @@ describe("Zotero.ItemTree", function () {
 			assert.lengthOf(zp.itemsView.getSelectedObjects(), 0);
 			zp.itemsView._restoreSelection(selection);
 			assert.lengthOf(zp.itemsView.getSelectedObjects(), 2);
+		});
+		
+		it("should not expand collapsed parents when expandCollapsedParents is false", async function () {
+			let parentItem = await createDataObject('item', { title: 'Parent Item' });
+			let childAttachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			await waitForItemsLoad(win);
+			
+			await itemsView.selectItem(childAttachment.id);
+			let parentRow = itemsView.getRowIndexByID(parentItem.id);
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			
+			itemsView.rowProvider._closeContainer(parentRow);
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			assert.isFalse(itemsView.isContainerOpen(parentRow));
+			
+			itemsView.selection.clearSelection();
+			await itemsView._restoreSelection([childAttachment], false, false);
+			
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			assert.isFalse(itemsView.isContainerOpen(parentRow));
+			assert.isFalse(itemsView.getRowIndexByID(childAttachment.id));
+			assert.sameMembers(itemsView.getSelectedItems(true), [parentItem.id]);
 		});
 	});
 
@@ -1870,9 +2188,17 @@ describe("Zotero.ItemTree", function () {
 			let itemAboveTwo = await createDataObject('item', { title: "BBB" });
 			let itemBelowOne = await createDataObject('item', { title: "ZZZ" });
 
-			// Initially, everything is sorted by title
+			// Ensure known starting state: primary sort by title ascending
 			var colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
-			await zp.itemsView.tree._columns.toggleSort(colIndex);
+			for (let i = 0; i < 3; i++) {
+				let sortFields = itemsView.getSortFields();
+				if (sortFields[0] == 'title' && itemsView.getSortDirection(sortFields) == 1) {
+					break;
+				}
+				await zp.itemsView.tree._columns.toggleSort(colIndex);
+			}
+			assert.equal(itemsView.getSortField(), 'title');
+			assert.equal(itemsView.getSortDirection(itemsView.getSortFields()), 1);
 
 			// Expand annotations
 			var itemRowIndex = zp.itemsView.getRowIndexByID(toplevelItem.id);
@@ -1998,6 +2324,62 @@ describe("Zotero.ItemTree", function () {
 				await notifySpy.returnValues[0];
 				notifySpy.restore();
 			});
+		});
+	});
+
+	describe("Search error handling", function () {
+		var rowProvider;
+
+		// Stub getSearchObject on a collectionTreeRow so that the search's .search() throws,
+		// simulating a broken saved search (e.g., "too many SQL variables").
+		function stubBrokenSearch(ctr) {
+			return sinon.stub(ctr, 'getSearchObject').resolves({
+				search: () => { throw new Error('simulated search failure'); }
+			});
+		}
+
+		beforeEach(async function () {
+			var search = await createDataObject('search');
+			await select(win, search);
+			itemsView = zp.itemsView;
+			rowProvider = itemsView.rowProvider;
+		});
+
+		it("should show load error message on search failure", async function () {
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			var setMessageSpy = sinon.spy(itemsView, 'setItemsPaneMessage');
+			try {
+				await rowProvider.refresh();
+				assert.isTrue(setMessageSpy.called);
+				assert.include(setMessageSpy.lastCall.args[0], Zotero.getString('pane.items.loadError'));
+				assert.equal(itemsView.rowCount, 0);
+			}
+			finally {
+				stub.restore();
+				setMessageSpy.restore();
+			}
+		});
+
+		it("should recover after switching to a working collection", async function () {
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			await rowProvider.refresh();
+			stub.restore();
+
+			await selectLibrary(win);
+			itemsView = zp.itemsView;
+			assert.isAbove(itemsView.rowCount, 0);
+			assert.isFalse(!!itemsView._itemsPaneMessage);
+		});
+
+		it("should not re-throw SearchError from refresh()", async function () {
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			try {
+				// refresh() should resolve, not reject
+				await rowProvider.refresh();
+			}
+			finally {
+				stub.restore();
+			}
 		});
 	});
 })

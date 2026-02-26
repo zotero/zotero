@@ -2021,7 +2021,7 @@ Zotero.Utilities.Internal = {
 	 */
 	makeClassEventDispatcher: function (cls) {
 		cls.prototype._events = null;
-		cls.prototype.runListeners = async function (event) {
+		cls.prototype.runListeners = async function (event, ...args) {
 			// Zotero.debug(`Running ${event} listeners on ${cls.toString()}`);
 			if (!this._events) this._events = {};
 			if (!this._events[event]) {
@@ -2034,7 +2034,7 @@ Zotero.Utilities.Internal = {
 			// at the time of runListeners() call to prevent triggering listeners that are added right
 			// runListeners() invocation
 			for (let [listener, once] of Array.from(this._events[event].listeners.entries())) {
-				await Promise.resolve(listener.call(this));
+				await Promise.resolve(listener.call(this, ...args));
 				if (once) {
 					this._events[event].listeners.delete(listener);
 				}

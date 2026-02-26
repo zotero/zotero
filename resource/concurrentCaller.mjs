@@ -200,7 +200,7 @@ ConcurrentCaller.prototype._processNext = function () {
 	if (!task) {
 		if (this._numRunning == 0 && !this._pausing) {
 			this._log("All tasks are done");
-			this._deferred.resolve();
+			this._deferred?.resolve();
 		}
 		else {
 			this._log("Nothing left to run -- waiting for running tasks to complete");

@@ -1437,10 +1437,6 @@ describe("Zotero.CollectionTree", function () {
 				await feedItem.saveTx();
 				var translateFn = sinon.spy(feedItem, 'translate');
 				
-				// Add observer to wait for collection add
-				var deferred = Zotero.Promise.defer();
-				var itemIds;
-
 				var ids = ((await onDrop('item', 'C' + collection.id, [feedItem.id]))).ids;
 				
 				// Check that the translated item was the one that was created after drag
