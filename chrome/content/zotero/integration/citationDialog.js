@@ -589,6 +589,7 @@ class LibraryLayout extends Layout {
 			label: columnLabel,
 			htmlLabel: ' ', // space for column label to appear empty
 			width: 26,
+			hidden: false,
 			staticWidth: true,
 			fixedWidth: true,
 			showInColumnPicker: false,

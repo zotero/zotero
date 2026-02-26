@@ -797,7 +797,7 @@ class CollectionViewItemTree extends ItemTree {
 	get collectionTreeRow() { return this.rowProvider.collectionTreeRow; }
 
 	get visibilityGroup() {
-		return this.collectionTreeRow?.visibilityGroup || 'default';
+		return this.collectionTreeRow?.visibilityGroup ?? 'default';
 	}
 
 	get isSortable() {
@@ -822,7 +822,7 @@ class CollectionViewItemTree extends ItemTree {
 		Zotero.debug(`CollectionViewItemTree.changeCollectionTreeRow(): ${collectionTreeRow.id}`);
 
 		// Set ID based on visibilityGroup
-		const visibilityGroup = collectionTreeRow.visibilityGroup || 'default';
+		const visibilityGroup = collectionTreeRow.visibilityGroup ?? 'default';
 		await this.setId("item-tree-" + this.props.id + "-" + visibilityGroup);
 
 		if (collectionTreeRow.view) {
