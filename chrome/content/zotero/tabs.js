@@ -297,7 +297,12 @@ var Zotero_Tabs = new function () {
 				}
 				return title;
 			}
-		}
+		},
+		toggleAudio: {
+			reader: (tab) => {
+				Zotero.Reader.getByTabID(tab.id).toggleReadAloudPaused();
+			}
+		},
 	};
 
 	this._getHook = function (type, action) {
@@ -393,7 +398,8 @@ var Zotero_Tabs = new function () {
 				renderTitle: tabContentType === 'reader',
 				selected: tab.id == this._selectedID,
 				isItemType: tab.id !== 'zotero-pane',
-				icon: tab.data?.icon || null
+				icon: tab.data?.icon || null,
+				audioStatus: tab.audioStatus,
 			};
 		}));
 		// Disable File > Close menuitem if multiple tabs are open
@@ -535,6 +541,7 @@ var Zotero_Tabs = new function () {
 				onTabClose={this.close.bind(this)}
 				onContextMenu={this._openMenu.bind(this)}
 				onRefocus={this.refocus.bind(this)}
+				onToggleAudio={this.toggleAudio.bind(this)}
 				onLoad={this._update.bind(this)}
 			/>
 		);
@@ -687,6 +694,28 @@ var Zotero_Tabs = new function () {
 
 		tab.title = title;
 		this._update();
+	};
+	
+	this.setAudioStatus = function (id, status) {
+		if (typeof title != 'object' || !('active' in status && 'paused' in status)) {
+			throw new Error(`'status' should be an object with { active, paused } properties`);
+		}
+		var { tab } = this._getTab(id);
+		if (!tab) {
+			return;
+		}
+		tab.audioStatus = status;
+		this._update();
+	};
+	
+	this.toggleAudio = function (id) {
+		var { tab } = this._getTab(id);
+		if (!tab) {
+			return;
+		}
+		let { tabContentType } = this.parseTabType(tab.type);
+		let toggleAudioHook = this._getHook(tabContentType, 'toggleAudio');
+		toggleAudioHook(tab);
 	};
 
 	/**
@@ -942,12 +971,18 @@ var Zotero_Tabs = new function () {
 		// Notify tab content about selection change
 		currentTabContent?.onTabSelectionChanged(true);
 	};
+	
+	this.canUnload = function (id) {
+		var { tab } = this._getTab(id);
+		return tab && tab.id !== this._selectedID && this._loadableTypes.includes(tab.type)
+			&& !(tab.audioStatus && tab.audioStatus.active && !tab.audioStatus.paused);
+	};
 
 	this.unload = function (id) {
-		var { tab, tabIndex } = this._getTab(id);
-		if (!tab || tab.id === this._selectedID || !this._loadableTypes.includes(tab.type)) {
+		if (!this.canUnload(id)) {
 			return;
 		}
+		var { tab, tabIndex } = this._getTab(id);
 		this.close(tab.id);
 		this.add({
 			id: tab.id,
@@ -977,7 +1012,9 @@ var Zotero_Tabs = new function () {
 				this.unload(tab.id);
 			}
 		}
-		// TODO: also unload note tabs
+		// TODO: also proactively unload note tabs, though they are already lazy loaded
+		// We don't for now because the open-with-location is not implemented.
+		// Unload them will cause cursor position to be reset.
 		let tabs = this._tabs.slice().filter(x => x.type === 'reader');
 		tabs.sort((a, b) => b.timeUnselected - a.timeUnselected);
 		tabs = tabs.slice(MAX_LOADED_TABS);
