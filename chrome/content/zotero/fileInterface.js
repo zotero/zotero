@@ -919,6 +919,39 @@ var Zotero_File_Interface = new function () {
 				fStream.write(bibliography, bibliography.length);
 				fStream.close();
 			}
+		} else if (io.method == 'save-to-zbib') {
+			const zbibStoreURL = 'https://v1snar4wu4.execute-api.us-east-1.amazonaws.com/1';
+			let itemsJSON = items.map(item => item.toJSON());
+			let data = {
+				title: Zotero.ftl.formatValueSync('bibliography-zbib-title'),
+				citationStyle: io.style.replace('http://www.zotero.org/styles/', ''),
+				items: itemsJSON
+			};
+			try {
+				let req = await Zotero.HTTP.request(
+					"POST",
+					zbibStoreURL,
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify(data)
+					}
+				);
+				if (req.status != 200) {
+					throw new Error(`Zotero.Bibliography: Received status ${req.status} from zbib store`);
+				}
+				let resp = JSON.parse(req.response);
+				let zbibURL = `https://zbib.org/${resp.key}`;
+				Zotero.launchURL(zbibURL);
+			} catch (e) {
+				Zotero.alert(
+					null,
+					Zotero.getString('general.error'),
+					Zotero.getString('fileInterface.bibliographyGenerationError')
+				);
+				throw (e);
+			}
 		}
 	}
 	
