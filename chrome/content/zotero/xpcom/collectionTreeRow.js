@@ -433,8 +433,15 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	}
 	
 	if (this.tags){
-		for (let tag of this.tags) {
-			s2.addCondition('tag', 'is', tag);
+		for (let [tagName, tagProps] of this.tags.entries()) {
+			if (tagProps.excluded) {
+				s2.addCondition('tag', 'isNot', tagName);
+				// When an item with a tag is excluded, have its children excluded as well
+				s2.addCondition('includeChildren', 'true');
+			}
+			else {
+				s2.addCondition('tag', 'is', tagName);
+			}
 		}
 	}
 	

@@ -49,6 +49,7 @@ class TagSelector extends React.PureComponent {
 					fontSize={this.props.fontSize}
 					lineHeight={this.props.lineHeight}
 					uiDensity={this.props.uiDensity}
+					excludeTag={this.props.excludeTag}
 				/>
 				<div className="tag-selector-filter-pane">
 					<div className="tag-selector-filter-container">
@@ -90,6 +91,7 @@ TagSelector.propTypes = {
 	}),
 	onSelect: PropTypes.func,
 	onKeyDown: PropTypes.func,
+	excludeTag: PropTypes.func,
 	onTagContext: PropTypes.func,
 	loaded: PropTypes.bool,
 	width: PropTypes.number.isRequired,

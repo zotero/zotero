@@ -45,7 +45,7 @@ describe("Tag Selector", function () {
 		await clearTagColors(libraryID);
 		// Default "Display All Tags in This Library" off
 		tagSelector.displayAllTags = false;
-		tagSelector.selectedTags = new Set();
+		tagSelector.selectedTags = new Map();
 		tagSelector.handleSearch('');
 		tagSelector.onItemViewChanged({
 			collectionTreeRow: win.ZoteroPane.getCollectionTreeRow(),
@@ -177,6 +177,45 @@ describe("Tag Selector", function () {
 			
 			var tags = getRegularTags();
 			assert.sameMembers(tags, ['A', 'B']);
+		});
+	});
+
+	describe("#excludeTag", function () {
+		let item1, item2;
+		beforeEach(async() => {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			item1 = createUnsavedDataObject('item', { collections: [collection.id] });
+			item1.setTags(['a']);
+			await item1.saveTx();
+			item2 = createUnsavedDataObject('item', { collections: [collection.id] });
+			item2.setTags(['b']);
+			var promise = waitForTagSelector(win);
+			await item2.saveTx();
+			await promise;
+		});
+		afterEach(async() => {
+			await item1.eraseTx();
+			await item2.eraseTx();
+		});
+
+		it("should mark excluded tags as such", async function () {		
+			let promise = waitForTagSelector(win);
+			await tagSelector.excludeTag('a');	
+			await promise;
+			
+			var tags = [...getRegularTagElements()];
+			var excludedTags = tags.filter(tag => tag.classList.contains('excluded')).map(tag => tag.textContent);
+			assert.sameMembers(excludedTags, ['a']);
+		});
+		it("should filter out item with excluded tag even if its child does not have the tag", async function () {	
+			await importPDFAttachment(item1);	
+			let promise = waitForTagSelector(win);
+			await tagSelector.excludeTag('a');
+			await promise;
+			
+			assert.equal(win.ZoteroPane.itemsView.rowCount, 1);
+			assert.equal(item2.id, win.ZoteroPane.itemsView.getRow(0).ref.id);
 		});
 	});
 	
