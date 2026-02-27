@@ -31,18 +31,15 @@ Zotero.CommandLineIngester = {
 	ingest: async function () {
 		const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/content/modules/commandLineOptions.mjs");
 
-		var mainWindow = Zotero.getMainWindow();
+		var mainWindow = await Zotero.getMainWindowPromise();
 		var fileToOpen;
 		// Handle zotero:// and file URIs
 		var uri = CommandLineOptions.url;
 		if (uri) {
 			if (uri.schemeIs("zotero")) {
-				// Check for existing window and focus it
-				if (mainWindow) {
 					mainWindow.focus();
 					mainWindow.ZoteroPane.loadURI(uri.spec);
 				}
-			}
 			// See below
 			else if (uri.schemeIs("file")) {
 				fileToOpen = OS.Path.fromFileURI(uri.spec);
