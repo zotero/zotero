@@ -340,6 +340,15 @@ const COLUMNS = [
 		zoteroPersist: ["hidden", "sortDirection"]
 	},
 	{
+		dataKey: "attachmentSize",
+		defaultIn: ["default"],
+		disabledIn: ["feeds", "feed"],
+		showInColumnPicker: true,
+		label: "zotero.tabs.attachmentSize.label",
+		flex: 0.25,
+		zoteroPersist: ["hidden", "sortDirection"]
+	},
+	{
 		dataKey: "numNotes",
 		disabledIn: ["feeds", "feed"],
 		showInColumnPicker: true,
