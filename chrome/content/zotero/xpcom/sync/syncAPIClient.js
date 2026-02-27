@@ -584,8 +584,15 @@ Zotero.Sync.APIClient.prototype = {
 		catch (e) {
 			Zotero.logError(e);
 
+			let error;
+			if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				error = 'network';
+			}
+			else {
+				error = 'unknown';
+			}
 			return {
-				voices: {},
+				error,
 				standardCreditsRemaining: null,
 				premiumCreditsRemaining: null,
 			};
