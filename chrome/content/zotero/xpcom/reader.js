@@ -1559,6 +1559,8 @@ class ReaderInstance {
 		let existing = this._getReadAloudVoices()[lang] || {};
 		let tierVoices = { ...existing.tierVoices };
 		if (tier) {
+			// Push to the end of the object
+			delete tierVoices[tier];
 			tierVoices[tier] = voice;
 		}
 		Zotero.Prefs.set('reader.readAloudVoices', JSON.stringify({
