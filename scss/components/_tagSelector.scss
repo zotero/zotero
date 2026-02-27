@@ -181,3 +181,98 @@
 		background-color: var(--fill-secondary);
 	}
 }
+
+// Without this, if you briefly hover over a clickable element while dragging the splitter
+// cursor will flash quickly switching between different modes.
+.tag-selector.splitter-drag {
+	cursor: row-resize !important;
+	.annotation-author,
+	.annotation-colors-section .annotation-color,
+	.tag-selector-item {
+		cursor: row-resize !important;
+	}
+}
+
+
+.horizontal-splitter {
+	padding: 4px 10px;
+	&:not(.disabled) {
+		cursor: row-resize;
+	}
+	.grippy {
+		border-bottom: var(--material-border);
+	}
+}
+.annotation-selector {
+	.annotation-data {
+		padding: 7px 10px;
+		font-size: $font-size-small;
+		overflow: auto;
+		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
+
+		.annotation-colors-section {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1px;
+
+			.annotation-color {
+				width: 20px;
+				height: 20px;
+				border-radius: 5px;
+				cursor: pointer;
+				display: flex;
+				justify-content: center;
+  				align-items: center;
+
+				.color-box {
+					display: block;
+					width: 14px;
+					height: 14px;
+					border-radius: 2px;
+				}
+
+				&.selected {
+					background: var(--fill-secondary);
+				}
+
+				&.disabled {
+					opacity: 0.3;
+					cursor: default;
+				}
+			}
+		}
+		
+		.annotation-authors-section {
+			display: flex;
+			margin-top: 4px;
+			flex-wrap: wrap;
+			gap: 2px;
+
+			.annotation-author {
+				border-radius: 5px;
+				height: 20px;
+				padding: 1px 4px;
+				display: flex;
+				align-items: center;
+				cursor: pointer;
+
+				.icon {
+					margin-inline-end: 4px;
+					margin-top: 1px;
+				}
+
+				&:hover {
+					background-color: var(--fill-quarternary);
+				}
+				&.selected {
+					background-color: var(--fill-secondary);
+					color: var(--material-background);
+
+					.icon {
+						fill: var(--material-background50);
+					}
+				}
+			}
+		}
+	}
+}
