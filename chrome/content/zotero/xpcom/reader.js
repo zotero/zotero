@@ -1585,11 +1585,11 @@ class ReaderInstance {
 				});
 			},
 
-			getAudio: (segment, voice, lang) => {
+			getAudio: (segment, voice) => {
 				return new targetWindow.Promise(async (resolve) => {
 					let apiKey = segment === 'sample' ? null : await Zotero.Sync.Data.Local.getAPIKey();
 					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-					resolve(Cu.cloneInto(await client.getReadAloudAudio(segment, voice.id, lang), targetWindow));
+					resolve(Cu.cloneInto(await client.getReadAloudAudio(segment, voice.id), targetWindow));
 				});
 			},
 

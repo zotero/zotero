@@ -600,7 +600,7 @@ Zotero.Sync.APIClient.prototype = {
 	},
 
 
-	async getReadAloudAudio(segment, voiceID, lang) {
+	async getReadAloudAudio(segment, voiceID) {
 		let url;
 		let params = new URLSearchParams();
 		if (segment === 'sample') {
@@ -611,7 +611,6 @@ Zotero.Sync.APIClient.prototype = {
 			params.set('text', segment.text);
 		}
 		params.set('voice', voiceID);
-		params.set('lang', lang);
 		let uri = url + "?" + params;
 		try {
 			let xmlhttp = await this.makeRequest("GET", uri, {
