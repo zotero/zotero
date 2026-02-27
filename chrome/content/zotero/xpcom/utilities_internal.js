@@ -1711,6 +1711,52 @@ Zotero.Utilities.Internal = {
 		elem.appendChild(menu);
 		return menu;
 	},
+
+	/**
+	 * Adding many top-level menuitems with icons freezes the UI on macOS. To fix it, hide the icons
+	 * from all menuitems except for the first few and insert them into the DOM. Then, run a job
+	 * through requestIdleCallback to make icons visible on remaining menuitems whenever the browser
+	 * is free.
+	 *
+	 * @param {Node<menupopup>} popup
+	 */
+	showMenuIconsOnIdle(popup) {
+		let topLevelMenuItems = [...popup.childNodes].filter(n => n.tagName == "menuitem");
+		let menuItemsWithIcons = topLevelMenuItems.filter(n => n.getAttribute("image"));
+		// If there are only a few menuitems with icons, just let them render normally
+		if (menuItemsWithIcons.length < 250) return;
+		// Find the node in the entire menu with the longest text. The icon is kept
+		// visible on that node from the start to let menu set the right width
+		let longestNode = topLevelMenuItems.reduce((longest, node) => {
+            if (!longest) return node;
+            if (node.textContent.length > longest.textContent.length) return node;
+            return longest;
+        }, null);
+		// The images are removed from all menuitems but the first few
+		let menuItemsWithHiddenIcon = menuItemsWithIcons.slice(100);
+		for (let node of menuItemsWithHiddenIcon) {
+			// Do not hide the image of the longest row so the menu has the right width from the start
+			if (node == longestNode) continue;
+			node.setAttribute("hidden-image", node.getAttribute("image"));
+			node.removeAttribute("image");
+		}
+		// Job to re-add the image ran whenever the browser is free
+		let currentIndex = 0;
+		function showNextBatchOfIcons(deadline) {
+			while (deadline.timeRemaining() > 0 && currentIndex < menuItemsWithHiddenIcon.length) {
+				let menuitem = menuItemsWithHiddenIcon[currentIndex++];
+				// Longest menuitem should not have its icon hidden
+				if (!menuitem.getAttribute("hidden-image")) continue;
+				menuitem.setAttribute("image", menuitem.getAttribute("hidden-image"));
+				menuitem.removeAttribute("hidden-image");
+			}
+			if (currentIndex < menuItemsWithHiddenIcon.length) {
+				requestIdleCallback(showNextBatchOfIcons);
+			}
+		}
+		
+		requestIdleCallback(showNextBatchOfIcons);
+	},
 	
 	openPreferences: function (paneID, options = {}) {
 		if (typeof options == 'string') {
