@@ -251,6 +251,7 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -
 reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Request credits for additional minutes during beta
 reader-read-aloud-sample-text = I am the local voice { $name }
 reader-read-aloud-voices-none-available = No voices available
+reader-read-aloud-first-run-no-voices-for-language = { $tier } Voices do not support { $language }.
 reader-read-aloud-region = Region
 reader-read-aloud-region-auto = Automatic
 reader-read-aloud-annotation-popup-move = Move annotation by sentence
