@@ -234,6 +234,27 @@ describe("Zotero.ItemTree", function () {
 			assert.lengthOf(selected, 1);
 			assert.equal(selected[0], existingItemID);
 		});
+
+		it("should clear tag selector when trying to select a missing item", async function () {
+			let itemOne = await createDataObject('item', { tags: [{ tag: 'item_tag_one' }] });
+			let itemTwo = await createDataObject('item');
+
+			// select a tag
+			await zp.tagSelector.handleTagSelected("item_tag_one");
+			await zp.itemsView._refreshPromise;
+
+			// ensure only the item with the tag is visible
+			assert.equal(zp.itemsView._rows.length, 1);
+			assert.equal(zp.itemsView._rows[0].id, itemOne.id);
+
+			// try to select the item without the tag
+			await zp.itemsView.selectItem(itemTwo.id);
+
+			// tag selector should be cleared and itemTwo - selected
+			assert.equal(zp.getCollectionTreeRow().tags.size, 0);
+			assert.equal(zp.tagSelector.selectedTags.size, 0);
+			assert.equal(zp.itemsView.getSelectedItems()[0].id, itemTwo.id);
+		});
 	});
 	
 	describe("#selectItems()", function () {

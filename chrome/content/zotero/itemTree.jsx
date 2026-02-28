@@ -1278,10 +1278,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 					// The row is still not found
 					// Clear the quick search and tag selection and try again (once)
 					if (!noRecurse && window.ZoteroPane) {
-						let cleared1 = await window.ZoteroPane.clearQuicksearch();
-						let cleared2 = window.ZoteroPane.tagSelector
-							&& window.ZoteroPane.tagSelector.clearTagSelection();
-						if (cleared1 || cleared2) {
+						let hasQuickSearch = !!this.collectionTreeRow.searchText;
+						let hasTagFilters = this.collectionTreeRow.tags.size > 0;
+						if (hasQuickSearch || hasTagFilters) {
+							// Clear all searches set on the collection tree row directly on
+							// collectionTreeRow (vs using ZoteroPane functions) to avoid
+							// refreshing the itemTree multiple times at the same time, which can lead
+							// to tag selector not showing all tags after quickSearch is cleared
+							this.collectionTreeRow.setTags(new Set());
+							this.collectionTreeRow.setSearch('');
+							// Clear quickSearch text field and tag selection without
+							// rerunning search
+							if (window.ZoteroPane.tagSelector) {
+								window.ZoteroPane.tagSelector.clearTagSelection();
+							}
+							window.ZoteroPane.clearQuicksearch(true);
+							// Rerun search and refresh the itemTree
+							await this.refreshAndMaintainSelection();
+							// Try to select the item(s) again
 							return this.selectItems(ids, true);
 						}
 					}

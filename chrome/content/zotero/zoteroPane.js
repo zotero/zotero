@@ -2800,11 +2800,13 @@ var ZoteroPane = new function () {
 	}
 	
 	
-	this.clearQuicksearch = async function () {
+	this.clearQuicksearch = async function (skipSearchRun) {
 		var search = document.getElementById('zotero-tb-search');
 		if (search.searchTextbox.value !== '') {
 			search.searchTextbox.value = '';
-			await this.search();
+			if (!skipSearchRun) {
+				await this.search();
+			}
 			return true;
 		}
 		return false;
