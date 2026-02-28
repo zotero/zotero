@@ -292,6 +292,9 @@ import-online-new =
 import-mendeley-username = Username
 import-mendeley-password = Password
 
+export-warning-cannot-import = { -app-name } cannot import data in { $format }. Only exports are supported using this format.
+export-warning-backup = You may lose data if you attempt to back up your entire library this way. <label data-l10n-name="backup-help-link">Learn more.</label>
+
 general-error = Error
 file-interface-import-error = An error occurred while trying to import the selected file. Please ensure that the file is valid and try again.
 file-interface-import-complete = Import Complete
