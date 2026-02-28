@@ -392,34 +392,23 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 			return;
 		}
 		
-		// Reject browser-based requests that don't require a CORS preflight request [1] if they
-		// don't come from the connector or include Zotero-Allowed-Request
-		//
-		// [1] https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#Simple_requests
-		var whitelistedEndpoints = [
-			'/connector/ping'
-		];
-		var simpleRequestContentTypes = [
-			'application/x-www-form-urlencoded',
-			'multipart/form-data',
-			'text/plain'
-		];
 		var isBrowser = (this.headers['user-agent'] && this.headers['user-agent'].startsWith('Mozilla/'))
 			// Origin isn't sent via fetch() for HEAD/GET, but for crazy UA strings, protecting
 			// POST requests is better than nothing
 			|| 'origin' in this.headers;
 		if (isBrowser
+				// Allow endpoints to explicitly opt into allowing browser requests
+				// if they really want to
+				&& !endpoint.allowRequestsFromUnsafeWebContent
 				&& !this.headers['x-zotero-connector-api-version']
 				&& !this.headers['zotero-allowed-request']
-				&& (!endpoint.supportedDataTypes
-				|| endpoint.supportedDataTypes == '*'
-				|| endpoint.supportedDataTypes.some(type => simpleRequestContentTypes.includes(type)))
-				&& !whitelistedEndpoints.includes(this.pathname)
-				// Ignore test endpoints
+				// Allow browser requests to test endpoints
 				&& !this.pathname.startsWith('/test/')
-				// Ignore content types that trigger preflight requests
-				&& !(this.contentType && !simpleRequestContentTypes.includes(this.contentType))) {
-			this._requestFinished(this._generateResponse(403, "text/plain", "Request not allowed\n"));
+				// Allow browser requests to /connector/ping as long as they come
+				// from navigation, not XHR/fetch()/resource loading
+				&& !(this.pathname === '/connector/ping' && this.headers['sec-fetch-mode'] === 'navigate')) {
+			Zotero.debug('Preventing request from browser');
+			this._cancelResponse();
 			return;
 		}
 		
@@ -547,7 +536,23 @@ Zotero.Server.RequestHandler.prototype._requestFinished = function (responseBody
 	finally {
 		this.response.finish();
 	}
-}
+};
+
+Zotero.Server.RequestHandler.prototype._cancelResponse = function () {
+	// Close the connection without sending anything back, so web content can't
+	// get any information about whether Zotero is running.
+	//
+	// This causes fetch() to throw a TypeError with the message
+	// "NetworkError when attempting to fetch resource.", exactly the same as
+	// when no server is running on our port.
+	if (this._responseSent) {
+		Zotero.debug('Request already finished; not cancelling');
+		return;
+	}
+	Zotero.debug('Cancelling without sending a response');
+	this._responseSent = true;
+	this.response.finish();
+};
 
 Zotero.Server.RequestHandler.prototype._decodeMultipartData = function (data) {
 	const contentDispositionRe = /^Content-Disposition:\s*(.*)$/i;
