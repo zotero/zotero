@@ -1037,10 +1037,11 @@ describe("Zotero.ItemTree", function () {
 			})
 
 			for (let objectType of ['collection', 'search']) {
-				it(`should remove ${objectType} from trash on delete`, async function (){
+				// eslint-disable-next-line no-loop-func
+				it(`should remove ${objectType} from trash on delete`, async function () {
 					var o1 = await createDataObject(objectType, { deleted: true });
-					var o2 = await createDataObject(objectType, { deleted: true  });
-					var o3 = await createDataObject(objectType, { deleted: true  });
+					var o2 = await createDataObject(objectType, { deleted: true });
+					var o3 = await createDataObject(objectType, { deleted: true });
 
 					// Go to trash
 					await selectTrash(win);
@@ -1053,7 +1054,23 @@ describe("Zotero.ItemTree", function () {
 					assert.isFalse(zp.itemsView.getRowIndexByID(o1.treeViewID));
 					assert.isFalse(zp.itemsView.getRowIndexByID(o2.treeViewID));
 					assert.isFalse(zp.itemsView.getRowIndexByID(o3.treeViewID));
-				})
+				});
+
+				// eslint-disable-next-line no-loop-func
+				it(`should apply quicksearch filter to deleted ${objectType} in trash`, async function () {
+					var matched = await createDataObject(objectType, { deleted: true });
+					var excluded = await createDataObject(objectType, { deleted: true });
+
+					await selectTrash(win);
+
+					let quickSearch = win.document.getElementById('zotero-tb-search-textbox');
+					quickSearch.value = matched.getDisplayTitle();
+					quickSearch.doCommand();
+
+					await itemsView._refreshPromise;
+					assert.isNumber(itemsView.getRowIndexByID(matched.treeViewID));
+					assert.isFalse(itemsView.getRowIndexByID(excluded.treeViewID));
+				});
 			}
 		});
 		
