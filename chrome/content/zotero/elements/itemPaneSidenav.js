@@ -728,21 +728,25 @@
 					});
 					firstBtn.dispatchEvent(clickEvent);
 				}
-				setTimeout(() => {
-					// If notes are visible, tab into them
-					if (this._contextNotesPaneVisible) {
-						Services.focus.moveFocus(window, this.contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
-					}
-					// Tab into the pinned section if it exists
-					else if (this.pinnedPane) {
-						Services.focus.moveFocus(window, this.container.getEnabledPane(this.pinnedPane),
-							Services.focus.MOVEFOCUS_FORWARD, 0);
-					}
-					// Otherwise, focus the top-level scrollable itemPane
-					else {
-						this._container.querySelector(".zotero-view-item").focus();
-					}
-				});
+				// Otherwise, just click on the focused button
+				else if (event.target.classList.contains("btn")) {
+					event.preventDefault();
+					event.target.click();
+				}
+
+				// If notes are visible, tab into them
+				if (this._contextNotesPaneVisible) {
+					Services.focus.moveFocus(window, this.contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
+				}
+				// Tab into the pinned section if it exists
+				else if (this.pinnedPane) {
+					Services.focus.moveFocus(window, this.container.getEnabledPane(this.pinnedPane),
+						Services.focus.MOVEFOCUS_FORWARD, 0);
+				}
+				// Otherwise, focus the top-level scrollable itemPane
+				else {
+					this._container.querySelector(".zotero-view-item").focus();
+				}
 			}
 		};
 
