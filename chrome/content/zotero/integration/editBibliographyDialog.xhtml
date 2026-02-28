@@ -32,62 +32,76 @@
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window
-	id="edit-bibliography-dialog"
-	class="contain-richlistbox"
+	id="zotero-edit-bibliography-dialog"
 	orient="vertical"
 	title="&zotero.integration.editBibliography.title;"
-	onload="Zotero_Bibliography_Dialog.load();"
-	onclose="Zotero_Bibliography_Dialog.close();"
-	onunload="doUnload();"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY width height">
-<dialog
-	id="zotero-edit-bibliography-dialog"
-	buttons="extra1,extra2,accept,cancel" buttonpack="end">
+
+<linkset>
+	<html:link rel="localization" href="zotero.ftl"/>
+	<html:link rel="localization" href="integration.ftl"/>
+</linkset>
 	
-	<script>
-
-		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
-
-		// Custom elements
-		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
-
-		Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
-		Services.scriptloader.loadSubScript("chrome://zotero/content/integration/editBibliographyDialog.js", this);
-	</script>
+<script>
+	Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+	Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+	Services.scriptloader.loadSubScript("chrome://zotero/content/integration/editBibliographyDialog.js", this);
+</script>
 	
-	<vbox id="zotero-select-items-container" flex="1" tabindex="0"  data-l10n-id="integration-editBibliography-wrapper" data-l10n-attrs="aria-description">
-		<hbox flex="1">
-			<vbox align="stretch" flex="1">
-				<hbox align="center" pack="end">
-					<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
-				</hbox>
-				<hbox flex="1" style="margin-top: 5px">
-					<vbox id="zotero-collections-tree-container" class="virtualized-table-container">
-						<html:div id="zotero-collections-tree" class="edit-bibl"></html:div>
-					</vbox>
-					<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1">
-						<html:div id="zotero-items-tree"></html:div>
-					</hbox>
-				</hbox>
-			</vbox>
-					
-			<vbox align="center" pack="center" id="citation-buttons">
-				<toolbarbutton id="add" data-l10n-id="integration-editBibliography-add-button" oncommand="Zotero_Bibliography_Dialog.add()" disabled="true" tabindex="0"/>
-				<toolbarbutton id="remove" data-l10n-id="integration-editBibliography-remove-button" oncommand="Zotero_Bibliography_Dialog.remove()" disabled="true" tabindex="0"/>
-			</vbox>
-			<vbox>
-				<label value="&zotero.integration.references.label;" control="item-list"/>
-				<richlistbox id="item-list" flex="1" align="stretch" seltype="multiple"
-							 style="width: 250px;" onselect="Zotero_Bibliography_Dialog.listItemSelected();"
-							 onchanged="Zotero_Bibliography_Dialog.textChanged()"
-							 onfocus="Zotero_Bibliography_Dialog.listItemFocused()"/>
-			</vbox>
+<item-tree-menu-bar/>
+<vbox id="zotero-edit-bibliography-dialog-box" flex="1" tabindex="0"  data-l10n-id="integration-editBibliography-wrapper" data-l10n-attrs="aria-description">
+	<hbox id="zotero-select-items-trees" flex="1">
+		<vbox id="zotero-collections-tree-container" class="virtualized-table-container">
+			<html:div id="zotero-collections-tree" class="edit-bibl"></html:div>
+		</vbox>
+
+		<vbox id="zotero-item-tree-container">
+			<hbox id="quick-search-textbox-wrapper" pack="end">
+				<quick-search-textbox id="zotero-tb-search" timeout="250" dir="reverse"/>
+			</hbox>
+			<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1">
+				<html:div id="zotero-items-tree"></html:div>
+			</hbox>
+		</vbox>
+	</hbox>
+	<splitter id="zotero-edit-bib-splitter" resizebefore="closest" resizeafter="closest" orient="horizontal" collapse="none" oncommand="BibliographyListUI.onSplitterDrag()"/>
+	<vbox id="zotero-reference-items-list-wrapper">
+		<hbox id="zotero-reference-items-list-header">
+			<html:button class="style-button" data-action="bold" tabindex="-1"/>
+			<html:button class="style-button" data-action="italic" tabindex="-1"/>
+			<html:button class="style-button" data-action="underline" tabindex="-1"/>
 		</hbox>
-		
-		<iframe id="editor" src="simpleEditor.html" flex="1" type="content" remote="false" maychangeremoteness="false" data-l10n-id="integration-editBibliography-editor"/>
-		<description id="zotero-editor-warning" style="margin: 9px 1px 0">&zotero.citation.editorWarning.label;</description>
+		<vbox id="zotero-reference-items-list"></vbox>
 	</vbox>
-</dialog>
+	
+	<vbox id="zotero-edit-bibliography-dialog-bottom">
+		<description id="zotero-editor-warning">&zotero.citation.editorWarning.label;</description>
+
+		<hbox id="zotero-edit-bibliography-dialog-bottom-btns">
+			<button id="zotero-edit-bibliography-revert-all-btn"/>
+			<spacer flex="1"/>
+			<button id="zotero-edit-bibliography-cancel-btn" label="Cancel"/>
+			<button id="zotero-edit-bibliography-accept-btn" default="true" label="Ok"/>
+		</hbox>
+	</vbox>
+	
+</vbox>
+
+<html:template>
+	<hbox class="list-item">
+		<hbox class="reference-editor placeholder" flex="1"></hbox>
+		<hbox class="item-labels">
+			<span class="label edited" data-l10n-id="integration-editBibliography-edited-item"/>
+			<span class="label excluded" data-l10n-id="integration-editBibliography-excluded-item"/>
+			<span class="label uncited" data-l10n-id="integration-editBibliography-uncited-item"/>
+		</hbox>
+		<hbox class="item-buttons">
+			<html:button class="item-revert-button" data-l10n-id="integration-editBibliography-revert"/>
+			<html:button class="add-button" data-l10n-id="integration-editBibliography-add"/>
+			<html:button class="remove-button" data-l10n-id="integration-editBibliography-remove"/>
+		</hbox>
+	</hbox>
+</html:template>
 </window>
