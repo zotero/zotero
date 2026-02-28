@@ -230,6 +230,8 @@ pref("extensions.zotero.scaffold.eslint.enabled", true);
 
 // Tabs
 pref("extensions.zotero.tabs.title.reader", "titleCreatorYear");
+pref("extensions.zotero.tabs.maxLoadedTabs", 3);
+pref("extensions.zotero.tabs.unloadUnusedAfter", 86400);
 
 // Reader
 pref("extensions.zotero.reader.textSelectionAnnotationMode", "highlight");
