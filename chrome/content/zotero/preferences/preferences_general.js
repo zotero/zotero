@@ -383,7 +383,7 @@ Zotero_Preferences.General = {
 		}
 		var openURLMenu = document.getElementById('openurl-menu');
 		let openURLMenuFirstItem = openURLMenu.menupopup.firstChild;
-		if (!this._openURLResolvers) {
+		if (!this._openURLResolvers?.length) {
 			openURLMenuFirstItem.setAttribute('label', Zotero.getString('general.loading'));
 			try {
 				this._openURLResolvers = await Zotero.Utilities.Internal.OpenURL.getResolvers();
@@ -531,10 +531,33 @@ Zotero_Preferences.General = {
 	},
 	
 	onOpenURLCustomized: function () {
-		// Change resolver preference to "custom"
-		let firstItem = document.getElementById('openurl-menu').menupopup.firstChild;
-		firstItem.setAttribute('label', Zotero.getString('general.custom'));
-		firstItem.setAttribute('value', 'custom');
+		let opeUrlInput = document.getElementById("openURLServerField");
+		let openUrlMenu = document.getElementById('openurl-menu').menupopup.firstChild;
+		// Remove trailing whitespaces
+		opeUrlInput.value = opeUrlInput.value.trim();
+		// If resolvers have been fetched, see if there is one that matches the input
+		if (this._openURLResolvers?.length) {
+			let inputMatchedResolved = this._openURLResolvers.find(resolver => resolver.url == opeUrlInput.value);
+			if (inputMatchedResolved) {
+				// User typed the url of an existing resolver, so update the name and dropdown label
+				Zotero.Prefs.set('openURL.name', inputMatchedResolved.name);
+				openUrlMenu.setAttribute('label', inputMatchedResolved.name);
+				return;
+			}
+		}
+		// If the resolvers have not been loaded, fetch them
+		else if (!this._openURLResolvers?.promise) {
+			// Save the promise so we don't request resolvers multiple times as the user types
+			this._openURLResolvers = Zotero.Promise.defer();
+			Zotero.Utilities.Internal.OpenURL.getResolvers().then((res) => {
+				this._openURLResolvers = res;
+				// Rerun so that if the user pastes a url, we still check if it matches loaded resolvers above
+				this.onOpenURLCustomized();
+			});
+		}
+		// Change resolver preference to "custom" if we did not find a matching resolver above
+		openUrlMenu.setAttribute('label', Zotero.getString('general.custom'));
+		openUrlMenu.setAttribute('value', 'custom');
 		Zotero.Prefs.clear('openURL.name');
 	},
 
