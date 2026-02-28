@@ -106,19 +106,18 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			Zotero.Utilities.Internal.onDragItems(event, [this._attachment.id]);
 		};
 
-		_handleAnnotationClick = () => {
-			// TODO: jump to annotations pane
-			let pane;
-			if (ZoteroContextPane) {
-				pane = ZoteroContextPane.sidenav?.container.querySelector(`:scope > [data-pane="attachment-annotations"]`);
-			}
-			if (pane) {
-				pane._section.open = true;
-			}
+		_handleAnnotationClick = async () => {
+			let paneID = "attachment-annotations";
 			let win = Zotero.getMainWindow();
 			if (win) {
-				win.ZoteroPane.selectItem(this._attachment.id);
 				win.Zotero_Tabs.select('zotero-pane');
+				let itemDetails = win.ZoteroContextPane.sidenav?.container;
+				let pane = itemDetails?.getPane(paneID);
+				if (pane) {
+					pane._section.open = true;
+					await itemDetails?.scrollToPane(paneID, 'instant', { pendingScroll: true });
+				}
+				await win.ZoteroPane.selectItem(this._attachment.id);
 				win.focus();
 			}
 		};
