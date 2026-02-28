@@ -214,7 +214,7 @@ describe("Zotero.ItemTree", function () {
 
 			// tag selector should be cleared and itemTwo - selected
 			assert.equal(zp.getCollectionTreeRow().tags.size, 0);
-			assert.equal(await zp.tagSelector.selectedTags.size, 0);
+			assert.equal(zp.tagSelector.selectedTags.size, 0);
 			assert.equal(zp.itemsView.getSelectedItems()[0].id, itemTwo.id);
 		});
 	});
