@@ -65,6 +65,7 @@ Zotero_Preferences.Cite = {
 		document.querySelector('#zotero-prefpane-cite').addEventListener('showing', () => {
 			this._tree.invalidate();
 		});
+		await Zotero_Preferences.QuickCopy.init();
 	},
 	
 	
@@ -201,6 +202,7 @@ Zotero_Preferences.Cite = {
 					fp.file,
 					true
 				);
+				await Zotero_Preferences.QuickCopy.populateQuickCopyList();
 			}
 			catch (e) {
 				(new Zotero.Exception.Alert("styles.install.unexpectedError",
@@ -245,6 +247,7 @@ Zotero_Preferences.Cite = {
 			}
 			
 			await this.refreshStylesList();
+			await Zotero_Preferences.QuickCopy.populateQuickCopyList();
 		}
 	},
 	
@@ -266,8 +269,8 @@ Zotero_Preferences.Cite = {
 			button.disabled = true;
 			try {
 				await Zotero.Schema.resetStyles()
-				if (Zotero_Preferences.Export) {
-					Zotero_Preferences.Export.populateQuickCopyList();
+				if (Zotero_Preferences.QuickCopy) {
+					Zotero_Preferences.QuickCopy.populateQuickCopyList();
 				}
 			}
 			finally {
