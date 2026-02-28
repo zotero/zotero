@@ -346,7 +346,8 @@ class ReaderInstance {
 				let libraryID = attachment.libraryID;
 				let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
 				if (annotation) {
-					this._openTagsPopup(annotation, x, y);
+					let { left, top } = this._iframe.getBoundingClientRect();
+					Zotero.Annotations.insertAnnotationsTagsPopup(this._popupset, annotation, x + left, y + top);
 				}
 			},
 			onClosePopup: () => {

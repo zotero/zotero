@@ -472,7 +472,10 @@
 				this._listenerAdded = true;
 			}
 			
-			this._head.setAttribute('aria-expanded', this.open);
+			// presence of aria-expanded implies the section can be expanded and collapsed
+			if (!this._disableCollapsing) {
+				this._head.setAttribute('aria-expanded', this.open);
+			}
 			this._head.setAttribute("aria-label", this.label);
 			this._title.textContent = this.label;
 			this._summary.textContent = this.summary;
