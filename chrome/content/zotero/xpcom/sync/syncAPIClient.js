@@ -547,8 +547,143 @@ Zotero.Sync.APIClient.prototype = {
 	deleteAPIKey: async function () {
 		await this.makeRequest("DELETE", this.baseURL + "keys/current");
 	},
-	
-	
+
+
+	async getReadAloudVoices() {
+		let url = this.baseURL + "tts/voices";
+		let params = new URLSearchParams();
+		params.set("lang", Services.locale.appLocaleAsBCP47);
+		params.set("version", "1");
+		let uri = url + "?" + params;
+		let noAPIKey = !this.apiKey;
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "json",
+				noAPIKey,
+				errorDelayMax: 8000,
+			});
+
+			let standardCreditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Standard-Credits-Remaining'));
+			if (isNaN(standardCreditsRemaining)) {
+				standardCreditsRemaining = null;
+			}
+			let premiumCreditsRemaining = noAPIKey ? null : parseInt(xmlhttp.getResponseHeader('Zotero-TTS-Premium-Credits-Remaining'));
+			if (isNaN(premiumCreditsRemaining)) {
+				premiumCreditsRemaining = null;
+			}
+
+			let devMode = xmlhttp.getResponseHeader('Zotero-TTS-Dev') === '1';
+
+			return {
+				voices: xmlhttp.response ?? {},
+				standardCreditsRemaining,
+				premiumCreditsRemaining,
+				devMode,
+			};
+		}
+		catch (e) {
+			Zotero.logError(e);
+
+			let error;
+			if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				error = 'network';
+			}
+			else {
+				error = 'unknown';
+			}
+			return {
+				error,
+				standardCreditsRemaining: null,
+				premiumCreditsRemaining: null,
+			};
+		}
+	},
+
+
+	async getReadAloudAudio(segment, voiceID) {
+		let url;
+		let params = new URLSearchParams();
+		if (segment === 'sample') {
+			url = this.baseURL + "tts/sample";
+		}
+		else {
+			url = this.baseURL + "tts/speak";
+			params.set('text', segment.text);
+		}
+		params.set('voice', voiceID);
+		let uri = url + "?" + params;
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "blob",
+				noAPIKey: segment === 'sample',
+				cache: true,
+				errorDelayMax: 8000,
+			});
+
+			return { audio: xmlhttp.response };
+		}
+		catch (e) {
+			Zotero.logError(e);
+
+			let error;
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status === 402) {
+				let body = await e.xmlhttp.response?.text();
+				error = body === 'daily_limit_exceeded' ? 'daily-limit-exceeded' : 'quota-exceeded';
+			}
+			else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
+				error = 'network';
+			}
+			else {
+				error = 'unknown';
+			}
+			return {
+				audio: null,
+				error,
+			};
+		}
+	},
+
+
+	async getReadAloudCreditsRemaining() {
+		let uri = this.baseURL + "tts/credits";
+		try {
+			let xmlhttp = await this.makeRequest("GET", uri, {
+				responseType: "json",
+				errorDelayMax: 8000,
+			});
+			return {
+				standardCreditsRemaining: xmlhttp.response.standardCreditsRemaining ?? null,
+				premiumCreditsRemaining: xmlhttp.response.premiumCreditsRemaining ?? null,
+			};
+		}
+		catch (e) {
+			Zotero.debug('Failed to fetch credits');
+			Zotero.logError(e);
+			return { standardCreditsRemaining: null, premiumCreditsRemaining: null };
+		}
+	},
+
+
+	async resetReadAloudCredits() {
+		let uri = this.baseURL + "tts/reset";
+		try {
+			let xmlhttp = await this.makeRequest("POST", uri, {
+				responseType: "json",
+				errorDelayMax: 8000,
+			});
+			return {
+				standardCreditsRemaining: xmlhttp.response.standardCreditsRemaining ?? null,
+				premiumCreditsRemaining: xmlhttp.response.premiumCreditsRemaining ?? null,
+			};
+		}
+		catch (e) {
+			Zotero.debug('Failed to reset credits');
+			Zotero.logError(e);
+			return { standardCreditsRemaining: null, premiumCreditsRemaining: null };
+		}
+	},
+
+
 	buildRequestURI: function (params) {
 		var uri = this.baseURL;
 		
@@ -653,7 +788,7 @@ Zotero.Sync.APIClient.prototype = {
 		let opts = {}
 		Object.assign(opts, options);
 		opts.headers = this.getHeaders(options.headers);
-		opts.noCache = true;
+		opts.noCache = !options.cache;
 		opts.foreground = !options.background;
 		opts.responseType = options.responseType || 'text';
 		if (options.body && options.body.length >= this.MIN_GZIP_SIZE

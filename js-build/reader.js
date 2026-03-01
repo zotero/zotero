@@ -36,9 +36,11 @@ async function getReader(signatures) {
 			await fs.remove(path.join(targetDir, 'zotero'));
 		}
 		catch (e) {
-			console.error(e);
+			if (!e.message?.includes('The requested URL returned error: 403')) {
+				console.error(e);
+			}
 			await exec('npm ci', { cwd: modulePath });
-			await exec('npm run build', { cwd: modulePath });
+			await exec('npm run build:zotero', { cwd: modulePath });
 			await fs.copy(path.join(modulePath, 'build', 'zotero'), targetDir);
 		}
 		signatures['reader'] = { hash };
