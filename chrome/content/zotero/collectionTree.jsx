@@ -470,7 +470,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				ref: ref => this.tree = ref,
 				treeboxRef: ref => this._treebox = ref,
 				renderItem: this.renderItem,
-				alternatingRowColors: null,
 
 				onSelectionChange: this._handleSelectionChange,
 				isSelectable: this.isSelectable,

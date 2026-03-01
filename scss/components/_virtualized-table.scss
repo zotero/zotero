@@ -115,6 +115,14 @@
 		box-sizing: border-box;
 		border-radius: 5px;
 
+		&.odd:not(.selected) {
+			background-color: var(--material-stripe);
+		}
+
+		&.even:not(.selected) {
+			background-color: var(--material-background);
+		}
+
 		&.drop:not(.flashing) {
 			color: var(--material-background) !important;
 			background: var(--fill-secondary) !important;
@@ -286,11 +294,9 @@
 		text-align: center;
 	}
 
-	.first-column {
-		> :first-child {
-			// offset header's column label/icon to align with the text in the first column, without introducing padding to the cell itself to avoid flexbox issues
-			padding-inline-start: calc(var(--firstColumnExtraWidth, 0px) + 8px);
-		}
+	.first-column > :first-child {
+		// offset header's column label/icon to align with the text in the first column, without introducing padding to the cell itself to avoid flexbox issues
+		padding-inline-start: calc(var(--firstColumnExtraWidth, 0px) + 8px);
 	}
 
 	.cell {
@@ -359,6 +365,22 @@
 		}
 	}
 }
+
+.virtualized-table.regular-only {
+	.virtualized-table-header .first-column > :first-child {
+		// Not reserving space for a twisty
+		padding-inline-start: var(--firstColumnExtraWidth, 0px);
+	}
+	
+	.row .spacer-twisty {
+		// This is technically restoring the padding that is removed for first/primary
+		// column.
+		// TODO: Cleanup this CSS. The virtualized table should work without primary/first row
+		// and reservation of space for twisties.
+		min-width: 8px;
+	}
+}
+
 
 .virtualized-table-body, .drag-image-container {
 	flex: 1 0;

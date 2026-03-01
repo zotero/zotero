@@ -27,7 +27,7 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const diff = require('diff');
 const VirtualizedTable = require('components/virtualized-table');
-const { getCSSIcon, IconAttachSmall } = require('components/icons');
+const { getCSSIcon, CSSIcon } = require('components/icons');
 const ItemTree = require('zotero/itemTree');
 const { getColumnDefinitionsByDataKey } = require('zotero/itemTreeColumns');
 const { makeRowRenderer } = VirtualizedTable;
@@ -42,42 +42,43 @@ let selectedTab = 0;
 
 const citationColumns = [
 	{
-		dataKey: 'isLinked',
-		label: 'Is Linked',
-		iconLabel: <IconAttachSmall/>,
-		width: 26,
-		staticWidth: true,
-		fixedWidth: true,
-		renderer: (index, data, column) => {
-			let icon = getCSSIcon('IconCross');
-			if (data) {
-				icon = getCSSIcon('IconTick');
-			}
-			icon.className += ` cell ${column.className}`;
-			return icon;
-		}
-	},
-	{
 		dataKey: 'title',
 		label: "Citation",
 		type: 'html'
 	},
+	{
+		dataKey: 'isLinked',
+		label: 'Is Linked',
+		iconLabel: <CSSIcon name="link" className="icon-16"/>,
+		width: 26,
+		staticWidth: true,
+		fixedWidth: true,
+		renderer: (index, data, column) => {
+			let icon = getCSSIcon('cross');
+			if (data) {
+				icon = getCSSIcon('tick');
+			}
+
+			icon.className += ` cell icon-16 ${column.className}`;
+			return icon;
+		}
+	},
 ];
 
-let itemColumns = getColumnDefinitionsByDataKey(['title', 'firstCreator', 'date']);
+let itemColumns = getColumnDefinitionsByDataKey(['title', 'firstCreator', 'year']);
 itemColumns.push({
 	dataKey: 'isLinked',
 	label: 'Is Linked',
-	iconLabel: <IconAttachSmall/>,
+	iconLabel: <CSSIcon name="link" className="icon-16"/>,
 	width: 26,
 	staticWidth: true,
 	fixedWidth: true,
 	renderer: (index, data, column) => {
-		let icon = getCSSIcon('IconCross');
+		let icon = getCSSIcon('cross');
 		if (data) {
-			icon = getCSSIcon('IconTick');
+			icon = getCSSIcon('tick');
 		}
-		icon.className += ` cell ${column.className}`;
+		icon.className += ` cell icon-16 ${column.className}`;
 		return icon;
 	}
 });
@@ -114,6 +115,22 @@ window.ZoteroDocumentCitations = {
 		citations = Object.values(io.citations);
 		items = io.items;
 		uncitedItems = io.uncitedItems;
+		
+		// Load library data for all items
+		let librariesNeeded = new Set();
+		for (let item of [...items, ...uncitedItems]) {
+			if (item.libraryID) {
+				librariesNeeded.add(item.libraryID);
+			}
+		}
+		for (let libraryID of librariesNeeded) {
+			let library = Zotero.Libraries.get(libraryID);
+			if (!library.getDataLoaded('item')) {
+				Zotero.debug("Waiting for items to load for library " + library.libraryID);
+				await library.waitForDataLoad('item');
+			}
+		}
+		
 		await this._initMappings();
 		await this.refreshCitationList();
 		await this.refreshItemList();
@@ -128,8 +145,9 @@ window.ZoteroDocumentCitations = {
 		// init VirtualizedTable
 		if (!citationList) {
 			await new Promise((resolve) => {
-				ReactDOM.createRoot(document.querySelector('#citation-list')).render(<VirtualizedTable
-					id="citation-list"
+				const domElem = document.querySelector('#citation-list-container');
+				ReactDOM.createRoot(domElem).render(<VirtualizedTable
+					id="citation-explorer-citations"
 					ref={(ref) => {
 						citationList = ref;
 						resolve();
@@ -137,6 +155,7 @@ window.ZoteroDocumentCitations = {
 					multiSelect={true}
 					getRowCount={() => this._renderedCitationRows.length}
 					showHeader={true}
+					alternateRowColors={true}
 					staticColumns={true}
 					columns={citationColumns}
 					renderItem={makeRowRenderer(index => this._renderedCitationRows[index])}
@@ -144,6 +163,11 @@ window.ZoteroDocumentCitations = {
 					onSelectionChange={this.onCitationSelectionChange.bind(this)}
 					getRowString={index => this._renderedCitationRows[index].title}
 				/>);
+				// Remove focus from itemList if focus is on citationList
+				// to prevent highlighting in both lists
+				domElem.addEventListener("focusin", (event) => {
+					itemList?.selection.clearSelection()
+				});
 			});
 		}
 		citationList.invalidate();
@@ -157,17 +181,26 @@ window.ZoteroDocumentCitations = {
 
 		let filteredItems = rows.filter(item => !this._filteredItems.has(item.id));
 		if (!itemList) {
-			let domElem = document.querySelector('#item-list');
+			let domElem = document.querySelector('#zotero-items-tree');
 			itemList = await ItemTree.init(domElem, {
-				id: "document-collections",
+				id: "citation-explorer-items",
 				regularOnly: true,
 				columns: itemColumns,
 				shouldListenForNotifications: false,
+				autoSelect: false,
 				onSelectionChange: this.onItemSelectionChange.bind(this),
 				onActivate: this.onItemActivate.bind(this),
-				emptyMessage: Zotero.getString('pane.items.loading')
+				emptyMessage: Zotero.getString('pane.items.loading'),
+				firstColumnExtraWidth: 28-16,
+				firstColumnPrependRenderer: this._itemFirstColumnPrependRenderer.bind(this),
 			});
 			await itemList.waitForLoad();
+			// Remove focus from citationList if focus is on itemList
+			// to prevent highlighting in both lists
+			domElem.addEventListener("focusin", (event) => {
+				citationList?.selection.clearSelection()
+			});
+			document.querySelector("item-tree-menu-bar").init(itemList);
 		}
 		await itemList.changeCollectionTreeRow({
 			getItems: async () => filteredItems,
@@ -202,23 +235,11 @@ window.ZoteroDocumentCitations = {
 		await this.refreshItemList();
 	},
 	
-	onSelectTab: async function (selectedIndex) {
-		if (selectedIndex === selectedTab) return;
-		selectedTab = selectedIndex;
-		if (selectedTab) {
-			this._highlightedCitations = new Set();
-			document.querySelector('#button-show-in-zotero').hidden = true;
-			document.querySelector('#button-relink-item').hidden = false;
-			document.querySelector('#button-addTo-library').style.display = 'none';
-		}
-		await this.refreshCitationList();
-		await this.refreshItemList();
-	},
-
 	_initMappings: async function () {
+		const itemMap = {};
 		itemRows = items.map((item) => {
 			let citedIn = [];
-			return new Proxy(item, {
+			let proxyItem = new Proxy(item, {
 				get(target, prop) {
 					if (prop == 'id' && !target.id) {
 						return target.cslItemID;
@@ -229,8 +250,10 @@ window.ZoteroDocumentCitations = {
 					return Reflect.get(...arguments);
 				}
 			});
+			itemMap[item.id || item.cslItemID] = proxyItem;
+			return proxyItem;
 		});
-		uncitedItemRows = uncitedItems.map((item) => {
+		itemRows.push(...uncitedItems.map((item) => {
 			return new Proxy(item, {
 				get(target, prop) {
 					if (prop == 'citedIn') {
@@ -239,31 +262,23 @@ window.ZoteroDocumentCitations = {
 					return Reflect.get(...arguments);
 				}
 			});
-		});
+		}));
 		citationRows = await Promise.all(citations
 			.map(async (citation, citationIndex) => {
 				let isLinked = true;
 				let citedItems = [];
 				// check if all citation items are linked
 				for (let citationItem of citation.citationItems) {
-					itemRows.forEach((itemRow, itemIndex) => {
-						if ([itemRow.id, itemRow.cslItemID].includes(citationItem.id)) {
-							citedItems.push(itemIndex);
-							itemRow.citedIn.push(citationIndex);
-						}
-					});
-					if (typeof citationItem.id != 'number') {
-						isLinked = false;
-						break;
-					}
+					itemMap[citationItem.id].citedIn.push(citationIndex);
+					isLinked = isLinked && typeof citationItem.id == 'number';
 				}
 				let title = await citation.field.getText();
 				if (citation.properties.plainCitation != title) {
 					let d = diff(citation.properties.plainCitation, title);
 					title = d.map(([type, text]) => {
 						if (type == 0) return text;
-						if (type == -1) return `<span style="color: red; text-decoration: line-through">${text}</span>`;
-						if (type == 1) return `<span style="color: green">${text}</span>`;
+						if (type == -1) return `<span class="diff-deleted">${text}</span>`;
+						if (type == 1) return `<span class="diff-added">${text}</span>`;
 					}).join('');
 				}
 				return {
@@ -292,7 +307,9 @@ window.ZoteroDocumentCitations = {
 				return;
 			}
 		}
-		catch (e) { }
+		catch (e) {
+			Zotero.logError(e);
+		}
 		// An error got thrown or wrong citation got activated, which means that some citations got deleted
 		// and now the citation explorer dialog is not showing correct citations and citation
 		// activation is not going to work right.
@@ -324,6 +341,9 @@ window.ZoteroDocumentCitations = {
 			}
 		}
 		itemList.setHighlightedRows(highlightedItems);
+		const noneSelected = citationList.selection.selected.size === 0;
+		document.querySelector('#button-show-in-document').disabled = noneSelected;
+		document.querySelector('#button-edit-citation').disabled = noneSelected;
 	},
 	
 	onCitationEdit: async function () {
@@ -347,22 +367,22 @@ window.ZoteroDocumentCitations = {
 		}
 		const item = itemList.getRow(itemList.selection.focused).ref;
 		const isUnlinked = typeof item.id != 'number';
-		const isMultiple = itemList.selection.selected.size > 1;
-		document.querySelector('#button-show-in-zotero').hidden = isMultiple || isUnlinked;
-		document.querySelector('#button-relink-item').hidden = isMultiple || !isUnlinked;
-		document.querySelector('#button-addTo-library').style.display = (isMultiple || !isUnlinked) ? 'none' : 'inherit';
+		const noneSelected = itemList.selection.selected.size === 0;
+		document.querySelector('#button-show-in-zotero').disabled = noneSelected || isUnlinked;
+		document.querySelector('#button-relink-item').disabled = noneSelected || !isUnlinked;
+		document.querySelector('#button-addTo-library').disabled = noneSelected || !isUnlinked;
 		
 		await this.refreshCitationList();
 	},
 		
 	onItemActivate: async function () {
-		if (itemList.selection.selected.size > 1) return;
 		const item = itemList.getRow(itemList.selection.focused).ref;
 		if (typeof item.id != 'number') {
 			this.onItemRelink();
 		}
 		else {
-			await Zotero.Utilities.Internal.showInLibrary(item);
+			await Zotero.Utilities.Internal.showInLibrary(
+					Array.from(itemList.selection.selected).map(index => itemList.getRow(index).ref));
 		}
 	},
 
@@ -389,9 +409,28 @@ window.ZoteroDocumentCitations = {
 		await this.refreshCitationList();
 		await this.refreshItemList();
 	},
+
+	_itemFirstColumnPrependRenderer: function (index, data, firstColumnPrepend) {
+		if (itemRows[index].citedIn.length === 0) {
+			let span = document.createElement('span');
+			span.classList.add('badge', 'badge-uncited');
+			span.textContent = 'Uncited';
+			firstColumnPrepend.push(span);
+		}
+		return firstColumnPrepend;
+	},
 	
 	async addToLibraryAndLink() {
 		var collectionID = _addToTarget.objectType == 'collection' ? _addToTarget.id : undefined;
+		
+		// Load library data
+		let targetLibraryID = _addToTarget.libraryID || _addToTarget.library.libraryID;
+		let library = Zotero.Libraries.get(targetLibraryID);
+		if (!library.getDataLoaded('item')) {
+			Zotero.debug("Waiting for items to load for library " + library.libraryID);
+			await library.waitForDataLoad('item');
+		}
+		
 		for (let index of itemList.selection.selected) {
 			let treeRow = itemList.getRow(index);
 			const oldItemID = treeRow.id;

@@ -75,14 +75,6 @@
 	
 	.virtualized-table, .drag-image-container {
 		.row {
-			&.odd:not(.selected) {
-				background-color: var(--material-stripe);
-			}
-
-			&.even:not(.selected) {
-				background-color: var(--material-background);
-			}
-
 			&.selected {
 				border-radius: 0;
 
