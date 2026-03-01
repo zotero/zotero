@@ -1657,6 +1657,39 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	}
 
 
+	this.startLoginSession = async function () {
+		let client = this.getAPIClient();
+		let userID = Zotero.Users.getCurrentUserID();
+		return client.createLoginSession(userID || undefined);
+	}
+
+
+	this.checkLoginSession = async function (sessionToken, result) {
+		if (!result) {
+			let client = this.getAPIClient();
+			result = await client.checkLoginSession(sessionToken);
+		}
+		if (result.status == "completed") {
+			if (!result.apiKey) throw new Error("apiKey not found in session response");
+			if (!result.userID) throw new Error("userID not found in session response");
+			if (!result.username) throw new Error("username not found in session response");
+			await Zotero.Sync.Data.Local.setAPIKey(result.apiKey);
+		}
+		return result;
+	}
+
+
+	this.cancelLoginSession = async function (sessionToken) {
+		try {
+			let client = this.getAPIClient();
+			await client.cancelLoginSession(sessionToken);
+		}
+		catch (e) {
+			Zotero.debug("Failed to cancel login session: " + e, 2);
+		}
+	}
+
+
 	this.deleteAPIKey = async function () {
 		this.resetStorageController('zfs');
 		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();

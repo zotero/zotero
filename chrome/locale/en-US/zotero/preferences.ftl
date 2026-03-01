@@ -129,3 +129,10 @@ preferences-sync-reset-restore-to-server-checkbox-label = { $remoteItemsDeletedC
     }
 preferences-sync-reset-restore-to-server-confirmation-text = delete online library
 preferences-sync-reset-restore-to-server-yes = Replace Data in Online Library
+
+preferences-sync-login-button =
+    .label = Log In
+preferences-sync-waiting-for-login =
+    .value = Waiting for login…
+preferences-sync-cancel-button =
+    .label = { general-cancel }

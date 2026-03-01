@@ -860,5 +860,7 @@ normalize-attachment-titles-text = { -app-name } automatically renames files on 
     
     Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
 
-banner-close-button = 
+banner-close-button =
     .aria-label = Dismiss notification
+
+sync-error-login-session-expired = Your login session has expired. Please try again.

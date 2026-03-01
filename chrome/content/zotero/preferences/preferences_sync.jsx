@@ -35,6 +35,12 @@ Zotero_Preferences.Sync = {
 	checkmarkChar: '\u2705',
 	noChar: '\uD83D\uDEAB',
 	
+	_pendingSessionToken: null,
+	_loginResolve: null,
+	_loginReject: null,
+	_pollTimerID: null,
+	_pollInterval: 3000,
+
 	init: async function () {
 		this.storeLastStorageSettings();
 		this.updateStorageSettingsUI();
@@ -73,6 +79,12 @@ Zotero_Preferences.Sync = {
 			}
 		}
 
+		window.addEventListener('beforeunload', () => {
+			if (this._pendingSessionToken) {
+				this.cancelLogin();
+			}
+		});
+
 		document.getElementById('storage-url-prefix').addEventListener('synctopreference', () => {
 			this.unverifyStorageServer();
 		});
@@ -83,63 +95,90 @@ Zotero_Preferences.Sync = {
 		document.getElementById('sync-authorized').hidden = !username;
 		document.getElementById('sync-reset').hidden = !username;
 		document.getElementById('sync-username').value = username;
-		document.getElementById('sync-password').value = '';
-		document.getElementById('sync-username-textbox').value = Zotero.Prefs.get('sync.server.username');
 
-		var img = document.getElementById('sync-status-indicator');
-		img.removeAttribute('verified');
-		img.removeAttribute('animated');
+		this._showLoginDefault();
 	},
 
 
-	credentialsChange: function (_event) {
-		var username = document.getElementById('sync-username-textbox');
-		var password = document.getElementById('sync-password');
-		var syncAuthButton = document.getElementById('sync-auth-button');
-		
-		syncAuthButton.setAttribute('disabled', !(username.value.length && password.value.length));
-	},
-	
-	
-	credentialsKeyPress: function (event) {
-		if (event.keyCode == 13) {
-			this.linkAccount(event);
-			event.preventDefault();
-		}
-	},
-	
-	
-	trimUsername: function () {
-		var tb = document.getElementById('sync-username-textbox');
-		var username = tb.value;
-		var trimmed = username.trim();
-		if (username != trimmed) {
-			tb.value = trimmed;
-		}
-	},
-	
-	
 	_secmodDeleted: false,
-	linkAccount: async function(event) {
-		this.trimUsername();
-		var username = document.getElementById('sync-username-textbox').value;
-		var password = document.getElementById('sync-password').value;
-
-		if (!username.length || !password.length) {
-			this.updateSyncIndicator();
+	linkAccount: async function (_event) {
+		// Guard against double-click
+		if (this._pendingSessionToken) {
 			return;
 		}
 
-		// Try to acquire API key with current credentials
-		this.updateSyncIndicator('animated');
+		let session;
 		try {
-			var json = await Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
+			session = await Zotero.Sync.Runner.startLoginSession();
 		}
 		catch (e) {
-			// On "User canceled primary password entry", delete secmod.db and restart
-			//
-			// It seems like this can happen when people have a very old profile directory (e.g.,
-			// from 2013 in 2024)
+			setTimeout(function () {
+				Zotero.Sync.Runner.alert(e);
+			});
+			throw e;
+		}
+
+		let sessionToken = session.sessionToken;
+		this._pendingSessionToken = sessionToken;
+		this._showLoginPending();
+		Zotero.launchURL(session.loginURL);
+
+		let result;
+		try {
+			// Create a shared promise that either streaming or polling can resolve
+			let loginPromise = new Promise((resolve, reject) => {
+				this._loginResolve = resolve;
+				this._loginReject = reject;
+			});
+
+			// Register streaming listener for instant notification
+			this._subscribeToLoginSession(sessionToken);
+			// Start polling as fallback (fire-and-forget)
+			this._startPolling(sessionToken);
+
+			result = await loginPromise;
+		}
+		catch (e) {
+			this._pendingSessionToken = null;
+			this._showLoginDefault();
+			// Session expired
+			if (e.expired) {
+				Zotero.alert(
+					window,
+					Zotero.getString('general.error'),
+					Zotero.ftl.formatValueSync('sync-error-login-session-expired')
+				);
+				return;
+			}
+			setTimeout(function () {
+				Zotero.Sync.Runner.alert(e);
+			});
+			throw e;
+		}
+		finally {
+			this._unsubscribeFromLoginSession(sessionToken);
+			this._stopPolling();
+			this._loginResolve = null;
+			this._loginReject = null;
+		}
+
+		// Login was cancelled
+		if (!result) {
+			this._pendingSessionToken = null;
+			this._showLoginDefault();
+			return;
+		}
+
+		// Validate and store the API key
+		await Zotero.Sync.Runner.checkLoginSession(sessionToken, result);
+
+		// Handle secmod.db issue when storing the API key
+		// This can happen when people have a very old profile directory (e.g., from 2013)
+		try {
+			// Force a read to verify the key was stored
+			await Zotero.Sync.Data.Local.getAPIKey();
+		}
+		catch (e) {
 			if (e.message.includes("User canceled primary password entry")) {
 				Zotero.logError(e);
 				let profileDir = Zotero.Profile.dir;
@@ -163,46 +202,33 @@ Zotero_Preferences.Sync = {
 					button0: Zotero.getString('general.restartNow'),
 					button1: Services.prompt.BUTTON_TITLE_CANCEL
 				});
-				
+
 				if (index == 0) {
 					Zotero.Utilities.Internal.quit(true);
 					return;
 				}
+				this._pendingSessionToken = null;
+				this._showLoginDefault();
 				return;
 			}
-			
-			setTimeout(function () {
-				Zotero.Sync.Runner.alert(e);
-			});
 			throw e;
 		}
-		finally {
-			this.updateSyncIndicator();
-		}
-		
-		// Invalid credentials
-		if (!json) {
-			Zotero.alert(window,
-				Zotero.getString('general.error'),
-				Zotero.getString('sync.error.invalidLogin')
-			);
-			return;
-		}
-		
-		var ok = await Zotero.Sync.Data.Local.checkUser(
+
+		let ok = await Zotero.Sync.Data.Local.checkUser(
 			window,
-			json.userID,
-			json.username,
-			json.displayName
+			result.userID,
+			result.username,
+			result.displayName
 		);
 		if (!ok) {
-			// createAPIKeyFromCredentials will have created an API key,
-			// but user decided not to use it, so we remove it here.
+			// Session created an API key, but user decided not to use it
 			Zotero.Sync.Runner.deleteAPIKey();
+			this._pendingSessionToken = null;
+			this._showLoginDefault();
 			return;
 		}
 
-		Zotero.Prefs.set('sync.server.username', username);
+		Zotero.Prefs.set('sync.server.username', result.username);
 
 		// It shouldn't be possible for a sync to be in progress if the user wasn't logged in,
 		// but check to be sure
@@ -213,21 +239,120 @@ Zotero_Preferences.Sync = {
 		window.addEventListener('beforeunload', () => {
 			Zotero.Sync.Runner.setSyncTimeout(1);
 		});
-		
-		this.displayFields(json.username);
+
+		this._pendingSessionToken = null;
+		this.displayFields(result.username);
 	},
 
-	/**
-	 * Updates the auth indicator icon, depending on status
-	 * @param {string} status
-	 */
-	updateSyncIndicator: function (status) {
-		var img = document.getElementById('sync-status-indicator');
-		
-		img.removeAttribute('animated');
-		if (status == 'animated') {
-			img.setAttribute('animated', true);
+
+	_subscribeToLoginSession: function (sessionToken) {
+		let topic = "login-session:" + sessionToken;
+		Zotero.Streamer.subscribe([topic], (data) => {
+			if (this._loginResolve) {
+				this._loginResolve(data);
+			}
+		});
+	},
+
+
+	_unsubscribeFromLoginSession: function (sessionToken) {
+		let topic = "login-session:" + sessionToken;
+		Zotero.Streamer.unsubscribe([topic]);
+	},
+
+
+	_startPolling: async function (sessionToken) {
+		let timeout = 10 * 60 * 1000; // 10 minutes
+		let startTime = Date.now();
+		let client = Zotero.Sync.Runner.getAPIClient();
+
+		while (true) {
+			// Wait before polling
+			await new Promise((resolve) => {
+				this._pollTimerID = setTimeout(resolve, this._pollInterval);
+			});
+			this._pollTimerID = null;
+
+			// Already resolved by streaming or cancel
+			if (!this._loginResolve) {
+				return;
+			}
+
+			// Check timeout
+			if (Date.now() - startTime > timeout) {
+				let e = new Error("Login session timed out");
+				e.expired = true;
+				this._loginReject(e);
+				return;
+			}
+
+			let result;
+			try {
+				result = await client.checkLoginSession(sessionToken);
+			}
+			catch (e) {
+				if (this._loginReject) {
+					this._loginReject(e);
+				}
+				return;
+			}
+
+			// Already resolved while we were awaiting
+			if (!this._loginResolve) {
+				return;
+			}
+
+			if (result.status == "completed") {
+				this._loginResolve(result);
+				return;
+			}
+			if (result.status == "cancelled") {
+				this._loginResolve(null);
+				return;
+			}
+			// "pending" -- continue polling
 		}
+	},
+
+
+	_stopPolling: function () {
+		if (this._pollTimerID) {
+			clearTimeout(this._pollTimerID);
+			this._pollTimerID = null;
+		}
+	},
+
+
+	cancelLogin: function () {
+		let token = this._pendingSessionToken;
+		this._pendingSessionToken = null;
+		if (this._loginResolve) {
+			this._loginResolve(null);
+		}
+		this._showLoginDefault();
+		if (token) {
+			this._unsubscribeFromLoginSession(token);
+			// Fire-and-forget
+			Zotero.Sync.Runner.cancelLoginSession(token);
+		}
+	},
+
+
+	_showLoginPending: function () {
+		document.getElementById('sync-login-default').hidden = true;
+		let pending = document.getElementById('sync-login-pending');
+		pending.hidden = false;
+		document.getElementById('sync-status-indicator').setAttribute('animated', true);
+	},
+
+
+	_showLoginDefault: function () {
+		document.getElementById('sync-login-default').hidden = false;
+		let pending = document.getElementById('sync-login-pending');
+		pending.hidden = true;
+		let indicator = document.getElementById('sync-status-indicator');
+		indicator.removeAttribute('verified');
+		indicator.removeAttribute('animated');
 	},
 
 	unlinkAccount: async function(showAlert=true) {
