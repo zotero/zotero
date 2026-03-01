@@ -104,10 +104,6 @@ editable-text {
 		&:focus:not(:read-only) {
 			background: var(--material-background);
 		}
-		
-		::placeholder {
-			color: var(--fill-tertiary);
-		}
 	}
 	&[nowrap] {
 		.input:not(:focus, :hover) {
@@ -120,6 +116,14 @@ editable-text {
 	&[hidden] {
 		display: none;
 	}
+	
+	&[multiple-values] {
+		::placeholder {
+			color: var(--accent-azure);
+			font-style: italic;
+		}
+	}
+	
 	textarea {
 		// Per https://stackoverflow.com/a/22700700, somehow this removes an extra half-line
 		// at the bottom of textarea on all platforms with non-overlay scrollbars

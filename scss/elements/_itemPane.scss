@@ -29,4 +29,15 @@ item-pane {
 			width: 100%;
 		}
 	}
+	
+	#batch-edit-prompt-message {
+		padding: 3px 8px;
+	}
+
+	#batch-edit-prompt-warning {
+		margin: 0.5em 18px;
+		text-align: center;
+		color: var(--fill-secondary);
+		font-size: 0.85em;
+	}
 }
