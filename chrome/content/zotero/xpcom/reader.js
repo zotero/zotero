@@ -1419,6 +1419,27 @@ class ReaderInstance {
 		}
 	}
 
+	_wrapConsole() {
+		let win = this._iframeWindow;
+		let console = win.console;
+		let wrapper = Cu.createObjectIn(win);
+		for (let method of ['log', 'info', 'warn', 'error', 'debug', 'trace']) {
+			let level = method === 'error' ? 1 : method === 'warn' ? 2 : 5;
+			Cu.exportFunction((...args) => {
+				try {
+					let message = args.map(a => typeof a === 'string' ? a : Zotero.Utilities.varDump(a))
+						.join(' ');
+					Zotero.debug(`${this.constructor.name} "${this._title}": ${message}`, level);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				console[method](...args);
+			}, wrapper, { defineAs: method });
+		}
+		Object.defineProperty(win.wrappedJSObject, 'console', { value: wrapper });
+	}
+
 	async _waitForReader() {
 		if (this._isReaderInitialized) {
 			return;
@@ -1769,6 +1790,7 @@ class ReaderTab extends ReaderInstance {
 			this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
 			this._iframeWindow = this._iframe.contentWindow;
 			this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
+			this._wrapConsole();
 			this._iframe.addEventListener('contextmenu', this._handleReaderTextboxContextMenuOpen);
 		}
 	};
@@ -1896,6 +1918,7 @@ class ReaderWindow extends ReaderInstance {
 			if (this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
 				this._iframeWindow = this._window.document.getElementById('reader').contentWindow;
 				this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
+				this._wrapConsole();
 				this._iframe.addEventListener('contextmenu', this._handleReaderTextboxContextMenuOpen);
 			}
 
@@ -2140,6 +2163,7 @@ class ReaderPreview extends ReaderInstance {
 		this._iframe = options.iframe;
 		this._iframeWindow = this._iframe.contentWindow;
 		this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
+		this._wrapConsole();
 	}
 
 	async _open({ state, location, secondViewState }) {
