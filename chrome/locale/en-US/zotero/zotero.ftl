@@ -644,6 +644,12 @@ new-collection-create-in = Create in:
 show-publications-menuitem =
     .label = Show My Publications
 
+file-renaming-settings-menuitem =
+    .label = Configure File Renaming
+
+group-file-renaming-settings-window =
+    .title = Configure File Renaming in "{ $groupName }"
+
 attachment-info-title = Title
 attachment-info-filename = Filename
 attachment-info-accessed = Accessed
