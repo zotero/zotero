@@ -130,6 +130,7 @@ function modify_omni {
 	rm actors/PictureInPictureChild.sys.mjs
 	rm actors/ThumbnailsChild.sys.mjs
 	rm actors/Translations{Engine,}{Parent,Child}.sys.mjs
+	rm actors/AudioPlayback{Parent,Child}.sys.mjs
 	
 	replace_line 'BROWSER_CHROME_URL:.+' 'BROWSER_CHROME_URL: "chrome:\/\/zotero\/content\/zoteroPane.xhtml",' modules/AppConstants.sys.mjs
 	
@@ -188,6 +189,7 @@ function modify_omni {
 	remove_between 'Thumbnails: \{' '^  },' $file
 	remove_between 'Translations: \{' '^  },' $file
 	remove_between 'TranslationsEngine: \{' '^  },' $file
+	remove_between 'AudioPlayback: \{' '^  },' $file
 	# Do not trigger LoginManager event that logs an error on autocomplete submission
 	remove_line 'DOMInputPasswordAdded: \{\},' $file
 	
