@@ -41,6 +41,9 @@ async function getReader(signatures) {
 			}
 			await exec('npm ci', { cwd: modulePath });
 			await exec('npm run build:zotero', { cwd: modulePath });
+			if (!fs.pathExists(path.join(modulePath, 'build', 'zotero', 'pdf', 'build', 'pdf.mjs'))) {
+				throw new Error('pdf.js build failed to produce output');
+			}
 			await fs.copy(path.join(modulePath, 'build', 'zotero'), targetDir);
 		}
 		signatures['reader'] = { hash };
