@@ -610,6 +610,9 @@ class ReaderInstance {
 			onSetReadAloudVoice: this._setReadAloudVoice.bind(this),
 			onSetReadAloudEnabledVoices: this._setReadAloudEnabledVoices.bind(this),
 			onSetReadAloudStatus: this._setReadAloudStatus.bind(this),
+			onPurchaseReadAloudCredits: () => {
+				Zotero.launchURL(ZOTERO_CONFIG.READ_ALOUD_URL);
+			},
 			onLogIn: () => {
 				// This causes a segfault without the timeout...
 				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync'));
