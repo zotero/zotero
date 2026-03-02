@@ -25,8 +25,9 @@
 <vbox id="zotero-prefpane-sync" onload="Zotero_Preferences.Sync.init()">
 	<vbox class="main-section">
 		<vbox id="sync-unauthorized">
-			<groupbox aria-label="&zotero.preferences.sync.syncServer;">
-				<label><html:h2>&zotero.preferences.sync.syncServer;</html:h2></label>
+			<groupbox data-l10n-id="preferences-sync-data-syncing-groupbox">
+				<label><html:h2 data-l10n-id="preferences-sync-data-syncing-heading"/></label>
+                <description data-l10n-id="preferences-sync-data-syncing-description"/>
 
 				<hbox>
 					<html:div class="form-grid">
@@ -66,8 +67,8 @@
 		</vbox>
 
 		<vbox id="sync-authorized" hidden="true">
-			<groupbox aria-label="&zotero.preferences.sync.syncServer;">
-				<label><html:h2>&zotero.preferences.sync.syncServer;</html:h2></label>
+			<groupbox data-l10n-id="preferences-sync-data-syncing-groupbox">
+				<label><html:h2 data-l10n-id="preferences-sync-data-syncing-heading"/></label>
 
 				<html:div class="form-grid">
 					<label value="&zotero.preferences.sync.username;"/>
