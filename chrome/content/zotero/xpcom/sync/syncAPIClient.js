@@ -601,25 +601,32 @@ Zotero.Sync.APIClient.prototype = {
 
 
 	async getReadAloudAudio(segment, voiceID) {
+		let method;
 		let url;
-		let params = new URLSearchParams();
+		let options = {
+			responseType: "blob",
+			errorDelayMax: 8000,
+		};
 		if (segment === 'sample') {
-			url = this.baseURL + "tts/sample";
+			method = "GET";
+			let params = new URLSearchParams();
+			params.set('voice', voiceID);
+			url = this.baseURL + "tts/sample?" + params;
+			options.noAPIKey = true;
 		}
 		else {
+			method = "POST";
 			url = this.baseURL + "tts/speak";
-			params.set('text', segment.text);
-		}
-		params.set('voice', voiceID);
-		let uri = url + "?" + params;
-		try {
-			let xmlhttp = await this.makeRequest("GET", uri, {
-				responseType: "blob",
-				noAPIKey: segment === 'sample',
-				cache: true,
-				errorDelayMax: 8000,
+			options.headers = {
+				"Content-Type": "application/json",
+			};
+			options.body = JSON.stringify({
+				voice: voiceID,
+				text: segment.text,
 			});
-
+		}
+		try {
+			let xmlhttp = await this.makeRequest(method, url, options);
 			return { audio: xmlhttp.response };
 		}
 		catch (e) {
