@@ -677,7 +677,7 @@ class ReaderInstance {
 	}
 
 	get itemID() {
-		return this._item.id;
+		return this._item?.id;
 	}
 
 	async updateTitle() {
@@ -1598,6 +1598,7 @@ class ReaderInstance {
 	}
 
 	_getReadAloudRemoteInterface(targetWindow) {
+		if (!this._window) return null;
 		// Wrap return values in child window Promises to avoid permissions errors
 		let audioCache = this._window.caches.open('read-aloud');
 		return {

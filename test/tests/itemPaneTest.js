@@ -739,7 +739,7 @@ describe("Item pane", function () {
 		});
 	});
 
-	describe.skip("Attachments pane", function () {
+	describe("Attachments pane", function () {
 		let paneID = "attachments";
 
 		beforeEach(function () {
@@ -1556,7 +1556,7 @@ describe("Item pane", function () {
 	});
 	
 	
-	describe.skip("Attachment pane", function () {
+	describe("Attachment pane", function () {
 		let paneID = "attachment-info";
 
 		beforeEach(function () {
@@ -1724,11 +1724,6 @@ describe("Item pane", function () {
 		});
 
 		it("should discard attachment pane preview after becoming invisible", async function () {
-			// TEMP: https://github.com/zotero/zotero/issues/5624
-			if (Zotero.automatedTest) {
-				this.skip();
-				return;
-			}
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			let attachmentBox = itemDetails.getPane(paneID);
 
