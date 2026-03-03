@@ -57,28 +57,49 @@ jobs:
         env:
           NODE_OPTIONS: --openssl-legacy-provider
       
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      # Create deployment ZIP from the build output, then replace build/ with the
+      # unzipped contents so that tests run against the same artifact that gets
+      # deployed. This catches problems that only manifest after a zip round-trip
+      # (e.g., resolved symlinks, missing files).
+      - name: Create deployment ZIP
+        run: |
+          cd build
+          zip -r ../build.zip *
+          cd ..
 
-      - name: Upload deployment ZIP
+      - name: Replace build with ZIP contents
+        run: |
+          rm -rf build
+          mkdir build
+          cd build
+          unzip ../build.zip
+
+      - name: Check if deployment branch
+        id: check-deploy
         if: |
           env.ACT != 'true'
           && github.repository == 'zotero/zotero'
           && github.event_name == 'push'
           && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fx128' || endsWith(github.ref, '-hotfix'))
+        run: echo "deploy=true" >> "$GITHUB_OUTPUT"
+
+      - uses: ruby/setup-ruby@v1
+        if: steps.check-deploy.outputs.deploy == 'true'
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+
+      - name: Upload deployment ZIP
+        if: steps.check-deploy.outputs.deploy == 'true'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           mkdir build-zip
-          cd build
-          zip -r ../build-zip/$GITHUB_SHA.zip *
-          cd ..
+          cp build.zip build-zip/$GITHUB_SHA.zip
           gem install --no-document dpl -v '>= 2.0'
           dpl s3 --bucket zotero-download --local_dir build-zip --upload_dir ci/client --acl public_read
-      
+
       - name: Run tests
         run: xvfb-run test/runtests.sh -f
 
