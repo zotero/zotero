@@ -212,8 +212,8 @@ class ReaderInstance {
 			try {
 				ftl.push(Zotero.File.getContentsFromURL(ftlURL));
 			}
-			catch (e) {
-				Zotero.logError(e);
+			catch {
+				// Ignore
 			}
 		}
 
