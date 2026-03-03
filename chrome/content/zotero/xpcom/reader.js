@@ -1599,6 +1599,7 @@ class ReaderInstance {
 
 	_getReadAloudRemoteInterface(targetWindow) {
 		// Wrap return values in child window Promises to avoid permissions errors
+		let audioCache = this._window.caches.open('read-aloud');
 		return {
 			getVoices: () => {
 				return new targetWindow.Promise(async (resolve) => {
@@ -1611,9 +1612,32 @@ class ReaderInstance {
 
 			getAudio: (segment, voice) => {
 				return new targetWindow.Promise(async (resolve) => {
+					let cacheURL = 'https://read-aloud.zotero.invalid/audio?'
+						+ new URLSearchParams({ voice: voice.id, text: segment.text });
+					let cache;
+					try {
+						cache = await audioCache;
+						let cached = await cache.match(cacheURL);
+						if (cached) {
+							resolve(Cu.cloneInto({ audio: await cached.blob() }, targetWindow));
+							return;
+						}
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 					let apiKey = segment === 'sample' ? null : await Zotero.Sync.Data.Local.getAPIKey();
 					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-					resolve(Cu.cloneInto(await client.getReadAloudAudio(segment, voice.id), targetWindow));
+					let result = await client.getReadAloudAudio(segment, voice.id);
+					if (result.audio && cache) {
+						try {
+							await cache.put(cacheURL, new Response(result.audio));
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+					}
+					resolve(Cu.cloneInto(result, targetWindow));
 				});
 			},
 
@@ -1922,7 +1946,7 @@ class ReaderWindow extends ReaderInstance {
 				this._iframeWindow = this._window.document.getElementById('reader').contentWindow;
 				this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
 				this._wrapConsole();
-				this._iframe.addEventListener('contextmenu', this._handleReaderTextboxContextMenuOpen);
+					this._iframe.addEventListener('contextmenu', this._handleReaderTextboxContextMenuOpen);
 			}
 
 			this._switchReaderSubtype(this._type);
