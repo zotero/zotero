@@ -326,6 +326,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 				this.addCondition('shortTitle', operator, part.text, false);
 				this.addCondition('court', operator, part.text, false);
 				this.addCondition('year', operator, part.text, false);
+				this.addCondition('citationKey', operator, part.text, false);
 			}
 			else {
 				this.addCondition('field', operator, part.text, false);
