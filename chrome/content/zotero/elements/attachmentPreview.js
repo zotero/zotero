@@ -263,7 +263,7 @@
 
 		notify(event, type, ids, extraData) {
 			if (!this.item) return;
-			if (this.isReaderType && this._reader) {
+			if (this.isReaderType && this._reader && this._reader._internalReader) {
 				// Following chrome/content/zotero/xpcom/reader.js
 				if (event === "delete") {
 					let disappearedIDs = this._reader.annotationItemIDs.filter(x => ids.includes(x));
@@ -418,13 +418,18 @@
 
 			this._debug(`Processing task ${task.type} (${uid})`);
 
-			switch (task.type) {
-				case "render":
-					await Promise.race([this._processRender(task.data), Zotero.Promise.delay(3000)]);
-					break;
-				case "discard":
-					await Promise.race([this._processDiscard(task.data), Zotero.Promise.delay(3000)]);
-					break;
+			try {
+				switch (task.type) {
+					case "render":
+						await Promise.race([this._processRender(task.data), Zotero.Promise.delay(3000)]);
+						break;
+					case "discard":
+						await Promise.race([this._processDiscard(task.data), Zotero.Promise.delay(3000)]);
+						break;
+				}
+			}
+			catch (e) {
+				this._debug(`Task ${task.type} (${uid}) failed: ${e}`);
 			}
 			
 			this._isProcessingTask = false;
@@ -448,6 +453,12 @@
 			}
 
 			this._debug(`Rendering item ${itemID}, previewType: ${previewType}`);
+
+			// Capture the current task UID to detect zombie renders.
+			// When _processTask's Promise.race times out, this render continues
+			// as a zombie while a new task starts. The new task changes
+			// _lastTaskUID, so the zombie can detect it's outdated.
+			let taskUID = this._lastTaskUID;
 
 			this._isRendering = true;
 			let success = false;
@@ -487,7 +498,11 @@
 				}
 			}
 			finally {
-				this.setPreviewStatus(success ? "success" : "fail");
+				// Only update status if this is still the current task,
+				// not a zombie from a timed-out Promise.race
+				if (this._lastTaskUID === taskUID) {
+					this.setPreviewStatus(success ? "success" : "fail");
+				}
 				this._isRendering = false;
 
 				this._debug(`Render processed, item ${itemID} ${success ? "succeeded" : "failed"}`);
@@ -530,6 +545,16 @@
 			let nextPreview = this._id("next-preview");
 			if (nextPreview) {
 				nextPreview.id = "preview";
+				// If the browser's document is already loaded, resolve the promise
+				// immediately. After the rename, its DOMContentLoaded would match
+				// "preview" instead of "next-preview", so the normal handler might
+				// not resolve this. We must check that readyState is "interactive"
+				// or "complete" (not just that contentWindow exists) because
+				// contentWindow can exist before DOMContentLoaded fires.
+				let readyState = nextPreview.contentDocument?.readyState;
+				if (readyState === "interactive" || readyState === "complete") {
+					this._nextPreviewInitializePromise.resolve();
+				}
 			}
 			this._debug("Preview discarded");
 
@@ -625,10 +650,10 @@
 		 */
 		async _renderReader(itemID) {
 			this.setPreviewStatus("loading");
-			// This only need to be awaited during first load
+			// This only need to be awaited during first load.
+			// _initializePromise (awaited in _processTask) already ensures both
+			// preview and next-preview are ready on first load.
 			await this._previewInitializePromise.promise;
-			// This should be awaited in the following refreshes
-			await this._nextPreviewInitializePromise.promise;
 
 			this._tryAbortRender(itemID);
 
@@ -683,6 +708,13 @@
 		_handleReaderLoad(event) {
 			if (this._id("preview")?.contentWindow?.document === event.target) {
 				this._previewInitializePromise.resolve();
+				// If there is no next-preview element, this preview was likely
+				// a next-preview promoted by _processDiscard before its
+				// DOMContentLoaded fired. Resolve that promise too so
+				// _processDiscard doesn't hang awaiting it.
+				if (!this._id("next-preview")) {
+					this._nextPreviewInitializePromise.resolve();
+				}
 			}
 			else if (this._id("next-preview")?.contentWindow?.document === event.target) {
 				this._nextPreviewInitializePromise.resolve();
