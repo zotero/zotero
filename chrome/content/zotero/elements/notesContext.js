@@ -66,13 +66,13 @@
 			
 			<popupset>
 				<menupopup class="context-pane-add-child-note-button-popup">
-					<menuitem class="context-pane-add-child-note" data-l10n-id="context-notes-add-child-note"/>
-					<menuitem class="context-pane-add-child-note-from-annotations" data-l10n-id="context-notes-add-child-note-from-annotations"/>
+					<menuitem class="context-pane-add-child-note" label="&zotero.context.addChildNote;"/>
+					<menuitem class="context-pane-add-child-note-from-annotations" label="&zotero.context.addChildNoteFromAnnotations;"/>
 				</menupopup>
 		
 				<menupopup class="context-pane-add-standalone-note-button-popup">
-					<menuitem class="context-pane-add-standalone-note" data-l10n-id="context-notes-add-standalone-note"/>
-					<menuitem class="context-pane-add-standalone-note-from-annotations" data-l10n-id="context-notes-add-standalone-note-from-annotations"/>
+					<menuitem class="context-pane-add-standalone-note" label="&zotero.context.addStandaloneNote;"/>
+					<menuitem class="context-pane-add-standalone-note-from-annotations" label="&zotero.context.addStandaloneNoteFromAnnotations;"/>
 				</menupopup>
 				
 				<menupopup class="context-pane-list-popup">
