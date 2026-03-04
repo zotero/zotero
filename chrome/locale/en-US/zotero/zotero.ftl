@@ -637,7 +637,7 @@ context-notes-add-standalone-note =
 context-notes-add-standalone-note-from-annotations =
     .label = Add Standalone Note from Annotations
 context-notes-edit-in-tab =
-    .label = Edit in a Built-in Tab
+    .label = Edit in a New Tab
 context-notes-edit-in-window =
     .label = Edit in a Separate Window
 
