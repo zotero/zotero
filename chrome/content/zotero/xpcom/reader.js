@@ -631,6 +631,10 @@ class ReaderInstance {
 		// Set title once again, because `ReaderWindow` isn't loaded the first time
 		this.updateTitle();
 
+		if (Zotero.isBetaBuild || Zotero.isDevBuild || Zotero.isSourceBuild) {
+			this._showReadAloudGuidance();
+		}
+
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
 			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange),
@@ -1657,6 +1661,20 @@ class ReaderInstance {
 				});
 			},
 		};
+	}
+
+	async _showReadAloudGuidance() {
+		await this._internalReader._primaryView.initializedPromise;
+
+		// Anchor to the toolbar button in the iframe
+		let readAloudButton = this._iframeWindow.document.getElementById('read-aloud');
+		if (!readAloudButton) return;
+
+		let guidancePanel = this._window.document.createXULElement('guidance-panel');
+		guidancePanel.setAttribute('about', 'readAloud');
+		guidancePanel.setAttribute('position', 'after_end');
+		this._popupset.appendChild(guidancePanel);
+		guidancePanel.show({ forEl: readAloudButton });
 	}
 
 	async _openReadAloudFirstRunDialog({ lang, ftl }) {

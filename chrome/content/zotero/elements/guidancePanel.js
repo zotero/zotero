@@ -125,7 +125,7 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 					text = await document.l10n.formatValue("first-run-guidance-" + about, options.l10nArgs || {});
 				}
 				text = text.split("\n");
-				var descriptionNode = document.querySelector('.panel-text');
+				var descriptionNode = this.querySelector('.panel-text');
 				
 				while (descriptionNode.hasChildNodes()) {
 					descriptionNode.removeChild(descriptionNode.firstChild);
@@ -144,6 +144,28 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 			var f = () => {
 				if (this.hasAttribute("foregroundonly") && Services.ww.activeWindow != window) return;
 				
+				// If the anchor element is inside another frame, create a proxy
+				// element in the parent document at the anchor's visual location
+				if (forEl.ownerDocument !== document) {
+					let iframe = forEl.ownerGlobal.frameElement;
+					if (iframe) {
+						let iframeRect = iframe.getBoundingClientRect();
+						let forElRect = forEl.getBoundingClientRect();
+						let proxy = document.createElement('div');
+						proxy.style.position = 'fixed';
+						proxy.style.left = (iframeRect.left + forElRect.left) + 'px';
+						proxy.style.top = (iframeRect.top + forElRect.top) + 'px';
+						proxy.style.width = forElRect.width + 'px';
+						proxy.style.height = forElRect.height + 'px';
+						proxy.style.pointerEvents = 'none';
+						document.documentElement.appendChild(proxy);
+						forEl = proxy;
+						this.panel.addEventListener('popuphidden', () => {
+							proxy.remove();
+						}, { once: true });
+					}
+				}
+
 				this.panel.openPopup(forEl, position || "after_start",
 					x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0);
 
