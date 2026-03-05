@@ -1512,7 +1512,7 @@
 				firstName.sizeToContent();
 				lastName.sizeToContent();
 				this.modifyCreator(rowIndex, fields);
-				this.item.saveTx();
+				this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		}
 		
@@ -1535,9 +1535,9 @@
 			}
 			
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-change-type' });
 			}
-			
+
 			var fieldsToDelete = this.item.getFieldsNotInType(itemTypeID, true);
 			
 			// Special cases handled below
@@ -1590,9 +1590,9 @@
 						Zotero.getString('pane.item.changeType.title'),
 						Zotero.getString('pane.item.changeType.text') + "\n" + fieldNames)) {
 				this.item.setType(itemTypeID);
-				
+
 				if (this.saveOnEdit) {
-					await this.item.saveTx();
+					await this.item.saveTx({ undoAction: 'undo-action-change-type' });
 				}
 				else {
 					this._forceRenderAll();
@@ -1849,7 +1849,7 @@
 				return;
 			}
 			this.item.removeCreator(index);
-			await this.item.saveTx();
+			await this.item.saveTx({ undoAction: 'undo-action-remove-creator' });
 		}
 		
 		removeUnsavedCreatorRow(onlyIfEmpty = false) {
@@ -2056,7 +2056,7 @@
 				this.modifyCreator(creatorIndex, fields);
 				if (this.saveOnEdit) {
 					this.ignoreBlur = true;
-					this.item.saveTx().then(() => {
+					this.item.saveTx({ undoAction: 'undo-action-edit-creator' }).then(() => {
 						this.ignoreBlur = false;
 					});
 				}
@@ -2145,9 +2145,9 @@
 				}
 				// Select the last field added
 				this._selectField = `itembox-field-value-creator-${newCreator.position}-lastName`;
-				
+
 				if (this.saveOnEdit) {
-					this.item.saveTx();
+					this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 				}
 			}
 		}
@@ -2220,18 +2220,22 @@
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			
 			// Creator fields
+			let isCreatorField = false;
+			let isCreatorUnsaved = false;
 			if (field == 'creator') {
+				isCreatorField = true;
 				var row = textbox.closest('.meta-row');
-				
+
 				var otherFields = this.getCreatorFields(row);
+				isCreatorUnsaved = otherFields.isUnsaved;
 				otherFields[creatorField] = value;
 				this.modifyCreator(creatorIndex, otherFields);
-				
+
 				if (Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
 					this._showCreatorTypeGuidance = true;
 				}
 			}
-			
+
 			// Fields
 			else {
 				// Access date needs to be parsed and converted to UTC SQL date
@@ -2297,10 +2301,16 @@
 			}
 			
 			if (this.saveOnEdit) {
-				await this._saveItems();
+				let saveOptions = {};
+				if (isCreatorField) {
+					saveOptions.undoAction = isCreatorUnsaved
+						? 'undo-action-add-creator'
+						: 'undo-action-edit-creator';
+				}
+				await this._saveItems(saveOptions);
 			}
 		}
-		
+
 		_rowIsClickable(fieldName) {
 			return this.clickByRow
 					&& (this.clickable
@@ -2324,17 +2334,17 @@
 			}
 		}
 		
-		async _saveItems() {
+		async _saveItems(saveOptions = {}) {
 			// Cache item and extra items to avoid a race condition where, after `hideEditor`,
 			// while we yield for `await Zotero.DB.executeTransaction`, itemBox is rendered for
 			// the new item and this.item is no longer relevant
 			let item = this.item;
 			let extraItems = this._extraItems;
-			
+
 			await Zotero.DB.executeTransaction(async () => {
-				await item.save();
+				await item.save(saveOptions);
 				for (let extraItem of extraItems) {
-					await extraItem.save();
+					await extraItem.save(saveOptions);
 				}
 			});
 			if (extraItems.length) {
@@ -2452,12 +2462,12 @@
 			fields.lastName = firstName;
 			fields.firstName = lastName;
 			this.modifyCreator(creatorIndex, fields);
-			
+
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		}
-		
+
 		canCapitalizeCreatorName(row) {
 			var fields = this.getCreatorFields(row);
 			return fields.firstName && Zotero.Utilities.capitalizeName(fields.firstName) != fields.firstName
@@ -2477,7 +2487,7 @@
 			var fields = this.getCreatorFields(row);
 			this.modifyCreator(creatorIndex, fields);
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		}
 
@@ -2591,10 +2601,10 @@
 				this.item.setCreator(i, creators[i]);
 			}
 			if (this.saveOnEdit && !skipSave) {
-				this.item.saveTx();
+				this.item.saveTx({ undoAction: 'undo-action-reorder-creator' });
 			}
 		}
-		
+
 		focusField(fieldName) {
 			this.querySelector(`editable-text[fieldname="${fieldName}"]`)?.focus();
 		}
@@ -2944,7 +2954,7 @@
 			
 			this.modifyCreator(index, fields);
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		};
 

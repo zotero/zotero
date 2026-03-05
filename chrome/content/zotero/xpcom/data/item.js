@@ -870,6 +870,95 @@ Zotero.Item.prototype.setField = function (field, value, loadIn) {
 	return true;
 }
 
+/**
+ * Override to correctly resolve item data fields via _itemData[fieldID]
+ */
+Zotero.Item.prototype._getUndoData = function () {
+	let skipFields = new Set(['version', 'synced', 'clientDateModified', 'dateModified']);
+	let fields = {};
+
+	// Fields tracked via _previousData
+	for (let field of Object.keys(this._previousData)) {
+		if (skipFields.has(field)) continue;
+		// Collections are an array but need explicit undo tracking
+		if (field === 'collections') {
+			fields[field] = {
+				old: this._previousData[field],
+				new: this._collections
+			};
+			continue;
+		}
+		if (field === 'note') {
+			fields[field] = {
+				old: this._previousData[field],
+				new: this._noteText
+			};
+			continue;
+		}
+		if (typeof this._previousData[field] === 'object' && this._previousData[field] !== null) {
+			continue;
+		}
+
+		let fieldID = Zotero.ItemFields.getID(field);
+		if (fieldID) {
+			// Item data field -- new value is in _itemData
+			fields[field] = {
+				old: this._previousData[field],
+				new: this._itemData[fieldID]
+			};
+		}
+		else {
+			// Primary data field -- new value is on the instance property
+			fields[field] = {
+				old: this._previousData[field],
+				new: this['_' + field]
+			};
+		}
+	}
+
+	// Fields tracked via _changedData (e.g. deleted, tags)
+	for (let field of Object.keys(this._changedData)) {
+		if (skipFields.has(field)) continue;
+		if (field === 'deleted') {
+			fields[field] = {
+				old: this._deleted,
+				new: this._changedData[field]
+			};
+		}
+		else if (field === 'tags') {
+			fields[field] = {
+				old: this._tags,
+				new: this._changedData[field]
+			};
+		}
+	}
+
+	// Creators tracked via _changed.creators
+	if (this._changed.creators) {
+		// Old creators were saved in _previousData.creators by _markFieldChange
+		let oldCreators = this._previousData.creators || {};
+		let newCreators = {};
+		for (let i = 0; i < this._creators.length; i++) {
+			newCreators[i] = Object.assign({}, this._creators[i]);
+		}
+		fields.creators = {
+			old: oldCreators,
+			new: newCreators
+		};
+	}
+
+	if (!Object.keys(fields).length) return null;
+
+	return {
+		objectType: this._objectType,
+		id: this._id,
+		libraryID: this._libraryID,
+		key: this._key,
+		fields
+	};
+};
+
+
 /*
  * Get the title for an item for display in the interface
  *
@@ -2989,7 +3078,7 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, options = 
 			if (origTitle === origFilename || origTitle === origFilenameNoExt) {
 				this.setField('title', newName);
 				out.titleUpdated = true;
-				await this.saveTx();
+				await this.saveTx({ skipUndo: true });
 			}
 		}
 		

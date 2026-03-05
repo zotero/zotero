@@ -860,7 +860,7 @@ normalize-attachment-titles-text = { -app-name } automatically renames files on 
     
     Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
 
-banner-close-button = 
+banner-close-button =
     .aria-label = Dismiss notification
 
 plugins-blocked-plugin =
@@ -879,3 +879,50 @@ item-pane-batch-editing-warning = Edit meta data for all selected items.
 item-pane-batch-editing-caution = Caution: edits to fields with multiple values will change the field for all items.
 
 item-pane-batch-editing-multiple-values-placeholder = Multiple
+
+undo-action-edit-metadata = { $count ->
+    [one] Edit Metadata
+   *[other] Edit Metadata ({ $count } items)
+}
+undo-action-trash = { $count ->
+    [one] Trash Item
+   *[other] Trash { $count } Items
+}
+undo-action-restore = { $count ->
+    [one] Restore Item
+   *[other] Restore { $count } Items
+}
+undo-action-trash-collection = { $count ->
+    [one] Trash Collection
+   *[other] Trash { $count } Collections
+}
+undo-action-restore-collection = { $count ->
+    [one] Restore Collection
+   *[other] Restore { $count } Collections
+}
+undo-action-add-to-collection = { $count ->
+    [one] Add to Collection
+   *[other] Add { $count } Items to Collection
+}
+undo-action-remove-from-collection = { $count ->
+    [one] Remove from Collection
+   *[other] Remove { $count } Items from Collection
+}
+undo-action-rename-collection = Rename Collection
+undo-action-rename-search = Rename Saved Search
+undo-action-move-collection = Move Collection
+undo-action-move-item = { $count ->
+    [one] Move Item
+   *[other] Move { $count } Items
+}
+undo-action-add-tag = Add Tag
+undo-action-change-tag = Change Tag
+undo-action-remove-tag = Remove Tag
+undo-action-edit-note = Edit Note
+undo-action-add-creator = Add Creator
+undo-action-remove-creator = Remove Creator
+undo-action-edit-creator = Edit Creator
+undo-action-reorder-creator = Reorder Creator
+undo-action-change-type = Change Item Type
+menu-edit-undo-action = Undo { $action }
+menu-edit-redo-action = Redo { $action }
