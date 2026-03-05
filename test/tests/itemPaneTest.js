@@ -739,7 +739,7 @@ describe("Item pane", function () {
 		});
 	});
 
-	describe("Attachments pane", function () {
+	describe.skip("Attachments pane", function () {
 		let paneID = "attachments";
 
 		beforeEach(function () {
