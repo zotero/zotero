@@ -1673,8 +1673,8 @@ class ReaderInstance {
 		let guidancePanel = this._window.document.createXULElement('guidance-panel');
 		guidancePanel.setAttribute('about', 'readAloud');
 		guidancePanel.setAttribute('position', 'after_end');
-		this._popupset.appendChild(guidancePanel);
-		guidancePanel.show({ forEl: readAloudButton });
+		this._popupset.append(guidancePanel);
+		await guidancePanel.show({ forEl: readAloudButton });
 	}
 
 	async _openReadAloudFirstRunDialog({ lang, ftl }) {
