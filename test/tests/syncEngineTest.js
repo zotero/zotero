@@ -163,17 +163,14 @@ describe("Zotero.Sync.Data.Engine", function () {
 	//
 	// Tests
 	//
-	beforeEach(function* () {
-		yield resetDB({
-			thisArg: this,
-			skipBundledFiles: true
-		});
-		
+	beforeEach(async function () {
+		await resetData();
+
 		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
-		
-		yield Zotero.Users.setCurrentUserID(userID);
-		yield Zotero.Users.setCurrentUsername("testuser");
-		yield Zotero.Users.setCurrentName("Test User");
+
+		await Zotero.Users.setCurrentUserID(userID);
+		await Zotero.Users.setCurrentUsername("testuser");
+		await Zotero.Users.setCurrentName("Test User");
 	})
 	
 	after(function () {

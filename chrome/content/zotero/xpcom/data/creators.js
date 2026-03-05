@@ -31,6 +31,7 @@ Zotero.Creators = new function () {
 	var _cache = {};
 	
 	this.init = async function () {
+		_cache = {};
 		var repaired = false;
 		var sql = "SELECT * FROM creators";
 		var rows = await Zotero.DB.queryAsync(sql);

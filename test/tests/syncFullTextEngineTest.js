@@ -45,10 +45,7 @@ describe("Zotero.Sync.Data.FullTextEngine", function () {
 	// Tests
 	//
 	beforeEach(function* () {
-		yield resetDB({
-			thisArg: this,
-			skipBundledFiles: true
-		});
+		yield resetData();
 		
 		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
 		

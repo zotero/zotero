@@ -497,10 +497,14 @@ var getGroup = function () {
 
 
 var createGroup = async function (props = {}) {
-	// Create a group item requires the current user to be set
-	if (!Zotero.Users.getCurrentUserID()) {
+	// Creating a group item requires the current user to be set and in the users table
+	let currentUserID = Zotero.Users.getCurrentUserID();
+	if (!currentUserID) {
 		await Zotero.Users.setCurrentUserID(1);
-		await Zotero.Users.setName(1, 'Name');
+		currentUserID = 1;
+	}
+	if (!Zotero.Users.getName(currentUserID)) {
+		await Zotero.Users.setName(currentUserID, 'Name');
 	}
 	
 	var group = new Zotero.Group;
@@ -745,6 +749,92 @@ async function resetDB(options = {}) {
 		options
 	);
 	await Zotero.Schema.schemaUpdatePromise;
+}
+
+/**
+ * Lightweight alternative to resetDB() that clears user data and sync state without doing a full
+ * Zotero shutdown/reinit cycle. Uses application APIs where possible to keep in-memory caches
+ * consistent.
+ *
+ * This is much faster than resetDB() because it avoids reloading all JS files and reinitializing
+ * the entire Zotero context. It's suitable for tests that need a clean data state (no items,
+ * collections, searches, or sync state) but don't need a completely fresh Zotero instance.
+ */
+async function resetData() {
+	resetPrefs();
+
+	// Erase group and feed libraries (cascades to their items, collections, etc.)
+	for (let group of Zotero.Groups.getAll()) {
+		await group.eraseTx({ skipDeleteLog: true });
+	}
+	for (let feed of Zotero.Feeds.getAll()) {
+		await feed.eraseTx({ skipDeleteLog: true });
+	}
+	_defaultGroup = null;
+
+	let userLibraryID = Zotero.Libraries.userLibraryID;
+
+	// Erase all objects in user library using application APIs so caches stay consistent.
+	// Top-level items first (children are erased automatically), then collections, then searches.
+	await Zotero.DB.executeTransaction(async function () {
+		let eraseOptions = { skipDeleteLog: true };
+		for (let item of (await Zotero.Items.getAll(userLibraryID, true, true))) {
+			await item.erase(eraseOptions);
+		}
+		for (let collection of Zotero.Collections.getByLibrary(userLibraryID, false, true)) {
+			if (!collection.parentID) {
+				await collection.erase(eraseOptions);
+			}
+		}
+		for (let search of (await Zotero.Searches.getAll(userLibraryID))) {
+			await search.erase(eraseOptions);
+		}
+
+		// Clear synced settings
+		let sql = "SELECT setting FROM syncedSettings WHERE libraryID=?";
+		let settings = await Zotero.DB.columnQueryAsync(sql, userLibraryID);
+		for (let setting of settings) {
+			await Zotero.SyncedSettings.clear(userLibraryID, setting, { skipDeleteLog: true });
+		}
+
+		// Clear sync-specific tables
+		await Zotero.Sync.Data.Local.clearCacheForLibrary(userLibraryID);
+		await Zotero.Sync.Data.Local.clearQueueForLibrary(userLibraryID);
+
+		// Clear fulltext and last-sync version entries
+		await Zotero.DB.queryAsync(
+			"DELETE FROM version WHERE schema IN (?, 'lastsync')",
+			"fulltext_" + userLibraryID
+		);
+
+		// Clear orphaned shared tables (items are gone but value rows remain)
+		await Zotero.DB.queryAsync("DELETE FROM tags");
+		await Zotero.DB.queryAsync("DELETE FROM creators");
+
+		// Clear account settings so Users.init() resets its private state
+		await Zotero.DB.queryAsync(
+			"DELETE FROM settings WHERE setting='account' AND key IN ('userID', 'libraryID', 'username')"
+		);
+		await Zotero.DB.queryAsync("DELETE FROM users");
+
+		// Reset library version
+		await Zotero.DB.queryAsync(
+			"UPDATE libraries SET version=0, storageVersion=0, lastSync=0 WHERE libraryID=?",
+			userLibraryID
+		);
+	});
+
+	// Clear delete logs
+	await Zotero.Sync.Data.Local.clearDeleteLogForLibrary(userLibraryID);
+	await Zotero.DB.queryAsync("DELETE FROM storageDeleteLog WHERE libraryID=?", userLibraryID);
+
+	// Reload caches from DB
+	await Zotero.Libraries.init();
+	await Zotero.Users.init();
+	await Zotero.Tags.init();
+	await Zotero.Creators.init();
+	await Zotero.SyncedSettings.loadAll(userLibraryID);
+	await Zotero.Sync.Data.Local.init();
 }
 
 /**

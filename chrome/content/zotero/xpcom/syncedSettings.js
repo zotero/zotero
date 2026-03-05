@@ -73,9 +73,7 @@ Zotero.SyncedSettings = (function () {
 		loadAll: async function (libraryID) {
 			Zotero.debug("Loading synced settings for library " + libraryID);
 			
-			if (!_cache[libraryID]) {
-				_cache[libraryID] = {};
-			}
+			_cache[libraryID] = {};
 			
 			var invalid = [];
 			

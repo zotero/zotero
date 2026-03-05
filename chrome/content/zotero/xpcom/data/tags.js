@@ -40,6 +40,8 @@ Zotero.Tags = new function () {
 	
 	
 	this.init = async function () {
+		_tagsByID.clear();
+		_idsByTag.clear();
 		await Zotero.DB.queryAsync(
 			"SELECT tagID, name FROM tags",
 			false,

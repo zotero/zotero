@@ -171,10 +171,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	}
 	
 	beforeEach(async function () {
-		await resetDB({
-			thisArg: this,
-			skipBundledFiles: true
-		});
+		await resetData();
 		
 		var port;
 		({ httpd, port } = await startHTTPServer());
