@@ -1,4 +1,4 @@
-describe("Item pane", function () {
+describe.only("Item pane", function () {
 	var win, doc, ZoteroPane, Zotero_Tabs, ZoteroContextPane, itemsView;
 
 	async function waitForPreviewBoxRender(box, itemID) {

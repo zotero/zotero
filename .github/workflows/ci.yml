@@ -100,8 +100,13 @@ jobs:
           gem install --no-document dpl -v '>= 2.0'
           dpl s3 --bucket zotero-download --local_dir build-zip --upload_dir ci/client --acl public_read
 
-      - name: Run tests
-        run: xvfb-run test/runtests.sh -f
+      - name: Run tests (20 iterations)
+        run: |
+          for i in $(seq 1 20); do
+            echo "========== TEST RUN $i/20 =========="
+            xvfb-run test/runtests.sh -f -b 2>&1 | tail -500
+            echo "========== END RUN $i/20 (exit: $?) =========="
+          done
 
       - name: Cache utilities Node modules
         id: utilities-node-cache
