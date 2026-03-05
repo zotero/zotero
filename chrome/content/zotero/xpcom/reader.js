@@ -1673,11 +1673,21 @@ class ReaderInstance {
 		let guidancePanel = this._window.document.createXULElement('guidance-panel');
 		guidancePanel.setAttribute('about', 'readAloud');
 		guidancePanel.setAttribute('position', 'after_end');
+		guidancePanel.setAttribute('noautohide', 'true');
 		this._popupset.append(guidancePanel);
+		this._readAloudGuidancePanel = guidancePanel;
 		await guidancePanel.show({ forEl: readAloudButton });
 	}
 
+	_hideReadAloudGuidance() {
+		if (this._readAloudGuidancePanel) {
+			this._readAloudGuidancePanel.hide();
+			this._readAloudGuidancePanel = null;
+		}
+	}
+
 	async _openReadAloudFirstRunDialog({ lang, ftl }) {
+		this._hideReadAloudGuidance();
 		let io = {
 			dataIn: {
 				lang,
@@ -1904,6 +1914,9 @@ class ReaderTab extends ReaderInstance {
 	}
 
 	_setReadAloudStatus(status) {
+		if (status.active) {
+			this._hideReadAloudGuidance();
+		}
 		if (status.active && !status.paused) {
 			// Wake up the docShell even if this tab is in the background,
 			// so event-loop tasks run immediately. Without this, playing
