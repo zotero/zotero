@@ -122,6 +122,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		// Clear message list
 		_errors = [];
 		_tooltipMessages = [];
+
+		// Clear undo history to avoid conflicts with remote changes
+		Zotero.UndoHistory.clear();
 		
 		// Shouldn't be possible because of serial()
 		if (_syncInProgress) {

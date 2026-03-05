@@ -306,7 +306,7 @@ Zotero.RecognizeDocument = new function () {
 				throw new Error("Error renaming " + path);
 			}
 			attachment.setAutoAttachmentTitle();
-			await attachment.saveTx();
+			await attachment.saveTx({ skipUndo: true });
 		}
 
 		try {

@@ -980,9 +980,9 @@ Zotero.Items = function () {
 	};
 
 
-	this.trash = async function (ids) {
+	this.trash = async function (ids, options = {}) {
 		Zotero.DB.requireTransaction();
-		
+
 		var libraryIDs = new Set();
 		ids = Zotero.flattenArguments(ids);
 		var items = [];
@@ -993,15 +993,28 @@ Zotero.Items = function () {
 				Zotero.Notifier.queue('trash', 'item', id);
 				continue;
 			}
-			
+
 			if (!item.isEditable()) {
 				throw new Error(item._ObjectType + " " + item.libraryKey + " is not editable");
 			}
-			
+
 			if (!Zotero.Libraries.get(item.libraryID).hasTrash) {
 				throw new Error(Zotero.Libraries.getName(item.libraryID) + " does not have a trash");
 			}
-			
+
+			// Record undo data before modifying state
+			if (Zotero.UndoHistory && !options.skipUndo && !item.deleted) {
+				Zotero.UndoHistory._addChange({
+					objectType: 'item',
+					id: item.id,
+					libraryID: item.libraryID,
+					key: item.key,
+					fields: {
+						deleted: { old: false, new: true }
+					}
+				});
+			}
+
 			items.push(item);
 			libraryIDs.add(item.libraryID);
 		}
@@ -1055,9 +1068,9 @@ Zotero.Items = function () {
 	};
 	
 	
-	this.trashTx = function (ids) {
+	this.trashTx = function (ids, options) {
 		return Zotero.DB.executeTransaction(async function () {
-			return this.trash(ids);
+			return this.trash(ids, options);
 		}.bind(this));
 	}
 	

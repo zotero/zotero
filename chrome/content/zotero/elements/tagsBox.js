@@ -461,7 +461,7 @@
 						this.add(value);
 						try {
 							this.item.replaceTag(oldValue, value);
-							await this.item.saveTx();
+							await this.item.saveTx({ undoAction: 'undo-action-change-tag' });
 						}
 						catch (e) {
 							this._forceRenderAll();
@@ -478,7 +478,7 @@
 							nextRowElem?.focus();
 						}
 						this.item.removeTag(oldValue);
-						await this.item.saveTx();
+						await this.item.saveTx({ undoAction: 'undo-action-remove-tag' });
 					}
 					catch (e) {
 						this._forceRenderAll();
@@ -498,7 +498,7 @@
 				}
 
 				tags.forEach(tag => this.item.addTag(tag));
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-add-tag' });
 			}
 			// Single tag at end
 			else {
@@ -513,7 +513,7 @@
 				this.add(value);
 				this.item.addTag(value);
 				try {
-					await this.item.saveTx();
+					await this.item.saveTx({ undoAction: 'undo-action-add-tag' });
 				}
 				catch (e) {
 					this._forceRenderAll();
