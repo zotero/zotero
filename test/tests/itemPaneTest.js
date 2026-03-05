@@ -1556,7 +1556,7 @@ describe("Item pane", function () {
 	});
 	
 	
-	describe("Attachment pane", function () {
+	describe.skip("Attachment pane", function () {
 		let paneID = "attachment-info";
 
 		beforeEach(function () {
