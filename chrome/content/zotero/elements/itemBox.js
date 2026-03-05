@@ -415,7 +415,8 @@
 				this.renderCustomRows(ids);
 				return;
 			}
-			if (event == 'modify' && this.item?.id && ids.includes(this.item.id)) {
+			if (event == 'modify' && this.item?.id
+					&& (ids.includes(this.item.id) || this._extraItems?.some(item => ids.includes(item.id)))) {
 				this._forceRenderAll();
 			}
 			if (event === 'select' && type === 'tab' && ids.length > 0) {
@@ -761,7 +762,7 @@
 					optionsButton.addEventListener("click", onContextMenu);
 					rowData.appendChild(optionsButton);
 					// Options button is always created for focus management but if the field is empty, it is hidden
-					if (!val) optionsButton.hidden = true;
+					if (!val && !extraFieldValues.some(v => v)) optionsButton.hidden = true;
 				}
 
 				rowData.oncontextmenu = onContextMenu;
@@ -1672,7 +1673,7 @@
 				firstName.sizeToContent();
 				lastName.sizeToContent();
 				this.modifyCreator(rowIndex, fields);
-				this.item.saveTx();
+				this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		}
 		
@@ -1694,6 +1695,8 @@
 				return true;
 			}
 			
+			// Flush any pending field edits as a separate undo step
+			// before changing the item type
 			if (this.saveOnEdit) {
 				await this.item.saveTx();
 			}
@@ -1752,7 +1755,7 @@
 				this.item.setType(itemTypeID);
 				
 				if (this.saveOnEdit) {
-					await this.item.saveTx();
+					await this.item.saveTx({ undoAction: 'undo-action-change-type' });
 				}
 				else {
 					this._forceRenderAll();
@@ -2030,7 +2033,7 @@
 				return;
 			}
 			this.item.removeCreator(index);
-			await this.item.saveTx();
+			await this.item.saveTx({ undoAction: 'undo-action-remove-creator' });
 		}
 		
 		removeUnsavedCreatorRow(onlyIfEmpty = false) {
@@ -2235,11 +2238,11 @@
 				var fields = this.getCreatorFields(row);
 				fields[creatorField] = creator[creatorField];
 				fields[otherField] = creator[otherField];
-
+				
 				this.modifyCreator(creatorIndex, fields);
 				if (this.saveOnEdit) {
 					this.ignoreBlur = true;
-					this.item.saveTx().then(() => {
+					this.item.saveTx({ undoAction: 'undo-action-edit-creator' }).then(() => {
 						this.ignoreBlur = false;
 					});
 				}
@@ -2330,7 +2333,7 @@
 				this._selectField = `itembox-field-value-creator-${newCreator.position}-lastName`;
 				
 				if (this.saveOnEdit) {
-					this.item.saveTx();
+					this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 				}
 			}
 		}
@@ -2403,10 +2406,14 @@
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			
 			// Creator fields
+			let isCreatorField = false;
+			let isCreatorUnsaved = false;
 			if (field == 'creator') {
+				isCreatorField = true;
 				var row = textbox.closest('.meta-row');
 				
 				var otherFields = this.getCreatorFields(row);
+				isCreatorUnsaved = otherFields.isUnsaved;
 				otherFields[creatorField] = value;
 				this.modifyCreator(creatorIndex, otherFields);
 				
@@ -2480,7 +2487,13 @@
 			}
 			
 			if (this.saveOnEdit) {
-				await this._saveItems();
+				let saveOptions = {};
+				if (isCreatorField) {
+					saveOptions.undoAction = isCreatorUnsaved
+						? 'undo-action-add-creator'
+						: 'undo-action-edit-creator';
+				}
+				await this._saveItems(saveOptions);
 			}
 		}
 		
@@ -2516,7 +2529,7 @@
 			}
 		}
 		
-		async _saveItems() {
+		async _saveItems(saveOptions = {}) {
 			// Cache item and extra items to avoid a race condition where, after `hideEditor`,
 			// while we yield for `await Zotero.DB.executeTransaction`, itemBox is rendered for
 			// the new item and this.item is no longer relevant
@@ -2524,9 +2537,9 @@
 			let extraItems = this._extraItems;
 			
 			await Zotero.DB.executeTransaction(async () => {
-				await item.save();
+				await item.save(saveOptions);
 				for (let extraItem of extraItems) {
-					await extraItem.save();
+					await extraItem.save(saveOptions);
 				}
 			});
 			if (extraItems.length) {
@@ -2646,7 +2659,7 @@
 			this.modifyCreator(creatorIndex, fields);
 			
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		}
 		
@@ -2669,7 +2682,7 @@
 			var fields = this.getCreatorFields(row);
 			this.modifyCreator(creatorIndex, fields);
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		}
 
@@ -2783,7 +2796,7 @@
 				this.item.setCreator(i, creators[i]);
 			}
 			if (this.saveOnEdit && !skipSave) {
-				this.item.saveTx();
+				this.item.saveTx({ undoAction: 'undo-action-reorder-creator' });
 			}
 		}
 		
@@ -3139,7 +3152,7 @@
 			
 			this.modifyCreator(index, fields);
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		};
 

@@ -4,6 +4,7 @@
 // http://www.zotero.org/documentation/hidden_prefs
 
 pref("extensions.zotero.firstRun2", true);
+pref("extensions.zotero.undoHistory.steps", 100);
 
 pref("extensions.zotero.saveRelativeAttachmentPath", false);
 pref("extensions.zotero.baseAttachmentPath", "");

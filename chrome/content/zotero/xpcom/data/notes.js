@@ -492,7 +492,7 @@ Zotero.Notes = new function () {
 			}
 		}
 		toNote.setNote(doc.body.innerHTML);
-		await toNote.save({ skipDateModifiedUpdate: true });
+		await toNote.save({ skipDateModifiedUpdate: true, skipUndo: true });
 	};
 	
 	this.promptToIgnoreMissingImage = function () {
@@ -637,7 +637,7 @@ Zotero.Notes = new function () {
 		schemaVersion++;
 		metadataContainer.setAttribute('data-schema-version', schemaVersion);
 		item.setNote(doc.body.innerHTML);
-		await item.saveTx({ skipDateModifiedUpdate: true });
+		await item.saveTx({ skipDateModifiedUpdate: true, skipUndo: true });
 		return true;
 	};
 };

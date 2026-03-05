@@ -913,3 +913,56 @@ item-pane-batch-editing-header = { $count ->
     [one] Editing { $count } item
    *[other] Editing { $count } items
 }
+
+undo-action-edit-metadata = { $count ->
+    [one] Edit Metadata
+   *[other] Edit Metadata ({ $count } items)
+}
+undo-action-trash = { $count ->
+    [one] Trash Item
+   *[other] Trash { $count } Items
+}
+undo-action-restore = { $count ->
+    [one] Restore Item
+   *[other] Restore { $count } Items
+}
+undo-action-trash-collection = { $count ->
+    [one] Trash Collection
+   *[other] Trash { $count } Collections
+}
+undo-action-restore-collection = { $count ->
+    [one] Restore Collection
+   *[other] Restore { $count } Collections
+}
+undo-action-add-to-collection = { $count ->
+    [one] Add to Collection
+   *[other] Add { $count } Items to Collection
+}
+undo-action-remove-from-collection = { $count ->
+    [one] Remove from Collection
+   *[other] Remove { $count } Items from Collection
+}
+undo-action-move-to-collection = { $count ->
+    [one] Move to Collection
+   *[other] Move { $count } Items to Collection
+}
+undo-action-rename-collection = Rename Collection
+undo-action-rename-search = Rename Saved Search
+undo-action-move-collection = Move Collection
+undo-action-move-item = { $count ->
+    [one] Move Item
+   *[other] Move { $count } Items
+}
+undo-action-add-tag = Add Tag
+undo-action-change-tag = Change Tag
+undo-action-remove-tag = Remove Tag
+undo-action-edit-note = Edit Note
+undo-action-add-creator = Add Creator
+undo-action-remove-creator = Remove Creator
+undo-action-edit-creator = Edit Creator
+undo-action-reorder-creator = Reorder Creator
+undo-action-change-type = Change Item Type
+undo-action-add-related = Add Related
+undo-action-remove-related = Remove Related
+menu-edit-undo-action = Undo { $action }
+menu-edit-redo-action = Redo { $action }
