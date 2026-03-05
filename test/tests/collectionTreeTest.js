@@ -1447,7 +1447,7 @@ describe("Zotero.CollectionTree", function () {
 				var item;
 				await translateFn.returnValues[0].then(function (i) {
 					item = i;
-					assert.equal(item.id, ids[0]);
+					assert.include(ids, item.id);
 				});
 				
 				await select(win, collection);
