@@ -1082,6 +1082,7 @@ describe("Item pane", function () {
 			});
 			let annotation = await createAnnotation('highlight', attachment1);
 
+			await ZoteroPane.selectItem(item1.id);
 			await itemDetails._renderPromise;
 			await waitForPreviewBoxReader(attachmentsBox, attachment1.id);
 
@@ -1108,6 +1109,7 @@ describe("Item pane", function () {
 			});
 
 			// Select item with attachment (no annotation)
+			await ZoteroPane.selectItem(item2.id);
 			await itemDetails._renderPromise;
 			await waitForPreviewBoxReader(attachmentsBox, attachment2.id);
 
@@ -1127,6 +1129,7 @@ describe("Item pane", function () {
 			await item3.saveTx();
 
 			// Select item without attachment
+			await ZoteroPane.selectItem(item3.id);
 			await itemDetails._renderPromise;
 
 			assert.isFalse(attachmentsBox.hidden);
