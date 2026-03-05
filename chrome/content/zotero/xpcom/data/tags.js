@@ -800,6 +800,10 @@ Zotero.Tags = new function () {
 		return Zotero.DB.executeTransaction(async function () {
 			// If all items already have the tag, remove it from all items
 			if (tagID && items.every(x => x.hasTag(tagName))) {
+				Zotero.UndoHistory.stageAction(
+					'undo-action-remove-tag',
+					{ count: items.length }
+				);
 				for (let item of items) {
 					if (item.removeTag(tagName)) {
 						await item.save();
@@ -809,6 +813,10 @@ Zotero.Tags = new function () {
 			}
 			// Otherwise add to all items
 			else {
+				Zotero.UndoHistory.stageAction(
+					'undo-action-add-tag',
+					{ count: items.length }
+				);
 				for (let item of items) {
 					if (item.addTag(tagName)) {
 						await item.save();
@@ -825,6 +833,10 @@ Zotero.Tags = new function () {
 	 */
 	this.removeColoredTagsFromItems = async function (items) {
 		return Zotero.DB.executeTransaction(async function () {
+			Zotero.UndoHistory.stageAction(
+				'undo-action-remove-tag',
+				{ count: items.length }
+			);
 			for (let item of items) {
 				let colors = this.getColors(item.libraryID);
 				let tags = item.getTags();

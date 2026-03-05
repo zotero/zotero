@@ -1330,6 +1330,11 @@ class CollectionViewItemTree extends ItemTree {
 				// canDrop() limits this to child items
 				var rowItem = this.getRow(row).ref; // the item we are dragging over
 				await Zotero.DB.executeTransaction(async function () {
+					Zotero.UndoHistory.stageAction(
+						'undo-action-change-parent-item',
+						{ count: items.length }
+					);
+
 					for (let i = 0; i < items.length; i++) {
 						let item = items[i];
 						item.parentID = rowItem.id;
@@ -1341,33 +1346,34 @@ class CollectionViewItemTree extends ItemTree {
 			// Dropped outside of a row
 			else {
 				// Remove from parent and make top-level
+				// (canDropCheck guarantees all items here are children with parents)
 				if (collectionTreeRow.isLibrary(true)) {
 					await Zotero.DB.executeTransaction(async function () {
+						Zotero.UndoHistory.stageAction(
+							'undo-action-convert-to-standalone',
+							{ count: items.length }
+						);
+
 						for (let i = 0; i < items.length; i++) {
 							let item = items[i];
-							if (!item.isRegularItem()) {
-								item.parentID = false;
-								await item.save();
-							}
+							item.parentID = false;
+							await item.save();
 						}
 					});
 				}
 				// Add to collection
 				else {
 					await Zotero.DB.executeTransaction(async function () {
+						Zotero.UndoHistory.stageAction(
+							'undo-action-convert-to-standalone',
+							{ count: items.length }
+						);
+
 						for (let i = 0; i < items.length; i++) {
 							let item = items[i];
-							var source = item.isRegularItem() ? false : item.parentItemID;
-							// Top-level item
-							if (source) {
-								item.parentID = false;
-								item.addToCollection(collectionTreeRow.ref.id);
-								await item.save();
-							}
-							else {
-								item.addToCollection(collectionTreeRow.ref.id);
-								await item.save();
-							}
+							item.parentID = false;
+							item.addToCollection(collectionTreeRow.ref.id);
+							await item.save();
 							toMove.push(item.id);
 						}
 					});
@@ -1646,15 +1652,21 @@ class CollectionViewItemTree extends ItemTree {
 
 			// Async but no need to wait
 			(async () => {
-				for (let item of items) {
-					if (tagRemove) {
-						item.removeTag(colorData.name);
+				await Zotero.DB.executeTransaction(async () => {
+					Zotero.UndoHistory.stageAction(
+						tagRemove ? 'undo-action-remove-tag' : 'undo-action-add-tag',
+						{ count: items.length }
+					);
+					for (let item of items) {
+						if (tagRemove) {
+							item.removeTag(colorData.name);
+						}
+						else {
+							item.addTag(colorData.name);
+						}
+						await item.save();
 					}
-					else {
-						item.addTag(colorData.name);
-					}
-					await item.saveTx();
-				}
+				});
 			})();
 
 			// We handled this
@@ -1787,6 +1799,10 @@ class CollectionViewItemTree extends ItemTree {
 				}
 
 				await Zotero.DB.executeTransaction(async () => {
+					Zotero.UndoHistory.stageAction(
+						'undo-action-remove-from-collection',
+						{ count: selectedItems.length }
+					);
 					for (let item of selectedItems) {
 						for (let collectionID of collectionIDs) {
 							item.removeFromCollection(collectionID);

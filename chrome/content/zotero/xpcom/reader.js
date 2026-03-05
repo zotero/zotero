@@ -136,7 +136,10 @@ class ReaderInstance {
 				let item = Zotero.Items.getByLibraryAndKey(libraryID, key);
 				if (item && item.isEditable()) {
 					item.annotationColor = color;
-					await item.saveTx({ skipDateModifiedUpdate: true, notifierQueue });
+					await item.saveTx({
+						skipDateModifiedUpdate: true,
+						notifierQueue
+					});
 				}
 			}
 		}

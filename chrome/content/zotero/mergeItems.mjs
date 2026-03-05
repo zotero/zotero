@@ -4,6 +4,10 @@ export function mergeItems(item, otherItems) {
 	Zotero.debug("Merging items");
 	
 	return Zotero.DB.executeTransaction(async function () {
+		Zotero.UndoHistory.stageAction(
+			'undo-action-merge-items',
+			{ count: otherItems.length + 1 }
+		);
 		var toSave = {};
 		toSave[item.id] = item;
 
