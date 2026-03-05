@@ -2598,6 +2598,75 @@ describe("Item pane", function () {
 			assert.equal(item4.getField('publicationTitle'), differentTitle);
 		});
 
+		it("should undo and redo a batch field edit", async function () {
+			let item1 = await createDataObject('item', { itemType: 'journalArticle' });
+			item1.setField('publicationTitle', 'Journal Alpha');
+			await item1.saveTx();
+
+			let item2 = await createDataObject('item', { itemType: 'journalArticle' });
+			item2.setField('publicationTitle', 'Journal Beta');
+			await item2.saveTx();
+
+			let item3 = await createDataObject('item', { itemType: 'journalArticle' });
+			item3.setField('publicationTitle', 'Journal Gamma');
+			await item3.saveTx();
+
+			await ZoteroPane.selectItems([item1.id, item2.id, item3.id]);
+			Zotero.UndoHistory.clear();
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+			let pubTitleField = itemBox.querySelector('editable-text[fieldname="publicationTitle"]');
+			assert.ok(pubTitleField, "publicationTitle field should exist");
+
+			pubTitleField._ignoredWindowInactiveBlur = false;
+			await activateZoteroPane();
+			await Zotero.Promise.delay(50);
+			pubTitleField.focus();
+
+			// Options sorted alphabetically: Alpha, Beta, Gamma
+			await waitForCallback(() => pubTitleField.ref.mController.matchCount === 3, 100, 500);
+			// Select "Journal Alpha" from autocomplete (first entry)
+			let modifyPromise = waitForItemEvent('modify');
+			pubTitleField.ref.dispatchEvent(new KeyboardEvent(
+				'keydown', { key: "ArrowDown", code: 'ArrowDown', keyCode: KeyboardEvent.DOM_VK_DOWN, bubbles: true }
+			));
+			await Zotero.Promise.delay(50);
+			pubTitleField.ref.dispatchEvent(new KeyboardEvent(
+				'keydown', { key: "Enter", code: "Enter", keyCode: KeyboardEvent.DOM_VK_RETURN, bubbles: true }
+			));
+			await modifyPromise;
+			// waitForItemEvent resolves during Notifier.commit, but UndoHistory's
+			// commit callback runs after -- wait a tick for it to complete.
+			await Zotero.Promise.delay(0);
+
+			assert.equal(item1.getField('publicationTitle'), 'Journal Alpha');
+			assert.equal(item2.getField('publicationTitle'), 'Journal Alpha');
+			assert.equal(item3.getField('publicationTitle'), 'Journal Alpha');
+			assert.isTrue(Zotero.UndoHistory.canUndo(), "should be able to undo");
+
+			// Undo should revert all items
+			await Zotero.UndoHistory.undo();
+			assert.equal(item1.getField('publicationTitle'), 'Journal Alpha',
+				"item1 should be unchanged (already had the selected value)");
+			assert.equal(item2.getField('publicationTitle'), 'Journal Beta',
+				"item2 should revert to original");
+			assert.equal(item3.getField('publicationTitle'), 'Journal Gamma',
+				"item3 should revert to original");
+
+			// Redo should re-apply to all items
+			await Zotero.UndoHistory.redo();
+			assert.equal(item1.getField('publicationTitle'), 'Journal Alpha');
+			assert.equal(item2.getField('publicationTitle'), 'Journal Alpha');
+			assert.equal(item3.getField('publicationTitle'), 'Journal Alpha');
+		});
+
 		it("should transform title case for all items in batch edit mode", async function () {
 			let titleCaseTitle = "The Great Gatsby";
 			let sentenceCaseTitle = "to kill a mockingbird";
