@@ -563,6 +563,12 @@ Zotero.Plugins = new function () {
 
 	// TODO: Get blocking list from server
 	const BLOCKED_PLUGINS = {
+		"better-bibtex@iris-advies.com": {
+			versionRanges: [{
+				maxVersion: "8.999"
+			}],
+			reason: "Versions of this plugin prior to version 9.0 prevent Zotero from closing properly and cannot be automatically updated.",
+		},
 		"zoterostyle@polygon.org": {
 			versionRanges: [{
 				maxVersion: "4.5.99"
