@@ -997,6 +997,7 @@ describe("Plugin API", function () {
 						let itemDetails = ZoteroPane.itemPane._itemDetails;
 						let infoBox = itemDetails.getPane("info");
 						let row = infoBox.querySelector("#itembox-field-value-title");
+						row.focus();
 						let event = new MouseEvent("contextmenu", {
 							bubbles: true,
 							cancelable: true,
