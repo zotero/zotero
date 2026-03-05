@@ -166,6 +166,12 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 					}
 				}
 
+				if (this.getAttribute('noautohide') === 'true') {
+					this.panel.setAttribute('noautohide', 'true');
+				}
+				else {
+					this.panel.removeAttribute('noautohide');
+				}
 				this.panel.openPopup(forEl, position || "after_start",
 					x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0);
 
