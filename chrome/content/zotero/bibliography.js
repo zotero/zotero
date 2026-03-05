@@ -61,6 +61,8 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		window.addEventListener('dialogaccept', () => this.acceptSelection());
 		window.addEventListener('dialoghelp', () => this.openHelpLink());
 		styleConfigurator = document.querySelector("#style-configurator");
+
+		this.updateIframe(Zotero.getString('styles.preview.instructions'));
 		
 		// Disable accept button until CE is initialized
 		document.querySelector("dialog").getButton('accept').setAttribute('disabled', 'true');
@@ -142,10 +144,13 @@ window.Zotero_File_Interface_Bibliography = new function () {
 
 		styleConfigurator.addEventListener("select", event => this.styleChanged(event));
 		styleConfigurator.addEventListener("manage-styles", this.manageStyles.bind(this));
+
 		
 		this.initBibWindow();
 
 		this.initDocPrefsWindow();
+
+		this.refresh()
 
 		setTimeout(() => this.updateWindowSize(), 0);
 		
@@ -174,6 +179,9 @@ window.Zotero_File_Interface_Bibliography = new function () {
 			= document.getElementById(mode);
 		document.getElementById('output-method-radio').selectedItem
 			= document.getElementById(method);
+		
+		
+		document.getElementById('output-mode-radio').addEventListener("select",this.refresh.bind(this))		
 		
 		this.onBibWindowStyleChange();
 	};
@@ -248,6 +256,8 @@ window.Zotero_File_Interface_Bibliography = new function () {
 			this.onDocPrefsWindowStyleChange(selectedStyleObj);
 		}
 		this.updateWindowSize();
+		this.refresh();
+
 	};
 
 	this.onBibWindowStyleChange = function (style = undefined) {
@@ -387,6 +397,90 @@ window.Zotero_File_Interface_Bibliography = new function () {
 			_io.exportDocument = true;
 			document.querySelector('dialog').acceptDialog();
 		}
+	};
+
+	this.refresh = function () {
+		var items = Zotero.getActiveZoteroPane().getSelectedItems();
+		if (items.length === 0) {
+			this.updateIframe(Zotero.getString('styles.editor.warning.noItems'), 'warning');
+			return;
+		}
+		
+		let style = Zotero.Styles.get(styleConfigurator.style);
+		var d = new Date();
+		var str = '<div>';
+		
+		Zotero.debug("Generate bibliography for " + style.title);
+		let bib;
+		let err = false;
+		try {
+			bib = this.generateBibliography(style);
+		}
+		catch (e) {
+			err = e;
+			Zotero.logError(e);
+		}
+		if (bib || err) {
+			str += bib || `<p style="color: red">${Zotero.Utilities.htmlSpecialChars(err)}</p>`;
+			str += '<hr>';
+		}
+		
+
+		str += '</div>';
+		this.updateIframe(str);
+
+		Zotero.debug(`Generated previews in ${new Date() - d} ms`);
+	};
+	
+	this.generateBibliography = function (style) {
+		var items = Zotero.getActiveZoteroPane().getSelectedItems();
+		if (items.length === 0) {
+			return '';
+		}
+		
+		
+		var locale = styleConfigurator.locale;
+
+		let mode = document.getElementById("output-mode-radio").selectedItem.id;
+		var styleEngine = style.getCiteProc(locale, 'html');
+		
+		// Generate multiple citations
+		let result = "";
+		if(mode=="citations"){
+			result = styleEngine.previewCitationCluster(
+				{
+					citationItems: items.map(item => ({ id: item.id })),
+					properties: {}
+				},
+				[], [], "html"
+			);
+		}else{
+			if (style.hasBibliography) {
+				styleEngine.updateItems(items.map(item => item.id));
+				result = Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
+			}
+		}
+		styleEngine.free();
+		
+		return result;
+	};
+
+	this.updateIframe = function (content, containerClass = 'preview') {
+		this.lastContent = { content, containerClass };
+		const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+		let iframe = document.getElementById('zotero-csl-preview-box');
+		iframe.contentDocument.documentElement.innerHTML = `<html>
+		<head>
+			<title></title>
+			<link rel="stylesheet" href="chrome://zotero-platform/content/zotero.css">
+			<style>
+				html {
+					color-scheme: ${isDarkMode ? "dark" : "light"};
+				}
+			</style>
+		</head>
+		<body id="csl-edit-preview"><div class="${containerClass} zotero-dialog">${content}</div></body>
+		</html>`;
 	};
 };
 
