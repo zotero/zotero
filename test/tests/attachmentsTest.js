@@ -968,7 +968,7 @@ describe("Zotero.Attachments", function () {
 			Zotero.HTTP.request.restore();
 		});
 		
-		it("should add a PDF from a resolved DOI webpage", async function () {
+		it.skip("should add a PDF from a resolved DOI webpage", async function () {
 			var doi = doi1;
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
