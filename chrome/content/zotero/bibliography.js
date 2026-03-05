@@ -441,23 +441,32 @@ window.Zotero_File_Interface_Bibliography = new function () {
 		
 		var locale = styleConfigurator.locale;
 
-		let mode = document.getElementById("output-mode-radio").selectedItem.id;
+		let mode = "both";
+		if (windowType === "bibliography"){
+			mode = document.getElementById("output-mode-radio").selectedItem.id;
+		}
 		var styleEngine = style.getCiteProc(locale, 'html');
 		
 		// Generate multiple citations
 		let result = "";
-		if(mode=="citations"){
-			result = styleEngine.previewCitationCluster(
+
+		if(mode==="citations" || mode==="both"){
+			result += styleEngine.previewCitationCluster(
 				{
 					citationItems: items.map(item => ({ id: item.id })),
 					properties: {}
 				},
 				[], [], "html"
 			);
-		}else{
+		}
+		if(mode==="both"){
+			result += "</br>"
+		}
+
+		if (mode=="bibliography" || mode==="both"){
 			if (style.hasBibliography) {
 				styleEngine.updateItems(items.map(item => item.id));
-				result = Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
+				result += Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
 			}
 		}
 		styleEngine.free();
