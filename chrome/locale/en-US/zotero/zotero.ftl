@@ -36,6 +36,7 @@ general-open-settings = Open Settings
 general-settings = Settings…
 general-help = Help
 general-tag = Tag
+general-ok = OK
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
