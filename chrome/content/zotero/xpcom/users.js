@@ -61,7 +61,8 @@ Zotero.Users = new function () {
 			
 			_localUserKey = key;
 		}
-		
+
+		_users = {};
 		rows = await Zotero.DB.queryAsync("SELECT userID, name FROM users");
 		for (let row of rows) {
 			_users[row.userID] = row.name;

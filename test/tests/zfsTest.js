@@ -42,10 +42,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 	// Tests
 	//
 	beforeEach(async function () {
-		await resetDB({
-			thisArg: this,
-			skipBundledFiles: true
-		});
+		await resetData();
 		win = await loadZoteroPane();
 		
 		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;

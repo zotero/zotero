@@ -540,10 +540,7 @@ describe("Zotero.Sync.Data.Local", function () {
 		var types = Zotero.DataObjectUtilities.getTypes();
 		
 		beforeEach(function* () {
-			yield resetDB({
-				thisArg: this,
-				skipBundledFiles: true
-			});
+			yield resetData();
 		})
 		
 		it("shouldn't trigger an auto-sync", async function () {

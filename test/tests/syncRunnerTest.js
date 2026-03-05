@@ -169,10 +169,7 @@ describe("Zotero.Sync.Runner", function () {
 	// Tests
 	//
 	beforeEach(function* () {
-		yield resetDB({
-			thisArg: this,
-			skipBundledFiles: true
-		});
+		yield resetData();
 		
 		userLibraryID = Zotero.Libraries.userLibraryID;
 		
