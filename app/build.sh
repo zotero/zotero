@@ -1055,6 +1055,8 @@ if [ $BUILD_LINUX == 1 ]; then
 		mkdir "$APPDIR/integration"
 		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration/install" "$APPDIR/integration/libreoffice"
 		
+		# Make icons dir for firefox builds without an updater (i.e. Linux distributions)
+		mkdir -p "$APPDIR/icons"
 		# Copy icons
 		cp "$CALLDIR/linux/icons/icon32.png" "$APPDIR/icons/"
 		cp "$CALLDIR/linux/icons/icon64.png" "$APPDIR/icons/"
