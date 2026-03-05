@@ -594,7 +594,7 @@ class LibraryLayout extends Layout {
 			staticWidth: true,
 			fixedWidth: true,
 			showInColumnPicker: false,
-			renderer: (index, inCitation, column) => {
+			renderCell: (index, inCitation, column) => {
 				let cell = Helpers.createNode("span", {}, `cell ${column.className} clickable`);
 				let iconWrapper = Helpers.createNode("span", {}, `icon-action`);
 				cell.append(iconWrapper);

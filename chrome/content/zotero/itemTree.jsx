@@ -29,21 +29,11 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
-const { VirtualizedTree, renderCell, formatColumnName } = VirtualizedTable;
-const Icons = require('components/icons');
-const { getCSSIcon, getCSSItemTypeIcon } = Icons;
+const { VirtualizedTree, formatColumnName } = VirtualizedTable;
 const { COLUMNS } = require("zotero/itemTreeColumns");
+const { ItemTreeRow } = require('zotero/itemTreeRow');
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
-const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
-
-const lazy = {};
-XPCOMUtils.defineLazyPreferenceGetter(
-	lazy,
-	"BIDI_BROWSER_UI",
-	"bidi.browser.ui",
-	false
-);
 
 /**
  * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
@@ -51,37 +41,6 @@ XPCOMUtils.defineLazyPreferenceGetter(
 
 const CHILD_INDENT = 16;
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
-const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
-
-class ItemTreeRow {
-	constructor(ref, level, isOpen) {
-		this.ref = ref;			//the Zotero item associated with this
-		this.level = level;
-		this.isOpen = isOpen;
-		this.id = ref.treeViewID;
-		this.type = 'item';
-	}
-
-	getField(field, unformatted) {
-		if (this.ref.hasOwnProperty(field) && this.ref[field] != null){
-			return this.ref[field];
-		}
-		else if (!Zotero.ItemTreeManager.isCustomColumn(field)) {
-			return this.ref.getField(field, unformatted, true);
-		}
-		return Zotero.ItemTreeManager.getCustomCellData(this.ref, field);
-	}
-
-	numNotes() {
-		if (this.ref.isNote()) {
-			return 0;
-		}
-		if (this.ref.isAttachment()) {
-			return this.ref.note !== '' ? 1 : 0;
-		}
-		return this.ref.numNotes(false, true) || 0;
-	}
-}
 
 /**
  * Base row data provider for ItemTree.
@@ -170,12 +129,11 @@ class ItemTreeRowProvider {
 	isContainer(index) {
 		let row = this.getRow(index);
 		if (!row) return false;
-		let item = row.ref;
-		return item.isRegularItem() || item.isFileAttachment();
+		return row.isContainer();
 	}
 
 	isContainerOpen(index) {
-		return this.getRow(index).isOpen;
+		return this.getRow(index)?.isContainerOpen() ?? false;
 	}
 
 	isContainerEmpty(index) {
@@ -186,19 +144,15 @@ class ItemTreeRowProvider {
 			return true;
 		}
 
-		var item = this.getRow(index).ref;
-		if (item.isFileAttachment()) {
-			// Consider attachments with non-matching annotation rows as empty when pref is set
-			if (Zotero.Prefs.get("hideContextAnnotationRows") && this._searchMode) {
-				return !item.getAnnotations().some(annotation => this._searchItemIDs.has(annotation.id));
-			}
-			return item.numAnnotations() == 0;
-		}
-		if (!item.isRegularItem()) {
+		let row = this.getRow(index);
+		if (!row) {
 			return true;
 		}
-		var includeTrashed = this._includeTrashed;
-		return item.numNotes(includeTrashed) === 0 && item.numAttachments(includeTrashed) == 0;
+		return row.isContainerEmpty({
+			searchMode: this._searchMode,
+			searchItemIDs: this._searchItemIDs,
+			includeTrashed: this._includeTrashed,
+		});
 	}
 	
 	_closeContainer(index, skipRowMapRefresh = false) {
@@ -238,49 +192,24 @@ class ItemTreeRowProvider {
 				count++;
 			}
 			this._rows[index].isOpen = false;
-		} else if (!this.isContainerEmpty(index)) {
+		}
+		else if (!this.isContainerEmpty(index)) {
 			// Open
-			let item = this.getRow(index).ref;
+			let row = this.getRow(index);
 			let level = this.getLevel(index);
-			// Get children
-			let includeTrashed = this._includeTrashed;
-			let attachments = item.isRegularItem() ? item.getAttachments(includeTrashed) : [];
-			let notes = item.isRegularItem() ? item.getNotes(includeTrashed) : [];
-			let annotations = [];
+			let newRows = row.getChildItems({
+				searchMode: this._searchMode,
+				searchItemIDs: this._searchItemIDs,
+				includeTrashed: this._includeTrashed,
+			});
 
-			if (item.isFileAttachment()) {
-				annotations = item.getAnnotations();
-			}
-			// Optionally, only keep annotation rows that match the search query
-			if (Zotero.Prefs.get("hideContextAnnotationRows") && this._searchMode) {
-				annotations = annotations.filter(annotation => this._searchItemIDs.has(annotation.id));
-			}
-			let newRows = [];
-			if (attachments.length && notes.length) {
-				newRows = notes.concat(attachments);
-			}
-			else if (attachments.length) {
-				newRows = attachments;
-			}
-			else if (notes.length) {
-				newRows = notes;
-			}
-			if (annotations.length) {
-				newRows = newRows.concat(annotations);
-			}
-
-			if (newRows.length) {
-				if (!item.isFileAttachment()) {
-					newRows = Zotero.Items.get(newRows);
-				}
-				for (let i = 0; i < newRows.length; i++) {
-					count++;
-					this._addRow(
-						new ItemTreeRow(newRows[i], level + 1, false),
-						index + i + 1,
-						true
-					);
-				}
+			for (let i = 0; i < newRows.length; i++) {
+				count++;
+				this._addRow(
+					ItemTreeRow.create(newRows[i], level + 1, false),
+					index + i + 1,
+					true
+				);
 			}
 
 			this._rows[index].isOpen = true;
@@ -566,18 +495,13 @@ class ItemTreeRowProvider {
 
 			switch (field) {
 			case 'title':
-				return Zotero.Items.getSortTitle(item.getDisplayTitle());
+				return Zotero.Items.getSortTitle(row.getDisplayTitle());
 
 			case 'hasAttachment':
-				if (this.itemTree._canGetBestAttachmentState(item)) {
-					return item.getBestAttachmentStateCached();
-				}
-				else {
-					return 0;
-				}
+				return row.getBestAttachmentStateCached() || 0;
 
 			case 'numNotes':
-				return row.numNotes(false, true) || 0;
+				return row.numNotes() || 0;
 
 			case 'date':
 				var val = row.ref.getField('date', true, true);
@@ -652,10 +576,11 @@ class ItemTreeRowProvider {
 			case 'firstCreator':
 				return creatorSort(a, b);
 
-			case 'itemType':
-				var typeA = Zotero.ItemTypes.getLocalizedString(a.ref.itemTypeID);
-				var typeB = Zotero.ItemTypes.getLocalizedString(b.ref.itemTypeID);
+			case 'itemType': {
+				let typeA = a.getTypeLabel();
+				let typeB = b.getTypeLabel();
 				return (typeA > typeB) ? 1 : (typeA < typeB) ? -1 : 0;
+			}
 
 			default:
 				if (fieldA === undefined) {
@@ -784,419 +709,6 @@ class ItemTreeRowProvider {
 	}
 }
 
-class ItemTreeRowRenderer {
-	constructor(itemTree) {
-		this.itemTree = itemTree;
-	}
-
-	renderItem(index, selection, oldDiv=null, columns, rowData) {
-		let div;
-		if (oldDiv) {
-			div = oldDiv;
-			div.innerHTML = "";
-		}
-		else {
-			div = document.createElement('div');
-			div.className = "row";
-		}
-
-		div.classList.toggle('selected', selection.isSelected(index));
-		div.classList.toggle('first-selected', selection.isFirstRowOfSelectionBlock(index));
-		div.classList.toggle('last-selected', selection.isLastRowOfSelectionBlock(index));
-		div.classList.toggle('focused', selection.focused == index);
-		div.classList.remove('drop', 'drop-before', 'drop-after');
-		// const rowData = this.itemTree._getRowData(index); // Passed in
-		div.classList.toggle('context-row', !!rowData.contextRow);
-		div.classList.toggle('unread', !!rowData.unread);
-		div.classList.toggle('highlighted', this.itemTree._highlightedRows.has(rowData.id));
-		let nextRowID = this.itemTree.getRow(index + 1)?.id;
-		let prevRowID = this.itemTree.getRow(index - 1)?.id;
-		div.classList.toggle('first-highlighted', this.itemTree._highlightedRows.has(rowData.id) && !this.itemTree._highlightedRows.has(prevRowID));
-		div.classList.toggle('last-highlighted', this.itemTree._highlightedRows.has(rowData.id) && !this.itemTree._highlightedRows.has(nextRowID));
-		
-		if (this.itemTree._dropRow == index) {
-			let span;
-			if (Zotero.DragDrop.currentOrientation != 0) {
-				span = document.createElement('span');
-				span.className = Zotero.DragDrop.currentOrientation < 0 ? "drop-before" : "drop-after";
-				div.appendChild(span);
-			} else {
-				div.classList.add('drop');
-			}
-		}
-
-		let { firstColumn } = columns.reduce((acc, column) => {
-			return !column.hidden && column.ordinal < acc.lowestOrdinal
-				? { lowestOrdinal: column.ordinal, firstColumn: column }
-				: acc;
-		}, { lowestOrdinal: Infinity, firstColumn: null });
-
-		let item = this.itemTree.getRow(index).ref;
-		let renderItemResult = false;
-
-		if (this.itemTree.props.renderItem) {
-			renderItemResult = this.itemTree.props.renderItem(index, selection, div, columns, rowData);
-		}
-
-		// Do not render if props.renderItem returned true (it performed custom rendering)
-		if (!renderItemResult) {
-			// Annotation row class reset
-			div.classList.toggle("annotation-row", item.isAnnotation());
-			div.classList.remove("tight");
-			if (item.isAnnotation()) {
-				this._renderAnnotationRow(index, div, item, columns);
-			}
-			else {
-				for (let column of columns) {
-					if (column.hidden) continue;
-					div.appendChild(this._renderCell(index, rowData[column.dataKey], column, column === firstColumn));
-				}
-			}
-		}
-
-		if (!oldDiv) {
-			// No drag-drop for collections or searches in the trash
-			if (this.itemTree.props.dragAndDrop && rowData.isItem) {
-				div.setAttribute('draggable', true);
-				div.addEventListener('dragstart', e => this.itemTree.onDragStart(e, index), { passive: true });
-				div.addEventListener('dragover', e => this.itemTree.onDragOver(e, index));
-				div.addEventListener('dragend', this.itemTree.onDragEnd.bind(this.itemTree), { passive: true });
-				div.addEventListener('dragleave', this.itemTree.onDragLeave.bind(this.itemTree), { passive: true });
-				div.addEventListener('drop', (e) => {
-					e.stopPropagation();
-					this.itemTree.onDrop(e, index);
-				}, { passive: true });
-			}
-			div.addEventListener('mousedown', this.itemTree._handleRowMouseUpDown.bind(this.itemTree), { passive: true });
-			div.addEventListener('mouseup', this.itemTree._handleRowMouseUpDown.bind(this.itemTree), { passive: true });
-		}
-
-		if (rowData.contextRow) {
-			div.setAttribute('aria-disabled', true);
-		}
-
-		return div;
-	}
-
-	_renderCell(index, data, column, isFirstColumn) {
-		let cell;
-		if (column.primary) {
-			cell = this._renderPrimaryCell(index, data, column);
-		}
-		else if (column.dataKey === 'hasAttachment') {
-			cell = this._renderHasAttachmentCell(index, data, column);
-		}
-		else if (column.renderCell) {
-			try {
-				// Pass document to renderCell so that it can create elements
-				cell = column.renderCell.apply(this.itemTree, [...arguments, document]);
-				// Ensure that renderCell returns an Element
-				if (!(cell instanceof window.Element)) {
-					cell = null;
-					throw new Error('renderCell must return an Element');
-				}
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
-		}
-
-		if (!cell) {
-			cell = renderCell.apply(this.itemTree, arguments);
-			if (column.dataKey === 'numNotes' && data) {
-				cell.dataset.l10nId = 'items-table-cell-notes';
-				cell.dataset.l10nArgs = JSON.stringify({ count: data });
-			}
-			else if (column.dataKey === 'itemType') {
-				cell.setAttribute('aria-hidden', true);
-			}
-		}
-
-		if (column.noPadding) {
-			cell.classList.add('no-padding');
-		}
-
-		if (isFirstColumn) {
-			const icon = this._getIcon(index);
-			icon.classList.add('cell-icon', 'item-icon');
-
-			if (cell.querySelector('.cell-text') === null) {
-				// convert text-only cell to a cell with text and icon
-				let textSpan = document.createElement('span');
-				textSpan.className = "cell-text";
-				textSpan.innerHTML = cell.innerHTML;
-				cell.innerHTML = "";
-				cell.append(textSpan);
-			}
-
-			let firstColumnPrepend = [icon];
-			if (this.itemTree.props.firstColumnPrependRenderer) {
-				firstColumnPrepend = this.itemTree.props.firstColumnPrependRenderer(index, data, firstColumnPrepend);
-			}
-
-			cell.prepend(...firstColumnPrepend);
-			cell.classList.add('first-column');
-		}
-		return cell;
-	}
-
-	_renderPrimaryCell(index, data, column) {
-		let span = document.createElement('span');
-		span.className = `cell ${column.className}`;
-		span.classList.add('primary');
-
-		const item = this.itemTree.getRow(index).ref;
-		let retracted = "";
-		let retractedAriaLabel = "";
-		if (Zotero.Retractions.isRetracted(item)) {
-			retracted = getCSSIcon("cross");
-			retracted.classList.add("icon-16");
-			retracted.classList.add("retracted");
-			retractedAriaLabel = Zotero.getString('retraction.banner');
-		}
-
-		let tagAriaLabel = '';
-		let tagSpans = [];
-		let coloredTags = item.getItemsListTags();
-		if (coloredTags.length) {
-			let { emoji, colored } = coloredTags.reduce((acc, tag) => {
-				acc[Zotero.Utilities.Internal.containsEmoji(tag.tag) ? 'emoji' : 'colored'].push(tag);
-				return acc;
-			}, { emoji: [], colored: [] });
-			
-			// Add colored tags first
-			if (colored.length) {
-				let coloredTagSpans = colored.map(x => this._getTagSwatch(x.tag, x.color));
-				let coloredTagSpanWrapper = document.createElement('span');
-				coloredTagSpanWrapper.className = 'colored-tag-swatches';
-				coloredTagSpanWrapper.append(...coloredTagSpans);
-				tagSpans.push(coloredTagSpanWrapper);
-			}
-			
-			// Add emoji tags after
-			tagSpans.push(...emoji.map(x => this._getTagSwatch(x.tag)));
-
-			tagAriaLabel = coloredTags.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
-			tagAriaLabel += ' ' + coloredTags.map(x => x.tag).join(', ') + '.';
-		}
-
-		let itemTypeAriaLabel;
-		try {
-			// Special treatment for trashed collections or searches since they are not an actual
-			// item and do not have an item type
-			if (item instanceof Zotero.Collection) {
-				itemTypeAriaLabel = Zotero.getString('searchConditions.collection') + '.';
-			}
-			else if (item instanceof Zotero.Search) {
-				itemTypeAriaLabel = Zotero.getString('searchConditions.savedSearch') + '.';
-			}
-			else {
-				var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
-				itemTypeAriaLabel = Zotero.getString(`itemTypes.${itemType}`) + '.';
-			}
-		}
-		catch (e) {
-			Zotero.debug('Error attempting to get a localized item type label for ' + itemType, 1);
-			Zotero.debug(e, 1);
-		}
-		
-		let textSpan = document.createElement('span');
-		let textWithFullStop = Zotero.Utilities.Internal.renderItemTitle(data, textSpan);
-		if (!textWithFullStop.match(/\.$/)) {
-			textWithFullStop += '.';
-		}
-		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
-		textSpan.className = "cell-text";
-		if (lazy.BIDI_BROWSER_UI) {
-			textSpan.dir = Zotero.ItemFields.getDirection(
-				item.itemTypeID, column.dataKey, item.getField('language')
-			);
-		}
-		textSpan.setAttribute('aria-label', textSpanAriaLabel);
-
-		if (Zotero.Prefs.get('ui.tagsAfterTitle')) {
-			span.append(retracted, textSpan, ...tagSpans);
-		}
-		else {
-			span.append(retracted, ...tagSpans, textSpan);
-		}
-
-		return span;
-	}
-
-	_renderHasAttachmentCell(index, data, column) {
-		let span = document.createElement('span');
-		span.className = `cell ${column.className}`;
-
-		if (this.itemTree.rowProvider.includeTrashed) return span;
-
-		const item = this.itemTree.getRow(index).ref;
-
-		if ((!this.itemTree.isContainer(index) || !this.itemTree.isContainerOpen(index))) {
-			let progressValue = Zotero.Sync.Storage.getItemDownloadProgress(item);
-			if (progressValue) {
-				let progress = document.createElement('progress');
-				progress.value = progressValue;
-				progress.max = 100;
-				progress.style.setProperty('--progress', `${progressValue}%`);
-				progress.className = 'attachment-progress';
-				span.append(progress);
-				return span;
-			}
-		}
-
-		// TEMP: For now, we use the blue bullet for all non-PDF attachments, but there's
-		// commented-out code for showing different icons for snapshots, files, and URL/DOI links
-		if (this._canGetBestAttachmentState(item)) {
-			const { type, exists } = item.getBestAttachmentStateCached();
-			let icon = "";
-			let ariaLabel;
-			// If the item has a child attachment
-			if (type !== null && type != 'none') {
-				if (type == 'pdf') {
-					icon = getCSSItemTypeIcon('attachmentPDF', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
-				}
-				else if (type == 'snapshot') {
-					icon = getCSSItemTypeIcon('attachmentSnapshot', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
-				}
-				else if (type == 'epub') {
-					icon = getCSSItemTypeIcon('attachmentEPUB', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
-				}
-				else if (type == 'image') {
-					icon = getCSSItemTypeIcon('attachmentImage', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasImage');
-				}
-				else if (type == 'video') {
-					icon = getCSSItemTypeIcon('attachmentVideo', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.hasVideo');
-				}
-				else {
-					icon = getCSSItemTypeIcon('attachmentFile', 'attachment-type');
-					ariaLabel = Zotero.getString('pane.item.attachments.has');
-				}
-				
-				if (!exists) {
-					icon.classList.add('icon-missing-file');
-				}
-			}
-			//else if (type == 'none') {
-			//	if (item.getField('url') || item.getField('DOI')) {
-			//		icon = getCSSIcon('IconLink');
-			//		ariaLabel = Zotero.getString('pane.item.attachments.hasLink');
-			//		icon.classList.add('cell-icon');
-			//	}
-			//}
-			if (ariaLabel) {
-				icon.setAttribute('aria-label', ariaLabel + '.');
-				span.setAttribute('title', ariaLabel);
-			}
-			span.append(icon);
-
-			// Don't run this immediately since it might cause a db check and disk access
-			// but delay for some time and see if the item is still visible in the tree
-			// (i.e. if we haven't scrolled right past it)
-			setTimeout(() => {
-				if (!this.itemTree.tree.rowIsVisible(index)) return;
-				item.getBestAttachmentState()
-					// Refresh cell when promise is fulfilled
-					.then(({ type: newType, exists: newExists }) => {
-						if (newType !== type || newExists !== exists) {
-							this.itemTree.tree.invalidateRow(index);
-						}
-					});
-			}, ATTACHMENT_STATE_LOAD_DELAY);
-		}
-
-		return span;
-	}
-
-	_renderAnnotationRow(index, div, item, columns) {
-		// Render annotation rows as a single cell with title/text and comment
-		// Use "title" column  as a blueprint to render the first part of annotation row
-		let titleRowData = Object.assign({}, columns.find(column => column.dataKey == "title"));
-		titleRowData.className = "title";
-		let title;
-		// Strip html tags from annotation comment and text until the algorithm
-		// for safe rendering of relevant html tags is carried over from the reader
-		let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
-		let plainText = parserUtils.convertToPlainText(item.annotationText || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
-		let plainComment = parserUtils.convertToPlainText(item.annotationComment || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
-		if (["highlight", "underline"].includes(item.annotationType)) {
-			title = this._renderCell(index, plainText, titleRowData, true);
-			let titleCell = title.querySelector(".cell-text");
-			titleCell.classList.add("italics");
-			titleCell.setAttribute("q-mark-open", Zotero.getString("punctuation.openingQMark"));
-			title.setAttribute("q-mark-close", Zotero.getString("punctuation.closingQMark"));
-			if (item.annotationComment) {
-				let comment = renderCell(null, plainComment, { className: "annotation-comment" });
-				div.appendChild(comment);
-			}
-			let containsCJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(item.annotationText);
-			div.classList.toggle("tight", !containsCJK);
-		}
-		else if (item.annotationComment) {
-			title = this._renderCell(index, plainComment, titleRowData, true);
-		}
-		else {
-			let annotationTypeName = Zotero.getString(`pdfReader.${item.annotationType}Annotation`);
-			title = this._renderCell(index, annotationTypeName, titleRowData, true);
-		}
-		div.prepend(title);
-	}
-
-	_getIcon(index) {
-		var item = this.itemTree.getRow(index).ref;
-		
-		// Non-item objects that can be appear in the trash
-		if (item instanceof Zotero.Collection || item instanceof Zotero.Search) {
-			let icon;
-			if (item instanceof Zotero.Collection) {
-				icon = getCSSIcon('collection');
-			}
-			else if (item instanceof Zotero.Search) {
-				icon = getCSSIcon('search');
-			}
-			icon.classList.add('icon-item-type');
-			return icon;
-		}
-		
-		var itemType = item.getItemTypeIconName();
-		if (item.isAnnotation()) {
-			return getCSSItemTypeIcon(itemType, `annotation-${item.annotationType}-${item.annotationColor}`);
-		}
-		return getCSSItemTypeIcon(itemType);
-	}
-
-	_canGetBestAttachmentState(item) {
-		return (item.isRegularItem() && item.numAttachments())
-			|| (item.isFileAttachment() && item.isTopLevelItem());
-	}
-	
-	_getTagSwatch(tag, color) {
-		let span = document.createElement('span');
-		span.className = 'tag-swatch';
-		let extractedEmojis = Zotero.Tags.extractEmojiForItemsList(tag);
-		// If contains emojis, display directly
-		//
-		// TODO: Check for a maximum number of graphemes, which is hard to do
-		// https://stackoverflow.com/a/54369605
-		if (extractedEmojis) {
-			span.textContent = extractedEmojis;
-			span.className += ' emoji';
-		}
-		// Otherwise display color
-		else {
-			span.className += ' colored';
-			span.dataset.color = color.toLowerCase();
-			span.style.color = color;
-		}
-		return span;
-	}
-}
-
 var ItemTree = class ItemTree extends LibraryTree {
 	static async init(domEl, opts={}) {
 		Zotero.debug(`Initializing React ${this.name} ${opts.id}`);
@@ -1252,8 +764,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		onActivate: PropTypes.func,
 		emptyMessage: PropTypes.string,
 		getExtraField: PropTypes.func,
-		// Should return true if it rendered the item, false if it did not and default rendering should occur
-		renderItem: PropTypes.func,
 		// A master sorting function. If it returns 0 then default sorting priorities take over
 		compareItems: PropTypes.func,
 	};
@@ -1280,7 +790,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._rowCache = {};
 		
 		this.rowProvider = new ItemTreeRowProvider(this);
-		this.renderer = new ItemTreeRowRenderer(this);
+		this._renderCtx = {
+			renderCell: (...args) => this._renderCell(...args),
+			firstColumn: null,
+			includeTrashed: false,
+			invalidateRow: (index) => this.tree?.invalidateRow(index),
+		};
 
 		if (props.shouldListenForNotifications) {
 			this._unregisterID = Zotero.Notifier.registerObserver(
@@ -2449,17 +1964,126 @@ var ItemTree = class ItemTree extends LibraryTree {
 	//
 	// //////////////////////////////////////////////////////////////////////////////
 	
-	_renderItem(...args) {
-		// Sanity check
-		if (args.length > 4) {
-			throw new Error(`Too many arguments to _renderItem`);
+	_renderItem(index, selection, oldDiv = null, columns = []) {
+		let row = this.getRow(index);
+		let rowData = this._getRowData(index);
+		let div;
+		if (oldDiv) {
+			div = oldDiv;
+			div.innerHTML = "";
 		}
-		while (args.length < 4) {
-			args.push(undefined);
+		else {
+			div = document.createElement('div');
+			div.className = 'row';
 		}
-		args.push(this._getRowData(args[0]));
-		return this.renderer.renderItem(...args);
+
+		// Toggle these here rather than in ItemTreeRow.renderRow()
+		// because div elements are reused to reduce DOM churn and need resetting
+		div.classList.toggle('selected', selection.isSelected(index));
+		div.classList.toggle('first-selected', selection.isFirstRowOfSelectionBlock(index));
+		div.classList.toggle('last-selected', selection.isLastRowOfSelectionBlock(index));
+		div.classList.toggle('focused', selection.focused == index);
+		div.classList.remove('drop', 'drop-before', 'drop-after');
+		div.classList.toggle('context-row', !!rowData.contextRow);
+		div.classList.toggle('unread', !!rowData.unread);
+		div.classList.toggle('highlighted', this._highlightedRows.has(rowData.id));
+		let nextRowID = this.getRow(index + 1)?.id;
+		let prevRowID = this.getRow(index - 1)?.id;
+		div.classList.toggle('first-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(prevRowID));
+		div.classList.toggle('last-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(nextRowID));
+		div.classList.toggle('annotation-row', row.type === 'annotation');
+		if (row.type !== 'annotation') {
+			div.classList.remove('tight');
+		}
+		
+		if (this._dropRow == index) {
+			let span;
+			if (Zotero.DragDrop.currentOrientation != 0) {
+				span = document.createElement('span');
+				span.className = Zotero.DragDrop.currentOrientation < 0 ? 'drop-before' : 'drop-after';
+				div.appendChild(span);
+			}
+			else {
+				div.classList.add('drop');
+			}
+		}
+
+		let { firstColumn } = columns.reduce((acc, column) => {
+			return !column.hidden && column.ordinal < acc.lowestOrdinal
+				? { lowestOrdinal: column.ordinal, firstColumn: column }
+				: acc;
+		}, { lowestOrdinal: Infinity, firstColumn: null });
+
+		this._renderCtx.firstColumn = firstColumn;
+		this._renderCtx.includeTrashed = this.rowProvider.includeTrashed;
+
+		row.renderRow(div, index, columns, rowData, this._renderCtx);
+
+		if (!oldDiv) {
+			if (this.props.dragAndDrop && row.isDraggable) {
+				div.setAttribute('draggable', true);
+				div.addEventListener('dragstart', e => this.onDragStart(e, index), { passive: true });
+				div.addEventListener('dragover', e => this.onDragOver(e, index));
+				div.addEventListener('dragend', this.onDragEnd.bind(this), { passive: true });
+				div.addEventListener('dragleave', this.onDragLeave.bind(this), { passive: true });
+				div.addEventListener('drop', (e) => {
+					e.stopPropagation();
+					this.onDrop(e, index);
+				}, { passive: true });
+			}
+			div.addEventListener('mousedown', this._handleRowMouseUpDown.bind(this), { passive: true });
+			div.addEventListener('mouseup', this._handleRowMouseUpDown.bind(this), { passive: true });
+		}
+
+		if (rowData.contextRow) {
+			div.setAttribute('aria-disabled', true);
+		}
+
+		return div;
 	}
+
+	_renderCell(index, data, column, isFirstColumn) {
+		const row = this.getRow(index);
+		let cell;
+
+		if (column.renderCell) {
+			try {
+				// Pass document to renderCell so that it can create elements
+				cell = column.renderCell.apply(this, [index, data, column, isFirstColumn, document]);
+				if (!(cell instanceof window.Element)) {
+					cell = null;
+					throw new Error('renderCell must return an Element');
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			column = Object.assign({}, column, { renderCell: null });
+		}
+
+		if (!cell) {
+			cell = row.renderCell(index, data, column, isFirstColumn, this._renderCtx);
+		}
+
+		if (isFirstColumn) {
+			const icon = row.getIcon();
+			icon.classList.add('cell-icon', 'item-icon');
+
+			if (cell.querySelector('.cell-text') === null) {
+				let textSpan = document.createElement('span');
+				textSpan.className = 'cell-text';
+				textSpan.innerHTML = cell.innerHTML;
+				cell.innerHTML = '';
+				cell.append(textSpan);
+			}
+
+			cell.prepend(icon);
+			cell.classList.add('first-column');
+		}
+
+		return cell;
+	}
+
 
 	_handleRowMouseUpDown(event) {
 		// Base implementation - override in subclasses for special behavior
@@ -2510,9 +2134,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			row.unread = true;
 		}
 		
-		if (!(treeRow.ref instanceof Zotero.Collection || treeRow.ref instanceof Zotero.Search)) {
-			row.itemType = Zotero.ItemTypes.getLocalizedString(treeRow.ref.itemTypeID);
-		}
+		row.itemType = treeRow.getTypeLabel();
 		// Year column is just date field truncated
 		row.year = treeRow.getField('date', true).substr(0, 4);
 		if (row.year) {
@@ -2527,23 +2149,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		row.numNotes = treeRow.numNotes() || "";
 		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
-		
-		if (treeRow.ref.isFileAttachment()
-				// TODO: Adjust this if we localize "Snapshot"
-				&& !(treeRow.ref.isSnapshotAttachment() && /snapshot/i.test(treeRow.ref.getField('title')))
-				&& Zotero.Prefs.get('showAttachmentFilenames')) {
-			try {
-				row.title = treeRow.ref.attachmentFilename;
-			}
-			catch {
-				// Path wasn't parseable - it could be truly invalid, or just
-				// invalid for this platform (e.g., Windows path on macOS/Linux)
-				row.title = treeRow.ref.attachmentPath;
-			}
-		}
-		else {
-			row.title = treeRow.ref.getDisplayTitle();
-		}
+		row.title = treeRow.getDisplayTitle();
 		
 		const columns = this.getColumns();
 		for (let col of columns) {
@@ -2892,10 +2498,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			if (!this._cachedBestAttachmentStates) {
 				let t = new Date();
 				for (let i = 0; i < this._rows.length; i++) {
-					let item = this.getRow(i).ref;
-					if (this.renderer._canGetBestAttachmentState(item)) {
-						await item.getBestAttachmentState();
-					}
+					let row = this.getRow(i);
+					await row.getBestAttachmentState();
 				}
 				Zotero.debug("Cached best attachment states in " + (new Date - t) + " ms");
 				this._cachedBestAttachmentStates = true;
@@ -3013,4 +2617,3 @@ Zotero.Utilities.Internal.makeClassEventDispatcher(ItemTreeRowProvider);
 module.exports = ItemTree;
 module.exports.ItemTreeRow = ItemTreeRow;
 module.exports.ItemTreeRowProvider = ItemTreeRowProvider;
-module.exports.ItemTreeRowRenderer = ItemTreeRowRenderer;

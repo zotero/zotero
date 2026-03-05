@@ -52,7 +52,7 @@ const citationColumns = [
 		width: 26,
 		staticWidth: true,
 		fixedWidth: true,
-		renderer: (index, data, column) => {
+		renderCell: (index, data, column) => {
 			let icon = getCSSIcon('IconCross');
 			if (data) {
 				icon = getCSSIcon('IconTick');
@@ -76,7 +76,7 @@ itemColumns.push({
 	width: 26,
 	staticWidth: true,
 	fixedWidth: true,
-	renderer: (index, data, column) => {
+	renderCell: (index, data, column) => {
 		let icon = getCSSIcon('IconCross');
 		if (data) {
 			icon = getCSSIcon('IconTick');

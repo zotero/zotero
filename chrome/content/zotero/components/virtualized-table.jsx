@@ -1874,8 +1874,9 @@ var Columns = class {
 				}
 			}
 		});
-		this._virtualizedTable.props.onColumnSort(sortIndex, sortedColumn.sortDirection);
+		let result = this._virtualizedTable.props.onColumnSort(sortIndex, sortedColumn.sortDirection);
 		this._virtualizedTable.forceUpdate();
+		return result;
 	}
 
 	getAsArray() {
@@ -1885,8 +1886,8 @@ var Columns = class {
 
 function renderCell(index, data, column, dir = null) {
 	column = column || { dataKey: "" };
-	if (column.renderer) {
-		return column.renderer(index, data, column, dir);
+	if (column.renderCell) {
+		return column.renderCell(index, data, column, dir);
 	}
 	let span = document.createElement('span');
 	span.className = `cell ${column.className}`;

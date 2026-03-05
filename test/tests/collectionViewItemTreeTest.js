@@ -50,7 +50,7 @@ describe("CollectionViewItemTree", function () {
 		
 		Zotero.Prefs.clear('recursiveCollections');
 	});
-	
+
 	describe("when performing a quick search", function () {
 		let quicksearch;
 		
@@ -1205,7 +1205,34 @@ describe("CollectionViewItemTree", function () {
 				assert.isNumber(itemsView.getRowIndexByID(c1.treeViewID));
 				assert.isFalse(itemsView.getRowIndexByID(c2.treeViewID));
 				assert.isFalse(itemsView.getRowIndexByID(c3.treeViewID));
-			})
+			});
+
+			it("should assign collection/search row types in trash", async function () {
+				let collection = await createDataObject('collection', { deleted: true });
+				let search = await createDataObject('search', { deleted: true });
+
+				await selectTrash(win);
+
+				let collectionRowIndex = itemsView.getRowIndexByID(collection.treeViewID);
+				let searchRowIndex = itemsView.getRowIndexByID(search.treeViewID);
+				assert.isNumber(collectionRowIndex);
+				assert.isNumber(searchRowIndex);
+				assert.equal(itemsView.getRow(collectionRowIndex).type, 'collection');
+				assert.equal(itemsView.getRow(searchRowIndex).type, 'search');
+			});
+
+			it("should sort by hasAttachment in trash without crashing", async function () {
+				await createDataObject('collection', { deleted: true });
+				await createDataObject('search', { deleted: true });
+				await createDataObject('item', { deleted: true });
+				await selectTrash(win);
+
+				let columnIndex = itemsView._getColumns().findIndex(column => column.dataKey == 'hasAttachment');
+				assert.isAtLeast(columnIndex, 0);
+
+				await itemsView._handleColumnSort(columnIndex, 1);
+				assert.isAbove(itemsView.rowCount, 0);
+			});
 
 			it("should restore all subcollections when parent is restored", async function () {
 				var c1 = await createDataObject('collection', { deleted: true });
@@ -2121,7 +2148,7 @@ describe("CollectionViewItemTree", function () {
 		});
 	});
 
-	describe("#_renderPrimaryCell()", function () {
+	describe("primary cell rendering", function () {
 		async function getPrimaryCellContent(asHTML = false) {
 			let cellText;
 			do {
@@ -2201,6 +2228,7 @@ describe("CollectionViewItemTree", function () {
 				let annotationRowIndex = zp.itemsView.getRowIndexByID(annotation.id);
 				offset += 1;
 				assert.equal(annotationRowIndex, attachmentRowIndex + offset);
+				assert.equal(zp.itemsView.getRow(annotationRowIndex).type, 'annotation');
 			}
 		});
 

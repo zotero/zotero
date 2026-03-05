@@ -42,7 +42,8 @@ const { getDragTargetOrient } = require("components/utils");
 const React = require('react');
 const ReactDOM = require('react-dom');
 const ItemTree = require('zotero/itemTree');
-const { ItemTreeRowProvider, ItemTreeRow } = ItemTree;
+const { ItemTreeRowProvider } = ItemTree;
+const { ItemTreeRow } = require('zotero/itemTreeRow');
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 
@@ -269,7 +270,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				}
 				
 				// Add new top-level items
-				let row = new ItemTreeRow(item, 0, false);
+				let row = ItemTreeRow.create(item, 0, false);
 				if (!allItemIDs.has(item.treeViewID)) {
 					newRows.push(row);
 					allItemIDs.add(item.treeViewID);
@@ -571,7 +572,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						this._removeRow(row, true);
 
 						let beforeRow = this.getRowCount();
-						this._addRow(new ItemTreeRow(item, 0, false), beforeRow);
+						this._addRow(ItemTreeRow.create(item, 0, false), beforeRow);
 
 						sort = id;
 					}
@@ -609,7 +610,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					if (add) {
 						// Most likely, the note or attachment's parent was removed.
 						let beforeRow = this.getRowCount();
-						this._addRow(new ItemTreeRow(item, 0, false), beforeRow);
+						this._addRow(ItemTreeRow.create(item, 0, false), beforeRow);
 						madeChanges = true;
 						sort = id;
 					}
@@ -642,7 +643,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					// Regular item or standalone note/attachment
 					&& item.isTopLevelItem()) {
 					let beforeRow = this.getRowCount();
-					this._addRow(new ItemTreeRow(item, 0, false), beforeRow);
+					this._addRow(ItemTreeRow.create(item, 0, false), beforeRow);
 					madeChanges = true;
 				}
 			}
@@ -1185,7 +1186,7 @@ class CollectionViewItemTree extends ItemTree {
 					// Can only drop before or after a top-level item
 					if (!targetRow.ref.isTopLevelItem()) return false;
 					// Cannot drop between an opened container and the first child row
-					if (orient == 1 && targetRow.isOpen) return false;
+					if (orient == 1 && targetRow.isContainerOpen()) return false;
 					// Cannot drop after the last child of a parent container
 					if (orient == -1) {
 						let parentIndex = this._rowMap[item.parentItemID];
