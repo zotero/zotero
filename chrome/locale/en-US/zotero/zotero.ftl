@@ -862,3 +862,6 @@ normalize-attachment-titles-text = { -app-name } automatically renames files on 
 
 banner-close-button = 
     .aria-label = Dismiss notification
+
+plugins-blocked-plugin =
+    .message = This plugin has been disabled by { -app-name }.
