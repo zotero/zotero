@@ -1599,7 +1599,9 @@ class ReaderInstance {
 
 	_getReadAloudRemoteInterface(targetWindow) {
 		// Wrap return values in child window Promises to avoid permissions errors
-		let audioCache = this._window.caches.open('read-aloud');
+		let audioCache = this._window?.caches?.open
+			? this._window.caches.open('read-aloud')
+			: null;
 		return {
 			getVoices: () => {
 				return new targetWindow.Promise(async (resolve) => {
@@ -1616,11 +1618,13 @@ class ReaderInstance {
 						+ new URLSearchParams({ voice: voice.id, text: segment.text });
 					let cache;
 					try {
-						cache = await audioCache;
-						let cached = await cache.match(cacheURL);
-						if (cached) {
-							resolve(Cu.cloneInto({ audio: await cached.blob() }, targetWindow));
-							return;
+						if (audioCache) {
+							cache = await audioCache;
+							let cached = await cache.match(cacheURL);
+							if (cached) {
+								resolve(Cu.cloneInto({ audio: await cached.blob() }, targetWindow));
+								return;
+							}
 						}
 					}
 					catch (e) {
