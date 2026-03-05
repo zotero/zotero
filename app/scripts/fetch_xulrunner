@@ -393,6 +393,13 @@ function modify_omni {
 		'<label target="_blank" class="text-link" dir="ltr"><\/label>' \
 		chrome/toolkit/content/mozapps/extensions/aboutaddons.html
 	
+	# Add zotero.ftl to the addons page for our own localized strings
+	replace_line 'href="toolkit\/about\/aboutAddons.ftl"' 'href="toolkit\/about\/aboutAddons.ftl" \/>\n    <link rel="localization" href="zotero.ftl"' \
+		chrome/toolkit/content/mozapps/extensions/aboutaddons.html
+	# Use our own localized string for blocked plugin notification
+	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.js"
+	replace_line 'details-notification-hard-blocked-\$\{typeSuffix\}' 'plugins-blocked-plugin' $file
+
 	# TODO: Use our own strings, but for now fix the bundled English ones
 	replace_line 'Manage Your Extensions' 'Manage Your Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line '= Extensions' '= Plugins' localization/en-US/toolkit/about/aboutAddons.ftl

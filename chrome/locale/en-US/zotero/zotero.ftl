@@ -859,3 +859,6 @@ normalize-attachment-titles-text = { -app-name } automatically renames files on 
     In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
     
     Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
+
+plugins-blocked-plugin =
+    .message = This plugin has been disabled by { -app-name }.
