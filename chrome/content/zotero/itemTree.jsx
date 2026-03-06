@@ -1831,8 +1831,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 *  @param {Boolean} acrossAllLevels - Expand rows across all levels
 	 */
 	expandAllRows(acrossAllLevels) {
+		// Do nothing if there are no rows
+		if (this.rowCount == 0) return;
 		this.selection.selectEventsSuppressed = true;
 		var selectedItems = this.getSelectedObjects();
+		// Remember scroll position of an anchor row relative to the viewport
+		let isFocusedRowVisible = this.selection.focused >= this._treebox.getFirstVisibleRow() && this.selection.focused <= this._treebox.getLastVisibleRow();
+		// The anchor row is the selected row if it is visible OR the first visible row otherwise
+		let anchorRowIndex = isFocusedRowVisible ? this.selection.focused : this._treebox.getFirstVisibleRow();
+		let anchorItemID = this.getRow(anchorRowIndex).ref.treeViewID;
+		let anchorOffset = this._treebox._getItemPosition(anchorRowIndex) - this._treebox.scrollOffset;
 		let deepestExpandedLevel = 0;
 		// Find the deepest expanded container level
 		for (let i = 0; i < this.rowCount; i++) {
@@ -1859,7 +1867,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		this._refreshRowMap();
-		this._restoreSelection(selectedItems);
+		this._restoreSelection(selectedItems, false, true);
+		// Restore scroll position so the anchor row stays in place
+		let newRowIndex = this._rowMap[anchorItemID];
+		let newPosition = this._treebox._getItemPosition(newRowIndex);
+		this._treebox.scrollTo(newPosition - anchorOffset);
+		
 		this.tree.invalidate();
 		this.selection.selectEventsSuppressed = false;
 	}
@@ -1872,8 +1885,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @param {Boolean} acrossAllLevels - Collapse rows across all levels
 	 */
 	collapseAllRows(acrossAllLevels = false) {
+		// Do nothing if there are no rows
+		if (this.rowCount == 0) return;
 		this.selection.selectEventsSuppressed = true;
 		const selectedItems = this.getSelectedObjects();
+		// Remember scroll position of an anchor row relative to the viewport
+		let isFocusedRowVisible = this.selection.focused >= this._treebox.getFirstVisibleRow() && this.selection.focused <= this._treebox.getLastVisibleRow();
+		// The anchor row is the selected row if it is visible OR the first visible row otherwise
+		let anchorRowIndex = isFocusedRowVisible ? this.selection.focused : this._treebox.getFirstVisibleRow();
+		let anchorItemID = this.getRow(anchorRowIndex).ref.treeViewID;
+		let anchorOffset = this._treebox._getItemPosition(anchorRowIndex) - this._treebox.scrollOffset;
+		// Also record scroll position of anchor row's visible parent, in case anchor row is collapsed
+		let parentItemOffset;
+		if (Zotero.Items.get(anchorItemID).parentItemID) {
+			let parentIndex = this._rowMap[Zotero.Items.get(anchorItemID).parentItem.treeViewID];
+			if (parentIndex >= this._treebox.getFirstVisibleRow()) {
+				parentItemOffset = this._treebox._getItemPosition(parentIndex) - this._treebox.scrollOffset;
+			}
+		}
 		// Find the deepest level that has expanded containers
 		let maxLevelWithCollapsed = -1;
 		for (let i = 0; i < this.rowCount; i++) {
@@ -1888,7 +1917,23 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		this._refreshRowMap();
-		this._restoreSelection(selectedItems, false);
+		this._restoreSelection(selectedItems, false, true);
+
+		// Restore scroll position so the anchor row stays in place
+		let newRowIndex = this._rowMap[anchorItemID];
+		// If the anchor row was collapsed, fall back to its parent
+		if (newRowIndex === undefined) {
+			let parent = Zotero.Items.get(anchorItemID).parentItem;
+			newRowIndex = this._rowMap[parent.treeViewID];
+			// Preserve the scroll position of the parent, if it was visible
+			// If it was not visible, just scroll parent exactly to the top
+			anchorOffset = parentItemOffset || 0;
+		}
+		if (newRowIndex !== undefined) {
+			let newPosition = this._treebox._getItemPosition(newRowIndex);
+			this._treebox.scrollTo(newPosition - anchorOffset);
+		}
+		
 		this.tree.invalidate();
 		this.selection.selectEventsSuppressed = false;
 	};
