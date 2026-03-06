@@ -41,8 +41,8 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 			<panel type="arrow" align="top">
 				<html:div class="panel-container">
 					<html:div class="panel-text"></html:div>
-					<html:button class="ok-button" hidden="hidden"
-						data-l10n-id="general-ok"></html:button>
+					<html:button class="dismiss-button" hidden="hidden"
+						data-l10n-id="general-got-it"></html:button>
 				</html:div>
 			</panel>
 		`);
@@ -80,11 +80,11 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 					}
 					this.panel.hidePopup();
 				};
-				let okButton = this.querySelector('.ok-button');
-				okButton.hidden = false;
-				okButton.addEventListener("click", dismiss);
+				let dismissButton = this.querySelector('.dismiss-button');
+				dismissButton.hidden = false;
+				dismissButton.addEventListener("click", dismiss);
 				this.panel.addEventListener('popupshown', () => {
-					okButton.focus();
+					dismissButton.focus();
 				});
 				this.panel.addEventListener("keydown", (event) => {
 					if (event.key === "Enter" || event.key === "Escape") {
