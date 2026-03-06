@@ -36,6 +36,7 @@ general-open-settings = Open Settings
 general-settings = Settings…
 general-help = Help
 general-tag = Tag
+general-got-it = Got It
 general-done = Done
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Go Back
@@ -773,6 +774,8 @@ architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A
 architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 
 first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
+
+first-run-guidance-readAloud = { -app-name } can now read your documents to you using natural-sounding voices.
 
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }

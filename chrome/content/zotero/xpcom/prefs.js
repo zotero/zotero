@@ -46,7 +46,7 @@ Zotero.Prefs = new function () {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 20;
+		var toVersion = 21;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -215,6 +215,10 @@ Zotero.Prefs = new function () {
 					case 20:
 						// QuickFormat dialog no longer exists -- replaced with `.citationDialog`
 						this.clear("firstRunGuidanceShown.quickFormat");
+						break;
+					
+					case 21:
+						this.set('firstRunGuidanceShown.readAloud', false);
 						break;
 				}
 			}

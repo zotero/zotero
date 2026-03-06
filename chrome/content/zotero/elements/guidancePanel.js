@@ -41,6 +41,8 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 			<panel type="arrow" align="top">
 				<html:div class="panel-container">
 					<html:div class="panel-text"></html:div>
+					<html:button class="dismiss-button" hidden="hidden"
+						data-l10n-id="general-got-it"></html:button>
 				</html:div>
 			</panel>
 		`);
@@ -72,11 +74,23 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 
 			if (this.getAttribute("noautohide") == 'true'
 					&& !this.hasAttribute('forward')) {
-				let listener = () => {
-					this.panel.removeEventListener("click", listener);
+				let dismiss = () => {
+					if (this._pref) {
+						Zotero.Prefs.set(this._pref, true);
+					}
 					this.panel.hidePopup();
 				};
-				this.panel.addEventListener("click", listener);
+				let dismissButton = this.querySelector('.dismiss-button');
+				dismissButton.hidden = false;
+				dismissButton.addEventListener("click", dismiss);
+				this.panel.addEventListener('popupshown', () => {
+					dismissButton.focus();
+				});
+				this.panel.addEventListener("keydown", (event) => {
+					if (event.key === "Enter" || event.key === "Escape") {
+						dismiss();
+					}
+				});
 			}
 		}
 
@@ -125,7 +139,7 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 					text = await document.l10n.formatValue("first-run-guidance-" + about, options.l10nArgs || {});
 				}
 				text = text.split("\n");
-				var descriptionNode = document.querySelector('.panel-text');
+				var descriptionNode = this.querySelector('.panel-text');
 				
 				while (descriptionNode.hasChildNodes()) {
 					descriptionNode.removeChild(descriptionNode.firstChild);
@@ -144,6 +158,34 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 			var f = () => {
 				if (this.hasAttribute("foregroundonly") && Services.ww.activeWindow != window) return;
 				
+				// If the anchor element is inside another frame, create a proxy
+				// element in the parent document at the anchor's visual location
+				if (forEl.ownerDocument !== document) {
+					let iframe = forEl.ownerGlobal.frameElement;
+					if (iframe) {
+						let iframeRect = iframe.getBoundingClientRect();
+						let forElRect = forEl.getBoundingClientRect();
+						let proxy = document.createElement('div');
+						proxy.style.position = 'fixed';
+						proxy.style.left = (iframeRect.left + forElRect.left) + 'px';
+						proxy.style.top = (iframeRect.top + forElRect.top) + 'px';
+						proxy.style.width = forElRect.width + 'px';
+						proxy.style.height = forElRect.height + 'px';
+						proxy.style.pointerEvents = 'none';
+						document.documentElement.appendChild(proxy);
+						forEl = proxy;
+						this.panel.addEventListener('popuphidden', () => {
+							proxy.remove();
+						}, { once: true });
+					}
+				}
+
+				if (this.getAttribute('noautohide') === 'true') {
+					this.panel.setAttribute('noautohide', 'true');
+				}
+				else {
+					this.panel.removeAttribute('noautohide');
+				}
 				this.panel.openPopup(forEl, position || "after_start",
 					x ? parseInt(x, 10) : 0, y ? parseInt(y, 10) : 0);
 
@@ -153,7 +195,12 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 				this.panel.style.setProperty('--anchor-x', `${anchorOffset}px`);
 
 				if (pref) {
-					Zotero.Prefs.set(pref, true);
+					if (this.getAttribute('noautohide') === 'true') {
+						this._pref = pref;
+					}
+					else {
+						Zotero.Prefs.set(pref, true);
+					}
 				}
 			};
 			
