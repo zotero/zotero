@@ -335,7 +335,16 @@ export class CitationDialogSearchHandler {
 			// Generate a string to search for each item
 			let itemStr = item.getCreators()
 				.map(creator => creator.firstName + " " + creator.lastName)
-				.concat([item.getField("title"), item.getField("date", true, true).substr(0, 4)])
+				.concat([
+					// conditions from quicksearch-titleCreatorYear
+					item.getField("title"),
+					item.getField("date", true, true).substr(0, 4),
+					item.getField("publicationTitle"),
+					item.getField("shortTitle"),
+					item.getField("court"),
+					item.getField("year"),
+					item.getField("citationKey")
+				])
 				.join(" ")
 				.toLowerCase();
 			
