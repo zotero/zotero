@@ -107,7 +107,7 @@ describe("Import/Export", function () {
  xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
     <z:Attachment rdf:about="#item_1234">
         <z:itemType>attachment</z:itemType>
-        <rdf:resource rdf:resource="files/1234/test1.pdf"/>
+        <z:path rdf:resource="files/1234/test1.pdf"/>
         <dc:identifier>
             <dcterms:URI>
                 <rdf:value>https://example.com</rdf:value>
@@ -120,7 +120,7 @@ describe("Import/Export", function () {
     </z:Attachment>
 	<z:Attachment rdf:about="#item_2345">
         <z:itemType>attachment</z:itemType>
-        <rdf:resource rdf:resource="files/2345/test2.pdf"/>
+        <z:path rdf:resource="files/2345/test2.pdf"/>
         <dc:title>Test 2</dc:title>
         <link:type>application/pdf</link:type>
     </z:Attachment>

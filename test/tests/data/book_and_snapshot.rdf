@@ -12,7 +12,7 @@
     </bib:Book>
     <z:Attachment rdf:about="#item_2">
         <z:itemType>attachment</z:itemType>
-        <rdf:resource rdf:resource="files/2/test.html"/>
+        <z:path rdf:resource="files/2/test.html"/>
         <dc:identifier>
             <dcterms:URI>
                <rdf:value>http://example.com/</rdf:value>
