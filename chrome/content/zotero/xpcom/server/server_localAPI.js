@@ -97,14 +97,14 @@ class LocalAPIEndpoint {
 			return this.makeResponse(400, 'text/plain', e.message);
 		}
 	}
-	
+
 	async _initInternal(requestData) {
 		if (!Zotero.Prefs.get('httpServer.localAPI.enabled')) {
 			return this.makeResponse(403, 'text/plain', 'Local API is not enabled');
 		}
-		
+
 		requestData.headers = new Headers(requestData.headers);
-		
+
 		let apiVersion = parseInt(
 			requestData.headers.get('Zotero-API-Version')
 				|| requestData.searchParams.get('v')
@@ -114,7 +114,7 @@ class LocalAPIEndpoint {
 		if (apiVersion !== LOCAL_API_VERSION && requestData.pathname != '/api/') {
 			return this.makeResponse(501, 'text/plain', `API version not implemented: ${apiVersion}`);
 		}
-		
+
 		let userID = requestData.pathParams.userID && parseInt(requestData.pathParams.userID);
 		if (userID !== undefined
 				&& userID != 0
@@ -126,7 +126,7 @@ class LocalAPIEndpoint {
 			}
 			return this.makeResponse(400, 'text/plain', 'Only data for the logged-in user is available locally -- use userID 0' + suffix);
 		}
-		
+
 		if (requestData.pathParams.groupID) {
 			let groupID = requestData.pathParams.groupID;
 			let libraryID = Zotero.Groups.getLibraryIDFromGroupID(parseInt(groupID));
@@ -138,13 +138,13 @@ class LocalAPIEndpoint {
 		else {
 			requestData.libraryID = Zotero.Libraries.userLibraryID;
 		}
-		
+
 		let library = Zotero.Libraries.get(requestData.libraryID);
 		if (!library.getDataLoaded('item')) {
 			Zotero.debug("Waiting for items to load for library " + library.libraryID);
 			await library.waitForDataLoad('item');
 		}
-		
+
 		let response = await this.run(requestData);
 		if (response.data) {
 			let dataIsArray = Array.isArray(response.data);
@@ -157,7 +157,7 @@ class LocalAPIEndpoint {
 					response.data = response.data.filter(dataObject => dataObject.version > since);
 				}
 			}
-			
+
 			if (dataIsArray && response.data.length > 1) {
 				let sort = requestData.searchParams.get('sort') || 'dateModified';
 				if (!['dateAdded', 'dateModified', 'title', 'creator', 'itemType', 'date', 'publisher', 'publicationTitle', 'journalAbbreviation', 'language', 'accessDate', 'libraryCatalog', 'callNumber', 'rights', 'addedBy', 'numItems']
@@ -203,7 +203,7 @@ class LocalAPIEndpoint {
 							: 0);
 				});
 			}
-			
+
 			let totalResults = 1;
 			let links;
 			if (dataIsArray) {
@@ -214,13 +214,13 @@ class LocalAPIEndpoint {
 				let limit = parseInt(requestData.searchParams.get('limit')) || response.data.length - start;
 				if (limit < 0) limit = 0;
 				response.data = response.data.slice(start, start + limit);
-				
+
 				links = this.buildLinks(requestData, start, limit, totalResults);
 			}
 			else {
 				links = this.buildLinks(requestData, 0, 0, 1);
 			}
-			
+
 			let headers = {
 				'Total-Results': totalResults,
 				'Link': Object.entries(links).map(([rel, url]) => `<${url}>; rel="${rel}"`).join(', ')
@@ -256,7 +256,7 @@ class LocalAPIEndpoint {
 	 */
 	buildLinks(requestData, start, limit, totalResults) {
 		let links = {};
-		
+
 		let buildURL = (searchParams) => {
 			let url = new URL(requestData.pathname, 'http://' + requestData.headers.get('Host'));
 			url.search = searchParams.toString();
@@ -320,7 +320,7 @@ class LocalAPIEndpoint {
 			links.alternate = ZOTERO_CONFIG.WWW_BASE_URL + requestData.pathname.substring(5)
 				.replace('users/0/', `users/${Zotero.Users.getCurrentUserID()}/`);
 		}
-		
+
 		return links;
 	}
 
@@ -524,7 +524,7 @@ Zotero.Server.Endpoints["/api/users/:userID/settings"] = Zotero.Server.LocalAPI.
 
 Zotero.Server.LocalAPI.Collections = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
-	
+
 	run({ pathname, pathParams, libraryID }) {
 		let top = pathname.endsWith('/top');
 		let collections = pathParams.collectionKey
@@ -592,14 +592,14 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 
 		let search = new Zotero.Search();
 		search.libraryID = libraryID;
-		
+
 		if (isTop) {
 			search.addCondition('noChildren', 'true');
 		}
 		else {
 			search.addCondition('includeChildren', 'true');
 		}
-		
+
 		if (pathParams.collectionKey) {
 			search.addCondition('itemType', 'isNot', 'annotation');
 			search.addCondition('collectionID', 'is',
@@ -619,14 +619,14 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 		if (searchParams.get('includeTrashed') == '1' && !pathname.endsWith('/trash')) {
 			search.addCondition('includeDeleted', 'true');
 		}
-		
+
 		let savedSearch;
 		if (pathParams.searchKey) {
 			savedSearch = Zotero.Searches.getByLibraryAndKey(libraryID, pathParams.searchKey);
 			if (!savedSearch) return _404;
 			search.setScope(savedSearch, true);
 		}
-		
+
 		if (searchParams.has('itemKey')) {
 			let scope = new Zotero.Search();
 			if (savedSearch) {
@@ -666,7 +666,7 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 		// TODO: Fix in search.js
 		let uniqueResultIDs = [...new Set(await search.search())];
 		let items = await Zotero.Items.getAsync(uniqueResultIDs);
-		
+
 		if (pathParams.itemKey) {
 			// Filter out the parent, as promised
 			items = items.filter(item => item.key != pathParams.itemKey);
@@ -676,7 +676,7 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 			let tmpTable = await Zotero.Search.idsToTempTable(items.map(item => item.id));
 			try {
 				let tags = await Zotero.Tags.getAllWithin({ tmpTable });
-				
+
 				let tagQ = searchParams.get('q');
 				if (tagQ) {
 					let pred = searchParams.get('qmode') == 'startsWith'
@@ -684,7 +684,7 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 						: (tag => tag.tag.includes(tagQ));
 					tags = tags.filter(pred);
 				}
-				
+
 				// getAllWithin() calls cleanData(), which discards type fields when they are 0
 				// But we always want them, so add them back if necessary
 				let json = await Zotero.Tags.toResponseJSON(libraryID,
@@ -695,7 +695,7 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable, [], { noCache: true });
 			}
 		}
-		
+
 		return { data: items };
 	}
 };
@@ -894,7 +894,7 @@ async function toResponseJSON(dataObjectOrObjects, searchParams) {
 	if (Array.isArray(dataObjectOrObjects)) {
 		return Promise.all(dataObjectOrObjects.map(o => toResponseJSON(o, searchParams)));
 	}
-	
+
 	// Ask the data object for its response JSON representation, updating URLs to point to localhost
 	let dataObject = dataObjectOrObjects;
 	let responseJSON = dataObject.toResponseJSONAsync
@@ -903,7 +903,7 @@ async function toResponseJSON(dataObjectOrObjects, searchParams) {
 			includeGroupDetails: true
 		})
 		: dataObject;
-	
+
 	// Add includes and remove 'data' if not requested
 	let include = searchParams.has('include') ? searchParams.get('include') : 'data';
 	let dataIncluded = false;
@@ -945,13 +945,13 @@ async function citeprocToHTML(itemOrItems, searchParams, asCitationList) {
 	let items = Array.isArray(itemOrItems)
 		? itemOrItems
 		: [itemOrItems];
-	
+
 	// Filter out attachments, annotations, and notes, which we can't generate citations for
 	items = items.filter(item => item.isRegularItem());
 	let styleIDOrURL = searchParams.get('style') || 'chicago-shortened-notes-bibliography';
 	let locale = searchParams.get('locale') || 'en-US';
 	let linkWrap = searchParams.get('linkwrap') == '1';
-	
+
 	let style = Zotero.Styles.get(styleIDOrURL);
 	// If not a URI, try with standard prefix
 	if (!style && !styleIDOrURL.includes(':')) {
@@ -976,7 +976,7 @@ async function citeprocToHTML(itemOrItems, searchParams, asCitationList) {
 	if (!style) {
 		throw new Error(`Unable to install style: ${styleIDOrURL}`);
 	}
-	
+
 	let cslEngine = style.getCiteProc(locale, 'html', { cache: true });
 	cslEngine.opt.development_extensions.wrap_url_and_doi = linkWrap;
 	return Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, 'html', asCitationList);
@@ -1026,17 +1026,17 @@ function buildSearchFromSearchSyntax(parentSearch, searchStrings, condition) {
 		if (searchString[0] == '\\' && searchString[1] == '-') {
 			searchString = searchString.substring(1);
 		}
-		
+
 		let childSearch = new Zotero.Search();
 		childSearch.libraryID = parentSearch.libraryID;
 		childSearch.setScope(parentSearch, true);
 		childSearch.addCondition('joinMode', 'any');
-		
+
 		let ors = searchString.split('||').map(or => or.trim());
 		for (let or of ors) {
 			childSearch.addCondition(condition, negate ? 'isNot' : 'is', or);
 		}
-		
+
 		parentSearch = childSearch;
 	}
 	return parentSearch;
@@ -1086,7 +1086,7 @@ async function fetchDOIMetadata(doi) {
  */
 function crossrefToZoteroItem(crossrefData) {
 	let item = {
-	
+
 		title: crossrefData.title?.[0] || 'Untitled',
 		DOI: crossrefData.DOI,
 	};
@@ -1162,23 +1162,11 @@ Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
 		}
 
 		try {
-			let crossrefData = await fetchDOIMetadata(doi);
-			let itemData = crossrefToZoteroItem(crossrefData);
-
 			let library = Zotero.Libraries.get(requestData.libraryID);
 			let item = new Zotero.Item('journalArticle');
-			item.libraryID = library.libraryID;
 
-			for (let [field, value] of Object.entries(itemData)) {
-				if (field === 'creators') {
-					for (let creator of value) {
-						item.addCreator(creator);
-					}
-				}
-				else if (value !== undefined && value !== null) {
-					item.setField(field, value);
-				}
-			}
+			item.libraryID = library.libraryID;
+			item.setField('DOI', doi);
 
 			await item.saveTx();
 
@@ -1358,3 +1346,169 @@ Zotero.Server.LocalAPI.AddItemsToCollection = class extends LocalAPIEndpoint {
 	}
 };
 Zotero.Server.Endpoints["/api/users/:userID/collections/:collectionKey/items"] = Zotero.Server.LocalAPI.AddItemsToCollection;
+
+/**
+* Remove items from collection
+* DELETE /api/users/0/collections/:collectionKey/items
+* Body: { "items": ["itemKey1", "itemKey2"] }
+*/
+
+Zotero.Server.LocalAPI.RemoveItemsFromCollection = class extends LocalAPIEndpoint {
+	supportedMethods = ['DELETE'];
+
+	async run(requestData) {
+		let collection = Zotero.Collections.getByLibraryAndKey(
+			requestData.libraryID,
+			requestData.pathParams.collectionKey
+		);
+
+		if (!collection) {
+			return [404, 'text/plain', 'Collection not found'];
+		}
+
+		let body = requestData.data || {};
+		let itemKeys = body.items || body.itemKeys;
+
+		if (!itemKeys || !Array.isArray(itemKeys) || itemKeys.length === 0) {
+			return [400, 'text/plain', 'Item keys are required (array of item keys)'];
+		}
+
+		try {
+			let removedItems = [];
+			let failedItems = [];
+
+			for (let itemKey of itemKeys) {
+				let item = await Zotero.Items.getByLibraryAndKeyAsync(
+					requestData.libraryID,
+					itemKey
+				);
+
+				if (!item) {
+					failedItems.push({ key: itemKey, error: 'Item not found' });
+					continue;
+				}
+
+				item.removeFromCollection(collection.id);
+				await item.saveTx();
+				removedItems.push(itemKey);
+			}
+
+			return [200, 'application/json', JSON.stringify({
+				success: true,
+				removed: removedItems,
+				failed: failedItems
+			}, null, 4)];
+		} catch (e) {
+			Zotero.logError(e);
+			return [500, 'text/plain', `Failed to remove items from collection: ${e.message}`];
+		}
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/collections/:collectionKey/items/remove"] = Zotero.Server.LocalAPI.RemoveItemsFromCollection;
+
+/**
+ * Add tags to item
+ * POST /api/users/0/items/:itemKey/tags
+ * Body: { "tags": ["tag1", "tag2"] }
+ */
+Zotero.Server.LocalAPI.AddTagsToItem = class extends LocalAPIEndpoint {
+	supportedMethods = ['POST'];
+
+	async run(requestData) {
+		let item = await Zotero.Items.getByLibraryAndKeyAsync(
+			requestData.libraryID,
+			requestData.pathParams.itemKey
+		);
+
+		if (!item) {
+			return [404, 'text/plain', 'Item not found'];
+		}
+
+		let body = requestData.data || {};
+		let tags = body.tags || body.tag;
+
+		if (!tags || !Array.isArray(tags) || tags.length === 0) {
+			return [400, 'text/plain', 'Tags are required (array of tag names)'];
+		}
+
+		try {
+			let added = [];
+			let failed = [];
+
+			for (let tagName of tags) {
+				let type = body.type || 0; // 0 = automatic, 1 = manual
+				let result = item.addTag(tagName, type);
+				if (result) {
+					added.push(tagName);
+				} else {
+					failed.push({ tag: tagName, error: 'Tag already exists' });
+				}
+			}
+
+			await item.saveTx();
+
+			return [200, 'application/json', JSON.stringify({
+				success: true,
+				added: added,
+				failed: failed
+			}, null, 4)];
+		} catch (e) {
+			Zotero.logError(e);
+			return [500, 'text/plain', `Failed to add tags: ${e.message}`];
+		}
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/tags"] = Zotero.Server.LocalAPI.AddTagsToItem;
+
+/**
+ * Remove tags from item
+ * POST /api/users/0/items/:itemKey/tags/remove
+ * Body: { "tags": ["tag1", "tag2"] }
+ */
+Zotero.Server.LocalAPI.RemoveTagsFromItem = class extends LocalAPIEndpoint {
+	supportedMethods = ['POST'];
+
+	async run(requestData) {
+		let item = await Zotero.Items.getByLibraryAndKeyAsync(
+			requestData.libraryID,
+			requestData.pathParams.itemKey
+		);
+
+		if (!item) {
+			return [404, 'text/plain', 'Item not found'];
+		}
+
+		let body = requestData.data || {};
+		let tags = body.tags || body.tag;
+
+		if (!tags || !Array.isArray(tags) || tags.length === 0) {
+			return [400, 'text/plain', 'Tags are required (array of tag names)'];
+		}
+
+		try {
+			let removed = [];
+			let failed = [];
+
+			for (let tagName of tags) {
+				let result = item.removeTag(tagName);
+				if (result) {
+					removed.push(tagName);
+				} else {
+					failed.push({ tag: tagName, error: 'Tag not found' });
+				}
+			}
+
+			await item.saveTx();
+
+			return [200, 'application/json', JSON.stringify({
+				success: true,
+				removed: removed,
+				failed: failed
+			}, null, 4)];
+		} catch (e) {
+			Zotero.logError(e);
+			return [500, 'text/plain', `Failed to remove tags: ${e.message}`];
+		}
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/tags/remove"] = Zotero.Server.LocalAPI.RemoveTagsFromItem;
