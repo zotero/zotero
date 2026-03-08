@@ -1055,3 +1055,304 @@ function searchToDebugJSON(search) {
 }
 
 class BadRequestError extends Error {}
+
+
+// ============================================================================
+// Local API Write Endpoints (Custom Implementation)
+// ============================================================================
+
+/**
+ * Fetch item metadata from DOI using CrossRef API
+ * @param {String} doi - The DOI to look up
+ * @returns {Promise<Object>} - Item data from CrossRef
+ */
+async function fetchDOIMetadata(doi) {
+	// Clean DOI
+	doi = doi.replace(/^https?:\/\/doi\.org\//, '').trim();
+
+	let url = `https://api.crossref.org/works/${encodeURIComponent(doi)}`;
+	let response = await fetch(url);
+	if (!response.ok) {
+		throw new Error(`DOI lookup failed: ${response.status}`);
+	}
+	let data = await response.json();
+	return data.message;
+}
+
+/**
+ * Convert CrossRef metadata to Zotero item data
+ * @param {Object} crossrefData - Data from CrossRef API
+ * @returns {Object} - Zotero item data
+ */
+function crossrefToZoteroItem(crossrefData) {
+	let item = {
+		itemType: 'journalArticle',
+		title: crossrefData.title?.[0] || 'Untitled',
+		DOI: crossrefData.DOI,
+	};
+
+	// Authors
+	if (crossrefData.author) {
+		item.creators = crossrefData.author.map(author => ({
+			creatorType: 'author',
+			firstName: author.given || '',
+			lastName: author.family || ''
+		}));
+	}
+
+	// Journal info
+	if (crossrefData['container-title']) {
+		item.publicationTitle = crossrefData['container-title'][0];
+	}
+	if (crossrefData.volume) {
+		item.volume = crossrefData.volume;
+	}
+	if (crossrefData.issue) {
+		item.issue = crossrefData.issue;
+	}
+	if (crossrefData.page) {
+		item.pages = crossrefData.page;
+	}
+
+	// Date
+	if (crossrefData.published?.['date-parts']?.[0]) {
+		let dateParts = crossrefData.published['date-parts'][0];
+		item.date = dateParts.join('-');
+	}
+	else if (crossrefData.created?.['date-parts']?.[0]) {
+		let dateParts = crossrefData.created['date-parts'][0];
+		item.date = dateParts.join('-');
+	}
+
+	// Abstract
+	if (crossrefData.abstract) {
+		item.abstractNote = crossrefData.abstract.replace(/<[^>]+>/g, '');
+	}
+
+	// ISSN
+	if (crossrefData.ISSN) {
+		item.ISSN = crossrefData.ISSN[0];
+	}
+
+	// URL
+	if (crossrefData.URL) {
+		item.url = crossrefData.URL;
+	}
+
+	return item;
+}
+
+// Extend LocalAPIEndpoint to support POST
+LocalAPIEndpoint.prototype.supportedMethods = ['GET', 'POST'];
+
+/**
+ * Create item from DOI
+ * POST /api/users/0/items
+ * Body: { "doi": "10.xxxx/xxxxx" }
+ */
+Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
+	supportedMethods = ['POST'];
+
+	async run(requestData) {
+		let body = await this._parseBody(requestData);
+		let doi = body.doi || body.DOI;
+
+		if (!doi) {
+			return [400, 'text/plain', 'DOI is required'];
+		}
+
+		try {
+			let crossrefData = await fetchDOIMetadata(doi);
+			let itemData = crossrefToZoteroItem(crossrefData);
+
+			let library = Zotero.Libraries.get(requestData.libraryID);
+			let item = new Zotero.Item('journalArticle');
+			item.libraryID = library.libraryID;
+
+			for (let [field, value] of Object.entries(itemData)) {
+				if (field === 'creators') {
+					for (let creator of value) {
+						item.addCreator(creator);
+					}
+				}
+				else if (value !== undefined && value !== null) {
+					item.setField(field, value);
+				}
+			}
+
+			await item.saveTx();
+
+			return [201, 'application/json', JSON.stringify({
+				success: true,
+				key: item.key,
+				data: item.toResponseJSON()
+			}, null, 4)];
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return [500, 'text/plain', `Failed to create item: ${e.message}`];
+		}
+	}
+
+	async _parseBody(requestData) {
+		let body = '';
+		if (requestData.body) {
+			body = requestData.body;
+		}
+		else if (requestData.input) {
+			body = await new Response(requestData.input).text();
+		}
+
+		try {
+			return JSON.parse(body);
+		}
+		catch (e) {
+			return {};
+		}
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/items"] = Zotero.Server.LocalAPI.CreateItem;
+
+/**
+ * Create collection or subcollection
+ * POST /api/users/0/collections
+ * Body: { "name": "Collection Name", "parentKey": "optional_parent_key" }
+ */
+Zotero.Server.LocalAPI.CreateCollection = class extends LocalAPIEndpoint {
+	supportedMethods = ['POST'];
+
+	async run(requestData) {
+		let body = await this._parseBody(requestData);
+		let name = body.name;
+
+		if (!name) {
+			return [400, 'text/plain', 'Collection name is required'];
+		}
+
+		try {
+			let library = Zotero.Libraries.get(requestData.libraryID);
+
+			let collection = new Zotero.Collection();
+			collection.name = name;
+			collection.libraryID = library.libraryID;
+
+			if (body.parentKey) {
+				let parentCollection = Zotero.Collections.getByLibraryAndKey(
+					requestData.libraryID,
+					body.parentKey
+				);
+				if (!parentCollection) {
+					return [400, 'text/plain', 'Parent collection not found'];
+				}
+				collection.parentID = parentCollection.id;
+			}
+
+			await collection.saveTx();
+
+			return [201, 'application/json', JSON.stringify({
+				success: true,
+				key: collection.key,
+				data: collection.toResponseJSON()
+			}, null, 4)];
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return [500, 'text/plain', `Failed to create collection: ${e.message}`];
+		}
+	}
+
+	async _parseBody(requestData) {
+		let body = '';
+		if (requestData.body) {
+			body = requestData.body;
+		}
+		else if (requestData.input) {
+			body = await new Response(requestData.input).text();
+		}
+
+		try {
+			return JSON.parse(body);
+		}
+		catch (e) {
+			return {};
+		}
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/collections"] = Zotero.Server.LocalAPI.CreateCollection;
+
+/**
+ * Add items to collection
+ * POST /api/users/0/collections/:collectionKey/items
+ * Body: { "items": ["itemKey1", "itemKey2"] }
+ */
+Zotero.Server.LocalAPI.AddItemsToCollection = class extends LocalAPIEndpoint {
+	supportedMethods = ['POST'];
+
+	async run(requestData) {
+		let collection = Zotero.Collections.getByLibraryAndKey(
+			requestData.libraryID,
+			requestData.pathParams.collectionKey
+		);
+
+		if (!collection) {
+			return [404, 'text/plain', 'Collection not found'];
+		}
+
+		let body = await this._parseBody(requestData);
+		let itemKeys = body.items || body.itemKeys;
+
+		if (!itemKeys || !Array.isArray(itemKeys) || itemKeys.length === 0) {
+			return [400, 'text/plain', 'Item keys are required (array of item keys)'];
+		}
+
+		try {
+			let addedItems = [];
+			let failedItems = [];
+
+			for (let itemKey of itemKeys) {
+				let item = await Zotero.Items.getByLibraryAndKeyAsync(
+					requestData.libraryID,
+					itemKey
+				);
+
+				if (!item) {
+					failedItems.push({ key: itemKey, error: 'Item not found' });
+					continue;
+				}
+
+				collection.addItem(item.id);
+				addedItems.push(itemKey);
+			}
+
+			await collection.saveTx();
+
+			return [200, 'application/json', JSON.stringify({
+				success: true,
+				added: addedItems,
+				failed: failedItems
+			}, null, 4)];
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return [500, 'text/plain', `Failed to add items to collection: ${e.message}`];
+		}
+	}
+
+	async _parseBody(requestData) {
+		let body = '';
+		if (requestData.body) {
+			body = requestData.body;
+		}
+		else if (requestData.input) {
+			body = await new Response(requestData.input).text();
+		}
+
+		try {
+			return JSON.parse(body);
+		}
+		catch (e) {
+			return {};
+		}
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/collections/:collectionKey/items"] = Zotero.Server.LocalAPI.AddItemsToCollection;
