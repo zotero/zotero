@@ -1155,10 +1155,9 @@ Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
 
 	async run(requestData) {
 		let body = requestData.data || {};
-		let doi = body.doi || body.DOI;
-
 		let itemType = body.itemType || 'journalArticle';
 
+		// Validate item type
 		let itemTypeID = Zotero.ItemTypes.getID(itemType);
 		if (!itemTypeID) {
 			let allTypes = Zotero.ItemTypes.getAll().map(t => t.name);
@@ -1168,16 +1167,46 @@ Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
 			}, null, 4)];
 		}
 
-		if (!doi) {
-			return [400, 'text/plain', 'DOI is required'];
+		// Get valid fields for this item type
+		let validFieldIDs = Zotero.ItemFields.getItemTypeFields(itemTypeID);
+		let validFields = new Set(validFieldIDs.map(id => Zotero.ItemFields.getName(id)));
+
+		// Filter and validate fields
+		let invalidFields = [];
+		let allowedFields = ['itemType', 'tags', 'collections'];
+		for (let key of Object.keys(body)) {
+			if (allowedFields.includes(key)) continue;
+			if (!validFields.has(key)) {
+				invalidFields.push(key);
+			}
+		}
+
+		if (invalidFields.length > 0) {
+			let allFields = validFieldIDs.map(id => Zotero.ItemFields.getName(id));
+			return [400, 'application/json', JSON.stringify({
+				error: `Invalid fields: ${invalidFields.join(', ')}`,
+				availableFields: allFields
+			}, null, 4)];
 		}
 
 		try {
 			let library = Zotero.Libraries.get(requestData.libraryID);
 			let item = new Zotero.Item(itemType);
-
 			item.libraryID = library.libraryID;
-			item.setField('DOI', doi);
+
+			// Set title (required - use placeholder if not provided)
+			let title = body.title || body.Title || 'Untitled';
+			item.setField('title', title);
+
+			// Set all other valid fields
+			for (let [key, value] of Object.entries(body)) {
+				if (['itemType', 'title', 'Title', 'tags', 'collections'].includes(key)) {
+					continue;
+				}
+				if (value !== undefined && value !== null && value !== '') {
+					item.setField(key, value);
+				}
+			}
 
 			await item.saveTx();
 
@@ -1186,8 +1215,7 @@ Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
 				key: item.key,
 				data: item.toResponseJSON()
 			}, null, 4)];
-		}
-		catch (e) {
+		} catch (e) {
 			Zotero.logError(e);
 			return [500, 'text/plain', `Failed to create item: ${e.message}`];
 		}
@@ -1197,15 +1225,13 @@ Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
 		let body = '';
 		if (requestData.body) {
 			body = requestData.body;
-		}
-		else if (requestData.input) {
+		} else if (requestData.input) {
 			body = await new Response(requestData.input).text();
 		}
 
 		try {
 			return JSON.parse(body);
-		}
-		catch (e) {
+		} catch (e) {
 			return {};
 		}
 	}
