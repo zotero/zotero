@@ -321,6 +321,15 @@ const COLUMNS = [
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
+		dataKey: "citationKey",
+		disabledIn: ["feeds", "feed"],
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
+		label: "itemFields.citationKey",
+		flex: 1,
+		zoteroPersist: ["width", "hidden", "sortDirection"]
+	},
+	{
 		dataKey: "extra",
 		disabledIn: ["feeds", "feed"],
 		showInColumnPicker: true,
