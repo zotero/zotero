@@ -1257,7 +1257,7 @@ Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
 		}
 	}
 };
-Zotero.Server.Endpoints["/api/users/:userID/items"] = Zotero.Server.LocalAPI.CreateItem;
+Zotero.Server.Endpoints["/api/users/:userID/create_item"] = Zotero.Server.LocalAPI.CreateItem;
 
 /**
  * Create collection or subcollection
