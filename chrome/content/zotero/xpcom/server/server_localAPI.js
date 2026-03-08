@@ -1157,13 +1157,24 @@ Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
 		let body = requestData.data || {};
 		let doi = body.doi || body.DOI;
 
+		let itemType = body.itemType || 'journalArticle';
+
+		let itemTypeID = Zotero.ItemTypes.getID(itemType);
+		if (!itemTypeID) {
+			let allTypes = Zotero.ItemTypes.getAll().map(t => t.name);
+			return [400, 'application/json', JSON.stringify({
+				error: `Invalid item type: ${itemType}`,
+				availableTypes: allTypes
+			}, null, 4)];
+		}
+
 		if (!doi) {
 			return [400, 'text/plain', 'DOI is required'];
 		}
 
 		try {
 			let library = Zotero.Libraries.get(requestData.libraryID);
-			let item = new Zotero.Item('journalArticle');
+			let item = new Zotero.Item(itemType);
 
 			item.libraryID = library.libraryID;
 			item.setField('DOI', doi);
