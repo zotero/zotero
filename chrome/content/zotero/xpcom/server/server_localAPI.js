@@ -533,7 +533,7 @@ Zotero.Server.LocalAPI.Collections = class extends LocalAPIEndpoint {
 		return { data: collections };
 	}
 };
-Zotero.Server.Endpoints["/api/users/:userID/collections"] = Zotero.Server.LocalAPI.Collections;
+Zotero.Server.Endpoints["/api/users/:userID/all_collections"] = Zotero.Server.LocalAPI.Collections;
 Zotero.Server.Endpoints["/api/groups/:groupID/collections"] = Zotero.Server.LocalAPI.Collections;
 Zotero.Server.Endpoints["/api/users/:userID/collections/top"] = Zotero.Server.LocalAPI.Collections;
 Zotero.Server.Endpoints["/api/groups/:groupID/collections/top"] = Zotero.Server.LocalAPI.Collections;
@@ -1404,65 +1404,6 @@ Zotero.Server.LocalAPI.AddItemsToCollection = class extends LocalAPIEndpoint {
 	}
 };
 Zotero.Server.Endpoints["/api/users/:userID/collections/:collectionKey/items"] = Zotero.Server.LocalAPI.AddItemsToCollection;
-
-/**
-* Remove items from collection
-* DELETE /api/users/0/collections/:collectionKey/items
-* Body: { "items": ["itemKey1", "itemKey2"] }
-*/
-
-Zotero.Server.LocalAPI.RemoveItemsFromCollection = class extends LocalAPIEndpoint {
-	supportedMethods = ['DELETE'];
-
-	async run(requestData) {
-		let collection = Zotero.Collections.getByLibraryAndKey(
-			requestData.libraryID,
-			requestData.pathParams.collectionKey
-		);
-
-		if (!collection) {
-			return [404, 'text/plain', 'Collection not found'];
-		}
-
-		let body = requestData.data || {};
-		let itemKeys = body.items || body.itemKeys;
-
-		if (!itemKeys || !Array.isArray(itemKeys) || itemKeys.length === 0) {
-			return [400, 'text/plain', 'Item keys are required (array of item keys)'];
-		}
-
-		try {
-			let removedItems = [];
-			let failedItems = [];
-
-			for (let itemKey of itemKeys) {
-				let item = await Zotero.Items.getByLibraryAndKeyAsync(
-					requestData.libraryID,
-					itemKey
-				);
-
-				if (!item) {
-					failedItems.push({ key: itemKey, error: 'Item not found' });
-					continue;
-				}
-
-				item.removeFromCollection(collection.id);
-				await item.saveTx();
-				removedItems.push(itemKey);
-			}
-
-			return [200, 'application/json', JSON.stringify({
-				success: true,
-				removed: removedItems,
-				failed: failedItems
-			}, null, 4)];
-		} catch (e) {
-			Zotero.logError(e);
-			return [500, 'text/plain', `Failed to remove items from collection: ${e.message}`];
-		}
-	}
-};
-Zotero.Server.Endpoints["/api/users/:userID/collections/:collectionKey/items/remove"] = Zotero.Server.LocalAPI.RemoveItemsFromCollection;
 
 /**
  * Add tags to item
