@@ -1086,7 +1086,7 @@ async function fetchDOIMetadata(doi) {
  */
 function crossrefToZoteroItem(crossrefData) {
 	let item = {
-		itemType: 'journalArticle',
+	
 		title: crossrefData.title?.[0] || 'Untitled',
 		DOI: crossrefData.DOI,
 	};
@@ -1154,7 +1154,7 @@ Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
 	supportedMethods = ['POST'];
 
 	async run(requestData) {
-		let body = await this._parseBody(requestData);
+		let body = requestData.data || {};
 		let doi = body.doi || body.DOI;
 
 		if (!doi) {
@@ -1222,7 +1222,7 @@ Zotero.Server.LocalAPI.CreateCollection = class extends LocalAPIEndpoint {
 	supportedMethods = ['POST'];
 
 	async run(requestData) {
-		let body = await this._parseBody(requestData);
+		let body = requestData.data || {};
 		let name = body.name;
 
 		if (!name) {
@@ -1298,7 +1298,10 @@ Zotero.Server.LocalAPI.AddItemsToCollection = class extends LocalAPIEndpoint {
 			return [404, 'text/plain', 'Collection not found'];
 		}
 
-		let body = await this._parseBody(requestData);
+		// Load collection data first
+		await collection.loadDataType('childItems');
+
+		let body = requestData.data || {};
 		let itemKeys = body.items || body.itemKeys;
 
 		if (!itemKeys || !Array.isArray(itemKeys) || itemKeys.length === 0) {
@@ -1320,11 +1323,10 @@ Zotero.Server.LocalAPI.AddItemsToCollection = class extends LocalAPIEndpoint {
 					continue;
 				}
 
-				collection.addItem(item.id);
+				item.addToCollection(collection.id);
+				await item.saveTx();
 				addedItems.push(itemKey);
 			}
-
-			await collection.saveTx();
 
 			return [200, 'application/json', JSON.stringify({
 				success: true,
