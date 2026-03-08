@@ -3662,6 +3662,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._columns.push(column);
 		}
 
+		// Ensure at least one primary column is visible -- if a plugin hid
+		// the Title column without providing its own, force-show it
+		if (!this._columns.some(c => c.primary && !c.hidden)) {
+			let title = this._columns.find(c => c.dataKey === 'title');
+			if (title) {
+				title.hidden = false;
+			}
+		}
+
 		return this._columns.sort((a, b) => a.ordinal - b.ordinal);
 	}
 	
