@@ -1200,20 +1200,11 @@ Zotero.Server.LocalAPI.CreateItem = class extends LocalAPIEndpoint {
 
 			// Set all other valid fields
 			for (let [key, value] of Object.entries(body)) {
-				if (['itemType', 'title', 'Title', 'creator', 'tags', 'collections'].includes(key)) {
+				if (['itemType', 'title', 'Title', 'tags', 'collections'].includes(key)) {
 					continue;
 				}
 				if (value !== undefined && value !== null && value !== '') {
 					item.setField(key, value);
-				}
-			}
-
-			// Handle creators
-			if (body.creators && Array.isArray(body.creators)) {
-				try {
-					item.setCreators(body.creators);
-				} catch (e) {
-					return [400, 'text/plain', `Invalid creator data: ${e.message}`];
 				}
 			}
 
