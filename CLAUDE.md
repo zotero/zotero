@@ -70,7 +70,7 @@ ESLint v9 flat config is in `eslint.config.mjs`. Uses `@zotero/eslint-config`, B
 - **Custom elements** (`chrome/content/zotero/elements/`) -- XUL custom elements inheriting from `XULElementBase` (defined in `elements/base.js`), which provides lifecycle helpers (`init()`, `destroy()`, `content` getter for templates). Registered via `customElements.define()`.
 - **React components** (`chrome/content/zotero/components/`) -- Used for complex interactive UI (tag selector, virtualized table, item tree, collection tree). Major tree views are `itemTree.jsx` and `collectionTree.jsx`.
 - **SCSS styles** (`scss/`) -- Compiled to CSS. Platform-specific overrides in `scss/mac/`, `scss/win/`, `scss/linux/`.
-- **Localization** -- Fluent (`.ftl` files) in `chrome/locale/en-US/zotero/`. Accessed via `data-l10n-id` attributes or `Zotero.getString()` for legacy `.properties` strings.
+- **Localization** -- Fluent (`.ftl` files) in `chrome/locale/en-US/zotero/`. Accessed via `data-l10n-id` attributes or `Zotero.getString()` for legacy `.properties` strings. All new strings must be added to `.ftl` files -- do not add new strings to `.properties` or `.dtd` files.
 
 ### Submodules
 
