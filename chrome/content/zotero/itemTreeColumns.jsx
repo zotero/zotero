@@ -334,7 +334,7 @@ const COLUMNS = [
 		disabledIn: ["feeds", "feed"],
 		showInColumnPicker: true,
 		columnPickerSubMenu: true,
-		label: "itemFields.PMID",
+		label: "PMID",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
