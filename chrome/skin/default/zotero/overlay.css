@@ -166,13 +166,13 @@
 
 /* Missing in Fx60 */
 .autocomplete-richlistbox {
-	border: 1px solid transparent;
+	border: none;
 	min-height: 1.8em;
 }
 
 .autocomplete-richlistitem {
 	font: message-box;
-	padding: 1px;
+	padding: 0 1px;
 	height: 1.5em;
 	min-height: 1.5em;
 }
