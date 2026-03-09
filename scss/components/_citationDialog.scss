@@ -344,6 +344,19 @@
 			#item-tree-container {
 				min-height: 100%;
 				flex: 1; /* expand all the way to the right */
+				// supress focus ring flashing during double-click
+				&.no-focus-ring {
+					.row.focused {
+						outline: none !important;
+						border: none !important;
+						> *:first-child {
+							margin-inline-start: 0;
+						}
+						> *:last-child {
+							margin-inline-end: 0;
+						}
+					}
+				}
 			}
 		}
 	}
