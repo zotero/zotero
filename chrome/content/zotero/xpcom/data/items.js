@@ -1260,6 +1260,9 @@ Zotero.Items = function () {
 		var validCreatorTypes = [
 			Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID),
 			Zotero.CreatorTypes.getID('editor'),
+			// Director used to be the primary type for Video Recording before
+			// Creator (mapped to Author) was added
+			Zotero.CreatorTypes.getID('director'),
 			Zotero.CreatorTypes.getID('contributor')
 		];
 	
@@ -1395,120 +1398,54 @@ Zotero.Items = function () {
 		if (_firstCreatorSQL) {
 			return _firstCreatorSQL;
 		}
-		
-		var editorCreatorTypeID = Zotero.CreatorTypes.getID('editor');
-		var contributorCreatorTypeID = Zotero.CreatorTypes.getID('contributor');
-		
-		/* This whole block is to get the firstCreator */
+
 		var localizedAnd = Zotero.getString('general.andJoiner').replace(/%S/g, '%s');
 		var localizedEtAl = Zotero.getString('general.etAl');
-		var sql = "COALESCE(" +
-			// First try for primary creator types
-			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators IC " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1" +
-			") " +
-			"WHEN 0 THEN NULL " +
-			"WHEN 1 THEN (" +
-				"SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1" +
-			") " +
-			"WHEN 2 THEN (" +
-				"SELECT PRINTF(" +
-					`'${localizedAnd}'` +
-					", " +
-					// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
-					// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators " +
-					"LEFT JOIN itemTypeCreatorTypes ITCT " +
-					"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-					"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators " +
-					"LEFT JOIN itemTypeCreatorTypes ITCT " +
-					"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-					"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
-				")" +
-			") " +
-			"ELSE (" +
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedEtAl + "' " + 
-			") " +
-			"END, " +
-			
-			// Then try editors
-			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}` +
-			") " +
-			"WHEN 0 THEN NULL " +
-			"WHEN 1 THEN (" +
-				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}` +
-			") " +
-			"WHEN 2 THEN (" +
-				"SELECT PRINTF(" +
-					`'${localizedAnd}'` +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
-					`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
-					"ORDER BY orderIndex LIMIT 1)" +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
-					`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
-					"ORDER BY orderIndex LIMIT 1,1) " +
-				")" +
-			") " +
-			"ELSE (" +
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
-				"ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedEtAl + "' " +
-			") " +
-			"END, " +
-			
-			// Then try contributors
-			"CASE (" +
-				"SELECT COUNT(*) FROM itemCreators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID}` +
-			") " +
-			"WHEN 0 THEN NULL " +
-			"WHEN 1 THEN (" +
-				"SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID}` +
-			") " +
-			"WHEN 2 THEN (" +
-				"SELECT PRINTF(" +
-					`'${localizedAnd}'` +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
-					`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
-					"ORDER BY orderIndex LIMIT 1)" +
-					", " +
-					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
-					`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
-					"ORDER BY orderIndex LIMIT 1,1) " +
-				")" +
-			") " +
-			"ELSE (" +
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
-				"ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedEtAl + "' " + 
-			") " +
-			"END" +
-		") AS firstCreator";
-		
+
+		// Generate a CASE block that returns the firstCreator display string
+		// for creators matching the given WHERE clause
+		function caseBlock(where) {
+			return "CASE ("
+				+ `SELECT COUNT(*) FROM itemCreators IC ${where}`
+				+ ") "
+				+ "WHEN 0 THEN NULL "
+				+ "WHEN 1 THEN ("
+					+ `SELECT lastName FROM itemCreators IC NATURAL JOIN creators ${where}`
+				+ ") "
+				+ "WHEN 2 THEN ("
+					+ "SELECT PRINTF("
+						+ `'${localizedAnd}'`
+						+ ", "
+						// \u2068 FIRST STRONG ISOLATE / \u2069 POP DIRECTIONAL ISOLATE
+						+ `(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators ${where} ORDER BY orderIndex LIMIT 1)`
+						+ ", "
+						+ `(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators ${where} ORDER BY orderIndex LIMIT 1,1) `
+					+ ")"
+				+ ") "
+				+ "ELSE ("
+					+ "SELECT "
+					+ `(SELECT lastName FROM itemCreators IC NATURAL JOIN creators ${where} ORDER BY orderIndex LIMIT 1)`
+					+ " || ' " + localizedEtAl + "' "
+				+ ") "
+				+ "END";
+		}
+
+		let primaryJoin = "LEFT JOIN itemTypeCreatorTypes ITCT "
+			+ "ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) "
+			+ "WHERE itemID=O.itemID AND primaryField=1";
+		function creatorTypeWhere(typeName) {
+			return `WHERE itemID=O.itemID AND creatorTypeID=${Zotero.CreatorTypes.getID(typeName)}`;
+		}
+
+		let sql = "COALESCE("
+			+ caseBlock(primaryJoin) + ", "
+			+ caseBlock(creatorTypeWhere('editor')) + ", "
+			// Director used to be the primary type for Video Recording before
+			// Creator (mapped to Author) was added
+			+ caseBlock(creatorTypeWhere('director')) + ", "
+			+ caseBlock(creatorTypeWhere('contributor'))
+			+ ") AS firstCreator";
+
 		_firstCreatorSQL = sql;
 		return sql;
 	}
@@ -1522,131 +1459,52 @@ Zotero.Items = function () {
 		if (_sortCreatorSQL) {
 			return _sortCreatorSQL;
 		}
-		
-		var editorCreatorTypeID = Zotero.CreatorTypes.getID('editor');
-		var contributorCreatorTypeID = Zotero.CreatorTypes.getID('contributor');
-		
-		var nameSQL = "lastName || ' ' || firstName ";
-		
-		var sql = "COALESCE("
-			// First try for primary creator types
-			+ "CASE (" +
-				"SELECT COUNT(*) FROM itemCreators IC " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1" +
-			") " +
-			"WHEN 0 THEN NULL " +
-			"WHEN 1 THEN (" +
-				"SELECT " + nameSQL + "FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1" +
-			") " +
-			"WHEN 2 THEN (" +
-				"SELECT " +
-				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
-				" || ' ' || " +
-				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
-			") " +
-			"ELSE (" +
-				"SELECT " +
-				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
-				" || ' ' || " +
-				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
-				" || ' ' || " +
-				"(SELECT " + nameSQL + " FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 2,1)" +
-			") "
-			+ "END, "
-			
-			// Then try editors
-			+ "CASE ("
-				+ "SELECT COUNT(*) FROM itemCreators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}`
-			+ ") "
-			+ "WHEN 0 THEN NULL "
-			+ "WHEN 1 THEN ("
-				+ "SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}`
-			+ ") "
-			+ "WHEN 2 THEN ("
-				+ "SELECT "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 1)"
-				+ " || ' ' || "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 1,1) "
-			+ ") "
-			+ "ELSE ("
-				+ "SELECT "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 1)"
-				+ " || ' ' || "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 1,1)"
-				+ " || ' ' || "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 2,1)"
-			+ ") "
-			+ "END, "
-			
-			// Then try contributors
-			+ "CASE ("
-				+ "SELECT COUNT(*) FROM itemCreators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID}`
-			+ ") "
-			+ "WHEN 0 THEN NULL "
-			+ "WHEN 1 THEN ("
-				+ "SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID}`
-			+ ") "
-			+ "WHEN 2 THEN ("
-				+ "SELECT "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 1)"
-				+ " || ' ' || "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 1,1) "
-			+ ") "
-			+ "ELSE ("
-				+ "SELECT "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 1)"
-				+ " || ' ' || "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 1,1)"
-				+ " || ' ' || "
-				+ "(SELECT " + nameSQL + " FROM itemCreators NATURAL JOIN creators "
-				+ `WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} `
-				+ "ORDER BY orderIndex LIMIT 2,1)"
-			+ ") "
-			+ "END"
-		+ ") AS sortCreator";
-		
+
+		let nameSQL = "lastName || ' ' || firstName ";
+
+		// Generate a CASE block that returns sortCreator strings (full names
+		// space-concatenated) for creators matching the given WHERE clause
+		function caseBlock(where) {
+			return "CASE ("
+				+ `SELECT COUNT(*) FROM itemCreators IC ${where}`
+				+ ") "
+				+ "WHEN 0 THEN NULL "
+				+ "WHEN 1 THEN ("
+					+ `SELECT ${nameSQL}FROM itemCreators IC NATURAL JOIN creators ${where}`
+				+ ") "
+				+ "WHEN 2 THEN ("
+					+ "SELECT "
+					+ `(SELECT ${nameSQL}FROM itemCreators IC NATURAL JOIN creators ${where} ORDER BY orderIndex LIMIT 1)`
+					+ " || ' ' || "
+					+ `(SELECT ${nameSQL}FROM itemCreators IC NATURAL JOIN creators ${where} ORDER BY orderIndex LIMIT 1,1)`
+				+ ") "
+				+ "ELSE ("
+					+ "SELECT "
+					+ `(SELECT ${nameSQL}FROM itemCreators IC NATURAL JOIN creators ${where} ORDER BY orderIndex LIMIT 1)`
+					+ " || ' ' || "
+					+ `(SELECT ${nameSQL}FROM itemCreators IC NATURAL JOIN creators ${where} ORDER BY orderIndex LIMIT 1,1)`
+					+ " || ' ' || "
+					+ `(SELECT ${nameSQL}FROM itemCreators IC NATURAL JOIN creators ${where} ORDER BY orderIndex LIMIT 2,1)`
+				+ ") "
+				+ "END";
+		}
+
+		let primaryJoin = "LEFT JOIN itemTypeCreatorTypes ITCT "
+			+ "ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) "
+			+ "WHERE itemID=O.itemID AND primaryField=1";
+		function creatorTypeWhere(typeName) {
+			return `WHERE itemID=O.itemID AND creatorTypeID=${Zotero.CreatorTypes.getID(typeName)}`;
+		}
+
+		let sql = "COALESCE("
+			+ caseBlock(primaryJoin) + ", "
+			+ caseBlock(creatorTypeWhere('editor')) + ", "
+			// Director used to be the primary type for Video Recording before
+			// Creator (mapped to Author) was added
+			+ caseBlock(creatorTypeWhere('director')) + ", "
+			+ caseBlock(creatorTypeWhere('contributor'))
+			+ ") AS sortCreator";
+
 		_sortCreatorSQL = sql;
 		return sql;
 	}

@@ -55,6 +55,22 @@ describe("Zotero.Item", function () {
 				Zotero.getString('general.andJoiner', ['\u2068B\u2069', '\u2068D\u2069'])
 			);
 		});
+		
+		// https://github.com/zotero/zotero/issues/5720
+		it("should return director as firstCreator for a videoRecording without a primary creator", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'videoRecording' });
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "B",
+					creatorType: "director"
+				}
+			]);
+			assert.equal(item.getField('firstCreator'), "B");
+
+			await item.saveTx();
+			assert.equal(item.getField('firstCreator'), "B");
+		});
 
 		it("should strip bidi isolates from firstCreator when unformatted = true", async function () {
 			var item = createUnsavedDataObject('item');
