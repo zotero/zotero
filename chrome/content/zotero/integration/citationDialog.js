@@ -631,20 +631,25 @@ class LibraryLayout extends Layout {
 				// Prevent Enter event from reaching KeyboardHandler which would accept the dialog
 				event.preventDefault();
 				event.stopPropagation();
-				let row = event.target;
+				let row = event.target.closest(".row");
 				let isClick = event.type == "dblclick";
-				// on Enter, clear the selection and try to find
-				// the last item's row to keep it visible after items are added
+				// Suppress focus-ring on focused rows to avoid flashing
+				doc.querySelector("#item-tree-container").classList.add("no-focus-ring");
+				this.itemsView.selection.clearSelection();
+				// on Enter, try to find the last item's row to keep it visible after items are added
 				if (!isClick) {
-					this.itemsView.selection.clearSelection();
 					let lastItemID = items[items.length - 1].id;
 					let rowIndex = this.itemsView.getRowIndexByID(lastItemID);
-					row = doc.querySelector(`#item-tree-citationDialog-row-${rowIndex}`);
-					if (!row) return;
+					row = doc.querySelector(`#item-tree-citationDialog-row-${rowIndex}`) || row;
 				}
 				let rowTopBeforeRefresh = row.getBoundingClientRect().top;
-				IOManager.addItemsToCitation(items).then(() => {
+				IOManager.addItemsToCitation(items, { noInputRefocus: true }).then(() => {
 					this._scrollItemTreeToRow(row.id, rowTopBeforeRefresh);
+					// move focus to bubble-input after virtualized-table steals focus on double-click
+					setTimeout(() => {
+						_id("bubble-input").refocusInput();
+						doc.querySelector("#item-tree-container").classList.remove("no-focus-ring");
+					}, 5);
 				});
 			},
 			emptyMessage: Zotero.getString('pane.items.loading'),
