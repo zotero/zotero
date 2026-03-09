@@ -2495,7 +2495,7 @@ describe("Zotero.Translate.ItemGetter", function () {
 			var rdf = Zotero.File.getContents(exportFile);
 			var dp = new DOMParser();
 			var doc = dp.parseFromString(rdf, 'text/xml');
-			assert.equal(doc.querySelector('resource').getAttribute('rdf:resource'), path);
+			assert.equal(doc.querySelector('path').getAttribute('rdf:resource'), path);
 		});
 	});
 });
