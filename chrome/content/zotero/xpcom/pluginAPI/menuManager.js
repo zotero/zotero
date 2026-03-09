@@ -81,7 +81,7 @@
 	 * @type {object}
 	 * @property {string} menuType - The type of the menu item
 	 * @property {string} [l10nID] - The l10n ID for the menu item
-	 * @property {object} [l10nArgs] - Arguments for the l10n ID
+	 * @property {string} [l10nArgs] - Arguments for the l10n ID. Support for object type is deprecated.
 	 * @property {string} [icon] - The icon for the menu item
 	 * - For menu icons, it is recommended to use an SVG icon with a size of 16x16.
 	 * Use `fill="context-fill"` in the SVG to use the default icon color
@@ -126,7 +126,17 @@
 				optional: true,
 			},
 			l10nArgs: {
-				type: "object",
+				// TODO: remove support for object type in the future.
+				checkHook: (value) => {
+					if (typeof value === "undefined" || typeof value === "string") {
+						return true;
+					}
+					if (typeof value === "object") {
+						this._log("Option 'l10nArgs' should be a string. The support for object type is deprecated.", "warn");
+						return true;
+					}
+					return "Option 'l10nArgs' should be a string.";
+				},
 				optional: true,
 			},
 			icon: {
@@ -440,7 +450,15 @@
 						menuElem.dataset.l10nId = menuData.l10nID;
 					}
 					if (menuData.l10nArgs) {
-						menuElem.dataset.l10nArgs = JSON.stringify(menuData.l10nArgs);
+						let l10nArgs;
+						// TODO: remove support for object type in the future
+						if (typeof menuData.l10nArgs === "string") {
+							l10nArgs = menuData.l10nArgs;
+						}
+						else {
+							l10nArgs = JSON.stringify(menuData.l10nArgs);
+						}
+						menuElem.dataset.l10nArgs = l10nArgs;
 					}
 					if (menuData.icon || menuData.darkIcon) {
 						if (menuData.menuType === "menuitem") {
@@ -452,6 +470,12 @@
 						menuElem.style.setProperty("--custom-menu-icon-light", `url(${menuData.icon})`);
 						// Use the dark icon if available, otherwise use the light icon
 						menuElem.style.setProperty("--custom-menu-icon-dark", `url(${menuData.darkIcon || menuData.icon})`);
+					}
+					else {
+						// Make url invalid to avoid inheriting icons from parent menus
+						menuElem.style.setProperty("--custom-menu-icon-light", "initial");
+						menuElem.style.setProperty("--custom-menu-icon-dark", "initial");
+						menuElem.classList.remove("menuitem-iconic", "menu-iconic");
 					}
 				}
 			}

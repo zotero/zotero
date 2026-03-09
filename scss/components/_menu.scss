@@ -102,10 +102,10 @@ menuitem,
 menu {
 	&.zotero-custom-menu-item {
 		@media (prefers-color-scheme: light) {
-			list-style-image: var(--custom-menu-icon-light);
+			list-style-image: var(--custom-menu-icon-light, none);
 		}
 		@media (prefers-color-scheme: dark) {
-			list-style-image: var(--custom-menu-icon-dark);
+			list-style-image: var(--custom-menu-icon-dark, none);
 		}
 	}
 }
