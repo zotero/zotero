@@ -3720,6 +3720,7 @@ var ZoteroPane = new function () {
 			'relateItems',
 			'sep4',
 			'exportItems',
+			'exportPDF',
 			'createBib',
 			'loadReport',
 			'sep5',
@@ -4167,6 +4168,13 @@ var ZoteroPane = new function () {
 				if (menuItemsForAnnotations.includes(i)) continue;
 				show.delete(m[i]);
 			}
+		}
+
+		// Export PDF(s)... on PDF attachment(s) or their parent
+		let numFiles = Zotero.Items.numDistinctFileAttachmentsForLabel(items, item => item.isPDFAttachment());
+		if (numFiles) {
+			show.add(m.exportPDF);
+			menu.childNodes[m.exportPDF].setAttribute('label', Zotero.getString(`pane.items.menu.exportPDF${numFiles == 1 ? '' : '.multiple'}`));
 		}
 
 		// Set labels, plural if necessary
