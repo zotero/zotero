@@ -478,4 +478,18 @@ describe("Create a note from annotations from multiple items and attachments", f
 		// Check item URIs count
 		assert.equal(note.note.split('zotero.org').length - 1, 16);
 	});
+
+	it("should create a note from annotations without saving it as an item", async function () {
+		let annotations = [];
+		let attachment = await importPDFAttachment();
+		let annotation1 = await createAnnotation('highlight', attachment);
+		annotations.push(annotation1);
+		let annotation2 = await createAnnotation('highlight', attachment);
+		annotations.push(annotation2);
+		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations, { noSave: true });
+		assert.notOk(note.id);
+		assert.equal(note.note.split('test').length - 1, 1);
+		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
+		assert.equal(note.note.split(annotation2.annotationText).length - 1, 1);
+	});
 });
