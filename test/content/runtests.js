@@ -115,6 +115,9 @@ function Reporter(runner) {
 		if ('fast' != test.speed) {
 			msg += " ("+Math.round(test.duration)+" ms)";
 		}
+		if (test._currentRetry > 0) {
+			msg += " (passed on retry " + test._currentRetry + ")";
+		}
 		dump(msg+"\n");
 	});
 
@@ -163,7 +166,8 @@ mocha.setup({
 	ui: "bdd",
 	reporter: Reporter,
 	timeout: TestOptions.timeout || 10000,
-	grep: TestOptions.grep
+	grep: TestOptions.grep,
+	retries: TestOptions.retries || 0,
 });
 
 coMocha(Mocha);

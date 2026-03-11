@@ -21,4 +21,5 @@ export var TestOptions = {
 	stopAt: false,
 	grep: false,
 	timeout: false,
+	retries: 0,
 };
