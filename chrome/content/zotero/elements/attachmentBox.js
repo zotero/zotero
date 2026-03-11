@@ -320,12 +320,17 @@
 		}
 
 		notify(event, _type, ids, _extraData) {
-			if (ids.includes(this.item?.parentItem?.id)) {
-				// Ensure the "Rename from Parent" button is visible after the parent item changes (#5542)
-				this._resetRenderedFlags();
+			if (event == 'modify' && ids.includes(this.item?.parentItem?.id)) {
+				// Ensure the "Rename from Parent" button is visible after the parent item changes (#5542, #5816)
+				if (this.hidden) {
+					this._resetRenderedFlags();
+				}
+				else {
+					this.updateInfo();
+				}
 			}
 			if (event != 'modify' || !this.item?.id || !ids.includes(this.item.id)) return;
-			
+
 			Promise.all([
 				this.updateInfo(),
 				this.updatePreview()
