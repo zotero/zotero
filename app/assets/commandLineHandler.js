@@ -52,6 +52,7 @@ if (processTestOptions) {
 	TestOptions.stopAt = cmdLine.handleFlagWithParam("stopAtTestFile", false);
 	TestOptions.grep = cmdLine.handleFlagWithParam("grep", false);
 	TestOptions.timeout = cmdLine.handleFlagWithParam("ZoteroTestTimeout", false);
+	TestOptions.retries = cmdLine.handleFlagWithParam("retries", false) || 0;
 	
 	Services.ww.openWindow(
 		null,

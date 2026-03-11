@@ -101,7 +101,7 @@ jobs:
           dpl s3 --bucket zotero-download --local_dir build-zip --upload_dir ci/client --acl public_read
 
       - name: Run tests
-        run: xvfb-run test/runtests.sh -f
+        run: xvfb-run test/runtests.sh -f -r 3
 
       - name: Cache utilities Node modules
         id: utilities-node-cache

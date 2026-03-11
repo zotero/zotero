@@ -46,6 +46,7 @@ Options
  -f                  stop after first test failure
  -g                  only run tests matching the given pattern (grep)
  -h                  display this help
+ -r RETRIES          retry failed tests the given number of times (default: 0)
  -s TEST             start at the given test
  -t                  generate test data and quit
  -x EXECUTABLE       path to Zotero executable (default: $Z_EXECUTABLE)
@@ -56,7 +57,8 @@ DONE
 
 DEBUG=false
 DEBUG_LEVEL=5
-while getopts "bcd:e:fg:hs:tx:" opt; do
+RETRIES=0
+while getopts "bcd:e:fg:hr:s:tx:" opt; do
 	case $opt in
         b)
         	Z_ARGS="$Z_ARGS -ZoteroSkipBundledFiles"
@@ -82,6 +84,9 @@ while getopts "bcd:e:fg:hs:tx:" opt; do
 			;;
 		h)
 			usage
+			;;
+		r)
+			RETRIES="$OPTARG"
 			;;
 		s)
 			if [[ -z "$OPTARG" ]] || [[ ${OPTARG:0:1} = "-" ]]; then
@@ -176,7 +181,7 @@ ZOTERO_TEST=1 "$ROOT_DIR/app/scripts/dir_build" -q
 
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$Z_EXECUTABLE" -profile "$FX_PROFILE" \
-    -test "$TESTS" -grep "$GREP" -ZoteroTest $Z_ARGS
+    -test "$TESTS" -grep "$GREP" -retries "$RETRIES" -ZoteroTest $Z_ARGS
 
 # Check for success
 test -e "$PROFILE/success"
