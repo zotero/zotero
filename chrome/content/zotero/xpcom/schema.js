@@ -3516,6 +3516,11 @@ Zotero.Schema = new function () {
 			else if (i == 123) {
 				await Zotero.DB.queryAsync("CREATE INDEX itemData_valueID ON itemData(valueID)");
 			}
+
+			else if (i == 124) {
+				await Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastRead INT");
+				await Zotero.DB.queryAsync("CREATE INDEX itemAttachments_lastRead ON itemAttachments(lastRead)");
+			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}

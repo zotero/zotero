@@ -67,6 +67,8 @@ const STUB_COLLECTION_TREE_ROW = {
 	isFeed: () => false,
 	isFeeds: () => false,
 	isFeedsOrFeed: () => false,
+	isRecentlyRead: () => false,
+	isSortable: () => true,
 	isShare: () => false,
 	isTrash: () => false
 };
@@ -261,8 +263,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._itemsPaneMessage = null;
 		return shouldRerender && new Promise(resolve => this.forceUpdate(resolve));
 	}
-	
-	refresh = Zotero.serial(async function (skipExpandMatchParents) {
+
+	/**
+	 * @param {Boolean} [options.forceSortAll] Sort all items instead of only added items
+	 * @return {Promise<void>}
+	 */
+	refresh = Zotero.serial(async function (options = {}) {
 		Zotero.debug('Refreshing items list for ' + this.id);
 		
 		var resolve, reject;
@@ -393,7 +399,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// This still results in a lot of extra work (e.g., when clearing a quick search, we have to
 			// re-sort all items that didn't match the search), so as a further optimization we could keep
 			// a sorted list of items for a given column configuration and restore items from that.
-			await this.sort([...addedItemIDs]);
+			await this.sort(options.forceSortAll ? [...allItemIDs] : [...addedItemIDs]);
 			
 			// Update search results before collapse/expand of containers so that
 			// if hideContextAnnotationRows pref is true, child rows appear/disappear properly
@@ -771,6 +777,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 							await this.toggleOpenState(parentItemRowIndex);
 						}
 					}
+
+					if (item.parentItemID && this._getColumns().some(col => !col.hidden && col.dependsOnChildren)) {
+						delete this._rowCache[item.parentItemID];
+						if (this._rowMap[item.parentItemID] !== undefined) {
+							this.tree.invalidateRow(this._rowMap[item.parentItemID]);
+							// If we're sorting by a dependsOnChildren column, also re-sort
+							// (We don't look at secondary sort here because no dependsOnParent columns can be secondary sorts.
+							// If that changes, we need to be more thorough here.)
+							let sortField = this.getSortField();
+							if (this._getColumns().find(col => col.dataKey == sortField)?.dependsOnChildren) {
+								madeChanges = true;
+								sort = true;
+							}
+						}
+					}
 				}
 
 				if (sort && ids.length != 1) {
@@ -794,6 +815,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					|| collectionTreeRow.isPublications()
 					|| collectionTreeRow.isTrash()
 					|| collectionTreeRow.isUnfiled()
+					|| collectionTreeRow.isRecentlyRead()
 					|| hasQuickSearch) {
 				if (hasQuickSearch) {
 					// For item adds, clear the quick search, unless all the new items have
@@ -1125,7 +1147,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					showHeader: true,
 					columns: this._getColumns(),
 					onColumnPickerMenu: this._displayColumnPickerMenu,
-					onColumnSort: this.collectionTreeRow.isFeedsOrFeed() ? null : this._handleColumnSort,
+					onColumnSort: this.collectionTreeRow.isSortable() ? this._handleColumnSort : null,
 					getColumnPrefs: this._getColumnPrefs,
 					storeColumnPrefs: this._storeColumnPrefs,
 					getDefaultColumnOrder: this._getDefaultColumnOrder,
@@ -1189,7 +1211,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (collectionTreeRow.visibilityGroup) {
 			newId += "-" + collectionTreeRow.visibilityGroup;
 		}
-		if (this.id != newId && this.props.persistColumns) {
+		let idChanged = this.id != newId;
+		if (idChanged && this.props.persistColumns) {
 			await this._writeColumnPrefsToFile(true);
 			this.id = newId;
 			await this._loadColumnPrefsFromFile();
@@ -1203,7 +1226,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		this.selection.clearSelection();
 		this.selection.focused = 0;
-		await this.refresh();
+		await this.refresh({ forceSortAll: idChanged });
 		if (Zotero.CollectionTreeCache.error) {
 			return this.setItemsPaneMessage(Zotero.getString('pane.items.loadError'));
 		}
@@ -1487,6 +1510,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				
 			case 'feed':
 				return (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
+
+			case 'lastRead':
+				return item.getItemLastRead();
 			
 			default:
 				let extraField = this.props.getExtraField(row.ref, field);
@@ -1976,6 +2002,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			else if (collectionTreeRow.isLibrary(true)
 					|| collectionTreeRow.isSearch()
 					|| collectionTreeRow.isUnfiled()
+					|| collectionTreeRow.isRecentlyRead()
 					|| collectionTreeRow.isRetracted()
 					|| collectionTreeRow.isDuplicates()
 					|| force) {
@@ -2046,10 +2073,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @return {Number} - -1 for descending, 1 for ascending
 	 */
 	getSortDirection(sortFields) {
-		sortFields = sortFields || this.getSortFields();
 		if (this.collectionTreeRow.isFeedsOrFeed()) {
 			return Zotero.Prefs.get('feeds.sortAscending') ? 1 : -1;
 		}
+		if (this.collectionTreeRow.isRecentlyRead()) {
+			return -1;
+		}
+		sortFields = sortFields || this.getSortFields();
 		const columns = this._getColumns();
 		for (const field of sortFields) {
 			const col = columns.find(c => c.dataKey == field);
@@ -2063,6 +2093,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	getSortField() {
 		if (this.collectionTreeRow.isFeedsOrFeed()) {
 			return 'id';
+		}
+		if (this.collectionTreeRow.isRecentlyRead()) {
+			return 'lastRead';
 		}
 		var column = this._sortedColumn;
 		if (!column) {
@@ -2789,7 +2822,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		//
 		// Secondary Sort menu
 		//
-		if (!this.collectionTreeRow.isFeedsOrFeed()) {
+		if (this.collectionTreeRow.isSortable()) {
 			try {
 				const id = prefix + 'sort-menu';
 				const primaryField = this.getSortField();
@@ -3445,7 +3478,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		row.numNotes = treeRow.numNotes() || "";
 		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
-		
+		row.lastRead = row.isItem ? treeRow.ref.getItemLastRead() : "";
+
 		if (treeRow.ref.isFileAttachment()
 				// TODO: Adjust this if we localize "Snapshot"
 				&& !(treeRow.ref.isSnapshotAttachment() && /snapshot/i.test(treeRow.ref.getField('title')))
@@ -3503,6 +3537,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 						val = '';
 					}
 				}
+				break;
+			case 'lastRead':
+				if (val) {
+					let date = new Date(val * 1000);
+					val = date.toLocaleString();
+				}
+				break;
 			}
 			row[key] = val;
 		}

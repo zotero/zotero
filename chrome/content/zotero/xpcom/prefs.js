@@ -504,8 +504,9 @@ Zotero.Prefs = new function () {
 		const prefKeys = {
 			duplicates: 'duplicateLibraries',
 			unfiled: 'unfiledLibraries',
+			recentlyRead: 'recentlyReadLibraries',
 			retracted: 'retractedLibraries',
-			publications: 'publications',
+			publications: 'publications'
 		};
 		let prefKey = prefKeys[type];
 		if (!prefKey) {
@@ -538,6 +539,7 @@ Zotero.Prefs = new function () {
 		const prefKeys = {
 			duplicates: 'duplicateLibraries',
 			unfiled: 'unfiledLibraries',
+			recentlyRead: 'recentlyReadLibraries',
 			retracted: 'retractedLibraries',
 			publications: 'publications'
 		};
