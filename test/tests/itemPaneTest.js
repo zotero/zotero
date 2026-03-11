@@ -1757,82 +1757,6 @@ describe("Item pane", function () {
 			attachmentBox._discardPreviewTimeout = currentDiscardTimeout;
 		});
 
-		it("should hide the rename from parent button if already renamed", async function () {
-			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
-			let file = getTestDataDirectory();
-			file.append('test.pdf');
-			let attachment = await Zotero.Attachments.importFromFile({
-				file: file,
-				fileBaseName: "Lorem Ipsum", // Simulate auto-renaming, normally code would call getRenamedFileBaseNameIfAllowedType to generate fileBaseName
-				parentItemID: item.id
-			});
-
-			let zp = win.ZoteroPane;
-			await zp.selectItems([attachment.id]);
-
-			let itemBox = doc.getElementById('zotero-attachment-box');
-			let itemDetails = ZoteroPane.itemPane._itemDetails;
-			await zp.selectItems([attachment.id]);
-			await itemDetails._renderPromise;
-
-			let label = itemBox._id('fileName');
-			let button = itemBox._id('rename-from-parent');
-			
-			// File is auto-renamed during import, button should be hidden
-			assert.isTrue(button.hidden);
-			assert.equal(label.value, "Lorem Ipsum.pdf");
-			
-			await attachment.eraseTx();
-			await item.eraseTx();
-		});
-
-		it("should hide the rename from parent button, after file was renamed", async function () {
-			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
-			let file = getTestDataDirectory();
-			file.append('test.txt');
-			let attachment = await Zotero.Attachments.importFromFile({
-				file: file,
-				parentItemID: item.id
-			});
-
-			let zp = win.ZoteroPane;
-			let itemBox = doc.getElementById('zotero-attachment-box');
-			let label = itemBox._id('fileName');
-			let button = itemBox._id('rename-from-parent');
-			let itemDetails = ZoteroPane.itemPane._itemDetails;
-			await zp.selectItems([attachment.id]);
-			await itemDetails._renderPromise;
-			assert.isFalse(button.hidden);
-
-			button.click();
-			assert.equal(await waitForItemEvent('modify'), attachment.id);
-			assert.equal(await waitForItemEvent('modify'), attachment.id);
-
-			assert.isTrue(button.hidden);
-			assert.equal(label.value, "Lorem Ipsum.txt");
-			
-			await attachment.eraseTx();
-			await item.eraseTx();
-		});
-
-		it("should hide the rename from parent button for top-level items", async function () {
-			let file = getTestDataDirectory();
-			file.append('test.pdf');
-			let topLevelAttachment = await Zotero.Attachments.importFromFile({
-				file: file,
-			});
-
-			let zp = win.ZoteroPane;
-			let itemBox = doc.getElementById('zotero-attachment-box');
-			let button = itemBox._id('rename-from-parent');
-			let itemDetails = ZoteroPane.itemPane._itemDetails;
-			await zp.selectItems([topLevelAttachment.id]);
-			await itemDetails._renderPromise;
-			
-			assert.isTrue(button.hidden);
-			await topLevelAttachment.eraseTx();
-		});
-
 		it("should not transfer focused title while switching between items", async function () {
 			let item = new Zotero.Item('book');
 			let attachmentOne = await importFileAttachment('test.pdf', { title: 'PDF_one', parentItemID: item.id });
@@ -1870,8 +1794,145 @@ describe("Item pane", function () {
 			assert.sameMembers(attachment.getCollections(), note.getCollections());
 		});
 	});
-	
-	
+
+
+	describe("File renaming", function () {
+		before(function () {
+			Zotero.Prefs.set("panes.attachment-info.open", true);
+		});
+
+		it("should hide the rename from parent button if already renamed", async function () {
+			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let attachment = await Zotero.Attachments.importFromFile({
+				file: file,
+				fileBaseName: "Lorem Ipsum", // Simulate auto-renaming, normally code would call getRenamedFileBaseNameIfAllowedType to generate fileBaseName
+				parentItemID: item.id
+			});
+
+			let zp = win.ZoteroPane;
+			await zp.selectItems([attachment.id]);
+
+			let itemBox = doc.getElementById('zotero-attachment-box');
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			await zp.selectItems([attachment.id]);
+			await itemDetails._renderPromise;
+
+			let label = itemBox._id('fileName');
+			let button = itemBox._id('rename-from-parent');
+
+			// File is auto-renamed during import, button should be hidden
+			assert.isTrue(button.hidden);
+			assert.equal(label.value, "Lorem Ipsum.pdf");
+
+			await attachment.eraseTx();
+			await item.eraseTx();
+		});
+
+		it("should hide the rename from parent button, after file was renamed", async function () {
+			let item = await createDataObject('item', { title: 'Lorem Ipsum' });
+			let file = getTestDataDirectory();
+			file.append('test.txt');
+			let attachment = await Zotero.Attachments.importFromFile({
+				file: file,
+				parentItemID: item.id
+			});
+
+			let zp = win.ZoteroPane;
+			let itemBox = doc.getElementById('zotero-attachment-box');
+			let label = itemBox._id('fileName');
+			let button = itemBox._id('rename-from-parent');
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			await zp.selectItems([attachment.id]);
+			await itemDetails._renderPromise;
+			assert.isFalse(button.hidden);
+
+			button.click();
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+			assert.equal(await waitForItemEvent('modify'), attachment.id);
+
+			assert.isTrue(button.hidden);
+			assert.equal(label.value, "Lorem Ipsum.txt");
+
+			await attachment.eraseTx();
+			await item.eraseTx();
+		});
+
+		it("should hide the rename from parent button for top-level items", async function () {
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let topLevelAttachment = await Zotero.Attachments.importFromFile({
+				file: file,
+			});
+
+			let zp = win.ZoteroPane;
+			let itemBox = doc.getElementById('zotero-attachment-box');
+			let button = itemBox._id('rename-from-parent');
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			await zp.selectItems([topLevelAttachment.id]);
+			await itemDetails._renderPromise;
+
+			assert.isTrue(button.hidden);
+			await topLevelAttachment.eraseTx();
+		});
+
+		it("should show rename-from-parent button after parent metadata changes", async function () {
+			// Disable auto-rename so that changing parent metadata does not auto-rename the file
+			let origAutoRename = Zotero.Prefs.get('autoRenameFiles.onMetadataChange');
+			Zotero.Prefs.set('autoRenameFiles.onMetadataChange', false);
+
+			try {
+				// Create an item and an attachment whose filename already matches the template
+				let item = await createDataObject('item', { title: 'Lorem Ipsum' });
+				let file = getTestDataDirectory();
+				file.append('test.pdf');
+				let attachment = await Zotero.Attachments.importFromFile({
+					file: file,
+					fileBaseName: "Lorem Ipsum",
+					parentItemID: item.id
+				});
+
+				let zp = win.ZoteroPane;
+				let itemBox = doc.getElementById('zotero-attachment-box');
+				let button = itemBox._id('rename-from-parent');
+				let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+				// Select the attachment -- button should be hidden since filename matches
+				await zp.selectItems([attachment.id]);
+				await itemDetails._renderPromise;
+				assert.isTrue(button.hidden, "button should be hidden when filename matches parent");
+
+				// Select the parent item and change its title without saving
+				await zp.selectItems([item.id]);
+				await itemDetails._renderPromise;
+				item.setField('title', 'Changed Title');
+
+				// Switch back to the attachment before parent save completes.
+				// This simulates the race between blur-triggered saveTx()
+				// and the item details pane rendering for the newly selected attachment.
+				await zp.selectItems([attachment.id]);
+				await itemDetails._renderPromise;
+
+				// Now save the parent -- the notify will fire after the attachment box
+				// has already rendered (and skipped re-render because deps matched cache)
+				await item.saveTx();
+				// Wait for the notifier-triggered async updateInfo() to complete
+				await waitForCallback(() => !button.hidden);
+
+				// The button should now be visible since the filename no longer matches
+				assert.isFalse(button.hidden, "button should be visible after parent title changed");
+
+				await attachment.eraseTx();
+				await item.eraseTx();
+			}
+			finally {
+				Zotero.Prefs.set('autoRenameFiles.onMetadataChange', origAutoRename);
+			}
+		});
+	});
+
+
 	describe("Note editor", function () {
 		it("should refresh on note update", async function () {
 			var item = new Zotero.Item('note');
