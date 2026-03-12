@@ -19,11 +19,14 @@ const ATTACHMENT_STATE_LOAD_DELAY = 150;
  * types (ZoteroItemTreeRow, CollectionItemTreeRow, SearchItemTreeRow, etc.).
  */
 class ItemTreeRow {
-	constructor(ref, level, isOpen) {
+	constructor(ref, level, isOpen, id) {
 		this.ref = ref;
 		this.level = level;
 		this.isOpen = isOpen;
-		this.id = ref.treeViewID;
+		this.id = id ?? ref.treeViewID;
+		if (this.id == null) {
+			throw new Error('ItemTreeRow: ref.treeViewID is required (or pass id explicitly)');
+		}
 	}
 
 	get type() {
@@ -31,6 +34,15 @@ class ItemTreeRow {
 	}
 
 	get isDraggable() {
+		return false;
+	}
+
+	/**
+	 * Whether child rows should be sorted by the tree's active comparator
+	 * when this container is opened. Default false preserves the order
+	 * returned by getChildItems().
+	 */
+	get sortChildren() {
 		return false;
 	}
 

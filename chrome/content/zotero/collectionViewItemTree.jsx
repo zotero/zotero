@@ -43,7 +43,7 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const ItemTree = require('zotero/itemTree');
 const { ItemTreeRowProvider } = ItemTree;
-const { ItemTreeRow } = require('zotero/itemTreeRow');
+
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 
@@ -270,7 +270,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				}
 				
 				// Add new top-level items
-				let row = ItemTreeRow.create(item, 0, false);
+				let row = this.createRow(item, 0, false);
 				if (!allItemIDs.has(item.treeViewID)) {
 					newRows.push(row);
 					allItemIDs.add(item.treeViewID);
@@ -572,7 +572,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						this._removeRow(row, true);
 
 						let beforeRow = this.getRowCount();
-						this._addRow(ItemTreeRow.create(item, 0, false), beforeRow);
+						this._addRow(this.createRow(item, 0, false), beforeRow);
 
 						sort = id;
 					}
@@ -610,7 +610,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					if (add) {
 						// Most likely, the note or attachment's parent was removed.
 						let beforeRow = this.getRowCount();
-						this._addRow(ItemTreeRow.create(item, 0, false), beforeRow);
+						this._addRow(this.createRow(item, 0, false), beforeRow);
 						madeChanges = true;
 						sort = id;
 					}
@@ -643,7 +643,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					// Regular item or standalone note/attachment
 					&& item.isTopLevelItem()) {
 					let beforeRow = this.getRowCount();
-					this._addRow(ItemTreeRow.create(item, 0, false), beforeRow);
+					this._addRow(this.createRow(item, 0, false), beforeRow);
 					madeChanges = true;
 				}
 			}

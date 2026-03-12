@@ -77,7 +77,6 @@ var doLoad = async function () {
 		},
 		id: io.itemTreeID || "select-items-dialog",
 		dragAndDrop: false,
-		persistColumns: true,
 		regularOnly: io.onlyRegularItems,
 		columnPicker: true,
 		multiSelect: io.multiSelect,

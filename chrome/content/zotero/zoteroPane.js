@@ -1659,7 +1659,6 @@ var ZoteroPane = new function () {
 			ZoteroPane.itemsView = await CollectionViewItemTree.init(itemsTree, {
 				id: "main",
 				dragAndDrop: true,
-				persistColumns: true,
 				columnPicker: true,
 				onSelectionChange: selection => ZoteroPane.itemSelected(selection),
 				onContextMenu: (...args) => ZoteroPane.onItemsContextMenuOpen(...args),

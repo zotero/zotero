@@ -67,6 +67,33 @@ class ItemTreeRowProvider {
 		this.onUpdate = this.createEventBinding('update');
 	}
 
+	/**
+	 * Create an ItemTreeRow for a reference object.
+	 * Subclasses can override to return custom row types.
+	 *
+	 * @param {Object} ref - The reference object (e.g. Zotero.Item, Zotero.Collection)
+	 * @param {number} level - The nesting level
+	 * @param {boolean} isOpen - Whether the row is open (if a container)
+	 * @returns {ItemTreeRow}
+	 */
+	createRow(ref, level, isOpen) {
+		return ItemTreeRow.create(ref, level, isOpen);
+	}
+
+	/**
+	 * Whether a container row's children should be sorted with the current
+	 * tree comparator when the container is opened.
+	 *
+	 * Default delegates to the row's sortChildren property. Subclasses can
+	 * override for view-specific behavior.
+	 *
+	 * @param {ItemTreeRow} row
+	 * @returns {boolean}
+	 */
+	shouldSortChildren(row) {
+		return !!row.sortChildren;
+	}
+
 	get includeTrashed() {
 		return this._includeTrashed;
 	}
@@ -197,19 +224,20 @@ class ItemTreeRowProvider {
 			// Open
 			let row = this.getRow(index);
 			let level = this.getLevel(index);
-			let newRows = row.getChildItems({
+			let childRefs = row.getChildItems({
 				searchMode: this._searchMode,
 				searchItemIDs: this._searchItemIDs,
 				includeTrashed: this._includeTrashed,
 			});
 
-			for (let i = 0; i < newRows.length; i++) {
+			let childRows = childRefs.map(ref => this.createRow(ref, level + 1, false));
+			if (this._sortFields && this.shouldSortChildren(row)) {
+				childRows.sort((a, b) => this._compareRows(a, b));
+			}
+
+			for (let i = 0; i < childRows.length; i++) {
 				count++;
-				this._addRow(
-					ItemTreeRow.create(newRows[i], level + 1, false),
-					index + i + 1,
-					true
-				);
+				this._addRow(childRows[i], index + i + 1, true);
 			}
 
 			this._rows[index].isOpen = true;
@@ -423,16 +451,182 @@ class ItemTreeRowProvider {
 	}
 
 	/**
+	 * Initialize sort state from current tree settings.
+	 * Called at the start of _sort(). The state is stored on the instance
+	 * so that _compareRows() can be used by both _sort() and _toggleOpenState().
+	 */
+	_initSortState() {
+		this._sortFields = this.itemTree.getSortFields();
+		this._sortDirection = this.itemTree.getSortDirection(this._sortFields);
+		this._sortCollation = Zotero.getLocaleCollation();
+		this._sortCreatorAsString = Zotero.Prefs.get('sortCreatorAsString');
+		this._sortCache = {};
+		this._sortFields.forEach(x => this._sortCache[x] = {});
+		this._sortCreatorCache = {};
+	}
+
+	/**
+	 * Get a sortable field value for a row.
+	 * Uses this._sortCache for memoization.
+	 */
+	_getSortField(field, row) {
+		let aID = row.id;
+		if (this._sortCache[field] && this._sortCache[field][aID] !== undefined) {
+			return this._sortCache[field][aID];
+		}
+
+		let val;
+		switch (field) {
+			case 'title':
+				val = Zotero.Items.getSortTitle(row.getDisplayTitle());
+				break;
+
+			case 'hasAttachment':
+				val = row.getBestAttachmentStateCached() || 0;
+				break;
+
+			case 'numNotes':
+				val = row.numNotes() || 0;
+				break;
+
+			case 'date':
+				val = row.ref.getField('date', true, true);
+				if (val) {
+					val = val.substr(0, 10);
+					if (val.indexOf('0000') == 0) {
+						val = "";
+					}
+				}
+				break;
+
+			case 'year':
+				val = row.ref.getField('date', true, true);
+				if (val) {
+					val = val.substr(0, 4);
+					if (val == '0000') {
+						val = "";
+					}
+				}
+				break;
+
+			case 'feed':
+				val = (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
+				break;
+
+			default: {
+				let extraField = this.itemTree.props.getExtraField(row.ref, field);
+				if (extraField !== undefined) {
+					val = extraField;
+				}
+				else {
+					val = row.getField(field, false, true);
+				}
+				break;
+			}
+		}
+
+		if (this._sortCache[field]) {
+			this._sortCache[field][aID] = val;
+		}
+		return val;
+	}
+
+	/**
+	 * Compare two rows on a single sort field.
+	 */
+	_compareField(a, b, sortField) {
+		// Set whether rows with empty values should sort at the beginning
+		var emptyFirst = { title: true, date: true, year: true };
+
+		switch (sortField) {
+			case 'firstCreator': {
+				let prop = this._sortCreatorAsString ? 'firstCreator' : 'sortCreator';
+				let cache = this._sortCreatorCache;
+				let fieldA = cache[a.id];
+				let fieldB = cache[b.id];
+				if (fieldA === undefined) {
+					let s = a.ref[prop];
+					if (!s) s = a.ref.getField('firstCreator');
+					cache[a.id] = fieldA = Zotero.Items.getSortTitle(s || '');
+				}
+				if (fieldB === undefined) {
+					let s = b.ref[prop];
+					if (!s) s = b.ref.getField('firstCreator');
+					cache[b.id] = fieldB = Zotero.Items.getSortTitle(s || '');
+				}
+				if (fieldA === '' && fieldB === '') return 0;
+				if (fieldA === '' && fieldB !== '') return 1;
+				if (fieldA !== '' && fieldB === '') return -1;
+				return this._sortCollation.compareString(1, fieldA, fieldB);
+			}
+
+			case 'itemType': {
+				let typeA = a.getTypeLabel();
+				let typeB = b.getTypeLabel();
+				return (typeA > typeB) ? 1 : (typeA < typeB) ? -1 : 0;
+			}
+
+			default: {
+				let fieldA = this._getSortField(sortField, a);
+				let fieldB = this._getSortField(sortField, b);
+
+				if (!emptyFirst[sortField]) {
+					if (fieldA === '' && fieldB !== '') return 1;
+					if (fieldA !== '' && fieldB === '') return -1;
+				}
+
+				if (sortField == 'hasAttachment') {
+					const order = ['pdf', 'snapshot', 'epub', 'image', 'video', 'other', 'none'];
+					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : (order.length - 1));
+					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : (order.length - 1));
+					return fieldA - fieldB;
+				}
+
+				if (sortField == 'callNumber') {
+					return Zotero.Utilities.Item.compareCallNumbers(fieldA, fieldB);
+				}
+
+				return this._sortCollation.compareString(1, String(fieldA), String(fieldB));
+			}
+		}
+	}
+
+	/**
+	 * Compare two rows using the current sort state.
+	 *
+	 * Uses sort state initialized by _initSortState() (called from _sort()).
+	 * Also used by _toggleOpenState() to sort child rows when containers are
+	 * opened, ensuring the same ordering is applied at every tree level.
+	 *
+	 * @param {ItemTreeRow} a
+	 * @param {ItemTreeRow} b
+	 * @returns {number}
+	 */
+	_compareRows(a, b) {
+		let cmp = this.itemTree.props.compareItems(a, b, this._sortDirection);
+		if (cmp !== 0) return cmp;
+		for (let i = 0; i < this._sortFields.length; i++) {
+			cmp = this._compareField(a, b, this._sortFields[i]);
+			if (cmp !== 0) {
+				return cmp * this._sortDirection;
+			}
+		}
+		return 0;
+	}
+
+	/**
 	 * Core sorting logic without view updates.
 	 * Saves and restores open state internally.
+	 *
+	 * Initializes sort state so that _compareRows() is available to both
+	 * the top-level sort and _toggleOpenState() when containers are reopened.
+	 *
 	 * @param {number[]|null} itemIDs - Specific items to sort, or null for full sort
 	 */
 	_sort(itemIDs) {
-		var sortFields = this.itemTree.getSortFields();
-		var direction = this.itemTree.getSortDirection(sortFields);
-		var collation = Zotero.getLocaleCollation();
-		var sortCreatorAsString = Zotero.Prefs.get('sortCreatorAsString');
-
+		// Initialize sort state
+		this._initSortState();
+	
 		// For child items, just close and reopen parents
 		if (itemIDs) {
 			let parentItemIDs = new Set();
@@ -473,155 +667,11 @@ class ItemTreeRowProvider {
 		// Save open state and close containers before sorting
 		var openItemIDs = this._saveOpenState();
 
-		Zotero.debug(`Sorting items list by ${sortFields.join(", ")} ${direction == 1 ? "ascending" : "descending"} `
+		Zotero.debug(`Sorting items list by ${this._sortFields.join(", ")} `
+			+ `${this._sortDirection == 1 ? "ascending" : "descending"} `
 			+ (itemIDs && itemIDs.length
 				? `for ${itemIDs.length} ` + Zotero.Utilities.pluralize(itemIDs.length, ['item', 'items'])
 				: ""));
-
-		// Set whether rows with empty values should sort at the beginning
-		var emptyFirst = {
-			title: true,
-			date: true,
-			year: true,
-		};
-
-		// Cache primary values while sorting
-		var cache = {};
-		sortFields.forEach(x => cache[x] = {});
-
-		// Get the display field for a row
-		let getField = (field, row) => {
-			var item = row.ref;
-
-			switch (field) {
-			case 'title':
-				return Zotero.Items.getSortTitle(row.getDisplayTitle());
-
-			case 'hasAttachment':
-				return row.getBestAttachmentStateCached() || 0;
-
-			case 'numNotes':
-				return row.numNotes() || 0;
-
-			case 'date':
-				var val = row.ref.getField('date', true, true);
-				if (val) {
-					val = val.substr(0, 10);
-					if (val.indexOf('0000') == 0) {
-						val = "";
-					}
-				}
-				return val;
-
-			case 'year':
-				var val = row.ref.getField('date', true, true);
-				if (val) {
-					val = val.substr(0, 4);
-					if (val == '0000') {
-						val = "";
-					}
-				}
-				return val;
-
-			case 'feed':
-				return (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
-
-			default:
-				let extraField = this.itemTree.props.getExtraField(row.ref, field);
-				if (extraField !== undefined) return extraField;
-				return row.getField(field, false, true);
-			}
-		};
-
-		var creatorSortCache = {};
-
-		const creatorSort = (a, b) => {
-			var itemA = a.ref;
-			var itemB = b.ref;
-			var aItemID = a.id,
-				bItemID = b.id,
-				fieldA = creatorSortCache[aItemID],
-				fieldB = creatorSortCache[bItemID];
-			var prop = sortCreatorAsString ? 'firstCreator' : 'sortCreator';
-			var sortStringA = itemA[prop];
-			if (!sortStringA) sortStringA = itemA.getField('firstCreator');
-			var sortStringB = itemB[prop];
-			if (!sortStringB) sortStringB = itemB.getField('firstCreator');
-			if (fieldA === undefined) {
-				fieldA = Zotero.Items.getSortTitle(sortStringA);
-				creatorSortCache[aItemID] = fieldA;
-			}
-			if (fieldB === undefined) {
-				fieldB = Zotero.Items.getSortTitle(sortStringB);
-				creatorSortCache[bItemID] = fieldB;
-			}
-
-			if (fieldA === "" && fieldB === "") {
-				return 0;
-			}
-
-			if (fieldA === '' && fieldB !== '') return 1;
-			if (fieldA !== '' && fieldB === '') return -1;
-
-			return collation.compareString(1, fieldA, fieldB);
-		};
-
-		function fieldCompare(a, b, sortField) {
-			var aItemID = a.id;
-			var bItemID = b.id;
-			var fieldA = cache[sortField][aItemID];
-			var fieldB = cache[sortField][bItemID];
-
-			switch (sortField) {
-			case 'firstCreator':
-				return creatorSort(a, b);
-
-			case 'itemType': {
-				let typeA = a.getTypeLabel();
-				let typeB = b.getTypeLabel();
-				return (typeA > typeB) ? 1 : (typeA < typeB) ? -1 : 0;
-			}
-
-			default:
-				if (fieldA === undefined) {
-					cache[sortField][aItemID] = fieldA = getField(sortField, a);
-				}
-
-				if (fieldB === undefined) {
-					cache[sortField][bItemID] = fieldB = getField(sortField, b);
-				}
-
-				if (!emptyFirst[sortField]) {
-					if (fieldA === '' && fieldB !== '') return 1;
-					if (fieldA !== '' && fieldB === '') return -1;
-				}
-
-				if (sortField == 'hasAttachment') {
-					const order = ['pdf', 'snapshot', 'epub', 'image', 'video', 'other', 'none'];
-					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : (order.length - 1));
-					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : (order.length - 1));
-					return fieldA - fieldB;
-				}
-
-				if (sortField == 'callNumber') {
-					return Zotero.Utilities.Item.compareCallNumbers(fieldA, fieldB);
-				}
-
-				return collation.compareString(1, fieldA, fieldB);
-			}
-		}
-
-		var rowSort = (a, b, dir) => {
-			let cmp = this.itemTree.props.compareItems(a, b, dir);
-			if (cmp !== 0) return cmp;
-			for (let i = 0; i < sortFields.length; i++) {
-				let cmp = fieldCompare(a, b, sortFields[i]);
-				if (cmp !== 0) {
-					return cmp * dir;
-				}
-			}
-			return 0;
-		};
 
 		// Sort specific items or all
 		try {
@@ -629,21 +679,22 @@ class ItemTreeRowProvider {
 				let idsToSort = new Set(itemIDs);
 				this._rows.sort((a, b) => {
 					if (!idsToSort.has(a.ref.id) && !idsToSort.has(b.ref.id)) return 0;
-					return rowSort(a, b, direction);
+					return this._compareRows(a, b);
 				});
 			}
 			else {
-				this._rows.sort((a, b) => rowSort(a, b, direction));
+				this._rows.sort((a, b) => this._compareRows(a, b));
 			}
 		}
 		catch (e) {
 			Zotero.logError("Error sorting fields: " + e.message);
 			Zotero.debug(e, 1);
-			Zotero.Prefs.clear('secondarySort.' + sortFields[0]);
+			Zotero.Prefs.clear('secondarySort.' + this._sortFields[0]);
 			Zotero.Prefs.clear('fallbackSort');
 		}
 
-		// Restore open state
+		// Restore open state — _toggleOpenState() sorts children
+		// using _compareRows() with the same sort state
 		this.refreshRowMap();
 		this._restoreOpenState(openItemIDs);
 	}
@@ -736,7 +787,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	static defaultProps = {
 		dragAndDrop: false,
-		persistColumns: false,
 		columnPicker: false,
 		regularOnly: false,
 		multiSelect: true,
@@ -753,7 +803,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		id: PropTypes.string.isRequired,
 		
 		dragAndDrop: PropTypes.bool,
-		persistColumns: PropTypes.bool,
 		columnPicker: PropTypes.bool,
 		regularOnly: PropTypes.bool,
 		multiSelect: PropTypes.bool,
@@ -840,13 +889,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		// Save current columns (only if we have an existing id)
-		if (this._id != null && this.props.persistColumns) {
+		if (this._id != null && this.props.columnPicker) {
 			await this._writeColumnPrefsToFile(true);
 		}
 
 		this._id = newId;
 
-		if (!this.props.persistColumns) {
+		if (!this.props.columnPicker) {
 			this._sortContextReadyPromise = Zotero.Promise.resolve();
 			return;
 		}
@@ -1923,6 +1972,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	buildColumnPickerMenu(menupopup) {
+		if (!this.props.columnPicker) return;
 		const prefix = 'zotero-column-picker-';
 		const columns = this._getColumns();
 
@@ -2195,7 +2245,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_getColumnPrefs = () => {
-		if (!this.props.persistColumns) return {};
+		if (!this.props.columnPicker) return {};
 		return this._columnPrefs || {};
 	}
 
@@ -2205,7 +2255,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._columns = this._columns.map(column => Object.assign(column, prefs[column.dataKey]))
 			.sort((a, b) => a.ordinal - b.ordinal);
 		
-		if (!this.props.persistColumns) return;
+		if (!this.props.columnPicker) return;
 		Zotero.debug(`Storing itemTree ${this.id} column prefs`, 2);
 		this._columnPrefs = prefs;
 		if (!this._columns) {
@@ -2222,7 +2272,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	_loadColumnPrefsFromFile = async () => {
-		if (!this.props.persistColumns) return;
+		if (!this.props.columnPicker) return;
 		try {
 			let columnPrefs = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
 			let persistSettings = JSON.parse(columnPrefs);
@@ -2240,7 +2290,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @returns {Promise}
 	 */
 	_writeColumnPrefsToFile = async (force=false) => {
-		if (!this.props.persistColumns) return;
+		if (!this.props.columnPicker) return;
 		var writeToFile = async () => {
 			try {
 				let persistSettingsString = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
@@ -2310,7 +2360,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		const columns = this.getColumns();
 		let hasDefaultIn = columns.some(column => 'defaultIn' in column);
 		for (let column of columns) {
-			if (this.props.persistColumns) {
+			if (this.props.columnPicker) {
 				if (column.disabledIn && column.disabledIn.includes(visibilityGroup)) continue;
 				const columnSettings = columnsSettings[column.dataKey];
 				if (!columnSettings && this.id === 'main') {

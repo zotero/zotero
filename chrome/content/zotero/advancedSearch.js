@@ -65,7 +65,6 @@ var ZoteroAdvancedSearch = new function () {
 		this.itemsView = await CollectionViewItemTree.init(elem, {
 			id: "advanced-search",
 			dragAndDrop: true,
-			persistColumns: true,
 			columnPicker: true,
 			onActivate: this.onItemActivate.bind(this),
 			columns,
