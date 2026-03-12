@@ -84,6 +84,7 @@ Zotero.AttachmentReadObserver = {
 		else if (type == 'setting') {
 			for (let id of ids) {
 				let [settingLibraryID, settingKey] = id.split('/');
+				settingLibraryID = parseInt(settingLibraryID);
 				if (settingLibraryID != Zotero.Libraries.userLibraryID) {
 					continue;
 				}
@@ -98,6 +99,7 @@ Zotero.AttachmentReadObserver = {
 					}
 					else {
 						Zotero.debug('Invalid library slug in key: ' + settingKey);
+						continue;
 					}
 					let item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, itemKey);
 					if (item.isAttachment()) {

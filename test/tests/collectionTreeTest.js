@@ -604,8 +604,8 @@ describe("Zotero.CollectionTree", function () {
 			await createDataObject('collection', { libraryID: group.libraryID });
 			await select(win, c2);
 			
-			// Group, collections, Duplicates, Unfiled, and trash
-			assert.equal(cv._rows.length, originalRowCount + 9);
+			// Group, collections, Recently Read, Duplicates, Unfiled, and trash
+			assert.equal(cv._rows.length, originalRowCount + 10);
 			
 			// Select group
 			await cv.selectLibrary(group.libraryID);

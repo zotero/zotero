@@ -3747,13 +3747,13 @@ Zotero.Item.prototype._getLastPageIndexSettingKey = function (ignoreInvalid = fa
  */
 Zotero.Item.prototype._getLastReadSettingKey = function (ignoreInvalid = false) {
 	let library = this.library;
-	if (!ignoreInvalid && !library.isGroup) {
-		let error = new Error(`Can't get lastRead key for ${library.libraryType} item`);
+	if (!library.isGroup) {
+		let msg = `Can't get lastRead key for ${library.libraryType} item`;
 		if (ignoreInvalid) {
-			Zotero.logError(error);
+			Zotero.logError(msg);
 			return false;
 		}
-		throw error;
+		throw new Error(msg);
 	}
 	return this._getSettingKey('lastRead', ignoreInvalid);
 };
@@ -5253,6 +5253,13 @@ Zotero.Item.prototype._eraseData = async function (env) {
 			let id = this._getLastPageIndexSettingKey(true);
 			if (id) {
 				await Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
+			}
+			
+			// Delete last read synced setting for group items
+			if (this.library.isGroup) {
+				await Zotero.SyncedSettings.clear(
+					Zotero.Libraries.userLibraryID, this._getLastReadSettingKey()
+				);
 			}
 		}
 		

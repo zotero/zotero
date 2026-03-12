@@ -3712,6 +3712,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
+		// Force sort indicator for views with a fixed sort order
+		if (this.collectionTreeRow?.isRecentlyRead()) {
+			let col = this._columns.find(c => c.dataKey === 'lastRead');
+			if (col) {
+				col.sortDirection = -1;
+				this._sortedColumn = col;
+			}
+		}
+
 		return this._columns.sort((a, b) => a.ordinal - b.ordinal);
 	}
 	
