@@ -621,7 +621,8 @@
 		}
 		#itemDetails {
 			.popup {
-				width: 364px; // with padding and border, the panel is 400px
+				width: min-content;
+				min-width: 364px; // with padding and border, the panel is 400px
 				.details-header {
 					.icon {
 						margin-inline-end: 5px;
@@ -671,8 +672,20 @@
 						}
 					}
 				}
+				.buttons {
+					display: flex;
+					flex-wrap: nowrap;
+					white-space: nowrap;
+					gap: 4px;
+				}
 				button.done {
-					float: right;
+					// align html buttons with 'done' xul:button
+					@media not (-moz-platform: macos) {
+						margin-top: 0;
+						margin-bottom: 0;
+						margin-inline-end: 0;
+					}
+					margin-inline-start: auto;
 				}
 				button.remove {
 					color: var(--accent-red);
