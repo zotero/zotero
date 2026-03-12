@@ -28,6 +28,10 @@ const ReactDOM = require('react-dom');
 const diff = require('diff');
 const VirtualizedTable = require('components/virtualized-table');
 const { getCSSIcon, IconAttachSmall } = require('components/icons');
+// TODO: Create a custom row provider for citationExplorer to use with base ItemTree.
+// Currently uses changeCollectionTreeRow which only exists on CollectionViewItemTree,
+// so this is broken until we either switch to CollectionViewItemTree or create a
+// simple row provider that can display arbitrary items.
 const ItemTree = require('zotero/itemTree');
 const { getColumnDefinitionsByDataKey } = require('zotero/itemTreeColumns');
 const { makeRowRenderer } = VirtualizedTable;
@@ -48,7 +52,7 @@ const citationColumns = [
 		width: 26,
 		staticWidth: true,
 		fixedWidth: true,
-		renderer: (index, data, column) => {
+		renderCell: (index, data, column) => {
 			let icon = getCSSIcon('IconCross');
 			if (data) {
 				icon = getCSSIcon('IconTick');
@@ -72,7 +76,7 @@ itemColumns.push({
 	width: 26,
 	staticWidth: true,
 	fixedWidth: true,
-	renderer: (index, data, column) => {
+	renderCell: (index, data, column) => {
 		let icon = getCSSIcon('IconCross');
 		if (data) {
 			icon = getCSSIcon('IconTick');
