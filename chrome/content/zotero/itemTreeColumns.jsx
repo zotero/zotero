@@ -330,6 +330,15 @@ const COLUMNS = [
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
+		dataKey: "PMID",
+		disabledIn: ["feeds", "feed"],
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
+		label: "PMID",
+		flex: 1,
+		zoteroPersist: ["width", "hidden", "sortDirection"]
+	},
+	{
 		dataKey: "extra",
 		disabledIn: ["feeds", "feed"],
 		showInColumnPicker: true,
