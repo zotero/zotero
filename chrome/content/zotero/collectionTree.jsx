@@ -1432,7 +1432,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				break;
 			
 			case 'recentlyRead':
-				icon = 'duplicates'; // TODO: TEMP
+				icon = 'recent';
 				break;
 
 			case 'header':
