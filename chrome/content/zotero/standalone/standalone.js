@@ -237,8 +237,50 @@ const ZoteroStandalone = new function () {
 		this.updateQuickCopyOptions();
 		// goUpdateGlobalEditMenuItems(true) is necessary to update Edit menu when contenteditable is focused
 		window.goUpdateGlobalEditMenuItems(true);
+		this._updateUndoRedoLabels();
 
 		this.onUpdateCustomMenus(event, 'edit');
+	};
+
+	this._updateUndoRedoLabels = function () {
+		let undoItem = document.getElementById('menu_undo');
+		let redoItem = document.getElementById('menu_redo');
+		if (!undoItem || !redoItem) return;
+
+		// When a native text-editing controller handles undo/redo
+		// (e.g. focused input), show generic labels and let it take over
+		let nativeUndo = Zotero.UndoHistory.hasNativeUndo(document);
+		let nativeRedo = Zotero.UndoHistory.hasNativeRedo(document);
+
+		let undoAction = !nativeUndo && Zotero.UndoHistory.getUndoAction();
+		if (undoAction) {
+			let actionLabel = Zotero.ftl.formatValueSync(
+				undoAction.action, undoAction.actionArgs || undefined
+			);
+			let fullLabel = Zotero.ftl.formatValueSync(
+				'menu-edit-undo-action', { action: actionLabel }
+			);
+			undoItem.removeAttribute('data-l10n-id');
+			undoItem.setAttribute('label', fullLabel);
+		}
+		else {
+			document.l10n.setAttributes(undoItem, 'text-action-undo');
+		}
+
+		let redoAction = !nativeRedo && Zotero.UndoHistory.getRedoAction();
+		if (redoAction) {
+			let actionLabel = Zotero.ftl.formatValueSync(
+				redoAction.action, redoAction.actionArgs || undefined
+			);
+			let fullLabel = Zotero.ftl.formatValueSync(
+				'menu-edit-redo-action', { action: actionLabel }
+			);
+			redoItem.removeAttribute('data-l10n-id');
+			redoItem.setAttribute('label', fullLabel);
+		}
+		else {
+			document.l10n.setAttributes(redoItem, 'text-action-redo');
+		}
 	};
 	
 	/**

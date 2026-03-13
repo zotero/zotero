@@ -276,8 +276,8 @@ Zotero.Sync.Data.Local = {
 		// Mark library for full sync
 		var library = Zotero.Libraries.get(libraryID);
 		library.libraryVersion = -1;
-		await library.saveTx();
-		
+		await library.saveTx({ skipUndo: true });
+
 		await this.resetUnsyncedLibraryFiles(libraryID);
 	},
 	
@@ -566,7 +566,7 @@ Zotero.Sync.Data.Local = {
 					let c = Zotero.Collections.get(e.collectionID);
 					Zotero.debug(`Removing parent collection ${c.parentKey} from collection ${c.key}`);
 					c.parentID = null;
-					await c.saveTx();
+					await c.saveTx({ skipUndo: true });
 					return this.getUnsynced(...arguments);
 				}
 				else {

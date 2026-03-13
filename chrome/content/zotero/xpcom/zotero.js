@@ -545,6 +545,11 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		Zotero.DB.addCallback('begin', id => Zotero.Notifier.begin(id));
 		Zotero.DB.addCallback('commit', id => Zotero.Notifier.commit(null, id));
 		Zotero.DB.addCallback('rollback', id => Zotero.Notifier.reset(id));
+
+		// Add undo history callbacks to the DB layer
+		Zotero.DB.addCallback('begin', id => Zotero.UndoHistory._onTransactionBegin(id));
+		Zotero.DB.addCallback('commit', id => Zotero.UndoHistory._onTransactionCommit(id));
+		Zotero.DB.addCallback('rollback', id => Zotero.UndoHistory._onTransactionRollback(id));
 		
 		try {
 			// Require >=2.1b3 database to ensure proper locking
@@ -676,7 +681,14 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			const { ZoteroAutoComplete } = ChromeUtils.importESModule(
 				`chrome://zotero/content/zotero-autocomplete.mjs`
 			);
+			
 			ZoteroAutoComplete.init();
+
+			const { OptionsAutoComplete } = ChromeUtils.importESModule(
+				`chrome://zotero/content/modules/optionsAutoComplete.mjs`
+			);
+			
+			OptionsAutoComplete.init();
 
 			await Zotero.Users.init();
 			await Zotero.Libraries.init();
