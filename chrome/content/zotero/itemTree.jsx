@@ -27,6 +27,7 @@ const { noop, getDragTargetOrient } = require("components/utils");
 const PropTypes = require("prop-types");
 const React = require('react');
 const ReactDOM = require('react-dom');
+const cx = require('classnames');
 const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
@@ -103,6 +104,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		regularOnly: false,
 		multiSelect: true,
 		shouldListenForNotifications: true,
+		autoSelect: true,
 		columns: COLUMNS,
 		onContextMenu: noop,
 		onActivate: noop,
@@ -119,7 +121,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		regularOnly: PropTypes.bool,
 		multiSelect: PropTypes.bool,
 		shouldListenForNotifications: PropTypes.bool,
+		// Whether to automatically select the focused row when the tree is focused via tab key
+		autoSelect: PropTypes.bool,
 		columns: PropTypes.array,
+		firstColumnPrependRenderer: PropTypes.func,
 		onSelectionChange: PropTypes.func,
 		onContextMenu: PropTypes.func,
 		onActivate: PropTypes.func,
@@ -1083,7 +1088,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * Select the first row when the tree is focused by the keyboard.
 	 */
 	handleKeyUp = (event) => {
-		if (!Zotero.locked && (event.code === 'Tab' || event.key.includes("Arrow")) && this.selection.count == 0) {
+		if (!Zotero.locked && this.props.autoSelect && (event.code === 'Tab' || event.key.includes("Arrow")) && this.selection.count == 0) {
 			this.selection.select(this.selection.focused);
 		}
 	};
@@ -1121,8 +1126,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 					renderItem: this._renderItem.bind(this),
 					hide: showMessage,
 					key: "virtualized-table",
+					className: cx([{ "regular-only": this.props.regularOnly }]),
 
 					showHeader: true,
+					alternateRowColors: true,
 					columns: this._getColumns(),
 					onColumnPickerMenu: this._displayColumnPickerMenu,
 					onColumnSort: this.collectionTreeRow.isFeedsOrFeed() ? null : this._handleColumnSort,
@@ -2766,20 +2773,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 					moreItems.push(columnMenuitemElements[column.dataKey]);
 				}
 			}
+			
+			if (moreItems.length) {
+				// Sort fields and move to submenu
+				var collation = Zotero.getLocaleCollation();
+				moreItems.sort(function (a, b) {
+					return collation.compareString(1, a.getAttribute('label'), b.getAttribute('label'));
+				});
+				moreItems.forEach(function (elem) {
+					moreMenuPopup.appendChild(menupopup.removeChild(elem));
+				});
 
-			// Sort fields and move to submenu
-			var collation = Zotero.getLocaleCollation();
-			moreItems.sort(function (a, b) {
-				return collation.compareString(1, a.getAttribute('label'), b.getAttribute('label'));
-			});
-			moreItems.forEach(function (elem) {
-				moreMenuPopup.appendChild(menupopup.removeChild(elem));
-			});
-
-			let sep = document.createXULElement('menuseparator');
-			menupopup.appendChild(sep);
-			moreMenu.appendChild(moreMenuPopup);
-			menupopup.appendChild(moreMenu);
+				let sep = document.createXULElement('menuseparator');
+				menupopup.appendChild(sep);
+				moreMenu.appendChild(moreMenuPopup);
+				menupopup.appendChild(moreMenu);
+			}
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -3153,7 +3162,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			indentSpan.className = "cell-indent";
 			indentSpan.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
 
-			let twisty;
+			let twisty = "";
+			// No need to reserve space for a twisty if we're only displaying regular items.
 			if (this.isContainerEmpty(index)) {
 				twisty = document.createElement('span');
 				twisty.classList.add("spacer-twisty");
@@ -3164,6 +3174,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (this.isContainerOpen(index)) {
 					twisty.classList.add('open');
 				}
+				twisty.style.pointerEvents = 'auto';
 				twisty.addEventListener('mousedown', event => event.stopPropagation());
 				twisty.addEventListener('mouseup', event => this.handleTwistyMouseUp(event, index),
 					{ passive: true });
@@ -3183,7 +3194,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 				cell.append(textSpan);
 			}
 
-			cell.prepend(indentSpan, twisty, icon);
+			let firstColumnPrepend = [icon];
+			if (this.props.firstColumnPrependRenderer) {
+				firstColumnPrepend = this.props.firstColumnPrependRenderer(index, data, firstColumnPrepend);
+			}
+
+			cell.prepend(indentSpan, twisty, ...firstColumnPrepend);
 			cell.classList.add('first-column');
 		}
 		return cell;
