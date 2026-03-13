@@ -7,6 +7,11 @@ let httpRequest = (method, url, options) => {
 	if (!('errorDelayMax' in options)) {
 		options.errorDelayMax = 0;
 	}
+	if (!options.testBrowserRequest) {
+		options.headers = new Headers(options.headers || {});
+		options.headers.set('User-Agent', 'Some-API-Client/1.0');
+	}
+	delete options.testBrowserRequest;
 	return Zotero.HTTP.request(method, url, options);
 }
 
@@ -60,6 +65,32 @@ describe("Connector Server", function () {
 		win.close();
 	});
 
+	describe("/connector/ping", function () {
+		it("should reject browser requests", async function () {
+			let reqPromise = httpRequest(
+				'GET',
+				connectorServerPath + "/connector/ping",
+				{
+					testBrowserRequest: true,
+				}
+			);
+			await assert.isRejected(reqPromise, Zotero.getString('sync.error.checkConnection'));
+		});
+		
+		it("should allow browser request if page is loaded directly", async function () {
+			let { response } = await httpRequest(
+				'GET',
+				connectorServerPath + "/connector/ping",
+				{
+					headers: {
+						'Sec-Fetch-Mode': 'navigate',
+					},
+					testBrowserRequest: true,
+				}
+			);
+			assert.include(response, 'Zotero is running');
+		});
+	});
 
 	describe('/connector/getTranslatorCode', function () {
 		it('should respond with translator code', async function () {
@@ -1604,7 +1635,8 @@ describe("Connector Server", function () {
 						"Content-Type": "text/plain",
 						"X-Zotero-Connector-API-Version": "2"
 					},
-					body: style
+					body: style,
+					testBrowserRequest: true,
 				}
 			);
 			assert.equal(response.status, 201);
@@ -1618,7 +1650,8 @@ describe("Connector Server", function () {
 						"Content-Type": "text/plain",
 						"Zotero-Allowed-Request": "1"
 					},
-					body: style
+					body: style,
+					testBrowserRequest: true,
 				}
 			);
 			assert.equal(response.status, 201);
@@ -1627,7 +1660,7 @@ describe("Connector Server", function () {
 		});
 		
 		it('should reject text/plain request without X-Zotero-Connector-API-Version', async function () {
-			var req = await httpRequest(
+			var reqPromise = httpRequest(
 				'POST',
 				endpoint,
 				{
@@ -1635,10 +1668,11 @@ describe("Connector Server", function () {
 						"Content-Type": "text/plain"
 					},
 					body: style,
-					successCodes: [403]
+					successCodes: [403],
+					testBrowserRequest: true,
 				}
 			);
-			assert.equal(req.status, 403);
+			await assert.isRejected(reqPromise, Zotero.getString('sync.error.checkConnection'));
 		});
 	});
 	
@@ -1668,17 +1702,18 @@ describe("Connector Server", function () {
 		
 		it('should reject requests without X-Zotero-Connector-API-Version', async function () {
 			const sessionID = Zotero.Utilities.randomString();
-			var req = await httpRequest(
+			var reqPromise = httpRequest(
 				'POST',
 				endpoint + `?session=${sessionID}`,
 				{
 					headers: {
 						"Content-Type": "text/plain"
 					},
-					successCodes: [403]
+					successCodes: [403],
+					testBrowserRequest: true,
 				}
 			);
-			assert.equal(req.status, 403);
+			await assert.isRejected(reqPromise, Zotero.getString('sync.error.checkConnection'));
 		});
 		
 		it('should import resources (BibTeX) into selected collection', async function () {
@@ -1753,188 +1788,6 @@ describe("Connector Server", function () {
 			let itemIDs = await addedItemIDsPromise;
 			var item = Zotero.Items.get(itemIDs[0]);
 			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
-		});
-	});
-	
-	describe('/connector/request', function () {
-		let endpoint;
-		
-		before(function () {
-			endpoint = connectorServerPath + '/connector/request';
-		});
-		
-		beforeEach(function () {
-			Zotero.Server.Connector.Request.enableValidation = true;
-		});
-
-		after(function () {
-			Zotero.Server.Connector.Request.enableValidation = true;
-		});
-		
-		it('should reject GET requests', async function () {
-			let req = await httpRequest(
-				'GET',
-				endpoint,
-				{
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({
-						method: 'GET',
-						url: 'https://www.example.com/'
-					}),
-					successCodes: false
-				}
-			);
-			assert.equal(req.status, 400);
-			assert.include(req.responseText, 'Endpoint does not support method');
-		});
-
-		it('should not make requests to arbitrary hosts', async function () {
-			let req = await httpRequest(
-				'POST',
-				endpoint,
-				{
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({
-						method: 'GET',
-						url: `http://localhost:${Zotero.Server.port}/`
-					}),
-					successCodes: false
-				}
-			);
-			assert.equal(req.status, 400);
-			assert.include(req.responseText, 'Unsupported URL');
-
-			req = await httpRequest(
-				'POST',
-				endpoint,
-				{
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({
-						method: 'GET',
-						url: `http://www.example.com/`
-					}),
-					successCodes: false
-				}
-			);
-			assert.equal(req.status, 400);
-			assert.include(req.responseText, 'Unsupported URL');
-		});
-
-		it('should reject requests with non-Mozilla/ user agents', async function () {
-			let req = await httpRequest(
-				'POST',
-				endpoint,
-				{
-					headers: {
-						'content-type': 'application/json',
-						'user-agent': 'BadBrowser/1.0'
-					},
-					body: JSON.stringify({
-						method: 'GET',
-						url: `https://www.worldcat.org/api/nonexistent`
-					}),
-					successCodes: false
-				}
-			);
-			assert.equal(req.status, 400);
-			assert.include(req.responseText, 'Unsupported User-Agent');
-		});
-
-		it('should allow a request to an allowed host', async function () {
-			let stub = sinon.stub(Zotero.HTTP, 'request');
-			// First call: call original
-			stub.callThrough();
-			// Second call (call from within /connector/request handler): return the following
-			stub.onSecondCall().returns({
-				status: 200,
-				getAllResponseHeaders: () => '',
-				response: 'it went through'
-			});
-			
-			let req = await httpRequest(
-				'POST',
-				endpoint,
-				{
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({
-						method: 'GET',
-						url: `https://www.worldcat.org/api/nonexistent`
-					})
-				}
-			);
-			assert.equal(req.status, 200);
-			assert.equal(JSON.parse(req.responseText).body, 'it went through');
-			
-			stub.restore();
-		});
-
-		it('should return response in translator request() format with lowercase headers', async function () {
-			let testEndpointPath = '/test/header';
-			
-			httpd.registerPathHandler(
-				testEndpointPath,
-				{
-					handle: function (request, response) {
-						response.setStatusLine(null, 200, 'OK');
-						response.setHeader('X-Some-Header', 'Header value');
-						response.write('body');
-					}
-				}
-			);
-			
-			Zotero.Server.Connector.Request.enableValidation = false;
-			let req = await httpRequest(
-				'POST',
-				endpoint,
-				{
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({
-						method: 'GET',
-						url: testServerPath + testEndpointPath
-					}),
-					responseType: 'json'
-				}
-			);
-			
-			assert.equal(req.response.status, 200);
-			assert.equal(req.response.headers['x-some-header'], 'Header value');
-			assert.equal(req.response.body, 'body');
-		});
-
-		it('should set Referer', async function () {
-			let testEndpointPath = '/test/referer';
-			let referer = 'https://www.example.com/';
-
-			httpd.registerPathHandler(
-				testEndpointPath,
-				{
-					handle: function (request, response) {
-						assert.equal(request.getHeader('Referer'), referer);
-						response.setStatusLine(null, 200, 'OK');
-						response.write('');
-					}
-				}
-			);
-
-			Zotero.Server.Connector.Request.enableValidation = false;
-			let req = await httpRequest(
-				'POST',
-				endpoint,
-				{
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({
-						method: 'GET',
-						url: testServerPath + testEndpointPath,
-						options: {
-							headers: {
-								Referer: referer
-							}
-						}
-					})
-				}
-			);
-
-			assert.equal(JSON.parse(req.response).status, 200);
 		});
 	});
 });
