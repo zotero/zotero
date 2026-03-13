@@ -41,6 +41,10 @@
 			DragDropHandler.init(this);
 		}
 
+		destroy() {
+			DragDropHandler.destroy();
+		}
+
 		focus() {
 			this.refocusInput();
 		}
@@ -382,11 +386,29 @@
 			this.dragOver = null;
 			this.doc = bubbleInput.ownerDocument;
 
-			bubbleInput.addEventListener("dragstart", this.handleDragStart.bind(this));
-			bubbleInput.addEventListener("dragenter", this.handleDragEnter.bind(this));
-			bubbleInput.addEventListener("dragover", this.handleDragOver.bind(this));
-			bubbleInput.addEventListener("drop", this.handleDrop.bind(this));
-			this.doc.addEventListener("dragend", this.handleDragEnd.bind(this));
+			this._boundHandlers = {
+				dragstart: this.handleDragStart.bind(this),
+				dragenter: this.handleDragEnter.bind(this),
+				dragover: this.handleDragOver.bind(this),
+				drop: this.handleDrop.bind(this),
+				dragend: this.handleDragEnd.bind(this),
+			};
+			bubbleInput.addEventListener("dragstart", this._boundHandlers.dragstart);
+			bubbleInput.addEventListener("dragenter", this._boundHandlers.dragenter);
+			bubbleInput.addEventListener("dragover", this._boundHandlers.dragover);
+			bubbleInput.addEventListener("drop", this._boundHandlers.drop);
+			this.doc.addEventListener("dragend", this._boundHandlers.dragend);
+		},
+
+		destroy() {
+			if (this._boundHandlers) {
+				this.bubbleInput?.removeEventListener("dragstart", this._boundHandlers.dragstart);
+				this.bubbleInput?.removeEventListener("dragenter", this._boundHandlers.dragenter);
+				this.bubbleInput?.removeEventListener("dragover", this._boundHandlers.dragover);
+				this.bubbleInput?.removeEventListener("drop", this._boundHandlers.drop);
+				this.doc?.removeEventListener("dragend", this._boundHandlers.dragend);
+				this._boundHandlers = null;
+			}
 		},
 
 		handleDragStart(event) {
