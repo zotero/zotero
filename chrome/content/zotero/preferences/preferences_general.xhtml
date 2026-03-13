@@ -111,49 +111,11 @@
 			<vbox align="start">
 				<label id="preferences-file-renaming-intro" data-l10n-id="preferences-file-renaming-intro"/>
 				<separator class="thin"/>
-				<checkbox id="auto-rename-files"
-					data-l10n-id="preferences-file-renaming-auto-rename-files"
-					preference="extensions.zotero.autoRenameFiles"
-					oncommand="setTimeout(() => { Zotero_Preferences.General.handleAutoRenameChange(); Zotero_Preferences.General.updateAutoRenameFilesUI(); })" native="true"
-				/>
-				<vbox class="indented-pref" aria-labelledby="preferences-file-renaming-file-types" role="group">
-					<label id="preferences-file-renaming-file-types" data-l10n-id="preferences-file-renaming-file-types"/>
-					<hbox
-						id="zotero-prefpane-file-renaming-file-types-box"
-						class="indented-pref"
-						oncommand="Zotero_Preferences.General.setAutoRenameFileTypes()"
-					>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-pdf"
-							data-content-type="application/pdf"
-							native="true"
-						/>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-epub"
-							data-content-type="application/epub+zip"
-							native="true"
-						/>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-image"
-							data-content-type="image/"
-							native="true"
-						/>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-audio"
-							data-content-type="audio/"
-							native="true"
-						/>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-video"
-							data-content-type="video/"
-							native="true"
-						/>
-					</hbox>
-				</vbox>
-				<checkbox id="rename-linked-files" class="indented-pref"
-					label="&zotero.preferences.autoRenameFiles.renameLinked;"
-					preference="extensions.zotero.autoRenameFiles.linked"
-					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"
+				<file-renaming-settings
+						rename-now-hidden="true"
+						template-hidden="true"
+						instructions-hidden="true"
+						id="file-renaming-settings"
 				/>
 				<hbox id="file-renaming-buttons">
 					<button id="file-renaming-customize-button"

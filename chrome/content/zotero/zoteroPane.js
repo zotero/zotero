@@ -3301,6 +3301,21 @@ var ZoteroPane = new function () {
 			}
 		},
 		{
+			id: "fileRenamingSettings",
+			oncommand: () => {
+				const libraryID = this.getSelectedLibraryID();
+				if (libraryID === Zotero.Libraries.userLibraryID) {
+					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-general', { scrollTo: '#preferences-file-renaming-title' });
+				}
+				else {
+					const args = { libraryID };
+					Services.ww.openWindow(null, 'chrome://zotero/content/groupFileRenaming.xhtml',
+						'zotero-group-file-renaming', 'chrome,dialog=no,titlebar,centerscreen,resizable=yes', args
+					);
+				}
+			}
+		},
+		{
 			id: "sep1",
 		},
 		{
@@ -3589,6 +3604,7 @@ var ZoteroPane = new function () {
 			if (!library.archived) {
 				show.push(
 					'sync',
+					'fileRenamingSettings',
 					'sep1',
 					'newCollection',
 					'newSavedSearch'
