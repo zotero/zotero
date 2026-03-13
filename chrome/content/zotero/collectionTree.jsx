@@ -3167,13 +3167,19 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			else {
 				// Get all collections at the same level that don't have a different parent
 				startRow++;
+				// Skip past virtual collections (e.g., Recently Read) that come
+				// before collections in the tree
+				while (startRow < this._rows.length
+						&& this.getLevel(startRow) == level
+						&& this.getRow(startRow).isRecentlyRead()) {
+					startRow++;
+				}
 				loop:
 				for (let i = startRow; i < this._rows.length; i++) {
 					let treeRow = this.getRow(i);
 					beforeRow = i;
-					
-					// Since collections come first, if we reach something that's not a collection,
-					// stop
+
+					// If we reach something that's not a collection, stop
 					if (!treeRow.isCollection()) {
 						break;
 					}
@@ -3236,7 +3242,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				for (let i = startRow; i < this._rows.length; i++) {
 					let treeRow = this.getRow(i);
 					beforeRow = i;
-					
+
+					// Skip forward to first collection
+					if (treeRow.isRecentlyRead()) {
+						continue;
+					}
 					// If we've reached something other than collections, stop
 					if (treeRow.isSearch()) {
 						// If current search sorts after, stop
