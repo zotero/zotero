@@ -92,6 +92,7 @@ class EditorInstance {
 			Zotero.Prefs.registerObserver('note.fontSize', this._handleFontChange),
 			Zotero.Prefs.registerObserver('note.tabFontSize', this._handleFontChange),
 			Zotero.Prefs.registerObserver('note.fontFamily', this._handleFontChange),
+			Zotero.Prefs.registerObserver('noteTabComfortableContentView', this._handleContentViewModeChange),
 			Zotero.Prefs.registerObserver('note.css', this._handleStyleChange),
 			Zotero.Prefs.registerObserver('layout.spellcheckDefault', this._handleSpellCheckChange, true)
 		];
@@ -375,8 +376,8 @@ class EditorInstance {
 	}
 
 	_getContentViewMode() {
-		// TODO: Use prefs
-		return this._tabID ? 'comfortable' : 'wide';
+		let comfortableView = Zotero.Prefs.get('noteTabComfortableContentView');
+		return this._tabID && comfortableView ? 'comfortable' : 'wide';
 	}
 	
 	_handleFontChange = () => {
