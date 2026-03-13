@@ -868,3 +868,7 @@ banner-close-button =
 
 plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
+
+search-conditions-annotationColor = Annotation Color
+search-conditions-annotationAuthor = Annotation Author
+search-conditions-annotationType = Annotation Type
