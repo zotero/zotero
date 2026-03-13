@@ -578,6 +578,7 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+    .title = { pane-notes }
 sidenav-note-info =
     .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
@@ -629,6 +630,7 @@ context-notes-search =
     .placeholder = Search Notes
 context-notes-return-button =
     .aria-label = { general-go-back }
+    .tooltiptext = { general-go-back }
 
 new-collection = New Collection…
 menu-new-collection =
