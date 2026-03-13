@@ -587,6 +587,39 @@ Zotero.SearchConditions = new function () {
 			},
 			
 			{
+				name: 'annotationColor',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAnnotations',
+				field: 'color',
+				special: false,
+			},
+
+			{
+				name: 'annotationType',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAnnotations',
+				field: 'type',
+				special: false,
+			},
+
+			{
+				name: 'annotationAuthor',
+				operators: {
+					is: true,
+					isNot: true,
+				},
+				table: 'groupItems',
+				field: 'createdByUserID',
+				special: false,
+			},
+			
+			{
 				name: 'fulltextWord',
 				operators: {
 					contains: true,
@@ -732,7 +765,18 @@ Zotero.SearchConditions = new function () {
 		else if (['author', 'editor', 'bookAuthor'].includes(str)) {
 			return Zotero.CreatorTypes.getLocalizedString(str);
 		}
+
+		// Try .ftl format
+		try {
+			let conditionKey = 'search-conditions-' + str;
+			let conditionString = Zotero.getString(conditionKey);
+			if (conditionString) {
+				return conditionString;
+			}
+		}
+		catch (_) {}
 		
+		// Try .properties format
 		try {
 			let conditionKey = 'searchConditions.' + str;
 			let conditionString = Zotero.getString(conditionKey);

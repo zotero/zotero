@@ -1207,7 +1207,8 @@ Zotero.Search.prototype._buildQuery = async function () {
 				//
 				if (condition.table) {
 					let negationOperators = ['isNot', 'doesNotContain'];
-					let isNegationOperator = negationOperators.includes(condition.operator);
+					let isNegationOperator = negationOperators.includes(condition.operator);			
+					let isAnnotationCondition = condition.name.includes('annotation');
 					
 					condSelectSQL += 'itemID '
 					if (isNegationOperator) {
@@ -1215,23 +1216,23 @@ Zotero.Search.prototype._buildQuery = async function () {
 					}
 					condSelectSQL += 'IN (';
 					selectOpenParens = 1;
-					
-					// TEMP: Don't match annotations for negation operators, since it would result in
-					// all parent attachments being returned
+
+					// For negative operators, add all items of the "wrong" type to the
+					// NOT IN set so they get excluded from results:
+					// - Annotation conditions: exclude non-annotations (so only
+					//   annotations can match)
+					// - Non-annotation conditions: exclude annotations (so annotations
+					//   don't trivially match all negative queries)
 					if (isNegationOperator) {
-						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID="
+						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID"
+							+ (isAnnotationCondition ? "!=" : "=")
 							+ Zotero.ItemTypes.getID('annotation') + " UNION ";
 					}
 					
 					switch (condition.name) {
-						case 'tag':
-							condSQL += "SELECT itemID FROM itemTags "
-								+ "LEFT JOIN itemAnnotations IAnT USING (itemID) WHERE (";
-							break;
-						
-						case 'annotationText':
-						case 'annotationComment':
-							condSQL += `SELECT itemID FROM ${condition.table} WHERE (`
+						case 'annotationAuthor':
+							condSQL += "SELECT itemID FROM itemAnnotations "
+								+ "LEFT JOIN groupItems USING (itemID) WHERE (";
 							break;
 							
 						default:
