@@ -70,6 +70,7 @@ const xpcomFilesLocal = [
 	'annotations',
 	'api',
 	'attachments',
+	'attachmentReadObserver',
 	'browserDownload',
 	'cite',
 	'citeprocRsBridge',

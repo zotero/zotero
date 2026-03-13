@@ -83,6 +83,8 @@ var ZoteroAdvancedSearch = new function () {
 			isFeed: () => false,
 			isFeeds: () => false,
 			isFeedsOrFeed: () => false,
+			isRecentlyRead: () => false,
+			isSortable: () => true,
 			isShare: () => false,
 			isTrash: () => false,
 			isSearch: () => true
@@ -101,7 +103,7 @@ var ZoteroAdvancedSearch = new function () {
 		_searchBox.updateSearch();
 		_searchBox.active = true;
 		
-		return this.itemsView.changeCollectionTreeRow({
+		var collectionTreeRow = {
 			ref: _searchBox.search,
 			visibilityGroup: 'default',
 			isSearchMode: () => true,
@@ -113,8 +115,21 @@ var ZoteroAdvancedSearch = new function () {
 				search.libraryID = _libraryID;
 				var ids = await search.search();
 				return Zotero.Items.get(ids);
-			}
-		});
+			},
+			isLibrary: () => false,
+			isCollection: () => false,
+			isPublications: () => false,
+			isDuplicates: () => false,
+			isFeed: () => false,
+			isFeeds: () => false,
+			isFeedsOrFeed: () => false,
+			isRecentlyRead: () => false,
+			isSortable: () => true,
+			isShare: () => false,
+			isTrash: () => false
+		};
+
+		return this.itemsView.changeCollectionTreeRow(collectionTreeRow);
 	}
 	
 	

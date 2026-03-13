@@ -360,6 +360,7 @@
 				case 'date':
 				case 'dateAdded':
 				case 'dateModified':
+				case 'lastRead':
 				case 'itemType':
 				case 'fileTypeID':
 				case 'publicationTitle':

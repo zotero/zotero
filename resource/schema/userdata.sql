@@ -1,4 +1,4 @@
--- 123
+-- 124
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -211,6 +211,7 @@ CREATE TABLE itemAttachments (
     storageModTime INT,
     storageHash TEXT,
     lastProcessedModificationTime INT,
+    lastRead INT,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
     FOREIGN KEY (parentItemID) REFERENCES items(itemID) ON DELETE CASCADE,
     FOREIGN KEY (charsetID) REFERENCES charsets(charsetID) ON DELETE SET NULL
@@ -220,6 +221,7 @@ CREATE INDEX itemAttachments_charsetID ON itemAttachments(charsetID);
 CREATE INDEX itemAttachments_contentType ON itemAttachments(contentType);
 CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
 CREATE INDEX itemAttachments_lastProcessedModificationTime ON itemAttachments(lastProcessedModificationTime);
+CREATE INDEX itemAttachments_lastRead ON itemAttachments(lastRead);
 
 CREATE TABLE itemAnnotations (
     itemID INTEGER PRIMARY KEY,

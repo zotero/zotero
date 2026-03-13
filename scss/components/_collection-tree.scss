@@ -1,10 +1,17 @@
-$icons: (
+// Themed icons -- separate SVGs per color in dark/, light/, white/
+$themed-icons: (
 	collection, duplicates, feed, feed-error, feed-library, feed-updating, groups, library,
 	library-group, publications, trash-full, trash, unfiled, retracted, search,
 );
 
-@mixin -icon-collection-type-rules {
-	@each $icon in $icons {
+// Universal icons -- single SVG with context-fill, colored via CSS
+// Map of icon name to fill color variable
+$universal-icons: (
+	recent: --tag-purple,
+);
+
+@mixin -themed-icon-rules {
+	@each $icon in $themed-icons {
 		.icon-css.icon-#{$icon} {
 			@include focus-states using ($color) {
 				@include svgicon($icon, $color, "16", "collection-tree");
@@ -13,15 +20,37 @@ $icons: (
 	}
 }
 
-// Universal icon rules
-@include focus-states using ($color) {
-	@include -icon-collection-type-rules;
+@mixin -universal-icon-rules {
+	@each $icon, $fill in $universal-icons {
+		.icon-css.icon-#{$icon} {
+			@include svgicon($icon, "universal", "16", "collection-tree");
+			@include focus-states using ($color) {
+				@if $color == "white" {
+					fill: white;
+				}
+				@else {
+					fill: var(#{$fill});
+				}
+			}
+		}
+	}
 }
 
-// Selection and focus aware icon rules
+@include focus-states using ($color) {
+	@include -themed-icon-rules;
+}
+
 .focus-states-target {
 	.row {
-		@include -icon-collection-type-rules;
+		@include -themed-icon-rules;
+	}
+}
+
+@include -universal-icon-rules;
+
+.focus-states-target {
+	.row {
+		@include -universal-icon-rules;
 	}
 }
 
@@ -60,7 +89,7 @@ $icons: (
 				height: 16px;
 			}
 	
-			@each $icon in $icons {
+			@each $icon in $themed-icons {
 				.icon-css.icon-#{$icon} {
 					@include focus-states(
 						".row.selected",
