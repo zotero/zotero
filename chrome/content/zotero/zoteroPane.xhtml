@@ -31,6 +31,8 @@
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+<?xml-stylesheet href="chrome://zotero/content/screenshotExplainer.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/content/katex/katex.min.css" type="text/css"?>
 
 <!DOCTYPE window [
 	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
@@ -87,6 +89,8 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/locateMenu.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/menuAccessKey.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/containers/tagSelectorContainer.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/screenshotExplainer.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/katex/katex.min.js", this);
 	</script>
 	
 	<commandset id="mainCommandSet">
@@ -894,6 +898,14 @@
 
 			<hbox id="zotero-pq-buttons">
 			</hbox>
+
+			<toolbarbutton
+					id="zotero-tb-screenshot-explain"
+					class="zotero-tb-button"
+					tabindex="-1"
+					tooltiptext="Explain selection with AI"
+					oncommand="try { (window.Zotero_Screenshot_Explainer || Zotero_Screenshot_Explainer).startCapture(); } catch (e) { Zotero.logError(e); }"/>
+			<div xmlns="http://www.w3.org/1999/xhtml" class="zotero-tb-separator"></div>
 
 			<toolbarbutton tabindex="-1" id="zotero-tb-sync-error" hidden="true" style="-moz-user-focus: normal;" />
 			
