@@ -53,6 +53,9 @@
 	"general-tag": {
 		"string": "Tag"
 	},
+	"general-got-it": {
+		"string": "Got It"
+	},
 	"general-done": {
 		"string": "Done"
 	},
@@ -989,6 +992,9 @@
 	"first-run-guidance-authorMenu": {
 		"string": "{ app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu."
 	},
+	"first-run-guidance-readAloud": {
+		"string": "{ app-name } can now read your documents to you using natural-sounding voices."
+	},
 	"advanced-search-conditions-menu.aria-label": {
 		"string": "Search condition"
 	},
@@ -1081,6 +1087,9 @@
 	},
 	"banner-close-button.aria-label": {
 		"string": "Dismiss notification"
+	},
+	"plugins-blocked-plugin.message": {
+		"string": "This plugin has been disabled by { app-name }."
 	},
 	"preferences-window.title": {
 		"string": "{ app-name } Settings"
