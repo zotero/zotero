@@ -261,8 +261,7 @@ class CitationExplorerItemTree extends ItemTree {
 	}
 
 	isSelectable(index, _selectAll = false) {
-		let row = this.getRow(index);
-		return !!row && row.type !== 'library';
+		return !!this.getRow(index);
 	}
 
 	_renderItem(index, selection, oldDiv = null, columns = []) {
