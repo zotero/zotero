@@ -1043,6 +1043,7 @@ class ReaderInstance {
 			}
 		}
 
+		let defaultSpreadMode = Zotero.Prefs.get('reader.defaultSpreadMode');
 		if (this._type === 'pdf') {
 			let pageIndex = item.getAttachmentLastPageIndex();
 			if (state) {
@@ -1054,7 +1055,10 @@ class ReaderInstance {
 				return state;
 			}
 			else if (Number.isInteger(pageIndex)) {
-				return { pageIndex };
+				return { pageIndex, spreadMode: defaultSpreadMode };
+			}
+			else {
+				return { spreadMode: defaultSpreadMode };
 			}
 		}
 		else if (this._type === 'epub') {
@@ -1064,7 +1068,7 @@ class ReaderInstance {
 				return state;
 			}
 			else {
-				return { cfi };
+				return { cfi, spreadMode: defaultSpreadMode };
 			}
 		}
 		else if (this._type === 'snapshot') {
@@ -2318,14 +2322,15 @@ class ReaderPreview extends ReaderInstance {
 	}
 
 	async _getState() {
+		let defaultSpreadMode = Zotero.Prefs.get('reader.defaultSpreadMode');
 		if (this._type === "pdf") {
-			return { pageIndex: 0, scale: "page-height", scrollMode: 0, spreadMode: 0 };
+			return { pageIndex: 0, scale: "page-height", scrollMode: 0, spreadMode: defaultSpreadMode };
 		}
 		else if (this._type === "epub") {
 			return Object.assign(await super._getState(), {
 				scale: 1,
 				flowMode: "paginated",
-				spreadMode: 0
+				spreadMode: defaultSpreadMode
 			});
 		}
 		else if (this._type === "snapshot") {
