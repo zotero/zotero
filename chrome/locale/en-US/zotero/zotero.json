@@ -1274,6 +1274,12 @@
 	"preferences-sync-data-syncing-description": {
 		"string": "Log in with your { app-name } account to sync your data between devices, collaborate with others, and more."
 	},
+	"preferences-account-log-in.label": {
+		"string": "Log In"
+	},
+	"preferences-account-log-out.label": {
+		"string": "Log Out…"
+	},
 	"preferences-sync-reset-restore-to-server-body": {
 		"string": "{ app-name } will replace “{ libraryName }” on { domain } with data from this computer."
 	},
