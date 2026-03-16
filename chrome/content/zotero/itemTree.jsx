@@ -395,37 +395,37 @@ class ItemTreeRowProvider {
 	 * @returns {number[]} - Array of item IDs that were open
 	 */
 	_saveOpenState() {
-		var openItemIDs = [];
+		var openIDs = [];
 		var toClose = [];
 		for (var i = 0; i < this._rows.length; i++) {
 			if (this.isContainer(i) && this.isContainerOpen(i)) {
 				let row = this.getRow(i);
-				openItemIDs.push(row.ref.id);
+				openIDs.push(row.id);
 				if (row.level == 0) {
-					toClose.push(row.ref.id);
+					toClose.push(row.id);
 				}
 			}
 		}
 		// Close top-level containers from bottom up
 		for (let i = toClose.length - 1; i >= 0; i--) {
 			let row = this._rowMap[toClose[i]];
-			if (this.isContainerOpen(row)) {
+			if (row !== undefined && this.isContainerOpen(row)) {
 				this._toggleOpenState(row, true);
 			}
 		}
 		this.refreshRowMap();
-		return openItemIDs;
+		return openIDs;
 	}
 
 	/**
 	 * Restore previously open containers.
-	 * @param {number[]} itemIDs - Array of item IDs to reopen
+	 * @param {Array} ids - Array of row IDs (treeViewIDs) to reopen
 	 * @param {boolean} secondLevel - Internal flag for recursive call
 	 */
-	_restoreOpenState(itemIDs, secondLevel = false) {
+	_restoreOpenState(ids, secondLevel = false) {
 		var rowsToOpen = [];
 		var nextLevelToOpen = [];
-		for (let id of itemIDs) {
+		for (let id of ids) {
 			var row = this._rowMap[id];
 			if (row === undefined) {
 				if (!secondLevel) {
@@ -665,7 +665,7 @@ class ItemTreeRowProvider {
 		}
 
 		// Save open state and close containers before sorting
-		var openItemIDs = this._saveOpenState();
+		var openIDs = this._saveOpenState();
 
 		Zotero.debug(`Sorting items list by ${this._sortFields.join(", ")} `
 			+ `${this._sortDirection == 1 ? "ascending" : "descending"} `
@@ -696,7 +696,7 @@ class ItemTreeRowProvider {
 		// Restore open state — _toggleOpenState() sorts children
 		// using _compareRows() with the same sort state
 		this.refreshRowMap();
-		this._restoreOpenState(openItemIDs);
+		this._restoreOpenState(openIDs);
 	}
 
 	/**
