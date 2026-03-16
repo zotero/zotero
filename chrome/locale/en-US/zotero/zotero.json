@@ -1268,6 +1268,12 @@
 	"preferences-advanced-default-data-dir.aria-label": {
 		"string": "Default location"
 	},
+	"-preferences-sync-data-syncing": {
+		"string": "Data Syncing"
+	},
+	"preferences-sync-data-syncing-description": {
+		"string": "Log in with your { app-name } account to sync your data between devices, collaborate with others, and more."
+	},
 	"preferences-sync-reset-restore-to-server-body": {
 		"string": "{ app-name } will replace “{ libraryName }” on { domain } with data from this computer."
 	},
@@ -1349,8 +1355,14 @@
 	"reader-highlight-annotation": {
 		"string": "Highlight annotation"
 	},
+	"reader-highlight-annotation-short": {
+		"string": "Highlight"
+	},
 	"reader-underline-annotation": {
 		"string": "Underline annotation"
+	},
+	"reader-underline-annotation-short": {
+		"string": "Underline"
 	},
 	"reader-note-annotation": {
 		"string": "Note Annotation"
@@ -1720,6 +1732,174 @@
 	},
 	"reader-page-options": {
 		"string": "Page Options"
+	},
+	"reader-read-aloud": {
+		"string": "Read Aloud"
+	},
+	"reader-read-aloud-options": {
+		"string": "Options"
+	},
+	"reader-read-aloud-skip-back": {
+		"string": "Skip Back"
+	},
+	"reader-read-aloud-skip-ahead": {
+		"string": "Skip Ahead"
+	},
+	"reader-read-aloud-add-annotation": {
+		"string": "Annotate Sentence ({ key1 }/{ key2 })"
+	},
+	"reader-read-aloud-play": {
+		"string": "Play"
+	},
+	"reader-read-aloud-pause": {
+		"string": "Pause"
+	},
+	"reader-read-aloud-speed": {
+		"string": "Reading Speed"
+	},
+	"reader-read-aloud-voice": {
+		"string": "Voice"
+	},
+	"reader-read-aloud-voice-tier": {
+		"string": "Voice Mode"
+	},
+	"reader-read-aloud-voice-tier-local": {
+		"string": "Local"
+	},
+	"reader-read-aloud-voice-tier-standard": {
+		"string": "Standard"
+	},
+	"reader-read-aloud-voice-tier-premium": {
+		"string": "Premium"
+	},
+	"reader-read-aloud-more-voices": {
+		"string": "More Voices…"
+	},
+	"reader-read-aloud-language": {
+		"string": "Language"
+	},
+	"reader-read-aloud-remaining-time": {
+		"string": "Remaining reading time"
+	},
+	"reader-read-aloud-log-in-link": {
+		"string": "<log-in>Log in</log-in> to access { app-name } Voices."
+	},
+	"reader-read-aloud-log-in-button": {
+		"string": "Log In"
+	},
+	"reader-read-aloud-add-more-time": {
+		"string": "Add more time"
+	},
+	"reader-read-aloud-quota-exceeded-message": {
+		"string": "<add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with {tier, select, standard {Standard Voices} local {Local Voices}}."
+	},
+	"reader-read-aloud-error-unknown": {
+		"string": "An unknown error occurred."
+	},
+	"reader-read-aloud-error-connection": {
+		"string": "Unable to connect to the Read Aloud service. Please check your internet connection."
+	},
+	"reader-read-aloud-error-daily-limit-exceeded": {
+		"string": "You have exceeded your daily limit for { app-name } Voices."
+	},
+	"reader-read-aloud-retry": {
+		"string": "Retry"
+	},
+	"reader-read-aloud-first-run-title": {
+		"string": "Choose your preferred Read Aloud voice:"
+	},
+	"reader-read-aloud-first-run-voice-tier-local-bullet-os-provided": {
+		"string": "Voices provided by your operating system"
+	},
+	"reader-read-aloud-first-run-voice-tier-local-bullet-offline": {
+		"string": "Available without an internet connection"
+	},
+	"reader-read-aloud-first-run-voice-tier-local-bullet-no-account": {
+		"string": "Available without a { app-name } account"
+	},
+	"reader-read-aloud-first-run-voice-tier-local-bullet-free": {
+		"string": "Free to use"
+	},
+	"reader-read-aloud-first-run-voice-tier-standard-bullet-natural-sounding": {
+		"string": "Natural-sounding voices"
+	},
+	"reader-read-aloud-first-run-voice-tier-standard-bullet-online-only": {
+		"string": "Only available with an internet connection"
+	},
+	"reader-read-aloud-first-run-voice-tier-standard-bullet-account-required": {
+		"string": "Requires a { app-name } account"
+	},
+	"reader-read-aloud-first-run-voice-tier-standard-bullet-limited-languages": {
+		"string": "Limited language selection"
+	},
+	"reader-read-aloud-first-run-voice-tier-standard-bullet-no-multilingual": {
+		"string": "No multilingual support"
+	},
+	"reader-read-aloud-first-run-voice-tier-standard-bullet-internal-processing": {
+		"string": "Source text doesn’t leave { app-name } servers"
+	},
+	"reader-read-aloud-first-run-voice-tier-standard-bullet-unlimited-with-subscription": {
+		"string": "Unlimited use with a { subscription-name } subscription"
+	},
+	"reader-read-aloud-first-run-voice-tier-premium-bullet-highest-quality": {
+		"string": "Highest-quality voices"
+	},
+	"reader-read-aloud-first-run-voice-tier-premium-bullet-online-only": {
+		"string": "Only available with an internet connection"
+	},
+	"reader-read-aloud-first-run-voice-tier-premium-bullet-account-required": {
+		"string": "Requires a { app-name } account"
+	},
+	"reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages": {
+		"string": "Broad language selection"
+	},
+	"reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual": {
+		"string": "Multilingual support"
+	},
+	"reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing": {
+		"string": "Source text is processed by external text-to-speech providers"
+	},
+	"reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes": {
+		"string": "{ subscription-name } plans include monthly Premium Voice minutes"
+	},
+	"reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits": {
+		"string": "Request credits for additional minutes during beta"
+	},
+	"reader-read-aloud-sample-text": {
+		"string": "I am the local voice { name }"
+	},
+	"reader-read-aloud-voices-none-available": {
+		"string": "No voices available"
+	},
+	"reader-read-aloud-first-run-no-voices-for-language": {
+		"string": "{ tier } Voices do not support { language }."
+	},
+	"reader-read-aloud-region": {
+		"string": "Region"
+	},
+	"reader-read-aloud-region-auto": {
+		"string": "Automatic"
+	},
+	"reader-read-aloud-annotation-popup-move": {
+		"string": "Move annotation by sentence"
+	},
+	"reader-read-aloud-annotation-popup-extend": {
+		"string": "Extend annotation by sentence"
+	},
+	"reader-read-aloud-annotation-popup-delete": {
+		"string": "Delete"
+	},
+	"reader-read-aloud-annotation-popup-done": {
+		"string": "Done"
+	},
+	"reader-read-aloud-annotation-popup-change-color": {
+		"string": "Change color"
+	},
+	"reader-read-aloud-annotation-popup-highlight": {
+		"string": "Highlight"
+	},
+	"reader-read-aloud-annotation-popup-underline": {
+		"string": "Underline"
 	},
 	"integration-docPrefs-window.title": {
 		"string": "{ app-name } - Document Preferences"
