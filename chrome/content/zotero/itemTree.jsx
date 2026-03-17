@@ -3004,7 +3004,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// Add emoji tags after
 			tagSpans.push(...emoji.map(x => this._getTagSwatch(x.tag)));
 
-			tagAriaLabel = coloredTags.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
+			tagAriaLabel = coloredTags.length == 1 ? Zotero.getString('search-conditions-tag') : Zotero.getString('itemFields.tags');
 			tagAriaLabel += ' ' + coloredTags.map(x => x.tag).join(', ') + '.';
 		}
 
@@ -3013,10 +3013,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// Special treatment for trashed collections or searches since they are not an actual
 			// item and do not have an item type
 			if (item instanceof Zotero.Collection) {
-				itemTypeAriaLabel = Zotero.getString('searchConditions.collection') + '.';
+				itemTypeAriaLabel = Zotero.getString('search-conditions-collection') + '.';
 			}
 			else if (item instanceof Zotero.Search) {
-				itemTypeAriaLabel = Zotero.getString('searchConditions.savedSearch') + '.';
+				itemTypeAriaLabel = Zotero.getString('search-conditions-savedSearch') + '.';
 			}
 			else {
 				var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
