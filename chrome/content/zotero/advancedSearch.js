@@ -24,7 +24,7 @@
 */
 
 
-import ItemTree from 'zotero/itemTree';
+import CollectionViewItemTree from 'zotero/collectionViewItemTree';
 import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
@@ -39,6 +39,7 @@ var ZoteroAdvancedSearch = new function () {
 
 	var _searchBox;
 	var _libraryID;
+	var _searchCounter = 0;
 	
 	async function onLoad() {
 		_searchBox = document.getElementById('zotero-search-box');
@@ -61,16 +62,16 @@ var ZoteroAdvancedSearch = new function () {
 			column.hidden = !['title', 'firstCreator', 'year', 'hasAttachment'].includes(column.dataKey);
 			return column;
 		});
-		this.itemsView = await ItemTree.init(elem, {
+		this.itemsView = await CollectionViewItemTree.init(elem, {
 			id: "advanced-search",
 			dragAndDrop: true,
-			persistColumns: true,
 			columnPicker: true,
 			onActivate: this.onItemActivate.bind(this),
 			columns,
 		});
 
 		await this.itemsView.changeCollectionTreeRow({
+			id: 'advanced-search-' + _searchCounter++,
 			ref: _searchBox.search,
 			visibilityGroup: 'default',
 			isSearchMode: () => true,
@@ -102,6 +103,7 @@ var ZoteroAdvancedSearch = new function () {
 		_searchBox.active = true;
 		
 		return this.itemsView.changeCollectionTreeRow({
+			id: 'advanced-search-' + _searchCounter++,
 			ref: _searchBox.search,
 			visibilityGroup: 'default',
 			isSearchMode: () => true,

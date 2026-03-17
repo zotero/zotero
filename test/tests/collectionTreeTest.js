@@ -1436,25 +1436,9 @@ describe("Zotero.CollectionTree", function () {
 				feedItem.setField('url', url);
 				await feedItem.saveTx();
 				var translateFn = sinon.spy(feedItem, 'translate');
-
-				// Add observer to wait for collection-item add, using setTimeout
-				// to ensure all synchronous notifier processing completes first
-				var deferred = Zotero.Promise.defer();
-				var observerID = Zotero.Notifier.registerObserver({
-					notify: function (event, type, ids) {
-						if (type == 'collection-item' && event == 'add'
-								&& ids.some(id => id.startsWith(collection.id + "-"))) {
-							setTimeout(function () {
-								deferred.resolve();
-							});
-						}
-					}
-				}, 'collection-item', 'test');
-
-				await onDrop('item', 'C' + collection.id, [feedItem.id], deferred.promise);
-
-				Zotero.Notifier.unregisterObserver(observerID);
-
+				
+				var ids = ((await onDrop('item', 'C' + collection.id, [feedItem.id]))).ids;
+				
 				// Check that the translated item was the one that was created after drag
 				var item = await translateFn.returnValues[0];
 				assert.ok(item, 'Translation should return an item');

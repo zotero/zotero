@@ -32,7 +32,39 @@ Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, isOpe
 	this.level = level || 0;
 	this.isOpen = isOpen || false;
 	this.onUnload = null;
+	this.searchText = "";
+	this.searchMode = "search";
+	this.tags = new Set();
+	
+	// Per-instance search cache. Within a single refresh cycle, multiple consumers need the
+	// same search results — getItems() for the items pane and getTags() for the tag selector
+	// both call getSearchResults(), and getSearchResults() calls getSearchObject(). This cache
+	// ensures the underlying DB query only runs once per cycle. Call clearCache() to invalidate
+	// (e.g., at the start of a refresh, or when filters change).
+	//
+	// On search failure (e.g., a saved search with invalid conditions), getSearchResults() throws
+	// a Zotero.CollectionTreeRow.SearchError. This is caught in
+	// CollectionViewItemTreeRowProvider.refresh() to show a load-error message without bricking
+	// the UI, so the user can still edit/delete the broken search. See the catch block in
+	// refresh() for details.
+	this._cachedResults = null;
+	this._cachedSearch = null;
+	this._cachedTempTable = null;
 }
+
+/**
+ * Error thrown by CollectionTreeRow.getSearchResults() when the underlying
+ * Zotero.Search query fails (e.g., a saved search with invalid conditions).
+ * Caught by CollectionViewItemTreeRowProvider.refresh() to show a load-error
+ * message without bricking the UI.
+ */
+Zotero.CollectionTreeRow.SearchError = class SearchError extends Error {
+	constructor(cause) {
+		super('ZoteroSearchError');
+		this.name = 'ZoteroSearchError';
+		this.cause = cause;
+	}
+};
 
 Zotero.CollectionTreeRow.IDCounter = 0;
 
@@ -315,32 +347,24 @@ Zotero.CollectionTreeRow.prototype.getItems = async function () {
 };
 
 Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTable) {
-	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
-		Zotero.CollectionTreeCache.clear();
-	}
-	
-	if(!Zotero.CollectionTreeCache.lastResults) {
+	if (!this._cachedResults) {
 		let s = await this.getSearchObject();
-		Zotero.CollectionTreeCache.error = false;
 		try {
-			Zotero.CollectionTreeCache.lastResults = await s.search();
+			this._cachedResults = await s.search();
 		}
 		catch (e) {
 			Zotero.logError(e);
-			Zotero.CollectionTreeCache.lastResults = [];
-			// Flag error so ZoteroPane::onCollectionSelected() can show a message
-			Zotero.CollectionTreeCache.error = true;
+			throw new Zotero.CollectionTreeRow.SearchError(e);
 		}
-		Zotero.CollectionTreeCache.lastTreeRow = this;
 	}
 	
-	if(asTempTable) {
-		if(!Zotero.CollectionTreeCache.lastTempTable) {
-			Zotero.CollectionTreeCache.lastTempTable = await Zotero.Search.idsToTempTable(Zotero.CollectionTreeCache.lastResults);
+	if (asTempTable) {
+		if (!this._cachedTempTable) {
+			this._cachedTempTable = await Zotero.Search.idsToTempTable(this._cachedResults);
 		}
-		return Zotero.CollectionTreeCache.lastTempTable;
+		return this._cachedTempTable;
 	}
-	return Zotero.CollectionTreeCache.lastResults;
+	return this._cachedResults;
 };
 
 /*
@@ -349,13 +373,9 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTabl
  * This accounts for the collection, saved search, quicksearch, tags, etc.
  */
 Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
-	if (Zotero.CollectionTreeCache.lastTreeRow && Zotero.CollectionTreeCache.lastTreeRow.id !== this.id) {
-		Zotero.CollectionTreeCache.clear();
+	if (this._cachedSearch) {
+		return this._cachedSearch;
 	}
-	
-	if(Zotero.CollectionTreeCache.lastSearch) {
-		return Zotero.CollectionTreeCache.lastSearch;
-	}	
 	
 	var includeScopeChildren = false;
 	
@@ -438,8 +458,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 		}
 	}
 	
-	Zotero.CollectionTreeCache.lastTreeRow = this;
-	Zotero.CollectionTreeCache.lastSearch = s2;
+	this._cachedSearch = s2;
 	return s2;
 };
 
@@ -470,15 +489,54 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 };
 
 
+/**
+ * Clear the per-instance search cache. Call this at the start of a refresh cycle
+ * or when search/tag filters change, so the next getSearchResults()/getSearchObject()
+ * call runs a fresh DB query.
+ */
+Zotero.CollectionTreeRow.prototype.clearCache = function () {
+	this._cachedSearch = null;
+	if (this._cachedTempTable) {
+		let tableName = this._cachedTempTable;
+		let id = Zotero.DB.addCallback('commit', async function () {
+			await Zotero.DB.queryAsync(
+				"DROP TABLE IF EXISTS " + tableName, false, { noCache: true }
+			);
+			Zotero.DB.removeCallback('commit', id);
+		});
+	}
+	this._cachedTempTable = null;
+	this._cachedResults = null;
+};
+
 Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null) {
-	Zotero.CollectionTreeCache.clear();
+	if (this.searchText === searchText && this.searchMode === mode) {
+		return false;
+	}
+	this.clearCache();
 	this.searchText = searchText;
 	this.searchMode = mode;
+	return true;
 }
 
 Zotero.CollectionTreeRow.prototype.setTags = function (tags) {
-	Zotero.CollectionTreeCache.clear();
-	this.tags = tags;
+	let oldTags = this.tags instanceof Set ? this.tags : new Set(this.tags || []);
+	let newTags = tags instanceof Set ? new Set(tags) : new Set(tags || []);
+	if (oldTags.size === newTags.size) {
+		let hasChanges = false;
+		for (let tag of newTags) {
+			if (!oldTags.has(tag)) {
+				hasChanges = true;
+				break;
+			}
+		}
+		if (!hasChanges) {
+			return false;
+		}
+	}
+	this.clearCache();
+	this.tags = newTags;
+	return true;
 }
 
 /*
@@ -489,6 +547,7 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 		case 'search':
 		case 'publications':
 		case 'trash':
+		case 'unfiled':
 			return true;
 	}
 	
@@ -500,28 +559,5 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 	// Tag filter
 	if (this.tags && this.tags.size) {
 		return true;
-	}
-}
-
-Zotero.CollectionTreeCache = {
-	"lastTreeRow":null,
-	"lastTempTable":null,
-	"lastSearch":null,
-	"lastResults":null,
-
-	"clear": function () {
-		this.lastTreeRow = null;
-		this.lastSearch = null;
-		if (this.lastTempTable) {
-			let tableName = this.lastTempTable;
-			let id = Zotero.DB.addCallback('commit', async function () {
-				await Zotero.DB.queryAsync(
-					"DROP TABLE IF EXISTS " + tableName, false, { noCache: true }
-				);
-				Zotero.DB.removeCallback('commit', id);
-			});
-		}
-		this.lastTempTable = null;
-		this.lastResults = null;
 	}
 }
