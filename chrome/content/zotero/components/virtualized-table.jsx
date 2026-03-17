@@ -330,6 +330,8 @@ class VirtualizedTable extends React.Component {
 		this._typingString = "";
 		this._jsWindowID = `virtualized-table-list-${Zotero.Utilities.randomString(5)}`;
 		this._containerWidth = props.containerWidth || window.innerWidth;
+		this.className = props.className || "";
+		this.firstColumnExtraWidth = props.firstColumnExtraWidth || 0;
 		
 		this._columns = new Columns(this);
 		
@@ -1066,7 +1068,7 @@ class VirtualizedTable extends React.Component {
 	
 		this._setXulTooltip();
 
-		this._topDiv.style.setProperty("--first-column-extra-width", `${this.props.firstColumnExtraWidth}px`);
+		this._topDiv.style.setProperty("--first-column-extra-width", `${this.firstColumnExtraWidth}px`);
 		window.addEventListener("resize", () => {
 			this._debouncedRerender();
 		});
@@ -1248,7 +1250,9 @@ class VirtualizedTable extends React.Component {
 				{
 				resizing: this.state.resizing,
 				'multi-select': this.props.multiSelect
-			}]),
+			},
+				this.className
+			]),
 			id: this.props.id,
 			ref: ref => this._topDiv = ref,
 			tabIndex: 0,
@@ -1461,10 +1465,9 @@ class VirtualizedTree extends VirtualizedTable {
 	_toggledOpenStateIndex = null;
 
 	constructor(props) {
-		props.firstColumnExtraWidth += 16; // 16px for twisty
-		if (!props.className) props.className = "";
-		props.className += " virtualized-tree";
 		super(props);
+		this.className += " virtualized-tree";
+		this.firstColumnExtraWidth += 16; // 16px for twisty
 	}
 
 	toggleOpenState(index, ...args) {
@@ -1767,7 +1770,7 @@ var Columns = class {
 			} else {
 				// It's set in CSS, so we subtract it here to prevent sliding
 				if (column.dataKey === visibleColumns[0].dataKey) {
-					width -= this._virtualizedTable.props.firstColumnExtraWidth;
+					width -= this._virtualizedTable.firstColumnExtraWidth;
 				}
 				width = (width - columnPadding);
 				Zotero.debug(`Columns ${dataKey} width ${width}`);
