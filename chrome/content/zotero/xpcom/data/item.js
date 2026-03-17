@@ -3584,7 +3584,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLastRead', {
 		if (val !== null && typeof val != 'number') {
 			throw new Error('attachmentLastRead must be a number');
 		}
-		if (val != parseInt(val)) {
+		if (val !== null && val != parseInt(val)) {
 			throw new Error('attachmentLastRead must be an integer timestamp in seconds');
 		}
 

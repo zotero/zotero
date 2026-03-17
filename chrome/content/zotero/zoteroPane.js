@@ -2299,10 +2299,12 @@ var ZoteroPane = new function () {
 			};
 			prompt = force ? toTrash : toRemoveFromPublications;
 		}
+		else if (collectionTreeRow.isRecentlyRead()) {
+			prompt = force ? toTrash : toRemove;
+		}
 		else if (collectionTreeRow.isLibrary(true)
 				|| collectionTreeRow.isSearch()
 				|| collectionTreeRow.isUnfiled()
-				|| collectionTreeRow.isRecentlyRead()
 				|| collectionTreeRow.isRetracted()
 				|| collectionTreeRow.isDuplicates()) {
 			// In library, don't prompt if meta key was pressed
@@ -4144,13 +4146,19 @@ var ZoteroPane = new function () {
 			show.add(m.addToCollection);
 		}
 		
-		// Remove from collection
+		// Remove from collection / Recently Read
+		menu.childNodes[m.removeItems].removeAttribute('data-l10n-id');
 		if (collectionTreeRow.isCollection() && items.every(item => item.isTopLevelItem())) {
 			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
 			show.add(m.removeItems);
 		}
 		else if (collectionTreeRow.isPublications()) {
 			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.removeFromPublications' + multiple));
+			show.add(m.removeItems);
+		}
+		else if (collectionTreeRow.isRecentlyRead()) {
+			menu.childNodes[m.removeItems].removeAttribute('label');
+			menu.childNodes[m.removeItems].setAttribute('data-l10n-id', 'item-menu-remove-from-recently-read');
 			show.add(m.removeItems);
 		}
 		
