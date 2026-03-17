@@ -90,6 +90,33 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		return windows;
 	};
 	
+	/** Deferred promise for main window readiness */
+	let _mainWindowDeferred = null;
+
+	this.getMainWindowPromise = function () {
+		let win = this.getMainWindow();
+		if (win && !win.closed) {
+			return Promise.resolve(win);
+		}
+
+		// Create deferred if not exists
+		if (!_mainWindowDeferred) {
+			_mainWindowDeferred = Zotero.Promise.defer();
+		}
+		return _mainWindowDeferred.promise;
+	};
+
+	/**
+	 * Called when main window is ready to signal waiters
+	 * @param {ChromeWindow} win - The main window
+	 */
+	this.mainWindowReady = function (win) {
+		if (_mainWindowDeferred) {
+			_mainWindowDeferred.resolve(win);
+			_mainWindowDeferred = null;
+		}
+	};
+
 	this.getActiveZoteroPane = function () {
 		var win = Services.wm.getMostRecentWindow("navigator:browser");
 		return win ? win.ZoteroPane : null;
