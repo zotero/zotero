@@ -735,6 +735,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			await Zotero.Retractions.init();
 			await Zotero.Dictionaries.init();
 			Zotero.Reader.init();
+			Zotero.AttachmentReadObserver.init();
 			
 			// Load all library data except for items, which are loaded when libraries are first
 			// clicked on or if otherwise necessary
