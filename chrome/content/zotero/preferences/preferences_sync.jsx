@@ -261,6 +261,7 @@ Zotero_Preferences.Sync = {
 
 		this.displayFields();
 		Zotero.Prefs.clear('sync.librariesToSync');
+		Zotero.Prefs.clear('reader.readAloudVoices');
 		await Zotero.Sync.Runner.deleteAPIKey();
 	},
 	
