@@ -70,7 +70,7 @@
 		<div class="citation-explorer-grid-left grid-padded-section" id="citations-label">Citations</div>
 
 		<div class="searchbox-container citation-explorer-grid-left grid-padded-section">
-			<xul:search-textbox id="citation-search" placeholder="Citation Content" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onCitationFilter()" dir="reverse"/>
+			<xul:search-textbox id="citation-search" placeholder="Citation Content" class="search-box" timeout="250" oncommand="ZoteroCitationExplorer.onCitationFilter()" dir="reverse"/>
 		</div>
 	
 		<div class="virtualized-table-container citation-explorer-grid-left">
@@ -86,7 +86,7 @@
 		<div class="grid-padded-section" id="items-in-bibliography-label">Items in Bibliography</div>
 
 		<div class="searchbox-container grid-padded-section">
-			<xul:search-textbox id="item-search" placeholder="Title, Creator, Year" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onItemFilter()" dir="reverse"/>
+			<xul:search-textbox id="item-search" placeholder="Title, Creator, Year" class="search-box" timeout="250" oncommand="ZoteroCitationExplorer.onItemFilter()" dir="reverse"/>
 		</div>
 		
 		<div class="virtualized-table-container">
@@ -97,10 +97,10 @@
 			<input type="button" id="button-show-in-zotero" value="Show in Zotero" disabled="true"/>
 			<input type="button" id="button-relink-item" class="right" value="Relink Item" disabled="true"/>
 			<button is="split-menu-button" id="button-addTo-library"
-					onclick="ZoteroDocumentCitations.addToLibraryAndLink()"
+					onclick="ZoteroCitationExplorer.addToLibraryAndLink()"
 					popup="item-addTo-menu" disabled="true"/>
 			<xul:popupset>
-				<xul:menupopup id="item-addTo-menu" onpopupshowing="ZoteroDocumentCitations.buildAddToLibraryContextMenu(event);"/>
+				<xul:menupopup id="item-addTo-menu" onpopupshowing="ZoteroCitationExplorer.buildAddToLibraryContextMenu(event);"/>
 			</xul:popupset>
 		</div>
 	</div>
