@@ -92,7 +92,7 @@ class LibraryItemTreeRow extends ItemTreeRow {
 
 	renderRow(div, index, columns, rowData, renderCtx) {
 		let titleColumn = columns.find(c => c.dataKey === 'title') || columns[0];
-		let cell = renderCtx.renderCell(index, this.ref.name, titleColumn, true);
+		let cell = renderCtx.renderCell(index, this.getDisplayTitle(), titleColumn, true);
 		div.appendChild(cell);
 	}
 }
@@ -191,13 +191,15 @@ class CitationExplorerRowProvider extends ItemTreeRowProvider {
 			return new UnlinkedItemsTreeRow(this._unlinkedItems, isOpen);
 		}
 		if (ref instanceof Zotero.Library) {
-			let items = this._sourceItems.filter(
-				item => (item.libraryID ?? Zotero.Libraries.userLibraryID) === ref.libraryID
-			);
+			let items = this._sourceItems.filter((item) => {
+				let key = item.treeViewID ?? item.cslItemID;
+				return (item.libraryID ?? Zotero.Libraries.userLibraryID) === ref.libraryID
+					&& !this._cslItemIDByID.has(key);
+			});
 			return new LibraryItemTreeRow(ref, items, isOpen);
 		}
 
-		let key = ref.treeViewID;
+		let key = ref.treeViewID ?? ref.cslItemID;
 		return new CitationExplorerItemTreeRow(ref, level, isOpen, {
 			citedIn: this._citedInByID.get(key) || [],
 			cslItemID: this._cslItemIDByID.get(key) || null,
@@ -237,7 +239,8 @@ class CitationExplorerRowProvider extends ItemTreeRowProvider {
 		this._unlinkedItems = [];
 
 		for (const item of this._sourceItems) {
-			if (this._cslItemIDByID.has(item.treeViewID)) {
+			let key = item.treeViewID ?? item.cslItemID;
+			if (this._cslItemIDByID.has(key)) {
 				this._unlinkedItems.push(item);
 				continue;
 			}
@@ -618,7 +621,62 @@ window.ZoteroCitationExplorer = {
 	 * @private
 	 */
 	onItemSelectionChange: async function () {
-		let selectedRows = [...itemList.selection.selected]
+		const getGroupKey = (row) => {
+			if (!row) return null;
+			if (row instanceof UnlinkedItemsTreeRow) return UNLINKED_ITEMS_ID;
+			if (row instanceof CitationExplorerItemTreeRow) {
+				return row.isLinked
+					? (row.ref.libraryID ?? Zotero.Libraries.userLibraryID)
+					: UNLINKED_ITEMS_ID;
+			}
+			if (row instanceof LibraryItemTreeRow) {
+				return row.ref.libraryID ?? Zotero.Libraries.userLibraryID;
+			}
+			return null;
+		};
+
+		let selectedIndexes = [...itemList.selection.selected];
+		if (selectedIndexes.length > 1) {
+			let focusedIndex = itemList.selection.focused;
+			if (focusedIndex == null || focusedIndex < 0 || !itemList.getRow(focusedIndex)) {
+				focusedIndex = selectedIndexes[0];
+			}
+			let focusedRow = itemList.getRow(focusedIndex);
+			let allowedIndexes = [];
+
+			// Deny multi-selection that includes container rows
+			if (focusedRow instanceof LibraryItemTreeRow) {
+				allowedIndexes = [focusedIndex];
+			}
+			else {
+				let focusedGroup = getGroupKey(focusedRow);
+				allowedIndexes = selectedIndexes.filter((index) => {
+					let row = itemList.getRow(index);
+					return row instanceof CitationExplorerItemTreeRow
+						&& getGroupKey(row) === focusedGroup;
+				});
+			}
+
+			if (!allowedIndexes.length) {
+				allowedIndexes = [focusedIndex];
+			}
+
+			if (allowedIndexes.length !== selectedIndexes.length) {
+				let oldSelected = new Set(itemList.selection.selected);
+				itemList.selection.selected = new Set(allowedIndexes);
+				if (!allowedIndexes.includes(focusedIndex)) {
+					itemList.selection.focused = allowedIndexes[0] ?? focusedIndex;
+				}
+				itemList.selection.pivot = itemList.selection.focused;
+				let toInvalidate = new Set([...oldSelected, ...allowedIndexes]);
+				for (let index of toInvalidate) {
+					itemList.tree?.invalidateRow(index);
+				}
+				selectedIndexes = allowedIndexes;
+			}
+		}
+
+		let selectedRows = selectedIndexes
 			.map(index => itemList.getRow(index))
 			.filter(row => row instanceof CitationExplorerItemTreeRow);
 
@@ -633,10 +691,11 @@ window.ZoteroCitationExplorer = {
 		let isItemRow = focusedRow instanceof CitationExplorerItemTreeRow;
 		let isUnlinked = isItemRow && !focusedRow.isLinked;
 		let noneSelected = selectedRows.length === 0;
+		let anyUnlinkedSelected = selectedRows.some(row => !row.isLinked);
 
 		document.querySelector('#button-show-in-zotero').disabled = noneSelected || !isItemRow || isUnlinked;
-		document.querySelector('#button-relink-item').disabled = noneSelected || !isUnlinked;
-		document.querySelector('#button-addTo-library').disabled = noneSelected || !isUnlinked;
+		document.querySelector('#button-relink-item').disabled = noneSelected || !anyUnlinkedSelected;
+		document.querySelector('#button-addTo-library').disabled = noneSelected || !anyUnlinkedSelected;
 		
 		await this.refreshCitationList();
 	},
