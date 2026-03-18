@@ -793,6 +793,34 @@ advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
 
+search-conditions-tooltip-fields = Fields:
+search-conditions-collection = Collection
+search-conditions-savedSearch = Saved Search
+search-conditions-itemTypeID = Item Type
+search-conditions-tag = Tag
+search-conditions-note = Note
+search-conditions-childNote = Child Note
+search-conditions-creator = Creator
+search-conditions-thesisType = Thesis Type
+search-conditions-reportType = Report Type
+search-conditions-videoRecordingFormat = Video Recording Format
+search-conditions-audioFileType = Audio File Type
+search-conditions-audioRecordingFormat = Audio Recording Format
+search-conditions-letterType = Letter Type
+search-conditions-interviewMedium = Interview Medium
+search-conditions-manuscriptType = Manuscript Type
+search-conditions-presentationType = Presentation Type
+search-conditions-mapType = Map Type
+search-conditions-artworkMedium = Artwork Medium
+search-conditions-dateModified = Date Modified
+search-conditions-fulltextContent = Attachment Content
+search-conditions-programmingLanguage = Programming Language
+search-conditions-fileTypeID = Attachment File Type
+search-conditions-lastRead = Attachment Last Read
+search-conditions-annotationText = Annotation Text
+search-conditions-annotationComment = Annotation Comment
+search-conditions-anyField = Any Field
+
 find-pdf-files-added = { $count ->
     [one] { $count } file added
     *[other] { $count } files added

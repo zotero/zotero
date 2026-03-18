@@ -745,17 +745,23 @@ Zotero.SearchConditions = new function () {
 		else if (['author', 'editor', 'bookAuthor'].includes(str)) {
 			return Zotero.CreatorTypes.getLocalizedString(str);
 		}
-		
+
 		try {
-			let conditionKey = 'searchConditions.' + str;
-			let conditionString = Zotero.getString(conditionKey);
-			if (conditionString !== conditionKey) {
+			let ftlKey = 'search-conditions-' + str;
+			let conditionString = Zotero.getString(ftlKey);
+			if (conditionString && conditionString !== ftlKey) {
 				return conditionString;
 			}
 		}
 		catch (e) {}
 
-		return Zotero.ItemFields.getLocalizedString(str);
+		try {
+			return Zotero.ItemFields.getLocalizedString(str);
+		}
+		catch (e) {
+			Zotero.debug(`getLocalizedName: no localized string for '${str}'`, 2);
+			return str;
+		}
 	}
 	
 	

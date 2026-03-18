@@ -331,7 +331,7 @@
 						var hbox = document.createXULElement('hbox');
 						
 						var label = document.createXULElement('label');
-						label.setAttribute('value', Zotero.getString('searchConditions.tooltip.fields'));
+						label.setAttribute('value', Zotero.getString('search-conditions-tooltip-fields'));
 						hbox.appendChild(label);
 						var vbox = document.createXULElement('vbox');
 						for (let str of localized) {
