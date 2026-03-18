@@ -775,6 +775,29 @@ Zotero.Integration.Interface.prototype.addNote = async function () {
 };
 
 /**
+ * Insert annotations combined into one note into the current document.
+ * @return {Promise}
+ */
+Zotero.Integration.Interface.prototype.addAnnotation = async function () {
+	await this._session.init(false, false);
+
+	if ((!await this._doc.canInsertField(this._session.data.prefs.fieldType))) {
+		throw new Zotero.Exception.Alert("integration.error.cannotInsertHere", [],
+			"integration.error.title");
+	}
+
+	let citations = await this._session.cite(null, false, true);
+	if (this._session.data.prefs.delayCitationUpdates) {
+		return Promise.all(citations.map((citation) => {
+			return this._session.writeDelayedCitation(citation.field, citation);
+		}));
+	}
+	else {
+		return this._session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
+	}
+};
+
+/**
  * Adds a bibliography to the current document.
  * @return {Promise}
  */
@@ -1483,7 +1506,7 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
  * display the citation dialog and perform any field/text inserts after
  * the dialog edits are accepted
  */
-Zotero.Integration.Session.prototype.cite = async function (field, addNote=false) {
+Zotero.Integration.Session.prototype.cite = async function (field, addNote=false, addAnnotations = false) {
 	var newField;
 	var citation;
 	
@@ -1559,6 +1582,7 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		fieldIndexPromise, citationsByItemIDPromise, previewFn
 	);
 	io.isCitingNotes = addNote;
+	io.isAddingAnnotations = addAnnotations;
 	Zotero.debug(`Editing citation:`);
 	Zotero.debug(JSON.stringify(citation.toJSON()));
 
@@ -1640,6 +1664,19 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 Zotero.Integration.Session.prototype._insertCitingResult = async function (fieldIndex, field, citation) {
 	await citation.loadItemData();
 	
+	let allItems = citation.citationItems.map(item => Zotero.Cite.getItem(item.id));
+	// Handle adding selected annotations as a mock note
+	if (allItems.some(item => item.isAnnotation())) {
+		if (!allItems.every(item => item.isAnnotation())) {
+			throw new Error("Citing result with annotations must not include other item types");
+		}
+		let includeComments = Zotero.Prefs.get("integration.annotationDialogIncludeComments");
+		// Note is created with embedded data to be inserted but nothing is saved to DB
+		let mockNote = await Zotero.EditorInstance.createNoteFromAnnotations(
+			allItems, { noSave: true, noComments: !includeComments }
+		);
+		return this._insertNoteIntoDocument(fieldIndex, field, mockNote);
+	}
 	let firstItem = Zotero.Cite.getItem(citation.citationItems[0].id);
 	if (firstItem && firstItem.isNote()) {
 		return this._insertNoteIntoDocument(fieldIndex, field, firstItem);

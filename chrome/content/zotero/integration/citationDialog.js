@@ -50,6 +50,7 @@ var DIALOG_STATE = {
 
 	isCitingItems: () => DIALOG_STATE.type == 'citation',
 	isAddingNote: () => DIALOG_STATE.type == 'add-note',
+	isAddingAnnotations: () => DIALOG_STATE.type == 'annotations',
 };
 
 
@@ -67,6 +68,8 @@ async function onLoad() {
 	}
 	ioReadyPromise.then(() => ioIsReady = true);
 	window.isPristine = true;
+	// set the font-size and density
+	Zotero.UIProperties.set(document.querySelector("body"));
 
 	Zotero.debug("Citation Dialog: initializing");
 	let timer = new Zotero.Integration.Timer();
@@ -74,13 +77,16 @@ async function onLoad() {
 
 	Helpers = new CitationDialogHelpers({ doc, io });
 	SearchHandler = new CitationDialogSearchHandler({ dialogState: DIALOG_STATE, io });
-	PopupsHandler = new CitationDialogPopupsHandler({ doc });
+	PopupsHandler = new CitationDialogPopupsHandler({ doc, dialogState: DIALOG_STATE });
 	KeyboardHandler = new CitationDialogKeyboardHandler({ doc });
 
 	// Initialize dialog type before layouts that depend on DIALOG_STATE.type
 	let initialType = 'citation';
 	if (io.isCitingNotes) {
 		initialType = 'add-note';
+	}
+	else if (io.isAddingAnnotations) {
+		initialType = 'annotations';
 	}
 	await setDialogType(initialType);
 
@@ -189,9 +195,12 @@ function onUnload() {
 
 function cleanupBeforeDialogClosing() {
 	if (!currentLayout || !libraryLayout) return;
-	Zotero.Prefs.set("integration.citationDialogLastUsedMode", currentLayout.type);
-	if (currentLayout.type == "library") {
-		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
+	// Only library mode in annotations dialog
+	if (!DIALOG_STATE.isAddingAnnotations()) {
+		Zotero.Prefs.set("integration.citationDialogLastUsedMode", currentLayout.type);
+		if (currentLayout.type == "library") {
+			Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
+		}
 	}
 	libraryLayout.collectionsView.unregister();
 	libraryLayout.itemsView.unregister();
@@ -207,12 +216,18 @@ function _id(id) {
 	return doc.getElementById(id);
 }
 
-// Switch between "Add/Edit Citation" and "Add Note" modes
+// Switch between "Add/Edit Citation", "Add Note", "Add annotations" modes
 async function setDialogType(type) {
 	if (type == DIALOG_STATE.type) return;
 	if (DIALOG_STATE.loaded && io.disableDialogTypeSwitch) return;
 	DIALOG_STATE.type = type;
 	document.documentElement.setAttribute("dialog-type", DIALOG_STATE.type);
+
+	let modeSpecificComponents = doc.querySelectorAll(`[data-dialog-type]`);
+	for (let component of modeSpecificComponents) {
+		let shouldBeVisible = component.getAttribute("data-dialog-type").includes(type);
+		component.hidden = !shouldBeVisible;
+	}
 
 	Helpers.setActiveSegmentedControl(_id(`dialog-type-${DIALOG_STATE.type}`));
 
@@ -223,6 +238,9 @@ async function setDialogType(type) {
 	}
 
 	// Set proper settings availability depending on the type
+	_id("bubble-input").sortable = DIALOG_STATE.isCitingItems();
+	_id("keepSorted").disabled = !io.sortable || !DIALOG_STATE.isCitingItems();
+	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
 	if (DIALOG_STATE.isCitingItems()) {
 		_id("settings-button").hidden = !io.sortable;
 		_id("keepSorted").disabled = !io.sortable;
@@ -234,6 +252,15 @@ async function setDialogType(type) {
 		_id("settings-button").hidden = true;
 		_id("keepSorted").disabled = true;
 	}
+	else if (DIALOG_STATE.isAddingAnnotations()) {
+		// Only library mode supported when adding annotations
+		await IOManager.toggleDialogMode("library");
+		_id("includeComments").checked = Zotero.Prefs.get("integration.annotationDialogIncludeComments");
+	}
+
+	// hide the settings button if there are no settings to show
+	let visibleSettings = !!_id("settings-popup").querySelector(".popup div:not([hidden]) input:not([disabled])");
+	_id("settings-button").hidden = !visibleSettings;
 
 	// After initial loading, hide the dialog type switch if it is not wanted
 	// (e.g. when adding citations in the note editor or when editing existing citation)
@@ -276,7 +303,8 @@ class Layout {
 		let searchResultGroups = SearchHandler.getOrderedSearchResultGroups(citedIDs);
 		for (let { key, group, isLibrary } of searchResultGroups) {
 			// selected items become a collapsible deck/list if there are multiple items
-			let isGroupCollapsible = key == "selected" && group.length > 1;
+			let collapsibleGroupID = DIALOG_STATE.isAddingAnnotations() ? "selectedAnnotations" : "selected";
+			let isGroupCollapsible = key == collapsibleGroupID && group.length > 1;
 			
 			// Construct each section and items
 			let sectionHeader = "";
@@ -460,8 +488,10 @@ class LibraryLayout extends Layout {
 	async init() {
 		await this._initItemTree();
 		await this._initCollectionTree();
+		this.collectionsView.itemTreeView = this.itemsView;
 		// on mouse scrollwheel in suggested items, scroll the list horizontally
 		_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
+		this._initSidepane();
 	}
 
 	// Create item node for an item group and store item ids in itemIDs attribute
@@ -472,17 +502,23 @@ class LibraryLayout extends Layout {
 			role: "option",
 			"data-tabindex": 30,
 			"data-arrow-nav-enabled": true,
-			draggable: true
+			draggable: DIALOG_STATE.isCitingItems()
 		}, "item keyboard-clickable");
 		let id = item.cslItemID || item.id;
 		itemNode.setAttribute("itemID", id);
 		itemNode.setAttribute("role", "option");
 		itemNode.id = id;
-		let title = Helpers.createNode("div", {}, "title");
-		let description = Helpers.buildItemDescription(item);
-		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), title);
-
+		let title = Helpers.buildItemTitle(item);
+		let description = Helpers.buildItemDescription(item, true);
 		itemNode.append(title, description);
+
+		if (DIALOG_STATE.isAddingAnnotations() && item.isAnnotation()) {
+			let attachment = Zotero.Items.get(item.parentItemID);
+			let topLevelItem = attachment.parentItemID ? Zotero.Items.get(attachment.parentItemID) : attachment;
+			let topLevelItemTitle = Helpers.buildItemTitle(topLevelItem);
+			topLevelItemTitle.classList.add("description");
+			itemNode.prepend(topLevelItemTitle);
+		}
 
 		if (index !== null) {
 			itemNode.style.setProperty('--deck-index', index);
@@ -519,13 +555,9 @@ class LibraryLayout extends Layout {
 		await this._refreshItemsViewHighlightedRows();
 		// Save selected items, clear selection to not scroll after refresh
 		let selectedItemIDs = this.itemsView.getSelectedItems(true);
-		this.itemsView.selection.clearSelection();
-		// Refresh to reset row cache to get latest data of which items are included
-		await this.itemsView.refresh();
-		// Redraw the itemTree
-		this.itemsView.tree.invalidate();
-		// Restore selection without scrolling
 		this.itemsView.selection.selectEventsSuppressed = true;
+		this.itemsView.selection.clearSelection();
+		// Restore selection without scrolling
 		await this.itemsView.selectItems(selectedItemIDs, true, true);
 		this.itemsView.selection.selectEventsSuppressed = false;
 	}
@@ -595,17 +627,18 @@ class LibraryLayout extends Layout {
 			showInColumnPicker: false,
 			renderer: (index, inCitation, column) => {
 				let cell = Helpers.createNode("span", {}, `cell ${column.className} clickable`);
-				let iconWrapper = Helpers.createNode("span", {}, `icon-action`);
-				cell.append(iconWrapper);
-				let icon = getCSSIcon('plus-circle');
 				if (inCitation === null) {
 					// no icon should be shown when an item cannot be added
 					// (e.g. when citing notes, parent items are displayed but not included)
-					icon = getCSSIcon("");
+					return cell;
 				}
+				let iconWrapper = Helpers.createNode("span", {}, `icon-action`);
+				cell.append(iconWrapper);
+				let icon = getCSSIcon('plus-circle');
+				iconWrapper.append(icon);
 				// add aria-label for screen readers to announce if this item is added
-				else if (inCitation) {
-					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added")
+				if (inCitation) {
+					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added");
 				}
 				else {
 					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table");
@@ -624,13 +657,19 @@ class LibraryLayout extends Layout {
 			columnPicker: true,
 			onSelectionChange: () => {
 				libraryLayout.updateSelectedItems();
+				if (DIALOG_STATE.isAddingAnnotations()) {
+					this._handleSelectionChangeWithAnnotation();
+				}
 			},
 			regularOnly: DIALOG_STATE.isCitingItems(),
-			multiSelect: DIALOG_STATE.isCitingItems(),
+			multiSelect: DIALOG_STATE.isCitingItems() || DIALOG_STATE.isAddingAnnotations(),
 			onActivate: (event, items) => {
 				// Prevent Enter event from reaching KeyboardHandler which would accept the dialog
 				event.preventDefault();
 				event.stopPropagation();
+				if (DIALOG_STATE.isAddingAnnotations() && items.some(item => !item.isAnnotation())) return;
+				if (DIALOG_STATE.isAddingNote() && items.some(item => !item.isNote())) return;
+
 				let row = event.target.closest(".row");
 				let isClick = event.type == "dblclick";
 				// Suppress focus-ring on focused rows to avoid flashing
@@ -661,6 +700,7 @@ class LibraryLayout extends Layout {
 					if (!(item instanceof Zotero.Item)) return null;
 					if (DIALOG_STATE.isAddingNote() && !item.isNote()) return null;
 					if (DIALOG_STATE.isCitingItems() && !item.isRegularItem()) return null;
+					if (DIALOG_STATE.isAddingAnnotations() && !item.isAnnotation()) return null;
 					// The returned value needs to be a string due to a call to .toLowerCase()
 					// in _handleTyping of virtualized-table. Otherwise, errors are thrown if you type
 					// when the addToCitation column is used for sorting.
@@ -705,6 +745,36 @@ class LibraryLayout extends Layout {
 			rowsContainer.setAttribute("role", "group");
 		}
 	}
+
+	_initSidepane() {
+		// Click on the + icon of annotion-row will bubbleize the annotation
+		_id("annotations-list").addEventListener("click", (event) => {
+			if (!event.target.classList.contains("zotero-clicky-plus")) return;
+			let annotationRow = event.target.closest("annotation-row");
+			let item = Zotero.Items.get(annotationRow.annotation.id);
+			IOManager.addItemsToCitation(item);
+		});
+		// Space/Enter on annotation row is the same as clicking on the + icon
+		_id("annotations-list").addEventListener("keydown", (event) => {
+			if ([" ", "Enter"].includes(event.key) && event.target.tagName == "annotation-row") {
+				let item = Zotero.Items.get(event.target.annotation.id);
+				IOManager.addItemsToCitation(item);
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		});
+		// Handle the actual filtering in itemPane
+		_id("annotations-sidebar-filter").addEventListener("input", (event) => {
+			_id("annotations-filter-cancel-btn").hidden = !event.target.value;
+			_id("annotations-list").filter = event.target.value;
+			_id("annotations-list").render();
+		});
+		// Handle click on X button to clear the filter
+		_id("annotations-filter-cancel-btn").addEventListener("click", () => {
+			_id("annotations-sidebar-filter").value = "";
+			_id("annotations-sidebar-filter").dispatchEvent(new Event('input', { bubbles: true }));
+		});
+	}
 	
 	async _onCollectionSelection() {
 		var collectionTreeRow = this.collectionsView.getRow(this.collectionsView.selection.focused);
@@ -730,6 +800,10 @@ class LibraryLayout extends Layout {
 				// when citing notes, only keep notes or note parents
 				if (DIALOG_STATE.isAddingNote()) {
 					items = items.filter(item => item.isNote() || item.getNotes().length);
+				}
+				// when adding annotations, only keep annotations, their attachments, and their top-level items
+				if (DIALOG_STATE.isAddingAnnotations()) {
+					return SearchHandler.keepItemsWithAnnotations(items);
 				}
 				return items;
 			},
@@ -766,6 +840,37 @@ class LibraryLayout extends Layout {
 		IOManager.addItemsToCitation([row.ref]).then(() => {
 			this._scrollItemTreeToRow(rowNode.id, rowTopBeforeRefresh);
 		});
+	}
+
+	_handleSelectionChangeWithAnnotation() {
+		let selectedItems = this.itemsView.getSelectedItems().filter(item => item.isAnnotation() || item.isFileAttachment() || item.isRegularItem());
+		let selectedAnnotations = selectedItems.flatMap(item => SearchHandler.getAllAnnotations(item));
+		let uniqueAnnotations = [];
+		let annotationIDs = new Set();
+		for (let annotation of selectedAnnotations) {
+			if (annotationIDs.has(annotation.id)) continue;
+			uniqueAnnotations.push(annotation);
+			annotationIDs.add(annotation.id);
+		}
+		// Don't re-render if the list has not changed
+		let rendered = new Set(_id("annotations-list").items.map(item => item.id));
+		if (rendered.isSupersetOf(annotationIDs) && rendered.isSubsetOf(annotationIDs)) return;
+
+		// When no annotations are selected, a message will be shown
+		_id("annotations-list-wrapper").hidden = uniqueAnnotations.length == 0;
+		_id("annotations-sidebar-filter-wrapper").hidden = uniqueAnnotations.length == 0;
+		_id("annotations-message").hidden = uniqueAnnotations.length > 0;
+
+		_id("annotations-list").items = uniqueAnnotations;
+		_id("annotations-list").filter = "";
+		_id("annotations-sidebar-filter").value = "";
+		_id("annotations-list").render();
+
+		// Add the plus icon to every annotation row
+		let annotationRows = [...doc.querySelectorAll("#annotations-list annotation-row")];
+		for (let annotationRow of annotationRows) {
+			annotationRow.setAttribute("action", "plus");
+		}
 	}
 
 	// Highlight/de-highlight selected rows
@@ -843,11 +948,11 @@ class ListLayout extends Layout {
 		let dataTypeLabel = item.getItemTypeIconName(true);
 		icon.setAttribute("data-item-type", dataTypeLabel);
 
-		let title = Helpers.createNode("div", {}, "title");
+		let title = Helpers.buildItemTitle(item);
 		let titleContent = Helpers.createNode("span", {}, "");
 		let description = Helpers.buildItemDescription(item);
 		Zotero.Utilities.Internal.renderItemTitle(item.getDisplayTitle(), titleContent);
-		title.append(icon, titleContent);
+		title.prepend(icon);
 		itemNode.append(title, description);
 		if (Zotero.Retractions.isRetracted(item)) {
 			let retractedIcon = getCSSIcon("cross");
@@ -1010,6 +1115,8 @@ const IOManager = {
 			this.toggleDialogMode(event.target.closest(".option").getAttribute("value"));
 		});
 
+		_id("includeComments").addEventListener("click", () => this._toggleIncludeComments());
+
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
 
@@ -1065,6 +1172,8 @@ const IOManager = {
 		// the trees get rendered no matter what.
 		if (currentLayout.type == "library") {
 			currentLayout.forceUpdateTablesAfterRefresh = true;
+			// highlight items added in list in itemTree
+			currentLayout._refreshItemsViewHighlightedRows();
 		}
 		await currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
 		// When library layout is opened for the first time (initial state or first switch from list mode),
@@ -1095,6 +1204,9 @@ const IOManager = {
 		if (accepted || SearchHandler.searching) return;
 		if (!Array.isArray(items)) {
 			items = [items];
+		}
+		if (DIALOG_STATE.isAddingAnnotations()) {
+			items = items.filter(item => item.isAnnotation());
 		}
 		// if selecting a note, add it and immediately accept the dialog
 		if (DIALOG_STATE.isAddingNote()) {
@@ -1235,6 +1347,12 @@ const IOManager = {
 			}
 		}
 		let itemsToAdd = Array.from(itemIDs).map(itemID => SearchHandler.getItem(itemID));
+		// while adding annotations, clicking on selected non-annotation(s) will select them in itemTree
+		if (DIALOG_STATE.isAddingAnnotations() && !itemsToAdd.every(i => i.isAnnotation())) {
+			libraryLayout.itemsView.selectItems([...itemIDs].map(id => parseInt(id)));
+			_id("zotero-items-tree").querySelector("[tabindex]").focus();
+			return;
+		}
 		IOManager.addItemsToCitation(itemsToAdd);
 	},
 
@@ -1299,13 +1417,13 @@ const IOManager = {
 	resetSelectedAfterFocus(event) {
 		if (currentLayout.type == "list") return;
 		let focused = event.target;
-		let itemsShouldRemainSelected = focused.classList.contains("input") || _id("library-other-items").contains(focused);
-		if (itemsShouldRemainSelected) {
+		if (_id("bubble-input").contains(focused)) {
 			if (!doc.querySelector(".item.selected")) {
 				currentLayout.markPreSelected();
 			}
 			return;
 		}
+		if (_id("library-other-items").contains(focused)) return;
 		for (let item of doc.querySelectorAll(".item")) {
 			item.classList.remove("selected");
 			item.classList.remove("current");
@@ -1453,7 +1571,11 @@ const IOManager = {
 
 	_openItemDetailsPopup(dialogReferenceID) {
 		let bubbleItem = CitationDataManager.getItem({ dialogReferenceID });
-		PopupsHandler.openItemDetails(bubbleItem, Helpers.buildItemDescription(bubbleItem.item));
+		let topLevelItem = bubbleItem.item;
+		if (DIALOG_STATE.isAddingAnnotations()) {
+			topLevelItem = bubbleItem.item.topLevelItem;
+		}
+		PopupsHandler.openItemDetails(bubbleItem, Helpers.buildItemDescription(topLevelItem));
 	},
 
 	_handleInput({ query, eventType }) {
@@ -1573,6 +1695,11 @@ const IOManager = {
 		CitationDataManager.sort().then(() => {
 			this.updateBubbleInput();
 		});
+	},
+
+	_toggleIncludeComments() {
+		let includeComments = _id("includeComments").checked;
+		Zotero.Prefs.set("integration.annotationDialogIncludeComments", includeComments);
 	},
 
 	// Return focus to where it was before click moved focus.
@@ -1819,6 +1946,18 @@ const CitationDataManager = {
 
 	// Resorts the items in the citation
 	async sort() {
+		if (DIALOG_STATE.isAddingAnnotations()) {
+			// Sort annotations but only within the same attachment
+			this.items.sort((a, b) => {
+				// first sort by parentItemID to group annotations by the parent attachment
+				if (a.item.parentItemID !== b.item.parentItemID) {
+					return a.item.parentItemID - b.item.parentItemID;
+				}
+				// then sort by annotation order
+				return (a.item.annotationSortIndex > b.item.annotationSortIndex) - (a.item.annotationSortIndex < b.item.annotationSortIndex);
+			});
+			return;
+		}
 		if (!_id("keepSorted").checked) return;
 		// It can take arbitrarily long time for documents with many cited items to load
 		// all data necessary to run io.sort().
