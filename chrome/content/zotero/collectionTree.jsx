@@ -3021,7 +3021,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var newRows = 0;
 		
 		// Recently Read
-		if (showRecentlyRead) {
+		if (showRecentlyRead && this._isFilterEmpty()) {
 			let s = new Zotero.Search();
 			s.libraryID = libraryID;
 			s.name = Zotero.getString('pane.collections.recentlyRead');
