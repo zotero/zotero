@@ -36,7 +36,11 @@ describe("Citation Dialog", function () {
 	beforeEach(async function () {
 		// Many operations (e.g. IOManager.addItemsToCitation) are disabled
 		// when search runs. Search can be triggered by a variety of events
-		// so before each test, we make sure that search has finished running
+		// (notably the window "focus" listener, which kicks off a search after
+		// a 100ms delay). Before each test, wait out that delay, then wait for
+		// any searches — including ones that only just started during the
+		// delay — to finish running.
+		await Zotero.Promise.delay(150);
 		while (SearchHandler.searching) {
 			await Zotero.Promise.delay(10);
 		}
@@ -218,11 +222,12 @@ describe("Citation Dialog", function () {
 	
 			// open popup
 			let firstBubble = CitationDataManager.items[0];
-			IOManager._openItemDetailsPopup(firstBubble.dialogReferenceID);
 			let popup = dialog.document.getElementById("itemDetails");
-			
-			// give the popup time to open
-			await Zotero.Promise.delay(50);
+			let popupOpenPromise = popup.state == "open"
+				? Promise.resolve()
+				: waitForDOMEvent(popup, "popupshown");
+			IOManager._openItemDetailsPopup(firstBubble.dialogReferenceID);
+			await popupOpenPromise;
 			assert.equal(popup.state, "open");
 	
 			// set locator/suffix/prefix values
@@ -472,7 +477,7 @@ describe("Citation Dialog", function () {
 			await dialog.libraryLayout.itemsView.selectItem(itemOne.id);
 			// Make sure the row node is highlighted
 			let rowIndex = dialog.libraryLayout.itemsView.getRowIndexByID(itemOne.id);
-			let rowID = "item-tree-citationDialog-row-" + rowIndex;
+			let rowID = `${dialog.libraryLayout.itemsView.id}-row-${rowIndex}`;
 			let rowNode = dialog.document.getElementById(rowID);
 			assert.isTrue(rowNode.classList.contains("highlighted"));
 		});
@@ -882,9 +887,11 @@ describe("Citation Dialog", function () {
 			let bubble = dialog.document.querySelector("bubble-input .bubble");
 			let popup = dialog.document.getElementById("itemDetails");
 
+			let popupOpenPromise = popup.state == "open"
+				? Promise.resolve()
+				: waitForDOMEvent(popup, "popupshown");
 			bubble.click();
-			// give the popup time to open
-			await Zotero.Promise.delay(50);
+			await popupOpenPromise;
 			assert.equal(popup.state, "open");
 
 			// make sure the annotation-row preview is visible in the popup

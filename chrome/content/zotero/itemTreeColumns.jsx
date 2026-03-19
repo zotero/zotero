@@ -188,6 +188,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "lastRead",
+		sortReverse: true,
 		defaultSort: -1,
 		defaultIn: ["recentlyRead"],
 		disabledIn: ["feeds", "feed"],

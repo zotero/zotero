@@ -24,7 +24,7 @@
 */
 
 import CollectionTree from 'zotero/collectionTree';
-import ItemTree from 'zotero/itemTree';
+import CollectionViewItemTree from 'zotero/collectionViewItemTree';
 
 var itemsView;
 var collectionsView;
@@ -63,7 +63,7 @@ var doLoad = async function () {
 	if(io.addBorder) document.getElementsByTagName("dialog")[0].style.border = "1px solid black";
 	if(io.singleSelection) document.getElementById("zotero-items-tree").setAttribute("seltype", "single");
 	
-	itemsView = await ItemTree.init(document.getElementById('zotero-items-tree'), {
+	itemsView = await CollectionViewItemTree.init(document.getElementById('zotero-items-tree'), {
 		onSelectionChange: () => {
 			if (isEditBibliographyDialog) {
 				Zotero_Bibliography_Dialog.treeItemSelected();
@@ -77,7 +77,6 @@ var doLoad = async function () {
 		},
 		id: io.itemTreeID || "select-items-dialog",
 		dragAndDrop: false,
-		persistColumns: true,
 		regularOnly: io.onlyRegularItems,
 		columnPicker: true,
 		multiSelect: io.multiSelect,
