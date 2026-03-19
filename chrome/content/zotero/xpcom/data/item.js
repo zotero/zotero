@@ -1475,35 +1475,32 @@ Zotero.Item.prototype._saveData = async function (env) {
 			}
 		}
 		if (createdByUserID || lastModifiedByUserID) {
-			try {
-				let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
-				await Zotero.DB.queryAsync(
-					sql,
-					[
-						itemID,
-						createdByUserID || null,
-						lastModifiedByUserID || null
-					]
-				);
+			let sql;
+			let params;
+			// If only updating lastModifiedByUserID, preserve existing
+			// createdByUserID
+			if (!createdByUserID && lastModifiedByUserID) {
+				sql = "INSERT INTO groupItems VALUES (?, NULL, ?) "
+					+ "ON CONFLICT(itemID) DO UPDATE "
+					+ "SET lastModifiedByUserID=?";
+				params = [itemID, lastModifiedByUserID, lastModifiedByUserID];
 			}
-			// TODO: Use schema update step to add username to users table if group library
-			// and no current name
+			else {
+				sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
+				params = [itemID, createdByUserID || null, lastModifiedByUserID || null];
+			}
+			try {
+				await Zotero.DB.queryAsync(sql, params);
+			}
+			// TODO: Use schema update step to add username to users table
+			// if group library and no current name
 			catch (e) {
 				let username = await Zotero.DB.valueQueryAsync(
 					"SELECT value FROM settings WHERE setting='account' AND key='username'"
 				);
 				if (username) {
 					await Zotero.Users.setCurrentName(username);
-					
-					let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
-					await Zotero.DB.queryAsync(
-						sql,
-						[
-							itemID,
-							createdByUserID || null,
-							lastModifiedByUserID || null
-						]
-					);
+					await Zotero.DB.queryAsync(sql, params);
 				}
 				else {
 					Zotero.logError("Current username not found -- not setting group item user");
