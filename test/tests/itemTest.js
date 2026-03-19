@@ -3322,4 +3322,38 @@ describe("Zotero.Item", function () {
 			assert.isUndefined((await item.toResponseJSONAsync()).links.attachment.attachmentSize);
 		});
 	});
+
+	describe("Group Item Users", function () {
+		let group;
+
+		before(async function () {
+			group = await createGroup();
+		});
+
+		it("should set createdByUserID for new group item", async function () {
+			let item = createUnsavedDataObject('item', { libraryID: group.libraryID });
+			await item.saveTx();
+			assert.equal(item.createdByUserID, Zotero.Users.getCurrentUserID());
+		});
+
+		it("should set lastModifiedByUserID when modifying group item", async function () {
+			let item = createUnsavedDataObject('item', { libraryID: group.libraryID });
+			await item.saveTx();
+
+			item.setField('title', 'Modified');
+			await item.saveTx();
+			assert.equal(item.lastModifiedByUserID, Zotero.Users.getCurrentUserID());
+		});
+
+		it("should not set lastModifiedByUserID with skipDateModifiedUpdate", async function () {
+			let item = createUnsavedDataObject('item', { libraryID: group.libraryID });
+			await item.saveTx();
+
+			item.addToCollection(
+				(await createDataObject('collection', { libraryID: group.libraryID })).id
+			);
+			await item.saveTx({ skipDateModifiedUpdate: true });
+			assert.isNull(item.lastModifiedByUserID);
+		});
+	});
 });

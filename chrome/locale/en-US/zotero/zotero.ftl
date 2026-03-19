@@ -329,6 +329,9 @@ items-table-cell-notes =
         *[other] { $count } Notes
     }
 
+items-column-added-by = Added By
+items-column-modified-by = Modified By
+
 report-error =
     .label = Report Error…
 

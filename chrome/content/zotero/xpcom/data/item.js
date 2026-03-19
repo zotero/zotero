@@ -1470,14 +1470,9 @@ Zotero.Item.prototype._saveData = async function (env) {
 			if (!createdByUserID && isNew) {
 				createdByUserID = Zotero.Users.getCurrentUserID();
 			}
-			// TEMP: For now, don't update lastModifiedByUserID -- we may want to start doing this
-			// before we start showing a last-modified-by name in the UI so that it updates
-			// immediately rather than waiting until a sync happens, but we should figure out if we
-			// want all changes to count and make sure the dataserver follows the same behavior.
-			//
-			//if (!lastModifiedByUserID && !isNew) {
-			//	lastModifiedByUserID = Zotero.Users.getCurrentUserID();
-			//}
+			if (!lastModifiedByUserID && !isNew && !options.skipDateModifiedUpdate) {
+				lastModifiedByUserID = Zotero.Users.getCurrentUserID();
+			}
 		}
 		if (createdByUserID || lastModifiedByUserID) {
 			try {

@@ -373,6 +373,24 @@ const COLUMNS = [
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
+		dataKey: "addedBy",
+		groupLibrariesOnly: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
+		label: "items-column-added-by",
+		flex: 1,
+		zoteroPersist: ["width", "hidden", "sortDirection"]
+	},
+	{
+		dataKey: "lastModifiedBy",
+		groupLibrariesOnly: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
+		label: "items-column-modified-by",
+		flex: 1,
+		zoteroPersist: ["width", "hidden", "sortDirection"]
+	},
+	{
 		dataKey: "feed",
 		disabledIn: ["default", "feed"],
 		showInColumnPicker: true,

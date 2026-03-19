@@ -1864,7 +1864,8 @@ function formatColumnName(column) {
 	if (column.label in Zotero.Intl.strings) {
 		return Zotero.getString(column.label);
 	}
-	else if (/^[^\s]+\w\.\w[^\s]+$/.test(column.label)) {
+	// Dotted keys (.properties) or hyphenated keys with 3+ segments (Fluent)
+	else if (/^[^\s]+\w\.\w[^\s]+$/.test(column.label) || /^\w+(-\w+){2,}$/.test(column.label)) {
 		try {
 			let labelString = Zotero.getString(column.label);
 			if (labelString !== column.label) {

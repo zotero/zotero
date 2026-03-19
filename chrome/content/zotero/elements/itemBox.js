@@ -674,6 +674,39 @@
 					
 					rowData.appendChild(button);
 				}
+
+				// Insert user row after the corresponding date row
+				if (Zotero.Libraries.get(this.item.libraryID).libraryType === 'group') {
+					let userID;
+					let userFieldName;
+					let labelKey;
+					if (fieldName === 'dateAdded') {
+						userID = this.item.createdByUserID;
+						userFieldName = 'addedBy';
+						labelKey = 'items-column-added-by';
+					}
+					else if (fieldName === 'dateModified') {
+						userID = this.item.lastModifiedByUserID
+							|| this.item.createdByUserID;
+						userFieldName = 'lastModifiedBy';
+						labelKey = 'items-column-modified-by';
+					}
+					if (userID) {
+						let userLabel = document.createElement("div");
+						userLabel.className = "meta-label";
+						userLabel.setAttribute("fieldname", userFieldName);
+						userLabel.appendChild(this.createLabelElement({
+							text: Zotero.getString(labelKey),
+							id: `itembox-field-${userFieldName}-label`,
+						}));
+						let userData = document.createElement("div");
+						userData.className = "meta-data";
+						userData.appendChild(this.createValueElement({
+							text: Zotero.Users.getName(userID),
+						}));
+						this.addDynamicRow(userLabel, userData);
+					}
+				}
 			}
 			
 			//

@@ -1513,7 +1513,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 			case 'lastRead':
 				return item.getItemLastRead();
-			
+
+			case 'addedBy':
+				return item.createdByUserID
+					? Zotero.Users.getName(item.createdByUserID) : '';
+
+			case 'lastModifiedBy': {
+				let userID = item.lastModifiedByUserID || item.createdByUserID;
+				return userID ? Zotero.Users.getName(userID) : '';
+			}
+
 			default:
 				let extraField = this.props.getExtraField(row.ref, field);
 				if (extraField !== undefined) return extraField;
@@ -3479,6 +3488,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		row.numNotes = treeRow.numNotes() || "";
 		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
 		row.lastRead = row.isItem ? treeRow.ref.getItemLastRead() : "";
+		row.addedBy = row.isItem && treeRow.ref.createdByUserID
+			? Zotero.Users.getName(treeRow.ref.createdByUserID) : "";
+		row.lastModifiedBy = row.isItem
+			&& (treeRow.ref.lastModifiedByUserID || treeRow.ref.createdByUserID)
+			? Zotero.Users.getName(treeRow.ref.lastModifiedByUserID
+				|| treeRow.ref.createdByUserID) : "";
 
 		if (treeRow.ref.isFileAttachment()
 				// TODO: Adjust this if we localize "Snapshot"
@@ -3563,6 +3578,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		if (!this.props.persistColumns) return;
 		Zotero.debug(`Storing itemTree ${this.id} column prefs`, 2);
+		// Preserve prefs for columns not active in the current view (e.g.,
+		// group-only columns when viewing a personal library)
+		if (this._columnPrefs) {
+			for (let [key, val] of Object.entries(this._columnPrefs)) {
+				if (!(key in prefs) && COLUMNS.some(c => c.dataKey === key)) {
+					prefs[key] = val;
+				}
+			}
+		}
 		this._columnPrefs = prefs;
 		if (!this._columns) {
 			Zotero.debug(new Error(), 1);
@@ -3672,6 +3696,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		for (let column of columns) {
 			if (this.props.persistColumns) {
 				if (column.disabledIn && column.disabledIn.includes(visibilityGroup)) continue;
+				if (column.groupLibrariesOnly && !this.collectionTreeRow.isWithinGroup()) continue;
 				const columnSettings = columnsSettings[column.dataKey];
 				if (!columnSettings && this.id === 'main') {
 					column = this._setLegacyColumnSettings(column);
