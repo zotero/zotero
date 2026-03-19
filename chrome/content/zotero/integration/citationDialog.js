@@ -377,7 +377,7 @@ class Layout {
 			}
 		}
 		// Pre-select the item to be added on Enter of an input
-		else {
+		else if (_id("bubble-input").contains(doc.activeElement)) {
 			this.markPreSelected();
 		}
 		// Ensure focus is never lost
