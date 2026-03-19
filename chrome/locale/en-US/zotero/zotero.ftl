@@ -334,6 +334,7 @@ items-table-cell-notes =
 
 items-column-added-by = Added By
 items-column-modified-by = Modified By
+items-column-last-read = Last Read
 
 report-error =
     .label = Report Error…

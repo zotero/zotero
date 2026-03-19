@@ -192,7 +192,7 @@ const COLUMNS = [
 		defaultIn: ["recentlyRead"],
 		disabledIn: ["feeds", "feed"],
 		dependsOnChildren: true,
-		label: "pane.items.columns.lastRead",
+		label: "items-column-last-read",
 		flex: 2,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
