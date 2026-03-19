@@ -1451,9 +1451,10 @@ class EditorInstance {
 	 * @param {Boolean} options.noSave - If true, note item is not saved and ink/image annotations are
 	 *									embedded as "data:image/..." strings instead of via imageAttachmentKey.
 	 * @param {Boolean} options.noComments - If true, annotation comments are skipped
+	 * @param {Boolean} options.noHeader - If true, header is not added to the note
 	 * @returns {Promise<Zotero.Item>}
 	 */
-	static async createNoteFromAnnotations(annotations, { parentID, collectionID, noSave, noComments } = {}) {
+	static async createNoteFromAnnotations(annotations, { parentID, collectionID, noSave, noComments, noHeader } = {}) {
 		if (!annotations.length) {
 			throw new Error("No annotations provided");
 		}
@@ -1497,13 +1498,16 @@ class EditorInstance {
 			jsonAnnotations.push(jsonAnnotation);
 		}
 
-		let vars = {
-			title: Zotero.getString('reader-annotations'),
-			date: new Date().toLocaleString()
-		};
-		let html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
-		// New line is needed for note title parser
-		html += '\n';
+		let html = '';
+		if (!noHeader) {
+			let vars = {
+				title: Zotero.getString('reader-annotations'),
+				date: new Date().toLocaleString()
+			};
+			html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
+			// New line is needed for note title parser
+			html += '\n';
+		}
 
 		// If there is no real note item saved, do not import images as annotations.
 		// Instead, serializeAnnotations below will embed images as "data:image/..." strings
