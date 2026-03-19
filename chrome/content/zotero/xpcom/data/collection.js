@@ -1053,3 +1053,16 @@ Zotero.Collection.prototype.canMoveToTargetAsync = async function (target, optio
 	}
 	return true;
 };
+
+// Determine which libraries the collection can be copied to
+Zotero.Collection.prototype.getLibrariesForCopying = async function () {
+	let libraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
+	let librariesWhereOneCanCopy = [];
+	for (let library of libraries) {
+		let canCopy = await this.canMoveToTargetAsync(library);
+		if (canCopy) {
+			librariesWhereOneCanCopy.push(library);
+		}
+	}
+	return librariesWhereOneCanCopy;
+};

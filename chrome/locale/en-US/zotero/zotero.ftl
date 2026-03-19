@@ -189,6 +189,10 @@ collections-menu-move-collection =
     .label = Move To
 collections-menu-copy-collection =
     .label = Copy To
+collections-menu-move-collection-dialog =
+    .label = Move To…
+collections-menu-copy-collection-dialog =
+    .label = Copy To…
 
 item-creator-moveDown =
     .label = Move Down
@@ -230,6 +234,8 @@ item-menu-change-parent-item =
      .label = Change Parent Item…
 item-menu-relate-items =
     .label = Relate Items
+item-menu-add-to-collection-dialog =
+    .label = Add to Collection…
 
 view-online = View Online
 item-menu-option-view-online =
