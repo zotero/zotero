@@ -50,12 +50,12 @@
 		init() {
 			this._body = this.querySelector('.body');
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item']);
-			this._body.addEventListener('keydown', this._handleKeyDown.bind(this));
+			this._body.addEventListener('keydown', this._handleKeyDown);
 		}
 
 		destroy() {
 			Zotero.Notifier.unregisterObserver(this._notifierID);
-			this._body.removeEventListener('keydown', this._handleKeyDown.bind(this));
+			this._body.removeEventListener('keydown', this._handleKeyDown);
 		}
 
 		notify(action, type, ids) {
@@ -155,7 +155,7 @@
 		}
 
 		// Handle arrowUp/Down navigation between focused annotation rows
-		_handleKeyDown(event) {
+		_handleKeyDown = (event) => {
 			if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
 			
 			let currentRow = event.target.closest('annotation-row');
@@ -178,7 +178,7 @@
 				visibleRows[nextIndex].focus();
 				event.preventDefault();
 			}
-		}
+		};
 	}
 
 	customElements.define("annotation-items-pane", AnnotationItemsPane);
