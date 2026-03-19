@@ -1417,9 +1417,13 @@ describe("Zotero.CollectionTree", function () {
 			
 			after(async function () {
 				await new Promise(resolve => httpd.stop(resolve));
+				Zotero.Prefs.clear('downloadAssociatedFiles');
 			});
-			
+
 			it("should add a translated feed item retrieved from a URL", async function () {
+				// Disable OA PDF lookups to avoid external network requests
+				Zotero.Prefs.set('downloadAssociatedFiles', false);
+
 				// Serve the feed entry webpage via localhost
 				const urlPath = "/journalArticle-single.html";
 				const url = `http://localhost:${httpdPort}` + urlPath;
