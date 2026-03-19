@@ -2003,9 +2003,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			else if (collectionTreeRow.isRecentlyRead() && !force) {
 				await Zotero.DB.executeTransaction(async () => {
 					for (let item of selectedItems) {
-						let attachments = item.isAttachment()
-							? [item]
-							: Zotero.Items.get(item.getAttachments(false))
+						let topLevelItem = item.topLevelItem;
+						let attachments = topLevelItem.isAttachment()
+							? [topLevelItem]
+							: Zotero.Items.get(topLevelItem.getAttachments(false))
 								.filter(a => a.attachmentLastRead);
 						for (let attachment of attachments) {
 							attachment.attachmentLastRead = null;

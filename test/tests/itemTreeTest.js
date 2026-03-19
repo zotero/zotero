@@ -1059,7 +1059,35 @@ describe("Zotero.ItemTree", function () {
 			assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 		});
 		
-		describe("Trash", function () {
+		describe("Remove from Recently Read", function () {
+		it("should remove a parent item when a child note is selected", async function () {
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			let item = await createDataObject('item');
+			let attachment = await importPDFAttachment(item);
+			let note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+
+			attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+			await attachment.saveTx();
+
+			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+			await waitForItemsLoad(win);
+			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+
+			// Expand the parent and select the child note
+			let parentRow = zp.itemsView.getRowIndexByID(item.id);
+			if (!zp.itemsView.isContainerOpen(parentRow)) {
+				await zp.itemsView.toggleOpenState(parentRow);
+			}
+			await zp.itemsView.selectItem(note.id);
+
+			await zp.itemsView.deleteSelection();
+
+			assert.isNull(attachment.attachmentLastRead);
+			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+		});
+	});
+
+	describe("Trash", function () {
 			it("should remove untrashed parent item when last trashed child is deleted", async function () {
 				var item = await createDataObject('item');
 				var note = await createDataObject(
