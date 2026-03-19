@@ -247,7 +247,7 @@ export class CitationDialogKeyboardHandler {
 			nodeToFocus.focus();
 		}
 		else {
-			nodeToFocus.querySelector("[tabindex]:not([hidden]")?.focus();
+			nodeToFocus.querySelector("[tabindex]:not([hidden])")?.focus();
 		}
 		return nodeToFocus;
 	}

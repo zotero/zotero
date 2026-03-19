@@ -4347,7 +4347,7 @@ Zotero.Item.prototype.numAnnotations = function (includeTrashed) {
  * Returns child annotations for an attachment item
  *
  * @param {Boolean} [includeTrashed=false] - Include annotations in trash
- * @param {Boolean} [asIDs=false] - Return ids of annootations instead of Zotero.Item objects
+ * @param {Boolean} [asIDs=false] - Return ids of annotations instead of Zotero.Item objects
  * @return {Zotero.Item[]}
  */
 Zotero.Item.prototype.getAnnotations = function (includeTrashed, asIDs) {

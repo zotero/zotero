@@ -354,8 +354,8 @@ export class CitationDialogHelpers {
 				annotationContent = Zotero.getString("punctuation.openingQMark") + annotationText + Zotero.getString("punctuation.closingQMark");
 			}
 			else if (comment) {
-				let annotationCommment = comment.substr(0, 32) + (comment.length > 32 ? "…" : "");
-				annotationContent = annotationCommment;
+				let annotationComment = comment.substr(0, 32) + (comment.length > 32 ? "…" : "");
+				annotationContent = annotationComment;
 			}
 			else {
 				annotationContent = Zotero.getString(`pdfReader.${item.annotationType}Annotation`);
@@ -384,7 +384,7 @@ export class CitationDialogHelpers {
 			str += ", " + parseInt(date);
 		}
 
-		// If original item is an annotaiton, return the bubble string with the annotation info
+		// If original item is an annotation, return the bubble string with the annotation info
 		if (bubbleItem.item.isAnnotation()) {
 			return str + " " + annotationContent;
 		}
