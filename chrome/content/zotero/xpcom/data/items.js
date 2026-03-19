@@ -960,15 +960,32 @@ Zotero.Items = function () {
 				parentItemIDs.add(item.parentItemID);
 			}
 		});
+		let hasGroupLibrary = [...libraryIDs].some(
+			id => Zotero.Libraries.get(id).libraryType === 'group'
+		);
+		let dateModified = Zotero.DB.transactionDateTime;
 		await Zotero.Utilities.Internal.forEachChunkAsync(ids, 250, async function (chunk) {
+			let idStr = chunk.map(id => parseInt(id)).join(", ");
 			await Zotero.DB.queryAsync(
-				"UPDATE items SET synced=0, clientDateModified=CURRENT_TIMESTAMP "
-					+ `WHERE itemID IN (${chunk.map(id => parseInt(id)).join(", ")})`
+				"UPDATE items SET synced=0, clientDateModified=CURRENT_TIMESTAMP, "
+					+ `dateModified=? WHERE itemID IN (${idStr})`,
+				dateModified
 			);
 			await Zotero.DB.queryAsync(
 				"INSERT OR IGNORE INTO deletedItems (itemID) VALUES "
 					+ chunk.map(id => "(" + id + ")").join(", ")
 			);
+			// Update lastModifiedByUserID for group items
+			if (hasGroupLibrary) {
+				let currentUserID = Zotero.Users.getCurrentUserID();
+				if (currentUserID) {
+					await Zotero.DB.queryAsync(
+						"UPDATE groupItems SET lastModifiedByUserID=? "
+							+ `WHERE itemID IN (${idStr})`,
+						currentUserID
+					);
+				}
+			}
 		}.bind(this));
 		
 		// Keep in sync with Zotero.Item::saveData()
