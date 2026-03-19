@@ -3696,7 +3696,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		for (let column of columns) {
 			if (this.props.persistColumns) {
 				if (column.disabledIn && column.disabledIn.includes(visibilityGroup)) continue;
-				if (column.groupLibrariesOnly && !this.collectionTreeRow.isWithinGroup()) continue;
+				if (column.groupLibrariesOnly && (!this.collectionTreeRow.isWithinGroup || !this.collectionTreeRow.isWithinGroup())) continue;
 				const columnSettings = columnsSettings[column.dataKey];
 				if (!columnSettings && this.id === 'main') {
 					column = this._setLegacyColumnSettings(column);
