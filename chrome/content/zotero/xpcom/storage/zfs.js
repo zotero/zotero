@@ -1034,8 +1034,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		var fileSize = (await OS.File.stat(item.getFilePath())).size;
 		
 		text += "\n\n" + filename
-			// TODO: Format more intelligently (e.g., use MB or GB for large files)
-			+ " (" + Zotero.Utilities.numberFormat(Math.round(fileSize / 1024), 0) + " KB)";
+			+ " (" + Zotero.Utilities.numberFormat(fileSize / (1024 * 1024), 1) + " MB)";
 		
 		var e = new Zotero.Error(
 			text,
