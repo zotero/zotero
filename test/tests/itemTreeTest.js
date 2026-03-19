@@ -1060,6 +1060,25 @@ describe("Zotero.ItemTree", function () {
 		});
 		
 		describe("Remove from Recently Read", function () {
+		it("should remove a parent item when the parent is selected", async function () {
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			let item = await createDataObject('item');
+			let attachment = await importPDFAttachment(item);
+
+			attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+			await attachment.saveTx();
+
+			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+			await waitForItemsLoad(win);
+			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+
+			await zp.itemsView.selectItem(item.id);
+			await zp.itemsView.deleteSelection();
+
+			assert.isNull(attachment.attachmentLastRead);
+			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+		});
+
 		it("should remove a parent item when a child note is selected", async function () {
 			let userLibraryID = Zotero.Libraries.userLibraryID;
 			let item = await createDataObject('item');
