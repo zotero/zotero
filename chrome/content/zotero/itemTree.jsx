@@ -674,9 +674,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				delete this._rowCache[id];
 			}
 
-			// If saved search, publications, or trash, just re-run search
+			// If saved search, publications, recently read, or trash, just re-run search
 			if (collectionTreeRow.isSearch()
 				|| collectionTreeRow.isPublications()
+				|| collectionTreeRow.isRecentlyRead()
 				|| collectionTreeRow.isTrash()
 				|| hasQuickSearch) {
 				await this.refresh();
@@ -2007,6 +2008,32 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (selectedItemIDs.length > 0) {
 					await Zotero.Items.erase(selectedItemIDs);
 				}
+			}
+			else if (collectionTreeRow.isRecentlyRead() && !force) {
+				await Zotero.DB.executeTransaction(async () => {
+					for (let item of selectedItems) {
+						let attachments;
+						// Child attachment -- clear only this one
+						if (item.isAttachment() && !item.isTopLevelItem()) {
+							attachments = [item];
+						}
+						// Top-level item -- clear all child attachments
+						else if (item.isTopLevelItem()) {
+							attachments = item.isAttachment()
+								? [item]
+								: Zotero.Items.get(item.getAttachments(false))
+									.filter(a => a.attachmentLastRead);
+						}
+						// Child note or other non-attachment child -- skip
+						else {
+							continue;
+						}
+						for (let attachment of attachments) {
+							attachment.attachmentLastRead = null;
+							await attachment.save({ skipDateModifiedUpdate: true });
+						}
+					}
+				});
 			}
 			else if (collectionTreeRow.isLibrary(true)
 					|| collectionTreeRow.isSearch()

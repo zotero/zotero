@@ -179,8 +179,11 @@ zotero-toolbar-tabs-scroll-backwards =
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 
+recently-read = Recently Read
 collections-menu-show-recently-read =
-    .label = Show Recently Read
+    .label = Show { recently-read }
+item-menu-remove-from-recently-read =
+    .label = Remove from { recently-read }…
 collections-menu-rename-collection =
     .label = Rename Collection
 collections-menu-edit-saved-search =
