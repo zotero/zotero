@@ -2003,11 +2003,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 			else if (collectionTreeRow.isRecentlyRead() && !force) {
 				await Zotero.DB.executeTransaction(async () => {
 					for (let item of selectedItems) {
-						let topLevelItem = item.topLevelItem;
-						let attachments = topLevelItem.isAttachment()
-							? [topLevelItem]
-							: Zotero.Items.get(topLevelItem.getAttachments(false))
-								.filter(a => a.attachmentLastRead);
+						let attachments;
+						// Child attachment -- clear only this one
+						if (item.isAttachment() && !item.isTopLevelItem()) {
+							attachments = [item];
+						}
+						// Top-level item -- clear all child attachments
+						else if (item.isTopLevelItem()) {
+							attachments = item.isAttachment()
+								? [item]
+								: Zotero.Items.get(item.getAttachments(false))
+									.filter(a => a.attachmentLastRead);
+						}
+						// Child note or other non-attachment child -- skip
+						else {
+							continue;
+						}
 						for (let attachment of attachments) {
 							attachment.attachmentLastRead = null;
 							await attachment.save({ skipDateModifiedUpdate: true });

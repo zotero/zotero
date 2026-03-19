@@ -4157,9 +4157,17 @@ var ZoteroPane = new function () {
 			show.add(m.removeItems);
 		}
 		else if (collectionTreeRow.isRecentlyRead()) {
+			// Disable for child items that aren't attachments with lastRead
+			let canRemove = items.every((item) => {
+				if (item.isTopLevelItem()) return true;
+				return item.isAttachment() && item.attachmentLastRead;
+			});
 			menu.childNodes[m.removeItems].removeAttribute('label');
 			menu.childNodes[m.removeItems].setAttribute('data-l10n-id', 'item-menu-remove-from-recently-read');
 			show.add(m.removeItems);
+			if (!canRemove) {
+				disable.add(m.removeItems);
+			}
 		}
 		
 		// Show in library
