@@ -24,7 +24,7 @@
 */
 
 
-const ItemTree = require('zotero/itemTree');
+const CollectionViewItemTree = require('zotero/collectionViewItemTree');
 const { getCSSIcon } = require('components/icons');
 const { COLUMNS } = require('zotero/itemTreeColumns');
 var doc, io, ioReadyPromise, ioIsReady, accepted;
@@ -660,10 +660,11 @@ class LibraryLayout extends Layout {
 			label: columnLabel,
 			htmlLabel: ' ', // space for column label to appear empty
 			width: 26,
+			hidden: false,
 			staticWidth: true,
 			fixedWidth: true,
 			showInColumnPicker: false,
-			renderer: (index, inCitation, column) => {
+			renderCell: (index, inCitation, column) => {
 				let cell = Helpers.createNode("span", {}, `cell ${column.className} clickable`);
 				if (inCitation === null) {
 					// no icon should be shown when an item cannot be added
@@ -688,7 +689,7 @@ class LibraryLayout extends Layout {
 				return cell;
 			}
 		});
-		this.itemsView = await ItemTree.init(itemsTree, {
+		this.itemsView = await CollectionViewItemTree.init(itemsTree, {
 			id: "citationDialog",
 			dragAndDrop: DIALOG_STATE.isCitingItems(),
 			persistColumns: true,
@@ -717,7 +718,7 @@ class LibraryLayout extends Layout {
 				if (!isClick) {
 					let lastItemID = items[items.length - 1].id;
 					let rowIndex = this.itemsView.getRowIndexByID(lastItemID);
-					row = doc.querySelector(`#item-tree-citationDialog-row-${rowIndex}`) || row;
+					row = doc.getElementById(`${this.itemsView.id}-row-${rowIndex}`) || row;
 				}
 				let rowTopBeforeRefresh = row.getBoundingClientRect().top;
 				IOManager.addItemsToCitation(items, { noInputRefocus: true }).then(() => {
@@ -848,9 +849,14 @@ class LibraryLayout extends Layout {
 			id: collectionTreeRow.id,
 			getItems: async () => {
 				let items = await collectionTreeRow.getItems();
-				// when citing notes, only keep notes or note parents
+				// In add-note mode, note parent checks call item.getNotes(), which requires childItems
 				if (DIALOG_STATE.isAddingNote()) {
-					items = items.filter(item => SearchHandler.isItemWithNotes(item));
+					let regularItems = items.filter(item => SearchHandler.isItemWithNotes(item));
+					if (regularItems.length) {
+						await Zotero.Items.loadDataTypes(regularItems, ['childItems']);
+					}
+					// when citing notes, only keep notes or note parents
+					items = items.filter(item => item.isNote() || item.getNotes().length);
 				}
 				// when adding annotations, only keep annotations, their attachments, and their top-level items
 				if (DIALOG_STATE.isAddingAnnotations()) {
@@ -861,9 +867,10 @@ class LibraryLayout extends Layout {
 			isSearch: () => true,
 			isSearchMode: () => true,
 			setSearch: (searchText, mode) => collectionTreeRow.setSearch(searchText, mode),
+			clearCache: () => collectionTreeRow.clearCache(),
 			ref: collectionTreeRow.ref
 		});
-		await this.itemsView.setFilter('search', SearchHandler.searchValue);
+		await this.itemsView.setFilter('citation-search', SearchHandler.searchValue);
 		
 		this.itemsView.clearItemsPaneMessage();
 	}
@@ -883,7 +890,7 @@ class LibraryLayout extends Layout {
 
 	// click on + icon will add the item to the citation
 	_handleItemsViewIconClick(index) {
-		let rowNode = doc.querySelector(`#item-tree-citationDialog-row-${index}`);
+		let rowNode = doc.getElementById(`${this.itemsView.id}-row-${index}`);
 		let rowTopBeforeRefresh = rowNode.getBoundingClientRect().top;
 		this.itemsView.selection.clearSelection();
 		let row = this.itemsView.getRow(index);
