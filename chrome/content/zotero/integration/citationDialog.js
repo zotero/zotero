@@ -2017,5 +2017,27 @@ window.addEventListener("focus", async () => {
 	await Zotero.Promise.delay(100);
 	if (accepted) return;
 	SearchHandler.clearNonLibraryItemsCache();
-	currentLayout?.search(SearchHandler.searchValue);
+	if (!currentLayout) return;
+	if (currentLayout.type == "list") {
+		listLayout.search(SearchHandler.searchValue);
+		return;
+	}
+	
+	// Temp: if there are no items selected, after itemsView.setFilter call during
+	// libraryLayout.search, the top-level item of the focused row will be selected.
+	// This needs to be fixed in the itemTree but for now, clear focused row
+	// before filtering, and then restore it, so that selection doesn't change.
+	let focused = libraryLayout.itemsView.selection.focused;
+	if (libraryLayout.itemsView.selection.selected.size !== 0) {
+		// Just run normal search if some items are selected
+		libraryLayout.search(SearchHandler.searchValue);
+		return;
+	}
+	doc.querySelector("#item-tree-container").classList.add("no-focus-ring");
+	libraryLayout.itemsView.selection.focused = 0;
+	await libraryLayout.search(SearchHandler.searchValue);
+	libraryLayout.itemsView.selection.focused = focused;
+	libraryLayout.itemsView.tree?.invalidate();
+	doc.querySelector("#item-tree-container").classList.remove("no-focus-ring");
 });
+
