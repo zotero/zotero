@@ -2006,6 +2006,8 @@ describe("ZoteroPane", function () {
 			// Open the menupopup so it gets populated
 			let popup = doc.getElementById('zotero-copy-collection-popup');
 			popup.openPopup();
+			// Wait a moment to populate the popup
+			await Zotero.Promise.delay();
 
 			// Find the menuitem for collection B and click it
 			let collectionMenuItem = popup.querySelector(`[value="C${collectionB.id}"]`);
