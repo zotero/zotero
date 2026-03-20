@@ -31,15 +31,13 @@
 
 				<hbox>
 					<vbox>
-						<hbox id="account-login-default">
-							<button id="account-login-button"
-								data-l10n-id="preferences-account-log-in"
+						<hbox class="account-login-default">
+							<button data-l10n-id="preferences-account-log-in"
 								oncommand="Zotero_Preferences.Sync.linkAccount(event)"/>
 						</hbox>
-						<hbox id="account-login-pending" hidden="true" align="center">
-							<label id="sync-status-indicator"/>
-							<label id="account-login-status"
-								data-l10n-id="preferences-account-waiting-for-login"/>
+						<hbox class="account-login-pending" hidden="true" align="center">
+							<label class="account-login-status-indicator"/>
+							<label data-l10n-id="preferences-account-waiting-for-login"/>
 							<button data-l10n-id="preferences-account-cancel-button"
 								oncommand="Zotero_Preferences.Sync.cancelLogin()"/>
 						</hbox>
@@ -52,6 +50,33 @@
 						<label is="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
 					</vbox>
 				</hbox>
+			</groupbox>
+		</vbox>
+
+		<vbox id="account-logged-out" hidden="true">
+			<groupbox data-l10n-id="preferences-sync-data-syncing-groupbox">
+				<label><html:h2 data-l10n-id="preferences-sync-data-syncing-heading"/></label>
+
+				<hbox align="center">
+					<label value="&zotero.preferences.sync.username;"/>
+					<label id="account-logged-out-username"/>
+					<label data-l10n-id="preferences-account-logged-out-status" class="account-logged-out-status"/>
+				</hbox>
+
+				<vbox style="margin-top: 8px">
+					<hbox class="account-login-default" style="gap: 8px">
+						<button data-l10n-id="preferences-account-log-in"
+							oncommand="Zotero_Preferences.Sync.linkAccount(event)"/>
+						<button data-l10n-id="preferences-account-switch-accounts"
+							oncommand="Zotero_Preferences.Sync.switchAccounts()"/>
+					</hbox>
+					<hbox class="account-login-pending" hidden="true" align="center">
+						<label class="account-login-status-indicator"/>
+						<label data-l10n-id="preferences-account-waiting-for-login"/>
+						<button data-l10n-id="preferences-account-cancel-button"
+							oncommand="Zotero_Preferences.Sync.cancelLogin()"/>
+					</hbox>
+				</vbox>
 			</groupbox>
 		</vbox>
 

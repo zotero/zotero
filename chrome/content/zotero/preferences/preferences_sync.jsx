@@ -108,10 +108,21 @@ Zotero_Preferences.Sync = {
 	},
 
 	displayFields: function (username) {
-		document.getElementById('sync-unauthorized').hidden = !!username;
-		document.getElementById('sync-authorized').hidden = !username;
-		document.getElementById('sync-reset').hidden = !username;
+		let linkedUserID = Zotero.Users.getCurrentUserID();
+		let linkedUsername = Zotero.Users.getCurrentUsername()
+			|| Zotero.Prefs.get('sync.server.username')
+			|| "";
+		let loggedIn = !!username;
+		let loggedOutLinked = !loggedIn && !!linkedUserID;
+
+		document.getElementById('sync-unauthorized').hidden = loggedIn || loggedOutLinked;
+		document.getElementById('account-logged-out').hidden = !loggedOutLinked;
+		document.getElementById('sync-authorized').hidden = !loggedIn;
+		document.getElementById('sync-reset').hidden = !loggedIn;
 		document.getElementById('sync-username').value = username;
+		if (loggedOutLinked) {
+			document.getElementById('account-logged-out-username').value = linkedUsername;
+		}
 
 		this._showLoginDefault();
 	},
@@ -356,20 +367,29 @@ Zotero_Preferences.Sync = {
 
 
 	_showLoginPending: function () {
-		document.getElementById('account-login-default').hidden = true;
-		let pending = document.getElementById('account-login-pending');
-		pending.hidden = false;
-		document.getElementById('sync-status-indicator').setAttribute('animated', true);
+		for (let elem of document.querySelectorAll('.account-login-default')) {
+			elem.hidden = true;
+		}
+		for (let elem of document.querySelectorAll('.account-login-pending')) {
+			elem.hidden = false;
+		}
+		for (let elem of document.querySelectorAll('.account-login-status-indicator')) {
+			elem.setAttribute('animated', true);
+		}
 	},
 
 
 	_showLoginDefault: function () {
-		document.getElementById('account-login-default').hidden = false;
-		let pending = document.getElementById('account-login-pending');
-		pending.hidden = true;
-		let indicator = document.getElementById('sync-status-indicator');
-		indicator.removeAttribute('verified');
-		indicator.removeAttribute('animated');
+		for (let elem of document.querySelectorAll('.account-login-default')) {
+			elem.hidden = false;
+		}
+		for (let elem of document.querySelectorAll('.account-login-pending')) {
+			elem.hidden = true;
+		}
+		for (let elem of document.querySelectorAll('.account-login-status-indicator')) {
+			elem.removeAttribute('verified');
+			elem.removeAttribute('animated');
+		}
 	},
 
 	unlinkAccount: async function(showAlert=true) {
@@ -406,8 +426,45 @@ Zotero_Preferences.Sync = {
 		Zotero.Prefs.clear('reader.readAloudVoices');
 		await Zotero.Sync.Runner.deleteAPIKey();
 	},
-	
-	
+
+
+	switchAccounts: async function () {
+		let username = Zotero.Users.getCurrentUsername()
+			|| Zotero.Prefs.get('sync.server.username')
+			|| "";
+		let confirmationText = await document.l10n.formatValue(
+			'preferences-account-switch-confirmation-text',
+		);
+		let [title, text, acceptLabel] = await document.l10n.formatValues([
+			'general-warning',
+			{ id: 'preferences-account-switch-text', args: { username } },
+			'preferences-account-switch-accept',
+		]);
+		text += "\n\n" + await document.l10n.formatValue(
+			'general-type-to-continue',
+			{ text: confirmationText }
+		);
+		let io = {
+			title,
+			text,
+			acceptLabel,
+			confirmationText,
+		};
+		window.openDialog("chrome://zotero/content/hardConfirmationDialog.xhtml", "",
+			"chrome,dialog,dependent,modal,centerscreen", io);
+
+		if (!io.accept) {
+			return;
+		}
+
+		let resetDataDirFile = PathUtils.join(Zotero.DataDirectory.dir, 'reset-data-directory');
+		await Zotero.File.putContentsAsync(resetDataDirFile, '');
+		Zotero.Prefs.set('reopenAccountPrefsOnRestart', true);
+		Zotero.Prefs.clear('sync.server.username');
+		Zotero.Utilities.Internal.quit(true);
+	},
+
+
 	showLibrariesToSyncDialog: function() {
 		var io = {};
 		window.openDialog('chrome://zotero/content/preferences/librariesToSync.xhtml',

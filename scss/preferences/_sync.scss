@@ -29,11 +29,13 @@
 	margin-inline-end: 10px;
 }
 
-#zotero-prefpane-sync #account-login-button {
-	margin-inline-start: 0;
+#zotero-prefpane-sync .account-logged-out-status {
+	font-style: italic;
+	opacity: 0.7;
+	margin-inline-start: 6px;
 }
 
-#zotero-prefpane-sync #account-login-pending {
+#zotero-prefpane-sync .account-login-pending {
 	gap: 6px;
 
 	button {
@@ -41,11 +43,7 @@
 	}
 }
 
-#zotero-prefpane-sync #account-login-status {
-	font-style: italic;
-}
-
-#zotero-prefpane-sync #sync-status-indicator
+#zotero-prefpane-sync .account-login-status-indicator
 {
 	width: 20px;
 	height: 20px;
@@ -55,12 +53,12 @@
 	background-size: contain;
 }
 
-#zotero-prefpane-sync #sync-status-indicator[verified=true]
+#zotero-prefpane-sync .account-login-status-indicator[verified=true]
 {
 	@include svgicon("success", "universal", "20");
 }
 
-#zotero-prefpane-sync #sync-status-indicator[verified=false]
+#zotero-prefpane-sync .account-login-status-indicator[verified=false]
 {
 	@include svgicon("error", "universal", "20");
 }
@@ -74,7 +72,7 @@
 	}
 }
 
-#zotero-prefpane-sync #sync-status-indicator[animated]
+#zotero-prefpane-sync .account-login-status-indicator[animated]
 {
 	@include svgicon("sync", "universal", "20");
 	animation: rotating 2s linear infinite;

@@ -44,7 +44,7 @@ describe("Sync Preferences", function () {
 				launchURLStub = sinon.stub(Zotero, 'launchURL');
 				streamerSubscribeStub = sinon.stub(Zotero.Streamer, 'subscribe').returns(false);
 				streamerUnsubscribeStub = sinon.stub(Zotero.Streamer, 'unsubscribe');
-				indicatorElem = doc.getElementById('sync-status-indicator');
+				indicatorElem = doc.querySelector('.account-login-status-indicator');
 				sinon.stub(Zotero, 'alert');
 				// Speed up polling for tests
 				win.Zotero_Preferences.Sync._pollInterval = 10;
@@ -111,8 +111,8 @@ describe("Sync Preferences", function () {
 				await win.Zotero_Preferences.Sync.linkAccount();
 
 				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), "");
-				assert.equal(doc.getElementById('account-login-default').hidden, false);
-				assert.equal(doc.getElementById('account-login-pending').hidden, true);
+				assert.equal(doc.querySelector('.account-login-default').hidden, false);
+				assert.equal(doc.querySelector('.account-login-pending').hidden, true);
 			});
 
 
@@ -193,8 +193,8 @@ describe("Sync Preferences", function () {
 				// Wait for the login promise to resolve after cancellation
 				await loginPromise;
 
-				assert.equal(doc.getElementById('account-login-default').hidden, false);
-				assert.equal(doc.getElementById('account-login-pending').hidden, true);
+				assert.equal(doc.querySelector('.account-login-default').hidden, false);
+				assert.equal(doc.querySelector('.account-login-pending').hidden, true);
 				assert.isTrue(cancelLoginSessionStub.calledWith('test-session-token'));
 
 				cancelLoginSessionStub.restore();

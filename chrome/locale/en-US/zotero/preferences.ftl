@@ -144,3 +144,13 @@ preferences-account-waiting-for-login =
     .value = Waiting for login…
 preferences-account-cancel-button =
     .label = { general-cancel }
+
+preferences-account-logged-out-status =
+    .value = (logged out)
+
+preferences-account-switch-accounts =
+    .label = Switch Accounts…
+preferences-account-switch-text =
+    Switching to a different account will remove all { -app-name } data on this computer. Before continuing, make sure all data and files you wish to keep have been synced with the “{ $username }” account or you have a backup of your { -app-name } data directory.
+preferences-account-switch-confirmation-text = remove local data
+preferences-account-switch-accept = Remove Data and Restart

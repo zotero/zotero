@@ -634,6 +634,11 @@ var ZoteroPane = new function () {
 			ZoteroPane.showArchitectureWarning();
 			ZoteroPane.showFileRenamingBanner();
 			ZoteroPane.initSyncReminders(true);
+
+			if (Zotero.Prefs.get('reopenAccountPrefsOnRestart')) {
+				Zotero.Prefs.clear('reopenAccountPrefsOnRestart');
+				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+			}
 		});
 		
 		// TEMP: Clean up extra files from Mendeley imports <5.0.51
@@ -899,7 +904,7 @@ var ZoteroPane = new function () {
 		if (Zotero.Sync.Runner.syncInProgress) {
 			Zotero.Sync.Runner.updateIcons('animate');
 		}
-		
+
 		return true;
 	};
 	
