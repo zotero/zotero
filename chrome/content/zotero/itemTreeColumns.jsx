@@ -350,7 +350,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "hasAttachment",
-		defaultIn: ["default"],
+		defaultIn: ["default", "recentlyRead"],
 		disabledIn: ["feeds", "feed"],
 		showInColumnPicker: true,
 		dependsOnChildren: true,
