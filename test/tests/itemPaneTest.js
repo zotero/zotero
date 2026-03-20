@@ -2379,7 +2379,7 @@ describe("Item pane", function () {
 			let attachmentTwo = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: toplevelItemTwo.id });
 			let highlightTwo = await createAnnotation('highlight', attachmentTwo);
 
-			ZoteroPane.itemsView.expandAllRows();
+			ZoteroPane.itemsView.expandAllRows(true);
 
 			await ZoteroPane.itemsView.selectItems([highlightOne.id, highlightTwo.id]);
 
@@ -2400,7 +2400,7 @@ describe("Item pane", function () {
 			highlightOne.annotationText = "Annotation";
 			await highlightOne.saveTx();
 			
-			ZoteroPane.itemsView.expandAllRows();
+			ZoteroPane.itemsView.expandAllRows(true);
 			await ZoteroPane.itemsView.selectItems([highlightOne.id]);
 
 			assert.equal(win.document.querySelector("annotation-items-pane annotation-row .quote").textContent, "Annotation");
