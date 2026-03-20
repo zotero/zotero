@@ -330,6 +330,33 @@ Zotero.Sync.APIClient.prototype = {
 	},
 	
 	
+	deleteSettings: async function (libraryType, libraryTypeID, libraryVersion, keys) {
+		for (let key of keys) {
+			let params = {
+				target: 'settings',
+				libraryType: libraryType,
+				libraryTypeID: libraryTypeID,
+				objectKey: key
+			};
+			let uri = this.buildRequestURI(params);
+			let xmlhttp = await this.makeRequest("DELETE", uri, {
+				headers: {
+					"If-Unmodified-Since-Version": libraryVersion
+				},
+				successCodes: [204, 404, 412],
+				timeout: this.UPLOAD_TIMEOUT,
+			});
+			// Setting may have already been deleted
+			if (xmlhttp.status == 404) {
+				continue;
+			}
+			this._check412(xmlhttp);
+			libraryVersion = this._getLastModifiedVersion(xmlhttp);
+		}
+		return libraryVersion;
+	},
+
+
 	uploadSettings: async function (libraryType, libraryTypeID, libraryVersion, settings) {
 		var method = "POST";
 		var objectType = "setting";

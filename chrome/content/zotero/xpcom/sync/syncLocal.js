@@ -236,7 +236,12 @@ Zotero.Sync.Data.Local = {
 		if (Object.keys(settings).length) {
 			return true;
 		}
-		
+
+		let deletedSettings = await this.getDeleted('setting', libraryID);
+		if (deletedSettings.length) {
+			return true;
+		}
+
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(libraryID)) {
 			let ids = await Zotero.Sync.Data.Local.getUnsynced(objectType, libraryID);
 			if (ids.length) {
@@ -266,7 +271,10 @@ Zotero.Sync.Data.Local = {
 		for (let key of Object.keys(settings)) {
 			await Zotero.SyncedSettings.clear(libraryID, key, { skipDeleteLog: true });
 		}
-		
+
+		let deletedSettingKeys = await this.getDeleted('setting', libraryID);
+		await this.removeObjectsFromDeleteLog('setting', libraryID, deletedSettingKeys);
+
 		for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(libraryID)) {
 			// New/modified objects
 			let ids = await this.getUnsynced(objectType, libraryID);

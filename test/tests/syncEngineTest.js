@@ -1056,6 +1056,52 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
+		it("should upload setting deletions", async function () {
+			({ engine, client, caller } = await setup());
+
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = library.storageVersion = lastLibraryVersion;
+			await library.saveTx();
+
+			// Create and then delete a setting
+			await Zotero.SyncedSettings.set(libraryID, "testSetting1", "value1");
+			await Zotero.SyncedSettings.set(libraryID, "testSetting2", "value2");
+			// Mark as synced so the delete log is the only thing to upload
+			await Zotero.SyncedSettings.markAsSynced(
+				libraryID, ["testSetting1", "testSetting2"], lastLibraryVersion
+			);
+			await Zotero.SyncedSettings.clear(libraryID, "testSetting1");
+			await Zotero.SyncedSettings.clear(libraryID, "testSetting2");
+
+			let deletedKeys = [];
+			server.respond(function (req) {
+				if (req.method == "DELETE") {
+					let match = req.url.match(/\/settings\/(.+?)(\?|$)/);
+					if (match) {
+						deletedKeys.push(decodeURIComponent(match[1]));
+						req.respond(
+							204,
+							{
+								"Last-Modified-Version": ++lastLibraryVersion
+							},
+							""
+						);
+						return;
+					}
+				}
+			});
+
+			await engine.start();
+
+			assert.sameMembers(deletedKeys, ["testSetting1", "testSetting2"]);
+			// Delete log should be cleared
+			let remaining = await Zotero.Sync.Data.Local.getDeleted('setting', libraryID);
+			assert.lengthOf(remaining, 0);
+		});
+
+
 		it("shouldn't update library storage version after item upload if storage version was already behind", async function () {
 			({ engine, client, caller } = await setup());
 			

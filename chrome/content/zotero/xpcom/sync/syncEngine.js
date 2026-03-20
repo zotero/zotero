@@ -1013,7 +1013,32 @@ Zotero.Sync.Data.Engine.prototype._startUpload = async function () {
 	catch (e) {
 		return this._handleUploadError(e);
 	}
-	
+
+	// Upload setting deletions
+	try {
+		let keys = await Zotero.Sync.Data.Local.getDeleted('setting', this.libraryID);
+		if (keys.length) {
+			libraryVersion = await this.apiClient.deleteSettings(
+				this.library.libraryType,
+				this.libraryTypeID,
+				libraryVersion,
+				keys
+			);
+			await Zotero.Sync.Data.Local.removeObjectsFromDeleteLog(
+				'setting', this.libraryID, keys
+			);
+			if (this.library.libraryVersion == this.library.storageVersion) {
+				this.library.storageVersion = libraryVersion;
+			}
+			this.library.libraryVersion = libraryVersion;
+			await this.library.saveTx({ skipNotifier: true });
+			settingsUploaded = true;
+		}
+	}
+	catch (e) {
+		return this._handleUploadError(e);
+	}
+
 	// Get unsynced local objects for each object type
 	for (let objectType of Zotero.DataObjectUtilities.getTypesForLibrary(this.libraryID)) {
 		this._statusCheck();
