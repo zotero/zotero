@@ -104,7 +104,7 @@ Zotero.AttachmentReadObserver = {
 					let item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, itemKey);
 					if (item && item.isAttachment()) {
 						item.attachmentLastRead = Zotero.SyncedSettings.get(settingLibraryID, settingKey);
-						await item.saveTx({ skipDateModifiedUpdate: true, skipEditCheck: true });
+						await item.saveTx({ skipDateModifiedUpdate: true, skipEditCheck: true, skipSyncedUpdate: true });
 					}
 				}
 			}
