@@ -233,6 +233,11 @@ item-menu-change-parent-item =
      .label = Change Parent Item…
 item-menu-relate-items =
     .label = Relate Items
+item-menu-export-annotations =
+    .label = { $count ->
+                [one] Export Annotation as a Note…
+                *[other] Export Annotations as a Note…
+            } 
 
 view-online = View Online
 item-menu-option-view-online =

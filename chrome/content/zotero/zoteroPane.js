@@ -3229,7 +3229,41 @@ var ZoteroPane = new function () {
 				return this.getSelectedItems(asIDs);
 		}
 	};
-	
+
+
+	/**
+	 * Return annotations from the currently selected items
+	 *
+	 * Returns child annotations of selected regular items or attachments,
+	 * as well as selected annotations
+	 *
+	 * @return {Zotero.Item[]}
+	 */
+	this.getSelectedAnnotations = function () {
+		let selectedItemIDs = this.getSelectedItems(true);
+		let itemIDs = this.getSortedItems(true).filter(id => selectedItemIDs.includes(id));
+		let annotationsByID = new Map();
+		for (let item of Zotero.Items.get(itemIDs)) {
+			if (item.isAnnotation()) {
+				annotationsByID.set(item.id, item);
+				continue;
+			}
+			let attachments = [];
+			if (item.isRegularItem()) {
+				attachments = Zotero.Items.get(item.getAttachments())
+					.filter(att => att.isFileAttachment() && att.getAnnotations().length);
+			}
+			else if (item.isFileAttachment() && item.getAnnotations().length) {
+				attachments = [item];
+			}
+			for (let attachment of attachments) {
+				for (let annotation of attachment.getAnnotations()) {
+					annotationsByID.set(annotation.id, annotation);
+				}
+			}
+		}
+		return [...annotationsByID.values()];
+	};
 	
 	function getSortField() {
 		if (!this.itemsView) {
@@ -3741,6 +3775,8 @@ var ZoteroPane = new function () {
 			'relateItems',
 			'sep4',
 			'exportItems',
+			'exportPDF',
+			'exportAnnotations',
 			'createBib',
 			'loadReport',
 			'sep5',
@@ -4202,6 +4238,20 @@ var ZoteroPane = new function () {
 				if (menuItemsForAnnotations.includes(i)) continue;
 				show.delete(m[i]);
 			}
+		}
+
+		// Export PDF(s)... on PDF attachment(s) or their parent
+		let numFiles = Zotero.Items.numDistinctFileAttachmentsForLabel(items, item => item.isPDFAttachment());
+		if (numFiles) {
+			show.add(m.exportPDF);
+			menu.childNodes[m.exportPDF].setAttribute('label', Zotero.getString(`pane.items.menu.exportPDF${numFiles == 1 ? '' : '.multiple'}`));
+		}
+
+		// Export Annotations... on items with annotations
+		let numAnnotations = this.getSelectedAnnotations().length;
+		if (numAnnotations) {
+			show.add(m.exportAnnotations);
+			document.l10n.setAttributes(menu.childNodes[m.exportAnnotations], "item-menu-export-annotations", { count: numAnnotations });
 		}
 
 		// Set labels, plural if necessary

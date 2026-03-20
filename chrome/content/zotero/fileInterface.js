@@ -181,6 +181,7 @@ var Zotero_File_Interface = new function () {
 	this.exportCollection = exportCollection;
 	this.exportItemsToClipboard = exportItemsToClipboard;
 	this.exportItems = exportItems;
+	this.exportAnnotations = exportAnnotations;
 	this.bibliographyFromItems = bibliographyFromItems;
 	
 	/**
@@ -236,7 +237,23 @@ var Zotero_File_Interface = new function () {
 		
 		exporter.save();
 	}
-	
+
+	/*
+	 * Exports annotations from selected items
+	 */
+	async function exportAnnotations() {
+		let annotations = ZoteroPane.getSelectedAnnotations();
+		if (!annotations.length) return;
+
+		let note = await Zotero.EditorInstance.createNoteFromAnnotations(
+			annotations, { noSave: true }
+		);
+
+		var exporter = new Zotero_File_Exporter();
+		exporter.items = [note];
+		exporter.save();
+	}
+
 	
 	/*
 	 * exports items to clipboard
