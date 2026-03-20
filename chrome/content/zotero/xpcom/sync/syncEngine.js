@@ -777,7 +777,7 @@ Zotero.Sync.Data.Engine.prototype._restoreRestoredCollectionItems = async functi
 					// deletion.)
 					if (o.deleted) {
 						o.deleted = false
-						await o.saveTx();
+						await o.saveTx({ skipUndo: true });
 					}
 				}
 				else {
@@ -1358,7 +1358,8 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = async function (objectType, i
 						// with this.
 						skipEditCheck: objectType == 'item'
 							&& this.library.isGroup
-							&& toSave[i].isAnnotation()
+							&& toSave[i].isAnnotation(),
+						skipUndo: true
 					});
 				}
 				if (this.library.libraryVersion == this.library.storageVersion) {

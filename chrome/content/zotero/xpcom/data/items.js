@@ -928,7 +928,7 @@ Zotero.Items = function () {
 
 	this.trash = async function (ids) {
 		Zotero.DB.requireTransaction();
-		
+
 		var libraryIDs = new Set();
 		ids = Zotero.flattenArguments(ids);
 		var items = [];
@@ -947,7 +947,20 @@ Zotero.Items = function () {
 			if (!Zotero.Libraries.get(item.libraryID).hasTrash) {
 				throw new Error(Zotero.Libraries.getName(item.libraryID) + " does not have a trash");
 			}
-			
+
+			// Record undo data before modifying state
+			if (Zotero.UndoHistory && !item.deleted) {
+				Zotero.UndoHistory._addChange({
+					objectType: 'item',
+					id: item.id,
+					libraryID: item.libraryID,
+					key: item.key,
+					fields: {
+						deleted: { old: false, new: true }
+					}
+				});
+			}
+
 			items.push(item);
 			libraryIDs.add(item.libraryID);
 		}

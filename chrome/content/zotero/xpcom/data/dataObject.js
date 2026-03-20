@@ -885,6 +885,52 @@ Zotero.DataObject.prototype._markForReload = function (dataType) {
 
 
 /**
+ * Build a change record for UndoHistory from the current pending changes.
+ * Called during save() before _saveData() clears change tracking.
+ *
+ * @return {Object|null} - ChangeRecord or null if nothing undoable
+ */
+Zotero.DataObject.prototype._getUndoData = function () {
+	let skipFields = new Set(['version', 'synced', 'clientDateModified', 'dateModified']);
+	let fields = {};
+
+	// Fields tracked via _previousData (old-style: old value stored)
+	for (let field of Object.keys(this._previousData)) {
+		if (skipFields.has(field)) continue;
+		// Skip non-scalar fields like relations
+		if (typeof this._previousData[field] === 'object' && this._previousData[field] !== null) {
+			continue;
+		}
+		fields[field] = {
+			old: this._previousData[field],
+			new: this['_' + field]
+		};
+	}
+
+	// Fields tracked via _changedData (new-style: new value stored)
+	for (let field of Object.keys(this._changedData)) {
+		if (skipFields.has(field)) continue;
+		if (field === 'deleted') {
+			fields[field] = {
+				old: this._deleted,
+				new: this._changedData[field]
+			};
+		}
+	}
+
+	if (!Object.keys(fields).length) return null;
+
+	return {
+		objectType: this._objectType,
+		id: this._id,
+		libraryID: this._libraryID,
+		key: this._key,
+		fields
+	};
+};
+
+
+/**
  * @param {String} [op='edit'] - Operation to check; if not provided, check edit privileges for
  *     library
  */
@@ -907,6 +953,7 @@ Zotero.DataObject.prototype.isEditable = function (_op = 'edit') {
  * @param {Boolean} [options.skipNotifier] - Don't trigger Zotero.Notifier events
  * @param {Boolean} [options.skipSelect] - Don't select object automatically in trees
  * @param {Boolean} [options.skipSyncedUpdate] - Don't automatically set 'synced' to false
+ * @param {Boolean} [options.skipUndo] - Don't record this save in UndoHistory
  * @return {Promise<Integer|Boolean>}  Promise for itemID of new item,
  *                                     TRUE on item update, or FALSE if item was unchanged
  */
@@ -930,7 +977,8 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 			'skipSyncedUpdate',
 			'skipEditCheck',
 			'skipNotifier',
-			'skipSelect'
+			'skipSelect',
+			'skipUndo'
 		].forEach(x => env.options[x] = true);
 	}
 	
@@ -969,7 +1017,14 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 				env.notifierData.changed[field] = this['_' + field];
 			}
 		}
-		
+
+		// Capture undo data before _saveData clears change tracking
+		if (!env.options.skipUndo && Zotero.UndoHistory) {
+			if (!env.isNew) {
+				env.undoData = this._getUndoData();
+			}
+		}
+
 		// Create transaction
 		let result
 		if (env.options.tx) {
@@ -977,6 +1032,12 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 				Zotero.DataObject.prototype._saveData.call(this, env);
 				await this._saveData(env);
 				await Zotero.DataObject.prototype._finalizeSave.call(this, env);
+				if (env.undoData) {
+					Zotero.UndoHistory._addChange(env.undoData);
+					if (env.options.undoAction) {
+						Zotero.UndoHistory.setAction(env.options.undoAction, env.options.undoActionArgs);
+					}
+				}
 				return this._finalizeSave(env);
 			}.bind(this), env.transactionOptions);
 		}
@@ -987,6 +1048,12 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 			await this._saveData(env);
 			await Zotero.DataObject.prototype._finalizeSave.call(this, env);
 			result = this._finalizeSave(env);
+			if (env.undoData) {
+				Zotero.UndoHistory._addChange(env.undoData);
+				if (env.options.undoAction) {
+					Zotero.UndoHistory.setAction(env.options.undoAction, env.options.undoActionArgs);
+				}
+			}
 		}
 		this._postSave(env);
 		return result;
