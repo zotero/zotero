@@ -55,7 +55,10 @@ Zotero.HardConfirmationDialog = {
 			this.onCheckbox();
 		}
 		if (this.io.confirmationText) {
-			document.getElementById('zotero-hardConfirmationDialog-textbox').hidden = false;
+			let textbox = document.getElementById('zotero-hardConfirmationDialog-textbox');
+			textbox.hidden = false;
+			textbox.placeholder = this.io.confirmationText;
+			textbox.focus();
 			this.onKeyUp();
 		}
 		
