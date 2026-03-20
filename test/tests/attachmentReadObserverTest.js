@@ -89,5 +89,24 @@ describe("Zotero.AttachmentReadObserver", function () {
 			);
 			assert.equal(dbVal, value);
 		});
+
+		it("should not mark a group attachment as unsynced when the associated synced setting changes", async function () {
+			let group = await createGroup();
+			let item = await createDataObject('item', { libraryID: group.libraryID });
+			let attachment = await importPDFAttachment(item);
+			let key = attachment._getLastReadSettingKey();
+
+			// Mark as synced
+			attachment.synced = true;
+			await attachment.saveTx({ skipSyncedUpdate: true });
+			assert.isTrue(attachment.synced);
+
+			let value = 1674668000;
+			await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, key, value);
+			assert.equal(attachment.attachmentLastRead, value);
+			// Verify item is still synced
+			await attachment.reload();
+			assert.isTrue(attachment.synced);
+		});
 	});
 });
