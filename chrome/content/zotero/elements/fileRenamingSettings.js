@@ -126,13 +126,9 @@
 				'auto-rename-enabled',
 				'file-types',
 				'format-template',
-				'instructions-hidden',
-				'main-hidden',
 				'rename-linked-enabled',
 				'rename-linked-hidden',
 				'rename-now-disabled',
-				'rename-now-hidden',
-				'template-hidden',
 			];
 		}
 
@@ -244,10 +240,6 @@
 		};
 
 		updatePreview = () => {
-			if (this.getAttribute('template-hidden') === 'true') {
-				return;
-			}
-			
 			const [item, ext, attachmentTitle] = this.getActiveItem() ?? [this.mockItem ?? this.makeMockItem(), DEFAULT_EXT, ''];
 			const formatString = this.formatTemplate;
 			const preview = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString, attachmentTitle });
@@ -268,11 +260,7 @@
 			this.autoRenameEnabled = this.getAttribute('auto-rename-enabled') === 'true';
 			this.renameLinkedCheckbox.checked = this.getAttribute('rename-linked-enabled') === 'true';
 			this.formatTemplate = this.getAttribute('format-template') ?? '';
-			this.sectionMain.hidden = this.getAttribute('main-hidden') === 'true';
-			this.sectionInstructions.hidden = this.getAttribute('instructions-hidden') === 'true';
 			this.renameLinkedCheckbox.hidden = this.getAttribute('rename-linked-hidden') === 'true';
-			this.sectionTemplate.hidden = this.getAttribute('template-hidden') === 'true';
-			this.renameNowButton.hidden = this.getAttribute('rename-now-hidden') === 'true';
 			this.renameNowButton.disabled = this.getAttribute('rename-now-disabled') === 'true';
 
 			this.autoRenameToggleCheckbox.addEventListener("command", this.handleRenameToggle);
@@ -309,12 +297,6 @@
 					this.formatTemplate = newValue ?? '';
 					this.updatePreview();
 					break;
-				case 'instructions-hidden':
-					this.sectionInstructions.hidden = newValue === 'true';
-					break;
-				case 'main-hidden':
-					this.sectionMain.hidden = newValue === 'true';
-					break;
 				case 'rename-linked-enabled':
 					this.renameLinkedCheckbox.checked = newValue === 'true';
 					break;
@@ -323,15 +305,6 @@
 					break;
 				case 'rename-now-disabled':
 					this.renameNowButton.disabled = newValue === 'true';
-					break;
-				case 'rename-now-hidden':
-					this.renameNowButton.hidden = newValue === 'true';
-					break;
-				case 'template-hidden':
-					this.sectionTemplate.hidden = newValue === 'true';
-					if (!this.sectionTemplate.hidden) {
-						this.updatePreview();
-					}
 					break;
 			}
 		}
