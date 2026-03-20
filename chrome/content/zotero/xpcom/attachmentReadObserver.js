@@ -53,7 +53,7 @@ Zotero.AttachmentReadObserver = {
 		}
 		
 		item.attachmentLastRead = Math.round(this._getCurrentDate().getTime() / 1000);
-		await item.saveTx({ skipDateModifiedUpdate: true });
+		await item.saveTx({ skipDateModifiedUpdate: true, skipEditCheck: true });
 	},
 	
 	async notify(action, type, ids, extraData) {
