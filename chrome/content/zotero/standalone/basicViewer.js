@@ -83,9 +83,6 @@ function loadURI(uri, options = {}) {
 	else {
 		browser.browsingContext.sandboxFlags |= SANDBOXED_SCRIPTS;
 	}
-	if (options.cookieSandbox) {
-		options.cookieSandbox.attachToBrowser(browser);
-	}
 	browser.loadURI(
 		uri,
 		{
