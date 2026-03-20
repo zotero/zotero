@@ -60,7 +60,7 @@ describe("Zotero.AttachmentReadObserver", function () {
 			let item = await createDataObject('item', { libraryID: group.libraryID });
 			let attachment = await importPDFAttachment(item);
 			let key = attachment._getLastReadSettingKey();
-			
+
 			let firstValue = 1674668000;
 			await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, key, firstValue);
 			assert.equal(attachment.attachmentLastRead, firstValue);
@@ -68,6 +68,26 @@ describe("Zotero.AttachmentReadObserver", function () {
 			let secondValue = 1674668123;
 			await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, key, secondValue);
 			assert.equal(attachment.attachmentLastRead, secondValue);
+		});
+
+		it("should update a read-only group attachment's attachmentLastRead when the associated synced setting changes", async function () {
+			let group = await createGroup();
+			let item = await createDataObject('item', { libraryID: group.libraryID });
+			let attachment = await importPDFAttachment(item);
+			let key = attachment._getLastReadSettingKey();
+
+			// Make the group read-only after creating test data
+			group.editable = false;
+			await group.saveTx();
+
+			let value = 1674668000;
+			await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, key, value);
+			assert.equal(attachment.attachmentLastRead, value);
+			// Verify persisted to DB, not just set in memory
+			let dbVal = await Zotero.DB.valueQueryAsync(
+				"SELECT lastRead FROM itemAttachments WHERE itemID=?", attachment.id
+			);
+			assert.equal(dbVal, value);
 		});
 	});
 });
