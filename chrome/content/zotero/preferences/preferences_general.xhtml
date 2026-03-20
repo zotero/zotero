@@ -107,29 +107,15 @@
 		
 		<groupbox id="zotero-prefpane-file-renaming-groupbox" aria-labelledby="preferences-file-renaming-title" aria-describedby="preferences-file-renaming-intro">
 			<label><html:h2 id="preferences-file-renaming-title" data-l10n-id="preferences-file-renaming-title"/></label>
-			
+
 			<vbox align="start">
 				<label id="preferences-file-renaming-intro" data-l10n-id="preferences-file-renaming-intro"/>
 				<separator class="thin"/>
-				<file-renaming-settings
-						rename-now-hidden="true"
-						template-hidden="true"
-						instructions-hidden="true"
-						id="file-renaming-settings"
+				<button id="file-renaming-configure-button"
+					data-l10n-id="preferences-file-renaming-configure-button"
+					data-search-strings="preferences-file-renaming-format-title, preferences-file-renaming-format-template, preferences-file-renaming-auto-rename-files"
+					oncommand="Zotero_Preferences.General.openFileRenamingDialog()"
 				/>
-				<hbox id="file-renaming-buttons">
-					<button id="file-renaming-customize-button"
-						data-l10n-id="preferences-file-renaming-customize-button"
-						data-search-strings="preferences-file-renaming-format-title, preferences-file-renaming-format-template"
-						oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-file-renaming')"
-					/>
-					<button
-						hidden="true"
-						id="file-renaming-general-rename-now"
-						data-l10n-id="preferences-file-renaming-rename-now"
-						oncommand="Zotero_Preferences.General.openRenameFilesPreview()"
-					/>
-				</hbox>
 			</vbox>
 		</groupbox>
 		

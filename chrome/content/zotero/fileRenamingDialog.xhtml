@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <!--
 	***** BEGIN LICENSE BLOCK *****
-	
+
 	Copyright © 2026 Corporation for Digital Scholarship
 					 Vienna, Virginia, USA
 					http://zotero.org
-	
+
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -20,7 +20,7 @@
 
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 -->
 
@@ -33,25 +33,29 @@
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
-		id="group-file-renaming-settings"
+		id="file-renaming-settings-dialog"
+		data-l10n-id="file-renaming-settings-window"
 		width="800"
 		height="600"
-		onload="GroupFileRenaming.init()"
+		onload="FileRenamingDialog.init()"
 >
 	<groupbox>
 		<script>
 			Services.scriptloader.loadSubScript('chrome://zotero/content/include.js', this);
 			Services.scriptloader.loadSubScript('chrome://zotero/content/customElements.js', this);
-			Services.scriptloader.loadSubScript('chrome://zotero/content/groupFileRenaming.js', this);
+			Services.scriptloader.loadSubScript('chrome://zotero/content/fileRenamingDialog.js', this);
 		</script>
 		<linkset>
 			<html:link rel="localization" href="branding/brand.ftl" />
 			<html:link rel="localization" href="zotero.ftl" />
 			<html:link rel="localization" href="preferences.ftl" />
 		</linkset>
-		<vbox>
-			<html:p id="intro" data-l10n-id="group-file-renaming-intro" />
-		</vbox>
-		<file-renaming-settings id="file-renaming-settings" rename-linked-hidden="true" />
+		<hbox align="center" id="library-picker-row">
+			<label data-l10n-id="file-renaming-settings-library-label" control="library-picker" />
+			<menulist id="library-picker" native="true">
+				<menupopup />
+			</menulist>
+		</hbox>
+		<file-renaming-settings id="file-renaming-settings" />
 	</groupbox>
 </window>

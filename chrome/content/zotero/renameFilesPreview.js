@@ -84,8 +84,10 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 			this.introEl.dataset.l10nId = 'rename-files-preview-no-files';
 			this.cancelBtnEl.label = await document.l10n.formatValue('general-done');
 			this.acceptBtnEl.remove();
-			// There is nothing that would be renamed; ensure the “Rename Files” button is hidden in the preferences pane.
-			Zotero.Prefs.set('autoRenameFiles.done', true);
+			// There is nothing that would be renamed; ensure the “Rename Files” button is disabled in the dialog.
+			if (this.libraryID === Zotero.Libraries.userLibraryID) {
+				Zotero.Prefs.set('autoRenameFiles.done', true);
+			}
 		}
 		else {
 			this.rows = rows.flatMap(obj => [{ name: obj.oldName }, { name: obj.newName }, { type: 'separator' }]);
