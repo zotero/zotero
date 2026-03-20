@@ -59,6 +59,30 @@ describe("Zotero.HTTP", function () {
 				}
 			}
 		);
+		// Returns 200 if the "authed" cookie is present, 403 otherwise.
+		// Always sets the "authed" cookie in the response.
+		httpd.registerPathHandler(
+			'/cookie-check',
+			{
+				handle(request, response) {
+					let hasCookie = false;
+					try {
+						let cookies = request.getHeader('Cookie');
+						hasCookie = cookies.includes('authed=yes');
+					}
+					catch {}
+					response.setHeader('Set-Cookie', 'authed=yes; Path=/', false);
+					if (hasCookie) {
+						response.setStatusLine(null, 200, "OK");
+						response.write("authenticated");
+					}
+					else {
+						response.setStatusLine(null, 403, "Forbidden");
+						response.write("no cookie");
+					}
+				}
+			}
+		);
 	});
 	
 	beforeEach(function () {
@@ -347,6 +371,143 @@ describe("Zotero.HTTP", function () {
 				}
 			);
 			assert.isTrue(called);
+		});
+	});
+
+	describe("Cookie isolation", function () {
+		var cookieURL;
+
+		before(function () {
+			cookieURL = baseURL + 'cookie-check';
+		});
+
+		beforeEach(function () {
+			Zotero.HTTP.mock = null;
+			// Clear all cookies for the test server
+			Services.cookies.removeAll();
+		});
+
+		it("should send cookies by default (mozAnon: false)", async function () {
+			// First request sets the cookie but gets 403
+			var req = await Zotero.HTTP.request('GET', cookieURL, {
+				successCodes: false
+			});
+			assert.equal(req.status, 403);
+
+			// Second request should send the cookie and get 200
+			req = await Zotero.HTTP.request('GET', cookieURL, {
+				successCodes: false
+			});
+			assert.equal(req.status, 200);
+		});
+
+		it("should not send cookies with anon: true", async function () {
+			// First request sets the cookie
+			await Zotero.HTTP.request('GET', cookieURL, {
+				successCodes: false
+			});
+
+			// Second request with anon: true should not send the cookie
+			var req = await Zotero.HTTP.request('GET', cookieURL, {
+				anon: true,
+				successCodes: false
+			});
+			assert.equal(req.status, 403);
+		});
+
+		describe("#newCookieContext()", function () {
+			it("should isolate cookies from the default jar", async function () {
+				let ctx = Zotero.HTTP.newCookieContext();
+				try {
+					// Set cookie in the default jar
+					await Zotero.HTTP.request('GET', cookieURL, {
+						successCodes: false
+					});
+
+					// Request in the isolated context should not see the default cookie
+					let req = await Zotero.HTTP.request('GET', cookieURL, {
+						cookieContextId: ctx.id,
+						successCodes: false
+					});
+					assert.equal(req.status, 403);
+				}
+				finally {
+					ctx.dispose();
+				}
+			});
+
+			it("should persist cookies within the same context", async function () {
+				let ctx = Zotero.HTTP.newCookieContext();
+				try {
+					// First request in context -- gets 403, sets cookie
+					let req = await Zotero.HTTP.request('GET', cookieURL, {
+						cookieContextId: ctx.id,
+						successCodes: false
+					});
+					assert.equal(req.status, 403);
+
+					// Second request in same context -- should have the cookie
+					req = await Zotero.HTTP.request('GET', cookieURL, {
+						cookieContextId: ctx.id,
+						successCodes: false
+					});
+					assert.equal(req.status, 200);
+				}
+				finally {
+					ctx.dispose();
+				}
+			});
+
+			it("should not leak cookies between different contexts", async function () {
+				let ctx1 = Zotero.HTTP.newCookieContext();
+				let ctx2 = Zotero.HTTP.newCookieContext();
+				try {
+					// Set cookie in ctx1
+					await Zotero.HTTP.request('GET', cookieURL, {
+						cookieContextId: ctx1.id,
+						successCodes: false
+					});
+
+					// ctx2 should not see ctx1's cookie
+					let req = await Zotero.HTTP.request('GET', cookieURL, {
+						cookieContextId: ctx2.id,
+						successCodes: false
+					});
+					assert.equal(req.status, 403);
+				}
+				finally {
+					ctx1.dispose();
+					ctx2.dispose();
+				}
+			});
+
+			it("should remove cookies on dispose()", async function () {
+				let ctx = Zotero.HTTP.newCookieContext();
+
+				// Set cookie in context
+				await Zotero.HTTP.request('GET', cookieURL, {
+					cookieContextId: ctx.id,
+					successCodes: false
+				});
+
+				// Verify cookie exists
+				let cookies = ctx.getCookies('127.0.0.1');
+				assert.isTrue(cookies.some(c => c.name === 'authed'));
+
+				// Dispose and verify cookies are gone
+				ctx.dispose();
+				let ctx2 = Zotero.HTTP.newCookieContext();
+				try {
+					let req = await Zotero.HTTP.request('GET', cookieURL, {
+						cookieContextId: ctx.id,
+						successCodes: false
+					});
+					assert.equal(req.status, 403);
+				}
+				finally {
+					ctx2.dispose();
+				}
+			});
 		});
 	});
 
