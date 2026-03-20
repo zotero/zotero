@@ -139,7 +139,9 @@ export async function renameFilesFromParent({ libraryID = null, pretend = false,
 	const t2 = Date.now();
 	if (!pretend) {
 		Zotero.debug(`Renaming ${count + noFilePresentCount} attachments (${noFilePresentCount} with no file present) took ${((t2 - t1) / 1000).toFixed(2)} seconds (Processed ${items.length} items in library: ${libraryID}`);
-		Zotero.Prefs.set('autoRenameFiles.done', true);
+		if (libraryID === Zotero.Libraries.userLibraryID) {
+			Zotero.Prefs.set('autoRenameFiles.done', true);
+		}
 	}
 	return summary;
 }
