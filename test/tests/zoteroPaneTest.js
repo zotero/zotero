@@ -1110,6 +1110,76 @@ describe("ZoteroPane", function () {
 			var restoreMenuItem = menu.querySelector('.zotero-menuitem-restore-to-library');
 			assert.isTrue(restoreMenuItem.disabled);
 		});
+
+		it("should list collections when not too many", async function () {
+			Zotero.Prefs.set('collectionsMenu.maxEntriesTotal', 1000);
+
+			let collection = await createDataObject('collection');
+			let item = await createDataObject('item');
+
+			await zp.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+
+			let menu = win.document.getElementById('zotero-itemmenu');
+			menu.openPopup();
+			// The menu (not menuitem) variant should be shown
+			let addToCollectionMenu = menu.querySelector('.zotero-menuitem-add-to-collection');
+			assert.isFalse(addToCollectionMenu.hidden);
+			// The dialog variant should be hidden
+			let addToCollectionDialog = menu.querySelector('.zotero-menuitem-add-to-collection-dialog');
+			assert.isTrue(addToCollectionDialog.hidden);
+
+			// Open the menupopup so it gets populated
+			let popup = addToCollectionMenu.querySelector('menupopup');
+			popup.openPopup();
+
+			// Find the menuitem for our collection and click it
+			let collectionMenuItem = popup.querySelector(`[value="C${collection.id}"]`);
+			assert.ok(collectionMenuItem);
+			collectionMenuItem.doCommand();
+			popup.hidePopup();
+			await waitForNotifierEvent("modify", "item");
+			
+			// Verify item was added to the collection
+			assert.isTrue(collection.hasItem(item.id));
+		});
+
+		it("should not list collections if too many", async function () {
+			let collection = await createDataObject('collection');
+			let item = await createDataObject('item');
+
+			Zotero.Prefs.set('collectionsMenu.maxEntriesTotal', 0);
+
+			await zp.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+
+			let menu = win.document.getElementById('zotero-itemmenu');
+			// The menu variant should be hidden
+			let addToCollectionMenu = menu.querySelector('.zotero-menuitem-add-to-collection');
+			assert.isTrue(addToCollectionMenu.hidden);
+			// The dialog menuitem should be shown
+			let addToCollectionDialog = menu.querySelector('.zotero-menuitem-add-to-collection-dialog');
+			assert.isFalse(addToCollectionDialog.hidden);
+
+			// Set up listener for the dialog before triggering it
+			waitForWindow('chrome://zotero/content/selectCollectionDialog.xhtml', async (selectWin) => {
+				// Wait for the dialog to finish loading
+				do {
+					await Zotero.Promise.delay(50);
+				}
+				while (!selectWin.loaded);
+				await selectWin.collectionsView.makeVisible();
+				// Select the target collection
+				await selectWin.collectionsView.selectByID('C' + collection.id);
+				selectWin.document.querySelector('dialog').acceptDialog();
+			});
+			await zp.addToCollectionViaDialog();
+
+			// Verify item was added to the collection
+			assert.isTrue(collection.hasItem(item.id));
+
+			Zotero.Prefs.set('collectionsMenu.maxEntriesTotal', 1000);
+		});
 	});
 
 	describe("#restoreSelectedItems()", function () {
@@ -1825,7 +1895,7 @@ describe("ZoteroPane", function () {
 
 			await waitForNotifierEvent("add", "collection");
 
-			// Collection has been copies
+			// Collection has been copied
 			let groupCollections = groupCollection.getDescendents(false, 'collection');
 			let newCollectionID = groupCollections.find(col => col.name == collectionChild.name).id;
 			let newCollection = Zotero.Collections.get(newCollectionID);
@@ -1872,6 +1942,122 @@ describe("ZoteroPane", function () {
 			assert.sameMembers(items, [item.id]);
 			// Copied collection is a top-level collection
 			assert.notOk(newCollection.parentID);
+		});
+		
+		it("should allow copying between libraries if there is a linked collection but it is in trash", async function () {
+			let groupDestination = await createGroup();
+			let groupCollection = await createDataObject('collection', { libraryID: groupDestination.libraryID });
+
+			let collection = await createDataObject('collection');
+			let collectionChild = await createDataObject('collection', { parentID: collection.id });
+
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+
+			await zp.copyCollection(groupCollection);
+
+			await waitForNotifierEvent("add", "collection");
+
+			// Collection has been copied
+			let newCollection = zp.getSelectedCollection();
+			assert.equal(newCollection.libraryID, groupCollection.libraryID);
+			assert.equal(newCollection.name, collectionChild.name);
+
+			// Send new collection to trash
+			newCollection.deleted = true;
+			await newCollection.saveTx();
+
+			// Right click on the selected collection
+			await zp.collectionsView.selectByID("C" + collectionChild.id);
+			await zp.buildCopyCollectionMenu({});
+			await Zotero.Promise.delay();
+
+			let groupMenu = doc.querySelector(`#zotero-copy-collection-popup menu[value="L${groupDestination.libraryID}"]`);
+			// Menu of the library with linked collection should be enabled
+			assert.equal(groupMenu.disabled, false);
+
+			// Copy collection again
+			await zp.copyCollection(groupCollection);
+			await waitForNotifierEvent("add", "collection");
+			let anotherNewCollection = zp.getSelectedCollection();
+			// Newly created collection is in the group
+			assert.equal(anotherNewCollection.libraryID, groupCollection.libraryID);
+		});
+	});
+	describe("#buildCollectionContextMenu()", function () {
+		it("should list collections for copy when not too many", async function () {
+			Zotero.Prefs.set('collectionsMenu.maxEntriesTotal', 1000);
+
+			let collectionA = await createDataObject('collection');
+			let collectionB = await createDataObject('collection');
+
+			await select(win, collectionA);
+			await zp.buildCollectionContextMenu();
+
+			let menu = doc.getElementById('zotero-collectionmenu');
+			menu.openPopup();
+
+			// The menu (not menuitem) variant for copy should be shown
+			let copyCollectionMenu = menu.querySelector('#copyCollection');
+			assert.isFalse(copyCollectionMenu.hidden);
+			// The dialog variant should be hidden
+			let copyCollectionDialog = menu.querySelector('#copyCollectionDialog');
+			assert.isTrue(copyCollectionDialog.hidden);
+
+			// Open the menupopup so it gets populated
+			let popup = doc.getElementById('zotero-copy-collection-popup');
+			popup.openPopup();
+			// Wait a moment to populate the popup
+			await Zotero.Promise.delay();
+
+			// Find the menuitem for collection B and click it
+			let collectionMenuItem = popup.querySelector(`[value="C${collectionB.id}"]`);
+			assert.ok(collectionMenuItem);
+			collectionMenuItem.doCommand();
+			popup.hidePopup();
+			await waitForNotifierEvent("add", "collection");
+
+			// Verify collection A was copied into collection B
+			let childNames = collectionB.getDescendents(false, 'collection').map(col => col.name);
+			assert.include(childNames, collectionA.name);
+		});
+
+		it("should not list collections for copy if too many", async function () {
+			let collectionA = await createDataObject('collection');
+			let collectionB = await createDataObject('collection');
+
+			Zotero.Prefs.set('collectionsMenu.maxEntriesTotal', 0);
+
+			await select(win, collectionA);
+			await zp.buildCollectionContextMenu();
+
+			let menu = doc.getElementById('zotero-collectionmenu');
+
+			// The menu variant for copy should be hidden
+			let copyCollectionMenu = menu.querySelector('#copyCollection');
+			assert.isTrue(copyCollectionMenu.hidden);
+			// The dialog menuitem should be shown
+			let copyCollectionDialog = menu.querySelector('#copyCollectionDialog');
+			assert.isFalse(copyCollectionDialog.hidden);
+
+			// Set up listener for the dialog before triggering it
+			waitForWindow('chrome://zotero/content/selectCollectionDialog.xhtml', async (selectWin) => {
+				do {
+					await Zotero.Promise.delay(50);
+				}
+				while (!selectWin.loaded);
+				await selectWin.collectionsView.makeVisible();
+				// Select the target collection
+				await selectWin.collectionsView.selectByID('C' + collectionB.id);
+				selectWin.document.querySelector('dialog').acceptDialog();
+			});
+			await zp.copyCollectionViaDialog();
+			await waitForNotifierEvent("add", "collection");
+
+			// Verify collection A was copied into collection B
+			let childNames = collectionB.getDescendents(false, 'collection').map(col => col.name);
+			assert.include(childNames, collectionA.name);
+
+			Zotero.Prefs.set('collectionsMenu.maxEntriesTotal', 1000);
 		});
 	});
 	describe("#moveCollection", function () {
