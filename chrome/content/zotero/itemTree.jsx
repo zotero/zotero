@@ -142,7 +142,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._introText = null;
 		
 		this._rowCache = {};
-		this._highlightedRows = new Set();
+		this._highlightedRows = new Map();
 		
 		this._modificationLock = Zotero.Promise.resolve();
 		this._refreshPromise = Zotero.Promise.resolve();
@@ -1754,11 +1754,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this.ensureRowIsVisible(indices[0] + maxBuffer);
 	}
 	
-	async setHighlightedRows(ids) {
+	async setHighlightedRows(ids, highlightClasses = {}) {
 		if (!Array.isArray(ids)) {
 			return;
 		}
-		this._highlightedRows = new Set(ids);
+		this._highlightedRows.clear();
+		for (let id of ids) {
+			this._highlightedRows.set(id, highlightClasses[id] || null);
+		}
 		this.tree.invalidate();
 	}
 	
@@ -3278,6 +3281,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		div.classList.toggle('context-row', !!rowData.contextRow);
 		div.classList.toggle('unread', !!rowData.unread);
 		div.classList.toggle('highlighted', this._highlightedRows.has(rowData.id));
+		let highlightedClass = this._highlightedRows.get(rowData.id);
+		if (highlightedClass) {
+			div.setAttribute('highlighted-class', highlightedClass);
+		}
+		else {
+			div.removeAttribute('highlighted-class');
+		}
 		let nextRowID = this.getRow(index + 1)?.id;
 		let prevRowID = this.getRow(index - 1)?.id;
 		div.classList.toggle('first-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(prevRowID));
@@ -3727,6 +3737,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				const columnSettings = columnsSettings[column.dataKey];
 				if (!columnSettings && this.id === 'main') {
 					column = this._setLegacyColumnSettings(column);
+				}
+				// Special handling for some custom columns that must always be visible
+				// (e.g. +/- buttons column in Edit Bibliography dialog)
+				if (columnSettings && column.isAlwaysVisible) {
+					columnSettings.hidden = false;
 				}
 
 				// Also includes a `hidden` pref and overrides the above if available
