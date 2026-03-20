@@ -58,12 +58,13 @@ Zotero.AttachmentReadObserver = {
 	
 	async notify(action, type, ids, extraData) {
 		if (type == 'file') {
-			if (!['pageChange', 'open'].includes(action)) {
+			if (!['pageChange', 'open', 'close'].includes(action)) {
 				return;
 			}
 			let items = await Zotero.Items.getAsync(ids);
 			switch (action) {
 				case 'open':
+				case 'close':
 					for (let item of items) {
 						await this.updateAttachmentLastRead(item);
 					}
