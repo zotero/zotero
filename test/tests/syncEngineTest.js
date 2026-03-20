@@ -1077,10 +1077,12 @@ describe("Zotero.Sync.Data.Engine", function () {
 
 			let deletedKeys = [];
 			server.respond(function (req) {
-				if (req.method == "DELETE") {
-					let match = req.url.match(/\/settings\/(.+?)(\?|$)/);
+				if (req.method == "DELETE" && req.url.includes('/settings?')) {
+					let match = req.url.match(/settingKey=([^&]+)/);
 					if (match) {
-						deletedKeys.push(decodeURIComponent(match[1]));
+						deletedKeys.push(
+							...decodeURIComponent(match[1]).split(',')
+						);
 						req.respond(
 							204,
 							{

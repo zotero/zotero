@@ -1017,16 +1017,19 @@ Zotero.Sync.Data.Engine.prototype._startUpload = async function () {
 	// Upload setting deletions
 	try {
 		let keys = await Zotero.Sync.Data.Local.getDeleted('setting', this.libraryID);
-		if (keys.length) {
+		while (keys.length) {
+			let batch = keys.slice(0, this.uploadDeletionBatchSize);
 			libraryVersion = await this.apiClient.deleteSettings(
 				this.library.libraryType,
 				this.libraryTypeID,
 				libraryVersion,
-				keys
+				batch
 			);
 			await Zotero.Sync.Data.Local.removeObjectsFromDeleteLog(
-				'setting', this.libraryID, keys
+				'setting', this.libraryID, batch
 			);
+			keys.splice(0, batch.length);
+
 			if (this.library.libraryVersion == this.library.storageVersion) {
 				this.library.storageVersion = libraryVersion;
 			}
