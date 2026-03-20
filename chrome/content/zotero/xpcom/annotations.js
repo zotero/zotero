@@ -334,6 +334,22 @@ Zotero.Annotations = new function () {
 	 * @param {Zotero.Item[]} items
 	 * @returns {Promise<void>}
 	 */
+	/**
+	 * Return all annotation authors in a library
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Object[]} - Array of { userID, name }
+	 */
+	this.getAllAuthors = async function (libraryID) {
+		let sql = `SELECT DISTINCT u.userID, u.name FROM users u
+			JOIN groupItems gi ON (gi.createdByUserID = u.userID)
+			JOIN itemAnnotations ia ON (ia.itemID = gi.itemID)
+			JOIN items i ON (i.itemID = ia.itemID)
+			WHERE i.libraryID = ?`;
+		let rows = await Zotero.DB.queryAsync(sql, libraryID);
+		return rows.map(row => ({ userID: row.userID, name: row.name }));
+	};
+
 	this.splitAnnotations = async function (items) {
 		if (!Array.isArray(items)) {
 			items = [items];
