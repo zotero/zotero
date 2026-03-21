@@ -1506,6 +1506,7 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 
 	Zotero.debug(`Updating item users in ${this.library.name}`);
 
+	let updatedItemIDs = [];
 	let lastCount;
 	while (keys.length) {
 		// If no progress was made, bail
@@ -1521,7 +1522,7 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 
 		if (error) {
 			Zotero.logError(error);
-			return;
+			break;
 		}
 
 		for (let jsonItem of jsonItems) {
@@ -1542,9 +1543,15 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 			}
 
 			await item.updateCreatedByUser.apply(item, params);
+			updatedItemIDs.push(item.id);
 		}
 
 		keys = await Zotero.DB.columnQueryAsync(sql, this.libraryID);
+	}
+
+	// Refresh item tree to show updated user names
+	if (updatedItemIDs.length) {
+		await Zotero.Notifier.trigger('modify', 'item', updatedItemIDs, {});
 	}
 };
 
