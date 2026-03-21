@@ -1493,14 +1493,30 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = async function (objectType,
 
 /**
  * Update createdByUserID/lastModifiedByUserID for previously downloaded group items
+ *
+ * This is a one-time backfill for items synced before user tracking was added.
+ * Once complete, a flag is set so it doesn't run again.
  */
 Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
-	let max = this.apiClient.MAX_OBJECTS_PER_REQUEST;
+	let settingKey = 'groupItemUsersBackfilled-' + this.libraryID;
+	let backfilled = await Zotero.DB.valueQueryAsync(
+		"SELECT value FROM settings WHERE setting='sync' AND key=?",
+		settingKey
+	);
+	if (backfilled) {
+		return;
+	}
 
+	let max = this.apiClient.MAX_OBJECTS_PER_REQUEST;
 	let sql = "SELECT key FROM items LEFT JOIN groupItems GI USING (itemID) "
-		+ `WHERE libraryID=? AND GI.itemID IS NULL ORDER BY itemID LIMIT ${max}`;
+		+ "WHERE libraryID=? AND (GI.itemID IS NULL OR GI.createdByUserID IS NULL) "
+		+ `ORDER BY itemID LIMIT ${max}`;
 	let keys = await Zotero.DB.columnQueryAsync(sql, this.libraryID);
 	if (!keys.length) {
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO settings VALUES ('sync', ?, 1)",
+			settingKey
+		);
 		return;
 	}
 
@@ -1509,7 +1525,8 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 	let updatedItemIDs = [];
 	let lastCount;
 	while (keys.length) {
-		// If no progress was made, bail
+		// If no progress was made, some items can't be resolved -- mark
+		// as complete so we don't retry every sync
 		if (keys.length === lastCount) {
 			Zotero.debug(`${keys.length} items remaining without user data -- stopping`);
 			break;
@@ -1522,7 +1539,11 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 
 		if (error) {
 			Zotero.logError(error);
-			break;
+			// Don't set backfilled flag -- retry next sync
+			if (updatedItemIDs.length) {
+				await Zotero.Notifier.trigger('modify', 'item', updatedItemIDs, {});
+			}
+			return;
 		}
 
 		for (let jsonItem of jsonItems) {
@@ -1548,6 +1569,8 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 
 		keys = await Zotero.DB.columnQueryAsync(sql, this.libraryID);
 	}
+
+	await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('sync', ?, 1)", settingKey);
 
 	// Refresh item tree to show updated user names
 	if (updatedItemIDs.length) {
