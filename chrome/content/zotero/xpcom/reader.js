@@ -675,6 +675,9 @@ class ReaderInstance {
 			this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 		}
 		this._flushState();
+		if (this._item?.id) {
+			Zotero.Notifier.trigger('close', 'file', this._item.id);
+		}
 		if (this._blockingObserver && this._iframe) {
 			this._blockingObserver.unregister(this._iframe);
 		}

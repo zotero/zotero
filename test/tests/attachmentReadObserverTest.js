@@ -24,6 +24,24 @@ describe("Zotero.AttachmentReadObserver", function () {
 			stub.restore();
 		});
 
+		it("should update an attachment's attachmentLastRead when it is closed", async function () {
+			let attachment = await importPDFAttachment(null);
+
+			// We open the attachment at midnight on January 1
+			let stub = sinon.stub(Zotero.AttachmentReadObserver, '_getCurrentDate')
+				.callsFake(() => new Date(2023, 1, 1, 0, 0, 0));
+			await Zotero.Notifier.trigger('open', 'file', [attachment.id]);
+			let initialLastRead = attachment.attachmentLastRead;
+			assert.isNumber(initialLastRead);
+
+			// We close it ten minutes later
+			stub.callsFake(() => new Date(2023, 1, 1, 0, 10, 0));
+			await Zotero.Notifier.trigger('close', 'file', [attachment.id]);
+			assert.isAbove(attachment.attachmentLastRead, initialLastRead);
+
+			stub.restore();
+		});
+
 		it("should update an attachment's attachmentLastRead every five minutes when the page changes", async function () {
 			let attachment = await importPDFAttachment(null);
 
