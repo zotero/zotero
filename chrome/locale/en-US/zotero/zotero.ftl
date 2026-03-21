@@ -908,3 +908,16 @@ banner-close-button =
 
 plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
+
+item-pane-batch-editing-prompt =
+    .aria-label = Batch editing
+
+item-pane-batch-editing-enable =
+    .label = Enter Batch Edit Mode
+
+item-pane-batch-editing-multiple-values-placeholder = Multiple
+
+item-pane-batch-editing-header = { $count ->
+    [one] Editing { $count } item
+   *[other] Editing { $count } items
+}

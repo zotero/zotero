@@ -2565,4 +2565,307 @@ describe("Item pane", function () {
 			await waitForToggle('reader toolbar');
 		});
 	});
+	
+	describe("Batch Edit", function () {
+		it("should enter and exit batch edit mode", async function () {
+			let item1 = await createDataObject('item', { itemType: 'journalArticle' });
+			let item2 = await createDataObject('item', { itemType: 'journalArticle' });
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+			await waitForFrame();
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			// Enter batch edit mode
+			assert.equal(itemPane.mode, "batch-edit-prompt");
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			assert.ok(batchEditEnableBtn, "Enter Batch Edit Mode button should exist");
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			// Should now be in item mode with batch editing enabled
+			assert.equal(itemPane.mode, "item");
+
+			// Header should hide title-head and show items selected label
+			let header = itemDetails._header;
+			assert.ok(header.classList.contains('no-title-head'), "title-head should be hidden in batch edit mode");
+			assert.ok(header.querySelector('[data-l10n-id="item-pane-batch-editing-header"]'), "batch editing header label should be in header");
+
+			// Exit batch edit mode by changing selection to a single item
+			await ZoteroPane.selectItem(item1.id);
+			await waitForFrame();
+
+			// Should be back in batch-edit-prompt mode when re-selecting both
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+			await waitForFrame();
+			assert.equal(itemPane.mode, "batch-edit-prompt");
+		});
+		it("should restore collapsed info section state after exiting batch edit via selection change", async function () {
+			let item1 = await createDataObject('item', { itemType: 'journalArticle' });
+			let item2 = await createDataObject('item', { itemType: 'journalArticle' });
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			// Select item1 and collapse the info section
+			await ZoteroPane.selectItem(item1.id);
+			await waitForFrame();
+			let infoSection = itemDetails.querySelector('collapsible-section[data-pane="info"]');
+			infoSection.open = false;
+			assert.isFalse(infoSection.open, "info section should be collapsed");
+
+			// Select both items to enter batch edit prompt
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+			await waitForFrame();
+			assert.equal(itemPane.mode, "batch-edit-prompt");
+
+			// Enter batch edit mode
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+			assert.equal(itemPane.mode, "item");
+
+			// Info section should be forced open with no twisty
+			infoSection = itemDetails.querySelector('collapsible-section[data-pane="info"]');
+			assert.isTrue(infoSection.open, "info section should be open in batch edit mode");
+			let twisty = infoSection.querySelector('.twisty');
+			assert.isTrue(twisty.hidden, "twisty should be hidden in batch edit mode");
+
+			// Change selection to just one item -- exits batch edit
+			await ZoteroPane.selectItem(item1.id);
+			await waitForFrame();
+
+			// Info section should restore its previous collapsed state
+			infoSection = itemDetails.querySelector('collapsible-section[data-pane="info"]');
+			assert.isFalse(infoSection.open, "info section should be collapsed after exiting batch edit");
+			twisty = infoSection.querySelector('.twisty');
+			assert.isFalse(twisty.hidden, "twisty should be visible after exiting batch edit");
+		});
+		it("should apply autocomplete value to all items in batch edit mode", async function () {
+			let sharedTitle = "Journal of Shared Research";
+			let differentTitle = "Journal of Different Research";
+
+			let item1 = await createDataObject('item', { itemType: 'journalArticle' });
+			item1.setField('publicationTitle', sharedTitle);
+			await item1.saveTx();
+
+			let item2 = await createDataObject('item', { itemType: 'journalArticle' });
+			item2.setField('publicationTitle', sharedTitle);
+			await item2.saveTx();
+
+			let item3 = await createDataObject('item', { itemType: 'journalArticle' });
+			item3.setField('publicationTitle', differentTitle);
+			await item3.saveTx();
+
+			let item4 = await createDataObject('item', { itemType: 'journalArticle' });
+			await item4.saveTx();
+
+			await ZoteroPane.selectItems([item1.id, item2.id, item3.id, item4.id]);
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+			
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+			
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+			let pubTitleField = itemBox.querySelector('editable-text[fieldname="publicationTitle"]');
+			assert.ok(pubTitleField, "publicationTitle field should exist");
+			
+			pubTitleField._ignoredWindowInactiveBlur = false;
+			await activateZoteroPane();
+			await Zotero.Promise.delay(50);
+			pubTitleField.focus();
+
+			await waitForCallback(() => pubTitleField.ref.mController.matchCount === 2, 100, 500);
+			// options should be sorted alphabetically, empty values are ignored
+			assert.equal(pubTitleField.ref.mController.matchCount, 2);
+			assert.equal(pubTitleField.ref.mController.getValueAt(0), differentTitle);
+			assert.equal(pubTitleField.ref.mController.getValueAt(1), sharedTitle);
+
+			let modifyPromise = waitForItemEvent('modify');
+			pubTitleField.ref.dispatchEvent(new KeyboardEvent(
+				'keydown', { key: "ArrowDown", code: 'ArrowDown', keyCode: KeyboardEvent.DOM_VK_DOWN, bubbles: true, }
+			));
+			await Zotero.Promise.delay(50);
+			pubTitleField.ref.dispatchEvent(new KeyboardEvent(
+				'keydown', { key: "Enter", code: "Enter", keyCode: KeyboardEvent.DOM_VK_RETURN, bubbles: true }
+			));
+			await modifyPromise;
+
+			assert.equal(item1.getField('publicationTitle'), differentTitle);
+			assert.equal(item2.getField('publicationTitle'), differentTitle);
+			assert.equal(item3.getField('publicationTitle'), differentTitle);
+			assert.equal(item4.getField('publicationTitle'), differentTitle);
+		});
+
+		it("should not show View Online button for URL and DOI fields in batch edit mode", async function () {
+			let item1 = await createDataObject('item', { itemType: 'journalArticle' });
+			item1.setField('url', 'https://example.com/1');
+			item1.setField('DOI', '10.1234/test1');
+			await item1.saveTx();
+
+			let item2 = await createDataObject('item', { itemType: 'journalArticle' });
+			item2.setField('url', 'https://example.com/2');
+			item2.setField('DOI', '10.1234/test2');
+			await item2.saveTx();
+
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+
+			let urlLink = itemBox.querySelector('#itembox-field-url-link');
+			let doiLink = itemBox.querySelector('#itembox-field-DOI-link');
+
+			// View Online buttons should not exist in batch edit mode
+			assert.isNull(urlLink, "URL View Online button should not be present in batch edit mode");
+			assert.isNull(doiLink, "DOI View Online button should not be present in batch edit mode");
+		});
+
+		it("should not show date field status or tooltip in batch edit mode", async function () {
+			let item1 = await createDataObject('item', { itemType: 'journalArticle' });
+			item1.setField('date', '2024-01-15');
+			await item1.saveTx();
+
+			let item2 = await createDataObject('item', { itemType: 'journalArticle' });
+			item2.setField('date', '2023-06-20');
+			await item2.saveTx();
+
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+
+			// Date field status indicator (y m d) should not be present
+			let dateStatus = itemBox.querySelector('#zotero-date-field-status');
+			assert.isNull(dateStatus, "date field status should not be present in batch edit mode");
+
+			// Date field should not have a tooltip
+			let dateField = itemBox.querySelector('editable-text[fieldname="date"]');
+			assert.ok(dateField, "date field should exist");
+			assert.isNull(dateField.getAttribute('tooltiptext'), "date field should not have a tooltip in batch edit mode");
+		});
+
+		it("should transform title case for all items in batch edit mode", async function () {
+			let titleCaseTitle = "The Great Gatsby";
+			let sentenceCaseTitle = "to kill a mockingbird";
+
+			// Create two books with different titles in different cases
+			let item1 = await createDataObject('item', { itemType: 'book' });
+			item1.setField('title', titleCaseTitle);
+			await item1.saveTx();
+
+			let item2 = await createDataObject('item', { itemType: 'book' });
+			item2.setField('title', sentenceCaseTitle);
+			await item2.saveTx();
+
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			// Find the title field
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+			let titleField = itemBox.querySelector('editable-text[fieldname="title"]');
+			assert.ok(titleField, "title field should exist");
+
+			// Find and click the options button for the title field
+			let optionsButton = itemBox.querySelector('#itembox-field-title-options');
+			assert.ok(optionsButton, "options button should exist");
+
+			// Click the options button to open the context menu
+			let menuPromise = new Promise((resolve) => {
+				let observer = new MutationObserver((mutations) => {
+					for (let mutation of mutations) {
+						for (let node of mutation.addedNodes) {
+							if (node.tagName === 'menupopup') {
+								observer.disconnect();
+								resolve(node);
+							}
+						}
+					}
+				});
+				observer.observe(itemBox.querySelector('#info-box > popupset'), { childList: true });
+			});
+
+			optionsButton.click();
+			let menupopup = await menuPromise;
+
+			let titleCaseMenuItem = Array.from(menupopup.querySelectorAll('menuitem'))
+				.find(item => item.getAttribute('label') === Zotero.getString('zotero.item.textTransform.titlecase'));
+			assert.ok(titleCaseMenuItem, "title case menu item should exist");
+
+			let modifyPromise = waitForItemEvent('modify');
+			titleCaseMenuItem.click();
+			// Label should not flash individual values -- it stays as "Multiple" in batch mode
+			assert.equal(titleField.value, '', "title field value should remain empty in batch mode");
+			assert.equal(titleField.placeholder, 'Multiple', "title field should still show Multiple placeholder");
+			await modifyPromise;
+
+			assert.equal(item1.getField('title'), "The Great Gatsby", "item1 should remain in title case");
+			assert.equal(item2.getField('title'), "To Kill a Mockingbird", "item2 should be transformed to title case");
+		});
+	});
+
+	it("should not focus read-only fields with multiple values", async function () {
+		let item1 = await createDataObject('item', { itemType: 'journalArticle' });
+		item1.setField('title', 'Item 1');
+		await item1.saveTx();
+
+		let item2 = await createDataObject('item', { itemType: 'journalArticle' });
+		item2.setField('title', 'Item 2');
+		await item2.saveTx();
+
+		await ZoteroPane.selectItems([item1.id, item2.id]);
+
+		let itemPane = win.ZoteroPane.itemPane;
+		let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+		let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+		batchEditEnableBtn.click();
+		await itemDetails._renderPromise;
+
+		let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+		let dateModifiedField = itemBox.querySelector('editable-text[fieldname="dateModified"]');
+		assert.ok(dateModifiedField, "dateModified field should exist");
+		assert.isTrue(dateModifiedField.readOnly, "dateModified should be read-only");
+		assert.isTrue(dateModifiedField.multipleValues, "dateModified should have multiple values");
+		assert.equal(
+			dateModifiedField.placeholder,
+			Zotero.getString('item-pane-batch-editing-multiple-values-placeholder')
+		);
+
+		// tabIndex should be -1 to prevent tab navigation
+		assert.equal(dateModifiedField.ref.tabIndex, -1, "tabIndex should be -1");
+
+		// Clicking the field should not focus it
+		await activateZoteroPane();
+		await Zotero.Promise.delay(50);
+		dateModifiedField.ref.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+		await waitForFrame();
+
+		assert.isFalse(dateModifiedField.focused, "read-only multiple-values field should not be focusable via click");
+		assert.equal(
+			dateModifiedField.placeholder,
+			Zotero.getString('item-pane-batch-editing-multiple-values-placeholder'),
+			"Multiple placeholder should not be cleared"
+		);
+	});
 });
