@@ -88,6 +88,10 @@ module.exports = class {
 	 * Call to remove the windowed-list from the container
 	 */
 	destroy() {
+		if (this._scrollRafId) {
+			cancelAnimationFrame(this._scrollRafId);
+			this._scrollRafId = null;
+		}
 		if (this.innerElem) {
 			this.targetElement.removeEventListener('scroll', this._handleScroll);
 			this.targetElement.removeChild(this.innerElem);
@@ -284,7 +288,7 @@ module.exports = class {
 	_handleScroll = (event) => {
 		const { scrollOffset: prevScrollOffset } = this;
 		const { clientHeight, scrollHeight, scrollTop } = event.currentTarget;
-		
+
 		if (prevScrollOffset === scrollTop) {
 			// Scroll position may have been updated by cDM/cDU,
 			// In which case we don't need to trigger another render,
@@ -301,7 +305,13 @@ module.exports = class {
 		this.scrollDirection = prevScrollOffset < scrollOffset ? 1 : -1;
 		this.scrollOffset = scrollOffset;
 		this._resetScrollDirection();
-		this.render();
+		// Coalesce multiple scroll events into a single render per animation frame
+		if (!this._scrollRafId) {
+			this._scrollRafId = requestAnimationFrame(() => {
+				this._scrollRafId = null;
+				this.render();
+			});
+		}
 	};
 	
 	_binarySearchOffsets(array, searchValue, lookupByOffset=false) {

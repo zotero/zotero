@@ -117,13 +117,14 @@ var ZoteroPane = new function () {
 		this.itemPane = document.querySelector("#zotero-item-pane");
 		ZoteroPane_Local.updateLayout();
 		this.updateWindow();
-		window.addEventListener("resize", () => {
+		this._onResize = Zotero.Utilities.debounce(() => {
 			this.updateWindow();
-			let tabsDeck = document.querySelector('#tabs-deck')
+			let tabsDeck = document.querySelector('#tabs-deck');
 			if (!tabsDeck || tabsDeck.getAttribute('selectedIndex') == 0) {
 				this.updateLayoutConstraints();
 			}
-		});
+		}, 100);
+		window.addEventListener("resize", this._onResize);
 		window.setTimeout(this.updateLayoutConstraints.bind(this), 0);
 		
 		Zotero.updateQuickSearchBox(document);
@@ -746,7 +747,11 @@ var ZoteroPane = new function () {
 		if (!Zotero || !Zotero.initialized || !_loaded) {
 			return;
 		}
-		
+
+		if (this._onResize) {
+			window.removeEventListener("resize", this._onResize);
+		}
+
 		this.serializePersist();
 
 		if(this.collectionsView) this.collectionsView.unregister();
@@ -754,7 +759,7 @@ var ZoteroPane = new function () {
 		if (_syncRemindersObserverID) {
 			Zotero.Notifier.unregisterObserver(_syncRemindersObserverID);
 		}
-		
+
 		this.uninitContainers();
 		
 		observerService.removeObserver(_reloadObserver, "zotero-reloaded");

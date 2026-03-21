@@ -401,9 +401,10 @@ Zotero.Notifier = new function () {
 				};
 				
 				// Remove redundant ids
+				let seen = new Set();
 				for (let i = 0; i < queue[type][event].ids.length; i++) {
 					let id = queue[type][event].ids[i];
-					
+
 					// Don't send modify on nonexistent items or tags
 					if (event == 'modify') {
 						if (type == 'item' && !((await Zotero.Items.getAsync(id)))) {
@@ -413,8 +414,9 @@ Zotero.Notifier = new function () {
 							continue;
 						}
 					}
-					
-					if (runQueue[type][event].ids.indexOf(id) == -1) {
+
+					if (!seen.has(id)) {
+						seen.add(id);
 						runQueue[type][event].ids.push(id);
 					}
 				}

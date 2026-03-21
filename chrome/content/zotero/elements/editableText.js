@@ -211,6 +211,11 @@
 			this.render();
 		}
 
+		destroy() {
+			this._resizeObserver?.disconnect();
+			this.removeEventListener('keydown', this._captureAutocompleteKeydown, true);
+		}
+
 		render() {
 			let autocompleteParams = this.autocomplete;
 			let autocompleteEnabled = !this.multiline && !!autocompleteParams;

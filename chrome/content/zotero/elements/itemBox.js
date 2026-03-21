@@ -169,6 +169,7 @@
 
 			Zotero.Prefs.unregisterObserver(this._prefsObserverID);
 
+			this._creatorTypeMenu?.removeEventListener('command', this._handleCreatorTypeChange);
 			this._id('zotero-creator-transform-menu')?.removeEventListener('popupshowing', this._handleCreatorTransformMenuShowing);
 			this._id('zotero-creator-transform-menu')?.removeEventListener('command', this._handleCreatorTransformMenuCommand);
 			this._id('creator-transform-swap-names')?.removeEventListener('command', this._handleCreatorTransformSwapNames);

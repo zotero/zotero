@@ -90,11 +90,12 @@ var ZoteroContextPane = new function () {
 
 		this.context = _contextPaneInner;
 
-		window.addEventListener('resize', this.update);
+		this._onResize = Zotero.Utilities.throttle(this.update, 100);
+		window.addEventListener('resize', this._onResize);
 	};
 
 	this.destroy = function () {
-		window.removeEventListener('resize', this.update);
+		window.removeEventListener('resize', this._onResize);
 	};
 
 	this.updateAddToNote = () => {
