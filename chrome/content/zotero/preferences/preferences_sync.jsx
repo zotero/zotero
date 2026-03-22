@@ -435,10 +435,11 @@ Zotero_Preferences.Sync = {
 		let confirmationText = await document.l10n.formatValue(
 			'preferences-account-switch-confirmation-text',
 		);
-		let [title, text, acceptLabel] = await document.l10n.formatValues([
+		let [title, text, acceptLabel, moreInfo] = await document.l10n.formatValues([
 			'general-warning',
 			{ id: 'preferences-account-switch-text', args: { username } },
 			'preferences-account-switch-accept',
+			'general-more-information',
 		]);
 		text += "\n\n" + await document.l10n.formatValue(
 			'general-type-to-continue',
@@ -449,9 +450,15 @@ Zotero_Preferences.Sync = {
 			text,
 			acceptLabel,
 			confirmationText,
+			extra2Label: moreInfo,
 		};
 		window.openDialog("chrome://zotero/content/hardConfirmationDialog.xhtml", "",
 			"chrome,dialog,dependent,modal,centerscreen", io);
+
+		if (io.extra2) {
+			Zotero.launchURL("https://www.zotero.org/support/kb/switching_accounts");
+			return;
+		}
 
 		if (!io.accept) {
 			return;
