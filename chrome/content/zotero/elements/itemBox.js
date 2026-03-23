@@ -603,7 +603,7 @@
 					}
 				}
 				// Hidden open-link button just for focus management
-				else if (['url', 'homepage', 'DOI', 'PMID', 'PMCID'].includes(fieldName)) {
+				if (!openLinkButton && ['url', 'homepage', 'DOI', 'PMID', 'PMCID'].includes(fieldName)) {
 					openLinkButton = this.createOpenLinkIcon(null, fieldName);
 				}
 				let rowData = document.createElement('div');
