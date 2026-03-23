@@ -1510,8 +1510,9 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 	let max = this.apiClient.MAX_OBJECTS_PER_REQUEST;
 	let sql = "SELECT key FROM items LEFT JOIN groupItems GI USING (itemID) "
 		+ "WHERE libraryID=? AND (GI.itemID IS NULL OR GI.createdByUserID IS NULL) "
-		+ `ORDER BY itemID LIMIT ${max}`;
-	let keys = await Zotero.DB.columnQueryAsync(sql, this.libraryID);
+		+ `AND items.itemID > ? ORDER BY items.itemID LIMIT ${max}`;
+	let minItemID = 0;
+	let keys = await Zotero.DB.columnQueryAsync(sql, [this.libraryID, minItemID]);
 	if (!keys.length) {
 		await Zotero.DB.queryAsync(
 			"REPLACE INTO settings VALUES ('sync', ?, 1)",
@@ -1523,16 +1524,7 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 	Zotero.debug(`Updating item users in ${this.library.name}`);
 
 	let updatedItemIDs = [];
-	let lastCount;
 	while (keys.length) {
-		// If no progress was made, some items can't be resolved -- mark
-		// as complete so we don't retry every sync
-		if (keys.length === lastCount) {
-			Zotero.debug(`${keys.length} items remaining without user data -- stopping`);
-			break;
-		}
-		lastCount = keys.length;
-
 		let { json: jsonItems, error } = await this.apiClient.downloadObjects(
 			this.library.libraryType, this.libraryTypeID, 'item', keys
 		)[0];
@@ -1550,7 +1542,6 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 			let item = Zotero.Items.getByLibraryAndKey(this.libraryID, jsonItem.key);
 			let params = [null, null];
 
-			// This should almost always exist, but maybe doesn't for some old items?
 			if (jsonItem.meta.createdByUser) {
 				let { id: userID, username, name } = jsonItem.meta.createdByUser;
 				await Zotero.Users.setName(userID, name !== '' ? name : username);
@@ -1567,7 +1558,12 @@ Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
 			updatedItemIDs.push(item.id);
 		}
 
-		keys = await Zotero.DB.columnQueryAsync(sql, this.libraryID);
+		// Advance past this batch using the last key from the query
+		let lastItem = Zotero.Items.getByLibraryAndKey(
+			this.libraryID, keys[keys.length - 1]
+		);
+		minItemID = lastItem.id;
+		keys = await Zotero.DB.columnQueryAsync(sql, [this.libraryID, minItemID]);
 	}
 
 	await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('sync', ?, 1)", settingKey);
