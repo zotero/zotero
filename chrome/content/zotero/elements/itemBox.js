@@ -583,8 +583,27 @@
 						addLinkContextMenu = true;
 					}
 				}
+				else if (fieldName == 'PMID' && val && typeof val == 'string') {
+					let pmid = val.trim();
+					if (/^\d+$/.test(pmid)) {
+						link = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`;
+						openLinkButton = this.createOpenLinkIcon(link, fieldName);
+						addLinkContextMenu = true;
+					}
+				}
+				else if (fieldName == 'PMCID' && val && typeof val == 'string') {
+					let pmcid = val.trim().toUpperCase();
+					if (/^\d+$/.test(pmcid)) {
+						pmcid = `PMC${pmcid}`;
+					}
+					if (/^PMC\d+$/.test(pmcid)) {
+						link = `https://pmc.ncbi.nlm.nih.gov/articles/${pmcid}/`;
+						openLinkButton = this.createOpenLinkIcon(link, fieldName);
+						addLinkContextMenu = true;
+					}
+				}
 				// Hidden open-link button just for focus management
-				else if (['url', 'homepage', 'DOI'].includes(fieldName)) {
+				else if (['url', 'homepage', 'DOI', 'PMID', 'PMCID'].includes(fieldName)) {
 					openLinkButton = this.createOpenLinkIcon(null, fieldName);
 				}
 				let rowData = document.createElement('div');
