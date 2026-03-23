@@ -1583,7 +1583,7 @@ class EditorInstanceUtilities {
 
 			if (!annotation.text
 				&& !annotation.comment
-				&& !annotation.imageAttachmentKey
+				&& annotation.type !== 'image'
 				|| annotation.type === 'ink') {
 				continue;
 			}
@@ -1650,6 +1650,9 @@ class EditorInstanceUtilities {
 				let width = Math.round(rectWidth * CSS_UNITS * PDFJS_DEFAULT_SCALE);
 				let height = Math.round(rectHeight * width / rectWidth);
 				imageHTML = `<img data-attachment-key="${annotation.imageAttachmentKey}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
+			}
+			else if (annotation.type === 'image') {
+				imageHTML = Zotero.getString('annotation-image-not-available');
 			}
 
 			// Text
