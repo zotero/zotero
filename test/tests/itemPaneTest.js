@@ -683,6 +683,37 @@ describe("Item pane", function () {
 			assert.equal(doc.activeElement.parentNode.id, "itembox-field-value-series");
 			assert.equal(doc.activeElement.value, "Series name");
 		});
+
+		it("should not loose focus on Tab from invalid DOI", async function () {
+			var item = new Zotero.Item('journalArticle');
+			item.setField('DOI', '10.3390/fluids10110300');
+			await item.saveTx();
+			await ZoteroPane.selectItem(item.id);
+
+			var itemBox = doc.getElementById('zotero-editpane-info-box');
+
+			// Focus the valid DOI field and tab from it
+			let doiField = itemBox.querySelector('#itembox-field-value-DOI');
+			doiField.focus();
+			assert.isTrue(doiField.contains(doc.activeElement));
+
+			Services.focus.moveFocus(win, doc.activeElement, Services.focus.MOVEFOCUS_FORWARD, 0);
+			await waitForItemEvent('modify');
+
+			// The open-link button for DOI should be focused
+			assert.equal(doc.activeElement.id, 'itembox-field-DOI-link');
+
+			// Now set DOI to an invalid value and tab from it again
+			doiField.focus();
+			doiField.value = '123';
+
+			Services.focus.moveFocus(win, doc.activeElement, Services.focus.MOVEFOCUS_FORWARD, 0);
+			await waitForItemEvent('modify')
+
+			// Focus should land on the citation key field
+			let citationKeyField = itemBox.querySelector('#itembox-field-value-citationKey');
+			assert.isTrue(citationKeyField.contains(doc.activeElement));
+		});
 	});
 
 	describe("Libraries and collections pane", function () {
