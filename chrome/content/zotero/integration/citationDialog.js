@@ -1313,7 +1313,7 @@ const IOManager = {
 		}
 	},
 
-	handleItemClick(event) {
+	async handleItemClick(event) {
 		let targetItem = event.target.closest(".item");
 		let multiselectable = targetItem.closest("[data-multiselectable]");
 		
@@ -1349,7 +1349,12 @@ const IOManager = {
 		let itemsToAdd = Array.from(itemIDs).map(itemID => SearchHandler.getItem(itemID));
 		// while adding annotations, clicking on selected non-annotation(s) will select them in itemTree
 		if (DIALOG_STATE.isAddingAnnotations() && !itemsToAdd.every(i => i.isAnnotation())) {
-			libraryLayout.itemsView.selectItems([...itemIDs].map(id => parseInt(id)));
+			let selected = await libraryLayout.itemsView.selectItems([...itemIDs].map(id => parseInt(id)));
+			// if no items were selected, select item's group in collection tree and try again
+			if (!selected) {
+				await libraryLayout.collectionsView.selectLibrary(itemsToAdd[0].libraryID);
+				libraryLayout.itemsView.selectItems([...itemIDs].map(id => parseInt(id)));
+			}
 			_id("zotero-items-tree").querySelector("[tabindex]").focus();
 			return;
 		}
