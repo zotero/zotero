@@ -2487,15 +2487,17 @@ Zotero.Integration.Session.prototype.openCitationExplorer = async function () {
 	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/citationExplorer.xhtml', 'resizable', io);
 	
 	if (io.openCitationDialog) {
-		let citations = await this.cite(io.openCitationDialog);
-		if (this.data.prefs.delayCitationUpdates) {
-			for (let citation of citations) {
-				await this.writeDelayedCitation(citation.field, citation);
+		try {
+			await this.cite(io.openCitationDialog);
+		}
+		catch (e) {
+			if (!(e instanceof Zotero.Exception.Alert)) {
+				Zotero.debug("An error occurred while citing from Citation Explorer. Document will be updated.");
+				Zotero.logError(e);
 			}
-		} else {
-			return this.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 		}
 	}
+	return this.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 };
 
 
