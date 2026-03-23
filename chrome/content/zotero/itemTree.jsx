@@ -1872,31 +1872,118 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._restoreSelection(savedSelection);
 	}
 
-	expandAllRows() {
+	/**
+	 *  Expand rows level by level.
+	 * 	If all regular items are collapsed, they are toggled open to reveal attachments.
+	 *	If some regular items are expanded, only remaining collapsed regular items are toggled open.
+	 *	If all regular items are expanded, their attachments' rows will be expanded to reveal annotations.
+	 *	If there are expanded attachments rows, all rows on all levels are expanded.
+	 *  @param {Boolean} acrossAllLevels - Expand rows across all levels
+	 */
+	expandAllRows(acrossAllLevels) {
+		// Do nothing if there are no rows
+		if (this.rowCount == 0) return;
 		this.selection.selectEventsSuppressed = true;
 		var selectedItems = this.getSelectedObjects();
-		for (var i=0; i<this.rowCount; i++) {
-			if (this.isContainer(i) && !this.isContainerOpen(i)) {
+		// Remember scroll position of an anchor row relative to the viewport
+		let isFocusedRowVisible = this.selection.focused >= this._treebox.getFirstVisibleRow() && this.selection.focused <= this._treebox.getLastVisibleRow();
+		// The anchor row is the selected row if it is visible OR the first visible row otherwise
+		let anchorRowIndex = isFocusedRowVisible ? this.selection.focused : this._treebox.getFirstVisibleRow();
+		let anchorItemID = this.getRow(anchorRowIndex).ref.treeViewID;
+		let anchorOffset = this._treebox._getItemPosition(anchorRowIndex) - this._treebox.scrollOffset;
+		let deepestExpandedLevel = 0;
+		// Find the deepest expanded container level
+		for (let i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && this.isContainerOpen(i) && this.getLevel(i) > deepestExpandedLevel) {
+            	deepestExpandedLevel = this.getLevel(i);
+       		}
+		}
+		// Check if there are any remaining rows on that level to expand
+		let rowsToExpandAtThatLevel = false;
+		for (let i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && !this.isContainerOpen(i) && this.getLevel(i) == deepestExpandedLevel) {
+				rowsToExpandAtThatLevel = true;
+				break;
+			}
+		}
+		// If not, move to the next level
+		if (!rowsToExpandAtThatLevel) {
+			deepestExpandedLevel++;
+		}
+		// Expand containers
+		for (var i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && !this.isContainerOpen(i) && (acrossAllLevels || this.getLevel(i) <= deepestExpandedLevel)) {
 				this.toggleOpenState(i, true);
 			}
 		}
 		this._refreshRowMap();
-		this._restoreSelection(selectedItems);
+		this._restoreSelection(selectedItems, false, true);
+		// Restore scroll position so the anchor row stays in place
+		let newRowIndex = this._rowMap[anchorItemID];
+		let newPosition = this._treebox._getItemPosition(newRowIndex);
+		this._treebox.scrollTo(newPosition - anchorOffset);
+		
 		this.tree.invalidate();
 		this.selection.selectEventsSuppressed = false;
 	}
 
 
-	collapseAllRows() {
+	/**
+	 * Collapse all rows up one level.
+	 * If there are expanded attachment container rows, only they are collapsed.
+	 * Otherwise, expanded regular items are collapsed.
+	 * @param {Boolean} acrossAllLevels - Collapse rows across all levels
+	 */
+	collapseAllRows(acrossAllLevels = false) {
+		// Do nothing if there are no rows
+		if (this.rowCount == 0) return;
 		this.selection.selectEventsSuppressed = true;
 		const selectedItems = this.getSelectedObjects();
-		for (var i=0; i<this.rowCount; i++) {
-			if (this.isContainer(i)) {
+		// Remember scroll position of an anchor row relative to the viewport
+		let isFocusedRowVisible = this.selection.focused >= this._treebox.getFirstVisibleRow() && this.selection.focused <= this._treebox.getLastVisibleRow();
+		// The anchor row is the selected row if it is visible OR the first visible row otherwise
+		let anchorRowIndex = isFocusedRowVisible ? this.selection.focused : this._treebox.getFirstVisibleRow();
+		let anchorItemID = this.getRow(anchorRowIndex).ref.treeViewID;
+		let anchorOffset = this._treebox._getItemPosition(anchorRowIndex) - this._treebox.scrollOffset;
+		// Also record scroll position of anchor row's visible parent, in case anchor row is collapsed
+		let parentItemOffset;
+		if (Zotero.Items.get(anchorItemID).parentItemID) {
+			let parentIndex = this._rowMap[Zotero.Items.get(anchorItemID).parentItem.treeViewID];
+			if (parentIndex >= this._treebox.getFirstVisibleRow()) {
+				parentItemOffset = this._treebox._getItemPosition(parentIndex) - this._treebox.scrollOffset;
+			}
+		}
+		// Find the deepest level that has expanded containers
+		let maxLevelWithCollapsed = -1;
+		for (let i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && this.isContainerOpen(i) && this.getLevel(i) > maxLevelWithCollapsed) {
+				maxLevelWithCollapsed = this.getLevel(i);
+			}
+		}
+		// Collapse containers at that level
+		for (var i = 0; i < this.rowCount; i++) {
+			if (this.isContainer(i) && this.isContainerOpen(i) && (acrossAllLevels || this.getLevel(i) === maxLevelWithCollapsed)) {
 				this._closeContainer(i, true);
 			}
 		}
 		this._refreshRowMap();
-		this._restoreSelection(selectedItems, false);
+		this._restoreSelection(selectedItems, false, true);
+
+		// Restore scroll position so the anchor row stays in place
+		let newRowIndex = this._rowMap[anchorItemID];
+		// If the anchor row was collapsed, fall back to its parent
+		if (newRowIndex === undefined) {
+			let parent = Zotero.Items.get(anchorItemID).parentItem;
+			newRowIndex = this._rowMap[parent.treeViewID];
+			// Preserve the scroll position of the parent, if it was visible
+			// If it was not visible, just scroll parent exactly to the top
+			anchorOffset = parentItemOffset || 0;
+		}
+		if (newRowIndex !== undefined) {
+			let newPosition = this._treebox._getItemPosition(newRowIndex);
+			this._treebox.scrollTo(newPosition - anchorOffset);
+		}
+		
 		this.tree.invalidate();
 		this.selection.selectEventsSuppressed = false;
 	};
