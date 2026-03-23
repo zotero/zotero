@@ -1448,9 +1448,13 @@ class EditorInstance {
 	 * @param {Object} options
 	 * @param {Integer} options.parentID - Creates standalone note if not provided
 	 * @param {Integer} options.collectionID - Only valid if parentID not provided
+	 * @param {Boolean} options.noSave - If true, note item is not saved and ink/image annotations are
+	 *									embedded as "data:image/..." strings instead of via imageAttachmentKey.
+	 * @param {Boolean} options.noComments - If true, annotation comments are skipped
+	 * @param {Boolean} options.noHeader - If true, header is not added to the note
 	 * @returns {Promise<Zotero.Item>}
 	 */
-	static async createNoteFromAnnotations(annotations, { parentID, collectionID } = {}) {
+	static async createNoteFromAnnotations(annotations, { parentID, collectionID, noSave, noComments, noHeader } = {}) {
 		if (!annotations.length) {
 			throw new Error("No annotations provided");
 		}
@@ -1470,34 +1474,46 @@ class EditorInstance {
 		}
 
 		let note = new Zotero.Item('note');
-		note.libraryID = annotations[0].libraryID;
-		if (parentID) {
-			note.parentID = parentID;
+		if (!noSave) {
+			note.libraryID = annotations[0].libraryID;
+			if (parentID) {
+				note.parentID = parentID;
+			}
+			else if (collectionID) {
+				note.addToCollection(collectionID);
+			}
+			await note.saveTx();
 		}
-		else if (collectionID) {
-			note.addToCollection(collectionID);
-		}
-		await note.saveTx();
 		let editorInstance = new EditorInstance();
 		editorInstance._item = note;
 		let jsonAnnotations = [];
 		for (let annotation of annotations) {
 			let attachmentItem = Zotero.Items.get(annotation.parentID);
 			let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
+			if (noComments) {
+				jsonAnnotation.comment = null;
+			}
 			jsonAnnotation.attachmentItemID = attachmentItem.id;
 			jsonAnnotation.id = annotation.key;
 			jsonAnnotations.push(jsonAnnotation);
 		}
 
-		let vars = {
-			title: Zotero.getString('reader-annotations'),
-			date: new Date().toLocaleString()
-		};
-		let html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
-		// New line is needed for note title parser
-		html += '\n';
+		let html = '';
+		if (!noHeader) {
+			let vars = {
+				title: Zotero.getString('reader-annotations'),
+				date: new Date().toLocaleString()
+			};
+			html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
+			// New line is needed for note title parser
+			html += '\n';
+		}
 
-		await editorInstance.importImages(jsonAnnotations);
+		// If there is no real note item saved, do not import images as annotations.
+		// Instead, serializeAnnotations below will embed images as "data:image/..." strings
+		if (!noSave) {
+			await editorInstance.importImages(jsonAnnotations);
+		}
 
 		let multipleParentParent = false;
 		let lastParentParentID;
@@ -1559,7 +1575,9 @@ class EditorInstance {
 		}
 		html = `<div data-citation-items="${citationItems}" data-schema-version="${schemaVersion}">${html}</div>`;
 		note.setNote(html);
-		await note.saveTx();
+		if (!noSave) {
+			await note.saveTx();
+		}
 		return note;
 	}
 }
@@ -1583,8 +1601,8 @@ class EditorInstanceUtilities {
 
 			if (!annotation.text
 				&& !annotation.comment
-				&& annotation.type !== 'image'
-				|| annotation.type === 'ink') {
+				&& !annotation.image
+				&& annotation.type !== 'image') {
 				continue;
 			}
 
@@ -1636,12 +1654,31 @@ class EditorInstanceUtilities {
 			}
 
 			// Image
-			if (annotation.imageAttachmentKey) {
-				// // let imageAttachmentKey = await this._importImage(annotation.image);
-				// delete annotation.image;
-
+			if (annotation.imageAttachmentKey || annotation.image) {
+				// Find the bounding rectangle of the annotation
+				let rect;
+				if (annotation.type == "ink") {
+					let x = annotation.position.paths[0][0];
+					let y = annotation.position.paths[0][1];
+					rect = [x, y, x, y];
+					for (let path of annotation.position.paths) {
+						for (let i = 0; i < path.length - 1; i += 2) {
+							let x = path[i];
+							let y = path[i + 1];
+							rect[0] = Math.min(rect[0], x);
+							rect[1] = Math.min(rect[1], y);
+							rect[2] = Math.max(rect[2], x);
+							rect[3] = Math.max(rect[3], y);
+						}
+					}
+				}
+				else if (annotation.type == "image") {
+					rect = annotation.position.rects[0];
+				}
+				else {
+					throw new Error("Unexpected annotation type for image embedding: " + annotation.type);
+				}
 				// Normalize image dimensions to 1.25 of the print size
-				let rect = annotation.position.rects[0];
 				let rectWidth = rect[2] - rect[0];
 				let rectHeight = rect[3] - rect[1];
 				// Constants from pdf.js
@@ -1649,7 +1686,13 @@ class EditorInstanceUtilities {
 				const PDFJS_DEFAULT_SCALE = 1.25;
 				let width = Math.round(rectWidth * CSS_UNITS * PDFJS_DEFAULT_SCALE);
 				let height = Math.round(rectHeight * width / rectWidth);
-				imageHTML = `<img data-attachment-key="${annotation.imageAttachmentKey}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
+				// if imageAttachmentKey is provided, use it in the HTML, otherwise use data:image/... string as src
+				if (annotation.imageAttachmentKey) {
+					imageHTML = `<img data-attachment-key="${annotation.imageAttachmentKey}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
+				}
+				else {
+					imageHTML = `<img class="${annotation.type}" src="${annotation.image}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
+				}
 			}
 			else if (annotation.type === 'image') {
 				imageHTML = Zotero.getString('annotation-image-not-available');
@@ -1674,7 +1717,7 @@ class EditorInstanceUtilities {
 			else if (['note', 'text'].includes(annotation.type)) {
 				template = Zotero.Prefs.get('annotations.noteTemplates.note');
 			}
-			else if (annotation.type === 'image') {
+			else {
 				template = '<p>{{image}}<br/>{{citation}} {{comment}}</p>';
 			}
 
