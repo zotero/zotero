@@ -33,8 +33,9 @@ const Icons = require('components/icons');
  * @property {string} label - The column label. Either a string or the id to an i18n string.
  * @property {string} [pluginID] - Set plugin ID to auto remove column when plugin is removed.
  * @property {string[]} [enabledTreeIDs=[]] - Which tree ids the column should be enabled in. If undefined, enabled in main tree. If ["*"], enabled in all trees.
- * @property {string[]} [defaultIn] - Will be deprecated. Types of trees the column is default in. Can be [default, feed];
- * @property {string[]} [disabledIn] - Will be deprecated. Types of trees where the column is not available
+ * @property {string[]} [disabledIn] - Types of collectionTreeRow where the column is not available. See itemTree.js#_matchesViewType()
+ * @property {string[]} [enabledIn] - Types of collectionTreeRow where the column is enabled. See itemTree.js#_matchesViewType(). Intersected with disabledIn.
+ * @property {string[]} [defaultIn] - Types of collectionTreeRow the column is default in. See itemTree.js#_matchesViewType()
  * @property {boolean} [dependsOnChildren=false] - Set to true if the column depends on child item data (e.g. numNotes, lastRead)
  * @property {boolean} [sortReverse=false] - Default: false. Set to true to reverse the sort order
  * @property {number} [flex=1] - Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
@@ -61,7 +62,7 @@ const COLUMNS = [
 	{
 		dataKey: "title",
 		primary: true,
-		defaultIn: ["default", "feeds", "feed", "recentlyRead"],
+		defaultIn: ["*"],
 		label: "itemFields.title",
 		showInColumnPicker: false,
 		flex: 4,
@@ -69,7 +70,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "firstCreator",
-		defaultIn: ["default", "feeds", "feed", "recentlyRead"],
+		defaultIn: ["*"],
 		label: "zotero.items.creator_column",
 		showInColumnPicker: true,
 		flex: 1,
@@ -351,7 +352,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "hasAttachment",
-		defaultIn: ["default", "recentlyRead"],
+		defaultIn: ["*"],
 		disabledIn: ["feeds", "feed"],
 		showInColumnPicker: true,
 		dependsOnChildren: true,
@@ -375,7 +376,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "addedBy",
-		groupLibrariesOnly: true,
+		enabledIn: ["group"],
 		showInColumnPicker: true,
 		columnPickerSubMenu: true,
 		label: "items-column-added-by",
@@ -384,7 +385,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "lastModifiedBy",
-		groupLibrariesOnly: true,
+		enabledIn: ["group"],
 		showInColumnPicker: true,
 		columnPickerSubMenu: true,
 		label: "items-column-modified-by",

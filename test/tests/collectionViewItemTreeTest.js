@@ -2762,37 +2762,6 @@ describe("CollectionViewItemTree", function () {
 		});
 	});
 	
-	describe("Added By column", function () {
-		it("should show in a group library and hide in a personal library", async function () {
-			let getTableColumns = () => itemsView.tree._columns.getAsArray();
-
-			// Start in personal library
-			await selectLibrary(win);
-			itemsView = zp.itemsView;
-			assert.notOk(
-				getTableColumns().find(c => c.dataKey === 'addedBy'),
-				"addedBy column should not be present in personal library"
-			);
-
-			// Switch to a group library
-			let group = await createGroup();
-			await selectLibrary(win, group.libraryID);
-			itemsView = zp.itemsView;
-			assert.ok(
-				getTableColumns().find(c => c.dataKey === 'addedBy'),
-				"addedBy column should be present in group library"
-			);
-
-			// Switch back to personal library
-			await selectLibrary(win);
-			itemsView = zp.itemsView;
-			assert.notOk(
-				getTableColumns().find(c => c.dataKey === 'addedBy'),
-				"addedBy column should not be present after switching back to personal library"
-			);
-		});
-	});
-
 	describe('Advanced Search', function () {
 		describe('#notify', function () {
 			it('should resolve the returned promise when an item is selected', async function() {
@@ -2884,6 +2853,69 @@ describe("CollectionViewItemTree", function () {
 			finally {
 				stub.restore();
 			}
+		});
+	});
+
+	describe("enabledIn columns", function () {
+		it("should preserve column position and visibility across view switches", async function () {
+			let group = await createGroup();
+			let groupLibraryID = group.libraryID;
+
+			// Switch to group library
+			await selectLibrary(win, groupLibraryID);
+			itemsView = zp.itemsView;
+
+			// Find addedBy column and enable it
+			let columns = itemsView._getColumns();
+			let addedByIndex = columns.findIndex(c => c.dataKey == 'addedBy');
+			assert.notEqual(addedByIndex, -1, 'addedBy column should exist in group view');
+			let addedByCol = columns[addedByIndex];
+			if (addedByCol.hidden) {
+				itemsView.tree._columns.toggleHidden(addedByIndex);
+			}
+			// Confirm it's visible
+			columns = itemsView._getColumns();
+			addedByCol = columns.find(c => c.dataKey == 'addedBy');
+			assert.isFalse(addedByCol.hidden, 'addedBy should be visible after toggle');
+
+			// Move addedBy to ordinal 2 (between other visible columns)
+			itemsView.tree._columns.setOrder(
+				columns.findIndex(c => c.dataKey == 'addedBy'), 2
+			);
+
+			// Record visible columns and addedBy position
+			columns = itemsView._getColumns();
+			let visibleBefore = columns.filter(c => !c.hidden).map(c => c.dataKey);
+			let addedByOrdinalBefore = columns.find(c => c.dataKey == 'addedBy').ordinal;
+			assert.include(visibleBefore, 'addedBy');
+
+			// Switch to user library — addedBy should not be there
+			await selectLibrary(win);
+			itemsView = zp.itemsView;
+			columns = itemsView._getColumns();
+			let addedByInUserLib = columns.find(c => c.dataKey == 'addedBy');
+			assert.isTrue(addedByInUserLib.disabled, 'addedBy should be disabled in user library');
+
+			// Verify addedBy is not in visible columns rendered by tree
+			let visibleInUserLib = itemsView.tree._getVisibleColumns().map(c => c.dataKey);
+			assert.notInclude(visibleInUserLib, 'addedBy');
+
+			// Switch back to group library
+			await selectLibrary(win, groupLibraryID);
+			itemsView = zp.itemsView;
+
+			// addedBy should still be visible and at the same ordinal
+			columns = itemsView._getColumns();
+			addedByCol = columns.find(c => c.dataKey == 'addedBy');
+			assert.isFalse(addedByCol.hidden, 'addedBy should be visible after switching back');
+			assert.isFalse(!!addedByCol.disabled, 'addedBy should not be disabled in group');
+			assert.equal(addedByCol.ordinal, addedByOrdinalBefore,
+				'addedBy ordinal should be preserved after switching views');
+
+			// Verify it's still in the same position among visible columns
+			let visibleAfter = columns.filter(c => !c.hidden).map(c => c.dataKey);
+			assert.deepEqual(visibleAfter, visibleBefore,
+				'visible column order should be preserved');
 		});
 	});
 })
