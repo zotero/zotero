@@ -859,6 +859,7 @@ Zotero.Sync.APIClient.prototype = {
 		opts.headers = this.getHeaders(options.headers);
 		opts.noCache = !options.cache;
 		opts.foreground = !options.background;
+		opts.anon = true;
 		opts.responseType = options.responseType || 'text';
 		if (options.body && options.body.length >= this.MIN_GZIP_SIZE
 				&& Zotero.Prefs.get('sync.server.compressData')) {

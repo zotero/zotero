@@ -33,7 +33,6 @@
  *         <li>attachmentMode - One of Zotero.Translate.ItemSaver.ATTACHMENT_* specifying how attachments should be saved</li>
  *         <li>linkFiles - Save attachments as linked files instead of stored files</li>
  *         <li>forceTagType - Force tags to specified tag type</li>
- *         <li>cookieSandbox - Cookie sandbox for attachment requests</li>
  *         <li>proxy - A proxy to deproxify item URLs</li>
  *         <li>baseURI - URI to which attachment paths should be relative</li>
  *         <li>saveOptions - Options to pass to DataObject::save() (e.g., skipSelect)</li>
@@ -57,7 +56,6 @@ Zotero.Translate.ItemSaver = function (options) {
 	this._linkFiles = options.linkFiles;
 	this._forceTagType = options.forceTagType;
 	this._referrer = options.referrer;
-	this._cookieSandbox = options.cookieSandbox;
 	this._proxy = options.proxy;
 	this._itemToJSONItem = new Map();
 	
@@ -987,7 +985,6 @@ Zotero.Translate.ItemSaver.prototype = {
 			fileBaseName,
 			contentType: mimeType,
 			referrer: this._referrer,
-			cookieSandbox: this._cookieSandbox,
 			collections: !parentItemID ? this._collections : undefined,
 			saveOptions: this._saveOptions,
 		});

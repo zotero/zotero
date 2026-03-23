@@ -456,9 +456,8 @@ Zotero.Utilities.Internal = {
 	 * @param {nsIURI} uri URL
 	 * @param {nsIFile|string path} target file
 	 * @param {Object} [headers]
-	 * @param {Zotero.CookieSandbox} [cookieSandbox]
 	 */
-	saveURI: function (wbp, uri, target, headers, cookieSandbox) {
+	saveURI: function (wbp, uri, target, headers) {
 		Zotero.warn("Zotero.Utilities.Internal.saveURI() is deprecated -- use Zotero.HTTP.download()");
 		
 		// Handle gzip encoding
@@ -476,11 +475,6 @@ Zotero.Utilities.Internal = {
 		
 		if (headers) {
 			headers = Object.keys(headers).map(x => x + ": " + headers[x]).join("\r\n") + "\r\n";
-		}
-		
-		// Untested
-		if (cookieSandbox) {
-			cookieSandbox.attachToInterfaceRequestor(wbp.progressListener);
 		}
 		
 		// TODO: Check/fix cookie stuff
@@ -1343,13 +1337,11 @@ Zotero.Utilities.Internal = {
 	 * Run translation on a Document to try to find a PDF URL
 	 *
 	 * @param {Document} doc
-	 * @param {Zotero.CookieSandbox} cookieSandbox
 	 * @return {{ title: string, url: string } | false} - PDF attachment title and URL, or false if none found
 	 */
-	getFileFromDocument: async function (doc, { cookieSandbox } = {}) {
+	getFileFromDocument: async function (doc) {
 		let translate = new Zotero.Translate.Web();
 		translate.setDocument(doc);
-		translate.setCookieSandbox(cookieSandbox);
 		var translators = await translate.getTranslators();
 		// TEMP: Until there's a generic webpage translator
 		if (!translators.length) {
