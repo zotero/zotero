@@ -675,7 +675,7 @@ class ReaderInstance {
 			this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 		}
 		this._flushState();
-		if (this._item?.id) {
+		if (this._item?.id && !this._isTransient()) {
 			Zotero.Notifier.trigger('close', 'file', this._item.id);
 		}
 		if (this._blockingObserver && this._iframe) {
@@ -971,6 +971,9 @@ class ReaderInstance {
 	}
 
 	async _setState(state) {
+		if (this._isTransient()) {
+			return;
+		}
 		let item = Zotero.Items.get(this._item.id);
 		if (item) {
 			let lastPageIndex;
@@ -1091,6 +1094,10 @@ class ReaderInstance {
 			}
 		}
 		return null;
+	}
+
+	_isTransient() {
+		return false;
 	}
 
 	_isReadOnly() {
@@ -2326,6 +2333,10 @@ class ReaderPreview extends ReaderInstance {
 		}
 	}
 
+	_isTransient() {
+		return true;
+	}
+
 	_isReadOnly() {
 		return true;
 	}
@@ -2346,8 +2357,6 @@ class ReaderPreview extends ReaderInstance {
 		}
 		return super._getState();
 	}
-
-	async _setState() {}
 
 	updateTitle() {}
 
