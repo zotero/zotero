@@ -57,7 +57,7 @@ export class CitationDialogHelpers {
 			titleWrapper.setAttribute("q-mark-close", Zotero.getString("punctuation.closingQMark"));
 		}
 		else {
-			title = Zotero.getString(`pdfReader.${item.annotationType}Annotation`);
+			title = Zotero.getString(`reader-${item.annotationType}-annotation`);
 		}
 		Zotero.Utilities.Internal.renderItemTitle(title, titleNode);
 		return titleWrapper;
@@ -358,7 +358,7 @@ export class CitationDialogHelpers {
 				annotationContent = annotationComment;
 			}
 			else {
-				annotationContent = Zotero.getString(`pdfReader.${item.annotationType}Annotation`);
+				annotationContent = Zotero.getString(`reader-${item.annotationType}-annotation`);
 			}
 			while (item.parentItem) {
 				item = item.parentItem;
