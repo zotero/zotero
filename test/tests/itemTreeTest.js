@@ -1059,7 +1059,63 @@ describe("Zotero.ItemTree", function () {
 			assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 		});
 		
-		describe("Remove from Recently Read", function () {
+		describe("Recently Read quicksearch", function () {
+		let quicksearch;
+
+		before(() => {
+			quicksearch = win.document.getElementById('zotero-tb-search-textbox');
+		});
+		afterEach(async () => {
+			quicksearch.value = "";
+			quicksearch.doCommand();
+			await zp.itemsView._refreshPromise;
+		});
+
+		it("should find parent item by title", async function () {
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			let item = await createDataObject('item', { title: 'Unique Parent Title ZZZ' });
+			let attachment = await importPDFAttachment(item);
+			attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+			await attachment.saveTx();
+
+			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+			await waitForItemsLoad(win);
+			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+
+			quicksearch.value = "Unique Parent Title ZZZ";
+			quicksearch.doCommand();
+			await zp.itemsView._refreshPromise;
+
+			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+		});
+
+		it("should not show non-matching parent item", async function () {
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			let matchItem = await createDataObject('item', { title: 'Matching Item AAA' });
+			let matchAttachment = await importPDFAttachment(matchItem);
+			matchAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
+			await matchAttachment.saveTx();
+
+			let otherItem = await createDataObject('item', { title: 'Other Item BBB' });
+			let otherAttachment = await importPDFAttachment(otherItem);
+			otherAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
+			await otherAttachment.saveTx();
+
+			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+			await waitForItemsLoad(win);
+			assert.isNumber(zp.itemsView.getRowIndexByID(matchItem.id));
+			assert.isNumber(zp.itemsView.getRowIndexByID(otherItem.id));
+
+			quicksearch.value = "Matching Item AAA";
+			quicksearch.doCommand();
+			await zp.itemsView._refreshPromise;
+
+			assert.isNumber(zp.itemsView.getRowIndexByID(matchItem.id));
+			assert.isFalse(zp.itemsView.getRowIndexByID(otherItem.id));
+		});
+	});
+
+	describe("Remove from Recently Read", function () {
 		it("should remove a parent item when the parent is selected", async function () {
 			let userLibraryID = Zotero.Libraries.userLibraryID;
 			let item = await createDataObject('item');

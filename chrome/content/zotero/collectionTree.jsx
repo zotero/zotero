@@ -3027,6 +3027,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			s.name = Zotero.getString('recently-read');
 			s.addCondition('libraryID', 'is', libraryID);
 			s.addCondition('lastRead', 'isInTheLast', '14 days');
+			s.addCondition('includeParents', 'true');
 			rows.splice(row + 1 + newRows, 0,
 				new Zotero.CollectionTreeRow(this, 'recentlyRead', s, level + 1));
 			newRows++;
