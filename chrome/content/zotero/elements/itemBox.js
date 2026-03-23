@@ -584,7 +584,7 @@
 					}
 				}
 				else if (fieldName == 'PMID' && val && typeof val == 'string') {
-					let pmid = val.trim().replace(/^PMID:\s*/i, '');
+					let pmid = val.trim();
 					if (/^\d+$/.test(pmid)) {
 						link = `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`;
 						openLinkButton = this.createOpenLinkIcon(link, fieldName);
@@ -592,7 +592,7 @@
 					}
 				}
 				else if (fieldName == 'PMCID' && val && typeof val == 'string') {
-					let pmcid = val.trim().replace(/^PMCID:\s*/i, '').toUpperCase();
+					let pmcid = val.trim().toUpperCase();
 					if (/^\d+$/.test(pmcid)) {
 						pmcid = `PMC${pmcid}`;
 					}
