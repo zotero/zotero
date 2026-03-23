@@ -116,6 +116,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		if (this.collectionTreeRow && this.collectionTreeRow.id === collectionTreeRow.id) {
 			return;
 		}
+		let resetColumns = false;
+		if (this.collectionTreeRow?.type != collectionTreeRow.type) {
+			resetColumns = true;
+		}
 		this.collectionTreeRow = collectionTreeRow;
 
 		// Set ID based on visibilityGroup
@@ -131,7 +135,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// Emit loading state - only setCollectionTreeRow shows loading UI
 		await this.runListeners('update', null, { loading: true });
 		await this.itemTree._ensureSortContextReady();
-		this.itemTree._getColumns();
+		resetColumns && await this.itemTree._resetColumns();
 		await this.refresh({ forceSortAll: idChanged });
 	}
 
@@ -852,6 +856,14 @@ class CollectionViewItemTree extends ItemTree {
 
 	get visibilityGroup() {
 		return this.collectionTreeRow?.visibilityGroup ?? 'default';
+	}
+
+	get viewType() {
+		let ctr = this.collectionTreeRow;
+		if (!ctr) return 'default';
+		let type = ctr.type;
+		if (ctr.isWithinGroup?.()) return type + '-group';
+		return type;
 	}
 
 	get isSortable() {

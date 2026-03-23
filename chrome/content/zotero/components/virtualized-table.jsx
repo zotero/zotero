@@ -1429,9 +1429,13 @@ class VirtualizedTable extends React.Component {
 	}
 
 	async _resetColumns() {
-		this.invalidate();
 		this._columns = new Columns(this);
-		await new Promise((resolve) => {this.forceUpdate(resolve)});
+		return new Promise((resolve) => {
+			this.forceUpdate(() => {
+				this._jsWindow.invalidate();
+				resolve();
+			});
+		})
 	}
 	
 	// Set aria-activedescendant on table container
@@ -1626,9 +1630,10 @@ var Columns = class {
 			// Fixed width columns can sometimes somehow obtain a width property
 			// this fixes it for users that may have run into the bug
 			if (column.fixedWidth && typeof columnsSettings[column.dataKey] == "object") {
-				delete columnsSettings[column.dataKey].width;;
+				delete columnsSettings[column.dataKey].width;
 			}
-			column = Object.assign({}, column, columnsSettings[column.dataKey]);
+			// Don't load column settings for disabled columns (they are overriden to be hidden)
+			column = Object.assign({}, column, column.disabled ? {} : columnsSettings[column.dataKey]);
 			column.className = cx(column.className, column.dataKey, column.dataKey + this._cssSuffix,
 				{ 'fixed-width': column.fixedWidth });
 			if (column.type) {
@@ -1648,32 +1653,22 @@ var Columns = class {
 		// if new columns got added recently
 		columns.forEach((column, index) => column.ordinal = index);
 
-		// Setting column widths
-		const visibleColumns =
-			columns.reduce((accumulator, column) => accumulator += column.hidden ? 0 : 1, 0);
-		const containerWidth = this._virtualizedTable._containerWidth;
+		// Compute initial CSS widths for visible columns. Widths are not persisted
+		// from here — they flow to disk only when the user resizes (see onResize).
 		let columnWidths = {};
-		for (let i = 0; i < columns.length; i++) {
-			let column = columns[i];
-
-			if (!column.hidden) {
-				if (column.width) {
-					columnWidths[column.dataKey] = column.width;
-				}
-				else {
-					column.flex = column.flex || 1;
-					columnWidths[column.dataKey] = column.width = containerWidth / visibleColumns * (column.flex || 1);
-				}
+		for (let column of columns) {
+			if (column.disabled || column.hidden) continue;
+			if (column.width) {
+				columnWidths[column.dataKey] = column.width;
 			}
-			// Serializing back column settings for storage
-			columnsSettings[column.dataKey] = this._getColumnPrefsToPersist(column);
+			else {
+				column.flex = column.flex || 1;
+				columnWidths[column.dataKey] = column.width = this._computeFlexWidth(column);
+			}
 		}
-		// Storing back persist settings to account for legacy upgrades
-		this._storePrefs(columnsSettings);
 
 		// Set column width CSS rules
 		this.onResize(columnWidths);
-		// Whew, all this just to get a list of columns
 	}
 
 	_initializeStyleMap() {
@@ -1758,10 +1753,6 @@ var Columns = class {
 			if (column.hidden) continue;
 			const styleIndex = this._columnStyleMap[window.CSS.escape(dataKey)];
 			const columnPadding = column.iconLabel ? 0 : COLUMN_PADDING;
-			if (storePrefs && !column.fixedWidth) {
-				column.width = width;
-				prefs[dataKey] = this._getColumnPrefsToPersist(column);
-			}
 			if (column.fixedWidth) {
 				width = column.width;
 			}
@@ -1777,6 +1768,10 @@ var Columns = class {
 				width = (width - columnPadding);
 				Zotero.debug(`Columns ${dataKey} width ${width}`);
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `calc(var(--extra-width, 0px) + ${width}px`);
+			}
+			if (storePrefs) {
+				column.width = width;
+				prefs[dataKey] = this._getColumnPrefsToPersist(column);
 			}
 		}
 		if (storePrefs) {
@@ -1842,14 +1837,13 @@ var Columns = class {
 		const column = this._columns[index];
 		column.hidden = !column.hidden;
 
-		if (!column.hidden && !column.width) {
+		if (!column.hidden && !column.width && !(column.fixedWidth || column.staticWidth)) {
 			column.width = this._computeFlexWidth(column);
 		}
 
 		let prefs = this._getPrefs();
-		if (prefs[column.dataKey]) {
-			prefs[column.dataKey].hidden = column.hidden;
-		}
+		prefs[column.dataKey] = prefs[column.dataKey] || {};
+		prefs[column.dataKey].hidden = column.hidden;
 		this.onResize(Object.fromEntries(this._columns.map(c => [c.dataKey, c.width])));
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();

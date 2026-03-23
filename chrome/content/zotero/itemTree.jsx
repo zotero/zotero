@@ -1003,6 +1003,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 	get visibilityGroup() {
 		return 'default';
 	}
+	
+	get viewType() {
+		return 'library';
+	}
 
 	get isSortable() {
 		return true;
@@ -1896,6 +1900,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			const column = columns[i];
 			// Filter out columns that are not shown in the column picker
 			if (column.showInColumnPicker === false) continue;
+			// Skip columns disabled for the current view
+			if (column.disabled) continue;
 			let label = formatColumnName(column);
 			let menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('type', 'checkbox');
@@ -1904,9 +1910,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			menuitem.addEventListener('command', () => this.tree._columns.toggleHidden(i));
 			if (!column.hidden) {
 				menuitem.setAttribute('checked', true);
-			}
-			if (column.disabledIn && column.disabledIn.includes(this.visibilityGroup)) {
-				menuitem.setAttribute('disabled', true);
 			}
 			columnMenuitemElements[column.dataKey] = menuitem;
 			menupopup.appendChild(menuitem);
@@ -1926,7 +1929,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let moreItems = [];
 			for (let i = 0; i < columns.length; i++) {
 				const column = columns[i];
-				if (column.columnPickerSubMenu) {
+				if (column.columnPickerSubMenu && !column.disabled) {
 					moreItems.push(columnMenuitemElements[column.dataKey]);
 				}
 			}
@@ -2355,15 +2358,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_storeColumnPrefs = (prefs) => {
-		// Even if we don't persist column info we still need to store it on the itemTree instance
-		// otherwise sorting and such breaks after dragging columns
-		this._columns = this._columns.map(column => Object.assign(column, prefs[column.dataKey]))
-			.sort((a, b) => a.ordinal - b.ordinal);
-		
-		if (!this.props.columnPicker) return;
+		if (!this.props.columnPicker) {
+			// Without columnPicker, prefs aren't persisted. Still invalidate the
+			// cached column array so the next _getColumns() rebuild picks up any
+			// user-initiated changes (e.g., column drag order).
+			this._columnsId = null;
+			return;
+		}
 		Zotero.debug(`Storing itemTree ${this.id} column prefs`, 2);
 		// Preserve prefs for columns not active in the current view (e.g.,
-		// group-only columns when viewing a personal library)
+		// group-only columns when viewing a personal library) so their
+		// settings (ordinal, width, etc.) come back when the view switches.
 		if (this._columnPrefs) {
 			for (let [key, val] of Object.entries(this._columnPrefs)) {
 				if (!(key in prefs) && COLUMNS.some(c => c.dataKey === key)) {
@@ -2372,10 +2377,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		this._columnPrefs = prefs;
-		if (!this._columns) {
-			Zotero.debug(new Error(), 1);
-		}
-		
+		// Invalidate the cached _columns array; next _getColumns() call will
+		// rebuild canonical state from COLUMNS defs + _columnPrefs + viewType.
+		this._columnsId = null;
+
 		this._writeColumnPrefsToFile();
 	}
 	
@@ -2431,41 +2436,41 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	};
 
-	_setLegacyColumnSettings(column) {
-		let persistSettings = JSON.parse(Zotero.Prefs.get('pane.persist') || "{}");
-		const legacyDataKey = "zotero-items-column-" + column.dataKey;
-		const legacyPersistSetting = persistSettings[legacyDataKey];
-		if (legacyPersistSetting) {
-			// Remove legacy pref
-			delete persistSettings[legacyDataKey];
-			for (const key in legacyPersistSetting) {
-				if (typeof legacyPersistSetting[key] == "string") {
-					if (key == 'sortDirection') {
-						legacyPersistSetting[key] = legacyPersistSetting[key] == 'ascending' ? 1 : -1;
-					}
-					else {
-						try {
-							legacyPersistSetting[key] = JSON.parse(legacyPersistSetting[key]);
-						} catch (e) {}
-					}
-				}
-				if (key == 'ordinal') {
-					legacyPersistSetting[key] /= 2;
-				}
-			}
-			Zotero.Prefs.set('pane.persist', JSON.stringify(persistSettings));
-		}
-		return Object.assign({}, column, legacyPersistSetting || {});
+	/**
+	 * Check if a list of view types includes the current view.
+	 *
+	 * Matches against collectionTreeRow.type (e.g. 'library', 'collection',
+	 * 'feed', 'recentlyRead', 'group', etc.).
+	 *
+	 * The special value "*" matches any view type.
+	 *
+	 * "group" matches any view within a group library (not just the group root).
+	 *
+	 * "default" matches any type not in the special visibility groups
+	 * (feed, feeds, recentlyRead) — i.e. standard library/collection/search/trash views.
+	 *
+	 * @param {string[]} viewTypes
+	 * @returns {boolean}
+	 */
+	_matchesViewType(viewTypes) {
+		if (viewTypes.includes('*')) return true;
+		let viewType = this.viewType;
+		if (!viewType) return false;
+		// Direct match (e.g. 'feed', 'recentlyRead', 'library-group')
+		if (viewTypes.includes(viewType)) return true;
+		// 'group' matches any view within a group library (viewType ends with '-group')
+		if (viewTypes.includes('group') && viewType.endsWith('-group')) return true;
+		// Base type match without the '-group' suffix (e.g. 'library' matches 'library-group')
+		let baseType = viewType.replace(/-group$/, '');
+		if (viewTypes.includes(baseType)) return true;
+		// 'default' matches any type not in the special visibility groups
+		if (viewTypes.includes('default') && !Zotero.CollectionTreeRow.visibilityGroups[baseType]) return true;
+		return false;
 	}
 
 	_getColumns() {
-		const visibilityGroup = this.visibilityGroup;
-		const prefKey = this.id;
-		// Include group status in cache key so groupLibrariesOnly columns
-		// are recalculated when switching between personal and group libraries
-		let cacheKey = prefKey
-			+ (this.collectionTreeRow.isWithinGroup?.() ? '-group' : '');
-		if (this._columnsId == cacheKey) {
+		const prefKey = this.id + '-' + this.viewType;
+		if (this._columnsId == prefKey) {
 			return this._columns;
 		}
 
@@ -2478,13 +2483,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 		const columns = this.getColumns();
 		let hasDefaultIn = columns.some(column => 'defaultIn' in column);
 		for (let column of columns) {
+			// Determine if this column is disabled for the current view
+			let columnDisabled = false;
 			if (this.props.columnPicker) {
-				if (column.disabledIn && column.disabledIn.includes(visibilityGroup)) continue;
-				if (column.groupLibrariesOnly && (!this.collectionTreeRow.isWithinGroup || !this.collectionTreeRow.isWithinGroup())) continue;
-				const columnSettings = columnsSettings[column.dataKey];
-				if (!columnSettings && this.id === 'main') {
-					column = this._setLegacyColumnSettings(column);
+				if (column.enabledIn) {
+					columnDisabled = !this._matchesViewType(column.enabledIn);
 				}
+				else if (column.disabledIn && this._matchesViewType(column.disabledIn)) {
+					columnDisabled = true;
+				}
+				const columnSettings = columnsSettings[column.dataKey];
 
 				// Also includes a `hidden` pref and overrides the above if available
 				column = Object.assign({}, column, columnSettings || {});
@@ -2497,10 +2505,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			else {
 				column = Object.assign({}, column);
 			}
+			// Disabled columns are always hidden and cannot be toggled
+			if (columnDisabled) {
+				column.hidden = true;
+				column.disabled = true;
+			}
 			// Initial hidden value
-			if (!("hidden" in column)) {
-				if (hasDefaultIn && visibilityGroup) {
-					column.hidden = !(column.defaultIn && column.defaultIn.includes(visibilityGroup));
+			else if (!("hidden" in column)) {
+				if (hasDefaultIn && this.collectionTreeRow) {
+					column.hidden = !(column.defaultIn && this._matchesViewType(column.defaultIn));
 				}
 				else {
 					column.hidden = false;
