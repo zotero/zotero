@@ -750,6 +750,9 @@ class PDFWorker {
 			Zotero.debug(`Rendering ${annotations.length} annotation(s) for attachment ${attachment.key}`);
 
 			let path = await attachment.getFilePathAsync();
+			if (!path) {
+				return 0;
+			}
 			let buf = await OS.File.read(path, {});
 			buf = new Uint8Array(buf).buffer;
 
