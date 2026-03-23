@@ -404,8 +404,128 @@ describe("Zotero.Search", function () {
 					var matches = await s.search();
 					assert.sameMembers(matches, [annotation.id]);
 				});
+
+				it("should not return parent item on 'doesNotContain' condition", async function () {
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					var annotation = await createAnnotation('highlight', attachment, { annotationComment: "some comment" });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('annotationText', 'doesNotContain', 'nonexistent');
+					var matches = await s.search();
+					assert.include(matches, annotation.id);
+					assert.notInclude(matches, item.id);
+					assert.notInclude(matches, attachment.id);
+				});
 			});
-			
+
+			describe("title", function () {
+				it("should not return annotations for a 'doesNotContain' condition", async function () {
+					var item = await createDataObject('item', { title: 'Test Title' });
+					var attachment = await importPDFAttachment(item);
+					var annotation = await createAnnotation('highlight', attachment);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('title', 'doesNotContain', 'nonexistent');
+					var matches = await s.search();
+					assert.include(matches, item.id);
+					assert.notInclude(matches, annotation.id);
+				});
+			});
+
+			describe("annotationColor", function () {
+				it("should return annotation matching color", async function () {
+					var attachment = await importPDFAttachment();
+					var annotationOne = await createAnnotation('highlight', attachment, { annotationColor: '#ffd400' });
+					var annotationTwo = await createAnnotation('highlight', attachment, { annotationColor: '#ff6666' });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('annotationColor', 'is', '#ffd400');
+					var matches = await s.search();
+					assert.include(matches, annotationOne.id);
+					assert.notInclude(matches, annotationTwo.id);
+				});
+			});
+
+			describe("annotationType", function () {
+				it("should return annotation matching type", async function () {
+					var attachment = await importPDFAttachment();
+					var annotationOne = await createAnnotation('highlight', attachment);
+					var annotationTwo = await createAnnotation('underline', attachment);
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('annotationType', 'is', Zotero.Annotations.ANNOTATION_TYPE_HIGHLIGHT);
+					var matches = await s.search();
+					assert.include(matches, annotationOne.id);
+					assert.notInclude(matches, annotationTwo.id);
+				});
+			});
+
+			describe("annotationAuthor", function () {
+				it("should return annotation by matching author and not by another", async function () {
+					var group = await getGroup();
+
+					await Zotero.Users.setName(12345, 'User One');
+					await Zotero.Users.setName(67890, 'User Two');
+
+					var groupAttachment = await importFileAttachment('test.pdf', {
+						libraryID: group.libraryID,
+						contentType: 'application/pdf',
+					});
+
+					var annotation1 = await createAnnotation('highlight', groupAttachment);
+					annotation1.createdByUserID = 12345;
+					annotation1.lastModifiedByUserID = 12345;
+					await annotation1.saveTx({ skipEditCheck: true });
+
+					var annotation2 = await createAnnotation('highlight', groupAttachment);
+					annotation2.createdByUserID = 67890;
+					annotation2.lastModifiedByUserID = 67890;
+					await annotation2.saveTx({ skipEditCheck: true });
+
+					var s = new Zotero.Search();
+					s.libraryID = group.libraryID;
+					s.addCondition('annotationAuthor', 'is', 12345);
+					var matches = await s.search();
+					assert.include(matches, annotation1.id);
+					assert.notInclude(matches, annotation2.id);
+				});
+
+				it("should not return annotation by matching author with 'isNot'", async function () {
+					var group = await getGroup();
+
+					await Zotero.Users.setName(12345, 'User One');
+					await Zotero.Users.setName(67890, 'User Two');
+
+					var groupAttachment = await importFileAttachment('test.pdf', {
+						libraryID: group.libraryID,
+						contentType: 'application/pdf',
+					});
+
+					var annotation1 = await createAnnotation('highlight', groupAttachment);
+					annotation1.createdByUserID = 12345;
+					annotation1.lastModifiedByUserID = 12345;
+					await annotation1.saveTx({ skipEditCheck: true });
+
+					var annotation2 = await createAnnotation('highlight', groupAttachment);
+					annotation2.createdByUserID = 67890;
+					annotation2.lastModifiedByUserID = 67890;
+					await annotation2.saveTx({ skipEditCheck: true });
+
+					var s = new Zotero.Search();
+					s.libraryID = group.libraryID;
+					s.addCondition('annotationAuthor', 'isNot', 12345);
+					var matches = await s.search();
+					assert.notInclude(matches, annotation1.id);
+					assert.include(matches, annotation2.id);
+					assert.notInclude(matches, groupAttachment.id);
+				});
+			});
+
 			describe("fulltextWord", function () {
 				it("should return matches with full-text conditions", async function () {
 					let s = new Zotero.Search();
