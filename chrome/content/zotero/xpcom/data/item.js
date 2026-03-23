@@ -1017,7 +1017,7 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 		}
 		// If no comment or text exists: "Ink annotation"/"Image annotation"
 		if (!title.length) {
-			title = Zotero.getString(`pdfReader.${this.annotationType}Annotation`);
+			title = Zotero.getString(`reader-${this.annotationType}-annotation`);
 		}
 	}
 	

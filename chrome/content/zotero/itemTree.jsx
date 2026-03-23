@@ -3385,7 +3385,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			else {
 				// Catch all - use annotation type as the title
-				let annotationTypeName = Zotero.getString(`pdfReader.${item.annotationType}Annotation`);
+				let annotationTypeName = Zotero.getString(`reader-${item.annotationType}-annotation`);
 				title = this._renderCell(index, annotationTypeName, titleRowData, true);
 			}
 			div.prepend(title);
