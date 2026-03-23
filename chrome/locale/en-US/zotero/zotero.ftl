@@ -654,6 +654,10 @@ new-collection-create-in = Create in:
 show-publications-menuitem =
     .label = Show My Publications
 
+file-renaming-settings-window =
+    .title = Configure File Renaming
+file-renaming-settings-library-label = Library:
+
 attachment-info-title = Title
 attachment-info-filename = Filename
 attachment-info-accessed = Accessed

@@ -73,6 +73,7 @@
 @import "components/window";
 @import "components/newCollectionDialog";
 @import "components/reader";
+@import "components/fileRenamingDialog";
 
 
 // Elements
@@ -114,3 +115,4 @@
 @import "elements/itemPane";
 @import "elements/itemPaneCustomSection";
 @import "elements/contextPane";
+@import "elements/fileRenamingSettings";

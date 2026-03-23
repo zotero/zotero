@@ -26,7 +26,6 @@
 "use strict";
 
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
-let { openRenameFilesPreview, promptAutoRenameFiles } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
 
 Zotero_Preferences.General = {
 	_openURLResolvers: null,
@@ -54,17 +53,14 @@ Zotero_Preferences.General = {
 		}
 		document.getElementById('openurl-primary-popup').firstChild.setAttribute('label', resolverName);
 		
-		this._renameFilesPrefObserver = Zotero.Prefs.registerObserver('autoRenameFiles.done', this._handleRenameFilesDonePrefChange.bind(this));
 		this.refreshLocale();
 		this._initItemPaneHeaderUI();
-		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
 		this._initEbookFontFamilyMenu();
 		this._initAutoDisableToolCheckbox();
 	},
 
 	uninit: function () {
-		Zotero.Prefs.unregisterObserver(this._renameFilesPrefObserver);
 	},
 
 	_getAutomaticLocaleMenuLabel: function () {
@@ -223,50 +219,10 @@ Zotero_Preferences.General = {
 		}
 	}),
 	
-	setAutoRenameFileTypes: function () {
-		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-box');
-		let enabledTypes = new Set(
-			Zotero.Prefs.get('autoRenameFiles.fileTypes')
-				.split(',')
-				.filter(Boolean)
+	openFileRenamingDialog: function () {
+		Services.ww.openWindow(null, 'chrome://zotero/content/fileRenamingDialog.xhtml',
+			'zotero-file-renaming-dialog', 'chrome,dialog=no,titlebar,centerscreen,resizable=yes', null
 		);
-		for (let checkbox of typesBox.querySelectorAll('checkbox')) {
-			if (checkbox.checked) {
-				enabledTypes.add(checkbox.dataset.contentType);
-			}
-			else {
-				enabledTypes.delete(checkbox.dataset.contentType);
-			}
-		}
-		Zotero.Prefs.set('autoRenameFiles.fileTypes', [...enabledTypes].join(','));
-		Zotero.Prefs.set('autoRenameFiles.done', false);
-	},
-	
-	updateAutoRenameFilesUI: function () {
-		let disabled = !Zotero.Prefs.get('autoRenameFiles');
-		
-		let typesBox = document.getElementById('zotero-prefpane-file-renaming-file-types-box');
-		let enabledTypes = Zotero.Prefs.get('autoRenameFiles.fileTypes').split(',');
-		for (let checkbox of typesBox.querySelectorAll('checkbox')) {
-			checkbox.checked = enabledTypes.includes(checkbox.dataset.contentType);
-			checkbox.disabled = disabled;
-		}
-		document.getElementById('rename-linked-files').disabled = disabled;
-		document.getElementById('file-renaming-general-rename-now').setAttribute('hidden', Zotero.Prefs.get('autoRenameFiles.done'));
-	},
-	
-	handleAutoRenameChange: function () {
-		if (Zotero.Prefs.get('autoRenameFiles')) {
-			promptAutoRenameFiles();
-		}
-	},
-
-	_handleRenameFilesDonePrefChange: function (newValue) {
-		document.getElementById('file-renaming-general-rename-now').setAttribute('hidden', newValue);
-	},
-
-	openRenameFilesPreview: function () {
-		openRenameFilesPreview();
 	},
 
 	//

@@ -22,10 +22,12 @@ preferences-file-renaming-file-type-audio =
     .label = { file-type-audio }
 preferences-file-renaming-file-type-video =
     .label = { file-type-video }
-preferences-file-renaming-customize-button =
-    .label = Customize Filename Format…
+preferences-file-renaming-configure-button =
+    .label = Configure File Renaming…
 preferences-file-renaming-rename-now =
     .label = Rename Files…
+preferences-file-renaming-rename-linked =
+    .label = Rename linked files
 
 preferences-file-renaming-format-title = Filename Format
 preferences-file-renaming-format-instructions = You can customize the filename pattern { -app-name } uses to rename attachment files from parent metadata.
