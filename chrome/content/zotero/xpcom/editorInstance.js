@@ -1467,7 +1467,6 @@ class EditorInstance {
 				}
 				catch (e) {
 					Zotero.debug(e);
-					throw e;
 				}
 				break;
 			}
