@@ -48,7 +48,8 @@ Zotero_Preferences.Sync = {
 
 		var username = Zotero.Users.getCurrentUsername() || Zotero.Prefs.get('sync.server.username') || " ";
 		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
-		this.displayFields(apiKey ? username : "");
+		let emails = apiKey ? Zotero.Users.getCurrentEmails() : undefined;
+		this.displayFields(apiKey ? username : "", { emails });
 		
 		var pass = await Zotero.Sync.Runner.getStorageController('webdav').getPassword();
 		if (pass) {
@@ -61,7 +62,10 @@ Zotero_Preferences.Sync = {
 					Zotero.Sync.Runner.getAPIClient({apiKey}),
 					{timeout: 5000}
 				);
-				this.displayFields(keyInfo.username);
+				this.displayFields(keyInfo.username, { emails: keyInfo.emails });
+				if (keyInfo.emails) {
+					await Zotero.Users.setCurrentEmails(keyInfo.emails);
+				}
 			}
 			catch (e) {
 				// API key wrong/invalid
@@ -107,24 +111,57 @@ Zotero_Preferences.Sync = {
 		}
 	},
 
-	displayFields: function (username) {
+	displayFields: function (username, { emails } = {}) {
 		let linkedUserID = Zotero.Users.getCurrentUserID();
 		let linkedUsername = Zotero.Users.getCurrentUsername()
 			|| Zotero.Prefs.get('sync.server.username')
 			|| "";
 		let loggedIn = !!username;
 		let loggedOutLinked = !loggedIn && !!linkedUserID;
+		let linked = loggedIn || loggedOutLinked;
 
-		document.getElementById('sync-unauthorized').hidden = loggedIn || loggedOutLinked;
-		document.getElementById('account-logged-out').hidden = !loggedOutLinked;
-		document.getElementById('sync-authorized').hidden = !loggedIn;
+		document.getElementById('sync-unauthorized').hidden = linked;
+		document.getElementById('account-linked').hidden = !linked;
 		document.getElementById('sync-reset').hidden = !loggedIn;
-		document.getElementById('sync-username').value = username;
-		if (loggedOutLinked) {
-			document.getElementById('account-logged-out-username').value = linkedUsername;
+
+		// Toggle logged-in vs logged-out elements within the linked container
+		document.getElementById('account-log-out-button').hidden = !loggedIn;
+		document.querySelector('.account-logged-out-status').hidden = !loggedOutLinked;
+		document.getElementById('account-logged-out-actions').hidden = !loggedOutLinked;
+		for (let elem of document.querySelectorAll('.sync-settings')) {
+			elem.hidden = !loggedIn;
 		}
 
+		let displayUsername = loggedIn ? username : linkedUsername;
+		document.getElementById('account-username').value = displayUsername;
+
+		if (!loggedIn && loggedOutLinked && emails === undefined) {
+			emails = Zotero.Users.getCurrentEmails();
+		}
+		this._updateEmails(emails);
+
 		this._showLoginDefault();
+	},
+
+
+	_updateEmails: function (emails) {
+		let label = document.getElementById('account-email-label');
+		let container = document.getElementById('account-emails');
+		container.replaceChildren();
+
+		if (!emails || !emails.length) {
+			label.hidden = true;
+			container.hidden = true;
+			return;
+		}
+
+		label.hidden = false;
+		container.hidden = false;
+		for (let email of emails) {
+			let emailLabel = document.createXULElement('label');
+			emailLabel.value = email;
+			container.appendChild(emailLabel);
+		}
 	},
 
 
@@ -246,7 +283,8 @@ Zotero_Preferences.Sync = {
 			window,
 			result.userID,
 			result.username,
-			result.displayName
+			result.displayName,
+			result.emails
 		);
 		if (!ok) {
 			// Session created an API key, but user decided not to use it
@@ -269,7 +307,7 @@ Zotero_Preferences.Sync = {
 		});
 
 		this._pendingSessionToken = null;
-		this.displayFields(result.username);
+		this.displayFields(result.username, { emails: result.emails });
 	},
 
 

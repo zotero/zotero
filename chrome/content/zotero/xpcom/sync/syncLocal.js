@@ -113,9 +113,10 @@ Zotero.Sync.Data.Local = {
 	 * @param {Integer} userID - New userID
 	 * @param {String} username - New username
 	 * @param {String} [name] - New display name
+	 * @param {String[]} [emails] - Email addresses
 	 * @return {Boolean} - True to continue, false to cancel
 	 */
-	checkUser: async function (win, userID, username, name) {
+	checkUser: async function (win, userID, username, name, emails) {
 		var lastUserID = Zotero.Users.getCurrentUserID();
 		var lastUsername = Zotero.Users.getCurrentUsername();
 		var lastName = Zotero.Users.getCurrentName();
@@ -179,6 +180,9 @@ Zotero.Sync.Data.Local = {
 			var newName = name || username;
 			if (lastName != newName) {
 				await Zotero.Users.setCurrentName(newName);
+			}
+			if (emails) {
+				await Zotero.Users.setCurrentEmails(emails);
 			}
 		});
 		

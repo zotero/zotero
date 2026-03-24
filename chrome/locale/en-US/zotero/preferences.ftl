@@ -148,6 +148,9 @@ preferences-account-cancel-button =
 preferences-account-logged-out-status =
     .value = (logged out)
 
+preferences-account-email-label =
+    .value = Email:
+
 preferences-account-switch-accounts =
     .label = Switch Accounts…
 preferences-account-switch-text =

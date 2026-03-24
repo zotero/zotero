@@ -194,7 +194,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				lastWin,
 				keyInfo.userID,
 				keyInfo.username,
-				keyInfo.displayName
+				keyInfo.displayName,
+				keyInfo.emails
 			);
 			if (!ok) {
 				Zotero.debug("User cancelled sync on username mismatch");

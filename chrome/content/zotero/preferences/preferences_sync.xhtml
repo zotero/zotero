@@ -53,17 +53,58 @@
 			</groupbox>
 		</vbox>
 
-		<vbox id="account-logged-out" hidden="true">
+		<vbox id="account-linked" hidden="true">
 			<groupbox data-l10n-id="preferences-sync-data-syncing-groupbox">
 				<label><html:h2 data-l10n-id="preferences-sync-data-syncing-heading"/></label>
 
-				<hbox align="center">
+				<html:div class="form-grid">
 					<label value="&zotero.preferences.sync.username;"/>
-					<label id="account-logged-out-username"/>
-					<label data-l10n-id="preferences-account-logged-out-status" class="account-logged-out-status"/>
-				</hbox>
+					<hbox>
+						<label id="account-username" value=""/>
+						<!-- Logged in -->
+						<button id="account-log-out-button"
+							data-l10n-id="preferences-account-log-out"
+							aria-describedby="account-username"
+							oncommand="Zotero_Preferences.Sync.unlinkAccount()"
+							hidden="true"/>
+						<!-- Logged out -->
+						<label data-l10n-id="preferences-account-logged-out-status"
+							class="account-logged-out-status" hidden="true"/>
+					</hbox>
 
-				<vbox style="margin-top: 8px">
+					<label id="account-email-label"
+						data-l10n-id="preferences-account-email-label"
+						hidden="true"/>
+					<vbox id="account-emails" hidden="true"/>
+
+					<!-- Logged in: sync settings -->
+					<box class="sync-settings" hidden="true"/>
+					<box class="sync-settings" hidden="true">
+						<button id="sync-libraries-button" label="&zotero.preferences.sync.librariesToSync.button;"
+							oncommand="Zotero_Preferences.Sync.showLibrariesToSyncDialog()"
+							data-search-strings="zotero.preferences.sync.librariesToSync"/>
+					</box>
+
+					<box class="sync-settings" hidden="true"/>
+					<checkbox class="sync-settings" hidden="true"
+						label="&zotero.preferences.sync.syncAutomatically;"
+						preference="extensions.zotero.sync.autoSync"
+						native="true"/>
+
+					<box class="sync-settings" hidden="true"/>
+					<checkbox class="sync-settings" hidden="true"
+						label="&zotero.preferences.sync.syncFullTextContent;"
+						preference="extensions.zotero.sync.fulltext.enabled"
+						tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"
+						native="true"/>
+
+					<box class="sync-settings" hidden="true"/>
+					<label class="sync-settings" hidden="true"
+						is="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
+				</html:div>
+
+				<!-- Logged out: login/switch buttons -->
+				<vbox id="account-logged-out-actions" style="margin-top: 8px" hidden="true">
 					<hbox class="account-login-default" style="gap: 8px">
 						<button data-l10n-id="preferences-account-log-in"
 							oncommand="Zotero_Preferences.Sync.linkAccount(event)"/>
@@ -77,43 +118,6 @@
 							oncommand="Zotero_Preferences.Sync.cancelLogin()"/>
 					</hbox>
 				</vbox>
-			</groupbox>
-		</vbox>
-
-		<vbox id="sync-authorized" hidden="true">
-			<groupbox data-l10n-id="preferences-sync-data-syncing-groupbox">
-				<label><html:h2 data-l10n-id="preferences-sync-data-syncing-heading"/></label>
-
-				<html:div class="form-grid">
-					<label value="&zotero.preferences.sync.username;"/>
-					<hbox>
-						<label id="sync-username" value="Username"/>
-						<button data-l10n-id="preferences-account-log-out"
-							aria-describedby="sync-username"
-							oncommand="Zotero_Preferences.Sync.unlinkAccount()"/>
-					</hbox>
-
-					<box/>
-					<box>
-						<button id="sync-libraries-button" label="&zotero.preferences.sync.librariesToSync.button;"
-							oncommand="Zotero_Preferences.Sync.showLibrariesToSyncDialog()"
-							data-search-strings="zotero.preferences.sync.librariesToSync"/>
-					</box>
-
-					<box/>
-					<checkbox label="&zotero.preferences.sync.syncAutomatically;"
-						preference="extensions.zotero.sync.autoSync"
-						native="true"/>
-
-					<box/>
-					<checkbox label="&zotero.preferences.sync.syncFullTextContent;"
-						preference="extensions.zotero.sync.fulltext.enabled"
-						tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"
-						native="true"/>
-
-					<box/>
-					<label is="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
-				</html:div>
 
 			</groupbox>
 
