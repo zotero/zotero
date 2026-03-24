@@ -1264,6 +1264,29 @@ describe("Zotero.ItemTree", function () {
 			assert.isNull(attachment1.attachmentLastRead);
 			assert.equal(attachment2.attachmentLastRead, lastRead);
 		});
+
+		it("should remove a group item when its lastRead synced setting is cleared", async function () {
+			let group = await createGroup();
+			let groupLibraryID = group.libraryID;
+			let item = await createDataObject('item', { libraryID: groupLibraryID });
+			let attachment = await importPDFAttachment(item);
+			let key = attachment._getLastReadSettingKey();
+
+			await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, key, Math.round(Date.now() / 1000));
+
+			await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
+			await waitForItemsLoad(win);
+			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+
+			// Simulate clearing via sync (as if another device removed it)
+			await Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, key, { skipDeleteLog: true });
+
+			// Wait for the notify to propagate and the view to refresh
+			await zp.itemsView._refreshPromise;
+
+			assert.isNull(attachment.attachmentLastRead);
+			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+		});
 	});
 
 	describe("Trash", function () {
