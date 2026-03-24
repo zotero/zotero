@@ -2117,7 +2117,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						}
 						for (let attachment of attachments) {
 							attachment.attachmentLastRead = null;
-							await attachment.save({ skipDateModifiedUpdate: true });
+							await attachment.save({ skipDateModifiedUpdate: true, skipEditCheck: true });
 						}
 					}
 				});

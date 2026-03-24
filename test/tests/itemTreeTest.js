@@ -1265,6 +1265,30 @@ describe("Zotero.ItemTree", function () {
 			assert.equal(attachment2.attachmentLastRead, lastRead);
 		});
 
+		it("should remove an item from a read-only group library", async function () {
+			let group = await createGroup();
+			let groupLibraryID = group.libraryID;
+			let item = await createDataObject('item', { libraryID: groupLibraryID });
+			let attachment = await importPDFAttachment(item);
+
+			attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+			await attachment.saveTx();
+
+			// Make the group read-only after creating test data
+			group.editable = false;
+			await group.saveTx();
+
+			await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
+			await waitForItemsLoad(win);
+			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+
+			await zp.itemsView.selectItem(item.id);
+			await zp.itemsView.deleteSelection();
+
+			assert.isNull(attachment.attachmentLastRead);
+			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+		});
+
 		it("should remove a group item when its lastRead synced setting is cleared", async function () {
 			let group = await createGroup();
 			let groupLibraryID = group.libraryID;
