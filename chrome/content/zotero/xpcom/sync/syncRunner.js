@@ -1683,6 +1683,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		this.resetStorageController('zfs');
 		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 		var client = this.getAPIClient({apiKey});
+		// Remove streaming subscription before clearing the key
+		await Zotero.Streamer.removeSyncSubscription();
 		await Zotero.Sync.Data.Local.setAPIKey();
 		await client.deleteAPIKey();
 	}

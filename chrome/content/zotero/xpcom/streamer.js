@@ -102,6 +102,28 @@ Zotero.Streamer_Module.prototype = {
 	},
 
 
+	/**
+	 * Remove the API key subscription before the key is deleted
+	 */
+	removeSyncSubscription: async function () {
+		if (!this._subscriptions.has('sync')) {
+			return;
+		}
+		let apiKey = this.apiKey || (await Zotero.Sync.Data.Local.getAPIKey());
+		if (!apiKey || !this._socket || this._socket.readyState !== this._socket.OPEN) {
+			this._subscriptions.delete('sync');
+			return;
+		}
+		let data = JSON.stringify({
+			action: 'deleteSubscriptions',
+			subscriptions: [{ apiKey }]
+		});
+		Zotero.debug("WebSocket message send: " + this._hideAPIKey(data));
+		this._socket.send(data);
+		this._subscriptions.delete('sync');
+	},
+
+
 	_sendSubscriptions: function (topics) {
 		let data = JSON.stringify({
 			action: "createSubscriptions",
@@ -140,7 +162,14 @@ Zotero.Streamer_Module.prototype = {
 			}
 		}
 		else if (this._subscriptions.has('sync')) {
-			subscriptionsToRemove.push({ apiKey });
+			if (apiKey) {
+				subscriptionsToRemove.push({ apiKey });
+			}
+			else {
+				// API key was cleared -- just remove local tracking.
+				// The server will clean up on reconnect.
+				this._subscriptions.delete('sync');
+			}
 		}
 		
 		if (Zotero.Prefs.get('automaticScraperUpdates')) {
