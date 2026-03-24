@@ -3683,6 +3683,28 @@ Zotero.Item.prototype.setAttachmentLastPageIndex = async function (val) {
 };
 
 
+Zotero.Item.prototype.getAttachmentLastReadAloudPosition = function () {
+	if (!this.isFileAttachment()) {
+		throw new Error("getAttachmentLastReadAloudPosition() can only be called on file attachments");
+	}
+
+	var id = this._getLastReadAloudPositionSettingKey();
+	return Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id);
+};
+
+Zotero.Item.prototype.setAttachmentLastReadAloudPosition = async function (val) {
+	if (!this.isFileAttachment()) {
+		throw new Error("setAttachmentLastReadAloudPosition() can only be called on file attachments");
+	}
+
+	var id = this._getLastReadAloudPositionSettingKey();
+	if (val === null) {
+		return Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
+	}
+	return Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, id, val);
+};
+
+
 /**
  * Get the key for a synced setting related to this item
  *
@@ -3725,6 +3747,19 @@ Zotero.Item.prototype._getSettingKey = function (prefix, ignoreInvalid = false) 
  */
 Zotero.Item.prototype._getLastPageIndexSettingKey = function (ignoreInvalid = false) {
 	return this._getSettingKey('lastPageIndex', ignoreInvalid);
+};
+
+
+/**
+ * Get the key for the item's lastReadAloudPosition synced setting
+ *
+ * E.g., 'lastReadAloudPosition_u_ABCD2345' or 'lastReadAloudPosition_g123_ABCD2345'
+ *
+ * @param {Boolean} [ignoreInvalid=false]
+ * @return {String | false}
+ */
+Zotero.Item.prototype._getLastReadAloudPositionSettingKey = function (ignoreInvalid = false) {
+	return this._getSettingKey('lastReadAloudPosition', ignoreInvalid);
 };
 
 
@@ -5239,22 +5274,24 @@ Zotero.Item.prototype._eraseData = async function (env) {
 				});
 			}
 			
-			// Delete last page index
+			// Delete synced settings linked to this attachment
 			//
 			// Getting a key is optional so that the deletion doesn't fail if the attachment
 			// exists in a type of library where it doesn't belong, most likely if a plugin created
 			// one and we didn't properly prevent it:
 			// https://forums.zotero.org/discussion/93453/unsubscribe-rss-feed-fail
-			let id = this._getLastPageIndexSettingKey(true);
-			if (id) {
-				await Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
-			}
 			
-			// Delete last read synced setting for group items
-			if (this.library.isGroup) {
-				await Zotero.SyncedSettings.clear(
-					Zotero.Libraries.userLibraryID, this._getLastReadSettingKey()
-				);
+			let ids = [
+				this._getLastPageIndexSettingKey(true),
+				this._getLastReadAloudPositionSettingKey(true),
+				// Last Read, stored as a synced setting on the user library for group items
+				this.library.isGroup && this._getLastReadSettingKey(),
+			];
+			for (let id of ids) {
+				if (!id) {
+					continue;
+				}
+				await Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
 			}
 		}
 		
