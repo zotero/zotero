@@ -253,8 +253,12 @@ async function setDialogType(type) {
 		_id("keepSorted").disabled = true;
 	}
 	else if (DIALOG_STATE.isAddingAnnotations()) {
-		// Only library mode supported when adding annotations
-		await IOManager.toggleDialogMode("library");
+		// Only library mode supported when adding annotations.
+		// On the first call, current layout is not loaded.
+		// Dialog mode will be set in setInitialDialogMode
+		if (currentLayout) {
+			await IOManager.toggleDialogMode("library");
+		}
 		_id("includeComments").checked = Zotero.Prefs.get("integration.annotationDialogIncludeComments");
 	}
 
@@ -1313,7 +1317,7 @@ const IOManager = {
 		}
 	},
 
-	handleItemClick(event) {
+	async handleItemClick(event) {
 		let targetItem = event.target.closest(".item");
 		let multiselectable = targetItem.closest("[data-multiselectable]");
 		
@@ -1349,7 +1353,12 @@ const IOManager = {
 		let itemsToAdd = Array.from(itemIDs).map(itemID => SearchHandler.getItem(itemID));
 		// while adding annotations, clicking on selected non-annotation(s) will select them in itemTree
 		if (DIALOG_STATE.isAddingAnnotations() && !itemsToAdd.every(i => i.isAnnotation())) {
-			libraryLayout.itemsView.selectItems([...itemIDs].map(id => parseInt(id)));
+			let selected = await libraryLayout.itemsView.selectItems([...itemIDs].map(id => parseInt(id)));
+			// if no items were selected, select item's group in collection tree and try again
+			if (!selected) {
+				await libraryLayout.collectionsView.selectLibrary(itemsToAdd[0].libraryID);
+				libraryLayout.itemsView.selectItems([...itemIDs].map(id => parseInt(id)));
+			}
 			_id("zotero-items-tree").querySelector("[tabindex]").focus();
 			return;
 		}
@@ -1439,6 +1448,10 @@ const IOManager = {
 		// When the dialog is opened for the very first time, default to list mode
 		if (!desiredMode) {
 			desiredMode = "list";
+		}
+		// Only library mode when adding annotations
+		if (DIALOG_STATE.isAddingAnnotations()) {
+			desiredMode = "library";
 		}
 		await this.toggleDialogMode(desiredMode);
 	},
