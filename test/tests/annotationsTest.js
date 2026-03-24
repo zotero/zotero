@@ -556,4 +556,25 @@ describe("Create a note from annotations from multiple items and attachments", f
 		assert.ok(doc.querySelector('span.underline'));
 		assert.ok(doc.querySelector('span.highlight'));
 	});
+
+	it("should show placeholder for image annotation with comment but without cache image", async function () {
+		let attachment = await importPDFAttachment();
+		let annotation = await createAnnotation('image', attachment);
+		let cachePath = Zotero.Annotations.getCacheImagePath(annotation);
+		await OS.File.remove(cachePath, { ignoreAbsent: true });
+		let note = await Zotero.EditorInstance.createNoteFromAnnotations([annotation]);
+		let placeholder = Zotero.getString('annotation-image-not-available');
+		assert.include(note.note, placeholder);
+		assert.include(note.note, annotation.annotationComment);
+	});
+
+	it("should show placeholder for image annotation without comment or cache image", async function () {
+		let attachment = await importPDFAttachment();
+		let annotation = await createAnnotation('image', attachment, { comment: '' });
+		let cachePath = Zotero.Annotations.getCacheImagePath(annotation);
+		await OS.File.remove(cachePath, { ignoreAbsent: true });
+		let note = await Zotero.EditorInstance.createNoteFromAnnotations([annotation]);
+		let placeholder = Zotero.getString('annotation-image-not-available');
+		assert.include(note.note, placeholder);
+	});
 });
