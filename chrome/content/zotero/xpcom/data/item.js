@@ -5663,6 +5663,14 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			this[field] = !!json[field];
 		}
 	});
+
+	// Clear lastRead if not present in JSON
+	if (this.isAttachment()
+			&& this.libraryID == Zotero.Libraries.userLibraryID
+			&& !json.lastRead
+			&& this.attachmentLastRead) {
+		this.attachmentLastRead = null;
+	}
 }
 
 

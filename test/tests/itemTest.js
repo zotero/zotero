@@ -2735,6 +2735,21 @@ describe("Zotero.Item", function () {
 			assert.strictEqual(item.getField('accessDate'), '');
 		});
 		
+		it("should clear lastRead when absent from JSON", async function () {
+			let item = await createDataObject('item');
+			let attachment = await importPDFAttachment(item);
+			attachment.attachmentLastRead = 123450000;
+			await attachment.saveTx();
+			assert.equal(attachment.attachmentLastRead, 123450000);
+
+			// Simulate JSON from server without lastRead
+			let json = attachment.toJSON();
+			delete json.lastRead;
+
+			attachment.fromJSON(json);
+			assert.isNull(attachment.attachmentLastRead);
+		});
+
 		it("should remove missing creators and change existing", function () {
 			var item = new Zotero.Item('book');
 			item.setCreators(
