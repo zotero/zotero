@@ -38,6 +38,8 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 
 		// Populate library picker
 		let libraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
+		console.log("FileRenamingDialog: libraries: "
+			+ libraries.map(lib => `${lib.name} (id=${lib.libraryID}, isAdmin=${lib.isAdmin})`).join(", "));
 		let menupopup = this.libraryPicker.querySelector('menupopup');
 		for (let lib of libraries) {
 			let menuitem = document.createXULElement('menuitem');
@@ -92,6 +94,7 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			formatTemplate = Zotero.SyncedSettings.get(libraryID, 'attachmentRenameTemplate')
 				?? this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 
+			this.settingsEl.setAttribute('readonly', 'false');
 			this.settingsEl.setAttribute('rename-linked-hidden', 'false');
 			this.settingsEl.setAttribute('rename-linked-enabled', String(renameLinked));
 
@@ -105,6 +108,8 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			formatTemplate = Zotero.SyncedSettings.get(libraryID, 'attachmentRenameTemplate')
 				?? this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 
+			let isAdmin = Zotero.Libraries.get(libraryID).isAdmin;
+			this.settingsEl.setAttribute('readonly', String(!isAdmin));
 			this.settingsEl.setAttribute('rename-linked-hidden', 'true');
 			this.settingsEl.setAttribute('rename-now-disabled', String(!autoRenameEnabled));
 		}

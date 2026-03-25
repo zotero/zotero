@@ -129,6 +129,7 @@
 				'rename-linked-enabled',
 				'rename-linked-hidden',
 				'rename-now-disabled',
+				'readonly',
 			];
 		}
 
@@ -232,10 +233,13 @@
 		};
 		
 		updateDisabled = () => {
+			let readonly = this.getAttribute('readonly') === 'true';
 			for (let checkbox of this.fileTypesCheckboxes.querySelectorAll('checkbox')) {
-				checkbox.disabled = !this.autoRenameEnabled;
+				checkbox.disabled = readonly || !this.autoRenameEnabled;
 			}
-			this.renameLinkedCheckbox.disabled = !this.autoRenameEnabled;
+			this.autoRenameToggleCheckbox.disabled = readonly;
+			this.renameLinkedCheckbox.disabled = readonly || !this.autoRenameEnabled;
+			this.formatTemplateTextarea.readOnly = readonly;
 			this.renameNowButton.hidden = !this.autoRenameEnabled;
 		};
 
@@ -305,6 +309,9 @@
 					break;
 				case 'rename-now-disabled':
 					this.renameNowButton.disabled = newValue === 'true';
+					break;
+				case 'readonly':
+					this.updateDisabled();
 					break;
 			}
 		}
