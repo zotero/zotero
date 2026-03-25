@@ -243,10 +243,7 @@ export function registerAutoRenameFileFromParent() {
 				}
 
 				let changes = Object.entries(extraData[id].changed).filter(([key, _value]) => {
-					if (['tags', 'collections'].includes(key)) {
-						return false; // Don't care about tags or collections
-					}
-					return true;
+					return !['tags', 'collections'].includes(key); // Only consider metadata fields that affect file naming
 				});
 
 				if (changes.length === 0) {
@@ -275,12 +272,17 @@ export function registerAutoRenameFileFromParent() {
 
 				if (previousMetadataBaseName === currentBaseName) {
 					// Filename appears to be derived from the metadata, so update it to match the latest metadata.
+					// Not awaited: we're inside the parent item's modify notification handler.
+					// Renaming the attachment triggers a child item modify notification.
+					// If we await here, that child notification fires (and is fully processed
+					// by all observers) before the parent notification is released -- reversing
+					// the expected parent-then-child order.
 					renameFileFromParent(attachmentItem);
 				}
 				else {
 					// Filename has most likely been manually changed, so
 					// don’t rename it. Reset `autoRenameFiles.done` so that
-					// "Rename Files Now" appears in Preferences.
+					// "Rename Files" is enabled in the file renaming settings dialog.
 					Zotero.Prefs.set('autoRenameFiles.done', false);
 				}
 			}
@@ -295,10 +297,14 @@ export async function openRenameFilesPreview(libraryID) {
 		"renameFilesPreview", "chrome,dialog=yes,centerscreen,modal", args);
 }
 
-export async function promptAutoRenameFiles() {
+export async function promptAutoRenameFiles(libraryID) {
+	let isUserLibrary = !libraryID || libraryID === Zotero.Libraries.userLibraryID;
+	let bodyID = isUserLibrary
+		? { id: 'file-renaming-auto-rename-prompt-body' }
+		: { id: 'file-renaming-auto-rename-prompt-body-library', args: { library: Zotero.Libraries.get(libraryID).name } };
 	let [title, description, yes, no] = await Zotero.getMainWindow().document.l10n.formatValues([
 		'file-renaming-auto-rename-prompt-title',
-		'file-renaming-auto-rename-prompt-body',
+		bodyID,
 		'file-renaming-auto-rename-prompt-yes',
 		'file-renaming-auto-rename-prompt-no'
 	]);
@@ -309,9 +315,13 @@ export async function promptAutoRenameFiles() {
 		button1: no
 	});
 	if (index == 0) {
-		openRenameFilesPreview();
+		openRenameFilesPreview(libraryID);
+		return true;
 	}
 	else {
-		Zotero.Prefs.set('autoRenameFiles.done', false);
+		if (isUserLibrary) {
+			Zotero.Prefs.set('autoRenameFiles.done', false);
+		}
+		return false;
 	}
 }

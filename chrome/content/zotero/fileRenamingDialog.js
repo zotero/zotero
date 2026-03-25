@@ -25,6 +25,8 @@
 
 var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 	prompted: false,
+	_settingsChanged: false,
+	_currentLibraryID: null,
 
 	init: function () {
 		const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE, DEFAULT_AUTO_RENAME_FILE_TYPES } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
@@ -56,6 +58,14 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 		this._renameFilesPrefObserver = Zotero.Prefs.registerObserver('autoRenameFiles.done', this._handleDonePrefChange);
 
 		this.loadSettingsForLibrary(initialLibraryID);
+		this._currentLibraryID = initialLibraryID;
+
+		window.addEventListener('unload', () => {
+			if (this._shouldPromptRename(this._currentLibraryID)) {
+				this._promptRename(this._currentLibraryID);
+			}
+			Zotero.Prefs.unregisterObserver(this._renameFilesPrefObserver);
+		});
 	},
 
 	get libraryID() {
@@ -67,26 +77,26 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 	},
 
 	loadSettingsForLibrary: function (libraryID) {
+		this._settingsChanged = false;
 		let isUserLib = libraryID === Zotero.Libraries.userLibraryID;
 
 		let autoRenameEnabled;
 		let fileTypes;
 		let formatTemplate;
+		let renameLinked;
 
 		if (isUserLib) {
 			autoRenameEnabled = Zotero.Prefs.get('autoRenameFiles');
 			fileTypes = Zotero.Prefs.get('autoRenameFiles.fileTypes');
+			renameLinked = Zotero.Prefs.get('autoRenameFiles.linked');
 			formatTemplate = Zotero.SyncedSettings.get(libraryID, 'attachmentRenameTemplate')
 				?? this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 
 			this.settingsEl.setAttribute('rename-linked-hidden', 'false');
-			this.settingsEl.setAttribute('rename-linked-enabled',
-				String(Zotero.Prefs.get('autoRenameFiles.linked')));
+			this.settingsEl.setAttribute('rename-linked-enabled', String(renameLinked));
 
-			// Track template state for user library prompt-to-rename logic
-			this.lastFormatString = formatTemplate;
-			this.isTemplateInSync = Zotero.Prefs.get('autoRenameFiles.done');
-			this.settingsEl.setAttribute('rename-now-disabled', String(Zotero.Prefs.get('autoRenameFiles.done')));
+			this._baselineDone = Zotero.Prefs.get('autoRenameFiles.done');
+			this.settingsEl.setAttribute('rename-now-disabled', String(this._baselineDone));
 		}
 		else {
 			autoRenameEnabled = Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(libraryID);
@@ -99,14 +109,33 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			this.settingsEl.setAttribute('rename-now-disabled', String(!autoRenameEnabled));
 		}
 
+		// Store baseline for comparing against future changes
+		// renameLinked is only relevant for the user library
+		this._baselineSettings = isUserLib
+			? { autoRenameEnabled, fileTypes, formatTemplate, renameLinked }
+			: { autoRenameEnabled, fileTypes, formatTemplate };
+
 		this.settingsEl.setAttribute('auto-rename-enabled', String(autoRenameEnabled));
 		this.settingsEl.setAttribute('file-types', fileTypes);
 		this.settingsEl.setAttribute('format-template', formatTemplate);
 	},
 
-	handleLibraryChange: function () {
+	handleLibraryChange: async function () {
+		let previousLibraryID = this._currentLibraryID;
+		let newLibraryID = this.libraryID;
+		if (this._shouldPromptRename(previousLibraryID)) {
+			// Revert picker so the previous library is visible behind the prompt
+			this.libraryPicker.value = String(previousLibraryID);
+			let userChoseRename = await this._promptRename(previousLibraryID);
+			if (userChoseRename) {
+				return;
+			}
+			// User declined -- proceed with the switch
+			this.libraryPicker.value = String(newLibraryID);
+		}
+		this._currentLibraryID = newLibraryID;
 		this.prompted = false;
-		this.loadSettingsForLibrary(this.libraryID);
+		this.loadSettingsForLibrary(newLibraryID);
 	},
 
 	handleSettingsChange: function (event) {
@@ -115,18 +144,9 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 		}
 
 		const { autoRenameEnabled, enabledFileTypes, renameLinkedEnabled, formatTemplate } = event.detail;
+		let base = this._baselineSettings;
 
 		if (this.isUserLibrary) {
-			const { promptAutoRenameFiles } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
-
-			if (enabledFileTypes !== Zotero.Prefs.get('autoRenameFiles.fileTypes')) {
-				Zotero.Prefs.set('autoRenameFiles.done', false);
-			}
-
-			if (!Zotero.Prefs.get('autoRenameFiles') && autoRenameEnabled) {
-				promptAutoRenameFiles();
-			}
-
 			Zotero.Prefs.set('autoRenameFiles', autoRenameEnabled);
 			Zotero.Prefs.set('autoRenameFiles.fileTypes', enabledFileTypes);
 			Zotero.Prefs.set('autoRenameFiles.linked', renameLinkedEnabled);
@@ -139,21 +159,39 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 				Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate', formatTemplate);
 			}
 
-			// Update rename-now-disabled based on template sync state
-			Zotero.Prefs.set('autoRenameFiles.done',
-				this.isTemplateInSync ? formatTemplate === this.lastFormatString : false);
+			// If settings match the baseline and files were already renamed, mark as done;
+			// otherwise, files need renaming
+			let settingsMatch = autoRenameEnabled === base.autoRenameEnabled
+				&& enabledFileTypes === base.fileTypes
+				&& formatTemplate === base.formatTemplate
+				&& renameLinkedEnabled === base.renameLinked;
+			Zotero.Prefs.set('autoRenameFiles.done', settingsMatch && this._baselineDone);
 		}
 		else {
-			this.settingsEl.setAttribute('rename-now-disabled', String(!autoRenameEnabled));
 			Zotero.SyncedSettings.set(this.libraryID, 'autoRenameFiles', autoRenameEnabled);
 			Zotero.SyncedSettings.set(this.libraryID, 'autoRenameFilesFileTypes', enabledFileTypes);
 			Zotero.SyncedSettings.set(this.libraryID, 'attachmentRenameTemplate', formatTemplate);
+
+			this._settingsChanged = autoRenameEnabled !== base.autoRenameEnabled
+				|| enabledFileTypes !== base.fileTypes
+				|| formatTemplate !== base.formatTemplate;
+			this.settingsEl.setAttribute('rename-now-disabled', String(!autoRenameEnabled));
 		}
 	},
 
 	handleRename: function () {
 		const { openRenameFilesPreview } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
 		openRenameFilesPreview(this.libraryID);
+		if (!this.isUserLibrary) {
+			this._settingsChanged = false;
+			this._baselineSettings = {
+				autoRenameEnabled: Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(this.libraryID),
+				fileTypes: Zotero.SyncedSettings.get(this.libraryID, 'autoRenameFilesFileTypes')
+					?? this.DEFAULT_AUTO_RENAME_FILE_TYPES,
+				formatTemplate: Zotero.SyncedSettings.get(this.libraryID, 'attachmentRenameTemplate')
+					?? this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE,
+			};
+		}
 	},
 
 	_handleDonePrefChange: function (newValue) {
@@ -161,14 +199,36 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 
 		this.settingsEl.setAttribute('rename-now-disabled', String(newValue));
 
-		// Renaming has finished -- store the new value of the template and reset the flags
+		// Renaming has finished -- update baseline to current settings
 		if (newValue) {
-			this.lastFormatString = Zotero.SyncedSettings.get(
-				Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate'
-			);
-			this.isTemplateInSync = true;
+			this._baselineSettings = {
+				autoRenameEnabled: Zotero.Prefs.get('autoRenameFiles'),
+				fileTypes: Zotero.Prefs.get('autoRenameFiles.fileTypes'),
+				formatTemplate: Zotero.SyncedSettings.get(
+					Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate'
+				) ?? this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE,
+				renameLinked: Zotero.Prefs.get('autoRenameFiles.linked'),
+			};
+			this._baselineDone = true;
 			this.prompted = false;
 		}
+	},
+
+	_shouldPromptRename: function (libraryID) {
+		if (libraryID === Zotero.Libraries.userLibraryID) {
+			// User library tracks rename-needed state via the autoRenameFiles.done pref
+			return Zotero.Prefs.get('autoRenameFiles') && !Zotero.Prefs.get('autoRenameFiles.done');
+		}
+		// Group libraries use the local "_settingsChanged" flag
+		return this._settingsChanged
+			&& Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(libraryID);
+	},
+
+	_promptRename: async function (libraryID) {
+		const { promptAutoRenameFiles } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+		let renamed = await promptAutoRenameFiles(libraryID);
+		this._settingsChanged = false;
+		return renamed;
 	},
 
 	promptReplace: function () {
