@@ -706,6 +706,7 @@ account-error-login-session-expired = Your login session has expired. Please try
 
 file-renaming-auto-rename-prompt-title = Renaming Settings Changed
 file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
+file-renaming-auto-rename-prompt-body-library = Would you like to rename existing files in library "{ $library }" to match the new settings?
 file-renaming-auto-rename-prompt-yes = Preview Changes…
 file-renaming-auto-rename-prompt-no = Keep Existing Filenames
 
