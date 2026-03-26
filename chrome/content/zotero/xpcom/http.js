@@ -733,16 +733,17 @@ Zotero.HTTP = new function () {
 	
 	/**
 	 * Send an HTTP GET request via XMLHTTPRequest
-	 * 
-	 * @param {nsIURI|String}	url				URL to request
-	 * @param {Function} 		onDone			Callback to be executed upon request completion
-	 * @param {String} 		responseCharset	Character set to force on the response
+	 *
+	 * @param {nsIURI|String} url URL to request
+	 * @param {Function} onDone Callback to be executed upon request completion
+	 * @param {String} responseCharset Character set to force on the response
+	 * @param _unused Removed
 	 * @param {Object} requestHeaders HTTP headers to include with request
 	 * @return {XMLHttpRequest} The XMLHttpRequest object if the request was sent, or
 	 *     false if the browser is offline
 	 * @deprecated Use {@link Zotero.HTTP.request}
 	 */
-	this.doGet = function (url, onDone, responseCharset, _cookieSandbox, requestHeaders) {
+	this.doGet = function (url, onDone, responseCharset, _unused, requestHeaders) {
 		if (url instanceof Components.interfaces.nsIURI) {
 			// Don't display password in console
 			var disp = this.getDisplayURI(url);
