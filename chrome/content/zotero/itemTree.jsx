@@ -109,7 +109,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		onContextMenu: noop,
 		onActivate: noop,
 		emptyMessage: '',
-		getExtraField: noop
+		getExtraField: noop,
+		filterChildItems: null
 	};
 
 	static propTypes = {
@@ -1819,6 +1820,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (newRows) {
 			if (!item.isFileAttachment()) {
 				newRows = Zotero.Items.get(newRows);
+			}
+			// Skip unwanted child items (e.g. in citation dialog)
+			if (this.props.filterChildItems) {
+				newRows = newRows.filter(this.props.filterChildItems);
 			}
 			for (let i = 0; i < newRows.length; i++) {
 				count++;

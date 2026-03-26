@@ -697,6 +697,16 @@ class LibraryLayout extends Layout {
 			},
 			emptyMessage: Zotero.getString('pane.items.loading'),
 			columns: itemColumns,
+			// Skip irrelevant child rows (e.g. no notes in annotations mode)
+			filterChildItems: (item) => {
+				if (DIALOG_STATE.isAddingAnnotations()) {
+					return SearchHandler.isItemWithAnnotations(item);
+				}
+				else if (DIALOG_STATE.isAddingNote()) {
+					return SearchHandler.isItemWithNotes(item);
+				}
+				return true;
+			},
 			// getExtraField helps itemTree fetch the data for a column that's
 			// not a part of actual item properties
 			getExtraField: (item, key) => {
@@ -803,7 +813,7 @@ class LibraryLayout extends Layout {
 				let items = await collectionTreeRow.getItems();
 				// when citing notes, only keep notes or note parents
 				if (DIALOG_STATE.isAddingNote()) {
-					items = items.filter(item => item.isNote() || item.getNotes().length);
+					items = items.filter(item => SearchHandler.isItemWithNotes(item));
 				}
 				// when adding annotations, only keep annotations, their attachments, and their top-level items
 				if (DIALOG_STATE.isAddingAnnotations()) {
