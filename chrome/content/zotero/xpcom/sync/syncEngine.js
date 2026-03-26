@@ -1152,18 +1152,50 @@ Zotero.Sync.Data.Engine.prototype._uploadSettings = async function (settings, li
 					value: settings[key]
 				};
 			}
-			libraryVersion = await this.apiClient.uploadSettings(
+			let response = await this.apiClient.uploadSettings(
 				this.library.libraryType,
 				this.libraryTypeID,
 				libraryVersion,
 				json
 			);
-			await Zotero.SyncedSettings.markAsSynced(
-				this.libraryID,
-				keys,
-				libraryVersion
-			);
-			
+			libraryVersion = response.libraryVersion;
+
+			if (response.results) {
+				// Write report -- some settings may have been rejected
+				let failedKeys = [];
+				for (let index in response.results.failed) {
+					let { code } = response.results.failed[index];
+					let settingKey = keys[index];
+					Zotero.logError(`Error ${code} for setting ${settingKey} in `
+						+ this.library.name);
+					if (code == 403) {
+						failedKeys.push(settingKey);
+					}
+				}
+
+				let successKeys = keys.filter(k => !failedKeys.includes(k));
+				if (successKeys.length) {
+					await Zotero.SyncedSettings.markAsSynced(
+						this.libraryID,
+						successKeys,
+						libraryVersion
+					);
+				}
+
+				// Reset rejected settings to remote version
+				if (failedKeys.length) {
+					await this._resetUnsyncedSettings(failedKeys);
+				}
+			}
+			else {
+				// 204 -- all settings succeeded
+				await Zotero.SyncedSettings.markAsSynced(
+					this.libraryID,
+					keys,
+					libraryVersion
+				);
+			}
+
 			if (this.library.libraryVersion == this.library.storageVersion) {
 				this.library.storageVersion = libraryVersion;
 			}
@@ -1175,6 +1207,43 @@ Zotero.Sync.Data.Engine.prototype._uploadSettings = async function (settings, li
 	);
 	Zotero.debug("Done uploading settings in " + this.library.name);
 	return libraryVersion;
+};
+
+
+/**
+ * Download current remote values for the given settings and overwrite local versions
+ */
+Zotero.Sync.Data.Engine.prototype._resetUnsyncedSettings = async function (keys) {
+	Zotero.debug(`Resetting ${keys.length} setting(s) to remote version in ${this.library.name}`);
+
+	let results = await this.apiClient.getSettings(
+		this.library.libraryType,
+		this.libraryTypeID,
+		0 // Get all settings
+	);
+
+	if (!results || !results.settings) {
+		Zotero.logError("Couldn't download settings to reset after 403");
+		return;
+	}
+
+	for (let key of keys) {
+		if (results.settings[key]) {
+			await Zotero.SyncedSettings.set(
+				this.libraryID,
+				key,
+				results.settings[key].value,
+				results.settings[key].version,
+				true // synced
+			);
+			Zotero.debug(`Reset setting '${key}' to remote version`);
+		}
+		else {
+			// Setting doesn't exist on server -- remove locally
+			await Zotero.SyncedSettings.clear(this.libraryID, key, { skipDeleteLog: true });
+			Zotero.debug(`Removed local setting '${key}' (not on server)`);
+		}
+	}
 };
 
 

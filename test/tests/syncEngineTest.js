@@ -3578,13 +3578,98 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(spy.callCount, 0);
 			
 			assert.isFalse(group.filesEditable);
-			
+
 			assert.ok(Zotero.Items.get(item1.id));
 			assert.isFalse(Zotero.Items.get(item2.id));
 		});
+
+
+		it("should reset rejected settings to remote version on 403", async function () {
+			var group = await createGroup({
+				libraryVersion: 5
+			});
+			var libraryID = group.libraryID;
+			({ engine, client, caller } = await setup({ libraryID }));
+
+			var lastLibraryVersion = 5;
+
+			// Set a setting that will be rejected (admin-only) and one that will succeed
+			await Zotero.SyncedSettings.set(libraryID, "tagColors", [{ name: "A", color: "#CC66CC" }]);
+			await Zotero.SyncedSettings.set(libraryID, "attachmentRenameTemplate", "{{ title }}");
+
+			server.respond(function (req) {
+				if (req.method == "POST" && req.url.includes("/settings")) {
+					// Return write report with 403 for the restricted setting
+					req.respond(
+						200,
+						{
+							"Content-Type": "application/json",
+							"Last-Modified-Version": ++lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {},
+							success: {},
+							unchanged: {},
+							failed: {
+								1: {
+									key: "attachmentRenameTemplate",
+									code: 403,
+									message: "Only group admins can change setting 'attachmentRenameTemplate'"
+								}
+							}
+						})
+					);
+					return;
+				}
+
+				// GET settings -- return remote values for reset
+				if (req.method == "GET" && req.url.includes("/settings")) {
+					req.respond(
+						200,
+						{
+							"Content-Type": "application/json",
+							"Last-Modified-Version": lastLibraryVersion
+						},
+						JSON.stringify({
+							attachmentRenameTemplate: {
+								value: "{{ firstCreator }} - {{ year }} - {{ title }}",
+								version: 3
+							}
+						})
+					);
+					return;
+				}
+
+				// Default: no other uploads
+				if (req.method == "POST" || req.method == "DELETE") {
+					req.respond(
+						204,
+						{
+							"Last-Modified-Version": lastLibraryVersion
+						},
+						""
+					);
+				}
+			});
+
+			var result = await engine._startUpload();
+			assert.equal(result, engine.UPLOAD_RESULT_SUCCESS);
+
+			// attachmentRenameTemplate should have been reset to the remote version
+			var value = Zotero.SyncedSettings.get(libraryID, "attachmentRenameTemplate");
+			assert.equal(value, "{{ firstCreator }} - {{ year }} - {{ title }}");
+
+			var metadata = Zotero.SyncedSettings.getMetadata(libraryID, "attachmentRenameTemplate");
+			assert.isTrue(metadata.synced);
+			assert.equal(metadata.version, 3);
+
+			// tagColors should have been marked as synced (succeeded)
+			var tagMetadata = Zotero.SyncedSettings.getMetadata(libraryID, "tagColors");
+			assert.isTrue(tagMetadata.synced);
+		});
 	});
-	
-	
+
+
 	describe("Conflict Resolution", function () {
 		beforeEach(function* () {
 			yield Zotero.DB.queryAsync("DELETE FROM syncCache");

@@ -380,10 +380,13 @@ Zotero.Sync.APIClient.prototype = {
 				"If-Unmodified-Since-Version": libraryVersion
 			},
 			body: json,
-			successCodes: [204, 412]
+			successCodes: [200, 204, 412]
 		});
 		this._check412(xmlhttp);
-		return this._getLastModifiedVersion(xmlhttp);
+		return {
+			libraryVersion: this._getLastModifiedVersion(xmlhttp),
+			results: xmlhttp.status == 200 ? this._parseJSON(xmlhttp.responseText) : null
+		};
 	},
 	
 	
