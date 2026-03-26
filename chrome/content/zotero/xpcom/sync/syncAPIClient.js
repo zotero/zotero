@@ -52,6 +52,9 @@ Zotero.Sync.APIClient.prototype = {
 	
 	getKeyInfo: async function (options={}) {
 		var uri = this.baseURL + "keys/current";
+		if (options.includeEmails) {
+			uri += "?includeEmails=1";
+		}
 		let opts = {};
 		Object.assign(opts, options);
 		opts.successCodes = [200, 403, 404];

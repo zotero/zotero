@@ -60,7 +60,7 @@ Zotero_Preferences.Sync = {
 			try {
 				var keyInfo = await Zotero.Sync.Runner.checkAccess(
 					Zotero.Sync.Runner.getAPIClient({apiKey}),
-					{timeout: 5000}
+					{timeout: 5000, includeEmails: true}
 				);
 				this.displayFields(keyInfo.username, { emails: keyInfo.emails });
 				if (keyInfo.emails) {
