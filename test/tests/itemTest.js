@@ -1508,6 +1508,43 @@ describe("Zotero.Item", function () {
 	});
 	
 	
+	describe("Last Read Aloud position", function () {
+		describe("#getAttachmentLastReadAloudPosition()", function () {
+			it("should get and set the Read Aloud position", async function () {
+				var attachment = await importFileAttachment('test.pdf');
+				assert.isNull(attachment.getAttachmentLastReadAloudPosition());
+				await attachment.setAttachmentLastReadAloudPosition({ pageIndex: 5 });
+				assert.deepEqual({ pageIndex: 5 }, attachment.getAttachmentLastReadAloudPosition());
+			});
+
+			it("should throw an error if called on a regular item", async function () {
+				var item = createUnsavedDataObject('item');
+				assert.throws(
+					() => item.getAttachmentLastReadAloudPosition(),
+					"getAttachmentLastReadAloudPosition() can only be called on file attachments"
+				);
+			});
+
+			it("should clear the position when set to null", async function () {
+				var attachment = await importFileAttachment('test.pdf');
+				await attachment.setAttachmentLastReadAloudPosition({ pageIndex: 3 });
+				assert.isNotNull(attachment.getAttachmentLastReadAloudPosition());
+				await attachment.setAttachmentLastReadAloudPosition(null);
+				assert.isNull(attachment.getAttachmentLastReadAloudPosition());
+			});
+		});
+
+		it("should be cleared when item is deleted", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			await attachment.setAttachmentLastReadAloudPosition({ pageIndex: 7 });
+			var id = attachment._getLastReadAloudPositionSettingKey();
+			assert.deepEqual({ pageIndex: 7 }, Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id));
+			await attachment.eraseTx();
+			assert.isNull(Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id));
+		});
+	});
+
+
 	describe("Annotations", function () {
 		var item;
 		var attachment;

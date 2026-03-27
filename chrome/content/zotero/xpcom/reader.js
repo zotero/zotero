@@ -991,6 +991,15 @@ class ReaderInstance {
 			}
 			let pageChanged = item.getAttachmentLastPageIndex() != lastPageIndex;
 			item.setAttachmentLastPageIndex(lastPageIndex);
+
+			if ('lastReadAloudPosition' in state) {
+				let newPos = state.lastReadAloudPosition ?? null;
+				let currentPos = item.getAttachmentLastReadAloudPosition();
+				if (JSON.stringify(newPos) !== JSON.stringify(currentPos)) {
+					item.setAttachmentLastReadAloudPosition(newPos);
+				}
+			}
+
 			let file = Zotero.Attachments.getStorageDirectory(item);
 			if (!(await OS.File.exists(file.path))) {
 				await Zotero.Attachments.createDirectoryForItem(item);
@@ -1032,26 +1041,26 @@ class ReaderInstance {
 	}
 
 	async _getState() {
-		let state;
+		let stateFromFile;
 		let item = Zotero.Items.get(this._item.id);
 		let directory = Zotero.Attachments.getStorageDirectory(item);
 		let file = directory.clone();
 		file.append(this.stateFileName);
 		try {
 			if (await OS.File.exists(file.path)) {
-				state = JSON.parse(await Zotero.File.getContentsAsync(file.path));
+				stateFromFile = JSON.parse(await Zotero.File.getContentsAsync(file.path));
 			}
 		}
 		catch (e) {
 			Zotero.logError(e);
 		}
 		// Try to fall back to the older .zotero-pdf-state file
-		if (!state && this._type === 'pdf') {
+		if (!stateFromFile && this._type === 'pdf') {
 			let file = directory.clone();
 			file.append('.zotero-pdf-state');
 			try {
 				if (await OS.File.exists(file.path)) {
-					state = JSON.parse(await Zotero.File.getContentsAsync(file.path));
+					stateFromFile = JSON.parse(await Zotero.File.getContentsAsync(file.path));
 				}
 			}
 			catch (e) {
@@ -1059,41 +1068,48 @@ class ReaderInstance {
 			}
 		}
 
+		let lastReadAloudPosition = item.getAttachmentLastReadAloudPosition();
+		let state = null;
+
 		if (this._type === 'pdf') {
 			let pageIndex = item.getAttachmentLastPageIndex();
-			if (state) {
-				if (Number.isInteger(pageIndex) && state.pageIndex !== pageIndex) {
-					state.pageIndex = pageIndex;
-					delete state.top;
-					delete state.left;
+			if (stateFromFile) {
+				if (Number.isInteger(pageIndex) && stateFromFile.pageIndex !== pageIndex) {
+					stateFromFile.pageIndex = pageIndex;
+					delete stateFromFile.top;
+					delete stateFromFile.left;
 				}
-				return state;
+				state = stateFromFile;
 			}
 			else if (Number.isInteger(pageIndex)) {
-				return { pageIndex };
+				state = { pageIndex };
 			}
 		}
 		else if (this._type === 'epub') {
 			let cfi = item.getAttachmentLastPageIndex();
-			if (state) {
-				state.cfi = cfi;
-				return state;
+			if (stateFromFile) {
+				stateFromFile.cfi = cfi;
+				state = stateFromFile;
 			}
 			else {
-				return { cfi };
+				state = { cfi };
 			}
 		}
 		else if (this._type === 'snapshot') {
 			let scrollYPercent = item.getAttachmentLastPageIndex();
-			if (state) {
-				state.scrollYPercent = scrollYPercent;
-				return state;
+			if (stateFromFile) {
+				stateFromFile.scrollYPercent = scrollYPercent;
+				state = stateFromFile;
 			}
 			else {
-				return { scrollYPercent };
+				state = { scrollYPercent };
 			}
 		}
-		return null;
+
+		if (state) {
+			state.lastReadAloudPosition = lastReadAloudPosition;
+		}
+		return state;
 	}
 
 	_isTransient() {
