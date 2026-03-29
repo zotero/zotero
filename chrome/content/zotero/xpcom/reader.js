@@ -58,6 +58,8 @@ class ReaderInstance {
 			this._resolveInitPromise = resolve;
 			this._rejectInitPromise = reject;
 		});
+		this._isUninitialized = false;
+		this._customEventHandler = null;
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
 
@@ -175,7 +177,10 @@ class ReaderInstance {
 
 		await this._waitForReader();
 
-		this._iframeWindow.addEventListener('customEvent', (event) => {
+		if (this._customEventHandler) {
+			this._iframeWindow.removeEventListener('customEvent', this._customEventHandler);
+		}
+		this._customEventHandler = (event) => {
 			let data = event.detail.wrappedJSObject;
 			let append = data.append;
 			data.append = (...args) => {
@@ -183,7 +188,8 @@ class ReaderInstance {
 			};
 			data.reader = this;
 			Zotero.Reader._dispatchEvent(data);
-		});
+		};
+		this._iframeWindow.addEventListener('customEvent', this._customEventHandler);
 
 		this._blockingObserver = new BlockingObserver({
 			shouldBlock(uri) {
@@ -671,6 +677,21 @@ class ReaderInstance {
 	}
 
 	uninit() {
+		if (this._isUninitialized) {
+			return;
+		}
+		this._isUninitialized = true;
+		if (this._customEventHandler && this._iframeWindow) {
+			try {
+				this._iframeWindow.removeEventListener('customEvent', this._customEventHandler);
+			}
+			catch {}
+			this._customEventHandler = null;
+		}
+		if (this._iframe) {
+			this._iframe.removeEventListener('contextmenu', this._handleReaderTextboxContextMenuOpen);
+		}
+		this._hideReadAloudGuidance();
 		if (this._prefObserverIDs) {
 			this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 		}
@@ -1867,6 +1888,16 @@ class ReaderTab extends ReaderInstance {
 			}
 		});
 	}
+
+	uninit() {
+		if (this._window) {
+			this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
+			this._window.removeEventListener('pointerdown', this._handlePointerDown);
+			this._window.removeEventListener('pointerup', this._handlePointerUp);
+		}
+		this._pointerDownWindow = null;
+		super.uninit();
+	}
 	
 	close() {
 		this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
@@ -2548,7 +2579,7 @@ class Reader {
 	 * @returns {void}
 	 */
 	unregisterEventListener(type, handler) {
-		this._registeredListeners = this._registeredListeners.filter(x => x.type === type && x.handler === handler);
+		this._registeredListeners = this._registeredListeners.filter(x => !(x.type === type && x.handler === handler));
 	}
 
 	_unregisterEventListenerByPluginID(pluginID) {
