@@ -248,10 +248,19 @@ describe("Zotero.Tags", function () {
 		});
 
 		it("should return first symbol span ", function () {
-			console.assert(Zotero.Tags.extractEmojiForItemsList("Hello weather symbols ☼☁☂", "☼☁☂"));
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("Hello weather symbols ☼☁☂"), "☼☁☂");
 		});
 		it("should return first span of mixed symbols, emojis and flags ", function () {
-			console.assert(Zotero.Tags.extractEmojiForItemsList("Hello weather, flags and cats ☼☁☂🇱🇺🏴󠁧󠁢󠁥󠁮󠁧󠁿🐈", "☼☁☂🇱🇺🏴󠁧󠁢󠁥󠁮󠁧󠁿🐈"));
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("Hello weather, flags and cats ☼☁☂🇱🇺🏴󠁧󠁢󠁥󠁮󠁧󠁿🐈"), "☼☁☂🇱🇺🏴󠁧󠁢󠁥󠁮󠁧󠁿🐈");
+		});
+		it("should ignore ©, ®, and ™", function () {
+			assert.isNull(Zotero.Tags.extractEmojiForItemsList("Copyright © 2024"));
+			assert.isNull(Zotero.Tags.extractEmojiForItemsList("Brand®"));
+			assert.isNull(Zotero.Tags.extractEmojiForItemsList("Product™"));
+			assert.isNull(Zotero.Tags.extractEmojiForItemsList("All three ©®™ together"));
+		});
+		it("should still extract ©️, ®️, and ™️ with Variation Selector-16", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("Legal ©️®️™️"), "©️®️™️");
 		});
 	});
 
