@@ -1,5 +1,23 @@
 #citation-dialog, #progress-bar {
-	min-width: 1000px;
+	min-width: 800px;
+
+	&[dialog-layout="library"] {
+		min-width: 1000px;
+	}
+	// during resizing, components of library mode have flexible height
+	&[resizing="true"] {
+		#library-other-items {
+			flex-shrink: 1 !important;
+		}
+		#library-trees {
+			min-height: 0 !important;
+			#sidebar {
+				#annotations-message {
+					display: none !important;
+				}
+			}
+		}
+	}
 	height: 100%;
 
 	body {
@@ -370,9 +388,13 @@
 			overflow-y: auto;
 			scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 			height: 100%;
-			padding-top: 4px;
-			padding-bottom: 8px;
 			.section {
+				&:first-child {
+					padding-top: 4px;
+				}
+				&:last-child {
+					padding-bottom: 8px;
+				}
 				// show dividers except for on the last section
 				.divider {
 					margin: 4px 16px;

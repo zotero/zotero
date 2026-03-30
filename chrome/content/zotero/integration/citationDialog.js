@@ -90,8 +90,19 @@ async function onLoad() {
 	}
 	await setDialogType(initialType);
 
-	// Initial height for the dialog (search row with no bubbles)
-	window.resizeTo(window.innerWidth, Helpers.getSearchRowHeight());
+	// Restore the dimensions of the dialog in the specified mode.
+	// That way, opening "annotation" dialog (always library mode)
+	// will not conflict with how wide the "citation" dialog will be in list mode.
+	let initialMode = IOManager.getInitialDialogMode();
+	let savedParams = Helpers.fetchStoredWindowParams()[initialMode] || {};
+	let restoredWidth = savedParams.width || window.innerWidth;
+	let restoredHeight = savedParams.height || Helpers.getSearchRowHeight();
+	window.resizeTo(restoredWidth, restoredHeight);
+	// On windows, after initial window size is set, make sure we don't resize list
+	// mode when search results are ready for a moment to avoid blinking
+	if (Zotero.isWin && initialMode == "list") {
+		Helpers.delayNextSmoothResize(250);
+	}
 
 	libraryLayout = new LibraryLayout();
 	listLayout = new ListLayout();
@@ -117,7 +128,7 @@ async function onLoad() {
 	await SearchHandler.refreshSelectedAndOpenItems();
 	// some nodes (e.g. item-tree-menu-bar) are expected to be present to switch modes
 	// so this has to go after all layouts are loaded
-	await IOManager.setInitialDialogMode();
+	await IOManager.toggleDialogMode(initialMode);
 	// most of IO handling relies on currentLayout being defined so it must follow setInitialDialogMode
 	IOManager.init();
 	// explicitly focus bubble input so one can begin typing right away
@@ -155,6 +166,8 @@ async function accept() {
 	if (accepted || SearchHandler.searching || !CitationDataManager.items.length) return;
 	accepted = true;
 	Zotero.debug("Citation Dialog: accepted");
+
+	cleanupBeforeDialogClosing();
 	_id("library-layout").hidden = true;
 	_id("list-layout").hidden = true;
 	_id("bubble-input").hidden = true;
@@ -174,7 +187,6 @@ async function accept() {
 		await CitationDataManager.sort();
 	}
 	CitationDataManager.updateCitationObject(true);
-	cleanupBeforeDialogClosing();
 	io.accept((percent) => {
 		_id("progress").value = Math.round(percent);
 	});
@@ -195,6 +207,17 @@ function onUnload() {
 
 function cleanupBeforeDialogClosing() {
 	if (!currentLayout || !libraryLayout) return;
+	
+	// Save window params for current layout mode so we can restore it on next dialog open
+	let allParams = Helpers.fetchStoredWindowParams();
+	let params = { width: window.outerWidth };
+	// Only save height in library mode, since in list mode height varies
+	if (currentLayout.type == "library") {
+		params.height = window.outerHeight;
+	}
+	allParams[currentLayout.type] = params;
+	Zotero.Prefs.set("integration.citationDialog.windowParams", JSON.stringify(allParams));
+
 	// Only library mode in annotations dialog
 	if (!DIALOG_STATE.isAddingAnnotations()) {
 		Zotero.Prefs.set("integration.citationDialogLastUsedMode", currentLayout.type);
@@ -220,6 +243,8 @@ function _id(id) {
 async function setDialogType(type) {
 	if (type == DIALOG_STATE.type) return;
 	if (DIALOG_STATE.loaded && io.disableDialogTypeSwitch) return;
+	// If there is a running search, do nothing to avoid window resizing conflicts
+	if (SearchHandler.searching) return;
 	DIALOG_STATE.type = type;
 	document.documentElement.setAttribute("dialog-type", DIALOG_STATE.type);
 
@@ -410,8 +435,8 @@ class Layout {
 		// noop if cited items are not yet loaded
 		SearchHandler.refreshCitedItems();
 		
-		// Never resize window of list layout here to avoid flickering
-		// The window will always be resized after the second items list update below
+		// Never resize window here to avoid flickering
+		// The window will always be resized after the second items update below
 		await this.refreshItemsList({ skipWindowResize: true });
 
 		// debounce to not rerun sql search until typing is probably done
@@ -438,6 +463,7 @@ class Layout {
 			while (!this.itemsView.collectionTreeRow) {
 				await Zotero.Promise.delay(10);
 			}
+			await this.refreshItemsList();
 			await this.itemsView.setFilter('citation-search', SearchHandler.searchValue);
 		}
 
@@ -487,6 +513,7 @@ class LibraryLayout extends Layout {
 	constructor() {
 		super("library");
 		this._scrolledToFirstCitedOnInit = false;
+		this.MIN_WIDTH = 1000; // min-width from _citationDialog.scss
 	}
 
 	async init() {
@@ -531,7 +558,7 @@ class LibraryLayout extends Layout {
 		return itemNode;
 	}
 
-	async refreshItemsList(options) {
+	async refreshItemsList(options = {}) {
 		await super.refreshItemsList(options);
 		_id("library-other-items").querySelector(".search-items").hidden = !_id("library-layout").querySelector(".section:not([hidden])");
 		_id("library-no-suggested-items-message").hidden = !_id("library-other-items").querySelector(".search-items").hidden;
@@ -539,7 +566,9 @@ class LibraryLayout extends Layout {
 		if (!_id("library-no-suggested-items-message").hidden) {
 			doc.l10n.setAttributes(_id("library-no-suggested-items-message"), `integration-citationDialog-lib-message-${DIALOG_STATE.type}`, { search: SearchHandler.searchValue.length > 0 });
 		}
-		this.resizeWindow();
+		if (!options.skipWindowResize) {
+			this.resizeWindow();
+		}
 		let collapsibleDecks = [..._id("library-other-items").querySelectorAll(".section.expandable")];
 		for (let collapsibleDeck of collapsibleDecks) {
 			collapsibleDeck.querySelector(".itemsContainer").addEventListener("click", this._captureItemsContainerClick, true);
@@ -575,25 +604,30 @@ class LibraryLayout extends Layout {
 		IOManager.updateBubbleInput();
 	}
 
-	resizeWindow() {
+	async resizeWindow() {
+		await Helpers.smoothResizingPromise;
 		let bubbleInputHeight = Helpers.getSearchRowHeight();
 		let suggestedItemsHeight = _id("library-other-items").getBoundingClientRect().height;
-		let minTableHeight = 200;
+		let minTableHeight = 400;
 		let bottomHeight = _id("bottom-area-wrapper").getBoundingClientRect().height;
-		
-		let minHeight = bubbleInputHeight + suggestedItemsHeight + bottomHeight + minTableHeight;
-		// set min-height to make sure suggested items and at least 200px of itemsView is always visible
-		doc.documentElement.style.minHeight = `${minHeight}px`;
 
-		// resize the window if it is too small
-		if (window.innerHeight < minHeight) {
+		let minHeight = bubbleInputHeight + suggestedItemsHeight + bottomHeight + minTableHeight;
+
+		let targetWidth = Math.max(window.innerWidth, this.MIN_WIDTH);
+		let targetHeight = Math.max(minHeight, lastSetWindowHeight);
+		let needsResize = window.innerHeight < minHeight || window.innerWidth < this.MIN_WIDTH;
+
+		if (needsResize) {
+			doc.documentElement.style.removeProperty('min-height');
 			ignoreWindowResizing = true;
-			// pick the larger of minHeight or last height set by the user
-			let leastNeededHeight = Math.max(minHeight, lastSetWindowHeight);
-			window.resizeTo(window.innerWidth, leastNeededHeight);
-			setTimeout(() => {
-				ignoreWindowResizing = false;
-			}, 100);
+			Helpers.smoothResize(targetWidth, targetHeight, {
+				onComplete: () => {
+					_id("bubble-input").refocusInput();
+					doc.documentElement.style.minHeight = `${minHeight}px`;
+					document.documentElement.setAttribute("dialog-layout", this.type);
+					ignoreWindowResizing = false;
+				},
+			});
 		}
 	}
 
@@ -787,6 +821,9 @@ class LibraryLayout extends Layout {
 		if (this.itemsView && this.itemsView.collectionTreeRow && this.itemsView.collectionTreeRow.id == collectionTreeRow.id) {
 			return;
 		}
+		// _onCollectionSelection will be called during initiation. It can take a while
+		// to load for large libraries. If we are in list mode during initial load, do nothing.
+		if (currentLayout?.type !== "library") return;
 
 		this.itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		
@@ -932,6 +969,7 @@ class LibraryLayout extends Layout {
 class ListLayout extends Layout {
 	constructor() {
 		super("list");
+		this.MIN_WIDTH = 800; // min-width from _citationDialog.scss
 	}
 
 	// Create item node for an item group and store item ids in itemIDs attribute
@@ -994,7 +1032,8 @@ class ListLayout extends Layout {
 		IOManager.updateBubbleInput();
 	}
 
-	resizeWindow() {
+	async resizeWindow() {
+		await Helpers.smoothResizingPromise;
 		let bubbleInputHeight = Helpers.getSearchRowHeight();
 
 		// height of all sections
@@ -1015,7 +1054,7 @@ class ListLayout extends Layout {
 
 		// height of the bottom section
 		let bottomHeight = _id("bottom-area-wrapper").getBoundingClientRect().height;
-		
+
 		// set min height and resize the window
 		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + bottomHeight + marginOfError;
 		// window.resizeTo(X,Y) resizes the window so that it's outerHeight == Y. On mac and windows,
@@ -1030,16 +1069,19 @@ class ListLayout extends Layout {
 
 		// cap window height at the height last set by the user
 		autoHeight = Math.min(autoHeight, lastSetWindowHeight);
+		let targetWidth = Math.min(window.innerWidth, this.MIN_WIDTH);
 		ignoreWindowResizing = true;
 		
 		// Timeout is required likely to allow minHeight update to settle
 		setTimeout(() => {
-			window.resizeTo(window.innerWidth, parseInt(autoHeight));
+			Helpers.smoothResize(targetWidth, autoHeight, {
+				onComplete: () => {
+					_id("bubble-input").refocusInput();
+					document.documentElement.setAttribute("dialog-layout", this.type);
+					ignoreWindowResizing = false;
+				},
+			});
 		}, 10);
-
-		setTimeout(() => {
-			ignoreWindowResizing = false;
-		}, 100);
 	}
 
 	_markRoundedCorners() {
@@ -1144,6 +1186,8 @@ const IOManager = {
 
 	// switch between list and library modes
 	async toggleDialogMode(newMode) {
+		// If there is a running search, do nothing to avoid window resizing conflicts
+		if (SearchHandler.searching) return;
 		// Do nothing if switching to a mode that is already active
 		if (currentLayout?.type == newMode) return;
 		
@@ -1157,8 +1201,16 @@ const IOManager = {
 		}
 
 
+		document.documentElement.removeAttribute("dialog-layout");
 		let isInitialModeSetting = currentLayout === undefined;
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
+
+		// Wait for window resize before running search to avoid stutter with large libraries
+		if (!isInitialModeSetting) {
+			await currentLayout.resizeWindow();
+			await Helpers.smoothResizingPromise;
+		}
+
 		// do not show View menubar with itemTree-specific options in list mode
 		doc.querySelector("item-tree-menu-bar").suppressed = currentLayout.type == "list";
 		// switching from library to list mode initiated by the user (not via setInitialDialogMode on load)
@@ -1178,6 +1230,8 @@ const IOManager = {
 			currentLayout.forceUpdateTablesAfterRefresh = true;
 			// highlight items added in list in itemTree
 			currentLayout._refreshItemsViewHighlightedRows();
+			// In case _onCollectionSelection never ran (initial layout was list), explicitly run it now
+			await currentLayout._onCollectionSelection();
 		}
 		await currentLayout.search(SearchHandler.searchValue, { skipDebounce: true });
 		// When library layout is opened for the first time (initial state or first switch from list mode),
@@ -1439,8 +1493,8 @@ const IOManager = {
 		}
 	},
 
-	// Set the initial dialog mode per user's preference
-	async setInitialDialogMode() {
+	// Get the initial dialog mode per user's preference
+	getInitialDialogMode() {
 		let desiredMode = Zotero.Prefs.get("integration.citationDialogMode");
 		if (desiredMode == "last-used") {
 			desiredMode = Zotero.Prefs.get("integration.citationDialogLastUsedMode");
@@ -1453,7 +1507,7 @@ const IOManager = {
 		if (DIALOG_STATE.isAddingAnnotations()) {
 			desiredMode = "library";
 		}
-		await this.toggleDialogMode(desiredMode);
+		return desiredMode;
 	},
 	
 	// handle drag start of item nodes into bubble-input
@@ -2023,6 +2077,8 @@ window.addEventListener("resize", () => {
 
 // When the dialog is re-focused, run the search again in case selected or opened items changed
 window.addEventListener("focus", async () => {
+	// Ensure search does not run on the first focus of the dialog from onLoad handling
+	if (!DIALOG_STATE.loaded) return;
 	// Wait a moment to allow accept button click event to fire.
 	// Without this, clicking accept button when the dialog is not focused
 	// would refocus the dialog, run the search below,

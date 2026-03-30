@@ -29,6 +29,7 @@ import { Zotero } from "chrome://zotero/content/zotero.mjs";
 export class CitationDialogHelpers {
 	constructor({ doc }) {
 		this.doc = doc;
+		this.smoothResizingPromise = Zotero.Promise.resolve();
 	}
 
 	// shortcut to create a node with specified class and attributes
@@ -434,5 +435,75 @@ export class CitationDialogHelpers {
 		if (!segmentedControlOption) return;
 		segmentedControlOption.classList.add("active");
 		segmentedControlOption.setAttribute("aria-checked", "true");
+	}
+
+	fetchStoredWindowParams() {
+		try {
+			return JSON.parse(Zotero.Prefs.get("integration.citationDialog.windowParams") || "{}");
+		}
+		catch (e) {
+			return {};
+		}
+	}
+
+	smoothResize(targetWidth, targetHeight, { duration = 300, onComplete } = {}) {
+		let win = this.doc.defaultView;
+		let resolve;
+		this.smoothResizingPromise = new Promise(r => resolve = r);
+		let chromeWidth = win.outerWidth - win.innerWidth;
+		let chromeHeight = win.outerHeight - win.innerHeight;
+
+		// On Linux, animated resizing is too jumpy, so just resize in one step
+		if (Zotero.isLinux) {
+			win.resizeTo(targetWidth, targetHeight);
+			resolve();
+			if (onComplete) {
+				onComplete();
+			}
+			return;
+		}
+
+		let startWidth = win.innerWidth;
+		let startHeight = win.innerHeight;
+		let startX = win.screenX;
+		let startTime = null;
+
+		win.document.documentElement.setAttribute("resizing", "true");
+
+		function step(timestamp) {
+			if (!startTime) startTime = timestamp;
+			let progress = Math.min((timestamp - startTime) / duration, 1);
+			let ease = 1 - Math.pow(1 - progress, 3);
+
+			let w = Math.round(startWidth + (targetWidth - startWidth) * ease);
+			let h = Math.round(startHeight + (targetHeight - startHeight) * ease);
+
+			// Move window left by half the width change so it resizes from both sides equally
+			let currentWidthDelta = (w + chromeWidth) - (startWidth + chromeWidth);
+			let x = Math.round(startX - currentWidthDelta / 2);
+
+			win.moveTo(x, win.screenY);
+			win.resizeTo(w + chromeWidth, h + chromeHeight);
+
+			if (progress < 1) {
+				win.requestAnimationFrame(step);
+			}
+			else {
+				win.document.documentElement.removeAttribute("resizing");
+				resolve();
+				if (onComplete) {
+					onComplete();
+				}
+			}
+		}
+		win.requestAnimationFrame(step);
+	}
+
+	delayNextSmoothResize(delay = 100) {
+		let resolve;
+		this.smoothResizingPromise = new Promise(r => resolve = r);
+		setTimeout(() => {
+			resolve();
+		}, delay);
 	}
 }
