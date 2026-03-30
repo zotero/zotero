@@ -1452,15 +1452,44 @@ describe("ZoteroPane", function () {
 			"zotero-tb-sync",
 			"zotero-tb-tabs-menu"
 		];
+		beforeEach(function () {
+			// Reset collection search field state
+			let collectionSearchField = doc.getElementById("zotero-collections-search");
+			let collectionSearchButton = doc.getElementById("zotero-tb-collections-search");
+			collectionSearchField.classList.remove("visible", "expanding");
+			collectionSearchField.setAttribute("disabled", true);
+			collectionSearchField.style.visibility = 'hidden';
+			collectionSearchField.style.removeProperty('max-width');
+			collectionSearchField.value = '';
+			collectionSearchButton.style.display = '';
+		});
+
 		it("should shift-tab across the zotero pane", async function () {
 			let searchBox = doc.getElementById('zotero-tb-search-textbox');
 			searchBox.focus();
 
 			for (let id of sequence) {
-				doc.activeElement.dispatchEvent(shiftTab);
-				// Wait for collection search to be revealed
+				// Set up focus listener before dispatching the event
+				// to avoid racing against async focus from setTimeout
+				let focusPromise;
 				if (id === "zotero-collections-search") {
-					await Zotero.Promise.delay(250);
+					focusPromise = waitForDOMEvent(doc.getElementById(id), "focus");
+				}
+				// Set up hide observer before the shift-tab that blurs collection-search
+				let hidePromise;
+				if (id === "zotero-tb-collection-add") {
+					let field = doc.getElementById("zotero-collections-search");
+					if (field.style.visibility !== 'hidden') {
+						hidePromise = waitForDOMAttributes(field, "style",
+							() => field.style.visibility === 'hidden');
+					}
+				}
+				doc.activeElement.dispatchEvent(shiftTab);
+				if (focusPromise) {
+					await focusPromise;
+				}
+				if (hidePromise) {
+					await hidePromise;
 				}
 				// Some elements don't have id, so use classes to verify they're focused
 				if (doc.activeElement.id) {
@@ -1469,10 +1498,6 @@ describe("ZoteroPane", function () {
 				else {
 					let clases = [...doc.activeElement.classList];
 					assert.include(clases, id);
-				}
-				// Wait for collection search to be hidden for subsequent tests
-				if (id === "zotero-tb-collection-add") {
-					await Zotero.Promise.delay(50);
 				}
 			}
 			doc.activeElement.dispatchEvent(shiftTab);
@@ -1485,12 +1510,17 @@ describe("ZoteroPane", function () {
 
 		it("should tab across the zotero pane", async function () {
 			win.Zotero_Tabs.moveFocus("current");
-			sequence.reverse();
-			for (let id of sequence) {
-				doc.activeElement.dispatchEvent(tab);
-				// Wait for collection search to be revealed
+			let reversed = [...sequence].reverse();
+			for (let id of reversed) {
+				// Set up focus listener before dispatching the event
+				// to avoid racing against async focus from setTimeout
+				let focusPromise;
 				if (id === "zotero-collections-search") {
-					await Zotero.Promise.delay(250);
+					focusPromise = waitForDOMEvent(doc.getElementById(id), "focus");
+				}
+				doc.activeElement.dispatchEvent(tab);
+				if (focusPromise) {
+					await focusPromise;
 				}
 				// Some elements don't have id, so use classes to verify they're focused
 				if (doc.activeElement.id) {
