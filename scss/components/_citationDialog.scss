@@ -45,7 +45,7 @@
 		max-height: 28px;
 		padding: 0;
 		color: var(--fill-secondary);
-		background-size: 60% !important;
+		background-size: auto !important;
 		background-repeat: no-repeat;
 		border-radius: 5px;
 		margin: 0;
@@ -62,7 +62,7 @@
 	}
 
 	#accept-button {
-		@include svgicon("arrow-right", "universal", "20");
+		@include svgicon("checkmark", "universal", "20");
 	}
 	#cancel-button {
 		@include svgicon("x", "universal", "20");
@@ -633,10 +633,13 @@
 		}
 		#dialog-type-setting {
 			#dialog-type-annotations .icon {
-				@include svgicon("attachment-annotations", "universal", "16");			
 				width: 16px;
 				height: 16px;
-				fill: var(--tag-purple);
+				@include light-dark(
+					background,
+					url('chrome://zotero/skin/16/light/annotations.svg') no-repeat center/contain,
+					url('chrome://zotero/skin/16/dark/annotations.svg') no-repeat center/contain
+				);
 			}
 		}
 	}
