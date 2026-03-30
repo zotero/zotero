@@ -117,7 +117,7 @@ $universal-icons: (
 	
 	// Highlight takes priority over selection
 	.row.highlighted.selected {
-		background: #FFFF99;
+		background: var(--highlight-color, var(--accent-highlight));
 	}
 
 	.cell.primary {
