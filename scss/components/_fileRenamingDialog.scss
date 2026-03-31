@@ -5,4 +5,22 @@
 		margin-bottom: 1em;
 		gap: 0.5em;
 	}
+
+	#library-picker-row label {
+		font-size: 15px;
+		font-weight: 600;
+	}
+	
+	#library-picker {
+		width: 14em;
+		margin-inline-start: .25em;
+		font-size: 15px;
+		height: 1.6em;
+	}
+
+	#file-renaming-buttons {
+		justify-content: flex-end;
+		gap: 0.5em;
+		margin-top: 0.5em;
+	}
 }

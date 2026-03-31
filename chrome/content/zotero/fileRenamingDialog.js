@@ -34,12 +34,11 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 		this.DEFAULT_AUTO_RENAME_FILE_TYPES = DEFAULT_AUTO_RENAME_FILE_TYPES;
 
 		this.settingsEl = document.getElementById('file-renaming-settings');
+		this.renameNowButton = document.getElementById('file-renaming-rename-now');
 		this.libraryPicker = document.getElementById('library-picker');
 
 		// Populate library picker
 		let libraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
-		console.log("FileRenamingDialog: libraries: "
-			+ libraries.map(lib => `${lib.name} (id=${lib.libraryID}, isAdmin=${lib.isAdmin})`).join(", "));
 		let menupopup = this.libraryPicker.querySelector('menupopup');
 		for (let lib of libraries) {
 			let menuitem = document.createXULElement('menuitem');
@@ -54,7 +53,8 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 
 		this.libraryPicker.addEventListener('command', this.handleLibraryChange.bind(this));
 		this.settingsEl.addEventListener('change', this.handleSettingsChange.bind(this));
-		this.settingsEl.addEventListener('rename', this.handleRename.bind(this));
+		this.renameNowButton.addEventListener('command', this.handleRename.bind(this));
+		document.getElementById('file-renaming-done').addEventListener('command', () => window.close());
 
 		this._handleDonePrefChange = this._handleDonePrefChange.bind(this);
 		this._renameFilesPrefObserver = Zotero.Prefs.registerObserver('autoRenameFiles.done', this._handleDonePrefChange);
@@ -99,7 +99,8 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			this.settingsEl.setAttribute('rename-linked-enabled', String(renameLinked));
 
 			this._baselineDone = Zotero.Prefs.get('autoRenameFiles.done');
-			this.settingsEl.setAttribute('rename-now-disabled', String(this._baselineDone));
+			this.renameNowButton.hidden = !autoRenameEnabled;
+			this.renameNowButton.disabled = this._baselineDone;
 		}
 		else {
 			autoRenameEnabled = Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(libraryID);
@@ -111,7 +112,8 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			let isAdmin = Zotero.Libraries.get(libraryID).isAdmin;
 			this.settingsEl.setAttribute('readonly', String(!isAdmin));
 			this.settingsEl.setAttribute('rename-linked-hidden', 'true');
-			this.settingsEl.setAttribute('rename-now-disabled', String(!autoRenameEnabled));
+			this.renameNowButton.hidden = !autoRenameEnabled;
+			this.renameNowButton.disabled = !autoRenameEnabled;
 		}
 
 		// Store baseline for comparing against future changes
@@ -171,6 +173,7 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 				&& formatTemplate === base.formatTemplate
 				&& renameLinkedEnabled === base.renameLinked;
 			Zotero.Prefs.set('autoRenameFiles.done', settingsMatch && this._baselineDone);
+			this.renameNowButton.hidden = !autoRenameEnabled;
 		}
 		else {
 			Zotero.SyncedSettings.set(this.libraryID, 'autoRenameFiles', autoRenameEnabled);
@@ -180,7 +183,8 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			this._settingsChanged = autoRenameEnabled !== base.autoRenameEnabled
 				|| enabledFileTypes !== base.fileTypes
 				|| formatTemplate !== base.formatTemplate;
-			this.settingsEl.setAttribute('rename-now-disabled', String(!autoRenameEnabled));
+			this.renameNowButton.hidden = !autoRenameEnabled;
+			this.renameNowButton.disabled = !autoRenameEnabled;
 		}
 	},
 
@@ -202,7 +206,7 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 	_handleDonePrefChange: function (newValue) {
 		if (!this.isUserLibrary) return;
 
-		this.settingsEl.setAttribute('rename-now-disabled', String(newValue));
+		this.renameNowButton.disabled = newValue;
 
 		// Renaming has finished -- update baseline to current settings
 		if (newValue) {

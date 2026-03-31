@@ -111,12 +111,6 @@
 						aria-labelledby="file-renaming-format-preview-label"
 						id="file-renaming-format-preview"
 					/>
-					<hbox id="file-renaming-format-preview-buttons">
-						<button
-							id="file-renaming-rename-now"
-							data-l10n-id="preferences-file-renaming-rename-now"
-						/>
-					</hbox>
 				</groupbox>
 			</vbox>
 	`);
@@ -128,7 +122,6 @@
 				'format-template',
 				'rename-linked-enabled',
 				'rename-linked-hidden',
-				'rename-now-disabled',
 				'readonly',
 			];
 		}
@@ -224,14 +217,6 @@
 			this.handleChange();
 		};
 
-		handleRenameNow = () => {
-			const event = new CustomEvent("rename", {
-				bubbles: true,
-				cancelable: true
-			});
-			this.dispatchEvent(event);
-		};
-		
 		updateDisabled = () => {
 			let readonly = this.getAttribute('readonly') === 'true';
 			for (let checkbox of this.fileTypesCheckboxes.querySelectorAll('checkbox')) {
@@ -240,7 +225,6 @@
 			this.autoRenameToggleCheckbox.disabled = readonly;
 			this.renameLinkedCheckbox.disabled = readonly || !this.autoRenameEnabled;
 			this.formatTemplateTextarea.readOnly = readonly;
-			this.renameNowButton.hidden = !this.autoRenameEnabled;
 		};
 
 		updatePreview = () => {
@@ -258,21 +242,17 @@
 			this.fileTypesCheckboxes = this.querySelector('#file-renaming-file-types-box');
 			this.renameLinkedCheckbox = this.querySelector('#rename-linked-files');
 			this.formatTemplateTextarea = this.querySelector('#file-renaming-format-template');
-			this.renameNowButton = this.querySelector('#file-renaming-rename-now');
-			
 			this.enabledFileTypes = this.getAttribute('file-types') ?? '';
 			this.autoRenameEnabled = this.getAttribute('auto-rename-enabled') === 'true';
 			this.renameLinkedCheckbox.checked = this.getAttribute('rename-linked-enabled') === 'true';
 			this.formatTemplate = this.getAttribute('format-template') ?? '';
 			this.renameLinkedCheckbox.hidden = this.getAttribute('rename-linked-hidden') === 'true';
-			this.renameNowButton.disabled = this.getAttribute('rename-now-disabled') === 'true';
 
 			this.autoRenameToggleCheckbox.addEventListener("command", this.handleRenameToggle);
 			this.fileTypesCheckboxes.addEventListener("command", this.handleChange);
 			this.renameLinkedCheckbox.addEventListener("command", this.handleChange);
 			this.formatTemplateTextarea.addEventListener("input", this.handleTemplateInput);
 			this.formatTemplateTextarea.addEventListener("blur", this.handleTemplateBlur);
-			this.renameNowButton.addEventListener("command", this.handleRenameNow);
 
 			this._itemsView = Zotero.getActiveZoteroPane()?.itemsView;
 			if (this._itemsView) {
@@ -306,9 +286,6 @@
 					break;
 				case 'rename-linked-hidden':
 					this.renameLinkedCheckbox.hidden = newValue === 'true';
-					break;
-				case 'rename-now-disabled':
-					this.renameNowButton.disabled = newValue === 'true';
 					break;
 				case 'readonly':
 					this.updateDisabled();

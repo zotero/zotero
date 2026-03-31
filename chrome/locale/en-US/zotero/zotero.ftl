@@ -657,6 +657,8 @@ show-publications-menuitem =
 file-renaming-settings-window =
     .title = Configure File Renaming
 file-renaming-settings-library-label = Library:
+file-renaming-done =
+    .label = { general-done }
 
 attachment-info-title = Title
 attachment-info-filename = Filename
@@ -913,3 +915,4 @@ banner-close-button =
 
 plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
+
