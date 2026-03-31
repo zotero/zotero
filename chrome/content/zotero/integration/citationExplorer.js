@@ -690,12 +690,12 @@ window.ZoteroCitationExplorer = {
 		let focusedRow = itemList.getRow(itemList.selection.focused);
 		let isItemRow = focusedRow instanceof CitationExplorerItemTreeRow;
 		let isUnlinked = isItemRow && !focusedRow.isLinked;
-		let noneSelected = selectedRows.length === 0;
+		let noneItemsSelected = selectedRows.length === 0;
 		let anyUnlinkedSelected = selectedRows.some(row => !row.isLinked);
 
-		document.querySelector('#button-show-in-zotero').disabled = noneSelected || !isItemRow || isUnlinked;
-		document.querySelector('#button-relink-item').disabled = noneSelected || !anyUnlinkedSelected;
-		document.querySelector('#button-addTo-library').disabled = noneSelected || !anyUnlinkedSelected;
+		document.querySelector('#button-show-in-zotero').disabled = noneItemsSelected || !isItemRow || isUnlinked;
+		document.querySelector('#button-relink-item').disabled = noneItemsSelected || !anyUnlinkedSelected;
+		document.querySelector('#button-addTo-library').disabled = noneItemsSelected;
 		
 		await this.refreshCitationList();
 	},
