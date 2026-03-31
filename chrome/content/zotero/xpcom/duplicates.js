@@ -23,21 +23,49 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Duplicates = function (libraryID) {
-	if (typeof libraryID == 'undefined') {
-		throw ("libraryID not provided in Zotero.Duplicates constructor");
+Zotero.Duplicates = function (libraryIDs) {
+	if (typeof libraryIDs == 'undefined') {
+		throw ("libraryID(s) not provided in Zotero.Duplicates constructor");
 	}
 	
-	if (!libraryID) {
-		libraryID = Zotero.Libraries.userLibraryID;
+	if (!libraryIDs) {
+		libraryIDs = Zotero.Libraries.userLibraryID;
 	}
 	
-	this._libraryID = libraryID;
+	if (!Array.isArray(libraryIDs)) {
+		libraryIDs = [libraryIDs];
+	}
+	
+	if (!libraryIDs.length) {
+		throw ("libraryIDs must contain at least one libraryID");
+	}
+	
+	this._libraryIDs = libraryIDs;
 }
 
 
 Zotero.Duplicates.prototype.__defineGetter__('name', function () { return Zotero.getString('pane.collections.duplicate'); });
-Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () { return this._libraryID; });
+Zotero.Duplicates.prototype.__defineGetter__('libraryIDs', function () { return this._libraryIDs; });
+Zotero.Duplicates.prototype.__defineGetter__('libraryID', function () {
+	if (this._libraryIDs.length > 1) {
+		throw ("libraryID is not available when Zotero.Duplicates includes multiple libraries");
+	}
+	return this._libraryIDs[0];
+});
+
+Zotero.Duplicates.prototype._getLibraryCondition = function (field = 'libraryID') {
+	if (this._libraryIDs.length == 1) {
+		return {
+			sql: `${field}=?`,
+			params: [this._libraryIDs[0]]
+		};
+	}
+	
+	return {
+		sql: `${field} IN (${this._libraryIDs.map(() => '?').join(', ')})`,
+		params: this._libraryIDs.slice()
+	};
+};
 
 /**
  * Get duplicates, populate a temporary table, and return a search based
@@ -74,7 +102,9 @@ Zotero.Duplicates.prototype.getSearchObject = async function () {
 	}
 	
 	var s = new Zotero.Search;
-	s.libraryID = this._libraryID;
+	if (this._libraryIDs.length == 1) {
+		s.libraryID = this.libraryID;
+	}
 	s.addCondition('tempTable', 'is', table);
 	return s;
 };
@@ -191,15 +221,17 @@ Zotero.Duplicates.prototype._findDuplicates = async function () {
 		}
 	}
 	
+	let libraryCondition = this._getLibraryCondition();
+	
 	// Match books by ISBN
 	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND itemTypeID=? AND fieldID=? "
+				+ `WHERE ${libraryCondition.sql} AND itemTypeID=? AND fieldID=? `
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
 	var rows = await Zotero.DB.queryAsync(
 		sql,
 		[
-			this._libraryID,
+			...libraryCondition.params,
 			Zotero.ItemTypes.getID('book'),
 			Zotero.ItemFields.getID('ISBN')
 		]
@@ -224,12 +256,12 @@ Zotero.Duplicates.prototype._findDuplicates = async function () {
 	// DOI
 	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID=? AND value LIKE ? "
+				+ `WHERE ${libraryCondition.sql} AND fieldID=? AND value LIKE ? `
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
 	var rows = await Zotero.DB.queryAsync(
 		sql,
 		[
-			this._libraryID,
+			...libraryCondition.params,
 			Zotero.ItemFields.getID('DOI'),
 			'10.%'
 		]
@@ -252,18 +284,19 @@ Zotero.Duplicates.prototype._findDuplicates = async function () {
 	}
 	
 	// Get years
-	var dateFields = [Zotero.ItemFields.getID('date')].concat(
-		Zotero.ItemFields.getTypeFieldsFromBase('date')
-	);
+	var dateFields = [
+		Zotero.ItemFields.getID('date'),
+		...Zotero.ItemFields.getTypeFieldsFromBase('date')
+	];
 	var sql = "SELECT itemID, SUBSTR(value, 1, 4) AS year FROM items "
 				+ "JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID IN ("
+				+ `WHERE ${libraryCondition.sql} AND fieldID IN (`
 				+ dateFields.map(() => '?').join() + ") "
 				+ "AND SUBSTR(value, 1, 4) != '0000' "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems) "
 				+ "ORDER BY value";
-	var rows = await Zotero.DB.queryAsync(sql, [this._libraryID].concat(dateFields));
+	var rows = await Zotero.DB.queryAsync(sql, [...libraryCondition.params, ...dateFields]);
 	var yearCache = {};
 	for (let i = 0; i < rows.length; i++) {
 		let row = rows[i];
@@ -278,11 +311,11 @@ Zotero.Duplicates.prototype._findDuplicates = async function () {
 	titleIDs.push(Zotero.ItemFields.getID('title'));
 	var sql = "SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID IN "
+				+ `WHERE ${libraryCondition.sql} AND fieldID IN `
 				+ "(" + titleIDs.join(', ') + ") "
 				+ `AND itemTypeID NOT IN (${itemTypeAttachment}, ${itemTypeNote}) `
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)";
-	var rows = await Zotero.DB.queryAsync(sql, [this._libraryID]);
+	var rows = await Zotero.DB.queryAsync(sql, libraryCondition.params);
 	if (rows.length) {
 		//normalize all values ahead of time
 		rows = rows.map(function (row) {
@@ -302,10 +335,10 @@ Zotero.Duplicates.prototype._findDuplicates = async function () {
 		let sql = "SELECT itemID, lastName, firstName, fieldMode FROM items "
 			+ "JOIN itemCreators USING (itemID) "
 			+ "JOIN creators USING (creatorID) "
-			+ `WHERE libraryID=? AND itemTypeID NOT IN (${itemTypeAttachment}, ${itemTypeNote}) AND `
+			+ `WHERE ${libraryCondition.sql} AND itemTypeID NOT IN (${itemTypeAttachment}, ${itemTypeNote}) AND `
 			+ "itemID NOT IN (SELECT itemID FROM deletedItems)"
 			+ "ORDER BY itemID, orderIndex";
-		let creatorRows = await Zotero.DB.queryAsync(sql, this._libraryID);
+		let creatorRows = await Zotero.DB.queryAsync(sql, libraryCondition.params);
 		let lastItemID;
 		let itemCreators = [];
 		for (let i = 0; i < creatorRows.length; i++) {
