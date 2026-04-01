@@ -3,5 +3,6 @@
 	color: LinkText;
 	text-decoration: underline;
 	cursor: pointer;
+	margin: 0;
 	@include focus-ring;
 }

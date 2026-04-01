@@ -287,13 +287,6 @@ menulist[disabled="true"] {
 	font-size: .85em;
 }
 
-/* Links within messages */
-description label[class=zotero-text-link],
-label[class=zotero-text-link],
-label[is=zotero-text-link] {
-	margin: 0;
-}
-
 .form-grid {
 	display: grid;
 	grid-template-columns: max-content 1fr;
