@@ -324,7 +324,7 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			return;
 		}
 
-		const { autoRenameEnabled, enabledFileTypes, renameLinkedEnabled, formatTemplate } = event.detail;
+		let { autoRenameEnabled, enabledFileTypes, renameLinkedEnabled, formatTemplate } = event.detail;
 		let base = this._baselineSettings;
 
 		if (this.isUserLibrary) {

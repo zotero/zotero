@@ -177,10 +177,10 @@
 		}
 
 		handleChange = () => {
-			const autoRenameEnabled = this.autoRenameEnabled;
-			const enabledFileTypes = this.enabledFileTypes;
-			const renameLinkedEnabled = this.renameLinkedEnabled;
-			const formatTemplate = this.formatTemplate;
+			let autoRenameEnabled = this.autoRenameEnabled;
+			let enabledFileTypes = this.enabledFileTypes;
+			let renameLinkedEnabled = this.renameLinkedEnabled;
+			let formatTemplate = this.formatTemplate;
 			this.dispatchEvent(new CustomEvent("change", {
 				detail: {
 					autoRenameEnabled,
@@ -194,7 +194,7 @@
 		};
 
 		handleTemplateInput = () => {
-			const formatString = this.formatTemplateTextarea.value;
+			let formatString = this.formatTemplateTextarea.value;
 			// Ignore the empty value, which we'll reset in handleInputBlur() if necessary
 			if (formatString.replace(/\s/g, '') === '') {
 				return;
@@ -204,7 +204,7 @@
 		};
 
 		handleTemplateBlur = () => {
-			const formatString = this.formatTemplateTextarea.value;
+			let formatString = this.formatTemplateTextarea.value;
 			if (formatString.replace(/\s/g, '') === '') {
 				this.formatTemplateTextarea.value = DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 				this.updatePreview();
@@ -228,9 +228,9 @@
 		};
 
 		updatePreview = () => {
-			const [item, ext, attachmentTitle] = this.getActiveItem() ?? [this.mockItem ?? this.makeMockItem(), DEFAULT_EXT, ''];
-			const formatString = this.formatTemplate;
-			const preview = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString, attachmentTitle });
+			let [item, ext, attachmentTitle] = this.getActiveItem() ?? [this.mockItem ?? this.makeMockItem(), DEFAULT_EXT, ''];
+			let formatString = this.formatTemplate;
+			let preview = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString, attachmentTitle });
 			this.querySelector('#file-renaming-format-preview').innerText = `${preview}.${ext}`;
 		};
 
@@ -264,7 +264,7 @@
 
 		disconnectedCallback() {
 			super.disconnectedCallback();
-			this._itemsView.onSelect.removeListener(this.updatePreview);
+			this._itemsView?.onSelect.removeListener(this.updatePreview);
 		}
 
 		attributeChangedCallback(name, oldValue, newValue) {
