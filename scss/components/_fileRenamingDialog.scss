@@ -24,59 +24,6 @@
 		height: 1.6em;
 	}
 
-	#file-renaming-deck {
-		overflow: hidden;
-	}
-
-	#preview-panel {
-		display: flex;
-		flex-direction: column;
-	}
-
-	#preview-intro {
-		margin-block: 0 0.5em;
-	}
-
-	.virtualized-table-container {
-		flex: 1 1 auto;
-		display: flex;
-		overflow: hidden;
-		border: var(--material-panedivider);
-
-		.virtualized-table-wrapper {
-			width: 100%;
-		}
-
-		.virtualized-table-loading {
-			width: 100%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-
-			&[hidden] {
-				display: none;
-			}
-		}
-
-		.virtualized-table {
-			overflow: hidden;
-
-			.row {
-				&.new:not(.selected) {
-					color: var(--fill-primary);
-				}
-
-				&.old:not(.selected) {
-					color: var(--fill-secondary);
-				}
-			}
-		}
-	}
-
-	progress.hidden {
-		display: none;
-	}
-
 	#file-renaming-buttons {
 		justify-content: flex-end;
 		gap: 0.5em;

@@ -23,12 +23,9 @@
 	***** END LICENSE BLOCK *****
 */
 
-/* global FileRenamingPreview */
 var FileRenamingDialog = { // eslint-disable-line no-unused-vars
-	_state: 'settings',
 	_settingsChanged: false,
 	_currentLibraryID: null,
-	_continuation: null,
 	_forceClose: false,
 
 	init: function () {
@@ -36,20 +33,10 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 		this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE = DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 		this.DEFAULT_AUTO_RENAME_FILE_TYPES = DEFAULT_AUTO_RENAME_FILE_TYPES;
 
-		// Settings elements
 		this.settingsEl = document.getElementById('file-renaming-settings');
 		this.libraryPicker = document.getElementById('library-picker');
-		this.deck = document.getElementById('file-renaming-deck');
-
-		// Preview elements
-		this.previewIntroEl = document.getElementById('preview-intro');
-		this.previewFilesListEl = document.getElementById('preview-files-list');
-		this.previewLoadingEl = document.getElementById('preview-loading');
-		this.previewProgressEl = document.getElementById('preview-progress');
-
-		// Buttons
-		this.secondaryBtn = document.getElementById('file-renaming-secondary-btn');
-		this.primaryBtn = document.getElementById('file-renaming-primary-btn');
+		this.renameFilesBtn = document.getElementById('file-renaming-rename-files-btn');
+		this.doneBtn = document.getElementById('file-renaming-done-btn');
 
 		// Populate library picker
 		let libraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
@@ -67,18 +54,15 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 
 		this.libraryPicker.addEventListener('command', this.handleLibraryChange.bind(this));
 		this.settingsEl.addEventListener('change', this.handleSettingsChange.bind(this));
-		this.secondaryBtn.addEventListener('command', this._handleSecondaryClick.bind(this));
-		this.primaryBtn.addEventListener('command', this._handlePrimaryClick.bind(this));
+		this.renameFilesBtn.addEventListener('command', this._handleRenameFilesClick.bind(this));
+		this.doneBtn.addEventListener('command', this._handleDoneClick.bind(this));
 
 		this._handleDonePrefChange = this._handleDonePrefChange.bind(this);
 		this._renameFilesPrefObserver = Zotero.Prefs.registerObserver('autoRenameFiles.done', this._handleDonePrefChange);
 
-		// Initialize preview renderer
-		FileRenamingPreview.init(this.previewFilesListEl, this.previewProgressEl);
-
 		this.loadSettingsForLibrary(initialLibraryID);
 		this._currentLibraryID = initialLibraryID;
-		this._showSettings();
+		this._updateButtons();
 
 		window.addEventListener('unload', () => {
 			Zotero.Prefs.unregisterObserver(this._renameFilesPrefObserver);
@@ -93,36 +77,13 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 		return this.libraryID === Zotero.Libraries.userLibraryID;
 	},
 
-	// --- State: Settings ---
-
-	_showSettings: function () {
-		this._state = 'settings';
-		this.deck.selectedIndex = 0;
-		this.libraryPicker.disabled = false;
-
-		// Reset preview panel for next use
-		this.previewFilesListEl.hidden = false;
-		this.previewLoadingEl.hidden = false;
-		this.previewProgressEl.classList.add('hidden');
-		this.previewProgressEl.value = 0;
-		this.previewIntroEl.dataset.l10nId = 'rename-files-preview-intro';
-
-		this._updateSettingsButtons();
-	},
-
-	_updateSettingsButtons: function () {
+	_updateButtons: function () {
 		let autoRenameEnabled = this.settingsEl.autoRenameEnabled;
-
-		this.secondaryBtn.hidden = !autoRenameEnabled;
-		this.secondaryBtn.disabled = this._isRenameNowDisabled();
-		document.l10n.setAttributes(this.secondaryBtn, 'preferences-file-renaming-rename-now');
-
-		this.primaryBtn.hidden = false;
-		this.primaryBtn.disabled = false;
-		document.l10n.setAttributes(this.primaryBtn, 'file-renaming-done-button');
+		this.renameFilesBtn.hidden = !autoRenameEnabled;
+		this.renameFilesBtn.disabled = this._isRenameFilesBtnDisabled();
 	},
 
-	_isRenameNowDisabled: function () {
+	_isRenameFilesBtnDisabled: function () {
 		let libraryID = this._currentLibraryID;
 		if (libraryID === Zotero.Libraries.userLibraryID) {
 			return Zotero.Prefs.get('autoRenameFiles.done');
@@ -130,121 +91,32 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 		return !Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(libraryID);
 	},
 
-	// --- State: Preview ---
+	_openRenameFilesPreview: function (libraryID) {
+		let args = { libraryID };
+		Services.ww.openWindow(null, "chrome://zotero/content/renameFilesPreview.xhtml",
+			"renameFilesPreview", "chrome,dialog=yes,centerscreen,modal", args);
+		if (!args.cancelled) {
+			this._resetBaseline(libraryID);
+		}
+		return !args.cancelled;
+	},
 
-	_enterPreview: async function (libraryID, continuation) {
-		this._state = 'preview-loading';
-		this._continuation = continuation;
-		this._previewLibraryID = libraryID;
-
-		this.deck.selectedIndex = 1;
-		this.libraryPicker.disabled = true;
-
-		// Reset preview UI
-		this.previewLoadingEl.hidden = false;
-		this.previewProgressEl.classList.add('hidden');
-		this.previewProgressEl.value = 0;
-		this.previewIntroEl.dataset.l10nId = 'rename-files-preview-intro';
-
-		// Show Cancel, disable Rename Files until loading completes
-		this.secondaryBtn.hidden = false;
-		this.secondaryBtn.disabled = false;
-		document.l10n.setAttributes(this.secondaryBtn, 'file-renaming-cancel-button');
-
-		this.primaryBtn.hidden = false;
-		this.primaryBtn.disabled = true;
-		document.l10n.setAttributes(this.primaryBtn, 'file-renaming-rename-files');
-
-		let results = await FileRenamingPreview.loadPreview(libraryID);
-
-		this.previewLoadingEl.hidden = true;
-
-		if (results.length === 0) {
-			this._state = 'no-files';
-			this.previewIntroEl.dataset.l10nId = 'rename-files-preview-no-files';
-
-			// Mark as done for user library
-			if (libraryID === Zotero.Libraries.userLibraryID) {
-				Zotero.Prefs.set('autoRenameFiles.done', true);
+	_handleDoneClick: async function () {
+		// "Done" button -- prompt if dirty, then close
+		if (this._shouldPromptRename(this._currentLibraryID)) {
+			let wantsRename = await this._promptRename(this._currentLibraryID);
+			if (wantsRename) {
+				this._openRenameFilesPreview(this._currentLibraryID);
 			}
-
-			// Show only Done
-			this.secondaryBtn.hidden = true;
-			document.l10n.setAttributes(this.primaryBtn, 'file-renaming-done-button');
-			this.primaryBtn.disabled = false;
 		}
-		else {
-			this._state = 'preview-ready';
-			this.primaryBtn.disabled = false;
-		}
+		window.close(); // bypasses the onclose handler
 	},
 
-	_handlePrimaryClick: async function () {
-		switch (this._state) {
-			case 'settings':
-				// "Done" button in settings -- prompt if dirty, then close
-				if (this._shouldPromptRename(this._currentLibraryID)) {
-					this._handleWindowClosePrompt();
-				}
-				else {
-					window.close(); // bypasses the onclose handler
-				}
-				break;
-
-			case 'preview-ready':
-				await this._startRename();
-				break;
-
-			case 'no-files':
-				this._executeContinuation();
-				break;
-		}
+	_handleRenameFilesClick: function () {
+		// "Rename Files..." button
+		this._openRenameFilesPreview(this._currentLibraryID);
+		this._updateButtons();
 	},
-
-	_handleSecondaryClick: function () {
-		switch (this._state) {
-			case 'settings':
-				// "Preview Changes..." button -- enter preview
-				this._enterPreview(this._currentLibraryID, () => {
-					this._resetBaseline(this._currentLibraryID);
-					FileRenamingPreview.destroy();
-					this._showSettings();
-				});
-				break;
-
-			default:
-				// "Cancel" from any preview sub-state
-				FileRenamingPreview.destroy();
-				this._showSettings();
-				break;
-		}
-	},
-
-	_startRename: async function () {
-		this._state = 'renaming';
-
-		this.previewFilesListEl.hidden = true;
-		this.previewProgressEl.classList.remove('hidden');
-		this.previewIntroEl.dataset.l10nId = 'rename-files-preview-renaming';
-
-		this.secondaryBtn.hidden = true;
-		this.primaryBtn.hidden = true;
-
-		await FileRenamingPreview.runRename(this._previewLibraryID);
-
-		this._executeContinuation();
-	},
-
-	_executeContinuation: function () {
-		let continuation = this._continuation;
-		this._continuation = null;
-		FileRenamingPreview.destroy();
-		if (continuation) {
-			continuation();
-		}
-	},
-
-	// --- Settings management ---
 
 	loadSettingsForLibrary: function (libraryID) {
 		this._settingsChanged = false;
@@ -300,23 +172,15 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			// Revert picker so the previous library is visible behind the prompt
 			this.libraryPicker.value = String(previousLibraryID);
 			let wantsRename = await this._promptRename(previousLibraryID);
-			if (wantsRename) {
-				this._enterPreview(previousLibraryID, () => {
-					this._resetBaseline(previousLibraryID);
-					FileRenamingPreview.destroy();
-					this._currentLibraryID = newLibraryID;
-					this.libraryPicker.value = String(newLibraryID);
-					this.loadSettingsForLibrary(newLibraryID);
-					this._showSettings();
-				});
+			if (wantsRename && !this._openRenameFilesPreview(previousLibraryID)) {
+				// User cancelled the preview -- stay on the current library
 				return;
 			}
-			// User declined -- proceed with the switch
 			this.libraryPicker.value = String(newLibraryID);
 		}
 		this._currentLibraryID = newLibraryID;
 		this.loadSettingsForLibrary(newLibraryID);
-		this._updateSettingsButtons();
+		this._updateButtons();
 	},
 
 	handleSettingsChange: function (event) {
@@ -340,13 +204,12 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 				Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate', formatTemplate);
 			}
 
-			// If settings match the baseline and files were already renamed, mark as done;
-			// otherwise, files need renaming
 			let settingsMatch = autoRenameEnabled === base.autoRenameEnabled
 				&& enabledFileTypes === base.fileTypes
 				&& formatTemplate === base.formatTemplate
 				&& renameLinkedEnabled === base.renameLinked;
 			Zotero.Prefs.set('autoRenameFiles.done', settingsMatch && this._baselineDone);
+			this._settingsChanged = !settingsMatch;
 		}
 		else {
 			Zotero.SyncedSettings.set(this.libraryID, 'autoRenameFiles', autoRenameEnabled);
@@ -358,63 +221,42 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 				|| formatTemplate !== base.formatTemplate;
 		}
 
-		this._updateSettingsButtons();
+		this._updateButtons();
 	},
 
-	handleWindowClose: function (event) {
-		if (this._forceClose || this._state !== 'settings') {
+	handleWindowClose: async function (event) {
+		if (this._forceClose) {
 			return true;
 		}
 		if (this._shouldPromptRename(this._currentLibraryID)) {
 			event.preventDefault();
-			this._handleWindowClosePrompt();
+			let wantsRename = await this._promptRename(this._currentLibraryID);
+			if (wantsRename) {
+				this._openRenameFilesPreview(this._currentLibraryID);
+			}
+			this._forceClose = true;
+			window.close();
 			return false;
 		}
 		return true;
 	},
 
-	_handleWindowClosePrompt: async function () {
-		let libraryID = this._currentLibraryID;
-		let wantsRename = await this._promptRename(libraryID);
-		if (wantsRename) {
-			this._enterPreview(libraryID, () => {
-				this._forceClose = true;
-				window.close();
-			});
-		}
-		else {
-			this._forceClose = true;
-			window.close();
-		}
-	},
-
-	_handleDonePrefChange: function (newValue) {
-		if (this._currentLibraryID !== Zotero.Libraries.userLibraryID) return;
-
-		// Renaming has finished -- update baseline to current settings
-		if (newValue) {
-			this._baselineSettings = {
-				autoRenameEnabled: Zotero.Prefs.get('autoRenameFiles'),
-				fileTypes: Zotero.Prefs.get('autoRenameFiles.fileTypes'),
-				formatTemplate: Zotero.SyncedSettings.get(
-					Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate'
-				) ?? this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE,
-				renameLinked: Zotero.Prefs.get('autoRenameFiles.linked'),
-			};
-			this._baselineDone = true;
+	_handleDonePrefChange: function () {
+		if (this._currentLibraryID !== Zotero.Libraries.userLibraryID) {
+			return;
 		}
 
-		if (this._state === 'settings') {
-			this._updateSettingsButtons();
-		}
+		this._updateButtons();
 	},
 
 	_shouldPromptRename: function (libraryID) {
+		if (!this._settingsChanged) {
+			return false;
+		}
 		if (libraryID === Zotero.Libraries.userLibraryID) {
 			return Zotero.Prefs.get('autoRenameFiles') && !Zotero.Prefs.get('autoRenameFiles.done');
 		}
-		return this._settingsChanged
-			&& Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(libraryID);
+		return Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(libraryID);
 	},
 
 	_promptRename: async function (libraryID) {
@@ -444,11 +286,19 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 	},
 
 	_resetBaseline: function (libraryID) {
+		this._settingsChanged = false;
 		if (libraryID === Zotero.Libraries.userLibraryID) {
 			this._baselineDone = true;
+			this._baselineSettings = {
+				autoRenameEnabled: Zotero.Prefs.get('autoRenameFiles'),
+				fileTypes: Zotero.Prefs.get('autoRenameFiles.fileTypes'),
+				formatTemplate: Zotero.SyncedSettings.get(
+					Zotero.Libraries.userLibraryID, 'attachmentRenameTemplate'
+				) ?? this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE,
+				renameLinked: Zotero.Prefs.get('autoRenameFiles.linked'),
+			};
 		}
 		else {
-			this._settingsChanged = false;
 			this._baselineSettings = {
 				autoRenameEnabled: Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(libraryID),
 				fileTypes: Zotero.SyncedSettings.get(libraryID, 'autoRenameFilesFileTypes')

@@ -717,8 +717,11 @@ file-renaming-auto-rename-prompt-body-library = Would you like to rename existin
 file-renaming-auto-rename-prompt-yes = { file-renaming-preview-changes }
 file-renaming-auto-rename-prompt-no = Keep Existing Filenames
 
+rename-files-preview-window =
+    .title = Rename Files
 rename-files-preview-loading = Loading…
-rename-files-preview-intro = { -app-name } will rename the following files in this library to match their parent items:
+rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-intro-library = { -app-name } will rename the following files in "{ $library }" to match their parent items:
 rename-files-preview-renaming = Renaming…
 rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 

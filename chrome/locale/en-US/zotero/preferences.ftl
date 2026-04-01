@@ -25,7 +25,7 @@ preferences-file-renaming-file-type-video =
 preferences-file-renaming-configure-button =
     .label = Configure File Renaming…
 preferences-file-renaming-rename-now =
-    .label = { file-renaming-preview-changes }
+    .label = Rename Files…
 preferences-file-renaming-rename-linked =
     .label = Rename linked files
 
