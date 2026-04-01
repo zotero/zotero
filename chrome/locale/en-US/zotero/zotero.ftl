@@ -657,8 +657,12 @@ show-publications-menuitem =
 file-renaming-settings-window =
     .title = Configure File Renaming
 file-renaming-settings-library-label = Library:
-file-renaming-done =
+file-renaming-rename-files =
+    .label = Rename Files
+file-renaming-done-button =
     .label = { general-done }
+file-renaming-cancel-button =
+    .label = { general-cancel }
 
 attachment-info-title = Title
 attachment-info-filename = Filename
@@ -715,7 +719,7 @@ file-renaming-auto-rename-prompt-no = Keep Existing Filenames
 rename-files-preview =
     .buttonlabelaccept = Rename Files
 rename-files-preview-loading = Loading…
-rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
+rename-files-preview-intro = { -app-name } will rename the following files in this library to match their parent items:
 rename-files-preview-renaming = Renaming…
 rename-files-preview-no-files = All filenames already match parent items. No changes are required.
 

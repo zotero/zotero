@@ -38,11 +38,13 @@
 		width="800"
 		height="600"
 		onload="FileRenamingDialog.init()"
+		onclose="return FileRenamingDialog.handleWindowClose(event)"
 >
 	<groupbox>
 		<script>
 			Services.scriptloader.loadSubScript('chrome://zotero/content/include.js', this);
 			Services.scriptloader.loadSubScript('chrome://zotero/content/customElements.js', this);
+			Services.scriptloader.loadSubScript('chrome://zotero/content/fileRenamingPreview.js', this);
 			Services.scriptloader.loadSubScript('chrome://zotero/content/fileRenamingDialog.js', this);
 		</script>
 		<linkset>
@@ -50,22 +52,39 @@
 			<html:link rel="localization" href="zotero.ftl" />
 			<html:link rel="localization" href="preferences.ftl" />
 		</linkset>
+
 		<hbox align="center" id="library-picker-row">
 			<label data-l10n-id="file-renaming-settings-library-label" control="library-picker" />
 			<menulist id="library-picker" native="true">
 				<menupopup />
 			</menulist>
 		</hbox>
-		<file-renaming-settings id="file-renaming-settings" />
+
+		<deck id="file-renaming-deck" flex="1">
+			<!-- Panel 0: Settings -->
+			<vbox id="settings-panel">
+				<file-renaming-settings id="file-renaming-settings" />
+			</vbox>
+
+			<!-- Panel 1: Preview -->
+			<vbox id="preview-panel">
+				<vbox>
+					<html:p id="preview-intro" data-l10n-id="rename-files-preview-intro" />
+				</vbox>
+				<vbox class="virtualized-table-container">
+					<html:div id="preview-files-list" class="virtualized-table-wrapper">
+						<html:div class="virtualized-table-loading" id="preview-loading">
+							<html:span data-l10n-id="rename-files-preview-loading" />
+						</html:div>
+					</html:div>
+					<html:progress id="preview-progress" max="1" value="0" />
+				</vbox>
+			</vbox>
+		</deck>
+
 		<hbox id="file-renaming-buttons">
-			<button
-				id="file-renaming-rename-now"
-				data-l10n-id="preferences-file-renaming-rename-now"
-			/>
-			<button
-				id="file-renaming-done"
-				data-l10n-id="file-renaming-done"
-			/>
+			<button id="file-renaming-secondary-btn" />
+			<button id="file-renaming-primary-btn" />
 		</hbox>
 	</groupbox>
 </window>

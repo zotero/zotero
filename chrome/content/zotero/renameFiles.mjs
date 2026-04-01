@@ -290,38 +290,3 @@ export function registerAutoRenameFileFromParent() {
 	}, ['item'], 'autoRenameFileFromParent', 150); // lower priority than the other item observers
 }
 
-export async function openRenameFilesPreview(libraryID) {
-	libraryID = libraryID ?? Zotero.Libraries.userLibraryID;
-	const args = { libraryID };
-	Services.ww.openWindow(null, "chrome://zotero/content/renameFilesPreview.xhtml",
-		"renameFilesPreview", "chrome,dialog=yes,centerscreen,modal", args);
-}
-
-export async function promptAutoRenameFiles(libraryID) {
-	let isUserLibrary = !libraryID || libraryID === Zotero.Libraries.userLibraryID;
-	let bodyID = isUserLibrary
-		? { id: 'file-renaming-auto-rename-prompt-body' }
-		: { id: 'file-renaming-auto-rename-prompt-body-library', args: { library: Zotero.Libraries.get(libraryID).name } };
-	let [title, description, yes, no] = await Zotero.getMainWindow().document.l10n.formatValues([
-		'file-renaming-auto-rename-prompt-title',
-		bodyID,
-		'file-renaming-auto-rename-prompt-yes',
-		'file-renaming-auto-rename-prompt-no'
-	]);
-	let index = Zotero.Prompt.confirm({
-		title,
-		text: description,
-		button0: yes,
-		button1: no
-	});
-	if (index == 0) {
-		openRenameFilesPreview(libraryID);
-		return true;
-	}
-	else {
-		if (isUserLibrary) {
-			Zotero.Prefs.set('autoRenameFiles.done', false);
-		}
-		return false;
-	}
-}
