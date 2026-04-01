@@ -281,6 +281,15 @@
 	"zotero-toolbar-tabs-scroll-backwards.title": {
 		"string": "Scroll backwards"
 	},
+	"recently-read": {
+		"string": "Recently Read"
+	},
+	"collections-menu-show-recently-read.label": {
+		"string": "Show { recently-read }"
+	},
+	"item-menu-remove-from-recently-read.label": {
+		"string": "Remove from { recently-read }…"
+	},
 	"collections-menu-rename-collection.label": {
 		"string": "Rename Collection"
 	},
@@ -451,6 +460,15 @@
 	},
 	"items-table-cell-notes.aria-label": {
 		"string": "{count, plural, one {{ count } Note} other {{ count } Notes}}"
+	},
+	"items-column-added-by": {
+		"string": "Added By"
+	},
+	"items-column-modified-by": {
+		"string": "Modified By"
+	},
+	"items-column-last-read": {
+		"string": "Last Read"
 	},
 	"report-error.label": {
 		"string": "Report Error…"
@@ -896,6 +914,15 @@
 	"attachment-rename-from-parent.tooltiptext": {
 		"string": "Rename File to Match Parent Item"
 	},
+	"account-log-in": {
+		"string": "Log In"
+	},
+	"account-not-logged-in-text": {
+		"string": "Log in to your Zotero account to sync your data."
+	},
+	"account-error-login-session-expired": {
+		"string": "Your login session has expired. Please try again."
+	},
 	"file-renaming-auto-rename-prompt-title": {
 		"string": "Renaming Settings Changed"
 	},
@@ -1003,6 +1030,87 @@
 	},
 	"advanced-search-condition-input.aria-label": {
 		"string": "Value"
+	},
+	"search-conditions-tooltip-fields": {
+		"string": "Fields:"
+	},
+	"search-conditions-collection": {
+		"string": "Collection"
+	},
+	"search-conditions-savedSearch": {
+		"string": "Saved Search"
+	},
+	"search-conditions-itemTypeID": {
+		"string": "Item Type"
+	},
+	"search-conditions-tag": {
+		"string": "Tag"
+	},
+	"search-conditions-note": {
+		"string": "Note"
+	},
+	"search-conditions-childNote": {
+		"string": "Child Note"
+	},
+	"search-conditions-creator": {
+		"string": "Creator"
+	},
+	"search-conditions-thesisType": {
+		"string": "Thesis Type"
+	},
+	"search-conditions-reportType": {
+		"string": "Report Type"
+	},
+	"search-conditions-videoRecordingFormat": {
+		"string": "Video Recording Format"
+	},
+	"search-conditions-audioFileType": {
+		"string": "Audio File Type"
+	},
+	"search-conditions-audioRecordingFormat": {
+		"string": "Audio Recording Format"
+	},
+	"search-conditions-letterType": {
+		"string": "Letter Type"
+	},
+	"search-conditions-interviewMedium": {
+		"string": "Interview Medium"
+	},
+	"search-conditions-manuscriptType": {
+		"string": "Manuscript Type"
+	},
+	"search-conditions-presentationType": {
+		"string": "Presentation Type"
+	},
+	"search-conditions-mapType": {
+		"string": "Map Type"
+	},
+	"search-conditions-artworkMedium": {
+		"string": "Artwork Medium"
+	},
+	"search-conditions-dateModified": {
+		"string": "Date Modified"
+	},
+	"search-conditions-fulltextContent": {
+		"string": "Attachment Content"
+	},
+	"search-conditions-programmingLanguage": {
+		"string": "Programming Language"
+	},
+	"search-conditions-fileTypeID": {
+		"string": "Attachment File Type"
+	},
+	"search-conditions-lastRead": {
+		"string": "Attachment Last Read"
+	},
+	"search-conditions-annotationText": {
+		"string": "Annotation Text"
+	},
+	"search-conditions-annotationComment": {
+		"string": "Annotation Comment"
+	},
+	"search-conditions-anyField": {
+		"string": "Any Field"
 	},
 	"find-pdf-files-added": {
 		"string": "{count, plural, one {{ count } file added} other {{ count } files added}}"
@@ -1274,9 +1382,6 @@
 	"preferences-sync-data-syncing-description": {
 		"string": "Log in with your { app-name } account to sync your data between devices, collaborate with others, and more."
 	},
-	"preferences-account-log-in.label": {
-		"string": "Log In"
-	},
 	"preferences-account-log-out.label": {
 		"string": "Log Out…"
 	},
@@ -1297,6 +1402,30 @@
 	},
 	"preferences-sync-reset-restore-to-server-yes": {
 		"string": "Replace Data in Online Library"
+	},
+	"preferences-account-log-in.label": {
+		"string": "Log In"
+	},
+	"preferences-account-waiting-for-login.value": {
+		"string": "Waiting for login…"
+	},
+	"preferences-account-logged-out-status.value": {
+		"string": "(logged out)"
+	},
+	"preferences-account-email-label.value": {
+		"string": "Email:"
+	},
+	"preferences-account-switch-accounts.label": {
+		"string": "Switch Accounts…"
+	},
+	"preferences-account-switch-text": {
+		"string": "Switching to a different account will remove all { app-name } data on this computer. Before continuing, make sure all data and files you wish to keep have been synced with the “{ username }” account or you have a backup of your { app-name } data directory."
+	},
+	"preferences-account-switch-confirmation-text": {
+		"string": "remove local data"
+	},
+	"preferences-account-switch-accept": {
+		"string": "Remove Data and Restart"
 	},
 	"scaffold-translator-output.aria-label": {
 		"string": "Console"
@@ -1748,8 +1877,14 @@
 	"reader-read-aloud-skip-back": {
 		"string": "Skip Back"
 	},
+	"reader-read-aloud-skip-back-sentence": {
+		"string": "Skip Back by Sentence"
+	},
 	"reader-read-aloud-skip-ahead": {
 		"string": "Skip Ahead"
+	},
+	"reader-read-aloud-skip-ahead-sentence": {
+		"string": "Skip Ahead by Sentence"
 	},
 	"reader-read-aloud-add-annotation": {
 		"string": "Annotate Sentence ({ key1 }/{ key2 })"
@@ -1943,6 +2078,12 @@
 	"integration-citationDialog-section-selected": {
 		"string": "Selected Items ({ count }/{ total })"
 	},
+	"integration-citationDialog-section-selectedAnnotations": {
+		"string": "Selected Annotations"
+	},
+	"integration-citationDialog-section-selectedItems": {
+		"string": "Selected Items"
+	},
 	"integration-citationDialog-section-cited": {
 		"string": "{count, plural, =0 {Cited Items} other {Cited Items ({ count })}}"
 	},
@@ -1955,6 +2096,9 @@
 	"integration-citationDialog-details-suppressAuthor": {
 		"string": "Omit Author"
 	},
+	"integration-citationDialog-details-includeComments": {
+		"string": "Include Comments"
+	},
 	"integration-citationDialog-settings-title": {
 		"string": "Citation Settings"
 	},
@@ -1963,6 +2107,9 @@
 	},
 	"integration-citationDialog-lib-message-add-note": {
 		"string": "{search, select, true {No selected notes match the current search} other {No notes are selected}}"
+	},
+	"integration-citationDialog-lib-message-annotations": {
+		"string": "{search, select, true {No items with annotations match the current search} other {No selected or open items with annotations}}"
 	},
 	"integration-citationDialog-settings-keepSorted": {
 		"string": "Keep sources sorted"
@@ -1978,6 +2125,9 @@
 	},
 	"integration-citationDialog-btn-type-add-note.title": {
 		"string": "Add Note"
+	},
+	"integration-citationDialog-btn-type-annotations.title": {
+		"string": "Add Annotations"
 	},
 	"integration-citationDialog-general-instructions": {
 		"string": "Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation."
@@ -1996,6 +2146,9 @@
 	},
 	"integration-citationDialog-single-input-add-note.placeholder": {
 		"string": "Search for a note to insert into the document"
+	},
+	"integration-citationDialog-single-input-annotations.placeholder": {
+		"string": "Search for annotations to insert into the document"
 	},
 	"integration-citationDialog-aria-item-list.aria-description": {
 		"string": "Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }"
@@ -2023,6 +2176,12 @@
 	},
 	"integration-citationDialog-add-to-citation": {
 		"string": "Add to Citation"
+	},
+	"integration-citationDialog-annotations-filter.placeholder": {
+		"string": "Filter annotations"
+	},
+	"integration-citationDialog-annotations-empty": {
+		"string": "Select an item, attachment, or annotation to view annotation details"
 	},
 	"integration-prefs-displayAs-label": {
 		"string": "Display Citations As:"
