@@ -510,6 +510,11 @@ describe("Citation Dialog", function () {
 			while (SearchHandler.searching) {
 				await Zotero.Promise.delay(10);
 			}
+			// Re-set cached items right before search to guard against
+			// the window focus handler clearing them
+			SearchHandler.selectedItems = [selectedOne, selectedTwo, selectedAndOpenOne];
+			SearchHandler.openItems = [openOne, openTwo, selectedAndOpenOne, citedAndOpenOne];
+			SearchHandler.citedItems = [citedOne, citedAndOpenOne];
 			// Search for "one"
 			await dialog.currentLayout.search("one", { skipDebounce: true });
 			// Selected items should have both "one_selected" and "one_selected_open"
@@ -541,6 +546,11 @@ describe("Citation Dialog", function () {
 			while (SearchHandler.searching) {
 				await Zotero.Promise.delay(10);
 			}
+			// Re-set cached items right before search to guard against
+			// the window focus handler clearing them
+			SearchHandler.selectedItems = [selectedOne, selectedTwo, selectedAndOpenOne];
+			SearchHandler.openItems = [openOne, openTwo, selectedAndOpenOne, citedAndOpenOne];
+			SearchHandler.citedItems = [citedOne, citedAndOpenOne];
 			// Search for "one"
 			await dialog.currentLayout.search("one", { skipDebounce: true });
 			// Selected items should have both "one_selected" and "one_selected_open"
@@ -678,6 +688,9 @@ describe("Citation Dialog", function () {
 
 		it("should not display empty note child rows", async function () {
 			await dialog.setDialogType("add-note");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
 			await IOManager.toggleDialogMode("library");
 			while (SearchHandler.searching) {
 				await Zotero.Promise.delay(10);

@@ -2095,6 +2095,7 @@ window.addEventListener("focus", async () => {
 	// which replaces accept button with the spinner and interrupts the click event.
 	await Zotero.Promise.delay(100);
 	if (accepted) return;
+	if (SearchHandler.searching) return;
 	SearchHandler.clearNonLibraryItemsCache();
 	if (!currentLayout) return;
 	if (currentLayout.type == "list") {
