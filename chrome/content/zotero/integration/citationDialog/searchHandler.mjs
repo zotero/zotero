@@ -234,15 +234,26 @@ export class CitationDialogSearchHandler {
 
 	// Return items that are either annotations or are ancestors of annotations
 	keepItemsWithAnnotations(items) {
-		return items.filter((item) => {
-			if (item.isAnnotation()) return true;
-			if (item.isFileAttachment() && item.getAnnotations().length) return true;
-			if (item.isRegularItem()) {
-				let attachments = Zotero.Items.get(item.getAttachments());
-				return attachments.some(att => att.isFileAttachment() && att.getAnnotations().length);
-			}
-			return false;
-		});
+		return items.filter(item => this.isItemWithAnnotations(item));
+	}
+	
+	isItemWithAnnotations(item) {
+		if (item.isAnnotation()) return true;
+		if (item.isFileAttachment() && item.getAnnotations().length) return true;
+		if (item.isRegularItem()) {
+			let attachments = Zotero.Items.get(item.getAttachments());
+			return attachments.some(att => att.isFileAttachment() && att.getAnnotations().length);
+		}
+		return false;
+	}
+
+	isItemWithNotes(item) {
+		if (item.isNote() && item.getNote().length > 0) return true;
+		if (item.isRegularItem()) {
+			let notes = Zotero.Items.get(item.getNotes());
+			return notes.some(note => note.getNote().length > 0);
+		}
+		return false;
 	}
 
 	getAllAnnotations(item) {

@@ -675,6 +675,41 @@ describe("Citation Dialog", function () {
 			let itemNode = dialog.document.querySelector(`.item[id="${item.id}"]`);
 			assert.isOk(itemNode);
 		});
+
+		it("should not display empty note child rows", async function () {
+			await dialog.setDialogType("add-note");
+			await IOManager.toggleDialogMode("library");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+
+			let parentItem = await createDataObject('item', { title: "parent_with_notes" });
+			let noteWithContent = await createDataObject('item', {
+				itemType: 'note',
+				parentID: parentItem.id
+			});
+			noteWithContent.setNote('<p>Some note content</p>');
+			await noteWithContent.saveTx();
+
+			let emptyNote = await createDataObject('item', {
+				itemType: 'note',
+				parentID: parentItem.id
+			});
+			await emptyNote.saveTx();
+
+			// Refresh itemTree
+			await dialog.libraryLayout.search("", { skipDebounce: true });
+
+			// The empty note should not be among the itemTree rows
+			let emptyNoteRowIndex = dialog.libraryLayout.itemsView.getRowIndexByID(emptyNote.id);
+			assert.isFalse(emptyNoteRowIndex);
+
+			// The note with content should be present
+			let noteRowIndex = dialog.libraryLayout.itemsView.getRowIndexByID(noteWithContent.id);
+			assert.isOk(noteRowIndex !== false);
+
+			await parentItem.eraseTx();
+		});
 	});
 
 
@@ -843,6 +878,24 @@ describe("Citation Dialog", function () {
 			let annotationPreview = popup.querySelector("annotation-row");
 			assert.isOk(annotationPreview);
 			assert.notOk(annotationPreview.closest("[hidden]"));
+		});
+
+		it("should not display note child rows", async function () {
+			let note = await createDataObject('item', {
+				itemType: 'note',
+				parentID: parentItem.id
+			});
+			note.setNote('<p>Test note content</p>');
+			await note.saveTx();
+
+			// Refresh itemTree
+			await dialog.libraryLayout.search("", { skipDebounce: true });
+
+			// Check that the note is not among the itemTree rows
+			let noteRowIndex = dialog.libraryLayout.itemsView.getRowIndexByID(note.id);
+			assert.isFalse(noteRowIndex);
+
+			await note.eraseTx();
 		});
 	});
 
