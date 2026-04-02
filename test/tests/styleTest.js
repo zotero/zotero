@@ -80,7 +80,7 @@ describe("Zotero.Styles", function () {
 				[item],
 				'bibliography=http://www.zotero.org/styles/nlm-citation-sequence'
 			);
-			assert.equal(o.text, '1. Foo bar: baz qux. 2019; \n');
+			assert.equal(o.text, '1. Foo bar: baz qux. 2019.\n');
 		});
 	});
 	
