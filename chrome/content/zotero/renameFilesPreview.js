@@ -52,11 +52,11 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 		this.acceptBtn.addEventListener('command', this.handleAccept.bind(this));
 
 		if (this.libraryID === Zotero.Libraries.userLibraryID) {
-			document.l10n.setAttributes(this.introEl, 'rename-files-preview-intro');
+			document.l10n.setAttributes(this.introEl, 'file-renaming-preview-window-intro');
 		}
 		else {
 			let libraryName = Zotero.Libraries.get(this.libraryID).name;
-			document.l10n.setAttributes(this.introEl, 'rename-files-preview-intro-library', { library: libraryName });
+			document.l10n.setAttributes(this.introEl, 'file-renaming-preview-window-intro-library', { library: libraryName });
 		}
 
 		this._rowRenderer = VirtualizedTable.makeRowRenderer(this._getRowData.bind(this));
@@ -71,7 +71,7 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 
 		if (results.length === 0) {
 			this._noFiles = true;
-			this.introEl.dataset.l10nId = 'rename-files-preview-no-files';
+			this.introEl.dataset.l10nId = 'file-renaming-preview-window-no-files';
 			this.cancelBtn.hidden = true;
 			document.l10n.setAttributes(this.acceptBtn, 'file-renaming-done-button');
 
@@ -99,7 +99,7 @@ var RenameFilesPreview = { // eslint-disable-line no-unused-vars
 
 		this.filesListEl.hidden = true;
 		this.progressEl.classList.remove('hidden');
-		this.introEl.dataset.l10nId = 'rename-files-preview-renaming';
+		this.introEl.dataset.l10nId = 'file-renaming-preview-window-renaming';
 		this.cancelBtn.hidden = true;
 		this.acceptBtn.hidden = true;
 

@@ -33,7 +33,7 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		id="rename-files-preview"
-		data-l10n-id="rename-files-preview-window"
+		data-l10n-id="file-renaming-preview-window"
 		width="800"
 		height="500"
 		onload="RenameFilesPreview.init()"
@@ -47,6 +47,7 @@
 		<linkset>
 			<html:link rel="localization" href="branding/brand.ftl" />
 			<html:link rel="localization" href="zotero.ftl" />
+			<html:link rel="localization" href="fileRenaming.ftl" />
 		</linkset>
 
 		<vbox>
@@ -55,7 +56,7 @@
 		<vbox class="virtualized-table-container">
 			<html:div id="preview-files-list" class="virtualized-table-wrapper">
 				<html:div class="virtualized-table-loading" id="preview-loading">
-					<html:span data-l10n-id="rename-files-preview-loading" />
+					<html:span data-l10n-id="file-renaming-preview-window-loading" />
 				</html:div>
 			</html:div>
 			<html:progress id="preview-progress" max="1" value="0" />

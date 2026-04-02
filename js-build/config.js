@@ -123,6 +123,7 @@ const ftlFileBaseNames = [
 	'integration',
 	'note-editor',
 	'schema',
+	'fileRenaming',
 ];
 
 const buildsURL = 'https://zotero-download.s3.amazonaws.com/ci/';
