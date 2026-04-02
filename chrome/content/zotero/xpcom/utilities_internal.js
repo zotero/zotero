@@ -3400,15 +3400,15 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 	// Get Quick Copy format for current URL (set via /ping from connector)
 	let format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 
+	// If all items are annotations, wrap them in a note object for translation
+	if (items.every(item => item.isAnnotation())) {
+		items = [Zotero.QuickCopy.annotationsToNote(items)];
+	}
+
 	// If all items are notes, use one of the note export translators
 	if (items.every(item => item.isNote())) {
 		format = Zotero.QuickCopy.getNoteFormat();
-	}
-
-	// If all items are annotations, wrap them in a note object for translation
-	if (items.every(item => item.isAnnotation())) {
-		format = Zotero.QuickCopy.getNoteFormat();
-		items = [Zotero.QuickCopy.annotationsToNote(items)];
+		items = Zotero.QuickCopy.reformatNoteCitations(items);
 	}
 
 	Zotero.debug("Dragging with format " + format);

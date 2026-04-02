@@ -2764,13 +2764,15 @@ var ZoteroPane = new function () {
 		}
 		
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-		if (items.every(item => item.isNote() || item.isAttachment())) {
+		if (items.every(item => item.isNote() || item.isAttachment() || item.isAnnotation())) {
 			format = Zotero.QuickCopy.getNoteFormat();
 		}
 		// To copy annotations, wrap them in a temp note
 		if (items.every(item => item.isAnnotation())) {
-			format = Zotero.QuickCopy.getNoteFormat();
 			items = [Zotero.QuickCopy.annotationsToNote(items)];
+		}
+		if (items.every(item => item.isNote())) {
+			items = Zotero.QuickCopy.reformatNoteCitations(items);
 		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		

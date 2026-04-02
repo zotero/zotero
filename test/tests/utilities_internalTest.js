@@ -970,4 +970,210 @@ describe("Zotero.Utilities.Internal", function () {
 			}
 		});
 	});
+
+	describe("#onDragItems()", function () {
+		var noteItem, itemOne, itemTwo;
+		var styleID = 'http://www.zotero.org/styles/chicago-notes-bibliography';
+
+		before(async function () {
+			await Zotero.Styles.init();
+			await Zotero.Translators.init();
+
+			itemOne = createUnsavedDataObject('item', {
+				itemType: 'book',
+				title: 'Item One',
+				creators: [
+					{ firstName: 'firstOne', lastName: 'lastOne', creatorType: 'author' },
+					{ firstName: 'firstTwo', lastName: 'lastTwo', creatorType: 'author' }
+				]
+			});
+			await itemOne.saveTx();
+
+			itemTwo = createUnsavedDataObject('item', {
+				itemType: 'book',
+				title: 'Item Two',
+				creators: [
+					{ firstName: 'firstTwo', lastName: 'lastTwo', creatorType: 'author' },
+					{ firstName: 'firstThree', lastName: 'lastThree', creatorType: 'author' }
+				]
+			});
+			await itemTwo.saveTx();
+
+			var uriOne = Zotero.URI.getItemURI(itemOne);
+			var uriTwo = Zotero.URI.getItemURI(itemTwo);
+			var citationOne = {
+				citationItems: [{ uris: [uriOne] }],
+				properties: {}
+			};
+			var citationTwo = {
+				citationItems: [{ uris: [uriTwo] }],
+				properties: {}
+			};
+			var noteHTML = '<div data-schema-version="9">'
+				+ '<p>Some text</p>'
+				+ '<p><span class="citation" data-citation="'
+				+ encodeURIComponent(JSON.stringify(citationOne))
+				+ '">(<span class="citation-item">lastOne and lastTwo</span>)</span></p>'
+				+ '<p><span class="citation" data-citation="'
+				+ encodeURIComponent(JSON.stringify(citationTwo))
+				+ '">(<span class="citation-item">lastTwo and lastThree</span>)</span></p>'
+				+ '<p>Done</p>'
+				+ '</div>';
+
+			noteItem = createUnsavedDataObject('item', {
+				itemType: 'note',
+				note: noteHTML
+			});
+			await noteItem.saveTx();
+
+			// Preload note translators
+			let markdownTranslator = Zotero.Translators.get(Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN);
+			markdownTranslator.cacheCode = true;
+			await Zotero.Translators.getCodeForTranslator(markdownTranslator);
+			let htmlTranslator = Zotero.Translators.get(Zotero.Translators.TRANSLATOR_ID_NOTE_HTML);
+			htmlTranslator.cacheCode = true;
+			await Zotero.Translators.getCodeForTranslator(htmlTranslator);
+		});
+
+		afterEach(function () {
+			Zotero.Prefs.clear('note.export.useCSLCitation');
+			Zotero.Prefs.clear('export.quickCopy.setting');
+			Zotero.Prefs.clear('export.noteQuickCopy.setting');
+		});
+
+		after(async function () {
+			await Zotero.Items.erase([noteItem.id, itemOne.id, itemTwo.id]);
+		});
+
+		function createFakeEvent() {
+			var data = {};
+			return {
+				dataTransfer: {
+					setData: (type, val) => data[type] = val,
+					getData: type => data[type],
+					setDragImage: () => {},
+					mozSetDataAt: () => {},
+					effectAllowed: 'copy'
+				},
+				shiftKey: false
+			};
+		}
+
+		it("should produce CSL-formatted plain text when dragging a note with useCSLCitation enabled", function () {
+			Zotero.Prefs.set('note.export.useCSLCitation', true);
+			Zotero.Prefs.set('export.quickCopy.setting', 'bibliography=' + styleID);
+			Zotero.Prefs.set('export.noteQuickCopy.setting', JSON.stringify({
+				mode: 'export',
+				id: Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT,
+				markdownOptions: { includeAppLinks: false },
+				htmlOptions: { includeAppLinks: false }
+			}));
+
+			var event = createFakeEvent();
+			Zotero.Utilities.Internal.onDragItems(event, [noteItem.id]);
+
+			var text = event.dataTransfer.getData('text/plain');
+			var expected = 'Some text\n\n'
+				+ '(firstOne lastOne and firstTwo lastTwo, Item One (n.d.).)\n\n'
+				+ '(firstTwo lastTwo and firstThree lastThree, Item Two (n.d.).)\n\n'
+				+ 'Done';
+			assert.equal(text, expected);
+		});
+
+		it("should produce default citation format when dragging a note with useCSLCitation disabled", function () {
+			Zotero.Prefs.set('note.export.useCSLCitation', false);
+			Zotero.Prefs.set('export.quickCopy.setting', 'bibliography=' + styleID);
+			Zotero.Prefs.set('export.noteQuickCopy.setting', JSON.stringify({
+				mode: 'export',
+				id: Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT,
+				markdownOptions: { includeAppLinks: false },
+				htmlOptions: { includeAppLinks: false }
+			}));
+
+			var event = createFakeEvent();
+			Zotero.Utilities.Internal.onDragItems(event, [noteItem.id]);
+
+			var text = event.dataTransfer.getData('text/plain');
+			var expected = 'Some text\n\n'
+				+ '(lastOne and lastTwo)\n\n'
+				+ '(lastTwo and lastThree)\n\n'
+				+ 'Done';
+			assert.equal(text, expected);
+		});
+
+		it("should use embedded item data for deleted items when dragging a note", async function () {
+			// Create items and build a note with embedded citation data
+			var deletedItem = createUnsavedDataObject('item', {
+				itemType: 'book',
+				title: 'Deleted Item',
+				creators: [
+					{ firstName: 'firstDeleted', lastName: 'lastDeleted', creatorType: 'author' }
+				]
+			});
+			await deletedItem.saveTx();
+
+			var uriOne = Zotero.URI.getItemURI(itemOne);
+			var uriDeleted = Zotero.URI.getItemURI(deletedItem);
+			var itemDataOne = Zotero.Utilities.Item.itemToCSLJSON(itemOne);
+			var itemDataDeleted = Zotero.Utilities.Item.itemToCSLJSON(deletedItem);
+
+			var citationOne = {
+				citationItems: [{ uris: [uriOne] }],
+				properties: {}
+			};
+			var citationDeleted = {
+				citationItems: [{ uris: [uriDeleted] }],
+				properties: {}
+			};
+
+			// Build note with data-citation-items containing embedded item data
+			var storedCitationItems = [
+				{ uris: [uriOne], itemData: itemDataOne },
+				{ uris: [uriDeleted], itemData: itemDataDeleted }
+			];
+			var deletedNoteHTML = '<div data-citation-items="'
+				+ encodeURIComponent(JSON.stringify(storedCitationItems))
+				+ '" data-schema-version="9">'
+				+ '<p>Before</p>'
+				+ '<p><span class="citation" data-citation="'
+				+ encodeURIComponent(JSON.stringify(citationOne))
+				+ '">(<span class="citation-item">lastOne and lastTwo</span>)</span></p>'
+				+ '<p><span class="citation" data-citation="'
+				+ encodeURIComponent(JSON.stringify(citationDeleted))
+				+ '">(<span class="citation-item">lastDeleted</span>)</span></p>'
+				+ '<p>After</p>'
+				+ '</div>';
+
+			var deletedNoteItem = createUnsavedDataObject('item', {
+				itemType: 'note',
+				note: deletedNoteHTML
+			});
+			await deletedNoteItem.saveTx();
+
+			// Delete the item so its URI no longer resolves
+			await deletedItem.eraseTx();
+
+			Zotero.Prefs.set('note.export.useCSLCitation', true);
+			Zotero.Prefs.set('export.quickCopy.setting', 'bibliography=' + styleID);
+			Zotero.Prefs.set('export.noteQuickCopy.setting', JSON.stringify({
+				mode: 'export',
+				id: Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT,
+				markdownOptions: { includeAppLinks: false },
+				htmlOptions: { includeAppLinks: false }
+			}));
+
+			var event = createFakeEvent();
+			Zotero.Utilities.Internal.onDragItems(event, [deletedNoteItem.id]);
+
+			var text = event.dataTransfer.getData('text/plain');
+			var expected = 'Before\n\n'
+				+ '(firstOne lastOne and firstTwo lastTwo, Item One (n.d.).)\n\n'
+				+ '(firstDeleted lastDeleted, Deleted Item (n.d.).)\n\n'
+				+ 'After';
+			assert.equal(text, expected);
+
+			// Cleanup
+			await deletedNoteItem.eraseTx();
+		});
+	});
 });
