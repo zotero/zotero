@@ -923,33 +923,6 @@
 	"account-error-login-session-expired": {
 		"string": "Your login session has expired. Please try again."
 	},
-	"file-renaming-auto-rename-prompt-title": {
-		"string": "Renaming Settings Changed"
-	},
-	"file-renaming-auto-rename-prompt-body": {
-		"string": "Would you like to rename existing files in your library to match the new settings?"
-	},
-	"file-renaming-auto-rename-prompt-yes": {
-		"string": "Preview Changes…"
-	},
-	"file-renaming-auto-rename-prompt-no": {
-		"string": "Keep Existing Filenames"
-	},
-	"rename-files-preview.buttonlabelaccept": {
-		"string": "Rename Files"
-	},
-	"rename-files-preview-loading": {
-		"string": "Loading…"
-	},
-	"rename-files-preview-intro": {
-		"string": "{ app-name } will rename the following files in your library to match their parent items:"
-	},
-	"rename-files-preview-renaming": {
-		"string": "Renaming…"
-	},
-	"rename-files-preview-no-files": {
-		"string": "All filenames already match parent items. No changes are required."
-	},
 	"toggle-preview.label": {
 		"string": "{type, select, open {Hide} collapsed {Show} unknown {Toggle}} Attachment Preview"
 	},
@@ -1214,35 +1187,8 @@
 	"preferences-file-renaming-intro": {
 		"string": "{ app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item."
 	},
-	"preferences-file-renaming-auto-rename-files.label": {
-		"string": "Automatically rename files"
-	},
-	"preferences-file-renaming-file-types": {
-		"string": "Rename files of these types:"
-	},
-	"preferences-file-renaming-customize-button.label": {
-		"string": "Customize Filename Format…"
-	},
-	"preferences-file-renaming-rename-now.label": {
-		"string": "Rename Files…"
-	},
-	"preferences-file-renaming-format-title": {
-		"string": "Filename Format"
-	},
-	"preferences-file-renaming-format-instructions": {
-		"string": "You can customize the filename pattern { app-name } uses to rename attachment files from parent metadata."
-	},
-	"preferences-file-renaming-format-instructions-example": {
-		"string": "For example, “{ example }” in this template will be replaced with the title of the parent item, truncated at 50 characters."
-	},
-	"preferences-file-renaming-format-instructions-more": {
-		"string": "See the <label data-l10n-name=\"file-renaming-format-help-link\">documentation</label> for more information."
-	},
-	"preferences-file-renaming-format-template": {
-		"string": "Filename Template:"
-	},
-	"preferences-file-renaming-format-preview": {
-		"string": "Preview:"
+	"preferences-file-renaming-configure-button.label": {
+		"string": "Configure File Renaming…"
 	},
 	"preferences-attachment-titles-title": {
 		"string": "Attachment Titles"
@@ -1871,6 +1817,9 @@
 	"reader-read-aloud": {
 		"string": "Read Aloud"
 	},
+	"reader-read-aloud-from-here": {
+		"string": "Read Aloud from Here"
+	},
 	"reader-read-aloud-options": {
 		"string": "Options"
 	},
@@ -2479,5 +2428,77 @@
 	},
 	"creatorTypes-seriesCreator": {
 		"string": "Series Creator"
+	},
+	"file-renaming-settings-window.title": {
+		"string": "Configure File Renaming"
+	},
+	"file-renaming-settings-library-label": {
+		"string": "Library:"
+	},
+	"file-renaming-auto-rename-files.label": {
+		"string": "Automatically rename files"
+	},
+	"file-renaming-file-types": {
+		"string": "Rename files of these types:"
+	},
+	"file-renaming-rename-now.label": {
+		"string": "Rename Files…"
+	},
+	"file-renaming-rename-linked.label": {
+		"string": "Rename linked files"
+	},
+	"file-renaming-format-title": {
+		"string": "Filename Format"
+	},
+	"file-renaming-format-instructions": {
+		"string": "You can customize the filename pattern { app-name } uses to rename attachment files from parent metadata."
+	},
+	"file-renaming-format-instructions-example": {
+		"string": "For example, \"{ example }\" in this template will be replaced with the title of the parent item, truncated at 50 characters."
+	},
+	"file-renaming-format-instructions-more": {
+		"string": "See the <label data-l10n-name=\"file-renaming-format-help-link\">documentation</label> for more information."
+	},
+	"file-renaming-format-template": {
+		"string": "Filename Template:"
+	},
+	"file-renaming-format-preview": {
+		"string": "Preview:"
+	},
+	"file-renaming-preview-changes": {
+		"string": "Preview Changes…"
+	},
+	"file-renaming-rename-files.label": {
+		"string": "Rename Files"
+	},
+	"file-renaming-auto-rename-prompt-title": {
+		"string": "Renaming Settings Changed"
+	},
+	"file-renaming-auto-rename-prompt-body": {
+		"string": "Would you like to rename existing files in your library to match the new settings?"
+	},
+	"file-renaming-auto-rename-prompt-body-library": {
+		"string": "Would you like to rename existing files in library \"{ library }\" to match the new settings?"
+	},
+	"file-renaming-auto-rename-prompt-no": {
+		"string": "Keep Existing Filenames"
+	},
+	"file-renaming-preview-window.title": {
+		"string": "Rename Files"
+	},
+	"file-renaming-preview-window-loading": {
+		"string": "Loading…"
+	},
+	"file-renaming-preview-window-intro": {
+		"string": "{ app-name } will rename the following files in your library to match their parent items:"
+	},
+	"file-renaming-preview-window-intro-library": {
+		"string": "{ app-name } will rename the following files in \"{ library }\" to match their parent items:"
+	},
+	"file-renaming-preview-window-renaming": {
+		"string": "Renaming…"
+	},
+	"file-renaming-preview-window-no-files": {
+		"string": "All filenames already match parent items. No changes are required."
 	}
 }
