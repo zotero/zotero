@@ -79,7 +79,9 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 
 	_updateButtons: function () {
 		let autoRenameEnabled = this.settingsEl.autoRenameEnabled;
-		this.renameFilesBtn.hidden = !autoRenameEnabled;
+		let library = Zotero.Libraries.get(this._currentLibraryID);
+		let isAdmin = this.isUserLibrary || library.isAdmin;
+		this.renameFilesBtn.hidden = !autoRenameEnabled || !isAdmin;
 		this.renameFilesBtn.disabled = this._isRenameFilesBtnDisabled();
 	},
 
