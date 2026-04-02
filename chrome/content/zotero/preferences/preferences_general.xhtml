@@ -107,69 +107,15 @@
 		
 		<groupbox id="zotero-prefpane-file-renaming-groupbox" aria-labelledby="preferences-file-renaming-title" aria-describedby="preferences-file-renaming-intro">
 			<label><html:h2 id="preferences-file-renaming-title" data-l10n-id="preferences-file-renaming-title"/></label>
-			
+
 			<vbox align="start">
 				<label id="preferences-file-renaming-intro" data-l10n-id="preferences-file-renaming-intro"/>
 				<separator class="thin"/>
-				<checkbox id="auto-rename-files"
-					data-l10n-id="preferences-file-renaming-auto-rename-files"
-					preference="extensions.zotero.autoRenameFiles"
-					oncommand="setTimeout(() => { Zotero_Preferences.General.handleAutoRenameChange(); Zotero_Preferences.General.updateAutoRenameFilesUI(); })" native="true"
+				<button id="file-renaming-configure-button"
+					data-l10n-id="preferences-file-renaming-configure-button"
+					data-search-strings="file-renaming-format-title, file-renaming-format-template, file-renaming-auto-rename-files"
+					oncommand="Zotero_Preferences.General.openFileRenamingDialog()"
 				/>
-				<vbox class="indented-pref" aria-labelledby="preferences-file-renaming-file-types" role="group">
-					<label id="preferences-file-renaming-file-types" data-l10n-id="preferences-file-renaming-file-types"/>
-					<hbox
-						id="zotero-prefpane-file-renaming-file-types-box"
-						class="indented-pref"
-						oncommand="Zotero_Preferences.General.setAutoRenameFileTypes()"
-					>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-pdf"
-							data-content-type="application/pdf"
-							native="true"
-						/>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-epub"
-							data-content-type="application/epub+zip"
-							native="true"
-						/>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-image"
-							data-content-type="image/"
-							native="true"
-						/>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-audio"
-							data-content-type="audio/"
-							native="true"
-						/>
-						<checkbox
-							data-l10n-id="preferences-file-renaming-file-type-video"
-							data-content-type="video/"
-							native="true"
-						/>
-					</hbox>
-				</vbox>
-				<vbox class="indented-pref">
-					<checkbox id="rename-linked-files"
-						label="&zotero.preferences.autoRenameFiles.renameLinked;"
-						preference="extensions.zotero.autoRenameFiles.linked"
-						oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"
-					/>
-				</vbox>
-				<hbox id="file-renaming-buttons">
-					<button id="file-renaming-customize-button"
-						data-l10n-id="preferences-file-renaming-customize-button"
-						data-search-strings="preferences-file-renaming-format-title, preferences-file-renaming-format-template"
-						oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-file-renaming')"
-					/>
-					<button
-						hidden="true"
-						id="file-renaming-general-rename-now"
-						data-l10n-id="preferences-file-renaming-rename-now"
-						oncommand="Zotero_Preferences.General.openRenameFilesPreview()"
-					/>
-				</hbox>
 			</vbox>
 		</groupbox>
 		

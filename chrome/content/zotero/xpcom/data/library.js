@@ -71,7 +71,7 @@ Zotero.Library = function (params = {}) {
 // DB columns
 Zotero.defineProperty(Zotero.Library, '_dbColumns', {
 	value: Object.freeze([
-		'type', 'editable', 'filesEditable', 'version', 'storageVersion', 'lastSync', 'archived'
+		'type', 'editable', 'filesEditable', 'version', 'storageVersion', 'lastSync', 'archived', 'isAdmin'
 	])
 });
 
@@ -209,7 +209,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'allowsLinkedFiles', {
 
 // Create other accessors
 (function () {
-	let accessors = ['editable', 'filesEditable', 'storageVersion', 'archived'];
+	let accessors = ['editable', 'filesEditable', 'storageVersion', 'archived', 'isAdmin'];
 	for (let i=0; i<accessors.length; i++) {
 		let prop = Zotero.Library._colToProp(accessors[i]);
 		Zotero.defineProperty(Zotero.Library.prototype, accessors[i], {
@@ -353,7 +353,8 @@ Zotero.Library.prototype._loadDataFromRow = function (row) {
 	this._libraryStorageVersion = row._libraryStorageVersion;
 	this._libraryLastSync =  row._libraryLastSync !== 0 ? new Date(row._libraryLastSync * 1000) : false;
 	this._libraryArchived = !!row._libraryArchived;
-	
+	this._libraryIsAdmin = !!row._libraryIsAdmin;
+
 	this._hasCollections = !!row.hasCollections;
 	this._hasSearches = !!row.hasSearches;
 	

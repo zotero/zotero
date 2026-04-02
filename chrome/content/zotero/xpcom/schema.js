@@ -3521,7 +3521,13 @@ Zotero.Schema = new function () {
 				await Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastRead INT");
 				await Zotero.DB.queryAsync("CREATE INDEX itemAttachments_lastRead ON itemAttachments(lastRead)");
 			}
-			
+
+			else if (i == 125) {
+				await Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN isAdmin INT NOT NULL DEFAULT 0");
+				// Force all groups to resync so isAdmin is populated from the API
+				await Zotero.DB.queryAsync("UPDATE groups SET version = 0");
+			}
+
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		

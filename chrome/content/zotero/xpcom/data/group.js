@@ -287,11 +287,13 @@ Zotero.Group.prototype.fromJSON = function (json, userID) {
 	
 	var editable = false;
 	var filesEditable = false;
+	var isAdmin = false;
 	if (userID) {
-		({ editable, filesEditable } = Zotero.Groups.getPermissionsFromJSON(json, userID));
+		({ editable, filesEditable, isAdmin } = Zotero.Groups.getPermissionsFromJSON(json, userID));
 	}
 	this.editable = editable;
 	this.filesEditable = filesEditable;
+	this.isAdmin = isAdmin;
 }
 
 Zotero.Group.prototype._prepFieldChange = function (field) {

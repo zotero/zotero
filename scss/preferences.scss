@@ -39,12 +39,13 @@
 // --------------------------------------------------
 
 @import "preferences/general";
-@import "preferences/file_renaming";
 @import "preferences/sync";
 @import "preferences/sync_reset";
 @import "preferences/export";
 @import "preferences/cite";
 @import "preferences/advanced";
+
+@import "elements/fileRenamingSettings";
 
 @include macOS-normalize-controls;
 

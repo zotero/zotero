@@ -24,7 +24,8 @@
 	***** END LICENSE BLOCK *****
 -->
 
-<?xml-stylesheet href="chrome://global/skin/"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css"?>
@@ -32,37 +33,36 @@
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
-		id="rename-files-preview"
-		data-l10n-id="rename-files-preview-window"
+		id="file-renaming-settings-dialog"
+		data-l10n-id="file-renaming-settings-window"
 		width="800"
-		height="500"
-		onload="RenameFilesPreview.init()"
+		height="600"
+		onload="FileRenamingDialog.init()"
+		onclose="return FileRenamingDialog.handleWindowClose(event)"
 >
-	<vbox id="rename-files-preview-content">
+	<groupbox>
 		<script>
 			Services.scriptloader.loadSubScript('chrome://zotero/content/include.js', this);
 			Services.scriptloader.loadSubScript('chrome://zotero/content/customElements.js', this);
-			Services.scriptloader.loadSubScript('chrome://zotero/content/renameFilesPreview.js', this);
+			Services.scriptloader.loadSubScript('chrome://zotero/content/fileRenamingDialog.js', this);
 		</script>
 		<linkset>
 			<html:link rel="localization" href="branding/brand.ftl" />
 			<html:link rel="localization" href="zotero.ftl" />
 		</linkset>
 
-		<vbox>
-			<html:p id="preview-intro" />
-		</vbox>
-		<vbox class="virtualized-table-container">
-			<html:div id="preview-files-list" class="virtualized-table-wrapper">
-				<html:div class="virtualized-table-loading" id="preview-loading">
-					<html:span data-l10n-id="rename-files-preview-loading" />
-				</html:div>
-			</html:div>
-			<html:progress id="preview-progress" max="1" value="0" />
-		</vbox>
-		<hbox id="preview-buttons">
-			<button id="preview-cancel-btn" data-l10n-id="file-renaming-cancel-button" />
-			<button id="preview-accept-btn" data-l10n-id="file-renaming-rename-files" disabled="true" />
+		<hbox align="center" id="library-picker-row">
+			<label data-l10n-id="file-renaming-settings-library-label" control="library-picker" />
+			<menulist id="library-picker" native="true">
+				<menupopup />
+			</menulist>
 		</hbox>
-	</vbox>
+
+		<file-renaming-settings id="file-renaming-settings" />
+
+		<hbox id="file-renaming-buttons">
+			<button id="file-renaming-rename-files-btn" data-l10n-id="file-renaming-rename-now" />
+			<button id="file-renaming-done-btn" data-l10n-id="file-renaming-done-button" />
+		</hbox>
+	</groupbox>
 </window>

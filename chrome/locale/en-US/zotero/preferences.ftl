@@ -7,32 +7,10 @@ preferences-auto-recognize-files =
     .label = Automatically retrieve metadata for PDFs and ebooks
 
 preferences-file-renaming-title = File Renaming
-preferences-file-renaming-intro = 
-     { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
-preferences-file-renaming-auto-rename-files =
-    .label = Automatically rename files
-preferences-file-renaming-file-types = Rename files of these types:
-preferences-file-renaming-file-type-pdf =
-    .label = { file-type-pdf }
-preferences-file-renaming-file-type-epub =
-    .label = { file-type-ebook }
-preferences-file-renaming-file-type-image =
-    .label = { file-type-image }
-preferences-file-renaming-file-type-audio =
-    .label = { file-type-audio }
-preferences-file-renaming-file-type-video =
-    .label = { file-type-video }
-preferences-file-renaming-customize-button =
-    .label = Customize Filename Format…
-preferences-file-renaming-rename-now =
-    .label = Rename Files…
-
-preferences-file-renaming-format-title = Filename Format
-preferences-file-renaming-format-instructions = You can customize the filename pattern { -app-name } uses to rename attachment files from parent metadata.
-preferences-file-renaming-format-instructions-example = For example, “{ $example }” in this template will be replaced with the title of the parent item, truncated at 50 characters.
-preferences-file-renaming-format-instructions-more = See the <label data-l10n-name="file-renaming-format-help-link">documentation</label> for more information.
-preferences-file-renaming-format-template = Filename Template:
-preferences-file-renaming-format-preview = Preview:
+preferences-file-renaming-intro =
+    { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
+preferences-file-renaming-configure-button =
+    .label = Configure File Renaming…
 
 preferences-attachment-titles-title = Attachment Titles
 preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.

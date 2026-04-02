@@ -1,47 +1,54 @@
-#rename-files-preview {
-    min-width: 800px;
-    min-height: 500px;
+#rename-files-preview-content {
+	padding: 14px 24px 24px;
+	flex: 1;
 
-    dialog {
-        background-color: var(--color-sidepane);
-        padding: 14px 24px;
-    }
+	.virtualized-table-container {
+		flex: 1 1 auto;
+		display: flex;
+		overflow: hidden;
+		border: var(--material-panedivider);
 
-    .virtualized-table-container {
-        flex: 1 1 auto;
-        display: flex;
-        overflow: hidden;
-        border: var(--material-panedivider);
+		.virtualized-table-wrapper {
+			width: 100%;
+		}
 
-        .virtualized-table-wrapper {
-            width: 100%;
-        }
+		.virtualized-table-loading {
+			width: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 
-        .virtualized-table-loading {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+			&[hidden] {
+				display: none;
+			}
+		}
 
-        .virtualized-table {
-            overflow: hidden;
+		.virtualized-table {
+			overflow: hidden;
 
-            .row {
-                &.new:not(.selected) {
-                    color: var(--fill-primary);
-                }
+			.row {
+				&.new:not(.selected) {
+					color: var(--fill-primary);
+				}
 
-                &.old:not(.selected) {
-                    color: var(--fill-secondary);
-                }
-            }
-        }
-    }
+				&.old:not(.selected) {
+					color: var(--fill-secondary);
+				}
+			}
+		}
+	}
 
-    progress {
-        &.hidden {
-            display: none;
-        }
-    }
+	#preview-intro {
+		margin-block: 0 0.5em;
+	}
+
+	progress.hidden {
+		display: none;
+	}
+
+	#preview-buttons {
+		justify-content: flex-end;
+		gap: 0.5em;
+		margin-top: 0.5em;
+	}
 }
