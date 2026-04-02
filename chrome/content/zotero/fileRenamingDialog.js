@@ -136,7 +136,8 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			formatTemplate = Zotero.SyncedSettings.get(libraryID, 'attachmentRenameTemplate')
 				?? this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 
-			this.settingsEl.setAttribute('readonly', 'false');
+			let library = Zotero.Libraries.get(libraryID);
+			this.settingsEl.setAttribute('readonly', String(!library.editable));
 			this.settingsEl.setAttribute('rename-linked-hidden', 'false');
 			this.settingsEl.setAttribute('rename-linked-enabled', String(renameLinked));
 
