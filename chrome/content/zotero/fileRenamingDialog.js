@@ -81,16 +81,15 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 		let autoRenameEnabled = this.settingsEl.autoRenameEnabled;
 		let library = Zotero.Libraries.get(this._currentLibraryID);
 		let isAdmin = this.isUserLibrary || library.isAdmin;
-		this.renameFilesBtn.hidden = !autoRenameEnabled || !isAdmin;
-		this.renameFilesBtn.disabled = this._isRenameFilesBtnDisabled();
+		this.renameFilesBtn.hidden = !isAdmin;
+		this.renameFilesBtn.disabled = !autoRenameEnabled || this._isRenameFilesBtnDisabled();
 	},
 
 	_isRenameFilesBtnDisabled: function () {
-		let libraryID = this._currentLibraryID;
-		if (libraryID === Zotero.Libraries.userLibraryID) {
+		if (this.isUserLibrary) {
 			return Zotero.Prefs.get('autoRenameFiles.done');
 		}
-		return !Zotero.Attachments.isAutoRenameFilesEnabledForLibrary(libraryID);
+		return false;
 	},
 
 	_openRenameFilesPreview: function (libraryID) {
