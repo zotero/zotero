@@ -31,56 +31,56 @@
 			<vbox>
 				<groupbox id="file-rename-settings-section-main">
 					<checkbox id="auto-rename-files"
-						data-l10n-id="preferences-file-renaming-auto-rename-files"
+						data-l10n-id="file-renaming-auto-rename-files"
 						native="true"
 					/>
-					<vbox class="indented-pref" aria-labelledby="preferences-file-renaming-file-types" role="group">
-						<label id="preferences-file-renaming-file-types" data-l10n-id="preferences-file-renaming-file-types"/>
+					<vbox class="indented-pref" aria-labelledby="file-renaming-file-types" role="group">
+						<label id="file-renaming-file-types" data-l10n-id="file-renaming-file-types"/>
 						<hbox
 							id="file-renaming-file-types-box"
 							class="indented-pref"
 						>
 							<checkbox
-								data-l10n-id="preferences-file-renaming-file-type-pdf"
+								data-l10n-id="file-renaming-file-type-pdf"
 								data-content-type="application/pdf"
 								native="true"
 							/>
 							<checkbox
-								data-l10n-id="preferences-file-renaming-file-type-epub"
+								data-l10n-id="file-renaming-file-type-epub"
 								data-content-type="application/epub+zip"
 								native="true"
 							/>
 							<checkbox
-								data-l10n-id="preferences-file-renaming-file-type-image"
+								data-l10n-id="file-renaming-file-type-image"
 								data-content-type="image/"
 								native="true"
 							/>
 							<checkbox
-								data-l10n-id="preferences-file-renaming-file-type-audio"
+								data-l10n-id="file-renaming-file-type-audio"
 								data-content-type="audio/"
 								native="true"
 							/>
 							<checkbox
-								data-l10n-id="preferences-file-renaming-file-type-video"
+								data-l10n-id="file-renaming-file-type-video"
 								data-content-type="video/"
 								native="true"
 							/>
 						</hbox>
 					</vbox>
 					<checkbox id="rename-linked-files" class="indented-pref"
-						data-l10n-id="preferences-file-renaming-rename-linked"
+						data-l10n-id="file-renaming-rename-linked"
 						preference="extensions.zotero.autoRenameFiles.linked"
 						native="true"
 					/>
 				</groupbox>
 				
 				<groupbox id="file-rename-settings-section-instructions">
-					<label data-l10n-id="preferences-file-renaming-format-instructions" />
+					<label data-l10n-id="file-renaming-format-instructions" />
 					<separator class="thin" />
-					<label data-l10n-id="preferences-file-renaming-format-instructions-example"
+					<label data-l10n-id="file-renaming-format-instructions-example"
 						data-l10n-args='${JSON.stringify({ example: "{{ title truncate=\"50\" }}" })}' />
 					<separator class="thin" />
-					<label data-l10n-id="preferences-file-renaming-format-instructions-more">
+					<label data-l10n-id="file-renaming-format-instructions-more">
 						<label
 							is="zotero-text-link"
 							href="https://www.zotero.org/support/file_renaming"
@@ -95,7 +95,7 @@
 						for="file-renaming-format-template"
 						id="file-renaming-format-template-label"
 					>
-						<html:h2 data-l10n-id="preferences-file-renaming-format-template" />
+						<html:h2 data-l10n-id="file-renaming-format-template" />
 					</html:label>
 					<html:textarea
 						aria-labelledby="file-renaming-format-template-label"
@@ -104,7 +104,7 @@
 					/>
 					<html:label id="file-renaming-format-preview-label">
 						<html:h2
-							data-l10n-id="preferences-file-renaming-format-preview"
+							data-l10n-id="file-renaming-format-preview"
 						/>
 					</html:label>
 					<html:label
