@@ -56,12 +56,12 @@
 <!ENTITY recursiveCollections.label "Tampilkan Item dari Subkoleksi">
 <!ENTITY fontSize.label "Ukuran font">
 <!ENTITY noteFontSize.label "Ukuran font catatan">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Kolom">
+<!ENTITY sortBy.label "Urutkan Berdasarkan">
 
 <!ENTITY toolsMenu.label "Perkakas">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "Pasang Konektor Peramban...">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Pengaya">
 <!ENTITY developer.label "Pengembang">

@@ -22,6 +22,8 @@ integration-editBibliography-wrapper =
 integration-citationDialog = 引注对话框
 integration-citationDialog-section-open = 已打开的文档 ({ $count })
 integration-citationDialog-section-selected = 已选中的条目 ({ $count }/{ $total })
+integration-citationDialog-section-selectedAnnotations = 已选中的注释
+integration-citationDialog-section-selectedItems = 已选中的条目
 integration-citationDialog-section-cited =
     { $count ->
         [0] 已引用条目
@@ -30,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = 后缀
 integration-citationDialog-details-prefix = 前缀
 integration-citationDialog-details-suppressAuthor = 省略作者
+integration-citationDialog-details-includeComments = 包含评论
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
@@ -45,6 +48,11 @@ integration-citationDialog-lib-message-add-note =
         [true] 无匹配的笔记
        *[other] 未选中笔记
     }
+integration-citationDialog-lib-message-annotations =
+    { $search ->
+        [true] 当前搜索未找到带注释的匹配条目
+       *[other] 没有已选中或已打开的带注释条目
+    }
 integration-citationDialog-settings-keepSorted = 保持文献自动排序
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
@@ -54,6 +62,8 @@ integration-citationDialog-btn-type-citation =
     .title = 添加/编辑引注
 integration-citationDialog-btn-type-add-note =
     .title = 添加笔记
+integration-citationDialog-btn-type-annotations =
+    .title = 添加注释
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -71,6 +81,8 @@ integration-citationDialog-input-citation =
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
     .placeholder = 搜索要添加到文档中的笔记
+integration-citationDialog-single-input-annotations =
+    .placeholder = 搜索要插入到文档中的注释
 integration-citationDialog-aria-item-list =
     .aria-description = 使用向上/向下箭头修改条目选择。 { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
@@ -87,6 +99,9 @@ integration-citationDialog-collapse-section =
     .title = 折叠此栏
 integration-citationDialog-bubble-empty = （无标题）
 integration-citationDialog-add-to-citation = 添加到引文
+integration-citationDialog-annotations-filter =
+    .placeholder = 筛选注释
+integration-citationDialog-annotations-empty = 选择一个条目、附件或注释以查看注释详细信息
 integration-prefs-displayAs-label = 引注显示为:
 integration-prefs-footnotes =
     .label = 脚注

@@ -18,7 +18,9 @@ reader-add-note = Dodaj notatkę
 reader-add-text = Dodaj tekst
 reader-select-area = Wybierz obszar
 reader-highlight-annotation = Podświetl adnotację
+reader-highlight-annotation-short = Podświetl
 reader-underline-annotation = Podkreśl adnotację
+reader-underline-annotation-short = Podkreślenie
 reader-note-annotation = Adnotacja notatką
 reader-text-annotation = Adnotacja tekstowa
 reader-image-annotation = Adnotacja obrazem
@@ -56,8 +58,10 @@ reader-prompt-delete-pages-text =
 reader-prompt-delete-annotations-title = Usuń adnotacje
 reader-prompt-delete-annotations-text =
     { $count ->
-        [one] Are you sure you want to delete the selected annotation?
-       *[other] Are you sure you want to delete the selected annotations?
+        [one] Czy na pewno chcesz usunąć wybraną adnotację?
+        [few] Czy na pewno chcesz usunąć wybrane adnotacje?
+        [many] Czy na pewno chcesz usunąć wybrane adnotacje?
+       *[other] Czy na pewno chcesz usunąć wybrane adnotacje?
     }
 reader-rotate-left = Obróć w lewo
 reader-rotate-right = Obróć w prawo
@@ -195,3 +199,72 @@ reader-selected-pages =
        *[other] { $count } wybranych stron
     }
 reader-page-options = Ustawienia strony
+reader-read-aloud = Read Aloud
+reader-read-aloud-from-here = Read Aloud from Here
+reader-read-aloud-options = Opcje
+reader-read-aloud-skip-back = Skip Back
+reader-read-aloud-skip-back-sentence = Skip Back by Sentence
+reader-read-aloud-skip-ahead = Skip Ahead
+reader-read-aloud-skip-ahead-sentence = Skip Ahead by Sentence
+reader-read-aloud-add-annotation = Annotate Sentence ({ $key1 }/{ $key2 })
+reader-read-aloud-play = Odtwórz
+reader-read-aloud-pause = Pauza
+reader-read-aloud-speed = Szybkość czytania
+reader-read-aloud-voice = Głos
+reader-read-aloud-voice-tier = Tryb głosu
+reader-read-aloud-voice-tier-local = Local
+reader-read-aloud-voice-tier-standard = Norma
+reader-read-aloud-voice-tier-premium = Premium
+reader-read-aloud-more-voices = Więcej głosów...
+reader-read-aloud-language = Język
+reader-read-aloud-remaining-time = Pozostały czas czytania
+reader-read-aloud-log-in-link = <log-in>Zaloguj się</log-in>, aby uzyskać dostęp do głosów { -app-name }.
+reader-read-aloud-log-in-button = Zaloguj się
+reader-read-aloud-done-button = { general-done }
+reader-read-aloud-add-more-time = Dodaj więcej czasu
+reader-read-aloud-quota-exceeded-message =
+    <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with { $tier ->
+        [standard] Standard Voices
+       *[local] Local Voices
+    }.
+reader-read-aloud-error = { general-error }
+reader-read-aloud-error-unknown = Wystąpił nieznany błąd.
+reader-read-aloud-error-connection = Nie można się połączyć z usługą Read Aloud. Sprawdź swoje połączenie internetowe.
+reader-read-aloud-error-daily-limit-exceeded = You have exceeded your daily limit for { -app-name } Voices.
+reader-read-aloud-retry = Ponów
+reader-read-aloud-first-run-title = Wybierz swój preferowany głos Read Aloud:
+reader-read-aloud-first-run-voice-tier-local-bullet-os-provided = Głosy dostarczone przez Twój system operacyjny
+reader-read-aloud-first-run-voice-tier-local-bullet-offline = Dostępne bez połączenia internetowego
+reader-read-aloud-first-run-voice-tier-local-bullet-no-account = Nie wymaga konta { -app-name }
+reader-read-aloud-first-run-voice-tier-local-bullet-free = Darmowy do używania
+reader-read-aloud-first-run-voice-tier-standard-bullet-natural-sounding = Naturalnie brzmiące głosy
+reader-read-aloud-first-run-voice-tier-standard-bullet-online-only = Dostępne tylko z połączeniem internetowym
+reader-read-aloud-first-run-voice-tier-standard-bullet-account-required = Wymaga konta { -app-name }
+reader-read-aloud-first-run-voice-tier-standard-bullet-limited-languages = Ograniczony wybór języków
+reader-read-aloud-first-run-voice-tier-standard-bullet-no-multilingual = Brak wsparcia wielu języków
+reader-read-aloud-first-run-voice-tier-standard-bullet-internal-processing = Source text doesn’t leave { -app-name } servers
+reader-read-aloud-first-run-voice-tier-standard-bullet-unlimited-with-subscription = Nieograniczone użycie z subskrypcją { -subscription-name }
+reader-read-aloud-first-run-voice-tier-premium-bullet-highest-quality = Głosy o najwyższej jakości
+reader-read-aloud-first-run-voice-tier-premium-bullet-online-only = Dostępne tylko z połączeniem internetowym
+reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = Wymaga konta { -app-name }
+reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Broad language selection
+reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Wsparcie wielu języków
+reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Source text is processed by external text-to-speech providers
+reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } plans include monthly Premium Voice minutes
+reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Request credits for additional minutes during beta
+reader-read-aloud-sample-text = I am the local voice { $name }
+reader-read-aloud-voices-none-available = Brak dostępnych głosów
+reader-read-aloud-first-run-no-voices-for-language = { $tier } Voices do not support { $language }.
+reader-read-aloud-region = Region
+reader-read-aloud-region-auto = Automatycznie
+reader-read-aloud-annotation-popup-move = Move annotation by sentence
+reader-read-aloud-annotation-popup-extend = Extend annotation by sentence
+reader-read-aloud-annotation-popup-delete = Usuń
+reader-read-aloud-annotation-popup-done = Zrobione
+reader-read-aloud-annotation-popup-change-color = Zmień kolor
+reader-read-aloud-annotation-popup-highlight = Podświetl
+reader-read-aloud-annotation-popup-underline = Podkreślenie
+reader-tab-audio-play =
+    .title = { reader-read-aloud-play }
+reader-tab-audio-pause =
+    .title = { reader-read-aloud-pause }

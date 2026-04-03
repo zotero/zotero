@@ -18,7 +18,9 @@ reader-add-note = Not Ekle
 reader-add-text = Metin Ekle
 reader-select-area = Alanı Seç
 reader-highlight-annotation = Vurgulanmış ek açıklama
+reader-highlight-annotation-short = Highlight
 reader-underline-annotation = Altı çizgili ek açıklama
+reader-underline-annotation-short = Altı Çizili
 reader-note-annotation = Not Ek Açıklaması
 reader-text-annotation = Metin Ek Açıklaması
 reader-image-annotation = Resim Ek Açıklaması
@@ -48,8 +50,8 @@ reader-prompt-password-protected = İşlem, parola korumalı PDF dosyaları içi
 reader-prompt-delete-pages-title = Sayfaları Sil
 reader-prompt-delete-pages-text =
     { $count ->
-        [one] Are you sure you want to delete { $count } page from the PDF file?
-       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+        [one] PDF dosyasından { $count } sayfayı silmek istediğinize emin misiniz?
+       *[other] PDF dosyasından { $count }  sayfayı silmek istediğinize emin misiniz?
     }
 reader-prompt-delete-annotations-title = Açıklamaları Sil
 reader-prompt-delete-annotations-text =
@@ -191,3 +193,72 @@ reader-selected-pages =
        *[other] { $count } pages selected
     }
 reader-page-options = Page Options
+reader-read-aloud = Read Aloud
+reader-read-aloud-from-here = Read Aloud from Here
+reader-read-aloud-options = Seçenekler
+reader-read-aloud-skip-back = Skip Back
+reader-read-aloud-skip-back-sentence = Skip Back by Sentence
+reader-read-aloud-skip-ahead = Skip Ahead
+reader-read-aloud-skip-ahead-sentence = Skip Ahead by Sentence
+reader-read-aloud-add-annotation = Annotate Sentence ({ $key1 }/{ $key2 })
+reader-read-aloud-play = Play
+reader-read-aloud-pause = Pause
+reader-read-aloud-speed = Reading Speed
+reader-read-aloud-voice = Voice
+reader-read-aloud-voice-tier = Voice Mode
+reader-read-aloud-voice-tier-local = Local
+reader-read-aloud-voice-tier-standard = Standart
+reader-read-aloud-voice-tier-premium = Premium
+reader-read-aloud-more-voices = More Voices…
+reader-read-aloud-language = Dil
+reader-read-aloud-remaining-time = Remaining reading time
+reader-read-aloud-log-in-link = <log-in>Log in</log-in> to access { -app-name } Voices.
+reader-read-aloud-log-in-button = Log In
+reader-read-aloud-done-button = { general-done }
+reader-read-aloud-add-more-time = Add more time
+reader-read-aloud-quota-exceeded-message =
+    <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with { $tier ->
+        [standard] Standard Voices
+       *[local] Local Voices
+    }.
+reader-read-aloud-error = { general-error }
+reader-read-aloud-error-unknown = Bilinmeyen bir hata oluştu.
+reader-read-aloud-error-connection = Unable to connect to the Read Aloud service. Please check your internet connection.
+reader-read-aloud-error-daily-limit-exceeded = You have exceeded your daily limit for { -app-name } Voices.
+reader-read-aloud-retry = Retry
+reader-read-aloud-first-run-title = Choose your preferred Read Aloud voice:
+reader-read-aloud-first-run-voice-tier-local-bullet-os-provided = Voices provided by your operating system
+reader-read-aloud-first-run-voice-tier-local-bullet-offline = Available without an internet connection
+reader-read-aloud-first-run-voice-tier-local-bullet-no-account = Available without a { -app-name } account
+reader-read-aloud-first-run-voice-tier-local-bullet-free = Free to use
+reader-read-aloud-first-run-voice-tier-standard-bullet-natural-sounding = Natural-sounding voices
+reader-read-aloud-first-run-voice-tier-standard-bullet-online-only = Only available with an internet connection
+reader-read-aloud-first-run-voice-tier-standard-bullet-account-required = Requires a { -app-name } account
+reader-read-aloud-first-run-voice-tier-standard-bullet-limited-languages = Limited language selection
+reader-read-aloud-first-run-voice-tier-standard-bullet-no-multilingual = No multilingual support
+reader-read-aloud-first-run-voice-tier-standard-bullet-internal-processing = Source text doesn’t leave { -app-name } servers
+reader-read-aloud-first-run-voice-tier-standard-bullet-unlimited-with-subscription = Unlimited use with a { -subscription-name } subscription
+reader-read-aloud-first-run-voice-tier-premium-bullet-highest-quality = Highest-quality voices
+reader-read-aloud-first-run-voice-tier-premium-bullet-online-only = Only available with an internet connection
+reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = Requires a { -app-name } account
+reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Broad language selection
+reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Multilingual support
+reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Source text is processed by external text-to-speech providers
+reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } plans include monthly Premium Voice minutes
+reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Request credits for additional minutes during beta
+reader-read-aloud-sample-text = I am the local voice { $name }
+reader-read-aloud-voices-none-available = No voices available
+reader-read-aloud-first-run-no-voices-for-language = { $tier } Voices do not support { $language }.
+reader-read-aloud-region = Region
+reader-read-aloud-region-auto = Otomatik
+reader-read-aloud-annotation-popup-move = Move annotation by sentence
+reader-read-aloud-annotation-popup-extend = Extend annotation by sentence
+reader-read-aloud-annotation-popup-delete = Sil
+reader-read-aloud-annotation-popup-done = Tamam
+reader-read-aloud-annotation-popup-change-color = Change color
+reader-read-aloud-annotation-popup-highlight = Highlight
+reader-read-aloud-annotation-popup-underline = Altı Çizili
+reader-tab-audio-play =
+    .title = { reader-read-aloud-play }
+reader-tab-audio-pause =
+    .title = { reader-read-aloud-pause }

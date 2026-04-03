@@ -22,6 +22,8 @@ integration-editBibliography-wrapper =
 integration-citationDialog = Диалог цитирования
 integration-citationDialog-section-open = Открыть документы ({ $count })
 integration-citationDialog-section-selected = Выбрано ({ $count }/{ $total }) записей
+integration-citationDialog-section-selectedAnnotations = Selected Annotations
+integration-citationDialog-section-selectedItems = Выбрать записи
 integration-citationDialog-section-cited =
     { $count ->
         [0] записей процитированно
@@ -30,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Суффикс
 integration-citationDialog-details-prefix = Префикс
 integration-citationDialog-details-suppressAuthor = Не выводить автора
+integration-citationDialog-details-includeComments = Include Comments
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
@@ -45,6 +48,11 @@ integration-citationDialog-lib-message-add-note =
         [true] No selected notes match the current search
        *[other] No notes are selected
     }
+integration-citationDialog-lib-message-annotations =
+    { $search ->
+        [true] No items with annotations match the current search
+       *[other] No selected or open items with annotations
+    }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
@@ -54,6 +62,8 @@ integration-citationDialog-btn-type-citation =
     .title = Добавить/редактировать цитирование
 integration-citationDialog-btn-type-add-note =
     .title = Добавить заметку
+integration-citationDialog-btn-type-annotations =
+    .title = Add Annotations
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -71,6 +81,8 @@ integration-citationDialog-input-citation =
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
     .placeholder = Найти заметку для вставки в документ
+integration-citationDialog-single-input-annotations =
+    .placeholder = Search for annotations to insert into the document
 integration-citationDialog-aria-item-list =
     .aria-description = Используйте клавиши стрелок вверх/вниз для изменения выбора записей. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
@@ -87,6 +99,9 @@ integration-citationDialog-collapse-section =
     .title = Collapse section
 integration-citationDialog-bubble-empty = (no title)
 integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-annotations-filter =
+    .placeholder = Filter annotations
+integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
 integration-prefs-displayAs-label = Отобразить цитаты как:
 integration-prefs-footnotes =
     .label = Сноски

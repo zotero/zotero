@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sincronização">
 <!ENTITY zotero.preferences.sync.username "Usuário:">
 <!ENTITY zotero.preferences.sync.password "Senha:">
-<!ENTITY zotero.preferences.sync.syncServer "Sincronização de dados">
-<!ENTITY zotero.preferences.sync.setUpSync "Configurar a sincronização">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Desassociar a conta...">
 <!ENTITY zotero.preferences.sync.createAccount "Criar conta">
 <!ENTITY zotero.preferences.sync.lostPassword "Esqueceu a senha?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizar automaticamente">

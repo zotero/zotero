@@ -22,6 +22,8 @@ integration-editBibliography-wrapper =
 integration-citationDialog = Henvisningsdialogboks
 integration-citationDialog-section-open = Åpne dokumenter ({ $count })
 integration-citationDialog-section-selected = Valgte elementer ({ $count }/{ $total })
+integration-citationDialog-section-selectedAnnotations = Valgte kommentarer
+integration-citationDialog-section-selectedItems = Valgte elementer
 integration-citationDialog-section-cited =
     { $count ->
         [0] Henviste elementer
@@ -30,11 +32,12 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Suffiks
 integration-citationDialog-details-prefix = Prefiks
 integration-citationDialog-details-suppressAuthor = Utelat forfatter
+integration-citationDialog-details-includeComments = Inkluderer merknader
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
-integration-citationDialog-settings-title = Innstillinger for henvisnger
+integration-citationDialog-settings-title = Innstillinger for henvisninger
 integration-citationDialog-lib-message-citation =
     { $search ->
         [true] Ingen valgte, åpne eller henviste elementer samsvarer med det aktuelle søket
@@ -45,6 +48,11 @@ integration-citationDialog-lib-message-add-note =
         [true] Ingen valgte notater samsvarer med det aktuelle søket
        *[other] ingen notater er valgt
     }
+integration-citationDialog-lib-message-annotations =
+    { $search ->
+        [true] Ingen elementer med merknader samsvarer med det aktuelle søket
+       *[other] Ingen valgte eller åpne elementer med merknader
+    }
 integration-citationDialog-settings-keepSorted = Behold sortering av kildene
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
@@ -54,6 +62,8 @@ integration-citationDialog-btn-type-citation =
     .title = Legg til/endre henvisning
 integration-citationDialog-btn-type-add-note =
     .title = Legg til notat
+integration-citationDialog-btn-type-annotations =
+    .title = Legg til kommentarer
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -71,6 +81,8 @@ integration-citationDialog-input-citation =
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
     .placeholder = Søk etter notat for å legge det inn i dokumentet
+integration-citationDialog-single-input-annotations =
+    .placeholder = Søk etter kommentarer som skal settes inn i dokumentet
 integration-citationDialog-aria-item-list =
     .aria-description = Bruk opp-/nedpilen for å endre valg av element. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
@@ -87,6 +99,9 @@ integration-citationDialog-collapse-section =
     .title = Skjul seksjon
 integration-citationDialog-bubble-empty = (ingen tittel)
 integration-citationDialog-add-to-citation = Legg til henvisning
+integration-citationDialog-annotations-filter =
+    .placeholder = Filtrer kommentarer
+integration-citationDialog-annotations-empty = Velg et element, et vedlegg eller en kommentar for å se detaljene for kommentaren
 integration-prefs-displayAs-label = Vis henvisninger som:
 integration-prefs-footnotes =
     .label = Fotnoter

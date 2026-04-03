@@ -22,7 +22,7 @@
 <!ENTITY closeCmd.label "閉じる">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "添付ファイルを管理">
+<!ENTITY manageAttachments.label "Manage Attachments">
 <!ENTITY convertToStored.label "リンクファイルを保存ファイルに変換...">
 <!ENTITY importCmd.label "インポート...">
 <!ENTITY importCmd.key "I">
@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "出典表記をコピー">
 <!ENTITY copyBibliographyCmd.label "参考文献目録をコピー">
-<!ENTITY copyNoteCmd.label "メモをコピー">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "ページの方向を切り替える">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -49,14 +49,14 @@
 <!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "レイアウト">
 <!ENTITY standardView.label "標準ビュー">
-<!ENTITY stackedView.label "積み上げビュー">
+<!ENTITY stackedView.label "Stacked View">
 <!ENTITY collectionsPane.label "コレクションパネル">
-<!ENTITY itemPane.label "アイテムパネル">
-<!ENTITY tagSelector.label "タグ選択ボックス">
+<!ENTITY itemPane.label "Item Pane">
+<!ENTITY tagSelector.label "Tag Selector">
 <!ENTITY recursiveCollections.label "サブコレクションからアイテムを表示">
 <!ENTITY fontSize.label "フォントサイズ">
 <!ENTITY noteFontSize.label "メモのフォントサイズ">
-<!ENTITY columns.label "コラム">
+<!ENTITY columns.label "Columns">
 <!ENTITY sortBy.label "Sort By">
 
 <!ENTITY toolsMenu.label "ツール">

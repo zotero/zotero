@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Синхронизация">
 <!ENTITY zotero.preferences.sync.username "Имя пользователя:">
 <!ENTITY zotero.preferences.sync.password "Пароль:">
-<!ENTITY zotero.preferences.sync.syncServer "Синхронизация данных">
-<!ENTITY zotero.preferences.sync.setUpSync "Настроить синхронизацию">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Отвязать аккаунт">
 <!ENTITY zotero.preferences.sync.createAccount "Создать аккаунт">
 <!ENTITY zotero.preferences.sync.lostPassword "Забыли пароль?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Синхронизировать автоматически">

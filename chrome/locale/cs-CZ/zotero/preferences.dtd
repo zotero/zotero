@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sync">
 <!ENTITY zotero.preferences.sync.username "Uživatelské jméno:">
 <!ENTITY zotero.preferences.sync.password "Heslo:">
-<!ENTITY zotero.preferences.sync.syncServer "Synchronizace dat">
-<!ENTITY zotero.preferences.sync.setUpSync "Nastavení synchronizace">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Odpojit účet...">
 <!ENTITY zotero.preferences.sync.createAccount "Vytvořit účet">
 <!ENTITY zotero.preferences.sync.lostPassword "Ztracené heslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizovat automaticky">

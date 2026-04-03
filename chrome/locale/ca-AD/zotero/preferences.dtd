@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sincronitza">
 <!ENTITY zotero.preferences.sync.username "Nom d'usuari">
 <!ENTITY zotero.preferences.sync.password "Contrasenya">
-<!ENTITY zotero.preferences.sync.syncServer "Sincronització de dades">
-<!ENTITY zotero.preferences.sync.setUpSync "Configura la sincronització">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Desvincula el compte…">
 <!ENTITY zotero.preferences.sync.createAccount "Crea un compte">
 <!ENTITY zotero.preferences.sync.lostPassword "Has oblidat la contrasenya?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronitza automàticament">

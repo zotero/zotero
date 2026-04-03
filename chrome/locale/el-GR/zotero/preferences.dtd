@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Συγχρονισμός">
 <!ENTITY zotero.preferences.sync.username "Όνομα χρήστη:">
 <!ENTITY zotero.preferences.sync.password "Κωδικός:">
-<!ENTITY zotero.preferences.sync.syncServer "Συγχρονισμός Δεδομένων">
-<!ENTITY zotero.preferences.sync.setUpSync "Ρύθμιση Συγχρονισμού">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Αποσύνδεση Λογαριασμού...">
 <!ENTITY zotero.preferences.sync.createAccount "Δημιουργία λογαριασμού">
 <!ENTITY zotero.preferences.sync.lostPassword "Χάσατε τον κωδικό;">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Αυτόματος συγχρονισμός">

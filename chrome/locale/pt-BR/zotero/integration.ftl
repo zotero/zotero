@@ -22,6 +22,8 @@ integration-editBibliography-wrapper =
 integration-citationDialog = Caixa de citação
 integration-citationDialog-section-open = Abrir documentos ({ $count })
 integration-citationDialog-section-selected = Itens Selecionados ({ $count }/{ $total })
+integration-citationDialog-section-selectedAnnotations = Selected Annotations
+integration-citationDialog-section-selectedItems = Itens Selecionados
 integration-citationDialog-section-cited =
     { $count ->
         [0] Itens citados
@@ -30,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Sufixo
 integration-citationDialog-details-prefix = Prefixo
 integration-citationDialog-details-suppressAuthor = Omitir autor
+integration-citationDialog-details-includeComments = Include Comments
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
@@ -45,6 +48,11 @@ integration-citationDialog-lib-message-add-note =
         [true] Nenhuma nota selecionada corresponde a busca
        *[other] Nenhuma nota selecionada
     }
+integration-citationDialog-lib-message-annotations =
+    { $search ->
+        [true] No items with annotations match the current search
+       *[other] No selected or open items with annotations
+    }
 integration-citationDialog-settings-keepSorted = Manter as fontes ordenadas
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
@@ -54,6 +62,8 @@ integration-citationDialog-btn-type-citation =
     .title = Adicionar/Editar citação
 integration-citationDialog-btn-type-add-note =
     .title = Adicionar nota
+integration-citationDialog-btn-type-annotations =
+    .title = Add Annotations
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -71,6 +81,8 @@ integration-citationDialog-input-citation =
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
     .placeholder = Busque por nota para inserir no documento
+integration-citationDialog-single-input-annotations =
+    .placeholder = Search for annotations to insert into the document
 integration-citationDialog-aria-item-list =
     .aria-description = Utilize as setas direcionais para cima/para baixo para mudar a seleção. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
@@ -87,6 +99,9 @@ integration-citationDialog-collapse-section =
     .title = Comprimir seção
 integration-citationDialog-bubble-empty = (sem título)
 integration-citationDialog-add-to-citation = Adicionar citação
+integration-citationDialog-annotations-filter =
+    .placeholder = Filter annotations
+integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
 integration-prefs-displayAs-label = Exibir citações como:
 integration-prefs-footnotes =
     .label = Notas de rodapé

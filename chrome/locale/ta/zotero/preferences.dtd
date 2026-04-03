@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "ஒத்திசைவு">
 <!ENTITY zotero.preferences.sync.username "பயனர்பெயர்:">
 <!ENTITY zotero.preferences.sync.password "கடவுச்சொல்:">
-<!ENTITY zotero.preferences.sync.syncServer "தரவு ஒத்திசைவு">
-<!ENTITY zotero.preferences.sync.setUpSync "ஒத்திசைவை அமை">
-<!ENTITY zotero.preferences.sync.unlinkAccount "கணக்கைத் துண்டி…">
 <!ENTITY zotero.preferences.sync.createAccount "கணக்கை உருவாக்கு">
 <!ENTITY zotero.preferences.sync.lostPassword "கடவுச்சொல் இழந்ததா?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "தானாக ஒத்திசை">

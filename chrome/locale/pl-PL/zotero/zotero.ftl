@@ -34,6 +34,7 @@ general-open-settings = Otwórz ustawienia
 general-settings = Ustawienia...
 general-help = Pomoc
 general-tag = Etykieta
+general-got-it = Rozumiem
 general-done = Zrobione
 general-view-troubleshooting-instructions = Pokaż instrukcje dla rozwiązywania problemów
 general-go-back = Wróć
@@ -121,7 +122,7 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Przesuń kolumnę w prawo
 menu-view-hide-context-annotation-rows =
-    .label = Hide Non-Matching Annotations
+    .label = Ukryj niepasujące adnotacje
 menu-view-note-font-size =
     .label = Rozmiar czcionki notatek
 menu-view-note-tab-font-size =
@@ -157,6 +158,11 @@ zotero-toolbar-tabs-scroll-backwards =
     .title = Przewiń wstecz
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
+recently-read = Recently Read
+collections-menu-show-recently-read =
+    .label = Show { recently-read }
+item-menu-remove-from-recently-read =
+    .label = Remove from { recently-read }…
 collections-menu-rename-collection =
     .label = Zmień nazwę kolekcji
 collections-menu-edit-saved-search =
@@ -285,6 +291,9 @@ items-table-cell-notes =
             [many] { $count } notatek
            *[other] { $count } notatek
         }
+items-column-added-by = Added By
+items-column-modified-by = Modified By
+items-column-last-read = Last Read
 report-error =
     .label = Zgłoś błąd...
 rtfScan-wizard =
@@ -482,7 +491,7 @@ section-tags =
            *[other] { $count } Etykiet
         }
 section-related =
-    .label = { $count } Related
+    .label = { $count } powiązanych
 section-attachment-info =
     .label = { pane-attachment-info }
 section-button-remove =
@@ -608,16 +617,9 @@ item-title-empty-note = Notatka bez tytułu
 attachment-preview-placeholder = Brak załącznika do pokazania w podglądzie
 attachment-rename-from-parent =
     .tooltiptext = Zmień nazwę pliku tak, aby odpowiadał elementowi nadrzędnemu
-file-renaming-auto-rename-prompt-title = Zmieniono ustawienia nazw plików
-file-renaming-auto-rename-prompt-body = Czy chcesz zmienić nazwy istniejących plików w twojej bibliotece, aby zgadzały się z nowymi ustawieniami?
-file-renaming-auto-rename-prompt-yes = Podgląd zmian...
-file-renaming-auto-rename-prompt-no = Zachowaj istniejące nazwy plików
-rename-files-preview =
-    .buttonlabelaccept = Zmień nazwy plików
-rename-files-preview-loading = Wczytywanie...
-rename-files-preview-intro = { -app-name } zmieni nazwy następujących plików w Twojej bibliotece tak, aby odpowiadały nazwom ich elementów nadrzędnych:
-rename-files-preview-renaming = Zmiana nazw...
-rename-files-preview-no-files = Wszystkie nazwy plików obecnie odpowiadają elementom nadrzędnym. Nie są wymagane żadne zmiany.
+account-log-in = Zaloguj się
+account-not-logged-in-text = Log in to your Zotero account to sync your data.
+account-error-login-session-expired = Your login session has expired. Please try again.
 toggle-preview =
     .label =
         { $type ->
@@ -697,6 +699,7 @@ architecture-warning-action = Pobierz wersję 64-bitową { -app-name }
 architecture-x64-on-arm64-message = { -app-name } jest uruchomiony w trybie emulacji. Wersja natywna { -app-name } będzie działać bardziej wydajnie.
 architecture-x64-on-arm64-action = Pobierz { -app-name } dla ARM64
 first-run-guidance-authorMenu = { -app-name } pozwala ci także podać edytorów i tłumaczy. Możesz zmienić autora na edytora lub tłumacza, wybierając z tego menu.
+first-run-guidance-readAloud = { -app-name } can now read your documents to you using natural-sounding voices.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =
@@ -710,6 +713,33 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Wartość
     .label = { $label }
+search-conditions-tooltip-fields = Pola:
+search-conditions-collection = Kolekcja
+search-conditions-savedSearch = Zapisane wyszukiwanie
+search-conditions-itemTypeID = Typ elementu
+search-conditions-tag = Etykieta
+search-conditions-note = Notatka
+search-conditions-childNote = Notatka podrzędna
+search-conditions-creator = Twórca
+search-conditions-thesisType = Typ pracy dyplomowej
+search-conditions-reportType = Typ raportu
+search-conditions-videoRecordingFormat = Format nagrania wideo
+search-conditions-audioFileType = Typ pliku audio
+search-conditions-audioRecordingFormat = Format nagrania audio
+search-conditions-letterType = Typ listu
+search-conditions-interviewMedium = Nośnik wywiadu
+search-conditions-manuscriptType = Typ rękopisu
+search-conditions-presentationType = Typ prezentacji
+search-conditions-mapType = Typ mapy
+search-conditions-artworkMedium = Technika wykonania
+search-conditions-dateModified = Data modyfikacji
+search-conditions-fulltextContent = Zawartość załącznika
+search-conditions-programmingLanguage = Język programowania
+search-conditions-fileTypeID = Typ pliku załącznika
+search-conditions-lastRead = Attachment Last Read
+search-conditions-annotationText = Tekst adnotacji
+search-conditions-annotationComment = Komentarz adnotacji
+search-conditions-anyField = Dowolne pole
 find-pdf-files-added =
     { $count ->
         [one] { $count } plik dodany
@@ -726,14 +756,18 @@ select-items-convertToStandalone =
 select-items-convertToStandaloneAttachment =
     .label =
         { $count ->
-            [one] Convert to Standalone Attachment
-           *[other] Convert to Standalone Attachments
+            [one] Przekształć na samodzielny załącznik
+            [few] Przekształć na samodzielne załączniki
+            [many] Przekształć na samodzielne załączniki
+           *[other] Przekształć na samodzielne załączniki
         }
 select-items-convertToStandaloneNote =
     .label =
         { $count ->
-            [one] Convert to Standalone Note
-           *[other] Convert to Standalone Notes
+            [one] Przekształć na samodzielną notatkę
+            [few] Przekształć na samodzielne notatki
+            [many] Przekształć na samodzielne notatki
+           *[other] Przekształć na samodzielne notatki
         }
 file-type-webpage = Strona internetowa
 file-type-image = Obraz
@@ -757,7 +791,7 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
-file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
+file-renaming-banner-message = { -app-name } teraz automatycznie synchronizuje nazwy plików załączników podczas dokonywania zmian w elementach.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = Łącznik { -app-name } musi zostać zaktualizowany, aby działać z tą wersją { -app-name }.
@@ -771,3 +805,7 @@ menu-normalize-attachment-titles =
     .label = Normalizuj nazwy załączników...
 normalize-attachment-titles-title = Normalizuj nazwy załączników
 normalize-attachment-titles-text = { -app-name } automatycznie zmienia nazwy plików na dysku z użyciem metadanych elementu nadrzędnego, ale używa osobnych, prostszych nazw jak “Full Text PDF”, “Preprint PDF”, or “PDF” dla głównych załączników, aby utrzymać bardziej klarowną listę elementów i zapobiec duplikowaniu informacji.W starszych wersjach { -app-name }, podobnie jak używając różnych wtyczek, nazwy plików załączników mogą być niepotrzebnie zmieniane, aby odpowiadały nazwom plików.Czy chcesz zaktualizować wybrane załączniki, aby użyć ich prostszych nazw? Zostaną zmienione tylko główne załączniki z nazwami, które odpowiadają nazwie pliku.
+banner-close-button =
+    .aria-label = Dismiss notification
+plugins-blocked-plugin =
+    .message = Ta wtyczka została wyłączona przez { -app-name }.

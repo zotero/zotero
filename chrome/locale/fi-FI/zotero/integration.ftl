@@ -22,6 +22,8 @@ integration-editBibliography-wrapper =
 integration-citationDialog = Viittausikkuna
 integration-citationDialog-section-open = Avoimia asiakirjoja: ({ $count })
 integration-citationDialog-section-selected = Valittuja nimikkeitä ({ $count }/{ $total })
+integration-citationDialog-section-selectedAnnotations = Selected Annotations
+integration-citationDialog-section-selectedItems = Valitut nimikkeet
 integration-citationDialog-section-cited =
     { $count ->
         [0] Viitatut nimikkeet
@@ -30,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Jälkiliite
 integration-citationDialog-details-prefix = Etuliite
 integration-citationDialog-details-suppressAuthor = Piilota tekijä
+integration-citationDialog-details-includeComments = Include Comments
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
@@ -45,6 +48,11 @@ integration-citationDialog-lib-message-add-note =
         [true] Yksikään valituista muistiinpanoista ei täsmää tämänhetkiseen hakuun
        *[other] Ei muistiinpanoja valittuna
     }
+integration-citationDialog-lib-message-annotations =
+    { $search ->
+        [true] No items with annotations match the current search
+       *[other] No selected or open items with annotations
+    }
 integration-citationDialog-settings-keepSorted = Pidä lähteet lajiteltuna
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
@@ -54,6 +62,8 @@ integration-citationDialog-btn-type-citation =
     .title = Lisää/muokkaa viitettä
 integration-citationDialog-btn-type-add-note =
     .title = Lisää muistiinpano
+integration-citationDialog-btn-type-annotations =
+    .title = Add Annotations
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -71,6 +81,8 @@ integration-citationDialog-input-citation =
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
     .placeholder = Etsi muistiinpanoa lisättäväksi tähän asiakirjaan
+integration-citationDialog-single-input-annotations =
+    .placeholder = Search for annotations to insert into the document
 integration-citationDialog-aria-item-list =
     .aria-description = Muuta nimikkeen valintaa ylä- ja alanuolinäppäimellä. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
@@ -87,6 +99,9 @@ integration-citationDialog-collapse-section =
     .title = Kutista osa
 integration-citationDialog-bubble-empty = (ei otsikkoa)
 integration-citationDialog-add-to-citation = Lisää viittaukseen
+integration-citationDialog-annotations-filter =
+    .placeholder = Filter annotations
+integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
 integration-prefs-displayAs-label = Näytä sitaatit muodossa:
 integration-prefs-footnotes =
     .label = Alaviitteet

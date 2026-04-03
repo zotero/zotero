@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synkroniser">
 <!ENTITY zotero.preferences.sync.username "Brukarnamn:">
 <!ENTITY zotero.preferences.sync.password "Passord:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "Lag konto">
 <!ENTITY zotero.preferences.sync.lostPassword "Gløymt passordet?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">

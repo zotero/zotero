@@ -48,14 +48,11 @@
 <!ENTITY zotero.preferences.prefpane.sync "동기화">
 <!ENTITY zotero.preferences.sync.username "사용자명:">
 <!ENTITY zotero.preferences.sync.password "비밀번호:">
-<!ENTITY zotero.preferences.sync.syncServer "데이터 동기화">
-<!ENTITY zotero.preferences.sync.setUpSync "동기화 설정">
-<!ENTITY zotero.preferences.sync.unlinkAccount "계정 연결 해제...">
 <!ENTITY zotero.preferences.sync.createAccount "계정 생성">
 <!ENTITY zotero.preferences.sync.lostPassword "비밀번호를 분실하셨나요?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "자동 동기화">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "전문(全文) 동기화">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero가 라이브러리의 파일 내용을 zotero.org 및 그외 연결된 기기와 동기화하여, 여러분이 어디에 있든 파일을 손쉽게 검색할 수 있게 합니다. 파일 내용이 일반에 공개되는 것은 아닙니다.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero는 Zotero 라이브러리에 있는 파일의 전체 텍스트 콘텐츠를 zotero.org 및 기타 연결된 장치와 동기화하여 어디에서든 파일을 쉽게 검색할 수 있도록 합니다. 파일의 전체 텍스트 콘텐츠는 공개적으로 공유되지 않습니다.">
 <!ENTITY zotero.preferences.sync.about "동기화 알아보기">
 <!ENTITY zotero.preferences.sync.fileSyncing "파일 동기화">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -71,7 +68,7 @@
 <!ENTITY zotero.preferences.sync.librariesToSync.button "라이브러리 선택...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "동기화">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "라이브러리">
-<!ENTITY zotero.preferences.sync.reset.warning1 "다음 작업은 특이하고 특수한 상황에만 제한적으로 적용되어야 합니다. 일반적인 문제 해결에는 사용하지 마십시오. 많은 경우, 재설정이 또 다른 문제를 일으킬 수 있습니다. ">
+<!ENTITY zotero.preferences.sync.reset.warning1 "다음 작업은 드물고 특정한 상황에서만 사용해야 하며 일반적인 문제 해결에는 사용해서는 안 됩니다. 재설정을 하면 오히려 추가적인 문제가 발생하는 경우가 많습니다. 자세한 내용은 다음을 참조하십시오.">
 <!ENTITY zotero.preferences.sync.reset.warning2 "동기화 초기화 옵션">
 <!ENTITY zotero.preferences.sync.reset.warning3 "추가정보.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "데이터 동기화 기록 초기화">

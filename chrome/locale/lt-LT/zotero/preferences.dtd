@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sinchronizavimas">
 <!ENTITY zotero.preferences.sync.username "Naudotojo vardas:">
 <!ENTITY zotero.preferences.sync.password "Slaptažodis:">
-<!ENTITY zotero.preferences.sync.syncServer "Duomenų sinchronizavimas">
-<!ENTITY zotero.preferences.sync.setUpSync "Konfigūruoti sinchronizavimą">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Nebesieti su paskyra...">
 <!ENTITY zotero.preferences.sync.createAccount "Sukurti paskyrą">
 <!ENTITY zotero.preferences.sync.lostPassword "Pamiršote slaptažodį?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sinchronizuoti automatiškai">

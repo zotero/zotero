@@ -22,6 +22,8 @@ integration-editBibliography-wrapper =
 integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
+integration-citationDialog-section-selectedAnnotations = Selected Annotations
+integration-citationDialog-section-selectedItems = 選択されたアイテム
 integration-citationDialog-section-cited =
     { $count ->
         [0] Cited Items
@@ -30,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Suffix
 integration-citationDialog-details-prefix = Prefix
 integration-citationDialog-details-suppressAuthor = 著者名を省略
+integration-citationDialog-details-includeComments = Include Comments
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
@@ -45,15 +48,22 @@ integration-citationDialog-lib-message-add-note =
         [true] No selected notes match the current search
        *[other] No notes are selected
     }
+integration-citationDialog-lib-message-annotations =
+    { $search ->
+        [true] No items with annotations match the current search
+       *[other] No selected or open items with annotations
+    }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = ライブラリ
 integration-citationDialog-mode-list = List
 integration-citationDialog-btn-type-citation =
-    .title = 出典表記を追加・編集
+    .title = Add/Edit Citation
 integration-citationDialog-btn-type-add-note =
     .title = メモを追加
+integration-citationDialog-btn-type-annotations =
+    .title = Add Annotations
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -71,6 +81,8 @@ integration-citationDialog-input-citation =
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
     .placeholder = Search for a note to insert into the document
+integration-citationDialog-single-input-annotations =
+    .placeholder = Search for annotations to insert into the document
 integration-citationDialog-aria-item-list =
     .aria-description = Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
@@ -87,7 +99,10 @@ integration-citationDialog-collapse-section =
     .title = Collapse section
 integration-citationDialog-bubble-empty = (no title)
 integration-citationDialog-add-to-citation = Add to Citation
-integration-prefs-displayAs-label = 出典表記の出力形式:
+integration-citationDialog-annotations-filter =
+    .placeholder = Filter annotations
+integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
+integration-prefs-displayAs-label = Display Citations As:
 integration-prefs-footnotes =
     .label = 脚注
 integration-prefs-endnotes =
@@ -101,14 +116,14 @@ integration-prefs-bookmarks-formatNotice =
        *[other] { "" }
     }
 integration-prefs-automaticCitationUpdates =
-    .label = 出典表記を自動的に更新する
-    .tooltip = 更新待ちの出典表記は書類中でハイライト表示されます。
-integration-prefs-automaticCitationUpdates-description = 更新を無効化すれば大きな書類への出典表記の挿入が高速化できます。出典表記を手動で更新するためにはリフレッシュボタンをクリックしてください。
+    .label = Automatically update citations
+    .tooltip = Citations with pending updates will be highlighted in the document
+integration-prefs-automaticCitationUpdates-description = Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.
 integration-prefs-automaticJournalAbbeviations =
     .label = MEDLINEの略誌名を使用する
 integration-prefs-automaticJournalAbbeviations-description = 「雑誌略誌名」のフィールドは無視されます。
 integration-prefs-exportDocument =
-    .label = 別のワープロソフトに切り替える...
+    .label = Switch to a Different Word Processor…
 integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
 integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.

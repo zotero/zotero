@@ -34,6 +34,7 @@ general-open-settings = Åpne innstillinger
 general-settings = Innstillinger…
 general-help = Hjelp
 general-tag = Emneord
+general-got-it = Forstått
 general-done = Ferdig
 general-view-troubleshooting-instructions = Se instruksjoner for feilsøking
 general-go-back = Gå tilbake
@@ -121,7 +122,7 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Flytt kolonne til høyre
 menu-view-hide-context-annotation-rows =
-    .label = Hide Non-Matching Annotations
+    .label = Skjul kommentarer uten treff
 menu-view-note-font-size =
     .label = Skriftstørrelse for notat
 menu-view-note-tab-font-size =
@@ -155,6 +156,11 @@ zotero-toolbar-tabs-scroll-backwards =
     .title = Rull bakover
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
+recently-read = Nettopp lest
+collections-menu-show-recently-read =
+    .label = Vis { recently-read }
+item-menu-remove-from-recently-read =
+    .label = Fjern fra { recently-read }…
 collections-menu-rename-collection =
     .label = Endre navn på samlingen
 collections-menu-edit-saved-search =
@@ -270,7 +276,7 @@ import-online-intro = I neste trinn blir du bedt om å logge inn på { $targetAp
 import-online-intro2 = { -app-name } vil aldri se eller lagre passordet ditt { $targetApp }.
 import-online-form-intro = Vennligst skriv inn påloggingsinformasjonen din for å logge på { $targetAppOnline }. Dette er nødvendig for å importere { $targetApp }-biblioteket ditt til { -app-name }.
 import-online-wrong-credentials = Innlogging til { $targetApp } mislyktes. Vennligst skriv inn påloggingsinformasjonen på nytt og prøv igjen.
-import-online-blocked-by-plugin = Importen kan ikke fortsette med { $plugin } installert. Deaktiver denne program-tillegget og prøv på nytt.
+import-online-blocked-by-plugin = Importen kan ikke fortsette med { $plugin } installert. Deaktiver dette programtillegget og prøv på nytt.
 import-online-relink-only =
     .label = Koble sammen igjen Mendeley Desktop henvisninger
 import-online-relink-kb = Mer informasjon
@@ -281,6 +287,9 @@ items-table-cell-notes =
             [one] { $count } Notat
            *[other] { $count } Notater
         }
+items-column-added-by = Lagt til av
+items-column-modified-by = Endret av
+items-column-last-read = Sist lest
 report-error =
     .label = Rapporter feil…
 rtfScan-wizard =
@@ -594,16 +603,9 @@ item-title-empty-note = Notat uten tittel
 attachment-preview-placeholder = Intet vedlegg å forhåndsvise
 attachment-rename-from-parent =
     .tooltiptext = Endre navn på fil for å samsvare med overordnet element
-file-renaming-auto-rename-prompt-title = Innstillinger for å endre navn er endret
-file-renaming-auto-rename-prompt-body = Ønsker du å endre navn på eksisterende filer i ditt bibliotek for å samsvare med de nye innstliingene?
-file-renaming-auto-rename-prompt-yes = Forhåndsvis endringer…
-file-renaming-auto-rename-prompt-no = Behold ekisterende filnavn
-rename-files-preview =
-    .buttonlabelaccept = Endre navn på filene
-rename-files-preview-loading = Laster inn...
-rename-files-preview-intro = { -app-name } vil endre navn på de følgende filene i ditt bibliotek for å samsvare med overordnede elementer:
-rename-files-preview-renaming = Endrer navn…
-rename-files-preview-no-files = Alle filnavn samsvarer allerede med overordnede elementer. Ingen endringer er nødvendige.
+account-log-in = Logg inn
+account-not-logged-in-text = Logg inn på Zotero-kontoen din for å synkronisere dataene dine.
+account-error-login-session-expired = Påloggingsøkten din har utløpt. Prøv på nytt.
 toggle-preview =
     .label =
         { $type ->
@@ -675,6 +677,7 @@ architecture-warning-action = Last ned 64-bit { -app-name }
 architecture-x64-on-arm64-message = { -app-name } kjører i emulert modus. En plattformavhengig versjon av { -app-name } vil kjøre mer effektivt.
 architecture-x64-on-arm64-action = Last ned { -app-name } for ARM64
 first-run-guidance-authorMenu = { -app-name } kan du også angi redaktører og oversettere. Du kan gjøre en forfatter om til en redaktør eller oversetter ved å velge fra denne menyen.
+first-run-guidance-readAloud = { -app-name } kan nå lese dokumentene dine for deg ved hjelp av naturlige stemmer.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =
@@ -688,6 +691,33 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Verdi
     .label = { $label }
+search-conditions-tooltip-fields = Felter:
+search-conditions-collection = Samling
+search-conditions-savedSearch = Lagret søk
+search-conditions-itemTypeID = Elementtype
+search-conditions-tag = Emneord
+search-conditions-note = Notat
+search-conditions-childNote = Underordnet notat
+search-conditions-creator = Opphaver
+search-conditions-thesisType = Avhandlingstype
+search-conditions-reportType = Rapporttype
+search-conditions-videoRecordingFormat = Video-opptak format
+search-conditions-audioFileType = Lydfil-type
+search-conditions-audioRecordingFormat = Lyd-opptak format
+search-conditions-letterType = Brevtype
+search-conditions-interviewMedium = Intervjumedium
+search-conditions-manuscriptType = Manuskripttype
+search-conditions-presentationType = Presentasjonstype
+search-conditions-mapType = Karttype
+search-conditions-artworkMedium = Kunstmedium
+search-conditions-dateModified = Dato endret
+search-conditions-fulltextContent = Vedleggsinnhold
+search-conditions-programmingLanguage = Programmeringsspråk
+search-conditions-fileTypeID = Vedleggets filtype
+search-conditions-lastRead = Vedlegg sist lest
+search-conditions-annotationText = Kommentartekst
+search-conditions-annotationComment = Merknad til kommentar
+search-conditions-anyField = Hvilket som helst felt
 find-pdf-files-added =
     { $count ->
         [one] { $count } fil lagt til
@@ -749,6 +779,10 @@ normalize-attachment-titles-title = Normaliser vedleggstitler
 normalize-attachment-titles-text =
     { -app-name } endrer automatisk navn på filer på disken ved hjelp av metadata fra overordnet element, men bruker separate, enklere titler som «Fulltekst-PDF», «Preprint-PDF» eller «PDF» for primære vedlegg for å holde elementlisten ryddigere og unngå duplisering av informasjon.
     
-    I eldre versjoner av { -app-name }, samt ved bruk av visse plugins, kunne vedleggstitler endres unødvendig for å samsvare med filnavnene.
+    I eldre versjoner av { -app-name }, samt ved bruk av visse programtillegg, kunne vedleggstitler endres unødvendig for å samsvare med filnavnene.
     
     Ønsker du å oppdatere de valgte vedleggene for å bruke enklere titler? Bare primære vedlegg med titler som samsvarer med filnavnet vil bli endret.
+banner-close-button =
+    .aria-label = Avvis varsel
+plugins-blocked-plugin =
+    .message = Dette programtillegget har blitt deaktivert av { -app-name }.

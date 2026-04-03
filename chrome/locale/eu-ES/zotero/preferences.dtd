@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sinkronizatu">
 <!ENTITY zotero.preferences.sync.username "Erabiltzailea:">
 <!ENTITY zotero.preferences.sync.password "Pasahitza:">
-<!ENTITY zotero.preferences.sync.syncServer "Datuen sinkronizazioa">
-<!ENTITY zotero.preferences.sync.setUpSync "Ezarri sinkronizazioa">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Kontua desestekatu...">
 <!ENTITY zotero.preferences.sync.createAccount "Kontua sortu">
 <!ENTITY zotero.preferences.sync.lostPassword "Pasahitza ahaztu zaizu?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sinkronizatu automatikoki">

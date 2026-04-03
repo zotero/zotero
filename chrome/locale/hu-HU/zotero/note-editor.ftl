@@ -6,8 +6,8 @@ note-editor-unlink = Hivatkozás eltávolítása
 note-editor-right-to-left = Jobbról balra
 note-editor-left-to-right = Balról jobbra
 note-editor-update-notice =
-    This note was edited with a newer version of { -app-name }.
-    Please update { -app-name } to make changes.
+    Ez a jegyzet a { -app-name } újabb verziójával lett szerkesztve.
+    Kérjük, frissítse a { -app-name } alkalmazást a változtatások végrehajtásához.
 note-editor-enter-link = Hivatkozás beszúrása
 note-editor-heading-1 = Címsor 1
 note-editor-heading-2 = Címsor 2

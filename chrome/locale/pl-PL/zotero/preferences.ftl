@@ -5,29 +5,8 @@ preferences-auto-recognize-files =
     .label = Automatycznie pobieraj metadane dla plików PDF i ebooków
 preferences-file-renaming-title = Zmiana nazw plików
 preferences-file-renaming-intro = { -app-name } może automatycznie zmienić nazwy plików na podstawie szczegółów elementu nadrzędnego (tytuł, autor, etc.) i utrzymać nazwy plików zsynchronizowane podczas dokonywania przez Ciebie zmian. Pobrane pliki są zawsze początkowo nazywane na podstawie elementu nadrzędnego.
-preferences-file-renaming-auto-rename-files =
-    .label = Automatycznie zmień nazwy plików
-preferences-file-renaming-file-types = Zmień nazwy plików następujących typów:
-preferences-file-renaming-file-type-pdf =
-    .label = { file-type-pdf }
-preferences-file-renaming-file-type-epub =
-    .label = { file-type-ebook }
-preferences-file-renaming-file-type-image =
-    .label = { file-type-image }
-preferences-file-renaming-file-type-audio =
-    .label = { file-type-audio }
-preferences-file-renaming-file-type-video =
-    .label = { file-type-video }
-preferences-file-renaming-customize-button =
-    .label = Dostosuj format nazwy pliku...
-preferences-file-renaming-rename-now =
-    .label = Zmień nazwy plików...
-preferences-file-renaming-format-title = Format nazwy pliku
-preferences-file-renaming-format-instructions = Możesz dostosować wzorzec zmiany nazwy plik, który zostanie użyty przez { -app-name } aby zmienić nazwy plików załączników w taki sposób, aby użyte zostały metadane elementu nadrzędnego.
-preferences-file-renaming-format-instructions-example = Na przykład “{ $example }” w tym szablonie zostanie zastąpione tytułem elementu nadrzędnego, skróconym do 50 znaków.
-preferences-file-renaming-format-instructions-more = Zobacz <label data-l10n-name="file-renaming-format-help-link">dokumentację</label>, aby uzyskać więcej informacji.
-preferences-file-renaming-format-template = Szablon nazwy pliku:
-preferences-file-renaming-format-preview = Podgląd:
+preferences-file-renaming-configure-button =
+    .label = Configure File Renaming…
 preferences-attachment-titles-title = Nazwy załączników
 preferences-attachment-titles-intro = Nazwy załączników są <label data-l10n-name="wiki-link">różne od nazw plików</label>. Aby wspierać różne style pracy, { -app-name } może pokazywać nazwy plików zamiast nazw załączników na liście elementów.
 preferences-attachment-titles-show-filenames =
@@ -98,6 +77,13 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Domyślny: { $directory })
     .aria-label = Domyślna lokalizacja
+-preferences-sync-data-syncing = Synchronizacja danych
+preferences-sync-data-syncing-groupbox =
+    .aria-label = { -preferences-sync-data-syncing }
+preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
+preferences-sync-data-syncing-description = Log in with your { -app-name } account to sync your data between devices, collaborate with others, and more.
+preferences-account-log-out =
+    .label = Wyloguj się...
 preferences-sync-reset-restore-to-server-body = { -app-name } zastąpi “{ $libraryName }” na { $domain } danymi z tego komputera.
 preferences-sync-reset-restore-to-server-deleted-items-text =
     { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
@@ -112,8 +98,25 @@ preferences-sync-reset-restore-to-server-remaining-items-text =
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->
-        [one] Delete 1 item
-       *[other] Delete { $remoteItemsDeletedCount } items
+        [one] Usuń { $remoteItemsDeletedCount } element
+        [few] Usuń { $remoteItemsDeletedCount } elementy
+        [many] Usuń { $remoteItemsDeletedCount } elementów
+       *[other] Usuń { $remoteItemsDeletedCount } elementów
     }
 preferences-sync-reset-restore-to-server-confirmation-text = usuń bibliotekę online
 preferences-sync-reset-restore-to-server-yes = Zamień dane w zdalnej bibliotece
+preferences-account-log-in =
+    .label = Zaloguj się
+preferences-account-waiting-for-login =
+    .value = Waiting for login…
+preferences-account-cancel-button =
+    .label = { general-cancel }
+preferences-account-logged-out-status =
+    .value = (logged out)
+preferences-account-email-label =
+    .value = Email:
+preferences-account-switch-accounts =
+    .label = Switch Accounts…
+preferences-account-switch-text = Switching to a different account will remove all { -app-name } data on this computer. Before continuing, make sure all data and files you wish to keep have been synced with the “{ $username }” account or you have a backup of your { -app-name } data directory.
+preferences-account-switch-confirmation-text = remove local data
+preferences-account-switch-accept = Remove Data and Restart

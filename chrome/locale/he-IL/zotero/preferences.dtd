@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "סנכרון">
 <!ENTITY zotero.preferences.sync.username "שם משתמש:">
 <!ENTITY zotero.preferences.sync.password "סיסמה:">
-<!ENTITY zotero.preferences.sync.syncServer "סנכרון נתונים">
-<!ENTITY zotero.preferences.sync.setUpSync "הקמת סנכרון">
-<!ENTITY zotero.preferences.sync.unlinkAccount "ניתוק חשבון…">
 <!ENTITY zotero.preferences.sync.createAccount "יצירת חשבון">
 <!ENTITY zotero.preferences.sync.lostPassword "איבדת סיסמה?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "סנכרון אוטומטית">

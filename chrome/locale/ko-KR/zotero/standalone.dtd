@@ -1,9 +1,9 @@
 <!ENTITY preferencesCmdMac.label "환경설정...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "서비스">
-<!ENTITY hideThisAppCmdMac.label "&brandShortName; 감추기">
+<!ENTITY hideThisAppCmdMac.label "&brandShortName; 숨기기">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "다른 것들은 감추기">
+<!ENTITY hideOtherAppsCmdMac.label "나머지 숨기기">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "모두 보이기">
 <!ENTITY quitApplicationCmdMac.label "Zotero 종료">
@@ -75,7 +75,7 @@
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "&brandShortName; 소개">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "매뉴얼">
+<!ENTITY productHelp.label "지원 및 문서">
 <!ENTITY productHelp.accesskey "H">
 <!ENTITY helpTroubleshootingInfo.label "문제 해결 정보">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">

@@ -2,9 +2,9 @@
 
 <!ENTITY zotero.search.searchInLibrary "ライブラリの中を検索">
 
-<!ENTITY zotero.search.joinMode.prefix "次の条件">
+<!ENTITY zotero.search.joinMode.prefix "Match">
 <!ENTITY zotero.search.joinMode.any "のいずれか">
-<!ENTITY zotero.search.joinMode.all "のすべて">
+<!ENTITY zotero.search.joinMode.all "all">
 <!ENTITY zotero.search.joinMode.suffix "を満たす:">
 
 <!ENTITY zotero.search.recursive.label "サブコレクションを検索する">
@@ -12,7 +12,7 @@
 <!ENTITY zotero.search.includeParentsAndChildren "一致するアイテムの親アイテムと子アイテムを表示">
 
 <!ENTITY zotero.search.textModes.phrase "フレーズ">
-<!ENTITY zotero.search.textModes.phraseBinary "フレーズ (バイナリファイルを含む)">
+<!ENTITY zotero.search.textModes.phraseBinary "Phrase (incl. binary files)">
 <!ENTITY zotero.search.textModes.regexp "正規表現">
 <!ENTITY zotero.search.textModes.regexpCS "正規表現（大文字小文字の区別あり）">
 

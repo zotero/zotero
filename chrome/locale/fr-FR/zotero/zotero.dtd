@@ -317,7 +317,7 @@
 <!ENTITY zotero.pdfReader.scrolled "Affiché en défilement">
 <!ENTITY zotero.pdfReader.paginated "Paginé">
 <!ENTITY zotero.pdfReader.zoomIn "Zoomer">
-<!ENTITY zotero.pdfReader.zoomOut "Dé-zoomer">
+<!ENTITY zotero.pdfReader.zoomOut "Dézoomer">
 <!ENTITY zotero.pdfReader.zoomReset "Réinitialiser le zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Zoom automatique">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Pleine largeur">

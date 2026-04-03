@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Синхронизиране">
 <!ENTITY zotero.preferences.sync.username "Потребителско име:">
 <!ENTITY zotero.preferences.sync.password "Парола:">
-<!ENTITY zotero.preferences.sync.syncServer "Синхронизиране на данни">
-<!ENTITY zotero.preferences.sync.setUpSync "Настройване на синхронизирането">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Прекратяване на връзката с акаунта...">
 <!ENTITY zotero.preferences.sync.createAccount "Регистрация">
 <!ENTITY zotero.preferences.sync.lostPassword "Загубена парола?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Автоматично синхронизиране">

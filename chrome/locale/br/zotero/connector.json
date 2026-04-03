@@ -41,14 +41,35 @@
   "general_copyToClipboard": {
     "message": "Eilañ er golver"
   },
+  "itemType_pdf": {
+    "message": "Stagadenn PDF"
+  },
+  "itemType_epub": {
+    "message": "EPUB stag"
+  },
+  "itemType_snapshot": {
+    "message": "Tapadenn skramm"
+  },
   "itemType_note": {
     "message": "Notenn"
+  },
+  "itemType_link": {
+    "message": "Liamm web"
   },
   "itemType_attachment": {
     "message": "Pezh-stag"
   },
   "progressWindow_savingTo": {
     "message": "Enrollañ e-barzh"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "Gwelet ar munudoù"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Kuzhat ar munudoù"
+  },
+  "progressWindow_saveItem": {
+    "message": "Elfenn $1: $2"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Balizoù (skejet gant virgulennoù)"

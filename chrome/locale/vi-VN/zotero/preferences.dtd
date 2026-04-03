@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Đồng bộ">
 <!ENTITY zotero.preferences.sync.username "Tên người dùng:">
 <!ENTITY zotero.preferences.sync.password "Mật khẩu:">
-<!ENTITY zotero.preferences.sync.syncServer "Đồng bộ dữ liệu">
-<!ENTITY zotero.preferences.sync.setUpSync "Thiết lập đồng bộ">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Ngắt liên kết với tài khoản...">
 <!ENTITY zotero.preferences.sync.createAccount "Tạo tài khoản">
 <!ENTITY zotero.preferences.sync.lostPassword "Quên mật khẩu?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Tự động đồng bộ">

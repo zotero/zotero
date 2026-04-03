@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "التزامن">
 <!ENTITY zotero.preferences.sync.username "اسم المستخدم:">
 <!ENTITY zotero.preferences.sync.password "كلمة المرور:">
-<!ENTITY zotero.preferences.sync.syncServer "مزامنة البيانات">
-<!ENTITY zotero.preferences.sync.setUpSync "إعداد المزامنة">
-<!ENTITY zotero.preferences.sync.unlinkAccount "إلغاء ارتباط الحساب">
 <!ENTITY zotero.preferences.sync.createAccount "تسجيل اشتراك جديد">
 <!ENTITY zotero.preferences.sync.lostPassword "نسيت كلمة المرور؟">
 <!ENTITY zotero.preferences.sync.syncAutomatically "التزامن التلقائي">

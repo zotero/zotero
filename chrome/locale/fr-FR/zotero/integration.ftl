@@ -22,6 +22,8 @@ integration-editBibliography-wrapper =
 integration-citationDialog = Fenêtre de citation
 integration-citationDialog-section-open = Documents ouverts : ({ $count })
 integration-citationDialog-section-selected = Documents sélectionnés : ({ $count }/{ $total })
+integration-citationDialog-section-selectedAnnotations = Annotations sélectionnées
+integration-citationDialog-section-selectedItems = Documents sélectionnés
 integration-citationDialog-section-cited =
     { $count ->
         [0] documents cités
@@ -30,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Suffixe
 integration-citationDialog-details-prefix = Préfixe
 integration-citationDialog-details-suppressAuthor = Ignorer l'auteur
+integration-citationDialog-details-includeComments = Inclure les commentaires
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
@@ -45,6 +48,11 @@ integration-citationDialog-lib-message-add-note =
         [true] Aucune note sélectionnée ne correspond à la recherche actuelle
        *[other] Aucune note n'est sélectionnée
     }
+integration-citationDialog-lib-message-annotations =
+    { $search ->
+        [true] No items with annotations match the current search
+       *[other] No selected or open items with annotations
+    }
 integration-citationDialog-settings-keepSorted = Trier les sources automatiquement
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
@@ -54,6 +62,8 @@ integration-citationDialog-btn-type-citation =
     .title = Ajouter/Modifier la citation
 integration-citationDialog-btn-type-add-note =
     .title = Ajouter une note
+integration-citationDialog-btn-type-annotations =
+    .title = Ajouter les annotations
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -71,6 +81,8 @@ integration-citationDialog-input-citation =
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
     .placeholder = Rechercher une note à insérer dans le document
+integration-citationDialog-single-input-annotations =
+    .placeholder = Rechercher les annotations à insérer dans le document
 integration-citationDialog-aria-item-list =
     .aria-description = Utiliser les flèches de direction haut/bas pour modifier la sélection de documents. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
@@ -87,6 +99,9 @@ integration-citationDialog-collapse-section =
     .title = Réduire la section
 integration-citationDialog-bubble-empty = (sans titre)
 integration-citationDialog-add-to-citation = Ajouter à la citation
+integration-citationDialog-annotations-filter =
+    .placeholder = Filtrer les annotations
+integration-citationDialog-annotations-empty = Sélectionner un document, une pièce jointe ou une annotation pour afficher les détails de l'annotation
 integration-prefs-displayAs-label = Afficher les citations en tant que :
 integration-prefs-footnotes =
     .label = notes de bas de page
@@ -120,4 +135,4 @@ first-run-guidance-citationDialog =
     
     Une fois votre sélection effectuée, cliquez sur la bulle ou sélectionnez-la à l'aide du clavier, puis appuyez sur ↓/Espace pour afficher les options de citation telles que le numéro de page, le préfixe et le suffixe.
     
-    Vous pouvez aussi ajouter un numéro de page ou un autre localisateur en l'incluant dans vos termes de recherche (par exemple, « histoire { $locator } ») ou en le saisissant après la bulle et en appuyant sur { return-or-enter }.
+    Vous pouvez aussi ajouter un numéro de page ou un autre localisateur en l'incluant dans vos termes de recherche (par exemple, "histoire { $locator }") ou en le saisissant après la bulle et en appuyant sur { return-or-enter }.

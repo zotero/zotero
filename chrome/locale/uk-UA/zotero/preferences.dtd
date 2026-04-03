@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Синхронізація">
 <!ENTITY zotero.preferences.sync.username "Ім'я користувача:">
 <!ENTITY zotero.preferences.sync.password "Пароль:">
-<!ENTITY zotero.preferences.sync.syncServer "Синхронізація даних">
-<!ENTITY zotero.preferences.sync.setUpSync "Налаштувати синхронізацію">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Від'єднати обліковий запис...">
 <!ENTITY zotero.preferences.sync.createAccount "Створити обліковий запис">
 <!ENTITY zotero.preferences.sync.lostPassword "Забули пароль?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Синхронізувати автоматично">

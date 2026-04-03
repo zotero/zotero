@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Hollek">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Etrefas">
 <!ENTITY zotero.preferences.fileHandling "Meradur ar restroù">
 <!ENTITY zotero.preferences.automaticSnapshots "Em-dapout skeudenn ar bajenn da vare krouidigezh elfennoù diwar pajennoù Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Em-stagañ ar PDFoù kevelet da vare enrolladur elfennoù">
@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sinkro">
 <!ENTITY zotero.preferences.sync.username "Anv-implijer:">
 <!ENTITY zotero.preferences.sync.password "Ger-tremen:">
-<!ENTITY zotero.preferences.sync.syncServer "Sinkro ar roadennoù">
-<!ENTITY zotero.preferences.sync.setUpSync "Termeniñ ar sinkro">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Diliammañ ar gont">
 <!ENTITY zotero.preferences.sync.createAccount "Krouiñ ur gont">
 <!ENTITY zotero.preferences.sync.lostPassword "Ger-tremen ankouaeet?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Em-sinkroaat">

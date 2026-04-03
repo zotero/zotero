@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "សមកាលកម្ម">
 <!ENTITY zotero.preferences.sync.username "ឈ្មោះអ្នកប្រើ:">
 <!ENTITY zotero.preferences.sync.password "លេខសម្ងាត់:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
 <!ENTITY zotero.preferences.sync.createAccount "បង្កើតគណនី">
 <!ENTITY zotero.preferences.sync.lostPassword "ភ្លេចលេខសម្ងាត់?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "ធ្វើសមកាលកម្មដោយស្វ័យប្រវត្តិ">

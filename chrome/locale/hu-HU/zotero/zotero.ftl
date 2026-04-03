@@ -34,6 +34,7 @@ general-open-settings = Beállítások megnyitása
 general-settings = Beállítások…
 general-help = Súgó
 general-tag = Címke
+general-got-it = Got It
 general-done = Rendben
 general-view-troubleshooting-instructions = View Troubleshooting Instructions
 general-go-back = Vissza
@@ -125,7 +126,7 @@ menu-view-hide-context-annotation-rows =
 menu-view-note-font-size =
     .label = Jegyzet betűmérete
 menu-view-note-tab-font-size =
-    .label = Note Tab Font Size
+    .label = Jegyzet fül betűmérete
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 menu-edit-copy-annotation =
@@ -155,6 +156,11 @@ zotero-toolbar-tabs-scroll-backwards =
     .title = Scroll backwards
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
+recently-read = Recently Read
+collections-menu-show-recently-read =
+    .label = Show { recently-read }
+item-menu-remove-from-recently-read =
+    .label = Remove from { recently-read }…
 collections-menu-rename-collection =
     .label = Gyűjtemény átnevezése
 collections-menu-edit-saved-search =
@@ -200,7 +206,7 @@ item-menu-add-linked-file =
 item-menu-add-url =
     .label = Web Link
 item-menu-change-parent-item =
-    .label = Change Parent Item…
+    .label = Áthelyezés másik elemhez…
 item-menu-relate-items =
     .label = Relate Items
 view-online = Online megtekintés
@@ -281,6 +287,9 @@ items-table-cell-notes =
             [one] { $count } Jegyzet
            *[other] { $count } Jegyzetek
         }
+items-column-added-by = Added By
+items-column-modified-by = Modified By
+items-column-last-read = Last Read
 report-error =
     .label = Hiba bejelentése...
 rtfScan-wizard =
@@ -400,24 +409,12 @@ publications-buttons-next-sharing =
 publications-buttons-next-choose-license =
     .label = Válasszon egy licencet
 licenses-cc-0 = CC0 1.0 Universal Public Domain Dedication
-licenses-cc-by =
-    Creative Commons Attribution 4.0 International License
-    (Nevezd meg! 4.0 Nemzetközi Licence)
-licenses-cc-by-nd =
-    Creative Commons Attribution-NoDerivatives 4.0 International License
-    (Nevezd meg!-Ne változtasd! 4.0 Nemzetközi Licence)
-licenses-cc-by-sa =
-    Creative Commons Attribution-ShareAlike 4.0 International License
-    (Nevezd meg!-Így add tovább! 4.0 Nemzetközi Licence)
-licenses-cc-by-nc =
-    Creative Commons Attribution-NonCommercial 4.0 International License
-    (Nevezd meg!-Ne add el! 4.0 Nemzetközi Licence)
-licenses-cc-by-nc-nd =
-    Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License
-    (Nevezd meg!-Ne add el!-Ne változtasd! 4.0 Nemzetközi Licence)
-licenses-cc-by-nc-sa =
-    Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
-    (Nevezd meg!-Ne add el!-Így add tovább! 4.0 Nemzetközi Licence)
+licenses-cc-by = Creative Commons Nevezd meg! 4.0 Nemzetközi Licence
+licenses-cc-by-nd = Creative Commons Nevezd meg!-Ne változtasd! 4.0 Nemzetközi Licence
+licenses-cc-by-sa = Creative Commons Nevezd meg!-Így add tovább! 4.0 Nemzetközi Licence
+licenses-cc-by-nc = Creative Commons Nevezd meg!-Ne add el! 4.0 Nemzetközi Licence
+licenses-cc-by-nc-nd = Creative Commons Nevezd meg!-Ne add el!-Ne változtasd! 4.0 Nemzetközi Licence
+licenses-cc-by-nc-sa = Creative Commons Nevezd meg!-Ne add el!-Így add tovább! 4.0 Nemzetközi Licence
 licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
 licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
 debug-output-logging-restart-in-troubleshooting-mode-checkbox = { general-restartInTroubleshootingMode }
@@ -606,16 +603,9 @@ item-title-empty-note = Cím nélküli jegyzet
 attachment-preview-placeholder = Nincs melléklet az előnézethez
 attachment-rename-from-parent =
     .tooltiptext = Rename File to Match Parent Item
-file-renaming-auto-rename-prompt-title = Renaming Settings Changed
-file-renaming-auto-rename-prompt-body = Would you like to rename existing files in your library to match the new settings?
-file-renaming-auto-rename-prompt-yes = Preview Changes…
-file-renaming-auto-rename-prompt-no = Keep Existing Filenames
-rename-files-preview =
-    .buttonlabelaccept = Rename Files
-rename-files-preview-loading = Betöltés…
-rename-files-preview-intro = { -app-name } will rename the following files in your library to match their parent items:
-rename-files-preview-renaming = Renaming…
-rename-files-preview-no-files = All filenames already match parent items. No changes are required.
+account-log-in = Log In
+account-not-logged-in-text = Log in to your Zotero account to sync your data.
+account-error-login-session-expired = Your login session has expired. Please try again.
 toggle-preview =
     .label =
         { $type ->
@@ -687,6 +677,7 @@ architecture-warning-action = 64 bites változat letöltése { -app-name }
 architecture-x64-on-arm64-message = { -app-name } is running in emulated mode. A native version of { -app-name } will run more efficiently.
 architecture-x64-on-arm64-action = { -app-name } letöltése ARM64-re
 first-run-guidance-authorMenu = { -app-name } lehetővé teszi szerkesztők és fordítók megadását is. Ebből a menüből kiválasztva a szerzőt szerkesztővé vagy fordítóvá alakíthatja.
+first-run-guidance-readAloud = { -app-name } can now read your documents to you using natural-sounding voices.
 advanced-search-remove-btn =
     .tooltiptext = { general-remove }
 advanced-search-add-btn =
@@ -700,6 +691,33 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Érték
     .label = { $label }
+search-conditions-tooltip-fields = Mezők:
+search-conditions-collection = Gyűjtemény
+search-conditions-savedSearch = Mentett keresés
+search-conditions-itemTypeID = Forrás típusa
+search-conditions-tag = Címke
+search-conditions-note = Jegyzet
+search-conditions-childNote = Ez alá tartozó jegyzet
+search-conditions-creator = Szerző
+search-conditions-thesisType = Szakdolgozat típusa
+search-conditions-reportType = Jelentés típusa
+search-conditions-videoRecordingFormat = Video felvételi formátum
+search-conditions-audioFileType = Audió fájl típusa
+search-conditions-audioRecordingFormat = Hang felvételi formátum
+search-conditions-letterType = Levél típusa
+search-conditions-interviewMedium = Interjú médiuma
+search-conditions-manuscriptType = Kézirat típusa
+search-conditions-presentationType = Jelentés típusa
+search-conditions-mapType = Térkép típusa
+search-conditions-artworkMedium = Műalkotás médiuma
+search-conditions-dateModified = Módosítás dátuma
+search-conditions-fulltextContent = Csatolmány tartalma
+search-conditions-programmingLanguage = Programozási nyelv
+search-conditions-fileTypeID = Csatolt fájl típusa
+search-conditions-lastRead = Attachment Last Read
+search-conditions-annotationText = Megjegyzés szövege
+search-conditions-annotationComment = Megjegyzés Jegyzet
+search-conditions-anyField = Bármelyik mező
 find-pdf-files-added =
     { $count ->
         [one] { $count } file added
@@ -764,3 +782,7 @@ normalize-attachment-titles-text =
     In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
     
     Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
+banner-close-button =
+    .aria-label = Dismiss notification
+plugins-blocked-plugin =
+    .message = This plugin has been disabled by { -app-name }.

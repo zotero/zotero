@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Szinkronizálás">
 <!ENTITY zotero.preferences.sync.username "Felhasználónév:">
 <!ENTITY zotero.preferences.sync.password "Jelszó:">
-<!ENTITY zotero.preferences.sync.syncServer "Adatok szinkronizálása">
-<!ENTITY zotero.preferences.sync.setUpSync "Szinkronizálás beállítása">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Fiók leválasztása…">
 <!ENTITY zotero.preferences.sync.createAccount "Új felhasználói fiók">
 <!ENTITY zotero.preferences.sync.lostPassword "Elveszett jelszó?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatikus szinkronizálás">

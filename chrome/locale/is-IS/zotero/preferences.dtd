@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Samstilla">
 <!ENTITY zotero.preferences.sync.username "Notandanafn:">
 <!ENTITY zotero.preferences.sync.password "Lykilorð:">
-<!ENTITY zotero.preferences.sync.syncServer "Samstilling gagna">
-<!ENTITY zotero.preferences.sync.setUpSync "Setja upp samstillingu">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Aftengja aðgang…">
 <!ENTITY zotero.preferences.sync.createAccount "Nýr notandi">
 <!ENTITY zotero.preferences.sync.lostPassword "Týnt lykilorð?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Samstilla sjálfkrafa">

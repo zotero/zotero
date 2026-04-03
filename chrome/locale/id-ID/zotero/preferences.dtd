@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Antarmuka">
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Ambil foto secara automatis ketika menyusun item dari laman web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lampirkan PDF dan berkas terkait lainnya secara automatis saat menyimpan item">
@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Buang item-item di dalam kantung sampah yang telah dihapus lebih dari">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "hari yang lalu secara automatis">
 
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
-<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filename">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Tampilkan tab sebagai">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Pembuat - Tahun - Judul">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Judul - Pembuat - Tahun">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Nama dokumen">
 
 <!ENTITY zotero.preferences.groups "Grup">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Saat menyalin item antarperpustakaan, turut masukkan:">
@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Sinkronisasi">
 <!ENTITY zotero.preferences.sync.username "Nama pengguna:">
 <!ENTITY zotero.preferences.sync.password "Password:">
-<!ENTITY zotero.preferences.sync.syncServer "Sinkronisasi data">
-<!ENTITY zotero.preferences.sync.setUpSync "Atur sinkronisasi">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Akun...">
 <!ENTITY zotero.preferences.sync.createAccount "Buat Akun">
 <!ENTITY zotero.preferences.sync.lostPassword "Kehilangan Password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "SInkronisasikan secara automatis">

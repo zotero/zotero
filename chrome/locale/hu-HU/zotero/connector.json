@@ -152,6 +152,9 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Mentés engedélyezése online könyvtárba"
   },
+  "reports_report_submitted": {
+    "message": "Hibajelentése elküldésre került.\n\nReport ID: $1\n\nKérjük, tegyen közzé egy üzenetet a Zotero fórumokon ezzel a Report ID, a probléma leírásával és a probléma reprodukálásához szükséges lépésekkel.\n\nA hibajelentéseket csak akkor vizsgáljuk meg, ha azok a fórumokon is megjelennek."
+  },
   "reports_debug_output_submitted": {
     "message": "A hibakeresés eredménye elküldve.\n\nA hibaazonosító$1."
   },
@@ -175,6 +178,9 @@
   },
   "integration_googleDocs_documentLocked": {
     "message": "A dokumentum hivatkozásait egy másik $1 felhasználó szerkeszti. Próbálja meg később."
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "A $1 engedélyre van szüksége a Google Docs-dokumentumok szerkesztéséhez, hogy hivatkozásokat illesszen be. Kérjük, próbálkozzon újra, és engedélyezze a $1 a Google Docs-dokumentumok megtekintését, szerkesztését, létrehozását és törlését."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "A kiválasztott Google-fióknak nincs jogosultsága a dokumentum szerkesztésére. Kérjük, próbálja meg újra, és győződjön meg róla, hogy a szerkesztési jogosultsággal rendelkező fiókot választotta."

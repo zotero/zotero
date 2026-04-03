@@ -48,9 +48,6 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synkronointi">
 <!ENTITY zotero.preferences.sync.username "Käyttäjätunnus:">
 <!ENTITY zotero.preferences.sync.password "Salasana:">
-<!ENTITY zotero.preferences.sync.syncServer "Tietojen synkronointi">
-<!ENTITY zotero.preferences.sync.setUpSync "Määritä synkronointi">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Poista linkitys käyttäjätiliin...">
 <!ENTITY zotero.preferences.sync.createAccount "Luo käyttäjätili">
 <!ENTITY zotero.preferences.sync.lostPassword "Unohditko salasanan?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkronoi automaattisesti">

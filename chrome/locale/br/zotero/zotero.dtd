@@ -301,7 +301,7 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.editInWindow "Aozañ en ur prenestr distag">
 
 <!ENTITY zotero.pdfReader.firstPage "Pajenn gentañ">
 <!ENTITY zotero.pdfReader.lastPage "Pajenn ziwezhañ">
@@ -314,14 +314,14 @@
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
 <!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.scrolled "Scrolled">
-<!ENTITY zotero.pdfReader.paginated "Paginated">
+<!ENTITY zotero.pdfReader.scrolled "Dibunet">
+<!ENTITY zotero.pdfReader.paginated "Pajennet">
 <!ENTITY zotero.pdfReader.zoomIn "Zoumañ">
 <!ENTITY zotero.pdfReader.zoomOut "Dizoumañ">
-<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
+<!ENTITY zotero.pdfReader.zoomReset "Adderaouiñ Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Em-adventañ">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Zoumañ betek ledander ar bajenn">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoumañ betek uhelder ar bajenn">
 <!ENTITY zotero.pdfReader.splitVertically "Rannañ a-blom">
 <!ENTITY zotero.pdfReader.splitHorizontally "Rannañ a-blaen">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">

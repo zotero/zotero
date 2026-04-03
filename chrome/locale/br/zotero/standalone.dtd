@@ -56,12 +56,12 @@
 <!ENTITY recursiveCollections.label "Diskouez an elfennoù diwar an is-dastumadeg">
 <!ENTITY fontSize.label "Ment skritur">
 <!ENTITY noteFontSize.label "Notenn ment skritur">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Bannoù">
+<!ENTITY sortBy.label "Rummañ dre">
 
 <!ENTITY toolsMenu.label "Ostilhoù">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "Staliañ ar c'hevreer merdeer...">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Lugantoù">
 <!ENTITY developer.label "Diorren">
