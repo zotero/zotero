@@ -315,7 +315,12 @@ Zotero_Preferences.Sync = {
 		let topic = "login-session:" + sessionToken;
 		Zotero.Streamer.subscribe([topic], (data) => {
 			if (this._loginResolve) {
-				this._loginResolve(data);
+				if (data.event == "loginComplete") {
+					this._loginResolve(data);
+				}
+				else if (data.event == "loginCancelled") {
+					this._loginResolve(null);
+				}
 			}
 		});
 	},
