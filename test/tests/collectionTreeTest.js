@@ -1418,11 +1418,14 @@ describe("Zotero.CollectionTree", function () {
 			after(async function () {
 				await new Promise(resolve => httpd.stop(resolve));
 				Zotero.Prefs.clear('downloadAssociatedFiles');
+				Zotero.Prefs.clear('automaticSnapshots');
 			});
 
 			it("should add a translated feed item retrieved from a URL", async function () {
-				// Disable OA PDF lookups to avoid external network requests
+				// Disable file/snapshot saving to avoid external network requests and async
+				// attachment processing
 				Zotero.Prefs.set('downloadAssociatedFiles', false);
+				Zotero.Prefs.set('automaticSnapshots', false);
 
 				// Serve the feed entry webpage via localhost
 				const urlPath = "/journalArticle-single.html";
