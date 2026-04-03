@@ -348,7 +348,7 @@ Zotero.Attachments = new function () {
 						await OS.File.move(file.path, newPath);
 					}
 					else {
-						await OS.File.copy(file.path, newPath);
+						await Zotero.File.copyFile(file.path, newPath);
 					}
 				}
 				// Copy entire parent directory (for HTML snapshots)

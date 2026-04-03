@@ -1086,11 +1086,108 @@ Zotero.File = new function () {
 		return this.iterateDirectory(source, function (entry) {
 			return entry.isDir
 				? this.copyDirectory(entry.path, OS.Path.join(target, entry.name))
-				: OS.File.copy(entry.path, OS.Path.join(target, entry.name));
+				: this.copyFile(entry.path, OS.Path.join(target, entry.name));
 		}.bind(this))
 	};
 	
 	
+	var _isAPFSCache = {};
+
+	/**
+	 * Check if a path is on an APFS volume
+	 *
+	 * @param {String} path
+	 * @return {Boolean}
+	 */
+	this.isAPFS = function (path) {
+		if (!Zotero.isMac) return false;
+
+		let dir = PathUtils.parent(path);
+		if (dir in _isAPFSCache) {
+			return _isAPFSCache[dir];
+		}
+
+		let result = false;
+		try {
+			let { ctypes } = ChromeUtils.importESModule(
+				"resource://gre/modules/ctypes.sys.mjs"
+			);
+			// struct statfs -- f_fstypename is a char[16] at byte offset 72
+			const STATFS_SIZE = 2168;
+			const FSTYPENAME_OFFSET = 72;
+			const FSTYPENAME_LEN = 16;
+			let buf = new ctypes.ArrayType(ctypes.uint8_t, STATFS_SIZE)();
+			let lib = ctypes.open("/usr/lib/libSystem.B.dylib");
+			try {
+				let statfs = lib.declare(
+					"statfs",
+					ctypes.default_abi,
+					ctypes.int,
+					ctypes.char.ptr,
+					ctypes.voidptr_t
+				);
+				if (statfs(dir, buf.address()) === 0) {
+					let typeName = '';
+					for (let i = FSTYPENAME_OFFSET; i < FSTYPENAME_OFFSET + FSTYPENAME_LEN; i++) {
+						if (buf[i] === 0) break;
+						typeName += String.fromCharCode(buf[i]);
+					}
+					result = typeName === 'apfs';
+				}
+			}
+			finally {
+				lib.close();
+			}
+		}
+		catch (e) {
+			Zotero.warn("Failed to check filesystem type: " + e);
+		}
+
+		_isAPFSCache[dir] = result;
+		return result;
+	};
+
+
+	/**
+	 * Copy a file, using APFS cloning on macOS when available and falling back to a regular
+	 * copy otherwise
+	 *
+	 * @param {String} source
+	 * @param {String} target
+	 */
+	this.copyFile = async function (source, target) {
+		if (this.isAPFS(source)) {
+			try {
+				let { ctypes } = ChromeUtils.importESModule(
+					"resource://gre/modules/ctypes.sys.mjs"
+				);
+				let lib = ctypes.open("/usr/lib/libSystem.B.dylib");
+				try {
+					let clonefile = lib.declare(
+						"clonefile",
+						ctypes.default_abi,
+						ctypes.int,
+						ctypes.char.ptr, // src
+						ctypes.char.ptr, // dst
+						ctypes.uint32_t  // flags
+					);
+					let result = clonefile(source, target, 0);
+					if (result === 0) {
+						return;
+					}
+				}
+				finally {
+					lib.close();
+				}
+			}
+			catch (e) {
+				Zotero.warn("clonefile() failed -- falling back to regular copy: " + e);
+			}
+		}
+		await IOUtils.copy(source, target);
+	};
+
+
 	this.createDirectoryIfMissing = function (dir) {
 		dir = this.pathToFile(dir);
 		if (!dir.exists() || !dir.isDirectory()) {

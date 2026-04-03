@@ -222,7 +222,7 @@ class PDFWorker {
 				return 0;
 			}
 			if (!annotations.length) {
-				await OS.File.copy(attachmentPath, path);
+				await Zotero.File.copyFile(attachmentPath, path);
 				return 0;
 			}
 			let buf = await IOUtils.read(attachmentPath);

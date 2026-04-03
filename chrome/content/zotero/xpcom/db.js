@@ -1043,13 +1043,19 @@ Zotero.DBConnection.prototype.backUpDatabase = async function ({ force, suffix, 
 		return this._offlineBackupPromise;
 	}
 	
+	// On APFS, use cloning for all backups -- it's nearly instant and backup files share
+	// disk blocks via copy-on-write, saving potentially gigabytes of space
+	if (online && Zotero.File.isAPFS(this._dbPath)) {
+		online = false;
+	}
+
 	var resolveOfflineBackupPromise;
 	var success = false;
 	if (online) {
 		this._onlineBackupInProgress = true;
 	}
 	// For offline backups, start a promise that will be resolved when the backup finishes
-	else if (!online) {
+	else {
 		this._offlineBackupPromise = new Promise(function () {
 			resolveOfflineBackupPromise = arguments[0];
 		});
@@ -1114,7 +1120,7 @@ Zotero.DBConnection.prototype.backUpDatabase = async function ({ force, suffix, 
 		else {
 			try {
 				await this.closeDatabase();
-				await IOUtils.copy(this._dbPath, tmpFile);
+				await Zotero.File.copyFile(this._dbPath, tmpFile);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -1453,7 +1459,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 	// Copy backup file to main DB file
 	this._debug("Restoring database '" + this._dbName + "' from backup file", 1);
 	try {
-		await OS.File.copy(backupFile, file);
+		await Zotero.File.copyFile(backupFile, file);
 	}
 	catch (e) {
 		// TODO: deal with low disk space

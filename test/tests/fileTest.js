@@ -220,6 +220,49 @@ describe("Zotero.File", function () {
 	});
 	
 	
+	describe("#isAPFS()", function () {
+		it("should return true on macOS for the temp directory", function () {
+			if (!Zotero.isMac) this.skip();
+			assert.isTrue(Zotero.File.isAPFS(Zotero.getTempDirectory().path));
+		});
+
+		it("should return false on non-Mac platforms", function () {
+			if (Zotero.isMac) this.skip();
+			assert.isFalse(Zotero.File.isAPFS(Zotero.getTempDirectory().path));
+		});
+	});
+
+	describe("#copyFile()", function () {
+		it("should copy a file", async function () {
+			let tmpDir = await getTempDirectory();
+			let source = OS.Path.join(tmpDir, "source.txt");
+			let target = OS.Path.join(tmpDir, "target.txt");
+			await Zotero.File.putContentsAsync(source, "Hello world");
+
+			await Zotero.File.copyFile(source, target);
+
+			assert.isTrue(await OS.File.exists(target));
+			assert.equal(await Zotero.File.getContentsAsync(target), "Hello world");
+		});
+
+		it("should copy a file to a different directory", async function () {
+			let tmpDir = await getTempDirectory();
+			let subDir = OS.Path.join(tmpDir, "sub");
+			await OS.File.makeDir(subDir);
+			let source = OS.Path.join(tmpDir, "source.txt");
+			let target = OS.Path.join(subDir, "target.txt");
+			await Zotero.File.putContentsAsync(source, "Hello world");
+
+			await Zotero.File.copyFile(source, target);
+
+			assert.isTrue(await OS.File.exists(target));
+			assert.equal(await Zotero.File.getContentsAsync(target), "Hello world");
+			// Source should still exist
+			assert.isTrue(await OS.File.exists(source));
+		});
+	});
+
+
 	describe("#copyDirectory()", function () {
 		it("should copy all files within a directory", async function () {
 			var tmpDir = Zotero.getTempDirectory().path;
