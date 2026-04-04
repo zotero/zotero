@@ -374,11 +374,16 @@
 			}
 			let delimiters = [',', ';'];
 			let interceptRegex = new RegExp(`[\\p{L}\\p{N}]+\\s*(${delimiters.join('|')})\\s*[\\p{L}\\p{N}]+`, 'iu');
-			let match = str.match(interceptRegex);
+			// Combine existing field value with pasted text at cursor position
+			let existing = textbox.ref?.value || '';
+			let selStart = textbox.ref?.selectionStart ?? existing.length;
+			let selEnd = textbox.ref?.selectionEnd ?? existing.length;
+			let combined = existing.slice(0, selStart) + str + existing.slice(selEnd);
+			let match = combined.match(interceptRegex);
 			if (match) {
 				event.preventDefault();
-				textbox.value = str.trim();
-				this.openTagSplitterWindow(str, match[1], textbox);
+				textbox.value = combined.trim();
+				this.openTagSplitterWindow(combined, match[1], textbox);
 			}
 		};
 
