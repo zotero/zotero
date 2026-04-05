@@ -79,6 +79,7 @@ general-gray = Gray
 general-black = Black
 
 general-loading = Loading…
+general-more-information = More Information
 
 citation-style-label = Citation Style:
 language-label = Language:
