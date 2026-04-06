@@ -1073,6 +1073,9 @@
 	"search-conditions-fileTypeID": {
 		"string": "Attachment File Type"
 	},
+	"search-conditions-attachmentStorageType": {
+		"string": "Attachment Storage Type"
+	},
 	"search-conditions-lastRead": {
 		"string": "Attachment Last Read"
 	},
@@ -1126,6 +1129,12 @@
 	},
 	"file-type-ebook": {
 		"string": "Ebook"
+	},
+	"attachment-storage-type-stored": {
+		"string": "Stored"
+	},
+	"attachment-storage-type-linked": {
+		"string": "Linked"
 	},
 	"post-upgrade-message": {
 		"string": "You’ve been upgraded to <span data-l10n-name=\"post-upgrade-appver\">{ app-name } { version }</span>! Learn about <a data-l10n-name=\"new-features-link\">what’s new</a>."

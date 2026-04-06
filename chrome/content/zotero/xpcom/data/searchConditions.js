@@ -355,6 +355,16 @@ Zotero.SearchConditions = new function () {
 				table: 'itemAttachments',
 				field: 'fileTypeID'
 			},
+
+			{
+				name: 'attachmentStorageType',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAttachments',
+				field: 'linkMode'
+			},
 			
 			{
 				name: 'tagID',
