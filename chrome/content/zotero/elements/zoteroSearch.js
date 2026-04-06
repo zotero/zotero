@@ -1087,6 +1087,7 @@
 			switch (condition) {
 				case 'fulltextContent':
 				case 'fileTypeID':
+				case 'attachmentStorageType':
 				case 'lastRead':
 					return 'attachment';
 				case 'annotationText':
@@ -1275,6 +1276,16 @@
 					this._valueMenuPending = false;
 					break;
 				}
+				case 'attachmentStorageType':
+				{
+					let rows = ['stored', 'linked'].map(type => ({
+						name: Zotero.getString('attachment-storage-type-' + type),
+						value: type
+					}));
+					
+					this.createValueMenu(rows);
+					break;
+				}
 				default:
 				{
 					if (operatorsList.value == 'isInTheLast') {
@@ -1313,7 +1324,8 @@
 					|| this.selectedCondition == 'fileTypeID'
 					|| this.selectedCondition == 'annotationType'
 					|| this.selectedCondition == 'annotationColor'
-					|| this.selectedCondition == 'annotationAuthor') {
+					|| this.selectedCondition == 'annotationAuthor'
+					|| this.selectedCondition == 'attachmentStorageType') {
 				this.querySelector('#valuefield').hidden = true;
 				this.querySelector('#valuemenu').hidden = false;
 				this.querySelector('#value-date-age').hidden = true;
