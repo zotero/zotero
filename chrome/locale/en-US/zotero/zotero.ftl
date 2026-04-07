@@ -61,6 +61,7 @@ general-et-al = et al.
 general-previous = Previous
 general-next = Next
 general-learn-more = Learn More
+general-more-information = More Information
 general-warning = Warning
 general-type-to-continue = Type “{ $text }” to continue.
 general-continue = Continue
@@ -323,7 +324,7 @@ import-online-wrong-credentials = Login to { $targetApp } failed. Please re-ente
 import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
 import-online-relink-only =
     .label = Relink Mendeley Desktop citations
-import-online-relink-kb = More Information
+import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
 
 items-table-cell-notes =
