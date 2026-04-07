@@ -1107,263 +1107,283 @@ describe("Zotero.ItemTree", function () {
 			});
 		});
 		
-		it("should re-sort by Last Read when child attachmentLastRead is updated in the user library", async function () {
-			let userLibraryID = Zotero.Libraries.userLibraryID;
-			let item1 = await createDataObject('item', { libraryID: userLibraryID });
-			let attachment1 = await importPDFAttachment(item1);
-			let item2 = await createDataObject('item', { libraryID: userLibraryID });
-			let attachment2 = await importPDFAttachment(item2);
-			assert.notOk(item1.getItemLastRead());
-			assert.notOk(item2.getItemLastRead());
-			
-			// attachment2 is more recently opened
-			attachment1.attachmentLastRead = Math.round(Date.now() / 1000) - 5;
-			attachment2.attachmentLastRead = Math.round(Date.now() / 1000);
-			await attachment1.saveTx();
-			await attachment2.saveTx();
+		describe("Recently Read", function () {
+			before(async function () {
+				await resetData();
+			});
 
-			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-			assert.equal(zp.getCollectionTreeRow().id, 'Y' + userLibraryID);
-			await waitForItemsLoad(win);
-			assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
+			it("should re-sort by Last Read when child attachmentLastRead is updated in the user library", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let item1 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment1 = await importPDFAttachment(item1);
+				let item2 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment2 = await importPDFAttachment(item2);
+				assert.notOk(item1.getItemLastRead());
+				assert.notOk(item2.getItemLastRead());
 
-			// Now make attachment2 much less recently opened
-			attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
-			await attachment2.saveTx();
+				// attachment2 is more recently opened
+				attachment1.attachmentLastRead = Math.round(Date.now() / 1000) - 5;
+				attachment2.attachmentLastRead = Math.round(Date.now() / 1000);
+				await attachment1.saveTx();
+				await attachment2.saveTx();
 
-			assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
-		});
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+				assert.equal(zp.getCollectionTreeRow().id, 'Y' + userLibraryID);
+				await waitForItemsLoad(win);
+				assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 
-		it("should re-sort by Last Read when child attachmentLastRead is updated in a group library", async function () {
-			let groupLibraryID = (await createGroup()).libraryID;
-			let item1 = await createDataObject('item', { libraryID: groupLibraryID });
-			let attachment1 = await importPDFAttachment(item1);
-			let item2 = await createDataObject('item', { libraryID: groupLibraryID });
-			let attachment2 = await importPDFAttachment(item2);
-			assert.notOk(item1.getItemLastRead());
-			assert.notOk(item2.getItemLastRead());
+				// Now make attachment2 much less recently opened
+				attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
+				await attachment2.saveTx();
 
-			// attachment2 is more recently opened
-			attachment1.attachmentLastRead = Math.round(Date.now() / 1000) - 5;
-			attachment2.attachmentLastRead = Math.round(Date.now() / 1000);
-			await attachment1.saveTx();
-			await attachment2.saveTx();
+				assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 
-			await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
-			assert.equal(zp.getCollectionTreeRow().id, 'Y' + groupLibraryID);
-			await waitForItemsLoad(win);
-			assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
+				await item1.eraseTx();
+				await item2.eraseTx();
+			});
 
-			// Now make attachment2 much less recently opened
-			attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
-			await attachment2.saveTx();
+			it("should re-sort by Last Read when child attachmentLastRead is updated in a group library", async function () {
+				let groupLibraryID = (await createGroup()).libraryID;
+				let item1 = await createDataObject('item', { libraryID: groupLibraryID });
+				let attachment1 = await importPDFAttachment(item1);
+				let item2 = await createDataObject('item', { libraryID: groupLibraryID });
+				let attachment2 = await importPDFAttachment(item2);
+				assert.notOk(item1.getItemLastRead());
+				assert.notOk(item2.getItemLastRead());
 
-			assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
-		});
+				// attachment2 is more recently opened
+				attachment1.attachmentLastRead = Math.round(Date.now() / 1000) - 5;
+				attachment2.attachmentLastRead = Math.round(Date.now() / 1000);
+				await attachment1.saveTx();
+				await attachment2.saveTx();
 
-		it("should show items read more than 14 days ago if within 14 days of the most recently read item", async function () {
-			let userLibraryID = Zotero.Libraries.userLibraryID;
-			let threeMonthsAgo = Math.round(Date.now() / 1000) - (90 * 24 * 60 * 60);
+				await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
+				assert.equal(zp.getCollectionTreeRow().id, 'Y' + groupLibraryID);
+				await waitForItemsLoad(win);
+				assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 
-			let item1 = await createDataObject('item', { libraryID: userLibraryID });
-			let attachment1 = await importPDFAttachment(item1);
-			attachment1.attachmentLastRead = threeMonthsAgo;
-			await attachment1.saveTx();
+				// Now make attachment2 much less recently opened
+				attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
+				await attachment2.saveTx();
 
-			let item2 = await createDataObject('item', { libraryID: userLibraryID });
-			let attachment2 = await importPDFAttachment(item2);
-			attachment2.attachmentLastRead = threeMonthsAgo - (5 * 24 * 60 * 60);
-			await attachment2.saveTx();
+				assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 
-			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-			await waitForItemsLoad(win);
+				await item1.eraseTx();
+				await item2.eraseTx();
+			});
 
-			// Both should appear -- within 14 days of each other
-			assert.isNumber(zp.itemsView.getRowIndexByID(item1.id));
-			assert.isNumber(zp.itemsView.getRowIndexByID(item2.id));
-		});
+			it("should show empty Recently Read when no items have been read", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let item = await createDataObject('item', { libraryID: userLibraryID });
 
-		it("should not show items read more than 14 days before the most recently read item", async function () {
-			let userLibraryID = Zotero.Libraries.userLibraryID;
-			let threeMonthsAgo = Math.round(Date.now() / 1000) - (90 * 24 * 60 * 60);
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+				await waitForItemsLoad(win);
 
-			let item1 = await createDataObject('item', { libraryID: userLibraryID });
-			let attachment1 = await importPDFAttachment(item1);
-			attachment1.attachmentLastRead = threeMonthsAgo;
-			await attachment1.saveTx();
+				assert.equal(zp.itemsView.rowCount, 0);
 
-			let item2 = await createDataObject('item', { libraryID: userLibraryID });
-			let attachment2 = await importPDFAttachment(item2);
-			attachment2.attachmentLastRead = threeMonthsAgo - (20 * 24 * 60 * 60);
-			await attachment2.saveTx();
+				await item.eraseTx();
+			});
 
-			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-			await waitForItemsLoad(win);
+			it("should show items read more than 14 days ago if within 14 days of the most recently read item", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let threeMonthsAgo = Math.round(Date.now() / 1000) - (90 * 24 * 60 * 60);
 
-			// item1 should appear, item2 should not -- read 20 days before most recent
-			assert.isNumber(zp.itemsView.getRowIndexByID(item1.id));
-			assert.isFalse(zp.itemsView.getRowIndexByID(item2.id));
-		});
+				let item1 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment1 = await importPDFAttachment(item1);
+				attachment1.attachmentLastRead = threeMonthsAgo;
+				await attachment1.saveTx();
 
-		it("should show empty Recently Read when no items have been read", async function () {
-			let userLibraryID = Zotero.Libraries.userLibraryID;
-			await createDataObject('item', { libraryID: userLibraryID });
+				let item2 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment2 = await importPDFAttachment(item2);
+				attachment2.attachmentLastRead = threeMonthsAgo - (5 * 24 * 60 * 60);
+				await attachment2.saveTx();
 
-			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-			await waitForItemsLoad(win);
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+				await waitForItemsLoad(win);
 
-			assert.equal(zp.itemsView.rowCount, 0);
-		});
+				// Both should appear -- within 14 days of each other
+				assert.isNumber(zp.itemsView.getRowIndexByID(item1.id));
+				assert.isNumber(zp.itemsView.getRowIndexByID(item2.id));
 
-		describe("Recently Read quicksearch", function () {
-		let quicksearch;
+				await item1.eraseTx();
+				await item2.eraseTx();
+			});
 
-		before(() => {
-			quicksearch = win.document.getElementById('zotero-tb-search-textbox');
-		});
-		afterEach(async () => {
-			quicksearch.value = "";
-			quicksearch.doCommand();
-			await zp.itemsView._refreshPromise;
-		});
+			it("should not show items read more than 14 days before the most recently read item", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let threeMonthsAgo = Math.round(Date.now() / 1000) - (90 * 24 * 60 * 60);
 
-		it("should find parent item by title", async function () {
-			let userLibraryID = Zotero.Libraries.userLibraryID;
-			let item = await createDataObject('item', { title: 'Unique Parent Title ZZZ' });
-			let attachment = await importPDFAttachment(item);
-			attachment.attachmentLastRead = Math.round(Date.now() / 1000);
-			await attachment.saveTx();
+				let item1 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment1 = await importPDFAttachment(item1);
+				attachment1.attachmentLastRead = threeMonthsAgo;
+				await attachment1.saveTx();
 
-			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-			await waitForItemsLoad(win);
-			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+				let item2 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment2 = await importPDFAttachment(item2);
+				attachment2.attachmentLastRead = threeMonthsAgo - (20 * 24 * 60 * 60);
+				await attachment2.saveTx();
 
-			quicksearch.value = "Unique Parent Title ZZZ";
-			quicksearch.doCommand();
-			await zp.itemsView._refreshPromise;
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+				await waitForItemsLoad(win);
 
-			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
-		});
+				// item1 should appear, item2 should not -- read 20 days before most recent
+				assert.isNumber(zp.itemsView.getRowIndexByID(item1.id));
+				assert.isFalse(zp.itemsView.getRowIndexByID(item2.id));
 
-		it("should not show non-matching parent item", async function () {
-			let userLibraryID = Zotero.Libraries.userLibraryID;
-			let matchItem = await createDataObject('item', { title: 'Matching Item AAA' });
-			let matchAttachment = await importPDFAttachment(matchItem);
-			matchAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
-			await matchAttachment.saveTx();
+				await item1.eraseTx();
+				await item2.eraseTx();
+			});
 
-			let otherItem = await createDataObject('item', { title: 'Other Item BBB' });
-			let otherAttachment = await importPDFAttachment(otherItem);
-			otherAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
-			await otherAttachment.saveTx();
+			describe("With Quick Search", function () {
+				let quicksearch;
 
-			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-			await waitForItemsLoad(win);
-			assert.isNumber(zp.itemsView.getRowIndexByID(matchItem.id));
-			assert.isNumber(zp.itemsView.getRowIndexByID(otherItem.id));
+				before(() => {
+					quicksearch = win.document.getElementById('zotero-tb-search-textbox');
+				});
+				afterEach(async () => {
+					quicksearch.value = "";
+					quicksearch.doCommand();
+					await zp.itemsView._refreshPromise;
+				});
 
-			quicksearch.value = "Matching Item AAA";
-			quicksearch.doCommand();
-			await zp.itemsView._refreshPromise;
+				it("should find parent item by title", async function () {
+					let userLibraryID = Zotero.Libraries.userLibraryID;
+					let item = await createDataObject('item', { title: 'Unique Parent Title ZZZ' });
+					let attachment = await importPDFAttachment(item);
+					attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+					await attachment.saveTx();
 
-			assert.isNumber(zp.itemsView.getRowIndexByID(matchItem.id));
-			assert.isFalse(zp.itemsView.getRowIndexByID(otherItem.id));
-		});
-	});
+					await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+					await waitForItemsLoad(win);
+					assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
 
-	describe("Remove from Recently Read", function () {
-		it("should remove a parent item when the parent is selected", async function () {
-			let userLibraryID = Zotero.Libraries.userLibraryID;
-			let item = await createDataObject('item');
-			let attachment = await importPDFAttachment(item);
+					quicksearch.value = "Unique Parent Title ZZZ";
+					quicksearch.doCommand();
+					await zp.itemsView._refreshPromise;
 
-			attachment.attachmentLastRead = Math.round(Date.now() / 1000);
-			await attachment.saveTx();
+					assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+				});
 
-			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-			await waitForItemsLoad(win);
-			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+				it("should not show non-matching parent item", async function () {
+					let userLibraryID = Zotero.Libraries.userLibraryID;
+					let matchItem = await createDataObject('item', { title: 'Matching Item AAA' });
+					let matchAttachment = await importPDFAttachment(matchItem);
+					matchAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
+					await matchAttachment.saveTx();
 
-			await zp.itemsView.selectItem(item.id);
-			await zp.itemsView.deleteSelection();
+					let otherItem = await createDataObject('item', { title: 'Other Item BBB' });
+					let otherAttachment = await importPDFAttachment(otherItem);
+					otherAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
+					await otherAttachment.saveTx();
 
-			assert.isNull(attachment.attachmentLastRead);
-			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
-		});
+					await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+					await waitForItemsLoad(win);
+					assert.isNumber(zp.itemsView.getRowIndexByID(matchItem.id));
+					assert.isNumber(zp.itemsView.getRowIndexByID(otherItem.id));
 
-		it("should clear only the selected child attachment's lastRead", async function () {
-			let userLibraryID = Zotero.Libraries.userLibraryID;
-			let item = await createDataObject('item');
-			let attachment1 = await importPDFAttachment(item);
-			let attachment2 = await importPDFAttachment(item);
+					quicksearch.value = "Matching Item AAA";
+					quicksearch.doCommand();
+					await zp.itemsView._refreshPromise;
 
-			let lastRead = Math.round(Date.now() / 1000);
-			attachment1.attachmentLastRead = lastRead;
-			attachment2.attachmentLastRead = lastRead;
-			await attachment1.saveTx();
-			await attachment2.saveTx();
+					assert.isNumber(zp.itemsView.getRowIndexByID(matchItem.id));
+					assert.isFalse(zp.itemsView.getRowIndexByID(otherItem.id));
+				});
+			});
 
-			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-			await waitForItemsLoad(win);
+			describe("After Remove from Recently Read", function () {
+				it("should remove a parent item when the parent is selected", async function () {
+					let userLibraryID = Zotero.Libraries.userLibraryID;
+					let item = await createDataObject('item');
+					let attachment = await importPDFAttachment(item);
 
-			// Expand the parent and select the first child attachment
-			let parentRow = zp.itemsView.getRowIndexByID(item.id);
-			if (!zp.itemsView.isContainerOpen(parentRow)) {
-				await zp.itemsView.toggleOpenState(parentRow);
-			}
-			await zp.itemsView.selectItem(attachment1.id);
+					attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+					await attachment.saveTx();
 
-			await zp.itemsView.deleteSelection();
+					await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+					await waitForItemsLoad(win);
+					assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
 
-			assert.isNull(attachment1.attachmentLastRead);
-			assert.equal(attachment2.attachmentLastRead, lastRead);
-		});
+					await zp.itemsView.selectItem(item.id);
+					await zp.itemsView.deleteSelection();
 
-		it("should remove an item from a read-only group library", async function () {
-			let group = await createGroup();
-			let groupLibraryID = group.libraryID;
-			let item = await createDataObject('item', { libraryID: groupLibraryID });
-			let attachment = await importPDFAttachment(item);
+					assert.isNull(attachment.attachmentLastRead);
+					assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+				});
 
-			attachment.attachmentLastRead = Math.round(Date.now() / 1000);
-			await attachment.saveTx();
+				it("should clear only the selected child attachment's lastRead", async function () {
+					let userLibraryID = Zotero.Libraries.userLibraryID;
+					let item = await createDataObject('item');
+					let attachment1 = await importPDFAttachment(item);
+					let attachment2 = await importPDFAttachment(item);
 
-			// Make the group read-only after creating test data
-			group.editable = false;
-			await group.saveTx();
+					let lastRead = Math.round(Date.now() / 1000);
+					attachment1.attachmentLastRead = lastRead;
+					attachment2.attachmentLastRead = lastRead;
+					await attachment1.saveTx();
+					await attachment2.saveTx();
 
-			await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
-			await waitForItemsLoad(win);
-			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+					await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+					await waitForItemsLoad(win);
 
-			await zp.itemsView.selectItem(item.id);
-			await zp.itemsView.deleteSelection();
+					// Expand the parent and select the first child attachment
+					let parentRow = zp.itemsView.getRowIndexByID(item.id);
+					if (!zp.itemsView.isContainerOpen(parentRow)) {
+						await zp.itemsView.toggleOpenState(parentRow);
+					}
+					await zp.itemsView.selectItem(attachment1.id);
 
-			assert.isNull(attachment.attachmentLastRead);
-			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
-		});
+					await zp.itemsView.deleteSelection();
 
-		it("should remove a group item when its lastRead synced setting is cleared", async function () {
-			let group = await createGroup();
-			let groupLibraryID = group.libraryID;
-			let item = await createDataObject('item', { libraryID: groupLibraryID });
-			let attachment = await importPDFAttachment(item);
-			let key = attachment._getLastReadSettingKey();
+					assert.isNull(attachment1.attachmentLastRead);
+					assert.equal(attachment2.attachmentLastRead, lastRead);
+				});
 
-			await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, key, Math.round(Date.now() / 1000));
+				it("should remove an item from a read-only group library", async function () {
+					let group = await createGroup();
+					let groupLibraryID = group.libraryID;
+					let item = await createDataObject('item', { libraryID: groupLibraryID });
+					let attachment = await importPDFAttachment(item);
 
-			await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
-			await waitForItemsLoad(win);
-			assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+					attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+					await attachment.saveTx();
 
-			// Simulate clearing via sync (as if another device removed it)
-			await Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, key, { skipDeleteLog: true });
+					// Make the group read-only after creating test data
+					group.editable = false;
+					await group.saveTx();
 
-			// Wait for the notify to propagate and the view to refresh
-			await zp.itemsView._refreshPromise;
+					await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
+					await waitForItemsLoad(win);
+					assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
 
-			assert.isNull(attachment.attachmentLastRead);
-			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+					await zp.itemsView.selectItem(item.id);
+					await zp.itemsView.deleteSelection();
+
+					assert.isNull(attachment.attachmentLastRead);
+					assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+				});
+
+				it("should remove a group item when its lastRead synced setting is cleared", async function () {
+					let group = await createGroup();
+					let groupLibraryID = group.libraryID;
+					let item = await createDataObject('item', { libraryID: groupLibraryID });
+					let attachment = await importPDFAttachment(item);
+					let key = attachment._getLastReadSettingKey();
+
+					await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, key, Math.round(Date.now() / 1000));
+
+					await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
+					await waitForItemsLoad(win);
+					assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+
+					// Simulate clearing via sync (as if another device removed it)
+					await Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, key, { skipDeleteLog: true });
+
+					// Wait for the notify to propagate and the view to refresh
+					await zp.itemsView._refreshPromise;
+
+					assert.isNull(attachment.attachmentLastRead);
+					assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+				});
 		});
 	});
 
