@@ -128,6 +128,9 @@
 	"general-learn-more": {
 		"string": "Learn More"
 	},
+	"general-more-information": {
+		"string": "More Information"
+	},
 	"general-warning": {
 		"string": "Warning"
 	},
@@ -451,9 +454,6 @@
 	},
 	"import-online-relink-only.label": {
 		"string": "Relink Mendeley Desktop citations"
-	},
-	"import-online-relink-kb": {
-		"string": "More Information"
 	},
 	"import-online-connection-error": {
 		"string": "{ app-name } could not connect to { targetApp }. Please check your internet connection and try again."
