@@ -1111,6 +1111,9 @@ describe("Zotero.ItemTree", function () {
 			before(async function () {
 				await resetData();
 			});
+			afterEach(function () {
+				Zotero.Items._lastReadCutoffs.clear();
+			});
 
 			it("should re-sort by Last Read when child attachmentLastRead is updated in the user library", async function () {
 				let userLibraryID = Zotero.Libraries.userLibraryID;
@@ -1229,6 +1232,34 @@ describe("Zotero.ItemTree", function () {
 				// item1 should appear, item2 should not -- read 20 days before most recent
 				assert.isNumber(zp.itemsView.getRowIndexByID(item1.id));
 				assert.isFalse(zp.itemsView.getRowIndexByID(item2.id));
+
+				await item1.eraseTx();
+				await item2.eraseTx();
+			});
+
+			it("should not remove old items when a new item is read", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let threeMonthsAgo = Math.round(Date.now() / 1000) - (90 * 24 * 60 * 60);
+
+				let item1 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment1 = await importPDFAttachment(item1);
+				attachment1.attachmentLastRead = threeMonthsAgo;
+				await attachment1.saveTx();
+
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+				await waitForItemsLoad(win);
+				assert.isNumber(zp.itemsView.getRowIndexByID(item1.id));
+
+				// Read something new, so it shifts the window far away from item1
+				let item2 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment2 = await importPDFAttachment(item2);
+				attachment2.attachmentLastRead = Math.round(Date.now() / 1000);
+				await attachment2.saveTx();
+				await waitForItemsLoad(win);
+
+				// item1 should still be visible
+				assert.isNumber(zp.itemsView.getRowIndexByID(item1.id));
+				assert.isNumber(zp.itemsView.getRowIndexByID(item2.id));
 
 				await item1.eraseTx();
 				await item2.eraseTx();

@@ -139,34 +139,53 @@ Zotero.Items = function () {
 		return this.getAsync(ids);
 	};
 	
+	this._lastReadCutoffs = new Map(); // libraryID -> cutoff timestamp
 	
 	/**
 	 * Get items with recently read attachments in a library.
 	 *
 	 * "Recently read" means read within two weeks of the most recently read
-	 * attachment in the library.
+	 * attachment in the library (cutoff fixed within each session).
 	 *
 	 * @param {Integer} libraryID
 	 * @return {Promise<Integer[]>} Item IDs (parent items, or standalone attachments)
 	 */
 	this.getLastRead = async function (libraryID) {
 		let twoWeeksInSeconds = 14 * 24 * 60 * 60;
+
+		// Freeze the cutoff on first load so that reading something new
+		// doesn't cause old items to vanish mid-session
+		let cutoff;
+		if (this._lastReadCutoffs.has(libraryID)) {
+			cutoff = this._lastReadCutoffs.get(libraryID);
+		}
+		else {
+			let maxSQL = "SELECT MAX(IA.lastRead) FROM itemAttachments IA "
+				+ "JOIN items I ON (I.itemID = IA.itemID) "
+				+ "WHERE I.libraryID = ? "
+				+ "AND IA.lastRead IS NOT NULL "
+				+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
+				+ "AND COALESCE(IA.parentItemID, IA.itemID) NOT IN (SELECT itemID FROM deletedItems)";
+			let maxLastRead = await Zotero.DB.valueQueryAsync(maxSQL, [libraryID]);
+			if (maxLastRead) {
+				cutoff = maxLastRead - twoWeeksInSeconds;
+				this._lastReadCutoffs.set(libraryID, cutoff);
+			}
+			else {
+				// No items with lastRead.
+				// Don't persist this - we want to calculate a new cutoff if items come in later.
+				cutoff = 0;
+			}
+		}
+
 		let sql = "SELECT DISTINCT COALESCE(IA.parentItemID, IA.itemID) "
 			+ "FROM itemAttachments IA "
 			+ "JOIN items I ON (I.itemID = COALESCE(IA.parentItemID, IA.itemID)) "
-			+ "WHERE IA.lastRead >= ("
-				+ "SELECT MAX(IA2.lastRead) - " + twoWeeksInSeconds + " "
-				+ "FROM itemAttachments IA2 "
-				+ "JOIN items I2 ON (I2.itemID = IA2.itemID) "
-				+ "WHERE I2.libraryID = ? "
-				+ "AND IA2.lastRead IS NOT NULL "
-				+ "AND IA2.itemID NOT IN (SELECT itemID FROM deletedItems) "
-				+ "AND COALESCE(IA2.parentItemID, IA2.itemID) NOT IN (SELECT itemID FROM deletedItems)"
-			+ ") "
+			+ "WHERE IA.lastRead >= ? "
 			+ "AND I.libraryID = ? "
 			+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
 			+ "AND COALESCE(IA.parentItemID, IA.itemID) NOT IN (SELECT itemID FROM deletedItems)";
-		return Zotero.DB.columnQueryAsync(sql, [libraryID, libraryID]);
+		return Zotero.DB.columnQueryAsync(sql, [cutoff, libraryID]);
 	};
 
 

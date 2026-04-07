@@ -737,5 +737,33 @@ describe("Zotero.Items", function () {
 			let ids = await Zotero.Items.getLastRead(libraryID);
 			assert.include(ids, att.id);
 		});
+
+		it("should freeze cutoff so old items persist when a new item is read", async function () {
+			let group = await createGroup();
+			let libraryID = group.libraryID;
+			let threeMonthsAgo = Math.round(Date.now() / 1000) - (90 * 24 * 60 * 60);
+			let now = Math.round(Date.now() / 1000);
+
+			// Read an item 3 months ago
+			let item1 = await createDataObject('item', { libraryID });
+			let att1 = await importPDFAttachment(item1);
+			att1.attachmentLastRead = threeMonthsAgo;
+			await att1.saveTx();
+
+			// First call freezes the cutoff based on this item
+			let ids = await Zotero.Items.getLastRead(libraryID);
+			assert.include(ids, item1.id);
+
+			// Read something new today -- would shift the window if not frozen
+			let item2 = await createDataObject('item', { libraryID });
+			let att2 = await importPDFAttachment(item2);
+			att2.attachmentLastRead = now;
+			await att2.saveTx();
+
+			// item1 should still appear because the cutoff is frozen
+			ids = await Zotero.Items.getLastRead(libraryID);
+			assert.include(ids, item1.id);
+			assert.include(ids, item2.id);
+		});
 	});
 });
