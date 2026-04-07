@@ -1160,7 +1160,61 @@ describe("Zotero.ItemTree", function () {
 
 			assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 		});
-		
+
+		it("should show items read more than 14 days ago if within 14 days of the most recently read item", async function () {
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			let threeMonthsAgo = Math.round(Date.now() / 1000) - (90 * 24 * 60 * 60);
+
+			let item1 = await createDataObject('item', { libraryID: userLibraryID });
+			let attachment1 = await importPDFAttachment(item1);
+			attachment1.attachmentLastRead = threeMonthsAgo;
+			await attachment1.saveTx();
+
+			let item2 = await createDataObject('item', { libraryID: userLibraryID });
+			let attachment2 = await importPDFAttachment(item2);
+			attachment2.attachmentLastRead = threeMonthsAgo - (5 * 24 * 60 * 60);
+			await attachment2.saveTx();
+
+			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+			await waitForItemsLoad(win);
+
+			// Both should appear -- within 14 days of each other
+			assert.isNumber(zp.itemsView.getRowIndexByID(item1.id));
+			assert.isNumber(zp.itemsView.getRowIndexByID(item2.id));
+		});
+
+		it("should not show items read more than 14 days before the most recently read item", async function () {
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			let threeMonthsAgo = Math.round(Date.now() / 1000) - (90 * 24 * 60 * 60);
+
+			let item1 = await createDataObject('item', { libraryID: userLibraryID });
+			let attachment1 = await importPDFAttachment(item1);
+			attachment1.attachmentLastRead = threeMonthsAgo;
+			await attachment1.saveTx();
+
+			let item2 = await createDataObject('item', { libraryID: userLibraryID });
+			let attachment2 = await importPDFAttachment(item2);
+			attachment2.attachmentLastRead = threeMonthsAgo - (20 * 24 * 60 * 60);
+			await attachment2.saveTx();
+
+			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+			await waitForItemsLoad(win);
+
+			// item1 should appear, item2 should not -- read 20 days before most recent
+			assert.isNumber(zp.itemsView.getRowIndexByID(item1.id));
+			assert.isFalse(zp.itemsView.getRowIndexByID(item2.id));
+		});
+
+		it("should show empty Recently Read when no items have been read", async function () {
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			await createDataObject('item', { libraryID: userLibraryID });
+
+			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+			await waitForItemsLoad(win);
+
+			assert.equal(zp.itemsView.rowCount, 0);
+		});
+
 		describe("Recently Read quicksearch", function () {
 		let quicksearch;
 

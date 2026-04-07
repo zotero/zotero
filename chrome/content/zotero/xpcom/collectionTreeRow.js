@@ -364,14 +364,25 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 		return Zotero.CollectionTreeCache.lastSearch;
 	}	
 	
+	var s;
 	var includeScopeChildren = false;
 	
 	// Create/load the inner search
-	if (this.ref instanceof Zotero.Search) {
-		var s = this.ref;
+	if (this.isRecentlyRead()) {
+		let ids = await Zotero.Items.getLastRead(this.ref.libraryID);
+		let tmpTable = await Zotero.Search.idsToTempTable(ids, { idColumn: 'id' });
+		s = new Zotero.Search();
+		s.libraryID = this.ref.libraryID;
+		s.addCondition('tempTable', 'is', tmpTable);
+		this.onUnload = async function () {
+			await Zotero.DB.queryAsync(`DROP TABLE IF EXISTS ${tmpTable}`, false, { noCache: true });
+		};
+	}
+	else if (this.ref instanceof Zotero.Search) {
+		s = this.ref;
 	}
 	else if (this.isDuplicates()) {
-		var s = await this.ref.getSearchObject();
+		s = await this.ref.getSearchObject();
 		let tmpTable;
 		for (let id in s.conditions) {
 			let c = s.conditions[id];
@@ -386,7 +397,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 		};
 	}
 	else {
-		var s = new Zotero.Search();
+		s = new Zotero.Search();
 		if (!this.isFeeds()) {
 			s.libraryID = this.ref.libraryID;
 		}

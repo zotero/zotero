@@ -655,4 +655,87 @@ describe("Zotero.Items", function () {
 			}
 		});
 	});
+
+	describe("#getLastRead()", function () {
+		it("should return items read within two weeks of the most recently read", async function () {
+			let group = await createGroup();
+			let libraryID = group.libraryID;
+			let now = Math.round(Date.now() / 1000);
+
+			let item1 = await createDataObject('item', { libraryID });
+			let att1 = await importPDFAttachment(item1);
+			att1.attachmentLastRead = now;
+			await att1.saveTx();
+
+			let item2 = await createDataObject('item', { libraryID });
+			let att2 = await importPDFAttachment(item2);
+			att2.attachmentLastRead = now - (10 * 24 * 60 * 60); // 10 days before
+			await att2.saveTx();
+
+			let item3 = await createDataObject('item', { libraryID });
+			let att3 = await importPDFAttachment(item3);
+			att3.attachmentLastRead = now - (20 * 24 * 60 * 60); // 20 days before
+			await att3.saveTx();
+
+			let ids = await Zotero.Items.getLastRead(libraryID);
+			assert.include(ids, item1.id);
+			assert.include(ids, item2.id);
+			assert.notInclude(ids, item3.id);
+		});
+
+		it("should return empty array when no items have been read", async function () {
+			let group = await createGroup();
+			let ids = await Zotero.Items.getLastRead(group.libraryID);
+			assert.lengthOf(ids, 0);
+		});
+
+		it("should exclude deleted items", async function () {
+			let group = await createGroup();
+			let libraryID = group.libraryID;
+			let now = Math.round(Date.now() / 1000);
+
+			let item = await createDataObject('item', { libraryID });
+			let att = await importPDFAttachment(item);
+			att.attachmentLastRead = now;
+			await att.saveTx();
+			item.deleted = true;
+			await item.saveTx();
+
+			let ids = await Zotero.Items.getLastRead(libraryID);
+			assert.notInclude(ids, item.id);
+		});
+
+		it("should return items read months ago if within two weeks of each other", async function () {
+			let group = await createGroup();
+			let libraryID = group.libraryID;
+			let threeMonthsAgo = Math.round(Date.now() / 1000) - (90 * 24 * 60 * 60);
+
+			let item1 = await createDataObject('item', { libraryID });
+			let att1 = await importPDFAttachment(item1);
+			att1.attachmentLastRead = threeMonthsAgo;
+			await att1.saveTx();
+
+			let item2 = await createDataObject('item', { libraryID });
+			let att2 = await importPDFAttachment(item2);
+			att2.attachmentLastRead = threeMonthsAgo - (5 * 24 * 60 * 60);
+			await att2.saveTx();
+
+			let ids = await Zotero.Items.getLastRead(libraryID);
+			assert.include(ids, item1.id);
+			assert.include(ids, item2.id);
+		});
+
+		it("should return standalone attachments without parents", async function () {
+			let group = await createGroup();
+			let libraryID = group.libraryID;
+			let now = Math.round(Date.now() / 1000);
+
+			let att = await importPDFAttachment(null, { libraryID });
+			att.attachmentLastRead = now;
+			await att.saveTx();
+
+			let ids = await Zotero.Items.getLastRead(libraryID);
+			assert.include(ids, att.id);
+		});
+	});
 });

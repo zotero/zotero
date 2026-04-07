@@ -140,6 +140,36 @@ Zotero.Items = function () {
 	};
 	
 	
+	/**
+	 * Get items with recently read attachments in a library.
+	 *
+	 * "Recently read" means read within two weeks of the most recently read
+	 * attachment in the library.
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Promise<Integer[]>} Item IDs (parent items, or standalone attachments)
+	 */
+	this.getLastRead = async function (libraryID) {
+		let twoWeeksInSeconds = 14 * 24 * 60 * 60;
+		let sql = "SELECT DISTINCT COALESCE(IA.parentItemID, IA.itemID) "
+			+ "FROM itemAttachments IA "
+			+ "JOIN items I ON (I.itemID = COALESCE(IA.parentItemID, IA.itemID)) "
+			+ "WHERE IA.lastRead >= ("
+				+ "SELECT MAX(IA2.lastRead) - " + twoWeeksInSeconds + " "
+				+ "FROM itemAttachments IA2 "
+				+ "JOIN items I2 ON (I2.itemID = IA2.itemID) "
+				+ "WHERE I2.libraryID = ? "
+				+ "AND IA2.lastRead IS NOT NULL "
+				+ "AND IA2.itemID NOT IN (SELECT itemID FROM deletedItems) "
+				+ "AND COALESCE(IA2.parentItemID, IA2.itemID) NOT IN (SELECT itemID FROM deletedItems)"
+			+ ") "
+			+ "AND I.libraryID = ? "
+			+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
+			+ "AND COALESCE(IA.parentItemID, IA.itemID) NOT IN (SELECT itemID FROM deletedItems)";
+		return Zotero.DB.columnQueryAsync(sql, [libraryID, libraryID]);
+	};
+
+
 	//
 	// Bulk data loading functions
 	//
