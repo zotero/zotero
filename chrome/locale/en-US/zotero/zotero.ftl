@@ -198,6 +198,9 @@ collections-menu-show-recently-read =
     .label = Show { recently-read }
 item-menu-remove-from-recently-read =
     .label = Remove from { recently-read }…
+collections-menu-clear-all-last-read =
+    .label = Clear All Last Read…
+recently-read-clear-all-confirm = All Last Read dates in this library will be erased.
 
 # Item list section headers for a multiple-row collection-tree selection within one library
 items-section-collections-selected =
