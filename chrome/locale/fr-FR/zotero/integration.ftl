@@ -41,7 +41,7 @@ integration-citationDialog-settings-title = Paramètres de citation
 integration-citationDialog-lib-message-citation =
     { $search ->
         [true] Aucun document sélectionné, ouvert ou cité ne correspond à la recherche actuelle
-       *[other] Aucun document sélectionné ou ouvert
+       *[other] Aucun document n'est ouvert ou sélectionné
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
@@ -50,8 +50,8 @@ integration-citationDialog-lib-message-add-note =
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
-        [true] No items with annotations match the current search
-       *[other] No selected or open items with annotations
+        [true] Aucun document avec annotations ne correspond à la recherche actuelle
+       *[other] Aucun document avec annotations n'est ouvert ou sélectionné
     }
 integration-citationDialog-settings-keepSorted = Trier les sources automatiquement
 integration-citationDialog-btn-settings =

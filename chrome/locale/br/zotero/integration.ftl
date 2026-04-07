@@ -23,7 +23,7 @@ integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
 integration-citationDialog-section-selectedAnnotations = Selected Annotations
-integration-citationDialog-section-selectedItems = Selected Items
+integration-citationDialog-section-selectedItems = Elfennoù diuzet
 integration-citationDialog-section-cited =
     { $count ->
         [0] Cited Items
