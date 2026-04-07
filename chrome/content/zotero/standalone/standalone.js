@@ -66,7 +66,7 @@ const ZoteroStandalone = new function () {
 							await Zotero.Schema.schemaUpdatePromise;
 							this.updateQuickCopyOptions();
 						}, 0);
-						// "library" or "reader"
+						// "library", "reader" or "note"
 						let type = extraData[ids[0]].type;
 						this.switchMenuType(type);
 						if (type === 'reader') {
@@ -157,7 +157,7 @@ const ZoteroStandalone = new function () {
 	}
 
 	this.switchMenuType = function (type) {
-		document.querySelectorAll('.menu-type-library, .menu-type-reader').forEach(el => el.hidden = true);
+		document.querySelectorAll('.menu-type-library, .menu-type-reader, .menu-type-note').forEach(el => el.hidden = true);
 		document.querySelectorAll('.menu-type-' + type).forEach(el => el.hidden = false);
 	};
 
@@ -239,6 +239,16 @@ const ZoteroStandalone = new function () {
 		window.goUpdateGlobalEditMenuItems(true);
 
 		this.onUpdateCustomMenus(event, 'edit');
+	};
+
+	this.showNoteInLibrary = function () {
+		let win = Zotero.getMainWindow();
+		let noteEditor = Zotero.Notes.getByTabID(Zotero_Tabs.selectedID);
+		if (!noteEditor?.itemID) {
+			return;
+		}
+		win.ZoteroPane.selectItems([noteEditor.itemID]);
+		win.focus();
 	};
 	
 	/**
