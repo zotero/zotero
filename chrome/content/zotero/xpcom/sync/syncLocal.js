@@ -1739,7 +1739,20 @@ Zotero.Sync.Data.Local = {
 						|| isAutoMergeType) {
 					continue;
 				}
-				
+
+				// Auto-resolve lastRead by keeping the most recent value
+				if (c1.field == 'lastRead') {
+					if ((c1.value || 0) > (c2.value || 0)) {
+						// Local is more recent -- drop remote change
+						changeset2.splice(j--, 1);
+					}
+					else {
+						// Remote is more recent -- apply it
+						matchedLocalChanges.add(i);
+					}
+					continue;
+				}
+
 				// Conflict
 				matchedLocalChanges.add(i);
 				changeset2.splice(j--, 1);

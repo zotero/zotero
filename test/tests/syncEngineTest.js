@@ -3783,7 +3783,61 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var keys = await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID);
 			assert.lengthOf(keys, 0);
 		});
-		
+
+		it("should auto-resolve lastRead conflict by picking the most recent value", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			({ engine, client, caller } = await setup());
+
+			// Create a user-library attachment with a lastRead value
+			let attachment = await importFileAttachment('test.pdf');
+			attachment.version = 10;
+			attachment.synced = true;
+			attachment.attachmentLastRead = 1700000000;
+			await attachment.saveTx({ skipAll: true });
+
+			// Save original version in cache
+			let jsonData = attachment.toJSON();
+			jsonData.key = attachment.key;
+			jsonData.version = 10;
+			let json = {
+				key: attachment.key,
+				version: 10,
+				data: jsonData
+			};
+			await Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json]);
+
+			// Modify lastRead locally (older)
+			attachment.attachmentLastRead = 1700000100;
+			attachment.synced = false;
+			await attachment.saveTx({ skipAll: true });
+
+			// Create remote version with newer lastRead
+			let remoteJSON = Object.assign({}, jsonData);
+			remoteJSON.lastRead = 1700000200;
+			remoteJSON.version = 15;
+			let responseJSON = {
+				key: attachment.key,
+				version: 15,
+				data: remoteJSON
+			};
+
+			setResponse({
+				method: "GET",
+				url: `users/1/items?itemKey=${attachment.key}&includeTrashed=1`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 15
+				},
+				json: [responseJSON]
+			});
+
+			// Should not show conflict resolution window
+			await engine._downloadObjects('item', [attachment.key]);
+
+			// The most recent lastRead value should win
+			assert.equal(attachment.attachmentLastRead, 1700000200);
+		});
+
 		it("should show conflict resolution window on note conflicts", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			({ engine, client, caller } = await setup());
