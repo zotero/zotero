@@ -115,7 +115,11 @@ const ZoteroStandalone = new function () {
 			Zotero.hideZoteroPaneOverlays();
 			ZoteroPane.init();
 			ZoteroPane.makeVisible();
-			
+
+			// Delegate undo/redo to a focused child window (note editor,
+			// reader) that handles them internally (see editMenuOverlay.js)
+			window.zoteroInitChildWindowUndoRedo();
+
 			// Don't ask before handing http and https URIs
 			var eps = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
 					.getService(Components.interfaces.nsIExternalProtocolService);
@@ -282,7 +286,7 @@ const ZoteroStandalone = new function () {
 			document.l10n.setAttributes(redoItem, 'text-action-redo');
 		}
 	};
-	
+
 	/**
 	 * Builds new item menu
 	 */

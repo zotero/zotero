@@ -26,6 +26,10 @@ function goUpdateGlobalEditMenuItems(force) {
   goUpdateCommand("cmd_selectAll");
   goUpdateCommand("cmd_delete");
   goUpdateCommand("cmd_switchTextDirection");
+
+  // Zotero: a focused child window that handles undo/redo internally
+  // overrides the native cmd_undo/cmd_redo state set above
+  zoteroUpdateChildWindowUndoRedo();
 }
 
 // update menu items that relate to undo/redo
@@ -148,3 +152,73 @@ window.addEventListener("contextmenu", e => {
   // context menu from an ancestor too but we only want to show this one.
   e.preventDefault();
 });
+
+// -- Zotero additions below --
+
+/**
+ * Check whether focus is in a child window (iframe) that handles
+ * its own undo/redo internally (e.g. note editor, reader).
+ */
+function zoteroIsFocusInChildWindow() {
+	let focusedWindow = document.commandDispatcher.focusedWindow;
+	if (focusedWindow && focusedWindow !== document.defaultView) {
+		return true;
+	}
+	let el = document.commandDispatcher.focusedElement;
+	return !!(el && (el.tagName === 'iframe' || el.tagName === 'IFRAME'));
+}
+
+/**
+ * When focus is in a child window (note editor, reader), the native
+ * cmd_undo/cmd_redo dispatch doesn't reach the iframe's editor (e.g.
+ * native redo stack is empty so no beforeinput event fires). Install
+ * listeners that intercept undo/redo commands and delegate to the
+ * child window's doUndo/doRedo when available.
+ */
+function zoteroInitChildWindowUndoRedo() {
+	for (let [cmdId, method] of [['cmd_undo', 'doUndo'], ['cmd_redo', 'doRedo']]) {
+		document.getElementById(cmdId)?.addEventListener('command', (event) => {
+			if (!zoteroIsFocusInChildWindow()) {
+				return;
+			}
+			let focusedWindow = document.commandDispatcher.focusedWindow;
+			let wrappedWin = focusedWindow?.wrappedJSObject;
+			if (typeof wrappedWin?.[method] === 'function') {
+				event.stopPropagation();
+				wrappedWin[method]();
+			}
+		});
+	}
+}
+
+/**
+ * When focus is in a child window (e.g. note editor), the native
+ * contenteditable's redo state doesn't reflect the actual editor's
+ * state (ProseMirror handles undo/redo internally). Query the
+ * iframe's own canUndo/canRedo if available and override the
+ * cmd_undo/cmd_redo state. Called from goUpdateGlobalEditMenuItems.
+ */
+function zoteroUpdateChildWindowUndoRedo() {
+	if (!zoteroIsFocusInChildWindow()) {
+		return;
+	}
+	let focusedWindow = document.commandDispatcher.focusedWindow;
+	let wrappedWin = focusedWindow?.wrappedJSObject;
+	if (typeof wrappedWin?.canUndo !== 'function') {
+		return;
+	}
+	let undoCmd = document.getElementById('cmd_undo');
+	let redoCmd = document.getElementById('cmd_redo');
+	if (wrappedWin.canUndo()) {
+		undoCmd?.removeAttribute('disabled');
+	}
+	else {
+		undoCmd?.setAttribute('disabled', 'true');
+	}
+	if (wrappedWin.canRedo()) {
+		redoCmd?.removeAttribute('disabled');
+	}
+	else {
+		redoCmd?.setAttribute('disabled', 'true');
+	}
+}
