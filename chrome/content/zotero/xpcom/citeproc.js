@@ -21128,7 +21128,14 @@ CSL.Util.PageRangeMangler.getFunction = function (state, rangeType) {
                 if (begin > 100 && begin % 100 && parseInt((begin / 100), 10) === parseInt((end / 100), 10)) {
                     m[3] = "" + (end % 100);
                 } else if (begin >= 10000) {
-                    m[3] = "" + (end % 1000);
+                    e = "" + end;
+                    for (var i = 3; i < e.length; i++) {
+                        var divisor = Math.pow(10, i);
+                        if (Math.floor(begin / divisor) === Math.floor(end / divisor)) {
+                            m[3] = "" + (end % divisor);
+                            break;
+                        }
+                    }
                 }
             }
             if (m[2].slice(1) === m[0]) {
