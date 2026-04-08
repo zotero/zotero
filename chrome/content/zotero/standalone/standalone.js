@@ -240,16 +240,6 @@ const ZoteroStandalone = new function () {
 
 		this.onUpdateCustomMenus(event, 'edit');
 	};
-
-	this.showNoteInLibrary = function () {
-		let win = Zotero.getMainWindow();
-		let noteEditor = Zotero.Notes.getByTabID(Zotero_Tabs.selectedID);
-		if (!noteEditor?.itemID) {
-			return;
-		}
-		win.ZoteroPane.selectItems([noteEditor.itemID]);
-		win.focus();
-	};
 	
 	/**
 	 * Builds new item menu

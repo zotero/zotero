@@ -5397,6 +5397,30 @@ var ZoteroPane = new function () {
 	}
 	
 	
+	this.showInLibrary = function () {
+		switch (Zotero_Tabs.selectedType) {
+			case 'reader': {
+				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+				if (reader) {
+					let item = Zotero.Items.get(reader.itemID);
+					let itemID = item.parentID || item.id;
+					return ZoteroPane.selectItems([itemID]);
+				}
+				return;
+			}
+			case 'note': {
+				let tab = Zotero_Tabs.getTabInfo(Zotero_Tabs.selectedID);
+				if (tab.data.itemID) {
+					return ZoteroPane.selectItems([tab.data.itemID]);
+				}
+				return;
+			}
+			default:
+				return;
+		}
+	};
+	
+	
 	function viewSelectedAttachment(event, noLocateOnMissing)
 	{
 		if (this.itemsView && this.itemsView.selection.count == 1) {
