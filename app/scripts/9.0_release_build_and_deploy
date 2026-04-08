@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+. "$APP_ROOT_DIR/config.sh"
+
+CHANNEL="release"
+BRANCH="main"
+if [ "`uname`" = "Darwin" ]; then
+	export SAFARI_APPEX="$ROOT_DIR/../safari-app-extension-builds/release/ZoteroSafariExtension.appex"
+fi
+
+cd "$SCRIPT_DIR"
+./check_requirements
+
+hash=`./get_repo_branch_hash $BRANCH`
+source_dir=`./get_commit_files $hash`
+build_dir=`mktemp -d`
+
+function cleanup {
+	rm -rf "$source_dir"
+	rm -rf "$build_dir"
+}
+trap cleanup EXIT
+
+./prepare_build -s "$source_dir" -o "$build_dir" -c $CHANNEL -m $hash
+./build_and_deploy -d "$build_dir" -p $BUILD_PLATFORMS -c $CHANNEL
