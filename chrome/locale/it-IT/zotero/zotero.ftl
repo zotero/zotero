@@ -158,11 +158,11 @@ zotero-toolbar-tabs-scroll-backwards =
     .title = Scorri indietro
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
-recently-read = Recently Read
+recently-read = Letti di recente
 collections-menu-show-recently-read =
-    .label = Show { recently-read }
+    .label = Mostra { recently-read }
 item-menu-remove-from-recently-read =
-    .label = Remove from { recently-read }…
+    .label = Rimuovi da { recently-read }…
 collections-menu-rename-collection =
     .label = Rinomina collezione
 collections-menu-edit-saved-search =
@@ -290,9 +290,9 @@ items-table-cell-notes =
             [many] { $count } Note
            *[other] { $count } Note
         }
-items-column-added-by = Added By
-items-column-modified-by = Modified By
-items-column-last-read = Last Read
+items-column-added-by = Aggiunto da
+items-column-modified-by = Modificato da
+items-column-last-read = Ultima lettura
 report-error =
     .label = Segnala un errore…
 rtfScan-wizard =
@@ -612,8 +612,8 @@ attachment-preview-placeholder = Nessun allegato da mostrare
 attachment-rename-from-parent =
     .tooltiptext = Rinominare il file in base ai metadati dell'elemento genitore
 account-log-in = Accedi
-account-not-logged-in-text = Log in to your Zotero account to sync your data.
-account-error-login-session-expired = Your login session has expired. Please try again.
+account-not-logged-in-text = Accedi al tuo account Zotero per sincronizzare i dati.
+account-error-login-session-expired = La sessione di accesso è scaduta. Riprova.
 toggle-preview =
     .label =
         { $type ->
@@ -726,7 +726,7 @@ search-conditions-dateModified = Data ultima modifica
 search-conditions-fulltextContent = Contenuto dell'allegato
 search-conditions-programmingLanguage = Linguaggio di programmazione
 search-conditions-fileTypeID = Tipo di allegato
-search-conditions-lastRead = Attachment Last Read
+search-conditions-lastRead = Ultima lettura dell'allegato
 search-conditions-annotationText = Testo dell'annotazione
 search-conditions-annotationComment = Commento all'annotazione
 search-conditions-anyField = Qualsiasi campo
