@@ -48,6 +48,8 @@
 	<commandset id="mainCommandSet">
 		<!--FILE-->
 		<command id="cmd_close" oncommand="window.close();"/>
+		<!--EDIT-->
+		<command id="cmd_find" oncommand="handleFind();"/>
 	</commandset>
 
 	<keyset id="mainKeyset">
@@ -108,6 +110,10 @@
 				<menuitem id="menu_selectAll"
 						  key="key_selectAll"
 						  command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
+				<menuseparator/>
+				<menuitem id="menu_find"
+						  key="key_find"
+						  command="cmd_find" label="&findCmd.label;"/>
 			</menupopup>
 		</menu>
 
