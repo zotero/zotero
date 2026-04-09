@@ -776,6 +776,18 @@ Zotero.Server.Connector.UpdateSession.prototype = {
 		
 		await session.update(data.target, tags, note);
 		
+		if (data.updatedMetadata) {
+			let item = session.getItemByConnectorKey(data.updatedMetadata.id);
+			if (item) {
+				for (let field of data.updatedMetadata.fields) {
+					if (field.name === 'itemType') continue;
+					item.setField(field.name, field.value);
+				}
+				item.setCreators(data.updatedMetadata.creators || []);
+				await item.saveTx();
+			}
+		}
+
 		return [200, "application/json", JSON.stringify({})];
 	}
 };
@@ -1114,6 +1126,7 @@ Zotero.Server.Connector.Ping.prototype = {
 					downloadAssociatedFiles: Zotero.Prefs.get("downloadAssociatedFiles"),
 					supportsAttachmentUpload: true,
 					supportsTagsAutocomplete: true,
+					supportsMetadataUpdates: true,
 					googleDocsAddNoteEnabled: true,
 					googleDocsAddAnnotationEnabled: true,
 					canUserAddNote: true,
