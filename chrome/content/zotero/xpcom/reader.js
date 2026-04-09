@@ -246,7 +246,7 @@ class ReaderInstance {
 			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
 			sidebarView: Zotero.Prefs.get('reader.lastSidebarTab'),
-			enableReadAloud: Zotero.isBetaBuild || Zotero.isDevBuild || Zotero.isSourceBuild,
+			enableReadAloud: true,
 			readAloudVoices: this._getReadAloudVoices(),
 			readAloudEnabledVoices: await this._getReadAloudEnabledVoices(),
 			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
