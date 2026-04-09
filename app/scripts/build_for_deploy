@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Builds and deploys Zotero with full and incremental updates
+# Builds Zotero and uploads to S3 and deploy server, but does not make the build live.
+# To make the build live, run the deploy script on the deploy server (or via SSH).
 #
 set -euo pipefail
 
@@ -107,13 +108,13 @@ do
 			usage
 			;;
 	esac
-	
+
 	echo
 	echo "Getting $platform_name incrementals"
 	INCREMENTALS="`\"$SCRIPT_DIR/manage_incrementals\" -c $CHANNEL -p ${PLATFORMS:i:1} -n $NUM_INCREMENTALS`"
 	echo "$INCREMENTALS"
 	echo
-	
+
 	if [ -n "$INCREMENTALS" ]; then
 		for from in $INCREMENTALS; do
 			echo "Building incremental update for $platform_name from $from to $VERSION"
@@ -127,7 +128,7 @@ done
 "$SCRIPT_DIR/upload_builds" $CHANNEL $VERSION
 
 # Upload file lists and build info for each platform
-channel_deploy_path="$DEPLOY_PATH/$CHANNEL"
+channel_deploy_path="$DEPLOY_PATH/manifests/$CHANNEL"
 mkdir "$TEMP_DIR/version_info"
 chmod g+ws "$TEMP_DIR/version_info"
 cp "$DIST_DIR"/files-* "$TEMP_DIR/version_info"
@@ -148,38 +149,9 @@ do
 done
 rsync -rv "$TEMP_DIR/version_info/" $DEPLOY_HOST:"$channel_deploy_path/$VERSION/"
 
-# Download updates JSON for each platform, update it, and reupload it
-for i in `seq 0 1 $((${#PLATFORMS}-1))`
-do
-	case ${PLATFORMS:i:1} in
-		m)
-			architectures="mac"
-			;;
-		w)
-			architectures="win32 win-x64 win-arm64"
-			;;
-		l)
-			architectures="linux-i686 linux-x86_64 linux-arm64"
-			;;
-	esac
-	
-	for arch in $architectures;
-	do
-		jsonfile="updates-$arch.json"
-		
-		scp $DEPLOY_HOST:"$channel_deploy_path/$jsonfile" "$TEMP_DIR/$jsonfile"
-		"$SCRIPT_DIR/add_version_info" -f "$TEMP_DIR/$jsonfile" -v $VERSION -b $BUILD_ID
-		scp "$TEMP_DIR/$jsonfile" $DEPLOY_HOST:"$channel_deploy_path/$jsonfile"
-	done
-done
-
-# Add version to incremental lists
-echo
-for i in `seq 0 1 $((${#PLATFORMS}-1))`
-do
-	"$SCRIPT_DIR/manage_incrementals" -c $CHANNEL -p ${PLATFORMS:i:1} -a $VERSION
-done
-
-$DEPLOY_CMD
-
 rm -rf "$STAGE_DIR"/*
+
+echo
+echo "Build $VERSION uploaded successfully."
+echo "To deploy, run on the deploy server:"
+echo "  ./deploy $CHANNEL $VERSION $PLATFORMS"

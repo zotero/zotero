@@ -8,9 +8,19 @@ ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 CHANNEL="release"
 BRANCH="main"
+BUILD_ONLY=0
 if [ "`uname`" = "Darwin" ]; then
 	export SAFARI_APPEX="$ROOT_DIR/../safari-app-extension-builds/release/ZoteroSafariExtension.appex"
 fi
+
+while getopts "b" opt; do
+	case $opt in
+		b)
+			BUILD_ONLY=1
+			;;
+	esac
+	shift $((OPTIND-1)); OPTIND=1
+done
 
 cd "$SCRIPT_DIR"
 ./check_requirements
@@ -26,4 +36,14 @@ function cleanup {
 trap cleanup EXIT
 
 ./prepare_build -s "$source_dir" -o "$build_dir" -c $CHANNEL -m $hash
-./build_and_deploy -d "$build_dir" -p $BUILD_PLATFORMS -c $CHANNEL
+VERSION="`cat \"$build_dir/version\"`"
+./build_for_deploy -d "$build_dir" -p $BUILD_PLATFORMS -c $CHANNEL
+
+if [ $BUILD_ONLY -eq 1 ]; then
+	echo
+	echo "Build only -- skipping deploy."
+	echo "To deploy, run on the deploy server:"
+	echo "  $DEPLOY_PATH/deploy $CHANNEL $VERSION $BUILD_PLATFORMS"
+else
+	ssh $DEPLOY_HOST "$DEPLOY_PATH/deploy" $CHANNEL "$VERSION" $BUILD_PLATFORMS
+fi
