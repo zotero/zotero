@@ -68,9 +68,6 @@ INCR_FILENAME="incrementals-$PLATFORM"
 REMOTE_PATH="$DEPLOY_PATH/manifests/$CHANNEL/$INCR_FILENAME"
 INCR_PATH="$DIST_DIR/$INCR_FILENAME"
 
-if [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
-	INCR_PATH=$(cygpath -w "$INCR_PATH")
-fi
 
 mkdir -p "$DIST_DIR"
 scp $DEPLOY_HOST:"$REMOTE_PATH" "$INCR_PATH" >&2
