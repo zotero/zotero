@@ -3810,11 +3810,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		const visibilityGroup = this.collectionTreeRow.visibilityGroup;
 		const prefKey = this.id;
-		if (this._columnsId == prefKey) {
+		// Include group status in cache key so groupLibrariesOnly columns
+		// are recalculated when switching between personal and group libraries
+		let cacheKey = prefKey
+			+ (this.collectionTreeRow.isWithinGroup?.() ? '-group' : '');
+		if (this._columnsId == cacheKey) {
 			return this._columns;
 		}
-		
-		this._columnsId = prefKey;
+
+		this._columnsId = cacheKey;
 		this._columns = [];
 		
 		let columnsSettings = this._getColumnPrefs();

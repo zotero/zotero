@@ -2397,6 +2397,37 @@ describe("Zotero.ItemTree", function () {
 		});
 	});
 	
+	describe("Added By column", function () {
+		it("should show in a group library and hide in a personal library", async function () {
+			let getTableColumns = () => itemsView.tree._columns.getAsArray();
+
+			// Start in personal library
+			await selectLibrary(win);
+			itemsView = zp.itemsView;
+			assert.notOk(
+				getTableColumns().find(c => c.dataKey === 'addedBy'),
+				"addedBy column should not be present in personal library"
+			);
+
+			// Switch to a group library
+			let group = await createGroup();
+			await selectLibrary(win, group.libraryID);
+			itemsView = zp.itemsView;
+			assert.ok(
+				getTableColumns().find(c => c.dataKey === 'addedBy'),
+				"addedBy column should be present in group library"
+			);
+
+			// Switch back to personal library
+			await selectLibrary(win);
+			itemsView = zp.itemsView;
+			assert.notOk(
+				getTableColumns().find(c => c.dataKey === 'addedBy'),
+				"addedBy column should not be present after switching back to personal library"
+			);
+		});
+	});
+
 	describe('Advanced Search', function () {
 		describe('#notify', function () {
 			it('should resolve the returned promise when an item is selected', async function() {
