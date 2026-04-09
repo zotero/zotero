@@ -112,6 +112,16 @@ do
 	echo
 	echo "Getting $platform_name incrementals"
 	INCREMENTALS="`\"$SCRIPT_DIR/manage_incrementals\" -c $CHANNEL -p ${PLATFORMS:i:1} -n $NUM_INCREMENTALS`"
+
+	# Fetch pinned incrementals from deploy server and merge
+	PINNED_FILE="$DEPLOY_PATH/manifests/$CHANNEL/pinned-incrementals-$platform"
+	PINNED=""
+	if ssh $DEPLOY_HOST "test -f $PINNED_FILE"; then
+		PINNED="`ssh $DEPLOY_HOST cat $PINNED_FILE`"
+	fi
+
+	# Combine and deduplicate
+	INCREMENTALS="`echo -e "$INCREMENTALS\n$PINNED" | sort -u | grep -v '^$'`"
 	echo "$INCREMENTALS"
 	echo
 
