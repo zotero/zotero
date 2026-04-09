@@ -1236,7 +1236,8 @@ class VirtualizedTable extends React.Component {
 				"focus-states-target",
 				{
 				resizing: this.state.resizing,
-				'multi-select': this.props.multiSelect
+				'multi-select': this.props.multiSelect,
+				'no-alternating-rows': Zotero.Prefs.get('ui.noAlternatingRows'),
 			}]),
 			id: this.props.id,
 			ref: ref => this._topDiv = ref,
