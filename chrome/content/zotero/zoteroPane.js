@@ -6701,7 +6701,7 @@ var ZoteroPane = new function () {
 		
 		// Set message and link to current version
 		let div = document.getElementById('post-upgrade-message');
-		document.l10n.setArgs(div, { version: "8" });
+		document.l10n.setArgs(div, { version: majorVersion });
 		let link = document.getElementById('post-upgrade-new-features-link');
 		link.href = ZOTERO_CONFIG.NEW_FEATURES_URL.replace('{version}', majorVersion);
 		document.getElementById('post-upgrade-container').removeAttribute('collapsed');
