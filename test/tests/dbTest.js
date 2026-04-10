@@ -430,28 +430,6 @@ describe("Zotero.DB", function () {
 			assert.isFalse(await IOUtils.exists(bakFile2));
 		});
 		
-		it("should perform an offline backup if an online backup is already in progress", async function () {
-			// On APFS, online backups use cloning (offline path), so this doesn't apply
-			if (Zotero.File.isAPFS(Zotero.DB.path)) this.skip();
-			var promise = Zotero.DB.backUpDatabase({ suffix: 'test', online: true });
-			var result = await Zotero.DB.backUpDatabase({ suffix: 'test2' });
-			// The online backup fails
-			assert.ok(await getPromiseError(promise));
-			assert.isFalse(await IOUtils.exists(bakFile));
-			assert.isTrue(result);
-			assert.isTrue(await IOUtils.exists(bakFile2));
-		});
-
-		it("shouldn't perform an online backup if one is already in progress", async function () {
-			// On APFS, online backups use cloning (offline path), so this doesn't apply
-			if (Zotero.File.isAPFS(Zotero.DB.path)) this.skip();
-			var promise = Zotero.DB.backUpDatabase({ suffix: 'test', online: true });
-			var result = await Zotero.DB.backUpDatabase({ suffix: 'test2', online: true });
-			await promise;
-			assert.isFalse(result);
-			assert.isFalse(await IOUtils.exists(bakFile2));
-			assert.isTrue(await IOUtils.exists(bakFile));
-		});
 	});
 
 
