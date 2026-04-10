@@ -94,6 +94,7 @@ Zotero.DBConnection = function (dbNameOrPath) {
 	this._lastTransactionDate = null;
 	this._transactionRollback = false;
 	this._transactionNestingLevel = 0;
+	this._commitCount = 0;
 	this._callbacks = {
 		begin: [],
 		commit: [],
@@ -481,6 +482,7 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 			}
 			
 			result = await conn.executeTransaction(func);
+			this._commitCount++;
 			Zotero.debug(`Committed DB transaction ${id}`, 4);
 		}
 		finally {
@@ -499,12 +501,6 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 		}
 		
 		this._transactionID = null;
-		
-		if (options.vacuumOnCommit) {
-			Zotero.debug('Vacuuming database');
-			await this.queryAsync('VACUUM');
-			Zotero.debug('Done vacuuming');
-		}
 		
 		// Function to run once transaction has been committed but before any
 		// permanent callbacks
@@ -906,10 +902,16 @@ Zotero.DBConnection.prototype.executeSQLFile = async function (sql) {
 /*
  * Implements nsIObserver
  */
-Zotero.DBConnection.prototype.observe = function (subject, topic, data) {
+Zotero.DBConnection.prototype.observe = async function (subject, topic, data) {
 	switch (topic) {
 		case 'idle':
-			this.backUpDatabase({ online: true });
+			try {
+				await this.backUpDatabase({ online: true });
+				await this.vacuum();
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 			break;
 	}
 }
@@ -925,16 +927,129 @@ Zotero.DBConnection.prototype.getCachedStatements = function () {
 };
 
 
-// TEMP
-Zotero.DBConnection.prototype.vacuum = function () {
-	return this.executeTransaction(async function () {}, { vacuumOnCommit: true });
+/**
+ * Vacuum the database using VACUUM INTO and perform an atomic file swap
+ *
+ * Creates a compacted copy of the database without blocking writes during
+ * the copy phase, then closes the connection and atomically replaces the
+ * original file if no writes occurred during compaction.
+ *
+ * @param {Object} [options]
+ * @param {Boolean} [options.force] - Skip time/freelist/disk-space checks
+ * @return {Promise<Boolean>} - Whether vacuum was performed
+ */
+Zotero.DBConnection.prototype.vacuum = async function ({ force } = {}) {
+	if (this._externalDB) {
+		return false;
+	}
+
+	if (this.inTransaction()) {
+		await this.waitForTransaction();
+	}
+
+	if (!force) {
+		// Check time threshold
+		let lastVacuum = Zotero.Prefs.get('vacuum.lastTime') || 0;
+		let intervalDays = Zotero.Prefs.get('vacuum.interval') || 14;
+		let intervalMs = intervalDays * 24 * 60 * 60 * 1000;
+		if ((Date.now() - lastVacuum) < intervalMs) {
+			Zotero.debug("Database was vacuumed recently -- skipping");
+			return false;
+		}
+
+		// Check freelist threshold
+		let freelistCount = await this.valueQueryAsync("PRAGMA freelist_count");
+		let pageCount = await this.valueQueryAsync("PRAGMA page_count");
+		let threshold = Zotero.Prefs.get('vacuum.freelistThreshold') || 10;
+		if (pageCount > 0 && (freelistCount / pageCount * 100) < threshold) {
+			Zotero.debug(`Database freelist is ${freelistCount}/${pageCount} pages `
+				+ `(${(freelistCount / pageCount * 100).toFixed(1)}%) `
+				+ `-- below ${threshold}% threshold, skipping`);
+			return false;
+		}
+
+		// Check disk space
+		let dbFile = Zotero.File.pathToFile(this._dbPath);
+		let dbSize = (await IOUtils.stat(this._dbPath)).size;
+		let freeSpace = dbFile.diskSpaceAvailable;
+		if (freeSpace < dbSize) {
+			Zotero.debug(`Not enough disk space to vacuum database `
+				+ `(${freeSpace} available, ${dbSize} needed) -- skipping`);
+			return false;
+		}
+	}
+
+	let tmpFile = this._dbPath + '.vacuum.tmp';
+
+	try {
+		// Clean up any leftover temp file from a previous failed attempt
+		if (await IOUtils.exists(tmpFile)) {
+			await IOUtils.remove(tmpFile);
+		}
+
+		Zotero.debug("Vacuuming database");
+		let t = new Date();
+
+		let commitCountBefore = this._commitCount;
+
+		// Disable auto_vacuum for the output file if previously enabled -- periodic VACUUM handles
+		// compaction, and auto_vacuum causes fragmentation
+		await this.queryAsync("PRAGMA auto_vacuum=0");
+
+		// VACUUM INTO creates a compacted copy as a snapshot of committed data. Concurrent writes
+		// in WAL are NOT included in the output.
+		await this.queryAsync(`VACUUM INTO '${tmpFile.replace(/'/g, "''")}'`);
+
+		// Block other code from reopening the connection during the swap
+		let resolveVacuumPromise;
+		this._offlineBackupPromise = new Promise(function () {
+			resolveVacuumPromise = arguments[0];
+		});
+
+		try {
+			// Close the database -- this waits for any in-flight transactions and checkpoints WAL
+			await this.closeDatabase();
+
+			// If any writes happened between VACUUM INTO start and close, the compacted copy is
+			// stale -- abort
+			if (this._commitCount !== commitCountBefore) {
+				Zotero.debug("Database was modified during vacuum -- aborting swap", 1);
+				await IOUtils.remove(tmpFile);
+				return false;
+			}
+
+			// Atomic swap
+			await IOUtils.move(tmpFile, this._dbPath);
+
+			Zotero.Prefs.set('vacuum.lastTime', Date.now());
+			Zotero.debug("Vacuumed database in " + (new Date() - t) + " ms");
+
+			return true;
+		}
+		finally {
+			this._offlineBackupPromise = null;
+			resolveVacuumPromise();
+		}
+	}
+	catch (e) {
+		Zotero.logError(e);
+		try {
+			if (await IOUtils.exists(tmpFile)) {
+				await IOUtils.remove(tmpFile);
+			}
+		}
+		catch (e2) {
+			Zotero.logError(e2);
+		}
+		return false;
+	}
 };
 
 
 // TEMP
 Zotero.DBConnection.prototype.info = async function () {
 	var info = {};
-	var pragmas = ['auto_vacuum', 'cache_size', 'main.locking_mode', 'page_size'];
+	var pragmas = ['auto_vacuum', 'cache_size', 'journal_mode', 'main.locking_mode', 'page_size', 'synchronous'];
 	for (let p of pragmas) {
 		info[p] = await Zotero.DB.valueQueryAsync(`PRAGMA ${p}`);
 	}
@@ -978,6 +1093,18 @@ Zotero.DBConnection.prototype.closeDatabase = async function (permanent) {
 		}
 		
 		Zotero.debug("Closing database");
+
+		// Checkpoint WAL before closing so all data is in the main file
+		// and -wal file is truncated. Use _connection.execute() directly
+		// to avoid deadlocking with _offlineBackupPromise in queryAsync.
+		try {
+			Zotero.debug("PRAGMA wal_checkpoint(TRUNCATE)");
+			await this._connection.execute("PRAGMA wal_checkpoint(TRUNCATE)");
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
 		this.closed = true;
 		await this._connection.close();
 		this._connection = undefined;
@@ -1285,7 +1412,15 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 		else {
 			await this.queryAsync("PRAGMA main.locking_mode=NORMAL");
 		}
-		
+
+		// Enable WAL mode for better write performance. With locking_mode=EXCLUSIVE
+		// set first, SQLite uses heap memory for the WAL index instead of shared
+		// memory, so no -shm file is created on disk.
+		await this.queryAsync("PRAGMA journal_mode=WAL");
+		// NORMAL synchronous is safe with WAL -- only risks losing the last
+		// transaction on power loss, not corruption
+		await this.queryAsync("PRAGMA synchronous=NORMAL");
+
 		// Set page cache size to 8MB
 		let pageSize = await this.valueQueryAsync("PRAGMA page_size");
 		let cacheSize = 8192000 / pageSize;

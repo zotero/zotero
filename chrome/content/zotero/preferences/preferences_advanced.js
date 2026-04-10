@@ -237,13 +237,6 @@ Zotero_Preferences.Advanced = {
 					return;
 				}
 				
-				try {
-					await Zotero.DB.vacuum();
-				}
-				catch (e) {
-					Zotero.logError(e);
-					ok = false;
-				}
 			}
 			var str = ok ? 'passed' : 'failed';
 			

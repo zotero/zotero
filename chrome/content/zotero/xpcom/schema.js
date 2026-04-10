@@ -2206,11 +2206,9 @@ Zotero.Schema = new function () {
 			try {
 				var userLibraryID = 1;
 				
-				// Enable auto-vacuuming
 				await Zotero.DB.queryAsync("PRAGMA page_size = 4096");
 				await Zotero.DB.queryAsync("PRAGMA encoding = 'UTF-8'");
-				await Zotero.DB.queryAsync("PRAGMA auto_vacuum = 1");
-				
+
 				var sql = await _getSchemaSQL('system');
 				await Zotero.DB.executeSQLFile(sql);
 				

@@ -68,6 +68,10 @@ pref("extensions.zotero.feeds.defaultCleanupUnreadAfter", 30);
 pref("extensions.zotero.backup.numBackups", 2);
 pref("extensions.zotero.backup.interval", 1440);
 
+pref("extensions.zotero.vacuum.lastTime", 0);
+pref("extensions.zotero.vacuum.interval", 14);  // days
+pref("extensions.zotero.vacuum.freelistThreshold", 10);  // percentage of free pages to trigger
+
 pref("extensions.zotero.lastCreatorFieldMode",0);
 pref("extensions.zotero.lastAbstractExpand", true);
 pref("extensions.zotero.lastRenameAssociatedFile", false);

@@ -453,4 +453,37 @@ describe("Zotero.DB", function () {
 			assert.isTrue(await IOUtils.exists(bakFile));
 		});
 	});
+
+
+	describe("#vacuum()", function () {
+		it("should vacuum the database with force option", async function () {
+			let result = await Zotero.DB.vacuum({ force: true });
+			assert.isTrue(result);
+
+			// DB should still be functional
+			let count = await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM items");
+			assert.isNumber(count);
+
+			// Vacuum timestamp should be updated
+			assert.isAbove(Zotero.Prefs.get('vacuum.lastTime'), 0);
+
+			// Temp file should be cleaned up
+			assert.isFalse(await IOUtils.exists(Zotero.DB.path + '.vacuum.tmp'));
+		});
+
+		it("should skip vacuum when recently vacuumed", async function () {
+			Zotero.Prefs.set('vacuum.lastTime', Date.now());
+			let result = await Zotero.DB.vacuum();
+			assert.isFalse(result);
+			Zotero.Prefs.clear('vacuum.lastTime');
+		});
+
+		it("should skip vacuum when freelist is below threshold", async function () {
+			Zotero.Prefs.clear('vacuum.lastTime');
+			Zotero.Prefs.set('vacuum.freelistThreshold', 99);
+			let result = await Zotero.DB.vacuum();
+			assert.isFalse(result);
+			Zotero.Prefs.clear('vacuum.freelistThreshold');
+		});
+	});
 });
