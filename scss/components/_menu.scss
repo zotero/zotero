@@ -69,6 +69,7 @@ $menu-icons: (
 	duplicate-saved-search: 'duplicate',
 	copy-collection: 'copy-collection',
 	move-collection: 'move-collection',
+	relate-items: 'relate-items',
 );
 
 @each $cls, $icon in $menu-icons {
