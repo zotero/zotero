@@ -104,6 +104,16 @@
 					transform: scaleX(-1);
 					flex-direction: row-reverse;
 				}
+				
+				// Fix the stacking order reversing issue when selected
+				.tag-swatch {
+					position: relative;
+					@for $i from 1 through 9 {
+						&:nth-child(#{$i}) {
+							z-index: 10 - $i;
+						}
+					}
+				}
 			}
 
 			.icon-item-type + .tag-swatch,
