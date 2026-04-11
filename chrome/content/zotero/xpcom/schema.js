@@ -1936,6 +1936,11 @@ Zotero.Schema = new function () {
 				`SELECT COUNT(*) > 0 FROM items WHERE itemTypeID=${attachmentID} AND itemID NOT IN (SELECT itemID FROM itemAttachments)`,
 				`INSERT INTO itemAttachments (itemID, linkMode) SELECT itemID, 0 FROM items WHERE itemTypeID=${attachmentID} AND itemID NOT IN (SELECT itemID FROM itemAttachments)`,
 			],
+			// Missing itemAnnotations rows
+			[
+				`SELECT COUNT(*) > 0 FROM items WHERE itemTypeID=${annotationID} AND itemID NOT IN (SELECT itemID FROM itemAnnotations)`,
+				`DELETE FROM items WHERE itemTypeID=${annotationID} AND itemID NOT IN (SELECT itemID FROM itemAnnotations)`,
+			],
 			// Attachments with note parents, unless they're embedded-image attachments
 			[
 				`SELECT COUNT(*) > 0 FROM itemAttachments `
