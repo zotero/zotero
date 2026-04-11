@@ -317,7 +317,12 @@ Zotero.Items = function () {
 					else if (item.isAnnotation()) {
 						await item.loadDataType('annotation');
 					}
-					item.updateDisplayTitle()
+					try {
+						item.updateDisplayTitle();
+					}
+					catch (e2) {
+						Zotero.logError(e2);
+					}
 				}
 				else {
 					throw e;
