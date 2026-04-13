@@ -1304,7 +1304,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					// Clear the quick search and tag selection and try again (once)
 					if (!noRecurse && window.ZoteroPane) {
 						let hasQuickSearch = !!this.collectionTreeRow.searchText;
-						let hasTagFilters = this.collectionTreeRow.tags.size > 0;
+						let hasTagFilters = this.collectionTreeRow.tags?.size > 0;
 						if (hasQuickSearch || hasTagFilters) {
 							// Clear all searches set on the collection tree row directly on
 							// collectionTreeRow (vs using ZoteroPane functions) to avoid
