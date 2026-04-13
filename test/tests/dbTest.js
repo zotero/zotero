@@ -450,7 +450,7 @@ describe("Zotero.DB", function () {
 		});
 
 		it("should skip vacuum when recently vacuumed", async function () {
-			Zotero.Prefs.set('vacuum.lastTime', Date.now());
+			Zotero.Prefs.set('vacuum.lastTime', Math.floor(Date.now() / 1000));
 			let result = await Zotero.DB.vacuum();
 			assert.isFalse(result);
 			Zotero.Prefs.clear('vacuum.lastTime');

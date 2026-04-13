@@ -951,8 +951,9 @@ Zotero.DBConnection.prototype.vacuum = async function ({ force } = {}) {
 		// Check time threshold
 		let lastVacuum = Zotero.Prefs.get('vacuum.lastTime') || 0;
 		let intervalDays = Zotero.Prefs.get('vacuum.interval') || 14;
-		let intervalMs = intervalDays * 24 * 60 * 60 * 1000;
-		if ((Date.now() - lastVacuum) < intervalMs) {
+		let intervalSeconds = intervalDays * 24 * 60 * 60;
+		let nowSeconds = Math.floor(Date.now() / 1000);
+		if ((nowSeconds - lastVacuum) < intervalSeconds) {
 			Zotero.debug("Database was vacuumed recently -- skipping");
 			return false;
 		}
@@ -1021,7 +1022,7 @@ Zotero.DBConnection.prototype.vacuum = async function ({ force } = {}) {
 			// Atomic swap
 			await IOUtils.move(tmpFile, this._dbPath);
 
-			Zotero.Prefs.set('vacuum.lastTime', Date.now());
+			Zotero.Prefs.set('vacuum.lastTime', Math.floor(Date.now() / 1000));
 			Zotero.debug("Vacuumed database in " + (new Date() - t) + " ms");
 
 			return true;
