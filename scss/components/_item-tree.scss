@@ -152,7 +152,7 @@
 					// RTL: Parent is flipped, so margin can always be on logical left
 					margin-left: -0.38461538em;
 
-					@include focus-states using($color) {
+					@include focus-states('.row.selected', '.virtualized-table:focus-within') using($color) {
 						@if $color =="white" {
 							background: url("chrome://zotero/skin/tag-crescent-border.svg") no-repeat center/contain;
 						}
