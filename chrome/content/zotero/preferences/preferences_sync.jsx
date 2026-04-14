@@ -122,15 +122,13 @@ Zotero_Preferences.Sync = {
 
 		document.getElementById('sync-unauthorized').hidden = linked;
 		document.getElementById('account-linked').hidden = !linked;
+		document.getElementById('sync-settings-section').hidden = !loggedIn;
 		document.getElementById('sync-reset').hidden = !loggedIn;
 
 		// Toggle logged-in vs logged-out elements within the linked container
 		document.getElementById('account-log-out-button').hidden = !loggedIn;
 		document.querySelector('.account-logged-out-status').hidden = !loggedOutLinked;
 		document.getElementById('account-logged-out-actions').hidden = !loggedOutLinked;
-		for (let elem of document.querySelectorAll('.sync-settings')) {
-			elem.hidden = !loggedIn;
-		}
 
 		let displayUsername = loggedIn ? username : linkedUsername;
 		document.getElementById('account-username').value = displayUsername;

@@ -47,8 +47,8 @@ Zotero.PreferencePanes = {
 		},
 		{
 			id: 'zotero-prefpane-sync',
-			label: 'zotero.preferences.prefpane.sync',
-			image: 'chrome://zotero/skin/20/universal/sync.svg',
+			label: 'preferences-pane-account',
+			image: 'chrome://zotero/skin/20/universal/account.svg',
 			src: 'chrome://zotero/content/preferences/preferences_sync.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_sync.js'],
 			defaultXUL: true,
