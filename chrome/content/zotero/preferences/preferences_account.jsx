@@ -89,7 +89,7 @@ Zotero_Preferences.Sync = {
 			}
 		});
 
-		document.getElementById('zotero-prefpane-sync').addEventListener('action', () => {
+		document.getElementById('zotero-prefpane-account').addEventListener('action', () => {
 			this._handlePendingAction();
 		});
 		// Auto-trigger login if opened with the 'logIn' action.

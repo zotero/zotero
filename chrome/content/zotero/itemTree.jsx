@@ -1125,7 +1125,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					window.ZoteroPane.loadURI(e.target.dataset.href);
 				}
 				if (e.target.dataset.action == 'open-sync-prefs') {
-					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-account');
 				}
 			}}
 			className={"items-tree-message"}
@@ -3953,7 +3953,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						else if (span.hasAttribute('data-action')) {
 							if (span.getAttribute('data-action') == 'open-sync-prefs') {
 								span.onclick = () => {
-									Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+									Zotero.Utilities.Internal.openPreferences('zotero-prefpane-account');
 								};
 							}
 						}

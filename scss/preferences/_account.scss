@@ -1,35 +1,35 @@
 /* Settings tab */
-#zotero-prefpane-sync .form-grid {
+#zotero-prefpane-account .form-grid {
 	align-items: center;
 }
 
-#zotero-prefpane-sync .form-grid > hbox {
+#zotero-prefpane-account .form-grid > hbox {
 	align-items: center;
 }
 
-#zotero-prefpane-sync .form-grid > label:nth-child(odd)
+#zotero-prefpane-account .form-grid > label:nth-child(odd)
 {
 	text-align: end;
 }
 
-#zotero-prefpane-sync .form-grid > hbox
+#zotero-prefpane-account .form-grid > hbox
 {
 	margin-inline-start: 4px;
 	display: flex;
 	align-items: center;
 }
 
-#zotero-prefpane-sync .form-grid > hbox > textbox
+#zotero-prefpane-account .form-grid > hbox > textbox
 {
 	margin-inline: 3px;
 }
-#zotero-prefpane-sync .form-grid > hbox > label:last-child
+#zotero-prefpane-account .form-grid > hbox > label:last-child
 {
 	margin-inline-start: 0;
 	margin-inline-end: 10px;
 }
 
-#zotero-prefpane-sync .account-logged-out-status {
+#zotero-prefpane-account .account-logged-out-status {
 	font-style: italic;
 	opacity: 0.7;
 	margin-inline-start: 6px;
@@ -43,7 +43,7 @@
 	margin-inline-start: 4px;
 }
 
-#zotero-prefpane-sync .account-login-pending {
+#zotero-prefpane-account .account-login-pending {
 	gap: 6px;
 
 	button {
@@ -51,7 +51,7 @@
 	}
 }
 
-#zotero-prefpane-sync .account-login-status-indicator
+#zotero-prefpane-account .account-login-status-indicator
 {
 	width: 20px;
 	height: 20px;
@@ -61,12 +61,12 @@
 	background-size: contain;
 }
 
-#zotero-prefpane-sync .account-login-status-indicator[verified=true]
+#zotero-prefpane-account .account-login-status-indicator[verified=true]
 {
 	@include svgicon("success", "universal", "20");
 }
 
-#zotero-prefpane-sync .account-login-status-indicator[verified=false]
+#zotero-prefpane-account .account-login-status-indicator[verified=false]
 {
 	@include svgicon("error", "universal", "20");
 }
@@ -80,7 +80,7 @@
 	}
 }
 
-#zotero-prefpane-sync .account-login-status-indicator[animated]
+#zotero-prefpane-account .account-login-status-indicator[animated]
 {
 	@include svgicon("sync", "universal", "20");
 	animation: rotating 2s linear infinite;

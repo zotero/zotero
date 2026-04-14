@@ -637,7 +637,7 @@ var ZoteroPane = new function () {
 
 			if (Zotero.Prefs.get('reopenAccountPrefsOnRestart')) {
 				Zotero.Prefs.clear('reopenAccountPrefsOnRestart');
-				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-account');
 			}
 		});
 		
@@ -3047,7 +3047,7 @@ var ZoteroPane = new function () {
 
 			switch (reminderType) {
 				case 'setUp':
-					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-account');
 					break;
 				case 'autoSync':
 					Zotero.Prefs.set(`sync.autoSync`, true);

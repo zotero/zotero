@@ -3,7 +3,7 @@ describe("Sync Preferences", function () {
 	before(function* () {
 		// Load prefs with sync pane
 		win = yield loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
-			pane: 'zotero-prefpane-sync'
+			pane: 'zotero-prefpane-account'
 		});
 		doc = win.document;
 		yield win.Zotero_Preferences.waitForFirstPaneLoad();

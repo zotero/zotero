@@ -615,7 +615,7 @@ class ReaderInstance {
 			},
 			onLogIn: () => {
 				// This causes a segfault without the timeout...
-				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync', { action: 'logIn' }));
+				setTimeout(() => Zotero.Utilities.Internal.openPreferences('zotero-prefpane-account', { action: 'logIn' }));
 			},
 			onOpenReadAloudFirstRunPopup: ({ lang }) => {
 				// As above
