@@ -1,4 +1,4 @@
-describe("Sync Preferences", function () {
+describe("Account Preferences", function () {
 	var win, doc;
 	before(function* () {
 		// Load prefs with sync pane
@@ -95,7 +95,7 @@ describe("Sync Preferences", function () {
 
 				assert.isTrue(Zotero.alert.called);
 				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), "");
-				assert.equal(doc.querySelector('.sync-settings').hidden, true);
+				assert.equal(doc.getElementById('sync-settings-section').hidden, true);
 			});
 
 
@@ -124,7 +124,7 @@ describe("Sync Preferences", function () {
 
 				assert.isTrue(deleteAPIKey.called);
 				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), "");
-				assert.equal(doc.querySelector('.sync-settings').hidden, true);
+				assert.equal(doc.getElementById('sync-settings-section').hidden, true);
 			});
 
 			it("should reset the storage controller when unlinking", async function () {
