@@ -895,7 +895,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			Zotero.Prefs.set("sync.storage.url", "127.0.0.1:9999");
 			
 			// Begin install procedure
-			var win = await loadPrefPane('sync');
+			var win = await loadPrefPane('account');
 			var button = win.document.getElementById('storage-verify');
 			
 			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
@@ -935,7 +935,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			);
 			
 			// Begin install procedure
-			var win = await loadPrefPane('sync');
+			var win = await loadPrefPane('account');
 			var button = win.document.getElementById('storage-verify');
 			
 			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
@@ -971,7 +971,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
 			// Begin install procedure
-			var win = await loadPrefPane('sync');
+			var win = await loadPrefPane('account');
 			var button = win.document.getElementById('storage-verify');
 			
 			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
@@ -1026,7 +1026,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			);
 			
 			// Begin verify procedure
-			var win = await loadPrefPane('sync');
+			var win = await loadPrefPane('account');
 			var button = win.document.getElementById('storage-verify');
 			
 			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
@@ -1081,7 +1081,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
 			// Begin install procedure
-			var win = await loadPrefPane('sync');
+			var win = await loadPrefPane('account');
 			var button = win.document.getElementById('storage-verify');
 			
 			var spy = sinon.spy(win.Zotero_Preferences.Sync, "verifyStorageServer");
