@@ -22,94 +22,16 @@
 
 	***** END LICENSE BLOCK *****
 -->
-<vbox id="zotero-prefpane-sync" onload="Zotero_Preferences.Sync.init()">
+<vbox id="zotero-prefpane-account" onload="Zotero_Preferences.Sync.init()">
 	<vbox class="main-section">
 		<vbox id="sync-unauthorized">
-			<groupbox data-l10n-id="preferences-sync-data-syncing-groupbox">
-				<label><html:h2 data-l10n-id="preferences-sync-data-syncing-heading"/></label>
-                <description data-l10n-id="preferences-sync-data-syncing-description"/>
+			<description data-l10n-id="preferences-sync-data-syncing-description"/>
 
-				<hbox>
-					<vbox>
-						<hbox class="account-login-default">
-							<button data-l10n-id="preferences-account-log-in"
-								oncommand="Zotero_Preferences.Sync.linkAccount(event)"/>
-						</hbox>
-						<hbox class="account-login-pending" hidden="true" align="center">
-							<label class="account-login-status-indicator"/>
-							<label data-l10n-id="preferences-account-waiting-for-login"/>
-							<button data-l10n-id="preferences-account-cancel-button"
-								oncommand="Zotero_Preferences.Sync.cancelLogin()"/>
-						</hbox>
-					</vbox>
-
-					<vbox style="width:2em"/>
-					<vbox>
-						<label is="zotero-text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
-						<separator class="thin"/>
-						<label is="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
-					</vbox>
-				</hbox>
-			</groupbox>
-		</vbox>
-
-		<vbox id="account-linked" hidden="true">
-			<groupbox data-l10n-id="preferences-sync-data-syncing-groupbox">
-				<label><html:h2 data-l10n-id="preferences-sync-data-syncing-heading"/></label>
-
-				<html:div class="form-grid">
-					<label value="&zotero.preferences.sync.username;"/>
-					<hbox>
-						<label id="account-username" value=""/>
-						<!-- Logged in -->
-						<button id="account-log-out-button"
-							data-l10n-id="preferences-account-log-out"
-							aria-describedby="account-username"
-							oncommand="Zotero_Preferences.Sync.unlinkAccount()"
-							hidden="true"/>
-						<!-- Logged out -->
-						<label data-l10n-id="preferences-account-logged-out-status"
-							class="account-logged-out-status" hidden="true"/>
-					</hbox>
-
-					<label id="account-email-label"
-						data-l10n-id="preferences-account-email-label"
-						hidden="true"/>
-					<vbox id="account-emails" hidden="true"/>
-
-					<!-- Logged in: sync settings -->
-					<box class="sync-settings" hidden="true"/>
-					<box class="sync-settings" hidden="true">
-						<button id="sync-libraries-button" label="&zotero.preferences.sync.librariesToSync.button;"
-							oncommand="Zotero_Preferences.Sync.showLibrariesToSyncDialog()"
-							data-search-strings="zotero.preferences.sync.librariesToSync"/>
-					</box>
-
-					<box class="sync-settings" hidden="true"/>
-					<checkbox class="sync-settings" hidden="true"
-						label="&zotero.preferences.sync.syncAutomatically;"
-						preference="extensions.zotero.sync.autoSync"
-						native="true"/>
-
-					<box class="sync-settings" hidden="true"/>
-					<checkbox class="sync-settings" hidden="true"
-						label="&zotero.preferences.sync.syncFullTextContent;"
-						preference="extensions.zotero.sync.fulltext.enabled"
-						tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"
-						native="true"/>
-
-					<box class="sync-settings" hidden="true"/>
-					<label class="sync-settings" hidden="true"
-						is="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
-				</html:div>
-
-				<!-- Logged out: login/switch buttons -->
-				<vbox id="account-logged-out-actions" style="margin-top: 8px" hidden="true">
-					<hbox class="account-login-default" style="gap: 8px">
+			<hbox>
+				<vbox>
+					<hbox class="account-login-default">
 						<button data-l10n-id="preferences-account-log-in"
 							oncommand="Zotero_Preferences.Sync.linkAccount(event)"/>
-						<button data-l10n-id="preferences-account-switch-accounts"
-							oncommand="Zotero_Preferences.Sync.switchAccounts()"/>
 					</hbox>
 					<hbox class="account-login-pending" hidden="true" align="center">
 						<label class="account-login-status-indicator"/>
@@ -119,10 +41,88 @@
 					</hbox>
 				</vbox>
 
-			</groupbox>
+				<vbox style="width:2em"/>
+				<vbox>
+					<label is="zotero-text-link" value="&zotero.preferences.sync.createAccount;" href="http://zotero.org/user/register"/>
+					<separator class="thin"/>
+					<label is="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
+				</vbox>
+			</hbox>
+		</vbox>
 
-			<groupbox id="storage-settings" aria-label="&zotero.preferences.sync.fileSyncing;">
-				<label><html:h2>&zotero.preferences.sync.fileSyncing;</html:h2></label>
+		<vbox id="account-linked" hidden="true">
+			<html:div class="form-grid">
+				<label value="&zotero.preferences.sync.username;"/>
+				<hbox>
+					<label id="account-username" value=""/>
+					<!-- Logged in -->
+					<button id="account-log-out-button"
+						data-l10n-id="preferences-account-log-out"
+						aria-describedby="account-username"
+						oncommand="Zotero_Preferences.Sync.unlinkAccount()"
+						hidden="true"/>
+					<!-- Logged out -->
+					<label data-l10n-id="preferences-account-logged-out-status"
+						class="account-logged-out-status" hidden="true"/>
+				</hbox>
+
+				<label id="account-email-label"
+					data-l10n-id="preferences-account-email-label"
+					hidden="true"/>
+				<vbox id="account-emails" hidden="true"/>
+			</html:div>
+
+			<!-- Logged out: login/switch buttons -->
+			<vbox id="account-logged-out-actions" style="margin-top: 8px" hidden="true">
+				<hbox class="account-login-default" style="gap: 8px">
+					<button data-l10n-id="preferences-account-log-in"
+						oncommand="Zotero_Preferences.Sync.linkAccount(event)"/>
+					<button data-l10n-id="preferences-account-switch-accounts"
+						oncommand="Zotero_Preferences.Sync.switchAccounts()"/>
+				</hbox>
+				<hbox class="account-login-pending" hidden="true" align="center">
+					<label class="account-login-status-indicator"/>
+					<label data-l10n-id="preferences-account-waiting-for-login"/>
+					<button data-l10n-id="preferences-account-cancel-button"
+						oncommand="Zotero_Preferences.Sync.cancelLogin()"/>
+				</hbox>
+			</vbox>
+		</vbox>
+	</vbox>
+
+	<vbox class="main-section" id="sync-settings-section" hidden="true">
+		<html:h1 data-l10n-id="preferences-sync-settings-heading"/>
+		<description data-l10n-id="preferences-sync-settings-intro">
+			<label is="zotero-text-link" href="http://www.zotero.org/support/sync" data-l10n-name="sync-link"/>
+		</description>
+		<separator class="thin"/>
+
+		<groupbox>
+			<html:div class="form-grid">
+				<box/>
+				<checkbox
+					label="&zotero.preferences.sync.syncAutomatically;"
+					preference="extensions.zotero.sync.autoSync"
+					native="true"/>
+
+				<box/>
+				<checkbox
+					label="&zotero.preferences.sync.syncFullTextContent;"
+					preference="extensions.zotero.sync.fulltext.enabled"
+					tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"
+					native="true"/>
+
+				<box/>
+				<box>
+					<button id="sync-libraries-button" label="&zotero.preferences.sync.librariesToSync.button;"
+						oncommand="Zotero_Preferences.Sync.showLibrariesToSyncDialog()"
+						data-search-strings="zotero.preferences.sync.librariesToSync"/>
+				</box>
+			</html:div>
+		</groupbox>
+
+		<groupbox id="storage-settings" aria-label="&zotero.preferences.sync.fileSyncing;">
+			<label><html:h2>&zotero.preferences.sync.fileSyncing;</html:h2></label>
 
 				<!-- My Library -->
 				<hbox>
@@ -137,7 +137,7 @@
 						oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()"
 						native="true">
 						<menupopup>
-							<menuitem label="Zotero" value="zotero"/>
+							<menuitem label="Zotero Storage" value="zotero"/>
 							<menuitem label="WebDAV" value="webdav"/>
 						</menupopup>
 					</menulist>
@@ -212,7 +212,7 @@
 				<separator id="storage-separator" class="thin"/>
 
 				<!-- Group Libraries -->
-				<checkbox label="&zotero.preferences.sync.fileSyncing.groups;"
+				<checkbox data-l10n-id="preferences-sync-fileSyncing-groups"
 					preference="extensions.zotero.sync.storage.groups.enabled"
 					oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroupsUI()"
 					native="true"/>
@@ -234,18 +234,15 @@
 				<separator class="thin"/>
 
 				<vbox id="storage-terms">
-					<hbox style="margin-top: .4em; display: block" align="center">
-						<label id="preferences_storage_terms" >&zotero.preferences.sync.fileSyncing.tos1;</label>
-						<label is="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" value="&zotero.preferences.sync.fileSyncing.tos2;" aria-describedby="preferences_storage_terms"/>
-						<label>&zotero.preferences.period;</label>
-					</hbox>
+					<description style="margin-top: .4em" data-l10n-id="preferences-sync-fileSyncing-tos">
+						<label is="zotero-text-link" href="https://www.zotero.org/support/terms/terms_of_service" data-l10n-name="terms-link"/>
+					</description>
 				</vbox>
-			</groupbox>
-		</vbox>
+		</groupbox>
 	</vbox>
 
 	<vbox class="main-section" id="sync-reset" align="start" aria-label="&zotero.preferences.sync.reset;" role="group">
-		<html:h1>&zotero.preferences.sync.reset;</html:h1>
+		<html:h1 data-l10n-id="preferences-sync-reset-heading"/>
 		<button label="&zotero.preferences.sync.reset.showResetOptions;" oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-reset-sync')"
 			data-search-strings="
 				zotero.preferences.sync.reset.restoreToOnlineLibrary,

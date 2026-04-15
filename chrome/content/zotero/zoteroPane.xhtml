@@ -421,9 +421,12 @@
 									oncommand="ZoteroStandalone.currentReader.rotatePageRight()"
 							/>
 							<menuseparator/>
-							<menuitem id="menu_find" label="&findCmd.label;"
+							<menuitem id="menu_find" class="menu-type-library" label="&findCmd.label;"
 									key="key_find" accesskey="&findCmd.accesskey;"
 									command="cmd_find"/>
+							<menuitem id="menu_find_reader" class="menu-type-reader" label="&findCmd.label;"
+									key="key_find" accesskey="&findCmd.accesskey;"
+									oncommand="ZoteroStandalone.currentReader.toggleFindPopup({ open: true });"/>
 							<menuitem id="menu_advancedSearch"
 									label="&zotero.toolbar.advancedSearch;"
 									key="key_advancedSearch"

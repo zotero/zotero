@@ -1126,6 +1126,7 @@ function importTextAttachment(parentItem, options = {}) {
 	return importFileAttachment('test.txt', {
 		contentType: 'text/plain',
 		charset: 'utf-8',
+		libraryID: options.libraryID,
 		parentID: parentItem ? parentItem.id : null,
 		title: options.title
 	});
@@ -1136,6 +1137,7 @@ function importHTMLAttachment(parentItem, options = {}) {
 	return importFileAttachment('test.html', {
 		contentType: 'text/html',
 		charset: 'utf-8',
+		libraryID: options.libraryID,
 		parentID: parentItem ? parentItem.id : null,
 		title: options.title
 	});
@@ -1151,6 +1153,7 @@ function importSnapshotAttachment(parentItem, options = {}) {
 		file,
 		contentType: 'text/html',
 		charset: 'utf-8',
+		libraryID: options.libraryID,
 		parentItemID: parentItem ? parentItem.id : null,
 	});
 }
@@ -1161,6 +1164,7 @@ async function importPDFAttachment(parentItem, options = {}) {
 		'test.pdf',
 		{
 			contentType: 'application/pdf',
+			libraryID: options.libraryID,
 			parentID: parentItem ? parentItem.id : null,
 			title: options.title
 		}

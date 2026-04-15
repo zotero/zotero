@@ -115,7 +115,7 @@ Zotero.Sync.Storage.Engine.prototype.start = async function () {
 							let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 									   .getService(Components.interfaces.nsIWindowMediator);
 							let lastWin = wm.getMostRecentWindow("navigator:browser");
-							lastWin.ZoteroPane.openPreferences('zotero-prefpane-sync');
+							lastWin.ZoteroPane.openPreferences('zotero-prefpane-account');
 						}
 					}
 				);

@@ -923,25 +923,25 @@ Zotero.Search.prototype.getSQLParams = async function () {
 /*
  * Batch insert
  */
-Zotero.Search.idsToTempTable = async function (ids) {
+Zotero.Search.idsToTempTable = async function (ids, { idColumn = 'itemID' } = {}) {
 	var tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
-	
+
 	Zotero.debug(`Creating ${tmpTable} with ${ids.length} item${ids.length != 1 ? 's' : ''}`);
 	var sql = "CREATE TEMPORARY TABLE " + tmpTable;
 	if (ids.length) {
 		sql += " AS "
-		+ "WITH cte(itemID) AS ("
+		+ `WITH cte(${idColumn}) AS (`
 			+ "VALUES " + ids.map(id => "(" + parseInt(id) + ")").join(',')
 		+ ") "
 		+ "SELECT * FROM cte";
 	}
 	else {
-		sql += " (itemID INTEGER PRIMARY KEY)";
+		sql += ` (${idColumn} INTEGER PRIMARY KEY)`;
 	}
 	await Zotero.DB.queryAsync(sql, false, { debug: false, noCache: true });
 	if (ids.length) {
 		await Zotero.DB.queryAsync(
-			`CREATE UNIQUE INDEX ${tmpTable}_itemID ON ${tmpTable}(itemID)`,
+			`CREATE UNIQUE INDEX ${tmpTable}_${idColumn} ON ${tmpTable}(${idColumn})`,
 			false,
 			{
 				noCache: true

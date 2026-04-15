@@ -1066,7 +1066,8 @@ class VirtualizedTable extends React.Component {
 	}
 	
 	componentDidUpdate(prevProps) {
-		if (this.props.id !== prevProps.id) {
+		if (this.props.id !== prevProps.id
+				|| this.props.columns !== prevProps.columns) {
 			this._columns = new Columns(this);
 			this.forceUpdate();
 		}

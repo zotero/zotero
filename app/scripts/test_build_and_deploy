@@ -24,4 +24,6 @@ function cleanup {
 trap cleanup EXIT
 
 ./prepare_build -s "$source_dir" -o "$build_dir" -c $CHANNEL -m $hash
-./build_and_deploy -d "$build_dir" -p $BUILD_PLATFORMS -c $CHANNEL -i 1
+VERSION="`cat \"$build_dir/version\"`"
+./build_for_deploy -d "$build_dir" -p $BUILD_PLATFORMS -c $CHANNEL -i 1
+ssh $DEPLOY_HOST "$DEPLOY_PATH/deploy" $CHANNEL "$VERSION" $BUILD_PLATFORMS

@@ -3022,14 +3022,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		
 		// Recently Read
 		if (showRecentlyRead && this._isFilterEmpty()) {
-			let s = new Zotero.Search();
-			s.libraryID = libraryID;
-			s.name = Zotero.getString('recently-read');
-			s.addCondition('libraryID', 'is', libraryID);
-			s.addCondition('lastRead', 'isInTheLast', '14 days');
-			s.addCondition('includeParents', 'true');
 			rows.splice(row + 1 + newRows, 0,
-				new Zotero.CollectionTreeRow(this, 'recentlyRead', s, level + 1));
+				new Zotero.CollectionTreeRow(this,
+					'recentlyRead',
+					{
+						libraryID,
+						name: Zotero.getString('recently-read'),
+					},
+					level + 1
+				)
+			);
 			newRows++;
 		}
 

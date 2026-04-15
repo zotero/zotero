@@ -430,27 +430,38 @@ describe("Zotero.DB", function () {
 			assert.isFalse(await IOUtils.exists(bakFile2));
 		});
 		
-		it("should perform an offline backup if an online backup is already in progress", async function () {
-			// On APFS, online backups use cloning (offline path), so this doesn't apply
-			if (Zotero.File.isAPFS(Zotero.DB.path)) this.skip();
-			var promise = Zotero.DB.backUpDatabase({ suffix: 'test', online: true });
-			var result = await Zotero.DB.backUpDatabase({ suffix: 'test2' });
-			// The online backup fails
-			assert.ok(await getPromiseError(promise));
-			assert.isFalse(await IOUtils.exists(bakFile));
+	});
+
+
+	describe("#vacuum()", function () {
+		it("should vacuum the database with force option", async function () {
+			let result = await Zotero.DB.vacuum({ force: true });
 			assert.isTrue(result);
-			assert.isTrue(await IOUtils.exists(bakFile2));
+
+			// DB should still be functional
+			let count = await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM items");
+			assert.isNumber(count);
+
+			// Vacuum timestamp should be updated
+			assert.isAbove(Zotero.Prefs.get('vacuum.lastTime'), 0);
+
+			// Temp file should be cleaned up
+			assert.isFalse(await IOUtils.exists(Zotero.DB.path + '.vacuum.tmp'));
 		});
 
-		it("shouldn't perform an online backup if one is already in progress", async function () {
-			// On APFS, online backups use cloning (offline path), so this doesn't apply
-			if (Zotero.File.isAPFS(Zotero.DB.path)) this.skip();
-			var promise = Zotero.DB.backUpDatabase({ suffix: 'test', online: true });
-			var result = await Zotero.DB.backUpDatabase({ suffix: 'test2', online: true });
-			await promise;
+		it("should skip vacuum when recently vacuumed", async function () {
+			Zotero.Prefs.set('vacuum.lastTime', Math.floor(Date.now() / 1000));
+			let result = await Zotero.DB.vacuum();
 			assert.isFalse(result);
-			assert.isFalse(await IOUtils.exists(bakFile2));
-			assert.isTrue(await IOUtils.exists(bakFile));
+			Zotero.Prefs.clear('vacuum.lastTime');
+		});
+
+		it("should skip vacuum when freelist is below threshold", async function () {
+			Zotero.Prefs.clear('vacuum.lastTime');
+			Zotero.Prefs.set('vacuum.freelistThreshold', 99);
+			let result = await Zotero.DB.vacuum();
+			assert.isFalse(result);
+			Zotero.Prefs.clear('vacuum.freelistThreshold');
 		});
 	});
 });

@@ -197,12 +197,12 @@ reader-selected-pages =
     }
 reader-page-options = Opzioni pagina
 reader-read-aloud = Leggi ad alta voce
-reader-read-aloud-from-here = Read Aloud from Here
+reader-read-aloud-from-here = Leggi ad alta voce da qui
 reader-read-aloud-options = Opzioni
 reader-read-aloud-skip-back = Indietro
-reader-read-aloud-skip-back-sentence = Skip Back by Sentence
+reader-read-aloud-skip-back-sentence = Indietro di una frase
 reader-read-aloud-skip-ahead = Avanti
-reader-read-aloud-skip-ahead-sentence = Skip Ahead by Sentence
+reader-read-aloud-skip-ahead-sentence = Avanti di una frase
 reader-read-aloud-add-annotation = Annota frase ({ $key1 }/{ $key2 })
 reader-read-aloud-play = Riproduci
 reader-read-aloud-pause = Pausa

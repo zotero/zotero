@@ -1125,7 +1125,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					window.ZoteroPane.loadURI(e.target.dataset.href);
 				}
 				if (e.target.dataset.action == 'open-sync-prefs') {
-					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-account');
 				}
 			}}
 			className={"items-tree-message"}
@@ -1304,7 +1304,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					// Clear the quick search and tag selection and try again (once)
 					if (!noRecurse && window.ZoteroPane) {
 						let hasQuickSearch = !!this.collectionTreeRow.searchText;
-						let hasTagFilters = this.collectionTreeRow.tags.size > 0;
+						let hasTagFilters = this.collectionTreeRow.tags?.size > 0;
 						if (hasQuickSearch || hasTagFilters) {
 							// Clear all searches set on the collection tree row directly on
 							// collectionTreeRow (vs using ZoteroPane functions) to avoid
@@ -3810,11 +3810,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		const visibilityGroup = this.collectionTreeRow.visibilityGroup;
 		const prefKey = this.id;
-		if (this._columnsId == prefKey) {
+		// Include group status in cache key so groupLibrariesOnly columns
+		// are recalculated when switching between personal and group libraries
+		let cacheKey = prefKey
+			+ (this.collectionTreeRow.isWithinGroup?.() ? '-group' : '');
+		if (this._columnsId == cacheKey) {
 			return this._columns;
 		}
-		
-		this._columnsId = prefKey;
+
+		this._columnsId = cacheKey;
 		this._columns = [];
 		
 		let columnsSettings = this._getColumnPrefs();
@@ -3949,7 +3953,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						else if (span.hasAttribute('data-action')) {
 							if (span.getAttribute('data-action') == 'open-sync-prefs') {
 								span.onclick = () => {
-									Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+									Zotero.Utilities.Internal.openPreferences('zotero-prefpane-account');
 								};
 							}
 						}

@@ -1153,7 +1153,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					e.dialogButtonText = Zotero.ftl.formatValueSync('account-log-in');
 					e.dialogButtonCallback = function () {
 						Zotero.Utilities.Internal.openPreferences(
-							"zotero-prefpane-sync",
+							"zotero-prefpane-account",
 							{ action: 'logIn' }
 						);
 					};

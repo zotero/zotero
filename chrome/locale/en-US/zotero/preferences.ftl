@@ -91,11 +91,19 @@ preferences-advanced-default-data-dir =
     .value = (Default: { $directory })
     .aria-label = Default location
 
+preferences-pane-account = Account
+
 -preferences-sync-data-syncing = Data Syncing
 preferences-sync-data-syncing-groupbox =
     .aria-label = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-description = Log in with your { -app-name } account to sync your data between devices, collaborate with others, and more.
+preferences-sync-settings-heading = Sync
+preferences-sync-settings-intro = { -app-name } can sync your library data and files across devices. <label data-l10n-name="sync-link">Learn more</label>
+preferences-sync-reset-heading = Sync Reset
+preferences-sync-fileSyncing-groups =
+    .label = Sync attachment files in group libraries using { -app-name } Storage
+preferences-sync-fileSyncing-tos = By using { -app-name } Storage, you agree to become bound by its <label data-l10n-name="terms-link">terms and conditions</label>.
 preferences-account-log-out =
     .label = Log Out…
 

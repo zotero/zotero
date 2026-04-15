@@ -64,22 +64,19 @@ if [[ "$VERSION" ]] && [[ "$NUM_VERSIONS" ]]; then
 	usage
 fi
 
-INCR_FILENAME="incrementals-$CHANNEL-$PLATFORM"
-S3_URL="s3://$S3_BUCKET/$S3_DIST_PATH/$CHANNEL/incrementals-$PLATFORM"
+INCR_FILENAME="incrementals-$PLATFORM"
+REMOTE_PATH="$DEPLOY_PATH/manifests/$CHANNEL/$INCR_FILENAME"
 INCR_PATH="$DIST_DIR/$INCR_FILENAME"
 
-if [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
-        INCR_PATH=$(cygpath -w "$INCR_PATH")
-fi
 
 mkdir -p "$DIST_DIR"
-aws s3 cp $S3_URL "$INCR_PATH" >&2
+scp $DEPLOY_HOST:"$REMOTE_PATH" "$INCR_PATH" >&2
 
 # Add version to file and reupload
 if [ "$VERSION" ]; then
 	echo "Adding $VERSION to incrementals-$PLATFORM"
 	echo $VERSION >> "$INCR_PATH"
-	aws s3 cp "$INCR_PATH" $S3_URL
+	scp "$INCR_PATH" $DEPLOY_HOST:"$REMOTE_PATH"
 # Show last n versions
 elif [ "$NUM_VERSIONS" -gt 0 ]; then
 	# TEMP: Don't include 6.0 versions
