@@ -1963,7 +1963,16 @@ class ReaderTab extends ReaderInstance {
 			// If this tab was unpaused, pause all others
 			for (let reader of Zotero.Reader._readers) {
 				if (reader === this) continue;
-				reader.toggleReadAloudPaused(true);
+				try {
+					reader.toggleReadAloudPaused(true);
+				}
+				catch (e) {
+					// Failed to pause the other reader.
+					// This seems to be caused by the _internalReader being a
+					// dead object. Not clear why, but we can log and continue;
+					// if the other reader is dead, it's not playing audio.
+					Zotero.logError(e);
+				}
 			}
 		}
 		this._window.Zotero_Tabs.setAudioStatus(this.tabID, status);
