@@ -9,7 +9,38 @@ Zotero.HTTP = new function () {
 
 	var { SecurityInfo } = ChromeUtils.importESModule("resource://gre/modules/SecurityInfo.sys.mjs");
 	var { NetUtil } = ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
-	
+
+
+	/**
+	 * Parse a URI (nsIURI or string), extract any embedded credentials, and
+	 * return the URL as a credential-free string
+	 *
+	 * Mozilla percent-encodes periods in the username component of nsIURIs (%2E), which is
+	 * technically valid but breaks Basic auth against most servers, so we undo that here.
+	 *
+	 * @param {nsIURI|String} uri
+	 * @return {{ url: String, username: String|null, password: String|null }}
+	 */
+	function _parseURI(uri) {
+		if (!(uri instanceof Components.interfaces.nsIURI)) {
+			try {
+				uri = Services.io.newURI(uri);
+			}
+			catch (e) {
+				return { url: uri, username: null, password: null };
+			}
+		}
+		let username = uri.username || null;
+		let password = null;
+		if (username) {
+			username = username.replace(/%2E/, '.');
+			password = uri.password || null;
+			uri = uri.mutate().setUserPass('').finalize();
+		}
+		return { url: uri.spec, username, password };
+	}
+
+
 	/**
 	 * Exception returned for unexpected status when promise* is used
 	 * @constructor
@@ -154,72 +185,11 @@ Zotero.HTTP = new function () {
 	 *     code is received (or a code not in options.successCodes if provided).
 	 */
 	this.request = async function (method, url, options = {}) {
-		var errorDelayGenerator;
-		
-		while (true) {
-			try {
-				let req = await this._requestInternal(...arguments);
-				return req;
-			}
-			catch (e) {
-				if (e instanceof this.UnexpectedStatusException) {
-					_checkConnection(e.xmlhttp, url);
-					
-					if (e.is5xx()) {
-						Zotero.logError(e);
-						// Check for Retry-After header on 503 and wait the specified amount of time
-						if (e.xmlhttp.status == 503 && (await _checkRetry(e.xmlhttp))) {
-							continue;
-						}
-						// Don't retry if errorDelayMax is 0
-						if (options.errorDelayMax === 0 || Zotero.HTTP.disableErrorRetry) {
-							throw e;
-						}
-						// Automatically retry other 5xx errors by default
-						if (!errorDelayGenerator) {
-							// Keep trying for up to an hour
-							errorDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-								options.errorDelayIntervals || _errorDelayIntervals,
-								options.errorDelayMax !== undefined
-									? options.errorDelayMax
-									: _errorDelayMax
-							);
-						}
-						let delayPromise = errorDelayGenerator.next().value;
-						let keepGoing;
-						// Provide caller with a callback to cancel while waiting to retry
-						if (options.cancellerReceiver) {
-							let resolve;
-							let reject;
-							let cancelPromise = new Zotero.Promise((res, rej) => {
-								resolve = res;
-								reject = function () {
-									rej(new Zotero.HTTP.CancelledException);
-								};
-							});
-							options.cancellerReceiver(reject);
-							try {
-								keepGoing = await Promise.race([delayPromise, cancelPromise]);
-							}
-							catch (e) {
-								Zotero.debug("Request cancelled");
-								throw e;
-							}
-							resolve();
-						}
-						else {
-							keepGoing = await delayPromise;
-						}
-						if (!keepGoing) {
-							Zotero.logError("Failed too many times");
-							throw e;
-						}
-						continue;
-					}
-				}
-				throw e;
-			}
-		}
+		return _retryOnServerError(
+			() => this._requestInternal(...arguments),
+			url,
+			options
+		);
 	};
 	
 	
@@ -227,18 +197,8 @@ Zotero.HTTP = new function () {
 	 * Most of the logic for request() is here, with request() handling automatic 5xx retries
 	 */
 	this._requestInternal = async function (method, url, options = {}) {
-		if (url instanceof Components.interfaces.nsIURI) {
-			// Extract username and password from URI and undo Mozilla's excessive percent-encoding
-			options.username = url.username || null;
-			if (options.username) {
-				options.username = options.username.replace(/%2E/, '.');
-				options.password = url.password || null;
-				url = url.mutate().setUserPass('').finalize();
-			}
-			
-			url = url.spec;
-		}
-		
+		({ url, username: options.username, password: options.password } = _parseURI(url));
+
 		var dispURL = url;
 		
 		// Add username:******** to display URL
@@ -309,6 +269,7 @@ Zotero.HTTP = new function () {
 			isFile = channel instanceof Components.interfaces.nsIFileChannel;
 		var redirectStatus;
 		var redirectLocation;
+		var redirectChannel;
 		if(channel instanceof Components.interfaces.nsIHttpChannelInternal) {
 			channel.forceAllowThirdPartyCookie = true;
 			
@@ -340,6 +301,10 @@ Zotero.HTTP = new function () {
 					asyncOnChannelRedirect: function (oldChannel, newChannel, flags, callback) {
 						redirectStatus = (flags & Ci.nsIChannelEventSink.REDIRECT_PERMANENT) ? 301 : 302;
 						redirectLocation = newChannel.URI.spec;
+						try {
+							redirectChannel = oldChannel.QueryInterface(Ci.nsIHttpChannel);
+						}
+						catch (e) {}
 						oldChannel.cancel(Cr.NS_BINDING_ABORTED);
 						callback.onRedirectVerifyCallback(Cr.NS_BINDING_ABORTED);
 					}
@@ -392,50 +357,11 @@ Zotero.HTTP = new function () {
 		}
 		
 		const defaultTimeout = 30000;
-		let requestTimeout;
-		let connectTimeout;
-		let inactivityTimeout;
 		if (options.timeout !== 0) {
-			// For downloads, manually implement connect and inactivity timeouts, since the XHR
-			// `timeout` property applies to the whole request, even if data is being downloaded
-			if (options.isDownload) {
-				// TODO: Try a lower default connect timeout and take a separate option?
-				connectTimeout = options.timeout || defaultTimeout;
-				inactivityTimeout = options.timeout || defaultTimeout;
-			}
-			else {
-				requestTimeout = options.timeout || defaultTimeout;
-			}
-		}
-		let connectTimerID = null;
-		let inactivityTimerID = null;
-		let timedOutAfter;
-		
-		function clearConnectTimer() {
-			if (connectTimerID) {
-				clearTimeout(connectTimerID);
-				connectTimerID = null;
-			}
-		}
-		
-		function resetInactivityTimer() {
-			clearTimeout(inactivityTimerID);
-			inactivityTimerID = setTimeout(() => {
-				Zotero.warn(`Inactivity timeout for ${method} ${dispURL} -- aborting request`);
-				timedOutAfter = inactivityTimeout;
-				xmlhttp.abort();
-			}, inactivityTimeout);
-		}
-		
-		if (requestTimeout) {
+			let requestTimeout = options.timeout || defaultTimeout;
 			xmlhttp.timeout = requestTimeout;
 			xmlhttp.ontimeout = function () {
 				deferred.reject(new Zotero.HTTP.TimeoutException(requestTimeout));
-			};
-		}
-		else if (inactivityTimeout) {
-			xmlhttp.onprogress = function () {
-				resetInactivityTimer();
 			};
 		}
 		
@@ -451,17 +377,7 @@ Zotero.HTTP = new function () {
 			});
 		}
 		
-		if (connectTimeout || inactivityTimeout) {
-			xmlhttp.onloadstart = () => {
-				clearConnectTimer();
-				resetInactivityTimer();
-			};
-		}
-		
 		xmlhttp.onloadend = async function () {
-			clearConnectTimer();
-			clearTimeout(inactivityTimerID);
-			
 			var status = redirectStatus || xmlhttp.status;
 			var success;
 			
@@ -511,19 +427,18 @@ Zotero.HTTP = new function () {
 				success = status >= 200 && status < 300;
 			}
 			
-			// Create a fake XMLHttpRequest object for an unfollowed or canceled redirect, since
-			// the real one won't be accurate. Only `status` and `getResponseHeader('Location')`
-			// are available.
+			// Create a fake XMLHttpRequest object for an unfollowed or canceled redirect,
+			// since the real one won't be accurate
 			if (redirectStatus) {
-				let channel = xmlhttp.channel;
 				xmlhttp = {
 					status,
 					getResponseHeader: function (header) {
 						if (header.toLowerCase() == 'location') {
 							return redirectLocation;
 						}
-						Zotero.debug("Warning: Attempt to get response header other than Location "
-							+ "for redirect", 2);
+						if (redirectChannel) {
+							return redirectChannel.getResponseHeader(header);
+						}
 						return null;
 					}
 				};
@@ -575,11 +490,6 @@ Zotero.HTTP = new function () {
 				}
 				Zotero.debug(msg, 1);
 				
-				if (timedOutAfter) {
-					deferred.reject(new Zotero.HTTP.TimeoutException(timedOutAfter));
-					return;
-				}
-				
 				if (xmlhttp.status == 0) {
 					try {
 						this.checkSecurity(channel, { isProxyAuthRequest: options.isProxyAuthRequest });
@@ -619,14 +529,6 @@ Zotero.HTTP = new function () {
 			body = options.body || null;
 		}
 		
-		if (connectTimeout) {
-			connectTimerID = setTimeout(() => {
-				Zotero.warn(`Connect timeout for ${method} ${dispURL} -- aborting request`);
-				timedOutAfter = connectTimeout;
-				xmlhttp.abort();
-			}, connectTimeout);
-		}
-		
 		xmlhttp.send(body);
 		
 		return deferred.promise;
@@ -663,35 +565,190 @@ Zotero.HTTP = new function () {
 	
 	
 	/**
-	 * Download a file
+	 * Download a file, streaming the response body directly to disk
 	 *
-	 * @param {nsIURI|String} url - URL to request
+	 * Uses fetch() + ReadableStream instead of XMLHttpRequest so that the response body is
+	 * streamed to disk chunk by chunk, avoiding the 2 GB IOUtils.write() limit and reducing
+	 * memory pressure for large files.
+	 *
+	 * @param {nsIURI|String} uri - URL to request
 	 * @param {String} path - Path to save file to
-	 * @param {Object} [options] - See `Zotero.HTTP.request()`
+	 * @param {Object} [options]
+	 * @param {Object|Headers} [options.headers] - HTTP headers to send with the request
+	 * @param {Boolean} [options.noCache] - Bypass the cache
+	 * @param {Number[]|false} [options.successCodes] - HTTP status codes that are considered
+	 *     successful, or FALSE to allow all
+	 * @param {Function} [options.onProgress] - Progress callback (totalBytes, contentLength)
+	 * @param {Function} [options.cancellerReceiver] - Callback to receive a cancel function
+	 * @param {Number} [options.timeout = 30000] - Timeout in milliseconds (connect and
+	 *     inactivity); 0 to disable
+	 * @param {Number[]} [options.errorDelayIntervals] - Retry delay intervals for 5xx errors
+	 * @param {Number} [options.errorDelayMax] - Max time to spend retrying 5xx errors
+	 * @return {Promise<Response>} - A promise for a fetch Response object
 	 */
 	this.download = async function (uri, path, options = {}) {
-		// TODO: Convert request() to fetch() and use ReadableStream
-		var req = await this.request(
-			'GET',
-			uri,
-			{
-				...options,
-				isDownload: true,
-				responseType: 'blob',
-				// Downloads can have channel notification callbacks, etc., so always do them for real
-				noMock: true
-			}
+		let { url, username, password } = _parseURI(uri);
+
+		if (!/^https?:/.test(url)) {
+			throw new Error("HTTP.download() only supports HTTP(S) URLs -- got " + url);
+		}
+
+		let dispURL = options.displayURL || url;
+		if (username) {
+			dispURL = dispURL.replace(/^(https?:\/\/)/, `$1${username}:********@`);
+		}
+		dispURL = dispURL.replace(/key=[^&]+&?/, "").replace(/\?$/, "");
+
+		Zotero.debug("HTTP GET " + dispURL);
+
+		if (this.browserIsOffline()) {
+			Zotero.debug(`HTTP GET ${dispURL} failed: ${Zotero.appName} is offline`);
+			throw new this.BrowserOfflineException();
+		}
+
+		return _retryOnServerError(
+			() => _downloadInternal(url, path, options, {
+				username, password, dispURL
+			}),
+			url,
+			options
 		);
-		if (req.status >= 200 && req.status < 300) {
-			var bytes = await IOUtils.write(path, await req.response.bytes());
-			Zotero.debug(`Saved file to ${path} (${bytes} byte${bytes != 1 ? 's' : ''})`);
-		}
-		// Only relevant if status is in successCodes
-		else {
-			Zotero.debug("Not saving file for non-2xx response code");
-		}
-		return req;
 	};
+
+
+	/**
+	 * Internal implementation for download() -- streams a file to disk using fetch()
+	 */
+	async function _downloadInternal(url, path, options, ctx) {
+		let defaultTimeout = 30000;
+		let timeout = options.timeout !== 0 ? (options.timeout || defaultTimeout) : 0;
+
+		// AbortController handles both cancellation and timeouts
+		let controller = new AbortController();
+		let inactivityTimerID;
+
+		function resetInactivityTimer() {
+			clearTimeout(inactivityTimerID);
+			if (timeout) {
+				inactivityTimerID = setTimeout(() => {
+					Zotero.warn(`Inactivity timeout for GET ${ctx.dispURL}`
+						+ " -- aborting request");
+					controller.abort();
+				}, timeout);
+			}
+		}
+
+		if (options.cancellerReceiver) {
+			options.cancellerReceiver(() => {
+				controller.abort();
+			});
+		}
+
+		// Build fetch options
+		let fetchOptions = {
+			signal: controller.signal,
+		};
+		if (options.noCache) {
+			fetchOptions.cache = 'no-store';
+		}
+
+		// Build headers
+		let headers = new Zotero.HTTP.CasePreservingHeaders(options.headers || {});
+		if (ctx.username) {
+			let encoded = btoa(ctx.username + ':' + (ctx.password || ''));
+			headers.set('Authorization', `Basic ${encoded}`);
+		}
+		fetchOptions.headers = headers;
+
+		// Start the request with a connect timeout
+		let connectTimerID;
+		if (timeout) {
+			connectTimerID = setTimeout(() => {
+				Zotero.warn(`Connect timeout for GET ${ctx.dispURL} -- aborting request`);
+				controller.abort();
+			}, timeout);
+		}
+
+		let response;
+		try {
+			response = await fetch(url, fetchOptions);
+		}
+		catch (e) {
+			clearTimeout(connectTimerID);
+			clearTimeout(inactivityTimerID);
+			if (controller.signal.aborted) {
+				throw new Zotero.HTTP.TimeoutException(timeout);
+			}
+			throw e;
+		}
+		clearTimeout(connectTimerID);
+
+		let status = response.status;
+
+		// Check success
+		let success;
+		if (options.successCodes) {
+			success = options.successCodes.includes(status);
+		}
+		else if (options.successCodes === false) {
+			success = true;
+		}
+		else {
+			success = status >= 200 && status < 300;
+		}
+
+		if (!success) {
+			let msg = "HTTP GET " + ctx.dispURL + " failed with status code " + status;
+			Zotero.debug(msg, 1);
+			throw new Zotero.HTTP.UnexpectedStatusException(response, url, msg);
+		}
+
+		// For non-2xx success (e.g., 404 in successCodes), don't write a file
+		if (status < 200 || status >= 300) {
+			Zotero.debug("HTTP GET " + ctx.dispURL + " finished with " + status);
+			return response;
+		}
+
+		// Stream response body to disk
+		let reader = response.body.getReader();
+		let totalBytes = 0;
+		let contentLength = parseInt(response.headers.get('Content-Length')) || null;
+		let onProgress = options.onProgress;
+
+		try {
+			await IOUtils.write(path, new Uint8Array());
+			while (true) {
+				resetInactivityTimer();
+				let { done, value } = await reader.read();
+				if (done) break;
+				await IOUtils.write(path, value, { mode: 'append' });
+				totalBytes += value.byteLength;
+				if (onProgress) {
+					try {
+						onProgress(totalBytes, contentLength);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+			}
+		}
+		catch (e) {
+			clearTimeout(inactivityTimerID);
+			IOUtils.remove(path, { ignoreAbsent: true }).catch(e2 => Zotero.logError(e2));
+			if (controller.signal.aborted) {
+				throw new Zotero.HTTP.TimeoutException(timeout);
+			}
+			throw e;
+		}
+		clearTimeout(inactivityTimerID);
+
+		Zotero.debug("HTTP GET " + ctx.dispURL + " succeeded with " + status);
+		Zotero.debug("Saved " + path + " (" + totalBytes + " byte"
+			+ (totalBytes != 1 ? 's' : '') + ")");
+
+		return response;
+	}
 	
 	
 	/**
@@ -1439,7 +1496,11 @@ Zotero.HTTP = new function () {
 	};
 	
 	async function _checkRetry(req) {
-		var retryAfter = req.getResponseHeader("Retry-After");
+		// req may be an XMLHttpRequest (from request()) or a fetch Response
+		// (from download())
+		var retryAfter = req.headers?.get
+			? req.headers.get("Retry-After")
+			: req.getResponseHeader("Retry-After");
 		if (!retryAfter) {
 			return false;
 		}
@@ -1451,8 +1512,95 @@ Zotero.HTTP = new function () {
 		await Zotero.Promise.delay(retryAfter * 1000);
 		return true;
 	}
-	
-	
+
+
+	/**
+	 * Call `fn` and automatically retry on 5xx errors with exponential backoff.
+	 *
+	 * @param {Function} fn - Async function to call (should throw
+	 *     UnexpectedStatusException on failure)
+	 * @param {String} url - URL being requested (for _checkConnection)
+	 * @param {Object} options - Must contain errorDelayIntervals, errorDelayMax,
+	 *     and cancellerReceiver if applicable
+	 * @return {Promise} - Result of fn()
+	 */
+	async function _retryOnServerError(fn, url, options) {
+		var errorDelayGenerator;
+
+		while (true) {
+			try {
+				return await fn();
+			}
+			catch (e) {
+				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+					_checkConnection(e.xmlhttp, url);
+
+					if (e.is5xx()) {
+						Zotero.logError(e);
+						// Check for Retry-After header on 503
+						if (e.xmlhttp.status == 503 && (await _checkRetry(e.xmlhttp))) {
+							continue;
+						}
+						// Don't retry if errorDelayMax is 0
+						if (options.errorDelayMax === 0
+								|| Zotero.HTTP.disableErrorRetry) {
+							throw e;
+						}
+						// Automatically retry other 5xx errors by default
+						if (!errorDelayGenerator) {
+							// Keep trying for up to an hour
+							errorDelayGenerator
+								= Zotero.Utilities.Internal.delayGenerator(
+									options.errorDelayIntervals
+										|| _errorDelayIntervals,
+									options.errorDelayMax !== undefined
+										? options.errorDelayMax
+										: _errorDelayMax
+								);
+						}
+						let delayPromise = errorDelayGenerator.next().value;
+						let keepGoing;
+						// Provide caller with a callback to cancel
+						// while waiting to retry
+						if (options.cancellerReceiver) {
+							let resolve;
+							let reject;
+							let cancelPromise = new Zotero.Promise(
+								(res, rej) => {
+									resolve = res;
+									reject = function () {
+										rej(new Zotero.HTTP.CancelledException);
+									};
+								}
+							);
+							options.cancellerReceiver(reject);
+							try {
+								keepGoing = await Promise.race(
+									[delayPromise, cancelPromise]
+								);
+							}
+							catch (e) {
+								Zotero.debug("Request cancelled");
+								throw e;
+							}
+							resolve();
+						}
+						else {
+							keepGoing = await delayPromise;
+						}
+						if (!keepGoing) {
+							Zotero.logError("Failed too many times");
+							throw e;
+						}
+						continue;
+					}
+				}
+				throw e;
+			}
+		}
+	}
+
+
 	/**
 	 * Mimics the window.location/document.location interface, given an nsIURL
 	 * @param {nsIURL} url

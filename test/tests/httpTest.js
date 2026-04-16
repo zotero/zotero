@@ -30,6 +30,7 @@ describe("Zotero.HTTP", function () {
 			{
 				handle: function (request, response) {
 					response.setHeader('Location', redirectLocation);
+					response.setHeader('X-Custom', 'redirect-value', false);
 					response.setStatusLine(null, 301, "Moved Permanently");
 					response.write(`<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">\n<html><head>\n<title>301 Moved Permanently</title>\n</head><body>\n<h1>Moved Permanently</h1>\n<p>The document has moved <a href="${redirectLocation}">here</a>.</p>\n</body></html>`);
 				}
@@ -94,6 +95,7 @@ describe("Zotero.HTTP", function () {
 			);
 			assert.equal(req.status, 301);
 			assert.equal(req.getResponseHeader('Location'), redirectLocation);
+			assert.equal(req.getResponseHeader('X-Custom'), 'redirect-value');
 		});
 		
 		it("should catch an interrupted connection", async function () {
@@ -155,7 +157,13 @@ describe("Zotero.HTTP", function () {
 		describe("Retries", function () {
 			var spy;
 			var delayStub;
-			
+
+			before(async function () {
+				// Wait for proxy auth probing to finish so its
+				// Zotero.Promise.delay() calls don't pollute the stub
+				await Zotero.proxyAuthComplete;
+			});
+
 			beforeEach(function () {
 				delayStub = sinon.stub(Zotero.Promise, "delay").returns(Promise.resolve());
 			});
@@ -315,6 +323,213 @@ describe("Zotero.HTTP", function () {
 	});
 	
 	
+	describe("#download()", function () {
+		var tmpDir;
+
+		before(function () {
+			httpd.registerPathHandler(
+				'/download/small.bin',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.setHeader("Content-Type", "application/octet-stream", false);
+						let data = "abc".repeat(1024);
+						response.setHeader("Content-Length", String(data.length), false);
+						response.write(data);
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				'/download/large.bin',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.setHeader("Content-Type", "application/octet-stream", false);
+						// 256 KB -- enough to exercise multiple onDataAvailable calls
+						let chunk = "x".repeat(1024);
+						for (let i = 0; i < 256; i++) {
+							response.write(chunk);
+						}
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				'/download/404',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 404, "Not Found");
+						response.write("Not found");
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				'/download/500',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 500, "Internal Server Error");
+						response.write("Server error");
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				'/download/redirect-to-file',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 302, "Found");
+						response.setHeader("Location", baseURL + "download/small.bin", false);
+					}
+				}
+			);
+			httpd.registerPathHandler(
+				'/download/custom-header',
+				{
+					handle: function (request, response) {
+						let val;
+						try {
+							val = request.getHeader("X-Custom");
+						}
+						catch (e) {
+							val = "";
+						}
+						response.setStatusLine(null, 200, "OK");
+						response.setHeader("X-Echo", val, false);
+						response.write("ok");
+					}
+				}
+			);
+		});
+
+		beforeEach(async function () {
+			Zotero.HTTP.mock = null;
+			tmpDir = await getTempDirectory();
+		});
+
+		afterEach(async function () {
+			await IOUtils.remove(tmpDir, { recursive: true, ignoreAbsent: true });
+		});
+
+
+		it("should download a file to disk", async function () {
+			let dest = PathUtils.join(tmpDir, "small.bin");
+			let req = await Zotero.HTTP.download(
+				baseURL + "download/small.bin",
+				dest
+			);
+			assert.equal(req.status, 200);
+			let stat = await IOUtils.stat(dest);
+			assert.equal(stat.size, 3 * 1024);
+		});
+
+		it("should download a larger file", async function () {
+			let dest = PathUtils.join(tmpDir, "large.bin");
+			let req = await Zotero.HTTP.download(
+				baseURL + "download/large.bin",
+				dest
+			);
+			assert.equal(req.status, 200);
+			let stat = await IOUtils.stat(dest);
+			assert.equal(stat.size, 256 * 1024);
+		});
+
+		it("should send request headers", async function () {
+			let dest = PathUtils.join(tmpDir, "custom.bin");
+			let req = await Zotero.HTTP.download(
+				baseURL + "download/custom-header",
+				dest,
+				{
+					headers: { "X-Custom": "test-value" }
+				}
+			);
+			assert.equal(req.status, 200);
+			assert.equal(req.headers.get("X-Echo"), "test-value");
+		});
+
+		it("should throw UnexpectedStatusException for non-success status", async function () {
+			let dest = PathUtils.join(tmpDir, "404.bin");
+			let e = await getPromiseError(
+				Zotero.HTTP.download(baseURL + "download/404", dest)
+			);
+			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+			assert.equal(e.status, 404);
+			// File should not exist
+			assert.isFalse(await IOUtils.exists(dest));
+		});
+
+		it("should allow non-success status with successCodes", async function () {
+			let dest = PathUtils.join(tmpDir, "404.bin");
+			let req = await Zotero.HTTP.download(
+				baseURL + "download/404",
+				dest,
+				{
+					successCodes: [200, 404]
+				}
+			);
+			assert.equal(req.status, 404);
+		});
+
+		it("should follow redirects", async function () {
+			let dest = PathUtils.join(tmpDir, "redirected.bin");
+			let req = await Zotero.HTTP.download(
+				baseURL + "download/redirect-to-file",
+				dest
+			);
+			assert.equal(req.status, 200);
+			let stat = await IOUtils.stat(dest);
+			assert.equal(stat.size, 3 * 1024);
+		});
+
+		it("should call onProgress during download", async function () {
+			let dest = PathUtils.join(tmpDir, "progress.bin");
+			let progressCalls = [];
+			await Zotero.HTTP.download(
+				baseURL + "download/large.bin",
+				dest,
+				{
+					onProgress(progress, progressMax) {
+						progressCalls.push({ progress, progressMax });
+					}
+				}
+			);
+			assert.isAbove(progressCalls.length, 0);
+			// Last call should have accumulated all bytes
+			let last = progressCalls[progressCalls.length - 1];
+			assert.equal(last.progress, 256 * 1024);
+		});
+
+		it("should retry on 5xx errors", async function () {
+			let delayStub = sinon.stub(Zotero.Promise, "delay")
+				.returns(Promise.resolve());
+			try {
+				let dest = PathUtils.join(tmpDir, "500.bin");
+				let e = await getPromiseError(
+					Zotero.HTTP.download(
+						baseURL + "download/500",
+						dest,
+						{
+							errorDelayIntervals: [10, 20],
+							errorDelayMax: 35
+						}
+					)
+				);
+				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+				assert.equal(e.status, 500);
+			}
+			finally {
+				delayStub.restore();
+			}
+		});
+
+		it("should accept nsIURI as first argument", async function () {
+			let dest = PathUtils.join(tmpDir, "nsuri.bin");
+			let nsUri = Services.io.newURI(baseURL + "download/small.bin");
+			let req = await Zotero.HTTP.download(nsUri, dest);
+			assert.equal(req.status, 200);
+			let stat = await IOUtils.stat(dest);
+			assert.equal(stat.size, 3 * 1024);
+		});
+	});
+
+
 	describe("#processDocuments()", function () {
 		beforeEach(function () {
 			Zotero.HTTP.mock = null;
