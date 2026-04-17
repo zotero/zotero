@@ -6705,6 +6705,18 @@ var ZoteroPane = new function () {
 		let link = document.getElementById('post-upgrade-new-features-link');
 		link.href = ZOTERO_CONFIG.NEW_FEATURES_URL.replace('{version}', majorVersion);
 		document.getElementById('post-upgrade-container').removeAttribute('collapsed');
+
+		// Workaround for a Fluent issue (possibly triggered by plugin localizations) where
+		// $version isn't substituted, leaving "{$version}" visible in the banner. The same issue
+		// can cause other problems, and it would be good to figure out what's triggering it, but
+		// this one is visible enough that it's worth fixing manually.
+		document.l10n.translateElements([div]).then(() => {
+			let span = document.getElementById('post-upgrade-appver');
+			if (span.textContent.includes('$version')) {
+				span.textContent = span.textContent
+					.replace(/\{\s*\$version\s*\}/g, majorVersion);
+			}
+		});
 	};
 	
 	
