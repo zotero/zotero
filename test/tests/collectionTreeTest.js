@@ -1467,6 +1467,13 @@ describe("Zotero.CollectionTree", function () {
 				assert.ok(item, 'Translation should return an item');
 
 				await select(win, collection);
+				// TEMP: Some extra asserts to debug flakiness in CI
+				var selectedTreeRow = win.ZoteroPane.getCollectionTreeRow();
+				assert.ok(selectedTreeRow, 'a collection tree row should be selected');
+				assert.isTrue(selectedTreeRow.isCollection(),
+					'selected tree row should be a collection');
+				assert.equal(selectedTreeRow.ref.id, collection.id,
+					'selected collection tree row should match created collection');
 
 				var itemsView = win.ZoteroPane.itemsView;
 				assert.equal(itemsView.rowCount, 1);
