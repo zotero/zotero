@@ -238,6 +238,8 @@
 				}
 			}
 
+			let mainKey = this._getOptionMainKey(option);
+
 			// Validate nested menus recursively
 			for (let i = 0; i < option.menus.length; i++) {
 				let result = this._validateMenuData(option.menus[i], `menus[${i}]`);
@@ -245,6 +247,8 @@
 					return false;
 				}
 				option.menus[i] = result.obj;
+				// Record mainKey so DOM elements can be found by it during unregister
+				option.menus[i]._mainKey = mainKey;
 			}
 			return option;
 		}
@@ -299,7 +303,7 @@
 
 		async _unregisterByPluginID(pluginID) {
 			let removedKeys = await super._unregisterByPluginID(pluginID);
-			if (!removedKeys) {
+			if (!removedKeys || removedKeys.length === 0) {
 				return [];
 			}
 			// Remove all custom menu items from the main window and reader window
@@ -310,9 +314,9 @@
 			}
 			windows.push(...Zotero.getMainWindows());
 			for (let window of windows) {
-				// Remove all custom menu items that match the removed keys
 				// The query selector is like ".CUSTOM_MENU_CLASS:is(.key1, .key2, .key3)"
-				window.document.querySelectorAll(`.${CUSTOM_MENU_CLASS}:is(.${removedKeys.join(", .")})`)
+				let selector = removedKeys.map(k => `.${CSS.escape(k)}`).join(", ");
+				window.document.querySelectorAll(`.${CUSTOM_MENU_CLASS}:is(${selector})`)
 					.forEach(elem => elem.remove());
 			}
 			return removedKeys;
@@ -442,7 +446,7 @@
 						break;
 					}
 				}
-				menuElem.classList.add(CUSTOM_MENU_CLASS, menuData._key);
+				menuElem.classList.add(CUSTOM_MENU_CLASS, menuData._key, menuData._mainKey);
 
 				// Init label and icon for non-separator menu items
 				if (menuData.menuType !== "separator") {
