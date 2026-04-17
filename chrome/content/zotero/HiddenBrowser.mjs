@@ -48,7 +48,8 @@ export class HiddenBrowser {
 	 * @param {Boolean} [options.blockRemoteResources] Block all remote (non-file:) resources
 	 * @param {Boolean} [options.useHiddenFrame=true] Use a hidden frame to create the browser.
 	 * 		Must be set to false if intending to call print().
-	 * @param {Zotero.CookieSandbox} [options.cookieSandbox]
+	 * @param {Number} [options.cookieContextId] - userContextId from Zotero.HTTP.newCookieContext()
+	 *     for cookie isolation
 	 */
 	constructor(options = {}) {
 		this._destroyed = false;
@@ -80,13 +81,12 @@ export class HiddenBrowser {
 			browser.setAttribute("remote", "true");
 			browser.setAttribute('maychangeremoteness', 'true');
 			browser.setAttribute("disableglobalhistory", "true");
+			if (options.cookieContextId) {
+				browser.setAttribute("usercontextid", String(options.cookieContextId));
+			}
 			browser.style.display = "none";
 			doc.documentElement.appendChild(browser);
-			
-			if (options.cookieSandbox) {
-				options.cookieSandbox.attachToBrowser(browser);
-			}
-			
+
 			if (options.blockRemoteResources) {
 				this._blockingObserver = new BlockingObserver({
 					shouldBlock(uri) {

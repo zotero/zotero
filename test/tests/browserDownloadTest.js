@@ -62,7 +62,7 @@ describe("Zotero.BrowserDownload", function () {
 			let downloadPDFStub = sinon.stub(Zotero.BrowserDownload, "downloadPDFViaViewer");
 			
 			let promise = Zotero.BrowserDownload.downloadPDF('https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html', tmpFile.path,
-				{ cookieSandbox: new Zotero.CookieSandbox(), shouldDisplayCaptcha: true });
+				{ shouldDisplayCaptcha: true });
 			await new Promise(resolve => downloadPDFStub.callsFake((...args) => {
 				resolve();
 				Zotero.Prefs.set('downloadPDFViaBrowser.downloadTimeout', 60e3);

@@ -340,15 +340,13 @@ Zotero.MIME = new function () {
 	
 	/**
 	 * @param {String} url
-	 * @param {Zotero.CookieSandbox} [cookieSandbox]
 	 * @return {Promise}
 	 */
-	this.getMIMETypeFromURL = async function (url, cookieSandbox) {
+	this.getMIMETypeFromURL = async function (url) {
 		var xmlhttp = await Zotero.HTTP.request(
 			"HEAD",
 			url,
 			{
-				cookieSandbox,
 				successCodes: false
 			}
 		);

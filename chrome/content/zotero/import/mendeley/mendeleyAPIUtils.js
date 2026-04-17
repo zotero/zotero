@@ -158,9 +158,9 @@ const getAll = async (tokens, endPoint, params = {}, headers = {}, options = {},
  */
 const obtainReferenceManagerToken = async (login, password) => {
 	let { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
-	let cookieSandbox = new Zotero.CookieSandbox({});
+	let cookieContext = Zotero.HTTP.newCookieContext();
 	let browser = new HiddenBrowser({
-		cookieSandbox,
+		cookieContextId: cookieContext.id,
 		docShell: {
 			allowMetaRedirects: true,
 			allowAuth: true,
@@ -168,61 +168,70 @@ const obtainReferenceManagerToken = async (login, password) => {
 	});
 	await browser._createdPromise;
 
-	return new Promise((resolve, reject) => {
-		let hasEnteredLogin = false;
-		let hasEnteredPassword = false;
+	try {
+		return await new Promise((resolve, reject) => {
+			let hasEnteredLogin = false;
+			let hasEnteredPassword = false;
 
-		browser.webProgress.addProgressListener({
-			QueryInterface: ChromeUtils.generateQI([Ci.nsIWebProgressListener, Ci.nsISupportsWeakReference]),
-			async onLocationChange() {
-				let url = browser.currentURI.spec;
-				Zotero.debug(`Obtain Mendeley access token, visiting "${url}"`, 5);
-				if (url.startsWith("https://id.elsevier.com/as/authorization.oauth2")) {
-					Zotero.debug("Logging in to Mendeley Reference Manager");
-					if (!hasEnteredLogin) {
-						hasEnteredLogin = await browser.browsingContext.currentWindowGlobal
-							.getActor("MendeleyAuth")
-							.sendQuery("login", { login });
+			browser.webProgress.addProgressListener({
+				QueryInterface: ChromeUtils.generateQI([Ci.nsIWebProgressListener, Ci.nsISupportsWeakReference]),
+				async onLocationChange() {
+					let url = browser.currentURI.spec;
+					Zotero.debug(`Obtain Mendeley access token, visiting "${url}"`, 5);
+					if (url.startsWith("https://id.elsevier.com/as/authorization.oauth2")) {
+						Zotero.debug("Logging in to Mendeley Reference Manager");
 						if (!hasEnteredLogin) {
-							browser.destroy();
-							reject(new Error("Failed to enter login"));
+							hasEnteredLogin = await browser.browsingContext.currentWindowGlobal
+								.getActor("MendeleyAuth")
+								.sendQuery("login", { login });
+							if (!hasEnteredLogin) {
+								browser.destroy();
+								reject(new Error("Failed to enter login"));
+							}
 						}
 					}
-				}
-				else if (url.match(/https:\/\/id.elsevier.com\/as\/(.*?)\/resume\/as/)) {
-					Zotero.debug("Entering password to the Mendeley Reference Manager");
-					if (!hasEnteredPassword) {
-						hasEnteredPassword = await browser.browsingContext.currentWindowGlobal
-							.getActor("MendeleyAuth")
-							.sendQuery("password", { password });
+					else if (url.match(/https:\/\/id.elsevier.com\/as\/(.*?)\/resume\/as/)) {
+						Zotero.debug("Entering password to the Mendeley Reference Manager");
 						if (!hasEnteredPassword) {
-							browser.destroy();
-							reject(new Error("Failed to enter password"));
+							hasEnteredPassword = await browser.browsingContext.currentWindowGlobal
+								.getActor("MendeleyAuth")
+								.sendQuery("password", { password });
+							if (!hasEnteredPassword) {
+								browser.destroy();
+								reject(new Error("Failed to enter password"));
+							}
 						}
 					}
-				}
-				else if (url.startsWith("https://www.mendeley.com/reference-manager/library")) {
-					const cookies = cookieSandbox.getCookiesForURI(
-						Services.io.newURI("https://www.mendeley.com/reference-manager/library")
-					);
-					browser.destroy();
-					if (!cookies.accessToken) {
-						reject(new Error("Failed to obtain Mendeley access token"));
+					else if (url.startsWith("https://www.mendeley.com/reference-manager/library")) {
+						let accessToken;
+						for (let cookie of cookieContext.getCookies("www.mendeley.com")) {
+							if (cookie.name === "accessToken") {
+								accessToken = cookie.value;
+								break;
+							}
+						}
+						browser.destroy();
+						if (!accessToken) {
+							reject(new Error("Failed to obtain Mendeley access token"));
+						}
+						resolve(accessToken);
 					}
-					resolve(cookies.accessToken);
+					else {
+						Zotero.debug(`Ignoring unexpected URL while obtaining Mendeley access token: ${url}`);
+					}
 				}
-				else {
-					Zotero.debug(`Ignoring unexpected URL while obtaining Mendeley access token: ${url}`);
-				}
-			}
-		}, Ci.nsIWebProgress.NOTIFY_LOCATION);
+			}, Ci.nsIWebProgress.NOTIFY_LOCATION);
 
-		browser.load("https://www.mendeley.com/sign-in?routeTo=https://www.mendeley.com/reference-manager/library/");
-		Zotero.Promise.delay(ACCESS_TOKEN_TIMEOUT).then(() => {
-			browser.destroy();
-			reject(new Error("Timed out while obtaining Mendeley access token"));
+			browser.load("https://www.mendeley.com/sign-in?routeTo=https://www.mendeley.com/reference-manager/library/");
+			Zotero.Promise.delay(ACCESS_TOKEN_TIMEOUT).then(() => {
+				browser.destroy();
+				reject(new Error("Timed out while obtaining Mendeley access token"));
+			});
 		});
-	});
+	}
+	finally {
+		cookieContext.dispose();
+	}
 };
 
 const obtainReferenceManagerTokenWithRetry = async (login, password, tries = 3) => {

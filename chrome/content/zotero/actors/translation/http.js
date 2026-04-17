@@ -109,15 +109,6 @@ Zotero.HTTP = new function() {
 
 		xmlhttp.open(method, url, true);
 		
-		// Overwrite the system nsILoadInfo with one tied to our document
-		// so CookieSandbox can identify the source of the XHR
-		xmlhttp.channel.loadInfo = NetUtil.newChannel({
-			uri: url,
-			loadingNode: document,
-			securityFlags: Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_INHERITS_SEC_CONTEXT,
-			contentPolicyType: Ci.nsIContentPolicy.TYPE_XMLHTTPREQUEST,
-		}).loadInfo;
-
 		for (let header in options.headers) {
 			xmlhttp.setRequestHeader(header, options.headers[header]);
 		}
@@ -158,7 +149,7 @@ Zotero.HTTP = new function() {
 	 * @param {String}			url				URL to request
 	 * @param {Function} 		onDone			Callback to be executed upon request completion
 	 * @param {String}			responseCharset
-	 * @param {N/A}				cookieSandbox	Not used in Connector
+	 * @param {N/A}				cookieSandbox	Unused, kept for compatibility with translate submodule
 	 * @param {Object}			headers			HTTP headers to include with the request
 	 * @return {Boolean} True if the request was sent, or false if the browser is offline
 	 */

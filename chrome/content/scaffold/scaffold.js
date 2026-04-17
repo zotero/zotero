@@ -60,6 +60,7 @@ var Scaffold = new function () {
 	var _editors = {};
 
 	var _browserProgressListener = null;
+	var _persistentCookieContext = null;
 
 	var _propertyMap = {
 		'textbox-translatorID': 'translatorID',
@@ -224,6 +225,10 @@ var Scaffold = new function () {
 	
 	this.handleUnload = function () {
 		Zotero.Prefs.unregisterObserver(_prefsObserverID);
+		if (_persistentCookieContext) {
+			_persistentCookieContext.dispose();
+			_persistentCookieContext = null;
+		}
 	};
 	
 	this.promptForTranslatorsDirectory = async function () {
@@ -2007,15 +2012,33 @@ var Scaffold = new function () {
 		_clearOutput();
 
 		let rememberCookies = document.getElementById('checkbox-remember-cookies').checked;
+		let cookieContext;
+		if (rememberCookies) {
+			if (!_persistentCookieContext) {
+				_persistentCookieContext = Zotero.HTTP.newCookieContext();
+			}
+			cookieContext = _persistentCookieContext;
+		}
+		else {
+			cookieContext = Zotero.HTTP.newCookieContext();
+		}
+
 		let tester = new TranslatorTester(_getTranslatorFromPane(), {
 			translatorProvider: _translatorProvider,
-			cookieSandbox: rememberCookies ? null : new Zotero.CookieSandbox(),
+			cookieSandbox: cookieContext.id,
 			debug: _logOutput,
 			webTranslationEnvironment: new ZoteroWebTranslationEnvironment(),
 		});
 
-		for (let test of tests) {
-			yield { test, ...await tester.run(test) };
+		try {
+			for (let test of tests) {
+				yield { test, ...await tester.run(test) };
+			}
+		}
+		finally {
+			if (!rememberCookies) {
+				cookieContext.dispose();
+			}
 		}
 	};
 

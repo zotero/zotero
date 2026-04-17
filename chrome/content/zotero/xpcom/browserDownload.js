@@ -32,11 +32,6 @@ Zotero.BrowserDownload = {
 	},
 
 	/**
-	 * Stores cookie sandboxes for urls where we attempt to clear the captcha
-	 */
-	_storedCookieSandboxes: {},
-
-	/**
 	 * Checks whether the url can be handled as a hidden browser download
 	 * @param {String} url
 	 */
@@ -101,7 +96,6 @@ Zotero.BrowserDownload = {
 	 * @param {String} url
 	 * @param {String} path
 	 * @param {Object} [options]
-	 * @param {Object} [options.cookieSandbox]
 	 * @param {Boolean} [options.shouldDisplayCaptcha=false]
 	 */
 	async downloadPDF(url, path, options = {}) {
@@ -109,21 +103,14 @@ Zotero.BrowserDownload = {
 
 		let hiddenBrowser;
 		let pdfMIMETypeHandler;
-		let cookieSandbox = options.cookieSandbox?.clone();
 		let pdfFoundDeferred = Zotero.Promise.defer();
-		
-		let uri = new URL(url);
-		if (this._storedCookieSandboxes[uri.host]) {
-			Zotero.debug(`BrowserDownload: Using a stored cookie sandbox for ${uri.host}`);
-			cookieSandbox = this._storedCookieSandboxes[uri.host];
-		}
 
 		// Technically this is not a download, but the full operation (load, redirect, etc) timeout
 		const downloadTimeout = Zotero.Prefs.get('downloadPDFViaBrowser.downloadTimeout');
 		const onLoadTimeout = Zotero.Prefs.get('downloadPDFViaBrowser.onLoadTimeout');
 
 		try {
-			hiddenBrowser = new HiddenBrowser({ cookieSandbox });
+			hiddenBrowser = new HiddenBrowser();
 			await hiddenBrowser._createdPromise;
 			
 			let pdfLoaded = false;
@@ -171,7 +158,6 @@ Zotero.BrowserDownload = {
 			catch (err) {
 				Zotero.logError(err);
 			}
-			delete this._storedCookieSandboxes[uri.host];
 			if (options?.shouldDisplayCaptcha) {
 				Zotero.debug(`BrowserDownload: Downloading via a hidden browser failed due to ${e.message}`);
 				const captchaLocator = this.getCaptchaLocator(url);
@@ -202,16 +188,6 @@ Zotero.BrowserDownload = {
 		let pdfFoundDeferred = Zotero.Promise.defer();
 		const downloadTimeout = Zotero.Prefs.get('downloadPDFViaBrowser.downloadTimeout');
 		
-		let uri = new URL(url);
-		// Since we are downloading via the viewer it means we failed to download via the
-		// hidden browser either using the cookies provided by the client or stored cookies.
-		// We will now use client provided cookies but remove the user agent, since
-		// the cloudflare bot protection doesn't like it when we e.g. use Chrome UA from
-		// a Chrome Connector cookie sandbox, while acting like a Mozilla browser.
-		// Cloudflare's bot protection allegedly examines TLS handshake and the like to
-		// make sure that you are using the browser you are claiming to be.
-		delete options.cookieSandbox?.userAgent;
-		
 		try {
 			wmListener = {
 				onOpenWindow(xulWindow) {
@@ -225,7 +201,7 @@ Zotero.BrowserDownload = {
 			};
 			Services.wm.addListener(wmListener);
 			await new Promise((resolve) => {
-				win = Zotero.openInViewer(url, { cookieSandbox: options.cookieSandbox });
+				win = Zotero.openInViewer(url);
 				win.addEventListener('load', resolve);
 			});
 			browser = win.document.querySelector('browser');
@@ -245,7 +221,6 @@ Zotero.BrowserDownload = {
 				pdfFoundDeferred.promise
 			]);
 			pdfFound = true;
-			this._storedCookieSandboxes[uri.host] = options.cookieSandbox;
 			await Zotero.File.putContentsAsync(path, pdfBlob);
 		}
 		catch (e) {

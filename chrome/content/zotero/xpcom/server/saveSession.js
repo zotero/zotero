@@ -75,21 +75,9 @@ Zotero.Server.Connector.SaveSession = class {
 	async saveItems(target) {
 		var { library, collection } = Zotero.Server.Connector.resolveTarget(target);
 		var data = this._requestData.data;
-		var headers = this._requestData.headers;
-		var cookieSandbox = data.uri
-			? new Zotero.CookieSandbox(
-				null,
-				data.uri,
-				data.detailedCookies ? "" : data.cookie || "",
-				headers["User-Agent"]
-			)
-			: null;
-		if (cookieSandbox && data.detailedCookies) {
-			cookieSandbox.addCookiesFromHeader(data.detailedCookies);
-		}
-		
+
 		var proxy = data.proxy && new Zotero.Proxy(data.proxy);
-		
+
 		this.itemSaver = new Zotero.Translate.ItemSaver({
 			libraryID: library.libraryID,
 			collections: collection ? [collection.id] : undefined,
@@ -97,7 +85,6 @@ Zotero.Server.Connector.SaveSession = class {
 			attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE,
 			forceTagType: 1,
 			referrer: data.uri,
-			cookieSandbox,
 			proxy
 		});
 		let items = await this.itemSaver.saveItems(data.items, () => 0, () => 0);
