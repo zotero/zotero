@@ -31,7 +31,9 @@
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	drawintitlebar-platforms="mac,win"
-	resizable="false">
+	resizable="false"
+	windowtype="zotero:citationDialog"
+	>
 	<head>
 		<title data-l10n-id="integration-citationDialog"></title>
 		<link rel="localization" href="zotero.ftl"/>
@@ -68,7 +70,7 @@
 		
 		<div id="list-layout" class="layout" hidden="true">
 			<div class="divider"></div>
-			<div id="list-layout-wrapper" class="vbox search-items" data-arrow-nav="vertical" data-multiselectable="true" role="listbox" aria-describedby="item-description"></div>
+			<div id="list-layout-wrapper" class="vbox"></div>
 		</div>
 		
 		<div id="library-layout" class="layout" hidden="true">
@@ -86,6 +88,10 @@
 					<div id="zotero-items-tree" data-tabindex="60" style="--highlight-color: var(--accent-blue30);"/>
 				</div>
 				<div id="sidebar" class="vbox">
+					<div id="add-note-sidebar" class="vbox" data-dialog-type="add-note">
+						<xul:note-editor id="note-preview" flex="1"/>
+						<div id="empty-note-preview-message" data-l10n-id="integration-citationDialog-insertNote-preview-msg"></div>
+					</div>
 					<div id="annotations-sidebar" class="vbox" data-dialog-type="annotations">
 						<!-- Uses styling from _search.scss -->
 						<div id="annotations-sidebar-filter-wrapper" class="search" hidden="true">
