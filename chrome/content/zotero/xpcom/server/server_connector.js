@@ -270,23 +270,14 @@ Zotero.Server.Connector.Detect.prototype = {
 	
 	async getTranslators(requestData) {
 		var data = requestData.data;
-		var cookieSandbox = data.uri
-			? new Zotero.CookieSandbox(
-				null,
-				data.uri,
-				data.cookie || "",
-				requestData.headers["User-Agent"]
-			)
-			: null;
-		
+
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
 		doc = Zotero.HTTP.wrapDocument(doc, data.uri);
-		
+
 		let translate = this._translate = new Zotero.Translate.Web();
 		translate.setDocument(doc);
-		cookieSandbox && translate.setCookieSandbox(cookieSandbox);
-		
+
 		return await translate.getTranslators();
 	},
 }

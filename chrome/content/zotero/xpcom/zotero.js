@@ -717,7 +717,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			Zotero.Streamer.init();
 			
 			Zotero.MIMETypeHandler.init();
-			Zotero.CookieSandbox.init();
 			await Zotero.Proxies.init();
 			
 			// Initialize keyboard shortcuts
@@ -1196,7 +1195,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @param {String} uri
 	 * @param {Object} [options]
 	 * @param {Function} [options.onLoad] - Function to run once URI is loaded; passed the loaded document
-	 * @param {Object} [options.cookieSandbox] - Attach a cookie sandbox to the browser
 	 * @param {Boolean} [options.allowJavaScript] - Set to false to disable JavaScript
 	 */
 	this.openInViewer = function (uri, options) {

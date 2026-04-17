@@ -39,8 +39,6 @@ Zotero.Attachments = new function () {
 	
 	var _findFileQueue = [];
 	var _findFileQueuePromise = null;
-	var _findFileCookieSandboxes = new Map();
-	
 	var self = this;
 	
 	
@@ -519,7 +517,6 @@ Zotero.Attachments = new function () {
 	 * @param {Boolean} [options.renameIfAllowedType=false]
 	 * @param {String} [options.contentType]
 	 * @param {String} [options.referrer]
-	 * @param {CookieSandbox} [options.cookieSandbox]
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
@@ -533,7 +530,6 @@ Zotero.Attachments = new function () {
 		var renameIfAllowedType = options.renameIfAllowedType;
 		var contentType = options.contentType;
 		var referrer = options.referrer;
-		var cookieSandbox = options.cookieSandbox;
 		var saveOptions = options.saveOptions;
 		
 		Zotero.debug('Importing attachment from URL ' + url);
@@ -557,7 +553,6 @@ Zotero.Attachments = new function () {
 			try {
 				browser = new HiddenBrowser({
 					docShell: { allowImages: true },
-					cookieSandbox,
 				});
 				await browser.load(url, { requireSuccessfulStatus: true });
 				return await Zotero.Attachments.importFromDocument({
@@ -606,7 +601,6 @@ Zotero.Attachments = new function () {
 					url,
 					tmpFile,
 					{
-						cookieSandbox,
 						referrer,
 						enforceFileType: Zotero.Attachments.FIND_AVAILABLE_FILE_TYPES.includes(contentType),
 						shouldDisplayCaptcha: true
@@ -655,7 +649,7 @@ Zotero.Attachments = new function () {
 			return process(contentType, Zotero.MIME.hasNativeHandler(contentType));
 		}
 		
-		var args = await Zotero.MIME.getMIMETypeFromURL(url, cookieSandbox);
+		var args = await Zotero.MIME.getMIMETypeFromURL(url);
 		return process(...args);
 	};
 	
@@ -1168,7 +1162,6 @@ Zotero.Attachments = new function () {
 	 * @param {String} url
 	 * @param {String} path
 	 * @param {Object} [options]
-	 * @param {Object} [options.cookieSandbox]
 	 * @param {String} [options.referrer]
 	 * @param {Boolean} [options.enforceFileType] - Delete file if not one of SUPPORTED_FILE_TYPES
 	 * @param {Boolean} [options.shouldDisplayCaptcha]
@@ -1186,7 +1179,6 @@ Zotero.Attachments = new function () {
 				path,
 				{
 					headers,
-					cookieSandbox: options.cookieSandbox
 				}
 			);
 			// Check that the downloaded file is the expected type
@@ -2054,8 +2046,6 @@ Zotero.Attachments = new function () {
 				continue;
 			}
 
-			let cookieSandbox = _getFindFileCookieSandboxForSite(url || pageURL);
-			
 			if (urlResolver.referrer) {
 				options.referrer = urlResolver.referrer;
 			}
@@ -2072,7 +2062,7 @@ Zotero.Attachments = new function () {
 				while (tries-- > 0) {
 					try {
 						await beforeRequest(url);
-						await this.downloadFile(url, path, { ...options, cookieSandbox });
+						await this.downloadFile(url, path, options);
 						afterRequest(url);
 						return { url, props: urlResolver };
 					}
@@ -2128,7 +2118,6 @@ Zotero.Attachments = new function () {
 										followRedirects: false,
 										// Use our own error handling
 										errorDelayMax: 0,
-										cookieSandbox,
 									}
 								);
 							}
@@ -2233,7 +2222,7 @@ Zotero.Attachments = new function () {
 					}
 					// Otherwise translate the Document we parsed above
 					else if (doc) {
-						({ title, mimeType, url } = await Zotero.Utilities.Internal.getFileFromDocument(doc, { cookieSandbox }));
+						({ title, mimeType, url } = await Zotero.Utilities.Internal.getFileFromDocument(doc));
 					}
 				}
 				catch (e) {
@@ -2252,7 +2241,7 @@ Zotero.Attachments = new function () {
 				addTriedURL(url);
 				
 				// Use the page we loaded as the referrer
-				let downloadOptions = Object.assign({}, options, { referrer: responseURL, cookieSandbox });
+				let downloadOptions = Object.assign({}, options, { referrer: responseURL });
 				// Backoff loop
 				let tries = 3;
 				while (tries-- >= 0) {
@@ -2276,45 +2265,6 @@ Zotero.Attachments = new function () {
 	};
 
 
-	/**
-	 * Get an ephemeral CookieSandbox based on the URL's site (scheme + eTLD+1).
-	 * Sandboxes expire after 24 hours of inactivity.
-	 * @param {nsIURI | string} url
-	 * @returns {Zotero.CookieSandbox}
-	 */
-	function _getFindFileCookieSandboxForSite(url) {
-		let lastUsedCutoff = Date.now() - 24 * 60 * 60 * 1000;
-		for (let [site, { lastUsed }] of _findFileCookieSandboxes) {
-			if (lastUsed >= lastUsedCutoff) {
-				// The map is kept in order of expiration, so if we've gotten to a non-expired entry,
-				// we're done
-				break;
-			}
-			_findFileCookieSandboxes.delete(site);
-		}
-		
-		if (typeof url === 'string') {
-			url = Services.io.newURI(url);
-		}
-		let site;
-		try {
-			site = Services.eTLD.getSite(url);
-		}
-		catch {
-			// eTLD service can't handle URLs without TLDs (e.g., localhost),
-			// so fall back to the host
-			site = url.hostPort;
-		}
-		
-		let cookieSandbox = _findFileCookieSandboxes.get(site)?.cookieSandbox
-			?? new Zotero.CookieSandbox();
-		// Delete and re-add to keep entries in order of expiration
-		_findFileCookieSandboxes.delete(site);
-		_findFileCookieSandboxes.set(site, { cookieSandbox, lastUsed: Date.now() });
-		return cookieSandbox;
-	}
-	
-	
 	/**
 	 * @deprecated Use Zotero.Utilities.cleanURL instead
 	 */

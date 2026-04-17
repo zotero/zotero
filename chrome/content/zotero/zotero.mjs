@@ -74,7 +74,6 @@ const xpcomFilesLocal = [
 	'browserDownload',
 	'cite',
 	'citeprocRsBridge',
-	'cookieSandbox',
 	'data/library',
 	'data/libraries',
 	'data/dataObject',
