@@ -89,18 +89,30 @@ export class CitationDialogSearchHandler {
 	// Takes citedItems as a parameter to filter them out from Selected, Opened and Cited groups.
 	getOrderedSearchResultGroups(citedItemIDs = new Set()) {
 		let removeItemsIncludedInCitation = (items) => {
-			return items.filter(i => !citedItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
+			items = items.filter(i => !citedItemIDs.has(i.cslItemID ? i.cslItemID : i.id));
+			// When adding notes, also remove parent items whose child notes are all cited
+			if (this.dialogState.isAddingNote()) {
+				items = items.filter((item) => {
+					if (!item.isRegularItem()) return true;
+					let noteIDs = item.getNotes();
+					return noteIDs.some(id => !citedItemIDs.has(id));
+				});
+			}
+			return items;
 		};
 		let result = [];
 		let groupKeys = ["selected", "open", "cited"];
 		if (this.dialogState.isAddingAnnotations()) {
 			groupKeys = ["selectedAnnotations", "selectedItems", "open", "cited"];
 		}
+		else if (this.dialogState.isAddingNote() && this.dialogState.getCurrentLayoutType() == "library") {
+			groupKeys = ["selectedNotes", "selectedItems", "open", "cited"];
+		}
 		// selected/open/cited go first
 		for (let groupKey of groupKeys) {
 			let groupItems = this.results[groupKey];
 			// in selected and opened items, do not display items already in the citation
-			if (["selected", "selectedAnnotations", "selectedItems", "open"].includes(groupKey)) {
+			if (["selected", "selectedAnnotations", "selectedItems", "selectedNotes", "open"].includes(groupKey)) {
 				groupItems = removeItemsIncludedInCitation(groupItems);
 			}
 			if (groupItems.length) {
@@ -116,21 +128,28 @@ export class CitationDialogSearchHandler {
 		// library items go after
 		let libraryItems = Object.values(this.results.found.reduce((acc, item) => {
 			if (!acc[item.libraryID]) {
-				acc[item.libraryID] = { key: item.libraryID, group: [], isLibrary: true };
+				acc[item.libraryID] = { key: item.libraryID, group: [], label: Zotero.Libraries.get(item.libraryID).name };
 			}
 			acc[item.libraryID].group.push(item);
 			return acc;
 		}, {}));
-
-		// sort actual items or notes
-		let itemComparator = this.dialogState.isAddingNote() ? this._createNotesSort() : this._createItemsSort();
-		libraryItems.forEach((library) => {
-			library.group.sort(itemComparator);
-		});
-	
 		// sort libraries by the number of items
 		libraryItems.sort((a, b) => b.group.length - a.group.length);
 		result.push(...libraryItems);
+
+		// post processing: normalize every group into an array of { item, children }
+		// objects so callers always receive the same shape.
+		for (let section of result) {
+			if (this.dialogState.isAddingNote() && this.dialogState.getCurrentLayoutType() === "list") {
+				// _groupNotesWithParents already returns { item, children } objects
+				section.group = this._groupNotesWithParents(section.group, citedItemIDs);
+			}
+			else {
+				let itemComparator = this.dialogState.isAddingNote() ? this._createNotesSort() : this._createItemsSort();
+				section.group.sort(itemComparator);
+				section.group = section.group.map(item => ({ item, children: [] }));
+			}
+		}
 
 		return result;
 	}
@@ -154,6 +173,11 @@ export class CitationDialogSearchHandler {
 			// separate selected annotations into its own group which appears in a separate deck
 			this.results.selectedItems = this.results.selected.filter(item => !item.isAnnotation());
 			this.results.selectedAnnotations = this.results.selected.filter(item => item.isAnnotation());
+		}
+		// when notes are being cited, in lib mode selected items are separated into top-level items and notes
+		if (this.dialogState.isAddingNote()) {
+			this.results.selectedItems = this.results.selected.filter(item => !item.isNote());
+			this.results.selectedNotes = this.results.selected.filter(item => item.isNote());
 		}
 		// if a specific library ID is specified, only keep items from that library
 		if (this.io.filterLibraryIDs) {
@@ -232,6 +256,10 @@ export class CitationDialogSearchHandler {
 		return str;
 	}
 
+	keepItemsWithNotes(items) {
+		return items.filter(item => this.isItemWithNotes(item));
+	}
+
 	// Return items that are either annotations or are ancestors of annotations
 	keepItemsWithAnnotations(items) {
 		return items.filter(item => this.isItemWithAnnotations(item));
@@ -291,29 +319,31 @@ export class CitationDialogSearchHandler {
 			this.io.filterLibraryIDs.forEach(id => s.addCondition("libraryID", "is", id));
 		}
 		let realInputRegex = /[\w\u007F-\uFFFF]/;
+		if (!realInputRegex.test(this.searchValue)) return [];
 		if (this.dialogState.isAddingNote()) {
-			s.addCondition("quicksearch-titleCreatorYearNote", "contains", this.searchValue);
+			let scope = new Zotero.Search;
+			// Allow to search by ISBN/DOI for the top-level item
+			let addedIdentifierCondition = this._addIdentifierConditions(scope, this.searchValue);
+			if (!addedIdentifierCondition) {
+				// If identifier is not provided, search by conditions equivalent to quicksearch-titleCreatorYear
+				this._addQuickSearchEquivalentConditions(scope);
+			}
+			scope.addCondition("includeChildren", "true");
+			s.setScope(scope);
+			s.addCondition("itemType", "is", "note");
 		}
-		else if (realInputRegex.test(this.searchValue)) {
-			// search for the identifier if it is provided,
-			// otherwise look up by title, creator and year
-			let isDOI = Zotero.Utilities.cleanDOI(this.searchValue);
-			let isISBN = Zotero.Utilities.cleanISBN(this.searchValue);
-			if (isDOI) {
-				s.addCondition("DOI", "contains", this.searchValue);
-			}
-			else if (isISBN) {
-				s.addCondition("ISBN", "contains", this.searchValue);
-			}
-			else {
+		else {
+			// search items by the identifier if provided, or by title/creator/year otherwise
+			let addedIdentifierCondition = this._addIdentifierConditions(s, this.searchValue);
+			if (!addedIdentifierCondition) {
 				s.addCondition("quicksearch-titleCreatorYear", "contains", this.searchValue);
-				s.addCondition("itemType", "isNot", "attachment");
 			}
+			s.addCondition("itemType", "isNot", "attachment");
 		}
 		let searchResultIDs = await s.search();
 		// Search results might be in an unloaded library, so get items asynchronously and load necessary data
+		await this._ensureRelevantItemsAreLoaded(searchResultIDs);
 		var items = await Zotero.Items.getAsync(searchResultIDs);
-		await Zotero.Items.loadDataTypes(items);
 		return items;
 	}
 
@@ -326,7 +356,6 @@ export class CitationDialogSearchHandler {
 	}
 
 	async _getReaderOpenItems() {
-		if (this.dialogState.isAddingNote()) return [];
 		let tabs = [];
 		let win = Zotero.getMainWindow();
 		// If the main window is open, use it to get open tabs
@@ -339,7 +368,7 @@ export class CitationDialogSearchHandler {
 			if (!mainWindowLastState) return [];
 			tabs = mainWindowLastState.tabs;
 		}
-		let itemIDs = tabs.filter(t => t.type === 'reader').sort((a, b) => {
+		let itemIDs = tabs.filter(t => ['reader', 'note'].includes(t.type)).sort((a, b) => {
 			// Sort selected tab first
 			if (a.selected) return -1;
 			else if (b.selected) return 1;
@@ -352,21 +381,21 @@ export class CitationDialogSearchHandler {
 		if (!itemIDs.length) return [];
 
 		// Fetch top-most items and load necessary data, in case tabs belong to an unloaded library
+		await this._ensureRelevantItemsAreLoaded(itemIDs);
 		let items = [];
 		for (let itemID of itemIDs) {
 			let item = await Zotero.Items.getAsync(itemID);
+			if (!item) continue;
 			if (item && item.parentItemID) {
 				item = await Zotero.Items.getAsync(item.parentItemID);
 			}
 			items.push(item);
 		}
 		if (this.dialogState.isAddingAnnotations()) {
-			// Make sure annotations are loaded on unloaded tabs from unloaded libraries
-			await this._ensureRelevantItemsAreLoaded(items);
 			items = this.keepItemsWithAnnotations(items);
 		}
-		else {
-			await Zotero.Items.loadDataTypes(items);
+		if (this.dialogState.isAddingNote()) {
+			items = this.keepItemsWithNotes(items);
 		}
 		// Return deduplicated items since there may be multiple tabs opened for the same
 		// top-level item (duplicate tabs or a multiple attachments belonging to the same item)
@@ -376,7 +405,7 @@ export class CitationDialogSearchHandler {
 	_getSelectedLibraryItems() {
 		let selected = Zotero.getActiveZoteroPane()?.getSelectedItems() || [];
 		if (this.dialogState.isAddingNote()) {
-			return selected.filter(i => i.isNote()) || [];
+			return this.keepItemsWithNotes(selected);
 		}
 		if (this.dialogState.isAddingAnnotations()) {
 			return this.keepItemsWithAnnotations(selected);
@@ -418,6 +447,16 @@ export class CitationDialogSearchHandler {
 					itemStr += " " + makeSearchString(item.topLevelItem);
 				}
 			}
+			// Handle searching through selected notes
+			if (this.dialogState.isAddingNote()) {
+				if (item.isNote()) {
+					itemStr += ` ${item.getNote().toLowerCase()}`;
+					if (item.parentItemID) {
+						let parentStr = makeSearchString(item.topLevelItem);
+						itemStr += ` ${parentStr}`;
+					}
+				}
+			}
 			// Include items that match every word that was typed
 			let allMatch = splits.every(split => itemStr.includes(split));
 			if (allMatch) {
@@ -433,8 +472,16 @@ export class CitationDialogSearchHandler {
 		let searchParts = Zotero.SearchConditions.parseSearchString(searchString);
 		var collation = Zotero.getLocaleCollation();
 		return ((a, b) => {
+			// When displaying notes, top level notes may appear among top-level
+			// container items.
+			if (this.dialogState.isAddingNote()) {
+				if (a.isNote() || b.isNote()) {
+					return collation.compareString(1, a.getDisplayTitle(), b.getDisplayTitle());
+				}
+			}
+			// Sort by left-bound name matches first
 			var firstCreatorA = a.firstCreator, firstCreatorB = b.firstCreator;
-			
+
 			// Favor left-bound name matches (e.g., "Baum" < "Appelbaum"),
 			// using last name of first author
 			if (firstCreatorA && firstCreatorB) {
@@ -491,21 +538,104 @@ export class CitationDialogSearchHandler {
 		return stringNoYear + " " + year;
 	}
 
-	// load all ancestors,descendants, and siblings of provided items
-	async _ensureRelevantItemsAreLoaded(items) {
+	_addIdentifierConditions(search, searchValue) {
+		let cleanDOI = Zotero.Utilities.cleanDOI(searchValue);
+		let cleanISBN = Zotero.Utilities.cleanISBN(searchValue);
+
+		if (cleanDOI) {
+			search.addCondition("DOI", "contains", cleanDOI);
+			return true;
+		}
+		else if (cleanISBN) {
+			search.addCondition("ISBN", "contains", cleanISBN);
+			return true;
+		}
+		return false;
+	}
+
+	// Replicate quicksearch-titleCreatorYear conditions on a search object,
+	// with an additional "note" condition so that note content is also matched.
+	_addQuickSearchEquivalentConditions(search) {
+		let parts = Zotero.SearchConditions.parseSearchString(this.searchValue);
+		for (let part of parts) {
+			search.addCondition("blockStart");
+			search.addCondition("key", "is", part.text, false);
+			search.addCondition("title", "contains", part.text, false);
+			search.addCondition("publicationTitle", "contains", part.text, false);
+			search.addCondition("shortTitle", "contains", part.text, false);
+			search.addCondition("court", "contains", part.text, false);
+			search.addCondition("year", "contains", part.text, false);
+			search.addCondition("citationKey", "contains", part.text, false);
+			search.addCondition("creator", "contains", part.text, false);
+			search.addCondition("note", "contains", part.text, false);
+			search.addCondition("blockEnd");
+		}
+	}
+
+	// Given an array of note items, construct a new array of { item, children }
+	// objects where each parent regular item is paired with its child notes.
+	// Top-level notes (no parent) have an empty children array.
+	// Returns [{ item: parentA, children: [noteA1, noteA2] }, { item: topLevelNote, children: [] }]
+	_groupNotesWithParents(items, citedItemIDs = new Set()) {
+		let topLevelItems = {};
+		for (let item of items) {
+			let topLevel = item.topLevelItem;
+			if (!topLevelItems[topLevel.id]) {
+				topLevelItems[topLevel.id] = [];
+			}
+			if (item.parentItemID) {
+				topLevelItems[topLevel.id].push(item);
+			}
+		}
+		let topLevelArray = Object.keys(topLevelItems).map(id => Zotero.Items.get(id));
+		topLevelArray.sort(this._createItemsSort());
+		let result = [];
+		for (let topLevelItem of topLevelArray) {
+			let childNotes = topLevelItems[topLevelItem.id];
+			// if there is a parent item with no notes, add all of its child notes
+			// (e.g. for an opened item)
+			if (childNotes.length === 0 && topLevelItem.isRegularItem()) {
+				let noteIDs = topLevelItem.getNotes();
+				childNotes = Zotero.Items.get(noteIDs);
+			}
+			// Exclude notes already added to the citation
+			childNotes = childNotes.filter(note => !citedItemIDs.has(note.id));
+			// Skip regular items whose child notes are all cited
+			if (!childNotes.length && topLevelItem.isRegularItem()) continue;
+			childNotes.sort(this._createNotesSort());
+			result.push({ item: topLevelItem, children: childNotes });
+		}
+		return result;
+	}
+
+	// load all ancestors, descendants, and siblings of provided item IDs
+	async _ensureRelevantItemsAreLoaded(itemIDs) {
+		// Load the items themselves first so we can walk up to parents
+		let items = await Zotero.Items.getAsync(itemIDs);
+		await Zotero.Items.loadDataTypes(items);
+		// Walk up to ensure all ancestors are loaded (e.g. for notes whose
+		// parent may not be loaded yet, which would cause topLevelItem to throw)
+		for (let item of items) {
+			while (item.parentItemID) {
+				item = await Zotero.Items.getAsync(item.parentItemID);
+			}
+		}
 		let topLevelItems = items.map(item => item.topLevelItem);
-		// load all data of top-level items and their attachments
+		// Load all data of top-level items
 		await Zotero.Items.loadDataTypes(topLevelItems);
+
+		// Load children: attachments and notes
 		let regularItems = topLevelItems.filter(item => item.isRegularItem());
 		let attachmentIDs = regularItems.flatMap(item => item.getAttachments());
-		let attachments = await Zotero.Items.getAsync(attachmentIDs);
-		await Zotero.Items.loadDataTypes(attachments);
+		let noteIDs = regularItems.flatMap(item => item.getNotes());
+		let children = await Zotero.Items.getAsync([...attachmentIDs, ...noteIDs]);
+		await Zotero.Items.loadDataTypes(children);
 
 		// Load annotations.
 		// Zotero.Items.loadDataTypes on parent items will set the
 		// _annotations cache on attachments but not load the annotations themselves.
 		// So fetch annotationIDs from the cache and load annotations separately.
-		attachments = attachments.filter(attachment => attachment.isFileAttachment());
+		let attachments = children.filter(item => item.isFileAttachment?.());
 		let annotationIDs = attachments.flatMap(attachment => attachment.getAnnotations(false, true));
 		let annotations = await Zotero.Items.getAsync(annotationIDs);
 		await Zotero.Items.loadDataTypes(annotations);

@@ -460,6 +460,68 @@ Zotero.Notes = new function () {
 	};
 
 	/**
+	 * Create an unsaved note item combining the content of multiple notes.
+	 * Embedded images are inlined as data URIs and citation metadata from all
+	 * notes is merged into a single container so that getExportableNote can
+	 * resolve citations that reference items not in the local library.
+	 *
+	 * @param {Zotero.Item[]} notes - Array of note items to combine
+	 * @returns {Promise<Zotero.Item>} - Unsaved note item with combined content
+	 */
+	this.createCombinedNote = async function (notes) {
+		let parser = new DOMParser();
+		let allCitationItems = [];
+		let combinedInnerHTML = "";
+		let schemaVersion = 0;
+		for (let note of notes) {
+			let noteHTML = note.getNote();
+			// Replace <img data-attachment-key="..."> with inline data URIs
+			let attachments = Zotero.Items.get(note.getAttachments());
+			for (let attachment of attachments) {
+				if (!attachment.isEmbeddedImageAttachment()) continue;
+				let path = await attachment.getFilePathAsync();
+				if (!path || !await IOUtils.exists(path)) continue;
+				let contentType = attachment.attachmentContentType || "image/png";
+				let dataURI = await Zotero.File.generateDataURI(path, contentType);
+				noteHTML = noteHTML.replace(
+					new RegExp(`(<img[^>]*?)data-attachment-key="${attachment.key}"`, "g"),
+					`$1src="${dataURI}"`
+				);
+			}
+			// Parse the note HTML and extract citation-items metadata + inner content
+			let doc = parser.parseFromString(noteHTML, "text/html");
+			let container = doc.querySelector('div[data-schema-version]');
+			if (container) {
+				// Track the highest schema version across all notes
+				let sv = parseInt(container.getAttribute("data-schema-version")) || 0;
+				if (sv > schemaVersion) {
+					schemaVersion = sv;
+				}
+				// Collect citation items from this note's metadata
+				let citationItemsAttr = container.getAttribute("data-citation-items");
+				if (citationItemsAttr) {
+					try {
+						let items = JSON.parse(decodeURIComponent(citationItemsAttr));
+						allCitationItems.push(...items);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+			}
+			if (combinedInnerHTML) combinedInnerHTML += "<br><br>";
+			combinedInnerHTML += container ? container.innerHTML : noteHTML;
+		}
+		// Wrap combined content in a single schema container with merged citation metadata
+		let mergedCitationItems = encodeURIComponent(JSON.stringify(allCitationItems));
+		let mergedHTML = `<div data-schema-version="${schemaVersion}" data-citation-items="${mergedCitationItems}">${combinedInnerHTML}</div>`;
+		let mockNote = new Zotero.Item('note');
+		mockNote.libraryID = notes[0].libraryID;
+		mockNote.setNote(mergedHTML);
+		return mockNote;
+	};
+
+	/**
 	 * Copy embedded images from one note to another and update
 	 * item keys in note HTML.
 	 *

@@ -385,143 +385,161 @@
 	#list-layout {
 		#list-layout-wrapper {
 			-moz-user-select: none;
-			overflow-y: auto;
 			scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
-			height: 100%;
-			.section {
-				&:first-child {
-					padding-top: 4px;
+
+			// Fill remaining space between the search row and #bottom-area,
+			// and clip overflow so the inner virtualized table provides scrolling.
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+			min-height: 0;
+			overflow: hidden;
+
+			// Let the virtualized table fill the wrapper so its body can scroll
+			// instead of expanding the wrapper to fit all rows.
+			.virtualized-table {
+				flex: 1;
+				min-height: 0;
+			}
+
+			// Neutralize default virtualized-table styling so list-mode rows behave like
+			// the old section-based layout (stacked blocks, no flex-centering, no row
+			// background/outline from VT's default selected/focused styling).
+			.virtualized-table-body {
+				padding: 4px 0 8px 0;
+			}
+			.row {
+				display: block;
+				border-radius: 0;
+				// Clip row contents so collapsed rows (animated to height: 0
+				// during section collapse) don't overflow on top of each other.
+				overflow: hidden;
+
+				&.selected {
+					background-color: transparent;
+					color: inherit;
 				}
-				&:last-child {
-					padding-bottom: 8px;
+				&.focused:not(.selected) {
+					outline: none;
 				}
-				// show dividers except for on the last section
-				.divider {
-					margin: 4px 16px;
-					border-bottom: 1px solid var(--fill-quinary);
-				}
-				&:last-child {
-					.divider {
-						display: none;
-					}
-				}
-				.header {
-					font-weight: 700;
-					font-size: 1rem;
-					color: var(--fill-secondary);
-					padding: 4px 8px 4px 16px;
+			}
+
+			// Section dividers -- emitted as their own row between sections.
+			// The trailing divider after the last section is omitted in JS.
+			.row > .divider {
+				margin: 4px 16px;
+				border-bottom: 1px solid var(--fill-quinary);
+			}
+
+			// Section header -- emitted as its own row at the start of every section.
+			.row > .header {
+				font-weight: 700;
+				font-size: 1rem;
+				color: var(--fill-secondary);
+				margin: 4px 8px 4px 16px;
+				display: flex;
+
+				.header-btn-group {
 					display: flex;
-					.header-btn-group {
-						display: flex;
-						align-items: center;
-						height: 17px;
-					}
+					align-items: center;
+					height: 17px;
 				}
-				.item {
-					@include focus-ring(true);
-					margin: 0 8px;
-					padding: 4px 8px;
+			}
+
+			// Collapsible header (currently only the "selected" group when it has
+			// multiple items). Keyed on a class set by _renderRow, replacing the old
+			// `.section.expandable` / `.section.expandable.expanded` ancestors.
+			.row > .header.collapsible.selected.focused {
+				outline: 2px solid var(--accent-blue30);
+				outline-offset: 1px;
+				border-radius: 5px;
+			}
+			.row > .header.collapsible {
+				justify-content: space-between;
+
+				.header-label {
+					@include focus-ring;
 					border-radius: 5px;
-					color: var(--fill-primary);
-					cursor: default;
 					-moz-window-dragging: no-drag;
-					&:not([disabled]):hover {
-						background-color: var(--fill-quinary);
+					&:hover {
+						cursor: pointer;
+						text-decoration: underline;
 					}
-					&.selected {
-						background-color: var(--selected-item-background);
-						border-radius: 0;
-						
-					}
-					&.selected-first {
-						border-top-left-radius: 5px;
-						border-top-right-radius: 5px;
-					}
-					&.selected-last {
-						border-bottom-left-radius: 5px;
-						border-bottom-right-radius: 5px;
-					}
-
-					.icon {
-						margin-top: -4px;
-						margin-inline-end: 4px;
-						flex-shrink: 0;
-						&.retracted {
-							width: 12px;
-							height: 12px;
-							color: var(--accent-red);
-							@include svgicon("cross", "universal", "16");
-						}
-					}
-					.description {
-						// Needed to have empty item row description to still occupy height
+					&::before {
+						@include svgicon("chevron-8", "universal", "8");
+						width: 8px;
+						height: 8px;
+						display: inline-block;
+						content: "";
 						white-space: pre;
-						margin-inline-start: 20px;
-						overflow: hidden;
-  						text-overflow: ellipsis;
-					}
-					.title {
-						font-size: 1rem;
-						overflow: hidden;
-						text-wrap: nowrap;
-						text-overflow: ellipsis;
+						margin-inline-end: 3px;
+
+						transform: rotate(180deg);
+						transform-origin: center;
+						transition: transform 0.2s ease-in-out;
+						vertical-align: middle;
+						margin-bottom: 3px;
 					}
 				}
-				&.expandable {
-					// styling for expandable header with a twisty
-					.header {
-						display: flex;
-						justify-content: space-between;
+			}
+			.row > .header.collapsible.collapsed .header-label::before {
+				transform: rotate(0deg);
+			}
 
-						.header-label {
-							@include focus-ring;
-							border-radius: 5px;
-							-moz-window-dragging: no-drag;
-							&:hover {
-								cursor: pointer;
-								text-decoration: underline;
-							}
-							&::before {
-								@include svgicon("chevron-8", "universal", "8");
-								width: 8px;
-								height: 8px;
-								display: inline-block;
-								content: "";
-								white-space: pre;
-								margin-inline-end: 3px;
+			// Items (including the cited-items loading placeholder).
+			.row > .item {
+				@include focus-ring(true);
+				margin: 0 8px;
+				padding: 4px 8px;
+				border-radius: 5px;
+				color: var(--fill-primary);
+				cursor: default;
+				-moz-window-dragging: no-drag;
 
-								transform: rotate(0deg);
-								transform-origin: center;
-								transition: transform 0.2s ease-in-out;
-								vertical-align: middle;
-								margin-bottom: 3px;
-							}
-						}
+				&:not([disabled]):hover {
+					background-color: var(--fill-quinary);
+				}
+				&.selected {
+					background-color: var(--selected-item-background);
+					border-radius: 0;
+				}
+				&.first-selected {
+					border-top-left-radius: 5px;
+					border-top-right-radius: 5px;
+				}
+				&.last-selected {
+					border-bottom-left-radius: 5px;
+					border-bottom-right-radius: 5px;
+				}
+
+				.icon {
+					margin-top: -4px;
+					margin-inline-end: 4px;
+					flex-shrink: 0;
+					&.retracted {
+						width: 12px;
+						height: 12px;
+						color: var(--accent-red);
+						@include svgicon("cross", "universal", "16");
 					}
-					&.expanded {
-						.header-label::before {
-							transform: rotate(180deg);
-						}
-					}
-					// item container has no height when it is collapsed
-					.itemsContainer {
-						transition: height 0.3s ease;
-						overflow: hidden;
-						// add small padding at the top and bottom to make sure the focus-ring (if it appear) is not
-						// cutoff by the overflow:hidden. Negative margin is to preserve spacing set by other components.
-						padding: 1px 0;
-						margin: -1px 0;
-					}
-					&:not(.expanded) {
-						.itemsContainer {
-							height: 0 !important; // important to override inline height with items displayed
-						}
-					}
+				}
+				.description {
+					// Needed to have empty item row description to still occupy height
+					white-space: pre;
+					margin-inline-start: 20px;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+				.title {
+					font-size: 1rem;
+					overflow: hidden;
+					text-wrap: nowrap;
+					text-overflow: ellipsis;
 				}
 			}
 		}
 		&.empty {
-			#list-layout-wrapper {
+			#list-layout-wrapper .virtualized-table-body {
 				padding: 0;
 			}
 		}
@@ -872,6 +890,90 @@
 					.clickable {
 						margin-inline-start: auto;
 					}
+				}
+			}
+		}
+	}
+}
+
+#citation-dialog[dialog-type="add-note"] {
+	#library-layout {
+		#sidebar {
+			display: block;
+			width: 250px;
+			border-inline-start: var(--material-panedivider);
+			background: var(--material-sidepane) !important;
+			#add-note-sidebar {
+				height: 100%;
+				#note-preview {
+					#links-container {
+						display: none;
+					}
+				}
+				#empty-note-preview-message {
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					text-align: center;
+					padding: 8px;
+					height: 100%;
+				}
+			}
+		}
+		// when adding a note, the item cards are slightly taller
+		#library-other-items {
+			height: 100px;
+			.item {
+				height: 58px !important;
+			}
+		}
+	}
+	#list-layout {
+		#list-layout-wrapper {
+			// Items rendered inside VirtualizedTable rows use .row > .item
+			.row > .item {
+				border-radius: 5px;
+				// container parent items of notes are not properly selectable --
+				// clicking them toggles collapse instead
+				&.container {
+					background-color: var(--color-background);
+					&:hover {
+						outline: 2px solid var(--fill-quinary);
+						outline-offset: -2px;
+					}
+					// Selected containers get the same outline treatment as
+					// selected collapsible headers -- they're not addable, so
+					// the item's background-based selection style doesn't apply.
+					&.selected {
+						outline: 2px solid var(--accent-blue30);
+						outline-offset: -2px;
+						border-radius: 5px;
+					}
+					.title::before {
+						@include svgicon("chevron-8", "universal", "8");
+						width: 8px;
+						height: 8px;
+						display: inline-block;
+						content: "";
+						margin-inline-end: 4px;
+						vertical-align: middle;
+						margin-bottom: 3px;
+						fill: var(--fill-secondary);
+					}
+					&.collapsed .title::before {
+						transform: rotate(270deg);
+					}
+					// push description a bit more to the right so that it
+					// aligns with title after twisty is added
+					.description {
+						margin-inline-start: 32px;
+					}
+				}
+				&:not(.container) {
+					padding-inline: 20px;
+				}
+				&.child {
+					padding-inline: 36px;
 				}
 			}
 		}
