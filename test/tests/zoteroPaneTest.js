@@ -171,6 +171,7 @@ describe("ZoteroPane", function () {
 		var apiKey = Zotero.Utilities.randomString(24);
 		var baseURL;
 		var httpd;
+		var server;
 		
 		async function downloadOnDemand() {
 			var item = new Zotero.Item("attachment");
@@ -185,18 +186,17 @@ describe("ZoteroPane", function () {
 			var md5 = Zotero.Utilities.Internal.md5(text)
 			
 			var s3Path = `pretend-s3/${item.key}`;
-			httpd.registerPathHandler(
-				`/users/1/items/${item.key}/file`,
-				{
-					handle: function (request, response) {
-						response.setStatusLine(null, 302, "Found");
-						response.setHeader("Zotero-File-Modification-Time", mtime, false);
-						response.setHeader("Zotero-File-MD5", md5, false);
-						response.setHeader("Zotero-File-Compressed", "No", false);
-						response.setHeader("Location", baseURL + s3Path, false);
-					}
+			server.respondWith(function (req) {
+				if (req.method == "GET"
+						&& req.url == baseURL + `users/1/items/${item.key}/file`) {
+					req.respond(302, {
+						"Zotero-File-Modification-Time": mtime,
+						"Zotero-File-MD5": md5,
+						"Zotero-File-Compressed": "No",
+						"Location": baseURL + s3Path,
+					}, "");
 				}
-			);
+			});
 			httpd.registerPathHandler(
 				"/" + s3Path,
 				{
@@ -206,7 +206,7 @@ describe("ZoteroPane", function () {
 					}
 				}
 			);
-			
+
 			// Disable loadURI() so viewAttachment() doesn't trigger translator loading
 			var stub = sinon.stub(Zotero, "launchFile");
 			
@@ -230,12 +230,16 @@ describe("ZoteroPane", function () {
 			({ httpd, port } = await startHTTPServer());
 			baseURL = `http://localhost:${port}/`;
 			Zotero.Prefs.set("api.url", baseURL);
-			
+
+			server = sinon.fakeServer.create();
+			server.autoRespond = true;
+
 			Zotero.Sync.Runner.apiKey = apiKey;
 			await Zotero.Users.setCurrentUserID(1);
 			await Zotero.Users.setCurrentUsername("testuser");
 		})
 		afterEach(function* () {
+			server.restore();
 			var defer = Zotero.Promise.defer();
 			httpd.stop(() => defer.resolve());
 			yield defer.promise;
@@ -262,18 +266,17 @@ describe("ZoteroPane", function () {
 			var md5 = Zotero.Utilities.Internal.md5(text)
 			
 			var s3Path = `pretend-s3/${item.key}`;
-			httpd.registerPathHandler(
-				`/users/1/items/${item.key}/file`,
-				{
-					handle: function (request, response) {
-						response.setStatusLine(null, 302, "Found");
-						response.setHeader("Zotero-File-Modification-Time", mtime, false);
-						response.setHeader("Zotero-File-MD5", md5, false);
-						response.setHeader("Zotero-File-Compressed", "No", false);
-						response.setHeader("Location", baseURL + s3Path, false);
-					}
+			server.respondWith(function (req) {
+				if (req.method == "GET"
+						&& req.url == baseURL + `users/1/items/${item.key}/file`) {
+					req.respond(302, {
+						"Zotero-File-Modification-Time": mtime,
+						"Zotero-File-MD5": md5,
+						"Zotero-File-Compressed": "No",
+						"Location": baseURL + s3Path,
+					}, "");
 				}
-			);
+			});
 			httpd.registerPathHandler(
 				"/" + s3Path,
 				{
@@ -283,7 +286,7 @@ describe("ZoteroPane", function () {
 					}
 				}
 			);
-			
+
 			// Disable loadURI() so viewAttachment() doesn't trigger translator loading
 			var downloadSpy = sinon.spy(Zotero.Sync.Runner, "downloadFile");
 			var launchFileStub = sinon.stub(Zotero, "launchFile");
