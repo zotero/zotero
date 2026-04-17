@@ -313,5 +313,32 @@ describe("Item Tags Box", function () {
 				await item.eraseTx();
 			}
 		});
+
+		it("should insert pasted text at cursor position within existing value", async function () {
+			let item = await createDataObject('item');
+			let tagsbox = doc.querySelector('#zotero-editpane-tags');
+			let stub = sinon.stub(tagsbox, 'openTagSplitterWindow');
+
+			let row = tagsbox.newTag();
+			let editable = row.querySelector('editable-text');
+
+			// Simulate user having typed "foobar" with cursor before "b" (position 3)
+			editable.value = 'foobar';
+			editable.ref.value = 'foobar';
+			editable.ref.selectionStart = 3;
+			editable.ref.selectionEnd = 3;
+
+			let event = createPasteEvent('s,a');
+			editable.dispatchEvent(event);
+
+			assert.isTrue(event.defaultPrevented, 'paste should be intercepted');
+			assert.isTrue(stub.calledOnce, 'tag splitter should open');
+			// "foobar" with "s,a" inserted at position 3 -> "foos,abar"
+			assert.equal(stub.args[0][0], 'foos,abar', 'should pass combined string with paste inserted at cursor');
+			assert.equal(stub.args[0][1], ',', 'delimiter should be comma');
+
+			stub.restore();
+			await item.eraseTx();
+		});
 	});
 })
