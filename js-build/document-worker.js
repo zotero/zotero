@@ -29,14 +29,14 @@ async function getDocumentWorker(signatures) {
 			await exec(
 				`cd ${tmpDir}`
 				+ ` && (test -f ${filename} || curl -f ${url} -o ${filename})`
-				+ ` && unzip -o ${filename} worker.js -d ${targetDir}`
+				+ ` && unzip -o ${filename} -d ${targetDir}`
 			);
 		}
 		catch (e) {
 			console.error(e);
 			await exec('npm ci', { cwd: modulePath });
 			await exec('npm run build', { cwd: modulePath });
-			await fs.copy(path.join(modulePath, 'build', 'worker.js'), path.join(targetDir, 'worker.js'));
+			await fs.copy(path.join(modulePath, 'build'), targetDir);
 		}
 		signatures['document-worker'] = { hash };
 	}

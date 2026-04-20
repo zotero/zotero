@@ -24,6 +24,7 @@
 */
 
 const WORKER_URL = 'chrome://zotero/content/xpcom/pdfWorker/worker.js';
+const ASSETS_URL = 'chrome://zotero/content/xpcom/pdfWorker/';
 const CMAPS_URL = 'resource://zotero/reader/pdf/web/cmaps/';
 const STANDARD_FONTS_URL = 'resource://zotero/reader/pdf/web/standard_fonts/';
 const WASM_URL = 'resource://zotero/reader/pdf/web/wasm/';
@@ -141,6 +142,20 @@ class PDFWorker {
 				}
 				catch (e) {
 					Zotero.debug('Failed to fetch wasm data:');
+					Zotero.debug(e);
+				}
+				try {
+					if (message.action === 'FetchData') {
+						let response = await Zotero.HTTP.request(
+							'GET',
+							ASSETS_URL + message.data,
+							{ responseType: 'arraybuffer' }
+						);
+						respData = new Uint8Array(response.response);
+					}
+				}
+				catch (e) {
+					Zotero.debug(`Failed to fetch data (${message.data}):`);
 					Zotero.debug(e);
 				}
 				try {
@@ -674,6 +689,58 @@ class PDFWorker {
 			}
 
 			Zotero.debug(`Extracted full text for item ${attachment.libraryKey} in ${new Date() - t} ms`);
+
+			return result;
+		}, isPriority);
+	}
+
+	/**
+	 * Get Zotero Structured Text JSON for a PDF, EPUB, or snapshot attachment
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @param {Boolean} [isPriority]
+	 * @param {String} [password]
+	 * @returns {Promise<Object|null>}
+	 */
+	async getStructuredData(itemID, isPriority, password) {
+		return this._enqueue(async () => {
+			let attachment = await Zotero.Items.getAsync(itemID);
+
+			Zotero.debug(`Getting structured data from item ${attachment.libraryKey}`);
+			let t = new Date();
+
+			let contentType = attachment.attachmentContentType;
+			if (!(attachment.isPDFAttachment()
+					|| attachment.isEPUBAttachment()
+					|| attachment.isSnapshotAttachment())) {
+				throw new Error('Item must be a PDF, EPUB, or snapshot attachment');
+			}
+
+			let path = await attachment.getFilePathAsync();
+			if (!path) {
+				return null;
+			}
+			let buf = await IOUtils.read(path);
+			buf = new Uint8Array(buf).buffer;
+
+			try {
+				var result = await this._query('getStructuredData', {
+					buf, contentType, password
+				}, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'getStructuredData' failed: ${JSON.stringify({ error: e.message })}`);
+				try {
+					error.name = JSON.parse(e.message).name;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				Zotero.logError(error);
+				throw error;
+			}
+
+			Zotero.debug(`Extracted structured data for item ${attachment.libraryKey} in ${new Date() - t} ms`);
 
 			return result;
 		}, isPriority);
