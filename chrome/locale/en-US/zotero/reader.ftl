@@ -229,7 +229,7 @@ reader-read-aloud-quota-exceeded-message = <add-more-time>{ reader-read-aloud-ad
 }.
 reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = An unknown error occurred.
-reader-read-aloud-error-connection = Unable to connect to the Read Aloud service. Please check your internet connection.
+reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
 reader-read-aloud-error-daily-limit-exceeded = You have exceeded your daily limit for { -app-name } Voices.
 reader-read-aloud-retry = Retry
 reader-read-aloud-first-run-title = Choose your preferred Read Aloud voice:
