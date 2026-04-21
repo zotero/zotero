@@ -1473,10 +1473,14 @@ describe("ZoteroPane", function () {
 
 			for (let id of sequence) {
 				// Set up focus listener before dispatching the event
-				// to avoid racing against async focus from setTimeout
+				// to avoid racing against async focus from setTimeout.
+				// Use "focusin" rather than "focus" because the target is a XUL
+				// <search-textbox> whose real focus target is an anonymous inner
+				// <input>; "focus" does not bubble, so a listener on the outer
+				// element would never fire.
 				let focusPromise;
 				if (id === "zotero-collections-search") {
-					focusPromise = waitForDOMEvent(doc.getElementById(id), "focus");
+					focusPromise = waitForDOMEvent(doc.getElementById(id), "focusin");
 				}
 				// Set up hide observer before the shift-tab that blurs collection-search
 				let hidePromise;
@@ -1516,10 +1520,12 @@ describe("ZoteroPane", function () {
 			let reversed = [...sequence].reverse();
 			for (let id of reversed) {
 				// Set up focus listener before dispatching the event
-				// to avoid racing against async focus from setTimeout
+				// to avoid racing against async focus from setTimeout.
+				// See the shift-tab test above for why this listens on "focusin"
+				// rather than "focus".
 				let focusPromise;
 				if (id === "zotero-collections-search") {
-					focusPromise = waitForDOMEvent(doc.getElementById(id), "focus");
+					focusPromise = waitForDOMEvent(doc.getElementById(id), "focusin");
 				}
 				doc.activeElement.dispatchEvent(tab);
 				if (focusPromise) {
