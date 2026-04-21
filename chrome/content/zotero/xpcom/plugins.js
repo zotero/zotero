@@ -371,9 +371,12 @@ Zotero.Plugins = new function () {
 			}
 		};
 		try {
-			Services.scriptloader.loadSubScript(
+			Services.scriptloader.loadSubScriptWithOptions(
 				addon.getResourceURI("prefs.js").spec,
-				obj
+				{
+					target: obj,
+					ignoreCache: true
+				}
 			);
 		}
 		catch (e) {
@@ -394,9 +397,12 @@ Zotero.Plugins = new function () {
 			}
 		};
 		try {
-			Services.scriptloader.loadSubScript(
+			Services.scriptloader.loadSubScriptWithOptions(
 				addon.getResourceURI("prefs.js").spec,
-				obj
+				{
+					target: obj,
+					ignoreCache: true
+				}
 			);
 		}
 		catch (e) {
