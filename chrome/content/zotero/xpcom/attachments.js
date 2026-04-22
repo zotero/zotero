@@ -1200,8 +1200,8 @@ Zotero.Attachments = new function () {
 					&& (e instanceof this.InvalidPDFException
 						// Thrown by HTTP.download()
 						|| (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status == 403))) {
-				if (Zotero.BrowserDownload.shouldAttemptDownloadViaBrowser(url)) {
-					return Zotero.BrowserDownload.downloadPDF(url, path, options);
+				if (Zotero.BrowserRequest.getEntryForURL(url)) {
+					return Zotero.BrowserRequest.downloadPDF(url, path, options);
 				}
 			}
 			throw e;

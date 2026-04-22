@@ -326,8 +326,8 @@ describe("Zotero.Attachments", function () {
 	
 	
 	describe("#importFromURL()", function () {
-		it("should use BrowserDownload for a JS redirect page", async function () {
-			let downloadPDFStub = sinon.stub(Zotero.BrowserDownload, "downloadPDF");
+		it("should use BrowserRequest for a JS redirect page", async function () {
+			let downloadPDFStub = sinon.stub(Zotero.BrowserRequest, "downloadPDF");
 			downloadPDFStub.callsFake(async (_url, path) => {
 				await OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'test.pdf'), path);
 			});
@@ -623,7 +623,7 @@ describe("Zotero.Attachments", function () {
 			});
 		});
 		
-		it("should use BrowserDownload for 403 when enforcing file type", async function () {
+		it("should use BrowserRequest for 403 when enforcing file type", async function () {
 			let prefix = Zotero.Utilities.randomString();
 			let testServerPath = 'http://127.0.0.1:' + testServerPort + '/' + prefix;
 			let pdfURL = testServerPath + '/test.pdf';
@@ -638,9 +638,9 @@ describe("Zotero.Attachments", function () {
 			);
 			
 			let path = OS.Path.join(Zotero.getTempDirectory().path, 'test.pdf');
-			let shouldAttemptStub = sinon.stub(Zotero.BrowserDownload, "shouldAttemptDownloadViaBrowser");
-			let downloadPDFStub = sinon.stub(Zotero.BrowserDownload, "downloadPDF");
-			shouldAttemptStub.returns(true);
+			let getEntryStub = sinon.stub(Zotero.BrowserRequest, "getEntryForURL");
+			let downloadPDFStub = sinon.stub(Zotero.BrowserRequest, "downloadPDF");
+			getEntryStub.returns({ match: 'test' });
 			downloadPDFStub.callsFake(async (_url, path) => {
 				await OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'test.pdf'), path);
 			});
@@ -648,14 +648,14 @@ describe("Zotero.Attachments", function () {
 			try {
 				item = await Zotero.Attachments.downloadFile(pdfURL, path, { enforceFileType: true });
 				
-				assert.isTrue(shouldAttemptStub.calledOnce);
+				assert.isTrue(getEntryStub.calledOnce);
 				assert.isTrue(downloadPDFStub.calledOnce);
 			}
 			finally {
 				// Clean up
 				if (item) await Zotero.Items.erase(item.id);
 				downloadPDFStub.restore();
-				shouldAttemptStub.restore();
+				getEntryStub.restore();
 			}
 		});
 	});

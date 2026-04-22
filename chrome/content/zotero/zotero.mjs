@@ -71,7 +71,7 @@ const xpcomFilesLocal = [
 	'api',
 	'attachments',
 	'attachmentReadObserver',
-	'browserDownload',
+	'browserRequest',
 	'cite',
 	'citeprocRsBridge',
 	'data/library',
