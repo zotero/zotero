@@ -147,7 +147,7 @@ Zotero.HTTP = new function () {
 
 
 	// Base for generated userContextIds -- high to avoid collision with Firefox containers
-	var _nextCookieContextId = 100000 + Math.floor(Math.random() * 100000);
+	var _nextUserContextId = 100000 + Math.floor(Math.random() * 100000);
 
 	/**
 	 * Create an isolated cookie context backed by a unique Mozilla userContextId.
@@ -159,7 +159,7 @@ Zotero.HTTP = new function () {
 	 * @return {{ id: number, getCookies: (host: string) => nsICookie[], dispose: () => void }}
 	 */
 	this.newCookieContext = function () {
-		let id = _nextCookieContextId++;
+		let id = _nextUserContextId++;
 		return {
 			id,
 			/**
@@ -205,8 +205,7 @@ Zotero.HTTP = new function () {
 	 * @param {Number[]|false} [options.successCodes] - HTTP status codes that are considered
 	 *     successful, or FALSE to allow all
 	 * @param {Boolean} [options.anon] - Make the request anonymously, without global cookies
-	 * @param {Number} [options.cookieContextId] - userContextId from newCookieContext() for
-	 *     cookie isolation
+	 * @param {Number} [options.userContextId] - From newCookieContext() for cookie isolation
 	 * @param {Number} [options.timeout = 30000] - Request timeout specified in milliseconds, or 0
 	 *     for no timeout
 	 * @param {Number[]} [options.errorDelayIntervals] - Array of milliseconds to wait before
@@ -260,7 +259,7 @@ Zotero.HTTP = new function () {
 		
 		// Translation framework uses cookieSandbox to hold userContextId number
 		if (typeof options.cookieSandbox === 'number') {
-			options.cookieContextId = options.cookieSandbox;
+			options.userContextId = options.cookieSandbox;
 			delete options.cookieSandbox;
 		}
 
@@ -295,8 +294,8 @@ Zotero.HTTP = new function () {
 		xmlhttp.open(method, url, true, options.username, options.password);
 		
 		// Isolate cookies into a separate jar via userContextId
-		if (options.cookieContextId && xmlhttp.setOriginAttributes) {
-			xmlhttp.setOriginAttributes({ userContextId: options.cookieContextId });
+		if (options.userContextId && xmlhttp.setOriginAttributes) {
+			xmlhttp.setOriginAttributes({ userContextId: options.userContextId });
 		}
 
 		// Pass the request to a callback

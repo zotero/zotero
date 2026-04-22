@@ -160,7 +160,7 @@ const obtainReferenceManagerToken = async (login, password) => {
 	let { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
 	let cookieContext = Zotero.HTTP.newCookieContext();
 	let browser = new HiddenBrowser({
-		cookieContextId: cookieContext.id,
+		userContextId: cookieContext.id,
 		docShell: {
 			allowMetaRedirects: true,
 			allowAuth: true,

@@ -78,7 +78,7 @@ Zotero.BrowserRequest = {
 	 * client-side redirects or cookie-setting challenges to settle.
 	 *
 	 * Cookies acquired by the browser remain in the shared jar keyed on
-	 * cookieContextId; a subsequent Zotero.HTTP.request using the same ID will
+	 * userContextId; a subsequent Zotero.HTTP.request using the same ID will
 	 * see them.
 	 *
 	 * On timeout, if the page contains the entry's captchaLocator and
@@ -86,7 +86,7 @@ Zotero.BrowserRequest = {
 	 *
 	 * @param {string} url
 	 * @param {object} [options]
-	 * @param {number} [options.cookieContextId]
+	 * @param {number} [options.userContextId]
 	 * @param {object} [options.entry] - registry entry controlling escalation
 	 * @param {boolean} [options.allowViewer=false]
 	 * @returns {Promise<void>}
@@ -94,13 +94,13 @@ Zotero.BrowserRequest = {
 	async clearChallenge(url, options = {}) {
 		Zotero.debug(`BrowserRequest: Clearing challenge at ${url}`);
 
-		let { cookieContextId, entry, allowViewer = false } = options;
+		let { userContextId, entry, allowViewer = false } = options;
 		let successCookie = entry?.successCookie;
 		// Capture the cookie's current value (if any) before the attempt so
 		// we can tell a freshly-issued cookie from a stale one left over from
 		// a previous session.
 		let initialCookieValue = successCookie
-			? this._readCookieValue({ ...successCookie, cookieContextId })
+			? this._readCookieValue({ ...successCookie, userContextId })
 			: null;
 		// Cloudflare Turnstile rejects the "Zotero/[version]" suffix.
 		// A plain Firefox UA on just this browsing context lets the widget run.
@@ -111,11 +111,11 @@ Zotero.BrowserRequest = {
 		// before the page fully settles (or redirects somewhere else).
 		let hiddenBrowser;
 		try {
-			hiddenBrowser = new HiddenBrowser({ cookieContextId, customUserAgent });
+			hiddenBrowser = new HiddenBrowser({ userContextId, customUserAgent });
 			await hiddenBrowser._createdPromise;
 			await this._loadAndSettle(hiddenBrowser, url, {
 				successCookie,
-				cookieContextId
+				userContextId
 			});
 		}
 		catch (e) {
@@ -129,7 +129,7 @@ Zotero.BrowserRequest = {
 		}
 
 		if (successCookie) {
-			let currentValue = this._readCookieValue({ ...successCookie, cookieContextId });
+			let currentValue = this._readCookieValue({ ...successCookie, userContextId });
 			if (currentValue && currentValue !== initialCookieValue) {
 				return;
 			}
@@ -144,14 +144,14 @@ Zotero.BrowserRequest = {
 		Zotero.debug(`BrowserRequest: Escalating to viewer for ${url}`);
 		if (successCookie) {
 			await this._loadAndWaitForCookieInViewer(url, {
-				cookieContextId,
+				userContextId,
 				customUserAgent,
 				successCookie
 			});
 			return;
 		}
 		await this.clearChallengeInViewer(url, {
-			cookieContextId,
+			userContextId,
 			captchaLocator: entry.captchaLocator
 		});
 	},
@@ -165,7 +165,7 @@ Zotero.BrowserRequest = {
 	async _loadAndWaitForCookieInViewer(url, options) {
 		Zotero.debug(`BrowserRequest: Awaiting user challenge clearance (cookie ${options.successCookie.name}) at ${url}`);
 		const timeout = Zotero.Prefs.get('browserRequest.timeout');
-		const { successCookie, cookieContextId, customUserAgent } = options;
+		const { successCookie, userContextId, customUserAgent } = options;
 
 		let win, wmListener, pollInterval;
 		let done = false;
@@ -178,14 +178,14 @@ Zotero.BrowserRequest = {
 			});
 			Services.wm.addListener(wmListener);
 			await new Promise((resolve) => {
-				win = Zotero.openInViewer(url, { cookieContextId, customUserAgent });
+				win = Zotero.openInViewer(url, { userContextId, customUserAgent });
 				win.addEventListener('load', resolve);
 			});
 			Zotero.Utilities.Internal.activate(win);
 
 			pollInterval = this._pollForCookie({
 				successCookie,
-				cookieContextId,
+				userContextId,
 				onFound: () => {
 					done = true;
 					cookieDeferred.resolve();
@@ -213,11 +213,11 @@ Zotero.BrowserRequest = {
 	 * Read the value of a named cookie on a given host under an optional
 	 * userContextId. Returns null if the cookie is absent.
 	 */
-	_readCookieValue({ host, name, cookieContextId }) {
+	_readCookieValue({ host, name, userContextId }) {
 		try {
 			let cookies = Services.cookies.getCookiesFromHost(
 				host,
-				cookieContextId ? { userContextId: cookieContextId } : {}
+				userContextId ? { userContextId } : {}
 			);
 			for (let cookie of cookies) {
 				if (cookie.name === name) {
@@ -262,16 +262,16 @@ Zotero.BrowserRequest = {
 	 *
 	 * @param {object} opts
 	 * @param {{host: string, name: string}} opts.successCookie
-	 * @param {number} [opts.cookieContextId]
+	 * @param {number} [opts.userContextId]
 	 * @param {Function} opts.onFound
 	 * @param {number} [opts.intervalMs=250]
 	 * @returns {number} interval handle
 	 */
-	_pollForCookie({ successCookie, cookieContextId, onFound, intervalMs = 250 }) {
+	_pollForCookie({ successCookie, userContextId, onFound, intervalMs = 250 }) {
 		let { host, name } = successCookie;
-		let initialValue = this._readCookieValue({ host, name, cookieContextId });
+		let initialValue = this._readCookieValue({ host, name, userContextId });
 		return setInterval(() => {
-			let currentValue = this._readCookieValue({ host, name, cookieContextId });
+			let currentValue = this._readCookieValue({ host, name, userContextId });
 			if (currentValue && currentValue !== initialValue) {
 				onFound();
 			}
@@ -285,7 +285,7 @@ Zotero.BrowserRequest = {
 	 *
 	 * @param {string} url
 	 * @param {object} options
-	 * @param {number} [options.cookieContextId]
+	 * @param {number} [options.userContextId]
 	 * @param {string} options.captchaLocator
 	 * @returns {Promise<void>}
 	 */
@@ -306,7 +306,7 @@ Zotero.BrowserRequest = {
 			Services.wm.addListener(wmListener);
 			await new Promise((resolve) => {
 				win = Zotero.openInViewer(url, {
-					cookieContextId: options.cookieContextId
+					userContextId: options.userContextId
 				});
 				win.addEventListener('load', resolve);
 			});
@@ -407,7 +407,7 @@ Zotero.BrowserRequest = {
 	 * @param {object} [opts]
 	 * @param {(blob: Blob) => void} [opts.onPDF]
 	 * @param {{ host: string, name: string }} [opts.successCookie]
-	 * @param {number} [opts.cookieContextId]
+	 * @param {number} [opts.userContextId]
 	 * @returns {Promise<void>}
 	 */
 	async _loadAndSettle(hiddenBrowser, url, opts = {}) {
@@ -455,7 +455,7 @@ Zotero.BrowserRequest = {
 			if (opts.successCookie) {
 				cookiePollInterval = this._pollForCookie({
 					successCookie: opts.successCookie,
-					cookieContextId: opts.cookieContextId,
+					userContextId: opts.userContextId,
 					onFound: () => {
 						Zotero.debug(`BrowserRequest: successCookie ${opts.successCookie.name} appeared`);
 						cookieDeferred.resolve();
