@@ -1620,17 +1620,16 @@ class ListLayout extends Layout {
 		ignoreWindowResizing = true;
 		
 		// Timeout is required likely to allow minHeight update to settle
-		setTimeout(() => {
-			Helpers.smoothResize(targetWidth, autoHeight, {
-				onComplete: () => {
-					if (!_id("citationDialog-list-table")?.contains(doc.activeElement)) {
-						_id("bubble-input").refocusInput();
-					}
-					document.documentElement.setAttribute("dialog-layout", this.type);
-					ignoreWindowResizing = false;
-				},
-			});
-		}, 10);
+		await Zotero.Promise.delay(10);
+		Helpers.smoothResize(targetWidth, autoHeight, {
+			onComplete: () => {
+				if (!_id("citationDialog-list-table")?.contains(doc.activeElement)) {
+					_id("bubble-input").refocusInput();
+				}
+				document.documentElement.setAttribute("dialog-layout", this.type);
+				ignoreWindowResizing = false;
+			},
+		});
 	}
 }
 
