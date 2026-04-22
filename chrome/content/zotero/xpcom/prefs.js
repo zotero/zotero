@@ -46,7 +46,7 @@ Zotero.Prefs = new function () {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 21;
+		var toVersion = 22;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -219,6 +219,21 @@ Zotero.Prefs = new function () {
 					
 					case 21:
 						this.set('firstRunGuidanceShown.readAloud', false);
+						break;
+
+					// downloadPDFViaBrowser.* -> browserRequest.*;
+					// module was generalized to handle more than PDF downloads
+					case 22:
+						if (this.prefHasUserValue('downloadPDFViaBrowser.onLoadTimeout')) {
+							this.set('browserRequest.onLoadTimeout',
+								this.get('downloadPDFViaBrowser.onLoadTimeout'));
+							this.clear('downloadPDFViaBrowser.onLoadTimeout');
+						}
+						if (this.prefHasUserValue('downloadPDFViaBrowser.downloadTimeout')) {
+							this.set('browserRequest.timeout',
+								this.get('downloadPDFViaBrowser.downloadTimeout'));
+							this.clear('downloadPDFViaBrowser.downloadTimeout');
+						}
 						break;
 				}
 			}

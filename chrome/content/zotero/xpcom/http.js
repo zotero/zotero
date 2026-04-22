@@ -258,8 +258,8 @@ Zotero.HTTP = new function () {
 			Zotero.debug("HTTP " + method + " " + dispURL);
 		}
 		
-		// Translation framework uses cookieSandbox
-		if (options.cookieSandbox && typeof options.cookieSandbox === 'string') {
+		// Translation framework uses cookieSandbox to hold userContextId number
+		if (typeof options.cookieSandbox === 'number') {
 			options.cookieContextId = options.cookieSandbox;
 			delete options.cookieSandbox;
 		}
