@@ -848,6 +848,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}
 		catch (e) {
 			if (_checkDataDirAccessError(e)) {}
+			else if (_checkDataDirStorageIOError(e)) {}
 			// Storage busy
 			else if (e.message.includes('2153971713')) {
 				Zotero.startupError = Zotero.getString('startupError.databaseInUse');
@@ -899,8 +900,49 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		Zotero.startupError = msg;
 		return true;
 	}
-	
-	
+
+
+	/**
+	 * Check for an SQLite I/O error when using a custom data directory, which typically means
+	 * the data directory is on a network share or in a cloud storage folder, and offer the user
+	 * a way to reset the data directory to the default location so they can start up without having
+	 * to edit prefs.js manually.
+	 */
+	function _checkDataDirStorageIOError(e) {
+		// NS_ERROR_STORAGE_IOERR (0x80630002)
+		if (e.name != 'NS_ERROR_STORAGE_IOERR' && !e.message.includes('2153971714')) {
+			return false;
+		}
+		// Only handle the case where a custom data directory is in use -- in the default
+		// location, an I/O error is more likely something else (disk issue, antivirus, etc.)
+		// and swapping locations probably won't help.
+		if (Zotero.DataDirectory.dir == Zotero.DataDirectory.defaultDir) {
+			return false;
+		}
+
+		Zotero.startupError = Zotero.getString('dataDir.databaseCannotBeOpened', Zotero.clientName)
+			+ "\n\n"
+			+ Zotero.getString('data-dir-unsupported-storage')
+			+ "\n\n"
+			+ Zotero.getString('dataDir.location', Zotero.DataDirectory.dir);
+
+		_startupErrorHandler = async function () {
+			let index = Zotero.Prompt.confirm({
+				title: Zotero.getString('general.error'),
+				text: Zotero.startupError,
+				button0: Zotero.getString('dataDir.useDefaultLocation'),
+				button1: Zotero.getString('general.quit'),
+			});
+			// Revert to default location
+			if (index == 0) {
+				Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
+				Zotero.Utilities.Internal.quit(true);
+			}
+		};
+		return true;
+	}
+
+
 	this.shutdown = async function () {
 		Zotero.debug("Shutting down Zotero");
 		
