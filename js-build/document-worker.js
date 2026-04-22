@@ -7,19 +7,19 @@ const exec = util.promisify(require('child_process').exec);
 const { getSignatures, writeSignatures, onSuccess, onError } = require('./utils');
 const { buildsURL } = require('./config');
 
-async function getPDFWorker(signatures) {
+async function getDocumentWorker(signatures) {
 	const t1 = Date.now();
 
-	const modulePath = path.join(__dirname, '..', 'pdf-worker');
+	const modulePath = path.join(__dirname, '..', 'document-worker');
 
 	const { stdout } = await exec('git rev-parse HEAD', { cwd: modulePath });
 	const hash = stdout.trim();
 
-	if (!('pdf-worker' in signatures) || signatures['pdf-worker'].hash !== hash) {
+	if (!('document-worker' in signatures) || signatures['document-worker'].hash !== hash) {
 		const targetDir = path.join(__dirname, '..', 'build', 'chrome', 'content', 'zotero', 'xpcom', 'pdfWorker');
 		try {
 			const filename = hash + '.zip';
-			const tmpDir = path.join(__dirname, '..', 'tmp', 'builds', 'pdf-worker');
+			const tmpDir = path.join(__dirname, '..', 'tmp', 'builds', 'document-worker');
 			const url = buildsURL + 'document-worker/' + filename;
 
 			await fs.remove(targetDir);
@@ -38,26 +38,26 @@ async function getPDFWorker(signatures) {
 			await exec('npm run build', { cwd: modulePath });
 			await fs.copy(path.join(modulePath, 'build', 'worker.js'), path.join(targetDir, 'worker.js'));
 		}
-		signatures['pdf-worker'] = { hash };
+		signatures['document-worker'] = { hash };
 	}
 
 	const t2 = Date.now();
 
 	return {
-		action: 'pdf-worker',
+		action: 'document-worker',
 		count: 1,
 		totalCount: 1,
 		processingTime: t2 - t1
 	};
 }
 
-module.exports = getPDFWorker;
+module.exports = getDocumentWorker;
 
 if (require.main === module) {
 	(async () => {
 		try {
 			const signatures = await getSignatures();
-			onSuccess(await getPDFWorker(signatures));
+			onSuccess(await getDocumentWorker(signatures));
 			await writeSignatures(signatures);
 		}
 		catch (err) {

@@ -78,7 +78,7 @@ Several features are developed in separate repos and included as Git submodules:
 
 - `reader/` -- PDF/EPUB/snapshot reader with annotations
 - `note-editor/` -- Rich text note editor
-- `pdf-worker/` -- PDF processing (extraction, manipulation)
+- `document-worker/` -- PDF processing (extraction, manipulation)
 - `translators/` -- 760+ web translators for importing metadata from websites
 - `styles/` -- CSL citation styles
 - `chrome/content/zotero/xpcom/utilities/` -- Shared utility library

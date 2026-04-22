@@ -30,8 +30,8 @@
 	url = https://github.com/zotero/reader.git
 	branch = master
 [submodule "pdf-worker"]
-	path = pdf-worker
-	url = https://github.com/zotero/pdf-worker.git
+	path = document-worker
+	url = https://github.com/zotero/document-worker.git
 	branch = master
 [submodule "note-editor"]
 	path = note-editor
