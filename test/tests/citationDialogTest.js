@@ -532,11 +532,14 @@ describe("Citation Dialog", function () {
 			assert.include(libraryIDs, libraryOne.id);
 			assert.notInclude(libraryIDs, libraryTwo.id);
 			assert.notInclude(libraryIDs, citedOne.id);
-			// Make sure actual nodes for search matches are rendered
+			// Make sure all expected items are present in the list rows.
+			// VT only renders visible rows so we check _listRows, not the DOM.
 			let expectedItemCardIDs = [...selectedIDs, ...openIDs, ...citedIDs, ...libraryIDs];
+			let listRowIDs = dialog.listLayout._listRows
+				.filter(r => r.kind === "item" && r.ref)
+				.map(r => r.ref.id);
 			for (let itemID of expectedItemCardIDs) {
-				let node = dialog.document.querySelector(`.item[id="${itemID}"]`);
-				assert.isOk(node);
+				assert.include(listRowIDs, itemID);
 			}
 		});
 
