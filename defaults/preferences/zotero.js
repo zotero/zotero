@@ -90,8 +90,8 @@ pref("extensions.zotero.itemPaneHeader.bibEntry.locale", "");
 pref("extensions.zotero.tagSelector.showAutomatic", true);
 pref("extensions.zotero.tagSelector.displayAllTags", false);
 
-pref("extensions.zotero.downloadPDFViaBrowser.onLoadTimeout", 3000);
-pref("extensions.zotero.downloadPDFViaBrowser.downloadTimeout", 60000);
+pref("extensions.zotero.browserRequest.onLoadTimeout", 3000);
+pref("extensions.zotero.browserRequest.timeout", 60000);
 
 // Keyboard shortcuts
 pref("extensions.zotero.keys.saveToZotero", "S");

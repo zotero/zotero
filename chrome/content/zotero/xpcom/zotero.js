@@ -1196,6 +1196,10 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @param {Object} [options]
 	 * @param {Function} [options.onLoad] - Function to run once URI is loaded; passed the loaded document
 	 * @param {Boolean} [options.allowJavaScript] - Set to false to disable JavaScript
+	 * @param {Number} [options.cookieContextId] - userContextId to isolate the viewer's cookies
+	 *     into the same jar as a Zotero.HTTP.request or HiddenBrowser using the same ID
+	 * @param {String} [options.customUserAgent] - Override the User-Agent for all requests
+	 *     from this viewer's browsing context
 	 */
 	this.openInViewer = function (uri, options) {
 		if (options && !options.onLoad && typeof options === 'function') {
@@ -1205,7 +1209,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 
 		var viewerWins = Services.wm.getEnumerator("zotero:basicViewer");
 		for (let existingWin of viewerWins) {
-			if (existingWin.viewerOriginalURI === uri) {
+			if (existingWin.viewerOriginalURI === uri && existingWin.viewerCookieContextId === options?.cookieContextId) {
 				existingWin.focus();
 				return existingWin;
 			}
@@ -2059,6 +2063,10 @@ Zotero.Keys = new function () {
  * @namespace
  */
 Zotero.VersionHeader = {
+	_plainUAHosts: new Set(),
+	_uaAppSuffixRe: null,
+	_uaFirefoxComponent: null,
+
 	init: function () {
 		this.register();
 		Zotero.addShutdownListener(this.unregister);
@@ -2084,7 +2092,9 @@ Zotero.VersionHeader = {
 				let isAppNameDomain = s3RE.test(domain);
 				if (!isAppNameDomain) {
 					let ua = channel.getRequestHeader('User-Agent');
-					ua = this.update(ua);
+					ua = this.update(ua, {
+						mode: this._plainUAHosts.has(domain) ? 'plain' : 'full',
+					});
 					channel.setRequestHeader('User-Agent', ua, false);
 				}
 			}
@@ -2095,22 +2105,56 @@ Zotero.VersionHeader = {
 	},
 	
 	/**
-	 * Add Firefox/[version] to the default user agent
+	 * Register a host that needs the "Zotero/[version]" component stripped
+	 * from its requests' UA. Currently this is only used for hosts that we
+	 * handle Cloudflare Turnstile challenges on; Turnstile won't pass with
+	 * Zotero/ in the UA string, and future requests need the same UA as the
+	 * one that passed Turnstile, so we have to override for all requests to
+	 * the host.
 	 *
-	 * @param {String} ua - User Agent
+	 * @param {string} host
 	 */
-	update: function (ua) {
+	registerPlainUAHost: function (host) {
+		this._plainUAHosts.add(host);
+	},
+
+	/**
+	 * @param {String} ua
+	 * @param {'full' | 'plain'} [mode='full'] If 'full', add Firefox/[version] to the default user agent. If 'plain', remove
+	 * 		Zotero/[version] instead.
+	 * @return {String}
+	 */
+	update: function (ua, { mode = 'full' } = {}) {
 		var info = Services.appinfo;
-		var appName = info.name;
-		
-		var pos = ua.indexOf(appName + '/');
-		
-		// Default UA (not a faked UA from the connector)
-		if (pos != -1) {
-			ua = ua.substring(0, pos) + `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0 ` + ua.substring(pos);
+		if (!this._uaAppSuffixRe) {
+			this._uaAppSuffixRe = new RegExp(`\\s*${info.name}/\\S+`);
+			this._uaFirefoxComponent = `Firefox/${info.platformVersion.match(/^\d+/)[0]}.0`;
 		}
-		
+		if (mode === 'plain') {
+			ua = ua.replace(this._uaAppSuffixRe, '');
+			if (!/\bFirefox\//.test(ua)) {
+				ua += ` ${this._uaFirefoxComponent}`;
+			}
+		}
+		else {
+			let pos = ua.indexOf(info.name + '/');
+			// Default UA (not a faked UA from the connector)
+			if (pos != -1) {
+				ua = ua.substring(0, pos) + `${this._uaFirefoxComponent} ` + ua.substring(pos);
+			}
+		}
 		return ua;
+	},
+
+	/**
+	 * Plain Firefox UA, without the "Zotero/[version]" suffix.
+	 *
+	 * @return {String}
+	 */
+	getPlainFirefoxUA: function () {
+		var ua = Cc["@mozilla.org/network/protocol;1?name=http"]
+			.getService(Ci.nsIHttpProtocolHandler).userAgent;
+		return this.update(ua, { mode: 'plain' });
 	},
 	
 	unregister: function () {

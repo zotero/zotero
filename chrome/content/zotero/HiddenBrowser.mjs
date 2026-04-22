@@ -50,6 +50,8 @@ export class HiddenBrowser {
 	 * 		Must be set to false if intending to call print().
 	 * @param {Number} [options.cookieContextId] - userContextId from Zotero.HTTP.newCookieContext()
 	 *     for cookie isolation
+	 * @param {String} [options.customUserAgent] - Override User-Agent for all requests
+	 *     from this browser's browsing context
 	 */
 	constructor(options = {}) {
 		this._destroyed = false;
@@ -94,6 +96,10 @@ export class HiddenBrowser {
 					}
 				});
 				this._blockingObserver.register(browser);
+			}
+			
+			if (options.customUserAgent) {
+				browser.browsingContext.customUserAgent = options.customUserAgent;
 			}
 			
 			this._browser = browser;
