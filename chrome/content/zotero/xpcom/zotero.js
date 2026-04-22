@@ -1238,7 +1238,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @param {Object} [options]
 	 * @param {Function} [options.onLoad] - Function to run once URI is loaded; passed the loaded document
 	 * @param {Boolean} [options.allowJavaScript] - Set to false to disable JavaScript
-	 * @param {Number} [options.cookieContextId] - userContextId to isolate the viewer's cookies
+	 * @param {Number} [options.userContextId] - To isolate the viewer's cookies
 	 *     into the same jar as a Zotero.HTTP.request or HiddenBrowser using the same ID
 	 * @param {String} [options.customUserAgent] - Override the User-Agent for all requests
 	 *     from this viewer's browsing context
@@ -1251,7 +1251,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 
 		var viewerWins = Services.wm.getEnumerator("zotero:basicViewer");
 		for (let existingWin of viewerWins) {
-			if (existingWin.viewerOriginalURI === uri && existingWin.viewerCookieContextId === options?.cookieContextId) {
+			if (existingWin.viewerOriginalURI === uri && existingWin.viewerUserContextId === options?.userContextId) {
 				existingWin.focus();
 				return existingWin;
 			}

@@ -426,7 +426,7 @@ describe("Zotero.HTTP", function () {
 
 					// Request in the isolated context should not see the default cookie
 					let req = await Zotero.HTTP.request('GET', cookieURL, {
-						cookieContextId: ctx.id,
+						userContextId: ctx.id,
 						successCodes: false
 					});
 					assert.equal(req.status, 403);
@@ -441,14 +441,14 @@ describe("Zotero.HTTP", function () {
 				try {
 					// First request in context -- gets 403, sets cookie
 					let req = await Zotero.HTTP.request('GET', cookieURL, {
-						cookieContextId: ctx.id,
+						userContextId: ctx.id,
 						successCodes: false
 					});
 					assert.equal(req.status, 403);
 
 					// Second request in same context -- should have the cookie
 					req = await Zotero.HTTP.request('GET', cookieURL, {
-						cookieContextId: ctx.id,
+						userContextId: ctx.id,
 						successCodes: false
 					});
 					assert.equal(req.status, 200);
@@ -464,13 +464,13 @@ describe("Zotero.HTTP", function () {
 				try {
 					// Set cookie in ctx1
 					await Zotero.HTTP.request('GET', cookieURL, {
-						cookieContextId: ctx1.id,
+						userContextId: ctx1.id,
 						successCodes: false
 					});
 
 					// ctx2 should not see ctx1's cookie
 					let req = await Zotero.HTTP.request('GET', cookieURL, {
-						cookieContextId: ctx2.id,
+						userContextId: ctx2.id,
 						successCodes: false
 					});
 					assert.equal(req.status, 403);
@@ -486,7 +486,7 @@ describe("Zotero.HTTP", function () {
 
 				// Set cookie in context
 				await Zotero.HTTP.request('GET', cookieURL, {
-					cookieContextId: ctx.id,
+					userContextId: ctx.id,
 					successCodes: false
 				});
 
@@ -499,7 +499,7 @@ describe("Zotero.HTTP", function () {
 				let ctx2 = Zotero.HTTP.newCookieContext();
 				try {
 					let req = await Zotero.HTTP.request('GET', cookieURL, {
-						cookieContextId: ctx.id,
+						userContextId: ctx.id,
 						successCodes: false
 					});
 					assert.equal(req.status, 403);

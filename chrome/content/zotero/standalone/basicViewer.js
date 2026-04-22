@@ -35,13 +35,13 @@ window.addEventListener("load", /*async */function () {
 	let { uri, options } = window.arguments[0].wrappedJSObject;
 
 	browser = document.querySelector('browser');
-	if (options?.cookieContextId) {
+	if (options?.userContextId) {
 		// Set usercontextid on new <browser> so it takes effect
 		let newBrowser = document.createXULElement('browser');
 		for (let { name, value } of browser.attributes) {
 			newBrowser.setAttribute(name, value);
 		}
-		newBrowser.setAttribute('usercontextid', String(options.cookieContextId));
+		newBrowser.setAttribute('usercontextid', String(options.userContextId));
 		browser.replaceWith(newBrowser);
 		browser = newBrowser;
 	}
@@ -56,7 +56,7 @@ window.addEventListener("load", /*async */function () {
 	}
 
 	window.viewerOriginalURI = uri;
-	window.viewerCookieContextId = options?.cookieContextId;
+	window.viewerUserContextId = options?.userContextId;
 	loadURI(Services.io.newURI(uri), options);
 }, false);
 

@@ -11,7 +11,7 @@ export class ZoteroWebTranslationEnvironment extends AbstractWebTranslationEnvir
 		const { HiddenBrowser } = ChromeUtils.importESModule('chrome://zotero/content/HiddenBrowser.mjs');
 		let browser = new HiddenBrowser({
 			docShell: { allowMetaRedirects: true },
-			cookieContextId: tester.cookieSandbox,
+			userContextId: tester.cookieSandbox,
 		});
 
 		await browser.load(url, { requireSuccessfulStatus: true });
