@@ -43,3 +43,17 @@ fi
 cd "$gecko_path"
 ./mach build
 ./mach package
+
+# Copy the packaged ZIP back to app/win/ for launcher/xul.dll extraction
+case $arch in
+	x64)   zip_suffix=win64 ;;
+	arm64) zip_suffix=win64-aarch64 ;;
+	win32) zip_suffix=win32 ;;
+esac
+zip_file=$(ls "$gecko_path"/obj-*/dist/firefox-*.en-US.${zip_suffix}.zip 2>/dev/null | head -1) || true
+if [ -z "$zip_file" ] || [ ! -f "$zip_file" ]; then
+	echo "Could not find packaged zip for $arch in $gecko_path/obj-*/dist/" >&2
+	exit 1
+fi
+cp "$zip_file" "$SCRIPT_DIR/"
+echo "Copied $(basename "$zip_file") to $SCRIPT_DIR"
