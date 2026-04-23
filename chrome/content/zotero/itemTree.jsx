@@ -176,6 +176,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		if (this.collectionTreeRow) {
 			this.collectionTreeRow.view.itemTreeView = this;
+			// Resolve the promise when itemTreeView is set
+			this.collectionTreeRow.view._itemTreeViewReadyDeferred.resolve();
+
 		}
 		
 		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
@@ -1223,6 +1226,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this.collectionTreeRow = collectionTreeRow;
 		this.selection.selectEventsSuppressed = true;
 		this.collectionTreeRow.view.itemTreeView = this;
+		// Resolve the promise when itemTreeView is set
+		this.collectionTreeRow.view._itemTreeViewReadyDeferred.resolve();
+
 		// Ensures that an up to date this._columns is set
 		this._getColumns();
 
