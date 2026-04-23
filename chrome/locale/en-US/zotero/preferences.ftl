@@ -49,6 +49,8 @@ preferences-locate-library-lookup-intro = Library Lookup can find a resource onl
 preferences-locate-resolver = Resolver:
 preferences-locate-base-url = Base URL:
 
+preferences-export-use-csl-citation =
+    .label = Use CSL style for citations in notes
 preferences-quickCopy-minus =
     .aria-label = { general-remove }
     .label = { $label }

@@ -343,7 +343,215 @@ Zotero.QuickCopy = new function () {
 		tmpNote.setNote(html);
 		return tmpNote;
 	};
-	
+
+	/**
+	 * Reformat citation spans in note items using the QuickCopy CSL style
+	 *
+	 * Parses citation data from each <span class="citation"> in the note HTML,
+	 * resolves item URIs, and reformats using the CSL engine. Returns new temporary
+	 * note items with updated HTML -- the originals are not modified.
+	 *
+	 * @param {Zotero.Item[]} items - Note items to process
+	 * @return {Zotero.Item[]} - New note items with CSL-formatted citations
+	 */
+	this.reformatNoteCitations = function (items) {
+		if (!items.every(item => item.isNote())) {
+			return items;
+		}
+
+		if (!Zotero.Prefs.get('note.export.useCSLCitation')) {
+			return items;
+		}
+
+		let setting = Zotero.Prefs.get('export.quickCopy.setting');
+		let format = this.unserializeSetting(setting);
+		if (format.mode !== 'bibliography' || !format.id) {
+			return items;
+		}
+
+		let style = Zotero.Styles.get(format.id);
+		if (!style) {
+			return items;
+		}
+
+		let locale = format.locale || Zotero.Prefs.get('export.quickCopy.locale');
+		let cslEngine;
+		try {
+			cslEngine = style.getCiteProc(locale, 'html', { cache: true });
+		}
+		catch (e) {
+			Zotero.logError('Failed to initialize CSL engine for note citation reformatting: ' + e);
+			return items;
+		}
+
+		try {
+			// First pass: collect all unique item IDs across all notes,
+			// and build a fallback map of embedded CSL JSON for deleted items
+			let allItemIDs = new Set();
+			let embeddedCSLByFakeID = {};
+			let parsedNotes = [];
+
+			for (let item of items) {
+				if (!item.isNote()) {
+					parsedNotes.push(null);
+					continue;
+				}
+
+				let noteHTML = item.getNote();
+				if (!noteHTML) {
+					parsedNotes.push(null);
+					continue;
+				}
+
+				let parser = new DOMParser();
+				let doc = parser.parseFromString(noteHTML, 'text/html');
+				let citationSpans = doc.querySelectorAll('span.citation[data-citation]');
+
+				if (!citationSpans.length) {
+					parsedNotes.push(null);
+					continue;
+				}
+
+				// Parse embedded citation item data from the note wrapper
+				// for fallback when items have been deleted
+				let embeddedItemDataByURI = {};
+				let containerNode = doc.querySelector('div[data-citation-items]');
+				if (containerNode) {
+					try {
+						let storedItems = JSON.parse(decodeURIComponent(
+							containerNode.getAttribute('data-citation-items')
+						));
+						if (Array.isArray(storedItems)) {
+							for (let si of storedItems) {
+								if (si.uris && si.itemData) {
+									for (let uri of si.uris) {
+										embeddedItemDataByURI[uri] = si.itemData;
+									}
+								}
+							}
+						}
+					}
+					catch (e) {
+						// Ignore parse errors
+					}
+				}
+
+				let spanData = [];
+				for (let span of citationSpans) {
+					let citation;
+					try {
+						citation = JSON.parse(decodeURIComponent(span.getAttribute('data-citation')));
+					}
+					catch (e) {
+						spanData.push(null);
+						continue;
+					}
+
+					if (!citation || !citation.citationItems || !citation.citationItems.length) {
+						spanData.push(null);
+						continue;
+					}
+
+					let cslItems = [];
+					for (let ci of citation.citationItems) {
+						if (!ci.uris || !ci.uris.length) continue;
+						let uri = ci.uris[0];
+						let itemID = Zotero.URI.getURIItemID(uri);
+
+						if (!itemID) {
+							// Item deleted -- use embedded CSL JSON if available
+							let embeddedData = embeddedItemDataByURI[uri];
+							if (!embeddedData) continue;
+
+							let fakeID = Zotero.Utilities.randomString();
+							let cslData = Zotero.Utilities.deepCopy(embeddedData);
+							cslData.id = fakeID;
+							embeddedCSLByFakeID[fakeID] = cslData;
+							itemID = fakeID;
+						}
+
+						allItemIDs.add(itemID);
+						let cslItem = { id: itemID };
+						if (ci.locator) {
+							cslItem.locator = ci.locator;
+							cslItem.label = ci.label || 'page';
+						}
+						if (ci.prefix) {
+							cslItem.prefix = ci.prefix;
+						}
+						if (ci.suffix) {
+							cslItem.suffix = ci.suffix;
+						}
+						cslItems.push(cslItem);
+					}
+
+					spanData.push(cslItems.length ? { span, cslItems } : null);
+				}
+
+				parsedNotes.push({ doc, spanData });
+			}
+
+			if (!allItemIDs.size) {
+				cslEngine.free();
+				return items;
+			}
+
+			// If we have embedded items for deleted citations, temporarily
+			// patch retrieveItem so citeproc can resolve fake IDs
+			let originalRetrieveItem;
+			if (Object.keys(embeddedCSLByFakeID).length) {
+				originalRetrieveItem = cslEngine.sys.retrieveItem;
+				cslEngine.sys.retrieveItem = function (id) {
+					if (embeddedCSLByFakeID[id]) {
+						return embeddedCSLByFakeID[id];
+					}
+					return originalRetrieveItem.call(this, id);
+				};
+			}
+
+			cslEngine.updateItems([...allItemIDs]);
+
+			// Second pass: format citations and build new note items
+			let result = [];
+			for (let i = 0; i < items.length; i++) {
+				let parsed = parsedNotes[i];
+				if (!parsed) {
+					result.push(items[i]);
+					continue;
+				}
+
+				for (let data of parsed.spanData) {
+					if (!data) continue;
+					let citation = {
+						citationItems: data.cslItems,
+						properties: {}
+					};
+					let formatted = cslEngine.previewCitationCluster(citation, [], [], 'html');
+					data.span.innerHTML = '(' + formatted + ')';
+				}
+
+				let tmpNote = new Zotero.Item('note');
+				tmpNote.libraryID = items[i].libraryID;
+				tmpNote.setNote(parsed.doc.body.innerHTML);
+				result.push(tmpNote);
+			}
+
+			// Restore original retrieveItem if patched
+			if (originalRetrieveItem) {
+				cslEngine.sys.retrieveItem = originalRetrieveItem;
+			}
+			cslEngine.free();
+			return result;
+		}
+		catch (e) {
+			Zotero.logError('Failed to reformat note citations: ' + e);
+			if (cslEngine) {
+				cslEngine.free();
+			}
+			return items;
+		}
+	};
+
 	/**
 	 * If an export translator is the selected output format, load its code (which must be done
 	 * asynchronously) ahead of time, since drag-and-drop requires synchronous operation
