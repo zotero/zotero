@@ -2691,33 +2691,38 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 			}
 		}
-		// If the filter has been cleared and the selection has not changed, restore the initial scroll position
-		if (shouldRestoreScrollPosition) {
-			// For the initial scroll position to make sense, collapse rows that were initially collapsed
+		// Filter has been cleared: restore collapsed state of collections and scroll position
+		if (willBeEmpty && !isEmpty) {
+			let selectedCollectionID = this.getSelectedCollection(true);
 			for (let rowID of this._filterInitialCollapsedRows) {
 				let index = this.getRowIndexByID(rowID);
-				if (index && this._rows[index].isOpen) {
+				let row = this._rows[index];
+				if (!row || !row.isCollection()) continue;
+				// Do not collapse ancestory of selected collection
+				let descendents = new Set(Zotero.Collections.getByParent(row.ref.id, true, false).map(col => col.id));
+				if (row.isOpen && !descendents.has(selectedCollectionID)) {
 					this.toggleOpenState(index);
 				}
 			}
 			this._filterInitialCollapsedRows = [];
-			collectionTable.scrollTop = this._filterInitialScrollPosition;
-			this._filterInitialScrollPosition = null;
+			// If collection tree was focused, scroll the selected row to the middle
+			if (this._treeWasFocused) {
+				let selectedRow = collectionTable.querySelector(".row.selected");
+				let rowRect = selectedRow.getBoundingClientRect();
+				let tableRect = collectionTable.getBoundingClientRect();
+				let rowMiddle = rowRect.top + rowRect.height / 2;
+				let tableMiddle = tableRect.top + tableRect.height / 2;
+				collectionTable.scrollTop = collectionTable.scrollTop + rowMiddle - tableMiddle;
+			}
+			// Otherwise, restore the initial scroll position
+			else {
+				collectionTable.scrollTop = this._filterInitialScrollPosition;
+				this._filterInitialScrollPosition = null;
+			}
 		}
 		// During filtering, scroll to the very top
 		else if (!willBeEmpty) {
 			collectionTable.scrollTop = 0;
-		}
-		// If the filtering is cleared and the selection has changed, scroll to have the
-		// newly selected row in the middle
-		else if (willBeEmpty && !isEmpty) {
-			let selectedRow = collectionTable.querySelector(".row.selected");
-			let rowRect = selectedRow.getBoundingClientRect();
-			let tableRect = collectionTable.getBoundingClientRect();
-			let rowMiddle = rowRect.top + rowRect.height / 2;
-			let tableMiddle = tableRect.top + tableRect.height / 2;
-			let scrollPosition = collectionTable.scrollTop + rowMiddle - tableMiddle;
-			collectionTable.scrollTop = scrollPosition;
 		}
 		// Focus the collection tree
 		if (focusTree) {
