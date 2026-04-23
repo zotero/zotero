@@ -1074,6 +1074,115 @@ describe("Connector Server", function () {
 			assert.equal(note.getNote(), "Test note");
 		});
 		
+		it("should update metadata of item saved via /saveItems", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+
+			const id = Zotero.Utilities.randomString();
+			var sessionID = Zotero.Utilities.randomString();
+			var body = {
+				sessionID,
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: "Title",
+						id,
+						creators: [
+							{
+								firstName: "First",
+								lastName: "Last",
+								creatorType: "author"
+							}
+						]
+					}
+				],
+				uri: "http://example.com"
+			};
+
+			var reqPromise = httpRequest(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+
+			var ids = await waitForItemEvent('add');
+			var item = Zotero.Items.get(ids[0]);
+			var req = await reqPromise;
+			assert.equal(req.status, 201);
+			assert.equal(item.getField('title'), "Title");
+
+			// Update metadata
+			req = await httpRequest(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: collection.treeViewID,
+						tags: "",
+						note: "",
+						updatedMetadata: {
+							id,
+							fields: [
+								{
+									name: "itemType",
+									label: "Item Type",
+									value: "newspaperArticle"
+								},
+								{
+									name: "title",
+									label: "Title",
+									value: "Updated Title"
+								},
+								{
+									name: "abstractNote",
+									label: "Abstract",
+									value: "Updated abstract"
+								},
+								{
+									name: "date",
+									label: "Date",
+									value: "2026-04-08"
+								},
+								{
+									name: "url",
+									label: "URL",
+									value: "http://example.com/updated"
+								}
+							],
+							creators: [
+								{
+									firstName: "New First",
+									lastName: "New Last",
+									creatorType: "author"
+								}
+							]
+						}
+					})
+				}
+			);
+
+			assert.equal(req.status, 200);
+			assert.equal(item.getField('title'), "Updated Title");
+			assert.equal(item.getField('abstractNote'), "Updated abstract");
+			assert.equal(item.getField('date'), "2026-04-08");
+			assert.equal(item.getField('url'), "http://example.com/updated");
+			var creators = item.getCreators();
+			assert.equal(creators.length, 1);
+			assert.equal(creators[0].firstName, "New First");
+			assert.equal(creators[0].lastName, "New Last");
+			// Verify collection is preserved
+			assert.isTrue(collection.hasItem(item.id));
+		});
+
 		it("should update collections and tags of a PDF saved via /saveStandaloneAttachment", async function () {
 			const sessionID = Zotero.Utilities.randomString();
 			
