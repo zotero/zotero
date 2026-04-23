@@ -2306,6 +2306,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					await Zotero.DB.executeTransaction(async function () {
 						let collection = await Zotero.Collections.getAsync(targetCollectionID);
 						await collection.addItems(ids);
+						// If moving, remove from source in the same
+						// transaction so it's a single undo step
+						if (dropEffect == 'move' && toMove.length
+								&& sourceTreeRow && sourceTreeRow.isCollection()) {
+							await sourceTreeRow.ref.removeItems(toMove);
+							toMove = [];
+							Zotero.UndoHistory.setAction(
+								'undo-action-move-to-collection', { count: ids.length }
+							);
+						}
 					}.bind(this));
 				}
 				else if (targetTreeRow.isPublications()) {

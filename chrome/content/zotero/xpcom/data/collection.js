@@ -386,6 +386,7 @@ Zotero.Collection.prototype._finalizeSave = async function (env) {
 };
 
 
+
 /**
  * @param {Number} itemID
  * @return {Promise}
@@ -615,6 +616,18 @@ Zotero.Collection.prototype.trash = async function (env) {
 				// so we have to do it manually here
 				if (env.options && env.options.skipDeleteLog) {
 					env.notifierData[c.id].skipDeleteLog = true;
+				}
+				// Record undo data for descendent collections
+				if (Zotero.UndoHistory && !(env.options && env.options.skipUndo) && !c.deleted) {
+					Zotero.UndoHistory._addChange({
+						objectType: 'collection',
+						id: c.id,
+						libraryID: c.libraryID,
+						key: c.key,
+						fields: {
+							deleted: { old: false, new: true }
+						}
+					});
 				}
 			}
 		}
