@@ -32,6 +32,8 @@ pref("extensions.zotero.hideContextAnnotationRows", true);
 pref("extensions.zotero.fontSize", "1.00");
 pref("extensions.zotero.layout", "standard");
 pref("extensions.zotero.recursiveCollections", false);
+pref("extensions.zotero.collectionsMenu.maxEntriesTotal", 5000);
+pref("extensions.zotero.collectionsMenu.maxEntriesAtOneLevel", 100);
 pref("extensions.zotero.autoRecognizeFiles", true);
 pref("extensions.zotero.autoRenameFiles", true);
 pref("extensions.zotero.autoRenameFiles.linked", false);

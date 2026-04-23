@@ -1777,27 +1777,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				return true;
 			}
 			else if (dataType == 'zotero/collection') {
-				if (!treeRow.isLibrary(true) && !treeRow.isCollection()) {
-					return false;
-				}
-				
 				let draggedCollectionID = data[0];
 				let draggedCollection = Zotero.Collections.get(draggedCollectionID);
-				
-				// Dragging within same library
-				if (treeRow.ref.libraryID == draggedCollection.libraryID) {
-					// Collections cannot be dropped on themselves
-					if (draggedCollectionID == treeRow.ref.id) {
-						return false;
-					}
-					
-					// Nor in their children
-					if (draggedCollection.hasDescendent('collection', treeRow.ref.id)) {
-						return false;
-					}
-				}
-				
-				return true;
+				return draggedCollection.canMoveToTarget(treeRow.ref, { debug: true });
 			}
 		}
 		return false;	
@@ -1869,30 +1851,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 			}
 			else if (dataType == 'zotero/collection') {
+				// Can drop collections into trash to delete it
+				if (treeRow.isTrash()) return true;
 				let draggedCollectionID = data[0];
 				let draggedCollection = Zotero.Collections.get(draggedCollectionID);
-				
-				// Dragging a collection to a different library
-				if (treeRow.ref.libraryID != draggedCollection.libraryID) {
-					// Disallow if linked collection already exists
-					if (await draggedCollection.getLinkedCollection(treeRow.ref.libraryID, true)) {
-						Zotero.debug("Linked collection already exists in library");
-						return false;
-					}
-					
-					let descendents = draggedCollection.getDescendents(false, 'collection');
-					for (let descendent of descendents) {
-						descendent = Zotero.Collections.get(descendent.id);
-						// Disallow if linked collection already exists for any subcollections
-						//
-						// If this is allowed in the future for the root collection,
-						// need to allow drag only to root
-						if (await descendent.getLinkedCollection(treeRow.ref.libraryID, true)) {
-							Zotero.debug("Linked subcollection already exists in library");
-							return false;
-						}
-					}
-				}
+				let canMove = await draggedCollection.canMoveToTargetAsync(treeRow.ref, { debug: true });
+				return canMove;
 			}
 		}
 		return true;
@@ -2725,6 +2689,36 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 	}
 
+	clearCollectionSearch(searchFieldSelector) {
+		let collectionsSearchField = document.querySelector(searchFieldSelector);
+		// If empty filter - just focus the collectionTree
+		if (collectionsSearchField.value.length == 0) {
+			return document.getElementById("collection-tree");
+		}
+		// Clear the search field and focus collection tree
+		if (collectionsSearchField.value.length) {
+			collectionsSearchField.value = '';
+			this.setFilter("", true);
+		}
+		return null;
+	}
+
+	focusCollectionTree(searchFieldSelector) {
+		let collectionsSearchField = document.querySelector(searchFieldSelector);
+		// Prevent Enter/Tab pressed before the filtering ran from doing anything
+		if (!this.filterEquals(collectionsSearchField.value)) {
+			return null;
+		}
+		// If the current row passes the filter, make sure it is visible and focus collectionTree
+		if (this.focusedRowMatchesFilter()) {
+			this.ensureRowIsVisible(this.selection.focused);
+			return document.getElementById('collection-tree');
+		}
+		// Otherwise, focus the first row passing the filter
+		this.focusFirstMatchingRow(false);
+		return null;
+	}
+
 
 	/**
 	 * Creates an extra hidden row to keep focus on it when a currently focused row does not match the filter.
@@ -2760,17 +2754,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	
 	_isFilterEmpty() {
 		return this._filter === "";
-	}
-
-	clearFilter() {
-		// Clear the search field
-		if (collectionsSearchField.value.length) {
-			collectionsSearchField.value = '';
-			ZoteroPane.handleCollectionSearchInput();
-			return null;
-		}
-		// If the search field is empty, focus the collection tree
-		return document.getElementById('collection-tree');
 	}
 
 	/**
@@ -2978,7 +2961,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
 			var showUnfiled = this.props.hideSources.indexOf('unfiled') == -1
 				&& this._virtualCollectionLibraries.unfiled?.[libraryID] !== false;
-			var showRecentlyRead = this._virtualCollectionLibraries.recentlyRead?.[libraryID] !== false;
+			var showRecentlyRead = this.props.hideSources.indexOf('recentlyRead') == -1
+				&& this._virtualCollectionLibraries.recentlyRead?.[libraryID] !== false;
 			var showRetracted = this.props.hideSources.indexOf('retracted') == -1
 				&& this._virtualCollectionLibraries.retracted?.[libraryID] !== false
 				&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
@@ -2986,6 +2970,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				&& this._virtualCollectionLibraries.publications?.[libraryID] !== false
 				&& libraryID == Zotero.Libraries.userLibraryID;
 			var showTrash = this.props.hideSources.indexOf('trash') == -1;
+			var showSavedSearches = this.props.hideSources.indexOf('searches') == -1;
 		}
 		else {
 			var savedSearches = [];
@@ -2995,6 +2980,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var showRetracted = false;
 			var showPublications = false;
 			var showTrash = false;
+			var showSavedSearches = false;
 		}
 		
 		// If not a manual open and either the library is set to be collapsed or this is a collection that isn't explicitly opened,
@@ -3054,14 +3040,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		
 		// Add searches
-		for (var i = 0, len = savedSearches.length; i < len; i++) {
-			// Skip searches in trash
-			if (savedSearches[i].deleted) continue;
-			// Skip searches not matching the filter
-			if (!this._includedInTree(savedSearches[i])) continue;
-			rows.splice(row + 1 + newRows, 0,
-				new Zotero.CollectionTreeRow(this, 'search', savedSearches[i], level + 1));
-			newRows++;
+		if (showSavedSearches) {
+			for (let i = 0; i < savedSearches.length; i++) {
+				// Skip searches in trash
+				if (savedSearches[i].deleted) continue;
+				// Skip searches not matching the filter
+				if (!this._includedInTree(savedSearches[i])) continue;
+				rows.splice(row + 1 + newRows, 0,
+					new Zotero.CollectionTreeRow(this, 'search', savedSearches[i], level + 1));
+				newRows++;
+			}
 		}
 		
 		if (showPublications && this._isFilterEmpty()) {

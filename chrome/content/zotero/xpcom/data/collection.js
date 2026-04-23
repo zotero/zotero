@@ -987,3 +987,82 @@ Zotero.Collection.prototype._unregisterChildItem = function (itemID) {
 		this._childItems.delete(itemID);
 	}
 }
+
+Zotero.Collection.prototype.canMoveToTarget = function (target, options = {}) {
+	let logMessage = (message) => {
+		if (options.debug) {
+			Zotero.debug(message);
+		}
+	};
+	if (!(target instanceof Zotero.Library || target instanceof Zotero.Collection)) {
+		logMessage("Can only add collection to another collection or group");
+		return false;
+	}
+	let targetLibrary = target instanceof Zotero.Library
+		? target
+		: Zotero.Libraries.get(target.libraryID);
+	if (!targetLibrary.editable) {
+		logMessage("Not editable target library.");
+		return false;
+	}
+	if (target instanceof Zotero.Collection) {
+		if (target.id == this.id) {
+			logMessage("Cannot add collection to itself");
+			return false;
+		}
+		if (this.hasDescendent('collection', target.id)) {
+			logMessage("Cannot add collection to its descendent");
+			return false;
+		}
+		if (this.parentID == target.id) {
+			logMessage("Cannot add collection to its direct parent");
+			return false;
+		}
+	}
+
+	return true;
+};
+
+Zotero.Collection.prototype.canMoveToTargetAsync = async function (target, options = {}) {
+	let logMessage = (message) => {
+		if (options.debug) {
+			Zotero.debug(message);
+		}
+	};
+	if (!this.canMoveToTarget(target, options)) return false;
+
+	if (target.libraryID !== this.libraryID) {
+		let linkedCollection = await this.getLinkedCollection(target.libraryID, true);
+		if (linkedCollection && !linkedCollection.deleted) {
+			logMessage(`Linked collection already exists in library ${target.libraryID}`);
+			return false;
+		}
+		let descendents = this.getDescendents(false, 'collection');
+		for (let descendent of descendents) {
+			descendent = Zotero.Collections.get(descendent.id);
+			// Disallow if linked collection already exists for any subcollections
+			//
+			// If this is allowed in the future for the root collection,
+			// need to allow drag only to root
+			let linkedSubcollection = await descendent.getLinkedCollection(target.libraryID, true);
+			if (linkedSubcollection && !linkedSubcollection.deleted) {
+				logMessage("Linked subcollection already exists in library");
+				return false;
+			}
+		}
+	}
+	return true;
+};
+
+// Determine which libraries the collection can be copied to
+Zotero.Collection.prototype.getLibrariesForCopying = async function () {
+	let libraries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
+	let librariesWhereOneCanCopy = [];
+	for (let library of libraries) {
+		let canCopy = await this.canMoveToTargetAsync(library);
+		if (canCopy) {
+			librariesWhereOneCanCopy.push(library);
+		}
+	}
+	return librariesWhereOneCanCopy;
+};

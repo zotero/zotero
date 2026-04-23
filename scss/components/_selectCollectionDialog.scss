@@ -1,0 +1,48 @@
+#zotero-select-collection-dialog {
+	display: flex;
+	min-width: 400px;
+	min-height: 450px;
+}
+
+#select-collection-dialog {
+	appearance: none;
+	background: var(--material-background);
+	display: flex;
+	flex-direction: column;
+	-moz-window-dragging: drag;
+	height: 100%;
+
+	#zotero-select-collection-container {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-height: 100%;
+		-moz-window-dragging: no-drag;
+		margin: -15px -15px 0 -15px;
+
+		#search-toolbar {
+			margin: 10px;
+			@media (-moz-platform: windows) {
+				margin: 20px 15px 10px 15px;
+			}
+			#zotero-collections-search {
+				max-width: 100%;
+				width: 100%;
+			}
+		}
+	}
+
+	#zotero-collections-tree-container {
+		min-width: 400px;
+		flex: 1;
+		background: var(--material-sidepane);
+		
+		.virtualized-table-body {
+			padding: 16px 8px;
+		}
+	}
+
+	#zotero-collections-tree {
+		background: var(--material-sidepane);
+	}
+}

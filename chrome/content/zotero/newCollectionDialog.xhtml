@@ -65,9 +65,12 @@
 		
 		<vbox>
 			<label data-l10n-id="new-collection-create-in" control="create-in"/>
-			<menulist id="create-in" native="true">
+			<menulist id="create-in" native="true"  hidden="true">
 				<menupopup id="zotero-new-collection-menu" />
 			</menulist>
+			<vbox id="zotero-collections-tree-container" class="virtualized-table-container" hidden="true">
+				<html:div id="zotero-collections-tree"/>
+			</vbox>
 		</vbox>
 	</dialog>
 </window>

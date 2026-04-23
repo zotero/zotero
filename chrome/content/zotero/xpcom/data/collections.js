@@ -85,6 +85,41 @@ Zotero.Collections = function () {
 		return _getByContainer(null, parentCollectionID, recursive, includeTrashed);
 	}
 	
+
+	/**
+	 * Determine if the user has too many collections in a library to list them all in a menu.
+	 * @param {Integer[]} libraryIDs - ids of libraries whose collections will be counted.
+	 * If not provided, will check all libraries.
+	 * @returns {Boolean} true if the number of collections exceeds the limits set in preferences.
+	 */
+	this.canListCollectionsInMenu = function (libraryIDs) {
+		if (!Array.isArray(libraryIDs)) {
+			libraryIDs = [libraryIDs];
+		}
+		let maxEntriesTotal = Zotero.Prefs.get("collectionsMenu.maxEntriesTotal");
+		let maxEntriesAtOneLevel = Zotero.Prefs.get("collectionsMenu.maxEntriesAtOneLevel");
+		let totalCollectionsCount = 0;
+		for (let libraryID of libraryIDs) {
+			let allCollections = Zotero.Collections.getByLibrary(libraryID, true, false);
+			totalCollectionsCount += allCollections.length;
+			// Too many top-level collections in this library
+			let topLevelCollections = Zotero.Collections.getByLibrary(libraryID);
+			if (topLevelCollections.length > maxEntriesAtOneLevel) {
+				return false;
+			}
+			// Any single collection has too many children
+			for (let collection of allCollections) {
+				if (collection.getChildCollections().length > maxEntriesAtOneLevel) {
+					return false;
+				}
+			}
+		}
+		// Too many total collections across all libraries
+		if (totalCollectionsCount > maxEntriesTotal) {
+			return false;
+		}
+		return true;
+	};
 	
 	var _getByContainer = function (libraryID, parentID, recursive, includeTrashed) {
 		let children = [];
