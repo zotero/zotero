@@ -189,6 +189,37 @@ Zotero.Items = function () {
 	};
 
 
+	/**
+	 * Clear lastRead from all attachments in a library.
+	 *
+	 * @param {Integer} libraryID
+	 */
+	this.clearAllLastRead = async function (libraryID) {
+		let sql = "SELECT itemID FROM itemAttachments WHERE lastRead IS NOT NULL "
+			+ "AND itemID IN (SELECT itemID FROM items WHERE libraryID = ?)";
+		let ids = await Zotero.DB.columnQueryAsync(sql, [libraryID]);
+		if (!ids.length) {
+			return;
+		}
+
+		let items = await this.getAsync(ids);
+		await Zotero.Utilities.Internal.forEachChunkAsync(
+			items,
+			100,
+			async (chunk) => {
+				await Zotero.DB.executeTransaction(async () => {
+					for (let item of chunk) {
+						item.attachmentLastRead = null;
+						await item.save({ skipDateModifiedUpdate: true, skipEditCheck: true });
+					}
+				});
+			}
+		);
+
+		this._lastReadCutoffs.delete(libraryID);
+	};
+
+
 	//
 	// Bulk data loading functions
 	//
