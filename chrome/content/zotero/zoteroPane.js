@@ -1636,6 +1636,25 @@ var ZoteroPane = new function () {
 		return this.collectionsView.toggleVirtualCollection(libraryID, type, show, select);
 	};
 	
+	this.handleFind = function () {
+		switch (Zotero_Tabs.selectedType) {
+			case 'reader': {
+				ZoteroStandalone.currentReader.toggleFindPopup({ open: true });
+				return;
+			}
+			case 'note': {
+				let noteEditor = Zotero.Notes.getByTabID(Zotero_Tabs.selectedID)
+				if (noteEditor) {
+					return noteEditor.openFindBar();
+				}
+				return;
+			}
+			default:
+				document.getElementById('zotero-tb-search-textbox').select();
+				return;
+		}
+	};
+
 	this.openAdvancedSearchWindow = function () {
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
