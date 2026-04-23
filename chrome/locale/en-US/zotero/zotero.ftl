@@ -417,9 +417,12 @@ bibliography-outputMethod-saveAsHTML =
     .label = Save as HTML
 bibliography-outputMethod-copyToClipboard =
     .label = Copy to Clipboard
+bibliography-outputMethod-saveToZbib =
+    .label = Save to ZoteroBib
 bibliography-outputMethod-print =
     .label = Print
 bibliography-manageStyles-label = Manage Styles…
+bibliography-zbib-title = Saved from Zotero
 
 styleEditor-locatorType =
     .aria-label = Locator type
