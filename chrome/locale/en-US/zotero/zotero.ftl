@@ -816,6 +816,7 @@ search-conditions-dateModified = Date Modified
 search-conditions-fulltextContent = Attachment Content
 search-conditions-programmingLanguage = Programming Language
 search-conditions-fileTypeID = Attachment File Type
+search-conditions-attachmentStorageType = Attachment Storage Type
 search-conditions-lastRead = Attachment Last Read
 search-conditions-annotationText = Annotation Text
 search-conditions-annotationComment = Annotation Comment
@@ -851,6 +852,9 @@ file-type-video = Video
 file-type-presentation = Presentation
 file-type-document = Document
 file-type-ebook = Ebook
+
+attachment-storage-type-stored = Stored
+attachment-storage-type-linked = Linked
 
 post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
@@ -898,4 +902,3 @@ banner-close-button =
 
 plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
-

@@ -363,6 +363,7 @@
 				case 'lastRead':
 				case 'itemType':
 				case 'fileTypeID':
+				case 'attachmentStorageType':
 				case 'publicationTitle':
 				case 'tag':
 				case 'note':
@@ -490,6 +491,16 @@
 					this.createValueMenu(rows);
 					break;
 				}
+				case 'attachmentStorageType':
+				{
+					let rows = ['stored', 'linked'].map(type => ({
+						name: Zotero.getString('attachment-storage-type-' + type),
+						value: type
+					}));
+					
+					this.createValueMenu(rows);
+					break;
+				}
 				default:
 				{
 					if (operatorsList.value == 'isInTheLast') {
@@ -522,7 +533,8 @@
 			// Drop-down menu
 			if (this.selectedCondition == 'collection'
 					|| this.selectedCondition == 'itemType'
-					|| this.selectedCondition == 'fileTypeID') {
+					|| this.selectedCondition == 'fileTypeID'
+					|| this.selectedCondition == 'attachmentStorageType') {
 				this.querySelector('#valuefield').hidden = true;
 				this.querySelector('#valuemenu').hidden = false;
 				this.querySelector('#value-date-age').hidden = true;

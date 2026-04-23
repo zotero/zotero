@@ -1424,6 +1424,37 @@ Zotero.Search.prototype._buildQuery = async function () {
 						}
 						skipOperators = true;
 						break;
+
+					case 'attachmentStorageType': {
+						let linkModes;
+						switch (condition.value) {
+							case 'stored':
+								linkModes = [
+									Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+									Zotero.Attachments.LINK_MODE_IMPORTED_URL
+								];
+								break;
+
+							case 'linked':
+								linkModes = [
+									Zotero.Attachments.LINK_MODE_LINKED_FILE,
+									Zotero.Attachments.LINK_MODE_LINKED_URL
+								];
+								break;
+
+							default:
+								throw ("Invalid attachmentStorageType '" + condition.value
+									+ "' specified in search.js");
+						}
+						condSQL += 'linkMode ';
+						if (condition.operator == 'isNot') {
+							condSQL += 'NOT ';
+						}
+						condSQL += `IN (${linkModes.map(() => '?').join(', ')})`;
+						condSQLParams.push(...linkModes);
+						skipOperators = true;
+						break;
+					}
 					
 					case 'tag':
 						condSQL += "tagID IN (SELECT tagID FROM tags WHERE ";
