@@ -41,15 +41,15 @@ fi
 # Clean up any old artifacts
 rm -f "$version"-*.zip
 
-# Process each architecture
+# Process whichever arch ZIPs are present
+processed=0
 for i in "${!files[@]}"; do
 	file="${files[$i]}"
 	arch="${arches[$i]}"
 	temp_zip="xul-temp-$arch.zip"
 	
 	if [ ! -f "$file" ]; then
-		echo "Missing file: $file"
-		exit 1
+		continue
 	fi
 	
 	dlls=(xul.dll)
@@ -75,4 +75,10 @@ for i in "${!files[@]}"; do
 	rm -f xul.dll lgpllibs.dll
 	
 	echo "Created $final_zip"
+	processed=$((processed + 1))
 done
+
+if [ $processed -eq 0 ]; then
+	echo "No firefox-$version.en-US.*.zip files found in $SCRIPT_DIR" >&2
+	exit 1
+fi
