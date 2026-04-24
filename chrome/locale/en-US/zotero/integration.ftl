@@ -49,6 +49,10 @@ integration-citationDialog-lib-message-annotations = { $search ->
     [true] No items with annotations match the current search
    *[other] No selected or open items with annotations
 }
+integration-citationDialog-list-message-citation = No selected, open, or cited items
+integration-citationDialog-list-message-citation-searching = No items match the current search
+integration-citationDialog-list-message-add-note = No selected or open notes
+integration-citationDialog-list-message-add-note-searching = No notes match the current search
 integration-citationDialog-settings-keepSorted = Keep sources sorted
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }

@@ -431,6 +431,19 @@
 				border-bottom: 1px solid var(--fill-quinary);
 			}
 
+			// Empty-state message -- emitted as a single row when no search
+			// results are available.
+			.row > .empty-message {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 100%;
+				padding: 0 16px;
+				text-align: center;
+				font-size: 1rem;
+				color: var(--fill-secondary);
+			}
+
 			// Section header -- emitted as its own row at the start of every section.
 			.row > .header {
 				font-weight: 700;
@@ -536,11 +549,6 @@
 					text-wrap: nowrap;
 					text-overflow: ellipsis;
 				}
-			}
-		}
-		&.empty {
-			#list-layout-wrapper .virtualized-table-body {
-				padding: 0;
 			}
 		}
 	}
