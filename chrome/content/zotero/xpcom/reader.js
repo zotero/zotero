@@ -625,6 +625,18 @@ class ReaderInstance {
 				// As above
 				setTimeout(() => this._openReadAloudVoicesDialog({ lang, tier, ftl }));
 			},
+			getSDT: (password) => {
+				return new this._iframeWindow.Promise(async (resolve) => {
+					try {
+						let sdt = await Zotero.PDFWorker.getStructuredData(this._item.id, true, password);
+						resolve(sdt ? Cu.cloneInto(sdt, this._iframeWindow) : null);
+					}
+					catch (e) {
+						Zotero.logError(e);
+						resolve(null);
+					}
+				});
+			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
