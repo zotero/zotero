@@ -218,6 +218,10 @@ function cleanupBeforeDialogClosing() {
 	allParams[currentLayout.type] = params;
 	Zotero.Prefs.set("integration.citationDialog.windowParams", JSON.stringify(allParams));
 
+	if (libraryLayout.collectionTreeWidth) {
+		Zotero.Prefs.set("integration.citationDialog.collectionTreeWidth", libraryLayout.collectionTreeWidth);
+	}
+
 	// Only library mode in annotations dialog
 	if (!DIALOG_STATE.isAddingAnnotations()) {
 		Zotero.Prefs.set("integration.citationDialogLastUsedMode", currentLayout.type);
@@ -523,6 +527,7 @@ class LibraryLayout extends Layout {
 		// on mouse scrollwheel in suggested items, scroll the list horizontally
 		_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
 		this._initSidepane();
+		this._initCollectionsTreeDivider();
 	}
 
 	// Create item node for an item group and store item ids in itemIDs attribute
@@ -821,6 +826,53 @@ class LibraryLayout extends Layout {
 		_id("annotations-filter-cancel-btn").addEventListener("click", () => {
 			_id("annotations-sidebar-filter").value = "";
 			_id("annotations-sidebar-filter").dispatchEvent(new Event('input', { bubbles: true }));
+		});
+	}
+
+	// Draggable divider to resize collectionTree
+	_initCollectionsTreeDivider() {
+		let setCollectionTreeWidth = (width) => {
+			let minWidth = 200;
+			let maxWidth = Math.floor(window.innerWidth * 0.4); // 40% of window width
+			let nextWidth = Math.round(Math.max(minWidth, Math.min(width, maxWidth))); // enforce width between 200px and maxWidth
+			_id("collections-tree-container").style.width = `${nextWidth}px`;
+			this.collectionTreeWidth = nextWidth;
+		};
+
+		let divider = _id("collections-tree-divider");
+		let savedWidth = Zotero.Prefs.get("integration.citationDialog.collectionTreeWidth");
+		setCollectionTreeWidth(savedWidth || 200);
+
+		let startX = 0;
+		let startWidth = 0;
+		let onPointerMove = (event) => {
+			let delta = event.clientX - startX;
+			if (Zotero.rtl) delta = -delta;
+			setCollectionTreeWidth(startWidth + delta);
+		};
+		let onPointerUp = (event) => {
+			divider.removeEventListener("pointermove", onPointerMove);
+			divider.removeEventListener("pointerup", onPointerUp);
+			divider.removeEventListener("pointercancel", onPointerUp);
+			try {
+				divider.releasePointerCapture(event.pointerId);
+			}
+			catch (e) {}
+		};
+		divider.addEventListener("pointerdown", (event) => {
+			if (event.button !== 0) return;
+			event.preventDefault();
+			startX = event.clientX;
+			startWidth = _id("collections-tree-container").getBoundingClientRect().width;
+			divider.setPointerCapture(event.pointerId);
+			divider.addEventListener("pointermove", onPointerMove);
+			divider.addEventListener("pointerup", onPointerUp);
+			divider.addEventListener("pointercancel", onPointerUp);
+		});
+
+		// Update max width when the window is resized
+		window.addEventListener("resize", () => {
+			setCollectionTreeWidth(this.collectionTreeWidth);
 		});
 	}
 	
