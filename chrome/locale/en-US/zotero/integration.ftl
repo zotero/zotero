@@ -22,7 +22,8 @@ integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
 integration-citationDialog-section-selectedAnnotations = Selected Annotations
-integration-citationDialog-section-selectedItems = Selected Items
+integration-citationDialog-section-selectedItems = Selected Items ({ $count })
+integration-citationDialog-section-selectedNotes = Selected Notes ({ $count })
 integration-citationDialog-section-cited = { $count ->
     [0] Cited Items
     *[other] Cited Items ({ $count })
@@ -48,6 +49,10 @@ integration-citationDialog-lib-message-annotations = { $search ->
     [true] No items with annotations match the current search
    *[other] No selected or open items with annotations
 }
+integration-citationDialog-list-message-citation = No selected, open, or cited items
+integration-citationDialog-list-message-citation-searching = No items match the current search
+integration-citationDialog-list-message-add-note = No selected or open notes
+integration-citationDialog-list-message-add-note-searching = No notes match the current search
 integration-citationDialog-settings-keepSorted = Keep sources sorted
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
@@ -97,6 +102,7 @@ integration-citationDialog-collapse-section =
     .title = Collapse section
 integration-citationDialog-bubble-empty = (no title)
 integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-insertNote-preview-msg = Select a note to see its preview
 integration-citationDialog-annotations-filter =
     .placeholder = Filter annotations
 integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
