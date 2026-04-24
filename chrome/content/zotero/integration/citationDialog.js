@@ -1315,8 +1315,16 @@ class ListLayout extends Layout {
 			}
 		}
 
-		// Hide padding of list layout if there is not a single item to show
-		_id("list-layout").classList.toggle("empty", this._listRows.length === 0);
+		// Insert message when there are no matching results - only
+		// when window resizing is not skipped, meaning library search has ran
+		if (!skipWindowResize) {
+			if (this._listRows.length === 0) {
+				this._listRows.push(new ListRow({
+					kind: "empty",
+					ref: { activeSearch: SearchHandler.searchValue.length > 0 },
+				}));
+			}
+		}
 
 		// Push per-row heights to the virtualized table's _customRowHeightMap
 		this._table.updateCustomRowHeights(
@@ -1428,6 +1436,15 @@ class ListLayout extends Layout {
 			let divider = doc.createElement("div");
 			divider.className = "divider";
 			div.appendChild(divider);
+		}
+		else if (row.kind === "empty") {
+			let message = doc.createElement("div");
+			message.className = "empty-message";
+			let suffix = row.ref.activeSearch ? "-searching" : "";
+			message.textContent = Zotero.getString(
+				`integration-citationDialog-list-message-${DIALOG_STATE.type}${suffix}`
+			);
+			div.appendChild(message);
 		}
 		else {
 			div.setAttribute("data-l10n-id", "integration-citationDialog-aria-item-list");
