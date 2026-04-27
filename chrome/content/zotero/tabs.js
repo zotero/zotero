@@ -781,6 +781,12 @@ var Zotero_Tabs = new function () {
 	 * Close all tabs except the first one
 	 */
 	this.closeAll = function () {
+		// Ensure a non-loadable tab is selected before bulk-close. Otherwise,
+		// closing the currently selected tab can auto-select an unloaded tab,
+		// which triggers lazy-load hooks during shutdown.
+		if (this._selectedID !== 'zotero-pane') {
+			this.select('zotero-pane');
+		}
 		this.close(this._tabs.slice(1).map(x => x.id));
 	};
 	
