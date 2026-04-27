@@ -91,62 +91,25 @@ Zotero.Profile = {
 	
 	
 	/**
-	 * Get the path to the Firefox Profiles directory, which may or may not exist
-	 *
-	 * @return {String|null} - Path, or null if none due to filesystem location
-	 */
-	getOtherAppProfilesDir: function () {
-		var dir = PathUtils.parent(PathUtils.parent(PathUtils.parent(this.dir)));
-		if (dir === '' || dir == '.') {
-			return null;
-		}
-		
-		if (Zotero.isWin) {
-			dir = OS.Path.join(PathUtils.parent(dir), "Mozilla", "Firefox");
-		}
-		else if (Zotero.isMac) {
-			dir = OS.Path.join(dir, "Firefox");
-		}
-		else {
-			dir = OS.Path.join(dir, ".mozilla", "firefox");
-		}
-		
-		return OS.Path.join(dir, "Profiles");
-	},
-	
-	
-	/**
-	 * Find other profile directories (for this app or the other app) using the given data directory
+	 * Find other Zotero profile directories using the given data directory
 	 *
 	 * @param {String} dataDir
-	 * @param {Boolean} [includeOtherApps=false] - Check Firefox profiles
 	 * @return {String[]}
 	 */
-	findOtherProfilesUsingDataDirectory: async function (dataDir, includeOtherApps = true) {
-		let otherAppProfiles = includeOtherApps ? await this._findOtherAppProfiles() : [];
-		let otherProfiles = (await this._findOtherProfiles()).concat(otherAppProfiles);
+	findOtherProfilesUsingDataDirectory: async function (dataDir) {
+		let otherProfiles = await this._findOtherProfiles();
 		
-		// First get profiles pointing at this directory
 		for (let i = 0; i < otherProfiles.length; i++) {
 			let dir = otherProfiles[i];
 			let prefs = await Zotero.File.getContentsAsync(OS.Path.join(dir, "prefs.js"));
 			prefs = prefs.trim().split(/(?:\r\n|\r|\n)/);
-			
+		
 			let keep = prefs.some(line => line.includes("extensions.zotero.useDataDir") && line.includes("true"))
 				&& prefs.some(line => line.match(/extensions\.zotero\.(lastD|d)ataDir/) && line.includes(dataDir));
 			if (!keep) {
 				otherProfiles.splice(i, 1);
 				i--;
 			}
-		}
-		
-		// If the parent of the source directory is a profile directory from the other app, add that
-		// to the list, which addresses the situation where the source directory is a custom
-		// location for the current profile but is a default in the other app (meaning it wouldn't
-		// be added above).
-		let dataDirParent = PathUtils.parent(dataDir);
-		if (otherAppProfiles.includes(dataDirParent) && !otherProfiles.includes(dataDirParent)) {
-			otherProfiles.push(dataDirParent);
 		}
 		
 		if (otherProfiles.length) {
@@ -191,82 +154,6 @@ Zotero.Profile = {
 	},
 	
 	
-	/**
-	 * @return {Boolean} - True if accessible or skipped, false if not
-	 */
-	checkFirefoxProfileAccess: async function () {
-		try {
-			let profilesDir = Zotero.Profile.getOtherAppProfilesDir();
-			if (!profilesDir) {
-				return true;
-			}
-			let profilesParent = PathUtils.parent(profilesDir);
-			Zotero.debug("Looking for Firefox profile in " + profilesParent);
-			let defProfile = await this.getDefaultInProfilesDir(profilesParent);
-			if (defProfile) {
-				let profileDir = defProfile[0];
-				Zotero.debug("Found default profile at " + profileDir);
-				let prefsFile = OS.Path.join(profileDir, "prefs.js");
-				await Zotero.File.getContentsAsync(prefsFile);
-				let dir = OS.Path.join(profileDir, Zotero.DataDirectory.legacyDirName);
-				Zotero.debug("Checking for 'zotero' subdirectory");
-				if ((await OS.File.stat(dir)).isDir) {
-					let dbFilename = Zotero.DataDirectory.getDatabaseFilename();
-					let dbFile = OS.Path.join(dir, dbFilename);
-					Zotero.debug("Checking database access within 'zotero' subdirectory");
-					(await OS.File.stat(dbFile)).lastModificationDate;
-				}
-				else {
-					Zotero.debug("'zotero' is not a directory!");
-				}
-			}
-			else {
-				Zotero.debug("No default profile found");
-			}
-		}
-		catch (e) {
-			if (e.name == 'NotFoundError' || (e instanceof OS.File.Error && e.becauseNoSuchFile)) {
-				return true;
-			}
-			Zotero.debug(e, 2)
-			return false
-		}
-		return true;
-	},
-	
-	
-	readPrefsFromFile: async function (prefsFile) {
-		var sandbox = new Components.utils.Sandbox("http://www.example.com/");
-		Components.utils.evalInSandbox(
-			"var prefs = {};"+
-			"function user_pref(key, val) {"+
-				"prefs[key] = val;"+
-			"}"
-		, sandbox);
-		
-		(await Zotero.File.getContentsAsync(prefsFile))
-			.split(/\n/)
-			.filter((line) => {
-				// Strip comments
-				return !line.startsWith('#')
-					// Only process lines in our pref branch
-					&& line.includes(ZOTERO_CONFIG.PREF_BRANCH);
-			})
-			// Process each line individually
-			.forEach((line) => {
-				try {
-					Zotero.debug("Processing " + line);
-					Components.utils.evalInSandbox(line, sandbox);
-				}
-				catch (e) {
-					Zotero.logError("Error processing prefs line: " + line);
-				}
-			});
-		
-		return sandbox.prefs;
-	},
-	
-	
 	//
 	// Private methods
 	//
@@ -293,7 +180,7 @@ Zotero.Profile = {
 	
 	
 	/**
-	 * Find other profile directories for this app (Firefox or Zotero)
+	 * Find other Zotero profile directories
 	 *
 	 * @return {Promise<String[]>} - Array of paths
 	 */
@@ -301,16 +188,5 @@ Zotero.Profile = {
 		var profileDir = this.dir;
 		var profilesDir = this.getProfilesDir();
 		return (await this._getProfilesInDir(profilesDir)).filter(dir => dir != profileDir);
-	},
-	
-	
-	/**
-	 * Find profile directories for the other app (Firefox or Zotero)
-	 *
-	 * @return {Promise<String[]>} - Array of paths
-	 */
-	_findOtherAppProfiles: async function () {
-		var dir = this.getOtherAppProfilesDir();
-		return dir && (await OS.File.exists(dir)) ? this._getProfilesInDir(dir) : [];
 	}
 };

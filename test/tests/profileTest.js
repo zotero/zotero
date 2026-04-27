@@ -79,45 +79,18 @@ user_pref("loop.copy.ticket", 196);
 			await Zotero.File.putContentsAsync(prefsFile2, contents2);
 			await Zotero.File.putContentsAsync(prefsFile3, contents3);
 			
-			var stub = sinon.stub(Zotero.Profile, "getOtherAppProfilesDir")
-				.returns(OS.Path.join(tmpDir, "Profiles"));
+			var stub = sinon.stub(Zotero.Profile, "_findOtherProfiles")
+				.returns([
+					OS.Path.join(tmpDir, "Profiles", profile1),
+					OS.Path.join(tmpDir, "Profiles", profile2),
+					OS.Path.join(tmpDir, "Profiles", profile3)
+				]);
 			
 			var dirs = await Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir);
 			
 			stub.restore();
 			
 			assert.sameMembers(dirs, [OS.Path.join(tmpDir, "Profiles", profile2)]);
-			assert.lengthOf(dirs, 1);
-		});
-		
-		
-		it("should find other-app profile with directory as a legacy default location", async function () {
-			let contents1 = `user_pref("extensions.lastAppVersion", "49.0");
-user_pref("extensions.shownSelectionUI", true);
-user_pref("extensions.ui.locale.hidden", true);
-user_pref("loop.copy.ticket", 196);
-`;
-			let contents2 = `user_pref("extensions.lastAppVersion", "50.0");
-user_pref("extensions.shownSelectionUI", true);
-user_pref("extensions.ui.locale.hidden", true);
-user_pref("loop.copy.ticket", 196);
-`;
-			
-			let prefsFile1 = OS.Path.join(tmpDir, "Profiles", profile1, "prefs.js");
-			let prefsFile2 = OS.Path.join(tmpDir, "Profiles", profile2, "prefs.js");
-			await Zotero.File.putContentsAsync(prefsFile1, contents1);
-			await Zotero.File.putContentsAsync(prefsFile2, contents2);
-			
-			var stub = sinon.stub(Zotero.Profile, "getOtherAppProfilesDir")
-				.returns(OS.Path.join(tmpDir, "Profiles"));
-			
-			var dirs = await Zotero.Profile.findOtherProfilesUsingDataDirectory(
-				OS.Path.join(OS.Path.dirname(prefsFile1), Zotero.DataDirectory.legacyDirName)
-			);
-			
-			stub.restore();
-			
-			assert.sameMembers(dirs, [OS.Path.join(tmpDir, "Profiles", profile1)]);
 			assert.lengthOf(dirs, 1);
 		});
 	});

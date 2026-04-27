@@ -807,55 +807,6 @@ var ZoteroPane = new function () {
 			searchBar.searchTextbox.select();
 		}, 1);
 		
-		//
-		// TEMP: Remove after people are no longer upgrading from Zotero for Firefox
-		//
-		var showFxProfileWarning = false;
-		var pref = 'firstRun.skipFirefoxProfileAccessCheck';
-		if (Zotero.fxProfileAccessError != undefined && Zotero.fxProfileAccessError) {
-			showFxProfileWarning = true;
-		}
-		else if (!Zotero.Prefs.get(pref)) {
-			showFxProfileWarning = !await Zotero.Profile.checkFirefoxProfileAccess();
-		}
-		if (showFxProfileWarning) {
-			Zotero.uiReadyPromise.then(async function () {
-				await Zotero.Promise.delay(2000);
-				
-				var ps = Services.prompt;
-				var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-				var text = "Zotero was unable to access your Firefox profile to check for "
-					+ "existing Zotero data.\n\n"
-					+ "If you’ve upgraded from Zotero 4.0 for Firefox and don’t see the data "
-					+ "you expect, it may be located elsewhere on your computer. "
-					+ "Click “More Information” for help restoring your previous data.\n\n"
-					+ "If you’re new to Zotero, you can ignore this message.";
-				var url = 'https://www.zotero.org/support/kb/data_missing_after_zotero_5_upgrade';
-				var dontShowAgain = {};
-				let index = ps.confirmEx(null,
-					Zotero.getString('general.warning'),
-					text,
-					buttonFlags,
-					Zotero.getString('general.moreInformation'),
-					"Ignore",
-					null,
-					Zotero.getString('general.dontShowAgain'),
-					dontShowAgain
-				);
-				if (dontShowAgain.value) {
-					Zotero.Prefs.set(pref, true)
-				}
-				if (index == 0) {
-					this.loadURI(url);
-				}
-			}.bind(this));
-		}
-		// Once we successfully find it once, don't bother checking again
-		else {
-			Zotero.Prefs.set(pref, true);
-		}
-		
 		if (Zotero.proxyFailure) {
 			try {
 				Zotero.Sync.Runner.updateIcons(Zotero.proxyFailure);
@@ -879,9 +830,6 @@ var ZoteroPane = new function () {
 			}
 			else if (Zotero.Sync.Server.manualSyncRequired) {
 				Zotero.debug('Manual sync required -- skipping auto-sync', 4);
-			}
-			else if (showFxProfileWarning) {
-				Zotero.debug('Firefox profile access error -- skipping initial auto-sync', 4);
 			}
 			else {
 				startupSync = true;

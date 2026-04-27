@@ -373,11 +373,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			if (this.skipLoading) {
 				return;
 			}
-			
-			await Zotero.DataDirectory.checkForLostLegacy();
-			if (this.restarting) {
-				return;
-			}
 		}
 		
 		// Make sure data directory isn't in Dropbox, etc.
