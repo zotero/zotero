@@ -112,6 +112,11 @@
 			}
 		}
 
+		focusSection() {
+			this.open = true;
+			this._abstractField?.focus({ focusVisible: true });
+		}
+
 		render() {
 			if (!this.item) return;
 			if (this._isAlreadyRendered()) return;

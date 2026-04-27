@@ -2558,7 +2558,12 @@
 		}
 		
 		focusField(fieldName) {
-			this.querySelector(`editable-text[fieldname="${fieldName}"]`)?.focus();
+			this.open = true;
+			if (fieldName === 'itemType') {
+				this.querySelector('#item-type-menu').focus({ focusVisible: true });
+				return;
+			}
+			this.querySelector(`editable-text[fieldname="${fieldName}"]`).focus();
 		}
 
 		_saveFieldFocus() {

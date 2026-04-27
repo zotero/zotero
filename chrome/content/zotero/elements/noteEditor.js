@@ -408,9 +408,9 @@
 				<html:div id="parent-label" class="label" hidden="true"/>
 				<html:div id="parent-value" class="value zotero-clicky" hidden="true"/>
 -->
-				<tags-box id="tags"/>
-				<libraries-collections-box id="libraries-collections"/>
-				<related-box id="related"/>
+				<tags-box id="tags" data-pane="tags"/>
+				<libraries-collections-box id="libraries-collections" data-pane="libraries-collections"/>
+				<related-box id="related" data-pane="related"/>
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 
@@ -433,6 +433,10 @@
 			this.destroy();
 		}
 
+		get item() {
+			return this._item;
+		}
+
 		set item(val) {
 			this._item = val;
 			this._id('related').item = this._item;
@@ -445,6 +449,15 @@
 			}
 
 			this.refresh();
+		}
+
+		// Mirror relevant methods from itemDetails so that Go menu generation treats LinksBox the same way
+		getEnabledPanes() {
+			return Array.from(this.querySelectorAll(':scope > [data-pane]:not([hidden])'));
+		}
+
+		getEnabledPane(id) {
+			return this.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]:not([hidden])`);
 		}
 
 		set mode(val) {
