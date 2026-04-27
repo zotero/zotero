@@ -93,9 +93,40 @@ user_pref("loop.copy.ticket", 196);
 			assert.sameMembers(dirs, [OS.Path.join(tmpDir, "Profiles", profile2)]);
 			assert.lengthOf(dirs, 1);
 		});
+
+
+		it("should match path with escaped backslashes (Windows)", async function () {
+			// Simulate a Windows path. Backslashes are escaped when written by the prefs system.
+			let dataDir = "C:\\Users\\foo\\Zotero";
+			let escapedDataDir = "C:\\\\Users\\\\foo\\\\Zotero";
+			let contents = `user_pref("extensions.zotero.dataDir", "${escapedDataDir}");
+user_pref("extensions.zotero.useDataDir", true);
+`;
+
+			let prefsFile1 = OS.Path.join(tmpDir, "Profiles", profile1, "prefs.js");
+			await Zotero.File.putContentsAsync(prefsFile1, "");
+			let prefsFile2 = OS.Path.join(tmpDir, "Profiles", profile2, "prefs.js");
+			await Zotero.File.putContentsAsync(prefsFile2, contents);
+			let prefsFile3 = OS.Path.join(tmpDir, "Profiles", profile3, "prefs.js");
+			await Zotero.File.putContentsAsync(prefsFile3, "");
+
+			var stub = sinon.stub(Zotero.Profile, "_findOtherProfiles")
+				.returns([
+					OS.Path.join(tmpDir, "Profiles", profile1),
+					OS.Path.join(tmpDir, "Profiles", profile2),
+					OS.Path.join(tmpDir, "Profiles", profile3)
+				]);
+
+			var dirs = await Zotero.Profile.findOtherProfilesUsingDataDirectory(dataDir);
+
+			stub.restore();
+
+			assert.sameMembers(dirs, [OS.Path.join(tmpDir, "Profiles", profile2)]);
+			assert.lengthOf(dirs, 1);
+		});
 	});
-	
-	
+
+
 	describe("#updateProfileDataDirectory()", function () {
 		it("should add new lines to prefs.js", async function () {
 			let prefsFile = OS.Path.join(tmpDir, "Profiles", profile1, "prefs.js");

@@ -98,14 +98,16 @@ Zotero.Profile = {
 	 */
 	findOtherProfilesUsingDataDirectory: async function (dataDir) {
 		let otherProfiles = await this._findOtherProfiles();
-		
+		// Backslashes are escaped in prefs.js, so escape them here for the substring match
+		let escapedDataDir = dataDir.replace(/\\/g, '\\\\');
+
 		for (let i = 0; i < otherProfiles.length; i++) {
 			let dir = otherProfiles[i];
 			let prefs = await Zotero.File.getContentsAsync(OS.Path.join(dir, "prefs.js"));
 			prefs = prefs.trim().split(/(?:\r\n|\r|\n)/);
-		
+
 			let keep = prefs.some(line => line.includes("extensions.zotero.useDataDir") && line.includes("true"))
-				&& prefs.some(line => line.match(/extensions\.zotero\.(lastD|d)ataDir/) && line.includes(dataDir));
+				&& prefs.some(line => line.match(/extensions\.zotero\.(lastD|d)ataDir/) && line.includes(escapedDataDir));
 			if (!keep) {
 				otherProfiles.splice(i, 1);
 				i--;
