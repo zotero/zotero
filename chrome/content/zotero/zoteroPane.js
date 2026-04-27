@@ -5070,7 +5070,17 @@ var ZoteroPane = new function () {
 				if (!this.collectionsView.editable) {
 					continue;
 				}
-				let openInWindow = event?.shiftKey || options.forceAlternateWindowBehavior;
+				let openInWindow;
+				if (typeof options.forceOpenInWindow === 'boolean') {
+					openInWindow = options.forceOpenInWindow;
+				}
+				else {
+					openInWindow = Zotero.Prefs.get('openNoteInNewWindow');
+					let useAlternateWindowBehavior = event?.shiftKey || options.forceAlternateWindowBehavior;
+					if (useAlternateWindowBehavior) {
+						openInWindow = !openInWindow;
+					}
+				}
 				ZoteroPane.openNote(item.id, { openInWindow });
 			}
 			else if (item.isAttachment()) {
@@ -5116,10 +5126,16 @@ var ZoteroPane = new function () {
 				await item.saveTx();
 			}
 
-			let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
-			let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
-			if (useAlternateWindowBehavior) {
-				openInWindow = !openInWindow;
+			let openInWindow;
+			if (typeof extraData?.forceOpenInWindow === 'boolean') {
+				openInWindow = extraData.forceOpenInWindow;
+			}
+			else {
+				openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
+				let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
+				if (useAlternateWindowBehavior) {
+					openInWindow = !openInWindow;
+				}
 			}
 			await Zotero.FileHandlers.open(item, {
 				location: extraData?.location,

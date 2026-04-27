@@ -377,6 +377,11 @@ var Zotero_LocateMenu = new function () {
 	function ViewItem(alternateWindowBehavior) {
 		this._viewItemType = "mixed";
 		this._numItems = 0;
+		let _getOpenInNewWindow = function (viewItemType) {
+			return Zotero.Prefs.get(
+				viewItemType === "note" ? "openNoteInNewWindow" : "openReaderInNewWindow"
+			);
+		};
 		Object.defineProperty(this, "className", {
 			get() {
 				switch (this._viewItemType) {
@@ -407,7 +412,7 @@ var Zotero_LocateMenu = new function () {
 					openIn = "external";
 				}
 				else {
-					let openInNewWindow = Zotero.Prefs.get("openReaderInNewWindow");
+					let openInNewWindow = _getOpenInNewWindow(this._viewItemType);
 					if (alternateWindowBehavior) {
 						openInNewWindow = !openInNewWindow;
 					}
@@ -432,8 +437,12 @@ var Zotero_LocateMenu = new function () {
 				&& alternateWindowBehavior) {
 				return false;
 			}
-			if ((locateMode === "tab" && !alternateWindowBehavior)
-				|| (locateMode === "window" && alternateWindowBehavior)) {
+			let openInWindow = _getOpenInNewWindow(usableItem.isNote() ? "note" : usableItem.attachmentReaderType);
+			if (alternateWindowBehavior) {
+				openInWindow = !openInWindow;
+			}
+			if ((locateMode === "tab" && !openInWindow)
+				|| (locateMode === "window" && openInWindow)) {
 				// Don't show option if it would open in the same type of the current context
 				return false;
 			}
@@ -473,10 +482,15 @@ var Zotero_LocateMenu = new function () {
 				if (usableItem) usableItems.push(usableItem);
 			}
 			
+			let forceOpenInWindow;
+			let openIn = this.l10nArgs.openIn;
+			forceOpenInWindow = { window: true, tab: false }[openIn];
+
 			ZoteroPane.viewItems(usableItems, event,
 				{
 					noLocateOnMissing: false,
-					forceAlternateWindowBehavior: alternateWindowBehavior
+					forceAlternateWindowBehavior: alternateWindowBehavior,
+					forceOpenInWindow,
 				});
 		};
 		
