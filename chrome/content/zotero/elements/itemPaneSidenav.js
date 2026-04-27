@@ -463,7 +463,7 @@
 				return;
 			}
 
-			button = document.createXULElement("div");
+			button = document.createElement("div");
 			button.classList.add("btn");
 			button.dataset.pane = paneID;
 			button.addEventListener('contextmenu', this.handleButtonContextMenu);
