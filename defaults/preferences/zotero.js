@@ -210,6 +210,8 @@ pref("extensions.zotero.fileHandler.snapshot", "");
 pref("extensions.zotero.openReaderInNewWindow", false);
 
 pref("extensions.zotero.openNoteInNewWindow", false);
+pref("extensions.zotero.note.contentViewMode", "wide");
+pref("extensions.zotero.note.tabContentViewMode", "comfortable");
 
 // File/URL opening executable if launch() fails
 pref("extensions.zotero.fallbackLauncher.unix", "/usr/bin/xdg-open");
