@@ -317,6 +317,13 @@ Zotero.Server.RequestHandler.prototype.handleRequest = async function () {
 	
 	Zotero.debug(requestDebug, 5);
 	
+	// Make sure the Host header is set to localhost or 127.0.0.1 to prevent DNS rebinding attacks
+	let host = this.headers.host;
+	if (!host || !/^(?:127\.0\.0\.1|\[::1\]|localhost)(?::[0-9]+)?$/i.test(host)) {
+		this._requestFinished(this._generateResponse(400, "text/plain", "Invalid Host header\n"));
+		return;
+	}
+	
 	if (this.headers.origin) {
 		this.origin = this.headers.origin;
 	}
