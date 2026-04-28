@@ -348,7 +348,7 @@ class Layout {
 
 
 	// Run search and refresh items list
-	async search(value, { skipDebounce = false } = {}) {
+	async search(value, { skipDebounce = false, skipEmptyMsgDelay = false } = {}) {
 		if (accepted) return;
 		let timer = new Zotero.Integration.Timer();
 		timer.start();
@@ -364,7 +364,7 @@ class Layout {
 		
 		// Never resize window here to avoid flickering
 		// The window will always be resized after the second items update below
-		await this.refreshItemsList({ skipWindowResize: true });
+		await this.refreshItemsList({ skipWindowResize: true, showEmptyMessage: skipEmptyMsgDelay });
 
 		// debounce to not rerun sql search until typing is probably done
 		if (!skipDebounce) {
@@ -1253,7 +1253,7 @@ class ListLayout extends Layout {
 		return itemNode;
 	}
 
-	async refreshItemsList({ skipWindowResize, retainItemsState } = {}) {
+	async refreshItemsList({ skipWindowResize, retainItemsState, showEmptyMessage = true } = {}) {
 		Zotero.debug("Citation Dialog: refreshing list items");
 		// If requested, snapshot the currently-selected item IDs so we can
 		// re-select the same items after rebuilding _listRows.
@@ -1322,15 +1322,14 @@ class ListLayout extends Layout {
 			}
 		}
 
-		// Insert message when there are no matching results - only
-		// when window resizing is not skipped, meaning library search has ran
-		if (!skipWindowResize) {
-			if (this._listRows.length === 0) {
-				this._listRows.push(new ListRow({
-					kind: "empty",
-					ref: { activeSearch: SearchHandler.searchValue.length > 0 },
-				}));
-			}
+		// Insert a single row with a centered message when there are no results
+		// to show. Suppressed during the first pass of a fresh search so we
+		// don't flash "No items match" before library search completes.
+		if (showEmptyMessage && this._listRows.length === 0) {
+			this._listRows.push(new ListRow({
+				kind: "empty",
+				ref: { activeSearch: SearchHandler.searchValue.length > 0 },
+			}));
 		}
 
 		// Push per-row heights to the virtualized table's _customRowHeightMap
@@ -2508,7 +2507,7 @@ window.addEventListener("focus", async () => {
 	SearchHandler.clearNonLibraryItemsCache();
 	if (!currentLayout) return;
 	if (currentLayout.type == "list") {
-		listLayout.search(SearchHandler.searchValue);
+		listLayout.search(SearchHandler.searchValue, { skipEmptyMsgDelay: true });
 		return;
 	}
 	
