@@ -67,14 +67,15 @@ describe("Connector Server", function () {
 
 	describe("/connector/ping", function () {
 		it("should reject browser requests", async function () {
-			let reqPromise = httpRequest(
+			let error = await getPromiseError(httpRequest(
 				'GET',
 				connectorServerPath + "/connector/ping",
 				{
 					testBrowserRequest: true,
 				}
-			);
-			await assert.isRejected(reqPromise, Zotero.getString('sync.error.checkConnection'));
+			));
+			assert.instanceOf(error, Zotero.HTTP.UnexpectedStatusException);
+			assert.include(error.message, Zotero.getString('sync.error.checkConnection'));
 		});
 		
 		it("should allow browser request if page is loaded directly", async function () {
@@ -1660,7 +1661,7 @@ describe("Connector Server", function () {
 		});
 		
 		it('should reject text/plain request without X-Zotero-Connector-API-Version', async function () {
-			var reqPromise = httpRequest(
+			var error = await getPromiseError(httpRequest(
 				'POST',
 				endpoint,
 				{
@@ -1671,8 +1672,9 @@ describe("Connector Server", function () {
 					successCodes: [403],
 					testBrowserRequest: true,
 				}
-			);
-			await assert.isRejected(reqPromise, Zotero.getString('sync.error.checkConnection'));
+			));
+			assert.instanceOf(error, Zotero.HTTP.UnexpectedStatusException);
+			assert.include(error.message, Zotero.getString('sync.error.checkConnection'));
 		});
 	});
 	
@@ -1702,7 +1704,7 @@ describe("Connector Server", function () {
 		
 		it('should reject requests without X-Zotero-Connector-API-Version', async function () {
 			const sessionID = Zotero.Utilities.randomString();
-			var reqPromise = httpRequest(
+			var error = await getPromiseError(httpRequest(
 				'POST',
 				endpoint + `?session=${sessionID}`,
 				{
@@ -1712,8 +1714,9 @@ describe("Connector Server", function () {
 					successCodes: [403],
 					testBrowserRequest: true,
 				}
-			);
-			await assert.isRejected(reqPromise, Zotero.getString('sync.error.checkConnection'));
+			));
+			assert.instanceOf(error, Zotero.HTTP.UnexpectedStatusException);
+			assert.include(error.message, Zotero.getString('sync.error.checkConnection'));
 		});
 		
 		it('should import resources (BibTeX) into selected collection', async function () {
