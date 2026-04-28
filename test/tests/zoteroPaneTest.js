@@ -1944,4 +1944,156 @@ describe("ZoteroPane", function () {
 			assert.includeMembers(topLevelCollections, [collectionChild]);
 		});
 	});
+
+	describe("Go menu", function () {
+		let goPopup;
+
+		before(function () {
+			goPopup = doc.getElementById('menu_goPopup');
+		});
+
+		beforeEach(async function () {
+			// Switch back to library tab if a previous test opened a reader/note tab
+			if (win.Zotero_Tabs.selectedID !== 'zotero-pane') {
+				let promise = waitForNotifierEvent("select", "tab");
+				win.Zotero_Tabs.select('zotero-pane');
+				await promise;
+			}
+			win.Zotero_Tabs.closeAll();
+			await selectLibrary(win);
+			// Clear lingering item selection from a previous test
+			if (zp.itemsView.selection.count > 0) {
+				let promise = zp.itemsView.waitForSelect();
+				zp.itemsView.selection.clearSelection();
+				await promise;
+			}
+		});
+
+		function openGoMenu() {
+			goPopup.dispatchEvent(new MouseEvent('popupshowing'));
+		}
+
+		function visibleStaticItemIds() {
+			return [...goPopup.children]
+				.filter(el => !el.classList.contains('go-menu-section-dynamic')
+					&& !el.hidden
+					&& ['menuitem', 'menu'].includes(el.tagName.toLowerCase()))
+				.map(el => el.id);
+		}
+
+		function dynamicSectionLabels() {
+			return [...goPopup.querySelectorAll('.go-menu-section-dynamic')]
+				.map(el => el.getAttribute('label'));
+		}
+
+		it("should show only Tabs Menu, Library, Quick Search, and Locate in library tab with no selection", function () {
+			openGoMenu();
+			assert.sameMembers(visibleStaticItemIds(), [
+				'go-menuitem-tabs',
+				'go-menuitem-library',
+				'go-menuitem-quick-search',
+				'go-menuitem-locate'
+			]);
+			assert.lengthOf(dynamicSectionLabels(), 0);
+		});
+
+		it("should list item-pane sections when an item is selected in library tab", async function () {
+			let item = await createDataObject('item', { itemType: 'book' });
+			await select(win, item);
+			openGoMenu();
+			let labels = dynamicSectionLabels();
+			assert.include(labels, 'Info');
+			assert.include(labels, 'Abstract');
+			assert.include(labels, 'Attachments');
+			assert.include(labels, 'Notes');
+			assert.include(labels, 'Libraries and Collections');
+			assert.include(labels, 'Tags');
+			assert.include(labels, 'Related');
+
+			// Selecting a section should focus its collapsible-section header
+			let tagsMenuItem = [...goPopup.querySelectorAll('.go-menu-section-dynamic')]
+				.find(el => el.getAttribute('label') === 'Tags');
+			let focusPromise = waitForDOMEvent(win.ZoteroPane.itemPane.itemDetails, 'focusin');
+			tagsMenuItem.dispatchEvent(new MouseEvent('command'));
+			await focusPromise;
+			assert.equal(doc.activeElement.textContent, "0 Tags");
+			assert.isTrue(doc.activeElement.classList.contains("head"));
+		});
+
+		it("should render the Item Info entry as a submenu of item fields", async function () {
+			let item = await createDataObject('item', { itemType: 'book' });
+			await select(win, item);
+			openGoMenu();
+			let info = [...goPopup.querySelectorAll('.go-menu-section-dynamic')]
+				.find(el => el.getAttribute('label') === 'Info');
+			assert.ok(info, "Info entry should exist");
+			assert.equal(info.tagName.toLowerCase(), 'menu');
+			let submenu = info.querySelector('menupopup');
+			let fieldLabels = [...submenu.children].map(el => el.getAttribute('label'));
+			assert.include(fieldLabels, "Item Type");
+			assert.include(fieldLabels, "Author");
+			let fieldIDs = Zotero.ItemFields.getItemTypeFields(item.itemTypeID);
+			for (let fieldID of fieldIDs) {
+				let fieldName = Zotero.ItemFields.getName(fieldID);
+				if (fieldName === "abstractNote") continue;
+				let label = Zotero.ItemFields.getLocalizedString(fieldID);
+				assert.include(fieldLabels, label, `Item Info submenu should include "${label}"`);
+			}
+
+			// Selecting Title should focus the title editable-text in the info-box
+			let titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemTypeID, 'title');
+			let titleLabel = Zotero.ItemFields.getLocalizedString(titleFieldID);
+			let titleMenuItem = [...submenu.children].find(el => el.getAttribute('label') === titleLabel);
+			let infoBox = win.ZoteroPane.itemPane.itemDetails.querySelector('info-box');
+			let focusPromise = waitForDOMEvent(infoBox, 'focusin');
+			titleMenuItem.dispatchEvent(new MouseEvent('command'));
+			await focusPromise;
+			assert.equal(doc.activeElement.closest('editable-text').id, 'itembox-field-value-title');
+		});
+
+		it("should list Tags, Related, and Libraries and Collections when a note is selected in library tab", async function () {
+			let note = new Zotero.Item('note');
+			note.setNote('test');
+			await note.saveTx();
+			await select(win, note);
+			openGoMenu();
+			let labels = dynamicSectionLabels();
+			assert.include(labels, 'Tags');
+			assert.include(labels, 'Related');
+			assert.include(labels, 'Libraries and Collections');
+			assert.notInclude(labels, 'Info');
+			assert.notInclude(labels, 'Abstract');
+		});
+
+		it("should list attachment sections for a standalone PDF in a reader tab", async function () {
+			let attachment = await importPDFAttachment();
+			let tabPromise = waitForNotifierEvent("select", "tab");
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			await reader._initPromise;
+			await tabPromise;
+			openGoMenu();
+			let labels = dynamicSectionLabels();
+			assert.include(labels, 'Attachment Info');
+			assert.include(labels, 'Libraries and Collections');
+			assert.include(labels, 'Tags');
+			assert.include(labels, 'Related');
+		});
+
+		it("should list Note Info, Libraries and Collections, Tags, and Related for a note tab", async function () {
+			let note = new Zotero.Item('note');
+			note.setNote('test note');
+			await note.saveTx();
+			await Zotero.Notes.open(note.id);
+			await waitForCallback(
+				() => win.Zotero_Tabs.currentItemPane?.itemDetails?.item?.id === note.id,
+				50, 5
+			);
+			openGoMenu();
+			let labels = dynamicSectionLabels();
+			assert.include(labels, 'Note Info');
+			assert.include(labels, 'Libraries and Collections');
+			assert.include(labels, 'Tags');
+			assert.include(labels, 'Related');
+		});
+	});
 })

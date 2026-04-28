@@ -111,6 +111,17 @@
 			this.setAttribute("view-type", type);
 		}
 
+
+		get itemDetails() {
+			if (this.mode === 'note') {
+				return this._noteEditor?.querySelector('links-box');
+			}
+			if (this.mode === 'item') {
+				return this._itemDetails;
+			}
+			return null;
+		}
+
 		get collapsed() {
 			return isPaneCollapsed(this);
 		}
