@@ -352,13 +352,20 @@ Zotero.File = new function () {
 	}
 
 	/**
-	 * Return a promise for the contents of resource.
+	 * Return a promise for the contents of a local resource URL as a UTF-8
+	 * string. Goes through an nsIChannel to handle jar: URLs containing '@'.
 	 *
-	 * @param {String} url - the resource url
+	 * @param {String} url - the resource url (file://, jar:, resource://, chrome://)
 	 * @return {Promise<String>} the resource contents as a string
 	 */
 	this.getResourceAsync = function (url) {
-		return getContentsFromURLAsync(url);
+		let channel = NetUtil.newChannel({
+			uri: url,
+			loadUsingSystemPrincipal: true,
+			securityFlags: Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_SEC_CONTEXT_IS_NULL,
+			contentPolicyType: Ci.nsIContentPolicy.TYPE_OTHER,
+		});
+		return this.getContentsAsync(channel, 'UTF-8');
 	}
 	
 	

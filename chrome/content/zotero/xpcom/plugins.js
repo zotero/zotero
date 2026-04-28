@@ -40,7 +40,15 @@ Zotero.Plugins = new function () {
 	var scopes = new Map();
 	var observers = new Set();
 	var addonVersions = new Map();
-	var addonL10nSources = new Map();
+
+	// All plugins' FTL content is consolidated into one L10nFileSource, so the
+	// solver never has to choose between competing per-plugin sources.
+	// Miscompiles can happen when a plugin uses `{optional: true}` because the tester
+	// can't distinguish "source has content" from "source is an optional-miss".
+	const PLUGIN_L10N_SOURCE_NAME = "zotero-plugins";
+	const PLUGIN_L10N_PRE_PATH = "zotero-plugins:{locale}/";
+	// addon.id -> Map<full_path, ftl_content>
+	var addonL10nContents = new Map();
 	
 	const REASONS = {
 		APP_STARTUP: 1,
@@ -421,16 +429,9 @@ Zotero.Plugins = new function () {
 	 * could be included in an XHTML file as
 	 *   <link rel="localization" href="make-it-red.ftl"/>
 	 *
-	 * Locale subdirectories that match Zotero locales (Services.locale.availableLocales)
-	 * are registered as is. Other locales are aliased to a best-fit Zotero locale.
-	 * For example, Zotero has an 'eu-ES' locale but no 'eu-FR' locale. If a plugin
-	 * included an 'eu-FR' locale instead, 'eu-FR' would be aliased to 'eu-ES',
-	 * and 'eu-FR' strings would show if the user's Zotero locale is 'eu-ES'.
-	 *
-	 * If a plugin doesn't have a locale matching the current Zotero locale, 'en-US'
-	 * is used as a fallback. If it doesn't have an 'en-*' locale, Fluent chooses a
-	 * fallback arbitrarily. For instance, a plugin with only a 'de' locale would
-	 * show German strings even if the user's Zotero locale is 'en-US'.
+	 * For each Zotero locale the plugin doesn't ship translations for, the
+	 * plugin's closest-locale content (exact -> same-language -> en-US ->
+	 * first available) is used, so every Zotero locale has a valid bundle.
 	 *
 	 * @param addon
 	 * @returns {Promise<void>}
@@ -449,58 +450,102 @@ Zotero.Plugins = new function () {
 			Zotero.logError(e);
 			return;
 		}
-		
-		let matchedLocales = [];
-		let unmatchedLocales = [];
+
+		// Read every .ftl in every plugin locale directory into memory.
+		let pluginFilesByLocale = new Map();
 		for (let pluginLocale of pluginLocales) {
-			(zoteroLocales.includes(pluginLocale) ? matchedLocales : unmatchedLocales)
-				.push(pluginLocale);
-		}
-		
-		let sources = [];
-		// All locales that exactly match a Zotero locale can be registered at once
-		if (matchedLocales.length) {
-			sources.push(new L10nFileSource(
-				addon.id,
-				'app',
-				matchedLocales,
-				// {locale} is replaced with the locale code
-				rootURI.spec + 'locale/{locale}/',
-			));
-		}
-		// Other locales need to be registered individually to create aliases
-		for (let unmatchedLocale of unmatchedLocales) {
-			let resolvedLocale = Zotero.Utilities.Internal.resolveLocale(unmatchedLocale, zoteroLocales);
-			// resolveLocale() returns en-US as a fallback; don't use it unless
-			// the unmatched plugin locale is en-*
-			if (resolvedLocale === 'en-US' && !unmatchedLocale.startsWith('en')) {
-				Zotero.debug(`${addon.id}: No matching locale for ${unmatchedLocale}`);
+			let files;
+			try {
+				files = await readDirectory(rootURI, `locale/${pluginLocale}`);
+			}
+			catch (e) {
+				Zotero.logError(e);
 				continue;
 			}
-			Zotero.debug(`${addon.id}: Aliasing ${unmatchedLocale} to ${resolvedLocale}`);
-			if (sources.some(source => source.locales.includes(resolvedLocale))) {
-				Zotero.debug(`${addon.id}: ${resolvedLocale} already registered`);
-				continue;
+			let contents = new Map();
+			for (let file of files) {
+				if (!file.endsWith('.ftl')) continue;
+				let url = rootURI.spec + `locale/${pluginLocale}/${file}`;
+				try {
+					contents.set(file, await Zotero.File.getResourceAsync(url));
+				}
+				catch (e) {
+					Zotero.logError(new Error(`${addon.id}: failed to read ${url}: ${e}`));
+				}
 			}
-			sources.push(new L10nFileSource(
-				addon.id + '-' + unmatchedLocale,
-				'app',
-				[resolvedLocale],
-				// Don't use the {locale} placeholder here - manually specify the aliased locale code
-				rootURI.spec + `locale/${unmatchedLocale}/`,
-			));
+			pluginFilesByLocale.set(pluginLocale, contents);
 		}
-		L10nRegistry.getInstance().registerSources(sources);
-		addonL10nSources.set(addon.id, sources.map(source => source.name));
+
+		// Plugin locales can have partial coverage, pick the fallback per file.
+		let localesPerFile = new Map();
+		for (let [pluginLocale, files] of pluginFilesByLocale) {
+			for (let filename of files.keys()) {
+				if (!localesPerFile.has(filename)) {
+					localesPerFile.set(filename, []);
+				}
+				localesPerFile.get(filename).push(pluginLocale);
+			}
+		}
+
+		let contributions = new Map();
+		for (let zoteroLocale of zoteroLocales) {
+			let prefix = PLUGIN_L10N_PRE_PATH.replace('{locale}', zoteroLocale);
+			for (let [filename, available] of localesPerFile) {
+				let pick = Zotero.Utilities.Internal.resolveLocale(
+					zoteroLocale, available, { silent: true }
+				);
+				if (!pick) {
+					pick = available.find(l => l.startsWith('en')) || available[0];
+				}
+				contributions.set(
+					prefix + filename,
+					pluginFilesByLocale.get(pick).get(filename)
+				);
+			}
+		}
+		addonL10nContents.set(addon.id, contributions);
+		rebuildUnifiedPluginSource(zoteroLocales);
 	}
-	
-	
-	function unregisterLocales(addon) {
-		let sources = addonL10nSources.get(addon.id);
-		if (sources) {
-			L10nRegistry.getInstance().removeSources(sources);
-			addonL10nSources.delete(addon.id);
+
+
+	/**
+	 * Rebuild the unified plugin L10nFileSource from all active plugins'
+	 * contributions and register (or update) it in L10nRegistry.
+	 */
+	function rebuildUnifiedPluginSource(zoteroLocales) {
+		let fs = [];
+		for (let contributions of addonL10nContents.values()) {
+			for (let [path, source] of contributions) {
+				fs.push({ path, source });
+			}
 		}
+		let registry = L10nRegistry.getInstance();
+		if (!fs.length) {
+			if (registry.hasSource(PLUGIN_L10N_SOURCE_NAME)) {
+				registry.removeSources([PLUGIN_L10N_SOURCE_NAME]);
+			}
+			return;
+		}
+		let source = L10nFileSource.createMock(
+			PLUGIN_L10N_SOURCE_NAME,
+			'app',
+			zoteroLocales,
+			PLUGIN_L10N_PRE_PATH,
+			fs
+		);
+		if (registry.hasSource(PLUGIN_L10N_SOURCE_NAME)) {
+			registry.updateSources([source]);
+		}
+		else {
+			registry.registerSources([source]);
+		}
+	}
+
+
+	function unregisterLocales(addon) {
+		if (!addonL10nContents.has(addon.id)) return;
+		addonL10nContents.delete(addon.id);
+		rebuildUnifiedPluginSource(Services.locale.availableLocales);
 	}
 
 	/**

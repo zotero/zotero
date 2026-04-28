@@ -1469,7 +1469,18 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
-	resolveLocale: function (locale, locales) {
+	/**
+	 * Resolve `locale` to the best-fit entry in `locales`.
+	 *
+	 * @param {String} locale
+	 * @param {String[]} locales
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.silent=false] - Suppress the not-found logError
+	 *     and return null instead of throwing when no match exists.
+	 * @return {String|null}
+	 */
+	resolveLocale: function (locale, locales, options = {}) {
+		let { silent = false } = options;
 		// If the locale exists as-is, use it
 		if (locales.includes(locale)) {
 			return locale;
@@ -1487,9 +1498,10 @@ Zotero.Utilities.Internal = {
 		// If none, use en-US
 		if (!possibleLocales.length) {
 			if (!locales.includes('en-US')) {
+				if (silent) return null;
 				throw new Error("Locales not available");
 			}
-			Zotero.logError(`Locale ${locale} not found`);
+			if (!silent) Zotero.logError(`Locale ${locale} not found`);
 			return 'en-US';
 		}
 		
