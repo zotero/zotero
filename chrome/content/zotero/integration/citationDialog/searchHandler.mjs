@@ -386,7 +386,10 @@ export class CitationDialogSearchHandler {
 		for (let itemID of itemIDs) {
 			let item = await Zotero.Items.getAsync(itemID);
 			if (!item) continue;
-			if (item && item.parentItemID) {
+			// When inserting citations, tab item is a PDF, so we want to grab it's paren item.
+			// When inserting notes, we want to show the actual note
+			let isOpenNoteInNoteMode = this.dialogState.isAddingNote() && item.isNote();
+			if (item.parentItemID && !isOpenNoteInNoteMode) {
 				item = await Zotero.Items.getAsync(item.parentItemID);
 			}
 			items.push(item);
