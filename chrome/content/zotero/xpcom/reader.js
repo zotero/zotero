@@ -256,6 +256,7 @@ class ReaderInstance {
 			readAloudVoices: this._getReadAloudVoices(),
 			readAloudEnabledVoices: await this._getReadAloudEnabledVoices(),
 			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
+			readAloudHighlightGranularity: Zotero.Prefs.get('reader.readAloud.highlightGranularity'),
 			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
@@ -665,6 +666,7 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.text', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.image', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.readAloudVoices', this._handleReadAloudVoicesPrefChange),
+			Zotero.Prefs.registerObserver('reader.readAloud.highlightGranularity', this._handleReadAloudHighlightGranularityChange),
 		];
 
 		return true;
@@ -1191,6 +1193,12 @@ class ReaderInstance {
 		this._internalReader.setReadAloudVoices(Cu.cloneInto(this._getReadAloudVoices(), this._iframeWindow));
 	};
 
+	_handleReadAloudHighlightGranularityChange = () => {
+		this._internalReader.setReadAloudHighlightGranularity(
+			Zotero.Prefs.get('reader.readAloud.highlightGranularity')
+		);
+	};
+
 	_handleReadAloudEnabledVoicesChange = async (voices) => {
 		if (!voices) {
 			voices = await this._getReadAloudEnabledVoices();
@@ -1687,7 +1695,7 @@ class ReaderInstance {
 			getAudio: (segment, voice) => {
 				return new targetWindow.Promise(async (resolve) => {
 					let cacheURL = 'https://read-aloud.zotero.invalid/audio?'
-						+ new URLSearchParams({ voice: voice.id, text: segment.text });
+						+ new URLSearchParams({ voice: voice.id, text: segment.text, timestamps: 1 });
 					let cache;
 					try {
 						cache = await audioCache;
