@@ -1491,8 +1491,64 @@ describe("ZoteroPane", function () {
 		});
 
 		it("should shift-tab across the zotero pane", async function () {
+			Zotero.Debug.init(1);
+
+			let logOpenWindows = (label) => {
+				let lines = [`[window probe] ${label}: activeWindow=${Services.focus.activeWindow?.document?.documentURI}`];
+				let enumerator = Services.wm.getEnumerator(null);
+				let i = 0;
+				while (enumerator.hasMoreElements()) {
+					let w = enumerator.getNext();
+					let uri = w.document?.documentURI;
+					let title = w.document?.title;
+					let closed = w.closed;
+					lines.push(`[window probe]   [${i++}] uri=${uri} title=${JSON.stringify(title)} closed=${closed}`);
+				}
+				Zotero.debug(lines.join('\n'));
+			};
+			logOpenWindows('start of shift-tab test');
+
 			let searchBox = doc.getElementById('zotero-tb-search-textbox');
 			searchBox.focus();
+
+			let describeNode = (n) => {
+				if (!n) return '<null>';
+				let id = n.id || (n.classList ? '.' + [...n.classList].join('.') : '');
+				return `${n.tagName || '?'}#${id}`;
+			};
+			// Probe: log every focusin/focus/focusout/blur event at document level
+			let logFocusEvent = (ev) => {
+				Zotero.debug(`[focus probe] ${ev.type} target=${describeNode(ev.target)} `
+					+ `composedTarget=${describeNode(ev.composedTarget)} `
+					+ `relatedTarget=${describeNode(ev.relatedTarget)}`);
+			};
+			doc.addEventListener('focusin', logFocusEvent, true);
+			doc.addEventListener('focusout', logFocusEvent, true);
+			doc.addEventListener('focus', logFocusEvent, true);
+			doc.addEventListener('blur', logFocusEvent, true);
+
+			// Probe: log all mutations to the collection search field's style/class so we
+			// can see exactly when (and whether) the click handler and hideCollectionSearch
+			// run and what they change
+			let collectionSearchField = doc.getElementById("zotero-collections-search");
+			let mutationObserver = new MutationObserver((muts) => {
+				for (let m of muts) {
+					let val = m.target.getAttribute(m.attributeName);
+					Zotero.debug(`[search-field mutation] ${m.attributeName}: ${m.oldValue} -> ${val}`);
+				}
+			});
+			mutationObserver.observe(collectionSearchField, {
+				attributes: true,
+				attributeFilter: ['class', 'style', 'disabled'],
+				attributeOldValue: true,
+			});
+
+			// Sanity check: verify the listener fires at all
+			Zotero.debug(`[focus probe] sanity: focusing zotero-tb-add then back`);
+			doc.getElementById('zotero-tb-add').focus();
+			Zotero.debug(`[focus probe] after first focus; activeElement=${doc.activeElement?.id}`);
+			searchBox.focus();
+			Zotero.debug(`[focus probe] sanity done; activeElement=${doc.activeElement?.id}`);
 
 			for (let id of sequence) {
 				// Set up focus listener before dispatching the event
@@ -1514,12 +1570,26 @@ describe("ZoteroPane", function () {
 							() => field.style.visibility === 'hidden');
 					}
 				}
+				let prevActiveId = doc.activeElement.id || [...doc.activeElement.classList].join('.');
 				doc.activeElement.dispatchEvent(shiftTab);
 				if (focusPromise) {
-					await focusPromise;
+					Zotero.debug(`[shift-tab probe] awaiting focusPromise for ${id} (from ${prevActiveId})`);
+					let raced = await Promise.race([
+						focusPromise.then(() => 'resolved'),
+						Zotero.Promise.delay(8000).then(() => 'timeout')
+					]);
+					Zotero.debug(`[shift-tab probe] focusPromise for ${id}: ${raced}; activeElement=${doc.activeElement.id}`);
+					if (raced === 'timeout') throw new Error(`focusPromise hung for ${id}`);
 				}
 				if (hidePromise) {
-					await hidePromise;
+					Zotero.debug(`[shift-tab probe] awaiting hidePromise for ${id} (from ${prevActiveId})`);
+					let raced = await Promise.race([
+						hidePromise.then(() => 'resolved'),
+						Zotero.Promise.delay(8000).then(() => 'timeout')
+					]);
+					let field = doc.getElementById("zotero-collections-search");
+					Zotero.debug(`[shift-tab probe] hidePromise for ${id}: ${raced}; visibility=${field.style.visibility}; classes=${[...field.classList].join(',')}; activeElement=${doc.activeElement.id}`);
+					if (raced === 'timeout') throw new Error(`hidePromise hung for ${id}`);
 				}
 				// Some elements don't have id, so use classes to verify they're focused
 				if (doc.activeElement.id) {
