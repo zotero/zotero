@@ -222,6 +222,23 @@
 			</vbox>
 		</groupbox>
 
+		<groupbox id="zotero-prefpane-read-aloud-groupbox" aria-labelledby="preferences-read-aloud-title">
+			<label><html:h2 id="preferences-read-aloud-title" data-l10n-id="preferences-read-aloud-title"/></label>
+
+			<hbox align="center">
+				<label data-l10n-id="preferences-read-aloud-highlight-granularity" control="read-aloud-highlight-granularity-menulist"/>
+				<menulist id="read-aloud-highlight-granularity-menulist"
+						preference="extensions.zotero.reader.readAloud.highlightGranularity"
+						native="true">
+					<menupopup>
+						<menuitem data-l10n-id="preferences-read-aloud-highlight-granularity-paragraph" value="paragraph"/>
+						<menuitem data-l10n-id="preferences-read-aloud-highlight-granularity-sentence" value="sentence"/>
+						<menuitem data-l10n-id="preferences-read-aloud-highlight-granularity-word" value="word"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+		</groupbox>
+
 		<groupbox id="zotero-prefpane-note-groupbox" aria-labelledby="preferences-note-title">
 			<label><html:h2 id="preferences-note-title" data-l10n-id="preferences-note-title"/></label>
 			<checkbox id="open-note-in-new-window"

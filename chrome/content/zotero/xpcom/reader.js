@@ -264,6 +264,7 @@ class ReaderInstance {
 			readAloudVoices: this._getReadAloudVoices(),
 			readAloudEnabledVoices: await this._getReadAloudEnabledVoices(),
 			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
+			readAloudHighlightGranularity: Zotero.Prefs.get('reader.readAloud.highlightGranularity'),
 			getSDTPack: this._createGetSDTPack(this._iframeWindow),
 			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
@@ -662,6 +663,7 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.text', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.image', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.readAloudVoices', this._handleReadAloudVoicesPrefChange),
+			Zotero.Prefs.registerObserver('reader.readAloud.highlightGranularity', this._handleReadAloudHighlightGranularityChange),
 		];
 
 		return true;
@@ -1223,6 +1225,12 @@ class ReaderInstance {
 		this._internalReader.setReadAloudVoices(Cu.cloneInto(this._getReadAloudVoices(), this._iframeWindow));
 	};
 
+	_handleReadAloudHighlightGranularityChange = () => {
+		this._internalReader.setReadAloudHighlightGranularity(
+			Zotero.Prefs.get('reader.readAloud.highlightGranularity')
+		);
+	};
+
 	_handleReadAloudEnabledVoicesChange = async (voices) => {
 		if (!voices) {
 			voices = await this._getReadAloudEnabledVoices();
@@ -1729,7 +1737,19 @@ class ReaderInstance {
 						cache = await audioCache;
 						let cached = await cache.match(cacheURL);
 						if (cached) {
-							resolve(Cu.cloneInto({ audio: await cached.blob() }, targetWindow));
+							// Word-level timestamps are cached in a response header
+							// alongside the audio (see below)
+							let timestamps;
+							let timestampsHeader = cached.headers.get('X-Zotero-Timestamps');
+							if (timestampsHeader) {
+								try {
+									timestamps = JSON.parse(timestampsHeader);
+								}
+								catch (e) {
+									Zotero.logError(e);
+								}
+							}
+							resolve(Cu.cloneInto({ audio: await cached.blob(), timestamps }, targetWindow));
 							return;
 						}
 					}
@@ -1743,7 +1763,13 @@ class ReaderInstance {
 					// returned with Cache-Control: no-store)
 					if (result.audio && cache && !result.noStore) {
 						try {
-							await cache.put(cacheURL, new Response(result.audio));
+							// Put word-level timestamps in a header so they
+							// get cached with the audio response
+							let headers = {};
+							if (result.timestamps) {
+								headers['X-Zotero-Timestamps'] = JSON.stringify(result.timestamps);
+							}
+							await cache.put(cacheURL, new Response(result.audio, { headers }));
 						}
 						catch (e) {
 							Zotero.logError(e);
@@ -1775,7 +1801,7 @@ class ReaderInstance {
 	// cacheVersion is included so that a server-side version bump changes the
 	// key, causing old entries to miss and the correct audio to be re-fetched.
 	_getReadAloudCacheURL(segment, voice) {
-		let params = { voice: voice.id, text: segment.text, cacheVersion: voice.cacheVersion };
+		let params = { voice: voice.id, text: segment.text, cacheVersion: voice.cacheVersion, timestamps: 1 };
 		return 'https://read-aloud.zotero.invalid/audio?' + new URLSearchParams(params);
 	}
 
@@ -1797,8 +1823,10 @@ class ReaderInstance {
 			}
 			let cache = await audioCache;
 			for (let request of await cache.keys()) {
-				let version = new URL(request.url).searchParams.get('cacheVersion');
-				if (!validVersions.has(version)) {
+				let params = new URL(request.url).searchParams;
+				// Drop entries stored in the pre-timestamp format, plus those
+				// whose cacheVersion is no longer offered by the server
+				if (params.get('timestamps') !== '1' || !validVersions.has(params.get('cacheVersion'))) {
 					await cache.delete(request);
 				}
 			}

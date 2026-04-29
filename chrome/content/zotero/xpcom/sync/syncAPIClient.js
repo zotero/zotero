@@ -672,13 +672,16 @@ Zotero.Sync.APIClient.prototype = {
 		let method;
 		let url;
 		let options = {
-			responseType: "blob",
+			// Could be audio bytes or a JSON { audioURL, timestamps } object
+			// Inspect the Content-Type before parsing
+			responseType: "arraybuffer",
 			errorDelayMax: 8000,
 		};
 		if (segment === 'sample') {
 			method = "GET";
 			let params = new URLSearchParams();
 			params.set('voice', voiceID);
+			params.set('timestamps', '1');
 			url = this.baseURL + "tts/sample?" + params;
 			options.noAPIKey = true;
 		}
@@ -691,20 +694,36 @@ Zotero.Sync.APIClient.prototype = {
 			options.body = JSON.stringify({
 				voice: voiceID,
 				text: segment.text,
+				timestamps: 1,
 			});
 		}
 		try {
 			let xmlhttp = await this.makeRequest(method, url, options);
+			let contentType = xmlhttp.getResponseHeader('Content-Type') || '';
 			let cacheControl = xmlhttp.getResponseHeader('Cache-Control') || '';
 			let noStore = /(?:^|,)\s*no-store\s*(?:,|$)/i.test(cacheControl);
-			return { audio: xmlhttp.response, noStore };
+			if (contentType.includes('application/json')) {
+				let json = JSON.parse(new TextDecoder().decode(xmlhttp.response));
+				let audioResponse = await Zotero.HTTP.request('GET', json.audioURL, {
+					responseType: "blob",
+					errorDelayMax: 8000,
+				});
+				return { audio: audioResponse.response, timestamps: json.timestamps, noStore };
+			}
+			return { audio: new Blob([xmlhttp.response], { type: contentType }), noStore };
 		}
 		catch (e) {
 			Zotero.logError(e);
 
 			let error;
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status === 402) {
-				let body = await e.xmlhttp.response?.text();
+				let body = null;
+				try {
+					body = new TextDecoder().decode(e.xmlhttp.response);
+				}
+				catch {
+					// Ignore
+				}
 				error = body === 'daily_limit_exceeded' ? 'daily-limit-exceeded' : 'quota-exceeded';
 			}
 			else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
