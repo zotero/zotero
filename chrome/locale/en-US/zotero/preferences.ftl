@@ -28,6 +28,15 @@ preferences-reader-ebook-font = Ebook font:
 preferences-reader-ebook-hyphenate =
     .label = Enable automatic hyphenation
 
+preferences-read-aloud-title = Read Aloud
+preferences-read-aloud-highlight-granularity = While reading, highlight:
+preferences-read-aloud-highlight-granularity-paragraph =
+    .label = Paragraphs
+preferences-read-aloud-highlight-granularity-sentence =
+    .label = Sentences
+preferences-read-aloud-highlight-granularity-word =
+    .label = Words
+
 preferences-note-title = Notes
 preferences-note-open-in-new-window =
     .label = Open notes in new windows instead of tabs

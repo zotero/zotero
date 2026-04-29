@@ -672,13 +672,16 @@ Zotero.Sync.APIClient.prototype = {
 		let method;
 		let url;
 		let options = {
-			responseType: "blob",
+			// Could be a blob (audio bytes) or an application/json envelope with `audioURL`
+			// and `timestamps`; we inspect the Content-Type before parsing.
+			responseType: "arraybuffer",
 			errorDelayMax: 8000,
 		};
 		if (segment === 'sample') {
 			method = "GET";
 			let params = new URLSearchParams();
 			params.set('voice', voiceID);
+			params.set('timestamps', '1');
 			url = this.baseURL + "tts/sample?" + params;
 			options.noAPIKey = true;
 		}
@@ -691,11 +694,21 @@ Zotero.Sync.APIClient.prototype = {
 			options.body = JSON.stringify({
 				voice: voiceID,
 				text: segment.text,
+				timestamps: 1,
 			});
 		}
 		try {
 			let xmlhttp = await this.makeRequest(method, url, options);
-			return { audio: xmlhttp.response };
+			let contentType = xmlhttp.getResponseHeader('Content-Type') || '';
+			if (contentType.includes('application/json')) {
+				let json = JSON.parse(new TextDecoder().decode(xmlhttp.response));
+				let audioResponse = await Zotero.HTTP.request('GET', json.audioURL, {
+					responseType: "blob",
+					errorDelayMax: 8000,
+				});
+				return { audio: audioResponse.response, timestamps: json.timestamps };
+			}
+			return { audio: new Blob([xmlhttp.response], { type: contentType }) };
 		}
 		catch (e) {
 			Zotero.logError(e);
