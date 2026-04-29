@@ -108,11 +108,11 @@
 			<label><html:h2>&zotero.preferences.dataDir;</html:h2></label>
 			
 			<hbox align="center">
-				<label id="dara-dir-label" value="Data directory:" control="data-dir-path"></label>
+				<label id="data-dir-label" data-l10n-id="preferences-advanced-data-dir" control="data-dir-path"></label>
 				<html:input type="text" id="data-dir-path" preference="extensions.zotero.dataDir"
 					readonly="true" class="directory-path"/>
 				<button id="change-data-dir" label="&zotero.preferences.attachmentBaseDir.selectBasePath;"
-					aria-describedby="dara-dir-label"
+					aria-describedby="data-dir-label"
 					oncommand="Zotero_Preferences.Advanced.dataDirUpdate(true)"/>
 			</hbox>
 			
