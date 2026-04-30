@@ -41,6 +41,7 @@ get_canonical_arch() {
 
 function check_line {
 	pattern=$1
+	file=$2
 	if ! grep -E -q "$pattern" "$file"; then
 		echo "$pattern" not found in "$file" -- aborting 2>&1
 		exit 1

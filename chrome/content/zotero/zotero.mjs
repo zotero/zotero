@@ -113,6 +113,7 @@ const xpcomFilesLocal = [
 	'mime',
 	'notifier',
 	'fileHandlers',
+	'osKeyStore',
 	'plugins',
 	'pluginAPI/menuManager',
 	'pluginAPI/itemPaneManager',

@@ -30,7 +30,8 @@ if (!Zotero.Sync.Data) {
 Zotero.Sync.Data.Local = {
 	_syncQueueIntervals: [0.5, 1, 4, 16, 16, 16, 16, 16, 16, 16, 64], // hours
 	_loginManagerHost: 'chrome://zotero',
-	_loginManagerRealm: 'Zotero Web API',
+	_loginManagerRealm: 'Zotero Web API (encrypted)',
+	_loginManagerRealmLegacy: 'Zotero Web API',
 	_lastSyncTime: null,
 	_lastClassicSyncTime: null,
 	
@@ -45,12 +46,35 @@ Zotero.Sync.Data.Local = {
 	/**
 	 * @return {Promise}
 	 */
-	getAPIKey: function () {
+	getAPIKey: async function () {
+		// Prefer the legacy realm during the transition window: an older version
+		// may have written a fresh value there after we migrated, and we want
+		// to use the most recent value. Mirror it to the encrypted realm but
+		// keep the legacy entry so a downgrade can still read it. The legacy
+		// realm will be cleared in a future version once downgrades are
+		// unlikely.
+		var legacyLogin = this._getLegacyAPIKeyLoginInfo();
+		if (legacyLogin) {
+			let apiKey = legacyLogin.password;
+			if (!this._mirroredAPIKey) {
+				try {
+					Zotero.debug("Mirroring plaintext API key to encrypted storage");
+					await this._writeEncryptedAPIKey(apiKey);
+					this._mirroredAPIKey = true;
+				}
+				catch (e) {
+					Zotero.logError(e);
+					Zotero.OSKeyStore.alertMigrateFailed();
+				}
+			}
+			return apiKey;
+		}
 		var login = this._getAPIKeyLoginInfo();
-		return login
-			? login.password
-			// Fallback to old username/password
-			: this._getAPIKeyFromLogin();
+		if (login) {
+			return Zotero.OSKeyStore.decrypt(login.password);
+		}
+		// Fallback to old username/password
+		return this._getAPIKeyFromLogin();
 	},
 	
 	
@@ -58,8 +82,7 @@ Zotero.Sync.Data.Local = {
 	 * Check for an API key or a legacy username/password (which may or may not be valid)
 	 */
 	hasCredentials: function () {
-		var login = this._getAPIKeyLoginInfo();
-		if (login) {
+		if (this._getAPIKeyLoginInfo() || this._getLegacyAPIKeyLoginInfo()) {
 			return true;
 		}
 		// If no API key, check for legacy login
@@ -70,6 +93,7 @@ Zotero.Sync.Data.Local = {
 	
 	setAPIKey: async function (apiKey) {
 		var oldLoginInfo = this._getAPIKeyLoginInfo();
+		var legacyLoginInfo = this._getLegacyAPIKeyLoginInfo();
 		
 		// Clear old login
 		if ((!apiKey || apiKey === "")) {
@@ -77,10 +101,31 @@ Zotero.Sync.Data.Local = {
 				Zotero.debug("Clearing old API key");
 				Services.logins.removeLogin(oldLoginInfo);
 			}
+			if (legacyLoginInfo) {
+				Services.logins.removeLogin(legacyLoginInfo);
+			}
 			Zotero.Notifier.trigger('delete', 'api-key', []);
 			return;
 		}
 		
+		try {
+			await this._writeEncryptedAPIKey(apiKey);
+		}
+		catch (e) {
+			Zotero.OSKeyStore.alertSaveFailed();
+			throw e;
+		}
+		// Drop any leftover plaintext entry from the legacy realm
+		if (legacyLoginInfo) {
+			Services.logins.removeLogin(legacyLoginInfo);
+		}
+		Zotero.Notifier.trigger('modify', 'api-key', []);
+	},
+	
+	
+	_writeEncryptedAPIKey: async function (apiKey) {
+		var oldLoginInfo = this._getAPIKeyLoginInfo();
+		var storedValue = await Zotero.OSKeyStore.encrypt(apiKey);
 		var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
 				Components.interfaces.nsILoginInfo, "init");
 		var loginInfo = new nsLoginInfo(
@@ -88,7 +133,7 @@ Zotero.Sync.Data.Local = {
 			null,
 			this._loginManagerRealm,
 			'API Key',
-			apiKey,
+			storedValue,
 			'',
 			''
 		);
@@ -100,7 +145,6 @@ Zotero.Sync.Data.Local = {
 			Zotero.debug("Replacing API key");
 			Services.logins.modifyLogin(oldLoginInfo, loginInfo);
 		}
-		Zotero.Notifier.trigger('modify', 'api-key', []);
 	},
 	
 	
@@ -424,6 +468,25 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		// Get API from returned array of nsILoginInfo objects
+		return logins.length ? logins[0] : false;
+	},
+	
+	
+	/**
+	 * @return {nsILoginInfo|false}
+	 */
+	_getLegacyAPIKeyLoginInfo: function () {
+		try {
+			var logins = Services.logins.findLogins(
+				this._loginManagerHost,
+				null,
+				this._loginManagerRealmLegacy
+			);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
 		return logins.length ? logins[0] : false;
 	},
 	
