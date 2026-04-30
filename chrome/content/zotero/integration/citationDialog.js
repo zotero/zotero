@@ -216,11 +216,10 @@ function cleanupBeforeDialogClosing() {
 		params.height = window.outerHeight;
 	}
 	allParams[currentLayout.type] = params;
+	// Remember the width of collectionTree, so it can be restored on next open
+	allParams.library = allParams.library || {};
+	allParams.library.collectionTreeWidth = libraryLayout.collectionTreeWidth;
 	Zotero.Prefs.set("integration.citationDialog.windowParams", JSON.stringify(allParams));
-
-	if (libraryLayout.collectionTreeWidth) {
-		Zotero.Prefs.set("integration.citationDialog.collectionTreeWidth", libraryLayout.collectionTreeWidth);
-	}
 
 	// Only library mode in annotations dialog
 	if (!DIALOG_STATE.isAddingAnnotations()) {
@@ -833,6 +832,9 @@ class LibraryLayout extends Layout {
 	_initCollectionsTreeDivider() {
 		let setCollectionTreeWidth = (width) => {
 			let minWidth = 200;
+			if (!width) {
+				width = minWidth;
+			}
 			let maxWidth = Math.floor(window.innerWidth * 0.4); // 40% of window width
 			let nextWidth = Math.round(Math.max(minWidth, Math.min(width, maxWidth))); // enforce width between 200px and maxWidth
 			_id("collections-tree-container").style.width = `${nextWidth}px`;
@@ -840,8 +842,8 @@ class LibraryLayout extends Layout {
 		};
 
 		let divider = _id("collections-tree-divider");
-		let savedWidth = Zotero.Prefs.get("integration.citationDialog.collectionTreeWidth");
-		setCollectionTreeWidth(savedWidth || 200);
+		let savedWidth = Helpers.fetchStoredWindowParams().library?.collectionTreeWidth;
+		setCollectionTreeWidth(savedWidth);
 
 		let startX = 0;
 		let startWidth = 0;
@@ -850,14 +852,10 @@ class LibraryLayout extends Layout {
 			if (Zotero.rtl) delta = -delta;
 			setCollectionTreeWidth(startWidth + delta);
 		};
-		let onPointerUp = (event) => {
+		let onPointerUp = () => {
 			divider.removeEventListener("pointermove", onPointerMove);
 			divider.removeEventListener("pointerup", onPointerUp);
 			divider.removeEventListener("pointercancel", onPointerUp);
-			try {
-				divider.releasePointerCapture(event.pointerId);
-			}
-			catch (e) {}
 		};
 		divider.addEventListener("pointerdown", (event) => {
 			if (event.button !== 0) return;
