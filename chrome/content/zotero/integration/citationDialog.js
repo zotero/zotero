@@ -633,6 +633,11 @@ class LibraryLayout extends Layout {
 				},
 			});
 		}
+		// ensure dialog-layout and min-height is set even if window does not need resizing
+		else {
+			doc.documentElement.style.minHeight = `${minHeight}px`;
+			document.documentElement.setAttribute("dialog-layout", this.type);
+		}
 	}
 
 	// handle click on the items container
