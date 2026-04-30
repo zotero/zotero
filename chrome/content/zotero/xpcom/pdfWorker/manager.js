@@ -25,9 +25,14 @@
 
 const WORKER_URL = 'chrome://zotero/content/xpcom/pdfWorker/worker.js';
 const ASSETS_URL = 'chrome://zotero/content/xpcom/pdfWorker/';
-const CMAPS_URL = 'resource://zotero/reader/pdf/web/cmaps/';
-const STANDARD_FONTS_URL = 'resource://zotero/reader/pdf/web/standard_fonts/';
-const WASM_URL = 'resource://zotero/reader/pdf/web/wasm/';
+const READER_PDF_ASSETS_URL = 'resource://zotero/reader/pdf/web/';
+
+function getAssetURL(path) {
+	if (path.startsWith('cmaps/') || path.startsWith('standard_fonts/')) {
+		return READER_PDF_ASSETS_URL + path;
+	}
+	return ASSETS_URL + path;
+}
 
 class PDFWorker {
 	constructor() {
@@ -86,69 +91,29 @@ class PDFWorker {
 		this._worker = new Worker(WORKER_URL);
 		this._worker.addEventListener('message', async (event) => {
 			let message = event.data;
-			if (message.responseID) {
-				let { resolve, reject } = this._waitingPromises[message.responseID];
+			if ('responseID' in message) {
+				let promise = this._waitingPromises[message.responseID];
 				delete this._waitingPromises[message.responseID];
-				if (message.data) {
-					resolve(message.data);
+				if (!promise) {
+					Zotero.debug(`Received response from PDF worker for unknown request ${message.responseID}`);
+					return;
+				}
+				let { resolve, reject } = promise;
+				if ('error' in message) {
+					reject(new Error(JSON.stringify(message.error)));
 				}
 				else {
-					reject(new Error(JSON.stringify(message.error)));
+					resolve(message.data);
 				}
 				return;
 			}
-			if (message.id) {
+			if ('id' in message) {
 				let respData = null;
-				try {
-					if (message.action === 'FetchBuiltInCMap') {
-						let response = await Zotero.HTTP.request(
-							'GET',
-							CMAPS_URL + message.data + '.bcmap',
-							{ responseType: 'arraybuffer' }
-						);
-						respData = {
-							isCompressed: true,
-							cMapData: new Uint8Array(response.response)
-						};
-					}
-				}
-				catch (e) {
-					Zotero.debug('Failed to fetch CMap data:');
-					Zotero.debug(e);
-				}
-				try {
-					if (message.action === 'FetchStandardFontData') {
-						let response = await Zotero.HTTP.request(
-							'GET',
-							STANDARD_FONTS_URL + message.data,
-							{ responseType: 'arraybuffer' }
-						);
-						respData = new Uint8Array(response.response);
-					}
-				}
-				catch (e) {
-					Zotero.debug('Failed to fetch standard font data:');
-					Zotero.debug(e);
-				}
-				try {
-					if (message.action === 'FetchWasm') {
-						let response = await Zotero.HTTP.request(
-							'GET',
-							WASM_URL + message.data,
-							{ responseType: 'arraybuffer' }
-						);
-						respData = new Uint8Array(response.response);
-					}
-				}
-				catch (e) {
-					Zotero.debug('Failed to fetch wasm data:');
-					Zotero.debug(e);
-				}
 				try {
 					if (message.action === 'FetchData') {
 						let response = await Zotero.HTTP.request(
 							'GET',
-							ASSETS_URL + message.data,
+							getAssetURL(message.data),
 							{ responseType: 'arraybuffer' }
 						);
 						respData = new Uint8Array(response.response);
@@ -177,7 +142,7 @@ class PDFWorker {
 			}
 		});
 		this._worker.addEventListener('error', (event) => {
-			Zotero.logError(`PDF Web Worker error (${event.filename}:${event.lineno}): ${event.message}`);
+			Zotero.logError(`Document worker error (${event.filename}:${event.lineno}): ${event.message}`);
 		});
 	}
 	
@@ -244,12 +209,12 @@ class PDFWorker {
 			buf = new Uint8Array(buf).buffer;
 
 			try {
-				var res = await this._query('export', {
+				var res = await this._query('pdf.writeAnnotations', {
 					buf, annotations, password
 				}, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'export' failed: ${JSON.stringify({
+				let error = new Error(`Worker action 'pdf.writeAnnotations' failed: ${JSON.stringify({
 					annotations,
 					error: e.message
 				})}`);
@@ -346,12 +311,12 @@ class PDFWorker {
 			buf = new Uint8Array(buf).buffer;
 
 			try {
-				var { imported, deleted, buf: modifiedBuf } = await this._query('import', {
+				var { imported, deleted, buf: modifiedBuf } = await this._query('pdf.importAnnotations', {
 					buf, existingAnnotations, password, transfer
 				}, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'import' failed: ${JSON.stringify({
+				let error = new Error(`Worker action 'pdf.importAnnotations' failed: ${JSON.stringify({
 					existingAnnotations,
 					error: e.message
 				})}`);
@@ -419,12 +384,12 @@ class PDFWorker {
 			let buf = await IOUtils.read(pdfPath);
 			buf = new Uint8Array(buf).buffer;
 			try {
-				var annotations = await this._query('importCitavi', {
+				var annotations = await this._query('pdf.importCitaviAnnotations', {
 					buf, citaviAnnotations, password
 				}, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'importCitavi' failed: ${JSON.stringify({
+				let error = new Error(`Worker action 'pdf.importCitaviAnnotations' failed: ${JSON.stringify({
 					citaviAnnotations,
 					error: e.message
 				})}`);
@@ -453,12 +418,12 @@ class PDFWorker {
 			let buf = await IOUtils.read(pdfPath);
 			buf = new Uint8Array(buf).buffer;
 			try {
-				var annotations = await this._query('importMendeley', {
+				var annotations = await this._query('pdf.importMendeleyAnnotations', {
 					buf, mendeleyAnnotations, password
 				}, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'importMendeley' failed: ${JSON.stringify({
+				let error = new Error(`Worker action 'pdf.importMendeleyAnnotations' failed: ${JSON.stringify({
 					mendeleyAnnotations,
 					error: e.message
 				})}`);
@@ -522,12 +487,12 @@ class PDFWorker {
 			buf = new Uint8Array(buf).buffer;
 
 			try {
-				var { buf: modifiedBuf } = await this._query('deletePages', {
+				var { buf: modifiedBuf } = await this._query('pdf.deletePages', {
 					buf, pageIndexes, password
 				}, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'deletePages' failed: ${JSON.stringify({ error: e.message })}`);
+				let error = new Error(`Worker action 'pdf.deletePages' failed: ${JSON.stringify({ error: e.message })}`);
 				try {
 					error.name = JSON.parse(e.message).name;
 				}
@@ -620,12 +585,12 @@ class PDFWorker {
 			buf = new Uint8Array(buf).buffer;
 
 			try {
-				var { buf: modifiedBuf } = await this._query('rotatePages', {
+				var { buf: modifiedBuf } = await this._query('pdf.rotatePages', {
 					buf, pageIndexes, degrees, password
 				}, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'rotatePages' failed: ${JSON.stringify({ error: e.message })}`);
+				let error = new Error(`Worker action 'pdf.rotatePages' failed: ${JSON.stringify({ error: e.message })}`);
 				try {
 					error.name = JSON.parse(e.message).name;
 				}
@@ -672,12 +637,12 @@ class PDFWorker {
 			buf = new Uint8Array(buf).buffer;
 
 			try {
-				var result = await this._query('getFulltext', {
+				var result = await this._query('pdf.getFulltext', {
 					buf, maxPages, password
 				}, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'getFullText' failed: ${JSON.stringify({ error: e.message })}`);
+				let error = new Error(`Worker action 'pdf.getFulltext' failed: ${JSON.stringify({ error: e.message })}`);
 				try {
 					error.name = JSON.parse(e.message).name;
 				}
@@ -695,7 +660,7 @@ class PDFWorker {
 	}
 
 	/**
-	 * Get Zotero Structured Text JSON for a PDF, EPUB, or snapshot attachment
+	 * Get structured document text for a PDF, EPUB, or snapshot attachment
 	 *
 	 * @param {Integer} itemID Attachment item id
 	 * @param {Boolean} [isPriority]
@@ -706,7 +671,7 @@ class PDFWorker {
 		return this._enqueue(async () => {
 			let attachment = await Zotero.Items.getAsync(itemID);
 
-			Zotero.debug(`Getting structured data from item ${attachment.libraryKey}`);
+			Zotero.debug(`Getting structured document text from item ${attachment.libraryKey}`);
 			let t = new Date();
 
 			let contentType = attachment.attachmentContentType;
@@ -724,12 +689,12 @@ class PDFWorker {
 			buf = new Uint8Array(buf).buffer;
 
 			try {
-				var result = await this._query('getStructuredData', {
+				var result = await this._query('getStructuredDocumentText', {
 					buf, contentType, password
 				}, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'getStructuredData' failed: ${JSON.stringify({ error: e.message })}`);
+				let error = new Error(`Worker action 'getStructuredDocumentText' failed: ${JSON.stringify({ error: e.message })}`);
 				try {
 					error.name = JSON.parse(e.message).name;
 				}
@@ -740,7 +705,7 @@ class PDFWorker {
 				throw error;
 			}
 
-			Zotero.debug(`Extracted structured data for item ${attachment.libraryKey} in ${new Date() - t} ms`);
+			Zotero.debug(`Extracted structured document text for item ${attachment.libraryKey} in ${new Date() - t} ms`);
 
 			return result;
 		}, isPriority);
@@ -770,10 +735,10 @@ class PDFWorker {
 			buf = new Uint8Array(buf).buffer;
 
 			try {
-				var result = await this._query('getRecognizerData', { buf, password }, [buf]);
+				var result = await this._query('pdf.getRecognizerData', { buf, password }, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'getRecognizerData' failed: ${JSON.stringify({ error: e.message })}`);
+				let error = new Error(`Worker action 'pdf.getRecognizerData' failed: ${JSON.stringify({ error: e.message })}`);
 				try {
 					error.name = JSON.parse(e.message).name;
 				}
@@ -826,10 +791,10 @@ class PDFWorker {
 			let { libraryID } = attachment;
 
 			try {
-				var result = await this._query('renderAnnotations', { libraryID, buf, annotations, password }, [buf]);
+				var result = await this._query('pdf.renderAnnotations', { libraryID, buf, annotations, password }, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'renderAnnotations' failed: ${JSON.stringify({ error: e.message })}`);
+				let error = new Error(`Worker action 'pdf.renderAnnotations' failed: ${JSON.stringify({ error: e.message })}`);
 				try {
 					error.name = JSON.parse(e.message).name;
 				}
@@ -869,10 +834,10 @@ class PDFWorker {
 			buf = new Uint8Array(buf).buffer;
 
 			try {
-				var result = await this._query('hasAnnotations', { buf, password }, [buf]);
+				var result = await this._query('pdf.hasAnnotations', { buf, password }, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker 'hasAnnotations' failed: ${JSON.stringify({ error: e.message })}`);
+				let error = new Error(`Worker action 'pdf.hasAnnotations' failed: ${JSON.stringify({ error: e.message })}`);
 				try {
 					error.name = JSON.parse(e.message).name;
 				}

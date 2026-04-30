@@ -7,16 +7,18 @@ const exec = util.promisify(require('child_process').exec);
 const { getSignatures, writeSignatures, onSuccess, onError } = require('./utils');
 const { buildsURL } = require('./config');
 
+const sharedAssetDirs = ['cmaps', 'standard_fonts'];
+
 async function getDocumentWorker(signatures) {
 	const t1 = Date.now();
 
 	const modulePath = path.join(__dirname, '..', 'document-worker');
+	const targetDir = path.join(__dirname, '..', 'build', 'chrome', 'content', 'zotero', 'xpcom', 'pdfWorker');
 
 	const { stdout } = await exec('git rev-parse HEAD', { cwd: modulePath });
 	const hash = stdout.trim();
 
 	if (!('document-worker' in signatures) || signatures['document-worker'].hash !== hash) {
-		const targetDir = path.join(__dirname, '..', 'build', 'chrome', 'content', 'zotero', 'xpcom', 'pdfWorker');
 		try {
 			const filename = hash + '.zip';
 			const tmpDir = path.join(__dirname, '..', 'tmp', 'builds', 'document-worker');
@@ -39,6 +41,10 @@ async function getDocumentWorker(signatures) {
 			await fs.copy(path.join(modulePath, 'build'), targetDir);
 		}
 		signatures['document-worker'] = { hash };
+	}
+
+	for (let dir of sharedAssetDirs) {
+		await fs.remove(path.join(targetDir, dir));
 	}
 
 	const t2 = Date.now();
