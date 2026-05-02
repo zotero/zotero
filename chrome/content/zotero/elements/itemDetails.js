@@ -395,7 +395,28 @@
 				if (this._pendingRender) {
 					elem.pendingRender = true;
 				}
-				this._paneParent.append(elem);
+				// If the section to insert is non-orderable, directly append it
+				if (!this.sidenav.isPaneOrderable(paneID)) {
+					this._paneParent.append(elem);
+				}
+				else {
+					// Loop from tail to find the first orderable section and insert after it
+					let children = Array.from(this._paneParent.children);
+					let inserted = false;
+					for (let i = children.length - 1; i >= 0; i--) {
+						let child = children[i];
+						let childPaneID = child.dataset.pane;
+						if (this.sidenav.isPaneOrderable(childPaneID)) {
+							this._paneParent.insertBefore(elem, child.nextSibling);
+							inserted = true;
+							break;
+						}
+					}
+					// If no orderable section found, prepend
+					if (!inserted) {
+						this._paneParent.prepend(elem);
+					}
+				}
 				elem.setL10nID(header.l10nID);
 				elem.setL10nArgs(header.l10nArgs);
 				this._intersectionOb.observe(elem);
