@@ -99,6 +99,8 @@ const ZoteroStandalone = new function () {
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemCitationsToClipboard'));
 			document.getElementById('key_copyBibliography')
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemsToClipboard'));
+			document.getElementById('key_copyExport')
+				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemsToClipboardAsExport'));
 			document.getElementById('key_showTabsMenu')
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('showTabsMenu'));
 			// Force menu to update with shortcut key at startup -- as of fx128, this is necessary
@@ -348,32 +350,29 @@ const ZoteroStandalone = new function () {
 			win.ZoteroPane.updateQuickCopyCommands(selected);
 		}
 
-		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 		var exportingNotes = selected.every(item => item.isNote() || item.isAttachment());
 		var exportingAnnotations = selected.every(item => item.isAnnotation());
-		if (exportingNotes || exportingAnnotations) {
-			format = Zotero.QuickCopy.getNoteFormat();
-		}
-		format = Zotero.QuickCopy.unserializeSetting(format);
-		
+
 		var copyCitation = document.getElementById('menu_copyCitation');
 		var copyBibliography = document.getElementById('menu_copyBibliography');
 		var copyExport = document.getElementById('menu_copyExport');
 		var copyNote = document.getElementById('menu_copyNote');
 		var copyAnnotation = document.getElementById('menu_copyAnnotation');
-		
-		copyCitation.hidden = !selected.length || format.mode != 'bibliography';
-		copyBibliography.hidden = !selected.length || format.mode != 'bibliography';
-		copyExport.hidden = !selected.length || format.mode != 'export' || exportingNotes;
-		copyNote.hidden = !selected.length || format.mode != 'export' || !exportingNotes;
-		copyAnnotation.hidden = !selected.length || format.mode != 'export' || !exportingAnnotations;
+
+		copyCitation.hidden = !selected.length || exportingNotes || exportingAnnotations;
+		copyBibliography.hidden = !selected.length || exportingNotes || exportingAnnotations;
+		copyExport.hidden = !selected.length || exportingNotes || exportingAnnotations;
+		copyNote.hidden = !selected.length || !exportingNotes;
+		copyAnnotation.hidden = !selected.length || !exportingAnnotations;
 		document.l10n.setAttributes(copyAnnotation, "menu-edit-copy-annotation", { count: selected.length });
-		
-		if (format.mode == 'export') {
+
+		// Label the export menu with the selected translator name
+		var exportFormat = Zotero.QuickCopy.getFormat('export');
+		if (exportFormat.id) {
 			try {
-				let obj = Zotero.Translators.get(format.id);
-				if (obj) {
-					copyExport.label = Zotero.getString('quickCopy.copyAs', obj.label);
+				let translator = Zotero.Translators.get(exportFormat.id);
+				if (translator) {
+					copyExport.label = Zotero.getString('quickCopy.copyAs', translator.label);
 				}
 				else {
 					copyExport.hidden = true;

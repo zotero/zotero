@@ -46,7 +46,7 @@ Zotero.Prefs = new function () {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 22;
+		var toVersion = 23;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -233,6 +233,32 @@ Zotero.Prefs = new function () {
 							this.set('browserRequest.timeout',
 								this.get('downloadPDFViaBrowser.downloadTimeout'));
 							this.clear('downloadPDFViaBrowser.downloadTimeout');
+						}
+						break;
+
+					// Migrate the combined export.quickCopy.setting pref to the
+					// per-mode bibliographySetting / exportSetting prefs.
+					case 23:
+						if (this.prefHasUserValue('export.quickCopy.setting')) {
+							let setting = this.get('export.quickCopy.setting');
+							let parsed = Zotero.QuickCopy.unserializeSetting(setting);
+							if (parsed.mode === 'bibliography') {
+								this.set('export.quickCopy.bibliographySetting', JSON.stringify(parsed));
+								this.set('export.quickCopy.preferredFormatOnDrag', 'bibliography');
+							}
+							else if (parsed.mode === 'export') {
+								this.set('export.quickCopy.exportSetting', JSON.stringify(parsed));
+								this.set('export.quickCopy.preferredFormatOnDrag', 'export');
+							}
+							// Move the locale pref into the bibliography pref JSON
+							let locale = this.get('export.quickCopy.locale');
+							if (locale) {
+								let bibFormat = Zotero.QuickCopy.unserializeSetting(this.get('export.quickCopy.bibliographySetting'));
+								bibFormat.locale = locale;
+								this.set('export.quickCopy.bibliographySetting', JSON.stringify(bibFormat));
+							}
+							this.clear('export.quickCopy.setting');
+							this.clear('export.quickCopy.locale');
 						}
 						break;
 				}
