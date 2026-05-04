@@ -48,12 +48,15 @@ Zotero.BrowserRequest = {
 			captchaLocator: null,
 			// Wait for WorldCat's own Turnstile cookie to land
 			successCookie: { host: 'search.worldcat.org', name: 'turnstile_passed' },
-			// turnstile_passed is signed against (IP, UA), so we must use the
-			// same plain-Firefox UA for the translator's follow-up requests as
-			// the hidden browser used when earning it.
-			plainUAHost: 'search.worldcat.org',
 			detectBlock: (status, body) => status === 403 && /turnstile_required/.test(body)
-		}
+		},
+	],
+	
+	PLAIN_UA_HOSTS: [
+		'challenges.cloudflare.com',
+		'www.sciencedirect.com',
+		'pdf.sciencedirectassets.com',
+		'search.worldcat.org',
 	],
 
 	/**
@@ -152,6 +155,7 @@ Zotero.BrowserRequest = {
 		}
 		await this.clearChallengeInViewer(url, {
 			userContextId,
+			customUserAgent,
 			captchaLocator: entry.captchaLocator
 		});
 	},
@@ -287,6 +291,7 @@ Zotero.BrowserRequest = {
 	 * @param {object} options
 	 * @param {number} [options.userContextId]
 	 * @param {string} options.captchaLocator
+	 * @param {string} [options.customUserAgent]
 	 * @returns {Promise<void>}
 	 */
 	async clearChallengeInViewer(url, options) {
@@ -306,7 +311,8 @@ Zotero.BrowserRequest = {
 			Services.wm.addListener(wmListener);
 			await new Promise((resolve) => {
 				win = Zotero.openInViewer(url, {
-					userContextId: options.userContextId
+					userContextId: options.userContextId,
+					customUserAgent: options.customUserAgent,
 				});
 				win.addEventListener('load', resolve);
 			});
@@ -591,13 +597,16 @@ Zotero.BrowserRequest = {
 		let pdfFoundDeferred = Zotero.Promise.defer();
 		const timeout = Zotero.Prefs.get('browserRequest.timeout');
 
+		// As above: Cloudflare Turnstile rejects the "Zotero/[version]" suffix, so strip
+		let customUserAgent = Zotero.VersionHeader.getPlainFirefoxUA();
+
 		try {
 			wmListener = this._makeViewerCloseListener(() => {
 				if (!pdfFound) pdfFoundDeferred.reject(new Error('BrowserRequest: User closed the viewer'));
 			});
 			Services.wm.addListener(wmListener);
 			await new Promise((resolve) => {
-				win = Zotero.openInViewer(url);
+				win = Zotero.openInViewer(url, { customUserAgent });
 				win.addEventListener('load', resolve);
 			});
 			browser = win.document.querySelector('browser');
@@ -640,8 +649,6 @@ Zotero.BrowserRequest = {
 // Register hosts that we intercept Cloudflare Turnstile challenges on,
 // so they receive a plain UA everywhere. See comment on
 // Zotero.VersionHeader.registerPlainUAHost().
-for (let entry of Zotero.BrowserRequest.CHALLENGE_URLS) {
-	if (entry.plainUAHost) {
-		Zotero.VersionHeader.registerPlainUAHost(entry.plainUAHost);
-	}
+for (let host of Zotero.BrowserRequest.PLAIN_UA_HOSTS) {
+	Zotero.VersionHeader.registerPlainUAHost(host);
 }
