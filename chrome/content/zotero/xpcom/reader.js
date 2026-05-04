@@ -407,8 +407,7 @@ class ReaderInstance {
 					// annotations are wrapped in a temp note for translation
 					let items = [Zotero.QuickCopy.annotationsToNote(annotations)];
 					let format = Zotero.QuickCopy.getNoteFormat();
-					Zotero.debug(`Copying/dragging (${annotations.length}) annotation(s) with ${format}`);
-					format = Zotero.QuickCopy.unserializeSetting(format);
+					Zotero.debug(`Copying/dragging (${annotations.length}) annotation(s) with ${JSON.stringify(format)}`);
 					// Basically the same code is used in itemTree.jsx onDragStart
 					if (format.mode === 'export') {
 						// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown

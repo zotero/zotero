@@ -1365,6 +1365,7 @@ var ZoteroPane = new function () {
 				// this.itemSelected()
 				case 'copySelectedItemCitationsToClipboard':
 				case 'copySelectedItemsToClipboard':
+				case 'copySelectedItemsToClipboardAsExport':
 					return;
 				
 				default:
@@ -2000,27 +2001,24 @@ var ZoteroPane = new function () {
 	 * still caught in handleKeyPress so that we can show an alert about not having references selected.
 	 */
 	this.updateQuickCopyCommands = function (selectedItems) {
-		let canCopy = false;
+		let canCopyBibliography = false;
+		let canCopyExport = false;
 		// If all items are notes/attachments and at least one note is not empty
 		if (selectedItems.every(item => item.isNote() || item.isAttachment())) {
 			if (selectedItems.some(item => item.note)) {
-				canCopy = true;
+				canCopyBibliography = true;
+				canCopyExport = true;
 			}
 		}
 		else {
-			let format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-			format = Zotero.QuickCopy.unserializeSetting(format);
-			if (format.mode == 'bibliography') {
-				canCopy = selectedItems.some(item => item.isRegularItem() || item.isAnnotation());
-			}
-			else {
-				canCopy = true;
-			}
+			canCopyBibliography = selectedItems.some(item => item.isRegularItem() || item.isAnnotation());
+			canCopyExport = selectedItems.length > 0;
 		}
-		
-		document.getElementById('cmd_zotero_copyCitation').setAttribute('disabled', !canCopy);
-		document.getElementById('cmd_zotero_copyBibliography').setAttribute('disabled', !canCopy);
-		document.getElementById('cmd_zotero_copyAnnotation').setAttribute('disabled', !canCopy);
+
+		document.getElementById('cmd_zotero_copyCitation').setAttribute('disabled', !canCopyBibliography);
+		document.getElementById('cmd_zotero_copyBibliography').setAttribute('disabled', !canCopyBibliography);
+		document.getElementById('cmd_zotero_copyExport').setAttribute('disabled', !canCopyExport);
+		document.getElementById('cmd_zotero_copyAnnotation').setAttribute('disabled', !canCopyBibliography);
 	};
 	
 	
@@ -2699,28 +2697,29 @@ var ZoteroPane = new function () {
 	}
 	
 	
-	this.copySelectedItemsToClipboard = function (asCitations) {
+	this.copySelectedItemsToClipboard = function (asCitations, mode = 'bibliography') {
 		var items = [];
 		let itemIDs = this.getSelectedItems(true);
 		// Get selected item IDs in the item tree order
 		itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
 		items = Zotero.Items.get(itemIDs);
-		
+
 		if (!items.length) {
 			return;
 		}
-		
-		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-		if (items.every(item => item.isNote() || item.isAttachment())) {
+
+		var format = Zotero.QuickCopy.getFormat(mode);
+		if (items.every(item => item.isNote() || item.isAttachment() || item.isAnnotation())) {
 			format = Zotero.QuickCopy.getNoteFormat();
 		}
 		// To copy annotations, wrap them in a temp note
 		if (items.every(item => item.isAnnotation())) {
-			format = Zotero.QuickCopy.getNoteFormat();
 			items = [Zotero.QuickCopy.annotationsToNote(items)];
 		}
-		format = Zotero.QuickCopy.unserializeSetting(format);
-		
+		if (items.every(item => item.isNote())) {
+			items = Zotero.QuickCopy.reformatNoteCitations(items);
+		}
+
 		// In bibliography mode, remove notes and attachments
 		if (format.mode == 'bibliography') {
 			items = items.filter(item => item.isRegularItem());
@@ -2740,10 +2739,8 @@ var ZoteroPane = new function () {
 			return;
 		}
 		
-		// determine locale preference
-		var locale = format.locale ? format.locale : Zotero.Prefs.get('export.quickCopy.locale');
-		
 		if (format.mode == 'bibliography') {
+			var locale = format.locale;
 			Zotero_File_Interface.copyItemsToClipboard(
 				items, format.id, locale, format.contentType == 'html', asCitations
 			);
