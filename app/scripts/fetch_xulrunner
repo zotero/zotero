@@ -252,6 +252,13 @@ function modify_omni {
 		'let version = Services.appinfo.version;
 		addon.strictCompatibility = !version.includes("-beta") && !version.includes("-dev") && !version.includes("SOURCE");' modules/addons/XPIInstall.sys.mjs
 	
+	# Bypass plugin update compatibility check on beta/dev/source builds and ignore persisted compatibility flag
+	# e.g., upgrade from a non-beta build and the manifest isn't re-parsed on app upgrade.
+	replace_line '!this\.addon\.strictCompatibility' \
+		'(!this.addon.strictCompatibility || Services.appinfo.version.includes("-beta") || Services.appinfo.version.includes("-dev") || Services.appinfo.version.includes("SOURCE"))' modules/addons/XPIInstall.sys.mjs
+	replace_line '!this\.strictCompatibility &&' \
+		'(!this.strictCompatibility || Services.appinfo.version.includes("-beta") || Services.appinfo.version.includes("-dev") || Services.appinfo.version.includes("SOURCE")) &&' modules/addons/XPIDatabase.sys.mjs
+	
 	# Accept zotero@chnm.gmu.edu for target application to allow Zotero 6 plugins to remain
 	# installed in Zotero 7
 	replace_line "if \(targetApp.id == Services.appinfo.ID\) \{" "if (targetApp.id == 'zotero\@chnm.gmu.edu') targetApp.id = '$APP_ID'; if (targetApp.id == Services.appinfo.ID) {" modules/addons/XPIDatabase.sys.mjs
@@ -269,6 +276,9 @@ function modify_omni {
 	replace_line "id: TOOLKIT_ID," "id: '$APP_ID'," modules/addons/AddonUpdateChecker.sys.mjs
 	replace_line 'lazy.AddonManagerPrivate.webExtensionsMinPlatformVersion' '"7.0"' modules/addons/AddonUpdateChecker.sys.mjs
 	replace_line 'result.targetApplications.push' 'false && result.targetApplications.push' modules/addons/AddonUpdateChecker.sys.mjs
+	# Don't force strictCompatibility on update results on beta/dev/source builds
+	replace_line 'result\.strictCompatibility = appEntry\.maxVersion != "\*";' \
+		'let appVer = Services.appinfo.version; result.strictCompatibility = appEntry.maxVersion != "*" && !appVer.includes("-beta") && !appVer.includes("-dev") && !appVer.includes("SOURCE");' modules/addons/AddonUpdateChecker.sys.mjs
 	# Set uninstall flag to true if the update config has it set
 	replace_line 'targetApplications: \[appEntry\],' \
 		'targetApplications: \[appEntry\],
