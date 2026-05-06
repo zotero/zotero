@@ -86,6 +86,23 @@ class PDFWorker {
 		});
 	}
 
+	// Like _query, but onPartial fires for each isPartial message before the
+	// terminal response resolves the promise. Returns { promise, abort }.
+	_streamingQuery(action, data, transfer, onPartial) {
+		this._lastPromiseID++;
+		let id = this._lastPromiseID;
+		let promise = new Promise((resolve, reject) => {
+			this._waitingPromises[id] = { resolve, reject, onPartial };
+			this._worker.postMessage({ id, action, data }, transfer);
+		});
+		let abort = () => {
+			if (this._worker && this._waitingPromises[id]) {
+				this._worker.postMessage({ action: 'abort', id });
+			}
+		};
+		return { promise, abort };
+	}
+
 	_init() {
 		if (this._worker) return;
 		this._worker = new Worker(WORKER_URL);
@@ -93,11 +110,22 @@ class PDFWorker {
 			let message = event.data;
 			if ('responseID' in message) {
 				let promise = this._waitingPromises[message.responseID];
-				delete this._waitingPromises[message.responseID];
 				if (!promise) {
 					Zotero.debug(`Received response from PDF worker for unknown request ${message.responseID}`);
 					return;
 				}
+				if (message.isPartial) {
+					if (promise.onPartial) {
+						try {
+							promise.onPartial(message.data);
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+					}
+					return;
+				}
+				delete this._waitingPromises[message.responseID];
 				let { resolve, reject } = promise;
 				if ('error' in message) {
 					reject(new Error(JSON.stringify(message.error)));
@@ -669,46 +697,101 @@ class PDFWorker {
 	 */
 	async getStructuredData(itemID, isPriority, password) {
 		return this._enqueue(async () => {
-			let attachment = await Zotero.Items.getAsync(itemID);
-
+			let prep = await this._prepareStructuredDataRequest(itemID);
+			if (!prep) return null;
+			let { attachment, contentType, buf } = prep;
 			Zotero.debug(`Getting structured document text from item ${attachment.libraryKey}`);
 			let t = new Date();
-
-			let contentType = attachment.attachmentContentType;
-			if (!(attachment.isPDFAttachment()
-					|| attachment.isEPUBAttachment()
-					|| attachment.isSnapshotAttachment())) {
-				throw new Error('Item must be a PDF, EPUB, or snapshot attachment');
-			}
-
-			let path = await attachment.getFilePathAsync();
-			if (!path) {
-				return null;
-			}
-			let buf = await IOUtils.read(path);
-			buf = new Uint8Array(buf).buffer;
-
 			try {
 				var result = await this._query('getStructuredDocumentText', {
 					buf, contentType, password
 				}, [buf]);
 			}
 			catch (e) {
-				let error = new Error(`Worker action 'getStructuredDocumentText' failed: ${JSON.stringify({ error: e.message })}`);
-				try {
-					error.name = JSON.parse(e.message).name;
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-				Zotero.logError(error);
-				throw error;
+				throw this._wrapStructuredDataError(e);
 			}
-
 			Zotero.debug(`Extracted structured document text for item ${attachment.libraryKey} in ${new Date() - t} ms`);
-
 			return result;
 		}, isPriority);
+	}
+
+	async _prepareStructuredDataRequest(itemID) {
+		let attachment = await Zotero.Items.getAsync(itemID);
+		if (!(attachment.isPDFAttachment()
+				|| attachment.isEPUBAttachment()
+				|| attachment.isSnapshotAttachment())) {
+			throw new Error('Item must be a PDF, EPUB, or snapshot attachment');
+		}
+		let path = await attachment.getFilePathAsync();
+		if (!path) return null;
+		let buf = await IOUtils.read(path);
+		return {
+			attachment,
+			contentType: attachment.attachmentContentType,
+			buf: new Uint8Array(buf).buffer,
+		};
+	}
+
+	_wrapStructuredDataError(e) {
+		let error = new Error(`Worker action 'getStructuredDocumentText' failed: ${JSON.stringify({ error: e.message })}`);
+		try {
+			error.name = JSON.parse(e.message).name;
+		}
+		catch (parseErr) {
+			Zotero.logError(parseErr);
+		}
+		Zotero.logError(error);
+		return error;
+	}
+
+	// Streaming variant of getStructuredData. onChunk receives partial chunks
+	// ({ kind: 'partial', pages, content, pageIndexOffset, contentIndexOffset,
+	// pageIndexRange, totalPageCount }) followed by a final chunk
+	// ({ kind: 'final', structure }). Returns { promise, abort }.
+	getStructuredDataStream(itemID, onChunk, options = {}) {
+		let abortFn = null;
+		let aborted = false;
+		let { password, batchSize, isPriority } = options;
+		let promise = this._enqueue(async () => {
+			if (aborted) {
+				let e = new Error('Aborted');
+				e.name = 'AbortError';
+				throw e;
+			}
+			let prep = await this._prepareStructuredDataRequest(itemID);
+			if (!prep) return;
+			let { attachment, contentType, buf } = prep;
+			Zotero.debug(`Streaming structured document text from item ${attachment.libraryKey}`);
+			let t = new Date();
+			try {
+				let { promise: queryPromise, abort } = this._streamingQuery(
+					'getStructuredDocumentText',
+					{
+						buf,
+						contentType,
+						password,
+						streaming: true,
+						...(batchSize ? { batchSize } : {}),
+					},
+					[buf],
+					onChunk
+				);
+				abortFn = abort;
+				if (aborted) abort();
+				await queryPromise;
+			}
+			catch (e) {
+				throw this._wrapStructuredDataError(e);
+			}
+			Zotero.debug(`Streamed structured document text for item ${attachment.libraryKey} in ${new Date() - t} ms`);
+		}, isPriority);
+		return {
+			promise,
+			abort: () => {
+				aborted = true;
+				if (abortFn) abortFn();
+			},
+		};
 	}
 
 	/**
