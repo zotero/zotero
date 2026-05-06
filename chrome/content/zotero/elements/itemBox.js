@@ -953,51 +953,45 @@
 		restoreCustomRowElements() {
 			if (!this._customRowElemCache) return;
 			for (let position of Object.keys(this._customRowElemCache)) {
-				this.insertCustomRow(this._customRowElemCache[position], position);
+				this._customRowElemCache[position].forEach((rowElem) => {
+					this.insertCustomRow(rowElem, position);
+				});
 				this._customRowElemCache[position] = [];
 			}
 		}
 
 		insertCustomRow(rowElem, position = "end") {
-			// Handle both single elements and arrays
-			let elements = Array.isArray(rowElem) ? rowElem : [rowElem];
-			
-			// Determine insertion order based on position
-			// Only reverse when there are multiple elements
-			if (position !== "end" && elements.length > 1) {
-				// For 'start' and 'afterCreators', reverse to maintain order
-				elements = elements.reverse();
-			}
-			
-			for (let elem of elements) {
-				switch (position) {
-					case "start": {
-						this._infoTable.prepend(elem);
-						break;
+			switch (position) {
+				case "start": {
+					let itemTypeRow = this._infoTable.querySelector(".meta-label[fieldname=itemType]")?.parentElement;
+					if (itemTypeRow) {
+						this._infoTable.insertBefore(rowElem, itemTypeRow);
 					}
-					case "afterCreators": {
-						// The `_firstRowBeforeCreators` is actually the first row after creator rows
-						if (this._firstRowBeforeCreators) {
-							this._infoTable.insertBefore(elem, this._firstRowBeforeCreators);
-							// Update the anchor node for creator rows
-							this._firstRowBeforeCreators = elem;
-						}
-						else {
-							this._infoTable.append(elem);
-						}
-						break;
+					else {
+						this._infoTable.append(rowElem);
 					}
-					case "end":
-					default: {
-						let dateAddedRow = this._infoTable.querySelector(".meta-label[fieldname=dateAdded]")?.parentElement;
-						if (dateAddedRow) {
-							this._infoTable.insertBefore(elem, dateAddedRow);
-						}
-						else {
-							this._infoTable.append(elem);
-						}
-						break;
+					break;
+				}
+				case "afterCreators": {
+					// The `_firstRowBeforeCreators` is actually the first row after creator rows
+					if (this._firstRowBeforeCreators) {
+						this._infoTable.insertBefore(rowElem, this._firstRowBeforeCreators);
 					}
+					else {
+						this._infoTable.append(rowElem);
+					}
+					break;
+				}
+				case "end":
+				default: {
+					let dateAddedRow = this._infoTable.querySelector(".meta-label[fieldname=dateAdded]")?.parentElement;
+					if (dateAddedRow) {
+						this._infoTable.insertBefore(rowElem, dateAddedRow);
+					}
+					else {
+						this._infoTable.append(rowElem);
+					}
+					break;
 				}
 			}
 		}
