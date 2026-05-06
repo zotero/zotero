@@ -142,3 +142,76 @@ index 1718caa3c66d..10fa59c0cd80 100644
      nsresult rv = GetW(exePath);
  #  else
      char exePath[MAXPATHLEN];
+diff --git a/toolkit/components/remote/WinRemoteMessage.cpp b/toolkit/components/remote/WinRemoteMessage.cpp
+--- a/toolkit/components/remote/WinRemoteMessage.cpp
++++ b/toolkit/components/remote/WinRemoteMessage.cpp
+@@ -33,6 +33,31 @@
+ 
+ COPYDATASTRUCT* WinRemoteMessageSender::CopyData() { return &mData; }
+ 
++nsresult WinRemoteMessageReceiver::ParseV0(const nsACString& aBuffer) {
++  CommandLineParserWin<char> parser;
++  parser.HandleCommandLine(aBuffer);
++
++  mCommandLine = new nsCommandLine();
++  return mCommandLine->Init(parser.Argc(), parser.Argv(), nullptr,
++                            nsICommandLine::STATE_REMOTE_AUTO);
++}
++
++nsresult WinRemoteMessageReceiver::ParseV1(const nsACString& aBuffer) {
++  CommandLineParserWin<char> parser;
++  size_t cch = parser.HandleCommandLine(aBuffer);
++  ++cch;  // skip a null char
++
++  nsCOMPtr<nsIFile> workingDir;
++  if (cch < aBuffer.Length()) {
++    NS_NewLocalFile(NS_ConvertUTF8toUTF16(Substring(aBuffer, cch)), false,
++                    getter_AddRefs(workingDir));
++  }
++
++  mCommandLine = new nsCommandLine();
++  return mCommandLine->Init(parser.Argc(), parser.Argv(), workingDir,
++                            nsICommandLine::STATE_REMOTE_AUTO);
++}
++
+ nsresult WinRemoteMessageReceiver::ParseV2(const nsAString& aBuffer) {
+   CommandLineParserWin<char16_t> parser;
+   size_t cch = parser.HandleCommandLine(aBuffer);
+@@ -111,6 +136,12 @@
+ 
+ nsresult WinRemoteMessageReceiver::Parse(const COPYDATASTRUCT* aMessageData) {
+   switch (static_cast<WinRemoteMessageVersion>(aMessageData->dwData)) {
++    case WinRemoteMessageVersion::CommandLineOnly:
++      return ParseV0(nsDependentCSubstring(
++          reinterpret_cast<char*>(aMessageData->lpData), aMessageData->cbData));
++    case WinRemoteMessageVersion::CommandLineAndWorkingDir:
++      return ParseV1(nsDependentCSubstring(
++          reinterpret_cast<char*>(aMessageData->lpData), aMessageData->cbData));
+     case WinRemoteMessageVersion::CommandLineAndWorkingDirInUtf16:
+       return ParseV2(
+           nsDependentSubstring(reinterpret_cast<wchar_t*>(aMessageData->lpData),
+diff --git a/toolkit/components/remote/WinRemoteMessage.h b/toolkit/components/remote/WinRemoteMessage.h
+--- a/toolkit/components/remote/WinRemoteMessage.h
++++ b/toolkit/components/remote/WinRemoteMessage.h
+@@ -29,10 +29,10 @@
+ // some sort, as v3 does, to reduce the chances of variants of bug 1847458.
+ enum class WinRemoteMessageVersion : uint32_t {
+   // "<CommandLine>\0" in utf8
+-  /* CommandLineOnly = 0, */
++  CommandLineOnly = 0,
+ 
+   // "<CommandLine>\0<WorkingDir>\0" in utf8
+-  /* CommandLineAndWorkingDir = 1, */
++  CommandLineAndWorkingDir = 1,
+ 
+   // L"<CommandLine>\0<WorkingDir>\0" in utf16, used by ESR 128
+   CommandLineAndWorkingDirInUtf16 = 2,
+@@ -62,6 +62,8 @@
+ class WinRemoteMessageReceiver final {
+   nsCOMPtr<nsICommandLineRunner> mCommandLine;
+ 
++  nsresult ParseV0(const nsACString& aBuffer);
++  nsresult ParseV1(const nsACString& aBuffer);
+   nsresult ParseV2(const nsAString& aBuffer);
+   nsresult ParseV3(const nsACString& aBuffer);
+
