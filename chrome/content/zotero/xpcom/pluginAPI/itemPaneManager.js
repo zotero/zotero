@@ -437,6 +437,22 @@
 			}
 			this._refresh([rowID]);
 		}
+
+		get data() {
+			let options = this.options;
+			// Ensure deterministic ordering for rows with the same `position`.
+			// Sort `rowID` so insertion (prepend/insertBefore) produces a
+			// stable visual order regardless of registration timing.
+			if (Array.isArray(options) && options.length > 1) {
+				options = options.sort((a, b) =>
+					String(a.rowID ?? "").localeCompare(String(b.rowID ?? ""))
+				);
+			}
+			return {
+				updateID: this.updateID,
+				options,
+			};
+		}
 	}
 
 
