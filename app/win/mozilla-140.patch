@@ -165,8 +165,8 @@ diff --git a/toolkit/components/remote/WinRemoteMessage.cpp b/toolkit/components
 +
 +  nsCOMPtr<nsIFile> workingDir;
 +  if (cch < aBuffer.Length()) {
-+    NS_NewLocalFile(NS_ConvertUTF8toUTF16(Substring(aBuffer, cch)), false,
-+                    getter_AddRefs(workingDir));
++    (void)NS_NewLocalFile(NS_ConvertUTF8toUTF16(Substring(aBuffer, cch)),
++                          getter_AddRefs(workingDir));
 +  }
 +
 +  mCommandLine = new nsCommandLine();
