@@ -638,6 +638,40 @@ class ReaderInstance {
 					}
 				});
 			},
+			getSDTStream: (password, onChunk, onStart) => {
+				return new this._iframeWindow.Promise((resolve, reject) => {
+					let { promise, abort } = Zotero.PDFWorker.getStructuredDataStream(
+						this._item.id,
+						(chunk) => {
+							try {
+								onChunk(Cu.cloneInto(chunk, this._iframeWindow));
+							}
+							catch (e) {
+								Zotero.logError(e);
+							}
+						},
+						{
+							password,
+							isPriority: true,
+						}
+					);
+					if (onStart) {
+						try {
+							onStart(Cu.exportFunction(() => abort(), this._iframeWindow));
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+					}
+					promise.then(
+						() => resolve(),
+						(e) => {
+							Zotero.logError(e);
+							reject(new this._iframeWindow.Error(e.message));
+						}
+					);
+				});
+			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
