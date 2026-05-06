@@ -483,8 +483,16 @@ var Zotero_LocateMenu = new function () {
 			}
 			
 			let forceOpenInWindow;
-			let openIn = this.l10nArgs.openIn;
-			forceOpenInWindow = { window: true, tab: false }[openIn];
+			if (this._viewItemType !== "mixed" && Zotero.Prefs.get(`fileHandler.${this._viewItemType}`)) {
+				// Use external handler; keep forceOpenInWindow undefined
+			}
+			else {
+				let openInNewWindow = _getOpenInNewWindow(this._viewItemType);
+				if (alternateWindowBehavior) {
+					openInNewWindow = !openInNewWindow;
+				}
+				forceOpenInWindow = openInNewWindow;
+			}
 
 			ZoteroPane.viewItems(usableItems, event,
 				{
