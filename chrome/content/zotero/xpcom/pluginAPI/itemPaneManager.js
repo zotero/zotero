@@ -440,9 +440,8 @@
 
 		get data() {
 			let options = this.options;
-			// Ensure deterministic ordering for rows with the same `position`.
-			// Sort `rowID` so insertion (prepend/insertBefore) produces a
-			// stable visual order regardless of registration timing.
+			// Since `rowID` is mapped to a namespaced key including `pluginID`,
+			// sorting by it produces a stable visual order grouped by plugin,
 			if (Array.isArray(options) && options.length > 1) {
 				options = options.sort((a, b) =>
 					String(a.rowID ?? "").localeCompare(String(b.rowID ?? ""))
