@@ -2462,6 +2462,9 @@ describe("Zotero.ItemTree", function () {
 				assert.isTrue(notifySpy.calledOnce);
 				await notifySpy.returnValues[0];
 				notifySpy.restore();
+
+				searchWin.close();
+				await item.eraseTx();
 			});
 		});
 	});
