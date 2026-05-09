@@ -1031,6 +1031,48 @@ describe("Zotero.Attachments", function () {
 			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
 		});
 
+		it("should include a PubMed Central resolver from a PMCID in Extra", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('extra', 'PMCID: PMC9262588');
+			await item.saveTx();
+
+			var resolvers = Zotero.Attachments.getFileResolvers(item, ['oa']);
+
+			assert.deepEqual(resolvers, [
+				{
+					pageURL: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9262588/',
+					accessMethod: 'oa'
+				}
+			]);
+		});
+
+		it("should include a PubMed Central resolver alongside DOI OA resolvers", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', '10.1093/nar/gkac173');
+			item.setField('extra', 'PMCID: PMC9262588');
+			await item.saveTx();
+
+			var resolvers = Zotero.Attachments.getFileResolvers(item, ['oa']);
+
+			assert.lengthOf(resolvers, 2);
+			assert.deepEqual(resolvers[0], {
+				pageURL: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9262588/',
+				accessMethod: 'oa'
+			});
+			assert.isFunction(resolvers[1]);
+		});
+
+		it("should allow finding files for an item with a PMCID in Extra", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('extra', 'PMCID: PMC9262588');
+			await item.saveTx();
+
+			assert.isTrue(Zotero.Attachments.canFindFileForItem(item));
+		});
+
 		it("should add a PDF from a URL", async function () {
 			var url = pageURL1;
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
