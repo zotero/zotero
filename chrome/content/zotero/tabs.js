@@ -742,15 +742,22 @@ var Zotero_Tabs = new function () {
 				continue;
 			}
 			if (tab.id == this._selectedID) {
+				let tabToSelect = null;
+				if (this._prevSelectedID && !ids.includes(this._prevSelectedID)) {
+					tabToSelect = this._getTab(this._prevSelectedID).tab;
+				}
+				else {
+					tabToSelect = this._tabs
+						.slice(tabIndex + 1)
+						.concat(this._tabs.slice(0, tabIndex).reverse())
+						.find(x => !ids.includes(x.id));
+				}
 				let selectOptions = {};
 				// If the tabs menu is visible, let the tab bar handle focus
 				if (this.tabsMenuPanel.visible) {
 					selectOptions.keepTabFocused = true;
 				}
-				this.select(
-					this._prevSelectedID || (this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id,
-					false, selectOptions
-				);
+				this.select(tabToSelect.id, false, selectOptions);
 			}
 			if (tab.id == this._prevSelectedID) {
 				this._prevSelectedID = null;
