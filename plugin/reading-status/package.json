@@ -1,0 +1,16 @@
+{
+	"name": "zotero-reading-status",
+	"version": "0.1.0",
+	"description": "Reading-progress field and Kanban board for Zotero 7+",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "bash scripts/build.sh",
+		"link": "bash scripts/dev-link.sh",
+		"lint": "eslint content test",
+		"test": "node --test test/*.test.js"
+	},
+	"devDependencies": {
+		"eslint": "^9.0.0"
+	}
+}

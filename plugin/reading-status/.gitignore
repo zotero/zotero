@@ -1,0 +1,4 @@
+node_modules/
+dist/
+*.xpi
+.DS_Store

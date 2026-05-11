@@ -1,0 +1,18 @@
+{
+	"manifest_version": 2,
+	"name": "Reading Status & Kanban",
+	"description": "Per-item reading-progress field and Kanban board view",
+	"version": "0.1.0",
+	"author": "",
+	"icons": {
+		"32": "content/icons/icon-32.svg"
+	},
+	"applications": {
+		"zotero": {
+			"id": "reading-status@placeholder",
+			"update_url": "",
+			"strict_min_version": "7.0",
+			"strict_max_version": "9.0.*"
+		}
+	}
+}
