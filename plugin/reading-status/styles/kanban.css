@@ -1,0 +1,108 @@
+/* Plugin styles for the Reading Status Kanban tab.
+ * Loaded as an author stylesheet via nsIStyleSheetService — applies to all
+ * Zotero windows, so every selector is scoped under .kanban-tab-content. */
+
+.kanban-tab-content {
+	display: flex;
+	flex: 1;
+	overflow: hidden;
+	min-height: 0;
+	height: 100%;
+}
+
+.kanban-tab-content .kanban-board {
+	display: flex;
+	flex-direction: row;
+	gap: 8px;
+	padding: 8px;
+	flex: 1;
+	overflow-x: auto;
+	overflow-y: hidden;
+	min-height: 0;
+	background: var(--material-sidepane);
+}
+
+.kanban-tab-content .kanban-column {
+	flex: 1 1 220px;
+	min-width: 200px;
+	max-width: 320px;
+	display: flex;
+	flex-direction: column;
+	background: var(--material-background);
+	border: var(--material-border-quarternary);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.kanban-tab-content .kanban-column.drag-over {
+	outline: 2px solid var(--fill-primary);
+	outline-offset: -2px;
+}
+
+.kanban-tab-content .kanban-column-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 6px 10px;
+	font-weight: 600;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	border-bottom: var(--material-border-quarternary);
+	background: var(--color-button);
+}
+
+.kanban-tab-content .kanban-column-count {
+	font-weight: 400;
+	color: var(--fill-secondary);
+	font-size: 11px;
+	padding: 1px 6px;
+	border-radius: 8px;
+	background: var(--color-stripe);
+}
+
+.kanban-tab-content .kanban-column-cards {
+	flex: 1;
+	overflow-y: auto;
+	padding: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-height: 0;
+}
+
+.kanban-tab-content .kanban-card {
+	background: var(--material-background);
+	border: var(--material-border-quarternary);
+	border-radius: 4px;
+	padding: 8px 10px;
+	cursor: grab;
+	user-select: none;
+}
+
+.kanban-tab-content .kanban-card:hover {
+	border-color: var(--fill-primary);
+}
+
+.kanban-tab-content .kanban-card.dragging {
+	opacity: 0.4;
+}
+
+.kanban-tab-content .kanban-card-title {
+	font-weight: 500;
+	font-size: 13px;
+	line-height: 1.3;
+	margin-bottom: 4px;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+}
+
+.kanban-tab-content .kanban-card-meta {
+	font-size: 11px;
+	color: var(--fill-secondary);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
