@@ -900,3 +900,9 @@ plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
 
 data-dir-unsupported-storage = This can happen if the { -app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share.
+
+local-api-authorize-title = Local API Authorization
+local-api-authorize-text = “{ $appName }”, an application running on your computer, wants to modify your { -app-name } library.
+local-api-authorize-allow = Allow
+local-api-authorize-always-allow = Always Allow
+local-api-authorize-deny = Deny
