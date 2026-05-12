@@ -3722,6 +3722,13 @@ Zotero.Schema = new function () {
 					await Zotero.DB.queryAsync("UPDATE itemAttachments SET path=? WHERE itemID=?", ['storage:' + filename, row.itemID]);
 				}
 			}
+
+			else if (i == 129) {
+				let clientVersionTables = ['items', 'collections', 'savedSearches', 'libraries', 'groups'];
+				for (let table of clientVersionTables) {
+					await Zotero.DB.queryAsync(`ALTER TABLE ${table} ADD COLUMN clientVersion INT NOT NULL DEFAULT 0`);
+				}
+			}
 		}
 		
 		await _updateDBVersion('userdata', toVersion);
