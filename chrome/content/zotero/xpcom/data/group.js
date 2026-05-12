@@ -244,7 +244,7 @@ Zotero.Group.prototype.toResponseJSON = function (options = {}) {
 		let uri = Zotero.URI.getGroupURI(this);
 		return {
 			id: this.id,
-			version: this.clientVersion,
+			version: options.syncedVersionProperty ? this.version : this.clientVersion,
 			links: {
 				self: {
 					href: Zotero.URI.toAPIURL(uri, options.apiURL),

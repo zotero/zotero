@@ -1496,10 +1496,15 @@ Zotero.DataObject.prototype._finalizeErase = async function (env) {
 
 
 Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
+	// Default to showing synced properties, since that's what the API does, and this function
+	// is generally used to emulate the API
+	options.syncedStorageProperties ??= true;
+	options.syncedVersionProperty ??= true;
+
 	let uri = Zotero.URI.getObjectURI(this);
 	var json = {
 		key: this.key,
-		version: this.clientVersion,
+		version: options.syncedVersionProperty ? this.version : this.clientVersion,
 		library: this.library.toResponseJSON({ ...options, includeGroupDetails: false }),
 		links: {
 			self: {
