@@ -33,6 +33,7 @@ const Draggable = require('./draggable');
 const { CSSIcon, getCSSIcon } = require('components/icons');
 
 const TYPING_TIMEOUT = 1000;
+// TODO: Move these to CSS variables
 const MINIMUM_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
 const COLUMN_MIN_WIDTH = 20;
@@ -331,7 +332,7 @@ class VirtualizedTable extends React.Component {
 		this._jsWindowID = `virtualized-table-list-${Zotero.Utilities.randomString(5)}`;
 		this._containerWidth = props.containerWidth || window.innerWidth;
 		this.className = props.className || "";
-		this.firstColumnExtraWidth = props.firstColumnExtraWidth || 0;
+		this.firstColumnExtraWidth = (props.firstColumnExtraWidth) - (COLUMN_PADDING / 2); // missing left-padding of the content cell
 		
 		this._columns = new Columns(this);
 		
@@ -1753,22 +1754,23 @@ var Columns = class {
 			if (column.hidden) continue;
 			const styleIndex = this._columnStyleMap[window.CSS.escape(dataKey)];
 			const columnPadding = column.iconLabel ? 0 : COLUMN_PADDING;
+			let cssWidth = width;
+			// It's set in CSS, so we subtract it here to prevent sliding
+			if (column.dataKey === visibleColumns[0].dataKey) {
+				cssWidth -= this._virtualizedTable.firstColumnExtraWidth;
+			}
 			if (column.fixedWidth) {
-				width = column.width;
+				cssWidth = width = column.width;
 			}
 			if (column.fixedWidth && column.width || column.staticWidth) {
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex', `0 0`, `important`);
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `calc(var(--extra-width, 0px) + ${width}px`, 'important');
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `calc(var(--extra-width, 0px) + ${width}px`, 'important');
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `calc(var(--extra-width, 0px) + ${cssWidth}px`, 'important');
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `calc(var(--extra-width, 0px) + ${cssWidth}px`, 'important');
 			} else {
-				// It's set in CSS, so we subtract it here to prevent sliding
-				if (column.dataKey === visibleColumns[0].dataKey) {
-					width -= this._virtualizedTable.firstColumnExtraWidth;
-				}
-				width = (width - columnPadding);
-				Zotero.debug(`Columns ${dataKey} width ${width}`);
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `calc(var(--extra-width, 0px) + ${width}px`);
+				width -= columnPadding;
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `calc(var(--extra-width, 0px) + ${cssWidth}px`);
 			}
+			Zotero.debug(`Columns ${dataKey} width ${width}`);
 			if (storePrefs) {
 				column.width = width;
 				prefs[dataKey] = this._getColumnPrefsToPersist(column);

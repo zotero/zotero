@@ -1375,7 +1375,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				storeColumnPrefs: this._storeColumnPrefs.bind(this),
 				getDefaultColumnOrder: this._getDefaultColumnOrder.bind(this),
 				containerWidth: this.domEl.clientWidth,
-				firstColumnExtraWidth: 16 + 16 + 4, // 16px for twisty, 16px for icon + 4px for margin-right
+				firstColumnExtraWidth: 16 + 4, // 16px for icon + 4px for margin-right
 
 				multiSelect: this.props.multiSelect,
 
