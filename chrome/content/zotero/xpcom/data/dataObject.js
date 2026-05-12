@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+
 let lazy = {};
 XPCOMUtils.defineLazyPreferenceGetter(
 	lazy,
