@@ -1,4 +1,4 @@
--- 125
+-- 126
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -164,6 +164,7 @@ CREATE TABLE items (
     libraryID INT NOT NULL,
     key TEXT NOT NULL,
     version INT NOT NULL DEFAULT 0,
+    clientVersion INT NOT NULL DEFAULT 0,
     synced INT NOT NULL DEFAULT 0,
     UNIQUE (libraryID, key),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
@@ -295,6 +296,7 @@ CREATE TABLE collections (
     libraryID INT NOT NULL,
     key TEXT NOT NULL,
     version INT NOT NULL DEFAULT 0,
+    clientVersion INT NOT NULL DEFAULT 0,
     synced INT NOT NULL DEFAULT 0,
     UNIQUE (libraryID, key),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE,
@@ -351,6 +353,7 @@ CREATE TABLE savedSearches (
     libraryID INT NOT NULL,
     key TEXT NOT NULL,
     version INT NOT NULL DEFAULT 0,
+    clientVersion INT NOT NULL DEFAULT 0,
     synced INT NOT NULL DEFAULT 0,
     UNIQUE (libraryID, key),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
@@ -395,6 +398,7 @@ CREATE TABLE libraries (
     editable INT NOT NULL,
     filesEditable INT NOT NULL,
     version INT NOT NULL DEFAULT 0,
+    clientVersion INT NOT NULL DEFAULT 0,
     storageVersion INT NOT NULL DEFAULT 0,
     lastSync INT NOT NULL DEFAULT 0,
     archived INT NOT NULL DEFAULT 0,
@@ -412,6 +416,7 @@ CREATE TABLE groups (
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     version INT NOT NULL,
+    clientVersion INT NOT NULL DEFAULT 0,
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 
