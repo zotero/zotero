@@ -163,6 +163,20 @@ function modify_omni {
 	
 	# Prevent error during network requests
 	replace_line 'async lazyInit\(\) \{' 'async lazyInit() { if (this.features) return false;' modules/UrlClassifierExceptionListService.sys.mjs
+
+	# Silence CrashManager "Could not get children of [...]/Crash Reports/events" spam
+	replace_line '\/\/ Missing events folders are allowed' '\/\/ Missing events folders are allowed (silence warning)
+        if (ex) return entries;' modules/CrashManager.sys.mjs
+
+	# Several services pull in services-settings (which we strip) and throw
+	# at profile-after-change. Remove their #init() methods to prevent errors.
+	replace_line 'async #init\(\) \{' 'async #init() {} async _unused_init() {' modules/EssentialDomainsRemoteSettings.sys.mjs
+	replace_line 'async #init\(\) \{' 'async #init() {} async _unused_init() {' modules/SimpleURIUnknownSchemesRemoteObserver.sys.mjs
+	# RemotePermissionService uses a top-level import, so even loading the
+	# module throws
+	replace_line 'import \{ RemoteSettings \} from "resource:\/\/services-settings\/remote-settings.sys.mjs";' \
+		'const RemoteSettings = () => ({ on() {}, get: async () => [] });' \
+		modules/RemotePermissionService.sys.mjs
 	
 	replace_line 'pref\("network.captive-portal-service.enabled".+' 'pref("network.captive-portal-service.enabled", false);' greprefs.js
 	replace_line 'pref\("network.connectivity-service.enabled".+' 'pref("network.connectivity-service.enabled", false);' greprefs.js
