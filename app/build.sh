@@ -473,6 +473,43 @@ if [ $DEVTOOLS -eq 1 ]; then
 	replace_line 'if \(isBFCache\) {' \
 		'if (isBFCache || isFrameSwitching) {' \
 		chrome/devtools/modules/devtools/server/actors/thread.js
+
+	# Suppress "Failed to get the active browserId" error when profile recording starts
+	replace_line 'console\.error\(' \
+		'if (false) console.error(' \
+		chrome/devtools/modules/devtools/shared/performance-new/recording-utils.sys.mjs
+
+	# Stub out profile favicon lookup since we don't have PlacesUtils
+	replace_line 'return getPageFavicons\(pageUrls\);' \
+		'return pageUrls ? pageUrls.map(() => null) : [];' \
+		chrome/devtools/modules/devtools/client/performance-new/shared/background.sys.mjs
+
+	# Use our profilerViewer.xhtml to display profiles.
+	# We can't use basicViewer because that loads Zotero scripts, and profiling
+	# runs in the Browser Toolbox child process, where a second Zotero instance
+	# would collide with the locked database.
+	replace_line 'const contentBrowser = await new Promise\(resolveOnContentBrowserCreated =>' \
+		'if (typeof win.openWebLinkIn !== "function") {
+			const ww = Cc["\@mozilla.org\/embedcomp\/window-watcher;1"].getService(
+				Ci.nsIWindowWatcher
+			);
+			const arg = { uri: urlToLoad };
+			arg.wrappedJSObject = arg;
+			const viewerWin = ww.openWindow(
+				null,
+				"chrome:\/\/zotero\/content\/standalone\/profilerViewer.xhtml",
+				null,
+				"chrome,dialog=no,resizable,centerscreen,scrollbars",
+				arg
+			);
+			return await new Promise(resolve => {
+				viewerWin.addEventListener("load", () => {
+					resolve(viewerWin.document.getElementById("content"));
+					}, { once: true });
+				});
+			}
+			const contentBrowser = await new Promise(resolveOnContentBrowserCreated =>' \
+		chrome/devtools/modules/devtools/client/performance-new/shared/browser.js
 fi
 
 # 5.0.96.3 / 5.0.97-beta.37+ddc7be75c

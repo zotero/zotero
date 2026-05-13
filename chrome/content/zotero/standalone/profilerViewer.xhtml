@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		windowtype="zotero:profiler-viewer"
+		title="Firefox Profiler"
+		style="min-width: 1100px; min-height: 800px;"
+		persist="screenX screenY width height sizemode">
+	<script>
+		let webChannel = null;
+
+		window.addEventListener("load", () => {
+			const { uri } = window.arguments[0].wrappedJSObject;
+			const browser = document.getElementById("content");
+
+			// profiler.firefox.com refuses /from-browser for non-Firefox UAs
+			const version = Services.appinfo.platformVersion;
+			browser.browsingContext.customUserAgent = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:${version}) Gecko/20100101 Firefox/${version}`;
+
+			// Register the global JSWindowActors
+			ChromeUtils.importESModule(
+				"resource://gre/modules/ActorManagerParent.sys.mjs"
+			);
+
+			const { WebChannel } = ChromeUtils.importESModule(
+				"resource://gre/modules/WebChannel.sys.mjs"
+			);
+			const { handleWebChannelMessage } = ChromeUtils.importESModule(
+				"resource://devtools/client/performance-new/shared/background.sys.mjs"
+			);
+			webChannel = new WebChannel(
+				"profiler.firefox.com",
+				Services.io.newURI("https://profiler.firefox.com")
+			);
+			webChannel.listen((id, message, target) => {
+				handleWebChannelMessage(webChannel, id, message, target);
+			});
+
+			// Intercept clicks the browser can't route on its own:
+			// - blob: downloads (no download manager)
+			// - external / target="_blank" links (no window.open() handler).
+			try {
+				ChromeUtils.registerWindowActor("ProfilerViewer", {
+					parent: {
+						esModuleURI:
+							"chrome://zotero/content/actors/ProfilerViewerParent.mjs",
+					},
+					child: {
+						esModuleURI:
+							"chrome://zotero/content/actors/ProfilerViewerChild.mjs",
+						events: {
+							click: { capture: true, mozSystemGroup: true },
+						},
+					},
+					matches: ["https://profiler.firefox.com/*"],
+					allFrames: true,
+				});
+			}
+			catch {
+				// Already registered in this process
+			}
+
+			browser.loadURI(Services.io.newURI(uri), {
+				triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
+			});
+			browser.addEventListener("pagetitlechanged", () => {
+				document.title = browser.contentTitle || browser.currentURI.spec;
+			});
+		}, { once: true });
+
+		window.addEventListener("unload", () => {
+			if (webChannel) {
+				webChannel.stopListening();
+				webChannel = null;
+			}
+		}, { once: true });
+	</script>
+
+	<hbox flex="1">
+		<browser
+			id="content"
+			type="content"
+			flex="1"
+			remote="false"
+			disableglobalhistory="true"
+			maychangeremoteness="true"
+		/>
+	</hbox>
+</window>
