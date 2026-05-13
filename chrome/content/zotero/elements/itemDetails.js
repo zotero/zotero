@@ -407,7 +407,7 @@
 						let child = children[i];
 						let childPaneID = child.dataset.pane;
 						if (this.sidenav.isPaneOrderable(childPaneID)) {
-							this._paneParent.insertBefore(elem, child.nextSibling);
+							child.after(elem);
 							inserted = true;
 							break;
 						}
