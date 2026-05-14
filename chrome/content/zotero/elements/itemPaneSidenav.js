@@ -112,6 +112,15 @@
 		set container(val) {
 			if (this._container == val) return;
 			this._container = val;
+			// When changing containers, hide all data-pane buttons up front; they'll
+			// be unhidden during render() for panes present in the new container.
+			// Otherwise, buttons for panes from the previous container would linger.
+			if (val) {
+				for (let button of this.querySelectorAll('.btn[data-pane]')) {
+					if (button.dataset.pane === 'context-notes') continue;
+					button.parentElement.hidden = true;
+				}
+			}
 			this.render();
 		}
 		
@@ -188,6 +197,10 @@
 		}
 
 		isPanePinnable(id) {
+			// The active container can opt out of pin support entirely
+			if (!this.container?.supportsPinning) {
+				return false;
+			}
 			if (['context-notes', 'context-all-notes', 'context-item-notes'].includes(id)) {
 				return false;
 			}
@@ -199,6 +212,10 @@
 		}
 
 		isPaneOrderable(paneID) {
+			// The active container can opt out of reordering entirely
+			if (!this.container?.supportsReorder) {
+				return false;
+			}
 			let orderable
 				// Built-in or orderable custom sections
 				= this._builtInPanes.includes(paneID) || Zotero.ItemPaneManager.isSectionOrderable(paneID);
@@ -823,13 +840,24 @@
 			this._contextMenuTarget = paneID;
 
 			let isPinnable = this.isPanePinnable(paneID);
-			this.querySelector('.zotero-menuitem-pin').hidden = !isPinnable || this.pinnedPane == paneID;
-			this.querySelector('.zotero-menuitem-unpin').hidden = !isPinnable || this.pinnedPane != paneID;
+			let pinHidden = !isPinnable || this.pinnedPane == paneID;
+			let unpinHidden = !isPinnable || this.pinnedPane != paneID;
+			this.querySelector('.zotero-menuitem-pin').hidden = pinHidden;
+			this.querySelector('.zotero-menuitem-unpin').hidden = unpinHidden;
 			this.querySelector('.zotero-menuitem-pin-separator').hidden = !isPinnable;
 
-			this.querySelector('.zotero-menuitem-reorder-up').hidden = !this.isPaneMovable(paneID, 'up');
-			this.querySelector('.zotero-menuitem-reorder-down').hidden = !this.isPaneMovable(paneID, 'down');
-			this.querySelector('.zotero-menuitem-reorder-reset').hidden = !this.isOrderChanged();
+			let canReorder = !!this.container?.supportsReorder;
+			let moveUpHidden = !this.isPaneMovable(paneID, 'up');
+			let moveDownHidden = !this.isPaneMovable(paneID, 'down');
+			let resetHidden = !canReorder || !this.isOrderChanged();
+			this.querySelector('.zotero-menuitem-reorder-up').hidden = moveUpHidden;
+			this.querySelector('.zotero-menuitem-reorder-down').hidden = moveDownHidden;
+			this.querySelector('.zotero-menuitem-reorder-reset').hidden = resetHidden;
+
+			// Don't open an empty popup
+			if (pinHidden && unpinHidden && moveUpHidden && moveDownHidden && resetHidden) {
+				return;
+			}
 
 			this.querySelector('.context-menu')
 					.openPopupAtScreen(event.screenX, event.screenY, true);

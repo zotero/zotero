@@ -24,32 +24,7 @@
 */
 
 {
-	const waitFrame = async () => {
-		return waitNoLongerThan(new Promise((resolve) => {
-			requestAnimationFrame(resolve);
-		}), 30);
-	};
-	
-	const waitFrames = async (n) => {
-		for (let i = 0; i < n; i++) {
-			await waitFrame();
-		}
-	};
-
-	const waitDOMUpdate = async (timeout = 50) => {
-		return new Promise((resolve) => {
-			requestIdleCallback(resolve, { timeout });
-		});
-	};
-
-	const waitNoLongerThan = async (promise, ms = 1000) => {
-		return Promise.race([
-			promise,
-			Zotero.Promise.delay(ms)
-		]);
-	};
-
-	class ItemDetails extends XULElementBase {
+	class ItemDetails extends ItemPaneContainerBase {
 		content = MozXULElement.parseXULToFragment(`
 			<hbox id="zotero-view-item-container" class="zotero-view-item-container" flex="1">
 				<html:div class="zotero-view-item-main">
@@ -116,20 +91,20 @@
 			this._tabID = tabID;
 		}
 
-		get tabType() {
-			return this.getAttribute('tabType');
-		}
-
-		set tabType(tabType) {
-			this.setAttribute('tabType', tabType);
-		}
-		
 		get collectionTreeRow() {
 			return this._collectionTreeRow;
 		}
 		
 		set collectionTreeRow(collectionTreeRow) {
 			this._collectionTreeRow = collectionTreeRow;
+		}
+
+		get supportsPinning() {
+			return true;
+		}
+
+		get supportsReorder() {
+			return true;
 		}
 
 		get pinnedPane() {
@@ -151,47 +126,12 @@
 			this._savePinnedPane();
 		}
 
-		get _minScrollHeight() {
-			return parseFloat(this._paneParent.style.getPropertyValue('--min-scroll-height') || 0);
-		}
-		
-		set _minScrollHeight(val) {
-			this._paneParent.style.setProperty('--min-scroll-height', val + 'px');
-		}
-
-		/**
-		 * Convenience getter that delegates to our <item-pane> / <context-pane>
-		 * parent. This exists because the sidenav controls us, not the <item-pane>,
-		 * but needs to get/set its collapsed state.
-		 * @returns {boolean}
-		 */
-		get _collapsed() {
-			let parentPane = this.closest('item-pane, context-pane');
-			if (!parentPane) {
-				return false;
-			}
-			return parentPane.collapsed;
-		}
-		
-		/**
-		 * Convenience setter for collapsed state. See above.
-		 * @param {boolean} val
-		 */
-		set _collapsed(val) {
-			let parentPane = this.closest('item-pane, context-pane');
-			if (!parentPane) {
-				return;
-			}
-			parentPane.collapsed = val;
-		}
-
 		get sidenav() {
-			return this._sidenav;
+			return super.sidenav;
 		}
 
 		set sidenav(sidenav) {
-			this._sidenav = sidenav;
-			sidenav.container = this;
+			super.sidenav = sidenav;
 			// Manually update once and further changes will be synced automatically to sidenav
 			this.forceUpdateSideNav();
 		}
@@ -337,9 +277,9 @@
 					if (!this.isPaneVisible(box.dataset.pane)) {
 						continue;
 					}
-					await waitNoLongerThan(box.asyncRender(), 500);
+					await this._waitNoLongerThan(box.asyncRender(), 500);
 					// Make sure the layout is updated for next isPaneVisible check
-					await waitDOMUpdate();
+					await this._waitDOMUpdate();
 				}
 			}
 
@@ -430,22 +370,6 @@
 				this._handleTabSelect(ids);
 			}
 		};
-
-		getPane(id) {
-			return this._paneParent.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]`);
-		}
-
-		getEnabledPane(id) {
-			return this._paneParent.querySelector(`:scope > [data-pane="${CSS.escape(id)}"]:not([hidden])`);
-		}
-
-		getPanes() {
-			return Array.from(this._paneParent.querySelectorAll(':scope > [data-pane]'));
-		}
-
-		getEnabledPanes() {
-			return Array.from(this._paneParent.querySelectorAll(':scope > [data-pane]:not([hidden])'));
-		}
 
 		getVisiblePanes() {
 			let panes = this.getPanes();
@@ -543,111 +467,29 @@
 			}
 		}
 
-		async scrollToPane(paneID, behavior = 'smooth') {
-			let panes = this.getEnabledPanes();
-			let paneIndex = panes.findIndex(elem => elem.dataset.pane == paneID);
-			let pane = panes[paneIndex];
-			if (!pane) return null;
-
-			let scrollPromise;
-
-			// If the itemPane is collapsed, just remember which pane needs to be scrolled to
-			// when itemPane is expanded.
-			if (this._collapsed) {
-				this._lastScrollPaneID = paneID;
-				return null;
-			}
-
-			// If the pane is already at the top, no need to scroll
-			if (Math.abs(pane.getBoundingClientRect().top - this._paneParent.getBoundingClientRect().top) < 1) {
-				return true;
-			}
-
-			// Temporarily disable intersection observer to prevent unwanted rendering
+		_beforeScrollToPane(_pane) {
+			// Suspend the intersection observer for the duration of the scroll so
+			// the pane we're scrolling toward (and any panes that swing through
+			// the viewport on the way) don't trigger lazy renders mid-flight.
 			this._toggleIntersectionObserver(false);
+		}
 
-			// The pane should always be at the very top
-			// If there isn't enough stuff below it for it to be at the top, we add padding
-			// We use a ::before pseudo-element for this so that we don't need to add another level to the DOM
-			this._makeSpaceForPane(pane);
-			if (behavior == 'smooth') {
-				this._disableScrollHandler = true;
-				scrollPromise = this._waitForScroll();
-				scrollPromise.then(() => this._disableScrollHandler = false);
-			}
-			else {
-				// Wait for the next DOM update to make sure the height is updated before rendering
-				scrollPromise = waitDOMUpdate();
-			}
-			pane.scrollIntoView({ block: 'start', behavior });
-			pane.focus();
-			await scrollPromise;
-
-			// Check current and following panes for async render
+		async _afterScrollToPane(_pane, panes, paneIndex) {
+			// After the scroll settles, async-render the pane we landed on and
+			// any visible panes below it, then re-enable the intersection observer
 			for (let i = paneIndex; i < panes.length; i++) {
 				let nextPane = panes[i];
-				// Stop if the pane is not visible anymore
+				// Stop at the first pane no longer in view
 				if (!this.isPaneVisible(nextPane.dataset.pane)) {
 					break;
 				}
 				if (nextPane.asyncRender) {
 					await nextPane.asyncRender();
 					// Wait for the next DOM update to make sure the layout is updated
-					await waitDOMUpdate();
+					await this._waitDOMUpdate();
 				}
 			}
-
-			// Re-enable intersection observer
 			this._toggleIntersectionObserver(true);
-			return true;
-		}
-		
-		_makeSpaceForPane(pane) {
-			let oldMinScrollHeight = this._minScrollHeight;
-			let newMinScrollHeight = this._getMinScrollHeightForPane(pane);
-			if (newMinScrollHeight > oldMinScrollHeight) {
-				this._minScrollHeight = newMinScrollHeight;
-			}
-		}
-		
-		_getMinScrollHeightForPane(pane) {
-			let paneRect = pane.getBoundingClientRect();
-			let containerRect = this._paneParent.getBoundingClientRect();
-			// No offsetTop property for XUL elements
-			let offsetTop = paneRect.top - containerRect.top + this._paneParent.scrollTop;
-			return offsetTop + containerRect.height;
-		}
-
-		async _waitForScroll() {
-			let scrollPromise = Zotero.Promise.defer();
-			let lastScrollTop = this._paneParent.scrollTop;
-			const checkScrollStart = () => {
-				// If the scrollTop is not changed, wait for scroll to happen
-				if (lastScrollTop === this._paneParent.scrollTop) {
-					requestAnimationFrame(checkScrollStart);
-				}
-				// Wait for scroll to end
-				else {
-					requestAnimationFrame(checkScrollEnd);
-				}
-			};
-			const checkScrollEnd = async () => {
-				// Wait for 3 frames to make sure not further scrolls
-				await waitFrames(3);
-				if (lastScrollTop === this._paneParent.scrollTop) {
-					scrollPromise.resolve();
-				}
-				else {
-					lastScrollTop = this._paneParent.scrollTop;
-					requestAnimationFrame(checkScrollEnd);
-				}
-			};
-			checkScrollStart();
-			// Abort after 3 seconds, which should be enough
-			return Promise.race([
-				scrollPromise.promise,
-				Zotero.Promise.delay(3000)
-			]);
 		}
 
 		async blurOpenField() {

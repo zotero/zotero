@@ -39,6 +39,10 @@
 			</collapsible-section>
 		`);
 		
+		_mode = 'view';
+
+		_fieldAlternatives = {};
+
 		get item() {
 			return this._item;
 		}
@@ -64,6 +68,36 @@
 			}
 			this.blurOpenField();
 			super.editable = editable;
+		}
+
+		get mode() {
+			return this._mode;
+		}
+
+		set mode(val) {
+			switch (val) {
+				case 'view':
+				case 'edit':
+				case 'merge':
+					break;
+				case 'fieldmerge':
+					this._fieldAlternatives = {};
+					break;
+				default:
+					throw new Error(`Invalid mode '${val}'`);
+			}
+			this._mode = val;
+			this.setAttribute('mode', val);
+		}
+
+		set fieldAlternatives(val) {
+			if (val.constructor.name != 'Object') {
+				throw Error('fieldAlternatives must be an Object in <abstract-box>.fieldAlternatives');
+			}
+			if (this._mode != 'fieldmerge') {
+				throw Error('fieldAlternatives is valid only in fieldmerge mode in <abstract-box>.fieldAlternatives');
+			}
+			this._fieldAlternatives = val;
 		}
 
 		init() {
@@ -157,6 +191,59 @@
 			}
 			this._abstractField.readOnly = !this.editable;
 			this._abstractField.setAttribute('aria-label', Zotero.ItemFields.getLocalizedString('abstractNote'));
+
+			this._renderFieldVersionButton();
+		}
+
+		_renderFieldVersionButton() {
+			let existing = this.querySelector('.zotero-field-version-button');
+			if (existing) {
+				existing.remove();
+			}
+
+			if (this._mode !== 'fieldmerge') {
+				return;
+			}
+
+			let alternatives = this._fieldAlternatives?.abstractNote;
+			if (!alternatives || !alternatives.length) {
+				return;
+			}
+
+			let button = document.createXULElement('toolbarbutton');
+			button.className = 'zotero-field-version-button zotero-clicky-merge';
+			document.l10n.setAttributes(button, 'itembox-button-merge', {
+				field: Zotero.ItemFields.getLocalizedString('abstractNote') || ''
+			});
+
+			let popup = button.appendChild(document.createXULElement('menupopup'));
+			for (let v of alternatives) {
+				let menuitem = document.createXULElement('menuitem');
+				let sv = Zotero.Utilities.ellipsize(v, 60);
+				menuitem.setAttribute('label', sv);
+				if (v != sv) {
+					menuitem.setAttribute('tooltiptext', v);
+				}
+				menuitem.setAttribute('originalValue', v);
+				menuitem.addEventListener('command', () => {
+					this.item.setField('abstractNote', menuitem.getAttribute('originalValue'));
+					this._forceRenderAll();
+				});
+				popup.appendChild(menuitem);
+			}
+
+			button.addEventListener('click', (event) => {
+				event.preventDefault();
+				event.stopPropagation();
+				if (event.screenX) {
+					popup.openPopupAtScreen(event.screenX - 5, event.screenY + 5, true);
+				}
+				else {
+					popup.openPopup(button, 'after_start');
+				}
+			});
+
+			this.querySelector('.body').appendChild(button);
 		}
 
 		_ensureFeedAbstractBrowserExists = Zotero.Utilities.Internal.serial(async () => {
