@@ -26,6 +26,10 @@
 "use strict";
 
 {
+	const { ItemPaneSectionElementBase } = ChromeUtils.importESModule(
+		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
+		{ global: "current" }
+	);
 	ChromeUtils.importESModule("chrome://zotero/content/actors/ActorManager.mjs");
 
 	const SANDBOX_ALL_FLAGS = 0xFFFFF;

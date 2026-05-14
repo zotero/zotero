@@ -26,6 +26,10 @@
 "use strict";
 
 {
+	const { ItemPaneSectionElementBase } = ChromeUtils.importESModule(
+		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
+		{ global: "current" }
+	);
 	const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 
 	const lazy = {};

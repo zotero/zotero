@@ -26,6 +26,11 @@
 "use strict";
 
 {
+	const { ItemPaneSectionElementBase } = ChromeUtils.importESModule(
+		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
+		{ global: "current" }
+	);
+
 	const PREF_HEADER_MODE = 'itemPaneHeader';
 	const PREF_BIB_ENTRY_STYLE = 'itemPaneHeader.bibEntry.style';
 	const PREF_BIB_ENTRY_LOCALE = 'itemPaneHeader.bibEntry.locale';

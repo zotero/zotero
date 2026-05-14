@@ -24,6 +24,11 @@
 */
 
 {
+	const { ItemPaneContainerBase } = ChromeUtils.importESModule(
+		"chrome://zotero/content/elements/itemPaneContainerBase.mjs",
+		{ global: "current" }
+	);
+
 	class ItemDetails extends ItemPaneContainerBase {
 		content = MozXULElement.parseXULToFragment(`
 			<hbox id="zotero-view-item-container" class="zotero-view-item-container" flex="1">

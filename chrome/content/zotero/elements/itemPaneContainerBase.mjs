@@ -23,7 +23,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 /**
  * Base class for elements that host a vertical stack of [data-pane] sections
  * controlled by an <item-pane-sidenav>.
@@ -40,8 +39,7 @@
  * render of following panes, etc.) can override the _beforeScrollToPane() and
  * _afterScrollToPane() hooks.
  */
-// eslint-disable-next-line no-unused-vars
-class ItemPaneContainerBase extends XULElementBase {
+export class ItemPaneContainerBase extends XULElementBase {
 	_paneParent = null;
 
 	connectedCallback() {

@@ -28,6 +28,11 @@
 import { getCSSItemTypeIcon } from 'components/icons';
 
 {
+	const { ItemPaneSectionElementBase } = ChromeUtils.importESModule(
+		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
+		{ global: "current" }
+	);
+
 	class RelatedBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-related" data-pane="related" extra-buttons="add">
