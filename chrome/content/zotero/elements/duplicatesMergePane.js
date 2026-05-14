@@ -29,26 +29,29 @@
 		mergeItems: "chrome://zotero/content/mergeItems.mjs",
 	});
 
-	class DuplicatesMergePane extends XULElementBase {
+	class DuplicatesMergePane extends ItemPaneContainerBase {
 		content = MozXULElement.parseXULToFragment(`
-			<groupbox>
-				<button id="zotero-duplicates-merge-button" data-l10n-id="item-pane-duplicates-merge-items" />
-			</groupbox>
-			
-			<groupbox id="zotero-duplicates-merge-version-select">
-				<description>&zotero.duplicatesMerge.versionSelect;</description>
-				<hbox>
-					<richlistbox id="zotero-duplicates-merge-original-date" rows="0"/>
-				</hbox>
-			</groupbox>
-			
-			<groupbox id="zotero-duplicates-merge-field-select">
-				<description>&zotero.duplicatesMerge.fieldSelect;</description>
-			</groupbox>
+			<vbox id="zotero-duplicates-merge-controls">
+				<groupbox>
+					<button id="zotero-duplicates-merge-button" data-l10n-id="item-pane-duplicates-merge-items" />
+				</groupbox>
 
-			<vbox id="zotero-duplicates-merge-info-box-container">
-				<info-box id="zotero-duplicates-merge-info-box"/>
+				<groupbox id="zotero-duplicates-merge-version-select">
+					<description>&zotero.duplicatesMerge.versionSelect;</description>
+					<hbox>
+						<richlistbox id="zotero-duplicates-merge-original-date" rows="0"/>
+					</hbox>
+				</groupbox>
+
+				<groupbox id="zotero-duplicates-merge-field-select">
+					<description>&zotero.duplicatesMerge.fieldSelect;</description>
+				</groupbox>
 			</vbox>
+
+			<html:div id="zotero-duplicates-merge-view-item" class="zotero-view-item" tabindex="0">
+				<info-box id="zotero-duplicates-merge-info-box" data-pane="info"/>
+				<abstract-box id="zotero-duplicates-merge-abstract-box" data-pane="abstract"/>
+			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd']);
 
 		init() {
@@ -56,6 +59,10 @@
 			this._items = [];
 			this._otherItems = [];
 			this._ignoreFields = ['dateAdded', 'dateModified', 'accessDate'];
+
+			this._paneParent = this.querySelector('#zotero-duplicates-merge-view-item');
+			this._infoBox = this.querySelector('#zotero-duplicates-merge-info-box');
+			this._abstractBox = this.querySelector('#zotero-duplicates-merge-abstract-box');
 
 			this.querySelector("#zotero-duplicates-merge-button").addEventListener(
 				"command", () => this.merge());
@@ -113,15 +120,14 @@
 			// Update the UI
 			//
 			
-			let button = document.getElementById('zotero-duplicates-merge-button');
-			let versionSelect = document.getElementById('zotero-duplicates-merge-version-select');
-			let itembox = document.getElementById('zotero-duplicates-merge-info-box');
-			let fieldSelect = document.getElementById('zotero-duplicates-merge-field-select');
+			let button = this.querySelector('#zotero-duplicates-merge-button');
+			let versionSelect = this.querySelector('#zotero-duplicates-merge-version-select');
+			let fieldSelect = this.querySelector('#zotero-duplicates-merge-field-select');
 			
 			let alternatives = oldestItem.multiDiff(otherItems, this._ignoreFields);
 			if (alternatives) {
 				// Populate richlistbox with Date Added values from all items
-				let dateList = document.getElementById('zotero-duplicates-merge-original-date');
+				let dateList = this.querySelector('#zotero-duplicates-merge-original-date');
 				dateList.innerHTML = '';
 				
 				let numRows = 0;
@@ -143,9 +149,9 @@
 			
 			document.l10n.setArgs(button, { count: otherItems.length + 1 });
 			versionSelect.hidden = fieldSelect.hidden = !alternatives;
-			itembox.hiddenFields = alternatives ? [] : ['dateAdded', 'dateModified'];
-			// Since the header of the collapsible section is hidden, the section has to be opened
-			itembox.open = true;
+			this._infoBox.hiddenFields = alternatives ? [] : ['dateAdded', 'dateModified'];
+			this._infoBox.open = true;
+			this._abstractBox.open = true;
 			
 			this.setMaster(0);
 			
@@ -153,8 +159,8 @@
 		}
 		
 		setMaster(pos) {
-			let itembox = document.getElementById('zotero-duplicates-merge-info-box');
-			itembox.mode = 'fieldmerge';
+			this._infoBox.mode = 'fieldmerge';
+			this._abstractBox.mode = 'fieldmerge';
 			
 			this._otherItems = this._items.concat();
 			let item = this._otherItems.splice(pos, 1)[0];
@@ -168,21 +174,32 @@
 				for (let i in alternatives) {
 					alternatives[i].unshift(itemValues[i] !== undefined ? itemValues[i] : '');
 				}
-				itembox.fieldAlternatives = alternatives;
+				this._infoBox.fieldAlternatives = alternatives;
+				this._abstractBox.fieldAlternatives = {
+					abstractNote: alternatives.abstractNote
+				};
+			}
+			else {
+				this._infoBox.fieldAlternatives = {};
+				this._abstractBox.fieldAlternatives = {};
 			}
 			
 			this._masterItem = item;
-			itembox.item = item.clone();
-			// The item.id is null which equals to _lastRenderItemID, so we need to force render it
-			itembox._forceRenderAll();
+			// Share the same clone between info-box and abstract-box so that
+			// alternative selections from either side accumulate on a single item.
+			let clone = item.clone();
+			this._infoBox.item = clone;
+			this._abstractBox.item = clone;
+			// The clone's item.id is null which equals to _lastRenderItemID, so we need to force render
+			this._infoBox._forceRenderAll();
+			this._abstractBox._forceRenderAll();
 		}
 		
 		async merge() {
-			let itembox = document.getElementById('zotero-duplicates-merge-info-box');
-			// Update master item with any field alternatives from the item box
+			// Update master item with any field alternatives chosen in the boxes
 			let json = this._masterItem.toJSON();
 			// Exclude certain properties that are empty in the cloned object, so we don't clobber them
-			const { relations: _r, collections: _c, tags: _t, ...keep } = itembox.item.toJSON();
+			const { relations: _r, collections: _c, tags: _t, ...keep } = this._infoBox.item.toJSON();
 			Object.assign(json, keep);
 			
 			this._masterItem.fromJSON(json);

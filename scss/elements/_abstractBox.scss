@@ -9,6 +9,7 @@ abstract-box {
 
 abstract-box .body {
 	display: flex;
+	align-items: flex-start;
 	
 	editable-text {
 		line-height: 1.5;
@@ -16,5 +17,10 @@ abstract-box .body {
 	
 	editable-text, browser {
 		flex: 1;
+	}
+
+	.zotero-field-version-button {
+		padding: 3px;
+		flex-shrink: 0;
 	}
 }

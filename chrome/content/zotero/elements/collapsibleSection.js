@@ -199,7 +199,7 @@
 		}
 		
 		_buildContextMenu() {
-			let containerRoot = this.closest('.zotero-view-item-container, context-notes-list');
+			let containerRoot = this.closest('.item-pane-container-root, .zotero-view-item-container, context-notes-list');
 			
 			let contextMenu = document.createXULElement('menupopup');
 
@@ -298,7 +298,7 @@
 
 				let canMoveUp = sidenav?.isPaneMovable(this.dataset.pane, 'up');
 				let canMoveDown = sidenav?.isPaneMovable(this.dataset.pane, 'down');
-				let canReset = sidenav?.isOrderChanged();
+				let canReset = !!sidenav?.container?.supportsReorder && sidenav?.isOrderChanged();
 
 				moveSectionUp.hidden = !canMoveUp;
 				moveSectionDown.hidden = !canMoveDown;

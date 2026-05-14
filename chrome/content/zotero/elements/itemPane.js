@@ -636,6 +636,7 @@
 					if (this.previousElementSibling.localName === "splitter") {
 						this.previousElementSibling.setAttribute("state", "open");
 					}
+					this._sidenav.container = this._duplicatesPane;
 					break;
 				}
 				case "annotations": {
@@ -644,10 +645,15 @@
 				}
 			}
 			let isViewingItem = type == "item";
+			let isViewingDuplicates = type == "duplicates";
 			if (previousViewType != "item" && isViewingItem) {
 				this._itemDetails.forceUpdateSideNav();
 			}
-			this._itemDetails.sidenav.toggleDefaultStatus(!isViewingItem);
+			// Switch sidenav back to item-details when leaving duplicates mode
+			if (!isViewingDuplicates && this._sidenav.container !== this._itemDetails) {
+				this._sidenav.container = this._itemDetails;
+			}
+			this._sidenav.toggleDefaultStatus(!isViewingItem && !isViewingDuplicates);
 		}
 	}
 	customElements.define("item-pane", ItemPane);
