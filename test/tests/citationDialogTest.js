@@ -13,6 +13,7 @@ describe("Citation Dialog", function () {
 		getItems() {
 			return [];
 		},
+		preview: () => {},
 		allCitedDataLoadedPromise: Promise.resolve(),
 	};
 	let dialog, win, doc, IOManager, CitationDataManager, SearchHandler;
@@ -604,6 +605,7 @@ describe("Citation Dialog", function () {
 				getItems() {
 					return new Zotero.Promise(() => {});
 				},
+				preview: () => {},
 				allCitedDataLoadedPromise: new Zotero.Promise(() => {}),
 			};
 

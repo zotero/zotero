@@ -1550,7 +1550,7 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 			this.updateFromDocument(FORCE_CITATIONS_FALSE).then(() => this.citationsByItemID);
 	}
 
-	var previewFn = async function (citation) {
+	var previewFn = async function (citation, format) {
 		let idx = await fieldIndexPromise;
 		await citationsByItemIDPromise;
 
@@ -1566,7 +1566,7 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		let citationsPost = citations.slice(sliceIdx);
 		let citationID = citation.citationID;
 		try {
-			var result = this.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
+			var result = this.style.previewCitationCluster(citation, citationsPre, citationsPost, format || "rtf");
 		} catch(e) {
 			throw e;
 		} finally {
@@ -1797,10 +1797,11 @@ Zotero.Integration.CitationEditInterface = function (items, sortable, fieldIndex
 Zotero.Integration.CitationEditInterface.prototype = {
 	/**
 	 * Execute a callback with a preview of the given citation
+	 * @param {String} [format] Override the default output format (e.g. "html" for use in citation dialog)
 	 * @return {Promise} A promise resolved with the previewed citation string
 	 */
-	preview: function () {
-		return this.previewFn(this.citation);
+	preview: function (format) {
+		return this.previewFn(this.citation, format);
 	},
 	
 	/**
