@@ -24,6 +24,11 @@
 */
 
 {
+	const { ItemPaneSectionElementBase } = ChromeUtils.importESModule(
+		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
+		{ global: "current" }
+	);
+
 	class PreviewRenderAbortError extends Error {
 		constructor() {
 			super("AttachmentPreview render aborted");

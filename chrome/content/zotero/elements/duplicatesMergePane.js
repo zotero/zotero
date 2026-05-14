@@ -24,6 +24,11 @@
 */
 
 {
+	const { ItemPaneContainerBase } = ChromeUtils.importESModule(
+		"chrome://zotero/content/elements/itemPaneContainerBase.mjs",
+		{ global: "current" }
+	);
+
 	let lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		mergeItems: "chrome://zotero/content/mergeItems.mjs",

@@ -28,8 +28,6 @@
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
 Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSection.js', this);
-Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneContainer.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMenuBar.js', this);
 
 {
@@ -63,6 +61,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['zoterosearchcondition', 'chrome://zotero/content/elements/zoteroSearch.js'],
 		['zoterosearchtextbox', 'chrome://zotero/content/elements/zoteroSearch.js'],
 		['zoterosearchagefield', 'chrome://zotero/content/elements/zoteroSearch.js'],
+		['item-pane-custom-section', 'chrome://zotero/content/elements/itemPaneCustomSection.js'],
 		['item-pane-header', 'chrome://zotero/content/elements/itemPaneHeader.js'],
 		['editable-text', 'chrome://zotero/content/elements/editableText.js'],
 		['item-pane-sidenav', 'chrome://zotero/content/elements/itemPaneSidenav.js'],

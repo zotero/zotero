@@ -28,6 +28,10 @@
 
 
 {
+	const { ItemPaneSectionElementBase } = ChromeUtils.importESModule(
+		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
+		{ global: "current" }
+	);
 	let { canRenameFileFromParent, renameFileFromParent } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
 	class AttachmentBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`

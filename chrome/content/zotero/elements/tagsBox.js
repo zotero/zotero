@@ -26,6 +26,11 @@
 "use strict";
 
 {
+	const { ItemPaneSectionElementBase } = ChromeUtils.importESModule(
+		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
+		{ global: "current" }
+	);
+
 	class TagsBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 				<collapsible-section data-l10n-id="section-tags" data-pane="tags" extra-buttons="add">
