@@ -246,6 +246,7 @@ pref("extensions.zotero.reader.autoDisableTool.note", true);
 pref("extensions.zotero.reader.autoDisableTool.text", true);
 pref("extensions.zotero.reader.autoDisableTool.image", true);
 pref("extensions.zotero.reader.lastSidebarTab", "annotations");
+pref("extensions.zotero.reader.readAloud.customEndpoint.model", "gpt-4o-mini-tts");
 
 // Set color scheme to auto by default
 pref("browser.theme.toolbar-theme", 2);
