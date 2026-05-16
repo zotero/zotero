@@ -131,6 +131,11 @@
 		}
 	}
 
+	&.excluded {
+		background-color: var(--accent-red);
+		text-decoration: line-through;
+	}
+
 	&.colored {
 		font-weight: 600;
 
