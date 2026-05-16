@@ -374,7 +374,7 @@
 			return false;
 		}
 
-		onConditionSelected(conditionName, reload) {
+		async onConditionSelected(conditionName, reload) {
 			var conditionsMenu = this.querySelector('#conditionsmenu');
 			var operatorsList = this.querySelector('#operatorsmenu');
 			
@@ -490,6 +490,44 @@
 					this.createValueMenu(rows);
 					break;
 				}
+				case 'annotationColor':
+				{
+					let rows = [
+						{ name: Zotero.getString('general.yellow'), value: '#ffd400' },
+						{ name: Zotero.getString('general.red'), value: '#ff6666' },
+						{ name: Zotero.getString('general.green'), value: '#5fb236' },
+						{ name: Zotero.getString('general.blue'), value: '#2ea8e5' },
+						{ name: Zotero.getString('general.purple'), value: '#a28ae5' },
+						{ name: Zotero.getString('general.magenta'), value: '#e56eee' },
+						{ name: Zotero.getString('general.orange'), value: '#f19837' },
+						{ name: Zotero.getString('general.gray'), value: '#aaaaaa' },
+					];
+					this.createValueMenu(rows);
+					break;
+				}
+				case 'annotationType':
+				{
+					let rows = [
+						{ name: 'Highlight', value: Zotero.Annotations.ANNOTATION_TYPE_HIGHLIGHT },
+						{ name: 'Underline', value: Zotero.Annotations.ANNOTATION_TYPE_UNDERLINE },
+						{ name: 'Text', value: Zotero.Annotations.ANNOTATION_TYPE_TEXT },
+						{ name: 'Note', value: Zotero.Annotations.ANNOTATION_TYPE_NOTE },
+						{ name: 'Ink', value: Zotero.Annotations.ANNOTATION_TYPE_INK },
+						{ name: 'Image', value: Zotero.Annotations.ANNOTATION_TYPE_IMAGE },
+					];
+					this.createValueMenu(rows);
+					break;
+				}
+				case 'annotationAuthor':
+				{
+					let libraryID = this.parent.search.libraryID;
+					let authors = await Zotero.Annotations.getAllAuthors(libraryID);
+					let collation = Zotero.getLocaleCollation();
+					let rows = authors.map(a => ({ name: a.name, value: a.userID }));
+					rows.sort((a, b) => collation.compareString(1, a.name, b.name));
+					this.createValueMenu(rows);
+					break;
+				}
 				default:
 				{
 					if (operatorsList.value == 'isInTheLast') {
@@ -522,7 +560,10 @@
 			// Drop-down menu
 			if (this.selectedCondition == 'collection'
 					|| this.selectedCondition == 'itemType'
-					|| this.selectedCondition == 'fileTypeID') {
+					|| this.selectedCondition == 'fileTypeID'
+					|| this.selectedCondition == 'annotationColor'
+					|| this.selectedCondition == 'annotationType'
+					|| this.selectedCondition == 'annotationAuthor') {
 				this.querySelector('#valuefield').hidden = true;
 				this.querySelector('#valuemenu').hidden = false;
 				this.querySelector('#value-date-age').hidden = true;
@@ -731,6 +772,7 @@
 		onLibraryChange() {
 			switch (this.selectedCondition) {
 				case 'collection':
+				case 'annotationAuthor':
 					this.onConditionSelected(this.selectedCondition, true);
 					break;
 			}

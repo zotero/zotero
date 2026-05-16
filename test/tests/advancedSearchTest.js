@@ -225,6 +225,81 @@ describe("Advanced Search", function () {
 			});
 		});
 		
+		describe("Annotation Author", function () {
+			it("should show annotation authors for a group library", async function () {
+				var group = await getGroup();
+				var groupLibraryID = group.libraryID;
+
+				await Zotero.Users.setName(11111, 'Alice');
+				await Zotero.Users.setName(22222, 'Bob');
+
+				var groupAttachment = await importFileAttachment('test.pdf', {
+					libraryID: groupLibraryID,
+					contentType: 'application/pdf',
+				});
+
+				var annotation1 = await createAnnotation('highlight', groupAttachment);
+				annotation1.createdByUserID = 11111;
+				annotation1.lastModifiedByUserID = 11111;
+				await annotation1.saveTx({ skipEditCheck: true });
+
+				var annotation2 = await createAnnotation('highlight', groupAttachment);
+				annotation2.createdByUserID = 22222;
+				annotation2.lastModifiedByUserID = 22222;
+				await annotation2.saveTx({ skipEditCheck: true });
+
+				// Switch to group library
+				var libraryMenu = searchWin.document.getElementById('libraryMenu');
+				for (let i = 0; i < libraryMenu.itemCount; i++) {
+					let menuitem = libraryMenu.getItemAtIndex(i);
+					if (menuitem.value == groupLibraryID) {
+						menuitem.click();
+						break;
+					}
+				}
+
+				var s = new Zotero.Search();
+				s.libraryID = groupLibraryID;
+				s.addCondition('title', 'is', '');
+				searchBox.search = s;
+
+				var searchCondition = conditions.firstChild;
+				var valueMenu = searchCondition.querySelector('#valuemenu');
+
+				// Select 'Annotation Author' condition from the "More" submenu
+				var moreMenu = searchCondition.querySelector('#more-conditions-menu menupopup');
+				for (let menuitem of moreMenu.children) {
+					if (menuitem.value == 'annotationAuthor') {
+						menuitem.click();
+						break;
+					}
+				}
+
+				// Wait for async dropdown population
+				await Zotero.Promise.delay(9000);
+
+				assert.isFalse(valueMenu.hidden);
+				assert.equal(valueMenu.itemCount, 2);
+
+				var values = [];
+				var labels = [];
+				for (let i = 0; i < valueMenu.itemCount; i++) {
+					let menuitem = valueMenu.getItemAtIndex(i);
+					values.push(menuitem.getAttribute('value'));
+					labels.push(menuitem.getAttribute('label'));
+				}
+
+				assert.include(labels, 'Alice');
+				assert.include(labels, 'Bob');
+				assert.include(values, '11111');
+				assert.include(values, '22222');
+
+				await annotation1.eraseTx();
+				await annotation2.eraseTx();
+				await groupAttachment.eraseTx();
+			});
+		});
+
 		describe("Saved Search", function () {
 			it("shouldn't appear", async function () {
 				var searchCondition = conditions.firstChild;
