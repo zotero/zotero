@@ -23,6 +23,8 @@
 	***** END LICENSE BLOCK *****
 */
 
+import CollectionTree from 'zotero/collectionTree';
+
 var Zotero_New_Collection_Dialog = {
 	_handleLoad() {
 		let io = window.arguments[0];
@@ -34,7 +36,20 @@ var Zotero_New_Collection_Dialog = {
 		
 		this._libraryID = io.libraryID;
 		this._parentCollectionID = io.parentCollectionID;
-		this._updateMenu();
+
+		// depending on how many collections there are, display the dropdown
+		// or the entire collection tree
+		if (Zotero.Collections.canListCollectionsInMenu(this._libraryID)) {
+			document.getElementById("create-in").hidden = false;
+			this._updateMenu();
+		}
+		else {
+			document.getElementById("zotero-collections-tree-container").hidden = false;
+			setTimeout(() => {
+				window.moveToAlertPosition();
+				this._initCollectionTree();
+			});
+		}
 	},
 
 	_handleAccept() {
@@ -43,6 +58,26 @@ var Zotero_New_Collection_Dialog = {
 			libraryID: this._libraryID,
 			parentCollectionID: this._parentCollectionID
 		};
+	},
+
+	async _initCollectionTree() {
+		this._collectionsView = await CollectionTree.init(document.getElementById('zotero-collections-tree'), {
+			onSelectionChange: () => {
+				let selectedCollection = this._collectionsView.getSelectedCollection();
+				this._parentCollectionID = selectedCollection ? selectedCollection.id : null;
+			},
+			filterLibraryIDs: [this._libraryID],
+			hideSources: ['duplicates', 'trash', 'feeds', 'unfiled', 'retracted', 'publications', 'searches', 'recentlyRead']
+		});
+		
+		await this._collectionsView.makeVisible();
+		
+		if (this._parentCollectionID) {
+			await this._collectionsView.selectByID('C' + this._parentCollectionID);
+		}
+		else {
+			await this._collectionsView.selectByID('L' + this._libraryID);
+		}
 	},
 
 	_updateMenu() {

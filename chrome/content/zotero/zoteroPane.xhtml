@@ -950,10 +950,12 @@
 				<menupopup id="zotero-move-collection-popup" onpopupshowing="ZoteroPane_Local.buildMoveCollectionMenu(event)">
 				</menupopup>
 			</menu>
+			<menuitem class="zotero-menuitem-move-collection" data-l10n-id="collections-menu-move-collection-dialog"/>
 			<menu class="menu-iconic zotero-menuitem-copy-collection">
 				<menupopup id="zotero-copy-collection-popup" onpopupshowing="ZoteroPane_Local.buildCopyCollectionMenu(event)">
 				</menupopup>
 			</menu>
+			<menuitem class="zotero-menuitem-copy-collection" data-l10n-id="collections-menu-copy-collection-dialog"/>
 			<menuitem class="zotero-menuitem-duplicate-collection"/>
 			<menuitem class="zotero-menuitem-mark-read-feed"/>
 			<menuitem class="zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;"/>
@@ -1011,6 +1013,7 @@
 			<menu class="menu-iconic zotero-menuitem-add-to-collection">
 				<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddItemToCollectionMenu(event)"/>
 			</menu>
+			<menuitem class="menuitem-iconic zotero-menuitem-add-to-collection-dialog" data-l10n-id="item-menu-add-to-collection-dialog" oncommand="ZoteroPane_Local.addToCollectionViaDialog();"/>
 			<menuitem class="menuitem-iconic zotero-menuitem-remove-items" oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
 			<menuitem class="menuitem-iconic zotero-menuitem-duplicate-and-convert" oncommand="ZoteroPane_Local.duplicateAndConvertSelectedItem();"/>
 			<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>
