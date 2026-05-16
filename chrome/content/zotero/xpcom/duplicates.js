@@ -359,7 +359,7 @@ Zotero.Duplicates.prototype._findDuplicates = async function () {
 			// If both items have a year and they're off by more than one, it's not a dupe
 			if (typeof yearCache[a.itemID] != 'undefined'
 					&& typeof yearCache[b.itemID] != 'undefined'
-					&& Math.abs(yearCache[a.itemID] - yearCache[b.itemID]) > 1) {
+					&& Math.abs(yearCache[a.itemID] - yearCache[b.itemID]) >= 1) {
 				return 0;
 			}
 			
