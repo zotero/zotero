@@ -24,6 +24,7 @@ describe("Citation Dialog", function () {
 		Services.ww.openWindow(null, "chrome://zotero/content/integration/citationDialog.xhtml", "", "", io);
 		dialog = await dialogPromise;
 		doc = dialog.document;
+		dialog.DIALOG_STATE.isTestRun = true;
 		IOManager = dialog.IOManager;
 		CitationDataManager = dialog.CitationDataManager;
 		SearchHandler = dialog.SearchHandler;
@@ -536,11 +537,14 @@ describe("Citation Dialog", function () {
 			assert.include(libraryIDs, libraryOne.id);
 			assert.notInclude(libraryIDs, libraryTwo.id);
 			assert.notInclude(libraryIDs, citedOne.id);
-			// Make sure actual nodes for search matches are rendered
+			// Make sure all expected items are present in the list rows.
+			// VT only renders visible rows so we check _listRows, not the DOM.
 			let expectedItemCardIDs = [...selectedIDs, ...openIDs, ...citedIDs, ...libraryIDs];
+			let listRowIDs = dialog.listLayout._listRows
+				.filter(r => r.kind === "item" && r.ref)
+				.map(r => r.ref.id);
 			for (let itemID of expectedItemCardIDs) {
-				let node = dialog.document.querySelector(`.item[id="${itemID}"]`);
-				assert.isOk(node);
+				assert.include(listRowIDs, itemID);
 			}
 		});
 
@@ -648,7 +652,7 @@ describe("Citation Dialog", function () {
 			}
 
 			// Before switching to add-note, note should not appear in search results
-			let results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group;
+			let results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group.map(e => e.item);
 			assert.notIncludeMembers(results, [note]);
 
 			// Switch to add-note type
@@ -659,7 +663,7 @@ describe("Citation Dialog", function () {
 			}
 
 			// After switching to add-note, the note must appear in search results
-			results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group;
+			results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group.map(e => e.item);
 			assert.includeMembers(results, [note]);
 			// And it's node is rendered
 			let noteNode = dialog.document.querySelector(`.item[id="${note.id}"]`);
@@ -675,7 +679,7 @@ describe("Citation Dialog", function () {
 
 			// Before switching to add/edit citation, item should not appear in search results
 			assert.equal(dialog.DIALOG_STATE.type, "citation");
-			let results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group;
+			let results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group.map(e => e.item);
 
 			// Switch to add/edit citation
 			await dialog.setDialogType("citation");
@@ -684,7 +688,7 @@ describe("Citation Dialog", function () {
 			}
 
 			// Item must now appear in search results
-			results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group;
+			results = dialog.SearchHandler.getOrderedSearchResultGroups()[0].group.map(e => e.item);
 			assert.includeMembers(results, [item]);
 			// Item node must be rendered
 			let itemNode = dialog.document.querySelector(`.item[id="${item.id}"]`);
@@ -728,6 +732,130 @@ describe("Citation Dialog", function () {
 
 			await parentItem.eraseTx();
 		});
+
+		it("should combine multiple notes into a single unsaved note", async function () {
+			let noteA = await createDataObject('item', { itemType: 'note' });
+			noteA.setNote("<div data-schema-version=\"9\"><p>Content from note A</p></div>");
+			await noteA.saveTx();
+
+			let noteB = await createDataObject('item', { itemType: 'note' });
+			noteB.setNote("<div data-schema-version=\"9\"><p>Content from note B</p></div>");
+			await noteB.saveTx();
+
+			let combined = await Zotero.Notes.createCombinedNote([noteA, noteB]);
+
+			// The combined note should be unsaved (no id)
+			assert.isFalse(combined.id > 0);
+
+			// The combined note content should include both notes' content
+			let html = combined.getNote();
+			assert.include(html, "Content from note A");
+			assert.include(html, "Content from note B");
+
+			// There should be a line break separating the two notes
+			assert.include(html, "<br><br>");
+
+			// The combined note should have the schema version wrapper
+			assert.include(html, 'data-schema-version="9"');
+
+			await noteA.eraseTx();
+			await noteB.eraseTx();
+		});
+
+		it("should render child notes under parent item container in list mode", async function () {
+			await dialog.setDialogType("add-note");
+			await IOManager.toggleDialogMode("list");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+
+			let parentItem = await createDataObject('item', { title: "unique_parent_for_note_test" });
+			let childNote = await createDataObject('item', { itemType: 'note', parentID: parentItem.id });
+			childNote.setNote("<p>Child note content for testing</p>");
+			await childNote.saveTx();
+
+			// Search for the parent item title
+			await dialog.currentLayout.search("unique_parent_for_note_test", { skipDebounce: true });
+
+			// The parent item should be rendered as a container
+			let parentNode = dialog.document.querySelector(`.item[id="${parentItem.id}"]`);
+			while (!parentNode) {
+				await Zotero.Promise.delay(10);
+				parentNode = dialog.document.querySelector(`.item[id="${parentItem.id}"]`);
+			}
+			assert.isOk(parentNode, "parent item node should exist");
+			assert.isTrue(parentNode.classList.contains("container"), "parent should have container class");
+	
+			// The child note should be rendered as a child
+			let childNode = dialog.document.querySelector(`.item[id="${childNote.id}"]`);
+			while (!childNode) {
+				await Zotero.Promise.delay(10);
+				childNode = dialog.document.querySelector(`.item[id="${childNote.id}"]`);
+			}
+			assert.isOk(childNode, "child note node should exist");
+			assert.isTrue(childNode.classList.contains("child"), "child note should have child class");
+
+			await parentItem.eraseTx();
+		});
+
+		it("should add multiple selected notes to bubble-input", async function () {
+			await dialog.setDialogType("add-note");
+			await IOManager.toggleDialogMode("list");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+
+			// Clear any existing items in the citation
+			dialog.CitationDataManager.items = [];
+			dialog.CitationDataManager.updateItemAddedCache();
+			IOManager.updateBubbleInput();
+
+			let noteOne = await createDataObject('item', { itemType: 'note' });
+			noteOne.setNote("<p>First note for multi-select</p>");
+			await noteOne.saveTx();
+
+			let noteTwo = await createDataObject('item', { itemType: 'note' });
+			noteTwo.setNote("<p>Second note for multi-select</p>");
+			await noteTwo.saveTx();
+
+			// Search to make both notes appear
+			await dialog.currentLayout.search("note for multi-select", { skipDebounce: true });
+
+			// Find the row indices for both notes
+			let rows = dialog.listLayout._listRows;
+			let noteOneIndex = rows.findIndex(r => r.kind === "item" && r.ref?.id === noteOne.id);
+			let noteTwoIndex = rows.findIndex(r => r.kind === "item" && r.ref?.id === noteTwo.id);
+			assert.isAbove(noteOneIndex, -1, "noteOne should be in _listRows");
+			assert.isAbove(noteTwoIndex, -1, "noteTwo should be in _listRows");
+
+			// Select both rows
+			dialog.listLayout._table.selection.select(noteOneIndex);
+			dialog.listLayout._table.selection.toggleSelect(noteTwoIndex);
+
+			// Activate (simulates Enter) on the selected rows
+			let indices = Array.from(dialog.listLayout._table.selection.selected);
+			dialog.listLayout._handleActivate(
+				{ stopPropagation: () => {} },
+				indices
+			);
+
+			// Both notes should be in CitationDataManager.items
+			let citedIDs = dialog.CitationDataManager.items.map(i => i.item.id);
+			assert.sameMembers(citedIDs, [noteOne.id, noteTwo.id]);
+
+			// Both should appear as bubbles in bubble-input
+			let bubbleOne, bubbleTwo;
+			while (!bubbleOne && !bubbleTwo) {
+				bubbleOne = dialog.document.querySelector(`.bubble[dialogReferenceID="${dialog.CitationDataManager.items[0].dialogReferenceID}"]`);
+				bubbleTwo = dialog.document.querySelector(`.bubble[dialogReferenceID="${dialog.CitationDataManager.items[1].dialogReferenceID}"]`);
+				await Zotero.Promise.delay(10);
+			}
+			assert.ok(bubbleOne);
+			assert.ok(bubbleTwo);
+
+			await noteOne.eraseTx();
+			await noteTwo.eraseTx();
+		});
 	});
 
 
@@ -770,7 +898,7 @@ describe("Citation Dialog", function () {
 			while (SearchHandler.searching) {
 				await Zotero.Promise.delay(10);
 			}
-			dialog.IOManager._lastClickTime = null;
+			dialog.libraryLayout._lastClickTime = null;
 		});
 
 		after(function () {

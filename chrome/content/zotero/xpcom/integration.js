@@ -1677,13 +1677,17 @@ Zotero.Integration.Session.prototype._insertCitingResult = async function (field
 		);
 		return this._insertNoteIntoDocument(fieldIndex, field, mockNote);
 	}
-	let firstItem = Zotero.Cite.getItem(citation.citationItems[0].id);
-	if (firstItem && firstItem.isNote()) {
-		return this._insertNoteIntoDocument(fieldIndex, field, firstItem);
+	// Handle inserting notes
+	if (allItems.every(item => item.isNote())) {
+		// If a single note is selected, just insert it
+		if (allItems.length == 1) {
+			return this._insertNoteIntoDocument(fieldIndex, field, allItems[0]);
+		}
+		// If multiple notes are selected, combine them into a single unsaved note before inserting
+		let mockNote = await Zotero.Notes.createCombinedNote(allItems);
+		return this._insertNoteIntoDocument(fieldIndex, field, mockNote);
 	}
-	else {
-		return [await this._insertItemsIntoDocument(fieldIndex++, field, citation)];
-	}
+	return [await this._insertItemsIntoDocument(fieldIndex++, field, citation)];
 };
 
 /**

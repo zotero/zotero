@@ -27,8 +27,9 @@ import { Zotero } from "chrome://zotero/content/zotero.mjs";
 
 // Helper functions for citationDialog.js
 export class CitationDialogHelpers {
-	constructor({ doc }) {
+	constructor({ doc, dialogState }) {
 		this.doc = doc;
+		this.dialogState = dialogState;
 		this.smoothResizingPromise = Zotero.Promise.resolve();
 	}
 
@@ -65,9 +66,10 @@ export class CitationDialogHelpers {
 	}
 
 	// build and return a node with the description (e.g. creator/published/date/etc) of an item
-	buildItemDescription(item) {
+	buildItemDescription(item, { twoLines } = {}) {
 		let descriptionWrapper = this.doc.createElement("div");
 		descriptionWrapper.classList = "description";
+		descriptionWrapper.id = `description-${item.id}`;
 		let wrapTextInSpan = (text, styles = {}) => {
 			let span = this.doc.createElement("span");
 			for (let [style, value] of Object.entries(styles)) {
@@ -88,16 +90,26 @@ export class CitationDialogHelpers {
 			var date = Zotero.Date.sqlToDate(item.dateModified, true);
 			date = Zotero.Date.toFriendlyDate(date);
 			let dateLabel = wrapTextInSpan(date);
-			
+
 			var text = item.note;
 			text = Zotero.Utilities.unescapeHTML(text);
 			text = text.trim();
 			text = text.slice(0, 500);
+			// Display two lines of the note if specified
 			var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
-			if (parts[1]) {
-				dateLabel.textContent += ` ${parts[1]}.`;
-			}
+			let firstLine = parts[1];
+			let secondLine = parts[2];
+			dateLabel.textContent += " ";
 			descriptionWrapper.appendChild(dateLabel);
+			if (firstLine) {
+				dateLabel.textContent += `${firstLine}`;
+				if (twoLines && secondLine) {
+					let lineBreak = this.doc.createElement("br");
+					descriptionWrapper.appendChild(lineBreak);
+					let secondLineSpan = wrapTextInSpan(secondLine);
+					descriptionWrapper.appendChild(secondLineSpan);
+				}
+			}
 			addPeriodIfNeeded(descriptionWrapper);
 			return descriptionWrapper;
 		}
@@ -187,23 +199,87 @@ export class CitationDialogHelpers {
 
 			let addAllBtn = this.createNode("span", { tabindex: -1, 'data-tabindex': 22, role: "button", "aria-describedby": headerSpan.id }, "add-all keyboard-clickable");
 			buttonGroup.append(addAllBtn);
-			
-			if (dialogMode == "list") {
-				headerSpan.setAttribute("role", "button");
-				headerSpan.setAttribute("tabindex", -1);
-				headerSpan.setAttribute("data-tabindex", 21);
-				headerSpan.classList.add("keyboard-clickable");
-			}
-			if (dialogMode == "library") {
-				itemContainer.setAttribute("tabindex", -1);
-				itemContainer.setAttribute("data-tabindex", 30);
+			itemContainer.setAttribute("tabindex", -1);
+			itemContainer.setAttribute("data-tabindex", 30);
 
-				let collapseSectionBtn = this.createNode("button", { tabindex: -1, 'data-tabindex': 21, "aria-describedby": headerSpan.id }, "btn-icon collapse-section-btn keyboard-clickable");
-				this.doc.l10n.setAttributes(collapseSectionBtn, "integration-citationDialog-collapse-section");
-				buttonGroup.prepend(collapseSectionBtn);
-			}
+			let collapseSectionBtn = this.createNode("button", { tabindex: -1, 'data-tabindex': 21, "aria-describedby": headerSpan.id }, "btn-icon collapse-section-btn keyboard-clickable");
+			this.doc.l10n.setAttributes(collapseSectionBtn, "integration-citationDialog-collapse-section");
+			buttonGroup.prepend(collapseSectionBtn);
 		}
 		return section;
+	}
+
+	// Build the header node for a section in list mode (rendered as its own row in the
+	// virtualized table). For collapsible sections an "Add all" button is included.
+	// All classes (collapsible, collapsed, selected, focused) are applied here based
+	// on the row state. Click handlers are wired from the provided callbacks.
+	buildListHeader(row, isSelected, isFocused, { labelClick, addAllClick } = {}) {
+		let { headerText } = row.ref;
+		let isCollapsible = row.isCollapsible;
+		let id = row.id;
+		let header = this.createNode("div", { id }, "header");
+		let headerSpan = this.createNode("span", {}, "header-label");
+		headerSpan.innerText = headerText;
+		header.append(headerSpan);
+
+		let buttonGroup = this.createNode("div", {}, "header-btn-group");
+		header.append(buttonGroup);
+
+		// Block mouse events from bubbling to VT's row-level handlers.
+		// Bubbling phase so that inner capturing handlers fire first.
+		for (let evt of ["mousedown", "mouseup", "dblclick"]) {
+			header.addEventListener(evt, (e) => {
+				e.stopPropagation();
+				e.preventDefault();
+			});
+		}
+
+		if (isCollapsible) {
+			header.classList.add("collapsible");
+			header.classList.toggle("collapsed", !row.isOpen);
+			header.classList.toggle("selected", isSelected);
+			header.classList.toggle("focused", isFocused);
+			headerSpan.id = `header_${id}`;
+			if (labelClick) {
+				headerSpan.addEventListener("mousedown", (e) => {
+					e.stopPropagation();
+					labelClick();
+				}, true);
+				headerSpan.addEventListener("mouseup", e => e.stopPropagation(), true);
+			}
+			let addAllBtn = this.createNode("span", { "aria-describedby": headerSpan.id }, "add-all");
+			addAllBtn.textContent = Zotero.getString("integration-citationDialog-add-all");
+			if (addAllClick) {
+				addAllBtn.addEventListener("mousedown", (e) => {
+					e.stopPropagation();
+					addAllClick();
+				}, true);
+			}
+			buttonGroup.append(addAllBtn);
+		}
+		return header;
+	}
+
+	// Generate a label for a section of search results (e.g. "Selected Items (3)")
+	// `group` is an array of { item, children } objects from SearchHandler.
+	async getSectionLabel(key, group, allSelectedItemsCount) {
+		let count = group.length || 0;
+		// in list mode of insertNote, only count top-level items since
+		// child items are nested under their parents
+		if (this.dialogState.isAddingNote() && this.dialogState.getCurrentLayoutType() === "list") {
+			count = group.filter(entry => !entry.item.parentItemID).length;
+		}
+		if (key == "selected") {
+			// when citing notes, we don't want to use the label that includes the
+			// total count because it's confusing in list mode when parents on
+			// selected notes also appear
+			if (this.dialogState.isAddingNote()) {
+				return this.doc.l10n.formatValue(`integration-citationDialog-section-selectedItems`, { count });
+			}
+			// when not citing notes, add the total count param
+			return this.doc.l10n.formatValue(`integration-citationDialog-section-selected`, { count, total: allSelectedItemsCount });
+		}
+		return this.doc.l10n.formatValue(`integration-citationDialog-section-${key}`, { count });
 	}
 
 	// Create mock item node to use as a the placeholder for cited items that are loading
@@ -395,8 +471,9 @@ export class CitationDialogHelpers {
 			// Try to fetch the short form of the locator label. E.g. "p." for "page"
 			// If there is no locator label, default to "page" for now
 			let label = (Zotero.Cite.getLocatorString(bubbleItem.label || 'page', 'short') || '').toLocaleLowerCase();
-			
-			str += `, ${label} ${bubbleItem.locator}`;
+			let locator = bubbleItem.locator.substr(0, 10) + (bubbleItem.locator.length > 10 ? "…" : "");
+
+			str += `, ${label} ${locator}`;
 		}
 		
 		// Prefix
@@ -454,7 +531,7 @@ export class CitationDialogHelpers {
 		let chromeHeight = win.outerHeight - win.innerHeight;
 
 		// On Linux, animated resizing is too jumpy, so just resize in one step
-		if (Zotero.isLinux) {
+		if (Zotero.isLinux || this.dialogState.isTestRun) {
 			win.resizeTo(targetWidth, targetHeight);
 			resolve();
 			if (onComplete) {
@@ -505,5 +582,76 @@ export class CitationDialogHelpers {
 		setTimeout(() => {
 			resolve();
 		}, delay);
+	}
+
+	selectItemNodesRange(startNode, endNode = null) {
+		let itemNodes = [...this.doc.querySelectorAll(".item")];
+		for (let node of itemNodes) {
+			node.classList.remove("selected");
+		}
+		if (startNode === null) return;
+
+		// can't select the collapsed deck of items
+		if (startNode.classList.contains("itemsContainer")) return;
+
+		let startIndex = itemNodes.indexOf(startNode);
+		let endIndex = endNode ? itemNodes.indexOf(endNode) : startIndex;
+
+		// if startIndex is after endIndex, just swap them
+		if (startIndex > endIndex) [startIndex, endIndex] = [endIndex, startIndex];
+
+		for (let i = startIndex; i <= endIndex; i++) {
+			this.toggleItemNodeSelect(itemNodes[i], true);
+		}
+	}
+
+	toggleItemNodeSelect(itemNode, isSelected = null) {
+		if (isSelected === true) {
+			itemNode.classList.add("selected");
+		}
+		else if (isSelected === false) {
+			itemNode.classList.remove("selected");
+		}
+		else {
+			itemNode.classList.toggle("selected");
+		}
+	}
+
+	toggleSectionCollapse(section, status) {
+		// set desired class
+		if (status == "expanded" && !section.classList.contains("expanded")) {
+			section.classList.add("expanded");
+		}
+		else if (status == "collapsed" && section.classList.contains("expanded")) {
+			section.classList.remove("expanded");
+		}
+		else if (!status) {
+			section.classList.toggle("expanded");
+		}
+		// mark collapsed items as unfocusable
+		if (section.classList.contains("expandable") && !section.classList.contains("expanded")) {
+			for (let item of [...section.querySelectorAll(".item")]) {
+				item.removeAttribute("tabindex");
+				item.setAttribute("draggable", false);
+				item.classList.remove("current");
+				item.classList.remove("selected");
+			}
+			section.querySelector(".itemsContainer").setAttribute("tabindex", -1);
+			section.querySelector(".itemsContainer").dataset.arrowNavEnabled = true;
+			if (this.doc.activeElement.classList.contains("item")) {
+				section.querySelector(".itemsContainer").focus();
+			}
+		}
+		// when expanded, make them focusable again
+		else {
+			for (let item of [...section.querySelectorAll(".item")]) {
+				item.setAttribute("tabindex", -1);
+				item.setAttribute("draggable", true);
+			}
+			let container = section.querySelector(".itemsContainer");
+			container.removeAttribute("tabindex");
+			container.classList.remove("selected", "current");
+		}
+		section.querySelector(".header-label").setAttribute("aria-expanded", section.classList.contains("expanded"));
 	}
 }

@@ -99,14 +99,19 @@ export class CitationDialogPopupsHandler {
 		popup.style.top = `${bubbleRect.bottom + 10}px`;
 
 		this._getNode("#itemDetails .show").hidden = !this.bubbleItem.item.id;
-		let topLevelItem = this.bubbleItem.item.topLevelItem;
+		// For notes, show the note's own title and icon rather than walking
+		// up to the parent item.
+		let displayItem = this.bubbleItem.item;
+		if (!displayItem.isNote()) {
+			displayItem = displayItem.topLevelItem;
+		}
 
 		// Add header and fill inputs with their values
 		let description = itemDescription;
 		this._getNode("#itemDetails").querySelector(".description")?.remove();
-		this._getNode("#itemTitle").textContent = topLevelItem.getDisplayTitle();
+		this._getNode("#itemTitle").textContent = displayItem.getDisplayTitle();
 		this._getNode("#itemTitle").after(description);
-		let dataTypeLabel = topLevelItem.getItemTypeIconName(true);
+		let dataTypeLabel = displayItem.getItemTypeIconName(true);
 		this._getNode("#itemDetails").querySelector(".icon").setAttribute("data-item-type", dataTypeLabel);
 
 		bubble.classList.add("showingDetails");

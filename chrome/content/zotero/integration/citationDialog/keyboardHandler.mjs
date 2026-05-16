@@ -32,6 +32,10 @@ export class CitationDialogKeyboardHandler {
 		this._multiselectStart = null;
 	}
 
+	get listLayout() {
+		return this.doc.ownerGlobal.listLayout;
+	}
+
 	_id(id) {
 		return this.doc.getElementById(id);
 	}
@@ -80,6 +84,20 @@ export class CitationDialogKeyboardHandler {
 			}
 			event.stopPropagation();
 			event.preventDefault();
+		}
+		// arrowUp from the top-most selectable row of the list-mode table will refocus bubble-input
+		if (this._id("citationDialog-list-table")?.contains(event.target) && event.key == "ArrowUp" && noModifiers) {
+			let table = this.listLayout?._table;
+			let focused = table.selection.focused;
+			// Check if focused row is the first selectable (item) row
+			let rows = this.listLayout._listRows;
+			let firstSelectable = rows.findIndex(r => r.isSelectable);
+			if (focused <= firstSelectable) {
+				table.selection.clearSelection();
+				this._id("bubble-input").refocusInput();
+				event.stopPropagation();
+				event.preventDefault();
+			}
 		}
 	}
 
@@ -149,26 +167,15 @@ export class CitationDialogKeyboardHandler {
 		}
 		// arrow up/down from bubble-input in list mode will move selection in the items list
 		else if (!this._id("list-layout").hidden && (event.key == "ArrowDown" || event.key == "ArrowUp") && this._id("bubble-input").contains(event.target) && onlyShiftModifierPossible) {
-			let group = this.doc.querySelector("#list-layout [data-arrow-nav]");
-			let current = group.querySelector(".current");
-			let firstRow = group.querySelector('[data-arrow-nav-enabled="true"][tabindex]');
-			// on arrowUp from the first row, clear selection
-			if (current === firstRow && event.key == "ArrowUp" && !event.shiftKey) {
-				this._selectItems(null);
-				firstRow?.classList.remove("current");
-				group.scrollTo(0, 0);
-				this._multiselectStart = null;
-			}
-			else if (current || event.key == "ArrowDown") {
-				// Arrow down from input will just change the selected item without moving focus
-				let multiSelect = event.shiftKey;
-				this._navigateGroup({ group, current, forward: event.key == "ArrowDown", shouldSelect: true, shouldFocus: false, multiSelect });
-			}
+			let forward = event.key == "ArrowDown";
+			let multiSelect = event.shiftKey;
+			this._navigateListSelection(forward, multiSelect);
 			handled = true;
 		}
 		// arrowUp from the first item will refocus bubbleInput
 		else if (event.key == "ArrowUp" && this._shouldRefocusBubbleInputOnArrowUp() && noModifiers) {
 			this._id("bubble-input").refocusInput();
+			this.listLayout._table.selection.clearSelection();
 			handled = true;
 		}
 		// handle focus and selection movement within bubble-input and item groups
@@ -245,6 +252,9 @@ export class CitationDialogKeyboardHandler {
 		}
 		else if (nodeToFocus.getAttribute("tabindex")) {
 			nodeToFocus.focus();
+			if (nodeToFocus.id === "citationDialog-list-table") {
+				this._ensureListSelection();
+			}
 		}
 		else {
 			nodeToFocus.querySelector("[tabindex]:not([hidden])")?.focus();
@@ -256,7 +266,7 @@ export class CitationDialogKeyboardHandler {
 	// Navigate the group by moving selection or focus between nodes in a group
 	_navigateGroup({ group, current, forward, multiSelect, shouldFocus, shouldSelect }) {
 		// navigable nodes have to be marked with data-arrow-nav-enabled
-		let allFocusableWithinGroup = [...group.querySelectorAll("[tabindex][data-arrow-nav-enabled]")];
+		let allFocusableWithinGroup = [...group.querySelectorAll("[tabindex][data-arrow-nav-enabled]:not([hidden]):not([disabled])")];
 		let nextFocusableIndex = 0;
 		for (let i = 0; i < allFocusableWithinGroup.length; i++) {
 			if (allFocusableWithinGroup[i] == current) {
@@ -277,14 +287,6 @@ export class CitationDialogKeyboardHandler {
 		
 		current?.classList.remove("current");
 		nextNode.classList.add("current");
-		// if the node is not being focused in list mode, make sure we scroll to it so it is visible
-		if (!shouldFocus) {
-			let wrapperRect = this._id("list-layout-wrapper").getBoundingClientRect();
-			let nodeRect = nextNode.getBoundingClientRect();
-			if (nodeRect.bottom > wrapperRect.bottom || nodeRect.top < wrapperRect.top) {
-				nextNode.scrollIntoView();
-			}
-		}
 		
 		if (multiSelect) {
 			// on arrow keypress while holding shift, move focus and also perform multiselect
@@ -302,12 +304,74 @@ export class CitationDialogKeyboardHandler {
 		return nextNode;
 	}
 
+	// When focus enters the list-mode table with no selection, select the
+	// first item so the user has a starting point for arrow navigation.
+	_ensureListSelection() {
+		let layout = this.listLayout;
+		if (!layout?._table || layout._table.selection.count > 0) return;
+		let firstItem = layout._listRows.findIndex(r => r.canBeAdded);
+		if (firstItem >= 0) {
+			layout._table.selection.select(firstItem);
+		}
+	}
+
+	// Navigate VT selection up/down while focus stays on bubble-input.
+	// ArrowUp past the first selectable row clears selection.
+	_navigateListSelection(forward, multiSelect) {
+		let table = this.listLayout?._table;
+		if (!table) return;
+		let selection = table.selection;
+		let rows = this.listLayout._listRows;
+		let rowCount = rows.length;
+
+		// Find the next selectable index from a given position
+		let findSelectable = (from, fwd) => {
+			let i = from;
+			while (i >= 0 && i < rowCount) {
+				if (rows[i]?.canBeAdded) return i;
+				i += fwd ? 1 : -1;
+			}
+			return -1;
+		};
+
+		let focused = selection.focused;
+		// Nothing selected yet -- select the first selectable row on ArrowDown
+		if (selection.count === 0 || focused < 0) {
+			if (!forward) return;
+			let first = findSelectable(0, true);
+			if (first >= 0) {
+				selection.select(first);
+				table.scrollToRow(first);
+			}
+			return;
+		}
+
+		let next = findSelectable(focused + (forward ? 1 : -1), forward);
+		// ArrowUp past the first selectable row -- clear selection
+		if (next < 0 && !forward) {
+			selection.clearSelection();
+			table.scrollToRow(0);
+			return;
+		}
+		if (next < 0) return;
+
+		if (multiSelect) {
+			selection.shiftSelect(next);
+		}
+		else {
+			selection.select(next);
+		}
+		table.scrollToRow(next);
+	}
+
 	_shouldRefocusBubbleInputOnArrowUp() {
 		if (!this._id("library-layout").hidden) {
 			return this._id("library-other-items").contains(this.doc.activeElement);
 		}
 		if (!this._id("list-layout").hidden) {
-			return this.doc.activeElement == this.doc.querySelector(".item");
+			// In list mode, focus stays on bubble-input; arrowUp from the
+			// first selected row clears selection (handled in navigateSelection).
+			return false;
 		}
 		return false;
 	}
