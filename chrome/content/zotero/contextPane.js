@@ -61,6 +61,15 @@ var ZoteroContextPane = new function () {
 		}
 	});
 
+	Object.defineProperty(this, 'itemDetails', {
+		get: () => {
+			if (_contextPaneInner.mode === 'notes') {
+				return this.activeEditor?.querySelector('links-box');
+			}
+			return document.getElementById('zotero-context-pane-item-deck').selectedPanel;
+		}
+	});
+
 	this.focus = () => {
 		return _contextPaneInner.handleFocus();
 	};

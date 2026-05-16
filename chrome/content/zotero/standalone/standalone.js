@@ -101,6 +101,10 @@ const ZoteroStandalone = new function () {
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemsToClipboard'));
 			document.getElementById('key_showTabsMenu')
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('showTabsMenu'));
+			document.getElementById('key_library')
+				.setAttribute('key', Zotero.Keys.getKeyForCommand('library'));
+			document.getElementById('key_quicksearch')
+				.setAttribute('key', Zotero.Keys.getKeyForCommand('quicksearch'));
 			// Force menu to update with shortcut key at startup -- as of fx128, this is necessary
 			// to get the shortcut to reliably appear for the menu item without switching tabs
 			document.getElementById('show-tabs-menu').hidden = true;
@@ -390,6 +394,8 @@ const ZoteroStandalone = new function () {
 	
 	
 	this.onGoMenuOpen = function (event) {
+		if (event.target !== event.currentTarget) return;
+
 		var keyBack = document.getElementById('key_back');
 		var keyForward = document.getElementById('key_forward');
 
@@ -423,10 +429,135 @@ const ZoteroStandalone = new function () {
 			this.updateMenuItemEnabled('go-menuitem-forward', reader.canNavigateForward);
 		}
 
+		this._rebuildGoMenuSections(event.target);
+
 		this.onUpdateCustomMenus(event, 'go');
 	};
-	
-	
+
+	this._rebuildGoMenuSections = function (popup) {
+		let beforeSep = document.getElementById('go-menu-sep-sections-before');
+		let afterSep = document.getElementById('go-menu-sep-sections-after');
+
+		// Clear previously inserted dynamic entries
+		popup.querySelectorAll('.go-menu-section-dynamic').forEach(el => el.remove());
+
+		let itemDetails = Zotero_Tabs.currentItemPane?.itemDetails;
+		let hasSections = false;
+
+		for (let pane of (itemDetails?.getEnabledPanes() || [])) {
+			let paneID = pane.dataset.pane;
+			let section = pane.querySelector('collapsible-section');
+			if (!section) continue;
+
+			let label = Zotero.ftl.formatValueSync(`pane-${paneID}`)
+				|| section.getAttribute('label')
+				|| paneID;
+
+			let element;
+			if (paneID === 'info') {
+				element = document.createXULElement('menu');
+				element.setAttribute('label', label);
+				let submenu = document.createXULElement('menupopup');
+				element.appendChild(submenu);
+				this._populateItemInfoFields(submenu, itemDetails.item);
+				if (!submenu.hasChildNodes()) {
+					element.setAttribute('disabled', true);
+				}
+			}
+			else {
+				element = document.createXULElement('menuitem');
+				element.setAttribute('label', label);
+				element.addEventListener('command', () => {
+					Zotero_Tabs.currentItemPane.collapsed = false;
+					itemDetails.getEnabledPane(paneID).focusSection();
+				});
+			}
+			element.classList.add('go-menu-section-dynamic');
+			popup.insertBefore(element, afterSep);
+			hasSections = true;
+		}
+
+		// Only unhide separators the current tab type allows
+		let type = Zotero_Tabs.selectedType;
+		let beforeApplies = beforeSep.classList.contains(`menu-type-${type}`);
+		let afterApplies = afterSep.classList.contains(`menu-type-${type}`);
+		beforeSep.hidden = !(hasSections && beforeApplies);
+		afterSep.hidden = !(hasSections && afterApplies);
+	};
+
+
+	this._populateItemInfoFields = function (popup, item) {
+		let focusItemInfoField = function (fieldName) {
+			let pane = Zotero_Tabs.currentItemPane;
+			if (!pane) return;
+			pane.collapsed = false;
+			pane.itemDetails?.querySelector('info-box')?.focusField(fieldName);
+		};
+
+		let itemTypeMenuItem = document.createXULElement('menuitem');
+		itemTypeMenuItem.setAttribute('label', Zotero.getString('zotero.items.itemType'));
+		itemTypeMenuItem.addEventListener('command', () => focusItemInfoField('itemType'));
+		popup.appendChild(itemTypeMenuItem);
+
+		let fieldIDs = Zotero.ItemFields.getItemTypeFields(item.getField('itemTypeID'));
+		let titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemTypeID, 'title');
+		for (let fieldID of fieldIDs) {
+			let fieldName = Zotero.ItemFields.getName(fieldID);
+			// Skip abstract - it has its own section
+			if (fieldName === "abstractNote") continue;
+
+			let menuitem = document.createXULElement('menuitem');
+			menuitem.setAttribute('label', Zotero.ItemFields.getLocalizedString(fieldID));
+			menuitem.addEventListener('command', () => focusItemInfoField(fieldName));
+			popup.appendChild(menuitem);
+
+			if (fieldID === titleFieldID) {
+				let firstCreator = item.getCreators()[0];
+				let creatorTypeID;
+				if (firstCreator) {
+					creatorTypeID = firstCreator.creatorTypeID;
+				}
+				else if (item.library.editable
+						&& Zotero.CreatorTypes.itemTypeHasCreators(item.itemTypeID)) {
+					creatorTypeID = Zotero.CreatorTypes.getPrimaryIDForType(item.itemTypeID);
+				}
+				if (creatorTypeID) {
+					let creatorMenuItem = document.createXULElement('menuitem');
+					creatorMenuItem.setAttribute('label',
+						Zotero.CreatorTypes.getLocalizedString(creatorTypeID));
+					creatorMenuItem.addEventListener('command', () => focusItemInfoField('creator-0-lastName'));
+					popup.appendChild(creatorMenuItem);
+				}
+			}
+		}
+	};
+
+
+	this.onGoMenuCommand = function (action) {
+		let target;
+		if (action === 'locate') {
+			let sidenavID = "zotero-view-item-sidenav";
+			// in non-library tabs the sidenav is hidden if context pane is collapsed
+			if (Zotero_Tabs.hasContextPane(Zotero_Tabs.selectedType)) {
+				ZoteroContextPane.collapsed = false;
+				sidenavID = "zotero-context-pane-sidenav";
+			}
+			target = document.querySelector(`#${sidenavID} toolbarbutton[data-action="locate"]`);
+		}
+		else {
+			let targetIDs = {
+				tabs: 'zotero-tb-tabs-menu',
+				library: 'collection-tree',
+				'quick-search': 'zotero-tb-search-textbox',
+			};
+			target = document.getElementById(targetIDs[action]);
+		}
+		if (target) {
+			target.focus({ focusVisible: true });
+		}
+	};
+
+
 	this.onViewMenuOpen = function (event) {
 		// PDF Reader
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);

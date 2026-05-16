@@ -150,6 +150,15 @@ menu-view-note-tab-font-size =
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 
+menu-go-tabs =
+    .label = Tabs Menu
+menu-go-library =
+    .label = Library
+menu-go-quick-search =
+    .label = Quick Search
+menu-go-locate =
+    .label = Locate
+
 menu-edit-copy-annotation =
     .label = { $count ->
         [one] Copy Annotation

@@ -92,6 +92,18 @@ var Zotero_Tabs = new function () {
 		return this._hasContextPaneTypes.includes(type);
 	};
 
+	Object.defineProperty(this, 'currentItemPane', {
+		get: () => {
+			if (this.selectedType === 'library') {
+				return ZoteroPane.itemPane;
+			}
+			if (this.hasContextPane(this.selectedType)) {
+				return ZoteroContextPane;
+			}
+			return null;
+		}
+	});
+
 	this.hasNoteContext = function (type) {
 		return this._hasNoteContextTypes.includes(type);
 	};

@@ -181,6 +181,10 @@
 		<key id="key_showTabsMenu"
 				command="cmd_zotero_showTabsMenu"
 				modifiers="accel"/>
+		<key id="key_library"
+				modifiers="accel shift"/>
+		<key id="key_quicksearch"
+				modifiers="accel shift"/>
 	</keyset>
 
 	<keyset id="editMenuKeys">
@@ -711,13 +715,43 @@
 						</menupopup>
 					</menu>
 					
-					<menu 
+					<menu
 						id="go-menu"
-						class="menu-type-reader"
+						class="menu-type-reader menu-type-library menu-type-note"
 						label="&goMenu.label;"
 						accesskey="&goMenu.accesskey;">
 						<menupopup id="menu_goPopup"
 									onpopupshowing="ZoteroStandalone.onGoMenuOpen(event)">
+							<menuitem
+								id="go-menuitem-tabs"
+								class="menu-type-library menu-type-reader menu-type-note"
+								data-l10n-id="menu-go-tabs"
+								oncommand="ZoteroStandalone.onGoMenuCommand('tabs')"
+							/>
+							<menuitem
+								id="go-menuitem-library"
+								class="menu-type-library"
+								data-l10n-id="menu-go-library"
+								key="key_library"
+								oncommand="ZoteroStandalone.onGoMenuCommand('library')"
+							/>
+							<menuitem
+								id="go-menuitem-quick-search"
+								class="menu-type-library"
+								data-l10n-id="menu-go-quick-search"
+								key="key_quicksearch"
+								oncommand="ZoteroStandalone.onGoMenuCommand('quick-search')"
+							/>
+							<menuitem
+								id="go-menuitem-locate"
+								class="menu-type-library menu-type-reader menu-type-note"
+								data-l10n-id="menu-go-locate"
+								oncommand="ZoteroStandalone.onGoMenuCommand('locate')"
+							/>
+							<menuseparator id="go-menu-sep-sections-before"
+								class="menu-type-library menu-type-reader menu-type-note"/>
+							<menuseparator id="go-menu-sep-sections-after"
+								class="menu-type-reader"/>
 							<menuitem
 								id="go-menuitem-first-page"
 								class="menu-type-reader pdf epub"

@@ -85,6 +85,12 @@ class ItemPaneSectionElementBase extends XULElementBase {
 		}
 	}
 
+	focusSection() {
+		if (!this._section) return;
+		this._section.open = true;
+		this._section._head?.focus({ focusVisible: true });
+	}
+
 	get collapsible() {
 		return this._section.collapsible;
 	}
