@@ -41,7 +41,6 @@
 @import "preferences/general";
 @import "preferences/account";
 @import "preferences/sync_reset";
-@import "preferences/export";
 @import "preferences/cite";
 @import "preferences/advanced";
 
@@ -276,7 +275,7 @@ menulist[disabled="true"] {
 	pointer-events: none;
 }
 
-#export-citePaperJournalArticleURL
+#quickCopy-citePaperJournalArticleURL
 {
 	font-size: .85em;
 }

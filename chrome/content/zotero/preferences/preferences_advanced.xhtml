@@ -172,13 +172,13 @@
 			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-copySelectedItemCitationsToClipboard" maxlength="1" size="1"
 					preference="extensions.zotero.keys.copySelectedItemCitationsToClipboard"
-					oninput="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
+					oninput="if (Zotero_Preferences.QuickCopy) { Zotero_Preferences.QuickCopy.updateQuickCopyInstructions(); }"/>
 
 			<html:label for="textbox-copySelectedItemsToClipboard">&zotero.preferences.keys.copySelectedItemsToClipboard;</html:label>
 			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-copySelectedItemsToClipboard" maxlength="1" size="1"
 					preference="extensions.zotero.keys.copySelectedItemsToClipboard"
-					oninput="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
+					oninput="if (Zotero_Preferences.QuickCopy) { Zotero_Preferences.QuickCopy.updateQuickCopyInstructions(); }"/>
 
 			<html:label for="textbox-toggleAllRead">&zotero.preferences.keys.toggleAllRead;</html:label>
 			<html:label class="modifier"/>
