@@ -144,18 +144,6 @@ async function onLoad() {
 		}
 	});
 
-	//
-	// Show guidance panel on the first run. Noop on subsequent runs.
-	//
-	// Use localized locator string (e.g., "p10")
-	let locatorString = Zotero.Cite.getLocatorString("page", "short").toLowerCase()
-		// Strip trailing period ("p." → "p")
-		.replace(/\.$/, '')
-		+ "10";
-	doc.querySelector("guidance-panel").show({ l10nArgs: { locator: locatorString } });
-	// Hide guidance panel on any keypress
-	doc.addEventListener("keydown", () => doc.querySelector("guidance-panel").hide(), { capture: true, once: true });
-
 	DIALOG_STATE.loaded = true;
 	let initTime = timer.stop();
 	Zotero.debug(`Citation Dialog: initialized in ${initTime} s`);
@@ -1395,6 +1383,15 @@ const IOManager = {
 		}
 
 		this.updateBubbleInput();
+
+		// Show guidance panel on the first run
+		if (DIALOG_STATE.isCitingItems() && !Zotero.Prefs.get("firstRunGuidanceShown.citationDialog")) {
+			doc.querySelector(".bubble").id = "first-bubble";
+			// Center the panel on the first bubble
+			let width = doc.querySelector(".bubble").getBoundingClientRect().width;
+			doc.querySelector("guidance-panel").setAttribute("x", Math.round(width / 2));
+			IOManager.showFirstRunDialog();
+		}
 		// Always refresh items list to make sure the opened and selected items are up to date
 		await currentLayout.refreshItemsList();
 		if (!noInputRefocus) {
@@ -1580,6 +1577,17 @@ const IOManager = {
 			desiredMode = "library";
 		}
 		return desiredMode;
+	},
+
+	showFirstRunDialog() {
+		let locatorString = Zotero.Cite.getLocatorString("page", "short").toLowerCase()
+			// Strip trailing period ("p." → "p")
+			.replace(/\.$/, '')
+			+ "10";
+		// Use localized locator string (e.g., "p10")
+		doc.querySelector("guidance-panel").show({ l10nArgs: { locator: locatorString } });
+		// Hide guidance panel on any keypress
+		doc.addEventListener("keydown", () => doc.querySelector("guidance-panel").hide(), { capture: true, once: true });
 	},
 	
 	// handle drag start of item nodes into bubble-input
