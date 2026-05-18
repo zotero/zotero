@@ -553,7 +553,7 @@ Zotero.Sync.Storage.Local = {
 			
 			var library = Zotero.Libraries.get(libraryID);
 			library.storageVersion = -1;
-			await library.save();
+			await library.save({ skipUndo: true });
 		}.bind(this));
 	},
 	
