@@ -639,6 +639,10 @@ context-notes-search =
     .placeholder = Search Notes
 context-notes-return-button =
     .aria-label = { general-go-back }
+context-notes-edit-in-tab =
+    .label = Edit in a New Tab
+context-notes-edit-in-window =
+    .label = Edit in a Separate Window
 
 new-collection = New Collection…
 menu-new-collection =
