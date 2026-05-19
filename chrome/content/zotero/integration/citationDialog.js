@@ -258,8 +258,9 @@ async function setDialogType(type) {
 	_id("keepSorted").disabled = !io.sortable || !DIALOG_STATE.isCitingItems();
 	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
 	if (DIALOG_STATE.isCitingItems()) {
-		_id("settings-button").hidden = !io.sortable;
 		_id("keepSorted").disabled = !io.sortable;
+		_id("keepSorted").parentElement.hidden = !io.sortable;
+		libraryLayout?.updateCitationPreview();
 		if (!DIALOG_STATE.loaded) {
 			_id("keepSorted").checked = io.sortable && !io.citation.properties.unsorted;
 		}
@@ -505,6 +506,7 @@ class LibraryLayout extends Layout {
 		super("library");
 		this._scrolledToFirstCitedOnInit = false;
 		this.MIN_WIDTH = 1000; // min-width from _citationDialog.scss
+		this._renderCitationPreviewDebounced = Zotero.Utilities.debounce(() => this._renderCitationPreview(), 250);
 	}
 
 	async init() {
@@ -515,6 +517,7 @@ class LibraryLayout extends Layout {
 		_id("library-other-items").addEventListener('wheel', this._scrollHorizontallyOnWheel);
 		this._initSidepane();
 		this._initCollectionsTreeDivider();
+		this.updateCitationPreview();
 	}
 
 	// Create item node for an item group and store item ids in itemIDs attribute
@@ -601,9 +604,10 @@ class LibraryLayout extends Layout {
 		let bubbleInputHeight = Helpers.getSearchRowHeight();
 		let suggestedItemsHeight = _id("library-other-items").getBoundingClientRect().height;
 		let minTableHeight = 400;
+		let citationPreview = _id("citation-preview-wrapper").getBoundingClientRect().height;
 		let bottomHeight = _id("bottom-area-wrapper").getBoundingClientRect().height;
 
-		let minHeight = bubbleInputHeight + suggestedItemsHeight + bottomHeight + minTableHeight;
+		let minHeight = bubbleInputHeight + suggestedItemsHeight + citationPreview + bottomHeight + minTableHeight;
 
 		let targetWidth = Math.max(window.innerWidth, this.MIN_WIDTH);
 		let targetHeight = Math.max(minHeight, lastSetWindowHeight);
@@ -918,6 +922,40 @@ class LibraryLayout extends Layout {
 		this.itemsView.clearItemsPaneMessage();
 	}
 
+	// Show the citation preview when citing items + the pref is enabled.
+	// When shown, toggle the empty-state message and (re)render the citation cluster.
+	updateCitationPreview() {
+		let prefShown = Zotero.Prefs.get("integration.citationPreviewShown");
+		let isCitingItems = DIALOG_STATE.isCitingItems();
+		let hasPreview = !!io.preview;
+		let shouldShow = isCitingItems && prefShown && hasPreview;
+		_id("citation-preview").hidden = !shouldShow;
+		let isEmpty = !CitationDataManager.items.length;
+		_id("citation-preview-empty").hidden = !isEmpty;
+		_id("citation-preview-content").hidden = isEmpty;
+		// The toggle button only makes sense while citing items with a backing
+		// preview function. It reflects the pref directly.
+		let toggleBtn = _id("display-preview-button");
+		toggleBtn.hidden = !(isCitingItems && hasPreview);
+		toggleBtn.setAttribute("aria-pressed", prefShown ? "true" : "false");
+		if (shouldShow && !isEmpty) {
+			this._renderCitationPreviewDebounced();
+		}
+	}
+
+	async _renderCitationPreview() {
+		if (!DIALOG_STATE.isCitingItems()) return;
+		if (!Zotero.Prefs.get("integration.citationPreviewShown")) return;
+		if (!CitationDataManager.items.length) return;
+		if (!io.preview) return;
+
+		CitationDataManager.updateCitationObject();
+		let html = await io.preview("html");
+		// Re-check after the await in case the user cleared items
+		if (!CitationDataManager.items.length) return;
+		_id("citation-preview-content").innerHTML = html;
+	}
+
 	// backspace/delete in itemsView deletes items from the citation
 	_handleItemsViewKeyPress(event) {
 		if (event.key == "Delete" || Zotero.isMac && event.key == "Backspace") {
@@ -1112,11 +1150,12 @@ class ListLayout extends Layout {
 			marginOfError = Zotero.isWin ? 6 : 2;
 		}
 
-		// height of the bottom section
+		// height of citation preview (0 when hidden) and the bottom section
+		let citationPreview = _id("citation-preview-wrapper").getBoundingClientRect().height;
 		let bottomHeight = _id("bottom-area-wrapper").getBoundingClientRect().height;
 
 		// set min height and resize the window
-		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + bottomHeight + marginOfError;
+		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + citationPreview + bottomHeight + marginOfError;
 		// window.resizeTo(X,Y) resizes the window so that it's outerHeight == Y. On mac and windows,
 		// innerHeight and outerHeight are the same. On linux, the outerHeight > innerHeight, perhaps
 		// outerHeight there includes chrome, borders, etc. This difference is accounted for below, so that the dialog
@@ -1124,7 +1163,7 @@ class ListLayout extends Layout {
 		if (Zotero.isLinux) {
 			autoHeight += (window.outerHeight - window.innerHeight);
 		}
-		let minHeight = bubbleInputHeight + bottomHeight;
+		let minHeight = bubbleInputHeight + citationPreview + bottomHeight;
 		doc.documentElement.style.minHeight = `${minHeight}px`;
 
 		// cap window height at the height last set by the user
@@ -1222,6 +1261,7 @@ const IOManager = {
 		});
 
 		_id("includeComments").addEventListener("click", () => this._toggleIncludeComments());
+		_id("display-preview-button").addEventListener("click", () => this._toggleDisplayPreview());
 
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
@@ -1264,6 +1304,9 @@ const IOManager = {
 		document.documentElement.removeAttribute("dialog-layout");
 		let isInitialModeSetting = currentLayout === undefined;
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
+
+		// Reflect visibility of the citation preview after the layout switch.
+		libraryLayout?.updateCitationPreview();
 
 		// Wait for window resize before running search to avoid stutter with large libraries
 		if (!isInitialModeSetting) {
@@ -1315,6 +1358,7 @@ const IOManager = {
 			};
 		}), DIALOG_STATE.type);
 		_id("accept-button").disabled = !CitationDataManager.items.length;
+		libraryLayout?.updateCitationPreview();
 	},
 
 	async addItemsToCitation(items, { noInputRefocus, index } = { index: null }) {
@@ -1847,6 +1891,13 @@ const IOManager = {
 	_toggleIncludeComments() {
 		let includeComments = _id("includeComments").checked;
 		Zotero.Prefs.set("integration.annotationDialogIncludeComments", includeComments);
+	},
+
+	_toggleDisplayPreview() {
+		let newShown = !Zotero.Prefs.get("integration.citationPreviewShown");
+		Zotero.Prefs.set("integration.citationPreviewShown", newShown);
+		libraryLayout.updateCitationPreview();
+		currentLayout.resizeWindow();
 	},
 
 	// Return focus to where it was before click moved focus.

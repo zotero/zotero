@@ -105,6 +105,14 @@
 		</div>
 
 		<div id="bottom-area" class="layout">
+			<div class="divider"></div>
+			<div id="citation-preview" class="vbox" data-dialog-type="citation">
+				<div id="citation-preview-wrapper" class="vbox">
+					<div id="citation-preview-content"></div>
+					<div id="citation-preview-empty" data-l10n-id="integration-citationDialog-preview-empty"></div>
+				</div>
+				<div class="divider subtle"></div>
+			</div>
 			<div id="bottom-area-wrapper" class="hbox">
 				<div id="dialog-type-setting" class="segmented-switch" data-arrow-nav="horizontal" data-tabindex="70" role="radiogroup" aria-orientation="horizontal">
 					<div id="dialog-type-citation" class="option keyboard-clickable" value="citation" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-btn-type-citation">
@@ -119,7 +127,9 @@
 				</div>
 				<div class="hbox" style="flex:1"></div>
 				<div id="bottom-btn-group" class="hbox">
-					<div id="dialog-mode-setting" data-dialog-type="citation,add-note" class="segmented-switch" role="radiogroup" data-arrow-nav="horizontal" data-tabindex="80" aria-orientation="horizontal">
+					<button id="display-preview-button" class="btn-icon" data-dialog-type="citation" data-l10n-id="integration-citationDialog-btn-displayPreview" aria-pressed="false" tabindex="-1" data-tabindex="80"></button>
+					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-tabindex="81"></button>
+					<div id="dialog-mode-setting" data-dialog-type="citation,add-note" class="segmented-switch" role="radiogroup" data-arrow-nav="horizontal" data-tabindex="82" aria-orientation="horizontal">
 						<div id="dialog-mode-list" class="option keyboard-clickable" value="list" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true">
 							<span data-l10n-id="integration-citationDialog-mode-list"></span>
 						</div>
@@ -127,7 +137,6 @@
 							<span data-l10n-id="integration-citationDialog-mode-library"></span>
 						</div>
 					</div>
-					<button id="settings-button" class="btn-icon icon-citation-dialog-settings" data-l10n-id="integration-citationDialog-btn-settings" tabindex="-1" data-tabindex="81"></button>
 				</div>
 			</div>
 		</div>

@@ -1227,14 +1227,6 @@ class EditorInstance {
 			},
 			
 			/**
-			 * Execute a callback with a preview of the given citation
-			 * @return {Promise} A promise resolved with the previewed citation string
-			 */
-			preview: async function () {
-				// Zotero.debug('CI: preview');
-			},
-
-			/**
 			 * Sort the citationItems within citation (depends on this.citation.properties.unsorted)
 			 * @return {Promise} A promise resolved with the previewed citation string
 			 */
