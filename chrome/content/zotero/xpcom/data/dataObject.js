@@ -23,6 +23,15 @@
     ***** END LICENSE BLOCK *****
 */
 
+const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
+
+let lazy = {};
+XPCOMUtils.defineLazyPreferenceGetter(
+	lazy,
+	'shouldTrackClientVersions',
+	'extensions.zotero.httpServer.localAPI.enabled',
+);
+
 /**
  * @property {String} (readOnly) objectType
  * @property {String} (readOnly) libraryKey
@@ -50,6 +59,7 @@ Zotero.DataObject = function () {
 	this._dateAdded = null;
 	this._dateModified = null;
 	this._version = null;
+	this._clientVersion = null;
 	this._synced = null;
 	this._identified = false;
 	this._parentID = null;
@@ -1179,6 +1189,15 @@ Zotero.DataObject.prototype._finalizeSave = async function (env) {
 	else if (env.skipCache) {
 		Zotero.logError("skipCache is only for new objects");
 	}
+
+	if (lazy.shouldTrackClientVersions) {
+		let libraryClientVersion = await this.library.incrementClientVersion();
+		await Zotero.DB.queryAsync(
+			`UPDATE ${this.ObjectsClass.table} SET clientVersion = ? WHERE ${this.ObjectsClass.idColumn}=?`,
+			[libraryClientVersion, this.id]
+		);
+		this._clientVersion = libraryClientVersion;
+	}
 };
 
 
@@ -1365,10 +1384,15 @@ Zotero.DataObject.prototype._finalizeErase = async function (env) {
 
 
 Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
+	// Default to showing synced properties, since that's what the API does, and this function
+	// is generally used to emulate the API
+	options.syncedStorageProperties ??= true;
+	options.syncedVersionProperty ??= true;
+
 	let uri = Zotero.URI.getObjectURI(this);
 	var json = {
 		key: this.key,
-		version: this.version,
+		version: options.syncedVersionProperty ? this.version : this.clientVersion,
 		library: this.library.toResponseJSON({ ...options, includeGroupDetails: false }),
 		links: {
 			self: {

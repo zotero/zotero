@@ -3531,6 +3531,14 @@ Zotero.Schema = new function () {
 				await Zotero.DB.queryAsync("UPDATE groups SET version = 0");
 			}
 
+			else if (i == 126) {
+				let clientVersionTables = ['items', 'collections', 'savedSearches', 'libraries', 'groups'];
+				for (let table of clientVersionTables) {
+					await Zotero.DB.queryAsync(`ALTER TABLE ${table} ADD COLUMN clientVersion INT NOT NULL DEFAULT 0`);
+				}
+			}
+
+
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		
