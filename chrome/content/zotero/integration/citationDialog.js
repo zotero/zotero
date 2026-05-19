@@ -1319,6 +1319,9 @@ const IOManager = {
 		let isInitialModeSetting = currentLayout === undefined;
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
 
+		// Reflect visibility of the citation preview after the layout switch.
+		libraryLayout?.updateCitationPreview();
+
 		// Wait for window resize before running search to avoid stutter with large libraries
 		if (!isInitialModeSetting) {
 			await currentLayout.resizeWindow();
@@ -1353,8 +1356,6 @@ const IOManager = {
 		if (currentLayout.type == "library") {
 			currentLayout._tryToScrollToFirstCitedRow();
 		}
-		// Reflect visibility of the citation preview after the layout switch.
-		libraryLayout?.updateCitationPreview();
 	},
 
 	// pass current items in the citation to bubble-input to have it update the bubbles
