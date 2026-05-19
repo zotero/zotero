@@ -50,6 +50,9 @@ export class CitationDialogSearchHandler {
 		this.selectedItems = null;
 		this.openItems = null;
 		this.citedItems = null;
+		// number of cited items in each library, keyed by libraryID.
+		// Populated once cited items are loaded in refreshCitedItems.
+		this.citedItemCountsByLibrary = {};
 	}
 
 	setSearchValue(str, enforceMinQueryLength) {
@@ -84,7 +87,8 @@ export class CitationDialogSearchHandler {
 	// where key is selected/open/cited/{libraryID}, and group is the respective list of items.
 	// Groups are sorted in the order they will be rendered:
 	// Selected, Opened, Cited go first, followed by found library item groups ordered
-	// by the number of results in each library.
+	// by the number of cited items in each library (if loaded). Ties are broken by
+	// keeping My Library first, then sorting other libraries alphabetically by name.
 	// Items/notes in the libraries group are sorted via _createItemsSort/_createNotesSort comparators.
 	// Takes citedItems as a parameter to filter them out from Selected, Opened and Cited groups.
 	getOrderedSearchResultGroups(citedItemIDs = new Set()) {
@@ -128,8 +132,18 @@ export class CitationDialogSearchHandler {
 			library.group.sort(itemComparator);
 		});
 	
-		// sort libraries by the number of items
-		libraryItems.sort((a, b) => b.group.length - a.group.length);
+		// sort libraries by the number of cited items in each library;
+		// when counts are equal (or cited items have not been loaded yet),
+		// keep My Library first and sort the rest alphabetically by name
+		let collation = Zotero.getLocaleCollation();
+		libraryItems.sort((a, b) => {
+			let aCount = this.citedItemCountsByLibrary[a.key] || 0;
+			let bCount = this.citedItemCountsByLibrary[b.key] || 0;
+			if (aCount !== bCount) return bCount - aCount;
+			if (a.key === Zotero.Libraries.userLibraryID) return -1;
+			if (b.key === Zotero.Libraries.userLibraryID) return 1;
+			return collation.compareString(1, Zotero.Libraries.get(a.key).name, Zotero.Libraries.get(b.key).name);
+		});
 		result.push(...libraryItems);
 
 		return result;
@@ -180,6 +194,13 @@ export class CitationDialogSearchHandler {
 	async refreshCitedItems() {
 		if (this.citedItems === null) {
 			this.citedItems = await this._getCitedItems();
+			// Record how many items from each library are already cited in the document.
+			// Used for sorting to move currently cited libraries to the top of search results.
+			for (let item of this.citedItems || []) {
+				let libraryID = item.libraryID;
+				if (!libraryID) continue;
+				this.citedItemCountsByLibrary[libraryID] = (this.citedItemCountsByLibrary[libraryID] || 0) + 1;
+			}
 		}
 		if (!this.citedItems) return;
 
