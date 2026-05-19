@@ -133,6 +133,12 @@ function modify_omni {
 	rm actors/AudioPlayback{Parent,Child}.sys.mjs
 	
 	replace_line 'BROWSER_CHROME_URL:.+' 'BROWSER_CHROME_URL: "chrome:\/\/zotero\/content\/zoteroPane.xhtml",' modules/AppConstants.sys.mjs
+	# Used by OSKeyStore as the master-key label, visible in macOS Keychain Access.
+	# Verify that OSKeyStore still derives the label from MOZ_APP_BASENAME, so a
+	# future Mozilla change to a hardcoded string doesn't silently rebrand the
+	# keychain entry back to "Firefox Encrypted Storage".
+	replace_line 'MOZ_APP_BASENAME: "Firefox"' 'MOZ_APP_BASENAME: "Zotero"' modules/AppConstants.sys.mjs
+	check_line 'STORE_LABEL: AppConstants\.MOZ_APP_BASENAME \+ " Encrypted Storage"' modules/OSKeyStore.sys.mjs
 	
 	# https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/internals/preferences.html
 	#
@@ -460,7 +466,7 @@ function modify_omni {
 		chrome/toolkit/content/global/commonDialog.xhtml
 	# commonDialog.css link is split across multiple lines, so we have to do a weird substitution,
 	# so check the one-line global.css to make sure the format hasn't changed
-	check_line '<html:link rel="stylesheet" href="chrome:\/\/global\/skin\/global.css" \/>'
+	check_line '<html:link rel="stylesheet" href="chrome:\/\/global\/skin\/global.css" \/>' chrome/toolkit/content/global/commonDialog.xhtml
 	replace_line 'chrome:\/\/global\/skin\/commonDialog.css"' \
 		'chrome:\/\/global\/skin\/commonDialog.css"\/>
 		<html:link rel="stylesheet" href="chrome:\/\/zotero-platform\/content\/zotero.css"' \
