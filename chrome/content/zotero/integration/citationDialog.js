@@ -934,22 +934,21 @@ class LibraryLayout extends Layout {
 		this.itemsView.clearItemsPaneMessage();
 	}
 
-	// Show the citation preview only when we're in library mode + citation type + the pref is enabled.
+	// Show the citation preview when citing items + the pref is enabled.
 	// When shown, toggle the empty-state message and (re)render the citation cluster.
 	updateCitationPreview() {
 		let prefShown = Zotero.Prefs.get("integration.citationPreviewShown");
-		let isLibraryMode = currentLayout?.type === "library";
 		let isCitingItems = DIALOG_STATE.isCitingItems();
 		let hasPreview = !!io.preview;
-		let shouldShow = isLibraryMode && isCitingItems && prefShown && hasPreview;
+		let shouldShow = isCitingItems && prefShown && hasPreview;
 		_id("citation-preview").hidden = !shouldShow;
 		let isEmpty = !CitationDataManager.items.length;
 		_id("citation-preview-empty").hidden = !isEmpty;
 		_id("citation-preview-content").hidden = isEmpty;
-		// The toggle button only makes sense in library mode while citing items
-		// with a backing preview function. It reflects the pref directly.
+		// The toggle button only makes sense while citing items with a backing
+		// preview function. It reflects the pref directly.
 		let toggleBtn = _id("display-preview-button");
-		toggleBtn.hidden = !(isLibraryMode && isCitingItems && hasPreview);
+		toggleBtn.hidden = !(isCitingItems && hasPreview);
 		toggleBtn.setAttribute("aria-pressed", prefShown ? "true" : "false");
 		if (shouldShow && !isEmpty) {
 			this._renderCitationPreviewDebounced();
@@ -957,7 +956,6 @@ class LibraryLayout extends Layout {
 	}
 
 	async _renderCitationPreview() {
-		if (currentLayout?.type !== "library") return;
 		if (!DIALOG_STATE.isCitingItems()) return;
 		if (!Zotero.Prefs.get("integration.citationPreviewShown")) return;
 		if (!CitationDataManager.items.length) return;
@@ -965,8 +963,7 @@ class LibraryLayout extends Layout {
 
 		CitationDataManager.updateCitationObject();
 		let html = await io.preview("html");
-		// Re-check gates after the await in case the user cleared items or switched modes
-		if (currentLayout?.type !== "library") return;
+		// Re-check after the await in case the user cleared items
 		if (!CitationDataManager.items.length) return;
 		_id("citation-preview-content").innerHTML = html;
 	}
@@ -1165,11 +1162,12 @@ class ListLayout extends Layout {
 			marginOfError = Zotero.isWin ? 6 : 2;
 		}
 
-		// height of the bottom section
+		// height of citation preview (0 when hidden) and the bottom section
+		let citationPreview = _id("citation-preview-wrapper").getBoundingClientRect().height;
 		let bottomHeight = _id("bottom-area-wrapper").getBoundingClientRect().height;
 
 		// set min height and resize the window
-		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + bottomHeight + marginOfError;
+		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + citationPreview + bottomHeight + marginOfError;
 		// window.resizeTo(X,Y) resizes the window so that it's outerHeight == Y. On mac and windows,
 		// innerHeight and outerHeight are the same. On linux, the outerHeight > innerHeight, perhaps
 		// outerHeight there includes chrome, borders, etc. This difference is accounted for below, so that the dialog
@@ -1177,7 +1175,7 @@ class ListLayout extends Layout {
 		if (Zotero.isLinux) {
 			autoHeight += (window.outerHeight - window.innerHeight);
 		}
-		let minHeight = bubbleInputHeight + bottomHeight;
+		let minHeight = bubbleInputHeight + citationPreview + bottomHeight;
 		doc.documentElement.style.minHeight = `${minHeight}px`;
 
 		// cap window height at the height last set by the user
@@ -1891,6 +1889,7 @@ const IOManager = {
 		let newShown = !Zotero.Prefs.get("integration.citationPreviewShown");
 		Zotero.Prefs.set("integration.citationPreviewShown", newShown);
 		libraryLayout.updateCitationPreview();
+		currentLayout.resizeWindow();
 	},
 
 	// Return focus to where it was before click moved focus.
