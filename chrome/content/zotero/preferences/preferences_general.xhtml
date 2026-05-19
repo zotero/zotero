@@ -224,6 +224,22 @@
 				preference="extensions.zotero.openNoteInNewWindow"
 				native="true"
 			/>
+			<vbox class="fileHandler-menus">
+				<label data-l10n-id="preferences-note-content-view" control="note-content-view-mode"/>
+				<menulist id="note-content-view-mode" preference="extensions.zotero.note.contentViewMode" native="true">
+					<menupopup>
+						<menuitem data-l10n-id="preferences-note-content-view-wide" value="wide"/>
+						<menuitem data-l10n-id="preferences-note-content-view-comfortable" value="comfortable"/>
+					</menupopup>
+				</menulist>
+				<label data-l10n-id="preferences-note-tab-content-view" control="note-tab-content-view-mode"/>
+				<menulist id="note-tab-content-view-mode" preference="extensions.zotero.note.tabContentViewMode" native="true">
+					<menupopup>
+						<menuitem data-l10n-id="preferences-note-content-view-wide" value="wide"/>
+						<menuitem data-l10n-id="preferences-note-content-view-comfortable" value="comfortable"/>
+					</menupopup>
+				</menulist>
+			</vbox>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-locate-groupbox" aria-label="&zotero.preferences.prefpane.locate;" aria-describedby="preferences-locate-library-lookup-intro">
