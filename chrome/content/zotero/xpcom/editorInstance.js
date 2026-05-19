@@ -425,6 +425,11 @@ class EditorInstance {
 		this._postMessage({ action: 'focusToolbar' });
 	}
 
+	openFindBar() {
+		this._iframeWindow.focus();
+		this._postMessage({ action: 'openFindBar' });
+	}
+
 	async importImages(annotations) {
 		for (let annotation of annotations) {
 			if (annotation.image && !this._filesReadOnly) {

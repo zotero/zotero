@@ -32,6 +32,10 @@ function showInLibrary() {
 	noteEditor._editorInstance._showInLibrary([noteEditor._editorInstance._item.id]);
 }
 
+function handleFind() {
+	noteEditor._editorInstance.openFindBar();
+}
+
 async function onLoad() {
 	if (window.arguments) {
 		var io = window.arguments[0];
