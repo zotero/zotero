@@ -35,36 +35,50 @@
 		
 		<separator/>
 		
-		<label value="&zotero.preferences.quickCopy.itemFormat;" control="zotero-quickCopy-menu"/>
-		<menulist id="zotero-quickCopy-menu" label="&zotero.general.loading;" native="true"/>
-		
+		<label data-l10n-id="preferences-quickCopy-preferredFormatOnDrag" control="zotero-quickCopy-preferredFormatOnDrag"/>
+		<radiogroup orient="horizontal" id="zotero-quickCopy-preferredFormatOnDrag"
+			oncommand="Zotero_Preferences.Export.updateQuickCopyPrefs()">
+			<radio data-l10n-id="preferences-quickCopy-preferredFormatOnDrag-bibliography-radio" value="bibliography"/>
+			<radio data-l10n-id="preferences-quickCopy-preferredFormatOnDrag-export-radio" value="export"/>
+		</radiogroup>
+
+		<label data-l10n-id="preferences-quickCopy-bibliographyFormat" control="zotero-quickCopy-bibliography-menu"/>
+		<menulist id="zotero-quickCopy-bibliography-menu" label="&zotero.general.loading;"
+			oncommand="Zotero_Preferences.Export.updateQuickCopyPrefs()" native="true"/>
+
 		<hbox align="center">
 			<label id="zotero-quickCopy-locale-menu-label" value="&zotero.bibliography.locale.label;" control="zotero-quickCopy-locale-menu"/>
-			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value" native="true"/>
-			
+			<menulist id="zotero-quickCopy-locale-menu"
+				oncommand="Zotero_Preferences.Export.updateQuickCopyPrefs()" native="true"/>
+
 			<separator orient="vertical" width="15px"/>
-			
+
 			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
-				oncommand="Zotero_Preferences.Export.onCopyAsHTMLChange(this.checked)"
+				oncommand="Zotero_Preferences.Export.updateQuickCopyPrefs()"
 				native="true"/>
 		</hbox>
-		
+
+		<label data-l10n-id="preferences-quickCopy-exportFormat" control="zotero-quickCopy-export-menu"/>
+		<menulist id="zotero-quickCopy-export-menu" label="&zotero.general.loading;"
+			oncommand="Zotero_Preferences.Export.updateQuickCopyPrefs()" native="true"/>
+
 		<separator/>
-		
+
 		<label value="&zotero.preferences.quickCopy.noteFormat;" control="zotero-noteQuickCopy-menu"/>
-		<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;" native="true"/>
+		<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;"
+			oncommand="Zotero_Preferences.Export.updateQuickCopyPrefs()" native="true"/>
 		<box id="noteQuickCopy-wrapper">
 			<vbox id="noteQuickCopy-format-options" hidden="true" align="center">
 				<hbox id="noteQuickCopy-markdown-options" align="center">
 					<label id="noteQuickCopy-markdown-includeAppLinks-label"></label>
 					<checkbox id="noteQuickCopy-markdown-includeAppLinks"
-						oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"
+						oncommand="Zotero_Preferences.Export.updateQuickCopyPrefs()"
 						native="true" aria-describedby="noteQuickCopy-markdown-includeAppLinks-label"/>
 				</hbox>
 				<hbox id="noteQuickCopy-html-options" align="center">
 					<label id="noteQuickCopy-html-includeAppLinks-label"></label>
 					<checkbox id="noteQuickCopy-html-includeAppLinks"
-						oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"
+						oncommand="Zotero_Preferences.Export.updateQuickCopyPrefs()"
 						native="true" aria-describedby="noteQuickCopy-html-includeAppLinks-label"/>
 				</hbox>
 			</vbox>

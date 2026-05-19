@@ -104,10 +104,13 @@
 		<command id="cmd_zotero_exportLibrary" oncommand="Zotero_File_Interface.exportFile();"/>
 		<command id="cmd_zotero_advancedSearch" oncommand="ZoteroPane_Local.openAdvancedSearchWindow();"/>
 		<command id="cmd_zotero_copyCitation"
-				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true);"
+				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(true, 'bibliography');"
 				 disabled="true"/>
 		<command id="cmd_zotero_copyBibliography"
-				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"
+				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(false, 'bibliography');"
+				 disabled="true"/>
+		<command id="cmd_zotero_copyExport"
+				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard(false, 'export');"
 				 disabled="true"/>
 		<command id="cmd_zotero_copyAnnotation"
 				 oncommand="ZoteroPane_Local.copySelectedItemsToClipboard();"
@@ -171,6 +174,9 @@
 				modifiers="accel shift"/>
 		<key id="key_copyBibliography"
 				command="cmd_zotero_copyBibliography"
+				modifiers="accel shift"/>
+		<key id="key_copyExport"
+				command="cmd_zotero_copyExport"
 				modifiers="accel shift"/>
 		<key id="key_advancedSearch"
 				command="cmd_zotero_advancedSearch"
@@ -384,8 +390,8 @@
 									hidden="true"/>
 							<menuitem id="menu_copyExport"
 									class="menu-type-library"
-									key="key_copyBibliography"
-									command="cmd_zotero_copyBibliography"
+									key="key_copyExport"
+									command="cmd_zotero_copyExport"
 									hidden="true"/>
 							<menuitem id="menu_copyNote"
 									label="&copyNoteCmd.label;"
