@@ -132,7 +132,7 @@ describe("Zotero_File_Interface", function () {
 	});
 	
 	
-	describe("#copyItemsToClipboard()", function () {
+	describe("#writeToClipboard()", function () {
 		var clipboardService, item1, item2;
 		
 		before(function* () {
@@ -164,73 +164,70 @@ describe("Zotero_File_Interface", function () {
 		// Non-"Copy as HTML" mode
 		//
 		it("should copy HTML and text citations to the clipboard", async function () {
-			win.Zotero_File_Interface.copyItemsToClipboard(
+			let content = Zotero.QuickCopy.getContentFromItems(
 				[item1, item2],
-				'http://www.zotero.org/styles/apa',
-				'en-US',
-				false,
-				true
+				{ mode: 'bibliography', id: 'http://www.zotero.org/styles/apa', contentType: '', locale: 'en-US' },
+				{ asCitations: true }
 			);
-			
+			win.Zotero_File_Interface.writeToClipboard(content);
+
 			// HTML
 			var str = getDataForFlavor('text/html');
 			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
-			
+
 			// Plain text
 			str = getDataForFlavor('text/plain');
 			assert.equal(str, '(A, 2016; B, 2016)');
 		});
-		
+
 		it("should copy HTML and text bibliography to the clipboard", async function () {
-			win.Zotero_File_Interface.copyItemsToClipboard(
+			let content = Zotero.QuickCopy.getContentFromItems(
 				[item1, item2],
-				'http://www.zotero.org/styles/apa',
-				'en-US'
+				{ mode: 'bibliography', id: 'http://www.zotero.org/styles/apa', contentType: '', locale: 'en-US' }
 			);
-			
+			win.Zotero_File_Interface.writeToClipboard(content);
+
 			var str = getDataForFlavor('text/html');
 			assert.include(str, 'line-height');
 			assert.include(str, '<i>A</i>');
 			assert.include(str, '<i>B</i>');
-			
+
 			// Plain text
 			str = getDataForFlavor('text/plain');
 			assert.equal(str, 'A. (2016).\nB. (2016).\n');
 		});
-		
+
 		//
 		// "Copy as HTML" mode
 		//
 		it("should copy HTML and HTML source citations to the clipboard", async function () {
-			win.Zotero_File_Interface.copyItemsToClipboard(
+			let content = Zotero.QuickCopy.getContentFromItems(
 				[item1, item2],
-				'http://www.zotero.org/styles/apa',
-				'en-US',
-				true,
-				true
+				{ mode: 'bibliography', id: 'http://www.zotero.org/styles/apa', contentType: 'html', locale: 'en-US' },
+				{ asCitations: true }
 			);
-			
+			win.Zotero_File_Interface.writeToClipboard(content);
+
 			var str = getDataForFlavor('text/html');
 			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
-			
+
 			// Plain text
 			str = getDataForFlavor('text/plain');
 			assert.equal(str, '(<i>A</i>, 2016; <i>B</i>, 2016)');
 		});
-		
+
 		it("should copy HTML and HTML source bibliography to the clipboard", async function () {
-			win.Zotero_File_Interface.copyItemsToClipboard(
+			let content = Zotero.QuickCopy.getContentFromItems(
 				[item1, item2],
-				'http://www.zotero.org/styles/apa',
-				'en-US',
-				true
+				{ mode: 'bibliography', id: 'http://www.zotero.org/styles/apa', contentType: 'html', locale: 'en-US' }
 			);
-			
+			win.Zotero_File_Interface.writeToClipboard(content);
+
 			var str = getDataForFlavor('text/html');
 			assert.include(str, 'line-height');
 			assert.include(str, '<i>A</i>');
 			assert.include(str, '<i>B</i>');
-			
+
 			// Plain text
 			str = getDataForFlavor('text/plain');
 			assert.include(str, 'line-height');
@@ -475,7 +472,8 @@ describe("Zotero_File_Interface", function () {
 				markdownOptions: { includeAppLinks: false },
 				htmlOptions: { includeAppLinks: false }
 			};
-			win.Zotero_File_Interface.exportItemsToClipboard(items, format);
+			let content = Zotero.QuickCopy.getContentFromItems(items, format);
+			win.Zotero_File_Interface.writeToClipboard(content);
 			await Zotero.Promise.delay();
 
 			var text = getClipboardText();

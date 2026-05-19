@@ -80,7 +80,7 @@ describe("Zotero.QuickCopy", function () {
 			await Zotero.QuickCopy.loadSiteSettings();
 
 			Zotero.QuickCopy.lastActiveURL = 'https://wiki.test.org/page';
-			let bib = Zotero.QuickCopy.getFormat('bibliography');
+			let bib = Zotero.QuickCopy.getFormat({ mode: 'bibliography' });
 			assert.equal(bib.id, APA_STYLE_ID);
 		});
 
@@ -107,14 +107,14 @@ describe("Zotero.QuickCopy", function () {
 			await Zotero.QuickCopy.loadSiteSettings();
 
 			Zotero.QuickCopy.lastActiveURL = 'https://test.org/styles/apa';
-			let bib = Zotero.QuickCopy.getFormat('bibliography');
+			let bib = Zotero.QuickCopy.getFormat({ mode: 'bibliography' });
 			assert.equal(bib.id, APA_STYLE_ID);
 		});
 
 		describe("default settings (no site match)", function () {
 			it("should return the default bibliographySetting for mode='bibliography'", function () {
 				Zotero.QuickCopy.lastActiveURL = 'https://no-match.test/';
-				let result = Zotero.QuickCopy.getFormat('bibliography');
+				let result = Zotero.QuickCopy.getFormat({ mode: 'bibliography' });
 				let expected = Zotero.QuickCopy.unserializeSetting(
 					Zotero.Prefs.get('export.quickCopy.bibliographySetting')
 				);
@@ -124,7 +124,7 @@ describe("Zotero.QuickCopy", function () {
 
 			it("should return the default exportSetting for mode='export'", function () {
 				Zotero.QuickCopy.lastActiveURL = 'https://no-match.test/';
-				let result = Zotero.QuickCopy.getFormat('export');
+				let result = Zotero.QuickCopy.getFormat({ mode: 'export' });
 				let expected = Zotero.QuickCopy.unserializeSetting(
 					Zotero.Prefs.get('export.quickCopy.exportSetting')
 				);
@@ -156,14 +156,14 @@ describe("Zotero.QuickCopy", function () {
 				await setSiteSetting(legacy);
 
 				// bibliography mode → site override
-				let bib = Zotero.QuickCopy.getFormat('bibliography');
+				let bib = Zotero.QuickCopy.getFormat({ mode: 'bibliography' });
 				assert.equal(bib.mode, 'bibliography');
 				assert.equal(bib.id, APA_STYLE_ID);
 				assert.equal(bib.contentType, 'html');
 				assert.equal(bib.locale, 'en-US');
 
 				// export mode → no site override → global default
-				let exp = Zotero.QuickCopy.getFormat('export');
+				let exp = Zotero.QuickCopy.getFormat({ mode: 'export' });
 				let globalExport = Zotero.QuickCopy.unserializeSetting(
 					Zotero.Prefs.get('export.quickCopy.exportSetting')
 				);
@@ -185,12 +185,12 @@ describe("Zotero.QuickCopy", function () {
 				await setSiteSetting(legacy);
 
 				// export mode → site override
-				let exp = Zotero.QuickCopy.getFormat('export');
+				let exp = Zotero.QuickCopy.getFormat({ mode: 'export' });
 				assert.equal(exp.mode, 'export');
 				assert.equal(exp.id, BIBTEX_TRANSLATOR_ID);
 
 				// bibliography mode → no site override → global default
-				let bib = Zotero.QuickCopy.getFormat('bibliography');
+				let bib = Zotero.QuickCopy.getFormat({ mode: 'bibliography' });
 				let globalBib = Zotero.QuickCopy.unserializeSetting(
 					Zotero.Prefs.get('export.quickCopy.bibliographySetting')
 				);
@@ -207,7 +207,7 @@ describe("Zotero.QuickCopy", function () {
 				Zotero.QuickCopy.lastActiveURL = `https://${domain}/`;
 				await setSiteSetting(`bibliography/html=${APA_STYLE_ID}`);
 
-				let bib = Zotero.QuickCopy.getFormat('bibliography');
+				let bib = Zotero.QuickCopy.getFormat({ mode: 'bibliography' });
 				assert.equal(bib.mode, 'bibliography');
 				assert.equal(bib.id, APA_STYLE_ID);
 				assert.equal(bib.contentType, 'html');
@@ -227,13 +227,13 @@ describe("Zotero.QuickCopy", function () {
 				});
 				await setSiteSetting(siteFormat);
 
-				let bib = Zotero.QuickCopy.getFormat('bibliography');
+				let bib = Zotero.QuickCopy.getFormat({ mode: 'bibliography' });
 				assert.equal(bib.mode, 'bibliography');
 				assert.equal(bib.id, APA_STYLE_ID);
 				assert.equal(bib.locale, 'fr-FR');
 
 				// export → no site override → global default
-				let exp = Zotero.QuickCopy.getFormat('export');
+				let exp = Zotero.QuickCopy.getFormat({ mode: 'export' });
 				let globalExport = Zotero.QuickCopy.unserializeSetting(
 					Zotero.Prefs.get('export.quickCopy.exportSetting')
 				);
@@ -254,11 +254,11 @@ describe("Zotero.QuickCopy", function () {
 				});
 				await setSiteSetting(siteFormat);
 
-				let bib = Zotero.QuickCopy.getFormat('bibliography');
+				let bib = Zotero.QuickCopy.getFormat({ mode: 'bibliography' });
 				assert.equal(bib.mode, 'bibliography');
 				assert.equal(bib.id, APA_STYLE_ID);
 
-				let exp = Zotero.QuickCopy.getFormat('export');
+				let exp = Zotero.QuickCopy.getFormat({ mode: 'export' });
 				assert.equal(exp.mode, 'export');
 				assert.equal(exp.id, BIBTEX_TRANSLATOR_ID);
 
@@ -288,11 +288,9 @@ describe("Zotero.QuickCopy", function () {
 	describe("#getContentFromItems()", function () {
 		it("should generate BibTeX", async function () {
 			var item = await createDataObject('item');
-			var content = "";
-			var worked = false;
 			
 			await Zotero.Translators.init();
-			
+
 			var translatorID = '9cb70025-a888-4a29-a210-93ec52da40d4'; // BibTeX
 			var format = 'export=' + translatorID;
 			Zotero.Prefs.set("export.quickCopy.exportSetting", format);
@@ -301,17 +299,10 @@ describe("Zotero.QuickCopy", function () {
 			while (!translator.code) {
 				await Zotero.Promise.delay(50);
 			}
-			
-			Zotero.QuickCopy.getContentFromItems(
-				[item],
-				format,
-				(obj, w) => {
-					content = obj.string;
-					worked = w;
-				}
-			);
-			assert.isTrue(worked);
-			assert.isTrue(content.trim().startsWith('@'));
+
+			let content = Zotero.QuickCopy.getContentFromItems([item], format);
+			assert.isString(content.text);
+			assert.isTrue(content.text.trim().startsWith('@'));
 		});
 	});
 	
@@ -319,13 +310,11 @@ describe("Zotero.QuickCopy", function () {
 		var item = createUnsavedDataObject('item', { itemType: 'webpage', title: 'Foo' });
 		item.setField('date', '2020-03-11');
 		await item.saveTx();
-		var content = "";
-		var worked = false;
-		
+
 		// This shouldn't be used
 		Zotero.Prefs.set('export.lastLocale', 'fr-FR');
 		await Zotero.Styles.init();
-		
+
 		var format = 'bibliography=http://www.zotero.org/styles/apa';
 		Zotero.Prefs.set("export.quickCopy.bibliographySetting", format);
 		
@@ -357,7 +346,7 @@ describe("Zotero.QuickCopy", function () {
 		await item.saveTx();
 		
 		// Copy citation, not bibliography
-		let { text } = Zotero.QuickCopy.getContentFromItems([item], format, null, true);
-		assert.equal(text, '《新型数据财产的行为主义保护：基于财产权理论的分析》。');
+		let content = Zotero.QuickCopy.getContentFromItems([item], format, { asCitations: true });
+		assert.equal(content.text, '《新型数据财产的行为主义保护：基于财产权理论的分析》。');
 	});
 })

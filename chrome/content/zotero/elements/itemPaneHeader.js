@@ -398,13 +398,16 @@
 				Zotero.Utilities.Internal.copyTextToClipboard(this.creatorYear.textContent);
 			}
 			else if (selectedMode === 'bibEntry') {
-				Zotero_File_Interface.copyItemsToClipboard(
+				let content = Zotero.QuickCopy.getContentFromItems(
 					[this._item],
-					Zotero.Prefs.get(PREF_BIB_ENTRY_STYLE),
-					Zotero.Prefs.get(PREF_BIB_ENTRY_LOCALE),
-					false,
-					false
+					{
+						mode: 'bibliography',
+						id: Zotero.Prefs.get(PREF_BIB_ENTRY_STYLE),
+						contentType: '',
+						locale: Zotero.Prefs.get(PREF_BIB_ENTRY_LOCALE)
+					}
 				);
+				Zotero_File_Interface.writeToClipboard(content);
 			}
 		}
 		

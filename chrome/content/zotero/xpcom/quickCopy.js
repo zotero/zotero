@@ -235,11 +235,6 @@ Zotero.QuickCopy = new function () {
 		return '';
 	};
 
-	this.getNoteFormat = function () {
-		return this.unserializeSetting(Zotero.Prefs.get('export.noteQuickCopy.setting'));
-	};
-
-
 	this.getLocale = function () {
 		return this.unserializeSetting(
 			Zotero.Prefs.get('export.quickCopy.bibliographySetting')
@@ -303,12 +298,21 @@ Zotero.QuickCopy = new function () {
 
 
 	/**
-	 * Get the Quick Copy format for the currently active URL if any.
+	 * Get the Quick Copy format for the currently active URL.
+	 * When `items` is a selection composed entirely of notes/annotations,
+	 * return the user's note-format pref.
 	 *
-	 * @param {String} [mode] - Optional 'bibliography' or 'export' - omit for drag-drop
-	 * @return {Object} - `{mode, id, contentType, locale}` for bibliography; `{mode, id}` for export
+	 * @param {Object} [options]
+	 * @param {String} [options.mode] - 'bibliography' or 'export'; omit for drag-drop
+	 * @param {Zotero.Item[]} [options.items] - Items the format will be applied to
+	 * @return {Object} - `{mode, id, contentType, locale}` for bibliography; `{mode, id, ...}` for export
 	 */
-	this.getFormat = function (mode) {
+	this.getFormat = function ({ mode, items } = {}) {
+		// Note-only selections always use the note format
+		if (items && items.length && items.every(item => item.isNote() || item.isAnnotation())) {
+			return this.unserializeSetting(Zotero.Prefs.get('export.noteQuickCopy.setting'));
+		}
+
 		var siteRaw = _findSiteFormatForURL(this.lastActiveURL);
 		var site = siteRaw ? this.parseSiteFormat(siteRaw) : null;
 
@@ -334,79 +338,140 @@ Zotero.QuickCopy = new function () {
 	};
 	
 	
-	/*
-	 * Get text and (when applicable) HTML content from items
+	/**
+	 * Produce QuickCopy content from items. Single entry point for clipboard
+	 * copy, drag-and-drop, and the Bibliography dialog. Item-type prep is
+	 * handled here: annotations are wrapped via annotationsToNote, notes are
+	 * passed through reformatNoteCitations, and bibliography mode is filtered
+	 * to regular items. Always returns { text, html },
+	 * unless export translator provides no html format.
 	 *
-	 * |items| is an array of Zotero.Item objects
-	 *
-	 * |format| may be a Quick Copy format string
-	 * (e.g. "bibliography=http://www.zotero.org/styles/apa")
-	 * or an Quick Copy format object
-	 *
-	 * |callback| is only necessary if using an export format and should be
-	 * a function suitable for Zotero.Translate.setHandler, taking parameters
-	 * |obj| and |worked|. The generated content should be placed in obj.string
-	 * and |worked| should be true if the operation is successful.
-	 *
-	 * If bibliography format, the process is synchronous and an object
-	 * contain properties 'text' and 'html' is returned.
+	 * @param {Zotero.Item[]} items
+	 * @param {String|Object} format
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.asCitations=false] - Bibliography only: in-text citation cluster
+	 * @return {{text: String, html?: String} | null}
 	 */
-	this.getContentFromItems = function (items, format, callback, modified) {
-		if (items.length > Zotero.Prefs.get('export.quickCopy.dragLimit')) {
-			Zotero.debug("Skipping quick copy for " + items.length + " items");
-			return false;
-		}
+	this.getContentFromItems = function (items, format, options = {}) {
+		if (!items.length) return null;
 		
 		format = this.unserializeSetting(format);
-		
-		if (format.mode == 'export') {
-			var translation = new Zotero.Translate.Export;
-			translation.noWait = true;	// needed not to break drags
-			// Allow to reuse items array
-			translation.setItems(items.slice());
-			translation.setTranslator(format.id);
-			if (format.options) {
-				translation.setDisplayOptions(format.options);
-			}
-			translation.setHandler("done", callback);
-			translation.translate();
-			return true;
-		}
-		else if (format.mode == 'bibliography') {
-			items = items.filter(item => !item.isNote());
 
-			var locale = format.locale || this.getLocale();
-			
-			// Copy citations if shift key pressed
-			if (modified) {
-				var csl = Zotero.Styles.get(format.id).getCiteProc(locale, "text", { cache: true });
+		// Format-appropriate item transformations:
+		//   annotations → wrap into a temp note,
+		//   notes → reformat embedded citations in the current bib style,
+		//   bibliography mode → keep only regular items.
+		if (items.every(item => item.isAnnotation())) {
+			items = [this.annotationsToNote(items)];
+		}
+		if (items.every(item => item.isNote())) {
+			items = this.reformatNoteCitations(items);
+		}
+		if (format.mode === 'bibliography') {
+			items = items.filter(item => item.isRegularItem());
+		}
+		if (!items.length) return null;
+
+		if (format.mode === 'export') {
+			// Markdown+RichText virtual translator: produces both flavors,
+			// using its `markdownOptions` and `htmlOptions` independently.
+			if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+				let text = _runExportTranslator(items, {
+					mode: 'export',
+					id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN,
+					options: format.markdownOptions
+				});
+				let html = _runExportTranslator(items, {
+					mode: 'export',
+					id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML,
+					options: format.htmlOptions
+				});
+				if (text === null || html === null) return null;
+				return {
+					text: text.replace(/\r\n/g, '\n'),
+					html: html.replace(/\r\n/g, '\n')
+				};
+			}
+
+			// Note HTML: HTML output, exposed on both flavors so rich-text
+			// targets get the formatting and plain editors get the source.
+			if (format.id === Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+				let output = _runExportTranslator(items, format);
+				if (output === null) return null;
+				output = output.replace(/\r\n/g, '\n');
+				let parser = new DOMParser();
+				let doc = parser.parseFromString(output, 'text/html');
+				output = doc.body.innerHTML;
+				return { text: output, html: output };
+			}
+
+			// Other export translators (e.g. BibTeX): single-flavor output.
+			let output = _runExportTranslator(items, format);
+			if (output === null) return null;
+			return { text: output.replace(/\r\n/g, '\n') };
+		}
+
+		if (format.mode === 'bibliography') {
+			let locale = format.locale || this.getLocale();
+			let style = Zotero.Styles.get(format.id);
+			if (!style) return null;
+
+			// Bibliography mode always produces both flavors: plain text for
+			// `text/plain`, HTML for `text/html`. "Copy as HTML" (contentType
+			// === 'html') sends the HTML version to `text/plain` as well, so
+			// plain editors paste HTML source.
+			let html, text;
+			if (options.asCitations) {
+				let csl = style.getCiteProc(locale, 'html', { cache: true });
 				csl.updateItems(items.map(item => item.id));
-				var citation = {
+				let citation = {
 					citationItems: items.map(item => ({ id: item.id })),
 					properties: {}
 				};
-				var html = csl.previewCitationCluster(citation, [], [], "html"); 
-				var text = csl.previewCitationCluster(citation, [], [], "text");
+				html = csl.previewCitationCluster(citation, [], [], 'html');
+				text = csl.previewCitationCluster(citation, [], [], 'text');
 				csl.free();
 			}
 			else {
-				var style = Zotero.Styles.get(format.id);
-				var cslEngine = style.getCiteProc(locale, 'html', { cache: true });
- 				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
- 				cslEngine.free();
+				let cslEngine = style.getCiteProc(locale, 'html', { cache: true });
+				html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, 'html');
+				cslEngine.free();
 				cslEngine = style.getCiteProc(locale, 'text', { cache: true });
-				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
+				text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, 'text');
 				cslEngine.free();
 			}
-			
+
 			return {
-				text: format.contentType == "html" ? html : text,
-				html,
+				text: format.contentType === 'html' ? html : text,
+				html
 			};
 		}
-		
-		throw ("Invalid mode '" + format.mode + "' in Zotero.QuickCopy.getContentFromItems()");
+
+		throw new Error(`Invalid Quick Copy mode '${format.mode}'`);
 	};
+
+
+	/**
+	 * Run an export translator synchronously (relies on noWait + preloaded
+	 * translator code) and return its string output, or null on failure.
+	 */
+	function _runExportTranslator(items, format) {
+		let result = null;
+		let translation = new Zotero.Translate.Export();
+		translation.noWait = true;
+		translation.setItems(items.slice());
+		translation.setTranslator(format.id);
+		if (format.options) {
+			translation.setDisplayOptions(format.options);
+		}
+		translation.setHandler("done", (obj, worked) => {
+			if (worked) {
+				result = obj.string;
+			}
+		});
+		translation.translate();
+		return result;
+	}
 
 	/**
 	 * Generate a note item to pass to getContentFromItems() from an array of annotations
@@ -462,7 +527,7 @@ Zotero.QuickCopy = new function () {
 
 		// Use getFormat() so site-specific bibliography overrides apply when
 		// the user is on a URL with a configured site setting
-		let format = this.getFormat('bibliography');
+		let format = this.getFormat({ mode: 'bibliography' });
 		if (format.mode !== 'bibliography' || !format.id) {
 			return items;
 		}

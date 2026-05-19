@@ -2698,62 +2698,23 @@ var ZoteroPane = new function () {
 	
 	
 	this.copySelectedItemsToClipboard = function (asCitations, mode = 'bibliography') {
-		var items = [];
 		let itemIDs = this.getSelectedItems(true);
 		// Get selected item IDs in the item tree order
 		itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
-		items = Zotero.Items.get(itemIDs);
+		let items = Zotero.Items.get(itemIDs);
+		if (!items.length) return;
 
-		if (!items.length) {
-			return;
-		}
+		let format = Zotero.QuickCopy.getFormat({ mode, items });
 
-		var format = Zotero.QuickCopy.getFormat(mode);
-		if (items.every(item => item.isNote() || item.isAttachment() || item.isAnnotation())) {
-			format = Zotero.QuickCopy.getNoteFormat();
-		}
-		// To copy annotations, wrap them in a temp note
-		if (items.every(item => item.isAnnotation())) {
-			items = [Zotero.QuickCopy.annotationsToNote(items)];
-		}
-		if (items.every(item => item.isNote())) {
-			items = Zotero.QuickCopy.reformatNoteCitations(items);
-		}
+		// asCitations only applies to bibliography mode
+		if (asCitations && format.mode !== 'bibliography') return;
 
-		// In bibliography mode, remove notes and attachments
-		if (format.mode == 'bibliography') {
-			items = items.filter(item => item.isRegularItem());
-		}
-		
-		// DEBUG: We could copy notes via keyboard shortcut if we altered
-		// Z_F_I.copyItemsToClipboard() to use Z.QuickCopy.getContentFromItems(),
-		// but 1) we'd need to override that function's drag limit and 2) when I
-		// tried it the OS X clipboard seemed to be getting text vs. HTML wrong,
-		// automatically converting text/html to plaintext rather than using
-		// text/unicode. (That may be fixable, however.)
-		//
-		// This isn't currently shown, because the commands are disabled when not relevant, so this
-		// function isn't called
-		if (!items.length) {
+		let content = Zotero.QuickCopy.getContentFromItems(items, format, { asCitations });
+		if (!content) {
 			Services.prompt.alert(null, "", Zotero.getString("fileInterface.noReferencesError"));
 			return;
 		}
-		
-		if (format.mode == 'bibliography') {
-			var locale = format.locale;
-			Zotero_File_Interface.copyItemsToClipboard(
-				items, format.id, locale, format.contentType == 'html', asCitations
-			);
-		}
-		else if (format.mode == 'export') {
-			// Copy citations doesn't work in export mode
-			if (asCitations) {
-				return;
-			}
-			else {
-				Zotero_File_Interface.exportItemsToClipboard(items, format);
-			}
-		}
+		Zotero_File_Interface.writeToClipboard(content);
 	}
 	
 	

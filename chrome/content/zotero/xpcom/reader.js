@@ -410,48 +410,20 @@ class ReaderInstance {
 					if (fromText) {
 						return;
 					}
-					// annotations are wrapped in a temp note for translation
+					// Convert the iframe's JSON annotations into a single note
+					// item; getContentFromItems handles the rest (reformatting
+					// embedded citations, picking the right output flavors).
 					let items = [Zotero.QuickCopy.annotationsToNote(annotations)];
-					// Reformat any citations in the annotation note using the
-					// current bibliography style (matches main pane drag behavior)
-					items = Zotero.QuickCopy.reformatNoteCitations(items);
-					let format = Zotero.QuickCopy.getNoteFormat();
+					let format = Zotero.QuickCopy.getFormat({ items });
 					Zotero.debug(`Copying/dragging (${annotations.length}) annotation(s) with ${JSON.stringify(format)}`);
-					// Basically the same code is used in itemTree.jsx onDragStart
-					if (format.mode === 'export') {
-						// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
-						// and Note HTML translators instead
-						if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-							let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions };
-							let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions };
-							Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
-								if (!worked) {
-									return;
-								}
-								Zotero.QuickCopy.getContentFromItems(items, htmlFormat, (obj2, worked) => {
-									if (!worked) {
-										return;
-									}
-									dataTransfer.setData('text/plain', obj.string.replace(/\r\n/g, '\n'));
-									dataTransfer.setData('text/html', obj2.string.replace(/\r\n/g, '\n'));
-								});
-							});
+
+					let content = Zotero.QuickCopy.getContentFromItems(items, format);
+					if (content) {
+						if (content.html) {
+							dataTransfer.setData('text/html', content.html);
 						}
-						else {
-							Zotero.QuickCopy.getContentFromItems(items, format, (obj, worked) => {
-								if (!worked) {
-									return;
-								}
-								var text = obj.string.replace(/\r\n/g, '\n');
-								// For Note HTML translator use body content only
-								if (format.id === Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
-									// Use body content only
-									let parser = new DOMParser();
-									let doc = parser.parseFromString(text, 'text/html');
-									text = doc.body.innerHTML;
-								}
-								dataTransfer.setData('text/plain', text);
-							});
+						if (content.text) {
+							dataTransfer.setData('text/plain', content.text);
 						}
 					}
 				}

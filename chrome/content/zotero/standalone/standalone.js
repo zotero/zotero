@@ -367,7 +367,7 @@ const ZoteroStandalone = new function () {
 		document.l10n.setAttributes(copyAnnotation, "menu-edit-copy-annotation", { count: selected.length });
 
 		// Label the export menu with the selected translator name
-		var exportFormat = Zotero.QuickCopy.getFormat('export');
+		var exportFormat = Zotero.QuickCopy.getFormat({ mode: 'export' });
 		if (exportFormat.id) {
 			try {
 				let translator = Zotero.Translators.get(exportFormat.id);
