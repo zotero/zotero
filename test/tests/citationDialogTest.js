@@ -571,6 +571,63 @@ describe("Citation Dialog", function () {
 				assert.isOk(node);
 			}
 		});
+
+		it("should sort libraries in list mode by cited count, with user library first and others alphabetical on tie", async function () {
+			let gammaGroup = await createGroup({ name: "gamma_group" });
+			let betaGroup = await createGroup({ name: "beta_group" });
+			let alphaGroup = await createGroup({ name: "alpha_group" });
+
+			// One search-matching item per library
+			let userItem = await createDataObject('item', { title: "libsort_user" });
+			let gammaItem = await createDataObject('item', { title: "libsort_gamma", libraryID: gammaGroup.libraryID });
+			let betaItem = await createDataObject('item', { title: "libsort_beta", libraryID: betaGroup.libraryID });
+			let alphaItem = await createDataObject('item', { title: "libsort_alpha", libraryID: alphaGroup.libraryID });
+			// Cited item with a title that doesn't match the search query, so it
+			// isn't removed from results.found by deduplication. Goes in gamma_group
+			// so that group has a higher cited count than the rest.
+			let citedItem = await createDataObject('item', { title: "cited_item", libraryID: gammaGroup.libraryID });
+
+			io.getItems = async () => [citedItem];
+			io.isAllCitedDataLoaded = true;
+
+			await IOManager.toggleDialogMode("list");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+
+			SearchHandler.selectedItems = [];
+			SearchHandler.openItems = [];
+			// Reset so refreshCitedItems re-fetches via io.getItems and
+			// populates citedItemCountsByLibrary
+			SearchHandler.citedItems = null;
+			SearchHandler.citedItemCountsByLibrary = {};
+			await SearchHandler.refreshCitedItems();
+
+			await dialog.currentLayout.search("libsort", { skipDebounce: true });
+
+			let libraryGroupKeys = SearchHandler.getOrderedSearchResultGroups()
+				.filter(g => g.isLibrary)
+				.map(g => g.key);
+
+			// Expected order:
+			//   1. gamma_group  -- only library with a cited item (cited count wins)
+			//   2. user library -- userLibraryID wins ties over other libraries
+			//   3. alpha_group -- alphabetical fallback among remaining libraries
+			//   4. beta_group
+			assert.deepEqual(libraryGroupKeys, [
+				gammaGroup.libraryID,
+				userItem.libraryID,
+				alphaGroup.libraryID,
+				betaGroup.libraryID
+			]);
+
+			// Reset cited state so subsequent tests aren't affected
+			SearchHandler.citedItems = [];
+			SearchHandler.citedItemCountsByLibrary = {};
+
+			io.getItems = () => [];
+			delete io.isAllCitedDataLoaded;
+		});
 	});
 
 	describe("Dialog loading", function () {
