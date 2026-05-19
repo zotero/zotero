@@ -888,9 +888,9 @@ menu-normalize-attachment-titles =
     .label = Normalize Attachment Titles…
 normalize-attachment-titles-title = Normalize Attachment Titles
 normalize-attachment-titles-text = { -app-name } automatically renames files on disk using parent item metadata, but it uses separate, simpler titles such as “Full Text PDF”, “Preprint PDF”, or “PDF” for primary attachments to keep the items list cleaner and avoid duplicating information.
-    
+
     In older versions of { -app-name }, as well as when using certain plugins, attachment titles could be changed unnecessarily to match the filenames.
-    
+
     Would you like to update the selected attachments to use simpler titles? Only primary attachments with titles that match the filename will be changed.
 
 banner-close-button =
@@ -900,3 +900,29 @@ plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
 
 data-dir-unsupported-storage = This can happen if the { -app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share.
+
+menu-copy-as =
+    .label = Copy As
+
+menu-copy-citation =
+    .label = Citation
+menu-copy-bibliography =
+    .label = Bibliography
+menu-copy-note =
+    .label = Note Text
+
+menu-copy-local-link =
+    .label = {$numItems ->
+        [one] App Link
+        *[other] App Links
+    }
+menu-copy-local-item-link =
+    .label = Item
+menu-copy-local-reader-link =
+    .label = Reader
+
+menu-copy-web-library-link =
+    .label = Online Library {$numItems ->
+        [one] Link
+        *[other] Links
+    }

@@ -631,6 +631,33 @@ class ReaderInstance {
 				// As above
 				setTimeout(() => this._openReadAloudVoicesDialog({ lang, tier, ftl }));
 			},
+			onCopyLinkToAnnotation: (annotation) => {
+				let { position, id } = annotation;
+				let attachment = Zotero.Items.get(this._item.id);
+				let itemURI = 'zotero://open/'
+					+ Zotero.API.getLibraryPrefix(attachment.libraryID)
+					+ '/items/' + attachment.key;
+				// See Note HTML/Markdown translators
+				if (position.type === 'FragmentSelector') {
+					itemURI += '?cfi=' + encodeURIComponent(position.value);
+				}
+				else if (position.type === 'CssSelector') {
+					itemURI += '?sel=' + encodeURIComponent(position.value);
+				}
+				else {
+					itemURI += '?page=' + (position.pageIndex + 1);
+				}
+				itemURI += '&annotation=' + id;
+				Zotero.Utilities.Internal.copyTextToClipboard(itemURI);
+			},
+			onCopyLinkToPage: (pageIndex) => {
+				let attachment = Zotero.Items.get(this._item.id);
+				let itemURI = 'zotero://open/'
+					+ Zotero.API.getLibraryPrefix(attachment.libraryID)
+					+ '/items/' + attachment.key
+					+ '?page=' + (pageIndex + 1);
+				Zotero.Utilities.Internal.copyTextToClipboard(itemURI);
+			}
 		}, this._iframeWindow, { cloneFunctions: true }));
 
 		this._resolveInitPromise();
