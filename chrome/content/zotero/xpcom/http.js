@@ -207,9 +207,9 @@ Zotero.HTTP = new function () {
 	 * @param {Number} [options.timeout = 30000] - Request timeout specified in milliseconds, or 0
 	 *     for no timeout
 	 * @param {Number[]} [options.errorDelayIntervals] - Array of milliseconds to wait before
-	 *     retrying after 5xx error; if unspecified, a default set is used
+	 *     retrying after 429/5xx error; if unspecified, a default set is used
 	 * @param {Number} [options.errorDelayMax = 3600000] - Milliseconds to wait before stopping
-	 *     5xx retries; set to 0 to disable retrying
+	 *     429/5xx retries; set to 0 to disable retrying
 	 * @return {Promise<XMLHttpRequest>} - A promise resolved with the XMLHttpRequest object if the
 	 *     request succeeds or rejected if the browser is offline or a non-2XX status response
 	 *     code is received (or a code not in options.successCodes if provided).
@@ -1536,7 +1536,8 @@ Zotero.HTTP = new function () {
 
 
 	/**
-	 * Call `fn` and automatically retry on 5xx errors with exponential backoff.
+	 * Call `fn` and automatically retry on 429/5xx errors, honoring Retry-After
+	 * for 429 and 503 and falling back to exponential backoff otherwise.
 	 *
 	 * @param {Function} fn - Async function to call (should throw
 	 *     UnexpectedStatusException on failure)
@@ -1556,10 +1557,11 @@ Zotero.HTTP = new function () {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 					_checkConnection(e.xmlhttp, url);
 
-					if (e.is5xx()) {
+					if (e.status == 429 || e.is5xx()) {
 						Zotero.logError(e);
-						// Check for Retry-After header on 503
-						if (e.xmlhttp.status == 503 && (await _checkRetry(e.xmlhttp))) {
+						// Check for Retry-After header on 429 or 503
+						if ((e.status == 429 || e.status == 503)
+								&& (await _checkRetry(e.xmlhttp))) {
 							continue;
 						}
 						// Don't retry if errorDelayMax is 0
@@ -1567,7 +1569,7 @@ Zotero.HTTP = new function () {
 								|| Zotero.HTTP.disableErrorRetry) {
 							throw e;
 						}
-						// Automatically retry other 5xx errors by default
+						// Automatically retry other 429/5xx errors by default
 						if (!errorDelayGenerator) {
 							// Keep trying for up to an hour
 							errorDelayGenerator

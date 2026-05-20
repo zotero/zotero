@@ -281,6 +281,35 @@ describe("Zotero.HTTP", function () {
 				assert.equal(spy.callCount, 3);
 			});
 			
+			it("should obey Retry-After for 429", async function () {
+				var called = 0;
+				server.respond(function (req) {
+					if (req.method == "GET" && req.url == baseURL + "error") {
+						if (called < 1) {
+							req.respond(
+								429,
+								{
+									"Retry-After": "5"
+								},
+								""
+							);
+						}
+						else {
+							req.respond(
+								200,
+								{},
+								""
+							);
+						}
+					}
+					called++;
+				});
+				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
+				await Zotero.HTTP.request("GET", baseURL + "error");
+				assert.equal(2, spy.callCount);
+				assert.approximately(delayStub.args[0][0], 5 * 1000, 5);
+			});
+			
 			it("should obey Retry-After for 503", async function () {
 				var called = 0;
 				server.respond(function (req) {
