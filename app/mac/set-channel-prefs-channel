@@ -19,7 +19,8 @@ binary=$1
 from_channel=$2
 to_channel=$3
 # `strings` has a 4-character minimum by default, but we need 3 for 'dev'
-strings_cmd="strings -n 3"
+# `-arch all` is needed so builds on x86 mac also find the two positions of `source`
+strings_cmd="strings -n 3 -arch all"
 
 if [ ${#to_channel} -gt 7 ]; then
 	echo "Channel length cannot exceed 7 characters -- aborting" >&2
