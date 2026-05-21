@@ -53,7 +53,14 @@ Zotero.AttachmentReadObserver = {
 		}
 		
 		item.attachmentLastRead = Math.round(this._getCurrentDate().getTime() / 1000);
-		await item.saveTx({ skipDateModifiedUpdate: true, skipEditCheck: true });
+		await item.saveTx({
+			skipDateModifiedUpdate: true,
+			skipEditCheck: true,
+			// For group items, lastRead is synced via a synced setting in My Library, so don't
+			// mark the group item itself as needing sync (which would cause an access-denied error
+			// in read-only libraries)
+			skipSyncedUpdate: item.library.isGroup,
+		});
 	},
 	
 	async notify(action, type, ids, extraData) {
