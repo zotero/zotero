@@ -146,7 +146,7 @@
 			
 			this._value = val;
 			const styleData = this._style ? Zotero.Styles.get(this._style) : null;
-			this.localeListEl.value = styleData && styleData.locale || this._value;
+			this.localeListEl.value = styleData && styleData.effectiveLocale || this._value;
 		}
 
 		get style() {
@@ -156,8 +156,8 @@
 		set style(style) {
 			this._style = style;
 			const styleData = style ? Zotero.Styles.get(style) : null;
-			this.localeListEl.disabled = !style || !!styleData.locale;
-			this.localeListEl.value = styleData && styleData.locale || this._value || this.fallbackLocale;
+			this.localeListEl.disabled = !style || !!styleData.effectiveLocale;
+			this.localeListEl.value = styleData && styleData.effectiveLocale || this._value || this.fallbackLocale;
 		}
 
 		connectedCallback() {
