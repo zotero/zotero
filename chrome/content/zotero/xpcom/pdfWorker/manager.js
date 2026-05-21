@@ -699,12 +699,12 @@ class PDFWorker {
 		return this._enqueue(async () => {
 			let prep = await this._prepareStructuredDataRequest(itemID);
 			if (!prep) return null;
-			let { attachment, contentType, buf } = prep;
+			let { attachment, contentType, buf, sourceHash } = prep;
 			Zotero.debug(`Getting structured document text from item ${attachment.libraryKey}`);
 			let t = new Date();
 			try {
 				var result = await this._query('getStructuredDocumentText', {
-					buf, contentType, password
+					buf, contentType, password, sourceHash
 				}, [buf]);
 			}
 			catch (e) {
@@ -725,10 +725,15 @@ class PDFWorker {
 		let path = await attachment.getFilePathAsync();
 		if (!path) return null;
 		let buf = await IOUtils.read(path);
+		let sourceHash = await attachment.attachmentHash;
+		if (!sourceHash) {
+			throw new Error('Attachment is missing an MD5 hash');
+		}
 		return {
 			attachment,
 			contentType: attachment.attachmentContentType,
 			buf: new Uint8Array(buf).buffer,
+			sourceHash,
 		};
 	}
 
@@ -760,16 +765,17 @@ class PDFWorker {
 			}
 			let prep = await this._prepareStructuredDataRequest(itemID);
 			if (!prep) return;
-			let { attachment, contentType, buf } = prep;
+			let { attachment, contentType, buf, sourceHash } = prep;
 			Zotero.debug(`Streaming structured document text from item ${attachment.libraryKey}`);
 			let t = new Date();
 			try {
 				let { promise: queryPromise, abort } = this._streamingQuery(
-					'getStructuredDocumentText',
+					'getStructuredDocumentTextJSON',
 					{
 						buf,
 						contentType,
 						password,
+						sourceHash,
 						streaming: true,
 						...(batchSize ? { batchSize } : {}),
 					},
