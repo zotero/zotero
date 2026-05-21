@@ -702,7 +702,13 @@ Zotero.Sync.APIClient.prototype = {
 
 			let error;
 			if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.status === 402) {
-				let body = await e.xmlhttp.response?.text();
+				let body = null;
+				try {
+					body = new TextDecoder().decode(e.xmlhttp.response);
+				}
+				catch {
+					// Ignore
+				}
 				error = body === 'daily_limit_exceeded' ? 'daily-limit-exceeded' : 'quota-exceeded';
 			}
 			else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
