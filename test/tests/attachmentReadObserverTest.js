@@ -42,6 +42,21 @@ describe("Zotero.AttachmentReadObserver", function () {
 			stub.restore();
 		});
 
+		it("should not mark a group attachment as unsynced when opened", async function () {
+			let group = await createGroup();
+			let item = await createDataObject('item', { libraryID: group.libraryID });
+			let attachment = await importPDFAttachment(item);
+
+			// Mark as synced
+			attachment.synced = true;
+			await attachment.saveTx({ skipSyncedUpdate: true });
+			assert.isTrue(attachment.synced);
+
+			await Zotero.Notifier.trigger('open', 'file', [attachment.id]);
+			assert.isNumber(attachment.attachmentLastRead);
+			assert.isTrue(attachment.synced);
+		});
+
 		it("should update an attachment's attachmentLastRead every five minutes when the page changes", async function () {
 			let attachment = await importPDFAttachment(null);
 
