@@ -614,10 +614,10 @@ Zotero.Styles = new function () {
 			return menulist.value;
 		}
 		
-		menulist.disabled = !!style.locale;
+		menulist.disabled = !!style.effectiveLocale;
 		if (menulist.labelElement) menulist.labelElement.disabled = false;
 		
-		let selectLocale = style.locale || prefLocale || Zotero.locale;
+		let selectLocale = style.effectiveLocale || prefLocale || Zotero.locale;
 		selectLocale = Zotero.Styles.primaryDialects[selectLocale] || selectLocale;
 		
 		// Make sure the locale we want to select is in the menulist
@@ -713,6 +713,23 @@ Zotero.Style = function (style, path) {
 	
 	this._cachedEngines = new Map();
 }
+
+/**
+ * The style's own default-locale, falling back to the parent's for dependent
+ * styles that don't specify their own. citeproc-js parses the parent's XML and
+ * will honor the parent's default-locale over any user-selected locale unless
+ * forced, so this reflects the locale that will actually be used.
+ */
+Object.defineProperty(Zotero.Style.prototype, 'effectiveLocale', {
+	get: function () {
+		if (this.locale) return this.locale;
+		if (this.source) {
+			let parent = Zotero.Styles.get(this.source);
+			if (parent) return parent.locale;
+		}
+		return null;
+	}
+});
 
 /**
  * Get a citeproc-js CSL.Engine instance

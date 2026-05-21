@@ -203,4 +203,40 @@ describe("Zotero.Styles", function () {
 			assert.isFalse(visible.some(s => s.styleID === prefix + oldName));
 		});
 	});
+
+	describe("Zotero.Style#effectiveLocale", function () {
+		it("should return the style's own default-locale", function () {
+			let xml = `<?xml version="1.0" encoding="utf-8"?>
+			<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0" default-locale="fr-FR">
+			  <info>
+				<title>Test</title>
+				<id>http://www.zotero.org/styles/test-own-locale</id>
+				<link href="http://www.zotero.org/styles/test-own-locale" rel="self"/>
+				<updated>2024-01-01T00:00:00+00:00</updated>
+			  </info>
+			  <citation><layout><text variable="title"/></layout></citation>
+			</style>`;
+			let style = new Zotero.Style(xml);
+			assert.equal(style.effectiveLocale, "fr-FR");
+		});
+
+		it("should fall back to the parent's default-locale when the dependent has none", function () {
+			let parentID = "http://www.zotero.org/styles/american-medical-association";
+			assert.equal(Zotero.Styles.get(parentID).locale, "en-US");
+
+			let xml = `<?xml version="1.0" encoding="utf-8"?>
+			<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0">
+			  <info>
+				<title>Test Dependent</title>
+				<id>http://www.zotero.org/styles/test-dependent</id>
+				<link href="http://www.zotero.org/styles/test-dependent" rel="self"/>
+				<link href="${parentID}" rel="independent-parent"/>
+				<updated>2024-01-01T00:00:00+00:00</updated>
+			  </info>
+			</style>`;
+			let style = new Zotero.Style(xml);
+			assert.isNull(style.locale);
+			assert.equal(style.effectiveLocale, "en-US");
+		});
+	});
 });
