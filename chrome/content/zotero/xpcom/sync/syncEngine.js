@@ -92,6 +92,32 @@ Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_RESTART = 5;
 Zotero.Sync.Data.Engine.prototype.UPLOAD_RESULT_CANCEL = 6;
 
 Zotero.Sync.Data.Engine.prototype.start = async function () {
+	let resetAttempted = false;
+	while (true) {
+		try {
+			return await this._runSync();
+		}
+		catch (e) {
+			// If the server's library version has gone backwards (e.g., because the user's
+			// account was deleted and undeleted, leaving a fresh shardLibraries row on the
+			// dataserver), reset the local library version and storage version to -1 and
+			// restart, which will run the full-sync path in _runSync().
+			if (!resetAttempted && e.name === 'ZoteroLibraryVersionDecreaseError') {
+				resetAttempted = true;
+				Zotero.warn(`Library version went backward for ${this.library.name} `
+					+ `(${e.message}) -- resetting for full sync`);
+				this.library.libraryVersion = -1;
+				this.library.storageVersion = -1;
+				await this.library.saveTx();
+				continue;
+			}
+			throw e;
+		}
+	}
+};
+
+
+Zotero.Sync.Data.Engine.prototype._runSync = async function () {
 	Zotero.debug("Starting data sync for " + this.library.name);
 	
 	// TODO: Handle new/changed user when setting key

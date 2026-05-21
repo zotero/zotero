@@ -289,7 +289,13 @@ Zotero.Library.prototype._set = function (prop, val) {
 			if (val < -1) throw new Error(prop + ' must not be less than -1');
 			
 			// Ensure that it is never decreasing, unless it is being set to -1
-			if (val != -1 && val < this._libraryVersion) throw new Error(prop + ' cannot decrease');
+			if (val != -1 && val < this._libraryVersion) {
+				// Caught in syncEngine to trigger a full sync (e.g., after a server-side
+				// account deletion/recreation has reset the remote library version)
+				let e = new Error(prop + ' cannot decrease');
+				e.name = 'ZoteroLibraryVersionDecreaseError';
+				throw e;
+			}
 			
 			break;
 		
@@ -301,7 +307,11 @@ Zotero.Library.prototype._set = function (prop, val) {
 			// Ensure that it is never decreasing, unless it is being set to -1
 			// by Reset File Sync History
 			if (val != -1 && val < this._libraryStorageVersion) {
-				throw new Error(prop + ' cannot decrease');
+				// Caught in syncEngine to trigger a full sync (e.g., after a server-side
+				// account deletion/recreation has reset the remote library version)
+				let e = new Error(prop + ' cannot decrease');
+				e.name = 'ZoteroLibraryVersionDecreaseError';
+				throw e;
 			}
 			val = newVal;
 			break;

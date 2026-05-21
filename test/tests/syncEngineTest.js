@@ -2101,8 +2101,65 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.isTrue(item.synced);
 			assert.equal(library.libraryVersion, lastLibraryVersion);
 		});
+
+		it("should reset library version and retry full sync if server version goes backward", async function () {
+			// Reproduces the case where an account is deleted and undeleted on the server,
+			// leaving a fresh shardLibraries row with a low version. A sync attempt then
+			// receives a Last-Modified-Version below the local one, the setter throws, and
+			// start() should reset both versions to -1 and retry.
+			({ engine, client, caller } = await setup());
+			let library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 100;
+			library.storageVersion = 100;
+			await library.saveTx();
+
+			let seenVersions = [];
+			let stub = sinon.stub(engine, '_runSync').callsFake(async function () {
+				seenVersions.push({
+					libraryVersion: library.libraryVersion,
+					storageVersion: library.storageVersion
+				});
+				if (seenVersions.length === 1) {
+					// Simulate the setter throw that happens when the server's
+					// Last-Modified-Version is below the local libraryVersion
+					library.libraryVersion = 5;
+				}
+			});
+
+			await engine.start();
+
+			assert.equal(stub.callCount, 2);
+			assert.deepEqual(seenVersions[0], { libraryVersion: 100, storageVersion: 100 });
+			assert.deepEqual(seenVersions[1], { libraryVersion: -1, storageVersion: -1 });
+			stub.restore();
+		});
+
+		it("should not retry more than once if version decrease keeps recurring", async function () {
+			({ engine, client, caller } = await setup());
+			let library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 100;
+			await library.saveTx();
+
+			let stub = sinon.stub(engine, '_runSync').callsFake(async function () {
+				let e = new Error('_libraryVersion cannot decrease');
+				e.name = 'ZoteroLibraryVersionDecreaseError';
+				throw e;
+			});
+
+			let caught;
+			try {
+				await engine.start();
+			}
+			catch (e) {
+				caught = e;
+			}
+
+			assert.equal(stub.callCount, 2);
+			assert.equal(caught && caught.name, 'ZoteroLibraryVersionDecreaseError');
+			stub.restore();
+		});
 	})
-	
+
 	describe("#_startDownload()", function () {
 		it("shouldn't redownload objects that are already up to date", async function () {
 			var userLibraryID = Zotero.Libraries.userLibraryID;
