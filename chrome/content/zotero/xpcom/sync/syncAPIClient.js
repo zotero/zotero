@@ -872,7 +872,10 @@ Zotero.Sync.APIClient.prototype = {
 			opts.compressBody = true;
 		}
 		opts.cancellerReceiver = this.cancellerReceiver;
-		
+		// Handle 429 and Retry-After ourselves so we can pause the entire batch
+		// of concurrent sync requests, not just retry the one that failed
+		opts.noRetryOnThrottle = true;
+
 		var tries = 0;
 		while (true) {
 			var result = await this.caller.start(async function () {
@@ -885,7 +888,8 @@ Zotero.Sync.APIClient.prototype = {
 				catch (e) {
 					tries++;
 					if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-						if (this._check429(e.xmlhttp)) {
+						if (this._check429(e.xmlhttp)
+								|| (e.xmlhttp.status == 503 && this._checkRetry(e.xmlhttp))) {
 							// Return false to keep retrying request
 							return false;
 						}

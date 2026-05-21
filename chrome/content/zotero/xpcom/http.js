@@ -210,6 +210,11 @@ Zotero.HTTP = new function () {
 	 *     retrying after 429/5xx error; if unspecified, a default set is used
 	 * @param {Number} [options.errorDelayMax = 3600000] - Milliseconds to wait before stopping
 	 *     429/5xx retries; set to 0 to disable retrying
+	 * @param {Boolean} [options.noRetryOnThrottle] - Don't retry on 429 or 503 with a
+	 *     Retry-After header; instead, throw UnexpectedStatusException to the caller so it
+	 *     can apply its own throttling (e.g., the sync API client, which pauses an entire
+	 *     batch of concurrent requests). Other 5xx errors (and 503 without Retry-After) are
+	 *     still retried automatically.
 	 * @return {Promise<XMLHttpRequest>} - A promise resolved with the XMLHttpRequest object if the
 	 *     request succeeds or rejected if the browser is offline or a non-2XX status response
 	 *     code is received (or a code not in options.successCodes if provided).
@@ -1516,17 +1521,25 @@ Zotero.HTTP = new function () {
 		);
 	};
 	
-	async function _checkRetry(req) {
+	function _getRetryAfter(req) {
 		// req may be an XMLHttpRequest (from request()) or a fetch Response
 		// (from download())
 		var retryAfter = req.headers?.get
 			? req.headers.get("Retry-After")
 			: req.getResponseHeader("Retry-After");
 		if (!retryAfter) {
-			return false;
+			return null;
 		}
 		if (parseInt(retryAfter) != retryAfter) {
 			Zotero.logError(`Invalid Retry-After delay ${retryAfter}`);
+			return null;
+		}
+		return parseInt(retryAfter);
+	}
+
+	async function _checkRetry(req) {
+		var retryAfter = _getRetryAfter(req);
+		if (retryAfter === null) {
 			return false;
 		}
 		Zotero.debug(`Delaying ${retryAfter} seconds for Retry-After`);
@@ -1556,6 +1569,15 @@ Zotero.HTTP = new function () {
 			catch (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
 					_checkConnection(e.xmlhttp, url);
+
+					// Callers that handle server-signaled throttling themselves
+					// (e.g., to pause a batch of concurrent requests) opt out of
+					// automatic 429 and 503-with-Retry-After retries
+					if (options.noRetryOnThrottle
+							&& (e.status == 429
+								|| (e.status == 503 && _getRetryAfter(e.xmlhttp) !== null))) {
+						throw e;
+					}
 
 					if (e.status == 429 || e.is5xx()) {
 						Zotero.logError(e);
