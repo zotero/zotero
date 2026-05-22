@@ -453,4 +453,16 @@ describe("Zotero.DB", function () {
 			assert.isTrue(await IOUtils.exists(bakFile));
 		});
 	});
+
+	describe("#onConnect()", function () {
+		it("should run registered callbacks after the connection is reopened", async function () {
+			let count = 0;
+			Zotero.DB.onConnect(async () => {
+				count++;
+			});
+			await Zotero.DB.closeDatabase();
+			await Zotero.DB.valueQueryAsync("SELECT 1");
+			assert.equal(count, 1);
+		});
+	});
 });

@@ -61,9 +61,15 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	var _syncLibraryVersion = 0;
 	
 	this.init = async function () {
-		await Zotero.DB.queryAsync("ATTACH ':memory:' AS 'indexing'");
-		await Zotero.DB.queryAsync('CREATE TABLE indexing.fulltextWords (word NOT NULL)');
-		
+		let setUpIndexingDB = async () => {
+			await Zotero.DB.queryAsync("ATTACH ':memory:' AS 'indexing'");
+			await Zotero.DB.queryAsync('CREATE TABLE indexing.fulltextWords (word NOT NULL)');
+		};
+		await setUpIndexingDB();
+		// ATTACHed databases don't survive a connection reopen (e.g., after vacuum), so
+		// re-run the setup on every reconnect
+		Zotero.DB.onConnect(setUpIndexingDB);
+
 		let pdfConverterFileName = "pdftotext";
 		let pdfInfoFileName = "pdfinfo";
 		

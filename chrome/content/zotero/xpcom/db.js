@@ -105,7 +105,8 @@ Zotero.DBConnection = function (dbNameOrPath) {
 	};
 	this._dbIsCorrupt = null
 	this._onlineBackupInProgress = false;
-	
+	this._onConnectCallbacks = [];
+
 	this._transactionPromise = null;
 	
 	if (dbNameOrPath == 'zotero') {
@@ -988,6 +989,21 @@ Zotero.DBConnection.prototype.closeDatabase = async function (permanent) {
 
 
 /**
+ * Register a callback to run after the SQLite connection is opened, including after it has
+ * been closed and reopened (e.g., after vacuum()). Use this for per-connection state that
+ * doesn't persist across reopens, such as ATTACHed databases or temp tables.
+ *
+ * The callback is not invoked for the connection that's already open at registration time --
+ * the caller is responsible for any initial setup.
+ *
+ * @param {Function} callback - Async function called with no arguments after each (re)open
+ */
+Zotero.DBConnection.prototype.onConnect = function (callback) {
+	this._onConnectCallbacks.push(callback);
+};
+
+
+/**
  * @deprecated
  */
 Zotero.DBConnection.prototype.backupDatabase = async function (_suffix, _force) {
@@ -1302,7 +1318,16 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 			idleService.addIdleObserver(this, 300);
 		});
 	}
-	
+
+	for (let callback of this._onConnectCallbacks) {
+		try {
+			await callback();
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	}
+
 	return this._connection;
 };
 
