@@ -1491,6 +1491,19 @@ describe("ZoteroPane", function () {
 		});
 
 		it("should shift-tab across the zotero pane", async function () {
+			Zotero.Debug.init(1);
+
+			// Log all currently open windows to help diagnose intermittent
+			// failures caused by other tests leaving windows open and stealing focus
+			Zotero.debug("Open windows at start of shift-tab test:");
+			for (let openWin of Services.wm.getEnumerator(null)) {
+				Zotero.debug("  - "
+					+ "type=" + (openWin.document.documentElement.getAttribute("windowtype") || "")
+					+ ", URL=" + openWin.location.href
+					+ ", title=" + JSON.stringify(openWin.document.title)
+					+ ", active=" + (openWin === Services.focus.activeWindow));
+			}
+
 			let searchBox = doc.getElementById('zotero-tb-search-textbox');
 			searchBox.focus();
 
