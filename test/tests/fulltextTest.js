@@ -62,6 +62,16 @@ describe("Zotero.FullText", function () {
 				);
 			});
 
+			it("should still work after the DB connection is reopened", async function () {
+				var item = await importFileAttachment('test.txt');
+				await Zotero.DB.vacuum({ force: true });
+				await Zotero.Fulltext.indexItems([item.id]);
+				assert.equal(
+					((await Zotero.Fulltext.getIndexedState(item))),
+					Zotero.Fulltext.INDEX_STATE_INDEXED
+				);
+			});
+
 			describe("Indexing with HiddenBrowser", () => {
 				it("should index attachment as its attachmentContentType when supported", async function () {
 					// Firefox would normally load this as text/x-shellscript, but we detect text/plain
