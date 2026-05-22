@@ -1194,6 +1194,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Handle loading/message state
 		if (options.loading) {
 			options.message ||= Zotero.getString('pane.items.loading');
+			// Suppress select events during loading
+			this.selection.selectEventsSuppressed = true;
 			this.selection.clearSelection();
 			this.selection.focused = 0;
 		}
