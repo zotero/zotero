@@ -505,22 +505,20 @@ Zotero_Preferences.Export = {
 	
 	
 	updateQuickCopyInstructions: function () {
-		var prefix = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
-		
-		var key = Zotero.Prefs.get('keys.copySelectedItemsToClipboard');
-		var str = Zotero.getString('zotero.preferences.export.quickCopy.instructions', prefix + key);
-		var instr = document.getElementById('quickCopy-instructions');
-		while (instr.hasChildNodes()) {
-			instr.removeChild(instr.firstChild);
-		}
-		instr.appendChild(document.createTextNode(str));
-		
-		key = Zotero.Prefs.get('keys.copySelectedItemCitationsToClipboard');
-		str = Zotero.getString('zotero.preferences.export.quickCopy.citationInstructions', prefix + key);
-		instr = document.getElementById('quickCopy-citationInstructions');
-		while (instr.hasChildNodes()) {
-			instr.removeChild(instr.firstChild);
-		}
-		instr.appendChild(document.createTextNode(str));
+		var shiftPrefix = Zotero.getString("command-or-control") + "+" + Zotero.getString("general-key-shift") + "+";
+
+		document.l10n.setAttributes(
+			document.getElementById('quickCopy-instructions'),
+			'preferences-quickCopy-instructions',
+			{
+				bibShortcut: shiftPrefix + Zotero.Prefs.get('keys.copyAsBibliography'),
+				exportShortcut: shiftPrefix + Zotero.Prefs.get('keys.copyAsExport')
+			}
+		);
+		document.l10n.setAttributes(
+			document.getElementById('quickCopy-citationInstructions'),
+			'preferences-quickCopy-citationInstructions',
+			{ citationShortcut: Zotero.getString("command-or-control") + "+C" }
+		);
 	}
 };

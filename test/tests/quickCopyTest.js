@@ -349,4 +349,153 @@ describe("Zotero.QuickCopy", function () {
 		let content = Zotero.QuickCopy.getContentFromItems([item], format, { asCitations: true });
 		assert.equal(content.text, '《新型数据财产的行为主义保护：基于财产权理论的分析》。');
 	});
-})
+});
+
+
+describe("Smart copy", function () {
+	var win, zp, doc;
+	var regularItem, attachment, annotation, note;
+	var clipboardService;
+	const SMART_COPY_BIB = {
+		mode: 'bibliography',
+		id: 'http://www.zotero.org/styles/apa',
+		contentType: '',
+		locale: ''
+	};
+
+	before(async function () {
+		win = await loadZoteroPane();
+		zp = win.ZoteroPane;
+		doc = win.document;
+		clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"]
+			.getService(Components.interfaces.nsIClipboard);
+
+		await Zotero.Styles.init();
+		await Zotero.Translators.init();
+
+		// Preload Note Markdown / Note HTML translators
+		for (let id of [
+			Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN,
+			Zotero.Translators.TRANSLATOR_ID_NOTE_HTML,
+		]) {
+			let translator = Zotero.Translators.get(id);
+			translator.cacheCode = true;
+			await Zotero.Translators.getCodeForTranslator(translator);
+		}
+
+		regularItem = createUnsavedDataObject('item', {
+			itemType: 'journalArticle',
+			title: 'My Smart Copy Paper'
+		});
+		regularItem.setField('date', '2020');
+		regularItem.setCreators([
+			{ firstName: 'Jane', lastName: 'Smartcopy', creatorType: 'author' }
+		]);
+		await regularItem.saveTx();
+
+		attachment = await importFileAttachment('test.pdf', { parentItemID: regularItem.id });
+		annotation = await createAnnotation('highlight', attachment);
+
+		note = createUnsavedDataObject('item', { itemType: 'note' });
+		note.setNote('<p>Test note content</p>');
+		await note.saveTx();
+	});
+
+	// The test runner has a root-level afterEach (test/content/runtests.js)
+	// that clears any user-set pref after every test. Re-pin the bibliography
+	// style here before each test.
+	beforeEach(function () {
+		Zotero.Prefs.set('export.quickCopy.bibliographySetting', JSON.stringify(SMART_COPY_BIB));
+	});
+
+	after(async function () {
+		win.Zotero_Tabs.closeAll();
+		win.close();
+	});
+
+	function getClipboardText() {
+		let transferable = Components.classes["@mozilla.org/widget/transferable;1"]
+			.createInstance(Components.interfaces.nsITransferable);
+		transferable.init(null);
+		transferable.addDataFlavor('text/plain');
+	
+		clipboardService.getData(transferable, Components.interfaces.nsIClipboard.kGlobalClipboard);
+		let str = {};
+		transferable.getTransferData('text/plain', str, {});
+		return str.value.QueryInterface(Components.interfaces.nsISupportsString).data;
+	}
+
+	function clearClipboard() {
+		clipboardService.emptyClipboard(Components.interfaces.nsIClipboard.kGlobalClipboard);
+	}
+
+	describe("Library tab", function () {
+		beforeEach(async function () {
+			await selectLibrary(win);
+			doc.getElementById('item-tree-main').focus();
+		});
+
+		it("should copy citation for a regular item", async function () {
+			await zp.itemsView.selectItem(regularItem.id);
+			clearClipboard();
+			doc.getElementById('key_smartCopy').doCommand();
+			assert.equal(getClipboardText(), '(Smartcopy, 2020)');
+		});
+
+		it("should copy annotation content when an annotation is selected", async function () {
+			await zp.itemsView.selectItem(annotation.id);
+			clearClipboard();
+			doc.getElementById('key_smartCopy').doCommand();
+			assert.include(getClipboardText(), annotation.annotationText);
+		});
+
+		it("should copy note content when a note is selected", async function () {
+			await zp.itemsView.selectItem(note.id);
+			clearClipboard();
+			doc.getElementById('key_smartCopy').doCommand();
+			assert.include(getClipboardText(), 'Test note content');
+		});
+	});
+
+	describe("Reader tab", function () {
+		var reader;
+		var hasFocusStub;
+
+		before(async function () {
+			reader = await Zotero.Reader.open(attachment.id);
+			await reader._initPromise;
+			await reader._internalReader._primaryView.initializedPromise;
+			while (!reader._iframeWindow) {
+				await Zotero.Promise.delay(50);
+			}
+			// Pretend that the reader is focused
+			hasFocusStub = sinon.stub(reader._iframeWindow.document, 'hasFocus').returns(true);
+		});
+
+		beforeEach(async function () {
+			await win.Zotero_Tabs.select(reader.tabID);
+		});
+
+		after(function () {
+			hasFocusStub.restore();
+		});
+
+		it("should copy parent citation when nothing is selected in the reader", function () {
+			clearClipboard();
+			doc.getElementById('key_smartCopy').doCommand();
+			assert.equal(getClipboardText(), '(Smartcopy, 2020)');
+		});
+
+		it("should copy selected annotation", function () {
+			let stub = sinon.stub(reader, 'getSelectedAnnotationIDs').returns([annotation.key]);
+			try {
+				clearClipboard();
+				doc.getElementById('key_smartCopy').doCommand();
+				assert.include(getClipboardText(), annotation.annotationText);
+			}
+			finally {
+				stub.restore();
+			}
+		});
+	});
+});

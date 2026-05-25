@@ -1361,11 +1361,10 @@ var ZoteroPane = new function () {
 					break;
 				
 				// Handled by <key>s in standalone.js, pointing to <command>s in zoteroPane.xul,
-				// which are enabled or disabled by this.updateQuickCopyCommands(), called by
+				// which are enabled or disabled by this.updateQuickCopyMenu(), called by
 				// this.itemSelected()
-				case 'copySelectedItemCitationsToClipboard':
-				case 'copySelectedItemsToClipboard':
-				case 'copySelectedItemsToClipboardAsExport':
+				case 'copyAsBibliography':
+				case 'copyAsExport':
 					return;
 				
 				default:
@@ -1901,10 +1900,9 @@ var ZoteroPane = new function () {
 			this.itemPane.editable = this.collectionsView.editable;
 			this.itemPane.updateItemPaneButtons(selectedItems);
 			
-			// Tab selection observer in standalone.js makes sure that
-			// updateQuickCopyCommands is called
+			// Keep the copy command + menu state current as the library selection changes
 			if (Zotero_Tabs.selectedType == 'library') {
-				this.updateQuickCopyCommands(selectedItems);
+				this.updateQuickCopyMenu();
 			}
 			
 			// Check if selection has actually changed. The onselect event that calls this
@@ -1996,29 +1994,65 @@ var ZoteroPane = new function () {
 	};
 	
 	/**
-	 * Update the <command> elements that control the shortcut keys and the enabled state of the
-	 * "Copy Citation"/"Copy Bibliography"/"Copy as"/"Copy Note" menu options. When disabled, the shortcuts are
-	 * still caught in handleKeyPress so that we can show an alert about not having references selected.
+	 * Refresh the Edit-menu copy entries to match the current context.
+	 * Sets `menu_copy` item's label and disabled state (Cmd/Ctrl+C), as well as
+	 * Copy Bibliography and Export as ... disabled state.
 	 */
-	this.updateQuickCopyCommands = function (selectedItems) {
-		let canCopyBibliography = false;
-		let canCopyExport = false;
-		// If all items are notes/attachments and at least one note is not empty
-		if (selectedItems.every(item => item.isNote() || item.isAttachment())) {
-			if (selectedItems.some(item => item.note)) {
-				canCopyBibliography = true;
-				canCopyExport = true;
-			}
-		}
-		else {
-			canCopyBibliography = selectedItems.some(item => item.isRegularItem() || item.isAnnotation());
-			canCopyExport = selectedItems.length > 0;
+	this.updateQuickCopyMenu = function () {
+		let selected = this.getSelectedItems();
+
+		// Consolidated Copy entry: reflect what Cmd+C would do in this context
+		let copyItem = document.getElementById('menu_copy');
+		let action = this.classifyCopyContext();
+		copyItem.disabled = false;
+		let count = selected.length;
+		document.l10n.setAttributes(copyItem, `menu-edit-copy-${action}`, { count });
+		// Default Copy -- mirror cmd_copy's enabled state
+		if (action === "text") {
+			copyItem.disabled = document.getElementById('cmd_copy').hasAttribute('disabled');
 		}
 
-		document.getElementById('cmd_zotero_copyCitation').setAttribute('disabled', !canCopyBibliography);
-		document.getElementById('cmd_zotero_copyBibliography').setAttribute('disabled', !canCopyBibliography);
-		document.getElementById('cmd_zotero_copyExport').setAttribute('disabled', !canCopyExport);
-		document.getElementById('cmd_zotero_copyAnnotation').setAttribute('disabled', !canCopyBibliography);
+		// Copy Bibliography / Copy as ...:
+		//  - Library tab: only available when the selection contains regular items.
+		//  - Reader tab: available when the open item has a parent regular item
+		//    to act on.
+		let hideBibAndExport;
+		if (Zotero_Tabs.selectedType === 'reader') {
+			let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+			let hasMetadata = Zotero.Items.get(reader.itemID).parentItem;
+			hideBibAndExport = !hasMetadata;
+		}
+		else {
+			let exportingNotes = selected.every(item => item.isNote() || item.isAttachment());
+			let exportingAnnotations = selected.every(item => item.isAnnotation());
+			hideBibAndExport = !selected.length || exportingNotes || exportingAnnotations;
+		}
+		let copyBibliography = document.getElementById('menu_copyBibliography');
+		let copyExport = document.getElementById('menu_copyExport');
+		copyBibliography.hidden = hideBibAndExport;
+		copyExport.hidden = hideBibAndExport;
+		document.getElementById('cmd_zotero_copyBibliography').setAttribute('disabled', hideBibAndExport);
+		document.getElementById('cmd_zotero_copyExport').setAttribute('disabled', hideBibAndExport);
+
+		// Label "Copy as ..." with the selected export translator's name
+		let exportFormat = Zotero.QuickCopy.getFormat({ mode: 'export' });
+		if (exportFormat.id) {
+			try {
+				let translator = Zotero.Translators.get(exportFormat.id);
+				if (translator) {
+					copyExport.label = Zotero.getString('quickCopy.copyAs', translator.label);
+				}
+				else {
+					copyExport.hidden = true;
+				}
+			}
+			catch (e) {
+				if (!(e instanceof Zotero.Exception.UnloadedDataException && e.dataType == 'translators')) {
+					Zotero.logError(e);
+				}
+				copyExport.hidden = true;
+			}
+		}
 	};
 	
 	
@@ -2698,26 +2732,95 @@ var ZoteroPane = new function () {
 	
 	
 	this.copySelectedItemsToClipboard = function (asCitations, mode = 'bibliography') {
-		let itemIDs = this.getSelectedItems(true);
-		// Get selected item IDs in the item tree order
-		itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
-		let items = Zotero.Items.get(itemIDs);
+		let items;
+		// "Copy Bibliography" / "Copy as ..." in the reader tab always act
+		// on the parent item being read -- annotation selection is for the
+		// smart-copy (Cmd+C / asCitations=true) path only.
+		if (!asCitations && Zotero_Tabs.selectedType === 'reader') {
+			let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+			let item = Zotero.Items.get(reader.itemID);
+			if (item.parentItem) item = item.parentItem;
+			items = [item];
+		}
+		else {
+			let itemIDs = this.getSelectedItems(true);
+			// Get selected item IDs in the item tree order
+			itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
+			items = Zotero.Items.get(itemIDs);
+		}
 		if (!items.length) return;
 
 		let format = Zotero.QuickCopy.getFormat({ mode, items });
 
-		// asCitations only applies to bibliography mode
-		if (asCitations && format.mode !== 'bibliography') return;
-
-		let content = Zotero.QuickCopy.getContentFromItems(items, format, { asCitations });
+		// asCitations only applies to bibliography mode; for notes/annotations
+		// the note format is used and asCitations is ignored
+		let content = Zotero.QuickCopy.getContentFromItems(items, format, {
+			asCitations: asCitations && format.mode === 'bibliography'
+		});
 		if (!content) {
 			Services.prompt.alert(null, "", Zotero.getString("fileInterface.noReferencesError"));
 			return;
 		}
+		// When copying annotations, also set the zotero/annotation flavor so
+		// the note editor's paste handler can render them with linked
+		// citations (matches the rich path used by drag-and-drop from the
+		// reader). Shape mirrors reader.js _getAnnotation -- the note
+		// editor's paste plugin expects `id` (not `key`) and normalized tags.
+		if (items.every(item => item.isAnnotation())) {
+			content.annotations = JSON.stringify(items.map((annotation) => {
+				let json = Zotero.Annotations.toJSONSync(annotation);
+				json.id = annotation.key;
+				delete json.key;
+				json.attachmentItemID = annotation.parentItemID;
+				json.tags = json.tags || [];
+				return json;
+			}));
+		}
 		Zotero_File_Interface.writeToClipboard(content);
 	}
-	
-	
+
+
+	/**
+	 * Classify what Cmd/Ctrl+C in the current context should do
+	 *
+	 * @returns {'text' | 'citation' | 'note' | 'annotation'}
+	 *   - 'citation' if we should quick-copy as an in-text citation
+	 *   - 'note'/'annotation' if we should quick-copy via the note format
+	 * 	 - 'text' - default, copy should copy text
+	 */
+	this.classifyCopyContext = function () {
+		let tab = Zotero_Tabs.getTabInfo();
+
+		if (tab.type === 'reader') {
+			let reader = Zotero.Reader.getByTabID(tab.id);
+			// Quick-copy only applies when the reader is focused
+			if (!reader?._iframeWindow?.document.hasFocus()) return 'text';
+			let hasMetadata = Zotero.Items.get(reader.itemID).parentItem;
+			let defaultMode = hasMetadata ? "citation" : "text";
+			// if nothing is selected in the reader, Copy should copy the citation if top level item exists
+			return reader.getSelectionType() || defaultMode;
+		}
+
+		if (tab.type === 'library') {
+			// Quick-copy only applies when the items tree owns focus
+			if (!this.itemsView.domEl.contains(document.activeElement)) {
+				return 'text';
+			}
+			let items = this.getSelectedItems();
+			if (!items.length) return 'text';
+			if (items.every(item => item.isAnnotation())) return 'annotation';
+			if (items.every(item => item.isNote() || item.isAttachment())) {
+				return items.some(item => item.note) ? 'note' : 'text';
+			}
+			if (items.some(item => item.isRegularItem() || item.isAnnotation())) {
+				return 'citation';
+			}
+		}
+
+		return 'text';
+	};
+
+
 	this.clearQuicksearch = async function (skipSearchRun) {
 		var search = document.getElementById('zotero-tb-search');
 		if (search.searchTextbox.value !== '') {
@@ -3089,6 +3192,8 @@ var ZoteroPane = new function () {
 	 * Return an array of Item objects for selected items
 	 *
 	 * If asIDs is true, return an array of itemIDs instead
+	 *
+	 * For the reader tab, returns the selected annotation item(s) in sidebar, if any.
 	 */
 	this.getSelectedItems = function (asIDs) {
 		switch (Zotero_Tabs.selectedType) {
@@ -3103,6 +3208,13 @@ var ZoteroPane = new function () {
 					let item = Zotero.Items.get(reader.itemID);
 					if (item.parentItem) {
 						item = item.parentItem;
+					}
+					// Return annotations selected in reader's sidebar if any
+					let selectedAnnotations = reader.getSelectedAnnotationIDs()
+						.map(id => Zotero.Items.getByLibraryAndKey(item.libraryID, id))
+						.filter(Boolean);
+					if (selectedAnnotations.length) {
+						return asIDs ? selectedAnnotations.map(item => item.id) : selectedAnnotations;
 					}
 					return asIDs ? [item.id] : [item];
 				}

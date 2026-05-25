@@ -168,16 +168,16 @@
 			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-quicksearch" maxlength="1" size="1" preference="extensions.zotero.keys.quicksearch"/>
 
-			<html:label for="textbox-copySelectedItemCitationsToClipboard">&zotero.preferences.keys.copySelectedItemCitationsToClipboard;</html:label>
+			<html:label for="textbox-copyAsBibliography" data-l10n-id="preferences-keys-copy-as-bibliography"/>
 			<html:label class="modifier"/>
-			<html:input type="text" id="textbox-copySelectedItemCitationsToClipboard" maxlength="1" size="1"
-					preference="extensions.zotero.keys.copySelectedItemCitationsToClipboard"
+			<html:input type="text" id="textbox-copyAsBibliography" maxlength="1" size="1"
+					preference="extensions.zotero.keys.copyAsBibliography"
 					oninput="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
 
-			<html:label for="textbox-copySelectedItemsToClipboard">&zotero.preferences.keys.copySelectedItemsToClipboard;</html:label>
+			<html:label for="textbox-copyAsExport" data-l10n-id="preferences-keys-copy-as-export"/>
 			<html:label class="modifier"/>
-			<html:input type="text" id="textbox-copySelectedItemsToClipboard" maxlength="1" size="1"
-					preference="extensions.zotero.keys.copySelectedItemsToClipboard"
+			<html:input type="text" id="textbox-copyAsExport" maxlength="1" size="1"
+					preference="extensions.zotero.keys.copyAsExport"
 					oninput="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
 
 			<html:label for="textbox-toggleAllRead">&zotero.preferences.keys.toggleAllRead;</html:label>

@@ -248,7 +248,7 @@ var Zotero_File_Interface = new function () {
 	 */
 	this.writeToClipboard = function (content) {
 		if (!content) return;
-		let { text, html } = content;
+		let { text, html, annotations } = content;
 
 		let transferable = Components.classes['@mozilla.org/widget/transferable;1']
 			.createInstance(Components.interfaces.nsITransferable);
@@ -269,6 +269,16 @@ var Zotero_File_Interface = new function () {
 			str.data = text;
 			transferable.addDataFlavor('text/plain');
 			transferable.setTransferData('text/plain', str, text.length * 2);
+		}
+		// Rich annotation payload for the note editor's paste handler; without
+		// it, pasted annotations land as plain text with unresolved {citation}
+		// placeholders.
+		if (annotations) {
+			let str = Components.classes['@mozilla.org/supports-string;1']
+				.createInstance(Components.interfaces.nsISupportsString);
+			str.data = annotations;
+			transferable.addDataFlavor('zotero/annotation');
+			transferable.setTransferData('zotero/annotation', str, annotations.length * 2);
 		}
 
 		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);

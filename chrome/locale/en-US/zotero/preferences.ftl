@@ -1,6 +1,9 @@
 preferences-window =
     .title = { -app-name } Settings
 
+preferences-keys-copy-as-bibliography = Copy as Bibliography
+preferences-keys-copy-as-export = Copy in Export Format
+
 preferences-appearance-title = Appearance and Language
 
 preferences-auto-recognize-files =
@@ -48,6 +51,9 @@ preferences-item-pane-header-missing-style = Missing style: <{ $shortName }>
 preferences-locate-library-lookup-intro = Library Lookup can find a resource online using your library’s OpenURL resolver.
 preferences-locate-resolver = Resolver:
 preferences-locate-base-url = Base URL:
+
+preferences-quickCopy-instructions = Quick Copy allows you to quickly export items in a given format. You can copy selected items to the clipboard in the selected bibliography style or export format by pressing { $bibShortcut } or { $exportShortcut } respectively. You can also drag items directly into a text box in another program.
+preferences-quickCopy-citationInstructions = You can also copy citations or footnotes in selected citation style by pressing { $citationShortcut } or holding down Shift before dragging items.
 
 preferences-quickCopy-bibliographyFormat = Bibliography Style:
 preferences-quickCopy-exportFormat = Export Format:

@@ -306,7 +306,7 @@ describe("Zotero_File_Interface", function () {
 		});
 	});
 
-	describe("#exportItemsToClipboard()", function () {
+	describe("Copy citations to clipboard", function () {
 		var noteItem, itemOne, itemTwo;
 		var styleID = 'http://www.zotero.org/styles/chicago-notes-bibliography';
 

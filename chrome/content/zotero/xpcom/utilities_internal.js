@@ -3425,7 +3425,11 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 	// Get Quick Copy format for current URL (set via /ping from connector)
 	// and the items being dragged. getContentFromItems handles the rest
 	// (annotation wrapping, note-citation reformatting, regular-item filter).
-	let format = Zotero.QuickCopy.getFormat({ items });
+	// Shift-Drag means the user wants a citation cluster, so use bibliography
+	// mode then regardless of the pref
+	let format = event.shiftKey
+		? Zotero.QuickCopy.getFormat({ mode: 'bibliography', items })
+		: Zotero.QuickCopy.getFormat({ items });
 
 	Zotero.debug("Dragging with format " + JSON.stringify(format));
 	try {

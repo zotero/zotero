@@ -110,6 +110,40 @@ class ReaderInstance {
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;
 	}
 
+	/**
+	 * Keys of the annotations currently selected in the reader.
+	 *
+	 * @returns {String[]}
+	 */
+	getSelectedAnnotationIDs() {
+		let ids = this._internalReader?._state?.selectedAnnotationIDs;
+		return ids ? Array.from(ids) : [];
+	}
+
+	/**
+	 * What is currently selected in the reader's view(s), used to predict what
+	 * a copy action will produce so the Edit menu and Cmd+C handler can label
+	 * and behave accordingly.
+	 *
+	 * @returns {'annotation' | 'text' | null}
+	 */
+	getSelectionType() {
+		if (!this._internalReader) return null;
+
+		if (this.getSelectedAnnotationIDs().length > 0) {
+			return 'annotation';
+		}
+
+		let view = this._internalReader._lastViewPrimary ? this._internalReader._primaryView : this._internalReader._secondaryView;
+		if (!view || !view._iframeWindow) return null;
+		let sel = view._iframeWindow.getSelection();
+		if (sel && !sel.isCollapsed && String(sel).length > 0) {
+			return 'text';
+		}
+
+		return null;
+	}
+
 	async migrateMendeleyColors(libraryID, annotations) {
 		let colorMap = new Map();
 		colorMap.set('#fff5ad', '#ffd400');

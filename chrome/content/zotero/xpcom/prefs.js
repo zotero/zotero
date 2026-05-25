@@ -46,7 +46,7 @@ Zotero.Prefs = new function () {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 23;
+		var toVersion = 24;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -259,6 +259,21 @@ Zotero.Prefs = new function () {
 							}
 							this.clear('export.quickCopy.setting');
 							this.clear('export.quickCopy.locale');
+						}
+						break;
+
+					case 24:
+						// Separate Cmd+Shift+A shortcut to copy citation is removed - now handled with Cmd/Ctrl + C
+						this.clear('keys.copySelectedItemCitationsToClipboard');
+						// Rename copySelectedItemsToClipboard to copyAsBibliography for clarity
+						if (this.prefHasUserValue("keys.copySelectedItemsToClipboard")) {
+							this.set("keys.copyAsBibliography", this.get("keys.copySelectedItemsToClipboard"));
+							this.clear("keys.copySelectedItemsToClipboard");
+						}
+						// Rename copySelectedItemsToClipboardAsExport to copyAsExport for consistency with the above
+						if (this.prefHasUserValue("keys.copySelectedItemsToClipboardAsExport")) {
+							this.set("keys.copyAsExport", this.get("keys.copySelectedItemsToClipboardAsExport"));
+							this.clear("keys.copySelectedItemsToClipboardAsExport");
 						}
 						break;
 				}
