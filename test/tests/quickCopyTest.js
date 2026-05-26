@@ -459,9 +459,13 @@ describe("Smart copy", function () {
 
 	describe("Reader tab", function () {
 		var reader;
-		var hasFocusStub;
+		// Use a local sandbox: sinon's default sandbox tracks every stub
+		// forever, so a later `sinon.restore()` elsewhere would
+		// re-invoke our stub's restore against the already dead reader.
+		var sandbox;
 
 		before(async function () {
+			sandbox = sinon.createSandbox();
 			reader = await Zotero.Reader.open(attachment.id);
 			await reader._initPromise;
 			await reader._internalReader._primaryView.initializedPromise;
@@ -469,7 +473,7 @@ describe("Smart copy", function () {
 				await Zotero.Promise.delay(50);
 			}
 			// Pretend that the reader is focused
-			hasFocusStub = sinon.stub(reader._iframeWindow.document, 'hasFocus').returns(true);
+			sandbox.stub(reader._iframeWindow.document, 'hasFocus').returns(true);
 		});
 
 		beforeEach(async function () {
@@ -477,7 +481,7 @@ describe("Smart copy", function () {
 		});
 
 		after(function () {
-			hasFocusStub.restore();
+			sandbox.restore();
 		});
 
 		it("should copy parent citation when nothing is selected in the reader", function () {
@@ -487,15 +491,10 @@ describe("Smart copy", function () {
 		});
 
 		it("should copy selected annotation", function () {
-			let stub = sinon.stub(reader, 'getSelectedAnnotationIDs').returns([annotation.key]);
-			try {
-				clearClipboard();
-				doc.getElementById('key_smartCopy').doCommand();
-				assert.include(getClipboardText(), annotation.annotationText);
-			}
-			finally {
-				stub.restore();
-			}
+			sandbox.stub(reader, 'getSelectedAnnotationIDs').returns([annotation.key]);
+			clearClipboard();
+			doc.getElementById('key_smartCopy').doCommand();
+			assert.include(getClipboardText(), annotation.annotationText);
 		});
 	});
 });
