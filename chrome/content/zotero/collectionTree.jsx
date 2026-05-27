@@ -334,7 +334,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (treeRow.isFeeds()) {
 			depth = 0;
 		}
-		div.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
 		
 		// Create a single-cell for the row (for the single-column layout)
 		let cell = document.createElement('span');
