@@ -1619,6 +1619,10 @@ var ZoteroPane = new function () {
 				emptyMessage: Zotero.getString('pane.items.loading')
 			});
 			ZoteroPane.itemsView.onRefresh.addListener(() => ZoteroPane.setTagScope());
+			// Update itemPane on initial load
+			ZoteroPane.itemsView.onRefresh.addListener(async () => {
+				await ZoteroPane.itemSelected();
+			}, true);
 			ZoteroPane.itemsView.waitForLoad().then(() => Zotero.uiIsReady());
 
 			ItemTreeMenuBar.setItemTreeSortKeys(ZoteroPane.itemsView);
