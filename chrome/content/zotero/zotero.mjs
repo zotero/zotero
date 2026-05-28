@@ -230,8 +230,25 @@ function makeZoteroContext() {
 		zContext = new ZoteroContext();
 		zContext.Zotero = function () {};
 
-		// Override Date prototype to follow Zotero configured locale #3880
-		subscriptLoader.loadSubScript("chrome://zotero/content/dateOverrides.js");
+		// Override Date prototype to follow Zotero configured locale (#3880).
+		// Patch this module scope, every open chrome window, and each chrome
+		// window opened in the future. Each require loader sandbox is patched
+		// separately in require.js.
+		let dateOverridesURL = "chrome://zotero/content/dateOverrides.js";
+		subscriptLoader.loadSubScript(dateOverridesURL);
+		for (let win of Services.wm.getEnumerator(null)) {
+			subscriptLoader.loadSubScript(dateOverridesURL, win);
+		}
+		Services.ww.registerNotification({
+			observe(subject, topic) {
+				if (topic !== 'domwindowopened') {
+					return;
+				}
+				subject.addEventListener('load', () => {
+					subscriptLoader.loadSubScript(dateOverridesURL, subject);
+				}, { once: true });
+			}
+		});
 	}
 	
 	// Load zotero.js first

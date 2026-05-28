@@ -144,6 +144,15 @@ function ZoteroLoader({
 		}
 	})
 
+	// If we're using a new sandbox, patch Date#toLocale*String() there to
+	// follow the app locale
+	if (!sharedGlobal) {
+		Services.scriptloader.loadSubScript(
+			'chrome://zotero/content/dateOverrides.js',
+			this.loader.sharedGlobal
+		);
+	}
+
 	// Fetch custom pseudo modules and globals
 	const { modules, globals } = {
 		// TODO: TEMP: Stub this out
