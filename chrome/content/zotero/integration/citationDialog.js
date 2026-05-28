@@ -1205,6 +1205,8 @@ const IOManager = {
 		doc.addEventListener("show-details-popup", ({ detail: { dialogReferenceID } }) => this._openItemDetailsPopup(dialogReferenceID));
 		// mark item nodes as selected to highlight them and mark relevant bubbles
 		doc.addEventListener("select-items", ({ detail: { startNode, endNode } }) => this.selectItemNodesRange(startNode, endNode));
+		// focus the item tree from citation dialog keyboard navigation
+		doc.addEventListener("focus-item-tree", ({ detail }) => this.focusItemTree(detail));
 		// update bubbles after citation item is updated by itemDetails popup
 		doc.addEventListener("item-details-updated", () => this.updateBubbleInput());
 
@@ -1398,6 +1400,17 @@ const IOManager = {
 			_id("bubble-input").refocusInput();
 		}
 		dialogNotPristine();
+	},
+
+	focusItemTree({ selectIfEmpty = false } = {}) {
+		let focusable = _id("zotero-items-tree").querySelector("[tabindex]");
+		if (!focusable) return false;
+		focusable.focus();
+		if (selectIfEmpty && libraryLayout?.itemsView?.selection?.count == 0) {
+			let selection = libraryLayout.itemsView.selection;
+			selection.select(selection.focused);
+		}
+		return true;
 	},
 
 	// select all items between startNode and endNode

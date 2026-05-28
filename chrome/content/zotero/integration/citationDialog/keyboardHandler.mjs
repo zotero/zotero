@@ -139,13 +139,13 @@ export class CitationDialogKeyboardHandler {
 				this._navigateGroup({ group, current: null, forward: true, shouldSelect: true, shouldFocus: true, multiSelect: false });
 			}
 			else if (this._id("zotero-items-tree").querySelector(".row")) {
-				this._id("zotero-items-tree").querySelector("[tabindex]").focus();
+				this._focusItemTree({ selectIfEmpty: true });
 			}
 			handled = true;
 		}
 		// arrow down from suggested items in library mode will focus items table
 		else if (!this._id("library-layout").hidden && event.key == "ArrowDown" && event.target.closest(".itemsContainer") && noModifiers && this._id("zotero-items-tree").querySelector(".row")) {
-			this._id("zotero-items-tree").querySelector("[tabindex]").focus();
+			this._focusItemTree({ selectIfEmpty: true });
 		}
 		// arrow up/down from bubble-input in list mode will move selection in the items list
 		else if (!this._id("list-layout").hidden && (event.key == "ArrowDown" || event.key == "ArrowUp") && this._id("bubble-input").contains(event.target) && onlyShiftModifierPossible) {
@@ -310,6 +310,15 @@ export class CitationDialogKeyboardHandler {
 			return this.doc.activeElement == this.doc.querySelector(".item");
 		}
 		return false;
+	}
+
+	_focusItemTree({ selectIfEmpty = false } = {}) {
+		this.doc.dispatchEvent(new CustomEvent("focus-item-tree", {
+			bubbles: true,
+			detail: {
+				selectIfEmpty
+			}
+		}));
 	}
 
 	_selectItems(startNode, endNode) {
