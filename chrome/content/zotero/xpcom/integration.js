@@ -1513,10 +1513,21 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 	if (field) {
 		field = await Zotero.Integration.Field.loadExisting(field);
 
-		if (field.type != INTEGRATION_TYPE_ITEM) {
-			throw new Zotero.Exception.Alert("integration.error.notInCitation");
+		if (field.type === INTEGRATION_TYPE_ITEM) {
+			citation = new Zotero.Integration.Citation(field, await field.unserialize(), await field.getNoteIndex());
 		}
-		citation = new Zotero.Integration.Citation(field, await field.unserialize(), await field.getNoteIndex());
+		else if (field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
+			throw new Zotero.Exception.Alert("integration.error.inBibliography");
+		}
+		else {
+			// Treat any non-item and non-bibliograph field as a TEMP placeholder, that is likely
+			// there because previous integration command stopped prematurely (e.g. by closing Zotero).
+			// This could also be something else, but since the integration plugin on the word processor
+			// side decided to return what it thought to be a Zotero field, we should treat it as such.
+			newField = true;
+			field = new Zotero.Integration.CitationField(field._field);
+			citation = new Zotero.Integration.Citation(field);
+		}
 	} else {
 		newField = true;
 		field = new Zotero.Integration.CitationField(await this.addField(true));
