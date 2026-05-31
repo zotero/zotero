@@ -46,6 +46,13 @@ Zotero_Preferences.Sync = {
 		this.updateStorageSettingsUI();
 		this.updateStorageSettingsGroupsUI();
 
+		// iCloud Drive is offered only where the backend can run (macOS, or an
+		// explicitly configured container path)
+		if (Zotero.Sync.Storage.iCloudBridge.available) {
+			let icloudItem = document.getElementById('storage-protocol-icloud');
+			if (icloudItem) icloudItem.hidden = false;
+		}
+
 		var username = Zotero.Users.getCurrentUsername() || Zotero.Prefs.get('sync.server.username') || " ";
 		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 		let emails = apiKey ? Zotero.Users.getCurrentEmails() : undefined;
@@ -694,15 +701,16 @@ Zotero_Preferences.Sync = {
 		var storageSettings = document.getElementById('storage-settings');
 		var protocolMenu = document.getElementById('storage-protocol');
 		var settings = document.getElementById('storage-webdav-settings');
+		var icloudSettings = document.getElementById('storage-icloud-settings');
 		var sep = document.getElementById('storage-separator');
 		
-		if (!enabled || protocol == 'zotero') {
-			settings.hidden = true;
-			sep.hidden = false;
-		}
-		else {
-			settings.hidden = false;
-			sep.hidden = true;
+		settings.hidden = !(enabled && protocol == 'webdav');
+		icloudSettings.hidden = !(enabled && protocol == 'icloud');
+		// Separator is shown only when no provider-specific panel is visible
+		sep.hidden = !(settings.hidden && icloudSettings.hidden);
+		
+		if (enabled && protocol == 'icloud') {
+			this.updateiCloudStatusUI();
 		}
 		
 		document.getElementById('storage-user-download-mode').disabled = !enabled;
@@ -716,6 +724,23 @@ Zotero_Preferences.Sync = {
 			document.getElementById('storage-groups-download-mode').disabled = !enabled;
 			this.updateStorageTerms();
 		});
+	},
+	
+	
+	updateiCloudStatusUI: async function () {
+		var label = document.getElementById('storage-icloud-status');
+		if (!label) return;
+		var bridge = Zotero.Sync.Storage.iCloudBridge;
+		if (!bridge.available) {
+			label.value = Zotero.getString('sync.storage.error.icloud.unsupportedPlatform');
+			return;
+		}
+		try {
+			label.value = bridge.getStorageDirectory();
+		}
+		catch (e) {
+			label.value = Zotero.getString('sync.storage.error.icloud.noAccount');
+		}
 	},
 	
 	
@@ -769,6 +794,12 @@ Zotero_Preferences.Sync = {
 			}
 		}
 		
+		if (oldProtocol == 'icloud') {
+			this.unverifyStorageServer();
+			Zotero.Sync.Runner.getStorageController('icloud').clearCachedCredentials();
+			Zotero.Sync.Runner.resetStorageController('icloud');
+		}
+		
 		if (oldProtocol == 'zotero' && newProtocol == 'webdav') {
 			var sql = "SELECT COUNT(*) FROM settings "
 				+ "WHERE setting='storage' AND key='zfsPurge' AND value='user'";
@@ -818,6 +849,32 @@ Zotero_Preferences.Sync = {
 		await this.onStorageSettingsChange();
 		
 		Zotero.debug("Verifying storage");
+		
+		// iCloud has no URL/credentials -- verify the container and return
+		if (Zotero.Prefs.get('sync.storage.protocol') == 'icloud') {
+			let icloudController = Zotero.Sync.Runner.getStorageController('icloud');
+			let ok = false;
+			try {
+				await icloudController.checkServer();
+				ok = true;
+			}
+			catch (e) {
+				ok = await icloudController.handleVerificationError(e, window);
+			}
+			if (ok) {
+				Zotero.debug('iCloud verification succeeded');
+				Zotero.alert(
+					window,
+					Zotero.getString('sync.storage.serverConfigurationVerified'),
+					Zotero.getString('sync.storage.fileSyncSetUp')
+				);
+			}
+			else {
+				Zotero.logError('iCloud verification failed');
+			}
+			this.updateiCloudStatusUI();
+			return;
+		}
 		
 		var verifyButton = document.getElementById("storage-verify");
 		var abortButton = document.getElementById("storage-abort");

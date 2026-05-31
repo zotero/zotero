@@ -70,9 +70,13 @@ Zotero.Sync.Storage.Local = {
 	getModeForLibrary: function (libraryID) {
 		var libraryType = Zotero.Libraries.get(libraryID).libraryType;
 		switch (libraryType) {
-		case 'user':
-			return Zotero.Prefs.get("sync.storage.protocol") == 'webdav' ? 'webdav' : 'zfs';
-		
+		case 'user': {
+			let protocol = Zotero.Prefs.get("sync.storage.protocol");
+			if (protocol == 'webdav') return 'webdav';
+			if (protocol == 'icloud') return 'icloud';
+			return 'zfs';
+		}
+
 		case 'publications':
 		case 'group':
 		// TODO: Remove after making sure this is never called for feed libraries
@@ -93,6 +97,7 @@ Zotero.Sync.Storage.Local = {
 		
 		switch (mode) {
 		case 'webdav':
+		case 'icloud':
 		case 'zfs':
 			Zotero.Prefs.set("sync.storage.protocol", mode);
 			break;

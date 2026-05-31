@@ -153,6 +153,8 @@ const xpcomFilesLocal = [
 	'storage/storageUtilities',
 	'storage/zfs',
 	'storage/webdav',
+	'storage/icloudBridge',
+	'storage/icloud',
 	'syncedSettings',
 	'uri',
 	'users',

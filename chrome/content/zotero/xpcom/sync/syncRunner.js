@@ -1681,6 +1681,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 
 	this.deleteAPIKey = async function () {
 		this.resetStorageController('zfs');
+		this.resetStorageController('icloud');
 		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 		var client = this.getAPIClient({apiKey});
 		// Remove streaming subscription before clearing the key

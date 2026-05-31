@@ -175,6 +175,9 @@ pref("extensions.zotero.sync.storage.verified", false);
 pref("extensions.zotero.sync.storage.scheme", "https");
 pref("extensions.zotero.sync.storage.url", "");
 pref("extensions.zotero.sync.storage.username", "");
+pref("extensions.zotero.sync.storage.icloud.verified", false);
+// Optional explicit iCloud container path (advanced / non-macOS). Empty = auto-detect.
+pref("extensions.zotero.sync.storage.icloud.containerPath", "");
 pref("extensions.zotero.sync.storage.maxDownloads", 4);
 pref("extensions.zotero.sync.storage.maxUploads", 2);
 pref("extensions.zotero.sync.storage.deleteDelayDays", 30);

@@ -6,7 +6,10 @@ Zotero.Sync.Storage.Utilities = {
 		
 		case 'webdav':
 			return Zotero.Sync.Storage.Mode.WebDAV;
-		
+
+		case 'icloud':
+			return Zotero.Sync.Storage.Mode.iCloud;
+
 		default:
 			throw new Error("Invalid storage mode '" + mode + "'");
 		}
