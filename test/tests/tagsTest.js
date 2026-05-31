@@ -10,8 +10,80 @@ describe("Zotero.Tags", function () {
 			
 			assert.typeOf(Zotero.Tags.getID(tagName), "number");
 		})
+
+		it("should find a tag stored in a non-normalized form", async function () {
+			// Random ASCII prefix + a combining acute accent, so the name is unique
+			// per run but stored in a non-normalized (NFD) form
+			var nfd = Zotero.Utilities.randomString() + 'e\u0301';
+			var nfc = nfd.normalize();
+			assert.notEqual(nfd, nfc);
+
+			var item = await createDataObject('item');
+
+			// Write the tag straight to the DB in non-normalized form, bypassing the
+			// normalization that Zotero.Tags.create() performs, and attach it to the item
+			var tagID = Zotero.ID.get('tags');
+			await Zotero.DB.executeTransaction(async function () {
+				await Zotero.DB.queryAsync(
+					"INSERT INTO tags (tagID, name) VALUES (?, ?)", [tagID, nfd]
+				);
+				await Zotero.DB.queryAsync(
+					"INSERT INTO itemTags (itemID, tagID, type) VALUES (?, ?, 0)",
+					[item.id, tagID]
+				);
+			});
+
+			// Rebuild the tag cache from the DB so it picks up the non-normalized name
+			await Zotero.Tags.init();
+
+			// getID() normalizes its lookup, so it should still match the stored tag
+			assert.equal(Zotero.Tags.getID(nfc), tagID);
+		})
 	})
-	
+
+	describe("non-normalized tags", function () {
+		// Tags loaded onto an item are normalized (NFC, trimmed), so removing a tag that's
+		// stored in a non-normalized form requires getID() to resolve the normalized name.
+		// Previously the id cache was keyed by the raw DB name, so getID() returned false,
+		// and the false was bound as the tagID parameter -- "Invalid boolean parameter 1
+		// 'false' [QUERY: DELETE FROM itemTags WHERE itemID=? AND tagID=? AND type=?]".
+		it("should remove a tag stored in a non-normalized form without throwing", async function () {
+			// Random ASCII prefix + a combining acute accent, so the name is unique
+			// per run but stored in a non-normalized (NFD) form
+			var nfd = Zotero.Utilities.randomString() + 'e\u0301';
+			var nfc = nfd.normalize();
+			assert.notEqual(nfd, nfc);
+
+			var item = await createDataObject('item');
+
+			var tagID = Zotero.ID.get('tags');
+			await Zotero.DB.executeTransaction(async function () {
+				await Zotero.DB.queryAsync(
+					"INSERT INTO tags (tagID, name) VALUES (?, ?)", [tagID, nfd]
+				);
+				await Zotero.DB.queryAsync(
+					"INSERT INTO itemTags (itemID, tagID, type) VALUES (?, ?, 0)",
+					[item.id, tagID]
+				);
+			});
+
+			await Zotero.Tags.init();
+			await item.loadDataType('tags', true);
+
+			// The loaded tag is normalized
+			assert.sameDeepMembers(item.getTags(), [{ tag: nfc }]);
+
+			item.removeTag(nfc);
+			await item.saveTx();
+
+			assert.lengthOf(item.getTags(), 0);
+			var count = await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM itemTags WHERE itemID=?", item.id
+			);
+			assert.equal(count, 0);
+		})
+	})
+
 	describe("#getName()", function () {
 		it("should return tag id", async function () {
 			var tagName = Zotero.Utilities.randomString();

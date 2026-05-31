@@ -48,10 +48,13 @@ Zotero.Tags = new function () {
 			{
 				onRow: function (row) {
 					var tagID = row.getResultByIndex(0);
-					var name = row.getResultByIndex(1);
+					// Normalize the name to match getID() and Items._loadTags(), which clean
+					// tags on lookup and load -- otherwise a tag stored in a non-normalized
+					// form (e.g., non-NFC or with surrounding whitespace) can never be matched
+					var name = this.cleanData({ tag: row.getResultByIndex(1) }).tag;
 					_tagsByID.set(tagID, name);
 					_idsByTag.set(name, tagID);
-				}
+				}.bind(this)
 			}
 		);
 		_initialized = true;
