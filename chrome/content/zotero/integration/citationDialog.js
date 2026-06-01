@@ -1375,6 +1375,7 @@ const IOManager = {
 			// If no locator is provided, record which bubbles were just added.
 			// If a locator is typed next, these bubbles will receive it.
 			this._justAddedBubbles = bubbleItems;
+			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems();
 		}
 		await CitationDataManager.addItems({ bubbleItems, index });
 		// Refresh the itemTree if in library mode
@@ -1693,6 +1694,7 @@ const IOManager = {
 		if (currentLayout.type == "library") {
 			libraryLayout.refreshItemsView();
 		}
+		this._clearJustAddedBubbles();
 		this.updateBubbleInput();
 		// Always refresh items list to make sure the opened and selected items are up to date
 		currentLayout.refreshItemsList();
@@ -1811,6 +1813,7 @@ const IOManager = {
 		if (event && event.type == "keydown" && !navigationKeys.includes(event.key)) return;
 		// clear just added bubbles and update bubble input to reflect that
 		this._justAddedBubbles = null;
+		_id("bubble-input").showJustAddedPlaceholder = false;
 		this.updateBubbleInput();
 	},
 
