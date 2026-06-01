@@ -31,7 +31,9 @@
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	drawintitlebar-platforms="mac,win"
-	resizable="false">
+	resizable="false"
+	windowtype="zotero:citation-dialog"
+	>
 	<head>
 		<title data-l10n-id="integration-citationDialog"></title>
 		<link rel="localization" href="zotero.ftl"/>
@@ -154,6 +156,9 @@
 							<!--fx128: size="0" forces select have default native style -->
 							<select name="locator" id="label" class="details-label" size="0"></select>
 							<input id="locator" class="details-data" aria-labelledby="label" aria-describedby="itemDetails-combinedInfo"/>
+							<div class="details-locator-info" data-l10n-id="integration-citationDialog-details-locator-info">
+								<a data-l10n-name="docs-link" class="link" tabindex="0" href="https://www.zotero.org/support/word_processor_plugin_usage#page_and_other_locators" onclick="Zotero.launchURL(this.href)"/>
+							</div>
 							
 							<label class="details-label" for="prefix" data-l10n-id="integration-citationDialog-details-prefix"></label>
 							<input id="prefix" class="details-data"/>

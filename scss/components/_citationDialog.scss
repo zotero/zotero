@@ -786,6 +786,14 @@
 							height: 24px; // same height as input
 						}
 					}
+					.details-locator-info {
+						padding-inline-start: 5px;
+						grid-column: 2;
+						// pull closer to the locator input above
+						margin-top: -4px;
+						color: var(--fill-secondary);
+						font-size: .93rem;
+					}
 				}
 				.buttons {
 					display: flex;

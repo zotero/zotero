@@ -36,6 +36,7 @@
 			this._body = this.querySelector('.bubble-input.body');
 			this._body.addEventListener('click', this._onBodyClick.bind(this));
 			this._lastFocusedInput = null;
+			this.showJustAddedPlaceholder = false;
 
 			Utils.init(this);
 			DragDropHandler.init(this);
@@ -123,11 +124,10 @@
 			if (isOnlyInput) {
 				document.l10n.setAttributes(this._body.firstChild, `integration-citationDialog-single-input-${dialogType}`);
 			}
-			// otherwise, add a regular aria descriptions and placeholders to all inputs
+			// otherwise, set default placeholders for all inputs, with special handling
+			// of the last input after a bubble is added with visible placeholder
 			else {
-				for (let input of [...this.querySelectorAll(".input")]) {
-					document.l10n.setAttributes(input, `integration-citationDialog-input-${dialogType}`);
-				}
+				Utils.setupInputPlaceholders(this.showJustAddedPlaceholder, dialogType);
 			}
 			// If any two inputs end up next to each other (e.g. after bubble is deleted),
 			// have them merged
@@ -342,6 +342,13 @@
 				// record this input as last focused if it's not empty OR if the focus left bubbleInput altogether
 				if (!Utils.isInputEmpty(input) || !this.contains(event.relatedTarget)) {
 					this._lastFocusedInput = input;
+				}
+				// Collapse a placeholder input back to regular size once focus leaves.
+				// The placeholder attributes are reset on the next refresh()
+				if (input.classList.contains("just-added-placeholder")) {
+					input.classList.remove("just-added-placeholder");
+					input.removeAttribute("title");
+					input.style.minWidth = "";
 				}
 			});
 			return input;
@@ -602,6 +609,87 @@
 				spanWidth = 1;
 			}
 			return spanWidth;
+		},
+
+		getTextWidth(text) {
+			let span = document.createElement("span");
+			span.classList = "input";
+			span.innerText = text;
+			this.bubbleInput._body.appendChild(span);
+			let spanWidth = span.getBoundingClientRect().width;
+			span.remove();
+			return spanWidth;
+		},
+
+		// Return the longest prefix of `text` such that prefix + "…" fits within maxWidth,
+		// or the original text if it already fits. Used for placeholder truncation, since
+		// text-overflow:ellipsis doesn't work on <input> in Firefox chrome.
+		truncateToWidth(text, maxWidth) {
+			if (this.getTextWidth(text) <= maxWidth) return text;
+			let ellipsis = "…";
+			for (let i = text.length - 1; i > 0; i--) {
+				let candidate = text.slice(0, i) + ellipsis;
+				if (this.getTextWidth(candidate) <= maxWidth) {
+					return candidate;
+				}
+			}
+			return ellipsis;
+		},
+
+		// Set aria-descriptions and placeholders on every input in the bubble-input.
+		// For the just-added input (the last one, when showJustAddedPlaceholder is set), the
+		// placeholder is truncated to the space remaining on its line and passed to Fluent as
+		// a variable.
+		setupInputPlaceholders(showJustAddedPlaceholder, dialogType) {
+			let allInputs = [...this.bubbleInput.querySelectorAll(".input")];
+			let lastInput = allInputs[allInputs.length - 1];
+			let bodyRight = this.bubbleInput._body.getBoundingClientRect().right;
+			for (let input of allInputs) {
+				let isJustAdded = showJustAddedPlaceholder && input === lastInput;
+				if (!isJustAdded) {
+					// If the just-added placeholder was dismissed (e.g. by right-arrow at the
+					// end of the input) while the input is still focused and empty, keep the
+					// visible placeholder but fall back to the default search prompt, since
+					// searching still works. It collapses when the input loses focus (see the
+					// blur handler in _createInputElem())
+					if (input.classList.contains("just-added-placeholder")
+							&& document.activeElement == input && !input.value) {
+						let placeholder = this.truncateToWidth(
+							" " + Zotero.getString("integration-citationDialog-search-for-items"),
+							parseFloat(input.style.minWidth) || Infinity);
+						document.l10n.setAttributes(input, "integration-citationDialog-just-added-input-citation", { placeholder, title: "" });
+						continue;
+					}
+					input.classList.remove("just-added-placeholder");
+					document.l10n.setAttributes(input, `integration-citationDialog-input-${dialogType}`);
+					// Clear any stale title and min-width left over from a previous just-added state
+					input.removeAttribute("title");
+					input.style.minWidth = "";
+				}
+				if (isJustAdded && !input.classList.contains("just-added-placeholder")) {
+					input.classList.add("just-added-placeholder");
+					// Leading NBSP gives a small visual gap between the cursor and the placeholder
+					// text (CSS padding/text-indent on input or ::placeholder both move the cursor too)
+					let fullPlaceholder = " " + Zotero.getString("integration-citationDialog-just-added-input-placeholder");
+					let availableWidth = bodyRight - input.getBoundingClientRect().left - 20;
+					let placeholderWidth = this.getTextWidth(fullPlaceholder);
+					let placeholder, title, minWidth;
+					if (availableWidth >= placeholderWidth) {
+						placeholder = fullPlaceholder;
+						title = "";
+						minWidth = placeholderWidth;
+					}
+					else {
+						placeholder = this.truncateToWidth(fullPlaceholder, availableWidth);
+						title = fullPlaceholder;
+						minWidth = availableWidth;
+					}
+					// min-width keeps the placeholder visible when the input is empty, but
+					// lets the input grow to fit content the user types beyond the placeholder.
+					input.style.minWidth = minWidth + 'px';
+					document.l10n.setAttributes(input, "integration-citationDialog-just-added-input-citation", { placeholder, title });
+				}
+			}
 		},
 
 		// If a bubble is removed between two inputs we need to combine them

@@ -1206,6 +1206,7 @@ class ListLayout extends Layout {
 const IOManager = {
 	sectionExpandedStatus: {},
 	_skipInputAcceptOnEnterUntil: 0,
+	_timesItemsAdded: 0,
 
 	// most essential IO functionality that is added immediately on load
 	preInit() {
@@ -1406,7 +1407,12 @@ const IOManager = {
 			// If no locator is provided, record which bubbles were just added.
 			// If a locator is typed next, these bubbles will receive it.
 			this._justAddedBubbles = bubbleItems;
+			// Only show the placeholder guidance on the first add -- after
+			// that, the user presumably knows about the shortcut
+			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems()
+				&& this._timesItemsAdded < 1;
 		}
+		this._timesItemsAdded++;
 		await CitationDataManager.addItems({ bubbleItems, index });
 		// Refresh the itemTree if in library mode
 		if (currentLayout.type == "library") {
@@ -1695,6 +1701,9 @@ const IOManager = {
 				input.value = "";
 				input.dispatchEvent(new Event('input', { bubbles: true }));
 				this.updateBubbleInput();
+				// The typed-locator shortcut has been used, so stop showing the tip
+				// about it in the item details popup
+				Zotero.Prefs.set("integration.citationDialogShowLocatorTip", false);
 				return;
 			}
 		}
@@ -1735,9 +1744,14 @@ const IOManager = {
 
 	_deleteItem(dialogReferenceID) {
 		CitationDataManager.deleteItem({ dialogReferenceID });
+		// If the citation is emptied, show the placeholder guidance again on the next add
+		if (!CitationDataManager.items.length) {
+			this._timesItemsAdded = 0;
+		}
 		if (currentLayout.type == "library") {
 			libraryLayout.refreshItemsView();
 		}
+		this._clearJustAddedBubbles();
 		this.updateBubbleInput();
 		// Always refresh items list to make sure the opened and selected items are up to date
 		currentLayout.refreshItemsList();
@@ -1835,9 +1849,14 @@ const IOManager = {
 			bubbleItem.label = "page";
 		}
 		IOManager._hideLoadingSpinner();
-		// Clear the input and update bubbles
+		// Clear the input and update bubbles. The placeholder stays, since both of its
+		// suggestions still apply -- typed digits keep appending to the locator, and
+		// any other input starts a search
 		input.value = "";
 		IOManager.updateBubbleInput();
+		// The typed-locator shortcut has been used, so stop showing the tip
+		// about it in the item details popup
+		Zotero.Prefs.set("integration.citationDialogShowLocatorTip", false);
 		// Disable Enter on input from accepting the dialog for the next 500ms;
 		// If one intends to confirmed the numeric locator by pressing Enter (via _handleInputEnter),
 		// we ensure that the Enter keypress won't happen right after when the locator is added to
@@ -1851,11 +1870,14 @@ const IOManager = {
 	// and Enter is presses, just-added bubbles get that locator.
 	_clearJustAddedBubbles(event) {
 		if (!this._justAddedBubbles) return;
-		// on keydown, only proceed if it's an arrow key
-		let navigationKeys = ["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft"];
-		if (event && event.type == "keydown" && !navigationKeys.includes(event.key)) return;
+		// On keydown, only proceed for left/right arrows, which move to another
+		// reference (e.g. to explicitly search for a year). Up/down arrows just move
+		// the list selection while focus remains in the input, so locator entry
+		// stays active.
+		if (event && event.type == "keydown" && !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
 		// clear just added bubbles and update bubble input to reflect that
 		this._justAddedBubbles = null;
+		_id("bubble-input").showJustAddedPlaceholder = false;
 		this.updateBubbleInput();
 	},
 

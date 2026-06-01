@@ -52,7 +52,7 @@ bubble-input {
 		// inputs initially occupy no width so they don't misalign bubbles at the
 		// start of each line. On focus, set their width for the cursor to appear
 		// and offset it by negative margin to avoid bubbles shifting
-		&.empty:not(.full-width):focus {
+		&.empty:not(.full-width):not(.just-added-placeholder):focus {
 			min-width: 1px;
 			margin-inline-start: -1px;
 		}

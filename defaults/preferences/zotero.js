@@ -152,6 +152,7 @@ pref("extensions.zotero.integration.keepAddCitationDialogRaised", false);
 pref("extensions.zotero.integration.upgradeTemplateDelayedOn", 0);
 pref("extensions.zotero.integration.dontPromptMendeleyImport", false);
 pref("extensions.zotero.integration.citationDialogMode", "last-used");
+pref("extensions.zotero.integration.citationDialogShowLocatorTip", true);
 pref("extensions.zotero.integration.annotationDialogIncludeComments", true);
 pref("extensions.zotero.integration.citationPreviewShown", true);
 
