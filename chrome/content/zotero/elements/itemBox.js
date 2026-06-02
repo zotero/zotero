@@ -67,6 +67,9 @@
 			this._selectFieldValue = null;
 			this._selectFieldSelection = null;
 			this._addCreatorRow = false;
+			this._addingCreatorRowsInBulk = false;
+			this._needsUnsavedCreatorRemoval = false;
+			this._pendingCreatorSizing = [];
 			this._switchedModeOfCreator = null;
 			this._popupNode = null;
 
@@ -780,52 +783,55 @@
 				this._firstRowBeforeCreators = this._infoTable.firstChild;
 			}
 			
-			this._creatorCount = 0;
-			var num = this.item.numCreators();
-			if (num > 0) {
-				// Limit number of creators display
-				var max = Math.min(num, this._initialVisibleCreators);
-				// If only 1 or 2 more, just display
-				if (num < max + 3 || this._displayAllCreators) {
-					max = num;
-				}
-				for (let i = 0; i < max; i++) {
-					let data = this.item.getCreator(i);
-					this.addCreatorRow(data, data.creatorTypeID, false);
-				}
-				if (this._draggedCreator) {
-					this._draggedCreator = false;
-					// Block hover effects on creators, enable them back on first mouse movement.
-					// See comment in creatorDragPlaceholder() for explanation
-					for (let label of document.querySelectorAll(".meta-label[fieldname^='creator-']")) {
-						label.closest(".meta-row").classList.add("noHover");
+			let max;
+			this._addCreatorRowsBulk(() => {
+				this._creatorCount = 0;
+				var num = this.item.numCreators();
+				if (num > 0) {
+					// Limit number of creators display
+					max = Math.min(num, this._initialVisibleCreators);
+					// If only 1 or 2 more, just display
+					if (num < max + 3 || this._displayAllCreators) {
+						max = num;
 					}
-					let removeHoverBlock = () => {
-						let noHoverRows = document.querySelectorAll('.noHover');
-						noHoverRows.forEach(el => el.classList.remove('noHover'));
-						document.removeEventListener('mousemove', removeHoverBlock);
-					};
-					document.addEventListener('mousemove', removeHoverBlock);
+					for (let i = 0; i < max; i++) {
+						let data = this.item.getCreator(i);
+						this.addCreatorRow(data, data.creatorTypeID, false);
+					}
+					if (this._draggedCreator) {
+						this._draggedCreator = false;
+						// Block hover effects on creators, enable them back on first mouse movement.
+						// See comment in creatorDragPlaceholder() for explanation
+						for (let label of document.querySelectorAll(".meta-label[fieldname^='creator-']")) {
+							label.closest(".meta-row").classList.add("noHover");
+						}
+						let removeHoverBlock = () => {
+							let noHoverRows = document.querySelectorAll('.noHover');
+							noHoverRows.forEach(el => el.classList.remove('noHover'));
+							document.removeEventListener('mousemove', removeHoverBlock);
+						};
+						document.addEventListener('mousemove', removeHoverBlock);
+					}
+
+					// Additional creators not displayed
+					if (num > max) {
+						this.addMoreCreatorsRow(num - max);
+					}
+					else {
+						// If we didn't start with creators truncated,
+						// don't truncate for as long as we're viewing
+						// this item, so that added creators aren't
+						// immediately hidden
+						this._displayAllCreators = true;
+					}
 				}
-				
-				// Additional creators not displayed
-				if (num > max) {
-					this.addMoreCreatorsRow(num - max);
+				else if (this.editable && Zotero.CreatorTypes.itemTypeHasCreators(this.item.itemTypeID)) {
+					// Add default row
+					this.addCreatorRow(false, false, false);
 				}
-				else {
-					// If we didn't start with creators truncated,
-					// don't truncate for as long as we're viewing
-					// this item, so that added creators aren't
-					// immediately hidden
-					this._displayAllCreators = true;
-				}
-			}
-			else if (this.editable && Zotero.CreatorTypes.itemTypeHasCreators(this.item.itemTypeID)) {
-				// Add default row
-				this.addCreatorRow(false, false, false);
-			}
-			
-			
+			});
+
+
 			if (this._showCreatorTypeGuidance) {
 				let creatorTypeLabels = this.querySelectorAll(".creator-type-label");
 				this._id("zotero-author-guidance").show({
@@ -833,9 +839,6 @@
 				});
 				this._showCreatorTypeGuidance = false;
 			}
-
-			this._ensureButtonsFocusable();
-			this._updateCreatorButtonsStatus();
 
 			// Set focus on the last focused field
 			this._restoreFieldFocus();
@@ -1150,6 +1153,39 @@
 			return row;
 		}
 		
+		_addCreatorRowsBulk(fn) {
+			this._addingCreatorRowsInBulk = true;
+			// Remove unsaved creator row in the first addCreatorRow() invocation
+			this._needsUnsavedCreatorRemoval = true;
+			try {
+				fn();
+			}
+			finally {
+				this._addingCreatorRowsInBulk = false;
+				this._needsUnsavedCreatorRemoval = false;
+				this._finishCreatorRowChanges();
+			}
+		}
+
+		/**
+		 * Perform final work after adding one or more creator rows:
+		 * - Size added name fields to their content
+		 * - Ensure button focusability
+		 * - Update hidden/disabled status of each button
+		 */
+		_finishCreatorRowChanges() {
+			if (this._addingCreatorRowsInBulk) {
+				return;
+			}
+			let fieldsToSize = this._pendingCreatorSizing;
+			this._pendingCreatorSizing = [];
+			if (fieldsToSize.length) {
+				customElements.get("editable-text").batchSizeToContent(fieldsToSize);
+			}
+			this._ensureButtonsFocusable();
+			this._updateCreatorButtonsStatus();
+		}
+
 		addCreatorRow(creatorData, creatorTypeIDOrName, unsaved, before) {
 			// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
 			// may need need to be adjusted if this DOM structure changes
@@ -1319,8 +1355,18 @@
 			
 			this._creatorCount++;
 			
-			// Delete existing unsaved creator row if any
-			this.removeUnsavedCreatorRow();
+			// Delete existing unsaved creator row, if any.
+			// During a bulk add, this only needs to run once, on the first row, rather than
+			// repeating the slow removeUnsavedCreatorRow() procedure for every row in the loop.
+			if (this._addingCreatorRowsInBulk) {
+				if (this._needsUnsavedCreatorRemoval) {
+					this._needsUnsavedCreatorRemoval = false;
+					this.removeUnsavedCreatorRow();
+				}
+			}
+			else {
+				this.removeUnsavedCreatorRow();
+			}
 
 			// If this creator row's type was just switched, remove ".show-on-hover" to avoid buttons appearing
 			// and then immediately disappearing when the css rule kicks in if the row is hovered.
@@ -1335,8 +1381,6 @@
 			}
 			let row = this.addDynamicRow(rowLabel, rowData, before);
 
-			this._ensureButtonsFocusable();
-			
 			/**
 			 * Events handling creator drag-drop reordering
 			 */
@@ -1385,10 +1429,14 @@
 				this.switchCreatorMode(rowData.parentNode, 0, true, false, rowIndex);
 			}
 			
-			lastNameElem.sizeToContent();
-			firstNameElem.sizeToContent();
+			// Queue the name fields to be sized to their content. The actual sizing is batched in
+			// _finishCreatorRowChanges() so that all fields added in one operation are measured and
+			// resized together, which is many orders of magnitude faster than sizing each field
+			// individually.
+			this._pendingCreatorSizing.push(lastNameElem, firstNameElem);
 
 			if (!this.editable) {
+				this._finishCreatorRowChanges();
 				return;
 			}
 
@@ -1409,9 +1457,10 @@
 				rowData.setAttribute("unsaved", true);
 				lastNameElem.focus();
 			}
-			// Refresh creator buttons status, e.g. to disable + button of a row that just added
-			// a new creator
-			this._updateCreatorButtonsStatus();
+
+			// Finalize sizing/button state. A no-op during a bulk add, which finalizes once at the
+			// end (see _addCreatorRowsBulk()).
+			this._finishCreatorRowChanges();
 		}
 		
 		addMoreCreatorsRow(num) {
@@ -1864,7 +1913,7 @@
 			
 			unsavedCreatorData.closest(".meta-row").remove();
 			this._creatorCount--;
-			this._updateCreatorButtonsStatus();
+			this._finishCreatorRowChanges();
 		}
 		
 		dateTimeFromUTC(valueText) {
@@ -2336,7 +2385,7 @@
 
 		// Make sure that irrelevant creators +/- buttons are disabled
 		_updateCreatorButtonsStatus() {
-			let creatorValues = [...this.querySelectorAll(".creator-type-value")];
+			let creatorValues = this.querySelectorAll(".creator-type-value");
 			let row;
 			for (let creatorValue of creatorValues) {
 				row = creatorValue.closest(".meta-row");
@@ -2363,22 +2412,34 @@
 			var [label1, label2] = row.querySelectorAll('editable-text');
 			var fieldMode = row.querySelector('[fieldMode]')?.getAttribute('fieldMode');
 			let isUnsavedRow = !!row.querySelector("[unsaved=true]");
-			// Calculate the index this row will occupy after the new row (if it exists) is saved.
-			// This is used for focus management.
-			let creatorsData = [...this.querySelectorAll(".creator-type-value")];
-			let position = creatorsData.findIndex(node => node.parentNode == row);
-			if (position == -1) {
-				position = null;
-			}
-			var fields = {
+			let position;
+			
+			let fields = {
 				lastName: label1.value.trim(),
 				firstName: label2.value.trim(),
 				fieldMode: fieldMode ? parseInt(fieldMode) : 0,
 				creatorTypeID: parseInt(typeID),
-				position: position,
 				isUnsaved: isUnsavedRow
 			};
-			
+			Object.defineProperty(fields, 'position', {
+				// Calculate the index this row will occupy after the new row (if it exists) is saved.
+				// This is used for focus management.
+				// (We compute this lazily, since the procedure is relatively slow and most callers
+				// don't need it. Needs to be a lambda to avoid aliasing `this`.)
+				get: () => {
+					if (position === undefined) {
+						let creatorsData = [...this.querySelectorAll(".creator-type-value")];
+						position = creatorsData.findIndex(node => node.parentNode == row);
+						if (position == -1) {
+							position = null;
+						}
+					}
+					return position;
+				},
+				set: () => {
+					throw new Error('position is read-only');
+				},
+			});
 			return fields;
 		}
 		
@@ -2437,7 +2498,7 @@
 			var row = this._popupNode.closest('.meta-row');
 			let label = row.querySelector('.meta-label');
 			var creatorIndex = parseInt(label.getAttribute('fieldname').split('-')[1]);
-			let [lastName, firstName] = [...row.querySelectorAll("editable-text")];
+			let [lastName, firstName] = row.querySelectorAll("editable-text");
 			lastName.value = Zotero.Utilities.capitalizeName(lastName.value);
 			firstName.value = Zotero.Utilities.capitalizeName(firstName.value);
 			var fields = this.getCreatorFields(row);
