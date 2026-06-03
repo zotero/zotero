@@ -93,6 +93,7 @@ const xpcomFilesLocal = [
 	'data/group',
 	'data/groups',
 	'data/itemFields',
+	'itemMetadataUpdater',
 	'data/relations',
 	'data/search',
 	'data/searchConditions',
