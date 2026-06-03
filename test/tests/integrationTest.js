@@ -615,6 +615,42 @@ describe("Zotero.Integration", function () {
 				assert.equal(citation.citationItems.length, 2);
 				assert.equal(citation.citationItems[0].id, testItems[3].id);
 			});
+
+			it('should continue citation insertion if in TEMP field', async function () {
+				var docID = this.test.fullTitle();
+				if (!(docID in applications)) await initDoc(docID);
+				var doc = applications[docID].doc;
+				var field = await doc.insertField('Field', 0);
+				await field.setCode('TEMP');
+
+				sinon.stub(doc, 'cursorInField').resolves(field);
+				sinon.stub(doc, 'canInsertField').resolves(false);
+
+				setAddEditItems(testItems[0]);
+				await execCommand('addEditCitation', docID);
+				assert.equal(doc.fields.length, 1);
+				var citation = await (new Zotero.Integration.CitationField(field, field.code)).unserialize();
+				assert.equal(citation.citationItems.length, 1);
+				assert.equal(citation.citationItems[0].id, testItems[0].id);
+			});
+
+			it('should display a bibliography-specific error if in bibliography field', async function () {
+				await insertMultipleCitations.call(this);
+				var docID = this.test.fullTitle();
+				var doc = applications[docID].doc;
+				await execCommand('addEditBibliography', docID);
+				var bibliographyField = doc.fields[doc.fields.length - 1];
+
+				sinon.stub(doc, 'cursorInField').resolves(bibliographyField);
+				var displayAlertStub = sinon.stub(doc, 'displayAlert').resolves(0);
+
+				await execCommand('addEditCitation', docID);
+				assert.isTrue(displayAlertStub.calledOnce);
+				assert.equal(
+					displayAlertStub.firstCall.args[0],
+					Zotero.getString('integration.error.inBibliography', ['Add/Edit Bibliography'])
+				);
+			});
 			
 			it('should write an implicitly updated citation into the document', async function () {
 				await insertMultipleCitations.call(this);
