@@ -646,7 +646,10 @@ describe("Zotero.Integration", function () {
 
 				await execCommand('addEditCitation', docID);
 				assert.isTrue(displayAlertStub.calledOnce);
-				assert.equal(displayAlertStub.firstCall.args[0], Zotero.getString('integration.error.inBibliography'));
+				assert.equal(
+					displayAlertStub.firstCall.args[0],
+					Zotero.getString('integration.error.inBibliography', ['Add/Edit Bibliography'])
+				);
 			});
 			
 			it('should write an implicitly updated citation into the document', async function () {

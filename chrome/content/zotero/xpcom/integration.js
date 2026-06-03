@@ -1517,7 +1517,10 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 			citation = new Zotero.Integration.Citation(field, await field.unserialize(), await field.getNoteIndex());
 		}
 		else if (field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
-			throw new Zotero.Exception.Alert("integration.error.inBibliography");
+			let commandName = this._app.processorName == 'Google Docs'
+				? '“Add/edit bibliography”'
+				: 'Add/Edit Bibliography';
+			throw new Zotero.Exception.Alert("integration.error.inBibliography", [commandName]);
 		}
 		else {
 			// Treat any non-item and non-bibliograph field as a TEMP placeholder, that is likely
