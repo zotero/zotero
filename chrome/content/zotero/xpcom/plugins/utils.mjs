@@ -28,6 +28,8 @@ import { PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS } from "chrome:
 
 const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
 
+const CUSTOM_PARSER_KEY = "__zoteroCustomParser__";
+
 const VarCheck = {
 	isObject(v) {
 		return v !== null && typeof v === "object";
@@ -149,6 +151,58 @@ const VarCheck = {
 	isPrivilegedScope(scope) {
 		// If the scope is unprivileged, it will be xrayed and thus using its properties is safe
 		return scope.PERMISSIONS.includes("*");
+	},
+
+	PERMISSION_MATCH_MODES: {
+		HOST_PERMISSIONS: "pattern",
+		PREF_PERMISSIONS: "prefix",
+		INTEROP_PERMISSIONS: "exact",
+	},
+
+	/**
+	 * Check if a scope has a specific permission in a named permission list.
+	 * Privileged scopes always pass. Returns true if allowed, false if denied.
+	 *
+	 * @param {object} scope - The sandbox scope
+	 * @param {string} listKey - The scope property holding the permission list (e.g. "INTEROP_PERMISSIONS")
+	 * @param {string} value - The value to check against the list
+	 * @param {object} [options]
+	 * @param {"exact"|"prefix"|"pattern"} [options.matchMode] - "exact" for exact match, "prefix" for prefix match, "pattern" for pattern match
+	 * @returns {boolean}
+	 */
+	checkScopePermission(scope, listKey, value, { matchMode = undefined } = {}) {
+		if (!scope || this.isPrivilegedScope(scope)) {
+			return true;
+		}
+		let allowed = scope[listKey];
+		if (!allowed) {
+			return false;
+		}
+		if (!matchMode) {
+			matchMode = VarCheck.PERMISSION_MATCH_MODES[listKey] || "exact";
+		}
+
+		let list = Array.from(allowed);
+		switch (matchMode) {
+			case "prefix": {
+				return list.some(prefix => value.startsWith(prefix));
+			}
+			case "pattern": {
+				// Use MatchPatternSet for WebExtension-style URL pattern matching
+				// (e.g. "*://*.example.com/*", "<all_urls>")
+				try {
+					let patterns = new MatchPatternSet(list, { restrictSchemes: false });
+					return patterns.matches(value);
+				}
+				catch {
+					return false;
+				}
+			}
+			case "exact":
+			default: {
+				return list.includes(value);
+			}
+		}
 	},
 
 	mergeSchema(a, b) {
@@ -592,4 +646,4 @@ const ScopeUtils = {
 	},
 };
 
-export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY };
+export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY };
