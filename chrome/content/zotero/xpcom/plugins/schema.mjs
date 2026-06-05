@@ -47,7 +47,13 @@ const PERMISSION_SCHEMAS = {
 			uiReadyPromise: true,
 			unlockPromise: true,
 			startupSyncPromise: true,
-			// Data access
+			// Window access (also available via onMainWindowLoad hook)
+			getMainWindow: "WindowScopeCallable",
+			getMainWindows: "WindowScopeCallable",
+		},
+	},
+	data: {
+		Zotero: {
 			Items: {
 				// Read
 				get: true,
@@ -107,7 +113,14 @@ const PERMISSION_SCHEMAS = {
 				removeFromLibrary: true,
 				setColor: true,
 			},
-			// I/O
+			Notifier: {
+				registerObserver: "FromScopeCallable",
+				unregisterObserver: true,
+			},
+		},
+	},
+	fileSystem: {
+		Zotero: {
 			File: {
 				// Read
 				getExtension: true,
@@ -134,14 +147,17 @@ const PERMISSION_SCHEMAS = {
 				createDirectoryIfMissingAsync: true,
 				zipDirectory: true,
 			},
-			// Network
+		},
+	},
+	network: {
+		Zotero: {
 			HTTP: {
 				request: "FromScopeCallable",
 			},
-			Notifier: {
-				registerObserver: "FromScopeCallable",
-				unregisterObserver: true,
-			},
+		},
+	},
+	preferences: {
+		Zotero: {
 			Prefs: {
 				registerObserver: "FromScopeCallable",
 				unregisterObserver: true,
@@ -150,15 +166,20 @@ const PERMISSION_SCHEMAS = {
 				clear: true,
 				resetBranch: true,
 			},
+		},
+	},
+	ui: {
+		Zotero: {
 			// UI APIs
 			ItemTreeManager: true,
 			ItemPaneManager: true,
 			MenuManager: true,
-			// Windows: getMainWindow are created separately to wrap the returned window
-			getMainWindow: "WindowScopeCallable",
-			getMainWindows: "WindowScopeCallable",
+			Reader: {
+				registerEventListener: "FromScopeCallable",
+				unregisterEventListener: true,
+			},
 		},
-	}
+	},
 };
 
 const WINDOW_SCHEMAS = {
@@ -176,8 +197,8 @@ const WINDOW_SCHEMAS = {
 };
 
 const MAIN_WINDOW_SCHEMAS = {
-	default: {
-		// TODO: Use permissions to determine which of these to expose
+	default: {},
+	mainWindow: {
 		Zotero_Tabs: {
 			// Read-only state
 			selectedID: true,
@@ -228,7 +249,7 @@ const MAIN_WINDOW_SCHEMAS = {
 			newNote: true,
 			newChildNote: true,
 		},
-	}
+	},
 };
 
 export { PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
