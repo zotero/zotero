@@ -29,6 +29,7 @@ import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
 const ScopeVariables = {
+	MAX_WRAP_DEPTH: 10,
 
 	/**
 	 * Wrap a single value with a safe object based on its type.
@@ -45,7 +46,7 @@ const ScopeVariables = {
 	 * @param {Element} [options.rootNode] - Optional root node to restrict DOM access.
 	 * @returns {any} The wrapped value safe for use in the plugin scope
 	 */
-	toScope(value, addonID, { rootNode = null } = {}) {
+	toScope(value, addonID, { rootNode = null, _seen = null, _depth = 0 } = {}) {
 		if (!addonID) {
 			return value;
 		}
@@ -78,13 +79,20 @@ const ScopeVariables = {
 			);
 		}
 
+		// Prevent infinite recursion -- cross-compartment Xray wrappers may not
+		// have stable identity, so a Set alone is not reliable.  Use both.
+		if (_depth > ScopeVariables.MAX_WRAP_DEPTH) return value;
+		if (!_seen) _seen = new Set();
+		if (_seen.has(value)) return value;
+		_seen.add(value);
+
 		// Handle arrays by cloning into scope and recursively wrapping elements
 		if (Array.isArray(value)) {
 			let arr = Cu.cloneInto([], scope, {
 				wrapReflectors: true,
 				cloneFunctions: true,
 			});
-			arr.push(...value.map(v => ScopeVariables.toScope(v, addonID, { rootNode })));
+			arr.push(...value.map(v => ScopeVariables.toScope(v, addonID, { rootNode, _seen, _depth: _depth + 1 })));
 			return arr;
 		}
 
@@ -93,7 +101,7 @@ const ScopeVariables = {
 			let wrapped = Cu.createObjectIn(scope);
 			for (let key in value) {
 				if (Object.prototype.hasOwnProperty.call(value, key)) {
-					wrapped[key] = ScopeVariables.toScope(value[key], addonID, { rootNode });
+					wrapped[key] = ScopeVariables.toScope(value[key], addonID, { rootNode, _seen, _depth: _depth + 1 });
 				}
 			}
 			return wrapped;
@@ -128,7 +136,7 @@ const ScopeVariables = {
 	 * @param {boolean} [options.unwrapReturn=false] - Whether to unwrap DOM nodes in return value
 	 * @returns {any} - Wrapped value safe for use in the host scope
 	 */
-	fromScope(value, addonID, { rootNode = null, unwrapReturn = false } = {}) {
+	fromScope(value, addonID, { rootNode = null, unwrapReturn = false, _seen = null, _depth = 0 } = {}) {
 		if (!addonID) {
 			return value;
 		}
@@ -137,14 +145,14 @@ const ScopeVariables = {
 			return value;
 		}
 
-		// Unwrap instance facades and DOM node wrappers back to their originals
-		if (VarCheck.isObjectLike(value) && typeof value[ORIGINAL_REF_KEY] === "function") {
-			return value[ORIGINAL_REF_KEY]();
+		// Early return for primitives
+		if (!VarCheck.isObjectLike(value)) {
+			return value;
 		}
 
-		// Recursively unwrap array elements
-		if (Array.isArray(value)) {
-			return Array.from(value).map(v => ScopeVariables.fromScope(v, addonID, { rootNode, unwrapReturn }));
+		// Unwrap instance facades and DOM node wrappers back to their originals
+		if (typeof value[ORIGINAL_REF_KEY] === "function") {
+			return value[ORIGINAL_REF_KEY]();
 		}
 
 		if (typeof value === "function") {
@@ -173,12 +181,25 @@ const ScopeVariables = {
 			});
 			return wrapper;
 		}
-		else if (VarCheck.isPlainObject(value)) {
+
+		// Prevent infinite recursion -- cross-compartment Xray wrappers may not
+		// have stable identity, so a Set alone is not reliable.  Use both.
+		if (_depth > ScopeVariables.MAX_WRAP_DEPTH) return value;
+		if (!_seen) _seen = new Set();
+		if (_seen.has(value)) return value;
+		_seen.add(value);
+
+		// Recursively unwrap array elements
+		if (Array.isArray(value)) {
+			return Array.from(value).map(v => ScopeVariables.fromScope(v, addonID, { rootNode, unwrapReturn, _seen, _depth: _depth + 1 }));
+		}
+
+		if (VarCheck.isPlainObject(value)) {
 			let hasFunction = false;
 			let wrapped = {};
 			for (let key of Object.keys(value)) {
 				let val = value[key];
-				let wrappedVal = ScopeVariables.fromScope(val, addonID, { rootNode, unwrapReturn });
+				let wrappedVal = ScopeVariables.fromScope(val, addonID, { rootNode, unwrapReturn, _seen, _depth: _depth + 1 });
 				if (wrappedVal !== val) {
 					hasFunction = true;
 				}
@@ -355,6 +376,15 @@ const ScopeVariables = {
 					set: holder.s,
 				});
 			}
+
+			// Store a reference to the original object for unwrapping in fromScope,
+			// so that wrappers are detected and not recursed into
+			Object.defineProperty(wrapper, ORIGINAL_REF_KEY, {
+				value: () => objRef.deref(),
+				enumerable: false,
+				configurable: false,
+				writable: false,
+			});
 
 			return wrapper;
 		}
