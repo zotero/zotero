@@ -3627,6 +3627,135 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("XHTML sanitization", function () {
+		var { WindowScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
+
+		it("should remove unsafe elements from a fragment", function () {
+			let frag = MozXULElement.parseXULToFragment(
+				'<html:div id="safe">Safe</html:div>'
+				+ '<html:script>alert("xss")</html:script>'
+				+ '<browser src="chrome://zotero/content/zoteroPane.xhtml"/>'
+				+ '<html:iframe src="about:config"></html:iframe>'
+				+ '<html:p>Text</html:p>'
+			);
+			WindowScopeVariables.sanitizeFragment(frag);
+			assert.isNull(frag.querySelector("script"), "<script> should be removed");
+			assert.isNull(frag.querySelector("browser"), "<browser> should be removed");
+			assert.isNull(frag.querySelector("iframe"), "<iframe> should be removed");
+			assert.ok(frag.querySelector('[id="safe"]'), "<div> should remain");
+			assert.ok(frag.querySelector("p"), "<p> should remain");
+		});
+
+		it("should strip on* attributes when no pluginID is provided", function () {
+			let frag = MozXULElement.parseXULToFragment(
+				'<html:p onclick="alert(1)" onmouseover="alert(2)">Click</html:p>'
+				+ '<html:div onload="alert(3)">Div</html:div>'
+			);
+			WindowScopeVariables.sanitizeFragment(frag);
+			let p = frag.querySelector("p");
+			assert.ok(p, "<p> should remain");
+			assert.isFalse(p.hasAttribute("onclick"), "onclick should be stripped");
+			assert.isFalse(p.hasAttribute("onmouseover"), "onmouseover should be stripped");
+			let div = frag.querySelector("div");
+			assert.isFalse(div.hasAttribute("onload"), "onload should be stripped");
+		});
+
+		it("should preserve safe attributes", function () {
+			let frag = MozXULElement.parseXULToFragment(
+				'<html:div id="test" class="my-class" data-value="42">Content</html:div>'
+			);
+			WindowScopeVariables.sanitizeFragment(frag);
+			let div = frag.querySelector("div");
+			assert.equal(div.getAttribute("id"), "test");
+			assert.equal(div.getAttribute("class"), "my-class");
+			assert.equal(div.getAttribute("data-value"), "42");
+		});
+
+		it("should skip sanitization for privileged plugins", function () {
+			loadTestScope(["*"]);
+			let frag = MozXULElement.parseXULToFragment(
+				'<html:script>alert("xss")</html:script>'
+				+ '<html:p onclick="alert(1)">Click</html:p>'
+			);
+			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
+			assert.ok(frag.querySelector("script"), "<script> should remain for privileged plugins");
+			let p = frag.querySelector("p");
+			assert.isTrue(p.hasAttribute("onclick"), "onclick should remain for privileged plugins");
+		});
+
+		it("should sanitize for unprivileged plugins when pluginID is provided", function () {
+			loadTestScope(["default"]);
+			let frag = MozXULElement.parseXULToFragment(
+				'<html:script>alert("xss")</html:script>'
+				+ '<html:p onclick="alert(1)">Click</html:p>'
+			);
+			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
+			assert.isNull(frag.querySelector("script"), "<script> should be removed for unprivileged plugins");
+			let p = frag.querySelector("p");
+			assert.isFalse(p.hasAttribute("onclick"), "onclick should be removed for unprivileged plugins");
+			assert.isTrue(p.hasAttribute("data-sandbox-on-click"), "handler should be stored as data attr");
+		});
+
+		it("should rewire on* handlers to execute in sandbox scope", function () {
+			loadTestScope(["default"]);
+			Cu.evalInSandbox("var handlerCalled = false;", scope);
+
+			let frag = MozXULElement.parseXULToFragment(
+				'<html:button onclick="handlerCalled = true;">Click</html:button>'
+			);
+			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
+
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			container.appendChild(document.importNode(frag, true));
+			WindowScopeVariables.activateInlineHandlers(container, ADDON_ID);
+
+			try {
+				let button = container.querySelector("button");
+				assert.isFalse(button.hasAttribute("onclick"), "onclick attr should be removed");
+				assert.isFalse(button.hasAttribute("data-sandbox-on-click"), "data attr should be removed after activation");
+				button.click();
+				assert.isTrue(Cu.evalInSandbox("handlerCalled", scope), "handler should have set variable in sandbox");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("should provide wrapped this and event to rewired handlers", function () {
+			loadTestScope(["default"]);
+			Cu.evalInSandbox("var capturedTagName = null; var capturedEventType = null;", scope);
+
+			let frag = MozXULElement.parseXULToFragment(
+				'<html:button onclick="capturedTagName = this.tagName; capturedEventType = event.type;">Click</html:button>'
+			);
+			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
+
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			container.appendChild(document.importNode(frag, true));
+			WindowScopeVariables.activateInlineHandlers(container, ADDON_ID);
+
+			try {
+				container.querySelector("button").click();
+				let tagName = Cu.evalInSandbox("capturedTagName", scope);
+				assert.ok(tagName, "this.tagName should be accessible");
+				assert.isTrue(
+					tagName.toUpperCase().includes("BUTTON"),
+					"this.tagName should contain BUTTON"
+				);
+				assert.equal(
+					Cu.evalInSandbox("capturedEventType", scope),
+					"click",
+					"event.type should be accessible"
+				);
+			}
+			finally {
+				container.remove();
+			}
+		});
+	});
+
 	describe("resolveURI", function () {
 		it("should resolve relative URIs for privileged plugins against file:// root", async function () {
 			loadTestScope(["*"]);
