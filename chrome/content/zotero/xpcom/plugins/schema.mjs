@@ -324,6 +324,9 @@ const PERMISSION_SCHEMAS = {
 			ItemTreeManager: true,
 		},
 	},
+	ui: {
+		// An umbrella permission for all UI-related APIs. See IMPLIED_PERMISSIONS.
+	},
 	itemPane: {
 		Zotero: {
 			ItemPaneManager: true,
