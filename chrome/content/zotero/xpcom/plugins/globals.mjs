@@ -30,6 +30,7 @@ import { ScopeVariables, WindowScopeVariables } from "chrome://zotero/content/xp
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
+	FilePicker: "chrome://zotero/content/modules/filePicker.mjs",
 });
 
 
@@ -332,4 +333,24 @@ function setupPreferences(scope, addon) {
 	});
 }
 
-export { setupConsole, setupOpenWindow, setupHTTP, setupPreferences };
+/**
+ * Set up the `FilePicker` constructor on the plugin scope.
+ * The `init` method is overridden to unwrap the sandbox-side
+ * parentWindow argument via `fromScope` before passing it to
+ * the real nsIFilePicker.
+ *
+ * @param {Object} scope - The sandbox scope
+ * @param {string} addonID - The addon's ID
+ */
+function setupFilePicker(scope, addonID) {
+	let { FilePicker } = lazy;
+	class PluginFilePicker extends FilePicker {
+		init(parentWindow, title, mode) {
+			parentWindow = ScopeVariables.fromScope(parentWindow, addonID);
+			return super.init(parentWindow, title, mode);
+		}
+	}
+	scope.FilePicker = ScopeUtils.ensureConstructableInScope(PluginFilePicker, scope, { mutable: true });
+}
+
+export { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker };
