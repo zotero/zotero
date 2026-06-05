@@ -26,7 +26,7 @@
 
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 import { ORIGINAL_REF_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
-import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
+import { ScopeVariables, WindowScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
@@ -132,10 +132,12 @@ function setupOpenWindow(scope, rootURI) {
 							if ((flags & Ci.nsIWebProgressListener.STATE_STOP)
 								&& (flags & Ci.nsIWebProgressListener.STATE_IS_WINDOW)
 								&& Components.isSuccessCode(status)) {
-								resolve(browser.contentWindow);
-								if (typeof onLoad === "function") {
-									onLoad(browser.contentWindow);
-								}
+								WindowScopeVariables.setupContentL10n(browser).then(() => {
+									resolve(browser.contentWindow);
+									if (typeof onLoad === "function") {
+										onLoad(browser.contentWindow);
+									}
+								});
 							}
 						},
 						onLocationChange() {},
