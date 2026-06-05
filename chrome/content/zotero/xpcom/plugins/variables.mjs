@@ -632,6 +632,21 @@ const WindowScopeVariables = {
 			);
 		}
 
+		// addEventListener / removeEventListener need the callback-wrapping
+		// logic from createSafeWindowCallable so that event handlers receive
+		// safe Event wrappers and the correct handler identity is preserved
+		// for removal.
+		for (let method of ["addEventListener", "removeEventListener"]) {
+			Object.defineProperty(wrapper, method, {
+				value: WindowScopeVariables.createSafeWindowCallable(
+					doc[method], doc, addonID, { rootNode }
+				),
+				enumerable: true,
+				configurable: false,
+				writable: false,
+			});
+		}
+
 		Object.preventExtensions(wrapper);
 		return wrapper;
 	},
