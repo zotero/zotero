@@ -230,10 +230,13 @@ const ScopeVariables = {
 	 * @param {Object} schema Allowlist schema, see schema.mjs
 	 * @param {Object} scope Scope to mirror the objects
 	 * @param {Object} options
-	 * - mutable: {Boolean} Whether to make the mirrored object mutable. Default false (frozen).
+	 * @param {Boolean} options.mutable Whether to make the mirrored object mutable. Default false (frozen).
+	 * @param {Boolean} options.cache Whether to cache the mirrored object. Default false.
+	 * @param {Boolean} options.strong Whether to use a strong reference to the target. Default false (WeakRef).
+	 *   Use this for constructor-created objects that the caller owns, to prevent premature GC.
 	 * @returns {Object} The mirrored object in scope
 	 */
-	createAllowlistMirrorObject(target, schema, addonID, { mutable = false, cache = false } = {}) {
+	createAllowlistMirrorObject(target, schema, addonID, { mutable = false, cache = false, strong = false } = {}) {
 		let scope = PluginSandbox.getScope(addonID);
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return target;
@@ -255,7 +258,7 @@ const ScopeVariables = {
 		 * Wrap an object with an allowlist schema recursively.
 		 * The mutable only applies to the top-level wrapper; nested objects are always frozen.
 		 */
-		function wrapAllowlist(obj, schemaNode, { mutable = false } = {}) {
+		function wrapAllowlist(obj, schemaNode, { mutable = false, strong: strongRef = false } = {}) {
 			if (!VarCheck.isObjectLike(obj)) return obj;
 
 			if (schemaNode !== true && (!schemaNode || typeof schemaNode !== "object")) {
@@ -276,7 +279,7 @@ const ScopeVariables = {
 			if (cache) {
 				cacheForObj.set(cacheKey, wrapper);
 			}
-			let objRef = new WeakRef(obj);
+			let objRef = strongRef ? { deref: () => obj } : new WeakRef(obj);
 
 			let keys = VarCheck.getAllowedKeys(obj, schemaNode);
 
@@ -356,7 +359,7 @@ const ScopeVariables = {
 			return wrapper;
 		}
 
-		let result = wrapAllowlist(target, schema, { mutable });
+		let result = wrapAllowlist(target, schema, { mutable, strong });
 		return result;
 	},
 };

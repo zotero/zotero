@@ -214,7 +214,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			// Add additional global vars
 			Localization: ScopeUtils.ensureConstructableInScope(Localization, scope, {
 				mutable: true,
-				returnParser: instance => ScopeVariables.createAllowlistMirrorObject(instance, true, addon.id, { mutable: true }),
+				returnParser: instance => ScopeVariables.createAllowlistMirrorObject(instance, true, addon.id, { mutable: true, strong: true }),
 			}),
 			setTimeout,
 			clearTimeout,
