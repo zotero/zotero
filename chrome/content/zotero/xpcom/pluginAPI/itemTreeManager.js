@@ -28,8 +28,11 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 {
-	const { PluginAPIBase } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs");
-	const { ScopeVariables, WindowScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
+	const lazy = {};
+	ChromeUtils.defineESModuleGetters(lazy, {
+		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+	});
 
 
 	/**
@@ -55,7 +58,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 	 */
 
 
-	class ItemTreeColumnManagerInternal extends PluginAPIBase {
+	class ItemTreeColumnManagerInternal extends lazy.PluginAPIBase {
 		constructor() {
 			super();
 			this.config = {
@@ -160,21 +163,20 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				option.enabledTreeIDs = ["*"];
 			}
 			option.showInColumnPicker = option.showInColumnPicker === undefined ? true : option.showInColumnPicker;
+
 			if (option.renderCell) {
-				let renderCell = option.renderCell;
-				option.renderCell = function (index, data, column, isFirstColumn, doc) {
-					let safeColumn = ScopeVariables.createAllowlistMirrorObject(column, true, option.pluginID);
-					let safeDoc = WindowScopeVariables.createSafeDocument(doc, option.pluginID);
-					let elem = renderCell.call(this, index, data, safeColumn, isFirstColumn, safeDoc);
-					return WindowScopeVariables.unwrapDOMNode(elem);
-				};
+				option.renderCell = lazy.ScopeVariables.fromScope(
+					option.renderCell,
+					option.pluginID,
+					{ unwrapReturn: true }
+				);
 			}
+
 			if (option.dataProvider) {
-				let dataProvider = option.dataProvider;
-				option.dataProvider = function (item, dataKey) {
-					let safeItem = ScopeVariables.createAllowlistMirrorObject(item, true, option.pluginID, { mutable: true });
-					return dataProvider.call(this, safeItem, dataKey);
-				};
+				option.dataProvider = lazy.ScopeVariables.fromScope(
+					option.dataProvider,
+					option.pluginID
+				);
 			}
 			return option;
 		}
