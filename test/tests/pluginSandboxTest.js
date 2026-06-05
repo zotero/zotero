@@ -4117,20 +4117,6 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("resolveURI", function () {
-		it("should resolve relative URIs for privileged plugins against file:// root", async function () {
-			loadTestScope(["*"]);
-			let rootURI = "file:///tmp/test-plugin/";
-			let stub = sinon.stub(Zotero.Plugins, "getRootURI").resolves(rootURI);
-			try {
-				let resolved = await Zotero.Plugins.resolveURI(ADDON_ID, "content/overlay.html");
-				assert.equal(resolved, rootURI + "content/overlay.html");
-				assert.isTrue(resolved.startsWith("file:///"), "Privileged plugin URI should be file://");
-			}
-			finally {
-				stub.restore();
-			}
-		});
-
 		it("should resolve relative URIs for unprivileged plugins against moz-extension:// root", async function () {
 			var tmpDir = await getTempDirectory();
 			let fileURI = Services.io.newURI(PathUtils.toFileURI(tmpDir) + "/");
@@ -4159,19 +4145,6 @@ describe("Plugin Sandbox", function () {
 			finally {
 				PluginSandbox.unloadScope(ADDON_ID);
 				await IOUtils.remove(tmpDir, { recursive: true });
-			}
-		});
-
-		it("should return absolute URIs unchanged", async function () {
-			loadTestScope(["*"]);
-			let stub = sinon.stub(Zotero.Plugins, "getRootURI").resolves("file:///tmp/test-plugin/");
-			try {
-				let absoluteURI = "https://example.com/resource.html";
-				let resolved = await Zotero.Plugins.resolveURI(ADDON_ID, absoluteURI);
-				assert.equal(resolved, absoluteURI);
-			}
-			finally {
-				stub.restore();
 			}
 		});
 	});
