@@ -143,6 +143,10 @@ const PERMISSION_SCHEMAS = {
 			HTTP: {
 				request: true,
 			},
+			// UI APIs
+			ItemTreeManager: true,
+			ItemPaneManager: true,
+			MenuManager: true,
 		},
 	}
 };
