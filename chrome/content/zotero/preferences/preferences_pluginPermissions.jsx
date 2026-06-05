@@ -170,10 +170,43 @@ if (!Zotero_Preferences.PluginPermissions) {
 				"preferences-plugin-permissions-legacy-badge",
 			].map(async key => [key, await document.l10n.formatValue(key) || key])));
 
-			await this.refresh();
+			let pane = document.getElementById(PARENT_PANE_ID);
+			let firstShow = true;
+			pane.addEventListener('showing', () => {
+				if (firstShow) {
+					firstShow = false;
+					return;
+				}
+				this.refresh();
+			});
 
-			document.getElementById(PARENT_PANE_ID)
-				.addEventListener('showing', () => this._tree?.invalidate());
+			this._pluginObserver = {
+				install: () => this._scheduleRefresh(),
+				uninstall: () => this._scheduleRefresh(),
+				startup: () => this._scheduleRefresh(),
+				shutdown: () => this._scheduleRefresh(),
+			};
+			Zotero.Plugins.addObserver(this._pluginObserver);
+			pane.addEventListener('unload', () => {
+				if (this._pluginObserver) {
+					Zotero.Plugins.removeObserver(this._pluginObserver);
+					this._pluginObserver = null;
+				}
+				if (this._refreshTimer) {
+					clearTimeout(this._refreshTimer);
+					this._refreshTimer = null;
+				}
+			}, { once: true });
+
+			await this.refresh();
+		},
+
+		_scheduleRefresh() {
+			if (this._refreshTimer) return;
+			this._refreshTimer = setTimeout(() => {
+				this._refreshTimer = null;
+				this.refresh().catch(e => Zotero.logError(e));
+			}, 200);
 		},
 
 		async refresh() {
