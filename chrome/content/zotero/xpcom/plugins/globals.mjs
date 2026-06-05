@@ -38,7 +38,7 @@ function getConsole(addon) {
 		let console = new lazy.ConsoleAPI({
 			prefix: `${addon.name} (${addon.id}):\n`,
 		});
-		let wrapper = ScopeVariables.createAllowlistMirrorObject(console, true, addon.id, { mutable: false, cache: true, strong: true });
+		let wrapper = ScopeVariables.createAllowlistMirrorObject(console, true, addon.id, { cache: true, strong: true });
 		return wrapper;
 	};
 }
