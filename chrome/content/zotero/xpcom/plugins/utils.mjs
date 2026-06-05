@@ -149,6 +149,10 @@ const VarCheck = {
 	resolvePermissions(rawPermissions) {
 		if (!Array.isArray(rawPermissions)) return rawPermissions;
 		let resolved = new Set(rawPermissions);
+		if (resolved.size !== 0 && !resolved.has("*") && !resolved.has("default")) {
+			// The default is always implied in unprivileged scopes
+			resolved.add("default");
+		}
 		for (let perm of Object.keys(IMPLIED_PERMISSIONS)) {
 			if (resolved.has(perm)) {
 				for (let p of IMPLIED_PERMISSIONS[perm]) resolved.add(p);
