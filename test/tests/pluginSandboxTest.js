@@ -220,7 +220,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Items", function () {
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "data"]);
 		});
 
 		it("should expose Zotero.Items.get()", async function () {
@@ -396,7 +396,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Libraries", function () {
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "data"]);
 		});
 
 		it("should return a library from Zotero.Libraries.get()", function () {
@@ -530,7 +530,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Collections", function () {
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "data"]);
 		});
 
 		it("should return collection facades from getByLibrary()", async function () {
@@ -651,7 +651,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Groups", function () {
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "data"]);
 		});
 
 		it("should return a group from Zotero.Groups.get()", async function () {
@@ -722,7 +722,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Tags", function () {
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "data"]);
 		});
 
 		it("should get tag ID and name", async function () {
@@ -825,7 +825,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "fileSystem"]);
 		});
 
 		let fileMethods = [
@@ -1119,7 +1119,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "network"]);
 		});
 
 		it("should make a GET request and return status and response text", async function () {
@@ -1268,7 +1268,7 @@ describe("Plugin Sandbox", function () {
 		}
 
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "data"]);
 		});
 
 		afterEach(function () {
@@ -1510,7 +1510,7 @@ describe("Plugin Sandbox", function () {
 		let testPrefKeys = [];
 
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "preferences"]);
 		});
 
 		afterEach(function () {
@@ -1750,7 +1750,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "ui"]);
 		});
 
 		describe("ItemTreeManager", function () {
@@ -2159,6 +2159,46 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 		});
+
+		describe("Reader", function () {
+			it("should expose Reader.registerEventListener as a function", function () {
+				assert.isTrue(evalInScope("typeof Zotero.Reader.registerEventListener === 'function'"));
+			});
+
+			it("should expose Reader.unregisterEventListener as a function", function () {
+				assert.isTrue(evalInScope("typeof Zotero.Reader.unregisterEventListener === 'function'"));
+			});
+
+			it("should register and unregister an event listener", function () {
+				evalInScope(`
+					var _readerHandler = function(event) {};
+					Zotero.Reader.registerEventListener('renderToolbar', _readerHandler, '${ADDON_ID}');
+				`);
+
+				// Verify listener was added
+				let listeners = Zotero.Reader._registeredListeners.filter(
+					l => l.pluginID === ADDON_ID && l.type === 'renderToolbar'
+				);
+				assert.equal(listeners.length, 1, "Should have one registered listener");
+
+				// Unregister from sandbox
+				evalInScope("Zotero.Reader.unregisterEventListener('renderToolbar', _readerHandler)");
+
+				listeners = Zotero.Reader._registeredListeners.filter(
+					l => l.pluginID === ADDON_ID && l.type === 'renderToolbar'
+				);
+				assert.equal(listeners.length, 0, "Listener should be removed after unregister");
+			});
+
+			it("should not expose unlisted Reader methods", function () {
+				assert.isTrue(evalInScope("typeof Zotero.Reader.open === 'undefined'"),
+					"open should not be exposed");
+				assert.isTrue(evalInScope("typeof Zotero.Reader._registeredListeners === 'undefined'"),
+					"_registeredListeners should not be exposed");
+				assert.isTrue(evalInScope("typeof Zotero.Reader._dispatchEvent === 'undefined'"),
+					"_dispatchEvent should not be exposed");
+			});
+		});
 	});
 
 	describe("Zotero Main Window", function () {
@@ -2173,7 +2213,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default"]);
+			loadTestScope(["default", "mainWindow"]);
 			// Store the window in a sandbox variable -- returning wrapper objects
 			// across compartments via evalInScope doesn't work, so all assertions
 			// must evaluate entirely inside the sandbox and return primitives.
@@ -2574,11 +2614,8 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("Access control", function () {
-		beforeEach(function () {
-			loadTestScope(["default"]);
-		});
-
 		it("should not expose unlisted Zotero properties", function () {
+			loadTestScope(["default"]);
 			// These are internal properties not in the schema
 			assert.isTrue(evalInScope("typeof Zotero.DB === 'undefined'"));
 			assert.isTrue(evalInScope("typeof Zotero.Schema === 'undefined'"));
@@ -2586,6 +2623,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should not expose privileged globals", function () {
+			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof ChromeUtils === 'undefined'"));
 			assert.isTrue(evalInScope("typeof Services === 'undefined'"));
 			assert.isTrue(evalInScope("typeof IOUtils === 'undefined'"));
@@ -2593,6 +2631,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should not allow setting listed properties on Zotero sub-objects", function () {
+			loadTestScope(["default", "data"]);
 			// The mirror is created with mutable: false, so setting listed props should throw
 			let threw = false;
 			try {
@@ -2604,6 +2643,104 @@ describe("Plugin Sandbox", function () {
 			assert.isTrue(threw, "Setting Zotero.Items.get should throw");
 			// The function should still work
 			assert.isTrue(evalInScope("typeof Zotero.Items.get === 'function'"));
+		});
+	});
+
+	describe("Permission isolation", function () {
+		it("should not expose data APIs with only default permission", function () {
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof Zotero.Items === 'undefined'"),
+				"Items should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Libraries === 'undefined'"),
+				"Libraries should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Collections === 'undefined'"),
+				"Collections should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Groups === 'undefined'"),
+				"Groups should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Tags === 'undefined'"),
+				"Tags should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Notifier === 'undefined'"),
+				"Notifier should not be exposed without data permission");
+		});
+
+		it("should not expose fileSystem APIs with only default permission", function () {
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof Zotero.File === 'undefined'"),
+				"File should not be exposed without fileSystem permission");
+		});
+
+		it("should not expose network APIs with only default permission", function () {
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof Zotero.HTTP === 'undefined'"),
+				"HTTP should not be exposed without network permission");
+		});
+
+		it("should not expose preferences APIs with only default permission", function () {
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof Zotero.Prefs === 'undefined'"),
+				"Prefs should not be exposed without preferences permission");
+		});
+
+		it("should not expose UI APIs with only default permission", function () {
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof Zotero.ItemTreeManager === 'undefined'"),
+				"ItemTreeManager should not be exposed without ui permission");
+			assert.isTrue(evalInScope("typeof Zotero.ItemPaneManager === 'undefined'"),
+				"ItemPaneManager should not be exposed without ui permission");
+			assert.isTrue(evalInScope("typeof Zotero.MenuManager === 'undefined'"),
+				"MenuManager should not be exposed without ui permission");
+			assert.isTrue(evalInScope("typeof Zotero.Reader === 'undefined'"),
+				"Reader should not be exposed without ui permission");
+		});
+
+		it("should expose data APIs but not fileSystem with data permission", function () {
+			loadTestScope(["default", "data"]);
+			assert.isTrue(evalInScope("typeof Zotero.Items === 'object'"),
+				"Items should be exposed with data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Libraries === 'object'"),
+				"Libraries should be exposed with data permission");
+			assert.isTrue(evalInScope("typeof Zotero.File === 'undefined'"),
+				"File should not be exposed with only data permission");
+			assert.isTrue(evalInScope("typeof Zotero.HTTP === 'undefined'"),
+				"HTTP should not be exposed with only data permission");
+		});
+
+		it("should expose fileSystem APIs but not data with fileSystem permission", function () {
+			loadTestScope(["default", "fileSystem"]);
+			assert.isTrue(evalInScope("typeof Zotero.File === 'object'"),
+				"File should be exposed with fileSystem permission");
+			assert.isTrue(evalInScope("typeof Zotero.Items === 'undefined'"),
+				"Items should not be exposed with only fileSystem permission");
+		});
+
+		it("should merge multiple permissions correctly", function () {
+			loadTestScope(["default", "data", "network", "preferences"]);
+			assert.isTrue(evalInScope("typeof Zotero.Items === 'object'"),
+				"Items should be exposed with data permission");
+			assert.isTrue(evalInScope("typeof Zotero.HTTP === 'object'"),
+				"HTTP should be exposed with network permission");
+			assert.isTrue(evalInScope("typeof Zotero.Prefs === 'object'"),
+				"Prefs should be exposed with preferences permission");
+			assert.isTrue(evalInScope("typeof Zotero.File === 'undefined'"),
+				"File should not be exposed without fileSystem permission");
+			assert.isTrue(evalInScope("typeof Zotero.ItemTreeManager === 'undefined'"),
+				"ItemTreeManager should not be exposed without ui permission");
+		});
+
+		it("should still expose default APIs (logging, platform info, window access) regardless of permissions", function () {
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof Zotero.debug === 'function'"),
+				"debug should always be exposed");
+			assert.isTrue(evalInScope("typeof Zotero.warn === 'function'"),
+				"warn should always be exposed");
+			assert.isString(evalInScope("Zotero.version"),
+				"version should always be exposed");
+			assert.isBoolean(evalInScope("Zotero.isMac"),
+				"isMac should always be exposed");
+			assert.isTrue(evalInScope("typeof Zotero.getMainWindow === 'function'"),
+				"getMainWindow should always be exposed");
+			assert.isTrue(evalInScope("typeof Zotero.getMainWindows === 'function'"),
+				"getMainWindows should always be exposed");
 		});
 	});
 });
