@@ -106,7 +106,7 @@ class ItemTreeRow {
 	renderRow(div, index, columns, rowData, renderCtx) {
 		for (let column of columns) {
 			if (column.hidden) continue;
-			div.appendChild(renderCtx.renderCell(index, rowData[column.dataKey], column, column === renderCtx.firstColumn));
+			div.appendChild(renderCtx.renderCell(index, rowData[column.dataKey], column, column === renderCtx.firstColumn, div));
 		}
 	}
 
@@ -533,7 +533,7 @@ class AnnotationItemTreeRow extends ZoteroItemTreeRow {
 		let plainText = parserUtils.convertToPlainText(this.ref.annotationText || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
 		let plainComment = parserUtils.convertToPlainText(this.ref.annotationComment || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
 		if (["highlight", "underline"].includes(this.ref.annotationType)) {
-			title = renderCtx.renderCell(index, plainText, titleRowData, true);
+			title = renderCtx.renderCell(index, plainText, titleRowData, true, div);
 			let titleCell = title.querySelector('.cell-text');
 			titleCell.classList.add('italics');
 			titleCell.setAttribute('q-mark-open', Zotero.getString('punctuation.openingQMark'));
@@ -546,18 +546,18 @@ class AnnotationItemTreeRow extends ZoteroItemTreeRow {
 			div.classList.toggle('tight', !containsCJK);
 		}
 		else if (this.ref.annotationComment) {
-			title = renderCtx.renderCell(index, plainComment, titleRowData, true);
+			title = renderCtx.renderCell(index, plainComment, titleRowData, true, div);
 		}
 		else {
 			let annotationTypeName = Zotero.getString(`reader-${this.ref.annotationType}-annotation`);
-			title = renderCtx.renderCell(index, annotationTypeName, titleRowData, true);
+			title = renderCtx.renderCell(index, annotationTypeName, titleRowData, true, div);
 		}
 		div.prepend(title);
 
 		let addToCitationColumn = columns.find(column => column.dataKey == 'addToCitation');
 		if (addToCitationColumn) {
 			let data = rowData?.[addToCitationColumn.dataKey];
-			let cell = renderCtx.renderCell(index, data, addToCitationColumn, false);
+			let cell = renderCtx.renderCell(index, data, addToCitationColumn, false, div);
 			if (cell) {
 				div.append(cell);
 			}
