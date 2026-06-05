@@ -42,6 +42,49 @@ const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.m
 const CHILD_INDENT = 16;
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 
+// Migrate unsuffixed `<id>` keys back to `<id>-default`. Earlier 10.0 betas dropped the `-default`
+// suffix from main-library tree IDs, stranding 9.0.x prefs and breaking version switching.
+// Restoring the suffix lets both versions share state.
+let _treePrefsMigrationPromise = null;
+function _migrateTreePrefsFile() {
+	if (!_treePrefsMigrationPromise) {
+		_treePrefsMigrationPromise = (async () => {
+			let persistSettings;
+			try {
+				let contents = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
+				persistSettings = JSON.parse(contents);
+			}
+			catch {
+				return;
+			}
+			if (!persistSettings || typeof persistSettings !== 'object') return;
+			let knownSuffixes = [
+				'-default',
+				...Object.values(Zotero.CollectionTreeRow.visibilityGroups).map(g => '-' + g),
+			];
+			let changed = false;
+			for (let key of Object.keys(persistSettings)) {
+				if (knownSuffixes.some(s => key.endsWith(s))) continue;
+				let newKey = key + '-default';
+				let value = persistSettings[key];
+				// Prefer the unsuffixed (beta-era) data when non-empty, since
+				// it's newer than anything left at `-default` from 9.0.x.
+				if (!(newKey in persistSettings) || (value && Object.keys(value).length)) {
+					persistSettings[newKey] = value;
+				}
+				delete persistSettings[key];
+				changed = true;
+			}
+			if (changed) {
+				await Zotero.File.putContentsAsync(
+					COLUMN_PREFS_FILEPATH, JSON.stringify(persistSettings)
+				);
+			}
+		})();
+	}
+	return _treePrefsMigrationPromise;
+}
+
 /**
  * Base row data provider for ItemTree.
  *
@@ -2394,18 +2437,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	_loadColumnPrefsFromFile = async () => {
 		if (!this.props.columnPicker) return;
+		await _migrateTreePrefsFile();
 		try {
 			let columnPrefs = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
 			let persistSettings = JSON.parse(columnPrefs);
-			// Fall back to the pre-item-tree-refactor "<id>-default" key,
-			// including when "<id>" is an empty object written out by an
-			// earlier post-refactor beta before this fallback was added.
-			// _writeColumnPrefsToFile() removes it on the next write.
-			let prefs = persistSettings[this.id];
-			if (!prefs || !Object.keys(prefs).length) {
-				prefs = persistSettings[this.id + '-default'];
-			}
-			this._columnPrefs = prefs || {};
+			this._columnPrefs = persistSettings[this.id] || {};
 		}
 		catch (e) {
 			this._columnPrefs = {};
@@ -2420,6 +2456,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 */
 	_writeColumnPrefsToFile = async (force=false) => {
 		if (!this.props.columnPicker) return;
+		await _migrateTreePrefsFile();
 		var writeToFile = async () => {
 			try {
 				let persistSettingsString = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
@@ -2429,7 +2466,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 				persistSettings = {};
 			}
 			persistSettings[this.id] = this._columnPrefs;
-			delete persistSettings[this.id + '-default'];
 
 			let prefString = JSON.stringify(persistSettings);
 			Zotero.debug(`Writing column prefs of length ${prefString.length} to file ${COLUMN_PREFS_FILEPATH}`);

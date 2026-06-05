@@ -147,7 +147,7 @@ var Zotero_Lookup = new function () {
 			// Send the focus to the item tree after the popup closes
 			ZoteroPane.lastFocusedElement = null;
 			document.getElementById("zotero-lookup-panel").hidePopup();
-			document.getElementById("item-tree-main").focus();
+			document.getElementById("item-tree-main-default").focus();
 		}
 		return false;
 	};

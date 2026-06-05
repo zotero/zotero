@@ -124,10 +124,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 
 		// Set ID based on visibilityGroup
 		const visibilityGroup = collectionTreeRow.visibilityGroup || 'default';
-		let treeID = "item-tree-" + this.itemTree.props.id;
-		if (visibilityGroup != 'default') {
-			treeID += "-" + visibilityGroup;
-		}
+		let treeID = "item-tree-" + this.itemTree.props.id + "-" + visibilityGroup;
 		// Needs to be called after this.collectionTreeRow is set so that this.itemTree.visibilityGroup is correct
 		let idChanged = await this.itemTree.setId(treeID);
 		

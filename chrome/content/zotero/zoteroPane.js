@@ -438,7 +438,7 @@ var ZoteroPane = new function () {
 
 		itemTree.addEventListener("keydown", (event) => {
 			let actionsMap = {
-				'item-tree-main': {
+				'item-tree-main-default': {
 					ShiftTab: () => document.getElementById('zotero-tb-toggle-item-pane-stacked')
 				}
 			};
@@ -1066,7 +1066,7 @@ var ZoteroPane = new function () {
 			else {
 				enableHighlight = !event.shiftKey && !event.metaKey && event.key == "Control" && !event.altKey;
 			}
-			let isItemTreeFocused = document.activeElement.id == "item-tree-main";
+			let isItemTreeFocused = document.activeElement.id == "item-tree-main-default";
 			// Only highlight collections when itemTree is focused to try to avoid
 			// conflicts with other shortcuts
 			if (enableHighlight && isItemTreeFocused) {

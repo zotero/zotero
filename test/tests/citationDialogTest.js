@@ -863,7 +863,7 @@ describe("Citation Dialog", function () {
 			await Zotero.Promise.delay();
 			// Expect that itemTree row is selected and itemTree is focused
 			assert.equal(dialog.libraryLayout.itemsView.getSelectedItems(true)[0], parentItem.id);
-			assert.equal(dialog.document.activeElement.id, "item-tree-citationDialog");
+			assert.equal(dialog.document.activeElement.id, "item-tree-citationDialog-default");
 		});
 
 		it("should display selected items and selected annotations in separate decks", async function () {
