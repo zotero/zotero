@@ -86,7 +86,7 @@ function setupOpenWindow(scope, rootURI, addonID) {
 	let holder = Cu.createObjectIn(scope);
 	Cu.exportFunction(
 		(url, features, options = {}) => {
-			let { windowId, onLoad } = Cu.waiveXrays(options);
+			let { windowId, onLoad, fitContent } = Cu.waiveXrays(options);
 			if (windowId !== null && windowId !== undefined && typeof windowId !== "string") {
 				throw new Error("openWindow: windowId must be a string");
 			}
@@ -112,6 +112,7 @@ function setupOpenWindow(scope, rootURI, addonID) {
 			// that loads the plugin's HTML content. The browser's
 			// contentWindow gets a resource:// content principal,
 			// enabling same-origin DOM access from the sandbox.
+			let resizable = !safeFeatures || safeFeatures.includes("resizable");
 			let chromeFeatures = "chrome,dialog=no,"
 				+ (safeFeatures || "resizable");
 			let win = Services.ww.openWindow(
@@ -148,6 +149,24 @@ function setupOpenWindow(scope, rootURI, addonID) {
 									resolve(browser.contentWindow);
 									if (typeof onLoad === "function") {
 										onLoad(browser.contentWindow);
+									}
+									if (fitContent) {
+										// Set explicit size on browser from content before sizeToContent,
+										let docEl = browser.contentDocument.documentElement;
+										browser.style.width = docEl.scrollWidth + "px";
+										browser.style.height = docEl.scrollHeight + "px";
+										browser.removeAttribute("flex");
+										win.sizeToContent();
+										// Only keep syncing if the window is not manually resizable.
+										if (!resizable) {
+											let ro = new win.ResizeObserver(Zotero.Utilities.debounce(() => {
+												browser.style.width = docEl.scrollWidth + "px";
+												browser.style.height = docEl.scrollHeight + "px";
+												win.sizeToContent();
+											}, 100));
+											ro.observe(docEl);
+											win.addEventListener("unload", () => ro.disconnect(), { once: true });
+										}
 									}
 								});
 							}
