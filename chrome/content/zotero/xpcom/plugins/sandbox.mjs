@@ -31,6 +31,8 @@ import {
 } from "resource://gre/modules/Timer.sys.mjs";
 import { VarCheck } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
+import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
+import { setupConsole, setupOpenWindow } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
@@ -89,6 +91,7 @@ function unloadScope(id) {
 		return;
 	}
 	scopes.delete(id);
+	PluginProtocol.unregister(id);
 	// Delay nuke to allow any pending operations to complete
 	// TODO: Throws error 0x80070057
 	setTimeout(() => {
@@ -149,7 +152,7 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 		}
 	);
 
-	ChromeUtils.defineLazyGetter(scope, "console", ScopeVariables.getConsole(addon));
+	setupConsole(scope, addon);
 	
 	// fx140: Shim ChromeUtils.import() in the plugin scope
 	// TODO: Do we want this?
@@ -173,8 +176,12 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 }
 
 function loadUnprivilegedScope(addon, globalVars = {}) {
+	let rootURI = PluginProtocol.register(
+		addon.id, addon.getResourceURI(), addon.syncGUID
+	);
+
 	var scope = new Cu.Sandbox(
-		null,
+		rootURI,
 		{
 			sandboxName: addon.id,
 			wantGlobalProperties: [
@@ -194,8 +201,6 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			freshCompartment: true,
 		}
 	);
-
-	let rootURI = addon.getResourceURI().spec;
 	let permissions = addon.installPermissions.permissions;
 
 	Object.assign(
@@ -217,7 +222,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 		}
 	);
 
-	ChromeUtils.defineLazyGetter(scope, "console", ScopeVariables.getConsole(addon));
+	setupConsole(scope, addon);
 
 	scopes.set(addon.id, scope);
 
@@ -233,9 +238,14 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 	}
 
 	Object.assign(scope, extraGlobals);
+
+	if (permissions.includes("window")) {
+		setupOpenWindow(scope, rootURI);
+	}
+
 	return scope;
 }
 
-var PluginSandbox = { loadScope, unloadScope, getScope };
+const PluginSandbox = { loadScope, unloadScope, getScope };
 
 export { PluginSandbox };
