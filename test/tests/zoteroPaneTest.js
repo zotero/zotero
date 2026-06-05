@@ -23,9 +23,9 @@ describe("ZoteroPane", function () {
 			await selectLibrary(win);
 			await zp.itemsView.selectItem(item.id);
 			
-			var itemTree = doc.getElementById("item-tree-main");
+			var itemTree = doc.getElementById("item-tree-main-default");
 			itemTree.focus();
-			assert.equal(doc.activeElement.id, "item-tree-main");
+			assert.equal(doc.activeElement.id, "item-tree-main-default");
 			
 			var key = Zotero.isMac ? "Alt" : "Control";
 			itemTree.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
