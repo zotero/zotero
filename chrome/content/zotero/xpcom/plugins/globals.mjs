@@ -41,7 +41,7 @@ function getConsole(addon) {
 		let console = new lazy.ConsoleAPI({
 			prefix: `${addon.name} (${addon.id}):\n`,
 		});
-		let wrapper = ScopeVariables.createAllowlistMirrorObject(console, true, addon.id, { cache: true, strong: true });
+		let wrapper = ScopeVariables.createAllowlistMirrorObject(console, true, addon.id, { cache: true, strong: true, pathPrefix: "console" });
 		return wrapper;
 	};
 }
@@ -215,6 +215,7 @@ function setupHTTP(scope) {
 	// sandbox's restricted principal.  The principal is determined by
 	// the calling context of `new`, not the constructor's origin.
 	let createXHR = Cu.evalInSandbox("() => new XMLHttpRequest()", scope);
+	let addonID = scope.PLUGIN_ID;
 
 	let HTTP = Cu.createObjectIn(scope);
 
@@ -232,6 +233,7 @@ function setupHTTP(scope) {
 					args[2].noMock = true;
 					return args;
 				},
+				trace: { pluginID: addonID, path: `Zotero.HTTP.${name}` },
 			}
 		);
 	}
@@ -284,6 +286,8 @@ function setupPreferences(scope, addon) {
 
 	let Prefs = Cu.createObjectIn(scope);
 
+	let addonID = addon.id;
+
 	for (let [method, sig] of Object.entries(PREFS_METHODS)) {
 		let keyIndex = sig.indexOf("key");
 		let globalIndex = sig.indexOf("global");
@@ -303,6 +307,7 @@ function setupPreferences(scope, addon) {
 					args[globalIndex] = true;
 					return args;
 				},
+				trace: { pluginID: addonID, path: `Zotero.Prefs.${method}` },
 			}
 		);
 	}
@@ -319,10 +324,12 @@ function setupPreferences(scope, addon) {
 				checkPrefPermission(args[1]);
 				return args;
 			},
+			trace: { pluginID: addonID, path: "Zotero.Prefs.resetBranch" },
 		}
 	);
 
 	// registerObserver(name, handler, global)
+	let registerObserverTrace = { pluginID: addonID, path: "Zotero.Prefs.registerObserver" };
 	Prefs.registerObserver = ScopeUtils.ensureCallableInScope(
 		Zotero.Prefs.registerObserver, Zotero.Prefs, scope, {
 			argParser: (args) => {
@@ -332,16 +339,19 @@ function setupPreferences(scope, addon) {
 				else {
 					checkPrefPermission(args[0]);
 				}
-				args[1] = ScopeVariables.fromScope(args[1], addon.id);
+				args[1] = ScopeVariables.fromScope(args[1], addonID, { trace: registerObserverTrace });
 				args[2] = true;
 				return args;
 			},
+			trace: registerObserverTrace,
 		}
 	);
 
 	// unregisterObserver(symbol)
 	Prefs.unregisterObserver = ScopeUtils.ensureCallableInScope(
-		Zotero.Prefs.unregisterObserver, Zotero.Prefs, scope, {}
+		Zotero.Prefs.unregisterObserver, Zotero.Prefs, scope, {
+			trace: { pluginID: addonID, path: "Zotero.Prefs.unregisterObserver" },
+		}
 	);
 
 	// Attach to the scope's Zotero mirror object
@@ -370,7 +380,10 @@ function setupFilePicker(scope, addonID) {
 			return super.init(parentWindow, title, mode);
 		}
 	}
-	scope.FilePicker = ScopeUtils.ensureConstructableInScope(PluginFilePicker, scope, { mutable: true });
+	scope.FilePicker = ScopeUtils.ensureConstructableInScope(PluginFilePicker, scope, {
+		mutable: true,
+		trace: { pluginID: addonID, path: "FilePicker" },
+	});
 }
 
 /**
@@ -428,7 +441,7 @@ function setupPluginDB(scope, addon) {
 
 	let wrapped = ScopeUtils.ensureConstructableInScope(
 		PluginDBConnection, scope,
-		{ mutable: true, instanceSchema: PLUGIN_DB_SCHEMA }
+		{ mutable: true, instanceSchema: PLUGIN_DB_SCHEMA, trace: { pluginID: addon.id, path: "Zotero.DBConnection" } }
 	);
 
 	// Static helpers on the constructor for managing plugin databases.
