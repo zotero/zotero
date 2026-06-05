@@ -61,12 +61,15 @@
 }
 
 .legacy-badge {
-	display: inline-block;
-	padding: 1px 6px;
-	border-radius: 3px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
 	font-size: 0.8em;
-	font-weight: 600;
-	text-transform: uppercase;
+	font-weight: 700;
+	line-height: 1;
 	background: color-mix(in srgb, var(--accent-red) 18%, transparent);
 	color: var(--accent-red);
 }
