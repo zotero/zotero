@@ -2,7 +2,7 @@ describe("Plugin File Access", function () {
 	var { PluginFileAccess } = ChromeUtils.importESModule(
 		"chrome://zotero/content/xpcom/plugins/file.mjs"
 	);
-	var { getPluginUUID } = ChromeUtils.importESModule(
+	var { PluginUUID } = ChromeUtils.importESModule(
 		"chrome://zotero/content/xpcom/plugins/uuid.mjs"
 	);
 
@@ -18,7 +18,7 @@ describe("Plugin File Access", function () {
 
 	before(async function () {
 		await Zotero.initializationPromise;
-		pluginUUID = getPluginUUID(PLUGIN_ID);
+		pluginUUID = PluginUUID.getByID(PLUGIN_ID);
 		tempDir = await getTempDirectory();
 		// The prompt opens with the main Zotero window as opener; make sure
 		// one exists so `Zotero.getMainWindow()` resolves.
