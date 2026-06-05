@@ -254,10 +254,21 @@ function setupPreferences(scope) {
 
 	// Plugin's own namespace
 	let ownPrefix = `extensions.${PluginUUID.getByID(pluginID)}.`;
-	let allPrefixes = [ownPrefix, ...prefPrefixes];
+	let declaredPrefixes = Array.from(prefPrefixes || []).filter(
+		p => typeof p === "string" && p.length > 0
+	);
+	let allPrefixes = [ownPrefix, ...declaredPrefixes];
+
+	// Require a trailing "." for prefix matches so "extensions.zo" can't
+	// silently cover all of "extensions.zotero.*".
+	function prefixMatches(prefix, pref) {
+		if (pref === prefix) return true;
+		if (prefix.endsWith(".") && pref.startsWith(prefix)) return true;
+		return false;
+	}
 
 	function checkPrefPermission(pref) {
-		if (allPrefixes.some(prefix => pref.startsWith(prefix))) {
+		if (allPrefixes.some(prefix => prefixMatches(prefix, pref))) {
 			return;
 		}
 		throw new Error(
