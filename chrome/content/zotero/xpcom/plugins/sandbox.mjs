@@ -32,7 +32,7 @@ import {
 import { VarCheck, ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
-import { setupConsole, setupOpenWindow, setupHTTP, setupPreferences } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
+import { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
@@ -262,6 +262,10 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 
 	if (permissions.includes("preferences")) {
 		setupPreferences(scope, addon);
+	}
+
+	if (permissions.includes("fileSystem")) {
+		setupFilePicker(scope, addon.id);
 	}
 
 	return scope;
