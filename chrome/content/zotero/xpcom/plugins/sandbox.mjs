@@ -57,6 +57,11 @@ function loadScope(addon, globalVars = {}) {
 		unloadScope(addon.id);
 	}
 
+	// Register moz-extension:// protocol
+	PluginProtocol.register(
+		addon.id, addon.getResourceURI(), addon.syncGUID
+	);
+
 	let scope;
 	if (VarCheck.isPrivilegedPermission(addon)) {
 		Zotero.debug(`Loading privileged scope for plugin ${addon.id}`);
@@ -68,7 +73,7 @@ function loadScope(addon, globalVars = {}) {
 	}
 	
 	try {
-		let uri = addon.getResourceURI().spec + 'bootstrap.js';
+		let uri = PluginProtocol.getBaseURI(addon.id) + 'bootstrap.js';
 		Services.scriptloader.loadSubScriptWithOptions(
 			uri,
 			{
@@ -176,10 +181,7 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 }
 
 function loadUnprivilegedScope(addon, globalVars = {}) {
-	let rootURI = PluginProtocol.register(
-		addon.id, addon.getResourceURI(), addon.syncGUID
-	);
-
+	let rootURI = PluginProtocol.getBaseURI(addon.id);
 	var scope = new Cu.Sandbox(
 		rootURI,
 		{
