@@ -296,10 +296,12 @@ function modify_omni {
       }
       manifest.browser_specific_settings = undefined;
       manifest.content_scripts = [];
-      manifest.host_permissions = [];
       manifest.web_accessible_resources = undefined;
       manifest.experiment_apis = {};
     }' modules/Extension.sys.mjs
+
+	# Allow host_permissions in MV2 manifests (Firefox restricts it to MV3)
+	sed -i.bak '/"host_permissions": {/{n;s/"min_manifest_version": 3/"min_manifest_version": 2/;}' chrome/toolkit/content/extensions/schemas/manifest.json
 
 	# Add Zotero permissions in https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/schemas/manifest.json
 	# PermissionNoPrompt (for manifest.permissions in MV3 and MV2)

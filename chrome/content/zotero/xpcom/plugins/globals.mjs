@@ -25,6 +25,7 @@
 
 
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
+import { ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables, WindowScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
@@ -169,4 +170,58 @@ function setupOpenWindow(scope, rootURI, addonID) {
 	scope.openWindow = holder.f;
 }
 
-export { setupConsole, setupOpenWindow };
+/**
+ * Set up a `Zotero.HTTP` wrapper on the plugin scope that injects the
+ * sandbox's XMLHttpRequest into every request.  The sandbox's XHR
+ * carries the plugin's restricted principal (constrained by
+ * allowedOrigins from host_permissions), so Firefox's built-in
+ * security enforces URL access control.
+ *
+ * @param {Object} scope - The sandbox scope
+ * @param {string} addonID - The addon's ID
+ */
+/**
+ * Set up Zotero.HTTP on the plugin scope.
+ * Uses a XHR factory created inside the sandbox so instances carry the
+ * sandbox's restricted principal (constrained by allowedOrigins from
+ * host_permissions).  Firefox's built-in principal security enforces
+ * URL access control.
+ *
+ * @param {Object} scope - The sandbox scope
+ */
+function setupHTTP(scope) {
+	// Create XHR factory *inside* the sandbox so instances get the
+	// sandbox's restricted principal.  The principal is determined by
+	// the calling context of `new`, not the constructor's origin.
+	let createXHR = Cu.evalInSandbox("() => new XMLHttpRequest()", scope);
+
+	let HTTP = Cu.createObjectIn(scope);
+
+	for (let name of ["request", "processDocuments"]) {
+		HTTP[name] = ScopeUtils.ensureCallableInScope(
+			Zotero.HTTP[name], Zotero.HTTP, scope, {
+				mutable: true,
+				argParser: (args) => {
+					// Inject sandbox XHR factory into options
+					// Options is always at index 2 for both request() and processDocuments()
+					if (!args[2] || typeof args[2] !== "object") {
+						args[2] = {};
+					}
+					args[2].createXMLHttpRequest = createXHR;
+					args[2].noMock = true;
+					return args;
+				},
+			}
+		);
+	}
+
+	// Attach to the scope's Zotero mirror object
+	Object.defineProperty(Cu.waiveXrays(scope.Zotero), "HTTP", {
+		value: HTTP,
+		enumerable: true,
+		configurable: false,
+		writable: false,
+	});
+}
+
+export { setupConsole, setupOpenWindow, setupHTTP };

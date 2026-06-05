@@ -6,13 +6,13 @@ describe("Plugin Sandbox", function () {
 	var mockAddon;
 	var scope;
 
-	function createMockAddon(permissions = ["default"]) {
+	function createMockAddon(permissions = ["default"], origins = []) {
 		return {
 			id: ADDON_ID,
 			name: "Test Sandbox Plugin",
 			version: "1.0.0",
 			syncGUID: "{00000000-0000-0000-0000-000000000001}",
-			installPermissions: { permissions },
+			installPermissions: { permissions, origins },
 			getResourceURI() {
 				return Services.io.newURI("file:///nonexistent/");
 			}
@@ -54,8 +54,8 @@ describe("Plugin Sandbox", function () {
 		catch (e) {}
 	});
 
-	function loadTestScope(permissions) {
-		mockAddon = createMockAddon(permissions);
+	function loadTestScope(permissions, origins) {
+		mockAddon = createMockAddon(permissions, origins);
 		PluginSandbox.loadScope(mockAddon);
 		scope = PluginSandbox.getScope(ADDON_ID);
 	}
@@ -1360,7 +1360,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default", "network"]);
+			loadTestScope(["default", "network"], ["*://127.0.0.1/*"]);
 		});
 
 		it("should make a GET request and return status and response text", async function () {
@@ -1501,6 +1501,48 @@ describe("Plugin Sandbox", function () {
 				}).then(results => results[0])
 			`);
 			assert.include(result, "/test/sandbox-http/");
+		});
+
+		describe("network access control", function () {
+			afterEach(function () {
+				for (let ep of endpoints) {
+					delete Zotero.Server.Endpoints[ep];
+				}
+				endpoints = [];
+			});
+
+			it("should block requests to origins not in host_permissions via CORS", async function () {
+				// Unload existing scope (created by parent beforeEach with 127.0.0.1 origins)
+				// and recreate with empty origins to test CORS enforcement
+				PluginSandbox.unloadScope(ADDON_ID);
+				loadTestScope(["default", "network"], []);
+
+				let url = registerEndpoint("GET", function () {
+					return [200, "text/plain", "should not reach here"];
+				});
+
+				let rejected = await evalInScope(`
+					Zotero.HTTP.request('GET', ${JSON.stringify(url)}, {
+						responseType: 'text'
+					}).then(() => false, () => true)
+				`);
+				assert.isTrue(rejected,
+					"Request to undeclared origin should be blocked by CORS");
+			});
+
+			it("should allow requests when origin is in host_permissions", async function () {
+				// Parent beforeEach already creates scope with *://127.0.0.1/*
+				let url = registerEndpoint("GET", function () {
+					return [200, "text/plain", "allowed"];
+				});
+
+				let result = await evalInScope(`
+					Zotero.HTTP.request('GET', ${JSON.stringify(url)}, {
+						responseType: 'text'
+					}).then(req => req.responseText)
+				`);
+				assert.equal(result, "allowed");
+			});
 		});
 	});
 
