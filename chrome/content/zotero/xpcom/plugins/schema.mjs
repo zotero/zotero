@@ -88,6 +88,7 @@ const PERMISSION_SCHEMAS = {
 				get: true,
 				getAsync: true,
 				getByLibraryAndKey: true,
+				// Handle passed item objects from plugin scope
 				getTopLevel: "FromScopeCallable",
 				keepTopLevel: "FromScopeCallable",
 				// Write
@@ -204,6 +205,7 @@ const PERMISSION_SCHEMAS = {
 				zipDirectory: true,
 			},
 		},
+		// FilePicker is set up directly by setupFilePicker() in globals.mjs
 	},
 	network: {
 		// Zotero.HTTP is set up directly by setupHTTP() in globals.mjs
@@ -270,7 +272,7 @@ const PERMISSION_SCHEMAS = {
 		},
 	},
 	openWindow: {
-		// The openWindow permission gates the openWindow() global function.
+		// Set up directly by setupOpenWindow() in globals.mjs
 	},
 };
 

@@ -115,11 +115,11 @@ const VarCheck = {
 	},
 
 	hasOriginalRef(v) {
-		return this.isObjectLike(v) && typeof v[ORIGINAL_REF_KEY] === "function";
+		return this.isObjectLike(v) && typeof Cu.waiveXrays(v)[ORIGINAL_REF_KEY] === "function";
 	},
 
 	getOriginalRef(v) {
-		return v[ORIGINAL_REF_KEY]();
+		return Cu.waiveXrays(v)[ORIGINAL_REF_KEY]();
 	},
 
 	getOriginalOrSelf(v) {
