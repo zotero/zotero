@@ -562,6 +562,7 @@ const WindowScopeVariables = {
 			"screenY",
 			"devicePixelRatio",
 			"screen",
+			"closed",
 		]) {
 			let holder = Cu.createObjectIn(scope);
 			Cu.exportFunction(() => win[prop], holder, { defineAs: "g" });
