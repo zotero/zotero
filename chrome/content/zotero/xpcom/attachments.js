@@ -124,14 +124,13 @@ Zotero.Attachments = new function () {
 				
 				// Copy or move file to unique filename, which automatically shortens long filenames
 				if (options.moveFile) {
-					const newFilePath = await Zotero.File.moveToUnique(file.path, newFile);
-					newFile = Zotero.File.pathToFile(newFilePath);
+					newFile = await Zotero.File.moveToUnique(file.path, newFile);
 				}
 				else {
 					newFile = Zotero.File.copyToUnique(file, newFile);
 				}
 				
-				await Zotero.File.setNormalFilePermissions(newFile.path);
+				await Zotero.File.setNormalFilePermissions(newFile);
 				
 				if (!contentType) {
 					contentType = await Zotero.MIME.getMIMETypeFromFile(newFile);
@@ -140,7 +139,7 @@ Zotero.Attachments = new function () {
 				if (charset) {
 					attachmentItem.attachmentCharset = charset;
 				}
-				attachmentItem.attachmentPath = newFile.path;
+				attachmentItem.attachmentPath = newFile;
 				if (title == undefined) {
 					attachmentItem.setAutoAttachmentTitle();
 				}
@@ -3217,8 +3216,6 @@ Zotero.Attachments = new function () {
 			// Copy file to unique filename, which automatically shortens long filenames
 			else {
 				newFile = Zotero.File.copyToUnique(file, newFile);
-				// TEMP: copyToUnique returns an nsIFile
-				newFile = newFile.path;
 				await Zotero.File.setNormalFilePermissions(newFile);
 				let mtime = (await OS.File.stat(file)).lastModificationDate;
 				await OS.File.setDates(newFile, null, mtime);
