@@ -89,7 +89,7 @@ function sanitizeFeatures(features) {
 function setupOpenWindow(scope, rootURI) {
 	let holder = Cu.createObjectIn(scope);
 	Cu.exportFunction(
-		(url, features) => {
+		(url, features, onLoad) => {
 			let resolved;
 			try {
 				resolved = new URL(String(url || ""), rootURI).href;
@@ -139,6 +139,9 @@ function setupOpenWindow(scope, rootURI) {
 								&& (flags & Ci.nsIWebProgressListener.STATE_IS_WINDOW)
 								&& Components.isSuccessCode(status)) {
 								resolve(browser.contentWindow);
+								if (typeof onLoad === "function") {
+									onLoad(browser.contentWindow);
+								}
 							}
 						},
 						onLocationChange() {},
