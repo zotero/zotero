@@ -3754,6 +3754,58 @@ describe("Plugin Sandbox", function () {
 				container.remove();
 			}
 		});
+
+		it("should block setting on* properties on wrapped elements", function () {
+			loadTestScope(["default"]);
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			let button = document.createElement("button");
+			container.appendChild(button);
+
+			try {
+				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
+					button, ADDON_ID, { rootNode: new WeakRef(container) }
+				);
+				scope._btn = wrappedButton;
+				let warnStub = sinon.stub(Zotero, "warn");
+				evalInScope("_btn.onclick = function() {}");
+				assert.isTrue(warnStub.calledOnce, "should warn about on* property");
+				assert.include(warnStub.firstCall.args[0], "addEventListener");
+				assert.isNull(button.onclick, "onclick should not be set on real element");
+				warnStub.restore();
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("should block setAttribute for on* attributes on wrapped elements", function () {
+			loadTestScope(["default"]);
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			let button = document.createElement("button");
+			container.appendChild(button);
+
+			try {
+				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
+					button, ADDON_ID, { rootNode: new WeakRef(container) }
+				);
+				scope._btn = wrappedButton;
+				let warnStub = sinon.stub(Zotero, "warn");
+				evalInScope('_btn.setAttribute("onclick", "alert(1)")');
+				assert.isTrue(warnStub.calledOnce, "should warn about on* attribute");
+				assert.include(warnStub.firstCall.args[0], "addEventListener");
+				assert.isFalse(button.hasAttribute("onclick"), "onclick attribute should not be set");
+				warnStub.restore();
+
+				// Verify non-on* attributes still work
+				evalInScope('_btn.setAttribute("class", "test-class")');
+				assert.equal(button.getAttribute("class"), "test-class");
+			}
+			finally {
+				container.remove();
+			}
+		});
 	});
 
 	describe("resolveURI", function () {
