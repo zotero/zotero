@@ -1368,7 +1368,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default", "fileSystem"]);
+			loadTestScope(["default", "fileSystemRead", "fileSystemWrite"]);
 		});
 
 		let fileMethods = [
@@ -3673,10 +3673,16 @@ describe("Plugin Sandbox", function () {
 				"Duplicates should not be exposed without data permission");
 		});
 
-		it("should not expose fileSystem APIs with only default permission", function () {
+		it("should only expose File.reveal with default permission", function () {
 			loadTestScope(["default"]);
-			assert.isTrue(evalInScope("typeof Zotero.File === 'undefined'"),
-				"File should not be exposed without fileSystem permission");
+			assert.isTrue(evalInScope("typeof Zotero.File === 'object'"),
+				"File should be exposed with default permission");
+			assert.isTrue(evalInScope("typeof Zotero.File.reveal === 'function'"),
+				"File.reveal should be exposed with default permission");
+			assert.isTrue(evalInScope("typeof Zotero.File.getContentsAsync === 'undefined'"),
+				"File.getContentsAsync should not be exposed without fileSystemRead");
+			assert.isTrue(evalInScope("typeof Zotero.File.putContentsAsync === 'undefined'"),
+				"File.putContentsAsync should not be exposed without fileSystemWrite");
 		});
 
 		it("should not expose network APIs with only default permission", function () {
@@ -3753,14 +3759,14 @@ describe("Plugin Sandbox", function () {
 				"Items should be exposed with data permission");
 			assert.isTrue(evalInScope("typeof Zotero.Libraries === 'object'"),
 				"Libraries should be exposed with data permission");
-			assert.isTrue(evalInScope("typeof Zotero.File === 'undefined'"),
-				"File should not be exposed with only data permission");
+			assert.isTrue(evalInScope("typeof Zotero.File.getContentsAsync === 'undefined'"),
+				"File read methods should not be exposed with only data permission");
 			assert.isTrue(evalInScope("typeof Zotero.HTTP === 'undefined'"),
 				"HTTP should not be exposed with only data permission");
 		});
 
 		it("should expose fileSystem APIs but not data with fileSystem permission", function () {
-			loadTestScope(["default", "fileSystem"]);
+			loadTestScope(["default", "fileSystemRead", "fileSystemWrite"]);
 			assert.isTrue(evalInScope("typeof Zotero.File === 'object'"),
 				"File should be exposed with fileSystem permission");
 			assert.isTrue(evalInScope("typeof Zotero.Items === 'undefined'"),
@@ -3779,8 +3785,8 @@ describe("Plugin Sandbox", function () {
 				"Prefs should be exposed with preferences permission");
 			assert.isTrue(evalInScope("typeof Zotero.Translators === 'object'"),
 				"Translators should be exposed with translator permission");
-			assert.isTrue(evalInScope("typeof Zotero.File === 'undefined'"),
-				"File should not be exposed without fileSystem permission");
+			assert.isTrue(evalInScope("typeof Zotero.File.getContentsAsync === 'undefined'"),
+				"File read methods should not be exposed without fileSystemRead permission");
 			assert.isTrue(evalInScope("typeof Zotero.ItemTreeManager === 'undefined'"),
 				"ItemTreeManager should not be exposed without itemTree permission");
 		});

@@ -33,6 +33,28 @@ const SchemaKey = Object.freeze({
 
 const IMPLIED_PERMISSIONS = {
 	dataWrite: ["dataRead"],
+	fileSystemWrite: ["fileSystemRead"],
+};
+
+const DATA_OBJECT_READ_SCHEMA = {
+	[SchemaKey.WILDCARD]: true,
+	[SchemaKey.RECURSIVE]: true,
+	save: false,
+	saveTx: false,
+	erase: false,
+	eraseTx: false,
+	// Collection
+	addItem: false,
+	addItems: false,
+	removeItem: false,
+	removeItems: false,
+	// Search
+	addCondition: false,
+	removeCondition: false,
+	// Feed
+	updateFeed: false,
+	clearExpiredItems: false,
+	storeSyncedSettings: false,
 };
 
 const PERMISSION_SCHEMAS = {
@@ -71,8 +93,6 @@ const PERMISSION_SCHEMAS = {
 				capitalizeName: true,
 				randomString: true,
 				Internal: {
-					copyTextToClipboard: true,
-					copyToClipboard: true,
 					md5: true,
 					md5Async: true,
 					sha1: true,
@@ -80,6 +100,13 @@ const PERMISSION_SCHEMAS = {
 					byteLength: true,
 					extractExtraFields: true,
 				}
+			},
+			File: {
+				getExtension: true,
+				normalizeToUnix: true,
+				directoryContains: true,
+				truncateFileName: true,
+				reveal: true,
 			},
 			Date: {
 				strToISO: true,
@@ -213,31 +240,44 @@ const PERMISSION_SCHEMAS = {
 			Feed: "Constructor",
 		},
 	},
-	fileSystem: {
+	clipboardRead: {
 		Zotero: {
 			Utilities: {
 				Internal: {
 					getClipboard: true,
 				}
 			},
+		},
+	},
+	clipboardWrite: {
+		Zotero: {
+			Utilities: {
+				Internal: {
+					copyTextToClipboard: true,
+					copyToClipboard: true,
+				}
+			},
+		},
+	},
+	fileSystemRead: {
+		Zotero: {
 			File: {
-				// Read
-				getExtension: true,
 				getBinaryContentsAsync: true,
 				getContentsAsync: true,
 				getContentsFromURLAsync: true,
 				directoryIsEmpty: true,
 				generateDataURI: true,
-				normalizeToUnix: true,
-				directoryContains: true,
-				truncateFileName: true,
-				reveal: true,
-				// Write
+				iterateDirectory: true,
+			},
+		},
+	},
+	fileSystemWrite: {
+		Zotero: {
+			File: {
 				putContentsAsync: true,
 				download: true,
 				rename: true,
 				removeIfExists: true,
-				iterateDirectory: true,
 				moveDirectory: true,
 				setNormalFilePermissions: true,
 				moveToUnique: true,
@@ -247,8 +287,8 @@ const PERMISSION_SCHEMAS = {
 				zipDirectory: true,
 			},
 		},
-		// FilePicker is set up directly by setupFilePicker() in globals.mjs
 	},
+	// FilePicker is set up by setupFilePicker() with fileSystemRead or fileSystemWrite
 	network: {
 		// Zotero.HTTP is set up directly by setupHTTP() in globals.mjs
 		// using the sandbox's XMLHttpRequest for principal-based access control.
@@ -406,27 +446,6 @@ const MAIN_WINDOW_SCHEMAS = {
 			newChildNote: true,
 		},
 	},
-};
-
-const DATA_OBJECT_READ_SCHEMA = {
-	[SchemaKey.WILDCARD]: true,
-	[SchemaKey.RECURSIVE]: true,
-	save: false,
-	saveTx: false,
-	erase: false,
-	eraseTx: false,
-	// Collection
-	addItem: false,
-	addItems: false,
-	removeItem: false,
-	removeItems: false,
-	// Search
-	addCondition: false,
-	removeCondition: false,
-	// Feed
-	updateFeed: false,
-	clearExpiredItems: false,
-	storeSyncedSettings: false,
 };
 
 export { SchemaKey, DATA_OBJECT_READ_SCHEMA, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
