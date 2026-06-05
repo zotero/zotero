@@ -119,6 +119,15 @@ const ScopeVariables = {
 						let value = Reflect.get(actualObj, prop);
 
 						if (typeof value === "function") {
+							// If the schema value for this prop is a string, we need to call custom handling function
+							if (typeof schemaNode === "object" && typeof schemaNode[prop] === "string") {
+								switch (schemaNode[prop]) {
+									case "WindowScopeCallable":
+										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID);
+									default:
+										Utils.throwPropError("access", prop, "unknown schema handler");
+								}
+							}
 							return ScopeUtils.ensureCallableInScope(value, actualObj, scope);
 						}
 
@@ -166,7 +175,130 @@ const ScopeVariables = {
 		let result = wrapAllowlist(target, schema, { mutable });
 		return result;
 	},
+};
 
+const WindowScopeVariables = {
+
+	/**
+	 * Wrap a function from the host scope to be called in the sandbox scope,
+	 * with DOM arguments unwrapped before passing to the actual function,
+	 * and DOM return values wrapped before returning to the sandbox.
+	 * This is to allow sandbox code to call DOM methods with wrapped DOM nodes and receive wrapped DOM nodes,
+	 * while the actual function runs in the privileged host scope with access to real DOM nodes.
+	 */
+	createSafeWindowCallable(func, thisArg, addonID, { rootNode } = {}) {
+		let scope = getScope(addonID);
+		return ScopeUtils.ensureCallableInScope(
+			func,
+			thisArg,
+			scope,
+			{
+				argParser: args => WindowScopeVariables.unwrapDOMArguments(args, addonID, { rootNode }),
+				returnParser: value => WindowScopeVariables.createSafeWindowObjectOrList(value, addonID, { rootNode }),
+			}
+		);
+	},
+
+	/**
+	 * Wrap a DOM node or Window object within the given root subtree
+	 */
+	createSafeWindowObject(node, addonID, { rootNode } = {}) {
+		if (Utils.isWindowObject(node)) {
+			return WindowScopeVariables.createSafeWindow(node, addonID, { rootNode });
+		}
+
+		if (!Utils.isDOMNode(node)) {
+			return node;
+		}
+
+		let root = rootNode.deref ? rootNode.deref() : rootNode;
+		if (root === null) {
+			// No access
+			return null;
+		}
+		if (!root) {
+			Utils.throwPropError("access", "root element", "object has been garbage collected");
+		}
+
+		// Check if node is within root subtree
+		if (!Utils.isElementWithinSubtree(node, root)) {
+			return null;
+		}
+
+		if (Utils.isDocumentObject(node)) {
+			return WindowScopeVariables.createSafeDocument(node, addonID, { rootNode });
+		}
+
+		return WindowScopeVariables.createSafeHTMLElement(node, addonID, { rootNode });
+	},
+
+	/**
+	 * Wrap an array-like list of DOM nodes or Window objects within the given root subtree
+	 */
+	createSafeWindowObjectOrList(nodes, addonID, { rootNode } = {}) {
+		if (nodes instanceof NodeList) {
+			let items = Array.from(nodes)
+				.map(item => WindowScopeVariables.createSafeWindowObject(item, addonID, { rootNode }))
+				.filter(item => item !== null);
+
+			let nodeList = new NodeList();
+			for (let i = 0; i < items.length; i++) {
+				nodeList[i] = items[i];
+			}
+			nodeList.length = items.length;
+			return ScopeVariables.createAllowlistMirrorObject(nodeList, true, addonID, { mutable: true });
+		}
+
+		if (Utils.isArrayLike(nodes)) {
+			let items = Array.from(nodes);
+			if (items.length === 0 || !items.some(item => Utils.isDOMNode(item) || Utils.isWindowObject(item))) {
+				return nodes;
+			}
+			// Since it's a return from DOM method, we can assume it's safe to do the filtering
+			return items.map(item => WindowScopeVariables.createSafeWindowObject(item, addonID, { rootNode })).filter(item => item !== null);
+		}
+		
+		return WindowScopeVariables.createSafeWindowObject(nodes, addonID, { rootNode });
+	},
+
+	/**
+	 * Wrap a Window object that only exposes allowed properties and methods based on the schema
+	 * If the `rootNode` is not provided, the wrapper will be created without access to any DOM.
+	 */
+	createSafeWindow(win, addonID, { rootNode } = {}) {
+		let scope = getScope(addonID);
+
+		if (Utils.isPrivilegedScope(scope)) {
+			return win;
+		}
+
+		// This should be executed after the scope is fully initialized with permissions, so we can get the correct schema based on permissions
+		let permissions = scope.PERMISSIONS;
+		let schema;
+		if (win.location.href === "chrome://zotero/content/zoteroPane.xhtml") {
+			schema = Utils.getMainWindowSchema(permissions);
+		}
+		else {
+			schema = Utils.getWindowSchema(permissions);
+		}
+		let wrapper = ScopeVariables.createAllowlistMirrorObject(win, schema, addonID, { mutable: false, cache: false });
+
+		Object.defineProperties(wrapper, {
+			document: {
+				get() {
+					return WindowScopeVariables.createSafeDocument(win.document, addonID, { rootNode });
+				},
+				enumerable: true,
+				configurable: false,
+			},
+		});
+		return wrapper;
+	},
+
+	/**
+	 * Wrap a Document object that only exposes allowed properties and methods based on the schema
+	 * If the `rootNode` is not provided, the wrapper will be created without access to any DOM.
+	 */
 	createSafeDocument(doc, addonID, { rootNode } = {}) {
 		let scope = getScope(addonID);
 		if (Utils.isPrivilegedScope(scope)) {
@@ -204,7 +336,7 @@ const ScopeVariables = {
 							Utils.throwPropError("access", "document", "object has been garbage collected");
 						}
 						let newElement = actualDoc[method](...args);
-						return ScopeVariables.createSafeHTMLElement(newElement, addonID, { rootNode });
+						return WindowScopeVariables.createSafeHTMLElement(newElement, addonID, { rootNode });
 					},
 					wrapper,
 					{ defineAs: method }
@@ -216,57 +348,6 @@ const ScopeVariables = {
 		return wrapper;
 	},
 
-	/**
-	 * Wrap a DOM node in a safe element within the given root subtree
-	 */
-	createSafeDOMNode(node, addonID, { rootNode } = {}) {
-		if (!Utils.isDOMNode(node)) {
-			return node;
-		}
-
-		let root = rootNode.deref ? rootNode.deref() : rootNode;
-		if (!root) {
-			Utils.throwPropError("access", "root element", "object has been garbage collected");
-		}
-
-		// Check if node is within root subtree
-		if (!Utils.isElementWithinSubtree(node, root)) {
-			return null;
-		}
-
-		if (node.nodeType === 9) {
-			return ScopeVariables.createSafeDocument(node, addonID, { rootNode });
-		}
-
-		return ScopeVariables.createSafeHTMLElement(node, addonID, { rootNode });
-	},
-
-	createSafeDOMNodeOrList(nodes, addonID, { rootNode } = {}) {
-		if (nodes instanceof NodeList) {
-			let items = Array.from(nodes)
-				.map(item => ScopeVariables.createSafeDOMNode(item, addonID, { rootNode }))
-				.filter(item => item !== null);
-
-			let nodeList = new NodeList();
-			for (let i = 0; i < items.length; i++) {
-				nodeList[i] = items[i];
-			}
-			nodeList.length = items.length;
-			return ScopeVariables.createAllowlistMirrorObject(nodeList, true, addonID, { mutable: true });
-		}
-
-		if (Utils.isArrayLike(nodes)) {
-			let items = Array.from(nodes);
-			if (items.length === 0 || !items.some(item => Utils.isDOMNode(item))) {
-				return nodes;
-			}
-			// Since it's a return from DOM method, we can assume it's safe to do the filtering
-			return items.map(item => ScopeVariables.createSafeDOMNode(item, addonID, { rootNode })).filter(item => item !== null);
-		}
-		
-		return ScopeVariables.createSafeDOMNode(nodes, addonID, { rootNode });
-	},
-
 	createSafeEvent(event, addonID, { rootNode } = {}) {
 		let scope = getScope(addonID);
 
@@ -274,7 +355,7 @@ const ScopeVariables = {
 			return event;
 		}
 
-		// Create a mirrored event without freezing so we can modify DOM properties
+		// Create a mirrored event in mutable mode so we can modify DOM properties
 		let wrappedEvent = ScopeVariables.createAllowlistMirrorObject(event, true, addonID, { mutable: true });
 
 		let DOMProps = ["target", "currentTarget", "relatedTarget"];
@@ -284,7 +365,7 @@ const ScopeVariables = {
 		for (let prop of DOMProps) {
 			if (event[prop]) {
 				Object.defineProperty(wrappedEvent, prop, {
-					value: ScopeVariables.createSafeDOMNode(event[prop], addonID, { rootNode }),
+					value: WindowScopeVariables.createSafeWindowObject(event[prop], addonID, { rootNode }),
 					enumerable: true,
 					configurable: false,
 					writable: false,
@@ -295,14 +376,7 @@ const ScopeVariables = {
 		for (let method of DOMPropMethods) {
 			if (typeof event[method] === "function") {
 				Object.defineProperty(wrappedEvent, method, {
-					value: ScopeUtils.ensureCallableInScope(
-						(...args) => {
-							let result = event[method](...args);
-							return ScopeVariables.createSafeDOMNodeOrList(result, addonID, { rootNode });
-						},
-						event,
-						scope
-					),
+					value: WindowScopeVariables.createSafeWindowCallable(event[method], event, addonID, { rootNode }),
 					enumerable: true,
 					configurable: false,
 					writable: false,
@@ -349,61 +423,6 @@ const ScopeVariables = {
 			return elem;
 		}
 
-		/**
-		 * Convert the arguments before passing to actual DOM methods
-		 * - For DOM nodes, unwrap to actual nodes. For methods like `appendChild`
-		 * - For array-like arguments, unwrap each item if they are wrapped DOM nodes (assume no nested arrays or functions in arrays)
-		 * - For callback functions, wrap them to wrap DOM nodes and Events in their arguments and return values
-		 */
-		function convertDOMArguments(args) {
-			return args.map((arg) => {
-				if (ScopeVariables.isWrappedDOMNode(arg)) {
-					return ScopeVariables.unwrapDOMNode(arg);
-				}
-				if (Utils.isArrayLike(arg)) {
-					let items = Array.from(arg);
-					if (items.some(item => ScopeVariables.isWrappedDOMNode(item))) {
-						return items.map(item => ScopeVariables.unwrapDOMNode(item));
-					}
-				}
-				if (typeof arg === "function") {
-					// If this function has already been wrapped, return the wrapped version
-					if (arg[ORIGINAL_REF_KEY]) {
-						return arg[ORIGINAL_REF_KEY]();
-					}
-					
-					let wrappedCallback = function (...callbackArgs) {
-						// Wrap DOM nodes and Events in callback arguments
-						let wrappedArgs = callbackArgs.map((cbArg) => {
-							if (Utils.isDOMNode(cbArg)) {
-								return ScopeVariables.createSafeDOMNode(cbArg, addonID, { rootNode });
-							}
-							// Wrap Event objects and their related properties
-							if (cbArg && typeof cbArg === "object" && typeof cbArg.type === "string") {
-								// It's likely an Event - create a safe version
-								return ScopeVariables.createSafeEvent(cbArg, addonID, { rootNode });
-							}
-							return cbArg;
-						});
-						// Call the original function with wrapped arguments and wrap its result
-						let result = arg.apply(this, wrappedArgs);
-						return (result);
-					};
-					
-					// Store the reference to the wrapped callback for future checks
-					Object.defineProperty(arg, ORIGINAL_REF_KEY, {
-						value: () => wrappedCallback,
-						enumerable: false,
-						configurable: false,
-						writable: false,
-					});
-					
-					return wrappedCallback;
-				}
-				return arg;
-			});
-		}
-
 		let keys = Utils.getAllKeysIncludingPrototypes(elem);
 		for (let prop of keys) {
 			if (typeof prop === "symbol") continue;
@@ -413,7 +432,7 @@ const ScopeVariables = {
 				() => {
 					if (prop === "ownerDocument") {
 						let actual = getActual();
-						return ScopeVariables.createSafeDocument(actual.ownerDocument, addonID, { rootNode });
+						return WindowScopeVariables.createSafeDocument(actual.ownerDocument, addonID, { rootNode });
 					}
 					if (blockedWindowProps.has(prop)) {
 						Utils.throwPropError("access", prop);
@@ -423,23 +442,16 @@ const ScopeVariables = {
 					let value = Reflect.get(actual, prop);
 
 					// Access to global window objects is not allowed
-					if (Utils.isGlobalWindowObject(value)) {
+					if (Utils.isWindowObject(value)) {
 						Utils.throwPropError("access", prop);
 					}
 
 					// Wrap the function to wrap DOM results
 					if (typeof value === "function") {
-						return ScopeUtils.ensureCallableInScope(
-							(...args) => {
-								let unwrappedArgs = convertDOMArguments(args);
-								return ScopeVariables.createSafeDOMNodeOrList(value.apply(actual, unwrappedArgs), addonID, { rootNode });
-							},
-							actual,
-							scope
-						);
+						return WindowScopeVariables.createSafeWindowCallable(value, actual, addonID, { rootNode });
 					}
 
-					let wrapped = ScopeVariables.createSafeDOMNodeOrList(value, addonID, { rootNode });
+					let wrapped = WindowScopeVariables.createSafeWindowObjectOrList(value, addonID, { rootNode });
 					if (wrapped !== value) {
 						return wrapped;
 					}
@@ -463,7 +475,7 @@ const ScopeVariables = {
 					if (blockedWindowProps.has(prop)) {
 						Utils.throwPropError("set", prop);
 					}
-					let unwrappedValue = ScopeVariables.unwrapDOMNode(value);
+					let unwrappedValue = WindowScopeVariables.unwrapDOMNode(value);
 					return Reflect.set(actual, prop, unwrappedValue);
 				},
 				holder,
@@ -491,16 +503,78 @@ const ScopeVariables = {
 	},
 
 
+	/**
+	 * Convert the arguments before passing to actual DOM methods e.g., `appendChild` or `addEventListener`
+	 * - For DOM nodes, unwrap to actual nodes.
+	 * - For array-like arguments, unwrap each item if they are wrapped DOM nodes (assume no nested arrays or functions in arrays)
+	 * - For callback functions, wrap them to wrap DOM nodes and Events in their arguments and return values. For example:
+	 *   - When calling `addEventListener` from the sandbox with callback `fn_{sandbox}`
+	 *   - We return a wrapped callback `fn_{host}^{wrapped}` to the host scope, and store the reference on `fn_{sandbox}`
+	 *   - The wrapped callback `fn_{host}^{wrapped}` is the actual function passed to `addEventListener`
+	 *   - When calling `removeEventListener` from the sandbox with the original callback `fn_{sandbox}`
+	 *   - This function detects that `fn_{sandbox}` has a wrapped reference stored, and returns `fn_{host}^{wrapped}` to the host scope
+	 *   - Thus, the correct function reference is passed to `removeEventListener`
+	 */
+	unwrapDOMArguments(args, addonID, { rootNode } = {}) {
+		return args.map((arg) => {
+			if (WindowScopeVariables.isWrappedDOMNode(arg)) {
+				return WindowScopeVariables.unwrapDOMNode(arg);
+			}
+			if (Utils.isArrayLike(arg)) {
+				let items = Array.from(arg);
+				if (items.some(item => WindowScopeVariables.isWrappedDOMNode(item))) {
+					return items.map(item => WindowScopeVariables.unwrapDOMNode(item));
+				}
+			}
+			if (typeof arg === "function") {
+				// If this function has already been wrapped, return the wrapped version
+				if (arg[ORIGINAL_REF_KEY]) {
+					return arg[ORIGINAL_REF_KEY]();
+				}
+				
+				let wrappedCallback = function (...callbackArgs) {
+					// Wrap DOM nodes and Events in callback arguments
+					let wrappedArgs = callbackArgs.map((cbArg) => {
+						if (Utils.isDOMNode(cbArg)) {
+							return WindowScopeVariables.createSafeWindowObject(cbArg, addonID, { rootNode });
+						}
+						// Wrap Event objects and their related properties
+						if (cbArg && typeof cbArg === "object" && typeof cbArg.type === "string") {
+							// It's likely an Event - create a safe version
+							return WindowScopeVariables.createSafeEvent(cbArg, addonID, { rootNode });
+						}
+						return cbArg;
+					});
+					// Call the original function with wrapped arguments and wrap its result
+					let result = arg.apply(this, wrappedArgs);
+					return (result);
+				};
+				
+				// Store the reference to the wrapped callback for future checks
+				Object.defineProperty(arg, ORIGINAL_REF_KEY, {
+					value: () => wrappedCallback,
+					enumerable: false,
+					configurable: false,
+					writable: false,
+				});
+				
+				return wrappedCallback;
+			}
+			return arg;
+		});
+	},
+
+
 	isWrappedDOMNode(value) {
 		return Utils.isObjectLike(value) && typeof value[ORIGINAL_REF_KEY] === "function";
 	},
 
 	unwrapDOMNode(value) {
-		if (ScopeVariables.isWrappedDOMNode(value)) {
+		if (WindowScopeVariables.isWrappedDOMNode(value)) {
 			return value[ORIGINAL_REF_KEY]();
 		}
 		return value;
-	}
+	},
 };
 
-export { ScopeVariables };
+export { ScopeVariables, WindowScopeVariables };
