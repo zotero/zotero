@@ -25,6 +25,7 @@
 
 
 import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { SchemaKey, DATA_OBJECT_READ_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
@@ -81,6 +82,10 @@ const ScopeVariables = {
 				addonID,
 				{ rootNode: rootNode || null }
 			);
+		}
+
+		if (VarCheck.isDataObject(value)) {
+			return DataScopeVariables.createSafeDataObject(value, addonID);
 		}
 
 		if (!_seen) _seen = new Map();
@@ -356,6 +361,31 @@ const ScopeVariables = {
 						let value = Reflect.get(actualObj, prop);
 
 						if (typeof value === "function") {
+							// If the schema value is in the form of { [SchemaKey.HANDLER]: "HandlerType", [SchemaKey.SCHEMA]: subSchema }, use the specified handler for this function
+							if (typeof schemaNode === "object" && VarCheck.isObject(schemaNode[prop]) && schemaNode[prop][SchemaKey.HANDLER]) {
+								let handler = schemaNode[prop];
+								switch (handler[SchemaKey.HANDLER]) {
+									case "Callable":
+										return ScopeUtils.ensureCallableInScope(value, actualObj, scope, {
+											mutable, instanceSchema: handler[SchemaKey.SCHEMA] || null,
+										});
+									case "Constructor":
+										return ScopeUtils.ensureConstructableInScope(value, scope, {
+											mutable: true, instanceSchema: handler[SchemaKey.SCHEMA] || null,
+										});
+									case "FromScopeCallable":
+										return ScopeUtils.ensureCallableInScope(value, actualObj, scope, {
+											argParser: args => args.map(arg => ScopeVariables.fromScope(arg, addonID)),
+											instanceSchema: handler[SchemaKey.SCHEMA] || null,
+										});
+									case "WindowScopeCallable":
+										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID);
+									case "CustomParserCallable":
+										return ScopeVariables.createCustomParserCallable(value, actualObj, addonID);
+									default:
+										VarCheck.throwPropError("access", prop, "unknown schema handler");
+								}
+							}
 							// If the schema value for this prop is a string, we need to call custom handling function
 							if (typeof schemaNode === "object" && typeof schemaNode[prop] === "string") {
 								switch (schemaNode[prop]) {
@@ -1329,4 +1359,27 @@ const WindowScopeVariables = {
 	},
 };
 
-export { ScopeVariables, WindowScopeVariables };
+const DataScopeVariables = {
+
+	/**
+	 * Wrap a Zotero DataObject or Library instance for safe use in the plugin scope.
+	 * Without dataRead permission, returns undefined.
+	 * Without dataWrite permission, write methods are blocked via DATA_OBJECT_READ_SCHEMA.
+	 */
+	createSafeDataObject(value, addonID) {
+		let scope = PluginSandbox.getScope(addonID);
+		if (VarCheck.isPrivilegedScope(scope)) {
+			return value;
+		}
+		// dataWrite implies dataRead
+		let hasRead = scope["PERMISSIONS"].includes("dataRead");
+		if (!hasRead) {
+			return undefined;
+		}
+		let hasWrite = scope["PERMISSIONS"].includes("dataWrite");
+		let instanceSchema = hasWrite ? null : DATA_OBJECT_READ_SCHEMA;
+		return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true, instanceSchema });
+	}
+};
+
+export { ScopeVariables, WindowScopeVariables, DataScopeVariables };
