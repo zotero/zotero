@@ -49,6 +49,10 @@ integration-citationDialog-lib-message-annotations = { $search ->
    *[other] No selected or open items with annotations
 }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-preview-header = Preview
+integration-citationDialog-preview-empty = Preview of your citation will appear here.
+integration-citationDialog-btn-displayPreview =
+    .title = Display citation preview
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Library

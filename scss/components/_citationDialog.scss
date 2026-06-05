@@ -110,6 +110,11 @@
 	.divider {
 		border-bottom: 1px solid var(--color-panedivider);
 		margin: 0;
+
+		&.subtle {
+			border-bottom-color: var(--fill-quinary);
+			margin: 0 8px;
+		}
 	}
 
 	.add-all {
@@ -547,8 +552,48 @@
 		}
 	}
 
+	#citation-preview {
+		padding-top: 6px;
+
+		// While the preview is being toggled on, lay it out off-flow so the window can grow to
+		// fit it before it's revealed: absolute keeps a real, measurable height without pushing
+		// the list around, and visibility:hidden keeps it invisible until there's room for it.
+		// inset-inline: 0 matches the in-flow width (body is the flow parent), so the measured
+		// height is accurate.
+		&.measuring {
+			position: absolute;
+			inset-inline: 0;
+			visibility: hidden;
+		}
+
+		#citation-preview-header {
+			padding: 0px 12px 4px 12px;
+			color: var(--fill-secondary);
+			font-weight: 600;
+			font-size: 0.93rem;
+		}
+
+		#citation-preview-wrapper {
+			padding: 0px 12px 8px 12px;
+			min-height: 20px;
+			max-height: 160px;
+			overflow-y: auto;
+			-moz-window-dragging: no-drag;
+			font-family: "Times New Roman";
+
+			#citation-preview-content {
+				color: var(--fill-primary);
+				font-size: 1rem;
+			}
+
+			#citation-preview-empty {
+				padding-top: 2px;
+				color: var(--fill-secondary);
+			}
+		}
+	}
+
 	#bottom-area-wrapper {
-		border-top: var(--material-panedivider);
 		padding: 4px 8px;
 
 		.segmented-switch {
@@ -647,6 +692,12 @@
 			height: 28px;
 			gap: 8px;
 			-moz-window-dragging: no-drag;
+			#display-preview-button {
+				@include svgicon("dialog-citation-preview", "universal", "20");
+				&[aria-pressed="true"] {
+					background-color: var(--fill-quinary);
+				}
+			}
 			#settings-button {
 				@include svgicon("dialog-options", "universal", "16");
 			}
