@@ -29,9 +29,6 @@
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
 
-<!-- Chrome wrapper for plugin content windows.
-     The <browser> element loads plugin HTML with a content principal,
-     enabling same-origin DOM access from the plugin sandbox. -->
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		style="display: flex; --tab-min-height: 0;">
@@ -41,9 +38,17 @@
 		<html:link rel="localization" href="browser/browserSets.ftl"/>
 	</linkset>
 
-	<script>
+	<script><![CDATA[
 		var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
-	</script>
+		{
+			let raw = window.arguments && window.arguments[0];
+			let args = raw && (raw.wrappedJSObject || raw) || {};
+			if (args.notitle) {
+				document.documentElement.setAttribute("drawintitlebar-platforms", "mac,win,linux");
+				Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", window);
+			}
+		}
+	]]></script>
 	<script src="chrome://zotero/content/pluginWindow.js"/>
 
 	<vbox flex="1">
