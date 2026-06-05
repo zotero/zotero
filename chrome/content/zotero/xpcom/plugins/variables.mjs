@@ -25,15 +25,12 @@
 
 
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
-import { VarCheck, ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
 });
-
-const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
-
 
 const ScopeVariables = {
 
@@ -85,6 +82,16 @@ const ScopeVariables = {
 			);
 		}
 
+		// Handle arrays by cloning into scope and recursively wrapping elements
+		if (Array.isArray(value)) {
+			let arr = Cu.cloneInto([], scope, {
+				wrapReflectors: true,
+				cloneFunctions: true,
+			});
+			arr.push(...value.map(v => ScopeVariables.toScope(v, addonID, { rootNode })));
+			return arr;
+		}
+
 		// Recursively wrap plain objects to allow access to nested properties
 		if (VarCheck.isPlainObject(value)) {
 			let wrapped = Cu.createObjectIn(scope);
@@ -134,6 +141,16 @@ const ScopeVariables = {
 			return value;
 		}
 
+		// Unwrap instance facades and DOM node wrappers back to their originals
+		if (VarCheck.isObjectLike(value) && typeof value[ORIGINAL_REF_KEY] === "function") {
+			return value[ORIGINAL_REF_KEY]();
+		}
+
+		// Recursively unwrap array elements
+		if (Array.isArray(value)) {
+			return Array.from(value).map(v => ScopeVariables.fromScope(v, addonID, { rootNode, unwrapReturn }));
+		}
+
 		if (typeof value === "function") {
 			let wrapper = function (...args) {
 				// Determine the actual rootNode - can be a function that extracts it from args
@@ -142,7 +159,7 @@ const ScopeVariables = {
 				// Wrap all arguments before passing to plugin function
 				let wrappedArgs = args.map(arg => ScopeVariables.toScope(arg, addonID, { rootNode: actualRootNode }));
 
-				let result = value.apply(this, wrappedArgs);
+				let result = Reflect.apply(value, this, wrappedArgs);
 
 				if (unwrapReturn) {
 					return WindowScopeVariables.unwrapDOMNode(result);
@@ -417,6 +434,13 @@ const WindowScopeVariables = {
 	 * Wrap an array-like list of DOM nodes or Window objects within the given root subtree
 	 */
 	createSafeWindowObjectOrList(nodes, addonID, { rootNode } = {}) {
+		// Check for Window/DOM objects before the array-like check,
+		// because Window has a numeric `length` property (frame count)
+		// that causes isArrayLike to return true, bypassing the wrapper.
+		if (VarCheck.isWindowObject(nodes) || VarCheck.isDOMNode(nodes)) {
+			return WindowScopeVariables.createSafeWindowObject(nodes, addonID, { rootNode });
+		}
+
 		if (nodes instanceof NodeList) {
 			let items = Array.from(nodes)
 				.map(item => WindowScopeVariables.createSafeWindowObject(item, addonID, { rootNode }))
