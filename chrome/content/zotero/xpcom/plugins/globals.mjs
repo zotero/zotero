@@ -224,4 +224,112 @@ function setupHTTP(scope) {
 	});
 }
 
-export { setupConsole, setupOpenWindow, setupHTTP };
+// Method signatures for Prefs methods that follow the standard key/global pattern.
+// key: pref name (auto-prefixed when global=false, permission-checked when global=true)
+// global: flag index -- forced to true when calling real Zotero.Prefs
+const PREFS_METHODS = {
+	get: ["key", "global"],
+	set: ["key", "value", "global"],
+	clear: ["key", "global"],
+};
+
+/**
+ * Set up Zotero.Prefs on the plugin scope with access control.
+ *
+ * The "preferences" permission exposes the Zotero.Prefs API.
+ * Access scope is controlled by the plugin's syncGUID namespace
+ * and pref_permissions declared in the manifest.
+ * Global (non-Zotero) prefs are not accessible from unprivileged plugins.
+ *
+ * @param {Object} scope - The sandbox scope
+ * @param {Object} addon - The addon descriptor
+ */
+function setupPreferences(scope, addon) {
+	let prefPrefixes = addon.installPermissions.pref_permissions || [];
+
+	// Plugin's own namespace
+	let ownPrefix = `extensions.${addon.syncGUID.replace(/[{}]/g, '')}.`;
+	let allPrefixes = [ownPrefix, ...prefPrefixes];
+
+	function checkPrefPermission(pref) {
+		if (allPrefixes.some(prefix => pref.startsWith(prefix))) {
+			return;
+		}
+		throw new Error(
+			`Permission denied: cannot access preference "${pref}".`
+			+ ' Declare it in "pref_permissions".'
+		);
+	}
+
+	let Prefs = Cu.createObjectIn(scope);
+
+	for (let [method, sig] of Object.entries(PREFS_METHODS)) {
+		let keyIndex = sig.indexOf("key");
+		let globalIndex = sig.indexOf("global");
+
+		Prefs[method] = ScopeUtils.ensureCallableInScope(
+			Zotero.Prefs[method], Zotero.Prefs, scope, {
+				argParser: (args) => {
+					// Auto-prefix with ownPrefix (plugin's namespace)
+					if (!args[globalIndex]) {
+						args[keyIndex] = ownPrefix + args[keyIndex];
+					}
+					// Use as-is, gated by pref_permissions
+					else {
+						checkPrefPermission(args[keyIndex]);
+					}
+					// Always call with global=true
+					args[globalIndex] = true;
+					return args;
+				},
+			}
+		);
+	}
+
+	// resetBranch(exclude, branch)
+	Prefs.resetBranch = ScopeUtils.ensureCallableInScope(
+		Zotero.Prefs.resetBranch, Zotero.Prefs, scope, {
+			argParser: (args) => {
+				if (!args[1]) {
+					throw new Error(
+						'Permission denied: cannot reset entire preference branch.'
+					);
+				}
+				checkPrefPermission(args[1]);
+				return args;
+			},
+		}
+	);
+
+	// registerObserver(name, handler, global)
+	Prefs.registerObserver = ScopeUtils.ensureCallableInScope(
+		Zotero.Prefs.registerObserver, Zotero.Prefs, scope, {
+			argParser: (args) => {
+				if (!args[2]) {
+					args[0] = ownPrefix + args[0];
+				}
+				else {
+					checkPrefPermission(args[0]);
+				}
+				args[1] = ScopeVariables.fromScope(args[1], addon.id);
+				args[2] = true;
+				return args;
+			},
+		}
+	);
+
+	// unregisterObserver(symbol)
+	Prefs.unregisterObserver = ScopeUtils.ensureCallableInScope(
+		Zotero.Prefs.unregisterObserver, Zotero.Prefs, scope, {}
+	);
+
+	// Attach to the scope's Zotero mirror object
+	Object.defineProperty(Cu.waiveXrays(scope.Zotero), "Prefs", {
+		value: Prefs,
+		enumerable: true,
+		configurable: false,
+		writable: false,
+	});
+}
+
+export { setupConsole, setupOpenWindow, setupHTTP, setupPreferences };
