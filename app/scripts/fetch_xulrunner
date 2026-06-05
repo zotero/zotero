@@ -283,6 +283,7 @@ function modify_omni {
 
 	# Add Zotero permissions in https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/schemas/manifest.json
 	replace_line '"notifications"' '"notifications",
+	  "*",
 	  "zotero",
 	  "data",
 	  "fileSystem",
