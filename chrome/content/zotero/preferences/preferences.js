@@ -404,10 +404,6 @@
 				let event = new Event('showing');
 				child.dispatchEvent(event);
 			}
-			if (pane.scope) {
-				Cu.nukeSandbox(pane.scope);
-				pane.scope = null;
-			}
 		},
 
 		_parseXHTMLToFragment(str, entities = [], pluginID = null) {
