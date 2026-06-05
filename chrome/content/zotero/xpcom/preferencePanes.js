@@ -146,14 +146,13 @@
 		 * @return {Promise<string>} Resolves to the ID of the pane if successfully added
 		 *
 		 * @example
-		 * Register a pane with an onLoad hook:
 		 * ```javascript
 		 * Zotero.PreferencePanes.register({
 		 * 	pluginID: 'my-plugin@my-namespace.com',
-		 * 	src: rootURI + 'my-pane.xhtml',
 		 * 	id: 'my-plugin-pane',
-		 * 	l10nFiles: [rootURI + 'my-pane.ftl'],
-		 * 	stylesheets: [rootURI + 'my-pane.css'],
+		 * 	src: 'my-pane.xhtml',
+		 * 	stylesheets: ['my-pane.css'],
+		 * 	l10nFiles: ['my-pane.ftl'],
 		 * 	onLoad: ({ doc, body }) => {
 		 * 		// Initialize pane
 		 * 	}
