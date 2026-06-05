@@ -25,16 +25,58 @@
 -->
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
 
-<!-- Minimal chrome wrapper for plugin content windows.
+<!-- Chrome wrapper for plugin content windows.
      The <browser> element loads plugin HTML with a content principal,
      enabling same-origin DOM access from the plugin sandbox. -->
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-		xmlns:html="http://www.w3.org/1999/xhtml">
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		style="display: flex; --tab-min-height: 0;">
 
-	<browser id="plugin-browser"
-			 type="content"
-			 flex="1"
-			 remote="false"
-			 disableglobalhistory="true"/>
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="browser/browserSets.ftl"/>
+	</linkset>
+
+	<script>
+		var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+	</script>
+	<script src="chrome://zotero/content/pluginWindow.js"/>
+
+	<vbox flex="1">
+		<vbox id="titlebar">
+			<html:div type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
+					defaultset="menubar-items"
+					mode="icons" iconsize="small" defaulticonsize="small" autohide="false"
+					context="toolbar-context-menu">
+				<toolbaritem id="menubar-items" align="center">
+					<menubar id="main-menubar">
+						<menu id="menu-file" data-l10n-id="menu-file" hidden="true">
+							<menupopup id="menu-file-popup"/>
+						</menu>
+						<menu id="menu-edit" data-l10n-id="menu-edit" hidden="true">
+							<menupopup id="menu-edit-popup"/>
+						</menu>
+						<menu id="menu-view" data-l10n-id="menu-view" hidden="true">
+							<menupopup id="menu-view-popup"/>
+						</menu>
+						<menu id="menu-window" data-l10n-id="menu-window-menu" hidden="true">
+							<menupopup id="menu-window-popup"/>
+						</menu>
+						<menu id="menu-help" data-l10n-id="menu-help" hidden="true">
+							<menupopup id="menu-help-popup"/>
+						</menu>
+					</menubar>
+				</toolbaritem>
+			</html:div>
+		</vbox>
+		<browser id="plugin-browser"
+				 type="content"
+				 flex="1"
+				 remote="false"
+				 disableglobalhistory="true"/>
+	</vbox>
 </window>

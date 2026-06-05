@@ -246,7 +246,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 	Object.assign(scope, extraGlobals);
 
 	if (permissions.includes("openWindow")) {
-		setupOpenWindow(scope, rootURI);
+		setupOpenWindow(scope, rootURI, addon.id);
 	}
 
 	return scope;
