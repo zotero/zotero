@@ -777,8 +777,8 @@ const WindowScopeVariables = {
 		});
 
 		// Add createFrame for chrome documents with a registered protocol
-		let rootURI = PluginProtocol.getBaseURI(pluginID);
-		if (typeof doc.createXULElement === "function" && rootURI) {
+		let baseURI = PluginProtocol.getBaseURI(pluginID);
+		if (typeof doc.createXULElement === "function" && baseURI) {
 			Cu.exportFunction(
 				(url, options = {}) => {
 					let actualDoc = docRef.deref();
@@ -790,12 +790,12 @@ const WindowScopeVariables = {
 
 					let resolved;
 					try {
-						resolved = new URL(String(url || ""), rootURI).href;
+						resolved = new URL(String(url || ""), baseURI).href;
 					}
 					catch {
 						throw new Error(`Invalid URL: ${url}`);
 					}
-					if (!resolved.startsWith(rootURI)) {
+					if (!resolved.startsWith(baseURI)) {
 						throw new Error(`URL must be within plugin root: ${url}`);
 					}
 					let pathname = new URL(resolved).pathname.toLowerCase();
