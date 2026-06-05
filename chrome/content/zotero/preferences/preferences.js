@@ -339,11 +339,6 @@
 						);
 					}
 				}
-				if (pane.l10nFiles) {
-					for (let ftl of pane.l10nFiles) {
-						MozXULElement.insertFTLIfNeeded(ftl);
-					}
-				}
 				let markup = Zotero.File.getContentsFromURL(pane.src);
 				let dtdFiles = [
 					'chrome://zotero/locale/zotero.dtd',
