@@ -168,7 +168,10 @@ Zotero.UndoHistory = {
 		}
 		catch (e) {
 			Zotero.logError('UndoHistory: undo failed: ' + e);
-			// Entry is lost -- don't push to redo
+			// A failure means the object drifted out from under our snapshots,
+			// so the rest of the stack can't be trusted either. Discard history
+			// rather than risk applying stale values.
+			this.clear();
 		}
 		return true;
 	},
@@ -202,7 +205,10 @@ Zotero.UndoHistory = {
 		}
 		catch (e) {
 			Zotero.logError('UndoHistory: redo failed: ' + e);
-			// Entry is lost -- don't push to undo
+			// A failure means the object drifted out from under our snapshots,
+			// so the rest of the stack can't be trusted either. Discard history
+			// rather than risk applying stale values.
+			this.clear();
 		}
 		return true;
 	},
