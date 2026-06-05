@@ -46,7 +46,8 @@ function loadScope(addon, globalVars = {}) {
 	let existingScope = scopes.get(addon.id);
 	
 	if (existingScope) {
-		if (existingScope.PERMISSIONS === currentPermissions) {
+		let existingPermissions = Utils.getPermissionsString(existingScope?.PERMISSIONS);
+		if (existingPermissions === currentPermissions) {
 			Zotero.debug(`Reusing existing scope for plugin ${addon.id}`);
 			ChromeUtils.defineLazyGetter(existingScope, "console", ScopeVariables.getConsole(addon));
 			return;
@@ -90,6 +91,7 @@ function unloadScope(id) {
 	}
 	scopes.delete(id);
 	// Delay nuke to allow any pending operations to complete
+	// TODO: Throws error 0x80070057
 	setTimeout(() => {
 		Cu.nukeSandbox(scope);
 	}, SANDBOX_NUKE_DELAY_MS);
@@ -135,7 +137,7 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 			Services,
 			Worker,
 			XMLSerializer,
-			PERMISSIONS: "*",
+			PERMISSIONS: ["*"],
 			
 			// Add additional global functions
 			setTimeout,
@@ -203,11 +205,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			loadSubScript: res => Services.scriptloader.loadSubScript(
 				`${rootURI}${res}`, scope
 			),
-			importESModule: async (res) => {
-				let moduleURI = `${rootURI}${res}`;
-				return Cu.importESModule(moduleURI, scope);
-			},
-			PERMISSIONS: Utils.getPermissionsString(permissions),
+			PERMISSIONS: Cu.cloneInto(permissions, scope),
 			
 			// Add additional global functions
 			setTimeout,
