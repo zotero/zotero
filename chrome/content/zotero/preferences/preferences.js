@@ -43,6 +43,7 @@
 		_mutationObservers: new Map(),
 
 		init: function () {
+			Zotero.WindowResourceManager.applyAllToWindow(window, "preferencePane");
 			this.navigation = document.getElementById('prefs-navigation');
 			this.content = document.getElementById('prefs-content');
 			this.helpContainer = document.getElementById('prefs-help-container');

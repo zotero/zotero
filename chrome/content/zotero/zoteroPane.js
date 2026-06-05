@@ -77,6 +77,8 @@ var ZoteroPane = new function () {
 	 */
 	this.init = function () {
 		Zotero.debug("Initializing Zotero pane");
+
+		Zotero.WindowResourceManager.applyAllToWindow(window, "mainWindow");
 		
 		// Set key down handler
 		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown);
