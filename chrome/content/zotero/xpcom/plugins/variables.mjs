@@ -370,14 +370,19 @@ const WindowScopeVariables = {
 	 * This is to allow sandbox code to call DOM methods with wrapped DOM nodes and receive wrapped DOM nodes,
 	 * while the actual function runs in the privileged host scope with access to real DOM nodes.
 	 */
-	createSafeWindowCallable(func, thisArg, addonID, { rootNode } = {}) {
+	createSafeWindowCallable(func, thisArg, addonID, { rootNode, argValidator } = {}) {
 		let scope = PluginSandbox.getScope(addonID);
 		return ScopeUtils.ensureCallableInScope(
 			func,
 			thisArg,
 			scope,
 			{
-				argParser: args => WindowScopeVariables.unwrapDOMArguments(args, addonID, { rootNode }),
+				argParser(args) {
+					if (typeof argValidator === "function" && !argValidator(args)) {
+						return null;
+					}
+					return WindowScopeVariables.unwrapDOMArguments(args, addonID, { rootNode });
+				},
 				returnParser: value => WindowScopeVariables.createSafeWindowObjectOrList(value, addonID, { rootNode }),
 			}
 		);
@@ -724,6 +729,21 @@ const WindowScopeVariables = {
 
 					// Wrap the function to wrap DOM results
 					if (typeof value === "function") {
+						// Block setAttribute/setAttributeNS from setting on* event handlers
+						if (prop === "setAttribute" || prop === "setAttributeNS") {
+							let nameArgIndex = prop === "setAttributeNS" ? 1 : 0;
+							return WindowScopeVariables.createSafeWindowCallable(value, actual, addonID, {
+								rootNode,
+								argValidator(args) {
+									let attrName = String(args[nameArgIndex] || "");
+									if (/^on/i.test(attrName)) {
+										Zotero.warn(`Setting ${attrName} attribute is not allowed for unprivileged plugins. Use addEventListener() instead.`);
+										return false;
+									}
+									return true;
+								},
+							});
+						}
 						return WindowScopeVariables.createSafeWindowCallable(value, actual, addonID, { rootNode });
 					}
 
@@ -750,6 +770,10 @@ const WindowScopeVariables = {
 					}
 					if (blockedWindowProps.has(prop)) {
 						VarCheck.throwPropError("set", prop);
+					}
+					if (/^on/i.test(prop)) {
+						Zotero.warn(`Setting ${prop} directly is not allowed for unprivileged plugins. Use addEventListener() instead.`);
+						return false;
 					}
 					let unwrappedValue = WindowScopeVariables.unwrapDOMNode(value);
 					return Reflect.set(actual, prop, unwrappedValue);
