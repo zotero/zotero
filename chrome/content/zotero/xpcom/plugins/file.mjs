@@ -84,7 +84,19 @@ function isForbidden(canonicalPath) {
 	return false;
 }
 
-async function showPrompt(pluginID, path, mode, { canPersistFile, canPersistParent, parentPath, isDirectory }) {
+/**
+ * Open the prompt window and resolve when the user makes a choice.
+ *
+ * @param {string} pluginID
+ * @param {string} path
+ * @param {"read"|"write"} mode
+ * @param {Object} promptArgs
+ * @param {Object} [options]
+ * @param {Function} [options.onWindowOpen]
+ */
+async function showPrompt(pluginID, path, mode, promptArgs, options = {}) {
+	let { canPersistFile, canPersistParent, parentPath, isDirectory } = promptArgs;
+	let { onWindowOpen } = options;
 	let pluginName = await Zotero.Plugins.getName(pluginID) || pluginID;
 	return new Promise((resolve) => {
 		let args = {
@@ -98,13 +110,14 @@ async function showPrompt(pluginID, path, mode, { canPersistFile, canPersistPare
 			isDirectory,
 			resolve,
 		};
-		Services.ww.openWindow(
+		let win = Services.ww.openWindow(
 			null,
 			"chrome://zotero/content/pluginFileAccessPrompt.xhtml",
 			"_blank",
 			"chrome,resizable=no,alwaysontop=yes",
 			args,
 		);
+		if (onWindowOpen) onWindowOpen(win);
 	});
 }
 
@@ -370,6 +383,9 @@ class FileAccessState {
 
 	worker = null;
 
+	// window -> session ref
+	openPromptWindows = new Map();
+
 	constructor(pluginID) {
 		this.pluginID = pluginID;
 		this.uuid = getPluginUUID(pluginID);
@@ -392,6 +408,23 @@ class FileAccessState {
 			}
 			catch {}
 			this.activeSession = null;
+		}
+		this._closeOpenPrompts();
+	}
+
+	_closeOpenPrompts(sessionFilter = null) {
+		let toClose = [];
+		for (let [win, session] of this.openPromptWindows) {
+			if (sessionFilter === null || session === sessionFilter) {
+				toClose.push(win);
+			}
+		}
+		for (let win of toClose) {
+			this.openPromptWindows.delete(win);
+			try {
+				win.close();
+			}
+			catch {}
 		}
 	}
 
@@ -489,6 +522,10 @@ class FileAccessState {
 				this.activeSession = null;
 			}
 			session.resolveDone();
+			// If the session ends with a prompt still open (e.g. timeout
+			// abandoned the fn mid-await), close it. The user shouldn't be
+			// left staring at a prompt whose answer can no longer matter.
+			this._closeOpenPrompts(session);
 		}
 	}
 
@@ -577,18 +614,29 @@ class FileAccessState {
 			}
 			catch {}
 
+			let promptWindow;
+			let owningSession = this.activeSession;
 			let answer;
 			try {
-				answer = await showPrompt(this.pluginID, req.path, req.mode, {
-					canPersistFile,
-					canPersistParent,
-					parentPath,
-					isDirectory,
-				});
+				answer = await showPrompt(
+					this.pluginID, req.path, req.mode,
+					{ canPersistFile, canPersistParent, parentPath, isDirectory },
+					{
+						onWindowOpen: (win) => {
+							promptWindow = win;
+							this.openPromptWindows.set(win, owningSession);
+						},
+					},
+				);
 			}
 			catch (e) {
 				Zotero.logError(e);
 				answer = { decision: "deny", reason: "prompt-error" };
+			}
+			finally {
+				if (promptWindow) {
+					this.openPromptWindows.delete(promptWindow);
+				}
 			}
 			if (this.queue[0] === req) {
 				this.queue.shift();
