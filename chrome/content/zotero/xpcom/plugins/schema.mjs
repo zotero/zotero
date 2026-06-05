@@ -132,6 +132,7 @@ const PERMISSION_SCHEMAS = {
 			Libraries: {
 				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
 				getAll: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				userLibraryID: true,
 				getName: true,
 				getType: true,
 				getLastSyncTime: true,
