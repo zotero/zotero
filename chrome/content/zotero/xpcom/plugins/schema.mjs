@@ -143,6 +143,11 @@ const PERMISSION_SCHEMAS = {
 				registerObserver: "FromScopeCallable",
 				unregisterObserver: true,
 			},
+			// Constructors
+			Item: "Constructor",
+			Collection: "Constructor",
+			Search: "Constructor",
+			Duplicates: "Constructor",
 		},
 	},
 	fileSystem: {
@@ -199,6 +204,11 @@ const PERMISSION_SCHEMAS = {
 		Zotero: {
 			Translators: {
 				getAll: true,
+			},
+			Translate: {
+				Import: "Constructor",
+				Search: "Constructor",
+				Web: "Constructor",
 			},
 		},
 	},
