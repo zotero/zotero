@@ -334,7 +334,7 @@ const ScopeUtils = {
 	/**
 	 * Create a function that runs in privileged realm and scopes returns
 	 */
-	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null } = {}) {
+	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null, skipArgRescoping = false } = {}) {
 		if (VarCheck.isSameCompartment(func, scope)) {
 			return func;
 		}
@@ -353,7 +353,7 @@ const ScopeUtils = {
 				VarCheck.throwPropError("access", "this", "object has been garbage collected");
 			}
 			// Make sure the args are in the same scope if the thisArg is not in the current compartment
-			if (actualThisArg && !VarCheck.isSameCompartment(actualThisArg, {})) {
+			if (!skipArgRescoping && actualThisArg && !VarCheck.isSameCompartment(actualThisArg, {})) {
 				args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(actualThisArg), { mutable });
 			}
 			let res = func.apply(actualThisArg, args);
