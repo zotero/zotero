@@ -27,6 +27,7 @@
 import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { SchemaKey, DATA_OBJECT_READ_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
+import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
 const ScopeVariables = {
@@ -163,7 +164,7 @@ const ScopeVariables = {
 	 * @param {boolean} [options.unwrapReturn=false] - Whether to unwrap DOM nodes in return value
 	 * @returns {any} - Wrapped value safe for use in the host scope
 	 */
-	fromScope(value, addonID, { rootNode = null, unwrapReturn = false, _seen = null } = {}) {
+	fromScope(value, addonID, { rootNode = null, unwrapReturn = false, trace = null, _seen = null } = {}) {
 		if (!addonID) {
 			return value;
 		}
@@ -183,7 +184,10 @@ const ScopeVariables = {
 		}
 
 		if (typeof value === "function") {
+			let funcName = value.name || "anonymous";
+			let hookPath = trace ? `${trace.path}:${funcName}` : funcName;
 			let wrapper = function (...args) {
+				let t = PluginTrace.start();
 				// Determine the actual rootNode - can be a function that extracts it from args
 				let actualRootNode = typeof rootNode === "function" ? rootNode(...args) : rootNode;
 
@@ -191,6 +195,8 @@ const ScopeVariables = {
 				let wrappedArgs = args.map(arg => ScopeVariables.toScope(arg, addonID, { rootNode: actualRootNode }));
 
 				let result = Reflect.apply(value, this, wrappedArgs);
+
+				PluginTrace.end(t, addonID, "hook", hookPath);
 
 				if (unwrapReturn) {
 					return VarCheck.getOriginalOrSelf(result);
@@ -214,7 +220,7 @@ const ScopeVariables = {
 
 		// Recursively unwrap array elements
 		if (Array.isArray(value)) {
-			let arr = Array.from(value).map(v => ScopeVariables.fromScope(v, addonID, { rootNode, unwrapReturn, _seen }));
+			let arr = Array.from(value).map(v => ScopeVariables.fromScope(v, addonID, { rootNode, unwrapReturn, trace, _seen }));
 			_seen.set(value, arr);
 			return arr;
 		}
@@ -224,7 +230,7 @@ const ScopeVariables = {
 			let wrapped = {};
 			for (let key of Object.keys(value)) {
 				let val = value[key];
-				let wrappedVal = ScopeVariables.fromScope(val, addonID, { rootNode, unwrapReturn, _seen });
+				let wrappedVal = ScopeVariables.fromScope(val, addonID, { rootNode, unwrapReturn, trace, _seen });
 				if (wrappedVal !== val) {
 					hasFunction = true;
 				}
@@ -254,17 +260,18 @@ const ScopeVariables = {
 	 * Wrap a host function using a custom arg parser attached on the
 	 * function itself via `setCustomParser`.
 	 */
-	createCustomParserCallable(func, thisArg, addonID) {
+	createCustomParserCallable(func, thisArg, addonID, { trace } = {}) {
 		let scope = PluginSandbox.getScope(addonID);
 		let parser = func[CUSTOM_PARSER_KEY];
 		if (typeof parser !== "function") {
-			return ScopeUtils.ensureCallableInScope(func, thisArg, scope);
+			return ScopeUtils.ensureCallableInScope(func, thisArg, scope, { trace });
 		}
 		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
 			argParser: (args) => {
 				parser({ addonID, thisArg, args });
 				return args;
 			},
+			trace,
 		});
 	},
 
@@ -274,10 +281,11 @@ const ScopeVariables = {
 	 * are wrapped using `fromScope` before passing to the actual function.
 	 * This allows the host to safely consume plugin-provided functions.
 	 */
-	createFromScopeCallable(func, thisArg, addonID) {
+	createFromScopeCallable(func, thisArg, addonID, { trace } = {}) {
 		let scope = PluginSandbox.getScope(addonID);
 		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
-			argParser: args => args.map(arg => ScopeVariables.fromScope(arg, addonID)),
+			argParser: args => args.map(arg => ScopeVariables.fromScope(arg, addonID, { trace })),
+			trace,
 		});
 	},
 
@@ -300,7 +308,7 @@ const ScopeVariables = {
 	 *   Use this for constructor-created objects that the caller owns, to prevent premature GC.
 	 * @returns {Object} The mirrored object in scope
 	 */
-	createAllowlistMirrorObject(target, schema, addonID, { frozen = true, mutable = true, cache = false, strong = false } = {}) {
+	createAllowlistMirrorObject(target, schema, addonID, { frozen = true, mutable = true, cache = false, strong = false, pathPrefix = "" } = {}) {
 		let scope = PluginSandbox.getScope(addonID);
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return target;
@@ -323,7 +331,7 @@ const ScopeVariables = {
 		 * `frozen` controls whether properties on the wrapper can be set.
 		 * `mutable` (from outer scope) controls whether values returned from methods/getters are writable.
 		 */
-		function wrapAllowlist(obj, schemaNode, { frozen: isFrozen = true, strong: strongRef = false } = {}) {
+		function wrapAllowlist(obj, schemaNode, { frozen: isFrozen = true, strong: strongRef = false, pathPrefix: prefix = "" } = {}) {
 			if (!VarCheck.isObjectLike(obj)) return obj;
 
 			if (schemaNode !== true && (!schemaNode || typeof schemaNode !== "object")) {
@@ -351,6 +359,9 @@ const ScopeVariables = {
 			for (let prop of keys) {
 				if (!VarCheck.isAllowed(schemaNode, prop)) continue;
 
+				let propPath = prefix ? `${prefix}.${prop}` : prop;
+				let trace = prefix ? { pluginID: addonID, path: propPath } : null;
+
 				let holder = Cu.createObjectIn(scope);
 				Cu.exportFunction(
 					() => {
@@ -368,20 +379,23 @@ const ScopeVariables = {
 									case "Callable":
 										return ScopeUtils.ensureCallableInScope(value, actualObj, scope, {
 											mutable, instanceSchema: handler[SchemaKey.SCHEMA] || null,
+											trace,
 										});
 									case "Constructor":
 										return ScopeUtils.ensureConstructableInScope(value, scope, {
 											mutable: true, instanceSchema: handler[SchemaKey.SCHEMA] || null,
+											trace,
 										});
 									case "FromScopeCallable":
 										return ScopeUtils.ensureCallableInScope(value, actualObj, scope, {
-											argParser: args => args.map(arg => ScopeVariables.fromScope(arg, addonID)),
+											argParser: args => args.map(arg => ScopeVariables.fromScope(arg, addonID, { trace })),
 											instanceSchema: handler[SchemaKey.SCHEMA] || null,
+											trace,
 										});
 									case "WindowScopeCallable":
-										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID);
+										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID, { trace });
 									case "CustomParserCallable":
-										return ScopeVariables.createCustomParserCallable(value, actualObj, addonID);
+										return ScopeVariables.createCustomParserCallable(value, actualObj, addonID, { trace });
 									default:
 										VarCheck.throwPropError("access", prop, "unknown schema handler");
 								}
@@ -390,13 +404,13 @@ const ScopeVariables = {
 							if (typeof schemaNode === "object" && typeof schemaNode[prop] === "string") {
 								switch (schemaNode[prop]) {
 									case "WindowScopeCallable":
-										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID);
+										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID, { trace });
 									case "FromScopeCallable":
-										return ScopeVariables.createFromScopeCallable(value, actualObj, addonID);
+										return ScopeVariables.createFromScopeCallable(value, actualObj, addonID, { trace });
 									case "CustomParserCallable":
-										return ScopeVariables.createCustomParserCallable(value, actualObj, addonID);
+										return ScopeVariables.createCustomParserCallable(value, actualObj, addonID, { trace });
 									case "Constructor":
-										return ScopeUtils.ensureConstructableInScope(value, scope, { mutable: true });
+										return ScopeUtils.ensureConstructableInScope(value, scope, { mutable: true, trace });
 									default:
 										VarCheck.throwPropError("access", prop, "unknown schema handler");
 								}
@@ -405,9 +419,9 @@ const ScopeVariables = {
 							// with sub-properties (e.g. Zotero.Translate has .Search, .Web)
 							let nextSchema = VarCheck.nextSchema(schemaNode, prop);
 							if (nextSchema && typeof nextSchema === "object") {
-								return wrapAllowlist(value, nextSchema);
+								return wrapAllowlist(value, nextSchema, { pathPrefix: propPath });
 							}
-							return ScopeUtils.ensureCallableInScope(value, actualObj, scope, { mutable });
+							return ScopeUtils.ensureCallableInScope(value, actualObj, scope, { mutable, trace });
 						}
 
 						if (VarCheck.isObjectLike(value)) {
@@ -420,11 +434,15 @@ const ScopeVariables = {
 							let nextSchemaNode = VarCheck.nextSchema(schemaNode, prop);
 
 							if (nextSchemaNode === true || (nextSchemaNode && typeof nextSchemaNode === "object")) {
-								return wrapAllowlist(value, nextSchemaNode);
+								return wrapAllowlist(value, nextSchemaNode, { pathPrefix: propPath });
 							}
 							return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable });
 						}
 
+						// Leaf value, trace the get
+						if (trace) {
+							PluginTrace.record(addonID, "get", propPath);
+						}
 						return value;
 					},
 					holder,
@@ -439,6 +457,9 @@ const ScopeVariables = {
 						let actualObj = objRef.deref();
 						if (!actualObj) {
 							VarCheck.throwPropError("set", prop, "object has been garbage collected");
+						}
+						if (trace) {
+							PluginTrace.record(addonID, "set", propPath);
 						}
 						return Reflect.set(actualObj, prop, value);
 					},
@@ -466,7 +487,7 @@ const ScopeVariables = {
 			return wrapper;
 		}
 
-		let result = wrapAllowlist(target, schema, { frozen, strong });
+		let result = wrapAllowlist(target, schema, { frozen, strong, pathPrefix });
 		return result;
 	},
 };
@@ -480,7 +501,7 @@ const WindowScopeVariables = {
 	 * This is to allow sandbox code to call DOM methods with wrapped DOM nodes and receive wrapped DOM nodes,
 	 * while the actual function runs in the privileged host scope with access to real DOM nodes.
 	 */
-	createSafeWindowCallable(func, thisArg, addonID, { rootNode, argValidator } = {}) {
+	createSafeWindowCallable(func, thisArg, addonID, { rootNode, argValidator, trace } = {}) {
 		let scope = PluginSandbox.getScope(addonID);
 		return ScopeUtils.ensureCallableInScope(
 			func,
@@ -498,6 +519,7 @@ const WindowScopeVariables = {
 				// DOM nodes unwrapped to their real compartment, callbacks as chrome
 				// functions. Re-scoping would double-wrap callbacks, breaking event listeners.
 				skipArgRescoping: true,
+				trace,
 			}
 		);
 	},
@@ -592,7 +614,7 @@ const WindowScopeVariables = {
 		else {
 			schema = VarCheck.getWindowSchema(permissions);
 		}
-		let wrapper = ScopeVariables.createAllowlistMirrorObject(win, schema, addonID, { cache: false });
+		let wrapper = ScopeVariables.createAllowlistMirrorObject(win, schema, addonID, { cache: false, pathPrefix: "window" });
 
 		// addEventListener / removeEventListener need the callback-wrapping
 		// logic from createSafeWindowCallable so that event handlers receive

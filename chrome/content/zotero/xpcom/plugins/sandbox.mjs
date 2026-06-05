@@ -152,6 +152,7 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 			Services,
 			Worker,
 			XMLSerializer,
+			PLUGIN_ID: addon.id,
 			PERMISSIONS: ["*"],
 			HOST_PERMISSIONS: ["*"],
 			PREF_PERMISSIONS: ["*"],
@@ -224,6 +225,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 				`${rootURI}${res}`, scope
 			),
 			isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
+			PLUGIN_ID: addon.id,
 			PERMISSIONS: Cu.cloneInto(permissions, scope),
 			HOST_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.host_permissions || [], scope),
 			PREF_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.pref_permissions || [], scope),
@@ -233,7 +235,8 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			// Add additional global vars
 			Localization: ScopeUtils.ensureConstructableInScope(Localization, scope, {
 				mutable: true,
-				returnParser: instance => ScopeVariables.createAllowlistMirrorObject(instance, true, addon.id, { frozen: false, strong: true }),
+				returnParser: instance => ScopeVariables.createAllowlistMirrorObject(instance, true, addon.id, { frozen: false, strong: true, pathPrefix: "Localization" }),
+				trace: { pluginID: addon.id, path: "Localization" },
 			}),
 			setTimeout,
 			clearTimeout,
@@ -257,7 +260,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 		if (!obj) {
 			continue;
 		}
-		extraGlobals[key] = ScopeVariables.createAllowlistMirrorObject(obj, schema[key], addon.id, { cache: true });
+		extraGlobals[key] = ScopeVariables.createAllowlistMirrorObject(obj, schema[key], addon.id, { cache: true, pathPrefix: key });
 	}
 
 	Object.assign(scope, extraGlobals);
