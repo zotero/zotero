@@ -2666,6 +2666,11 @@ describe("Plugin Sandbox", function () {
 				assert.isTrue(evalInScope("typeof _win.MozXULElement.insertFTLIfNeeded === 'function'"));
 			});
 
+			it("should expose document.l10n.addResourceIds and removeResourceIds", function () {
+				assert.isTrue(evalInScope("typeof _win.document.l10n.addResourceIds === 'function'"));
+				assert.isTrue(evalInScope("typeof _win.document.l10n.removeResourceIds === 'function'"));
+			});
+
 			it("matchMedia should return a usable MediaQueryList", function () {
 				let expected = win.matchMedia('(prefers-color-scheme: dark)').matches;
 				let matches = evalInScope("_win.matchMedia('(prefers-color-scheme: dark)').matches");

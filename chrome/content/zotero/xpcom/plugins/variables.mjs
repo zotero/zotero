@@ -665,6 +665,12 @@ const WindowScopeVariables = {
 			});
 		}
 
+		if (doc.l10n) {
+			wrapper.l10n = ScopeVariables.createAllowlistMirrorObject(
+				doc.l10n, { addResourceIds: true, removeResourceIds: true }, addonID
+			);
+		}
+
 		Object.preventExtensions(wrapper);
 		return wrapper;
 	},
