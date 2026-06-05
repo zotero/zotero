@@ -293,6 +293,7 @@ function modify_omni {
 	  "itemPane",
 	  "menu",
 	  "windowResource",
+	  "openWindow",
 	  "reader",
 	  "preferencePane",
 	  "mainWindow"' chrome/toolkit/content/extensions/schemas/manifest.json
