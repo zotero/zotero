@@ -274,7 +274,8 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 		setupPreferences(scope, addon);
 	}
 
-	if (permissions.includes("fileSystem")) {
+	// fileSystemWrite implies fileSystemRead
+	if (permissions.includes("fileSystemRead")) {
 		setupFilePicker(scope, addon.id);
 	}
 
