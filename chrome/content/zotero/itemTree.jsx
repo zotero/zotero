@@ -2208,7 +2208,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	//  Private methods
 	//
 	// //////////////////////////////////////////////////////////////////////////////
-	
+
 	_renderItem(index, selection, oldDiv = null, columns = []) {
 		let row = this.getRow(index);
 		let rowData = this._getRowData(index);
@@ -2295,14 +2295,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 
-	_renderCell(index, data, column, isFirstColumn) {
+	_renderCell(index, data, column, isFirstColumn, parentElement) {
 		const row = this.getRow(index);
 		let cell;
 
 		if (column.renderCell) {
 			try {
 				// Pass document to renderCell so that it can create elements
-				cell = column.renderCell.apply(this, [index, data, column, isFirstColumn, document]);
+				// Pass parentElement to restrict plugin API access
+				cell = column.renderCell.apply(this, [index, data, column, isFirstColumn, document, parentElement]);
 				if (!(cell instanceof window.Element)) {
 					cell = null;
 					throw new Error('renderCell must return an Element');
