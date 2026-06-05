@@ -36,10 +36,13 @@
 	<linkset>
 		<html:link rel="localization" href="browser/menubar.ftl"/>
 		<html:link rel="localization" href="browser/browserSets.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
 	</linkset>
 
 	<script><![CDATA[
 		var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 		{
 			let raw = window.arguments && window.arguments[0];
 			let args = raw && (raw.wrappedJSObject || raw) || {};
@@ -48,8 +51,40 @@
 				Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", window);
 			}
 		}
+		Services.scriptloader.loadSubScript("chrome://zotero/content/pluginWindow.js", this);
 	]]></script>
-	<script src="chrome://zotero/content/pluginWindow.js"/>
+
+	<commandset id="mainCommandSet">
+		<command id="cmd_close" oncommand="window.close();"/>
+
+		<commandset id="editMenuCommands"/>
+
+		<command id="cmd_fullZoomReduce"
+			oncommand="ZoomManager.reduce(document.getElementById('plugin-browser'));"/>
+		<command id="cmd_fullZoomEnlarge"
+			oncommand="ZoomManager.enlarge(document.getElementById('plugin-browser'));"/>
+		<command id="cmd_fullZoomReset"
+			oncommand="ZoomManager.reset(document.getElementById('plugin-browser'));"/>
+	</commandset>
+
+	<keyset id="mainKeyset">
+		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>
+	</keyset>
+
+	<popupset>
+		<menupopup id="pluginContentContextMenu"
+				onpopupshowing="goUpdateGlobalEditMenuItems(true)">
+			<menuitem data-l10n-id="text-action-undo" command="cmd_undo"/>
+			<menuitem data-l10n-id="text-action-redo" command="cmd_redo"/>
+			<menuseparator/>
+			<menuitem data-l10n-id="text-action-cut" command="cmd_cut"/>
+			<menuitem data-l10n-id="text-action-copy" command="cmd_copy"/>
+			<menuitem data-l10n-id="text-action-paste" command="cmd_paste"/>
+			<menuitem data-l10n-id="text-action-delete" command="cmd_delete"/>
+			<menuseparator/>
+			<menuitem data-l10n-id="text-action-select-all" command="cmd_selectAll"/>
+		</menupopup>
+	</popupset>
 
 	<vbox flex="1">
 		<vbox id="titlebar">
@@ -83,6 +118,7 @@
 				 flex="1"
 				 remote="false"
 				 disableglobalhistory="true"
-				 transparent="transparent"/>
+				 transparent="transparent"
+				 context="pluginContentContextMenu"/>
 	</vbox>
 </window>

@@ -29,11 +29,9 @@ window.PluginWindow = {
 	/**
 	 * Initialize the plugin chrome window.
 	 *
-	 * @param {string} [windowId] - Unique window identifier provided by
-	 *     the plugin.  When set, the predefined menubar menus are wired
-	 *     to Zotero.MenuManager with targets of the form
-	 *     "pluginWindow/<windowId>/menubar/{file,edit,view,window,help}".
-	 *     Menus that have registered items are shown automatically.
+	 * @param {string} [windowId] - Unique window identifier provided by the plugin.
+	 *       menubar:      "pluginWindow/<windowId>/menubar/{file,edit,view,window,help}"
+	 *       context menu: "pluginWindow/<windowId>/context"
 	 * @param {string} [pluginID] - Plugin ID owning this window. When set,
 	 *     the window will close automatically on plugin shutdown.
 	 */
@@ -56,9 +54,11 @@ window.PluginWindow = {
 			document.title = browser.contentDocument?.title || "";
 		}, true);
 
-		// Wire predefined menubar popups to MenuManager
-		if (windowId && !notitle) {
-			this._setupMenus(windowId);
+		if (windowId) {
+			if (!notitle) {
+				this._setupMenus(windowId);
+			}
+			this._setupContextMenu(windowId);
 		}
 
 		if (pluginID) {
@@ -109,5 +109,16 @@ window.PluginWindow = {
 				menu.hidden = false;
 			}
 		}
+	},
+
+	_setupContextMenu(windowId) {
+		let popup = document.getElementById("pluginContentContextMenu");
+		if (!popup) return;
+		let target = `pluginWindow/${windowId}/context`;
+
+		popup.addEventListener("popupshowing", (event) => {
+			if (event.target !== event.currentTarget) return;
+			Zotero.MenuManager.updateMenuPopup(popup, target, { event });
+		});
 	},
 };
