@@ -142,6 +142,7 @@ function setupOpenWindow(scope, rootURI, addonID) {
 								&& (flags & Ci.nsIWebProgressListener.STATE_IS_WINDOW)
 								&& Components.isSuccessCode(status)) {
 								WindowScopeVariables.setupContentL10n(browser).then(() => {
+									browser.focus();
 									resolve(browser.contentWindow);
 									if (typeof onLoad === "function") {
 										onLoad(browser.contentWindow);
