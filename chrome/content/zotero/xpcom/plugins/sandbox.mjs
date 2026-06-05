@@ -29,7 +29,7 @@ import {
 	setInterval, clearInterval,
 	requestIdleCallback, cancelIdleCallback
 } from "resource://gre/modules/Timer.sys.mjs";
-import { Utils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { VarCheck } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
@@ -42,11 +42,11 @@ var scopes = new Map();
  * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4233
  */
 function loadScope(addon, globalVars = {}) {
-	let currentPermissions = Utils.getPermissionsString(addon.installPermissions.permissions);
+	let currentPermissions = VarCheck.getPermissionsString(addon.installPermissions.permissions);
 	let existingScope = scopes.get(addon.id);
 	
 	if (existingScope) {
-		let existingPermissions = Utils.getPermissionsString(existingScope?.PERMISSIONS);
+		let existingPermissions = VarCheck.getPermissionsString(existingScope?.PERMISSIONS);
 		if (existingPermissions === currentPermissions) {
 			Zotero.debug(`Reusing existing scope for plugin ${addon.id}`);
 			return;
@@ -56,7 +56,7 @@ function loadScope(addon, globalVars = {}) {
 	}
 
 	let scope;
-	if (Utils.isPrivilegedPermission(addon)) {
+	if (VarCheck.isPrivilegedPermission(addon)) {
 		Zotero.debug(`Loading privileged scope for plugin ${addon.id}`);
 		scope = loadPrivilegedScope(addon, globalVars);
 	}
@@ -221,7 +221,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 
 	scopes.set(addon.id, scope);
 
-	let schema = Utils.getPermissionSchema(permissions);
+	let schema = VarCheck.getPermissionSchema(permissions);
 
 	let extraGlobals = {};
 	for (let key in schema) {
@@ -236,4 +236,6 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 	return scope;
 }
 
-export { loadScope, unloadScope, getScope };
+var PluginSandbox = { loadScope, unloadScope, getScope };
+
+export { PluginSandbox };

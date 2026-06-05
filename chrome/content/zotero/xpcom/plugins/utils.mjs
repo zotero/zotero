@@ -27,7 +27,7 @@
 import { PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 
 
-const Utils = {
+const VarCheck = {
 	isObject(v) {
 		return v !== null && typeof v === "object";
 	},
@@ -42,7 +42,18 @@ const Utils = {
 	isPlainObject(v) {
 		if (v === null || typeof v !== "object") return false;
 		let proto = Object.getPrototypeOf(v);
-		return proto === Object.prototype || proto === null;
+		if (proto === null) return true;
+		return proto === Object.prototype || proto === VarCheck._getObjectPrototype(v);
+	},
+
+	// Cross-compartment safe check for Object.prototype identity
+	_isObjectPrototype(v) {
+		return v === Object.prototype
+			|| (v !== null && typeof v === "object" && v === VarCheck._getObjectPrototype(v));
+	},
+
+	_getObjectPrototype(v) {
+		return Cu.getGlobalForObject(v).Object.prototype;
 	},
 
 	isArrayLike(v) {
@@ -59,7 +70,7 @@ const Utils = {
 	},
 
 	isElementWithinSubtree(targetElem, rootElem) {
-		if (!Utils.isDOMNode(targetElem) || !Utils.isDOMNode(rootElem)) {
+		if (!VarCheck.isDOMNode(targetElem) || !VarCheck.isDOMNode(rootElem)) {
 			return false;
 		}
 		try {
@@ -70,7 +81,7 @@ const Utils = {
 	},
 
 	isDocumentObject(value) {
-		if (!Utils.isObjectLike(value)) return false;
+		if (!VarCheck.isObjectLike(value)) return false;
 		try {
 			// Document nodes have nodeType === 9
 			if (value.nodeType === 9) {
@@ -82,7 +93,7 @@ const Utils = {
 	},
 
 	isWindowObject(value) {
-		if (!Utils.isObjectLike(value)) return false;
+		if (!VarCheck.isObjectLike(value)) return false;
 		try {
 			return value.window === value;
 		}
@@ -209,7 +220,7 @@ const Utils = {
 	getAllKeysIncludingPrototypes(obj, { allowSymbols = false } = {}) {
 		let seen = new Set();
 		let cur = obj;
-		while (cur && cur !== Object.prototype) {
+		while (cur && !VarCheck._isObjectPrototype(cur)) {
 			for (let k of Reflect.ownKeys(cur)) seen.add(k);
 			cur = Object.getPrototypeOf(cur);
 		}
@@ -230,9 +241,9 @@ const Utils = {
 	getPrototypeMethodNames(obj, { allowSymbols = false } = {}) {
 		let seen = new Set();
 		let cur = obj;
-		while (cur && cur !== Object.prototype) {
+		while (cur && !VarCheck._isObjectPrototype(cur)) {
 			let proto = Object.getPrototypeOf(cur);
-			if (!proto || proto === Object.prototype) break;
+			if (!proto || VarCheck._isObjectPrototype(proto)) break;
 
 			for (let k of Reflect.ownKeys(proto)) {
 				if (!allowSymbols && typeof k === "symbol") continue;
@@ -249,9 +260,9 @@ const Utils = {
 	getPrototypeGetterNames(obj, { allowSymbols = false } = {}) {
 		let seen = new Set();
 		let cur = obj;
-		while (cur && cur !== Object.prototype) {
+		while (cur && !VarCheck._isObjectPrototype(cur)) {
 			let proto = Object.getPrototypeOf(cur);
-			if (!proto || proto === Object.prototype) break;
+			if (!proto || VarCheck._isObjectPrototype(proto)) break;
 
 			for (let k of Reflect.ownKeys(proto)) {
 				if (!allowSymbols && typeof k === "symbol") continue;
@@ -272,11 +283,11 @@ const ScopeUtils = {
 	 * Create a function that runs in privileged realm and scopes returns
 	 */
 	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null } = {}) {
-		if (Utils.isSameCompartment(func, scope)) {
+		if (VarCheck.isSameCompartment(func, scope)) {
 			return func;
 		}
 		let holder = Cu.createObjectIn(scope);
-		let thisArgRef = Utils.isObjectLike(thisArg) ? new WeakRef(thisArg) : null;
+		let thisArgRef = VarCheck.isObjectLike(thisArg) ? new WeakRef(thisArg) : null;
 
 		let wrapped = (...args) => {
 			args = args.map(arg => Cu.waiveXrays(arg));
@@ -285,7 +296,7 @@ const ScopeUtils = {
 			}
 			let actualThisArg = thisArgRef ? thisArgRef.deref() : thisArg;
 			if (thisArgRef && !actualThisArg) {
-				Utils.throwPropError("access", "this", "object has been garbage collected");
+				VarCheck.throwPropError("access", "this", "object has been garbage collected");
 			}
 			let res = func.apply(actualThisArg, args);
 			if (typeof returnParser === "function") {
@@ -303,10 +314,10 @@ const ScopeUtils = {
 	 * Following https://github.com/mdn/content/issues/15059#issuecomment-1198017259
 	 */
 	ensurePromiseVarInScope(maybePromise, scope, { mutable = false } = {}) {
-		if (Utils.isSameCompartment(maybePromise, scope)) {
+		if (VarCheck.isSameCompartment(maybePromise, scope)) {
 			return maybePromise;
 		}
-		if (Utils.isPromise(maybePromise)) {
+		if (VarCheck.isPromise(maybePromise)) {
 			return new scope.Promise((resolve, reject) => {
 				maybePromise.then(
 					v => resolve(ScopeUtils._ensureVarInScope(v, scope, { mutable })),
@@ -328,7 +339,7 @@ const ScopeUtils = {
 			return ScopeUtils.ensureCallableInScope(value, null, scope);
 		}
 
-		if (!Utils.isObjectLike(value)) return value;
+		if (!VarCheck.isObjectLike(value)) return value;
 
 		if (Array.isArray(value)) {
 			let arr = Cu.cloneInto([], scope, {
@@ -339,7 +350,7 @@ const ScopeUtils = {
 			return arr;
 		}
 
-		if (Utils.isPlainObject(value)) {
+		if (VarCheck.isPlainObject(value)) {
 			return Cu.cloneInto(value, scope, {
 				wrapReflectors: true,
 				cloneFunctions: true,
@@ -353,13 +364,13 @@ const ScopeUtils = {
 	 * Create a readonly facade for a class instance, exposing methods and getters (own and prototype)
 	 */
 	_ensureInstanceInScope(instance, scope, { mutable = false } = {}) {
-		if (!Utils.isObjectLike(instance)) return instance;
+		if (!VarCheck.isObjectLike(instance)) return instance;
 
 		let facade = Cu.createObjectIn(scope);
 		let instanceRef = new WeakRef(instance);
 
 		// Expose prototype-chain methods as privileged wrapper that calls the real method on the real instance
-		let methodNames = Utils.getPrototypeMethodNames(instance);
+		let methodNames = VarCheck.getPrototypeMethodNames(instance);
 		for (let name of methodNames) {
 			if (name === "constructor") continue;
 
@@ -370,7 +381,7 @@ const ScopeUtils = {
 				(...args) => {
 					let inst = instanceRef.deref();
 					if (!inst) {
-						Utils.throwPropError("access", name, "object has been garbage collected");
+						VarCheck.throwPropError("access", name, "object has been garbage collected");
 					}
 					let res = method.apply(inst, args);
 					return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable });
@@ -381,14 +392,14 @@ const ScopeUtils = {
 		}
 
 		// Expose prototype-chain getters as readonly accessors
-		let getterNames = Utils.getPrototypeGetterNames(instance);
+		let getterNames = VarCheck.getPrototypeGetterNames(instance);
 		for (let name of getterNames) {
 			if (Object.prototype.hasOwnProperty.call(facade, name)) continue;
 			let holder = Cu.createObjectIn(scope);
 			Cu.exportFunction(() => {
 				let inst = instanceRef.deref();
 				if (!inst) {
-					Utils.throwPropError("access", name, "object has been garbage collected");
+					VarCheck.throwPropError("access", name, "object has been garbage collected");
 				}
 				return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, name), scope, { mutable });
 			}, holder, { defineAs: "g" });
@@ -396,11 +407,11 @@ const ScopeUtils = {
 			Cu.exportFunction(
 				(value) => {
 					if (!mutable) {
-						Utils.throwPropError("set", name);
+						VarCheck.throwPropError("set", name);
 					}
 					let inst = instanceRef.deref();
 					if (!inst) {
-						Utils.throwPropError("set", name, "object has been garbage collected");
+						VarCheck.throwPropError("set", name, "object has been garbage collected");
 					}
 					return Reflect.set(inst, name, value);
 				},
@@ -426,7 +437,7 @@ const ScopeUtils = {
 				Cu.exportFunction(() => {
 					let inst = instanceRef.deref();
 					if (!inst) {
-						Utils.throwPropError("access", key, "object has been garbage collected");
+						VarCheck.throwPropError("access", key, "object has been garbage collected");
 					}
 					return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, key), scope, { mutable });
 				}, holder, { defineAs: "g" });
@@ -435,7 +446,7 @@ const ScopeUtils = {
 				Cu.exportFunction(() => {
 					let inst = instanceRef.deref();
 					if (!inst) {
-						Utils.throwPropError("access", key, "object has been garbage collected");
+						VarCheck.throwPropError("access", key, "object has been garbage collected");
 					}
 					return ScopeUtils.ensurePromiseVarInScope(inst[key], scope, { mutable });
 				}, holder, { defineAs: "g" });
@@ -445,7 +456,7 @@ const ScopeUtils = {
 				(value) => {
 					let inst = instanceRef.deref();
 					if (!inst) {
-						Utils.throwPropError("set", key, "object has been garbage collected");
+						VarCheck.throwPropError("set", key, "object has been garbage collected");
 					}
 					return Reflect.set(inst, key, value);
 				},
@@ -466,4 +477,4 @@ const ScopeUtils = {
 	},
 };
 
-export { Utils, ScopeUtils };
+export { VarCheck, ScopeUtils };

@@ -161,6 +161,9 @@ const WINDOW_SCHEMAS = {
 		prompt: true,
 		getComputedStyle: true,
 		matchMedia: true,
+		MozXULElement: {
+			insertFTLIfNeeded: true,
+		}
 		// `document` is dynamically created by WindowScopeVariables.createSafeDocument and thus not included here
 	}
 };

@@ -26,6 +26,7 @@
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.mjs");
+const { ScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
 
 const ZipReader = Components.Constructor(
 	"@mozilla.org/libjar/zip-reader;1",
@@ -2641,7 +2642,7 @@ class Reader {
 	/**
 	 * @param {ReaderEventType} type - Event type
 	 * @param {ReaderEventHandler} handler - Event handler
-	 * @param {string} [pluginID] - Plugin ID
+	 * @param {string} pluginID - Plugin ID
 	 * @returns {void}
 	 *
 	 * @example
@@ -2680,7 +2681,8 @@ class Reader {
 	 * }, 'my-plugin@my-namespace.com');
 	 * ```
 	 */
-	registerEventListener(type, handler, pluginID = undefined) {
+	registerEventListener(type, handler, pluginID) {
+		handler = ScopeVariables.fromScope(handler, pluginID);
 		this._registeredListeners.push({ pluginID, type, handler });
 	}
 
@@ -2690,7 +2692,9 @@ class Reader {
 	 * @returns {void}
 	 */
 	unregisterEventListener(type, handler) {
-		this._registeredListeners = this._registeredListeners.filter(x => !(x.type === type && x.handler === handler));
+		this._registeredListeners = this._registeredListeners.filter(
+			x => !(x.type === type && ScopeVariables.getOriginal(x.handler) === handler)
+		);
 	}
 
 	_unregisterEventListenerByPluginID(pluginID) {
