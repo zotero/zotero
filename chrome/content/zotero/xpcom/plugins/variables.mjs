@@ -556,6 +556,28 @@ const WindowScopeVariables = {
 			});
 		}
 
+		// Expose read-only size/position properties
+		for (let prop of [
+			"innerWidth",
+			"innerHeight",
+			"outerWidth",
+			"outerHeight",
+			"scrollX",
+			"scrollY",
+			"screenX",
+			"screenY",
+			"devicePixelRatio",
+			"screen",
+		]) {
+			let holder = Cu.createObjectIn(scope);
+			Cu.exportFunction(() => win[prop], holder, { defineAs: "g" });
+			Object.defineProperty(wrapper, prop, {
+				get: holder.g,
+				enumerable: true,
+				configurable: false,
+			});
+		}
+
 		Object.defineProperties(wrapper, {
 			document: {
 				get() {
