@@ -30,7 +30,7 @@ import { ScopeVariables, WindowScopeVariables } from "chrome://zotero/content/xp
 import { PLUGIN_DB_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
-import { getPluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
+import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
@@ -253,7 +253,7 @@ function setupPreferences(scope) {
 	let prefPrefixes = scope.PREF_PERMISSIONS;
 
 	// Plugin's own namespace
-	let ownPrefix = `extensions.${getPluginUUID(pluginID)}.`;
+	let ownPrefix = `extensions.${PluginUUID.getByID(pluginID)}.`;
 	let allPrefixes = [ownPrefix, ...prefPrefixes];
 
 	function checkPrefPermission(pref) {
@@ -446,7 +446,7 @@ function setupFile(scope) {
 	Cu.exportFunction(
 		() => {
 			let zoteroTmp = Zotero.getTempDirectory().path;
-			let pluginTmp = PathUtils.join(zoteroTmp, "plugin-" + getPluginUUID(pluginID));
+			let pluginTmp = PathUtils.join(zoteroTmp, "plugin-" + PluginUUID.getByID(pluginID));
 			Zotero.File.createDirectoryIfMissing(pluginTmp);
 			PluginFileAccess.addSessionGrant(pluginID, pluginTmp, "write");
 			return pluginTmp;
@@ -508,7 +508,7 @@ function setupFile(scope) {
 function setupPluginDB(scope) {
 	let pluginID = scope.PLUGIN_ID;
 	let pluginDir = PathUtils.join(
-		Zotero.DataDirectory.dir, "plugin-db", getPluginUUID(pluginID)
+		Zotero.DataDirectory.dir, "plugin-db", PluginUUID.getByID(pluginID)
 	);
 
 	let PluginDBConnection = function (dbName) {
