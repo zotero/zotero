@@ -281,7 +281,9 @@ Zotero.HTTP = new function () {
 				|| options.noMock
 				|| url.startsWith('resource://')
 				|| url.startsWith('chrome://')) {
-			var xmlhttp = new XMLHttpRequest({ mozAnon });
+			var xmlhttp = options.createXMLHttpRequest
+				? options.createXMLHttpRequest({ mozAnon })
+				: new XMLHttpRequest({ mozAnon });
 		}
 		else {
 			var xmlhttp = new this.mock;
@@ -1421,7 +1423,8 @@ Zotero.HTTP = new function () {
 				url,
 				{
 					responseType: 'document',
-					headers
+					headers,
+					createXMLHttpRequest: options.createXMLHttpRequest,
 				}
 			)
 			.then((xhr) => {
