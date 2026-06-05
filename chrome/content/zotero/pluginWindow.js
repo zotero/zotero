@@ -40,6 +40,8 @@ window.PluginWindow = {
 	init(windowId, pluginID) {
 		let browser = document.getElementById("plugin-browser");
 
+		browser.docShell.windowDraggingAllowed = true;
+
 		let rawArgs = window.arguments && window.arguments[0];
 		let args = rawArgs && (rawArgs.wrappedJSObject || rawArgs) || {};
 		let notitle = !!args.notitle;
