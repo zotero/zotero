@@ -3330,9 +3330,8 @@ Zotero.Item.prototype.relinkAttachmentFile = async function (path, skipItemUpdat
 			await Zotero.Attachments.createDirectoryForItem(this);
 		}
 		
-		let newFile;
 		try {
-			newFile = Zotero.File.copyToUnique(path, newPath);
+			newPath = Zotero.File.copyToUnique(path, newPath);
 		}
 		catch (e) {
 			// Restore backup file if copying failed
@@ -3341,7 +3340,6 @@ Zotero.Item.prototype.relinkAttachmentFile = async function (path, skipItemUpdat
 			}
 			throw e;
 		}
-		newPath = newFile.path;
 		
 		// Delete backup file
 		if (backupCreated) {
