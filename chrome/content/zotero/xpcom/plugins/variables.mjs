@@ -42,16 +42,16 @@ const ScopeVariables = {
 	 * - Other objects: createAllowlistMirrorObject to allow access to safe properties and methods
 	 * - Primitives: returned as-is
 	 * @param {any} value - The value to wrap
-	 * @param {string} addonID - The plugin ID for scope restrictions
+	 * @param {string} pluginID - The plugin ID for scope restrictions
 	 * @param {Object} [options] - Options for wrapping
 	 * @param {Element} [options.rootNode] - Optional root node to restrict DOM access.
 	 * @returns {any} The wrapped value safe for use in the plugin scope
 	 */
-	toScope(value, addonID, { rootNode = null, _seen = null } = {}) {
-		if (!addonID) {
+	toScope(value, pluginID, { rootNode = null, _seen = null } = {}) {
+		if (!pluginID) {
 			return value;
 		}
-		let scope = PluginSandbox.getScope(addonID);
+		let scope = PluginSandbox.getScope(pluginID);
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return value;
 		}
@@ -73,20 +73,20 @@ const ScopeVariables = {
 		if (value instanceof Event) {
 			return WindowScopeVariables.createSafeEvent(
 				value,
-				addonID,
+				pluginID,
 				{ rootNode: rootNode || null }
 			);
 		}
 		if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
 			return WindowScopeVariables.createSafeWindowObject(
 				value,
-				addonID,
+				pluginID,
 				{ rootNode: rootNode || null }
 			);
 		}
 
 		if (VarCheck.isDataObject(value)) {
-			return DataScopeVariables.createSafeDataObject(value, addonID);
+			return DataScopeVariables.createSafeDataObject(value, pluginID);
 		}
 
 		if (!_seen) _seen = new Map();
@@ -99,7 +99,7 @@ const ScopeVariables = {
 				cloneFunctions: true,
 			});
 			_seen.set(value, arr);
-			arr.push(...value.map(v => ScopeVariables.toScope(v, addonID, { rootNode, _seen })));
+			arr.push(...value.map(v => ScopeVariables.toScope(v, pluginID, { rootNode, _seen })));
 			return arr;
 		}
 
@@ -114,7 +114,7 @@ const ScopeVariables = {
 					let hasCached = false;
 					Cu.exportFunction(() => {
 						if (!hasCached) {
-							cached = ScopeVariables.toScope(value[key], addonID, { rootNode, _seen });
+							cached = ScopeVariables.toScope(value[key], pluginID, { rootNode, _seen });
 							hasCached = true;
 						}
 						return cached;
@@ -138,7 +138,7 @@ const ScopeVariables = {
 		return ScopeVariables.createAllowlistMirrorObject(
 			value,
 			true,
-			addonID,
+			pluginID,
 			{ frozen: false }
 		);
 	},
@@ -157,18 +157,18 @@ const ScopeVariables = {
 	 *   2. Non-function properties are copied as-is
 	 *
 	 * @param {any} value - The value from plugin scope to wrap
-	 * @param {string} addonID - The plugin ID for scope restrictions
+	 * @param {string} pluginID - The plugin ID for scope restrictions
 	 * @param {Object} [options] - Options for wrapping
 	 * @param {Element|Function} [options.rootNode=null] - Optional root node to restrict DOM access.
 	 *   Can be an Element or a function that takes the arguments and returns an Element.
 	 * @param {boolean} [options.unwrapReturn=false] - Whether to unwrap DOM nodes in return value
 	 * @returns {any} - Wrapped value safe for use in the host scope
 	 */
-	fromScope(value, addonID, { rootNode = null, unwrapReturn = false, trace = null, _seen = null } = {}) {
-		if (!addonID) {
+	fromScope(value, pluginID, { rootNode = null, unwrapReturn = false, trace = null, _seen = null } = {}) {
+		if (!pluginID) {
 			return value;
 		}
-		let scope = PluginSandbox.getScope(addonID);
+		let scope = PluginSandbox.getScope(pluginID);
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return value;
 		}
@@ -192,11 +192,11 @@ const ScopeVariables = {
 				let actualRootNode = typeof rootNode === "function" ? rootNode(...args) : rootNode;
 
 				// Wrap all arguments before passing to plugin function
-				let wrappedArgs = args.map(arg => ScopeVariables.toScope(arg, addonID, { rootNode: actualRootNode }));
+				let wrappedArgs = args.map(arg => ScopeVariables.toScope(arg, pluginID, { rootNode: actualRootNode }));
 
 				let result = Reflect.apply(value, this, wrappedArgs);
 
-				PluginTrace.end(t, addonID, "hook", hookPath);
+				PluginTrace.end(t, pluginID, "hook", hookPath);
 
 				if (unwrapReturn) {
 					return VarCheck.getOriginalOrSelf(result);
@@ -220,7 +220,7 @@ const ScopeVariables = {
 
 		// Recursively unwrap array elements
 		if (Array.isArray(value)) {
-			let arr = Array.from(value).map(v => ScopeVariables.fromScope(v, addonID, { rootNode, unwrapReturn, trace, _seen }));
+			let arr = Array.from(value).map(v => ScopeVariables.fromScope(v, pluginID, { rootNode, unwrapReturn, trace, _seen }));
 			_seen.set(value, arr);
 			return arr;
 		}
@@ -230,7 +230,7 @@ const ScopeVariables = {
 			let wrapped = {};
 			for (let key of Object.keys(value)) {
 				let val = value[key];
-				let wrappedVal = ScopeVariables.fromScope(val, addonID, { rootNode, unwrapReturn, trace, _seen });
+				let wrappedVal = ScopeVariables.fromScope(val, pluginID, { rootNode, unwrapReturn, trace, _seen });
 				if (wrappedVal !== val) {
 					hasFunction = true;
 				}
@@ -260,15 +260,15 @@ const ScopeVariables = {
 	 * Wrap a host function using a custom arg parser attached on the
 	 * function itself via `setCustomParser`.
 	 */
-	createCustomParserCallable(func, thisArg, addonID, { trace } = {}) {
-		let scope = PluginSandbox.getScope(addonID);
+	createCustomParserCallable(func, thisArg, pluginID, { trace } = {}) {
+		let scope = PluginSandbox.getScope(pluginID);
 		let parser = func[CUSTOM_PARSER_KEY];
 		if (typeof parser !== "function") {
 			return ScopeUtils.ensureCallableInScope(func, thisArg, scope, { trace });
 		}
 		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
 			argParser: (args) => {
-				parser({ addonID, thisArg, args });
+				parser({ pluginID, thisArg, args });
 				return args;
 			},
 			trace,
@@ -281,10 +281,10 @@ const ScopeVariables = {
 	 * are wrapped using `fromScope` before passing to the actual function.
 	 * This allows the host to safely consume plugin-provided functions.
 	 */
-	createFromScopeCallable(func, thisArg, addonID, { trace } = {}) {
-		let scope = PluginSandbox.getScope(addonID);
+	createFromScopeCallable(func, thisArg, pluginID, { trace } = {}) {
+		let scope = PluginSandbox.getScope(pluginID);
 		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
-			argParser: args => args.map(arg => ScopeVariables.fromScope(arg, addonID, { trace })),
+			argParser: args => args.map(arg => ScopeVariables.fromScope(arg, pluginID, { trace })),
 			trace,
 		});
 	},
@@ -308,8 +308,8 @@ const ScopeVariables = {
 	 *   Use this for constructor-created objects that the caller owns, to prevent premature GC.
 	 * @returns {Object} The mirrored object in scope
 	 */
-	createAllowlistMirrorObject(target, schema, addonID, { frozen = true, mutable = true, cache = false, strong = false, pathPrefix = "" } = {}) {
-		let scope = PluginSandbox.getScope(addonID);
+	createAllowlistMirrorObject(target, schema, pluginID, { frozen = true, mutable = true, cache = false, strong = false, pathPrefix = "" } = {}) {
+		let scope = PluginSandbox.getScope(pluginID);
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return target;
 		}
@@ -360,7 +360,7 @@ const ScopeVariables = {
 				if (!VarCheck.isAllowed(schemaNode, prop)) continue;
 
 				let propPath = prefix ? `${prefix}.${prop}` : prop;
-				let trace = prefix ? { pluginID: addonID, path: propPath } : null;
+				let trace = prefix ? { pluginID: pluginID, path: propPath } : null;
 
 				let holder = Cu.createObjectIn(scope);
 				Cu.exportFunction(
@@ -388,14 +388,14 @@ const ScopeVariables = {
 										});
 									case "FromScopeCallable":
 										return ScopeUtils.ensureCallableInScope(value, actualObj, scope, {
-											argParser: args => args.map(arg => ScopeVariables.fromScope(arg, addonID, { trace })),
+											argParser: args => args.map(arg => ScopeVariables.fromScope(arg, pluginID, { trace })),
 											instanceSchema: handler[SchemaKey.SCHEMA] || null,
 											trace,
 										});
 									case "WindowScopeCallable":
-										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID, { trace });
+										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, pluginID, { trace });
 									case "CustomParserCallable":
-										return ScopeVariables.createCustomParserCallable(value, actualObj, addonID, { trace });
+										return ScopeVariables.createCustomParserCallable(value, actualObj, pluginID, { trace });
 									default:
 										VarCheck.throwPropError("access", prop, "unknown schema handler");
 								}
@@ -404,11 +404,11 @@ const ScopeVariables = {
 							if (typeof schemaNode === "object" && typeof schemaNode[prop] === "string") {
 								switch (schemaNode[prop]) {
 									case "WindowScopeCallable":
-										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID, { trace });
+										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, pluginID, { trace });
 									case "FromScopeCallable":
-										return ScopeVariables.createFromScopeCallable(value, actualObj, addonID, { trace });
+										return ScopeVariables.createFromScopeCallable(value, actualObj, pluginID, { trace });
 									case "CustomParserCallable":
-										return ScopeVariables.createCustomParserCallable(value, actualObj, addonID, { trace });
+										return ScopeVariables.createCustomParserCallable(value, actualObj, pluginID, { trace });
 									case "Constructor":
 										return ScopeUtils.ensureConstructableInScope(value, scope, { mutable: true, trace });
 									default:
@@ -428,7 +428,7 @@ const ScopeVariables = {
 							// Intercept Window/DOM objects to prevent
 							// privilege escalation through nested properties
 							if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
-								return WindowScopeVariables.createSafeWindowObject(value, addonID);
+								return WindowScopeVariables.createSafeWindowObject(value, pluginID);
 							}
 
 							let nextSchemaNode = VarCheck.nextSchema(schemaNode, prop);
@@ -441,7 +441,7 @@ const ScopeVariables = {
 
 						// Leaf value, trace the get
 						if (trace) {
-							PluginTrace.record(addonID, "get", propPath);
+							PluginTrace.record(pluginID, "get", propPath);
 						}
 						return value;
 					},
@@ -459,7 +459,7 @@ const ScopeVariables = {
 							VarCheck.throwPropError("set", prop, "object has been garbage collected");
 						}
 						if (trace) {
-							PluginTrace.record(addonID, "set", propPath);
+							PluginTrace.record(pluginID, "set", propPath);
 						}
 						return Reflect.set(actualObj, prop, value);
 					},
@@ -501,8 +501,8 @@ const WindowScopeVariables = {
 	 * This is to allow sandbox code to call DOM methods with wrapped DOM nodes and receive wrapped DOM nodes,
 	 * while the actual function runs in the privileged host scope with access to real DOM nodes.
 	 */
-	createSafeWindowCallable(func, thisArg, addonID, { rootNode, argValidator, trace } = {}) {
-		let scope = PluginSandbox.getScope(addonID);
+	createSafeWindowCallable(func, thisArg, pluginID, { rootNode, argValidator, trace } = {}) {
+		let scope = PluginSandbox.getScope(pluginID);
 		return ScopeUtils.ensureCallableInScope(
 			func,
 			thisArg,
@@ -512,9 +512,9 @@ const WindowScopeVariables = {
 					if (typeof argValidator === "function" && !argValidator(args)) {
 						return null;
 					}
-					return WindowScopeVariables.unwrapDOMArguments(args, addonID, { rootNode });
+					return WindowScopeVariables.unwrapDOMArguments(args, pluginID, { rootNode });
 				},
-				returnParser: value => WindowScopeVariables.createSafeWindowObjectOrList(value, addonID, { rootNode }),
+				returnParser: value => WindowScopeVariables.createSafeWindowObjectOrList(value, pluginID, { rootNode }),
 				// unwrapDOMArguments already produces args suitable for native methods:
 				// DOM nodes unwrapped to their real compartment, callbacks as chrome
 				// functions. Re-scoping would double-wrap callbacks, breaking event listeners.
@@ -527,9 +527,9 @@ const WindowScopeVariables = {
 	/**
 	 * Wrap a DOM node or Window object within the given root subtree
 	 */
-	createSafeWindowObject(node, addonID, { rootNode } = {}) {
+	createSafeWindowObject(node, pluginID, { rootNode } = {}) {
 		if (VarCheck.isWindowObject(node)) {
-			return WindowScopeVariables.createSafeWindow(node, addonID, { rootNode });
+			return WindowScopeVariables.createSafeWindow(node, pluginID, { rootNode });
 		}
 
 		if (!VarCheck.isDOMNode(node)) {
@@ -539,7 +539,7 @@ const WindowScopeVariables = {
 		let root = rootNode?.deref ? rootNode.deref() : rootNode;
 
 		if (VarCheck.isDocumentObject(node)) {
-			return WindowScopeVariables.createSafeDocument(node, addonID, { rootNode });
+			return WindowScopeVariables.createSafeDocument(node, pluginID, { rootNode });
 		}
 
 		if (root === null) {
@@ -555,23 +555,23 @@ const WindowScopeVariables = {
 			return null;
 		}
 
-		return WindowScopeVariables.createSafeHTMLElement(node, addonID, { rootNode });
+		return WindowScopeVariables.createSafeHTMLElement(node, pluginID, { rootNode });
 	},
 
 	/**
 	 * Wrap an array-like list of DOM nodes or Window objects within the given root subtree
 	 */
-	createSafeWindowObjectOrList(nodes, addonID, { rootNode } = {}) {
+	createSafeWindowObjectOrList(nodes, pluginID, { rootNode } = {}) {
 		// Check for Window/DOM objects before the array-like check,
 		// because Window has a numeric `length` property (frame count)
 		// that causes isArrayLike to return true, bypassing the wrapper.
 		if (VarCheck.isWindowObject(nodes) || VarCheck.isDOMNode(nodes)) {
-			return WindowScopeVariables.createSafeWindowObject(nodes, addonID, { rootNode });
+			return WindowScopeVariables.createSafeWindowObject(nodes, pluginID, { rootNode });
 		}
 
 		if (nodes instanceof NodeList) {
 			let items = Array.from(nodes)
-				.map(item => WindowScopeVariables.createSafeWindowObject(item, addonID, { rootNode }))
+				.map(item => WindowScopeVariables.createSafeWindowObject(item, pluginID, { rootNode }))
 				.filter(item => item !== null);
 
 			let nodeList = new NodeList();
@@ -579,7 +579,7 @@ const WindowScopeVariables = {
 				nodeList[i] = items[i];
 			}
 			nodeList.length = items.length;
-			return ScopeVariables.createAllowlistMirrorObject(nodeList, true, addonID, { frozen: false });
+			return ScopeVariables.createAllowlistMirrorObject(nodeList, true, pluginID, { frozen: false });
 		}
 
 		if (VarCheck.isArrayLike(nodes)) {
@@ -588,18 +588,18 @@ const WindowScopeVariables = {
 				return nodes;
 			}
 			// Since it's a return from DOM method, we can assume it's safe to do the filtering
-			return items.map(item => WindowScopeVariables.createSafeWindowObject(item, addonID, { rootNode })).filter(item => item !== null);
+			return items.map(item => WindowScopeVariables.createSafeWindowObject(item, pluginID, { rootNode })).filter(item => item !== null);
 		}
 		
-		return WindowScopeVariables.createSafeWindowObject(nodes, addonID, { rootNode });
+		return WindowScopeVariables.createSafeWindowObject(nodes, pluginID, { rootNode });
 	},
 
 	/**
 	 * Wrap a Window object that only exposes allowed properties and methods based on the schema
 	 * If the `rootNode` is not provided, the wrapper will be created without access to any DOM.
 	 */
-	createSafeWindow(win, addonID, { rootNode } = {}) {
-		let scope = PluginSandbox.getScope(addonID);
+	createSafeWindow(win, pluginID, { rootNode } = {}) {
+		let scope = PluginSandbox.getScope(pluginID);
 
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return win;
@@ -614,7 +614,7 @@ const WindowScopeVariables = {
 		else {
 			schema = VarCheck.getWindowSchema(permissions);
 		}
-		let wrapper = ScopeVariables.createAllowlistMirrorObject(win, schema, addonID, { cache: false, pathPrefix: "window" });
+		let wrapper = ScopeVariables.createAllowlistMirrorObject(win, schema, pluginID, { cache: false, pathPrefix: "window" });
 
 		// addEventListener / removeEventListener need the callback-wrapping
 		// logic from createSafeWindowCallable so that event handlers receive
@@ -624,7 +624,7 @@ const WindowScopeVariables = {
 		for (let method of ["addEventListener", "removeEventListener"]) {
 			Object.defineProperty(wrapper, method, {
 				value: WindowScopeVariables.createSafeWindowCallable(
-					win[method], win, addonID, { rootNode }
+					win[method], win, pluginID, { rootNode }
 				),
 				enumerable: true,
 				configurable: false,
@@ -658,7 +658,7 @@ const WindowScopeVariables = {
 		Object.defineProperties(wrapper, {
 			document: {
 				get() {
-					return WindowScopeVariables.createSafeDocument(win.document, addonID, { rootNode });
+					return WindowScopeVariables.createSafeDocument(win.document, pluginID, { rootNode });
 				},
 				enumerable: true,
 				configurable: false,
@@ -671,8 +671,8 @@ const WindowScopeVariables = {
 	 * Wrap a Document object that only exposes allowed properties and methods based on the schema
 	 * If the `rootNode` is not provided, the wrapper will be created without access to any DOM.
 	 */
-	createSafeDocument(doc, addonID, { rootNode } = {}) {
-		let scope = PluginSandbox.getScope(addonID);
+	createSafeDocument(doc, pluginID, { rootNode } = {}) {
+		let scope = PluginSandbox.getScope(pluginID);
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return doc;
 		}
@@ -706,7 +706,7 @@ const WindowScopeVariables = {
 							VarCheck.throwPropError("access", "document", "object has been garbage collected");
 						}
 						let newElement = actualDoc[method](...args);
-						return WindowScopeVariables.createSafeHTMLElement(newElement, addonID, { rootNode });
+						return WindowScopeVariables.createSafeHTMLElement(newElement, pluginID, { rootNode });
 					},
 					wrapper,
 					{ defineAs: method }
@@ -715,7 +715,7 @@ const WindowScopeVariables = {
 		});
 
 		// Add createFrame for chrome documents with a registered protocol
-		let rootURI = PluginProtocol.getBaseURI(addonID);
+		let rootURI = PluginProtocol.getBaseURI(pluginID);
 		if (typeof doc.createXULElement === "function" && rootURI) {
 			Cu.exportFunction(
 				(url, onLoad) => {
@@ -786,7 +786,7 @@ const WindowScopeVariables = {
 					});
 					observer.observe(actualDoc.documentElement, { childList: true, subtree: true });
 
-					return WindowScopeVariables.createSafeHTMLElement(browser, addonID, { rootNode });
+					return WindowScopeVariables.createSafeHTMLElement(browser, pluginID, { rootNode });
 				},
 				wrapper,
 				{ defineAs: "createFrame" }
@@ -801,7 +801,7 @@ const WindowScopeVariables = {
 						VarCheck.throwPropError("access", "document", "object has been garbage collected");
 					}
 					let fragment = actualDoc.createDocumentFragment();
-					return WindowScopeVariables.createSafeHTMLElement(fragment, addonID, { rootNode });
+					return WindowScopeVariables.createSafeHTMLElement(fragment, pluginID, { rootNode });
 				},
 				wrapper,
 				{ defineAs: "createDocumentFragment" }
@@ -815,7 +815,7 @@ const WindowScopeVariables = {
 		for (let method of ["addEventListener", "removeEventListener"]) {
 			Object.defineProperty(wrapper, method, {
 				value: WindowScopeVariables.createSafeWindowCallable(
-					doc[method], doc, addonID, { rootNode }
+					doc[method], doc, pluginID, { rootNode }
 				),
 				enumerable: true,
 				configurable: false,
@@ -841,7 +841,7 @@ const WindowScopeVariables = {
 						VarCheck.throwPropError("access", "document", "object has been garbage collected");
 					}
 					let result = actualDoc[method](...args);
-					return WindowScopeVariables.createSafeWindowObjectOrList(result, addonID, { rootNode });
+					return WindowScopeVariables.createSafeWindowObjectOrList(result, pluginID, { rootNode });
 				},
 				wrapper,
 				{ defineAs: method }
@@ -850,7 +850,7 @@ const WindowScopeVariables = {
 
 		if (doc.l10n) {
 			wrapper.l10n = ScopeVariables.createAllowlistMirrorObject(
-				doc.l10n, { addResourceIds: true, removeResourceIds: true }, addonID
+				doc.l10n, { addResourceIds: true, removeResourceIds: true }, pluginID
 			);
 		}
 
@@ -926,8 +926,8 @@ const WindowScopeVariables = {
 		return l10n.translateRoots();
 	},
 
-	createSafeEvent(event, addonID, { rootNode } = {}) {
-		let scope = PluginSandbox.getScope(addonID);
+	createSafeEvent(event, pluginID, { rootNode } = {}) {
+		let scope = PluginSandbox.getScope(pluginID);
 
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return event;
@@ -952,13 +952,13 @@ const WindowScopeVariables = {
 			}
 		}
 
-		let wrappedEvent = ScopeVariables.createAllowlistMirrorObject(event, schema, addonID, { frozen: false });
+		let wrappedEvent = ScopeVariables.createAllowlistMirrorObject(event, schema, pluginID, { frozen: false });
 
 		// Wrap DOM-referencing properties
 		for (let prop of DOMProps) {
 			if (event[prop]) {
 				Object.defineProperty(wrappedEvent, prop, {
-					value: WindowScopeVariables.createSafeWindowObject(event[prop], addonID, { rootNode }),
+					value: WindowScopeVariables.createSafeWindowObject(event[prop], pluginID, { rootNode }),
 					enumerable: true,
 					configurable: false,
 					writable: false,
@@ -969,7 +969,7 @@ const WindowScopeVariables = {
 		for (let method of DOMPropMethods) {
 			if (typeof event[method] === "function") {
 				Object.defineProperty(wrappedEvent, method, {
-					value: WindowScopeVariables.createSafeWindowCallable(event[method], event, addonID, { rootNode }),
+					value: WindowScopeVariables.createSafeWindowCallable(event[method], event, pluginID, { rootNode }),
 					enumerable: true,
 					configurable: false,
 					writable: false,
@@ -980,8 +980,8 @@ const WindowScopeVariables = {
 		return wrappedEvent;
 	},
 
-	createSafeHTMLElement(elem, addonID, { rootNode } = {}) {
-		let scope = PluginSandbox.getScope(addonID);
+	createSafeHTMLElement(elem, pluginID, { rootNode } = {}) {
+		let scope = PluginSandbox.getScope(pluginID);
 
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return elem;
@@ -1023,13 +1023,13 @@ const WindowScopeVariables = {
 				() => {
 					if (prop === "ownerDocument") {
 						let actual = getActual();
-						return WindowScopeVariables.createSafeDocument(actual.ownerDocument, addonID, { rootNode });
+						return WindowScopeVariables.createSafeDocument(actual.ownerDocument, pluginID, { rootNode });
 					}
 					if (prop === "ownerGlobal" || prop === "defaultView") {
 						let actual = getActual();
 						let win = Reflect.get(actual, prop);
 						if (!win) return null;
-						return WindowScopeVariables.createSafeWindow(win, addonID, { rootNode });
+						return WindowScopeVariables.createSafeWindow(win, pluginID, { rootNode });
 					}
 					if (blockedWindowProps.has(prop)) {
 						VarCheck.throwPropError("access", prop);
@@ -1048,7 +1048,7 @@ const WindowScopeVariables = {
 						// Block setAttribute/setAttributeNS from setting on* event handlers
 						if (prop === "setAttribute" || prop === "setAttributeNS") {
 							let nameArgIndex = prop === "setAttributeNS" ? 1 : 0;
-							return WindowScopeVariables.createSafeWindowCallable(value, actual, addonID, {
+							return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
 								rootNode,
 								argValidator(args) {
 									let attrName = String(args[nameArgIndex] || "");
@@ -1060,10 +1060,10 @@ const WindowScopeVariables = {
 								},
 							});
 						}
-						return WindowScopeVariables.createSafeWindowCallable(value, actual, addonID, { rootNode });
+						return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, { rootNode });
 					}
 
-					let wrapped = WindowScopeVariables.createSafeWindowObjectOrList(value, addonID, { rootNode });
+					let wrapped = WindowScopeVariables.createSafeWindowObjectOrList(value, pluginID, { rootNode });
 					if (wrapped !== value) {
 						return wrapped;
 					}
@@ -1141,7 +1141,7 @@ const WindowScopeVariables = {
 								fragment.appendChild(doc.importNode(child, true));
 							}
 						}
-						WindowScopeVariables.sanitizeFragment(fragment, addonID);
+						WindowScopeVariables.sanitizeFragment(fragment, pluginID);
 						let result;
 						if (useXML) {
 							// Directly replace children to preserve namespace information.
@@ -1157,7 +1157,7 @@ const WindowScopeVariables = {
 							value = tmp.innerHTML;
 							result = Reflect.set(actual, prop, value);
 						}
-						WindowScopeVariables.activateWhenConnected(actual, addonID);
+						WindowScopeVariables.activateWhenConnected(actual, pluginID);
 						return result;
 					}
 					return Reflect.set(actual, prop, VarCheck.getOriginalOrSelf(value));
@@ -1199,7 +1199,7 @@ const WindowScopeVariables = {
 	 *   - This function detects that `fn_{sandbox}` has a wrapped reference stored, and returns `fn_{host}^{wrapped}` to the host scope
 	 *   - Thus, the correct function reference is passed to `removeEventListener`
 	 */
-	unwrapDOMArguments(args, addonID, { rootNode } = {}) {
+	unwrapDOMArguments(args, pluginID, { rootNode } = {}) {
 		return args.map((arg) => {
 			if (VarCheck.hasOriginalRef(arg)) {
 				return VarCheck.getOriginalRef(arg);
@@ -1214,18 +1214,18 @@ const WindowScopeVariables = {
 					// Wrap DOM nodes and Events in callback arguments
 					let wrappedArgs = callbackArgs.map((cbArg) => {
 						if (VarCheck.isDOMNode(cbArg)) {
-							return WindowScopeVariables.createSafeWindowObject(cbArg, addonID, { rootNode });
+							return WindowScopeVariables.createSafeWindowObject(cbArg, pluginID, { rootNode });
 						}
 						// Wrap Event objects and their related properties
 						if (cbArg && typeof cbArg === "object" && typeof cbArg.type === "string") {
 							// It's likely an Event - create a safe version
-							return WindowScopeVariables.createSafeEvent(cbArg, addonID, { rootNode });
+							return WindowScopeVariables.createSafeEvent(cbArg, pluginID, { rootNode });
 						}
 						return cbArg;
 					});
 					// Call the original function with wrapped arguments.
 					// Use Reflect.apply to avoid cross-compartment issues with the args array.
-					let scope = PluginSandbox.getScope(addonID);
+					let scope = PluginSandbox.getScope(pluginID);
 					let scopeArgs = Cu.cloneInto([], scope);
 					for (let a of wrappedArgs) scopeArgs.push(a);
 					let result = arg.apply(this, scopeArgs);
@@ -1388,8 +1388,8 @@ const DataScopeVariables = {
 	 * Without dataRead permission, returns undefined.
 	 * Without dataWrite permission, write methods are blocked via DATA_OBJECT_READ_SCHEMA.
 	 */
-	createSafeDataObject(value, addonID) {
-		let scope = PluginSandbox.getScope(addonID);
+	createSafeDataObject(value, pluginID) {
+		let scope = PluginSandbox.getScope(pluginID);
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return value;
 		}
