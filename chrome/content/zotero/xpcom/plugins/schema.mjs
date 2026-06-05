@@ -60,11 +60,13 @@ const PERMISSION_SCHEMAS = {
 				randomString: true,
 				Internal: {
 					copyTextToClipboard: true,
+					copyToClipboard: true,
 					md5: true,
 					md5Async: true,
 					sha1: true,
 					decodeUTF8: true,
 					byteLength: true,
+					extractExtraFields: true,
 				}
 			},
 			Date: {
