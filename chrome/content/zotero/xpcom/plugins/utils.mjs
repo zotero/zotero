@@ -346,11 +346,15 @@ const ScopeUtils = {
 			if (typeof argParser === "function") {
 				args = argParser(args);
 				// argParser returning null signals the call should be blocked
-				if (args === null) return;
+				if (args === null) return undefined;
 			}
 			let actualThisArg = thisArgRef ? thisArgRef.deref() : thisArg;
 			if (thisArgRef && !actualThisArg) {
 				VarCheck.throwPropError("access", "this", "object has been garbage collected");
+			}
+			// Make sure the args are in the same scope if the thisArg is not in the current compartment
+			if (actualThisArg && !VarCheck.isSameCompartment(actualThisArg, {})) {
+				args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(actualThisArg), { mutable });
 			}
 			let res = func.apply(actualThisArg, args);
 			if (typeof returnParser === "function") {
@@ -436,6 +440,10 @@ const ScopeUtils = {
 					let inst = instanceRef.deref();
 					if (!inst) {
 						VarCheck.throwPropError("access", name, "object has been garbage collected");
+					}
+					// Make sure the args are in the same scope if the thisArg is not in the current compartment
+					if (!VarCheck.isSameCompartment(inst, {})) {
+						args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(inst), { mutable });
 					}
 					let res = method.apply(inst, args);
 					return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable });
