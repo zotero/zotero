@@ -2675,6 +2675,60 @@ describe("Plugin Sandbox", function () {
 				assert.equal(media, '(prefers-color-scheme: dark)');
 			});
 
+			it("should receive events via addEventListener on safe window", function () {
+				evalInScope(`
+					var _winEvtType = null;
+					function _winHandler(e) { _winEvtType = e.type; }
+					_win.addEventListener("test-sandbox-evt", _winHandler);
+				`);
+				win.dispatchEvent(new CustomEvent("test-sandbox-evt"));
+				assert.equal(evalInScope("_winEvtType"), "test-sandbox-evt",
+					"handler should have received the dispatched event");
+			});
+
+			it("should pass a usable Event to addEventListener callback on safe window", function () {
+				evalInScope(`
+					var _winEvt = {};
+					_win.addEventListener("test-sandbox-evt2", function (e) {
+						_winEvt.type = e.type;
+						_winEvt.bubbles = e.bubbles;
+						_winEvt.cancelable = e.cancelable;
+						_winEvt.defaultPrevented = e.defaultPrevented;
+						_winEvt.hasPreventDefault = typeof e.preventDefault === "function";
+						_winEvt.hasStopPropagation = typeof e.stopPropagation === "function";
+						_winEvt.detail = e.detail;
+						e.preventDefault();
+						_winEvt.defaultPreventedAfter = e.defaultPrevented;
+					});
+				`);
+				win.dispatchEvent(new CustomEvent("test-sandbox-evt2", {
+					bubbles: true, cancelable: true, detail: 42,
+				}));
+				assert.equal(evalInScope("_winEvt.type"), "test-sandbox-evt2", "type");
+				assert.isTrue(evalInScope("_winEvt.bubbles"), "bubbles");
+				assert.isTrue(evalInScope("_winEvt.cancelable"), "cancelable");
+				assert.isFalse(evalInScope("_winEvt.defaultPrevented"), "defaultPrevented before");
+				assert.isTrue(evalInScope("_winEvt.hasPreventDefault"), "preventDefault is function");
+				assert.isTrue(evalInScope("_winEvt.hasStopPropagation"), "stopPropagation is function");
+				assert.equal(evalInScope("_winEvt.detail"), 42, "detail from CustomEvent");
+				assert.isTrue(evalInScope("_winEvt.defaultPreventedAfter"), "defaultPrevented after preventDefault()");
+			});
+
+			it("should remove listener via removeEventListener on safe window", function () {
+				evalInScope(`
+					var _winEvtCount = 0;
+					function _winCountHandler(e) { _winEvtCount++; }
+					_win.addEventListener("test-sandbox-rm", _winCountHandler);
+				`);
+				win.dispatchEvent(new CustomEvent("test-sandbox-rm"));
+				assert.equal(evalInScope("_winEvtCount"), 1, "handler should fire once");
+
+				evalInScope("_win.removeEventListener('test-sandbox-rm', _winCountHandler)");
+				win.dispatchEvent(new CustomEvent("test-sandbox-rm"));
+				assert.equal(evalInScope("_winEvtCount"), 1,
+					"handler should not fire after removal");
+			});
+
 			it("should not expose dangerous window globals", function () {
 				assert.isTrue(evalInScope("typeof _win.eval === 'undefined'"),
 					"eval should not be exposed");
@@ -3801,6 +3855,111 @@ describe("Plugin Sandbox", function () {
 				// Verify non-on* attributes still work
 				evalInScope('_btn.setAttribute("class", "test-class")');
 				assert.equal(button.getAttribute("class"), "test-class");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("should receive events via addEventListener on wrapped elements", function () {
+			loadTestScope(["default"]);
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			let button = document.createElement("button");
+			container.appendChild(button);
+
+			try {
+				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
+					button, ADDON_ID, { rootNode: new WeakRef(container) }
+				);
+				scope._btn = wrappedButton;
+				evalInScope(`
+					var _elemEvtType = null;
+					var _elemEvtTarget = null;
+					_btn.addEventListener("click", function (e) {
+						_elemEvtType = e.type;
+						_elemEvtTarget = e.target;
+					});
+				`);
+				button.click();
+				assert.equal(evalInScope("_elemEvtType"), "click",
+					"handler should receive the click event");
+				assert.isTrue(evalInScope("_elemEvtTarget !== null"),
+					"event target should be wrapped, not null");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("should pass a usable Event to addEventListener callback on wrapped elements", function () {
+			loadTestScope(["default"]);
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			let button = document.createElement("button");
+			container.appendChild(button);
+
+			try {
+				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
+					button, ADDON_ID, { rootNode: new WeakRef(container) }
+				);
+				scope._btn = wrappedButton;
+				evalInScope(`
+					var _elemEvt = {};
+					_btn.addEventListener("click", function (e) {
+						_elemEvt.type = e.type;
+						_elemEvt.bubbles = e.bubbles;
+						_elemEvt.cancelable = e.cancelable;
+						_elemEvt.hasPreventDefault = typeof e.preventDefault === "function";
+						_elemEvt.hasStopPropagation = typeof e.stopPropagation === "function";
+						_elemEvt.targetTagName = e.target ? e.target.tagName : null;
+						_elemEvt.currentTargetTagName = e.currentTarget ? e.currentTarget.tagName : null;
+					});
+				`);
+				button.click();
+				assert.equal(evalInScope("_elemEvt.type"), "click", "type");
+				assert.isTrue(evalInScope("_elemEvt.bubbles"), "bubbles");
+				assert.isTrue(evalInScope("_elemEvt.hasPreventDefault"), "preventDefault is function");
+				assert.isTrue(evalInScope("_elemEvt.hasStopPropagation"), "stopPropagation is function");
+				assert.equal(
+					evalInScope("_elemEvt.targetTagName").toUpperCase(), "BUTTON",
+					"target should be the button"
+				);
+				assert.equal(
+					evalInScope("_elemEvt.currentTargetTagName").toUpperCase(), "BUTTON",
+					"currentTarget should be the button"
+				);
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("should remove listener via removeEventListener on wrapped elements", function () {
+			loadTestScope(["default"]);
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			let button = document.createElement("button");
+			container.appendChild(button);
+
+			try {
+				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
+					button, ADDON_ID, { rootNode: new WeakRef(container) }
+				);
+				scope._btn = wrappedButton;
+				evalInScope(`
+					var _elemClickCount = 0;
+					function _elemClickHandler(e) { _elemClickCount++; }
+					_btn.addEventListener("click", _elemClickHandler);
+				`);
+				button.click();
+				assert.equal(evalInScope("_elemClickCount"), 1,
+					"handler should fire once");
+
+				evalInScope("_btn.removeEventListener('click', _elemClickHandler)");
+				button.click();
+				assert.equal(evalInScope("_elemClickCount"), 1,
+					"handler should not fire after removal");
 			}
 			finally {
 				container.remove();
