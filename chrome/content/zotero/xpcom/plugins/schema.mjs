@@ -50,6 +50,15 @@ const PERMISSION_SCHEMAS = {
 			// Window access (also available via onMainWindowLoad hook)
 			getMainWindow: "WindowScopeCallable",
 			getMainWindows: "WindowScopeCallable",
+			// Utilities
+			Utilities: {
+				cleanDOI: true,
+				sentenceCase: true,
+				capitalizeName: true,
+			},
+			Date: {
+				strToISO: true,
+			},
 		},
 	},
 	data: {
@@ -113,6 +122,23 @@ const PERMISSION_SCHEMAS = {
 				removeFromLibrary: true,
 				setColor: true,
 			},
+			ItemFields: {
+				getAll: true,
+				getID: true,
+				isValidForType: true,
+				getName: true,
+				getLocalizedString: true,
+			},
+			ItemTypes: {
+				getID: true,
+				getLocalizedString: true,
+			},
+			CreatorTypes: {
+				getLocalizedString: true,
+			},
+			Fulltext: {
+				getPages: true,
+			},
 			Notifier: {
 				registerObserver: "FromScopeCallable",
 				unregisterObserver: true,
@@ -153,6 +179,7 @@ const PERMISSION_SCHEMAS = {
 		Zotero: {
 			HTTP: {
 				request: "FromScopeCallable",
+				processDocuments: "FromScopeCallable",
 			},
 		},
 	},
@@ -165,6 +192,13 @@ const PERMISSION_SCHEMAS = {
 				set: true,
 				clear: true,
 				resetBranch: true,
+			},
+		},
+	},
+	translator: {
+		Zotero: {
+			Translators: {
+				getAll: true,
 			},
 		},
 	},
@@ -239,6 +273,8 @@ const MAIN_WINDOW_SCHEMAS = {
 			// Navigation
 			selectItem: true,
 			selectItems: true,
+			// Virtual collections
+			setVirtual: true,
 			// UI actions
 			toggleItemPane: true,
 			toggleTagSelector: true,
