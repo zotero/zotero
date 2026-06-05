@@ -210,6 +210,49 @@ describe("Zotero.UndoHistory", function () {
 		});
 	});
 
+	describe("apply failure", function () {
+		it("should clear both stacks if applying an undo entry fails", async function () {
+			let collection = await createDataObject('collection', { name: 'Original' });
+
+			collection.name = 'Modified';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+
+			// Force the save during undo to fail
+			let stub = sinon.stub(collection, 'save').rejects(new Error('save failed'));
+			try {
+				await Zotero.UndoHistory.undo();
+			}
+			finally {
+				stub.restore();
+			}
+
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+			assert.isFalse(Zotero.UndoHistory.canRedo());
+		});
+
+		it("should clear both stacks if applying a redo entry fails", async function () {
+			let collection = await createDataObject('collection', { name: 'Original' });
+
+			collection.name = 'Modified';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			await Zotero.UndoHistory.undo();
+			assert.isTrue(Zotero.UndoHistory.canRedo());
+
+			// Force the save during redo to fail
+			let stub = sinon.stub(collection, 'save').rejects(new Error('save failed'));
+			try {
+				await Zotero.UndoHistory.redo();
+			}
+			finally {
+				stub.restore();
+			}
+
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+			assert.isFalse(Zotero.UndoHistory.canRedo());
+		});
+	});
+
 	describe("canUndo/canRedo", function () {
 		it("should return false when stacks are empty", function () {
 			assert.isFalse(Zotero.UndoHistory.canUndo());
