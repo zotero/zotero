@@ -115,7 +115,7 @@ const xpcomFilesLocal = [
 	'undoHistory',
 	'fileHandlers',
 	'osKeyStore',
-	'plugins',
+	'plugins/plugins',
 	'pluginAPI/menuManager',
 	'pluginAPI/itemPaneManager',
 	'pluginAPI/itemTreeManager',
