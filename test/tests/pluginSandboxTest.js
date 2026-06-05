@@ -446,6 +446,27 @@ describe("Plugin Sandbox", function () {
 			await parent.eraseTx();
 		});
 
+		it("should construct a new Zotero.Item", async function () {
+			evalInScope(`
+				var _item = new Zotero.Item('book');
+				_item.setField('title', 'Constructor Test Book');
+			`);
+			let itemType = evalInScope("_item.itemType");
+			let title = evalInScope("_item.getField('title')");
+			assert.equal(itemType, 'book');
+			assert.equal(title, 'Constructor Test Book');
+
+			// Save and verify
+			let id = await evalInScope("_item.saveTx()");
+			assert.isNumber(id);
+			let realItem = Zotero.Items.get(id);
+			assert.ok(realItem);
+			assert.equal(realItem.getField('title'), 'Constructor Test Book');
+			assert.equal(realItem.itemType, 'book');
+
+			await realItem.eraseTx();
+		});
+
 		it("should not expose unlisted methods", function () {
 			assert.isTrue(evalInScope("typeof Zotero.Items.erase === 'undefined'"));
 			assert.isTrue(evalInScope("typeof Zotero.Items.emptyTrash === 'undefined'"));
@@ -705,6 +726,23 @@ describe("Plugin Sandbox", function () {
 			await item.eraseTx();
 			await collection.eraseTx();
 		});
+
+		it("should construct a new Zotero.Collection", async function () {
+			evalInScope(`
+				var _col = new Zotero.Collection();
+				_col.name = 'Constructor Test Collection';
+			`);
+			let name = evalInScope("_col.name");
+			assert.equal(name, 'Constructor Test Collection');
+
+			let id = await evalInScope("_col.saveTx()");
+			assert.isNumber(id);
+			let realCol = Zotero.Collections.get(id);
+			assert.ok(realCol);
+			assert.equal(realCol.name, 'Constructor Test Collection');
+
+			await realCol.eraseTx();
+		});
 	});
 
 	describe("Zotero.Groups", function () {
@@ -867,6 +905,46 @@ describe("Plugin Sandbox", function () {
 			assert.isFalse(item.hasTag('sandbox-remove-tag'));
 
 			await item.eraseTx();
+		});
+	});
+
+	describe("Zotero.Search", function () {
+		beforeEach(function () {
+			loadTestScope(["default", "data"]);
+		});
+
+		it("should construct a new Zotero.Search", async function () {
+			evalInScope(`
+				var _search = new Zotero.Search();
+				_search.name = 'Constructor Test Search';
+				_search.addCondition('title', 'contains', 'test');
+			`);
+			let name = evalInScope("_search.name");
+			assert.equal(name, 'Constructor Test Search');
+
+			let id = await evalInScope("_search.saveTx()");
+			assert.isNumber(id);
+			let realSearch = Zotero.Searches.get(id);
+			assert.ok(realSearch);
+			assert.equal(realSearch.name, 'Constructor Test Search');
+
+			await realSearch.eraseTx();
+		});
+	});
+
+	describe("Zotero.Duplicates", function () {
+		beforeEach(function () {
+			loadTestScope(["default", "data"]);
+		});
+
+		it("should construct a new Zotero.Duplicates", async function () {
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			evalInScope(`
+				var _dup = new Zotero.Duplicates(${userLibraryID});
+				var _dupLibraryID = _dup.libraryID;
+			`);
+			let libraryID = evalInScope("_dupLibraryID");
+			assert.equal(libraryID, userLibraryID);
 		});
 	});
 
@@ -1701,6 +1779,130 @@ describe("Plugin Sandbox", function () {
 			assert.isArray(translators);
 		});
 
+		it("should construct a new Zotero.Translate.Import", function () {
+			evalInScope(`
+				var _ti = new Zotero.Translate.Import();
+				var _tiType = _ti.type;
+			`);
+			let type = evalInScope("_tiType");
+			assert.equal(type, 'import');
+		});
+
+		it("should construct a new Zotero.Translate.Search", function () {
+			evalInScope(`
+				var _ts = new Zotero.Translate.Search();
+				var _tsType = _ts.type;
+			`);
+			let type = evalInScope("_tsType");
+			assert.equal(type, 'search');
+		});
+
+		it("should construct a new Zotero.Translate.Web", function () {
+			evalInScope(`
+				var _tw = new Zotero.Translate.Web();
+				var _twType = _tw.type;
+			`);
+			let type = evalInScope("_twType");
+			assert.equal(type, 'web');
+		});
+
+		it("should import an item via Translate.Import facade", async function () {
+			let translator = buildDummyTranslator("import",
+				'function doImport() {'
+				+ '  var item = new Zotero.Item("book");'
+				+ '  item.title = "Sandbox Import Test";'
+				+ '  item.complete();'
+				+ '}');
+			Cu.exportFunction(() => translator, scope, { defineAs: "_getTestTranslator" });
+
+			let count = await evalInScope(`
+				var _ti2 = new Zotero.Translate.Import();
+				_ti2.setString("");
+				_ti2.setTranslator(_getTestTranslator());
+				_ti2.translate().then(items => items.length);
+			`);
+			assert.equal(count, 1);
+		});
+
+		it("should call itemDone handler during Translate.Import", async function () {
+			let translator = buildDummyTranslator("import",
+				'function doImport() {'
+				+ '  var item = new Zotero.Item("journalArticle");'
+				+ '  item.title = "Handler Test Article";'
+				+ '  item.complete();'
+				+ '}');
+			Cu.exportFunction(() => translator, scope, { defineAs: "_getHandlerTranslator" });
+
+			let handlerCount = await evalInScope(`
+				var _handlerCount = 0;
+				var _ti3 = new Zotero.Translate.Import();
+				_ti3.setString("");
+				_ti3.setTranslator(_getHandlerTranslator());
+				_ti3.setHandler('itemDone', function() { _handlerCount++; });
+				_ti3.translate().then(function() { return _handlerCount; });
+			`);
+			assert.equal(handlerCount, 1);
+		});
+
+		it("should set search and retrieve translators on Translate.Search", async function () {
+			let len = await evalInScope(`
+				var _ts2 = new Zotero.Translate.Search();
+				_ts2.setSearch({ itemType: 'journalArticle', DOI: '10.1234/test' });
+				_ts2.getTranslators().then(function(t) {
+					return t.length;
+				});
+			`);
+			assert.isNumber(len);
+			if (len > 0) {
+				let label = await evalInScope(`
+					_ts2.getTranslators().then(function(t) {
+						return t[0].label;
+					});
+				`);
+				assert.isString(label);
+			}
+		});
+
+		it("should set identifier and retrieve translators on Translate.Search", async function () {
+			let len = await evalInScope(`
+				var _ts3 = new Zotero.Translate.Search();
+				_ts3.setIdentifier({ DOI: '10.1234/test' });
+				_ts3.getTranslators().then(function(t) {
+					return t.length;
+				});
+			`);
+			assert.isNumber(len);
+			if (len > 0) {
+				let label = await evalInScope(`
+					_ts3.getTranslators().then(function(t) {
+						return t[0].label;
+					});
+				`);
+				assert.isString(label);
+			}
+		});
+
+		it("should clear handlers so they do not fire", async function () {
+			let translator = buildDummyTranslator("import",
+				'function doImport() {'
+				+ '  var item = new Zotero.Item("book");'
+				+ '  item.title = "Clear Handler Test";'
+				+ '  item.complete();'
+				+ '}');
+			Cu.exportFunction(() => translator, scope, { defineAs: "_getClearTranslator" });
+
+			let handlerCount = await evalInScope(`
+				var _clearCount = 0;
+				var _ti4 = new Zotero.Translate.Import();
+				_ti4.setString("");
+				_ti4.setTranslator(_getClearTranslator());
+				_ti4.setHandler('itemDone', function() { _clearCount++; });
+				_ti4.clearHandlers('itemDone');
+				_ti4.translate().then(function() { return _clearCount; });
+			`);
+			assert.equal(handlerCount, 0);
+		});
+
 		it("should not expose Translators without translator permission", function () {
 			PluginSandbox.unloadScope(ADDON_ID);
 			loadTestScope(["default"]);
@@ -2456,9 +2658,11 @@ describe("Plugin Sandbox", function () {
 				assert.isTrue(evalInScope("typeof _win.matchMedia === 'function'"));
 			});
 
-			it("should expose MozXULElement", function () {
-				// MozXULElement is a class (function), so the mirror wraps it as a callable.
-				assert.isTrue(evalInScope("typeof _win.MozXULElement === 'function'"));
+			it("should expose MozXULElement.insertFTLIfNeeded", function () {
+				// MozXULElement is a class with static methods; the schema exposes
+				// sub-properties, so it is wrapped as a namespace object.
+				assert.isTrue(evalInScope("typeof _win.MozXULElement === 'object'"));
+				assert.isTrue(evalInScope("typeof _win.MozXULElement.insertFTLIfNeeded === 'function'"));
 			});
 
 			it("matchMedia should return a usable MediaQueryList", function () {
@@ -2876,6 +3080,14 @@ describe("Plugin Sandbox", function () {
 				"Fulltext should not be exposed without data permission");
 			assert.isTrue(evalInScope("typeof Zotero.Notifier === 'undefined'"),
 				"Notifier should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Item === 'undefined'"),
+				"Item should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Collection === 'undefined'"),
+				"Collection should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Search === 'undefined'"),
+				"Search should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Duplicates === 'undefined'"),
+				"Duplicates should not be exposed without data permission");
 		});
 
 		it("should not expose fileSystem APIs with only default permission", function () {
@@ -2900,6 +3112,8 @@ describe("Plugin Sandbox", function () {
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof Zotero.Translators === 'undefined'"),
 				"Translators should not be exposed without translator permission");
+			assert.isTrue(evalInScope("typeof Zotero.Translate === 'undefined'"),
+				"Translate should not be exposed without translator permission");
 		});
 
 		it("should not expose UI APIs with only default permission", function () {

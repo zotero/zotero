@@ -303,6 +303,33 @@ const VarCheck = {
 const ScopeUtils = {
 
 	/**
+	 * Create a constructable function that runs in privileged realm and scopes returns.
+	 * The returned function can be called with `new` from the sandbox scope.
+	 * The constructed instance is wrapped via ensurePromiseVarInScope.
+	 */
+	ensureConstructableInScope(Constructor, scope, { mutable = false, returnParser = null } = {}) {
+		if (VarCheck.isSameCompartment(Constructor, scope)) {
+			return Constructor;
+		}
+		let holder = Cu.createObjectIn(scope);
+
+		// Must use a regular function (not arrow) so it has [[Construct]] and
+		// can be called with `new` from the sandbox.  When the function returns
+		// an object, `new` uses that object instead of the auto-created `this`.
+		let wrapped = function (...args) {
+			args = args.map(arg => Cu.waiveXrays(arg));
+			let instance = Reflect.construct(Constructor, args);
+			if (typeof returnParser === "function") {
+				instance = returnParser(instance);
+			}
+			return ScopeUtils.ensurePromiseVarInScope(instance, scope, { mutable });
+		};
+
+		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
+		return holder.f;
+	},
+
+	/**
 	 * Create a function that runs in privileged realm and scopes returns
 	 */
 	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null } = {}) {
