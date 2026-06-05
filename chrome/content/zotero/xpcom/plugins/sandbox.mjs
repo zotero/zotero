@@ -32,7 +32,7 @@ import {
 import { VarCheck, ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
-import { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
+import { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupPluginDB } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
@@ -277,6 +277,10 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 	// fileSystemWrite implies fileSystemRead
 	if (permissions.includes("fileSystemRead")) {
 		setupFilePicker(scope, addon.id);
+	}
+
+	if (permissions.includes("database")) {
+		setupPluginDB(scope, addon);
 	}
 
 	return scope;
