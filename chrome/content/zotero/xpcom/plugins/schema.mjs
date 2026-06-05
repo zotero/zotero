@@ -237,7 +237,7 @@ const PERMISSION_SCHEMAS = {
 	reader: {
 		Zotero: {
 			Reader: {
-				registerEventListener: "FromScopeCallable",
+				registerEventListener: true,
 				unregisterEventListener: true,
 			},
 		},

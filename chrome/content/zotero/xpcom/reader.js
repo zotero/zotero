@@ -203,10 +203,6 @@ class ReaderInstance {
 		}
 		this._customEventHandler = (event) => {
 			let data = event.detail.wrappedJSObject;
-			let append = data.append;
-			data.append = (...args) => {
-				append(...Components.utils.cloneInto(args, this._iframeWindow, { wrapReflectors: true, cloneFunctions: true }));
-			};
 			data.reader = this;
 			Zotero.Reader._dispatchEvent(data);
 		};
@@ -2702,9 +2698,26 @@ class Reader {
 	}
 
 	_dispatchEvent(event) {
+		if (event.type === 'renderTextSelectionPopup') {
+			event.elem = event.doc.querySelector('.selection-popup');
+		}
+		let wrappedEventCache = new Map();
 		for (let listener of this._registeredListeners) {
 			if (listener.type === event.type) {
-				listener.handler(event);
+				let wrappedEvent = wrappedEventCache.get(listener.pluginID);
+				if (!wrappedEvent) {
+					let dispatchedEvent = Object.assign({}, event);
+					dispatchedEvent.append = (...args) => {
+						args = ScopeVariables.fromScope(args, listener.pluginID);
+						event.append(...Components.utils.cloneInto(args, event.reader._iframeWindow, { wrapReflectors: true, cloneFunctions: true }));
+					};
+
+					wrappedEvent = ScopeVariables.toScope(dispatchedEvent, listener.pluginID,
+						// If the `elem` is provided, allow access to its subtree
+						{ rootNode: dispatchedEvent.elem || null });
+					wrappedEventCache.set(listener.pluginID, wrappedEvent);
+				}
+				listener.handler(wrappedEvent);
 			}
 		}
 	}
@@ -2782,7 +2795,7 @@ class Reader {
 	 */
 	unregisterEventListener(type, handler) {
 		this._registeredListeners = this._registeredListeners.filter(
-			x => !(x.type === type && ScopeVariables.getOriginal(x.handler) === handler)
+			x => !(x.type === type && x.handler === handler)
 		);
 	}
 

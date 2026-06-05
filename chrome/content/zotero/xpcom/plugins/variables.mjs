@@ -29,7 +29,6 @@ import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
 const ScopeVariables = {
-	MAX_WRAP_DEPTH: 10,
 
 	/**
 	 * Wrap a single value with a safe object based on its type.
@@ -46,7 +45,7 @@ const ScopeVariables = {
 	 * @param {Element} [options.rootNode] - Optional root node to restrict DOM access.
 	 * @returns {any} The wrapped value safe for use in the plugin scope
 	 */
-	toScope(value, addonID, { rootNode = null, _seen = null, _depth = 0 } = {}) {
+	toScope(value, addonID, { rootNode = null, _seen = null } = {}) {
 		if (!addonID) {
 			return value;
 		}
@@ -57,6 +56,11 @@ const ScopeVariables = {
 
 		// Early return for primitives
 		if (!VarCheck.isObjectLike(value)) {
+			return value;
+		}
+
+		// Skip already-wrapped scope objects
+		if (typeof value[ORIGINAL_REF_KEY] === "function") {
 			return value;
 		}
 
@@ -79,12 +83,8 @@ const ScopeVariables = {
 			);
 		}
 
-		// Prevent infinite recursion -- cross-compartment Xray wrappers may not
-		// have stable identity, so a Set alone is not reliable.  Use both.
-		if (_depth > ScopeVariables.MAX_WRAP_DEPTH) return value;
-		if (!_seen) _seen = new Set();
-		if (_seen.has(value)) return value;
-		_seen.add(value);
+		if (!_seen) _seen = new Map();
+		if (_seen.has(value)) return _seen.get(value);
 
 		// Handle arrays by cloning into scope and recursively wrapping elements
 		if (Array.isArray(value)) {
@@ -92,18 +92,40 @@ const ScopeVariables = {
 				wrapReflectors: true,
 				cloneFunctions: true,
 			});
-			arr.push(...value.map(v => ScopeVariables.toScope(v, addonID, { rootNode, _seen, _depth: _depth + 1 })));
+			_seen.set(value, arr);
+			arr.push(...value.map(v => ScopeVariables.toScope(v, addonID, { rootNode, _seen })));
 			return arr;
 		}
 
-		// Recursively wrap plain objects to allow access to nested properties
+		// Wrap plain objects with lazy getters to avoid deep recursion
 		if (VarCheck.isPlainObject(value)) {
 			let wrapped = Cu.createObjectIn(scope);
+			_seen.set(value, wrapped);
 			for (let key in value) {
 				if (Object.prototype.hasOwnProperty.call(value, key)) {
-					wrapped[key] = ScopeVariables.toScope(value[key], addonID, { rootNode, _seen, _depth: _depth + 1 });
+					let holder = Cu.createObjectIn(scope);
+					let cached;
+					let hasCached = false;
+					Cu.exportFunction(() => {
+						if (!hasCached) {
+							cached = ScopeVariables.toScope(value[key], addonID, { rootNode, _seen });
+							hasCached = true;
+						}
+						return cached;
+					}, holder, { defineAs: "g" });
+					Object.defineProperty(wrapped, key, {
+						get: holder.g,
+						enumerable: true,
+						configurable: false,
+					});
 				}
 			}
+			Object.defineProperty(wrapped, ORIGINAL_REF_KEY, {
+				value: () => value,
+				enumerable: false,
+				configurable: false,
+				writable: false,
+			});
 			return wrapped;
 		}
 
@@ -136,7 +158,7 @@ const ScopeVariables = {
 	 * @param {boolean} [options.unwrapReturn=false] - Whether to unwrap DOM nodes in return value
 	 * @returns {any} - Wrapped value safe for use in the host scope
 	 */
-	fromScope(value, addonID, { rootNode = null, unwrapReturn = false, _seen = null, _depth = 0 } = {}) {
+	fromScope(value, addonID, { rootNode = null, unwrapReturn = false, _seen = null } = {}) {
 		if (!addonID) {
 			return value;
 		}
@@ -182,16 +204,14 @@ const ScopeVariables = {
 			return wrapper;
 		}
 
-		// Prevent infinite recursion -- cross-compartment Xray wrappers may not
-		// have stable identity, so a Set alone is not reliable.  Use both.
-		if (_depth > ScopeVariables.MAX_WRAP_DEPTH) return value;
-		if (!_seen) _seen = new Set();
-		if (_seen.has(value)) return value;
-		_seen.add(value);
+		if (!_seen) _seen = new Map();
+		if (_seen.has(value)) return _seen.get(value);
 
 		// Recursively unwrap array elements
 		if (Array.isArray(value)) {
-			return Array.from(value).map(v => ScopeVariables.fromScope(v, addonID, { rootNode, unwrapReturn, _seen, _depth: _depth + 1 }));
+			let arr = Array.from(value).map(v => ScopeVariables.fromScope(v, addonID, { rootNode, unwrapReturn, _seen }));
+			_seen.set(value, arr);
+			return arr;
 		}
 
 		if (VarCheck.isPlainObject(value)) {
@@ -199,13 +219,14 @@ const ScopeVariables = {
 			let wrapped = {};
 			for (let key of Object.keys(value)) {
 				let val = value[key];
-				let wrappedVal = ScopeVariables.fromScope(val, addonID, { rootNode, unwrapReturn, _seen, _depth: _depth + 1 });
+				let wrappedVal = ScopeVariables.fromScope(val, addonID, { rootNode, unwrapReturn, _seen });
 				if (wrappedVal !== val) {
 					hasFunction = true;
 				}
 				wrapped[key] = wrappedVal;
 			}
 			if (hasFunction) {
+				_seen.set(value, wrapped);
 				return wrapped;
 			}
 		}
@@ -340,6 +361,12 @@ const ScopeVariables = {
 						}
 
 						if (VarCheck.isObjectLike(value)) {
+							// Intercept Window/DOM objects to prevent
+							// privilege escalation through nested properties
+							if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
+								return WindowScopeVariables.createSafeWindowObject(value, addonID);
+							}
+
 							let nextSchemaNode = VarCheck.nextSchema(schemaNode, prop);
 
 							if (nextSchemaNode === true || (nextSchemaNode && typeof nextSchemaNode === "object")) {
@@ -696,6 +723,31 @@ const WindowScopeVariables = {
 				writable: false,
 			});
 		}
+
+		// DOM query methods -- results are filtered to the rootNode subtree
+		[
+			"getElementById",
+			"getElementsByClassName",
+			"getElementsByName",
+			"getElementsByTagName",
+			"getElementsByTagNameNS",
+			"querySelector",
+			"querySelectorAll",
+		].forEach((method) => {
+			if (typeof doc[method] !== "function") return;
+			Cu.exportFunction(
+				(...args) => {
+					let actualDoc = docRef.deref();
+					if (!actualDoc) {
+						VarCheck.throwPropError("access", "document", "object has been garbage collected");
+					}
+					let result = actualDoc[method](...args);
+					return WindowScopeVariables.createSafeWindowObjectOrList(result, addonID, { rootNode });
+				},
+				wrapper,
+				{ defineAs: method }
+			);
+		});
 
 		if (doc.l10n) {
 			wrapper.l10n = ScopeVariables.createAllowlistMirrorObject(
