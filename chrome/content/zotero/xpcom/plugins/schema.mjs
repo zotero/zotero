@@ -141,7 +141,19 @@ const PERMISSION_SCHEMAS = {
 			},
 			// Network
 			HTTP: {
-				request: true,
+				request: "FromScopeCallable",
+			},
+			Notifier: {
+				registerObserver: "FromScopeCallable",
+				unregisterObserver: true,
+			},
+			Prefs: {
+				registerObserver: "FromScopeCallable",
+				unregisterObserver: true,
+				get: true,
+				set: true,
+				clear: true,
+				resetBranch: true,
 			},
 			// UI APIs
 			ItemTreeManager: true,
