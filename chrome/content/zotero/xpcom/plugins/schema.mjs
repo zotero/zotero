@@ -210,16 +210,9 @@ const PERMISSION_SCHEMAS = {
 		// using the sandbox's XMLHttpRequest for principal-based access control.
 	},
 	preferences: {
-		Zotero: {
-			Prefs: {
-				registerObserver: "FromScopeCallable",
-				unregisterObserver: true,
-				get: true,
-				set: true,
-				clear: true,
-				resetBranch: true,
-			},
-		},
+		// Zotero.Prefs is set up directly by setupPreferences() in globals.mjs.
+		// By default, plugin can access the prefixed `extensions.<GUID>` branch.
+		// For other branches, access is gated by the pref_permissions declared in the manifest.
 	},
 	translator: {
 		Zotero: {
