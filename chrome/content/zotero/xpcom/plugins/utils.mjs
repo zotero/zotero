@@ -322,7 +322,9 @@ const ScopeUtils = {
 			if (typeof returnParser === "function") {
 				instance = returnParser(instance);
 			}
-			return ScopeUtils.ensurePromiseVarInScope(instance, scope, { mutable });
+			// Use strong reference for constructor-created objects since the
+			// plugin owns the instance and it must not be GC'd prematurely
+			return ScopeUtils.ensurePromiseVarInScope(instance, scope, { mutable, strong: true });
 		};
 
 		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
@@ -365,19 +367,19 @@ const ScopeUtils = {
 	 * Ensure a potentially promise variable is safe to expose in the sandbox scope
 	 * Following https://github.com/mdn/content/issues/15059#issuecomment-1198017259
 	 */
-	ensurePromiseVarInScope(maybePromise, scope, { mutable = false } = {}) {
+	ensurePromiseVarInScope(maybePromise, scope, { mutable = false, strong = false } = {}) {
 		if (VarCheck.isSameCompartment(maybePromise, scope)) {
 			return maybePromise;
 		}
 		if (VarCheck.isPromise(maybePromise)) {
 			return new scope.Promise((resolve, reject) => {
 				maybePromise.then(
-					v => resolve(ScopeUtils._ensureVarInScope(v, scope, { mutable })),
+					v => resolve(ScopeUtils._ensureVarInScope(v, scope, { mutable, strong })),
 					e => reject(e)
 				);
 			});
 		}
-		return ScopeUtils._ensureVarInScope(maybePromise, scope, { mutable });
+		return ScopeUtils._ensureVarInScope(maybePromise, scope, { mutable, strong });
 	},
 
 	/**
@@ -386,7 +388,7 @@ const ScopeUtils = {
 	 * - Plain objects/arrays are cloned into the scope
 	 * - Non-plain objects (class instances) are wrapped in a readonly facade with methods and getters (own and prototype) preserved
 	 */
-	_ensureVarInScope(value, scope, { mutable = false } = {}) {
+	_ensureVarInScope(value, scope, { mutable = false, strong = false } = {}) {
 		if (typeof value === "function") {
 			return ScopeUtils.ensureCallableInScope(value, null, scope);
 		}
@@ -409,17 +411,17 @@ const ScopeUtils = {
 			});
 		}
 
-		return ScopeUtils._ensureInstanceInScope(value, scope, { mutable });
+		return ScopeUtils._ensureInstanceInScope(value, scope, { mutable, strong });
 	},
 
 	/**
 	 * Create a readonly facade for a class instance, exposing methods and getters (own and prototype)
 	 */
-	_ensureInstanceInScope(instance, scope, { mutable = false } = {}) {
+	_ensureInstanceInScope(instance, scope, { mutable = false, strong = false } = {}) {
 		if (!VarCheck.isObjectLike(instance)) return instance;
 
 		let facade = Cu.createObjectIn(scope);
-		let instanceRef = new WeakRef(instance);
+		let instanceRef = strong ? { deref: () => instance } : new WeakRef(instance);
 
 		// Expose prototype-chain methods as privileged wrapper that calls the real method on the real instance
 		let methodNames = VarCheck.getPrototypeMethodNames(instance);
