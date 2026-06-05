@@ -4429,8 +4429,10 @@ describe("Plugin Sandbox", function () {
 
 					let contentWin = await evalInScope(`
 						new Promise((resolve) => {
-							let frame = _safeDoc.createFrame("test.html", function(win) {
-								resolve(win);
+							let frame = _safeDoc.createFrame("test.html", {
+								onLoad: function(win) {
+									resolve(win);
+								},
 							});
 							_container.appendChild(frame);
 						});
@@ -4448,7 +4450,7 @@ describe("Plugin Sandbox", function () {
 					setupSafeScope();
 					let threw = false;
 					try {
-						evalInScope('_safeDoc.createFrame("https://evil.com/page.html", function() {})');
+						evalInScope('_safeDoc.createFrame("https://evil.com/page.html", { onLoad: function() {} })');
 					}
 					catch {
 						threw = true;
@@ -4461,7 +4463,7 @@ describe("Plugin Sandbox", function () {
 					setupSafeScope();
 					let threw = false;
 					try {
-						evalInScope('_safeDoc.createFrame("script.js", function() {})');
+						evalInScope('_safeDoc.createFrame("script.js", { onLoad: function() {} })');
 					}
 					catch {
 						threw = true;
@@ -4475,8 +4477,10 @@ describe("Plugin Sandbox", function () {
 
 					let contentWin = await evalInScope(`
 						new Promise((resolve) => {
-							let frame = _safeDoc.createFrame("privileged.html", function(win) {
-								resolve(win);
+							let frame = _safeDoc.createFrame("privileged.html", {
+								onLoad: function(win) {
+									resolve(win);
+								},
 							});
 							_container.appendChild(frame);
 						});
@@ -4528,8 +4532,10 @@ describe("Plugin Sandbox", function () {
 							},
 							onRender: function({ doc, body }) {
 								if (body.querySelector && body.querySelector('browser')) return;
-								let frame = doc.createFrame("test.html", function(win) {
-									_resolveFrameLoad(win);
+								let frame = doc.createFrame("test.html", {
+									onLoad: function(win) {
+										_resolveFrameLoad(win);
+									},
 								});
 								body.appendChild(frame);
 							},
