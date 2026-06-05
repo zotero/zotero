@@ -119,6 +119,7 @@ const PERMISSION_SCHEMAS = {
 			},
 		},
 	},
+
 	dataRead: {
 		Zotero: {
 			Items: {
@@ -242,6 +243,10 @@ const PERMISSION_SCHEMAS = {
 				executeTransaction: true,
 			},
 		},
+	},
+	database: {
+		// Exposes a Zotero.DBConnection instance with a restricted schema defined by PLUGIN_DB_SCHEMA.
+		// Set up directly by setupPluginDB() in globals.mjs.
 	},
 	clipboardRead: {
 		Zotero: {
@@ -451,4 +456,25 @@ const MAIN_WINDOW_SCHEMAS = {
 	},
 };
 
-export { SchemaKey, DATA_OBJECT_READ_SCHEMA, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
+/**
+ * Allowlist schema for DBConnection instances created by plugins.
+ */
+const PLUGIN_DB_SCHEMA = {
+	queryAsync: true,
+	queryTx: true,
+	executeTransaction: true,
+	valueQueryAsync: true,
+	rowQueryAsync: true,
+	columnQueryAsync: true,
+	tableExists: true,
+	columnExists: true,
+	indexExists: true,
+	getColumns: true,
+	closeDatabase: true,
+	inTransaction: true,
+	parseSQLFile: true,
+	executeSQLFile: true,
+	path: true,
+};
+
+export { SchemaKey, DATA_OBJECT_READ_SCHEMA, PLUGIN_DB_SCHEMA, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
