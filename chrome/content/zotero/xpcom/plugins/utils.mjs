@@ -24,12 +24,8 @@
 */
 
 
-import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 import { PERMISSION_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 
-const lazy = XPCOMUtils.declareLazy({
-	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
-});
 
 const Utils = {
 	isObject(v) {
@@ -49,13 +45,63 @@ const Utils = {
 		return proto === Object.prototype || proto === null;
 	},
 
-	throwPropError(op, prop) {
+	isArrayLike(v) {
+		return Array.isArray(v) || (this.isObjectLike(v) && typeof v.length === "number");
+	},
+
+	isDOMNode(value) {
+		if (!this.isObjectLike(value)) return false;
+		try {
+			return typeof value.nodeType === "number" && typeof value.nodeName === "string";
+		}
+		catch {}
+		return false;
+	},
+
+	isElementWithinSubtree(targetElem, rootElem) {
+		if (!Utils.isDOMNode(targetElem) || !Utils.isDOMNode(rootElem)) {
+			return false;
+		}
+		try {
+			return rootElem.contains(targetElem);
+		}
+		catch {}
+		return false;
+	},
+
+	isGlobalWindowObject(value) {
+		if (!Utils.isObjectLike(value)) return false;
+		try {
+			if (value.window === value
+				|| value.self === value
+				|| value.ownerGlobal === value
+				|| (value.document && value.document.defaultView === value)) {
+				return true;
+			}
+		}
+		catch {}
+		return false;
+	},
+
+	throwPropError(op, prop = undefined, reason = undefined) {
 		let p = typeof prop === "symbol" ? prop.toString() : String(prop);
-		throw new Error(`Permission denied: cannot ${op}${prop === undefined ? "" : ` "${p}"`}`);
+		throw new Error(`Permission denied: cannot ${op}${prop === undefined ? " " : ` "${p}".`}${reason ? ` (${reason})` : ""}`);
 	},
 
 	getPermissionsString(permissions) {
 		return [...permissions].toSorted().join(',');
+	},
+
+	isPrivilegedPermission(addon) {
+		if (addon.installPermissions.permissions.includes("zotero")) {
+			return false;
+		}
+		return true;
+	},
+
+	isPrivilegedScope(scope) {
+		// If the scope is unprivileged, it will be xrayed and thus using its properties is safe
+		return scope.PERMISSIONS === "*";
 	},
 
 	mergeSchema(a, b) {
@@ -183,16 +229,16 @@ const ScopeUtils = {
 	 * Ensure a potentially promise variable is safe to expose in the sandbox scope
 	 * Following https://github.com/mdn/content/issues/15059#issuecomment-1198017259
 	 */
-	ensurePromiseVarInScope(maybePromise, scope) {
+	ensurePromiseVarInScope(maybePromise, scope, { mutable = false } = {}) {
 		if (Utils.isPromise(maybePromise)) {
 			return new scope.Promise((resolve, reject) => {
 				maybePromise.then(
-					v => resolve(this.ensureVarInScope(v, scope)),
+					v => resolve(this.ensureVarInScope(v, scope, { mutable })),
 					e => reject(e)
 				);
 			});
 		}
-		return this.ensureVarInScope(maybePromise, scope);
+		return this.ensureVarInScope(maybePromise, scope, { mutable });
 	},
 
 	/**
@@ -201,7 +247,7 @@ const ScopeUtils = {
 	 * - Plain objects/arrays are cloned into the scope
 	 * - Non-plain objects (class instances) are wrapped in a readonly facade with methods and getters (own and prototype) preserved
 	 */
-	ensureVarInScope(value, scope) {
+	ensureVarInScope(value, scope, { mutable = false } = {}) {
 		if (typeof value === "function") {
 			return this.ensureCallableInScope(value, null, scope);
 		}
@@ -215,19 +261,24 @@ const ScopeUtils = {
 			});
 		}
 
-		return this.ensureInstanceInScope(value, scope);
+		return this.ensureInstanceInScope(value, scope, { mutable });
 	},
 
 	/**
 	 * Create a function that runs in privileged realm and scopes returns
 	 */
-	ensureCallableInScope(func, thisArg = undefined, scope) {
+	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false } = {}) {
 		let holder = Cu.createObjectIn(scope);
+		let thisArgRef = Utils.isObjectLike(thisArg) ? new WeakRef(thisArg) : null;
 
 		let wrapped = (...args) => {
-			let res;
-			res = func.apply(thisArg, args);
-			return ScopeUtils.ensurePromiseVarInScope(res, scope);
+			args = args.map(arg => Cu.waiveXrays(arg));
+			let actualThisArg = thisArgRef ? thisArgRef.deref() : thisArg;
+			if (thisArgRef && !actualThisArg) {
+				Utils.throwPropError("access", "this", "object has been garbage collected");
+			}
+			let res = func.apply(actualThisArg, args);
+			return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable });
 		};
 
 		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
@@ -237,10 +288,11 @@ const ScopeUtils = {
 	/**
 	 * Create a readonly facade for a class instance, exposing methods and getters (own and prototype)
 	 */
-	ensureInstanceInScope(instance, scope) {
+	ensureInstanceInScope(instance, scope, { mutable = false } = {}) {
 		if (!Utils.isObjectLike(instance)) return instance;
 
 		let facade = Cu.createObjectIn(scope);
+		let instanceRef = new WeakRef(instance);
 
 		// Expose prototype-chain methods as privileged wrapper that calls the real method on the real instance
 		let methodNames = Utils.getPrototypeMethodNames(instance);
@@ -252,8 +304,12 @@ const ScopeUtils = {
 
 			Cu.exportFunction(
 				(...args) => {
-					let res = method.apply(instance, args);
-					return ScopeUtils.ensurePromiseVarInScope(res, scope);
+					let inst = instanceRef.deref();
+					if (!inst) {
+						Utils.throwPropError("access", name, "object has been garbage collected");
+					}
+					let res = method.apply(inst, args);
+					return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable });
 				},
 				facade,
 				{ defineAs: name }
@@ -265,15 +321,34 @@ const ScopeUtils = {
 		for (let name of getterNames) {
 			if (Object.prototype.hasOwnProperty.call(facade, name)) continue;
 			let holder = Cu.createObjectIn(scope);
-			Cu.exportFunction(() => ScopeUtils.ensurePromiseVarInScope(Reflect.get(instance, name), scope), holder, { defineAs: "g" });
+			Cu.exportFunction(() => {
+				let inst = instanceRef.deref();
+				if (!inst) {
+					Utils.throwPropError("access", name, "object has been garbage collected");
+				}
+				return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, name), scope, { mutable });
+			}, holder, { defineAs: "g" });
+
+			Cu.exportFunction(
+				(value) => {
+					if (!mutable) {
+						Utils.throwPropError("set", name);
+					}
+					let inst = instanceRef.deref();
+					if (!inst) {
+						Utils.throwPropError("set", name, "object has been garbage collected");
+					}
+					return Reflect.set(inst, name, value);
+				},
+				holder,
+				{ defineAs: "s" }
+			);
 
 			Object.defineProperty(facade, name, {
 				enumerable: true,
 				configurable: false,
 				get: holder.g,
-				set() {
-					Utils.throwPropError("set", name);
-				},
+				set: holder.s,
 			});
 		}
 
@@ -284,126 +359,47 @@ const ScopeUtils = {
 			let desc = ownDescriptors[key];
 			let holder = Cu.createObjectIn(scope);
 			if (typeof desc.get === "function") {
-				Cu.exportFunction(() => ScopeUtils.ensurePromiseVarInScope(Reflect.get(instance, key), scope), holder, { defineAs: "g" });
+				Cu.exportFunction(() => {
+					let inst = instanceRef.deref();
+					if (!inst) {
+						Utils.throwPropError("access", key, "object has been garbage collected");
+					}
+					return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, key), scope, { mutable });
+				}, holder, { defineAs: "g" });
 			}
 			else {
-				Cu.exportFunction(() => ScopeUtils.ensurePromiseVarInScope(instance[key], scope), holder, { defineAs: "g" });
+				Cu.exportFunction(() => {
+					let inst = instanceRef.deref();
+					if (!inst) {
+						Utils.throwPropError("access", key, "object has been garbage collected");
+					}
+					return ScopeUtils.ensurePromiseVarInScope(inst[key], scope, { mutable });
+				}, holder, { defineAs: "g" });
 			}
+
+			Cu.exportFunction(
+				(value) => {
+					let inst = instanceRef.deref();
+					if (!inst) {
+						Utils.throwPropError("set", key, "object has been garbage collected");
+					}
+					return Reflect.set(inst, key, value);
+				},
+				holder,
+				{ defineAs: "s" }
+			);
 
 			Object.defineProperty(facade, key, {
 				enumerable: true,
 				configurable: false,
 				get: holder.g,
-				set() {
-					Utils.throwPropError("set", key);
-				},
+				set: holder.s,
 			});
 		}
 
 		Object.preventExtensions(facade);
 		return facade;
 	},
-
-	// https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/ExtensionCommon.sys.mjs#60
-	getConsole(addon, scope) {
-		return () => {
-			let console = new lazy.ConsoleAPI({
-				prefix: `${addon.name} (${addon.id}):\n`,
-			});
-			return Cu.cloneInto(
-				createAllowlistMirrorObject(console, true, scope),
-				scope,
-				{ wrapReflectors: true, cloneFunctions: true }
-			);
-		};
-	},
 };
 
-/**
- * Create a mirrored object in scope based on the allowlist schema
- * This is to bypass Gecko cross-compartment with different security principles for the designated
- * attributes and methods on the target object, so that the scope with a lower privilege can access
- * the exposed ones safely, with functions exposed to scope and direct/subsequent variables from
- * function returns properly mirrored in scope as well.
- * @param {Object} target Target object to mirror
- * @param {Object} schema Allowlist schema, see schema.mjs
- * @param {Object} scope Scope to mirror the objects
- * @returns {Object} The mirrored object in scope
- */
-function createAllowlistMirrorObject(target, schema, scope) {
-	// Facade cache to preserve identity and handle cycles for schema-based traversal
-	let allowlistFacadeCache = new WeakMap();
-
-	function getAllowlistCacheForObj(obj) {
-		let m = allowlistFacadeCache.get(obj);
-		if (!m) {
-			m = new Map();
-			allowlistFacadeCache.set(obj, m);
-		}
-		return m;
-	}
-
-	/**
-	 * Wrap an object with an allowlist schema recursively
-	 */
-	function wrapAllowlist(obj, schemaNode) {
-		if (!Utils.isObjectLike(obj)) return obj;
-
-		if (schemaNode !== true && (!schemaNode || typeof schemaNode !== "object")) {
-			return Object.freeze(Cu.createObjectIn(scope));
-		}
-
-		let cacheForObj = getAllowlistCacheForObj(obj);
-		let key = Utils.schemaKey(schemaNode);
-		if (cacheForObj.has(key)) return cacheForObj.get(key);
-
-		let wrapper = Cu.createObjectIn(scope);
-		cacheForObj.set(key, wrapper);
-
-		let keys = Utils.getAllowedKeys(obj, schemaNode);
-
-		for (let prop of keys) {
-			if (!Utils.isAllowed(schemaNode, prop)) continue;
-
-			let holder = Cu.createObjectIn(scope);
-			Cu.exportFunction(
-				() => {
-					let value = Reflect.get(obj, prop);
-
-					if (typeof value === "function") {
-						return ScopeUtils.ensureCallableInScope(value, obj, scope);
-					}
-
-					if (Utils.isObjectLike(value)) {
-						let nextSchemaNode = Utils.nextSchema(schemaNode, prop);
-
-						if (nextSchemaNode === true || (nextSchemaNode && typeof nextSchemaNode === "object")) {
-							return wrapAllowlist(value, nextSchemaNode);
-						}
-						return ScopeUtils.ensurePromiseVarInScope(value, scope);
-					}
-
-					return value;
-				},
-				holder,
-				{ defineAs: "g" }
-			);
-
-			Object.defineProperty(wrapper, prop, {
-				enumerable: true,
-				configurable: false,
-				get: holder.g,
-				set() {
-					Utils.throwPropError("set", prop);
-				},
-			});
-		}
-
-		Object.preventExtensions(wrapper);
-		return wrapper;
-	}
-
-	return Object.freeze(wrapAllowlist(target, schema));
-}
-
-export { Utils, ScopeUtils, createAllowlistMirrorObject };
+export { Utils, ScopeUtils };
