@@ -2772,7 +2772,6 @@ class Reader {
 	 * ```
 	 */
 	registerEventListener(type, handler, pluginID) {
-		handler = ScopeVariables.fromScope(handler, pluginID);
 		this._registeredListeners.push({ pluginID, type, handler });
 	}
 
