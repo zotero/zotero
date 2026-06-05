@@ -63,6 +63,7 @@ const ALLOWED_WINDOW_FEATURES = new Set([
 	"centerscreen",
 	"resizable",
 	"minimizable",
+	"alwaysontop",
 ]);
 
 function sanitizeFeatures(features) {
@@ -86,7 +87,7 @@ function setupOpenWindow(scope) {
 	let holder = Cu.createObjectIn(scope);
 	Cu.exportFunction(
 		(url, features, options = {}) => {
-			let { windowId, onLoad, fitContent } = Cu.waiveXrays(options);
+			let { windowId, onLoad, fitContent, notitle } = Cu.waiveXrays(options);
 			if (windowId !== null && windowId !== undefined && typeof windowId !== "string") {
 				throw new Error("openWindow: windowId must be a string");
 			}
@@ -113,12 +114,14 @@ function setupOpenWindow(scope) {
 			let resizable = !safeFeatures || safeFeatures.includes("resizable");
 			let chromeFeatures = "chrome,dialog=no,"
 				+ (safeFeatures || "resizable");
+			// Use custom notitle style because the `titlebar=no` feature is ugly
+			let windowArgs = { notitle: !!notitle };
 			let win = Services.ww.openWindow(
 				null,
 				"chrome://zotero/content/pluginWindow.xhtml",
 				null,
 				chromeFeatures,
-				null
+				windowArgs
 			);
 
 			return new scope.Promise((resolve) => {
@@ -143,6 +146,11 @@ function setupOpenWindow(scope) {
 								&& (flags & Ci.nsIWebProgressListener.STATE_IS_WINDOW)
 								&& Components.isSuccessCode(status)) {
 								WindowScopeVariables.setupContentL10n(browser).then(() => {
+									Cu.exportFunction(
+										() => win.close(),
+										browser.contentWindow,
+										{ defineAs: "close" }
+									);
 									browser.focus();
 									resolve(browser.contentWindow);
 									if (typeof onLoad === "function") {
