@@ -151,6 +151,16 @@ function setupOpenWindow(scope) {
 										browser.contentWindow,
 										{ defineAs: "close" }
 									);
+
+									browser.addEventListener("contextmenu", (event) => {
+										let t = event.target;
+										if (t && t.closest
+												&& t.closest("input, textarea, [contenteditable]")) {
+											return;
+										}
+										event.preventDefault();
+									});
+
 									browser.focus();
 									resolve(browser.contentWindow);
 									if (typeof onLoad === "function") {

@@ -206,13 +206,19 @@
 							if (VALID_TARGETS.includes(value)) {
 								return true;
 							}
-							// pluginWindow/<windowId>/menubar/<type>
 							let parts = value.split("/");
-							if (parts.length === 4
-									&& parts[0] === "pluginWindow"
-									&& parts[2] === "menubar"
-									&& VALID_PLUGIN_WINDOW_MENU_TYPES.includes(parts[3])) {
-								return true;
+							if (parts[0] === "pluginWindow") {
+								// pluginWindow/<windowId>/menubar/<type>
+								if (parts.length === 4
+										&& parts[2] === "menubar"
+										&& VALID_PLUGIN_WINDOW_MENU_TYPES.includes(parts[3])) {
+									return true;
+								}
+								// pluginWindow/<windowId>/context
+								if (parts.length === 3
+										&& parts[2] === "context") {
+									return true;
+								}
 							}
 							return `Option 'target' must be one of ${VALID_TARGETS.join(", ")} or a valid pluginWindow target, got ${value}`;
 						}
