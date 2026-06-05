@@ -206,12 +206,8 @@ const PERMISSION_SCHEMAS = {
 		},
 	},
 	network: {
-		Zotero: {
-			HTTP: {
-				request: "FromScopeCallable",
-				processDocuments: "FromScopeCallable",
-			},
-		},
+		// Zotero.HTTP is set up directly by setupHTTP() in globals.mjs
+		// using the sandbox's XMLHttpRequest for principal-based access control.
 	},
 	preferences: {
 		Zotero: {
