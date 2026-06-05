@@ -37,7 +37,8 @@ Zotero.Plugins = new function () {
 			Ci.amIAddonManagerStartup,
 		],
 	});
-	var scopes = new Map();
+	var PluginSandbox = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
+
 	var observers = new Set();
 	var addonVersions = new Map();
 	// Windows that have a live library view, for which onMainWindowLoad has been called
@@ -104,8 +105,8 @@ Zotero.Plugins = new function () {
 			addonVersions.set(addon.id, addon.version);
 			// Unblocking in shouldBlockPlugin() can run onEnabling(), which already loads and
 			// starts the plugin
-			if (scopes.has(addon.id)) continue;
-			_loadScope(addon);
+			if (PluginSandbox.getScope(addon.id)) continue;
+			PluginSandbox.loadScope(addon, REASONS);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.APP_STARTUP);
@@ -155,101 +156,6 @@ Zotero.Plugins = new function () {
 		}
 	};
 	
-	
-	/**
-	 * Adapted from loadBootstrapScope() in Firefox 60 ESR
-	 *
-	 * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4233
-	 */
-	function _loadScope(addon) {
-		if (scopes.has(addon.id)) {
-			return;
-		}
-		var scope = new Cu.Sandbox(
-			Services.scriptSecurityManager.getSystemPrincipal(),
-			{
-				sandboxName: addon.id,
-				wantGlobalProperties: [
-					"atob",
-					"btoa",
-					"Blob",
-					"crypto",
-					"CSS",
-					"ChromeUtils",
-					"DOMParser",
-					"fetch",
-					"File",
-					"FileReader",
-					"TextDecoder",
-					"TextEncoder",
-					"URL",
-					"URLSearchParams",
-					"XMLHttpRequest"
-				]
-			}
-		);
-		for (let name in REASONS) {
-			scope[name] = REASONS[name];
-		}
-		Object.assign(
-			scope,
-			{
-				Zotero,
-				ChromeWorker,
-				IOUtils,
-				Localization,
-				PathUtils,
-				Services,
-				Worker,
-				XMLSerializer,
-				
-				// Add additional global functions
-				setTimeout,
-				clearTimeout,
-				setInterval,
-				clearInterval,
-				requestIdleCallback,
-				cancelIdleCallback,
-			}
-		);
-		
-		// fx140: Shim ChromeUtils.import() in the plugin scope
-		// TODO: Do we want this?
-		scope.ChromeUtils = new Proxy(scope.ChromeUtils, {
-			get(target, property, receiver) {
-				if (property === 'import') {
-					return function (uri) {
-						let esmURI = uri.replace('.jsm', uri.includes('/zotero/') ? '.mjs' : '.sys.mjs');
-						Zotero.warn('ChromeUtils.import() has been removed. Use importESModule():\n'
-							+ `  ChromeUtils.importESModule("${esmURI}");`);
-						return receiver.importESModule(esmURI);
-					};
-				}
-				return Reflect.get(target, property, receiver);
-			}
-		});
-		
-		scopes.set(addon.id, scope);
-		
-		try {
-			let uri = addon.getResourceURI().spec + 'bootstrap.js';
-			Services.scriptloader.loadSubScriptWithOptions(
-				uri,
-				{
-					target: scope,
-					ignoreCache: true,
-					// Plugins are loaded from jar:file: URIs, which the script loader
-					// otherwise refuses (Mozilla bug 1974213)
-					allowUnsafeURL: true
-				}
-			);
-		}
-		catch (e) {
-			Zotero.logError(e);
-		}
-	}
-	
-	
 	/**
 	 * Adapted from callBootstrapMethod() in Firefox 60 ESR
 	 *
@@ -264,18 +170,18 @@ Zotero.Plugins = new function () {
 			// Skip disabled plugins, unless this plugin was started and the call is part of
 			// disabling it now (e.g., 'shutdown' after it was blocked while running)
 			if ((addon.softDisabled || addon.appDisabled)
-					&& (!scopes.has(id) || !['shutdown', 'uninstall'].includes(method))) {
+					&& (!PluginSandbox.getScope(id) || !['shutdown', 'uninstall'].includes(method))) {
 				Zotero.debug(`Skipping bootstrap method '${method}' for disabled plugin ${id}`);
 				return;
 			}
 			
-			let scope = scopes.get(id);
+			let scope = PluginSandbox.getScope(id);
 			
 			let func;
 			try {
 				func = scope[method] || Cu.evalInSandbox(`${method};`, scope);
 			}
-			catch (e) {}
+			catch {}
 			
 			if (!func) {
 				Zotero.warn(`Plugin ${id} is missing bootstrap method '${method}'`);
@@ -292,7 +198,7 @@ Zotero.Plugins = new function () {
 			}
 			let result;
 			try {
-				result = func.call(scope, params, reason);
+				result = func.call(scope, Cu.cloneInto(params, scope), Cu.cloneInto(reason, scope));
 				// If bootstrap method returns a promise, wait for it
 				if (result && result.then) {
 					await result;
@@ -336,11 +242,6 @@ Zotero.Plugins = new function () {
 			}
 		}
 		return "UNKNOWN";
-	}
-	
-	
-	function _unloadScope(id) {
-		scopes.delete(id);
 	}
 	
 	
@@ -519,7 +420,7 @@ Zotero.Plugins = new function () {
 	this.getAllPluginIDs = async function () {
 		let addons = await AddonManager.getAddonsByTypes(["extension"]);
 		return addons.map(addon => addon.id);
-	}
+	};
 
 
 	/**
@@ -755,7 +656,7 @@ Zotero.Plugins = new function () {
 					}
 				}
 			}
-			catch (ex) {
+			catch {
 				// Fall-through, return what we have.
 			}
 			return results;
@@ -1215,7 +1116,7 @@ Zotero.Plugins = new function () {
 				Services.obs.notifyObservers(null, "startupcache-invalidate");
 				unregisterLocales(existingAddon);
 				clearDefaultPrefs(existingAddon);
-				_unloadScope(existingAddon.id);
+				PluginSandbox.unloadScope(existingAddon.id);
 				addonVersions.delete(existingAddon.id);
 			}
 		},
@@ -1237,7 +1138,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			
-			_loadScope(addon);
+			PluginSandbox.loadScope(addon);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'install', reason);
@@ -1251,7 +1152,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Enabling plugin " + addon.id);
-			_loadScope(addon);
+			PluginSandbox.loadScope(addon);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
@@ -1281,7 +1182,7 @@ Zotero.Plugins = new function () {
 		
 		async onUninstalled(addon) {
 			Zotero.debug("Uninstalled plugin " + addon.id);
-			_unloadScope(addon.id);
+			PluginSandbox.unloadScope(addon.id);
 			addonVersions.delete(addon.id);
 		},
 		
