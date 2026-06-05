@@ -1,0 +1,50 @@
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+@import "abstracts/placeholders";
+@import "abstracts/utilities";
+
+@include macOS-normalize-controls;
+
+window {
+	min-width: 420px;
+	max-width: 480px;
+}
+
+#prompt-content {
+	gap: 10px;
+
+	@media (-moz-platform: macos) {
+		padding: 20px;
+	}
+
+	@media not (-moz-platform: macos) {
+		padding: 14px;
+	}
+}
+
+#prompt-title {
+	font-weight: bold;
+	font-size: 1.08em;
+}
+
+#prompt-headline {
+	line-height: 1.5;
+
+	code {
+		font-family: monospace;
+		word-break: break-all;
+		user-select: text;
+	}
+}
+
+#opt-dont-ask {
+	margin-top: 4px;
+}
+
+#prompt-buttons {
+	height: 25px;
+	margin-top: 4px;
+	justify-content: flex-end;
+	gap: 8px;
+}
