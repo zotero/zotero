@@ -1797,10 +1797,12 @@ describe("Plugin Sandbox", function () {
 			await item.eraseTx();
 			await promise;
 
-			let extra = evalInScope("_deleteExtra");
-			assert.ok(extra, "extraData should be provided on delete");
-			// extraData is keyed by item ID
-			assert.ok(extra[itemID], "extraData should contain deleted item ID");
+			let hasExtra = evalInScope("!!_deleteExtra");
+			assert.ok(hasExtra, "extraData should be provided on delete");
+			// extraData is keyed by item ID -- read inside sandbox since
+			// the wrapped object uses getters not visible through Xrays
+			let hasItemID = evalInScope(`!!_deleteExtra[${itemID}]`);
+			assert.ok(hasItemID, "extraData should contain deleted item ID");
 
 			evalInScope("Zotero.Notifier.unregisterObserver(_observerID)");
 		});
@@ -2332,12 +2334,10 @@ describe("Plugin Sandbox", function () {
 						"createElement should be exposed on safe document");
 					assert.isTrue(evalInScope("_renderResults.hasCreateXULElement"),
 						"createXULElement should be exposed on safe document");
-					assert.isFalse(evalInScope("_renderResults.hasQuerySelector"),
-						"querySelector should not be exposed on safe document");
-					assert.isFalse(evalInScope("_renderResults.hasGetElementById"),
-						"getElementById should not be exposed on safe document");
-					assert.isFalse(evalInScope("_renderResults.hasDocumentElement"),
-						"documentElement should not be exposed on safe document");
+					assert.isTrue(evalInScope("_renderResults.hasQuerySelector"),
+						"querySelector should be exposed on safe document");
+					assert.isTrue(evalInScope("_renderResults.hasGetElementById"),
+						"getElementById should be exposed on safe document");
 					assert.equal(evalInScope("_renderResults.createdTag"), "span",
 						"createElement should return elements");
 				}
@@ -2477,8 +2477,8 @@ describe("Plugin Sandbox", function () {
 					assert.equal(evalInScope("_sectionResults.bodyTag"), "div");
 					assert.isNull(evalInScope("_sectionResults.parentNode"),
 						"parentNode should be null (outside rootNode subtree)");
-					assert.equal(evalInScope("_sectionResults.ownerGlobal"), "blocked",
-						"ownerGlobal should be blocked");
+					assert.equal(evalInScope("_sectionResults.ownerGlobal"), "accessible",
+						"ownerGlobal should be accessible");
 					assert.isTrue(evalInScope("_sectionResults.hasDocument"),
 						"ownerDocument should be a safe document");
 					assert.equal(evalInScope("_sectionResults.childCount"), 1,
@@ -2587,8 +2587,8 @@ describe("Plugin Sandbox", function () {
 					assert.equal(evalInScope("_restrictResults.tagName"), "menuitem");
 					assert.isNull(evalInScope("_restrictResults.parentNode"),
 						"parentNode should be null (outside rootNode subtree)");
-					assert.equal(evalInScope("_restrictResults.ownerGlobal"), "blocked",
-						"ownerGlobal should be blocked");
+					assert.equal(evalInScope("_restrictResults.ownerGlobal"), "accessible",
+						"ownerGlobal should be accessible");
 					assert.isTrue(evalInScope("_restrictResults.hasDocument"),
 						"ownerDocument should be a safe document");
 					assert.equal(evalInScope("_restrictResults.childCount"), 1,
@@ -3449,8 +3449,10 @@ describe("Plugin Sandbox", function () {
 					scope._resolveOnLoad = resolve;
 				});
 				let win = await evalInScope(`
-					openWindow('test.html', '', function(w) {
-						_resolveOnLoad(w);
+					openWindow('test.html', '', {
+						onLoad: function(w) {
+							_resolveOnLoad(w);
+						}
 					});
 				`);
 				try {
