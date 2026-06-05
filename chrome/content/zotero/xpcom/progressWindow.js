@@ -110,9 +110,7 @@ Zotero.ProgressWindow = function (options = {}) {
 		_timeoutID = false,
 		_closing = false,
 		_mouseWasOver = false,
-		_deferredUntilWindowLoad = [],
-		_deferredUntilWindowLoadThis = [],
-		_deferredUntilWindowLoadArgs = [];
+		_deferred = [];
 	
 	/**
 	 * Shows the progress window
@@ -154,85 +152,91 @@ Zotero.ProgressWindow = function (options = {}) {
 	/**
 	 * Changes the "headline" shown at the top of the progress window
 	 */
-	this.changeHeadline = _deferUntilWindowLoad(function changeHeadline(text, cssIconKey, postText) {
-		var doc = _progressWindow.document,
-			headline = doc.getElementById("zotero-progress-text-headline");
-		while(headline.hasChildNodes()) headline.removeChild(headline.firstChild);
-		
-		var preNode = doc.createXULElement("label");
-		preNode.setAttribute("value", text);
-		preNode.setAttribute("crop", "end");
-		headline.appendChild(preNode);
-		
-		if(cssIconKey) {
-			// No getCSSIcon() without a window context
-			let iconEl = doc.createElement('span');
-			iconEl.classList.add('icon');
-			iconEl.classList.add('icon-16');
-			iconEl.classList.add('icon-css');
-			iconEl.classList.add(`icon-${cssIconKey}`);
-			headline.appendChild(iconEl);
-		}
-		
-		if(postText) {
-			var postNode = doc.createXULElement("label");
-			postNode.setAttribute("value", postText);
-			postNode.setAttribute("crop", "end");
-			postNode.setAttribute("flex", "1");
-			headline.appendChild(postNode);
-		}
-	});
+	this.changeHeadline = function (text, cssIconKey, postText) {
+		_runWhenLoaded(() => {
+			var doc = _progressWindow.document,
+				headline = doc.getElementById("zotero-progress-text-headline");
+			while(headline.hasChildNodes()) headline.removeChild(headline.firstChild);
+
+			var preNode = doc.createXULElement("label");
+			preNode.setAttribute("value", text);
+			preNode.setAttribute("crop", "end");
+			headline.appendChild(preNode);
+
+			if(cssIconKey) {
+				// No getCSSIcon() without a window context
+				let iconEl = doc.createElement('span');
+				iconEl.classList.add('icon');
+				iconEl.classList.add('icon-16');
+				iconEl.classList.add('icon-css');
+				iconEl.classList.add(`icon-${cssIconKey}`);
+				headline.appendChild(iconEl);
+			}
+
+			if(postText) {
+				var postNode = doc.createXULElement("label");
+				postNode.setAttribute("value", postText);
+				postNode.setAttribute("crop", "end");
+				postNode.setAttribute("flex", "1");
+				headline.appendChild(postNode);
+			}
+		});
+	};
 	
 	/**
 	 * Adds a line to the progress window with the specified icon
 	 */
-	this.addLines = _deferUntilWindowLoad(function addLines(labels, icons) {
-		if(typeof labels === "object" && typeof icons === "object") {
-			for (var i in labels) {
-				let progress = new this.ItemProgress(icons[i], labels[i]);
+	this.addLines = function (labels, icons) {
+		_runWhenLoaded(() => {
+			if(typeof labels === "object" && typeof icons === "object") {
+				for (var i in labels) {
+					let progress = new self.ItemProgress(icons[i], labels[i]);
+					progress.setProgress(100);
+				}
+			} else {
+				let progress = new self.ItemProgress(icons, labels);
 				progress.setProgress(100);
 			}
-		} else {
-			let progress = new this.ItemProgress(icons, labels);
-			progress.setProgress(100);
-		}
-		
-		_move();
-	});
+
+			_move();
+		});
+	};
 	
 	/**
 	 * Add a description to the progress window
 	 *
 	 * <a> elements are turned into XUL links
 	 */
-	this.addDescription = _deferUntilWindowLoad(function addDescription(text) {
-		var newHB = _progressWindow.document.createXULElement("hbox");
-		newHB.setAttribute("class", "zotero-progress-item-hbox");
-		var newDescription = _progressWindow.document.createXULElement("description");
-		
-		var parts = Zotero.Utilities.parseMarkup(text);
-		for (let part of parts) {
-			if (part.type == 'text') {
-				var elem = _progressWindow.document.createTextNode(part.text);
-			}
-			else if (part.type == 'link') {
-				var elem = _progressWindow.document.createXULElement('label');
-				elem.setAttribute('value', part.text);
-				elem.setAttribute('class', 'zotero-text-link');
-				elem.setAttribute('role', 'link');
-				for (var i in part.attributes) {
-					elem.setAttribute(i, part.attributes[i]);
+	this.addDescription = function (text) {
+		_runWhenLoaded(() => {
+			var newHB = _progressWindow.document.createXULElement("hbox");
+			newHB.setAttribute("class", "zotero-progress-item-hbox");
+			var newDescription = _progressWindow.document.createXULElement("description");
+
+			var parts = Zotero.Utilities.parseMarkup(text);
+			for (let part of parts) {
+				if (part.type == 'text') {
+					var elem = _progressWindow.document.createTextNode(part.text);
 				}
+				else if (part.type == 'link') {
+					var elem = _progressWindow.document.createXULElement('label');
+					elem.setAttribute('value', part.text);
+					elem.setAttribute('class', 'zotero-text-link');
+					elem.setAttribute('role', 'link');
+					for (var i in part.attributes) {
+						elem.setAttribute(i, part.attributes[i]);
+					}
+				}
+
+				newDescription.appendChild(elem);
 			}
-			
-			newDescription.appendChild(elem);
-		}
-		
-		newHB.appendChild(newDescription);
-		_progressWindow.document.getElementById("zotero-progress-text-box").appendChild(newHB);
-		
-		_move();
-	});
+
+			newHB.appendChild(newDescription);
+			_progressWindow.document.getElementById("zotero-progress-text-box").appendChild(newHB);
+
+			_move();
+		});
+	};
 	
 	/**
 	 * Sets a timer to close the progress window. If a previous close timer was set,
@@ -282,99 +286,108 @@ Zotero.ProgressWindow = function (options = {}) {
 	 * Creates a new object representing a line in the progressWindow. This is the OO
 	 * version of addLines() above.
 	 */
-	this.ItemProgress = _deferUntilWindowLoad(function (itemType, text, parentItemProgress) {
+	this.ItemProgress = function (itemType, text, parentItemProgress) {
 		this.setText(text);
-		
-		this._image = _progressWindow.document.createXULElement("hbox");
-		this._image.setAttribute("flex", 0);
-		if (itemType) {
-			this.setItemTypeAndIcon(itemType);
-		}
-		
-		this._hbox = _progressWindow.document.createXULElement("hbox");
-		this._hbox.setAttribute("class", "zotero-progress-item-hbox");
-		if(parentItemProgress) {
-			this._hbox.style.marginLeft = "16px";
-			this._hbox.zoteroIsChildItem;
-		} else {
-			this._hbox.setAttribute("parent", "true");
-		}
-		this._hbox.style.opacity = "0.5";
-		
-		this._hbox.appendChild(this._image);
-		this._hbox.appendChild(this._itemText);
-		
-		var container = _progressWindow.document.getElementById("zotero-progress-text-box");
-		if(parentItemProgress) {
-			var nextItem = parentItemProgress._hbox.nextSibling;
-			while(nextItem && nextItem.zoteroIsChildItem) {
-				nextItem = nextItem.nextSibling;
+		_runWhenLoaded(() => {
+			this._image = _progressWindow.document.createXULElement("hbox");
+			this._image.setAttribute("flex", 0);
+			if (itemType) {
+				this.setItemTypeAndIcon(itemType);
 			}
-			container.insertBefore(this._hbox, nextItem);
-		} else {
-			container.appendChild(this._hbox);
-		}
-		
-		_move();
-	});
-	
+
+			this._hbox = _progressWindow.document.createXULElement("hbox");
+			this._hbox.setAttribute("class", "zotero-progress-item-hbox");
+			if(parentItemProgress) {
+				this._hbox.style.marginLeft = "16px";
+				this._hbox.zoteroIsChildItem;
+			} else {
+				this._hbox.setAttribute("parent", "true");
+			}
+			this._hbox.style.opacity = "0.5";
+
+			this._hbox.appendChild(this._image);
+			this._hbox.appendChild(this._itemText);
+
+			var container = _progressWindow.document.getElementById("zotero-progress-text-box");
+			if(parentItemProgress) {
+				var nextItem = parentItemProgress._hbox.nextSibling;
+				while(nextItem && nextItem.zoteroIsChildItem) {
+					nextItem = nextItem.nextSibling;
+				}
+				container.insertBefore(this._hbox, nextItem);
+			} else {
+				container.appendChild(this._hbox);
+			}
+
+			_move();
+		});
+	};
+
 	/**
 	 * Sets the current save progress for this item.
 	 * @param {Integer} percent A percentage from 0 to 100.
 	 */
-	this.ItemProgress.prototype.setProgress = _deferUntilWindowLoad(function (percent) {
-		if(percent != 0 && percent != 100) {
-			// Indication of partial progress, so we will use the circular indicator
-			var nArcs = 20;
-			this._image.className = "";
-			this._image.style.width = "16px";
-			this._image.style.backgroundRepeat = "no-repeat";
-			this._image.style.backgroundSize = "auto 16px";
-			this._image.style.backgroundImage = "url('chrome://zotero/skin/progress_arcs.png')";
-			this._image.style.backgroundPosition = "-"+(Math.round(percent/100*nArcs)*16)+"px 0";
-			this._hbox.style.opacity = percent/200+.5;
-		} else if(percent == 100) {
-			this._image.className = this._iconClassName;
-			this._image.style = "";
-			this._hbox.style.opacity = "1";
-			this._hbox.style.filter = "";
-		}
-	});
-	
+	this.ItemProgress.prototype.setProgress = function (percent) {
+		_runWhenLoaded(() => {
+			if(percent != 0 && percent != 100) {
+				// Indication of partial progress, so we will use the circular indicator
+				var nArcs = 20;
+				this._image.className = "";
+				this._image.style.width = "16px";
+				this._image.style.backgroundRepeat = "no-repeat";
+				this._image.style.backgroundSize = "auto 16px";
+				this._image.style.backgroundImage = "url('chrome://zotero/skin/progress_arcs.png')";
+				this._image.style.backgroundPosition = "-"+(Math.round(percent/100*nArcs)*16)+"px 0";
+				this._hbox.style.opacity = percent/200+.5;
+			} else if(percent == 100) {
+				this._image.className = this._iconClassName;
+				this._image.style = "";
+				this._hbox.style.opacity = "1";
+				this._hbox.style.filter = "";
+			}
+		});
+	};
+
 	/**
 	 * Sets the icon for this item.
 	 * @param {String} [itemType]
 	 * @param {String} [cssIcon]
 	 */
-	this.ItemProgress.prototype.setItemTypeAndIcon = _deferUntilWindowLoad(function (itemType, cssIcon = 'item-type') {
-		// No getCSSItemTypeIcon() without a window context
-		this._image.className = this._iconClassName = `icon icon-16 icon-css icon-${cssIcon}`;
-		this._image.dataset.itemType = itemType;
-		this._image.style = "";
-	});
-	
-	this.ItemProgress.prototype.setText = _deferUntilWindowLoad(function (text) {
-		if (!this._itemText) {
-			this._itemText = _progressWindow.document.createXULElement("description");
-		}
-		else {
-			this._itemText.textContent = '';
-		}
-		this._itemText.appendChild(_progressWindow.document.createTextNode(text));
-		this._itemText.setAttribute("class", "zotero-progress-item-label");
-		this._itemText.setAttribute("crop", "end");
-	});
-	
+	this.ItemProgress.prototype.setItemTypeAndIcon = function (itemType, cssIcon = 'item-type') {
+		_runWhenLoaded(() => {
+			// No getCSSItemTypeIcon() without a window context
+			this._image.className = this._iconClassName = `icon icon-16 icon-css icon-${cssIcon}`;
+			this._image.dataset.itemType = itemType;
+			this._image.style = "";
+		});
+	};
+
+	this.ItemProgress.prototype.setText = function (text) {
+		_runWhenLoaded(() => {
+			if (!this._itemText) {
+				this._itemText = _progressWindow.document.createXULElement("description");
+			}
+			else {
+				this._itemText.textContent = '';
+			}
+			this._itemText.appendChild(_progressWindow.document.createTextNode(text));
+			this._itemText.setAttribute("class", "zotero-progress-item-label");
+			this._itemText.setAttribute("crop", "end");
+		});
+	};
+
 	/**
 	 * Indicates that an error occurred saving this item.
 	 */
-	this.ItemProgress.prototype.setError = _deferUntilWindowLoad(function () {
-		this._image.style.backgroundImage = "url('chrome://zotero/skin/cross.png')";
-		this._image.style.backgroundPosition = "";
-		this._itemText.style.color = "red";
-		this._hbox.style.opacity = "1";
-		this._hbox.style.filter = "";
-	});
+	this.ItemProgress.prototype.setError = function () {
+		_runWhenLoaded(() => {
+			this._image.style.backgroundImage = "url('chrome://zotero/skin/cross.png')";
+			this._image.style.backgroundPosition = "";
+			this._itemText.style.color = "red";
+			this._hbox.style.opacity = "1";
+			this._hbox.style.filter = "";
+		});
+	};
 	
 	this.Translation = {};
 	
@@ -462,17 +475,14 @@ Zotero.ProgressWindow = function (options = {}) {
 	function _onWindowLoaded() {
 		_windowLoading = false;
 		_windowLoaded = true;
-		
+
 		_move();
-		
+
 		// do things we delayed because the window was loading
-		for(var i=0; i<_deferredUntilWindowLoad.length; i++) {
-			_deferredUntilWindowLoad[i].apply(_deferredUntilWindowLoadThis[i],
-				_deferredUntilWindowLoadArgs[i]);
+		for (let fn of _deferred) {
+			fn();
 		}
-		_deferredUntilWindowLoad = [];
-		_deferredUntilWindowLoadThis = [];
-		_deferredUntilWindowLoadArgs = [];
+		_deferred = [];
 
 		_progressWindow.sizeToContent();
 	}
@@ -533,19 +543,15 @@ Zotero.ProgressWindow = function (options = {}) {
 	}
 	
 	/**
-	 * Wraps a function to ensure it isn't called until the window is loaded
+	 * Run a function now if the window is loaded, otherwise queue it
 	 */
-	function _deferUntilWindowLoad(fn) {
-		return function () {
-			if(_window && _window.closed) return;
-			
-			if(_windowLoaded) {
-				fn.apply(this, Array.prototype.slice.call(arguments));
-			} else {
-				_deferredUntilWindowLoad.push(fn);
-				_deferredUntilWindowLoadThis.push(this);
-				_deferredUntilWindowLoadArgs.push(Array.prototype.slice.call(arguments));
-			}
+	function _runWhenLoaded(fn) {
+		if(_window && _window.closed) return;
+
+		if(_windowLoaded) {
+			fn();
+		} else {
+			_deferred.push(fn);
 		}
 	}
 }
