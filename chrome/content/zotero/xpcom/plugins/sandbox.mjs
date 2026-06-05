@@ -215,6 +215,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			loadSubScript: res => Services.scriptloader.loadSubScript(
 				`${rootURI}${res}`, scope
 			),
+			isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
 			PERMISSIONS: Cu.cloneInto(permissions, scope),
 			
 			// Add additional global vars
