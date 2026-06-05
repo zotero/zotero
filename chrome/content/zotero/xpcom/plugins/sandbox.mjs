@@ -126,6 +126,28 @@ function getScope(id) {
 	return scopes.get(id);
 }
 
+function defineFrozenIdentity(scope, addon, uuid, perms) {
+	let freezeInSandbox = Cu.evalInSandbox("arr => Object.freeze(arr)", scope);
+	let toFrozenSandboxArray = arr => freezeInSandbox(Cu.cloneInto(arr, scope));
+	let vars = {
+		PLUGIN_ID: addon.id,
+		PLUGIN_UUID: uuid,
+		PERMISSIONS: toFrozenSandboxArray(perms.permissions),
+		HOST_PERMISSIONS: toFrozenSandboxArray(perms.hostPermissions),
+		PREF_PERMISSIONS: toFrozenSandboxArray(perms.prefPermissions),
+		INTEROP_PERMISSIONS: toFrozenSandboxArray(perms.interopPermissions),
+		VERSION: addon.version,
+	};
+	for (let [name, value] of Object.entries(vars)) {
+		Object.defineProperty(scope, name, {
+			value,
+			enumerable: true,
+			configurable: false,
+			writable: false,
+		});
+	}
+}
+
 function loadPrivilegedScope(addon, uuid, globalVars = {}) {
 	var scope = new Cu.Sandbox(
 		Services.scriptSecurityManager.getSystemPrincipal(),
@@ -162,13 +184,6 @@ function loadPrivilegedScope(addon, uuid, globalVars = {}) {
 			Services,
 			Worker,
 			XMLSerializer,
-			PLUGIN_ID: addon.id,
-			PLUGIN_UUID: uuid,
-			PERMISSIONS: ["*"],
-			HOST_PERMISSIONS: ["*"],
-			PREF_PERMISSIONS: ["*"],
-			INTEROP_PERMISSIONS: ["*"],
-			VERSION: addon.version,
 
 			// Add additional global functions
 			setTimeout,
@@ -180,6 +195,13 @@ function loadPrivilegedScope(addon, uuid, globalVars = {}) {
 			...globalVars
 		}
 	);
+
+	defineFrozenIdentity(scope, addon, uuid, {
+		permissions: ["*"],
+		hostPermissions: ["*"],
+		prefPermissions: ["*"],
+		interopPermissions: ["*"],
+	});
 
 	setupConsole(scope, addon);
 	
@@ -236,13 +258,6 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 				`${rootURI}${res}`, scope
 			),
 			isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
-			PLUGIN_ID: addon.id,
-			PLUGIN_UUID: uuid,
-			PERMISSIONS: Cu.cloneInto(permissions, scope),
-			HOST_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.host_permissions || [], scope),
-			PREF_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.pref_permissions || [], scope),
-			INTEROP_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.interop_permissions || [], scope),
-			VERSION: addon.version,
 
 			// Add additional global vars
 			Localization: ScopeUtils.ensureConstructableInScope(Localization, scope, {
@@ -259,6 +274,13 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 			...globalVars
 		}
 	);
+
+	defineFrozenIdentity(scope, addon, uuid, {
+		permissions,
+		hostPermissions: addon.installPermissions?.host_permissions || [],
+		prefPermissions: addon.installPermissions?.pref_permissions || [],
+		interopPermissions: addon.installPermissions?.interop_permissions || [],
+	});
 
 	setupConsole(scope, addon);
 
