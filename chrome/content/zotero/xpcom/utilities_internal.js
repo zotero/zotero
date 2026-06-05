@@ -2509,9 +2509,11 @@ Zotero.Utilities.Internal = {
 	 * Open an element's <menupopup> child (as a native context menu on macOS).
 	 *
 	 * @param {XULElement} element
+	 * @param {Element} [expandTarget]
+	 * Element that receives the `aria-expanded` state. Defaults to `element`.
 	 * @return {Boolean} If a <menupopup> child was found and opened
 	 */
-	showNativeElementPopup(element) {
+	showNativeElementPopup(element, expandTarget = element) {
 		let popup = element.hasAttribute('popup')
 			? element.getRootNode().getElementById(element.getAttribute('popup'))
 			: element.querySelector(':scope > menupopup');
@@ -2522,7 +2524,8 @@ Zotero.Utilities.Internal = {
 				let dir = win.getComputedStyle(element).direction;
 				popup.openPopupAtScreen(
 					win.screenX + (dir == 'rtl' ? rect.right : rect.left),
-					win.screenY + rect.bottom,
+					// Match the MacOS 26 menu behavior
+					win.screenY + rect.bottom + 5,
 					true
 				);
 			}
@@ -2530,18 +2533,20 @@ Zotero.Utilities.Internal = {
 				popup.openPopup(element, 'after_start', 0, 0, true, false);
 			}
 			element.setAttribute('open', true);
+			expandTarget.setAttribute('aria-expanded', 'true');
 
 			let handler = (event) => {
 				if (event.target == popup) {
 					element.setAttribute('open', false);
+					expandTarget.setAttribute('aria-expanded', 'false');
 					popup.removeEventListener('popuphiding', handler);
 				}
 			};
 			popup.addEventListener('popuphiding', handler);
-			
+
 			return true;
 		}
-		
+
 		return false;
 	},
 

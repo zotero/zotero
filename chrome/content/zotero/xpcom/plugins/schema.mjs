@@ -270,29 +270,31 @@ const PERMISSION_SCHEMAS = {
 	fileSystemRead: {
 		Zotero: {
 			File: {
-				getBinaryContentsAsync: true,
-				getContentsAsync: true,
-				getContentsFromURLAsync: true,
-				directoryIsEmpty: true,
-				generateDataURI: true,
-				iterateDirectory: true,
+				getBinaryContentsAsync: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
+				getContentsAsync: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
+				// getContentsFromURLAsync is injected by setupFile() for network access control
+				directoryIsEmpty: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
+				generateDataURI: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
+				iterateDirectory: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
+				// withAccessSession, requestFileAccess, getPluginDir are
+				// injected directly onto the File mirror by setupFile().
 			},
 		},
 	},
 	fileSystemWrite: {
 		Zotero: {
 			File: {
-				putContentsAsync: true,
-				download: true,
-				rename: true,
-				removeIfExists: true,
-				moveDirectory: true,
-				setNormalFilePermissions: true,
-				moveToUnique: true,
-				copyToUnique: true,
-				copyDirectory: true,
-				createDirectoryIfMissingAsync: true,
-				zipDirectory: true,
+				putContentsAsync: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
+				// download is injected by setupFile() for network access control
+				rename: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
+				removeIfExists: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
+				moveDirectory: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0, 1] } },
+				setNormalFilePermissions: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
+				moveToUnique: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0, 1] } },
+				copyToUnique: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0], write: [1] } },
+				copyDirectory: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0], write: [1] } },
+				createDirectoryIfMissingAsync: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
+				zipDirectory: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0], write: [1] } },
 			},
 		},
 	},
