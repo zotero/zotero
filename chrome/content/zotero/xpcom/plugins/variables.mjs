@@ -635,6 +635,21 @@ const WindowScopeVariables = {
 			);
 		}
 
+		if (typeof doc.createDocumentFragment === "function") {
+			Cu.exportFunction(
+				() => {
+					let actualDoc = docRef.deref();
+					if (!actualDoc) {
+						VarCheck.throwPropError("access", "document", "object has been garbage collected");
+					}
+					let fragment = actualDoc.createDocumentFragment();
+					return WindowScopeVariables.createSafeHTMLElement(fragment, addonID, { rootNode });
+				},
+				wrapper,
+				{ defineAs: "createDocumentFragment" }
+			);
+		}
+
 		// addEventListener / removeEventListener need the callback-wrapping
 		// logic from createSafeWindowCallable so that event handlers receive
 		// safe Event wrappers and the correct handler identity is preserved
@@ -809,8 +824,58 @@ const WindowScopeVariables = {
 						Zotero.warn(`Setting ${prop} directly is not allowed for unprivileged plugins. Use addEventListener() instead.`);
 						return false;
 					}
-					let unwrappedValue = WindowScopeVariables.unwrapDOMNode(value);
-					return Reflect.set(actual, prop, unwrappedValue);
+					if (prop === "outerHTML") {
+						VarCheck.throwPropError("set", prop);
+					}
+					// Sanitize HTML strings to strip unsafe tags and on* event handlers.
+					if (prop === "innerHTML") {
+						if (typeof value !== "string") {
+							VarCheck.throwPropError("set", prop, "value must be a string");
+						}
+						let doc = actual.ownerDocument;
+						let parser = new doc.defaultView.DOMParser();
+						let fragment = doc.createDocumentFragment();
+						let useXML = false;
+						let xmlParsed = parser.parseFromSafeString(
+							`<div xmlns="http://www.w3.org/1999/xhtml"
+								 xmlns:html="http://www.w3.org/1999/xhtml"
+								 xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+							${value}
+							</div>`,
+							"application/xml"
+						);
+						if (xmlParsed.documentElement.localName !== "parsererror") {
+							useXML = true;
+							for (let child of Array.from(xmlParsed.documentElement.childNodes)) {
+								fragment.appendChild(doc.importNode(child, true));
+							}
+						}
+						else {
+							let htmlParsed = parser.parseFromSafeString(`<div>${value}</div>`, "text/html");
+							for (let child of Array.from(htmlParsed.querySelector("div").childNodes)) {
+								fragment.appendChild(doc.importNode(child, true));
+							}
+						}
+						WindowScopeVariables.sanitizeFragment(fragment, addonID);
+						let result;
+						if (useXML) {
+							// Directly replace children to preserve namespace information.
+							// Re-serializing to string and setting innerHTML would re-parse
+							// through the HTML parser, stripping namespace metadata.
+							while (actual.firstChild) actual.removeChild(actual.firstChild);
+							actual.appendChild(fragment);
+							result = true;
+						}
+						else {
+							let tmp = doc.createElement("div");
+							tmp.appendChild(fragment);
+							value = tmp.innerHTML;
+							result = Reflect.set(actual, prop, value);
+						}
+						WindowScopeVariables.activateWhenConnected(actual, addonID);
+						return result;
+					}
+					return Reflect.set(actual, prop, WindowScopeVariables.unwrapDOMNode(value));
 				},
 				holder,
 				{ defineAs: "s" }
@@ -923,6 +988,15 @@ const WindowScopeVariables = {
 		"meta",
 	]),
 
+	// Pre-compiled CSS selector for all known on* event-handler attributes from
+	// Firefox nsGkAtomList.h. Used by sanitizeFragment to avoid querying
+	// every element in the tree.
+	// Generated with:
+	//   curl -s 'https://searchfox.org/firefox-esr140/raw/__GENERATED__/xpcom/ds/nsGkAtomList.h' \
+	//     | awk -F'"' '/^GK_ATOM\(on[a-z]/ {print $2}' | grep -v '^only$' | sort -u \
+	//     | awk '{printf "%s,", "*["$1"]"}' | sed 's/,$//'
+	ON_EVENT_ATTRS_SELECTOR: "*[onabort],*[onactivate],*[onactivated],*[onaddsourcebuffer],*[onaddtrack],*[onafterprint],*[onafterscriptexecute],*[onanimationcancel],*[onanimationend],*[onanimationiteration],*[onanimationstart],*[onaudioend],*[onaudioprocess],*[onaudiostart],*[onauxclick],*[onbeforecopy],*[onbeforecut],*[onbeforeinput],*[onbeforematch],*[onbeforepaste],*[onbeforeprint],*[onbeforescriptexecute],*[onbeforetoggle],*[onbeforeunload],*[onbegin],*[onbeginEvent],*[onblocked],*[onblur],*[onboundary],*[onboundschange],*[onbroadcast],*[onbufferedamountlow],*[oncached],*[oncancel],*[oncanplay],*[oncanplaythrough],*[onchange],*[onchargingchange],*[onchargingtimechange],*[onchecking],*[onclick],*[onclose],*[oncommand],*[oncommandupdate],*[oncomplete],*[oncompositionend],*[oncompositionstart],*[oncompositionupdate],*[onconnect],*[onconnectionavailable],*[oncontentvisibilityautostatechange],*[oncontextlost],*[oncontextmenu],*[oncontextrestored],*[oncontrollerchange],*[oncookiechange],*[oncopy],*[oncuechange],*[oncurrententrychange],*[oncut],*[ondata],*[ondataavailable],*[ondblclick],*[ondeactivated],*[ondequeue],*[ondevicechange],*[ondevicelight],*[ondevicemotion],*[ondeviceorientation],*[ondeviceorientationabsolute],*[ondischargingtimechange],*[ondispose],*[ondownloading],*[ondrag],*[ondragdrop],*[ondragend],*[ondragenter],*[ondragexit],*[ondragleave],*[ondragover],*[ondragstart],*[ondrain],*[ondrop],*[ondurationchange],*[onemptied],*[onencrypted],*[onend],*[onendEvent],*[onended],*[onenter],*[onerror],*[onexit],*[onfetch],*[onfinish],*[onfocus],*[onfocusin],*[onfocusout],*[onformdata],*[onfullscreenchange],*[onfullscreenerror],*[ongamepadaxismove],*[ongamepadbuttondown],*[ongamepadbuttonup],*[ongamepadconnected],*[ongamepaddisconnected],*[ongatheringstatechange],*[onget],*[ongotpointercapture],*[onhashchange],*[oninput],*[oninputsourceschange],*[oninstall],*[oninvalid],*[onkeydown],*[onkeypress],*[onkeystatuseschange],*[onkeyup],*[onlanguagechange],*[onlevelchange],*[onload],*[onloadeddata],*[onloadedmetadata],*[onloadend],*[onloading],*[onloadingdone],*[onloadingerror],*[onloadstart],*[onlostpointercapture],*[onmark],*[onmerchantvalidation],*[onmessage],*[onmessageerror],*[onmetadatachange],*[onmidimessage],*[onmousedown],*[onmouseenter],*[onmouseleave],*[onmouselongtap],*[onmousemove],*[onmouseout],*[onmouseover],*[onmouseup],*[onmousewheel],*[onmozaccesskeynotfound],*[onmozfullscreenchange],*[onmozfullscreenerror],*[onmozorientationchange],*[onmozpointerlockchange],*[onmozpointerlockerror],*[onmozshowdropdown],*[onmozshowdropdown-sourcetouch],*[onmozvisualresize],*[onmozvisualscroll],*[onmute],*[onnavigate],*[onnavigateerror],*[onnavigatesuccess],*[onnomatch],*[onnotificationclick],*[onnotificationclose],*[onnoupdate],*[onobsolete],*[onoffline],*[ononline],*[onopen],*[onorientationchange],*[onoverflow],*[onpagehide],*[onpageshow],*[onpaste],*[onpause],*[onpayerdetailchange],*[onpaymentmethodchange],*[onphoto],*[onplay],*[onplaybackstatechange],*[onplaying],*[onpointercancel],*[onpointerdown],*[onpointerenter],*[onpointerleave],*[onpointerlockchange],*[onpointerlockerror],*[onpointermove],*[onpointerout],*[onpointerover],*[onpointerrawupdate],*[onpointerup],*[onpopstate],*[onpopuphidden],*[onpopuphiding],*[onpopuppositioned],*[onpopupshowing],*[onpopupshown],*[onpositionstatechange],*[onprintPreviewUpdate],*[onprioritychange],*[onprocessorerror],*[onprogress],*[onpush],*[onpushsubscriptionchange],*[onratechange],*[onreadystatechange],*[onrejectionhandled],*[onrelease],*[onremove],*[onremovesourcebuffer],*[onremovetrack],*[onrepeat],*[onrepeatEvent],*[onrequestprogress],*[onreset],*[onresize],*[onresourcetimingbufferfull],*[onresponseprogress],*[onresult],*[onresume],*[onrtctransform],*[onscroll],*[onscrollend],*[onsecuritypolicyviolation],*[onseeked],*[onseeking],*[onselect],*[onselectend],*[onselectionchange],*[onselectstart],*[onset],*[onshippingaddresschange],*[onshippingoptionchange],*[onshow],*[onslotchange],*[onsoundend],*[onsoundstart],*[onsourceclose],*[onsourceended],*[onsourceopen],*[onspeechend],*[onspeechstart],*[onsqueeze],*[onsqueezeend],*[onsqueezestart],*[onstalled],*[onstart],*[onstatechange],*[onstop],*[onstorage],*[onsubmit],*[onsuccess],*[onsupportedkeyschange],*[onsuspend],*[onsystemstatusbarclick],*[onterminate],*[ontext],*[ontextInput],*[ontimeout],*[ontimeupdate],*[ontoggle],*[ontonechange],*[ontouchcancel],*[ontouchend],*[ontouchmove],*[ontouchstart],*[ontransitioncancel],*[ontransitionend],*[ontransitionrun],*[ontransitionstart],*[ontypechange],*[onuncapturederror],*[onunderflow],*[onunhandledrejection],*[onunload],*[onunmute],*[onupdate],*[onupdateend],*[onupdatefound],*[onupdateready],*[onupdatestart],*[onupgradeneeded],*[onuserproximity],*[onversionchange],*[onvisibilitychange],*[onvoiceschanged],*[onvolumechange],*[onvrdisplayactivate],*[onvrdisplayconnect],*[onvrdisplaydeactivate],*[onvrdisplaydisconnect],*[onvrdisplaypresentchange],*[onwaiting],*[onwaitingforkey],*[onwarning],*[onwebkitAnimationEnd],*[onwebkitAnimationIteration],*[onwebkitAnimationStart],*[onwebkitTransitionEnd],*[onwebkitanimationend],*[onwebkitanimationiteration],*[onwebkitanimationstart],*[onwebkittransitionend],*[onwheel],*[onzoom]",
+
 	/**
 	 * Sanitize a parsed DOM fragment by removing unsafe elements and
 	 * stripping inline event-handler attributes (on*).
@@ -937,38 +1011,32 @@ const WindowScopeVariables = {
 	 * @returns {DocumentFragment} The same fragment, sanitized
 	 */
 	sanitizeFragment(fragment, pluginID) {
-		if (pluginID) {
-			let scope = PluginSandbox.getScope(pluginID);
-			if (!scope || VarCheck.isPrivilegedScope(scope)) {
-				return fragment;
-			}
-		}
-		let walker = fragment.ownerDocument.createTreeWalker(
-			fragment,
-			NodeFilter.SHOW_ELEMENT
-		);
+		if (!pluginID) return fragment;
+		let scope = PluginSandbox.getScope(pluginID);
+		if (!scope || VarCheck.isPrivilegedScope(scope)) return;
 
-		let toRemove = [];
-		let node;
-		while ((node = walker.nextNode())) {
-			if (this.UNSAFE_TAGS.has(node.localName.toLowerCase())) {
-				toRemove.push(node);
-				continue;
-			}
-			// Convert on* attributes: store as data attrs for post-insertion activation
+
+		// Remove unsafe elements via querySelectorAll (faster than tree walking)
+		let unsafeSelector = Array.from(this.UNSAFE_TAGS).join(",");
+		for (let node of fragment.querySelectorAll(unsafeSelector)) {
+			node.remove();
+		}
+
+		// Convert on* attributes to data-sandbox-on-* for post-insertion activation.
+		// Use the pre-compiled ON_EVENT_ATTRS_SELECTOR to visit only elements that
+		// actually carry one of the known event-handler attributes, avoiding a full
+		// tree walk over every node.
+		for (let node of fragment.querySelectorAll(this.ON_EVENT_ATTRS_SELECTOR)) {
 			for (let attr of Array.from(node.attributes)) {
 				if (/^on/i.test(attr.localName)) {
 					let eventName = attr.localName.slice(2);
 					node.removeAttribute(attr.name);
 					if (pluginID) {
 						node.setAttribute(`data-sandbox-on-${eventName}`, attr.value);
+						node.classList.add("_sandbox-has-handlers");
 					}
 				}
 			}
-		}
-
-		for (let node of toRemove) {
-			node.remove();
 		}
 
 		return fragment;
@@ -987,13 +1055,9 @@ const WindowScopeVariables = {
 		let scope = PluginSandbox.getScope(pluginID);
 		if (!scope || VarCheck.isPrivilegedScope(scope)) return;
 
-		let walker = root.ownerDocument.createTreeWalker(
-			root,
-			NodeFilter.SHOW_ELEMENT
-		);
-
-		let node = root;
-		do {
+		// Only process elements marked by sanitizeFragment
+		for (let node of root.querySelectorAll("._sandbox-has-handlers")) {
+			node.classList.remove("_sandbox-has-handlers");
 			for (let attr of Array.from(node.attributes)) {
 				let match = attr.localName.match(/^data-sandbox-on-(.+)$/);
 				if (!match) continue;
@@ -1017,7 +1081,33 @@ const WindowScopeVariables = {
 				});
 			}
 		}
-		while ((node = walker.nextNode()));
+	},
+
+	/**
+	 * Call activateInlineHandlers once elem is connected to the DOM.
+	 * If already connected, activates immediately; otherwise sets up a
+	 * one-shot MutationObserver on the document to detect insertion.
+	 *
+	 * @param {Element} elem
+	 * @param {string} pluginID
+	 */
+	activateWhenConnected(elem, pluginID) {
+		if (!pluginID) return;
+		let scope = PluginSandbox.getScope(pluginID);
+		if (!scope || VarCheck.isPrivilegedScope(scope)) return;
+
+		if (elem.isConnected) {
+			WindowScopeVariables.activateInlineHandlers(elem, pluginID);
+			return;
+		}
+		let doc = elem.ownerDocument;
+		let observer = new doc.defaultView.MutationObserver(() => {
+			if (elem.isConnected) {
+				observer.disconnect();
+				WindowScopeVariables.activateInlineHandlers(elem, pluginID);
+			}
+		});
+		observer.observe(doc.documentElement || doc, { childList: true, subtree: true });
 	},
 };
 
