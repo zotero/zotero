@@ -148,6 +148,10 @@ function defineFrozenIdentity(scope, addon, uuid, perms) {
 	}
 }
 
+function defineFunction(scope, name, func) {
+	Cu.exportFunction(func, scope, { defineAs: name });
+}
+
 function loadPrivilegedScope(addon, uuid, globalVars = {}) {
 	var scope = new Cu.Sandbox(
 		Services.scriptSecurityManager.getSystemPrincipal(),
@@ -254,30 +258,35 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 	Object.assign(
 		scope,
 		{
-			loadSubScript: (res) => {
-				let uri = new URL(res, baseURI).href;
-				if (!uri.startsWith(baseURI)) {
-					throw new Error(`loadSubScript: ${res} resolves outside the plugin directory`);
-				}
-				return Services.scriptloader.loadSubScript(uri, scope);
-			},
-			isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
-
 			// Add additional global vars
 			Localization: ScopeUtils.ensureConstructableInScope(Localization, scope, {
 				mutable: true,
 				returnParser: instance => ScopeVariables.createAllowlistMirrorObject(instance, true, addon.id, { frozen: false, strong: true, pathPrefix: "Localization" }),
 				trace: { pluginID: addon.id, path: "Localization" },
 			}),
-			setTimeout,
-			clearTimeout,
-			setInterval,
-			clearInterval,
-			requestIdleCallback,
-			cancelIdleCallback,
 			...globalVars
 		}
 	);
+
+	let funcToExport = {
+		setTimeout,
+		clearTimeout,
+		setInterval,
+		clearInterval,
+		requestIdleCallback,
+		cancelIdleCallback,
+		loadSubScript: (res) => {
+			let uri = new URL(res, baseURI).href;
+			if (!uri.startsWith(baseURI)) {
+				throw new Error(`loadSubScript: ${res} resolves outside the plugin directory`);
+			}
+			return Services.scriptloader.loadSubScript(uri, scope);
+		},
+		isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
+	};
+	for (let key in funcToExport) {
+		defineFunction(scope, key, funcToExport[key]);
+	}
 
 	defineFrozenIdentity(scope, addon, uuid, {
 		permissions,
