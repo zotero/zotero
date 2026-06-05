@@ -980,7 +980,7 @@ Zotero.Items = function () {
 	};
 
 
-	this.trash = async function (ids, options = {}) {
+	this.trash = async function (ids) {
 		Zotero.DB.requireTransaction();
 
 		var libraryIDs = new Set();
@@ -1073,9 +1073,9 @@ Zotero.Items = function () {
 	};
 	
 	
-	this.trashTx = function (ids, options) {
+	this.trashTx = function (ids) {
 		return Zotero.DB.executeTransaction(async function () {
-			return this.trash(ids, options);
+			return this.trash(ids);
 		}.bind(this));
 	}
 	
