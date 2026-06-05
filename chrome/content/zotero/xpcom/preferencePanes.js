@@ -137,8 +137,8 @@
 		 * 		the plugin's root. Only available for privileged plugins.
 		 * @param {string[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane, optionally
 		 * 		relative to the plugin's root
-		 * @param {string[]} [options.l10nFiles] Array of Fluent (.ftl) file URIs to load for localization, optionally
-		 * 		relative to the plugin's root. Loaded via MozXULElement.insertFTLIfNeeded().
+		 * @param {string[]} [options.l10nFiles] Array of Fluent (.ftl) file paths to load for localization.
+		 * 		Registered once via `Zotero.WindowResourceManager` and applied to every preferences window.
 		 * @param {Function} [options.onLoad] Called after the pane content is loaded and inserted into the document.
 		 * 		Receives `{ doc, body }` where `doc` is the preferences document and `body` is the pane container element.
 		 * @param {string} [options.helpURL] If provided, a help button will be displayed under the pane
@@ -202,11 +202,20 @@
 				src: await Zotero.Plugins.resolveURI(options.pluginID, options.src),
 				scripts: await Promise.all(options.scripts.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
 				stylesheets: await Promise.all(options.stylesheets.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
-				l10nFiles: options.l10nFiles,
 				onLoad,
 				helpURL: options.helpURL,
 				defaultXUL: true,
 			};
+
+			addPaneOptions.l10nResourceIDs = options.l10nFiles.map((url, index) => {
+				return Zotero.WindowResourceManager.registerResource({
+					resourceID: `${addPaneOptions.id}-l10n-${index}`,
+					pluginID: options.pluginID,
+					target: "preferencePane",
+					type: "ftl",
+					url,
+				});
+			}).filter(Boolean);
 
 			this.pluginPanes.push(addPaneOptions);
 			Zotero.debug(`Plugin ${addPaneOptions.pluginID} registered preference pane ${addPaneOptions.id} ("${addPaneOptions.rawLabel}")`);
@@ -221,6 +230,12 @@
 		 * @param {string} id - ID of the pane to unregister, as returned by `Zotero.PreferencePanes.register()`
 		 */
 		unregister: function (id) {
+			let pane = this.pluginPanes.find(p => p.id === id);
+			if (pane) {
+				for (let resourceID of pane.l10nResourceIDs || []) {
+					Zotero.WindowResourceManager.unregisterResource(resourceID);
+				}
+			}
 			this.pluginPanes = this.pluginPanes.filter(p => p.id !== id);
 			this._refreshPreferences();
 		},
