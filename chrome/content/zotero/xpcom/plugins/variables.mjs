@@ -31,6 +31,8 @@ import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
 
+const CALLBACK_WRAPPERS_KEY = "__zoteroCallbackWrappers__";
+
 const ScopeVariables = {
 
 	/**
@@ -596,7 +598,7 @@ const WindowScopeVariables = {
 			return node;
 		}
 
-		let root = rootNode?.deref ? rootNode.deref() : rootNode;
+		let root = WindowScopeVariables.resolveRoot(rootNode);
 
 		if (VarCheck.isDocumentObject(node)) {
 			return WindowScopeVariables.createSafeDocument(node, pluginID, { rootNode });
@@ -1053,6 +1055,14 @@ const WindowScopeVariables = {
 			return elem;
 		}
 
+		// Refuse to wrap a connected element outside its rootNode subtree.
+		if (rootNode) {
+			let root = WindowScopeVariables.resolveRoot(rootNode);
+			if (root && elem.isConnected && !VarCheck.isElementWithinSubtree(elem, root)) {
+				return null;
+			}
+		}
+
 		// let elemRef = new WeakRef(elem);
 		let wrapper = Cu.createObjectIn(scope);
 
@@ -1122,6 +1132,81 @@ const WindowScopeVariables = {
 								},
 							});
 						}
+						// Methods that mutate the element's parent (sibling
+						// insertion, self-removal). When actual IS the rootNode,
+						// its parent is outside the plugin's subtree.
+						if (WindowScopeVariables.PARENT_MUTATING_METHODS.has(prop)) {
+							return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
+								rootNode,
+								argValidator() {
+									let r = WindowScopeVariables.resolveRoot(rootNode);
+									if (r && actual === r) {
+										Zotero.warn(`${prop}() on a rootNode element is not allowed.`);
+										return false;
+									}
+									return true;
+								},
+							});
+						}
+						if (prop === "insertAdjacentHTML") {
+							let holderFn = Cu.createObjectIn(scope);
+							Cu.exportFunction(
+								(position, html) => {
+									let pos = String(position || "").toLowerCase();
+									if (!["beforebegin", "afterbegin", "beforeend", "afterend"].includes(pos)) {
+										throw new Error(`insertAdjacentHTML: invalid position "${position}"`);
+									}
+									// beforebegin/afterend write to the parent; refuse if
+									// actual is the rootNode (parent is out of subtree).
+									if (pos === "beforebegin" || pos === "afterend") {
+										let r = WindowScopeVariables.resolveRoot(rootNode);
+										if (r && actual === r) {
+											Zotero.warn(`insertAdjacentHTML '${pos}' on a rootNode element is not allowed.`);
+											return;
+										}
+									}
+									let { fragment } = WindowScopeVariables.parseSanitizedFragment(
+										String(html ?? ""), actual.ownerDocument, pluginID
+									);
+									switch (pos) {
+										case "beforebegin":
+											if (actual.parentNode) actual.parentNode.insertBefore(fragment, actual);
+											break;
+										case "afterbegin":
+											actual.insertBefore(fragment, actual.firstChild);
+											break;
+										case "beforeend":
+											actual.appendChild(fragment);
+											break;
+										case "afterend":
+											if (actual.parentNode) {
+												actual.parentNode.insertBefore(fragment, actual.nextSibling);
+											}
+											break;
+									}
+									WindowScopeVariables.activateWhenConnected(actual, pluginID);
+								},
+								holderFn,
+								{ defineAs: "f" }
+							);
+							return holderFn.f;
+						}
+						if (prop === "setHTMLUnsafe" || prop === "setHTML") {
+							let holderFn = Cu.createObjectIn(scope);
+							Cu.exportFunction(
+								(html) => {
+									let { fragment } = WindowScopeVariables.parseSanitizedFragment(
+										String(html ?? ""), actual.ownerDocument, pluginID
+									);
+									while (actual.firstChild) actual.removeChild(actual.firstChild);
+									actual.appendChild(fragment);
+									WindowScopeVariables.activateWhenConnected(actual, pluginID);
+								},
+								holderFn,
+								{ defineAs: "f" }
+							);
+							return holderFn.f;
+						}
 						return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, { rootNode });
 					}
 
@@ -1176,34 +1261,9 @@ const WindowScopeVariables = {
 					}
 					// Sanitize HTML strings to strip unsafe tags and on* event handlers.
 					if (prop === "innerHTML") {
-						if (typeof value !== "string") {
-							VarCheck.throwPropError("set", prop, "value must be a string");
-						}
 						let doc = actual.ownerDocument;
-						let parser = new doc.defaultView.DOMParser();
-						let fragment = doc.createDocumentFragment();
-						let useXML = false;
-						let xmlParsed = parser.parseFromSafeString(
-							`<div xmlns="http://www.w3.org/1999/xhtml"
-								 xmlns:html="http://www.w3.org/1999/xhtml"
-								 xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-							${value}
-							</div>`,
-							"application/xml"
-						);
-						if (xmlParsed.documentElement.localName !== "parsererror") {
-							useXML = true;
-							for (let child of Array.from(xmlParsed.documentElement.childNodes)) {
-								fragment.appendChild(doc.importNode(child, true));
-							}
-						}
-						else {
-							let htmlParsed = parser.parseFromSafeString(`<div>${value}</div>`, "text/html");
-							for (let child of Array.from(htmlParsed.querySelector("div").childNodes)) {
-								fragment.appendChild(doc.importNode(child, true));
-							}
-						}
-						WindowScopeVariables.sanitizeFragment(fragment, pluginID);
+						let { fragment, useXML } = WindowScopeVariables
+							.parseSanitizedFragment(value, doc, pluginID);
 						let result;
 						if (useXML) {
 							// Directly replace children to preserve namespace information.
@@ -1216,8 +1276,7 @@ const WindowScopeVariables = {
 						else {
 							let tmp = doc.createElement("div");
 							tmp.appendChild(fragment);
-							value = tmp.innerHTML;
-							result = Reflect.set(actual, prop, value);
+							result = Reflect.set(actual, prop, tmp.innerHTML);
 						}
 						WindowScopeVariables.activateWhenConnected(actual, pluginID);
 						return result;
@@ -1267,11 +1326,31 @@ const WindowScopeVariables = {
 				return VarCheck.getOriginalRef(arg);
 			}
 			if (typeof arg === "function") {
-				// If this function has already been wrapped, return the wrapped version
-				if (VarCheck.hasOriginalRef(arg)) {
-					return VarCheck.getOriginalRef(arg);
+				// Key wrappers by (callback, rootNode) -- a single callback
+				// registered on two elements with different rootNodes must
+				// produce two wrappers so each handler sees its own subtree.
+				let rootKey = WindowScopeVariables.resolveRoot(rootNode) ?? null;
+				let waived = Cu.waiveXrays(arg);
+				let wrappersByRoot = waived[CALLBACK_WRAPPERS_KEY];
+				if (wrappersByRoot && wrappersByRoot.has(rootKey)) {
+					return wrappersByRoot.get(rootKey);
 				}
-				
+				if (!wrappersByRoot) {
+					wrappersByRoot = new Map();
+					try {
+						Object.defineProperty(waived, CALLBACK_WRAPPERS_KEY, {
+							value: wrappersByRoot,
+							enumerable: false,
+							configurable: false,
+							writable: false,
+						});
+					}
+					catch {
+						// Frozen sandbox-side function -- fall back to one-shot.
+						wrappersByRoot = null;
+					}
+				}
+
 				let wrappedCallback = function (...callbackArgs) {
 					// Wrap DOM nodes and Events in callback arguments
 					let wrappedArgs = callbackArgs.map((cbArg) => {
@@ -1293,15 +1372,11 @@ const WindowScopeVariables = {
 					let result = arg.apply(this, scopeArgs);
 					return (result);
 				};
-				
-				// Store the reference to the wrapped callback for future checks
-				Object.defineProperty(arg, ORIGINAL_REF_KEY, {
-					value: () => wrappedCallback,
-					enumerable: false,
-					configurable: false,
-					writable: false,
-				});
-				
+
+				if (wrappersByRoot) {
+					wrappersByRoot.set(rootKey, wrappedCallback);
+				}
+
 				return wrappedCallback;
 			}
 			if (VarCheck.isArrayLike(arg)) {
@@ -1312,6 +1387,11 @@ const WindowScopeVariables = {
 		});
 	},
 
+	resolveRoot(rootNode) {
+		return rootNode?.deref ? rootNode.deref() : rootNode;
+	},
+
+
 	UNSAFE_TAGS: new Set([
 		"script",
 		"browser",
@@ -1320,6 +1400,26 @@ const WindowScopeVariables = {
 		"embed",
 		"meta",
 	]),
+
+	PARENT_MUTATING_METHODS: new Set(["before", "after", "replaceWith", "remove"]),
+
+	URL_ATTRS: new Set([
+		"href",
+		"src",
+		"action",
+		"formaction",
+		"data",
+		"poster",
+		"background",
+		"ping",
+		"srcdoc",
+	]),
+
+	// Selector visits only elements that carry one of the URL attributes,
+	// matching any namespace via `[*|attr]` (so xlink:href is covered).
+	URL_ATTRS_SELECTOR: "[*|href],[*|src],[*|action],[*|formaction],[*|data],[*|poster],[*|background],[*|ping],[*|srcdoc]",
+
+	UNSAFE_URL_SCHEMES: /^\s*javascript\s*:/i,
 
 	// Pre-compiled CSS selector for all known on* event-handler attributes from
 	// Firefox nsGkAtomList.h. Used by sanitizeFragment to avoid querying
@@ -1371,7 +1471,59 @@ const WindowScopeVariables = {
 			}
 		}
 
+		// Strip javascript:/vbscript:/data:text/html URIs from URL attributes
+		// so a click or submit can't execute script. The selector visits only
+		// elements that actually carry a URL attribute.
+		for (let node of fragment.querySelectorAll(this.URL_ATTRS_SELECTOR)) {
+			for (let attr of Array.from(node.attributes)) {
+				if (!this.URL_ATTRS.has(attr.localName.toLowerCase())) continue;
+				if (this.UNSAFE_URL_SCHEMES.test(attr.value)) {
+					node.removeAttributeNode(attr);
+				}
+			}
+		}
+
 		return fragment;
+	},
+
+	/**
+	 * Parse an HTML/XHTML string into a sanitized DocumentFragment.
+	 * Tries XML first to preserve namespaces, falls back to HTML.
+	 *
+	 * @param {string} html
+	 * @param {Document} doc
+	 * @param {string} pluginID
+	 * @returns {{ fragment: DocumentFragment, useXML: boolean }}
+	 */
+	parseSanitizedFragment(html, doc, pluginID) {
+		if (typeof html !== "string") {
+			VarCheck.throwPropError("set", "innerHTML", "value must be a string");
+		}
+		let parser = new doc.defaultView.DOMParser();
+		let fragment = doc.createDocumentFragment();
+		let useXML = false;
+		let xmlParsed = parser.parseFromSafeString(
+			`<div xmlns="http://www.w3.org/1999/xhtml"
+				 xmlns:html="http://www.w3.org/1999/xhtml"
+				 xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+			${html}
+			</div>`,
+			"application/xml"
+		);
+		if (xmlParsed.documentElement.localName !== "parsererror") {
+			useXML = true;
+			for (let child of Array.from(xmlParsed.documentElement.childNodes)) {
+				fragment.appendChild(doc.importNode(child, true));
+			}
+		}
+		else {
+			let htmlParsed = parser.parseFromSafeString(`<div>${html}</div>`, "text/html");
+			for (let child of Array.from(htmlParsed.querySelector("div").childNodes)) {
+				fragment.appendChild(doc.importNode(child, true));
+			}
+		}
+		WindowScopeVariables.sanitizeFragment(fragment, pluginID);
+		return { fragment, useXML };
 	},
 
 	/**
