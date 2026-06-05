@@ -25,7 +25,11 @@
 
 
 {
-	const PluginAPIBase = ChromeUtils.importESModule("chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs").PluginAPIBase;
+	const lazy = {};
+	ChromeUtils.defineESModuleGetters(lazy, {
+		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+	});
 
 
 	/**
@@ -193,7 +197,7 @@
 	 */
 
 
-	class ItemPaneSectionManagerInternal extends PluginAPIBase {
+	class ItemPaneSectionManagerInternal extends lazy.PluginAPIBase {
 		constructor() {
 			super();
 			this.config = {
@@ -281,6 +285,40 @@
 					},
 				},
 			};
+		}
+
+		_hookNames = ['onInit', 'onDestroy', 'onItemChange', 'onRender', 'onAsyncRender', 'onToggle'];
+
+		_convert(option) {
+			option = super._convert(option);
+
+			for (let hookName of this._hookNames) {
+				if (option[hookName]) {
+					option[hookName] = lazy.ScopeVariables.fromScope(
+						option[hookName],
+						option.pluginID,
+						{ rootNode: props => props.body }
+					);
+				}
+			}
+
+			if (option.sectionButtons) {
+				option.sectionButtons = option.sectionButtons.map((button) => {
+					if (button.onClick) {
+						return {
+							...button,
+							onClick: lazy.ScopeVariables.fromScope(
+								button.onClick,
+								option.pluginID,
+								{ rootNode: props => props.body }
+							)
+						};
+					}
+					return button;
+				});
+			}
+
+			return option;
 		}
 
 		_validate(option) {
@@ -375,7 +413,7 @@
 	 */
 
 
-	class ItemPaneInfoRowManagerInternal extends PluginAPIBase {
+	class ItemPaneInfoRowManagerInternal extends lazy.PluginAPIBase {
 		constructor() {
 			super();
 			this.config = {
@@ -429,6 +467,22 @@
 					},
 				},
 			};
+		}
+
+		_convert(option) {
+			option = super._convert(option);
+
+			if (option.onGetData) {
+				option.onGetData = lazy.ScopeVariables.fromScope(option.onGetData, option.pluginID);
+			}
+			if (option.onSetData) {
+				option.onSetData = lazy.ScopeVariables.fromScope(option.onSetData, option.pluginID);
+			}
+			if (option.onItemChange) {
+				option.onItemChange = lazy.ScopeVariables.fromScope(option.onItemChange, option.pluginID);
+			}
+
+			return option;
 		}
 
 		refresh(rowID) {
