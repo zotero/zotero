@@ -26,6 +26,7 @@
 
 import { PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 
+const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
 
 const VarCheck = {
 	isObject(v) {
@@ -41,6 +42,9 @@ const VarCheck = {
 	},
 	isPlainObject(v) {
 		if (v === null || typeof v !== "object") return false;
+		// Unwaive Xray waivers so prototype comparisons work correctly
+		// for cross-compartment objects (e.g. Cu.waiveXrays'd sandbox objects)
+		v = Cu.unwaiveXrays(v);
 		let proto = Object.getPrototypeOf(v);
 		if (proto === null) return true;
 		return proto === Object.prototype || proto === VarCheck._getObjectPrototype(v);
@@ -53,7 +57,7 @@ const VarCheck = {
 	},
 
 	_getObjectPrototype(v) {
-		return Cu.getGlobalForObject(v).Object.prototype;
+		return Cu.getGlobalForObject(Cu.unwaiveXrays(v)).Object.prototype;
 	},
 
 	isArrayLike(v) {
@@ -274,6 +278,25 @@ const VarCheck = {
 			cur = proto;
 		}
 		return Array.from(seen);
+	},
+
+	getPrototypeValueNames(obj, { allowSymbols = false } = {}) {
+		let seen = new Set();
+		let cur = obj;
+		while (cur && !VarCheck._isObjectPrototype(cur)) {
+			let proto = Object.getPrototypeOf(cur);
+			if (!proto || VarCheck._isObjectPrototype(proto)) break;
+
+			for (let k of Reflect.ownKeys(proto)) {
+				if (!allowSymbols && typeof k === "symbol") continue;
+				let desc = Object.getOwnPropertyDescriptor(proto, k);
+				if (desc && "value" in desc && typeof desc.value !== "function") {
+					seen.add(k);
+				}
+			}
+			cur = proto;
+		}
+		return Array.from(seen);
 	}
 };
 
@@ -427,6 +450,32 @@ const ScopeUtils = {
 			});
 		}
 
+		// Expose prototype-chain value properties (non-function) as readonly
+		let valueNames = VarCheck.getPrototypeValueNames(instance);
+		for (let name of valueNames) {
+			if (Object.prototype.hasOwnProperty.call(facade, name)) continue;
+			let val = instance[name];
+			let holder = Cu.createObjectIn(scope);
+			Cu.exportFunction(() => {
+				return ScopeUtils.ensurePromiseVarInScope(val, scope, { mutable });
+			}, holder, { defineAs: "g" });
+
+			Cu.exportFunction(
+				() => {
+					VarCheck.throwPropError("set", name);
+				},
+				holder,
+				{ defineAs: "s" }
+			);
+
+			Object.defineProperty(facade, name, {
+				enumerable: true,
+				configurable: false,
+				get: holder.g,
+				set: holder.s,
+			});
+		}
+
 		// Expose own enumerable data properties and getters as readonly
 		let ownDescriptors = Object.getOwnPropertyDescriptors(instance);
 		for (let key of Object.keys(ownDescriptors)) {
@@ -472,9 +521,17 @@ const ScopeUtils = {
 			});
 		}
 
+		// Store a reference to the original instance for unwrapping in fromScope
+		Object.defineProperty(facade, ORIGINAL_REF_KEY, {
+			value: () => instanceRef.deref(),
+			enumerable: false,
+			configurable: false,
+			writable: false,
+		});
+
 		Object.preventExtensions(facade);
 		return facade;
 	},
 };
 
-export { VarCheck, ScopeUtils };
+export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY };
