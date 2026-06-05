@@ -94,9 +94,9 @@
 	color: var(--accent-red);
 }
 
-// `edit` isn't in _item-tree.scss's $-coloredIcons list, so the
-// universal-icon rule from `.focus-states-target .row .icon-{name}` doesn't
-// reach it. Register it locally for the in-row edit button.
+// `edit` and `trash` aren't in _item-tree.scss's $-coloredIcons list, so
+// the universal-icon rule from `.focus-states-target .row .icon-{name}`
+// doesn't reach them. Register locally.
 .focus-states-target .row .icon-edit {
 	@include svgicon("edit", "universal", "16");
 	fill: var(--fill-secondary);
@@ -105,8 +105,14 @@
 	fill: var(--accent-white);
 }
 
-// Hide vtable containers via the standard `hidden` attribute (used for the
-// empty-grants state in the subpane and the selection-info panel).
+.focus-states-target .row .icon-trash {
+	@include svgicon("trash", "universal", "16");
+	fill: var(--accent-red);
+}
+.focus-states-target:focus-within .row.selected .icon-trash {
+	fill: var(--accent-white);
+}
+
 .virtualized-table-container[hidden] {
 	display: none;
 }
@@ -137,25 +143,62 @@
 		padding: 0;
 	}
 
-	.file-access-cell { font-variant-numeric: tabular-nums; }
-	.file-access-allow { color: var(--accent-green); font-weight: 600; }
-	.file-access-deny { color: var(--accent-red); font-weight: 600; }
-	.file-access-zero { color: var(--fill-quarternary); font-weight: normal; }
-	.file-access-sep { color: var(--fill-secondary); margin: 0 2px; }
-	.file-access-na,
 	.size-na { color: var(--fill-secondary); }
-
-	// Uninstalled orphans -- nudge the eye toward them so the user knows
-	// what to clean up.
 	.plugin-name-uninstalled { color: var(--accent-orange); }
+}
 
-	// Mute the "0 / 0" zeroes a bit harder on the focused-selected row so
-	// they still read as muted against the accent-blue background.
-	.virtualized-table:focus-within .row.selected .file-access-zero {
-		opacity: 0.5;
+// Alternating row backgrounds, matching the citation style manager
+// in preferences_cite.scss.
+%striped-rows {
+	.virtualized-table .row {
+		&.odd  { background-color: var(--material-stripe); }
+		&.even { background-color: var(--material-background); }
 	}
 }
 
 .permissions-grants-table {
 	max-height: 220px;
+	@extend %striped-rows;
+}
+
+.permissions-prefs-table {
+	max-height: 240px;
+	@extend %striped-rows;
+
+	.pref-editable {
+		cursor: pointer;
+	}
+	.pref-editable:hover {
+		background: var(--material-mix-quinary);
+	}
+
+	.pref-modified {
+		font-weight: 600;
+	}
+
+	.pref-type-boolean { color: var(--accent-blue); }
+	.pref-type-number  { color: var(--accent-green); }
+	.pref-type-unknown { color: var(--fill-secondary); }
+
+	// Always-rendered <input> for string/int values: strip native chrome
+	// until :focus so it reads as a label otherwise. Transparent border
+	// reserves the box so focusing doesn't shift content.
+	.pref-value-input {
+		width: 100%;
+		box-sizing: border-box;
+		margin: 0 -5px;
+		padding: 0 4px;
+		border: 1px solid transparent;
+		border-radius: 3px;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		outline: none;
+		cursor: text;
+	}
+	.pref-value-input:focus {
+		border-color: var(--accent-blue);
+		background: var(--material-background);
+		color: var(--fill-primary);
+	}
 }
