@@ -24,14 +24,13 @@
 */
 
 
-var Cu = Components.utils;
-
 import {
 	setTimeout, clearTimeout,
 	setInterval, clearInterval,
 	requestIdleCallback, cancelIdleCallback
 } from "resource://gre/modules/Timer.sys.mjs";
-import { createAllowlistMirrorObject, Utils, ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { Utils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
@@ -46,29 +45,25 @@ function loadScope(addon, globalVars = {}) {
 	let currentPermissions = Utils.getPermissionsString(addon.installPermissions.permissions);
 	let existingScope = scopes.get(addon.id);
 	
-	if (existingScope && existingScope.PERMISSIONS === currentPermissions) {
-		Zotero.debug(`Reusing existing scope for plugin ${addon.id}`);
-		return;
-	}
-	
 	if (existingScope) {
+		if (existingScope.PERMISSIONS === currentPermissions) {
+			Zotero.debug(`Reusing existing scope for plugin ${addon.id}`);
+			ChromeUtils.defineLazyGetter(existingScope, "console", ScopeVariables.getConsole(addon));
+			return;
+		}
 		Zotero.debug(`Permissions changed for plugin ${addon.id}, recreating scope`);
 		unloadScope(addon.id);
 	}
 
 	let scope;
-	if (addon.installPermissions.permissions.includes("zotero")) {
-		Zotero.debug(`Loading unprivileged scope for plugin ${addon.id}, permissions: ${currentPermissions}`);
-		scope = loadUnprivilegedScope(addon, globalVars);
-	}
-	else {
+	if (Utils.isPrivilegedPermission(addon)) {
 		Zotero.debug(`Loading privileged scope for plugin ${addon.id}`);
 		scope = loadPrivilegedScope(addon, globalVars);
 	}
-
-	ChromeUtils.defineLazyGetter(scope, "console", ScopeUtils.getConsole(addon, scope));
-
-	scopes.set(addon.id, scope);
+	else {
+		Zotero.debug(`Loading unprivileged scope for plugin ${addon.id}, permissions: ${currentPermissions}`);
+		scope = loadUnprivilegedScope(addon, globalVars);
+	}
 	
 	try {
 		let uri = addon.getResourceURI().spec + 'bootstrap.js';
@@ -152,6 +147,8 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 			...globalVars
 		}
 	);
+
+	ChromeUtils.defineLazyGetter(scope, "console", ScopeVariables.getConsole(addon));
 	
 	// fx140: Shim ChromeUtils.import() in the plugin scope
 	// TODO: Do we want this?
@@ -168,6 +165,8 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 			return Reflect.get(target, property, receiver);
 		}
 	});
+
+	scopes.set(addon.id, scope);
 
 	return scope;
 }
@@ -197,16 +196,6 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 
 	let rootURI = addon.getResourceURI().spec;
 	let permissions = addon.installPermissions.permissions;
-	let schema = Utils.getPermissionSchema(permissions);
-
-	let extraGlobals = {};
-	for (let key in schema) {
-		let obj = globalThis[key];
-		if (!obj) {
-			continue;
-		}
-		extraGlobals[key] = createAllowlistMirrorObject(obj, schema[key], scope);
-	}
 
 	Object.assign(
 		scope,
@@ -218,7 +207,6 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 				let moduleURI = `${rootURI}${res}`;
 				return Cu.importESModule(moduleURI, scope);
 			},
-			...extraGlobals,
 			PERMISSIONS: Utils.getPermissionsString(permissions),
 			
 			// Add additional global functions
@@ -232,6 +220,22 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 		}
 	);
 
+	ChromeUtils.defineLazyGetter(scope, "console", ScopeVariables.getConsole(addon));
+
+	scopes.set(addon.id, scope);
+
+	let schema = Utils.getPermissionSchema(permissions);
+
+	let extraGlobals = {};
+	for (let key in schema) {
+		let obj = globalThis[key];
+		if (!obj) {
+			continue;
+		}
+		extraGlobals[key] = ScopeVariables.createAllowlistMirrorObject(obj, schema[key], addon.id, { mutable: false, cache: true });
+	}
+
+	Object.assign(scope, extraGlobals);
 	return scope;
 }
 
