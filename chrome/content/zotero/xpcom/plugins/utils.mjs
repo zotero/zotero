@@ -24,7 +24,7 @@
 */
 
 
-import { PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
+import { SchemaKey, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 
 const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
 
@@ -108,6 +108,18 @@ const VarCheck = {
 		return false;
 	},
 
+	/**
+	 * Check if a value is a Zotero DataObject or Library instance
+	 */
+	isDataObject(value) {
+		try {
+			return value instanceof Zotero.DataObject
+				|| value instanceof Zotero.Library;
+		}
+		catch {}
+		return false;
+	},
+
 	isSameCompartment(obj1, obj2) {
 		// Non-objects (null, undefined, primitives) can be directly accessed across compartments
 		if (!this.isObjectLike(obj1) || !this.isObjectLike(obj2)) {
@@ -133,6 +145,18 @@ const VarCheck = {
 		throw new Error(`Permission denied: cannot ${op}${prop === undefined ? " " : ` "${p}".`}${reason ? ` (${reason})` : ""}`);
 	},
 
+	// Only run once at scope creation. Otherwise use `scope.PERMISSIONS`
+	resolvePermissions(rawPermissions) {
+		if (!Array.isArray(rawPermissions)) return rawPermissions;
+		let resolved = new Set(rawPermissions);
+		for (let perm of Object.keys(IMPLIED_PERMISSIONS)) {
+			if (resolved.has(perm)) {
+				for (let p of IMPLIED_PERMISSIONS[perm]) resolved.add(p);
+			}
+		}
+		return Array.from(resolved);
+	},
+
 	getPermissionsString(permissions) {
 		if (!Array.isArray(permissions)) {
 			return null;
@@ -141,7 +165,7 @@ const VarCheck = {
 	},
 
 	isPrivilegedPermission(addon) {
-		let permissions = addon.installPermissions.permissions;
+		let permissions = this.resolvePermissions(addon.installPermissions.permissions);
 		if (permissions.includes("*") || permissions.length === 0) {
 			return true;
 		}
@@ -208,11 +232,33 @@ const VarCheck = {
 	mergeSchema(a, b) {
 		// Allowed in either schema, allowed
 		if (a === true || b === true) return true;
+		if (a === false && b === false) return false;
+		if (a === false) return b;
+		if (b === false) return a;
+
+		// String value with the same handler wins
+		if (typeof a === "string" && typeof b === "string") return a === b ? a : a;
+		if (typeof a === "string" && this.isObject(b) && b[SchemaKey.HANDLER] === a) return a;
+		if (typeof b === "string" && this.isObject(a) && a[SchemaKey.HANDLER] === b) return b;
 
 		if (!this.isObject(a)) a = undefined;
 		if (!this.isObject(b)) b = undefined;
 		if (!a) return b;
 		if (!b) return a;
+
+		if (a[SchemaKey.HANDLER] && b[SchemaKey.HANDLER]) {
+			if (a[SchemaKey.HANDLER] === b[SchemaKey.HANDLER]) {
+				// Merge sub-schemas if both have the same handler specified
+				let out = { [SchemaKey.HANDLER]: a[SchemaKey.HANDLER] };
+				if (a[SchemaKey.SCHEMA] || b[SchemaKey.SCHEMA]) {
+					out[SchemaKey.SCHEMA] = this.mergeSchema(a[SchemaKey.SCHEMA] || undefined, b[SchemaKey.SCHEMA] || undefined);
+				}
+				return out;
+			}
+			else {
+				throw new Error(`Conflicting handlers: "${a[SchemaKey.HANDLER]}" vs "${b[SchemaKey.HANDLER]}"`);
+			}
+		}
 
 		let out = { ...a };
 
@@ -224,64 +270,64 @@ const VarCheck = {
 				out[k] = bv;
 				continue;
 			}
-			// Allowed in either schema, allowed
-			if (av === true || bv === true) {
-				out[k] = true;
-				continue;
-			}
-			// Both objects, merge recursively
-			if (this.isObject(av) && this.isObject(bv)) {
-				out[k] = this.mergeSchema(av, bv);
-				continue;
-			}
-			out[k] = this.isObject(bv) ? bv : av;
+			out[k] = this.mergeSchema(av, bv);
 		}
 		return out;
 	},
 
-	getPermissionSchema(permissions) {
-		let schemas = [PERMISSION_SCHEMAS.default];
-
-		for (let perm of permissions) {
-			if (perm in PERMISSION_SCHEMAS) {
-				schemas.push(PERMISSION_SCHEMAS[perm]);
+	/**
+	 * Collect matching schemas from a schema map based on permissions.
+	 * Supports composite keys (e.g. "mainWindow,dataWrite") that require
+	 * all listed permissions to be present.
+	 */
+	_collectSchemas(schemaMap, permissions) {
+		let permSet = new Set(permissions);
+		let schemas = [];
+		for (let key of Object.keys(schemaMap)) {
+			if (key === "default") continue;
+			let parts = key.split(",");
+			if (parts.every(p => permSet.has(p))) {
+				schemas.push(schemaMap[key]);
 			}
 		}
+		return schemas;
+	},
+
+	getPermissionSchema(permissions) {
+		let schemas = [PERMISSION_SCHEMAS.default, ...this._collectSchemas(PERMISSION_SCHEMAS, permissions)];
 		return schemas.reduce((acc, s) => this.mergeSchema(acc, s), undefined);
 	},
 
 	getWindowSchema(permissions) {
-		let schemas = [WINDOW_SCHEMAS.default];
-
-		for (let perm of permissions) {
-			if (perm in WINDOW_SCHEMAS) {
-				schemas.push(WINDOW_SCHEMAS[perm]);
-			}
-		}
+		let schemas = [WINDOW_SCHEMAS.default, ...this._collectSchemas(WINDOW_SCHEMAS, permissions)];
 		return schemas.reduce((acc, s) => this.mergeSchema(acc, s), undefined);
 	},
 
 	getMainWindowSchema(permissions) {
 		let winSchema = this.getWindowSchema(permissions);
-
-		let schemas = [MAIN_WINDOW_SCHEMAS.default, winSchema];
-		
-		for (let perm of permissions) {
-			if (perm in MAIN_WINDOW_SCHEMAS) {
-				schemas.push(MAIN_WINDOW_SCHEMAS[perm]);
-			}
-		}
+		let schemas = [MAIN_WINDOW_SCHEMAS.default, winSchema, ...this._collectSchemas(MAIN_WINDOW_SCHEMAS, permissions)];
 		return schemas.reduce((acc, s) => this.mergeSchema(acc, s), undefined);
 	},
 
 	isAllowed(schemaNode, prop) {
 		if (schemaNode === true || typeof schemaNode === "string") return true;
 		if (!schemaNode || typeof schemaNode !== "object") return false;
-		return Object.prototype.hasOwnProperty.call(schemaNode, prop);
+		if (Object.prototype.hasOwnProperty.call(schemaNode, prop)) {
+			return schemaNode[prop] !== false;
+		}
+		if (schemaNode[SchemaKey.WILDCARD] === true) return true;
+		return false;
 	},
 
 	nextSchema(schemaNode, prop) {
-		return schemaNode === true || typeof schemaNode === "string" ? true : schemaNode[prop];
+		if (schemaNode === true || typeof schemaNode === "string") return true;
+		if (schemaNode && typeof schemaNode === "object") {
+			if (Object.prototype.hasOwnProperty.call(schemaNode, prop)) {
+				return schemaNode[prop];
+			}
+			if (schemaNode[SchemaKey.WILDCARD] === true) return true;
+		}
+		return undefined;
 	},
 
 	schemaKey(schemaNode) {
@@ -302,9 +348,16 @@ const VarCheck = {
 	getAllowedKeys(obj, schemaNode, { allowSymbols = false } = {}) {
 		if (schemaNode === true) return this.getAllKeysIncludingPrototypes(obj, { allowSymbols });
 		if (!schemaNode || typeof schemaNode !== "object") return [];
-		let keys = Object.keys(schemaNode);
+		if (schemaNode[SchemaKey.WILDCARD] === true) {
+			let excluded = new Set(
+				Object.keys(schemaNode).filter(k => schemaNode[k] === false)
+			);
+			return this.getAllKeysIncludingPrototypes(obj, { allowSymbols })
+				.filter(k => !excluded.has(k));
+		}
+		let keys = Object.keys(schemaNode).filter(k => schemaNode[k] !== false);
 		if (allowSymbols) {
-			keys.push(...Object.getOwnPropertySymbols(schemaNode).filter(s => schemaNode[s]));
+			keys.push(...Object.getOwnPropertySymbols(schemaNode).filter(s => schemaNode[s] && schemaNode[s] !== false));
 		}
 		return keys;
 	},
@@ -374,7 +427,7 @@ const ScopeUtils = {
 	 * The returned function can be called with `new` from the sandbox scope.
 	 * The constructed instance is wrapped via ensurePromiseVarInScope.
 	 */
-	ensureConstructableInScope(Constructor, scope, { mutable = false, returnParser = null } = {}) {
+	ensureConstructableInScope(Constructor, scope, { mutable = false, returnParser = null, instanceSchema = null } = {}) {
 		if (VarCheck.isSameCompartment(Constructor, scope)) {
 			return Constructor;
 		}
@@ -391,7 +444,7 @@ const ScopeUtils = {
 			}
 			// Use strong reference for constructor-created objects since the
 			// plugin owns the instance and it must not be GC'd prematurely
-			return ScopeUtils.ensurePromiseVarInScope(instance, scope, { mutable, strong: true });
+			return ScopeUtils.ensurePromiseVarInScope(instance, scope, { mutable, strong: true, instanceSchema });
 		};
 
 		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
@@ -401,7 +454,7 @@ const ScopeUtils = {
 	/**
 	 * Create a function that runs in privileged realm and scopes returns
 	 */
-	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null, skipArgRescoping = false } = {}) {
+	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null, skipArgRescoping = false, instanceSchema = null } = {}) {
 		if (VarCheck.isSameCompartment(func, scope)) {
 			return func;
 		}
@@ -427,7 +480,7 @@ const ScopeUtils = {
 			if (typeof returnParser === "function") {
 				res = returnParser(res);
 			}
-			return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable });
+			return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema });
 		};
 
 		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
@@ -438,19 +491,19 @@ const ScopeUtils = {
 	 * Ensure a potentially promise variable is safe to expose in the sandbox scope
 	 * Following https://github.com/mdn/content/issues/15059#issuecomment-1198017259
 	 */
-	ensurePromiseVarInScope(maybePromise, scope, { mutable = false, strong = false } = {}) {
+	ensurePromiseVarInScope(maybePromise, scope, { mutable = false, strong = false, instanceSchema = null } = {}) {
 		if (VarCheck.isSameCompartment(maybePromise, scope)) {
 			return maybePromise;
 		}
 		if (VarCheck.isPromise(maybePromise)) {
 			return new scope.Promise((resolve, reject) => {
 				maybePromise.then(
-					v => resolve(ScopeUtils._ensureVarInScope(v, scope, { mutable, strong })),
+					v => resolve(ScopeUtils._ensureVarInScope(v, scope, { mutable, strong, instanceSchema })),
 					e => reject(e)
 				);
 			});
 		}
-		return ScopeUtils._ensureVarInScope(maybePromise, scope, { mutable, strong });
+		return ScopeUtils._ensureVarInScope(maybePromise, scope, { mutable, strong, instanceSchema });
 	},
 
 	/**
@@ -459,7 +512,7 @@ const ScopeUtils = {
 	 * - Plain objects/arrays are cloned into the scope
 	 * - Non-plain objects (class instances) are wrapped in a readonly facade with methods and getters (own and prototype) preserved
 	 */
-	_ensureVarInScope(value, scope, { mutable = false, strong = false } = {}) {
+	_ensureVarInScope(value, scope, { mutable = false, strong = false, instanceSchema = null } = {}) {
 		if (typeof value === "function") {
 			// If the function has own prototype properties beyond 'constructor',
 			// it's meant to be used as a constructor (e.g. ProgressWindow.ItemProgress)
@@ -477,7 +530,7 @@ const ScopeUtils = {
 				wrapReflectors: true,
 				cloneFunctions: true,
 			});
-			arr.push(...value.map(v => ScopeUtils.ensurePromiseVarInScope(v, scope, { mutable })));
+			arr.push(...value.map(v => ScopeUtils.ensurePromiseVarInScope(v, scope, { mutable, instanceSchema })));
 			return arr;
 		}
 
@@ -488,14 +541,22 @@ const ScopeUtils = {
 			});
 		}
 
-		return ScopeUtils._ensureInstanceInScope(value, scope, { mutable, strong });
+		return ScopeUtils._ensureInstanceInScope(value, scope, { mutable, strong, instanceSchema });
 	},
 
 	/**
 	 * Create a readonly facade for a class instance, exposing methods and getters (own and prototype)
 	 */
-	_ensureInstanceInScope(instance, scope, { mutable = false, strong = false } = {}) {
+	_ensureInstanceInScope(instance, scope, { mutable = false, strong = false, instanceSchema = null } = {}) {
 		if (!VarCheck.isObjectLike(instance)) return instance;
+
+		function isPropertyAllowed(name) {
+			if (!instanceSchema) return true;
+			if (instanceSchema[SchemaKey.WILDCARD] === true) return instanceSchema[name] !== false;
+			return name in instanceSchema && instanceSchema[name] !== false;
+		}
+
+		let nestedSchema = (instanceSchema && instanceSchema[SchemaKey.RECURSIVE]) ? instanceSchema : null;
 
 		let facade = Cu.createObjectIn(scope);
 		let instanceRef = strong ? { deref: () => instance } : new WeakRef(instance);
@@ -504,6 +565,7 @@ const ScopeUtils = {
 		let methodNames = VarCheck.getPrototypeMethodNames(instance);
 		for (let name of methodNames) {
 			if (name === "constructor") continue;
+			if (!isPropertyAllowed(name)) continue;
 
 			let method = instance[name];
 			if (typeof method !== "function") continue;
@@ -519,7 +581,7 @@ const ScopeUtils = {
 						args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(inst), { mutable });
 					}
 					let res = method.apply(inst, args);
-					return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable });
+					return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema: nestedSchema });
 				},
 				facade,
 				{ defineAs: name }
@@ -529,6 +591,7 @@ const ScopeUtils = {
 		// Expose prototype-chain getters as readonly accessors
 		let getterNames = VarCheck.getPrototypeGetterNames(instance);
 		for (let name of getterNames) {
+			if (!isPropertyAllowed(name)) continue;
 			if (Object.prototype.hasOwnProperty.call(facade, name)) continue;
 			let holder = Cu.createObjectIn(scope);
 			Cu.exportFunction(() => {
@@ -536,7 +599,7 @@ const ScopeUtils = {
 				if (!inst) {
 					VarCheck.throwPropError("access", name, "object has been garbage collected");
 				}
-				return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, name), scope, { mutable });
+				return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, name), scope, { mutable, instanceSchema: nestedSchema });
 			}, holder, { defineAs: "g" });
 
 			Cu.exportFunction(
@@ -565,11 +628,12 @@ const ScopeUtils = {
 		// Expose prototype-chain value properties (non-function) as readonly
 		let valueNames = VarCheck.getPrototypeValueNames(instance);
 		for (let name of valueNames) {
+			if (!isPropertyAllowed(name)) continue;
 			if (Object.prototype.hasOwnProperty.call(facade, name)) continue;
 			let val = instance[name];
 			let holder = Cu.createObjectIn(scope);
 			Cu.exportFunction(() => {
-				return ScopeUtils.ensurePromiseVarInScope(val, scope, { mutable });
+				return ScopeUtils.ensurePromiseVarInScope(val, scope, { mutable, instanceSchema: nestedSchema });
 			}, holder, { defineAs: "g" });
 
 			Cu.exportFunction(
@@ -591,6 +655,7 @@ const ScopeUtils = {
 		// Expose own enumerable data properties and getters as readonly
 		let ownDescriptors = Object.getOwnPropertyDescriptors(instance);
 		for (let key of Object.keys(ownDescriptors)) {
+			if (!isPropertyAllowed(key)) continue;
 			if (Object.prototype.hasOwnProperty.call(facade, key)) continue;
 			let desc = ownDescriptors[key];
 			let holder = Cu.createObjectIn(scope);
@@ -600,7 +665,7 @@ const ScopeUtils = {
 					if (!inst) {
 						VarCheck.throwPropError("access", key, "object has been garbage collected");
 					}
-					return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, key), scope, { mutable });
+					return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, key), scope, { mutable, instanceSchema: nestedSchema });
 				}, holder, { defineAs: "g" });
 			}
 			else {
@@ -609,7 +674,7 @@ const ScopeUtils = {
 					if (!inst) {
 						VarCheck.throwPropError("access", key, "object has been garbage collected");
 					}
-					return ScopeUtils.ensurePromiseVarInScope(inst[key], scope, { mutable });
+					return ScopeUtils.ensurePromiseVarInScope(inst[key], scope, { mutable, instanceSchema: nestedSchema });
 				}, holder, { defineAs: "g" });
 			}
 

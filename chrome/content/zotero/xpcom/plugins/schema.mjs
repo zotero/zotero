@@ -24,6 +24,17 @@
 */
 
 
+const SchemaKey = Object.freeze({
+	WILDCARD: Symbol("plugin.schema.wildcard"),
+	HANDLER: Symbol("plugin.schema.handler"),
+	SCHEMA: Symbol("plugin.schema.schema"),
+	RECURSIVE: Symbol("plugin.schema.recursive"),
+});
+
+const IMPLIED_PERMISSIONS = {
+	dataWrite: ["dataRead"],
+};
+
 const PERMISSION_SCHEMAS = {
 	default: {
 		Zotero: {
@@ -81,24 +92,18 @@ const PERMISSION_SCHEMAS = {
 			},
 		},
 	},
-	data: {
+	dataRead: {
 		Zotero: {
 			Items: {
-				// Read
-				get: true,
-				getAsync: true,
-				getByLibraryAndKey: true,
-				// Handle passed item objects from plugin scope
-				getTopLevel: "FromScopeCallable",
-				keepTopLevel: "FromScopeCallable",
-				// Write
-				trash: true,
-				trashTx: true,
+				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				getAsync: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				getByLibraryAndKey: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				getTopLevel: { [SchemaKey.HANDLER]: "FromScopeCallable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				keepTopLevel: { [SchemaKey.HANDLER]: "FromScopeCallable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
 			},
 			Libraries: {
-				// Read
-				get: true,
-				getAll: true,
+				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				getAll: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
 				getName: true,
 				getType: true,
 				getLastSyncTime: true,
@@ -110,27 +115,19 @@ const PERMISSION_SCHEMAS = {
 				exists: true,
 			},
 			Collections: {
-				// Read
-				getByLibrary: true,
-				getByParent: true,
-				getCollectionsContainingItems: true,
-				// Write
-				registerChildCollection: true,
-				unregisterChildCollection: true,
-				registerChildItem: true,
-				unregisterChildItem: true,
+				getByLibrary: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				getByParent: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				getCollectionsContainingItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
 			},
 			Groups: {
-				// Read
-				get: true,
-				getAll: true,
-				getByLibraryID: true,
+				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				getAll: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				getByLibraryID: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
 				getGroupIDFromLibraryID: true,
 				getLibraryIDFromGroupID: true,
 				exists: true,
 			},
 			Tags: {
-				// Read
 				getName: true,
 				getID: true,
 				getAll: true,
@@ -138,10 +135,6 @@ const PERMISSION_SCHEMAS = {
 				getColor: true,
 				getColorByPosition: true,
 				getColors: true,
-				// Write
-				rename: true,
-				removeFromLibrary: true,
-				setColor: true,
 			},
 			ItemFields: {
 				getAll: true,
@@ -164,11 +157,60 @@ const PERMISSION_SCHEMAS = {
 				registerObserver: "FromScopeCallable",
 				unregisterObserver: true,
 			},
-			// Constructors
+			Translators: {
+				getAll: true,
+			},
+			Item: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			Collection: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			Search: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			Duplicates: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			Feed: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+		},
+	},
+	dataWrite: {
+		Zotero: {
+			Items: {
+				get: true,
+				getAsync: true,
+				getByLibraryAndKey: true,
+				getTopLevel: "FromScopeCallable",
+				keepTopLevel: "FromScopeCallable",
+				trash: true,
+				trashTx: true,
+			},
+			Libraries: {
+				get: true,
+				getAll: true,
+			},
+			Collections: {
+				getByLibrary: true,
+				getByParent: true,
+				getCollectionsContainingItems: true,
+				registerChildCollection: true,
+				unregisterChildCollection: true,
+				registerChildItem: true,
+				unregisterChildItem: true,
+			},
+			Groups: {
+				get: true,
+				getAll: true,
+				getByLibraryID: true,
+			},
+			Tags: {
+				rename: true,
+				removeFromLibrary: true,
+				setColor: true,
+			},
+			Translate: {
+				Import: "Constructor",
+				Search: "Constructor",
+				Web: "Constructor",
+			},
 			Item: "Constructor",
 			Collection: "Constructor",
 			Search: "Constructor",
 			Duplicates: "Constructor",
+			Feed: "Constructor",
 		},
 	},
 	fileSystem: {
@@ -215,18 +257,6 @@ const PERMISSION_SCHEMAS = {
 		// Zotero.Prefs is set up directly by setupPreferences() in globals.mjs.
 		// By default, plugin can access the prefixed `extensions.<GUID>` branch.
 		// For other branches, access is gated by the pref_permissions declared in the manifest.
-	},
-	translator: {
-		Zotero: {
-			Translators: {
-				getAll: true,
-			},
-			Translate: {
-				Import: "Constructor",
-				Search: "Constructor",
-				Web: "Constructor",
-			},
-		},
 	},
 	itemTree: {
 		Zotero: {
@@ -340,31 +370,36 @@ const MAIN_WINDOW_SCHEMAS = {
 			focus: true,
 		},
 		ZoteroPane: {
-			// Read-only state
 			loaded: true,
-			// Selection queries
-			getSelectedLibraryID: true,
-			getSelectedCollection: true,
-			getSelectedSavedSearch: true,
-			getSelectedGroup: true,
-			getSelectedItems: true,
-			getSortedItems: true,
 			getSortField: true,
 			getSortDirection: true,
-			// Permission checks
-			canEdit: true,
-			canEditLibrary: true,
-			canEditFiles: true,
-			// Navigation
-			selectItem: true,
-			selectItems: true,
-			// Virtual collections
-			setVirtual: true,
-			// UI actions
 			toggleItemPane: true,
 			toggleTagSelector: true,
 			clearQuicksearch: true,
-			// Creation
+		},
+	},
+	"mainWindow,dataRead": {
+		ZoteroPane: {
+			getSelectedLibraryID: true,
+			getSelectedCollection: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			getSelectedSavedSearch: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			getSelectedGroup: true,
+			getSelectedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			getSortedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			canEdit: true,
+			canEditLibrary: true,
+			canEditFiles: true,
+			selectItem: true,
+			selectItems: true,
+			setVirtual: true,
+		},
+	},
+	"mainWindow,dataWrite": {
+		ZoteroPane: {
+			getSelectedCollection: true,
+			getSelectedSavedSearch: true,
+			getSelectedItems: true,
+			getSortedItems: true,
 			newItem: true,
 			newCollection: true,
 			newNote: true,
@@ -373,4 +408,25 @@ const MAIN_WINDOW_SCHEMAS = {
 	},
 };
 
-export { PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
+const DATA_OBJECT_READ_SCHEMA = {
+	[SchemaKey.WILDCARD]: true,
+	[SchemaKey.RECURSIVE]: true,
+	save: false,
+	saveTx: false,
+	erase: false,
+	eraseTx: false,
+	// Collection
+	addItem: false,
+	addItems: false,
+	removeItem: false,
+	removeItems: false,
+	// Search
+	addCondition: false,
+	removeCondition: false,
+	// Feed
+	updateFeed: false,
+	clearExpiredItems: false,
+	storeSyncedSettings: false,
+};
+
+export { SchemaKey, DATA_OBJECT_READ_SCHEMA, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
