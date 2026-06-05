@@ -42,6 +42,7 @@ const PERMISSION_SCHEMAS = {
 			isMac: true,
 			isWin: true,
 			isLinux: true,
+			locale: true,
 			// Actions
 			launchURL: true,
 			// Locks
