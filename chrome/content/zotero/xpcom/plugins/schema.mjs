@@ -224,6 +224,10 @@ const PERMISSION_SCHEMAS = {
 			},
 		},
 	},
+	window: {
+		// The window permission gates the openWindow() global function.
+		// No additional Zotero.* APIs are exposed.
+	},
 };
 
 const WINDOW_SCHEMAS = {

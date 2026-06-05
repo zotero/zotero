@@ -267,3 +267,7 @@ pref("dom.fetch.allow_force_allowed_dtd", true);
 // Translators are evaluated in the parent process with the system principal
 pref("security.allow_eval_with_system_principal", true);
 pref("security.allow_eval_in_parent_process", true);
+
+// Treat the parent process as the extension process so moz-extension:// content
+// can load in non-remote <browser> elements (used by plugin sandbox windows)
+pref("extensions.webextensions.remote", false);
