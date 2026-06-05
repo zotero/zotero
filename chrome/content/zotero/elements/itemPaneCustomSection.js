@@ -30,11 +30,14 @@
 		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
 		{ global: "current" }
 	);
+	const { WindowScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
 
 	class ItemPaneCustomSection extends ItemPaneSectionElementBase {
 		_hooks = {};
 
 		_sectionButtons = {};
+
+		_pluginID = null;
 
 		_refreshDisabled = true;
 
@@ -53,7 +56,15 @@
 				</collapsible-section>
 				<html:style class="custom-style"></html:style>
 			`;
-			return MozXULElement.parseXULToFragment(content);
+			return WindowScopeVariables.sanitizeFragment(MozXULElement.parseXULToFragment(content), this._pluginID);
+		}
+
+		get pluginID() {
+			return this._pluginID;
+		}
+
+		set pluginID(pluginID) {
+			this._pluginID = pluginID;
 		}
 
 		get paneID() {
@@ -78,9 +89,11 @@
 		set bodyXHTML(bodyXHTML) {
 			this._bodyXHTML = bodyXHTML;
 			if (this.initialized) {
+				let frag = MozXULElement.parseXULToFragment(bodyXHTML);
 				this._body.replaceChildren(
-					document.importNode(MozXULElement.parseXULToFragment(bodyXHTML), true)
+					document.importNode(WindowScopeVariables.sanitizeFragment(frag, this._pluginID), true)
 				);
+				WindowScopeVariables.activateInlineHandlers(this._body, this._pluginID);
 			}
 		}
 
@@ -88,6 +101,8 @@
 			this._section = this.querySelector("collapsible-section");
 			this._body = this._section.querySelector('[data-type="body"]');
 			this._style = this.querySelector(".custom-style");
+
+			WindowScopeVariables.activateInlineHandlers(this._body, this._pluginID);
 
 			if (this.paneID) this.dataset.pane = this.paneID;
 			if (this._label) this._section.label = this._label;

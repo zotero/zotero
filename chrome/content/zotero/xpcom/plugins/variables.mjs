@@ -500,8 +500,6 @@ const WindowScopeVariables = {
 		let docRef = new WeakRef(doc);
 
 		let wrapper = Cu.createObjectIn(scope);
-		// Dangerous tags that should not be created
-		let unsafeTags = ["script", "iframe", "browser", "object", "embed", "meta"];
 
 		["createElement", "createXULElement", "createElementNS"].forEach((method) => {
 			if (typeof doc[method] === "function") {
@@ -519,7 +517,7 @@ const WindowScopeVariables = {
 							localName = tagName.includes(":") ? tagName.split(":").pop() : tagName;
 						}
 
-						if (unsafeTags.includes(localName.toLowerCase())) {
+						if (WindowScopeVariables.UNSAFE_TAGS.has(localName.toLowerCase())) {
 							VarCheck.throwPropError("create", tagName, "tag is not allowed");
 						}
 
@@ -624,11 +622,20 @@ const WindowScopeVariables = {
 			return event;
 		}
 
-		// Create a mirrored event in mutable mode so we can modify DOM properties
-		let wrappedEvent = ScopeVariables.createAllowlistMirrorObject(event, true, addonID, { mutable: true });
+		// DOM-referencing properties that need special wrapping
+		let DOMProps = new Set(["target", "currentTarget", "relatedTarget"]);
+		let DOMPropMethods = new Set(["composedPath"]);
+		let DOMOverrides = new Set([...DOMProps, ...DOMPropMethods]);
 
-		let DOMProps = ["target", "currentTarget", "relatedTarget"];
-		let DOMPropMethods = ["composedPath"];
+		// Build schema excluding DOM properties we'll handle separately
+		let schema = {};
+		for (let key of VarCheck.getAllKeysIncludingPrototypes(event)) {
+			if (!DOMOverrides.has(key)) {
+				schema[key] = true;
+			}
+		}
+
+		let wrappedEvent = ScopeVariables.createAllowlistMirrorObject(event, schema, addonID, { mutable: true });
 
 		// Wrap DOM-referencing properties
 		for (let prop of DOMProps) {
@@ -843,6 +850,112 @@ const WindowScopeVariables = {
 			return value[ORIGINAL_REF_KEY]();
 		}
 		return value;
+	},
+
+	UNSAFE_TAGS: new Set([
+		"script",
+		"browser",
+		"iframe",
+		"object",
+		"embed",
+		"meta",
+	]),
+
+	/**
+	 * Sanitize a parsed DOM fragment by removing unsafe elements and
+	 * stripping inline event-handler attributes (on*).
+	 * Operates on an already-parsed DocumentFragment (from
+	 * MozXULElement.parseXULToFragment or DOMParser).
+	 *
+	 * Only sanitizes unprivileged plugins. If pluginID is provided and
+	 * the plugin is privileged, the fragment is returned unchanged.
+	 *
+	 * @param {DocumentFragment} fragment - The fragment to sanitize in place
+	 * @param {string} [pluginID] - Plugin ID to check privilege level
+	 * @returns {DocumentFragment} The same fragment, sanitized
+	 */
+	sanitizeFragment(fragment, pluginID) {
+		if (pluginID) {
+			let scope = PluginSandbox.getScope(pluginID);
+			if (!scope || VarCheck.isPrivilegedScope(scope)) {
+				return fragment;
+			}
+		}
+		let walker = fragment.ownerDocument.createTreeWalker(
+			fragment,
+			NodeFilter.SHOW_ELEMENT
+		);
+
+		let toRemove = [];
+		let node;
+		while ((node = walker.nextNode())) {
+			if (this.UNSAFE_TAGS.has(node.localName.toLowerCase())) {
+				toRemove.push(node);
+				continue;
+			}
+			// Convert on* attributes: store as data attrs for post-insertion activation
+			for (let attr of Array.from(node.attributes)) {
+				if (/^on/i.test(attr.localName)) {
+					let eventName = attr.localName.slice(2);
+					node.removeAttribute(attr.name);
+					if (pluginID) {
+						node.setAttribute(`data-sandbox-on-${eventName}`, attr.value);
+					}
+				}
+			}
+		}
+
+		for (let node of toRemove) {
+			node.remove();
+		}
+
+		return fragment;
+	},
+
+	/**
+	 * Activate inline event handlers that were converted to data-sandbox-on-*
+	 * attributes by sanitizeFragment. Must be called after the element is
+	 * inserted into the document (after importNode).
+	 *
+	 * @param {Element} root - The root element to walk
+	 * @param {string} pluginID - Plugin ID for sandbox scope lookup
+	 */
+	activateInlineHandlers(root, pluginID) {
+		if (!pluginID) return;
+		let scope = PluginSandbox.getScope(pluginID);
+		if (!scope || VarCheck.isPrivilegedScope(scope)) return;
+
+		let walker = root.ownerDocument.createTreeWalker(
+			root,
+			NodeFilter.SHOW_ELEMENT
+		);
+
+		let node = root;
+		do {
+			for (let attr of Array.from(node.attributes)) {
+				let match = attr.localName.match(/^data-sandbox-on-(.+)$/);
+				if (!match) continue;
+				let eventName = match[1];
+				let handlerCode = attr.value;
+				node.removeAttribute(attr.name);
+
+				let fn = Cu.evalInSandbox(
+					`(function(event) { ${handlerCode} })`,
+					scope
+				);
+				let rootNode = new WeakRef(node);
+				node.addEventListener(eventName, function (realEvent) {
+					let wrappedThis = WindowScopeVariables.createSafeHTMLElement(
+						this, pluginID, { rootNode }
+					);
+					let wrappedEvent = WindowScopeVariables.createSafeEvent(
+						realEvent, pluginID, { rootNode }
+					);
+					fn.call(wrappedThis, wrappedEvent);
+				});
+			}
+		}
+		while ((node = walker.nextNode()));
 	},
 };
 
