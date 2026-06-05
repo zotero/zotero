@@ -29,6 +29,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 {
 	const PluginAPIBase = ChromeUtils.importESModule("chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs").PluginAPIBase;
+	const ScopeVariables = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs").ScopeVariables;
 
 
 	/**
@@ -158,6 +159,22 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				option.enabledTreeIDs = ["*"];
 			}
 			option.showInColumnPicker = option.showInColumnPicker === undefined ? true : option.showInColumnPicker;
+			if (option.renderCell) {
+				let renderCell = option.renderCell;
+				option.renderCell = function (index, data, column, isFirstColumn, doc) {
+					let safeColumn = ScopeVariables.createAllowlistMirrorObject(column, true, option.pluginID);
+					let safeDoc = ScopeVariables.createSafeDocument(doc, option.pluginID);
+					let elem = renderCell.call(this, index, data, safeColumn, isFirstColumn, safeDoc);
+					return ScopeVariables.unwrapDOMNode(elem);
+				};
+			}
+			if (option.dataProvider) {
+				let dataProvider = option.dataProvider;
+				option.dataProvider = function (item, dataKey) {
+					let safeItem = ScopeVariables.createAllowlistMirrorObject(item, true, option.pluginID, { mutable: true });
+					return dataProvider.call(this, safeItem, dataKey);
+				};
+			}
 			return super._add(option);
 		}
 
