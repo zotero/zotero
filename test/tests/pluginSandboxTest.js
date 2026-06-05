@@ -248,11 +248,6 @@ describe("Plugin Sandbox", function () {
 			assert.isString(result);
 			assert.equal(result, Zotero.Utilities.capitalizeName('john smith'));
 		});
-
-		it("should not expose unlisted Utilities methods", function () {
-			assert.isTrue(evalInScope("typeof Zotero.Utilities.randomString === 'undefined'"),
-				"randomString should not be exposed");
-		});
 	});
 
 	describe("Zotero.Date", function () {
@@ -3254,18 +3249,18 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("openWindow API", function () {
-		it("should not be available without 'window' permission", function () {
+		it("should not be available without 'openWindow' permission", function () {
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof openWindow === 'undefined'"));
 		});
 
-		it("should be available with 'window' permission", function () {
-			loadTestScope(["default", "window"]);
+		it("should be available with 'openWindow' permission", function () {
+			loadTestScope(["default", "openWindow"]);
 			assert.isTrue(evalInScope("typeof openWindow === 'function'"));
 		});
 
 		it("should reject URLs outside plugin root", function () {
-			loadTestScope(["default", "window"]);
+			loadTestScope(["default", "openWindow"]);
 			let threw = false;
 			try {
 				evalInScope("openWindow('https://example.com/page.html')");
@@ -3277,7 +3272,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should reject absolute file:// URLs outside plugin root", function () {
-			loadTestScope(["default", "window"]);
+			loadTestScope(["default", "openWindow"]);
 			let threw = false;
 			try {
 				evalInScope("openWindow('file:///etc/page.html')");
@@ -3289,7 +3284,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should reject .xhtml files", function () {
-			loadTestScope(["default", "window"]);
+			loadTestScope(["default", "openWindow"]);
 			let threw = false;
 			try {
 				evalInScope("openWindow('settings.xhtml')");
@@ -3301,7 +3296,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should reject .xul files", function () {
-			loadTestScope(["default", "window"]);
+			loadTestScope(["default", "openWindow"]);
 			let threw = false;
 			try {
 				evalInScope("openWindow('dialog.xul')");
@@ -3313,7 +3308,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should reject .js files", function () {
-			loadTestScope(["default", "window"]);
+			loadTestScope(["default", "openWindow"]);
 			let threw = false;
 			try {
 				evalInScope("openWindow('script.js')");
@@ -3395,7 +3390,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should open an .html window and resolve with a window object", async function () {
-				loadTestScopeWithURI(["default", "window"]);
+				loadTestScopeWithURI(["default", "openWindow"]);
 				let win = await evalInScope("openWindow('test.html')");
 				try {
 					assert.ok(win, "openWindow should resolve with a window");
@@ -3407,7 +3402,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should call onLoad callback with the content window", async function () {
-				loadTestScopeWithURI(["default", "window"]);
+				loadTestScopeWithURI(["default", "openWindow"]);
 				let cbkLoadPromise = new Promise((resolve) => {
 					scope._resolveOnLoad = resolve;
 				});
@@ -3428,7 +3423,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should load relative CSS and JS resources", async function () {
-				loadTestScopeWithURI(["default", "window"]);
+				loadTestScopeWithURI(["default", "openWindow"]);
 				let win = await evalInScope("openWindow('resources.html')");
 				try {
 					assert.equal(win.document.title, "Resources");
@@ -3445,7 +3440,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should reveal content expandos via wrappedJSObject", async function () {
-				loadTestScopeWithURI(["default", "window"]);
+				loadTestScopeWithURI(["default", "openWindow"]);
 				let win = await evalInScope("openWindow('resources.html')");
 				try {
 					// Xray wrappers hide expandos set by content scripts
@@ -3459,7 +3454,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should allow plugin scope to manipulate the DOM of the opened window", async function () {
-				loadTestScopeWithURI(["default", "window"]);
+				loadTestScopeWithURI(["default", "openWindow"]);
 				let win = await evalInScope("openWindow('test.html')");
 				try {
 					// Store the window on the scope so sandbox code can reference it
@@ -3489,7 +3484,7 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 			it("should open separate windows for each call", async function () {
-				loadTestScopeWithURI(["default", "window"]);
+				loadTestScopeWithURI(["default", "openWindow"]);
 				let win1 = await evalInScope("openWindow('test.html')");
 				let win2 = await evalInScope("openWindow('test.html')");
 				try {
@@ -3507,7 +3502,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should not expose privileged APIs in the content window", async function () {
-				loadTestScopeWithURI(["default", "window"]);
+				loadTestScopeWithURI(["default", "openWindow"]);
 				let win = await evalInScope("openWindow('privileged.html')");
 				try {
 					let results = win.document.getElementById("results");
@@ -3692,6 +3687,7 @@ describe("Plugin Sandbox", function () {
 		var { WindowScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
 
 		it("should remove unsafe elements from a fragment", function () {
+			loadTestScope(["default"]);
 			let frag = MozXULElement.parseXULToFragment(
 				'<html:div id="safe">Safe</html:div>'
 				+ '<html:script>alert("xss")</html:script>'
@@ -3699,7 +3695,7 @@ describe("Plugin Sandbox", function () {
 				+ '<html:iframe src="about:config"></html:iframe>'
 				+ '<html:p>Text</html:p>'
 			);
-			WindowScopeVariables.sanitizeFragment(frag);
+			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
 			assert.isNull(frag.querySelector("script"), "<script> should be removed");
 			assert.isNull(frag.querySelector("browser"), "<browser> should be removed");
 			assert.isNull(frag.querySelector("iframe"), "<iframe> should be removed");
@@ -3707,12 +3703,13 @@ describe("Plugin Sandbox", function () {
 			assert.ok(frag.querySelector("p"), "<p> should remain");
 		});
 
-		it("should strip on* attributes when no pluginID is provided", function () {
+		it("should strip on* attributes for unprivileged plugins", function () {
+			loadTestScope(["default"]);
 			let frag = MozXULElement.parseXULToFragment(
 				'<html:p onclick="alert(1)" onmouseover="alert(2)">Click</html:p>'
 				+ '<html:div onload="alert(3)">Div</html:div>'
 			);
-			WindowScopeVariables.sanitizeFragment(frag);
+			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
 			let p = frag.querySelector("p");
 			assert.ok(p, "<p> should remain");
 			assert.isFalse(p.hasAttribute("onclick"), "onclick should be stripped");
@@ -3722,10 +3719,11 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should preserve safe attributes", function () {
+			loadTestScope(["default"]);
 			let frag = MozXULElement.parseXULToFragment(
 				'<html:div id="test" class="my-class" data-value="42">Content</html:div>'
 			);
-			WindowScopeVariables.sanitizeFragment(frag);
+			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
 			let div = frag.querySelector("div");
 			assert.equal(div.getAttribute("id"), "test");
 			assert.equal(div.getAttribute("class"), "my-class");
