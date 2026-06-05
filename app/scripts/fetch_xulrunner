@@ -107,11 +107,11 @@ function get_utf16_chars {
 # Zotero plugin permission strings to inject into the WebExtension manifest schema
 ZOTERO_PLUGIN_PERMISSIONS='"*",
 	  "default",
-	  "data",
+	  "dataRead",
+	  "dataWrite",
 	  "fileSystem",
 	  "network",
 	  "preferences",
-	  "translator",
 	  "itemTree",
 	  "itemPane",
 	  "menu",
