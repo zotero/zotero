@@ -42,6 +42,8 @@ const PERMISSION_SCHEMAS = {
 			isMac: true,
 			isWin: true,
 			isLinux: true,
+			// Actions
+			launchURL: true,
 			// Locks
 			initializationPromise: true,
 			uiReadyPromise: true,
@@ -58,7 +60,6 @@ const PERMISSION_SCHEMAS = {
 				randomString: true,
 				Internal: {
 					copyTextToClipboard: true,
-					getClipboard: true,
 					md5: true,
 					md5Async: true,
 					sha1: true,
@@ -69,7 +70,12 @@ const PERMISSION_SCHEMAS = {
 			Date: {
 				strToISO: true,
 			},
-			Promise: true,
+			// Only expose the added utility methods as sandbox has native Promise.
+			Promise: {
+				method: true,
+				defer: true,
+				delay: true,
+			},
 		},
 	},
 	data: {
@@ -163,6 +169,11 @@ const PERMISSION_SCHEMAS = {
 	},
 	fileSystem: {
 		Zotero: {
+			Utilities: {
+				Internal: {
+					getClipboard: true,
+				}
+			},
 			File: {
 				// Read
 				getExtension: true,
