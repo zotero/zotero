@@ -276,7 +276,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Items", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should expose Zotero.Items.get()", async function () {
@@ -471,9 +471,309 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("dataRead permission", function () {
+		beforeEach(function () {
+			loadTestScope(["default", "dataRead"]);
+		});
+
+		it("should expose read methods on Zotero.Items", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Items.get === 'function'"));
+			assert.isTrue(evalInScope("typeof Zotero.Items.getAsync === 'function'"));
+			assert.isTrue(evalInScope("typeof Zotero.Items.getByLibraryAndKey === 'function'"));
+		});
+
+		it("should not expose write methods on Zotero.Items", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Items.trash === 'undefined'"));
+			assert.isTrue(evalInScope("typeof Zotero.Items.trashTx === 'undefined'"));
+		});
+
+		it("should block save/saveTx/erase/eraseTx on items returned from Zotero.Items.get()", async function () {
+			let item = new Zotero.Item('book');
+			item.setField('title', 'Read Only Test');
+			await item.saveTx();
+
+			evalInScope(`var _item = Zotero.Items.get(${item.id})`);
+
+			// Read access should work
+			assert.equal(evalInScope("_item.id"), item.id);
+			assert.equal(evalInScope("_item.getField('title')"), 'Read Only Test');
+			assert.equal(evalInScope("_item.itemType"), 'book');
+
+			// Write methods should not exist on the facade
+			assert.isTrue(evalInScope("typeof _item.save === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _item.saveTx === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _item.erase === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _item.eraseTx === 'undefined'"));
+
+			await item.eraseTx();
+		});
+
+		it("should block write methods on items returned from Zotero.Items.getAsync()", async function () {
+			let item = new Zotero.Item('book');
+			item.setField('title', 'Async Read Only Test');
+			await item.saveTx();
+
+			let hasSave = await evalInScope(`
+				Zotero.Items.getAsync(${item.id}).then(i => typeof i.save)
+			`);
+			let hasSaveTx = await evalInScope(`
+				Zotero.Items.getAsync(${item.id}).then(i => typeof i.saveTx)
+			`);
+			let hasErase = await evalInScope(`
+				Zotero.Items.getAsync(${item.id}).then(i => typeof i.erase)
+			`);
+			let hasEraseTx = await evalInScope(`
+				Zotero.Items.getAsync(${item.id}).then(i => typeof i.eraseTx)
+			`);
+
+			assert.equal(hasSave, 'undefined');
+			assert.equal(hasSaveTx, 'undefined');
+			assert.equal(hasErase, 'undefined');
+			assert.equal(hasEraseTx, 'undefined');
+
+			await item.eraseTx();
+		});
+
+		it("should block write methods on items from array results", async function () {
+			let item1 = new Zotero.Item('book');
+			await item1.saveTx();
+			let item2 = new Zotero.Item('book');
+			await item2.saveTx();
+
+			evalInScope(`
+				var _items = Zotero.Items.get([${item1.id}, ${item2.id}]);
+			`);
+
+			assert.isTrue(evalInScope("typeof _items[0].save === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _items[0].saveTx === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _items[1].erase === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _items[1].eraseTx === 'undefined'"));
+
+			await item1.eraseTx();
+			await item2.eraseTx();
+		});
+
+		it("should block write methods on constructed items", async function () {
+			evalInScope(`var _newItem = new Zotero.Item('book')`);
+
+			// Constructor should work
+			assert.equal(evalInScope("_newItem.itemType"), 'book');
+
+			// Write methods should not exist
+			assert.isTrue(evalInScope("typeof _newItem.save === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _newItem.saveTx === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _newItem.erase === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _newItem.eraseTx === 'undefined'"));
+		});
+
+		it("should block write methods on collections returned from Collections.getByLibrary()", async function () {
+			let col = new Zotero.Collection();
+			col.name = 'Read Only Collection';
+			await col.saveTx();
+
+			evalInScope(`
+				var _cols = Zotero.Collections.getByLibrary(${col.libraryID});
+				var _col = _cols.find(c => c.id === ${col.id});
+			`);
+
+			assert.equal(evalInScope("_col.name"), 'Read Only Collection');
+			assert.isTrue(evalInScope("typeof _col.save === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _col.saveTx === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _col.erase === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _col.eraseTx === 'undefined'"));
+			// Collection-specific write methods
+			assert.isTrue(evalInScope("typeof _col.addItem === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _col.addItems === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _col.removeItem === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _col.removeItems === 'undefined'"));
+
+			await col.eraseTx();
+		});
+
+		it("should block write methods on libraries returned from Libraries.get()", function () {
+			let libraryID = Zotero.Libraries.userLibraryID;
+			evalInScope(`var _lib = Zotero.Libraries.get(${libraryID})`);
+
+			// Read access should work
+			assert.ok(evalInScope("_lib.name"));
+			assert.equal(evalInScope("_lib.libraryType"), 'user');
+
+			// Write methods should not exist
+			assert.isTrue(evalInScope("typeof _lib.save === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _lib.saveTx === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _lib.erase === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _lib.eraseTx === 'undefined'"));
+		});
+
+		it("should block write methods on libraries returned from Libraries.getAll()", function () {
+			evalInScope(`
+				var _libs = Zotero.Libraries.getAll();
+				var _firstLib = _libs[0];
+			`);
+
+			assert.ok(evalInScope("_firstLib"));
+			assert.isTrue(evalInScope("typeof _firstLib.save === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _firstLib.saveTx === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _firstLib.erase === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _firstLib.eraseTx === 'undefined'"));
+		});
+
+		it("should block write methods on constructed searches", function () {
+			evalInScope(`var _search = new Zotero.Search()`);
+
+			// Write methods should not exist
+			assert.isTrue(evalInScope("typeof _search.save === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _search.saveTx === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _search.addCondition === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _search.removeCondition === 'undefined'"));
+		});
+
+		it("should block write methods on Search returned from Duplicates.getSearchObject()", async function () {
+			let libraryID = Zotero.Libraries.userLibraryID;
+			evalInScope(`var _dupes = new Zotero.Duplicates(${libraryID})`);
+
+			let hasSave = await evalInScope(`
+				_dupes.getSearchObject().then(s => typeof s.save)
+			`);
+			let hasSaveTx = await evalInScope(`
+				_dupes.getSearchObject().then(s => typeof s.saveTx)
+			`);
+			let hasAddCondition = await evalInScope(`
+				_dupes.getSearchObject().then(s => typeof s.addCondition)
+			`);
+
+			assert.equal(hasSave, 'undefined');
+			assert.equal(hasSaveTx, 'undefined');
+			assert.equal(hasAddCondition, 'undefined');
+		});
+
+		it("should propagate read-only restriction to nested return values", async function () {
+			let parent = new Zotero.Item('book');
+			parent.setField('title', 'Parent Item');
+			await parent.saveTx();
+			let note = new Zotero.Item('note');
+			note.parentItemID = parent.id;
+			await note.saveTx();
+
+			evalInScope(`
+				var _note = Zotero.Items.get(${note.id});
+				var _topLevel = _note.topLevelItem;
+			`);
+
+			// The nested return (topLevelItem) should also be read-only
+			assert.equal(evalInScope("_topLevel.id"), parent.id);
+			assert.isTrue(evalInScope("typeof _topLevel.save === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _topLevel.saveTx === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _topLevel.erase === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _topLevel.eraseTx === 'undefined'"));
+
+			await note.eraseTx();
+			await parent.eraseTx();
+		});
+
+		it("should block write methods on constructed feeds", function () {
+			evalInScope(`var _feed = new Zotero.Feed({ url: 'https://example.com/feed' })`);
+
+			// Read access should work
+			assert.equal(evalInScope("_feed.url"), 'https://example.com/feed');
+			assert.equal(evalInScope("_feed.libraryType"), 'feed');
+
+			// Write methods should not exist
+			assert.isTrue(evalInScope("typeof _feed.save === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _feed.saveTx === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _feed.erase === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _feed.eraseTx === 'undefined'"));
+			// Feed-specific write methods
+			assert.isTrue(evalInScope("typeof _feed.updateFeed === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _feed.clearExpiredItems === 'undefined'"));
+			assert.isTrue(evalInScope("typeof _feed.storeSyncedSettings === 'undefined'"));
+		});
+
+		it("should not expose Tags write methods", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Tags.rename === 'undefined'"));
+			assert.isTrue(evalInScope("typeof Zotero.Tags.removeFromLibrary === 'undefined'"));
+			assert.isTrue(evalInScope("typeof Zotero.Tags.setColor === 'undefined'"));
+		});
+
+		it("should not expose Collections write methods", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Collections.registerChildCollection === 'undefined'"));
+			assert.isTrue(evalInScope("typeof Zotero.Collections.unregisterChildCollection === 'undefined'"));
+			assert.isTrue(evalInScope("typeof Zotero.Collections.registerChildItem === 'undefined'"));
+			assert.isTrue(evalInScope("typeof Zotero.Collections.unregisterChildItem === 'undefined'"));
+		});
+	});
+
+	describe("dataWrite permission", function () {
+		beforeEach(function () {
+			loadTestScope(["default", "dataRead", "dataWrite"]);
+		});
+
+		it("should allow save/saveTx on items returned from Zotero.Items.get()", async function () {
+			let item = new Zotero.Item('book');
+			item.setField('title', 'Write Test');
+			await item.saveTx();
+
+			evalInScope(`var _item = Zotero.Items.get(${item.id})`);
+
+			// Write methods should exist
+			assert.isTrue(evalInScope("typeof _item.save === 'function'"));
+			assert.isTrue(evalInScope("typeof _item.saveTx === 'function'"));
+			assert.isTrue(evalInScope("typeof _item.erase === 'function'"));
+			assert.isTrue(evalInScope("typeof _item.eraseTx === 'function'"));
+
+			await item.eraseTx();
+		});
+
+		it("should allow save/saveTx on constructed items", async function () {
+			evalInScope(`
+				var _newItem = new Zotero.Item('book');
+				_newItem.setField('title', 'Write Constructor Test');
+			`);
+
+			assert.isTrue(evalInScope("typeof _newItem.saveTx === 'function'"));
+			let id = await evalInScope("_newItem.saveTx()");
+			assert.isNumber(id);
+
+			let realItem = Zotero.Items.get(id);
+			assert.equal(realItem.getField('title'), 'Write Constructor Test');
+
+			await realItem.eraseTx();
+		});
+
+		it("should expose Items.trash/trashTx with dataWrite", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Items.trash === 'function'"));
+			assert.isTrue(evalInScope("typeof Zotero.Items.trashTx === 'function'"));
+		});
+
+		it("should expose Tags write methods with dataWrite", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Tags.rename === 'function'"));
+			assert.isTrue(evalInScope("typeof Zotero.Tags.removeFromLibrary === 'function'"));
+			assert.isTrue(evalInScope("typeof Zotero.Tags.setColor === 'function'"));
+		});
+
+		it("should allow write methods on constructed feeds with dataWrite", function () {
+			evalInScope(`var _feed = new Zotero.Feed({ url: 'https://example.com/feed' })`);
+
+			assert.isTrue(evalInScope("typeof _feed.save === 'function'"));
+			assert.isTrue(evalInScope("typeof _feed.saveTx === 'function'"));
+			assert.isTrue(evalInScope("typeof _feed.erase === 'function'"));
+			assert.isTrue(evalInScope("typeof _feed.eraseTx === 'function'"));
+			assert.isTrue(evalInScope("typeof _feed.updateFeed === 'function'"));
+			assert.isTrue(evalInScope("typeof _feed.clearExpiredItems === 'function'"));
+			assert.isTrue(evalInScope("typeof _feed.storeSyncedSettings === 'function'"));
+		});
+
+		it("should expose Collections write methods with dataWrite", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Collections.registerChildCollection === 'function'"));
+			assert.isTrue(evalInScope("typeof Zotero.Collections.unregisterChildCollection === 'function'"));
+			assert.isTrue(evalInScope("typeof Zotero.Collections.registerChildItem === 'function'"));
+			assert.isTrue(evalInScope("typeof Zotero.Collections.unregisterChildItem === 'function'"));
+		});
+	});
+
 	describe("Zotero.Libraries", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should return a library from Zotero.Libraries.get()", function () {
@@ -607,7 +907,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Collections", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should return collection facades from getByLibrary()", async function () {
@@ -745,7 +1045,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Groups", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should return a group from Zotero.Groups.get()", async function () {
@@ -816,7 +1116,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Tags", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should get tag ID and name", async function () {
@@ -908,7 +1208,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Search", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should construct a new Zotero.Search", async function () {
@@ -932,7 +1232,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Duplicates", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should construct a new Zotero.Duplicates", async function () {
@@ -948,7 +1248,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.ItemFields", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should expose Zotero.ItemFields.getAll()", function () {
@@ -998,7 +1298,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.ItemTypes", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should expose Zotero.ItemTypes.getID()", function () {
@@ -1022,7 +1322,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.CreatorTypes", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should expose Zotero.CreatorTypes.getLocalizedString()", function () {
@@ -1035,7 +1335,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Fulltext", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should expose Zotero.Fulltext.getPages()", async function () {
@@ -1570,7 +1870,7 @@ describe("Plugin Sandbox", function () {
 		}
 
 		beforeEach(function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		afterEach(function () {
@@ -1812,7 +2112,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.Translators", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "translator"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 		});
 
 		it("should expose Zotero.Translators.getAll()", async function () {
@@ -1945,11 +2245,20 @@ describe("Plugin Sandbox", function () {
 			assert.equal(handlerCount, 0);
 		});
 
-		it("should not expose Translators without translator permission", function () {
+		it("should not expose Translators without data permission", function () {
 			PluginSandbox.unloadScope(ADDON_ID);
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof Zotero.Translators === 'undefined'"),
-				"Translators should not be exposed without translator permission");
+				"Translators should not be exposed without data permission");
+		});
+
+		it("should not expose Translate constructors with only dataRead", function () {
+			PluginSandbox.unloadScope(ADDON_ID);
+			loadTestScope(["default", "dataRead"]);
+			assert.isTrue(evalInScope("typeof Zotero.Translators.getAll === 'function'"),
+				"Translators.getAll should be exposed with dataRead");
+			assert.isTrue(evalInScope("typeof Zotero.Translate === 'undefined'"),
+				"Translate constructors should not be exposed with only dataRead");
 		});
 	});
 
@@ -2195,7 +2504,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default", "itemTree", "itemPane", "menu", "reader"]);
+			loadTestScope(["default", "dataRead", "itemTree", "itemPane", "menu", "reader"]);
 		});
 
 		describe("ItemTreeManager", function () {
@@ -2345,6 +2654,44 @@ describe("Plugin Sandbox", function () {
 					evalInScope("Zotero.ItemTreeManager.unregisterColumn(_renderColKey)");
 				}
 			});
+
+			it("should block write methods on items passed to dataProvider without dataWrite", async function () {
+				evalInScope(`
+					var _permResults = {};
+					var _permColKey = Zotero.ItemTreeManager.registerColumn({
+						dataKey: 'sandbox-perm-col',
+						label: 'Perm Column',
+						pluginID: '${ADDON_ID}',
+						dataProvider: function(item, dataKey) {
+							_permResults.hasSave = typeof item.save;
+							_permResults.hasSaveTx = typeof item.saveTx;
+							_permResults.hasErase = typeof item.eraseTx;
+							_permResults.hasGetField = typeof item.getField;
+							_permResults.itemType = item.itemType;
+							return 'test';
+						}
+					});
+				`);
+				let dataKey = evalInScope("_permColKey");
+
+				let item = new Zotero.Item('book');
+				item.setField('title', 'Permission Test');
+				await item.saveTx();
+
+				Zotero.ItemTreeManager.getCustomCellData(item, dataKey);
+
+				// Read methods should work
+				assert.equal(evalInScope("_permResults.hasGetField"), 'function');
+				assert.equal(evalInScope("_permResults.itemType"), 'book');
+
+				// Write methods should be blocked (no dataWrite permission)
+				assert.equal(evalInScope("_permResults.hasSave"), 'undefined');
+				assert.equal(evalInScope("_permResults.hasSaveTx"), 'undefined');
+				assert.equal(evalInScope("_permResults.hasErase"), 'undefined');
+
+				evalInScope("Zotero.ItemTreeManager.unregisterColumn(_permColKey)");
+				await item.eraseTx();
+			});
 		});
 
 		describe("ItemPaneManager", function () {
@@ -2491,6 +2838,45 @@ describe("Plugin Sandbox", function () {
 					evalInScope("Zotero.ItemPaneManager.unregisterSection(_sectionID)");
 				}
 			});
+
+			it("should block write methods on items passed to info row callbacks without dataWrite", async function () {
+				evalInScope(`
+					var _infoRowPermResults = {};
+					var _permRowID = Zotero.ItemPaneManager.registerInfoRow({
+						rowID: 'sandbox-perm-row',
+						pluginID: '${ADDON_ID}',
+						label: { l10nID: 'general-print' },
+						onGetData: function({ item }) {
+							_infoRowPermResults.hasSave = typeof item.save;
+							_infoRowPermResults.hasSaveTx = typeof item.saveTx;
+							_infoRowPermResults.hasErase = typeof item.eraseTx;
+							_infoRowPermResults.hasGetField = typeof item.getField;
+							_infoRowPermResults.itemID = item.id;
+							return 'test';
+						}
+					});
+				`);
+				let rowID = evalInScope("_permRowID");
+
+				let item = new Zotero.Item('book');
+				item.setField('title', 'InfoRow Perm Test');
+				await item.saveTx();
+
+				let onGetData = Zotero.ItemPaneManager.getInfoRowHook(rowID, 'onGetData');
+				onGetData({ item, tabType: 'library', editable: false });
+
+				// Read access should work
+				assert.equal(evalInScope("_infoRowPermResults.hasGetField"), 'function');
+				assert.equal(evalInScope("_infoRowPermResults.itemID"), item.id);
+
+				// Write methods should be blocked
+				assert.equal(evalInScope("_infoRowPermResults.hasSave"), 'undefined');
+				assert.equal(evalInScope("_infoRowPermResults.hasSaveTx"), 'undefined');
+				assert.equal(evalInScope("_infoRowPermResults.hasErase"), 'undefined');
+
+				evalInScope("Zotero.ItemPaneManager.unregisterInfoRow(_permRowID)");
+				await item.eraseTx();
+			});
 		});
 
 		describe("MenuManager", function () {
@@ -2601,6 +2987,53 @@ describe("Plugin Sandbox", function () {
 					evalInScope("Zotero.MenuManager.unregisterMenu(_restrictMenuID)");
 				}
 			});
+
+			it("should block write methods on items passed to menu callbacks without dataWrite", async function () {
+				evalInScope(`
+					var _menuPermResults = {};
+					var _permMenuID = Zotero.MenuManager.registerMenu({
+						menuID: 'sandbox-perm-menu',
+						pluginID: '${ADDON_ID}',
+						target: 'main/library/item',
+						menus: [{
+							menuType: 'menuitem',
+							l10nID: 'general-print',
+							onCommand: function(event, context) {
+								if (context.items && context.items.length > 0) {
+									var item = context.items[0];
+									_menuPermResults.hasSave = typeof item.save;
+									_menuPermResults.hasSaveTx = typeof item.saveTx;
+									_menuPermResults.hasErase = typeof item.eraseTx;
+									_menuPermResults.hasGetField = typeof item.getField;
+									_menuPermResults.itemID = item.id;
+								}
+							}
+						}]
+					});
+				`);
+				let menuID = evalInScope("_permMenuID");
+				let option = Zotero.MenuManager._menuManager._optionsCache[menuID];
+				let onCommand = option.menus[0].onCommand;
+
+				let item = new Zotero.Item('book');
+				item.setField('title', 'Menu Perm Test');
+				await item.saveTx();
+
+				// Invoke the wrapped callback with items in context
+				onCommand(null, { items: [item] });
+
+				// Read access should work
+				assert.equal(evalInScope("_menuPermResults.hasGetField"), 'function');
+				assert.equal(evalInScope("_menuPermResults.itemID"), item.id);
+
+				// Write methods should be blocked
+				assert.equal(evalInScope("_menuPermResults.hasSave"), 'undefined');
+				assert.equal(evalInScope("_menuPermResults.hasSaveTx"), 'undefined');
+				assert.equal(evalInScope("_menuPermResults.hasErase"), 'undefined');
+
+				evalInScope("Zotero.MenuManager.unregisterMenu(_permMenuID)");
+				await item.eraseTx();
+			});
 		});
 
 		describe("Reader", function () {
@@ -2656,7 +3089,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default", "mainWindow"]);
+			loadTestScope(["default", "mainWindow", "dataRead"]);
 			// Store the window in a sandbox variable -- returning wrapper objects
 			// across compartments via evalInScope doesn't work, so all assertions
 			// must evaluate entirely inside the sandbox and return primitives.
@@ -3021,31 +3454,37 @@ describe("Plugin Sandbox", function () {
 				evalInScope("_win.ZoteroPane.toggleItemPane()");
 			});
 
-			it("should create a new collection and return its ID", async function () {
-				let dialogPromise = waitForDialog(
-					null,
-					'accept',
-					'chrome://zotero/content/newCollectionDialog.xhtml'
-				);
-				let collID = await evalInScope("_win.ZoteroPane.newCollection()");
-				await dialogPromise;
-				assert.isNumber(collID);
+			it("should not expose data-accessing methods without dataRead", function () {
+				PluginSandbox.unloadScope(ADDON_ID);
+				loadTestScope(["default", "mainWindow"]);
+				evalInScope("var _winNoData = Zotero.getMainWindow()");
 
-				let collection = Zotero.Collections.get(collID);
-				assert.ok(collection);
+				// UI-only methods should still work
+				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.loaded !== 'undefined'"),
+					"loaded should be exposed without dataRead");
+				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.toggleItemPane === 'function'"),
+					"toggleItemPane should be exposed without dataRead");
 
-				await collection.eraseTx();
+				// Data-accessing methods should not be available
+				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.getSelectedItems === 'undefined'"),
+					"getSelectedItems should not be exposed without dataRead");
+				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.getSelectedCollection === 'undefined'"),
+					"getSelectedCollection should not be exposed without dataRead");
+				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.selectItem === 'undefined'"),
+					"selectItem should not be exposed without dataRead");
+				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.canEdit === 'undefined'"),
+					"canEdit should not be exposed without dataRead");
 			});
 
-			it("should create a new note and return its item ID", async function () {
-				let noteID = await evalInScope("_win.ZoteroPane.newNote(false, null, 'Test note')");
-				assert.isNumber(noteID);
-
-				let note = Zotero.Items.get(noteID);
-				assert.ok(note);
-				assert.equal(note.itemType, 'note');
-
-				await note.eraseTx();
+			it("should not expose creation methods without dataWrite", function () {
+				assert.isTrue(evalInScope("typeof _win.ZoteroPane.newItem === 'undefined'"),
+					"newItem should not be exposed without dataWrite");
+				assert.isTrue(evalInScope("typeof _win.ZoteroPane.newCollection === 'undefined'"),
+					"newCollection should not be exposed without dataWrite");
+				assert.isTrue(evalInScope("typeof _win.ZoteroPane.newNote === 'undefined'"),
+					"newNote should not be exposed without dataWrite");
+				assert.isTrue(evalInScope("typeof _win.ZoteroPane.newChildNote === 'undefined'"),
+					"newChildNote should not be exposed without dataWrite");
 			});
 
 			it("should not expose internal properties", function () {
@@ -3077,6 +3516,53 @@ describe("Plugin Sandbox", function () {
 					"handleKeyPress should not be exposed");
 				assert.isTrue(evalInScope("typeof _win.ZoteroPane.buildItemContextMenu === 'undefined'"),
 					"buildItemContextMenu should not be exposed");
+			});
+		});
+
+		describe("ZoteroPane creation methods (requires dataWrite)", function () {
+			beforeEach(function () {
+				// Override parent beforeEach with mainWindow + dataWrite permissions
+				PluginSandbox.unloadScope(ADDON_ID);
+				loadTestScope(["default", "mainWindow", "dataRead", "dataWrite"]);
+				evalInScope("var _win2 = Zotero.getMainWindow()");
+			});
+
+			it("should expose creation methods with dataWrite", function () {
+				assert.isTrue(evalInScope("typeof _win2.ZoteroPane.newItem === 'function'"),
+					"newItem should be exposed with dataWrite");
+				assert.isTrue(evalInScope("typeof _win2.ZoteroPane.newCollection === 'function'"),
+					"newCollection should be exposed with dataWrite");
+				assert.isTrue(evalInScope("typeof _win2.ZoteroPane.newNote === 'function'"),
+					"newNote should be exposed with dataWrite");
+				assert.isTrue(evalInScope("typeof _win2.ZoteroPane.newChildNote === 'function'"),
+					"newChildNote should be exposed with dataWrite");
+			});
+
+			it("should create a new collection and return its ID", async function () {
+				let dialogPromise = waitForDialog(
+					null,
+					'accept',
+					'chrome://zotero/content/newCollectionDialog.xhtml'
+				);
+				let collID = await evalInScope("_win2.ZoteroPane.newCollection()");
+				await dialogPromise;
+				assert.isNumber(collID);
+
+				let collection = Zotero.Collections.get(collID);
+				assert.ok(collection);
+
+				await collection.eraseTx();
+			});
+
+			it("should create a new note and return its item ID", async function () {
+				let noteID = await evalInScope("_win2.ZoteroPane.newNote(false, null, 'Test note')");
+				assert.isNumber(noteID);
+
+				let note = Zotero.Items.get(noteID);
+				assert.ok(note);
+				assert.equal(note.itemType, 'note');
+
+				await note.eraseTx();
 			});
 		});
 
@@ -3139,7 +3625,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should not allow setting listed properties on Zotero sub-objects", function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 			// The mirror is created with mutable: false, so setting listed props should throw
 			let threw = false;
 			try {
@@ -3208,9 +3694,43 @@ describe("Plugin Sandbox", function () {
 		it("should not expose translator APIs with only default permission", function () {
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof Zotero.Translators === 'undefined'"),
-				"Translators should not be exposed without translator permission");
+				"Translators should not be exposed without data permission");
 			assert.isTrue(evalInScope("typeof Zotero.Translate === 'undefined'"),
-				"Translate should not be exposed without translator permission");
+				"Translate should not be exposed without dataWrite permission");
+		});
+
+		it("should imply dataRead when dataWrite is granted", async function () {
+			// Only declare dataWrite -- dataRead should be implied
+			loadTestScope(["default", "dataWrite"]);
+
+			// dataRead APIs should be available
+			assert.isTrue(evalInScope("typeof Zotero.Items === 'object'"),
+				"Items should be exposed via implied dataRead");
+			assert.isTrue(evalInScope("typeof Zotero.Items.get === 'function'"),
+				"Items.get should be exposed via implied dataRead");
+			assert.isTrue(evalInScope("typeof Zotero.Libraries === 'object'"),
+				"Libraries should be exposed via implied dataRead");
+			assert.isTrue(evalInScope("typeof Zotero.Translators === 'object'"),
+				"Translators should be exposed via implied dataRead");
+
+			// dataWrite APIs should also be available
+			assert.isTrue(evalInScope("typeof Zotero.Items.trash === 'function'"),
+				"Items.trash should be exposed with dataWrite");
+			assert.isTrue(evalInScope("typeof Zotero.Translate === 'object'"),
+				"Translate should be exposed with dataWrite");
+
+			// Write methods on returned items should be unrestricted
+			let item = new Zotero.Item('book');
+			item.setField('title', 'Implied Permission Test');
+			await item.saveTx();
+
+			evalInScope(`var _impliedItem = Zotero.Items.get(${item.id})`);
+			assert.isTrue(evalInScope("typeof _impliedItem.save === 'function'"),
+				"save should be available on items with implied dataRead + dataWrite");
+			assert.isTrue(evalInScope("typeof _impliedItem.saveTx === 'function'"),
+				"saveTx should be available on items with implied dataRead + dataWrite");
+
+			await item.eraseTx();
 		});
 
 		it("should not expose UI APIs with only default permission", function () {
@@ -3228,7 +3748,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should expose data APIs but not fileSystem with data permission", function () {
-			loadTestScope(["default", "data"]);
+			loadTestScope(["default", "dataRead", "dataWrite"]);
 			assert.isTrue(evalInScope("typeof Zotero.Items === 'object'"),
 				"Items should be exposed with data permission");
 			assert.isTrue(evalInScope("typeof Zotero.Libraries === 'object'"),
@@ -3248,7 +3768,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should merge multiple permissions correctly", function () {
-			loadTestScope(["default", "data", "network", "preferences", "translator"], [], ["test."]);
+			loadTestScope(["default", "dataRead", "dataWrite", "network", "preferences"], [], ["test."]);
 			assert.isTrue(evalInScope("typeof Zotero.Items === 'object'"),
 				"Items should be exposed with data permission");
 			assert.isTrue(evalInScope("typeof Zotero.ItemFields === 'object'"),
