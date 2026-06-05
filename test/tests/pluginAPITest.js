@@ -1184,4 +1184,65 @@ describe("Plugin API", function () {
 			assert.isTrue(Zotero.MenuManager.unregisterMenu(menuID));
 		});
 	});
+
+	describe("Window resource manager", function () {
+		let pluginID = "test-plugin@zotero.org";
+
+		afterEach(function () {
+			// Clean up any registered resources
+			for (let option of Zotero.WindowResourceManager._manager.options) {
+				Zotero.WindowResourceManager.unregisterResource(option.resourceID);
+			}
+		});
+
+		it("should register and unregister CSS resource", function () {
+			let resourceID = Zotero.WindowResourceManager.registerResource({
+				resourceID: "test-css",
+				pluginID,
+				target: "mainWindow",
+				type: "css",
+				url: "chrome://zotero/skin/zotero.css",
+			});
+			assert.isString(resourceID);
+
+			// Verify CSS link is added to document
+			let link = doc.querySelector(`link[data-resource-id="${CSS.escape(resourceID)}"]`);
+			assert.exists(link, "CSS link element should be added to document");
+			assert.equal(link.rel, "stylesheet");
+			assert.include(link.href, "zotero.css");
+
+			// Unregister and verify removal
+			let success = Zotero.WindowResourceManager.unregisterResource(resourceID);
+			assert.isTrue(success);
+
+			link = doc.querySelector(`link[data-resource-id="${CSS.escape(resourceID)}"]`);
+			assert.notExists(link, "CSS link should be removed after unregister");
+		});
+
+		it("should register and unregister FTL resource", async function () {
+			// preferences.ftl is not loaded by default in the main window
+			let resourceID = Zotero.WindowResourceManager.registerResource({
+				resourceID: "test-ftl",
+				pluginID,
+				target: "mainWindow",
+				type: "ftl",
+				url: "preferences.ftl",
+			});
+			assert.isString(resourceID);
+
+			// Verify the FTL strings are actually resolvable
+			let l10n = new Localization(["preferences.ftl"], true);
+			let expected = l10n.formatValueSync("preferences-file-renaming-title");
+			let value = await doc.l10n.formatValue("preferences-file-renaming-title");
+			assert.isString(value);
+			assert.equal(value, expected);
+
+			// Unregister and verify the FTL link is removed
+			let success = Zotero.WindowResourceManager.unregisterResource(resourceID);
+			assert.isTrue(success);
+
+			let link = doc.querySelector(`link[href="preferences.ftl"]`);
+			assert.notExists(link, "FTL link should be removed after unregister");
+		});
+	});
 });

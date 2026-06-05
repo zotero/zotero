@@ -292,6 +292,7 @@ function modify_omni {
 	  "itemTree",
 	  "itemPane",
 	  "menu",
+	  "windowResource",
 	  "reader",
 	  "preferencePane",
 	  "mainWindow"' chrome/toolkit/content/extensions/schemas/manifest.json

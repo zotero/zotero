@@ -227,6 +227,11 @@ const PERMISSION_SCHEMAS = {
 			MenuManager: true,
 		},
 	},
+	windowResource: {
+		Zotero: {
+			WindowResourceManager: true,
+		},
+	},
 	reader: {
 		Zotero: {
 			Reader: {
