@@ -28,8 +28,8 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 {
-	const PluginAPIBase = ChromeUtils.importESModule("chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs").PluginAPIBase;
-	const ScopeVariables = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs").ScopeVariables;
+	const { PluginAPIBase } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs");
+	const { ScopeVariables, WindowScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
 
 
 	/**
@@ -152,8 +152,9 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			};
 		}
 
-		_add(option) {
-			option = Object.assign({}, option);
+		_convert(option) {
+			option = super._convert(option);
+
 			option.enabledTreeIDs = option.enabledTreeIDs || ["main"];
 			if (option.enabledTreeIDs.includes("*")) {
 				option.enabledTreeIDs = ["*"];
@@ -163,9 +164,9 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				let renderCell = option.renderCell;
 				option.renderCell = function (index, data, column, isFirstColumn, doc) {
 					let safeColumn = ScopeVariables.createAllowlistMirrorObject(column, true, option.pluginID);
-					let safeDoc = ScopeVariables.createSafeDocument(doc, option.pluginID);
+					let safeDoc = WindowScopeVariables.createSafeDocument(doc, option.pluginID);
 					let elem = renderCell.call(this, index, data, safeColumn, isFirstColumn, safeDoc);
-					return ScopeVariables.unwrapDOMNode(elem);
+					return WindowScopeVariables.unwrapDOMNode(elem);
 				};
 			}
 			if (option.dataProvider) {
@@ -175,7 +176,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 					return dataProvider.call(this, safeItem, dataKey);
 				};
 			}
-			return super._add(option);
+			return option;
 		}
 
 		_validate(option) {
