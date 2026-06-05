@@ -84,6 +84,106 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(utf8, "€");
 		});
 	});
+
+
+	describe("#copyToClipboard()/#getClipboard()", function () {
+		it("should round-trip a plain-text string", function () {
+			let text = "Hello, clipboard! Voilà ☃";
+			ZUI.copyToClipboard({ "text/plain": text });
+			assert.equal(ZUI.getClipboard("text/plain"), text);
+		});
+
+		it("should round-trip a custom string flavor", function () {
+			let flavor = "application/x-zotero-test-string";
+			let text = "custom string payload";
+			ZUI.copyToClipboard({ [flavor]: text });
+			assert.equal(ZUI.getClipboard(flavor), text);
+		});
+
+		it("should round-trip a custom binary flavor as an ArrayBuffer", function () {
+			let flavor = "application/x-zotero-test-binary";
+			let bytes = new Uint8Array([0, 1, 2, 253, 254, 255]);
+			ZUI.copyToClipboard({ [flavor]: bytes });
+			let result = ZUI.getClipboard(flavor, "binary");
+			// The buffer is created in the utilities module's compartment, so
+			// check the class name rather than using instanceof
+			assert.equal(Cu.getClassName(result, true), "ArrayBuffer");
+			assert.deepEqual(new Uint8Array(result), bytes);
+		});
+
+		it("should return an nsIFile for a copied file path", function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			ZUI.copyToClipboard({ "application/x-moz-file": path });
+			let file = ZUI.getClipboard("application/x-moz-file");
+			assert.instanceOf(file, Components.interfaces.nsIFile);
+			assert.equal(file.path, path);
+		});
+
+		it("should return an imgIContainer for a copied image", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			let bytes = await IOUtils.read(path);
+			ZUI.copyToClipboard({ "image/png": bytes.buffer });
+			let image = ZUI.getClipboard("application/x-moz-nativeimage");
+			assert.instanceOf(image, Components.interfaces.imgIContainer);
+			assert.isAbove(image.width, 0);
+			assert.isAbove(image.height, 0);
+		});
+
+		it("should round-trip an imgIContainer through the native-image flavor", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			let bytes = await IOUtils.read(path);
+			ZUI.copyToClipboard({ "image/png": bytes.buffer });
+			let image = ZUI.getClipboard("application/x-moz-nativeimage");
+			// Put the imgIContainer back directly and read it again
+			ZUI.copyToClipboard({ "application/x-moz-nativeimage": image });
+			let image2 = ZUI.getClipboard("application/x-moz-nativeimage");
+			assert.instanceOf(image2, Components.interfaces.imgIContainer);
+			assert.equal(image2.width, image.width);
+			assert.equal(image2.height, image.height);
+		});
+
+		it("should return null when no matching flavor is on the clipboard", function () {
+			ZUI.copyToClipboard({ "text/plain": "something" });
+			assert.isNull(ZUI.getClipboard("application/x-zotero-absent-flavor"));
+		});
+
+		it("should return file contents and path for a file with a dataType", async function () {
+			let tmpFile = OS.Path.join(Zotero.getTempDirectory().path, "clipboard-test.txt");
+			await IOUtils.writeUTF8(tmpFile, "héllo, clipboard");
+			try {
+				ZUI.copyToClipboard({ "application/x-moz-file": tmpFile });
+				assert.equal(ZUI.getClipboard("application/x-moz-file", "path"), tmpFile);
+				assert.equal(ZUI.getClipboard("application/x-moz-file", "string"), "héllo, clipboard");
+				let buf = ZUI.getClipboard("application/x-moz-file", "binary");
+				assert.deepEqual(new Uint8Array(buf), new Uint8Array(await IOUtils.read(tmpFile)));
+			}
+			finally {
+				await IOUtils.remove(tmpFile);
+			}
+		});
+
+		it("should return PNG bytes for an image with dataType 'binary'", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			let bytes = await IOUtils.read(path);
+			ZUI.copyToClipboard({ "image/png": bytes.buffer });
+			let buf = ZUI.getClipboard("application/x-moz-nativeimage", "binary");
+			assert.equal(Cu.getClassName(buf, true), "ArrayBuffer");
+			// PNG file signature
+			assert.deepEqual(Array.from(new Uint8Array(buf).subarray(0, 8)), [137, 80, 78, 71, 13, 10, 26, 10]);
+		});
+
+		it("should return base64 for an image with dataType 'string'", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			let bytes = await IOUtils.read(path);
+			ZUI.copyToClipboard({ "image/png": bytes.buffer });
+			let b64 = ZUI.getClipboard("application/x-moz-nativeimage", "string");
+			assert.isString(b64);
+			// Decodes to a PNG (signature byte + "PNG")
+			let decoded = atob(b64);
+			assert.equal(decoded.charCodeAt(0), 137);
+			assert.equal(decoded.substr(1, 3), "PNG");
+		});
+	});
 	
 	
 	describe("#containsEmoji()", function () {
