@@ -163,3 +163,63 @@ fulltext-stats-attachments-indexed = Attachments indexed:
 fulltext-stats-partially-indexed = Partially indexed:
 fulltext-stats-not-available = Full-text content or file not available:
 fulltext-stats-notes-indexed = Notes indexed:
+preferences-pane-plugin-permissions = Permissions
+
+preferences-plugin-permissions = Permissions
+preferences-plugin-permissions-intro = Manage plugin permissions and data.
+preferences-plugin-permissions-empty = No plugins.
+
+preferences-plugin-permissions-delete-db-button =
+    .label = Delete Database
+
+preferences-plugin-permissions-delete-db-confirm-title = Delete Plugin Database
+preferences-plugin-permissions-delete-db-confirm-body = Delete the database for { $name }? This cannot be undone.
+preferences-plugin-permissions-delete-db-confirm-action = Delete
+
+preferences-plugin-permissions-edit-subpane = Edit Plugin Permissions
+preferences-plugin-permissions-edit-data-heading = Data Directory
+preferences-plugin-permissions-edit-no-data = No data directory.
+preferences-plugin-permissions-edit-db-heading = Database
+preferences-plugin-permissions-edit-no-db = No database.
+preferences-plugin-permissions-grants-heading = File Access Permissions
+preferences-plugin-permissions-grants-empty = No remembered permissions.
+
+preferences-plugin-permissions-edit-status-disabled = This plugin is disabled.
+preferences-plugin-permissions-edit-status-uninstalled = This plugin is no longer installed.
+
+preferences-plugin-permissions-edit-remove-all-heading = Remove All Data
+preferences-plugin-permissions-edit-remove-all-intro = Delete the data directory, database, and remembered permissions for this plugin.
+preferences-plugin-permissions-edit-remove-all-button =
+    .label = Remove All Data…
+preferences-plugin-permissions-edit-remove-all-confirm-title = Remove All Plugin Data
+preferences-plugin-permissions-edit-remove-all-confirm-body = Remove all data stored for { $name }? This cannot be undone.
+preferences-plugin-permissions-edit-remove-all-confirm-action = Remove
+preferences-plugin-permissions-show-in-folder =
+    .label = Show in Folder
+preferences-plugin-permissions-clear-folder =
+    .label = Clear Folder
+preferences-plugin-permissions-add-grant-file =
+    .label = Add File…
+preferences-plugin-permissions-add-grant-folder =
+    .label = Add Folder…
+preferences-plugin-permissions-remove-grant =
+    .aria-label = Remove
+
+preferences-plugin-permissions-clear-folder-confirm-title = Clear Data Folder
+preferences-plugin-permissions-clear-folder-confirm-body = Remove all files in { $name }'s data folder? This cannot be undone.
+preferences-plugin-permissions-clear-folder-confirm-action = Clear
+
+preferences-plugin-permissions-add-grant-mode-title = Choose file access permission type:
+preferences-plugin-permissions-add-grant-mode-label = What should the plugin be allowed to do with this file/folder?
+
+preferences-plugin-permissions-col-plugin = Plugin
+preferences-plugin-permissions-col-file-access = File Access
+preferences-plugin-permissions-col-data = Data
+preferences-plugin-permissions-col-db = Database
+preferences-plugin-permissions-edit-row = Edit
+preferences-plugin-permissions-legacy-badge = Legacy
+preferences-plugin-permissions-legacy-hint = Legacy plugin is not managed by Zotero. Contact the author of the plugin to update.
+preferences-plugin-permissions-installed-heading = Declared permissions:
+preferences-plugin-permissions-uninstalled-hint = This plugin is no longer installed. Data left on disk can be removed.
+preferences-plugin-permissions-uninstalled-remove-button =
+    .label = Remove All Data…

@@ -31,19 +31,6 @@ const ZOTERO_PLUGIN_NS_UUID = "3c0b7f5a-2b95-5af5-87c8-ecf611478d41";
 // pluginID -> pluginUUID, avoid recomputing
 const cache = new Map();
 
-
-/**
- * Return a stable, hyphenated 36-char UUID for a plugin.
- */
-function getPluginUUID(id) {
-	if (cache.has(id)) {
-		return cache.get(id);
-	}
-	let uuid = uuidv5(ZOTERO_PLUGIN_NS_UUID, id);
-	cache.set(id, uuid);
-	return uuid;
-}
-
 /**
  * Compute a UUIDv5 from a namespace UUID + name (RFC 4122 §4.3).
  *
@@ -90,4 +77,16 @@ function formatUUID(bytes) {
 	return `${hex.substr(0, 8)}-${hex.substr(8, 4)}-${hex.substr(12, 4)}-${hex.substr(16, 4)}-${hex.substr(20, 12)}`;
 }
 
-export { getPluginUUID };
+
+const PluginUUID = {
+	getByID(id) {
+		if (cache.has(id)) {
+			return cache.get(id);
+		}
+		let uuid = uuidv5(ZOTERO_PLUGIN_NS_UUID, id);
+		cache.set(id, uuid);
+		return uuid;
+	},
+};
+
+export { PluginUUID };
