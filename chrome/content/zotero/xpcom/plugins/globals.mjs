@@ -28,6 +28,7 @@ import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 import { ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables, WindowScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PLUGIN_DB_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
+import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
@@ -35,25 +36,21 @@ const lazy = XPCOMUtils.declareLazy({
 });
 
 
-// https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/ExtensionCommon.sys.mjs#60
-function getConsole(addon) {
-	return () => {
-		let console = new lazy.ConsoleAPI({
-			prefix: `${addon.name} (${addon.id}):\n`,
-		});
-		let wrapper = ScopeVariables.createAllowlistMirrorObject(console, true, addon.id, { cache: true, strong: true, pathPrefix: "console" });
-		return wrapper;
-	};
-}
-
 /**
  * Set up a lazy `console` global on the sandbox scope.
  *
  * @param {Object} scope - The sandbox scope
- * @param {Object} addon - The addon descriptor
+ * @param {Object} addon - The addon instance from AddonManager (needed for display name)
  */
+// https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/ExtensionCommon.sys.mjs#60
 function setupConsole(scope, addon) {
-	ChromeUtils.defineLazyGetter(scope, "console", getConsole(addon));
+	let pluginID = scope.PLUGIN_ID;
+	ChromeUtils.defineLazyGetter(scope, "console", () => {
+		let console = new lazy.ConsoleAPI({
+			prefix: `${addon.name} (${addon.id}):\n`,
+		});
+		return ScopeVariables.createAllowlistMirrorObject(console, true, pluginID, { cache: true, strong: true, pathPrefix: "console" });
+	});
 }
 
 const ALLOWED_WINDOW_FEATURES = new Set([
@@ -80,10 +77,10 @@ function sanitizeFeatures(features) {
  * that loads the plugin's HTML content.
  *
  * @param {Object} scope - The sandbox scope to attach `openWindow` to
- * @param {string} rootURI - The plugin's resource:// root URI
- * @param {string} addonID - The plugin ID
  */
-function setupOpenWindow(scope, rootURI, addonID) {
+function setupOpenWindow(scope) {
+	let pluginID = scope.PLUGIN_ID;
+	let rootURI = PluginProtocol.getBaseURI(pluginID);
 	let holder = Cu.createObjectIn(scope);
 	Cu.exportFunction(
 		(url, features, options = {}) => {
@@ -110,9 +107,7 @@ function setupOpenWindow(scope, rootURI, addonID) {
 			let safeFeatures = sanitizeFeatures(features ? String(features) : "");
 
 			// Open a chrome wrapper window with a <browser> element
-			// that loads the plugin's HTML content. The browser's
-			// contentWindow gets a resource:// content principal,
-			// enabling same-origin DOM access from the sandbox.
+			// that loads the plugin's HTML content
 			let resizable = !safeFeatures || safeFeatures.includes("resizable");
 			let chromeFeatures = "chrome,dialog=no,"
 				+ (safeFeatures || "resizable");
@@ -130,7 +125,7 @@ function setupOpenWindow(scope, rootURI, addonID) {
 						.getElementById("plugin-browser");
 
 					// Initialize the plugin window (title sync, menus, lifecycle)
-					win.PluginWindow.init(windowId, addonID);
+					win.PluginWindow.init(windowId, pluginID);
 
 					let nsURI = Services.io.newURI(resolved);
 					let principal = Services.scriptSecurityManager
@@ -192,30 +187,17 @@ function setupOpenWindow(scope, rootURI, addonID) {
 }
 
 /**
- * Set up a `Zotero.HTTP` wrapper on the plugin scope that injects the
- * sandbox's XMLHttpRequest into every request.  The sandbox's XHR
- * carries the plugin's restricted principal (constrained by
- * allowedOrigins from host_permissions), so Firefox's built-in
- * security enforces URL access control.
- *
- * @param {Object} scope - The sandbox scope
- * @param {string} addonID - The addon's ID
- */
-/**
  * Set up Zotero.HTTP on the plugin scope.
  * Uses a XHR factory created inside the sandbox so instances carry the
  * sandbox's restricted principal (constrained by allowedOrigins from
- * host_permissions).  Firefox's built-in principal security enforces
+ * host_permissions). Firefox's built-in principal security enforces
  * URL access control.
  *
  * @param {Object} scope - The sandbox scope
  */
 function setupHTTP(scope) {
-	// Create XHR factory *inside* the sandbox so instances get the
-	// sandbox's restricted principal.  The principal is determined by
-	// the calling context of `new`, not the constructor's origin.
 	let createXHR = Cu.evalInSandbox("() => new XMLHttpRequest()", scope);
-	let addonID = scope.PLUGIN_ID;
+	let pluginID = scope.PLUGIN_ID;
 
 	let HTTP = Cu.createObjectIn(scope);
 
@@ -225,7 +207,6 @@ function setupHTTP(scope) {
 				mutable: true,
 				argParser: (args) => {
 					// Inject sandbox XHR factory into options
-					// Options is always at index 2 for both request() and processDocuments()
 					if (!args[2] || typeof args[2] !== "object") {
 						args[2] = {};
 					}
@@ -233,13 +214,12 @@ function setupHTTP(scope) {
 					args[2].noMock = true;
 					return args;
 				},
-				trace: { pluginID: addonID, path: `Zotero.HTTP.${name}` },
+				trace: { pluginID, path: `Zotero.HTTP.${name}` },
 			}
 		);
 	}
 
-	// Attach to the scope's Zotero mirror object
-	Object.defineProperty(Cu.waiveXrays(scope.Zotero), "HTTP", {
+	Object.defineProperty(scope.Zotero, "HTTP", {
 		value: HTTP,
 		enumerable: true,
 		configurable: false,
@@ -247,9 +227,6 @@ function setupHTTP(scope) {
 	});
 }
 
-// Method signatures for Prefs methods that follow the standard key/global pattern.
-// key: pref name (auto-prefixed when global=false, permission-checked when global=true)
-// global: flag index -- forced to true when calling real Zotero.Prefs
 const PREFS_METHODS = {
 	get: ["key", "global"],
 	set: ["key", "value", "global"],
@@ -260,18 +237,21 @@ const PREFS_METHODS = {
  * Set up Zotero.Prefs on the plugin scope with access control.
  *
  * The "preferences" permission exposes the Zotero.Prefs API.
- * Access scope is controlled by the plugin's syncGUID namespace
- * and pref_permissions declared in the manifest.
- * Global (non-Zotero) prefs are not accessible from unprivileged plugins.
+ * By default, plugins can only access preferences in their own namespace,
+ * `extensions.<PLUGIN_GUID>.*`. Additional namespaces can be granted via the `pref_permissions`
+ * in the manifest.
+ * The `global` argument behavior is different from the main Zotero.Prefs API:
+ * If `global` is true, the key is used as-is and must match an allowed namespace.
+ * If `global` is false or omitted, the plugin's own namespace is prefixed to the key.
  *
  * @param {Object} scope - The sandbox scope
- * @param {Object} addon - The addon descriptor
  */
-function setupPreferences(scope, addon) {
-	let prefPrefixes = addon.installPermissions.pref_permissions || [];
+function setupPreferences(scope) {
+	let pluginID = scope.PLUGIN_ID;
+	let prefPrefixes = scope.PREF_PERMISSIONS;
 
 	// Plugin's own namespace
-	let ownPrefix = `extensions.${addon.syncGUID.replace(/[{}]/g, '')}.`;
+	let ownPrefix = `extensions.${scope.PLUGIN_GUID}.`;
 	let allPrefixes = [ownPrefix, ...prefPrefixes];
 
 	function checkPrefPermission(pref) {
@@ -286,8 +266,7 @@ function setupPreferences(scope, addon) {
 
 	let Prefs = Cu.createObjectIn(scope);
 
-	let addonID = addon.id;
-
+	// get, set, clear
 	for (let [method, sig] of Object.entries(PREFS_METHODS)) {
 		let keyIndex = sig.indexOf("key");
 		let globalIndex = sig.indexOf("global");
@@ -307,7 +286,7 @@ function setupPreferences(scope, addon) {
 					args[globalIndex] = true;
 					return args;
 				},
-				trace: { pluginID: addonID, path: `Zotero.Prefs.${method}` },
+				trace: { pluginID, path: `Zotero.Prefs.${method}` },
 			}
 		);
 	}
@@ -324,12 +303,12 @@ function setupPreferences(scope, addon) {
 				checkPrefPermission(args[1]);
 				return args;
 			},
-			trace: { pluginID: addonID, path: "Zotero.Prefs.resetBranch" },
+			trace: { pluginID, path: "Zotero.Prefs.resetBranch" },
 		}
 	);
 
 	// registerObserver(name, handler, global)
-	let registerObserverTrace = { pluginID: addonID, path: "Zotero.Prefs.registerObserver" };
+	let registerObserverTrace = { pluginID, path: "Zotero.Prefs.registerObserver" };
 	Prefs.registerObserver = ScopeUtils.ensureCallableInScope(
 		Zotero.Prefs.registerObserver, Zotero.Prefs, scope, {
 			argParser: (args) => {
@@ -339,7 +318,7 @@ function setupPreferences(scope, addon) {
 				else {
 					checkPrefPermission(args[0]);
 				}
-				args[1] = ScopeVariables.fromScope(args[1], addonID, { trace: registerObserverTrace });
+				args[1] = ScopeVariables.fromScope(args[1], pluginID, { trace: registerObserverTrace });
 				args[2] = true;
 				return args;
 			},
@@ -350,12 +329,11 @@ function setupPreferences(scope, addon) {
 	// unregisterObserver(symbol)
 	Prefs.unregisterObserver = ScopeUtils.ensureCallableInScope(
 		Zotero.Prefs.unregisterObserver, Zotero.Prefs, scope, {
-			trace: { pluginID: addonID, path: "Zotero.Prefs.unregisterObserver" },
+			trace: { pluginID, path: "Zotero.Prefs.unregisterObserver" },
 		}
 	);
 
-	// Attach to the scope's Zotero mirror object
-	Object.defineProperty(Cu.waiveXrays(scope.Zotero), "Prefs", {
+	Object.defineProperty(scope.Zotero, "Prefs", {
 		value: Prefs,
 		enumerable: true,
 		configurable: false,
@@ -370,35 +348,34 @@ function setupPreferences(scope, addon) {
  * the real nsIFilePicker.
  *
  * @param {Object} scope - The sandbox scope
- * @param {string} addonID - The addon's ID
  */
-function setupFilePicker(scope, addonID) {
+function setupFilePicker(scope) {
+	let pluginID = scope.PLUGIN_ID;
 	let { FilePicker } = lazy;
 	class PluginFilePicker extends FilePicker {
 		init(parentWindow, title, mode) {
-			parentWindow = ScopeVariables.fromScope(parentWindow, addonID);
+			parentWindow = ScopeVariables.fromScope(parentWindow, pluginID);
 			return super.init(parentWindow, title, mode);
 		}
 	}
 	scope.FilePicker = ScopeUtils.ensureConstructableInScope(PluginFilePicker, scope, {
 		mutable: true,
-		trace: { pluginID: addonID, path: "FilePicker" },
+		trace: { pluginID, path: "FilePicker" },
 	});
 }
 
 /**
  * Set up `Zotero.DBConnection` on the sandbox scope.
  * The constructor creates plugin-scoped SQLite databases under
- * `<data dir>/plugin-data/<syncGUID>/`.  Only accepts a plain
+ * `<data dir>/plugin-data/<PLUGIN_GUID>/`.  Only accepts a plain
  * database name; instances are restricted via PLUGIN_DB_SCHEMA.
  *
  * @param {Object} scope - The sandbox scope
- * @param {Object} addon - The addon descriptor
  */
-function setupPluginDB(scope, addon) {
-	let guidDir = addon.syncGUID.replace(/[{}]/g, "");
+function setupPluginDB(scope) {
+	let pluginID = scope.PLUGIN_ID;
 	let pluginDir = PathUtils.join(
-		Zotero.DataDirectory.dir, "plugin-data", guidDir
+		Zotero.DataDirectory.dir, "plugin-data", scope.PLUGIN_GUID
 	);
 
 	let PluginDBConnection = function (dbName) {
@@ -441,7 +418,7 @@ function setupPluginDB(scope, addon) {
 
 	let wrapped = ScopeUtils.ensureConstructableInScope(
 		PluginDBConnection, scope,
-		{ mutable: true, instanceSchema: PLUGIN_DB_SCHEMA, trace: { pluginID: addon.id, path: "Zotero.DBConnection" } }
+		{ mutable: true, instanceSchema: PLUGIN_DB_SCHEMA, trace: { pluginID, path: "Zotero.DBConnection" } }
 	);
 
 	// Static helpers on the constructor for managing plugin databases.
