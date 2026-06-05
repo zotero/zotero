@@ -32,6 +32,7 @@ Zotero.Plugins = new function () {
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		WindowScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 	const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 	XPCOMUtils.defineLazyServiceGetters(lazy, {
@@ -234,8 +235,10 @@ Zotero.Plugins = new function () {
 	 * @return {Promise<String>}
 	 */
 	this.resolveURI = async function (id, uri) {
-		// We can't use addon.getResourceURI(path) here because that only accepts a relative path
-		return new URL(uri, await this.getRootURI(id)).href;
+		// For unprivileged plugins, resolve against the moz-extension:// base URI
+		// For privileged plugins (no registered protocol), fall back to the file:// root.
+		let baseURI = lazy.PluginProtocol.getBaseURI(id) || await this.getRootURI(id);
+		return new URL(uri, baseURI).href;
 	};
 	
 	
