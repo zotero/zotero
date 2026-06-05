@@ -60,7 +60,7 @@ const ScopeVariables = {
 		}
 
 		// Skip already-wrapped scope objects
-		if (typeof value[ORIGINAL_REF_KEY] === "function") {
+		if (VarCheck.hasOriginalRef(value)) {
 			return value;
 		}
 
@@ -173,8 +173,8 @@ const ScopeVariables = {
 		}
 
 		// Unwrap instance facades and DOM node wrappers back to their originals
-		if (typeof value[ORIGINAL_REF_KEY] === "function") {
-			return value[ORIGINAL_REF_KEY]();
+		if (VarCheck.hasOriginalRef(value)) {
+			return VarCheck.getOriginalRef(value);
 		}
 
 		if (typeof value === "function") {
@@ -188,7 +188,7 @@ const ScopeVariables = {
 				let result = Reflect.apply(value, this, wrappedArgs);
 
 				if (unwrapReturn) {
-					return WindowScopeVariables.unwrapDOMNode(result);
+					return VarCheck.getOriginalOrSelf(result);
 				}
 
 				return result;
@@ -234,20 +234,6 @@ const ScopeVariables = {
 		return value;
 	},
 
-	/**
-	 * Get the original unwrapped function from a fromScope-wrapped function.
-	 * Returns the function itself if it is not wrapped.
-	 * Useful for matching wrapped handlers back to their originals in
-	 * register/unregister patterns.
-	 * @param {Function} fn - A possibly wrapped function
-	 * @returns {Function} The original function
-	 */
-	getOriginal(fn) {
-		if (typeof fn === "function" && typeof fn[ORIGINAL_REF_KEY] === "function") {
-			return fn[ORIGINAL_REF_KEY]();
-		}
-		return fn;
-	},
 
 	/**
 	 * Wrap a host function so that when called from the plugin scope,
@@ -1091,7 +1077,7 @@ const WindowScopeVariables = {
 						WindowScopeVariables.activateWhenConnected(actual, addonID);
 						return result;
 					}
-					return Reflect.set(actual, prop, WindowScopeVariables.unwrapDOMNode(value));
+					return Reflect.set(actual, prop, VarCheck.getOriginalOrSelf(value));
 				},
 				holder,
 				{ defineAs: "s" }
@@ -1132,13 +1118,13 @@ const WindowScopeVariables = {
 	 */
 	unwrapDOMArguments(args, addonID, { rootNode } = {}) {
 		return args.map((arg) => {
-			if (WindowScopeVariables.isWrappedDOMNode(arg)) {
-				return WindowScopeVariables.unwrapDOMNode(arg);
+			if (VarCheck.hasOriginalRef(arg)) {
+				return VarCheck.getOriginalRef(arg);
 			}
 			if (typeof arg === "function") {
 				// If this function has already been wrapped, return the wrapped version
-				if (arg[ORIGINAL_REF_KEY]) {
-					return arg[ORIGINAL_REF_KEY]();
+				if (VarCheck.hasOriginalRef(arg)) {
+					return VarCheck.getOriginalRef(arg);
 				}
 				
 				let wrappedCallback = function (...callbackArgs) {
@@ -1175,24 +1161,10 @@ const WindowScopeVariables = {
 			}
 			if (VarCheck.isArrayLike(arg)) {
 				let items = Array.from(arg);
-				if (items.some(item => WindowScopeVariables.isWrappedDOMNode(item))) {
-					return items.map(item => WindowScopeVariables.unwrapDOMNode(item));
-				}
+				return items.map(item => VarCheck.getOriginalOrSelf(item));
 			}
 			return arg;
 		});
-	},
-
-
-	isWrappedDOMNode(value) {
-		return VarCheck.isObjectLike(value) && typeof value[ORIGINAL_REF_KEY] === "function";
-	},
-
-	unwrapDOMNode(value) {
-		if (WindowScopeVariables.isWrappedDOMNode(value)) {
-			return value[ORIGINAL_REF_KEY]();
-		}
-		return value;
 	},
 
 	UNSAFE_TAGS: new Set([
