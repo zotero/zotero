@@ -26,6 +26,7 @@
 
 import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
+import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
 const ScopeVariables = {
 
@@ -534,6 +535,83 @@ const WindowScopeVariables = {
 				);
 			}
 		});
+
+		// Add createFrame for chrome documents with a registered protocol
+		let rootURI = PluginProtocol.getBaseURI(addonID);
+		if (typeof doc.createXULElement === "function" && rootURI) {
+			Cu.exportFunction(
+				(url, onLoad) => {
+					let actualDoc = docRef.deref();
+					if (!actualDoc) {
+						VarCheck.throwPropError("access", "document", "object has been garbage collected");
+					}
+
+					let resolved;
+					try {
+						resolved = new URL(String(url || ""), rootURI).href;
+					}
+					catch {
+						throw new Error(`Invalid URL: ${url}`);
+					}
+					if (!resolved.startsWith(rootURI)) {
+						throw new Error(`URL must be within plugin root: ${url}`);
+					}
+					let pathname = new URL(resolved).pathname.toLowerCase();
+					if (!pathname.endsWith(".html") && !pathname.endsWith(".htm")) {
+						throw new Error(`Only .html files are allowed: ${url}`);
+					}
+
+					let browser = actualDoc.createXULElement("browser");
+					browser.setAttribute("type", "content");
+					browser.setAttribute("remote", "false");
+					browser.setAttribute("disableglobalhistory", "true");
+
+					// Defer loading until the element is connected to the document.
+					// The <browser> custom element creates its docshell in
+					// connectedCallback (synchronous during appendChild). The
+					// MutationObserver fires as a microtask after appendChild
+					// returns, so the docshell is ready by then.
+					let observer = new actualDoc.defaultView.MutationObserver((_mutations, obs) => {
+						if (!browser.isConnected) return;
+						obs.disconnect();
+
+						let nsURI = Services.io.newURI(resolved);
+						let principal = Services.scriptSecurityManager
+							.createContentPrincipal(nsURI, {});
+
+						browser.addProgressListener({
+							QueryInterface: ChromeUtils.generateQI([
+								Ci.nsIWebProgressListener,
+								Ci.nsISupportsWeakReference,
+							]),
+							onStateChange(_wp, _req, flags, status) {
+								if ((flags & Ci.nsIWebProgressListener.STATE_STOP)
+									&& (flags & Ci.nsIWebProgressListener.STATE_IS_WINDOW)
+									&& Components.isSuccessCode(status)) {
+									if (typeof onLoad === "function") {
+										onLoad(browser.contentWindow);
+									}
+								}
+							},
+							onLocationChange() {},
+							onProgressChange() {},
+							onStatusChange() {},
+							onSecurityChange() {},
+							onContentBlockingEvent() {},
+						}, Ci.nsIWebProgress.NOTIFY_ALL);
+
+						browser.loadURI(nsURI, {
+							triggeringPrincipal: principal,
+						});
+					});
+					observer.observe(actualDoc.documentElement, { childList: true, subtree: true });
+
+					return WindowScopeVariables.createSafeHTMLElement(browser, addonID, { rootNode });
+				},
+				wrapper,
+				{ defineAs: "createFrame" }
+			);
+		}
 
 		Object.preventExtensions(wrapper);
 		return wrapper;

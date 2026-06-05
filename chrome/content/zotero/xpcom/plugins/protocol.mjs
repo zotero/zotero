@@ -78,6 +78,18 @@ function unregister(addonID) {
 	policies.delete(addonID);
 }
 
-const PluginProtocol = { register, unregister };
+/**
+ * Get the moz-extension:// base URI for a registered plugin.
+ *
+ * @param {string} addonID
+ * @returns {string|null} The base URI, or null if not registered
+ */
+function getBaseURI(addonID) {
+	let policy = policies.get(addonID);
+	if (!policy) return null;
+	return `moz-extension://${policy.mozExtensionHostname}/`;
+}
+
+const PluginProtocol = { register, unregister, getBaseURI };
 
 export { PluginProtocol };
