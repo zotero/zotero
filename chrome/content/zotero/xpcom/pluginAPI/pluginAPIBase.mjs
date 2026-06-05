@@ -282,7 +282,7 @@ class PluginAPIBase {
 				// Validations passed, continue with post-processing
 
 				// Wrap functions for safe execution
-				if (gotType === "function") {
+				if (gotType === "function" && !requirement.unsafeFunction) {
 					obj[key] = (...args) => {
 						try {
 							return val(...args);
