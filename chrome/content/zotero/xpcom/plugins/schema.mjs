@@ -34,6 +34,16 @@ const SchemaKey = Object.freeze({
 const IMPLIED_PERMISSIONS = {
 	dataWrite: ["dataRead"],
 	fileSystemWrite: ["fileSystemRead"],
+	ui: [
+		"itemTree",
+		"itemPane",
+		"menu",
+		"windowResource",
+		"reader",
+		"preferencePane",
+		"userPrompt",
+		"openWindow",
+	],
 };
 
 const DATA_OBJECT_READ_SCHEMA = {
