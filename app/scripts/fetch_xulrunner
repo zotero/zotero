@@ -303,6 +303,18 @@ function modify_omni {
 	# Allow host_permissions in MV2 manifests (Firefox restricts it to MV3)
 	sed -i.bak '/"host_permissions": {/{n;s/"min_manifest_version": 3/"min_manifest_version": 2/;}' chrome/toolkit/content/extensions/schemas/manifest.json
 
+	# Add pref_permissions as a new manifest property (array of pref prefix strings)
+	# Inserted after host_permissions in the WebExtensionManifest properties
+	# https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/schemas/manifest.json
+	sed -i.bak '/"optional_host_permissions": {/i\
+\      "pref_permissions": {\
+\        "type": "array",\
+\        "items": { "type": "string" },\
+\        "optional": true,\
+\        "default": []\
+\      },
+' chrome/toolkit/content/extensions/schemas/manifest.json
+
 	# Add Zotero permissions in https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/schemas/manifest.json
 	# PermissionNoPrompt (for manifest.permissions in MV3 and MV2)
 	replace_line '"unlimitedStorage"' "\"unlimitedStorage\",
@@ -310,7 +322,17 @@ function modify_omni {
 	# OptionalPermission (for manifest.optional_permissions)
 	replace_line '"notifications"' "\"notifications\",
 	  $ZOTERO_PLUGIN_PERMISSIONS" chrome/toolkit/content/extensions/schemas/manifest.json
-	
+
+	# Pass pref_permissions through from manifest to addon.installPermissions
+	# https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/Extension.sys.mjs#1259
+	replace_line 'origins: this.originControls \? \[\] : this.getManifestOrigins\(\),' \
+		'origins: this.originControls ? [] : this.getManifestOrigins(),
+      pref_permissions: Array.from(this.manifest.pref_permissions || []),' modules/Extension.sys.mjs
+	# https://searchfox.org/firefox-esr140/source/toolkit/mozapps/extensions/internal/XPIDatabase.sys.mjs#1412
+	replace_line 'permissions: required.permissions.concat\(requested\?\.permissions \?\? \[\]\),' \
+		'permissions: required.permissions.concat(requested?.permissions ?? []),
+      pref_permissions: [...(required?.pref_permissions ?? []), ...(requested?.pref_permissions ?? [])],' modules/addons/XPIDatabase.sys.mjs
+
 	# Use applications.zotero instead of applications.gecko
 	replace_line 'let bss = manifest.applications\?.gecko' 'let bss = manifest.applications?.zotero' modules/addons/XPIInstall.sys.mjs
 	replace_line 'manifest.applications\?.gecko' 'manifest.applications?.zotero' modules/Extension.sys.mjs

@@ -6,13 +6,15 @@ describe("Plugin Sandbox", function () {
 	var mockAddon;
 	var scope;
 
-	function createMockAddon(permissions = ["default"], origins = []) {
+	var SYNC_GUID = "{00000000-0000-0000-0000-000000000001}";
+
+	function createMockAddon(permissions = ["default"], origins = [], prefPrefixes = []) {
 		return {
 			id: ADDON_ID,
 			name: "Test Sandbox Plugin",
 			version: "1.0.0",
-			syncGUID: "{00000000-0000-0000-0000-000000000001}",
-			installPermissions: { permissions, origins },
+			syncGUID: SYNC_GUID,
+			installPermissions: { permissions, origins, pref_permissions: prefPrefixes },
 			getResourceURI() {
 				return Services.io.newURI("file:///nonexistent/");
 			}
@@ -54,8 +56,8 @@ describe("Plugin Sandbox", function () {
 		catch (e) {}
 	});
 
-	function loadTestScope(permissions, origins) {
-		mockAddon = createMockAddon(permissions, origins);
+	function loadTestScope(permissions, origins, prefPrefixes) {
+		mockAddon = createMockAddon(permissions, origins, prefPrefixes);
 		PluginSandbox.loadScope(mockAddon);
 		scope = PluginSandbox.getScope(ADDON_ID);
 	}
@@ -1954,10 +1956,6 @@ describe("Plugin Sandbox", function () {
 	describe("Zotero.Prefs", function () {
 		let testPrefKeys = [];
 
-		beforeEach(function () {
-			loadTestScope(["default", "preferences"]);
-		});
-
 		afterEach(function () {
 			// Clean up test prefs
 			for (let key of testPrefKeys) {
@@ -1979,207 +1977,209 @@ describe("Plugin Sandbox", function () {
 			catch (e) {}
 		});
 
-		it("should set and get a string pref", function () {
-			let key = 'test.sandbox.stringPref';
-			testPrefKeys.push(key);
-			evalInScope(`Zotero.Prefs.set('${key}', 'hello world')`);
-			let val = evalInScope(`Zotero.Prefs.get('${key}')`);
-			assert.equal(val, 'hello world');
+		describe("auto-prefixed namespace (global=false)", function () {
+			// Full pref path prefix for the mock addon
+			var OWN_PREFIX = 'extensions.' + SYNC_GUID.replace(/[{}]/g, '') + '.';
+
+			beforeEach(function () {
+				loadTestScope(["default", "preferences"]);
+			});
+
+			it("should auto-prefix get/set with syncGUID", function () {
+				let shortKey = 'myPref';
+				let fullKey = OWN_PREFIX + shortKey;
+				testPrefKeys.push(SYNC_GUID + '.' + shortKey);
+				// Plugin sets without global flag -- auto-prefixed
+				evalInScope(`Zotero.Prefs.set('${shortKey}', 'hello')`);
+				// Chrome sees it under the full key (global=true)
+				assert.equal(Zotero.Prefs.get(fullKey, true), 'hello');
+				// Plugin reads it back
+				assert.equal(evalInScope(`Zotero.Prefs.get('${shortKey}')`), 'hello');
+			});
+
+			it("should set and get different types", function () {
+				testPrefKeys.push(SYNC_GUID + '.str', SYNC_GUID + '.int', SYNC_GUID + '.bool');
+				evalInScope("Zotero.Prefs.set('str', 'value')");
+				assert.equal(evalInScope("Zotero.Prefs.get('str')"), 'value');
+
+				evalInScope("Zotero.Prefs.set('int', 42)");
+				assert.strictEqual(evalInScope("Zotero.Prefs.get('int')"), 42);
+
+				evalInScope("Zotero.Prefs.set('bool', true)");
+				assert.strictEqual(evalInScope("Zotero.Prefs.get('bool')"), true);
+			});
+
+			it("should clear an auto-prefixed pref", function () {
+				let fullKey = OWN_PREFIX + 'clearMe';
+				testPrefKeys.push(SYNC_GUID + '.clearMe');
+				evalInScope("Zotero.Prefs.set('clearMe', 'val')");
+				assert.equal(Zotero.Prefs.get(fullKey, true), 'val');
+				evalInScope("Zotero.Prefs.clear('clearMe')");
+				assert.isUndefined(Zotero.Prefs.get(fullKey, true));
+			});
+
+			it("should reflect prefs between sandbox and chrome", function () {
+				let fullKey = OWN_PREFIX + 'cross';
+				testPrefKeys.push(SYNC_GUID + '.cross');
+				// Set from sandbox, read from chrome
+				evalInScope("Zotero.Prefs.set('cross', 'fromSandbox')");
+				assert.equal(Zotero.Prefs.get(fullKey, true), 'fromSandbox');
+				// Set from chrome, read from sandbox
+				Zotero.Prefs.set(fullKey, 'fromChrome', true);
+				assert.equal(evalInScope("Zotero.Prefs.get('cross')"), 'fromChrome');
+			});
+
+			it("should register observer on auto-prefixed pref", function () {
+				let fullKey = OWN_PREFIX + 'obs';
+				testPrefKeys.push(SYNC_GUID + '.obs');
+
+				evalInScope(`
+					var _prefNewValue = undefined;
+					var _prefObsID = Zotero.Prefs.registerObserver(
+						'obs',
+						function(newValue) { _prefNewValue = newValue; }
+					);
+				`);
+
+				// Change from chrome side using full key
+				Zotero.Prefs.set(fullKey, 'observed', true);
+				assert.equal(evalInScope("_prefNewValue"), 'observed');
+
+				evalInScope("Zotero.Prefs.unregisterObserver(_prefObsID)");
+			});
 		});
 
-		it("should set and get an integer pref", function () {
-			let key = 'test.sandbox.intPref';
-			testPrefKeys.push(key);
-			evalInScope(`Zotero.Prefs.set('${key}', 42)`);
-			let val = evalInScope(`Zotero.Prefs.get('${key}')`);
-			assert.strictEqual(val, 42);
+		describe("explicit access (global=true)", function () {
+			beforeEach(function () {
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.test.sandbox."]);
+			});
+
+			it("should get/set prefs by full name with global=true", function () {
+				let fullKey = 'extensions.zotero.test.sandbox.explicit';
+				let shortKey = 'test.sandbox.explicit';
+				testPrefKeys.push(shortKey);
+				evalInScope(`Zotero.Prefs.set('${fullKey}', 'hello', true)`);
+				assert.equal(Zotero.Prefs.get(shortKey), 'hello');
+				assert.equal(evalInScope(`Zotero.Prefs.get('${fullKey}', true)`), 'hello');
+			});
+
+			it("should clear a pref with global=true", function () {
+				let fullKey = 'extensions.zotero.test.sandbox.clearExplicit';
+				let shortKey = 'test.sandbox.clearExplicit';
+				testPrefKeys.push(shortKey);
+				evalInScope(`Zotero.Prefs.set('${fullKey}', 'val', true)`);
+				evalInScope(`Zotero.Prefs.clear('${fullKey}', true)`);
+				assert.isUndefined(Zotero.Prefs.get(shortKey));
+			});
+
+			it("should register observer with global=true", function () {
+				let fullKey = 'extensions.zotero.test.sandbox.obsExplicit';
+				let shortKey = 'test.sandbox.obsExplicit';
+				testPrefKeys.push(shortKey);
+
+				evalInScope(`
+					var _prefNewValue = undefined;
+					var _prefObsID = Zotero.Prefs.registerObserver(
+						'${fullKey}',
+						function(newValue) { _prefNewValue = newValue; },
+						true
+					);
+				`);
+
+				Zotero.Prefs.set(shortKey, 'observed');
+				assert.equal(evalInScope("_prefNewValue"), 'observed');
+
+				evalInScope("Zotero.Prefs.unregisterObserver(_prefObsID)");
+			});
+
+			it("should resetBranch within declared prefix", function () {
+				let key1 = 'test.sandbox.reset1';
+				let key2 = 'test.sandbox.reset2';
+				testPrefKeys.push(key1, key2);
+				evalInScope(`Zotero.Prefs.set('extensions.zotero.${key1}', 'val1', true)`);
+				evalInScope(`Zotero.Prefs.set('extensions.zotero.${key2}', 'val2', true)`);
+
+				evalInScope("Zotero.Prefs.resetBranch([], 'extensions.zotero.test.sandbox.reset')");
+
+				assert.isUndefined(Zotero.Prefs.get(key1));
+				assert.isUndefined(Zotero.Prefs.get(key2));
+			});
 		});
 
-		it("should set and get a boolean pref", function () {
-			let key = 'test.sandbox.boolPref';
-			testPrefKeys.push(key);
-			evalInScope(`Zotero.Prefs.set('${key}', true)`);
-			assert.strictEqual(evalInScope(`Zotero.Prefs.get('${key}')`), true);
+		describe("access control", function () {
+			it("should deny global=true for prefs not matching pref_permissions", function () {
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.myPlugin."]);
+				let threw = false;
+				try {
+					evalInScope("Zotero.Prefs.get('extensions.zotero.fontSize', true)");
+				}
+				catch {
+					threw = true;
+				}
+				assert.isTrue(threw, "get() outside declared prefix should throw");
 
-			evalInScope(`Zotero.Prefs.set('${key}', false)`);
-			assert.strictEqual(evalInScope(`Zotero.Prefs.get('${key}')`), false);
-		});
+				threw = false;
+				try {
+					evalInScope("Zotero.Prefs.set('extensions.zotero.fontSize', 14, true)");
+				}
+				catch {
+					threw = true;
+				}
+				assert.isTrue(threw, "set() outside declared prefix should throw");
+			});
 
-		it("should overwrite a pref with a new value", function () {
-			let key = 'test.sandbox.overwrite';
-			testPrefKeys.push(key);
-			evalInScope(`Zotero.Prefs.set('${key}', 'first')`);
-			assert.equal(evalInScope(`Zotero.Prefs.get('${key}')`), 'first');
+			it("should allow global=true for prefs matching pref_permissions", function () {
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.fontSize"]);
+				evalInScope("Zotero.Prefs.get('extensions.zotero.fontSize', true)");
+			});
 
-			evalInScope(`Zotero.Prefs.set('${key}', 'second')`);
-			assert.equal(evalInScope(`Zotero.Prefs.get('${key}')`), 'second');
-		});
+			it("should deny resetBranch on entire Zotero branch", function () {
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.test."]);
+				let threw = false;
+				try {
+					evalInScope("Zotero.Prefs.resetBranch()");
+				}
+				catch {
+					threw = true;
+				}
+				assert.isTrue(threw, "resetBranch() without branch should throw");
+			});
 
-		it("should clear a pref", function () {
-			let key = 'test.sandbox.clearPref';
-			testPrefKeys.push(key);
-			evalInScope(`Zotero.Prefs.set('${key}', 'toBeCleared')`);
-			assert.equal(evalInScope(`Zotero.Prefs.get('${key}')`), 'toBeCleared');
+			it("should deny resetBranch on branches outside declared prefixes", function () {
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.myPlugin."]);
+				let threw = false;
+				try {
+					evalInScope("Zotero.Prefs.resetBranch([], 'extensions.zotero.other.')");
+				}
+				catch {
+					threw = true;
+				}
+				assert.isTrue(threw, "resetBranch outside declared prefix should throw");
+			});
 
-			evalInScope(`Zotero.Prefs.clear('${key}')`);
-			// After clearing, get should return undefined (no default exists)
-			let val = evalInScope(`Zotero.Prefs.get('${key}')`);
-			assert.isUndefined(val);
-		});
+			it("should deny resetBranch on non-Zotero branches", function () {
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.test."]);
+				let threw = false;
+				try {
+					evalInScope("Zotero.Prefs.resetBranch([], 'browser.')");
+				}
+				catch {
+					threw = true;
+				}
+				assert.isTrue(threw, "resetBranch on non-Zotero branch should throw");
+			});
 
-		it("should reflect prefs set from sandbox in chrome and vice versa", function () {
-			let key = 'test.sandbox.crossScope';
-			testPrefKeys.push(key);
-
-			// Set from sandbox, read from chrome
-			evalInScope(`Zotero.Prefs.set('${key}', 'fromSandbox')`);
-			assert.equal(Zotero.Prefs.get(key), 'fromSandbox');
-
-			// Set from chrome, read from sandbox
-			Zotero.Prefs.set(key, 'fromChrome');
-			assert.equal(evalInScope(`Zotero.Prefs.get('${key}')`), 'fromChrome');
-		});
-
-		it("should register and unregister a pref observer", function () {
-			let key = 'test.sandbox.obsReg';
-			testPrefKeys.push(key);
-
-			evalInScope(`
-				var _prefObsID = Zotero.Prefs.registerObserver(
-					'${key}',
-					function(newValue) {}
-				);
-			`);
-
-			let obsID = evalInScope("_prefObsID");
-			assert.ok(obsID, "registerObserver should return a truthy value");
-
-			// Should not throw
-			evalInScope("Zotero.Prefs.unregisterObserver(_prefObsID)");
-		});
-
-		it("should receive observer callback on pref change", function () {
-			let key = 'test.sandbox.obsChange';
-			testPrefKeys.push(key);
-
-			evalInScope(`
-				var _prefNewValue = undefined;
-				var _prefObsID = Zotero.Prefs.registerObserver(
-					'${key}',
-					function(newValue) { _prefNewValue = newValue; }
-				);
-			`);
-
-			// Change from chrome side -- callback should fire in sandbox
-			Zotero.Prefs.set(key, 'observed');
-
-			assert.equal(evalInScope("_prefNewValue"), 'observed');
-
-			evalInScope("Zotero.Prefs.unregisterObserver(_prefObsID)");
-		});
-
-		it("should receive updated value on each pref change", function () {
-			let key = 'test.sandbox.obsMulti';
-			testPrefKeys.push(key);
-
-			evalInScope(`
-				var _prefChangeCount = 0;
-				var _prefLatestValue = undefined;
-				var _prefObsID = Zotero.Prefs.registerObserver(
-					'${key}',
-					function(newValue) {
-						_prefChangeCount++;
-						_prefLatestValue = newValue;
-					}
-				);
-			`);
-
-			Zotero.Prefs.set(key, 'first');
-			assert.equal(evalInScope("_prefLatestValue"), 'first');
-
-			Zotero.Prefs.set(key, 'second');
-			assert.equal(evalInScope("_prefLatestValue"), 'second');
-
-			assert.isAtLeast(evalInScope("_prefChangeCount"), 2);
-
-			evalInScope("Zotero.Prefs.unregisterObserver(_prefObsID)");
-		});
-
-		it("should not receive observer callback after unregistering", function () {
-			let key = 'test.sandbox.obsUnreg';
-			testPrefKeys.push(key);
-
-			evalInScope(`
-				var _prefObsCount = 0;
-				var _prefObsID = Zotero.Prefs.registerObserver(
-					'${key}',
-					function(newValue) { _prefObsCount++; }
-				);
-			`);
-
-			Zotero.Prefs.set(key, 'before');
-			let countBefore = evalInScope("_prefObsCount");
-			assert.isAbove(countBefore, 0);
-
-			evalInScope("Zotero.Prefs.unregisterObserver(_prefObsID)");
-			evalInScope("_prefObsCount = 0");
-
-			Zotero.Prefs.set(key, 'after');
-			assert.equal(evalInScope("_prefObsCount"), 0, "Should not receive callback after unregistering");
-		});
-
-		it("should observe integer pref changes", function () {
-			let key = 'test.sandbox.obsInt';
-			testPrefKeys.push(key);
-			Zotero.Prefs.set(key, 0);
-
-			evalInScope(`
-				var _prefIntValue = undefined;
-				var _prefObsID = Zotero.Prefs.registerObserver(
-					'${key}',
-					function(newValue) { _prefIntValue = newValue; }
-				);
-			`);
-
-			Zotero.Prefs.set(key, 99);
-			assert.strictEqual(evalInScope("_prefIntValue"), 99);
-
-			evalInScope("Zotero.Prefs.unregisterObserver(_prefObsID)");
-		});
-
-		it("should observe boolean pref changes", function () {
-			let key = 'test.sandbox.obsBool';
-			testPrefKeys.push(key);
-			Zotero.Prefs.set(key, false);
-
-			evalInScope(`
-				var _prefBoolValue = undefined;
-				var _prefObsID = Zotero.Prefs.registerObserver(
-					'${key}',
-					function(newValue) { _prefBoolValue = newValue; }
-				);
-			`);
-
-			Zotero.Prefs.set(key, true);
-			assert.strictEqual(evalInScope("_prefBoolValue"), true);
-
-			evalInScope("Zotero.Prefs.unregisterObserver(_prefObsID)");
-		});
-
-		it("should resetBranch clearing test prefs", function () {
-			let key1 = 'test.sandbox.reset1';
-			let key2 = 'test.sandbox.reset2';
-			testPrefKeys.push(key1, key2);
-
-			evalInScope(`Zotero.Prefs.set('${key1}', 'val1')`);
-			evalInScope(`Zotero.Prefs.set('${key2}', 'val2')`);
-			assert.equal(evalInScope(`Zotero.Prefs.get('${key1}')`), 'val1');
-			assert.equal(evalInScope(`Zotero.Prefs.get('${key2}')`), 'val2');
-
-			evalInScope("Zotero.Prefs.resetBranch([], 'extensions.zotero.test.sandbox.reset')");
-
-			assert.isUndefined(evalInScope(`Zotero.Prefs.get('${key1}')`));
-			assert.isUndefined(evalInScope(`Zotero.Prefs.get('${key2}')`));
+			it("should deny registerObserver with global=true outside pref_permissions", function () {
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.myPlugin."]);
+				let threw = false;
+				try {
+					evalInScope("Zotero.Prefs.registerObserver('extensions.zotero.fontSize', function() {}, true)");
+				}
+				catch {
+					threw = true;
+				}
+				assert.isTrue(threw, "registerObserver outside allowed scope should throw");
+			});
 		});
 	});
 
@@ -3248,7 +3248,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should merge multiple permissions correctly", function () {
-			loadTestScope(["default", "data", "network", "preferences", "translator"]);
+			loadTestScope(["default", "data", "network", "preferences", "translator"], [], ["test."]);
 			assert.isTrue(evalInScope("typeof Zotero.Items === 'object'"),
 				"Items should be exposed with data permission");
 			assert.isTrue(evalInScope("typeof Zotero.ItemFields === 'object'"),
