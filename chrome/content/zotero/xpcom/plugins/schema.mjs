@@ -302,6 +302,17 @@ const MAIN_WINDOW_SCHEMAS = {
 			close: true,
 			rename: true,
 		},
+		ZoteroContextPane: {
+			// Read-only state
+			collapsed: true,
+			// Context pane inner
+			context: {
+				mode: true,
+			},
+			// Actions
+			togglePane: true,
+			focus: true,
+		},
 		ZoteroPane: {
 			// Read-only state
 			loaded: true,
