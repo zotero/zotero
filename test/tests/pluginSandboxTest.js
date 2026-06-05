@@ -1,12 +1,20 @@
 describe("Plugin Sandbox", function () {
 	var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
+	var { PluginFileAccess } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/file.mjs");
+	var { getPluginUUID } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/uuid.mjs");
+
+	var PREF_PREFIX = "extensions.zotero.pluginFileAccess.";
 
 	var ADDON_ID = "test-sandbox@zotero.org";
 
 	var mockAddon;
 	var scope;
 
+	// AddonManager's per-addon sync identifier. Distinct from the plugin's
+	// derived UUID below; kept on the mock for API completeness only.
 	var SYNC_GUID = "{00000000-0000-0000-0000-000000000001}";
+	// Deterministic UUID the sandbox uses for plugin-scoped paths and prefs.
+	var PLUGIN_UUID = getPluginUUID(ADDON_ID);
 
 	function createMockAddon(permissions = ["default"], origins = [], prefPrefixes = []) {
 		return {
@@ -801,9 +809,11 @@ describe("Plugin Sandbox", function () {
 
 		beforeEach(function () {
 			loadTestScope(["default", "database"]);
+			// Plugin databases live in plugin-db/<UUID>/, separate from the
+			// plugin's file-access data dir (plugin-data/<UUID>/).
 			pluginDir = PathUtils.join(
-				Zotero.DataDirectory.dir, "plugin-data",
-				SYNC_GUID.replace(/[{}]/g, "")
+				Zotero.DataDirectory.dir, "plugin-db",
+				PLUGIN_UUID
 			);
 		});
 
@@ -1662,8 +1672,12 @@ describe("Plugin Sandbox", function () {
 		var tmpDir;
 
 		before(async function () {
-			tmpDir = PathUtils.join(Zotero.getTempDirectory().path, 'pluginSandboxFileTest');
-			await IOUtils.makeDirectory(tmpDir, { ignoreExisting: true });
+			// Use a subdir of the plugin's own data directory so that all
+			// FS calls in these tests are auto-allowed (no session needed).
+			tmpDir = PathUtils.join(
+				Zotero.DataDirectory.dir, 'plugin-data', PLUGIN_UUID, 'pluginSandboxFileTest'
+			);
+			await IOUtils.makeDirectory(tmpDir, { ignoreExisting: true, createAncestors: true });
 		});
 
 		after(async function () {
@@ -1671,7 +1685,9 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default", "fileSystemRead", "fileSystemWrite"]);
+			// `network` is included so the URL-based helpers (which require
+			// it to enforce host_permissions via a sandbox XHR) get exposed.
+			loadTestScope(["default", "fileSystemRead", "fileSystemWrite", "network"]);
 		});
 
 		let fileMethods = [
@@ -1932,6 +1948,508 @@ describe("Plugin Sandbox", function () {
 			assert.equal(content, 'moved content');
 		});
 	});
+
+
+	describe("Zotero.File permissions", function () {
+		// Lives outside the plugin's auto-allowed plugin-data directory.
+		var outsidePath;
+		var outsideDir;
+
+		before(async function () {
+			outsideDir = await getTempDirectory();
+			outsidePath = PathUtils.join(outsideDir, "outside-" + Zotero.Utilities.randomString() + ".txt");
+			await IOUtils.writeUTF8(outsidePath, "outside content");
+		});
+
+		after(async function () {
+			await IOUtils.remove(outsidePath, { ignoreAbsent: true });
+		});
+
+		beforeEach(function () {
+			loadTestScope(["default", "fileSystemRead", "fileSystemWrite"]);
+			Zotero.Prefs.clear(PREF_PREFIX + PLUGIN_UUID, true);
+		});
+
+		afterEach(function () {
+			Zotero.Prefs.clear(PREF_PREFIX + PLUGIN_UUID, true);
+		});
+
+		it("denies read access outside plugin-data without a grant", async function () {
+			let denied = await evalInScope(`
+				Zotero.File.getContentsAsync(${JSON.stringify(outsidePath)})
+					.then(() => false, () => true)
+			`);
+			assert.isTrue(denied);
+		});
+
+		it("denies write access outside plugin-data without a grant", async function () {
+			let target = PathUtils.join(outsideDir, "no-write-" + Zotero.Utilities.randomString() + ".txt");
+			let denied = await evalInScope(`
+				Zotero.File.putContentsAsync(${JSON.stringify(target)}, "denied")
+					.then(() => false, () => true)
+			`);
+			assert.isTrue(denied);
+			assert.isFalse(await IOUtils.exists(target), "no file should have been written");
+		});
+
+		it("exposes the plugin-injected helpers (requestFileAccess, withAccessSession, getPluginDir, getTempDirectory) on Zotero.File", function () {
+			assert.equal(evalInScope("typeof Zotero.File.requestFileAccess"), "function");
+			assert.equal(evalInScope("typeof Zotero.File.withAccessSession"), "function");
+			assert.equal(evalInScope("typeof Zotero.File.getPluginDir"), "function");
+			assert.equal(evalInScope("typeof Zotero.File.getTempDirectory"), "function");
+		});
+
+		it("rejects requestFileAccess on the Zotero profile directory", async function () {
+			let target = PathUtils.join(PathUtils.profileDir, "prefs.js");
+			let denied = await evalInScope(`
+				Zotero.File.requestFileAccess(${JSON.stringify(target)}, "read")
+					.then(() => false, () => true)
+			`);
+			assert.isTrue(denied);
+		});
+
+		it("rejects requestFileAccess on the Zotero data directory outside plugin-data", async function () {
+			let target = PathUtils.join(Zotero.DataDirectory.dir, "zotero.sqlite");
+			let denied = await evalInScope(`
+				Zotero.File.requestFileAccess(${JSON.stringify(target)}, "read")
+					.then(() => false, () => true)
+			`);
+			assert.isTrue(denied);
+		});
+
+		it("auto-allows operations inside the plugin's own data directory", async function () {
+			let target = PathUtils.join(
+				Zotero.DataDirectory.dir, "plugin-data", PLUGIN_UUID,
+				"auto-" + Zotero.Utilities.randomString() + ".txt"
+			);
+			try {
+				await evalInScope(`
+					Zotero.File.putContentsAsync(${JSON.stringify(target)}, "auto-allowed")
+				`);
+				let content = await IOUtils.readUTF8(target);
+				assert.equal(content, "auto-allowed");
+			}
+			finally {
+				await IOUtils.remove(target, { ignoreAbsent: true });
+			}
+		});
+
+		it("honors a persisted read grant for Zotero.File operations", async function () {
+			Zotero.Prefs.set(
+				PREF_PREFIX + PLUGIN_UUID,
+				JSON.stringify([[outsidePath, { mode: "read" }]]),
+				true
+			);
+			let contents = await evalInScope(`
+				Zotero.File.getContentsAsync(${JSON.stringify(outsidePath)})
+			`);
+			assert.equal(contents, "outside content");
+		});
+
+		it("persisted deny rejects even when path is otherwise reachable", async function () {
+			// Persist a deny on the outer dir; child reads should reject.
+			Zotero.Prefs.set(
+				PREF_PREFIX + PLUGIN_UUID,
+				JSON.stringify([[outsideDir, { mode: "deny" }]]),
+				true
+			);
+			let denied = await evalInScope(`
+				Zotero.File.requestFileAccess(${JSON.stringify(outsidePath)}, "read")
+					.then(() => false, () => true)
+			`);
+			assert.isTrue(denied);
+		});
+
+		it("session grant from chrome covers a write inside the session", async function () {
+			let target = PathUtils.join(outsideDir, "session-write-" + Zotero.Utilities.randomString() + ".txt");
+			try {
+				await PluginFileAccess.withSession(ADDON_ID, async () => {
+					// Mirrors FilePicker.show()'s addSessionGrant after modeSave.
+					PluginFileAccess.addSessionGrant(ADDON_ID, target, "write");
+					await evalInScope(`
+						Zotero.File.putContentsAsync(${JSON.stringify(target)}, "session payload")
+					`);
+				});
+				assert.equal(await IOUtils.readUTF8(target), "session payload");
+			}
+			finally {
+				await IOUtils.remove(target, { ignoreAbsent: true });
+			}
+		});
+
+		it("session grants don't survive the session", async function () {
+			let target = PathUtils.join(outsideDir, "transient-" + Zotero.Utilities.randomString() + ".txt");
+			await IOUtils.writeUTF8(target, "transient");
+			try {
+				await PluginFileAccess.withSession(ADDON_ID, async () => {
+					PluginFileAccess.addSessionGrant(ADDON_ID, target, "read");
+				});
+				// Outside the session: the grant is gone, so reads reject.
+				let denied = await evalInScope(`
+					Zotero.File.getContentsAsync(${JSON.stringify(target)})
+						.then(() => false, () => true)
+				`);
+				assert.isTrue(denied);
+			}
+			finally {
+				await IOUtils.remove(target, { ignoreAbsent: true });
+			}
+		});
+
+		it("Zotero.File.getPluginDir returns the per-plugin data directory", async function () {
+			let dir = await evalInScope(`Zotero.File.getPluginDir()`);
+			let expected = PathUtils.join(Zotero.DataDirectory.dir, "plugin-data", PLUGIN_UUID);
+			assert.equal(dir, expected);
+		});
+
+		it("Zotero.File.getTempDirectory hands the plugin a writable scratch dir inside a session", async function () {
+			let tmpPath;
+			await PluginFileAccess.withSession(ADDON_ID, async () => {
+				tmpPath = await evalInScope(`Zotero.File.getTempDirectory()`);
+				assert.isString(tmpPath);
+				assert.include(tmpPath, PLUGIN_UUID);
+				let target = PathUtils.join(tmpPath, "in-temp-" + Zotero.Utilities.randomString() + ".txt");
+				await evalInScope(`
+					Zotero.File.putContentsAsync(${JSON.stringify(target)}, "temp")
+				`);
+				assert.equal(await IOUtils.readUTF8(target), "temp");
+			});
+		});
+
+		it("withAccessSession rejects when the chrome-configured session timeout fires", async function () {
+			// `Zotero.File.withAccessSession(fn)` deliberately omits the
+			// `options` arg so plugins can't extend the session timeout
+			// themselves -- chrome owns that. To verify the timeout reaches
+			// the sandbox side, stub `PluginFileAccess.withSession` for this
+			// test so it injects a tight timeout, then have the sandbox fn
+			// outlast it.
+			let original = PluginFileAccess.withSession;
+			PluginFileAccess.withSession = (pluginID, fn) => original.call(
+				PluginFileAccess, pluginID, fn, { timeout: 50 }
+			);
+			try {
+				let threw = await evalInScope(`Zotero.File.withAccessSession(async () => {
+					await new Promise(r => setTimeout(r, 300));
+				}).then(() => false, () => true)`);
+				assert.isTrue(threw,
+					"withAccessSession should reject when chrome times out the session");
+			}
+			finally {
+				PluginFileAccess.withSession = original;
+			}
+		});
+
+		it("does not expose file-IO methods without fileSystemRead permission", function () {
+			loadTestScope(["default"]);
+			// Default schema still exposes pure-string helpers (getExtension,
+			// normalizeToUnix, etc.) but no IO and no plugin-injected helpers.
+			assert.equal(evalInScope("typeof Zotero.File.getContentsAsync"), "undefined");
+			assert.equal(evalInScope("typeof Zotero.File.putContentsAsync"), "undefined");
+			assert.equal(evalInScope("typeof Zotero.File.requestFileAccess"), "undefined");
+			assert.equal(evalInScope("typeof Zotero.File.withAccessSession"), "undefined");
+			assert.equal(evalInScope("typeof Zotero.File.getPluginDir"), "undefined");
+			assert.equal(evalInScope("typeof Zotero.File.getTempDirectory"), "undefined");
+		});
+	});
+
+
+	describe("FilePicker session grants", function () {
+		var pickedFile;
+		var pickedDir;
+
+		before(async function () {
+			let scratch = await getTempDirectory();
+			pickedDir = PathUtils.join(scratch, "picked-dir-" + Zotero.Utilities.randomString());
+			await IOUtils.makeDirectory(pickedDir);
+			pickedFile = PathUtils.join(pickedDir, "picked.txt");
+			await IOUtils.writeUTF8(pickedFile, "picked content");
+		});
+
+		after(async function () {
+			await IOUtils.remove(pickedDir, { recursive: true, ignoreAbsent: true });
+		});
+
+		beforeEach(function () {
+			loadTestScope(["default", "fileSystemRead", "fileSystemWrite"]);
+		});
+
+		it("exposes FilePicker with the documented mode/return constants", function () {
+			assert.isTrue(evalInScope("typeof FilePicker === 'function'"));
+			let constants = evalInScope(`
+				let _fp = new FilePicker();
+				({
+					open: _fp.modeOpen,
+					save: _fp.modeSave,
+					getFolder: _fp.modeGetFolder,
+					openMultiple: _fp.modeOpenMultiple,
+					ok: _fp.returnOK,
+					cancel: _fp.returnCancel,
+					replace: _fp.returnReplace,
+				})
+			`);
+			assert.equal(constants.open, 0);
+			assert.equal(constants.save, 1);
+			assert.equal(constants.getFolder, 2);
+			assert.equal(constants.openMultiple, 3);
+			assert.equal(constants.ok, 0);
+			assert.equal(constants.cancel, 1);
+			assert.equal(constants.replace, 2);
+		});
+
+		it("does not expose FilePicker without fileSystemRead", function () {
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof FilePicker === 'undefined' || FilePicker === undefined"));
+		});
+
+		// FilePicker.show() opens a native OS dialog, so we don't drive the
+		// full UI flow from a test. Instead, simulate what each return path
+		// does -- on returnOK/returnReplace, FilePicker.show calls
+		// PluginFileAccess.addSessionGrant for the picked path with the
+		// mode-appropriate access -- and verify the plugin can then access
+		// the path from inside the same session.
+
+		it("modeOpen grant gives the plugin read access to the picked file", async function () {
+			await PluginFileAccess.withSession(ADDON_ID, async () => {
+				PluginFileAccess.addSessionGrant(ADDON_ID, pickedFile, "read");
+				let contents = await evalInScope(`
+					Zotero.File.getContentsAsync(${JSON.stringify(pickedFile)})
+				`);
+				assert.equal(contents, "picked content");
+			});
+		});
+
+		it("modeSave grant gives the plugin write access to the chosen destination", async function () {
+			let target = PathUtils.join(pickedDir, "saved-" + Zotero.Utilities.randomString() + ".txt");
+			try {
+				await PluginFileAccess.withSession(ADDON_ID, async () => {
+					PluginFileAccess.addSessionGrant(ADDON_ID, target, "write");
+					await evalInScope(`
+						Zotero.File.putContentsAsync(${JSON.stringify(target)}, "saved")
+					`);
+				});
+				assert.equal(await IOUtils.readUTF8(target), "saved");
+			}
+			finally {
+				await IOUtils.remove(target, { ignoreAbsent: true });
+			}
+		});
+
+		it("modeGetFolder grant covers everything inside the picked folder", async function () {
+			let inner = PathUtils.join(pickedDir, "inside-" + Zotero.Utilities.randomString() + ".txt");
+			try {
+				await PluginFileAccess.withSession(ADDON_ID, async () => {
+					// Folder picker with fileSystemWrite -> write grant on the dir
+					PluginFileAccess.addSessionGrant(ADDON_ID, pickedDir, "write");
+					await evalInScope(`
+						Zotero.File.putContentsAsync(${JSON.stringify(inner)}, "in folder")
+					`);
+					let read = await evalInScope(`
+						Zotero.File.getContentsAsync(${JSON.stringify(inner)})
+					`);
+					assert.equal(read, "in folder");
+				});
+			}
+			finally {
+				await IOUtils.remove(inner, { ignoreAbsent: true });
+			}
+		});
+
+		it("modeOpenMultiple grant covers each picked file independently", async function () {
+			let extra = PathUtils.join(pickedDir, "extra.txt");
+			await IOUtils.writeUTF8(extra, "extra content");
+			try {
+				await PluginFileAccess.withSession(ADDON_ID, async () => {
+					// FilePicker.show() iterates `this.files` and grants read on each.
+					PluginFileAccess.addSessionGrant(ADDON_ID, pickedFile, "read");
+					PluginFileAccess.addSessionGrant(ADDON_ID, extra, "read");
+					let main = await evalInScope(`
+						Zotero.File.getContentsAsync(${JSON.stringify(pickedFile)})
+					`);
+					let other = await evalInScope(`
+						Zotero.File.getContentsAsync(${JSON.stringify(extra)})
+					`);
+					assert.equal(main, "picked content");
+					assert.equal(other, "extra content");
+				});
+			}
+			finally {
+				await IOUtils.remove(extra, { ignoreAbsent: true });
+			}
+		});
+
+		it("picker grant does not bleed across sessions", async function () {
+			await PluginFileAccess.withSession(ADDON_ID, async () => {
+				PluginFileAccess.addSessionGrant(ADDON_ID, pickedFile, "read");
+			});
+			// Outside the session, reads should be rejected again.
+			let denied = await evalInScope(`
+				Zotero.File.getContentsAsync(${JSON.stringify(pickedFile)})
+					.then(() => false, () => true)
+			`);
+			assert.isTrue(denied);
+		});
+
+		it("a cancelled picker (no addSessionGrant call) leaves the path unreachable", async function () {
+			// returnCancel is the path where FilePicker.show simply returns
+			// without calling addSessionGrant; the file should stay denied.
+			await PluginFileAccess.withSession(ADDON_ID, async () => {
+				let denied = await evalInScope(`
+					Zotero.File.getContentsAsync(${JSON.stringify(pickedFile)})
+						.then(() => false, () => true)
+				`);
+				assert.isTrue(denied);
+			});
+		});
+	});
+
+
+	describe("Zotero.File URL-based helpers", function () {
+		var serverPath;
+		var endpoints = [];
+
+		function registerEndpoint(method, initFn) {
+			let endpoint = "/test/sandbox-file-url/" + Zotero.Utilities.randomString();
+			let handler = function () {};
+			handler.prototype = {
+				supportedMethods: [method],
+				supportedDataTypes: "*",
+				init(options) {
+					return initFn(options);
+				},
+			};
+			Zotero.Server.Endpoints[endpoint] = handler;
+			endpoints.push(endpoint);
+			return serverPath + endpoint;
+		}
+
+		before(function () {
+			serverPath = "http://127.0.0.1:" + Zotero.Server.port;
+		});
+
+		afterEach(function () {
+			for (let ep of endpoints) {
+				delete Zotero.Server.Endpoints[ep];
+			}
+			endpoints = [];
+		});
+
+		describe("getContentsFromURLAsync", function () {
+			beforeEach(function () {
+				loadTestScope(
+					["default", "fileSystemRead", "network"],
+					["*://127.0.0.1/*"]
+				);
+			});
+
+			it("fetches text from an http URL covered by host_permissions", async function () {
+				let url = registerEndpoint("GET", () => [200, "text/plain", "url body"]);
+				let text = await evalInScope(`
+					Zotero.File.getContentsFromURLAsync(${JSON.stringify(url)})
+				`);
+				assert.equal(text, "url body");
+			});
+
+			it("rejects non-http schemes (e.g. file://)", async function () {
+				let denied = await evalInScope(`(async () => {
+					try { await Zotero.File.getContentsFromURLAsync("file:///etc/passwd"); return false; }
+					catch { return true; }
+				})()`);
+				assert.isTrue(denied);
+			});
+
+			it("is not exposed without the network permission", function () {
+				loadTestScope(["default", "fileSystemRead"]);
+				assert.equal(
+					evalInScope("typeof Zotero.File.getContentsFromURLAsync"),
+					"undefined"
+				);
+			});
+		});
+
+		describe("download", function () {
+			var pluginDataDir;
+			var outsideDir;
+
+			before(async function () {
+				pluginDataDir = PathUtils.join(
+					Zotero.DataDirectory.dir, "plugin-data", PLUGIN_UUID
+				);
+				outsideDir = await getTempDirectory();
+			});
+
+			beforeEach(function () {
+				loadTestScope(
+					["default", "fileSystemRead", "fileSystemWrite", "network"],
+					["*://127.0.0.1/*"]
+				);
+			});
+
+			it("downloads to a path inside the plugin's own data directory", async function () {
+				let url = registerEndpoint("GET", () => [200, "application/octet-stream", "downloaded payload"]);
+				let target = PathUtils.join(pluginDataDir, "dl-" + Zotero.Utilities.randomString() + ".bin");
+				try {
+					await evalInScope(`
+						Zotero.File.download(${JSON.stringify(url)}, ${JSON.stringify(target)})
+					`);
+					let content = await IOUtils.readUTF8(target);
+					assert.equal(content, "downloaded payload");
+				}
+				finally {
+					await IOUtils.remove(target, { ignoreAbsent: true });
+				}
+			});
+
+			it("downloads to a session-granted path outside plugin-data", async function () {
+				let url = registerEndpoint("GET", () => [200, "text/plain", "session dl"]);
+				let target = PathUtils.join(outsideDir, "session-dl-" + Zotero.Utilities.randomString() + ".bin");
+				try {
+					await PluginFileAccess.withSession(ADDON_ID, async () => {
+						PluginFileAccess.addSessionGrant(ADDON_ID, target, "write");
+						await evalInScope(`
+							Zotero.File.download(${JSON.stringify(url)}, ${JSON.stringify(target)})
+						`);
+					});
+					let content = await IOUtils.readUTF8(target);
+					assert.equal(content, "session dl");
+				}
+				finally {
+					await IOUtils.remove(target, { ignoreAbsent: true });
+				}
+			});
+
+			it("rejects writing to a path outside the plugin's allowed scope", async function () {
+				let url = registerEndpoint("GET", () => [200, "text/plain", "blocked"]);
+				let target = PathUtils.join(outsideDir, "no-write-" + Zotero.Utilities.randomString() + ".bin");
+				let denied = await evalInScope(`
+					Zotero.File.download(${JSON.stringify(url)}, ${JSON.stringify(target)})
+						.then(() => false, () => true)
+				`);
+				assert.isTrue(denied);
+				assert.isFalse(await IOUtils.exists(target));
+			});
+
+			it("rejects non-http URIs (e.g. file://)", async function () {
+				let target = PathUtils.join(pluginDataDir, "nope-fileuri.bin");
+				let denied = await evalInScope(`(async () => {
+					try { await Zotero.File.download("file:///etc/passwd", ${JSON.stringify(target)}); return false; }
+					catch { return true; }
+				})()`);
+				assert.isTrue(denied);
+				assert.isFalse(await IOUtils.exists(target));
+			});
+
+			it("is not exposed without the network permission", function () {
+				loadTestScope(["default", "fileSystemRead", "fileSystemWrite"]);
+				assert.equal(evalInScope("typeof Zotero.File.download"), "undefined");
+			});
+
+			it("is not exposed without the fileSystemWrite permission", function () {
+				loadTestScope(["default", "fileSystemRead", "network"]);
+				assert.equal(evalInScope("typeof Zotero.File.download"), "undefined");
+			});
+		});
+	});
+
 
 	describe("Zotero.HTTP", function () {
 		var serverPath;
@@ -2591,16 +3109,16 @@ describe("Plugin Sandbox", function () {
 
 		describe("auto-prefixed namespace (global=false)", function () {
 			// Full pref path prefix for the mock addon
-			var OWN_PREFIX = 'extensions.' + SYNC_GUID.replace(/[{}]/g, '') + '.';
+			var OWN_PREFIX = 'extensions.' + PLUGIN_UUID + '.';
 
 			beforeEach(function () {
 				loadTestScope(["default", "preferences"]);
 			});
 
-			it("should auto-prefix get/set with syncGUID", function () {
+			it("should auto-prefix get/set with the plugin UUID", function () {
 				let shortKey = 'myPref';
 				let fullKey = OWN_PREFIX + shortKey;
-				testPrefKeys.push(SYNC_GUID + '.' + shortKey);
+				testPrefKeys.push(PLUGIN_UUID + '.' + shortKey);
 				// Plugin sets without global flag -- auto-prefixed
 				evalInScope(`Zotero.Prefs.set('${shortKey}', 'hello')`);
 				// Chrome sees it under the full key (global=true)
@@ -2610,7 +3128,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should set and get different types", function () {
-				testPrefKeys.push(SYNC_GUID + '.str', SYNC_GUID + '.int', SYNC_GUID + '.bool');
+				testPrefKeys.push(PLUGIN_UUID + '.str', PLUGIN_UUID + '.int', PLUGIN_UUID + '.bool');
 				evalInScope("Zotero.Prefs.set('str', 'value')");
 				assert.equal(evalInScope("Zotero.Prefs.get('str')"), 'value');
 
@@ -2623,7 +3141,7 @@ describe("Plugin Sandbox", function () {
 
 			it("should clear an auto-prefixed pref", function () {
 				let fullKey = OWN_PREFIX + 'clearMe';
-				testPrefKeys.push(SYNC_GUID + '.clearMe');
+				testPrefKeys.push(PLUGIN_UUID + '.clearMe');
 				evalInScope("Zotero.Prefs.set('clearMe', 'val')");
 				assert.equal(Zotero.Prefs.get(fullKey, true), 'val');
 				evalInScope("Zotero.Prefs.clear('clearMe')");
@@ -2632,7 +3150,7 @@ describe("Plugin Sandbox", function () {
 
 			it("should reflect prefs between sandbox and chrome", function () {
 				let fullKey = OWN_PREFIX + 'cross';
-				testPrefKeys.push(SYNC_GUID + '.cross');
+				testPrefKeys.push(PLUGIN_UUID + '.cross');
 				// Set from sandbox, read from chrome
 				evalInScope("Zotero.Prefs.set('cross', 'fromSandbox')");
 				assert.equal(Zotero.Prefs.get(fullKey, true), 'fromSandbox');
@@ -2643,7 +3161,7 @@ describe("Plugin Sandbox", function () {
 
 			it("should register observer on auto-prefixed pref", function () {
 				let fullKey = OWN_PREFIX + 'obs';
-				testPrefKeys.push(SYNC_GUID + '.obs');
+				testPrefKeys.push(PLUGIN_UUID + '.obs');
 
 				evalInScope(`
 					var _prefNewValue = undefined;

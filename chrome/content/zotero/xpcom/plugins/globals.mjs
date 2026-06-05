@@ -29,6 +29,8 @@ import { ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables, WindowScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PLUGIN_DB_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
+import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
+import { getPluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
@@ -238,7 +240,7 @@ const PREFS_METHODS = {
  *
  * The "preferences" permission exposes the Zotero.Prefs API.
  * By default, plugins can only access preferences in their own namespace,
- * `extensions.<PLUGIN_GUID>.*`. Additional namespaces can be granted via the `pref_permissions`
+ * `extensions.<PLUGIN_UUID>.*`. Additional namespaces can be granted via the `pref_permissions`
  * in the manifest.
  * The `global` argument behavior is different from the main Zotero.Prefs API:
  * If `global` is true, the key is used as-is and must match an allowed namespace.
@@ -251,7 +253,7 @@ function setupPreferences(scope) {
 	let prefPrefixes = scope.PREF_PERMISSIONS;
 
 	// Plugin's own namespace
-	let ownPrefix = `extensions.${scope.PLUGIN_GUID}.`;
+	let ownPrefix = `extensions.${getPluginUUID(pluginID)}.`;
 	let allPrefixes = [ownPrefix, ...prefPrefixes];
 
 	function checkPrefPermission(pref) {
@@ -351,11 +353,46 @@ function setupPreferences(scope) {
  */
 function setupFilePicker(scope) {
 	let pluginID = scope.PLUGIN_ID;
+	let canWrite = scope.PERMISSIONS.includes("fileSystemWrite");
 	let { FilePicker } = lazy;
 	class PluginFilePicker extends FilePicker {
 		init(parentWindow, title, mode) {
 			parentWindow = ScopeVariables.fromScope(parentWindow, pluginID);
+			this._pluginMode = mode;
 			return super.init(parentWindow, title, mode);
+		}
+
+		// After the user picks file(s)/folder, auto-grant access in the current session.
+		async show() {
+			let result = await super.show();
+			if (result === this.returnOK || result === this.returnReplace) {
+				try {
+					switch (this._pluginMode) {
+						case this.modeOpen:
+							PluginFileAccess.addSessionGrant(pluginID, this.file, "read");
+							break;
+						case this.modeSave:
+							if (canWrite) {
+								PluginFileAccess.addSessionGrant(pluginID, this.file, "write");
+							}
+							break;
+						case this.modeGetFolder:
+							PluginFileAccess.addSessionGrant(
+								pluginID, this.file, canWrite ? "write" : "read"
+							);
+							break;
+						case this.modeOpenMultiple:
+							for (let f of this.files) {
+								PluginFileAccess.addSessionGrant(pluginID, f, "read");
+							}
+							break;
+					}
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+			return result;
 		}
 	}
 	scope.FilePicker = ScopeUtils.ensureConstructableInScope(PluginFilePicker, scope, {
@@ -365,9 +402,105 @@ function setupFilePicker(scope) {
 }
 
 /**
+ * Inject plugin-only helpers onto the sandbox's `Zotero.File` mirror.
+ *
+ * @param {Object} scope - The sandbox scope
+ */
+function setupFile(scope) {
+	let pluginID = scope.PLUGIN_ID;
+	// Force-create the lazy File mirror so we can attach to it
+	let fileMirror = Cu.waiveXrays(scope).Zotero.File;
+	if (!fileMirror) return;
+
+	Cu.exportFunction(
+		(fn) => {
+			let wrappedFn = ScopeVariables.fromScope(fn, pluginID);
+			return ScopeUtils.ensurePromiseVarInScope(
+				PluginFileAccess.withSession(pluginID, wrappedFn), scope, {}
+			);
+		},
+		fileMirror,
+		{ defineAs: "withAccessSession" }
+	);
+
+	Cu.exportFunction(
+		(path, mode) => {
+			return ScopeUtils.ensurePromiseVarInScope(
+				PluginFileAccess.check(pluginID, path, mode), scope, {}
+			);
+		},
+		fileMirror,
+		{ defineAs: "requestFileAccess" }
+	);
+
+	Cu.exportFunction(
+		() => PluginFileAccess.getDir(pluginID),
+		fileMirror,
+		{ defineAs: "getPluginDir" }
+	);
+
+	// Return a plugin-scoped subdir of Zotero's temp dir, creating it on
+	// demand and adding a session grant. Without an active session, the
+	// grant is dropped -- but the plugin can still call this inside
+	// withAccessSession to get a usable temp area.
+	Cu.exportFunction(
+		() => {
+			let zoteroTmp = Zotero.getTempDirectory().path;
+			let pluginTmp = PathUtils.join(zoteroTmp, "plugin-" + getPluginUUID(pluginID));
+			Zotero.File.createDirectoryIfMissing(pluginTmp);
+			PluginFileAccess.addSessionGrant(pluginID, pluginTmp, "write");
+			return pluginTmp;
+		},
+		fileMirror,
+		{ defineAs: "getTempDirectory" }
+	);
+
+	function requireUrlAllowed(uriStr, method) {
+		if (typeof uriStr !== "string" || !/^https?:\/\//i.test(uriStr)) {
+			throw new Error(`Zotero.File.${method}: only http(s) URIs are supported`);
+		}
+		if (!PluginProtocol.canAccessURI(pluginID, uriStr)) {
+			throw new Error(`Zotero.File.${method}: URI not allowed by host_permissions`);
+		}
+	}
+
+	if (scope.PERMISSIONS.includes("network")) {
+		Cu.exportFunction(
+			(url, options) => {
+				requireUrlAllowed(url, "getContentsFromURLAsync");
+				return ScopeUtils.ensurePromiseVarInScope(
+					Zotero.File.getContentsFromURLAsync(url, options),
+					scope, {}
+				);
+			},
+			fileMirror,
+			{ defineAs: "getContentsFromURLAsync" }
+		);
+
+		if (scope.PERMISSIONS.includes("fileSystemWrite")) {
+			Cu.exportFunction(
+				(uri, path) => {
+					let uriStr = (uri && typeof uri === "object" && uri.spec) || uri;
+					requireUrlAllowed(uriStr, "download");
+					return ScopeUtils.ensurePromiseVarInScope(
+						(async () => {
+							await PluginFileAccess.check(pluginID, path, "write");
+							return Zotero.File.download(uriStr, path);
+						})(),
+						scope, {}
+					);
+				},
+				fileMirror,
+				{ defineAs: "download" }
+			);
+		}
+	}
+}
+
+/**
  * Set up `Zotero.DBConnection` on the sandbox scope.
  * The constructor creates plugin-scoped SQLite databases under
- * `<data dir>/plugin-data/<PLUGIN_GUID>/`.  Only accepts a plain
+ * `<data dir>/plugin-db/<PLUGIN_UUID>/`.  Only accepts a plain
  * database name; instances are restricted via PLUGIN_DB_SCHEMA.
  *
  * @param {Object} scope - The sandbox scope
@@ -375,7 +508,7 @@ function setupFilePicker(scope) {
 function setupPluginDB(scope) {
 	let pluginID = scope.PLUGIN_ID;
 	let pluginDir = PathUtils.join(
-		Zotero.DataDirectory.dir, "plugin-data", scope.PLUGIN_GUID
+		Zotero.DataDirectory.dir, "plugin-db", getPluginUUID(pluginID)
 	);
 
 	let PluginDBConnection = function (dbName) {
@@ -460,4 +593,4 @@ function setupPluginDB(scope) {
 	});
 }
 
-export { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupPluginDB };
+export { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupFile, setupPluginDB };
