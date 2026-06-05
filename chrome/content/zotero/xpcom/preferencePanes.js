@@ -110,7 +110,6 @@
 				parent: 'zotero-prefpane-plugin-permissions',
 				label: 'preferences-plugin-permissions-edit-subpane',
 				src: 'chrome://zotero/content/preferences/preferences_pluginPermissions_edit.xhtml',
-				scripts: ['chrome://zotero/content/preferences/preferences_pluginPermissions.js'],
 				defaultXUL: true,
 			}
 		]),
