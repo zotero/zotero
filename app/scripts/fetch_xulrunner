@@ -105,6 +105,25 @@ function get_utf16_chars {
 }
 
 #
+# Zotero plugin permission strings to inject into the WebExtension manifest schema
+ZOTERO_PLUGIN_PERMISSIONS='"*",
+	  "zotero",
+	  "default",
+	  "data",
+	  "fileSystem",
+	  "network",
+	  "preferences",
+	  "translator",
+	  "itemTree",
+	  "itemPane",
+	  "menu",
+	  "window",
+	  "windowResource",
+	  "openWindow",
+	  "reader",
+	  "preferencePane",
+	  "mainWindow"'
+
 # Make various modifications to the stock Firefox app
 #
 function modify_omni {
@@ -282,21 +301,12 @@ function modify_omni {
     }' modules/Extension.sys.mjs
 
 	# Add Zotero permissions in https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/schemas/manifest.json
-	replace_line '"notifications"' '"notifications",
-	  "*",
-	  "zotero",
-	  "data",
-	  "fileSystem",
-	  "network",
-	  "preferences",
-	  "itemTree",
-	  "itemPane",
-	  "menu",
-	  "windowResource",
-	  "openWindow",
-	  "reader",
-	  "preferencePane",
-	  "mainWindow"' chrome/toolkit/content/extensions/schemas/manifest.json
+	# PermissionNoPrompt (for manifest.permissions in MV3 and MV2)
+	replace_line '"unlimitedStorage"' "\"unlimitedStorage\",
+	  $ZOTERO_PLUGIN_PERMISSIONS" chrome/toolkit/content/extensions/schemas/manifest.json
+	# OptionalPermission (for manifest.optional_permissions)
+	replace_line '"notifications"' "\"notifications\",
+	  $ZOTERO_PLUGIN_PERMISSIONS" chrome/toolkit/content/extensions/schemas/manifest.json
 	
 	# Use applications.zotero instead of applications.gecko
 	replace_line 'let bss = manifest.applications\?.gecko' 'let bss = manifest.applications?.zotero' modules/addons/XPIInstall.sys.mjs
