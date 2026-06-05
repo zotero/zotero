@@ -407,6 +407,12 @@ const ScopeUtils = {
 	 */
 	_ensureVarInScope(value, scope, { mutable = false, strong = false } = {}) {
 		if (typeof value === "function") {
+			// If the function has own prototype properties beyond 'constructor',
+			// it's meant to be used as a constructor (e.g. ProgressWindow.ItemProgress)
+			if (value.prototype
+				&& Object.getOwnPropertyNames(value.prototype).some(n => n !== "constructor")) {
+				return ScopeUtils.ensureConstructableInScope(value, scope, { mutable });
+			}
 			return ScopeUtils.ensureCallableInScope(value, null, scope);
 		}
 

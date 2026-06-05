@@ -273,6 +273,13 @@ const PERMISSION_SCHEMAS = {
 			}
 		},
 	},
+	userPrompt: {
+		Zotero: {
+			ProgressWindow: "Constructor",
+			Prompt: true,
+			alert: true,
+		},
+	},
 	openWindow: {
 		// The openWindow permission gates the openWindow() global function.
 	},
