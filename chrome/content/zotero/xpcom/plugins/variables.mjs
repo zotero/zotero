@@ -802,6 +802,24 @@ const WindowScopeVariables = {
 					}
 
 					if (VarCheck.isObjectLike(value)) {
+						// DOMStringMap (dataset) has arbitrary string keys that are unknown at
+						// wrap time, so a static allowlist wrapper cannot cover them.
+						// Use a minimal Proxy in the sandbox scope that forwards get/set directly.
+						if (prop === "dataset") {
+							let mapGet = Cu.exportFunction(k => value[String(k)], scope);
+							let mapSet = Cu.exportFunction((k, v) => value[String(k)] = String(v), scope);
+							let mapDel = Cu.exportFunction(k => delete value[String(k)], scope);
+							let makeDatasetProxy = Cu.evalInSandbox(`
+								(function(get, set, del) {
+									return new Proxy({}, {
+										get(target, key) { return get(key); },
+										set(target, key, value) { set(key, value); return true; },
+										deleteProperty(target, key) { del(key); return true; },
+									});
+								})
+							`, scope);
+							return makeDatasetProxy(mapGet, mapSet, mapDel);
+						}
 						return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true });
 					}
 
