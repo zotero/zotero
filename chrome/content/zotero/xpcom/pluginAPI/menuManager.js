@@ -25,7 +25,11 @@
 
 
 {
-	const PluginAPIBase = ChromeUtils.importESModule("chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs").PluginAPIBase;
+	const lazy = {};
+	ChromeUtils.defineESModuleGetters(lazy, {
+		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+	});
 
 	const VALID_TARGETS = [
 		// Main window menubar menus
@@ -109,7 +113,7 @@
 	 */
 
 
-	class MenuManagerInternal extends PluginAPIBase {
+	class MenuManagerInternal extends lazy.PluginAPIBase {
 		_menusTypeDefinition = {
 			menuType: {
 				type: "string",
@@ -214,8 +218,30 @@
 			};
 		}
 
-		// _convert(option) {
-		// }
+		_hookNames = ['onShowing', 'onShown', 'onHiding', 'onHidden', 'onCommand'];
+
+		_convert(option) {
+			option = super._convert(option);
+			this._convertMenuHooks(option.menus, option.pluginID);
+			return option;
+		}
+
+		_convertMenuHooks(menus, pluginID) {
+			for (let menuData of menus) {
+				for (let hookName of this._hookNames) {
+					if (menuData[hookName]) {
+						menuData[hookName] = lazy.ScopeVariables.fromScope(
+							menuData[hookName],
+							pluginID,
+							{ rootNode: (event, context) => context?.menuElem }
+						);
+					}
+				}
+				if (menuData.menus) {
+					this._convertMenuHooks(menuData.menus, pluginID);
+				}
+			}
+		}
 
 		/**
 		 * Validate the menu options, overriding the base method to validate `menus` recursively

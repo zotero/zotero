@@ -332,6 +332,11 @@ var Zotero_Preferences = {
 					);
 				}
 			}
+			if (pane.l10nFiles) {
+				for (let ftl of pane.l10nFiles) {
+					MozXULElement.insertFTLIfNeeded(ftl);
+				}
+			}
 			let markup = Zotero.File.getContentsFromURL(pane.src);
 			let dtdFiles = [
 				'chrome://zotero/locale/zotero.dtd',
@@ -365,6 +370,10 @@ var Zotero_Preferences = {
 				Zotero.logError(new Error(`document.l10n.translateFragment() failed -- invalid data-l10n-id in pane '${pane.id}'?`));
 			}
 			await this._initImportedNodesPostInsert(pane.container);
+
+			if (typeof pane.onLoad === 'function') {
+				pane.onLoad({ doc: document, body: pane.container });
+			}
 
 			pane.loaded = true;
 		};
