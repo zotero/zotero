@@ -44,7 +44,7 @@ var scopes = new Map();
  * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4233
  */
 function loadScope(addon, globalVars = {}) {
-	let currentPermissions = VarCheck.getPermissionsString(addon.installPermissions.permissions);
+	let currentPermissions = VarCheck.getPermissionsString(VarCheck.resolvePermissions(addon.installPermissions.permissions));
 	let existingScope = scopes.get(addon.id);
 	
 	if (existingScope) {
@@ -215,7 +215,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			freshCompartment: true,
 		}
 	);
-	let permissions = addon.installPermissions.permissions;
+	let permissions = VarCheck.resolvePermissions(addon.installPermissions.permissions);
 
 	Object.assign(
 		scope,
