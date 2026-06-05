@@ -769,6 +769,31 @@ describe("Plugin Sandbox", function () {
 			assert.isTrue(evalInScope("typeof Zotero.Collections.registerChildItem === 'function'"));
 			assert.isTrue(evalInScope("typeof Zotero.Collections.unregisterChildItem === 'function'"));
 		});
+
+		it("should expose DB.executeTransaction with dataWrite", async function () {
+			assert.isTrue(evalInScope("typeof Zotero.DB.executeTransaction === 'function'"));
+
+			// Verify it actually works by running a transaction
+			let item = new Zotero.Item('book');
+			item.setField('title', 'DB Transaction Test');
+			await item.saveTx();
+
+			let newTitle = await evalInScope(`
+				Zotero.DB.executeTransaction(async function () {
+					var item = Zotero.Items.get(${item.id});
+					item.setField('title', 'Updated via Transaction');
+					await item.save();
+				}).then(() => Zotero.Items.get(${item.id}).getField('title'))
+			`);
+			assert.equal(newTitle, 'Updated via Transaction');
+
+			await item.eraseTx();
+		});
+
+		it("should not expose DB.executeTransaction without dataWrite", function () {
+			loadTestScope(["default", "dataRead"]);
+			assert.isFalse(evalInScope("typeof Zotero.DB !== 'undefined' && typeof Zotero.DB.executeTransaction === 'function'"));
+		});
 	});
 
 	describe("Zotero.Libraries", function () {

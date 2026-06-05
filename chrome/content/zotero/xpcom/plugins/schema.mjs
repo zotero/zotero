@@ -238,6 +238,9 @@ const PERMISSION_SCHEMAS = {
 			Search: "Constructor",
 			Duplicates: "Constructor",
 			Feed: "Constructor",
+			DB: {
+				executeTransaction: true,
+			},
 		},
 	},
 	clipboardRead: {
