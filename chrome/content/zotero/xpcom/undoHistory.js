@@ -67,24 +67,21 @@ Zotero.UndoHistory = {
 	 * @return {Object}
 	 */
 	getController(doc) {
-		let self = this;
 		return {
-			supportsCommand(cmd) {
-				return cmd === 'cmd_undo' || cmd === 'cmd_redo';
-			},
-			isCommandEnabled(cmd) {
+			supportsCommand: cmd => cmd === 'cmd_undo' || cmd === 'cmd_redo',
+			isCommandEnabled: (cmd) => {
 				// Defer to native text-editing controllers when they can
 				// handle undo/redo (e.g. focused input/textarea)
-				if (self._hasNativeCommand(doc, cmd)) return false;
-				if (cmd === 'cmd_undo') return self.canUndo();
-				if (cmd === 'cmd_redo') return self.canRedo();
+				if (this._hasNativeCommand(doc, cmd)) return false;
+				if (cmd === 'cmd_undo') return this.canUndo();
+				if (cmd === 'cmd_redo') return this.canRedo();
 				return false;
 			},
-			doCommand(cmd) {
-				if (cmd === 'cmd_undo') self.undo();
-				else if (cmd === 'cmd_redo') self.redo();
+			doCommand: (cmd) => {
+				if (cmd === 'cmd_undo') this.undo();
+				else if (cmd === 'cmd_redo') this.redo();
 			},
-			onEvent() {}
+			onEvent: () => {}
 		};
 	},
 
@@ -293,8 +290,8 @@ Zotero.UndoHistory = {
 		if (!this._pendingEntry) {
 			this._pendingEntry = { changes: [], action: null, actionArgs: null };
 		}
-		let existing = this._pendingEntry.changes.find(c =>
-			c.objectType === changeRecord.objectType && c.id === changeRecord.id);
+		let existing = this._pendingEntry.changes.find(
+			c => c.objectType === changeRecord.objectType && c.id === changeRecord.id);
 		if (existing) {
 			for (let [field, vals] of Object.entries(changeRecord.fields)) {
 				if (existing.fields[field]) {
