@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<!--
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2026 Corporation for Digital Scholarship
+					 Vienna, Virginia, USA
+					 https://www.zotero.org
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+-->
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/pluginFileAccessPrompt.css" type="text/css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		id="zotero-pluginFileAccessPrompt"
+		class="zotero-dialog"
+		data-l10n-id="plugin-file-access-window"
+		windowtype="zotero:plugin-file-access"
+		drawintitlebar-platforms="mac,win,linux"
+		role="alertdialog"
+		aria-modal="true"
+		aria-labelledby="prompt-title"
+		aria-describedby="prompt-headline"
+		onload="PluginFileAccessPrompt.init();"
+		onclose="PluginFileAccessPrompt.cancel(); return true;">
+
+	<linkset>
+		<html:link rel="localization" href="pluginFileAccess.ftl"/>
+	</linkset>
+
+	<vbox flex="1" id="prompt-content">
+		<description id="prompt-title" data-l10n-id="plugin-file-access-title"
+			role="heading" aria-level="1" tabindex="0"/>
+		<description id="prompt-headline" tabindex="0">
+			<html:code data-l10n-name="file-name"/>
+			<html:code data-l10n-name="dir-name"/>
+		</description>
+
+		<checkbox id="opt-dont-ask" data-l10n-id="plugin-file-access-remember"
+			native="true"/>
+
+		<hbox id="prompt-buttons">
+			<button id="btn-allow-plain" data-l10n-id="plugin-file-access-allow" hidden="true"/>
+			<html:button is="split-menu-button" id="btn-allow"
+				data-l10n-id="plugin-file-access-allow"
+				data-l10n-attrs="label"
+				popup="allow-menu"/>
+			<button id="btn-deny" data-l10n-id="plugin-file-access-deny" default="true"
+				aria-describedby="prompt-title prompt-headline"/>
+		</hbox>
+	</vbox>
+
+	<popupset>
+		<menupopup id="allow-menu">
+			<menuitem id="allow-parent" data-l10n-id="plugin-file-access-allow-folder"/>
+		</menupopup>
+	</popupset>
+
+	<script src="chrome://zotero/content/customElements.js"></script>
+	<script src="chrome://zotero/content/titlebar.js"/>
+	<script src="chrome://zotero/content/pluginFileAccessPrompt.js"></script>
+</window>
