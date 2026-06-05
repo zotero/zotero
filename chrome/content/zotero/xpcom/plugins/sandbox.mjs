@@ -32,7 +32,9 @@ import {
 import { VarCheck, ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
-import { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupPluginDB } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
+import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
+import { getPluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
+import { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupFile, setupPluginDB } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
@@ -46,14 +48,15 @@ var scopes = new Map();
 function loadScope(addon, globalVars = {}) {
 	let currentPermissions = VarCheck.getPermissionsString(VarCheck.resolvePermissions(addon.installPermissions.permissions));
 	let existingScope = scopes.get(addon.id);
-	
+	let uuid = getPluginUUID(addon.id);
+
 	if (existingScope) {
 		let existingPermissions = VarCheck.getPermissionsString(existingScope?.PERMISSIONS);
 		if (existingPermissions === currentPermissions) {
 			Zotero.debug(`Reusing existing scope for plugin ${addon.id}`);
 			// Ensure the moz-extension:// policy is still active
 			PluginProtocol.register(
-				addon.id, addon.getResourceURI(), addon.syncGUID,
+				addon.id, addon.getResourceURI(), uuid,
 				addon.installPermissions?.origins
 			);
 			// Update version
@@ -64,20 +67,22 @@ function loadScope(addon, globalVars = {}) {
 		unloadScope(addon.id);
 	}
 
+	PluginFileAccess.register(addon.id, uuid);
+
 	// Register moz-extension:// protocol with allowed origins from host_permissions
 	PluginProtocol.register(
-		addon.id, addon.getResourceURI(), addon.syncGUID,
+		addon.id, addon.getResourceURI(), uuid,
 		addon.installPermissions?.origins
 	);
 
 	let scope;
 	if (VarCheck.isPrivilegedPermission(addon)) {
 		Zotero.debug(`Loading privileged scope for plugin ${addon.id}`);
-		scope = loadPrivilegedScope(addon, globalVars);
+		scope = loadPrivilegedScope(addon, uuid, globalVars);
 	}
 	else {
 		Zotero.debug(`Loading unprivileged scope for plugin ${addon.id}, permissions: ${currentPermissions}`);
-		scope = loadUnprivilegedScope(addon, globalVars);
+		scope = loadUnprivilegedScope(addon, uuid, globalVars);
 	}
 	
 	try {
@@ -105,6 +110,7 @@ function unloadScope(id) {
 	}
 	scopes.delete(id);
 	PluginProtocol.unregister(id);
+	PluginFileAccess.unregister(id);
 	// Delay nuke to allow any pending operations to complete
 	// TODO: Throws error 0x80070057
 	setTimeout(() => {
@@ -116,7 +122,7 @@ function getScope(id) {
 	return scopes.get(id);
 }
 
-function loadPrivilegedScope(addon, globalVars = {}) {
+function loadPrivilegedScope(addon, uuid, globalVars = {}) {
 	var scope = new Cu.Sandbox(
 		Services.scriptSecurityManager.getSystemPrincipal(),
 		{
@@ -153,7 +159,7 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 			Worker,
 			XMLSerializer,
 			PLUGIN_ID: addon.id,
-			PLUGIN_GUID: addon.syncGUID.replace(/[{}]/g, ""),
+			PLUGIN_UUID: uuid,
 			PERMISSIONS: ["*"],
 			HOST_PERMISSIONS: ["*"],
 			PREF_PERMISSIONS: ["*"],
@@ -194,7 +200,7 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 	return scope;
 }
 
-function loadUnprivilegedScope(addon, globalVars = {}) {
+function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 	let rootURI = PluginProtocol.getBaseURI(addon.id);
 	var scope = new Cu.Sandbox(
 		rootURI,
@@ -227,7 +233,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			),
 			isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
 			PLUGIN_ID: addon.id,
-			PLUGIN_GUID: addon.syncGUID.replace(/[{}]/g, ""),
+			PLUGIN_UUID: uuid,
 			PERMISSIONS: Cu.cloneInto(permissions, scope),
 			HOST_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.host_permissions || [], scope),
 			PREF_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.pref_permissions || [], scope),
@@ -282,6 +288,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 	// fileSystemWrite implies fileSystemRead
 	if (permissions.includes("fileSystemRead")) {
 		setupFilePicker(scope);
+		setupFile(scope);
 	}
 
 	if (permissions.includes("database")) {
