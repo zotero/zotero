@@ -480,6 +480,22 @@ const WindowScopeVariables = {
 		}
 		let wrapper = ScopeVariables.createAllowlistMirrorObject(win, schema, addonID, { mutable: false, cache: false });
 
+		// addEventListener / removeEventListener need the callback-wrapping
+		// logic from createSafeWindowCallable so that event handlers receive
+		// safe Event wrappers and the correct handler identity is preserved
+		// for removal.  They are added manually (like `document`) rather than
+		// through the schema so that `rootNode` is forwarded.
+		for (let method of ["addEventListener", "removeEventListener"]) {
+			Object.defineProperty(wrapper, method, {
+				value: WindowScopeVariables.createSafeWindowCallable(
+					win[method], win, addonID, { rootNode }
+				),
+				enumerable: true,
+				configurable: false,
+				writable: false,
+			});
+		}
+
 		Object.defineProperties(wrapper, {
 			document: {
 				get() {
@@ -820,12 +836,6 @@ const WindowScopeVariables = {
 			if (WindowScopeVariables.isWrappedDOMNode(arg)) {
 				return WindowScopeVariables.unwrapDOMNode(arg);
 			}
-			if (VarCheck.isArrayLike(arg)) {
-				let items = Array.from(arg);
-				if (items.some(item => WindowScopeVariables.isWrappedDOMNode(item))) {
-					return items.map(item => WindowScopeVariables.unwrapDOMNode(item));
-				}
-			}
 			if (typeof arg === "function") {
 				// If this function has already been wrapped, return the wrapped version
 				if (arg[ORIGINAL_REF_KEY]) {
@@ -845,8 +855,12 @@ const WindowScopeVariables = {
 						}
 						return cbArg;
 					});
-					// Call the original function with wrapped arguments and wrap its result
-					let result = arg.apply(this, wrappedArgs);
+					// Call the original function with wrapped arguments.
+					// Use Reflect.apply to avoid cross-compartment issues with the args array.
+					let scope = PluginSandbox.getScope(addonID);
+					let scopeArgs = Cu.cloneInto([], scope);
+					for (let a of wrappedArgs) scopeArgs.push(a);
+					let result = arg.apply(this, scopeArgs);
 					return (result);
 				};
 				
@@ -859,6 +873,12 @@ const WindowScopeVariables = {
 				});
 				
 				return wrappedCallback;
+			}
+			if (VarCheck.isArrayLike(arg)) {
+				let items = Array.from(arg);
+				if (items.some(item => WindowScopeVariables.isWrappedDOMNode(item))) {
+					return items.map(item => WindowScopeVariables.unwrapDOMNode(item));
+				}
 			}
 			return arg;
 		});
