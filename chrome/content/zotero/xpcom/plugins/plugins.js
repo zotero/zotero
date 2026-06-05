@@ -29,6 +29,9 @@ Zotero.Plugins = new function () {
 	var lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		Blocklist: "resource://gre/modules/Blocklist.sys.mjs",
+		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		WindowScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 	});
 	const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 	XPCOMUtils.defineLazyServiceGetters(lazy, {
@@ -37,9 +40,6 @@ Zotero.Plugins = new function () {
 			Ci.amIAddonManagerStartup,
 		],
 	});
-	var { Utils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
-	var { WindowScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
-	var PluginSandbox = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 
 	var observers = new Set();
 	var addonVersions = new Map();
@@ -107,8 +107,8 @@ Zotero.Plugins = new function () {
 			addonVersions.set(addon.id, addon.version);
 			// Unblocking in shouldBlockPlugin() can run onEnabling(), which already loads and
 			// starts the plugin
-			if (PluginSandbox.getScope(addon.id)) continue;
-			PluginSandbox.loadScope(addon, REASONS);
+			if (lazy.PluginSandbox.getScope(addon.id)) continue;
+			lazy.PluginSandbox.loadScope(addon, REASONS);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.APP_STARTUP);
@@ -138,7 +138,7 @@ Zotero.Plugins = new function () {
 		mainWindows.add(window);
 		let { addons } = await AddonManager.getActiveAddons(["extension"]);
 		for (let addon of addons) {
-			await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window: WindowScopeVariables.createSafeWindow(window, addon.id, { rootNode: null }) });
+			await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window: lazy.WindowScopeVariables.createSafeWindow(window, addon.id, { rootNode: null }) });
 		}
 	};
 	
@@ -154,7 +154,7 @@ Zotero.Plugins = new function () {
 		}
 		let { addons } = await AddonManager.getActiveAddons(["extension"]);
 		for (let addon of addons) {
-			await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_UNLOAD, { window: WindowScopeVariables.createSafeWindow(window, addon.id, { rootNode: null }) });
+			await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_UNLOAD, { window: lazy.WindowScopeVariables.createSafeWindow(window, addon.id, { rootNode: null }) });
 		}
 	};
 	
@@ -172,12 +172,12 @@ Zotero.Plugins = new function () {
 			// Skip disabled plugins, unless this plugin was started and the call is part of
 			// disabling it now (e.g., 'shutdown' after it was blocked while running)
 			if ((addon.softDisabled || addon.appDisabled)
-					&& (!PluginSandbox.getScope(id) || !['shutdown', 'uninstall'].includes(method))) {
+					&& (!lazy.PluginSandbox.getScope(id) || !['shutdown', 'uninstall'].includes(method))) {
 				Zotero.debug(`Skipping bootstrap method '${method}' for disabled plugin ${id}`);
 				return;
 			}
 			
-			let scope = PluginSandbox.getScope(id);
+			let scope = lazy.PluginSandbox.getScope(id);
 			
 			let func;
 			try {
@@ -200,7 +200,7 @@ Zotero.Plugins = new function () {
 			}
 			let result;
 			try {
-				if (!Utils.isPrivilegedPermission(addon)) {
+				if (!lazy.VarCheck.isPrivilegedPermission(addon)) {
 					params = Cu.cloneInto(params, scope);
 					reason = Cu.cloneInto(reason, scope);
 				}
@@ -1122,7 +1122,7 @@ Zotero.Plugins = new function () {
 				Services.obs.notifyObservers(null, "startupcache-invalidate");
 				unregisterLocales(existingAddon);
 				clearDefaultPrefs(existingAddon);
-				PluginSandbox.unloadScope(existingAddon.id);
+				lazy.PluginSandbox.unloadScope(existingAddon.id);
 				addonVersions.delete(existingAddon.id);
 			}
 		},
@@ -1144,7 +1144,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			
-			PluginSandbox.loadScope(addon);
+			lazy.PluginSandbox.loadScope(addon);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'install', reason);
@@ -1158,7 +1158,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Enabling plugin " + addon.id);
-			PluginSandbox.loadScope(addon);
+			lazy.PluginSandbox.loadScope(addon);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
@@ -1188,7 +1188,7 @@ Zotero.Plugins = new function () {
 		
 		async onUninstalled(addon) {
 			Zotero.debug("Uninstalled plugin " + addon.id);
-			PluginSandbox.unloadScope(addon.id);
+			lazy.PluginSandbox.unloadScope(addon.id);
 			addonVersions.delete(addon.id);
 		},
 		

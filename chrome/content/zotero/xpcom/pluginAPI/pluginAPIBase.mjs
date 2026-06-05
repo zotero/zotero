@@ -239,6 +239,9 @@ class PluginAPIBase {
 					if (!Array.isArray(val)) {
 						throw new Error(`Option ${fullPath} must be ${requiredType}, got ${typeof val}`);
 					}
+					// Copy into a chrome-compartment array since Object.assign
+					// only shallow-copies and the array may be from a sandbox
+					val = obj[key] = Array.from(val);
 				}
 				// Should be required type or undefined
 				else if (requiredType && requiredType !== "any" && !["undefined", requiredType].includes(gotType)) {
