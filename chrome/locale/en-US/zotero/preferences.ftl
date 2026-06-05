@@ -213,6 +213,7 @@ preferences-plugin-permissions-add-grant-mode-title = Choose file access permiss
 preferences-plugin-permissions-add-grant-mode-label = What should the plugin be allowed to do with this file/folder?
 
 preferences-plugin-permissions-col-plugin = Plugin
+preferences-plugin-permissions-col-permissions = Perms
 preferences-plugin-permissions-col-file-access = File Access
 preferences-plugin-permissions-col-data = Data
 preferences-plugin-permissions-col-db = Database

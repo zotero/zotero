@@ -104,8 +104,9 @@ function renderEditCell(index, data, column) {
 	if (data.legacy) {
 		let badge = document.createElement('span');
 		badge.className = 'legacy-badge';
-		badge.textContent = data.legacyLabel;
+		badge.textContent = '!';
 		badge.setAttribute('title', data.legacyLabel);
+		badge.setAttribute('aria-label', data.legacyLabel);
 		cell.appendChild(badge);
 		return cell;
 	}
@@ -159,6 +160,7 @@ Zotero_Preferences.PluginPermissions = {
 		// which only handles .properties; resolve FTL keys up front.
 		this._labels = Object.fromEntries(await Promise.all([
 			"preferences-plugin-permissions-col-plugin",
+			"preferences-plugin-permissions-col-permissions",
 			"preferences-plugin-permissions-col-file-access",
 			"preferences-plugin-permissions-col-data",
 			"preferences-plugin-permissions-col-db",
@@ -244,12 +246,16 @@ Zotero_Preferences.PluginPermissions = {
 			let deny = grants.filter(g => g.mode === "deny").length;
 			let dataSize = info.legacy ? 0 : await PluginFileAccess.getDataDirSizeByUUID(uuid);
 			let dbSize = info.legacy ? 0 : await PluginFileAccess.getDbDirSizeByUUID(uuid);
+			let permissionsText;
+			if (info.legacy || !info.pluginID) permissionsText = "—";
+			else permissionsText = String(info.permissions?.length ?? 0);
 			rows.push({
 				uuid,
 				name: info.name,
 				legacy: info.legacy,
 				pluginID: info.pluginID,
 				permissions: info.permissions,
+				permissionsText,
 				fileAccess: { allow, deny, legacy: info.legacy },
 				dataText: info.legacy ? "—" : formatSize(dataSize),
 				dbText: info.legacy ? "—" : formatSize(dbSize),
@@ -265,7 +271,12 @@ Zotero_Preferences.PluginPermissions = {
 				},
 			});
 		}
-		rows.sort((a, b) => a.name.localeCompare(b.name));
+		// Non-legacy plugins first (they're the ones the user is most
+		// likely to be managing); legacy rows sink to the bottom.
+		rows.sort((a, b) => {
+			if (a.legacy !== b.legacy) return a.legacy ? 1 : -1;
+			return a.name.localeCompare(b.name);
+		});
 		return rows;
 	},
 
@@ -306,10 +317,17 @@ Zotero_Preferences.PluginPermissions = {
 				renderCell: (index, _data, column) => renderNameCell(this._rows[index], column),
 			},
 			{
+				dataKey: "permissionsText",
+				label: this._labels["preferences-plugin-permissions-col-permissions"],
+				fixedWidth: true,
+				width: 60,
+				renderCell: renderSizeCell,
+			},
+			{
 				dataKey: "fileAccess",
 				label: this._labels["preferences-plugin-permissions-col-file-access"],
 				fixedWidth: true,
-				width: 140,
+				width: 100,
 				renderCell: renderFileAccessCell,
 			},
 			{
@@ -331,7 +349,7 @@ Zotero_Preferences.PluginPermissions = {
 				label: " ",
 				htmlLabel: ' ',
 				fixedWidth: true,
-				width: 100,
+				width: 40,
 				renderCell: renderEditCell,
 			},
 		];
