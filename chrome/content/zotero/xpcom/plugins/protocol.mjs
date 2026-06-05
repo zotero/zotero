@@ -24,7 +24,7 @@
 */
 
 
-var policies = new Map(); // addonID -> WebExtensionPolicy
+var policies = new Map(); // pluginID -> WebExtensionPolicy
 
 /**
  * Register a plugin with the moz-extension:// protocol.
@@ -36,16 +36,16 @@ var policies = new Map(); // addonID -> WebExtensionPolicy
  * treated as the extension process and moz-extension:// content can
  * load in non-remote browser elements.
  *
- * @param {string} addonID -- The addon's ID
+ * @param {string} pluginID -- The addon's ID
  * @param {nsIURI} rootURI -- The addon's root directory URI
  * @param {string} syncGUID -- The addon's syncGUID (stable UUID from AddonManager)
  * @returns {string} The moz-extension:// base URI for this plugin
  */
-function register(addonID, rootURI, syncGUID, origins = []) {
+function register(pluginID, rootURI, syncGUID, origins = []) {
 	// Always recreate with fresh origins and re-activate,
 	// since origins may have changed or the policy may have
 	// been deactivated externally (e.g. by AddonManager on disable)
-	unregister(addonID);
+	unregister(pluginID);
 
 	// Firefox's extension startup registers a temporary WebExtensionPolicy
 	// before the manifest is parsed, with no webAccessibleResources:
@@ -53,7 +53,7 @@ function register(addonID, rootURI, syncGUID, origins = []) {
 	// Since Zotero plugins skip the full WebExtension lifecycle, this
 	// temporary policy is never replaced. Deactivate it so we can register
 	// our own with webAccessibleResources (needed for URI_LOADABLE_BY_ANYONE).
-	let existing = WebExtensionPolicy.getByID(addonID);
+	let existing = WebExtensionPolicy.getByID(pluginID);
 	let hostname;
 	if (existing) {
 		hostname = existing.mozExtensionHostname;
@@ -67,7 +67,7 @@ function register(addonID, rootURI, syncGUID, origins = []) {
 	let baseURL = rootURI.spec;
 
 	let policy = new WebExtensionPolicy({
-		id: addonID,
+		id: pluginID,
 		mozExtensionHostname: hostname,
 		baseURL,
 		localizeCallback: str => str,
@@ -80,28 +80,28 @@ function register(addonID, rootURI, syncGUID, origins = []) {
 	});
 	policy.active = true;
 
-	policies.set(addonID, policy);
+	policies.set(pluginID, policy);
 	return `moz-extension://${hostname}/`;
 }
 
 /**
  * Unregister a plugin from the moz-extension:// protocol.
  */
-function unregister(addonID) {
-	let policy = policies.get(addonID);
+function unregister(pluginID) {
+	let policy = policies.get(pluginID);
 	if (!policy) return;
 	policy.active = false;
-	policies.delete(addonID);
+	policies.delete(pluginID);
 }
 
 /**
  * Get the moz-extension:// base URI for a registered plugin.
  *
- * @param {string} addonID
+ * @param {string} pluginID
  * @returns {string|null} The base URI, or null if not registered
  */
-function getBaseURI(addonID) {
-	let policy = policies.get(addonID);
+function getBaseURI(pluginID) {
+	let policy = policies.get(pluginID);
 	if (!policy) return null;
 	return `moz-extension://${policy.mozExtensionHostname}/`;
 }
