@@ -56,6 +56,8 @@ function loadScope(addon, globalVars = {}) {
 				addon.id, addon.getResourceURI(), addon.syncGUID,
 				addon.installPermissions?.origins
 			);
+			// Update version
+			existingScope.VERSION = addon.version;
 			return;
 		}
 		Zotero.debug(`Permissions changed for plugin ${addon.id}, recreating scope`);
@@ -151,7 +153,11 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 			Worker,
 			XMLSerializer,
 			PERMISSIONS: ["*"],
-			
+			HOST_PERMISSIONS: ["*"],
+			PREF_PERMISSIONS: ["*"],
+			INTEROP_PERMISSIONS: ["*"],
+			VERSION: addon.version,
+
 			// Add additional global functions
 			setTimeout,
 			clearTimeout,
@@ -219,7 +225,11 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			),
 			isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
 			PERMISSIONS: Cu.cloneInto(permissions, scope),
-			
+			HOST_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.host_permissions || [], scope),
+			PREF_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.pref_permissions || [], scope),
+			INTEROP_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.interop_permissions || [], scope),
+			VERSION: addon.version,
+
 			// Add additional global vars
 			Localization: ScopeUtils.ensureConstructableInScope(Localization, scope, {
 				mutable: true,

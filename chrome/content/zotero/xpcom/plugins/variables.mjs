@@ -24,7 +24,7 @@
 */
 
 
-import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
@@ -234,6 +234,34 @@ const ScopeVariables = {
 		return value;
 	},
 
+	/**
+	 * Attach a custom arg parser on a function. When the function is
+	 * exposed via the `"CustomParserCallable"` schema type.
+	 *
+	 * @param {function} func
+	 * @param {function} parser
+	 */
+	setCustomParser(func, parser) {
+		func[CUSTOM_PARSER_KEY] = parser;
+	},
+
+	/**
+	 * Wrap a host function using a custom arg parser attached on the
+	 * function itself via `setCustomParser`.
+	 */
+	createCustomParserCallable(func, thisArg, addonID) {
+		let scope = PluginSandbox.getScope(addonID);
+		let parser = func[CUSTOM_PARSER_KEY];
+		if (typeof parser !== "function") {
+			return ScopeUtils.ensureCallableInScope(func, thisArg, scope);
+		}
+		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
+			argParser: (args) => {
+				parser({ addonID, thisArg, args });
+				return args;
+			},
+		});
+	},
 
 	/**
 	 * Wrap a host function so that when called from the plugin scope,
@@ -335,6 +363,8 @@ const ScopeVariables = {
 										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID);
 									case "FromScopeCallable":
 										return ScopeVariables.createFromScopeCallable(value, actualObj, addonID);
+									case "CustomParserCallable":
+										return ScopeVariables.createCustomParserCallable(value, actualObj, addonID);
 									case "Constructor":
 										return ScopeUtils.ensureConstructableInScope(value, scope, { mutable: true });
 									default:

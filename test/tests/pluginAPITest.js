@@ -1245,4 +1245,464 @@ describe("Plugin API", function () {
 			assert.notExists(link, "FTL link should be removed after unregister");
 		});
 	});
+
+	describe("PluginInteropManager", function () {
+		var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
+
+		const PROVIDER_ID = "test-interop-provider@zotero.org";
+		const CONSUMER_ID = "test-interop-consumer@zotero.org";
+		const PROVIDER_GUID = "{00000000-0000-0000-0000-000000000011}";
+		const CONSUMER_GUID = "{00000000-0000-0000-0000-000000000012}";
+
+		var providerScope, consumerScope;
+
+		function createMockAddon(id, syncGUID, { permissions = ["default", "pluginInterop"], interop_permissions = [] } = {}) {
+			return {
+				id,
+				name: "Test Plugin " + id,
+				version: "1.0.0",
+				syncGUID,
+				installPermissions: { permissions, origins: [], pref_permissions: [], interop_permissions },
+				getResourceURI() {
+					return Services.io.newURI("file:///nonexistent/");
+				}
+			};
+		}
+
+		function loadScopes({ consumerInterop } = {}) {
+			let provider = createMockAddon(PROVIDER_ID, PROVIDER_GUID);
+			let consumer = createMockAddon(CONSUMER_ID, CONSUMER_GUID, { interop_permissions: consumerInterop || [PROVIDER_ID] });
+			PluginSandbox.loadScope(provider);
+			PluginSandbox.loadScope(consumer);
+			providerScope = PluginSandbox.getScope(PROVIDER_ID);
+			consumerScope = PluginSandbox.getScope(CONSUMER_ID);
+		}
+
+		function evalInProvider(code) {
+			return Cu.evalInSandbox(code, providerScope);
+		}
+
+		function evalInConsumer(code) {
+			return Cu.evalInSandbox(code, consumerScope);
+		}
+
+		beforeEach(function () {
+			loadScopes();
+		});
+
+		afterEach(function () {
+			// Clean up all registered commands
+			for (let opt of Zotero.PluginInteropManager._registry.options) {
+				Zotero.PluginInteropManager.unregister(
+					Zotero.PluginInteropManager._registry._getOptionMainKey(opt)
+				);
+			}
+			try {
+				PluginSandbox.unloadScope(PROVIDER_ID);
+			}
+			catch {}
+			try {
+				PluginSandbox.unloadScope(CONSUMER_ID);
+			}
+			catch {}
+		});
+
+		it("should register from sandbox and call with primitive data", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "echo",
+					commandVersion: "1.0.0",
+					command({ data }) {
+						return data;
+					},
+				});
+			`);
+
+			let result = evalInConsumer(`
+				var echo = Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "echo",
+				});
+				[typeof echo, echo("hello"), echo(42), echo(true)];
+			`);
+			assert.equal(result[0], "function");
+			assert.equal(result[1], "hello");
+			assert.equal(result[2], 42);
+			assert.equal(result[3], true);
+		});
+
+		it("should pass callerPluginID to the command", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "whoami",
+					commandVersion: "1.0.0",
+					command({ callerPluginID }) {
+						return callerPluginID;
+					},
+				});
+			`);
+
+			let result = evalInConsumer(`
+				var whoami = Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "whoami",
+				});
+				whoami();
+			`);
+			assert.equal(result, CONSUMER_ID);
+		});
+
+		it("should handle plain object data and return", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "transform",
+					commandVersion: "1.0.0",
+					command({ data }) {
+						return { result: data.a + data.b, items: [data.a, data.b] };
+					},
+				});
+			`);
+
+			let result = evalInConsumer(`
+				var transform = Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "transform",
+				});
+				var r = transform({ a: 1, b: 2 });
+				JSON.stringify(r);
+			`);
+			assert.deepEqual(JSON.parse(result), { result: 3, items: [1, 2] });
+		});
+
+		it("should handle async command returning a promise", async function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "asyncAdd",
+					commandVersion: "1.0.0",
+					command({ data }) {
+						return Promise.resolve(data.a + data.b);
+					},
+				});
+			`);
+
+			let result = await evalInConsumer(`
+				var asyncAdd = Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "asyncAdd",
+				});
+				asyncAdd({ a: 10, b: 20 });
+			`);
+			assert.equal(result, 30);
+		});
+
+		it("should propagate errors thrown by the command", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "failing",
+					commandVersion: "1.0.0",
+					command() {
+						throw new Error("intentional error");
+					},
+				});
+			`);
+
+			assert.throws(() => {
+				evalInConsumer(`
+					var failing = Zotero.PluginInteropManager.getCommand({
+						callerPluginID: "${CONSUMER_ID}",
+						targetPluginID: "${PROVIDER_ID}",
+						commandName: "failing",
+					});
+					failing();
+				`);
+			});
+		});
+
+		it("should return NOT_FOUND for unregistered command", function () {
+			let result = evalInConsumer(`
+				Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "nonexistent",
+				});
+			`);
+			assert.equal(result, Zotero.PluginInteropManager.NOT_FOUND);
+		});
+
+		it("should return VERSION_TOO_LOW when minVersion exceeds command version", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "versioned",
+					commandVersion: "1.0.0",
+					command() {
+						return true;
+					},
+				});
+			`);
+
+			let result = evalInConsumer(`
+				Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "versioned",
+					minVersion: "2.0.0",
+				});
+			`);
+			assert.equal(result, Zotero.PluginInteropManager.VERSION_TOO_LOW);
+		});
+
+		it("should return VERSION_TOO_HIGH when maxVersion is below command version", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "versioned",
+					commandVersion: "3.0.0",
+					command() {
+						return true;
+					},
+				});
+			`);
+
+			let result = evalInConsumer(`
+				Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "versioned",
+					maxVersion: "2.0.0",
+				});
+			`);
+			assert.equal(result, Zotero.PluginInteropManager.VERSION_TOO_HIGH);
+		});
+
+		it("should return OK for checkOnly when command is available", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "check",
+					commandVersion: "1.0.0",
+					command() {
+						return true;
+					},
+				});
+			`);
+
+			let result = evalInConsumer(`
+				Zotero.PluginInteropManager.getCommand({
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "check",
+					checkOnly: true,
+				});
+			`);
+			assert.equal(result, Zotero.PluginInteropManager.OK);
+		});
+
+		it("should succeed when version is within min/max range", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "ranged",
+					commandVersion: "1.5.0",
+					command({ data }) {
+						return data;
+					},
+				});
+			`);
+
+			let result = evalInConsumer(`
+				var cmd = Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "ranged",
+					minVersion: "1.0.0",
+					maxVersion: "2.0.0",
+				});
+				[typeof cmd, cmd("ok")];
+			`);
+			assert.equal(result[0], "function");
+			assert.equal(result[1], "ok");
+		});
+
+		it("should unregister a command", function () {
+			evalInProvider(`
+				var _regKey = Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "removable",
+					commandVersion: "1.0.0",
+					command() {
+						return true;
+					},
+				});
+			`);
+
+			let key = evalInProvider("_regKey");
+			assert.isString(key);
+
+			let success = Zotero.PluginInteropManager.unregister(key);
+			assert.isTrue(success);
+
+			let result = evalInConsumer(`
+				Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "removable",
+				});
+			`);
+			assert.equal(result, Zotero.PluginInteropManager.NOT_FOUND);
+		});
+
+		it("should throw when calling an unregistered command via stale reference", function () {
+			evalInProvider(`
+				var _staleKey = Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "stale",
+					commandVersion: "1.0.0",
+					command() {
+						return "alive";
+					},
+				});
+			`);
+
+			evalInConsumer(`
+				var _staleCmd = Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "stale",
+				});
+			`);
+			assert.equal(evalInConsumer("typeof _staleCmd"), "function");
+			assert.equal(evalInConsumer("_staleCmd()"), "alive");
+
+			let key = evalInProvider("_staleKey");
+			Zotero.PluginInteropManager.unregister(key);
+
+			// Stale reference should throw
+			assert.throws(() => {
+				evalInConsumer("_staleCmd()");
+			});
+		});
+
+		it("should call a command from the privileged side without callerPluginID", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "privTest",
+					commandVersion: "1.0.0",
+					command({ callerPluginID, data }) {
+						return { caller: callerPluginID, value: data };
+					},
+				});
+			`);
+
+			// Call directly from privileged chrome scope (no callerPluginID)
+			let cmd = Zotero.PluginInteropManager.getCommand({
+				targetPluginID: PROVIDER_ID,
+				commandName: "privTest",
+			});
+			assert.isFunction(cmd);
+			let result = cmd("hello");
+			assert.equal(result.value, "hello");
+			assert.isUndefined(result.caller);
+		});
+
+		it("should handle async return from privileged caller", async function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "privAsync",
+					commandVersion: "1.0.0",
+					command({ data }) {
+						return Promise.resolve(data * 2);
+					},
+				});
+			`);
+
+			let cmd = Zotero.PluginInteropManager.getCommand({
+				targetPluginID: PROVIDER_ID,
+				commandName: "privAsync",
+			});
+			let result = await cmd(21);
+			assert.equal(result, 42);
+		});
+
+		it("should propagate errors to privileged caller", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "privFail",
+					commandVersion: "1.0.0",
+					command() {
+						throw new Error("priv error");
+					},
+				});
+			`);
+
+			let cmd = Zotero.PluginInteropManager.getCommand({
+				targetPluginID: PROVIDER_ID,
+				commandName: "privFail",
+			});
+			assert.throws(() => cmd(), /priv error/);
+		});
+
+		it("should return PERMISSION_DENIED when caller lacks interop_permissions", function () {
+			// Reload scopes with consumer having no interop_permissions
+			PluginSandbox.unloadScope(PROVIDER_ID);
+			PluginSandbox.unloadScope(CONSUMER_ID);
+			loadScopes({ consumerInterop: [] });
+
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "secret",
+					commandVersion: "1.0.0",
+					command() {
+						return "should not reach";
+					},
+				});
+			`);
+
+			let result = evalInConsumer(`
+				Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "${CONSUMER_ID}",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "secret",
+				});
+			`);
+			assert.equal(result, Zotero.PluginInteropManager.PERMISSION_DENIED);
+		});
+
+		it("should prevent unprivileged plugin from spoofing callerPluginID", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "whoami",
+					commandVersion: "1.0.0",
+					command({ callerPluginID }) {
+						return callerPluginID;
+					},
+				});
+			`);
+
+			// Consumer tries to spoof a different callerPluginID
+			let result = evalInConsumer(`
+				var cmd = Zotero.PluginInteropManager.getCommand({
+					callerPluginID: "spoofed-id@evil.com",
+					targetPluginID: "${PROVIDER_ID}",
+					commandName: "whoami",
+				});
+				cmd();
+			`);
+			// CustomParserCallable forces the real addon ID
+			assert.equal(result, CONSUMER_ID);
+		});
+	});
 });
