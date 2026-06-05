@@ -78,11 +78,17 @@ function sanitizeFeatures(features) {
  *
  * @param {Object} scope - The sandbox scope to attach `openWindow` to
  * @param {string} rootURI - The plugin's resource:// root URI
+ * @param {string} addonID - The plugin ID
  */
-function setupOpenWindow(scope, rootURI) {
+function setupOpenWindow(scope, rootURI, addonID) {
 	let holder = Cu.createObjectIn(scope);
 	Cu.exportFunction(
-		(url, features, onLoad) => {
+		(url, features, options = {}) => {
+			let { windowId, onLoad } = Cu.waiveXrays(options);
+			if (windowId !== null && windowId !== undefined && typeof windowId !== "string") {
+				throw new Error("openWindow: windowId must be a string");
+			}
+
 			let resolved;
 			try {
 				resolved = new URL(String(url || ""), rootURI).href;
@@ -118,6 +124,10 @@ function setupOpenWindow(scope, rootURI) {
 				win.addEventListener("load", () => {
 					let browser = win.document
 						.getElementById("plugin-browser");
+
+					// Initialize the plugin window (title sync, menus, lifecycle)
+					win.PluginWindow.init(windowId, addonID);
+
 					let nsURI = Services.io.newURI(resolved);
 					let principal = Services.scriptSecurityManager
 						.createContentPrincipal(nsURI, {});
