@@ -218,6 +218,64 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("Zotero.Utilities", function () {
+		beforeEach(function () {
+			loadTestScope(["default"]);
+		});
+
+		it("should expose Zotero.Utilities.cleanDOI()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Utilities.cleanDOI === 'function'"));
+			let doi = evalInScope("Zotero.Utilities.cleanDOI('https://doi.org/10.1234/test')");
+			assert.equal(doi, '10.1234/test');
+		});
+
+		it("should return falsy for invalid DOI from cleanDOI()", function () {
+			let result = evalInScope("Zotero.Utilities.cleanDOI('not a doi')");
+			assert.isNotOk(result);
+		});
+
+		it("should expose Zotero.Utilities.sentenceCase()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Utilities.sentenceCase === 'function'"));
+			let result = evalInScope("Zotero.Utilities.sentenceCase('A Title in Title Case')");
+			assert.isString(result);
+			assert.equal(result, Zotero.Utilities.sentenceCase('A Title in Title Case'));
+		});
+
+		it("should expose Zotero.Utilities.capitalizeName()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Utilities.capitalizeName === 'function'"));
+			let result = evalInScope("Zotero.Utilities.capitalizeName('john smith')");
+			assert.isString(result);
+			assert.equal(result, Zotero.Utilities.capitalizeName('john smith'));
+		});
+
+		it("should not expose unlisted Utilities methods", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Utilities.randomString === 'undefined'"),
+				"randomString should not be exposed");
+		});
+	});
+
+	describe("Zotero.Date", function () {
+		beforeEach(function () {
+			loadTestScope(["default"]);
+		});
+
+		it("should expose Zotero.Date.strToISO()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Date.strToISO === 'function'"));
+			let result = evalInScope("Zotero.Date.strToISO('January 1, 2020')");
+			assert.equal(result, '2020-01-01');
+		});
+
+		it("should return false for empty string from strToISO()", function () {
+			let result = evalInScope("Zotero.Date.strToISO('')");
+			assert.isFalse(result);
+		});
+
+		it("should not expose unlisted Date methods", function () {
+			assert.isTrue(evalInScope("typeof Zotero.Date.sqlToDate === 'undefined'"),
+				"sqlToDate should not be exposed");
+		});
+	});
+
 	describe("Zotero.Items", function () {
 		beforeEach(function () {
 			loadTestScope(["default", "data"]);
@@ -812,6 +870,115 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("Zotero.ItemFields", function () {
+		beforeEach(function () {
+			loadTestScope(["default", "data"]);
+		});
+
+		it("should expose Zotero.ItemFields.getAll()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.ItemFields.getAll === 'function'"));
+			let fields = evalInScope("Zotero.ItemFields.getAll()");
+			assert.isArray(fields);
+			assert.isAbove(fields.length, 0);
+			// Each field should have id and name
+			let first = fields[0];
+			assert.property(first, 'id');
+			assert.property(first, 'name');
+		});
+
+		it("should expose Zotero.ItemFields.getID()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.ItemFields.getID === 'function'"));
+			let id = evalInScope("Zotero.ItemFields.getID('title')");
+			assert.equal(id, Zotero.ItemFields.getID('title'));
+		});
+
+		it("should return false for invalid field name from getID()", function () {
+			let result = evalInScope("Zotero.ItemFields.getID('nonexistentField123')");
+			assert.isFalse(result);
+		});
+
+		it("should expose Zotero.ItemFields.getName()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.ItemFields.getName === 'function'"));
+			let titleID = Zotero.ItemFields.getID('title');
+			let name = evalInScope(`Zotero.ItemFields.getName(${titleID})`);
+			assert.equal(name, 'title');
+		});
+
+		it("should expose Zotero.ItemFields.isValidForType()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.ItemFields.isValidForType === 'function'"));
+			let titleID = Zotero.ItemFields.getID('title');
+			let bookID = Zotero.ItemTypes.getID('book');
+			let result = evalInScope(`Zotero.ItemFields.isValidForType(${titleID}, ${bookID})`);
+			assert.isTrue(result);
+		});
+
+		it("should expose Zotero.ItemFields.getLocalizedString()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.ItemFields.getLocalizedString === 'function'"));
+			let label = evalInScope("Zotero.ItemFields.getLocalizedString('title')");
+			assert.isString(label);
+			assert.equal(label, Zotero.ItemFields.getLocalizedString('title'));
+		});
+	});
+
+	describe("Zotero.ItemTypes", function () {
+		beforeEach(function () {
+			loadTestScope(["default", "data"]);
+		});
+
+		it("should expose Zotero.ItemTypes.getID()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.ItemTypes.getID === 'function'"));
+			let id = evalInScope("Zotero.ItemTypes.getID('book')");
+			assert.equal(id, Zotero.ItemTypes.getID('book'));
+		});
+
+		it("should return false for invalid type name from getID()", function () {
+			let result = evalInScope("Zotero.ItemTypes.getID('nonexistentType123')");
+			assert.isFalse(result);
+		});
+
+		it("should expose Zotero.ItemTypes.getLocalizedString()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.ItemTypes.getLocalizedString === 'function'"));
+			let label = evalInScope("Zotero.ItemTypes.getLocalizedString('book')");
+			assert.isString(label);
+			assert.equal(label, Zotero.ItemTypes.getLocalizedString('book'));
+		});
+	});
+
+	describe("Zotero.CreatorTypes", function () {
+		beforeEach(function () {
+			loadTestScope(["default", "data"]);
+		});
+
+		it("should expose Zotero.CreatorTypes.getLocalizedString()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.CreatorTypes.getLocalizedString === 'function'"));
+			let label = evalInScope("Zotero.CreatorTypes.getLocalizedString('author')");
+			assert.isString(label);
+			assert.equal(label, Zotero.CreatorTypes.getLocalizedString('author'));
+		});
+	});
+
+	describe("Zotero.Fulltext", function () {
+		beforeEach(function () {
+			loadTestScope(["default", "data"]);
+		});
+
+		it("should expose Zotero.Fulltext.getPages()", async function () {
+			assert.isTrue(evalInScope("typeof Zotero.Fulltext.getPages === 'function'"));
+			let item = new Zotero.Item('attachment');
+			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			item.attachmentContentType = 'application/pdf';
+			await item.saveTx();
+
+			// Un-indexed items return false; just verify the call completes without error
+			// and matches the host result
+			let result = await evalInScope(`Zotero.Fulltext.getPages(${item.id})`);
+			let expected = await Zotero.Fulltext.getPages(item.id);
+			assert.equal(result, expected);
+
+			await item.eraseTx();
+		});
+	});
+
 	describe("Zotero.File", function () {
 		var tmpDir;
 
@@ -1244,6 +1411,23 @@ describe("Plugin Sandbox", function () {
 			assert.equal(receivedData.title, 'Test');
 			assert.equal(receivedData.count, 3);
 		});
+
+		it("should expose Zotero.HTTP.processDocuments()", function () {
+			assert.isTrue(evalInScope("typeof Zotero.HTTP.processDocuments === 'function'"));
+		});
+
+		it("should fetch and process an HTML document with processDocuments()", async function () {
+			let url = registerEndpoint("GET", function () {
+				return [200, "text/html", "<html><head><title>Sandbox Doc</title></head><body><p>Hello</p></body></html>"];
+			});
+
+			let result = await evalInScope(`
+				Zotero.HTTP.processDocuments(${JSON.stringify(url)}, function (doc, responseURL) {
+					return responseURL;
+				}).then(results => results[0])
+			`);
+			assert.include(result, "/test/sandbox-http/");
+		});
 	});
 
 	describe("Zotero.Notifier", function () {
@@ -1503,6 +1687,25 @@ describe("Plugin Sandbox", function () {
 			assert.ok(extra[itemID], "extraData should contain deleted item ID");
 
 			evalInScope("Zotero.Notifier.unregisterObserver(_observerID)");
+		});
+	});
+
+	describe("Zotero.Translators", function () {
+		beforeEach(function () {
+			loadTestScope(["default", "translator"]);
+		});
+
+		it("should expose Zotero.Translators.getAll()", async function () {
+			assert.isTrue(evalInScope("typeof Zotero.Translators.getAll === 'function'"));
+			let translators = await evalInScope("Zotero.Translators.getAll()");
+			assert.isArray(translators);
+		});
+
+		it("should not expose Translators without translator permission", function () {
+			PluginSandbox.unloadScope(ADDON_ID);
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof Zotero.Translators === 'undefined'"),
+				"Translators should not be exposed without translator permission");
 		});
 	});
 
@@ -2507,6 +2710,10 @@ describe("Plugin Sandbox", function () {
 				await item2.eraseTx();
 			});
 
+			it("should expose setVirtual as a function", function () {
+				assert.isTrue(evalInScope("typeof _win.ZoteroPane.setVirtual === 'function'"));
+			});
+
 			it("should toggle item pane without throwing", function () {
 				evalInScope("_win.ZoteroPane.toggleItemPane()");
 				// Toggle back
@@ -2659,6 +2866,14 @@ describe("Plugin Sandbox", function () {
 				"Groups should not be exposed without data permission");
 			assert.isTrue(evalInScope("typeof Zotero.Tags === 'undefined'"),
 				"Tags should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.ItemFields === 'undefined'"),
+				"ItemFields should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.ItemTypes === 'undefined'"),
+				"ItemTypes should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.CreatorTypes === 'undefined'"),
+				"CreatorTypes should not be exposed without data permission");
+			assert.isTrue(evalInScope("typeof Zotero.Fulltext === 'undefined'"),
+				"Fulltext should not be exposed without data permission");
 			assert.isTrue(evalInScope("typeof Zotero.Notifier === 'undefined'"),
 				"Notifier should not be exposed without data permission");
 		});
@@ -2679,6 +2894,12 @@ describe("Plugin Sandbox", function () {
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof Zotero.Prefs === 'undefined'"),
 				"Prefs should not be exposed without preferences permission");
+		});
+
+		it("should not expose translator APIs with only default permission", function () {
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof Zotero.Translators === 'undefined'"),
+				"Translators should not be exposed without translator permission");
 		});
 
 		it("should not expose UI APIs with only default permission", function () {
@@ -2714,20 +2935,24 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should merge multiple permissions correctly", function () {
-			loadTestScope(["default", "data", "network", "preferences"]);
+			loadTestScope(["default", "data", "network", "preferences", "translator"]);
 			assert.isTrue(evalInScope("typeof Zotero.Items === 'object'"),
 				"Items should be exposed with data permission");
+			assert.isTrue(evalInScope("typeof Zotero.ItemFields === 'object'"),
+				"ItemFields should be exposed with data permission");
 			assert.isTrue(evalInScope("typeof Zotero.HTTP === 'object'"),
 				"HTTP should be exposed with network permission");
 			assert.isTrue(evalInScope("typeof Zotero.Prefs === 'object'"),
 				"Prefs should be exposed with preferences permission");
+			assert.isTrue(evalInScope("typeof Zotero.Translators === 'object'"),
+				"Translators should be exposed with translator permission");
 			assert.isTrue(evalInScope("typeof Zotero.File === 'undefined'"),
 				"File should not be exposed without fileSystem permission");
 			assert.isTrue(evalInScope("typeof Zotero.ItemTreeManager === 'undefined'"),
 				"ItemTreeManager should not be exposed without ui permission");
 		});
 
-		it("should still expose default APIs (logging, platform info, window access) regardless of permissions", function () {
+		it("should still expose default APIs (logging, platform info, window access, utilities) regardless of permissions", function () {
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof Zotero.debug === 'function'"),
 				"debug should always be exposed");
@@ -2741,6 +2966,14 @@ describe("Plugin Sandbox", function () {
 				"getMainWindow should always be exposed");
 			assert.isTrue(evalInScope("typeof Zotero.getMainWindows === 'function'"),
 				"getMainWindows should always be exposed");
+			assert.isTrue(evalInScope("typeof Zotero.Utilities === 'object'"),
+				"Utilities should always be exposed");
+			assert.isTrue(evalInScope("typeof Zotero.Utilities.cleanDOI === 'function'"),
+				"Utilities.cleanDOI should always be exposed");
+			assert.isTrue(evalInScope("typeof Zotero.Date === 'object'"),
+				"Date should always be exposed");
+			assert.isTrue(evalInScope("typeof Zotero.Date.strToISO === 'function'"),
+				"Date.strToISO should always be exposed");
 		});
 	});
 });
