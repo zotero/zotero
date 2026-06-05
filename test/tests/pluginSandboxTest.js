@@ -4050,6 +4050,67 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("element.dataset", function () {
+		var { WindowScopeVariables } = ChromeUtils.importESModule(
+			"chrome://zotero/content/xpcom/plugins/variables.mjs"
+		);
+
+		function setupSafeDiv() {
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			let target = document.createElement("div");
+			container.appendChild(target);
+			let wrappedTarget = WindowScopeVariables.createSafeHTMLElement(
+				target, ADDON_ID, { rootNode: new WeakRef(container) }
+			);
+			scope._target = wrappedTarget;
+			return { container, target };
+		}
+
+		it("should read and write arbitrary dataset keys", function () {
+			loadTestScope(["default"]);
+			let { container, target } = setupSafeDiv();
+			try {
+				evalInScope('_target.dataset.myKey = "hello";');
+				assert.equal(target.dataset.myKey, "hello", "value written via sandbox should appear on real element");
+				let read = evalInScope("_target.dataset.myKey");
+				assert.equal(read, "hello", "value should be readable back from sandbox");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("should support keys that did not exist at wrap time", function () {
+			loadTestScope(["default"]);
+			let { container, target } = setupSafeDiv();
+			try {
+				// target has no data attributes when wrapper is created
+				assert.equal(Object.keys(target.dataset).length, 0, "no keys initially");
+				evalInScope('_target.dataset.brand = "new";');
+				assert.equal(target.dataset.brand, "new", "new key written via sandbox should exist");
+				evalInScope('_target.dataset.second = "also";');
+				assert.equal(target.dataset.second, "also", "second new key should also work");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("should delete dataset keys", function () {
+			loadTestScope(["default"]);
+			let { container, target } = setupSafeDiv();
+			try {
+				target.dataset.toRemove = "yes";
+				evalInScope("delete _target.dataset.toRemove");
+				assert.isFalse("toRemove" in target.dataset, "key should be deleted from real element");
+			}
+			finally {
+				container.remove();
+			}
+		});
+	});
+
 	describe("resolveURI", function () {
 		it("should resolve relative URIs for privileged plugins against file:// root", async function () {
 			loadTestScope(["*"]);
