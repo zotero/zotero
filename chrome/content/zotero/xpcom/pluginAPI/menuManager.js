@@ -63,6 +63,11 @@
 		"sidenav/locate",
 	];
 
+	// pluginWindow/<windowId>/menubar/<type>
+	const VALID_PLUGIN_WINDOW_MENU_TYPES = [
+		"file", "edit", "view", "window", "help",
+	];
+
 	const GROUPED_TARGETS = [
 		"main/library/collection",
 		"main/library/item",
@@ -198,17 +203,27 @@
 						type: "string",
 						optional: false,
 						checkHook: (value) => {
-							if (!VALID_TARGETS.includes(value)) {
-								return `Option 'target' must be one of ${VALID_TARGETS.join(", ")}, got ${value}`;
+							if (VALID_TARGETS.includes(value)) {
+								return true;
 							}
-							return true;
+							// pluginWindow/<windowId>/menubar/<type>
+							let parts = value.split("/");
+							if (parts.length === 4
+									&& parts[0] === "pluginWindow"
+									&& parts[2] === "menubar"
+									&& VALID_PLUGIN_WINDOW_MENU_TYPES.includes(parts[3])) {
+								return true;
+							}
+							return `Option 'target' must be one of ${VALID_TARGETS.join(", ")} or a valid pluginWindow target, got ${value}`;
 						}
 					},
-					// l10nFiles: {
-					// 	type: "array",
-					// 	optional: true,
-					// 	children: "string",
-					// },
+					// Only for pluginWindow menubar menus.
+					// For other menus, use `Zotero.WindowResourceManager`.
+					l10nFiles: {
+						type: "array",
+						optional: true,
+						children: "string",
+					},
 					// Type check will be done in the _validate function for nested menus
 					menus: {
 						type: "array",
@@ -251,6 +266,12 @@
 			option = super._validate(option);
 
 			if (!option) {
+				return false;
+			}
+
+			let isPluginWindowTarget = option.target?.startsWith("pluginWindow/");
+			if (option.l10nFiles?.length && !isPluginWindowTarget) {
+				this._log("Invalid menu: 'l10nFiles' is only supported for pluginWindow targets", "warn");
 				return false;
 			}
 
@@ -364,6 +385,18 @@
 		}
 
 		/**
+		 * Ensure l10n files are loaded in the popup window, loading any that are missing.
+		 * @param {Window} win - The window that owns the popup element
+		 * @param {string[]} l10nFiles - Array of FTL resource paths to ensure are loaded
+		 */
+		_ensureL10nFilesInWindow(win, l10nFiles) {
+			if (!l10nFiles?.length) return;
+			for (let file of l10nFiles) {
+				win.MozXULElement.insertFTLIfNeeded(file);
+			}
+		}
+
+		/**
 		 * Update the popup element with the custom menu items for the target type
 		 * @param {XULPopupElement} popupElem - The popup element to update
 		 * @param {MenuData[]} menus - An array of menu data
@@ -391,17 +424,6 @@
 				return;
 			}
 			
-			// let win = popupElem.documentGlobal;
-			// let doc = popupElem.ownerDocument;
-
-			// TODO: maybe we can let plugins to load their own l10n files in onShowing,
-			// because otherwise we'll have to manage the l10n files unload when unregistering
-			// if (menuData.l10nFiles?.length > 0) {
-			// 	// Load l10n files
-			// 	for (let l10nFile of menuData.l10nFiles) {
-			// 		win.MozXULElement.insertFTLIfNeeded(l10nFile);
-			// 	}
-			// }
 
 			if (!skipGrouping) {
 				// Group menus if needed
@@ -863,8 +885,22 @@
 			return this._menuManager.unregister(paneID);
 		},
 
+		/**
+		 * Check whether any menus are registered for a given target.
+		 * @param {string} targetType
+		 * @returns {boolean}
+		 */
+		hasMenus(targetType) {
+			return this._menuManager.getCustomMenuOptions(targetType).length > 0;
+		},
+
 		updateMenuPopup(popupElem, targetType, args) {
 			let options = this._menuManager.getCustomMenuOptions(targetType);
+			// Ensure l10n files from all registered options are loaded in the popup's window
+			let win = popupElem.documentGlobal;
+			for (let option of options) {
+				this._menuManager._ensureL10nFilesInWindow(win, option.l10nFiles);
+			}
 			// Flatten the menus array
 			let menus = [];
 			for (let option of options) {
