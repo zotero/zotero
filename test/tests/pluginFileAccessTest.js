@@ -636,6 +636,44 @@ describe("Plugin File Access", function () {
 	});
 
 
+	describe("Prompt cleanup on lifecycle events", function () {
+		it("unregister closes any open prompt window for the plugin", async function () {
+			let path = PathUtils.join(tempDir, "unreg-cleanup.txt");
+			let { promptPromise, sessionPromise } = triggerPrompt(path);
+			let win = await promptPromise;
+			assert.isFalse(win.closed, "prompt should be open before unregister");
+
+			PluginFileAccess.unregister(PLUGIN_ID);
+			// The window closes asynchronously through its onclose handler.
+			await waitForCallback(() => win.closed);
+			// The originating check() inside the session sees deny and the
+			// session fn's .catch absorbs it, so sessionPromise resolves.
+			await sessionPromise;
+		});
+
+		it("session timeout closes any open prompt window for that session", async function () {
+			let path = PathUtils.join(tempDir, "session-timeout-cleanup.txt");
+			let promptPromise = waitForWindow(PROMPT_URL);
+			// Short chrome-side session timeout; sandbox API can't override it.
+			let sessionPromise = PluginFileAccess.withSession(PLUGIN_ID, async () => {
+				// Leave the check pending so the session timeout fires while
+				// the prompt is still open.
+				await PluginFileAccess.check(PLUGIN_ID, path, "read").catch(() => {});
+				await Zotero.Promise.delay(500);
+			}, { timeout: 100 });
+			let win = await promptPromise;
+			assert.isFalse(win.closed, "prompt should be open before timeout");
+
+			// Session rejects with timeout; consume.
+			try {
+				await sessionPromise;
+			}
+			catch {}
+			await waitForCallback(() => win.closed);
+		});
+	});
+
+
 	describe("Prompt accessibility", function () {
 		it("declares the window as an alertdialog with labelled/described relations", async function () {
 			let path = PathUtils.join(tempDir, "a11y-roles.txt");
