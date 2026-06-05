@@ -163,6 +163,111 @@ Zotero.Utilities.Internal = {
 			.getService(Components.interfaces.nsIClipboardHelper)
 			.copyString(str);
 	},
+
+
+	/**
+	 * Copy one or more data types to the clipboard.
+	 *
+	 * @param {Object} data -- Key: MIME types; Values: corresponding data.
+	 *     Supported flavors:
+	 *       - "text/plain" (string)
+	 *       - "text/html" (string)
+	 *       - "image/*" (ArrayBuffer, Uint8Array, base64 string, or data URI)
+	 *       - "application/x-moz-file" (string path or nsIFile)
+	 *     Other string values are wrapped as nsISupportsString,
+	 *     ArrayBuffer/TypedArray as nsIArrayBufferInputStream,
+	 *     and nsISupports objects are passed through directly.
+	 */
+	copyToClipboard: function (data) {
+		let transferable = Components.classes["@mozilla.org/widget/transferable;1"]
+			.createInstance(Components.interfaces.nsITransferable);
+		transferable.init(null);
+
+		for (let [flavor, value] of Object.entries(data)) {
+			let transferData;
+
+			// Normalize binary values: extract ArrayBuffer from typed arrays
+			// and copy cross-compartment buffers into this compartment
+			if (ArrayBuffer.isView(value)) {
+				value = value.buffer;
+			}
+			if (value instanceof ArrayBuffer
+				|| (typeof value === "object" && value
+					&& Cu.getClassName(value, true) === "ArrayBuffer")) {
+				if (Cu.getGlobalForObject(value) !== Cu.getGlobalForObject(this)) {
+					value = new Uint8Array(value).slice().buffer;
+				}
+			}
+
+			if (flavor === "application/x-moz-file") {
+				// File: accept a path string or nsIFile directly
+				if (typeof value === "string") {
+					let file = Components.classes["@mozilla.org/file/local;1"]
+						.createInstance(Components.interfaces.nsIFile);
+					file.initWithPath(value);
+					transferData = file;
+				}
+				else {
+					transferData = value;
+				}
+			}
+			else if (flavor.startsWith("image/")
+				|| (typeof value === "string" && value.startsWith("data:image/"))) {
+				// Image: accept ArrayBuffer, base64 string, or data URI.
+				// For data URIs, the MIME type is extracted from the URI itself.
+				let mimeType = flavor.startsWith("image/") ? flavor : "image/png";
+				let buf;
+				if (typeof value === "string") {
+					let dataURIMatch = value.match(/^data:(image\/[^;,]+)/);
+					if (dataURIMatch) {
+						mimeType = dataURIMatch[1];
+					}
+					let b64 = value.includes(",") ? value.split(",")[1] : value;
+					let binary = atob(b64);
+					let u8 = new Uint8Array(binary.length);
+					for (let i = 0; i < binary.length; i++) {
+						u8[i] = binary.charCodeAt(i);
+					}
+					buf = u8.buffer;
+				}
+				else {
+					buf = value;
+				}
+				let imgTools = Components.classes["@mozilla.org/image/tools;1"]
+					.getService(Components.interfaces.imgITools);
+				transferData = imgTools.decodeImageFromArrayBuffer(buf, mimeType);
+				flavor = "application/x-moz-nativeimage";
+			}
+			else if (typeof value === "string") {
+				// Text flavors (text/plain, text/html, etc.)
+				let str = Components.classes["@mozilla.org/supports-string;1"]
+					.createInstance(Components.interfaces.nsISupportsString);
+				str.data = value;
+				transferData = str;
+			}
+			else if (value instanceof ArrayBuffer) {
+				// Binary data for custom flavors
+				let inputStream = Components.classes["@mozilla.org/io/arraybuffer-input-stream;1"]
+					.createInstance(Components.interfaces.nsIArrayBufferInputStream);
+				inputStream.setData(value, 0, value.byteLength);
+				transferData = inputStream;
+			}
+			else {
+				// Pass through any nsISupports object directly
+				transferData = value;
+			}
+
+			transferable.addDataFlavor(flavor);
+			transferable.setTransferData(flavor, transferData);
+		}
+
+		let clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"]
+			.getService(Components.interfaces.nsIClipboard);
+		clipboardService.setData(
+			transferable, null,
+			Components.interfaces.nsIClipboard.kGlobalClipboard
+		);
+	},
 	
 	
 	/*
