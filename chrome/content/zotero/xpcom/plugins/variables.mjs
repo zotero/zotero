@@ -1013,8 +1013,7 @@ const WindowScopeVariables = {
 	sanitizeFragment(fragment, pluginID) {
 		if (!pluginID) return fragment;
 		let scope = PluginSandbox.getScope(pluginID);
-		if (!scope || VarCheck.isPrivilegedScope(scope)) return;
-
+		if (!scope || VarCheck.isPrivilegedScope(scope)) return fragment;
 
 		// Remove unsafe elements via querySelectorAll (faster than tree walking)
 		let unsafeSelector = Array.from(this.UNSAFE_TAGS).join(",");
