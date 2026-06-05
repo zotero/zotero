@@ -343,6 +343,8 @@ const ScopeUtils = {
 			args = args.map(arg => Cu.waiveXrays(arg));
 			if (typeof argParser === "function") {
 				args = argParser(args);
+				// argParser returning null signals the call should be blocked
+				if (args === null) return;
 			}
 			let actualThisArg = thisArgRef ? thisArgRef.deref() : thisArg;
 			if (thisArgRef && !actualThisArg) {
