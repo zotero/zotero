@@ -106,20 +106,24 @@ const ScopeVariables = {
 
 	/**
 	 * Wrap a variable from the plugin scope to be used in the host scope
-	 * Currently only wraps functions
+	 * Wraps functions and plain objects with function properties.
 	 *
 	 * - Functions:
 	 *   1. All arguments are wrapped using `toScope` before passing to the plugin function
 	 *   2. The plugin function is called with wrapped arguments
 	 *   3. The return value is optionally unwrapped if `unwrapReturn` is true
 	 *
-	 * @param {Function} value - The function from plugin scope to wrap
+	 * - Plain objects:
+	 *   1. Function properties are recursively wrapped using `fromScope`
+	 *   2. Non-function properties are copied as-is
+	 *
+	 * @param {any} value - The value from plugin scope to wrap
 	 * @param {string} addonID - The plugin ID for scope restrictions
 	 * @param {Object} [options] - Options for wrapping
 	 * @param {Element|Function} [options.rootNode=null] - Optional root node to restrict DOM access.
 	 *   Can be an Element or a function that takes the arguments and returns an Element.
 	 * @param {boolean} [options.unwrapReturn=false] - Whether to unwrap DOM nodes in return value
-	 * @returns {Function} - Wrapped function that handles argument wrapping and return unwrapping
+	 * @returns {any} - Wrapped value safe for use in the host scope
 	 */
 	fromScope(value, addonID, { rootNode = null, unwrapReturn = false } = {}) {
 		if (!addonID) {
@@ -156,6 +160,21 @@ const ScopeVariables = {
 			});
 			return wrapper;
 		}
+		else if (VarCheck.isPlainObject(value)) {
+			let hasFunction = false;
+			let wrapped = {};
+			for (let key of Object.keys(value)) {
+				let val = value[key];
+				let wrappedVal = ScopeVariables.fromScope(val, addonID, { rootNode, unwrapReturn });
+				if (wrappedVal !== val) {
+					hasFunction = true;
+				}
+				wrapped[key] = wrappedVal;
+			}
+			if (hasFunction) {
+				return wrapped;
+			}
+		}
 
 		return value;
 	},
@@ -173,6 +192,19 @@ const ScopeVariables = {
 			return fn[ORIGINAL_REF_KEY]();
 		}
 		return fn;
+	},
+
+	/**
+	 * Wrap a host function so that when called from the plugin scope,
+	 * any function arguments or object arguments with function properties
+	 * are wrapped using `fromScope` before passing to the actual function.
+	 * This allows the host to safely consume plugin-provided functions.
+	 */
+	createFromScopeCallable(func, thisArg, addonID) {
+		let scope = PluginSandbox.getScope(addonID);
+		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
+			argParser: args => args.map(arg => ScopeVariables.fromScope(arg, addonID)),
+		});
 	},
 
 	// https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/ExtensionCommon.sys.mjs#60
@@ -270,6 +302,8 @@ const ScopeVariables = {
 								switch (schemaNode[prop]) {
 									case "WindowScopeCallable":
 										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID);
+									case "FromScopeCallable":
+										return ScopeVariables.createFromScopeCallable(value, actualObj, addonID);
 									default:
 										VarCheck.throwPropError("access", prop, "unknown schema handler");
 								}
