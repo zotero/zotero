@@ -254,9 +254,13 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 	Object.assign(
 		scope,
 		{
-			loadSubScript: res => Services.scriptloader.loadSubScript(
-				`${baseURI}${res}`, scope
-			),
+			loadSubScript: (res) => {
+				let uri = new URL(res, baseURI).href;
+				if (!uri.startsWith(baseURI)) {
+					throw new Error(`loadSubScript: ${res} resolves outside the plugin directory`);
+				}
+				return Services.scriptloader.loadSubScript(uri, scope);
+			},
 			isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
 
 			// Add additional global vars
