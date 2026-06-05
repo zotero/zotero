@@ -540,6 +540,9 @@ function setupPluginDB(scope) {
 		// mozIStorageRow Proxies can cross compartments
 		let origQueryAsync = conn.queryAsync.bind(conn);
 		conn.queryAsync = async function (sql, params, options = {}) {
+			if (typeof sql === "string" && /^\s*(ATTACH|DETACH)\s/i.test(sql)) {
+				throw new Error("ATTACH/DETACH DATABASE is not allowed in plugin databases");
+			}
 			let rows = await origQueryAsync(sql, params, options);
 			if (!Array.isArray(rows)) return rows;
 			return rows.map(row => ScopeUtils.ensureForwardingProxyInScope(row, scope));
