@@ -1251,7 +1251,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					throw new Error(`Invalid URL '${url}'`);
 				}
 				let scheme = matches[1];
-				if (['javascript', 'data', 'chrome', 'resource'].includes(scheme)) {
+				if (['javascript', 'data', 'chrome', 'resource', 'moz-extension', 'file'].includes(scheme)) {
 					throw new Error(`Invalid scheme '${scheme}'`);
 				}
 				let svc = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
