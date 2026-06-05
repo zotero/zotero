@@ -212,16 +212,35 @@ const PERMISSION_SCHEMAS = {
 			},
 		},
 	},
-	ui: {
+	itemTree: {
 		Zotero: {
-			// UI APIs
 			ItemTreeManager: true,
+		},
+	},
+	itemPane: {
+		Zotero: {
 			ItemPaneManager: true,
+		},
+	},
+	menu: {
+		Zotero: {
 			MenuManager: true,
+		},
+	},
+	reader: {
+		Zotero: {
 			Reader: {
 				registerEventListener: "FromScopeCallable",
 				unregisterEventListener: true,
 			},
+		},
+	},
+	preferencePane: {
+		Zotero: {
+			PreferencePanes: {
+				register: true,
+				unregister: true,
+			}
 		},
 	},
 	window: {
