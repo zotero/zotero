@@ -137,7 +137,9 @@
 			let doc = win.document;
 			let mainKey = option[this._config.mainKeyName];
 			if (option.type === "ftl") {
-				win.MozXULElement.insertFTLIfNeeded(option.url);
+				win.document.l10n.addResourceIds([
+					{ path: option.url, optional: true },
+				]);
 			}
 			else if (option.type === "css") {
 				if (doc.querySelector(`link[data-resource-id="${CSS.escape(mainKey)}"]`)) {
@@ -178,7 +180,9 @@
 				}
 			}
 			else if (option.type === "ftl") {
-				win.document.querySelectorAll(`link[href="${CSS.escape(option.url)}"]`).forEach(link => link.remove());
+				win.document.l10n.removeResourceIds([
+					{ path: option.url },
+				]);
 			}
 		}
 
