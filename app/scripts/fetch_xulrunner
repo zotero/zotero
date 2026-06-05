@@ -281,9 +281,15 @@ function modify_omni {
       manifest.experiment_apis = {};
     }' modules/Extension.sys.mjs
 
-	# Add zotero to allowed permissions in https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/schemas/manifest.json
+	# Add Zotero permissions in https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/schemas/manifest.json
 	replace_line '"notifications"' '"notifications",
-	  "zotero"' chrome/toolkit/content/extensions/schemas/manifest.json
+	  "zotero",
+	  "data",
+	  "fileSystem",
+	  "network",
+	  "preferences",
+	  "ui",
+	  "mainWindow"' chrome/toolkit/content/extensions/schemas/manifest.json
 	
 	# Use applications.zotero instead of applications.gecko
 	replace_line 'let bss = manifest.applications\?.gecko' 'let bss = manifest.applications?.zotero' modules/addons/XPIInstall.sys.mjs
