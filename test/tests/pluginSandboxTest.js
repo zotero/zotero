@@ -3449,6 +3449,160 @@ describe("Plugin Sandbox", function () {
 					win.close();
 				}
 			});
+
+			describe("createFrame", function () {
+				var { WindowScopeVariables } = ChromeUtils.importESModule(
+					"chrome://zotero/content/xpcom/plugins/variables.mjs"
+				);
+
+				function setupSafeScope() {
+					scope._safeDoc = WindowScopeVariables.createSafeDocument(
+						mainWin.document, ADDON_ID, {}
+					);
+					// Wrap container as a safe element so sandbox can call appendChild
+					scope._container = WindowScopeVariables.createSafeHTMLElement(
+						mainWin.document.documentElement, ADDON_ID, {}
+					);
+				}
+
+				afterEach(function () {
+					// Clean up any appended browser elements
+					let browsers = mainWin.document.querySelectorAll('browser[type="content"][disableglobalhistory="true"]');
+					for (let b of browsers) {
+						b.remove();
+					}
+				});
+
+				it("should load plugin content and call onLoad with contentWindow", async function () {
+					loadTestScopeWithURI(["default"]);
+					setupSafeScope();
+
+					let contentWin = await evalInScope(`
+						new Promise((resolve) => {
+							let frame = _safeDoc.createFrame("test.html", function(win) {
+								resolve(win);
+							});
+							_container.appendChild(frame);
+						});
+					`);
+					assert.ok(contentWin, "createFrame should call onLoad with content window");
+					assert.equal(contentWin.document.title, "Test");
+					assert.equal(
+						contentWin.document.getElementById("test-div").textContent,
+						"Hello"
+					);
+				});
+
+				it("should reject URLs outside plugin root", function () {
+					loadTestScopeWithURI(["default"]);
+					setupSafeScope();
+					let threw = false;
+					try {
+						evalInScope('_safeDoc.createFrame("https://evil.com/page.html", function() {})');
+					}
+					catch {
+						threw = true;
+					}
+					assert.isTrue(threw, "Should reject URLs outside plugin root");
+				});
+
+				it("should reject non-.html files", function () {
+					loadTestScopeWithURI(["default"]);
+					setupSafeScope();
+					let threw = false;
+					try {
+						evalInScope('_safeDoc.createFrame("script.js", function() {})');
+					}
+					catch {
+						threw = true;
+					}
+					assert.isTrue(threw, "Should reject non-.html files");
+				});
+
+				it("should not expose privileged APIs in frame content", async function () {
+					loadTestScopeWithURI(["default"]);
+					setupSafeScope();
+
+					let contentWin = await evalInScope(`
+						new Promise((resolve) => {
+							let frame = _safeDoc.createFrame("privileged.html", function(win) {
+								resolve(win);
+							});
+							_container.appendChild(frame);
+						});
+					`);
+					let results = contentWin.document.getElementById("results");
+					let privilegedAPIs = ["chromeutils", "services", "ioutils", "pathutils", "cu", "cc", "ci", "zotero"];
+					for (let api of privilegedAPIs) {
+						assert.equal(
+							results.getAttribute("data-" + api),
+							"undefined",
+							`${api} should not be accessible in frame content`
+						);
+					}
+				});
+			});
+
+			describe("createFrame with ItemPaneManager", function () {
+				var registeredID;
+
+				afterEach(async function () {
+					if (registeredID) {
+						Zotero.ItemPaneManager.unregisterSection(registeredID);
+						registeredID = null;
+					}
+				});
+
+				it("should embed a frame in a custom item pane section via createFrame", async function () {
+					loadTestScopeWithURI(["default", "ui"]);
+
+					// Set up a promise on the scope that the onLoad callback will resolve
+					let frameLoadPromise = new Promise((resolve) => {
+						scope._resolveFrameLoad = resolve;
+					});
+
+					// Register a custom section from the plugin scope.
+					// The onRender hook uses doc.createFrame() to embed plugin HTML.
+					// The onLoad callback resolves a promise with the contentWindow.
+					registeredID = evalInScope(`
+						Zotero.ItemPaneManager.registerSection({
+							paneID: "test-createframe-section",
+							pluginID: "${ADDON_ID}",
+							header: {
+								l10nID: "zotero-item-pane-header-title",
+								icon: "chrome://zotero/skin/16/universal/note.svg",
+							},
+							sidenav: {
+								l10nID: "zotero-item-pane-header-title",
+								icon: "chrome://zotero/skin/20/universal/note.svg",
+							},
+							onRender: function({ doc, body }) {
+								if (body.querySelector && body.querySelector('browser')) return;
+								let frame = doc.createFrame("test.html", function(win) {
+									_resolveFrameLoad(win);
+								});
+								body.appendChild(frame);
+							},
+						});
+					`);
+
+					assert.ok(registeredID, "Section should be registered");
+
+					// Create an item to trigger the item pane render
+					let item = await createDataObject('item');
+
+					// Wait for the frame's onLoad callback to fire
+					let contentWin = await frameLoadPromise;
+					assert.ok(contentWin, "onLoad should receive a contentWindow");
+					assert.equal(contentWin.document.title, "Test");
+					assert.equal(
+						contentWin.document.getElementById("test-div").textContent,
+						"Hello"
+					);
+
+					await Zotero.Items.erase(item.id);
+				});
+			});
 		});
 	});
 });
