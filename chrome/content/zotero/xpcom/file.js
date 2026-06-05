@@ -1116,7 +1116,11 @@ Zotero.File = new function () {
 		return newFile;
 	}
 	
-	
+	/**
+	 * @param {String} file
+	 * @param {String} newFile
+	 * @returns {String} - Path of new file
+	 */
 	this.copyToUnique = function (file, newFile) {
 		file = this.pathToFile(file);
 		newFile = this.pathToFile(newFile);
@@ -1131,7 +1135,7 @@ Zotero.File = new function () {
 		
 		// Copy file to unique name
 		file.copyToFollowingLinks(newFile.parent, newName);
-		return newFile;
+		return newFile.path;
 	}
 	
 	
