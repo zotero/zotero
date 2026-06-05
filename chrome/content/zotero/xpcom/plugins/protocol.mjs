@@ -38,10 +38,11 @@ var policies = new Map(); // pluginID -> WebExtensionPolicy
  *
  * @param {string} pluginID -- The addon's ID
  * @param {nsIURI} rootURI -- The addon's root directory URI
- * @param {string} syncGUID -- The addon's syncGUID (stable UUID from AddonManager)
+ * @param {string} pluginUUID -- The addon's UUID (no curly braces; the
+ *   caller is responsible for stripping them from `syncUUID`)
  * @returns {string} The moz-extension:// base URI for this plugin
  */
-function register(pluginID, rootURI, syncGUID, origins = []) {
+function register(pluginID, rootURI, pluginUUID, origins = []) {
 	// Always recreate with fresh origins and re-activate,
 	// since origins may have changed or the policy may have
 	// been deactivated externally (e.g. by AddonManager on disable)
@@ -60,8 +61,7 @@ function register(pluginID, rootURI, syncGUID, origins = []) {
 		existing.active = false;
 	}
 	else {
-		// Strip curly braces from syncGUID (format: "{uuid}")
-		hostname = syncGUID.replace(/[{}]/g, "");
+		hostname = pluginUUID;
 	}
 
 	let baseURL = rootURI.spec;
@@ -106,6 +106,30 @@ function getBaseURI(pluginID) {
 	return `moz-extension://${policy.mozExtensionHostname}/`;
 }
 
-const PluginProtocol = { register, unregister, getBaseURI };
+/**
+ * Check whether a plugin's host_permissions cover the given URI string.
+ * Wraps the plugin's WebExtensionPolicy.canAccessURI() so callers that
+ * want to validate an outbound URL upfront (instead of letting the
+ * sandbox principal block it at request time) have a single entry point.
+ *
+ * @param {string} pluginID
+ * @param {string} uriStr -- URI to test; must be a parseable URI string
+ * @returns {boolean} true if the plugin is registered and its
+ *   host_permissions allow the URI; false otherwise
+ */
+function canAccessURI(pluginID, uriStr) {
+	let policy = policies.get(pluginID);
+	if (!policy) return false;
+	let nsURI;
+	try {
+		nsURI = Services.io.newURI(uriStr);
+	}
+	catch {
+		return false;
+	}
+	return policy.canAccessURI(nsURI);
+}
+
+const PluginProtocol = { register, unregister, getBaseURI, canAccessURI };
 
 export { PluginProtocol };
