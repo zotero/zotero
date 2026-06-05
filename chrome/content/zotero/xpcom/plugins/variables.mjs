@@ -640,9 +640,11 @@ const WindowScopeVariables = {
 								if ((flags & Ci.nsIWebProgressListener.STATE_STOP)
 									&& (flags & Ci.nsIWebProgressListener.STATE_IS_WINDOW)
 									&& Components.isSuccessCode(status)) {
-									if (typeof onLoad === "function") {
-										onLoad(browser.contentWindow);
-									}
+									WindowScopeVariables.setupContentL10n(browser).then(() => {
+										if (typeof onLoad === "function") {
+											onLoad(browser.contentWindow);
+										}
+									});
 								}
 							},
 							onLocationChange() {},
@@ -703,6 +705,74 @@ const WindowScopeVariables = {
 
 		Object.preventExtensions(wrapper);
 		return wrapper;
+	},
+
+	/**
+	 * Set up l10n on a content document inside a <browser> element.
+	 * Creates a DOMLocalization, connects it to the document root,
+	 * auto-detects <link rel="localization"> tags, and sets document.l10n.
+	 *
+	 * @param {XULElement} browser - The <browser> element containing the content
+	 * @returns {Promise} Resolves when initial translation is complete
+	 */
+	setupContentL10n(browser) {
+		let contentDoc = browser.contentDocument;
+		let contentWin = browser.contentWindow;
+		let l10n = new contentWin.DOMLocalization([], false);
+		l10n.connectRoot(contentDoc.documentElement);
+
+		// Collect initial <link rel="localization"> resource IDs
+		let links = contentDoc.querySelectorAll('link[rel="localization"]');
+		if (links.length) {
+			l10n.addResourceIds(
+				Array.from(links).map(link => link.getAttribute('href'))
+			);
+		}
+
+		// Observe <link rel="localization"> additions/removals to mirror
+		// the DocumentL10n behavior that chrome documents get natively.
+		let observer = new contentWin.MutationObserver((mutations) => {
+			let addIds = [];
+			let removeIds = [];
+			for (let mutation of mutations) {
+				for (let node of mutation.addedNodes) {
+					if (node.nodeName === "LINK"
+						&& node.getAttribute("rel") === "localization"
+						&& node.getAttribute("href")) {
+						addIds.push(node.getAttribute("href"));
+					}
+				}
+				for (let node of mutation.removedNodes) {
+					if (node.nodeName === "LINK"
+						&& node.getAttribute("rel") === "localization"
+						&& node.getAttribute("href")) {
+						removeIds.push(node.getAttribute("href"));
+					}
+				}
+			}
+			if (removeIds.length) {
+				l10n.removeResourceIds(removeIds);
+			}
+			if (addIds.length) {
+				l10n.addResourceIds(addIds);
+			}
+			if (addIds.length || removeIds.length) {
+				l10n.translateRoots();
+			}
+		});
+		observer.observe(contentDoc.documentElement, {
+			childList: true,
+			subtree: true,
+		});
+
+		// Clean up when the content window is closed
+		contentWin.addEventListener("unload", () => {
+			observer.disconnect();
+			l10n.disconnectRoot(contentDoc.documentElement);
+		}, { once: true });
+
+		Cu.waiveXrays(contentDoc).l10n = l10n;
+		return l10n.translateRoots();
 	},
 
 	createSafeEvent(event, addonID, { rootNode } = {}) {
