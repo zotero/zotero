@@ -289,7 +289,11 @@ function modify_omni {
 	  "fileSystem",
 	  "network",
 	  "preferences",
-	  "ui",
+	  "itemTree",
+	  "itemPane",
+	  "menu",
+	  "reader",
+	  "preferencePane",
 	  "mainWindow"' chrome/toolkit/content/extensions/schemas/manifest.json
 	
 	# Use applications.zotero instead of applications.gecko
