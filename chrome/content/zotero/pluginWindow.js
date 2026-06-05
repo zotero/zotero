@@ -40,6 +40,14 @@ window.PluginWindow = {
 	init(windowId, pluginID) {
 		let browser = document.getElementById("plugin-browser");
 
+		let rawArgs = window.arguments && window.arguments[0];
+		let args = rawArgs && (rawArgs.wrappedJSObject || rawArgs) || {};
+		let notitle = !!args.notitle;
+		if (notitle) {
+			let bar = document.getElementById("titlebar");
+			if (bar) bar.hidden = true;
+		}
+
 		// Keep the chrome window title in sync with the
 		// inner browser's document.title
 		browser.addEventListener("DOMTitleChanged", () => {
@@ -47,7 +55,7 @@ window.PluginWindow = {
 		}, true);
 
 		// Wire predefined menubar popups to MenuManager
-		if (windowId) {
+		if (windowId && !notitle) {
 			this._setupMenus(windowId);
 		}
 
