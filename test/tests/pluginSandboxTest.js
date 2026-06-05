@@ -3967,6 +3967,87 @@ describe("Plugin Sandbox", function () {
 				container.remove();
 			}
 		});
+
+		describe("innerHTML sanitization via wrapped element", function () {
+			function setupSafeDiv() {
+				let container = document.createElement("div");
+				document.documentElement.appendChild(container);
+				let target = document.createElement("div");
+				container.appendChild(target);
+				let wrappedTarget = WindowScopeVariables.createSafeHTMLElement(
+					target, ADDON_ID, { rootNode: new WeakRef(container) }
+				);
+				scope._target = wrappedTarget;
+				return { container, target };
+			}
+
+			it("should parse and set plain HTML content", function () {
+				loadTestScope(["default"]);
+				let { container, target } = setupSafeDiv();
+				try {
+					evalInScope('_target.innerHTML = "<b>bold</b> and <em>italic</em>"');
+					assert.equal(target.querySelector("b").textContent, "bold");
+					assert.equal(target.querySelector("em").textContent, "italic");
+				}
+				finally {
+					container.remove();
+				}
+			});
+
+			it("should preserve xul: and html: namespaces in innerHTML", function () {
+				loadTestScope(["default"]);
+				let { container, target } = setupSafeDiv();
+				try {
+					// XML parse path preserves namespace metadata -- nodes are inserted
+					// directly into the DOM rather than re-serialized through the HTML parser.
+					evalInScope(
+						'_target.innerHTML = \''
+						+ '<xul:label value="xul-label"/>'
+						+ '<html:span class="ns-test">ns-content</html:span>\''
+					);
+					let xulNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+					let htmlNS = "http://www.w3.org/1999/xhtml";
+					let label = target.querySelector("label");
+					assert.ok(label, "xul:label element should exist");
+					assert.equal(label.namespaceURI, xulNS, "label should be in XUL namespace");
+					assert.equal(label.getAttribute("value"), "xul-label", "value attribute should be preserved");
+					let span = target.querySelector("span");
+					assert.ok(span, "html:span element should exist");
+					assert.equal(span.namespaceURI, htmlNS, "span should be in HTML namespace");
+					assert.equal(span.textContent, "ns-content", "text content should be preserved");
+				}
+				finally {
+					container.remove();
+				}
+			});
+
+			it("should strip on* event handlers from innerHTML", function () {
+				loadTestScope(["default"]);
+				let { container, target } = setupSafeDiv();
+				try {
+					evalInScope('_target.innerHTML = \'<span onclick="evil()">click</span>\'');
+					let span = target.querySelector("span");
+					assert.ok(span, "span should be created");
+					assert.isFalse(span.hasAttribute("onclick"), "onclick should be stripped");
+				}
+				finally {
+					container.remove();
+				}
+			});
+
+			it("should strip unsafe tags from innerHTML", function () {
+				loadTestScope(["default"]);
+				let { container, target } = setupSafeDiv();
+				try {
+					evalInScope('_target.innerHTML = \'<script>evil()</script><b>safe</b>\'');
+					assert.isNull(target.querySelector("script"), "script should be stripped");
+					assert.ok(target.querySelector("b"), "safe content should remain");
+				}
+				finally {
+					container.remove();
+				}
+			});
+		});
 	});
 
 	describe("resolveURI", function () {
