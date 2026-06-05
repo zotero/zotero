@@ -43,7 +43,17 @@ var policies = new Map(); // addonID -> WebExtensionPolicy
  */
 function register(addonID, rootURI, syncGUID) {
 	if (policies.has(addonID)) {
-		return `moz-extension://${policies.get(addonID).mozExtensionHostname}/`;
+		let policy = policies.get(addonID);
+		// Re-activate if the policy was deactivated externally
+		if (!policy.active) {
+			// Deactivate any temporary policy Firefox may have created
+			let existing = WebExtensionPolicy.getByID(addonID);
+			if (existing && existing !== policy) {
+				existing.active = false;
+			}
+			policy.active = true;
+		}
+		return `moz-extension://${policy.mozExtensionHostname}/`;
 	}
 
 	// Firefox's extension startup registers a temporary WebExtensionPolicy
