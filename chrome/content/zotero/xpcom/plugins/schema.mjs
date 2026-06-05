@@ -248,6 +248,20 @@ const PERMISSION_SCHEMAS = {
 			WindowResourceManager: true,
 		},
 	},
+	pluginInterop: {
+		Zotero: {
+			PluginInteropManager: {
+				OK: true,
+				NOT_FOUND: true,
+				VERSION_TOO_LOW: true,
+				VERSION_TOO_HIGH: true,
+				PERMISSION_DENIED: true,
+				register: true,
+				unregister: true,
+				getCommand: "CustomParserCallable",
+			},
+		},
+	},
 	reader: {
 		Zotero: {
 			Reader: {
