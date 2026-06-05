@@ -46,8 +46,23 @@ function register(addonID, rootURI, syncGUID) {
 		return `moz-extension://${policies.get(addonID).mozExtensionHostname}/`;
 	}
 
-	// Strip curly braces from syncGUID (format: "{uuid}")
-	let hostname = syncGUID.replace(/[{}]/g, "");
+	// Firefox's extension startup registers a temporary WebExtensionPolicy
+	// before the manifest is parsed, with no webAccessibleResources:
+	// https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/Extension.sys.mjs#4080-4090
+	// Since Zotero plugins skip the full WebExtension lifecycle, this
+	// temporary policy is never replaced. Deactivate it so we can register
+	// our own with webAccessibleResources (needed for URI_LOADABLE_BY_ANYONE).
+	let existing = WebExtensionPolicy.getByID(addonID);
+	let hostname;
+	if (existing) {
+		hostname = existing.mozExtensionHostname;
+		existing.active = false;
+	}
+	else {
+		// Strip curly braces from syncGUID (format: "{uuid}")
+		hostname = syncGUID.replace(/[{}]/g, "");
+	}
+
 	let baseURL = rootURI.spec;
 
 	let policy = new WebExtensionPolicy({
