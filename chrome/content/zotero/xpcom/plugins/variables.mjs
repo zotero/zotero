@@ -133,7 +133,7 @@ const ScopeVariables = {
 			value,
 			true,
 			addonID,
-			{ mutable: true }
+			{ frozen: false }
 		);
 	},
 
@@ -272,13 +272,16 @@ const ScopeVariables = {
 	 * @param {Object} schema Allowlist schema, see schema.mjs
 	 * @param {Object} scope Scope to mirror the objects
 	 * @param {Object} options
-	 * @param {Boolean} options.mutable Whether to make the mirrored object mutable. Default false (frozen).
+	 * @param {Boolean} options.frozen Whether properties on the mirrored object cannot be set. Default true.
+	 * @param {Boolean} options.mutable Whether objects returned from methods/getters are writable.
+	 *   Defaults to true -- returned objects (e.g. items from Zotero.Items.get()) should generally
+	 *   be operable by plugins, even if the namespace itself is frozen.
 	 * @param {Boolean} options.cache Whether to cache the mirrored object. Default false.
 	 * @param {Boolean} options.strong Whether to use a strong reference to the target. Default false (WeakRef).
 	 *   Use this for constructor-created objects that the caller owns, to prevent premature GC.
 	 * @returns {Object} The mirrored object in scope
 	 */
-	createAllowlistMirrorObject(target, schema, addonID, { mutable = false, cache = false, strong = false } = {}) {
+	createAllowlistMirrorObject(target, schema, addonID, { frozen = true, mutable = true, cache = false, strong = false } = {}) {
 		let scope = PluginSandbox.getScope(addonID);
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return target;
@@ -298,9 +301,10 @@ const ScopeVariables = {
 
 		/**
 		 * Wrap an object with an allowlist schema recursively.
-		 * The mutable only applies to the top-level wrapper; nested objects are always frozen.
+		 * `frozen` controls whether properties on the wrapper can be set.
+		 * `mutable` (from outer scope) controls whether values returned from methods/getters are writable.
 		 */
-		function wrapAllowlist(obj, schemaNode, { mutable = false, strong: strongRef = false } = {}) {
+		function wrapAllowlist(obj, schemaNode, { frozen: isFrozen = true, strong: strongRef = false } = {}) {
 			if (!VarCheck.isObjectLike(obj)) return obj;
 
 			if (schemaNode !== true && (!schemaNode || typeof schemaNode !== "object")) {
@@ -357,7 +361,7 @@ const ScopeVariables = {
 							if (nextSchema && typeof nextSchema === "object") {
 								return wrapAllowlist(value, nextSchema);
 							}
-							return ScopeUtils.ensureCallableInScope(value, actualObj, scope);
+							return ScopeUtils.ensureCallableInScope(value, actualObj, scope, { mutable });
 						}
 
 						if (VarCheck.isObjectLike(value)) {
@@ -383,7 +387,7 @@ const ScopeVariables = {
 
 				Cu.exportFunction(
 					(value) => {
-						if (!mutable) {
+						if (isFrozen) {
 							VarCheck.throwPropError("set", prop);
 						}
 						let actualObj = objRef.deref();
@@ -416,7 +420,7 @@ const ScopeVariables = {
 			return wrapper;
 		}
 
-		let result = wrapAllowlist(target, schema, { mutable, strong });
+		let result = wrapAllowlist(target, schema, { frozen, strong });
 		return result;
 	},
 };
@@ -444,6 +448,10 @@ const WindowScopeVariables = {
 					return WindowScopeVariables.unwrapDOMArguments(args, addonID, { rootNode });
 				},
 				returnParser: value => WindowScopeVariables.createSafeWindowObjectOrList(value, addonID, { rootNode }),
+				// unwrapDOMArguments already produces args suitable for native methods:
+				// DOM nodes unwrapped to their real compartment, callbacks as chrome
+				// functions. Re-scoping would double-wrap callbacks, breaking event listeners.
+				skipArgRescoping: true,
 			}
 		);
 	},
@@ -503,7 +511,7 @@ const WindowScopeVariables = {
 				nodeList[i] = items[i];
 			}
 			nodeList.length = items.length;
-			return ScopeVariables.createAllowlistMirrorObject(nodeList, true, addonID, { mutable: true });
+			return ScopeVariables.createAllowlistMirrorObject(nodeList, true, addonID, { frozen: false });
 		}
 
 		if (VarCheck.isArrayLike(nodes)) {
@@ -538,7 +546,7 @@ const WindowScopeVariables = {
 		else {
 			schema = VarCheck.getWindowSchema(permissions);
 		}
-		let wrapper = ScopeVariables.createAllowlistMirrorObject(win, schema, addonID, { mutable: false, cache: false });
+		let wrapper = ScopeVariables.createAllowlistMirrorObject(win, schema, addonID, { cache: false });
 
 		// addEventListener / removeEventListener need the callback-wrapping
 		// logic from createSafeWindowCallable so that event handlers receive
@@ -856,6 +864,12 @@ const WindowScopeVariables = {
 			return event;
 		}
 
+		// If no rootNode is provided, use currentTarget as the root so that
+		// target and currentTarget are accessible to the plugin.
+		if (rootNode === null || rootNode === undefined) {
+			rootNode = event.currentTarget;
+		}
+
 		// DOM-referencing properties that need special wrapping
 		let DOMProps = new Set(["target", "currentTarget", "relatedTarget"]);
 		let DOMPropMethods = new Set(["composedPath"]);
@@ -869,7 +883,7 @@ const WindowScopeVariables = {
 			}
 		}
 
-		let wrappedEvent = ScopeVariables.createAllowlistMirrorObject(event, schema, addonID, { mutable: true });
+		let wrappedEvent = ScopeVariables.createAllowlistMirrorObject(event, schema, addonID, { frozen: false });
 
 		// Wrap DOM-referencing properties
 		for (let prop of DOMProps) {
@@ -912,8 +926,6 @@ const WindowScopeVariables = {
 		let wrapper = Cu.createObjectIn(scope);
 
 		const blockedWindowProps = new Set([
-			"ownerGlobal",
-			"defaultView",
 			"window",
 			"global",
 			"globalThis",
@@ -943,6 +955,12 @@ const WindowScopeVariables = {
 					if (prop === "ownerDocument") {
 						let actual = getActual();
 						return WindowScopeVariables.createSafeDocument(actual.ownerDocument, addonID, { rootNode });
+					}
+					if (prop === "ownerGlobal" || prop === "defaultView") {
+						let actual = getActual();
+						let win = Reflect.get(actual, prop);
+						if (!win) return null;
+						return WindowScopeVariables.createSafeWindow(win, addonID, { rootNode });
 					}
 					if (blockedWindowProps.has(prop)) {
 						VarCheck.throwPropError("access", prop);

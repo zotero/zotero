@@ -216,7 +216,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			// Add additional global vars
 			Localization: ScopeUtils.ensureConstructableInScope(Localization, scope, {
 				mutable: true,
-				returnParser: instance => ScopeVariables.createAllowlistMirrorObject(instance, true, addon.id, { mutable: true, strong: true }),
+				returnParser: instance => ScopeVariables.createAllowlistMirrorObject(instance, true, addon.id, { frozen: false, strong: true }),
 			}),
 			setTimeout,
 			clearTimeout,
@@ -240,7 +240,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 		if (!obj) {
 			continue;
 		}
-		extraGlobals[key] = ScopeVariables.createAllowlistMirrorObject(obj, schema[key], addon.id, { mutable: false, cache: true });
+		extraGlobals[key] = ScopeVariables.createAllowlistMirrorObject(obj, schema[key], addon.id, { cache: true });
 	}
 
 	Object.assign(scope, extraGlobals);
