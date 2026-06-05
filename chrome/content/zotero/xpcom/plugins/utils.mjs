@@ -25,6 +25,7 @@
 
 
 import { SchemaKey, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
+import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
 
 const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
 
@@ -431,7 +432,7 @@ const ScopeUtils = {
 	 * The returned function can be called with `new` from the sandbox scope.
 	 * The constructed instance is wrapped via ensurePromiseVarInScope.
 	 */
-	ensureConstructableInScope(Constructor, scope, { mutable = false, returnParser = null, instanceSchema = null } = {}) {
+	ensureConstructableInScope(Constructor, scope, { mutable = false, returnParser = null, instanceSchema = null, trace = null } = {}) {
 		if (VarCheck.isSameCompartment(Constructor, scope)) {
 			return Constructor;
 		}
@@ -441,6 +442,7 @@ const ScopeUtils = {
 		// can be called with `new` from the sandbox.  When the function returns
 		// an object, `new` uses that object instead of the auto-created `this`.
 		let wrapped = function (...args) {
+			let t = trace && PluginTrace.start();
 			args = args.map(arg => Cu.waiveXrays(arg));
 			let instance = Reflect.construct(Constructor, args);
 			if (typeof returnParser === "function") {
@@ -448,7 +450,9 @@ const ScopeUtils = {
 			}
 			// Use strong reference for constructor-created objects since the
 			// plugin owns the instance and it must not be GC'd prematurely
-			return ScopeUtils.ensurePromiseVarInScope(instance, scope, { mutable, strong: true, instanceSchema });
+			let result = ScopeUtils.ensurePromiseVarInScope(instance, scope, { mutable, strong: true, instanceSchema });
+			PluginTrace.end(t, trace?.pluginID, "construct", trace?.path);
+			return result;
 		};
 
 		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
@@ -458,7 +462,7 @@ const ScopeUtils = {
 	/**
 	 * Create a function that runs in privileged realm and scopes returns
 	 */
-	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null, skipArgRescoping = false, instanceSchema = null } = {}) {
+	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null, skipArgRescoping = false, instanceSchema = null, trace = null } = {}) {
 		if (VarCheck.isSameCompartment(func, scope)) {
 			return func;
 		}
@@ -466,6 +470,7 @@ const ScopeUtils = {
 		let thisArgRef = VarCheck.isObjectLike(thisArg) ? new WeakRef(thisArg) : null;
 
 		let wrapped = (...args) => {
+			let t = trace && PluginTrace.start();
 			args = args.map(arg => Cu.waiveXrays(arg));
 			if (typeof argParser === "function") {
 				args = argParser(args);
@@ -484,7 +489,9 @@ const ScopeUtils = {
 			if (typeof returnParser === "function") {
 				res = returnParser(res);
 			}
-			return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema });
+			let result = ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema });
+			PluginTrace.end(t, trace?.pluginID, "call", trace?.path);
+			return result;
 		};
 
 		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
@@ -569,6 +576,9 @@ const ScopeUtils = {
 		let facade = Cu.createObjectIn(scope);
 		let instanceRef = strong ? { deref: () => instance } : new WeakRef(instance);
 
+		let pluginID = scope.PLUGIN_ID;
+		let instanceName = instance.constructor?.name || "Object";
+
 		// Expose prototype-chain methods as privileged wrapper that calls the real method on the real instance
 		let methodNames = VarCheck.getPrototypeMethodNames(instance);
 		for (let name of methodNames) {
@@ -580,6 +590,7 @@ const ScopeUtils = {
 
 			Cu.exportFunction(
 				(...args) => {
+					let t = PluginTrace.start();
 					let inst = instanceRef.deref();
 					if (!inst) {
 						VarCheck.throwPropError("access", name, "object has been garbage collected");
@@ -589,7 +600,9 @@ const ScopeUtils = {
 						args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(inst), { mutable });
 					}
 					let res = method.apply(inst, args);
-					return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema: nestedSchema });
+					let result = ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema: nestedSchema });
+					PluginTrace.end(t, pluginID, "call", `${instanceName}.${name}`);
+					return result;
 				},
 				facade,
 				{ defineAs: name }
@@ -607,6 +620,7 @@ const ScopeUtils = {
 				if (!inst) {
 					VarCheck.throwPropError("access", name, "object has been garbage collected");
 				}
+				PluginTrace.record(pluginID, "get", `${instanceName}.${name}`);
 				return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, name), scope, { mutable, instanceSchema: nestedSchema });
 			}, holder, { defineAs: "g" });
 
@@ -619,6 +633,7 @@ const ScopeUtils = {
 					if (!inst) {
 						VarCheck.throwPropError("set", name, "object has been garbage collected");
 					}
+					PluginTrace.record(pluginID, "set", `${instanceName}.${name}`);
 					return Reflect.set(inst, name, value);
 				},
 				holder,
@@ -641,6 +656,7 @@ const ScopeUtils = {
 			let val = instance[name];
 			let holder = Cu.createObjectIn(scope);
 			Cu.exportFunction(() => {
+				PluginTrace.record(pluginID, "get", `${instanceName}.${name}`);
 				return ScopeUtils.ensurePromiseVarInScope(val, scope, { mutable, instanceSchema: nestedSchema });
 			}, holder, { defineAs: "g" });
 
@@ -673,6 +689,7 @@ const ScopeUtils = {
 					if (!inst) {
 						VarCheck.throwPropError("access", key, "object has been garbage collected");
 					}
+					PluginTrace.record(pluginID, "get", `${instanceName}.${key}`);
 					return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, key), scope, { mutable, instanceSchema: nestedSchema });
 				}, holder, { defineAs: "g" });
 			}
@@ -682,6 +699,7 @@ const ScopeUtils = {
 					if (!inst) {
 						VarCheck.throwPropError("access", key, "object has been garbage collected");
 					}
+					PluginTrace.record(pluginID, "get", `${instanceName}.${key}`);
 					return ScopeUtils.ensurePromiseVarInScope(inst[key], scope, { mutable, instanceSchema: nestedSchema });
 				}, holder, { defineAs: "g" });
 			}
@@ -692,6 +710,7 @@ const ScopeUtils = {
 					if (!inst) {
 						VarCheck.throwPropError("set", key, "object has been garbage collected");
 					}
+					PluginTrace.record(pluginID, "set", `${instanceName}.${key}`);
 					return Reflect.set(inst, key, value);
 				},
 				holder,

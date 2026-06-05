@@ -5019,4 +5019,174 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 	});
+
+	describe("PluginTrace", function () {
+		// Ensure the trace module is loaded
+		ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/trace.mjs");
+		var traceLines;
+		var listener;
+
+		function startCapture() {
+			traceLines = [];
+			listener = (line) => {
+				if (line.includes("[PluginTrace]")) {
+					traceLines.push(line);
+				}
+			};
+			Zotero.Debug.addListener(listener);
+		}
+
+		function stopCapture() {
+			Zotero.Debug.removeListener(listener);
+		}
+
+		function findTrace(type, pathSubstring) {
+			return traceLines.find(l => l.includes(`[${type}]`) && l.includes(pathSubstring));
+		}
+
+		afterEach(function () {
+			stopCapture();
+		});
+
+		describe("property access tracing", function () {
+			beforeEach(function () {
+				loadTestScope(["default"]);
+				startCapture();
+			});
+
+			it("should trace get of a leaf property", function () {
+				evalInScope("Zotero.version");
+				let line = findTrace("get", "Zotero.version");
+				assert.ok(line, "Should have a [get] trace for Zotero.version");
+				assert.include(line, ADDON_ID);
+			});
+
+			it("should trace set on a mutable instance", async function () {
+				PluginSandbox.unloadScope(ADDON_ID);
+				loadTestScope(["default", "dataRead", "dataWrite"]);
+				startCapture();
+				let item = await createDataObject('item', { title: 'Set Trace Test' });
+				try {
+					await evalInScope(`
+						Zotero.Items.getAsync(${item.id}).then(i => { i.dateModified = '2025-01-01'; })
+					`);
+					let setLine = traceLines.find(l => l.includes("[set]") && l.includes("dateModified"));
+					assert.ok(setLine, "Should have a [set] trace for dateModified");
+				}
+				finally {
+					await item.eraseTx();
+				}
+			});
+		});
+
+		describe("function call tracing", function () {
+			beforeEach(function () {
+				loadTestScope(["default"]);
+				startCapture();
+			});
+
+			it("should trace a function call with timing", function () {
+				evalInScope("Zotero.debug('trace test')");
+				let line = findTrace("call", "Zotero.debug");
+				assert.ok(line, "Should have a [call] trace for Zotero.debug");
+				assert.include(line, ADDON_ID);
+				assert.match(line, /\(\d+(\.\d+)?ms\)/, "Should include timing");
+			});
+
+			it("should trace nested namespace function calls", function () {
+				evalInScope("Zotero.Utilities.randomString()");
+				let line = findTrace("call", "Zotero.Utilities.randomString");
+				assert.ok(line, "Should have a [call] trace for Zotero.Utilities.randomString");
+			});
+		});
+
+		describe("constructor tracing", function () {
+			beforeEach(function () {
+				loadTestScope(["default"]);
+				startCapture();
+			});
+
+			it("should trace Localization constructor", function () {
+				evalInScope("new Localization(['zotero.ftl'])");
+				let line = findTrace("construct", "Localization");
+				assert.ok(line, "Should have a [construct] trace for Localization");
+				assert.include(line, ADDON_ID);
+				assert.match(line, /\(\d+(\.\d+)?ms\)/, "Should include timing");
+			});
+		});
+
+		describe("hook tracing", function () {
+			beforeEach(function () {
+				loadTestScope(["default", "dataRead"]);
+				startCapture();
+			});
+
+			it("should trace hooks passed via fromScope (Notifier)", async function () {
+				let observerID = evalInScope(`
+					var _observerID = Zotero.Notifier.registerObserver(
+						{ notify: function testHook() {} },
+						['item']
+					);
+					_observerID;
+				`);
+				// Trigger the observer -- trigger is async
+				await Zotero.Notifier.trigger('modify', 'item', []);
+				let line = traceLines.find(l => l.includes("[hook]"));
+				assert.ok(line, "Should have a [hook] trace. All traces: " + JSON.stringify(traceLines));
+				assert.include(line, ADDON_ID);
+
+				// Clean up
+				Zotero.Notifier.unregisterObserver(observerID);
+			});
+		});
+
+		describe("instance method tracing", function () {
+			beforeEach(function () {
+				loadTestScope(["default", "dataRead"]);
+				startCapture();
+			});
+
+			it("should trace method calls on returned instances", async function () {
+				let item = await createDataObject('item', { title: 'Trace Test Item' });
+				try {
+					await evalInScope(`Zotero.Items.getAsync(${item.id}).then(i => i.getField('title'))`);
+					let callLine = findTrace("call", "Zotero.Items.getAsync");
+					assert.ok(callLine, "Should have a [call] trace for Zotero.Items.getAsync");
+
+					let methodLine = traceLines.find(l => l.includes("[call]") && l.includes("getField"));
+					assert.ok(methodLine, "Should have a [call] trace for getField. All call traces: "
+						+ JSON.stringify(traceLines.filter(l => l.includes("[call]"))));
+					assert.include(methodLine, ADDON_ID);
+				}
+				finally {
+					await item.eraseTx();
+				}
+			});
+
+			it("should trace getter access on returned instances", async function () {
+				let item = await createDataObject('item', { title: 'Trace Getter Test' });
+				try {
+					await evalInScope(`Zotero.Items.getAsync(${item.id}).then(i => i.itemType)`);
+					let getLine = traceLines.find(l => l.includes("[get]") && l.includes("itemType"));
+					assert.ok(getLine, "Should have a [get] trace for itemType");
+				}
+				finally {
+					await item.eraseTx();
+				}
+			});
+		});
+
+		describe("console tracing", function () {
+			beforeEach(function () {
+				loadTestScope(["default"]);
+				startCapture();
+			});
+
+			it("should trace console method calls", function () {
+				evalInScope("console.log('trace test')");
+				let line = findTrace("call", "console.log");
+				assert.ok(line, "Should have a [call] trace for console.log");
+			});
+		});
+	});
 });
