@@ -718,11 +718,13 @@ const WindowScopeVariables = {
 		let rootURI = PluginProtocol.getBaseURI(pluginID);
 		if (typeof doc.createXULElement === "function" && rootURI) {
 			Cu.exportFunction(
-				(url, onLoad) => {
+				(url, options = {}) => {
 					let actualDoc = docRef.deref();
 					if (!actualDoc) {
 						VarCheck.throwPropError("access", "document", "object has been garbage collected");
 					}
+
+					let { onLoad } = Cu.waiveXrays(options);
 
 					let resolved;
 					try {
