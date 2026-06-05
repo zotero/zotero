@@ -161,7 +161,7 @@ Zotero.Plugins = new function () {
 			let params = {
 				id: addon.id,
 				version: addon.version,
-				rootURI: addon.getResourceURI().spec
+				rootURI: lazy.PluginProtocol.getBaseURI(addon.id),
 			};
 			if (extraParams) {
 				Object.assign(params, extraParams);
@@ -219,9 +219,8 @@ Zotero.Plugins = new function () {
 	}
 	
 	
-	this.getRootURI = async function (id) {
-		var addon = await AddonManager.getAddonByID(id);
-		return addon.getResourceURI().spec;
+	this.getRootURI = function (id) {
+		return lazy.PluginProtocol.getBaseURI(id);
 	};
 	
 	
@@ -234,10 +233,8 @@ Zotero.Plugins = new function () {
 	 * @throws {TypeError} On an invalid URI
 	 * @return {Promise<String>}
 	 */
-	this.resolveURI = async function (id, uri) {
-		// For unprivileged plugins, resolve against the moz-extension:// base URI
-		// For privileged plugins (no registered protocol), fall back to the file:// root.
-		let baseURI = lazy.PluginProtocol.getBaseURI(id) || await this.getRootURI(id);
+	this.resolveURI = function (id, uri) {
+		let baseURI = this.getRootURI(id);
 		return new URL(uri, baseURI).href;
 	};
 	
@@ -439,7 +436,7 @@ Zotero.Plugins = new function () {
 		};
 		try {
 			Services.scriptloader.loadSubScriptWithOptions(
-				addon.getResourceURI("prefs.js").spec,
+				lazy.PluginProtocol.getBaseURI(addon.id) + "prefs.js",
 				{
 					target: obj,
 					ignoreCache: true,
@@ -453,8 +450,8 @@ Zotero.Plugins = new function () {
 			}
 		}
 	}
-	
-	
+
+
 	function clearDefaultPrefs(addon) {
 		var branch = Services.prefs.getDefaultBranch("");
 		var obj = {
@@ -466,7 +463,7 @@ Zotero.Plugins = new function () {
 		};
 		try {
 			Services.scriptloader.loadSubScriptWithOptions(
-				addon.getResourceURI("prefs.js").spec,
+				lazy.PluginProtocol.getBaseURI(addon.id) + "prefs.js",
 				{
 					target: obj,
 					ignoreCache: true,
@@ -498,11 +495,11 @@ Zotero.Plugins = new function () {
 	 * @returns {Promise<void>}
 	 */
 	async function registerLocales(addon) {
-		let rootURI = addon.getResourceURI();
+		let baseURI = lazy.PluginProtocol.getBaseURI(addon.id);
 		let zoteroLocales = Services.locale.availableLocales;
 		let pluginLocales;
 		try {
-			pluginLocales = await readDirectory(rootURI, 'locale', true);
+			pluginLocales = await readDirectory(baseURI, 'locale', true);
 			if (!pluginLocales.length) {
 				return;
 			}
@@ -517,7 +514,7 @@ Zotero.Plugins = new function () {
 		for (let pluginLocale of pluginLocales) {
 			let files;
 			try {
-				files = await readDirectory(rootURI, `locale/${pluginLocale}`);
+				files = await readDirectory(baseURI, `locale/${pluginLocale}`);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -526,7 +523,7 @@ Zotero.Plugins = new function () {
 			let contents = new Map();
 			for (let file of files) {
 				if (!file.endsWith('.ftl')) continue;
-				let url = rootURI.spec + `locale/${pluginLocale}/${file}`;
+				let url = baseURI + `locale/${pluginLocale}/${file}`;
 				try {
 					contents.set(file, await Zotero.File.getResourceAsync(url));
 				}
@@ -613,15 +610,26 @@ Zotero.Plugins = new function () {
 	 * Read the contents of a directory in a plugin.
 	 * https://searchfox.org/mozilla-esr115/rev/7a83be92b8356ea63559bc3623b2b91a43f2ae05/toolkit/components/extensions/Extension.sys.mjs#882
 	 *
-	 * @param {nsIURI} rootURI
+	 * @param {string} baseURI -- moz-extension:// base URI for the plugin
 	 * @param {string} path
 	 * @param {boolean} [directoriesOnly=false]
 	 * @returns {Promise<string[]>}
 	 */
-	async function readDirectory(rootURI, path, directoriesOnly = false) {
+	async function readDirectory(baseURI, path, directoriesOnly = false) {
+		// Resolve moz-extension:// to the underlying file/jar URI for filesystem access
+		let uri = Services.io.newURI(baseURI);
+		let rootURI;
+		if (uri.scheme === 'moz-extension') {
+			let policy = WebExtensionPolicy.getByHostname(uri.host);
+			rootURI = Services.io.newURI(policy.baseURL);
+		}
+		else {
+			rootURI = uri;
+		}
+
 		if (rootURI instanceof Ci.nsIFileURL) {
-			let uri = Services.io.newURI("./" + path, null, rootURI);
-			let fullPath = uri.QueryInterface(Ci.nsIFileURL).file.path;
+			let pathURI = Services.io.newURI("./" + path, null, rootURI);
+			let fullPath = pathURI.QueryInterface(Ci.nsIFileURL).file.path;
 
 			let results = [];
 			try {
