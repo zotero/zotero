@@ -11,6 +11,7 @@ describe("Plugin Sandbox", function () {
 			id: ADDON_ID,
 			name: "Test Sandbox Plugin",
 			version: "1.0.0",
+			syncGUID: "{00000000-0000-0000-0000-000000000001}",
 			installPermissions: { permissions },
 			getResourceURI() {
 				return Services.io.newURI("file:///nonexistent/");
@@ -3188,6 +3189,266 @@ describe("Plugin Sandbox", function () {
 				"Date should always be exposed");
 			assert.isTrue(evalInScope("typeof Zotero.Date.strToISO === 'function'"),
 				"Date.strToISO should always be exposed");
+		});
+	});
+
+	describe("openWindow API", function () {
+		it("should not be available without 'window' permission", function () {
+			loadTestScope(["default"]);
+			assert.isTrue(evalInScope("typeof openWindow === 'undefined'"));
+		});
+
+		it("should be available with 'window' permission", function () {
+			loadTestScope(["default", "window"]);
+			assert.isTrue(evalInScope("typeof openWindow === 'function'"));
+		});
+
+		it("should reject URLs outside plugin root", function () {
+			loadTestScope(["default", "window"]);
+			let threw = false;
+			try {
+				evalInScope("openWindow('https://example.com/page.html')");
+			}
+			catch {
+				threw = true;
+			}
+			assert.isTrue(threw, "Opening external URL should throw");
+		});
+
+		it("should reject absolute file:// URLs outside plugin root", function () {
+			loadTestScope(["default", "window"]);
+			let threw = false;
+			try {
+				evalInScope("openWindow('file:///etc/page.html')");
+			}
+			catch {
+				threw = true;
+			}
+			assert.isTrue(threw, "Opening file:// URL should throw");
+		});
+
+		it("should reject .xhtml files", function () {
+			loadTestScope(["default", "window"]);
+			let threw = false;
+			try {
+				evalInScope("openWindow('settings.xhtml')");
+			}
+			catch {
+				threw = true;
+			}
+			assert.isTrue(threw, "Opening .xhtml file should throw");
+		});
+
+		it("should reject .xul files", function () {
+			loadTestScope(["default", "window"]);
+			let threw = false;
+			try {
+				evalInScope("openWindow('dialog.xul')");
+			}
+			catch {
+				threw = true;
+			}
+			assert.isTrue(threw, "Opening .xul file should throw");
+		});
+
+		it("should reject .js files", function () {
+			loadTestScope(["default", "window"]);
+			let threw = false;
+			try {
+				evalInScope("openWindow('script.js')");
+			}
+			catch {
+				threw = true;
+			}
+			assert.isTrue(threw, "Opening .js file should throw");
+		});
+
+		describe("should work with real HTML file", function () {
+			var tmpDir;
+			var mainWin;
+
+			function loadTestScopeWithURI(permissions) {
+				let fileURI = Services.io.newURI(PathUtils.toFileURI(tmpDir) + "/");
+				mockAddon = {
+					id: ADDON_ID,
+					name: "Test Sandbox Plugin",
+					version: "1.0.0",
+					syncGUID: "{00000000-0000-0000-0000-000000000002}",
+					installPermissions: { permissions },
+					getResourceURI() {
+						return fileURI;
+					}
+				};
+				PluginSandbox.loadScope(mockAddon);
+				scope = PluginSandbox.getScope(ADDON_ID);
+			}
+
+			before(async function () {
+				mainWin = await loadZoteroPane();
+				tmpDir = await getTempDirectory();
+				// Create a simple HTML file in the temp directory
+				let htmlContent = "<!DOCTYPE html><html><head><title>Test</title></head>"
+					+ "<body><div id='test-div'>Hello</div></body></html>";
+				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "test.html"), htmlContent);
+				// Also create an XHTML file to test rejection
+				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "test.xhtml"), "<html></html>");
+				// Create CSS and JS files for resource loading test
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "style.css"),
+					"#test-div { color: rgb(255, 0, 0); }"
+				);
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "script.js"),
+					"document.getElementById('test-div').setAttribute('data-script-loaded', 'true');\n"
+					+ "window._pluginScriptLoaded = true;"
+				);
+				let resourceHtml = "<!DOCTYPE html><html><head><title>Resources</title>"
+					+ '<link rel="stylesheet" href="style.css">'
+					+ "</head><body><div id='test-div'>Styled</div>"
+					+ '<script src="script.js"></script></body></html>';
+				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "resources.html"), resourceHtml);
+				// Create an HTML + external JS that probes privileged APIs
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "probe.js"),
+					"var apis = ['ChromeUtils', 'Services', 'IOUtils', 'PathUtils', 'Cu', 'Cc', 'Ci', 'Zotero'];\n"
+					+ "var r = document.getElementById('results');\n"
+					+ "apis.forEach(function(name) {\n"
+					+ "  r.setAttribute('data-' + name.toLowerCase(), typeof window[name]);\n"
+					+ "});\n"
+					+ "try {\n"
+					+ "  Components.classes['@mozilla.org/file/local;1'].createInstance(Components.interfaces.nsIFile);\n"
+					+ "  r.setAttribute('data-xpcom-blocked', 'false');\n"
+					+ "} catch(e) {\n"
+					+ "  r.setAttribute('data-xpcom-blocked', 'true');\n"
+					+ "}\n"
+				);
+				let privilegedProbeHtml = "<!DOCTYPE html><html><head><title>Privilege Probe</title></head>"
+					+ "<body><div id='results'></div>"
+					+ '<script src="probe.js"></script></body></html>';
+				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "privileged.html"), privilegedProbeHtml);
+			});
+
+			after(async function () {
+				mainWin.close();
+				await IOUtils.remove(tmpDir, { recursive: true });
+			});
+
+			it("should open an .html window and resolve with a window object", async function () {
+				loadTestScopeWithURI(["default", "window"]);
+				let win = await evalInScope("openWindow('test.html')");
+				try {
+					assert.ok(win, "openWindow should resolve with a window");
+					assert.equal(win.document.title, "Test");
+				}
+				finally {
+					win.close();
+				}
+			});
+
+			it("should load relative CSS and JS resources", async function () {
+				loadTestScopeWithURI(["default", "window"]);
+				let win = await evalInScope("openWindow('resources.html')");
+				try {
+					assert.equal(win.document.title, "Resources");
+					// JS resource should have executed (check DOM attribute, not expando -- Xrays hide expandos)
+					let div = win.document.getElementById("test-div");
+					assert.equal(div.getAttribute("data-script-loaded"), "true", "script.js should have executed");
+					// CSS resource should have been applied
+					let color = win.getComputedStyle(div).color;
+					assert.equal(color, "rgb(255, 0, 0)", "style.css should set color to red");
+				}
+				finally {
+					win.close();
+				}
+			});
+
+			it("should reveal content expandos via wrappedJSObject", async function () {
+				loadTestScopeWithURI(["default", "window"]);
+				let win = await evalInScope("openWindow('resources.html')");
+				try {
+					// Xray wrappers hide expandos set by content scripts
+					assert.isUndefined(win._pluginScriptLoaded, "Xray should hide expando properties");
+					// wrappedJSObject waives Xrays and reveals content-set expandos
+					assert.isTrue(win.wrappedJSObject._pluginScriptLoaded, "wrappedJSObject should reveal expando properties");
+				}
+				finally {
+					win.close();
+				}
+			});
+
+			it("should allow plugin scope to manipulate the DOM of the opened window", async function () {
+				loadTestScopeWithURI(["default", "window"]);
+				let win = await evalInScope("openWindow('test.html')");
+				try {
+					// Store the window on the scope so sandbox code can reference it
+					scope._testWin = win;
+
+					// Modify existing element from plugin scope
+					evalInScope("_testWin.document.getElementById('test-div').textContent = 'Modified'");
+					assert.equal(
+						win.document.getElementById("test-div").textContent,
+						"Modified",
+						"Plugin scope should be able to modify element text"
+					);
+
+					// Create and append a new element from plugin scope
+					evalInScope(
+						`let el = _testWin.document.createElement('p');
+						el.id = 'new-el';
+						el.textContent = 'Added by plugin';
+						_testWin.document.body.appendChild(el);`
+					);
+					let newEl = win.document.getElementById("new-el");
+					assert.ok(newEl, "Plugin scope should be able to append new elements");
+					assert.equal(newEl.textContent, "Added by plugin");
+				}
+				finally {
+					win.close();
+				}
+			});
+			it("should open separate windows for each call", async function () {
+				loadTestScopeWithURI(["default", "window"]);
+				let win1 = await evalInScope("openWindow('test.html')");
+				let win2 = await evalInScope("openWindow('test.html')");
+				try {
+					assert.notEqual(win1, win2, "Each openWindow call should return a different window");
+					// Mutating one should not affect the other
+					win1.document.getElementById("test-div").textContent = "Window 1";
+					win2.document.getElementById("test-div").textContent = "Window 2";
+					assert.equal(win1.document.getElementById("test-div").textContent, "Window 1");
+					assert.equal(win2.document.getElementById("test-div").textContent, "Window 2");
+				}
+				finally {
+					win1.close();
+					win2.close();
+				}
+			});
+
+			it("should not expose privileged APIs in the content window", async function () {
+				loadTestScopeWithURI(["default", "window"]);
+				let win = await evalInScope("openWindow('privileged.html')");
+				try {
+					let results = win.document.getElementById("results");
+					// Components is excluded -- it exists in content as a neutered object (accessing properties throws)
+					let privilegedAPIs = ["chromeutils", "services", "ioutils", "pathutils", "cu", "cc", "ci", "zotero"];
+					for (let api of privilegedAPIs) {
+						assert.equal(
+							results.getAttribute("data-" + api),
+							"undefined",
+							`${api} should not be accessible in plugin content window`
+						);
+					}
+					// Components exists but is neutered -- XPCOM instantiation should be blocked
+					assert.equal(
+						results.getAttribute("data-xpcom-blocked"),
+						"true",
+						"Components.classes XPCOM instantiation should be blocked"
+					);
+				}
+				finally {
+					win.close();
+				}
+			});
 		});
 	});
 });
