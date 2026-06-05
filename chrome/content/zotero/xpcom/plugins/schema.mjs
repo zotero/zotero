@@ -55,10 +55,12 @@ const PERMISSION_SCHEMAS = {
 				cleanDOI: true,
 				sentenceCase: true,
 				capitalizeName: true,
+				randomString: true,
 			},
 			Date: {
 				strToISO: true,
 			},
+			Promise: true,
 		},
 	},
 	data: {
