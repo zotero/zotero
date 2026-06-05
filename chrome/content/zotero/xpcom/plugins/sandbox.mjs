@@ -33,7 +33,8 @@ import { VarCheck, ScopeUtils } from "chrome://zotero/content/xpcom/plugins/util
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
-import { getPluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
+import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
+import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
 import { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupFile, setupPluginDB } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
@@ -48,7 +49,7 @@ var scopes = new Map();
 function loadScope(addon, globalVars = {}) {
 	let currentPermissions = VarCheck.getPermissionsString(VarCheck.resolvePermissions(addon.installPermissions.permissions));
 	let existingScope = scopes.get(addon.id);
-	let uuid = getPluginUUID(addon.id);
+	let uuid = PluginUUID.getByID(addon.id);
 
 	if (existingScope) {
 		let existingPermissions = VarCheck.getPermissionsString(existingScope?.PERMISSIONS);
@@ -68,6 +69,9 @@ function loadScope(addon, globalVars = {}) {
 	}
 
 	PluginFileAccess.register(addon.id, uuid);
+
+	// Record plugin name so that its data can be identified after uninstall.
+	PluginNames.record(addon.id, addon.name);
 
 	// Register moz-extension:// protocol with allowed origins from host_permissions
 	PluginProtocol.register(

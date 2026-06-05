@@ -26,10 +26,9 @@
 
 import { setTimeout, clearTimeout, requestIdleCallback } from "resource://gre/modules/Timer.sys.mjs";
 import { FileUtils } from "resource://gre/modules/FileUtils.sys.mjs";
-import { getPluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
+import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 
-
-const PREF_PREFIX = "extensions.zotero.pluginFileAccess.";
+const FILE_ACCESS_PREF_PREFIX = "extensions.zotero.pluginFileAccess.";
 
 // Max wall-clock duration of a `withSession` call. Generous since
 // file pickers and chained ops can legitimately take minutes.
@@ -119,6 +118,34 @@ async function showPrompt(pluginID, path, mode, promptArgs, options = {}) {
 		);
 		if (onWindowOpen) onWindowOpen(win);
 	});
+}
+
+async function _getDirSize(path) {
+	if (!path) return 0;
+	try {
+		if (!(await IOUtils.exists(path))) return 0;
+		if (Services.appinfo.OS === "WINNT") {
+			let escaped = path.replace(/'/g, "''");
+			let out = await Zotero.Utilities.Internal.subprocess(
+				"powershell.exe",
+				[
+					"-NoProfile",
+					"-Command",
+					"$ErrorActionPreference='SilentlyContinue';"
+					+ `[long]((Get-ChildItem -LiteralPath '${escaped}' -Recurse -File -Force`
+					+ " | Measure-Object -Property Length -Sum).Sum)",
+				]
+			);
+			return parseInt(out.trim()) || 0;
+		}
+		let out = await Zotero.Utilities.Internal.subprocess("du", ["-sk", path]);
+		let m = out.trim().match(/^(\d+)/);
+		return m ? parseInt(m[1]) * 1024 : 0;
+	}
+	catch (e) {
+		Zotero.logError(e);
+		return 0;
+	}
 }
 
 function canonicalize(rawPath) {
@@ -311,7 +338,7 @@ class PersistedGrantLayer extends GrantLayer {
 
 	constructor(pluginUUID) {
 		super();
-		this._prefKey = PREF_PREFIX + pluginUUID;
+		this._prefKey = FILE_ACCESS_PREF_PREFIX + pluginUUID;
 	}
 
 	_updateCache() {
@@ -388,7 +415,7 @@ class FileAccessState {
 
 	constructor(pluginID) {
 		this.pluginID = pluginID;
-		this.uuid = getPluginUUID(pluginID);
+		this.uuid = PluginUUID.getByID(pluginID);
 		this.persistedGrants = new PersistedGrantLayer(this.uuid);
 		Zotero.File.createDirectoryIfMissing(getPluginDataDir());
 		Zotero.File.createDirectoryIfMissing(this.getDir());
@@ -712,6 +739,57 @@ const PluginFileAccess = {
 		if (!state) return;
 		state.clearAllGrants();
 	},
+
+	getDataDirByUUID(uuid) {
+		return canonicalize(PathUtils.join(getPluginDataDir(), uuid));
+	},
+
+	getDbDirByUUID(uuid) {
+		return canonicalize(PathUtils.join(Zotero.DataDirectory.dir, "plugin-db", uuid));
+	},
+
+	async getDataDirSizeByUUID(uuid) {
+		return _getDirSize(this.getDataDirByUUID(uuid));
+	},
+
+	async getDbDirSizeByUUID(uuid) {
+		return _getDirSize(this.getDbDirByUUID(uuid));
+	},
+
+	async clearDataDirByUUID(uuid) {
+		await this.deleteDataDirByUUID(uuid).then(() => {
+			let dir = this.getDataDirByUUID(uuid);
+			Zotero.File.createDirectoryIfMissing(dir);
+		});
+	},
+
+	async deleteDataDirByUUID(uuid) {
+		let dir = this.getDataDirByUUID(uuid);
+		try {
+			await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	},
+
+	async deleteDbDirByUUID(uuid) {
+		let dir = this.getDbDirByUUID(uuid);
+		try {
+			await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	},
+
+	listFileAccessUUIDs() {
+		return Services.prefs.getBranch(FILE_ACCESS_PREF_PREFIX).getChildList("");
+	},
+
+	clearFileAccess(uuid) {
+		Zotero.Prefs.clear(FILE_ACCESS_PREF_PREFIX + uuid, true);
+	},
 };
 
-export { PluginFileAccess, };
+export { PluginFileAccess, PersistedGrantLayer };

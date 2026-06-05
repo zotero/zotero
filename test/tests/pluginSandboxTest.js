@@ -1,7 +1,16 @@
 describe("Plugin Sandbox", function () {
 	var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 	var { PluginFileAccess } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/file.mjs");
-	var { getPluginUUID } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/uuid.mjs");
+	var { getByID } = ChromeUtils.importESModule(
+		"chrome://zotero/content/xpcom/plugins/uuid.mjs"
+	).PluginUUID;
+	var {
+		get: getName,
+		list: listNames,
+		forget: forgetName,
+	} = ChromeUtils.importESModule(
+		"chrome://zotero/content/xpcom/plugins/names.mjs"
+	).PluginNames;
 
 	var PREF_PREFIX = "extensions.zotero.pluginFileAccess.";
 
@@ -14,7 +23,7 @@ describe("Plugin Sandbox", function () {
 	// derived UUID below; kept on the mock for API completeness only.
 	var SYNC_GUID = "{00000000-0000-0000-0000-000000000001}";
 	// Deterministic UUID the sandbox uses for plugin-scoped paths and prefs.
-	var PLUGIN_UUID = getPluginUUID(ADDON_ID);
+	var PLUGIN_UUID = getByID(ADDON_ID);
 
 	function createMockAddon(permissions = ["default"], origins = [], prefPrefixes = []) {
 		return {
@@ -69,6 +78,46 @@ describe("Plugin Sandbox", function () {
 		PluginSandbox.loadScope(mockAddon);
 		scope = PluginSandbox.getScope(ADDON_ID);
 	}
+
+	describe("Plugin name persistence", function () {
+		const PLUGIN_NAME_PREF = "extensions.zotero.pluginNames." + PLUGIN_UUID;
+
+		afterEach(function () {
+			Zotero.Prefs.clear(PLUGIN_NAME_PREF, true);
+		});
+
+		it("records the plugin name on load, keyed by UUID", function () {
+			loadTestScope(["default"]);
+			assert.equal(getName(PLUGIN_UUID), "Test Sandbox Plugin");
+		});
+
+		it("the recorded name survives unloading the plugin", function () {
+			loadTestScope(["default"]);
+			PluginSandbox.unloadScope(ADDON_ID);
+			// Name still recoverable -- chrome UI can show it for orphan dirs
+			assert.equal(getName(PLUGIN_UUID), "Test Sandbox Plugin");
+		});
+
+		it("listNames includes the loaded plugin", function () {
+			loadTestScope(["default"]);
+			let names = listNames();
+			let entry = names.find(n => n.uuid === PLUGIN_UUID);
+			assert.ok(entry, "loaded plugin should appear in the recorded list");
+			assert.equal(entry.name, "Test Sandbox Plugin");
+		});
+
+		it("returns null for unknown UUIDs", function () {
+			assert.isNull(getName("00000000-0000-0000-0000-000000000000"));
+		});
+
+		it("forgetName removes the entry", function () {
+			loadTestScope(["default"]);
+			assert.equal(getName(PLUGIN_UUID), "Test Sandbox Plugin");
+			forgetName(PLUGIN_UUID);
+			assert.isNull(getName(PLUGIN_UUID));
+		});
+	});
+
 
 	describe("Scope creation", function () {
 		it("should create an unprivileged scope with default permissions", function () {

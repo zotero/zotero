@@ -1,0 +1,71 @@
+<vbox class="main-section subpane" id="zotero-subpane-plugin-permissions-edit-content"
+		onload="event.waitUntil(Zotero_Preferences.PluginPermissions.initEditPane())">
+	<vbox class="main-section">
+		<hbox id="plugin-permissions-edit-status"
+				class="plugin-info-banner banner-warning" hidden="true">
+			<description id="plugin-permissions-edit-status-text" flex="1"/>
+		</hbox>
+
+		<groupbox aria-labelledby="plugin-permissions-edit-data-heading">
+			<label><html:h2 id="plugin-permissions-edit-data-heading" data-l10n-id="preferences-plugin-permissions-edit-data-heading"/></label>
+			<description id="plugin-permissions-edit-data-dir" class="dir-path"/>
+			<description id="plugin-permissions-edit-data-empty"
+				data-l10n-id="preferences-plugin-permissions-edit-no-data" hidden="true"/>
+			<separator class="thin"/>
+			<hbox id="plugin-permissions-edit-data-actions" class="button-row">
+				<button id="plugin-permissions-data-dir-show"
+					data-l10n-id="preferences-plugin-permissions-show-in-folder"
+					oncommand="Zotero_Preferences.PluginPermissions.showEditDir()"/>
+				<button id="plugin-permissions-data-dir-clear"
+					data-l10n-id="preferences-plugin-permissions-clear-folder"
+					oncommand="Zotero_Preferences.PluginPermissions.clearEditDir()"/>
+			</hbox>
+		</groupbox>
+
+		<groupbox id="plugin-permissions-edit-db-section"
+				aria-labelledby="plugin-permissions-edit-db-heading">
+			<label><html:h2 id="plugin-permissions-edit-db-heading" data-l10n-id="preferences-plugin-permissions-edit-db-heading"/></label>
+			<description id="plugin-permissions-edit-db-dir" class="dir-path"/>
+			<description id="plugin-permissions-edit-db-empty"
+				data-l10n-id="preferences-plugin-permissions-edit-no-db" hidden="true"/>
+			<separator class="thin"/>
+			<hbox id="plugin-permissions-edit-db-actions" class="button-row">
+				<button id="plugin-permissions-db-delete"
+					data-l10n-id="preferences-plugin-permissions-delete-db-button"
+					oncommand="Zotero_Preferences.PluginPermissions.deleteEditDb()"/>
+			</hbox>
+		</groupbox>
+
+		<groupbox aria-labelledby="plugin-permissions-grants-heading">
+			<label><html:h2 id="plugin-permissions-grants-heading" data-l10n-id="preferences-plugin-permissions-grants-heading"/></label>
+			<separator class="thin"/>
+			<hbox id="plugin-permissions-grants-container" class="virtualized-table-container" flex="1">
+				<html:div id="plugin-permissions-grants-table" class="permissions-grants-table"/>
+			</hbox>
+			<description id="plugin-permissions-grants-empty"
+				data-l10n-id="preferences-plugin-permissions-grants-empty" hidden="true"/>
+			<separator class="thin"/>
+			<hbox class="button-row">
+				<button id="plugin-permissions-grants-add-file"
+					data-l10n-id="preferences-plugin-permissions-add-grant-file"
+					oncommand="Zotero_Preferences.PluginPermissions.addEditGrant('file')"/>
+				<button id="plugin-permissions-grants-add-folder"
+					data-l10n-id="preferences-plugin-permissions-add-grant-folder"
+					oncommand="Zotero_Preferences.PluginPermissions.addEditGrant('folder')"/>
+			</hbox>
+		</groupbox>
+
+		<groupbox class="danger-zone"
+				aria-labelledby="plugin-permissions-edit-remove-all-heading">
+			<label><html:h2 id="plugin-permissions-edit-remove-all-heading" data-l10n-id="preferences-plugin-permissions-edit-remove-all-heading"/></label>
+			<description data-l10n-id="preferences-plugin-permissions-edit-remove-all-intro"/>
+			<separator class="thin"/>
+			<hbox>
+				<button id="plugin-permissions-edit-remove-all"
+					class="danger-button"
+					data-l10n-id="preferences-plugin-permissions-edit-remove-all-button"
+					oncommand="Zotero_Preferences.PluginPermissions.removeAllForPlugin()"/>
+			</hbox>
+		</groupbox>
+	</vbox>
+</vbox>
