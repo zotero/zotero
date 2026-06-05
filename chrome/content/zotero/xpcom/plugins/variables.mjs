@@ -321,9 +321,17 @@ const ScopeVariables = {
 										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, addonID);
 									case "FromScopeCallable":
 										return ScopeVariables.createFromScopeCallable(value, actualObj, addonID);
+									case "Constructor":
+										return ScopeUtils.ensureConstructableInScope(value, scope, { mutable: true });
 									default:
 										VarCheck.throwPropError("access", prop, "unknown schema handler");
 								}
+							}
+							// If the schema is an object, treat the function as a namespace
+							// with sub-properties (e.g. Zotero.Translate has .Search, .Web)
+							let nextSchema = VarCheck.nextSchema(schemaNode, prop);
+							if (nextSchema && typeof nextSchema === "object") {
+								return wrapAllowlist(value, nextSchema);
 							}
 							return ScopeUtils.ensureCallableInScope(value, actualObj, scope);
 						}
