@@ -3345,6 +3345,27 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 
+			it("should call onLoad callback with the content window", async function () {
+				loadTestScopeWithURI(["default", "window"]);
+				let cbkLoadPromise = new Promise((resolve) => {
+					scope._resolveOnLoad = resolve;
+				});
+				let win = await evalInScope(`
+					openWindow('test.html', '', function(w) {
+						_resolveOnLoad(w);
+					});
+				`);
+				try {
+					let cbkWin = await cbkLoadPromise;
+					assert.ok(cbkWin, "onLoad callback should receive a window");
+					assert.equal(cbkWin.document.title, "Test");
+					assert.equal(cbkWin, win, "onLoad window should be the same as the resolved window");
+				}
+				finally {
+					win.close();
+				}
+			});
+
 			it("should load relative CSS and JS resources", async function () {
 				loadTestScopeWithURI(["default", "window"]);
 				let win = await evalInScope("openWindow('resources.html')");
