@@ -24,7 +24,7 @@
 */
 
 
-import { PERMISSION_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
+import { PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 
 
 const Utils = {
@@ -69,18 +69,33 @@ const Utils = {
 		return false;
 	},
 
-	isGlobalWindowObject(value) {
+	isDocumentObject(value) {
 		if (!Utils.isObjectLike(value)) return false;
 		try {
-			if (value.window === value
-				|| value.self === value
-				|| value.ownerGlobal === value
-				|| (value.document && value.document.defaultView === value)) {
+			// Document nodes have nodeType === 9
+			if (value.nodeType === 9) {
 				return true;
 			}
 		}
 		catch {}
 		return false;
+	},
+
+	isWindowObject(value) {
+		if (!Utils.isObjectLike(value)) return false;
+		try {
+			return value.window === value;
+		}
+		catch {}
+		return false;
+	},
+
+	isSameCompartment(obj1, obj2) {
+		// Non-objects (null, undefined, primitives) can be directly accessed across compartments
+		if (!this.isObjectLike(obj1) || !this.isObjectLike(obj2)) {
+			return true;
+		}
+		return Cu.getGlobalForObject(obj1) === Cu.getGlobalForObject(obj2);
 	},
 
 	throwPropError(op, prop = undefined, reason = undefined) {
@@ -89,19 +104,23 @@ const Utils = {
 	},
 
 	getPermissionsString(permissions) {
+		if (!Array.isArray(permissions)) {
+			return null;
+		}
 		return [...permissions].toSorted().join(',');
 	},
 
 	isPrivilegedPermission(addon) {
-		if (addon.installPermissions.permissions.includes("zotero")) {
-			return false;
+		let permissions = addon.installPermissions.permissions;
+		if (permissions.includes("*") || permissions.length === 0) {
+			return true;
 		}
-		return true;
+		return false;
 	},
 
 	isPrivilegedScope(scope) {
 		// If the scope is unprivileged, it will be xrayed and thus using its properties is safe
-		return scope.PERMISSIONS === "*";
+		return scope.PERMISSIONS.includes("*");
 	},
 
 	mergeSchema(a, b) {
@@ -149,14 +168,38 @@ const Utils = {
 		return schemas.reduce((acc, s) => this.mergeSchema(acc, s), undefined);
 	},
 
+	getWindowSchema(permissions) {
+		let schemas = [WINDOW_SCHEMAS.default];
+
+		for (let perm of permissions) {
+			if (perm in WINDOW_SCHEMAS) {
+				schemas.push(WINDOW_SCHEMAS[perm]);
+			}
+		}
+		return schemas.reduce((acc, s) => this.mergeSchema(acc, s), undefined);
+	},
+
+	getMainWindowSchema(permissions) {
+		let winSchema = this.getWindowSchema(permissions);
+
+		let schemas = [MAIN_WINDOW_SCHEMAS.default, winSchema];
+		
+		for (let perm of permissions) {
+			if (perm in MAIN_WINDOW_SCHEMAS) {
+				schemas.push(MAIN_WINDOW_SCHEMAS[perm]);
+			}
+		}
+		return schemas.reduce((acc, s) => this.mergeSchema(acc, s), undefined);
+	},
+
 	isAllowed(schemaNode, prop) {
-		if (schemaNode === true) return true;
+		if (schemaNode === true || typeof schemaNode === "string") return true;
 		if (!schemaNode || typeof schemaNode !== "object") return false;
 		return Object.prototype.hasOwnProperty.call(schemaNode, prop);
 	},
 
 	nextSchema(schemaNode, prop) {
-		return schemaNode === true ? true : schemaNode[prop];
+		return schemaNode === true || typeof schemaNode === "string" ? true : schemaNode[prop];
 	},
 
 	schemaKey(schemaNode) {
@@ -226,58 +269,28 @@ const Utils = {
 const ScopeUtils = {
 
 	/**
-	 * Ensure a potentially promise variable is safe to expose in the sandbox scope
-	 * Following https://github.com/mdn/content/issues/15059#issuecomment-1198017259
-	 */
-	ensurePromiseVarInScope(maybePromise, scope, { mutable = false } = {}) {
-		if (Utils.isPromise(maybePromise)) {
-			return new scope.Promise((resolve, reject) => {
-				maybePromise.then(
-					v => resolve(this.ensureVarInScope(v, scope, { mutable })),
-					e => reject(e)
-				);
-			});
-		}
-		return this.ensureVarInScope(maybePromise, scope, { mutable });
-	},
-
-	/**
-	 * Ensure a variable is safely exposed in the scope. Always use `ensurePromiseVarInScope`
-	 * - Functions are exported as callables that scope their returns
-	 * - Plain objects/arrays are cloned into the scope
-	 * - Non-plain objects (class instances) are wrapped in a readonly facade with methods and getters (own and prototype) preserved
-	 */
-	ensureVarInScope(value, scope, { mutable = false } = {}) {
-		if (typeof value === "function") {
-			return this.ensureCallableInScope(value, null, scope);
-		}
-
-		if (!Utils.isObjectLike(value)) return value;
-
-		if (Utils.isPlainObject(value) || Array.isArray(value)) {
-			return Cu.cloneInto(value, scope, {
-				wrapReflectors: true,
-				cloneFunctions: true,
-			});
-		}
-
-		return this.ensureInstanceInScope(value, scope, { mutable });
-	},
-
-	/**
 	 * Create a function that runs in privileged realm and scopes returns
 	 */
-	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false } = {}) {
+	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null } = {}) {
+		if (Utils.isSameCompartment(func, scope)) {
+			return func;
+		}
 		let holder = Cu.createObjectIn(scope);
 		let thisArgRef = Utils.isObjectLike(thisArg) ? new WeakRef(thisArg) : null;
 
 		let wrapped = (...args) => {
 			args = args.map(arg => Cu.waiveXrays(arg));
+			if (typeof argParser === "function") {
+				args = argParser(args);
+			}
 			let actualThisArg = thisArgRef ? thisArgRef.deref() : thisArg;
 			if (thisArgRef && !actualThisArg) {
 				Utils.throwPropError("access", "this", "object has been garbage collected");
 			}
 			let res = func.apply(actualThisArg, args);
+			if (typeof returnParser === "function") {
+				res = returnParser(res);
+			}
 			return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable });
 		};
 
@@ -286,9 +299,60 @@ const ScopeUtils = {
 	},
 
 	/**
+	 * Ensure a potentially promise variable is safe to expose in the sandbox scope
+	 * Following https://github.com/mdn/content/issues/15059#issuecomment-1198017259
+	 */
+	ensurePromiseVarInScope(maybePromise, scope, { mutable = false } = {}) {
+		if (Utils.isSameCompartment(maybePromise, scope)) {
+			return maybePromise;
+		}
+		if (Utils.isPromise(maybePromise)) {
+			return new scope.Promise((resolve, reject) => {
+				maybePromise.then(
+					v => resolve(ScopeUtils._ensureVarInScope(v, scope, { mutable })),
+					e => reject(e)
+				);
+			});
+		}
+		return ScopeUtils._ensureVarInScope(maybePromise, scope, { mutable });
+	},
+
+	/**
+	 * Ensure a variable is safely exposed in the scope.
+	 * - Functions are exported as callables that scope their returns
+	 * - Plain objects/arrays are cloned into the scope
+	 * - Non-plain objects (class instances) are wrapped in a readonly facade with methods and getters (own and prototype) preserved
+	 */
+	_ensureVarInScope(value, scope, { mutable = false } = {}) {
+		if (typeof value === "function") {
+			return ScopeUtils.ensureCallableInScope(value, null, scope);
+		}
+
+		if (!Utils.isObjectLike(value)) return value;
+
+		if (Array.isArray(value)) {
+			let arr = Cu.cloneInto([], scope, {
+				wrapReflectors: true,
+				cloneFunctions: true,
+			});
+			arr.push(...value.map(v => ScopeUtils.ensurePromiseVarInScope(v, scope, { mutable })));
+			return arr;
+		}
+
+		if (Utils.isPlainObject(value)) {
+			return Cu.cloneInto(value, scope, {
+				wrapReflectors: true,
+				cloneFunctions: true,
+			});
+		}
+
+		return ScopeUtils._ensureInstanceInScope(value, scope, { mutable });
+	},
+
+	/**
 	 * Create a readonly facade for a class instance, exposing methods and getters (own and prototype)
 	 */
-	ensureInstanceInScope(instance, scope, { mutable = false } = {}) {
+	_ensureInstanceInScope(instance, scope, { mutable = false } = {}) {
 		if (!Utils.isObjectLike(instance)) return instance;
 
 		let facade = Cu.createObjectIn(scope);

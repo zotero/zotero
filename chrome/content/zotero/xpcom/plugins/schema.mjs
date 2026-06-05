@@ -147,9 +147,29 @@ const PERMISSION_SCHEMAS = {
 			ItemTreeManager: true,
 			ItemPaneManager: true,
 			MenuManager: true,
+			// Windows: getMainWindow are created separately to wrap the returned window
+			getMainWindow: "WindowScopeCallable",
+			getMainWindows: "WindowScopeCallable",
 		},
 	}
 };
 
-export { PERMISSION_SCHEMAS };
+const WINDOW_SCHEMAS = {
+	default: {
+		alert: true,
+		confirm: true,
+		prompt: true,
+		getComputedStyle: true,
+		matchMedia: true,
+		// `document` is dynamically created by WindowScopeVariables.createSafeDocument and thus not included here
+	}
+};
 
+const MAIN_WINDOW_SCHEMAS = {
+	default: {
+		// TODO: Use permissions to determine which of these to expose
+		Zotero_Tabs: true,
+	}
+};
+
+export { PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
