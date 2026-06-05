@@ -24,13 +24,8 @@
 */
 
 
-import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
-
-const lazy = XPCOMUtils.declareLazy({
-	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
-});
 
 const ScopeVariables = {
 
@@ -222,23 +217,6 @@ const ScopeVariables = {
 		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
 			argParser: args => args.map(arg => ScopeVariables.fromScope(arg, addonID)),
 		});
-	},
-
-	// https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/ExtensionCommon.sys.mjs#60
-	getConsole(addon) {
-		return () => {
-			let console = new lazy.ConsoleAPI({
-				prefix: `${addon.name} (${addon.id}):\n`,
-			});
-			let wrapper = ScopeVariables.createAllowlistMirrorObject(console, true, addon.id, { mutable: false, cache: true });
-			// Save a strong ref to the original object so that it doesn't get GCed before plugin unloads
-			Object.defineProperty(wrapper, ORIGINAL_REF_KEY, {
-				value() {
-					return console;
-				}
-			});
-			return wrapper;
-		};
 	},
 
 	/**
