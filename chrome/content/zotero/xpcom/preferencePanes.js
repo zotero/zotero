@@ -80,6 +80,14 @@
 				helpURL: 'https://www.zotero.org/support/preferences/cite',
 			},
 			{
+				id: 'zotero-prefpane-plugin-permissions',
+				label: 'preferences-pane-plugin-permissions',
+				image: 'chrome://zotero/skin/20/universal/magic-wand.svg',
+				src: 'chrome://zotero/content/preferences/preferences_pluginPermissions.xhtml',
+				scripts: ['chrome://zotero/content/preferences/preferences_pluginPermissions.js'],
+				defaultXUL: true,
+			},
+			{
 				id: 'zotero-prefpane-advanced',
 				label: 'zotero.preferences.prefpane.advanced',
 				image: 'chrome://zotero/skin/20/universal/wrench-screwdriver.svg',
@@ -96,6 +104,14 @@
 				scripts: ['chrome://zotero/content/preferences/preferences_account.js'],
 				defaultXUL: true,
 				helpURL: 'https://www.zotero.org/support/preferences/sync#reset',
+			},
+			{
+				id: 'zotero-subpane-plugin-permissions-edit',
+				parent: 'zotero-prefpane-plugin-permissions',
+				label: 'preferences-plugin-permissions-edit-subpane',
+				src: 'chrome://zotero/content/preferences/preferences_pluginPermissions_edit.xhtml',
+				scripts: ['chrome://zotero/content/preferences/preferences_pluginPermissions.js'],
+				defaultXUL: true,
 			}
 		]),
 
