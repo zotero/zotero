@@ -27,6 +27,7 @@
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 import { ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables, WindowScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
+import { PLUGIN_DB_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
@@ -372,4 +373,101 @@ function setupFilePicker(scope, addonID) {
 	scope.FilePicker = ScopeUtils.ensureConstructableInScope(PluginFilePicker, scope, { mutable: true });
 }
 
-export { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker };
+/**
+ * Set up `Zotero.DBConnection` on the sandbox scope.
+ * The constructor creates plugin-scoped SQLite databases under
+ * `<data dir>/plugin-data/<syncGUID>/`.  Only accepts a plain
+ * database name; instances are restricted via PLUGIN_DB_SCHEMA.
+ *
+ * @param {Object} scope - The sandbox scope
+ * @param {Object} addon - The addon descriptor
+ */
+function setupPluginDB(scope, addon) {
+	let guidDir = addon.syncGUID.replace(/[{}]/g, "");
+	let pluginDir = PathUtils.join(
+		Zotero.DataDirectory.dir, "plugin-data", guidDir
+	);
+
+	let PluginDBConnection = function (dbName) {
+		if (!dbName || typeof dbName !== "string") {
+			throw new Error("DBConnection requires a database name");
+		}
+		if (dbName.includes("/") || dbName.includes("\\") || dbName.includes("..")) {
+			throw new Error("DBConnection name must not contain path separators");
+		}
+		if (dbName === "zotero") {
+			throw new Error("Plugins cannot open the main Zotero database");
+		}
+		Zotero.File.createDirectoryIfMissing(pluginDir);
+		let dbPath = PathUtils.join(pluginDir, dbName + ".sqlite");
+		let conn = new Zotero.DBConnection(dbPath);
+
+		// Wrap queryAsync results with forwarding proxies so
+		// mozIStorageRow Proxies can cross compartments
+		let origQueryAsync = conn.queryAsync.bind(conn);
+		conn.queryAsync = async function (sql, params, options = {}) {
+			let rows = await origQueryAsync(sql, params, options);
+			if (!Array.isArray(rows)) return rows;
+			return rows.map(row => ScopeUtils.ensureForwardingProxyInScope(row, scope));
+		};
+
+		conn.rowQueryAsync = async function (sql, params) {
+			let rows = await conn.queryAsync(sql, params);
+			return rows.length ? rows[0] : false;
+		};
+
+		// getColumns reads row.name in chrome, so it must use the
+		// original queryAsync to avoid Xray-wrapped forwarding proxies
+		conn.getColumns = function (table) {
+			return origQueryAsync("PRAGMA table_info(" + table + ")")
+				.then(rows => rows.map(row => row.name));
+		};
+
+		return conn;
+	};
+
+	let wrapped = ScopeUtils.ensureConstructableInScope(
+		PluginDBConnection, scope,
+		{ mutable: true, instanceSchema: PLUGIN_DB_SCHEMA }
+	);
+
+	// Static helpers on the constructor for managing plugin databases.
+	let statics = Cu.createObjectIn(scope);
+	Cu.exportFunction(function (dbName) {
+		if (!dbName || typeof dbName !== "string") return false;
+		let dbPath = PathUtils.join(pluginDir, dbName + ".sqlite");
+		return IOUtils.exists(dbPath);
+	}, statics, { defineAs: "hasDatabase" });
+	Cu.exportFunction(async function (dbName) {
+		if (!dbName || typeof dbName !== "string") {
+			throw new Error("deleteDatabase requires a database name");
+		}
+		let dbPath = PathUtils.join(pluginDir, dbName + ".sqlite");
+		await IOUtils.remove(dbPath, { ignoreAbsent: true });
+	}, statics, { defineAs: "deleteDatabase" });
+	Cu.exportFunction(async function () {
+		await IOUtils.remove(pluginDir, { recursive: true, ignoreAbsent: true });
+	}, statics, { defineAs: "deleteAllDatabases" });
+
+	Object.defineProperty(wrapped, "hasDatabase", {
+		value: statics.hasDatabase,
+		enumerable: true,
+	});
+	Object.defineProperty(wrapped, "deleteDatabase", {
+		value: statics.deleteDatabase,
+		enumerable: true,
+	});
+	Object.defineProperty(wrapped, "deleteAllDatabases", {
+		value: statics.deleteAllDatabases,
+		enumerable: true,
+	});
+
+	Object.defineProperty(scope.Zotero, "DBConnection", {
+		value: wrapped,
+		enumerable: true,
+		configurable: false,
+		writable: false,
+	});
+}
+
+export { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupPluginDB };
