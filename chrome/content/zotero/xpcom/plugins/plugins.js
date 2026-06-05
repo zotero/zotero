@@ -158,17 +158,22 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			
+			let isPrivileged = lazy.VarCheck.isPrivilegedPermission(addon);
 			let params = {
 				id: addon.id,
 				version: addon.version,
-				rootURI: lazy.PluginProtocol.getBaseURI(addon.id),
+				baseURI: lazy.PluginProtocol.getBaseURI(addon.id),
 			};
+			// Keep compatibility with legacy plugins
+			if (isPrivileged) {
+				params.rootURI = addon.getResourceURI().spec;
+			}
 			if (extraParams) {
 				Object.assign(params, extraParams);
 			}
 			let result;
 			try {
-				if (!lazy.VarCheck.isPrivilegedPermission(addon)) {
+				if (!isPrivileged) {
 					params = Cu.cloneInto(params, scope);
 					reason = Cu.cloneInto(reason, scope);
 				}
