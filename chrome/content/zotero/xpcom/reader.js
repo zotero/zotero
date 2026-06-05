@@ -2698,9 +2698,6 @@ class Reader {
 	}
 
 	_dispatchEvent(event) {
-		if (event.type === 'renderTextSelectionPopup') {
-			event.elem = event.doc.querySelector('.selection-popup');
-		}
 		let wrappedEventCache = new Map();
 		for (let listener of this._registeredListeners) {
 			if (listener.type === event.type) {
@@ -2709,12 +2706,10 @@ class Reader {
 					let dispatchedEvent = Object.assign({}, event);
 					dispatchedEvent.append = (...args) => {
 						args = ScopeVariables.fromScope(args, listener.pluginID);
-						event.append(...Components.utils.cloneInto(args, event.reader._iframeWindow, { wrapReflectors: true, cloneFunctions: true }));
+						event.append(...args);
 					};
 
-					wrappedEvent = ScopeVariables.toScope(dispatchedEvent, listener.pluginID,
-						// If the `elem` is provided, allow access to its subtree
-						{ rootNode: dispatchedEvent.elem || null });
+					wrappedEvent = ScopeVariables.toScope(dispatchedEvent, listener.pluginID);
 					wrappedEventCache.set(listener.pluginID, wrappedEvent);
 				}
 				listener.handler(wrappedEvent);
