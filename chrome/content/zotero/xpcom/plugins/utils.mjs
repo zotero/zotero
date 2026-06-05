@@ -44,6 +44,16 @@ const VarCheck = {
 		return this.isObjectLike(v) && typeof v.then === "function";
 	},
 
+	isXPCOMObject(v) {
+		if (!this.isObject(v)) return false;
+		try {
+			return typeof v.QueryInterface === "function";
+		}
+		catch {
+			return false;
+		}
+	},
+
 	isPlainObject(v) {
 		if (v === null || typeof v !== "object") return false;
 		// Unwaive Xray waivers so prototype comparisons work correctly
@@ -548,6 +558,16 @@ const ScopeUtils = {
 			});
 			arr.push(...value.map(v => ScopeUtils.ensurePromiseVarInScope(v, scope, { mutable, instanceSchema })));
 			return arr;
+		}
+
+		// Binary data (ArrayBuffer, typed arrays, DataView): structured-clone
+		if (Cu.getClassName(value, true) === "ArrayBuffer" || ArrayBuffer.isView(value)) {
+			return Cu.cloneInto(value, scope);
+		}
+
+		// XPCOM objects get a blank wrapper to avoid leaking
+		if (VarCheck.isXPCOMObject(value)) {
+			return Cu.cloneInto({}, scope);
 		}
 
 		if (VarCheck.isPlainObject(value)) {
