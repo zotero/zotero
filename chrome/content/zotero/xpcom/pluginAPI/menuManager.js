@@ -214,6 +214,9 @@
 			};
 		}
 
+		// _convert(option) {
+		// }
+
 		/**
 		 * Validate the menu options, overriding the base method to validate `menus` recursively
 		 * @param {MenuOptions} option - The menu options to validate

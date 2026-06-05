@@ -37,6 +37,8 @@ Zotero.Plugins = new function () {
 			Ci.amIAddonManagerStartup,
 		],
 	});
+	var { Utils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
+	var { WindowScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
 	var PluginSandbox = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 
 	var observers = new Set();
@@ -104,7 +106,8 @@ Zotero.Plugins = new function () {
 					}
 					let { addons } = await AddonManager.getActiveAddons(["extension"]);
 					for (let addon of addons) {
-						await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
+						// Non-privileged plugins get a wrapped window with limited access and no DOM access.
+						await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window: WindowScopeVariables.createSafeWindow(domWindow, addon.id, { rootNode: null }) });
 					}
 				}
 				domWindow.addEventListener("load", onload, false);
@@ -118,7 +121,7 @@ Zotero.Plugins = new function () {
 				}
 				let { addons } = await AddonManager.getActiveAddons(["extension"]);
 				for (let addon of addons) {
-					await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
+					await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_LOAD, { window: WindowScopeVariables.createSafeWindow(domWindow, addon.id, { rootNode: null }) });
 				}
 			},
 		};
@@ -164,7 +167,11 @@ Zotero.Plugins = new function () {
 			}
 			let result;
 			try {
-				result = func.call(scope, Cu.cloneInto(params, scope), Cu.cloneInto(reason, scope));
+				if (!Utils.isPrivilegedPermission(addon)) {
+					params = Cu.cloneInto(params, scope);
+					reason = Cu.cloneInto(reason, scope);
+				}
+				result = func.call(scope, params, reason);
 				// If bootstrap method returns a promise, wait for it
 				if (result && result.then) {
 					await result;

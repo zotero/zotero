@@ -150,6 +150,8 @@ class PluginAPIBase {
 			return false;
 		}
 
+		option = this._convert(option);
+
 		let mainKey = this._getOptionMainKey(option);
 		this._optionsCache[mainKey] = option;
 		return mainKey;
@@ -317,6 +319,15 @@ class PluginAPIBase {
 			return CSS.escape(`${pluginID}-${mainKey}`);
 		}
 		return mainKey;
+	}
+
+	/**
+	 * Convert the option before storing, can be overridden by subclasses
+	 * @param {object} option
+	 * @returns {object}
+	 */
+	_convert(option) {
+		return option;
 	}
 
 	/**
