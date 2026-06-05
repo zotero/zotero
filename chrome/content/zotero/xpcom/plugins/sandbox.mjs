@@ -227,9 +227,9 @@ function loadPrivilegedScope(addon, uuid, globalVars = {}) {
 }
 
 function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
-	let rootURI = PluginProtocol.getBaseURI(addon.id);
+	let baseURI = PluginProtocol.getBaseURI(addon.id);
 	var scope = new Cu.Sandbox(
-		rootURI,
+		baseURI,
 		{
 			sandboxName: addon.id,
 			wantGlobalProperties: [
@@ -255,7 +255,7 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 		scope,
 		{
 			loadSubScript: res => Services.scriptloader.loadSubScript(
-				`${rootURI}${res}`, scope
+				`${baseURI}${res}`, scope
 			),
 			isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
 

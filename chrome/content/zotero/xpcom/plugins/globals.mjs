@@ -83,7 +83,7 @@ function sanitizeFeatures(features) {
  */
 function setupOpenWindow(scope) {
 	let pluginID = scope.PLUGIN_ID;
-	let rootURI = PluginProtocol.getBaseURI(pluginID);
+	let baseURI = PluginProtocol.getBaseURI(pluginID);
 	let holder = Cu.createObjectIn(scope);
 	Cu.exportFunction(
 		(url, features, options = {}) => {
@@ -94,12 +94,12 @@ function setupOpenWindow(scope) {
 
 			let resolved;
 			try {
-				resolved = new URL(String(url || ""), rootURI).href;
+				resolved = new URL(String(url || ""), baseURI).href;
 			}
 			catch {
 				throw new Error(`Invalid URL: ${url}`);
 			}
-			if (!resolved.startsWith(rootURI)) {
+			if (!resolved.startsWith(baseURI)) {
 				throw new Error(`URL must be within plugin root: ${url}`);
 			}
 			let pathname = new URL(resolved).pathname.toLowerCase();
