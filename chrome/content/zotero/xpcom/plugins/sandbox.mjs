@@ -29,7 +29,7 @@ import {
 	setInterval, clearInterval,
 	requestIdleCallback, cancelIdleCallback
 } from "resource://gre/modules/Timer.sys.mjs";
-import { VarCheck } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { VarCheck, ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 import { setupConsole, setupOpenWindow } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
@@ -211,7 +211,11 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			),
 			PERMISSIONS: Cu.cloneInto(permissions, scope),
 			
-			// Add additional global functions
+			// Add additional global vars
+			Localization: ScopeUtils.ensureConstructableInScope(Localization, scope, {
+				mutable: true,
+				returnParser: instance => ScopeVariables.createAllowlistMirrorObject(instance, true, addon.id, { mutable: true }),
+			}),
 			setTimeout,
 			clearTimeout,
 			setInterval,
