@@ -56,6 +56,15 @@ const PERMISSION_SCHEMAS = {
 				sentenceCase: true,
 				capitalizeName: true,
 				randomString: true,
+				Internal: {
+					copyTextToClipboard: true,
+					getClipboard: true,
+					md5: true,
+					md5Async: true,
+					sha1: true,
+					decodeUTF8: true,
+					byteLength: true,
+				}
 			},
 			Date: {
 				strToISO: true,
