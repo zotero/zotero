@@ -41,20 +41,11 @@ var policies = new Map(); // addonID -> WebExtensionPolicy
  * @param {string} syncGUID -- The addon's syncGUID (stable UUID from AddonManager)
  * @returns {string} The moz-extension:// base URI for this plugin
  */
-function register(addonID, rootURI, syncGUID) {
-	if (policies.has(addonID)) {
-		let policy = policies.get(addonID);
-		// Re-activate if the policy was deactivated externally
-		if (!policy.active) {
-			// Deactivate any temporary policy Firefox may have created
-			let existing = WebExtensionPolicy.getByID(addonID);
-			if (existing && existing !== policy) {
-				existing.active = false;
-			}
-			policy.active = true;
-		}
-		return `moz-extension://${policy.mozExtensionHostname}/`;
-	}
+function register(addonID, rootURI, syncGUID, origins = []) {
+	// Always recreate with fresh origins and re-activate,
+	// since origins may have changed or the policy may have
+	// been deactivated externally (e.g. by AddonManager on disable)
+	unregister(addonID);
 
 	// Firefox's extension startup registers a temporary WebExtensionPolicy
 	// before the manifest is parsed, with no webAccessibleResources:
@@ -80,7 +71,7 @@ function register(addonID, rootURI, syncGUID) {
 		mozExtensionHostname: hostname,
 		baseURL,
 		localizeCallback: str => str,
-		allowedOrigins: new MatchPatternSet([]),
+		allowedOrigins: new MatchPatternSet(origins, { restrictSchemes: false }),
 		// Mark all resources as web-accessible so GetFlagsForURI returns
 		// URI_LOADABLE_BY_ANYONE instead of URI_DANGEROUS_TO_LOAD.
 		webAccessibleResources: [

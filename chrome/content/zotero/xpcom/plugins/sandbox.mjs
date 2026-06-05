@@ -32,7 +32,7 @@ import {
 import { VarCheck, ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
-import { setupConsole, setupOpenWindow } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
+import { setupConsole, setupOpenWindow, setupHTTP } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
@@ -53,7 +53,8 @@ function loadScope(addon, globalVars = {}) {
 			Zotero.debug(`Reusing existing scope for plugin ${addon.id}`);
 			// Ensure the moz-extension:// policy is still active
 			PluginProtocol.register(
-				addon.id, addon.getResourceURI(), addon.syncGUID
+				addon.id, addon.getResourceURI(), addon.syncGUID,
+				addon.installPermissions?.origins
 			);
 			return;
 		}
@@ -61,9 +62,10 @@ function loadScope(addon, globalVars = {}) {
 		unloadScope(addon.id);
 	}
 
-	// Register moz-extension:// protocol
+	// Register moz-extension:// protocol with allowed origins from host_permissions
 	PluginProtocol.register(
-		addon.id, addon.getResourceURI(), addon.syncGUID
+		addon.id, addon.getResourceURI(), addon.syncGUID,
+		addon.installPermissions?.origins
 	);
 
 	let scope;
@@ -252,6 +254,10 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 
 	if (permissions.includes("openWindow")) {
 		setupOpenWindow(scope, rootURI, addon.id);
+	}
+
+	if (permissions.includes("network")) {
+		setupHTTP(scope);
 	}
 
 	return scope;
