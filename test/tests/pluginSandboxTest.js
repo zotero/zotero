@@ -2156,7 +2156,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			loadTestScope(["default", "ui"]);
+			loadTestScope(["default", "itemTree", "itemPane", "menu", "reader"]);
 		});
 
 		describe("ItemTreeManager", function () {
@@ -3174,13 +3174,15 @@ describe("Plugin Sandbox", function () {
 		it("should not expose UI APIs with only default permission", function () {
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof Zotero.ItemTreeManager === 'undefined'"),
-				"ItemTreeManager should not be exposed without ui permission");
+				"ItemTreeManager should not be exposed without itemTree permission");
 			assert.isTrue(evalInScope("typeof Zotero.ItemPaneManager === 'undefined'"),
-				"ItemPaneManager should not be exposed without ui permission");
+				"ItemPaneManager should not be exposed without itemPane permission");
 			assert.isTrue(evalInScope("typeof Zotero.MenuManager === 'undefined'"),
-				"MenuManager should not be exposed without ui permission");
+				"MenuManager should not be exposed without menu permission");
 			assert.isTrue(evalInScope("typeof Zotero.Reader === 'undefined'"),
-				"Reader should not be exposed without ui permission");
+				"Reader should not be exposed without reader permission");
+			assert.isTrue(evalInScope("typeof Zotero.PreferencePanes === 'undefined'"),
+				"PreferencePanes should not be exposed without preferencePane permission");
 		});
 
 		it("should expose data APIs but not fileSystem with data permission", function () {
@@ -3218,7 +3220,7 @@ describe("Plugin Sandbox", function () {
 			assert.isTrue(evalInScope("typeof Zotero.File === 'undefined'"),
 				"File should not be exposed without fileSystem permission");
 			assert.isTrue(evalInScope("typeof Zotero.ItemTreeManager === 'undefined'"),
-				"ItemTreeManager should not be exposed without ui permission");
+				"ItemTreeManager should not be exposed without itemTree permission");
 		});
 
 		it("should still expose default APIs (logging, platform info, window access, utilities) regardless of permissions", function () {
@@ -3629,7 +3631,7 @@ describe("Plugin Sandbox", function () {
 				});
 
 				it("should embed a frame in a custom item pane section via createFrame", async function () {
-					loadTestScopeWithURI(["default", "ui"]);
+					loadTestScopeWithURI(["default", "itemPane"]);
 
 					// Set up a promise on the scope that the onLoad callback will resolve
 					let frameLoadPromise = new Promise((resolve) => {
