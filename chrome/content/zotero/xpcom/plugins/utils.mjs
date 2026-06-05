@@ -525,6 +525,10 @@ const ScopeUtils = {
 
 		if (!VarCheck.isObjectLike(value)) return value;
 
+		if (VarCheck.hasOriginalRef(value)) {
+			return value;
+		}
+
 		if (Array.isArray(value)) {
 			let arr = Cu.cloneInto([], scope, {
 				wrapReflectors: true,
@@ -708,6 +712,75 @@ const ScopeUtils = {
 
 		Object.preventExtensions(facade);
 		return facade;
+	},
+
+	/**
+	 * Create a forwarding Proxy in the sandbox that delegates all property
+	 * access to a chrome-side object.  The real object stays in chrome;
+	 * the sandbox gets a Proxy whose traps are exported functions.
+	 * Carries ORIGINAL_REF_KEY so _ensureVarInScope passes it through.
+	 */
+	ensureForwardingProxyInScope(target, scope, { mutable = false } = {}) {
+		if (VarCheck.isSameCompartment(target, scope)) {
+			return target;
+		}
+
+		let traps = Cu.createObjectIn(scope);
+
+		Cu.exportFunction(function (_facade, prop) {
+			if (typeof prop === "symbol") return undefined;
+			if (prop === "then") return undefined;
+			if (prop === ORIGINAL_REF_KEY) return traps._origRef;
+			let value;
+			try {
+				value = Reflect.get(target, prop);
+			}
+			catch {
+				return undefined;
+			}
+			if (value === undefined || value === null) return value;
+			if (typeof value !== "object" && typeof value !== "function") {
+				return value;
+			}
+			if (typeof value === "function") {
+				return ScopeUtils.ensureCallableInScope(value, target, scope, { mutable });
+			}
+			return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable });
+		}, traps, { defineAs: "get" });
+
+		Cu.exportFunction(function (_facade, prop) {
+			if (typeof prop === "symbol") return false;
+			if (prop === ORIGINAL_REF_KEY) return true;
+			try {
+				return Reflect.has(target, prop);
+			}
+			catch {
+				return false;
+			}
+		}, traps, { defineAs: "has" });
+
+		Cu.exportFunction(function (_facade, prop, value) {
+			if (typeof prop === "symbol") return false;
+			if (!mutable) {
+				VarCheck.throwPropError("set", prop);
+			}
+			try {
+				return Reflect.set(target, prop, Cu.waiveXrays(value));
+			}
+			catch {
+				return false;
+			}
+		}, traps, { defineAs: "set" });
+
+		Cu.exportFunction(function () {
+			return target;
+		}, traps, { defineAs: "_origRef" });
+
+		let makeProxy = Cu.evalInSandbox(
+			`(function(t) { return new Proxy({}, { get: t.get, has: t.has, set: t.set }); })`,
+			scope
+		);
+		return makeProxy(traps);
 	},
 };
 
