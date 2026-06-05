@@ -153,6 +153,7 @@ function loadPrivilegedScope(addon, globalVars = {}) {
 			Worker,
 			XMLSerializer,
 			PLUGIN_ID: addon.id,
+			PLUGIN_GUID: addon.syncGUID.replace(/[{}]/g, ""),
 			PERMISSIONS: ["*"],
 			HOST_PERMISSIONS: ["*"],
 			PREF_PERMISSIONS: ["*"],
@@ -226,6 +227,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 			),
 			isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
 			PLUGIN_ID: addon.id,
+			PLUGIN_GUID: addon.syncGUID.replace(/[{}]/g, ""),
 			PERMISSIONS: Cu.cloneInto(permissions, scope),
 			HOST_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.host_permissions || [], scope),
 			PREF_PERMISSIONS: Cu.cloneInto(addon.installPermissions?.pref_permissions || [], scope),
@@ -266,7 +268,7 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 	Object.assign(scope, extraGlobals);
 
 	if (permissions.includes("openWindow")) {
-		setupOpenWindow(scope, rootURI, addon.id);
+		setupOpenWindow(scope);
 	}
 
 	if (permissions.includes("network")) {
@@ -274,16 +276,16 @@ function loadUnprivilegedScope(addon, globalVars = {}) {
 	}
 
 	if (permissions.includes("preferences")) {
-		setupPreferences(scope, addon);
+		setupPreferences(scope);
 	}
 
 	// fileSystemWrite implies fileSystemRead
 	if (permissions.includes("fileSystemRead")) {
-		setupFilePicker(scope, addon.id);
+		setupFilePicker(scope);
 	}
 
 	if (permissions.includes("database")) {
-		setupPluginDB(scope, addon);
+		setupPluginDB(scope);
 	}
 
 	return scope;

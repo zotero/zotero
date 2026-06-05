@@ -277,9 +277,9 @@
 	// preventing unprivileged plugins from spoofing their identity.
 	lazy.ScopeVariables.setCustomParser(
 		Zotero.PluginInteropManager.getCommand,
-		({ addonID, args }) => {
+		({ pluginID, args }) => {
 			if (args[0] && typeof args[0] === "object") {
-				args[0].callerPluginID = addonID;
+				args[0].callerPluginID = pluginID;
 			}
 		}
 	);
