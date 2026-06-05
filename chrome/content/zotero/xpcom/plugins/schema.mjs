@@ -53,8 +53,8 @@ const PERMISSION_SCHEMAS = {
 				get: true,
 				getAsync: true,
 				getByLibraryAndKey: true,
-				getTopLevel: true,
-				keepTopLevel: true,
+				getTopLevel: "FromScopeCallable",
+				keepTopLevel: "FromScopeCallable",
 				// Write
 				trash: true,
 				trashTx: true,
@@ -97,18 +97,14 @@ const PERMISSION_SCHEMAS = {
 				// Read
 				getName: true,
 				getID: true,
-				create: true,
 				getAll: true,
 				getAllWithin: true,
-				getTagItems: true,
-				search: true,
 				getColor: true,
 				getColorByPosition: true,
 				getColors: true,
 				// Write
 				rename: true,
 				removeFromLibrary: true,
-				purge: true,
 				setColor: true,
 			},
 			// I/O
@@ -123,7 +119,6 @@ const PERMISSION_SCHEMAS = {
 				normalizeToUnix: true,
 				directoryContains: true,
 				truncateFileName: true,
-				getCharsetFromFile: true,
 				reveal: true,
 				// Write
 				putContentsAsync: true,
@@ -183,7 +178,56 @@ const WINDOW_SCHEMAS = {
 const MAIN_WINDOW_SCHEMAS = {
 	default: {
 		// TODO: Use permissions to determine which of these to expose
-		Zotero_Tabs: true,
+		Zotero_Tabs: {
+			// Read-only state
+			selectedID: true,
+			selectedType: true,
+			selectedIndex: true,
+			numTabs: true,
+			// Query methods
+			getTabIDByItemID: true,
+			getTabInfo: true,
+			hasContextPane: true,
+			hasNoteContext: true,
+			parseTabType: true,
+			// Tab navigation
+			select: true,
+			selectPrev: true,
+			selectNext: true,
+			selectLast: true,
+			// Tab management
+			close: true,
+			rename: true,
+		},
+		ZoteroPane: {
+			// Read-only state
+			loaded: true,
+			// Selection queries
+			getSelectedLibraryID: true,
+			getSelectedCollection: true,
+			getSelectedSavedSearch: true,
+			getSelectedGroup: true,
+			getSelectedItems: true,
+			getSortedItems: true,
+			getSortField: true,
+			getSortDirection: true,
+			// Permission checks
+			canEdit: true,
+			canEditLibrary: true,
+			canEditFiles: true,
+			// Navigation
+			selectItem: true,
+			selectItems: true,
+			// UI actions
+			toggleItemPane: true,
+			toggleTagSelector: true,
+			clearQuicksearch: true,
+			// Creation
+			newItem: true,
+			newCollection: true,
+			newNote: true,
+			newChildNote: true,
+		},
 	}
 };
 
