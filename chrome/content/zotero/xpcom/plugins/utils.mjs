@@ -178,6 +178,7 @@ const VarCheck = {
 	},
 
 	isPrivilegedScope(scope) {
+		if (!scope) return true;
 		// If the scope is unprivileged, it will be xrayed and thus using its properties is safe
 		return scope.PERMISSIONS.includes("*");
 	},
