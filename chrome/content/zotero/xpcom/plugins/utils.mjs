@@ -40,6 +40,7 @@ const VarCheck = {
 	isPromise(v) {
 		return this.isObjectLike(v) && typeof v.then === "function";
 	},
+
 	isPlainObject(v) {
 		if (v === null || typeof v !== "object") return false;
 		// Unwaive Xray waivers so prototype comparisons work correctly
@@ -111,6 +112,18 @@ const VarCheck = {
 			return true;
 		}
 		return Cu.getGlobalForObject(obj1) === Cu.getGlobalForObject(obj2);
+	},
+
+	hasOriginalRef(v) {
+		return this.isObjectLike(v) && typeof v[ORIGINAL_REF_KEY] === "function";
+	},
+
+	getOriginalRef(v) {
+		return v[ORIGINAL_REF_KEY]();
+	},
+
+	getOriginalOrSelf(v) {
+		return this.hasOriginalRef(v) ? this.getOriginalRef(v) : v;
 	},
 
 	throwPropError(op, prop = undefined, reason = undefined) {
