@@ -49,7 +49,6 @@ function loadScope(addon, globalVars = {}) {
 		let existingPermissions = Utils.getPermissionsString(existingScope?.PERMISSIONS);
 		if (existingPermissions === currentPermissions) {
 			Zotero.debug(`Reusing existing scope for plugin ${addon.id}`);
-			ChromeUtils.defineLazyGetter(existingScope, "console", ScopeVariables.getConsole(addon));
 			return;
 		}
 		Zotero.debug(`Permissions changed for plugin ${addon.id}, recreating scope`);

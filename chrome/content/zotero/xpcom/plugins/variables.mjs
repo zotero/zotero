@@ -42,7 +42,14 @@ const ScopeVariables = {
 			let console = new lazy.ConsoleAPI({
 				prefix: `${addon.name} (${addon.id}):\n`,
 			});
-			return ScopeVariables.createAllowlistMirrorObject(console, true, addon.id, { mutable: false, cache: true });
+			let wrapper = ScopeVariables.createAllowlistMirrorObject(console, true, addon.id, { mutable: false, cache: true });
+			// Save a strong ref to the original object so that it doesn't get GCed before plugin unloads
+			Object.defineProperty(wrapper, ORIGINAL_REF_KEY, {
+				value() {
+					return console;
+				}
+			});
+			return wrapper;
 		};
 	},
 
