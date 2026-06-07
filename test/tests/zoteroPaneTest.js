@@ -1136,6 +1136,83 @@ describe("ZoteroPane", function () {
 			var restoreMenuItem = menu.querySelector('.zotero-menuitem-restore-to-library');
 			assert.isTrue(restoreMenuItem.disabled);
 		});
+
+		it("should hide update metadata from DOI when the selected item has no DOI", async function () {
+			await selectLibrary(win);
+			let item = await createDataObject('item', { itemType: 'journalArticle' });
+
+			await zp.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let menuItem = menu.querySelector('.zotero-menuitem-update-metadata-from-doi');
+			assert.isTrue(menuItem.hidden);
+		});
+
+		it("should show update metadata from DOI for a regular item with a DOI", async function () {
+			await selectLibrary(win);
+			let item = await createDataObject('item', { itemType: 'journalArticle' });
+			item.setField('DOI', '10.1111/zotero-pane-visible');
+			await item.saveTx();
+
+			await zp.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let menuItem = menu.querySelector('.zotero-menuitem-update-metadata-from-doi');
+			assert.isFalse(menuItem.hidden);
+			assert.isFalse(menuItem.disabled);
+			assert.equal(menuItem.getAttribute('label'), Zotero.getString('pane.items.menu.updateMetadataFromDOI'));
+		});
+
+		it("should show update metadata from DOI for a mixed selection with at least one DOI", async function () {
+			await selectLibrary(win);
+			let itemWithDOI = await createDataObject('item', { itemType: 'journalArticle' });
+			itemWithDOI.setField('DOI', '10.1111/zotero-pane-mixed');
+			await itemWithDOI.saveTx();
+			let itemWithoutDOI = await createDataObject('item', { itemType: 'journalArticle' });
+
+			await zp.selectItems([itemWithDOI.id, itemWithoutDOI.id]);
+			await zp.buildItemContextMenu();
+
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let menuItem = menu.querySelector('.zotero-menuitem-update-metadata-from-doi');
+			assert.isFalse(menuItem.hidden);
+		});
+
+		it("should hide update metadata from DOI for attachment and note selections", async function () {
+			await selectLibrary(win);
+			let attachment = await importFileAttachment('test.png');
+			let note = await createDataObject('item', { itemType: 'note' });
+
+			await zp.selectItems([attachment.id, note.id]);
+			await zp.buildItemContextMenu();
+
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let menuItem = menu.querySelector('.zotero-menuitem-update-metadata-from-doi');
+			assert.isTrue(menuItem.hidden);
+		});
+
+		it("should disable update metadata from DOI in a non-editable library", async function () {
+			let group = await createGroup();
+			let item = await createDataObject('item', {
+				libraryID: group.libraryID,
+				itemType: 'journalArticle'
+			});
+			item.setField('DOI', '10.1111/zotero-pane-disabled');
+			await item.saveTx();
+			group.editable = false;
+			await group.saveTx();
+
+			await selectLibrary(win, group.libraryID);
+			await zp.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let menuItem = menu.querySelector('.zotero-menuitem-update-metadata-from-doi');
+			assert.isFalse(menuItem.hidden);
+			assert.isTrue(menuItem.disabled);
+		});
 	});
 
 	describe("#restoreSelectedItems()", function () {

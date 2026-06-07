@@ -3700,6 +3700,7 @@ var ZoteroPane = new function () {
 			'createBib',
 			'loadReport',
 			'sep5',
+			'updateMetadataFromDOI',
 			'recognizePDF',
 			'unrecognize',
 			'createParent',
@@ -4042,6 +4043,16 @@ var ZoteroPane = new function () {
 			].forEach(x => disable.add(x));
 			
 		}
+		let canUpdateMetadataFromDOI = items.some(item => (
+			item.isRegularItem()
+				&& !item.isFeedItem
+				&& item.getField('DOI')
+		));
+		if (canUpdateMetadataFromDOI && !isTrash && !collectionTreeRow.isFeedsOrFeed()) {
+			show.add(m.sep5);
+			show.add(m.updateMetadataFromDOI);
+		}
+
 		// Show "Export Note…" if all notes or attachments
 		var noteExport = items.every(item => item.isNote() || item.isAttachment());
 		// Disable export if all notes are empty
@@ -4168,6 +4179,7 @@ var ZoteroPane = new function () {
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
 		menu.childNodes[m.createParent].setAttribute('label', Zotero.getString('pane.items.menu.createParent' + multiple));
+		menu.childNodes[m.updateMetadataFromDOI].setAttribute('label', Zotero.getString('pane.items.menu.updateMetadataFromDOI'));
 		menu.childNodes[m.recognizePDF].setAttribute('label', Zotero.getString('pane.items.menu.recognizeDocument'));
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
 		
@@ -5732,6 +5744,131 @@ var ZoteroPane = new function () {
 	this.recognizeSelected = function () {
 		Zotero.RecognizeDocument.recognizeItems(ZoteroPane.getSelectedItems());
 		Zotero.ProgressQueues.get('recognize').getDialog().open();
+	};
+
+
+	this.updateSelectedItemsMetadataFromDOI = async function (options = {}) {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return false;
+		}
+
+		let items = this.getSelectedItems()
+			.filter(item => item.isRegularItem() && !item.isFeedItem);
+		if (!items.length) {
+			return false;
+		}
+
+		let overwrite = !!options.overwrite;
+		if (options.overwrite === undefined) {
+			let buttonIndex = Zotero.Prompt.confirm({
+				title: Zotero.getString('itemMetadataUpdater.confirm.title'),
+				text: Zotero.getString(
+					items.length == 1
+						? 'itemMetadataUpdater.confirm.text'
+						: 'itemMetadataUpdater.confirm.text.multiple',
+					[items.length]
+				),
+				button0: Zotero.getString('itemMetadataUpdater.confirm.fillEmpty'),
+				button1: Zotero.Prompt.BUTTON_TITLE_CANCEL,
+				button2: Zotero.getString('itemMetadataUpdater.confirm.overwrite')
+			});
+			if (buttonIndex == 1) {
+				return false;
+			}
+			overwrite = buttonIndex == 2;
+		}
+
+		function getProgressMessage(status, result) {
+			if (status == 'processing') {
+				return Zotero.getString('itemMetadataUpdater.progress.updating');
+			}
+
+			switch (result.status) {
+				case 'updated':
+					return Zotero.getString('itemMetadataUpdater.progress.updated', [result.updatedFields.join(', ')]);
+				case 'unchanged':
+					return Zotero.getString('itemMetadataUpdater.progress.unchanged');
+				case 'skipped':
+					return Zotero.getString('itemMetadataUpdater.progress.skipped.' + result.reason);
+				case 'failed':
+					return Zotero.getString('itemMetadataUpdater.progress.failed', [result.error || Zotero.getString('general.error')]);
+				default:
+					return '';
+			}
+		}
+
+		let progressQueue = Zotero.ProgressQueues.get('updateMetadataFromDOI');
+		if (!progressQueue) {
+			progressQueue = Zotero.ProgressQueues.create({
+				id: 'updateMetadataFromDOI',
+				title: 'itemMetadataUpdater.progress.title',
+				columns: [
+					'general.item',
+					'itemMetadataUpdater.progress.status'
+				]
+			});
+		}
+		else {
+			progressQueue.cancel();
+		}
+
+		let cancelled = false;
+		let onCancel = () => {
+			cancelled = true;
+		};
+		progressQueue.addListener('cancel', onCancel);
+
+		for (let item of items) {
+			progressQueue.addRow(item);
+		}
+
+		let dialog = progressQueue.getDialog();
+		dialog.showMinimizeButton(false);
+		dialog.setStatus(Zotero.getString('itemMetadataUpdater.progress.updating'));
+		dialog.open();
+
+		let summary;
+		try {
+			summary = await Zotero.ItemMetadataUpdater.updateItemsFromDOI(items, {
+				overwrite,
+				shouldCancel: () => cancelled,
+				onProgress: ({ item, status, result }) => {
+					if (!item) {
+						return;
+					}
+
+					if (status == 'processing') {
+						progressQueue.updateRow(
+							item.id,
+							Zotero.ProgressQueue.ROW_PROCESSING,
+							getProgressMessage(status)
+						);
+						return;
+					}
+
+					progressQueue.updateRow(
+						item.id,
+						status == 'failed' ? Zotero.ProgressQueue.ROW_FAILED : Zotero.ProgressQueue.ROW_SUCCEEDED,
+						getProgressMessage(status, result)
+					);
+				}
+			});
+		}
+		finally {
+			progressQueue.removeListener('cancel', onCancel);
+		}
+
+		if (!summary.cancelled) {
+			dialog.setStatus(Zotero.getString('itemMetadataUpdater.progress.complete', [
+				summary.updated,
+				summary.unchanged,
+				summary.skipped,
+				summary.failed
+			]));
+		}
+
+		return summary;
 	};
 	
 	
