@@ -281,6 +281,58 @@ describe("Zotero.UndoHistory", function () {
 		});
 	});
 
+	describe("library erasure", function () {
+		it("should clear undo history when a related library is erased", async function () {
+			let group = await createGroup();
+			let collection = await createDataObject(
+				'collection', { libraryID: group.libraryID, name: 'Group Collection' }
+			);
+			Zotero.UndoHistory.clear();
+
+			collection.name = 'Renamed';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+
+			// The group's objects are cascade-deleted without per-object events, so
+			// the related undo entry must be discarded
+			await group.eraseTx();
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+			assert.isFalse(Zotero.UndoHistory.canRedo());
+		});
+
+		it("should clear undo history when the erased library is referenced only in the redo stack", async function () {
+			let group = await createGroup();
+			let collection = await createDataObject(
+				'collection', { libraryID: group.libraryID, name: 'Group Collection' }
+			);
+			Zotero.UndoHistory.clear();
+
+			collection.name = 'Renamed';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			// Move the entry onto the redo stack
+			await Zotero.UndoHistory.undo();
+			assert.isTrue(Zotero.UndoHistory.canRedo());
+
+			await group.eraseTx();
+			assert.isFalse(Zotero.UndoHistory.canRedo());
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+		});
+
+		it("should preserve undo history when an unrelated library is erased", async function () {
+			// Record an undo entry in the user library
+			let collection = await createDataObject('collection', { name: 'My Library Collection' });
+			Zotero.UndoHistory.clear();
+			collection.name = 'Renamed';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+
+			// Erasing an unrelated group must not touch the user-library history
+			let group = await createGroup();
+			await group.eraseTx();
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+		});
+	});
+
 	describe("canUndo/canRedo", function () {
 		it("should return false when stacks are empty", function () {
 			assert.isFalse(Zotero.UndoHistory.canUndo());

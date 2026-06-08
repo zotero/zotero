@@ -59,6 +59,17 @@ Zotero.UndoHistory = {
 	},
 
 	/**
+	 * Discard both stacks if any entry references an object in the given library.
+	 * @param {Integer} libraryID
+	 */
+	clearForLibrary(libraryID) {
+		let affectsLibrary = entry => entry.changes.some(change => change.libraryID === libraryID);
+		if (this._undoStack.some(affectsLibrary) || this._redoStack.some(affectsLibrary)) {
+			this.clear();
+		}
+	},
+
+	/**
 	 * Return a window controller for cmd_undo/cmd_redo that defers to
 	 * native text-editing controllers when they are active.
 	 * Caller should append it to window.controllers.
