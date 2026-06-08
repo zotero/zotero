@@ -987,17 +987,17 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 		].forEach(x => env.options[x] = true);
 	}
 	
-	var proceed = await this._initSave(env);
-	if (!proceed) return false;
-	
-	if (env.isNew) {
-		Zotero.debug('Saving data for new ' + this._objectType + ' to database', 4);
-	}
-	else {
-		Zotero.debug('Updating database with new ' + this._objectType + ' data', 4);
-	}
-	
 	try {
+		var proceed = await this._initSave(env);
+		if (!proceed) return false;
+		
+		if (env.isNew) {
+			Zotero.debug('Saving data for new ' + this._objectType + ' to database', 4);
+		}
+		else {
+			Zotero.debug('Updating database with new ' + this._objectType + ' data', 4);
+		}
+		
 		if (Zotero.DataObject.prototype._finalizeSave == this._finalizeSave) {
 			throw new Error("_finalizeSave not implemented for Zotero." + this._ObjectType);
 		}

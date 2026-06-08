@@ -251,6 +251,34 @@ describe("Zotero.UndoHistory", function () {
 			assert.isFalse(Zotero.UndoHistory.canUndo());
 			assert.isFalse(Zotero.UndoHistory.canRedo());
 		});
+
+		it("should not leave an object unsaveable after an undo apply failure", async function () {
+			// A (move target), P (original parent), B (child being moved)
+			let collectionA = await createDataObject('collection', { name: 'A' });
+			let collectionP = await createDataObject('collection', { name: 'P' });
+			let collectionB = await createDataObject('collection', { name: 'B', parentID: collectionP.id });
+
+			// Move B from P onto A, recording an undo entry for the parent change
+			Zotero.UndoHistory.clear();
+			collectionB.parentID = collectionA.id;
+			await collectionB.saveTx({ undoAction: 'undo-action-move-collection' });
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+
+			// Permanently erase P so its key no longer resolves to a collection
+			await collectionP.eraseTx();
+
+			// Undoing tries to set B's parent back to the now-erased P, which makes
+			// Collection._initSave throw. The apply fails and history is cleared, but
+			// B must not be left pinned to the vanished parent.
+			await Zotero.UndoHistory.undo();
+
+			// B should have been rolled back to its last valid parent (A) and remain
+			// editable
+			assert.equal(collectionB.parentID, collectionA.id);
+			collectionB.name = 'B renamed';
+			await collectionB.saveTx();
+			assert.equal(collectionB.name, 'B renamed');
+		});
 	});
 
 	describe("canUndo/canRedo", function () {
