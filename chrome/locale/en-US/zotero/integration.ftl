@@ -30,7 +30,7 @@ integration-citationDialog-section-cited = { $count ->
 integration-citationDialog-details-suffix = Suffix
 integration-citationDialog-details-prefix = Prefix
 integration-citationDialog-details-suppressAuthor = Omit Author
-integration-citationDialog-details-locator-info = After adding an item, you can type page numbers directly into the main input field. You can type other locators (e.g. chapter 5) and add them via Enter. <a data-l10n-name="docs-link">Learn more</a>.
+integration-citationDialog-details-locator-info = After adding an item, you can type page numbers directly into the main input field. You can type other locators (e.g. chapter 5) and add them via { return-or-enter  }. <a data-l10n-name="docs-link">Learn more</a>.
 integration-citationDialog-details-includeComments = Include Comments
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
