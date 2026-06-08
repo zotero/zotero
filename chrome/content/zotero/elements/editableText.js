@@ -38,9 +38,7 @@
 
 	class EditableText extends XULElementBase {
 		_input;
-		
-		_resizeObserver;
-		
+
 		_ignoredWindowInactiveBlur = false;
 		
 		_focusMousedownEvent = false;
@@ -76,7 +74,30 @@
 			});
 			return span;
 		}
-		
+
+		/**
+		 * A single ResizeObserver shared by every EditableText in the document.
+		 * When inputs resize, recompute the 'overflowing' state for all affected
+		 * fields at once, batching layout reads before writes:
+		 * toggling 'overflowing' makes the layout dirty, and measuring the width
+		 * requires a clean layout, so interleaving the two would force a reflow
+		 * per measurement, which adds up to multiple seconds of layout
+		 * calculations on outlier items with thousands of creators.
+		 *
+		 * See {@link #batchSizeToContent()}.
+		 */
+		static _resizeObserver = new ResizeObserver((entries) => {
+			let editableTexts = entries
+				.map(entry => entry.target.closest('editable-text'))
+				.filter(editableText => editableText?._input);
+			// Read phase: measure everything first
+			let overflowing = editableTexts.map(editableText => editableText._isOverflowing());
+			// Write phase: apply the class changes in one batch
+			for (let i = 0; i < editableTexts.length; i++) {
+				editableTexts[i].classList.toggle('overflowing', overflowing[i]);
+			}
+		});
+
 		get noWrap() {
 			return this.hasAttribute('nowrap');
 		}
@@ -199,6 +220,27 @@
 		sizeToContent = () => {
 			this.style.maxWidth = this._getContentWidth() + 'px';
 		};
+
+		/**
+		 * Size multiple elements to their content in a single batch.
+		 *
+		 * sizeToContent() reads layout and then updates layout styles.
+		 * Calling it once per element interleaves those reads and writes,
+		 * forcing a full synchronous reflow on every call. That's extremely
+		 * slow, especially if it occurs in a loop that also adds new elements
+		 * to the DOM on each iteration, as in the InfoBox.
+		 * Measuring everything first and only then applying the widths collapses
+		 * that to a single reflow regardless of how many elements are sized.
+		 *
+		 * @param {EditableText[]} elements
+		 */
+		static batchSizeToContent(elements) {
+			elements = [...elements];
+			let widths = elements.map(el => el._getContentWidth());
+			for (let i = 0; i < elements.length; i++) {
+				elements[i].style.maxWidth = widths[i] + 'px';
+			}
+		}
 		
 		attributeChangedCallback(name) {
 			if (name === 'value' || name === 'dir') {
@@ -209,6 +251,13 @@
 
 		init() {
 			this.render();
+		}
+
+		destroy() {
+			// Stop the shared observer from holding a reference to our input
+			if (this._input) {
+				EditableText._resizeObserver.unobserve(this._input);
+			}
 		}
 
 		render() {
@@ -245,6 +294,7 @@
 					this.removeEventListener('keydown', this._captureAutocompleteKeydown, true);
 				}
 				
+				let oldInput = this._input;
 				let focused = this.focused;
 				let selectionStart = this._input?.selectionStart;
 				let selectionEnd = this._input?.selectionEnd;
@@ -268,10 +318,12 @@
 					this._input.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
 				}
 				
-				this._resizeObserver?.disconnect();
+				if (oldInput) {
+					EditableText._resizeObserver.unobserve(oldInput);
+				}
+				// Only nowrap fields can overflow horizontally; textareas wrap
 				if (this.noWrap) {
-					this._resizeObserver = new ResizeObserver(this._handleInputResize);
-					this._resizeObserver.observe(this._input);
+					EditableText._resizeObserver.observe(this._input);
 				}
 			}
 			this._input.readOnly = this.readOnly;
@@ -497,10 +549,10 @@
 			}
 		};
 		
-		_handleInputResize = () => {
+		_isOverflowing() {
 			// Very small floating-point-error allowance
 			const EPSILON = 0.001;
-			this.classList.toggle('overflowing',
+			return (
 				// We're overflowing if the field can scroll at least a pixel
 				this._input.scrollLeftMax > 0
 				// But sometimes it can scroll a *sub*pixel, and every single
@@ -513,7 +565,7 @@
 					&& this._getContentWidth() > this._input.getBoundingClientRect().width + EPSILON
 				)
 			);
-		};
+		}
 
 		focus(options) {
 			// If the window isn't active, the focus event won't fire yet,
