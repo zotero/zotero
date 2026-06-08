@@ -147,7 +147,8 @@ var Zotero_Lookup = new function () {
 			// Send the focus to the item tree after the popup closes
 			ZoteroPane.lastFocusedElement = null;
 			document.getElementById("zotero-lookup-panel").hidePopup();
-			document.getElementById("item-tree-main-default").focus();
+			// The item tree's DOM id has a view-specific suffix, so use the current view's id
+			document.getElementById(ZoteroPane.itemsView.id).focus();
 		}
 		return false;
 	};
