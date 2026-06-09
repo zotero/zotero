@@ -2041,8 +2041,10 @@
 					}
 				}
 				let options = Object.keys(optionCounts);
-				options.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }));
-				let optionLabels = options.map(o => `[${optionCounts[o]}] ${o}`);
+				// Sort by frequency (most common first), then alphanumerically
+				options.sort((a, b) =>
+					optionCounts[b] - optionCounts[a]
+					|| a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }));
 				valueElement.multipleValues = true;
 				valueElement.value = '';
 				valueElement.placeholder = Zotero.getString('item-pane-batch-editing-multiple-values-placeholder');
@@ -2056,8 +2058,7 @@
 						search: 'zotero-options',
 						searchParam: JSON.stringify({
 							search: 'zotero-options',
-							options: optionLabels,
-							optionValues: options,
+							options: options,
 							includeNoValue: true
 						}),
 						popup: 'PopupAutoComplete',
