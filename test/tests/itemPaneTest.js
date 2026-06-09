@@ -2622,8 +2622,8 @@ describe("Item pane", function () {
 
 			// Enter batch edit mode
 			assert.equal(itemPane.mode, "batch-edit-prompt");
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
-			assert.ok(batchEditEnableBtn, "Enter Batch Edit Mode button should exist");
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
+			assert.ok(batchEditEnableBtn, "batch edit enable button should exist");
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -2663,7 +2663,7 @@ describe("Item pane", function () {
 			assert.equal(itemPane.mode, "batch-edit-prompt");
 
 			// Enter batch edit mode
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 			assert.equal(itemPane.mode, "item");
@@ -2708,7 +2708,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 			
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 			
@@ -2724,12 +2724,12 @@ describe("Item pane", function () {
 			// 2 value options + 1 "no value" option
 			await waitForCallback(() => pubTitleField.ref.mController.matchCount === 3, 100, 10);
 			let controller = pubTitleField.ref.mController;
-			// options should be sorted alphabetically, empty values are ignored
+			// Options are sorted by frequency (most common first); empty values are ignored
 			assert.equal(controller.matchCount, 3);
-			assert.equal(controller.getValueAt(0), `[1] ${differentTitle}`);
-			assert.equal(controller.getFinalCompleteValueAt(0), differentTitle);
-			assert.equal(controller.getValueAt(1), `[2] ${sharedTitle}`);
-			assert.equal(controller.getFinalCompleteValueAt(1), sharedTitle);
+			assert.equal(controller.getValueAt(0), sharedTitle);
+			assert.equal(controller.getFinalCompleteValueAt(0), sharedTitle);
+			assert.equal(controller.getValueAt(1), differentTitle);
+			assert.equal(controller.getFinalCompleteValueAt(1), differentTitle);
 			// Last option should be "no value"
 			assert.equal(controller.getStyleAt(2), 'options-ac-no-value');
 
@@ -2743,10 +2743,10 @@ describe("Item pane", function () {
 			));
 			await modifyPromise;
 
-			assert.equal(item1.getField('publicationTitle'), differentTitle);
-			assert.equal(item2.getField('publicationTitle'), differentTitle);
-			assert.equal(item3.getField('publicationTitle'), differentTitle);
-			assert.equal(item4.getField('publicationTitle'), differentTitle);
+			assert.equal(item1.getField('publicationTitle'), sharedTitle);
+			assert.equal(item2.getField('publicationTitle'), sharedTitle);
+			assert.equal(item3.getField('publicationTitle'), sharedTitle);
+			assert.equal(item4.getField('publicationTitle'), sharedTitle);
 		});
 
 		it("should not show View Online button for URL and DOI fields in batch edit mode", async function () {
@@ -2765,7 +2765,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -2793,7 +2793,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -2823,7 +2823,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -2857,7 +2857,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -2887,7 +2887,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -2914,7 +2914,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -2951,7 +2951,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -2993,7 +2993,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -3034,7 +3034,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -3069,7 +3069,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -3078,7 +3078,7 @@ describe("Item pane", function () {
 			assert.ok(pubTitleField, "publicationTitle field should exist");
 
 			assert.equal(pubTitleField.value, '', "field value should be empty before edit");
-			assert.equal(pubTitleField.placeholder, 'Multiple\u2026', "field should show Multiple placeholder before edit");
+			assert.equal(pubTitleField.placeholder, Zotero.getString('item-pane-batch-editing-multiple-values-placeholder'), "field should show Multiple placeholder before edit");
 
 			pubTitleField._ignoredWindowInactiveBlur = false;
 			await activateZoteroPane();
@@ -3118,7 +3118,7 @@ describe("Item pane", function () {
 			// Re-query since render() rebuilds the DOM
 			pubTitleField = itemBox.querySelector('editable-text[fieldname="publicationTitle"]');
 			assert.equal(pubTitleField.value, '', "field value should be empty after undo");
-			assert.equal(pubTitleField.placeholder, 'Multiple\u2026', "field should show Multiple placeholder after undo");
+			assert.equal(pubTitleField.placeholder, Zotero.getString('item-pane-batch-editing-multiple-values-placeholder'), "field should show Multiple placeholder after undo");
 
 			// Redo should re-apply to all items
 			await Zotero.UndoHistory.redo();
@@ -3144,7 +3144,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -3183,7 +3183,7 @@ describe("Item pane", function () {
 			titleCaseMenuItem.click();
 			// Label should not flash individual values -- it stays as "Multiple" in batch mode
 			assert.equal(titleField.value, '', "title field value should remain empty in batch mode");
-			assert.equal(titleField.placeholder, 'Multiple\u2026', "title field should still show Multiple placeholder");
+			assert.equal(titleField.placeholder, Zotero.getString('item-pane-batch-editing-multiple-values-placeholder'), "title field should still show Multiple placeholder");
 			await modifyPromise;
 
 			assert.equal(item1.getField('title'), "The Great Gatsby", "item1 should remain in title case");
@@ -3208,7 +3208,7 @@ describe("Item pane", function () {
 			let itemPane = win.ZoteroPane.itemPane;
 			let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-			let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 			batchEditEnableBtn.click();
 			await itemDetails._renderPromise;
 
@@ -3265,7 +3265,7 @@ describe("Item pane", function () {
 		let itemPane = win.ZoteroPane.itemPane;
 		let itemDetails = ZoteroPane.itemPane._itemDetails;
 
-		let batchEditEnableBtn = itemPane.querySelector('button[label="Enter Batch Edit Mode"]');
+		let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
 		batchEditEnableBtn.click();
 		await itemDetails._renderPromise;
 
