@@ -663,7 +663,14 @@ Zotero.Sync.Storage.Local = {
 			throw new Error("Downloaded file not found");
 		}
 		
-		await Zotero.Attachments.createDirectoryForItem(item);
+		try {
+			await Zotero.Attachments.createDirectoryForItem(item);
+		}
+		catch (e) {
+			Zotero.File.checkFileAccessError(
+				e, Zotero.Attachments.getStorageDirectory(item).path, 'create'
+			);
+		}
 		
 		var filename = item.attachmentFilename;
 		if (!filename) {
