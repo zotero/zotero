@@ -2014,7 +2014,6 @@ const CitationPreview = {
 		let shouldShow = isCitingItems && prefShown && hasPreview;
 		_id("citation-preview").hidden = !shouldShow;
 		let isEmpty = !CitationDataManager.items.length;
-		_id("citation-preview-header").hidden = isEmpty;
 		_id("citation-preview-empty").hidden = !isEmpty;
 		_id("citation-preview-content").hidden = isEmpty;
 		if (isEmpty) {

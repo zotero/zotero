@@ -566,15 +566,8 @@
 			visibility: hidden;
 		}
 
-		#citation-preview-header {
-			padding: 0px 12px 4px 12px;
-			color: var(--fill-secondary);
-			font-weight: 600;
-			font-size: 0.93rem;
-		}
-
 		#citation-preview-wrapper {
-			padding: 0px 12px 8px 12px;
+			padding: 2px 12px 8px 12px;
 			min-height: 20px;
 			max-height: 160px;
 			overflow-y: auto;
@@ -583,12 +576,13 @@
 
 			#citation-preview-content {
 				color: var(--fill-primary);
-				font-size: 1rem;
+				font-size: 1.1rem;
 			}
 
 			#citation-preview-empty {
 				padding-top: 2px;
 				color: var(--fill-secondary);
+				font-family: $font-family-base;
 			}
 		}
 	}
