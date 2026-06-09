@@ -131,6 +131,8 @@ async function onLoad() {
 	await IOManager.toggleDialogMode(initialMode);
 	// most of IO handling relies on currentLayout being defined so it must follow setInitialDialogMode
 	IOManager.init();
+	// set the text of the citation preview
+	CitationPreview.update();
 	// explicitly focus bubble input so one can begin typing right away
 	_id("bubble-input").refocusInput();
 	// wait to call functions that rely on io.getItems() or io.sort() till all cited data is loaded
@@ -258,8 +260,9 @@ async function setDialogType(type) {
 	_id("keepSorted").disabled = !io.sortable || !DIALOG_STATE.isCitingItems();
 	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
 	if (DIALOG_STATE.isCitingItems()) {
-		_id("settings-button").hidden = !io.sortable;
 		_id("keepSorted").disabled = !io.sortable;
+		_id("keepSorted").parentElement.hidden = !io.sortable;
+		CitationPreview.update();
 		if (!DIALOG_STATE.loaded) {
 			_id("keepSorted").checked = io.sortable && !io.citation.properties.unsorted;
 		}
@@ -596,14 +599,16 @@ class LibraryLayout extends Layout {
 		IOManager.updateBubbleInput();
 	}
 
+	// Resolves once the resize animation has fully completed
 	async resizeWindow() {
 		await Helpers.smoothResizingPromise;
 		let bubbleInputHeight = Helpers.getSearchRowHeight();
 		let suggestedItemsHeight = _id("library-other-items").getBoundingClientRect().height;
 		let minTableHeight = 400;
+		let citationPreview = _id("citation-preview").getBoundingClientRect().height;
 		let bottomHeight = _id("bottom-area-wrapper").getBoundingClientRect().height;
 
-		let minHeight = bubbleInputHeight + suggestedItemsHeight + bottomHeight + minTableHeight;
+		let minHeight = bubbleInputHeight + suggestedItemsHeight + citationPreview + bottomHeight + minTableHeight;
 
 		let targetWidth = Math.max(window.innerWidth, this.MIN_WIDTH);
 		let targetHeight = Math.max(minHeight, lastSetWindowHeight);
@@ -612,13 +617,16 @@ class LibraryLayout extends Layout {
 		if (needsResize) {
 			doc.documentElement.style.removeProperty('min-height');
 			ignoreWindowResizing = true;
-			Helpers.smoothResize(targetWidth, targetHeight, {
-				onComplete: () => {
-					_id("bubble-input").refocusInput();
-					doc.documentElement.style.minHeight = `${minHeight}px`;
-					document.documentElement.setAttribute("dialog-layout", this.type);
-					ignoreWindowResizing = false;
-				},
+			await new Promise((resolve) => {
+				Helpers.smoothResize(targetWidth, targetHeight, {
+					onComplete: () => {
+						_id("bubble-input").refocusInput();
+						doc.documentElement.style.minHeight = `${minHeight}px`;
+						document.documentElement.setAttribute("dialog-layout", this.type);
+						ignoreWindowResizing = false;
+						resolve();
+					},
+				});
 			});
 		}
 		// ensure dialog-layout and min-height is set even if window does not need resizing
@@ -1092,6 +1100,7 @@ class ListLayout extends Layout {
 		IOManager.updateBubbleInput();
 	}
 
+	// Resolves only once the resize animation has fully completed
 	async resizeWindow() {
 		await Helpers.smoothResizingPromise;
 		let bubbleInputHeight = Helpers.getSearchRowHeight();
@@ -1112,11 +1121,12 @@ class ListLayout extends Layout {
 			marginOfError = Zotero.isWin ? 6 : 2;
 		}
 
-		// height of the bottom section
+		// height of citation preview (0 when hidden) and the bottom section
+		let citationPreview = _id("citation-preview").getBoundingClientRect().height;
 		let bottomHeight = _id("bottom-area-wrapper").getBoundingClientRect().height;
 
 		// set min height and resize the window
-		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + bottomHeight + marginOfError;
+		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + citationPreview + bottomHeight + marginOfError;
 		// window.resizeTo(X,Y) resizes the window so that it's outerHeight == Y. On mac and windows,
 		// innerHeight and outerHeight are the same. On linux, the outerHeight > innerHeight, perhaps
 		// outerHeight there includes chrome, borders, etc. This difference is accounted for below, so that the dialog
@@ -1124,24 +1134,39 @@ class ListLayout extends Layout {
 		if (Zotero.isLinux) {
 			autoHeight += (window.outerHeight - window.innerHeight);
 		}
-		let minHeight = bubbleInputHeight + bottomHeight;
-		doc.documentElement.style.minHeight = `${minHeight}px`;
+		let minHeight = bubbleInputHeight + citationPreview + bottomHeight;
 
 		// cap window height at the height last set by the user
 		autoHeight = Math.min(autoHeight, lastSetWindowHeight);
 		let targetWidth = Math.min(window.innerWidth, this.MIN_WIDTH);
+
+		// Skip the resize animation if the window is already at the target size.
+		let needsResize = Math.round(window.innerWidth) !== Math.round(targetWidth) || Math.round(window.innerHeight) !== Math.round(autoHeight);
+		if (!needsResize) {
+			doc.documentElement.style.minHeight = `${minHeight}px`;
+			document.documentElement.setAttribute("dialog-layout", this.type);
+			return;
+		}
+
+		// Clear the min-height floor so the window can animate freely (including shrinking);
+		// it's restored to the new value in onComplete below.
+		doc.documentElement.style.removeProperty("min-height");
 		ignoreWindowResizing = true;
 		
-		// Timeout is required likely to allow minHeight update to settle
-		setTimeout(() => {
-			Helpers.smoothResize(targetWidth, autoHeight, {
-				onComplete: () => {
-					_id("bubble-input").refocusInput();
-					document.documentElement.setAttribute("dialog-layout", this.type);
-					ignoreWindowResizing = false;
-				},
-			});
-		}, 10);
+		// Timeout is required likely to allow the min-height removal to settle
+		await new Promise((resolve) => {
+			setTimeout(() => {
+				Helpers.smoothResize(targetWidth, autoHeight, {
+					onComplete: () => {
+						_id("bubble-input").refocusInput();
+						doc.documentElement.style.minHeight = `${minHeight}px`;
+						document.documentElement.setAttribute("dialog-layout", this.type);
+						ignoreWindowResizing = false;
+						resolve();
+					},
+				});
+			}, 10);
+		});
 	}
 
 	_markRoundedCorners() {
@@ -1224,6 +1249,7 @@ const IOManager = {
 		});
 
 		_id("includeComments").addEventListener("click", () => this._toggleIncludeComments());
+		_id("display-preview-button").addEventListener("click", () => this._toggleDisplayPreview());
 
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
@@ -1267,10 +1293,12 @@ const IOManager = {
 		let isInitialModeSetting = currentLayout === undefined;
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
 
+		// Reflect visibility of the citation preview after the layout switch.
+		CitationPreview.update();
+
 		// Wait for window resize before running search to avoid stutter with large libraries
 		if (!isInitialModeSetting) {
 			await currentLayout.resizeWindow();
-			await Helpers.smoothResizingPromise;
 		}
 
 		// do not show View menubar with itemTree-specific options in list mode
@@ -1317,6 +1345,7 @@ const IOManager = {
 			};
 		}), DIALOG_STATE.type);
 		_id("accept-button").disabled = !CitationDataManager.items.length;
+		CitationPreview.update();
 	},
 
 	async addItemsToCitation(items, { noInputRefocus, index } = { index: null }) {
@@ -1394,6 +1423,9 @@ const IOManager = {
 			doc.querySelector("guidance-panel").setAttribute("x", Math.round(width / 2));
 			IOManager.showFirstRunDialog();
 		}
+		// Render the preview before refreshing the list so resizeWindow measures its real height;
+		// otherwise the debounced render lands after the resize and overflows the window.
+		await CitationPreview.render();
 		// Always refresh items list to make sure the opened and selected items are up to date
 		await currentLayout.refreshItemsList();
 		if (!noInputRefocus) {
@@ -1862,6 +1894,31 @@ const IOManager = {
 		Zotero.Prefs.set("integration.annotationDialogIncludeComments", includeComments);
 	},
 
+	async _toggleDisplayPreview() {
+		let newShown = !Zotero.Prefs.get("integration.citationPreviewShown");
+		Zotero.Prefs.set("integration.citationPreviewShown", newShown);
+		// Reflect the pressed state right away, since revealing the preview is deferred until resize
+		_id("display-preview-button").setAttribute("aria-pressed", newShown ? "true" : "false");
+		let preview = _id("citation-preview");
+		if (newShown) {
+			// Lay the preview out off-flow via .measuring (real height, but invisible and not
+			// pushing the list around) so resizeWindow grows the window to fit it; then drop it
+			// into view once there's room, avoiding a momentary squeeze of the list.
+			await CitationPreview.render();
+			preview.classList.add("measuring");
+			preview.hidden = false;
+			await currentLayout.resizeWindow();
+			preview.classList.remove("measuring");
+			CitationPreview.update();
+		}
+		else {
+			// Hide first, then shrink -- freeing the space before the window contracts looks clean.
+			preview.classList.remove("measuring");
+			CitationPreview.update();
+			currentLayout.resizeWindow();
+		}
+	},
+
 	// Return focus to where it was before click moved focus.
 	// If it's not possible, refocus the last input in bubble-input so that
 	// focus is not just lost.
@@ -1937,6 +1994,52 @@ const IOManager = {
 			IOManager._focusBeforePanelShow = null;
 		});
 	}
+};
+
+// Manages the citation preview shown in the bottom area of both layouts.
+const CitationPreview = {
+	// Lazily create _renderDebounced on first use
+	get _renderDebounced() {
+		delete CitationPreview._renderDebounced;
+		CitationPreview._renderDebounced = Zotero.Utilities.debounce(() => CitationPreview.render(), 250);
+		return CitationPreview._renderDebounced;
+	},
+
+	// The rendered text is kept in sync with the cited items even while the preview is hidden,
+	// so it can be measured and revealed instantly when toggled on.
+	update() {
+		let prefShown = Zotero.Prefs.get("integration.citationPreviewShown");
+		let isCitingItems = DIALOG_STATE.isCitingItems();
+		let hasPreview = !!io.preview;
+		let shouldShow = isCitingItems && prefShown && hasPreview;
+		_id("citation-preview").hidden = !shouldShow;
+		let isEmpty = !CitationDataManager.items.length;
+		_id("citation-preview-empty").hidden = !isEmpty;
+		_id("citation-preview-content").hidden = isEmpty;
+		if (isEmpty) {
+			_id("citation-preview-content").innerHTML = "";
+		}
+		// The toggle button only makes sense while citing items with a backing
+		// preview function. It reflects the pref directly.
+		let toggleBtn = _id("display-preview-button");
+		toggleBtn.hidden = !(isCitingItems && hasPreview);
+		toggleBtn.setAttribute("aria-pressed", prefShown ? "true" : "false");
+		if (!isEmpty) {
+			CitationPreview._renderDebounced();
+		}
+	},
+
+	async render() {
+		if (!DIALOG_STATE.isCitingItems()) return;
+		if (!CitationDataManager.items.length) return;
+		if (!io.preview) return;
+
+		CitationDataManager.updateCitationObject();
+		let html = await io.preview("html");
+		// Re-check after the await in case the user cleared items
+		if (!CitationDataManager.items.length) return;
+		_id("citation-preview-content").innerHTML = html;
+	},
 };
 
 // Representation of a single entry in the citation.
