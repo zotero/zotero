@@ -204,3 +204,8 @@
 .autocomplete-richlistitem[type="options-ac-no-value"] {
 	color: var(--fill-secondary);
 }
+
+.autocomplete-richlistitem[type="options-ac-value"]:not([selected]):hover,
+.autocomplete-richlistitem[type="options-ac-no-value"]:not([selected]):hover {
+	background-color: var(--fill-quinary);
+}
