@@ -905,9 +905,9 @@ item-pane-batch-editing-prompt =
     .aria-label = Batch editing
 
 item-pane-batch-editing-enable =
-    .label = Enter Batch Edit Mode
+    .label = Edit Multiple Items…
 
-item-pane-batch-editing-multiple-values-placeholder = Multiple…
+item-pane-batch-editing-multiple-values-placeholder = Multiple
 
 item-pane-batch-editing-no-value = (No value)
 
