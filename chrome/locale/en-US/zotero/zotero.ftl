@@ -909,7 +909,7 @@ item-pane-batch-editing-enable =
 
 item-pane-batch-editing-multiple-values-placeholder = Multiple
 
-item-pane-batch-editing-no-value = (No value)
+item-pane-batch-editing-clear-values = Clear all values
 
 item-pane-batch-editing-header = { $count ->
     [one] Editing { $count } item

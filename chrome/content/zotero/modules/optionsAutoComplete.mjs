@@ -59,7 +59,7 @@ export class OptionsAutoComplete {
 		let matches = filtered.map(({ label }) => label);
 		let values = filtered.map(({ value }) => value);
 		let noValueLabel = searchParams?.includeNoValue && !searchString
-			? Zotero.getString('item-pane-batch-editing-no-value')
+			? Zotero.getString('item-pane-batch-editing-clear-values')
 			: null;
 		const result = makeResult(searchString, matches, { noValueLabel, values });
 		listener.onSearchResult(this, result);
