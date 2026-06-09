@@ -2562,6 +2562,7 @@ var ZoteroPane = new function () {
 				Zotero.hideZoteroPaneOverlays();
 			}
 			await Zotero.purgeDataObjects();
+			Zotero.UndoHistory.clear();
 		}
 	};
 	

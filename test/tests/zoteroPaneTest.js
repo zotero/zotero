@@ -862,8 +862,31 @@ describe("ZoteroPane", function () {
 			assert.isTrue(item.deleted);
 		});
 	});
-	
-	
+
+
+	describe("#emptyTrash()", function () {
+		it("should clear the undo/redo history", async function () {
+			// Record an undo entry
+			Zotero.UndoHistory.clear();
+			var collection = await createDataObject('collection', { name: 'Original' });
+			collection.name = 'Renamed';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+
+			// Put something in the trash to empty
+			await createDataObject('item', { deleted: true });
+
+			await selectTrash(win);
+			var promise = waitForDialog();
+			await zp.emptyTrash();
+			await promise;
+
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+			assert.isFalse(Zotero.UndoHistory.canRedo());
+		});
+	});
+
+
 	describe("#setVirtual()", function () {
 		var cv;
 		
