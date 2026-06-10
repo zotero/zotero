@@ -6586,12 +6586,19 @@ var ZoteroPane = new function () {
 	 * before the installer displays the "scary" OS prompt to access other application data.
 	 * @returns {Promise<Object>} Object with either install, dismiss or remindLater set to true.
 	 */
-	this.showMacWordPluginInstallWarning = function () {
+	this.showMacWordPluginInstallWarning = function (options = {}) {
 		return new Promise((resolve) => {
 			const panel = document.getElementById('mac-word-plugin-install-container');
+			const message = document.querySelector('#mac-word-plugin-install-banner .message');
 			const action = document.getElementById('mac-word-plugin-install-action');
 			const remind = document.getElementById('mac-word-plugin-install-remind-later');
 			const dontAskAgain = document.getElementById('mac-word-plugin-install-dont-ask-again');
+
+			// On macOS 27 (Golden Gate) and later, the user allows the installation in a
+			// folder-selection dialog rather than approving an OS permission prompt
+			message.dataset.l10nId = options.folderAccess
+				? 'mac-word-plugin-install-folder-message'
+				: 'mac-word-plugin-install-message';
 			
 			// TODO: Replace with ftl string
 			dontAskAgain.label = Zotero.getString('general.dontAskAgain');

@@ -862,12 +862,16 @@ text-action-paste-and-search =
     .label = Paste and Search
     
 mac-word-plugin-install-message = Zotero needs access to Word data to install the Word plugin.
+mac-word-plugin-install-folder-message = { -app-name } needs access to Word’s startup folder to install the Word plugin.
 mac-word-plugin-install-action-button =
     .label = Install Word plugin
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+mac-word-plugin-install-folder-dialog-title = Install the plugin in the Word startup folder
+mac-word-plugin-install-folder-dialog-button = Install
+mac-word-plugin-install-wrong-folder-selected = The suggested folder must be selected. Please try again without choosing a different folder.
 
 file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
 file-renaming-banner-documentation-link = { general-learn-more }
