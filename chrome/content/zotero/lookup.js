@@ -150,6 +150,10 @@ var Zotero_Lookup = new function () {
 			// The item tree's DOM id has a view-specific suffix, so use the current view's id
 			document.getElementById(ZoteroPane.itemsView.id).focus();
 		}
+		else {
+			// Hide on failure too
+			document.getElementById("zotero-lookup-panel").hidePopup();
+		}
 		return false;
 	};
 
@@ -164,6 +168,11 @@ var Zotero_Lookup = new function () {
 	};
 	
 	this.onFocusOut = function (event) {
+		// Ignore focus loss caused by the window being deactivated
+		if (Services.focus.activeWindow !== window) {
+			return;
+		}
+
 		// If the lookup popup was triggered by the lookup button,
 		// we want to return there on focus out. So we check
 		// (1) that we came from a button and (2) that
@@ -183,14 +192,51 @@ var Zotero_Lookup = new function () {
 	};
 	
 	
-	/**
-	 * Focuses the field
-	 */
 	this.onShown = function (event) {
 		// Ignore context menu
 		if (event.originalTarget.id != 'zotero-lookup-panel') return;
 		
+		// Focus the field
 		this.getActivePanel().querySelector('textarea').focus();
+
+		// Add handlers to dismiss the popup when contextually appropriate.
+		// We set noautohide="true" so the popup doesn't lose input when
+		// switching windows (e.g., so you can build a long list of identifiers
+		// copied from another app), but that means we need to manually handle
+		// closing on click outside (_onMouseDown) and closing on a window
+		// switch when there's no content (_onBlur)
+		window.addEventListener('mousedown', this._onMouseDown, { capture: true });
+		document.getElementById('zotero-lookup-panel').addEventListener('blur', this._onBlur, { capture: true });
+	};
+
+
+	/**
+	 * Hide on a click outside the panel
+	 */
+	this._onMouseDown = (event) => {
+		// Ignore clicks inside the panel or any popup (e.g. its context menu);
+		// only a click outside dismisses it
+		if (event.target.closest("panel, menupopup")) {
+			return;
+		}
+		document.getElementById("zotero-lookup-panel").hidePopup();
+		// Prevent the toolbar button's own handlers from triggering, so the
+		// popup doesn't immediately reopen
+		if (document.getElementById("zotero-tb-lookup").contains(event.target)) {
+			event.preventDefault();
+			event.stopPropagation();
+		}
+	};
+
+
+	this._onBlur = () => {
+		if (Services.focus.activeWindow === window) {
+			return;
+		}
+		let textBox = document.getElementById('zotero-lookup-textbox');
+		if (textBox.value.trim() === '') {
+			document.getElementById('zotero-lookup-panel').hidePopup();
+		}
 	};
 	
 	
@@ -201,6 +247,9 @@ var Zotero_Lookup = new function () {
 		// Ignore context menu
 		if (event.originalTarget.id != 'zotero-lookup-panel') return;
 		
+		window.removeEventListener('mousedown', this._onMouseDown, { capture: true });
+		document.getElementById('zotero-lookup-panel').removeEventListener('blur', this._onBlur, { capture: true });
+
 		document.getElementById("zotero-lookup-textbox").value = "";
 		Zotero_Lookup.setShowProgress(false);
 		
