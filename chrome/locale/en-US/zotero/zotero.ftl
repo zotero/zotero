@@ -918,11 +918,11 @@ item-pane-batch-editing-header = { $count ->
 
 undo-action-edit-metadata = { $count ->
     [one] Edit Metadata
-   *[other] Edit Metadata ({ $count } items)
+   *[other] Edit Metadata for { $count } Items
 }
 undo-action-edit-field = { $count ->
-    [one] Edit { $field }
-   *[other] Edit { $field } ({ $count } items)
+    [one] Edit of “{ $field }”
+   *[other] Edit of “{ $field }” for { $count } Items
 }
 undo-action-normalize-attachment-titles = Normalize Attachment Title
 undo-action-trash = { $count ->
