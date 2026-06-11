@@ -871,6 +871,31 @@ describe("Zotero.UndoHistory", function () {
 		});
 	});
 
+	describe("stale snapshot application", function () {
+		it("should not clobber a later third-party change to the same field", async function () {
+			let item = await createDataObject('item', { title: 'Original' });
+			Zotero.UndoHistory.clear();
+
+			// User edit, recorded on the undo stack as Original -> User Edit
+			item.setField('title', 'User Edit');
+			await item.saveTx({ undoAction: 'undo-action-edit-metadata' });
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+
+			// A plugin (or any non-UI writer) then changes the same field. No
+			// undoAction, so no new entry is created -- but the existing entry's
+			// snapshot (new: 'User Edit') no longer matches the object
+			item.setField('title', 'Plugin Edit');
+			await item.saveTx();
+
+			await Zotero.UndoHistory.undo();
+
+			// Undo should detect that the field drifted from the recorded value
+			// and decline (or clear), not silently revert the plugin's change
+			assert.equal(item.getField('title'), 'Plugin Edit',
+				"undo should not apply a stale snapshot over a later change");
+		});
+	});
+
 	describe("sync interaction", function () {
 		var apiKey = Zotero.Utilities.randomString(24);
 		var baseURL = "http://local.zotero/";
@@ -1167,6 +1192,66 @@ describe("Zotero.UndoHistory", function () {
 				"sanity: engine.start ran twice (initial run + restart)");
 			assert.isFalse(Zotero.UndoHistory.canUndo(),
 				"undo stack should be cleared even when restartSync recurses");
+		});
+
+		it("should not apply a stale snapshot via undo while a sync is still running", async function () {
+			// The undo stack is only cleared at the end of _sync(), so after a
+			// remote change has been applied but before the sync finishes,
+			// undo is still enabled and applies a snapshot that predates the
+			// remote change, silently reverting it
+			let library = Zotero.Libraries.userLibrary;
+			let lastLibraryVersion = 5;
+			let newLibraryVersion = 6;
+			library.libraryVersion = library.storageVersion = lastLibraryVersion;
+			await library.saveTx();
+
+			// Undoable user edit: Before -> After
+			let item = await createDataObject('item', { title: 'Before' });
+			Zotero.UndoHistory.clear();
+			item.setField('title', 'After');
+			await item.saveTx({ undoAction: 'undo-action-edit-metadata' });
+			item.version = lastLibraryVersion;
+			await Zotero.Sync.Data.Local.markObjectAsSynced(item);
+			let itemKey = item.key;
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+
+			setNoRemoteChangesResponses(lastLibraryVersion);
+
+			let libraryID = library.libraryID;
+			let remoteJSON = [{
+				key: itemKey,
+				version: newLibraryVersion,
+				data: Object.assign({}, item.toJSON(), {
+					key: itemKey,
+					version: newLibraryVersion,
+					title: 'Remote Edit'
+				})
+			}];
+			let engineStub = sinon.stub(Zotero.Sync.Data.Engine.prototype, 'start')
+				.callsFake(async function () {
+					// Remote change lands on the same item the undo entry covers
+					await Zotero.Sync.Data.Local.processObjectsFromJSON(
+						'item', libraryID, remoteJSON, {}
+					);
+					assert.equal(item.getField('title'), 'Remote Edit',
+						"sanity: remote data was applied");
+					// User presses Cmd+Z while the sync is still in progress
+					await Zotero.UndoHistory.undo();
+				});
+
+			try {
+				let runner = new Zotero.Sync.Runner_Module({ baseURL, apiKey });
+				await runner._sync({
+					libraries: [libraryID],
+					onError: e => { throw e; }
+				});
+			}
+			finally {
+				engineStub.restore();
+			}
+
+			assert.equal(item.getField('title'), 'Remote Edit',
+				"mid-sync undo should not revert a remote change that was already applied");
 		});
 	});
 });
