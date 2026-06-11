@@ -343,6 +343,13 @@
 				if (!Utils.isInputEmpty(input) || !this.contains(event.relatedTarget)) {
 					this._lastFocusedInput = input;
 				}
+				// Collapse a placeholder input back to regular size once focus leaves.
+				// The placeholder attributes are reset on the next refresh()
+				if (input.classList.contains("just-added-placeholder")) {
+					input.classList.remove("just-added-placeholder");
+					input.removeAttribute("title");
+					input.style.minWidth = "";
+				}
 			});
 			return input;
 		}
@@ -640,6 +647,19 @@
 			for (let input of allInputs) {
 				let isJustAdded = showJustAddedPlaceholder && input === lastInput;
 				if (!isJustAdded) {
+					// If the just-added placeholder was dismissed (e.g. by right-arrow at the
+					// end of the input) while the input is still focused and empty, keep the
+					// visible placeholder but fall back to the default search prompt, since
+					// searching still works. It collapses when the input loses focus (see the
+					// blur handler in _createInputElem())
+					if (input.classList.contains("just-added-placeholder")
+							&& document.activeElement == input && !input.value) {
+						let placeholder = this.truncateToWidth(
+							" " + Zotero.getString("integration-citationDialog-search-for-items"),
+							parseFloat(input.style.minWidth) || Infinity);
+						document.l10n.setAttributes(input, "integration-citationDialog-just-added-input-citation", { placeholder, title: "" });
+						continue;
+					}
 					input.classList.remove("just-added-placeholder");
 					document.l10n.setAttributes(input, `integration-citationDialog-input-${dialogType}`);
 					// Clear any stale title and min-width left over from a previous just-added state
