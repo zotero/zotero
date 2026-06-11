@@ -456,7 +456,10 @@
 					&.selected {
 						background-color: var(--selected-item-background);
 						border-radius: 0;
-						
+					}
+					// selected background wins over the hover effect
+					&.selected:not([disabled]):hover {
+						background-color: var(--selected-item-background);
 					}
 					&.selected-first {
 						border-top-left-radius: 5px;
