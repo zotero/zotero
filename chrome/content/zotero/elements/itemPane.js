@@ -482,7 +482,18 @@
 				'item-pane-batch-editing-header',
 				{ count: this.data.length }
 			);
-			append(description);
+			let icon = doc.createElement("span");
+			icon.className = "batch-edit-head-icon";
+			let doneButton = doc.createXULElement("button");
+			doneButton.setAttribute("default", "true");
+			document.l10n.setAttributes(doneButton, 'item-pane-batch-editing-done');
+			doneButton.addEventListener("command", () => {
+				this._setBatchEditCollapsible(false);
+				this._isBatchEditEnabled = false;
+				this.render();
+				this.updateItemPaneButtons();
+			});
+			append(icon, description, doneButton);
 		}
 
 		updateReadLabel() {

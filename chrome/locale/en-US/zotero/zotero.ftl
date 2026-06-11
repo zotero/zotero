@@ -916,6 +916,9 @@ item-pane-batch-editing-header = { $count ->
    *[other] Editing { $count } items
 }
 
+item-pane-batch-editing-done =
+    .label = { general-done }
+
 undo-action-edit-metadata = { $count ->
     [one] Edit Metadata
    *[other] Edit Metadata for { $count } Items

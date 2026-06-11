@@ -79,12 +79,33 @@ item-pane-header {
 		height: 24px;
 	}
 
-	&.batch-edit.has-custom-head .custom-head {
-		description {
-			font-weight: 600;
-			line-height: 1.333;
-			margin: 0;
-			padding-inline: calc(var(--editable-text-tight-padding-inline) + 1px);
+	&.batch-edit {
+		background: var(--accent-blue10);
+
+		&.has-custom-head .custom-head {
+			background: transparent;
+
+			.batch-edit-head-icon {
+				width: 16px;
+				height: 16px;
+				margin-inline-start: calc(var(--editable-text-tight-padding-inline) + 1px);
+				@include svgicon("edit", "universal", "16");
+				fill: var(--accent-blue);
+			}
+
+			description {
+				flex: 1;
+				font-weight: 600;
+				line-height: 1.333;
+				margin: 0;
+			}
+
+			button {
+				flex-grow: 0;
+				height: 24px;
+				min-width: 0;
+				padding-inline: 12px;
+			}
 		}
 	}
 }
