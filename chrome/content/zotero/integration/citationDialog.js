@@ -1651,6 +1651,9 @@ const IOManager = {
 				input.value = "";
 				input.dispatchEvent(new Event('input', { bubbles: true }));
 				this.updateBubbleInput();
+				// The typed-locator shortcut has been used, so stop showing the tip
+				// about it in the item details popup
+				Zotero.Prefs.set("integration.citationDialogShowLocatorTip", false);
 				return;
 			}
 		}
@@ -1795,6 +1798,9 @@ const IOManager = {
 		// Clear the input and update bubbles
 		input.value = "";
 		IOManager.updateBubbleInput();
+		// The typed-locator shortcut has been used, so stop showing the tip
+		// about it in the item details popup
+		Zotero.Prefs.set("integration.citationDialogShowLocatorTip", false);
 		// Disable Enter on input from accepting the dialog for the next 500ms;
 		// If one intends to confirmed the numeric locator by pressing Enter (via _handleInputEnter),
 		// we ensure that the Enter keypress won't happen right after when the locator is added to

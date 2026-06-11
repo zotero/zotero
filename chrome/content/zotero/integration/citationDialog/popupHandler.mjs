@@ -99,6 +99,9 @@ export class CitationDialogPopupsHandler {
 		popup.style.top = `${bubbleRect.bottom + 10}px`;
 
 		this._getNode("#itemDetails .show").hidden = !this.bubbleItem.item.id;
+		// Hide the typed-locator tip once the shortcut has been used
+		this._getNode("#itemDetails .details-locator-info").hidden
+			= !Zotero.Prefs.get("integration.citationDialogShowLocatorTip");
 		let topLevelItem = this.bubbleItem.item.topLevelItem;
 
 		// Add header and fill inputs with their values
