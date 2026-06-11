@@ -28,6 +28,9 @@
  * @namespace
  */
 var Zotero_Lookup = new function () {
+	this._button = null;
+	this._accepted = false;
+
 	/**
 	 * Performs a lookup by DOI, PMID, or ISBN on the given textBox value
 	 * and adds any items it can.
@@ -41,7 +44,6 @@ var Zotero_Lookup = new function () {
 	 * @param toggleProgress {function} - Callback to toggle progress on/off
 	 * @returns {Promise<Zotero.Item[]>}
 	 */
-	this._button = null;
 	this.addItemsFromIdentifier = async function (textBox, childItem, toggleProgress) {
 		var identifiers = Zotero.Utilities.extractIdentifiers(textBox.value);
 		if (!identifiers.length) {
@@ -137,6 +139,8 @@ var Zotero_Lookup = new function () {
 	 * Try a lookup and hide popup if successful
 	 */
 	this.accept = async function (textBox) {
+		this._accepted = true;
+		
 		let newItems = await Zotero_Lookup.addItemsFromIdentifier(
 			textBox,
 			false,
@@ -195,6 +199,8 @@ var Zotero_Lookup = new function () {
 	this.onShown = function (event) {
 		// Ignore context menu
 		if (event.originalTarget.id != 'zotero-lookup-panel') return;
+
+		this._accepted = false;
 		
 		// Focus the field
 		this.getActivePanel().querySelector('textarea').focus();
@@ -250,7 +256,9 @@ var Zotero_Lookup = new function () {
 		window.removeEventListener('mousedown', this._onMouseDown, { capture: true });
 		document.getElementById('zotero-lookup-panel').removeEventListener('blur', this._onBlur, { capture: true });
 
-		document.getElementById("zotero-lookup-textbox").value = "";
+		if (this._accepted) {
+			document.getElementById("zotero-lookup-textbox").value = "";
+		}
 		Zotero_Lookup.setShowProgress(false);
 		
 		// Revert to single-line when closing
