@@ -84,11 +84,12 @@ item-pane-header {
 
 		&.has-custom-head .custom-head {
 			background: transparent;
+			// Match the 4px icon-title gap of the collapsible sections below
+			gap: 4px;
 
 			.batch-edit-head-icon {
 				width: 16px;
 				height: 16px;
-				margin-inline-start: calc(var(--editable-text-tight-padding-inline) + 1px);
 				@include svgicon("edit", "universal", "16");
 				fill: var(--accent-blue);
 			}
