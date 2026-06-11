@@ -696,6 +696,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 */
 	var _doFileSync = async function (libraries, options) {
 		Zotero.debug("Starting file syncing");
+		// Drain file change events and run the modification check on the changed files across
+		// all libraries
+		await Zotero.Sync.Storage.FileChangeWatcher.snapshot();
 		var resyncLibraries = []
 		for (let libraryID of libraries) {
 			_stopCheck();

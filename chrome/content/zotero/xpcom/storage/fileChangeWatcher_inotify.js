@@ -28,8 +28,9 @@
  * inotify backend for FileChangeWatcher (Linux)
  *
  * Like the Windows RDCW backend, inotify is a live watcher -- it only captures events from the
- * moment watches are set up. The first getChangedItemKeys() call returns null to trigger a full
- * scan. Periodic full scans every 3 hours ensure no changes are missed permanently.
+ * moment watches are set up, accumulating changes between getChangedItemKeys() calls. The core
+ * watcher compensates by requiring a full scan of each library after watcher startup and every
+ * 3 hours.
  *
  * Note: errno values are read from ctypes.errno, which Mozilla ctypes captures immediately after
  * each default_abi call. Using an explicit __errno_location() call would be unreliable because
@@ -124,7 +125,6 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 		this._inotifyWdToKey = new Map();
 		this._inotifyAccumulatedKeys = new Set();
 		this._inotifySubdirsSetUp = false;
-		this._liveWatcherFirstCall = true;
 	},
 
 	/**
@@ -150,9 +150,11 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 			);
 			if (wd < 0) {
 				if (ctypes.errno === this._ENOSPC) {
-					Zotero.debug("FileChangeWatcher: inotify watch limit reached after "
-						+ count + " directories -- some changes may be missed");
-					break;
+					// Watch coverage would be silently incomplete, so give up on the watcher
+					// entirely -- the thrown error makes the core watcher disable itself and
+					// fall back to legacy scanning
+					throw new Error("inotify watch limit reached after " + count
+						+ " directories");
 				}
 				continue;
 			}
@@ -270,18 +272,9 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 
 		let ok = this._inotifyDrainEvents();
 
-		// First call or periodic refresh -- signal full scan
-		if (this._liveWatcherNeedsFullScan()) {
-			Zotero.debug("FileChangeWatcher: Live watcher signaling full scan"
-				+ " (first call or periodic refresh)");
-			this._inotifyAccumulatedKeys.clear();
-			return null;
-		}
-
 		// Overflow -- signal full scan
 		if (!ok) {
 			this._inotifyAccumulatedKeys.clear();
-			this._liveWatcherLastFullScanTime = Date.now();
 			return null;
 		}
 
