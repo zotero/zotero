@@ -1181,6 +1181,7 @@ class ListLayout extends Layout {
 const IOManager = {
 	sectionExpandedStatus: {},
 	_skipInputAcceptOnEnterUntil: 0,
+	_timesItemsAdded: 0,
 
 	// most essential IO functionality that is added immediately on load
 	preInit() {
@@ -1375,8 +1376,12 @@ const IOManager = {
 			// If no locator is provided, record which bubbles were just added.
 			// If a locator is typed next, these bubbles will receive it.
 			this._justAddedBubbles = bubbleItems;
-			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems();
+			// Only show the placeholder guidance on the first add -- after
+			// that, the user presumably knows about the shortcut
+			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems()
+				&& this._timesItemsAdded < 1;
 		}
+		this._timesItemsAdded++;
 		await CitationDataManager.addItems({ bubbleItems, index });
 		// Refresh the itemTree if in library mode
 		if (currentLayout.type == "library") {
@@ -1694,6 +1699,10 @@ const IOManager = {
 
 	_deleteItem(dialogReferenceID) {
 		CitationDataManager.deleteItem({ dialogReferenceID });
+		// If the citation is emptied, show the placeholder guidance again on the next add
+		if (!CitationDataManager.items.length) {
+			this._timesItemsAdded = 0;
+		}
 		if (currentLayout.type == "library") {
 			libraryLayout.refreshItemsView();
 		}
