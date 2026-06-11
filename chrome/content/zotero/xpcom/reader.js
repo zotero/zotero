@@ -256,6 +256,7 @@ class ReaderInstance {
 			readAloudVoices: this._getReadAloudVoices(),
 			readAloudEnabledVoices: await this._getReadAloudEnabledVoices(),
 			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
+			getSDTPack: this._createGetSDTPack(this._iframeWindow),
 			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
@@ -1131,6 +1132,26 @@ class ReaderInstance {
 			state.lastReadAloudPosition = lastReadAloudPosition;
 		}
 		return state;
+	}
+
+	// Returns the function passed to the reader as options.getSDTPack, which
+	// resolves with the SDT pack for the displayed attachment, generating it
+	// if necessary. The reader decides when to pull (currently at init, so
+	// the pack is ready when a feature needs it), and a reader build without
+	// SDT support never triggers extraction. The pack bytes are passed by
+	// value, so a held pack can't be affected by a later regeneration and
+	// always matches the document the reader is displaying.
+	_createGetSDTPack(targetWindow) {
+		if (!Zotero.SDT || !this.itemID || this._isTransient()) {
+			return null;
+		}
+		// Wrap the return value in a child window Promise to avoid
+		// permissions errors (as in _getReadAloudRemoteInterface()).
+		// getPack() never rejects
+		return () => new targetWindow.Promise(async (resolve) => {
+			let result = await Zotero.SDT.getPack(this.itemID, { isPriority: true });
+			resolve(Cu.cloneInto(result, targetWindow));
+		});
 	}
 
 	_isTransient() {

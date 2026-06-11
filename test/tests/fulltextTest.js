@@ -110,6 +110,23 @@ describe("Zotero.FullText", function () {
 				assert.isTrue(await OS.File.exists(OS.Path.join(storageDir, '.zotero-ft-cache')));
 				assert.isFalse(await OS.File.exists(OS.Path.join(storageDir, filename)));
 			});
+
+			it("should preserve the SDT cache when reindexing a linked attachment", async function () {
+				var file = OS.Path.join(getTestDataDirectory().path, 'test.pdf');
+				var linkedFile = OS.Path.join(await getTempDirectory(), 'test.pdf');
+				await OS.File.copy(file, linkedFile);
+				var item = await Zotero.Attachments.linkFromFile({ file: linkedFile });
+
+				// The full-text cache of a linked file shares the item's
+				// storage directory with the SDT cache, so reindexing must
+				// not recreate the directory and destroy it
+				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
+				var sdtCacheFile = OS.Path.join(storageDir, '.zotero-sdt-cache');
+				await Zotero.File.putContentsAsync(sdtCacheFile, 'test');
+
+				assert.isTrue(await Zotero.Fulltext.indexPDF(linkedFile, item.id));
+				assert.isTrue(await OS.File.exists(sdtCacheFile));
+			});
 		});
 	});
 	

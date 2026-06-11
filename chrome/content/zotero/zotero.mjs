@@ -117,6 +117,7 @@ const xpcomFilesLocal = [
 	'pluginAPI/menuManager',
 	'pluginAPI/itemPaneManager',
 	'pluginAPI/itemTreeManager',
+	'sdt',
 	'reader',
 	'progressQueue',
 	'progressQueueDialog',

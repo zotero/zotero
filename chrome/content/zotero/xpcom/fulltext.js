@@ -378,15 +378,22 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		}
 		var item = await Zotero.Items.getAsync(itemID);
 		var linkMode = item.attachmentLinkMode;
-		// If file is stored outside of Zotero, create a directory for the item
-		// in the storage directory and save the cache file there
-		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			var parentDirPath = await Zotero.Attachments.createDirectoryForItem(item);
-		}
-		else {
-			var parentDirPath = PathUtils.parent(filePath);
-		}
+		// If the file is stored outside of Zotero, the cache file is saved in
+		// the item's storage directory
+		var parentDirPath = linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE
+			? Zotero.Attachments.getStorageDirectory(item).path
+			: PathUtils.parent(filePath);
 		var cacheFilePath = OS.Path.join(parentDirPath, this.fulltextCacheFile);
+		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+			// Create only if missing -- don't use createDirectoryForItem(),
+			// which deletes and recreates the directory and would destroy
+			// other files stored there (e.g., the SDT cache)
+			await Zotero.File.createDirectoryIfMissingAsync(parentDirPath);
+			// Remove any previous cache file, which createDirectoryForItem()
+			// did implicitly, so that a failed re-extraction below can't
+			// leave a replaced file's old text in place
+			await IOUtils.remove(cacheFilePath, { ignoreAbsent: true });
+		}
 		try {
 			var {
 				text,
