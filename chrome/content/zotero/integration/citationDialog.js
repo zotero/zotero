@@ -1795,7 +1795,10 @@ const IOManager = {
 			bubbleItem.label = "page";
 		}
 		IOManager._hideLoadingSpinner();
-		// Clear the input and update bubbles
+		// Clear the input and update bubbles. The locator has been added, so
+		// stop showing the placeholder guidance, even though the bubbles remain
+		// just-added (typing more digits will keep appending to the locator).
+		_id("bubble-input").showJustAddedPlaceholder = false;
 		input.value = "";
 		IOManager.updateBubbleInput();
 		// The typed-locator shortcut has been used, so stop showing the tip
