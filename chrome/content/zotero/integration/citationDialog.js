@@ -1826,9 +1826,11 @@ const IOManager = {
 	// and Enter is presses, just-added bubbles get that locator.
 	_clearJustAddedBubbles(event) {
 		if (!this._justAddedBubbles) return;
-		// on keydown, only proceed if it's an arrow key
-		let navigationKeys = ["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft"];
-		if (event && event.type == "keydown" && !navigationKeys.includes(event.key)) return;
+		// On keydown, only proceed for left/right arrows, which move to another
+		// reference (e.g. to explicitly search for a year). Up/down arrows just move
+		// the list selection while focus remains in the input, so locator entry
+		// stays active.
+		if (event && event.type == "keydown" && !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
 		// clear just added bubbles and update bubble input to reflect that
 		this._justAddedBubbles = null;
 		_id("bubble-input").showJustAddedPlaceholder = false;
