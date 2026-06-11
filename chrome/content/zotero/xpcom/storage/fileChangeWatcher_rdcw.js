@@ -31,9 +31,9 @@
  * Unlike the previous USN Change Journal backend, this works without admin privileges -- it only
  * needs read access to the storage directory itself.
  *
- * This is a live watcher (like inotify on Linux): the first getChangedItemKeys() call returns null
- * to trigger a full scan, then accumulates changes between calls. Periodic full scans every 3 hours
- * via _liveWatcherNeedsFullScan() ensure no changes are missed permanently.
+ * This is a live watcher (like inotify on Linux): it only captures events from the moment the
+ * watch is set up, accumulating changes between getChangedItemKeys() calls. The core watcher
+ * compensates by requiring a full scan of each library after watcher startup and every 3 hours.
  *
  * Approach -- overlapped I/O polling:
  *   1. Init: Open storage directory with FILE_FLAG_OVERLAPPED, create an event handle, issue the
@@ -202,7 +202,6 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 		this._overlapped.hEvent = this._eventHandle;
 
 		this._rdcwAccumulatedKeys = new Set();
-		this._liveWatcherFirstCall = true;
 
 		// ---- Issue first ReadDirectoryChangesW call ----
 
@@ -324,7 +323,6 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 						Zotero.debug("FileChangeWatcher: RDCW buffer overflow"
 							+ " -- signaling full scan");
 						this._rdcwAccumulatedKeys.clear();
-						this._liveWatcherLastFullScanTime = Date.now();
 						// Re-arm for future notifications
 						try {
 							this._rdcwArm();
@@ -349,7 +347,6 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 					Zotero.debug("FileChangeWatcher: RDCW returned 0 bytes"
 						+ " -- signaling full scan");
 					this._rdcwAccumulatedKeys.clear();
-					this._liveWatcherLastFullScanTime = Date.now();
 					try {
 						this._rdcwArm();
 					}
@@ -372,14 +369,6 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 					break;
 				}
 			}
-		}
-
-		// First call or periodic refresh -- signal full scan
-		if (this._liveWatcherNeedsFullScan()) {
-			Zotero.debug("FileChangeWatcher: Live watcher signaling full scan"
-				+ " (first call or periodic refresh)");
-			this._rdcwAccumulatedKeys.clear();
-			return null;
 		}
 
 		let keys = this._rdcwAccumulatedKeys;

@@ -400,6 +400,194 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 		});
 	});
 
+	function resetWatcherState() {
+		watcher._snapshotTaken = false;
+		watcher._scannedLibraries = new Set();
+		watcher._lastFullScan = {};
+		Zotero.Prefs.clear(watcher._SCANNED_LIBRARIES_PREF);
+	}
+
+	function markLibrariesScanned(...libraryIDs) {
+		for (let libraryID of libraryIDs) {
+			watcher._scannedLibraries.add(libraryID);
+			watcher._lastFullScan[libraryID] = Date.now();
+		}
+	}
+
+	describe("snapshots", function () {
+		var savedAvailable, savedBackend;
+		var stub;
+
+		beforeEach(function () {
+			savedAvailable = watcher.available;
+			savedBackend = watcher._backend;
+			watcher.available = true;
+			resetWatcherState();
+		});
+
+		afterEach(function () {
+			if (stub) {
+				stub.restore();
+				stub = null;
+			}
+			watcher.available = savedAvailable;
+			watcher._backend = savedBackend;
+			resetWatcherState();
+		});
+
+		it("should require a full scan of a library that hasn't been scanned", async function () {
+			stub = sinon.stub(watcher, 'getChangedItemKeys').returns(new Set());
+			markLibrariesScanned(1);
+			await watcher.snapshot();
+			assert.isFalse(watcher.needsFullScan(1, true));
+			assert.isTrue(watcher.needsFullScan(2, true));
+			// Once a full scan has been recorded, watcher results can be relied on
+			watcher.recordFullScan(2);
+			assert.isFalse(watcher.needsFullScan(2, true));
+		});
+
+		it("should require a full scan of every library after a backend fallback", async function () {
+			stub = sinon.stub(watcher, 'getChangedItemKeys').returns(null);
+			markLibrariesScanned(1, 2);
+			await watcher.snapshot();
+			assert.isTrue(watcher.needsFullScan(1, true));
+			assert.isTrue(watcher.needsFullScan(2, true));
+		});
+
+		it("should prune scan records for deleted libraries", async function () {
+			stub = sinon.stub(watcher, 'getChangedItemKeys').returns(new Set());
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			markLibrariesScanned(userLibraryID, 99999);
+			await watcher.snapshot();
+			assert.isFalse(watcher.needsFullScan(userLibraryID, true));
+			assert.isTrue(watcher.needsFullScan(99999, true));
+		});
+
+		it("should require a full scan on a manual sync with a live watcher", async function () {
+			stub = sinon.stub(watcher, 'getChangedItemKeys').returns(new Set());
+			markLibrariesScanned(1);
+			await watcher.snapshot();
+			watcher._backend = 'rdcw';
+			assert.isTrue(watcher.needsFullScan(1, false));
+			assert.isFalse(watcher.needsFullScan(1, true));
+			// The FSEvents journal is trusted on manual syncs
+			watcher._backend = 'fsevents';
+			assert.isFalse(watcher.needsFullScan(1, false));
+		});
+	});
+
+	describe("multi-library file syncs", function () {
+		var apiKey = Zotero.Utilities.randomString(24);
+		var server, httpd, port, baseURL;
+
+		beforeEach(async function () {
+			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+			server = sinon.fakeServer.create();
+			server.autoRespond = true;
+
+			({ httpd, port } = await startHTTPServer());
+			baseURL = `http://localhost:${port}/`;
+
+			await Zotero.Users.setCurrentUserID(1);
+			await Zotero.Users.setCurrentUsername("testuser");
+		});
+
+		afterEach(async function () {
+			Zotero.HTTP.mock = null;
+			await new Promise(resolve => httpd.stop(resolve));
+			resetWatcherState();
+		});
+
+		function makeEngine(libraryID) {
+			const { ConcurrentCaller } = ChromeUtils.importESModule(
+				"resource://zotero/concurrentCaller.mjs"
+			);
+			var caller = new ConcurrentCaller(1);
+			caller.setLogger(msg => Zotero.debug(msg));
+
+			var client = new Zotero.Sync.APIClient({
+				baseURL,
+				apiVersion: ZOTERO_CONFIG.API_VERSION,
+				apiKey,
+				caller,
+				background: true
+			});
+
+			return new Zotero.Sync.Storage.Engine({
+				libraryID,
+				controller: new Zotero.Sync.Storage.Mode.ZFS({
+					apiClient: client
+				}),
+				background: true,
+				stopOnError: false
+			});
+		}
+
+		it("should detect an externally modified group file when My Library syncs first", async function () {
+			var group = await createGroup();
+			group.libraryVersion = 5;
+			await group.saveTx();
+			group.storageVersion = 5;
+			await group.saveTx();
+
+			var item = await importFileAttachment('test.png', { libraryID: group.libraryID });
+
+			// Mark as in sync, with the file mtime in the past
+			var path = await item.getFilePathAsync();
+			var mtime = (Math.floor(new Date().getTime() / 1000) * 1000) - 2000;
+			await OS.File.setDates(path, null, mtime);
+			item.attachmentSyncedModificationTime = mtime;
+			item.attachmentSyncedHash = await item.attachmentHash;
+			item.attachmentSyncState = "in_sync";
+			await item.saveTx({ skipAll: true });
+
+			// Modify the file externally
+			await Zotero.File.putContentsAsync(path, Zotero.Utilities.randomString());
+
+			// Simulate a watcher backend that reports the group file change on the first
+			// drain and nothing after that
+			var savedAvailable = watcher.available;
+			var stub = sinon.stub(watcher, 'getChangedItemKeys');
+			stub.returns(new Set());
+			stub.onFirstCall().returns(new Set([item.key]));
+			watcher.available = true;
+			// Simulate the steady state, with both libraries previously scanned
+			resetWatcherState();
+			markLibrariesScanned(Zotero.Libraries.userLibraryID, group.libraryID);
+
+			var spy = sinon.spy(Zotero.Sync.Storage.Local, 'checkForUpdatedFiles');
+			try {
+				// Drain events once per session and then file-sync My Library first and the
+				// group second, as the sync runner does
+				await watcher.snapshot();
+				await makeEngine(Zotero.Libraries.userLibraryID).start();
+				await makeEngine(group.libraryID).start();
+			}
+			finally {
+				stub.restore();
+				spy.restore();
+				watcher.available = savedAvailable;
+			}
+
+			// The group library should have been checked with the changed item rather than
+			// via a full scan -- checkForUpdatedFiles() drains the passed array, so just
+			// check that one was passed
+			var call = spy.getCalls().find(c => c.args[0] == group.libraryID);
+			assert.ok(call, "checkForUpdatedFiles() should be called for the group library");
+			assert.isArray(
+				call.args[1],
+				"checkForUpdatedFiles() should be passed the changed group items"
+			);
+			assert.equal(
+				item.attachmentSyncState,
+				Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD,
+				"Group file modified on disk should be marked for upload"
+			);
+
+			await group.eraseTx();
+		});
+	});
+
 	describe("ReadDirectoryChangesW backend (Windows)", function () {
 		before(async function () {
 			if (!Zotero.isWin) {
@@ -423,7 +611,6 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 		});
 
 		it("should initialize successfully");
-		it("should return null on first call (no persistent journal)");
 		it("should return an empty set when no files have changed");
 		it("should detect a modified attachment file");
 		it("should detect changes across multiple items");
@@ -431,7 +618,6 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 		it("should detect a new file added to a storage directory");
 		it("should re-arm overlapped I/O after draining notifications");
 		it("should return null on buffer overflow and re-arm");
-		it("should return null for periodic full scan after max age");
 		it("should only report valid 8-char item keys");
 	});
 
@@ -460,14 +646,12 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 		});
 
 		it("should initialize successfully");
-		it("should return null on first call (no persistent journal)");
 		it("should return an empty set when no files have changed");
 		it("should detect a modified attachment file");
 		it("should detect changes across multiple items");
 		it("should not report the same changes twice");
 		it("should detect a new file added to a storage directory");
 		it("should auto-watch newly created storage subdirectories");
-		it("should return null for periodic full scan after max age");
 		it("should only report valid 8-char item keys");
 	});
 

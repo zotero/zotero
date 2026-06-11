@@ -198,20 +198,43 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 		}
 		let sinceEventId = ctypes.UInt64(savedIdStr);
 
+		// kFSEventStreamEventFlag flags indicating that events were dropped or coalesced,
+		// so changes may be missing from the replay
+		const MUST_SCAN_SUBDIRS = 0x01;
+		const USER_DROPPED = 0x02;
+		const KERNEL_DROPPED = 0x04;
+		const EVENT_IDS_WRAPPED = 0x08;
+		// Sentinel event marking the end of historical events -- not a file change
+		const HISTORY_DONE = 0x10;
+
 		let changedKeys = new Set();
+		let droppedEvents = false;
 		let storageRoot = this._storageRoot;
 		let keyPattern = this._keyPattern;
 
 		let callbackFn = this._FSEventStreamCallbackType.ptr(function (
 			_streamRef, _info, numEvents, eventPaths,
-			_eventFlags, _eventIds
+			eventFlags, _eventIds
 		) {
 			let n = Number(numEvents);
 			let StringArray = ctypes.ArrayType(ctypes.char.ptr, n);
 			let paths = ctypes.cast(
 				eventPaths, StringArray.ptr
 			).contents;
+			let FlagsArray = ctypes.ArrayType(ctypes.uint32_t, n);
+			let flags = ctypes.cast(
+				eventFlags, FlagsArray.ptr
+			).contents;
 			for (let i = 0; i < n; i++) {
+				let f = flags[i];
+				if (f & (MUST_SCAN_SUBDIRS | USER_DROPPED
+						| KERNEL_DROPPED | EVENT_IDS_WRAPPED)) {
+					droppedEvents = true;
+					continue;
+				}
+				if (f & HISTORY_DONE) {
+					continue;
+				}
 				let p = paths[i].readString();
 				if (!p.startsWith(storageRoot)) continue;
 				let relative = p.substring(storageRoot.length);
@@ -271,6 +294,14 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 		Zotero.Prefs.set(
 			"sync.storage.watcher.fsEventsEventID", newEventId.toString()
 		);
+
+		if (droppedEvents) {
+			// The full scans triggered by the fallback cover everything up to now, so the
+			// advanced event ID baseline above remains valid
+			Zotero.debug("FileChangeWatcher: FSEvents reported dropped or coalesced events"
+				+ " -- signaling full scan");
+			return null;
+		}
 
 		return this._returnKeys(changedKeys);
 	},
