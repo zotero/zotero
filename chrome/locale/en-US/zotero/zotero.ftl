@@ -733,6 +733,9 @@ quicksearch-input =
 advanced-search = Advanced Search
 menuitem-advanced-search =
     .label = { advanced-search }
+quicksearch-advanced-search-button =
+    .tooltiptext = { advanced-search }
+    .aria-label = { advanced-search }
 
 item-pane-header-view-as =
     .label = View As

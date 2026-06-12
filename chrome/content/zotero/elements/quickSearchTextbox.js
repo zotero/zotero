@@ -102,12 +102,28 @@
 			wrapper.appendChild(dropmarkerHost);
 			wrapper.appendChild(searchBox);
 			
+			// Add Advanced Search button at the end of the field in main window
+			if (document.documentElement.getAttribute('windowtype') === 'navigator:browser') {
+				let advancedButton = document.createXULElement('toolbarbutton');
+				advancedButton.id = 'zotero-tb-search-advanced-button';
+				advancedButton.tabIndex = 0;
+				document.l10n.setAttributes(advancedButton, 'quicksearch-advanced-search-button');
+				advancedButton.addEventListener('command', (event) => {
+					// Don't trigger a quick search via the oncommand handler
+					event.stopPropagation();
+					ZoteroPane.toggleAdvancedSearchState('open');
+				});
+				wrapper.appendChild(advancedButton);
+			}
+			
 			this.deck = this.firstElementChild;
 			
-			this.querySelector('.advanced-collapse-button').addEventListener('command', () => {
+			this.querySelector('.advanced-collapse-button').addEventListener('command', (event) => {
+				event.stopPropagation();
 				ZoteroPane.toggleAdvancedSearchState('collapsed');
 			});
-			this.querySelector('.advanced-close-button').addEventListener('command', () => {
+			this.querySelector('.advanced-close-button').addEventListener('command', (event) => {
+				event.stopPropagation();
 				ZoteroPane.toggleAdvancedSearchState('closed');
 			});
 			
@@ -145,18 +161,6 @@
 				});
 
 				popup.append(item);
-			}
-			
-			// Add Advanced Search menu item in main window
-			if (document.documentElement.getAttribute('windowtype') === 'navigator:browser') {
-				let separator = document.createXULElement('menuseparator');
-				popup.append(separator);
-				let advancedSearchOption = document.createXULElement('menuitem');
-				document.l10n.setAttributes(advancedSearchOption, 'menuitem-advanced-search');
-				advancedSearchOption.addEventListener('command', () => {
-					ZoteroPane.toggleAdvancedSearchState('open');
-				});
-				popup.append(advancedSearchOption);
 			}
 			
 			return this._searchModePopup = popup;

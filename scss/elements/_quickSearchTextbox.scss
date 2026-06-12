@@ -74,6 +74,51 @@ quick-search-textbox {
 	height: 28px;
 	z-index: 1;
 	width: 100%;
+
+	// Keep input text and the clear icon out from under the Advanced Search button
+	&:has(~ #zotero-tb-search-advanced-button) {
+		padding-inline-end: 30px;
+	}
+}
+
+// Match the specificity of the #zotero-items-toolbar toolbarbutton rules
+#zotero-tb-search #zotero-tb-search-advanced-button {
+	position: relative;
+	width: 28px;
+	height: 28px;
+	min-width: 0;
+	margin: 0;
+	margin-inline-start: -30px;
+	margin-inline-end: 2px;
+	padding: 0;
+	z-index: 2;
+	@include svgicon-menu("filter", "universal", "16");
+	color: var(--fill-secondary);
+
+	@include focus-ring;
+
+	// Show the hover effect on a chip around the icon, inset within the field,
+	// rather than on the whole button
+	&:hover, &:active {
+		background-color: transparent;
+	}
+
+	.toolbarbutton-icon {
+		width: 24px;
+		height: 24px;
+		// The glyph is weighted slightly to the right within the SVG, so shift it
+		// a pixel left to optically center it (physical sides -- doesn't flip in RTL)
+		padding: 5px 6px 5px 4px;
+		border-radius: 4px;
+	}
+
+	&:hover .toolbarbutton-icon {
+		background-color: var(--fill-quinary);
+	}
+
+	&:active .toolbarbutton-icon {
+		background-color: var(--fill-quarternary);
+	}
 }
 
 #zotero-tb-search-spinner {
