@@ -72,6 +72,42 @@ describe("Advanced Search", function () {
 		await item.eraseTx();
 	});
 	
+	it("should scope results to the selected saved search", async function () {
+		var inBoth = await createDataObject('item', { title: "foo bar" });
+		var inSavedOnly = await createDataObject('item', { title: "foo baz" });
+		var inAdvancedOnly = await createDataObject('item', { title: "bar qux" });
+		
+		var saved = new Zotero.Search();
+		saved.libraryID = Zotero.Libraries.userLibraryID;
+		saved.name = "Scope Test";
+		saved.addCondition('title', 'contains', 'foo');
+		await saved.saveTx();
+		await select(win, saved);
+		
+		await zp.toggleAdvancedSearchState('open');
+		var s = new Zotero.Search();
+		s.libraryID = saved.libraryID;
+		s.addCondition('title', 'contains', 'bar');
+		deck.pane.search = s;
+		
+		var iv = zp.itemsView;
+		await deck.pane.submit();
+		await iv.waitForLoad();
+		
+		// Only the item matching both the saved search and the advanced search
+		assert.equal(iv.rowCount, 1);
+		assert.isNumber(iv.getRowIndexByID(inBoth.id));
+		
+		// The saved search itself shouldn't have been modified
+		assert.lengthOf(Object.keys(saved.getConditions()), 1);
+		
+		zp.setAdvancedSearchState('closed');
+		await iv.waitForLoad();
+		
+		await Zotero.Items.erase([inBoth.id, inSavedOnly.id, inAdvancedOnly.id]);
+		await saved.eraseTx();
+	});
+	
 	describe("Conditions", function () {
 		var pane, searchBox, conditions;
 		
