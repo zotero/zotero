@@ -39,6 +39,7 @@ Zotero.Library = function (params = {}) {
 	this._storageDownloadNeeded = false;
 	
 	this._lastReadItemInSession = null;
+	this._lastClientVersionIncrementTransactionID = null;
 	
 	Zotero.Utilities.Internal.assignProps(
 		this,
@@ -48,6 +49,7 @@ Zotero.Library = function (params = {}) {
 			'editable',
 			'filesEditable',
 			'libraryVersion',
+			'clientVersion',
 			'storageVersion',
 			'lastSync',
 			'archived'
@@ -71,7 +73,7 @@ Zotero.Library = function (params = {}) {
 // DB columns
 Zotero.defineProperty(Zotero.Library, '_dbColumns', {
 	value: Object.freeze([
-		'type', 'editable', 'filesEditable', 'version', 'storageVersion', 'lastSync', 'archived', 'isAdmin'
+		'type', 'editable', 'filesEditable', 'version', 'clientVersion', 'storageVersion', 'lastSync', 'archived', 'isAdmin'
 	])
 });
 
@@ -209,7 +211,7 @@ Zotero.defineProperty(Zotero.Library.prototype, 'allowsLinkedFiles', {
 
 // Create other accessors
 (function () {
-	let accessors = ['editable', 'filesEditable', 'storageVersion', 'archived', 'isAdmin'];
+	let accessors = ['editable', 'filesEditable', 'clientVersion', 'storageVersion', 'archived', 'isAdmin'];
 	for (let i=0; i<accessors.length; i++) {
 		let prop = Zotero.Library._colToProp(accessors[i]);
 		Zotero.defineProperty(Zotero.Library.prototype, accessors[i], {
@@ -299,6 +301,20 @@ Zotero.Library.prototype._set = function (prop, val) {
 			
 			break;
 		
+		case '_libraryClientVersion':
+			var newVal = Number.parseInt(val, 10);
+			if (newVal != val) {
+				throw new Error(`${prop} must be an integer (${typeof val} '${val}' given)`);
+			}
+			val = newVal;
+			
+			if (val < 0) throw new Error(prop + ' must not be less than 0');
+			
+			// Ensure that it is never decreasing
+			if (val < this._libraryClientVersion) throw new Error(prop + ' cannot decrease');
+			
+			break;
+		
 		case '_libraryStorageVersion':
 			var newVal = parseInt(val);
 			if (newVal != val) {
@@ -360,6 +376,7 @@ Zotero.Library.prototype._loadDataFromRow = function (row) {
 	this._libraryEditable = !!row._libraryEditable;
 	this._libraryFilesEditable = !!row._libraryFilesEditable;
 	this._libraryVersion = row._libraryVersion;
+	this._libraryClientVersion = row._libraryClientVersion;
 	this._libraryStorageVersion = row._libraryStorageVersion;
 	this._libraryLastSync =  row._libraryLastSync !== 0 ? new Date(row._libraryLastSync * 1000) : false;
 	this._libraryArchived = !!row._libraryArchived;
@@ -761,3 +778,18 @@ Zotero.Library.prototype.hasItem = function (item) {
 	}
 	return item.libraryID == this.libraryID;
 }
+
+Zotero.Library.prototype.incrementClientVersion = async function () {
+	let transactionID = Zotero.DB.requireTransaction();
+	if (transactionID === this._lastClientVersionIncrementTransactionID) {
+		return this._libraryClientVersion;
+	}
+
+	let clientVersion = await Zotero.DB.valueQueryAsync(
+		"UPDATE libraries SET clientVersion = clientVersion + 1 WHERE libraryID=? RETURNING clientVersion",
+		[this.libraryID]
+	);
+	this._libraryClientVersion = clientVersion;
+	this._lastClientVersionIncrementTransactionID = transactionID;
+	return clientVersion;
+};
