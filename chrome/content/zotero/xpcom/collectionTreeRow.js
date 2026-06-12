@@ -480,14 +480,25 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	let s3;
 	if (this.advancedSearch) {
 		s3 = this.advancedSearch.clone();
-		// Special condition - unaffected by joinMode
-		s3.addCondition('deleted', 'true');
+		// Show matches in the trash too. includeDeleted has to be set on the
+		// scope searches as well, since a search's scope defines the superset
+		// of possible results. Special condition - unaffected by joinMode.
+		if (!this.isTrash()) {
+			if (s == this.ref) {
+				// Don't modify a saved search object
+				s = s.clone(this.ref.libraryID);
+				s2.setScope(s, includeScopeChildren);
+			}
+			s.addCondition('includeDeleted', 'true');
+			s2.addCondition('includeDeleted', 'true');
+		}
+		s3.addCondition('includeDeleted', 'true');
 		s3.setScope(s2, includeScopeChildren);
 	}
 	else {
 		s3 = s2;
 	}
-
+	
 	this._cachedSearch = s3;
 	return s3;
 };
