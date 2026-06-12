@@ -479,7 +479,14 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	
 	let s3;
 	if (this.advancedSearch) {
-		s3 = this.advancedSearch.clone();
+		if (this.advancedSearch.libraryID === null) {
+			// A library-less search (Feeds pseudo-library) can't be clone()d
+			s3 = new Zotero.Search();
+			s3.fromJSON(this.advancedSearch.toJSON());
+		}
+		else {
+			s3 = this.advancedSearch.clone();
+		}
 		// Show matches in the trash too. includeDeleted has to be set on the
 		// scope searches as well, since a search's scope defines the superset
 		// of possible results. Special condition - unaffected by joinMode.
@@ -562,7 +569,18 @@ Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null
 
 Zotero.CollectionTreeRow.prototype.setAdvancedSearch = function (advancedSearch) {
 	this.clearCache();
-	this.advancedSearch = advancedSearch?.clone(this.ref.libraryID);
+	if (!advancedSearch) {
+		this.advancedSearch = undefined;
+	}
+	else if (this.ref.libraryID === undefined) {
+		// Feeds pseudo-library -- leave the library unset so that the search
+		// spans all feed libraries
+		this.advancedSearch = new Zotero.Search();
+		this.advancedSearch.fromJSON(advancedSearch.toJSON());
+	}
+	else {
+		this.advancedSearch = advancedSearch.clone(this.ref.libraryID);
+	}
 	return true;
 };
 

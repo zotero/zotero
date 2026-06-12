@@ -135,6 +135,33 @@ describe("Advanced Search", function () {
 		await saved.eraseTx();
 	});
 	
+	it("should search across feeds in Feeds view", async function () {
+		let feed = await createFeed();
+		let feedItem = await createDataObject('feedItem', { libraryID: feed.libraryID, setTitle: true }, { skipSelect: true });
+		let otherFeedItem = await createDataObject('feedItem', { libraryID: feed.libraryID, setTitle: true }, { skipSelect: true });
+		
+		await zp.collectionsView.selectFeeds();
+		await waitForItemsLoad(win);
+		
+		await zp.toggleAdvancedSearchState('open');
+		var s = new Zotero.Search();
+		s.libraryID = Zotero.Libraries.userLibraryID;
+		s.addCondition('title', 'is', feedItem.getField('title'));
+		deck.pane.search = s;
+		
+		var iv = zp.itemsView;
+		await deck.pane.submit();
+		await iv.waitForLoad();
+		
+		assert.equal(iv.rowCount, 1);
+		assert.isNumber(iv.getRowIndexByID(feedItem.id));
+		
+		await zp.setAdvancedSearchState('closed');
+		await selectLibrary(win);
+		
+		await feed.eraseTx();
+	});
+	
 	describe("Conditions", function () {
 		var pane, searchBox, conditions;
 		
