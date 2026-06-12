@@ -2874,13 +2874,10 @@ var ZoteroPane = new function () {
 	
 	
 	this.handleSearchInput = function (textbox, event) {
-		if (textbox.searchTextbox.value.includes('"')) {
+		if (textbox.searchTextbox.value.indexOf('"') != -1) {
 			this.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
 		}
-		else {
-			this.search();
-		}
-	};
+	}
 	
 	
 	/**
