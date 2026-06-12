@@ -41,6 +41,8 @@
 			</hbox>
 		`);
 
+		_active = false;
+
 		init() {
 			this._nameField = this.querySelector('#saved-search-name');
 			this._searchElem = this.querySelector('zoterosearch');
@@ -91,7 +93,15 @@
 			return this._search;
 		}
 		
+		/**
+		 * Whether the search has been submitted and should filter the items list
+		 */
+		get active() {
+			return this._active;
+		}
+		
 		set search(search) {
+			this._active = false;
 			if (this.type === 'saved') {
 				if (!search?.id) {
 					throw new Error('Cannot edit unsaved search');
@@ -140,6 +150,7 @@
 			}
 			
 			this._searchElem.updateSearch();
+			this._active = true;
 			await ZoteroPane.itemsView.setFilter('advanced-search', this._search);
 			ZoteroPane.itemsView.focus();
 		}
@@ -150,7 +161,7 @@
 			}
 
 			this.search = null;
-			await this.submit();
+			await ZoteroPane.itemsView.setFilter('advanced-search', null);
 		}
 
 		async save() {

@@ -24,6 +24,10 @@ describe("Advanced Search", function () {
 		await zp.toggleAdvancedSearchState('open');
 		var pane = deck.pane;
 		
+		// Opening the pane shouldn't filter the items list
+		await zp.itemsView.waitForLoad();
+		assert.equal(zp.itemsView.rowCount, 2);
+		
 		// Add condition
 		var s = new Zotero.Search();
 		s.libraryID = item.libraryID;

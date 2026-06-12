@@ -1804,7 +1804,7 @@ var ZoteroPane = new function () {
 
 		deck.pane.refresh();
 
-		let search = deck.state === 'closed' || deck.selectedSearchType !== 'temporary'
+		let search = deck.state === 'closed' || deck.selectedSearchType !== 'temporary' || !deck.pane.active
 			? null
 			: deck.pane.search;
 		if (collectionTreeRow) {
