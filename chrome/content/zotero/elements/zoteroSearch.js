@@ -559,6 +559,11 @@
 			
 			if (this.value) {
 				valueMenu.value = this.value;
+				// If the value isn't in the menu (e.g., a collection from another
+				// library after a library change), fall back to the first item
+				if (!valueMenu.selectedItem) {
+					valueMenu.selectedIndex = 0;
+				}
 			}
 		}
 
