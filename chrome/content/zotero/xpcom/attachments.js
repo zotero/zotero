@@ -1239,9 +1239,10 @@ Zotero.Attachments = new function () {
 	
 	
 	this.canFindFileForItem = function (item) {
+		let pmcid = item.getField('PMCID') || item.getExtraField('PMCID');
 		return item.isRegularItem()
 			&& !item.isFeedItem
-			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI'))
+			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI') || !!pmcid)
 			&& this.FIND_AVAILABLE_FILE_TYPES.every(type => item.numFileAttachmentsWithContentType(type) == 0);
 	};
 
@@ -1275,7 +1276,12 @@ Zotero.Attachments = new function () {
 		
 		var resolvers = [];
 		var doi = item.getField('DOI') || item.getExtraField('DOI');
+		var pmcid = item.getField('PMCID') || item.getExtraField('PMCID');
 		doi = Zotero.Utilities.cleanDOI(doi);
+		if (pmcid) {
+			let matches = pmcid.match(/\bPMC\d+\b/i);
+			pmcid = matches && matches[0].toUpperCase();
+		}
 		
 		if (useDOI && doi) {
 			doi = Zotero.Utilities.cleanDOI(doi);
@@ -1298,6 +1304,13 @@ Zotero.Attachments = new function () {
 					});
 				}
 			}
+		}
+		
+		if (useOA && pmcid) {
+			resolvers.push({
+				pageURL: `https://pmc.ncbi.nlm.nih.gov/articles/${pmcid}/`,
+				accessMethod: 'oa'
+			});
 		}
 		
 		if (useOA && doi) {
