@@ -118,7 +118,11 @@
 
 		refresh() {
 			this._ensureSearch();
-			this._search.libraryID = ZoteroPane.getSelectedLibraryID();
+			let libraryID = ZoteroPane.getSelectedLibraryID();
+			// Keep the previous library when the selected row doesn't have one (e.g., Feeds)
+			if (libraryID) {
+				this._search.libraryID = libraryID;
+			}
 			this._searchElem.search = this._search;
 			// There would be no way to scope a saved search to anything but the library root,
 			// so disable the option to save.
