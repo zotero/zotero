@@ -804,6 +804,7 @@ Zotero.Sync.Data.Engine.prototype._restoreRestoredCollectionItems = async functi
 					if (o.deleted) {
 						o.deleted = false
 						await o.saveTx();
+						Zotero.Sync.Data.Local.markRemoteChangesApplied();
 					}
 				}
 				else {
@@ -816,6 +817,7 @@ Zotero.Sync.Data.Engine.prototype._restoreRestoredCollectionItems = async functi
 					+ `to restored collection ${collection.libraryKey}`);
 				await Zotero.DB.executeTransaction(async function () {
 					await collection.addItems(addToCollection);
+					Zotero.Sync.Data.Local.markRemoteChangesApplied();
 				}.bind(this));
 			}
 			if (addToQueue.length) {
@@ -911,6 +913,7 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = async function (since, ne
 					await obj.eraseTx({
 						skipDeleteLog: true
 					});
+					Zotero.Sync.Data.Local.markRemoteChangesApplied();
 					continue;
 				}
 				conflicts.push({
@@ -960,12 +963,13 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = async function (since, ne
 							await obj.erase({
 								skipEditCheck: true
 							});
+							Zotero.Sync.Data.Local.markRemoteChangesApplied();
 						}
 					}.bind(this));
 				}.bind(this)
 			);
 		}
-		
+
 		if (toDelete.length) {
 			await Zotero.Utilities.Internal.forEachChunkAsync(
 				toDelete,
@@ -977,6 +981,7 @@ Zotero.Sync.Data.Engine.prototype._downloadDeletions = async function (since, ne
 								skipEditCheck: true,
 								skipDeleteLog: true
 							});
+							Zotero.Sync.Data.Local.markRemoteChangesApplied();
 						}
 					});
 				}

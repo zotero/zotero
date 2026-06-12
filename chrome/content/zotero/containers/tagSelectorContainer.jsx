@@ -665,7 +665,11 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 				ids = ids.split(',');
 				var items = Zotero.Items.get(ids);
 				var value = elem.textContent;
-				
+
+				Zotero.UndoHistory.stageAction(
+					remove ? 'undo-action-remove-tag' : 'undo-action-add-tag',
+					{ count: items.length }
+				);
 				for (let i=0; i<items.length; i++) {
 					let item = items[i];
 					if (remove) {
@@ -741,6 +745,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		if (dataOut.result.op === 'split') {
 			const itemIDs = await Zotero.Tags.getTagItems(this.libraryID, oldTagID);
 			await Zotero.DB.executeTransaction(async () => {
+				Zotero.UndoHistory.stageAction('undo-action-split-tag');
 				for (const itemID of itemIDs) {
 					const item = await Zotero.Items.getAsync(itemID);
 					const tagType = item.getTagType(oldTagName);

@@ -246,6 +246,7 @@
 						this.remove(tagName);
 						try {
 							item.removeTag(tagName);
+							this._pendingRemovalCount++;
 							// Save item after a debounce to avoid triggering multiple
 							// save operations. If there are many tags in the library,
 							// db transaction may not keep up with UI changes, and cause
@@ -466,7 +467,7 @@
 						this.add(value);
 						try {
 							this.item.replaceTag(oldValue, value);
-							await this.item.saveTx();
+							await this.item.saveTx({ undoAction: 'undo-action-change-tag' });
 						}
 						catch (e) {
 							this._forceRenderAll();
@@ -483,7 +484,10 @@
 							nextRowElem?.focus();
 						}
 						this.item.removeTag(oldValue);
-						await this.item.saveTx();
+						await this.item.saveTx({
+							undoAction: 'undo-action-remove-tag',
+							undoActionArgs: { count: 1 }
+						});
 					}
 					catch (e) {
 						this._forceRenderAll();
@@ -503,7 +507,10 @@
 				}
 
 				tags.forEach(tag => this.item.addTag(tag));
-				await this.item.saveTx();
+				await this.item.saveTx({
+					undoAction: 'undo-action-add-tag',
+					undoActionArgs: { count: 1 }
+				});
 			}
 			// Single tag at end
 			else {
@@ -518,7 +525,10 @@
 				this.add(value);
 				this.item.addTag(value);
 				try {
-					await this.item.saveTx();
+					await this.item.saveTx({
+						undoAction: 'undo-action-add-tag',
+						undoActionArgs: { count: 1 }
+					});
 				}
 				catch (e) {
 					this._forceRenderAll();
@@ -602,7 +612,9 @@
 		removeAll = () => {
 			if (Services.prompt.confirm(null, "", Zotero.getString('pane.item.tags.removeAll'))) {
 				this.item.setTags([]);
-				this.item.saveTx();
+				this.item.saveTx({
+					undoAction: 'undo-action-remove-all-tags'
+				});
 			}
 		};
 
@@ -652,8 +664,15 @@
 			}
 		}
 
+		_pendingRemovalCount = 0;
+
 		_saveItemDebounced = Zotero.Utilities.debounce(async (item) => {
-			await item.saveTx();
+			let count = this._pendingRemovalCount;
+			this._pendingRemovalCount = 0;
+			await item.saveTx({
+				undoAction: 'undo-action-remove-tags-from-item',
+				undoActionArgs: { count }
+			});
 		});
 
 		_id(id) {

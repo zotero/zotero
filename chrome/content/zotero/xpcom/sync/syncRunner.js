@@ -116,13 +116,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	this.sync = Zotero.serial(function (options = {}) {
 		return this._sync(options);
 	});
-	
-	
+
+
 	this._sync = async function (options) {
 		// Clear message list
 		_errors = [];
 		_tooltipMessages = [];
-		
+
 		// Shouldn't be possible because of serial()
 		if (_syncInProgress) {
 			let msg = Zotero.getString('sync.error.syncInProgress');
@@ -132,6 +132,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		_syncInProgress = true;
 		_stopping = false;
+
+		// Reset remote-change tracking for this sync; the undo stack is
+		// cleared lazily at the end only if remote mutations were applied.
+		Zotero.Sync.Data.Local.resetRemoteChangesApplied();
 		
 		try {
 			await Zotero.Notifier.trigger('start', 'sync', []);
@@ -321,7 +325,14 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		finally {
 			await this.end(options);
-			
+
+			// Clear undo history if this iteration applied remote changes.
+			// Done before any restart/queued recursive call so the inner
+			// sync's reset doesn't lose the decision made here.
+			if (Zotero.Sync.Data.Local.remoteChangesApplied) {
+				Zotero.UndoHistory.clear();
+			}
+
 			if (options.restartSync) {
 				delete options.restartSync;
 				Zotero.debug("Restarting sync");
@@ -334,7 +345,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				await this._sync(JSON.parse(_queuedSyncOptions.shift()));
 				return;
 			}
-			
+
 			Zotero.debug("Done syncing");
 			Zotero.Notifier.trigger('finish', 'sync', librariesToSync || []);
 		}
