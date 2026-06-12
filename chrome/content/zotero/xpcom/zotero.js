@@ -1730,6 +1730,28 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			else {
 				label.hidden = true;
 			}
+			let header = win.ZoteroPane.document.getElementById('zotero-pane-progress-header');
+			let progressIcon = win.ZoteroPane.document.getElementById('zotero-pane-progress-icon');
+			if (progressIcon) {
+				progressIcon.hidden = !icon;
+				progressIcon.setAttribute(
+					'class',
+					`icon icon-20 icon-css${icon ? ` icon-${icon}` : ''}`
+				);
+			}
+			if (header) {
+				header.hidden = !msg && !icon;
+			}
+			let detail = win.ZoteroPane.document.getElementById('zotero-pane-progress-detail');
+			if (detail) {
+				detail.hidden = true;
+				detail.value = "";
+			}
+			let percentage = win.ZoteroPane.document.getElementById('zotero-pane-progress-percentage');
+			if (percentage) {
+				percentage.hidden = !determinate;
+				percentage.value = determinate ? "0%" : "";
+			}
 			// This is the craziest thing. In Firefox 52.6.0, the very presence of this line
 			// causes Zotero on Linux to burn 5% CPU at idle, even if everything below it in
 			// the block is commented out. Same if the progressmeter itself is hidden="true".
@@ -1745,6 +1767,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			if (!progressMeter) {
 				progressMeter = doc.createElement('progress');
 				progressMeter.id = id;
+				progressMeter.classList.add('downloadProgress');
+				progressMeter.setAttribute('aria-labelledby', 'zotero-pane-progress-label');
+				progressMeter.setAttribute('aria-describedby', 'zotero-pane-progress-detail');
 			}
 			if (determinate) {
 				progressMeter.setAttribute('value', 0);
@@ -1766,31 +1791,86 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	
 	
 	/**
-	 * @param	{Number}	percentage		Percentage complete as integer or float
+	 * @param {Number} percentage - Percentage complete as integer or float
+	 * @param {String} [msg] - Updated progress title
+	 * @param {String} [detail] - Updated progress detail
 	 */
-	this.updateZoteroPaneProgressMeter = function (percentage) {
-		if(percentage !== null) {
+	this.updateZoteroPaneProgressMeter = function (percentage, msg, detail) {
+		let progressValue = null;
+		let displayedPercentage = null;
+		if (percentage !== null) {
 			if (percentage < 0 || percentage > 100) {
 				Zotero.debug("Invalid percentage value '" + percentage + "' in Zotero.updateZoteroPaneProgressMeter()");
 				return;
 			}
-			percentage = Math.round(percentage * 10);
+			displayedPercentage = Math.round(percentage);
+			progressValue = Math.round(percentage * 10);
 		}
-		if (percentage === _lastPercentage) {
+		if (progressValue === _lastPercentage && msg === undefined && detail === undefined) {
 			return;
 		}
+
+		if (msg !== undefined) {
+			_progressMessage = msg = msg || "";
+		}
+		let enumerator = Services.wm.getEnumerator("navigator:browser");
+		while (enumerator.hasMoreElements()) {
+			let win = enumerator.getNext();
+			if (!win.ZoteroPane) continue;
+
+			let doc = win.ZoteroPane.document;
+			let label = doc.getElementById('zotero-pane-progress-label');
+			let detailLabel = doc.getElementById('zotero-pane-progress-detail');
+			let percentageLabel = doc.getElementById('zotero-pane-progress-percentage');
+			if (!label || !detailLabel || !percentageLabel) {
+				continue;
+			}
+			if (msg !== undefined) {
+				if (msg) {
+					label.hidden = false;
+					label.value = msg;
+				}
+				else {
+					label.hidden = true;
+				}
+				let header = doc.getElementById('zotero-pane-progress-header');
+				let progressIcon = doc.getElementById('zotero-pane-progress-icon');
+				if (header && progressIcon) {
+					header.hidden = !msg && progressIcon.hidden;
+				}
+			}
+			if (detail !== undefined) {
+				if (detail) {
+					detailLabel.hidden = false;
+					detailLabel.value = detail;
+				}
+				else {
+					detailLabel.hidden = true;
+					detailLabel.value = "";
+				}
+			}
+			if (percentage !== null) {
+				percentageLabel.hidden = false;
+				percentageLabel.value = `${displayedPercentage}%`;
+			}
+			else {
+				percentageLabel.hidden = true;
+				percentageLabel.value = "";
+			}
+		}
+
 		for (let pm of _progressMeters) {
 			if (percentage !== null) {
 				if (!pm.hasAttribute('value')) {
 					pm.max = 1000;
 				}
-				pm.setAttribute('value', percentage);
+				pm.setAttribute('value', progressValue);
 			}
 			else if (pm.hasAttribute('value')) {
 				pm.removeAttribute('value');
 			}
 		}
-		_lastPercentage = percentage;
+		_lastPercentage = progressValue;
 	}
 	
 	

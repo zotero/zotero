@@ -1639,6 +1639,42 @@ describe("CollectionViewItemTree", function () {
 				assert.equal(zp.itemsView.rowCount, 0);
 			});
 
+			it("should permanently delete selected items in chunks", async function () {
+				let items = [];
+				for (let i = 0; i < 3; i++) {
+					items.push(await createDataObject('item', { deleted: true }));
+				}
+				let ids = items.map(item => item.id);
+
+				await selectTrash(win);
+				await itemsView.selectItems(ids);
+
+				let eraseInChunksSpy = sinon.spy(Zotero.Items, 'eraseInChunks');
+				let progressEvents = [];
+				try {
+					await itemsView.deleteSelection(
+						false,
+						{
+							onProgress: (progress, progressMax) => {
+								progressEvents.push([progress, progressMax]);
+							}
+						}
+					);
+				}
+				finally {
+					eraseInChunksSpy.restore();
+				}
+
+				assert.isTrue(eraseInChunksSpy.calledOnce);
+				assert.sameMembers(eraseInChunksSpy.firstCall.args[0], ids);
+				assert.isFunction(eraseInChunksSpy.firstCall.args[1].onProgress);
+				assert.deepEqual(progressEvents.at(-1), [ids.length, ids.length]);
+				for (let id of ids) {
+					assert.isFalse(await Zotero.Items.getAsync(id));
+					assert.isFalse(itemsView.getRowIndexByID(id));
+				}
+			});
+
 			it("should show only top-most trashed collection", async function () {
 				var c1 = await createDataObject('collection', { deleted: true });
 				var c2 = await createDataObject('collection', { parentID: c1.id });

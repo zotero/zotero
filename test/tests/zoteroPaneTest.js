@@ -839,6 +839,56 @@ describe("ZoteroPane", function () {
 		});
 	});
 	
+	describe("#emptyTrash()", function () {
+		it("should show deletion progress and cleanup status", async function () {
+			let stubs = [
+				sinon.stub(Zotero.Searches, 'getDeleted').resolves([]),
+				sinon.stub(Zotero.Searches, 'erase').resolves(),
+				sinon.stub(Zotero.Collections, 'getDeleted').resolves([]),
+				sinon.stub(Zotero.Collections, 'erase').resolves(),
+				sinon.stub(Zotero.Items, 'emptyTrash').callsFake(async (_libraryID, options) => {
+					options.onProgress(50, 100);
+				}),
+				sinon.stub(Zotero, 'purgeDataObjects').resolves()
+			];
+			let showSpy = sinon.spy(Zotero, 'showZoteroPaneProgressMeter');
+			let updateSpy = sinon.spy(Zotero, 'updateZoteroPaneProgressMeter');
+			let hideSpy = sinon.spy(Zotero, 'hideZoteroPaneOverlays');
+
+			try {
+				let dialogPromise = waitForDialog();
+				let emptyTrashPromise = zp.emptyTrash();
+				await dialogPromise;
+				await emptyTrashPromise;
+			}
+			finally {
+				for (let stub of stubs) {
+					stub.restore();
+				}
+				showSpy.restore();
+				updateSpy.restore();
+				hideSpy.restore();
+			}
+
+			assert.isTrue(showSpy.calledWith(
+				Zotero.getString('pane.items.delete.progress'),
+				true,
+				'trash'
+			));
+			assert.isTrue(updateSpy.calledWith(
+				50,
+				undefined,
+				Zotero.getString('pane.items.delete.progress.count', [50, 100])
+			));
+			assert.isTrue(updateSpy.calledWith(
+				null,
+				Zotero.getString('pane.items.delete.progress.cleaning'),
+				null
+			));
+			assert.isTrue(hideSpy.calledOnce);
+		});
+	});
+
 	describe("#deleteSelectedCollection()", function () {
 		it("should move collection to trash but not descendant items by default", async function () {
 			var collection = await createDataObject('collection');

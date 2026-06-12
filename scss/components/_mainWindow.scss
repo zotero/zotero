@@ -34,19 +34,66 @@
 }
 
 #zotero-pane-overlay {
-	background: rgba(0,0,0,.3);
+	background: rgba(0, 0, 0, 0.24);
 }
 
 #zotero-pane-progress-box {
-	background: var(--color-sidepane);
-	border-radius: 5px;
-	border: var(--color-panedivider);
-	height: 30px;
-	width: 300px;
+	background: var(--material-background);
+	border: var(--material-border);
+	border-radius: $border-radius-large;
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+	box-sizing: border-box;
+	gap: $space-sm;
+	padding: $space-md;
+	width: min(420px, calc(100vw - #{$space-xxl}));
+}
+
+#zotero-pane-progress-header {
+	gap: $space-xs;
+	min-width: 0;
+}
+
+#zotero-pane-progress-icon {
+	flex: 0 0 auto;
+}
+
+#zotero-pane-progress-label {
+	color: var(--fill-primary);
+	font-size: $font-size-h2;
+	font-weight: 600;
+	margin: 0;
+	min-width: 0;
 }
 
 #zotero-pane-progressmeter-container {
-	padding: 10px;
+	gap: $space-xs;
+	min-width: 0;
+	padding: 0;
+}
+
+#zotero-pane-progressmeter {
+	margin: 0;
+	width: 100%;
+}
+
+#zotero-pane-progress-status {
+	min-height: $line-height-computed;
+	min-width: 0;
+}
+
+#zotero-pane-progress-detail,
+#zotero-pane-progress-percentage {
+	color: var(--fill-secondary);
+	margin: 0;
+}
+
+#zotero-pane-progress-detail {
+	min-width: 0;
+}
+
+#zotero-pane-progress-percentage {
+	font-variant-numeric: tabular-nums;
+	margin-inline-start: $space-md;
 }
 
 #zotero-layout-switcher {
