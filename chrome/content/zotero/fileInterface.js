@@ -179,7 +179,6 @@ var Zotero_File_Interface = new function () {
 	var _unlock;
 	
 	this.exportCollection = exportCollection;
-	this.exportItemsToClipboard = exportItemsToClipboard;
 	this.exportItems = exportItems;
 	this.bibliographyFromItems = bibliographyFromItems;
 	
@@ -238,85 +237,52 @@ var Zotero_File_Interface = new function () {
 	}
 	
 	
-	/*
-	 * exports items to clipboard
+	/**
+	 * Write QuickCopy content to the system clipboard.
+	 *
+	 * Accepts the `{ text, html? }` shape returned by getContentFromItems().
+	 * Each present flavor is added; consumers (plain vs. rich-text targets)
+	 * each pick what they support.
+	 *
+	 * @param {{text: String, html?: String}} content
 	 */
-	function exportItemsToClipboard(items, format) {
-		function _translate(items, format, callback) {
-			let translation = new Zotero.Translate.Export();
-			translation.setItems(items.slice());
-			translation.setTranslator(format.id);
-			if (format.options) {
-				translation.setDisplayOptions(format.options);
-			}
-			translation.setHandler("done", callback);
-			translation.translate();
+	this.writeToClipboard = function (content) {
+		if (!content) return;
+		let { text, html, annotations } = content;
+
+		let transferable = Components.classes['@mozilla.org/widget/transferable;1']
+			.createInstance(Components.interfaces.nsITransferable);
+		let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
+			.getService(Components.interfaces.nsIClipboard);
+		transferable.init(null);
+
+		if (html) {
+			let str = Components.classes['@mozilla.org/supports-string;1']
+				.createInstance(Components.interfaces.nsISupportsString);
+			str.data = html;
+			transferable.addDataFlavor('text/html');
+			transferable.setTransferData('text/html', str, html.length * 2);
 		}
-		
-		// If translating with virtual "Markdown + Rich Text" translator, use Note Markdown and
-		// Note HTML instead
-		if (format.id == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-			let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions };
-			let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions };
-			_translate(items, markdownFormat, (obj, worked) => {
-				if (!worked) {
-					Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-					return;
-				}
-				_translate(items, htmlFormat, (obj2, worked) => {
-					if (!worked) {
-						Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-						return;
-					}
-					
-					let text = obj.string.replace(/\r\n/g, '\n');
-					let html = obj2.string.replace(/\r\n/g, '\n');
-
-					// copy to clipboard
-					let transferable = Components.classes['@mozilla.org/widget/transferable;1']
-						.createInstance(Components.interfaces.nsITransferable);
-					let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
-						.getService(Components.interfaces.nsIClipboard);
-
-					// Add Text
-					let str = Components.classes['@mozilla.org/supports-string;1']
-						.createInstance(Components.interfaces.nsISupportsString);
-					str.data = text;
-					transferable.addDataFlavor('text/plain');
-					transferable.setTransferData('text/plain', str, text.length * 2);
-
-					// Add HTML
-					str = Components.classes['@mozilla.org/supports-string;1']
-						.createInstance(Components.interfaces.nsISupportsString);
-					str.data = html;
-					transferable.addDataFlavor('text/html');
-					transferable.setTransferData('text/html', str, html.length * 2);
-
-					clipboardService.setData(
-						transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard
-					);
-				});
-			});
+		if (text) {
+			let str = Components.classes['@mozilla.org/supports-string;1']
+				.createInstance(Components.interfaces.nsISupportsString);
+			str.data = text;
+			transferable.addDataFlavor('text/plain');
+			transferable.setTransferData('text/plain', str, text.length * 2);
 		}
-		else {
-			_translate(items, format, (obj, worked) => {
-				if (!worked) {
-					Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-					return;
-				}
-				let text = obj.string;
-				// For Note HTML translator use body content only
-				if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
-					let parser = new DOMParser();
-					let doc = parser.parseFromString(text, 'text/html');
-					text = doc.body.innerHTML;
-				}
-				Components.classes['@mozilla.org/widget/clipboardhelper;1']
-					.getService(Components.interfaces.nsIClipboardHelper)
-					.copyString(text.replace(/\r\n/g, '\n'));
-			});
+		// Rich annotation payload for the note editor's paste handler; without
+		// it, pasted annotations land as plain text with unresolved {citation}
+		// placeholders.
+		if (annotations) {
+			let str = Components.classes['@mozilla.org/supports-string;1']
+				.createInstance(Components.interfaces.nsISupportsString);
+			str.data = annotations;
+			transferable.addDataFlavor('zotero/annotation');
+			transferable.setTransferData('zotero/annotation', str, annotations.length * 2);
 		}
-	}
+
+		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+	};
 	
 	
 	this.getMendeleyDirectory = function () {
@@ -755,70 +721,6 @@ var Zotero_File_Interface = new function () {
 	}
 	
 	
-	/**
-	 * Copies HTML and text citations or bibliography entries for passed items in given style
-	 *
-	 * Does not check that items are actual references (and not notes or attachments)
-	 *
-	 * @param {Zotero.Item[]} items
-	 * @param {String} style - Style id string (e.g., 'http://www.zotero.org/styles/apa')
-	 * @param {String} locale - Locale (e.g., 'en-US')
-	 * @param {Boolean} [asHTML=false] - Use HTML source for plain-text data
-	 * @param {Boolean} [asCitations=false] - Copy citation cluster instead of bibliography
-	 */
-	this.copyItemsToClipboard = function (items, style, locale, asHTML, asCitations) {
-		var d = new Date();
-		
-		// copy to clipboard
-		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
-						   createInstance(Components.interfaces.nsITransferable);
-		var clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"].
-							   getService(Components.interfaces.nsIClipboard);
-		style = Zotero.Styles.get(style);
-		var cslEngine = style.getCiteProc(locale, 'html', { cache: true });
-		
-		if (asCitations) {
-			cslEngine.updateItems(items.map(item => item.id));
-			var citation = {
-				citationItems: items.map(item => ({ id: item.id })),
-				properties: {}
-			};
-			var output = cslEngine.previewCitationCluster(citation, [], [], "html");
-		}
-		else {
-			var output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
-		}
-		
-		// add HTML
-		var str = Components.classes["@mozilla.org/supports-string;1"].
-				  createInstance(Components.interfaces.nsISupportsString);
-		str.data = output;
-		transferable.addDataFlavor("text/html");
-		transferable.setTransferData("text/html", str, output.length * 2);
-		
-		// If not "Copy as HTML", add plaintext; otherwise use HTML from above and just mark as text
-		if(!asHTML) {
-			if (asCitations) {
-				output = cslEngine.previewCitationCluster(citation, [], [], "text");
-			}
-			else {
-				output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, 'text');
-			}
-		}
-		cslEngine.free();
-
-		var str = Components.classes["@mozilla.org/supports-string;1"].
-				  createInstance(Components.interfaces.nsISupportsString);
-		str.data = output;
-		transferable.addDataFlavor("text/plain");
-		transferable.setTransferData("text/plain", str, output.length * 2);
-		
-		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
-		
-		Zotero.debug(`Copied bibliography to clipboard in ${new Date() - d} ms`);
-	}
-	
-	
 	/*
 	 * Shows bibliography options and creates a bibliography
 	 */
@@ -852,7 +754,12 @@ var Zotero_File_Interface = new function () {
 		// generate bibliography
 		try {
 			if(io.method == 'copy-to-clipboard') {
-				Zotero_File_Interface.copyItemsToClipboard(items, io.style, locale, false, io.mode === "citations");
+				let content = Zotero.QuickCopy.getContentFromItems(
+					items,
+					{ mode: 'bibliography', id: io.style, contentType: '', locale },
+					{ asCitations: io.mode === "citations" }
+				);
+				Zotero_File_Interface.writeToClipboard(content);
 			}
 			else {
 				var style = Zotero.Styles.get(io.style);

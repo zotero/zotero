@@ -38,96 +38,157 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	title=""
-	onload="Zotero_QuickCopySiteEditor.onLoad(); Zotero_Preferences.Export.updateQuickCopyUI(); sizeToContent()">
-<dialog 
+	onload="Zotero_QuickCopySiteEditor.onLoad(); sizeToContent()">
+<dialog
 	buttons="cancel,accept"
 	id="zotero-quickCopySiteEditor">
-	
+
+	<linkset>
+		<html:link rel="localization" href="branding/brand.ftl"/>
+		<html:link rel="localization" href="zotero.ftl"/>
+		<html:link rel="localization" href="preferences.ftl"/>
+	</linkset>
+
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="preferences.js"/>
 	<script src="preferences_export.js"/>
-	
+
 	<vbox id="zotero-preferences-quickCopySiteEditor">
 		<label value="&zotero.preferences.quickCopy.siteEditor.domainPath; &zotero.preferences.quickCopy.siteEditor.domainPath.example;" control="zotero-quickCopy-domain"/>
 		<html:input type="text" id="zotero-quickCopy-domain" oninput="Zotero_QuickCopySiteEditor.onDomainInput(event)"/>
-		
+
 		<separator class="thin"/>
-		
-		<label value="&zotero.preferences.quickCopy.siteEditor.format;" control="zotero-quickCopy-menu"/>
-		<menulist id="zotero-quickCopy-menu" native="true"/>
-		
-		<separator class="thin"/>
-		
-		<label id="zotero-quickCopy-locale-menu-label" value="&zotero.preferences.quickCopy.siteEditor.locale;" control="zotero-quickCopy-locale-menu"/>
-		<hbox align="center">
-			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value" native="true"/>
-		</hbox>
-		
-		<separator class="thin"/>
-		
-		<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
-			oncommand="Zotero_Preferences.Export.buildQuickCopyFormatDropDown(
-				document.getElementById('zotero-quickCopy-menu'),
-				this.checked ? 'html' : '',
-				null,
-				io.translators
-			)"
+
+		<label data-l10n-id="preferences-quickCopy-bibliographyFormat" control="zotero-quickCopy-bibliography-menu"/>
+		<menulist id="zotero-quickCopy-bibliography-menu"
+			oncommand="Zotero_QuickCopySiteEditor.onBibliographyChange()"
 			native="true"/>
+
+		<hbox align="center">
+			<label id="zotero-quickCopy-locale-menu-label" value="&zotero.preferences.quickCopy.siteEditor.locale;" control="zotero-quickCopy-locale-menu"/>
+			<menulist id="zotero-quickCopy-locale-menu" native="true"/>
+		</hbox>
+
+		<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
+			native="true"/>
+
+		<separator class="thin"/>
+
+		<label data-l10n-id="preferences-quickCopy-exportFormat" control="zotero-quickCopy-export-menu"/>
+		<menulist id="zotero-quickCopy-export-menu" native="true"/>
+
+		<separator class="thin"/>
+
+		<label data-l10n-id="preferences-quickCopy-preferredFormatOnDrag"/>
+		<radiogroup orient="horizontal" id="zotero-quickCopy-preferredFormatOnDrag">
+			<radio data-l10n-id="preferences-quickCopy-preferredFormatOnDrag-bibliography-radio" value="bibliography"/>
+			<radio data-l10n-id="preferences-quickCopy-preferredFormatOnDrag-export-radio" value="export"/>
+		</radiogroup>
 	</vbox>
-	
+
 	<script>
-	<![CDATA[
-		document.addEventListener('dialogaccept', () => Zotero_QuickCopySiteEditor.onAccept());
+		document.addEventListener('dialogaccept', (event) => {
+			if (!Zotero_QuickCopySiteEditor.onAccept()) {
+				event.preventDefault();
+			}
+		});
 
 		var Zotero_QuickCopySiteEditor = new function () {
-			var menu = document.getElementById('zotero-quickCopy-menu');
-			
+			var bibMenu, exportMenu, dragRadio, copyAsHTML, localeMenu, domainInput;
+
 			this.onLoad = function () {
-				// Hide OK button initially if domain field is empty
-				document.getElementById('zotero-quickCopySiteEditor').getButton('accept').disabled
-					= document.getElementById('zotero-quickCopy-domain').value.trim() === '';
+				var io = window.arguments[0];
+				var existing = io.siteSetting || {};
+				// Pre-select with the existing site override if there is one,
+				// otherwise the user's current global preference
+				var bibSub = existing.bibliography
+					|| Zotero.QuickCopy.unserializeSetting(
+						Zotero.Prefs.get('export.quickCopy.bibliographySetting')
+					);
+				var expSub = existing.export
+					|| Zotero.QuickCopy.unserializeSetting(
+						Zotero.Prefs.get('export.quickCopy.exportSetting')
+					);
+
+				bibMenu = document.getElementById('zotero-quickCopy-bibliography-menu');
+				exportMenu = document.getElementById('zotero-quickCopy-export-menu');
+				dragRadio = document.getElementById('zotero-quickCopy-preferredFormatOnDrag');
+				copyAsHTML = document.getElementById('zotero-quickCopy-copyAsHTML');
+				localeMenu = document.getElementById('zotero-quickCopy-locale-menu');
+				domainInput = document.getElementById('zotero-quickCopy-domain');
+
+				domainInput.value = io.domain || '';
+
+				// Build dropdowns; selection is applied below
+				Zotero_Preferences.Export.buildBibliographyQuickCopyDropDown(bibMenu);
+				Zotero_Preferences.Export.buildExportQuickCopyDropDown(exportMenu, io.translators);
+
+				Zotero_Preferences.Export._selectMenuItemByValue(bibMenu, bibSub.id);
+				Zotero_Preferences.Export._selectMenuItemByValue(exportMenu, expSub.id);
+
+				copyAsHTML.checked = bibSub.contentType === 'html';
+
+				// Locale list: populate full options, then filter by the selected style
+				Zotero.Styles.populateLocaleList(localeMenu);
+				Zotero.Styles.updateLocaleList(
+					localeMenu,
+					bibSub.id ? Zotero.Styles.get(bibSub.id) : null,
+					bibSub.locale || ''
+				);
+
+				dragRadio.value = existing.drag
+					|| Zotero.Prefs.get('export.quickCopy.preferredFormatOnDrag');
+
+				this.updateAcceptButton();
 			};
-			
+
+			this.updateAcceptButton = function () {
+				// Domain is the only required field; both menus always have a pre-selected value
+				var hasDomain = domainInput.value.trim() !== '';
+				document.getElementById('zotero-quickCopySiteEditor')
+					.getButton('accept').disabled = !hasDomain;
+			};
+
+			// Re-filter the locale list when the bibliography style changes
+			this.onBibliographyChange = function () {
+				let styleID = bibMenu.value;
+				Zotero.Styles.updateLocaleList(
+					localeMenu,
+					styleID ? Zotero.Styles.get(styleID) : null,
+					localeMenu.value || ''
+				);
+			};
+
 			this.onAccept = function () {
 				var io = window.arguments[0];
-				io.domain = document.getElementById('zotero-quickCopy-domain').value;
-				io.format = menu.value;
-				
-				io.locale = '';
-				if (!document.getElementById('zotero-quickCopy-locale-menu').disabled) {
-					io.locale = document.getElementById('zotero-quickCopy-locale-menu').value;
-				}
-				
+				io.domain = domainInput.value;
+
+				io.siteSetting = {
+					bibliography: {
+						id: bibMenu.value || '',
+						contentType: copyAsHTML.checked ? 'html' : '',
+						locale: localeMenu.value || ''
+					},
+					export: { id: exportMenu.value || '' },
+					drag: dragRadio.value
+						|| Zotero.Prefs.get('export.quickCopy.preferredFormatOnDrag')
+				};
 				io.ok = true;
-			}
-			
+				return true;
+			};
+
 			this.onDomainInput = function (event) {
-				// Hide OK button if domain field is empty
-				document.getElementById('zotero-quickCopySiteEditor').getButton('accept').disabled = event.target.value.trim() === '';
-				
-				// Auto-select Wikipedia Citation Templates
+				this.updateAcceptButton();
+
+				// Auto-select Wikipedia Citation Templates as the export format
 				if (event.target.value == 'wikipedia.org') {
-					menu.value = 'export=3f50aaac-7acc-4350-acd0-59cb77faf620';
-					Zotero_Preferences.Export.updateQuickCopyUI();
+					Zotero_Preferences.Export._selectMenuItemByValue(
+						exportMenu,
+						'3f50aaac-7acc-4350-acd0-59cb77faf620'
+					);
 				}
 			};
 		}
-		
-		var io = window.arguments[0];
-		var contentType = io.asHTML ? 'html' : '';
-		document.getElementById('zotero-quickCopy-domain').value = io.domain ? io.domain : '';
-		Zotero_Preferences.Export.buildQuickCopyFormatDropDown(
-			document.getElementById('zotero-quickCopy-menu'),
-			contentType,
-			io.format,
-			io.translators
-		);
-		Zotero.Styles.populateLocaleList(
-			document.getElementById('zotero-quickCopy-locale-menu')
-		);
-		document.getElementById('zotero-quickCopy-copyAsHTML').checked = io.asHTML;
-		Zotero_Preferences.Export._lastSelectedLocale = io.locale;
-	]]>
 	</script>
 </dialog>
 </window>

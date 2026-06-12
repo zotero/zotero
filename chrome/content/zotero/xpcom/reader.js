@@ -110,6 +110,40 @@ class ReaderInstance {
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;
 	}
 
+	/**
+	 * Keys of the annotations currently selected in the reader.
+	 *
+	 * @returns {String[]}
+	 */
+	getSelectedAnnotationIDs() {
+		let ids = this._internalReader?._state?.selectedAnnotationIDs;
+		return ids ? Array.from(ids) : [];
+	}
+
+	/**
+	 * What is currently selected in the reader's view(s), used to predict what
+	 * a copy action will produce so the Edit menu and Cmd+C handler can label
+	 * and behave accordingly.
+	 *
+	 * @returns {'annotation' | 'text' | null}
+	 */
+	getSelectionType() {
+		if (!this._internalReader) return null;
+
+		if (this.getSelectedAnnotationIDs().length > 0) {
+			return 'annotation';
+		}
+
+		let view = this._internalReader._lastViewPrimary ? this._internalReader._primaryView : this._internalReader._secondaryView;
+		if (!view || !view._iframeWindow) return null;
+		let sel = view._iframeWindow.getSelection();
+		if (sel && !sel.isCollapsed && String(sel).length > 0) {
+			return 'text';
+		}
+
+		return null;
+	}
+
 	async migrateMendeleyColors(libraryID, annotations) {
 		let colorMap = new Map();
 		colorMap.set('#fff5ad', '#ffd400');
@@ -411,46 +445,20 @@ class ReaderInstance {
 					if (fromText) {
 						return;
 					}
-					// annotations are wrapped in a temp note for translation
+					// Convert the iframe's JSON annotations into a single note
+					// item; getContentFromItems handles the rest (reformatting
+					// embedded citations, picking the right output flavors).
 					let items = [Zotero.QuickCopy.annotationsToNote(annotations)];
-					let format = Zotero.QuickCopy.getNoteFormat();
-					Zotero.debug(`Copying/dragging (${annotations.length}) annotation(s) with ${format}`);
-					format = Zotero.QuickCopy.unserializeSetting(format);
-					// Basically the same code is used in itemTree.jsx onDragStart
-					if (format.mode === 'export') {
-						// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
-						// and Note HTML translators instead
-						if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-							let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions };
-							let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions };
-							Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
-								if (!worked) {
-									return;
-								}
-								Zotero.QuickCopy.getContentFromItems(items, htmlFormat, (obj2, worked) => {
-									if (!worked) {
-										return;
-									}
-									dataTransfer.setData('text/plain', obj.string.replace(/\r\n/g, '\n'));
-									dataTransfer.setData('text/html', obj2.string.replace(/\r\n/g, '\n'));
-								});
-							});
+					let format = Zotero.QuickCopy.getFormat({ items });
+					Zotero.debug(`Copying/dragging (${annotations.length}) annotation(s) with ${JSON.stringify(format)}`);
+
+					let content = Zotero.QuickCopy.getContentFromItems(items, format);
+					if (content) {
+						if (content.html) {
+							dataTransfer.setData('text/html', content.html);
 						}
-						else {
-							Zotero.QuickCopy.getContentFromItems(items, format, (obj, worked) => {
-								if (!worked) {
-									return;
-								}
-								var text = obj.string.replace(/\r\n/g, '\n');
-								// For Note HTML translator use body content only
-								if (format.id === Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
-									// Use body content only
-									let parser = new DOMParser();
-									let doc = parser.parseFromString(text, 'text/html');
-									text = doc.body.innerHTML;
-								}
-								dataTransfer.setData('text/plain', text);
-							});
+						if (content.text) {
+							dataTransfer.setData('text/plain', content.text);
 						}
 					}
 				}

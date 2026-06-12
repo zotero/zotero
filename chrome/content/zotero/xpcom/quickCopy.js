@@ -45,7 +45,10 @@ Zotero.QuickCopy = new function () {
 		// Make sure export translator code is loaded whenever the output format changes
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver(
-				"export.quickCopy.setting", _loadOutputFormat
+				"export.quickCopy.bibliographySetting", _loadOutputFormat
+			),
+			Zotero.Prefs.registerObserver(
+				"export.quickCopy.exportSetting", _loadOutputFormat
 			),
 			Zotero.Prefs.registerObserver(
 				"export.noteQuickCopy.setting", _loadNoteOutputFormat
@@ -86,8 +89,16 @@ Zotero.QuickCopy = new function () {
 				format: row.format
 			};
 		});
-		for (let row of rows) {
-			await _preloadFormat(row.format);
+		// Preload every translator/style referenced by a site-specific entry
+		// so drag-drop has them available synchronously
+		for (let row of _siteSettings) {
+			let site = this.parseSiteFormat(row.format);
+			if (site.bibliography) {
+				await _preloadFormat(site.bibliography);
+			}
+			if (site.export) {
+				await _preloadFormat(site.export);
+			}
 		}
 	};
 	
@@ -96,7 +107,63 @@ Zotero.QuickCopy = new function () {
 		return _siteSettings && _siteSettings.length > 0;
 	};
 	
-	
+
+	/**
+	 * Parse a site-specific Quick Copy setting from the DB into a normalized
+	 * shape. Supports both the legacy single-mode format and the new shape;
+	 * always returns:
+	 *
+	 *   {
+	 *       bibliography?: { mode: 'bibliography', id, contentType, locale },
+	 *       export?:       { mode: 'export', id },
+	 *       drag?:         'bibliography' | 'export'
+	 *   }
+	 * @param {String|Object} raw - DB row.format value
+	 * @return {Object} - Normalized site setting
+	 */
+	this.parseSiteFormat = function (raw) {
+		var parsed = this.unserializeSetting(raw);
+		if (!parsed || typeof parsed !== 'object') {
+			return {};
+		}
+		// Legacy single-mode shape (top-level `mode` field)
+		if (parsed.mode === 'bibliography') {
+			return {
+				bibliography: {
+					mode: 'bibliography',
+					id: parsed.id,
+					contentType: parsed.contentType || '',
+					locale: parsed.locale || ''
+				},
+				drag: 'bibliography'
+			};
+		}
+		if (parsed.mode === 'export') {
+			return {
+				export: { mode: 'export', id: parsed.id },
+				drag: 'export'
+			};
+		}
+		// Ensure each sub-object is a complete single-mode setting
+		var out = {};
+		if (parsed.bibliography) {
+			out.bibliography = {
+				mode: 'bibliography',
+				id: parsed.bibliography.id,
+				contentType: parsed.bibliography.contentType || '',
+				locale: parsed.bibliography.locale || ''
+			};
+		}
+		if (parsed.export) {
+			out.export = { mode: 'export', id: parsed.export.id };
+		}
+		if (parsed.drag) {
+			out.drag = parsed.drag;
+		}
+		return out;
+	};
+
+
 	/*
 	 * Return Quick Copy setting object from string, stringified object, or object
 	 * 
@@ -111,26 +178,37 @@ Zotero.QuickCopy = new function () {
 	 */
 	this.unserializeSetting = function (setting) {
 		var settingObject = {};
-		
+
 		if (typeof setting === 'string') {
 			try {
 				// First test if string input is a stringified object
 				settingObject = JSON.parse(setting);
 			} catch (e) {
-				// Try parsing as formatted string
+				// Try parsing as formatted string. contentType and locale are
+				// only meaningful for bibliography mode.
 				var parsedSetting = setting.match(/(bibliography|export)(?:\/([^=]+))?=(.+)$/);
 				if (parsedSetting) {
 					settingObject.mode = parsedSetting[1];
-					settingObject.contentType = parsedSetting[2] || '';
+					if (parsedSetting[1] === 'bibliography') {
+						settingObject.contentType = parsedSetting[2] || '';
+					}
 					settingObject.id = parsedSetting[3];
-					settingObject.locale = '';
+					if (parsedSetting[1] === 'bibliography') {
+						settingObject.locale = '';
+					}
 				}
 			}
 		} else {
 			// Return input if not a string; it might already be an object
 			return setting;
 		}
-		
+
+		// Ensure bibliography mode always has contentType and locale fields
+		if (settingObject.mode === 'bibliography') {
+			if (settingObject.contentType === undefined) settingObject.contentType = '';
+			if (settingObject.locale === undefined) settingObject.locale = '';
+		}
+
 		return settingObject;
 	};
 	
@@ -156,21 +234,21 @@ Zotero.QuickCopy = new function () {
 		}
 		return '';
 	};
-	
-	this.getNoteFormat = function () {
-		var pref = Zotero.Prefs.get('export.noteQuickCopy.setting');
-		pref = JSON.stringify(this.unserializeSetting(pref));
-		return pref;
+
+	this.getLocale = function () {
+		return this.unserializeSetting(
+			Zotero.Prefs.get('export.quickCopy.bibliographySetting')
+		).locale;
 	};
-	
-	this.getFormatFromURL = function (url) {
-		var quickCopyPref = Zotero.Prefs.get("export.quickCopy.setting");
-		quickCopyPref = JSON.stringify(this.unserializeSetting(quickCopyPref));
-		
-		if (!url) {
-			return quickCopyPref;
-		}
-		
+
+
+	/**
+	 * Find the best-matching site setting row for the given URL (longest domain,
+	 * then longest path). Returns the raw DB row.format string, or null.
+	 */
+	var _findSiteFormatForURL = function (url) {
+		if (!url) return null;
+
 		var nsIURI;
 		try {
 			nsIURI = Services.io.newURI(url, null, null);
@@ -180,132 +258,220 @@ Zotero.QuickCopy = new function () {
 			var urlPath = nsIURI.pathQueryRef;
 		}
 		catch (e) {}
-		
+
 		// Skip non-HTTP URLs
 		if (!nsIURI || !/^https?$/.test(nsIURI.scheme)) {
-			return quickCopyPref;
+			return null;
 		}
-		
+
 		if (!_siteSettings) {
 			Zotero.debug("Quick Copy site settings not loaded", 2);
-			return quickCopyPref;
+			return null;
 		}
-		
+
 		var matches = [];
-		for (let i=0; i<_siteSettings.length; i++) {
+		for (let i = 0; i < _siteSettings.length; i++) {
 			let row = _siteSettings[i];
-			let domain = row.domainPath.split('/',1)[0];
+			let domain = row.domainPath.split('/', 1)[0];
 			let path = row.domainPath.substr(domain.length) || '/';
 			if (urlHostPort.endsWith(domain) && urlPath.startsWith(path)) {
 				matches.push({
-					format: JSON.stringify(this.unserializeSetting(row.format)),
+					format: row.format,
 					domainLength: domain.length,
 					pathLength: path.length
 				});
 			}
 		}
-		
+
+		if (!matches.length) return null;
+
 		// Give priority to longer domains, then longer paths
-		var sort = function (a, b) {
-			if (a.domainLength > b.domainLength) {
-				return -1;
-			}
-			else if (a.domainLength < b.domainLength) {
-				return 1;
-			}
-			
-			if (a.pathLength > b.pathLength) {
-				return -1;
-			}
-			else if (a.pathLength < b.pathLength) {
-				return 1;
-			}
-			
+		matches.sort(function (a, b) {
+			if (a.domainLength > b.domainLength) return -1;
+			if (a.domainLength < b.domainLength) return 1;
+			if (a.pathLength > b.pathLength) return -1;
+			if (a.pathLength < b.pathLength) return 1;
 			return -1;
-		};
-		
-		if (matches.length) {
-			matches.sort(sort);
-			return matches[0].format;
-		} else {
-			return quickCopyPref;
+		});
+		return matches[0].format;
+	};
+
+
+	/**
+	 * Get the Quick Copy format for the currently active URL.
+	 * When `items` is a selection composed entirely of notes/annotations,
+	 * return the user's note-format pref.
+	 *
+	 * @param {Object} [options]
+	 * @param {String} [options.mode] - 'bibliography' or 'export'; omit for drag-drop
+	 * @param {Zotero.Item[]} [options.items] - Items the format will be applied to
+	 * @return {Object} - `{mode, id, contentType, locale}` for bibliography; `{mode, id, ...}` for export
+	 */
+	this.getFormat = function ({ mode, items } = {}) {
+		// Note-only selections always use the note format
+		if (items && items.length && items.every(item => item.isNote() || item.isAnnotation())) {
+			return this.unserializeSetting(Zotero.Prefs.get('export.noteQuickCopy.setting'));
 		}
+
+		var siteRaw = _findSiteFormatForURL(this.lastActiveURL);
+		var site = siteRaw ? this.parseSiteFormat(siteRaw) : null;
+
+		// If no mode was requested (drag-drop), pick one from the site's
+		// `drag` pref or fall back to the user's preferredFormatOnDrag pref
+		if (!mode) {
+			if (site?.drag) {
+				mode = site.drag;
+			}
+			else {
+				mode = Zotero.Prefs.get('export.quickCopy.preferredFormatOnDrag');
+			}
+		}
+
+		// Site override for that mode wins, else fall back to global
+		if (site && site[mode] && site[mode].id) {
+			return site[mode];
+		}
+		var globalFormat = mode === 'export'
+			? Zotero.Prefs.get('export.quickCopy.exportSetting')
+			: Zotero.Prefs.get('export.quickCopy.bibliographySetting');
+		return this.unserializeSetting(globalFormat);
 	};
 	
 	
-	/*
-	 * Get text and (when applicable) HTML content from items
+	/**
+	 * Produce QuickCopy content from items. Single entry point for clipboard
+	 * copy, drag-and-drop, and the Bibliography dialog. Item-type prep is
+	 * handled here: annotations are wrapped via annotationsToNote, notes are
+	 * passed through reformatNoteCitations, and bibliography mode is filtered
+	 * to regular items. Always returns { text, html },
+	 * unless export translator provides no html format.
 	 *
-	 * |items| is an array of Zotero.Item objects
-	 *
-	 * |format| may be a Quick Copy format string
-	 * (e.g. "bibliography=http://www.zotero.org/styles/apa")
-	 * or an Quick Copy format object
-	 *
-	 * |callback| is only necessary if using an export format and should be
-	 * a function suitable for Zotero.Translate.setHandler, taking parameters
-	 * |obj| and |worked|. The generated content should be placed in obj.string
-	 * and |worked| should be true if the operation is successful.
-	 *
-	 * If bibliography format, the process is synchronous and an object
-	 * contain properties 'text' and 'html' is returned.
+	 * @param {Zotero.Item[]} items
+	 * @param {String|Object} format
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.asCitations=false] - Bibliography only: in-text citation cluster
+	 * @return {{text: String, html?: String} | null}
 	 */
-	this.getContentFromItems = function (items, format, callback, modified) {
-		if (items.length > Zotero.Prefs.get('export.quickCopy.dragLimit')) {
-			Zotero.debug("Skipping quick copy for " + items.length + " items");
-			return false;
-		}
+	this.getContentFromItems = function (items, format, options = {}) {
+		if (!items.length) return null;
 		
 		format = this.unserializeSetting(format);
-		
-		if (format.mode == 'export') {
-			var translation = new Zotero.Translate.Export;
-			translation.noWait = true;	// needed not to break drags
-			// Allow to reuse items array
-			translation.setItems(items.slice());
-			translation.setTranslator(format.id);
-			if (format.options) {
-				translation.setDisplayOptions(format.options);
-			}
-			translation.setHandler("done", callback);
-			translation.translate();
-			return true;
+
+		// Format-appropriate item transformations:
+		//   annotations → wrap into a temp note,
+		//   notes → reformat embedded citations in the current bib style,
+		//   bibliography mode → keep only regular items.
+		if (items.every(item => item.isAnnotation())) {
+			items = [this.annotationsToNote(items)];
 		}
-		else if (format.mode == 'bibliography') {
-			items = items.filter(item => !item.isNote());
-			
-			var locale = _getLocale(format);
-			
-			// Copy citations if shift key pressed
-			if (modified) {
-				var csl = Zotero.Styles.get(format.id).getCiteProc(locale, "text", { cache: true });
+		if (items.every(item => item.isNote())) {
+			items = this.reformatNoteCitations(items);
+		}
+		if (format.mode === 'bibliography') {
+			items = items.filter(item => item.isRegularItem());
+		}
+		if (!items.length) return null;
+
+		if (format.mode === 'export') {
+			// Markdown+RichText virtual translator: produces both flavors,
+			// using its `markdownOptions` and `htmlOptions` independently.
+			if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+				let text = _runExportTranslator(items, {
+					mode: 'export',
+					id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN,
+					options: format.markdownOptions
+				});
+				let html = _runExportTranslator(items, {
+					mode: 'export',
+					id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML,
+					options: format.htmlOptions
+				});
+				if (text === null || html === null) return null;
+				return {
+					text: text.replace(/\r\n/g, '\n'),
+					html: html.replace(/\r\n/g, '\n')
+				};
+			}
+
+			// Note HTML: HTML output, exposed on both flavors so rich-text
+			// targets get the formatting and plain editors get the source.
+			if (format.id === Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+				let output = _runExportTranslator(items, format);
+				if (output === null) return null;
+				output = output.replace(/\r\n/g, '\n');
+				let parser = new DOMParser();
+				let doc = parser.parseFromString(output, 'text/html');
+				output = doc.body.innerHTML;
+				return { text: output, html: output };
+			}
+
+			// Other export translators (e.g. BibTeX): single-flavor output.
+			let output = _runExportTranslator(items, format);
+			if (output === null) return null;
+			return { text: output.replace(/\r\n/g, '\n') };
+		}
+
+		if (format.mode === 'bibliography') {
+			let locale = format.locale || this.getLocale();
+			let style = Zotero.Styles.get(format.id);
+			if (!style) return null;
+
+			// Bibliography mode always produces both flavors: plain text for
+			// `text/plain`, HTML for `text/html`. "Copy as HTML" (contentType
+			// === 'html') sends the HTML version to `text/plain` as well, so
+			// plain editors paste HTML source.
+			let html, text;
+			if (options.asCitations) {
+				let csl = style.getCiteProc(locale, 'html', { cache: true });
 				csl.updateItems(items.map(item => item.id));
-				var citation = {
+				let citation = {
 					citationItems: items.map(item => ({ id: item.id })),
 					properties: {}
 				};
-				var html = csl.previewCitationCluster(citation, [], [], "html"); 
-				var text = csl.previewCitationCluster(citation, [], [], "text");
+				html = csl.previewCitationCluster(citation, [], [], 'html');
+				text = csl.previewCitationCluster(citation, [], [], 'text');
 				csl.free();
 			}
 			else {
-				var style = Zotero.Styles.get(format.id);
-				var cslEngine = style.getCiteProc(locale, 'html', { cache: true });
- 				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
- 				cslEngine.free();
+				let cslEngine = style.getCiteProc(locale, 'html', { cache: true });
+				html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, 'html');
+				cslEngine.free();
 				cslEngine = style.getCiteProc(locale, 'text', { cache: true });
-				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
+				text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, 'text');
 				cslEngine.free();
 			}
-			
+
 			return {
-				text: format.contentType == "html" ? html : text,
-				html,
+				text: format.contentType === 'html' ? html : text,
+				html
 			};
 		}
-		
-		throw ("Invalid mode '" + format.mode + "' in Zotero.QuickCopy.getContentFromItems()");
+
+		throw new Error(`Invalid Quick Copy mode '${format.mode}'`);
 	};
+
+
+	/**
+	 * Run an export translator synchronously (relies on noWait + preloaded
+	 * translator code) and return its string output, or null on failure.
+	 */
+	function _runExportTranslator(items, format) {
+		let result = null;
+		let translation = new Zotero.Translate.Export();
+		translation.noWait = true;
+		translation.setItems(items.slice());
+		translation.setTranslator(format.id);
+		if (format.options) {
+			translation.setDisplayOptions(format.options);
+		}
+		translation.setHandler("done", (obj, worked) => {
+			if (worked) {
+				result = obj.string;
+			}
+		});
+		translation.translate();
+		return result;
+	}
 
 	/**
 	 * Generate a note item to pass to getContentFromItems() from an array of annotations
@@ -343,16 +509,222 @@ Zotero.QuickCopy = new function () {
 		tmpNote.setNote(html);
 		return tmpNote;
 	};
-	
+
 	/**
-	 * If an export translator is the selected output format, load its code (which must be done
-	 * asynchronously) ahead of time, since drag-and-drop requires synchronous operation
+	 * Reformat citation spans in note items using the QuickCopy CSL style
+	 *
+	 * Parses citation data from each <span class="citation"> in the note HTML,
+	 * resolves item URIs, and reformats using the CSL engine. Returns new temporary
+	 * note items with updated HTML -- the originals are not modified.
+	 *
+	 * @param {Zotero.Item[]} items - Note items to process
+	 * @return {Zotero.Item[]} - New note items with CSL-formatted citations
+	 */
+	this.reformatNoteCitations = function (items) {
+		if (!items.every(item => item.isNote())) {
+			return items;
+		}
+
+		// Use getFormat() so site-specific bibliography overrides apply when
+		// the user is on a URL with a configured site setting
+		let format = this.getFormat({ mode: 'bibliography' });
+		if (format.mode !== 'bibliography' || !format.id) {
+			return items;
+		}
+
+		let style = Zotero.Styles.get(format.id);
+		if (!style) {
+			return items;
+		}
+
+		let locale = format.locale || this.getLocale();
+		let cslEngine;
+		try {
+			cslEngine = style.getCiteProc(locale, 'html', { cache: true });
+		}
+		catch (e) {
+			Zotero.logError('Failed to initialize CSL engine for note citation reformatting: ' + e);
+			return items;
+		}
+
+		try {
+			// First pass: collect all unique item IDs across all notes,
+			// and build a fallback map of embedded CSL JSON for deleted items
+			let allItemIDs = new Set();
+			let embeddedCSLByFakeID = {};
+			let parsedNotes = [];
+
+			for (let item of items) {
+				if (!item.isNote()) {
+					parsedNotes.push(null);
+					continue;
+				}
+
+				let noteHTML = item.getNote();
+				if (!noteHTML) {
+					parsedNotes.push(null);
+					continue;
+				}
+
+				let parser = new DOMParser();
+				let doc = parser.parseFromString(noteHTML, 'text/html');
+				let citationSpans = doc.querySelectorAll('span.citation[data-citation]');
+
+				if (!citationSpans.length) {
+					parsedNotes.push(null);
+					continue;
+				}
+
+				// Parse embedded citation item data from the note wrapper
+				// for fallback when items have been deleted
+				let embeddedItemDataByURI = {};
+				let containerNode = doc.querySelector('div[data-citation-items]');
+				if (containerNode) {
+					try {
+						let storedItems = JSON.parse(decodeURIComponent(
+							containerNode.getAttribute('data-citation-items')
+						));
+						if (Array.isArray(storedItems)) {
+							for (let si of storedItems) {
+								if (si.uris && si.itemData) {
+									for (let uri of si.uris) {
+										embeddedItemDataByURI[uri] = si.itemData;
+									}
+								}
+							}
+						}
+					}
+					catch (e) {
+						// Ignore parse errors
+					}
+				}
+
+				let spanData = [];
+				for (let span of citationSpans) {
+					let citation;
+					try {
+						citation = JSON.parse(decodeURIComponent(span.getAttribute('data-citation')));
+					}
+					catch (e) {
+						spanData.push(null);
+						continue;
+					}
+
+					if (!citation || !citation.citationItems || !citation.citationItems.length) {
+						spanData.push(null);
+						continue;
+					}
+
+					let cslItems = [];
+					for (let ci of citation.citationItems) {
+						if (!ci.uris || !ci.uris.length) continue;
+						let uri = ci.uris[0];
+						let itemID = Zotero.URI.getURIItemID(uri);
+
+						if (!itemID) {
+							// Item deleted -- use embedded CSL JSON if available
+							let embeddedData = embeddedItemDataByURI[uri];
+							if (!embeddedData) continue;
+
+							let fakeID = Zotero.Utilities.randomString();
+							let cslData = Zotero.Utilities.deepCopy(embeddedData);
+							cslData.id = fakeID;
+							embeddedCSLByFakeID[fakeID] = cslData;
+							itemID = fakeID;
+						}
+
+						allItemIDs.add(itemID);
+						let cslItem = { id: itemID };
+						if (ci.locator) {
+							cslItem.locator = ci.locator;
+							cslItem.label = ci.label || 'page';
+						}
+						if (ci.prefix) {
+							cslItem.prefix = ci.prefix;
+						}
+						if (ci.suffix) {
+							cslItem.suffix = ci.suffix;
+						}
+						cslItems.push(cslItem);
+					}
+
+					spanData.push(cslItems.length ? { span, cslItems } : null);
+				}
+
+				parsedNotes.push({ doc, spanData });
+			}
+
+			if (!allItemIDs.size) {
+				cslEngine.free();
+				return items;
+			}
+
+			// If we have embedded items for deleted citations, temporarily
+			// patch retrieveItem so citeproc can resolve fake IDs
+			let originalRetrieveItem;
+			if (Object.keys(embeddedCSLByFakeID).length) {
+				originalRetrieveItem = cslEngine.sys.retrieveItem;
+				cslEngine.sys.retrieveItem = function (id) {
+					if (embeddedCSLByFakeID[id]) {
+						return embeddedCSLByFakeID[id];
+					}
+					return originalRetrieveItem.call(this, id);
+				};
+			}
+
+			cslEngine.updateItems([...allItemIDs]);
+
+			// Second pass: format citations and build new note items
+			let result = [];
+			for (let i = 0; i < items.length; i++) {
+				let parsed = parsedNotes[i];
+				if (!parsed) {
+					result.push(items[i]);
+					continue;
+				}
+
+				for (let data of parsed.spanData) {
+					if (!data) continue;
+					let citation = {
+						citationItems: data.cslItems,
+						properties: {}
+					};
+					let formatted = cslEngine.previewCitationCluster(citation, [], [], 'html');
+					data.span.innerHTML = '(' + formatted + ')';
+				}
+
+				let tmpNote = new Zotero.Item('note');
+				tmpNote.libraryID = items[i].libraryID;
+				tmpNote.setNote(parsed.doc.body.innerHTML);
+				result.push(tmpNote);
+			}
+
+			// Restore original retrieveItem if patched
+			if (originalRetrieveItem) {
+				cslEngine.sys.retrieveItem = originalRetrieveItem;
+			}
+			cslEngine.free();
+			return result;
+		}
+		catch (e) {
+			Zotero.logError('Failed to reformat note citations: ' + e);
+			if (cslEngine) {
+				cslEngine.free();
+			}
+			return items;
+		}
+	};
+
+	/**
+	 * Preload the global default bibliography and export translators/styles so
+	 * drag-and-drop has them available synchronously. Site-specific formats
+	 * are preloaded by loadSiteSettings().
 	 *
 	 * @return {Promise}
 	 */
 	var _loadOutputFormat = async function () {
-		var format = Zotero.Prefs.get("export.quickCopy.setting");
-		return _preloadFormat(format);
+		await _preloadFormat(Zotero.Prefs.get('export.quickCopy.bibliographySetting'));
+		await _preloadFormat(Zotero.Prefs.get('export.quickCopy.exportSetting'));
 	};
 	
 	
@@ -390,16 +762,12 @@ Zotero.QuickCopy = new function () {
 		}
 		else if (format.mode === 'bibliography') {
 			let style = Zotero.Styles.get(format.id);
-			let locale = _getLocale(format);
+			let locale = format.locale || Zotero.QuickCopy.getLocale();
 			// Cache a single CiteProc instance (format-independent)
 			style.getCiteProc(locale, 'html', { cache: true });
 		}
 	};
 	
-	
-	function _getLocale(format) {
-		return format.locale || Zotero.Prefs.get('export.quickCopy.locale');
-	}
 	
 	var _loadFormattedNames = async function () {
 		var t = new Date;

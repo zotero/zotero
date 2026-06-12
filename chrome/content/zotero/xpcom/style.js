@@ -87,7 +87,6 @@ Zotero.Styles = new function () {
 		var bibliographyLocale = Zotero.Prefs.get("export.bibliographyLocale");
 		if (bibliographyLocale) {
 			Zotero.Prefs.set("export.lastLocale", bibliographyLocale);
-			Zotero.Prefs.set("export.quickCopy.locale", bibliographyLocale);
 			Zotero.Prefs.clear("export.bibliographyLocale");
 		}
 		

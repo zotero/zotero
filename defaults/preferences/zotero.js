@@ -99,8 +99,8 @@ pref("extensions.zotero.keys.newItem", "N");
 pref("extensions.zotero.keys.newNote", "O");
 pref("extensions.zotero.keys.library", "L");
 pref("extensions.zotero.keys.quicksearch", "K");
-pref("extensions.zotero.keys.copySelectedItemCitationsToClipboard", "A");
-pref("extensions.zotero.keys.copySelectedItemsToClipboard", "C");
+pref("extensions.zotero.keys.copyAsBibliography", "C");
+pref("extensions.zotero.keys.copyAsExport", "E");
 pref("extensions.zotero.keys.sync", "Y");
 pref("extensions.zotero.keys.toggleAllRead", "R");
 pref("extensions.zotero.keys.toggleRead", "`");
@@ -139,7 +139,9 @@ pref("extensions.zotero.import.createNewCollection.fromFileOpenHandler", true);
 pref("extensions.zotero.rtfScan.lastInputFile", "");
 pref("extensions.zotero.rtfScan.lastOutputFile", "");
 
-pref("extensions.zotero.export.quickCopy.setting", "bibliography=http://www.zotero.org/styles/chicago-shortened-notes-bibliography");
+pref("extensions.zotero.export.quickCopy.bibliographySetting", '{"mode":"bibliography","id":"http://www.zotero.org/styles/chicago-shortened-notes-bibliography","contentType":"","locale":""}');
+pref("extensions.zotero.export.quickCopy.exportSetting", '{"mode":"export","id":"9cb70025-a888-4a29-a210-93ec52da40d4"}');
+pref("extensions.zotero.export.quickCopy.preferredFormatOnDrag", "bibliography");
 pref("extensions.zotero.export.quickCopy.dragLimit", 50);
 
 pref("extensions.zotero.export.noteQuickCopy.setting", '{"mode":"export","id":"a45eca67-1ee8-45e5-b4c6-23fb8a852873","markdownOptions":{"includeAppLinks":true},"htmlOptions":{"includeAppLinks":false}}');

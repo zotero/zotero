@@ -89,6 +89,33 @@
 						'zotero/item': event.dataTransfer.getData('zotero/item')
 					}, this._iframe.contentWindow);
 				}, true);
+				// Same workaround for paste: the iframe's clipboardData.getData()
+				// returns empty for non-standard MIME types (zotero/annotation,
+				// zotero/item), so read them from the system clipboard here and
+				// proxy into the iframe scope.
+				this._iframe.contentWindow.addEventListener('paste', (_event) => {
+					let read = (flavor) => {
+						try {
+							let xfer = Components.classes['@mozilla.org/widget/transferable;1']
+								.createInstance(Components.interfaces.nsITransferable);
+							xfer.init(null);
+							xfer.addDataFlavor(flavor);
+							Components.classes['@mozilla.org/widget/clipboard;1']
+								.getService(Components.interfaces.nsIClipboard)
+								.getData(xfer, Components.interfaces.nsIClipboard.kGlobalClipboard);
+							let str = {};
+							xfer.getTransferData(flavor, str, {});
+							return str.value.QueryInterface(Components.interfaces.nsISupportsString).data;
+						}
+						catch (e) {
+							return '';
+						}
+					};
+					this._iframe.contentWindow.wrappedJSObject.pastedData = Components.utils.cloneInto({
+						'zotero/annotation': read('zotero/annotation'),
+						'zotero/item': read('zotero/item')
+					}, this._iframe.contentWindow);
+				}, true);
 				this._iframe.docShell.windowDraggingAllowed = true;
 				this._initialized = true;
 			});

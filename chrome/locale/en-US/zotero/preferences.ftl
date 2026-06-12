@@ -1,6 +1,9 @@
 preferences-window =
     .title = { -app-name } Settings
 
+preferences-keys-copy-as-bibliography = Copy as Bibliography
+preferences-keys-copy-as-export = Copy in Export Format
+
 preferences-appearance-title = Appearance and Language
 
 preferences-auto-recognize-files =
@@ -49,6 +52,21 @@ preferences-locate-library-lookup-intro = Library Lookup can find a resource onl
 preferences-locate-resolver = Resolver:
 preferences-locate-base-url = Base URL:
 
+preferences-quickCopy-instructions = Quick Copy allows you to quickly export items in a given format. You can copy selected items to the clipboard in the selected bibliography style or export format by pressing { $bibShortcut } or { $exportShortcut } respectively. You can also drag items directly into a text box in another program.
+preferences-quickCopy-citationInstructions = You can also copy citations or footnotes in selected citation style by pressing { $citationShortcut } or holding down Shift before dragging items.
+
+preferences-quickCopy-bibliographyFormat = Bibliography Style:
+preferences-quickCopy-exportFormat = Export Format:
+preferences-quickCopy-preferredFormatOnDrag = Format to use on drag:
+preferences-quickCopy-preferredFormatOnDrag-bibliography = Bibliography
+preferences-quickCopy-preferredFormatOnDrag-export = Export
+preferences-quickCopy-preferredFormatOnDrag-bibliography-radio =
+    .label = { preferences-quickCopy-preferredFormatOnDrag-bibliography }
+preferences-quickCopy-preferredFormatOnDrag-export-radio =
+    .label = { preferences-quickCopy-preferredFormatOnDrag-export }
+preferences-quickCopy-siteEditor-export-format = Export Format
+preferences-quickCopy-siteEditor-bibliography-format = Bibliography Format
+preferences-quickCopy-siteEditor-use-on-drag = On Drag
 preferences-quickCopy-minus =
     .aria-label = { general-remove }
     .label = { $label }

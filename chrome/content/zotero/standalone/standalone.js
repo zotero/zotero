@@ -64,7 +64,7 @@ const ZoteroStandalone = new function () {
 						setTimeout(async () => {
 							// Item and other things might not be loaded yet when reopening tabs
 							await Zotero.Schema.schemaUpdatePromise;
-							this.updateQuickCopyOptions();
+							ZoteroPane.updateQuickCopyMenu();
 						}, 0);
 						// "library", "reader" or "note"
 						let type = extraData[ids[0]].type;
@@ -95,10 +95,10 @@ const ZoteroStandalone = new function () {
 			return Zotero.initializationPromise;
 		})
 		.then(async function () {
-			document.getElementById('key_copyCitation')
-				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemCitationsToClipboard'));
 			document.getElementById('key_copyBibliography')
-				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemsToClipboard'));
+				.setAttribute('key', Zotero.Keys.getKeyForCommand('copyAsBibliography'));
+			document.getElementById('key_copyExport')
+				.setAttribute('key', Zotero.Keys.getKeyForCommand('copyAsExport'));
 			document.getElementById('key_showTabsMenu')
 				.setAttribute('key', Zotero.Keys.getKeyForCommand('showTabsMenu'));
 			// Force menu to update with shortcut key at startup -- as of fx128, this is necessary
@@ -234,9 +234,10 @@ const ZoteroStandalone = new function () {
 	};
 
 	this.onEditMenuOpen = function (event) {
-		this.updateQuickCopyOptions();
 		// goUpdateGlobalEditMenuItems(true) is necessary to update Edit menu when contenteditable is focused
+		// must happen before updateQuickCopyMenu so it knows the state of standard copy command
 		window.goUpdateGlobalEditMenuItems(true);
+		ZoteroPane.updateQuickCopyMenu();
 
 		this.onUpdateCustomMenus(event, 'edit');
 	};
@@ -335,56 +336,18 @@ const ZoteroStandalone = new function () {
 	};
 	
 	
-	this.updateQuickCopyOptions = function () {
-		var selected = [];
-
-		let win = Zotero.getMainWindow();
-		if (win) {
-			try {
-				selected = win.ZoteroPane.getSelectedItems();
-			}
-			catch (e) {
-			}
-			win.ZoteroPane.updateQuickCopyCommands(selected);
+	/**
+	 * Handle consolidated Edit > Copy menu clicked.
+	 * Native cmd_copy when text is selected, otherwise delegate to copySelectedItemsToClipboard
+	 * that handles copying of items/notes/annotation in library and reader tabs.
+	 */
+	this.handleCopyMenuCommand = function () {
+		if (ZoteroPane.classifyCopyContext() === 'text') {
+			// eslint-disable-next-line no-undef
+			goDoCommand('cmd_copy');
 		}
-
-		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-		var exportingNotes = selected.every(item => item.isNote() || item.isAttachment());
-		var exportingAnnotations = selected.every(item => item.isAnnotation());
-		if (exportingNotes || exportingAnnotations) {
-			format = Zotero.QuickCopy.getNoteFormat();
-		}
-		format = Zotero.QuickCopy.unserializeSetting(format);
-		
-		var copyCitation = document.getElementById('menu_copyCitation');
-		var copyBibliography = document.getElementById('menu_copyBibliography');
-		var copyExport = document.getElementById('menu_copyExport');
-		var copyNote = document.getElementById('menu_copyNote');
-		var copyAnnotation = document.getElementById('menu_copyAnnotation');
-		
-		copyCitation.hidden = !selected.length || format.mode != 'bibliography';
-		copyBibliography.hidden = !selected.length || format.mode != 'bibliography';
-		copyExport.hidden = !selected.length || format.mode != 'export' || exportingNotes;
-		copyNote.hidden = !selected.length || format.mode != 'export' || !exportingNotes;
-		copyAnnotation.hidden = !selected.length || format.mode != 'export' || !exportingAnnotations;
-		document.l10n.setAttributes(copyAnnotation, "menu-edit-copy-annotation", { count: selected.length });
-		
-		if (format.mode == 'export') {
-			try {
-				let obj = Zotero.Translators.get(format.id);
-				if (obj) {
-					copyExport.label = Zotero.getString('quickCopy.copyAs', obj.label);
-				}
-				else {
-					copyExport.hidden = true;
-				}
-			}
-			catch (e) {
-				if (!(e instanceof Zotero.Exception.UnloadedDataException && e.dataType == 'translators')) {
-					Zotero.logError(e);
-				}
-				copyExport.hidden = true;
-			}
+		else {
+			ZoteroPane.copySelectedItemsToClipboard(true, 'bibliography');
 		}
 	};
 	

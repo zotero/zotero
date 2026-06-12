@@ -3401,73 +3401,49 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 		}
 	}
 
-	// Get Quick Copy format for current URL (set via /ping from connector)
-	let format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-
-	// If all items are notes, use one of the note export translators
-	if (items.every(item => item.isNote())) {
-		format = Zotero.QuickCopy.getNoteFormat();
+	// Skip Quick Copy data for very large drags so we don't hang the drag
+	// preview while generating bibliography for the full set. The limit
+	// applies only to drag; keyboard-shortcut copy has no cap.
+	if (items.length > Zotero.Prefs.get('export.quickCopy.dragLimit')) {
+		Zotero.debug("Skipping Quick Copy drag data for " + items.length + " items");
+		return;
 	}
-
-	// If all items are annotations, wrap them in a note object for translation
+	// When dragging annotation items, also set the zotero/annotation flavor
+	// so the note editor knows how to handle them.
 	if (items.every(item => item.isAnnotation())) {
-		format = Zotero.QuickCopy.getNoteFormat();
-		items = [Zotero.QuickCopy.annotationsToNote(items)];
+		let jsonAnnotations = items.map((annotation) => {
+			let json = Zotero.Annotations.toJSONSync(annotation);
+			json.id = annotation.key;
+			delete json.key;
+			json.attachmentItemID = annotation.parentItemID;
+			json.tags = json.tags || [];
+			return json;
+		});
+		event.dataTransfer.setData('zotero/annotation', JSON.stringify(jsonAnnotations));
 	}
 
-	Zotero.debug("Dragging with format " + format);
-	format = Zotero.QuickCopy.unserializeSetting(format);
+	// Get Quick Copy format for current URL (set via /ping from connector)
+	// and the items being dragged. getContentFromItems handles the rest
+	// (annotation wrapping, note-citation reformatting, regular-item filter).
+	// Shift-Drag means the user wants a citation cluster, so use bibliography
+	// mode then regardless of the pref
+	let format = event.shiftKey
+		? Zotero.QuickCopy.getFormat({ mode: 'bibliography', items })
+		: Zotero.QuickCopy.getFormat({ items });
+
+	Zotero.debug("Dragging with format " + JSON.stringify(format));
 	try {
-		if (format.mode == 'export') {
-			// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
-			// and Note HTML translators instead
-			if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-				let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions };
-				let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions };
-				Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
-					if (!worked) {
-						Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-						return;
-					}
-					Zotero.QuickCopy.getContentFromItems(items, htmlFormat, (obj2, worked) => {
-						if (!worked) {
-							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-							return;
-						}
-						event.dataTransfer.setData('text/plain', obj.string.replace(/\r\n/g, '\n'));
-						event.dataTransfer.setData('text/html', obj2.string.replace(/\r\n/g, '\n'));
-					});
-				});
+		let content = Zotero.QuickCopy.getContentFromItems(items, format, {
+			// Shift on drag → in-text citation (bibliography mode only)
+			asCitations: format.mode === 'bibliography' && event.shiftKey
+		});
+		if (content) {
+			if (content.html) {
+				event.dataTransfer.setData('text/html', content.html);
 			}
-			else {
-				Zotero.QuickCopy.getContentFromItems(items, format, (obj, worked) => {
-					if (!worked) {
-						Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
-						return;
-					}
-					let text = obj.string.replace(/\r\n/g, '\n');
-					// For Note HTML translator use body content only
-					if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
-						// Use body content only
-						let parser = new DOMParser();
-						let doc = parser.parseFromString(text, 'text/html');
-						text = doc.body.innerHTML;
-					}
-					event.dataTransfer.setData('text/plain', text);
-				});
+			if (content.text) {
+				event.dataTransfer.setData('text/plain', content.text);
 			}
-		}
-		else if (format.mode == 'bibliography') {
-			let content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);
-			if (content) {
-				if (content.html) {
-					event.dataTransfer.setData("text/html", content.html);
-				}
-				event.dataTransfer.setData("text/plain", content.text);
-			}
-		}
-		else {
-			Zotero.logError("Invalid Quick Copy mode");
 		}
 	}
 	catch (e) {

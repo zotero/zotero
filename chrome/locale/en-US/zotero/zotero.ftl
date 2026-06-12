@@ -150,11 +150,20 @@ menu-view-note-tab-font-size =
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 
+menu-edit-copy-citation =
+    .label = Copy Citation
+menu-edit-copy-note =
+    .label = { $count ->
+        [one] Copy Note
+        *[other] Copy { $count } Notes
+    }
 menu-edit-copy-annotation =
     .label = { $count ->
         [one] Copy Annotation
-        *[other] Copy { $count } Annotations 
+        *[other] Copy { $count } Annotations
     }
+menu-edit-copy-text =
+    .label = Copy
 
 main-window-command =
     .label = Library
