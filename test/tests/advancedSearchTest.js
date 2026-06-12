@@ -40,8 +40,9 @@ describe("Advanced Search", function () {
 		var index = iv.getRowIndexByID(item.id);
 		assert.isNumber(index);
 		
-		zp.setAdvancedSearchState('closed');
-		await iv.waitForLoad();
+		// Closing should restore the unfiltered view
+		await zp.setAdvancedSearchState('closed');
+		assert.equal(iv.rowCount, 2);
 		
 		await item.eraseTx();
 		await otherItem.eraseTx();
@@ -66,8 +67,7 @@ describe("Advanced Search", function () {
 		
 		assert.isNumber(iv.getRowIndexByID(item.id));
 		
-		zp.setAdvancedSearchState('closed');
-		await iv.waitForLoad();
+		await zp.setAdvancedSearchState('closed');
 		
 		await item.eraseTx();
 	});
@@ -101,8 +101,7 @@ describe("Advanced Search", function () {
 		// The saved search itself shouldn't have been modified
 		assert.lengthOf(Object.keys(saved.getConditions()), 1);
 		
-		zp.setAdvancedSearchState('closed');
-		await iv.waitForLoad();
+		await zp.setAdvancedSearchState('closed');
 		
 		await Zotero.Items.erase([inBoth.id, inSavedOnly.id, inAdvancedOnly.id]);
 		await saved.eraseTx();
@@ -118,8 +117,8 @@ describe("Advanced Search", function () {
 			conditions = searchBox.querySelector('#conditions');
 		});
 		
-		after(function () {
-			zp.setAdvancedSearchState('closed');
+		after(async function () {
+			await zp.setAdvancedSearchState('closed');
 		});
 		
 		describe("Collection", function () {

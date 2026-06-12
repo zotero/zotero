@@ -1813,7 +1813,7 @@ var ZoteroPane = new function () {
 	/**
 	 * @param {'open' | 'collapsed' | 'closed'} state
 	 */
-	this.setAdvancedSearchState = function (state) {
+	this.setAdvancedSearchState = async function (state) {
 		let deck = document.getElementById('zotero-advanced-search-pane-deck');
 		let oldState = deck.state;
 		deck.selectedSearchType = 'temporary';
@@ -1830,7 +1830,7 @@ var ZoteroPane = new function () {
 		else {
 			// State change changes displayed items - refresh the tree
 			this._refreshAdvancedSearchPane();
-			this.itemsView.changeCollectionTreeRow(this.getCollectionTreeRow());
+			await this.itemsView.refreshAndMaintainSelection();
 		}
 
 		if (state === 'closed') {
@@ -1867,7 +1867,7 @@ var ZoteroPane = new function () {
 					break;
 			}
 		}
-		this.setAdvancedSearchState(state);
+		await this.setAdvancedSearchState(state);
 	};
 	
 	
