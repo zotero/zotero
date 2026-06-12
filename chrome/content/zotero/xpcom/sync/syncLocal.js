@@ -414,7 +414,8 @@ Zotero.Sync.Data.Local = {
 		}
 		catch (e) {
 			Zotero.logError(e);
-			if (this._lastLoginManagerErrorTime > Date.now() - 60000) {
+			if (!this._lastLoginManagerErrorTime
+					|| this._lastLoginManagerErrorTime < Date.now() - 60000) {
 				let msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
 					+ Zotero.getString('sync.error.loginManagerCorrupted2', Zotero.appName);
 				Zotero.alert(null, Zotero.getString('general.error'), msg);
