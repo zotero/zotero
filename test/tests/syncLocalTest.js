@@ -19,6 +19,41 @@ describe("Zotero.Sync.Data.Local", function () {
 			assert.strictEqual(await Zotero.Sync.Data.Local.getAPIKey(apiKey), "");
 		})
 	})
+
+
+	describe("#repairLoginManager()", function () {
+		it("should reset a key database with a primary password set", async function () {
+			var token = Components.classes["@mozilla.org/security/pk11tokendb;1"]
+				.getService(Components.interfaces.nsIPK11TokenDB)
+				.getInternalKeyToken();
+
+			// No-op if no primary password is set
+			assert.isFalse(Zotero.Sync.Data.Local.repairLoginManager());
+
+			if (token.needsUserInit) {
+				token.initPassword("repair-test");
+			}
+			else {
+				token.changePassword("", "repair-test");
+			}
+			try {
+				assert.isTrue(token.hasPassword);
+				assert.isTrue(Zotero.Sync.Data.Local.repairLoginManager());
+				assert.isFalse(token.hasPassword);
+
+				// Credentials should be saveable and readable again
+				var apiKey = Zotero.Utilities.randomString(24);
+				await Zotero.Sync.Data.Local.setAPIKey(apiKey);
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+			}
+			finally {
+				if (token.hasPassword) {
+					token.changePassword("repair-test", "");
+				}
+				await Zotero.Sync.Data.Local.setAPIKey("");
+			}
+		})
+	})
 	
 	
 	describe("#checkUser()", function () {

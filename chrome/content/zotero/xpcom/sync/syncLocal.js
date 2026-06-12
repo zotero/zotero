@@ -73,6 +73,16 @@ Zotero.Sync.Data.Local = {
 		if (login) {
 			return Zotero.OSKeyStore.decrypt(login.password);
 		}
+		// If the login manager had to be reset, the stored API key is gone, so tell the user
+		// to log in again
+		if (this._loginManagerRepaired && !this._loginManagerRepairAlertShown) {
+			this._loginManagerRepairAlertShown = true;
+			Zotero.alert(
+				null,
+				Zotero.getString('general-error'),
+				Zotero.getString('login-manager-reset')
+			);
+		}
 		// Fallback to old username/password
 		return this._getAPIKeyFromLogin();
 	},
@@ -112,8 +122,19 @@ Zotero.Sync.Data.Local = {
 			await this._writeEncryptedAPIKey(apiKey);
 		}
 		catch (e) {
-			Zotero.OSKeyStore.alertSaveFailed();
-			throw e;
+			// If the write failed because the key database was unusable, reset the login
+			// manager and retry, so that logging in works without a manual fix
+			if (!this.repairLoginManager()) {
+				Zotero.OSKeyStore.alertSaveFailed();
+				throw e;
+			}
+			try {
+				await this._writeEncryptedAPIKey(apiKey);
+			}
+			catch (e) {
+				Zotero.OSKeyStore.alertSaveFailed();
+				throw e;
+			}
 		}
 		// Drop any leftover plaintext entry from the legacy realm
 		if (legacyLoginInfo) {
@@ -446,6 +467,40 @@ Zotero.Sync.Data.Local = {
 	
 	
 	/**
+	 * Reset the login manager if the NSS key database is unusable
+	 *
+	 * Zotero never sets a primary password, so if one is set on the key database, it was either
+	 * corrupted or copied in from a Firefox profile, and stored logins can never be decrypted,
+	 * since there's no primary-password prompt. Clear stored logins and reset the key database
+	 * so that credentials can be saved again.
+	 *
+	 * @return {Boolean} - True if the login manager was reset
+	 */
+	repairLoginManager: function () {
+		try {
+			let token = Cc["@mozilla.org/security/pk11tokendb;1"]
+				.getService(Ci.nsIPK11TokenDB)
+				.getInternalKeyToken();
+			if (!token.hasPassword) {
+				return false;
+			}
+			Zotero.debug("Primary password set on NSS key database -- resetting login manager", 1);
+			Services.logins.removeAllLogins();
+			token.reset();
+			if (token.needsUserInit) {
+				token.initPassword("");
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+		this._loginManagerRepaired = true;
+		return true;
+	},
+
+
+	/**
 	 * @return {nsILoginInfo|false}
 	 */
 	_getAPIKeyLoginInfo: function () {
@@ -458,6 +513,11 @@ Zotero.Sync.Data.Local = {
 		}
 		catch (e) {
 			Zotero.logError(e);
+			// If the key database was unusable, reset the login manager so that credentials
+			// can be saved again
+			if (this.repairLoginManager()) {
+				return false;
+			}
 			if (!this._lastLoginManagerErrorTime
 					|| this._lastLoginManagerErrorTime < Date.now() - 60000) {
 				let msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"

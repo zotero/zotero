@@ -318,8 +318,19 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			await this._writeEncryptedPassword(username, password);
 		}
 		catch (e) {
-			Zotero.OSKeyStore.alertSaveFailed();
-			throw e;
+			// If the write failed because the key database was unusable, reset the login
+			// manager and retry
+			if (!Zotero.Sync.Data.Local.repairLoginManager()) {
+				Zotero.OSKeyStore.alertSaveFailed();
+				throw e;
+			}
+			try {
+				await this._writeEncryptedPassword(username, password);
+			}
+			catch (e) {
+				Zotero.OSKeyStore.alertSaveFailed();
+				throw e;
+			}
 		}
 		
 		// Drop any leftover plaintext entry from the legacy realm
