@@ -1765,7 +1765,7 @@ var ZoteroPane = new function () {
 			collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
 		}
 		
-		this._refreshAdvancedSearchPane();
+		this._refreshAdvancedSearchPane(collectionTreeRow);
 		this._updateEnabledActionsForRow(collectionTreeRow);
 
 		// If item data not yet loaded for library, load it now.
@@ -1795,18 +1795,25 @@ var ZoteroPane = new function () {
 	});
 
 
-	this._refreshAdvancedSearchPane = function () {
-		let collectionTreeRow = this.getCollectionTreeRow();
+	/**
+	 * @param {Zotero.CollectionTreeRow} [collectionTreeRow] - During collection selection,
+	 *     the newly selected row, which isn't in the items view yet
+	 */
+	this._refreshAdvancedSearchPane = function (collectionTreeRow) {
 		let deck = document.getElementById('zotero-advanced-search-pane-deck');
 
 		deck.pane.refresh();
 
-		if (deck.state === 'closed' || deck.selectedSearchType !== 'temporary') {
-			collectionTreeRow.setAdvancedSearch(null);
+		let search = deck.state === 'closed' || deck.selectedSearchType !== 'temporary'
+			? null
+			: deck.pane.search;
+		if (collectionTreeRow) {
+			collectionTreeRow.setAdvancedSearch(search);
+			return undefined;
 		}
-		else {
-			collectionTreeRow.setAdvancedSearch(deck.pane.search);
-		}
+		// Apply via the items view, whose row can be a different object from the
+		// collection tree's current row
+		return this.itemsView.setFilter('advanced-search', search);
 	};
 
 
@@ -1822,6 +1829,7 @@ var ZoteroPane = new function () {
 		let advancedSearchPane = deck.pane;
 
 		document.getElementById('zotero-tb-search').updateMode();
+		let refreshPromise;
 		if (state === 'open' && oldState === 'collapsed'
 				|| state === 'collapsed' && oldState === 'open') {
 			// State change only causes visual refresh - update the tree height
@@ -1829,10 +1837,11 @@ var ZoteroPane = new function () {
 		}
 		else {
 			// State change changes displayed items - refresh the tree
-			this._refreshAdvancedSearchPane();
-			await this.itemsView.refreshAndMaintainSelection();
+			refreshPromise = this._refreshAdvancedSearchPane();
 		}
-
+		
+		// Update the pane state synchronously, so that a state change initiated
+		// while the refresh below is pending doesn't see a stale search
 		if (state === 'closed') {
 			advancedSearchPane.search = null;
 		}
@@ -1840,9 +1849,11 @@ var ZoteroPane = new function () {
 			Zotero_Tabs.select('zotero-pane');
 			advancedSearchPane.focus();
 		}
+		
+		await refreshPromise;
 	};
-
-
+	
+	
 	/**
 	 * @param {'open' | 'collapsed' | 'closed'} state
 	 */
@@ -1886,12 +1897,14 @@ var ZoteroPane = new function () {
 		
 		if (state === 'open') {
 			deck.pane.search = collectionTreeRow.ref;
-			this._refreshAdvancedSearchPane();
-			deck.pane.focus();
 		}
 
 		document.getElementById('zotero-tb-search').updateMode();
-		await this.itemsView.refreshAndMaintainSelection();
+		let refreshPromise = this._refreshAdvancedSearchPane();
+		if (state === 'open') {
+			deck.pane.focus();
+		}
+		await refreshPromise;
 	};
 
 

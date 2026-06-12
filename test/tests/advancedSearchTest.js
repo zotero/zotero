@@ -72,6 +72,30 @@ describe("Advanced Search", function () {
 		await item.eraseTx();
 	});
 	
+	it("shouldn't reapply previous search when reopened while closing", async function () {
+		var item = await createDataObject('item', { setTitle: true });
+		
+		await zp.toggleAdvancedSearchState('open');
+		var s = new Zotero.Search();
+		s.libraryID = item.libraryID;
+		s.addCondition('title', 'is', 'nomatch');
+		deck.pane.search = s;
+		await deck.pane.submit();
+		await zp.itemsView.waitForLoad();
+		assert.equal(zp.itemsView.rowCount, 0);
+		
+		// Close and immediately reopen, without waiting, as with UI clicks
+		zp.toggleAdvancedSearchState('closed');
+		await zp.toggleAdvancedSearchState('open');
+		await zp.itemsView.waitForLoad();
+		
+		// The previous search shouldn't have been reapplied
+		assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+		
+		await zp.setAdvancedSearchState('closed');
+		await item.eraseTx();
+	});
+	
 	it("should scope results to the selected saved search", async function () {
 		var inBoth = await createDataObject('item', { title: "foo bar" });
 		var inSavedOnly = await createDataObject('item', { title: "foo baz" });
