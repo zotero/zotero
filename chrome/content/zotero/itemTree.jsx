@@ -2188,6 +2188,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		div.classList.toggle('first-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(prevRowID));
 		div.classList.toggle('last-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(nextRowID));
 		div.classList.toggle('annotation-row', row.type === 'annotation');
+		div.classList.toggle('library-header-row', row.type === 'library-header');
+		div.classList.toggle('section-gap', !!row.hasSectionGap);
 		if (row.type !== 'annotation') {
 			div.classList.remove('tight');
 		}

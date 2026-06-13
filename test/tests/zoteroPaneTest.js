@@ -2196,6 +2196,26 @@ describe("ZoteroPane", function () {
 				}
 				assert.equal(count, 1, "Item in both collections should appear only once");
 			});
+			
+			it("should group items by library for a cross-library selection", async function () {
+				let group = await createGroup();
+				let collection1 = await createDataObject('collection');
+				let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+				await createDataObject('item', { collections: [collection1.id] });
+				await createDataObject('item', { libraryID: group.libraryID, collections: [collection2.id] });
+
+				await zp.collectionsView.expandLibrary(group.libraryID);
+				await selectMultipleCollections([collection1, collection2]);
+
+				// The detailed grouping behavior (ordering, header heights, gating) is
+				// covered in collectionViewItemTreeTest; here just confirm that a
+				// cross-library selection produces a library-grouped view
+				assert.isNumber(zp.itemsView.getRowIndexByID("L" + Zotero.Libraries.userLibraryID),
+					"Cross-library selection should show a library header");
+
+				await selectLibrary(win);
+				await group.eraseTx();
+			});
 		});
 
 		describe("#newItem()", function () {

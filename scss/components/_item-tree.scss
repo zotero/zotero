@@ -215,6 +215,32 @@
 			}
 		}
 
+		// Section header above each library's items in a cross-library selection.
+		// A hairline below the heading separates it from its own items. The first
+		// heading sits flush at the top; every later heading carries extra height
+		// (via customRowHeights) that, with bottom-aligned content, becomes a gap
+		// above it separating it from the previous library's items.
+		.library-header-row {
+			border-bottom: var(--material-panedivider);
+
+			&.section-gap {
+				align-items: flex-end;
+			}
+
+			.cell.library-header {
+				display: flex;
+				align-items: center;
+				padding-bottom: 3px;
+				font-weight: 600;
+				color: var(--fill-secondary);
+
+				.icon-item-type {
+					margin-inline-end: 6px;
+					opacity: 0.8;
+				}
+			}
+		}
+
 		.annotation-row {
 			.cell {
 				font-size: $font-size-small;
