@@ -215,6 +215,22 @@
 			}
 		}
 
+		// Section header above each library's items in a cross-library selection.
+		.library-header-row {
+			.cell.library-header {
+				display: flex;
+				align-items: center;
+				padding-bottom: 3px;
+				font-weight: 600;
+				color: var(--fill-secondary);
+
+				.icon-item-type {
+					margin-inline-end: 6px;
+					opacity: 0.8;
+				}
+			}
+		}
+
 		.annotation-row {
 			.cell {
 				font-size: $font-size-small;

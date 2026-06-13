@@ -2648,7 +2648,99 @@ describe("CollectionViewItemTree", function () {
 			}
 		});
 	});
-	
+
+	describe("Library grouping", function () {
+		async function selectMultipleCollections(collections) {
+			await cv.selectByID("C" + collections[0].id);
+			await waitForItemsLoad(win);
+			for (let i = 1; i < collections.length; i++) {
+				cv.selection.toggleSelect(cv.getRowIndexByID("C" + collections[i].id));
+			}
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+		}
+
+		it("should group items by library with headers in collections-list order", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			// Reverse-alphabetical across the library boundary, so title sorting
+			// alone would put the group item first
+			let item1 = await createDataObject('item', { title: "ZZZ", collections: [collection1.id] });
+			let item2 = await createDataObject(
+				'item',
+				{ libraryID: group.libraryID, title: "AAA", collections: [collection2.id] }
+			);
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			let userHeaderRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
+			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
+			let item1Row = view.getRowIndexByID(item1.id);
+			let item2Row = view.getRowIndexByID(item2.id);
+
+			assert.isNumber(userHeaderRow, "User library header should be shown");
+			assert.isNumber(groupHeaderRow, "Group library header should be shown");
+			assert.isBelow(userHeaderRow, groupHeaderRow,
+				"User library group should come first");
+			assert.isAbove(item1Row, userHeaderRow);
+			assert.isBelow(item1Row, groupHeaderRow,
+				"User library item should be in the user library group despite sorting after the group item");
+			assert.isAbove(item2Row, groupHeaderRow);
+
+			// Header rows aren't selectable
+			assert.isFalse(view.isSelectable(userHeaderRow));
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("shouldn't group when all items are in a single library", async function () {
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection');
+			let item1 = await createDataObject('item', { collections: [collection1.id] });
+			let item2 = await createDataObject('item', { collections: [collection2.id] });
+
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			assert.isFalse(view.rowProvider._groupedByLibrary);
+			assert.isFalse(view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID),
+				"No library header should be shown for a single-library selection");
+			assert.isNumber(view.getRowIndexByID(item1.id));
+			assert.isNumber(view.getRowIndexByID(item2.id));
+
+			await selectLibrary(win);
+		});
+
+		it("shouldn't group feeds by library, even across feed libraries", async function () {
+			let feed1 = await createFeed();
+			let feed2 = await createFeed();
+			let feedItem1 = await createDataObject('feedItem', { libraryID: feed1.libraryID });
+			let feedItem2 = await createDataObject('feedItem', { libraryID: feed2.libraryID });
+
+			// Select both feeds (each is its own feed library)
+			await cv.selectByID(feed1.treeViewID);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID(feed2.treeViewID));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+
+			let view = zp.itemsView;
+			// The selection spans two feed libraries, but feeds are never grouped
+			assert.isFalse(view.rowProvider._groupedByLibrary);
+			assert.isFalse(view.getRowIndexByID("L" + feed1.libraryID),
+				"No library header should be shown for a feeds selection");
+			assert.isNumber(view.getRowIndexByID(feedItem1.id));
+			assert.isNumber(view.getRowIndexByID(feedItem2.id));
+
+			await selectLibrary(win);
+			await clearFeeds();
+		});
+	});
+
 	describe("#setFilter()", function () {
 		it("should refresh when search filter value changes", async function () {
 			let rowProvider = itemsView.rowProvider;

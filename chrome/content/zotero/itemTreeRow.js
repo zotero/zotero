@@ -631,6 +631,48 @@ class SearchItemTreeRow extends ItemTreeRow {
  * Dispatch order: Collection, Search, annotation item, file attachment item,
  * generic Zotero.Item, and finally the base ItemTreeRow fallback.
  */
+/**
+ * Non-selectable section header row shown above each library's items when the
+ * items list displays a multi-library selection. Wraps a Zotero.Library.
+ */
+class LibraryHeaderItemTreeRow extends ItemTreeRow {
+	constructor(library) {
+		super(library, 0, false);
+	}
+
+	get type() {
+		return 'library-header';
+	}
+
+	getDisplayTitle() {
+		return Zotero.Libraries.getName(this.ref.libraryID);
+	}
+
+	getField(field) {
+		if (field == 'title') {
+			return this.getDisplayTitle();
+		}
+		return '';
+	}
+
+	getIcon() {
+		let icon = getCSSIcon(this.ref.libraryType == 'group' ? 'library-group' : 'library');
+		icon.classList.add('icon-item-type');
+		return icon;
+	}
+
+	renderRow(div, _index, _columns, _rowData, _renderCtx) {
+		// Single cell with the library icon and name, spanning the row
+		let span = document.createElement('span');
+		span.className = 'cell primary library-header';
+		let textSpan = document.createElement('span');
+		textSpan.className = 'cell-text';
+		textSpan.textContent = this.getDisplayTitle();
+		span.append(this.getIcon(), textSpan);
+		div.appendChild(span);
+	}
+}
+
 ItemTreeRow.create = function (ref, level, isOpen) {
 	if (ref instanceof Zotero.Collection) return new CollectionItemTreeRow(ref, level, isOpen);
 	if (ref instanceof Zotero.Search) return new SearchItemTreeRow(ref, level, isOpen);
@@ -646,3 +688,4 @@ module.exports.FileItemTreeRow = FileItemTreeRow;
 module.exports.AnnotationItemTreeRow = AnnotationItemTreeRow;
 module.exports.CollectionItemTreeRow = CollectionItemTreeRow;
 module.exports.SearchItemTreeRow = SearchItemTreeRow;
+module.exports.LibraryHeaderItemTreeRow = LibraryHeaderItemTreeRow;

@@ -43,6 +43,7 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const ItemTree = require('zotero/itemTree');
 const { ItemTreeRowProvider } = ItemTree;
+const { LibraryHeaderItemTreeRow } = require('zotero/itemTreeRow');
 
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
@@ -110,6 +111,47 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	}
 
 	/**
+	 * When showing multiple libraries, group rows by library in collections-list
+	 * order -- independent of the active sort direction -- with each library's
+	 * header row pinned above its items
+	 */
+	_compareRows(a, b) {
+		if (this._groupedByLibrary) {
+			let rankA = this._libraryOrder.get(a.ref.libraryID) ?? Infinity;
+			let rankB = this._libraryOrder.get(b.ref.libraryID) ?? Infinity;
+			if (rankA != rankB) {
+				return rankA - rankB;
+			}
+			let aHeader = a.type == 'library-header';
+			let bHeader = b.type == 'library-header';
+			if (aHeader || bHeader) {
+				return aHeader == bHeader ? 0 : (aHeader ? -1 : 1);
+			}
+		}
+		return super._compareRows(a, b);
+	}
+
+	/**
+	 * Insert a library header row above each library's group of items.
+	 * Rows must already be sorted with library as the primary grouping.
+	 */
+	_insertLibraryHeaders() {
+		let newRows = [];
+		let lastLibraryID = null;
+		for (let row of this._rows) {
+			if (row.type == 'library-header') {
+				continue;
+			}
+			if (row.level == 0 && row.ref.libraryID !== lastLibraryID) {
+				lastLibraryID = row.ref.libraryID;
+				newRows.push(new LibraryHeaderItemTreeRow(Zotero.Libraries.get(lastLibraryID)));
+			}
+			newRows.push(row);
+		}
+		this._rows = newRows;
+	}
+
+	/**
 	 * Set new collectionTreeRows and refresh items.
 	 * This handles the data/model logic; UI orchestration stays in ItemTree.
 	 * @param {Object[]} collectionTreeRows - The collection tree rows to set
@@ -139,6 +181,19 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			resetColumns = true;
 		}
 		this.collectionTreeRows = collectionTreeRows;
+
+		// When the selection spans multiple libraries, group items by library in
+		// collections-list order (the order of the selected rows), with a header
+		// row above each library's items
+		this._libraryOrder = new Map();
+		for (let row of collectionTreeRows) {
+			let libraryID = row.ref.libraryID;
+			if (libraryID !== undefined && !this._libraryOrder.has(libraryID)) {
+				this._libraryOrder.set(libraryID, this._libraryOrder.size);
+			}
+		}
+		this._groupedByLibrary = !collectionTreeRows[0].isFeedsOrFeed()
+			&& this._libraryOrder.size > 1;
 
 		// Set ID based on visibilityGroup
 		const visibilityGroup = collectionTreeRows[0].visibilityGroup || 'default';
@@ -259,6 +314,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			var skipChildren;
 			for (let i = 0; i < this._rows.length; i++) {
 				let row = this._rows[i];
+				// Don't copy library header rows -- they're reinserted after sorting
+				if (row.type == 'library-header') {
+					continue;
+				}
 				// Top-level items
 				if (row.level == 0) {
 					// A top-level attachment moved into a parent. Don't copy, it will be added
@@ -336,7 +395,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			this._rows = newRows;
 			this.refreshRowMap();
 			await this.itemTree._ensureSortContextReady();
-			this._sort(options.forceSortAll ? null : [...addedItemIDs]);
+			// In grouped mode, always sort everything: a partial sort doesn't compare
+			// pre-existing rows against each other, so library grouping wouldn't be
+			// applied to rows carried over from the previous view
+			this._sort(options.forceSortAll || this._groupedByLibrary ? null : [...addedItemIDs]);
 			
 			// Toggle all open containers closed and open to refresh child items
 			var t = new Date();
@@ -347,7 +409,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			}
 			this.refreshRowMap();
 			Zotero.debug(`Refreshed open parents in ${new Date() - t} ms`);
-			
+
+			if (this._groupedByLibrary) {
+				this._insertLibraryHeaders();
+				this.refreshRowMap();
+			}
+
 			this._searchMode = newSearchMode;
 			this._searchItemIDs = newSearchItemIDs; // items matching the search
 			this.itemTree.invalidateRowCache(true);
@@ -536,7 +603,14 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			return;
 		}
 
-		if ((action == 'remove' && !collectionTreeRows.some(row => row.isLibrary(true)))
+		// In grouped (multi-library) mode, handle removals with a full refresh, since
+		// incremental row removal would leave the header row of an emptied library group
+		if (this._groupedByLibrary && ['remove', 'delete', 'trash'].includes(action)) {
+			this.itemTree.invalidateRowCache(ids);
+			refresh = true;
+			madeChanges = true;
+		}
+		else if ((action == 'remove' && !collectionTreeRows.some(row => row.isLibrary(true)))
 			|| action == 'delete' || action == 'trash'
 			|| (action == 'removeDuplicatesMaster' && collectionTreeRow.isDuplicates())) {
 			// Since a remove involves shifting of rows, we have to do it in order,
@@ -1022,6 +1096,10 @@ class CollectionViewItemTree extends ItemTree {
 	 * @returns {Boolean}
 	 */
 	isSelectable(index, selectAll=false) {
+		// Library header rows are never selectable
+		if (this.getRow(index)?.type == 'library-header') {
+			return false;
+		}
 		// Every listed item is selectable individually. There are exceptions
 		// for select-all selections.
 		if (!selectAll) return true;
@@ -1088,6 +1166,10 @@ class CollectionViewItemTree extends ItemTree {
 	 * Start a drag using HTML 5 Drag and Drop
 	 */
 	onDragStart(event, index) {
+		if (this.getRow(index)?.type == 'library-header') {
+			event.preventDefault();
+			return false;
+		}
 		Zotero.DragDrop.currentDragSource = this.collectionTreeRow;
 		return super.onDragStart(event, index);
 	};
