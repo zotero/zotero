@@ -174,6 +174,10 @@ quick-search-textbox {
 	
 	.advanced-close-button {
 		@include svgicon-menu("x", "universal", "20");
+		// Inset to match the filter button's right edge in the closed state (its
+		// chip sits 4px in from the field edge), so the edge doesn't shift when
+		// toggling between the search field and this header
+		margin-inline-end: 4px;
 	}
 
 	&[data-collapsed="true"] {
