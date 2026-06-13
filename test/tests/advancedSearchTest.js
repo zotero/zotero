@@ -212,7 +212,32 @@ describe("Advanced Search", function () {
 		after(async function () {
 			await zp.setAdvancedSearchState('closed');
 		});
-		
+
+		it("should reset to a single empty condition when the last populated condition is removed", async function () {
+			var s = new Zotero.Search();
+			s.libraryID = Zotero.Libraries.userLibraryID;
+			s.addCondition('title', 'contains', 'foo');
+			pane.search = s;
+
+			assert.lengthOf(conditions.childNodes, 1);
+			var row = conditions.firstChild;
+
+			// With a value entered, the last condition can be removed
+			assert.notEqual(row.querySelector('#remove').getAttribute('disabled'), 'true');
+
+			row.onRemoveClicked();
+
+			// It's replaced by a single empty default condition with the remove button disabled
+			assert.lengthOf(conditions.childNodes, 1);
+			var newRow = conditions.firstChild;
+			assert.equal(newRow.selectedCondition, 'title');
+			assert.equal(newRow.querySelector('#valuefield').value, '');
+			assert.equal(newRow.querySelector('#remove').getAttribute('disabled'), 'true');
+
+			// Focus moves to the new condition's drop-down
+			assert.equal(win.document.activeElement, newRow.querySelector('#conditionsmenu'));
+		});
+
 		describe("Collection", function () {
 			it("should show collections and saved searches", async function () {
 				var col1 = await createDataObject('collection', { name: "A" });

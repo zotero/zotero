@@ -104,6 +104,9 @@
 		
 		init() {
 			this.addEventListener('keypress', event => this.handleKeyPress(event));
+			// Re-evaluate which remove buttons are enabled as the conditions change
+			this.addEventListener('input', () => this.updateRemoveButtons());
+			this.addEventListener('command', () => this.updateRemoveButtons());
 		}
 
 		addCondition(ref) {
@@ -119,18 +122,17 @@
 			}
 			
 			condition.initWithParentAndCondition(this, ref);
-			
-			if (conditionsBox.childNodes.length == 2) {
-				conditionsBox.childNodes[0].enableRemoveButton();
-			}
-			else if (conditionsBox.childNodes.length == 1) {
-				conditionsBox.childNodes[0].disableRemoveButton();
-			}
+
+			this.updateRemoveButtons();
 		}
 
 		removeCondition(id) {
 			var conditionsBox = this.querySelector('#conditions');
-			
+			// Removing the only remaining condition resets it to the default empty
+			// condition -- the same one shown when the pane is first opened -- rather
+			// than leaving the search with no conditions
+			var resetToDefault = conditionsBox.childNodes.length == 1;
+
 			this.search.removeCondition(id);
 			let found = false;
 			for (var i = 0, len = conditionsBox.childNodes.length; i < len; i++) {
@@ -148,9 +150,30 @@
 					conditionsBox.childNodes[i].conditionID--;
 				}
 			}
-			
-			if (conditionsBox.childNodes.length == 1) {
-				conditionsBox.childNodes[0].disableRemoveButton();
+
+			if (resetToDefault) {
+				this.addCondition();
+				// The removed button is gone, so move focus to the new condition's drop-down
+				conditionsBox.firstChild.querySelector('#conditionsmenu').focus();
+			}
+			else {
+				this.updateRemoveButtons();
+			}
+		}
+
+		// Enable the remove (-) button on each condition. The last remaining
+		// condition can be removed only when it's populated, which resets it to the
+		// default empty condition.
+		updateRemoveButtons() {
+			var conditionsBox = this.querySelector('#conditions');
+			var rows = conditionsBox.childNodes;
+			for (let row of rows) {
+				if (rows.length > 1 || row.isPopulated()) {
+					row.enableRemoveButton();
+				}
+				else {
+					row.disableRemoveButton();
+				}
 			}
 		}
 
@@ -741,6 +764,21 @@
 				);
 				this.parent.addCondition(ref);
 			}
+		}
+
+		// Whether a value has been entered, used to decide whether the last
+		// remaining condition can be cleared back to the default state
+		isPopulated() {
+			let valueField = this.querySelector('#valuefield');
+			if (!valueField.hidden) {
+				return !!valueField.value;
+			}
+			let ageField = this.querySelector('#value-date-age');
+			if (!ageField.hidden) {
+				return !!ageField.querySelector('.input').value;
+			}
+			// The drop-down value menus (collection, item type, etc.) always have a selection
+			return true;
 		}
 
 		disableRemoveButton() {
