@@ -135,6 +135,44 @@ describe("Advanced Search", function () {
 		await saved.eraseTx();
 	});
 	
+	it("should scope results to multiple selected collections", async function () {
+		var collection1 = await createDataObject('collection');
+		var collection2 = await createDataObject('collection');
+		var inFirst = await createDataObject('item', { title: "foo bar", collections: [collection1.id] });
+		var inSecond = await createDataObject('item', { title: "foo baz", collections: [collection2.id] });
+		var noMatch = await createDataObject('item', { title: "qux", collections: [collection2.id] });
+		var notInCollections = await createDataObject('item', { title: "foo qux" });
+		
+		var cv = zp.collectionsView;
+		await cv.selectByID("C" + collection1.id);
+		await waitForItemsLoad(win);
+		cv.selection.toggleSelect(cv.getRowIndexByID("C" + collection2.id));
+		await zp.onCollectionSelected();
+		await zp.itemsView.waitForLoad();
+		
+		await zp.toggleAdvancedSearchState('open');
+		var s = new Zotero.Search();
+		s.libraryID = Zotero.Libraries.userLibraryID;
+		s.addCondition('title', 'contains', 'foo');
+		deck.pane.search = s;
+		
+		var iv = zp.itemsView;
+		await deck.pane.submit();
+		await iv.waitForLoad();
+		
+		// Matching items from both collections, but not the matching item
+		// outside the selected collections
+		assert.equal(iv.rowCount, 2);
+		assert.isNumber(iv.getRowIndexByID(inFirst.id));
+		assert.isNumber(iv.getRowIndexByID(inSecond.id));
+		
+		await zp.setAdvancedSearchState('closed');
+		await selectLibrary(win);
+		
+		await Zotero.Items.erase([inFirst.id, inSecond.id, noMatch.id, notInCollections.id]);
+		await Zotero.Collections.erase([collection1.id, collection2.id]);
+	});
+	
 	it("should search across feeds in Feeds view", async function () {
 		let feed = await createFeed();
 		let feedItem = await createDataObject('feedItem', { libraryID: feed.libraryID, setTitle: true }, { skipSelect: true });
@@ -158,8 +196,58 @@ describe("Advanced Search", function () {
 		
 		await zp.setAdvancedSearchState('closed');
 		await selectLibrary(win);
-		
+
 		await feed.eraseTx();
+	});
+
+	it("should scope value autocomplete to the given libraries", async function () {
+		// Run the 'zotero' autocomplete provider directly with given params
+		function autocomplete(searchString, params) {
+			return new Promise((resolve) => {
+				let search = Cc["@mozilla.org/autocomplete/search;1?name=zotero"]
+					.createInstance(Ci.nsIAutoCompleteSearch);
+				let listener = {
+					onSearchResult(_search, result) {
+						// Ignore intermediate (ongoing) updates
+						if (result.searchResult == Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING) {
+							return;
+						}
+						let values = [];
+						for (let i = 0; i < result.matchCount; i++) {
+							values.push(result.getValueAt(i));
+						}
+						resolve(values);
+					}
+				};
+				search.startSearch(searchString, JSON.stringify(params), null, listener);
+			});
+		}
+		
+		var group = await getGroup();
+		var groupLibraryID = group.libraryID;
+		// Autocomplete matches a value prefix, so both values start with the token
+		var token = Zotero.Utilities.randomString() + ' ';
+		var userPublisher = token + 'User';
+		var groupPublisher = token + 'Group';
+		var userItem = await createDataObject('item', { itemType: 'book' });
+		userItem.setField('publisher', userPublisher);
+		await userItem.saveTx();
+		var groupItem = await createDataObject('item', { itemType: 'book', libraryID: groupLibraryID });
+		groupItem.setField('publisher', groupPublisher);
+		await groupItem.saveTx();
+		
+		// Scoped to the user library: only its value
+		var userOnly = await autocomplete(token, { fieldName: 'publisher', libraryIDs: [Zotero.Libraries.userLibraryID] });
+		assert.deepEqual(userOnly, [userPublisher]);
+		
+		// Scoped to both libraries: both values
+		var both = await autocomplete(token, {
+			fieldName: 'publisher',
+			libraryIDs: [Zotero.Libraries.userLibraryID, groupLibraryID]
+		});
+		assert.includeMembers(both, [userPublisher, groupPublisher]);
+		
+		await Zotero.Items.erase([userItem.id, groupItem.id]);
 	});
 	
 	it("should save a search in an editable group library root but not a collection", async function () {
@@ -463,9 +551,35 @@ describe("Advanced Search", function () {
 				assert.include(values, "S" + search2.key);
 				
 				await selectLibrary(win);
-				
+
 				await Zotero.Collections.erase([collection1.id, collection2.id]);
 				await Zotero.Searches.erase([search1.id, search2.id]);
+			});
+			
+			it("shouldn't appear in a cross-library scope", async function () {
+				var group = await getGroup();
+				var groupLibraryID = group.libraryID;
+				
+				// Simulate the cross-library scope that advancedSearchPane.refresh() sets
+				// from a multi-library collection selection
+				searchBox.scopeLibraryIDs = [Zotero.Libraries.userLibraryID, groupLibraryID];
+				try {
+					var s = new Zotero.Search();
+					s.libraryID = Zotero.Libraries.userLibraryID;
+					s.addCondition('title', 'is', '');
+					pane.search = s;
+					
+					var searchCondition = conditions.firstChild;
+					var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+					
+					// Collection condition (which also covers saved searches) shouldn't be offered
+					for (let i = 0; i < conditionsMenu.itemCount; i++) {
+						assert.notEqual(conditionsMenu.getItemAtIndex(i).value, 'collection');
+					}
+				}
+				finally {
+					searchBox.scopeLibraryIDs = null;
+				}
 			});
 		});
 		

@@ -482,6 +482,33 @@ describe("Citation Dialog", function () {
 			let rowNode = dialog.document.getElementById(rowID);
 			assert.isTrue(rowNode.classList.contains("highlighted"));
 		});
+
+		it("should show the union of items from multiple selected collections", async function () {
+			let collectionOne = await createDataObject('collection');
+			let collectionTwo = await createDataObject('collection');
+			let itemOne = await createDataObject('item', { collections: [collectionOne.id] });
+			let itemTwo = await createDataObject('item', { collections: [collectionTwo.id] });
+
+			await IOManager.toggleDialogMode("library");
+			let cv = dialog.libraryLayout.collectionsView;
+			let itemsView = dialog.libraryLayout.itemsView;
+
+			// Select both collections
+			await cv.selectByID("C" + collectionOne.id);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + collectionTwo.id));
+			await dialog.libraryLayout._onCollectionSelection();
+			await itemsView.waitForLoad();
+
+			assert.isNumber(itemsView.getRowIndexByID(itemOne.id),
+				"Item from first selected collection should be shown");
+			assert.isNumber(itemsView.getRowIndexByID(itemTwo.id),
+				"Item from second selected collection should be shown");
+
+			// Restore the default single-row selection so later tests that rely on the
+			// library root being selected aren't affected by the leftover multi-selection
+			await cv.selectByID("L" + Zotero.Libraries.userLibraryID);
+			await itemsView.waitForLoad();
+		});
 	});
 
 	describe("Search", function () {

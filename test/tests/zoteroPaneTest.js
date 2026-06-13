@@ -1040,6 +1040,55 @@ describe("ZoteroPane", function () {
 		});
 	});
 	
+	describe("#buildCollectionContextMenu()", function () {
+		async function selectCollectionRows(ids) {
+			let cv = zp.collectionsView;
+			await cv.selectByID(ids[0]);
+			await waitForItemsLoad(win);
+			for (let id of ids.slice(1)) {
+				cv.selection.toggleSelect(cv.getRowIndexByID(id));
+			}
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+		}
+
+		afterEach(async function () {
+			await selectLibrary(win);
+		});
+
+		it("should hide New Subcollection and Rename for a multiple-collection selection", async function () {
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection');
+
+			// A single collection shows both single-target actions
+			await selectCollectionRows(["C" + c1.id]);
+			await zp.buildCollectionContextMenu();
+			assert.isFalse(win.document.getElementById('newSubcollection').hidden);
+			assert.isFalse(win.document.getElementById('editSelectedCollection').hidden);
+
+			// Two collections hides them
+			await selectCollectionRows(["C" + c1.id, "C" + c2.id]);
+			await zp.buildCollectionContextMenu();
+			assert.isTrue(win.document.getElementById('newSubcollection').hidden);
+			assert.isTrue(win.document.getElementById('editSelectedCollection').hidden);
+		});
+
+		it("should disable the report for a cross-library collection selection", async function () {
+			let group = await createGroup();
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection', { libraryID: group.libraryID });
+			await createDataObject('item', { collections: [c1.id] });
+			await createDataObject('item', { libraryID: group.libraryID, collections: [c2.id] });
+
+			await zp.collectionsView.expandLibrary(group.libraryID);
+			await selectCollectionRows(["C" + c1.id, "C" + c2.id]);
+			await zp.buildCollectionContextMenu();
+			assert.isTrue(win.document.getElementById('loadReport').disabled);
+
+			await group.eraseTx();
+		});
+	});
+
 	describe("#buildItemContextMenu()", function () {
 		it("shouldn't show export or bib options for multiple standalone file attachments without notes", async function () {
 			var item1 = await importFileAttachment('test.png');
@@ -1051,6 +1100,42 @@ describe("ZoteroPane", function () {
 			var menu = win.document.getElementById('zotero-itemmenu');
 			assert.isTrue(menu.querySelector('.zotero-menuitem-export').hidden);
 			assert.isTrue(menu.querySelector('.zotero-menuitem-create-bibliography').hidden);
+		});
+
+		it("should disable the report when selected items span libraries", async function () {
+			let group = await createGroup();
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection', { libraryID: group.libraryID });
+			let item1 = await createDataObject('item', { collections: [c1.id] });
+			let item2 = await createDataObject('item', { libraryID: group.libraryID, collections: [c2.id] });
+
+			// Cross-library multiple-collection selection -> grouped items view
+			await zp.collectionsView.expandLibrary(group.libraryID);
+			let cv = zp.collectionsView;
+			await cv.selectByID("C" + c1.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + c2.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let report = menu.querySelector('.zotero-menuitem-create-report');
+
+			// Select within the current (grouped) view rather than ZoteroPane.selectItems(),
+			// which would navigate the collection tree and drop the multi-selection
+
+			// Items from a single library: report enabled
+			await zp.itemsView.selectItems([item1.id]);
+			await zp.buildItemContextMenu();
+			assert.isFalse(report.disabled);
+
+			// Items spanning libraries: report disabled
+			await zp.itemsView.selectItems([item1.id, item2.id]);
+			await zp.buildItemContextMenu();
+			assert.isTrue(report.disabled);
+
+			await selectLibrary(win);
+			await group.eraseTx();
 		});
 		
 		it("should show “Export Note…” for standalone file attachment with note", async function () {
@@ -1968,6 +2053,223 @@ describe("ZoteroPane", function () {
 			// Child collection was pulled from under its parent to become a top-level collection
 			let topLevelCollections = Zotero.Collections.getByLibrary(library.id);
 			assert.includeMembers(topLevelCollections, [collectionChild]);
+		});
+	});
+
+
+	describe("Multi-Collection Selection", function () {
+		afterEach(async function () {
+			Zotero.Prefs.clear('recursiveCollections');
+			await selectLibrary(win);
+		});
+
+		async function selectMultipleCollections(collections) {
+			let cv = zp.collectionsView;
+			// Select the first collection
+			await cv.selectByID("C" + collections[0].id);
+			await waitForItemsLoad(win);
+			// Toggle-select additional collections
+			for (let i = 1; i < collections.length; i++) {
+				let row = cv.getRowIndexByID("C" + collections[i].id);
+				cv.selection.toggleSelect(row);
+			}
+			// Wait for the items view to reload with the combined set. The
+			// selection-triggered call is queued ahead of this one in Zotero.serial,
+			// and this one no-ops once the view matches the selection.
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+		}
+
+		describe("Uncombinable selections", function () {
+			it("should keep only the focused row when Recently Read and a collection are selected together", async function () {
+				let collection = await createDataObject('collection');
+				let cv = zp.collectionsView;
+				// Show and select Recently Read
+				await zp.setVirtual(Zotero.Libraries.userLibraryID, 'recentlyRead', true, true);
+				await waitForItemsLoad(win);
+				// Toggle-select the collection, forming an uncombinable two-row selection
+				cv.selection.toggleSelect(cv.getRowIndexByID("C" + collection.id));
+				await zp.onCollectionSelected();
+
+				// The selection should have been reduced to the focused (collection) row
+				assert.equal(cv.selection.count, 1);
+				let rows = zp.getCollectionTreeRows();
+				assert.lengthOf(rows, 1);
+				assert.isTrue(rows[0].isCollection());
+
+				await zp.setVirtual(Zotero.Libraries.userLibraryID, 'recentlyRead', false);
+			});
+		});
+
+		describe("Combinable special views", function () {
+			it("should combine Recently Read across libraries without reducing the selection", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let groupLibraryID = (await createGroup()).libraryID;
+				let cv = zp.collectionsView;
+
+				// Seed a recently-read item in each library
+				let userItem = await createDataObject('item', { libraryID: userLibraryID });
+				let userAttachment = await importPDFAttachment(userItem);
+				userAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
+				await userAttachment.saveTx();
+				let groupItem = await createDataObject('item', { libraryID: groupLibraryID });
+				let groupAttachment = await importPDFAttachment(groupItem);
+				groupAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
+				await groupAttachment.saveTx();
+
+				// Show Recently Read in both libraries, then select both rows
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, false);
+				await zp.setVirtual(groupLibraryID, 'recentlyRead', true, false);
+				await cv.selectByID('Y' + userLibraryID);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID('Y' + groupLibraryID));
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+
+				// Both Recently Read rows should remain selected
+				assert.equal(cv.selection.count, 2);
+				let rows = zp.getCollectionTreeRows();
+				assert.lengthOf(rows, 2);
+				assert.isTrue(rows.every(r => r.isRecentlyRead()));
+
+				// The items list should show the recently-read item from each library
+				assert.isNumber(zp.itemsView.getRowIndexByID(userItem.id));
+				assert.isNumber(zp.itemsView.getRowIndexByID(groupItem.id));
+
+				await zp.setVirtual(userLibraryID, 'recentlyRead', false);
+				await zp.setVirtual(groupLibraryID, 'recentlyRead', false);
+				Zotero.Items._lastReadCutoffs.clear();
+			});
+		});
+
+		describe("Items display", function () {
+			it("should show items from multiple selected collections", async function () {
+				let collection1 = await createDataObject('collection');
+				let collection2 = await createDataObject('collection');
+				let item1 = await createDataObject('item', { collections: [collection1.id] });
+				let item2 = await createDataObject('item', { collections: [collection2.id] });
+
+				await selectMultipleCollections([collection1, collection2]);
+
+				let itemsView = zp.itemsView;
+				assert.ok(itemsView.getRowIndexByID(item1.id) !== false, "Item from first collection should be shown");
+				assert.ok(itemsView.getRowIndexByID(item2.id) !== false, "Item from second collection should be shown");
+			});
+
+			it("should show items from subcollections with recursiveCollections", async function () {
+				Zotero.Prefs.set('recursiveCollections', true);
+
+				let collection1 = await createDataObject('collection');
+				let subCollection1 = await createDataObject('collection', { parentID: collection1.id });
+				let collection2 = await createDataObject('collection');
+				let subCollection2 = await createDataObject('collection', { parentID: collection2.id });
+
+				let item1 = await createDataObject('item', { collections: [subCollection1.id] });
+				let item2 = await createDataObject('item', { collections: [subCollection2.id] });
+				let item3 = await createDataObject('item', { collections: [collection1.id] });
+
+				await selectMultipleCollections([collection1, collection2]);
+
+				let itemsView = zp.itemsView;
+				assert.ok(itemsView.getRowIndexByID(item1.id) !== false,
+					"Item from subcollection of first collection should be shown");
+				assert.ok(itemsView.getRowIndexByID(item2.id) !== false,
+					"Item from subcollection of second collection should be shown");
+				assert.ok(itemsView.getRowIndexByID(item3.id) !== false,
+					"Item directly in first collection should be shown");
+			});
+
+			it("should not duplicate items that exist in both selected collections", async function () {
+				let collection1 = await createDataObject('collection');
+				let collection2 = await createDataObject('collection');
+				let item = await createDataObject('item', { collections: [collection1.id, collection2.id] });
+
+				await selectMultipleCollections([collection1, collection2]);
+
+				let itemsView = zp.itemsView;
+				// Count how many times the item appears
+				let count = 0;
+				for (let i = 0; i < itemsView.rowCount; i++) {
+					if (itemsView.getRow(i).ref.id === item.id) {
+						count++;
+					}
+				}
+				assert.equal(count, 1, "Item in both collections should appear only once");
+			});
+		});
+
+		describe("#newItem()", function () {
+			it("should add a new item to all selected collections", async function () {
+				let collection1 = await createDataObject('collection');
+				let collection2 = await createDataObject('collection');
+
+				await selectMultipleCollections([collection1, collection2]);
+
+				let item = await zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
+
+				assert.isTrue(item.inCollection(collection1.id),
+					"New item should be in first selected collection");
+				assert.isTrue(item.inCollection(collection2.id),
+					"New item should be in second selected collection");
+			});
+		});
+
+		describe("#duplicateSelectedItem()", function () {
+			it("should add duplicate to the subset of selected collections the original belongs to", async function () {
+				let collection1 = await createDataObject('collection');
+				let collection2 = await createDataObject('collection');
+				let collection3 = await createDataObject('collection');
+				// Item is in collections 1 and 3, not 2
+				let item = await createDataObject('item', { collections: [collection1.id, collection3.id] });
+
+				// Select collection1, which contains the item
+				await select(win, collection1);
+				await zp.itemsView.selectItem(item.id);
+
+				// Temporarily override getCollectionTreeRows to simulate multi-collection selection
+				let cv = zp.collectionsView;
+				let origGetRows = zp.getCollectionTreeRows;
+				let row1 = cv.getRowIndexByID("C" + collection1.id);
+				let row2 = cv.getRowIndexByID("C" + collection2.id);
+				let row3 = cv.getRowIndexByID("C" + collection3.id);
+				zp.getCollectionTreeRows = function () {
+					return [row1, row2, row3].map(index => cv.getRow(index));
+				};
+
+				try {
+					let duplicate = await zp.duplicateSelectedItem();
+
+					// Duplicate should be in collections 1 and 3 (selected + original is there)
+					// but not in collection 2 (selected but original isn't there)
+					assert.isTrue(duplicate.inCollection(collection1.id),
+						"Duplicate should be in collection 1 (selected and original exists)");
+					assert.isFalse(duplicate.inCollection(collection2.id),
+						"Duplicate should not be in collection 2 (selected but original doesn't exist)");
+					assert.isTrue(duplicate.inCollection(collection3.id),
+						"Duplicate should be in collection 3 (selected and original exists)");
+				}
+				finally {
+					zp.getCollectionTreeRows = origGetRows;
+				}
+			});
+		});
+
+		describe("#deleteSelectedCollection()", function () {
+			it("should move all selected collections to trash", async function () {
+				let collection1 = await createDataObject('collection');
+				let collection2 = await createDataObject('collection');
+
+				await selectMultipleCollections([collection1, collection2]);
+
+				let promise = waitForDialog();
+				await zp.deleteSelectedCollection();
+				await promise;
+
+				assert.isTrue(collection1.deleted,
+					"First collection should be in trash");
+				assert.isTrue(collection2.deleted,
+					"Second collection should be in trash");
+			});
 		});
 	});
 })

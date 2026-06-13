@@ -673,7 +673,6 @@ describe("Zotero.CollectionTree", function () {
 		it("should switch to library root if item isn't in collection", async function () {
 			var item = await createDataObject('item');
 			var collection = await createDataObject('collection');
-			Zotero.debug(zp.itemsView._rows);
 			await cv.selectItem(item.id);
 			await waitForItemsLoad(win);
 			assert.equal(cv.selection.focused, 0);
@@ -731,7 +730,7 @@ describe("Zotero.CollectionTree", function () {
 			}
 			
 			Zotero.DragDrop.currentDragSource = objectType == "item"
-				? zp.itemsView.collectionTreeRow
+				? zp.itemsView.collectionTreeRows[0]
 				: null;
 			
 			if (!promise) {
@@ -763,7 +762,7 @@ describe("Zotero.CollectionTree", function () {
 			var row = cv.getRowIndexByID(targetRowID);
 			
 			Zotero.DragDrop.currentDragSource = objectType == "item"
-				? zp.itemsView.collectionTreeRow
+				? zp.itemsView.collectionTreeRows[0]
 				: null;
 			var dt = {
 				dropEffect: 'copy',

@@ -1086,11 +1086,11 @@ Zotero.Translate.ItemGetter.prototype = {
 	setCollection: function (collection, getChildCollections) {
 		// get items in this collection
 		var items = new Set(collection.getChildItems());
-		
+
 		if (getChildCollections) {
 			// Get child collections
 			this._collectionsLeft = Zotero.Collections.getByParent(collection.id);
-			
+
 			// Get items in all descendant collections
 			let descendantCollections = Zotero.Collections.getByParent(collection.id, true);
 			for (let collection of descendantCollections) {
@@ -1098,7 +1098,7 @@ Zotero.Translate.ItemGetter.prototype = {
 				childItems.forEach(item => items.add(item));
 			}
 		}
-		
+
 		this._itemsLeft = Array.from(items.values());
 		this._itemsLeft.sort((a, b) => a.id - b.id);
 		this.numItems = this._itemsLeft.length;

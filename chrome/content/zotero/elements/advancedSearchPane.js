@@ -140,7 +140,11 @@
 		// editable library or group root (but not a feed) and not within a collection.
 		// Revisit when/if we support nested condition sets in the UI.
 		_canSaveInCurrentRow() {
-			let collectionTreeRow = ZoteroPane.getCollectionTreeRow();
+			let collectionTreeRows = ZoteroPane.getCollectionTreeRows();
+			if (collectionTreeRows.length != 1) {
+				return false;
+			}
+			let collectionTreeRow = collectionTreeRows[0];
 			return collectionTreeRow.isLibrary(true)
 				&& !collectionTreeRow.isFeed()
 				&& collectionTreeRow.editable;
@@ -152,6 +156,23 @@
 			// Keep the previous library when the selected row doesn't have one (e.g., Feeds)
 			if (libraryID) {
 				this._search.libraryID = libraryID;
+			}
+			// Set the libraries the search applies to: a temporary search spans all
+			// selected libraries, a saved search just its own. Used to scope value
+			// autocomplete and, when more than one library is involved, to drop the
+			// Collection/Saved Search condition, which can only resolve within one library.
+			if (this.type === 'temporary') {
+				let libraryIDs = [];
+				for (let row of ZoteroPane.getCollectionTreeRows()) {
+					let id = row.ref && row.ref.libraryID;
+					if (id !== undefined && id !== null && !libraryIDs.includes(id)) {
+						libraryIDs.push(id);
+					}
+				}
+				this._searchElem.scopeLibraryIDs = libraryIDs;
+			}
+			else {
+				this._searchElem.scopeLibraryIDs = [this._search.libraryID];
 			}
 			this._searchElem.search = this._search;
 			this._saveButton.disabled = this.type === 'temporary' && !this._canSaveInCurrentRow();
@@ -197,13 +218,13 @@
 				return;
 			}
 
-			let collectionTreeRow = ZoteroPane.getCollectionTreeRow();
+			let collectionTreeRows = ZoteroPane.getCollectionTreeRows();
 			if (!this._canSaveInCurrentRow()) {
 				throw new Error('Can only save in an editable library root');
 			}
 			this._ensureSearch();
-			
-			let libraryID = collectionTreeRow.ref.libraryID;
+
+			let libraryID = collectionTreeRows[0].ref.libraryID;
 			let searches = await Zotero.Searches.getAll(libraryID);
 			let prefix = Zotero.getString('pane.collections.untitled');
 			let defaultName = Zotero.Utilities.Internal.getNextName(

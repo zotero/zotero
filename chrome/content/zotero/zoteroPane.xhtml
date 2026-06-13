@@ -1030,13 +1030,13 @@
 
 		<!-- Tag Selector -->
 		<menupopup id="tag-menu">
-			<menuitem label="&zotero.tagSelector.assignColor;"
+			<menuitem id="assign-color-tag" label="&zotero.tagSelector.assignColor;"
 				oncommand="ZoteroPane.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
-			<menuitem label="&zotero.tagSelector.renameTag;"
+			<menuitem id="rename-tag" label="&zotero.tagSelector.renameTag;"
 				oncommand="ZoteroPane.tagSelector.openRenamePrompt(); event.stopPropagation();"/>
 			<menuitem id="split-tag" label="&zotero.tagSelector.splitTag;"
 				oncommand="ZoteroPane.tagSelector.openTagSplitterWindow(event)"/>
-			<menuitem label="&zotero.tagSelector.deleteTag;"
+			<menuitem id="delete-tag" label="&zotero.tagSelector.deleteTag;"
 				oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
 		</menupopup>
 		<menupopup id="tag-selector-view-settings-menu"
@@ -1048,9 +1048,14 @@
 					var libraryID = ZoteroPane.tagSelector.libraryID;
 					var library = Zotero.Libraries.get(libraryID);
 					var enabled = false;
-					if (library.editable) {
-						if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
-							enabled = true;
+					// 'Delete Automatic Tags in This Library' is per-library, so disable it
+					// when the selection spans multiple libraries (nested ifs to avoid '&amp;&amp;'
+					// in this XML attribute)
+					if (!ZoteroPane.tagSelector.multiLibrary) {
+						if (library.editable) {
+							if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
+								enabled = true;
+							}
 						}
 					}
 					document.getElementById('delete-automatic-tags').disabled = !enabled;

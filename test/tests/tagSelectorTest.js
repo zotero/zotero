@@ -48,7 +48,7 @@ describe("Tag Selector", function () {
 		tagSelector.selectedTags = new Set();
 		tagSelector.handleSearch('');
 		tagSelector.onItemViewChanged({
-			collectionTreeRow: win.ZoteroPane.getCollectionTreeRow(),
+			collectionTreeRows: win.ZoteroPane.getCollectionTreeRows(),
 			libraryID
 		});
 		await waitForTagSelector(win);
@@ -783,6 +783,128 @@ describe("Tag Selector", function () {
 		});
 	});
 
+	describe("Cross-library selection", function () {
+		var group, groupLibraryID;
+		
+		before(async function () {
+			group = await createGroup();
+			groupLibraryID = group.libraryID;
+			await collectionsView.expandLibrary(groupLibraryID);
+		});
+		
+		after(async function () {
+			await group.eraseTx();
+		});
+		
+		async function selectCrossLibrary(userCollection, groupCollection) {
+			let cv = collectionsView;
+			await cv.selectByID("C" + userCollection.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + groupCollection.id));
+			await win.ZoteroPane.onCollectionSelected();
+			await win.ZoteroPane.itemsView.waitForLoad();
+			tagSelector.onItemViewChanged({
+				collectionTreeRows: win.ZoteroPane.getCollectionTreeRows(),
+				libraryID: win.ZoteroPane.getSelectedLibraryID()
+			});
+			await waitForTagSelector(win);
+		}
+		
+		it("should show tags from all selected libraries", async function () {
+			let userTag = 'U ' + Zotero.Utilities.randomString();
+			let groupTag = 'G ' + Zotero.Utilities.randomString();
+			let userCollection = await createDataObject('collection');
+			let groupCollection = await createDataObject('collection', { libraryID: groupLibraryID });
+			let userItem = createUnsavedDataObject('item', { collections: [userCollection.id] });
+			userItem.setTags([userTag]);
+			let groupItem = createUnsavedDataObject(
+				'item', { libraryID: groupLibraryID, collections: [groupCollection.id] }
+			);
+			groupItem.setTags([groupTag]);
+			await Zotero.DB.executeTransaction(async function () {
+				await userItem.save();
+				await groupItem.save();
+			});
+			
+			await selectCrossLibrary(userCollection, groupCollection);
+
+			assert.isTrue(tagSelector.multiLibrary);
+			let tags = getRegularTags();
+			assert.includeMembers(tags, [userTag, groupTag]);
+		});
+		
+		it("shouldn't show colored tags in the selector across libraries", async function () {
+			let coloredTag = 'C ' + Zotero.Utilities.randomString();
+			let userCollection = await createDataObject('collection');
+			let groupCollection = await createDataObject('collection', { libraryID: groupLibraryID });
+			// Color the tag in the user library and apply it to an item there
+			await Zotero.Tags.setColor(libraryID, coloredTag, '#990000', 0);
+			let userItem = createUnsavedDataObject('item', { collections: [userCollection.id] });
+			userItem.setTags([coloredTag]);
+			let groupItem = createUnsavedDataObject(
+				'item', { libraryID: groupLibraryID, collections: [groupCollection.id] }
+			);
+			groupItem.setTags(['G ' + Zotero.Utilities.randomString()]);
+			await Zotero.DB.executeTransaction(async function () {
+				await userItem.save();
+				await groupItem.save();
+			});
+			
+			await selectCrossLibrary(userCollection, groupCollection);
+			
+			// The tag is still listed, just not as a colored tag
+			assert.include(getRegularTags(), coloredTag);
+			assert.notInclude(getColoredTags(), coloredTag);
+			
+			await Zotero.Tags.setColor(libraryID, coloredTag, false);
+		});
+		
+		it("should disable rename, color, and split but allow delete", async function () {
+			let userCollection = await createDataObject('collection');
+			let groupCollection = await createDataObject('collection', { libraryID: groupLibraryID });
+			await selectCrossLibrary(userCollection, groupCollection);
+			
+			let menu = doc.getElementById('tag-menu');
+			let mockEvent = { preventDefault() {}, screenX: 0, screenY: 0 };
+			try {
+				tagSelector.handleTagContext({ name: 'whatever' }, mockEvent);
+				assert.isTrue(doc.getElementById('assign-color-tag').disabled);
+				assert.isTrue(doc.getElementById('rename-tag').disabled);
+				assert.isTrue(doc.getElementById('split-tag').disabled);
+				assert.isFalse(doc.getElementById('delete-tag').disabled);
+			}
+			finally {
+				menu.hidePopup();
+			}
+		});
+		
+		it("should delete a tag from all selected libraries", async function () {
+			let sharedTag = 'shared ' + Zotero.Utilities.randomString();
+			let userCollection = await createDataObject('collection');
+			let groupCollection = await createDataObject('collection', { libraryID: groupLibraryID });
+			let userItem = createUnsavedDataObject('item', { collections: [userCollection.id] });
+			userItem.setTags([sharedTag]);
+			let groupItem = createUnsavedDataObject(
+				'item', { libraryID: groupLibraryID, collections: [groupCollection.id] }
+			);
+			groupItem.setTags([sharedTag]);
+			await Zotero.DB.executeTransaction(async function () {
+				await userItem.save();
+				await groupItem.save();
+			});
+			
+			await selectCrossLibrary(userCollection, groupCollection);
+			
+			tagSelector.contextTag = { name: sharedTag };
+			let dialogPromise = waitForDialog();
+			await tagSelector.openDeletePrompt();
+			await dialogPromise;
+			
+			assert.isFalse(userItem.hasTag(sharedTag), "Tag removed from user library item");
+			assert.isFalse(groupItem.hasTag(sharedTag), "Tag removed from group library item");
+		});
+	});
+	
 	describe("Search error handling", function () {
 		it("should degrade gracefully when getTags() throws SearchError", async function () {
 			// _safeGetTags wraps collectionTreeRow.getTags(), which calls getSearchResults().

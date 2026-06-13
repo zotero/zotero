@@ -56,6 +56,22 @@ var LibraryTree = class LibraryTree extends React.Component {
 		return this._waitForEvent('select');
 	}
 
+	componentDidMount() {
+		// Create an element where we can create drag images to be displayed next to the cursor while dragging
+		// since for multiple item drags we need to display all the elements
+		let elem = this._dragImageContainer = document.createElement("div");
+		elem.style.width = "100%";
+		elem.style.height = "2000px";
+		elem.style.position = "absolute";
+		elem.style.top = "-10000px";
+		elem.className = "drag-image-container";
+		this.domEl.appendChild(elem);
+	}
+
+	componentWillUnmount() {
+		this.domEl.removeChild(this._dragImageContainer);
+	}
+
 	componentDidCatch(error, info) {
 		// Async operations might attempt to update the react components
 		// after window close in tests, which will cause unnecessary crashing
@@ -116,6 +132,28 @@ var LibraryTree = class LibraryTree extends React.Component {
 			return false;
 		}
 		return this._rowMap[id];
+	}
+
+	/**
+	 * Get selected tree rows
+	 */
+	getSelectedRows() {
+		var indexes = this.selection ? Array.from(this.selection.selected) : [];
+		indexes = indexes.filter(index => index < this._rows.length);
+		try {
+			return indexes.map(index => this.getRow(index));
+		}
+		catch (e) {
+			Zotero.debug(indexes);
+			throw e;
+		}
+	}
+
+	/**
+	 * Get selected objects, including collections and searches in the trash in item trees
+	 */
+	getSelectedObjects() {
+		return this.getSelectedRows().map(row => row.ref);
 	}
 
 	/**
@@ -252,6 +290,27 @@ var LibraryTree = class LibraryTree extends React.Component {
 			event.dataTransfer.effectAllowed = effect;
 		}
 		event.dataTransfer.dropEffect = effect;
+	}
+
+	/**
+	 * Start a drag using HTML 5 Drag and Drop
+	 */
+	onDragStart(event, index) {
+		// Propagate selection before we set the drag image if dragging not one of the selected rows
+		if (!this.selection.isSelected(index)) {
+			this.selection.select(index);
+		}
+		// Set drag image
+		const dragElems = this.domEl.querySelectorAll('.selected');
+		for (let elem of dragElems) {
+			elem = elem.cloneNode(true);
+			elem.style.position = "initial";
+			this._dragImageContainer.appendChild(elem);
+		}
+	}
+
+	onDragEnd(_event, _index) {
+		this._dragImageContainer.innerHTML = "";
 	}
 };
 

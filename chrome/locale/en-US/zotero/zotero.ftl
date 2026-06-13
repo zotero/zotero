@@ -338,6 +338,8 @@ import-online-relink-only =
 import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
 
+tab-title-multiple-collections = Multiple
+
 items-table-cell-notes =
     .aria-label = { $count ->
         [one] { $count } Note

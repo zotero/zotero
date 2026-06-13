@@ -73,8 +73,8 @@ var Zotero_Lookup = new function () {
 		else {
 			try {
 				libraryID = ZoteroPane.getSelectedLibraryID();
-				let collection = ZoteroPane.getSelectedCollection();
-				collections = collection ? [collection.id] : false;
+				let selectedCollections = ZoteroPane.getSelectedCollections();
+				collections = selectedCollections.length ? selectedCollections.map(c => c.id) : false;
 			}
 			catch (e) {
 				/** TODO: handle this **/

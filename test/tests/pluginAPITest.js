@@ -944,6 +944,7 @@ describe("Plugin API", function () {
 						...defaultContextKeys,
 						"items",
 						"collectionTreeRow",
+						"collectionTreeRows",
 					]
 				},
 				"main/library/collection": {
@@ -954,6 +955,7 @@ describe("Plugin API", function () {
 					contextKeys: [
 						...defaultContextKeys,
 						"collectionTreeRow",
+						"collectionTreeRows",
 					]
 				},
 				"main/library/addAttachment": {

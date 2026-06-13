@@ -454,7 +454,7 @@ class Layout {
 		else {
 			// Make sure the collectionTreeRow is defined to
 			// avoid errors thrown when filter is set on first load
-			while (!this.itemsView.collectionTreeRow) {
+			while (!this.itemsView.collectionTreeRows) {
 				await Zotero.Promise.delay(10);
 			}
 			await this.refreshItemsList();
@@ -784,7 +784,8 @@ class LibraryLayout extends Layout {
 			hideSources: ['duplicates', 'trash', 'feeds'],
 			initialFolder: Zotero.Prefs.get("integration.citationDialogCollectionLastSelected"),
 			onActivate: () => {},
-			filterLibraryIDs: io.filterLibraryIDs
+			filterLibraryIDs: io.filterLibraryIDs,
+			multiSelect: true
 		});
 		// Add aria-description with instructions on what this collection tree is for
 		// Voiceover announces the description placed on the actual tree when focus enters it
@@ -877,10 +878,18 @@ class LibraryLayout extends Layout {
 	}
 	
 	async _onCollectionSelection() {
-		var collectionTreeRow = this.collectionsView.getRow(this.collectionsView.selection.focused);
 		if (!this.collectionsView.selection.count) return;
-		// Collection not changed
-		if (this.itemsView && this.itemsView.collectionTreeRow && this.itemsView.collectionTreeRow.id == collectionTreeRow.id) {
+		// Show the union of all selected collections (cross-library selections are
+		// grouped by library in the items view, as in List mode)
+		let selectedRows = [...this.collectionsView.selection.selected]
+			.sort((a, b) => a - b)
+			.map(index => this.collectionsView.getRow(index));
+		// Collection selection not changed
+		if (this.itemsView
+				&& Zotero.Utilities.arrayEquals(
+					selectedRows.map(row => row.id).sort(),
+					this.itemsView.collectionTreeRows.map(row => row.id).sort()
+				)) {
 			return;
 		}
 		// _onCollectionSelection will be called during initiation. It can take a while
@@ -888,41 +897,45 @@ class LibraryLayout extends Layout {
 		if (currentLayout?.type !== "library") return;
 
 		this.itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-		
-		// Load library data if necessary
-		var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
-		if (!library.getDataLoaded('item')) {
-			Zotero.debug("Waiting for items to load for library " + library.libraryID);
-			await library.waitForDataLoad('item');
+
+		// Load item data for each selected library if necessary
+		for (let libraryID of new Set(selectedRows.map(row => row.ref.libraryID))) {
+			let library = Zotero.Libraries.get(libraryID);
+			if (!library.getDataLoaded('item')) {
+				Zotero.debug("Waiting for items to load for library " + library.libraryID);
+				await library.waitForDataLoad('item');
+			}
 		}
-		
-		await this.itemsView.changeCollectionTreeRow({
+
+		// Restrict each collection's items to those relevant to the current citation mode
+		let filterItemsForMode = async (items) => {
+			// In add-note mode, note parent checks call item.getNotes(), which requires childItems
+			if (DIALOG_STATE.isAddingNote()) {
+				let regularItems = items.filter(item => SearchHandler.isItemWithNotes(item));
+				if (regularItems.length) {
+					await Zotero.Items.loadDataTypes(regularItems, ['childItems']);
+				}
+				// when citing notes, only keep notes or note parents
+				items = items.filter(item => item.isNote() || item.getNotes().length);
+			}
+			// when adding annotations, only keep annotations, their attachments, and their top-level items
+			if (DIALOG_STATE.isAddingAnnotations()) {
+				return SearchHandler.keepItemsWithAnnotations(items);
+			}
+			return items;
+		};
+
+		await this.itemsView.changeCollectionTreeRows(selectedRows.map(collectionTreeRow => ({
 			id: collectionTreeRow.id,
-			getItems: async () => {
-				let items = await collectionTreeRow.getItems();
-				// In add-note mode, note parent checks call item.getNotes(), which requires childItems
-				if (DIALOG_STATE.isAddingNote()) {
-					let regularItems = items.filter(item => SearchHandler.isItemWithNotes(item));
-					if (regularItems.length) {
-						await Zotero.Items.loadDataTypes(regularItems, ['childItems']);
-					}
-					// when citing notes, only keep notes or note parents
-					items = items.filter(item => item.isNote() || item.getNotes().length);
-				}
-				// when adding annotations, only keep annotations, their attachments, and their top-level items
-				if (DIALOG_STATE.isAddingAnnotations()) {
-					return SearchHandler.keepItemsWithAnnotations(items);
-				}
-				return items;
-			},
+			getItems: async () => filterItemsForMode(await collectionTreeRow.getItems()),
 			isSearch: () => true,
 			isSearchMode: () => true,
 			setSearch: (searchText, mode) => collectionTreeRow.setSearch(searchText, mode),
 			clearCache: () => collectionTreeRow.clearCache(),
 			ref: collectionTreeRow.ref
-		});
+		})));
 		await this.itemsView.setFilter('citation-search', SearchHandler.searchValue);
-		
+
 		this.itemsView.clearItemsPaneMessage();
 	}
 

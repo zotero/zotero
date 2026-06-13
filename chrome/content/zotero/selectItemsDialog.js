@@ -154,7 +154,7 @@ var onCollectionSelected = async function () {
 		await library.waitForDataLoad('item');
 	}
 	
-	await itemsView.changeCollectionTreeRow(collectionTreeRow);
+	await itemsView.changeCollectionTreeRows([collectionTreeRow]);
 	
 	itemsView.clearItemsPaneMessage();
 };

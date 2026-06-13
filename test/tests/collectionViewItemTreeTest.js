@@ -1962,6 +1962,120 @@ describe("CollectionViewItemTree", function () {
 			);
 		});
 		
+		it("should add a dragged file to all selected collections", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			
+			// Select both collections
+			await cv.selectByID("C" + collection1.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + collection2.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			itemsView = zp.itemsView;
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			
+			var idsPromise = waitForItemEvent('add');
+			
+			drop(0, -1, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['application/x-moz-file'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			})
+			
+			var ids = await idsPromise;
+			var item = Zotero.Items.get(ids[0]);
+			assert.isTrue(item.inCollection(collection1.id));
+			assert.isTrue(item.inCollection(collection2.id));
+		});
+		
+		it("should allow a file drop onto a specific item but not blank space for a cross-library selection", async function () {
+			var group = await createGroup();
+			var c1 = await createDataObject('collection');
+			var c2 = await createDataObject('collection', { libraryID: group.libraryID });
+			var userItem = await createDataObject('item', { collections: [c1.id] });
+			var groupItem = await createDataObject('item', { libraryID: group.libraryID, collections: [c2.id] });
+
+			await cv.expandLibrary(group.libraryID);
+			await cv.selectByID("C" + c1.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + c2.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			itemsView = zp.itemsView;
+
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var fileDataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['application/x-moz-file'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			};
+
+			// Directly onto a specific item (which identifies the target library): allowed
+			assert.isTrue(itemsView.canDropCheck(itemsView.getRowIndexByID(userItem.id), 0, fileDataTransfer));
+			// Into blank space (ambiguous across libraries): rejected
+			assert.isFalse(itemsView.canDropCheck(-1, -1, fileDataTransfer));
+
+			// Dropping onto the group item attaches the file in the group library
+			var idsPromise = waitForItemEvent('add');
+			await drop(itemsView.getRowIndexByID(groupItem.id), 0, fileDataTransfer);
+			var ids = await idsPromise;
+			var attachment = Zotero.Items.get(ids[0]);
+			assert.equal(attachment.libraryID, group.libraryID);
+			assert.equal(attachment.parentItemID, groupItem.id);
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("should allow a blank-space file drop for a mixed collection and saved-search selection regardless of order", async function () {
+			var collection = await createDataObject('collection');
+			var search = await createDataObject('search');
+
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var fileDataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['application/x-moz-file'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			};
+
+			// Select the saved search first (so it's focused), then add the collection
+			await cv.selectByID("S" + search.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + collection.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			itemsView = zp.itemsView;
+
+			// Allowed even though the focused row is a search, since a selected
+			// collection can receive the file
+			assert.isTrue(itemsView.canDropCheck(-1, -1, fileDataTransfer));
+
+			await selectLibrary(win);
+		});
+
 		it("should create a stored top-level attachment when a file URI is dragged", async function () {
 			var promise = itemsView.waitForSelect();
 			var pdfFile = getTestDataDirectory();
@@ -2449,16 +2563,16 @@ describe("CollectionViewItemTree", function () {
 		});
 	});
 	
-	describe("#setCollectionTreeRow()", function () {
-		it("should no-op when setting the same row", async function () {
+	describe("#setCollectionTreeRows()", function () {
+		it("should no-op when setting the same rows", async function () {
 			let rowProvider = itemsView.rowProvider;
 			let currentRow = rowProvider.collectionTreeRow;
 			assert.ok(currentRow);
-			
+
 			let refreshSpy = sinon.spy(rowProvider, 'refresh');
-			
+
 			try {
-				await rowProvider.setCollectionTreeRow(currentRow);
+				await rowProvider.setCollectionTreeRows([currentRow]);
 				assert.equal(refreshSpy.callCount, 0);
 			}
 			finally {

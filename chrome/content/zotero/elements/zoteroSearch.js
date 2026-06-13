@@ -432,9 +432,9 @@
 				case 'collection':
 				{
 					let rows = [];
-					
+
 					var libraryID = this.parent.search.libraryID;
-					
+
 					// Add collections
 					let cols = Zotero.Collections.getByLibrary(libraryID, true);
 					for (let col of cols) {
@@ -452,7 +452,7 @@
 							image: Zotero.Collection.prototype.treeViewImage
 						});
 					}
-					
+
 					// Add saved searches
 					let searches = Zotero.Searches.getByLibrary(libraryID);
 					for (let search of searches) {
@@ -513,7 +513,9 @@
 						}
 						
 						// Update field drop-down if applicable
-						this.querySelector('#valuefield').update(conditionName, this.mode);
+						this.querySelector('#valuefield').update(
+							conditionName, this.mode, this.parent && this.parent.scopeLibraryIDs
+						);
 					}
 				}
 			}
@@ -594,7 +596,17 @@
 			this.parent = parent;
 			this.conditionID = condition.id;
 			var menu = this.querySelector('#conditionsmenu');
-			
+
+			// Collection and saved search conditions resolve within a single library, so
+			// remove the Collection condition (which also covers saved searches) when the
+			// selection spans multiple libraries
+			if (this.parent.scopeLibraryIDs && this.parent.scopeLibraryIDs.length > 1) {
+				let collectionItem = menu.querySelector('menuitem[value="collection"]');
+				if (collectionItem) {
+					collectionItem.remove();
+				}
+			}
+
 			if (this.parent.search) {
 				this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
 				var prefix = '';
@@ -863,7 +875,7 @@
 			throw new Error('Invalid search textbox popup');
 		}
 
-		update(condition, mode) {
+		update(condition, mode, scopeLibraryIDs) {
 			var textbox = this.querySelector('#search-textbox');
 			var button = this.querySelector('#textbox-button');
 			
@@ -912,11 +924,15 @@
 						
 						default:
 							textbox.setAttribute('disableautocomplete', 'false');
-							
-							// TODO: Provide current libraryID
+
 							var autocompleteParams = {
 								fieldName: condition
 							};
+							// Scope suggestions to the selected libraries (the same set the
+							// collection condition menu uses). Empty/unset falls back to all libraries.
+							if (scopeLibraryIDs && scopeLibraryIDs.length) {
+								autocompleteParams.libraryIDs = scopeLibraryIDs;
+							}
 							switch (condition) {
 								case 'creator':
 								case 'author':

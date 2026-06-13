@@ -246,7 +246,32 @@ describe("Connector Server", function () {
 			var req = await reqPromise;
 			assert.equal(req.status, 201);
 		});
-		
+
+		it("should target only the focused row for a cross-library multiple-collection selection", async function () {
+			// A collection in My Library plus a group library root, with the group focused.
+			// The Connector saves to a single target, so it should use the focused row (the
+			// group root) and not the collection from the other library.
+			var group = await createGroup();
+			var collection = await createDataObject('collection');
+			var cv = win.ZoteroPane.collectionsView;
+
+			await select(win, collection);
+			var groupRow = cv.getRowIndexByID(group.treeViewID);
+			cv.selection.toggleSelect(groupRow);
+			await waitForItemsLoad(win);
+
+			// Sanity check: both rows selected, with the group focused
+			assert.equal(cv.selection.focused, groupRow);
+			assert.sameMembers(
+				win.ZoteroPane.getCollectionTreeRows().map(r => r.ref.libraryID),
+				[Zotero.Libraries.userLibraryID, group.libraryID]
+			);
+
+			var target = Zotero.Server.Connector.getSaveTarget();
+			assert.equal(target.library.libraryID, group.libraryID);
+			assert.isNull(target.collection);
+		});
+
 		it("should use the provided proxy to deproxify item url", async function () {
 			await selectLibrary(win, Zotero.Libraries.userLibraryID);
 			await waitForItemsLoad(win);

@@ -25,52 +25,69 @@
 
 
 var Zotero_Report_Interface = new function() {
-	/*
-	 * Load a report for the currently selected collection
+	/**
+	 * Load a report for the selected collections/searches
 	 */
 	this.loadCollectionReport = function () {
+		var libraryID = ZoteroPane_Local.getSelectedLibraryID();
+		var collections = ZoteroPane_Local.getSelectedCollections();
+		var items = collections.length
+			? _getCollectionItems(collections)
+			: ZoteroPane_Local.getSortedItems();
+		if (!items.length) {
+			throw new Error('No items in selected collections');
+		}
+		
 		var sortColumn = ZoteroPane_Local.getSortField();
-		var queryString = '?sort=' + sortColumn
-			+ '&direction=' + (ZoteroPane.getSortDirection() == 1 ? 'asc' : 'desc');
-		
-		var url = 'zotero://report/';
-		
-		var source = ZoteroPane_Local.getSelectedCollection();
-		if (!source) {
-			source = ZoteroPane_Local.getSelectedSavedSearch();
-		}
-		if (!source) {
-			throw new Error('No collection currently selected');
-		}
-		
-		url += Zotero.API.getLibraryPrefix(source.libraryID) + '/';
-		
-		if (source instanceof Zotero.Collection) {
-			url += 'collections/' + source.key;
-		}
-		else {
-			url += 'searches/' + source.key;
-		}
-		
-		url += '/items' + queryString;
+		var url = 'zotero://report/'
+			+ Zotero.API.getLibraryPrefix(libraryID) + '/'
+			+ 'items?sort=' + sortColumn
+			+ '&direction=' + (ZoteroPane.getSortDirection() == 1 ? 'asc' : 'desc')
+			+ '&itemKey=' + items.map(item => item.key).join(',');
 		
 		Zotero.openInViewer(url, { allowJavaScript: false });
 	}
 	
 	
-	/*
+	/**
 	 * Load a report for the currently selected items
 	 */
 	this.loadItemReport = function () {
-		var libraryID = ZoteroPane_Local.getSelectedLibraryID();
 		var items = ZoteroPane_Local.getSelectedItems();
-		
 		if (!items || !items.length) {
 			throw new Error('No items currently selected');
 		}
 		
-		var url = 'zotero://report/' + Zotero.API.getLibraryPrefix(libraryID) + '/items'
-			+ '?itemKey=' + items.map(item => item.key).join(',');
+		var libraryID = items[0].libraryID;
+		var url = 'zotero://report/'
+			+ Zotero.API.getLibraryPrefix(libraryID) + '/'
+			+ 'items?itemKey=' + items.map(item => item.key).join(',');
+
 		Zotero.openInViewer(url, { allowJavaScript: false });
+	}
+
+
+	/**
+	 * Get all items from the given collections, respecting recursiveCollections
+	 */
+	function _getCollectionItems(collections) {
+		var items = new Set();
+		var recursive = Zotero.Prefs.get('recursiveCollections');
+		for (let collection of collections) {
+			for (let item of collection.getChildItems()) {
+				items.add(item);
+			}
+			if (recursive) {
+				for (let desc of collection.getDescendents(false, 'collection')) {
+					let col = Zotero.Collections.get(desc.id);
+					if (col) {
+						for (let item of col.getChildItems()) {
+							items.add(item);
+						}
+					}
+				}
+			}
+		}
+		return [...items];
 	}
 }

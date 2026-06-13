@@ -74,12 +74,12 @@
 			this._data = data;
 		}
 
-		get collectionTreeRow() {
-			return this._collectionTreeRow;
+		get collectionTreeRows() {
+			return this._collectionTreeRows;
 		}
 
-		set collectionTreeRow(val) {
-			this._collectionTreeRow = val;
+		set collectionTreeRows(val) {
+			this._collectionTreeRows = val;
 		}
 
 		get itemsView() {
@@ -150,7 +150,7 @@
 
 		notify(action, type) {
 			if (type == 'item' && action == 'modify') {
-				if (this.collectionTreeRow && this.collectionTreeRow.isFeedsOrFeed()) {
+				if (this.collectionTreeRows?.[0]?.isFeedsOrFeed()) {
 					this.updateReadLabel();
 				}
 			}
@@ -191,7 +191,7 @@
 			this._itemDetails.tabID = "zotero-pane";
 			this._itemDetails.tabType = "library";
 			this._itemDetails.item = item;
-			this._itemDetails.collectionTreeRow = this.collectionTreeRow;
+			this._itemDetails.collectionTreeRows = this.collectionTreeRows;
 
 			this._itemDetails.render();
 
@@ -229,7 +229,7 @@
 			let count = this.data.length;
 			
 			// Display duplicates merge interface in item pane
-			if (this.collectionTreeRow.isDuplicates()) {
+			if (this.collectionTreeRows[0].isDuplicates()) {
 				if (!this.editable) {
 					if (count) {
 						msg = Zotero.getString('pane.item.duplicates.writeAccessRequired');
@@ -259,7 +259,7 @@
 				if (count) {
 					let key;
 					// In the trash, we have to check the object type
-					if (this.collectionTreeRow.isTrash()) {
+					if (this.collectionTreeRows[0].isTrash()) {
 						if (this.data.every(x => x instanceof Zotero.Collection)) {
 							key = 'item-pane-message-collections-selected';
 						}
@@ -280,7 +280,7 @@
 				}
 				else {
 					let count = this.itemsView.rowCount;
-					if (this.collectionTreeRow.isTrash()
+					if (this.collectionTreeRows[0].isTrash()
 							&& this.itemsView._rows?.some(
 								x => x.ref instanceof Zotero.Collection || x.ref instanceof Zotero.Search
 							)) {
@@ -315,7 +315,7 @@
 			}
 			
 			// My Publications buttons
-			var isPublications = this.collectionTreeRow.isPublications();
+			var isPublications = this.collectionTreeRows[0].isPublications();
 			// Show in My Publications view if selected items are all notes or non-linked-file attachments
 			var showMyPublicationsButtons = isPublications
 				&& this.data.every((item) => {
@@ -331,13 +331,13 @@
 
 			// Trash button
 			let nonDeletedItemsSelected = this.data.some(item => !item.deleted);
-			if (this.collectionTreeRow.isTrash() && !nonDeletedItemsSelected) {
+			if (this.collectionTreeRows[0].isTrash() && !nonDeletedItemsSelected) {
 				container.renderCustomHead(this.renderTrashHead.bind(this));
 				return;
 			}
 			
 			// Feed buttons
-			if (this.collectionTreeRow.isFeedsOrFeed()) {
+			if (this.collectionTreeRows[0].isFeedsOrFeed()) {
 				container.renderCustomHead(this.renderFeedHead.bind(this));
 				this.updateReadLabel();
 				return;
@@ -413,7 +413,7 @@
 		renderAnnotationsHead(data) {
 			let { doc, append } = data;
 			let button = doc.createXULElement("button");
-			button.disabled = !this.collectionTreeRow.editable;
+			button.disabled = !this.collectionTreeRows.every(o => o.editable);
 			button.id = 'zotero-item-pane-note-from-annotations';
 			if (Zotero.Items.getTopLevel(this.data).length == 1) {
 				button.label = Zotero.getString('pane.items.menu.addNoteFromAnnotations');
