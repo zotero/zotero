@@ -1,7 +1,10 @@
 advanced-search-deck {
 	flex-direction: column;
-	
-	> advanced-search-pane:not(.deck-selected) {
+
+	// Panes are children of the inner <deck>, so hide the non-selected one
+	// entirely -- otherwise it still occupies the deck's grid cell and forces
+	// the area to the height of the taller pane
+	advanced-search-pane:not(.deck-selected) {
 		display: none;
 	}
 }
