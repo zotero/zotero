@@ -1,5 +1,6 @@
 advanced-search-deck {
 	flex-direction: column;
+	border-bottom: 1px solid var(--color-panedivider);
 
 	// Panes are children of the inner <deck>, so hide the non-selected one
 	// entirely -- otherwise it still occupies the deck's grid cell and forces
