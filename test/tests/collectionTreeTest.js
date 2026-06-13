@@ -673,7 +673,6 @@ describe("Zotero.CollectionTree", function () {
 		it("should switch to library root if item isn't in collection", async function () {
 			var item = await createDataObject('item');
 			var collection = await createDataObject('collection');
-			Zotero.debug(zp.itemsView._rows);
 			await cv.selectItem(item.id);
 			await waitForItemsLoad(win);
 			assert.equal(cv.selection.focused, 0);
@@ -710,6 +709,120 @@ describe("Zotero.CollectionTree", function () {
 		});
 	});
 	
+	describe("#handleActivate()", function () {
+		it("shouldn't start editing when multiple collections are selected", async function () {
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection');
+			await cv.selectByID("C" + c1.id);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + c2.id));
+			assert.equal(cv.selection.count, 2);
+
+			cv.handleActivate(new Event('keydown'), [cv.selection.focused]);
+
+			assert.notOk(cv._editing);
+		});
+	});
+
+	describe("selection", function () {
+		// Toggle a row the way a Cmd-click/Space does (through the table's selection handler)
+		function toggleRow(index) {
+			cv.tree._onSelection(index, false, true);
+		}
+
+		it("should keep a selection when the last selected row is toggled off", async function () {
+			let c = await createDataObject('collection');
+			await cv.selectByID("C" + c.id);
+			let row = cv.getRowIndexByID("C" + c.id);
+			assert.equal(cv.selection.count, 1);
+
+			// Toggling off the only selected row would empty the selection
+			toggleRow(row);
+
+			assert.equal(cv.selection.count, 1);
+			assert.isTrue(cv.selection.isSelected(row));
+		});
+
+		it("should allow toggling off a row when others remain selected", async function () {
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection');
+			await cv.selectByID("C" + c1.id);
+			let r2 = cv.getRowIndexByID("C" + c2.id);
+			toggleRow(r2);
+			assert.equal(cv.selection.count, 2);
+
+			// Toggling one off leaves the other
+			toggleRow(r2);
+			assert.equal(cv.selection.count, 1);
+			assert.isTrue(cv.selection.isSelected(cv.getRowIndexByID("C" + c1.id)));
+		});
+
+		it("should mark the focused-but-unselected row for the focus ring", async function () {
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection');
+			await cv.selectByID("C" + c1.id);
+			let r2 = cv.getRowIndexByID("C" + c2.id);
+
+			// Move focus to c2 without selecting it (macOS Cmd-arrow style)
+			cv.tree._onSelection(r2, false, false, true);
+			assert.equal(cv.selection.focused, r2);
+			assert.isFalse(cv.selection.isSelected(r2));
+
+			// The focused (unselected) row gets the 'focused' class that drives the
+			// dotted focus ring (rendering is async, so wait for it)
+			await waitForCallback(() => {
+				let n = win.document.getElementById(`${cv.id}-row-${r2}`);
+				return n && n.classList.contains('focused');
+			}, 50, 20);
+			let node = win.document.getElementById(`${cv.id}-row-${r2}`);
+			assert.isTrue(node.classList.contains('focused'));
+			assert.isFalse(node.classList.contains('selected'));
+		});
+
+		it("should not leave a stale multi-selection after filtering", async function () {
+			let cA = await createDataObject('collection', { name: 'filterAAA' });
+			let cB = await createDataObject('collection', { name: 'filterBBB' });
+			let cC = await createDataObject('collection', { name: 'filterCCC' });
+
+			// Select all three, focusing the one that will still match the filter
+			await cv.selectByID("C" + cB.id);
+			toggleRow(cv.getRowIndexByID("C" + cC.id));
+			toggleRow(cv.getRowIndexByID("C" + cA.id));
+			assert.equal(cv.selection.count, 3);
+
+			await cv.setFilter("filterAAA");
+
+			// Only the still-matching focused row is selected -- no stale indices
+			assert.deepEqual(cv.getSelectedRows().map(r => r.id), ["C" + cA.id]);
+
+			await cv.setFilter("");
+		});
+	});
+
+	describe("#deleteSelectedCollection()", function () {
+		it("shouldn't delete a mixed-type selection", async function () {
+			let collection = await createDataObject('collection');
+			let search = await createDataObject('search');
+			await cv.selectByID("C" + collection.id);
+			cv.selection.toggleSelect(cv.getRowIndexByID("S" + search.id));
+			await zp.onCollectionSelected();
+			assert.equal(cv.selection.count, 2);
+
+			let stub = sinon.stub().returns(0);
+			let promptService = win.Services.prompt;
+			win.Services.prompt = { confirmEx: stub };
+			try {
+				await zp.deleteSelectedCollection(false);
+			}
+			finally {
+				win.Services.prompt = promptService;
+			}
+
+			assert.isFalse(stub.called, "Mixed selection shouldn't prompt or delete");
+			assert.isFalse(collection.deleted);
+			assert.isFalse(search.deleted);
+		});
+	});
+
 	describe("#onDrop()", function () {
 		/**
 		 * Simulate a drag and drop
@@ -731,7 +844,7 @@ describe("Zotero.CollectionTree", function () {
 			}
 			
 			Zotero.DragDrop.currentDragSource = objectType == "item"
-				? zp.itemsView.collectionTreeRow
+				? zp.itemsView.collectionTreeRows[0]
 				: null;
 			
 			if (!promise) {
@@ -763,7 +876,7 @@ describe("Zotero.CollectionTree", function () {
 			var row = cv.getRowIndexByID(targetRowID);
 			
 			Zotero.DragDrop.currentDragSource = objectType == "item"
-				? zp.itemsView.collectionTreeRow
+				? zp.itemsView.collectionTreeRows[0]
 				: null;
 			var dt = {
 				dropEffect: 'copy',

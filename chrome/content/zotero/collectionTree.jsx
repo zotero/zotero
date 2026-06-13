@@ -50,6 +50,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		dragAndDrop: false,
 		filterLibraryIDs: false,
 		hideSources: [],
+		multiSelect: false,
 		onContextMenu: noop,
 	};
 
@@ -59,13 +60,13 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		dragAndDrop: PropTypes.bool,
 		filterLibraryIDs: PropTypes.array,
 		hideSources: PropTypes.array,
+		multiSelect: PropTypes.bool,
 		onContextMenu: PropTypes.func,
 	};
 
 	constructor(props) {
 		super(props);
 		this.itemTreeView = null;
-		this.itemToSelect = null;
 
 		this.type = 'collection';
 		this.name = "CollectionTree";
@@ -140,6 +141,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	componentDidMount() {
+		super.componentDidMount();
+		
 		this.selection.select(0);
 		this.makeVisible();
 		if (this.props.dragAndDrop) {
@@ -242,6 +245,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	handleActivate = (event, indices) => {
+		// Activation (rename collection, edit saved search/feed, open library) acts on
+		// a single row, so ignore it when multiple rows are selected
+		if (this.selection.count > 1) {
+			return;
+		}
 		let index = indices[0];
 		let treeRow = this.getRow(index);
 		if (treeRow.isCollection() && this.editable && this.selection.focused == index) {
@@ -306,6 +314,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Classes
 		div.className = "row";
 		div.classList.toggle('selected', selection.isSelected(index));
+		div.classList.toggle('first-selected', selection.isFirstRowOfSelectionBlock(index));
+		div.classList.toggle('last-selected', selection.isLastRowOfSelectionBlock(index));
+		// Focus ring on the focused-but-unselected row (e.g., macOS Cmd-arrow navigation)
+		div.classList.toggle('focused', selection.focused == index);
 		div.classList.toggle('highlighted', this._highlightedRows.has(treeRow.id));
 		div.classList.toggle('drop', this._dropRow == index);
 		div.classList.toggle('flashing', this._flashingRow == index);
@@ -476,6 +488,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				onToggleOpenState: this.toggleOpenState,
 				getRowString: this.getRowString.bind(this),
 				
+				multiSelect: this.props.multiSelect,
+				// The collection tree must always have a selection
+				requireSelection: true,
+
 				onItemContextMenu: (...args) => this.props.onContextMenu && this.props.onContextMenu(...args),
 
 				onKeyDown: this.handleKeyDown,
@@ -1305,17 +1321,27 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * @returns {Promise<void>}
 	 */
 	async deleteSelection(deleteItems) {
-		var treeRow = this.getRow(this.selection.focused);
-		if (treeRow.isFeed()) {
-			await treeRow.ref.eraseTx();
-			return;
+		let treeRows = this.getSelectedRows();
+		// Feeds must be erased outside a transaction since Feed.erase()
+		// starts its own transaction internally
+		let feeds = treeRows.filter(r => r.isFeed());
+		let others = treeRows.filter(r => !r.isFeed());
+		for (let row of feeds) {
+			await row.ref.eraseTx();
 		}
-		treeRow.ref.deleted = true;
-		if (treeRow.isCollection()) {
-			await treeRow.ref.saveTx({ deleteItems });
-			return;
+		if (others.length) {
+			await Zotero.DB.executeTransaction(async () => {
+				for (let row of others) {
+					row.ref.deleted = true;
+					if (row.isCollection()) {
+						await row.ref.save({ deleteItems });
+					}
+					else {
+						await row.ref.save();
+					}
+				}
+			});
 		}
-		await treeRow.ref.saveTx();
 	}
 	
 	unregister() {
@@ -1371,20 +1397,35 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	getSelectedCollection(asID) {
-		var collection = this.getRow(this.selection.focused);
-		if (collection && collection.isCollection()) {
-			return asID ? collection.ref.id : collection.ref;
+		Zotero.debug("CollectionTree#getSelectedCollection() is deprecated -- use getSelectedCollections()");
+		return this.getSelectedCollections(asID)[0] || false;
+	}
+	
+	getSelectedCollections(asID) {
+		var collections = [];
+		for (let index of this.selection.selected) {
+			let row = this.getRow(index);
+			if (row && row.isCollection()) {
+				collections.push(asID ? row.ref.id : row.ref);
+			}
 		}
+		return collections;
 	}
 	
 	getSelectedSearch(asID) {
-		if (this.getRow(this.selection.focused)) {
-			var search = this.getRow(this.selection.focused);
-			if (search && search.isSearch()) {
-				return asID ? search.ref.id : search.ref;
+		Zotero.debug("CollectionTree#getSelectedSearch() is deprecated -- use getSelectedSearches()");
+		return this.getSelectedSearches(asID)[0] || false;
+	}
+	
+	getSelectedSearches(asID) {
+		var searches = [];
+		for (let index of this.selection.selected) {
+			let row = this.getRow(index);
+			if (row && row.isSearch()) {
+				searches.push(asID ? row.ref.id : row.ref);
 			}
 		}
-		return false;
+		return searches;
 	}
 	
 	getSelectedGroup(asID) {
@@ -1448,18 +1489,27 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 ////////////////////////////////////////////////////////////////////////////////
 
 	onDragStart(event, index) {
-		const treeRow = this.getRow(index);
+		super.onDragStart(event, index);
+		
 		// See note in #setDropEffect()
 		if (Zotero.isWin || Zotero.isLinux) {
 			event.dataTransfer.effectAllowed = 'copyMove';
 		}
 		
-		if (!treeRow.isCollection() && !treeRow.isSearch()) {
+		let rows = this.getSelectedRows();
+		// Ignore drag if all selected rows aren't the same type
+		if (!rows.every(o => o.type == rows[0].type)) {
 			return;
 		}
-		let type = treeRow.isCollection() ? "zotero/collection" : "zotero/search";
-		event.dataTransfer.setData(type, treeRow.ref.id);
-		Zotero.debug(`Dragging ${type} ` + treeRow.id);
+		// Ignore if not all collections or searches
+		if (!rows.every(o => o.isCollection() || o.isSearch())) {
+			return;
+		}
+		let type = rows[0].isCollection() ? "zotero/collection" : "zotero/search";
+		let ids = rows.map(o => o.ref.id);
+		event.dataTransfer.setDragImage(this._dragImageContainer, 0, 0);
+		event.dataTransfer.setData(type, ids);
+		Zotero.debug(`Dragging ${type} ` + (ids.length > 1 ? '[' + ids.join(', ') + ']' : ids[0]));
 	}
 
 	onDragOver(event, index) {
@@ -1603,7 +1653,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 	}
 	
-	onDragEnd = () => {
+	onDragEnd = (event, index) => {
+		super.onDragEnd(event, index);
+		
 		let dropRow = this._dropRow;
 		this._dropRow = null;
 		this.tree.invalidateRow(dropRow);
@@ -1775,19 +1827,20 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					return false;
 				}
 				
-				let draggedCollectionID = data[0];
-				let draggedCollection = Zotero.Collections.get(draggedCollectionID);
+				for (let id of data) {
+					let draggedCollection = Zotero.Collections.get(id);
 				
-				// Dragging within same library
-				if (treeRow.ref.libraryID == draggedCollection.libraryID) {
-					// Collections cannot be dropped on themselves
-					if (draggedCollectionID == treeRow.ref.id) {
-						return false;
-					}
+					// Dragging within same library
+					if (treeRow.ref.libraryID == draggedCollection.libraryID) {
+						// Collections cannot be dropped on themselves
+						if (id == treeRow.ref.id) {
+							return false;
+						}
 					
-					// Nor in their children
-					if (draggedCollection.hasDescendent('collection', treeRow.ref.id)) {
-						return false;
+						// Nor in their children
+						if (draggedCollection.hasDescendent('collection', treeRow.ref.id)) {
+							return false;
+						}
 					}
 				}
 				
@@ -2214,21 +2267,31 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var targetCollectionID = targetTreeRow.isCollection() ? targetTreeRow.ref.id : false;
 		
 		if (dataType == 'zotero/collection') {
-			var droppedCollection = await Zotero.Collections.getAsync(data[0]);
+			let droppedCollections = await Zotero.Collections.getAsync(data);
+			if (droppedCollections.some(c => c.id == targetCollectionID)) {
+				throw new Error("Can't drop onto source row");
+			}
+			
 			// Collection drag between libraries
-			if (targetLibraryID != droppedCollection.libraryID) {
-				await this.executeCollectionCopy({
-					collection: droppedCollection,
-					targetCollectionID,
-					targetLibraryID,
-					targetTreeRow,
-					copyOptions
-				});
+			if (targetLibraryID != droppedCollections[0].libraryID) {
+				for (let droppedCollection of droppedCollections) {
+					await this.executeCollectionCopy({
+						collection: droppedCollection,
+						targetCollectionID,
+						targetLibraryID,
+						targetTreeRow,
+						copyOptions
+					});
+				}
 			}
 			// Collection drag within a library
 			else {
-				droppedCollection.parentID = targetCollectionID;
-				await droppedCollection.saveTx();
+				await Zotero.DB.executeTransaction(async () => {
+					for (let droppedCollection of droppedCollections) {
+						droppedCollection.parentID = targetCollectionID;
+						await droppedCollection.save();
+					}
+				});
 			}
 		}
 		else if (dataType == 'zotero/item') {
@@ -2660,6 +2723,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			this.selection.clearSelection();
 		}
 		await this.reload();
+		// reload() rebuilds the rows, so any selected indices from before now point at
+		// different (or out-of-range) rows. Clear them and re-select just the current
+		// row below, collapsing a multi-selection to the focused row while filtering.
+		this.selection.clearSelection();
 		if (currentRow) {
 			// Special treatment for when there are no filter matches
 			// Otherwise, selection.focused does not get updated by selectByID, which breaks ZoteroPane.

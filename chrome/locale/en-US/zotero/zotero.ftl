@@ -195,15 +195,76 @@ collections-menu-show-recently-read =
     .label = Show { recently-read }
 item-menu-remove-from-recently-read =
     .label = Remove from { recently-read }…
-collections-menu-rename-collection =
-    .label = Rename Collection
+collections-menu-rename =
+    .label = Rename
 edit-saved-search = Edit Saved Search
-collections-menu-edit-saved-search =
-    .label = { edit-saved-search }
+collections-menu-edit-search =
+    .label = Edit Search
+collections-menu-duplicate-search =
+    .label = Duplicate Search
 collections-menu-move-collection =
     .label = Move To
 collections-menu-copy-collection =
     .label = Copy To
+collections-menu-export =
+    .label = Export…
+collections-menu-generate-report =
+    .label = Generate Report…
+collections-menu-create-bibliography =
+    .label = Create Bibliography…
+collections-menu-unsubscribe =
+    .label = Unsubscribe…
+collections-menu-delete =
+    .label = { $count ->
+        [one] Delete Collection…
+       *[other] Delete Collections…
+    }
+collections-menu-delete-with-items =
+    .label = { $count ->
+        [one] Delete Collection and Items…
+       *[other] Delete Collections and Items…
+    }
+collections-menu-delete-search =
+    .label = { $count ->
+        [one] Delete Search…
+       *[other] Delete Searches…
+    }
+
+collections-delete-title =
+    { $count ->
+        [one] Delete Collection
+       *[other] Delete Collections
+    }
+collections-delete-message =
+    { $count ->
+        [one] Are you sure you want to delete this collection?
+       *[other] Are you sure you want to delete { $count } collections?
+    }
+collections-delete-keep-items =
+    { $count ->
+        [one] Items within this collection will not be deleted.
+       *[other] Items within these collections will not be deleted.
+    }
+collections-delete-with-items-title =
+    { $count ->
+        [one] Delete Collection and Items
+       *[other] Delete Collections and Items
+    }
+collections-delete-with-items-message =
+    { $count ->
+        [one] Are you sure you want to delete this collection and move all items within it to the Trash?
+       *[other] Are you sure you want to delete { $count } collections and move all items within them to the Trash?
+    }
+collections-delete-search-title =
+    { $count ->
+        [one] Delete Search
+       *[other] Delete Searches
+    }
+collections-delete-search-message =
+    { $count ->
+        [one] Are you sure you want to delete this search?
+       *[other] Are you sure you want to delete { $count } searches?
+    }
 
 item-creator-moveDown =
     .label = Move Down
@@ -337,6 +398,8 @@ import-online-relink-only =
     .label = Relink Mendeley Desktop citations
 import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+
+tab-title-multiple-collections = Multiple
 
 items-table-cell-notes =
     .aria-label = { $count ->

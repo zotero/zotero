@@ -43,7 +43,7 @@ Zotero.Notes = new function () {
 	 * @returns {Promise<Zotero.EditorInstance | null>} Instance of Zotero.EditorInstance for the note.
 	 * If the note tab is opened in background (unloaded), returns null.
 	 */
-	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey } = {}) {
+	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey, collections } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
 		let win = Zotero.getMainWindow();
@@ -123,7 +123,8 @@ Zotero.Notes = new function () {
 				name = 'zotero-note-' + itemID;
 			}
 			
-			let io = { itemID, parentItemKey, location, _initPromise: Zotero.Promise.defer() };
+			let collectionIDs = collections ? collections.map(c => c.id).join(',') : '';
+			let io = { itemID, parentItemKey, collectionIDs, location, _initPromise: Zotero.Promise.defer() };
 			Services.ww.openWindow(
 				win,
 				'chrome://zotero/content/note.xhtml',

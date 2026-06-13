@@ -129,7 +129,7 @@
 		}
 		
 		get _renderDependencies() {
-			return [...super._renderDependencies, this.collectionTreeRow?.id];
+			return [...super._renderDependencies, this.collectionTreeRows?.map(o => o.id).join(',')];
 		}
 		
 		init() {
@@ -488,7 +488,7 @@
 				}
 
 				if (this.item instanceof Zotero.FeedItem) {
-					let row = ZoteroPane.getCollectionTreeRow();
+					let row = ZoteroPane.getCollectionTreeRows()[0];
 					if (row && row.isFeeds()) {
 						fieldNames.unshift("feed");
 					}

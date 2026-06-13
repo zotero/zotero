@@ -768,6 +768,37 @@ describe("Item pane", function () {
 			rowIDs = [...section.querySelectorAll(".row")].map(node => node.dataset.id);
 			assert.deepEqual(rowIDs, [`L${item.libraryID}`, `C${collectionParent.id}`, `C${collectionChild.id}`]);
 		});
+
+		it("should mark every selected collection as current for a multiple-collection selection", async function () {
+			// Select both collections the item belongs to. Select the (sub)collection
+			// first so its row is revealed, then toggle the parent into the selection.
+			let cv = ZoteroPane.collectionsView;
+			await cv.selectByID("C" + collectionChild.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + collectionParent.id));
+			await ZoteroPane.onCollectionSelected();
+			await ZoteroPane.itemsView.waitForLoad();
+			// Select within the current (multi-collection) view rather than
+			// ZoteroPane.selectItem(), which would navigate and drop the selection
+			await ZoteroPane.itemsView.selectItem(item.id);
+			// itemSelected() pushes the current selection into the item pane; force a
+			// render so the section reflects the multi-collection selection (item-pane
+			// render is skipped when the selected item itself hasn't changed)
+			await ZoteroPane.itemSelected();
+			await ZoteroPane.itemPane.render();
+
+			section = ZoteroPane.itemPane._itemDetails.getPane("libraries-collections");
+			let parentBox = section.querySelector(`.row[data-id="C${collectionParent.id}"] .box`);
+			let childBox = section.querySelector(`.row[data-id="C${collectionChild.id}"] .box`);
+			let libraryBox = section.querySelector(`.row[data-id="L${item.libraryID}"] .box`);
+
+			// Both selected collections are bolded (.current); the unselected library row is not
+			assert.isTrue(parentBox.classList.contains('current'));
+			assert.isTrue(childBox.classList.contains('current'));
+			assert.isFalse(libraryBox.classList.contains('current'));
+
+			await selectLibrary(win);
+		});
 	});
 
 	describe("Attachments pane", function () {

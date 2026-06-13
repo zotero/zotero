@@ -1497,12 +1497,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 						let hasQuickSearch = !!this.collectionTreeRow.searchText;
 						let hasTagFilters = this.collectionTreeRow.tags?.size > 0;
 						if (hasQuickSearch || hasTagFilters) {
-							// Clear all searches set on the collection tree row directly on
-							// collectionTreeRow (vs using ZoteroPane functions) to avoid
+							// Clear all searches set on the collection tree rows directly on
+							// the rows (vs using ZoteroPane functions) to avoid
 							// refreshing the itemTree multiple times at the same time, which can lead
 							// to tag selector not showing all tags after quickSearch is cleared
-							this.collectionTreeRow.setTags(new Set());
-							this.collectionTreeRow.setSearch('');
+							for (let collectionTreeRow of this.collectionTreeRows) {
+								collectionTreeRow.setTags(new Set());
+								collectionTreeRow.setSearch('');
+							}
 							// Clear quickSearch text field and tag selection without
 							// rerunning search
 							if (window.ZoteroPane.tagSelector) {

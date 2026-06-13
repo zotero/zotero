@@ -96,12 +96,12 @@
 			this._tabID = tabID;
 		}
 
-		get collectionTreeRow() {
-			return this._collectionTreeRow;
+		get collectionTreeRows() {
+			return this._collectionTreeRows;
 		}
 		
-		set collectionTreeRow(collectionTreeRow) {
-			this._collectionTreeRow = collectionTreeRow;
+		set collectionTreeRows(collectionTreeRows) {
+			this._collectionTreeRows = collectionTreeRows;
 		}
 
 		get supportsPinning() {
@@ -238,7 +238,7 @@
 				box.tabID = this.tabID;
 				box.tabType = this.tabType;
 				box.item = item;
-				box.collectionTreeRow = this.collectionTreeRow;
+				box.collectionTreeRows = this.collectionTreeRows;
 				// Discard hidden panes
 				if (box.hidden && box.discard) {
 					box.discard();

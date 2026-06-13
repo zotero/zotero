@@ -59,12 +59,12 @@ export class ItemPaneSectionElementBase extends XULElementBase {
 		this.setAttribute('tabType', tabType);
 	}
 
-	get collectionTreeRow() {
-		return this._collectionTreeRow;
+	get collectionTreeRows() {
+		return this._collectionTreeRows;
 	}
 
-	set collectionTreeRow(collectionTreeRow) {
-		this._collectionTreeRow = collectionTreeRow;
+	set collectionTreeRows(collectionTreeRows) {
+		this._collectionTreeRows = collectionTreeRows;
 	}
 
 	_syncRenderPending = false;

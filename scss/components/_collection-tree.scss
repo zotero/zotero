@@ -99,6 +99,20 @@ $universal-icons: (
 					}
 				}
 			}
+			
+			&.selected {
+				border-radius: 0;
+
+				&.first-selected {
+					border-top-left-radius: 5px;
+					border-top-right-radius: 5px;
+				}
+
+				&.last-selected {
+					border-bottom-left-radius: 5px;
+					border-bottom-right-radius: 5px;
+				}
+			}
 		}
 
 		.row.flashing:not(.drop) {

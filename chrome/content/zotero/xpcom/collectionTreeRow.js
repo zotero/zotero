@@ -324,7 +324,12 @@ Zotero.CollectionTreeRow.prototype.getTrashedCollections = async function () {
 };
 
 
-Zotero.CollectionTreeRow.prototype.getItems = async function () {
+/**
+ * @param {Object} [options]
+ * @param {Boolean} [options.unfiltered=false] - If true, ignore quicksearch, tag, and
+ *     advanced search filters
+ */
+Zotero.CollectionTreeRow.prototype.getItems = async function (options = {}) {
 	switch (this.type) {
 		// Fake results if this is a shared library
 		case 'share':
@@ -334,7 +339,7 @@ Zotero.CollectionTreeRow.prototype.getItems = async function () {
 			return this.ref.getItems();
 	}
 	
-	var ids = await this.getSearchResults();
+	var ids = await this.getSearchResults(false, { unfiltered: options.unfiltered });
 	
 	// Filter out items that exist in the items table (where search results come from) but that haven't
 	// yet been registered. This helps prevent unloaded-data crashes when switching collections while
@@ -353,7 +358,22 @@ Zotero.CollectionTreeRow.prototype.getItems = async function () {
 	return Zotero.Items.getAsync(ids);
 };
 
-Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTable) {
+/**
+ * @param {Boolean} [asTempTable=false]
+ * @param {Object} [options]
+ * @param {Boolean} [options.unfiltered=false] - If true, ignore quicksearch, tag, and
+ *     advanced search filters and bypass the cache
+ */
+Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTable, options = {}) {
+	if (options.unfiltered) {
+		let s = await this.getSearchObject({ unfiltered: true });
+		let ids = await s.search();
+		if (asTempTable) {
+			return Zotero.Search.idsToTempTable(ids);
+		}
+		return ids;
+	}
+	
 	if (!this._cachedResults) {
 		let s = await this.getSearchObject();
 		try {
@@ -378,9 +398,13 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTabl
  * Returns the search object for the currently display
  *
  * This accounts for the collection, saved search, quicksearch, tags, etc.
+ *
+ * @param {Object} [options]
+ * @param {Boolean} [options.unfiltered=false] - If true, ignore quicksearch, tag, and
+ *     advanced search filters and bypass the cache
  */
-Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
-	if (this._cachedSearch) {
+Zotero.CollectionTreeRow.prototype.getSearchObject = async function (options = {}) {
+	if (!options.unfiltered && this._cachedSearch) {
 		return this._cachedSearch;
 	}
 	
@@ -403,18 +427,20 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	}
 	else if (this.isDuplicates()) {
 		s = await this.ref.getSearchObject();
-		let tmpTable;
-		for (let id in s.conditions) {
-			let c = s.conditions[id];
-			if (c.condition == 'tempTable') {
-				tmpTable = c.value;
-				break;
+		if (!options.unfiltered) {
+			let tmpTable;
+			for (let id in s.conditions) {
+				let c = s.conditions[id];
+				if (c.condition == 'tempTable') {
+					tmpTable = c.value;
+					break;
+				}
 			}
+			// Called by ItemTreeView::unregister()
+			this.onUnload = async function () {
+				await Zotero.DB.queryAsync(`DROP TABLE IF EXISTS ${tmpTable}`, false, { noCache: true });
+			};
 		}
-		// Called by ItemTreeView::unregister()
-		this.onUnload = async function () {
-			await Zotero.DB.queryAsync(`DROP TABLE IF EXISTS ${tmpTable}`, false, { noCache: true });
-		};
 	}
 	else {
 		s = new Zotero.Search();
@@ -464,21 +490,23 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 	}
 	s2.setScope(s, includeScopeChildren);
 	
-	// Add Quick Search unless advanced search is enabled
-	if (this.searchText && !this.advancedSearch) {
-		let cond = 'quicksearch-'
-			+ (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode'));
-		s2.addCondition(cond, 'contains', this.searchText);
-	}
+	if (!options.unfiltered) {
+		// Add Quick Search unless advanced search is enabled
+		if (this.searchText && !this.advancedSearch) {
+			let cond = 'quicksearch-'
+				+ (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode'));
+			s2.addCondition(cond, 'contains', this.searchText);
+		}
 	
-	if (this.tags){
-		for (let tag of this.tags) {
-			s2.addCondition('tag', 'is', tag);
+		if (this.tags) {
+			for (let tag of this.tags) {
+				s2.addCondition('tag', 'is', tag);
+			}
 		}
 	}
 	
 	let s3;
-	if (this.advancedSearch) {
+	if (!options.unfiltered && this.advancedSearch) {
 		if (this.advancedSearch.libraryID === null) {
 			// A library-less search (Feeds pseudo-library) can't be clone()d
 			s3 = new Zotero.Search();
@@ -506,7 +534,9 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function () {
 		s3 = s2;
 	}
 	
-	this._cachedSearch = s3;
+	if (!options.unfiltered) {
+		this._cachedSearch = s3;
+	}
 	return s3;
 };
 
