@@ -31,7 +31,13 @@ zoterosearch {
 
 	caption {
 		font: inherit;
+		align-items: center;
+		gap: 4px;
 		padding-left: 0 !important;
+
+		label {
+			margin: 0;
+		}
 	}
 
 	label:first-child:not(tooltip label), checkbox:first-child {
@@ -43,10 +49,18 @@ zoterosearch {
 		margin-block: 0;
 	}
 
+	// Native menulists carry platform-specific margins (e.g. 5px 2px 3px on
+	// macOS) that macOS-normalize-controls doesn't cover, unlike the inputs and
+	// checkboxes. Zero them and let the containers' gaps control the spacing.
+	menulist {
+		margin: 0;
+	}
+
 	.search-condition {
 		flex: 1;
 		display: flex;
 		align-items: center;
+		gap: 8px;
 
 		.valuefield, .valuemenu, .value-date-age {
 			flex: 1;

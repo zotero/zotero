@@ -29,6 +29,9 @@ advanced-search-pane {
 
 		button {
 			min-width: 100px;
+			// Patch out the native button margins (5px 6px 3px on macOS) so the
+			// row's gap and the pane's padding control the spacing
+			margin: 0;
 		}
 	}
 	
