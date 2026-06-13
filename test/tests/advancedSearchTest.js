@@ -162,6 +162,43 @@ describe("Advanced Search", function () {
 		await feed.eraseTx();
 	});
 	
+	it("should save a search in an editable group library root but not a collection", async function () {
+		var group = await getGroup();
+		var groupLibraryID = group.libraryID;
+		var collection = await createDataObject('collection', { libraryID: groupLibraryID });
+		
+		await selectLibrary(win, groupLibraryID);
+		await zp.toggleAdvancedSearchState('open');
+		var pane = deck.pane;
+		
+		// Saving should be enabled at an editable group library root
+		assert.isFalse(pane._saveButton.disabled);
+		
+		var s = new Zotero.Search();
+		s.libraryID = groupLibraryID;
+		s.addCondition('title', 'contains', 'foo');
+		pane.search = s;
+		await pane.save();
+		
+		// The search should have been saved to the group library
+		var searches = await Zotero.Searches.getAll(groupLibraryID);
+		assert.lengthOf(searches, 1);
+		var conditions = Object.values(searches[0].getConditions());
+		assert.lengthOf(conditions, 1);
+		assert.equal(conditions[0].condition, 'title');
+		assert.equal(conditions[0].value, 'foo');
+		
+		// Saving should be disabled within a collection, which can't be scoped to
+		await selectCollection(win, collection.id);
+		await zp.toggleAdvancedSearchState('open');
+		assert.isTrue(deck.pane._saveButton.disabled);
+		
+		await zp.setAdvancedSearchState('closed');
+		await Zotero.Searches.erase(searches.map(s => s.id));
+		await collection.eraseTx();
+		await selectLibrary(win);
+	});
+	
 	describe("Conditions", function () {
 		var pane, searchBox, conditions;
 		

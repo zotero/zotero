@@ -126,6 +126,16 @@
 			}
 		}
 
+		// A saved search can only be scoped to a library root, so allow saving at an
+		// editable library or group root (but not a feed) and not within a collection.
+		// Revisit when/if we support nested condition sets in the UI.
+		_canSaveInCurrentRow() {
+			let collectionTreeRow = ZoteroPane.getCollectionTreeRow();
+			return collectionTreeRow.isLibrary(true)
+				&& !collectionTreeRow.isFeed()
+				&& collectionTreeRow.editable;
+		}
+
 		refresh() {
 			this._ensureSearch();
 			let libraryID = ZoteroPane.getSelectedLibraryID();
@@ -134,10 +144,7 @@
 				this._search.libraryID = libraryID;
 			}
 			this._searchElem.search = this._search;
-			// There would be no way to scope a saved search to anything but the library root,
-			// so disable the option to save.
-			// Somewhat unfortunate - revisit when/if we support nested condition sets in the UI.
-			this._saveButton.disabled = this.type === 'temporary' && !ZoteroPane.getCollectionTreeRow().isLibrary();
+			this._saveButton.disabled = this.type === 'temporary' && !this._canSaveInCurrentRow();
 		}
 
 		async cancel() {
@@ -181,8 +188,8 @@
 			}
 
 			let collectionTreeRow = ZoteroPane.getCollectionTreeRow();
-			if (!collectionTreeRow.isLibrary()) {
-				throw new Error('Can only save in library root');
+			if (!this._canSaveInCurrentRow()) {
+				throw new Error('Can only save in an editable library root');
 			}
 			this._ensureSearch();
 			
