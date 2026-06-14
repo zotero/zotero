@@ -975,15 +975,19 @@
 		insertCustomRow(rowElem, position = "end") {
 			switch (position) {
 				case "start": {
-					this._infoTable.prepend(rowElem);
+					let itemTypeRow = this._infoTable.querySelector(".meta-label[fieldname=itemType]")?.parentElement;
+					if (itemTypeRow) {
+						this._infoTable.insertBefore(rowElem, itemTypeRow);
+					}
+					else {
+						this._infoTable.append(rowElem);
+					}
 					break;
 				}
 				case "afterCreators": {
 					// The `_firstRowBeforeCreators` is actually the first row after creator rows
 					if (this._firstRowBeforeCreators) {
 						this._infoTable.insertBefore(rowElem, this._firstRowBeforeCreators);
-						// Update the anchor node for creator rows
-						this._firstRowBeforeCreators = rowElem;
 					}
 					else {
 						this._infoTable.append(rowElem);
