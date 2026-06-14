@@ -198,7 +198,25 @@ describe("Advanced Search", function () {
 		await collection.eraseTx();
 		await selectLibrary(win);
 	});
-	
+
+	it("should close the saved-search editor when the edited search is deleted", async function () {
+		var saved = await createDataObject('search', { name: "DeleteWhileEditing" });
+		await select(win, saved);
+		await zp.setSavedSearchEditorState('open');
+		assert.equal(deck.state, 'open');
+		assert.equal(deck.selectedSearchType, 'saved');
+
+		// Deleting the search being edited should close the editor without a
+		// save-changes prompt (which would otherwise block here)
+		await saved.eraseTx();
+		for (let i = 0; i < 60 && deck.state !== 'closed'; i++) {
+			await Zotero.Promise.delay(50);
+		}
+		assert.equal(deck.state, 'closed');
+
+		await selectLibrary(win);
+	});
+
 	describe("Conditions", function () {
 		var pane, searchBox, conditions;
 		

@@ -92,6 +92,13 @@
 		get search() {
 			return this._search;
 		}
+
+		/**
+		 * The ID of the saved search being edited, for type "saved"
+		 */
+		get editedSearchID() {
+			return this._searchID;
+		}
 		
 		/**
 		 * Whether the search has been submitted and should filter the items list
