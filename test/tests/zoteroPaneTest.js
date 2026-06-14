@@ -124,8 +124,16 @@ describe("ZoteroPane", function () {
 			var deck = doc.getElementById('zotero-advanced-search-pane-deck');
 			
 			var searchIDs = (await Zotero.Searches.getAll(userLibraryID)).map(s => s.id);
-			await deck.pane.save();
-			
+			// Saving prompts for a name; accept the default
+			var promptService = Services.prompt;
+			Services.prompt = { prompt: () => true };
+			try {
+				await deck.pane.save();
+			}
+			finally {
+				Services.prompt = promptService;
+			}
+
 			var newSearches = (await Zotero.Searches.getAll(userLibraryID))
 				.filter(s => !searchIDs.includes(s.id));
 			assert.lengthOf(newSearches, 1);
