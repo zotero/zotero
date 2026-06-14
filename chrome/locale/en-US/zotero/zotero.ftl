@@ -941,8 +941,13 @@ os-keystore-migrate-failed =
 
 search-button =
     .label = Search
-save-search-button =
-    .label = Save Search
+save-search-new-button =
+    .label = Save Search…
+save-search-edit-button =
+    .label = Save
+
+save-search-name-title = Save Search
+save-search-name-message = Enter a name for the saved search:
 
 saved-search-close-confirmation-title = Editing Saved Search
 saved-search-close-confirmation-body = Do you want to save changes you made to this saved search?

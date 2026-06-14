@@ -37,7 +37,7 @@
 				<button class="cancel-button" data-l10n-id="cancel-button"/>
 				<button class="search-button" data-l10n-id="search-button" default="true"/>
 				<button class="clear-button" data-l10n-id="clear-button"/>
-				<button class="save-button" data-l10n-id="save-search-button"/>
+				<button class="save-button" data-l10n-id="save-search-new-button"/>
 			</hbox>
 		`);
 
@@ -65,6 +65,9 @@
 			
 			if (this.type === 'saved') {
 				this._saveButton.setAttribute('default', 'true');
+				// Editing an existing search saves changes directly, so just "Save"
+				// (vs. "Save Search…" for creating a new one, which prompts for a name)
+				this._saveButton.setAttribute('data-l10n-id', 'save-search-edit-button');
 			}
 
 			this.addEventListener('keydown', this._handleKeyDown);
@@ -203,11 +206,22 @@
 			let libraryID = collectionTreeRow.ref.libraryID;
 			let searches = await Zotero.Searches.getAll(libraryID);
 			let prefix = Zotero.getString('pane.collections.untitled');
-			let name = Zotero.Utilities.Internal.getNextName(
+			let defaultName = Zotero.Utilities.Internal.getNextName(
 				prefix,
 				searches.map(s => s.name).filter(n => n.startsWith(prefix))
 			);
-			
+
+			// Prompt for a name, defaulting to the next "Untitled" name
+			let [title, message] = await document.l10n.formatValues([
+				'save-search-name-title',
+				'save-search-name-message'
+			]);
+			let nameObj = { value: defaultName };
+			if (!Services.prompt.prompt(window, title, message, nameObj, null, {})) {
+				return;
+			}
+			let name = nameObj.value.trim() || defaultName;
+
 			let search = this._search.clone(libraryID);
 			search.name = name;
 			await search.saveTx();

@@ -178,7 +178,20 @@ describe("Advanced Search", function () {
 		s.libraryID = groupLibraryID;
 		s.addCondition('title', 'contains', 'foo');
 		pane.search = s;
-		await pane.save();
+		// Saving prompts for a name
+		var promptService = Services.prompt;
+		Services.prompt = {
+			prompt: (parent, title, message, nameObj) => {
+				nameObj.value = 'Group Search';
+				return true;
+			}
+		};
+		try {
+			await pane.save();
+		}
+		finally {
+			Services.prompt = promptService;
+		}
 		
 		// The search should have been saved to the group library
 		var searches = await Zotero.Searches.getAll(groupLibraryID);
@@ -215,6 +228,42 @@ describe("Advanced Search", function () {
 		assert.equal(deck.state, 'closed');
 
 		await selectLibrary(win);
+	});
+
+	it("should prompt for a name when saving a new search", async function () {
+		await selectLibrary(win);
+		await zp.toggleAdvancedSearchState('open');
+		var s = new Zotero.Search();
+		s.libraryID = Zotero.Libraries.userLibraryID;
+		s.addCondition('title', 'contains', 'foo');
+		deck.pane.search = s;
+
+		var promptService = Services.prompt;
+		try {
+			// Cancelling the name prompt leaves the pane open and saves nothing
+			Services.prompt = { prompt: () => false };
+			await deck.pane.save();
+			assert.equal(deck.state, 'open');
+
+			// Accepting saves with the entered name and closes the pane
+			Services.prompt = {
+				prompt: (parent, title, message, nameObj) => {
+					nameObj.value = 'My Named Search';
+					return true;
+				}
+			};
+			await deck.pane.save();
+		}
+		finally {
+			Services.prompt = promptService;
+		}
+
+		var searches = await Zotero.Searches.getAll(Zotero.Libraries.userLibraryID);
+		var saved = searches.find(x => x.name === 'My Named Search');
+		assert.ok(saved);
+		assert.equal(deck.state, 'closed');
+
+		await saved.eraseTx();
 	});
 
 	describe("Conditions", function () {
