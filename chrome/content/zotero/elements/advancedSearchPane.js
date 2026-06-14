@@ -209,7 +209,10 @@
 		}
 		
 		focus(options) {
-			this._searchElem.querySelector('#conditionsmenu').focus(options);
+			let menu = this._searchElem.querySelector('#conditionsmenu');
+			// focusVisible so the focus ring shows even though we're focusing
+			// programmatically (in response to a click)
+			menu.focus({ focusVisible: true, ...options });
 		}
 	}
 	customElements.define("advanced-search-pane", AdvancedSearchPane);
