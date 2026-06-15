@@ -1031,10 +1031,10 @@ describe("Zotero.Attachments", function () {
 			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
 		});
 
-		it("should include a PubMed Central resolver from a PMCID in Extra", async function () {
+		it("should include a PubMed Central resolver from a PMCID", async function () {
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
-			item.setField('extra', 'PMCID: PMC9262588');
+			item.setField('PMCID', 'PMC9262588');
 			await item.saveTx();
 
 			var resolvers = Zotero.Attachments.getFileResolvers(item, ['oa']);
@@ -1051,7 +1051,7 @@ describe("Zotero.Attachments", function () {
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
 			item.setField('DOI', '10.1093/nar/gkac173');
-			item.setField('extra', 'PMCID: PMC9262588');
+			item.setField('PMCID', 'PMC9262588');
 			await item.saveTx();
 
 			var resolvers = Zotero.Attachments.getFileResolvers(item, ['oa']);
@@ -1064,10 +1064,10 @@ describe("Zotero.Attachments", function () {
 			assert.isFunction(resolvers[1]);
 		});
 
-		it("should allow finding files for an item with a PMCID in Extra", async function () {
+		it("should allow finding files for an item with a PMCID", async function () {
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
-			item.setField('extra', 'PMCID: PMC9262588');
+			item.setField('PMCID', 'PMC9262588');
 			await item.saveTx();
 
 			assert.isTrue(Zotero.Attachments.canFindFileForItem(item));

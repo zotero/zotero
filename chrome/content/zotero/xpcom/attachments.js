@@ -1239,7 +1239,7 @@ Zotero.Attachments = new function () {
 	
 	
 	this.canFindFileForItem = function (item) {
-		let pmcid = item.getField('PMCID') || item.getExtraField('PMCID');
+		let pmcid = item.getField('PMCID');
 		return item.isRegularItem()
 			&& !item.isFeedItem
 			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI') || !!pmcid)
@@ -1276,7 +1276,7 @@ Zotero.Attachments = new function () {
 		
 		var resolvers = [];
 		var doi = item.getField('DOI') || item.getExtraField('DOI');
-		var pmcid = item.getField('PMCID') || item.getExtraField('PMCID');
+		var pmcid = item.getField('PMCID');
 		doi = Zotero.Utilities.cleanDOI(doi);
 		if (pmcid) {
 			let matches = pmcid.match(/\bPMC\d+\b/i);

@@ -701,7 +701,7 @@ describe("Connector Server", function () {
 			assert.isTrue(JSON.parse(response.responseText));
 		});
 
-		it("should respond with 'true' if the item has a PMCID fallback", async function () {
+		it("should respond with 'true' if the item has a PMCID", async function () {
 			const sessionID = Zotero.Utilities.randomString();
 			const itemID = Zotero.Utilities.randomString();
 			const body = {
@@ -711,7 +711,7 @@ describe("Connector Server", function () {
 						id: itemID,
 						itemType: "journalArticle",
 						title: "Test Article with PMCID",
-						extra: "PMCID: PMC9262588",
+						PMCID: "PMC9262588",
 					}
 				]
 			};
