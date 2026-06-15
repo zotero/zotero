@@ -446,9 +446,9 @@ var ZoteroPane = new function () {
 				// The item tree's DOM id has a view-specific suffix, so key on the current view's id
 				[ZoteroPane.itemsView?.id]: {
 					ShiftTab: () => {
-						// Focus last element in Advanced Search deck
 						let advancedSearchDeck = document.getElementById('zotero-advanced-search-pane-deck');
-						if (advancedSearchDeck && !advancedSearchDeck.hidden) {
+						// Advanced Search open - focus the last focusable element of the deck
+						if (advancedSearchDeck?.state === 'open') {
 							Services.focus.moveFocus(
 								window,
 								document.getElementById('zotero-items-pane'),
@@ -456,6 +456,10 @@ var ZoteroPane = new function () {
 								0
 							);
 							return null;
+						}
+						// Advanced Search collapsed - focus the close button
+						if (advancedSearchDeck?.state === 'collapsed') {
+							return document.querySelector('#zotero-tb-search .advanced-close-button');
 						}
 						return document.getElementById('zotero-tb-toggle-item-pane-stacked');
 					}
