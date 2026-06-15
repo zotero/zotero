@@ -1,6 +1,12 @@
 zoterosearch {
 	flex-direction: column;
 	padding-inline: 8px;
+	// Block padding lives inside the scroll container (like the inline padding)
+	// so the top/bottom focus rings -- e.g. the join-mode menulist in the caption
+	// -- aren't clipped by overflow: auto. The negative margin cancels it so the
+	// surrounding spacing is unchanged.
+	padding-block: 8px;
+	margin-block: -8px;
 	gap: 8px;
 	overflow: auto;
 	max-height: 33vh;
