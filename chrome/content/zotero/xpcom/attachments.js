@@ -1276,8 +1276,8 @@ Zotero.Attachments = new function () {
 		
 		var resolvers = [];
 		var doi = item.getField('DOI') || item.getExtraField('DOI');
-		var pmcid = item.getField('PMCID');
 		doi = Zotero.Utilities.cleanDOI(doi);
+		var pmcid = item.getField('PMCID');
 		if (pmcid) {
 			let matches = pmcid.match(/\bPMC\d+\b/i);
 			pmcid = matches && matches[0].toUpperCase();
