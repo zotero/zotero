@@ -88,7 +88,7 @@ quick-search-textbox {
 	height: 28px;
 	min-width: 0;
 	margin: 0;
-	margin-inline-start: -26px;
+	margin-inline-start: -28px;
 	margin-inline-end: 2px;
 	padding: 0;
 	z-index: 2;
@@ -110,6 +110,9 @@ quick-search-textbox {
 		// a pixel left to optically center it (physical sides -- doesn't flip in RTL)
 		padding: 5px 6px 5px 4px;
 		border-radius: 4px;
+		// The button is 4px wider than the chip and left-aligns it, which puts the
+		// focus ring off-center; shift the chip 2px to center it within the button
+		margin-inline-start: 2px;
 	}
 
 	&:hover .toolbarbutton-icon {
@@ -174,10 +177,10 @@ quick-search-textbox {
 	
 	.advanced-close-button {
 		@include svgicon-menu("x", "universal", "20");
-		// Inset to match the filter button's right edge in the closed state (its
-		// chip sits 4px in from the field edge), so the edge doesn't shift when
-		// toggling between the search field and this header
-		margin-inline-end: 4px;
+		// Inset to match the filter button's chip in the closed state (it sits 2px
+		// in from the field edge), so the edge doesn't shift when toggling between
+		// the search field and this header
+		margin-inline-end: 2px;
 	}
 
 	&[data-collapsed="true"] {
