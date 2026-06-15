@@ -124,7 +124,12 @@
 			});
 			this.querySelector('.advanced-close-button').addEventListener('command', (event) => {
 				event.stopPropagation();
+				// if activated via the keyboard, move focus to the Advanced Search button
+				let triggeredByKeyboard = [MouseEvent.MOZ_SOURCE_KEYBOARD, MouseEvent.MOZ_SOURCE_UNKNOWN].includes(event.inputSource);
 				ZoteroPane.toggleAdvancedSearchState('closed');
+				if (triggeredByKeyboard) {
+					this.querySelector('#zotero-tb-search-advanced-button').focus();
+				}
 			});
 			
 			// If Alt-Up/Down, show popup
