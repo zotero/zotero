@@ -106,7 +106,7 @@
 			if (document.documentElement.getAttribute('windowtype') === 'navigator:browser') {
 				let advancedButton = document.createXULElement('toolbarbutton');
 				advancedButton.id = 'zotero-tb-search-advanced-button';
-				advancedButton.tabIndex = 0;
+				advancedButton.tabIndex = -1;
 				document.l10n.setAttributes(advancedButton, 'quicksearch-advanced-search-button');
 				advancedButton.addEventListener('command', (event) => {
 					// Don't trigger a quick search via the oncommand handler
