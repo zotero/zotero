@@ -39,7 +39,7 @@
 					<hbox id="advanced-search-indicator">
 						<label id="advanced-search-label"/>
 						<toolbarbutton class="zotero-clicky advanced-collapse-button" tabindex="0"/>
-						<toolbarbutton class="zotero-clicky advanced-close-button" tabindex="0"/>
+						<toolbarbutton class="zotero-clicky advanced-close-button" data-l10n-id="advanced-search-close" tabindex="0"/>
 					</hbox>
 				</deck>
 			`, ['chrome://zotero/locale/zotero.dtd']);
@@ -106,7 +106,7 @@
 			if (document.documentElement.getAttribute('windowtype') === 'navigator:browser') {
 				let advancedButton = document.createXULElement('toolbarbutton');
 				advancedButton.id = 'zotero-tb-search-advanced-button';
-				advancedButton.tabIndex = 0;
+				advancedButton.tabIndex = -1;
 				document.l10n.setAttributes(advancedButton, 'quicksearch-advanced-search-button');
 				advancedButton.addEventListener('command', (event) => {
 					// Don't trigger a quick search via the oncommand handler
@@ -124,7 +124,12 @@
 			});
 			this.querySelector('.advanced-close-button').addEventListener('command', (event) => {
 				event.stopPropagation();
+				// if activated via the keyboard, move focus to the Advanced Search button
+				let triggeredByKeyboard = [MouseEvent.MOZ_SOURCE_KEYBOARD, MouseEvent.MOZ_SOURCE_UNKNOWN].includes(event.inputSource);
 				ZoteroPane.toggleAdvancedSearchState('closed');
+				if (triggeredByKeyboard) {
+					this.querySelector('#zotero-tb-search-advanced-button').focus();
+				}
 			});
 			
 			// If Alt-Up/Down, show popup
@@ -195,6 +200,10 @@
 				this.deck.selectedIndex = state === 'closed' ? 0 : 1;
 				this.querySelector('#advanced-search-indicator').dataset.collapsed = state === 'collapsed';
 				this.querySelector('.advanced-collapse-button').hidden = selectedSearchType === 'saved';
+				document.l10n.setAttributes(
+					this.querySelector('.advanced-collapse-button'),
+					state === 'collapsed' ? 'advanced-search-expand' : 'advanced-search-collapse'
+				);
 			}
 		}
 		

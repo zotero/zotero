@@ -401,13 +401,20 @@ var ZoteroPane = new function () {
 					Tab: () => document.getElementById("zotero-tb-search-textbox"),
 					ShiftTab: () => document.getElementById('zotero-tb-add')
 				},
+				'advanced-collapse-button': {
+					ShiftTab: () => document.getElementById('zotero-tb-add')
+				},
 				'zotero-tb-search-textbox': {
-					Tab: () => document.getElementById("zotero-tb-toggle-item-pane-stacked"),
+					Tab: () => document.getElementById("zotero-tb-search-advanced-button"),
 					ShiftTab: () => document.getElementById("zotero-tb-search").focus()
+				},
+				'zotero-tb-search-advanced-button': {
+					Tab: () => document.getElementById("zotero-tb-toggle-item-pane-stacked"),
+					ShiftTab: () => document.getElementById("zotero-tb-search-textbox")
 				},
 				'zotero-tb-toggle-item-pane-stacked': {
 					Tab: () => itemTree.querySelector(".virtualized-table"),
-					ShiftTab: () => document.getElementById("zotero-tb-search-textbox")
+					ShiftTab: () => document.getElementById("zotero-tb-search-advanced-button")
 				},
 			};
 			moveFocus(actionsMap, event, true);
@@ -438,7 +445,24 @@ var ZoteroPane = new function () {
 			let actionsMap = {
 				// The item tree's DOM id has a view-specific suffix, so key on the current view's id
 				[ZoteroPane.itemsView?.id]: {
-					ShiftTab: () => document.getElementById('zotero-tb-toggle-item-pane-stacked')
+					ShiftTab: () => {
+						let advancedSearchDeck = document.getElementById('zotero-advanced-search-pane-deck');
+						// Advanced Search open - focus the last focusable element of the deck
+						if (advancedSearchDeck?.state === 'open') {
+							Services.focus.moveFocus(
+								window,
+								document.getElementById('zotero-items-pane'),
+								Services.focus.MOVEFOCUS_BACKWARD,
+								0
+							);
+							return null;
+						}
+						// Advanced Search collapsed - focus the close button
+						if (advancedSearchDeck?.state === 'collapsed') {
+							return document.querySelector('#zotero-tb-search .advanced-close-button');
+						}
+						return document.getElementById('zotero-tb-toggle-item-pane-stacked');
+					}
 				}
 			};
 			moveFocus(actionsMap, event);

@@ -736,6 +736,12 @@ menuitem-advanced-search =
 quicksearch-advanced-search-button =
     .tooltiptext = { advanced-search }
     .aria-label = { advanced-search }
+advanced-search-close =
+    .tooltiptext = Close Advanced Search
+advanced-search-expand =
+    .tooltiptext = Expand Advanced Search
+advanced-search-collapse =
+    .tooltiptext = Collapse Advanced Search
 
 item-pane-header-view-as =
     .label = View As

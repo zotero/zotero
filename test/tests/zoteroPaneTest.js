@@ -1464,6 +1464,7 @@ describe("ZoteroPane", function () {
 
 		// Focus sequence for Zotero Pane
 		let sequence = [
+			"zotero-tb-search-textbox",
 			"zotero-tb-search-dropmarker",
 			"zotero-tb-add",
 			"tag-selector-actions",
@@ -1488,8 +1489,10 @@ describe("ZoteroPane", function () {
 		});
 
 		it("should shift-tab across the zotero pane", async function () {
-			let searchBox = doc.getElementById('zotero-tb-search-textbox');
-			searchBox.focus();
+			// Start from the Advanced Search button (the last focusable element in the
+			// search field) so the first shift-tab exercises advanced button -> search field
+			let advancedButton = doc.getElementById('zotero-tb-search-advanced-button');
+			advancedButton.focus();
 
 			for (let id of sequence) {
 				// Set up focus listener before dispatching the event
@@ -1560,6 +1563,9 @@ describe("ZoteroPane", function () {
 					assert.include(clases, id);
 				}
 			}
+			// Tab from the search field to the Advanced Search button at the end of the field
+			doc.activeElement.dispatchEvent(tab);
+			assert.equal(doc.activeElement.id, "zotero-tb-search-advanced-button");
 		});
 
 		it("should navigate toolbarbuttons with arrows", async function () {
