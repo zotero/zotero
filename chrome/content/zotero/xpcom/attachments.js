@@ -1239,10 +1239,9 @@ Zotero.Attachments = new function () {
 	
 	
 	this.canFindFileForItem = function (item) {
-		let pmcid = item.getField('PMCID');
 		return item.isRegularItem()
 			&& !item.isFeedItem
-			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI') || !!pmcid)
+			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI') || !!item.getField('PMCID'))
 			&& this.FIND_AVAILABLE_FILE_TYPES.every(type => item.numFileAttachmentsWithContentType(type) == 0);
 	};
 
