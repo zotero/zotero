@@ -1047,7 +1047,7 @@ describe("Zotero.Attachments", function () {
 			]);
 		});
 
-		it("should include a PubMed Central resolver alongside DOI OA resolvers", async function () {
+		it("should include a PubMed Central resolver before DOI OA resolvers", async function () {
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
 			item.setField('DOI', '10.1093/nar/gkac173');
