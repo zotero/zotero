@@ -6750,8 +6750,9 @@ var ZoteroPane = new function () {
 
 	
 	this.showPostUpgradeBanner = function () {
-		// Don't show for beta builds or if disabled
-		if (Zotero.isBetaBuild || !Zotero.Prefs.get('showPostUpgradeBanner')) {
+		// Don't show for non-release builds or if disabled
+		if (Zotero.isBetaBuild || Zotero.isDevBuild || Zotero.isSourceBuild
+				|| !Zotero.Prefs.get('showPostUpgradeBanner')) {
 			return;
 		}
 		// Don't show if we've already shown a banner for this or a higher major version
