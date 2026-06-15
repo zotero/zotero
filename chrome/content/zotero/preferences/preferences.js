@@ -826,16 +826,25 @@ ${str}
 					localizedStrings = localizedStrings.flatMap((message, i) => {
 						// If we got something from Fluent, use the value and relevant attributes
 						if (message) {
-							return [message.value, message.attributes?.title, message.attributes?.label];
+							let attributeValues = (message.attributes ?? [])
+								.filter(attr => attr.name === 'title' || attr.name === 'label')
+								.map(attr => attr.value);
+							return [message.value, ...attributeValues];
 						}
 
 						// If we didn't, try strings from DTDs and properties
 						let key = stringKeys[i];
-						return [
-							Zotero.Intl.strings.hasOwnProperty(key)
-								? Zotero.Intl.strings[key]
-								: Zotero.getString(key)
-						];
+						if (Zotero.Intl.strings.hasOwnProperty(key)) {
+							return [Zotero.Intl.strings[key]];
+						}
+						try {
+							return [Zotero.getString(key)];
+						}
+						catch (e) {
+							// Don't let one missing string abort the entire search
+							Zotero.logError(e);
+							return [];
+						}
 					}).filter(Boolean)
 						.map(this._normalizeSearch)
 						.filter(Boolean);
