@@ -1401,8 +1401,14 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 		if (await OS.File.exists(corruptMarker)) {
 			throw new Error(this.DB_CORRUPTION_STRINGS[0]);
 		}
+		// Open without an exclusive lock at the OS level so the database can be opened on network
+		// filesystems (e.g., SMB shares), where acquiring the exclusive open lock fails with an I/O
+		// error. We still set locking_mode=EXCLUSIVE below, which gives us a connection-lifetime
+		// SQLite lock (preventing undetected concurrent writes) and keeps the WAL index in heap
+		// memory, avoiding the -shm file that can't be created on a network filesystem. See #4860.
 		this._connection = await Promise.resolve(this.Sqlite.openConnection({
-			path: file
+			path: file,
+			openNotExclusive: true
 		}));
 	}
 	catch (e) {
