@@ -1334,6 +1334,16 @@ Zotero.DBConnection.prototype.backUpDatabase = async function ({ force, suffix, 
 		success = true;
 		return true;
 	}
+	catch (e) {
+		// Backups are best-effort, so if anything goes wrong dealing
+		// with them -- e.g., an offline backup file on a network drive
+		// that can't be accessed, which fails with ERROR_FILE_OFFLINE
+		// (https://forums.zotero.org/discussion/132201/) -- log the
+		// error and skip the backup rather than letting it block a
+		// schema upgrade or startup.
+		Zotero.logError(e);
+		return false;
+	}
 	finally {
 		if (online) {
 			this._onlineBackupInProgress = false;
