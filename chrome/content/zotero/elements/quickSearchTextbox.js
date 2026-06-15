@@ -39,7 +39,7 @@
 					<hbox id="advanced-search-indicator">
 						<label id="advanced-search-label"/>
 						<toolbarbutton class="zotero-clicky advanced-collapse-button" tabindex="0"/>
-						<toolbarbutton class="zotero-clicky advanced-close-button" tabindex="0"/>
+						<toolbarbutton class="zotero-clicky advanced-close-button" data-l10n-id="advanced-search-close" tabindex="0"/>
 					</hbox>
 				</deck>
 			`, ['chrome://zotero/locale/zotero.dtd']);
@@ -200,6 +200,10 @@
 				this.deck.selectedIndex = state === 'closed' ? 0 : 1;
 				this.querySelector('#advanced-search-indicator').dataset.collapsed = state === 'collapsed';
 				this.querySelector('.advanced-collapse-button').hidden = selectedSearchType === 'saved';
+				document.l10n.setAttributes(
+					this.querySelector('.advanced-collapse-button'),
+					state === 'collapsed' ? 'advanced-search-expand' : 'advanced-search-collapse'
+				);
 			}
 		}
 		
