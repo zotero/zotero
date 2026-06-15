@@ -701,6 +701,52 @@ describe("Connector Server", function () {
 			assert.isTrue(JSON.parse(response.responseText));
 		});
 
+		it("should respond with 'true' if the item has a PMCID", async function () {
+			const sessionID = Zotero.Utilities.randomString();
+			const itemID = Zotero.Utilities.randomString();
+			const body = {
+				sessionID,
+				items: [
+					{
+						id: itemID,
+						itemType: "journalArticle",
+						title: "Test Article with PMCID",
+						PMCID: "PMC9262588",
+					}
+				]
+			};
+			
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/saveItems", 
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+			
+			assert.equal(response.status, 201);
+			
+			response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/hasAttachmentResolvers",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						itemID
+					}),
+				}
+			);
+			
+			assert.equal(response.status, 200);
+			assert.isTrue(JSON.parse(response.responseText));
+		});
+
 		it("should respond with 'false' if the item has no OA attachments", async function () {
 			const sessionID = Zotero.Utilities.randomString();
 			const itemID = Zotero.Utilities.randomString();
