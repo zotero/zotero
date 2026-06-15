@@ -388,6 +388,8 @@ export class CitationDialogSearchHandler {
 		}
 		else {
 			await Zotero.Items.loadDataTypes(items);
+			// Exclude non-citeable items (e.g., a standalone attachment open in a tab)
+			items = items.filter(i => i.isRegularItem());
 		}
 		// Return deduplicated items since there may be multiple tabs opened for the same
 		// top-level item (duplicate tabs or a multiple attachments belonging to the same item)
