@@ -756,6 +756,28 @@ describe("Zotero.CollectionTree", function () {
 			assert.isTrue(cv.selection.isSelected(cv.getRowIndexByID("C" + c1.id)));
 		});
 
+		it("should mark the focused-but-unselected row for the focus ring", async function () {
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection');
+			await cv.selectByID("C" + c1.id);
+			let r2 = cv.getRowIndexByID("C" + c2.id);
+
+			// Move focus to c2 without selecting it (macOS Cmd-arrow style)
+			cv.tree._onSelection(r2, false, false, true);
+			assert.equal(cv.selection.focused, r2);
+			assert.isFalse(cv.selection.isSelected(r2));
+
+			// The focused (unselected) row gets the 'focused' class that drives the
+			// dotted focus ring (rendering is async, so wait for it)
+			await waitForCallback(() => {
+				let n = win.document.getElementById(`${cv.id}-row-${r2}`);
+				return n && n.classList.contains('focused');
+			}, 50, 20);
+			let node = win.document.getElementById(`${cv.id}-row-${r2}`);
+			assert.isTrue(node.classList.contains('focused'));
+			assert.isFalse(node.classList.contains('selected'));
+		});
+
 		it("should not leave a stale multi-selection after filtering", async function () {
 			let cA = await createDataObject('collection', { name: 'filterAAA' });
 			let cB = await createDataObject('collection', { name: 'filterBBB' });

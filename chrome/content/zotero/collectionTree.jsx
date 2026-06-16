@@ -316,6 +316,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		div.classList.toggle('selected', selection.isSelected(index));
 		div.classList.toggle('first-selected', selection.isFirstRowOfSelectionBlock(index));
 		div.classList.toggle('last-selected', selection.isLastRowOfSelectionBlock(index));
+		// Focus ring on the focused-but-unselected row (e.g., macOS Cmd-arrow navigation)
+		div.classList.toggle('focused', selection.focused == index);
 		div.classList.toggle('highlighted', this._highlightedRows.has(treeRow.id));
 		div.classList.toggle('drop', this._dropRow == index);
 		div.classList.toggle('flashing', this._flashingRow == index);
