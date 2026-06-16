@@ -755,6 +755,25 @@ describe("Zotero.CollectionTree", function () {
 			assert.equal(cv.selection.count, 1);
 			assert.isTrue(cv.selection.isSelected(cv.getRowIndexByID("C" + c1.id)));
 		});
+
+		it("should not leave a stale multi-selection after filtering", async function () {
+			let cA = await createDataObject('collection', { name: 'filterAAA' });
+			let cB = await createDataObject('collection', { name: 'filterBBB' });
+			let cC = await createDataObject('collection', { name: 'filterCCC' });
+
+			// Select all three, focusing the one that will still match the filter
+			await cv.selectByID("C" + cB.id);
+			toggleRow(cv.getRowIndexByID("C" + cC.id));
+			toggleRow(cv.getRowIndexByID("C" + cA.id));
+			assert.equal(cv.selection.count, 3);
+
+			await cv.setFilter("filterAAA");
+
+			// Only the still-matching focused row is selected -- no stale indices
+			assert.deepEqual(cv.getSelectedRows().map(r => r.id), ["C" + cA.id]);
+
+			await cv.setFilter("");
+		});
 	});
 
 	describe("#onDrop()", function () {

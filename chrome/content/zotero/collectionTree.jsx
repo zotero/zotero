@@ -2721,6 +2721,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			this.selection.clearSelection();
 		}
 		await this.reload();
+		// reload() rebuilds the rows, so any selected indices from before now point at
+		// different (or out-of-range) rows. Clear them and re-select just the current
+		// row below, collapsing a multi-selection to the focused row while filtering.
+		this.selection.clearSelection();
 		if (currentRow) {
 			// Special treatment for when there are no filter matches
 			// Otherwise, selection.focused does not get updated by selectByID, which breaks ZoteroPane.
