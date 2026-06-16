@@ -248,19 +248,23 @@ describe("Connector Server", function () {
 		});
 
 		it("should target only the focused row for a cross-library multiple-collection selection", async function () {
-			// A collection in My Library plus a group library root, with the group focused.
-			// The Connector saves to a single target, so it should use the focused row (the
-			// group root) and not the collection from the other library.
+			// A collection in My Library plus a collection in a group library, with the group
+			// collection focused. The Connector saves to a single target, so it should use the
+			// focused row and not the collection from the other library.
 			var group = await createGroup();
-			var collection = await createDataObject('collection');
+			var userCollection = await createDataObject('collection');
+			var groupCollection = await createDataObject('collection', { libraryID: group.libraryID });
 			var cv = win.ZoteroPane.collectionsView;
 
-			await select(win, collection);
-			var groupRow = cv.getRowIndexByID(group.treeViewID);
+			// Reveal the group collection, then focus the My Library collection and toggle the
+			// group collection so it becomes the focused row
+			await select(win, groupCollection);
+			await select(win, userCollection);
+			var groupRow = cv.getRowIndexByID(groupCollection.treeViewID);
 			cv.selection.toggleSelect(groupRow);
 			await waitForItemsLoad(win);
 
-			// Sanity check: both rows selected, with the group focused
+			// Sanity check: both rows selected, with the group collection focused
 			assert.equal(cv.selection.focused, groupRow);
 			assert.sameMembers(
 				win.ZoteroPane.getCollectionTreeRows().map(r => r.ref.libraryID),
@@ -269,7 +273,7 @@ describe("Connector Server", function () {
 
 			var target = Zotero.Server.Connector.getSaveTarget();
 			assert.equal(target.library.libraryID, group.libraryID);
-			assert.isNull(target.collection);
+			assert.equal(target.collection.id, groupCollection.id);
 		});
 
 		it("should use the provided proxy to deproxify item url", async function () {
