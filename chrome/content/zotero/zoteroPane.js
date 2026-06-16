@@ -1712,6 +1712,21 @@ var ZoteroPane = new function () {
 		return !tagSelector.hasAttribute('collapsed')
 			|| tagSelector.getAttribute('collapsed') == 'false';
 	};
+
+
+	this.updateTagSelectorViewSettingsMenu = async function () {
+		document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
+		document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
+		document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
+		var libraryID = ZoteroPane.tagSelector.libraryID;
+		var library = Zotero.Libraries.get(libraryID);
+		// 'Delete Automatic Tags in This Library' is per-library, so disable it when the
+		// selection spans multiple libraries
+		var enabled = !ZoteroPane.tagSelector.multiLibrary
+			&& library.editable
+			&& (await Zotero.Tags.getAutomaticInLibrary(libraryID)).length > 0;
+		document.getElementById('delete-automatic-tags').disabled = !enabled;
+	};
 	
 	
 	/*

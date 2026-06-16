@@ -1040,26 +1040,7 @@
 				oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
 		</menupopup>
 		<menupopup id="tag-selector-view-settings-menu"
-			onpopupshowing="
-				document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
-				document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
-				document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
-				(async function () {
-					var libraryID = ZoteroPane.tagSelector.libraryID;
-					var library = Zotero.Libraries.get(libraryID);
-					var enabled = false;
-					// 'Delete Automatic Tags in This Library' is per-library, so disable it
-					// when the selection spans multiple libraries (nested ifs to avoid '&amp;&amp;'
-					// in this XML attribute)
-					if (!ZoteroPane.tagSelector.multiLibrary) {
-						if (library.editable) {
-							if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
-								enabled = true;
-							}
-						}
-					}
-					document.getElementById('delete-automatic-tags').disabled = !enabled;
-				})();">
+			onpopupshowing="ZoteroPane.updateTagSelectorViewSettingsMenu();">
 			<menuitem id="num-selected" disabled="true"/>
 			<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
 				oncommand="ZoteroPane.tagSelector.deselectAll();;"/>
