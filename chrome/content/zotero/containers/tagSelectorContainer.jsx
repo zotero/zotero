@@ -130,9 +130,12 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	 */
 	async _safeGetTags(...args) {
 		try {
-			let tags = (await Promise.all(
-				this.collectionTreeRows.map(row => row.getTags(...args))
-			)).flat();
+			let rows = this.collectionTreeRows || [];
+			// A single row uses its own cached temp table directly; multiple rows are
+			// combined into one temp table and query to avoid a per-row query
+			let tags = rows.length == 1
+				? await rows[0].getTags(...args)
+				: await Zotero.CollectionTreeRow.getTagsAcrossRows(rows, ...args);
 			// Multiple rows (collections, or collections across libraries) can return
 			// the same tag, so dedupe by name
 			return this._dedupeTags(tags);
