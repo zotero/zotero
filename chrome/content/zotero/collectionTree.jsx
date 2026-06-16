@@ -245,6 +245,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	handleActivate = (event, indices) => {
+		// Activation (rename collection, edit saved search/feed, open library) acts on
+		// a single row, so ignore it when multiple rows are selected
+		if (this.selection.count > 1) {
+			return;
+		}
 		let index = indices[0];
 		let treeRow = this.getRow(index);
 		if (treeRow.isCollection() && this.editable && this.selection.focused == index) {

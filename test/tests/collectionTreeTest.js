@@ -709,6 +709,20 @@ describe("Zotero.CollectionTree", function () {
 		});
 	});
 	
+	describe("#handleActivate()", function () {
+		it("shouldn't start editing when multiple collections are selected", async function () {
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection');
+			await cv.selectByID("C" + c1.id);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + c2.id));
+			assert.equal(cv.selection.count, 2);
+
+			cv.handleActivate(new Event('keydown'), [cv.selection.focused]);
+
+			assert.notOk(cv._editing);
+		});
+	});
+
 	describe("#onDrop()", function () {
 		/**
 		 * Simulate a drag and drop
