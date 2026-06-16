@@ -3445,6 +3445,11 @@ var ZoteroPane = new function () {
 	 * Show context menu once it's ready
 	 */
 	this.onItemsContextMenuOpen = async function (event, x, y) {
+		// Library section headers (in a grouped cross-library view) aren't items, so
+		// don't show the item context menu when one is right-clicked
+		if (event.target?.closest?.('.library-header-row')) {
+			return;
+		}
 		await ZoteroPane.buildItemContextMenu();
 		x = x || event.screenX;
 		y = y || event.screenY;
