@@ -798,6 +798,31 @@ describe("Zotero.CollectionTree", function () {
 		});
 	});
 
+	describe("#deleteSelectedCollection()", function () {
+		it("shouldn't delete a mixed-type selection", async function () {
+			let collection = await createDataObject('collection');
+			let search = await createDataObject('search');
+			await cv.selectByID("C" + collection.id);
+			cv.selection.toggleSelect(cv.getRowIndexByID("S" + search.id));
+			await zp.onCollectionSelected();
+			assert.equal(cv.selection.count, 2);
+
+			let stub = sinon.stub().returns(0);
+			let promptService = win.Services.prompt;
+			win.Services.prompt = { confirmEx: stub };
+			try {
+				await zp.deleteSelectedCollection(false);
+			}
+			finally {
+				win.Services.prompt = promptService;
+			}
+
+			assert.isFalse(stub.called, "Mixed selection shouldn't prompt or delete");
+			assert.isFalse(collection.deleted);
+			assert.isFalse(search.deleted);
+		});
+	});
+
 	describe("#onDrop()", function () {
 		/**
 		 * Simulate a drag and drop

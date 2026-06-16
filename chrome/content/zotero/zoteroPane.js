@@ -2572,7 +2572,7 @@ var ZoteroPane = new function () {
 	};
 	
 	
-	this.deleteSelectedCollection = function (deleteItems) {
+	this.deleteSelectedCollection = async function (deleteItems) {
 		var collectionTreeRows = this.getCollectionTreeRows();
 		if (!collectionTreeRows.length) {
 			return;
@@ -2613,22 +2613,35 @@ var ZoteroPane = new function () {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		
+
+		// A mixed-type selection (e.g., a collection and a saved search) has no
+		// coherent confirmation, so only delete a homogeneous selection
+		if (collectionTreeRows.length > 1
+				&& !collectionTreeRows.every(r => r.type === collectionTreeRows[0].type)) {
+			return;
+		}
+
 		var ps = Services.prompt;
 		buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		var title, message;
+		var count = collectionTreeRows.length;
 		// Work out the required title and message
 		if (collectionTreeRows[0].isCollection()) {
 			if (deleteItems) {
-				title = Zotero.getString('pane.collections.deleteWithItems.title');
-				message = Zotero.getString('pane.collections.deleteWithItems');
+				[title, message] = await document.l10n.formatValues([
+					{ id: 'collections-delete-with-items-title', args: { count } },
+					{ id: 'collections-delete-with-items-message', args: { count } },
+				]);
 			}
 			else {
-				title = Zotero.getString('pane.collections.delete.title');
-				message = Zotero.getString('pane.collections.delete')
-						+ "\n\n"
-						+ Zotero.getString('pane.collections.delete.keepItems');
+				let keepItems;
+				[title, message, keepItems] = await document.l10n.formatValues([
+					{ id: 'collections-delete-title', args: { count } },
+					{ id: 'collections-delete-message', args: { count } },
+					{ id: 'collections-delete-keep-items', args: { count } },
+				]);
+				message = message + "\n\n" + keepItems;
 			}
 		}
 		else if (collectionTreeRows[0].isFeed()) {
@@ -2636,8 +2649,10 @@ var ZoteroPane = new function () {
 			message = Zotero.getString('pane.feed.deleteWithItems');
 		}
 		else if (collectionTreeRows[0].isSearch()) {
-			title = Zotero.getString('pane.collections.deleteSearch.title');
-			message = Zotero.getString('pane.collections.deleteSearch');
+			[title, message] = await document.l10n.formatValues([
+				{ id: 'collections-delete-search-title', args: { count } },
+				{ id: 'collections-delete-search-message', args: { count } },
+			]);
 		}
 			
 		// Display prompt
@@ -3694,20 +3709,25 @@ var ZoteroPane = new function () {
 			}
 			
 			// Adjust labels
-			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-rename-collection');
+			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-rename');
 			document.l10n.setAttributes(m.moveCollection, 'collections-menu-move-collection');
 			document.l10n.setAttributes(m.copyCollection, 'collections-menu-copy-collection');
 			
-			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.collection'));
-			m.deleteCollectionAndItems.setAttribute('label', Zotero.getString('pane.collections.menu.delete.collectionAndItems'));
-			m.exportCollection.setAttribute('label', Zotero.getString('pane.collections.menu.export.collection'));
-			m.createBibCollection.setAttribute('label', Zotero.getString('pane.collections.menu.createBib.collection'));
-			m.loadReport.setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.collection'));
+			document.l10n.setAttributes(m.deleteCollection, 'collections-menu-delete', { count: collectionTreeRows.length });
+			document.l10n.setAttributes(m.deleteCollectionAndItems, 'collections-menu-delete-with-items', { count: collectionTreeRows.length });
+			document.l10n.setAttributes(m.exportCollection, 'collections-menu-export');
+			document.l10n.setAttributes(m.createBibCollection, 'collections-menu-create-bibliography');
+			document.l10n.setAttributes(m.loadReport, 'collections-menu-generate-report');
 
 			// New Subcollection and Rename act on a single collection, so hide them
 			// when more than one row is selected
 			if (collectionTreeRows.length > 1) {
 				show = show.filter(id => id != 'newSubcollection' && id != 'editSelectedCollection');
+			}
+			// A mixed-type selection has no coherent delete confirmation, so hide the
+			// delete actions unless every selected row is a collection
+			if (!collectionTreeRows.every(r => r.isCollection())) {
+				show = show.filter(id => id != 'deleteCollection' && id != 'deleteCollectionAndItems');
 			}
 
 			// Hide move/copy when collections span multiple libraries, and disable
@@ -3735,7 +3755,7 @@ var ZoteroPane = new function () {
 			// Adjust labels
 			m.refreshFeed.setAttribute('label', Zotero.getString('pane.collections.menu.refresh.feed'));
 			m.markReadFeed.setAttribute('label', Zotero.getString('pane.collections.menu.markAsRead.feed'));
-			m.deleteCollectionAndItems.setAttribute('label', Zotero.getString('pane.collections.menu.delete.feedAndItems'));
+			document.l10n.setAttributes(m.deleteCollectionAndItems, 'collections-menu-unsubscribe');
 		}
 		else if (collectionTreeRows.some(row => row.isFeeds())) {
 			show = [
@@ -3770,14 +3790,19 @@ var ZoteroPane = new function () {
 			}
 			
 			// Adjust labels
-			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-edit-saved-search');
-			m.duplicate.setAttribute('label', Zotero.getString('pane.collections.menu.duplicate.savedSearch'));
+			document.l10n.setAttributes(m.editSelectedCollection, 'collections-menu-edit-search');
+			document.l10n.setAttributes(m.duplicate, 'collections-menu-duplicate-search');
 			m.duplicate.classList.add('zotero-menuitem-duplicate-saved-search');
 			m.duplicate.classList.remove('zotero-menuitem-duplicate-collection');
-			m.deleteCollection.setAttribute('label', Zotero.getString('pane.collections.menu.delete.savedSearch'));
-			m.exportCollection.setAttribute('label', Zotero.getString('pane.collections.menu.export.savedSearch'));
-			m.createBibCollection.setAttribute('label', Zotero.getString('pane.collections.menu.createBib.savedSearch'));
-			m.loadReport.setAttribute('label', Zotero.getString('pane.collections.menu.generateReport.savedSearch'));
+			document.l10n.setAttributes(m.deleteCollection, 'collections-menu-delete-search', { count: collectionTreeRows.length });
+			document.l10n.setAttributes(m.exportCollection, 'collections-menu-export');
+			document.l10n.setAttributes(m.createBibCollection, 'collections-menu-create-bibliography');
+			document.l10n.setAttributes(m.loadReport, 'collections-menu-generate-report');
+
+			// Hide delete for a mixed-type selection (see the collection branch)
+			if (!collectionTreeRows.every(r => r.isSearch())) {
+				show = show.filter(id => id != 'deleteCollection');
+			}
 		}
 		else if (collectionTreeRows[0].isTrash()) {
 			show = ['emptyTrash'];
