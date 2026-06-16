@@ -1811,15 +1811,24 @@ var ZoteroPane = new function () {
 					case 0:
 						await advancedSearchDeck.pane.save();
 						return;
-					case 1:
+					case 1: {
+						// Revert to just the search being edited. Use selection.select()
+						// directly rather than selectByID(): the latter awaits
+						// waitForSelect() (which would deadlock here) and no-ops when the
+						// row is already selected -- which it is, as part of the new
+						// multi-selection -- leaving the change in place and re-prompting.
 						this.collectionsView.selection.selectEventsSuppressed = true;
 						try {
-							await this.collectionsView.selectByID(this.itemsView.collectionTreeRow.id);
+							let index = this.collectionsView.getRowIndexByID(this.itemsView.collectionTreeRow.id);
+							if (index !== false) {
+								this.collectionsView.selection.select(index);
+							}
 						}
 						finally {
 							this.collectionsView.selection.selectEventsSuppressed = false;
 						}
 						return;
+					}
 					case 2:
 						await advancedSearchDeck.pane.cancel();
 						break;

@@ -318,6 +318,41 @@ describe("Advanced Search", function () {
 		await selectLibrary(win);
 	});
 
+	it("should revert to the edited search without re-prompting when canceling", async function () {
+		var search1 = await createDataObject('search', { name: "CancelEditing1" });
+		var search2 = await createDataObject('search', { name: "CancelEditing2" });
+		let cv = zp.collectionsView;
+
+		await select(win, search1);
+		await zp.setSavedSearchEditorState('open');
+		assert.equal(deck.selectedSearchType, 'saved');
+
+		// zoteroPane.js uses the pane window's Services, so stub there. Set it before
+		// touching the selection so no prompt can reach the real (modal) service.
+		let stub = sinon.stub().returns(1); // Cancel
+		let promptService = win.Services.prompt;
+		win.Services.prompt = { confirmEx: stub };
+		try {
+			// Form a [search1, search2] multi-selection without firing a selection change
+			cv.selection.selectEventsSuppressed = true;
+			cv.selection.select(cv.getRowIndexByID("S" + search1.id));
+			cv.selection.toggleSelect(cv.getRowIndexByID("S" + search2.id));
+			cv.selection.selectEventsSuppressed = false;
+
+			await zp.onCollectionSelected();
+			// Prompted once (no loop) and reverted to just the edited search
+			assert.equal(stub.callCount, 1);
+			assert.deepEqual(cv.getSelectedRows().map(r => r.id), ["S" + search1.id]);
+		}
+		finally {
+			win.Services.prompt = promptService;
+		}
+
+		await zp.setSavedSearchEditorState('closed');
+		await Zotero.Searches.erase([search1.id, search2.id]);
+		await selectLibrary(win);
+	});
+
 	it("should prompt for a name when saving a new search", async function () {
 		await selectLibrary(win);
 		await zp.toggleAdvancedSearchState('open');
