@@ -4787,14 +4787,7 @@ var ZoteroPane = new function () {
 		
 		if (popup) {
 			// TODO: _text_
-			let collections = this.getSelectedCollections();
-			this.openNote(
-				null,
-				{
-					collections: collections.length ? collections : undefined,
-					parentKey
-				}
-			);
+			this.openNote(null, { parentKey });
 			return null;
 		}
 		
@@ -4888,12 +4881,10 @@ var ZoteroPane = new function () {
 	
 	
 	this.openNote = function (itemID, options = {
-		collections: undefined,
 		parentKey: undefined,
 		openInWindow: undefined
 	}) {
 		let {
-			collections,
 			parentKey,
 			openInWindow,
 		} = options;
@@ -4903,7 +4894,6 @@ var ZoteroPane = new function () {
 
 		return Zotero.Notes.open(itemID, undefined, {
 			openInWindow,
-			collections,
 		});
 	};
 

@@ -41,7 +41,6 @@ async function onLoad() {
 	}
 	
 	let itemID = parseInt(io.itemID);
-	let collectionIDs = io.collectionIDs.split(",").filter(x => x).map(x => parseInt(x));
 	let parentItemKey = io.parentItemKey;
 	let ref;
 
@@ -64,10 +63,6 @@ async function onLoad() {
 		if (parentItemKey) {
 			ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
 			noteEditor.parentItem = ref;
-		}
-		else if (collectionIDs.length) {
-			// DEBUG: Was 'collection', but seemingly unused?
-			noteEditor.collections = Zotero.Collections.get(collectionIDs);
 		}
 		noteEditor.refresh();
 	}
