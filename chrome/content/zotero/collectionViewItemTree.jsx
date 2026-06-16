@@ -199,6 +199,16 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				});
 			}
 			let newSearchItemIDs = new Set(newSearchItems.map(item => item.treeViewID));
+			// In Recently Read, the search matches parent items, but the items that were
+			// actually read are their child attachments. Mark those as matched too, so they
+			// display as full results rather than grayed-out context rows.
+			// Keep them out of newSearchParentIDs below so we don't auto-expand the parents.
+			if (this.collectionTreeRow.isRecentlyRead()) {
+				let lastReadAttachmentIDs = await Zotero.Items.getLastReadAttachmentIDs(this.collectionTreeRow.ref.libraryID);
+				for (let id of lastReadAttachmentIDs) {
+					newSearchItemIDs.add(id);
+				}
+			}
 			// Find the items that aren't yet in the tree
 			let itemsToAdd = newSearchItems.filter(item => this._rowMap[item.treeViewID] === undefined);
 			// Find the parents of search matches
@@ -209,7 +219,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			);
 			this._searchParentIDs = newSearchParentIDs;
 			
-			var newCellTextCache = {};
 			var newSearchMode = this.collectionTreeRow.isSearchMode();
 			var newRows = [];
 			var allItemIDs = new Set();

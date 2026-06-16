@@ -1379,6 +1379,74 @@ describe("CollectionViewItemTree", function () {
 				await item2.eraseTx();
 			});
 
+			it("should show read child attachments as matched, not context, rows", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let item = await createDataObject('item', { libraryID: userLibraryID });
+				let readAttachment = await importPDFAttachment(item);
+				let unreadAttachment = await importPDFAttachment(item);
+				readAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
+				await readAttachment.saveTx();
+
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+				await waitForItemsLoad(win);
+
+				let itemsView = zp.itemsView;
+				let parentRow = itemsView.getRowIndexByID(item.id);
+				assert.isNumber(parentRow);
+
+				// Expand the parent to reveal its children
+				await itemsView.toggleOpenState(parentRow);
+
+				let readRow = itemsView.getRowIndexByID(readAttachment.id);
+				let unreadRow = itemsView.getRowIndexByID(unreadAttachment.id);
+				assert.isNumber(readRow);
+				assert.isNumber(unreadRow);
+
+				// The read attachment is matched, shown in black
+				assert.isNotOk(itemsView._getRowData(readRow).contextRow);
+				// The parent is also matched
+				assert.isNotOk(itemsView._getRowData(parentRow).contextRow);
+				// The unread sibling is still a grayed-out context row
+				assert.isTrue(itemsView._getRowData(unreadRow).contextRow);
+
+				await item.eraseTx();
+			});
+
+			it("should not auto-expand parents of read attachments", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let now = Math.round(Date.now() / 1000);
+
+				let item1 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment1 = await importPDFAttachment(item1);
+				attachment1.attachmentLastRead = now;
+				await attachment1.saveTx();
+
+				let item2 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment2 = await importPDFAttachment(item2);
+				attachment2.attachmentLastRead = now - 5;
+				await attachment2.saveTx();
+
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+				await waitForItemsLoad(win);
+
+				let itemsView = zp.itemsView;
+				let item1Row = itemsView.getRowIndexByID(item1.id);
+				let item2Row = itemsView.getRowIndexByID(item2.id);
+				assert.isNumber(item1Row);
+				assert.isNumber(item2Row);
+
+				// Parents should remain collapsed - marking read children as matched
+				// must not trigger auto-expansion
+				assert.isFalse(itemsView.isContainerOpen(item1Row));
+				assert.isFalse(itemsView.isContainerOpen(item2Row));
+				// Child attachments are therefore not shown until the parent is expanded
+				assert.isFalse(itemsView.getRowIndexByID(attachment1.id));
+				assert.isFalse(itemsView.getRowIndexByID(attachment2.id));
+
+				await item1.eraseTx();
+				await item2.eraseTx();
+			});
+
 			it("should show empty Recently Read when no items have been read", async function () {
 				let userLibraryID = Zotero.Libraries.userLibraryID;
 				let item = await createDataObject('item', { libraryID: userLibraryID });
