@@ -1762,15 +1762,17 @@ var ZoteroPane = new function () {
 
 		// Only certain combinations of rows can be shown together in one items view.
 		// Collections, saved searches, and library roots can be mixed freely, within or
-		// across libraries. Recently Read can be combined only with other Recently Read
-		// rows (across libraries). All other special views (Trash, Duplicates, etc.) can't
-		// be shown alongside anything else. The visibility-group check enforces both the
-		// Recently Read restriction and the feed/non-feed split: Recently Read and feeds
-		// are each their own group, so pairing one with a collection (or with each other)
-		// spans two groups, which can't share an items view. When the selected rows can't
-		// be shown together, drop everything except the focused row and show just that.
-		// Selections spanning multiple libraries are shown grouped by library in the
-		// items list.
+		// across libraries, except that a library root can't be combined with a collection
+		// or saved search -- a library already shows all of its items, so pairing it with
+		// one of its own child collections/searches has no use case. Recently Read can be
+		// combined only with other Recently Read rows (across libraries). All other special
+		// views (Trash, Duplicates, etc.) can't be shown alongside anything else. The
+		// visibility-group check enforces both the Recently Read restriction and the
+		// feed/non-feed split: Recently Read and feeds are each their own group, so pairing
+		// one with a collection (or with each other) spans two groups, which can't share an
+		// items view. When the selected rows can't be shown together, drop everything except
+		// the focused row and show just that. Selections spanning multiple libraries are
+		// shown grouped by library in the items list.
 		if (collectionTreeRows.length > 1) {
 			let combinable = collectionTreeRows.every(
 				row => row.isCollection() || row.isSearch() || row.isLibrary(true)
@@ -1779,7 +1781,11 @@ var ZoteroPane = new function () {
 			let mixesVisibilityGroups = new Set(
 				collectionTreeRows.map(row => row.visibilityGroup)
 			).size > 1;
-			if (!combinable || mixesVisibilityGroups) {
+			// A library root already shows all of its items, so don't combine it with a
+			// collection or saved search (which share its visibility group)
+			let mixesLibraryAndCollection = collectionTreeRows.some(row => row.isLibrary(true))
+				&& collectionTreeRows.some(row => row.isCollection() || row.isSearch());
+			if (!combinable || mixesVisibilityGroups || mixesLibraryAndCollection) {
 				Zotero.debug("ZoteroPane.onCollectionSelected: Selected rows can't be shown "
 					+ "together -- keeping only the focused row");
 				// Drop all but the focused row. Don't await selectByID() here: it awaits

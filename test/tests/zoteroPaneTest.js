@@ -2132,6 +2132,22 @@ describe("ZoteroPane", function () {
 
 				await zp.setVirtual(Zotero.Libraries.userLibraryID, 'recentlyRead', false);
 			});
+
+			it("should keep only the focused row when a library and a collection are selected together", async function () {
+				let collection = await createDataObject('collection');
+				let cv = zp.collectionsView;
+				// Select the library root, then toggle-select a collection within it
+				await cv.selectByID("L" + Zotero.Libraries.userLibraryID);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID("C" + collection.id));
+				await zp.onCollectionSelected();
+
+				// The selection should have been reduced to the focused (collection) row
+				assert.equal(cv.selection.count, 1);
+				let rows = zp.getCollectionTreeRows();
+				assert.lengthOf(rows, 1);
+				assert.isTrue(rows[0].isCollection());
+			});
 		});
 
 		describe("Combinable special views", function () {
