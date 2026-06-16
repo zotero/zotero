@@ -379,6 +379,10 @@ class VirtualizedTable extends React.Component {
 
 		multiSelect: false,
 
+		// When true, the last selected row can't be toggled off, so the selection
+		// never becomes empty through user action
+		requireSelection: false,
+
 		onSelectionChange: noop,
 
 		// The below are for arrow-key navigation
@@ -442,6 +446,8 @@ class VirtualizedTable extends React.Component {
 		hide: PropTypes.bool,
 
 		multiSelect: PropTypes.bool,
+
+		requireSelection: PropTypes.bool,
 
 		onSelectionChange: PropTypes.func,
 
@@ -823,6 +829,11 @@ class VirtualizedTable extends React.Component {
 			this.selection.shiftSelect(index, toggleSelection, shouldDebounce);
 		}
 		else if (toggleSelection) {
+			// Don't allow toggling off the last selected row when a selection is required
+			if (this.props.requireSelection
+					&& this.selection.count === 1 && this.selection.isSelected(index)) {
+				return;
+			}
 			this.selection.toggleSelect(index, shouldDebounce);
 		}
 		else if (moveFocused) {

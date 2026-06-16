@@ -723,6 +723,40 @@ describe("Zotero.CollectionTree", function () {
 		});
 	});
 
+	describe("selection", function () {
+		// Toggle a row the way a Cmd-click/Space does (through the table's selection handler)
+		function toggleRow(index) {
+			cv.tree._onSelection(index, false, true);
+		}
+
+		it("should keep a selection when the last selected row is toggled off", async function () {
+			let c = await createDataObject('collection');
+			await cv.selectByID("C" + c.id);
+			let row = cv.getRowIndexByID("C" + c.id);
+			assert.equal(cv.selection.count, 1);
+
+			// Toggling off the only selected row would empty the selection
+			toggleRow(row);
+
+			assert.equal(cv.selection.count, 1);
+			assert.isTrue(cv.selection.isSelected(row));
+		});
+
+		it("should allow toggling off a row when others remain selected", async function () {
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection');
+			await cv.selectByID("C" + c1.id);
+			let r2 = cv.getRowIndexByID("C" + c2.id);
+			toggleRow(r2);
+			assert.equal(cv.selection.count, 2);
+
+			// Toggling one off leaves the other
+			toggleRow(r2);
+			assert.equal(cv.selection.count, 1);
+			assert.isTrue(cv.selection.isSelected(cv.getRowIndexByID("C" + c1.id)));
+		});
+	});
+
 	describe("#onDrop()", function () {
 		/**
 		 * Simulate a drag and drop

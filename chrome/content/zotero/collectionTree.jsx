@@ -487,7 +487,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				getRowString: this.getRowString.bind(this),
 				
 				multiSelect: this.props.multiSelect,
-				
+				// The collection tree must always have a selection
+				requireSelection: true,
+
 				onItemContextMenu: (...args) => this.props.onContextMenu && this.props.onContextMenu(...args),
 
 				onKeyDown: this.handleKeyDown,
