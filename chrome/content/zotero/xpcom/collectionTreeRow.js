@@ -568,6 +568,40 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 
 
 /**
+ * Returns all the tags used by items across multiple rows' views
+ *
+ * Combines the rows' search results into a single temporary table and runs one tag
+ * query, rather than creating a temp table and running a separate query per row.
+ *
+ * @param {Zotero.CollectionTreeRow[]} rows
+ * @param {Number[]} [types]
+ * @param {Number[]} [tagIDs]
+ * @return {Promise<Object[]>}
+ */
+Zotero.CollectionTreeRow.getTagsAcrossRows = async function (rows, types, tagIDs) {
+	// share/bucket/feeds rows never contribute tags (see getTags())
+	var tagRows = rows.filter(row => !['share', 'bucket', 'feeds'].includes(row.type));
+	if (!tagRows.length) {
+		return [];
+	}
+	// Combine the rows' search results into a single set of item IDs
+	var itemIDs = new Set();
+	for (let ids of await Promise.all(tagRows.map(row => row.getSearchResults(false)))) {
+		for (let id of ids) {
+			itemIDs.add(id);
+		}
+	}
+	var tmpTable = await Zotero.Search.idsToTempTable([...itemIDs]);
+	try {
+		return await Zotero.Tags.getAllWithin({ tmpTable, types, tagIDs });
+	}
+	finally {
+		await Zotero.DB.queryAsync(`DROP TABLE IF EXISTS ${tmpTable}`, false, { noCache: true });
+	}
+};
+
+
+/**
  * Clear the per-instance search cache. Call this at the start of a refresh cycle
  * or when search/tag filters change, so the next getSearchResults()/getSearchObject()
  * call runs a fresh DB query.
