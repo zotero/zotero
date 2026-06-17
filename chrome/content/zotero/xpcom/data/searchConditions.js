@@ -229,17 +229,25 @@ Zotero.SearchConditions = new function () {
 				noLoad: true
 			},
 			
-			// Quicksearch block markers
+			// Condition group markers. groupStart/groupEnd delimit a nested group of
+			// conditions; the group's join mode is a separate 'joinMode' condition placed
+			// inside the group, exactly as at the top level. Unlike the quicksearch block
+			// markers above, these are saved with the search, so they're not noLoad. The
+			// operator is an unused placeholder, since the sync server rejects an empty one.
 			{
-				name: 'blockStart',
-				noLoad: true
+				name: 'groupStart',
+				operators: {
+					true: true
+				}
 			},
-			
+
 			{
-				name: 'blockEnd',
-				noLoad: true
+				name: 'groupEnd',
+				operators: {
+					true: true
+				}
 			},
-			
+
 			// Shortcuts for adding collections and searches by id
 			{
 				name: 'collectionID',
