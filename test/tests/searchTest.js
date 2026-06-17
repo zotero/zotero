@@ -1150,7 +1150,7 @@ describe("Zotero.Search", function () {
 				it("should return matches for two 'any field' condition with joinMode=all", async function () {
 					var itemOne = await createDataObject('item', { title: "six-seven" });
 					var itemTwo = await createDataObject('item', { title: "seven-six" });
-					
+
 					var s = new Zotero.Search();
 					s.libraryID = userLibraryID;
 					s.addCondition('anyField', 'contains', "six");
@@ -1158,6 +1158,28 @@ describe("Zotero.Search", function () {
 					s.addCondition('joinMode', 'all');
 					var matches = await s.search();
 					assert.sameMembers(matches, [itemOne.id, itemTwo.id]);
+				});
+				it("should return matches for annotation text", async function () {
+					var attachment = await importPDFAttachment();
+					var annotation = await createAnnotation('highlight', attachment);
+					var str = annotation.annotationText.substr(0, 7);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('anyField', 'contains', str);
+					var matches = await s.search();
+					assert.include(matches, annotation.id);
+				});
+				it("should return matches for annotation comment", async function () {
+					var attachment = await importPDFAttachment();
+					var annotation = await createAnnotation('note', attachment);
+					var str = annotation.annotationComment.substr(0, 7);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('anyField', 'contains', str);
+					var matches = await s.search();
+					assert.include(matches, annotation.id);
 				});
 			});
 			
