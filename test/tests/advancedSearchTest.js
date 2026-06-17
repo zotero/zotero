@@ -455,7 +455,7 @@ describe("Advanced Search", function () {
 			await zp.toggleAdvancedSearchState('open');
 			pane = deck.pane;
 			searchBox = pane.querySelector('zoterosearch');
-			conditions = searchBox.querySelector('#conditions');
+			conditions = searchBox.querySelector('.conditions');
 		});
 		
 		after(async function () {
@@ -681,6 +681,22 @@ describe("Advanced Search", function () {
 			});
 		});
 
+		it("should insert a condition right after the row whose + is clicked", function () {
+			var s = new Zotero.Search();
+			s.libraryID = Zotero.Libraries.userLibraryID;
+			s.addCondition('title', 'contains', 'a');
+			s.addCondition('title', 'contains', 'b');
+			pane.search = s;
+			assert.lengthOf(conditions.children, 2);
+
+			conditions.children[0].onAddClicked({ preventDefault() {} });
+
+			// New (empty) condition lands between the two, not at the end
+			var values = [...conditions.children]
+				.map(row => row.querySelector('#valuefield').value);
+			assert.deepEqual(values, ['a', '', 'b']);
+		});
+
 		describe("Collection", function () {
 			it("should show collections and saved searches", async function () {
 				var col1 = await createDataObject('collection', { name: "A" });
@@ -875,7 +891,7 @@ describe("Advanced Search", function () {
 			it("shouldn't appear", async function () {
 				var searchCondition = conditions.firstChild;
 				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
-				
+
 				// Make sure "Saved Search" isn't present
 				for (let i = 0; i < conditionsMenu.itemCount; i++) {
 					let menuitem = conditionsMenu.getItemAtIndex(i);
@@ -883,6 +899,120 @@ describe("Advanced Search", function () {
 						assert.fail();
 					}
 				}
+			});
+		});
+
+		describe("Groups", function () {
+			function groupedSearch() {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'contains', 'foo');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('joinMode', 'any');
+				s.addCondition('tag', 'is', 'x');
+				s.addCondition('tag', 'is', 'y');
+				s.addCondition('groupEnd', 'true', '');
+				return s;
+			}
+
+			it("should render a nested group from group markers", function () {
+				pane.search = groupedSearch();
+
+				// Root holds the title row plus one nested group
+				assert.lengthOf(conditions.children, 2);
+				var group = conditions.querySelector('search-condition-group');
+				assert.equal(group.joinMode, 'any');
+				assert.lengthOf(group.conditionsContainer.children, 2);
+				assert.equal(group.conditionsContainer.firstChild.selectedCondition, 'tag');
+			});
+
+			it("should serialize a nested group back to markers", function () {
+				pane.search = groupedSearch();
+				searchBox.updateSearch();
+
+				var sequence = Object.values(searchBox.search.getConditions())
+					.map(c => c.condition);
+				assert.deepEqual(sequence,
+					['title', 'groupStart', 'joinMode', 'tag', 'tag', 'groupEnd']);
+			});
+
+			it("should wrap a condition in a new group in its place", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'contains', 'foo');
+				pane.search = s;
+
+				conditions.firstChild.onGroupClicked({ preventDefault() {} });
+
+				// The condition is now the sole member of a group in its old place,
+				// keeping its value
+				assert.lengthOf(conditions.children, 1);
+				var group = conditions.querySelector('search-condition-group');
+				assert.lengthOf(group.conditionsContainer.children, 1);
+				var row = group.conditionsContainer.firstChild;
+				assert.equal(row.selectedCondition, 'title');
+				assert.equal(row.querySelector('#valuefield').value, 'foo');
+			});
+
+			it("should remove a group when its last condition is removed", function () {
+				pane.search = groupedSearch();
+
+				var group = conditions.querySelector('search-condition-group');
+				group.conditionsContainer.firstChild.onRemoveClicked();
+				// Removing the group's first tag leaves it with the second
+				assert.ok(conditions.querySelector('search-condition-group'));
+				group.conditionsContainer.firstChild.onRemoveClicked();
+
+				// With no conditions left, the group itself is gone
+				assert.notOk(conditions.querySelector('search-condition-group'));
+				// The root's title condition remains
+				assert.lengthOf(conditions.children, 1);
+				assert.equal(conditions.firstChild.selectedCondition, 'title');
+			});
+
+			it("should reset the root to an empty condition when its last group empties", function () {
+				// A search whose only content is a single group with a single condition
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('tag', 'is', 'x');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+
+				var group = conditions.querySelector('search-condition-group');
+				group.conditionsContainer.firstChild.onRemoveClicked();
+
+				// The emptied group is gone and the root falls back to one empty condition
+				assert.notOk(conditions.querySelector('search-condition-group'));
+				assert.lengthOf(conditions.children, 1);
+				assert.equal(conditions.firstChild.selectedCondition, 'title');
+				assert.equal(conditions.firstChild.querySelector('#valuefield').value, '');
+			});
+
+			it("should add a sibling condition outside the group from the group's +", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'contains', 'foo');
+				pane.search = s;
+
+				// The root has no parent, so its caption "+" stays hidden
+				assert.isTrue(searchBox.rootGroup.addConditionButton.hidden);
+
+				// Wrap the only root condition, so the root now holds just the group
+				conditions.firstChild.onGroupClicked({ preventDefault() {} });
+				assert.lengthOf(conditions.children, 1);
+				var group = conditions.querySelector('search-condition-group');
+
+				// The group's "+" adds a sibling in the parent (root), not inside the group
+				group.onAddSiblingClicked();
+
+				assert.lengthOf(conditions.children, 2);
+				var rows = [...conditions.children]
+					.filter(c => c.localName === 'zoterosearchcondition');
+				assert.lengthOf(rows, 1);
+				assert.equal(rows[0].selectedCondition, 'title');
+				// Nothing was added inside the group
+				assert.lengthOf(group.conditionsContainer.children, 1);
 			});
 		});
 	});

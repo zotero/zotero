@@ -902,9 +902,13 @@ first-run-guidance-authorMenu = { -app-name } lets you specify editors and trans
 first-run-guidance-readAloud = { -app-name } can now read your documents to you using natural-sounding voices.
 
 advanced-search-remove-btn =
-    .tooltiptext = { general-remove }
+    .tooltiptext = Remove Condition
 advanced-search-add-btn =
-    .tooltiptext = { general-add }
+    .tooltiptext = Add Condition
+advanced-search-group-btn =
+    .tooltiptext = Add Condition Group
+advanced-search-remove-group-btn =
+    .tooltiptext = Remove Group
 advanced-search-conditions-menu =
     .aria-label = Search condition
     .label = { $label }

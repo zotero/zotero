@@ -12,16 +12,51 @@ zoterosearch {
 	max-height: 33vh;
 	@include macOS-normalize-controls;
 
-	groupbox {
+	.search-condition-group {
 		gap: 8px;
+		// Zero the toolkit groupbox margin so a nested group lines up flush with the
+		// left edge of the condition rows above it (reads as the next condition)
+		margin: 0;
+		padding: 0;
 
-		& > #conditions {
+		// The conditions container (root keeps id="conditions"; nested groups use the
+		// class) -- a rounded, filled box that nests as groups nest
+		.conditions {
 			min-width: fit-content; // Grow with content, don't overflow
 			padding: 8px;
-			gap: 8px;
+			// Roomier spacing between items (conditions and nested groups alike) so the
+			// list reads clearly without needing divider lines
+			gap: 12px;
 			background: var(--fill-senary);
 			border: var(--material-border-quinary);
 			border-radius: 6px;
+		}
+
+		// A nested group sits inside its parent's conditions box, indented so its
+		// caption and box line up with the condition controls above it (which are
+		// themselves inset by the row's leading gap). A group is just another item in
+		// the list, so it keeps the same spacing from its siblings as conditions do.
+		.search-condition-group {
+			gap: 4px;
+			margin-inline-start: 8px;
+		}
+
+		.remove-group {
+			margin: 0;
+		}
+	}
+
+	// The per-condition "group" button (wraps the condition in a new group)
+	.search-group-button {
+		@include svgicon-menu("group-condition", "universal", "16");
+		width: 20px;
+		margin: 0;
+		border: 0 !important;
+		border-radius: 2px;
+		color: var(--fill-secondary);
+
+		.toolbarbutton-text {
+			display: none;
 		}
 	}
 	
@@ -39,6 +74,7 @@ zoterosearch {
 		font: inherit;
 		align-items: center;
 		gap: 4px;
+		margin: 0 !important;
 		padding-left: 0 !important;
 
 		label {
@@ -73,7 +109,7 @@ zoterosearch {
 		}
 	}
 
-	#joinModeMenu {
+	.join-mode-menu {
 		min-width: 60px;
 	}
 	

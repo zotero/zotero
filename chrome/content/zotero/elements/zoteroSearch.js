@@ -37,23 +37,11 @@
 
 	class ZoteroSearch extends SearchElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<groupbox>
-				<caption align="center">
-					<label id="joinModeMenu-label" value="&zotero.search.joinMode.prefix;"/>
-					<menulist id="joinModeMenu" aria-labelledby="joinModeMenu-label" oncommand="this.closest('zoterosearch').updateJoinMode();" native="true">
-						<menupopup>
-							<menuitem label="&zotero.search.joinMode.any;" value="any"/>
-							<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
-						</menupopup>
-					</menulist>
-					<label value="&zotero.search.joinMode.suffix;"/>
-				</caption>
-				<vbox id="conditions"/>
-			</groupbox>
+			<search-condition-group root="true"/>
 			<hbox id="search-option-checkboxes">
-				<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.closest('zoterosearch').updateCheckbox('recursive');" native="true"/>
-				<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.closest('zoterosearch').updateCheckbox('noChildren');" native="true"/>
-				<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="this.closest('zoterosearch').updateCheckbox('includeParentsAndChildren');" native="true"/>
+				<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" native="true"/>
+				<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" native="true"/>
+				<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" native="true"/>
 			</hbox>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
@@ -63,162 +51,211 @@
 
 		set search(val) {
 			this.searchRef = val;
-
-			this.querySelector('#joinModeMenu').removeAttribute('condition');
-			this.querySelector('#joinModeMenu').value = 'all';
-			
-			this.querySelector('#recursiveCheckbox').checked = false;
-			this.querySelector('#noChildrenCheckbox').checked = false;
-			this.querySelector('#includeParentsAndChildrenCheckbox').checked = false;
-
-			var conditionsBox = this.querySelector('#conditions');
-			while (conditionsBox.hasChildNodes()) {
-				conditionsBox.removeChild(conditionsBox.firstChild);
+			// Setting condition controls' values during a render shouldn't trigger a
+			// rebuild of the search from the half-built tree
+			this._rendering = true;
+			try {
+				this.renderConditions();
 			}
-
-			var conditions = this.search.getConditions();
-			for (let id in conditions) {
-				let condition = conditions[id];
-				// Checkboxes
-				switch (condition.condition) {
-					case 'recursive':
-					case 'noChildren':
-					case 'includeParentsAndChildren':
-					{
-						let checkbox = condition.condition + 'Checkbox';
-						this.querySelector(`#${checkbox}`).setAttribute('condition', id);
-						this.querySelector(`#${checkbox}`).checked = condition.operator == 'true';
-						continue;
-					}
-				}
-
-				if (condition.condition == 'joinMode') {
-					this.querySelector('#joinModeMenu').setAttribute('condition', id);
-					this.querySelector('#joinModeMenu').value = condition.operator;
-				}
-				else {
-					this.addCondition(condition);
-				}
+			finally {
+				this._rendering = false;
 			}
 		}
-		
+
 		init() {
+			this.rootGroup = this.querySelector('search-condition-group[root]');
 			this.addEventListener('keypress', event => this.handleKeyPress(event));
 			// Re-evaluate which remove buttons are enabled as the conditions change
 			this.addEventListener('input', () => this.updateRemoveButtons());
 			this.addEventListener('command', () => this.updateRemoveButtons());
 		}
 
-		addCondition(ref) {
-			var conditionsBox = this.querySelector('#conditions');
-			var condition = document.createXULElement('zoterosearchcondition');
-			condition.setAttribute('flex', '1');
-			
-			conditionsBox.appendChild(condition);
-			
-			// Default to an empty 'title' condition
-			if (!ref) {
-				ref = this.search.getCondition(this.search.addCondition("title", "contains", ""));
+		// Build the condition tree (root group, nested groups, and search-global
+		// checkboxes) from the search's flat condition list
+		renderConditions() {
+			var root = this.rootGroup;
+
+			for (let name of ['recursive', 'noChildren', 'includeParentsAndChildren']) {
+				this.querySelector('#' + name + 'Checkbox').checked = false;
 			}
-			
-			condition.initWithParentAndCondition(this, ref);
+
+			root.clear();
+
+			// Walk the flat conditions, pushing/popping a group stack on the group
+			// markers. A 'joinMode' applies to the group on top of the stack; anything
+			// else becomes a condition row or a nested group within it.
+			var stack = [root];
+			var conditions = this.search.getConditions();
+			for (let id in conditions) {
+				let condition = conditions[id];
+				switch (condition.condition) {
+					case 'recursive':
+					case 'noChildren':
+					case 'includeParentsAndChildren':
+						this.querySelector('#' + condition.condition + 'Checkbox').checked
+							= condition.operator == 'true';
+						continue;
+
+					case 'joinMode':
+						stack[stack.length - 1].joinMode = condition.operator;
+						continue;
+
+					case 'groupStart': {
+						let group = document.createXULElement('search-condition-group');
+						stack[stack.length - 1].conditionsContainer.appendChild(group);
+						stack.push(group);
+						continue;
+					}
+
+					case 'groupEnd':
+						if (stack.length > 1) {
+							stack.pop();
+						}
+						continue;
+
+					default:
+						stack[stack.length - 1].addCondition(condition);
+				}
+			}
+
+			// The root always shows at least one condition, even for an empty search
+			if (!root.conditionsContainer.childElementCount) {
+				root.addCondition();
+			}
 
 			this.updateRemoveButtons();
 		}
 
-		removeCondition(id, focusRemoveButton) {
-			var conditionsBox = this.querySelector('#conditions');
-			// Removing the only remaining condition resets it to the default empty
-			// condition -- the same one shown when the pane is first opened -- rather
-			// than leaving the search with no conditions
-			var resetToDefault = conditionsBox.childNodes.length == 1;
+		// Regenerate the search's flat condition list from the current tree. The DOM is
+		// the source of truth: on any edit we walk the groups in order and rebuild
+		// search._conditions from scratch.
+		updateSearch() {
+			if (this._rendering || !this.search) {
+				return;
+			}
 
-			this.search.removeCondition(id);
-			let found = false;
-			for (var i = 0, len = conditionsBox.childNodes.length; i < len; i++) {
-				if (conditionsBox.childNodes[i].conditionID == id) {
-					conditionsBox.removeChild(conditionsBox.childNodes[i]);
-					found = true;
-					i--;
-					len--;
-					continue;
-				}
-				// When a condition is removed, ids of remaining conditions
-				// are shifted to remain in arithmetic sequence. The conditionID
-				// of the nodes need to be updated accordingly
-				if (found) {
-					conditionsBox.childNodes[i].conditionID--;
+			var flat = [];
+			this.collectGroup(this.rootGroup, flat, true);
+
+			// Search-global options
+			for (let name of ['recursive', 'noChildren', 'includeParentsAndChildren']) {
+				if (this.querySelector('#' + name + 'Checkbox').checked) {
+					flat.push({ condition: name, operator: 'true', value: null });
 				}
 			}
 
-			if (resetToDefault) {
-				this.addCondition();
+			this.rebuildConditions(flat);
+		}
+
+		// Append a group's serialized form to `flat`. The root contributes its
+		// conditions directly; a nested group is wrapped in groupStart/groupEnd markers.
+		// A 'joinMode' marker is emitted only for 'any'; 'all' is the default and is omitted.
+		collectGroup(group, flat, isRoot) {
+			if (!isRoot) {
+				flat.push({ condition: 'groupStart', operator: 'true', value: '' });
+			}
+			if (group.joinMode == 'any') {
+				flat.push({ condition: 'joinMode', operator: 'any', value: null });
+			}
+			for (let child of group.conditionsContainer.children) {
+				if (child.localName == 'zoterosearchcondition') {
+					let data = child.getConditionData();
+					if (data) {
+						flat.push(data);
+					}
+				}
+				else if (child.localName == 'search-condition-group') {
+					this.collectGroup(child, flat, false);
+				}
+			}
+			if (!isRoot) {
+				flat.push({ condition: 'groupEnd', operator: 'true', value: '' });
+			}
+		}
+
+		rebuildConditions(flat) {
+			var search = this.search;
+			var count = Object.keys(search.getConditions()).length;
+			// removeCondition() renumbers the remaining conditions, so 0 is always the
+			// next one to remove
+			for (let i = 0; i < count; i++) {
+				search.removeCondition(0);
+			}
+			for (let condition of flat) {
+				search.addCondition(condition.condition, condition.operator, condition.value, condition.required);
+			}
+		}
+
+		// Enable the remove (-) button on each condition. The root's last remaining
+		// condition can be removed only once it's populated, which resets it to the
+		// default empty condition.
+		updateRemoveButtons() {
+			var rootContainer = this.rootGroup.conditionsContainer;
+			var loneRootCondition = rootContainer.childElementCount == 1
+					&& rootContainer.firstElementChild.localName == 'zoterosearchcondition'
+				? rootContainer.firstElementChild
+				: null;
+			for (let row of this.querySelectorAll('zoterosearchcondition')) {
+				if (row == loneRootCondition && !row.isPopulated()) {
+					row.disableRemoveButton();
+				}
+				else {
+					row.enableRemoveButton();
+				}
+			}
+		}
+
+		// Remove a condition row, pruning any groups it empties. The root always keeps
+		// at least one condition, so emptying it resets it to a single empty default.
+		removeRow(row, focusRemoveButton) {
+			var group = row.closest('search-condition-group');
+			// Remember the row's place so focus can move there after a keyboard removal
+			var index = [...group.conditionsContainer.children].indexOf(row);
+			row.remove();
+			// A group left with no conditions is removed, bubbling up toward the root
+			while (!group.isRoot && !group.conditionsContainer.childElementCount) {
+				let parent = group.parentElement.closest('search-condition-group');
+				group.remove();
+				group = parent;
+			}
+
+			var reset = this.ensureNotEmpty();
+			this.updateSearch();
+			this.updateRemoveButtons();
+			if (reset) {
 				// The removed button is gone, so move focus to the new condition's drop-down
-				conditionsBox.firstChild.querySelector('#conditionsmenu').focus();
+				this.rootGroup.conditionsContainer.firstElementChild
+					.querySelector('#conditionsmenu').focus();
 			}
-			else {
-				this.updateRemoveButtons();
-				// After a keyboard removal, move focus to the remove button of the
-				// row that took the removed row's place, or the previous (now last)
-				// row if the last row was removed, so multiple conditions can be
-				// deleted in succession from the keyboard
-				if (focusRemoveButton) {
-					let rows = conditionsBox.childNodes;
-					let row = rows[id] || rows[rows.length - 1];
-					let button = row.querySelector('#remove');
-					// A disabled remove button can't take focus, so fall back to the
-					// row's condition drop-down
+			else if (focusRemoveButton && group.isConnected) {
+				// After a keyboard removal, move focus to the remove button of the row
+				// that took the removed row's place, or the last row if the removed row
+				// was last, so conditions can be deleted in succession from the keyboard
+				let rows = group.conditionsContainer.children;
+				let next = rows[index] || rows[rows.length - 1];
+				// A nested group may now hold that slot; focus its first condition
+				if (next && next.localName == 'search-condition-group') {
+					next = next.querySelector('zoterosearchcondition');
+				}
+				if (next) {
+					let button = next.querySelector('#remove');
+					// A disabled remove button can't take focus, so fall back to the drop-down
 					let target = button.getAttribute('disabled') == 'true'
-						? row.querySelector('#conditionsmenu')
+						? next.querySelector('#conditionsmenu')
 						: button;
 					setTimeout(() => target.focus({ focusVisible: true }));
 				}
 			}
 		}
 
-		// Enable the remove (-) button on each condition. The last remaining
-		// condition can be removed only when it's populated, which resets it to the
-		// default empty condition.
-		updateRemoveButtons() {
-			var conditionsBox = this.querySelector('#conditions');
-			var rows = conditionsBox.childNodes;
-			for (let row of rows) {
-				if (rows.length > 1 || row.isPopulated()) {
-					row.enableRemoveButton();
-				}
-				else {
-					row.disableRemoveButton();
-				}
+		// The root always shows at least one condition. Returns true if a default
+		// condition had to be added back.
+		ensureNotEmpty() {
+			if (!this.rootGroup.conditionsContainer.childElementCount) {
+				this.rootGroup.addCondition();
+				return true;
 			}
-		}
-
-		updateJoinMode() {
-			var menu = this.querySelector('#joinModeMenu');
-			if (menu.hasAttribute('condition')) this.search.updateCondition(menu.getAttribute('condition'), 'joinMode', menu.value, null);
-			else menu.setAttribute('condition', this.search.addCondition('joinMode', menu.value, null));
-		}
-
-		updateCheckbox(condition) {
-			var checkbox = this.querySelector('#' + condition + 'Checkbox');
-			var value = checkbox.checked ? 'true' : 'false';
-			if (checkbox.hasAttribute('condition')) {
-				this.search.updateCondition(checkbox.getAttribute('condition'),
-					condition, value, null);
-			}
-			else {
-				checkbox.setAttribute('condition',
-					this.search.addCondition(condition, value, null));
-			}
-		}
-
-		// Calls updateSearch() on all search conditions
-		updateSearch() {
-			var conditionsBox = this.querySelector('#conditions');
-			if (conditionsBox.hasChildNodes()) {
-				for (var i = 0, len = conditionsBox.childNodes.length; i < len; i++) {
-					conditionsBox.childNodes[i].updateSearch();
-				}
-			}
+			return false;
 		}
 
 		handleKeyPress(event) {
@@ -232,10 +269,14 @@
 					this.active = true;
 
 					if (event.shiftKey) {
-						this.addCondition();
-						// Move focus to the new row's drop-down so it can be set
-						// from the keyboard
-						this.focusNewCondition();
+						// Add to the group holding the focused control, falling back to the root
+						let group = event.target.closest
+							&& event.target.closest('search-condition-group');
+						let row = (group || this.rootGroup).addCondition();
+						this.updateSearch();
+						this.updateRemoveButtons();
+						// Move focus to the new row's drop-down so it can be set from the keyboard
+						this.focusNewCondition(row);
 					}
 					else {
 						this.doCommand();
@@ -244,16 +285,130 @@
 			}
 		}
 
-		// Move focus to the most recently added condition's drop-down. Deferred so
-		// it isn't immediately undone by the platform's own handling of the key
-		// event that triggered the addition (which otherwise keeps focus on the
-		// source element).
-		focusNewCondition() {
-			let menu = this.querySelector('#conditions').lastChild.querySelector('#conditionsmenu');
+		// Move focus to a newly added condition's drop-down. Deferred so it isn't
+		// immediately undone by the platform's own handling of the key event that
+		// triggered the addition (which otherwise keeps focus on the source element).
+		focusNewCondition(row) {
+			let menu = row.querySelector('#conditionsmenu');
 			setTimeout(() => menu.focus({ focusVisible: true }));
 		}
 	}
 	customElements.define("zoterosearch", ZoteroSearch);
+
+	class SearchConditionGroup extends SearchElementBase {
+		content = MozXULElement.parseXULToFragment(`
+			<groupbox class="search-condition-group">
+				<caption align="center">
+					<label class="join-mode-prefix" value="&zotero.search.joinMode.prefix;"/>
+					<menulist class="join-mode-menu" native="true" aria-label="&zotero.search.joinMode.prefix;">
+						<menupopup>
+							<menuitem label="&zotero.search.joinMode.any;" value="any"/>
+							<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
+						</menupopup>
+					</menulist>
+					<label class="join-mode-suffix" value="&zotero.search.joinMode.suffix;"/>
+					<spacer flex="1"/>
+					<toolbarbutton class="remove-group zotero-clicky zotero-clicky-minus" tabindex="0" hidden="true" data-l10n-id="advanced-search-remove-group-btn" onclick="this.closest('search-condition-group').onRemoveGroupClicked()"/>
+					<toolbarbutton class="add-condition zotero-clicky zotero-clicky-plus" tabindex="0" data-l10n-id="advanced-search-add-btn" onclick="this.closest('search-condition-group').onAddSiblingClicked()"/>
+				</caption>
+				<vbox class="conditions"/>
+			</groupbox>
+		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
+
+		init() {
+			this.joinMenu = this.querySelector('.join-mode-menu');
+			this.conditionsContainer = this.querySelector('.conditions');
+			// At init the group has no nested groups yet, so these resolve to its own
+			// caption buttons
+			this.addConditionButton = this.querySelector('.add-condition');
+			this.removeGroupButton = this.querySelector('.remove-group');
+
+			// The root group can't be removed and has no parent to add a sibling into, so
+			// its caption's remove ("-") and add ("+") buttons stay hidden; a nested group
+			// shows both
+			if (this.isRoot) {
+				this.addConditionButton.hidden = true;
+			}
+			else {
+				this.removeGroupButton.hidden = false;
+			}
+		}
+
+		get isRoot() {
+			return this.hasAttribute('root');
+		}
+
+		get searchElement() {
+			return this.closest('zoterosearch');
+		}
+
+		get search() {
+			return this.searchElement && this.searchElement.search;
+		}
+
+		get joinMode() {
+			return this.joinMenu.value;
+		}
+
+		set joinMode(val) {
+			this.joinMenu.value = val;
+		}
+
+		clear() {
+			this.joinMode = 'all';
+			while (this.conditionsContainer.firstChild) {
+				this.conditionsContainer.removeChild(this.conditionsContainer.firstChild);
+			}
+		}
+
+		// Add a condition row to this group. Inserts before `beforeNode` if given (e.g.
+		// right after the row whose "+" was clicked), otherwise appends.
+		addCondition(ref, beforeNode) {
+			var condition = document.createXULElement('zoterosearchcondition');
+			condition.setAttribute('flex', '1');
+			this.conditionsContainer.insertBefore(condition, beforeNode || null);
+
+			// Default to an empty 'title' condition
+			if (!ref) {
+				ref = { id: undefined, condition: 'title', operator: 'contains', value: '', mode: undefined, required: false };
+			}
+
+			condition.initWithParentAndCondition(this.searchElement, ref);
+			return condition;
+		}
+
+		// "+" in the group caption: add a sibling condition in the parent group, after
+		// this group -- the group's caption row acts as the group's single line item in
+		// its parent, so its "+" mirrors a condition row's "+". The root has no parent,
+		// so its "+" stays hidden.
+		onAddSiblingClicked() {
+			var parent = this.parentElement.closest('search-condition-group');
+			if (!parent) {
+				return;
+			}
+			var row = parent.addCondition(null, this.nextElementSibling);
+			var search = this.searchElement;
+			search.updateSearch();
+			search.updateRemoveButtons();
+			row.querySelector('#conditionsmenu').focus();
+		}
+
+		onRemoveGroupClicked() {
+			var search = this.searchElement;
+			var parent = this.parentElement.closest('search-condition-group');
+			this.remove();
+			// Removing a group can leave its parent empty; prune up toward the root
+			while (parent && !parent.isRoot && !parent.conditionsContainer.childElementCount) {
+				let grandparent = parent.parentElement.closest('search-condition-group');
+				parent.remove();
+				parent = grandparent;
+			}
+			search.ensureNotEmpty();
+			search.updateSearch();
+			search.updateRemoveButtons();
+		}
+	}
+	customElements.define("search-condition-group", SearchConditionGroup);
 
 	class ZoteroSearchCondition extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
@@ -277,6 +432,7 @@
 				<zoterosearchagefield id="value-date-age" class="value-date-age" hidden="true"/>
 				<toolbarbutton id="remove" tabindex="0" data-l10n-id="advanced-search-remove-btn" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.closest('zoterosearchcondition').onRemoveClicked(event)"/>
 				<toolbarbutton id="add" tabindex="0" data-l10n-id="advanced-search-add-btn" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.closest('zoterosearchcondition').onAddClicked(event)"/>
+				<toolbarbutton id="group" tabindex="0" data-l10n-id="advanced-search-group-btn" class="zotero-clicky search-group-button" onclick="this.closest('zoterosearchcondition').onGroupClicked(event)"/>
 			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
@@ -686,56 +842,62 @@
 			this.onConditionSelected(menu.value);
 		}
 
-		updateSearch() {
-			if (this.parent && this.parent.search && !this.dontupdate) {
-				var condition = this.selectedCondition;
-				var operator = this.querySelector('#operatorsmenu').value;
-				let value;
-				
-				// Regular text field
-				if (!this.querySelector('#valuefield').hidden) {
-					value = this.querySelector('#valuefield').value;
-					
-					// Convert datetimes to UTC before saving
-					switch (condition) {
-						case 'accessDate':
-						case 'dateAdded':
-						case 'dateModified':
-							if (Zotero.Date.isSQLDateTime(value)) {
-								value = Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(value), true);
-							}
-					}
-					
-					// Append mode to condition
-					if (this.querySelector('#valuefield').mode) {
-						condition += '/' + this.querySelector('#valuefield').mode;
-					}
-				}
-				
-				// isInTheLast operator
-				else if (!this.querySelector('#value-date-age').hidden) {
-					value = this.querySelector('#value-date-age').value;
-				}
-				
-				// Handle special C1234 and S5678 form for
-				// collections and searches
-				else if (condition == 'collection') {
-					var letter = this.querySelector('#valuemenu').value.substr(0, 1);
-					if (letter == 'C') {
-						condition = 'collection';
-					}
-					else if (letter == 'S') {
-						condition = 'savedSearch';
-					}
-					value = this.querySelector('#valuemenu').value.substr(1);
-				}
-				
-				// Regular drop-down menu
-				else {
-					value = this.querySelector('#valuemenu').value;
-				}
-				this.parent.search.updateCondition(this.conditionID, condition, operator, value);
+		// Return this row's current {condition, operator, value} for serialization.
+		// The owning <zoterosearch> collects these across the tree and rebuilds the
+		// search from scratch. Returns null while the row is still being set up.
+		getConditionData() {
+			if (!(this.parent && this.parent.search) || this.dontupdate) {
+				return null;
 			}
+
+			var condition = this.selectedCondition;
+			var operator = this.querySelector('#operatorsmenu').value;
+			let value;
+
+			// Regular text field
+			if (!this.querySelector('#valuefield').hidden) {
+				value = this.querySelector('#valuefield').value;
+
+				// Convert datetimes to UTC before saving
+				switch (condition) {
+					case 'accessDate':
+					case 'dateAdded':
+					case 'dateModified':
+						if (Zotero.Date.isSQLDateTime(value)) {
+							value = Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(value), true);
+						}
+				}
+
+				// Append mode to condition
+				if (this.querySelector('#valuefield').mode) {
+					condition += '/' + this.querySelector('#valuefield').mode;
+				}
+			}
+
+			// isInTheLast operator
+			else if (!this.querySelector('#value-date-age').hidden) {
+				value = this.querySelector('#value-date-age').value;
+			}
+
+			// Handle special C1234 and S5678 form for
+			// collections and searches
+			else if (condition == 'collection') {
+				var letter = this.querySelector('#valuemenu').value.substr(0, 1);
+				if (letter == 'C') {
+					condition = 'collection';
+				}
+				else if (letter == 'S') {
+					condition = 'savedSearch';
+				}
+				value = this.querySelector('#valuemenu').value.substr(1);
+			}
+
+			// Regular drop-down menu
+			else {
+				value = this.querySelector('#valuemenu').value;
+			}
+
+			return { condition, operator, value };
 		}
 
 		updateMenuCheckboxesRecursive(menu, value) {
@@ -859,27 +1021,59 @@
 		onRemoveClicked(event) {
 			if (this.parent) {
 				// A keyboard-synthesized click has detail 0, unlike a mouse click
-				this.parent.removeCondition(this.conditionID, event?.detail === 0);
+				this.parent.removeRow(this, event?.detail === 0);
 			}
 		}
 
 		onAddClicked(event) {
 			event.preventDefault();
-			if (this.parent) {
-				let ref = this.parent.search.getCondition(
-					this.parent.search.addCondition(
-						this.querySelector('#conditionsmenu').getAttribute('data-value'),
-						this.querySelector('#operatorsmenu').value,
-						""
-					)
-				);
-				this.parent.addCondition(ref);
-				// When activated from the keyboard (a synthesized click has detail
-				// 0, unlike a mouse click), move focus to the new row's drop-down
-				if (event.detail === 0) {
-					this.parent.focusNewCondition();
-				}
+			if (!this.parent) {
+				return;
 			}
+			// Add a sibling condition right after this one, seeded with this row's
+			// condition and operator
+			let group = this.closest('search-condition-group');
+			let row = group.addCondition({
+				id: undefined,
+				condition: this.querySelector('#conditionsmenu').getAttribute('data-value'),
+				operator: this.querySelector('#operatorsmenu').value,
+				value: '',
+				mode: undefined,
+				required: false
+			}, this.nextElementSibling);
+			this.parent.updateSearch();
+			this.parent.updateRemoveButtons();
+			// When activated from the keyboard (a synthesized click has detail 0,
+			// unlike a mouse click), move focus to the new row's drop-down
+			if (event.detail === 0) {
+				this.parent.focusNewCondition(row);
+			}
+		}
+
+		// Wrap this condition in a new group in its place, so further conditions can be
+		// added to the group to combine with it under a separate join mode
+		onGroupClicked(event) {
+			event.preventDefault();
+			if (!this.parent) {
+				return;
+			}
+			var group = this.closest('search-condition-group');
+			// Rebuild the condition inside the new group rather than moving the row, since
+			// detaching a custom element wipes its contents
+			var ref;
+			var data = this.getConditionData();
+			if (data) {
+				let [condition, mode] = Zotero.SearchConditions.parseCondition(data.condition);
+				ref = { id: undefined, condition, mode, operator: data.operator, value: data.value, required: false };
+			}
+			var newGroup = document.createXULElement('search-condition-group');
+			group.conditionsContainer.insertBefore(newGroup, this);
+			newGroup.addCondition(ref);
+			this.remove();
+
+			this.parent.updateSearch();
+			this.parent.updateRemoveButtons();
+			newGroup.conditionsContainer.firstElementChild.querySelector('#conditionsmenu').focus();
 		}
 
 		// Whether a value has been entered, used to decide whether the last
