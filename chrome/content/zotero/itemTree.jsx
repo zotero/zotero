@@ -2593,7 +2593,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
-		return this._columns.sort((a, b) => a.ordinal - b.ordinal);
+		let sortedColumns = this._columns.sort((a, b) => a.ordinal - b.ordinal);
+
+		// If no column has an explicit sort direction (e.g., a fresh profile that
+		// has never had a column header clicked), mark the default sort column --
+		// the first visible column, matching getSortField() -- as the sorted
+		// column. The view is already sorted ascending by this column (see
+		// getSortDirection()'s fallback), but without an explicit sortDirection
+		// the first click on the header would just set the direction to its
+		// default instead of reversing the sort.
+		if (!this._sortedColumn) {
+			let defaultColumn = sortedColumns.find(column => !column.hidden);
+			if (defaultColumn) {
+				defaultColumn.sortDirection = 1;
+				this._sortedColumn = defaultColumn;
+			}
+		}
+
+		return sortedColumns;
 	}
 	
 	_getColumn(index) {
