@@ -2700,8 +2700,7 @@ describe("CollectionViewItemTree", function () {
 			let group = await createGroup();
 			let collection1 = await createDataObject('collection');
 			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
-			// Two user-library items so the group's first item falls on an odd absolute index
-			await createDataObject('item', { collections: [collection1.id] });
+			// One user-library item so the group's first item falls on an even absolute index
 			await createDataObject('item', { collections: [collection1.id] });
 			await createDataObject('item', { libraryID: group.libraryID, collections: [collection2.id] });
 
@@ -2712,12 +2711,12 @@ describe("CollectionViewItemTree", function () {
 			let tree = view.tree;
 			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
 			let firstGroupItemRow = groupHeaderRow + 1;
-			// The group's first item is at an odd absolute index, but striping restarts at
-			// the header, so it gets the unstriped (even) shade
-			assert.equal(firstGroupItemRow % 2, 1, "Setup: first group item at an odd index");
+			// The header is the section's unstriped row, so the item right below it is
+			// striped (odd) -- even though its absolute index is even
+			assert.equal(firstGroupItemRow % 2, 0, "Setup: first group item at an even index");
 			let elem = tree._jsWindow.getElementByIndex(firstGroupItemRow);
-			assert.isTrue(elem.classList.contains('even'), "First item of a section is unstriped");
-			assert.isFalse(elem.classList.contains('odd'));
+			assert.isTrue(elem.classList.contains('odd'), "First item below a header is striped");
+			assert.isFalse(elem.classList.contains('even'));
 
 			await selectLibrary(win);
 			await group.eraseTx();

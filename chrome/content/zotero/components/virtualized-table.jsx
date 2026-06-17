@@ -1376,9 +1376,10 @@ class VirtualizedTable extends React.Component {
 	}
 
 	/**
-	 * Index of a row within its section (counting from the row after the preceding section
-	 * header), so striping restarts at each header. Without section headers this is just
-	 * the row index, preserving the normal whole-list striping.
+	 * The stripe index of a row, so striping restarts at each section header. The header
+	 * counts as the section's first (unstriped) row, so the data row right below it is
+	 * striped; subsequent rows alternate. Without section headers this is just the row
+	 * index, preserving the normal whole-list striping (first row unstriped).
 	 */
 	_sectionRelativeIndex(index) {
 		let base = -1;
@@ -1390,7 +1391,9 @@ class VirtualizedTable extends React.Component {
 				break;
 			}
 		}
-		return index - base - 1;
+		// No header above: stripe from the top (first row unstriped). With a header above,
+		// the header is the unstriped row 0, so the row below it (index - base == 1) is striped.
+		return base === -1 ? index : index - base;
 	}
 
 	/**
