@@ -1238,6 +1238,18 @@ Zotero.Search.prototype._buildQuery = async function () {
 						required: false
 					});
 					conditionsToProcess.push({
+						condition: 'annotationText',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({
+						condition: 'annotationComment',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({
 						condition: 'creator',
 						operator: condition.operator,
 						value: condition.value,
