@@ -166,10 +166,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 *
 	 * Across libraries, each header is the library name plus what's selected in it
 	 * ("My Library (2 collections selected)"); within a single library, one header
-	 * summarizes the selection ("2 collections selected"). Labels are resolved here (and
-	 * cached on the rows) so the sticky header can render them synchronously.
+	 * summarizes the selection ("2 collections selected"). Labels are resolved with
+	 * Zotero.ftl (the synchronous Fluent API) rather than awaiting document.l10n, so this
+	 * stays synchronous: that lets the sticky header render immediately and keeps
+	 * setCollectionTreeRows from adding an await that can race with rapid selection changes.
 	 */
-	async _computeSectionHeaders(collectionTreeRows) {
+	_computeSectionHeaders(collectionTreeRows) {
 		let grouped = this._groupedByLibrary;
 		// Group the selected rows by library, preserving selection order
 		let byLibrary = new Map();
@@ -180,7 +182,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			}
 			byLibrary.get(libraryID).push(row);
 		}
-		let entries = [];
+		let map = new Map();
 		for (let [libraryID, rows] of byLibrary) {
 			let count = rows.length;
 			let library = Zotero.Libraries.getName(libraryID);
@@ -200,17 +202,11 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			else {
 				id = grouped ? 'items-section-library-sources' : 'items-section-sources-selected';
 			}
+			let label = Zotero.ftl.formatValueSync(id || 'items-section-library', { library, count });
 			// Cross-library headers use the library icon; the single-library summary
 			// header has no icon, to set it apart from a sticky library header
-			entries.push({ libraryID, id, args: { library, count }, iconName: grouped ? undefined : null });
+			map.set(libraryID, { label, iconName: grouped ? undefined : null });
 		}
-		let labels = await document.l10n.formatValues(
-			entries.map(e => (e.id ? { id: e.id, args: e.args } : { id: 'items-section-library', args: e.args }))
-		);
-		let map = new Map();
-		entries.forEach((e, i) => {
-			map.set(e.libraryID, { label: labels[i], iconName: e.iconName });
-		});
 		return map;
 	}
 
@@ -263,7 +259,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		this._showSectionHeaders = !collectionTreeRows[0].isFeedsOrFeed()
 			&& collectionTreeRows.length > 1;
 		this._sectionHeaders = this._showSectionHeaders
-			? await this._computeSectionHeaders(collectionTreeRows)
+			? this._computeSectionHeaders(collectionTreeRows)
 			: new Map();
 
 		// Set ID based on visibilityGroup
