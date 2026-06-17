@@ -122,6 +122,43 @@ describe("Zotero.Search", function () {
 		});
 	});
 
+	describe("#combineConditions()", function () {
+		function pred(sql, params = []) {
+			return { sql, params };
+		}
+
+		it("should AND predicates in 'all' mode", function () {
+			var r = Zotero.Search.combineConditions([pred('A'), pred('B')]);
+			assert.equal(r.sql, 'A AND B');
+		});
+
+		it("should OR and parenthesize predicates in 'any' mode", function () {
+			var r = Zotero.Search.combineConditions([
+				{ marker: 'joinMode', operator: 'any' }, pred('A'), pred('B')
+			]);
+			assert.equal(r.sql, '(A OR B)');
+		});
+
+		it("should combine a nested group", function () {
+			var r = Zotero.Search.combineConditions([
+				pred('A'),
+				{ marker: 'groupStart' },
+				{ marker: 'joinMode', operator: 'any' },
+				pred('B'),
+				pred('C'),
+				{ marker: 'groupEnd' }
+			]);
+			assert.equal(r.sql, 'A AND (B OR C)');
+		});
+
+		it("should collect params in order", function () {
+			var r = Zotero.Search.combineConditions([pred('A=?', [1]), pred('B=?', [2])]);
+			assert.equal(r.sql, 'A=? AND B=?');
+			assert.deepEqual(r.params, [1, 2]);
+		});
+
+	});
+
 	describe("#search()", function () {
 		var userLibraryID;
 		var fooItem;
@@ -158,6 +195,65 @@ describe("Zotero.Search", function () {
 		});
 		
 		describe("Conditions", function () {
+			describe("Nested condition groups", function () {
+				it("should match A AND (B OR C)", async function () {
+					var ab = await createDataObject('item', { title: 'zgrpA', tags: [{ tag: 'zgrpB' }] });
+					var ac = await createDataObject('item', { title: 'zgrpA', tags: [{ tag: 'zgrpC' }] });
+					await createDataObject('item', { title: 'zgrpA' });
+					await createDataObject('item', { tags: [{ tag: 'zgrpB' }] });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'all');
+					s.addCondition('title', 'contains', 'zgrpA');
+					s.addCondition('groupStart', 'true', '');
+					s.addCondition('joinMode', 'any');
+					s.addCondition('tag', 'is', 'zgrpB');
+					s.addCondition('tag', 'is', 'zgrpC');
+					s.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await s.search(), [ab.id, ac.id]);
+				});
+
+				it("should match A OR (B AND C)", async function () {
+					var a = await createDataObject('item', { title: 'zg2A' });
+					var bc = await createDataObject('item', { title: 'zg2B', tags: [{ tag: 'zg2C' }] });
+					await createDataObject('item', { title: 'zg2B' });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('title', 'contains', 'zg2A');
+					s.addCondition('groupStart', 'true', '');
+					s.addCondition('joinMode', 'all');
+					s.addCondition('title', 'contains', 'zg2B');
+					s.addCondition('tag', 'is', 'zg2C');
+					s.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await s.search(), [a.id, bc.id]);
+				});
+
+				it("should match nested groups A AND (B OR (C AND D))", async function () {
+					var ab = await createDataObject('item', { title: 'zg3A', tags: [{ tag: 'zg3B' }] });
+					var acd = await createDataObject('item', { title: 'zg3A zg3C', tags: [{ tag: 'zg3D' }] });
+					await createDataObject('item', { title: 'zg3A zg3C' });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'all');
+					s.addCondition('title', 'contains', 'zg3A');
+					s.addCondition('groupStart', 'true', '');
+					s.addCondition('joinMode', 'any');
+					s.addCondition('tag', 'is', 'zg3B');
+					s.addCondition('groupStart', 'true', '');
+					s.addCondition('joinMode', 'all');
+					s.addCondition('title', 'contains', 'zg3C');
+					s.addCondition('tag', 'is', 'zg3D');
+					s.addCondition('groupEnd', 'true', '');
+					s.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await s.search(), [ab.id, acd.id]);
+				});
+
+			});
+
 			describe("collection", function () {
 				it("should find item in collection", async function () {
 					var col = await createDataObject('collection');

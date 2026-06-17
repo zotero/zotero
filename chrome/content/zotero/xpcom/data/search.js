@@ -305,15 +305,23 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	
 	// Shortcut to add a condition on every table -- does not return an id
 	if (condition.match(/^quicksearch/)) {
+		// The full-text content post-filter in search() isn't group-aware, so it can't
+		// tell that a quicksearch's full-text matches sit inside per-word 'any' groups.
+		// This flag tells it to merge them as a union even though the top-level join mode
+		// is 'all'. Once full-text conditions participate in the group tree, this flag and
+		// the post-filter special case both go away, leaving quicksearch as plain groups.
+		this._hasQuicksearch = true;
 		var parts = Zotero.SearchConditions.parseSearchString(value);
-		
+
 		for (let part of parts) {
 			if (condition == 'quicksearch-titleCreatorYearNote') {
 				this.addCondition('note', operator, part.text, false);
 				continue;
 			}
-			
-			this.addCondition('blockStart');
+
+			// Each word is an OR-group over the fields below
+			this.addCondition('groupStart', 'true', '');
+			this.addCondition('joinMode', 'any');
 
 			// Allow searching for exact object key
 			if (operator == 'contains' && Zotero.Utilities.isValidObjectKey(part.text)) {
@@ -336,7 +344,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 				this.addCondition('annotationComment', operator, part.text, false);
 			}
 			this.addCondition('creator', operator, part.text, false);
-			
+
 			if (condition == 'quicksearch-everything') {
 				if (part.inQuotes) {
 					this.addCondition('fulltextContent', operator, part.text, false);
@@ -348,8 +356,8 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 					}
 				}
 			}
-			
-			this.addCondition('blockEnd');
+
+			this.addCondition('groupEnd', 'true', '');
 		}
 		
 		if (condition == 'quicksearch-titleCreatorYear') {
@@ -564,33 +572,31 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 			await this._buildQuery();
 		}
 		
+		// Set true by the quicksearch expansion in addCondition()
+		var hasQuicksearch = !!this._hasQuicksearch;
 		// Set some variables for conditions to avoid further lookups
 		for (let condition of Object.values(this._conditions)) {
 			switch (condition.condition) {
 				case 'fulltextContent':
 					var fulltextContent = true;
 					break;
-				
+
 				case 'includeParentsAndChildren':
 					if (condition.operator == 'true') {
 						var includeParentsAndChildren = true;
 					}
 					break;
-				
+
 				case 'includeParents':
 					if (condition.operator == 'true') {
 						var includeParents = true;
 					}
 					break;
-				
+
 				case 'includeChildren':
 					if (condition.operator == 'true') {
 						var includeChildren = true;
 					}
-					break;
-				
-				case 'blockStart':
-					var hasQuicksearch = true;
 					break;
 			}
 		}
@@ -979,20 +985,30 @@ Zotero.Search.prototype._buildQuery = async function () {
 	var sql = 'SELECT itemID FROM items';
 	
 	var sqlParams = [];
-	// Separate ANY conditions for 'required' condition support
-	var anySQL = '';
-	var anySQLParams = [];
-	
+
 	var conditions = [];
-	
+
 	let lastCondition;
 	let conditionsToProcess = Object.values(this._conditions);
-	
-	// Process joinMode first, since other conditions may depend on it
+
+	// The search's top-level join mode, used by the full-text result merging in
+	// search(). Per-group join modes (including nested groups) are resolved from the
+	// 'joinMode' markers when the condition tree is assembled below, so the joinMode
+	// conditions are left in the stream rather than spliced out here. Only the
+	// top-level joinMode counts here, so skip any nested inside a group.
 	this._joinMode = 'all';
-	var joinModeIndex = conditionsToProcess.findIndex(cond => cond.condition == "joinMode");
-	if (joinModeIndex > -1) {
-		this._joinMode = conditionsToProcess.splice(joinModeIndex, 1)[0].operator;
+	let groupDepth = 0;
+	for (let cond of conditionsToProcess) {
+		if (cond.condition == 'groupStart') {
+			groupDepth++;
+		}
+		else if (cond.condition == 'groupEnd') {
+			groupDepth--;
+		}
+		else if (cond.condition == 'joinMode' && groupDepth == 0) {
+			this._joinMode = cond.operator;
+			break;
+		}
 	}
 	
 	for (let condition of conditionsToProcess) {
@@ -1085,25 +1101,32 @@ Zotero.Search.prototype._buildQuery = async function () {
 					// Handled in Search.search()
 					continue;
 				
-				// For quicksearch block markers
-				case 'blockStart':
-					conditions.push({name:'blockStart'});
+				// Group markers, passed through to the condition tree assembled after the
+				// main loop. Reset lastCondition so inline-filter merging doesn't combine
+				// conditions across a group boundary.
+				case 'joinMode':
+					lastCondition = null;
+					conditions.push({ name: 'joinMode', operator: condition.operator });
 					continue;
-				case 'blockEnd':
-					conditions.push({name:'blockEnd'});
+				case 'groupStart':
+					lastCondition = null;
+					conditions.push({ name: 'groupStart' });
+					continue;
+				case 'groupEnd':
+					lastCondition = null;
+					conditions.push({ name: 'groupEnd' });
 					continue;
 				
 				case 'anyField':
 					// We expand this condition to the same underlying set of conditions as 'quicksearch-fields'
 					// (although we don't detect keys or split into quoted and unquoted segments). 'quicksearch-fields'
 					// is expanded in addCondition(), but we can't do that with this condition because we don't want
-					// to save the conditions it expands to in the search object
-					if (this._joinMode == 'all') {
-						// If joinMode is 'any', do not wrap conditions in quickSearch block so that
-						// they become just a series of OR statements. Otherwise, "Any Field" will
-						// conflict with all other conditions (if multiple conditions are present).
-						conditionsToProcess.push({ condition: 'blockStart' });
-					}
+					// to save the conditions it expands to in the search object.
+					// Always wrap in an OR-group: "Any Field" means "matches in any one of
+					// these fields", which is correct whether the surrounding join mode is
+					// 'all' or 'any' (an OR-group nested in an 'any' group flattens out).
+					conditionsToProcess.push({ condition: 'groupStart', operator: 'true', value: '' });
+					conditionsToProcess.push({ condition: 'joinMode', operator: 'any' });
 					conditionsToProcess.push({
 						condition: 'field',
 						operator: condition.operator,
@@ -1128,9 +1151,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 						value: condition.value,
 						required: false
 					});
-					if (this._joinMode == 'all') {
-						conditionsToProcess.push({ condition: 'blockEnd' });
-					}
+					conditionsToProcess.push({ condition: 'groupEnd', operator: 'true', value: '' });
 					continue;
 			}
 			
@@ -1208,9 +1229,27 @@ Zotero.Search.prototype._buildQuery = async function () {
 	}
 	
 	if (this._hasPrimaryConditions) {
-		sql += " AND ";
-		
+		// Each condition produces a self-contained "itemID [NOT] IN (...)" predicate.
+		// Markers and predicates are collected here in document order, then assembled
+		// into a (possibly nested) tree of AND/OR groups below.
+		let builtConditions = [];
+
 		for (let condition of Object.values(conditions)){
+				// Group markers and per-group join modes are handled when the tree is
+				// assembled, not as SQL predicates
+				if (condition.name == 'groupStart') {
+					builtConditions.push({ marker: 'groupStart' });
+					continue;
+				}
+				if (condition.name == 'groupEnd') {
+					builtConditions.push({ marker: 'groupEnd' });
+					continue;
+				}
+				if (condition.name == 'joinMode') {
+					builtConditions.push({ marker: 'joinMode', operator: condition.operator });
+					continue;
+				}
+
 				var skipOperators = false;
 				var openParens = 0;
 				var condSQL = '';
@@ -1476,12 +1515,6 @@ Zotero.Search.prototype._buildQuery = async function () {
 					
 					case 'tempTable':
 						condSQL += "itemID IN (SELECT id FROM " + condition.value + ")";
-						skipOperators = true;
-						break;
-						
-					// For quicksearch blocks
-					case 'blockStart':
-					case 'blockEnd':
 						skipOperators = true;
 						break;
 				}
@@ -1788,64 +1821,120 @@ Zotero.Search.prototype._buildQuery = async function () {
 					condSQL += ')';
 				}
 				
-				// Little hack to support multiple quicksearch words
-				if (condition['name'] == 'blockStart') {
-					var inQS = true;
-					var qsSQL = '';
-					var qsParams = [];
-					continue;
-				}
-				else if (condition['name'] == 'blockEnd') {
-					inQS = false;
-					// Strip ' OR ' from last condition
-					qsSQL = qsSQL.substring(0, qsSQL.length-4);
-					
-					// Add to existing quicksearch words
-					if (!quicksearchSQLSet) {
-						var quicksearchSQLSet = [];
-						var quicksearchParamsSet = [];
-					}
-					quicksearchSQLSet.push(qsSQL);
-					quicksearchParamsSet.push(qsParams);
-				}
-				else if (inQS) {
-					qsSQL += condSQL + ' OR ';
-					qsParams = qsParams.concat(condSQLParams);
-				}
-				// Keep non-required conditions separate if in ANY mode
-				else if (!condition.required && this._joinMode == 'any') {
-					anySQL += condSQL + ' OR ';
-					anySQLParams = anySQLParams.concat(condSQLParams);
-				}
-				else {
-					condSQL += ' AND ';
-					sql += condSQL;
-					sqlParams = sqlParams.concat(condSQLParams);
-				}
+				builtConditions.push({
+					sql: condSQL,
+					params: condSQLParams,
+					required: condition.required
+				});
 		}
-		
-		// Add on ANY conditions
-		if (anySQL){
-			sql += '(' + anySQL;
-			sqlParams = sqlParams.concat(anySQLParams);
-			sql = sql.substring(0, sql.length-4); // remove last ' OR '
-			sql += ')';
-		}
-		else {
-			sql = sql.substring(0, sql.length-5); // remove last ' AND '
-		}
-		
-		// Add on quicksearch conditions
-		if (quicksearchSQLSet) {
-			sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "
-				+ "AND ((" + quicksearchSQLSet.join(') AND (') + "))";
-			
-			for (var k=0; k<quicksearchParamsSet.length; k++) {
-				sqlParams = sqlParams.concat(quicksearchParamsSet[k]);
-			}
+
+		// Combine the collected predicates and group markers into a single predicate
+		// (see Zotero.Search.combineConditions)
+		let combined = Zotero.Search.combineConditions(builtConditions);
+		if (combined.sql) {
+			sql += " AND " + combined.sql;
+			sqlParams = sqlParams.concat(combined.params);
 		}
 	}
 	
 	this._sql = sql;
 	this._sqlParams = sqlParams.length ? sqlParams : false;
+};
+
+
+/**
+ * Combine an ordered list of built condition predicates and group markers into a single SQL
+ * predicate.
+ *
+ * Each item in `builtConditions` is either a predicate { sql, params, required } or a group
+ * marker { marker: 'groupStart' | 'groupEnd' | 'joinMode', operator }. groupStart/groupEnd
+ * delimit nested groups and a 'joinMode' marker sets its enclosing group's mode.
+ *
+ * For example, conditions built as
+ *
+ *   search.addCondition('joinMode', 'all');
+ *   search.addCondition('title', 'contains', 'foo');
+ *   search.addCondition('groupStart', 'true', '');
+ *   search.addCondition('joinMode', 'any');
+ *   search.addCondition('tag', 'is', 'x');
+ *   search.addCondition('tag', 'is', 'y');
+ *   search.addCondition('groupEnd', 'true', '');
+ *
+ * combine to "title contains 'foo' AND (tag is 'x' OR tag is 'y')". The 'true' operator on the
+ * group markers is an unused placeholder -- they carry no value, but a condition's operator
+ * can't be empty.
+ *
+ * In 'all' mode a group's children are ANDed; in 'any' mode they're ORed, except 'required'
+ * conditions, which are always ANDed (legacy behavior, ultimately subsumable by grouping).
+ *
+ * @param {Object[]} builtConditions
+ * @return {{ sql: String, params: Array }} Combined predicate (sql is '' if nothing to combine)
+ */
+Zotero.Search.combineConditions = function (builtConditions) {
+	let root = { joinMode: 'all', children: [] };
+	let groupStack = [root];
+	for (let item of builtConditions) {
+		let group = groupStack[groupStack.length - 1];
+		if (item.marker == 'groupStart') {
+			let child = { joinMode: 'all', children: [] };
+			group.children.push(child);
+			groupStack.push(child);
+		}
+		else if (item.marker == 'groupEnd') {
+			// Ignore an unbalanced end marker rather than popping the root
+			if (groupStack.length > 1) {
+				groupStack.pop();
+			}
+		}
+		else if (item.marker == 'joinMode') {
+			group.joinMode = item.operator;
+		}
+		else {
+			group.children.push(item);
+		}
+	}
+
+	// Reduce a group node to a single { sql, params } predicate
+	let combineGroup = (node) => {
+		let requiredParts = [];
+		let requiredParams = [];
+		let optionalParts = [];
+		let optionalParams = [];
+		for (let child of node.children) {
+			let result = child.children ? combineGroup(child) : child;
+			if (!result.sql) {
+				continue;
+			}
+			if (node.joinMode == 'all' || result.required) {
+				requiredParts.push(result.sql);
+				requiredParams = requiredParams.concat(result.params);
+			}
+			else {
+				optionalParts.push(result.sql);
+				optionalParams = optionalParams.concat(result.params);
+			}
+		}
+		let parts = [];
+		let params = [];
+		if (requiredParts.length) {
+			parts.push(requiredParts.join(' AND '));
+			params = params.concat(requiredParams);
+		}
+		if (optionalParts.length) {
+			parts.push(optionalParts.length > 1
+				? '(' + optionalParts.join(' OR ') + ')'
+				: optionalParts[0]);
+			params = params.concat(optionalParams);
+		}
+		if (!parts.length) {
+			return { sql: '', params: [], required: false };
+		}
+		return {
+			sql: parts.length > 1 ? '(' + parts.join(' AND ') + ')' : parts[0],
+			params: params,
+			required: false
+		};
+	};
+
+	return combineGroup(root);
 };
