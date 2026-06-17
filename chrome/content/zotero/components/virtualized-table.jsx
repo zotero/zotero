@@ -383,6 +383,13 @@ class VirtualizedTable extends React.Component {
 		// never becomes empty through user action
 		requireSelection: false,
 
+		// When true, the header row of the section currently at the top of the view is
+		// pinned to the top while scrolling (see isSectionHeader)
+		stickySectionHeaders: false,
+		// Returns whether the row at the given index begins a section, i.e., should be
+		// pinned to the top while its section is scrolled through
+		isSectionHeader: () => false,
+
 		onSelectionChange: noop,
 
 		// The below are for arrow-key navigation
@@ -448,6 +455,9 @@ class VirtualizedTable extends React.Component {
 		multiSelect: PropTypes.bool,
 
 		requireSelection: PropTypes.bool,
+
+		stickySectionHeaders: PropTypes.bool,
+		isSectionHeader: PropTypes.func,
 
 		onSelectionChange: PropTypes.func,
 
@@ -1084,9 +1094,17 @@ class VirtualizedTable extends React.Component {
 		window.addEventListener("resize", () => {
 			this._debouncedRerender();
 		});
+
+		if (this.props.stickySectionHeaders) {
+			this._jsWindow.targetElement.addEventListener('scroll', this._updateStickySectionHeader, { passive: true });
+			this._updateStickySectionHeader();
+		}
 	}
-	
+
 	componentWillUnmount() {
+		if (this.props.stickySectionHeaders && this._jsWindow) {
+			this._jsWindow.targetElement.removeEventListener('scroll', this._updateStickySectionHeader);
+		}
 		this._jsWindow.destroy();
 	}
 	
@@ -1159,8 +1177,12 @@ class VirtualizedTable extends React.Component {
 		}
 		node.style.height = (index in this._customRowHeightMap ? this._customRowHeightMap[index] : this._rowHeight) + 'px';
 		node.id = this.props.id + "-row-" + index;
-		node.classList.toggle('odd', index % 2 == 1);
-		node.classList.toggle('even', index % 2 == 0);
+		// Row striping restarts at each section header, so every section's first row is
+		// the same shade (see _sectionRelativeIndex); without section headers this is just
+		// the row index
+		let stripeIndex = this._sectionRelativeIndex(index);
+		node.classList.toggle('odd', stripeIndex % 2 == 1);
+		node.classList.toggle('even', stripeIndex % 2 == 0);
 		if (!node.hasAttribute('role')) {
 			node.setAttribute('role', 'row');
 		}
@@ -1304,6 +1326,17 @@ class VirtualizedTable extends React.Component {
 				{columnDragMarker}
 				{header}
 				<div {...jsWindowProps} />
+				{this.props.stickySectionHeaders
+					&& <div
+						className="virtualized-table-sticky-section-header"
+						ref={ref => this._stickyHeader = ref}
+						aria-hidden="true"
+					>
+						<div
+							className="virtualized-table-sticky-section-header-content"
+							ref={ref => this._stickyHeaderContent = ref}
+						/>
+					</div>}
 			</div>
 		);
 	}
@@ -1315,6 +1348,7 @@ class VirtualizedTable extends React.Component {
 		if (!this._jsWindow) return;
 		this._jsWindow.invalidate();
 		this._updateWidth();
+		this._refreshStickySectionHeader();
 	}
 
 	/**
@@ -1325,6 +1359,135 @@ class VirtualizedTable extends React.Component {
 		if (!this._jsWindow) return;
 		this._jsWindow.render();
 		this._updateWidth();
+		this._refreshStickySectionHeader();
+	}
+
+	// ------------------------ Sticky Section Headers ------------------------ //
+
+	/**
+	 * The set of section-header rows can change whenever the row model changes, so drop
+	 * the cached indices and repin. Called after the list is invalidated/rerendered.
+	 */
+	_refreshStickySectionHeader() {
+		if (!this.props.stickySectionHeaders) return;
+		this._sectionHeaderIndices = null;
+		this._stickyHeaderIndex = null;
+		this._updateStickySectionHeader();
+	}
+
+	/**
+	 * Index of a row within its section (counting from the row after the preceding section
+	 * header), so striping restarts at each header. Without section headers this is just
+	 * the row index, preserving the normal whole-list striping.
+	 */
+	_sectionRelativeIndex(index) {
+		let base = -1;
+		for (let headerIndex of this._getSectionHeaderIndices()) {
+			if (headerIndex <= index) {
+				base = headerIndex;
+			}
+			else {
+				break;
+			}
+		}
+		return index - base - 1;
+	}
+
+	/**
+	 * Indices of all section-header rows, ascending. Cached until the row model changes.
+	 */
+	_getSectionHeaderIndices() {
+		// Only trees that opt into section headers have them
+		if (!this.props.stickySectionHeaders) {
+			return [];
+		}
+		if (this._sectionHeaderIndices) {
+			return this._sectionHeaderIndices;
+		}
+		let indices = [];
+		let count = this.props.getRowCount();
+		for (let i = 0; i < count; i++) {
+			if (this.props.isSectionHeader(i)) {
+				indices.push(i);
+			}
+		}
+		this._sectionHeaderIndices = indices;
+		return indices;
+	}
+
+	/**
+	 * Pin the header of the section currently at the top of the view, pushing it up as
+	 * the next section's header scrolls into it. The pinned header lives outside the
+	 * scrolling body (so it doesn't scroll itself) and reuses the consumer's renderItem
+	 * to match the real header row's appearance.
+	 *
+	 * The outer element is a fixed clip region anchored to the top of the body; the inner
+	 * (opaque) element holds the rendered header and is the part that translates, so the
+	 * push is clipped at the top of the body rather than spilling over the column header.
+	 */
+	_updateStickySectionHeader = () => {
+		if (!this.props.stickySectionHeaders || !this._stickyHeader || !this._jsWindow) {
+			return;
+		}
+		let clip = this._stickyHeader;
+		let content = this._stickyHeaderContent;
+		let headerIndices = this._getSectionHeaderIndices();
+		let scrollTop = this._jsWindow.targetElement.scrollTop;
+		// The section in view is the last header at or above the top of the view; the
+		// next header (if any) is what pushes it up
+		let currentIndex = -1;
+		let nextIndex = -1;
+		for (let index of headerIndices) {
+			if (this._jsWindow._getItemPosition(index) <= scrollTop) {
+				currentIndex = index;
+			}
+			else {
+				nextIndex = index;
+				break;
+			}
+		}
+		// Nothing to pin if there are no headers or the view is scrolled above the first
+		if (currentIndex == -1) {
+			clip.style.display = 'none';
+			this._stickyHeaderIndex = null;
+			return;
+		}
+		clip.style.display = '';
+		// Mark the header "stuck" once its section has scrolled up under it, so the
+		// consumer can show a divider (hairline) only while scrolling
+		clip.classList.toggle('stuck', scrollTop > this._jsWindow._getItemPosition(currentIndex));
+		// Re-render only when the pinned section changes. Use _renderItem (not the raw
+		// renderItem prop) so the pinned copy gets the same post-processing as a real row
+		// (e.g. the tree's indent/twisty spacer), then drop its id to avoid duplicating the
+		// real row's.
+		if (this._stickyHeaderIndex !== currentIndex) {
+			this._stickyHeaderIndex = currentIndex;
+			let node = this._renderItem(currentIndex);
+			node.removeAttribute('id');
+			content.textContent = '';
+			content.appendChild(node);
+		}
+		// Anchor the clip region over the top of the list body (below the column header,
+		// inside the scrollbar). Its height covers the pinned header plus the body's top
+		// padding, so a header pushed up is clipped at the body's top edge. Use the body's
+		// sub-pixel top (not the integer-rounded offsetTop) so the overlay lands exactly at
+		// the body's edge and never creeps over the column header's bottom divider.
+		let body = this._jsWindow.targetElement;
+		let insetTop = parseFloat(window.getComputedStyle(body).paddingTop) || 0;
+		let bodyTop = body.getBoundingClientRect().top - this._topDiv.getBoundingClientRect().top;
+		clip.style.top = bodyTop + 'px';
+		clip.style.left = body.offsetLeft + 'px';
+		clip.style.width = body.clientWidth + 'px';
+		clip.style.height = (this._rowHeight + insetTop) + 'px';
+		// Push the pinned header up as the next section's header approaches the top
+		let translateY = 0;
+		if (nextIndex != -1) {
+			let nextTop = this._jsWindow._getItemPosition(nextIndex) - scrollTop;
+			if (nextTop < this._rowHeight) {
+				translateY = nextTop - this._rowHeight;
+			}
+		}
+		content.style.transform = `translateY(${translateY}px)`;
 	}
 	
 	updateFontSize = () => {
