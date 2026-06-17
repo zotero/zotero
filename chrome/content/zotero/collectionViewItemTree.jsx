@@ -43,7 +43,7 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const ItemTree = require('zotero/itemTree');
 const { ItemTreeRowProvider } = ItemTree;
-const { LibraryHeaderItemTreeRow } = require('zotero/itemTreeRow');
+const { LibraryHeaderItemTreeRow, SpacerItemTreeRow } = require('zotero/itemTreeRow');
 
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
@@ -140,21 +140,78 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		let lastLibraryID = null;
 		let seenFirstHeader = false;
 		for (let row of this._rows) {
-			if (row.type == 'library-header') {
+			if (row.type == 'library-header' || row.type == 'spacer') {
 				continue;
 			}
 			if (row.level == 0 && row.ref.libraryID !== lastLibraryID) {
 				lastLibraryID = row.ref.libraryID;
-				let header = new LibraryHeaderItemTreeRow(Zotero.Libraries.get(lastLibraryID));
-				// Every header except the first gets a gap above it separating it from
-				// the previous library's items (see _updateLibraryHeaderHeights and CSS)
-				header.hasSectionGap = seenFirstHeader;
+				let library = Zotero.Libraries.get(lastLibraryID);
+				// Every header except the first gets a blank spacer row above it, for one
+				// row of whitespace separating its section from the previous library's
+				if (seenFirstHeader) {
+					newRows.push(new SpacerItemTreeRow(library));
+				}
 				seenFirstHeader = true;
-				newRows.push(header);
+				let { label, iconName } = this._sectionHeaders.get(lastLibraryID) || {};
+				newRows.push(new LibraryHeaderItemTreeRow(library, label, iconName));
 			}
 			newRows.push(row);
 		}
 		this._rows = newRows;
+	}
+
+	/**
+	 * Compute the section header label (and, for single-library selections, icon) for
+	 * each library in the selection. Returns a Map of libraryID -> { label, iconName }.
+	 *
+	 * Across libraries, each header is the library name plus what's selected in it
+	 * ("My Library (2 collections selected)"); within a single library, one header
+	 * summarizes the selection ("2 collections selected"). Labels are resolved here (and
+	 * cached on the rows) so the sticky header can render them synchronously.
+	 */
+	async _computeSectionHeaders(collectionTreeRows) {
+		let grouped = this._groupedByLibrary;
+		// Group the selected rows by library, preserving selection order
+		let byLibrary = new Map();
+		for (let row of collectionTreeRows) {
+			let libraryID = row.ref.libraryID;
+			if (!byLibrary.has(libraryID)) {
+				byLibrary.set(libraryID, []);
+			}
+			byLibrary.get(libraryID).push(row);
+		}
+		let entries = [];
+		for (let [libraryID, rows] of byLibrary) {
+			let count = rows.length;
+			let library = Zotero.Libraries.getName(libraryID);
+			let id;
+			if (rows.every(row => row.isRecentlyRead())) {
+				id = grouped ? 'items-section-library-recently-read' : null;
+			}
+			else if (rows.every(row => row.isLibrary(true))) {
+				id = grouped ? 'items-section-library' : null;
+			}
+			else if (rows.every(row => row.isCollection())) {
+				id = grouped ? 'items-section-library-collections' : 'items-section-collections-selected';
+			}
+			else if (rows.every(row => row.isSearch())) {
+				id = grouped ? 'items-section-library-searches' : 'items-section-searches-selected';
+			}
+			else {
+				id = grouped ? 'items-section-library-sources' : 'items-section-sources-selected';
+			}
+			// Cross-library headers use the library icon; the single-library summary
+			// header has no icon, to set it apart from a sticky library header
+			entries.push({ libraryID, id, args: { library, count }, iconName: grouped ? undefined : null });
+		}
+		let labels = await document.l10n.formatValues(
+			entries.map(e => (e.id ? { id: e.id, args: e.args } : { id: 'items-section-library', args: e.args }))
+		);
+		let map = new Map();
+		entries.forEach((e, i) => {
+			map.set(e.libraryID, { label: labels[i], iconName: e.iconName });
+		});
+		return map;
 	}
 
 	/**
@@ -200,6 +257,14 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		}
 		this._groupedByLibrary = !collectionTreeRows[0].isFeedsOrFeed()
 			&& this._libraryOrder.size > 1;
+		// A section header is shown above each library's items whenever more than one row
+		// is selected (a single header for a single-library selection; one per library
+		// across libraries). Feeds are never grouped or headed.
+		this._showSectionHeaders = !collectionTreeRows[0].isFeedsOrFeed()
+			&& collectionTreeRows.length > 1;
+		this._sectionHeaders = this._showSectionHeaders
+			? await this._computeSectionHeaders(collectionTreeRows)
+			: new Map();
 
 		// Set ID based on visibilityGroup
 		const visibilityGroup = collectionTreeRows[0].visibilityGroup || 'default';
@@ -311,8 +376,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			var skipChildren;
 			for (let i = 0; i < this._rows.length; i++) {
 				let row = this._rows[i];
-				// Don't copy library header rows -- they're reinserted after sorting
-				if (row.type == 'library-header') {
+				// Don't copy library header or spacer rows -- they're reinserted after sorting
+				if (row.type == 'library-header' || row.type == 'spacer') {
 					continue;
 				}
 				// Top-level items
@@ -407,7 +472,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			this.refreshRowMap();
 			Zotero.debug(`Refreshed open parents in ${new Date() - t} ms`);
 
-			if (this._groupedByLibrary) {
+			if (this._showSectionHeaders) {
 				this._insertLibraryHeaders();
 				this.refreshRowMap();
 			}
@@ -1040,44 +1105,11 @@ class CollectionViewItemTree extends ItemTree {
 	}
 
 	async handleRowModelUpdate(rows, options = {}) {
-		// Update header row heights before super renders: super invalidates the
-		// windowed list, and _renderItem reads the custom-height map at render time,
-		// so the map and offsets have to be set first for the taller rows to paint
-		this._updateLibraryHeaderHeights();
 		const completed = await super.handleRowModelUpdate(rows, options);
 		if (completed) {
 			await this._updateIntroText();
 		}
 		return completed;
-	}
-
-	/**
-	 * Each library header after the first is given extra height so that, with the
-	 * header content bottom-aligned (see _item-tree.scss), there's a gap above it
-	 * separating it from the previous library's items. The first header gets no extra
-	 * height (no gap at the top of the list). The windowed list positions every row at
-	 * index * baseRowHeight unless an override is given, so feed it the current header
-	 * indices on each model update.
-	 */
-	_updateLibraryHeaderHeights() {
-		if (!this.tree?._jsWindow || !this.tree._rowHeight) {
-			return;
-		}
-		// _groupedByLibrary and the row array live on the row provider, not the tree
-		let provider = this.rowProvider;
-		let customRowHeights = [];
-		if (provider._groupedByLibrary) {
-			// Headers with a section gap are made taller; bottom-aligned content (CSS)
-			// turns the extra height into a gap above the heading
-			let headerHeight = Math.round(this.tree._rowHeight * 1.5);
-			let rows = provider._rows;
-			for (let i = 0; i < rows.length; i++) {
-				if (rows[i].type == 'library-header' && rows[i].hasSectionGap) {
-					customRowHeights.push([i, headerHeight]);
-				}
-			}
-		}
-		this.tree.updateCustomRowHeights(customRowHeights);
 	}
 
 	async notify(action, type, ids, extraData) {
@@ -1126,8 +1158,9 @@ class CollectionViewItemTree extends ItemTree {
 	 * @returns {Boolean}
 	 */
 	isSelectable(index, selectAll=false) {
-		// Library header rows are never selectable
-		if (this.getRow(index)?.type == 'library-header') {
+		// Library header and spacer rows are never selectable
+		let type = this.getRow(index)?.type;
+		if (type == 'library-header' || type == 'spacer') {
 			return false;
 		}
 		// Every listed item is selectable individually. There are exceptions
@@ -1196,7 +1229,8 @@ class CollectionViewItemTree extends ItemTree {
 	 * Start a drag using HTML 5 Drag and Drop
 	 */
 	onDragStart(event, index) {
-		if (this.getRow(index)?.type == 'library-header') {
+		let type = this.getRow(index)?.type;
+		if (type == 'library-header' || type == 'spacer') {
 			event.preventDefault();
 			return false;
 		}

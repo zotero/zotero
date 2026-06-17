@@ -1424,6 +1424,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 				multiSelect: this.props.multiSelect,
 
+				stickySectionHeaders: true,
+				isSectionHeader: index => this.getRow(index)?.type == 'library-header',
+
 				onSelectionChange: this._handleSelectionChange.bind(this),
 				isSelectable: this.isSelectable.bind(this),
 				getParentIndex: this.getParentIndex.bind(this),
@@ -2189,7 +2192,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		div.classList.toggle('last-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(nextRowID));
 		div.classList.toggle('annotation-row', row.type === 'annotation');
 		div.classList.toggle('library-header-row', row.type === 'library-header');
-		div.classList.toggle('section-gap', !!row.hasSectionGap);
+		div.classList.toggle('spacer-row', row.type === 'spacer');
 		if (row.type !== 'annotation') {
 			div.classList.remove('tight');
 		}

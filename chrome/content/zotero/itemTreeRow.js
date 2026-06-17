@@ -636,8 +636,13 @@ class SearchItemTreeRow extends ItemTreeRow {
  * items list displays a multi-library selection. Wraps a Zotero.Library.
  */
 class LibraryHeaderItemTreeRow extends ItemTreeRow {
-	constructor(library) {
+	constructor(library, label, iconName) {
 		super(library, 0, false);
+		// Label and icon are computed from the selection (see
+		// CollectionViewItemTreeRow._computeSectionHeaders); fall back to the library's
+		// own name/icon when not provided
+		this._label = label;
+		this._iconName = iconName;
 	}
 
 	get type() {
@@ -645,7 +650,7 @@ class LibraryHeaderItemTreeRow extends ItemTreeRow {
 	}
 
 	getDisplayTitle() {
-		return Zotero.Libraries.getName(this.ref.libraryID);
+		return this._label ?? Zotero.Libraries.getName(this.ref.libraryID);
 	}
 
 	getField(field) {
@@ -656,20 +661,59 @@ class LibraryHeaderItemTreeRow extends ItemTreeRow {
 	}
 
 	getIcon() {
-		let icon = getCSSIcon(this.ref.libraryType == 'group' ? 'library-group' : 'library');
+		// An explicit null icon name means render no icon (e.g. the single-library
+		// summary header), distinct from undefined (use the library's own icon)
+		if (this._iconName === null) {
+			return null;
+		}
+		let iconName = this._iconName
+			?? (this.ref.libraryType == 'group' ? 'library-group' : 'library');
+		let icon = getCSSIcon(iconName);
 		icon.classList.add('icon-item-type');
 		return icon;
 	}
 
 	renderRow(div, _index, _columns, _rowData, _renderCtx) {
-		// Single cell with the library icon and name, spanning the row
+		// Single cell with an optional icon and the label, spanning the row
 		let span = document.createElement('span');
 		span.className = 'cell primary library-header';
 		let textSpan = document.createElement('span');
 		textSpan.className = 'cell-text';
 		textSpan.textContent = this.getDisplayTitle();
-		span.append(this.getIcon(), textSpan);
+		let icon = this.getIcon();
+		if (icon) {
+			span.append(icon, textSpan);
+		}
+		else {
+			// No icon, but reserve its space so the label still lines up with item titles
+			let spacer = document.createElement('span');
+			spacer.className = 'library-header-icon-spacer';
+			span.append(spacer, textSpan);
+		}
 		div.appendChild(span);
+	}
+}
+
+/**
+ * A blank, non-selectable row providing one row of whitespace above a library header
+ * (see CollectionViewItemTreeRow._insertLibraryHeaders). Kept separate from the header
+ * row so the header stays a uniform height and pins flush to the top when sticky.
+ */
+class SpacerItemTreeRow extends ItemTreeRow {
+	constructor(library) {
+		super(library, 0, false, 'spacer-' + library.libraryID);
+	}
+
+	get type() {
+		return 'spacer';
+	}
+
+	getField() {
+		return '';
+	}
+
+	renderRow(_div, _index, _columns, _rowData, _renderCtx) {
+		// Intentionally empty -- the row's height alone provides the whitespace
 	}
 }
 
@@ -688,4 +732,5 @@ module.exports.FileItemTreeRow = FileItemTreeRow;
 module.exports.AnnotationItemTreeRow = AnnotationItemTreeRow;
 module.exports.CollectionItemTreeRow = CollectionItemTreeRow;
 module.exports.SearchItemTreeRow = SearchItemTreeRow;
+module.exports.SpacerItemTreeRow = SpacerItemTreeRow;
 module.exports.LibraryHeaderItemTreeRow = LibraryHeaderItemTreeRow;
