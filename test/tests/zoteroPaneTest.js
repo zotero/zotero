@@ -1043,7 +1043,7 @@ describe("ZoteroPane", function () {
 			var c = searchBox.search.getCondition(
 				searchBox.search.addCondition("title", "contains", "foo")
 			);
-			searchBox.addCondition(c);
+			searchBox.rootGroup.addCondition(c);
 			await pane.save();
 		}
 		
