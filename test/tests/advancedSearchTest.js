@@ -160,11 +160,13 @@ describe("Advanced Search", function () {
 		await deck.pane.submit();
 		await iv.waitForLoad();
 		
-		// Matching items from both collections, but not the matching item
-		// outside the selected collections
-		assert.equal(iv.rowCount, 2);
+		// Matching items from both collections, but not the non-matching item or the
+		// matching item outside the selected collections (the row count also includes the
+		// "2 collections selected" section header)
 		assert.isNumber(iv.getRowIndexByID(inFirst.id));
 		assert.isNumber(iv.getRowIndexByID(inSecond.id));
+		assert.isFalse(iv.getRowIndexByID(noMatch.id));
+		assert.isFalse(iv.getRowIndexByID(notInCollections.id));
 		
 		await zp.setAdvancedSearchState('closed');
 		await selectLibrary(win);
