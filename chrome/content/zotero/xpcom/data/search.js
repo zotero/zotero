@@ -305,12 +305,6 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	
 	// Shortcut to add a condition on every table -- does not return an id
 	if (condition.match(/^quicksearch/)) {
-		// The full-text content post-filter in search() isn't group-aware, so it can't
-		// tell that a quicksearch's full-text matches sit inside per-word 'any' groups.
-		// This flag tells it to merge them as a union even though the top-level join mode
-		// is 'all'. Once full-text conditions participate in the group tree, this flag and
-		// the post-filter special case both go away, leaving quicksearch as plain groups.
-		this._hasQuicksearch = true;
 		var parts = Zotero.SearchConditions.parseSearchString(value);
 
 		for (let part of parts) {
@@ -568,12 +562,12 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 		this._requireData('conditions');
 	}
 	try {
-		if (!this._sql){
+		// Rebuild each run when a grouped fulltextContent is materialized into the SQL, so
+		// its matches reflect current full-text content rather than a cached set
+		if (!this._sql || this._hasEagerFullText){
 			await this._buildQuery();
 		}
 		
-		// Set true by the quicksearch expansion in addCondition()
-		var hasQuicksearch = !!this._hasQuicksearch;
 		// Set some variables for conditions to avoid further lookups
 		for (let condition of Object.values(this._conditions)) {
 			switch (condition.condition) {
@@ -663,22 +657,25 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 		//Zotero.debug(ids);
 		//Zotero.debug('Join mode: ' + this._joinMode);
 		
-		// Filter results with full-text search
+		// Filter top-level fulltextContent conditions with a full-text search (grouped
+		// ones are already in the SQL; see _buildQuery).
 		//
-		// If join mode ALL, return the (intersection of main and full-text word search)
-		// filtered by full-text content.
+		// If join mode ALL, return the intersection of the main search and full-text word
+		// search, filtered by full-text content.
 		//
-		// If join mode ANY or there's a quicksearch (which we assume fulltextContent is part of)
-		// and the main search is filtered by other conditions, return the union of the main search
-		// and (separate full-text word searches filtered by fulltext content).
+		// If join mode ANY and the main search is filtered by other conditions, return the
+		// union of the main search and (separate full-text word searches filtered by
+		// full-text content).
 		//
-		// If join mode ANY or there's a quicksearch and the main search isn't filtered, return just
-		// the union of (separate full-text word searches filtered by full-text content).
+		// If join mode ANY and the main search isn't filtered, return just the union of
+		// (separate full-text word searches filtered by full-text content).
 		var fullTextResults;
-		var joinModeAny = this._joinMode == 'any' || hasQuicksearch;
+		var joinModeAny = this._joinMode == 'any';
 		for (let condition of Object.values(this._conditions)) {
 			if (condition.condition != 'fulltextContent') continue;
-			
+			// Grouped fulltextContent is already in the SQL (materialized in _buildQuery)
+			if (this._eagerFullTextConditionIDs.has(condition.id)) continue;
+
 			if (!fullTextResults) {
 				// For join mode ANY, if we already filtered the main set, add those as results.
 				// Otherwise, start with an empty set.
@@ -976,12 +973,68 @@ Zotero.Search.idsToTempTable = async function (ids, { idColumn = 'itemID' } = {}
 };
 
 
+/**
+ * Resolve the itemIDs in this search's library/scope whose full-text content matches `value`
+ * (per `mode`). Used to materialize a fulltextContent condition that sits inside a group, so it
+ * can take part in the SQL AND/OR tree (see _buildQuery). Always returns the *matching* set; the
+ * caller applies IN/NOT IN for the contains/doesNotContain operator.
+ */
+Zotero.Search.prototype._fullTextContentMatches = async function (value, mode) {
+	var scopeIDs;
+	// Regexp can't use the word index, so scan every item in the library/scope
+	if (mode && mode.startsWith('regexp')) {
+		let s = new Zotero.Search();
+		if (this.libraryID !== null) {
+			s.libraryID = this.libraryID;
+		}
+		if (this._scope) {
+			s.setScope(this._scope, true);
+		}
+		scopeIDs = await s.search();
+	}
+	// Otherwise narrow to items matching the words via the full-text word index
+	else {
+		let splits = Zotero.Fulltext.semanticSplitter(value);
+		if (!splits.length) {
+			return [];
+		}
+		let s = new Zotero.Search();
+		if (this.libraryID !== null) {
+			s.libraryID = this.libraryID;
+		}
+		for (let split of splits) {
+			s.addCondition('fulltextWord', 'contains', split);
+		}
+		if (this._scope) {
+			s.setScope(this._scope, true);
+		}
+		scopeIDs = await s.search();
+		// A single word is fully resolved by the word index -- no phrase to verify
+		if (splits.length == 1) {
+			return scopeIDs;
+		}
+	}
+	if (!scopeIDs.length) {
+		return [];
+	}
+	let found = await Zotero.Fulltext.findTextInItems(scopeIDs, value, mode);
+	return found.map(x => x.id);
+};
+
+
 /*
  * Build the SQL query for the search
  */
 Zotero.Search.prototype._buildQuery = async function () {
 	this._requireData('conditions');
-	
+
+	// fulltextContent conditions nested inside a group are materialized into the SQL tree
+	// below (a plain itemID IN/NOT IN predicate) so they combine like any other condition.
+	// Track them so search()'s post-filter skips them, and so the query is rebuilt each run
+	// (full-text then reflects current content, as the post-filter does for top-level ones).
+	this._eagerFullTextConditionIDs = new Set();
+	this._hasEagerFullText = false;
+
 	var sql = 'SELECT itemID FROM items';
 	
 	var sqlParams = [];
@@ -989,6 +1042,9 @@ Zotero.Search.prototype._buildQuery = async function () {
 	var conditions = [];
 
 	let lastCondition;
+	// Group nesting depth as the conditions are processed, so a fulltextContent inside a
+	// group can be told apart from a top-level one
+	let loopDepth = 0;
 	let conditionsToProcess = Object.values(this._conditions);
 
 	// The search's top-level join mode, used by the full-text result merging in
@@ -1098,9 +1154,25 @@ Zotero.Search.prototype._buildQuery = async function () {
 					continue;
 				
 				case 'fulltextContent':
-					// Handled in Search.search()
+					// A fulltextContent inside a group is materialized into an itemID
+					// predicate so it joins the SQL AND/OR tree; a top-level one is left
+					// for the post-filter in search() (unchanged behavior)
+					if (loopDepth > 0) {
+						let matchIDs = await this._fullTextContentMatches(
+							condition.value, condition.mode
+						);
+						this._eagerFullTextConditionIDs.add(condition.id);
+						this._hasEagerFullText = true;
+						conditions.push({
+							name: '_fulltextContentPredicate',
+							operator: condition.operator,
+							matchIDs,
+							required: condition.required
+						});
+						this._hasPrimaryConditions = true;
+					}
 					continue;
-				
+
 				// Group markers, passed through to the condition tree assembled after the
 				// main loop. Reset lastCondition so inline-filter merging doesn't combine
 				// conditions across a group boundary.
@@ -1110,10 +1182,12 @@ Zotero.Search.prototype._buildQuery = async function () {
 					continue;
 				case 'groupStart':
 					lastCondition = null;
+					loopDepth++;
 					conditions.push({ name: 'groupStart' });
 					continue;
 				case 'groupEnd':
 					lastCondition = null;
+					loopDepth--;
 					conditions.push({ name: 'groupEnd' });
 					continue;
 				
@@ -1247,6 +1321,20 @@ Zotero.Search.prototype._buildQuery = async function () {
 				}
 				if (condition.name == 'joinMode') {
 					builtConditions.push({ marker: 'joinMode', operator: condition.operator });
+					continue;
+				}
+				// A grouped fulltextContent materialized into an itemID set (above)
+				if (condition.name == '_fulltextContentPredicate') {
+					let sql;
+					if (!condition.matchIDs.length) {
+						// No matches: 'contains' matches nothing, 'doesNotContain' matches all
+						sql = condition.operator == 'doesNotContain' ? '1' : '0';
+					}
+					else {
+						let op = condition.operator == 'doesNotContain' ? 'NOT IN' : 'IN';
+						sql = 'itemID ' + op + ' (' + condition.matchIDs.join(',') + ')';
+					}
+					builtConditions.push({ sql, params: [], required: condition.required });
 					continue;
 				}
 
