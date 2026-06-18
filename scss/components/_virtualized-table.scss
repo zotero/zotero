@@ -365,7 +365,9 @@
 // at the body's top edge instead of spilling over the column header.
 .virtualized-table-sticky-section-header {
 	position: absolute;
-	z-index: 1;
+	// Above the rows scrolling under it, including a focused row (z-index: 10000), so they
+	// pass underneath the pinned header rather than over it
+	z-index: 10001;
 	overflow: hidden;
 	pointer-events: none;
 

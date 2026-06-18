@@ -1449,16 +1449,17 @@ class VirtualizedTable extends React.Component {
 				break;
 			}
 		}
-		// Nothing to pin if there are no headers or the view is scrolled above the first
-		if (currentIndex == -1) {
+		// Show the pinned copy only once the header row has scrolled up past the top edge of
+		// the view
+		let stuck = currentIndex != -1
+			&& scrollTop > this._jsWindow._getItemPosition(currentIndex);
+		if (!stuck) {
 			clip.style.display = 'none';
 			this._stickyHeaderIndex = null;
 			return;
 		}
 		clip.style.display = '';
-		// Mark the header "stuck" once its section has scrolled up under it, so the
-		// consumer can show a divider (hairline) only while scrolling
-		clip.classList.toggle('stuck', scrollTop > this._jsWindow._getItemPosition(currentIndex));
+		clip.classList.add('stuck');
 		// Re-render only when the pinned section changes. Use _renderItem (not the raw
 		// renderItem prop) so the pinned copy gets the same post-processing as a real row
 		// (e.g. the tree's indent/twisty spacer), then drop its id to avoid duplicating the
@@ -1467,6 +1468,9 @@ class VirtualizedTable extends React.Component {
 			this._stickyHeaderIndex = currentIndex;
 			let node = this._renderItem(currentIndex);
 			node.removeAttribute('id');
+			// Strip the focus ring: focus defaults to row 0, which can be a header, but a
+			// pinned header shouldn't show focus
+			node.classList.remove('focused');
 			content.textContent = '';
 			content.appendChild(node);
 		}

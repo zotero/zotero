@@ -2669,16 +2669,22 @@ describe("CollectionViewItemTree", function () {
 			let view = zp.itemsView;
 			let tree = view.tree;
 			let body = tree._jsWindow.targetElement;
+			let userHeaderRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
 			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
 
-			// At the top of the list, the first (user library) header is pinned
+			// At the very top, the real header is in place, so nothing is pinned -- a pinned
+			// copy would just double the header
 			body.scrollTop = 0;
+			tree._updateStickySectionHeader();
+			assert.equal(tree._stickyHeader.style.display, 'none');
+
+			// Scrolling the first (user library) header up under the top pins it
+			body.scrollTop = tree._jsWindow._getItemPosition(userHeaderRow) + 5;
 			tree._updateStickySectionHeader();
 			assert.include(tree._stickyHeader.textContent,
 				Zotero.Libraries.getName(Zotero.Libraries.userLibraryID));
 
 			// The pinned header lines up horizontally with the real header row
-			let userHeaderRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
 			let realIcon = tree._jsWindow.getElementByIndex(userHeaderRow).querySelector('.icon-item-type');
 			let stickyIcon = tree._stickyHeaderContent.querySelector('.icon-item-type');
 			assert.equal(
@@ -2687,8 +2693,18 @@ describe("CollectionViewItemTree", function () {
 				"Pinned header icon should align with the real header icon"
 			);
 
-			// Scrolling the group header to the top pins the group library header instead
-			body.scrollTop = tree._jsWindow._getItemPosition(groupHeaderRow);
+			// A focused header row renders with the focus class, but the pinned copy must
+			// not carry that focus ring
+			tree.selection.focused = userHeaderRow;
+			assert.isTrue(tree._renderItem(userHeaderRow).classList.contains('focused'),
+				"Setup: a focused header row renders with the focus class");
+			tree._stickyHeaderIndex = null;
+			tree._updateStickySectionHeader();
+			assert.isFalse(tree._stickyHeaderContent.querySelector('.row').classList.contains('focused'),
+				"Pinned header should not show a focus ring");
+
+			// Scrolling the group header up under the top pins the group library header instead
+			body.scrollTop = tree._jsWindow._getItemPosition(groupHeaderRow) + 5;
 			tree._updateStickySectionHeader();
 			assert.include(tree._stickyHeader.textContent, Zotero.Libraries.getName(group.libraryID));
 
