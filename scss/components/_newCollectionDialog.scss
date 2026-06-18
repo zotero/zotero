@@ -6,4 +6,24 @@
 	menulist::part(icon) {
 		margin-inline-end: 3px;
 	}
+	
+	[hidden="true"] {
+		display: none !important;
+	}
+
+	#zotero-collections-tree-container {
+		min-width: 300px;
+		min-height: 300px;
+		max-height: 400px;
+		margin-top: 8px;
+		
+		.virtualized-table-body {
+			padding: 8px;
+		}
+	}
+	
+	#zotero-collections-tree {
+		border-radius: 5px;
+		background: var(--material-sidepane);
+	}
 }
