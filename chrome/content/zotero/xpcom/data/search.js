@@ -1075,7 +1075,9 @@ Zotero.Search.prototype._buildQuery = async function () {
 		}
 	}
 	
-	for (let condition of conditionsToProcess) {
+	// Index-based so anyField can splice its expansion in place (see below)
+	for (let conditionIndex = 0; conditionIndex < conditionsToProcess.length; conditionIndex++) {
+		let condition = conditionsToProcess[conditionIndex];
 		let name = condition.condition;
 		let conditionData = Zotero.SearchConditions.get(name);
 		
@@ -1209,54 +1211,30 @@ Zotero.Search.prototype._buildQuery = async function () {
 					conditions.push({ name: 'groupEnd' });
 					continue;
 				
-				case 'anyField':
-					// We expand this condition to the same underlying set of conditions as 'quicksearch-fields'
-					// (although we don't detect keys or split into quoted and unquoted segments). 'quicksearch-fields'
-					// is expanded in addCondition(), but we can't do that with this condition because we don't want
-					// to save the conditions it expands to in the search object.
-					// Always wrap in an OR-group: "Any Field" means "matches in any one of
-					// these fields", which is correct whether the surrounding join mode is
-					// 'all' or 'any' (an OR-group nested in an 'any' group flattens out).
-					conditionsToProcess.push({ condition: 'groupStart', operator: 'true', value: '' });
-					conditionsToProcess.push({ condition: 'joinMode', operator: 'any' });
-					conditionsToProcess.push({
-						condition: 'field',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					conditionsToProcess.push({
-						condition: 'tag',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					conditionsToProcess.push({
-						condition: 'note',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					conditionsToProcess.push({
-						condition: 'annotationText',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					conditionsToProcess.push({
-						condition: 'annotationComment',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					conditionsToProcess.push({
-						condition: 'creator',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					conditionsToProcess.push({ condition: 'groupEnd', operator: 'true', value: '' });
+				case 'anyField': {
+					// Expand to the same field set as 'quicksearch-fields' (without key
+					// detection or quoted/unquoted splitting). Done here rather than in
+					// addCondition() so the expansion isn't saved in the search object.
+					// Splice it in right after this condition so it's processed at the same
+					// nesting depth -- "Any Field" inside a group stays in that group.
+					// Always an OR-group: "Any Field" means "matches in any one of these
+					// fields", correct whether the surrounding join mode is 'all' or 'any'
+					// (an OR-group nested in an 'any' group flattens out).
+					let op = condition.operator;
+					let val = condition.value;
+					conditionsToProcess.splice(conditionIndex + 1, 0,
+						{ condition: 'groupStart', operator: 'true', value: '' },
+						{ condition: 'joinMode', operator: 'any' },
+						{ condition: 'field', operator: op, value: val },
+						{ condition: 'tag', operator: op, value: val },
+						{ condition: 'note', operator: op, value: val },
+						{ condition: 'annotationText', operator: op, value: val },
+						{ condition: 'annotationComment', operator: op, value: val },
+						{ condition: 'creator', operator: op, value: val },
+						{ condition: 'groupEnd', operator: 'true', value: '' }
+					);
 					continue;
+				}
 			}
 			
 			throw new Error('Unhandled special condition ' + name);
