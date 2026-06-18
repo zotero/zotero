@@ -1235,6 +1235,28 @@ Zotero.Search.prototype._buildQuery = async function () {
 					);
 					continue;
 				}
+				
+				case 'titleCreatorYear': {
+					// Expand to the same field set as 'quicksearch-titleCreatorYear' (without
+					// key detection or the top-level-only restriction, which the result level
+					// now handles). Spliced in after this condition like 'anyField' above, as
+					// an OR-group so it matches in any one of these fields.
+					let op = condition.operator;
+					let val = condition.value;
+					conditionsToProcess.splice(conditionIndex + 1, 0,
+						{ condition: 'groupStart', operator: 'true', value: '' },
+						{ condition: 'joinMode', operator: 'any' },
+						{ condition: 'title', operator: op, value: val },
+						{ condition: 'publicationTitle', operator: op, value: val },
+						{ condition: 'shortTitle', operator: op, value: val },
+						{ condition: 'court', operator: op, value: val },
+						{ condition: 'year', operator: op, value: val },
+						{ condition: 'citationKey', operator: op, value: val },
+						{ condition: 'creator', operator: op, value: val },
+						{ condition: 'groupEnd', operator: 'true', value: '' }
+					);
+					continue;
+				}
 			}
 			
 			throw new Error('Unhandled special condition ' + name);

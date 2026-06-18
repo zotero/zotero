@@ -1997,8 +1997,80 @@ var ZoteroPane = new function () {
 		}
 		await this.setAdvancedSearchState(state);
 	};
-	
-	
+
+
+	/**
+	 * Open the Advanced Search pane seeded from the quick search text, reproducing
+	 * the current quick search mode as editable conditions.
+	 *
+	 * The quick search field is cleared, since its text now lives in the Advanced
+	 * Search. Closing the Advanced Search resets to an unfiltered view rather than
+	 * restoring the quick search.
+	 *
+	 * @param {String} searchText
+	 * @param {String} [mode='fields'] - The quick search mode to reproduce
+	 */
+	this.openAdvancedSearchFromQuickSearch = async function (searchText, mode = 'fields') {
+		// Split into words (keeping quoted phrases intact), as the quick search does
+		let parts = Zotero.SearchConditions.parseSearchString(searchText);
+		if (!parts.length) {
+			await this.toggleAdvancedSearchState('open');
+			return;
+		}
+
+		let deck = document.getElementById('zotero-advanced-search-pane-deck');
+		let search = new Zotero.Search();
+		let libraryID = this.getSelectedLibraryID();
+		if (libraryID) {
+			search.libraryID = libraryID;
+		}
+
+		// Reproduce the quick search mode as editable conditions, one per word joined
+		// with "all": Title/Creator/Year and All Fields & Tags each map to a single
+		// condition, Everything to an "any" group of Any Field plus full-text.
+		// Title/Creator/Year matches only top-level items, so set the result level to item.
+		if (mode === 'titleCreatorYear') {
+			search.addCondition('resultLevel', 'item');
+		}
+		for (let part of parts) {
+			if (mode === 'everything') {
+				search.addCondition('groupStart', 'true', '');
+				search.addCondition('joinMode', 'any');
+				search.addCondition('anyField', 'contains', part.text);
+				search.addCondition('fulltextContent', 'contains', part.text);
+				search.addCondition('groupEnd', 'true', '');
+			}
+			else if (mode === 'titleCreatorYear') {
+				search.addCondition('titleCreatorYear', 'contains', part.text);
+			}
+			else {
+				search.addCondition('anyField', 'contains', part.text);
+			}
+		}
+
+		// Show the Advanced Search and seed it, without yet touching the items list,
+		// so that the quick search results stay visible until they're replaced below
+		deck.selectedSearchType = 'temporary';
+		deck.state = 'open';
+		deck.pane.search = search;
+		deck.pane.refresh();
+
+		// Clear the quick search text and the row's filter (without its own refresh),
+		// so the field doesn't flash empty and closing Advanced Search returns to an
+		// unfiltered view. The submit() below replaces the results in place.
+		let searchBox = document.getElementById('zotero-tb-search');
+		searchBox.updateMode();
+		searchBox.value = '';
+		this.itemsView.collectionTreeRow.setSearch('');
+
+		Zotero_Tabs.select('zotero-pane');
+		// Keep focus in the builder (on the first condition) rather than the results,
+		// so the user can refine the seeded search
+		await deck.pane.submit({ focusResults: false });
+		deck.pane.focus();
+	};
+
+
 	/**
 	 * @param {'open' | 'closed'} state
 	 */

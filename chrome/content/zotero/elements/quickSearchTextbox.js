@@ -111,7 +111,15 @@
 				advancedButton.addEventListener('command', (event) => {
 					// Don't trigger a quick search via the oncommand handler
 					event.stopPropagation();
-					ZoteroPane.toggleAdvancedSearchState('open');
+					// If there's text in the field, seed the Advanced Search with it,
+					// reproducing the current quick search mode as editable conditions.
+					let mode = Zotero.Prefs.get('search.quicksearch-mode');
+					if (this.value) {
+						ZoteroPane.openAdvancedSearchFromQuickSearch(this.value, mode);
+					}
+					else {
+						ZoteroPane.toggleAdvancedSearchState('open');
+					}
 				});
 				wrapper.appendChild(advancedButton);
 			}
