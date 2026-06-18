@@ -2331,6 +2331,28 @@ var ZoteroPane = new function () {
 		this.deleteSelectedItems();
 	}
 	
+	function getDeleteProgressHandler() {
+		let lastPercentage = -1;
+		let numberFormat = new Intl.NumberFormat();
+		return (progress, progressMax) => {
+			let percentage = progressMax
+				? Math.min(100, Math.round((progress / progressMax) * 100))
+				: 0;
+			if (percentage == lastPercentage) {
+				return;
+			}
+			lastPercentage = percentage;
+			Zotero.updateZoteroPaneProgressMeter(
+				percentage,
+				undefined,
+				Zotero.getString(
+					'pane.items.delete.progress.count',
+					[numberFormat.format(progress), numberFormat.format(progressMax)]
+				)
+			);
+		};
+	}
+
 	/*
 	 * Remove, trash, or delete item(s), depending on context
 	 *
@@ -2436,7 +2458,39 @@ var ZoteroPane = new function () {
 		}
 		
 		if (!prompt || Services.prompt.confirm(window, prompt.title, prompt.text)) {
-			await this.itemsView.deleteSelection(force);
+			let selectedItems = this.itemsView.getSelectedItems()
+				.filter(item => item instanceof Zotero.Item);
+			let isPermanentDelete = collectionTreeRow.isTrash()
+				|| (selectedItems.length && selectedItems.every(item => item.isAnnotation()));
+			let showProgress = isPermanentDelete && selectedItems.length >= 50;
+
+			if (showProgress) {
+				Zotero.showZoteroPaneProgressMeter(
+					Zotero.getString('pane.items.delete.progress'),
+					true,
+					'trash'
+				);
+				Zotero.updateZoteroPaneProgressMeter(
+					0,
+					undefined,
+					Zotero.getString(
+						'pane.items.delete.progress.count',
+						[new Intl.NumberFormat().format(0), new Intl.NumberFormat().format(selectedItems.length)]
+					)
+				);
+			}
+
+			try {
+				await this.itemsView.deleteSelection(
+					force,
+					showProgress ? { onProgress: getDeleteProgressHandler() } : undefined
+				);
+			}
+			finally {
+				if (showProgress) {
+					Zotero.hideZoteroPaneOverlays();
+				}
+			}
 		}
 	}
 	
@@ -2653,26 +2707,32 @@ var ZoteroPane = new function () {
 				+ Zotero.getString('general.actionCannotBeUndone')
 		);
 		if (result) {
-			Zotero.showZoteroPaneProgressMeter(null, true);
+			Zotero.showZoteroPaneProgressMeter(
+				Zotero.getString('pane.items.delete.progress'),
+				true,
+				'trash'
+			);
 			try {
 				let deletedSearches = await Zotero.Searches.getDeleted(libraryID, true);
 				await Zotero.Searches.erase(deletedSearches);
 				let deletedCollections = await Zotero.Collections.getDeleted(libraryID, true);
 				await Zotero.Collections.erase(deletedCollections);
-				let deleted = await Zotero.Items.emptyTrash(
+				await Zotero.Items.emptyTrash(
 					libraryID,
 					{
-						onProgress: (progress, progressMax) => {
-							var percentage = Math.round((progress / progressMax) * 100);
-							Zotero.updateZoteroPaneProgressMeter(percentage);
-						}
+						onProgress: getDeleteProgressHandler()
 					}
 				);
+				Zotero.updateZoteroPaneProgressMeter(
+					null,
+					Zotero.getString('pane.items.delete.progress.cleaning'),
+					null
+				);
+				await Zotero.purgeDataObjects();
 			}
 			finally {
 				Zotero.hideZoteroPaneOverlays();
 			}
-			await Zotero.purgeDataObjects();
 		}
 	};
 	

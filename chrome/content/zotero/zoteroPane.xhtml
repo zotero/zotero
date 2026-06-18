@@ -1436,13 +1436,22 @@
 					
 					<deck id="zotero-pane-overlay-deck" style="display: flex; justify-content: center;">
 						<box id="zotero-pane-progress" flex="1" align="center" pack="center">
-							<box id="zotero-pane-progress-box">
-								<vbox id="zotero-pane-progressmeter-container" flex="1">
+							<vbox id="zotero-pane-progress-box">
+								<hbox id="zotero-pane-progress-header" align="center">
+									<html:span id="zotero-pane-progress-icon"
+										class="icon icon-20 icon-css" hidden="true" aria-hidden="true"/>
 									<label id="zotero-pane-progress-label"/>
+								</hbox>
+								<vbox id="zotero-pane-progressmeter-container" flex="1">
 									<!-- See note in Zotero.showZoteroPaneProgressMeter()
 									<progressmeter id="zotero-pane-progressmeter" mode="undetermined"/> -->
+									<hbox id="zotero-pane-progress-status" align="center">
+										<label id="zotero-pane-progress-detail" flex="1"
+											role="status" aria-live="polite" aria-atomic="true"/>
+										<label id="zotero-pane-progress-percentage"/>
+									</hbox>
 								</vbox>
-							</box>
+							</vbox>
 						</box>
 					</deck>
 				</stack>

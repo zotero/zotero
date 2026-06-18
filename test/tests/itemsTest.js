@@ -258,6 +258,57 @@ describe("Zotero.Items", function () {
 	});
 	
 	
+	describe("#eraseInChunks()", function () {
+		it("should erase items in separate transactions and report overall progress", async function () {
+			let ids = [];
+			for (let i = 0; i < 5; i++) {
+				let item = createUnsavedDataObject('item');
+				item.deleted = true;
+				ids.push(await item.saveTx());
+			}
+
+			let progressEvents = [];
+			let eraseSpy = sinon.spy(Zotero.Items, 'erase');
+			try {
+				await Zotero.Items.eraseInChunks(
+					ids,
+					{
+						chunkSize: 2,
+						onProgress: (progress, progressMax) => {
+							progressEvents.push([progress, progressMax]);
+						}
+					}
+				);
+			}
+			finally {
+				eraseSpy.restore();
+			}
+
+			assert.deepEqual(
+				eraseSpy.getCalls().map(call => call.args[0]),
+				[
+					ids.slice(0, 2),
+					ids.slice(2, 4),
+					ids.slice(4)
+				]
+			);
+			assert.deepEqual(
+				progressEvents,
+				[
+					[1, 5],
+					[2, 5],
+					[3, 5],
+					[4, 5],
+					[5, 5]
+				]
+			);
+			for (let id of ids) {
+				assert.isFalse(await Zotero.Items.getAsync(id));
+			}
+		});
+	});
+
+
 	describe("#emptyTrash()", function () {
 		it("should delete items in the trash", async function () {
 			var item1 = createUnsavedDataObject('item');

@@ -1093,6 +1093,55 @@ Zotero.Items = function () {
 	
 	
 	/**
+	 * Permanently delete items in separate transactions to avoid blocking the UI and
+	 * accumulating a very large notifier queue.
+	 *
+	 * @param {Integer|Integer[]} ids
+	 * @param {Object} [options]
+	 * @param {Integer} [options.chunkSize=50]
+	 * @param {Function} [options.onProgress] - fn(progress, progressMax)
+	 */
+	this.eraseInChunks = async function (ids, options = {}) {
+		ids = Zotero.flattenArguments(ids);
+		if (!ids.length) {
+			return;
+		}
+
+		let chunkSize = options.chunkSize === undefined ? 50 : options.chunkSize;
+		if (!Number.isInteger(chunkSize) || chunkSize < 1) {
+			throw new Error("'chunkSize' must be a positive integer");
+		}
+
+		let processed = 0;
+		let eraseOptions = Object.assign({}, options);
+		delete eraseOptions.chunkSize;
+		delete eraseOptions.onProgress;
+
+		let reportedProgress = 0;
+		await Zotero.Utilities.Internal.forEachChunkAsync(
+			ids,
+			chunkSize,
+			async chunk => {
+				let chunkOptions = Object.assign({}, eraseOptions);
+				if (options.onProgress) {
+					chunkOptions.onProgress = progress => {
+						reportedProgress = processed + progress;
+						options.onProgress(reportedProgress, ids.length);
+					};
+				}
+				await this.erase(chunk, chunkOptions);
+				processed += chunk.length;
+				if (options.onProgress && reportedProgress < processed) {
+					reportedProgress = processed;
+					options.onProgress(reportedProgress, ids.length);
+				}
+				await Zotero.Promise.delay();
+			}
+		);
+	};
+
+
+	/**
 	 * @param {Integer} libraryID - Library to delete from
 	 * @param {Object} [options]
 	 * @param {Function} [options.onProgress] - fn(progress, progressMax)
@@ -1131,20 +1180,17 @@ Zotero.Items = function () {
 			// Show progress meter during deletions
 			let eraseOptions = options.onProgress
 				? {
-					onProgress: function (progress, progressMax) {
+					onProgress: function (progress) {
 						options.onProgress(processed + progress, deleted.length);
 					}
 				}
 				: undefined;
 			for (let x of ['top', 'child']) {
-				await Zotero.Utilities.Internal.forEachChunkAsync(
+				await this.eraseInChunks(
 					toDelete[x],
-					1000,
-					async function (chunk) {
-						await this.erase(chunk, eraseOptions);
-						processed += chunk.length;
-					}.bind(this)
+					eraseOptions
 				);
+				processed += toDelete[x].length;
 			}
 			Zotero.debug("Emptied " + deleted.length + " item(s) from trash in " + (new Date() - t) + " ms");
 			Zotero.Notifier.trigger('refresh', 'trash', libraryID);

@@ -1707,7 +1707,7 @@ class CollectionViewItemTree extends ItemTree {
 	//
 	// ///////////////////////////////////////////////////////////////////////////
 
-	async deleteSelection(force) {
+	async deleteSelection(force, options = {}) {
 		if (this.selection.count == 0) {
 			return;
 		}
@@ -1732,7 +1732,9 @@ class CollectionViewItemTree extends ItemTree {
 
 			// If all selected items are annotations, for now erase them skipping trash
 			if (selectedItems.length && selectedItems.every(item => item.isAnnotation())) {
-				await Zotero.Items.erase(selectedItemIDs);
+				await Zotero.Items.eraseInChunks(selectedItemIDs, {
+					onProgress: options.onProgress
+				});
 			}
 			else if (collectionTreeRow.isBucket()) {
 				collectionTreeRow.ref.deleteItems(ids);
@@ -1754,7 +1756,9 @@ class CollectionViewItemTree extends ItemTree {
 					await Zotero.Searches.erase(trashedSearches);
 				}
 				if (selectedItemIDs.length > 0) {
-					await Zotero.Items.erase(selectedItemIDs);
+					await Zotero.Items.eraseInChunks(selectedItemIDs, {
+						onProgress: options.onProgress
+					});
 				}
 			}
 			else if (collectionTreeRow.isRecentlyRead() && !force) {
