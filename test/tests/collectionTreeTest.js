@@ -896,6 +896,46 @@ describe("Zotero.CollectionTree", function () {
 			return canDrop;
 		};
 		
+		// Simulate a drag over a row and return the resulting dropEffect ('copy', 'move', or
+		// 'none'). Pass { move: true } to simulate the platform's move modifier being held.
+		var dragOver = function (objectType, targetRowID, ids, { move = false } = {}) {
+			var index = cv.getRowIndexByID(targetRowID);
+			
+			Zotero.DragDrop.currentDragSource = objectType == "item"
+				? zp.itemsView.collectionTreeRows[0]
+				: null;
+			
+			// Drop directly onto the middle of the row (orient 0)
+			var rowEl = {
+				classList: { contains: () => true },
+				getBoundingClientRect: () => ({ y: 0, height: 100 })
+			};
+			var dataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copyMove',
+				types: [`zotero/${objectType}`],
+				getData: function (type) {
+					if (type == `zotero/${objectType}`) {
+						return ids.join(",");
+					}
+					return "";
+				},
+				setDragImage: () => {}
+			};
+			cv.onDragOver({
+				preventDefault: () => {},
+				stopPropagation: () => {},
+				currentTarget: rowEl,
+				target: rowEl,
+				clientY: 50,
+				metaKey: move && Zotero.isMac,
+				shiftKey: move && !Zotero.isMac,
+				dataTransfer
+			}, index);
+			Zotero.DragDrop.currentDragSource = null;
+			return dataTransfer.dropEffect;
+		};
+		
 		describe("with items", function () {
 			it("should add an item to a collection", async function () {
 				var collection = await createDataObject('collection');
@@ -962,6 +1002,84 @@ describe("Zotero.CollectionTree", function () {
 				assert.equal(treeRow.ref.id, item.id);
 			});
 			
+			it("should add a multiple-library item selection to a collection, copying out-of-library items", async function () {
+				await Zotero.Users.setCurrentUserID(1);
+				await Zotero.Users.setName(1, 'Name');
+				
+				var collection = await createDataObject('collection');
+				var libraryItem = await createDataObject('item', false, { skipSelect: true });
+				
+				var group = await createGroup();
+				var groupItem = await createDataObject('item', { libraryID: group.libraryID });
+				
+				// Drop one item from the personal library and one from the group onto a
+				// personal-library collection
+				await onDrop('item', 'C' + collection.id, [libraryItem.id, groupItem.id]);
+				await collection.loadDataType('childItems');
+				
+				// The collection now contains the same-library item plus a copy of the group item
+				var childItemIDs = collection.getChildItems(true);
+				assert.lengthOf(childItemIDs, 2);
+				assert.include(childItemIDs, libraryItem.id);
+				
+				// The group item was copied into the personal library, and the copy links back to it
+				var copiedItem = Zotero.Items.get(childItemIDs.find(id => id != libraryItem.id));
+				assert.equal(copiedItem.libraryID, collection.libraryID);
+				assert.equal((await copiedItem.getLinkedItem(group.libraryID)).id, groupItem.id);
+				
+				await group.eraseTx();
+			});
+			
+			it("should disallow moving a multiple-library item selection", async function () {
+				var sourceCollection = await createDataObject('collection');
+				var targetCollection = await createDataObject('collection');
+				var libraryItem = await createDataObject('item', { collections: [sourceCollection.id] });
+
+				var group = await createGroup();
+				var groupItem = await createDataObject('item', { libraryID: group.libraryID });
+
+				// Source collection has to be selected so it's used as the drag source
+				await select(win, sourceCollection);
+				await waitForItemsLoad(win);
+
+				var ids = [libraryItem.id, groupItem.id];
+				// A plain drag copies the selection
+				assert.equal(dragOver('item', 'C' + targetCollection.id, ids), 'copy');
+				// A move is disallowed, since the out-of-library item can't be moved
+				assert.equal(dragOver('item', 'C' + targetCollection.id, ids, { move: true }), 'none');
+
+				await group.eraseTx();
+			});
+
+			it("should copy out-of-library items from a multiple-library selection dropped on a library root", async function () {
+				await Zotero.Users.setCurrentUserID(1);
+				await Zotero.Users.setName(1, 'Name');
+
+				var libraryItem = await createDataObject('item', false, { skipSelect: true });
+
+				var group = await createGroup();
+				var groupItem = await createDataObject('item', { libraryID: group.libraryID });
+
+				// Drop a personal-library item and a group item onto the personal library root: the
+				// item already in the library is a no-op, and the group item is copied in
+				var ids = (await onDrop('item', 'L' + userLibraryID, [libraryItem.id, groupItem.id])).ids;
+				assert.lengthOf(ids, 1);
+
+				var copiedItem = Zotero.Items.get(ids[0]);
+				assert.equal(copiedItem.libraryID, userLibraryID);
+				assert.equal((await copiedItem.getLinkedItem(group.libraryID)).id, groupItem.id);
+
+				await group.eraseTx();
+			});
+
+			it("should refuse a single-library selection dropped on its own library root", async function () {
+				var item1 = await createDataObject('item', false, { skipSelect: true });
+				var item2 = await createDataObject('item', false, { skipSelect: true });
+
+				// With no out-of-library items to copy, the drag is refused
+				assert.isFalse(await canDrop('item', 'L' + userLibraryID, [item1.id, item2.id]));
+			});
+
 			describe("My Publications", function () {
 				function getItemModifyPromise(item) {
 					// Add observer to wait for item modification

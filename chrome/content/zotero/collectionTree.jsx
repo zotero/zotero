@@ -1583,7 +1583,19 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					}
 				}
 				
-				if ((Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.shiftKey)) {
+				let move = (Zotero.isMac && event.metaKey) || (!Zotero.isMac && event.shiftKey);
+
+				// A selection from a multiple-collection view can span libraries. Those items can
+				// only be copied, never moved (a move can't coherently move some items and copy
+				// others), so disallow a move rather than silently substituting a copy.
+				let ids = Zotero.DragDrop.getDataFromDataTransfer(event.dataTransfer).data;
+				let items = Zotero.Items.get(ids);
+				if (new Set(items.map(item => item.libraryID)).size > 1) {
+					this.setDropEffect(event, move ? "none" : "copy");
+					return false;
+				}
+
+				if (move) {
 					this.setDropEffect(event, "move");
 				}
 				else {
@@ -1784,11 +1796,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					}
 					
 					// Intra-library drag
-					
-					// Don't allow drag onto root of same library
+
+					// An item can't be added to the root of its own library, but skip it rather
+					// than rejecting the whole drag, so a mixed-library selection can still copy
+					// its out-of-library items here. (If every item is already in this library,
+					// `skip` stays true and the drag is refused below.)
 					if (treeRow.isLibrary(true)) {
-						Zotero.debug("Can't drag into same library root");
-						return false;
+						Zotero.debug("Item " + item.id + " already in library " + treeRow.ref.libraryID);
+						continue;
 					}
 					
 					// Make sure there's at least one item that's not already in this destination
@@ -2338,42 +2353,46 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				});
 			}
 			
-			let newItems = [];
-			let newIDs = [];
+			// Route each item by its own library: items already in the target library are added
+			// directly, while items from other libraries are copied into the target library. A
+			// selection can span multiple libraries when dragging from a multiple-collection view.
+			let sameLibraryItems = [];
+			let otherLibraryItems = [];
 			let toMove = [];
-			// TODO: support items coming from different sources?
-			let sameLibrary = items[0].libraryID == targetLibraryID
-			
 			for (let item of items) {
 				if (!item.isTopLevelItem()) {
 					continue;
 				}
 				
-				newItems.push(item);
-				
-				if (sameLibrary) {
-					newIDs.push(item.id);
+				if (item.libraryID == targetLibraryID) {
+					sameLibraryItems.push(item);
 					toMove.push(item.id);
 				}
+				else {
+					otherLibraryItems.push(item);
+				}
 			}
-			if (sameLibrary) {
-				// Add items to target container in the same library.
+			
+			// Add same-library items to the target container
+			if (sameLibraryItems.length) {
 				if (targetCollectionID) {
-					let ids = newIDs.filter(itemID => Zotero.Items.get(itemID).isTopLevelItem());
+					let ids = sameLibraryItems.map(item => item.id);
 					await Zotero.DB.executeTransaction(async function () {
 						let collection = await Zotero.Collections.getAsync(targetCollectionID);
 						await collection.addItems(ids);
 					}.bind(this));
 				}
 				else if (targetTreeRow.isPublications()) {
-					await Zotero.Items.addToPublications(newItems, copyOptions);
+					await Zotero.Items.addToPublications(sameLibraryItems, copyOptions);
 				}
 			}
-			else {
+			
+			// Copy items from other libraries into the target library
+			if (otherLibraryItems.length) {
 				let toReconcile = [];
 				
 				await Zotero.Utilities.Internal.forEachChunkAsync(
-					newItems,
+					otherLibraryItems,
 					100,
 					function (chunk) {
 						return Zotero.DB.executeTransaction(async () => {
@@ -2442,11 +2461,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 			
 			
-			// If moving, remove items from source collection
-			if (dropEffect == 'move' && toMove.length) {
-				if (!sameLibrary) {
-					throw new Error("Cannot move items between libraries");
-				}
+			// If moving, remove items from source collection. A move of a mixed-library selection
+			// is disallowed in onDragOver(), so it shouldn't reach here; guard against a partial
+			// move just in case, since only the same-library items would be moved.
+			if (dropEffect == 'move' && toMove.length && !otherLibraryItems.length) {
 				if (!sourceTreeRow || !sourceTreeRow.isCollection()) {
 					throw new Error("Drag source must be a collection for move action");
 				}
