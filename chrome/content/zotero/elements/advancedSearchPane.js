@@ -187,15 +187,20 @@
 			await ZoteroPane.setSavedSearchEditorState('closed');
 		}
 
-		async submit() {
+		async submit({ focusResults = true } = {}) {
 			if (this.type === 'saved') {
 				throw new Error('submit() is unsupported for saved search');
 			}
-			
+
 			this._searchElem.updateSearch();
 			this._active = true;
 			await ZoteroPane.itemsView.setFilter('advanced-search', this._search);
-			ZoteroPane.itemsView.focus();
+			// Running the search normally moves focus to the results, but a caller that
+			// wants to keep focus in the search builder (e.g. quick search prefill) can
+			// opt out
+			if (focusResults) {
+				ZoteroPane.itemsView.focus();
+			}
 		}
 		
 		async clear() {

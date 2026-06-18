@@ -52,7 +52,82 @@ describe("Advanced Search", function () {
 		await otherItem.eraseTx();
 	});
 	
+	it("should seed from the quick search text and reset on close", async function () {
+		var match = await createDataObject('item', { title: "alpha beta" });
+		var partial = await createDataObject('item', { title: "alpha gamma" });
+		var neither = await createDataObject('item', { title: "delta" });
+
+		var searchBox = win.document.getElementById('zotero-tb-search');
+		searchBox.value = 'alpha beta';
+		await zp.itemsView.setFilter('search', 'alpha beta');
+
+		await zp.openAdvancedSearchFromQuickSearch('alpha beta', 'fields');
+		var iv = zp.itemsView;
+		await iv.waitForLoad();
+
+		// One "Any Field" condition per word, joined with "all"
+		var conditions = Object.values(deck.pane.search.getConditions())
+			.filter(c => c.condition === 'anyField');
+		assert.lengthOf(conditions, 2);
+		assert.sameMembers(conditions.map(c => c.value), ['alpha', 'beta']);
+
+		// Only the item matching both words, and the quick search field is cleared
+		assert.equal(iv.rowCount, 1);
+		assert.isNumber(iv.getRowIndexByID(match.id));
+		assert.equal(searchBox.value, '');
+
+		// Closing resets to an unfiltered view (doesn't restore the quick search)
+		await zp.setAdvancedSearchState('closed');
+		await iv.waitForLoad();
+		assert.equal(iv.rowCount, 3);
+
+		await Zotero.Items.erase([match.id, partial.id, neither.id]);
+	});
 	
+	it("should seed an \"Everything\" quick search as full-text groups", async function () {
+		await zp.openAdvancedSearchFromQuickSearch('alpha beta', 'everything');
+		await zp.itemsView.waitForLoad();
+
+		// Each word -> an "any" group of [Any Field, Full Text Content]
+		var conds = Object.values(deck.pane.search.getConditions());
+		assert.lengthOf(conds.filter(c => c.condition === 'groupStart'), 2);
+		assert.lengthOf(conds.filter(c => c.condition === 'anyField'), 2);
+		assert.sameMembers(
+			conds.filter(c => c.condition === 'fulltextContent').map(c => c.value),
+			['alpha', 'beta']
+		);
+
+		await zp.setAdvancedSearchState('closed');
+	});
+	it("should prefill a Title/Creator/Year quick search, restricted to top-level items", async function () {
+		// A top-level item whose title matches both words, and an item whose only match is a
+		// child attachment's title (which shouldn't broaden a top-level-only search)
+		var topMatch = await createDataObject('item', { title: "alpha beta" });
+		var childOnly = await createDataObject('item', { title: "zzznomatch" });
+		var attachment = await importPDFAttachment(childOnly);
+		attachment.setField('title', 'alpha beta');
+		await attachment.saveTx();
+
+		await zp.openAdvancedSearchFromQuickSearch('alpha beta', 'titleCreatorYear');
+		var iv = zp.itemsView;
+		await iv.waitForLoad();
+
+		// One "Title, Creator, Year" condition per word, plus a result level of item
+		var conds = Object.values(deck.pane.search.getConditions());
+		var tcy = conds.filter(c => c.condition === 'titleCreatorYear');
+		assert.lengthOf(tcy, 2);
+		assert.sameMembers(tcy.map(c => c.value), ['alpha', 'beta']);
+		assert.isTrue(conds.some(c => c.condition === 'resultLevel' && c.operator === 'item'));
+
+		// The top-level title matches; the child attachment's matching title doesn't broaden it
+		assert.equal(iv.rowCount, 1);
+		assert.isNumber(iv.getRowIndexByID(topMatch.id));
+
+		await zp.setAdvancedSearchState('closed');
+		await topMatch.eraseTx();
+		await childOnly.eraseTx();
+	});
+
 	it("should run a cross-level search across a multi-collection selection", async function () {
 		var word = 'zmc' + Zotero.Utilities.randomString();
 		var makeMatch = async function (collection) {
@@ -102,6 +177,7 @@ describe("Advanced Search", function () {
 		await Zotero.Collections.erase([c1.id, c2.id, c3.id]);
 	});
 	
+
 	it("shouldn't show trashed items outside the trash", async function () {
 		var item = await createDataObject('item', { setTitle: true });
 		item.deleted = true;

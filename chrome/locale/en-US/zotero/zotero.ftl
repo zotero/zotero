@@ -997,6 +997,7 @@ search-conditions-lastRead = Attachment Last Read
 search-conditions-annotationText = Annotation Text
 search-conditions-annotationComment = Annotation Comment
 search-conditions-anyField = Any Field
+search-conditions-titleCreatorYear = Title, Creator, Year
 
 find-pdf-files-added = { $count ->
     [one] { $count } file added

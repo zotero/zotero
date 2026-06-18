@@ -1201,6 +1201,29 @@ describe("Zotero.Search", function () {
 					assert.include(matches, annotation.id);
 				});
 			});
+			describe("titleCreatorYear", function () {
+				it("should match title, creator, and year but not other fields", async function () {
+					var word = 'ztcy' + Zotero.Utilities.randomString();
+					// Matches via title
+					var byTitle = await createDataObject('item', { title: 'a ' + word + ' b' });
+					// Matches via creator
+					var byCreator = await createDataObject('item', {
+						creators: [{ creatorType: 'author', lastName: word, firstName: 'X' }]
+					});
+					// Has the word only in a field outside the title/creator/year set
+					var byOther = await createDataObject('item');
+					byOther.setField('abstractNote', 'a ' + word + ' b');
+					await byOther.saveTx();
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('titleCreatorYear', 'contains', word);
+					assert.sameMembers(await s.search(), [byTitle.id, byCreator.id]);
+					
+					await Zotero.Items.erase([byTitle.id, byCreator.id, byOther.id]);
+				});
+			});
+			
 			
 			describe("savedSearch", function () {
 				it("should return items in the saved search", async function () {

@@ -521,7 +521,19 @@ Zotero.SearchConditions = new function () {
 				},
 				special: false
 			},
-			
+
+			{
+				name: 'titleCreatorYear',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true,
+					beginsWith: true
+				},
+				special: false
+			},
+
 			{
 				name: 'datefield',
 				operators: {
