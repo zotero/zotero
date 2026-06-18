@@ -51,7 +51,7 @@ Zotero.Retractions = {
 		// Load mappings of keys (DOI hashes and PMIDs) to items and vice versa and register for
 		// item changes so they can be kept up to date in notify().
 		await this._cacheKeyMappings();
-		Zotero.Notifier.registerObserver(this, ['item', 'group'], 'retractions', 20);
+		Zotero.Notifier.registerObserver(this, ['item', 'group', 'sync'], 'retractions', 20);
 		
 		// Load in the cached prefix list that we check new items against
 		try {
@@ -106,6 +106,7 @@ Zotero.Retractions = {
 		this._cacheDOIPrefixLength = null;
 		this._cachePMIDPrefixLength = null;
 		this._cachePrefixList = new Set();
+		this._suppressAlerts = false;
 	},
 	
 	/**
@@ -378,6 +379,20 @@ Zotero.Retractions = {
 			return;
 		}
 		
+		if (type == 'sync') {
+			// If there's no stored user yet, this is the first sync on this computer.
+			// Suppress the retraction banner until the sync completes -- we don't want
+			// to alert on items that were already in the library before we started
+			// checking.
+			if (action == 'start' && !Zotero.Users.getCurrentUserID()) {
+				this._suppressAlerts = true;
+			}
+			else if (action == 'finish') {
+				this._suppressAlerts = false;
+			}
+			return;
+		}
+
 		// Clean up cache on group deletion
 		if (type == 'group') {
 			if (action == 'delete') {
@@ -645,7 +660,7 @@ Zotero.Retractions = {
 		}
 		Zotero.debug(msg);
 		addedItemIDs = [...addedItemIDs];
-		if (addedItemIDs.length) {
+		if (addedItemIDs.length && !this._suppressAlerts) {
 			this._showAlert(addedItemIDs); // async
 		}
 		return addedItemIDs;
