@@ -25,6 +25,14 @@
 		padding-inline-start: 8px;
 		padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
 		box-sizing: border-box;
+		// A clear divider below the column headers (the default faint border is lost
+		// against the white section-header/spacer rows below it). The header already
+		// carries a second 1px line via ::after, so drop that one to avoid doubling.
+		border-bottom: var(--material-panedivider);
+
+		&::after {
+			border-bottom: none;
+		}
 
 		.cell.hasAttachment,
 		.cell.numNotes {
@@ -75,7 +83,8 @@
 	
 	.virtualized-table, .drag-image-container {
 		.row {
-			&.odd:not(.selected) {
+			// Header and spacer rows are always the pane background, never striped
+			&.odd:not(.selected):not(.library-header-row):not(.spacer-row) {
 				background-color: var(--material-stripe);
 			}
 
@@ -215,8 +224,15 @@
 			}
 		}
 
-		// Section header above each library's items in a cross-library selection.
+		// Section header above each library's items in a cross-library selection. These
+		// rows are pinned to the top while their section is scrolled (see the sticky
+		// section header support in virtualized-table), so they're a uniform height with
+		// top-aligned content. The background matches the pane so the items below stripe
+		// against it; square corners keep the on-scroll hairline from curving at the edges.
 		.library-header-row {
+			background-color: var(--material-background);
+			border-radius: 0;
+
 			.cell.library-header {
 				display: flex;
 				align-items: center;
@@ -225,10 +241,32 @@
 				color: var(--fill-secondary);
 
 				.icon-item-type {
-					margin-inline-end: 6px;
+					margin-inline-end: 4px;
 					opacity: 0.8;
 				}
+
+				// Stands in for a missing icon (single-library summary header) so the
+				// label still aligns with the item titles below it
+				.library-header-icon-spacer {
+					width: 16px;
+					margin-inline-end: 4px;
+					flex-shrink: 0;
+				}
 			}
+		}
+
+		// The divider under a section header shows only while its section is scrolled
+		// under the pinned copy (see the "stuck" state in virtualized-table). Drawn as a
+		// box-shadow rather than a border so toggling it doesn't shift the row's content.
+		.virtualized-table-sticky-section-header.stuck .library-header-row {
+			box-shadow: inset 0 -1px 0 var(--color-panedivider);
+		}
+
+		// Blank whitespace row above each library header (except the first); matches the
+		// pane background so it reads as empty space rather than a striped row
+		.spacer-row {
+			background-color: var(--material-background);
+			pointer-events: none;
 		}
 
 		.annotation-row {

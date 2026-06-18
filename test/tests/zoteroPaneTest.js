@@ -2236,10 +2236,12 @@ describe("ZoteroPane", function () {
 				await selectMultipleCollections([collection1, collection2]);
 
 				let itemsView = zp.itemsView;
-				// Count how many times the item appears
+				// Count how many times the item appears. Compare the row's ref object
+				// rather than its id: a section header's ref is the library, whose id can
+				// collide with an item id in a fresh database.
 				let count = 0;
 				for (let i = 0; i < itemsView.rowCount; i++) {
-					if (itemsView.getRow(i).ref.id === item.id) {
+					if (itemsView.getRow(i).ref === item) {
 						count++;
 					}
 				}

@@ -195,6 +195,41 @@ collections-menu-show-recently-read =
     .label = Show { recently-read }
 item-menu-remove-from-recently-read =
     .label = Remove from { recently-read }…
+
+# Item list section headers for a multiple-row collection-tree selection within one library
+items-section-collections-selected =
+    { $count ->
+        [one] { $count } collection selected
+       *[other] { $count } collections selected
+    }
+items-section-searches-selected =
+    { $count ->
+        [one] { $count } saved search selected
+       *[other] { $count } saved searches selected
+    }
+items-section-sources-selected =
+    { $count ->
+        [one] { $count } source selected
+       *[other] { $count } sources selected
+    }
+# Item list section headers for a selection spanning multiple libraries, one per library
+items-section-library-collections =
+    { $count ->
+        [one] { $library } ({ $count } collection selected)
+       *[other] { $library } ({ $count } collections selected)
+    }
+items-section-library-searches =
+    { $count ->
+        [one] { $library } ({ $count } saved search selected)
+       *[other] { $library } ({ $count } saved searches selected)
+    }
+items-section-library-sources =
+    { $count ->
+        [one] { $library } ({ $count } source selected)
+       *[other] { $library } ({ $count } sources selected)
+    }
+items-section-library-recently-read = { $library } ({ recently-read })
+items-section-library = { $library }
 collections-menu-rename =
     .label = Rename
 edit-saved-search = Edit Saved Search

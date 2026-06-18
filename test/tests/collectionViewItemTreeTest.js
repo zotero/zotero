@@ -2650,6 +2650,12 @@ describe("CollectionViewItemTree", function () {
 	});
 
 	describe("Library grouping", function () {
+		// Fluent wraps interpolated values in bidi isolation marks; strip them for
+		// plain-text comparisons
+		function stripBidi(str) {
+			return str.replace(/[⁦-⁩]/g, '');
+		}
+
 		async function selectMultipleCollections(collections) {
 			await cv.selectByID("C" + collections[0].id);
 			await waitForItemsLoad(win);
@@ -2693,11 +2699,114 @@ describe("CollectionViewItemTree", function () {
 			// Header rows aren't selectable
 			assert.isFalse(view.isSelectable(userHeaderRow));
 
+			// Each cross-library header is the library name plus what's selected in it
+			assert.equal(stripBidi(view.getRow(groupHeaderRow).getDisplayTitle()),
+				Zotero.Libraries.getName(group.libraryID) + " (1 collection selected)");
+
+			// A blank spacer row sits above every header except the first, for whitespace
+			// separating the sections
+			assert.notEqual(view.getRow(userHeaderRow - 1)?.type, 'spacer',
+				"No spacer above the first header");
+			assert.equal(view.getRow(groupHeaderRow - 1).type, 'spacer',
+				"Spacer row above a later header");
+			assert.isFalse(view.isSelectable(groupHeaderRow - 1),
+				"Spacer rows aren't selectable");
+
 			await selectLibrary(win);
 			await group.eraseTx();
 		});
 
-		it("shouldn't group when all items are in a single library", async function () {
+		it("should pin the section header of the library scrolled to the top", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			await createDataObject('item', { collections: [collection1.id] });
+			// Enough group items below the group header that it can be scrolled to the top
+			await Zotero.DB.executeTransaction(async function () {
+				for (let i = 0; i < 60; i++) {
+					let item = createUnsavedDataObject(
+						'item', { libraryID: group.libraryID, collections: [collection2.id] }
+					);
+					await item.save();
+				}
+			});
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			let tree = view.tree;
+			let body = tree._jsWindow.targetElement;
+			let userHeaderRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
+			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
+
+			// At the very top, the real header is in place, so nothing is pinned -- a pinned
+			// copy would just double the header
+			body.scrollTop = 0;
+			tree._updateStickySectionHeader();
+			assert.equal(tree._stickyHeader.style.display, 'none');
+
+			// Scrolling the first (user library) header up under the top pins it
+			body.scrollTop = tree._jsWindow._getItemPosition(userHeaderRow) + 5;
+			tree._updateStickySectionHeader();
+			assert.include(tree._stickyHeader.textContent,
+				Zotero.Libraries.getName(Zotero.Libraries.userLibraryID));
+
+			// The pinned header lines up horizontally with the real header row
+			let realIcon = tree._jsWindow.getElementByIndex(userHeaderRow).querySelector('.icon-item-type');
+			let stickyIcon = tree._stickyHeaderContent.querySelector('.icon-item-type');
+			assert.equal(
+				stickyIcon.getBoundingClientRect().left,
+				realIcon.getBoundingClientRect().left,
+				"Pinned header icon should align with the real header icon"
+			);
+
+			// A focused header row renders with the focus class, but the pinned copy must
+			// not carry that focus ring
+			tree.selection.focused = userHeaderRow;
+			assert.isTrue(tree._renderItem(userHeaderRow).classList.contains('focused'),
+				"Setup: a focused header row renders with the focus class");
+			tree._stickyHeaderIndex = null;
+			tree._updateStickySectionHeader();
+			assert.isFalse(tree._stickyHeaderContent.querySelector('.row').classList.contains('focused'),
+				"Pinned header should not show a focus ring");
+
+			// Scrolling the group header up under the top pins the group library header instead
+			body.scrollTop = tree._jsWindow._getItemPosition(groupHeaderRow) + 5;
+			tree._updateStickySectionHeader();
+			assert.include(tree._stickyHeader.textContent, Zotero.Libraries.getName(group.libraryID));
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("should restart row striping at each section header", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			// One user-library item so the group's first item falls on an even absolute index
+			await createDataObject('item', { collections: [collection1.id] });
+			await createDataObject('item', { libraryID: group.libraryID, collections: [collection2.id] });
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			let tree = view.tree;
+			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
+			let firstGroupItemRow = groupHeaderRow + 1;
+			// The header is the section's unstriped row, so the item right below it is
+			// striped (odd) -- even though its absolute index is even
+			assert.equal(firstGroupItemRow % 2, 0, "Setup: first group item at an even index");
+			let elem = tree._jsWindow.getElementByIndex(firstGroupItemRow);
+			assert.isTrue(elem.classList.contains('odd'), "First item below a header is striped");
+			assert.isFalse(elem.classList.contains('even'));
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("should show one summary header but not group for a single-library multi-selection", async function () {
 			let collection1 = await createDataObject('collection');
 			let collection2 = await createDataObject('collection');
 			let item1 = await createDataObject('item', { collections: [collection1.id] });
@@ -2706,9 +2815,11 @@ describe("CollectionViewItemTree", function () {
 			await selectMultipleCollections([collection1, collection2]);
 
 			let view = zp.itemsView;
+			// One library -> a single summary header, but not grouped into sections
 			assert.isFalse(view.rowProvider._groupedByLibrary);
-			assert.isFalse(view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID),
-				"No library header should be shown for a single-library selection");
+			let headerRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
+			assert.isNumber(headerRow, "A summary header should be shown");
+			assert.equal(stripBidi(view.getRow(headerRow).getDisplayTitle()), "2 collections selected");
 			assert.isNumber(view.getRowIndexByID(item1.id));
 			assert.isNumber(view.getRowIndexByID(item2.id));
 
