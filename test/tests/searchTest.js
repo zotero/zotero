@@ -494,6 +494,56 @@ describe("Zotero.Search", function () {
 					assert.notIncludeMembers(matches, [foobarItem.id]);
 					assert.includeMembers(matches, [fooItem.id, bazItem.id]);
 				});
+
+				// fulltextContent inside a group must combine with its siblings under the
+				// group's own join mode, not the search's top-level mode (it used to be
+				// applied as a global post-filter keyed on the top-level join mode)
+				it("should obey the group join mode for a grouped fulltextContent", async function () {
+					// OR: (title is foo.html OR full-text "foo bar") matches the title item and the text item
+					var orSearch = new Zotero.Search();
+					orSearch.libraryID = userLibraryID;
+					orSearch.addCondition('groupStart', 'true', '');
+					orSearch.addCondition('joinMode', 'any');
+					orSearch.addCondition('title', 'is', fooItem.getField('title'));
+					orSearch.addCondition('fulltextContent', 'contains', 'foo bar');
+					orSearch.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await orSearch.search(), [fooItem.id, foobarItem.id]);
+
+					// AND: title is foo.html OR (title is foobar.html AND full-text "nomatchphrase").
+					// The group's full-text doesn't match, so only fooItem (the OR branch) matches.
+					var andSearch = new Zotero.Search();
+					andSearch.libraryID = userLibraryID;
+					andSearch.addCondition('joinMode', 'any');
+					andSearch.addCondition('title', 'is', fooItem.getField('title'));
+					andSearch.addCondition('groupStart', 'true', '');
+					andSearch.addCondition('joinMode', 'all');
+					andSearch.addCondition('title', 'is', foobarItem.getField('title'));
+					andSearch.addCondition('fulltextContent', 'contains', 'nomatchphrase');
+					andSearch.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await andSearch.search(), [fooItem.id]);
+				});
+
+				it("should compose a grouped fulltextContent in doesNotContain and regexp modes", async function () {
+					// doesNotContain: (full-text doesNotContain "foo" AND title is baz.pdf) -> bazItem
+					var neg = new Zotero.Search();
+					neg.libraryID = userLibraryID;
+					neg.addCondition('groupStart', 'true', '');
+					neg.addCondition('joinMode', 'all');
+					neg.addCondition('fulltextContent', 'doesNotContain', 'foo');
+					neg.addCondition('title', 'is', bazItem.getField('title'));
+					neg.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await neg.search(), [bazItem.id]);
+
+					// regexp: (title is foo.html OR full-text regexp "foo.+bar") -> both
+					var re = new Zotero.Search();
+					re.libraryID = userLibraryID;
+					re.addCondition('groupStart', 'true', '');
+					re.addCondition('joinMode', 'any');
+					re.addCondition('title', 'is', fooItem.getField('title'));
+					re.addCondition('fulltextContent/regexp', 'contains', 'foo.+bar');
+					re.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await re.search(), [fooItem.id, foobarItem.id]);
+				});
 			});
 			
 			describe("annotationText", function () {
