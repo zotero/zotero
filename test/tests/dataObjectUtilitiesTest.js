@@ -345,7 +345,44 @@ describe("Zotero.DataObjectUtilities", function () {
 					Zotero.debug(changes);
 					assert.lengthOf(changes, 0);
 				})
-				
+
+				it("should diff conditions as an ordered unit, not an unordered set", function () {
+					// Condition order and group markers are structural, so the same conditions
+					// with the group wrapping a different one is a real change the diff must catch.
+					var json1 = {
+						conditions: [
+							{ condition: 'title', operator: 'contains', value: 'foo' },
+							{ condition: 'groupStart', operator: 'true', value: '' },
+							{ condition: 'tag', operator: 'is', value: 'x' },
+							{ condition: 'groupEnd', operator: 'true', value: '' }
+						]
+					};
+					var json2 = {
+						conditions: [
+							{ condition: 'groupStart', operator: 'true', value: '' },
+							{ condition: 'title', operator: 'contains', value: 'foo' },
+							{ condition: 'groupEnd', operator: 'true', value: '' },
+							{ condition: 'tag', operator: 'is', value: 'x' }
+						]
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 1);
+					assert.equal(changes[0].field, 'conditions');
+					assert.equal(changes[0].op, 'modify');
+					assert.deepEqual(changes[0].value, json2.conditions);
+				})
+
+				it("should show no change for identical conditions", function () {
+					var json1 = {
+						conditions: [{ condition: 'title', operator: 'is', value: 'A' }]
+					};
+					var json2 = {
+						conditions: [{ condition: 'title', operator: 'is', value: 'A' }]
+					};
+					var changes = Zotero.DataObjectUtilities.diff(json1, json2);
+					assert.lengthOf(changes, 0);
+				})
+
 				/*it("should not show an empty conditions object and a missing one as different", function () {
 					var json1 = {
 						conditions: []
@@ -738,82 +775,25 @@ describe("Zotero.DataObjectUtilities", function () {
 		// Search conditions
 		//
 		describe("conditions", function () {
-			it("should add a condition", function () {
+			// Conditions are applied as a whole ordered array (op: 'modify'), not merged
+			// member-by-member, so group structure (order + marker pairing) is preserved
+			it("should replace conditions with the modified array", function () {
 				var json = {
 					conditions: [
-						{
-							condition: "title",
-							op: "contains",
-							value: "A"
-						}
+						{ condition: "title", operator: "contains", value: "A" }
 					]
 				};
+				var newConditions = [
+					{ condition: "title", operator: "contains", value: "A" },
+					{ condition: "groupStart", operator: "true", value: "" },
+					{ condition: "tag", operator: "is", value: "x" },
+					{ condition: "groupEnd", operator: "true", value: "" }
+				];
 				var changes = [
-					{
-						field: "conditions",
-						op: "member-add",
-						value: {
-							condition: "title",
-							op: "contains",
-							value: "B"
-						}
-					}
+					{ field: "conditions", op: "modify", value: newConditions }
 				];
 				Zotero.DataObjectUtilities.applyChanges(json, changes);
-				assert.sameDeepMembers(
-					json.conditions,
-					[
-						{
-							condition: "title",
-							op: "contains",
-							value: "A"
-						},
-						{
-							condition: "title",
-							op: "contains",
-							value: "B"
-						}
-					]
-				);
-			})
-			
-			it("should remove a condition", function () {
-				var json = {
-					conditions: [
-						{
-							condition: "title",
-							op: "contains",
-							value: "A"
-						},
-						{
-							condition: "title",
-							op: "contains",
-							value: "B"
-						}
-					]
-				};
-				var changes = [
-					{
-						field: "conditions",
-						op: "member-remove",
-						value: {
-							condition: "title",
-							op: "contains",
-							value: "B"
-						}
-					}
-				];
-				Zotero.DataObjectUtilities.applyChanges(json, changes);
-				assert.sameDeepMembers(
-					json.conditions,
-					[
-						{
-							condition: "title",
-							op: "contains",
-							value: "A"
-						}
-					]
-				);
+				assert.deepEqual(json.conditions, newConditions);
 			})
 		})
 	})
