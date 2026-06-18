@@ -1113,6 +1113,25 @@ describe("Zotero.Search", function () {
 			});
 
 			describe("anyField", function () {
+				it("should expand an 'any field' within its own group", async function () {
+					// (anyField contains "znestfoo" OR title contains "zzznomatch") -> the
+					// item matches via Any Field. If the Any Field expansion leaked to the
+					// top level (ANDed) instead of staying in this OR-group, the
+					// non-matching title would exclude it.
+					var item = await createDataObject('item', { title: "znestfoo" });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('groupStart', 'true', '');
+					s.addCondition('joinMode', 'any');
+					s.addCondition('anyField', 'contains', "znestfoo");
+					s.addCondition('title', 'contains', "zzznomatch");
+					s.addCondition('groupEnd', 'true', '');
+					var matches = await s.search();
+					assert.includeMembers(matches, [item.id]);
+
+					await item.eraseTx();
+				});
 				it("should return matches for multiple 'any field' conditions with joinMode=any", async function () {
 					var itemOne = await createDataObject('item', { title: "one" });
 					var itemTwo = await createDataObject('item', { title: "two" });
