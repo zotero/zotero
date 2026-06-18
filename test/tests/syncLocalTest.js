@@ -2324,12 +2324,19 @@ describe("Zotero.Sync.Data.Local", function () {
 						},
 						{
 							field: "conditions",
-							op: "member-add",
-							value: {
-								condition: "place",
-								operator: "is",
-								value: "Chicago"
-							}
+							op: "modify",
+							value: [
+								{
+									condition: "title",
+									operator: "contains",
+									value: "A"
+								},
+								{
+									condition: "place",
+									operator: "is",
+									value: "Chicago"
+								}
+							]
 						}
 					]
 				);
@@ -2401,21 +2408,19 @@ describe("Zotero.Sync.Data.Local", function () {
 					[
 						{
 							field: "conditions",
-							op: "member-add",
-							value: {
-								condition: "place",
-								operator: "is",
-								value: "New York"
-							}
-						},
-						{
-							field: "conditions",
-							op: "member-remove",
-							value: {
-								condition: "place",
-								operator: "is",
-								value: "Chicago"
-							}
+							op: "modify",
+							value: [
+								{
+									condition: "title",
+									operator: "contains",
+									value: "A"
+								},
+								{
+									condition: "place",
+									operator: "is",
+									value: "New York"
+								}
+							]
 						}
 					]
 				);
@@ -2568,12 +2573,19 @@ describe("Zotero.Sync.Data.Local", function () {
 						},
 						{
 							field: "conditions",
-							op: "member-add",
-							value: {
-								condition: "place",
-								operator: "is",
-								value: "Chicago"
-							}
+							op: "modify",
+							value: [
+								{
+									condition: "title",
+									operator: "contains",
+									value: "A"
+								},
+								{
+									condition: "place",
+									operator: "is",
+									value: "Chicago"
+								}
+							]
 						}
 					]
 				);
