@@ -358,6 +358,31 @@
 	}
 }
 
+// Pinned copy of the current section's header row. The outer element is a fixed clip
+// region anchored over the top of the body, aligned to the rows' container so the pinned
+// row lines up with the real rows (positioned/sized in virtualized-table.jsx). The inner
+// element is opaque and translates, so a header pushed up by the next section is clipped
+// at the body's top edge instead of spilling over the column header.
+.virtualized-table-sticky-section-header {
+	position: absolute;
+	// Above the rows scrolling under it, including a focused row (z-index: 10000), so they
+	// pass underneath the pinned header rather than over it
+	z-index: 10001;
+	overflow: hidden;
+	pointer-events: none;
+
+	.virtualized-table-sticky-section-header-content {
+		box-sizing: border-box;
+		padding: 4px 8px 0;
+		// Opaque so the pinned header occludes the rows (and the real header row) beneath it
+		background-color: var(--material-background);
+
+		.row {
+			position: static;
+		}
+	}
+}
+
 .virtualized-table-body, .drag-image-container {
 	flex: 1 0;
 	max-width: 100%;
