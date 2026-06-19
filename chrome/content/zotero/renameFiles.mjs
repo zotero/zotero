@@ -252,9 +252,11 @@ export function registerAutoRenameFileFromParent() {
 
 				let parentItemBefore = parentItem.clone(null, { skipTags: true, includeCollections: false });
 				let validFields = Zotero.ItemFields.getItemTypeFields(parentItem.itemTypeID).map(fieldID => Zotero.ItemFields.getName(fieldID));
+				let previousItemType = null;
 				for (let [key, value] of changes) {
 					if (key === 'itemType') {
-						parentItemBefore.setType(value);
+						// Defer the type change until after the field changes below
+						previousItemType = value;
 					}
 					else if (key === 'creators') {
 						parentItemBefore.setCreators(Object.values(value));
@@ -262,6 +264,11 @@ export function registerAutoRenameFileFromParent() {
 					else if (validFields.includes(key)) {
 						parentItemBefore.setField(key, value);
 					}
+				}
+				if (previousItemType !== null) {
+					// Revert the type last. The field values above were recorded under the
+					// current type's field names, so they are base-field migrated by `setType()`
+					parentItemBefore.setType(Zotero.ItemTypes.getID(previousItemType));
 				}
 
 				await attachmentItem.loadDataType('itemData');

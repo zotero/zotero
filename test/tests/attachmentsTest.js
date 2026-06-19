@@ -2652,5 +2652,71 @@ describe("Zotero.Attachments", function () {
 			await attachment1.eraseTx();
 			await item.eraseTx();
 		});
+
+		it("should auto-rename a file when parent item type changes", async function () {
+			let libraryID = Zotero.Libraries.userLibraryID;
+			// Use a template that depends on the item type so that changing the
+			// type alone is enough to change the derived file name
+			await Zotero.SyncedSettings.set(
+				libraryID, 'attachmentRenameTemplate', '{{ itemType suffix=" - " }}{{ title truncate="100" }}'
+			);
+			let item, attachment1;
+			try {
+				item = createUnsavedDataObject('item', { itemType: 'book' });
+				item.setField('title', 'Lorem');
+				await item.saveTx();
+				attachment1 = await importFileAttachment('test.pdf', { parentItemID: item.id });
+				await renameFilesFromParent();
+				assert.equal(attachment1.attachmentFilename, 'book - Lorem.pdf');
+
+				item.setType(Zotero.ItemTypes.getID('journalArticle'));
+				item.saveTx();
+				assert.include(await waitForItemEvent("modify"), item.id);
+				// Renaming the attachment fires a second `modify` event
+				await waitNoLongerThan(waitForItemEvent("modify"), 1000);
+
+				assert.equal(attachment1.attachmentFilename, 'journalArticle - Lorem.pdf');
+			}
+			finally {
+				await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
+				if (attachment1) {
+					await attachment1.eraseTx();
+				}
+				if (item) {
+					await item.eraseTx();
+				}
+			}
+		});
+
+		it("should auto-rename a file when parent item type and a type-mapped field change together", async function () {
+			let item, attachment1;
+			try {
+				item = createUnsavedDataObject('item', { itemType: 'email' });
+				item.setField('title', 'Lorem');
+				await item.saveTx();
+				attachment1 = await importFileAttachment('test.pdf', { parentItemID: item.id });
+				await renameFilesFromParent();
+				assert.equal(attachment1.attachmentFilename, 'Lorem.pdf');
+
+				// Use the type-specific field name ('caseName'), as the item box
+				// does, so the changed key matches a field of the new type
+				item.setType(Zotero.ItemTypes.getID('case'));
+				item.setField('caseName', 'Ipsum');
+				item.saveTx();
+				assert.include(await waitForItemEvent("modify"), item.id);
+				// Renaming the attachment fires a second `modify` event
+				await waitNoLongerThan(waitForItemEvent("modify"), 1000);
+
+				assert.equal(attachment1.attachmentFilename, 'Ipsum.pdf');
+			}
+			finally {
+				if (attachment1) {
+					await attachment1.eraseTx();
+				}
+				if (item) {
+					await item.eraseTx();
+				}
+			}
+		});
 	});
 })
