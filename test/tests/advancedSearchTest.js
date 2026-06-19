@@ -544,6 +544,37 @@ describe("Advanced Search", function () {
 					conditions.lastChild.querySelector('#conditionsmenu')
 				);
 			});
+
+			it("shouldn't run the search on Shift-Enter", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+
+				function pressEnter(shiftKey) {
+					conditions.firstChild.querySelector('#conditionsmenu').dispatchEvent(
+						new win.KeyboardEvent('keydown', {
+							key: 'Enter',
+							shiftKey,
+							bubbles: true,
+							cancelable: true
+						})
+					);
+				}
+
+				var submit = sinon.stub(pane, 'submit');
+				try {
+					// Plain Enter runs the search
+					pressEnter(false);
+					assert.isTrue(submit.calledOnce);
+					// Shift-Enter does not
+					pressEnter(true);
+					assert.isTrue(submit.calledOnce);
+				}
+				finally {
+					submit.restore();
+				}
+			});
 		});
 
 		describe("Collection", function () {

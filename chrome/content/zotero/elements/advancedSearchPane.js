@@ -75,7 +75,9 @@
 
 		_handleKeyDown = async (event) => {
 			this._searchElem.updateSearch();
-			if (event.key === 'Enter') {
+			// Shift-Enter adds a new condition (handled by the search element), so
+			// don't run/save the search for it
+			if (event.key === 'Enter' && !event.shiftKey) {
 				if (this.type === 'temporary') {
 					await this.submit();
 				}
