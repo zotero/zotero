@@ -1333,6 +1333,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	handleActivate(event, indices) {
+		// Skip non-selectable rows (e.g. library headers and spacers), which aren't real items
+		// and can be double-clicked via the opaque sticky header
+		indices = indices.filter(index => this.isSelectable(index));
+		if (!indices.length) {
+			return;
+		}
 		let items = indices.map(index => this.getRow(index).ref);
 		this.props.onActivate(event, items);
 	}

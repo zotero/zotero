@@ -865,7 +865,9 @@ class VirtualizedTable extends React.Component {
 		}
 		// Normal selection
 		else if (!toggleSelection) {
-			if (index > 0 && !this.props.isSelectable(index)) {
+			// Non-selectable rows (e.g. a sticky library header) are a no-op, including no
+			// scroll-to-row below -- otherwise clicking the header at index 0 jumps to the top
+			if (!this.props.isSelectable(index)) {
 				return;
 			}
 			this.selection.select(index, shouldDebounce);
@@ -1106,6 +1108,10 @@ class VirtualizedTable extends React.Component {
 
 		if (this.props.stickySectionHeaders) {
 			this._jsWindow.targetElement.addEventListener('scroll', this._updateStickySectionHeader, { passive: true });
+			// The pinned header overlays the rows, so reject drops on it rather than letting
+			// them reach the body's drop handler (which would treat them as a list drop)
+			this._stickyHeader.addEventListener('dragover', this._rejectStickyHeaderDrop);
+			this._stickyHeader.addEventListener('drop', this._rejectStickyHeaderDrop);
 			this._updateStickySectionHeader();
 		}
 	}
@@ -1382,6 +1388,19 @@ class VirtualizedTable extends React.Component {
 	}
 
 	// ------------------------ Sticky Section Headers ------------------------ //
+
+	/**
+	 * Make a drop on the pinned header a no-op. Not preventing the default on dragover leaves
+	 * it an invalid drop target (so no drop fires), and stopping propagation keeps the event
+	 * from the body's handlers, which would otherwise allow the drop and treat it as a drop on
+	 * the list. The header occludes a row, but dropping on it shouldn't act on that row.
+	 */
+	_rejectStickyHeaderDrop = (e) => {
+		e.stopPropagation();
+		if (e.type == 'dragover' && e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'none';
+		}
+	}
 
 	/**
 	 * The set of section-header rows can change whenever the row model changes, so drop

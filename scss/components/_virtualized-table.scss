@@ -372,12 +372,17 @@
 	// Above the rows scrolling under it, including a focused row (z-index: 10000), so they
 	// pass underneath the pinned header rather than over it
 	z-index: 10001;
+	// The zero-height outer box never overlaps anything, so it takes no pointer events;
+	// the opaque content below sets pointer-events: auto so it absorbs them
 	pointer-events: none;
 
 	.virtualized-table-sticky-section-header-content {
 		box-sizing: border-box;
-		// Opaque so the pinned header occludes the rows (and the real header row) beneath it
+		// Opaque so the pinned header occludes the rows (and the real header row) beneath it,
+		// and opaque to pointer events too, so clicks, drags, and drops land on the pinned
+		// header rather than passing through to the occluded row underneath
 		background-color: var(--material-background);
+		pointer-events: auto;
 
 		.row {
 			position: static;

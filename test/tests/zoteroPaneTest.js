@@ -1194,6 +1194,38 @@ describe("ZoteroPane", function () {
 			await group.eraseTx();
 		});
 
+		it("shouldn't activate a library header row on double-click", async function () {
+			let group = await createGroup();
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection', { libraryID: group.libraryID });
+			await createDataObject('item', { collections: [c1.id] });
+			await createDataObject('item', { libraryID: group.libraryID, collections: [c2.id] });
+
+			// Cross-library multiple-collection selection -> grouped view with headers
+			await zp.collectionsView.expandLibrary(group.libraryID);
+			let cv = zp.collectionsView;
+			await cv.selectByID("C" + c1.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + c2.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+
+			let headerRow = zp.itemsView.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
+			assert.equal(zp.itemsView.getRow(headerRow).type, 'library-header');
+
+			let spy = sinon.spy(zp, 'onItemTreeActivate');
+			try {
+				zp.itemsView.handleActivate(new MouseEvent('dblclick'), [headerRow]);
+				assert.isFalse(spy.called, "Header row shouldn't be activated");
+			}
+			finally {
+				spy.restore();
+			}
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
 		it("should show “Export Note…” for standalone file attachment with note", async function () {
 			var item1 = await importFileAttachment('test.png');
 			item1.setNote('<p>Foo</p>');
