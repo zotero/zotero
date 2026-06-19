@@ -1055,3 +1055,21 @@ save-search-name-message = Enter a name for the saved search:
 
 saved-search-close-confirmation-title = Editing Saved Search
 saved-search-close-confirmation-body = Do you want to save changes you made to this saved search?
+
+item-pane-batch-editing-prompt =
+    .aria-label = Batch editing
+
+item-pane-batch-editing-enable =
+    .label = Edit Multiple Items…
+
+item-pane-batch-editing-multiple-values-placeholder = Multiple
+
+item-pane-batch-editing-clear-values = Clear all values
+
+item-pane-batch-editing-header = { $count ->
+    [one] Editing { $count } item
+   *[other] Editing { $count } items
+}
+
+item-pane-batch-editing-done =
+    .label = { general-done }

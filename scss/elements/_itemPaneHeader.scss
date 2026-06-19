@@ -78,4 +78,35 @@ item-pane-header {
 		border: none;
 		height: 24px;
 	}
+
+	&.batch-edit {
+		background: var(--accent-blue10);
+
+		&.has-custom-head .custom-head {
+			background: transparent;
+			// Match the 4px icon-title gap of the collapsible sections below
+			gap: 4px;
+
+			.batch-edit-head-icon {
+				width: 16px;
+				height: 16px;
+				@include svgicon("edit", "universal", "16");
+				fill: var(--accent-blue);
+			}
+
+			description {
+				flex: 1;
+				font-weight: 600;
+				line-height: 1.333;
+				margin: 0;
+			}
+
+			button {
+				flex-grow: 0;
+				height: 24px;
+				min-width: 0;
+				padding-inline: 12px;
+			}
+		}
+	}
 }
