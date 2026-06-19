@@ -2135,7 +2135,25 @@ describe("Zotero.Item", function () {
 			// "second" -> "third", old value is "second", and we don't notify about "extra" because it's not changed this time
 			assert.deepPropertyVal(extraData[ids[0]], 'changed', { title: 'second' });
 		});
-		
+
+		it("should report the previous itemType in notifier extraData on consecutive type changes", async function () {
+			var item = await createDataObject('item', { itemType: 'book' });
+
+			var promise = waitForNotifierEvent('modify', 'item');
+			item.setType(Zotero.ItemTypes.getID('journalArticle'));
+			await item.saveTx();
+			var { ids, extraData } = await promise;
+			assert.propertyVal(extraData[ids[0]].changed, 'itemType', 'book');
+
+			promise = waitForNotifierEvent('modify', 'item');
+			item.setType(Zotero.ItemTypes.getID('case'));
+			await item.saveTx();
+			({ ids, extraData } = await promise);
+			// Without clearing the 'itemType' alias from _previousData after the prior save,
+			// this would report the stale 'book' instead of 'journalArticle' (#5964)
+			assert.propertyVal(extraData[ids[0]].changed, 'itemType', 'journalArticle');
+		});
+
 		// 'deleted' and 'tags' use a different, newer mechanism for marking changes
 		it("should include changed 'deleted' value in notifier extraData", async function () {
 			var item = await createDataObject('item');
