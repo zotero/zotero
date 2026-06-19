@@ -52,27 +52,84 @@ describe("Advanced Search", function () {
 		await otherItem.eraseTx();
 	});
 	
-	it("should show results in trash", async function () {
+	it("shouldn't show trashed items outside the trash", async function () {
 		var item = await createDataObject('item', { setTitle: true });
 		item.deleted = true;
 		await item.saveTx();
-		
+
 		await zp.toggleAdvancedSearchState('open');
 		var pane = deck.pane;
-		
+
 		var s = new Zotero.Search();
 		s.libraryID = item.libraryID;
 		s.addCondition('title', 'is', item.getField('title'));
 		pane.search = s;
-		
+
 		var iv = zp.itemsView;
 		await pane.submit();
 		await iv.waitForLoad();
-		
-		assert.isNumber(iv.getRowIndexByID(item.id));
-		
+
+		assert.isFalse(iv.getRowIndexByID(item.id));
+
 		await zp.setAdvancedSearchState('closed');
-		
+
+		await item.eraseTx();
+	});
+
+	it("should remove a trashed result and not show it again on re-run", async function () {
+		var item = await createDataObject('item', { setTitle: true });
+
+		await zp.toggleAdvancedSearchState('open');
+		var pane = deck.pane;
+
+		var s = new Zotero.Search();
+		s.libraryID = item.libraryID;
+		s.addCondition('title', 'is', item.getField('title'));
+		pane.search = s;
+
+		var iv = zp.itemsView;
+		await pane.submit();
+		await iv.waitForLoad();
+		assert.isNumber(iv.getRowIndexByID(item.id));
+
+		// Trashing the item should remove it from the results
+		await Zotero.Items.trashTx(item.id);
+		assert.isFalse(iv.getRowIndexByID(item.id));
+
+		// Re-running the search shouldn't bring it back
+		await pane.submit();
+		await iv.waitForLoad();
+		assert.isFalse(iv.getRowIndexByID(item.id));
+
+		await zp.setAdvancedSearchState('closed');
+
+		await item.eraseTx();
+	});
+
+	it("should show trashed items when in the trash", async function () {
+		var item = await createDataObject('item', { setTitle: true });
+		item.deleted = true;
+		await item.saveTx();
+
+		await selectTrash(win, item.libraryID);
+
+		await zp.toggleAdvancedSearchState('open');
+		var pane = deck.pane;
+
+		var s = new Zotero.Search();
+		s.libraryID = item.libraryID;
+		s.addCondition('title', 'is', item.getField('title'));
+		pane.search = s;
+
+		var iv = zp.itemsView;
+		await pane.submit();
+		await iv.waitForLoad();
+
+		assert.isNumber(iv.getRowIndexByID(item.id));
+
+		await zp.setAdvancedSearchState('closed');
+		await selectLibrary(win, item.libraryID);
+
 		await item.eraseTx();
 	});
 	
