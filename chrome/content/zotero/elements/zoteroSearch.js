@@ -126,7 +126,7 @@
 			this.updateRemoveButtons();
 		}
 
-		removeCondition(id) {
+		removeCondition(id, focusRemoveButton) {
 			var conditionsBox = this.querySelector('#conditions');
 			// Removing the only remaining condition resets it to the default empty
 			// condition -- the same one shown when the pane is first opened -- rather
@@ -158,6 +158,21 @@
 			}
 			else {
 				this.updateRemoveButtons();
+				// After a keyboard removal, move focus to the remove button of the
+				// row that took the removed row's place, or the previous (now last)
+				// row if the last row was removed, so multiple conditions can be
+				// deleted in succession from the keyboard
+				if (focusRemoveButton) {
+					let rows = conditionsBox.childNodes;
+					let row = rows[id] || rows[rows.length - 1];
+					let button = row.querySelector('#remove');
+					// A disabled remove button can't take focus, so fall back to the
+					// row's condition drop-down
+					let target = button.getAttribute('disabled') == 'true'
+						? row.querySelector('#conditionsmenu')
+						: button;
+					setTimeout(() => target.focus({ focusVisible: true }));
+				}
 			}
 		}
 
@@ -841,9 +856,10 @@
 			}
 		}
 
-		onRemoveClicked() {
+		onRemoveClicked(event) {
 			if (this.parent) {
-				this.parent.removeCondition(this.conditionID);
+				// A keyboard-synthesized click has detail 0, unlike a mouse click
+				this.parent.removeCondition(this.conditionID, event?.detail === 0);
 			}
 		}
 

@@ -575,6 +575,53 @@ describe("Advanced Search", function () {
 					submit.restore();
 				}
 			});
+
+			// Native keyboard activation of a button dispatches a click with detail 0
+			function clickFromKeyboard(button) {
+				button.dispatchEvent(
+					new win.MouseEvent('click', { detail: 0, bubbles: true, cancelable: true })
+				);
+			}
+
+			function threeConditionSearch() {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'contains', 'a');
+				s.addCondition('title', 'contains', 'b');
+				s.addCondition('title', 'contains', 'c');
+				pane.search = s;
+			}
+
+			it("should focus the next row's remove button when removing via the keyboard", async function () {
+				threeConditionSearch();
+				assert.equal(conditions.childNodes.length, 3);
+
+				// Remove the first row
+				clickFromKeyboard(conditions.childNodes[0].querySelector('#remove'));
+
+				assert.equal(conditions.childNodes.length, 2);
+				await nextTick();
+				// Focus moves to the row that took its place
+				assert.equal(
+					win.document.activeElement,
+					conditions.childNodes[0].querySelector('#remove')
+				);
+			});
+
+			it("should focus the previous row's remove button when removing the last row", async function () {
+				threeConditionSearch();
+
+				// Remove the last row
+				clickFromKeyboard(conditions.childNodes[2].querySelector('#remove'));
+
+				assert.equal(conditions.childNodes.length, 2);
+				await nextTick();
+				// Focus moves up to the new last row
+				assert.equal(
+					win.document.activeElement,
+					conditions.childNodes[1].querySelector('#remove')
+				);
+			});
 		});
 
 		describe("Collection", function () {
