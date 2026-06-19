@@ -430,6 +430,52 @@ describe("Advanced Search", function () {
 			assert.equal(win.document.activeElement, newRow.querySelector('#conditionsmenu'));
 		});
 
+		describe("Find-as-you-type", function () {
+			function typeInMenu(menu, str) {
+				for (let ch of str) {
+					menu.dispatchEvent(new win.KeyboardEvent('keydown', {
+						key: ch,
+						bubbles: true,
+						cancelable: true
+					}));
+				}
+			}
+
+			it("should select a condition from the More submenu by typing its name", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+
+				var searchCondition = conditions.firstChild;
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+
+				// "Language" lives in the More submenu, so it's only reachable via type-ahead
+				assert.isFalse(searchCondition.isPrimaryCondition('language'));
+				typeInMenu(conditionsMenu, 'lang');
+				assert.equal(searchCondition.selectedCondition, 'language');
+			});
+
+			it("should cycle through matches when the same letter is typed repeatedly", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+
+				var searchCondition = conditions.firstChild;
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+
+				typeInMenu(conditionsMenu, 'd');
+				var first = searchCondition.selectedCondition;
+				typeInMenu(conditionsMenu, 'd');
+				var second = searchCondition.selectedCondition;
+
+				assert.notEqual(first, second);
+				assert.match(Zotero.SearchConditions.getLocalizedName(first), /^d/i);
+				assert.match(Zotero.SearchConditions.getLocalizedName(second), /^d/i);
+			});
+		});
+
 		describe("Collection", function () {
 			it("should show collections and saved searches", async function () {
 				var col1 = await createDataObject('collection', { name: "A" });

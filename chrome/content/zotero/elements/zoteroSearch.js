@@ -280,7 +280,14 @@
 			var conditionsMenu = this.querySelector('#conditionsmenu');
 			var moreConditionsMenu = this.querySelector('#more-conditions-menu');
 			var conditions = Zotero.SearchConditions.getStandardConditions();
-			
+
+			// Cache the (alphabetically sorted) condition list and set up
+			// find-as-you-type on the closed menu
+			this._conditions = conditions;
+			this._typeAheadBuffer = '';
+			this._typeAheadTime = 0;
+			conditionsMenu.addEventListener('keydown', event => this.handleConditionKeyDown(event), true);
+
 			for (let condition of conditions) {
 				let menuitem;
 				if (this.isPrimaryCondition(condition.name)) {
@@ -748,6 +755,70 @@
 			}
 			
 			return false;
+		}
+
+		// Find-as-you-type on the closed conditions menu. The native incremental
+		// find within the open popup only matches the visible top-level items, so
+		// this handles typing while the menu is closed to reach any condition,
+		// including the ~67 in the "More" submenu.
+		handleConditionKeyDown(event) {
+			var menu = this.querySelector('#conditionsmenu');
+			// Let the native incremental find handle typing while the popup is open,
+			// and ignore in-progress IME composition (event.key is "Process")
+			if (menu.open || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) {
+				return;
+			}
+			// Only act on a single printable character. Count code points rather
+			// than UTF-16 units so supplementary-plane characters (e.g. some CJK
+			// extension blocks) aren't treated as multi-key sequences.
+			if (Array.from(event.key).length != 1) {
+				return;
+			}
+
+			var now = Date.now();
+			// Start a new search if enough time has passed since the last keystroke
+			if (now - this._typeAheadTime > 1000) {
+				this._typeAheadBuffer = '';
+			}
+			this._typeAheadTime = now;
+
+			// With no search in progress, a space opens the menu instead of starting
+			// a search, matching the native menulist behavior
+			if (event.key == ' ' && !this._typeAheadBuffer) {
+				return;
+			}
+
+			this._typeAheadBuffer += event.key.toLowerCase();
+
+			var conditionName = this.findConditionByPrefix();
+			if (conditionName) {
+				event.preventDefault();
+				event.stopPropagation();
+				this.onConditionSelected(conditionName);
+			}
+		}
+
+		findConditionByPrefix() {
+			var buffer = this._typeAheadBuffer;
+			var conditions = this._conditions;
+
+			// When the same character is typed repeatedly, cycle through the
+			// matching conditions, starting after the currently selected one
+			var cycling = buffer.length > 1 && [...buffer].every(c => c == buffer[0]);
+			var prefix = cycling ? buffer[0] : buffer;
+
+			var startIndex = 0;
+			if (cycling) {
+				startIndex = conditions.findIndex(c => c.name == this.selectedCondition) + 1;
+			}
+
+			for (let i = 0; i < conditions.length; i++) {
+				let condition = conditions[(startIndex + i) % conditions.length];
+				if (condition.localized.toLowerCase().startsWith(prefix)) {
+					return condition.name;
+				}
+			}
+			return null;
 		}
 
 		onLibraryChange() {
