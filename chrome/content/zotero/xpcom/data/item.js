@@ -425,6 +425,16 @@ Zotero.Item.prototype._finalizeLoadFromRow = function (row) {
 }
 
 
+Zotero.Item.prototype._clearChanged = function (dataType) {
+	Zotero.DataObject.prototype._clearChanged.call(this, dataType);
+	// setType stores the old type under the 'itemType' alias, which the base
+	// primaryData clearing misses (it matches 'itemTypeID'), so clear it here
+	if (!dataType || dataType === 'primaryData') {
+		delete this._previousData.itemType;
+	}
+}
+
+
 /*
  * Set or change the item's type
  */
