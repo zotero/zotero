@@ -683,6 +683,13 @@ Zotero.Library.prototype._eraseData = async function (env) {
 	await Zotero.DB.queryAsync("DELETE FROM libraries WHERE libraryID=?", this.libraryID);
 	// TODO: Emit event so this doesn't have to be here
 	await Zotero.Fulltext.clearLibraryVersion(this.libraryID);
+
+	// Discard undo/redo history that references this library
+	if (Zotero.UndoHistory) {
+		Zotero.DB.addCurrentCallback('commit', function () {
+			Zotero.UndoHistory.clearForLibrary(this.libraryID);
+		}.bind(this));
+	}
 };
 
 Zotero.Library.prototype._finalizeErase = async function (env) {

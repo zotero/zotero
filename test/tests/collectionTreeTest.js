@@ -995,13 +995,13 @@ describe("Zotero.CollectionTree", function () {
 				assert.equal(zp.itemsView.rowCount, 0);
 				
 				await select(win, collection2);
-				
+
 				// Target collection should have item
 				assert.equal(zp.itemsView.rowCount, 1);
 				var treeRow = zp.itemsView.getRow(0);
 				assert.equal(treeRow.ref.id, item.id);
 			});
-			
+
 			it("should add a multiple-library item selection to a collection, copying out-of-library items", async function () {
 				await Zotero.Users.setCurrentUserID(1);
 				await Zotero.Users.setName(1, 'Name');
@@ -1078,6 +1078,41 @@ describe("Zotero.CollectionTree", function () {
 
 				// With no out-of-library items to copy, the drag is refused
 				assert.isFalse(await canDrop('item', 'L' + userLibraryID, [item1.id, item2.id]));
+			});
+
+			it("should record an undo step when adding an item to a collection", async function () {
+				var collection = await createDataObject('collection');
+				var item = await createDataObject('item', false, { skipSelect: true });
+				Zotero.UndoHistory.clear();
+
+				// Add observer to wait for collection add
+				var deferred = Zotero.Promise.defer();
+				var observerID = Zotero.Notifier.registerObserver({
+					notify: function (event, type, ids, extraData) {
+						if (type == 'collection-item' && event == 'add'
+								&& ids[0] == collection.id + "-" + item.id) {
+							setTimeout(function () {
+								deferred.resolve();
+							});
+						}
+					}
+				}, 'collection-item', 'test');
+
+				await onDrop('item', 'C' + collection.id, [item.id], deferred.promise);
+
+				Zotero.Notifier.unregisterObserver(observerID);
+
+				assert.include(item.getCollections(), collection.id);
+				assert.isTrue(Zotero.UndoHistory.canUndo());
+				var action = Zotero.UndoHistory.getUndoAction();
+				assert.equal(action.action, 'undo-action-add-to-collection');
+				assert.equal(action.actionArgs.count, 1);
+
+				await Zotero.UndoHistory.undo();
+				assert.notInclude(item.getCollections(), collection.id);
+
+				await Zotero.UndoHistory.redo();
+				assert.include(item.getCollections(), collection.id);
 			});
 
 			describe("My Publications", function () {

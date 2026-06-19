@@ -283,7 +283,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (!treeRow.editingName) return;
 		treeRow.ref.name = treeRow.editingName;
 		delete treeRow.editingName;
-		await treeRow.ref.saveTx();
+		await treeRow.ref.saveTx({ undoAction: 'undo-action-rename-collection' });
 		window.Zotero_Tabs.rename("zotero-pane", treeRow.ref.name);
 	}
 	
@@ -1330,14 +1330,27 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			await row.ref.eraseTx();
 		}
 		if (others.length) {
+			let collectionCount = others.filter(r => r.isCollection()).length;
+			let searchCount = others.length - collectionCount;
+			// Use the search label only when nothing but searches is selected;
+			// otherwise describe the action in terms of collections
+			let undoAction, undoActionArgs;
+			if (searchCount && !collectionCount) {
+				undoAction = 'undo-action-trash-search';
+				undoActionArgs = { count: searchCount };
+			}
+			else {
+				undoAction = 'undo-action-trash-collection';
+				undoActionArgs = { count: collectionCount + searchCount };
+			}
 			await Zotero.DB.executeTransaction(async () => {
 				for (let row of others) {
 					row.ref.deleted = true;
 					if (row.isCollection()) {
-						await row.ref.save({ deleteItems });
+						await row.ref.save({ deleteItems, undoAction, undoActionArgs });
 					}
 					else {
-						await row.ref.save();
+						await row.ref.save({ undoAction, undoActionArgs });
 					}
 				}
 			});
@@ -2260,16 +2273,21 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Dropping items, collections, or searches into trash
 		if (targetTreeRow.isTrash()) {
 			let objects = [];
+			let undoAction;
 			if (dataType == 'zotero/collection') {
 				objects = await Zotero.Collections.getAsync(data);
+				undoAction = 'undo-action-trash-collection';
 			}
 			else if (dataType == 'zotero/search') {
 				objects = await Zotero.Searches.getAsync(data);
+				undoAction = 'undo-action-trash-search';
 			}
 			else if (dataType == 'zotero/item') {
 				objects = await Zotero.Items.getAsync(data);
+				undoAction = 'undo-action-trash';
 			}
 			await Zotero.DB.executeTransaction(async function () {
+				Zotero.UndoHistory.stageAction(undoAction, { count: objects.length });
 				for (let obj of objects) {
 					obj.deleted = true;
 					await obj.save();
@@ -2304,7 +2322,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				await Zotero.DB.executeTransaction(async () => {
 					for (let droppedCollection of droppedCollections) {
 						droppedCollection.parentID = targetCollectionID;
-						await droppedCollection.save();
+						await droppedCollection.save({ undoAction: 'undo-action-move-collection' });
 					}
 				});
 			}
@@ -2380,6 +2398,21 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					await Zotero.DB.executeTransaction(async function () {
 						let collection = await Zotero.Collections.getAsync(targetCollectionID);
 						await collection.addItems(ids);
+						// If moving, remove from source in the same
+						// transaction so it's a single undo step
+						if (dropEffect == 'move' && toMove.length
+								&& sourceTreeRow && sourceTreeRow.isCollection()) {
+							await sourceTreeRow.ref.removeItems(toMove);
+							toMove = [];
+							Zotero.UndoHistory.stageAction(
+								'undo-action-move-to-collection', { count: ids.length }
+							);
+						}
+						else {
+							Zotero.UndoHistory.stageAction(
+								'undo-action-add-to-collection', { count: ids.length }
+							);
+						}
 					}.bind(this));
 				}
 				else if (targetTreeRow.isPublications()) {
