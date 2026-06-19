@@ -2672,10 +2672,17 @@ describe("Zotero.Attachments", function () {
 				item.setType(Zotero.ItemTypes.getID('journalArticle'));
 				item.saveTx();
 				assert.include(await waitForItemEvent("modify"), item.id);
-				// Renaming the attachment fires a second `modify` event
-				await waitNoLongerThan(waitForItemEvent("modify"), 1000);
-
+				// The attachment is renamed asynchronously, so wait for the filename to update
+				await waitForCallback(() => attachment1.attachmentFilename === 'journalArticle - Lorem.pdf', 100, 3);
 				assert.equal(attachment1.attachmentFilename, 'journalArticle - Lorem.pdf');
+
+				// A second consecutive type change guards against a regression where the old
+				// itemType was left in _previousData after the prior save, so the rename saw a stale type
+				item.setType(Zotero.ItemTypes.getID('case'));
+				item.saveTx();
+				assert.include(await waitForItemEvent("modify"), item.id);
+				await waitForCallback(() => attachment1.attachmentFilename === 'case - Lorem.pdf', 100, 3);
+				assert.equal(attachment1.attachmentFilename, 'case - Lorem.pdf');
 			}
 			finally {
 				await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
