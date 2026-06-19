@@ -884,6 +884,96 @@ Zotero.DataObject.prototype._markForReload = function (dataType) {
 }
 
 
+Zotero.DataObject.UNDO_SKIP_FIELDS = new Set(['version', 'synced', 'clientDateModified', 'dateModified']);
+
+/**
+ * Build a change record for UndoHistory from the current pending changes.
+ * Called during save() before _saveData() clears change tracking.
+ *
+ * @return {Object|null} - ChangeRecord or null if nothing undoable
+ */
+Zotero.DataObject.prototype._getUndoData = function () {
+	let skipFields = Zotero.DataObject.UNDO_SKIP_FIELDS;
+	let fields = {};
+
+	// Fields tracked via _previousData (old-style: old value stored)
+	for (let field of Object.keys(this._previousData)) {
+		if (skipFields.has(field)) continue;
+		// Skip non-scalar fields like relations
+		if (typeof this._previousData[field] === 'object' && this._previousData[field] !== null) {
+			continue;
+		}
+		fields[field] = {
+			old: this._previousData[field],
+			new: this['_' + field]
+		};
+	}
+
+	// Fields tracked via _changedData (new-style: new value stored)
+	for (let field of Object.keys(this._changedData)) {
+		if (skipFields.has(field)) continue;
+		if (field === 'deleted') {
+			fields[field] = {
+				old: this._deleted,
+				new: this._changedData[field]
+			};
+		}
+	}
+
+	if (!Object.keys(fields).length) return null;
+
+	return {
+		objectType: this._objectType,
+		id: this._id,
+		libraryID: this._libraryID,
+		key: this._key,
+		fields
+	};
+};
+
+
+/**
+ * Whether the object still holds the values captured in an undo snapshot for
+ * the given side -- the read-and-compare counterpart of _getUndoData(). Used by
+ * Zotero.UndoHistory to avoid replaying a snapshot over an external change.
+ *
+ * @param {Object} fields -- a change record's `fields` map (field -> { old, new })
+ * @param {String} side -- 'new' (undo) or 'old' (redo)
+ * @return {Boolean} -- true if every field still matches the recorded value
+ */
+Zotero.DataObject.prototype.matchesUndoSnapshot = function (fields, side) {
+	for (let field of Object.keys(fields)) {
+		if (!this._undoFieldMatches(field, fields[field][side])) {
+			return false;
+		}
+	}
+	return true;
+};
+
+
+/**
+ * Whether a single field still holds a recorded undo value. Overridden by
+ * Zotero.Item for item-specific fields; the base handles the primary scalar
+ * fields shared by all data objects.
+ *
+ * @param {String} field
+ * @param {*} recorded -- the recorded value for the side being checked
+ * @return {Boolean}
+ */
+Zotero.DataObject.prototype._undoFieldMatches = function (field, recorded) {
+	if (field === 'deleted') {
+		return this._deleted === recorded;
+	}
+	if (field === 'name') {
+		return this._name === recorded;
+	}
+	if (field === 'parentKey') {
+		return this._parentKey === recorded;
+	}
+	return this['_' + field] === recorded;
+};
+
+
 /**
  * @param {String} [op='edit'] - Operation to check; if not provided, check edit privileges for
  *     library
@@ -907,6 +997,11 @@ Zotero.DataObject.prototype.isEditable = function (_op = 'edit') {
  * @param {Boolean} [options.skipNotifier] - Don't trigger Zotero.Notifier events
  * @param {Boolean} [options.skipSelect] - Don't select object automatically in trees
  * @param {Boolean} [options.skipSyncedUpdate] - Don't automatically set 'synced' to false
+ * @param {String} [options.undoAction] - Fluent message ID for the undo entry's action label
+ *                                        (e.g. 'undo-action-edit-creator'); without this the save
+ *                                        is captured but discarded at commit
+ * @param {Object} [options.undoActionArgs] - Fluent message arguments for the action label
+ *                                            (e.g. { count: 3 })
  * @return {Promise<Integer|Boolean>}  Promise for itemID of new item,
  *                                     TRUE on item update, or FALSE if item was unchanged
  */
@@ -934,17 +1029,17 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 		].forEach(x => env.options[x] = true);
 	}
 	
-	var proceed = await this._initSave(env);
-	if (!proceed) return false;
-	
-	if (env.isNew) {
-		Zotero.debug('Saving data for new ' + this._objectType + ' to database', 4);
-	}
-	else {
-		Zotero.debug('Updating database with new ' + this._objectType + ' data', 4);
-	}
-	
 	try {
+		var proceed = await this._initSave(env);
+		if (!proceed) return false;
+		
+		if (env.isNew) {
+			Zotero.debug('Saving data for new ' + this._objectType + ' to database', 4);
+		}
+		else {
+			Zotero.debug('Updating database with new ' + this._objectType + ' data', 4);
+		}
+		
 		if (Zotero.DataObject.prototype._finalizeSave == this._finalizeSave) {
 			throw new Error("_finalizeSave not implemented for Zotero." + this._ObjectType);
 		}
@@ -969,7 +1064,14 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 				env.notifierData.changed[field] = this['_' + field];
 			}
 		}
-		
+
+		// Capture undo data before _saveData clears change tracking.
+		// Capture is unconditional for non-isNew saves; whether it lands on the
+		// undo stack depends on a stageAction() call within the same transaction.
+		if (Zotero.UndoHistory && !env.isNew) {
+			env.undoData = this._getUndoData();
+		}
+
 		// Create transaction
 		let result
 		if (env.options.tx) {
@@ -977,6 +1079,12 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 				Zotero.DataObject.prototype._saveData.call(this, env);
 				await this._saveData(env);
 				await Zotero.DataObject.prototype._finalizeSave.call(this, env);
+				if (env.undoData) {
+					Zotero.UndoHistory.stageChange(env.undoData);
+					if (env.options.undoAction) {
+						Zotero.UndoHistory.stageAction(env.options.undoAction, env.options.undoActionArgs);
+					}
+				}
 				return this._finalizeSave(env);
 			}.bind(this), env.transactionOptions);
 		}
@@ -987,6 +1095,12 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 			await this._saveData(env);
 			await Zotero.DataObject.prototype._finalizeSave.call(this, env);
 			result = this._finalizeSave(env);
+			if (env.undoData) {
+				Zotero.UndoHistory.stageChange(env.undoData);
+				if (env.options.undoAction) {
+					Zotero.UndoHistory.stageAction(env.options.undoAction, env.options.undoActionArgs);
+				}
+			}
 		}
 		this._postSave(env);
 		return result;

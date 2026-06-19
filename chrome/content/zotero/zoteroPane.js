@@ -105,7 +105,11 @@ var ZoteroPane = new function () {
 		}
 		
 		_loaded = true;
-		
+
+		// Register a window controller for global undo/redo. Appending (rather
+		// than inserting at 0) ensures text-editing controllers take priority.
+		window.controllers.appendController(Zotero.UndoHistory.getController(document));
+
 		var zp = document.getElementById('zotero-pane');
 		Zotero.UIProperties.registerRoot(zp);
 		zp.addEventListener('UIPropertiesChanged', () => {
@@ -2579,6 +2583,7 @@ var ZoteroPane = new function () {
 			skipDateModifiedUpdate: true
 		};
 		await Zotero.DB.executeTransaction(async () => {
+			Zotero.UndoHistory.stageAction('undo-action-add-related');
 			for (let index1 = 0; index1 < selectedItems.length; index1++) {
 				for (let index2 = index1 + 1; index2 < selectedItems.length; index2++) {
 					let item1 = selectedItems[index1];
@@ -2716,6 +2721,18 @@ var ZoteroPane = new function () {
 		let isSelected = object => selectedObjects.includes(object);
 
 		await Zotero.DB.executeTransaction(async () => {
+			let undoAction;
+			if (selectedObjects.every(o => o instanceof Zotero.Item)) {
+				undoAction = 'undo-action-restore-items';
+			}
+			else if (selectedObjects.every(o => o instanceof Zotero.Collection)) {
+				undoAction = 'undo-action-restore-collection';
+			}
+			else {
+				undoAction = 'undo-action-restore-objects';
+			}
+			Zotero.UndoHistory.stageAction(undoAction, { count: selectedObjects.length });
+
 			for (let row = 0; row < this.itemsView.rowCount; row++) {
 				// Only look at top-level items
 				if (this.itemsView.getLevel(row) !== 0) {
@@ -2801,6 +2818,7 @@ var ZoteroPane = new function () {
 				Zotero.hideZoteroPaneOverlays();
 			}
 			await Zotero.purgeDataObjects();
+			Zotero.UndoHistory.clear();
 		}
 	};
 	
@@ -2856,7 +2874,7 @@ var ZoteroPane = new function () {
 			selected.parentID = target.id;
 		}
 		
-		await selected.saveTx();
+		await selected.saveTx({ undoAction: 'undo-action-move-collection' });
 	};
 
 	// Copy selected collection into another collection or library.
@@ -4706,8 +4724,14 @@ var ZoteroPane = new function () {
 			collection = Zotero.Collections.get(id);
 		}
 
-		await Zotero.DB.executeTransaction(
-			() => collection.addItems(items.map(item => item.id)));
+		let ids = items.map(item => item.id);
+		await Zotero.DB.executeTransaction(async () => {
+			Zotero.UndoHistory.stageAction(
+				'undo-action-add-to-collection',
+				{ count: ids.length }
+			);
+			await collection.addItems(ids);
+		});
 	};
 
 
@@ -5612,6 +5636,11 @@ var ZoteroPane = new function () {
 		// If "Convert to Standalone Attachment" is selected, make all attachments top-level items
 		if (shouldConvertToStandaloneAttachment) {
 			await Zotero.DB.executeTransaction(async () => {
+				Zotero.UndoHistory.stageAction(
+					'undo-action-convert-to-standalone',
+					{ count: selectedItems.length }
+				);
+
 				for (let item of selectedItems) {
 					let parent = Zotero.Items.get(item.parentID);
 					if (parent) {
@@ -5634,6 +5663,11 @@ var ZoteroPane = new function () {
 		if (!newParentItem.length) return;
 
 		await Zotero.DB.executeTransaction(async () => {
+			Zotero.UndoHistory.stageAction(
+				'undo-action-change-parent-item',
+				{ count: selectedItems.length }
+			);
+
 			for (let item of selectedItems) {
 				item.parentID = newParentItem[0].id;
 				await item.save({ skipSelect: true });
@@ -6695,12 +6729,13 @@ var ZoteroPane = new function () {
 			return [];
 		}));
 		await Zotero.DB.executeTransaction(async () => {
+			Zotero.UndoHistory.stageAction('undo-action-normalize-attachment-titles');
 			for (let attachment of attachments) {
 				if (attachment.getField('title').replace(/\.[^.]+$/, '') !== attachment.attachmentFilename.replace(/\.[^.]+$/, '')) {
 					Zotero.debug(`Skipping attachment with modified title: ${attachment.getField('title')}`);
 					continue;
 				}
-				
+
 				let forceFirstOfType = !!attachment.parentItemID
 					&& await attachment.parentItem.getBestAttachment() === attachment;
 				attachment.setAutoAttachmentTitle({ forceFirstOfType });

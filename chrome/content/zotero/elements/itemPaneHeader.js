@@ -201,9 +201,15 @@
 			if (newValue.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
 				this._item.setField('shortTitle', newValue.substring(0, shortTitleVal.length));
 			}
-			await this._item.saveTx();
+			await this._item.saveTx({
+				undoAction: 'undo-action-edit-field',
+				undoActionArgs: {
+					field: Zotero.ItemFields.getLocalizedString(this._titleFieldID),
+					count: 1
+				}
+			});
 		}
-		
+
 		async save() {
 			if (!this.editable) {
 				return;
@@ -213,7 +219,13 @@
 					throw new Error('Item has not been added to library');
 				}
 				this._item.setField(this._titleFieldID, this.titleField.value);
-				await this._item.saveTx();
+				await this._item.saveTx({
+					undoAction: 'undo-action-edit-field',
+					undoActionArgs: {
+						field: Zotero.ItemFields.getLocalizedString(this._titleFieldID),
+						count: 1
+					}
+				});
 			}
 			this._forceRenderAll();
 		}

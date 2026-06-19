@@ -34,7 +34,21 @@ Zotero.Sync.Data.Local = {
 	_loginManagerRealmLegacy: 'Zotero Web API',
 	_lastSyncTime: null,
 	_lastClassicSyncTime: null,
-	
+	// Item/Collection-only -- synced settings can't affect the undo stack
+	_remoteChangesApplied: false,
+
+	get remoteChangesApplied() {
+		return this._remoteChangesApplied;
+	},
+
+	resetRemoteChangesApplied: function () {
+		this._remoteChangesApplied = false;
+	},
+
+	markRemoteChangesApplied: function () {
+		this._remoteChangesApplied = true;
+	},
+
 	init: async function () {
 		await this._loadLastSyncTime();
 		if (!_lastSyncTime) {
@@ -354,7 +368,7 @@ Zotero.Sync.Data.Local = {
 		var library = Zotero.Libraries.get(libraryID);
 		library.libraryVersion = -1;
 		await library.saveTx();
-		
+
 		await this.resetUnsyncedLibraryFiles(libraryID);
 	},
 	
@@ -414,8 +428,9 @@ Zotero.Sync.Data.Local = {
 					skipDeleteLog: true
 				}
 			);
+			this.markRemoteChangesApplied();
 		}
-		
+
 		// Deleted objects
 		keys = await Zotero.Sync.Data.Local.getDeleted(objectType, libraryID);
 		await this.removeObjectsFromDeleteLog(objectType, libraryID, keys);
@@ -1512,6 +1527,7 @@ Zotero.Sync.Data.Local = {
 									await obj.erase({
 										notifierQueue
 									});
+									Zotero.Sync.Data.Local.markRemoteChangesApplied();
 								}
 								catch (e) {
 									results.push({
@@ -1685,6 +1701,7 @@ Zotero.Sync.Data.Local = {
 				obj.synced = true;
 			}
 			await obj.save(saveOptions);
+			this.markRemoteChangesApplied();
 			let cacheJSON = options.cacheObject ? options.cacheObject : json.data;
 			await this.saveCacheObject(obj.objectType, obj.libraryID, cacheJSON);
 			// Delete older versions of the object in the cache

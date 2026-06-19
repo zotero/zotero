@@ -148,7 +148,10 @@ import { getCSSIcon } from 'components/icons';
 						Zotero.getString('pane.items.removeFromOther', [obj.name])
 					)) {
 						contextItem.removeFromCollection(obj.id);
-						contextItem.saveTx();
+						contextItem.saveTx({
+							undoAction: 'undo-action-remove-from-collection',
+							undoActionArgs: { count: 1 }
+						});
 					}
 				});
 				row.append(remove);

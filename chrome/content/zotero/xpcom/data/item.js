@@ -880,6 +880,217 @@ Zotero.Item.prototype.setField = function (field, value, loadIn) {
 	return true;
 }
 
+/**
+ * Override to correctly resolve item data fields via _itemData[fieldID]
+ */
+Zotero.Item.prototype._getUndoData = function () {
+	let skipFields = Zotero.DataObject.UNDO_SKIP_FIELDS;
+	let fields = {};
+
+	// Fields tracked via _previousData
+	for (let field of Object.keys(this._previousData)) {
+		if (skipFields.has(field)) continue;
+		// 'itemType' is a derived name, not directly settable -- handled below as itemTypeID
+		if (field === 'itemType') continue;
+		// Collections are an array but need explicit undo tracking
+		if (field === 'collections') {
+			fields[field] = {
+				old: this._previousData[field],
+				new: this._collections
+			};
+			continue;
+		}
+		if (field === 'note') {
+			fields[field] = {
+				old: this._previousData[field],
+				new: this._noteText
+			};
+			continue;
+		}
+		if (field === 'relations') {
+			fields[field] = {
+				old: this._previousData[field],
+				new: this._relations.map(r => [...r])
+			};
+			continue;
+		}
+		if (typeof this._previousData[field] === 'object' && this._previousData[field] !== null) {
+			continue;
+		}
+
+		let fieldID = Zotero.ItemFields.getID(field);
+		if (fieldID) {
+			// Item data field -- new value is in _itemData.
+			// After a type change, lost fields are no longer in _itemData.
+			let newValue = this._itemData[fieldID];
+			fields[field] = {
+				old: this._previousData[field],
+				new: newValue !== undefined ? newValue : false
+			};
+		}
+		else {
+			// Primary data field -- new value is on the instance property
+			fields[field] = {
+				old: this._previousData[field],
+				new: this['_' + field]
+			};
+		}
+	}
+
+	// Detect item type change and store with numeric IDs
+	if (this._changed.primaryData && this._changed.primaryData.itemTypeID
+			&& this._previousData.itemType) {
+		fields.itemTypeID = {
+			old: Zotero.ItemTypes.getID(this._previousData.itemType),
+			new: this._itemTypeID
+		};
+	}
+
+	// Fields tracked via _changedData (e.g. deleted, tags)
+	for (let field of Object.keys(this._changedData)) {
+		if (skipFields.has(field)) continue;
+		if (field === 'deleted') {
+			fields[field] = {
+				old: this._deleted,
+				new: this._changedData[field]
+			};
+		}
+		else if (field === 'tags') {
+			fields[field] = {
+				old: this._tags,
+				new: this._changedData[field]
+			};
+		}
+	}
+
+	// Creators tracked via _changed.creators
+	if (this._changed.creators) {
+		// Old creators were saved in _previousData.creators by _markFieldChange
+		let oldCreators = this._previousData.creators || {};
+		let newCreators = {};
+		for (let i = 0; i < this._creators.length; i++) {
+			newCreators[i] = Object.assign({}, this._creators[i]);
+		}
+		fields.creators = {
+			old: oldCreators,
+			new: newCreators
+		};
+	}
+
+	if (!Object.keys(fields).length) return null;
+
+	return {
+		objectType: this._objectType,
+		id: this._id,
+		libraryID: this._libraryID,
+		key: this._key,
+		fields
+	};
+};
+
+
+/**
+ * @see Zotero.DataObject.prototype._undoFieldMatches
+ *
+ * Mirrors how _getUndoData() (above) captures each item field, and reuses the
+ * canonical change-detection helpers so the staleness check and save-time
+ * change detection stay in agreement.
+ */
+Zotero.Item.prototype._undoFieldMatches = function (field, recorded) {
+	switch (field) {
+		case 'collections':
+			return !Zotero.DataObjectUtilities._collectionsChanged(this._collections, recorded);
+
+		case 'tags':
+			if (!Array.isArray(recorded)) {
+				return this._tags === recorded;
+			}
+			return !Zotero.DataObjectUtilities._tagsChanged(this._tags, recorded);
+
+		case 'relations':
+			return this._undoRelationsMatch(recorded);
+
+		case 'creators':
+			return this._undoCreatorsMatch(recorded);
+
+		case 'note':
+			return this._noteText === recorded;
+
+		case 'itemTypeID':
+			return this._itemTypeID === recorded;
+	}
+
+	let fieldID = Zotero.ItemFields.getID(field);
+	if (fieldID) {
+		return this._undoItemDataMatches(fieldID, recorded);
+	}
+	// Primary scalar field (e.g. dateAdded) -- defer to the base implementation
+	return Zotero.DataObject.prototype._undoFieldMatches.call(this, field, recorded);
+};
+
+
+/**
+ * Compare a recorded item-data value against the live one. An empty field reads
+ * back as false, null, undefined, or '' depending on the path, so treat all of
+ * those as equal -- like setField()'s own change check -- to avoid mistaking an
+ * unchanged value for an external edit.
+ *
+ * @param {Integer} fieldID
+ * @param {*} recorded
+ * @return {Boolean}
+ */
+Zotero.Item.prototype._undoItemDataMatches = function (fieldID, recorded) {
+	let current = this._itemData ? this._itemData[fieldID] : undefined;
+	let emptyCurrent = current === undefined || current === null || current === false || current === '';
+	let emptyRecorded = recorded === undefined || recorded === null || recorded === false || recorded === '';
+	if (emptyCurrent || emptyRecorded) {
+		return emptyCurrent === emptyRecorded;
+	}
+	return current === recorded;
+};
+
+
+/**
+ * Index-keyed creator comparison (reordering counts as a change), against the
+ * { index -> creatorData } shape _getUndoData() records.
+ *
+ * @param {Object} recorded
+ * @return {Boolean}
+ */
+Zotero.Item.prototype._undoCreatorsMatch = function (recorded) {
+	recorded = recorded || {};
+	if (this._creators.length !== Object.keys(recorded).length) {
+		return false;
+	}
+	for (let i = 0; i < this._creators.length; i++) {
+		if (!Zotero.Creators.equals(this._creators[i], recorded[i])) {
+			return false;
+		}
+	}
+	return true;
+};
+
+
+/**
+ * Order-independent comparison of the flat [predicate, object] pair arrays
+ * _getUndoData() records for relations.
+ *
+ * @param {Array} recorded
+ * @return {Boolean}
+ */
+Zotero.Item.prototype._undoRelationsMatch = function (recorded) {
+	if (!Array.isArray(recorded)) {
+		return false;
+	}
+	let current = this._relations.map(r => [...r]);
+	if (current.length !== recorded.length) {
+		return false;
+	}
+	let key = pair => pair[0] + "\t" + pair[1];
+	return Zotero.Utilities.arrayEquals(current.map(key).sort(), recorded.map(key).sort());
+};
+
+
 /*
  * Get the title for an item for display in the interface
  *
@@ -1540,6 +1751,14 @@ Zotero.Item.prototype._saveData = async function (env) {
 			if (Zotero.ItemFields.getID('accessDate') == fieldID
 					&& (this.getField(fieldID)) == 'CURRENT_TIMESTAMP') {
 				value = Zotero.DB.transactionDateTime;
+				// The undo snapshot captured the unresolved sentinel as this
+				// field's 'new' value. Replace it with the timestamp we're
+				// actually writing so staleness detection can compare against
+				// the stored value once the item reloads it
+				if (env.undoData && env.undoData.fields.accessDate
+						&& env.undoData.fields.accessDate.new === 'CURRENT_TIMESTAMP') {
+					env.undoData.fields.accessDate.new = value;
+				}
 			}
 			
 			let valueID = await Zotero.DB.valueQueryAsync(valueSQL, [value], { debug: true })

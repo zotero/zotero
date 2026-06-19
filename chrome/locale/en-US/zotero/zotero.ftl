@@ -1073,3 +1073,88 @@ item-pane-batch-editing-header = { $count ->
 
 item-pane-batch-editing-done =
     .label = { general-done }
+
+undo-action-edit-metadata = { $count ->
+    [one] Edit Metadata
+   *[other] Edit Metadata for { $count } Items
+}
+undo-action-edit-field = { $count ->
+    [one] Edit of “{ $field }”
+   *[other] Edit of “{ $field }” for { $count } Items
+}
+undo-action-normalize-attachment-titles = Normalize Attachment Title
+undo-action-trash = { $count ->
+    [one] Trash Item
+   *[other] Trash { $count } Items
+}
+undo-action-restore-items = { $count ->
+    [one] Restore Item
+   *[other] Restore { $count } Items
+}
+undo-action-trash-collection = { $count ->
+    [one] Trash Collection
+   *[other] Trash { $count } Collections
+}
+undo-action-trash-search = { $count ->
+    [one] Trash Saved Search
+   *[other] Trash { $count } Saved Searches
+}
+undo-action-restore-collection = { $count ->
+    [one] Restore Collection
+   *[other] Restore { $count } Collections
+}
+undo-action-restore-objects = { $count ->
+    [one] Restore Object
+   *[other] Restore { $count } Objects
+}
+undo-action-add-to-collection = { $count ->
+    [one] Add to Collection
+   *[other] Add { $count } Items to Collection
+}
+undo-action-remove-from-collection = { $count ->
+    [one] Remove from Collection
+   *[other] Remove { $count } Items from Collection
+}
+undo-action-move-to-collection = { $count ->
+    [one] Move to Collection
+   *[other] Move { $count } Items to Collection
+}
+undo-action-rename-collection = Rename Collection
+undo-action-move-collection = Move Collection
+undo-action-add-tag = { $count ->
+    [one] Add Tag
+   *[other] Add Tag to { $count } Items
+}
+undo-action-change-tag = Change Tag
+undo-action-split-tag = Split Tag
+undo-action-remove-tag = { $count ->
+    [one] Remove Tag
+   *[other] Remove Tag from { $count } Items
+}
+undo-action-remove-tags-from-item = { $count ->
+    [one] Remove Tag
+   *[other] Remove { $count } Tags
+}
+undo-action-remove-all-tags = Remove All Tags
+undo-action-edit-note = Edit Note
+undo-action-add-creator = Add Creator
+undo-action-remove-creator = Remove Creator
+undo-action-edit-creator = Edit Creator
+undo-action-reorder-creator = Reorder Creator
+undo-action-change-type = Change Item Type
+undo-action-change-parent-item = { $count ->
+    [one] Change Parent Item
+   *[other] Change Parent for { $count } Items
+}
+undo-action-convert-to-standalone = { $count ->
+    [one] Convert to Standalone
+   *[other] Convert { $count } Items to Standalone
+}
+undo-action-add-related = Add Related
+undo-action-remove-related = Remove Related
+undo-action-merge-items = { $count ->
+    [one] Merge Item
+   *[other] Merge { $count } Items
+}
+menu-edit-undo-action = Undo { $action }
+menu-edit-redo-action = Redo { $action }
