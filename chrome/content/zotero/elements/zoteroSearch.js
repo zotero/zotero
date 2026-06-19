@@ -215,15 +215,27 @@
 			switch (event.keyCode) {
 				case event.DOM_VK_RETURN:
 					this.active = true;
-					
+
 					if (event.shiftKey) {
 						this.addCondition();
+						// Move focus to the new row's drop-down so it can be set
+						// from the keyboard
+						this.focusNewCondition();
 					}
 					else {
 						this.doCommand();
 					}
 					break;
 			}
+		}
+
+		// Move focus to the most recently added condition's drop-down. Deferred so
+		// it isn't immediately undone by the platform's own handling of the key
+		// event that triggered the addition (which otherwise keeps focus on the
+		// source element).
+		focusNewCondition() {
+			let menu = this.querySelector('#conditions').lastChild.querySelector('#conditionsmenu');
+			setTimeout(() => menu.focus({ focusVisible: true }));
 		}
 	}
 	customElements.define("zoterosearch", ZoteroSearch);
@@ -846,6 +858,11 @@
 					)
 				);
 				this.parent.addCondition(ref);
+				// When activated from the keyboard (a synthesized click has detail
+				// 0, unlike a mouse click), move focus to the new row's drop-down
+				if (event.detail === 0) {
+					this.parent.focusNewCondition();
+				}
 			}
 		}
 

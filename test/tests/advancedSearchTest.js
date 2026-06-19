@@ -476,6 +476,76 @@ describe("Advanced Search", function () {
 			});
 		});
 
+		describe("Keyboard", function () {
+			// Focus is deferred to after the originating key event is handled
+			function nextTick() {
+				return new Promise(resolve => win.setTimeout(resolve));
+			}
+
+			it("should focus the new row's condition drop-down when adding via the + button", async function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+
+				var before = conditions.childNodes.length;
+				// Native keyboard activation of the button dispatches a click with detail 0
+				conditions.firstChild.querySelector('#add').dispatchEvent(
+					new win.MouseEvent('click', { detail: 0, bubbles: true, cancelable: true })
+				);
+
+				assert.equal(conditions.childNodes.length, before + 1);
+				await nextTick();
+				assert.equal(
+					win.document.activeElement,
+					conditions.lastChild.querySelector('#conditionsmenu')
+				);
+			});
+
+			it("shouldn't move focus when adding via the + button with the mouse", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+
+				var before = conditions.childNodes.length;
+				var addButton = conditions.firstChild.querySelector('#add');
+				addButton.focus();
+				// A mouse click has detail >= 1
+				addButton.dispatchEvent(
+					new win.MouseEvent('click', { detail: 1, bubbles: true, cancelable: true })
+				);
+
+				assert.equal(conditions.childNodes.length, before + 1);
+				assert.equal(win.document.activeElement, addButton);
+			});
+
+			it("should add a condition and focus its drop-down on Shift-Enter", async function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+
+				var before = conditions.childNodes.length;
+				conditions.firstChild.querySelector('#conditionsmenu').dispatchEvent(
+					new win.KeyboardEvent('keypress', {
+						key: 'Enter',
+						keyCode: 13,
+						shiftKey: true,
+						bubbles: true,
+						cancelable: true
+					})
+				);
+
+				assert.equal(conditions.childNodes.length, before + 1);
+				await nextTick();
+				assert.equal(
+					win.document.activeElement,
+					conditions.lastChild.querySelector('#conditionsmenu')
+				);
+			});
+		});
+
 		describe("Collection", function () {
 			it("should show collections and saved searches", async function () {
 				var col1 = await createDataObject('collection', { name: "A" });
