@@ -334,11 +334,27 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			}
 			let newSearchItems = [...newSearchItemSet];
 			if (this.collectionTreeRow.isTrash()) {
-				// When in trash, also fetch trashed collections and searched
-				// So that they are displayed among deleted items
+				// When in trash, also fetch trashed collections and searches
+				// so that they're displayed among the deleted items
+				let trashedCollections = await this.collectionTreeRow.getTrashedCollections();
+				let trashedSearches = await Zotero.Searches.getDeleted(this.collectionTreeRow.ref.libraryID);
+				// Collections and searches can't match item-level conditions or tags, so when
+				// an advanced search or tag filter is active, don't show them. With a quick
+				// search, match against their names.
+				let { searchText, advancedSearch, tags } = this.collectionTreeRow;
+				if (advancedSearch || (tags && tags.size)) {
+					trashedCollections = [];
+					trashedSearches = [];
+				}
+				else if (searchText) {
+					let words = searchText.toLowerCase().split(/\s+/).filter(Boolean);
+					let matches = obj => words.every(word => obj.name.toLowerCase().includes(word));
+					trashedCollections = trashedCollections.filter(matches);
+					trashedSearches = trashedSearches.filter(matches);
+				}
 				newSearchItems = newSearchItems
-					.concat(await this.collectionTreeRow.getTrashedCollections())
-					.concat(await Zotero.Searches.getDeleted(this.collectionTreeRow.ref.libraryID));
+					.concat(trashedCollections)
+					.concat(trashedSearches);
 			}
 			// Remove notes and attachments if necessary
 			if (this.itemTree.props.regularOnly) {

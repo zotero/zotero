@@ -1735,6 +1735,44 @@ describe("CollectionViewItemTree", function () {
 				assert.equal(itemsView.getRow(searchRowIndex).type, 'search');
 			});
 
+			it("shouldn't show trashed collections or searches when an advanced search is active", async function () {
+				let item = await createDataObject('item', { title: "advancedTrashMatch", deleted: true });
+				let collection = await createDataObject('collection', { name: "advancedTrashMatch", deleted: true });
+				let search = await createDataObject('search', { name: "advancedTrashMatch", deleted: true });
+
+				await selectTrash(win);
+
+				let s = new Zotero.Search();
+				s.libraryID = item.libraryID;
+				s.addCondition('title', 'is', "advancedTrashMatch");
+				await itemsView.setFilter('advanced-search', s);
+
+				// The matching item is shown, but the collection and search, which can't
+				// match item-level conditions, are excluded
+				assert.isNumber(itemsView.getRowIndexByID(item.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(collection.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(search.treeViewID));
+
+				await itemsView.setFilter('advanced-search', null);
+			});
+
+			it("should filter trashed collections and searches by name during a quick search", async function () {
+				let match = await createDataObject('collection', { name: "quickTrashFindme", deleted: true });
+				let other = await createDataObject('collection', { name: "quickTrashOther", deleted: true });
+				let matchSearch = await createDataObject('search', { name: "quickTrashFindme", deleted: true });
+				let otherSearch = await createDataObject('search', { name: "quickTrashOther", deleted: true });
+
+				await selectTrash(win);
+				await itemsView.setFilter('search', "quickTrashFindme");
+
+				assert.isNumber(itemsView.getRowIndexByID(match.treeViewID));
+				assert.isNumber(itemsView.getRowIndexByID(matchSearch.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(other.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(otherSearch.treeViewID));
+
+				await itemsView.setFilter('search', "");
+			});
+
 			it("should sort by hasAttachment in trash without crashing", async function () {
 				await createDataObject('collection', { deleted: true });
 				await createDataObject('search', { deleted: true });
