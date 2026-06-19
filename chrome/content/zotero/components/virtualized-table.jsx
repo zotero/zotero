@@ -813,7 +813,16 @@ class VirtualizedTable extends React.Component {
 	 * @param index {Number}
 	 */
 	scrollToRow(index) {
-		this._jsWindow && this._jsWindow.scrollToRow(index);
+		if (!this._jsWindow) return;
+		// When a sticky section header is pinned at the top of the view, it overlays the rows
+		// below it. Reserve a row's worth of space so a row scrolled up into view lands below the
+		// pinned header rather than behind it.
+		let topOffset = 0;
+		if (this.props.stickySectionHeaders && !this.props.isSectionHeader(index)
+				&& this._getSectionHeaderIndices().some(i => i < index)) {
+			topOffset = this._rowHeight;
+		}
+		this._jsWindow.scrollToRow(index, false, topOffset);
 	}
 
 	/**

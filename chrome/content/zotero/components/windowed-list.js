@@ -205,8 +205,11 @@ module.exports = class {
 	 * @param {Integer} index
 	 * @param {Boolean} forceScrollToTop  If true, the row will be scrolled to the top of the scrollbox
 	 * even if it is below the current scroll window.
+	 * @param {Integer} topOffset  Amount of space reserved at the top of the scrollbox (e.g. for a
+	 * sticky section header that overlays the rows). When scrolling a row into view from above, the
+	 * row is positioned below this offset rather than flush with the top edge.
 	 */
-	scrollToRow(index, forceScrollToTop = false) {
+	scrollToRow(index, forceScrollToTop = false, topOffset = 0) {
 		const { scrollOffset } = this;
 		const itemCount = this._getItemCount();
 		const height = this.getWindowHeight();
@@ -221,8 +224,8 @@ module.exports = class {
 			this.scrollTo(startPosition);
 			return;
 		}
-		if (startPosition < scrollOffset) {
-			this.scrollTo(startPosition);
+		if (startPosition - topOffset < scrollOffset) {
+			this.scrollTo(startPosition - topOffset);
 		}
 		else if (endPosition > scrollOffset + height) {
 			this.scrollTo(endPosition - height - 1);
