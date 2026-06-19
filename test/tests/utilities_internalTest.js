@@ -719,6 +719,16 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(out, 'foobar');
 		});
 
+		it("should not throw on an unbalanced {{endif}}", function () {
+			const vars = {
+				v1: '1',
+			};
+			// An {{endif}} without a matching {{if}} shouldn't pop the base level and crash
+			const template = 'foo{{endif}}bar{{if v1 == "1"}}baz{{endif}}';
+			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(out, 'foobarbaz');
+		});
+
 		it("should work with a condition in the middle", function () {
 			const vars = {
 				v1: '1',

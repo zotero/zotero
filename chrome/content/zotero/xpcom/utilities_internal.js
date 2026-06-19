@@ -2312,7 +2312,12 @@ Zotero.Utilities.Internal = {
 					continue;
 				}
 				else if (operator === 'endif') {
-					levels.pop();
+					// Don't pop the base level for an unbalanced {{endif}} (i.e. one without a matching
+					// {{if}}), which would leave `levels` empty and cause `level` to be undefined on the
+					// next iteration
+					if (levels.length > 1) {
+						levels.pop();
+					}
 					continue;
 				}
 				if (level.condition) {
