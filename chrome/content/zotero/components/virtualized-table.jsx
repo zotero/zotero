@@ -1312,7 +1312,12 @@ class VirtualizedTable extends React.Component {
 		}
 		let jsWindowProps = {
 			id: this._jsWindowID,
-			className: "virtualized-table-body",
+			// Reserve a scrollbar gutter when there are sticky section headers (see CSS), so the
+			// scrollbar doesn't float over the content. Without it a macOS overlay scrollbar
+			// overlaps the rows, and the opaque pinned header -- which must paint above the rows
+			// to occlude them, and so above the scrollbar -- covers the scrollbar's edge.
+			className: "virtualized-table-body"
+				+ (this.props.stickySectionHeaders ? " has-sticky-section-headers" : ""),
 			onFocus: (e) => {
 				if (e.target.id == this._jsWindowID) {
 					// Focus should always remain on the list itself.
@@ -1325,18 +1330,23 @@ class VirtualizedTable extends React.Component {
 			<div {...props}>
 				{columnDragMarker}
 				{header}
-				<div {...jsWindowProps} />
-				{this.props.stickySectionHeaders
-					&& <div
-						className="virtualized-table-sticky-section-header"
-						ref={ref => this._stickyHeader = ref}
-						aria-hidden="true"
-					>
-						<div
-							className="virtualized-table-sticky-section-header-content"
-							ref={ref => this._stickyHeaderContent = ref}
-						/>
-					</div>}
+				<div {...jsWindowProps}>
+					{/* Pinned copy of the current section's header. Lives inside the scrolling
+					    body (as its first child, before the windowed-list) and pins with
+					    position: sticky, so its width tracks the body's content box automatically
+					    and it lines up with the rows without any JS geometry. */}
+					{this.props.stickySectionHeaders
+						&& <div
+							className="virtualized-table-sticky-section-header"
+							ref={ref => this._stickyHeader = ref}
+							aria-hidden="true"
+						>
+							<div
+								className="virtualized-table-sticky-section-header-content"
+								ref={ref => this._stickyHeaderContent = ref}
+							/>
+						</div>}
+				</div>
 			</div>
 		);
 	}
@@ -1420,13 +1430,15 @@ class VirtualizedTable extends React.Component {
 
 	/**
 	 * Pin the header of the section currently at the top of the view, pushing it up as
-	 * the next section's header scrolls into it. The pinned header lives outside the
-	 * scrolling body (so it doesn't scroll itself) and reuses the consumer's renderItem
-	 * to match the real header row's appearance.
+	 * the next section's header scrolls into it, and reuse the consumer's renderItem so the
+	 * pinned copy matches the real header row's appearance.
 	 *
-	 * The outer element is a fixed clip region anchored to the top of the body; the inner
-	 * (opaque) element holds the rendered header and is the part that translates, so the
-	 * push is clipped at the top of the body rather than spilling over the column header.
+	 * The pinned header is the first child of the scrolling body and stays put via position:
+	 * sticky, taking its width from the body's content box so it lines up with the rows. The
+	 * outer element has zero height (so it adds no space to the flow); the inner (opaque)
+	 * element holds the rendered header, overflows downward over the rows, and is the part that
+	 * translates, so a header pushed up by the next section is clipped at the top of the body
+	 * (by the body's own overflow) rather than spilling over the column header.
 	 */
 	_updateStickySectionHeader = () => {
 		if (!this.props.stickySectionHeaders || !this._stickyHeader || !this._jsWindow) {
@@ -1474,18 +1486,10 @@ class VirtualizedTable extends React.Component {
 			content.textContent = '';
 			content.appendChild(node);
 		}
-		// Anchor the clip region over the top of the list body (below the column header,
-		// inside the scrollbar). Its height covers the pinned header plus the body's top
-		// padding, so a header pushed up is clipped at the body's top edge. Use the body's
-		// sub-pixel top (not the integer-rounded offsetTop) so the overlay lands exactly at
-		// the body's edge and never creeps over the column header's bottom divider.
-		let body = this._jsWindow.targetElement;
-		let insetTop = parseFloat(window.getComputedStyle(body).paddingTop) || 0;
-		let bodyTop = body.getBoundingClientRect().top - this._topDiv.getBoundingClientRect().top;
-		clip.style.top = bodyTop + 'px';
-		clip.style.left = body.offsetLeft + 'px';
-		clip.style.width = body.clientWidth + 'px';
-		clip.style.height = (this._rowHeight + insetTop) + 'px';
+		// Geometry is all CSS now: the clip is the first child of the scrolling body, has zero
+		// height (so it takes no space in the flow and the rows below aren't shifted down), and
+		// pins itself with position: sticky. Its content overflows downward over the rows and
+		// gets its width from the body's content box, so it lines up with the real rows.
 		// Push the pinned header up as the next section's header approaches the top
 		let translateY = 0;
 		if (nextIndex != -1) {

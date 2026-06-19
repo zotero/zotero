@@ -17,6 +17,16 @@
 		padding: 4px 8px 8px;
 	}
 
+	// With sticky section headers, the body can't have top padding: overflow clips at the
+	// padding box, so rows would scroll up into the padding and show above the pinned header
+	// (which sticks to the content-box top). Drop the top padding so rows clip exactly where the
+	// header pins, and keep the gap below the column header as a margin -- outside the scroll
+	// area, where rows can't reach it.
+	.virtualized-table-body.has-sticky-section-headers {
+		padding-top: 0;
+		margin-top: 4px;
+	}
+
 	.virtualized-table-body {
 		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 	}

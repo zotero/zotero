@@ -358,22 +358,23 @@
 	}
 }
 
-// Pinned copy of the current section's header row. The outer element is a fixed clip
-// region anchored over the top of the body, aligned to the rows' container so the pinned
-// row lines up with the real rows (positioned/sized in virtualized-table.jsx). The inner
-// element is opaque and translates, so a header pushed up by the next section is clipped
-// at the body's top edge instead of spilling over the column header.
+// Pinned copy of the current section's header row. It's the first child of the scrolling
+// body and pins itself with position: sticky, so its width comes from the body's content box
+// for free and it lines up with the real rows without any JS geometry. It has zero height --
+// so it takes no space in the flow, doesn't shift the rows down, and pins flush with the top
+// of the rows -- and its content overflows downward over the rows. (The body's scrollbar is
+// kept clear of it by the reserved scrollbar gutter, not by paint order; see below.)
 .virtualized-table-sticky-section-header {
-	position: absolute;
+	position: sticky;
+	top: 0;
+	height: 0;
 	// Above the rows scrolling under it, including a focused row (z-index: 10000), so they
 	// pass underneath the pinned header rather than over it
 	z-index: 10001;
-	overflow: hidden;
 	pointer-events: none;
 
 	.virtualized-table-sticky-section-header-content {
 		box-sizing: border-box;
-		padding: 4px 8px 0;
 		// Opaque so the pinned header occludes the rows (and the real header row) beneath it
 		background-color: var(--material-background);
 
@@ -388,6 +389,17 @@
 	max-width: 100%;
 	overflow: auto;
 	padding: 4px 8px 8px;
+
+	// With sticky section headers, reserve the scrollbar's track so it doesn't float over the
+	// content. The pinned header is opaque and must paint above the rows to occlude them, which
+	// in Gecko also paints it above the scrollbar; keeping the scrollbar out of the content box
+	// is what stops it from covering the scrollbar's edge (see the sticky header rules above).
+	// The body must also have no top padding so rows can't scroll up into it and show above the
+	// pinned header; that's handled per-consumer (e.g. #zotero-items-tree) where the padding is
+	// set with higher specificity.
+	&.has-sticky-section-headers {
+		scrollbar-gutter: stable;
+	}
 
 	.cell {
 		// NOTE: Do not add padding here. See #5198
