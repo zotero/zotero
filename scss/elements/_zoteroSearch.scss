@@ -12,38 +12,96 @@ zoterosearch {
 	max-height: 33vh;
 	@include macOS-normalize-controls;
 
+	// Use the full pane width
+	search-condition-group {
+		display: flex;
+		flex-direction: column;
+	}
+
 	.search-condition-group {
 		gap: 8px;
-		// Zero the toolkit groupbox margin so a nested group lines up flush with the
-		// left edge of the condition rows above it (reads as the next condition)
+		// Zero the toolkit groupbox margin/padding
 		margin: 0;
 		padding: 0;
 
-		// The conditions container (root keeps id="conditions"; nested groups use the
-		// class) -- a rounded, filled box that nests as groups nest
 		.conditions {
 			min-width: fit-content; // Grow with content, don't overflow
-			padding: 8px;
-			// Roomier spacing between items (conditions and nested groups alike) so the
-			// list reads clearly without needing divider lines
-			gap: 12px;
-			background: var(--fill-senary);
-			border: var(--material-border-quinary);
-			border-radius: 6px;
+			// Rows abut, separated by full-width dividers (below)
+			gap: 0;
 		}
 
-		// A nested group sits inside its parent's conditions box, indented so its
-		// caption and box line up with the condition controls above it (which are
-		// themselves inset by the row's leading gap). A group is just another item in
-		// the list, so it keeps the same spacing from its siblings as conditions do.
-		.search-condition-group {
-			gap: 4px;
-			margin-inline-start: 8px;
+		// A nested group has no box of its own. Each nesting level sets an indent that the
+		// rows and headers below apply to their own content -- not to the container -- so
+		// every row stays full width and its divider spans edge to edge. A group's
+		// conditions hold the level's indent; its header inherits the parent's, so the
+		// header lines up with the condition before it while the conditions step in one
+		// more level. (Custom properties can't accumulate by self-reference, so each level
+		// is set explicitly.)
+		@for $depth from 1 through 6 {
+			$sel: "";
+			@for $i from 1 through $depth {
+				$sel: "#{$sel}.search-condition-group ";
+			}
+			#{$sel}.conditions {
+				--indent: #{$depth * 20}px;
+			}
+		}
+
+		// The caption's remove-group/add-condition buttons, laid out so they line up in
+		// the same columns as a condition row's remove/add buttons. The placeholder
+		// reserves the trailing "( )" wrap-button column that rows have but captions don't.
+		.group-actions {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.group-action-placeholder {
+			width: 20px;
 		}
 
 		.remove-group {
 			margin: 0;
 		}
+	}
+
+	// Full-width dividers between rows and groups. They sit on the row/group wrappers,
+	// which run the full width, so the lines span edge to edge regardless of how deeply
+	// the content is indented. The first item in a box has no line above it; a group's
+	// header is divided from its conditions by a line below the caption.
+	.conditions > * {
+		border-top: var(--material-border-quinary);
+	}
+
+	.conditions > *:first-child {
+		border-top: 0;
+	}
+
+	search-condition-group:not([root]) > .search-condition-group {
+		gap: 0;
+
+		> caption {
+			border-bottom: var(--material-border-quinary);
+		}
+	}
+
+	// Only the root group draws the surrounding frame; nested groups are shown by
+	// indentation
+	search-condition-group[root] > .search-condition-group > .conditions {
+		// No vertical padding: the rows' own 6px block padding sets the gap to the frame,
+		// matching the gap to a divider, so the first and last rows are centered in their
+		// bands just like the rows between dividers
+		padding: 0 8px;
+		background: var(--fill-senary);
+		border: var(--material-border-quinary);
+		border-radius: 6px;
+	}
+
+	// The root header sits above the box, so indent it to the box's content edge
+	// (border + padding, 9px) plus the menulist label inset (5px) so "Match" lines up
+	// with the condition dropdowns' labels inside
+	search-condition-group[root] > .search-condition-group > caption {
+		padding-left: 14px !important;
 	}
 
 	// The per-condition "group" button (wraps the condition in a new group)
@@ -75,7 +133,13 @@ zoterosearch {
 		align-items: center;
 		gap: 4px;
 		margin: 0 !important;
-		padding-left: 0 !important;
+		// Vertical breathing room around the divider lines
+		padding-block: 6px;
+		// A nested group's header inherits its parent's indent, so it lines up with the
+		// sibling condition above it (the root header is re-indented to the box below).
+		// The extra 5px matches the menulist's internal label inset, so "Match" aligns
+		// with the condition dropdown's label rather than its (slightly wider) box.
+		padding-inline-start: calc(var(--indent, 0px) + 5px) !important;
 
 		label {
 			margin: 0;
@@ -103,6 +167,18 @@ zoterosearch {
 		display: flex;
 		align-items: center;
 		gap: 8px;
+		// Vertical breathing room around the divider lines
+		padding-block: 6px;
+		// Indent the row's content by its nesting level (see --indent above) while the
+		// row itself stays full width, so the divider below it spans edge to edge
+		padding-inline-start: var(--indent, 0px);
+
+		// The per-row tooltip container shouldn't take a flex slot (and the row's gap
+		// after it), which would push the condition menu right of the "Match" header.
+		// Take it out of flow rather than display:none, which would hide the tooltips.
+		popupset {
+			position: absolute;
+		}
 
 		.valuefield, .valuemenu, .value-date-age {
 			flex: 1;
