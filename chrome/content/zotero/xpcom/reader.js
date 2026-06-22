@@ -43,6 +43,9 @@ const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 const READ_ALOUD_ENABLED_VOICES_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudEnabledVoices.json');
 const READ_ALOUD_VOICE_DEFAULTS_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudVoiceDefaults.json');
 
+// Whether the Read Aloud audio cache has been pruned of stale versions this session
+let readAloudCachePruned = false;
+
 class ReaderInstance {
 	constructor(options) {
 		this.stateFileName = '.zotero-reader-state';
@@ -1693,13 +1696,17 @@ class ReaderInstance {
 					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
 					let result = await client.getReadAloudVoices();
 					resolve(Cu.cloneInto(result, targetWindow));
+					// Prune cache entries with outdated versions once per session,
+					// after the voices (and their current cache versions) are known
+					if (!readAloudCachePruned && result.voices) {
+						this._pruneReadAloudCache(audioCache, result.voices);
+					}
 				});
 			},
 
 			getAudio: (segment, voice) => {
 				return new targetWindow.Promise(async (resolve) => {
-					let cacheURL = 'https://read-aloud.zotero.invalid/audio?'
-						+ new URLSearchParams({ voice: voice.id, text: segment.text });
+					let cacheURL = this._getReadAloudCacheURL(segment, voice);
 					let cache;
 					try {
 						cache = await audioCache;
@@ -1715,7 +1722,9 @@ class ReaderInstance {
 					let apiKey = segment === 'sample' ? null : await Zotero.Sync.Data.Local.getAPIKey();
 					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
 					let result = await client.getReadAloudAudio(segment, voice.id);
-					if (result.audio && cache) {
+					// Skip caching when the server forbids it (e.g., error responses
+					// returned with Cache-Control: no-store)
+					if (result.audio && cache && !result.noStore) {
 						try {
 							await cache.put(cacheURL, new Response(result.audio));
 						}
@@ -1743,6 +1752,50 @@ class ReaderInstance {
 				});
 			},
 		};
+	}
+
+	// Build the local cache key for a Read Aloud audio segment. The voice's
+	// cacheVersion is included so that a server-side version bump changes the
+	// key, causing old entries to miss and the correct audio to be re-fetched.
+	_getReadAloudCacheURL(segment, voice) {
+		let params = { voice: voice.id, text: segment.text };
+		if (voice.cacheVersion !== undefined && voice.cacheVersion !== null) {
+			params.cacheVersion = voice.cacheVersion;
+		}
+		return 'https://read-aloud.zotero.invalid/audio?' + new URLSearchParams(params);
+	}
+
+	// Delete cached audio whose cacheVersion is no longer offered by the server,
+	// reclaiming space that key mismatches alone would leave behind. Runs once
+	// per session.
+	async _pruneReadAloudCache(audioCache, voices) {
+		readAloudCachePruned = true;
+		try {
+			let validVersions = new Set();
+			for (let configs of Object.values(voices)) {
+				if (!Array.isArray(configs)) continue;
+				for (let config of configs) {
+					if (config.cacheVersion !== undefined && config.cacheVersion !== null) {
+						validVersions.add(String(config.cacheVersion));
+					}
+				}
+			}
+			// Older servers without version support provide no versions; leave
+			// the cache untouched rather than wiping everything
+			if (!validVersions.size) {
+				return;
+			}
+			let cache = await audioCache;
+			for (let request of await cache.keys()) {
+				let version = new URL(request.url).searchParams.get('cacheVersion');
+				if (!validVersions.has(version)) {
+					await cache.delete(request);
+				}
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 
 	async _showReadAloudGuidance() {

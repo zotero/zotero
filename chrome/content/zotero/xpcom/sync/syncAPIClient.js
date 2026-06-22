@@ -695,7 +695,9 @@ Zotero.Sync.APIClient.prototype = {
 		}
 		try {
 			let xmlhttp = await this.makeRequest(method, url, options);
-			return { audio: xmlhttp.response };
+			let cacheControl = xmlhttp.getResponseHeader('Cache-Control') || '';
+			let noStore = /(?:^|,)\s*no-store\s*(?:,|$)/i.test(cacheControl);
+			return { audio: xmlhttp.response, noStore };
 		}
 		catch (e) {
 			Zotero.logError(e);
