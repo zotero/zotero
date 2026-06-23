@@ -52,6 +52,56 @@ describe("Advanced Search", function () {
 		await otherItem.eraseTx();
 	});
 	
+	
+	it("should run a cross-level search across a multi-collection selection", async function () {
+		var word = 'zmc' + Zotero.Utilities.randomString();
+		var makeMatch = async function (collection) {
+			var item = await createDataObject('item', { collections: [collection.id] });
+			var attachment = await importPDFAttachment(item);
+			await createAnnotation('highlight', attachment, { comment: 'foo ' + word + ' bar' });
+			return item;
+		};
+		var c1 = await createDataObject('collection');
+		var c2 = await createDataObject('collection');
+		var c3 = await createDataObject('collection');
+		var itemA = await makeMatch(c1);
+		var itemB = await makeMatch(c2);
+		var itemC = await makeMatch(c3); // in an unselected collection
+		
+		// Select c1 and c2, leaving c3 out
+		var cv = zp.collectionsView;
+		await cv.selectByID("C" + c1.id);
+		await waitForItemsLoad(win);
+		cv.selection.toggleSelect(cv.getRowIndexByID("C" + c2.id));
+		await zp.onCollectionSelected();
+		await zp.itemsView.waitForLoad();
+		
+		// Top-level items with a descendant annotation matching the comment
+		var s = new Zotero.Search();
+		s.libraryID = Zotero.Libraries.userLibraryID;
+		s.addCondition('resultLevel', 'item');
+		s.addCondition('annotationComment', 'contains', word);
+		
+		var iv = zp.itemsView;
+		await iv.setFilter('advanced-search', s);
+		await iv.waitForLoad();
+		
+		// The view merges getItems() across the selected rows (collectionViewItemTree),
+		// so the cross-level search runs scoped to each collection and the results union:
+		// both selected collections' matching items, but not the unselected one's
+		var rows = zp.getCollectionTreeRows();
+		var ids = new Set();
+		for (let arr of await Promise.all(rows.map(row => row.getItems()))) {
+			for (let item of arr) ids.add(item.id);
+		}
+		assert.sameMembers([...ids], [itemA.id, itemB.id]);
+		
+		await iv.setFilter('advanced-search', null);
+		await selectLibrary(win);
+		await Zotero.Items.erase([itemA.id, itemB.id, itemC.id]);
+		await Zotero.Collections.erase([c1.id, c2.id, c3.id]);
+	});
+	
 	it("shouldn't show trashed items outside the trash", async function () {
 		var item = await createDataObject('item', { setTitle: true });
 		item.deleted = true;
@@ -486,6 +536,23 @@ describe("Advanced Search", function () {
 			// Focus moves to the new condition's drop-down
 			assert.equal(win.document.activeElement, newRow.querySelector('#conditionsmenu'));
 		});
+		it("should hide the value textbox for a menu-based condition", async function () {
+			var s = new Zotero.Search();
+			s.libraryID = Zotero.Libraries.userLibraryID;
+			s.addCondition('title', 'is', '');
+			pane.search = s;
+			
+			var row = conditions.firstChild;
+			row.onConditionSelected('fileTypeID');
+			
+			// File Type uses a value menu, so the textbox must actually be hidden, not just
+			// sitting alongside the menu
+			var valuefield = row.querySelector('#valuefield');
+			assert.isTrue(valuefield.hidden);
+			assert.equal(win.getComputedStyle(valuefield).display, 'none');
+			assert.isFalse(row.querySelector('#valuemenu').hidden);
+		});
+		
 
 		describe("Find-as-you-type", function () {
 			function typeInMenu(menu, str) {
@@ -987,6 +1054,295 @@ describe("Advanced Search", function () {
 				assert.lengthOf(conditions.children, 1);
 				assert.equal(conditions.firstChild.selectedCondition, 'title');
 				assert.equal(conditions.firstChild.querySelector('#valuefield').value, '');
+			});
+
+			it("should default a fresh search to the top-level item result level", function () {
+				// Opening a new (unseeded) advanced search defaults the result level to
+				// top-level items, so child conditions map up without grouping
+				pane.search = null;
+				assert.equal(searchBox.rootGroup.resultLevel, 'item');
+			});
+
+			it("should render and serialize the root result level", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'annotation');
+				s.addCondition('annotationText', 'contains', 'foo');
+				pane.search = s;
+
+				assert.equal(searchBox.rootGroup.resultLevel, 'annotation');
+
+				searchBox.updateSearch();
+				var sequence = Object.values(searchBox.search.getConditions())
+					.map(c => c.condition);
+				assert.deepEqual(sequence, ['resultLevel', 'annotationText']);
+				var scopeCond = Object.values(searchBox.search.getConditions())
+					.find(c => c.condition == 'resultLevel');
+				assert.equal(scopeCond.operator, 'annotation');
+			});
+
+			it("should render and serialize a nested group result level", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('creator', 'contains', 'Smith');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('resultLevel', 'annotation');
+				s.addCondition('annotationText', 'contains', 'foo');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+
+				var group = conditions.querySelector('search-condition-group');
+				assert.equal(group.resultLevel, 'annotation');
+
+				searchBox.updateSearch();
+				var sequence = Object.values(searchBox.search.getConditions())
+					.map(c => c.condition);
+				assert.deepEqual(sequence,
+					['creator', 'groupStart', 'resultLevel', 'annotationText', 'groupEnd']);
+			});
+
+			it("should show a binding menu for a group of same-level descendant conditions", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item'); // result level
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('annotationText', 'contains', 'foo');
+				s.addCondition('annotationComment', 'contains', 'bar');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+
+				var group = conditions.querySelector('search-condition-group');
+				assert.isFalse(group.bindingMenu.hidden);
+				var values = [...group.bindingMenu.querySelectorAll('menuitem')].map(i => i.value);
+				assert.includeMembers(values, ['any', 'annotation']);
+				// No attachment conditions, so it isn't offered
+				assert.notInclude(values, 'attachment');
+
+				// Bind to the same annotation and confirm it serializes
+				group.resultLevel = 'annotation';
+				searchBox.updateSearch();
+				var seq = Object.values(searchBox.search.getConditions()).map(c => c.condition);
+				assert.deepEqual(seq,
+					['resultLevel', 'groupStart', 'resultLevel', 'annotationText', 'annotationComment', 'groupEnd']);
+				var groupScope = Object.values(searchBox.search.getConditions())
+					.filter(c => c.condition == 'resultLevel')[1];
+				assert.equal(groupScope.operator, 'annotation');
+			});
+
+			it("should not show a binding menu for a group of item-level conditions", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('title', 'contains', 'a');
+				s.addCondition('title', 'contains', 'b');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+
+				var group = conditions.querySelector('search-condition-group');
+				assert.isTrue(group.bindingMenu.hidden);
+			});
+
+			it("should render a stored group binding into the menu", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('resultLevel', 'annotation');
+				s.addCondition('annotationText', 'contains', 'foo');
+				s.addCondition('annotationComment', 'contains', 'bar');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+
+				var group = conditions.querySelector('search-condition-group');
+				assert.isFalse(group.bindingMenu.hidden);
+				assert.equal(group.resultLevel, 'annotation');
+				assert.equal(group.bindingMenu.value, 'annotation');
+			});
+
+			it("should offer a binding hint for ungrouped sibling descendant conditions", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('annotationText', 'contains', 'foo');
+				s.addCondition('annotationComment', 'contains', 'bar');
+				pane.search = s;
+
+				var hint = searchBox.querySelector('#search-binding-hint');
+				assert.isFalse(hint.hidden);
+				// One bindable level (annotation), so one suggestion line with one button
+				assert.lengthOf([...hint.querySelectorAll('button')], 1);
+			});
+
+			it("should not offer a binding hint for item-level sibling conditions", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('title', 'contains', 'a');
+				s.addCondition('title', 'contains', 'b');
+				pane.search = s;
+
+				assert.isTrue(searchBox.querySelector('#search-binding-hint').hidden);
+			});
+
+			it("should not offer a binding hint for an unpopulated condition", function () {
+				// One populated annotation condition plus an empty one: not enough to suggest
+				// binding until the second is actually filled in
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('annotationText', 'contains', 'foo');
+				s.addCondition('annotationComment', 'contains', '');
+				pane.search = s;
+
+				assert.isTrue(searchBox.querySelector('#search-binding-hint').hidden);
+			});
+
+			it("should wrap conditions into a bound group when the hint is taken", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('annotationText', 'contains', 'foo');
+				s.addCondition('annotationComment', 'contains', 'bar');
+				pane.search = s;
+
+				searchBox.rootGroup.bindSameEntity('annotation');
+
+				// The two conditions are now one group bound to annotation
+				var group = conditions.querySelector('search-condition-group');
+				assert.ok(group);
+				assert.equal(group.resultLevel, 'annotation');
+				assert.lengthOf(
+					[...group.conditionsContainer.children].filter(c => c.localName == 'zoterosearchcondition'),
+					2);
+
+				searchBox.updateSearch();
+				var seq = Object.values(searchBox.search.getConditions()).map(c => c.condition);
+				assert.deepEqual(seq,
+					['resultLevel', 'groupStart', 'resultLevel', 'annotationText', 'annotationComment', 'groupEnd']);
+
+				// Conditions are no longer ungrouped siblings, so the hint is gone
+				assert.isTrue(searchBox.querySelector('#search-binding-hint').hidden);
+			});
+
+			it("should fold a legacy noChildren into the result level", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('noChildren', 'true');
+				s.addCondition('title', 'contains', 'foo');
+				pane.search = s;
+
+				// Shown as result level = top-level items, no separate checkbox
+				assert.equal(searchBox.rootGroup.resultLevel, 'item');
+
+				searchBox.updateSearch();
+				var seq = Object.values(searchBox.search.getConditions()).map(c => c.condition);
+				assert.notInclude(seq, 'noChildren');
+				assert.deepEqual(seq, ['resultLevel', 'title']);
+			});
+
+
+			it("should warn when ALL conditions can't match the same item at a mixed result level", function () {
+				// No result type (mixed), so an item-level and an annotation-level condition
+				// can't both be true of one row
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'contains', 'a');
+				s.addCondition('annotationText', 'contains', 'b');
+				pane.search = s;
+
+				assert.isFalse(searchBox.querySelector('.level-warning').hidden);
+			});
+
+			it("should not warn when a result type lets the conditions combine", function () {
+				// Result type item: the annotation condition maps up, so it's satisfiable
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('title', 'contains', 'a');
+				s.addCondition('annotationText', 'contains', 'b');
+				pane.search = s;
+
+				assert.isTrue(searchBox.querySelector('.level-warning').hidden);
+			});
+
+			it("should warn when a condition can't reach the result type", function () {
+				// A note can never be (or be under) an attachment
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'attachment');
+				s.addCondition('note', 'contains', 'a');
+				pane.search = s;
+
+				assert.isFalse(searchBox.querySelector('.level-warning').hidden);
+			});
+
+			it("should warn on the group when a condition can't reach its binding", function () {
+				// A group bound to "same annotation" with a note condition: the conflict is the
+				// group's binding, so the warning belongs on the group, not at the root.
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('resultLevel', 'annotation');
+				s.addCondition('annotationComment', 'contains', 'a');
+				s.addCondition('note', 'contains', 'b');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+
+				var group = conditions.querySelector('search-condition-group');
+				assert.isFalse(group.levelWarning.hidden);
+				assert.isTrue(searchBox.rootGroup.levelWarning.hidden);
+			});
+
+			it("should not warn for a \"separately\" group whose conditions roll up", function () {
+				// "Separately" inherits the result level (item), so annotations and a note all
+				// roll up independently -- satisfiable, no warning (so "match separately" really
+				// does clear the bound-group warning)
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('annotationComment', 'contains', 'a');
+				s.addCondition('annotationComment', 'contains', 'b');
+				s.addCondition('note', 'contains', 'c');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+
+				assert.isTrue(conditions.querySelector('search-condition-group').levelWarning.hidden);
+			});
+
+			it("should not warn for an ordinary search", function () {
+				pane.search = null;
+				assert.isTrue(searchBox.querySelector('.level-warning').hidden);
+			});
+
+			it("should keep a legacy includeParentsAndChildren editable and round-tripping", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'contains', 'foo');
+				s.addCondition('includeParentsAndChildren', 'true');
+				pane.search = s;
+
+				assert.isFalse(searchBox.querySelector('#search-legacy-options').hidden);
+				assert.isTrue(searchBox.querySelector('#includeParentsAndChildrenCheckbox').checked);
+
+				searchBox.updateSearch();
+				var seq = Object.values(searchBox.search.getConditions()).map(c => c.condition);
+				assert.include(seq, 'includeParentsAndChildren');
+			});
+
+			it("should drop includeParentsAndChildren when its legacy checkbox is unchecked", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'contains', 'foo');
+				s.addCondition('includeParentsAndChildren', 'true');
+				pane.search = s;
+
+				searchBox.querySelector('#includeParentsAndChildrenCheckbox').checked = false;
+				searchBox.updateSearch();
+				var seq = Object.values(searchBox.search.getConditions()).map(c => c.condition);
+				assert.notInclude(seq, 'includeParentsAndChildren');
 			});
 
 			it("should add a sibling condition outside the group from the group's +", function () {
