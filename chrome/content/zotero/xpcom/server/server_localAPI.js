@@ -43,7 +43,7 @@ Limitations compared to api.zotero.org:
       the key is missing or unrecognized.
 
       Local API keys are unrelated to zotero.org API keys. They are obtained by POSTing to
-      /api/authorize-local (a local-only endpoint with no web API analog) with a JSON body
+      /api/local/authorize (a local-only endpoint with no web API analog) with a JSON body
       of the form { "appName": "<caller's display name>" }. This shows a modal with three
       buttons: "Allow" (one-time access), "Always Allow" (persistent access), and "Deny".
       On allow, the response is of the form:
@@ -110,7 +110,7 @@ const WRITE_TOKEN_CACHE_SECONDS = 12 * 60 * 60;
 const PENDING_UPLOADS = new Map();
 const UPLOAD_KEY_TTL_SECONDS = 60 * 60;
 
-// Rate-limiting state for /api/authorize-local. Each entry is a timestamp (ms)
+// Rate-limiting state for /api/local/authorize. Each entry is a timestamp (ms)
 // for a request that resulted in (or would result in) a confirmation prompt.
 // When the window holds AUTHORIZE_RATE_LIMIT_MAX entries that are all less
 // than AUTHORIZE_RATE_LIMIT_WINDOW_MS old, further requests are rejected with
@@ -566,7 +566,7 @@ class LocalAPIEndpoint {
 	 *
 	 * Returns null when the request is authorized to proceed, or an HTTP
 	 * response array when it should be rejected. Keys are obtained by callers
-	 * via POST /api/authorize-local; single-use keys are consumed (deleted
+	 * via POST /api/local/authorize; single-use keys are consumed (deleted
 	 * from the persistent store) here.
 	 *
 	 * @param {Object} requestData
@@ -593,7 +593,7 @@ class LocalAPIEndpoint {
 					'Content-Type': 'text/plain',
 					'WWW-Authenticate': 'Zotero-API-Key realm="Zotero Local API"',
 				},
-				'API key required -- POST /api/authorize-local to obtain one'
+				'API key required -- POST /api/local/authorize to obtain one'
 			];
 		}
 		let entry = await consumeLocalAPIKey(key);
@@ -750,7 +750,7 @@ Zotero.Server.LocalAPI.AuthorizeLocal = class extends LocalAPIEndpoint {
 		);
 	}
 };
-Zotero.Server.Endpoints["/api/authorize-local"] = Zotero.Server.LocalAPI.AuthorizeLocal;
+Zotero.Server.Endpoints["/api/local/authorize"] = Zotero.Server.LocalAPI.AuthorizeLocal;
 
 Zotero.Server.LocalAPI.Schema = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
