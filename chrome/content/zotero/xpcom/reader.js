@@ -1758,10 +1758,7 @@ class ReaderInstance {
 	// cacheVersion is included so that a server-side version bump changes the
 	// key, causing old entries to miss and the correct audio to be re-fetched.
 	_getReadAloudCacheURL(segment, voice) {
-		let params = { voice: voice.id, text: segment.text };
-		if (voice.cacheVersion !== undefined && voice.cacheVersion !== null) {
-			params.cacheVersion = voice.cacheVersion;
-		}
+		let params = { voice: voice.id, text: segment.text, cacheVersion: voice.cacheVersion };
 		return 'https://read-aloud.zotero.invalid/audio?' + new URLSearchParams(params);
 	}
 
@@ -1775,13 +1772,9 @@ class ReaderInstance {
 			for (let configs of Object.values(voices)) {
 				if (!Array.isArray(configs)) continue;
 				for (let config of configs) {
-					if (config.cacheVersion !== undefined && config.cacheVersion !== null) {
-						validVersions.add(String(config.cacheVersion));
-					}
+					validVersions.add(String(config.cacheVersion));
 				}
 			}
-			// Older servers without version support provide no versions; leave
-			// the cache untouched rather than wiping everything
 			if (!validVersions.size) {
 				return;
 			}
