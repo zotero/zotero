@@ -23,15 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
-
-let lazy = {};
-XPCOMUtils.defineLazyPreferenceGetter(
-	lazy,
-	'shouldTrackClientVersions',
-	'extensions.zotero.httpServer.localAPI.enabled',
-);
-
 /**
  * @property {String} (readOnly) objectType
  * @property {String} (readOnly) libraryKey
@@ -1304,14 +1295,12 @@ Zotero.DataObject.prototype._finalizeSave = async function (env) {
 		Zotero.logError("skipCache is only for new objects");
 	}
 
-	if (lazy.shouldTrackClientVersions) {
-		let libraryClientVersion = await this.library.incrementClientVersion();
-		await Zotero.DB.queryAsync(
-			`UPDATE ${this.ObjectsClass.table} SET clientVersion = ? WHERE ${this.ObjectsClass.idColumn}=?`,
-			[libraryClientVersion, this.id]
-		);
-		this._clientVersion = libraryClientVersion;
-	}
+	let libraryClientVersion = await this.library.incrementClientVersion();
+	await Zotero.DB.queryAsync(
+		`UPDATE ${this.ObjectsClass.table} SET clientVersion = ? WHERE ${this.ObjectsClass.idColumn}=?`,
+		[libraryClientVersion, this.id]
+	);
+	this._clientVersion = libraryClientVersion;
 };
 
 
