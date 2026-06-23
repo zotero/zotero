@@ -248,6 +248,22 @@ Zotero.SearchConditions = new function () {
 				}
 			},
 
+			// Optional level a group's conditions are evaluated at, placed inside the group
+			// like 'joinMode'. When a group's result level is a descendant level of the surrounding
+			// row (e.g., 'annotation' within a top-level item search), the group's conditions
+			// are matched against descendants and the match is mapped up to the parent --
+			// i.e., "the item has a descendant match for these conditions". The level
+			// rides in the operator, as with 'joinMode'. Saved with the search, so not noLoad.
+			{
+				name: 'resultLevel',
+				operators: {
+					item: true,
+					attachment: true,
+					note: true,
+					annotation: true
+				}
+			},
+
 			// Shortcuts for adding collections and searches by id
 			{
 				name: 'collectionID',
@@ -361,7 +377,9 @@ Zotero.SearchConditions = new function () {
 					isNot: true
 				},
 				table: 'itemAttachments',
-				field: 'fileTypeID'
+				field: 'fileTypeID',
+				// Matches attachment items; see 'level' handling in search.js
+				level: 'attachment'
 			},
 			
 			{
@@ -384,7 +402,9 @@ Zotero.SearchConditions = new function () {
 					doesNotContain: true
 				},
 				table: 'itemTags',
-				field: 'name'
+				field: 'name',
+				// Tags apply to items at any level, so a tag match is never mapped
+				level: 'any'
 			},
 			
 			{
@@ -396,7 +416,8 @@ Zotero.SearchConditions = new function () {
 				table: 'itemNotes',
 				// Exclude note prefix and suffix
 				field: `SUBSTR(note, ${1 + Zotero.Notes.notePrefix.length}, `
-					+ `LENGTH(note) - ${Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length})`
+					+ `LENGTH(note) - ${Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length})`,
+				level: 'note'
 			},
 			
 			{
@@ -594,6 +615,7 @@ Zotero.SearchConditions = new function () {
 				table: 'itemAnnotations',
 				field: 'text',
 				special: false,
+				level: 'annotation'
 			},
 			
 			{
@@ -605,6 +627,7 @@ Zotero.SearchConditions = new function () {
 				table: 'itemAnnotations',
 				field: 'comment',
 				special: false,
+				level: 'annotation'
 			},
 			
 			{
