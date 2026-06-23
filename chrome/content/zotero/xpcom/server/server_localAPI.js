@@ -2007,7 +2007,6 @@ async function writeSingleObject(endpoint, requestData, kind, isPatch) {
 	let body;
 	try {
 		validateObjectKey(key);
-		endpoint._checkLibraryIfUnmodifiedSinceVersion(requestData);
 		body = endpoint._parseJSONBody(data);
 	}
 	catch (e) {
@@ -2038,8 +2037,23 @@ async function writeSingleObject(endpoint, requestData, kind, isPatch) {
 				];
 			}
 		}
-		else if (!requestData.headers.get('If-Unmodified-Since-Version')) {
-			return [428, 'text/plain', 'If-Unmodified-Since-Version not provided'];
+		else {
+			let header = requestData.headers.get('If-Unmodified-Since-Version');
+			if (header === null) {
+				return [428, 'text/plain', 'If-Unmodified-Since-Version not provided'];
+			}
+			let expectedVersion = parseInt(header);
+			if (Number.isNaN(expectedVersion) || expectedVersion < 0) {
+				return [400, 'text/plain', 'Invalid If-Unmodified-Since-Version value'];
+			}
+			if (obj.clientVersion > expectedVersion) {
+				return [
+					412,
+					'text/plain',
+					`${kind} has been modified since specified version `
+					+ `(expected ${expectedVersion}, found ${obj.clientVersion})`
+				];
+			}
 		}
 
 		if (isPatch) {

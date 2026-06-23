@@ -1156,6 +1156,27 @@ describe("Local API Server", function () {
 				assert.equal(reloaded.getField('publisher'), '');
 				await item.eraseTx();
 			});
+
+			it("should accept If-Unmodified-Since-Version against the object version even after the library version advances", async function () {
+				let itemA = await createDataObject('item', { itemType: 'book' });
+				let versionA = itemA.clientVersion;
+				// Another write advances the library version past itemA's version
+				let itemB = await createDataObject('item', { itemType: 'book' });
+				assert.isAbove(itemB.clientVersion, versionA);
+
+				// itemA itself is unchanged, so a write with its version must succeed
+				let { status } = await apiPatch(`/users/0/items/${itemA.key}`, {
+					body: { publisher: 'Updated' },
+					headers: { 'If-Unmodified-Since-Version': String(versionA) },
+					successCodes: [204]
+				});
+				assert.equal(status, 204);
+				let reloaded = await Zotero.Items.getByLibraryAndKeyAsync(
+					Zotero.Libraries.userLibraryID, itemA.key);
+				assert.equal(reloaded.getField('publisher'), 'Updated');
+				await itemA.eraseTx();
+				await itemB.eraseTx();
+			});
 		});
 
 		describe("DELETE <userOrGroupPrefix>/items/<key>", function () {
