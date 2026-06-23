@@ -38,9 +38,11 @@
 	class ZoteroSearch extends SearchElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<search-condition-group root="true"/>
+			<vbox id="search-binding-hint" hidden="true"/>
 			<hbox id="search-option-checkboxes">
 				<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" native="true"/>
-				<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" native="true"/>
+			</hbox>
+			<hbox id="search-legacy-options" align="center" hidden="true">
 				<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" native="true"/>
 			</hbox>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
@@ -65,9 +67,20 @@
 		init() {
 			this.rootGroup = this.querySelector('search-condition-group[root]');
 			this.addEventListener('keypress', event => this.handleKeyPress(event));
-			// Re-evaluate which remove buttons are enabled as the conditions change
-			this.addEventListener('input', () => this.updateRemoveButtons());
-			this.addEventListener('command', () => this.updateRemoveButtons());
+			// Re-evaluate which remove buttons are enabled and which groups can bind to the
+			// same descendant as the conditions change
+			this.addEventListener('input', () => {
+				this.updateRemoveButtons();
+				this.updateBindingMenus();
+				this.updateBindingHint();
+				this.updateLevelWarning();
+			});
+			this.addEventListener('command', () => {
+				this.updateRemoveButtons();
+				this.updateBindingMenus();
+				this.updateBindingHint();
+				this.updateLevelWarning();
+			});
 		}
 
 		// Build the condition tree (root group, nested groups, and search-global
@@ -75,9 +88,11 @@
 		renderConditions() {
 			var root = this.rootGroup;
 
-			for (let name of ['recursive', 'noChildren', 'includeParentsAndChildren']) {
-				this.querySelector('#' + name + 'Checkbox').checked = false;
-			}
+			this.querySelector('#recursiveCheckbox').checked = false;
+			// 'Include parent and child items' is a legacy hack subsumed by result levels;
+			// its checkbox is shown only for an existing search that still carries the flag
+			this.querySelector('#includeParentsAndChildrenCheckbox').checked = false;
+			this.querySelector('#search-legacy-options').hidden = true;
 
 			root.clear();
 
@@ -90,14 +105,33 @@
 				let condition = conditions[id];
 				switch (condition.condition) {
 					case 'recursive':
+						this.querySelector('#recursiveCheckbox').checked = condition.operator == 'true';
+						continue;
+
+					// Legacy "show only top-level items" is exactly result level = item, so
+					// fold it into the root result level rather than a checkbox
 					case 'noChildren':
+						if (condition.operator == 'true') {
+							root.resultLevel = 'item';
+						}
+						continue;
+
+					// Legacy include-parents-and-children: keep it editable for searches that
+					// have it, but don't offer it on new ones
 					case 'includeParentsAndChildren':
-						this.querySelector('#' + condition.condition + 'Checkbox').checked
+						this.querySelector('#includeParentsAndChildrenCheckbox').checked
 							= condition.operator == 'true';
+						if (condition.operator == 'true') {
+							this.querySelector('#search-legacy-options').hidden = false;
+						}
 						continue;
 
 					case 'joinMode':
 						stack[stack.length - 1].joinMode = condition.operator;
+						continue;
+
+					case 'resultLevel':
+						stack[stack.length - 1].resultLevel = condition.operator;
 						continue;
 
 					case 'groupStart': {
@@ -124,6 +158,73 @@
 			}
 
 			this.updateRemoveButtons();
+			this.updateBindingMenus();
+			this.updateBindingHint();
+			this.updateLevelWarning();
+		}
+
+		// Refresh each nested group's same-entity binding menu (visibility and options)
+		updateBindingMenus() {
+			for (let group of this.querySelectorAll('search-condition-group')) {
+				group.updateBindingMenu();
+			}
+		}
+
+		// Refresh every group's level warning. Each group flags only its own conditions, so the
+		// message sits on the group whose conditions actually conflict and speaks to that group's
+		// controls (see SearchConditionGroup.updateLevelWarning).
+		updateLevelWarning() {
+			for (let group of this.querySelectorAll('search-condition-group')) {
+				group.updateLevelWarning();
+			}
+		}
+
+		// Offer to bind ungrouped sibling conditions at the root. The root can't bind itself
+		// (it returns the result level), so 2+ of its conditions sharing a level below the
+		// result level are wrappable into a "same attachment" group -- surfaced as a hint
+		// with a button per such level. Nested groups use their own binding menu instead.
+		updateBindingHint() {
+			var hint = this.querySelector('#search-binding-hint');
+			var resultLevel = this.rootGroup.resultLevel;
+			var counts = {};
+			for (let row of this.rootGroup.conditionsContainer.children) {
+				// Skip rows the user hasn't filled in yet, so a freshly added (or just-retyped)
+				// condition doesn't trigger the hint until it actually has a value
+				if (row.localName != 'zoterosearchcondition' || !row.isPopulated()) {
+					continue;
+				}
+				let level = row.conditionLevel;
+				if (Zotero.Search._isAncestorLevel(resultLevel, level)) {
+					counts[level] = (counts[level] || 0) + 1;
+				}
+			}
+			var levels = ['attachment', 'note', 'annotation'].filter(l => counts[l] >= 2);
+			// Only rebuild when the set of bindable levels changes, so re-running this on every
+			// keystroke doesn't recreate the rows and make the hint flicker.
+			let key = levels.join(',');
+			if (key === this._bindingHintKey) {
+				return;
+			}
+			this._bindingHintKey = key;
+			hint.replaceChildren();
+			if (!levels.length) {
+				hint.hidden = true;
+				return;
+			}
+			// One self-contained line per level: a statement naming that level and a button to
+			// group its conditions into one entity. Separate lines when 2+ levels each qualify.
+			for (let level of levels) {
+				let row = document.createXULElement('hbox');
+				row.setAttribute('align', 'center');
+				let label = document.createXULElement('label');
+				label.setAttribute('data-l10n-id', 'advanced-search-binding-hint-' + level);
+				let button = document.createXULElement('button');
+				button.setAttribute('data-l10n-id', 'advanced-search-bind-same-' + level);
+				button.addEventListener('command', () => this.rootGroup.bindSameEntity(level));
+				row.append(label, button);
+				hint.append(row);
+			}
+			hint.hidden = false;
 		}
 
 		// Regenerate the search's flat condition list from the current tree. The DOM is
@@ -137,14 +238,23 @@
 			var flat = [];
 			this.collectGroup(this.rootGroup, flat, true);
 
-			// Search-global options
-			for (let name of ['recursive', 'noChildren', 'includeParentsAndChildren']) {
-				if (this.querySelector('#' + name + 'Checkbox').checked) {
-					flat.push({ condition: name, operator: 'true', value: null });
-				}
+			// Search-global options. noChildren is no longer emitted here -- it's carried by
+			// the result level (resultLevel = item). includeParentsAndChildren is emitted only when
+			// its legacy checkbox is present and still checked, so unchecking it drops it.
+			if (this.querySelector('#recursiveCheckbox').checked) {
+				flat.push({ condition: 'recursive', operator: 'true', value: null });
+			}
+			if (this.querySelector('#includeParentsAndChildrenCheckbox').checked) {
+				flat.push({ condition: 'includeParentsAndChildren', operator: 'true', value: null });
 			}
 
 			this.rebuildConditions(flat);
+
+			// Any mutation runs through here (including paths whose menus stopPropagation, like
+			// changing or removing a condition), so refresh the derived UI from one place
+			this.updateBindingMenus();
+			this.updateBindingHint();
+			this.updateLevelWarning();
 		}
 
 		// Append a group's serialized form to `flat`. The root contributes its
@@ -156,6 +266,11 @@
 			}
 			if (group.joinMode == 'any') {
 				flat.push({ condition: 'joinMode', operator: 'any', value: null });
+			}
+			// A concrete result level is emitted as a marker inside the group, like joinMode; 'any'
+			// (the default) is omitted
+			if (group.resultLevel && group.resultLevel != 'any') {
+				flat.push({ condition: 'resultLevel', operator: group.resultLevel, value: null });
 			}
 			for (let child of group.conditionsContainer.children) {
 				if (child.localName == 'zoterosearchcondition') {
@@ -299,12 +414,26 @@
 		content = MozXULElement.parseXULToFragment(`
 			<groupbox class="search-condition-group">
 				<caption align="center">
+					<label class="result-level-prefix"/>
+					<menulist class="result-level-menu" native="true" data-l10n-id="advanced-search-result-level-menu">
+						<menupopup>
+							<menuitem value="any" data-l10n-id="advanced-search-result-level-any" selected="true"/>
+							<menuitem value="item" data-l10n-id="advanced-search-result-level-item"/>
+							<menuitem value="attachment" data-l10n-id="advanced-search-result-level-attachment"/>
+							<menuitem value="note" data-l10n-id="advanced-search-result-level-note"/>
+							<menuitem value="annotation" data-l10n-id="advanced-search-result-level-annotation"/>
+						</menupopup>
+					</menulist>
 					<label class="join-mode-prefix" value="&zotero.search.joinMode.prefix;"/>
 					<menulist class="join-mode-menu" native="true" aria-label="&zotero.search.joinMode.prefix;">
 						<menupopup>
 							<menuitem label="&zotero.search.joinMode.any;" value="any"/>
 							<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
 						</menupopup>
+					</menulist>
+					<label class="join-mode-following" data-l10n-id="advanced-search-of-the-following" hidden="true"/>
+					<menulist class="binding-menu" native="true" hidden="true" data-l10n-id="advanced-search-binding-menu">
+						<menupopup/>
 					</menulist>
 					<label class="join-mode-suffix" value="&zotero.search.joinMode.suffix;"/>
 					<spacer flex="1"/>
@@ -315,12 +444,53 @@
 					</hbox>
 				</caption>
 				<vbox class="conditions"/>
+				<hbox class="level-warning" hidden="true">
+					<description/>
+				</hbox>
 			</groupbox>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
 		init() {
 			this.joinMenu = this.querySelector('.join-mode-menu');
+			this.resultLevelMenu = this.querySelector('.result-level-menu');
+			this.bindingMenu = this.querySelector('.binding-menu');
 			this.conditionsContainer = this.querySelector('.conditions');
+			// The group's own warning element, stashed at init to avoid re-querying.
+			this.levelWarning = this.querySelector('.level-warning');
+
+			// The result level is tracked here and reflected to whichever control is active: the root's
+			// result-level menu ("Find ..."), or a nested group's binding menu ("... in the
+			// same attachment"). collectGroup/renderConditions read and write `resultLevel`.
+			this._resultLevel = 'any';
+
+			// The root surfaces the result-level menu; a nested group hides it and instead
+			// shows a binding menu (built on demand by updateBindingMenu) when it holds
+			// conditions that can be bound to the same descendant.
+			this.resultLevelMenu.value = 'any';
+			var scopePrefix = this.querySelector('.result-level-prefix');
+			if (this.isRoot) {
+				// Read as one sentence: "Find [Top-level items] matching [all] of the following:"
+				scopePrefix.setAttribute('data-l10n-id', 'advanced-search-result-level-prefix-root');
+				this.querySelector('.join-mode-prefix').setAttribute('data-l10n-id', 'advanced-search-join-prefix-root');
+				this.resultLevelControl = this.resultLevelMenu;
+			}
+			else {
+				// Nested: "Match [all] of the following:" -- the result level lives on the
+				// root. The binding menu (and its hiding of the suffix) is set up in
+				// updateBindingMenu().
+				this.resultLevelMenu.hidden = true;
+				scopePrefix.hidden = true;
+				this.resultLevelControl = this.bindingMenu;
+			}
+
+			// Keep the stored result level in sync when the user changes the control (the
+			// command target may be the menulist or a menuitem inside it), so a nested
+			// binding that later hides still round-trips its last value
+			this.addEventListener('command', (event) => {
+				if (this.resultLevelControl && this.resultLevelControl.contains(event.target)) {
+					this._resultLevel = this.resultLevelControl.value || 'any';
+				}
+			});
 			// At init the group has no nested groups yet, so these resolve to its own
 			// caption buttons
 			this.addConditionButton = this.querySelector('.add-condition');
@@ -357,8 +527,221 @@
 			this.joinMenu.value = val;
 		}
 
+		// The group's result level: 'any' (no level constraint -- mixed result for the root,
+		// plain grouping for a nested group) or a concrete 'item'/'attachment'/'note'/
+		// 'annotation' level for cross-level mapping. The active control's current
+		// selection is the source of truth; fall back to the stored value for a nested
+		// binding menu that's hidden (it has no options to read).
+		get resultLevel() {
+			if (this.resultLevelControl && !this.resultLevelControl.hidden) {
+				return this.resultLevelControl.value || 'any';
+			}
+			return this._resultLevel;
+		}
+
+		set resultLevel(val) {
+			this._resultLevel = val || 'any';
+			// Reflect to the active control if it currently offers a matching option; the
+			// binding menu's options are (re)built by updateBindingMenu()
+			let popup = this.resultLevelControl && this.resultLevelControl.querySelector('menupopup');
+			if (popup && [...popup.children].some(item => item.value == this._resultLevel)) {
+				this.resultLevelControl.value = this._resultLevel;
+			}
+		}
+
+		// Build the nested-group binding menu ("... in the same attachment"), shown only
+		// when binding is meaningful: 2+ conditions sharing a level below the result level.
+		updateBindingMenu() {
+			if (this.isRoot) {
+				return;
+			}
+			let resultLevel = 'any';
+			if (this.searchElement && this.searchElement.rootGroup) {
+				resultLevel = this.searchElement.rootGroup.resultLevel;
+			}
+			// Count this group's direct condition rows by level, keeping only levels below the
+			// result level -- those are what a group can bind to the same entity
+			let counts = {};
+			for (let row of this.conditionsContainer.children) {
+				// Skip rows the user hasn't filled in yet, so a freshly added (or just-retyped)
+				// condition doesn't trigger the hint until it actually has a value
+				if (row.localName != 'zoterosearchcondition' || !row.isPopulated()) {
+					continue;
+				}
+				let level = row.conditionLevel;
+				if (Zotero.Search._isAncestorLevel(resultLevel, level)) {
+					counts[level] = (counts[level] || 0) + 1;
+				}
+			}
+			let levels = Object.keys(counts);
+			// Binding is only meaningful when some level has 2+ conditions. When it isn't,
+			// hide the menu but preserve any stored level (a single descendant condition
+			// maps the same way bound or not, so it round-trips losslessly).
+			if (!levels.some(l => counts[l] >= 2)) {
+				this.bindingMenu.hidden = true;
+				// Plain group: "Match [all] of the following:" (the suffix carries the colon)
+				this.querySelector('.join-mode-suffix').hidden = false;
+				this.querySelector('.join-mode-following').hidden = true;
+				this._bindingMenuKey = null;
+				return;
+			}
+			// Drop a stored binding whose level is no longer offered
+			if (this._resultLevel != 'any' && !levels.includes(this._resultLevel)) {
+				this._resultLevel = 'any';
+			}
+
+			// Rebuild the popup only when its option set changes. Rebuilding it on every refresh
+			// would replace the menuitems mid-selection -- when the change came from this menu
+			// itself -- and wedge the drop-down.
+			let optionLevels = ['attachment', 'note', 'annotation'].filter(l => levels.includes(l));
+			let key = optionLevels.join(',');
+			if (key !== this._bindingMenuKey) {
+				this._bindingMenuKey = key;
+				let popup = this.bindingMenu.querySelector('menupopup');
+				popup.replaceChildren();
+				let separate = document.createXULElement('menuitem');
+				separate.setAttribute('value', 'any');
+				separate.setAttribute('data-l10n-id', 'advanced-search-binding-separate');
+				popup.append(separate);
+				for (let level of optionLevels) {
+					let item = document.createXULElement('menuitem');
+					item.setAttribute('value', level);
+					item.setAttribute('data-l10n-id', 'advanced-search-binding-same-' + level);
+					popup.append(item);
+				}
+			}
+			this.bindingMenu.hidden = false;
+			// Bound group: "Match [all] of the following in the same attachment". The binding
+			// phrase ends the caption, so swap the legacy "of the following:" (with its colon)
+			// for the colon-less "of the following" that precedes the binding menu.
+			this.querySelector('.join-mode-suffix').hidden = true;
+			this.querySelector('.join-mode-following').hidden = false;
+			this.bindingMenu.value = this._resultLevel;
+		}
+
+		// The level this group's conditions are actually matched at: its own result level (the
+		// result type for the root, the binding for a nested group) if set, otherwise the level
+		// it inherits from its enclosing group. Mirrors the engine, where an unbound
+		// ("separately") group maps its conditions to the parent's level rather than
+		// combining them at no level.
+		effectiveLevel() {
+			if (this.resultLevel != 'any') {
+				return this.resultLevel;
+			}
+			let parent = this.parentElement && this.parentElement.closest('search-condition-group');
+			return parent ? parent.effectiveLevel() : this.resultLevel;
+		}
+
+		// Warn when this group's own conditions can never combine: a child whose level can't
+		// reach the group's effective level, or -- with no level anywhere up the chain (a mixed
+		// result type) -- an "all" of children on different item-hierarchy branches. Each group
+		// flags only its own conditions, so the message sits where the problem is.
+		updateLevelWarning() {
+			let ownLevel = this.resultLevel;
+			let level = this.effectiveLevel();
+			// This group's direct children's levels: a populated condition row's own level (an
+			// empty row doesn't warn until it's filled in) or a nested group's binding. 'any'
+			// combines with anything, so drop it.
+			let childLevels = [...this.conditionsContainer.children].map((child) => {
+				if (child.localName == 'zoterosearchcondition') {
+					return child.isPopulated() ? child.conditionLevel : null;
+				}
+				if (child.localName == 'search-condition-group') {
+					return child.resultLevel;
+				}
+				return null;
+			}).filter(l => l && l != 'any');
+
+			let messageID = null;
+			let args = null;
+			let resultTypeArgs = () => {
+				let item = this.resultLevelMenu.querySelector('menuitem[value="item"]');
+				return { topLevelItems: item ? item.getAttribute('label') : 'top-level items' };
+			};
+			if (level != 'any') {
+				// A child that can't reach the effective level can never match here
+				if (childLevels.some(l => !this.levelsCombine(l, level))) {
+					if (!this.isRoot && ownLevel != 'any') {
+						// This group's own binding is the constraint, so "match separately" fixes it
+						messageID = 'advanced-search-group-warning-unreachable';
+						args = { entity: ownLevel };
+					}
+					else {
+						// The result type (this group's, or one it inherits) is the constraint
+						messageID = 'advanced-search-level-warning-unreachable';
+						args = resultTypeArgs();
+					}
+				}
+			}
+			else if (this.joinMode == 'all' && new Set(childLevels).size >= 2) {
+				// No level anywhere up the chain (mixed result type): ANDing conditions on
+				// different branches can never all match
+				let anyItem = this.joinMenu.querySelector('menuitem[value="any"]');
+				let matchAny = anyItem ? anyItem.getAttribute('label') : 'any';
+				if (this.isRoot) {
+					messageID = 'advanced-search-level-warning-mixed';
+					args = { matchAny, ...resultTypeArgs() };
+				}
+				else {
+					// Reachable only when the result type is "any", so setting one fixes it too
+					messageID = 'advanced-search-group-warning-mixed';
+					args = { matchAny, ...resultTypeArgs() };
+				}
+			}
+
+			// Only touch the DOM when the message changes, so re-running on every keystroke
+			// doesn't re-translate the string and make the warning flicker.
+			let key = messageID ? messageID + '\n' + JSON.stringify(args) : '';
+			if (key === this._levelWarningKey) {
+				return;
+			}
+			this._levelWarningKey = key;
+			if (messageID) {
+				document.l10n.setAttributes(this.levelWarning.querySelector('description'), messageID, args);
+			}
+			this.levelWarning.hidden = !messageID;
+		}
+
+		// Two levels combine if one is an ancestor of the other (or equal); 'any' matches any.
+		levelsCombine(a, b) {
+			return a == 'any' || b == 'any' || a == b
+				|| Zotero.Search._isAncestorLevel(a, b) || Zotero.Search._isAncestorLevel(b, a);
+		}
+
+		// Wrap this group's direct condition rows that match `level` into a new child group
+		// bound to that level ("the same attachment"). Used by the discoverability hint.
+		// Rows are rebuilt from their data rather than moved, since detaching a custom element
+		// wipes its contents.
+		bindSameEntity(level) {
+			let rows = [...this.conditionsContainer.children].filter(
+				row => row.localName == 'zoterosearchcondition' && row.conditionLevel == level);
+			if (rows.length < 2) {
+				return;
+			}
+			let newGroup = document.createXULElement('search-condition-group');
+			this.conditionsContainer.insertBefore(newGroup, rows[0]);
+			for (let row of rows) {
+				let data = row.getConditionData();
+				let ref;
+				if (data) {
+					let [condition, mode] = Zotero.SearchConditions.parseCondition(data.condition);
+					ref = { id: undefined, condition, mode, operator: data.operator, value: data.value, required: false };
+				}
+				newGroup.addCondition(ref);
+				row.remove();
+			}
+			newGroup.resultLevel = level;
+
+			let search = this.searchElement;
+			search.updateSearch();
+			search.updateRemoveButtons();
+			search.updateBindingMenus();
+			search.updateBindingHint();
+		}
+
 		clear() {
 			this.joinMode = 'all';
+			this.resultLevel = 'any';
 			while (this.conditionsContainer.firstChild) {
 				this.conditionsContainer.removeChild(this.conditionsContainer.firstChild);
 			}
@@ -757,6 +1140,14 @@
 				document.l10n.setAttributes(valueMenu, 'advanced-search-condition-input', { label: valueMenu.label });
 			}
 			this.updateMenuCheckboxesRecursive(operatorsList, operatorsList.selectedItem.getAttribute('value'));
+
+			// Changing the condition or operator is a mutation like add/remove, so rebuild the
+			// search and refresh the derived UI (binding hint, level warning) right away. The
+			// condition/operator menus stopPropagation, so this won't happen via event bubbling.
+			// (updateSearch no-ops during the initial render via its own guard.)
+			if (this.parent) {
+				this.parent.updateSearch();
+			}
 		}
 
 		createValueMenu(rows) {
@@ -1077,6 +1468,13 @@
 			this.parent.updateSearch();
 			this.parent.updateRemoveButtons();
 			newGroup.conditionsContainer.firstElementChild.querySelector('#conditionsmenu').focus();
+		}
+
+		// The item level this condition matches at ('item' by default), used to decide
+		// cross-level binding in a group
+		get conditionLevel() {
+			let data = this.selectedCondition && Zotero.SearchConditions.get(this.selectedCondition);
+			return (data && data.level) || 'item';
 		}
 
 		// Whether a value has been entered, used to decide whether the last

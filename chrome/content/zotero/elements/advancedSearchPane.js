@@ -127,6 +127,9 @@
 			}
 			else {
 				this._search = new Zotero.Search();
+				// Default a fresh search to top-level items, so a condition on a child
+				// (e.g. attachment content) maps up to its item without any grouping
+				this._search.addCondition('resultLevel', 'item');
 				this._search.addCondition('title', 'contains', '');
 			}
 			this._searchElem.search = this._search;

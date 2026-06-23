@@ -12,7 +12,7 @@ advanced-search-deck {
 
 advanced-search-pane {
 	@include inactive-opacity;
-	
+
 	flex-direction: column;
 	// Inline padding is further down the tree so focus rings work with overflow: auto
 	padding-block: 8px;

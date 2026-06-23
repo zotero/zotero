@@ -909,6 +909,57 @@ advanced-search-group-btn =
     .tooltiptext = Add Condition Group
 advanced-search-remove-group-btn =
     .tooltiptext = Remove Group
+advanced-search-result-level-menu =
+    .aria-label = Result type
+advanced-search-result-level-prefix-root =
+    .value = Find
+advanced-search-join-prefix-root =
+    .value = matching
+advanced-search-result-level-any =
+    .label = any items
+advanced-search-result-level-item =
+    .label = top-level items
+advanced-search-result-level-attachment =
+    .label = attachments
+advanced-search-result-level-note =
+    .label = notes
+advanced-search-result-level-annotation =
+    .label = annotations
+advanced-search-binding-menu =
+    .aria-label = Match against the same item
+advanced-search-binding-separate =
+    .label = separately
+advanced-search-binding-same-attachment =
+    .label = in the same attachment
+advanced-search-binding-same-note =
+    .label = in the same note
+advanced-search-binding-same-annotation =
+    .label = in the same annotation
+# Shown before the binding menu so a bound group reads "Match all of the following in the same
+# annotation" (the legacy "of the following:" -- with the colon -- is kept for a plain group)
+advanced-search-of-the-following =
+    .value = of the following
+advanced-search-binding-hint-attachment =
+    .value = These conditions can match separate attachments.
+advanced-search-binding-hint-note =
+    .value = These conditions can match separate notes.
+advanced-search-binding-hint-annotation =
+    .value = These conditions can match separate annotations.
+advanced-search-level-warning-mixed = These conditions cannot all match the same item, so this search will never return results. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+advanced-search-level-warning-unreachable = This search has a condition that cannot apply to the chosen result type. Set the result type to “{ $topLevelItems }” or remove the incompatible condition.
+advanced-search-group-warning-unreachable =
+    A condition here cannot be in the same { $entity ->
+        [attachment] attachment
+        [note] note
+       *[annotation] annotation
+    }. Match these separately or remove the incompatible condition.
+advanced-search-group-warning-mixed = These conditions cannot all match the same item, so this group will never match. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+advanced-search-bind-same-attachment =
+    .label = Match the same attachment
+advanced-search-bind-same-note =
+    .label = Match the same note
+advanced-search-bind-same-annotation =
+    .label = Match the same annotation
 advanced-search-conditions-menu =
     .aria-label = Search condition
     .label = { $label }

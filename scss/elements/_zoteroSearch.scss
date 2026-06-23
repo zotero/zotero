@@ -10,6 +10,9 @@ zoterosearch {
 	gap: 8px;
 	overflow: auto;
 	max-height: 33vh;
+	// Keep the whole builder a comfortable width on a wide window (left-aligned) rather
+	// than stretching the rows across the full width. The value field flexes within this.
+	max-width: 64em;
 	@include macOS-normalize-controls;
 
 	// Use the full pane width
@@ -23,6 +26,9 @@ zoterosearch {
 		// Zero the toolkit groupbox margin/padding
 		margin: 0;
 		padding: 0;
+		// The XUL groupbox shrink-wraps to content by default; fill its parent so the
+		// conditions box (and the value field) can use the available width
+		width: -moz-available;
 
 		.conditions {
 			min-width: fit-content; // Grow with content, don't overflow
@@ -118,6 +124,76 @@ zoterosearch {
 		}
 	}
 	
+	.level-warning {
+		// Each group's own warning, in a contained box below its conditions (the root's sits at
+		// the bottom; a nested group's sits inside its box) rather than as loose text. A light
+		// red callout mirrors the binding hint's light blue one, but at full size (vs the hint's
+		// smaller text) since this is a hard error -- the search can never match -- not a hint.
+		color: var(--accent-red);
+		// 10px inline is a small visual nudge to bring the text slightly in (it doesn't line up
+		// with anything exactly); 8px block keeps the two-line message from cramping.
+		padding: 8px 10px;
+		background: var(--accent-red10);
+		border-radius: 6px;
+		// Fill the pane width but contribute no intrinsic (max-content) width of its own, so
+		// showing/hiding this notice can't widen the search pane and shrink the collections
+		// pane. (Its long text would otherwise push the pane to its max-width.)
+		box-sizing: border-box;
+		width: 0;
+		min-width: 100%;
+
+		description {
+			// Wrap to the available width instead of overflowing the pane; min-width: 0 lets
+			// it shrink within the flex row rather than contributing an intrinsic width
+			flex: 1;
+			min-width: 0;
+			margin: 0;
+			white-space: normal;
+		}
+	}
+
+	// A nested group's warning sits inside the outer box, so leave room below it rather than
+	// letting it butt against the box's bottom edge. (The root's warning is below the box.)
+	search-condition-group:not([root]) .level-warning {
+		margin-block-end: 6px;
+	}
+
+	#search-binding-hint {
+		// A distinct suggestion callout under the conditions (not plain body text): a light
+		// blue, rounded block with slightly smaller text, one "[statement] [button]" line per
+		// bindable level. Fills the pane width but contributes no intrinsic width (like the
+		// warning) so its line can't widen the search pane.
+		display: flex;
+		flex-direction: column;
+		// Each row hugs its content (so the button sits right next to the text) while the
+		// box itself still fills the pane width
+		align-items: flex-start;
+		gap: 8px;
+		padding: 8px;
+		font-size: 0.9em;
+		background: var(--accent-blue10);
+		border-radius: 6px;
+		box-sizing: border-box;
+		width: 0;
+		min-width: 100%;
+
+		hbox {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+
+		button {
+			margin: 0;
+		}
+
+		// The explicit `display: flex` above overrides the `hidden` attribute's display:none,
+		// so re-assert it -- otherwise the empty box shows when there's nothing to suggest
+		&[hidden] {
+			display: none;
+		}
+	}
+
 	#search-option-checkboxes {
 		flex-direction: row;
 		flex-wrap: wrap;
@@ -143,6 +219,13 @@ zoterosearch {
 
 		label {
 			margin: 0;
+		}
+
+		// Native menulists sit a couple pixels high relative to the inline label text
+		// ("Find ... matching ... of the following:"); baseline/align-self alignment is
+		// locked by the platform, so nudge them down to sit on the text
+		menulist {
+			margin-block-start: 2px;
 		}
 	}
 
@@ -180,8 +263,24 @@ zoterosearch {
 			position: absolute;
 		}
 
-		.valuefield, .valuemenu, .value-date-age {
+		.valuemenu, .value-date-age {
 			flex: 1;
+		}
+
+		// The text value field grows to use the available row width (the overall cap is on
+		// the builder, not here). It's a flex container itself so the inner stack/input
+		// fills the host.
+		.valuefield {
+			display: flex;
+			flex: 1;
+			min-width: 12em;
+
+			// The `display: flex` above overrides the `hidden` attribute's display:none, so
+			// re-assert it -- otherwise the textbox shows alongside the value menu for
+			// menu-based conditions (Collection, Item Type, Attachment File Type)
+			&[hidden] {
+				display: none;
+			}
 		}
 	}
 
@@ -193,8 +292,14 @@ zoterosearch {
 		width: 15em;
 	}
 	
-	#operatorsmenu, #valuemenu, #valuefield, .search-in-the-last {
+	#operatorsmenu, #valuemenu, .search-in-the-last {
 		width: 12em;
+	}
+
+	// Fill the flexed value field (host -> stack -> input)
+	#search-textbox {
+		flex: 1;
+		width: 100%;
 	}
 	
 	#valuemenu::part(icon) {
