@@ -880,6 +880,8 @@ describe("Local API Server", function () {
 				assert.equal(entry.data.title, 'New Book From API');
 				assert.match(entry.key, /^[23456789ABCDEFGHIJKLMNPQRSTUVWXYZ]{8}$/);
 				assert.equal(response.success['0'], entry.key);
+				// Top-level version and data.version report the same (local) version
+				assert.equal(entry.version, entry.data.version);
 				// Cleanup
 				let item = await Zotero.Items.getByLibraryAndKeyAsync(
 					Zotero.Libraries.userLibraryID, entry.key);

@@ -1521,6 +1521,9 @@ Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
 		meta: {},
 		data: this.toJSON(options)
 	};
+	// Keep the data block's version consistent with the top-level version (toJSON() reports
+	// the synced version, which differs from clientVersion when syncedVersionProperty is false)
+	json.data.version = json.version;
 	if (options.version) {
 		json.version = json.data.version = options.version;
 	}
