@@ -6002,21 +6002,24 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			}
 			
 			if (this.isStoredFileAttachment() && !options.skipStorageProperties) {
-				// Add synced storage properties even if syncedStorageProperties is false,
-				// since we can't get the local properties synchronously
-				// We'll overwrite them in toResponseJSONAsync() if possible
-				
-				let mtime = this.attachmentSyncedModificationTime;
-				// There's never a reason to include these if they're null. This can happen if
-				// we're restoring to server from a copy of the database that was never
-				// file-synced. We don't want to clear the remote file associations when that
-				// happens.
-				if (mtime !== null) {
-					obj.mtime = mtime;
+				if (options.syncedStorageProperties) {
+					let mtime = this.attachmentSyncedModificationTime;
+					// There's never a reason to include these if they're null. This can happen if
+					// we're restoring to server from a copy of the database that was never
+					// file-synced. We don't want to clear the remote file associations when that
+					// happens.
+					if (mtime !== null) {
+						obj.mtime = mtime;
+					}
+					let md5 = this.attachmentSyncedHash;
+					if (md5 !== null) {
+						obj.md5 = md5;
+					}
 				}
-				let md5 = this.attachmentSyncedHash;
-				if (md5 !== null) {
-					obj.md5 = md5;
+				else {
+					// TEMP
+					//obj.mtime = (yield this.attachmentModificationTime) || null;
+					//obj.md5 = (yield this.attachmentHash) || null;
 				}
 			}
 		}
@@ -6123,6 +6126,21 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 			type: this.attachmentContentType,
 			title: this.attachmentFilename
 		};
+	}
+	
+	// Include storage properties in the response even when syncedStorageProperties is false (i.e.,
+	// when reporting the local version). The local values are only available asynchronously, so
+	// we need to use synced values as a fallback. toResponseJSONAsync() overwrites them with
+	// up-to-date local values.
+	if (this.isStoredFileAttachment() && !options.skipStorageProperties && !options.syncedStorageProperties) {
+		let mtime = this.attachmentSyncedModificationTime;
+		if (mtime !== null) {
+			json.data.mtime = mtime;
+		}
+		let md5 = this.attachmentSyncedHash;
+		if (md5 !== null) {
+			json.data.md5 = md5;
+		}
 	}
 	
 	return json;
