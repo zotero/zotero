@@ -85,7 +85,7 @@ describe("Local API Server", function () {
 		try {
 			let { response } = await Zotero.HTTP.request(
 				'POST',
-				apiRoot + '/authorize-local',
+				apiRoot + '/local/authorize',
 				{
 					headers: {
 						'Zotero-Allowed-Request': '1',
@@ -480,19 +480,19 @@ describe("Local API Server", function () {
 			writeAPIKey = await setupRememberedAPIKey();
 		});
 
-		// Reset the authorize-local rate limit between tests so a long sequence of
+		// Reset the local/authorize rate limit between tests so a long sequence of
 		// stubbed prompts can run without tripping the per-minute 429 throttle.
 		beforeEach(function () {
 			Zotero.Server.LocalAPI._resetAuthorizeRateLimit();
 		});
 
-		describe("POST /api/authorize-local", function () {
+		describe("POST /api/local/authorize", function () {
 			it("should return a key on allow", async function () {
 				let stub = sinon.stub(Zotero.Server.LocalAPI, '_promptForAuthorization')
 					.resolves({ allow: true, remember: false });
 				try {
 					let { response, status } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/authorize-local',
+						'POST', apiRoot + '/local/authorize',
 						{
 							headers: {
 								'Zotero-Allowed-Request': '1',
@@ -517,7 +517,7 @@ describe("Local API Server", function () {
 					.resolves({ allow: true, remember: true });
 				try {
 					let { response } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/authorize-local',
+						'POST', apiRoot + '/local/authorize',
 						{
 							headers: {
 								'Zotero-Allowed-Request': '1',
@@ -539,7 +539,7 @@ describe("Local API Server", function () {
 					.resolves({ allow: false, remember: false });
 				try {
 					let { response, status } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/authorize-local',
+						'POST', apiRoot + '/local/authorize',
 						{
 							headers: {
 								'Zotero-Allowed-Request': '1',
@@ -560,7 +560,7 @@ describe("Local API Server", function () {
 
 			it("should require appName", async function () {
 				let { status } = await Zotero.HTTP.request(
-					'POST', apiRoot + '/authorize-local',
+					'POST', apiRoot + '/local/authorize',
 					{
 						headers: {
 							'Zotero-Allowed-Request': '1',
@@ -583,7 +583,7 @@ describe("Local API Server", function () {
 					});
 				try {
 					await Zotero.HTTP.request(
-						'POST', apiRoot + '/authorize-local',
+						'POST', apiRoot + '/local/authorize',
 						{
 							headers: {
 								'Zotero-Allowed-Request': '1',
@@ -607,7 +607,7 @@ describe("Local API Server", function () {
 				try {
 					for (let i = 0; i < 5; i++) {
 						await Zotero.HTTP.request(
-							'POST', apiRoot + '/authorize-local',
+							'POST', apiRoot + '/local/authorize',
 							{
 								headers: {
 									'Zotero-Allowed-Request': '1',
@@ -620,7 +620,7 @@ describe("Local API Server", function () {
 						);
 					}
 					let xhr = await Zotero.HTTP.request(
-						'POST', apiRoot + '/authorize-local',
+						'POST', apiRoot + '/local/authorize',
 						{
 							headers: {
 								'Zotero-Allowed-Request': '1',
@@ -645,7 +645,7 @@ describe("Local API Server", function () {
 				// 5 bad-appName requests fail before the prompt and don't consume slots
 				for (let i = 0; i < 5; i++) {
 					await Zotero.HTTP.request(
-						'POST', apiRoot + '/authorize-local',
+						'POST', apiRoot + '/local/authorize',
 						{
 							headers: {
 								'Zotero-Allowed-Request': '1',
@@ -662,7 +662,7 @@ describe("Local API Server", function () {
 					.resolves({ allow: false, remember: false });
 				try {
 					let { status } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/authorize-local',
+						'POST', apiRoot + '/local/authorize',
 						{
 							headers: {
 								'Zotero-Allowed-Request': '1',
@@ -780,7 +780,7 @@ describe("Local API Server", function () {
 					.resolves({ allow: true, remember: false });
 				try {
 					let { response } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/authorize-local',
+						'POST', apiRoot + '/local/authorize',
 						{
 							headers: {
 								'Zotero-Allowed-Request': '1',
