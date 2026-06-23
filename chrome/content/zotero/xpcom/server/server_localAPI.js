@@ -2257,6 +2257,11 @@ async function authorizeUpload(item, params, headers, requestData) {
 	if (!filename) {
 		return [400, 'text/plain', 'File name not provided'];
 	}
+	// Reject anything that isn't a bare filename, since it's joined onto the storage
+	// directory path when the upload is received
+	if (filename.includes('/') || filename.includes('\\') || filename === '..' || filename === '.') {
+		return [400, 'text/plain', 'Invalid file name'];
+	}
 	let filesize = params.filesize;
 	if (filesize === undefined || filesize === null || filesize === '') {
 		return [400, 'text/plain', 'File size not provided'];

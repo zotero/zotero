@@ -1738,6 +1738,25 @@ describe("Local API Server", function () {
 				assert.equal(status, 400);
 			});
 
+			it("should reject a filename containing path separators with 400", async function () {
+				for (let filename of ['../escape.txt', 'sub/escape.txt', '..\\escape.txt', '..']) {
+					let { status } = await apiPost(
+						`/users/0/items/${attachment.key}/file`,
+						{
+							body: `md5=${'a'.repeat(32)}&filename=${encodeURIComponent(filename)}`
+								+ `&filesize=10&mtime=${Date.now()}`,
+							headers: {
+								'Content-Type': 'application/x-www-form-urlencoded',
+								'If-None-Match': '*',
+							},
+							successCodes: [400],
+							responseType: 'text'
+						}
+					);
+					assert.equal(status, 400, `expected 400 for filename '${filename}'`);
+				}
+			});
+
 			it("should perform a full upload + register flow", async function () {
 				// Generate new file content with a known MD5
 				let content = "Local API upload test content " + Date.now();
