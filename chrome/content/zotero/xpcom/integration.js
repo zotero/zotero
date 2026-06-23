@@ -3474,7 +3474,7 @@ Zotero.Integration.Citation = class {
 	}
 	
 	toJSON() {
-		const saveProperties = ["custom", "unsorted", "formattedCitation", "plainCitation", "dontUpdate", "noteIndex"];
+		const saveProperties = ["custom", "unsorted", "formattedCitation", "plainCitation", "dontUpdate", "noteIndex", "mode", "infix"];
 		const saveCitationItemKeys = ["locator", "label", "suppress-author", "author-only", "prefix",
 			"suffix", "ignoreRetraction"];
 		

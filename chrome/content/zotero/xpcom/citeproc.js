@@ -12802,6 +12802,14 @@ CSL.NameOutput.prototype._getAndJoin = function (blobs, delimiter) {
             finalJoin = this.institution.and[singleOrMultiple];
         } else {
             finalJoin = this.name.and[singleOrMultiple];
+            // CSL 1.1 (schema #365): for narrative/composite citations the author
+            // chunk is rendered in "author-only" mode. Use the textual "and" join
+            // built above instead of the parenthetical "&" symbol.
+            if (this.item && this.item["author-only"]
+                    && this.name.and_narrative
+                    && this.name.and_narrative[singleOrMultiple]) {
+                finalJoin = this.name.and_narrative[singleOrMultiple];
+            }
         }
         // finalJoin = new CSL.Blob(finalJoin);
         finalJoin = JSON.parse(JSON.stringify(finalJoin));
@@ -14866,6 +14874,47 @@ CSL.Node.name = {
                     this.and.multiple = new CSL.Blob(state.tmp.name_delimiter);
                     this.and.multiple.strings.prefix = "";
                     this.and.multiple.strings.suffix = "";
+                }
+
+                // CSL 1.1 (schema #365): narrative/composite citations render the
+                // author as the subject of a sentence ("Dawid and Stone (2026)"),
+                // where the textual "and" is required even when the parenthetical
+                // form ("(Dawid & Stone, 2026)") uses the "&" symbol. Pre-build an
+                // alternate finalJoin so the in-text (author-only) name render can
+                // switch term without affecting the parenthetical form. Only needed
+                // when the style configured the symbol form; "text"/"none" already
+                // produce the correct narrative join.
+                this.and_narrative = {};
+                if ("symbol" === state.inheritOpt(this, "and")) {
+                    var narrativeAndTerm = state.getTerm("and", "long", 0);
+                    var narrativeAndPrefixSingle = " ";
+                    var narrativeAndPrefixMultiple = ", ";
+                    if ("string" === typeof state.tmp.name_delimiter) {
+                        narrativeAndPrefixMultiple = state.tmp.name_delimiter;
+                    }
+                    var narrativeAndSuffix = " ";
+                    if (state.inheritOpt(this, "delimiter-precedes-last") === "always") {
+                        narrativeAndPrefixSingle = state.tmp.name_delimiter;
+                    } else if (state.inheritOpt(this, "delimiter-precedes-last") === "never") {
+                        if (narrativeAndPrefixMultiple) {
+                            narrativeAndPrefixMultiple = " ";
+                        }
+                    } else if (state.inheritOpt(this, "delimiter-precedes-last") === "after-inverted-name") {
+                        if (narrativeAndPrefixSingle) {
+                            narrativeAndPrefixSingle = state.tmp.name_delimiter;
+                        }
+                        if (narrativeAndPrefixMultiple) {
+                            narrativeAndPrefixMultiple = " ";
+                        }
+                    }
+                    state.output.append(narrativeAndTerm, "empty", true);
+                    this.and_narrative.single = state.output.pop();
+                    this.and_narrative.single.strings.prefix = narrativeAndPrefixSingle;
+                    this.and_narrative.single.strings.suffix = narrativeAndSuffix;
+                    state.output.append(narrativeAndTerm, "empty", true);
+                    this.and_narrative.multiple = state.output.pop();
+                    this.and_narrative.multiple.strings.prefix = narrativeAndPrefixMultiple;
+                    this.and_narrative.multiple.strings.suffix = narrativeAndSuffix;
                 }
 
                 this.ellipsis = {};

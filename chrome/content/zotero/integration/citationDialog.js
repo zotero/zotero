@@ -259,6 +259,10 @@ async function setDialogType(type) {
 	_id("bubble-input").sortable = DIALOG_STATE.isCitingItems();
 	_id("keepSorted").disabled = !io.sortable || !DIALOG_STATE.isCitingItems();
 	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
+	// Narrative ("Author (year)") mode is only meaningful when citing items
+	_id("narrativeMode").disabled = !DIALOG_STATE.isCitingItems();
+	_id("narrativeMode").parentElement.hidden = _id("narrativeMode").disabled;
+	_id("narrativeMode").checked = io.citation.properties.mode === "composite";
 	if (DIALOG_STATE.isCitingItems()) {
 		_id("keepSorted").disabled = !io.sortable;
 		_id("keepSorted").parentElement.hidden = !io.sortable;
@@ -1254,6 +1258,12 @@ const IOManager = {
 		// if keep sorted was unchecked and then checked, resort items and update bubbles
 		_id("keepSorted").addEventListener("change", () => this._resortItems());
 
+		// narrative ("Author (year)") toggle -- update citation object and refresh preview/bubbles
+		_id("narrativeMode").addEventListener("change", () => {
+			CitationDataManager.updateCitationObject();
+			CitationPreview.update();
+		});
+
 		// Switch list/library mode on mouse down
 		_id("dialog-mode-setting").addEventListener("mousedown", event => this.toggleDialogMode(event.target.closest(".option").getAttribute("value")));
 		// Swtich list/library mode on click via keyboard
@@ -2239,6 +2249,13 @@ const CitationDataManager = {
 		io.citation.citationItems = this.items.map(item => item.getCitationItem({ includeDialogReferenceID: !final }));
 		if (io.sortable) {
 			io.citation.properties.unsorted = !_id("keepSorted").checked;
+		}
+		// Narrative citation: render as "Author (year)" via citeproc composite cluster mode
+		if (_id("narrativeMode").checked) {
+			io.citation.properties.mode = "composite";
+		}
+		else {
+			delete io.citation.properties.mode;
 		}
 	},
 

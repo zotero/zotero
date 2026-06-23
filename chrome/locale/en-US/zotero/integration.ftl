@@ -50,6 +50,7 @@ integration-citationDialog-lib-message-annotations = { $search ->
    *[other] No selected or open items with annotations
 }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-settings-narrative = Author in text (Author (year))
 integration-citationDialog-preview-empty = Preview
 integration-citationDialog-btn-displayPreview =
     .title = Display citation preview

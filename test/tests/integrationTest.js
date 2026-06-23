@@ -634,6 +634,40 @@ describe("Zotero.Integration", function () {
 				assert.equal(citation.citationItems[0].id, testItems[0].id);
 			});
 
+			it('should insert a narrative "Author (year)" citation and persist composite mode', async function () {
+				var docID = this.test.fullTitle();
+				if (!(docID in applications)) await initDoc(docID);
+				var doc = applications[docID].doc;
+
+				// Mirror the citation dialog's "Author in text" toggle: a single cited item
+				// with cluster-level narrative (composite) mode.
+				dialogResults.citationDialog = async function (dialogName, io) {
+					let item = Zotero.Cite.getItem(testItems[0].id);
+					io.citation.citationItems = [{ id: item.id, uris: item.cslURIs, itemData: item.cslItemData }];
+					io.citation.properties.mode = "composite";
+					try {
+						await io.previewFn(io.citation);
+					}
+					catch (e) {}
+					io._acceptDeferred.resolve(() => {});
+				};
+
+				await execCommand('addEditCitation', docID);
+				assert.equal(doc.fields.length, 1);
+
+				// Narrative renders the author outside the parentheses ("Author No0 (n.d.)"),
+				// unlike the parenthetical form "(Author No0, n.d.)".
+				assert.equal(doc.fields[0].text, "Author No0 (n.d.)");
+
+				// Composite mode round-trips through the serialized field code, so re-editing
+				// or refreshing the document preserves the narrative form.
+				var citation = await (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
+				assert.equal(citation.properties.mode, "composite");
+
+				// Restore default dialog behavior for subsequent tests
+				setAddEditItems(testItems[0]);
+			});
+
 			it('should display a bibliography-specific error if in bibliography field', async function () {
 				await insertMultipleCitations.call(this);
 				var docID = this.test.fullTitle();
