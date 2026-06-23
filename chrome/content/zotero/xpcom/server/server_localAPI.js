@@ -576,6 +576,16 @@ class LocalAPIEndpoint {
 		let key = requestData.headers.get('Zotero-API-Key')
 			|| requestData.searchParams.get('key')
 			|| '';
+		// Also accept an "Authorization: Bearer <key>" token
+		if (!key) {
+			let authHeader = requestData.headers.get('Authorization');
+			if (authHeader) {
+				let match = /^Bearer\s+([a-zA-Z0-9]+)$/i.exec(authHeader.trim());
+				if (match) {
+					key = match[1];
+				}
+			}
+		}
 		if (!key) {
 			return [
 				401,
