@@ -418,6 +418,10 @@
 .virtualized-table.multi-select:focus {
 	.row.focused:not(.selected) {
 		outline: var(--default-focusring-width) dotted var(--color-accent);
+		// Inset the ring so it draws inside the row box rather than outside it, where the
+		// scroll container's overflow clip would cut off the top edge on the first row (the
+		// body has no top padding with sticky section headers)
+		outline-offset: calc(-1 * var(--default-focusring-width));
 		z-index: 10000;
 	}
 }
