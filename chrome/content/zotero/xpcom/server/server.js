@@ -592,10 +592,13 @@ Zotero.Server.RequestHandler.prototype._decodeMultipartData = function (data) {
 		let windowsHeaderBoundary = field.indexOf("\r\n\r\n");
 		if (unixHeaderBoundary < windowsHeaderBoundary && unixHeaderBoundary != -1) {
 			fieldData.header = field.slice(0, unixHeaderBoundary).trim();
-			fieldData.body = field.slice(unixHeaderBoundary+2).trim();
+			// Strip only the trailing delimiter newline before the next boundary, not all
+			// surrounding whitespace -- trimming would corrupt binary bodies (e.g., a file
+			// ending in a newline byte)
+			fieldData.body = field.slice(unixHeaderBoundary+2).replace(/\n$/, '');
 		} else if (windowsHeaderBoundary != -1) {
 			fieldData.header = field.slice(0, windowsHeaderBoundary).trim();
-			fieldData.body = field.slice(windowsHeaderBoundary+4).trim();
+			fieldData.body = field.slice(windowsHeaderBoundary+4).replace(/\r\n$/, '');
 		} else {
 			// Only log first 200 characters in case the part is large
 			Zotero.debug('Malformed multipart/form-data body: ' + field.substr(0, 200), 1);
