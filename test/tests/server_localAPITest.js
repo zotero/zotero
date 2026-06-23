@@ -755,6 +755,25 @@ describe("Local API Server", function () {
 				if (item) await item.eraseTx();
 			});
 
+			it("should accept the API key via Authorization: Bearer header", async function () {
+				let { status, response } = await apiPost(
+					`/users/0/items`,
+					{
+						body: [{ itemType: 'book', title: 'BearerKey Item' }],
+						headers: {
+							'Zotero-Write-Token': newWriteToken(),
+							'Authorization': `Bearer ${writeAPIKey}`,
+						},
+						skipAPIKey: true,
+					}
+				);
+				assert.equal(status, 200);
+				let key = response.successful['0'].key;
+				let item = await Zotero.Items.getByLibraryAndKeyAsync(
+					Zotero.Libraries.userLibraryID, key);
+				if (item) await item.eraseTx();
+			});
+
 			it("should consume a single-use API key after one write", async function () {
 				let oneShot;
 				let stub = sinon.stub(Zotero.Server.LocalAPI, '_promptForAuthorization')
