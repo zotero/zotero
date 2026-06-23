@@ -1192,10 +1192,18 @@ Zotero.Server.LocalAPI.UploadReceiver = class extends LocalAPIEndpoint {
 				let available = binaryStream.available();
 				bytes = new Uint8Array(binaryStream.readByteArray(available));
 			}
+			else if (Array.isArray(data)) {
+				// multipart/form-data upload (params=1): the server has already parsed the
+				// body into form fields, so take the file bytes from the `file` part's body,
+				// which the parser preserves as a binary string (one char per byte)
+				let filePart = data.find(part => part.params && part.params.name === 'file');
+				if (!filePart) {
+					return this.makeResponse(400, 'text/plain', 'No file content provided');
+				}
+				bytes = Uint8Array.from(filePart.body, c => c.charCodeAt(0) & 0xff);
+			}
 			else if (typeof data === 'string') {
-				// Best effort: text-decoded body. Will produce a corrupted file
-				// for true binary content -- the client should send a binary
-				// content-type so the server hands us the raw stream.
+				// Raw text body (a non-binary upload sent with a text content type)
 				let encoder = new TextEncoder();
 				bytes = encoder.encode(data);
 			}
@@ -2339,19 +2347,19 @@ async function authorizeUpload(item, params, headers, requestData) {
 	let host = requestData.headers.get('Host') || `localhost:${Zotero.Server.port}`;
 	let url = `http://${host}/api/local/uploads/${uploadKey}`;
 
-	if (requestData.searchParams.get('params') === '1') {
+	// params=1 in the body requests the multipart upload form (vs. the default prefix/suffix)
+	if (String(params.params) === '1') {
 		return [
 			200,
 			{ 'Content-Type': 'application/json' },
 			JSON.stringify({
 				url,
 				uploadKey,
-				contentType,
+				// In the web API, params holds S3 HTML form fields (key, policy, signature, etc.).
+				// There's no S3 locally, but we emit `key` so clients have something to iterate.
+				// The receiver ignores the returned values.
 				params: {
-					// Local uploads don't need S3-style form fields, but emit
-					// the field so clients expecting a 'params' array can
-					// iterate. They can be sent and will be ignored.
-					key: uploadKey,
+					key: md5,
 				},
 			})
 		];
