@@ -159,6 +159,32 @@ describe("Zotero.Search", function () {
 
 	});
 
+	describe("#mapPredicate()", function () {
+		var c = (sql, from, to, neg) => Zotero.Search.mapPredicate(sql, from, to, neg);
+
+		it("should leave a predicate unchanged when the result level is 'any'", function () {
+			assert.equal(c('X', 'item', 'any'), 'X');
+			assert.equal(c('X', 'any', 'any'), 'X');
+		});
+
+		it("should not roll up a negated level-agnostic condition", function () {
+			assert.equal(c('X', 'any', 'item', true), 'X');
+		});
+
+		it("should match nothing for unrelated branches (note vs annotation)", function () {
+			assert.equal(c('X', 'note', 'annotation'), '0');
+		});
+
+		it("should leave a multi-level field unchanged at a level it matches at", function () {
+			// e.g., title exists on both items and attachments, so at either result level the
+			// predicate is used as-is (the result-level FROM filters to the right rows)
+			assert.equal(c('X', ['item', 'attachment'], 'item'), 'X');
+			assert.equal(c('X', ['item', 'attachment'], 'attachment'), 'X');
+			assert.equal(c('X', ['item', 'attachment'], 'any'), 'X');
+		});
+
+	});
+
 	describe("#search()", function () {
 		var userLibraryID;
 		var fooItem;
@@ -252,6 +278,390 @@ describe("Zotero.Search", function () {
 					assert.sameMembers(await s.search(), [ab.id, acd.id]);
 				});
 
+			});
+
+			describe("Cross-level scope", function () {
+				it("should match a top-level item by a condition on a descendant annotation", async function () {
+					var text = 'zscopematch' + Zotero.Utilities.randomString();
+
+					// Author Smith, with a matching annotation on a child PDF -- should match
+					var item = await createDataObject('item', {
+						creators: [{ lastName: 'Zscopesmith', creatorType: 'author' }]
+					});
+					var attachment = await importPDFAttachment(item);
+					var annotation = await createAnnotation('highlight', attachment);
+					annotation.annotationText = text;
+					await annotation.saveTx();
+
+					// Author Smith, but no matching annotation -- shouldn't match
+					var noAnnotation = await createDataObject('item', {
+						creators: [{ lastName: 'Zscopesmith', creatorType: 'author' }]
+					});
+
+					// Matching annotation, but a different author -- shouldn't match
+					var other = await createDataObject('item', {
+						creators: [{ lastName: 'Zscopejones', creatorType: 'author' }]
+					});
+					var otherAttachment = await importPDFAttachment(other);
+					var otherAnnotation = await createAnnotation('highlight', otherAttachment);
+					otherAnnotation.annotationText = text;
+					await otherAnnotation.saveTx();
+
+					// creator is Smith AND (has an annotation whose text matches)
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('creator', 'contains', 'Zscopesmith');
+					s.addCondition('groupStart', 'true', '');
+					s.addCondition('resultLevel', 'annotation');
+					s.addCondition('annotationText', 'contains', text);
+					s.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await s.search(), [item.id]);
+
+					await item.eraseTx();
+					await noAnnotation.eraseTx();
+					await other.eraseTx();
+				});
+
+				it("should return descendant annotations as results with a top-level condition", async function () {
+					var text = 'zresult' + Zotero.Utilities.randomString();
+
+					// Smith item with two matching and one non-matching annotation
+					var item = await createDataObject('item', {
+						creators: [{ lastName: 'Zresultsmith', creatorType: 'author' }]
+					});
+					var attachment = await importPDFAttachment(item);
+					var match1 = await createAnnotation('highlight', attachment);
+					match1.annotationText = text;
+					await match1.saveTx();
+					var match2 = await createAnnotation('highlight', attachment);
+					match2.annotationText = text;
+					await match2.saveTx();
+					await createAnnotation('highlight', attachment); // random text -- no match
+
+					// Different author with a matching annotation -- shouldn't match
+					var other = await createDataObject('item', {
+						creators: [{ lastName: 'Zresultjones', creatorType: 'author' }]
+					});
+					var otherAttachment = await importPDFAttachment(other);
+					var otherAnnotation = await createAnnotation('highlight', otherAttachment);
+					otherAnnotation.annotationText = text;
+					await otherAnnotation.saveTx();
+
+					// Result level annotations: the matching annotations on Smith's items
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'annotation');
+					s.addCondition('creator', 'contains', 'Zresultsmith');
+					s.addCondition('annotationText', 'contains', text);
+					assert.sameMembers(await s.search(), [match1.id, match2.id]);
+
+					await item.eraseTx();
+					await other.eraseTx();
+				});
+
+				it("should match annotations for a negated annotation condition at the annotation result level", async function () {
+					// At the annotation result level, a negated annotation condition matches
+					// the annotations that lack the value
+					var text = 'zneg' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					var withText = await createAnnotation('highlight', attachment);
+					withText.annotationText = text;
+					await withText.saveTx();
+					var withoutText = await createAnnotation('highlight', attachment);
+					withoutText.annotationText = 'zsomethingelse';
+					await withoutText.saveTx();
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'annotation');
+					s.addCondition('annotationText', 'doesNotContain', text);
+					assert.sameMembers(await s.search(), [withoutText.id]);
+
+					await item.eraseTx();
+				});
+
+				it("should match an item in a collection by a child attachment's content", async function () {
+					// Collection (item-level) and Attachment Content (rolls up from the
+					// attachment) both resolve at the top-level item and intersect there
+					var collection = await createDataObject('collection');
+					// In the collection, with a child attachment whose content matches
+					var match = await createDataObject('item', { collections: [collection.id] });
+					await importFileAttachment("search/foobar.html", { parentID: match.id });
+					// In the collection, but no matching attachment content
+					var noContent = await createDataObject('item', { collections: [collection.id] });
+					// Has the matching content, but isn't in the collection
+					var notInCollection = await createDataObject('item');
+					await importFileAttachment("search/foobar.html", { parentID: notInCollection.id });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('collection', 'is', collection.key);
+					s.addCondition('fulltextContent', 'contains', 'foo bar');
+					assert.sameMembers(await s.search(), [match.id]);
+
+					await match.eraseTx();
+					await noContent.eraseTx();
+					await notInCollection.eraseTx();
+				});
+
+				it("should return a collection's matching descendants at a descendant result level", async function () {
+					// Collection (item-level) maps down to the annotation result level, so
+					// a matching annotation under a collection item is returned even though the
+					// top-level item doesn't itself match the annotation condition
+					var text = 'zcoll' + Zotero.Utilities.randomString();
+					var collection = await createDataObject('collection');
+					var item = await createDataObject('item', { collections: [collection.id] });
+					var attachment = await importPDFAttachment(item);
+					var match = await createAnnotation('highlight', attachment);
+					match.annotationText = text;
+					await match.saveTx();
+					// A matching annotation, but its item isn't in the collection
+					var other = await createDataObject('item');
+					var otherAttachment = await importPDFAttachment(other);
+					var otherAnnotation = await createAnnotation('highlight', otherAttachment);
+					otherAnnotation.annotationText = text;
+					await otherAnnotation.saveTx();
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'annotation');
+					s.addCondition('collection', 'is', collection.key);
+					s.addCondition('annotationText', 'contains', text);
+					assert.sameMembers(await s.search(), [match.id]);
+
+					await item.eraseTx();
+					await other.eraseTx();
+				});
+
+				it("should match an itemData field at the item or attachment level it lives at", async function () {
+					// title (like url/accessDate) exists on both top-level items and
+					// attachments, so it matches the right thing at each result level without
+					// rolling an attachment title up to its parent (or a parent title down)
+					var itemTitle = 'zti' + Zotero.Utilities.randomString();
+					var attTitle = 'zta' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item', { title: itemTitle });
+					var attachment = await importPDFAttachment(item);
+					attachment.setField('title', attTitle);
+					await attachment.saveTx();
+
+					let search = (level, value) => {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('resultLevel', level);
+						s.addCondition('title', 'contains', value);
+						return s.search();
+					};
+
+					// Attachment result level matches the attachment's own title, not its parent's
+					assert.sameMembers(await search('attachment', attTitle), [attachment.id]);
+					assert.sameMembers(await search('attachment', itemTitle), []);
+					// Item result level matches the item's own title, and an attachment title
+					// does not roll up to the item (option C: no rollup)
+					assert.sameMembers(await search('item', itemTitle), [item.id]);
+					assert.sameMembers(await search('item', attTitle), []);
+
+					await item.eraseTx();
+				});
+
+				it("should map a bare descendant condition to the result level (no group)", async function () {
+					var text = 'zbarecorr' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item', { title: 'zbarecorritem' });
+					var attachment = await importPDFAttachment(item);
+					var annotation = await createAnnotation('highlight', attachment);
+					annotation.annotationText = text;
+					await annotation.saveTx();
+
+					// Result level item + a plain annotation condition (no group) rolls up
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('annotationText', 'contains', text);
+					assert.sameMembers(await s.search(), [item.id]);
+
+					await item.eraseTx();
+				});
+
+				it("should match an item by its tag and a descendant annotation's comment", async function () {
+					// A cross-level search combining levels: a top-level item that itself has a
+					// given tag AND has a descendant annotation whose comment contains a word, returned
+					// at the item result level. The tag (level-agnostic) and the annotation
+					// comment (annotation level) both resolve at the item and intersect there.
+					var tag = 'ztag' + Zotero.Utilities.randomString();
+					var word = 'zword' + Zotero.Utilities.randomString();
+
+					// Tagged, with a descendant annotation whose comment contains the word
+					var item = await createDataObject('item', { tags: [{ tag }] });
+					var attachment = await importPDFAttachment(item);
+					await createAnnotation('highlight', attachment, { comment: 'foo ' + word + ' bar' });
+
+					// Tagged, but no matching annotation comment
+					var tagOnly = await createDataObject('item', { tags: [{ tag }] });
+					await importPDFAttachment(tagOnly);
+
+					// Has the matching annotation comment, but not the tag
+					var annotationOnly = await createDataObject('item');
+					var annAttachment = await importPDFAttachment(annotationOnly);
+					await createAnnotation('highlight', annAttachment, { comment: 'foo ' + word + ' bar' });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('tag', 'is', tag);
+					s.addCondition('annotationComment', 'contains', word);
+					assert.sameMembers(await s.search(), [item.id]);
+
+					await item.eraseTx();
+					await tagOnly.eraseTx();
+					await annotationOnly.eraseTx();
+				});
+
+				it("should map a bare full-text condition to the result level (no group)", async function () {
+					// A top-level full-text condition matches the item that owns the matching
+					// attachment, materializing and mapping to the result level
+					var item = await createDataObject('item', { title: 'zbareft' });
+					await importFileAttachment("search/foobar.html", { parentID: item.id });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('fulltextContent', 'contains', 'foo bar');
+					// The standalone foobarItem also matches and is itself a top-level item, so it's
+					// returned alongside the child attachment's parent
+					assert.sameMembers(await s.search(), [item.id, foobarItem.id]);
+
+					await item.eraseTx();
+				});
+
+				it("should return a standalone attachment whose annotation matches, at the item result level", async function () {
+					// A standalone (top-level) attachment is itself a top-level item, so its annotation
+					// maps up to the attachment's own id and the attachment is returned
+					var word = 'zsa' + Zotero.Utilities.randomString();
+					var standalone = await importPDFAttachment(); // top-level PDF, no parent
+					await createAnnotation('highlight', standalone, { comment: 'x ' + word + ' y' });
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('annotationComment', 'contains', word);
+					assert.sameMembers(await s.search(), [standalone.id]);
+					
+					await standalone.eraseTx();
+				});
+				
+
+				it("should bind a same-entity group below a non-item result level", async function () {
+					// Result level attachment + a group scoped to annotation: find attachments
+					// that have a single annotation matching all of the group's conditions.
+					// Exercises mapping where the parent level is 'attachment', not 'item'.
+					var text = 'zsame' + Zotero.Utilities.randomString();
+					var comment = 'zsamec' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item', { title: 'zsameitem' });
+
+					// One annotation matches both text and comment -> this attachment matches
+					var attachmentBoth = await importPDFAttachment(item);
+					var both = await createAnnotation('highlight', attachmentBoth, { comment });
+					both.annotationText = text;
+					await both.saveTx();
+
+					// Two separate annotations, one matching each -> shouldn't match
+					var attachmentSplit = await importPDFAttachment(item);
+					var hasText = await createAnnotation('highlight', attachmentSplit);
+					hasText.annotationText = text;
+					await hasText.saveTx();
+					await createAnnotation('highlight', attachmentSplit, { comment });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'attachment'); // result level = attachments
+					s.addCondition('groupStart', 'true', '');
+					s.addCondition('resultLevel', 'annotation'); // the same annotation
+					s.addCondition('annotationText', 'contains', text);
+					s.addCondition('annotationComment', 'contains', comment);
+					s.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await s.search(), [attachmentBoth.id]);
+
+					await item.eraseTx();
+				});
+
+				it("should roll a tag on a descendant up to the result item", async function () {
+					var tag = 'zroll' + Zotero.Utilities.randomString();
+					// Tagged child attachment (the item itself is untagged)
+					var viaChild = await createDataObject('item', { title: 'zrollchild' });
+					var attachment = await importPDFAttachment(viaChild);
+					attachment.addTag(tag);
+					await attachment.saveTx();
+					// Tagged directly
+					var viaSelf = await createDataObject('item', { title: 'zrollself', tags: [{ tag }] });
+					// Untagged
+					var untagged = await createDataObject('item', { title: 'zrollmiss' });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('tag', 'is', tag);
+					// The child's tag rolls up to its item; the directly tagged item matches too
+					assert.sameMembers(await s.search(), [viaChild.id, viaSelf.id]);
+
+					await viaChild.eraseTx();
+					await viaSelf.eraseTx();
+					await untagged.eraseTx();
+				});
+
+				it("should not propagate a tag down to descendant result items", async function () {
+					var tag = 'zdown' + Zotero.Utilities.randomString();
+					// The item is tagged, but its attachment is not
+					var item = await createDataObject('item', { title: 'zdownitem', tags: [{ tag }] });
+					await importPDFAttachment(item);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'attachment');
+					s.addCondition('tag', 'is', tag);
+					// Rollup is up-only: a parent's tag must not match its child attachment
+					assert.lengthOf(await s.search(), 0);
+
+					await item.eraseTx();
+				});
+
+				it("should not error when a condition can't reach the result level", async function () {
+					// A note can't be (or be under) an attachment, so this is empty -- but it
+					// must not throw a SQL param error: the dead predicate drops to the constant
+					// '0', and its bound value param must be dropped with it
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'attachment');
+					s.addCondition('joinMode', 'any');
+					s.addCondition('note', 'contains', 'zsqltest');
+					assert.lengthOf(await s.search(), 0);
+
+					// Same in 'all' mode
+					var s2 = new Zotero.Search();
+					s2.libraryID = userLibraryID;
+					s2.addCondition('resultLevel', 'attachment');
+					s2.addCondition('note', 'contains', 'zsqltest');
+					assert.lengthOf(await s2.search(), 0);
+				});
+
+				it("should project to all descendant annotations when there's no annotation condition", async function () {
+					// Result level annotations with only a top-level condition -> every
+					// annotation under matching items
+					var item = await createDataObject('item', {
+						creators: [{ lastName: 'Zprojsmith', creatorType: 'author' }]
+					});
+					var attachment = await importPDFAttachment(item);
+					var a1 = await createAnnotation('highlight', attachment);
+					var a2 = await createAnnotation('highlight', attachment);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'annotation');
+					s.addCondition('creator', 'contains', 'Zprojsmith');
+					assert.sameMembers(await s.search(), [a1.id, a2.id]);
+
+					await item.eraseTx();
+				});
 			});
 
 			describe("collection", function () {
@@ -647,6 +1057,47 @@ describe("Zotero.Search", function () {
 					s.addCondition('includeParentsAndChildren', 'true');
 					var matches = await s.search();
 					assert.lengthOf(matches, 0);
+				});
+
+				it("should include a match's parents and children", async function () {
+					var itemTitle = 'zincp' + Zotero.Utilities.randomString();
+					var attTitle = 'zinca' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item', { title: itemTitle });
+					var attachment = await importPDFAttachment(item);
+					attachment.setField('title', attTitle);
+					await attachment.saveTx();
+
+					let run = (value) => {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('title', 'is', value);
+						s.addCondition('includeParentsAndChildren', 'true');
+						return s.search();
+					};
+					// Matching the parent pulls in its child, and matching the child its parent
+					assert.sameMembers(await run(itemTitle), [item.id, attachment.id]);
+					assert.sameMembers(await run(attTitle), [item.id, attachment.id]);
+
+					await item.eraseTx();
+				});
+			});
+
+			describe("noChildren", function () {
+				it("should keep only top-level items", async function () {
+					var title = 'znochild' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item', { title });
+					var attachment = await importPDFAttachment(item);
+					attachment.setField('title', title);
+					await attachment.saveTx();
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('title', 'contains', title);
+					s.addCondition('noChildren', 'true');
+					// The child attachment matches the title too, but noChildren excludes it
+					assert.sameMembers(await s.search(), [item.id]);
+
+					await item.eraseTx();
 				});
 			});
 			

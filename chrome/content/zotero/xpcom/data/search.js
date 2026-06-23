@@ -1053,7 +1053,12 @@ Zotero.Search.prototype._buildQuery = async function () {
 	// conditions are left in the stream rather than spliced out here. Only the
 	// top-level joinMode counts here, so skip any nested inside a group.
 	this._joinMode = 'all';
+	// The result level the whole search returns. A top-level 'resultLevel' condition sets it;
+	// the default 'any' keeps the existing mixed-level behavior (no mapping, no
+	// level constraint on the result set).
+	let resultLevel = 'any';
 	let groupDepth = 0;
+	let foundJoinMode = false;
 	for (let cond of conditionsToProcess) {
 		if (cond.condition == 'groupStart') {
 			groupDepth++;
@@ -1061,9 +1066,12 @@ Zotero.Search.prototype._buildQuery = async function () {
 		else if (cond.condition == 'groupEnd') {
 			groupDepth--;
 		}
-		else if (cond.condition == 'joinMode' && groupDepth == 0) {
+		else if (groupDepth == 0 && cond.condition == 'joinMode' && !foundJoinMode) {
 			this._joinMode = cond.operator;
-			break;
+			foundJoinMode = true;
+		}
+		else if (groupDepth == 0 && cond.condition == 'resultLevel') {
+			resultLevel = cond.operator;
 		}
 	}
 	
@@ -1071,9 +1079,8 @@ Zotero.Search.prototype._buildQuery = async function () {
 		let name = condition.condition;
 		let conditionData = Zotero.SearchConditions.get(name);
 		
-		// Has a table (or 'savedSearch', which doesn't have a table but isn't special)
-		// TEMP: Or 'tag', which needs to match annotation parents
-		if (conditionData.table || name == 'savedSearch' || name == 'tempTable' || name == 'tag') {
+		// Has a table (or 'savedSearch'/'tempTable', which don't have a table but aren't special)
+		if (conditionData.table || name == 'savedSearch' || name == 'tempTable') {
 			// For conditions with an inline filter using 'is'/'isNot', combine with last condition
 			// if the same
 			if (lastCondition
@@ -1098,7 +1105,9 @@ Zotero.Search.prototype._buildQuery = async function () {
 				value: condition.value,
 				flags: conditionData.flags,
 				required: condition.required,
-				inlineFilter: conditionData.inlineFilter
+				inlineFilter: conditionData.inlineFilter,
+				// Item level(s) this condition matches at, for cross-level mapping
+				level: Zotero.Search._conditionLevel(name, conditionData)
 			};
 			conditions.push(lastCondition);
 			
@@ -1154,10 +1163,12 @@ Zotero.Search.prototype._buildQuery = async function () {
 					continue;
 				
 				case 'fulltextContent':
-					// A fulltextContent inside a group is materialized into an itemID
-					// predicate so it joins the SQL AND/OR tree; a top-level one is left
-					// for the post-filter in search() (unchanged behavior)
-					if (loopDepth > 0) {
+					// A fulltextContent inside a group -- or at the top level when a result
+					// level is set -- is materialized into an itemID predicate so it joins
+					// the SQL AND/OR tree and can be mapped to that level (full-text is
+					// indexed per attachment). A plain top-level one with no result level is
+					// left for the post-filter in search() (unchanged behavior).
+					if (loopDepth > 0 || resultLevel != 'any') {
 						let matchIDs = await this._fullTextContentMatches(
 							condition.value, condition.mode
 						);
@@ -1167,7 +1178,10 @@ Zotero.Search.prototype._buildQuery = async function () {
 							name: '_fulltextContentPredicate',
 							operator: condition.operator,
 							matchIDs,
-							required: condition.required
+							required: condition.required,
+							// Full-text content is indexed per attachment, so matches are at
+							// the attachment level for cross-level mapping
+							level: 'attachment'
 						});
 						this._hasPrimaryConditions = true;
 					}
@@ -1179,6 +1193,10 @@ Zotero.Search.prototype._buildQuery = async function () {
 				case 'joinMode':
 					lastCondition = null;
 					conditions.push({ name: 'joinMode', operator: condition.operator });
+					continue;
+				case 'resultLevel':
+					lastCondition = null;
+					conditions.push({ name: 'resultLevel', operator: condition.operator });
 					continue;
 				case 'groupStart':
 					lastCondition = null;
@@ -1301,7 +1319,27 @@ Zotero.Search.prototype._buildQuery = async function () {
 		sql += " AND (itemID IN (SELECT itemID FROM items WHERE libraryID=?))";
 		sqlParams.push(this.libraryID);
 	}
-	
+
+	// Result level: constrain the result set to one item level. The default
+	// ('any') leaves the mixed-level result unchanged.
+	switch (resultLevel) {
+		case 'item':
+			// Top-level items only (exclude child attachments/notes and annotations)
+			sql += " AND (itemID NOT IN (SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL) "
+				+ "AND itemID NOT IN (SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL) "
+				+ "AND itemID NOT IN (SELECT itemID FROM itemAnnotations))";
+			break;
+		case 'attachment':
+			sql += " AND (itemID IN (SELECT itemID FROM itemAttachments))";
+			break;
+		case 'note':
+			sql += " AND (itemID IN (SELECT itemID FROM itemNotes))";
+			break;
+		case 'annotation':
+			sql += " AND (itemID IN (SELECT itemID FROM itemAnnotations))";
+			break;
+	}
+
 	if (this._hasPrimaryConditions) {
 		// Each condition produces a self-contained "itemID [NOT] IN (...)" predicate.
 		// Markers and predicates are collected here in document order, then assembled
@@ -1323,6 +1361,10 @@ Zotero.Search.prototype._buildQuery = async function () {
 					builtConditions.push({ marker: 'joinMode', operator: condition.operator });
 					continue;
 				}
+				if (condition.name == 'resultLevel') {
+					builtConditions.push({ marker: 'resultLevel', operator: condition.operator });
+					continue;
+				}
 				// A grouped fulltextContent materialized into an itemID set (above)
 				if (condition.name == '_fulltextContentPredicate') {
 					let sql;
@@ -1334,7 +1376,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 						let op = condition.operator == 'doesNotContain' ? 'NOT IN' : 'IN';
 						sql = 'itemID ' + op + ' (' + condition.matchIDs.join(',') + ')';
 					}
-					builtConditions.push({ sql, params: [], required: condition.required });
+					builtConditions.push({ sql, params: [], required: condition.required, level: condition.level });
 					continue;
 				}
 
@@ -1359,29 +1401,20 @@ Zotero.Search.prototype._buildQuery = async function () {
 					}
 					condSelectSQL += 'IN (';
 					selectOpenParens = 1;
-					
-					// TEMP: Don't match annotations for negation operators, since it would result in
-					// all parent attachments being returned
-					if (isNegationOperator) {
+
+					// A negation matches every item that lacks the value, including annotations,
+					// which almost never carry item metadata or tags -- so a bare negation would
+					// otherwise return nearly every annotation in the library. Exclude them. When
+					// a result level is set, the result-level constraint already restricts to that
+					// level (and the cross-level mapping handles negation), so this only applies to
+					// the default path.
+					if (isNegationOperator && resultLevel == 'any') {
 						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID="
 							+ Zotero.ItemTypes.getID('annotation') + " UNION ";
 					}
-					
-					switch (condition.name) {
-						case 'tag':
-							condSQL += "SELECT itemID FROM itemTags "
-								+ "LEFT JOIN itemAnnotations IAnT USING (itemID) WHERE (";
-							break;
-						
-						case 'annotationText':
-						case 'annotationComment':
-							condSQL += `SELECT itemID FROM ${condition.table} WHERE (`
-							break;
-							
-						default:
-							condSQL += `SELECT itemID FROM ${condition.table} WHERE (`;
-					}
-					
+
+					condSQL += `SELECT itemID FROM ${condition.table} WHERE (`;
+
 					openParens = 1;
 				}
 				
@@ -1912,13 +1945,15 @@ Zotero.Search.prototype._buildQuery = async function () {
 				builtConditions.push({
 					sql: condSQL,
 					params: condSQLParams,
-					required: condition.required
+					required: condition.required,
+					level: condition.level || 'item',
+					negate: condition.operator == 'isNot' || condition.operator == 'doesNotContain'
 				});
 		}
 
 		// Combine the collected predicates and group markers into a single predicate
 		// (see Zotero.Search.combineConditions)
-		let combined = Zotero.Search.combineConditions(builtConditions);
+		let combined = Zotero.Search.combineConditions(builtConditions, resultLevel);
 		if (combined.sql) {
 			sql += " AND " + combined.sql;
 			sqlParams = sqlParams.concat(combined.params);
@@ -1955,10 +1990,18 @@ Zotero.Search.prototype._buildQuery = async function () {
  * In 'all' mode a group's children are ANDed; in 'any' mode they're ORed, except 'required'
  * conditions, which are always ANDed (legacy behavior, ultimately subsumable by grouping).
  *
+ * A group may also carry a 'resultLevel' marker (a level: 'item'/'attachment'/'note'/'annotation'),
+ * placed inside the group like 'joinMode'. When the result level is a descendant level of the
+ * enclosing row, the group's conditions are matched against descendants and mapped up to
+ * the parent (see Zotero.Search.mapPredicate) -- e.g., "the item has an annotation
+ * matching these conditions".
+ *
  * @param {Object[]} builtConditions
+ * @param {String} [rootLevel='any'] - The result level the whole search returns ('any' leaves
+ *     the mixed-level default unchanged; otherwise each condition is mapped to this level)
  * @return {{ sql: String, params: Array }} Combined predicate (sql is '' if nothing to combine)
  */
-Zotero.Search.combineConditions = function (builtConditions) {
+Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') {
 	let root = { joinMode: 'all', children: [] };
 	let groupStack = [root];
 	for (let item of builtConditions) {
@@ -1977,29 +2020,47 @@ Zotero.Search.combineConditions = function (builtConditions) {
 		else if (item.marker == 'joinMode') {
 			group.joinMode = item.operator;
 		}
+		else if (item.marker == 'resultLevel') {
+			group.level = item.operator;
+		}
 		else {
 			group.children.push(item);
 		}
 	}
 
-	// Reduce a group node to a single { sql, params } predicate
-	let combineGroup = (node) => {
+	// Reduce a group node to a single { sql, params } predicate. parentLevel is the level the
+	// enclosing row is at; the root is a top-level item.
+	let combineGroup = (node, parentLevel) => {
+		// The level this group's children are matched at -- its own result level if set, otherwise
+		// the enclosing level
+		let level = node.level || parentLevel;
 		let requiredParts = [];
 		let requiredParams = [];
 		let optionalParts = [];
 		let optionalParams = [];
 		for (let child of node.children) {
-			let result = child.children ? combineGroup(child) : child;
+			let result = child.children ? combineGroup(child, level) : child;
 			if (!result.sql) {
 				continue;
 			}
+			// A leaf condition's predicate selects itemIDs at its own natural level; if that
+			// differs from this group's level, map it to that level so the group's
+			// children combine at a single level. Nested groups are already mapped to
+			// their own level by the combineGroup() call above.
+			let childSQL = result.sql;
+			if (!child.children) {
+				childSQL = Zotero.Search.mapPredicate(childSQL, result.level || 'item', level, result.negate);
+			}
+			// When mapping reduces a predicate to a constant ('0'/'1' -- e.g., a condition
+			// whose level can't reach the result level), its placeholders are gone, so drop its params
+			let childParams = (childSQL === '0' || childSQL === '1') ? [] : result.params;
 			if (node.joinMode == 'all' || result.required) {
-				requiredParts.push(result.sql);
-				requiredParams = requiredParams.concat(result.params);
+				requiredParts.push(childSQL);
+				requiredParams = requiredParams.concat(childParams);
 			}
 			else {
-				optionalParts.push(result.sql);
-				optionalParams = optionalParams.concat(result.params);
+				optionalParts.push(childSQL);
+				optionalParams = optionalParams.concat(childParams);
 			}
 		}
 		let parts = [];
@@ -2017,12 +2078,271 @@ Zotero.Search.combineConditions = function (builtConditions) {
 		if (!parts.length) {
 			return { sql: '', params: [], required: false };
 		}
+		let sql = parts.length > 1 ? '(' + parts.join(' AND ') + ')' : parts[0];
+		// Map this group to the enclosing row's level. A 'any' enclosing level (the
+		// mixed-level default) has no row level of its own, so a descendant group with a result level
+		// anchors to the top-level item ("the item has a descendant match").
+		let target = parentLevel == 'any' ? 'item' : parentLevel;
+		if (node.level && node.level != 'any' && node.level != target) {
+			sql = Zotero.Search.mapPredicate(sql, node.level, target);
+		}
 		return {
-			sql: parts.length > 1 ? '(' + parts.join(' AND ') + ')' : parts[0],
-			params: params,
+			sql,
+			// Mapping to a constant drops the placeholders, so drop the params too
+			params: (sql === '0' || sql === '1') ? [] : params,
 			required: false
 		};
 	};
 
-	return combineGroup(root);
+	return combineGroup(root, rootLevel);
+};
+
+
+// The item hierarchy used for cross-level mapping: each child level maps to its parent
+// level via (itemID -> parentItemID) in the given table. 'item' is the top level.
+Zotero.Search._levelParent = {
+	annotation: 'attachment',
+	attachment: 'item',
+	note: 'item'
+};
+Zotero.Search._levelChildTable = {
+	annotation: 'itemAnnotations',
+	attachment: 'itemAttachments',
+	note: 'itemNotes'
+};
+// Attachments and notes can be top-level (parentItemID NULL); annotations always have a parent
+Zotero.Search._levelCanBeStandalone = {
+	annotation: false,
+	attachment: true,
+	note: true
+};
+
+/**
+ * Whether `anc` is an ancestor level of `desc` in the item hierarchy (e.g., 'item' is an
+ * ancestor of 'annotation'; 'attachment' is an ancestor of 'annotation'; 'note' and
+ * 'annotation' are unrelated).
+ */
+Zotero.Search._isAncestorLevel = function (anc, desc) {
+	let l = desc;
+	while (l != 'item') {
+		l = Zotero.Search._levelParent[l];
+		if (!l) {
+			return false;
+		}
+		if (l == anc) {
+			return true;
+		}
+	}
+	return false;
+};
+
+/**
+ * The number of parent hops between two levels in either direction, or null if they're on
+ * unrelated branches (e.g., note and annotation).
+ */
+Zotero.Search._levelDistance = function (a, b) {
+	let l = a;
+	let d = 0;
+	while (l && l != b) {
+		l = Zotero.Search._levelParent[l];
+		d++;
+	}
+	if (l == b) {
+		return d;
+	}
+	l = b;
+	d = 0;
+	while (l && l != a) {
+		l = Zotero.Search._levelParent[l];
+		d++;
+	}
+	return l == a ? d : null;
+};
+
+/**
+ * Given the levels a condition matches at, return the one closest (fewest hops) to `toLevel`,
+ * or null if none is related to it. Used to map a multi-level field from a single level.
+ */
+Zotero.Search._closestRelatedLevel = function (levels, toLevel) {
+	let best = null;
+	let bestDist = Infinity;
+	for (let level of levels) {
+		if (level == 'any') {
+			continue;
+		}
+		let d = Zotero.Search._levelDistance(level, toLevel);
+		if (d !== null && d < bestDist) {
+			best = level;
+			bestDist = d;
+		}
+	}
+	return best;
+};
+
+/**
+ * The item level(s) a condition matches at, for cross-level mapping. A condition
+ * definition can set `level` explicitly; otherwise it defaults to the top-level item, except
+ * for the few itemData fields that attachments also have (title, url, accessDate per the
+ * schema), which match at either the item or the attachment level.
+ */
+Zotero.Search._conditionLevel = function (name, conditionData) {
+	if (conditionData.level) {
+		return conditionData.level;
+	}
+	if (conditionData.table == 'itemData') {
+		let fieldID = Zotero.ItemFields.getID(name);
+		if (fieldID
+				&& Zotero.ItemFields.isValidForType(fieldID, Zotero.ItemTypes.getID('attachment'))) {
+			return ['item', 'attachment'];
+		}
+	}
+	return 'item';
+};
+
+/**
+ * Rewrite a predicate that selects itemIDs at `fromLevel` so it instead constrains itemIDs at
+ * `toLevel`, mapping through the item hierarchy:
+ *
+ *   - `toLevel` of 'any', or `toLevel` is one of the levels the condition matches at -- the
+ *     condition natively selects rows at the result level, so it's returned unchanged (the
+ *     result-level FROM filters to the right rows). This is how a multi-level field like title
+ *     matches item titles at the item level and attachment titles at the attachment level.
+ *   - `fromLevel` 'any' (level-agnostic, e.g., tag) -- the match rolls UP to the result level:
+ *     a `toLevel` item matches if it or any descendant carries it. Up only -- a parent's tag
+ *     isn't the child's. Skipped for a negated match (rolling up "isn't tagged" is ambiguous).
+ *   - `toLevel` an ancestor of `fromLevel` -- "the row has a descendant matching" (map up)
+ *   - `toLevel` a descendant of `fromLevel` -- "the row's ancestor matches" (map down)
+ *   - unrelated branches (e.g., note vs annotation) -- nothing can satisfy both, so '0'
+ *
+ * @param {String} sql - A predicate in terms of the `fromLevel` itemID
+ * @param {String|String[]} fromLevel - The level(s) the predicate selects ('item'/'attachment'/
+ *     'note'/'annotation'/'any'); an array for a field that exists at more than one level
+ * @param {String} toLevel - The level to constrain instead
+ * @param {Boolean} [negated] - Whether the predicate is a negation (isNot/doesNotContain); a
+ *     negated level-agnostic match is left at its own level rather than rolled up
+ * @return {String} A predicate in terms of the `toLevel` itemID
+ */
+Zotero.Search.mapPredicate = function (sql, fromLevel, toLevel, negated = false) {
+	if (toLevel == 'any') {
+		return sql;
+	}
+
+	// A condition may match at more than one level (e.g., an itemData field like title, which
+	// exists on both top-level items and attachments), so normalize to an array
+	let fromLevels = Array.isArray(fromLevel) ? fromLevel : [fromLevel];
+
+	if (fromLevels.length == 1 && fromLevels[0] == 'any') {
+		// Level-agnostic (e.g., tag): roll a positive match up to the result level; leave a
+		// negation at its carrying level (see above)
+		return negated ? sql : Zotero.Search._rollUpAnyToLevel(sql, toLevel);
+	}
+
+	// The condition already selects rows at the result level (it natively matches there), so
+	// the result-level FROM filters to the right rows -- no mapping needed
+	if (fromLevels.includes(toLevel)) {
+		return sql;
+	}
+
+	// Otherwise map from the one level in the set closest to the result level -- a
+	// descendant match up or an ancestor match down. Referencing the predicate's SQL exactly
+	// once keeps its bound parameters from being duplicated, so map from a single level.
+	let from = Zotero.Search._closestRelatedLevel(fromLevels, toLevel);
+	if (!from) {
+		// No level in the set is related to the result level (e.g., note vs annotation)
+		return '0';
+	}
+
+	// itemIDs at `from` matching the predicate
+	let matches = `SELECT itemID FROM items WHERE ${sql}`;
+
+	// Walk a child level up to its parent: SELECT the parentItemID of matching child rows.
+	// A standalone-capable level (attachment/note) can be a top-level item itself, so map a
+	// standalone row (no parent) to its own itemID rather than dropping it, matching the
+	// level-agnostic roll-up in _rollUpAnyToLevel.
+	let mapUp = (inner, from, to) => {
+		let l = from;
+		let s = inner;
+		while (l != to) {
+			let table = Zotero.Search._levelChildTable[l];
+			let select = Zotero.Search._levelCanBeStandalone[l]
+				? 'COALESCE(parentItemID, itemID)' : 'parentItemID';
+			s = `SELECT ${select} FROM ${table} WHERE itemID IN (${s})`;
+			l = Zotero.Search._levelParent[l];
+			if (!l) {
+				return null;
+			}
+		}
+		return s;
+	};
+
+	// Walk an ancestor level down to a descendant: SELECT the child rows whose parent matches,
+	// repeated for each step from `from` down to `to`
+	let mapDown = (inner, from, to) => {
+		let path = [];
+		let l = to;
+		while (l != from) {
+			path.push(l);
+			l = Zotero.Search._levelParent[l];
+			if (!l) {
+				return null;
+			}
+		}
+		let s = inner;
+		for (let i = path.length - 1; i >= 0; i--) {
+			let table = Zotero.Search._levelChildTable[path[i]];
+			s = `SELECT itemID FROM ${table} WHERE parentItemID IN (${s})`;
+		}
+		return s;
+	};
+
+	let mapped = Zotero.Search._isAncestorLevel(toLevel, from)
+		? mapUp(matches, from, toLevel)
+		: mapDown(matches, from, toLevel);
+	if (mapped === null) {
+		return '0';
+	}
+	return `itemID IN (${mapped})`;
+};
+
+
+/**
+ * Roll a level-agnostic predicate (e.g., tag) up to a result level: select `toLevel` items
+ * that themselves -- or any descendant -- match. Up only (an ancestor's match doesn't count).
+ *
+ * The predicate's own SQL is referenced exactly once (inside a subquery) so its bound
+ * parameters aren't duplicated.
+ *
+ * @param {String} sql - A predicate in terms of an itemID at any level
+ * @param {String} toLevel - 'item' / 'attachment' / 'note' / 'annotation'
+ * @return {String} A predicate in terms of the `toLevel` itemID
+ */
+Zotero.Search._rollUpAnyToLevel = function (sql, toLevel) {
+	let matches = `SELECT itemID FROM items WHERE ${sql}`;
+	switch (toLevel) {
+		// No descendants below these, so only a match at the level itself counts
+		case 'annotation':
+			return `itemID IN (SELECT itemID FROM itemAnnotations WHERE itemID IN (${matches}))`;
+		case 'note':
+			return `itemID IN (SELECT itemID FROM itemNotes WHERE itemID IN (${matches}))`;
+		// An attachment matches if it, or one of its annotations, matches
+		case 'attachment':
+			return "itemID IN ("
+				+ "SELECT COALESCE(att.itemID, annot.parentItemID) "
+				+ `FROM (${matches}) m `
+				+ "LEFT JOIN itemAttachments att ON att.itemID = m.itemID "
+				+ "LEFT JOIN itemAnnotations annot ON annot.itemID = m.itemID "
+				+ "WHERE att.itemID IS NOT NULL OR annot.itemID IS NOT NULL)";
+		// A top-level item matches if it, or any descendant (attachment, note, or an
+		// annotation of an attachment), matches
+		case 'item':
+		default:
+			return "itemID IN ("
+				+ "SELECT COALESCE(aAtt.parentItemID, att.parentItemID, note.parentItemID, m.itemID) "
+				+ `FROM (${matches}) m `
+				+ "LEFT JOIN itemAttachments att ON att.itemID = m.itemID AND att.parentItemID IS NOT NULL "
+				+ "LEFT JOIN itemNotes note ON note.itemID = m.itemID AND note.parentItemID IS NOT NULL "
+				+ "LEFT JOIN itemAnnotations annot ON annot.itemID = m.itemID "
+				+ "LEFT JOIN itemAttachments aAtt ON aAtt.itemID = annot.parentItemID AND aAtt.parentItemID IS NOT NULL"
+				+ ")";
+	}
 };
