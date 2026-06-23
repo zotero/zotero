@@ -1695,11 +1695,11 @@ describe("Local API Server", function () {
 				assert.property(response, 'suffix');
 			});
 
-			it("should return params object when ?params=1", async function () {
+			it("should return params object when params=1 is in the body", async function () {
 				let { response } = await apiPost(
-					`/users/0/items/${attachment.key}/file?params=1`,
+					`/users/0/items/${attachment.key}/file`,
 					{
-						body: `md5=${'b'.repeat(32)}&filename=x.pdf&filesize=10&mtime=${Date.now()}`,
+						body: `md5=${'b'.repeat(32)}&filename=x.pdf&filesize=10&mtime=${Date.now()}&params=1`,
 						headers: {
 							'Content-Type': 'application/x-www-form-urlencoded',
 							'If-None-Match': '*',
@@ -1839,6 +1839,80 @@ describe("Local API Server", function () {
 				assert.equal(reloaded.attachmentSyncedHash, md5);
 				assert.equal(reloaded.attachmentSyncedModificationTime, mtime);
 				assert.equal(reloaded.attachmentFilename, 'uploaded.bin');
+			});
+
+			// Exercises the params=1 multipart upload form: each returned param as a form
+			// field, then the file bytes in a final `file` field. Uses real binary content
+			// to confirm it survives the multipart path.
+			it("should perform a params=1 multipart upload + register flow", async function () {
+				// Binary content spanning the byte range, ending in a newline byte to
+				// confirm the multipart parser doesn't trim/corrupt the file body
+				let raw = [0x25, 0x50, 0x44, 0x46, 0x00, 0x7f, 0x80, 0xff, 0xd0, 0x0a];
+				let bytes = Uint8Array.from(raw);
+				let tmpDir = Zotero.getTempDirectory().path;
+				let tmpPath = PathUtils.join(tmpDir, 'localapi-mp-upload-test.bin');
+				await IOUtils.write(tmpPath, bytes);
+				let md5 = await Zotero.Utilities.Internal.md5Async(tmpPath);
+				await IOUtils.remove(tmpPath);
+
+				let mtime = Date.now();
+
+				// Phase 1: authorize with params=1 in the form body
+				let { response: authResp } = await apiPost(
+					`/users/0/items/${attachment.key}/file`,
+					{
+						body: `md5=${md5}&filename=uploaded.bin&filesize=${bytes.length}`
+							+ `&mtime=${mtime}&params=1`,
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'If-None-Match': '*',
+						}
+					}
+				);
+				assert.isObject(authResp.params);
+				assert.isString(authResp.uploadKey);
+
+				// Phase 2: upload as multipart/form-data via FormData, with the returned
+				// params first, then the file part
+				let formData = new FormData();
+				for (let [key, val] of Object.entries(authResp.params)) {
+					formData.append(key, val);
+				}
+				formData.append('file', new Blob([bytes]), 'uploaded.bin');
+
+				let uploadXhr = await Zotero.HTTP.request('POST', authResp.url, {
+					headers: {
+						'Zotero-Allowed-Request': '1',
+						'Content-Type': 'multipart/form-data',
+					},
+					body: formData,
+					successCodes: [201],
+					responseType: 'text'
+				});
+				assert.equal(uploadXhr.status, 201);
+
+				// Phase 3: register
+				let { status } = await apiPost(
+					`/users/0/items/${attachment.key}/file`,
+					{
+						body: `upload=${authResp.uploadKey}`,
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'If-None-Match': '*',
+						},
+						successCodes: [204]
+					}
+				);
+				assert.equal(status, 204);
+
+				let reloaded = await Zotero.Items.getByLibraryAndKeyAsync(
+					Zotero.Libraries.userLibraryID, attachment.key);
+				assert.equal(reloaded.attachmentSyncedHash, md5);
+				assert.equal(reloaded.attachmentFilename, 'uploaded.bin');
+				// The stored file's bytes must match exactly
+				let storedPath = await reloaded.getFilePathAsync();
+				let stored = await IOUtils.read(storedPath);
+				assert.deepEqual(Array.from(stored), raw);
 			});
 
 			it("should reject registration without prior upload", async function () {
