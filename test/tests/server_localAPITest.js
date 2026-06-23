@@ -2,7 +2,8 @@
 
 describe("Local API Server", function () {
 	let apiRoot;
-	
+	let serverID;
+
 	let collection;
 	let subcollection;
 	let collectionItem1;
@@ -27,7 +28,7 @@ describe("Local API Server", function () {
 	let writeAPIKey;
 
 	function apiRequest(method, endpoint, options = {}) {
-		let { body, headers, skipAPIKey, ...rest } = options;
+		let { body, headers, skipAPIKey, skipServerID, ...rest } = options;
 		let requestHeaders = {
 			'Zotero-Allowed-Request': '1',
 			...(headers || {})
@@ -36,6 +37,9 @@ describe("Local API Server", function () {
 				&& !requestHeaders['Zotero-API-Key']
 				&& !endpoint.includes('key=')) {
 			requestHeaders['Zotero-API-Key'] = writeAPIKey;
+		}
+		if (!skipServerID && serverID && !requestHeaders['Zotero-Server-ID']) {
+			requestHeaders['Zotero-Server-ID'] = serverID;
 		}
 		let requestBody = body;
 		if (body !== undefined && typeof body !== 'string'
@@ -78,23 +82,28 @@ describe("Local API Server", function () {
 			.substring(0, 32);
 	}
 
+	function authorizePost(body, { responseType = 'json', successCodes } = {}) {
+		let options = {
+			headers: {
+				'Zotero-Allowed-Request': '1',
+				'Content-Type': 'application/json',
+				'Zotero-Server-ID': serverID,
+			},
+			body: typeof body === 'string' ? body : JSON.stringify(body),
+			responseType
+		};
+		if (successCodes) {
+			options.successCodes = successCodes;
+		}
+		return Zotero.HTTP.request('POST', apiRoot + '/local/authorize', options);
+	}
+
 	// Stub the dialog and obtain a remembered API key directly via the endpoint
 	async function setupRememberedAPIKey(appName = 'Test Suite') {
 		let stub = sinon.stub(Zotero.Server.LocalAPI, '_promptForAuthorization')
 			.resolves({ allow: true, remember: true });
 		try {
-			let { response } = await Zotero.HTTP.request(
-				'POST',
-				apiRoot + '/local/authorize',
-				{
-					headers: {
-						'Zotero-Allowed-Request': '1',
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({ appName }),
-					responseType: 'json'
-				}
-			);
+			let { response } = await authorizePost({ appName });
 			return response.key;
 		}
 		finally {
@@ -104,6 +113,9 @@ describe("Local API Server", function () {
 
 	before(async function () {
 		apiRoot = 'http://127.0.0.1:' + Zotero.Server.port + '/api';
+
+		// Pref pinned in runtests.sh so it survives resets
+		serverID = Zotero.Prefs.get('httpServer.localAPI.serverID');
 
 		await resetDB({
 			thisArg: this
@@ -164,6 +176,78 @@ describe("Local API Server", function () {
 		});
 	});
 	
+	describe("Zotero-Server-ID", function () {
+		it("should return the server ID in a response header", async function () {
+			let xhr = await apiGet('/users/0/items');
+			assert.equal(xhr.getResponseHeader('Zotero-Server-ID'), serverID);
+		});
+
+		it("should accept a read with a matching server ID", async function () {
+			let xhr = await apiGet('/users/0/items', {
+				headers: {
+					'Zotero-Allowed-Request': '1',
+					'Zotero-Server-ID': serverID,
+				}
+			});
+			assert.equal(xhr.status, 200);
+		});
+
+		it("should accept a read with no server ID", async function () {
+			// apiGet() doesn't send the header
+			let xhr = await apiGet('/users/0/items');
+			assert.equal(xhr.status, 200);
+		});
+
+		it("should reject a read with a mismatched server ID with 412", async function () {
+			let xhr = await apiGet('/users/0/items', {
+				headers: {
+					'Zotero-Allowed-Request': '1',
+					'Zotero-Server-ID': 'wrongServerID',
+				},
+				responseType: 'text',
+				successCodes: [412]
+			});
+			assert.equal(xhr.status, 412);
+			// The rejection still carries the real server ID, so a client with a
+			// stale ID can recover
+			assert.equal(xhr.getResponseHeader('Zotero-Server-ID'), serverID);
+		});
+
+		it("should require a server ID on writes with 428", async function () {
+			let xhr = await apiPost('/users/0/items', {
+				body: [],
+				skipServerID: true,
+				skipAPIKey: true,
+				responseType: 'text',
+				successCodes: [428]
+			});
+			assert.equal(xhr.status, 428);
+		});
+
+		it("should reject a write with a mismatched server ID with 412", async function () {
+			let xhr = await apiPost('/users/0/items', {
+				body: [],
+				headers: { 'Zotero-Server-ID': 'wrongServerID' },
+				skipAPIKey: true,
+				responseType: 'text',
+				successCodes: [412]
+			});
+			assert.equal(xhr.status, 412);
+		});
+
+		it("should validate the server ID before the API key on writes", async function () {
+			// A valid server ID but no API key passes the server-ID check and
+			// then fails authentication with 401
+			let xhr = await apiPost('/users/0/items', {
+				body: [],
+				skipAPIKey: true,
+				responseType: 'text',
+				successCodes: [401]
+			});
+			assert.equal(xhr.status, 401);
+		});
+	});
+
 	describe("<userOrGroupPrefix>/collections", function () {
 		it("should return all collections", async function () {
 			let { response } = await apiGet('/users/0/collections');
@@ -491,17 +575,7 @@ describe("Local API Server", function () {
 				let stub = sinon.stub(Zotero.Server.LocalAPI, '_promptForAuthorization')
 					.resolves({ allow: true, remember: false });
 				try {
-					let { response, status } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/local/authorize',
-						{
-							headers: {
-								'Zotero-Allowed-Request': '1',
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({ appName: 'AllowApp' }),
-							responseType: 'json'
-						}
-					);
+					let { response, status } = await authorizePost({ appName: 'AllowApp' });
 					assert.equal(status, 200);
 					assert.isString(response.key);
 					assert.lengthOf(response.key, 32);
@@ -516,17 +590,7 @@ describe("Local API Server", function () {
 				let stub = sinon.stub(Zotero.Server.LocalAPI, '_promptForAuthorization')
 					.resolves({ allow: true, remember: true });
 				try {
-					let { response } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/local/authorize',
-						{
-							headers: {
-								'Zotero-Allowed-Request': '1',
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({ appName: 'RememberApp' }),
-							responseType: 'json'
-						}
-					);
+					let { response } = await authorizePost({ appName: 'RememberApp' });
 					assert.isTrue(response.remember);
 				}
 				finally {
@@ -538,18 +602,8 @@ describe("Local API Server", function () {
 				let stub = sinon.stub(Zotero.Server.LocalAPI, '_promptForAuthorization')
 					.resolves({ allow: false, remember: false });
 				try {
-					let { response, status } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/local/authorize',
-						{
-							headers: {
-								'Zotero-Allowed-Request': '1',
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({ appName: 'DeniedApp' }),
-							responseType: 'json',
-							successCodes: [403]
-						}
-					);
+					let { response, status } = await authorizePost(
+						{ appName: 'DeniedApp' }, { successCodes: [403] });
 					assert.equal(status, 403);
 					assert.isTrue(response.denied);
 				}
@@ -559,18 +613,8 @@ describe("Local API Server", function () {
 			});
 
 			it("should require appName", async function () {
-				let { status } = await Zotero.HTTP.request(
-					'POST', apiRoot + '/local/authorize',
-					{
-						headers: {
-							'Zotero-Allowed-Request': '1',
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({}),
-						responseType: 'text',
-						successCodes: [400]
-					}
-				);
+				let { status } = await authorizePost(
+					{}, { responseType: 'text', successCodes: [400] });
 				assert.equal(status, 400);
 			});
 
@@ -582,18 +626,8 @@ describe("Local API Server", function () {
 						return { allow: false };
 					});
 				try {
-					await Zotero.HTTP.request(
-						'POST', apiRoot + '/local/authorize',
-						{
-							headers: {
-								'Zotero-Allowed-Request': '1',
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({ appName: 'MyTestApp 1.0' }),
-							responseType: 'text',
-							successCodes: [403]
-						}
-					);
+					await authorizePost(
+						{ appName: 'MyTestApp 1.0' }, { responseType: 'text', successCodes: [403] });
 				}
 				finally {
 					stub.restore();
@@ -606,31 +640,11 @@ describe("Local API Server", function () {
 					.resolves({ allow: false, remember: false });
 				try {
 					for (let i = 0; i < 5; i++) {
-						await Zotero.HTTP.request(
-							'POST', apiRoot + '/local/authorize',
-							{
-								headers: {
-									'Zotero-Allowed-Request': '1',
-									'Content-Type': 'application/json',
-								},
-								body: JSON.stringify({ appName: 'Throttle ' + i }),
-								responseType: 'text',
-								successCodes: [403]
-							}
-						);
+						await authorizePost(
+							{ appName: 'Throttle ' + i }, { responseType: 'text', successCodes: [403] });
 					}
-					let xhr = await Zotero.HTTP.request(
-						'POST', apiRoot + '/local/authorize',
-						{
-							headers: {
-								'Zotero-Allowed-Request': '1',
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({ appName: 'Throttle 6' }),
-							responseType: 'text',
-							successCodes: [429]
-						}
-					);
+					let xhr = await authorizePost(
+						{ appName: 'Throttle 6' }, { responseType: 'text', successCodes: [429] });
 					assert.equal(xhr.status, 429);
 					let retryAfter = parseInt(xhr.getResponseHeader('Retry-After'));
 					assert.isAbove(retryAfter, 0);
@@ -644,35 +658,15 @@ describe("Local API Server", function () {
 			it("should not count rejected (pre-prompt) requests against the rate limit", async function () {
 				// 5 bad-appName requests fail before the prompt and don't consume slots
 				for (let i = 0; i < 5; i++) {
-					await Zotero.HTTP.request(
-						'POST', apiRoot + '/local/authorize',
-						{
-							headers: {
-								'Zotero-Allowed-Request': '1',
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({}),
-							responseType: 'text',
-							successCodes: [400]
-						}
-					);
+					await authorizePost(
+						{}, { responseType: 'text', successCodes: [400] });
 				}
 				// A subsequent valid request still goes through
 				let stub = sinon.stub(Zotero.Server.LocalAPI, '_promptForAuthorization')
 					.resolves({ allow: false, remember: false });
 				try {
-					let { status } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/local/authorize',
-						{
-							headers: {
-								'Zotero-Allowed-Request': '1',
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({ appName: 'AfterBadReqs' }),
-							responseType: 'json',
-							successCodes: [403]
-						}
-					);
+					let { status } = await authorizePost(
+						{ appName: 'AfterBadReqs' }, { successCodes: [403] });
 					assert.equal(status, 403);
 				}
 				finally {
@@ -779,17 +773,7 @@ describe("Local API Server", function () {
 				let stub = sinon.stub(Zotero.Server.LocalAPI, '_promptForAuthorization')
 					.resolves({ allow: true, remember: false });
 				try {
-					let { response } = await Zotero.HTTP.request(
-						'POST', apiRoot + '/local/authorize',
-						{
-							headers: {
-								'Zotero-Allowed-Request': '1',
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify({ appName: 'OneShotApp' }),
-							responseType: 'json'
-						}
-					);
+					let { response } = await authorizePost({ appName: 'OneShotApp' });
 					oneShot = response.key;
 				}
 				finally {
@@ -1834,6 +1818,7 @@ describe("Local API Server", function () {
 						headers: {
 							'Zotero-Allowed-Request': '1',
 							'Content-Type': 'application/octet-stream',
+							'Zotero-Server-ID': serverID,
 						},
 						body: content,
 						successCodes: [201],
@@ -1907,6 +1892,7 @@ describe("Local API Server", function () {
 					headers: {
 						'Zotero-Allowed-Request': '1',
 						'Content-Type': 'multipart/form-data',
+						'Zotero-Server-ID': serverID,
 					},
 					body: formData,
 					successCodes: [201],
@@ -1984,6 +1970,7 @@ describe("Local API Server", function () {
 						headers: {
 							'Zotero-Allowed-Request': '1',
 							'Content-Type': 'application/octet-stream',
+							'Zotero-Server-ID': serverID,
 						},
 						body: 'wrong content',
 						successCodes: [400],
@@ -2000,6 +1987,7 @@ describe("Local API Server", function () {
 						headers: {
 							'Zotero-Allowed-Request': '1',
 							'Content-Type': 'application/octet-stream',
+							'Zotero-Server-ID': serverID,
 						},
 						body: 'whatever',
 						successCodes: [404],
