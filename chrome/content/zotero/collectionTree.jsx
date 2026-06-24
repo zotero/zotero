@@ -185,6 +185,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		else if (event.key == "F2" && !Zotero.isMac && treeRow.isCollection()) {
 			this.handleActivate(event, [this.selection.focused]);
 		}
+		else if (event.key == 'a' && !event.shiftKey
+				&& (Zotero.isMac ? (event.metaKey && !event.ctrlKey) : event.ctrlKey)) {
+			if (this.props.multiSelect) {
+				this._handleSelectAll();
+			}
+			// Always own Cmd/Ctrl-A here so the table's unscoped Select All doesn't run
+			return false;
+		}
 		else if (["ArrowDown", "ArrowUp"].includes(event.key)) {
 			// Specific logic for keypress navigation during collection filtering
 			// that skips context-rows
@@ -2633,9 +2641,68 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return true;
 	}
 	
-	isSelectable = index => {
+	// Cmd/Ctrl-A on the collection tree. Expand the current selection to all rows of
+	// the same kind within their natural scope: all library roots, all collections
+	// sharing a parent with a selected collection (so a multi-level or multi-parent
+	// selection expands each branch it touches), or Recently Read in every library.
+	// Anything else (saved searches, Unfiled, Trash, etc.) has no useful "select
+	// all", so the selection is left untouched rather than cleared.
+	async _handleSelectAll() {
+		let selectedIndexes = Array.from(this.selection.selected);
+		if (!selectedIndexes.length) {
+			return;
+		}
+		let selectedRows = selectedIndexes.map(index => this.getRow(index));
+		let scope;
+		if (selectedRows.every(row => row.isLibrary(true))) {
+			scope = row => row.isLibrary(true);
+		}
+		else if (selectedRows.every(row => row.isCollection())) {
+			let parentIndexes = new Set(
+				selectedIndexes.map(index => this.getParentIndex(index))
+			);
+			scope = (row, index) => row.isCollection()
+				&& parentIndexes.has(this.getParentIndex(index));
+		}
+		else if (selectedRows.every(row => row.isRecentlyRead())) {
+			// Recently Read can appear under any library, so open any collapsed
+			// libraries that show it -- otherwise its row isn't in the tree to select
+			let libraryIDs = [];
+			for (let i = 0; i < this._rows.length; i++) {
+				let row = this.getRow(i);
+				if (row.isLibrary(true)
+						&& this._virtualCollectionLibraries.recentlyRead?.[row.ref.libraryID] !== false) {
+					libraryIDs.push(row.ref.libraryID);
+				}
+			}
+			for (let libraryID of libraryIDs) {
+				await this.expandLibrary(libraryID);
+			}
+			scope = row => row.isRecentlyRead();
+		}
+		else {
+			return;
+		}
+		this._selectAllScope = scope;
+		try {
+			this.selection.selectAll();
+		}
+		finally {
+			this._selectAllScope = null;
+		}
+	}
+
+	isSelectable = (index) => {
 		let treeRow = this.getRow(index);
-		return treeRow && !(treeRow.isSeparator() || treeRow.isHeader());
+		if (!treeRow || treeRow.isSeparator() || treeRow.isHeader()) {
+			return false;
+		}
+		// While a scoped Select All (Cmd/Ctrl-A) is running, restrict the new
+		// selection to the rows in the scope computed in _handleSelectAll()
+		if (this._selectAllScope) {
+			return this._selectAllScope(treeRow, index);
+		}
+		return true;
 	}
 
 	_closeContainer(row, skipMap) {

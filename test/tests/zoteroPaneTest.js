@@ -2246,6 +2246,120 @@ describe("ZoteroPane", function () {
 			});
 		});
 
+		describe("Select All (Cmd/Ctrl-A)", function () {
+			// Cmd/Ctrl-A is wired to _handleSelectAll() in the tree's keydown handler;
+			// the tests call it directly so they can await its (sometimes async) work.
+
+			it("should select all library roots when a library is selected", async function () {
+				let group = await createGroup();
+				let cv = zp.collectionsView;
+				await cv.selectByID("L" + Zotero.Libraries.userLibraryID);
+				await waitForItemsLoad(win);
+
+				await cv._handleSelectAll();
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+
+				let rows = zp.getCollectionTreeRows();
+				assert.isAbove(rows.length, 1, "More than one row should be selected");
+				assert.isTrue(rows.every(r => r.isLibrary(true)), "Every selected row should be a library root");
+				let libraryIDs = rows.map(r => r.ref.libraryID);
+				assert.include(libraryIDs, Zotero.Libraries.userLibraryID);
+				assert.include(libraryIDs, group.libraryID);
+
+				await group.eraseTx();
+			});
+
+			it("should select collections sharing a parent with any selected collection", async function () {
+				let cv = zp.collectionsView;
+				// Two parents with their own children. Selecting one child from each
+				// should expand to all children of both parents -- but not deeper
+				// (a subcollection) and not other libraries.
+				let parentA = await createDataObject('collection');
+				let a1 = await createDataObject('collection', { parentID: parentA.id });
+				let a2 = await createDataObject('collection', { parentID: parentA.id });
+				let parentB = await createDataObject('collection');
+				let b1 = await createDataObject('collection', { parentID: parentB.id });
+				let b2 = await createDataObject('collection', { parentID: parentB.id });
+				let sub = await createDataObject('collection', { parentID: a1.id });
+				let group = await createGroup();
+				let other = await createDataObject('collection', { libraryID: group.libraryID });
+
+				// Make the subcollection and the other library's collection visible rows
+				// so their exclusion is actually exercised, not just an absence of rows
+				await cv.expandToCollection(sub.id);
+				await cv.expandToCollection(b1.id);
+				await cv.expandLibrary(group.libraryID);
+				await cv.selectByID("C" + a1.id);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID("C" + b1.id));
+				await zp.onCollectionSelected();
+
+				await cv._handleSelectAll();
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+
+				let rows = zp.getCollectionTreeRows();
+				assert.isTrue(rows.every(r => r.isCollection()), "Every selected row should be a collection");
+				assert.sameMembers(rows.map(r => r.ref), [a1, a2, b1, b2]);
+
+				await group.eraseTx();
+			});
+
+			it("should select Recently Read in all libraries", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let groupLibraryID = (await createGroup()).libraryID;
+				let cv = zp.collectionsView;
+
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, false);
+				await zp.setVirtual(groupLibraryID, 'recentlyRead', true, false);
+				// Collapse the group so its Recently Read row isn't in the tree -- Select
+				// All must expand it to reach Recently Read in every library. Do this
+				// before selecting, since collapseLibrary() selects the collapsed library.
+				cv.collapseLibrary(groupLibraryID);
+				assert.isFalse(cv.getRowIndexByID('Y' + groupLibraryID),
+					"Group Recently Read should be hidden before Select All");
+				await cv.selectByID('Y' + userLibraryID);
+				await waitForItemsLoad(win);
+
+				await cv._handleSelectAll();
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+
+				let rows = zp.getCollectionTreeRows();
+				assert.isTrue(rows.every(r => r.isRecentlyRead()), "Every selected row should be Recently Read");
+				let libraryIDs = rows.map(r => r.ref.libraryID);
+				assert.include(libraryIDs, userLibraryID);
+				assert.include(libraryIDs, groupLibraryID);
+
+				await zp.setVirtual(userLibraryID, 'recentlyRead', false);
+				await zp.setVirtual(groupLibraryID, 'recentlyRead', false);
+			});
+
+			it("should leave a saved-search selection untouched", async function () {
+				let cv = zp.collectionsView;
+				// Saved searches combine fine, so this is a valid manual multi-selection,
+				// but Select All has no useful expansion for them and must not change it
+				let s1 = await createDataObject('search');
+				let s2 = await createDataObject('search');
+				let s3 = await createDataObject('search');
+				await createDataObject('search');
+				await cv.selectByID("S" + s1.id);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID("S" + s2.id));
+				cv.selection.toggleSelect(cv.getRowIndexByID("S" + s3.id));
+				await zp.onCollectionSelected();
+				assert.equal(cv.selection.count, 3);
+
+				await cv._handleSelectAll();
+				await zp.onCollectionSelected();
+
+				assert.equal(cv.selection.count, 3, "Select All should not add the fourth search");
+				let rows = zp.getCollectionTreeRows();
+				assert.sameMembers(rows.map(r => r.ref), [s1, s2, s3]);
+			});
+		});
+
 		describe("Items display", function () {
 			it("should show items from multiple selected collections", async function () {
 				let collection1 = await createDataObject('collection');
