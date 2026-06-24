@@ -73,7 +73,6 @@ describe("Zotero.Search", function () {
 			assert.propertyVal(condition, 'condition', 'title')
 			assert.propertyVal(condition, 'operator', 'is')
 			assert.propertyVal(condition, 'value', 'test')
-			assert.propertyVal(condition, 'required', false)
 		});
 		
 		it("should add a condition to an existing search", async function () {

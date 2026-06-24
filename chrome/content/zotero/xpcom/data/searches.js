@@ -122,7 +122,7 @@ Zotero.Searches = function () {
 	
 	
 	this._loadConditions = async function (libraryID, ids, idSQL) {
-		var sql = "SELECT savedSearchID, searchConditionID, condition, operator, value, required "
+		var sql = "SELECT savedSearchID, searchConditionID, condition, operator, value "
 			+ "FROM savedSearches LEFT JOIN savedSearchConditions USING (savedSearchID) "
 			+ "WHERE libraryID=?" + idSQL
 			+ "ORDER BY savedSearchID, searchConditionID";
@@ -179,8 +179,7 @@ Zotero.Searches = function () {
 					condition: conditionName,
 					mode: mode,
 					operator: condition.operator,
-					value: condition.value,
-					required: !!condition.required
+					value: condition.value
 				};
 			}
 			search._loaded.conditions = true;
@@ -210,8 +209,7 @@ Zotero.Searches = function () {
 						searchConditionID,
 						condition: row.getResultByIndex(2),
 						operator: row.getResultByIndex(3),
-						value: row.getResultByIndex(4),
-						required: row.getResultByIndex(5)
+						value: row.getResultByIndex(4)
 					});
 				}.bind(this)
 			}
