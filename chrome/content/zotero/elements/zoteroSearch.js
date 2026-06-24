@@ -297,7 +297,7 @@
 				search.removeCondition(0);
 			}
 			for (let condition of flat) {
-				search.addCondition(condition.condition, condition.operator, condition.value, condition.required);
+				search.addCondition(condition.condition, condition.operator, condition.value);
 			}
 		}
 
@@ -725,7 +725,7 @@
 				let ref;
 				if (data) {
 					let [condition, mode] = Zotero.SearchConditions.parseCondition(data.condition);
-					ref = { id: undefined, condition, mode, operator: data.operator, value: data.value, required: false };
+					ref = { id: undefined, condition, mode, operator: data.operator, value: data.value };
 				}
 				newGroup.addCondition(ref);
 				row.remove();
@@ -756,7 +756,7 @@
 
 			// Default to an empty 'title' condition
 			if (!ref) {
-				ref = { id: undefined, condition: 'title', operator: 'contains', value: '', mode: undefined, required: false };
+				ref = { id: undefined, condition: 'title', operator: 'contains', value: '', mode: undefined };
 			}
 
 			condition.initWithParentAndCondition(this.searchElement, ref);
@@ -1432,8 +1432,7 @@
 				condition: this.querySelector('#conditionsmenu').getAttribute('data-value'),
 				operator: this.querySelector('#operatorsmenu').value,
 				value: '',
-				mode: undefined,
-				required: false
+				mode: undefined
 			}, this.nextElementSibling);
 			this.parent.updateSearch();
 			this.parent.updateRemoveButtons();
@@ -1458,7 +1457,7 @@
 			var data = this.getConditionData();
 			if (data) {
 				let [condition, mode] = Zotero.SearchConditions.parseCondition(data.condition);
-				ref = { id: undefined, condition, mode, operator: data.operator, value: data.value, required: false };
+				ref = { id: undefined, condition, mode, operator: data.operator, value: data.value };
 			}
 			var newGroup = document.createXULElement('search-condition-group');
 			group.conditionsContainer.insertBefore(newGroup, this);

@@ -206,8 +206,8 @@ Zotero.Search.prototype._saveData = async function (env) {
 		
 		var i = 0;
 		var sql = "INSERT INTO savedSearchConditions "
-			+ "(savedSearchID, searchConditionID, condition, operator, value, required) "
-			+ "VALUES (?,?,?,?,?,?)";
+			+ "(savedSearchID, searchConditionID, condition, operator, value) "
+			+ "VALUES (?,?,?,?,?)";
 		for (let id in this._conditions) {
 			let condition = this._conditions[id];
 			
@@ -221,8 +221,7 @@ Zotero.Search.prototype._saveData = async function (env) {
 				i,
 				conditionString,
 				condition.operator ? condition.operator : null,
-				condition.value ? condition.value : null,
-				condition.required ? 1 : null
+				condition.value ? condition.value : null
 			];
 			await Zotero.DB.queryAsync(sql, sqlParams);
 			i++;
@@ -296,6 +295,10 @@ Zotero.Search.prototype._finalizeErase = async function (env) {
 
 Zotero.Search.prototype.addCondition = function (condition, operator, value, required) {
 	this._requireData('conditions');
+	
+	if (required) {
+		throw new Error("The 'required' parameter is no longer supported; use a condition group");
+	}
 	
 	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
 		let e = new Error("Invalid operator '" + operator + "' for condition " + condition);
@@ -414,8 +417,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 		condition: condition,
 		mode: mode,
 		operator: operator,
-		value: value,
-		required: !!required
+		value: value
 	};
 	
 	this._sql = null;
@@ -441,11 +443,14 @@ Zotero.Search.prototype.setScope = function (searchObj, includeChildren) {
  * @param {String} condition
  * @param {String} operator
  * @param {String} value
- * @param {Boolean} [required]
  * @return {Promise}
  */
 Zotero.Search.prototype.updateCondition = function (searchConditionID, condition, operator, value, required) {
 	this._requireData('conditions');
+	
+	if (required) {
+		throw new Error("The 'required' parameter is no longer supported; use a condition group");
+	}
 	
 	if (typeof this._conditions[searchConditionID] == 'undefined'){
 		throw new Error('Invalid searchConditionID ' + searchConditionID);
@@ -466,8 +471,7 @@ Zotero.Search.prototype.updateCondition = function (searchConditionID, condition
 		condition: condition,
 		mode: mode,
 		operator: operator,
-		value: value,
-		required: !!required
+		value: value
 	};
 	
 	this._sql = null;
@@ -505,7 +509,7 @@ Zotero.Search.prototype.removeCondition = function (searchConditionID) {
 
 
 /*
- * Returns an array with 'condition', 'operator', 'value', 'required'
+ * Returns an array with 'condition', 'operator', 'value'
  * for the given searchConditionID
  */
 Zotero.Search.prototype.getCondition = function (searchConditionID){
@@ -528,8 +532,7 @@ Zotero.Search.prototype.getConditions = function (){
 			condition: condition.condition,
 			mode: condition.mode,
 			operator: condition.operator,
-			value: condition.value,
-			required: condition.required
+			value: condition.value
 		};
 	}
 	return conditions;
@@ -1106,7 +1109,6 @@ Zotero.Search.prototype._buildQuery = async function () {
 				operator: condition.operator,
 				value: condition.value,
 				flags: conditionData.flags,
-				required: condition.required,
 				inlineFilter: conditionData.inlineFilter,
 				// Item level(s) this condition matches at, for cross-level mapping
 				level: Zotero.Search._conditionLevel(name, conditionData)
@@ -1180,7 +1182,6 @@ Zotero.Search.prototype._buildQuery = async function () {
 							name: '_fulltextContentPredicate',
 							operator: condition.operator,
 							matchIDs,
-							required: condition.required,
 							// Full-text content is indexed per attachment, so matches are at
 							// the attachment level for cross-level mapping
 							level: 'attachment'
@@ -1388,7 +1389,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 						let op = condition.operator == 'doesNotContain' ? 'NOT IN' : 'IN';
 						sql = 'itemID ' + op + ' (' + condition.matchIDs.join(',') + ')';
 					}
-					builtConditions.push({ sql, params: [], required: condition.required, level: condition.level });
+					builtConditions.push({ sql, params: [], level: condition.level });
 					continue;
 				}
 
@@ -1957,7 +1958,6 @@ Zotero.Search.prototype._buildQuery = async function () {
 				builtConditions.push({
 					sql: condSQL,
 					params: condSQLParams,
-					required: condition.required,
 					level: condition.level || 'item',
 					negate: condition.operator == 'isNot' || condition.operator == 'doesNotContain'
 				});
@@ -1981,7 +1981,7 @@ Zotero.Search.prototype._buildQuery = async function () {
  * Combine an ordered list of built condition predicates and group markers into a single SQL
  * predicate.
  *
- * Each item in `builtConditions` is either a predicate { sql, params, required } or a group
+ * Each item in `builtConditions` is either a predicate { sql, params } or a group
  * marker { marker: 'groupStart' | 'groupEnd' | 'joinMode', operator }. groupStart/groupEnd
  * delimit nested groups and a 'joinMode' marker sets its enclosing group's mode.
  *
@@ -1999,8 +1999,7 @@ Zotero.Search.prototype._buildQuery = async function () {
  * group markers is an unused placeholder -- they carry no value, but a condition's operator
  * can't be empty.
  *
- * In 'all' mode a group's children are ANDed; in 'any' mode they're ORed, except 'required'
- * conditions, which are always ANDed (legacy behavior, ultimately subsumable by grouping).
+ * In 'all' mode a group's children are ANDed; in 'any' mode they're ORed.
  *
  * A group may also carry a 'resultLevel' marker (a level: 'item'/'attachment'/'note'/'annotation'),
  * placed inside the group like 'joinMode'. When the result level is a descendant level of the
@@ -2066,7 +2065,7 @@ Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') 
 			// When mapping reduces a predicate to a constant ('0'/'1' -- e.g., a condition
 			// whose level can't reach the result level), its placeholders are gone, so drop its params
 			let childParams = (childSQL === '0' || childSQL === '1') ? [] : result.params;
-			if (node.joinMode == 'all' || result.required) {
+			if (node.joinMode == 'all') {
 				requiredParts.push(childSQL);
 				requiredParams = requiredParams.concat(childParams);
 			}
@@ -2088,7 +2087,7 @@ Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') 
 			params = params.concat(optionalParams);
 		}
 		if (!parts.length) {
-			return { sql: '', params: [], required: false };
+			return { sql: '', params: [] };
 		}
 		let sql = parts.length > 1 ? '(' + parts.join(' AND ') + ')' : parts[0];
 		// Map this group to the enclosing row's level. A 'any' enclosing level (the
@@ -2101,8 +2100,7 @@ Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') 
 		return {
 			sql,
 			// Mapping to a constant drops the placeholders, so drop the params too
-			params: (sql === '0' || sql === '1') ? [] : params,
-			required: false
+			params: (sql === '0' || sql === '1') ? [] : params
 		};
 	};
 
