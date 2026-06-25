@@ -699,6 +699,7 @@ ${str}
 		let termForDisplay = Zotero.Utilities.trimInternal(term).toLowerCase();
 		term = this._normalizeSearch(term);
 
+		let scrolled = false;
 		for (let paneContainer of this.content.querySelectorAll(':scope > .pane-container')) {
 			let roots = paneContainer.children;
 			while (roots.length === 1 && roots[0].childElementCount) {
@@ -719,6 +720,11 @@ ${str}
 							range.setStart(node, index);
 							range.setEnd(node, index + term.length);
 							this._getSearchSelection().addRange(range);
+							
+							if (!scrolled) {
+								node.parentElement?.scrollIntoView({ block: 'center' });
+								scrolled = true;
+							}
 						}
 						else if (node.nodeType == Node.ELEMENT_NODE) {
 							// For element nodes, wrap the element and add a tooltip
@@ -743,6 +749,11 @@ ${str}
 							// https://searchfox.org/mozilla-central/rev/703391c381f92a73d9a938cbe0d33ca64d94583b/browser/components/preferences/findInPage.js#689-691
 							let tooltipRect = tooltip.getBoundingClientRect();
 							tooltip.style.left = `calc(50% - ${tooltipRect.width / 2}px)`;
+							
+							if (!scrolled) {
+								node.scrollIntoView({ block: 'center' });
+								scrolled = true;
+							}
 						}
 
 						let tabPanel = this._closest(node, 'tabpanels > tabpanel');
