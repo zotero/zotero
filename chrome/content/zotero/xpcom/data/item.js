@@ -128,8 +128,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	enumerable: false
 });
 
-for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'synced',
-		'createdByUserID', 'lastModifiedByUserID']) {
+for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'clientVersion',
+		'synced', 'createdByUserID', 'lastModifiedByUserID']) {
 	let prop = '_' + name;
 	Zotero.defineProperty(Zotero.Item.prototype, name, {
 		get: function () { return this[prop]; },
@@ -6098,12 +6098,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 
 
 Zotero.Item.prototype.toResponseJSON = function (options = {}) {
-	// Default to showing synced storage properties, since that's what the API does, and this function
-	// is generally used to emulate the API
-	if (options.syncedStorageProperties === undefined) {
-		options.syncedStorageProperties = true;
-	}
-	
 	var json = this.constructor._super.prototype.toResponseJSON.call(this, options);
 	
 	// creatorSummary
@@ -6132,6 +6126,21 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 			type: this.attachmentContentType,
 			title: this.attachmentFilename
 		};
+	}
+	
+	// Include storage properties in the response even when syncedStorageProperties is false (i.e.,
+	// when reporting the local version). The local values are only available asynchronously, so
+	// we need to use synced values as a fallback. toResponseJSONAsync() overwrites them with
+	// up-to-date local values.
+	if (this.isStoredFileAttachment() && !options.skipStorageProperties && !options.syncedStorageProperties) {
+		let mtime = this.attachmentSyncedModificationTime;
+		if (mtime !== null) {
+			json.data.mtime = mtime;
+		}
+		let md5 = this.attachmentSyncedHash;
+		if (md5 !== null) {
+			json.data.md5 = md5;
+		}
 	}
 	
 	return json;
@@ -6170,6 +6179,12 @@ Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
 	else if (this.isImportedAttachment()) {
 		json.links.enclosure.length = await getFileSize(this);
 	}
+	
+	if (this.isStoredFileAttachment() && !options.skipStorageProperties) {
+		json.data.mtime = await this.attachmentModificationTime ?? null;
+		json.data.md5 = await this.attachmentHash ?? null;
+	}
+	
 	return json;
 };
 

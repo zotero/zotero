@@ -485,24 +485,42 @@ Zotero_Preferences.Advanced = {
 		
 		let checkbox = document.getElementById('zotero-prefpane-advanced-enable-local-api');
 		let availableMessage = document.getElementById('zotero-prefpane-advanced-local-api-available');
+		let authorizationsSection = document.getElementById('zotero-prefpane-advanced-local-api-write-authorizations');
 		let serverDisabledSection = document.getElementById('zotero-prefpane-advanced-server-disabled');
 		
 		if (!serverEnabled) {
 			checkbox.disabled = true;
 			availableMessage.hidden = true;
+			authorizationsSection.hidden = true;
 			serverDisabledSection.hidden = false;
 			return;
 		}
 		
 		checkbox.disabled = false;
 		availableMessage.hidden = !localAPIEnabled;
+		authorizationsSection.hidden = !localAPIEnabled;
 		serverDisabledSection.hidden = true;
 		
 		document.l10n.setArgs(availableMessage, {
 			url: `http://localhost:${Zotero.Server.port}/api/`
 		});
+		
+		if (localAPIEnabled) {
+			this.updateLocalAPIClearAuthorizationsButton();
+		}
 	},
 	
+	async updateLocalAPIClearAuthorizationsButton() {
+		let clearButton = document.getElementById('zotero-prefpane-advanced-local-api-clear');
+		let count = await Zotero.Server.LocalAPI.getAuthorizationCount();
+		clearButton.disabled = count === 0;
+	},
+
+	async clearLocalAPIAuthorizations() {
+		await Zotero.Server.LocalAPI.clearAuthorizations();
+		await this.updateLocalAPIClearAuthorizationsButton();
+	},
+
 	enableServerForLocalAPI() {
 		Zotero.Prefs.set('httpServer.enabled', true);
 		Zotero.Utilities.Internal.quit(true);

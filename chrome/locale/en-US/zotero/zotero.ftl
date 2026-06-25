@@ -1158,3 +1158,9 @@ undo-action-merge-items = { $count ->
 }
 menu-edit-undo-action = Undo { $action }
 menu-edit-redo-action = Redo { $action }
+
+local-api-authorize-title = Local API Authorization
+local-api-authorize-text = “{ $appName }”, an application running on your computer, wants to modify your { -app-name } library.
+local-api-authorize-allow = Allow
+local-api-authorize-always-allow = Always Allow
+local-api-authorize-deny = Deny

@@ -50,6 +50,7 @@ Zotero.DataObject = function () {
 	this._dateAdded = null;
 	this._dateModified = null;
 	this._version = null;
+	this._clientVersion = null;
 	this._synced = null;
 	this._identified = false;
 	this._parentID = null;
@@ -1293,6 +1294,13 @@ Zotero.DataObject.prototype._finalizeSave = async function (env) {
 	else if (env.skipCache) {
 		Zotero.logError("skipCache is only for new objects");
 	}
+
+	let libraryClientVersion = await this.library.incrementClientVersion();
+	await Zotero.DB.queryAsync(
+		`UPDATE ${this.ObjectsClass.table} SET clientVersion = ? WHERE ${this.ObjectsClass.idColumn}=?`,
+		[libraryClientVersion, this.id]
+	);
+	this._clientVersion = libraryClientVersion;
 };
 
 
@@ -1479,10 +1487,15 @@ Zotero.DataObject.prototype._finalizeErase = async function (env) {
 
 
 Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
+	// Default to showing synced properties, since that's what the API does, and this function
+	// is generally used to emulate the API
+	options.syncedStorageProperties ??= true;
+	options.syncedVersionProperty ??= true;
+
 	let uri = Zotero.URI.getObjectURI(this);
 	var json = {
 		key: this.key,
-		version: this.version,
+		version: options.syncedVersionProperty ? this.version : this.clientVersion,
 		library: this.library.toResponseJSON({ ...options, includeGroupDetails: false }),
 		links: {
 			self: {
@@ -1497,6 +1510,9 @@ Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
 		meta: {},
 		data: this.toJSON(options)
 	};
+	// Keep the data block's version consistent with the top-level version (toJSON() reports
+	// the synced version, which differs from clientVersion when syncedVersionProperty is false)
+	json.data.version = json.version;
 	if (options.version) {
 		json.version = json.data.version = options.version;
 	}

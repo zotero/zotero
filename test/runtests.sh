@@ -150,6 +150,7 @@ user_pref("extensions.zotero.reportTranslationFailure", false);
 user_pref("extensions.zotero.httpServer.enabled", true);
 user_pref("extensions.zotero.httpServer.port", 23124);	// ascii "ZT"
 user_pref("extensions.zotero.httpServer.localAPI.enabled", true);
+user_pref("extensions.zotero.httpServer.localAPI.serverID", "testserverid");
 user_pref("extensions.zotero.backup.numBackups", 0);
 user_pref("extensions.zotero.sync.autoSync", false);
 user_pref("extensions.zoteroMacWordIntegration.installed", true);
