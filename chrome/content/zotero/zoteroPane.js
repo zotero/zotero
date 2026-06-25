@@ -1673,9 +1673,6 @@ var ZoteroPane = new function () {
 			}
 			this.tagSelector.handleResize();
 		}
-		if (this.collectionsView) {
-			this.collectionsView.updateHeightDebounced();
-		}
 	}, 100);
 	
 	
@@ -1947,12 +1944,8 @@ var ZoteroPane = new function () {
 
 		document.getElementById('zotero-tb-search').updateMode();
 		let refreshPromise;
-		if (state === 'open' && oldState === 'collapsed'
-				|| state === 'collapsed' && oldState === 'open') {
-			// State change only causes visual refresh - update the tree height
-			this.itemsView.updateHeight();
-		}
-		else {
+		if (!(state === 'open' && oldState === 'collapsed'
+				|| state === 'collapsed' && oldState === 'open')) {
 			// State change changes displayed items - refresh the tree
 			refreshPromise = this._refreshAdvancedSearchPane();
 		}
@@ -7125,11 +7118,6 @@ var ZoteroPane = new function () {
 		}
 
 		this.updateLayoutConstraints();
-		if (ZoteroPane.itemsView) {
-			// Need to immediately rerender the items here without any debouncing
-			// since tree height will have changed
-			ZoteroPane.itemsView.updateHeight();
-		}
 		ZoteroContextPane.update();
 		Zotero_Tabs.updateSidebarLayout();
 	};
@@ -7313,9 +7301,6 @@ var ZoteroPane = new function () {
 
 		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
 		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
-		if (ZoteroPane.itemsView) {
-			ZoteroPane.itemsView.updateHeightDebounced();
-		}
 
 		this.handleTagSelectorResize();
 
