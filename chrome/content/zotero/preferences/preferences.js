@@ -44,7 +44,7 @@ var Zotero_Preferences = {
 
 		this.navigation.addEventListener('mouseover', event => this._handleNavigationMouseOver(event));
 		this.navigation.addEventListener('select', () => this._handleNavigationSelect());
-		this.searchField.addEventListener('command', () => this._search(this.searchField.value));
+		this.searchField.addEventListener('command', () => this._search(this.searchField.value.trim()));
 		
 		document.getElementById('prefs-subpane-back-button').addEventListener('command', () => {
 			let parent = this.panes.get(this.navigation.value).parent;
