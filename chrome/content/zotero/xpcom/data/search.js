@@ -1415,14 +1415,16 @@ Zotero.Search.prototype._buildQuery = async function () {
 					condSelectSQL += 'IN (';
 					selectOpenParens = 1;
 
-					// A negation matches every item that lacks the value, including annotations,
-					// which almost never carry item metadata or tags -- so a bare negation would
-					// otherwise return nearly every annotation in the library. Exclude them. When
-					// a result level is set, the result-level constraint already restricts to that
-					// level (and the cross-level mapping handles negation), so this only applies to
-					// the default path.
+					// A negation matches every item that lacks the value, but only one item level
+					// is a plausible match: a non-annotation condition (item metadata, tags) would
+					// otherwise return nearly every annotation, and an annotation condition (text,
+					// color, etc.) would return nearly every non-annotation. Exclude the wrong
+					// level. When a result level is set, the result-level constraint already
+					// restricts to that level (and the cross-level mapping handles negation), so
+					// this only applies to the default path.
 					if (isNegationOperator && resultLevel == 'any') {
-						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID="
+						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID"
+							+ (condition.level == 'annotation' ? "!=" : "=")
 							+ Zotero.ItemTypes.getID('annotation') + " UNION ";
 					}
 
@@ -1638,6 +1640,13 @@ Zotero.Search.prototype._buildQuery = async function () {
 					case 'childNote':
 						condSQL += "itemID IN (SELECT parentItemID FROM "
 							+ "itemNotes WHERE ";
+						openParens++;
+						break;
+
+					// The annotation's creator lives in groupItems, so restrict the annotation
+					// FROM above to items created by the given user
+					case 'annotationAuthor':
+						condSQL += "itemID IN (SELECT itemID FROM groupItems WHERE ";
 						openParens++;
 						break;
 					

@@ -951,13 +951,16 @@
 				case 'fulltextContent':
 				case 'annotationText':
 				case 'annotationComment':
+				case 'annotationType':
+				case 'annotationColor':
+				case 'annotationAuthor':
 					return true;
 			}
 			
 			return false;
 		}
 
-		onConditionSelected(conditionName, reload) {
+		async onConditionSelected(conditionName, reload) {
 			var conditionsMenu = this.querySelector('#conditionsmenu');
 			var operatorsList = this.querySelector('#operatorsmenu');
 			
@@ -1073,6 +1076,41 @@
 					this.createValueMenu(rows);
 					break;
 				}
+				case 'annotationType':
+				{
+					let types = [
+						['highlight', Zotero.Annotations.ANNOTATION_TYPE_HIGHLIGHT],
+						['underline', Zotero.Annotations.ANNOTATION_TYPE_UNDERLINE],
+						['note', Zotero.Annotations.ANNOTATION_TYPE_NOTE],
+						['text', Zotero.Annotations.ANNOTATION_TYPE_TEXT],
+						['image', Zotero.Annotations.ANNOTATION_TYPE_IMAGE],
+						['ink', Zotero.Annotations.ANNOTATION_TYPE_INK],
+					];
+					let rows = types.map(([name, value]) => ({
+						name: Zotero.getString('reader-' + name + '-annotation'),
+						value
+					}));
+					this.createValueMenu(rows);
+					break;
+				}
+				case 'annotationColor':
+				{
+					let rows = Zotero.Annotations.COLORS.map(([name, value]) => ({
+						name: Zotero.getString(name),
+						value
+					}));
+					this.createValueMenu(rows);
+					break;
+				}
+				case 'annotationAuthor':
+				{
+					let authors = await Zotero.Annotations.getAllAuthors(this.parent.search.libraryID);
+					let collation = Zotero.getLocaleCollation();
+					let rows = authors.map(a => ({ name: a.name, value: a.userID }));
+					rows.sort((a, b) => collation.compareString(1, a.name, b.name));
+					this.createValueMenu(rows);
+					break;
+				}
 				default:
 				{
 					if (operatorsList.value == 'isInTheLast') {
@@ -1107,7 +1145,10 @@
 			// Drop-down menu
 			if (this.selectedCondition == 'collection'
 					|| this.selectedCondition == 'itemType'
-					|| this.selectedCondition == 'fileTypeID') {
+					|| this.selectedCondition == 'fileTypeID'
+					|| this.selectedCondition == 'annotationType'
+					|| this.selectedCondition == 'annotationColor'
+					|| this.selectedCondition == 'annotationAuthor') {
 				this.querySelector('#valuefield').hidden = true;
 				this.querySelector('#valuemenu').hidden = false;
 				this.querySelector('#value-date-age').hidden = true;
@@ -1409,6 +1450,7 @@
 		onLibraryChange() {
 			switch (this.selectedCondition) {
 				case 'collection':
+				case 'annotationAuthor':
 					this.onConditionSelected(this.selectedCondition, true);
 					break;
 			}

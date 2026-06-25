@@ -996,6 +996,9 @@ search-conditions-fileTypeID = Attachment File Type
 search-conditions-lastRead = Attachment Last Read
 search-conditions-annotationText = Annotation Text
 search-conditions-annotationComment = Annotation Comment
+search-conditions-annotationType = Annotation Type
+search-conditions-annotationColor = Annotation Color
+search-conditions-annotationAuthor = Annotation Author
 search-conditions-anyField = Any Field
 search-conditions-titleCreatorYear = Title, Creator, Year
 

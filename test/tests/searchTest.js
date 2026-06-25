@@ -321,6 +321,46 @@ describe("Zotero.Search", function () {
 					await other.eraseTx();
 				});
 
+				it("should match annotations by type and color", async function () {
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+
+					var highlight = await createAnnotation('highlight', attachment);
+					highlight.annotationColor = '#ff6666';
+					await highlight.saveTx();
+
+					var note = await createAnnotation('note', attachment);
+					note.annotationColor = '#5fb236';
+					await note.saveTx();
+
+					// Type 'is' returns only the matching annotation
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('annotationType', 'is',
+						Zotero.Annotations.ANNOTATION_TYPE_HIGHLIGHT.toString());
+					assert.sameMembers(await s.search(), [highlight.id]);
+
+					// Color 'is' returns only the matching annotation
+					s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('annotationColor', 'is', '#5fb236');
+					assert.sameMembers(await s.search(), [note.id]);
+
+					// 'isNot' returns the other annotation -- not the parent item, the
+					// attachment, or every item in the library
+					s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('annotationType', 'isNot',
+						Zotero.Annotations.ANNOTATION_TYPE_NOTE.toString());
+					var matches = await s.search();
+					assert.include(matches, highlight.id);
+					assert.notInclude(matches, note.id);
+					assert.notInclude(matches, item.id);
+					assert.notInclude(matches, attachment.id);
+
+					await item.eraseTx();
+				});
+
 				it("should return descendant annotations as results with a top-level condition", async function () {
 					var text = 'zresult' + Zotero.Utilities.randomString();
 

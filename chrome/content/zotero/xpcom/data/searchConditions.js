@@ -641,7 +641,45 @@ Zotero.SearchConditions = new function () {
 				special: false,
 				level: 'annotation'
 			},
-			
+
+			{
+				name: 'annotationType',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAnnotations',
+				field: 'type',
+				special: false,
+				level: 'annotation'
+			},
+
+			{
+				name: 'annotationColor',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAnnotations',
+				field: 'color',
+				special: false,
+				level: 'annotation'
+			},
+
+			// Group-library annotations only; the creator lives in groupItems, so the SQL joins
+			// to it (see search.js)
+			{
+				name: 'annotationAuthor',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAnnotations',
+				field: 'createdByUserID',
+				special: false,
+				level: 'annotation'
+			},
+
 			{
 				name: 'fulltextWord',
 				operators: {
