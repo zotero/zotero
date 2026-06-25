@@ -1324,8 +1324,16 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	/*
 	 * Log a message to the Mozilla JS error console
 	 *
-	 * |type| is a string with one of the flag types in nsIScriptError:
-	 *    'error', 'warning', 'exception', 'strict'
+	 * |type| is a string matching one of the flag constants on nsIScriptError.
+	 * As of Firefox 140 ESR only three are defined:
+	 *    'error'   -> errorFlag   (0x0, default)
+	 *    'warning' -> warningFlag (0x1)
+	 *    'info'    -> infoFlag    (0x8)
+	 * The legacy 'exception' and 'strict' values have been removed upstream;
+	 * passing them yields an undefined flag and silently falls back to errorFlag.
+	 *
+	 * |sourceLine| is no longer accepted by nsIScriptError.init(), but is kept
+	 * in the signature for compatibility with older Zotero.log() callers.
 	 */
 	this.log = function (message, type, sourceName, sourceLine, lineNumber, columnNumber) {
 		var scriptError = Components.classes["@mozilla.org/scripterror;1"]
@@ -1339,7 +1347,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		scriptError.init(
 			message,
 			sourceName ? sourceName : null,
-			sourceLine != undefined ? sourceLine : null,
 			lineNumber != undefined ? lineNumber : null, 
 			columnNumber != undefined ? columnNumber : null,
 			flags,
