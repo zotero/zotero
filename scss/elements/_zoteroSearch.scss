@@ -256,7 +256,8 @@ zoterosearch {
 		flex: 1;
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		// Match the row's 6px block padding
+		gap: 6px;
 		// Vertical breathing room around the divider lines
 		padding-block: 6px;
 		// Indent the row's content by its nesting level (see --indent above) while the
