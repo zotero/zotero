@@ -628,7 +628,24 @@ describe("Advanced Search", function () {
 			assert.equal(win.getComputedStyle(valuefield).display, 'none');
 			assert.isFalse(row.querySelector('#valuemenu').hidden);
 		});
-		
+
+		it("should keep an edited value when switching to another text condition", async function () {
+			var s = new Zotero.Search();
+			s.libraryID = Zotero.Libraries.userLibraryID;
+			s.addCondition('title', 'contains', '');
+			pane.search = s;
+
+			var row = conditions.firstChild;
+			// Simulate the user typing into the value field after the row was loaded
+			row.querySelector('#valuefield').value = 'foo';
+
+			row.onConditionSelected('publicationTitle');
+
+			// The typed value carries over rather than reverting to the stale loaded value
+			assert.equal(row.querySelector('#valuefield').value, 'foo');
+			assert.equal(row.getConditionData().value, 'foo');
+		});
+
 
 		describe("Find-as-you-type", function () {
 			function typeInMenu(menu, str) {

@@ -972,9 +972,16 @@
 				return;
 			}
 			
+			// Carry the user's live edit forward to the new condition, since this.value is
+			// otherwise only set at load time and would revert on a switch. Skipped during the
+			// initial load, when there's no prior condition.
+			if (this.selectedCondition) {
+				this.value = this.getCurrentValue();
+			}
+
 			this.selectedCondition = conditionName;
 			this.selectedOperator = operatorsList.value;
-			
+
 			var condition = Zotero.SearchConditions.get(conditionName);
 			var operators = condition.operators;
 			
@@ -1277,6 +1284,20 @@
 			}
 			
 			this.onConditionSelected(menu.value);
+		}
+
+		// The live value from whichever value control is currently shown, in the same prefixed
+		// form this.value is stored in (so it can be carried across a condition change)
+		getCurrentValue() {
+			let valueField = this.querySelector('#valuefield');
+			if (!valueField.hidden) {
+				return valueField.value;
+			}
+			let ageField = this.querySelector('#value-date-age');
+			if (!ageField.hidden) {
+				return ageField.value;
+			}
+			return this.querySelector('#valuemenu').value;
 		}
 
 		// Return this row's current {condition, operator, value} for serialization.
