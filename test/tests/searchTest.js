@@ -834,6 +834,23 @@ describe("Zotero.Search", function () {
 				});
 			});
 			
+			describe("lastRead", function () {
+				it("should roll a child attachment's last-read date up to its top-level item", async function () {
+					var item = await createDataObject('item', { title: 'zlastread' });
+					var attachment = await importPDFAttachment(item);
+					attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+					await attachment.saveTx();
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('lastRead', 'isInTheLast', '1 days');
+					assert.sameMembers(await s.search(), [item.id]);
+
+					await item.eraseTx();
+				});
+			});
+
 			describe("fulltextContent", function () {
 				it("should find text in HTML files", async function () {
 					var s = new Zotero.Search();

@@ -345,7 +345,8 @@ Zotero.SearchConditions = new function () {
 					isInTheLast: true
 				},
 				table: 'itemAttachments',
-				field: 'lastRead'
+				field: 'lastRead',
+				level: 'attachment'
 			},
 
 			// Deprecated
