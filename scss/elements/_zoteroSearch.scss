@@ -184,7 +184,7 @@ zoterosearch {
 		width: 0;
 		min-width: 100%;
 
-		hbox {
+		> hbox {
 			display: flex;
 			align-items: center;
 			gap: 5px;
