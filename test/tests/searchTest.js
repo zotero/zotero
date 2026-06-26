@@ -19,7 +19,7 @@ describe("Zotero.Search", function () {
 			assert.sameMembers(matches, [item.id]);
 		});
 	});
-	
+
 	// This is for Zotero.Search._loadConditions()
 	describe("Loading", function () {
 		it("should convert old-style 'collection' condition value", async function () {
@@ -38,6 +38,41 @@ describe("Zotero.Search", function () {
 			await s.reload(['conditions'], true);
 			var matches = await s.search();
 			assert.sameMembers(matches, [item.id]);
+		});
+
+		it("should migrate a stored `childNote` condition to `note` at the item level", async function () {
+			var text = 'zloadcn' + Zotero.Utilities.randomString();
+			var item = await createDataObject('item', { title: 'zloadcnitem' });
+			var note = new Zotero.Item('note');
+			note.libraryID = item.libraryID;
+			note.parentID = item.id;
+			note.setNote('<p>' + text + '</p>');
+			await note.saveTx();
+
+			// Save a 'note' search with no result level, then rewrite the stored condition to the
+			// obsolete childNote to stand in for a legacy saved search
+			var s = new Zotero.Search();
+			s.libraryID = item.libraryID;
+			s.name = "Test";
+			s.addCondition('note', 'contains', text);
+			await s.saveTx();
+			await Zotero.DB.queryAsync(
+				"UPDATE savedSearchConditions SET condition=? WHERE savedSearchID=? AND condition=?",
+				['childNote', s.id, 'note']
+			);
+			await s.reload(['conditions'], true);
+
+			var conds = Object.values(s.getConditions());
+			assert.include(conds.map(c => c.condition), 'note');
+			assert.notInclude(conds.map(c => c.condition), 'childNote');
+			// An item result level is seeded so the note rolls up to its parent, as childNote did
+			var resultLevel = conds.find(c => c.condition == 'resultLevel');
+			assert.ok(resultLevel);
+			assert.equal(resultLevel.operator, 'item');
+			assert.sameMembers(await s.search(), [item.id]);
+
+			await item.eraseTx();
+			await s.eraseTx();
 		});
 	});
 	
@@ -1543,6 +1578,33 @@ describe("Zotero.Search", function () {
 	});
 	
 	describe("#fromJSON()", function () {
+		it("should migrate a `childNote` condition to `note` at the item level", async function () {
+			var text = 'zjsoncn' + Zotero.Utilities.randomString();
+			var item = await createDataObject('item', { title: 'zjsoncnitem' });
+			var note = new Zotero.Item('note');
+			note.libraryID = item.libraryID;
+			note.parentID = item.id;
+			note.setNote('<p>' + text + '</p>');
+			await note.saveTx();
+
+			var s = new Zotero.Search();
+			s.libraryID = item.libraryID;
+			s.fromJSON({
+				name: 'Test',
+				conditions: [{ condition: 'childNote', operator: 'contains', value: text }]
+			});
+
+			var conds = Object.values(s.getConditions());
+			assert.include(conds.map(c => c.condition), 'note');
+			assert.notInclude(conds.map(c => c.condition), 'childNote');
+			var resultLevel = conds.find(c => c.condition == 'resultLevel');
+			assert.ok(resultLevel);
+			assert.equal(resultLevel.operator, 'item');
+			assert.sameMembers(await s.search(), [item.id]);
+
+			await item.eraseTx();
+		});
+
 		it("should update all data", async function () {
 			let s = new Zotero.Search();
 			s.name = "Test";

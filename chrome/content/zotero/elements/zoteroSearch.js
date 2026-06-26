@@ -1014,7 +1014,6 @@
 				case 'publicationTitle':
 				case 'tag':
 				case 'note':
-				case 'childNote':
 				case 'fulltextContent':
 				case 'annotationText':
 				case 'annotationComment':

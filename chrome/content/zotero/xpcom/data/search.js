@@ -299,7 +299,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	if (required) {
 		throw new Error("The 'required' parameter is no longer supported; use a condition group");
 	}
-	
+
 	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
 		let e = new Error("Invalid operator '" + operator + "' for condition " + condition);
 		e.name = "ZoteroInvalidDataError";
@@ -890,13 +890,16 @@ Zotero.Search.prototype.fromJSON = function (json, options = {}) {
 	}
 	for (let i = 0; i < json.conditions.length; i++) {
 		let condition = json.conditions[i];
-		this.addCondition(
-			condition.condition,
-			condition.operator,
-			condition.value
-		);
+		// The obsolete `childNote` condition is replaced by `note` (see _loadConditions)
+		let name = condition.condition == 'childNote' ? 'note' : condition.condition;
+		this.addCondition(name, condition.operator, condition.value);
 	}
-	
+	// `childNote` returned the parent of a matching child note, so seed an item result level to
+	// roll the migrated `note` up to it (see _loadConditions)
+	if (json.conditions.some(c => c.condition == 'childNote')) {
+		this.addCondition('resultLevel', 'item');
+	}
+
 	if (json.deleted || this.deleted) {
 		this.deleted = !!json.deleted;
 	}
@@ -1637,12 +1640,6 @@ Zotero.Search.prototype._buildQuery = async function () {
 						break;
 					}
 					
-					case 'childNote':
-						condSQL += "itemID IN (SELECT parentItemID FROM "
-							+ "itemNotes WHERE ";
-						openParens++;
-						break;
-
 					// The annotation's creator lives in groupItems, so restrict the annotation
 					// FROM above to items created by the given user
 					case 'annotationAuthor':

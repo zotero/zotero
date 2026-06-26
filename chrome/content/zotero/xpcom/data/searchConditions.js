@@ -420,19 +420,7 @@ Zotero.SearchConditions = new function () {
 					+ `LENGTH(note) - ${Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length})`,
 				level: 'note'
 			},
-			
-			{
-				name: 'childNote',
-				operators: {
-					contains: true,
-					doesNotContain: true
-				},
-				table: 'items',
-				// Exclude note prefix and suffix
-				field: `SUBSTR(note, ${1 + Zotero.Notes.notePrefix.length}, `
-					+ `LENGTH(note) - ${Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length})`
-			},
-			
+
 			{
 				name: 'creator',
 				operators: {

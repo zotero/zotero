@@ -141,24 +141,33 @@ Zotero.Searches = function () {
 				search._maxSearchConditionID = rows[rows.length - 1].searchConditionID;
 			}
 			
+			// Track whether we migrate a `childNote` (below) so we can seed an item result level afterward
+			let migratedChildNote = false;
 			// Reindex conditions, in case they're not contiguous in the DB
 			for (let i = 0; i < rows.length; i++) {
 				let condition = rows[i];
-				
+
 				// Parse "condition[/mode]"
 				let [conditionName, mode] = Zotero.SearchConditions.parseCondition(condition.condition);
-				
+
 				// Not sure how this can happen, but prevent an error if it does
 				if (condition.value === null) {
 					condition.value = '';
 				}
-				
+
+				// Convert the obsolete childNote condition to note (see above) before validating,
+				// since it's no longer a registered condition
+				if (conditionName == 'childNote') {
+					conditionName = 'note';
+					migratedChildNote = true;
+				}
+
 				let cond = Zotero.SearchConditions.get(conditionName);
 				if (!cond || cond.noLoad) {
 					Zotero.debug("Invalid saved search condition '" + conditionName + "' -- skipping", 2);
 					continue;
 				}
-				
+
 				// Convert itemTypeID to itemType
 				//
 				// TEMP: This can be removed at some point
@@ -173,7 +182,7 @@ Zotero.Searches = function () {
 						condition.value = objKey;
 					}
 				}
-				
+
 				search._conditions[i] = {
 					id: i,
 					condition: conditionName,
@@ -181,6 +190,19 @@ Zotero.Searches = function () {
 					operator: condition.operator,
 					value: condition.value
 				};
+			}
+			// `childNote` returned the parent of a matching child note, so seed an item result
+			// level to roll the migrated `note` up to it
+			if (migratedChildNote) {
+				let id = rows.length;
+				search._conditions[id] = {
+					id,
+					condition: 'resultLevel',
+					mode: undefined,
+					operator: 'item',
+					value: ''
+				};
+				search._maxSearchConditionID = Math.max(search._maxSearchConditionID, id);
 			}
 			search._loaded.conditions = true;
 			search._clearChanged('conditions');
