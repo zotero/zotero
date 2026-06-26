@@ -1292,17 +1292,35 @@ describe("Advanced Search", function () {
 				assert.isTrue(searchBox.querySelector('#search-binding-hint').hidden);
 			});
 
-			it("should not offer a binding hint for an unpopulated condition", function () {
-				// One populated annotation condition plus an empty one: not enough to suggest
-				// binding until the second is actually filled in
+			it("should offer a binding hint for descendant conditions with no values", function () {
+				// Two descendant conditions suggest binding as soon as they're selected, with no
+				// values needed
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('annotationText', 'contains', '');
+				s.addCondition('annotationComment', 'contains', '');
+				pane.search = s;
+
+				assert.isFalse(searchBox.querySelector('#search-binding-hint').hidden);
+			});
+
+			it("should not offer a binding hint for a freshly added condition until it's changed", function () {
 				var s = new Zotero.Search();
 				s.libraryID = Zotero.Libraries.userLibraryID;
 				s.addCondition('resultLevel', 'item');
 				s.addCondition('annotationText', 'contains', 'foo');
-				s.addCondition('annotationComment', 'contains', '');
 				pane.search = s;
 
+				// "+" seeds a second annotation condition, but it shouldn't suggest binding until
+				// the user engages with it
+				conditions.firstChild.onAddClicked({ preventDefault() {}, detail: 1 });
 				assert.isTrue(searchBox.querySelector('#search-binding-hint').hidden);
+
+				// Engaging with the new row (here, typing in it) lets it count
+				conditions.lastChild.querySelector('#search-textbox')
+					.dispatchEvent(new win.Event('input', { bubbles: true }));
+				assert.isFalse(searchBox.querySelector('#search-binding-hint').hidden);
 			});
 
 			it("should wrap conditions into a bound group when the hint is taken", function () {

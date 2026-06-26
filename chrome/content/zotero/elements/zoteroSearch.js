@@ -69,18 +69,33 @@
 			this.addEventListener('keypress', event => this.handleKeyPress(event));
 			// Re-evaluate which remove buttons are enabled and which groups can bind to the
 			// same descendant as the conditions change
-			this.addEventListener('input', () => {
+			this.addEventListener('input', (event) => {
+				this.clearPendingAdd(event);
 				this.updateRemoveButtons();
 				this.updateBindingMenus();
 				this.updateBindingHint();
 				this.updateLevelWarning();
 			});
-			this.addEventListener('command', () => {
+			this.addEventListener('command', (event) => {
+				this.clearPendingAdd(event);
 				this.updateRemoveButtons();
 				this.updateBindingMenus();
 				this.updateBindingHint();
 				this.updateLevelWarning();
 			});
+		}
+
+		// A condition row added via the "+" button doesn't count toward the binding hint or
+		// level warning until the user engages with it, so adding a row (seeded with the previous
+		// row's condition) doesn't immediately warn before they've had a chance to change it.
+		// This clears that flag when a value edit bubbles up from a row -- typing in the field
+		// or picking from a value menu. Changing the condition doesn't bubble here (its menu
+		// stops propagation), so onConditionSelected() has to clear the flag itself.
+		clearPendingAdd(event) {
+			let row = event.target.closest && event.target.closest('zoterosearchcondition');
+			if (row) {
+				row._pendingAdd = false;
+			}
 		}
 
 		// Build the condition tree (root group, nested groups, and search-global
@@ -188,9 +203,9 @@
 			var resultLevel = this.rootGroup.resultLevel;
 			var counts = {};
 			for (let row of this.rootGroup.conditionsContainer.children) {
-				// Skip rows the user hasn't filled in yet, so a freshly added (or just-retyped)
-				// condition doesn't trigger the hint until it actually has a value
-				if (row.localName != 'zoterosearchcondition' || !row.isPopulated()) {
+				// Skip a row just added via "+" until the user engages with it, so adding a row
+				// doesn't immediately suggest grouping it
+				if (row.localName != 'zoterosearchcondition' || row._pendingAdd) {
 					continue;
 				}
 				let level = row.conditionLevel;
@@ -388,6 +403,9 @@
 						let group = event.target.closest
 							&& event.target.closest('search-condition-group');
 						let row = (group || this.rootGroup).addCondition();
+						// Don't let the new row trigger the binding hint/warning until the user
+						// engages with it (see clearPendingAdd)
+						row._pendingAdd = true;
 						this.updateSearch();
 						this.updateRemoveButtons();
 						// Move focus to the new row's drop-down so it can be set from the keyboard
@@ -567,9 +585,9 @@
 			// result level -- those are what a group can bind to the same entity
 			let counts = {};
 			for (let row of this.conditionsContainer.children) {
-				// Skip rows the user hasn't filled in yet, so a freshly added (or just-retyped)
-				// condition doesn't trigger the hint until it actually has a value
-				if (row.localName != 'zoterosearchcondition' || !row.isPopulated()) {
+				// Skip a row just added via "+" until the user engages with it, so adding a row
+				// doesn't immediately suggest grouping it
+				if (row.localName != 'zoterosearchcondition' || row._pendingAdd) {
 					continue;
 				}
 				let level = row.conditionLevel;
@@ -643,18 +661,19 @@
 		updateLevelWarning() {
 			let ownLevel = this.resultLevel;
 			let level = this.effectiveLevel();
-			// This group's direct children's levels: a populated condition row's own level (an
-			// empty row doesn't warn until it's filled in) or a nested group's binding. 'any'
-			// combines with anything, so drop it.
+			// Collect each direct child's level: a condition row's, or a nested group's binding
+			// (null for a "+"-added row not yet engaged with).
 			let childLevels = [...this.conditionsContainer.children].map((child) => {
 				if (child.localName == 'zoterosearchcondition') {
-					return child.isPopulated() ? child.conditionLevel : null;
+					return child._pendingAdd ? null : child.conditionLevel;
 				}
 				if (child.localName == 'search-condition-group') {
 					return child.resultLevel;
 				}
 				return null;
-			}).filter(l => l && l != 'any');
+			})
+				// Drop those nulls and 'any', which combines with anything
+				.filter(l => l && l != 'any');
 
 			let messageID = null;
 			let args = null;
@@ -777,6 +796,9 @@
 				return;
 			}
 			var row = parent.addCondition(null, this.nextElementSibling);
+			// Don't let the new row trigger the binding hint/warning until the user engages with
+			// it (see ZoteroSearch.clearPendingAdd)
+			row._pendingAdd = true;
 			var search = this.searchElement;
 			search.updateSearch();
 			search.updateRemoveButtons();
@@ -1024,6 +1046,9 @@
 				this.value = this.getCurrentValue();
 			}
 
+			// Changing the condition counts as engaging with a "+"-added row (see clearPendingAdd)
+			this._pendingAdd = false;
+
 			this.selectedCondition = conditionName;
 			this.selectedOperator = operatorsList.value;
 
@@ -1193,7 +1218,7 @@
 
 		onOperatorSelected() {
 			var operatorsList = this.querySelector('#operatorsmenu');
-			
+
 			// Drop-down menu
 			if (this.selectedCondition == 'collection'
 					|| this.selectedCondition == 'itemType'
@@ -1544,6 +1569,9 @@
 				value: '',
 				mode: undefined
 			}, this.nextElementSibling);
+			// Don't let the seeded row trigger the binding hint/warning until the user engages
+			// with it (see ZoteroSearch.clearPendingAdd)
+			row._pendingAdd = true;
 			this.parent.updateSearch();
 			this.parent.updateRemoveButtons();
 			// When activated from the keyboard (a synthesized click has detail 0,
