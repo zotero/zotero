@@ -356,6 +356,41 @@ describe("Zotero.Search", function () {
 					await other.eraseTx();
 				});
 
+				it("should match an annotation by its top-level item's title", async function () {
+					// Title exists on both items and attachments, so targeting annotations must
+					// reach the top-level item's title, not just the parent attachment's
+					var title = 'zanntitle' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item', { title });
+					var attachment = await importPDFAttachment(item);
+					var annotation = await createAnnotation('highlight', attachment);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'annotation');
+					s.addCondition('title', 'contains', title);
+					assert.sameMembers(await s.search(), [annotation.id]);
+
+					await item.eraseTx();
+				});
+
+				it("should match an annotation by its parent attachment's title", async function () {
+					// The other half of the union: an attachment's own title still matches
+					var title = 'zatttitle' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					attachment.setField('title', title);
+					await attachment.saveTx();
+					var annotation = await createAnnotation('highlight', attachment);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'annotation');
+					s.addCondition('title', 'contains', title);
+					assert.sameMembers(await s.search(), [annotation.id]);
+
+					await item.eraseTx();
+				});
+
 				it("should match annotations by type and color", async function () {
 					var item = await createDataObject('item');
 					var attachment = await importPDFAttachment(item);

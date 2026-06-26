@@ -2311,6 +2311,41 @@ Zotero.Search.mapPredicate = function (sql, fromLevel, toLevel, negated = false)
 		return s;
 	};
 
+	// A multi-level field (e.g. title, which exists on both the top-level item and an attachment)
+	// targeting a descendant should match if *any* of those ancestor levels has the value -- an
+	// annotation matches when its parent attachment OR its top-level item has the title (and a
+	// snapshot's URL stays matchable at the attachment level). Map down from each such ancestor
+	// and union them, testing the predicate once (a single `anc IN (...)`) so its bound parameters
+	// aren't duplicated. A negation keeps the single-level behavior below.
+	let ancestorLevels = fromLevels.filter(
+		l => l != 'any' && Zotero.Search._isAncestorLevel(l, toLevel));
+	if (!negated && ancestorLevels.length > 1) {
+		// (toLevel itemID, ancestor itemID) pairs, walking from toLevel up to `anc`. A standalone
+		// attachment/note has no parent, so it stands in as its own top-level item (COALESCE).
+		let pairsTo = (anc) => {
+			let levels = [];
+			let l = toLevel;
+			while (l != anc) {
+				levels.push(l);
+				l = Zotero.Search._levelParent[l];
+			}
+			let aliases = levels.map((_, i) => 't' + i);
+			let fromSQL = `${Zotero.Search._levelChildTable[levels[0]]} ${aliases[0]}`;
+			for (let i = 1; i < levels.length; i++) {
+				fromSQL += ` JOIN ${Zotero.Search._levelChildTable[levels[i]]} ${aliases[i]}`
+					+ ` ON ${aliases[i]}.itemID = ${aliases[i - 1]}.parentItemID`;
+			}
+			let last = aliases[aliases.length - 1];
+			let lastLevel = levels[levels.length - 1];
+			let ancExpr = Zotero.Search._levelCanBeStandalone[lastLevel]
+				? `COALESCE(${last}.parentItemID, ${last}.itemID)`
+				: `${last}.parentItemID`;
+			return `SELECT ${aliases[0]}.itemID AS itemID, ${ancExpr} AS anc FROM ${fromSQL}`;
+		};
+		let union = ancestorLevels.map(pairsTo).join(' UNION ALL ');
+		return `itemID IN (SELECT itemID FROM (${union}) WHERE anc IN (${matches}))`;
+	}
+
 	let mapped = Zotero.Search._isAncestorLevel(toLevel, from)
 		? mapUp(matches, from, toLevel)
 		: mapDown(matches, from, toLevel);
