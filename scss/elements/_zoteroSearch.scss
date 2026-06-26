@@ -308,6 +308,12 @@ zoterosearch {
 	#search-textbox {
 		flex: 1;
 		width: 100%;
+		// Match the drop-down menus' height and drop the native search input's extra left margin,
+		// so the row doesn't grow or shift (and the gap stays even) when switching between a text
+		// field and a drop-down menu
+		height: 22px;
+		box-sizing: border-box;
+		margin-inline: 0;
 	}
 	
 	#valuemenu::part(icon) {
