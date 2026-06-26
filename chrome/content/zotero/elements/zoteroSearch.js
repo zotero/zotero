@@ -440,6 +440,7 @@
 					<hbox class="group-actions">
 						<toolbarbutton class="remove-group zotero-clicky zotero-clicky-minus" tabindex="0" hidden="true" data-l10n-id="advanced-search-remove-group-btn" onclick="this.closest('search-condition-group').onRemoveGroupClicked()"/>
 						<toolbarbutton class="add-condition zotero-clicky zotero-clicky-plus" tabindex="0" data-l10n-id="advanced-search-add-btn" onclick="this.closest('search-condition-group').onAddSiblingClicked()"/>
+						<toolbarbutton class="ungroup-group zotero-clicky search-group-button" tabindex="0" hidden="true" data-l10n-id="advanced-search-ungroup-btn" onclick="this.closest('search-condition-group').onUngroupClicked()"/>
 						<html:div class="group-action-placeholder"/>
 					</hbox>
 				</caption>
@@ -495,15 +496,18 @@
 			// caption buttons
 			this.addConditionButton = this.querySelector('.add-condition');
 			this.removeGroupButton = this.querySelector('.remove-group');
+			this.ungroupButton = this.querySelector('.ungroup-group');
 
-			// The root group can't be removed and has no parent to add a sibling into, so
-			// its caption's remove ("-") and add ("+") buttons stay hidden; a nested group
-			// shows both
+			// remove-group and ungroup default to hidden in the template, so the root only also
+			// hides its add button. A nested group shows all three and swaps the empty spacer
+			// for the ungroup button.
 			if (this.isRoot) {
 				this.addConditionButton.hidden = true;
 			}
 			else {
 				this.removeGroupButton.hidden = false;
+				this.ungroupButton.hidden = false;
+				this.querySelector('.group-action-placeholder').hidden = true;
 			}
 		}
 
@@ -792,6 +796,47 @@
 			search.ensureNotEmpty();
 			search.updateSearch();
 			search.updateRemoveButtons();
+		}
+
+		// "Ungroup": dissolve this group, moving its conditions (and any nested groups) up into
+		// the parent in this group's place and dropping this group's own join mode and binding.
+		// The inverse of a condition row's group button.
+		onUngroupClicked() {
+			var search = this.searchElement;
+			var parent = this.parentElement.closest('search-condition-group');
+			if (!parent) {
+				return;
+			}
+			this.rebuildChildrenInto(parent, this);
+			this.remove();
+			search.updateSearch();
+			search.updateRemoveButtons();
+			search.updateBindingMenus();
+			search.updateBindingHint();
+		}
+
+		// Recreate this group's children inside `target`, before `beforeNode`, preserving any
+		// nested groups and their join mode and result level. Rows are rebuilt from their data
+		// rather than moved, since detaching a custom element wipes its contents.
+		rebuildChildrenInto(target, beforeNode) {
+			for (let child of [...this.conditionsContainer.children]) {
+				if (child.localName == 'zoterosearchcondition') {
+					let ref;
+					let data = child.getConditionData();
+					if (data) {
+						let [condition, mode] = Zotero.SearchConditions.parseCondition(data.condition);
+						ref = { id: undefined, condition, mode, operator: data.operator, value: data.value };
+					}
+					target.addCondition(ref, beforeNode);
+				}
+				else if (child.localName == 'search-condition-group') {
+					let newGroup = document.createXULElement('search-condition-group');
+					target.conditionsContainer.insertBefore(newGroup, beforeNode);
+					newGroup.joinMode = child.joinMode;
+					newGroup.resultLevel = child.resultLevel;
+					child.rebuildChildrenInto(newGroup, null);
+				}
+			}
 		}
 	}
 	customElements.define("search-condition-group", SearchConditionGroup);

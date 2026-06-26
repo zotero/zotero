@@ -1114,6 +1114,20 @@ describe("Advanced Search", function () {
 				assert.equal(row.querySelector('#valuefield').value, 'foo');
 			});
 
+			it("should ungroup a group back into its parent", function () {
+				pane.search = groupedSearch();
+
+				var group = conditions.querySelector('search-condition-group');
+				group.onUngroupClicked();
+
+				// The group is gone and its two tag conditions now sit alongside the title row
+				assert.notOk(conditions.querySelector('search-condition-group'));
+				searchBox.updateSearch();
+				var sequence = Object.values(searchBox.search.getConditions())
+					.map(c => c.condition);
+				assert.deepEqual(sequence, ['title', 'tag', 'tag']);
+			});
+
 			it("should remove a group when its last condition is removed", function () {
 				pane.search = groupedSearch();
 

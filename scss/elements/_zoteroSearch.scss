@@ -123,6 +123,12 @@ zoterosearch {
 			display: none;
 		}
 	}
+
+	// The group caption's "ungroup" button sits in the same column as a row's group button and
+	// reuses its styling, but with the bracket-remove icon
+	.ungroup-group {
+		@include svgicon-menu("ungroup-condition", "universal", "16");
+	}
 	
 	.level-warning {
 		// Each group's own warning, in a contained box below its conditions (the root's sits at
