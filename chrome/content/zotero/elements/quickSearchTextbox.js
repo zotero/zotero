@@ -37,7 +37,7 @@
 					<hbox id="search-wrapper">
 					</hbox>
 					<hbox id="advanced-search-indicator">
-						<label id="advanced-search-label"/>
+						<label id="advanced-search-label" crop="end"/>
 						<toolbarbutton class="zotero-clicky advanced-collapse-button" tabindex="0"/>
 						<toolbarbutton class="zotero-clicky advanced-close-button" data-l10n-id="advanced-search-close" tabindex="0"/>
 					</hbox>
@@ -206,6 +206,7 @@
 					selectedSearchType === 'temporary' ? 'advanced-search' : 'edit-saved-search',
 				);
 				this.deck.selectedIndex = state === 'closed' ? 0 : 1;
+				this.toggleAttribute('advanced-search-open', state !== 'closed');
 				this.querySelector('#advanced-search-indicator').dataset.collapsed = state === 'collapsed';
 				this.querySelector('.advanced-collapse-button').hidden = selectedSearchType === 'saved';
 				document.l10n.setAttributes(

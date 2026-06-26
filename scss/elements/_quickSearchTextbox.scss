@@ -8,6 +8,38 @@ quick-search-textbox {
 	max-width: 300px;
 	flex-grow: 1;
 
+	// While the Advanced Search indicator is shown, size this element to the indicator's content
+	// (full label + buttons) rather than the 146px quick-search width, and allow shrinking below
+	// it (min-width: 0) only when the toolbar overflows -- so the label stays full on a normal
+	// window and crops just enough on a narrow one, keeping the buttons to its right (collapse/
+	// close and the stacked item-pane toggle) unclipped. The normal search box keeps its default
+	// size (it isn't shown then).
+	&[advanced-search-open] {
+		width: auto;
+		min-width: 0;
+		// Take only the indicator's width (don't grow toward max-width), so the buttons sit right
+		// after the label and the toggle isn't pushed out; the toolbar's spacer absorbs the slack
+		flex-grow: 0;
+
+		// A XUL <deck> sizes to its largest panel and doesn't clamp the panel to the deck's
+		// width, so the indicator keeps its full width and overflows. Since only the indicator
+		// is shown while advanced search is open, lay the deck out as flex and let the indicator
+		// (and its label) shrink, hiding the inactive quick-search panel.
+		#search-deck {
+			min-width: 0;
+			display: flex;
+		}
+
+		#search-wrapper {
+			display: none;
+		}
+
+		#advanced-search-indicator {
+			flex: 1;
+			min-width: 0;
+		}
+	}
+
 	*[zoteroFontSize=small] {
 		font-size: 11px;
 	}
@@ -160,6 +192,9 @@ quick-search-textbox {
 
 	& > label {
 		flex: 1;
+		// Let the label shrink and crop on a narrow window so the collapse/close buttons to its
+		// right stay visible
+		min-width: 0;
 		padding-inline: 4px;
 		font-weight: 700;
 	}
