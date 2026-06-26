@@ -75,6 +75,7 @@
 				this.updateBindingMenus();
 				this.updateBindingHint();
 				this.updateLevelWarning();
+				this.updateSearchOptions();
 			});
 			this.addEventListener('command', (event) => {
 				this.clearPendingAdd(event);
@@ -82,6 +83,7 @@
 				this.updateBindingMenus();
 				this.updateBindingHint();
 				this.updateLevelWarning();
+				this.updateSearchOptions();
 			});
 		}
 
@@ -176,8 +178,16 @@
 			this.updateBindingMenus();
 			this.updateBindingHint();
 			this.updateLevelWarning();
+			this.updateSearchOptions();
 		}
 
+		// "Search subcollections" only affects Collection conditions (it expands them to
+		// their descendants), so show it only when the search actually has one
+		updateSearchOptions() {
+			let hasCollection = [...this.querySelectorAll('zoterosearchcondition')]
+				.some(row => row.selectedCondition == 'collection');
+			this.querySelector('#search-option-checkboxes').hidden = !hasCollection;
+		}
 
 		// Refresh each nested group's same-entity binding menu (visibility and options)
 		updateBindingMenus() {
@@ -257,7 +267,10 @@
 			// Search-global options. noChildren is no longer emitted here -- it's carried by
 			// the result level (resultLevel = item). includeParentsAndChildren is emitted only when
 			// its legacy checkbox is present and still checked, so unchecking it drops it.
-			if (this.querySelector('#recursiveCheckbox').checked) {
+			// 'recursive' only does anything alongside a Collection condition, so emit it only
+			// when the search has one, matching the checkbox's visibility.
+			if (this.querySelector('#recursiveCheckbox').checked
+					&& flat.some(c => c.condition == 'collection')) {
 				flat.push({ condition: 'recursive', operator: 'true', value: null });
 			}
 			if (this.querySelector('#includeParentsAndChildrenCheckbox').checked) {
@@ -271,6 +284,7 @@
 			this.updateBindingMenus();
 			this.updateBindingHint();
 			this.updateLevelWarning();
+			this.updateSearchOptions();
 		}
 
 		// Append a group's serialized form to `flat`. The root contributes its

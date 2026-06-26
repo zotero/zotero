@@ -1096,6 +1096,35 @@ describe("Advanced Search", function () {
 			});
 		});
 		
+		describe("Search subcollections", function () {
+			it("should appear only when there's a Collection condition", async function () {
+				var collection = await createDataObject('collection');
+				
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+				
+				var options = searchBox.querySelector('#search-option-checkboxes');
+				// Hidden while the search has no Collection condition to recurse into
+				assert.isTrue(options.hidden);
+				
+				// Switch the row to a Collection condition
+				var conditionsMenu = conditions.firstChild.querySelector('#conditionsmenu');
+				for (let i = 0; i < conditionsMenu.itemCount; i++) {
+					let menuitem = conditionsMenu.getItemAtIndex(i);
+					if (menuitem.value == 'collection') {
+						menuitem.click();
+						break;
+					}
+				}
+				
+				assert.isFalse(options.hidden);
+				
+				await collection.eraseTx();
+			});
+		});
+		
 		describe("Groups", function () {
 			function groupedSearch() {
 				var s = new Zotero.Search();
