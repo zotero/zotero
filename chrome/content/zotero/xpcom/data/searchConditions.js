@@ -306,7 +306,7 @@ Zotero.SearchConditions = new function () {
 					is: true,
 					isNot: true
 				},
-				special: true
+				special: false
 			},
 			
 			{

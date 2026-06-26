@@ -858,7 +858,7 @@ describe("Advanced Search", function () {
 		});
 
 		describe("Collection", function () {
-			it("should show collections and saved searches", async function () {
+			it("should show only collections", async function () {
 				var col1 = await createDataObject('collection', { name: "A" });
 				var col2 = await createDataObject('collection', { name: "C", parentID: col1.id });
 				var col3 = await createDataObject('collection', { name: "D", parentID: col2.id });
@@ -887,79 +887,23 @@ describe("Advanced Search", function () {
 				}
 				
 				assert.isFalse(valueMenu.hidden);
-				assert.equal(valueMenu.itemCount, 6);
+				// Only the collections, with the saved searches no longer mixed in
+				assert.equal(valueMenu.itemCount, 4);
 				var valueMenuItem = valueMenu.getItemAtIndex(1);
 				assert.equal(valueMenuItem.getAttribute('label'), "- " + col2.name);
 				assert.equal(valueMenuItem.getAttribute('value'), "C" + col2.key);
 				valueMenuItem = valueMenu.getItemAtIndex(2);
 				assert.equal(valueMenuItem.getAttribute('label'), "    - " + col3.name);
 				assert.equal(valueMenuItem.getAttribute('value'), "C" + col3.key);
-				valueMenuItem = valueMenu.getItemAtIndex(4);
-				assert.equal(valueMenuItem.getAttribute('label'), search1.name);
-				assert.equal(valueMenuItem.getAttribute('value'), "S" + search1.key);
-				valueMenuItem = valueMenu.getItemAtIndex(5);
-				assert.equal(valueMenuItem.getAttribute('label'), search2.name);
-				assert.equal(valueMenuItem.getAttribute('value'), "S" + search2.key);
+				var values = [];
+				for (let i = 0; i < valueMenu.itemCount; i++) {
+					values.push(valueMenu.getItemAtIndex(i).getAttribute('value'));
+				}
+				assert.notInclude(values, "S" + search1.key);
+				assert.notInclude(values, "S" + search2.key);
 				
 				await Zotero.Collections.erase([col1.id, col2.id, col3.id, col4.id]);
 				await Zotero.Searches.erase([search1.id, search2.id]);
-			});
-			
-			it("should be selected for 'savedSearch' condition", async function () {
-				var search = await createDataObject('search', { name: "A" });
-				
-				var s = new Zotero.Search();
-				s.libraryID = Zotero.Libraries.userLibraryID;
-				s.addCondition('savedSearch', 'is', search.key);
-				pane.search = s;
-				
-				var searchCondition = conditions.firstChild;
-				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
-				var valueMenu = searchCondition.querySelector('#valuemenu');
-				
-				assert.equal(conditionsMenu.selectedItem.value, 'collection');
-				assert.isFalse(valueMenu.hidden);
-				assert.equal(valueMenu.selectedItem.value, "S" + search.key);
-				
-				await search.eraseTx();
-			});
-			
-			it("should set 'savedSearch' condition when a search is selected", async function () {
-				var collection = await createDataObject('collection', { name: "A" });
-				var search = await createDataObject('search', { name: "B" });
-				
-				var s = new Zotero.Search();
-				s.libraryID = Zotero.Libraries.userLibraryID;
-				s.addCondition('title', 'is', '');
-				pane.search = s;
-				
-				var searchCondition = conditions.firstChild;
-				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
-				var valueMenu = searchCondition.querySelector('#valuemenu');
-				
-				// Select 'Collection' condition
-				for (let i = 0; i < conditionsMenu.itemCount; i++) {
-					let menuitem = conditionsMenu.getItemAtIndex(i);
-					if (menuitem.value == 'collection') {
-						menuitem.click();
-						break;
-					}
-				}
-				for (let i = 0; i < valueMenu.itemCount; i++) {
-					let menuitem = valueMenu.getItemAtIndex(i);
-					if (menuitem.getAttribute('value') == "S" + search.key) {
-						menuitem.click();
-						break;
-					}
-				}
-				
-				searchBox.updateSearch();
-				var condition = searchBox.search.getConditions()[0];
-				assert.equal(condition.condition, 'savedSearch');
-				assert.equal(condition.value, search.key);
-				
-				await collection.eraseTx();
-				await search.eraseTx();
 			});
 			
 			it("should update when the library is changed", async function () {
@@ -967,9 +911,7 @@ describe("Advanced Search", function () {
 				var groupLibraryID = group.libraryID;
 				
 				var collection1 = await createDataObject('collection', { name: "A" });
-				var search1 = await createDataObject('search', { name: "B" });
 				var collection2 = await createDataObject('collection', { name: "C", libraryID: groupLibraryID });
-				var search2 = await createDataObject('search', { name: "D", libraryID: groupLibraryID });
 				
 				var s = new Zotero.Search();
 				s.libraryID = Zotero.Libraries.userLibraryID;
@@ -990,12 +932,12 @@ describe("Advanced Search", function () {
 				}
 				for (let i = 0; i < valueMenu.itemCount; i++) {
 					let menuitem = valueMenu.getItemAtIndex(i);
-					if (menuitem.getAttribute('value') == "S" + search1.key) {
+					if (menuitem.getAttribute('value') == "C" + collection1.key) {
 						menuitem.click();
 						break;
 					}
 				}
-				assert.equal(valueMenu.value, "S" + search1.key);
+				assert.equal(valueMenu.value, "C" + collection1.key);
 				
 				// Switch to the group library in the collection tree, which changes
 				// the search library and re-renders the conditions
@@ -1010,14 +952,11 @@ describe("Advanced Search", function () {
 					values.push(menuitem.getAttribute('value'));
 				}
 				assert.notInclude(values, "C" + collection1.key);
-				assert.notInclude(values, "S" + search1.key);
 				assert.include(values, "C" + collection2.key);
-				assert.include(values, "S" + search2.key);
 				
 				await selectLibrary(win);
 
 				await Zotero.Collections.erase([collection1.id, collection2.id]);
-				await Zotero.Searches.erase([search1.id, search2.id]);
 			});
 			
 			it("shouldn't appear in a cross-library scope", async function () {
@@ -1036,9 +975,10 @@ describe("Advanced Search", function () {
 					var searchCondition = conditions.firstChild;
 					var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
 					
-					// Collection condition (which also covers saved searches) shouldn't be offered
+					// Neither Collection nor Saved Search can resolve across libraries
 					for (let i = 0; i < conditionsMenu.itemCount; i++) {
 						assert.notEqual(conditionsMenu.getItemAtIndex(i).value, 'collection');
+						assert.notEqual(conditionsMenu.getItemAtIndex(i).value, 'savedSearch');
 					}
 				}
 				finally {
@@ -1048,20 +988,114 @@ describe("Advanced Search", function () {
 		});
 		
 		describe("Saved Search", function () {
-			it("shouldn't appear", async function () {
+			it("should appear as a condition", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+
 				var searchCondition = conditions.firstChild;
 				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
 
-				// Make sure "Saved Search" isn't present
+				var values = [];
+				for (let i = 0; i < conditionsMenu.itemCount; i++) {
+					values.push(conditionsMenu.getItemAtIndex(i).value);
+				}
+				assert.include(values, 'savedSearch');
+			});
+			
+			it("should show only saved searches", async function () {
+				var collection = await createDataObject('collection', { name: "A" });
+				var search1 = await createDataObject('search', { name: "A" });
+				var search2 = await createDataObject('search', { name: "B" });
+				
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+				
+				var searchCondition = conditions.firstChild;
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+				var valueMenu = searchCondition.querySelector('#valuemenu');
+				
+				assert.isTrue(valueMenu.hidden);
+				// Select 'Saved Search' condition
 				for (let i = 0; i < conditionsMenu.itemCount; i++) {
 					let menuitem = conditionsMenu.getItemAtIndex(i);
 					if (menuitem.value == 'savedSearch') {
-						assert.fail();
+						menuitem.click();
+						break;
 					}
 				}
+				
+				assert.isFalse(valueMenu.hidden);
+				var values = [];
+				for (let i = 0; i < valueMenu.itemCount; i++) {
+					values.push(valueMenu.getItemAtIndex(i).getAttribute('value'));
+				}
+				assert.sameMembers(values, ["S" + search1.key, "S" + search2.key]);
+				assert.notInclude(values, "C" + collection.key);
+				
+				await collection.eraseTx();
+				await Zotero.Searches.erase([search1.id, search2.id]);
+			});
+			
+			it("should be selected for a 'savedSearch' condition", async function () {
+				var search = await createDataObject('search', { name: "A" });
+				
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('savedSearch', 'is', search.key);
+				pane.search = s;
+				
+				var searchCondition = conditions.firstChild;
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+				var valueMenu = searchCondition.querySelector('#valuemenu');
+				
+				assert.equal(conditionsMenu.selectedItem.value, 'savedSearch');
+				assert.isFalse(valueMenu.hidden);
+				assert.equal(valueMenu.selectedItem.value, "S" + search.key);
+				
+				await search.eraseTx();
+			});
+			
+			it("should set a 'savedSearch' condition when a search is selected", async function () {
+				var search = await createDataObject('search', { name: "B" });
+				
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+				
+				var searchCondition = conditions.firstChild;
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+				var valueMenu = searchCondition.querySelector('#valuemenu');
+				
+				// Select 'Saved Search' condition
+				for (let i = 0; i < conditionsMenu.itemCount; i++) {
+					let menuitem = conditionsMenu.getItemAtIndex(i);
+					if (menuitem.value == 'savedSearch') {
+						menuitem.click();
+						break;
+					}
+				}
+				for (let i = 0; i < valueMenu.itemCount; i++) {
+					let menuitem = valueMenu.getItemAtIndex(i);
+					if (menuitem.getAttribute('value') == "S" + search.key) {
+						menuitem.click();
+						break;
+					}
+				}
+				
+				searchBox.updateSearch();
+				var condition = searchBox.search.getConditions()[0];
+				assert.equal(condition.condition, 'savedSearch');
+				assert.equal(condition.value, search.key);
+				
+				await search.eraseTx();
 			});
 		});
-
+		
 		describe("Groups", function () {
 			function groupedSearch() {
 				var s = new Zotero.Search();

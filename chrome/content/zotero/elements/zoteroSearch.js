@@ -178,6 +178,7 @@
 			this.updateLevelWarning();
 		}
 
+
 		// Refresh each nested group's same-entity binding menu (visibility and options)
 		updateBindingMenus() {
 			for (let group of this.querySelectorAll('search-condition-group')) {
@@ -1003,6 +1004,7 @@
 			switch (condition) {
 				case 'anyField':
 				case 'collection':
+				case 'savedSearch':
 				case 'creator':
 				case 'title':
 				case 'date':
@@ -1092,7 +1094,6 @@
 
 					var libraryID = this.parent.search.libraryID;
 
-					// Add collections
 					let cols = Zotero.Collections.getByLibrary(libraryID, true);
 					for (let col of cols) {
 						// Indent subcollections
@@ -1110,7 +1111,15 @@
 						});
 					}
 
-					// Add saved searches
+					this.createValueMenu(rows);
+					break;
+				}
+				case 'savedSearch':
+				{
+					let rows = [];
+
+					let libraryID = this.parent.search.libraryID;
+
 					let searches = Zotero.Searches.getByLibrary(libraryID);
 					for (let search of searches) {
 						if (search.id != this.parent.search.id) {
@@ -1121,6 +1130,7 @@
 							});
 						}
 					}
+
 					this.createValueMenu(rows);
 					break;
 				}
@@ -1220,6 +1230,7 @@
 
 			// Drop-down menu
 			if (this.selectedCondition == 'collection'
+					|| this.selectedCondition == 'savedSearch'
 					|| this.selectedCondition == 'itemType'
 					|| this.selectedCondition == 'fileTypeID'
 					|| this.selectedCondition == 'annotationType'
@@ -1301,12 +1312,13 @@
 			var menu = this.querySelector('#conditionsmenu');
 
 			// Collection and saved search conditions resolve within a single library, so
-			// remove the Collection condition (which also covers saved searches) when the
-			// selection spans multiple libraries
+			// remove both when the selection spans multiple libraries
 			if (this.parent.scopeLibraryIDs && this.parent.scopeLibraryIDs.length > 1) {
-				let collectionItem = menu.querySelector('menuitem[value="collection"]');
-				if (collectionItem) {
-					collectionItem.remove();
+				for (let value of ['collection', 'savedSearch']) {
+					let item = menu.querySelector(`menuitem[value="${value}"]`);
+					if (item) {
+						item.remove();
+					}
 				}
 			}
 
@@ -1325,15 +1337,7 @@
 						break;
 				}
 				
-				// Map certain conditions to other menu items
-				let uiCondition = condition.condition;
-				switch (condition.condition) {
-					case 'savedSearch':
-						uiCondition = 'collection';
-						break;
-				}
-				
-				menu.setAttribute('value', uiCondition);
+				menu.setAttribute('value', condition.condition);
 				
 				// Convert datetimes from UTC to localtime
 				if ((condition.condition == 'accessDate'
@@ -1408,7 +1412,7 @@
 
 			// Handle special C1234 and S5678 form for
 			// collections and searches
-			else if (condition == 'collection') {
+			else if (condition == 'collection' || condition == 'savedSearch') {
 				var letter = this.querySelector('#valuemenu').value.substr(0, 1);
 				if (letter == 'C') {
 					condition = 'collection';
