@@ -14,8 +14,11 @@ advanced-search-pane {
 	@include inactive-opacity;
 
 	flex-direction: column;
-	// Inline padding is further down the tree so focus rings work with overflow: auto
 	padding-block: 8px;
+	// Shared inline inset for every row in the pane. zoterosearch re-creates this inside its
+	// own overflow: auto box (cancelling it with a negative margin) so its edge focus rings
+	// aren't clipped; the other rows just inherit it.
+	padding-inline: 10px;
 	gap: 8px;
 	background: var(--material-toolbar);
 
@@ -24,7 +27,6 @@ advanced-search-pane {
 	}
 
 	.advanced-search-buttons {
-		padding-inline: 8px;
 		gap: 8px;
 
 		button {

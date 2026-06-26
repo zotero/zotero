@@ -1,10 +1,12 @@
 zoterosearch {
 	flex-direction: column;
-	padding-inline: 8px;
-	// Block padding lives inside the scroll container (like the inline padding)
-	// so the top/bottom focus rings -- e.g. the join-mode menulist in the caption
-	// -- aren't clipped by overflow: auto. The negative margin cancels it so the
-	// surrounding spacing is unchanged.
+	// The pane sets a shared inline inset (its padding-inline); re-create it inside this scroll
+	// container and cancel the pane's with a negative margin, so edge focus rings -- e.g. the
+	// value field, or the caption's join-mode menulist -- aren't clipped by overflow: auto. The
+	// block padding works the same way vertically. The negative margins keep the surrounding
+	// spacing unchanged (the pane's padding and the column gap control it).
+	padding-inline: 10px;
+	margin-inline: -10px;
 	padding-block: 8px;
 	margin-block: -8px;
 	gap: 8px;
@@ -103,11 +105,11 @@ zoterosearch {
 		border-radius: 6px;
 	}
 
-	// The root header sits above the box, so indent it to the box's content edge
-	// (border + padding, 9px) plus the menulist label inset (5px) so "Match" lines up
-	// with the condition dropdowns' labels inside
+	// The root "Find ... matching ..." line is the top level of all conditions, so it needs no
+	// indent; and with no divider above it, no vertical padding either
 	search-condition-group[root] > .search-condition-group > caption {
-		padding-left: 14px !important;
+		padding-inline-start: 0 !important;
+		padding-block: 0;
 	}
 
 	// The per-condition "group" button (wraps the condition in a new group)
