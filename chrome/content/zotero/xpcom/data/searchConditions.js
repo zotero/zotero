@@ -417,6 +417,7 @@ Zotero.SearchConditions = new function () {
 				},
 				table: 'itemTags',
 				field: 'name',
+				normalizedField: 'COALESCE(nameNormalized, name)',
 				// Tags apply to items at any level, so a tag match is never mapped
 				level: 'any'
 			},
@@ -525,7 +526,9 @@ Zotero.SearchConditions = new function () {
 					isNotEmpty: true
 				},
 				table: 'itemCreators',
-				field: "TRIM(firstName || ' ' || lastName)"
+				field: "TRIM(firstName || ' ' || lastName)",
+				normalizedField: "TRIM(COALESCE(firstNameNormalized, firstName) || ' ' "
+					+ "|| COALESCE(lastNameNormalized, lastName))"
 			},
 			
 			{
@@ -538,6 +541,7 @@ Zotero.SearchConditions = new function () {
 				},
 				table: 'itemCreators',
 				field: 'lastName',
+				normalizedField: 'COALESCE(lastNameNormalized, lastName)',
 				special: true
 			},
 			
@@ -552,7 +556,9 @@ Zotero.SearchConditions = new function () {
 					isNotEmpty: true
 				},
 				table: 'itemCreators',
-				field: "TRIM(firstName || ' ' || lastName)"
+				field: "TRIM(firstName || ' ' || lastName)",
+				normalizedField: "TRIM(COALESCE(firstNameNormalized, firstName) || ' ' "
+					+ "|| COALESCE(lastNameNormalized, lastName))"
 			},
 			
 			{
@@ -566,7 +572,9 @@ Zotero.SearchConditions = new function () {
 					isNotEmpty: true
 				},
 				table: 'itemCreators',
-				field: "TRIM(firstName || ' ' || lastName)"
+				field: "TRIM(firstName || ' ' || lastName)",
+				normalizedField: "TRIM(COALESCE(firstNameNormalized, firstName) || ' ' "
+					+ "|| COALESCE(lastNameNormalized, lastName))"
 			},
 			
 			{
@@ -580,7 +588,9 @@ Zotero.SearchConditions = new function () {
 					isNotEmpty: true
 				},
 				table: 'itemCreators',
-				field: "TRIM(firstName || ' ' || lastName)"
+				field: "TRIM(firstName || ' ' || lastName)",
+				normalizedField: "TRIM(COALESCE(firstNameNormalized, firstName) || ' ' "
+					+ "|| COALESCE(lastNameNormalized, lastName))"
 			},
 			
 			{
@@ -596,6 +606,7 @@ Zotero.SearchConditions = new function () {
 				},
 				table: 'itemData',
 				field: 'value',
+				normalizedField: 'COALESCE(valueNormalized, value)',
 				aliases: await Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined "
 					+ "WHERE fieldName NOT IN ('accessDate', 'date', 'pages', "
 					+ "'section','seriesNumber','issue')"),
@@ -722,6 +733,7 @@ Zotero.SearchConditions = new function () {
 				},
 				table: 'itemAnnotations',
 				field: 'text',
+				normalizedField: 'COALESCE(textNormalized, text)',
 				special: false,
 				level: 'annotation'
 			},
@@ -734,6 +746,7 @@ Zotero.SearchConditions = new function () {
 				},
 				table: 'itemAnnotations',
 				field: 'comment',
+				normalizedField: 'COALESCE(commentNormalized, comment)',
 				special: false,
 				level: 'annotation'
 			},

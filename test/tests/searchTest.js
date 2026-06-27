@@ -1664,6 +1664,150 @@ describe("Zotero.Search", function () {
 				});
 			});
 			
+			describe("Accent-insensitive matching", function () {
+				it("should match accented and unaccented text interchangeably", async function () {
+					// Unaccented term against accented text
+					var item = await createDataObject('item', { title: 'zdiaséance', libraryID: userLibraryID });
+					var s1 = new Zotero.Search();
+					s1.libraryID = userLibraryID;
+					s1.addCondition('title', 'contains', 'zdiaseance');
+					assert.sameMembers(await s1.search(), [item.id]);
+
+					// Accented term against unaccented text
+					var item2 = await createDataObject('item', { title: 'zdiaresume', libraryID: userLibraryID });
+					var s2 = new Zotero.Search();
+					s2.libraryID = userLibraryID;
+					s2.addCondition('title', 'contains', 'zdiarésumé');
+					assert.sameMembers(await s2.search(), [item2.id]);
+				});
+
+				it("should match an accented creator from an unaccented term", async function () {
+					var item = await createDataObject('item', {
+						libraryID: userLibraryID,
+						creators: [{ firstName: 'Étiennezdia', lastName: 'Müllerzdia', creatorType: 'author' }]
+					});
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('creator', 'contains', 'etiennezdia mullerzdia');
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+
+				it("should match an accented tag from an unaccented term", async function () {
+					var item = await createDataObject('item', {
+						libraryID: userLibraryID,
+						tags: [{ tag: 'résumézdia' }]
+					});
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('tag', 'contains', 'resumezdia');
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+
+				it("should match non-ASCII text case-insensitively", async function () {
+					// SQLite's default LIKE folds only ASCII case, so uppercase Greek/Cyrillic values
+					// have to be stored normalized (lowercased) to match a lowercase search term
+					var greek = await createDataObject('item', { title: 'zdiaΘΕΜΑ', libraryID: userLibraryID });
+					var cyrillic = await createDataObject('item', { title: 'zdiaПРИВЕТ', libraryID: userLibraryID });
+					var s1 = new Zotero.Search();
+					s1.libraryID = userLibraryID;
+					s1.addCondition('title', 'contains', 'zdiaθεμα');
+					assert.sameMembers(await s1.search(), [greek.id]);
+					var s2 = new Zotero.Search();
+					s2.libraryID = userLibraryID;
+					s2.addCondition('title', 'contains', 'zdiaпривет');
+					assert.sameMembers(await s2.search(), [cyrillic.id]);
+				});
+
+				it("should match ligatures, superscripts, fractions, and non-decomposing letters", async function () {
+					var item = await createDataObject('item', { title: 'zdiasøren œuvre ﬁle x² ½ straße', libraryID: userLibraryID });
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('title', 'contains', 'zdiasoren oeuvre file x2 1/2 strasse');
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+
+				it("should ignore rich-text formatting tags in item fields", async function () {
+					// A word wrapped in supported formatting (here small-caps) -- the tags shouldn't
+					// break a phrase match across the word or be matchable themselves
+					var item = await createDataObject('item', {
+						title: 'The <span style="font-variant:small-caps;">zdiadrosophila</span> genome',
+						libraryID: userLibraryID
+					});
+					async function titleMatches(term) {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('title', 'contains', term);
+						return s.search();
+					}
+					// A phrase running from the formatted word into the next one matches
+					assert.sameMembers(await titleMatches('zdiadrosophila genome'), [item.id]);
+					// The tag markup itself isn't matched
+					assert.lengthOf(await titleMatches('small-caps'), 0);
+				});
+
+				it("should fold curly quotes and dashes to their ASCII forms", async function () {
+					// Word processors and translators produce curly quotes and en/em dashes; a
+					// search typed with straight quotes and hyphens should still match
+					var quoted = await createDataObject('item', {
+						title: 'zdia“pp. 10–12”', // curly quotes + en dash: "pp. 10-12"
+						libraryID: userLibraryID
+					});
+					var emDash = await createDataObject('item', {
+						title: 'zdiamind—body problem', // em dash
+						libraryID: userLibraryID
+					});
+					async function titleMatches(term) {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('title', 'contains', term);
+						return s.search();
+					}
+					// Straight quotes and hyphen match the curly quotes and en dash
+					assert.sameMembers(await titleMatches('zdia"pp. 10-12"'), [quoted.id]);
+					// Em dash folds to a hyphen too
+					assert.sameMembers(await titleMatches('zdiamind-body'), [emDash.id]);
+				});
+
+				it("should distinguish voiced kana and composed Hangul", async function () {
+					// NFKD decomposes が into か + a combining mark and 한 into jamo; without
+					// recomposition, the base character would substring-match the composed one
+					var ja = await createDataObject('item', { title: 'zdiaがん', libraryID: userLibraryID });
+					var ko = await createDataObject('item', { title: 'zdia한국', libraryID: userLibraryID });
+
+					async function titleMatches(term) {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('title', 'contains', term);
+						return s.search();
+					}
+
+					// The composed character matches itself
+					assert.sameMembers(await titleMatches('zdiaがん'), [ja.id]);
+					assert.sameMembers(await titleMatches('zdia한국'), [ko.id]);
+					// The base character must not match the composed/voiced one
+					assert.lengthOf(await titleMatches('zdiaかん'), 0);
+					assert.lengthOf(await titleMatches('zdia하'), 0);
+				});
+
+				it("should populate normalized columns for existing rows on backfill", async function () {
+					var item = await createDataObject('item', { title: 'zdiabörkbackfill', libraryID: userLibraryID });
+					// Simulate pre-migration data by clearing the normalized column
+					await Zotero.DB.queryAsync(
+						"UPDATE itemDataValues SET valueNormalized=NULL WHERE value=?",
+						'zdiabörkbackfill'
+					);
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('title', 'contains', 'zdiaborkbackfill');
+					assert.lengthOf(await s.search(), 0);
+
+					await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('search', 'normalizeBackfill', 1)");
+					await Zotero.Schema.populateNormalizedSearchColumns();
+
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+			});
+
 			describe("Quick search", function () {
 				describe("All Fields & Tags", function () {
 					it("should match annotation for tag search", async function () {

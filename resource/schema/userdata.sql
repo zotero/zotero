@@ -1,4 +1,4 @@
--- 125
+-- 126
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -172,7 +172,8 @@ CREATE INDEX items_synced ON items(synced);
 
 CREATE TABLE itemDataValues (
     valueID INTEGER PRIMARY KEY,
-    value UNIQUE
+    value UNIQUE,
+    valueNormalized TEXT
 );
 
 -- Type-specific data for individual items
@@ -229,7 +230,9 @@ CREATE TABLE itemAnnotations (
     type INTEGER NOT NULL,
     authorName TEXT,
     text TEXT,
+    textNormalized TEXT,
     comment TEXT,
+    commentNormalized TEXT,
     color TEXT,
     pageLabel TEXT,
     sortIndex TEXT NOT NULL,
@@ -242,7 +245,8 @@ CREATE INDEX itemAnnotations_parentItemID ON itemAnnotations(parentItemID);
 
 CREATE TABLE tags (
     tagID INTEGER PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    nameNormalized TEXT
 );
 
 CREATE TABLE itemRelations (
@@ -271,6 +275,8 @@ CREATE TABLE creators (
     firstName TEXT,
     lastName TEXT,
     fieldMode INT,
+    firstNameNormalized TEXT,
+    lastNameNormalized TEXT,
     UNIQUE (lastName, firstName, fieldMode)
 );
 
