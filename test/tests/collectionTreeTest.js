@@ -1859,6 +1859,15 @@ describe("Zotero.CollectionTree", function () {
 			});
 		}
 
+		it('should match an accented collection name from an unaccented filter', async function () {
+			var collection = await createDataObject('collection', { name: "zdiacrésumé", libraryID: userLibraryID });
+			await cv.setFilter("zdiacresume");
+			let displayedNames = cv._rows.filter(row => row.type == "collection").map(row => row.ref.name);
+			assert.include(displayedNames, "zdiacrésumé");
+			await cv.setFilter("");
+			await collection.eraseTx();
+		});
+
 		it('should show non-passing entries whose children pass the filter', async function () {
 			await cv.setFilter("three");
 			let displayedRowNames = cv._rows.filter(row => row.type == "collection").map(row => row.ref.name);
