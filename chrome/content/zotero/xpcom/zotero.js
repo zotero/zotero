@@ -806,7 +806,24 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					progressWin.startCloseTimer(3000);
 				}
 			});
-			
+
+			// Populate normalized search columns after an upgrade. This is local-only derived
+			// data, so we don't need to wait for sync for correctness, but we run after the
+			// initial auto-sync (like the Extra migration) so the backfill doesn't compete with a
+			// large initial download. It's sub-second for typical libraries and chunked so the UI
+			// stays responsive on large ones, and search degrades gracefully until it finishes --
+			// so it runs silently, without a progress window of its own (the full-text content
+			// index shows one for the slower, more visible pass).
+			Zotero.startupSyncPromise.then(async () => {
+				if (Zotero.test) return;
+				try {
+					await Zotero.Schema.populateNormalizedSearchColumns();
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			});
+
 			return true;
 		}
 		catch (e) {

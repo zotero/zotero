@@ -1745,7 +1745,7 @@ Zotero.Item.prototype._saveData = async function (env) {
 		let del = [];
 		
 		let valueSQL = "SELECT valueID FROM itemDataValues WHERE value=?";
-		let insertValueSQL = "INSERT INTO itemDataValues VALUES (?,?)";
+		let insertValueSQL = "INSERT INTO itemDataValues (valueID, value, valueNormalized) VALUES (?,?,?)";
 		let replaceSQL = "REPLACE INTO itemData VALUES (?,?,?)";
 		
 		for (let fieldID in this._changed.itemData) {
@@ -1774,7 +1774,8 @@ Zotero.Item.prototype._saveData = async function (env) {
 			let valueID = await Zotero.DB.valueQueryAsync(valueSQL, [value], { debug: true })
 			if (!valueID) {
 				valueID = Zotero.ID.get('itemDataValues');
-				await Zotero.DB.queryAsync(insertValueSQL, [valueID, value], { debug: false });
+				let valueNormalized = Zotero.Utilities.Internal.normalizeForSearchStorage(value);
+				await Zotero.DB.queryAsync(insertValueSQL, [valueID, value, valueNormalized], { debug: false });
 			}
 			
 			await Zotero.DB.queryAsync(replaceSQL, [itemID, fieldID, valueID], { debug: false });
@@ -2266,8 +2267,8 @@ Zotero.Item.prototype._saveData = async function (env) {
 		let isExternal = this._getLatestField('annotationIsExternal');
 		
 		let sql = "REPLACE INTO itemAnnotations "
-			+ "(itemID, parentItemID, type, authorName, text, comment, color, pageLabel, sortIndex, position, isExternal) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			+ "(itemID, parentItemID, type, authorName, text, textNormalized, comment, commentNormalized, color, pageLabel, sortIndex, position, isExternal) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		await Zotero.DB.queryAsync(
 			sql,
 			[
@@ -2276,7 +2277,9 @@ Zotero.Item.prototype._saveData = async function (env) {
 				typeID,
 				authorName || null,
 				text || null,
+				Zotero.Utilities.Internal.normalizeForSearchStorage(text),
 				comment || null,
+				Zotero.Utilities.Internal.normalizeForSearchStorage(comment),
 				color || Zotero.Annotations.DEFAULT_COLOR,
 				pageLabel || null,
 				sortIndex,

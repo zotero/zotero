@@ -36,6 +36,100 @@ ChromeUtils.defineESModuleGetters(globalThis, {
 Zotero.Utilities.Internal = {
 	SNAPSHOT_SAVE_TIMEOUT: 30000,
 
+	// Characters that NFKD leaves in a non-ASCII form: letters with no decomposition (letter
+	// ligatures and others) and the fraction slash NFKD introduces (½ -> "1⁄2"). Converted via an
+	// explicit map applied after NFKD/lowercasing, so that e.g. a search for "soren" matches
+	// "Søren" and "1/2" matches "½". Typographic ligatures (ﬁ, ﬂ, ...), superscripts, full-width
+	// forms, etc. don't need an entry -- NFKD already reduces those to ASCII.
+	_searchNormalizeMap: {
+		'ø': 'o',
+		'œ': 'oe',
+		'æ': 'ae',
+		'ł': 'l',
+		'đ': 'd',
+		'ð': 'd',
+		'þ': 'th',
+		'ß': 'ss',
+		'ı': 'i',
+		'⁄': '/'
+	},
+
+	// The rich-text formatting tags Zotero supports in item fields (see the rich-text bibliography
+	// support page). Stripped when normalizing so search matches the field's plain text: a phrase
+	// isn't broken across a formatted word (e.g., an italicized species name) and the tag markup
+	// itself isn't matchable. Only this whitelist is stripped, so literal angle brackets in a value
+	// stay searchable.
+	_searchFormattingTagRE: /<\/?(?:i|b|sub|sup)>|<span (?:style="font-variant:small-caps;"|class="nocase")>|<\/span>/g,
+
+
+	/**
+	 * Normalize a string to a case- and accent-insensitive form for searching
+	 *
+	 * Strips Zotero's supported field formatting tags (see _searchFormattingTagRE), then uses
+	 * Unicode NFKD compatibility decomposition (ICU-backed) to split combining marks off their base
+	 * letters and reduce presentation variants (typographic ligatures, superscripts, full-width
+	 * forms, etc.) to plain ASCII, strips the marks, converts a few non-decomposing letters via
+	 * _searchNormalizeMap, and folds typographic quotes and dashes to their ASCII forms. This is the
+	 * form stored in the normalized search columns and applied to search terms, so that e.g.
+	 * "seance" matches "séance", "x2" matches "x²", and "children's" matches a curly apostrophe.
+	 *
+	 * If you change this function or _searchNormalizeMap, add a userdata migration step that
+	 * re-normalizes existing rows whose raw value contains the affected characters (scan with
+	 * GLOB/LIKE).
+	 *
+	 * @param {String} str
+	 * @return {String}
+	 */
+	normalizeForSearch: function (str) {
+		if (!str) {
+			return str;
+		}
+		let map = Zotero.Utilities.Internal._searchNormalizeMap;
+		// Strip supported formatting tags so they don't break phrase matches or match themselves
+		if (str.includes('<')) {
+			str = str.replace(Zotero.Utilities.Internal._searchFormattingTagRE, '');
+		}
+		return str.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+			.replace(/[\u00f8\u0153\u00e6\u0142\u0111\u00f0\u00fe\u00df\u0131\u2044]/g, c => map[c])
+			// Fold typographic quotes and dashes to their ASCII forms, which NFKD leaves alone, so
+			// curly quotes and en/em dashes in stored text (from a word processor or translator)
+			// match the straight quotes and hyphens typed in a search. Dashes all fold to a single
+			// hyphen, since that's what a search is typed with.
+			.replace(/[\u2018\u2019\u201a\u201b\u2032]/g, "'")
+			.replace(/[\u201c\u201d\u201e\u201f\u2033]/g, '"')
+			.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212]/g, '-')
+			// Recompose (NFC) so kana and Hangul that NFKD split apart -- が into か + dakuten,
+			// 한 into jamo -- are put back together. Otherwise their decomposed forms would
+			// substring-match shorter ones under LIKE/instr (か matching が, 하 matching 한). Latin
+			// folding is unaffected: its diacritics were already stripped above, so nothing is
+			// left to recompose.
+			.normalize('NFC');
+	},
+
+
+	/**
+	 * Compute the value to store in a normalized search column for a given source value
+	 *
+	 * Returns the normalized form only when normalizing changes more than the case of ASCII letters,
+	 * which is all SQLite's default LIKE folds; otherwise returns null, so the bulk of plain-ASCII
+	 * values cost nothing and queries fall back to the raw column via COALESCE. A value with folded
+	 * diacritics, folded forms, or non-ASCII case (Greek, Cyrillic, ...) that LIKE wouldn't fold is
+	 * stored, so a normalized search term still matches it.
+	 *
+	 * @param {String} value
+	 * @return {String|null}
+	 */
+	normalizeForSearchStorage: function (value) {
+		if (typeof value != 'string' || !value) {
+			return null;
+		}
+		let normalized = Zotero.Utilities.Internal.normalizeForSearch(value);
+		// Lowercasing only the ASCII letters, so the comparison treats a case difference as
+		// significant unless LIKE would fold it
+		let asciiLowercased = value.replace(/[A-Z]/g, c => c.toLowerCase());
+		return normalized === asciiLowercased ? null : normalized;
+	},
+
 	/**
 	 * Run a function on chunks of a given size of an array's elements.
 	 *
