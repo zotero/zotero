@@ -2826,7 +2826,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let collectionTable = document.getElementById("collection-tree").firstElementChild;
 		let isEmpty = this._isFilterEmpty();
 		let willBeEmpty = filterText.length == 0;
-		this._filter = filterText.toLowerCase();
+		this._filter = Zotero.Utilities.Internal.normalizeForSearch(filterText);
 		let currentRow = this.getRow(this.selection.focused) || this._hiddenFocusedRow;
 		let currentRowDisplayed = currentRow && this._includedInTree(currentRow.ref);
 		let shouldRestoreScrollPosition = willBeEmpty && !isEmpty && !this._treeWasFocused;
@@ -3077,14 +3077,15 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (this._filterResultsCache[objectID] && !resetCache) {
 			return this._filterResultsCache[objectID];
 		}
-		// Filtering is case insensitive
-		let objectName = (object.name || "").toLowerCase();
+		// Filtering is case- and accent-insensitive
+		let normalize = Zotero.Utilities.Internal.normalizeForSearch;
+		let objectName = normalize(object.name || "");
 		// Special treatment to fetch the name for My Library or Feeds
 		if (objectID[0] == 'L' && object._ObjectType !== "Group") {
-			objectName = Zotero.getString('pane.collections.library').toLowerCase();
+			objectName = normalize(Zotero.getString('pane.collections.library'));
 		}
 		else if (objectID == 'feeds') {
-			objectName = Zotero.getString('pane.collections.feedLibraries').toLowerCase();
+			objectName = normalize(Zotero.getString('pane.collections.feedLibraries'));
 		}
 		let filterValue = this._filter;
 
