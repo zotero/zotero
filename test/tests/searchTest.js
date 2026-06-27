@@ -1421,6 +1421,72 @@ describe("Zotero.Search", function () {
 				});
 			});
 			
+			describe("Accent-insensitive matching", function () {
+				it("should match accented and unaccented text interchangeably", async function () {
+					// Unaccented term against accented text
+					var item = await createDataObject('item', { title: 'zdiaséance', libraryID: userLibraryID });
+					var s1 = new Zotero.Search();
+					s1.libraryID = userLibraryID;
+					s1.addCondition('title', 'contains', 'zdiaseance');
+					assert.sameMembers(await s1.search(), [item.id]);
+
+					// Accented term against unaccented text
+					var item2 = await createDataObject('item', { title: 'zdiaresume', libraryID: userLibraryID });
+					var s2 = new Zotero.Search();
+					s2.libraryID = userLibraryID;
+					s2.addCondition('title', 'contains', 'zdiarésumé');
+					assert.sameMembers(await s2.search(), [item2.id]);
+				});
+
+				it("should match an accented creator from an unaccented term", async function () {
+					var item = await createDataObject('item', {
+						libraryID: userLibraryID,
+						creators: [{ firstName: 'Étiennezdia', lastName: 'Müllerzdia', creatorType: 'author' }]
+					});
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('creator', 'contains', 'etiennezdia mullerzdia');
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+
+				it("should match an accented tag from an unaccented term", async function () {
+					var item = await createDataObject('item', {
+						libraryID: userLibraryID,
+						tags: [{ tag: 'résumézdia' }]
+					});
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('tag', 'contains', 'resumezdia');
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+
+				it("should match ligatures, superscripts, fractions, and non-decomposing letters", async function () {
+					var item = await createDataObject('item', { title: 'zdiasøren œuvre ﬁle x² ½ straße', libraryID: userLibraryID });
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('title', 'contains', 'zdiasoren oeuvre file x2 1/2 strasse');
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+
+				it("should populate normalized columns for existing rows on backfill", async function () {
+					var item = await createDataObject('item', { title: 'zdiabörkbackfill', libraryID: userLibraryID });
+					// Simulate pre-migration data by clearing the normalized column
+					await Zotero.DB.queryAsync(
+						"UPDATE itemDataValues SET valueNormalized=NULL WHERE value=?",
+						'zdiabörkbackfill'
+					);
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('title', 'contains', 'zdiaborkbackfill');
+					assert.lengthOf(await s.search(), 0);
+
+					await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('search', 'normalizeBackfill', 1)");
+					await Zotero.Schema.populateNormalizedSearchColumns();
+
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+			});
+
 			describe("Quick search", function () {
 				describe("All Fields & Tags", function () {
 					it("should match annotation for tag search", async function () {

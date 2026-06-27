@@ -1109,6 +1109,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 				alias: conditionData.name != name ? name : false,
 				table: conditionData.table,
 				field: conditionData.field,
+				normalizedField: conditionData.normalizedField,
 				operator: condition.operator,
 				value: condition.value,
 				flags: conditionData.flags,
@@ -1811,6 +1812,17 @@ Zotero.Search.prototype._buildQuery = async function () {
 					
 					// Non-date fields
 					else {
+						// For text conditions, match against the normalized shadow column
+						// with a normalized search term, so that e.g. "seance" matches
+						// "séance" and vice versa
+						var useNormalized = condition.normalizedField
+							&& typeof condition.value == 'string'
+							&& ['contains', 'doesNotContain', 'beginsWith']
+								.includes(condition.operator);
+						var searchValue = useNormalized
+							? Zotero.Utilities.Internal.normalizeForSearch(condition.value)
+							: condition.value;
+						
 						switch (condition.operator) {
 							// Cast strings as integers for < and > comparisons,
 							// at least until 
@@ -1828,7 +1840,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 								break;
 								
 							default:
-								condSQL += condition['field'];
+								condSQL += useNormalized ? condition.normalizedField : condition['field'];
 						}
 						
 						switch (condition['operator']){
@@ -1840,10 +1852,10 @@ Zotero.Search.prototype._buildQuery = async function () {
 								if (condition['flags'] &&
 										condition['flags']['leftbound'] &&
 										Zotero.Prefs.get('search.useLeftBound')) {
-									condSQLParams.push(condition['value'] + '%');
+									condSQLParams.push(searchValue + '%');
 								}
 								else {
-									condSQLParams.push('%' + condition['value'] + '%');
+									condSQLParams.push('%' + searchValue + '%');
 								}
 								break;
 								
@@ -1891,7 +1903,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 							
 							case 'beginsWith':
 								condSQL += ' LIKE ?';
-								condSQLParams.push(condition['value'] + '%');
+								condSQLParams.push(searchValue + '%');
 								break;
 							
 							case 'isLessThan':

@@ -806,7 +806,52 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					progressWin.startCloseTimer(3000);
 				}
 			});
-			
+
+			// Populate normalized search columns after an upgrade. This is local-only derived
+			// data, so we don't need to wait for sync for correctness, but we run after the
+			// initial auto-sync (like the Extra migration) so the backfill doesn't compete with a
+			// large initial download. It's sub-second for typical libraries, chunked transactions
+			// yield so the UI stays responsive on large ones, and search degrades gracefully
+			// until it finishes.
+			Zotero.startupSyncPromise.then(async () => {
+				if (Zotero.test) return;
+				let progressWin;
+				let itemProgress;
+				let startTime = Date.now();
+				try {
+					await Zotero.Schema.populateNormalizedSearchColumns({
+						onProgress: ({ progress, progressMax }) => {
+							// Most libraries finish in well under a second, so only show UI once
+							// the backfill has been running long enough to be worth noting
+							if (!progressWin && progress < progressMax
+									&& Date.now() - startTime > 1500) {
+								progressWin = new Zotero.ProgressWindow({
+									closeOnClick: false
+								});
+								progressWin.changeHeadline(Zotero.getString('upgrade.status'));
+								itemProgress = new progressWin.ItemProgress(
+									'journalArticle',
+									Zotero.getString('search-normalization-progress-message')
+								);
+								progressWin.show();
+							}
+							if (itemProgress) {
+								itemProgress.setProgress(progress / progressMax * 100);
+							}
+						}
+					});
+				}
+				catch (e) {
+					Zotero.logError(e);
+					if (itemProgress) {
+						itemProgress.setError();
+					}
+				}
+				if (progressWin) {
+					progressWin.startCloseTimer(3000);
+				}
+			});
+
 			return true;
 		}
 		catch (e) {
