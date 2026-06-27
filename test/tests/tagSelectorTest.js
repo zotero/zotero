@@ -134,7 +134,29 @@ describe("Tag Selector", function () {
 
 			tagSelector.handleSearch('');
 			await Zotero.Promise.delay(500);
-			
+
+			await item.eraseTx();
+		});
+
+		it("should match accented tags from an unaccented search term", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			var item = createUnsavedDataObject('item', { collections: [collection.id] });
+			item.setTags(['résumé', 'other']);
+			var promise = waitForTagSelector(win);
+			await item.saveTx();
+			await promise;
+
+			promise = waitForTagSelector(win);
+			tagSelector.handleSearch('resume');
+			await promise;
+
+			assert.sameMembers(getRegularTags(), ['résumé']);
+
+			promise = waitForTagSelector(win);
+			tagSelector.handleSearch('');
+			await promise;
+
 			await item.eraseTx();
 		});
 	});
