@@ -368,12 +368,11 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 		let rows = await Zotero.DB.queryAsync(
 			"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID=? AND value LIKE ? "
+				+ "WHERE libraryID=? AND fieldID=? "
 				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
 			[
 				libraryID,
-				Zotero.ItemFields.getID('DOI'),
-				'10.%'
+				Zotero.ItemFields.getID('DOI')
 			]
 		);
 		for (let row of rows) {
