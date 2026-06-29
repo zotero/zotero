@@ -365,7 +365,7 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 	let matches = [];
 
 	if (doiSet.size) {
-		let rows = await Zotero.DB.queryAsync(
+		let doiRows = await Zotero.DB.queryAsync(
 			"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "WHERE libraryID=? AND fieldID=? "
@@ -375,8 +375,25 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 				Zotero.ItemFields.getID('DOI')
 			]
 		);
-		for (let row of rows) {
+		for (let row of doiRows) {
 			let doi = Zotero.Utilities.cleanDOI(row.value);
+			if (doi && doiSet.has(doi.toLowerCase())) {
+				itemIDs.add(row.itemID);
+			}
+		}
+		let extraRows = await Zotero.DB.queryAsync(
+			"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE libraryID=? AND fieldID=? "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
+			[
+				libraryID,
+				Zotero.ItemFields.getID('extra')
+			]
+		);
+		for (let row of extraRows) {
+			let { fields } = Zotero.Utilities.Internal.extractExtraFields(row.value);
+			let doi = Zotero.Utilities.cleanDOI(fields.get('DOI'));
 			if (doi && doiSet.has(doi.toLowerCase())) {
 				itemIDs.add(row.itemID);
 			}
@@ -416,7 +433,10 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 
 		let matchedFields = [];
 		let matchedIdentifiers = {};
-		let itemDOI = Zotero.Utilities.cleanDOI(item.getField('DOI'));
+		let itemDOI = [
+			item.getField('DOI'),
+			item.getExtraField('DOI')
+		].map(doi => Zotero.Utilities.cleanDOI(doi)).find(doi => doi && doiSet.has(doi.toLowerCase()));
 		if (itemDOI && doiSet.has(itemDOI.toLowerCase())) {
 			matchedFields.push('DOI');
 			matchedIdentifiers.doi = itemDOI;

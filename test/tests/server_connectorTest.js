@@ -528,6 +528,37 @@ describe("Connector Server", function () {
 			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/prefixed-doi");
 		});
 
+		it("should match existing item DOI values stored in Extra", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("webpage");
+			item.setField("title", "Existing Extra DOI Page");
+			item.setField("extra", "DOI: 10.1234/existing-extra-doi");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: {
+							doi: ["10.1234/existing-extra-doi"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/existing-extra-doi");
+		});
+
 		it("should reject requests without identifiers", async function () {
 			let error = await getPromiseError(httpRequest(
 				"POST",
