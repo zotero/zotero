@@ -131,6 +131,11 @@ Zotero_Preferences.Spotlight = {
 		}
 	},
 
+	excludeDataDir: function () {
+		Zotero.DataDirectory.reveal();
+		Zotero.launchURL('x-apple.systempreferences:com.apple.preference.spotlight');
+	},
+
 	_excludedLibraries: function () {
 		try {
 			let raw = Zotero.Prefs.get('spotlight.excludedLibraries');

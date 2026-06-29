@@ -90,8 +90,6 @@ Zotero.Spotlight = new function () {
 		_registerPrefObservers();
 
 		_enabled = !!Zotero.Prefs.get(PREF + 'enabled');
-		// Applied regardless of ownership
-		_applyDataDirExclusion().catch(e => Zotero.logError(e));
 		if (!_enabled) {
 			return;
 		}
@@ -367,11 +365,6 @@ Zotero.Spotlight = new function () {
 		_prefObserverIDs.push(
 			Zotero.Prefs.registerObserver(PREF + 'enabled', _onEnabledChanged)
 		);
-		// excludeDataDir has an immediate filesystem effect, so apply on change.
-		_prefObserverIDs.push(
-			Zotero.Prefs.registerObserver(PREF + 'excludeDataDir',
-				() => _applyDataDirExclusion().catch(e => Zotero.logError(e)))
-		);
 	}
 
 	function _unregisterPrefObservers() {
@@ -405,29 +398,6 @@ Zotero.Spotlight = new function () {
 				await SpotlightOwner.release();
 				_isOwner = false;
 			}
-		}
-		await _applyDataDirExclusion();
-	}
-
-	// `.metadata_never_index` file excludes the data dir from Spotlight indexing.
-	async function _applyDataDirExclusion() {
-		if (!_dataDir) {
-			return;
-		}
-		let file = PathUtils.join(_dataDir, '.metadata_never_index');
-		let shouldExclude = _available && _enabled
-			&& !!Zotero.Prefs.get(PREF + 'excludeDataDir');
-		try {
-			let exists = await IOUtils.exists(file);
-			if (shouldExclude && !exists) {
-				await IOUtils.writeUTF8(file, '');
-			}
-			else if (!shouldExclude && exists) {
-				await IOUtils.remove(file);
-			}
-		}
-		catch (e) {
-			Zotero.logError(e);
 		}
 	}
 
