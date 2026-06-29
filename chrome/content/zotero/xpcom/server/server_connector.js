@@ -380,23 +380,29 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 		}
 	}
 	if (urlSet.size) {
-		let rows = await Zotero.DB.queryAsync(
-			"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
-				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID=? "
-				+ "AND value IN (" + identifiers.url.map(() => '?').join(',') + ") "
-				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
-			[
-				libraryID,
-				Zotero.ItemFields.getID('url'),
-				...identifiers.url
-			]
-		);
-		for (let row of rows) {
-			if (urlSet.has(row.value)) {
-				itemIDs.add(row.itemID);
+		await Zotero.Utilities.Internal.forEachChunkAsync(
+			identifiers.url,
+			Zotero.DB.MAX_BOUND_PARAMETERS - 2,
+			async function (chunk) {
+				let rows = await Zotero.DB.queryAsync(
+					"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+						+ "JOIN itemDataValues USING (valueID) "
+						+ "WHERE libraryID=? AND fieldID=? "
+						+ "AND value IN (" + chunk.map(() => '?').join(',') + ") "
+						+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
+					[
+						libraryID,
+						Zotero.ItemFields.getID('url'),
+						...chunk
+					]
+				);
+				for (let row of rows) {
+					if (urlSet.has(row.value)) {
+						itemIDs.add(row.itemID);
+					}
+				}
 			}
-		}
+		);
 	}
 
 	for (let itemID of itemIDs) {

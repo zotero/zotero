@@ -430,6 +430,40 @@ describe("Connector Server", function () {
 			assert.equal(data.matches[0].matchedIdentifiers.url, "https://www.example.com/path");
 		});
 
+		it("should chunk large URL duplicate lookups", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("webpage");
+			item.setField("title", "Existing Large Lookup Page");
+			item.setField("url", "https://example.com/target-large-lookup");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let urls = [];
+			for (let i = 0; i < Zotero.DB.MAX_BOUND_PARAMETERS + 5; i++) {
+				urls.push(`https://example.com/not-${i}`);
+			}
+			urls.push("https://example.com/target-large-lookup");
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: { url: urls }
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+		});
+
 		it("should reject requests without identifiers", async function () {
 			let error = await getPromiseError(httpRequest(
 				"POST",
