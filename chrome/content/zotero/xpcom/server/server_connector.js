@@ -454,7 +454,7 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 			id: item.id,
 			key: item.key,
 			libraryID: item.libraryID,
-			title: item.getField('title'),
+			title: item.getDisplayTitle(),
 			matchedFields,
 			matchedIdentifiers
 		});

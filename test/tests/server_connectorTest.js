@@ -559,6 +559,37 @@ describe("Connector Server", function () {
 			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/existing-extra-doi");
 		});
 
+		it("should return display titles for base-mapped title fields", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("legalCase");
+			item.setField("caseName", "Existing Case Name");
+			item.setField("url", "https://example.com/case");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: {
+							url: ["https://example.com/case"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].title, "Existing Case Name");
+		});
+
 		it("should reject requests without identifiers", async function () {
 			let error = await getPromiseError(httpRequest(
 				"POST",
