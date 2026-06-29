@@ -136,6 +136,7 @@ const xpcomFilesLocal = [
 	'server/server_localAPI',
 	'server/saveSession',
 	'session',
+	'spotlight',
 	'streamer',
 	'style',
 	'sync',

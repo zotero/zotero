@@ -1,0 +1,33 @@
+diff --git a/toolkit/xre/MacApplicationDelegate.mm b/toolkit/xre/MacApplicationDelegate.mm
+index b7db989..dc0798b 100644
+--- a/toolkit/xre/MacApplicationDelegate.mm
++++ b/toolkit/xre/MacApplicationDelegate.mm
+@@ -334,6 +334,28 @@ - (BOOL)application:(NSApplication*)application
+     continueUserActivity:(NSUserActivity*)userActivity
+       restorationHandler:
+           (void (^)(NSArray<id<NSUserActivityRestoring>>*))restorationHandler {
++
++  // Handle a clicked Core Spotlight result: its identifier is
++  // "<bundleid>:<zotero-path>", so route it as zotero://spotlight/<path> for the
++  // JS handler to open or select the item, even on a cold launch.
++  if ([userActivity.activityType isEqualToString:@"com.apple.corespotlightitem"]) {
++    NSString* zoteroIdent =
++        userActivity.userInfo[@"kCSSearchableItemActivityIdentifier"];
++    if ([zoteroIdent isKindOfClass:[NSString class]]) {
++      NSRange zoteroSep = [zoteroIdent rangeOfString:@":"];
++      if (zoteroSep.location != NSNotFound) {
++        NSURL* zoteroURL = [NSURL
++            URLWithString:[@"zotero://spotlight/"
++                              stringByAppendingString:
++                                  [zoteroIdent
++                                      substringFromIndex:zoteroSep.location + 1]]];
++        if (zoteroURL) {
++          return [self openURLs:@[ zoteroURL ]];
++        }
++      }
++    }
++  }
++
+   if (![userActivity.activityType
+           isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+     return NO;

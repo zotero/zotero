@@ -281,9 +281,102 @@
 				<label value="&zotero.preferences.search.indexStats.words;"/>
 				<label id="fulltext-stats-words"/>
 			</vbox>
-		</groupbox>	
+		</groupbox>
 	</vbox>
-	
+
+	<vbox class="main-section" id="zotero-prefpane-advanced-spotlight" role="group" hidden="true"
+			aria-labelledby="zotero-prefpane-advanced-spotlight-title">
+		<html:h1 id="zotero-prefpane-advanced-spotlight-title" data-l10n-id="preferences-spotlight-title"/>
+
+		<groupbox>
+			<checkbox
+				id="spotlight-enable"
+				data-l10n-id="preferences-spotlight-enable"
+				preference="extensions.zotero.spotlight.enabled"
+				native="true"
+			/>
+			<vbox id="spotlight-controls">
+				<hbox align="center" class="indented-pref">
+					<label data-l10n-id="preferences-spotlight-result-action" control="spotlight-result-action"/>
+					<menulist id="spotlight-result-action" native="true">
+						<menupopup>
+							<menuitem data-l10n-id="preferences-spotlight-result-action-show" value="false"/>
+							<menuitem data-l10n-id="preferences-spotlight-result-action-open" value="true"/>
+						</menupopup>
+					</menulist>
+				</hbox>
+				<checkbox
+					id="spotlight-index-fulltext"
+					class="indented-pref"
+					data-l10n-id="preferences-spotlight-index-fulltext"
+					preference="extensions.zotero.spotlight.indexFullText"
+					native="true"
+				/>
+			</vbox>
+
+			<vbox id="spotlight-owner-notice" hidden="true">
+				<hbox align="center">
+					<label id="spotlight-owner-text" class="text-muted"/>
+				</hbox>
+				<hbox>
+					<button id="spotlight-take-ownership"
+						data-l10n-id="preferences-spotlight-take-ownership"
+						oncommand="Zotero_Preferences.Spotlight.takeOwnership()"/>
+				</hbox>
+			</vbox>
+		</groupbox>
+
+		<hbox align="center">
+			<button id="spotlight-rebuild" data-l10n-id="preferences-spotlight-rebuild"
+				oncommand="Zotero_Preferences.Spotlight.rebuild()"/>
+		</hbox>
+		<description id="spotlight-status" class="text-muted" hidden="true"/>
+
+		<groupbox id="spotlight-libraries-group">
+			<label><html:h2 data-l10n-id="preferences-spotlight-libraries-title"/></label>
+			<vbox id="spotlight-libraries"/>
+		</groupbox>
+
+		<groupbox id="spotlight-privacy-group">
+			<label><html:h2 data-l10n-id="preferences-spotlight-privacy-title"/></label>
+			<description data-l10n-id="preferences-spotlight-privacy-description"/>
+			<checkbox
+				id="spotlight-exclude-data-dir"
+				data-l10n-id="preferences-spotlight-exclude-data-dir"
+				preference="extensions.zotero.spotlight.excludeDataDir"
+				native="true"
+			/>
+		</groupbox>
+
+		<groupbox id="spotlight-format-group">
+			<label><html:h2 data-l10n-id="preferences-spotlight-format-title"/></label>
+			<description data-l10n-id="preferences-spotlight-format-description">
+				<label is="zotero-text-link"
+					href="https://www.zotero.org/support/file_renaming"
+					data-l10n-name="spotlight-format-help-link"/>
+			</description>
+
+			<hbox style="display: flex; align-items: center;">
+				<label data-l10n-id="preferences-spotlight-title-template" control="spotlight-title-template"/>
+				<html:input
+					id="spotlight-title-template"
+					type="text"
+					style="flex: 1;"
+					preference="extensions.zotero.spotlight.titleTemplate"
+				/>
+			</hbox>
+			<hbox style="display: flex; align-items: center;">
+				<label data-l10n-id="preferences-spotlight-description-template" control="spotlight-description-template"/>
+				<html:input
+					id="spotlight-description-template"
+					type="text"
+					style="flex: 1;"
+					preference="extensions.zotero.spotlight.descriptionTemplate"
+				/>
+			</hbox>
+		</groupbox>
+	</vbox>
+
 	<vbox>
 		<hbox id="zotero-prefpane-advanced-open-buttons" align="center">
 			<button id="config-editor"
