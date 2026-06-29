@@ -9,7 +9,6 @@ describe("Zotero.Spotlight", function () {
 		'spotlight.enabled',
 		'spotlight.openOnConfirm',
 		'spotlight.indexFullText',
-		'spotlight.excludeDataDir',
 		'spotlight.titleTemplate',
 		'spotlight.descriptionTemplate',
 		'spotlight.excludedLibraries',
@@ -22,10 +21,6 @@ describe("Zotero.Spotlight", function () {
 		return PathUtils.join(
 			home, 'Library', 'Application Support', 'org.zotero.spotlight', 'owner.json'
 		);
-	}
-
-	function neverIndexPath() {
-		return PathUtils.join(Zotero.DataDirectory.dir, '.metadata_never_index');
 	}
 
 	// Unique lowercase-alnum token so a Core Spotlight wildcard query can find a
@@ -49,17 +44,6 @@ describe("Zotero.Spotlight", function () {
 			await Zotero.Promise.delay(500);
 		}
 		return results;
-	}
-
-	async function waitForFileState(path, shouldExist, timeout = 5000) {
-		let start = Date.now();
-		while (Date.now() - start < timeout) {
-			if ((await IOUtils.exists(path)) === shouldExist) {
-				return true;
-			}
-			await Zotero.Promise.delay(100);
-		}
-		return false;
 	}
 
 	before(async function () {
@@ -321,30 +305,6 @@ describe("Zotero.Spotlight", function () {
 			assert.isNull(await Zotero.Spotlight.getForeignOwner());
 			let written = JSON.parse(await IOUtils.readUTF8(ownerPath()));
 			assert.equal(written.dataDir, Zotero.DataDirectory.dir);
-		});
-	});
-
-	describe("data directory exclusion", function () {
-		before(function () {
-			// The exclusion only applies while the feature is enabled.
-			Zotero.Prefs.set('spotlight.enabled', true);
-		});
-
-		it("should write .metadata_never_index when the exclusion is on", async function () {
-			Zotero.Prefs.set('spotlight.excludeDataDir', false);
-			assert.isTrue(await waitForFileState(neverIndexPath(), false));
-			Zotero.Prefs.set('spotlight.excludeDataDir', true);
-			assert.isTrue(await waitForFileState(neverIndexPath(), true),
-				".metadata_never_index should be created");
-		});
-
-		it("should remove .metadata_never_index when the exclusion is off", async function () {
-			Zotero.Prefs.set('spotlight.excludeDataDir', true);
-			assert.isTrue(await waitForFileState(neverIndexPath(), true));
-			Zotero.Prefs.set('spotlight.excludeDataDir', false);
-			assert.isTrue(await waitForFileState(neverIndexPath(), false),
-				".metadata_never_index should be removed");
-			Zotero.Prefs.set('spotlight.excludeDataDir', true);
 		});
 	});
 

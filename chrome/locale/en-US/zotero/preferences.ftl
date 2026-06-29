@@ -120,9 +120,9 @@ preferences-spotlight-take-ownership =
     .label = Use This Profile Instead
 preferences-spotlight-libraries-title = Indexed Libraries
 preferences-spotlight-privacy-title = Avoiding Duplicate Indexing
-preferences-spotlight-privacy-description = macOS may also index the attachment files in your { -app-name } data directory, showing them in Spotlight alongside your library items. Excluding the data directory keeps Spotlight showing only your { -app-name } items.
+preferences-spotlight-privacy-description = macOS may also index the attachment files in your { -app-name } data directory, showing them in Spotlight alongside your library items. To prevent this, add the data directory to the list under Spotlight’s Privacy settings.
 preferences-spotlight-exclude-data-dir =
-    .label = Exclude data directory from Spotlight
+    .label = Reveal Data Directory and Open Spotlight Settings…
 preferences-spotlight-format-title = Display Format
 preferences-spotlight-format-description = Customize how items appear in Spotlight. See the <label data-l10n-name="spotlight-format-help-link">documentation</label> for the full list.
 preferences-spotlight-title-template =

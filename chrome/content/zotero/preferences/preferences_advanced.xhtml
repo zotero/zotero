@@ -344,12 +344,11 @@
 		<groupbox id="spotlight-privacy-group">
 			<label><html:h2 data-l10n-id="preferences-spotlight-privacy-title"/></label>
 			<description data-l10n-id="preferences-spotlight-privacy-description"/>
-			<checkbox
-				id="spotlight-exclude-data-dir"
-				data-l10n-id="preferences-spotlight-exclude-data-dir"
-				preference="extensions.zotero.spotlight.excludeDataDir"
-				native="true"
-			/>
+			<hbox>
+				<button id="spotlight-exclude-data-dir"
+					data-l10n-id="preferences-spotlight-exclude-data-dir"
+					oncommand="Zotero_Preferences.Spotlight.excludeDataDir()"/>
+			</hbox>
 		</groupbox>
 
 		<groupbox id="spotlight-format-group">
