@@ -77,7 +77,13 @@ Zotero.Utilities.Internal = {
 		}
 		let map = Zotero.Utilities.Internal._searchNormalizeMap;
 		return str.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-			.replace(/[\u00f8\u0153\u00e6\u0142\u0111\u00f0\u00fe\u00df\u0131\u2044]/g, c => map[c]);
+			.replace(/[\u00f8\u0153\u00e6\u0142\u0111\u00f0\u00fe\u00df\u0131\u2044]/g, c => map[c])
+			// Recompose (NFC) so kana and Hangul that NFKD split apart -- が into か + dakuten,
+			// 한 into jamo -- are put back together. Otherwise their decomposed forms would
+			// substring-match shorter ones under LIKE/instr (か matching が, 하 matching 한). Latin
+			// folding is unaffected: its diacritics were already stripped above, so nothing is
+			// left to recompose.
+			.normalize('NFC');
 	},
 
 

@@ -1468,6 +1468,27 @@ describe("Zotero.Search", function () {
 					assert.sameMembers(await s.search(), [item.id]);
 				});
 
+				it("should distinguish voiced kana and composed Hangul", async function () {
+					// NFKD decomposes が into か + a combining mark and 한 into jamo; without
+					// recomposition, the base character would substring-match the composed one
+					var ja = await createDataObject('item', { title: 'zdiaがん', libraryID: userLibraryID });
+					var ko = await createDataObject('item', { title: 'zdia한국', libraryID: userLibraryID });
+
+					async function titleMatches(term) {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('title', 'contains', term);
+						return s.search();
+					}
+
+					// The composed character matches itself
+					assert.sameMembers(await titleMatches('zdiaがん'), [ja.id]);
+					assert.sameMembers(await titleMatches('zdia한국'), [ko.id]);
+					// The base character must not match the composed/voiced one
+					assert.lengthOf(await titleMatches('zdiaかん'), 0);
+					assert.lengthOf(await titleMatches('zdia하'), 0);
+				});
+
 				it("should populate normalized columns for existing rows on backfill", async function () {
 					var item = await createDataObject('item', { title: 'zdiabörkbackfill', libraryID: userLibraryID });
 					// Simulate pre-migration data by clearing the normalized column
