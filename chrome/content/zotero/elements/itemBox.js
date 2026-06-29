@@ -2417,10 +2417,6 @@
 				return;
 			}
 			
-			if (textbox.cancelled) {
-				return;
-			}
-
 			var fieldName = textbox.getAttribute('fieldname');
 
 			let isMultiline = Zotero.ItemFields.isMultiline(fieldName);
@@ -2432,6 +2428,10 @@
 
 			if (isMultiline) {
 				textbox.setAttribute("min-lines", 1);
+			}
+
+			if (textbox.cancelled) {
+				return;
 			}
 
 			if (isCustomRow) {
