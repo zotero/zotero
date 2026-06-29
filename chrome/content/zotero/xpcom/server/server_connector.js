@@ -345,6 +345,10 @@ Zotero.Server.Connector._getItemIdentifiers = function (data) {
 
 	for (let item of data.items || []) {
 		addDOI(item.DOI);
+		if (item.extra) {
+			let { fields } = Zotero.Utilities.Internal.extractExtraFields(item.extra);
+			addDOI(fields.get('DOI'));
+		}
 		addURL(item.url);
 	}
 

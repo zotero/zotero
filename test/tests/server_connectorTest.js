@@ -464,6 +464,39 @@ describe("Connector Server", function () {
 			assert.equal(data.matches[0].id, item.id);
 		});
 
+		it("should extract DOI from translated item Extra before duplicate lookup", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing Extra DOI Article");
+			item.setField("DOI", "10.1234/extra-doi");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						items: [{
+							itemType: "journalArticle",
+							title: "New Extra DOI Article",
+							extra: "DOI: 10.1234/extra-doi"
+						}]
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/extra-doi");
+		});
+
 		it("should reject requests without identifiers", async function () {
 			let error = await getPromiseError(httpRequest(
 				"POST",
