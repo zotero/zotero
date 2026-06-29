@@ -851,14 +851,18 @@
 						userData.className = "meta-data";
 						let valueElem = this.createValueElement({
 							text: hasMultipleUsers ? '' : Zotero.Users.getName(userID),
+							id: `itembox-field-value-${userFieldName}`,
+							attributes: { fieldname: userFieldName },
 						});
-						if (this._extraItems.length) {
+						// Only treat the field as having multiple values -- which shows the
+						// "Multiple" placeholder and makes it non-focusable -- when the users
+						// actually differ. With a single shared value, leave it as a normal
+						// read-only field so keyboard users can still focus it.
+						if (this._extraItems.length && hasMultipleUsers) {
 							valueElem.multipleValues = true;
-							if (hasMultipleUsers) {
-								valueElem.placeholder = Zotero.getString(
-									'item-pane-batch-editing-multiple-values-placeholder'
-								);
-							}
+							valueElem.placeholder = Zotero.getString(
+								'item-pane-batch-editing-multiple-values-placeholder'
+							);
 						}
 						userData.appendChild(valueElem);
 						this.addDynamicRow(userLabel, userData);
@@ -1958,6 +1962,7 @@
 
 		createFieldValueElement(valueText, fieldName, extraFieldValues = []) {
 			valueText += '';
+			let rawValueText = valueText;
 
 			if (fieldName) {
 				var fieldID = Zotero.ItemFields.getID(fieldName);
@@ -2031,7 +2036,7 @@
 			}
 			
 			valueElement.values = [valueText, ...extraFieldValues];
-			const hasMultipleValues = extraFieldValues.length && extraFieldValues.some(v => v !== valueText);
+			const hasMultipleValues = extraFieldValues.length && extraFieldValues.some(v => (v + '') !== rawValueText);
 			if (hasMultipleValues) {
 				let allValues = [valueText, ...extraFieldValues];
 				let optionCounts = {};

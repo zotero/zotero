@@ -352,13 +352,11 @@
 				}
 			}
 			this._input.readOnly = this.readOnly;
-			if (this.readOnly && this.multipleValues) {
-				this._input.tabIndex = -1;
-			}
-			else {
-				this._input.removeAttribute('tabindex');
-			}
-			if (!(this.multipleValues && this.focused)) {
+			this._input.removeAttribute('tabindex');
+			// Read-only multiple-values fields are focusable (for keyboard access) but
+			// can't be edited, so keep their "Multiple" placeholder visible while focused.
+			// Editable fields clear it on focus (see _handleFocus), so don't reset it here.
+			if (!(this.multipleValues && this.focused && !this.readOnly)) {
 				this._input.placeholder = this.placeholder;
 			}
 
@@ -492,7 +490,9 @@
 			}
 			
 			if (this.multipleValues) {
-				this._input.placeholder = '';
+				if (!this.readOnly) {
+					this._input.placeholder = '';
+				}
 				this._input.value = '';
 				if (this._input.mController) {
 					this._input.mController.startSearch("");
@@ -571,10 +571,6 @@
 		};
 		
 		_handleMouseDown = (event) => {
-			if (this.readOnly && this.multipleValues) {
-				event.preventDefault();
-				return;
-			}
 			// Prevent a right-click from focusing the input when unfocused
 			if (event.button === 2 && document.activeElement !== this._input) {
 				event.preventDefault();

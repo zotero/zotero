@@ -2840,6 +2840,98 @@ describe("Item pane", function () {
 			assert.isNull(dateField.getAttribute('tooltiptext'), "date field should not have a tooltip in batch edit mode");
 		});
 
+		it("should focus a read-only multiple-values field via its label, keeping the Multiple placeholder", async function () {
+			let multiplePlaceholder = Zotero.getString('item-pane-batch-editing-multiple-values-placeholder');
+
+			// Differing dateAdded values make the read-only dateAdded field show the "Multiple" placeholder
+			let item1 = await _createDataObject('item', { itemType: 'journalArticle', dateAdded: '2020-01-01 00:00:00' });
+			let item2 = await _createDataObject('item', { itemType: 'journalArticle', dateAdded: '2021-06-15 00:00:00' });
+
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+			await waitForFrame();
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			await activateZoteroPane();
+
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+
+			let dateAddedField = itemBox.querySelector('editable-text[fieldname="dateAdded"]');
+			assert.ok(dateAddedField, "dateAdded field should exist");
+			assert.isTrue(dateAddedField.readOnly, "dateAdded field should be read-only");
+			assert.isTrue(dateAddedField.multipleValues, "dateAdded should show multiple values");
+			assert.equal(dateAddedField.placeholder, multiplePlaceholder);
+			assert.isFalse(dateAddedField.focused, "dateAdded field should not start focused");
+
+			// Read-only multiple-values fields are focusable for keyboard access.
+			// Clicking the label focuses the value, which should show an empty input
+			// with the "Multiple" placeholder
+			let dateAddedLabel = itemBox.querySelector('#itembox-field-dateAdded-label');
+			assert.ok(dateAddedLabel, "dateAdded label should exist");
+			dateAddedLabel.click();
+			await waitForFrame();
+
+			assert.isTrue(dateAddedField.focused, "clicking a read-only field's label should focus it");
+			// The field stays read-only, so it can't actually be edited
+			assert.isTrue(dateAddedField.readOnly, "field should remain read-only when focused");
+			assert.equal(dateAddedField.ref.value, '', "focused read-only field should show no value");
+			assert.equal(
+				dateAddedField.ref.placeholder,
+				multiplePlaceholder,
+				"the 'Multiple' placeholder should remain while focused"
+			);
+		});
+
+		it("should not show 'Multiple' for a read-only date field when all items share the same value", async function () {
+			let multiplePlaceholder = Zotero.getString('item-pane-batch-editing-multiple-values-placeholder');
+
+			// Both items share an identical dateAdded, so the read-only dateAdded
+			// field should display that single value rather than the "Multiple"
+			// placeholder
+			let sharedDateAdded = '2020-01-01 12:00:00';
+			let item1 = await _createDataObject('item', { itemType: 'journalArticle', dateAdded: sharedDateAdded });
+			let item2 = await _createDataObject('item', { itemType: 'journalArticle', dateAdded: sharedDateAdded });
+
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+			await waitForFrame();
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+
+			let dateAddedField = itemBox.querySelector('editable-text[fieldname="dateAdded"]');
+			assert.ok(dateAddedField, "dateAdded field should exist");
+			assert.isTrue(dateAddedField.readOnly, "dateAdded field should be read-only");
+
+			// Underlying values are identical, so the field must not be in
+			// multiple-values mode
+			assert.isFalse(
+				dateAddedField.multipleValues,
+				"dateAdded should not be in multiple-values mode when all items share the same value"
+			);
+			assert.notEqual(
+				dateAddedField.placeholder,
+				multiplePlaceholder,
+				"the 'Multiple' placeholder should not be shown when the value is identical"
+			);
+			// The shared value should be displayed
+			assert.equal(
+				dateAddedField.value,
+				itemBox.dateTimeFromUTC(item1.getField('dateAdded')),
+				"the shared date value should be displayed"
+			);
+		});
+
 		it("should show union of fields from all item types in cross-type batch edit", async function () {
 			let item1 = await _createDataObject('item', { itemType: 'book' });
 			item1.setField('publisher', 'Test Publisher');
@@ -3041,9 +3133,7 @@ describe("Item pane", function () {
 				"addedBy should show Multiple placeholder"
 			);
 			assert.equal(addedByValue.value, '', "addedBy value should be empty");
-
-			// Should not be focusable
-			assert.equal(addedByValue.ref.tabIndex, -1, "addedBy tabIndex should be -1");
+			assert.notEqual(addedByValue.ref.tabIndex, -1, "addedBy should be focusable");
 
 			// Group erasure cascades to items
 			await group.eraseTx();
@@ -3076,8 +3166,57 @@ describe("Item pane", function () {
 			assert.ok(addedByRow, "addedBy row should exist");
 			let addedByValue = addedByRow.parentElement.querySelector('editable-text');
 			assert.equal(addedByValue.value, 'Same User', "addedBy should show user name");
-			assert.isTrue(addedByValue.multipleValues, "addedBy should have multipleValues for non-focusable behavior");
-			assert.equal(addedByValue.ref.tabIndex, -1, "addedBy tabIndex should be -1");
+			// With a single shared value there is no "Multiple" placeholder, so the read-only
+			// field should stay reachable by keyboard users, same as in non-batch mode
+			assert.isFalse(addedByValue.multipleValues, "addedBy should not be in multiple-values mode");
+			assert.equal(addedByValue.placeholder, '', "addedBy should not show the Multiple placeholder");
+			assert.notEqual(addedByValue.ref.tabIndex, -1, "addedBy should remain focusable");
+
+			await group.eraseTx();
+		});
+		it("should keep focus on a read-only user field across a re-render in batch edit mode", async function () {
+			let group = await createGroup();
+			await Zotero.Users.setName(1, 'Same User');
+
+			let item1 = createUnsavedDataObject('item', { libraryID: group.libraryID });
+			item1.setField('createdByUserID', 1);
+			await item1.saveTx();
+
+			let item2 = createUnsavedDataObject('item', { libraryID: group.libraryID });
+			item2.setField('createdByUserID', 1);
+			await item2.saveTx();
+
+			await ZoteroPane.selectItems([item1.id, item2.id]);
+
+			let itemPane = win.ZoteroPane.itemPane;
+			let itemDetails = ZoteroPane.itemPane._itemDetails;
+
+			let batchEditEnableBtn = doc.getElementById('batch-edit-prompt-enable');
+			batchEditEnableBtn.click();
+			await itemDetails._renderPromise;
+
+			await activateZoteroPane();
+
+			let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
+
+			// Focus the read-only "added by" field (single shared user, so it is focusable)
+			let addedByValue = itemBox.querySelector('.meta-label[fieldname="addedBy"]')
+				?.parentElement.querySelector('editable-text');
+			assert.ok(addedByValue, "addedBy field should exist");
+			addedByValue.focus();
+			assert.isTrue(addedByValue.focused, "addedBy field should be focused");
+
+			// A re-render (which batch edits trigger on every save) must not drop focus --
+			// the field has to be identifiable by _saveFieldFocus/_restoreFieldFocus
+			await itemBox._forceRenderAll();
+
+			let newAddedByValue = itemBox.querySelector('.meta-label[fieldname="addedBy"]')
+				?.parentElement.querySelector('editable-text');
+			assert.ok(newAddedByValue, "addedBy field should still exist after re-render");
+			assert.isTrue(
+				newAddedByValue.focused,
+				"focus should be restored to the addedBy field after a re-render"
+			);
 
 			await group.eraseTx();
 		});
@@ -3282,15 +3421,10 @@ describe("Item pane", function () {
 		});
 	});
 
-	it("should not focus read-only fields with multiple values", async function () {
-		let item1 = await createDataObject('item', { itemType: 'journalArticle' });
-		item1.setField('title', 'Item 1');
-		await item1.saveTx();
+	it("should focus read-only fields with multiple values, showing the Multiple placeholder", async function () {
+		let item1 = await createDataObject('item', { itemType: 'journalArticle', dateAdded: '2020-01-01 00:00:00' });
+		let item2 = await createDataObject('item', { itemType: 'journalArticle', dateAdded: '2021-06-15 00:00:00' });
 
-		let item2 = await createDataObject('item', { itemType: 'journalArticle' });
-		item2.setField('title', 'Item 2');
-		await item2.saveTx();
-		
 		await ZoteroPane.selectItems([item1.id, item2.id]);
 
 		let itemPane = win.ZoteroPane.itemPane;
@@ -3300,30 +3434,30 @@ describe("Item pane", function () {
 		batchEditEnableBtn.click();
 		await itemDetails._renderPromise;
 
+		await activateZoteroPane();
+
 		let itemBox = itemPane.querySelector('#zotero-editpane-info-box');
-		let dateModifiedField = itemBox.querySelector('editable-text[fieldname="dateModified"]');
-		assert.ok(dateModifiedField, "dateModified field should exist");
-		assert.isTrue(dateModifiedField.readOnly, "dateModified should be read-only");
-		assert.isTrue(dateModifiedField.multipleValues, "dateModified should have multiple values");
+		let dateAddedField = itemBox.querySelector('editable-text[fieldname="dateAdded"]');
+		assert.ok(dateAddedField, "dateAdded field should exist");
+		assert.isTrue(dateAddedField.readOnly, "dateAdded should be read-only");
+		assert.isTrue(dateAddedField.multipleValues, "dateAdded should have multiple values");
 		assert.equal(
-			dateModifiedField.placeholder,
+			dateAddedField.placeholder,
 			Zotero.getString('item-pane-batch-editing-multiple-values-placeholder')
 		);
 
-		// tabIndex should be -1 to prevent tab navigation
-		assert.equal(dateModifiedField.ref.tabIndex, -1, "tabIndex should be -1");
+		assert.notEqual(dateAddedField.ref.tabIndex, -1, "tabIndex should not be -1");
 
-		// Clicking the field should not focus it
-		await activateZoteroPane();
-		await Zotero.Promise.delay(50);
-		dateModifiedField.ref.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+		dateAddedField.focus();
 		await waitForFrame();
 
-		assert.isFalse(dateModifiedField.focused, "read-only multiple-values field should not be focusable via click");
+		assert.isTrue(dateAddedField.focused, "read-only multiple-values field should be focusable");
+		assert.isTrue(dateAddedField.readOnly, "field should remain read-only when focused");
+		assert.equal(dateAddedField.ref.value, '', "focused read-only field should show no value");
 		assert.equal(
-			dateModifiedField.placeholder,
+			dateAddedField.ref.placeholder,
 			Zotero.getString('item-pane-batch-editing-multiple-values-placeholder'),
-			"Multiple placeholder should not be cleared"
+			"Multiple placeholder should remain while focused"
 		);
 		await item2.eraseTx();
 		await item1.eraseTx();
