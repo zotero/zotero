@@ -188,8 +188,32 @@ describe("ZoteroPane", function () {
 				Zotero.getString('pane.item.selected.multiple', 2)
 			);
 		})
+
+		it("should update the item count when filtering with nothing selected", async function () {
+			var collection = await createDataObject('collection');
+			await createDataObject('item', { collections: [collection.id], title: 'Perez study' });
+			await createDataObject('item', { collections: [collection.id], title: 'Unrelated paper' });
+
+			await zp.collectionsView.selectByID("C" + collection.id);
+			await waitForItemsLoad(win);
+
+			var messageBox = doc.getElementById('zotero-item-pane-message-box');
+			var twoInView = await doc.l10n.formatValue('item-pane-message-unselected', { count: 2 });
+			var oneInView = await doc.l10n.formatValue('item-pane-message-unselected', { count: 1 });
+
+			// Nothing selected, both items shown
+			await waitForCallback(() => messageBox.textContent == twoInView, 100, 5);
+
+			// Quick search filters to one item; the count should update even though the
+			// selection (nothing) hasn't changed
+			await zp.itemsView.setFilter('search', 'perez');
+			await waitForCallback(() => messageBox.textContent == oneInView, 100, 5);
+
+			await zp.itemsView.setFilter('search', '');
+			await collection.eraseTx();
+		})
 	})
-	
+
 	describe("#viewAttachment", function () {
 		var apiKey = Zotero.Utilities.randomString(24);
 		var baseURL;

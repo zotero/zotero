@@ -1607,10 +1607,12 @@ var ZoteroPane = new function () {
 				emptyMessage: Zotero.getString('pane.items.loading')
 			});
 			ZoteroPane.itemsView.onRefresh.addListener(() => ZoteroPane.setTagScope());
-			// Update itemPane on initial load
+			// Update the item pane on every refresh, so the "items in this view" count stays in
+			// sync when the result set changes without a selection change (e.g., quick search,
+			// tag filter, or sort with nothing selected)
 			ZoteroPane.itemsView.onRefresh.addListener(async () => {
 				await ZoteroPane.itemSelected();
-			}, true);
+			});
 			ZoteroPane.itemsView.waitForLoad().then(() => Zotero.uiIsReady());
 
 			ItemTreeMenuBar.setItemTreeSortKeys(ZoteroPane.itemsView);
