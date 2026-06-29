@@ -317,6 +317,7 @@ Zotero.Server.Connector._getItemIdentifiers = function (data) {
 		doi: new Set(),
 		url: new Set()
 	};
+	let proxy = data.proxy && new Zotero.Proxy(data.proxy);
 
 	let addDOI = (doi) => {
 		doi = doi && Zotero.Utilities.cleanDOI(doi);
@@ -325,6 +326,9 @@ Zotero.Server.Connector._getItemIdentifiers = function (data) {
 		}
 	};
 	let addURL = (url) => {
+		if (proxy && url) {
+			url = proxy.toProper(url);
+		}
 		if (url && typeof url == 'string') {
 			identifiers.url.add(url);
 		}

@@ -394,6 +394,42 @@ describe("Connector Server", function () {
 			assert.equal(data.matches[0].libraryID, group.libraryID);
 		});
 
+		it("should deproxify item URLs before duplicate lookup", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("webpage");
+			item.setField("title", "Existing Proxied Page");
+			item.setField("url", "https://www.example.com/path");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						proxy: {
+							scheme: "https://%h.proxy.example.com/%p"
+						},
+						items: [{
+							itemType: "webpage",
+							title: "New Proxied Page",
+							url: "https://www-example-com.proxy.example.com/path"
+						}]
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].matchedIdentifiers.url, "https://www.example.com/path");
+		});
+
 		it("should reject requests without identifiers", async function () {
 			let error = await getPromiseError(httpRequest(
 				"POST",
