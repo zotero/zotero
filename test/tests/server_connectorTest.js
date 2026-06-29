@@ -320,6 +320,56 @@ describe("Connector Server", function () {
 		});
 	});
 
+	describe("/connector/findExistingItems", function () {
+		it("should return matching top-level items for DOI and URL in the selected target library", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing Article");
+			item.setField("DOI", "10.1234/Example.1");
+			item.setField("url", "https://example.com/article");
+			await item.saveTx();
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: {
+							doi: ["10.1234/example.1"],
+							url: ["https://example.com/article"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].libraryID, Zotero.Libraries.userLibraryID);
+			assert.sameMembers(data.matches[0].matchedFields, ["DOI", "url"]);
+		});
+
+		it("should reject requests without identifiers", async function () {
+			let error = await getPromiseError(httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({})
+				}
+			));
+			assert.instanceOf(error, Zotero.HTTP.UnexpectedStatusException);
+			assert.include(error.message, "400");
+		});
+	});
+
 	describe("/connector/saveSingleFile", function () {
 		it("should save a webpage item with /saveSnapshot", async function () {
 			var collection = await createDataObject('collection');

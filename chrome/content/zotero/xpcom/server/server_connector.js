@@ -287,6 +287,147 @@ Zotero.Server.Connector.Detect.prototype = {
 	},
 }
 
+Zotero.Server.Connector.FindExistingItems = function () {};
+Zotero.Server.Endpoints["/connector/findExistingItems"] = Zotero.Server.Connector.FindExistingItems;
+Zotero.Server.Connector.FindExistingItems.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+
+	init: async function (requestData) {
+		let data = requestData.data || {};
+		let identifiers = Zotero.Server.Connector._getItemIdentifiers(data);
+		if (!identifiers.doi.length && !identifiers.url.length) {
+			return [400, "application/json", JSON.stringify({ error: "IDENTIFIERS_NOT_PROVIDED" })];
+		}
+
+		let { library } = Zotero.Server.Connector.getSaveTarget();
+		let matches = await Zotero.Server.Connector.findExistingItemsByIdentifiers(
+			identifiers,
+			library.libraryID
+		);
+		return [200, "application/json", JSON.stringify({ matches })];
+	}
+};
+
+Zotero.Server.Connector._getItemIdentifiers = function (data) {
+	let identifiers = {
+		doi: new Set(),
+		url: new Set()
+	};
+
+	let addDOI = (doi) => {
+		doi = doi && Zotero.Utilities.cleanDOI(doi);
+		if (doi) {
+			identifiers.doi.add(doi.toLowerCase());
+		}
+	};
+	let addURL = (url) => {
+		if (url && typeof url == 'string') {
+			identifiers.url.add(url);
+		}
+	};
+
+	if (data.identifiers) {
+		for (let doi of data.identifiers.doi || []) {
+			addDOI(doi);
+		}
+		for (let url of data.identifiers.url || []) {
+			addURL(url);
+		}
+	}
+
+	for (let item of data.items || []) {
+		addDOI(item.DOI);
+		addURL(item.url);
+	}
+
+	return {
+		doi: Array.from(identifiers.doi),
+		url: Array.from(identifiers.url)
+	};
+};
+
+Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identifiers, libraryID) {
+	let itemIDs = new Set();
+	let doiSet = new Set(identifiers.doi);
+	let urlSet = new Set(identifiers.url);
+	let matches = [];
+
+	if (doiSet.size) {
+		let rows = await Zotero.DB.queryAsync(
+			"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE libraryID=? AND fieldID=? AND value LIKE ? "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
+			[
+				libraryID,
+				Zotero.ItemFields.getID('DOI'),
+				'10.%'
+			]
+		);
+		for (let row of rows) {
+			let doi = Zotero.Utilities.cleanDOI(row.value);
+			if (doi && doiSet.has(doi.toLowerCase())) {
+				itemIDs.add(row.itemID);
+			}
+		}
+	}
+	if (urlSet.size) {
+		let rows = await Zotero.DB.queryAsync(
+			"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE libraryID=? AND fieldID=? "
+				+ "AND value IN (" + identifiers.url.map(() => '?').join(',') + ") "
+				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
+			[
+				libraryID,
+				Zotero.ItemFields.getID('url'),
+				...identifiers.url
+			]
+		);
+		for (let row of rows) {
+			if (urlSet.has(row.value)) {
+				itemIDs.add(row.itemID);
+			}
+		}
+	}
+
+	for (let itemID of itemIDs) {
+		let item = Zotero.Items.get(itemID);
+		if (!item || !item.isTopLevelItem()) {
+			continue;
+		}
+
+		let matchedFields = [];
+		let matchedIdentifiers = {};
+		let itemDOI = Zotero.Utilities.cleanDOI(item.getField('DOI'));
+		if (itemDOI && doiSet.has(itemDOI.toLowerCase())) {
+			matchedFields.push('DOI');
+			matchedIdentifiers.doi = itemDOI;
+		}
+		let itemURL = item.getField('url');
+		if (itemURL && urlSet.has(itemURL)) {
+			matchedFields.push('url');
+			matchedIdentifiers.url = itemURL;
+		}
+		if (!matchedFields.length) {
+			continue;
+		}
+
+		matches.push({
+			id: item.id,
+			key: item.key,
+			libraryID: item.libraryID,
+			title: item.getField('title'),
+			matchedFields,
+			matchedIdentifiers
+		});
+	}
+
+	return matches;
+};
+
 /**
  * Saves items to DB
  *
