@@ -330,6 +330,7 @@ describe("Connector Server", function () {
 			item.setField("DOI", "10.1234/Example.1");
 			item.setField("url", "https://example.com/article");
 			await item.saveTx();
+			Zotero.Items.unload(item.id);
 
 			let response = await httpRequest(
 				"POST",
@@ -369,6 +370,7 @@ describe("Connector Server", function () {
 			groupItem.setField("title", "Existing Group Article");
 			groupItem.setField("DOI", "10.1234/targeted");
 			await groupItem.saveTx();
+			Zotero.Items.unload([userItem.id, groupItem.id]);
 
 			let response = await httpRequest(
 				"POST",

@@ -396,7 +396,7 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 	}
 
 	for (let itemID of itemIDs) {
-		let item = Zotero.Items.get(itemID);
+		let item = await Zotero.Items.getAsync(itemID);
 		if (!item || !item.isTopLevelItem()) {
 			continue;
 		}
