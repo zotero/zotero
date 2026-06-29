@@ -301,7 +301,9 @@ Zotero.Server.Connector.FindExistingItems.prototype = {
 			return [400, "application/json", JSON.stringify({ error: "IDENTIFIERS_NOT_PROVIDED" })];
 		}
 
-		let { library } = Zotero.Server.Connector.getSaveTarget();
+		let { library } = data.target
+			? Zotero.Server.Connector.resolveTarget(data.target)
+			: Zotero.Server.Connector.getSaveTarget();
 		let matches = await Zotero.Server.Connector.findExistingItemsByIdentifiers(
 			identifiers,
 			library.libraryID

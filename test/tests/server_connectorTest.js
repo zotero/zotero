@@ -354,6 +354,44 @@ describe("Connector Server", function () {
 			assert.sameMembers(data.matches[0].matchedFields, ["DOI", "url"]);
 		});
 
+		it("should use the requested target library for duplicate lookup", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let userItem = new Zotero.Item("journalArticle");
+			userItem.setField("title", "Existing User Article");
+			userItem.setField("DOI", "10.1234/targeted");
+			await userItem.saveTx();
+
+			let group = await createGroup({ editable: true });
+			let groupItem = new Zotero.Item("journalArticle");
+			groupItem.libraryID = group.libraryID;
+			groupItem.setField("title", "Existing Group Article");
+			groupItem.setField("DOI", "10.1234/targeted");
+			await groupItem.saveTx();
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						target: group.treeViewID,
+						identifiers: {
+							doi: ["10.1234/targeted"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, groupItem.id);
+			assert.equal(data.matches[0].libraryID, group.libraryID);
+		});
+
 		it("should reject requests without identifiers", async function () {
 			let error = await getPromiseError(httpRequest(
 				"POST",
