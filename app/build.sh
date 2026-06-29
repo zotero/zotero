@@ -727,7 +727,20 @@ if [ $BUILD_MAC == 1 ]; then
 	mkdir "$CONTENTSDIR/Resources/integration"
 	cp -RH "$CALLDIR/modules/zotero-libreoffice-integration/install" "$CONTENTSDIR/Resources/integration/libreoffice"
 	cp -RH "$CALLDIR/modules/zotero-word-for-mac-integration/install" "$CONTENTSDIR/Resources/integration/word-for-mac"
-	
+
+	# Build the Core Spotlight bridge dylib
+	if command -v clang >/dev/null 2>&1; then
+		clang -dynamiclib -fobjc-arc -O2 -mmacosx-version-min=11.0 \
+			-arch x86_64 -arch arm64 \
+			-framework Foundation -framework AppKit -framework CoreServices \
+			-framework CoreSpotlight -framework UniformTypeIdentifiers \
+			-o "$CONTENTSDIR/Resources/libZoteroSpotlight.dylib" \
+			"$CALLDIR/mac/spotlight/ZoteroSpotlight.m" \
+			|| echo "  ! libZoteroSpotlight.dylib build failed -- continuing without Spotlight"
+	else
+		echo "  ! clang not found -- skipping libZoteroSpotlight.dylib build"
+	fi
+
 	# Delete extraneous files
 	find "$CONTENTSDIR" -depth -type d -name .git -exec rm -rf {} \;
 	find "$CONTENTSDIR" \( -name .DS_Store -or -name update.rdf \) -exec rm -f {} \;
@@ -816,6 +829,18 @@ if [ $BUILD_MAC == 1 ]; then
 			echo
 			/usr/bin/codesign --verify -vvvv "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
 		fi
+	else
+		# Ad-hoc sign unsigned (source/dev) builds: Core Spotlight only indexes
+		# for a signed app. No hardened runtime here, so Gecko's JIT still works.
+		echo "Ad-hoc signing $APP_NAME.app (unsigned build)"
+		/usr/bin/xattr -cr "$APPDIR"
+		# Sign our dylib, then the whole bundle (shallow if --deep trips on a
+		# nested component, so ad-hoc signing can't fail the build).
+		if [ -f "$APPDIR/Contents/Resources/libZoteroSpotlight.dylib" ]; then
+			/usr/bin/codesign --force --sign - "$APPDIR/Contents/Resources/libZoteroSpotlight.dylib"
+		fi
+		/usr/bin/codesign --force --deep --sign - "$APPDIR" \
+			|| /usr/bin/codesign --force --sign - "$APPDIR"
 	fi
 	
 	# Build and notarize disk image
