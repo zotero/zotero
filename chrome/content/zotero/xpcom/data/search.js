@@ -342,16 +342,16 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 			}
 			this.addCondition('creator', operator, part.text, false);
 
-			if (condition == 'quicksearch-everything') {
-				if (part.inQuotes) {
-					this.addCondition('fulltextContent', operator, part.text, false);
-				}
-				else {
-					var splits = Zotero.Fulltext.semanticSplitter(part.text);
-					for (let split of splits) {
-						this.addCondition('fulltextWord', operator, split, false);
-					}
-				}
+			// Match full-text content as a substring (case- and diacritic-insensitive)
+			// via the content index. Skip unquoted terms too short for the index (e.g.
+			// 1-2 characters), which would otherwise force a per-keystroke scan of the
+			// cached text; they're still matched against titles, tags, etc. above.
+			// Quoted term are matched regardless of length: quoting makes the quick
+			// search wait for Enter rather than run on each keystroke, so the scan
+			// isn't per-keystroke.
+			if (condition == 'quicksearch-everything'
+					&& (part.inQuotes || Zotero.FullText.canSearchContent(part.text))) {
+				this.addCondition('fulltextContent', operator, part.text, false);
 			}
 
 			this.addCondition('groupEnd', 'true', '');
@@ -692,85 +692,51 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 					: [];
 			}
 			
+			// The set of items this condition decides over: in ALL mode, the remaining main-search
+			// matches; in ANY mode, items in the library not already in the results
 			let scopeIDs;
-			// Regexp mode -- don't use full-text word index
-			let numSplits;
-			if (condition.mode && condition.mode.startsWith('regexp')) {
-				// In ANY mode, include items that haven't already been found, as long as they're in
-				// the right library
-				if (joinModeAny) {
-					let tmpTable = await Zotero.Search.idsToTempTable(fullTextResults);
-					let sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
-						+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
-					if (this.libraryID) {
-						sql += " AND libraryID=?";
-					}
-					let res = await Zotero.DB.valueQueryAsync(sql, this.libraryID, { noCache: true });
-					scopeIDs = res ? res.split(",").map(id => parseInt(id)) : [];
-					await Zotero.DB.queryAsync("DROP TABLE " + tmpTable, false, { noCache: true });
-				}
-				// In ALL mode, include remaining items from the main search
-				else {
-					scopeIDs = ids;
-				}
-			}
-			// If not regexp mode, run a new search against the full-text word index for words in
-			// this phrase
-			else {
-				//Zotero.debug('Running subsearch against full-text word index');
-				let s = new Zotero.Search();
+			if (joinModeAny) {
+				let tmpTable = await Zotero.Search.idsToTempTable(fullTextResults);
+				let sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
+					+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
 				if (this.libraryID) {
-					s.libraryID = this.libraryID;
+					sql += " AND libraryID=?";
 				}
-				let splits = Zotero.Fulltext.semanticSplitter(condition.value);
-				for (let split of splits){
-					s.addCondition('fulltextWord', condition.operator, split);
-				}
-				// If applicable, only search for words within specified scope (e.g. collection)
-				if (this._scope) {
-					s.setScope(this._scope, true);
-				}
-				numSplits = splits.length;
-				let wordMatches = await s.search();
-				
-				//Zotero.debug("Word index matches");
-				//Zotero.debug(wordMatches);
-				
-				// In ANY mode, include hits from word index that aren't already in the results
-				if (joinModeAny) {
-					let resultsSet = new Set(fullTextResults);
-					scopeIDs = wordMatches.filter(id => !resultsSet.has(id));
-				}
-				// In ALL mode, include the intersection of hits from word index and remaining
-				// main search matches
-				else {
-					let wordIDs = new Set(wordMatches);
-					scopeIDs = ids.filter(id => wordIDs.has(id));
-				}
+				let res = await Zotero.DB.valueQueryAsync(sql, this.libraryID, { noCache: true });
+				scopeIDs = res ? res.split(",").map(id => parseInt(id)) : [];
+				await Zotero.DB.queryAsync("DROP TABLE " + tmpTable, false, { noCache: true });
 			}
-			
-			// If only one word, just use the results from the word index
-			let filteredIDs = [];
-			if (numSplits === 1) {
-				filteredIDs = scopeIDs;
+			else {
+				scopeIDs = ids;
 			}
-			// Search the full-text content
-			else if (scopeIDs.length) {
-				let found = new Set(
-					(await Zotero.Fulltext.findTextInItems(
+
+			// Find which of those items match the full-text content. Use the trigram index for
+			// ordinary terms; fall back to scanning the cached text for regexp searches and for
+			// terms too short for the trigram index (findItemsWithContent returns null).
+			let contentMatches;
+			let indexMatches = (condition.mode && condition.mode.startsWith('regexp'))
+				? null
+				: await Zotero.FullText.findItemsWithContent(condition.value, this.libraryID);
+			if (indexMatches !== null) {
+				contentMatches = new Set(indexMatches);
+			}
+			else {
+				contentMatches = new Set(
+					(await Zotero.FullText.findTextInItems(
 						scopeIDs,
 						condition.value,
 						condition.mode
 					)).map(x => x.id)
 				);
-				// Either include or exclude the results, depending on the operator
-				filteredIDs = scopeIDs.filter((id) => {
-					return found.has(id)
-						? condition.operator == 'contains'
-						: condition.operator == 'doesNotContain';
-				});
 			}
-			
+
+			// Either include or exclude the matches, depending on the operator
+			let filteredIDs = scopeIDs.filter((id) => {
+				return contentMatches.has(id)
+					? condition.operator == 'contains'
+					: condition.operator == 'doesNotContain';
+			});
+
 			//Zotero.debug("Filtered IDs:")
 			//Zotero.debug(filteredIDs);
 			
@@ -991,44 +957,37 @@ Zotero.Search.idsToTempTable = async function (ids, { idColumn = 'itemID' } = {}
  * caller applies IN/NOT IN for the contains/doesNotContain operator.
  */
 Zotero.Search.prototype._fullTextContentMatches = async function (value, mode) {
-	var scopeIDs;
-	// Regexp can't use the word index, so scan every item in the library/scope
-	if (mode && mode.startsWith('regexp')) {
-		let s = new Zotero.Search();
-		if (this.libraryID !== null) {
-			s.libraryID = this.libraryID;
-		}
-		if (this._scope) {
-			s.setScope(this._scope, true);
-		}
-		scopeIDs = await s.search();
-	}
-	// Otherwise narrow to items matching the words via the full-text word index
-	else {
-		let splits = Zotero.Fulltext.semanticSplitter(value);
-		if (!splits.length) {
-			return [];
+	// For ordinary terms, match as a substring (case- and diacritic-insensitive) via the trigram
+	// index, then restrict to the search scope (e.g. a collection), if any
+	let indexMatches = (mode && mode.startsWith('regexp'))
+		? null
+		: await Zotero.FullText.findItemsWithContent(value, this.libraryID);
+	if (indexMatches !== null) {
+		if (!this._scope) {
+			return indexMatches;
 		}
 		let s = new Zotero.Search();
 		if (this.libraryID !== null) {
 			s.libraryID = this.libraryID;
 		}
-		for (let split of splits) {
-			s.addCondition('fulltextWord', 'contains', split);
-		}
-		if (this._scope) {
-			s.setScope(this._scope, true);
-		}
-		scopeIDs = await s.search();
-		// A single word is fully resolved by the word index -- no phrase to verify
-		if (splits.length == 1) {
-			return scopeIDs;
-		}
+		s.setScope(this._scope, true);
+		let scopeSet = new Set(await s.search());
+		return indexMatches.filter(id => scopeSet.has(id));
 	}
+	// Regexp, or a term too short for the trigram index -- scan the cached text of every item in
+	// the library/scope
+	let s = new Zotero.Search();
+	if (this.libraryID !== null) {
+		s.libraryID = this.libraryID;
+	}
+	if (this._scope) {
+		s.setScope(this._scope, true);
+	}
+	let scopeIDs = await s.search();
 	if (!scopeIDs.length) {
 		return [];
 	}
-	let found = await Zotero.Fulltext.findTextInItems(scopeIDs, value, mode);
+	let found = await Zotero.FullText.findTextInItems(scopeIDs, value, mode);
 	return found.map(x => x.id);
 };
 
@@ -1177,24 +1136,35 @@ Zotero.Search.prototype._buildQuery = async function () {
 				
 				case 'fulltextContent':
 					// A fulltextContent inside a group -- or at the top level when a result
-					// level is set -- is materialized into an itemID predicate so it joins
-					// the SQL AND/OR tree and can be mapped to that level (full-text is
-					// indexed per attachment). A plain top-level one with no result level is
-					// left for the post-filter in search() (unchanged behavior).
+					// level is set -- becomes an itemID predicate so it joins the SQL AND/OR
+					// tree and can be mapped to that level (full-text is indexed per
+					// attachment). A plain top-level one with no result level is left for the
+					// post-filter in search() (unchanged behavior).
 					if (loopDepth > 0 || resultLevel != 'any') {
-						let matchIDs = await this._fullTextContentMatches(
-							condition.value, condition.mode
-						);
 						this._eagerFullTextConditionIDs.add(condition.id);
 						this._hasEagerFullText = true;
-						conditions.push({
+						// Match via the index as a subquery -- no per-match itemID list to
+						// build or parse. Regexp and too-short terms can't use the index, so
+						// scan the cached text and materialize the matches instead.
+						let subquery = (condition.mode && condition.mode.startsWith('regexp'))
+							? null
+							: Zotero.FullText.getContentSearchSQL(condition.value);
+						let predicate = {
 							name: '_fulltextContentPredicate',
 							operator: condition.operator,
-							matchIDs,
 							// Full-text content is indexed per attachment, so matches are at
 							// the attachment level for cross-level mapping
 							level: 'attachment'
-						});
+						};
+						if (subquery) {
+							predicate.subquery = subquery;
+						}
+						else {
+							predicate.matchIDs = await this._fullTextContentMatches(
+								condition.value, condition.mode
+							);
+						}
+						conditions.push(predicate);
 						this._hasPrimaryConditions = true;
 					}
 					continue;
@@ -1387,18 +1357,23 @@ Zotero.Search.prototype._buildQuery = async function () {
 					builtConditions.push({ marker: 'resultLevel', operator: condition.operator });
 					continue;
 				}
-				// A grouped fulltextContent materialized into an itemID set (above)
+				// A grouped fulltextContent turned into an itemID predicate (above): a direct
+				// index subquery when possible, otherwise a materialized itemID list
 				if (condition.name == '_fulltextContentPredicate') {
-					let sql;
-					if (!condition.matchIDs.length) {
+					let op = condition.operator == 'doesNotContain' ? 'NOT IN' : 'IN';
+					let sql, params = [];
+					if (condition.subquery) {
+						sql = 'itemID ' + op + ' (' + condition.subquery.sql + ')';
+						params = condition.subquery.params;
+					}
+					else if (!condition.matchIDs.length) {
 						// No matches: 'contains' matches nothing, 'doesNotContain' matches all
 						sql = condition.operator == 'doesNotContain' ? '1' : '0';
 					}
 					else {
-						let op = condition.operator == 'doesNotContain' ? 'NOT IN' : 'IN';
 						sql = 'itemID ' + op + ' (' + condition.matchIDs.join(',') + ')';
 					}
-					builtConditions.push({ sql, params: [], level: condition.level });
+					builtConditions.push({ sql, params, level: condition.level });
 					continue;
 				}
 
@@ -1701,12 +1676,6 @@ Zotero.Search.prototype._buildQuery = async function () {
 					// FROM above to items created by the given user
 					case 'annotationAuthor':
 						condSQL += "itemID IN (SELECT itemID FROM groupItems WHERE ";
-						openParens++;
-						break;
-					
-					case 'fulltextWord':
-						condSQL += "wordID IN (SELECT wordID FROM fulltextWords "
-							+ "WHERE ";
 						openParens++;
 						break;
 					

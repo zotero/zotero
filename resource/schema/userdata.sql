@@ -1,4 +1,4 @@
--- 126
+-- 127
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -453,20 +453,6 @@ CREATE TABLE fulltextItems (
 );
 CREATE INDEX fulltextItems_synced ON fulltextItems(synced);
 CREATE INDEX fulltextItems_version ON fulltextItems(version);
-
-CREATE TABLE fulltextWords (
-    wordID INTEGER PRIMARY KEY,
-    word TEXT UNIQUE
-);
-
-CREATE TABLE fulltextItemWords (
-    wordID INT,
-    itemID INT,
-    PRIMARY KEY (wordID, itemID),
-    FOREIGN KEY (wordID) REFERENCES fulltextWords(wordID),
-    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
-);
-CREATE INDEX fulltextItemWords_itemID ON fulltextItemWords(itemID);
 
 CREATE TABLE syncCache (
     libraryID INT NOT NULL,

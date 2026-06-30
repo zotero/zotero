@@ -1894,7 +1894,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		await Zotero.DB.executeTransaction(async function () {
 			return Zotero.Tags.purge();
 		});
-		await Zotero.Fulltext.purgeUnusedWords();
+		await Zotero.FullText.purgeOrphanedContent();
 		await Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		//yield Zotero.DB.executeTransaction(async function () {

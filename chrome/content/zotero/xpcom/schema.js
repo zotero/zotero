@@ -46,7 +46,7 @@ Zotero.Schema = new function () {
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	// Update when adding _updateCompatibility() line to schema update step
-	var _maxCompatibility = 8;
+	var _maxCompatibility = 9;
 	
 	var _repositoryTimerID;
 	var _repositoryNotificationTimerID;
@@ -2099,11 +2099,6 @@ Zotero.Schema = new function () {
 				"DELETE FROM creators WHERE firstName='' AND lastName=''"
 			],
 
-			// Non-attachment items in the full-text index
-			[
-				`SELECT COUNT(*) > 0 FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=${attachmentID})`,
-				`DELETE FROM fulltextItemWords WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=${attachmentID})`
-			],
 			// Full-text items must be attachments
 			[
 				`SELECT COUNT(*) > 0 FROM fulltextItems WHERE itemID NOT IN (SELECT itemID FROM items WHERE itemTypeID=${attachmentID})`,
@@ -3671,12 +3666,20 @@ Zotero.Schema = new function () {
 				await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('search', 'normalizeBackfill', 1)");
 			}
 
+			else if (i == 127) {
+				await _updateCompatibility(9);
+
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextItemWords");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextWords");
+				Zotero.Prefs.clear('vacuum.lastTime');
+			}
+
 			// The condition 'required' flag was removed, but its savedSearchConditions column
 			// is kept for now so older code can still read the database (it SELECTs the column
 			// when loading saved searches). TODO: with the next userdata compatibility bump,
 			// bump the version and uncomment the migration below to drop the column.
 			//
-			// else if (i == 127) {
+			// else if (i == 128) {
 			// 	await Zotero.DB.queryAsync("ALTER TABLE savedSearchConditions RENAME TO savedSearchConditionsOld");
 			// 	await Zotero.DB.queryAsync("CREATE TABLE savedSearchConditions (\n    savedSearchID INT NOT NULL,\n    searchConditionID INT NOT NULL,\n    condition TEXT NOT NULL,\n    operator TEXT,\n    value TEXT,\n    PRIMARY KEY (savedSearchID, searchConditionID),\n    FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE\n)");
 			// 	await Zotero.DB.queryAsync("INSERT INTO savedSearchConditions SELECT savedSearchID, searchConditionID, condition, operator, value FROM savedSearchConditionsOld");

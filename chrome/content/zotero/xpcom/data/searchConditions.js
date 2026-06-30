@@ -790,20 +790,6 @@ Zotero.SearchConditions = new function () {
 			},
 
 			{
-				name: 'fulltextWord',
-				operators: {
-					contains: true,
-					doesNotContain: true
-				},
-				table: 'fulltextItemWords',
-				field: 'word',
-				flags: {
-					leftbound: true
-				},
-				special: true
-			},
-			
-			{
 				name: 'fulltextContent',
 				operators: {
 					contains: true,

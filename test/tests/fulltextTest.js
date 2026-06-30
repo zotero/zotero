@@ -1,4 +1,249 @@
 describe("Zotero.FullText", function () {
+	describe("Content database", function () {
+		async function createTextAttachment(content) {
+			let tmpDir = await getTempDirectory();
+			let path = OS.Path.join(tmpDir, Zotero.Utilities.randomString() + ".txt");
+			await Zotero.File.putContentsAsync(path, content);
+			return Zotero.Attachments.importFromFile({
+				file: path,
+				contentType: 'text/plain',
+				charset: 'utf-8'
+			});
+		}
+
+		function contentSearch(item, value) {
+			let s = new Zotero.Search();
+			s.libraryID = item.libraryID;
+			s.addCondition('fulltextContent', 'contains', value);
+			return s.search();
+		}
+
+		it("should match content case- and diacritic-insensitively", async function () {
+			let item = await createTextAttachment("The Séance was held at dawn");
+			assert.include(await contentSearch(item, 'seance'), item.id);
+			assert.include(await contentSearch(item, 'SÉANCE'), item.id);
+		});
+
+		it("should match a substring spanning a word boundary", async function () {
+			let item = await createTextAttachment("the quick brown fox");
+			// "ck bro" spans the space between two words, so the word index can't match it
+			assert.include(await contentSearch(item, 'ck bro'), item.id);
+		});
+
+		it("should match a term too short for the trigram index via fallback", async function () {
+			let item = await createTextAttachment("the quick brown fox");
+			// "fo" is shorter than a trigram, so this exercises the cached-text scan fallback
+			assert.include(await contentSearch(item, 'fo'), item.id);
+		});
+
+		it("should fold diacritics in the short-query fallback", async function () {
+			let item = await createTextAttachment("zzcafé latte");
+			// "fe" is too short for the trigram index, so it hits the cached-text scan; it should
+			// still match "café" (folding é -> e), consistent with the index path
+			assert.include(await contentSearch(item, 'fe'), item.id);
+		});
+
+		it("should match a 2-character CJK query (trigram can't)", async function () {
+			let item = await createTextAttachment("中文搜索系统设计");
+			assert.include(await contentSearch(item, '搜索'), item.id);
+		});
+
+		it("should match a longer CJK substring within a run", async function () {
+			let item = await createTextAttachment("中文搜索系统设计");
+			assert.include(await contentSearch(item, '搜索系统'), item.id);
+		});
+
+		it("should distinguish voiced and unvoiced kana in CJK content", async function () {
+			let item = await createTextAttachment("研究がん");
+			assert.include(await contentSearch(item, 'がん'), item.id);
+			assert.notInclude(await contentSearch(item, 'かん'), item.id);
+		});
+
+		it("should not match an unrelated CJK document", async function () {
+			let item = await createTextAttachment("天气预报很准确");
+			let other = await createTextAttachment("中文搜索系统设计");
+			let results = await contentSearch(item, '搜索');
+			assert.notInclude(results, item.id);
+			assert.include(results, other.id);
+		});
+
+		it("should record an index-state row when indexing", async function () {
+			let item = await createTextAttachment("index state recorded here");
+			let version = await Zotero.DB.valueQueryAsync(
+				"SELECT version FROM ftindex.fulltextIndexState WHERE itemID=?", item.id
+			);
+			assert.equal(version, 1);
+		});
+
+		it("should index queued items missing from the content index", async function () {
+			let item = await createTextAttachment("queued jabberwocky content");
+			// Simulate an item full-text indexed before the content index existed: drop its entries
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", item.id);
+
+			// It's now in the queue and not findable by content
+			assert.isAbove(await Zotero.FullText.getAttachmentIndexQueueCount(), 0);
+			assert.notInclude(await contentSearch(item, 'jabberwocky'), item.id);
+
+			// Draining the queue re-indexes it from the cached text
+			await Zotero.FullText.processAttachmentIndexQueue();
+
+			assert.include(await contentSearch(item, 'jabberwocky'), item.id);
+			let version = await Zotero.DB.valueQueryAsync(
+				"SELECT version FROM ftindex.fulltextIndexState WHERE itemID=?", item.id
+			);
+			assert.equal(version, 1);
+		});
+
+		it("should re-extract a queued item whose cache file is missing", async function () {
+			let item = await importFileAttachment('test.pdf');
+			let cacheFile = Zotero.FullText.getItemCacheFile(item).path;
+			// Grab a real word from the extracted text to search for after re-extraction
+			let word = (await Zotero.File.getContentsAsync(cacheFile)).match(/[a-z]{5,}/i)[0];
+			// Simulate the storage folder being cleared after indexing (cache gone, file present),
+			// then re-queue the item
+			await OS.File.remove(cacheFile);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", item.id);
+
+			// Draining the queue should re-extract from the file (not index empty)
+			await Zotero.FullText.processAttachmentIndexQueue();
+
+			assert.isTrue(await OS.File.exists(cacheFile));
+			assert.include(await contentSearch(item, word), item.id);
+		});
+
+		it("should not count unindexable attachments as not indexed", async function () {
+			let before = (await Zotero.FullText.getIndexStats()).unindexedQueue;
+			// A Word document can't be full-text indexed, so it shouldn't inflate "not indexed"
+			let path = OS.Path.join(await getTempDirectory(), Zotero.Utilities.randomString() + ".doc");
+			await Zotero.File.putContentsAsync(path, "not really a word doc");
+			await Zotero.Attachments.importFromFile({
+				file: path, contentType: 'application/msword'
+			});
+			let after = (await Zotero.FullText.getIndexStats()).unindexedQueue;
+			assert.equal(after, before);
+		});
+
+		it("should index an unindexed attachment that has a local file", async function () {
+			let item = await createTextAttachment("filepresentunindexed content");
+			// Simulate a never-indexed attachment: no fulltextItems row, not in the index
+			await Zotero.DB.queryAsync("DELETE FROM fulltextItems WHERE itemID=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", item.id);
+			assert.notInclude(await contentSearch(item, 'filepresentunindexed'), item.id);
+			await Zotero.FullText.processAttachmentExtractionQueue();
+			assert.include(await contentSearch(item, 'filepresentunindexed'), item.id);
+		});
+
+		it("should record an unindexed attachment with no local file as missing", async function () {
+			let item = await createTextAttachment("nolocalfile content");
+			await Zotero.DB.queryAsync("DELETE FROM fulltextItems WHERE itemID=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", item.id);
+			// Remove the file so there's no local content to index
+			await OS.File.remove(await item.getFilePathAsync());
+			await Zotero.FullText.processAttachmentExtractionQueue();
+			let synced = await Zotero.DB.valueQueryAsync(
+				"SELECT synced FROM fulltextItems WHERE itemID=?", item.id
+			);
+			assert.equal(synced, Zotero.FullText.SYNC_STATE_MISSING);
+		});
+
+		it("should record an attachment as missing when its content can't be extracted", async function () {
+			// A file that isn't a valid EPUB: extraction fails, so the import leaves no fulltextItems
+			// row. The item must still leave the queue (recorded missing) rather than being retried
+			// endlessly.
+			let tmpDir = await getTempDirectory();
+			let path = OS.Path.join(tmpDir, Zotero.Utilities.randomString() + ".epub");
+			await Zotero.File.putContentsAsync(path, "not really an EPUB");
+			let item = await Zotero.Attachments.importFromFile({
+				file: path, contentType: 'application/epub+zip'
+			});
+			assert.isNotOk(await Zotero.DB.valueQueryAsync(
+				"SELECT 1 FROM fulltextItems WHERE itemID=?", item.id
+			));
+			await Zotero.FullText.processAttachmentExtractionQueue();
+			let synced = await Zotero.DB.valueQueryAsync(
+				"SELECT synced FROM fulltextItems WHERE itemID=?", item.id
+			);
+			assert.equal(synced, Zotero.FullText.SYNC_STATE_MISSING);
+			// No longer pending, so the drain won't keep retrying it
+			assert.equal(await Zotero.FullText.getAttachmentExtractionQueueCount(), 0);
+		});
+
+		it("should skip unindexed attachments while indexing is disabled and index them when re-enabled", async function () {
+			let item = await createTextAttachment("disabledpref content");
+			await Zotero.DB.queryAsync("DELETE FROM fulltextItems WHERE itemID=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", item.id);
+			Zotero.Prefs.set('fulltext.textMaxLength', 0);
+			try {
+				// Disabled: not counted as pending, and a pass records nothing (so it can't loop)
+				assert.equal(await Zotero.FullText.getAttachmentExtractionQueueCount(), 0);
+				await Zotero.FullText.processAttachmentExtractionQueue();
+				assert.isNotOk(await Zotero.DB.valueQueryAsync(
+					"SELECT 1 FROM fulltextItems WHERE itemID=?", item.id
+				));
+			}
+			finally {
+				Zotero.Prefs.clear('fulltext.textMaxLength');
+			}
+			// Re-enabled: eligible again and indexed
+			await Zotero.FullText.processAttachmentExtractionQueue();
+			assert.include(await contentSearch(item, 'disabledpref'), item.id);
+		});
+
+		it("should purge content index entries orphaned by item deletion", async function () {
+			let item = await createTextAttachment("orphanpurge content");
+			assert.include(await contentSearch(item, 'orphanpurge'), item.id);
+			// Simulate the FK cascade from a delete that bypassed Item.erase(): drop the
+			// fulltextItems row, leaving the content index entries orphaned
+			await Zotero.DB.queryAsync("DELETE FROM fulltextItems WHERE itemID=?", item.id);
+			await Zotero.FullText.purgeOrphanedContent();
+			assert.notInclude(await contentSearch(item, 'orphanpurge'), item.id);
+		});
+
+		it("should remove content from the index when cleared", async function () {
+			let item = await createTextAttachment("disposable singular content");
+			assert.include(await contentSearch(item, 'disposable'), item.id);
+			await Zotero.DB.executeTransaction(async function () {
+				await Zotero.FullText.clearItemWords(item.id);
+			});
+			assert.notInclude(await contentSearch(item, 'disposable'), item.id);
+		});
+
+		it("should keep content searchable after optimizing the index", async function () {
+			let item = await createTextAttachment("optimizable content");
+			await Zotero.FullText.optimizeContentIndex();
+			assert.include(await contentSearch(item, 'optimizable'), item.id);
+		});
+
+		it("should keep content searchable after vacuuming the index", async function () {
+			let item = await createTextAttachment("vacuumable content");
+			await Zotero.FullText.vacuumContentIndex({ force: true });
+			assert.include(await contentSearch(item, 'vacuumable'), item.id);
+		});
+
+		it("should discard the index when it belongs to a different database instance", async function () {
+			let item = await createTextAttachment("instancemismatch content");
+			assert.include(await contentSearch(item, 'instancemismatch'), item.id);
+			// Simulate an index built against a different zotero.sqlite (e.g., the database was
+			// deleted and re-synced, reassigning local itemIDs) by changing the stored localUserKey
+			await Zotero.DB.queryAsync(
+				"UPDATE ftindex.fulltextIndexMeta SET value='xxxxxxxx' WHERE key='localUserKey'"
+			);
+			// Force a reconnect, which re-runs the content DB setup and detects the mismatch
+			await Zotero.DB.vacuum({ force: true });
+			assert.equal(
+				await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM ftindex.fulltextIndexState"), 0
+			);
+			assert.notInclude(await contentSearch(item, 'instancemismatch'), item.id);
+		});
+	});
+
 	describe("Indexing", function () {
 		beforeEach(function () {
 			Zotero.Prefs.clear('fulltext.textMaxLength');
@@ -220,6 +465,43 @@ describe("Zotero.FullText", function () {
 		});
 	})
 	
+	describe("#processSyncedContentNow()", function () {
+		before(() => {
+			Zotero.Prefs.set('fulltext.pdfMaxPages', 0);
+		});
+		after(() => {
+			Zotero.Prefs.clear('fulltext.pdfMaxPages');
+		});
+
+		it("should index sync-delivered content without waiting for idle", async function () {
+			var item = await importFileAttachment('test.pdf');
+			// Simulate content delivered by sync: stored as TO_PROCESS with a processor cache file,
+			// not yet in the search index (PDF indexing is disabled, so it wasn't indexed locally)
+			await Zotero.FullText.setItemContent(
+				item.libraryID,
+				item.key,
+				{ content: "zqpromptsync electrophoresis", indexedChars: 28, totalChars: 28 },
+				5
+			);
+			function search(term) {
+				let s = new Zotero.Search();
+				s.libraryID = item.libraryID;
+				s.addCondition('fulltextContent', 'contains', term);
+				return s.search();
+			}
+			assert.notInclude(await search('zqpromptsync'), item.id);
+
+			// Processing it promptly (as on sync completion) makes it searchable without idle
+			await Zotero.FullText.processSyncedContentNow();
+
+			assert.include(await search('zqpromptsync'), item.id);
+			assert.equal(
+				await Zotero.DB.valueQueryAsync("SELECT synced FROM fulltextItems WHERE itemID=?", item.id),
+				Zotero.FullText.SYNC_STATE_IN_SYNC
+			);
+		});
+	});
+
 	describe("#setItemContent()", function () {
 		before(() => {
 			// Disable PDF indexing
