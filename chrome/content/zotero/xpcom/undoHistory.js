@@ -258,7 +258,7 @@ Zotero.UndoHistory = {
 						if (field === 'itemTypeID') continue;
 						this._applyFieldValue(obj, field, values[applySide]);
 					}
-					await obj.save({ skipSelect: true });
+					await obj.save({ skipSelect: true, skipDateModifiedUpdate: change.skipDateModified });
 				}
 			});
 			if (stale) {
@@ -373,6 +373,7 @@ Zotero.UndoHistory = {
 		let existing = this._pendingEntry.changes.find(
 			c => c.objectType === changeRecord.objectType && c.id === changeRecord.id);
 		if (existing) {
+			existing.skipDateModified = !!(existing.skipDateModified && changeRecord.skipDateModified);
 			for (let [field, vals] of Object.entries(changeRecord.fields)) {
 				if (existing.fields[field]) {
 					existing.fields[field].new = vals.new;

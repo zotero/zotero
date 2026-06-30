@@ -1070,6 +1070,9 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 		// undo stack depends on a stageAction() call within the same transaction.
 		if (Zotero.UndoHistory && !env.isNew) {
 			env.undoData = this._getUndoData();
+			if (env.undoData) {
+				env.undoData.skipDateModified = !!env.options.skipDateModifiedUpdate;
+			}
 		}
 
 		// Create transaction

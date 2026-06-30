@@ -894,6 +894,43 @@ describe("Zotero.UndoHistory", function () {
 			assert.include(subject.relatedItems, relB.key);
 			assert.include(subject.relatedItems, relC.key);
 		});
+
+		it("should not bump Date Modified when undoing or redoing Relate Items", async function () {
+			let itemA = await createDataObject('item', { title: 'Item A' });
+			let itemB = await createDataObject('item', { title: 'Item B' });
+
+			// Pin both items to a known, old Date Modified so a bump is detectable
+			let dateModified = '2020-01-01 00:00:00';
+			itemA.dateModified = dateModified;
+			await itemA.saveTx();
+			itemB.dateModified = dateModified;
+			await itemB.saveTx();
+			Zotero.UndoHistory.clear();
+
+			// Relate the items, suppressing Date Modified updates (mirrors relatedBox.js)
+			await Zotero.DB.executeTransaction(async () => {
+				Zotero.UndoHistory.stageAction('undo-action-add-related');
+				itemA.addRelatedItem(itemB);
+				await itemA.save({ skipDateModifiedUpdate: true });
+				itemB.addRelatedItem(itemA);
+				await itemB.save({ skipDateModifiedUpdate: true });
+			});
+
+			assert.equal(itemA.dateModified, dateModified);
+			assert.equal(itemB.dateModified, dateModified);
+
+			await Zotero.UndoHistory.undo();
+			assert.notInclude(itemA.relatedItems, itemB.key);
+			assert.notInclude(itemB.relatedItems, itemA.key);
+			assert.equal(itemA.dateModified, dateModified, 'undo should not bump Item A Date Modified');
+			assert.equal(itemB.dateModified, dateModified, 'undo should not bump Item B Date Modified');
+
+			await Zotero.UndoHistory.redo();
+			assert.include(itemA.relatedItems, itemB.key);
+			assert.include(itemB.relatedItems, itemA.key);
+			assert.equal(itemA.dateModified, dateModified, 'redo should not bump Item A Date Modified');
+			assert.equal(itemB.dateModified, dateModified, 'redo should not bump Item B Date Modified');
+		});
 	});
 
 	describe("staging guards", function () {
