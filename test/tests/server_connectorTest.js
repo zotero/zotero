@@ -559,6 +559,78 @@ describe("Connector Server", function () {
 			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/existing-extra-doi");
 		});
 
+		it("should filter DOI lookup candidates before parsing values", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let unrelatedDOIItem = new Zotero.Item("journalArticle");
+			unrelatedDOIItem.setField("title", "Unrelated DOI Article");
+			unrelatedDOIItem.setField("DOI", "10.9999/unrelated-doi-candidate");
+			await unrelatedDOIItem.saveTx();
+
+			let unrelatedExtraItem = new Zotero.Item("webpage");
+			unrelatedExtraItem.setField("title", "Unrelated Extra Page");
+			unrelatedExtraItem.setField("extra", "UNRELATED_EXTRA_SHOULD_NOT_PARSE");
+			await unrelatedExtraItem.saveTx();
+
+			let doiItem = new Zotero.Item("journalArticle");
+			doiItem.setField("title", "Existing Filtered DOI Article");
+			doiItem.setField("DOI", "https://doi.org/10.1234/filtered-doi-candidate");
+			await doiItem.saveTx();
+
+			let extraItem = new Zotero.Item("webpage");
+			extraItem.setField("title", "Existing Filtered Extra Page");
+			extraItem.setField("extra", "DOI: 10.1234/filtered-extra-candidate");
+			await extraItem.saveTx();
+			Zotero.Items.unload([unrelatedDOIItem.id, unrelatedExtraItem.id, doiItem.id, extraItem.id]);
+
+			let originalCleanDOI = Zotero.Utilities.cleanDOI;
+			let originalExtractExtraFields = Zotero.Utilities.Internal.extractExtraFields;
+			let cleanedUnrelatedDOI = false;
+			let parsedUnrelatedExtra = false;
+			sinon.stub(Zotero.Utilities, "cleanDOI").callsFake(function (doi) {
+				if (doi && doi.includes("unrelated-doi-candidate")) {
+					cleanedUnrelatedDOI = true;
+				}
+				return originalCleanDOI.apply(this, arguments);
+			});
+			sinon.stub(Zotero.Utilities.Internal, "extractExtraFields").callsFake(function (extra) {
+				if (extra && extra.includes("UNRELATED_EXTRA_SHOULD_NOT_PARSE")) {
+					parsedUnrelatedExtra = true;
+				}
+				return originalExtractExtraFields.apply(this, arguments);
+			});
+
+			try {
+				let response = await httpRequest(
+					"POST",
+					connectorServerPath + "/connector/findExistingItems",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({
+							identifiers: {
+								doi: [
+									"10.1234/filtered-doi-candidate",
+									"10.1234/filtered-extra-candidate"
+								]
+							}
+						})
+					}
+				);
+
+				let data = JSON.parse(response.response);
+				assert.sameMembers(data.matches.map(match => match.id), [doiItem.id, extraItem.id]);
+				assert.isFalse(cleanedUnrelatedDOI);
+				assert.isFalse(parsedUnrelatedExtra);
+			}
+			finally {
+				Zotero.Utilities.cleanDOI.restore();
+				Zotero.Utilities.Internal.extractExtraFields.restore();
+			}
+		});
+
 		it("should return display titles for base-mapped title fields", async function () {
 			await selectLibrary(win, Zotero.Libraries.userLibraryID);
 			await waitForItemsLoad(win);

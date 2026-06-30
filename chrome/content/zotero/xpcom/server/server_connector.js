@@ -365,32 +365,38 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 	let matches = [];
 
 	if (doiSet.size) {
-		let doiRows = await Zotero.DB.queryAsync(
-			"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
-				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID=? "
-				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
-			[
-				libraryID,
-				Zotero.ItemFields.getID('DOI')
-			]
-		);
+		let getDOICandidateRows = async function (fieldID) {
+			let allRows = [];
+			await Zotero.Utilities.Internal.forEachChunkAsync(
+				identifiers.doi,
+				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
+				async function (chunk) {
+					let rows = await Zotero.DB.queryAsync(
+						"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+							+ "JOIN itemDataValues USING (valueID) "
+							+ "WHERE libraryID=? AND fieldID=? "
+							+ "AND (" + chunk.map(() => "LOWER(value) LIKE ?").join(" OR ") + ") "
+							+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
+						[
+							libraryID,
+							fieldID,
+							...chunk.map(doi => `%${doi}%`)
+						]
+					);
+					allRows.push(...rows);
+				}
+			);
+			return allRows;
+		};
+
+		let doiRows = await getDOICandidateRows(Zotero.ItemFields.getID('DOI'));
 		for (let row of doiRows) {
 			let doi = Zotero.Utilities.cleanDOI(row.value);
 			if (doi && doiSet.has(doi.toLowerCase())) {
 				itemIDs.add(row.itemID);
 			}
 		}
-		let extraRows = await Zotero.DB.queryAsync(
-			"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
-				+ "JOIN itemDataValues USING (valueID) "
-				+ "WHERE libraryID=? AND fieldID=? "
-				+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
-			[
-				libraryID,
-				Zotero.ItemFields.getID('extra')
-			]
-		);
+		let extraRows = await getDOICandidateRows(Zotero.ItemFields.getID('extra'));
 		for (let row of extraRows) {
 			let { fields } = Zotero.Utilities.Internal.extractExtraFields(row.value);
 			let doi = Zotero.Utilities.cleanDOI(fields.get('DOI'));
