@@ -884,7 +884,13 @@
 				<popupset id="condition-tooltips"/>
 				
 				<menulist id="conditionsmenu" oncommand="this.closest('zoterosearchcondition').onConditionSelected(event.target.value); event.stopPropagation()" native="true">
-					<menupopup onpopupshown="this.closest('zoterosearchcondition').revealSelectedCondition()">
+					<menupopup onpopupshown="if (event.target == this) this.closest('zoterosearchcondition').revealSelectedCondition()">
+						<menu id="attachment-conditions-menu">
+							<menupopup/>
+						</menu>
+						<menu id="annotation-conditions-menu">
+							<menupopup/>
+						</menu>
 						<menu id="more-conditions-menu" label="&zotero.general.more;">
 							<menupopup/>
 						</menu>
@@ -930,6 +936,8 @@
 			// Build conditions menu
 			var conditionsMenu = this.querySelector('#conditionsmenu');
 			var moreConditionsMenu = this.querySelector('#more-conditions-menu');
+			var attachmentConditionsMenu = this.querySelector('#attachment-conditions-menu');
+			var annotationConditionsMenu = this.querySelector('#annotation-conditions-menu');
 			var conditions = Zotero.SearchConditions.getStandardConditions();
 
 			// Cache the (alphabetically sorted) condition list and set up
@@ -939,20 +947,45 @@
 			this._typeAheadTime = 0;
 			conditionsMenu.addEventListener('keydown', event => this.handleConditionKeyDown(event), true);
 
+			// Label the submenus and seed the top-level entries with them, so the
+			// headings sort alphabetically alongside the primary conditions
+			attachmentConditionsMenu.setAttribute(
+				'label', Zotero.getString('search-conditions-submenu-attachment')
+			);
+			annotationConditionsMenu.setAttribute(
+				'label', Zotero.getString('search-conditions-submenu-annotation')
+			);
+			let topLevelEntries = [
+				{ label: attachmentConditionsMenu.getAttribute('label'), node: attachmentConditionsMenu },
+				{ label: annotationConditionsMenu.getAttribute('label'), node: annotationConditionsMenu },
+			];
+
 			for (let condition of conditions) {
 				let menuitem;
-				if (this.isPrimaryCondition(condition.name)) {
+				let submenu = this.getConditionSubmenu(condition.name);
+				// Attachment- and annotation-level conditions go in their own submenus,
+				// with a short label since the submenu heading supplies the context
+				if (submenu == 'attachment' || submenu == 'annotation') {
+					let parentMenu = submenu == 'attachment'
+						? attachmentConditionsMenu
+						: annotationConditionsMenu;
+					menuitem = parentMenu.appendItem(
+						Zotero.getString('search-conditions-short-' + condition.name),
+						condition.name
+					);
+				}
+				else if (this.isPrimaryCondition(condition.name)) {
 					menuitem = document.createXULElement('menuitem');
 					menuitem.setAttribute('label', condition.localized);
 					menuitem.setAttribute('value', condition.name);
-					moreConditionsMenu.before(menuitem);
+					topLevelEntries.push({ label: condition.localized, node: menuitem });
 				}
 				else {
 					menuitem = moreConditionsMenu.appendItem(
 						condition.localized, condition.name
 					);
 				}
-				
+
 				var baseFields = null;
 				try {
 					baseFields = Zotero.ItemFields.getTypeFieldsFromBase(condition.name);
@@ -1011,6 +1044,15 @@
 					menuitem.setAttribute('tooltip', condition.name + '-tooltip');
 				}
 			}
+
+			// Insert the top-level conditions and the two submenus alphabetically,
+			// before the catch-all "More" submenu
+			let collation = Zotero.getLocaleCollation();
+			topLevelEntries.sort((a, b) => collation.compareString(1, a.label, b.label));
+			for (let entry of topLevelEntries) {
+				moreConditionsMenu.before(entry.node);
+			}
+
 			conditionsMenu.selectedIndex = 0;
 		}
 
@@ -1024,22 +1066,34 @@
 				case 'date':
 				case 'dateAdded':
 				case 'dateModified':
-				case 'lastRead':
 				case 'itemType':
-				case 'fileTypeID':
 				case 'publicationTitle':
 				case 'tag':
 				case 'note':
+					return true;
+			}
+
+			return false;
+		}
+
+		// Conditions that live in the Attachment or Annotation submenu rather than
+		// at the top level of the conditions menu. Returns 'attachment', 'annotation',
+		// or null.
+		getConditionSubmenu(condition) {
+			switch (condition) {
 				case 'fulltextContent':
+				case 'fileTypeID':
+				case 'lastRead':
+					return 'attachment';
 				case 'annotationText':
 				case 'annotationComment':
 				case 'annotationType':
 				case 'annotationColor':
 				case 'annotationAuthor':
-					return true;
+					return 'annotation';
 			}
-			
-			return false;
+
+			return null;
 		}
 
 		async onConditionSelected(conditionName, reload) {

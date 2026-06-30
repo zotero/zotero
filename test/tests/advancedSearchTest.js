@@ -629,6 +629,54 @@ describe("Advanced Search", function () {
 			assert.isFalse(row.querySelector('#valuemenu').hidden);
 		});
 
+		it("should place attachment and annotation conditions in their submenus", function () {
+			var s = new Zotero.Search();
+			s.libraryID = Zotero.Libraries.userLibraryID;
+			s.addCondition('title', 'is', '');
+			pane.search = s;
+
+			var row = conditions.firstChild;
+			var attachmentMenu = row.querySelector('#attachment-conditions-menu');
+			var annotationMenu = row.querySelector('#annotation-conditions-menu');
+
+			// An attachment-level condition is in the Attachment submenu rather than at
+			// the top level of the conditions menu
+			assert.isFalse(row.isPrimaryCondition('fileTypeID'));
+			assert.ok(attachmentMenu.querySelector('menuitem[value="fileTypeID"]'));
+
+			// An annotation-level condition is in the Annotation submenu
+			assert.isFalse(row.isPrimaryCondition('annotationColor'));
+			assert.ok(annotationMenu.querySelector('menuitem[value="annotationColor"]'));
+
+			// Selecting one shows its full name as the closed-menu label
+			row.onConditionSelected('annotationColor');
+			assert.equal(row.selectedCondition, 'annotationColor');
+			assert.equal(
+				row.querySelector('#conditionsmenu').getAttribute('label'),
+				Zotero.SearchConditions.getLocalizedName('annotationColor')
+			);
+		});
+
+		it("should sort the submenus alphabetically among the top-level conditions", function () {
+			var s = new Zotero.Search();
+			s.libraryID = Zotero.Libraries.userLibraryID;
+			s.addCondition('title', 'is', '');
+			pane.search = s;
+
+			var row = conditions.firstChild;
+			var popup = row.querySelector('#conditionsmenu > menupopup');
+
+			// Top-level entries (including the Attachment/Annotation submenus) are in
+			// alphabetical order, with the catch-all "More" submenu kept last
+			var labels = [...popup.children]
+				.filter(node => node.id != 'more-conditions-menu')
+				.map(node => node.getAttribute('label'));
+			var collation = Zotero.getLocaleCollation();
+			var sorted = [...labels].sort((a, b) => collation.compareString(1, a, b));
+			assert.deepEqual(labels, sorted);
+			assert.equal(popup.lastElementChild.id, 'more-conditions-menu');
+		});
+
 		it("should keep an edited value when switching to another text condition", async function () {
 			var s = new Zotero.Search();
 			s.libraryID = Zotero.Libraries.userLibraryID;
