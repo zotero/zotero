@@ -107,6 +107,7 @@ Zotero.DBConnection = function (dbNameOrPath) {
 	this._dbIsCorrupt = null
 	this._onlineBackupInProgress = false;
 	this._onConnectCallbacks = [];
+	this._loadedExtensions = new Set();
 
 	this._transactionPromise = null;
 	
@@ -1071,6 +1072,24 @@ Zotero.DBConnection.prototype.integrityCheck = async function () {
 };
 
 
+/**
+ * Load a bundled SQLite extension (e.g., 'fts5') on the connection.
+ *
+ * Mozilla's mozStorage doesn't compile FTS in by default and disables generic extension loading,
+ * but it does allow loading specific bundled extensions by name. The module is registered per
+ * connection, so call this once: the extension is remembered and re-loaded automatically when the
+ * connection is reopened (e.g., after a vacuum()), before onConnect() callbacks run, so callers
+ * don't have to reload it themselves.
+ */
+Zotero.DBConnection.prototype.loadExtension = async function (name) {
+	var conn = await this._getConnectionAsync();
+	var result = conn._connectionData._dbConn.loadExtension(name);
+	// Remember it so it can be re-loaded on the next reconnect
+	this._loadedExtensions.add(name);
+	return result;
+};
+
+
 Zotero.DBConnection.prototype.isCorruptionError = function (e) {
 	return this.DB_CORRUPTION_STRINGS.some(x => e.message.includes(x));
 };
@@ -1469,6 +1488,18 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 				.getService(Components.interfaces.nsIUserIdleService);
 			idleService.addIdleObserver(this, 300);
 		});
+	}
+
+	// Re-load any extensions loaded via loadExtension(), which are registered per connection and
+	// so don't survive a reconnect. Done before the onConnect callbacks, which may depend on them
+	// (e.g., creating FTS5 tables).
+	for (let name of this._loadedExtensions) {
+		try {
+			this._connection._connectionData._dbConn.loadExtension(name);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 
 	for (let callback of this._onConnectCallbacks) {
