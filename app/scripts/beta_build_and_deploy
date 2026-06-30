@@ -8,10 +8,20 @@ ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 CHANNEL="beta"
 BRANCH="main"
+BUILD_ONLY=0
 export SAFARI_APPEX="$ROOT_DIR/../safari-app-extension-builds/beta/ZoteroSafariExtension.appex"
 
 # Set Safari extension LSMinimumSystemVersion to Mojave for betas
 perl -pi -e 's/<string>11\.0<\/string>/<string>10.14<\/string>/' "$SAFARI_APPEX"/Contents/Info.plist
+
+while getopts "b" opt; do
+	case $opt in
+		b)
+			BUILD_ONLY=1
+			;;
+	esac
+	shift $((OPTIND-1)); OPTIND=1
+done
 
 cd "$SCRIPT_DIR"
 ./check_requirements
@@ -29,4 +39,12 @@ trap cleanup EXIT
 ./prepare_build -s "$source_dir" -o "$build_dir" -c $CHANNEL -m $hash
 VERSION="`cat \"$build_dir/version\"`"
 ./build_for_deploy -d "$build_dir" -p $BUILD_PLATFORMS -c $CHANNEL
-ssh $DEPLOY_HOST "$DEPLOY_PATH/deploy" $CHANNEL "$VERSION" $BUILD_PLATFORMS
+
+if [ $BUILD_ONLY -eq 1 ]; then
+	echo
+	echo "Build only -- skipping deploy."
+	echo "To deploy, run on the deploy server:"
+	echo "  $DEPLOY_PATH/deploy $CHANNEL $VERSION $BUILD_PLATFORMS"
+else
+	ssh $DEPLOY_HOST "$DEPLOY_PATH/deploy" $CHANNEL "$VERSION" $BUILD_PLATFORMS
+fi
