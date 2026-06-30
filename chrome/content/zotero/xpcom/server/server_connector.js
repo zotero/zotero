@@ -430,6 +430,7 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 		if (!item || !item.isTopLevelItem()) {
 			continue;
 		}
+		await item.loadDataType('itemData');
 
 		let matchedFields = [];
 		let matchedIdentifiers = {};

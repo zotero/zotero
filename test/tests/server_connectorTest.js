@@ -400,7 +400,7 @@ describe("Connector Server", function () {
 
 			let item = new Zotero.Item("webpage");
 			item.setField("title", "Existing Proxied Page");
-			item.setField("url", "https://www.example.com/path");
+			item.setField("url", "https://duplicate.example.com/path");
 			await item.saveTx();
 			Zotero.Items.unload(item.id);
 
@@ -418,7 +418,7 @@ describe("Connector Server", function () {
 						items: [{
 							itemType: "webpage",
 							title: "New Proxied Page",
-							url: "https://www-example-com.proxy.example.com/path"
+							url: "https://duplicate-example-com.proxy.example.com/path"
 						}]
 					})
 				}
@@ -427,7 +427,7 @@ describe("Connector Server", function () {
 			let data = JSON.parse(response.response);
 			assert.lengthOf(data.matches, 1);
 			assert.equal(data.matches[0].id, item.id);
-			assert.equal(data.matches[0].matchedIdentifiers.url, "https://www.example.com/path");
+			assert.equal(data.matches[0].matchedIdentifiers.url, "https://duplicate.example.com/path");
 		});
 
 		it("should chunk large URL duplicate lookups", async function () {
@@ -563,7 +563,7 @@ describe("Connector Server", function () {
 			await selectLibrary(win, Zotero.Libraries.userLibraryID);
 			await waitForItemsLoad(win);
 
-			let item = new Zotero.Item("legalCase");
+			let item = new Zotero.Item("case");
 			item.setField("caseName", "Existing Case Name");
 			item.setField("url", "https://example.com/case");
 			await item.saveTx();
