@@ -1095,6 +1095,8 @@ userjs-pref-warning = Some { -app-name } settings have been overridden using an 
 
 migrate-extra-fields-progress-message = Migrating new fields from Extra field
 
+search-normalization-progress-message = Indexing items for search
+
 long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =

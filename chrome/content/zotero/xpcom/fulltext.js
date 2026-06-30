@@ -39,7 +39,14 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	this.SYNC_STATE_MISSING = 4;
 	
 	const _processorCacheFile = '.zotero-ft-unprocessed';
-	
+
+	// Schema version of the attached content database (fulltext.sqlite)
+	const _contentDBVersion = 1;
+	// Version of the content index format. Bump to force a rebuild of the index from the cached
+	// text (e.g., after a tokenizer or normalization change) -- items recorded at a lower version
+	// in fulltextIndexState are re-indexed by the background queue processor.
+	const _contentIndexVersion = 1;
+
 	const kWbClassSpace =            0;
 	const kWbClassAlphaLetter =      1;
 	const kWbClassPunct =            2;
@@ -55,20 +62,153 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	
 	var _idleObserverIsRegistered = false;
 	var _idleObserverDelay = 30;
+	// Shorter idle threshold (seconds) for the index drain than the sync content processor's, so
+	// indexing ramps back up a few seconds after the user pauses rather than waiting a full 30
+	var _drainIdleDelay = 3;
 	var _syncContentTimeoutID = null;
+	var _queueDrainTimerID = null;
+	var _indexingInProgress = false;
+	// Ordered itemID cursors for the queue processors, so each drain advances through the source
+	// tables once rather than rescanning already-indexed rows from the start on every batch. Reset
+	// to 0 when a pass reaches the end, to pick up anything re-queued below the cursor.
+	var _attachmentIndexQueueCursor = 0;
+	var _attachmentExtractionQueueCursor = 0;
+	// Flush a content batch to the index once it reaches this many characters, so peak memory stays
+	// bounded by the budget rather than by item size (each up to fulltext.textMaxLength)
+	const _maxContentBatchChars = 2000000;
+	var _processingSyncedContent = false;
+	var _reindexLimitTimeoutIDs = {};
 	var _syncContentBlacklist = {};
 	var _upgradeCheck = true;
 	var _syncLibraryVersion = 0;
 	
 	this.init = async function () {
-		let setUpIndexingDB = async () => {
-			await Zotero.DB.queryAsync("ATTACH ':memory:' AS 'indexing'");
-			await Zotero.DB.queryAsync('CREATE TABLE indexing.fulltextWords (word NOT NULL)');
+		// Set up the full-text content index: a contentless trigram FTS5 table in a separate
+		// attached database (fulltext.sqlite), used for content searching. It's a local,
+		// rebuildable index kept out of zotero.sqlite (so it doesn't bloat the main DB or its
+		// backups), versioned independently via PRAGMA user_version. The original extracted text
+		// still lives in the .zotero-ft-cache files; the index stores only normalized trigrams.
+		//
+		// FTS5 is a bundled SQLite extension. It's loaded once here; DBConnection re-loads it
+		// automatically after a reconnect (before this callback runs), so it's available for the
+		// FTS5 tables below.
+		await Zotero.DB.loadExtension('fts5');
+		let setUpContentDB = async () => {
+			let path = Zotero.DataDirectory.getDatabase('fulltext');
+			await Zotero.DB.queryAsync("ATTACH DATABASE ? AS ftindex", [path]);
+			// The index is keyed by local itemID, which is reassigned whenever zotero.sqlite is
+			// recreated (e.g., deleted and re-synced from the server). An index built against a
+			// different database instance would map its rows to the wrong items, so it has to be
+			// discarded and rebuilt rather than reused. Detect that by comparing the localUserKey
+			// the index was stamped with against the current one. The extracted text still lives in
+			// the .zotero-ft-cache files, so the background queue repopulates the index.
+			let localUserKey = Zotero.Users.getLocalUserKey();
+			let version = await Zotero.DB.valueQueryAsync("PRAGMA ftindex.user_version");
+			let indexedUserKey = version >= _contentDBVersion
+				? await Zotero.DB.valueQueryAsync(
+					"SELECT value FROM ftindex.fulltextIndexMeta WHERE key='localUserKey'")
+				: false;
+			if (version < _contentDBVersion || indexedUserKey != localUserKey) {
+				// Drop any existing tables so a stale or mismatched index is rebuilt from scratch
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextContent");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextContentCJK");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextIndexState");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextIndexMeta");
+				// Latin (and CJK runs of 3+ chars): trigram index over the normalized text
+				await Zotero.DB.queryAsync(
+					"CREATE VIRTUAL TABLE ftindex.fulltextContent USING fts5("
+					+ "text, tokenize='trigram', content='', contentless_delete=1)"
+				);
+				// CJK: overlapping 2-grams of CJK runs only, space-separated, indexed with the
+				// ascii tokenizer (which leaves multibyte characters intact and splits on the
+				// spaces). The trigram tokenizer can't match the 1-2-character queries common in
+				// CJK, so those go here instead.
+				await Zotero.DB.queryAsync(
+					"CREATE VIRTUAL TABLE ftindex.fulltextContentCJK USING fts5("
+					+ "text, tokenize='ascii', content='', contentless_delete=1)"
+				);
+				// Records which items are in the content index and at what format version. The
+				// contentless FTS5 tables can't be queried for this, so this side table makes the
+				// queue (items not yet indexed at the current version) a countable,
+				// resumable query.
+				await Zotero.DB.queryAsync(
+					"CREATE TABLE ftindex.fulltextIndexState (\n"
+					+ "    itemID INTEGER PRIMARY KEY,\n"
+					+ "    version INT NOT NULL\n"
+					+ ")"
+				);
+				// Index metadata, including the localUserKey the index was built against (above)
+				await Zotero.DB.queryAsync(
+					"CREATE TABLE ftindex.fulltextIndexMeta (\n"
+					+ "    key TEXT PRIMARY KEY,\n"
+					+ "    value NOT NULL\n"
+					+ ")"
+				);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO ftindex.fulltextIndexMeta (key, value) VALUES ('localUserKey', ?)",
+					[localUserKey]
+				);
+				await Zotero.DB.queryAsync("PRAGMA ftindex.user_version = " + _contentDBVersion);
+			}
 		};
-		await setUpIndexingDB();
-		// ATTACHed databases don't survive a connection reopen (e.g., after vacuum), so
-		// re-run the setup on every reconnect
-		Zotero.DB.onConnect(setUpIndexingDB);
+		// Rebuild the index if its file is found corrupt. A malformed page can surface from any
+		// query -- setup, a search, or the background queue -- so recovery is driven by the
+		// corruption handler: drop the file and recreate it (it's derived, so the queue repopulates
+		// it from the cache files). DBConnection confirms the main
+		// database is intact before calling this, so a disposable index failure never triggers
+		// main-database recovery.
+		let rebuildingContentDB = false;
+		let rebuildContentDB = async () => {
+			if (rebuildingContentDB) {
+				return;
+			}
+			rebuildingContentDB = true;
+			try {
+				Zotero.debug("Rebuilding corrupt full-text index", 1);
+				let path = Zotero.DataDirectory.getDatabase('fulltext');
+				// Detach before touching the file. If this fails (e.g., a transaction is in
+				// progress), stop rather than delete a still-attached database or reattach under a
+				// name that's still in use -- the index stays as it was, and a later corruption
+				// error or the next startup retries.
+				await Zotero.DB.queryAsync("DETACH DATABASE ftindex");
+				// Best-effort removal; if it fails, setUpContentDB reattaches the old file and a
+				// later corruption error retries, rather than leaving ftindex detached
+				try {
+					await IOUtils.remove(path, { ignoreAbsent: true });
+					await IOUtils.remove(path + "-wal", { ignoreAbsent: true });
+					await IOUtils.remove(path + "-shm", { ignoreAbsent: true });
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				await setUpContentDB();
+				this.registerQueueDrainObserver();
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			finally {
+				rebuildingContentDB = false;
+			}
+		};
+		Zotero.DB.addCorruptionHandler(rebuildContentDB);
+		// A corrupt index throws when first read here; the handler rebuilds it (deferred, after this
+		// unwinds). Any non-corruption error is unexpected.
+		try {
+			await setUpContentDB();
+		}
+		catch (e) {
+			if (!Zotero.DB.isCorruptionError(e)) {
+				throw e;
+			}
+			Zotero.logError(e);
+		}
+		// An ATTACHed database doesn't survive a connection reopen (e.g., after vacuum), so re-run
+		// the setup on every reconnect
+		Zotero.DB.onConnect(setUpContentDB);
+		// The main-database vacuum doesn't reach the attached index, so reclaim its space during the
+		// same idle maintenance
+		Zotero.DB.onIdle(() => this.vacuumContentIndex());
 
 		let pdfConverterFileName = "pdftotext";
 		let pdfInfoFileName = "pdfinfo";
@@ -114,6 +254,30 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					this.unregisterSyncContentProcessor();
 				}
 			});
+
+			// When a full-text limit is raised, re-extract just the items it affects rather than
+			// forcing a full rebuild (which would re-upload everything). Debounced and reading the
+			// settled value, so adjusting the limit -- or typing it in digit by digit -- only acts
+			// once it stops changing; bumping it up and back down doesn't trigger re-extraction.
+			// Gated in tests, which toggle these prefs without wanting indexing side effects.
+			if (!Zotero.test) {
+				let scheduleReindex = (type, pref) => {
+					if (_reindexLimitTimeoutIDs[type]) {
+						clearTimeout(_reindexLimitTimeoutIDs[type]);
+					}
+					_reindexLimitTimeoutIDs[type] = setTimeout(() => {
+						_reindexLimitTimeoutIDs[type] = null;
+						this.reindexTruncated(type, Zotero.Prefs.get(pref))
+							.catch(e => Zotero.logError(e));
+					}, 5000);
+				};
+				Zotero.Prefs.registerObserver('fulltext.textMaxLength', () => {
+					scheduleReindex('chars', 'fulltext.textMaxLength');
+				});
+				Zotero.Prefs.registerObserver('fulltext.pdfMaxPages', () => {
+					scheduleReindex('pages', 'fulltext.pdfMaxPages');
+				});
+			}
 			
 			// Stop content processor during syncs
 			Zotero.Notifier.registerObserver(
@@ -124,12 +288,28 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 						}
 						else if (event == 'stop') {
 							this.registerSyncContentProcessor();
+							// Index any content the sync just delivered right away, rather than
+							// waiting for the idle observer -- the user may want to search it, and
+							// in on-demand file-download mode it's their only searchable source.
+							// Not awaited; runs in the background.
+							if (!Zotero.test) {
+								this.processSyncedContentNow();
+							}
 						}
 					}.bind(this)
 				},
 				['sync'],
 				'fulltext'
 			);
+		});
+
+		// Bring the content index up to date for items full-text indexed before the index existed
+		// (or before a format-version bump), then index any never-before-indexed attachments on
+		// idle. Independent of full-text content syncing -- it indexes local text.
+		Zotero.uiReadyPromise.then(async () => {
+			await Zotero.Promise.delay(5000);
+			Zotero.addShutdownListener(this.unregisterQueueDrainObserver.bind(this));
+			await this.startQueueDrain();
 		});
 	};
 	
@@ -237,25 +417,16 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	
 	
 	/**
-	 * Index multiple words at once
+	 * Record an item's full-text indexing stats (indexed/total chars and pages, sync state) in
+	 * fulltextItems
 	 *
 	 * @requireTransaction
 	 * @param {Number} itemID
-	 * @param {Array<string>} words
 	 * @return {Promise}
 	 */
-	var indexWords = async function (itemID, words, stats, version, synced) {
+	var setFulltextItem = async function (itemID, stats, version, synced) {
 		Zotero.DB.requireTransaction();
-		let chunk;
-		await Zotero.DB.queryAsync("DELETE FROM indexing.fulltextWords");
-		while (words.length > 0) {
-			chunk = words.splice(0, 100);
-			await Zotero.DB.queryAsync('INSERT INTO indexing.fulltextWords (word) ' + chunk.map(x => 'SELECT ?').join(' UNION '), chunk);
-		}
-		await Zotero.DB.queryAsync('INSERT OR IGNORE INTO fulltextWords (word) SELECT word FROM indexing.fulltextWords');
-		await Zotero.DB.queryAsync('DELETE FROM fulltextItemWords WHERE itemID = ?', [itemID]);
-		await Zotero.DB.queryAsync('INSERT OR IGNORE INTO fulltextItemWords (wordID, itemID) SELECT wordID, ? FROM fulltextWords JOIN indexing.fulltextWords USING(word)', [itemID]);
-		
+
 		var cols = ['itemID', 'version', 'synced'];
 		var params = [
 			itemID,
@@ -271,8 +442,6 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		var sql = `REPLACE INTO fulltextItems (${cols.join(', ')}) `
 			+ `VALUES (${cols.map(_ => '?').join(', ')})`;
 		await Zotero.DB.queryAsync(sql, params);
-		
-		await Zotero.DB.queryAsync("DELETE FROM indexing.fulltextWords");
 	};
 	
 	
@@ -284,21 +453,18 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			throw new Error("itemID not provided");
 		}
 		
-		var words = this.semanticSplitter(text);
-		
 		while (Zotero.DB.inTransaction()) {
 			await Zotero.DB.waitForTransaction('indexString()');
 		}
-		
+
 		await Zotero.DB.executeTransaction(async function () {
-			this.clearItemWords(itemID, true);
-			await indexWords(itemID, words, stats, version, synced);
-			
-			/*
-			var sql = "REPLACE INTO fulltextContent (itemID, textContent) VALUES (?,?)";
-			Zotero.DB.query(sql, [itemID, {string:text}]);
-			*/
-			
+			await this.clearItemWords(itemID, true);
+			await setFulltextItem(itemID, stats, version, synced);
+
+			// Index the extracted text for content searching (FTS5 trigram + CJK 2-gram tables,
+			// plus the index-state row). The original text stays in the .zotero-ft-cache file.
+			await setContentIndex(itemID, text);
+
 			Zotero.Notifier.queue('index', 'item', itemID);
 			Zotero.Notifier.queue('refresh', 'item', itemID);
 		}.bind(this));
@@ -939,6 +1105,11 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 * @return {Boolean}  TRUE if there's more content to process; FALSE otherwise
 	 */
 	this.processSyncedContent = async function (itemIDs) {
+		// Defer to a prompt post-sync burst if one is running, so the two don't process the same
+		// items concurrently
+		if (!itemIDs && _processingSyncedContent) {
+			return;
+		}
 		// Idle observer can take a little while to trigger and may not cancel the setTimeout()
 		// in time, so check idle time directly
 		var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
@@ -986,7 +1157,47 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		// when Zotero is in the background this can be throttled to 10 seconds.
 		_syncContentTimeoutID = setTimeout(() => this.processSyncedContent(itemIDs), 200);
 	};
-	
+
+
+	/**
+	 * Process sync-delivered full-text content (marked SYNC_STATE_TO_PROCESS) into the index right
+	 * away, without waiting for the idle observer. Called when a sync finishes, since the user may
+	 * want to search the content they just synced -- and in on-demand file-download mode synced
+	 * content is their only searchable source. Yields between items so it doesn't block the UI, and
+	 * stops if another sync starts.
+	 *
+	 * @return {Promise}
+	 */
+	this.processSyncedContentNow = async function () {
+		// One drain at a time; the idle observer defers to this while it's running
+		if (_processingSyncedContent) {
+			return;
+		}
+		_processingSyncedContent = true;
+		try {
+			let sql = "SELECT itemID FROM fulltextItems WHERE synced=" + this.SYNC_STATE_TO_PROCESS;
+			let itemIDs = (await Zotero.DB.columnQueryAsync(sql))
+				.filter(id => !(id in _syncContentBlacklist));
+			if (itemIDs.length) {
+				Zotero.debug("Processing " + itemIDs.length + " "
+					+ Zotero.Utilities.pluralize(itemIDs.length, 'item') + " of synced full-text content");
+			}
+			for (let itemID of itemIDs) {
+				// A new sync started -- leave the rest to it and the idle observer
+				if (Zotero.Sync.Runner.syncInProgress) {
+					break;
+				}
+				await this.indexSyncedContent(itemID);
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		finally {
+			_processingSyncedContent = false;
+		}
+	};
+
 	this._syncContentIdleObserver = {
 		observe: function (subject, topic, data) {
 			// On idle, start the background processor
@@ -999,7 +1210,528 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			}
 		}.bind(this)
 	};
-	
+
+
+	//
+	// Content index queue
+	//
+	// Builds the content FTS5 indexes from the cached text of items that were full-text indexed
+	// before the index existed (or before a format-version bump). The work list is a query against
+	// fulltextIndexState, so progress is countable and resumable across restarts. New indexing goes
+	// through indexString(), which keeps the index current; this only drains the queue.
+	//
+
+	/**
+	 * Number of full-text-indexed items not yet in the content index at the current version
+	 * (i.e., the size of the content index queue). Suitable for showing indexing progress.
+	 *
+	 * @return {Promise<Integer>}
+	 */
+	this.getAttachmentIndexQueueCount = async function () {
+		return Zotero.DB.valueQueryAsync(
+			"SELECT COUNT(*) FROM fulltextItems FI "
+			+ "LEFT JOIN ftindex.fulltextIndexState S USING (itemID) "
+			+ "WHERE S.itemID IS NULL OR S.version<?",
+			[_contentIndexVersion]
+		);
+	};
+
+
+	/**
+	 * Process the content index queue, reading each item's cached text and indexing it.
+	 *
+	 * @param {Object} [options]
+	 * @param {Integer} [options.maxTime] - Stop after roughly this many ms (for a bounded startup
+	 *     burst); omit to drain the whole queue
+	 * @param {Boolean} [options.checkIdle] - Stop as soon as the user is no longer idle (for the
+	 *     idle-driven drain)
+	 * @return {Promise<Integer>} The number of items processed
+	 */
+	this.processAttachmentIndexQueue = async function ({ maxTime = null, checkIdle = false, onProgress = null } = {}) {
+		// Only one drain at a time -- the startup burst, the idle observer, and the prefs pane can
+		// all call this (and the unindexed-items pass below), and concurrent runs would process the
+		// same items or pile on the load
+		if (_indexingInProgress) {
+			return 0;
+		}
+		_indexingInProgress = true;
+		let start = Date.now();
+		let processed = 0;
+		try {
+			while (true) {
+				// Don't compete with syncing -- especially full-text content downloads, which would
+				// otherwise race with re-extraction here. Resume on a later idle once sync is done.
+				if (Zotero.Sync.Runner.syncInProgress) {
+					return processed;
+				}
+				if (checkIdle && !_canDrainIndex()) {
+					return processed;
+				}
+				let itemIDs = await Zotero.DB.columnQueryAsync(
+					"SELECT FI.itemID FROM fulltextItems FI "
+					+ "LEFT JOIN ftindex.fulltextIndexState S USING (itemID) "
+					+ "WHERE (S.itemID IS NULL OR S.version<?) AND FI.itemID>? "
+					+ "ORDER BY FI.itemID LIMIT 50",
+					[_contentIndexVersion, _attachmentIndexQueueCursor]
+				);
+				if (!itemIDs.length) {
+					// Nothing left above the cursor; restart from the beginning to catch anything
+					// re-queued below it, and stop only when a full pass finds nothing
+					if (_attachmentIndexQueueCursor) {
+						_attachmentIndexQueueCursor = 0;
+						continue;
+					}
+					Zotero.debug("No queued full-text content to index");
+					return processed;
+				}
+				Zotero.debug("Indexing " + itemIDs.length + " "
+					+ Zotero.Utilities.pluralize(itemIDs.length, 'item') + " into the full-text content index");
+				// Read text and write it in batched transactions, but cap each batch at a
+				// character budget so peak memory doesn't scale with item size
+				let batch = [];
+				let batchChars = 0;
+				let flushBatch = async () => {
+					if (!batch.length) {
+						return;
+					}
+					await Zotero.DB.executeTransaction(async function () {
+						for (let [itemID, text] of batch) {
+							await setContentIndex(itemID, text);
+						}
+					});
+					processed += batch.length;
+					batch = [];
+					batchChars = 0;
+				};
+				for (let itemID of itemIDs) {
+					let text = await _readContentForIndex(itemID);
+					// null -> re-extracted from the file by indexItems(), which already wrote it
+					if (text === null) {
+						processed++;
+						continue;
+					}
+					batch.push([itemID, text]);
+					batchChars += text.length;
+					if (batchChars >= _maxContentBatchChars) {
+						await flushBatch();
+					}
+				}
+				await flushBatch();
+				// The whole batch is indexed now (re-extracted or written above), so advance past it
+				_attachmentIndexQueueCursor = itemIDs[itemIDs.length - 1];
+				if (onProgress) {
+					onProgress(processed);
+				}
+				if (maxTime && (Date.now() - start) >= maxTime) {
+					return processed;
+				}
+			}
+		}
+		finally {
+			_indexingInProgress = false;
+		}
+	};
+
+
+	// Query for indexable attachments with no fulltextItems row yet -- the work list for
+	// processAttachmentExtractionQueue and the pending count. Skips types whose extraction is currently turned
+	// off, so they neither loop nor count as pending: a textMaxLength of 0 disables all indexing
+	// (returns null), and a pdfMaxPages of 0 disables PDFs. They become eligible again if the limit
+	// is raised.
+	function _attachmentExtractionSQL(select) {
+		if (!Zotero.Prefs.get('fulltext.textMaxLength')) {
+			return null;
+		}
+		// The text types use a LIKE, which the DB layer requires be a bound parameter, so 'text/%' is
+		// passed by callers rather than inlined alongside the other content types here
+		let types = Zotero.Prefs.get('fulltext.pdfMaxPages') > 0
+			? "contentType IN ('application/pdf', 'application/epub+zip') OR contentType LIKE ?"
+			: "contentType = 'application/epub+zip' OR contentType LIKE ?";
+		return "SELECT " + select + " FROM itemAttachments "
+			+ "WHERE linkMode != " + Zotero.Attachments.LINK_MODE_LINKED_URL + " "
+			+ "AND (" + types + ") "
+			+ "AND itemID NOT IN (SELECT itemID FROM fulltextItems)";
+	}
+
+
+	// Record an attachment as having no indexable content: an empty fulltextItems row (marked
+	// missing) plus an empty content-index entry, so it leaves both the unindexed queue and the
+	// content index queue.
+	async function recordMissingContent(itemID) {
+		await Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.queryAsync(
+				"INSERT OR IGNORE INTO fulltextItems (itemID, version, synced) VALUES (?, 0, ?)",
+				[itemID, Zotero.FullText.SYNC_STATE_MISSING]
+			);
+			await setContentIndex(itemID, '');
+		});
+	}
+
+
+	/**
+	 * Number of indexable attachments with no full-text content yet (no fulltextItems row). These
+	 * are extracted (or marked missing) by processAttachmentExtractionQueue() on the same triggers as the
+	 * content index queue.
+	 *
+	 * @return {Promise<Integer>}
+	 */
+	this.getAttachmentExtractionQueueCount = async function () {
+		let sql = _attachmentExtractionSQL("COUNT(*)");
+		if (!sql) {
+			return 0;
+		}
+		return Zotero.DB.valueQueryAsync(sql, ['text/%']);
+	};
+
+
+	/**
+	 * Index attachments that have no full-text content yet: extract any with a local file, and
+	 * record those with no local file (and therefore no cache) as missing, so they leave the queue
+	 * and are left for full-text content or file sync to fill in. Runs alongside the content index
+	 * queue, on the same startup/idle/prefs-pane triggers.
+	 *
+	 * @param {Object} [options]
+	 * @param {Integer} [options.maxTime] - Stop after roughly this many ms
+	 * @param {Boolean} [options.checkIdle] - Stop as soon as the user is no longer idle
+	 * @return {Promise<Integer>} The number of items processed
+	 */
+	this.processAttachmentExtractionQueue = async function ({ maxTime = null, checkIdle = false } = {}) {
+		if (_indexingInProgress) {
+			return 0;
+		}
+		_indexingInProgress = true;
+		let start = Date.now();
+		let processed = 0;
+		try {
+			let sql = _attachmentExtractionSQL("itemID");
+			// Indexing is turned off entirely (textMaxLength is 0) -- nothing to extract
+			if (!sql) {
+				return processed;
+			}
+			while (true) {
+				if (Zotero.Sync.Runner.syncInProgress) {
+					return processed;
+				}
+				let itemIDs = await Zotero.DB.columnQueryAsync(
+					sql + " AND itemID>? ORDER BY itemID LIMIT 50", ['text/%', _attachmentExtractionQueueCursor]
+				);
+				if (!itemIDs.length) {
+					// Nothing left above the cursor; restart from the beginning to catch anything
+					// newly unindexed below it
+					if (_attachmentExtractionQueueCursor) {
+						_attachmentExtractionQueueCursor = 0;
+						continue;
+					}
+					Zotero.debug("No attachments awaiting full-text extraction");
+					return processed;
+				}
+				Zotero.debug("Extracting full-text content for " + itemIDs.length + " "
+					+ Zotero.Utilities.pluralize(itemIDs.length, 'attachment'));
+				for (let itemID of itemIDs) {
+					if (checkIdle && !_canDrainIndex()) {
+						return processed;
+					}
+					let item = await Zotero.Items.getAsync(itemID);
+					if (await item.getFilePathAsync()) {
+						await this.indexItems([itemID], { ignoreErrors: true });
+						// indexItems() writes nothing when there's no text to index -- an unreadable
+						// file, a scanned PDF with no text, or an extraction error. Record an empty
+						// entry so the item leaves the queue instead of being retried every pass; it
+						// can be reindexed from its context menu or once its file changes.
+						if (!(await Zotero.DB.valueQueryAsync(
+								"SELECT 1 FROM fulltextItems WHERE itemID=?", itemID))) {
+							await recordMissingContent(itemID);
+						}
+					}
+					else {
+						// No local file -- and so no cache -- so there's nothing to index. Record it
+						// as missing (with an empty index entry, so it leaves both queues); full-text
+						// content or file sync will fill it in later.
+						await recordMissingContent(itemID);
+					}
+					processed++;
+					// Advance per item, not per batch, since this loop can return mid-batch
+					_attachmentExtractionQueueCursor = itemID;
+					if (maxTime && (Date.now() - start) >= maxTime) {
+						return processed;
+					}
+				}
+			}
+		}
+		finally {
+			_indexingInProgress = false;
+		}
+	};
+
+
+	/**
+	 * Index an item into the content tables for the queue, recording it in fulltextIndexState.
+	 * Normally this reads the item's already-extracted cache file (cheap). If the cache file is
+	 * missing but the attachment file is present, it re-extracts from the file instead, which
+	 * writes the cache and indexes the content. With no text available at all, the item is still
+	 * recorded (with no content) so it leaves the queue; it'll be re-indexed normally if its text
+	 * later arrives.
+	 */
+	// Read an item's already-extracted text for the content index, so the caller can write a
+	// batch of items in one transaction. Returns the text to index (possibly ''), or null if the
+	// item was re-extracted here (indexItems() already wrote it, so there's nothing to batch).
+	async function _readContentForIndex(itemID) {
+		try {
+			let item = await Zotero.Items.getAsync(itemID);
+			if (item && item.isAttachment()) {
+				let maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
+				let mimeType = item.attachmentContentType;
+				// PDFs/EPUBs/HTML keep their extracted text in the cache file; plain-text types are
+				// read from the file itself -- same sources findTextInItems() uses
+				if (Zotero.FullText.isCachedMIMEType(mimeType)) {
+					let cacheFile = Zotero.FullText.getItemCacheFile(item).path;
+					if (await OS.File.exists(cacheFile)) {
+						return await Zotero.File.getContentsAsync(cacheFile, 'utf-8', maxLength);
+					}
+					else if (await item.getFilePathAsync()) {
+						// Re-extract from the file; indexItems() writes the cache and indexes it
+						await Zotero.FullText.indexItems([itemID]);
+						return null;
+					}
+				}
+				else if (Zotero.MIME.isTextType(mimeType)) {
+					let path = await item.getFilePathAsync();
+					if (path) {
+						return await Zotero.File.getContentsAsync(path, item.attachmentCharset, maxLength);
+					}
+				}
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		return '';
+	}
+
+
+	function _isUserIdle() {
+		let idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
+			.getService(Components.interfaces.nsIUserIdleService);
+		return idleService.idleTime >= _drainIdleDelay * 1000;
+	}
+
+
+	function _isZoteroActive() {
+		// Whether the user is currently interacting with a Zotero window, so the DB may be serving
+		// their actions. document.hasFocus() is true only when a Zotero window is the focused window
+		// of the foreground app, so this is false whenever Zotero is in the background.
+		for (let win of Zotero.getMainWindows()) {
+			if (win.document && win.document.hasFocus()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	function _canDrainIndex() {
+		// Background indexing competes with the user's own queries only through the shared DB
+		// connection, so the goal is just to not add latency to their actions: index when Zotero is
+		// in the background (their input is going elsewhere) or when it's focused but they've gone
+		// idle. Sync is handled separately, in the drain loops.
+		return !_isZoteroActive() || _isUserIdle();
+	}
+
+
+	/**
+	 * Bring the content index up to date after an upgrade by draining the already-extracted text
+	 * into the search index, then hand any never-before-indexed attachments to the idle observer.
+	 */
+	this.startQueueDrain = async function () {
+		if (Zotero.test) return;
+		let progressWin;
+		let itemProgress;
+		let startTime = Date.now();
+		try {
+			// Restore content search after an upgrade by draining the queue of already-extracted
+			// text into the search index. Run this to completion proactively -- not gated on idle
+			// like the background work below -- because until it finishes content search is
+			// incomplete. Pause for syncs so it doesn't compete with full-text content downloads.
+			let total = await this.getAttachmentIndexQueueCount();
+			// Items drained so far, tracked across processor calls so the bar can advance after each
+			// batch within a call rather than only once per loop iteration
+			let done = 0;
+			let updateProgress = (n) => {
+				if (itemProgress && total > 0) {
+					itemProgress.setProgress(Math.min(100, Math.round(n / total * 100)));
+				}
+			};
+			while (true) {
+				if (Zotero.Sync.Runner.syncInProgress) {
+					await Zotero.Promise.delay(5000);
+					continue;
+				}
+				let remaining = await this.getAttachmentIndexQueueCount();
+				if (remaining == 0) {
+					break;
+				}
+				// Run at full speed while the user isn't actively using Zotero (idle or in another
+				// app), but yield between slices when they are, so the migration doesn't tie up the
+				// shared connection and main thread. It still always runs to completion.
+				if (!_canDrainIndex()) {
+					await Zotero.Promise.delay(250);
+				}
+				// Show a progress window once it's clear this will take a moment (like the
+				// normalized-column backfill), tracking progress as the queue drains
+				if (!progressWin && Date.now() - startTime > 1500) {
+					progressWin = new Zotero.ProgressWindow({ closeOnClick: false });
+					progressWin.changeHeadline(Zotero.getString('upgrade.status'));
+					itemProgress = new progressWin.ItemProgress(
+						'journalArticle',
+						Zotero.getString('search-normalization-progress-message')
+					);
+					progressWin.show();
+				}
+				updateProgress(done);
+				let base = done;
+				done = base + await this.processAttachmentIndexQueue(
+					{ maxTime: 1000, onProgress: n => updateProgress(base + n) }
+				);
+			}
+			if (itemProgress) {
+				itemProgress.setProgress(100);
+			}
+			await this.optimizeContentIndex();
+			if (total > 0) {
+				Zotero.debug("Indexed " + done + " " + Zotero.Utilities.pluralize(done, 'item')
+					+ " for search in " + (Date.now() - startTime) + " ms");
+			}
+			if (progressWin) {
+				progressWin.startCloseTimer(3000);
+			}
+			// Index never-before-indexed attachments (e.g., added while indexing was off) gently in
+			// the background -- they were never searchable, so unlike the migration above they can
+			// wait for idle
+			if ((await this.getAttachmentIndexQueueCount()) > 0
+					|| (await this.getAttachmentExtractionQueueCount()) > 0) {
+				this.registerQueueDrainObserver();
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+			if (itemProgress) {
+				itemProgress.setError();
+			}
+		}
+	};
+
+
+	/**
+	 * Merge the content index's FTS5 segments into one for faster queries. Called when the content
+	 * index queue drains, which can insert a burst of rows that FTS5 leaves as many segments for
+	 * searches to merge on the fly; 'optimize' merges them once instead. The trickle of inline
+	 * indexing during normal use doesn't need this -- FTS5 auto-merges those incremental writes --
+	 * and the extracted text lives in the cache files regardless, so a failure here is harmless.
+	 */
+	this.optimizeContentIndex = async function () {
+		try {
+			await Zotero.DB.queryAsync(
+				"INSERT INTO ftindex.fulltextContent(fulltextContent) VALUES('optimize')"
+			);
+			await Zotero.DB.queryAsync(
+				"INSERT INTO ftindex.fulltextContentCJK(fulltextContentCJK) VALUES('optimize')"
+			);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	};
+
+
+	/**
+	 * Reclaim disk space in the content index. The FTS5 tables reuse freed pages but never return
+	 * them to the OS, so a large drop in indexed content (e.g., adding and then deleting many
+	 * items) can leave fulltext.sqlite much bigger than its contents. The main database vacuum
+	 * covers only the main database, so the attached content index is vacuumed here. Like that
+	 * vacuum, this is gated on the freelist threshold, which makes it self-throttling: a vacuum
+	 * empties the freelist, so it won't run again until content drops substantially. Called from
+	 * the idle maintenance pass; pass force to skip the checks (e.g., from tests).
+	 *
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.force] - Skip the freelist and disk-space checks
+	 * @return {Promise<Boolean>} - Whether the index was vacuumed
+	 */
+	this.vacuumContentIndex = async function ({ force = false } = {}) {
+		if (!force) {
+			let freelistCount = await Zotero.DB.valueQueryAsync("PRAGMA ftindex.freelist_count");
+			let pageCount = await Zotero.DB.valueQueryAsync("PRAGMA ftindex.page_count");
+			let threshold = Zotero.Prefs.get('vacuum.freelistThreshold') || 10;
+			if (!(pageCount > 0) || (freelistCount / pageCount * 100) < threshold) {
+				return false;
+			}
+			// In-place VACUUM needs temporary space roughly the size of the database
+			let path = Zotero.DataDirectory.getDatabase('fulltext');
+			let size = (await IOUtils.stat(path)).size;
+			if (Zotero.File.pathToFile(path).diskSpaceAvailable < size) {
+				Zotero.debug("Not enough disk space to vacuum full-text content index -- skipping");
+				return false;
+			}
+		}
+		Zotero.debug("Vacuuming full-text content index");
+		let t = new Date();
+		await Zotero.DB.queryAsync("VACUUM ftindex");
+		Zotero.debug("Vacuumed full-text content index in " + (new Date() - t) + " ms");
+		return true;
+	};
+
+
+	this.registerQueueDrainObserver = function () {
+		if (Zotero.test) return;
+		if (_queueDrainTimerID) {
+			return;
+		}
+		Zotero.debug("Starting full-text content index queue processor");
+		_scheduleQueueDrain(_drainIdleDelay * 1000);
+	};
+
+
+	this.unregisterQueueDrainObserver = function () {
+		if (_queueDrainTimerID) {
+			clearTimeout(_queueDrainTimerID);
+			_queueDrainTimerID = null;
+		}
+	};
+
+
+	// Drain the content and unindexed-item queues in the background on a self-rescheduling timer.
+	// Unlike an OS idle observer, this keeps making progress while Zotero is in the background and
+	// the user works in other apps, and it backs off the moment they return to Zotero.
+	function _scheduleQueueDrain(delay) {
+		_queueDrainTimerID = setTimeout(async () => {
+			_queueDrainTimerID = null;
+			let self = Zotero.FullText;
+			try {
+				if (!_canDrainIndex() || Zotero.Sync.Runner.syncInProgress) {
+					_scheduleQueueDrain(_drainIdleDelay * 1000);
+					return;
+				}
+				if ((await self.getAttachmentIndexQueueCount()) == 0
+						&& (await self.getAttachmentExtractionQueueCount()) == 0) {
+					// Drained -- compact the index and stop
+					await self.optimizeContentIndex();
+					return;
+				}
+				Zotero.debug("Processing full-text index queues in the background ("
+					+ (_isZoteroActive() ? "focused but idle" : "not focused") + ")");
+				await self.processAttachmentIndexQueue({ maxTime: 1000, checkIdle: true });
+				await self.processAttachmentExtractionQueue({ maxTime: 1000, checkIdle: true });
+				_scheduleQueueDrain(250);
+			}
+			catch (e) {
+				// Stop on error instead of retrying, so a persistent failure (e.g., a full disk)
+				// doesn't spin. The drain starts again on the next trigger, such as a restart or a
+				// newly queued item.
+				Zotero.logError(e);
+			}
+		}, delay);
+	}
+
+
 	
 	/**
 	 * @param {Number} itemID
@@ -1093,24 +1825,22 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				}
 				if (matches){
 					Zotero.debug("Text found");
-					return content.substr(matches.index, 50);
+					return true;
 				}
-				
+
 				break;
-			
+
 			default:
-				// Case-insensitive
-				searchText = searchText.toLowerCase();
-				content = content.toLowerCase();
-				
-				var pos = content.indexOf(searchText);
-				if (pos!=-1){
+				// Case- and diacritic-insensitive, to match the content index (findItemsWithContent)
+				searchText = Zotero.Utilities.Internal.normalizeForSearch(searchText);
+				content = Zotero.Utilities.Internal.normalizeForSearch(content);
+				if (content.includes(searchText)){
 					Zotero.debug('Text found');
-					return content.substr(pos, 50);
+					return true;
 				}
 		}
-		
-		return -1;
+
+		return false;
 	}
 	
 	/**
@@ -1127,9 +1857,181 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 *  - Slashes in regex are optional
 	 *  - Add 'Binary' to the mode to search all files, not just text files
 	 *
-	 * @return {Promise<Array<Object>>} A promise for an array of match objects, with 'id' containing
-	 *                                  an itemID and 'match' containing a string snippet
+	 * @return {Promise<Array<Object>>} A promise for an array of objects with an 'id' property
+	 *                                  containing the itemID of each matching item
 	 */
+	// CJK scripts (Han/Hiragana/Katakana/Hangul) -- indexed as 2-grams rather than 3-grams,
+	// since CJK queries are commonly 1-2 characters
+	const _cjkCharRE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
+	const _cjkRunRE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]+/gu;
+
+	/**
+	 * Build a space-separated list of overlapping 2-grams of the CJK runs in `text`, for the
+	 * ascii-tokenized CJK index. Only CJK characters are bigrammed -- everything else is handled
+	 * by the trigram index -- so non-CJK text produces an empty string.
+	 *
+	 * @param {String} text - Normalized text (via normalizeForSearch)
+	 * @return {String}
+	 */
+	function getCJKBigrams(text) {
+		if (!text) {
+			return '';
+		}
+		let bigrams = [];
+		for (let match of text.matchAll(_cjkRunRE)) {
+			let run = match[0];
+			for (let i = 0; i < run.length - 1; i++) {
+				bigrams.push(run.substr(i, 2));
+			}
+		}
+		return bigrams.join(' ');
+	}
+
+
+	/**
+	 * Index an item's extracted text into the content FTS5 tables and record it in the index-state
+	 * table at the current version. Replaces any existing entries for the item. `text` may be empty
+	 * (e.g., no cache file), in which case the item is simply recorded as indexed with no content.
+	 *
+	 * Must be called within a transaction.
+	 */
+	async function setContentIndex(itemID, text) {
+		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", itemID);
+		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK WHERE rowid=?", itemID);
+		if (text) {
+			// Skip logging the params, which includes the full text
+			let normalized = Zotero.Utilities.Internal.normalizeForSearch(text) || '';
+			await Zotero.DB.queryAsync(
+				"INSERT INTO ftindex.fulltextContent (rowid, text) VALUES (?, ?)",
+				[itemID, normalized],
+				{ debugParams: false }
+			);
+			let cjk = getCJKBigrams(normalized);
+			if (cjk) {
+				await Zotero.DB.queryAsync(
+					"INSERT INTO ftindex.fulltextContentCJK (rowid, text) VALUES (?, ?)",
+					[itemID, cjk],
+					{ debugParams: false }
+				);
+			}
+		}
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO ftindex.fulltextIndexState (itemID, version) VALUES (?, ?)",
+			[itemID, _contentIndexVersion]
+		);
+	}
+
+
+	/**
+	 * Remove an item's entries from the content FTS5 tables and the index-state table.
+	 *
+	 * Must be called within a transaction.
+	 */
+	async function clearContentIndex(itemID) {
+		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", itemID);
+		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK WHERE rowid=?", itemID);
+		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", itemID);
+	}
+
+
+	/**
+	 * Resolve a search term to the FTS5 table and MATCH expression that find it as a substring
+	 * (case- and diacritic-insensitively, via normalizeForSearch): the trigram index for Latin,
+	 * the 2-gram index for pure CJK. Returns null when the index can't answer the term -- too short
+	 * for the trigram index, or a mix of CJK and non-CJK that neither index covers alone.
+	 *
+	 * @return {Object|null} { table, match } or null
+	 */
+	function getContentMatchClause(searchText) {
+		let normalized = Zotero.Utilities.Internal.normalizeForSearch(searchText);
+		if (!normalized) {
+			return null;
+		}
+		let hasCJK = _cjkCharRE.test(normalized);
+		let hasNonCJK = /[a-z0-9]/.test(normalized);
+		// Pure CJK: match the term's 2-grams as a contiguous phrase against the CJK index
+		if (hasCJK && !hasNonCJK) {
+			let bigrams = getCJKBigrams(normalized);
+			// A single CJK character has no 2-gram
+			if (!bigrams) {
+				return null;
+			}
+			return { table: 'fulltextContentCJK', match: '"' + bigrams + '"' };
+		}
+		// Pure non-CJK: match the whole term as a contiguous phrase (substring) against the
+		// trigram index, which only indexes runs of 3+ characters
+		if (!hasCJK && normalized.length >= 3) {
+			return { table: 'fulltextContent', match: '"' + normalized.replace(/"/g, '""') + '"' };
+		}
+		return null;
+	}
+
+
+	/**
+	 * Whether a term can be matched against the content index rather than needing a fallback scan
+	 * of the cached text. Quick search uses this to skip content matching for terms too short for
+	 * the index, avoiding a per-keystroke scan.
+	 *
+	 * @param {String} searchText
+	 * @return {Boolean}
+	 */
+	this.canSearchContent = function (searchText) {
+		return getContentMatchClause(searchText) !== null;
+	};
+
+
+	/**
+	 * Return the ids of attachment items in the given library whose full-text content contains
+	 * `searchText` as a substring. This is the non-regexp path for the 'fulltextContent' search
+	 * condition; callers intersect the result with their own scope/result sets.
+	 *
+	 * Returns null when the term can't be answered from the index (see getContentMatchClause), so
+	 * the caller can fall back to scanning the cached text.
+	 *
+	 * @param {String} searchText
+	 * @param {Integer|null} [libraryID] - Restrict to this library, or null/undefined for all
+	 * @return {Promise<Integer[]|null>}
+	 */
+	this.findItemsWithContent = async function (searchText, libraryID) {
+		let clause = getContentMatchClause(searchText);
+		if (!clause) {
+			return null;
+		}
+		let sql = "SELECT C.rowid FROM ftindex." + clause.table + " C JOIN items I ON (I.itemID = C.rowid) "
+			+ "WHERE C." + clause.table + " MATCH ?";
+		let params = [clause.match];
+		if (libraryID !== null && libraryID !== undefined) {
+			sql += " AND I.libraryID=?";
+			params.push(libraryID);
+		}
+		return Zotero.DB.columnQueryAsync(sql, params);
+	};
+
+
+	/**
+	 * A subquery selecting the itemIDs whose full-text content matches `searchText` as a substring
+	 * via the content index, for embedding directly in a search's SQL (e.g. `itemID IN (<subquery>)`)
+	 * rather than materializing every match into an itemID list. The caller applies the surrounding
+	 * scope and the IN/NOT IN for the operator.
+	 *
+	 * Returns null when the term can't be answered from the index (see getContentMatchClause), so
+	 * the caller can fall back to scanning the cached text.
+	 *
+	 * @param {String} searchText
+	 * @return {Object|null} { sql, params }
+	 */
+	this.getContentSearchSQL = function (searchText) {
+		let clause = getContentMatchClause(searchText);
+		if (!clause) {
+			return null;
+		}
+		return {
+			sql: "SELECT rowid FROM ftindex." + clause.table + " WHERE " + clause.table + " MATCH ?",
+			params: [clause.match]
+		};
+	};
+
+
 	this.findTextInItems = async function (items, searchText, mode) {
 		if (!searchText){
 			return [];
@@ -1180,12 +2082,8 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				content = await Zotero.File.getContentsAsync(path, item.attachmentCharset, maxLength);
 			}
 			
-			let match = findTextInString(content, searchText, mode);
-			if (match != -1) {
-				found.push({
-					id: itemID,
-					match: match
-				});
+			if (findTextInString(content, searchText, mode)) {
+				found.push({ id: itemID });
 			}
 		}
 		
@@ -1215,14 +2113,14 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				"UPDATE fulltextItems SET itemID=? WHERE itemID=?",
 				[toItem.id, fromItem.id]
 			);
-			await Zotero.DB.queryAsync(
-				"UPDATE fulltextItemWords SET itemID=? WHERE itemID=?",
-				[toItem.id, fromItem.id]
-			);
 		}
 		catch (e) {
 			await Zotero.DB.queryAsync("PRAGMA foreign_keys = true");
 		}
+		// The content index is keyed by rowid and can't be re-keyed in place, so drop the source
+		// item's now-orphaned entry; toItem has the moved fulltextItems row but no index entry, so
+		// the queue will re-index it from the moved cache file.
+		await clearContentIndex(fromItem.id);
 	};
 	
 	
@@ -1235,14 +2133,11 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		var sql = "SELECT rowid FROM fulltextItems WHERE itemID=? LIMIT 1";
 		var indexed = await Zotero.DB.valueQueryAsync(sql, itemID);
 		if (indexed) {
-			await Zotero.DB.queryAsync("DELETE FROM fulltextItemWords WHERE itemID=?", itemID);
 			await Zotero.DB.queryAsync("DELETE FROM fulltextItems WHERE itemID=?", itemID);
 		}
-		
-		if (indexed) {
-			Zotero.Prefs.set('purge.fulltext', true);
-		}
-		
+		// Remove the content index entries too (the content DB can't FK-cascade to zotero.sqlite)
+		await clearContentIndex(itemID);
+
 		if (!skipCacheClear) {
 			// Delete fulltext cache file if there is one
 			await clearCacheFile(itemID);
@@ -1408,25 +2303,35 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 * @return {Promise}
 	 */
 	this.getIndexStats = async function () {
-		var sql = "SELECT COUNT(*) FROM fulltextItems WHERE synced != ? AND "
+		// Indexed/Partial count items actually in the search index at the current version (joined to
+		// fulltextIndexState), so they reflect what's searchable rather than just extracted -- which
+		// keeps them disjoint from the backfill still in progress (remaining) and makes their sum the
+		// bar's numerator
+		var sql = "SELECT COUNT(*) FROM fulltextItems FI "
+			+ "JOIN ftindex.fulltextIndexState S USING (itemID) "
+			+ "WHERE S.version >= ? AND FI.synced != ? AND "
 			+ "((indexedPages IS NOT NULL AND indexedPages=totalPages) OR "
-			+ "(indexedChars IS NOT NULL AND indexedChars=totalChars))"
-		var indexed = await Zotero.DB.valueQueryAsync(sql, this.SYNC_STATE_MISSING);
+			+ "(indexedChars IS NOT NULL AND indexedChars=totalChars))";
+		var indexed = await Zotero.DB.valueQueryAsync(sql, [_contentIndexVersion, this.SYNC_STATE_MISSING]);
+
+		var sql = "SELECT COUNT(*) FROM fulltextItems FI "
+			+ "JOIN ftindex.fulltextIndexState S USING (itemID) "
+			+ "WHERE S.version >= ? AND "
+			+ "((indexedPages IS NOT NULL AND indexedPages<totalPages) OR "
+			+ "(indexedChars IS NOT NULL AND indexedChars<totalChars))";
+		var partial = await Zotero.DB.valueQueryAsync(sql, _contentIndexVersion);
 		
-		var sql = "SELECT COUNT(*) FROM fulltextItems WHERE "
-			+ "(indexedPages IS NOT NULL AND indexedPages<totalPages) OR "
-			+ "(indexedChars IS NOT NULL AND indexedChars<totalChars)"
-		var partial = await Zotero.DB.valueQueryAsync(sql);
-		
-		var sql = "SELECT COUNT(*) FROM itemAttachments WHERE itemID NOT IN "
-			+ "(SELECT itemID FROM fulltextItems WHERE synced != ? AND "
-			+ "(indexedPages IS NOT NULL OR indexedChars IS NOT NULL))";
-		var unindexed = await Zotero.DB.valueQueryAsync(sql, this.SYNC_STATE_MISSING);
-		
-		var sql = "SELECT COUNT(*) FROM fulltextWords";
-		var words = await Zotero.DB.valueQueryAsync(sql);
-		
-		return { indexed, partial, unindexed, words };
+		// Items with neither a local file nor full-text content (so nothing to index locally),
+		// recorded as missing -- shown as such rather than as a fixable "not indexed" count
+		var sql = "SELECT COUNT(*) FROM fulltextItems WHERE synced = ?";
+		var notAvailable = await Zotero.DB.valueQueryAsync(sql, this.SYNC_STATE_MISSING);
+
+		// Pending work, both auto-draining: items with extracted content not yet in the search index
+		// (remaining) and indexable attachments not yet extracted (unindexedQueue)
+		var remaining = await this.getAttachmentIndexQueueCount();
+		var unindexedQueue = await this.getAttachmentExtractionQueueCount();
+
+		return { indexed, partial, notAvailable, remaining, unindexedQueue };
 	};
 	
 	
@@ -1516,43 +2421,83 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		
 		await this.indexItems(itemIDs, { ignoreErrors: true });
 	};
-	
-	
+
+
 	/**
-	 * Clears full-text word index and all full-text cache files
+	 * Re-extract items whose content was truncated by a lower full-text limit, after that limit is
+	 * raised. Only the affected items are re-indexed, so raising a limit doesn't force a blanket
+	 * rebuild-and-reupload of everything. Items truncated by the character limit and the page limit
+	 * are tracked separately, via indexedChars/totalChars and indexedPages/totalPages.
+	 *
+	 * @param {String} type - 'chars' or 'pages'
+	 * @param {Integer} newLimit - The limit's new value
+	 * @return {Promise}
+	 */
+	this.reindexTruncated = async function (type, newLimit) {
+		newLimit = parseInt(newLimit);
+		// 0 (or invalid) means "don't index", which is handled at index time -- nothing to re-extract
+		if (!(newLimit > 0)) {
+			return;
+		}
+		// Items that were truncated (more content exists than was indexed) and that the higher limit
+		// would actually extend (the old ceiling was below the new one)
+		var sql = type == 'chars'
+			? "SELECT itemID FROM fulltextItems "
+				+ "WHERE indexedChars IS NOT NULL AND indexedChars < totalChars AND indexedChars < ?"
+			: "SELECT itemID FROM fulltextItems "
+				+ "WHERE indexedPages IS NOT NULL AND indexedPages < totalPages AND indexedPages < ?";
+		var itemIDs = await Zotero.DB.columnQueryAsync(sql, [newLimit]);
+		if (!itemIDs.length) {
+			return;
+		}
+		Zotero.debug(`Re-extracting ${itemIDs.length} `
+			+ `${Zotero.Utilities.pluralize(itemIDs.length, 'item')} truncated below the new full-text `
+			+ (type == 'chars' ? 'character' : 'page') + ' limit');
+		await this.indexItems(itemIDs, { ignoreErrors: true });
+	};
+
+
+	/**
+	 * Clears the full-text index and all full-text cache files
 	 *
 	 * @return {Promise}
 	 */
-	this.clearIndex = async function (skipLinkedURLs) {
+	this.clearIndex = async function () {
 		await Zotero.DB.executeTransaction(async function () {
-			var sql = "DELETE FROM fulltextItems";
-			if (skipLinkedURLs) {
-				var linkSQL = "SELECT itemID FROM itemAttachments WHERE linkMode ="
-					+ Zotero.Attachments.LINK_MODE_LINKED_URL;
-				
-				sql += " WHERE itemID NOT IN (" + linkSQL + ")";
-			}
-			await Zotero.DB.queryAsync(sql);
-			
-			sql = "DELETE FROM fulltextItemWords";
-			if (skipLinkedURLs) {
-				sql += " WHERE itemID NOT IN (" + linkSQL + ")";
-			}
-			await Zotero.DB.queryAsync(sql);
+			await Zotero.DB.queryAsync("DELETE FROM fulltextItems");
+
+			// Drop content index entries for items no longer in fulltextItems
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent "
+				+ "WHERE rowid NOT IN (SELECT itemID FROM fulltextItems)");
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK "
+				+ "WHERE rowid NOT IN (SELECT itemID FROM fulltextItems)");
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState "
+				+ "WHERE itemID NOT IN (SELECT itemID FROM fulltextItems)");
 		});
-		
-		if (skipLinkedURLs) {
-			await this.purgeUnusedWords();
-		}
-		else {
-			await Zotero.DB.queryAsync("DELETE FROM fulltextWords");
-		}
-		
+
 		await clearCacheFiles();
-		await Zotero.DB.queryAsync('VACUUM');
 	}
-	
-	
+
+
+	/**
+	 * Remove content index entries for items that no longer exist. Normal deletion clears these
+	 * via clearItemWords(), but the content database can't FK-cascade to zotero.sqlite, so this is
+	 * a periodic safety net for items removed through a path that bypassed Item.erase().
+	 *
+	 * @return {Promise}
+	 */
+	this.purgeOrphanedContent = async function () {
+		await Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent "
+				+ "WHERE rowid NOT IN (SELECT itemID FROM fulltextItems)");
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK "
+				+ "WHERE rowid NOT IN (SELECT itemID FROM fulltextItems)");
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState "
+				+ "WHERE itemID NOT IN (SELECT itemID FROM fulltextItems)");
+		});
+	};
+
+
 	/*
 	 * Clears cache file for an item
 	 */
@@ -1583,11 +2528,8 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	/*
 	 * Clear cache files for all attachments
 	 */
-	var clearCacheFiles = async function (skipLinkedURLs) {
+	var clearCacheFiles = async function () {
 		var sql = "SELECT itemID FROM itemAttachments";
-		if (skipLinkedURLs) {
-			sql += " WHERE linkMode != " + Zotero.Attachments.LINK_MODE_LINKED_URL;
-		}
 		var items = await Zotero.DB.columnQueryAsync(sql);
 		for (var i=0; i<items.length; i++) {
 			await clearCacheFile(items[i]);
@@ -1600,22 +2542,6 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		Zotero.DB.query("DELETE FROM fulltextContent WHERE itemID=" + itemID);
 	}
 	*/
-	
-	
-	/**
-	 * @return {Promise}
-	 */
-	this.purgeUnusedWords = async function () {
-		if (!Zotero.Prefs.get('purge.fulltext')) {
-			return;
-		}
-		
-		var sql = "DELETE FROM fulltextWords WHERE wordID NOT IN "
-					+ "(SELECT wordID FROM fulltextItemWords)";
-		await Zotero.DB.queryAsync(sql);
-		
-		Zotero.Prefs.set('purge.fulltext', false)
-	};
 	
 	
 	async function getPageData(path, contentType) {

@@ -1355,55 +1355,6 @@ describe("Zotero.Search", function () {
 				});
 			});
 			
-			describe("fulltextWord", function () {
-				it("should return matches with full-text conditions", async function () {
-					let s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('fulltextWord', 'contains', 'foo');
-					let matches = await s.search();
-					assert.lengthOf(matches, 2);
-					assert.sameMembers(matches, [fooItem.id, foobarItem.id]);
-				});
-		
-				it("should not return non-matches with full-text conditions", async function () {
-					let s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('fulltextWord', 'contains', 'nomatch');
-					let matches = await s.search();
-					assert.lengthOf(matches, 0);
-				});
-		
-				it("should return matches for full-text conditions in ALL mode", async function () {
-					let s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('joinMode', 'all');
-					s.addCondition('fulltextWord', 'contains', 'foo');
-					s.addCondition('fulltextWord', 'contains', 'bar');
-					let matches = await s.search();
-					assert.deepEqual(matches, [foobarItem.id]);
-				});
-		
-				it("should not return non-matches for full-text conditions in ALL mode", async function () {
-					let s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('joinMode', 'all');
-					s.addCondition('fulltextWord', 'contains', 'mjktkiuewf');
-					s.addCondition('fulltextWord', 'contains', 'zijajkvudk');
-					let matches = await s.search();
-					assert.lengthOf(matches, 0);
-				});
-		
-				it("should return a match that satisfies only one of two full-text condition in ANY mode", async function () {
-					let s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('joinMode', 'any');
-					s.addCondition('fulltextWord', 'contains', 'bar');
-					s.addCondition('fulltextWord', 'contains', 'nomatch');
-					let matches = await s.search();
-					assert.deepEqual(matches, [foobarItem.id]);
-				});
-			});
-			
 			describe("includeParentsAndChildren", function () {
 				it("should handle ANY search with no-op condition", async function () {
 					var s = new Zotero.Search();
@@ -1917,6 +1868,43 @@ describe("Zotero.Search", function () {
 						// Only the item from the collection is returned
 						assert.equal(matches.length, 1);
 						assert.equal(matches[0], fooItem.id);
+					});
+
+					async function importTextContent(content) {
+						let path = OS.Path.join(await getTempDirectory(), Zotero.Utilities.randomString() + ".txt");
+						await Zotero.File.putContentsAsync(path, content);
+						return Zotero.Attachments.importFromFile({
+							file: path, contentType: 'text/plain', charset: 'utf-8', title: 'xxxx'
+						});
+					}
+
+					it("should match full-text content as a substring", async function () {
+						let item = await importTextContent("zqs electrophoresis protocol");
+						let s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('quicksearch-everything', 'contains', 'lectro');
+						assert.include(await s.search(), item.id);
+					});
+
+					it("should require every word of a multi-word search", async function () {
+						let both = await importTextContent("zqsalpha zqsbeta zqsgamma");
+						let one = await importTextContent("zqsalpha zqsdelta");
+						let s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('quicksearch-everything', 'contains', 'zqsalpha zqsgamma');
+						let matches = await s.search();
+						assert.include(matches, both.id);
+						assert.notInclude(matches, one.id);
+					});
+
+					it("should skip content matching for a term too short for the index", async function () {
+						let item = await importTextContent("elephant");
+						let s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						// "el" is shorter than a trigram, so it isn't matched against content (which
+						// also avoids a per-keystroke scan); the title is "xxxx", so nothing matches
+						s.addCondition('quicksearch-everything', 'contains', 'el');
+						assert.notInclude(await s.search(), item.id);
 					});
 				});
 			});
