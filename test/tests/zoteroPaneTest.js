@@ -2536,4 +2536,39 @@ describe("ZoteroPane", function () {
 			});
 		});
 	});
+
+	describe("Quick search", function () {
+		var origWidth, origHeight;
+
+		before(function () {
+			origWidth = win.outerWidth;
+			origHeight = win.outerHeight;
+		});
+
+		after(function () {
+			win.resizeTo(origWidth, origHeight);
+		});
+
+		it("should keep the Advanced Search button within the items pane when the items pane is squeezed", async function () {
+			await selectLibrary(win);
+			// Narrow enough that the items pane (and its toolbar) is squeezed, but still wide
+			// enough to stay in standard (non-stacked) layout. With the collections pane and a
+			// wide item pane, this leaves the search field too narrow to reach its full width.
+			win.resizeTo(1000, 800);
+			await waitForCallback(() => win.innerWidth <= 1010, 10, 20);
+
+			let container = doc.getElementById('zotero-items-pane-container');
+			let search = doc.getElementById('zotero-tb-search');
+			let advButton = search.querySelector('#zotero-tb-search-advanced-button');
+			assert.ok(advButton, "Advanced Search button exists");
+
+			// Precondition: the field is squeezed below its max width, so the wrapper would
+			// overflow and push the trailing button out if it weren't allowed to shrink
+			assert.isBelow(search.getBoundingClientRect().width, 300,
+				"search field is squeezed below its full width");
+			// The button must stay within the items pane rather than overflowing under the item pane
+			assert.isAtMost(advButton.getBoundingClientRect().right, container.getBoundingClientRect().right,
+				"Advanced Search button's right edge is within the items pane");
+		});
+	});
 })

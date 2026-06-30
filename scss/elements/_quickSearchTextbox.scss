@@ -8,6 +8,13 @@ quick-search-textbox {
 	max-width: 300px;
 	flex-grow: 1;
 
+	// Let the wrapper shrink below its content width when the items pane is squeezed (e.g., by a
+	// wide item pane). Otherwise it keeps its intrinsic width and overflows to the right, pushing
+	// the trailing Advanced Search button out under the item pane where it's clipped.
+	#search-wrapper {
+		min-width: 0;
+	}
+
 	// While the Advanced Search indicator is shown, size this element to the indicator's content
 	// (full label + buttons) rather than the 146px quick-search width, and allow shrinking below
 	// it (min-width: 0) only when the toolbar overflows -- so the label stays full on a normal
