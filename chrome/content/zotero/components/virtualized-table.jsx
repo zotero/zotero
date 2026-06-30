@@ -1102,9 +1102,8 @@ class VirtualizedTable extends React.Component {
 		this._setXulTooltip();
 
 		this._topDiv.style.setProperty("--first-column-extra-width", `${this.firstColumnExtraWidth}px`);
-		window.addEventListener("resize", () => {
-			this._debouncedRerender();
-		});
+		this._resizeObserver = new ResizeObserver(() => this.rerender());
+		this._resizeObserver.observe(this._jsWindow.targetElement);
 
 		if (this.props.stickySectionHeaders) {
 			this._jsWindow.targetElement.addEventListener('scroll', this._updateStickySectionHeader, { passive: true });
@@ -1117,6 +1116,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	componentWillUnmount() {
+		this._resizeObserver?.disconnect();
 		if (this.props.stickySectionHeaders && this._jsWindow) {
 			this._jsWindow.targetElement.removeEventListener('scroll', this._updateStickySectionHeader);
 		}
@@ -1588,8 +1588,6 @@ class VirtualizedTable extends React.Component {
 		document.documentElement.removeChild(div);
 		return parseFloat(height.split('px')[0]);
 	}
-	
-	_debouncedRerender = Zotero.Utilities.debounce(this.rerender, 200);
 	
 	_updateWidth() {
 		if (!this.props.showHeader) return;

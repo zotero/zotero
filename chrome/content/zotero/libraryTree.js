@@ -252,16 +252,6 @@ var LibraryTree = class LibraryTree extends React.Component {
 		this.tree && this.tree.scrollToRow(index);
 	}
 
-	updateHeight = () => {
-		this.forceUpdate(() => {
-			if (this.tree) {
-				this.tree.rerender();
-			}
-		});
-	};
-
-	updateHeightDebounced = Zotero.Utilities.debounce(this.updateHeight, 200);
-
 	updateFontSize() {
 		this.tree.updateFontSize();
 	}
