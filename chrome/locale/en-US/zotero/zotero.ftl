@@ -833,6 +833,9 @@ quicksearch-input =
     .aria-label = Quick Search
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
+quicksearch-semantic-topk =
+    .aria-label = Number of similarity search results
+quickSearch-mode-similarity = Similarity
 
 advanced-search = Advanced Search
 menuitem-advanced-search =

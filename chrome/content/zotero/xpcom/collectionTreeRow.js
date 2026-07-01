@@ -377,7 +377,20 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTabl
 	if (!this._cachedResults) {
 		let s = await this.getSearchObject();
 		try {
-			this._cachedResults = await s.search();
+			let results = await s.search();
+			// Similarity (semantic) quick search: re-rank the scoped results by
+			// similarity to the query and keep the top K (the
+			// search.quicksearch-semantic-topK pref). Assign the cache only once
+			// ranking succeeds, so a ranking failure (e.g. model not yet
+			// downloaded) doesn't leave the full unranked scope cached as the
+			// search result.
+			if (this.isSimilaritySearch()) {
+				results = await Zotero.Embeddings.rankItemIDs(
+					this.searchText, results,
+					{ limit: Zotero.Prefs.get('search.quicksearch-semantic-topK') }
+				);
+			}
+			this._cachedResults = results;
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -493,9 +506,12 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function (options = {
 	if (!options.unfiltered) {
 		// Add Quick Search unless advanced search is enabled
 		if (this.searchText && !this.advancedSearch) {
-			let cond = 'quicksearch-'
-				+ (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode'));
-			s2.addCondition(cond, 'contains', this.searchText);
+			let mode = this.searchMode || Zotero.Prefs.get('search.quicksearch-mode');
+			// The similarity mode isn't a SQL condition -- the base search returns
+			// the full scope and getSearchResults() re-ranks it semantically.
+			if (mode !== 'similarity') {
+				s2.addCondition('quicksearch-' + mode, 'contains', this.searchText);
+			}
 		}
 	
 		if (this.tags) {
@@ -616,14 +632,26 @@ Zotero.CollectionTreeRow.prototype.clearCache = function () {
 };
 
 Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null) {
-	if (this.searchText === searchText && this.searchMode === mode) {
+	// Callers usually pass no mode (the active mode lives in the pref), so compare
+	// the effective mode from the last call: switching modes with unchanged text
+	// has to trigger a re-run -- as does changing the similarity top-K, which
+	// lives in its own pref. With no search text, neither matters.
+	let effectiveMode = mode || Zotero.Prefs.get('search.quicksearch-mode');
+	let topK = effectiveMode === 'similarity'
+		? Zotero.Prefs.get('search.quicksearch-semantic-topK')
+		: null;
+	if (this.searchText === searchText
+			&& (!searchText
+				|| (this._effectiveSearchMode === effectiveMode && this._searchTopK === topK))) {
 		return false;
 	}
 	this.clearCache();
 	this.searchText = searchText;
 	this.searchMode = mode;
+	this._effectiveSearchMode = effectiveMode;
+	this._searchTopK = topK;
 	return true;
-}
+};
 
 Zotero.CollectionTreeRow.prototype.setAdvancedSearch = function (advancedSearch) {
 	// Clearing an already-clear filter is a no-op. A passed search is always
@@ -691,6 +719,15 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 		return true;
 	}
 }
+
+/**
+ * Whether an active quick search on this row is in the semantic similarity
+ * mode -- i.e. the results are a ranked top-K set rather than a plain filter
+ */
+Zotero.CollectionTreeRow.prototype.isSimilaritySearch = function () {
+	return !!this.searchText && !this.advancedSearch
+		&& (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode')) === 'similarity';
+};
 
 Zotero.CollectionTreeRow.prototype.isSortable = function () {
 	return !this.isFeedsOrFeed() && !this.isRecentlyRead();

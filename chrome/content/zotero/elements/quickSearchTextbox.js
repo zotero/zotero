@@ -45,11 +45,17 @@
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 
-		_searchModes = {
-			titleCreatorYear: Zotero.getString('quickSearch.mode.titleCreatorYear'),
-			fields: Zotero.getString('quickSearch.mode.fieldsAndTags'),
-			everything: Zotero.getString('quickSearch.mode.everything')
-		};
+		get _searchModes() {
+			let modes = {
+				titleCreatorYear: Zotero.getString('quickSearch.mode.titleCreatorYear'),
+				fields: Zotero.getString('quickSearch.mode.fieldsAndTags'),
+				everything: Zotero.getString('quickSearch.mode.everything')
+			};
+			if (Zotero.Embeddings.isEnabled()) {
+				modes.similarity = Zotero.getString('quickSearch-mode-similarity');
+			}
+			return modes;
+		}
 
 		_searchModePopup = null;
 
@@ -122,8 +128,36 @@
 					}
 				});
 				wrapper.appendChild(advancedButton);
+				this._advancedButton = advancedButton;
 			}
-			
+
+			// Dropdown selecting how many results the similarity mode keeps;
+			// shown in place of the Advanced Search button
+			let topKList = document.createXULElement('menulist');
+			topKList.id = 'zotero-tb-search-topk';
+			topKList.hidden = true;
+			document.l10n.setAttributes(topKList, 'quicksearch-semantic-topk');
+			let topKPopup = document.createXULElement('menupopup');
+			for (let n of [5, 10, 25, 50, 100]) {
+				let item = document.createXULElement('menuitem');
+				item.label = String(n);
+				item.value = String(n);
+				topKPopup.append(item);
+			}
+			topKList.append(topKPopup);
+			topKList.value = String(Zotero.Prefs.get('search.quicksearch-semantic-topK'));
+			topKList.addEventListener('command', (event) => {
+				// Don't trigger a quick search via the oncommand handler
+				event.stopPropagation();
+				Zotero.Prefs.set('search.quicksearch-semantic-topK', parseInt(topKList.value));
+				// Re-run the current search with the new top-K
+				if (this.value) {
+					this.dispatchEvent(new Event('command'));
+				}
+			});
+			wrapper.appendChild(topKList);
+			this._topKList = topKList;
+
 			this.deck = this.firstElementChild;
 			
 			this.querySelector('.advanced-collapse-button').addEventListener('command', (event) => {
@@ -158,6 +192,15 @@
 			popup.id = "search-mode-popup";
 			popup.toggleAttribute("needsgutter", true);
 
+			this._populateSearchModePopup(popup);
+			// Rebuild the menu if the available modes changed since it was built
+			// (e.g. semantic search was enabled or disabled in the preferences)
+			popup.addEventListener('popupshowing', () => this._syncSearchModePopup());
+
+			return this._searchModePopup = popup;
+		}
+
+		_populateSearchModePopup(popup) {
 			for (let [mode, label] of Object.entries(this._searchModes)) {
 				let item = document.createXULElement('menuitem');
 				item.setAttribute('type', 'radio');
@@ -175,8 +218,22 @@
 
 				popup.append(item);
 			}
-			
-			return this._searchModePopup = popup;
+		}
+
+		_syncSearchModePopup() {
+			let popup = this._searchModePopup;
+			if (!popup) {
+				return;
+			}
+			let modes = Object.keys(this._searchModes);
+			let current = [...popup.children].map(item => item.value);
+			if (current.length === modes.length && current.every((mode, i) => mode === modes[i])) {
+				return;
+			}
+			popup.replaceChildren();
+			this._populateSearchModePopup(popup);
+			let active = Zotero.Prefs.get('search.quicksearch-mode');
+			popup.querySelector(`menuitem[value="${active}"]`)?.setAttribute('checked', 'true');
 		}
 		
 		onCollectionSelected() {
@@ -192,9 +249,18 @@
 				mode = 'fields';
 			}
 
+			this._syncSearchModePopup();
 			this.searchModePopup.querySelector(`menuitem[value="${mode}"]`)
 				.setAttribute('checked', 'true');
 			document.l10n.setAttributes(this.searchTextbox.inputField, "quicksearch-input", { placeholder: this._searchModes[mode] });
+
+			// Advanced Search doesn't apply to semantic search, so swap its
+			// button for the similarity result-count dropdown
+			let isSimilarity = mode === 'similarity';
+			if (this._advancedButton) {
+				this._advancedButton.hidden = isSimilarity;
+			}
+			this._topKList.hidden = !isSimilarity;
 
 			let advancedSearchDeck = document.getElementById('zotero-advanced-search-pane-deck');
 			if (advancedSearchDeck) {
