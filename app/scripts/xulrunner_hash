@@ -91,4 +91,5 @@ fi
 
 input_string="${platform}-${arch}-${components_hash}|${GECKO_VERSION}|${xulrunner_content}"
 
-printf "%s" "$input_string" | openssl dgst -sha256 | awk '{print $2}'
+
+printf "%s" "$input_string" | openssl dgst -sha256 | awk '{print $NF}'
