@@ -31,6 +31,12 @@ preferences-reader-ebook-hyphenate =
 preferences-note-title = Notes
 preferences-note-open-in-new-window =
     .label = Open notes in new windows instead of tabs
+preferences-note-content-view = Note content width
+preferences-note-tab-content-view = Note tab content width
+preferences-note-content-view-wide =
+    .label = Full width
+preferences-note-content-view-comfortable =
+    .label = Readable width
 
 preferences-color-scheme = Color Scheme:
 preferences-color-scheme-auto =
