@@ -99,6 +99,80 @@ describe("Zotero.CollectionTree", function () {
 			assert.equal(cv.selection.focused, row);
 			assert.ok(cv.isContainerOpen(row));
 		})
+
+		it("should expand/collapse selected containers when focus is on a multi-selection", async function () {
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection');
+			await createDataObject('collection', { parentID: collection1.id });
+			await createDataObject('collection', { parentID: collection2.id });
+			let collection1Row = cv.getRowIndexByID(collection1.treeViewID);
+			let collection2Row = cv.getRowIndexByID(collection2.treeViewID);
+			if (cv.isContainerOpen(collection1Row)) {
+				await cv.toggleOpenState(collection1Row);
+			}
+			collection2Row = cv.getRowIndexByID(collection2.treeViewID);
+			if (cv.isContainerOpen(collection2Row)) {
+				await cv.toggleOpenState(collection2Row);
+			}
+
+			cv.selection.select(cv.getRowIndexByID(collection1.treeViewID));
+			cv.selection.toggleSelect(cv.getRowIndexByID(collection2.treeViewID));
+			assert.equal(cv.selection.count, 2);
+			assert.isTrue(cv.selection.isSelected(cv.selection.focused));
+			let selectEventCount = 0;
+			let selectListener = () => selectEventCount++;
+			cv.onSelect.addListener(selectListener);
+			cv.tree._onKeyDown({
+				key: Zotero.arrowNextKey,
+				preventDefault: () => {},
+				stopPropagation: () => {}
+			});
+			await waitForCallback(() => selectEventCount
+				&& cv.isContainerOpen(cv.getRowIndexByID(collection1.treeViewID))
+				&& cv.isContainerOpen(cv.getRowIndexByID(collection2.treeViewID)));
+			assert.sameMembers(cv.getSelectedRows().map(row => row.id), [collection1.treeViewID, collection2.treeViewID]);
+
+			selectEventCount = 0;
+			cv.tree._onKeyDown({
+				key: Zotero.arrowPreviousKey,
+				preventDefault: () => {},
+				stopPropagation: () => {}
+			});
+			await waitForCallback(() => selectEventCount
+				&& !cv.isContainerOpen(cv.getRowIndexByID(collection1.treeViewID))
+				&& !cv.isContainerOpen(cv.getRowIndexByID(collection2.treeViewID)));
+			assert.sameMembers(cv.getSelectedRows().map(row => row.id), [collection1.treeViewID, collection2.treeViewID]);
+			cv.onSelect.removeListener(selectListener);
+		})
+
+		it("should preserve selection when focus is on a collapsed/expanded row", async function () {
+			let group = await createGroup();
+			let collection = await createDataObject('collection', { libraryID: group.libraryID });
+			let feed = await createFeed();
+			let groupRow = cv.getRowIndexByID(group.treeViewID);
+			if (!cv.isContainerOpen(groupRow)) {
+				await cv.toggleOpenState(groupRow);
+			}
+			await cv.selectByID(feed.treeViewID);
+			cv.selection.focused = groupRow;
+			cv.selection.pivot = groupRow;
+
+			await cv.toggleOpenState(groupRow);
+			assert.equal(cv.getSelectedRows()[0].id, feed.treeViewID);
+
+			groupRow = cv.getRowIndexByID(group.treeViewID);
+			cv.selection.focused = groupRow;
+			cv.selection.pivot = groupRow;
+			await cv.toggleOpenState(groupRow);
+			assert.equal(cv.getSelectedRows()[0].id, feed.treeViewID);
+
+			await cv.selectByID(collection.treeViewID);
+			groupRow = cv.getRowIndexByID(group.treeViewID);
+			cv.selection.focused = groupRow;
+			cv.selection.pivot = groupRow;
+			await cv.toggleOpenState(groupRow);
+			assert.equal(cv.getSelectedRows()[0].id, group.treeViewID);
+		})
 	})
 	
 	describe("#expandLibrary()", function () {
