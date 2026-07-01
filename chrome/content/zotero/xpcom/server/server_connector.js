@@ -317,12 +317,15 @@ Zotero.Server.Connector._getItemIdentifiers = function (data) {
 		doi: new Set(),
 		url: new Set()
 	};
+	let itemIdentifiers = [];
 	let proxy = data.proxy && new Zotero.Proxy(data.proxy);
 
 	let addDOI = (doi) => {
 		doi = doi && Zotero.Utilities.cleanDOI(doi);
 		if (doi) {
-			identifiers.doi.add(doi.toLowerCase());
+			doi = doi.toLowerCase();
+			identifiers.doi.add(doi);
+			return doi;
 		}
 	};
 	let addURL = (url) => {
@@ -331,6 +334,7 @@ Zotero.Server.Connector._getItemIdentifiers = function (data) {
 		}
 		if (url && typeof url == 'string') {
 			identifiers.url.add(url);
+			return url;
 		}
 	};
 
@@ -344,17 +348,38 @@ Zotero.Server.Connector._getItemIdentifiers = function (data) {
 	}
 
 	for (let item of data.items || []) {
-		addDOI(item.DOI);
+		let itemIdentifier = {
+			doi: new Set(),
+			url: new Set()
+		};
+		let addItemDOI = (doi) => {
+			doi = addDOI(doi);
+			if (doi) {
+				itemIdentifier.doi.add(doi);
+			}
+		};
+		let addItemURL = (url) => {
+			url = addURL(url);
+			if (url) {
+				itemIdentifier.url.add(url);
+			}
+		};
+		addItemDOI(item.DOI);
 		if (item.extra) {
 			let { fields } = Zotero.Utilities.Internal.extractExtraFields(item.extra);
-			addDOI(fields.get('DOI'));
+			addItemDOI(fields.get('DOI'));
 		}
-		addURL(item.url);
+		addItemURL(item.url);
+		itemIdentifiers.push({
+			doi: Array.from(itemIdentifier.doi),
+			url: Array.from(itemIdentifier.url)
+		});
 	}
 
 	return {
 		doi: Array.from(identifiers.doi),
-		url: Array.from(identifiers.url)
+		url: Array.from(identifiers.url),
+		itemIdentifiers
 	};
 };
 
@@ -362,7 +387,25 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 	let itemIDs = new Set();
 	let doiSet = new Set(identifiers.doi);
 	let urlSet = new Set(identifiers.url);
+	let requestItemIdentifiers = identifiers.itemIdentifiers || [];
 	let matches = [];
+	let getMatchedItemIndex = function (matchedIdentifiers) {
+		if (!requestItemIdentifiers.length) {
+			return undefined;
+		}
+		let doi = matchedIdentifiers.doi && Zotero.Utilities.cleanDOI(matchedIdentifiers.doi);
+		doi = doi && doi.toLowerCase();
+		for (let i = 0; i < requestItemIdentifiers.length; i++) {
+			let itemIdentifiers = requestItemIdentifiers[i];
+			if (doi && itemIdentifiers.doi.includes(doi)) {
+				return i;
+			}
+			if (matchedIdentifiers.url && itemIdentifiers.url.includes(matchedIdentifiers.url)) {
+				return i;
+			}
+		}
+		return undefined;
+	};
 
 	if (doiSet.size) {
 		let getDOICandidateRows = async function (fieldID) {
@@ -457,14 +500,19 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 			continue;
 		}
 
-		matches.push({
+		let match = {
 			id: item.id,
 			key: item.key,
 			libraryID: item.libraryID,
 			title: item.getDisplayTitle(),
 			matchedFields,
 			matchedIdentifiers
-		});
+		};
+		let matchedItemIndex = getMatchedItemIndex(matchedIdentifiers);
+		if (matchedItemIndex !== undefined) {
+			match.matchedItemIndex = matchedItemIndex;
+		}
+		matches.push(match);
 	}
 
 	return matches;

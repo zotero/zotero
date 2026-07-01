@@ -494,6 +494,7 @@ describe("Connector Server", function () {
 			let data = JSON.parse(response.response);
 			assert.lengthOf(data.matches, 1);
 			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].matchedItemIndex, 0);
 			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/extra-doi");
 		});
 
