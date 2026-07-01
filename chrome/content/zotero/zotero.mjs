@@ -101,6 +101,7 @@ const xpcomFilesLocal = [
 	'dictionaries',
 	'duplicates',
 	'editorInstance',
+	'embeddings',
 	'feedReader',
 	'fileDragDataProvider',
 	'fulltext',

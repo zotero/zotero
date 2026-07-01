@@ -457,6 +457,14 @@ CREATE TABLE fulltextItems (
 CREATE INDEX fulltextItems_synced ON fulltextItems(synced);
 CREATE INDEX fulltextItems_version ON fulltextItems(version);
 
+CREATE TABLE itemEmbeddings (
+    itemID INTEGER PRIMARY KEY,
+    embedding BLOB NOT NULL,
+    sourceHash TEXT NOT NULL,
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
+);
+
+
 CREATE TABLE syncCache (
     libraryID INT NOT NULL,
     key TEXT NOT NULL,

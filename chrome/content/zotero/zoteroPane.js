@@ -577,6 +577,7 @@ var ZoteroPane = new function () {
 			
 		Zotero_Tabs.init();
 		ZoteroContextPane.init();
+		Zotero.Embeddings.Indexing.init();
 		// The items tree has to be initialized first, since the collections tree selects a
 		// row as soon as it's initialized, which loads items into the items tree
 		await ZoteroPane.initItemsTree();

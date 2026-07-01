@@ -118,6 +118,36 @@ quick-search-textbox {
 	&:has(~ #zotero-tb-search-advanced-button) {
 		padding-inline-end: 30px;
 	}
+
+	// In similarity mode the Top-K dropdown replaces the Advanced Search button
+	// and is wider, so push the input text and the clear icon further in
+	// (must come after the rule above -- the hidden Advanced Search button still
+	// matches its :has() selector)
+	&:has(~ #zotero-tb-search-topk:not([hidden])) {
+		padding-inline-end: 62px;
+	}
+}
+
+// Top-K dropdown for the similarity quick search mode: overlay the end of the
+// search field, where the Advanced Search button it replaces normally sits
+#zotero-tb-search #zotero-tb-search-topk {
+	--topk-width: 52px;
+	position: relative;
+	width: var(--topk-width);
+	min-width: var(--topk-width);
+	height: 22px;
+	min-height: 22px;
+	margin: 0;
+	margin-inline-start: calc(-1 * var(--topk-width) - 5px);
+	margin-inline-end: 2px;
+	padding-inline: 2px;
+	align-self: center;
+	z-index: 2;
+
+	&::part(label) {
+		justify-content: center;
+		font-weight: normal;
+	}
 }
 
 // Match the specificity of the #zotero-items-toolbar toolbarbutton rules

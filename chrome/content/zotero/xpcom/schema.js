@@ -3844,6 +3844,10 @@ Zotero.Schema = new function () {
 					}
 				}
 			}
+
+			else if (i == 130) {
+				await Zotero.DB.queryAsync("CREATE TABLE itemEmbeddings (\n    itemID INTEGER PRIMARY KEY,\n    embedding BLOB NOT NULL,\n    sourceHash TEXT NOT NULL,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
+			}
 		}
 		
 		await _updateDBVersion('userdata', toVersion);
