@@ -1589,8 +1589,8 @@ var ZoteroPane = new function () {
 		this.loadURI(Zotero.Groups.addGroupURL);
 	}
 	
-	this.setVirtual = function (libraryID, type, show, select) {
-		return this.collectionsView.toggleVirtualCollection(libraryID, type, show, select);
+	this.setVirtual = function (libraryID, type, show, select, recordUndo) {
+		return this.collectionsView.toggleVirtualCollection(libraryID, type, show, select, recordUndo);
 	};
 
 	this.initItemsTree = async function () {
@@ -2678,27 +2678,27 @@ var ZoteroPane = new function () {
 		
 		// Remove virtual duplicates collection
 		if (collectionTreeRows[0].isDuplicates()) {
-			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'duplicates', false);
+			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'duplicates', false, false, true);
 			return;
 		}
 		// Remove virtual unfiled collection
 		else if (collectionTreeRows[0].isUnfiled()) {
-			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'unfiled', false);
+			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'unfiled', false, false, true);
 			return;
 		}
 		// Remove virtual recently read collection
 		else if (collectionTreeRows[0].isRecentlyRead()) {
-			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'recentlyRead', false);
+			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'recentlyRead', false, false, true);
 			return;
 		}
 		// Remove virtual retracted collection
 		else if (collectionTreeRows[0].isRetracted()) {
-			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'retracted', false);
+			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'retracted', false, false, true);
 			return;
 		}
 		// Hide "My Publications"
 		else if (collectionTreeRows[0].isPublications()) {
-			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'publications', false);
+			this.setVirtual(collectionTreeRows[0].ref.libraryID, 'publications', false, false, true);
 			return;
 		}
 		
@@ -3638,31 +3638,31 @@ var ZoteroPane = new function () {
 		{
 			id: "showDuplicates",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'duplicates', true, true);
+				this.setVirtual(this.getSelectedLibraryID(), 'duplicates', true, true, true);
 			}
 		},
 		{
 			id: "showUnfiled",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'unfiled', true, true);
+				this.setVirtual(this.getSelectedLibraryID(), 'unfiled', true, true, true);
 			}
 		},
 		{
 			id: "showRecentlyRead",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'recentlyRead', true, true);
+				this.setVirtual(this.getSelectedLibraryID(), 'recentlyRead', true, true, true);
 			}
 		},
 		{
 			id: "showRetracted",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'retracted', true, true);
+				this.setVirtual(this.getSelectedLibraryID(), 'retracted', true, true, true);
 			}
 		},
 		{
 			id: "showPublications",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'publications', true, true);
+				this.setVirtual(this.getSelectedLibraryID(), 'publications', true, true, true);
 			}
 		},
 		{
