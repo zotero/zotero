@@ -573,6 +573,7 @@ var ZoteroPane = new function () {
 			
 		Zotero_Tabs.init();
 		ZoteroContextPane.init();
+		Zotero.Embeddings.Indexing.init();
 		await ZoteroPane.initCollectionsTree();
 		await ZoteroPane.initItemsTree();
 		ZoteroPane.initCollectionTreeSearch();
