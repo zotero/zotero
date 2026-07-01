@@ -195,8 +195,8 @@ var LibraryTree = class LibraryTree extends React.Component {
 		let level = this.getLevel(index);
 
 		// Maintain selection unless specified otherwise
-		if (!skipSelectionUpdate && index <= this.selection.focused) {
-			this.selection.select(this.selection.focused - 1);
+		if (!skipSelectionUpdate) {
+			this.selection.adjustForRowRemoval(index);
 		}
 
 		this._rows.splice(index, 1);
