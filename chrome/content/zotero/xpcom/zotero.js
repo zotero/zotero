@@ -761,7 +761,10 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			
 			Zotero.Feeds.init();
 			Zotero.addShutdownListener(() => Zotero.Feeds.uninit());
-			
+
+			Zotero.Spotlight.init();
+			Zotero.addShutdownListener(() => Zotero.Spotlight.uninit());
+
 			Zotero.Schema.schemaUpdatePromise.then(Zotero.purgeDataObjects.bind(Zotero));
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update

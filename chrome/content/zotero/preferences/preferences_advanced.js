@@ -64,6 +64,10 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('zotero-prefpane-advanced-enable-local-api').addEventListener('synctopreference', () => {
 			this.updateLocalAPIUI();
 		});
+
+		if (Zotero_Preferences.Spotlight) {
+			Zotero_Preferences.Spotlight.init();
+		}
 	},
 	
 	
