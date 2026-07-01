@@ -3705,6 +3705,10 @@ Zotero.Schema = new function () {
 					await Zotero.DB.queryAsync("UPDATE itemAttachments SET path=? WHERE itemID=?", ['storage:' + filename, row.itemID]);
 				}
 			}
+
+			else if (i == 129) {
+				await Zotero.DB.queryAsync("CREATE TABLE itemEmbeddings (\n    itemID INTEGER PRIMARY KEY,\n    embedding BLOB NOT NULL,\n    sourceHash TEXT NOT NULL,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
+			}
 		}
 		
 		await _updateDBVersion('userdata', toVersion);

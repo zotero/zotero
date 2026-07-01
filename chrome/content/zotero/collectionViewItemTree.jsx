@@ -700,6 +700,13 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			refresh = true;
 			madeChanges = true;
 		}
+		// Under an active similarity quick search, handle removals with a full refresh too
+		else if (['remove', 'delete', 'trash'].includes(action)
+				&& collectionTreeRows.some(row => row.isSimilaritySearch())) {
+			this.itemTree.invalidateRowCache(ids);
+			refresh = true;
+			madeChanges = true;
+		}
 		else if ((action == 'remove' && !collectionTreeRows.some(row => row.isLibrary(true)))
 			|| action == 'delete' || action == 'trash'
 			|| (action == 'removeDuplicatesMaster' && collectionTreeRow.isDuplicates())) {
