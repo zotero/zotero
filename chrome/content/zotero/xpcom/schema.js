@@ -46,7 +46,7 @@ Zotero.Schema = new function () {
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	// Update when adding _updateCompatibility() line to schema update step
-	var _maxCompatibility = 7;
+	var _maxCompatibility = 8;
 	
 	var _repositoryTimerID;
 	var _repositoryNotificationTimerID;
@@ -748,8 +748,137 @@ Zotero.Schema = new function () {
 		
 		Zotero.debug(`Migrated fields from Extra for ${items.length} items in ${new Date() - t} ms`);
 	};
-	
-	
+
+
+	/**
+	 * Populate the normalized search columns added by the userdata 126 migration
+	 *
+	 * This is local-only derived data, so unlike migrateExtraFields() it doesn't wait for sync.
+	 * It's resumable across restarts: a cursor is persisted to the 'normalizeBackfill' setting
+	 * after each chunk, and the setting is only cleared once every table is done. New rows are
+	 * populated at insert time by the data layer, so only pre-existing rows are handled here.
+	 *
+	 * @param {Function} [onProgress] - Called with { progress, progressMax } as rows are processed
+	 */
+	this.populateNormalizedSearchColumns = async function ({ onProgress } = {}) {
+		var flag = await Zotero.DB.valueQueryAsync(
+			"SELECT value FROM settings WHERE setting='search' AND key='normalizeBackfill'"
+		);
+		if (flag === false) {
+			return;
+		}
+
+		Zotero.debug("Populating normalized search columns");
+		var startTime = new Date();
+		var normalize = Zotero.Utilities.Internal.normalizeForSearchStorage;
+
+		// Each table's primary key and the [source, target] column pairs to normalize
+		var tables = [
+			{
+				table: 'itemDataValues',
+				idColumn: 'valueID',
+				columns: [['value', 'valueNormalized']]
+			},
+			{
+				table: 'tags',
+				idColumn: 'tagID',
+				columns: [['name', 'nameNormalized']]
+			},
+			{
+				table: 'creators',
+				idColumn: 'creatorID',
+				columns: [['firstName', 'firstNameNormalized'], ['lastName', 'lastNameNormalized']]
+			},
+			{
+				table: 'itemAnnotations',
+				idColumn: 'itemID',
+				columns: [['text', 'textNormalized'], ['comment', 'commentNormalized']]
+			}
+		];
+
+		// Resume from a persisted cursor, if any
+		var startTableIndex = 0;
+		var startCursor = 0;
+		try {
+			let parsed = JSON.parse(flag);
+			if (parsed && Number.isInteger(parsed.ti)) {
+				startTableIndex = parsed.ti;
+				startCursor = parsed.id || 0;
+			}
+		}
+		catch (e) {}
+
+		const CHUNK_SIZE = 1000;
+		var progress = 0;
+		var progressMax = 0;
+		for (let { table } of tables) {
+			progressMax += await Zotero.DB.valueQueryAsync(`SELECT COUNT(*) FROM ${table}`);
+		}
+		if (onProgress) {
+			onProgress({ progress, progressMax });
+		}
+
+		for (let ti = startTableIndex; ti < tables.length; ti++) {
+			let { table, idColumn, columns } = tables[ti];
+			let sourceColumns = columns.map(c => c[0]);
+			let cursor = ti == startTableIndex ? startCursor : 0;
+
+			while (true) {
+				let rows = await Zotero.DB.queryAsync(
+					`SELECT ${idColumn}, ${sourceColumns.join(', ')} FROM ${table} `
+						+ `WHERE ${idColumn} > ? ORDER BY ${idColumn} LIMIT ?`,
+					[cursor, CHUNK_SIZE]
+				);
+				if (!rows.length) {
+					break;
+				}
+
+				await Zotero.DB.executeTransaction(async function () {
+					for (let row of rows) {
+						let sets = [];
+						let params = [];
+						for (let [source, target] of columns) {
+							let value = normalize(row[source]);
+							// Skip columns that don't need a normalized form
+							if (value !== null) {
+								sets.push(`${target}=?`);
+								params.push(value);
+							}
+						}
+						// Most rows are plain ASCII and need no update at all
+						if (sets.length) {
+							params.push(row[idColumn]);
+							// Skip logging the params, which include the full normalized value
+							await Zotero.DB.queryAsync(
+								`UPDATE ${table} SET ${sets.join(', ')} WHERE ${idColumn}=?`,
+								params,
+								{ debugParams: false }
+							);
+						}
+						cursor = row[idColumn];
+					}
+
+					// Persist the cursor in the same transaction as the updates
+					await Zotero.DB.queryAsync(
+						"REPLACE INTO settings VALUES ('search', 'normalizeBackfill', ?)",
+						JSON.stringify({ ti, id: cursor })
+					);
+				});
+
+				progress += rows.length;
+				if (onProgress) {
+					onProgress({ progress, progressMax });
+				}
+			}
+		}
+
+		await Zotero.DB.queryAsync(
+			"DELETE FROM settings WHERE setting='search' AND key='normalizeBackfill'"
+		);
+		Zotero.debug(`Populated normalized search columns in ${new Date() - startTime} ms`);
+	};
+
+
 	// https://www.zotero.org/support/nsf
 	//
 	// This is mostly temporary
@@ -3531,12 +3660,27 @@ Zotero.Schema = new function () {
 				await Zotero.DB.queryAsync("UPDATE groups SET version = 0");
 			}
 
+			else if (i == 126) {
+				await _updateCompatibility(8);
+
+				// Normalized shadow columns for accent-insensitive search. The columns are
+				// populated after startup by Zotero.Schema.populateNormalizedSearchColumns(),
+				// gated on the flag set below.
+				await Zotero.DB.queryAsync("ALTER TABLE itemDataValues ADD COLUMN valueNormalized TEXT");
+				await Zotero.DB.queryAsync("ALTER TABLE tags ADD COLUMN nameNormalized TEXT");
+				await Zotero.DB.queryAsync("ALTER TABLE creators ADD COLUMN firstNameNormalized TEXT");
+				await Zotero.DB.queryAsync("ALTER TABLE creators ADD COLUMN lastNameNormalized TEXT");
+				await Zotero.DB.queryAsync("ALTER TABLE itemAnnotations ADD COLUMN textNormalized TEXT");
+				await Zotero.DB.queryAsync("ALTER TABLE itemAnnotations ADD COLUMN commentNormalized TEXT");
+				await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('search', 'normalizeBackfill', 1)");
+			}
+
 			// The condition 'required' flag was removed, but its savedSearchConditions column
 			// is kept for now so older code can still read the database (it SELECTs the column
 			// when loading saved searches). TODO: with the next userdata compatibility bump,
 			// bump the version and uncomment the migration below to drop the column.
 			//
-			// else if (i == 126) {
+			// else if (i == 127) {
 			// 	await Zotero.DB.queryAsync("ALTER TABLE savedSearchConditions RENAME TO savedSearchConditionsOld");
 			// 	await Zotero.DB.queryAsync("CREATE TABLE savedSearchConditions (\n    savedSearchID INT NOT NULL,\n    searchConditionID INT NOT NULL,\n    condition TEXT NOT NULL,\n    operator TEXT,\n    value TEXT,\n    PRIMARY KEY (savedSearchID, searchConditionID),\n    FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE\n)");
 			// 	await Zotero.DB.queryAsync("INSERT INTO savedSearchConditions SELECT savedSearchID, searchConditionID, condition, operator, value FROM savedSearchConditionsOld");

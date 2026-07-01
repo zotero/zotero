@@ -584,10 +584,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		});
 		tags = coloredTags.concat(tags);
 		
-		// Filter
+		// Filter (case- and accent-insensitive, matching search conditions)
 		if (this.state.searchString) {
-			let lcStr = this.state.searchString.toLowerCase();
-			tags = tags.filter(tag => tag.tag.toLowerCase().includes(lcStr));
+			let normalizedStr = Zotero.Utilities.Internal.normalizeForSearch(this.state.searchString);
+			tags = tags.filter(tag => Zotero.Utilities.Internal.normalizeForSearch(tag.tag).includes(normalizedStr));
 		}
 		
 		// Prepare tag objects for list component

@@ -119,8 +119,9 @@ Zotero.Tags = new function () {
 		var id = this.getID(data.tag);
 		if (!id) {
 			id = Zotero.ID.get('tags');
-			let sql = "INSERT INTO tags (tagID, name) VALUES (?, ?)";
-			await Zotero.DB.queryAsync(sql, [id, data.tag]);
+			let sql = "INSERT INTO tags (tagID, name, nameNormalized) VALUES (?, ?, ?)";
+			let nameNormalized = Zotero.Utilities.Internal.normalizeForSearchStorage(data.tag);
+			await Zotero.DB.queryAsync(sql, [id, data.tag, nameNormalized]);
 			_tagsByID.set(id, data.tag);
 			_idsByTag.set(data.tag, id);
 		}
