@@ -2060,9 +2060,8 @@ var ZoteroPane = new function () {
 		this.itemsView.collectionTreeRow.setSearch('');
 
 		Zotero_Tabs.select('zotero-pane');
-		// Keep focus in the builder (on the first condition) rather than the results,
-		// so the user can refine the seeded search
-		await deck.pane.submit({ focusResults: false });
+		await deck.pane.submit();
+		// Focus the first condition so the user can refine the seeded search
 		deck.pane.focus();
 	};
 
