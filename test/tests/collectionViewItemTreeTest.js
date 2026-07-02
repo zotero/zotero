@@ -240,6 +240,37 @@ describe("CollectionViewItemTree", function () {
 			assert.isFalse(itemsView.getRowIndexByID(highlightOne.id));
 			assert.isFalse(itemsView.getRowIndexByID(highlightTwo.id));
 		});
+
+		it("should keep attachments expandable and show all annotations for non-annotation searches when hideContextAnnotationRows=true", async function () {
+			Zotero.Prefs.set("hideContextAnnotationRows", true);
+
+			let item = await createDataObject('item', { title: "uniqueParentTitle" });
+			let attachment = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: item.id });
+			let highlight = await createAnnotation('highlight', attachment, { comment: "comment one" });
+			let underline = await createAnnotation('underline', attachment, { comment: "comment two" });
+
+			// Search matches the parent item's title, not any annotation
+			await zp.itemsView.setFilter('search', "uniqueParentTitle");
+
+			// Expand the matched parent to reveal its attachment
+			let itemRow = itemsView.getRowIndexByID(item.id);
+			assert.isNumber(itemRow);
+			if (!itemsView.isContainerOpen(itemRow)) {
+				await itemsView.toggleOpenState(itemRow);
+			}
+
+			// The attachment should still be expandable even though no annotation matched
+			let attachmentRow = itemsView.getRowIndexByID(attachment.id);
+			assert.isNumber(attachmentRow);
+			assert.isFalse(itemsView.isContainerEmpty(attachmentRow));
+
+			// Expanding it should reveal all of its annotations rather than hiding them
+			if (!itemsView.isContainerOpen(attachmentRow)) {
+				await itemsView.toggleOpenState(attachmentRow);
+			}
+			assert.isNumber(itemsView.getRowIndexByID(highlight.id));
+			assert.isNumber(itemsView.getRowIndexByID(underline.id));
+		});
 	});
 	
 	describe("#selectItem()", function () {

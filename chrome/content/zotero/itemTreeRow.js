@@ -451,17 +451,21 @@ class FileItemTreeRow extends ZoteroItemTreeRow {
 		return true;
 	}
 
-	isContainerEmpty({ searchMode, searchItemIDs } = {}) {
-		if (Zotero.Prefs.get("hideContextAnnotationRows") && searchMode) {
-			return !this.ref.getAnnotations().some(annotation => searchItemIDs.has(annotation.id));
-		}
+	isContainerEmpty() {
 		return this.ref.numAnnotations() == 0;
 	}
 
 	getChildItems({ searchMode, searchItemIDs } = {}) {
 		let annotations = this.ref.getAnnotations();
-		if (Zotero.Prefs.get("hideContextAnnotationRows") && searchMode) {
-			annotations = annotations.filter(annotation => searchItemIDs.has(annotation.id));
+		// With "Hide Non-Matching Annotations" enabled, if any of the attachment's
+		// annotations match a search, show only those and hide the rest. If none match,
+		// show them all, since otherwise the attachment couldn't be expanded to browse its
+		// annotations at all.
+		if (searchMode && Zotero.Prefs.get("hideContextAnnotationRows")) {
+			let matches = annotations.filter(annotation => searchItemIDs.has(annotation.id));
+			if (matches.length) {
+				annotations = matches;
+			}
 		}
 		return annotations;
 	}

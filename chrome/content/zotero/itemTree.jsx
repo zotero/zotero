@@ -219,8 +219,6 @@ class ItemTreeRowProvider {
 			return true;
 		}
 		return row.isContainerEmpty({
-			searchMode: this._searchMode,
-			searchItemIDs: this._searchItemIDs,
 			includeTrashed: this._includeTrashed,
 		});
 	}
