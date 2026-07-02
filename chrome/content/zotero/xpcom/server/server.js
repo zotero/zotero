@@ -502,7 +502,7 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 		}
 	} catch(e) {
 		Zotero.debug(e);
-		this._requestFinished(this._generateResponse(500), "text/plain", "An error occurred\n");
+		this._requestFinished(this._generateResponse(500, "text/plain", "An error occurred\n"));
 		throw e;
 	}
 };
