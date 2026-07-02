@@ -1014,6 +1014,7 @@ search-conditions-submenu-annotation = Annotation
 # context. The full names above are still shown once a condition is selected.
 search-conditions-short-fulltextContent = Content
 search-conditions-short-fileTypeID = File Type
+search-conditions-short-attachmentStorageType = Storage Type
 search-conditions-short-lastRead = Last Read
 search-conditions-short-annotationText = Text
 search-conditions-short-annotationComment = Comment
