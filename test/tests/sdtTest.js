@@ -2,20 +2,24 @@ describe("Zotero.SDT", function () {
 	const SDT_CACHE_FILE_NAME = '.zotero-sdt-cache';
 	const TEST_PDF_HASH = 'e54589353710950c4b7ff70829a60036';
 	const SDT_PACK_MAGIC = [0x89, 0x53, 0x44, 0x54, 0x0d, 0x0a, 0x1a, 0x0a];
-	const TEST_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAHMAAABGAAAAAAAAADMAAAAAAAAAAQAAAB3MsQ7CIBQF0H+5MzWXtpSW1V9wcsPySF2EQGtiGv7daHLmcyKXtEqtqcCd2D9Z4JBDhMJbSn2mF5xuCsHvci3idwlw6NlPHXVHfSPd34XkHQo1HWWVX7b5usFBzGjmZTCD1VwM1/FhY7Sc+8VP5DChtS+rVipITE8tVrKKrlbKTFGyUiowVNJRyklMSs1RslICsZPz80pS80qCEvPSU5WsoqMNYnWiDWNja2N1lPJLS3Iy80CisbUAY2BgYKhWKqksSFWyUipILEpML0osyFDSUSpJrShRslIKSS0uUQh2CVFITkzOSNVTqgUA';
+	const TEST_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAHMAAABGAAAAAAAAADMAAAAAAAAAAQAAAB3MsQ7CIBQF0H+5MzW3tEDL6i84uWF5pC7SADUxTf/daHLmc2AreZFac4E/0D6bwGOLCQpvKfWZX/D6VIihybVIaBLhoaltx75jfyP934XkHQo172WRX7aGusJDzGimeTCD6zkbLuPDpeQ46TlYcrA4zy+rVipITE8tVrKKrlbKTFGyUiowVNJRyklMSs1RslICsZPz80pS80qCEvPSU5WsoqMNYnWiDWNja2N1lPJLS3Iy80CisbUAY2BgYKhWKqksSFWyUipILEpML0osyFDSUSpJrShRslIKSS0uUQh2CVFITkzOSNVTqgUA';
 	const STALE_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAGAAAABGAAAAAAAAADMAAAAAAAAAAQAAAIXMMQ6DMBBE0btMbaIxBcW2uQIVnYUXkSa2dk2kCPnuEVwgX6/+J6qVVd2LQU60b1UIat4Q8FHzV3lDYg/IqenTNDXNEIwcp4FxYJxJuT1ILgjwctiq12xPvkPAP6H3H6tWKkhMTy1WsoquVspMUbJSKjBU0lHKSUxKzVGyUgKxk/PzSlLzSoIS89JTlayiow1idaINY2NrY3WU8ktLcjLzQKKxtQBjYGBgqFYqqSxIVbJSKkgsSkwvSizIUNJRKkmtKFGyUgpJLS5RCHYJUUhOTM5I1VOqBQA=';
-	const STALE_PROCESSOR_VERSION_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAHMAAABGAAAAAAAAADMAAAAAAAAAAQAAAB3MsQ7CIBQF0H+5MzW3tEDL6i84uWF5pC7SADUxTf/daHLmc2AreZFac4E/0D6bwGOLCQpvKfWZX/D6VIihybVIaBLhoaltx75jfyP934XkHQo172WRX7aGusJDzGimeTCD6zkbLuPDpeQ46TlYcrA4zy+rVipITE8tVrKKrlbKTFGyUiowVNJRyklMSs1RslICsZPz80pS80qCEvPSU5WsoqMNYnWiDWNja2N1lPJLS3Iy80CisbUAY2BgYKhWKqksSFWyUipILEpML0osyFDSUSpJrShRslIKSS0uUQh2CVFITkzOSNVTqgUA';
+	const STALE_PROCESSOR_VERSION_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAHMAAABGAAAAAAAAADMAAAAAAAAAAQAAAB3MsQ7CIBQF0H+5MzWXtpSW1V9wcsPySF2EQGtiGv7daHLmcyKXtEqtqcCd2D9Z4JBDhMJbSn2mF5xuCsHvci3idwlw6NlPHXVHfSPd34XkHQo1HWWVX7b5usFBzGjmZTCD1VwM1/FhY7Sc+8VP5DChtS+rVipITE8tVrKKrlbKTFGyUiowVNJRyklMSs1RslICsZPz80pS80qCEvPSU5WsoqMNYnWiDWNja2N1lPJLS3Iy80CisbUAY2BgYKhWKqksSFWyUipILEpML0osyFDSUSpJrShRslIKSS0uUQh2CVFITkzOSNVTqgUA';
 	const WRONG_PROCESSOR_TYPE_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAHMAAABGAAAAAAAAADMAAAAAAAAAAQAAAB3MsQ6DIBQF0H+5szYXFRXW/kKnbojP2KUQwCaN4d8bm5z5nIgpeMk5JNgT5RsFFhKPBQ0+kvIrvGFVbbC6IvckrsgKi47d2FK1VA/S/t1IPtEghyN5ubbd5f3a9KBn0+t+UjSaflimbZs4d8aNZD+i1h+rVipITE8tVrKKrlbKTFGyUiowVNJRyklMSs1RslICsZPz80pS80qCEvPSU5WsoqMNYnWiDWNja2N1lPJLS3Iy80CisbUAY2BgYKhWKqksSFWyUipILEpML0osyFDSUSpJrShRslIKSS0uUQh2CVFITkzOSNVTqgUA';
 
 	it("should return a valid cached pack", async function () {
 		let item = await importFileAttachment('test.pdf');
 		await writeTestSDTCache(item);
 
-		let result = await getValidPack(item);
+		let progress = [];
+		let result = await getValidPack(item, {
+			onProgress: value => progress.push(value),
+		});
 
 		assert.equal(result.packVersion, 1);
 		assert.equal(result.schemaMajorVersion, 1);
 		assertPackMagic(result);
+		assert.deepEqual(progress, []);
 	});
 
 	it("should generate the pack when missing", async function () {
@@ -65,6 +69,50 @@ describe("Zotero.SDT", function () {
 			assert.isTrue(result1.ok, result1.reason);
 			assert.isTrue(result2.ok, result2.reason);
 			assert.isTrue(workerStub.calledOnce);
+		}
+		finally {
+			unblockWorker();
+			workerStub.restore();
+		}
+	});
+
+	it("should share generation progress between concurrent getPack() calls", async function () {
+		let item = await importFileAttachment('test.pdf');
+		await OS.File.remove(getSDTCachePath(item), { ignoreAbsent: true });
+
+		let unblockWorker;
+		let workerBlocked = new Promise((resolve) => {
+			unblockWorker = resolve;
+		});
+		let workerStub = sinon.stub(Zotero.PDFWorker, 'getStructuredDocumentText')
+			.callsFake(async (itemID, options = {}) => {
+				options.onProgress(10);
+				await workerBlocked;
+				options.onProgress(60);
+				return { buf: getTestSDTPackBuffer() };
+			});
+		try {
+			let progress1 = [];
+			let progress2 = [];
+			let promise1 = Zotero.SDT.getPack(item.id, {
+				onProgress: progress => progress1.push(progress),
+			});
+			await waitForProgress(progress1, 10);
+			assert.deepEqual(progress1, [10]);
+
+			let promise2 = Zotero.SDT.getPack(item.id, {
+				onProgress: progress => progress2.push(progress),
+			});
+			await waitForProgress(progress2, 10);
+			assert.deepEqual(progress2, [10]);
+
+			unblockWorker();
+			let [result1, result2] = await Promise.all([promise1, promise2]);
+			assert.isTrue(result1.ok, result1.reason);
+			assert.isTrue(result2.ok, result2.reason);
+			assert.isTrue(workerStub.calledOnce);
+			assert.deepEqual(progress1, [10, 60]);
+			assert.deepEqual(progress2, [10, 60]);
 		}
 		finally {
 			unblockWorker();
@@ -248,9 +296,16 @@ describe("Zotero.SDT", function () {
 		// bundled SDT module, matches its schema major version, and is
 		// stamped with the source file's hash, so this catches version
 		// drift between the document-worker and the bundled module
-		let result = await getValidPack(item);
+		let progress = [];
+		let result = await getValidPack(item, {
+			onProgress: value => progress.push(value),
+		});
 		assert.isTrue(await OS.File.exists(cachePath));
 		assertPackMagic(result);
+		assert.deepEqual(progress, progress.slice().sort((a, b) => a - b));
+		assert.equal(progress[0], 0);
+		assert.equal(progress.at(-1), 100);
+		assert.isTrue(progress.some(value => value > 0 && value < 100));
 
 		// getReader() should return a parsed pack from the cache without
 		// re-extracting
@@ -274,8 +329,8 @@ describe("Zotero.SDT", function () {
 		return cachePath;
 	}
 
-	async function getValidPack(item) {
-		let result = await Zotero.SDT.getPack(item.id);
+	async function getValidPack(item, options) {
+		let result = await Zotero.SDT.getPack(item.id, options);
 		assert.isTrue(result.ok, result.reason);
 		return result;
 	}
@@ -286,6 +341,12 @@ describe("Zotero.SDT", function () {
 
 	async function waitForStubCall(stub) {
 		while (!stub.called) {
+			await Zotero.Promise.delay(5);
+		}
+	}
+
+	async function waitForProgress(progress, value) {
+		while (!progress.includes(value)) {
 			await Zotero.Promise.delay(5);
 		}
 	}

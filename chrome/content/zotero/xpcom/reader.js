@@ -1154,8 +1154,22 @@ class ReaderInstance {
 		// Wrap the return value in a child window Promise to avoid
 		// permissions errors (as in _getReadAloudRemoteInterface()).
 		// getPack() never rejects
-		return () => new targetWindow.Promise(async (resolve) => {
-			let result = await Zotero.SDT.getPack(this.itemID, { isPriority: true });
+		return (options = {}) => new targetWindow.Promise(async (resolve) => {
+			let contentOptions = Cu.waiveXrays(options);
+			let onProgress = typeof contentOptions.onProgress === 'function'
+				? progress => {
+					if (!Components.utils.isDeadWrapper(targetWindow)) {
+						contentOptions.onProgress(progress);
+					}
+				}
+				: null;
+			let result = await Zotero.SDT.getPack(this.itemID, {
+				isPriority: true,
+				onProgress,
+			});
+			if (Components.utils.isDeadWrapper(targetWindow)) {
+				return;
+			}
 			resolve(Cu.cloneInto(result, targetWindow));
 		});
 	}

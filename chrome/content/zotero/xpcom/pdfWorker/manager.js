@@ -78,10 +78,14 @@ class PDFWorker {
 		});
 	}
 
-	async _query(action, data, transfer) {
+	async _query(action, data, transfer, options = {}) {
 		return new Promise((resolve, reject) => {
 			this._lastPromiseID++;
-			this._waitingPromises[this._lastPromiseID] = { resolve, reject };
+			this._waitingPromises[this._lastPromiseID] = {
+				resolve,
+				reject,
+				onProgress: typeof options.onProgress === 'function' ? options.onProgress : null,
+			};
 			this._worker.postMessage({ id: this._lastPromiseID, action, data }, transfer);
 		});
 	}
@@ -108,6 +112,18 @@ class PDFWorker {
 		this._worker = new Worker(WORKER_URL);
 		this._worker.addEventListener('message', async (event) => {
 			let message = event.data;
+			if ('progressID' in message) {
+				let promise = this._waitingPromises[message.progressID];
+				if (promise?.onProgress) {
+					try {
+						promise.onProgress(message.data?.progress);
+					}
+					catch {
+						// Progress reporting is best-effort and must not affect extraction.
+					}
+				}
+				return;
+			}
 			if ('responseID' in message) {
 				let promise = this._waitingPromises[message.responseID];
 				if (!promise) {
@@ -627,11 +643,13 @@ class PDFWorker {
 	 * Get structured document text for a PDF, EPUB, or snapshot attachment
 	 *
 	 * @param {Integer} itemID Attachment item id
-	 * @param {Boolean} [isPriority]
-	 * @param {String} [password]
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.isPriority]
+	 * @param {String} [options.password]
+	 * @param {Function} [options.onProgress]
 	 * @returns {Promise<Object|null>}
 	 */
-	async getStructuredDocumentText(itemID, isPriority, password) {
+	async getStructuredDocumentText(itemID, { isPriority = false, password, onProgress } = {}) {
 		return this._enqueue(async () => {
 			let attachment = await Zotero.Items.getAsync(itemID);
 			if (!(attachment.isPDFAttachment()
@@ -661,7 +679,10 @@ class PDFWorker {
 					contentType: attachment.attachmentContentType,
 					password,
 					sourceHash,
-				}, [buf]);
+					reportProgress: typeof onProgress === 'function',
+				}, [buf], {
+					onProgress,
+				});
 			}
 			catch (e) {
 				this._throwWorkerError('getStructuredDocumentText', e);
@@ -670,7 +691,7 @@ class PDFWorker {
 			Zotero.debug(`Extracted structured document text for item ${attachment.libraryKey} in ${new Date() - t} ms`);
 
 			return result;
-		}, isPriority);
+		}, !!isPriority);
 	}
 
 	/**

@@ -72,6 +72,8 @@ Zotero.SDT = new function () {
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.isPriority] - Put a needed extraction at the
 	 *     front of the worker queue (for user-initiated requests)
+	 * @param {Function} [options.onProgress] - Called with SDT generation
+	 *     progress from 0 to 100 when generation is needed
 	 * @returns {Promise<Object>} { ok: true, bytes: ArrayBuffer, packVersion,
 	 *     schemaMajorVersion }, or { ok: false, reason: 'unavailable' |
 	 *     'password-required' | 'failed' }
@@ -219,25 +221,64 @@ Zotero.SDT = new function () {
 
 	function _generate(context, options) {
 		let key = _getItemKey(context.item);
-		if (_generating.has(key)) {
-			return _generating.get(key);
+		let generation = _generating.get(key);
+		if (generation) {
+			_addGenerationProgressListener(generation, options.onProgress);
+			return generation.promise;
 		}
-		let promise = _generateUnqueued(context, options)
+
+		generation = {
+			promise: null,
+			listeners: new Set(),
+			lastProgress: null,
+		};
+		_addGenerationProgressListener(generation, options.onProgress);
+
+		let promise = _generateUnqueued(context, options, (progress) => {
+			_reportGenerationProgress(generation, progress);
+		})
 			.finally(() => _generating.delete(key));
-		_generating.set(key, promise);
+		generation.promise = promise;
+		_generating.set(key, generation);
 		return promise;
 	}
 
-	async function _generateUnqueued({ item, sourceHash, cachePath, processorType }, options) {
+	function _addGenerationProgressListener(generation, onProgress) {
+		if (typeof onProgress !== 'function') {
+			return;
+		}
+		generation.listeners.add(onProgress);
+		if (generation.lastProgress !== null) {
+			_callProgressListener(onProgress, generation.lastProgress);
+		}
+	}
+
+	function _reportGenerationProgress(generation, progress) {
+		generation.lastProgress = progress;
+		for (let listener of generation.listeners) {
+			_callProgressListener(listener, progress);
+		}
+	}
+
+	function _callProgressListener(onProgress, progress) {
+		try {
+			onProgress(progress);
+		}
+		catch {
+			// Progress reporting is best-effort and must not affect extraction.
+		}
+	}
+
+	async function _generateUnqueued({ item, sourceHash, cachePath, processorType }, options, onProgress) {
 		try {
 			if (_passwordFailures.get(_getItemKey(item)) === sourceHash) {
 				return { ok: false, reason: 'password-required' };
 			}
 			let t = new Date();
-			let result = await Zotero.PDFWorker.getStructuredDocumentText(
-				item.id,
-				!!options.isPriority
-			);
+			let result = await Zotero.PDFWorker.getStructuredDocumentText(item.id, {
+				isPriority: !!options.isPriority,
+				onProgress,
+			});
 			if (!result?.buf) {
 				return { ok: false, reason: 'failed' };
 			}
