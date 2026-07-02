@@ -46,6 +46,12 @@ const READ_ALOUD_VOICE_DEFAULTS_PATH = PathUtils.join(Zotero.Profile.dir, 'readA
 // Whether the Read Aloud audio cache has been pruned of stale versions this session
 let readAloudCachePruned = false;
 
+// How long a reader tab can stay hidden before its rendered pages are
+// discarded to reclaim memory. Visible pages re-render when the tab is
+// selected again. Short enough to matter, long enough to avoid re-rendering
+// when quickly switching between tabs
+const SUSPEND_HIDDEN_TAB_AFTER = 60000; // ms
+
 class ReaderInstance {
 	constructor(options) {
 		this.stateFileName = '.zotero-reader-state';
@@ -1964,7 +1970,21 @@ class ReaderTab extends ReaderInstance {
 
 			this._tabContainer.addEventListener('tab-selection-change', (event) => {
 				if (event.detail.selected) {
+					if (this._suspendTimeout) {
+						clearTimeout(this._suspendTimeout);
+						this._suspendTimeout = null;
+					}
+					this._internalReader.setSuspended(false);
 					this._updateLayout();
+				}
+				else {
+					// Discard rendered pages after the tab has been hidden for a while,
+					// since each loaded reader tab otherwise keeps up to 10 rendered
+					// page canvases (plus snapshot copies) in memory indefinitely
+					this._suspendTimeout = setTimeout(() => {
+						this._suspendTimeout = null;
+						this._internalReader.setSuspended(true);
+					}, SUSPEND_HIDDEN_TAB_AFTER);
 				}
 			});
 			if (select) {
@@ -1974,6 +1994,10 @@ class ReaderTab extends ReaderInstance {
 	}
 
 	uninit() {
+		if (this._suspendTimeout) {
+			clearTimeout(this._suspendTimeout);
+			this._suspendTimeout = null;
+		}
 		if (this._window) {
 			this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
 			this._window.removeEventListener('pointerdown', this._handlePointerDown);
