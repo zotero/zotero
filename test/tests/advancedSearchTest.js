@@ -612,6 +612,35 @@ describe("Advanced Search", function () {
 		await selectLibrary(win);
 	});
 
+	it("should close the saved-search editor without prompting when the edited search is trashed", async function () {
+		var saved = await createDataObject('search', { name: "TrashWhileEditing" });
+		await select(win, saved);
+		await zp.setSavedSearchEditorState('open');
+		assert.equal(deck.state, 'open');
+		assert.equal(deck.selectedSearchType, 'saved');
+
+		// Trashing the search being edited should close the editor without a
+		// save-changes prompt, as when it's deleted outright
+		let stub = sinon.stub().returns(1);
+		let promptService = win.Services.prompt;
+		win.Services.prompt = { confirmEx: stub };
+		try {
+			saved.deleted = true;
+			await saved.saveTx();
+			for (let i = 0; i < 60 && deck.state !== 'closed'; i++) {
+				await Zotero.Promise.delay(50);
+			}
+			assert.equal(deck.state, 'closed');
+			assert.equal(stub.callCount, 0);
+		}
+		finally {
+			win.Services.prompt = promptService;
+		}
+
+		await saved.eraseTx();
+		await selectLibrary(win);
+	});
+
 	it("should revert to the edited search without re-prompting when canceling", async function () {
 		var search1 = await createDataObject('search', { name: "CancelEditing1" });
 		var search2 = await createDataObject('search', { name: "CancelEditing2" });

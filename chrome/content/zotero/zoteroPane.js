@@ -1816,9 +1816,10 @@ var ZoteroPane = new function () {
 		if (this.itemsView.collectionTreeRow?.isSearch()
 				&& advancedSearchDeck.state === 'open'
 				&& advancedSearchDeck.selectedSearchType === 'saved') {
-			// If the saved search being edited was deleted, close the editor without
-			// prompting to save changes -- there's nothing left to save them to
-			if (!Zotero.Searches.get(advancedSearchDeck.pane.editedSearchID)) {
+			// If the saved search being edited was deleted or trashed, close the editor
+			// without prompting to save changes -- there's nothing left to save them to
+			let editedSearch = Zotero.Searches.get(advancedSearchDeck.pane.editedSearchID);
+			if (!editedSearch || editedSearch.deleted) {
 				await advancedSearchDeck.pane.cancel();
 			}
 			else {
