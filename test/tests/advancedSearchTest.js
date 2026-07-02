@@ -435,10 +435,9 @@ describe("Advanced Search", function () {
 		await Zotero.Items.erase([userItem.id, groupItem.id]);
 	});
 	
-	it("should save a search in an editable group library root but not a collection", async function () {
+	it("should save a search in an editable group library root but not the trash", async function () {
 		var group = await getGroup();
 		var groupLibraryID = group.libraryID;
-		var collection = await createDataObject('collection', { libraryID: groupLibraryID });
 		
 		await selectLibrary(win, groupLibraryID);
 		await zp.toggleAdvancedSearchState('open');
@@ -474,17 +473,127 @@ describe("Advanced Search", function () {
 		assert.equal(conditions[0].condition, 'title');
 		assert.equal(conditions[0].value, 'foo');
 		
-		// Saving should be disabled within a collection, which can't be scoped to
-		await selectCollection(win, collection.id);
+		// Saving should be disabled in the trash, which can't be scoped to
+		await selectTrash(win, groupLibraryID);
 		await zp.toggleAdvancedSearchState('open');
 		assert.isTrue(deck.pane._saveButton.disabled);
 		
 		await zp.setAdvancedSearchState('closed');
 		await Zotero.Searches.erase(searches.map(s => s.id));
+		await selectLibrary(win);
+	});
+	
+	it("should scope a saved search to the selected collection", async function () {
+		var collection = await createDataObject('collection');
+		var inCollection = await createDataObject('item', { title: "scoped foo", collections: [collection.id] });
+		var noMatch = await createDataObject('item', { title: "bar", collections: [collection.id] });
+		var outsideCollection = await createDataObject('item', { title: "scoped foo" });
+		
+		await selectCollection(win, collection.id);
+		await zp.toggleAdvancedSearchState('open');
+		var pane = deck.pane;
+		assert.isFalse(pane._saveButton.disabled);
+		
+		var s = new Zotero.Search();
+		s.libraryID = Zotero.Libraries.userLibraryID;
+		s.addCondition('title', 'contains', 'scoped');
+		pane.search = s;
+		
+		var promptService = Services.prompt;
+		Services.prompt = {
+			prompt: (parent, title, message, nameObj) => {
+				nameObj.value = 'Collection Scoped';
+				return true;
+			}
+		};
+		try {
+			await pane.save();
+		}
+		finally {
+			Services.prompt = promptService;
+		}
+		
+		var saved = (await Zotero.Searches.getAll(Zotero.Libraries.userLibraryID))
+			.find(x => x.name == 'Collection Scoped');
+		assert.ok(saved);
+		// The collection scope is a top-level condition above the existing one
+		var conditions = Object.values(saved.getConditions());
+		assert.equal(conditions[0].condition, 'collection');
+		assert.equal(conditions[0].value, collection.key);
+		// Only the matching item within the collection
+		var ids = await saved.search();
+		assert.sameMembers(ids, [inCollection.id]);
+		
+		await saved.eraseTx();
+		await Zotero.Items.erase([inCollection.id, noMatch.id, outsideCollection.id]);
 		await collection.eraseTx();
 		await selectLibrary(win);
 	});
-
+	
+	it("should group the scope and the existing conditions when saving an 'any' search with a collection and a saved search selected", async function () {
+		var scopeSearch = new Zotero.Search();
+		scopeSearch.libraryID = Zotero.Libraries.userLibraryID;
+		scopeSearch.name = "Scope Search";
+		scopeSearch.addCondition('title', 'contains', 'blue');
+		await scopeSearch.saveTx();
+		var collection = await createDataObject('collection');
+		// Matches a condition and is in the collection
+		var inCollection = await createDataObject('item', { title: "red apple", collections: [collection.id] });
+		// Matches a condition and the scope search
+		var inScopeSearch = await createDataObject('item', { title: "blue sky" });
+		// Matches a condition but is in neither scope
+		var outsideScopes = await createDataObject('item', { title: "red car" });
+		// In the collection but matches no condition
+		var noMatch = await createDataObject('item', { title: "green grass", collections: [collection.id] });
+		
+		var cv = zp.collectionsView;
+		await cv.selectByID("C" + collection.id);
+		await waitForItemsLoad(win);
+		cv.selection.toggleSelect(cv.getRowIndexByID("S" + scopeSearch.id));
+		await zp.onCollectionSelected();
+		await zp.itemsView.waitForLoad();
+		
+		await zp.toggleAdvancedSearchState('open');
+		var pane = deck.pane;
+		var s = new Zotero.Search();
+		s.libraryID = Zotero.Libraries.userLibraryID;
+		s.addCondition('joinMode', 'any');
+		s.addCondition('title', 'contains', 'red');
+		s.addCondition('title', 'contains', 'sky');
+		pane.search = s;
+		
+		var promptService = Services.prompt;
+		Services.prompt = {
+			prompt: (parent, title, message, nameObj) => {
+				nameObj.value = 'Scoped Any Search';
+				return true;
+			}
+		};
+		try {
+			await pane.save();
+		}
+		finally {
+			Services.prompt = promptService;
+		}
+		
+		var saved = (await Zotero.Searches.getAll(Zotero.Libraries.userLibraryID))
+			.find(x => x.name == 'Scoped Any Search');
+		assert.ok(saved);
+		// An 'any' group of the two scopes ANDed with an 'any' group of the conditions
+		var conditions = Object.values(saved.getConditions());
+		assert.lengthOf(conditions.filter(c => c.condition == 'groupStart'), 2);
+		assert.isTrue(conditions.some(c => c.condition == 'collection' && c.value == collection.key));
+		assert.isTrue(conditions.some(c => c.condition == 'savedSearch' && c.value == scopeSearch.key));
+		var ids = await saved.search();
+		assert.sameMembers(ids, [inCollection.id, inScopeSearch.id]);
+		
+		await saved.eraseTx();
+		await Zotero.Items.erase([inCollection.id, inScopeSearch.id, outsideScopes.id, noMatch.id]);
+		await collection.eraseTx();
+		await scopeSearch.eraseTx();
+		await selectLibrary(win);
+	});
+	
 	it("should close the saved-search editor when the edited search is deleted", async function () {
 		var saved = await createDataObject('search', { name: "DeleteWhileEditing" });
 		await select(win, saved);

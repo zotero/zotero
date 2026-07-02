@@ -141,18 +141,24 @@
 			}
 		}
 
-		// A saved search can only be scoped to a library root, so allow saving at an
-		// editable library or group root (but not a feed) and not within a collection.
-		// Revisit when/if we support nested condition sets in the UI.
-		_canSaveInCurrentRow() {
+		// Allow saving at an editable library or group root (but not a feed) or with
+		// collections and/or saved searches selected within a single editable library,
+		// in which case the selection is added to the saved search as scope conditions
+		// (see _addScopeConditions())
+		_canSaveInSelection() {
 			let collectionTreeRows = ZoteroPane.getCollectionTreeRows();
-			if (collectionTreeRows.length != 1) {
+			if (!collectionTreeRows.length) {
 				return false;
 			}
-			let collectionTreeRow = collectionTreeRows[0];
-			return collectionTreeRow.isLibrary(true)
-				&& !collectionTreeRow.isFeed()
-				&& collectionTreeRow.editable;
+			let libraryID = collectionTreeRows[0].ref?.libraryID;
+			return collectionTreeRows.every((row) => {
+				if (row.ref?.libraryID !== libraryID || !row.editable) {
+					return false;
+				}
+				return (row.isLibrary(true) && !row.isFeed())
+					|| row.isCollection()
+					|| row.isSearch();
+			});
 		}
 
 		refresh() {
@@ -180,7 +186,7 @@
 				this._searchElem.scopeLibraryIDs = [this._search.libraryID];
 			}
 			this._searchElem.search = this._search;
-			this._saveButton.disabled = this.type === 'temporary' && !this._canSaveInCurrentRow();
+			this._saveButton.disabled = this.type === 'temporary' && !this._canSaveInSelection();
 		}
 
 		async cancel() {
@@ -229,8 +235,8 @@
 			}
 
 			let collectionTreeRows = ZoteroPane.getCollectionTreeRows();
-			if (!this._canSaveInCurrentRow()) {
-				throw new Error('Can only save in an editable library root');
+			if (!this._canSaveInSelection()) {
+				throw new Error('Can only save in an editable library, collection, or saved search');
 			}
 			this._ensureSearch();
 
@@ -255,9 +261,102 @@
 
 			let search = this._search.clone(libraryID);
 			search.name = name;
+			// If saving within collections or saved searches rather than at the library
+			// root, scope the search to the selection
+			if (!collectionTreeRows.some(row => row.isLibrary(true))) {
+				this._addScopeConditions(search, collectionTreeRows);
+			}
 			await search.saveTx();
 
 			await ZoteroPane.setAdvancedSearchState('closed');
+		}
+		
+		// Scope a search to the given collection/saved search rows by adding a top-level
+		// collection/savedSearch condition for each -- an 'any' group of them when more
+		// than one row is selected. If the search's own join mode is 'any', its existing
+		// conditions move into an 'any' group of their own so the scope conditions apply
+		// to every result.
+		_addScopeConditions(search, collectionTreeRows) {
+			let conditions = Object.values(search.getConditions());
+			
+			// Split the existing conditions into top-level markers/flags, which are
+			// position-independent and stay at the top level, and the rest, which may get
+			// wrapped in a group below. The search always comes from updateSearch(), so
+			// these are the only markers/flags that can appear at the top level.
+			const FLAGS = ['resultLevel', 'recursive', 'includeParentsAndChildren'];
+			let joinMode = 'all';
+			let flags = [];
+			let rest = [];
+			let depth = 0;
+			// Number of top-level conditions and groups -- a single one doesn't need wrapping
+			let units = 0;
+			for (let condition of conditions) {
+				if (condition.condition == 'groupStart') {
+					if (!depth) {
+						units++;
+					}
+					depth++;
+					rest.push(condition);
+				}
+				else if (condition.condition == 'groupEnd') {
+					depth--;
+					rest.push(condition);
+				}
+				else if (!depth && condition.condition == 'joinMode') {
+					joinMode = condition.operator;
+				}
+				else if (!depth && FLAGS.includes(condition.condition)) {
+					flags.push(condition);
+				}
+				else {
+					if (!depth) {
+						units++;
+					}
+					rest.push(condition);
+				}
+			}
+			
+			let scope = collectionTreeRows.map(row => ({
+				condition: row.isCollection() ? 'collection' : 'savedSearch',
+				operator: 'is',
+				value: row.ref.key
+			}));
+			// Search subcollections when the collections view does
+			if (Zotero.Prefs.get('recursiveCollections')
+					&& scope.some(c => c.condition == 'collection')
+					&& !flags.some(c => c.condition == 'recursive')) {
+				flags.push({ condition: 'recursive', operator: 'true', value: null });
+			}
+			if (scope.length > 1) {
+				scope = [
+					{ condition: 'groupStart', operator: 'true', value: '' },
+					{ condition: 'joinMode', operator: 'any', value: null },
+					...scope,
+					{ condition: 'groupEnd', operator: 'true', value: '' }
+				];
+			}
+			if (joinMode == 'any' && units > 1) {
+				rest = [
+					{ condition: 'groupStart', operator: 'true', value: '' },
+					{ condition: 'joinMode', operator: 'any', value: null },
+					...rest,
+					{ condition: 'groupEnd', operator: 'true', value: '' }
+				];
+			}
+			
+			// Rebuild the search's conditions in the new order. removeCondition()
+			// renumbers the remaining conditions, so 0 is always the next one to remove.
+			let count = conditions.length;
+			for (let i = 0; i < count; i++) {
+				search.removeCondition(0);
+			}
+			for (let condition of [...scope, ...rest, ...flags]) {
+				search.addCondition(
+					condition.condition + (condition.mode ? '/' + condition.mode : ''),
+					condition.operator,
+					condition.value
+				);
+			}
 		}
 		
 		focus(options) {
