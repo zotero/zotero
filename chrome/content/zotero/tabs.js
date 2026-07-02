@@ -344,9 +344,23 @@ var Zotero_Tabs = new function () {
 		}
 	});
 	
+	// Unload background tabs right away when the OS reports memory pressure
+	// ("low-memory"/"low-memory-ongoing", or "heap-minimize" from about:memory),
+	// instead of waiting for the count/age-based unloading
+	this._memoryPressureObserver = {
+		observe: (subject, topic, data) => {
+			Zotero.debug(`Memory pressure (${data}): unloading background tabs`);
+			for (let tab of this._tabs.slice()) {
+				this.unload(tab.id);
+			}
+		}
+	};
+	Services.obs.addObserver(this._memoryPressureObserver, 'memory-pressure');
+
 	window.addEventListener('unload', () => {
 		Zotero.Notifier.unregisterObserver(this._notifierID);
 		Zotero.Prefs.unregisterObserver(this._prefsObserverID);
+		Services.obs.removeObserver(this._memoryPressureObserver, 'memory-pressure');
 	});
 
 	this._unloadInterval = setInterval(() => {
