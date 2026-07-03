@@ -2042,7 +2042,16 @@ const CitationDataManager = {
 		if (!ioIsReady) return;
 		Zotero.debug("Citation Dialog: sorting items");
 		this.updateCitationObject();
-		await io.sort();
+		try {
+			await io.sort();
+		}
+		catch (e) {
+			// Sorting runs the citation through the processor, so it can fail. Keep the
+			// current order -- if the citation can't be processed, the error will surface
+			// when it's inserted into the document.
+			Zotero.logError(e);
+			return;
+		}
 		// sync the order of this.items with io.citation.sortedItems
 		let sortedIOItems = io.citation.sortedItems.map(entry => entry[1]);
 		let sortedItems = sortedIOItems.map((sortedItem) => {
