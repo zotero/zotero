@@ -423,11 +423,12 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 	};
 
 	if (doiSet.size) {
+		let doiCandidateChunkSize = Math.min(100, Zotero.DB.MAX_BOUND_PARAMETERS - 2);
 		let getDOICandidateRows = async function (fieldID) {
 			let allRows = [];
 			await Zotero.Utilities.Internal.forEachChunkAsync(
 				identifiers.doi,
-				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
+				doiCandidateChunkSize,
 				async function (chunk) {
 					let rows = await Zotero.DB.queryAsync(
 						"SELECT itemID, value FROM items JOIN itemData USING (itemID) "

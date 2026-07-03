@@ -464,6 +464,40 @@ describe("Connector Server", function () {
 			assert.equal(data.matches[0].id, item.id);
 		});
 
+		it("should chunk large DOI duplicate lookups", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing Large DOI Lookup Article");
+			item.setField("DOI", "10.1234/target-large-doi-lookup");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let dois = [];
+			for (let i = 0; i < Zotero.DB.MAX_BOUND_PARAMETERS + 5; i++) {
+				dois.push(`10.1234/not-large-doi-${i}`);
+			}
+			dois.push("10.1234/target-large-doi-lookup");
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: { doi: dois }
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+		});
+
 		it("should extract DOI from translated item Extra before duplicate lookup", async function () {
 			await selectLibrary(win, Zotero.Libraries.userLibraryID);
 			await waitForItemsLoad(win);
