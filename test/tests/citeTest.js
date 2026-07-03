@@ -92,6 +92,80 @@ describe("Zotero.Cite", function () {
 		});
 	});
 	
+	describe("previewCitationCluster()", function () {
+		before(async function () {
+			if (Zotero.Prefs.get('cite.useCiteprocRs')) {
+				this.skip();
+			}
+			await Zotero.Styles.init();
+			await Zotero.Styles.install(
+				{ file: OS.Path.join(getTestDataDirectory().path, 'apa.csl') },
+				'http://www.zotero.org/styles/apa',
+				true
+			);
+		});
+		
+		async function makeEngineWithCitation() {
+			let item = new Zotero.Item;
+			item.fromJSON({
+				itemType: "book",
+				title: "Preview Test",
+				creators: [{ creatorType: "author", firstName: "Jane", lastName: "Smith" }],
+				date: "2019"
+			});
+			await item.saveTx();
+			let style = Zotero.Styles.get('http://www.zotero.org/styles/apa');
+			let cslEngine = style.getCiteProc('en-US', 'rtf');
+			cslEngine.processCitationCluster(
+				{
+					citationID: "CITATION-1",
+					citationItems: [{ id: item.id }],
+					properties: { noteIndex: 1 }
+				},
+				[], []
+			);
+			return { cslEngine, item };
+		}
+		
+		function assertStateRestored(cslEngine, item) {
+			assert.equal(cslEngine.opt.mode, 'rtf');
+			assert.lengthOf(cslEngine.registry.citationreg.citationByIndex, 1);
+			// Processor should still render in its native format
+			let text = cslEngine.previewCitationCluster(
+				{ citationItems: [{ id: item.id }], properties: { noteIndex: 2 } },
+				[["CITATION-1", 1]], [], "rtf"
+			);
+			assert.equal(text, "(Smith, 2019)");
+		}
+		
+		it("shouldn't modify processor state if an item can't be retrieved", async function () {
+			let { cslEngine, item } = await makeEngineWithCitation();
+			assert.throws(() => {
+				cslEngine.previewCitationCluster(
+					{ citationItems: [{ id: 999999999 }], properties: { noteIndex: 2 } },
+					[["CITATION-1", 1]], [], "html"
+				);
+			});
+			assertStateRestored(cslEngine, item);
+			cslEngine.free();
+		});
+		
+		it("shouldn't modify processor state if rendering fails", async function () {
+			let { cslEngine, item } = await makeEngineWithCitation();
+			let stub = sinon.stub(cslEngine, 'process_CitationCluster')
+				.throws(new Error("simulated rendering error"));
+			assert.throws(() => {
+				cslEngine.previewCitationCluster(
+					{ citationItems: [{ id: item.id }], properties: { noteIndex: 2 } },
+					[["CITATION-1", 1]], [], "html"
+				);
+			});
+			stub.restore();
+			assertStateRestored(cslEngine, item);
+			cslEngine.free();
+		});
+	});
+	
 	it("shouldn't hang during disambiguation (https://github.com/Juris-M/citeproc-js/issues/179)", async function () {
 		var item1 = new Zotero.Item;
 		item1.fromJSON({"key":"WB338HGS","version":0,"itemType":"journalArticle","creators":[{"firstName":"Carl G.","lastName":"de Boer","creatorType":"author"},{"firstName":"John P.","lastName":"Ray","creatorType":"author"},{"firstName":"Nir","lastName":"Hacohen","creatorType":"author"},{"firstName":"Aviv","lastName":"Regev","creatorType":"author"}],"tags":[{"tag":"CRISPR/Cas9","type":1},{"tag":"Enhancers","type":1},{"tag":"Gene regulation","type":1},{"tag":"Transcriptional regulation","type":1},{"tag":"Gene expression","type":1},{"tag":"Pooled screen","type":1},{"tag":"R","type":1}],"date":"June 3, 2020","title":"MAUDE: inferring expression changes in sorting-based CRISPR screens","journalAbbreviation":"Genome Biology","pages":"134","volume":"21","issue":"1","abstractNote":"","ISSN":"1474-760X","url":"https://doi.org/10.1186/s13059-020-02046-8","DOI":"10.1186/s13059-020-02046-8","publicationTitle":"Genome Biology","libraryCatalog":"BioMed Central","accessDate":"2021-02-17T02:40:40Z","shortTitle":"MAUDE"});
