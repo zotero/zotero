@@ -301,8 +301,17 @@ Zotero.Server.Connector.FindExistingItems.prototype = {
 			return [400, "application/json", JSON.stringify({ error: "IDENTIFIERS_NOT_PROVIDED" })];
 		}
 
-		let { library } = data.target
-			? Zotero.Server.Connector.resolveTarget(data.target)
+		let target;
+		if (data.target) {
+			try {
+				target = Zotero.Server.Connector.resolveTarget(data.target);
+			}
+			catch (e) {
+				Zotero.debug(`Could not resolve duplicate lookup target '${data.target}': ${e.message}`);
+			}
+		}
+		let { library } = target && target.library
+			? target
 			: Zotero.Server.Connector.getSaveTarget();
 		let matches = await Zotero.Server.Connector.findExistingItemsByIdentifiers(
 			identifiers,
@@ -330,7 +339,13 @@ Zotero.Server.Connector._getItemIdentifiers = function (data) {
 	};
 	let addURL = (url) => {
 		if (proxy && url) {
-			url = proxy.toProper(url);
+			try {
+				url = proxy.toProper(url);
+			}
+			catch (e) {
+				Zotero.debug(`Could not deproxify item URL for duplicate lookup: ${e.message}`);
+				return;
+			}
 		}
 		if (url && typeof url == 'string') {
 			identifiers.url.add(url);
@@ -442,7 +457,8 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 		let extraRows = await getDOICandidateRows(Zotero.ItemFields.getID('extra'));
 		for (let row of extraRows) {
 			let { fields } = Zotero.Utilities.Internal.extractExtraFields(row.value);
-			let doi = Zotero.Utilities.cleanDOI(fields.get('DOI'));
+			let extraDOI = fields.get('DOI');
+			let doi = extraDOI && Zotero.Utilities.cleanDOI(extraDOI);
 			if (doi && doiSet.has(doi.toLowerCase())) {
 				itemIDs.add(row.itemID);
 			}

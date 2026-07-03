@@ -632,6 +632,112 @@ describe("Connector Server", function () {
 			}
 		});
 
+		it("should ignore free-text Extra DOI candidates without failing the lookup", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let freeTextExtraItem = new Zotero.Item("webpage");
+			freeTextExtraItem.setField("title", "Free Text Extra Page");
+			freeTextExtraItem.setField("extra", "See https://doi.org/10.1234/free-text-extra for related work");
+			await freeTextExtraItem.saveTx();
+
+			let doiItem = new Zotero.Item("journalArticle");
+			doiItem.setField("title", "Existing DOI Article");
+			doiItem.setField("DOI", "10.1234/free-text-extra");
+			await doiItem.saveTx();
+			Zotero.Items.unload([freeTextExtraItem.id, doiItem.id]);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: {
+							doi: ["10.1234/free-text-extra"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.sameMembers(data.matches.map(match => match.id), [doiItem.id]);
+		});
+
+		it("should keep DOI lookup working when proxied item URL normalization fails", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing DOI With Bad URL Payload");
+			item.setField("DOI", "10.1234/bad-proxy-url");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						proxy: {
+							scheme: "https://%h.proxy.example.com/%p"
+						},
+						items: [{
+							itemType: "journalArticle",
+							title: "New DOI With Bad URL Payload",
+							DOI: "10.1234/bad-proxy-url",
+							url: "/relative/path"
+						}]
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+		});
+
+		it("should fall back to the current save target when requested collection no longer exists", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let collection = await createDataObject('collection');
+			let targetID = collection.treeViewID;
+			await collection.eraseTx();
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing User Library Article");
+			item.setField("DOI", "10.1234/deleted-target");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						target: targetID,
+						identifiers: {
+							doi: ["10.1234/deleted-target"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].libraryID, Zotero.Libraries.userLibraryID);
+		});
+
 		it("should return display titles for base-mapped title fields", async function () {
 			await selectLibrary(win, Zotero.Libraries.userLibraryID);
 			await waitForItemsLoad(win);
