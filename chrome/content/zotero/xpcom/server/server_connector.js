@@ -504,7 +504,7 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 			item.getField('DOI'),
 			item.getExtraField('DOI')
 		].map(doi => Zotero.Utilities.cleanDOI(doi)).find(doi => doi && doiSet.has(doi.toLowerCase()));
-		if (itemDOI && doiSet.has(itemDOI.toLowerCase())) {
+		if (itemDOI) {
 			matchedFields.push('DOI');
 			matchedIdentifiers.doi = itemDOI;
 		}
