@@ -340,7 +340,14 @@ Zotero.Server.Connector._getItemIdentifiers = function (data) {
 	let addURL = (url) => {
 		if (proxy && url) {
 			try {
-				url = proxy.toProper(url);
+				// Only deproxify when the proxy regexp actually matches.
+				// toProper() normalizes non-matching URLs through new URL().href,
+				// which can break exact-match lookups against values stored from
+				// the translator (e.g. https://example.com vs https://example.com/).
+				let normalized = new URL(url).href;
+				if (proxy.regexp.test(normalized)) {
+					url = proxy.toProper(normalized);
+				}
 			}
 			catch (e) {
 				Zotero.debug(`Could not deproxify item URL for duplicate lookup: ${e.message}`);
