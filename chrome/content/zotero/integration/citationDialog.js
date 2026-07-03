@@ -2053,6 +2053,7 @@ const CitationPreview = {
 		_id("citation-preview-content").hidden = isEmpty;
 		if (isEmpty) {
 			_id("citation-preview-content").innerHTML = "";
+			_id("citation-preview-error").hidden = true;
 		}
 		// The toggle button only makes sense while citing items with a backing
 		// preview function. It reflects the pref directly.
@@ -2070,10 +2071,21 @@ const CitationPreview = {
 		if (!io.preview) return;
 
 		CitationDataManager.updateCitationObject();
-		let html = await io.preview("html");
+		let html;
+		try {
+			html = await io.preview("html");
+		}
+		catch (e) {
+			// A preview failure usually means the citation itself won't process, but that
+			// error belongs to the insertion step -- just flag the preview as unavailable
+			Zotero.logError(e);
+		}
 		// Re-check after the await in case the user cleared items
 		if (!CitationDataManager.items.length) return;
-		_id("citation-preview-content").innerHTML = html;
+		let errored = html === undefined;
+		_id("citation-preview-content").hidden = errored;
+		_id("citation-preview-error").hidden = !errored;
+		_id("citation-preview-content").innerHTML = errored ? "" : html;
 	},
 };
 
@@ -2263,7 +2275,16 @@ const CitationDataManager = {
 		if (!ioIsReady) return;
 		Zotero.debug("Citation Dialog: sorting items");
 		this.updateCitationObject();
-		await io.sort();
+		try {
+			await io.sort();
+		}
+		catch (e) {
+			// Sorting runs the citation through the processor, so it can fail like the
+			// preview does. Keep the current order -- if the citation can't be processed,
+			// the error will surface when it's inserted into the document.
+			Zotero.logError(e);
+			return;
+		}
 		// sync the order of this.items with io.citation.sortedItems
 		let sortedIOItems = io.citation.sortedItems.map(entry => entry[1]);
 		let sortedItems = sortedIOItems.map((sortedItem) => {
