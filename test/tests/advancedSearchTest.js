@@ -1075,12 +1075,20 @@ describe("Advanced Search", function () {
 				assert.isFalse(valueMenu.hidden);
 				// Only the collections, with the saved searches no longer mixed in
 				assert.equal(valueMenu.itemCount, 4);
+				// Subcollections are indented via their icons rather than in the label,
+				// which would break find-as-you-type in the menu
+				function getIndent(menuitem) {
+					return win.getComputedStyle(menuitem.querySelector('.menu-icon'))
+						.marginInlineStart;
+				}
 				var valueMenuItem = valueMenu.getItemAtIndex(1);
-				assert.equal(valueMenuItem.getAttribute('label'), "- " + col2.name);
+				assert.equal(valueMenuItem.getAttribute('label'), col2.name);
 				assert.equal(valueMenuItem.getAttribute('value'), "C" + col2.key);
+				assert.equal(getIndent(valueMenuItem), '16px');
 				valueMenuItem = valueMenu.getItemAtIndex(2);
-				assert.equal(valueMenuItem.getAttribute('label'), "    - " + col3.name);
+				assert.equal(valueMenuItem.getAttribute('label'), col3.name);
 				assert.equal(valueMenuItem.getAttribute('value'), "C" + col3.key);
+				assert.equal(getIndent(valueMenuItem), '32px');
 				var values = [];
 				for (let i = 0; i < valueMenu.itemCount; i++) {
 					values.push(valueMenu.getItemAtIndex(i).getAttribute('value'));

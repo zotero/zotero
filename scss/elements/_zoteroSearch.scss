@@ -320,8 +320,9 @@ zoterosearch {
 		max-height: 16px;
 	}
 	
-	#valuemenu::part(label), #valuemenu menuitem > .menu-iconic-text {
-		white-space: pre;
+	// Indent subcollections below their parents, icon included
+	#valuemenu menuitem > .menu-icon {
+		margin-inline-start: calc(var(--nesting-level, 0) * 16px);
 	}
 
 	#condition-tooltips hbox > label

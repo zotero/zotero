@@ -1164,18 +1164,11 @@
 
 					let cols = Zotero.Collections.getByLibrary(libraryID, true);
 					for (let col of cols) {
-						// Indent subcollections
-						var indent = '';
-						if (col.level) {
-							for (let j = 1; j < col.level; j++) {
-								indent += '    ';
-							}
-							indent += '- ';
-						}
 						rows.push({
-							name: indent + Zotero.Utilities.trimInternal(col.name),
+							name: Zotero.Utilities.trimInternal(col.name),
 							value: 'C' + col.key,
-							image: Zotero.Collection.prototype.treeViewImage
+							image: Zotero.Collection.prototype.treeViewImage,
+							level: col.level
 						});
 					}
 
@@ -1360,6 +1353,11 @@
 				if (row.image) {
 					menuitem.className = 'menuitem-iconic';
 					menuitem.setAttribute('image', row.image);
+				}
+				// Indent nested rows (subcollections) via CSS rather than by prefixing
+				// the label, which would break find-as-you-type in the menu
+				if (row.level) {
+					menuitem.style.setProperty('--nesting-level', row.level);
 				}
 			}
 			valueMenu.selectedIndex = 0;
