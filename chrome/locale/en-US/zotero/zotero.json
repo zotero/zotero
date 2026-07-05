@@ -23,6 +23,9 @@
 	"delete-or-backspace": {
 		"string": "{PLATFORM(), select, macos {Delete} other {Backspace}}"
 	},
+	"-os-name": {
+		"string": "{PLATFORM(), select, macos {macOS} windows {Windows} other {Linux}}"
+	},
 	"general-print": {
 		"string": "Print"
 	},
@@ -293,17 +296,86 @@
 	"item-menu-remove-from-recently-read.label": {
 		"string": "Remove from { recently-read }…"
 	},
-	"collections-menu-rename-collection.label": {
-		"string": "Rename Collection"
+	"items-section-collections-selected": {
+		"string": "{count, plural, one {{ count } collection selected} other {{ count } collections selected}}"
 	},
-	"collections-menu-edit-saved-search.label": {
+	"items-section-searches-selected": {
+		"string": "{count, plural, one {{ count } saved search selected} other {{ count } saved searches selected}}"
+	},
+	"items-section-sources-selected": {
+		"string": "{count, plural, one {{ count } source selected} other {{ count } sources selected}}"
+	},
+	"items-section-library-collections": {
+		"string": "{count, plural, one {{ library } ({ count } collection selected)} other {{ library } ({ count } collections selected)}}"
+	},
+	"items-section-library-searches": {
+		"string": "{count, plural, one {{ library } ({ count } saved search selected)} other {{ library } ({ count } saved searches selected)}}"
+	},
+	"items-section-library-sources": {
+		"string": "{count, plural, one {{ library } ({ count } source selected)} other {{ library } ({ count } sources selected)}}"
+	},
+	"items-section-library-recently-read": {
+		"string": "{ library } ({ recently-read })"
+	},
+	"collections-menu-rename.label": {
+		"string": "Rename"
+	},
+	"edit-saved-search": {
 		"string": "Edit Saved Search"
+	},
+	"collections-menu-edit-search.label": {
+		"string": "Edit Search"
+	},
+	"collections-menu-duplicate-search.label": {
+		"string": "Duplicate Search"
 	},
 	"collections-menu-move-collection.label": {
 		"string": "Move To"
 	},
 	"collections-menu-copy-collection.label": {
 		"string": "Copy To"
+	},
+	"collections-menu-export.label": {
+		"string": "Export…"
+	},
+	"collections-menu-generate-report.label": {
+		"string": "Generate Report…"
+	},
+	"collections-menu-create-bibliography.label": {
+		"string": "Create Bibliography…"
+	},
+	"collections-menu-unsubscribe.label": {
+		"string": "Unsubscribe…"
+	},
+	"collections-menu-delete.label": {
+		"string": "{count, plural, one {Delete Collection…} other {Delete Collections…}}"
+	},
+	"collections-menu-delete-with-items.label": {
+		"string": "{count, plural, one {Delete Collection and Items…} other {Delete Collections and Items…}}"
+	},
+	"collections-menu-delete-search.label": {
+		"string": "{count, plural, one {Delete Search…} other {Delete Searches…}}"
+	},
+	"collections-delete-title": {
+		"string": "{count, plural, one {Delete Collection} other {Delete Collections}}"
+	},
+	"collections-delete-message": {
+		"string": "{count, plural, one {Are you sure you want to delete this collection?} other {Are you sure you want to delete { count } collections?}}"
+	},
+	"collections-delete-keep-items": {
+		"string": "{count, plural, one {Items within this collection will not be deleted.} other {Items within these collections will not be deleted.}}"
+	},
+	"collections-delete-with-items-title": {
+		"string": "{count, plural, one {Delete Collection and Items} other {Delete Collections and Items}}"
+	},
+	"collections-delete-with-items-message": {
+		"string": "{count, plural, one {Are you sure you want to delete this collection and move all items within it to the Trash?} other {Are you sure you want to delete { count } collections and move all items within them to the Trash?}}"
+	},
+	"collections-delete-search-title": {
+		"string": "{count, plural, one {Delete Search} other {Delete Searches}}"
+	},
+	"collections-delete-search-message": {
+		"string": "{count, plural, one {Are you sure you want to delete this search?} other {Are you sure you want to delete { count } searches?}}"
 	},
 	"item-creator-moveDown.label": {
 		"string": "Move Down"
@@ -457,6 +529,9 @@
 	},
 	"import-online-connection-error": {
 		"string": "{ app-name } could not connect to { targetApp }. Please check your internet connection and try again."
+	},
+	"tab-title-multiple-collections": {
+		"string": "Multiple"
 	},
 	"items-table-cell-notes.aria-label": {
 		"string": "{count, plural, one {{ count } Note} other {{ count } Notes}}"
@@ -935,6 +1010,18 @@
 	"quicksearch-input.aria-label": {
 		"string": "Quick Search"
 	},
+	"advanced-search": {
+		"string": "Advanced Search"
+	},
+	"advanced-search-close.tooltiptext": {
+		"string": "Close Advanced Search"
+	},
+	"advanced-search-expand.tooltiptext": {
+		"string": "Expand Advanced Search"
+	},
+	"advanced-search-collapse.tooltiptext": {
+		"string": "Collapse Advanced Search"
+	},
 	"item-pane-header-view-as.label": {
 		"string": "View As"
 	},
@@ -994,6 +1081,93 @@
 	},
 	"first-run-guidance-readAloud": {
 		"string": "{ app-name } can now read your documents to you using natural-sounding voices."
+	},
+	"advanced-search-remove-btn.tooltiptext": {
+		"string": "Remove Condition"
+	},
+	"advanced-search-add-btn.tooltiptext": {
+		"string": "Add Condition"
+	},
+	"advanced-search-group-btn.tooltiptext": {
+		"string": "Add Condition Group"
+	},
+	"advanced-search-remove-group-btn.tooltiptext": {
+		"string": "Remove Group"
+	},
+	"advanced-search-ungroup-btn.tooltiptext": {
+		"string": "Ungroup Conditions"
+	},
+	"advanced-search-result-level-menu.aria-label": {
+		"string": "Result type"
+	},
+	"advanced-search-result-level-prefix-root.value": {
+		"string": "Find"
+	},
+	"advanced-search-join-prefix-root.value": {
+		"string": "matching"
+	},
+	"advanced-search-result-level-any.label": {
+		"string": "any items"
+	},
+	"advanced-search-result-level-item.label": {
+		"string": "top-level items"
+	},
+	"advanced-search-result-level-attachment.label": {
+		"string": "attachments"
+	},
+	"advanced-search-result-level-note.label": {
+		"string": "notes"
+	},
+	"advanced-search-result-level-annotation.label": {
+		"string": "annotations"
+	},
+	"advanced-search-binding-menu.aria-label": {
+		"string": "Match against the same item"
+	},
+	"advanced-search-binding-separate.label": {
+		"string": "separately"
+	},
+	"advanced-search-binding-same-attachment.label": {
+		"string": "in the same attachment"
+	},
+	"advanced-search-binding-same-note.label": {
+		"string": "in the same note"
+	},
+	"advanced-search-binding-same-annotation.label": {
+		"string": "in the same annotation"
+	},
+	"advanced-search-of-the-following.value": {
+		"string": "of the following"
+	},
+	"advanced-search-binding-hint-attachment.value": {
+		"string": "These conditions can match separate attachments."
+	},
+	"advanced-search-binding-hint-note.value": {
+		"string": "These conditions can match separate notes."
+	},
+	"advanced-search-binding-hint-annotation.value": {
+		"string": "These conditions can match separate annotations."
+	},
+	"advanced-search-level-warning-mixed": {
+		"string": "These conditions cannot all match the same item, so this search will never return results. Try matching “{ matchAny }” of them, or set the result type to “{ topLevelItems }”."
+	},
+	"advanced-search-level-warning-unreachable": {
+		"string": "This search has a condition that cannot apply to the chosen result type. Set the result type to “{ topLevelItems }” or remove the incompatible condition."
+	},
+	"advanced-search-group-warning-unreachable": {
+		"string": "A condition here cannot be in the same {entity, select, attachment {attachment} note {note} annotation {annotation}}. Match these separately or remove the incompatible condition."
+	},
+	"advanced-search-group-warning-mixed": {
+		"string": "These conditions cannot all match the same item, so this group will never match. Try matching “{ matchAny }” of them, or set the result type to “{ topLevelItems }”."
+	},
+	"advanced-search-bind-same-attachment.label": {
+		"string": "Match the same attachment"
+	},
+	"advanced-search-bind-same-note.label": {
+		"string": "Match the same note"
+	},
+	"advanced-search-bind-same-annotation.label": {
+		"string": "Match the same annotation"
 	},
 	"advanced-search-conditions-menu.aria-label": {
 		"string": "Search condition"
@@ -1082,8 +1256,50 @@
 	"search-conditions-annotationComment": {
 		"string": "Annotation Comment"
 	},
+	"search-conditions-annotationType": {
+		"string": "Annotation Type"
+	},
+	"search-conditions-annotationColor": {
+		"string": "Annotation Color"
+	},
+	"search-conditions-annotationAuthor": {
+		"string": "Annotation Author"
+	},
 	"search-conditions-anyField": {
 		"string": "Any Field"
+	},
+	"search-conditions-titleCreatorYear": {
+		"string": "Title, Creator, Year"
+	},
+	"search-conditions-submenu-attachment": {
+		"string": "Attachment"
+	},
+	"search-conditions-submenu-annotation": {
+		"string": "Annotation"
+	},
+	"search-conditions-short-fulltextContent": {
+		"string": "Content"
+	},
+	"search-conditions-short-fileTypeID": {
+		"string": "File Type"
+	},
+	"search-conditions-short-lastRead": {
+		"string": "Last Read"
+	},
+	"search-conditions-short-annotationText": {
+		"string": "Text"
+	},
+	"search-conditions-short-annotationComment": {
+		"string": "Comment"
+	},
+	"search-conditions-short-annotationType": {
+		"string": "Type"
+	},
+	"search-conditions-short-annotationColor": {
+		"string": "Color"
+	},
+	"search-conditions-short-annotationAuthor": {
+		"string": "Author"
 	},
 	"find-pdf-files-added": {
 		"string": "{count, plural, one {{ count } file added} other {{ count } files added}}"
@@ -1136,8 +1352,20 @@
 	"mac-word-plugin-install-message": {
 		"string": "Zotero needs access to Word data to install the Word plugin."
 	},
+	"mac-word-plugin-install-folder-message": {
+		"string": "{ app-name } needs access to Word’s startup folder to install the Word plugin."
+	},
 	"mac-word-plugin-install-action-button.label": {
 		"string": "Install Word plugin"
+	},
+	"mac-word-plugin-install-folder-dialog-title": {
+		"string": "Install the plugin in the Word startup folder"
+	},
+	"mac-word-plugin-install-folder-dialog-button": {
+		"string": "Install"
+	},
+	"mac-word-plugin-install-wrong-folder-selected": {
+		"string": "The suggested folder must be selected. Please try again without choosing a different folder."
 	},
 	"file-renaming-banner-message": {
 		"string": "{ app-name } now automatically keeps attachment filenames in sync as you make changes to items."
@@ -1174,6 +1402,150 @@
 	},
 	"data-dir-unsupported-storage": {
 		"string": "This can happen if the { app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share."
+	},
+	"login-manager-reset": {
+		"string": "{ app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { app-name } settings."
+	},
+	"os-keystore-save-failed": {
+		"string": "{PLATFORM(), select, macos {{ app-name } couldn’t access the { os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.} windows {{ app-name } couldn’t securely save your credentials. Try again or restart { app-name }.} other {{ app-name } couldn’t access your { os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.}}"
+	},
+	"os-keystore-migrate-failed": {
+		"string": "{PLATFORM(), select, macos {{ app-name } couldn’t access the { os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { app-name }.} windows {{ app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { app-name } and try again.} other {{ app-name } couldn’t access your { os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { app-name }.}}"
+	},
+	"search-button.label": {
+		"string": "Search"
+	},
+	"save-search-new-button.label": {
+		"string": "Save Search…"
+	},
+	"save-search-edit-button.label": {
+		"string": "Save"
+	},
+	"save-search-name-title": {
+		"string": "Save Search"
+	},
+	"save-search-name-message": {
+		"string": "Enter a name for the saved search:"
+	},
+	"saved-search-close-confirmation-title": {
+		"string": "Editing Saved Search"
+	},
+	"saved-search-close-confirmation-body": {
+		"string": "Do you want to save changes you made to this saved search?"
+	},
+	"item-pane-batch-editing-prompt.aria-label": {
+		"string": "Batch editing"
+	},
+	"item-pane-batch-editing-enable.label": {
+		"string": "Edit Multiple Items…"
+	},
+	"item-pane-batch-editing-multiple-values-placeholder": {
+		"string": "Multiple"
+	},
+	"item-pane-batch-editing-clear-values": {
+		"string": "Clear all values"
+	},
+	"item-pane-batch-editing-header": {
+		"string": "{count, plural, one {Editing { count } item} other {Editing { count } items}}"
+	},
+	"undo-action-edit-metadata": {
+		"string": "{count, plural, one {Edit Metadata} other {Edit Metadata for { count } Items}}"
+	},
+	"undo-action-edit-field": {
+		"string": "{count, plural, one {Edit of “{ field }”} other {Edit of “{ field }” for { count } Items}}"
+	},
+	"undo-action-normalize-attachment-titles": {
+		"string": "Normalize Attachment Title"
+	},
+	"undo-action-trash": {
+		"string": "{count, plural, one {Trash Item} other {Trash { count } Items}}"
+	},
+	"undo-action-restore-items": {
+		"string": "{count, plural, one {Restore Item} other {Restore { count } Items}}"
+	},
+	"undo-action-trash-collection": {
+		"string": "{count, plural, one {Trash Collection} other {Trash { count } Collections}}"
+	},
+	"undo-action-trash-search": {
+		"string": "{count, plural, one {Trash Saved Search} other {Trash { count } Saved Searches}}"
+	},
+	"undo-action-restore-collection": {
+		"string": "{count, plural, one {Restore Collection} other {Restore { count } Collections}}"
+	},
+	"undo-action-restore-objects": {
+		"string": "{count, plural, one {Restore Object} other {Restore { count } Objects}}"
+	},
+	"undo-action-add-to-collection": {
+		"string": "{count, plural, one {Add to Collection} other {Add { count } Items to Collection}}"
+	},
+	"undo-action-remove-from-collection": {
+		"string": "{count, plural, one {Remove from Collection} other {Remove { count } Items from Collection}}"
+	},
+	"undo-action-move-to-collection": {
+		"string": "{count, plural, one {Move to Collection} other {Move { count } Items to Collection}}"
+	},
+	"undo-action-rename-collection": {
+		"string": "Rename Collection"
+	},
+	"undo-action-move-collection": {
+		"string": "Move Collection"
+	},
+	"undo-action-add-tag": {
+		"string": "{count, plural, one {Add Tag} other {Add Tag to { count } Items}}"
+	},
+	"undo-action-change-tag": {
+		"string": "Change Tag"
+	},
+	"undo-action-split-tag": {
+		"string": "Split Tag"
+	},
+	"undo-action-remove-tag": {
+		"string": "{count, plural, one {Remove Tag} other {Remove Tag from { count } Items}}"
+	},
+	"undo-action-remove-tags-from-item": {
+		"string": "{count, plural, one {Remove Tag} other {Remove { count } Tags}}"
+	},
+	"undo-action-remove-all-tags": {
+		"string": "Remove All Tags"
+	},
+	"undo-action-edit-note": {
+		"string": "Edit Note"
+	},
+	"undo-action-add-creator": {
+		"string": "Add Creator"
+	},
+	"undo-action-remove-creator": {
+		"string": "Remove Creator"
+	},
+	"undo-action-edit-creator": {
+		"string": "Edit Creator"
+	},
+	"undo-action-reorder-creator": {
+		"string": "Reorder Creator"
+	},
+	"undo-action-change-type": {
+		"string": "Change Item Type"
+	},
+	"undo-action-change-parent-item": {
+		"string": "{count, plural, one {Change Parent Item} other {Change Parent for { count } Items}}"
+	},
+	"undo-action-convert-to-standalone": {
+		"string": "{count, plural, one {Convert to Standalone} other {Convert { count } Items to Standalone}}"
+	},
+	"undo-action-add-related": {
+		"string": "Add Related"
+	},
+	"undo-action-remove-related": {
+		"string": "Remove Related"
+	},
+	"undo-action-merge-items": {
+		"string": "{count, plural, one {Merge Item} other {Merge { count } Items}}"
+	},
+	"menu-edit-undo-action": {
+		"string": "Undo { action }"
+	},
+	"menu-edit-redo-action": {
+		"string": "Redo { action }"
 	},
 	"preferences-window.title": {
 		"string": "{ app-name } Settings"
@@ -2069,6 +2441,9 @@
 	"integration-citationDialog-details-suppressAuthor": {
 		"string": "Omit Author"
 	},
+	"integration-citationDialog-details-locator-info": {
+		"string": "Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name=\"docs-link\">Learn more</a>"
+	},
 	"integration-citationDialog-details-includeComments": {
 		"string": "Include Comments"
 	},
@@ -2086,6 +2461,15 @@
 	},
 	"integration-citationDialog-settings-keepSorted": {
 		"string": "Keep sources sorted"
+	},
+	"integration-citationDialog-preview-empty": {
+		"string": "Preview"
+	},
+	"integration-citationDialog-preview-error": {
+		"string": "Preview unavailable"
+	},
+	"integration-citationDialog-btn-displayPreview.title": {
+		"string": "Display citation preview"
 	},
 	"integration-citationDialog-mode-library": {
 		"string": "Library"
@@ -2116,6 +2500,9 @@
 	},
 	"integration-citationDialog-single-input-citation.aria-description": {
 		"string": "Press Tab to select items to add to this citation. Press Escape to discard the changes and close the dialog."
+	},
+	"integration-citationDialog-just-added-input-placeholder": {
+		"string": "Type “10-15” to cite pages, or search for items"
 	},
 	"integration-citationDialog-single-input-add-note.placeholder": {
 		"string": "Search for a note to insert into the document"
@@ -2211,7 +2598,7 @@
 		"string": "A word processor integration command is already running."
 	},
 	"first-run-guidance-citationDialog": {
-		"string": "Type a title, author, and/or year to search for a reference.\n\nAfter you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.\n\nYou can also add a page number or other locator by including it with your search terms (e.g., “history { locator }”) or by typing it after the bubble and pressing { return-or-enter }."
+		"string": "Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.\n\nYou can also add a page number or other locator by including it with your search terms (e.g., “history { locator }”) or by typing it after the bubble and pressing { return-or-enter }."
 	},
 	"note-editor-set": {
 		"string": "Set"
