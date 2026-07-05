@@ -1538,6 +1538,73 @@ describe("Advanced Search", function () {
 				assert.equal(group.resultLevel, 'annotation');
 				assert.equal(group.bindingMenu.value, 'annotation');
 			});
+			
+			it("should keep showing a group binding when a condition switches level", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('resultLevel', 'annotation');
+				s.addCondition('annotationText', 'contains', 'foo');
+				s.addCondition('annotationComment', 'contains', 'bar');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+				
+				var group = conditions.querySelector('search-condition-group');
+				assert.isFalse(group.bindingMenu.hidden);
+				
+				// The binding stays visible (and clearable) rather than silently
+				// constraining the group from a hidden menu
+				group.conditionsContainer.firstChild.onConditionSelected('title');
+				searchBox.updateSearch();
+				
+				assert.isFalse(group.bindingMenu.hidden);
+				assert.equal(group.bindingMenu.value, 'annotation');
+				var seq = Object.values(searchBox.search.getConditions()).map(c => c.condition);
+				assert.deepEqual(seq,
+					['resultLevel', 'groupStart', 'resultLevel', 'title', 'annotationComment', 'groupEnd']);
+			});
+			
+			it("should keep showing a group binding for a lone condition at the bound level", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('resultLevel', 'annotation');
+				s.addCondition('annotationText', 'contains', 'foo');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+				
+				var group = conditions.querySelector('search-condition-group');
+				assert.isFalse(group.bindingMenu.hidden);
+				assert.equal(group.bindingMenu.value, 'annotation');
+				searchBox.updateSearch();
+				var seq = Object.values(searchBox.search.getConditions()).map(c => c.condition);
+				assert.deepEqual(seq,
+					['resultLevel', 'groupStart', 'resultLevel', 'annotationText', 'groupEnd']);
+			});
+			
+			it("should drop a group binding when no condition at its level remains", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('resultLevel', 'annotation');
+				s.addCondition('annotationText', 'contains', 'foo');
+				s.addCondition('annotationComment', 'contains', 'bar');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+				
+				var group = conditions.querySelector('search-condition-group');
+				group.conditionsContainer.firstChild.onConditionSelected('title');
+				group.conditionsContainer.lastChild.onConditionSelected('title');
+				searchBox.updateSearch();
+				
+				assert.isTrue(group.bindingMenu.hidden);
+				var seq = Object.values(searchBox.search.getConditions()).map(c => c.condition);
+				assert.deepEqual(seq,
+					['resultLevel', 'groupStart', 'title', 'title', 'groupEnd']);
+			});
 
 			it("should offer a binding hint for ungrouped sibling descendant conditions", function () {
 				var s = new Zotero.Search();

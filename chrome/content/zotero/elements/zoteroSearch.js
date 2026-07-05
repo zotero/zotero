@@ -261,6 +261,10 @@
 				return;
 			}
 
+			// Refresh the binding menus first: a condition edit can disqualify a group's
+			// same-entity binding, and collectGroup() below serializes the binding state
+			this.updateBindingMenus();
+
 			var flat = [];
 			this.collectGroup(this.rootGroup, flat, true);
 
@@ -281,7 +285,6 @@
 
 			// Any mutation runs through here (including paths whose menus stopPropagation, like
 			// changing or removing a condition), so refresh the derived UI from one place
-			this.updateBindingMenus();
 			this.updateBindingHint();
 			this.updateLevelWarning();
 			this.updateSearchOptions();
@@ -581,8 +584,9 @@
 			}
 		}
 
-		// Build the nested-group binding menu ("... in the same attachment"), shown only
-		// when binding is meaningful: 2+ conditions sharing a level below the result level.
+		// Build the nested-group binding menu ("... in the same attachment"), shown when
+		// binding is meaningful -- 2+ conditions sharing a level below the result level --
+		// or when the group is already bound.
 		updateBindingMenu() {
 			if (this.isRoot) {
 				return;
@@ -592,7 +596,10 @@
 				resultLevel = this.searchElement.rootGroup.resultLevel;
 			}
 			// Count this group's direct condition rows by level, keeping only levels below the
-			// result level -- those are what a group can bind to the same entity
+			// result level -- those are what a group can bind to the same entity. A mixed
+			// ('any') result anchors a bound group to the top-level item (see
+			// Zotero.Search.combineConditions), so treat it as 'item' here.
+			let bindableBelow = resultLevel == 'any' ? 'item' : resultLevel;
 			let counts = {};
 			for (let row of this.conditionsContainer.children) {
 				// Skip a row just added via "+" until the user engages with it, so adding a row
@@ -601,25 +608,25 @@
 					continue;
 				}
 				let level = row.conditionLevel;
-				if (Zotero.Search._isAncestorLevel(resultLevel, level)) {
+				if (Zotero.Search._isAncestorLevel(bindableBelow, level)) {
 					counts[level] = (counts[level] || 0) + 1;
 				}
 			}
 			let levels = Object.keys(counts);
-			// Binding is only meaningful when some level has 2+ conditions. When it isn't,
-			// hide the menu but preserve any stored level (a single descendant condition
-			// maps the same way bound or not, so it round-trips losslessly).
-			if (!levels.some(l => counts[l] >= 2)) {
+			// Drop a stored binding once no condition at its level remains
+			if (this._resultLevel != 'any' && !levels.includes(this._resultLevel)) {
+				this._resultLevel = 'any';
+			}
+			// Binding is offered once some level has 2+ conditions, and an existing binding
+			// stays visible (and clearable) even when its group no longer qualifies, so it
+			// can't invisibly constrain the group from a hidden menu
+			if (this._resultLevel == 'any' && !levels.some(l => counts[l] >= 2)) {
 				this.bindingMenu.hidden = true;
 				// Plain group: "Match [all] of the following:" (the suffix carries the colon)
 				this.querySelector('.join-mode-suffix').hidden = false;
 				this.querySelector('.join-mode-following').hidden = true;
 				this._bindingMenuKey = null;
 				return;
-			}
-			// Drop a stored binding whose level is no longer offered
-			if (this._resultLevel != 'any' && !levels.includes(this._resultLevel)) {
-				this._resultLevel = 'any';
 			}
 
 			// Rebuild the popup only when its option set changes. Rebuilding it on every refresh
