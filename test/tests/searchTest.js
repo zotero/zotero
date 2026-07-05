@@ -69,14 +69,15 @@ describe("Zotero.Search", function () {
 			var resultLevel = conds.find(c => c.condition == 'resultLevel');
 			assert.ok(resultLevel);
 			assert.equal(resultLevel.operator, 'item');
+			assert.sameMembers(s.toJSON().conditions.map(c => c.condition), ['note', 'resultLevel']);
 			assert.sameMembers(await s.search(), [item.id]);
 
 			await item.eraseTx();
 			await s.eraseTx();
 		});
 	});
-	
-	
+
+
 	describe("#save()", function () {
 		it("should fail without a name", async function () {
 			var s = new Zotero.Search;

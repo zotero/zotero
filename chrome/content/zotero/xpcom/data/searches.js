@@ -198,7 +198,9 @@ Zotero.Searches = function () {
 				search._conditions[id] = {
 					id,
 					condition: 'resultLevel',
-					mode: undefined,
+					// No mode -- parseCondition() uses false, and toJSON() only omits the
+					// "/mode" suffix for an exact false
+					mode: false,
 					operator: 'item',
 					value: ''
 				};
