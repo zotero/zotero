@@ -2071,13 +2071,15 @@ var ZoteroPane = new function () {
 		deck.pane.search = search;
 		deck.pane.refresh();
 
-		// Clear the quick search text and the row's filter (without its own refresh),
-		// so the field doesn't flash empty and closing Advanced Search returns to an
-		// unfiltered view. The submit() below replaces the results in place.
+		// Clear the quick search text and every selected row's filter (without their own
+		// refresh), so the field doesn't flash empty and closing Advanced Search returns
+		// to an unfiltered view. The submit() below replaces the results in place.
 		let searchBox = document.getElementById('zotero-tb-search');
 		searchBox.updateMode();
 		searchBox.value = '';
-		this.itemsView.collectionTreeRow.setSearch('');
+		for (let collectionTreeRow of this.itemsView.collectionTreeRows) {
+			collectionTreeRow.setSearch('');
+		}
 
 		Zotero_Tabs.select('zotero-pane');
 		await deck.pane.submit();
