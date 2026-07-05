@@ -411,8 +411,6 @@
 			}
 			switch (event.keyCode) {
 				case event.DOM_VK_RETURN:
-					this.active = true;
-
 					if (event.shiftKey) {
 						// Add to the group holding the focused control, falling back to the root
 						let group = event.target.closest
@@ -425,9 +423,6 @@
 						this.updateRemoveButtons();
 						// Move focus to the new row's drop-down so it can be set from the keyboard
 						this.focusNewCondition(row);
-					}
-					else {
-						this.doCommand();
 					}
 					break;
 			}
@@ -1604,15 +1599,6 @@
 				}
 			}
 			return null;
-		}
-
-		onLibraryChange() {
-			switch (this.selectedCondition) {
-				case 'collection':
-				case 'annotationAuthor':
-					this.onConditionSelected(this.selectedCondition, true);
-					break;
-			}
 		}
 
 		onRemoveClicked(event) {
