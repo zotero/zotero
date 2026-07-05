@@ -1070,6 +1070,30 @@ describe("Advanced Search", function () {
 					conditions.childNodes[1].querySelector('#remove')
 				);
 			});
+			
+			it("should focus the row that took a pruned group's place when removing via the keyboard", async function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'contains', 'a');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('tag', 'is', 'x');
+				s.addCondition('groupEnd', 'true', '');
+				s.addCondition('title', 'contains', 'b');
+				pane.search = s;
+				
+				// Removing the group's only condition prunes the group itself
+				var group = conditions.querySelector('search-condition-group');
+				clickFromKeyboard(group.conditionsContainer.firstChild.querySelector('#remove'));
+				
+				assert.notOk(conditions.querySelector('search-condition-group'));
+				assert.lengthOf(conditions.children, 2);
+				await nextTick();
+				// Focus lands on the row that took the group's place ('b'), not the first row
+				assert.equal(
+					win.document.activeElement,
+					conditions.children[1].querySelector('#remove')
+				);
+			});
 		});
 
 		it("should insert a condition right after the row whose + is clicked", function () {

@@ -363,6 +363,8 @@
 			// A group left with no conditions is removed, bubbling up toward the root
 			while (!group.isRoot && !group.conditionsContainer.childElementCount) {
 				let parent = group.parentElement.closest('search-condition-group');
+				// The pruned group's slot in its parent is now where focus should land
+				index = [...parent.conditionsContainer.children].indexOf(group);
 				group.remove();
 				group = parent;
 			}
