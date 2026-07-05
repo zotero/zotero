@@ -2019,12 +2019,12 @@ Zotero.Search.prototype._buildQuery = async function () {
  * @return {{ sql: String, params: Array }} Combined predicate (sql is '' if nothing to combine)
  */
 Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') {
-	let root = { joinMode: 'all', children: [] };
+	let root = { children: [] };
 	let groupStack = [root];
 	for (let item of builtConditions) {
 		let group = groupStack[groupStack.length - 1];
 		if (item.marker == 'groupStart') {
-			let child = { joinMode: 'all', children: [] };
+			let child = { children: [] };
 			group.children.push(child);
 			groupStack.push(child);
 		}
@@ -2035,7 +2035,10 @@ Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') 
 			}
 		}
 		else if (item.marker == 'joinMode') {
-			group.joinMode = item.operator;
+			// First one wins, matching _buildQuery()
+			if (!group.joinMode) {
+				group.joinMode = item.operator;
+			}
 		}
 		else if (item.marker == 'resultLevel') {
 			group.level = item.operator;
@@ -2071,7 +2074,8 @@ Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') 
 			// When mapping reduces a predicate to a constant ('0'/'1' -- e.g., a condition
 			// whose level can't reach the result level), its placeholders are gone, so drop its params
 			let childParams = (childSQL === '0' || childSQL === '1') ? [] : result.params;
-			if (node.joinMode == 'all') {
+			// Unset joinMode means the default 'all'
+			if (node.joinMode != 'any') {
 				requiredParts.push(childSQL);
 				requiredParams = requiredParams.concat(childParams);
 			}
