@@ -692,6 +692,35 @@ describe("Advanced Search", function () {
 		await selectLibrary(win);
 	});
 
+	it("should run a focused button's action on Enter instead of the pane default", async function () {
+		var saved = await createDataObject('search', { name: "EnterOnCancel" });
+		await select(win, saved);
+		await zp.setSavedSearchEditorState('open');
+		assert.equal(deck.selectedSearchType, 'saved');
+		
+		var savedPane = deck.pane;
+		var save = sinon.stub(savedPane, 'save');
+		var cancel = sinon.stub(savedPane, 'cancel');
+		try {
+			var cancelButton = savedPane.querySelector('.cancel-button');
+			cancelButton.focus();
+			cancelButton.dispatchEvent(
+				new win.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
+			);
+			// Enter on the focused Cancel button cancels -- it mustn't save
+			assert.isTrue(save.notCalled);
+			assert.isTrue(cancel.called);
+		}
+		finally {
+			save.restore();
+			cancel.restore();
+		}
+		
+		await zp.setSavedSearchEditorState('closed');
+		await saved.eraseTx();
+		await selectLibrary(win);
+	});
+
 	it("should prompt for a name when saving a new search", async function () {
 		await selectLibrary(win);
 		await zp.toggleAdvancedSearchState('open');

@@ -78,6 +78,13 @@
 			// Shift-Enter adds a new condition (handled by the search element), so
 			// don't run/save the search for it
 			if (event.key === 'Enter' && !event.shiftKey) {
+				// Enter on a focused button runs that button (which the platform only does
+				// for Space), not the pane's default action
+				let button = event.target.closest && event.target.closest('button, toolbarbutton');
+				if (button) {
+					button.click();
+					return;
+				}
 				if (this.type === 'temporary') {
 					await this.submit();
 				}
