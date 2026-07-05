@@ -52,6 +52,22 @@ describe("Advanced Search", function () {
 		await otherItem.eraseTx();
 	});
 	
+	it("shouldn't invalidate the collection tree row when clearing an unset advanced search", async function () {
+		// setAdvancedSearch() returns whether the row's filter changed, which
+		// setFilter() uses to decide whether to refresh the items list
+		let row = zp.getCollectionTreeRow();
+		// Nothing to clear
+		assert.isFalse(row.setAdvancedSearch(null));
+		
+		let s = new Zotero.Search();
+		s.libraryID = Zotero.Libraries.userLibraryID;
+		s.addCondition('title', 'is', 'foo');
+		// Applying and clearing a search are changes; clearing again isn't
+		assert.isTrue(row.setAdvancedSearch(s));
+		assert.isTrue(row.setAdvancedSearch(null));
+		assert.isFalse(row.setAdvancedSearch(null));
+	});
+	
 	it("should seed from the quick search text and reset on close", async function () {
 		var match = await createDataObject('item', { title: "alpha beta" });
 		var partial = await createDataObject('item', { title: "alpha gamma" });

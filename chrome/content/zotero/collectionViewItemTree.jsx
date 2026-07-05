@@ -306,8 +306,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			changed = changed || rowChanged;
 		}
 		if (changed) {
-			await this.refresh({ restoreSelection: true });
+			this._filterRefreshPromise = this.refresh({ restoreSelection: true });
 		}
+		// An unchanged filter can arrive while a previous filter's refresh is still in
+		// flight (e.g., closing and immediately reopening the Advanced Search), so wait
+		// for that refresh either way
+		await this._filterRefreshPromise;
 	}
 
 	/**

@@ -626,6 +626,12 @@ Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null
 }
 
 Zotero.CollectionTreeRow.prototype.setAdvancedSearch = function (advancedSearch) {
+	// Clearing an already-clear filter is a no-op. A passed search is always
+	// applied, even if it's the same object, since its conditions may have been
+	// edited in place.
+	if (!advancedSearch && !this.advancedSearch) {
+		return false;
+	}
 	this.clearCache();
 	if (!advancedSearch) {
 		this.advancedSearch = undefined;
