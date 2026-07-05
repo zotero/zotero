@@ -660,6 +660,24 @@ describe("Zotero.Search", function () {
 					await standalone.eraseTx();
 				});
 				
+				it("should return a standalone attachment whose annotation has a tag, in a search for top-level items", async function () {
+					// Same as above, but for a level-agnostic condition (tag), which rolls up
+					// separately from a fixed-level one like annotationComment
+					var tag = 'zsat' + Zotero.Utilities.randomString();
+					var standalone = await importPDFAttachment(); // top-level PDF, no parent
+					var annotation = await createAnnotation('highlight', standalone);
+					annotation.addTag(tag);
+					await annotation.saveTx();
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('tag', 'is', tag);
+					assert.sameMembers(await s.search(), [standalone.id]);
+					
+					await standalone.eraseTx();
+				});
+				
 
 				it("should bind a same-entity group below a non-item result level", async function () {
 					// Result level attachment + a group scoped to annotation: find attachments

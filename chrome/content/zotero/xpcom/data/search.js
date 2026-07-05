@@ -2391,13 +2391,15 @@ Zotero.Search._rollUpAnyToLevel = function (sql, toLevel) {
 		// annotation of an attachment), matches
 		case 'item':
 		default:
+			// For an annotation, prefer its attachment's parent, but fall back to the
+			// attachment itself (annot.parentItemID) when the attachment is standalone
 			return "itemID IN ("
-				+ "SELECT COALESCE(aAtt.parentItemID, att.parentItemID, note.parentItemID, m.itemID) "
+				+ "SELECT COALESCE(aAtt.parentItemID, annot.parentItemID, att.parentItemID, note.parentItemID, m.itemID) "
 				+ `FROM (${matches}) m `
 				+ "LEFT JOIN itemAttachments att ON att.itemID = m.itemID AND att.parentItemID IS NOT NULL "
 				+ "LEFT JOIN itemNotes note ON note.itemID = m.itemID AND note.parentItemID IS NOT NULL "
 				+ "LEFT JOIN itemAnnotations annot ON annot.itemID = m.itemID "
-				+ "LEFT JOIN itemAttachments aAtt ON aAtt.itemID = annot.parentItemID AND aAtt.parentItemID IS NOT NULL"
+				+ "LEFT JOIN itemAttachments aAtt ON aAtt.itemID = annot.parentItemID"
 				+ ")";
 	}
 };
