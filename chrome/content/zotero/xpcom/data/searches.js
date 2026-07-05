@@ -102,7 +102,7 @@ Zotero.Searches = function () {
 		return data1.condition === data2.condition
 			&& data1.operator === data2.operator
 			&& data1.value === data2.value;
-	},
+	};
 	
 	
 	this.getNextName = async function (libraryID, name) {
