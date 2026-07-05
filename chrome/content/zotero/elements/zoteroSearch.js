@@ -1125,6 +1125,11 @@
 			this.selectedCondition = conditionName;
 			this.selectedOperator = operatorsList.value;
 
+			// Invalidate any in-flight async value-menu population (annotationAuthor) from a
+			// previous selection, and clear the pending flag for synchronous conditions
+			let valueMenuToken = this._valueMenuToken = {};
+			this._valueMenuPending = false;
+
 			var condition = Zotero.SearchConditions.get(conditionName);
 			var operators = condition.operators;
 			
@@ -1255,11 +1260,19 @@
 				}
 				case 'annotationAuthor':
 				{
+					// The author list loads asynchronously; until the menu is populated, the
+					// row serializes its stored value (see getConditionData())
+					this._valueMenuPending = true;
 					let authors = await Zotero.Annotations.getAllAuthors(this.parent.search.libraryID);
+					// A newer selection took over while the list was loading
+					if (valueMenuToken !== this._valueMenuToken) {
+						return;
+					}
 					let collation = Zotero.getLocaleCollation();
 					let rows = authors.map(a => ({ name: a.name, value: a.userID }));
 					rows.sort((a, b) => collation.compareString(1, a.name, b.name));
 					this.createValueMenu(rows);
+					this._valueMenuPending = false;
 					break;
 				}
 				default:
@@ -1431,6 +1444,11 @@
 		// The live value from whichever value control is currently shown, in the same prefixed
 		// form this.value is stored in (so it can be carried across a condition change)
 		getCurrentValue() {
+			// While a value menu is still being populated asynchronously, the old control is
+			// still the visible one, so use the stored value (see getConditionData())
+			if (this._valueMenuPending) {
+				return this.value;
+			}
 			let valueField = this.querySelector('#valuefield');
 			if (!valueField.hidden) {
 				return valueField.value;
@@ -1453,6 +1471,12 @@
 			var condition = this.selectedCondition;
 			var operator = this.querySelector('#operatorsmenu').value;
 			let value;
+
+			// A value menu still being populated asynchronously (annotationAuthor) hasn't been
+			// swapped in yet, so serialize the stored value rather than reading the wrong control
+			if (this._valueMenuPending) {
+				return { condition, operator, value: this.value || '' };
+			}
 
 			// Regular text field
 			if (!this.querySelector('#valuefield').hidden) {

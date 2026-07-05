@@ -811,6 +811,30 @@ describe("Advanced Search", function () {
 			assert.equal(win.getComputedStyle(valuefield).display, 'none');
 			assert.isFalse(row.querySelector('#valuemenu').hidden);
 		});
+		
+		it("should keep a loaded annotationAuthor value while its author menu is populating", async function () {
+			var deferred = Zotero.Promise.defer();
+			var stub = sinon.stub(Zotero.Annotations, 'getAllAuthors').returns(deferred.promise);
+			try {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('annotationAuthor', 'is', '12345');
+				pane.search = s;
+				
+				// Serializing while the author list is still loading shouldn't drop the value
+				var row = conditions.firstChild;
+				assert.equal(row.getConditionData().value, '12345');
+				
+				deferred.resolve([{ name: "Some User", userID: 12345 }]);
+				// Let onConditionSelected() finish populating the menu
+				await Zotero.Promise.delay(0);
+				assert.isFalse(row.querySelector('#valuemenu').hidden);
+				assert.equal(row.getConditionData().value, '12345');
+			}
+			finally {
+				stub.restore();
+			}
+		});
 
 		it("should place attachment and annotation conditions in their submenus", function () {
 			var s = new Zotero.Search();
