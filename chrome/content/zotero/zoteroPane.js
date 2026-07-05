@@ -1815,50 +1815,21 @@ var ZoteroPane = new function () {
 		let advancedSearchDeck = document.getElementById('zotero-advanced-search-pane-deck');
 		if (this.itemsView.collectionTreeRow?.isSearch()
 				&& advancedSearchDeck.state === 'open'
-				&& advancedSearchDeck.selectedSearchType === 'saved') {
-			// If the saved search being edited was deleted or trashed, close the editor
-			// without prompting to save changes -- there's nothing left to save them to
-			let editedSearch = Zotero.Searches.get(advancedSearchDeck.pane.editedSearchID);
-			if (!editedSearch || editedSearch.deleted) {
-				await advancedSearchDeck.pane.cancel();
-			}
-			else {
-				let result = Services.prompt.confirmEx(window,
-					Zotero.getString('saved-search-close-confirmation-title'),
-					Zotero.getString('saved-search-close-confirmation-body'),
-					Ci.nsIPromptService.BUTTON_POS_0_DEFAULT
-						| Ci.nsIPrompt.BUTTON_TITLE_SAVE * Ci.nsIPrompt.BUTTON_POS_0
-						| Ci.nsIPrompt.BUTTON_TITLE_CANCEL * Ci.nsIPrompt.BUTTON_POS_1
-						| Ci.nsIPrompt.BUTTON_TITLE_DONT_SAVE * Ci.nsIPrompt.BUTTON_POS_2,
-					null, null, null,
-					null, {});
-				switch (result) {
-					case 0:
-						await advancedSearchDeck.pane.save();
-						return;
-					case 1: {
-						// Revert to just the search being edited. Use selection.select()
-						// directly rather than selectByID(): the latter awaits
-						// waitForSelect() (which would deadlock here) and no-ops when the
-						// row is already selected -- which it is, as part of the new
-						// multi-selection -- leaving the change in place and re-prompting.
-						this.collectionsView.selection.selectEventsSuppressed = true;
-						try {
-							let index = this.collectionsView.getRowIndexByID(this.itemsView.collectionTreeRow.id);
-							if (index !== false) {
-								this.collectionsView.selection.select(index);
-							}
-						}
-						finally {
-							this.collectionsView.selection.selectEventsSuppressed = false;
-						}
-						return;
-					}
-					case 2:
-						await advancedSearchDeck.pane.cancel();
-						break;
+				&& advancedSearchDeck.selectedSearchType === 'saved'
+				&& !(await this._confirmCloseSavedSearchEditor())) {
+			// Revert the selection to just the search being edited, suppressing the
+			// selection event so that this handler doesn't re-run and re-prompt
+			this.collectionsView.selection.selectEventsSuppressed = true;
+			try {
+				let index = this.collectionsView.getRowIndexByID(this.itemsView.collectionTreeRow.id);
+				if (index !== false) {
+					this.collectionsView.selection.select(index);
 				}
 			}
+			finally {
+				this.collectionsView.selection.selectEventsSuppressed = false;
+			}
+			return;
 		}
 		
 		// Rename tab
@@ -1935,11 +1906,59 @@ var ZoteroPane = new function () {
 
 
 	/**
+	 * Prompt to save changes in the open saved-search editor and close it
+	 *
+	 * If the search being edited was deleted or trashed, the editor is closed without
+	 * a prompt, since there's nothing left to save the changes to.
+	 *
+	 * @return {Promise<Boolean>} - False if the user chose Cancel, leaving the editor open
+	 */
+	this._confirmCloseSavedSearchEditor = async function () {
+		let deck = document.getElementById('zotero-advanced-search-pane-deck');
+		let editedSearch = Zotero.Searches.get(deck.pane.editedSearchID);
+		if (!editedSearch || editedSearch.deleted) {
+			await deck.pane.cancel();
+			return true;
+		}
+		let result = Zotero.Prompt.confirm({
+			window,
+			title: Zotero.getString('saved-search-close-confirmation-title'),
+			text: Zotero.getString('saved-search-close-confirmation-body'),
+			button0: Zotero.Prompt.BUTTON_TITLE_SAVE,
+			button1: Zotero.Prompt.BUTTON_TITLE_CANCEL,
+			button2: Zotero.Prompt.BUTTON_TITLE_DONT_SAVE
+		});
+		switch (result) {
+			case 0:
+				await deck.pane.save();
+				return true;
+			case 1:
+				return false;
+			default:
+				await deck.pane.cancel();
+				return true;
+		}
+	};
+	
+	
+	/**
 	 * @param {'open' | 'collapsed' | 'closed'} state
 	 * @param {Boolean} [skipRefresh=false] - Don't refresh the items view
 	 */
 	this.setAdvancedSearchState = async function (state, { skipRefresh = false } = {}) {
 		let deck = document.getElementById('zotero-advanced-search-pane-deck');
+		// Replacing or closing the saved-search editor discards its working copy, so
+		// prompt to save changes first, as when switching collections
+		if (deck.state === 'open' && deck.selectedSearchType === 'saved') {
+			if (!(await this._confirmCloseSavedSearchEditor())) {
+				return;
+			}
+			// The editor is now closed, which is all a close or collapse needs; only
+			// opening the temporary pane continues
+			if (state !== 'open') {
+				return;
+			}
+		}
 		let oldState = deck.state;
 		deck.selectedSearchType = 'temporary';
 		deck.state = state;

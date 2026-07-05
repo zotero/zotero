@@ -721,6 +721,47 @@ describe("Advanced Search", function () {
 		await selectLibrary(win);
 	});
 
+	it("should prompt before replacing the saved-search editor with a new advanced search", async function () {
+		var saved = await createDataObject('search', { name: "ToggleWhileEditing" });
+		await select(win, saved);
+		await zp.setSavedSearchEditorState('open');
+		
+		// Edit the editor's working copy
+		var searchBox = deck.pane.querySelector('zoterosearch');
+		searchBox.querySelector('.conditions').firstChild.querySelector('#valuefield').value = 'edited';
+		searchBox.updateSearch();
+		
+		let stub = sinon.stub().returns(1); // Cancel
+		let promptService = win.Services.prompt;
+		win.Services.prompt = { confirmEx: stub };
+		try {
+			// Cmd-Shift-F opens a new temporary search over the editor
+			await zp.toggleAdvancedSearchState('open');
+			
+			// Cancel keeps the editor open with the edits intact
+			assert.equal(stub.callCount, 1);
+			assert.equal(deck.selectedSearchType, 'saved');
+			assert.equal(deck.state, 'open');
+			assert.include(
+				Object.values(deck.pane.search.getConditions()).map(c => c.value), 'edited');
+			
+			// Save saves the edits and continues to the temporary pane
+			stub.returns(0);
+			await zp.toggleAdvancedSearchState('open');
+			assert.equal(stub.callCount, 2);
+			assert.equal(deck.selectedSearchType, 'temporary');
+			assert.equal(deck.state, 'open');
+			assert.include(Object.values(saved.getConditions()).map(c => c.value), 'edited');
+		}
+		finally {
+			win.Services.prompt = promptService;
+		}
+		
+		await zp.setAdvancedSearchState('closed');
+		await saved.eraseTx();
+		await selectLibrary(win);
+	});
+
 	it("should prompt for a name when saving a new search", async function () {
 		await selectLibrary(win);
 		await zp.toggleAdvancedSearchState('open');
