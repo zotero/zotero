@@ -804,11 +804,14 @@ describe("Item pane", function () {
 	describe("Attachments pane", function () {
 		let paneID = "attachments";
 
-		beforeEach(function () {
+		beforeEach(async function () {
 			Zotero.Prefs.set("panes.attachments.open", true);
 			Zotero.Prefs.set("showAttachmentPreview", true);
 			Zotero_Tabs.select("zotero-pane");
 			win.resizeTo(1000, 800);
+			// Wait for the resize to take effect, since some tests shrink the window without
+			// waiting for the restore at the end
+			await waitForCallback(() => win.outerWidth == 1000 && win.outerHeight == 800, 100, 3);
 		});
 
 		afterEach(function () {
