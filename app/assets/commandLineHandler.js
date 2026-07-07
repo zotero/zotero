@@ -50,6 +50,7 @@ if (processTestOptions) {
 	TestOptions.bail = cmdLine.handleFlag("bail", false);
 	TestOptions.startAt = cmdLine.handleFlagWithParam("startAtTestFile", false);
 	TestOptions.stopAt = cmdLine.handleFlagWithParam("stopAtTestFile", false);
+	TestOptions.shard = cmdLine.handleFlagWithParam("shard", false);
 	TestOptions.grep = cmdLine.handleFlagWithParam("grep", false);
 	TestOptions.timeout = cmdLine.handleFlagWithParam("ZoteroTestTimeout", false);
 	TestOptions.retries = cmdLine.handleFlagWithParam("retries", false) || 0;

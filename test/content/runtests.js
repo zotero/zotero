@@ -256,6 +256,41 @@ if (run && TestOptions.tests) {
 			dump(`Invalid start file ${startFile}\n`);
 		}
 		testFiles = testFiles.slice(startPos, stopPos + 1);
+
+		// Limit to the given shard of the file list (e.g., "2/4")
+		if (TestOptions.shard) {
+			let matches = TestOptions.shard.match(/^([0-9]+)\/([0-9]+)$/);
+			let shard = matches && parseInt(matches[1]);
+			let numShards = matches && parseInt(matches[2]);
+			if (!matches || shard < 1 || shard > numShards) {
+				dump(`Invalid shard ${TestOptions.shard}\n`);
+				run = false;
+				quit(true);
+			}
+			else {
+				// Split the sorted file list into contiguous chunks of roughly equal total file
+				// size, using size as a stand-in for run time. Contiguous chunks preserve the
+				// alphabetical run order of a full run, and a shard can be reproduced locally by
+				// passing its first and last files to -s and -e.
+				let sizes = new Map();
+				let totalSize = 0;
+				for (let fname of testFiles) {
+					let file = testDirectory.clone();
+					file.append(fname);
+					sizes.set(fname, file.fileSize);
+					totalSize += file.fileSize;
+				}
+				// A file belongs to the shard that the midpoint of its size range falls in
+				let cumSize = 0;
+				testFiles = testFiles.filter((fname) => {
+					let midpoint = cumSize + sizes.get(fname) / 2;
+					cumSize += sizes.get(fname);
+					return Math.min(numShards - 1, Math.floor(midpoint / totalSize * numShards)) == shard - 1;
+				});
+				dump(`Running shard ${shard}/${numShards} with ${testFiles.length} test files:\n`
+					+ testFiles.join(' ') + '\n');
+			}
+		}
 	} else {
 		var specifiedTests = TestOptions.tests.split(",");
 		for (let test of specifiedTests) {
