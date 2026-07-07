@@ -429,7 +429,7 @@ function waitForCallback(cb, interval, timeout) {
 			deferred.resolve(success);
 		} else if(Date.now() - start > timeout*1000) {
 			clearInterval(id);
-			deferred.reject(new Error("Promise timed out"));
+			deferred.reject(new Error("Promise timed out: " + cb.toString()));
 		}
 	}, interval);
 	return deferred.promise;
