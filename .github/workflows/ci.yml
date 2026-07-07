@@ -4,59 +4,62 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  build:
-    name: Build, Upload, Test
+  test:
+    name: Test (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           lfs: true
-      
+
       - name: Install Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
           #cache: npm
-      
+
       # On GitHub
       - name: Install xvfb
         if: env.ACT != 'true'
         run: sudo apt update && sudo apt install -y xvfb
-      
+
       # Local via act
       - name: Install packages for act
         if: env.ACT == 'true'
         run: apt update && apt install -y zstd xvfb dbus-x11 libgtk-3-0 libx11-xcb1 libdbus-glib-1-2 libxt6
-      
+
       - name: Cache xulrunner
         id: xulrunner-cache
         uses: actions/cache@v4
         with:
           path: app/xulrunner/firefox-x86_64
           key: xulrunner-${{ hashFiles('app/config.sh', 'app/scripts/fetch_xulrunner') }}
-      
+
       - name: Fetch xulrunner
         if: steps.xulrunner-cache.outputs.cache-hit != 'true'
         run: app/scripts/fetch_xulrunner -p l
-      
+
       - name: Cache Node modules
         id: node-cache
         uses: actions/cache@v4
         with:
           path: node_modules
           key: node-modules-${{ hashFiles('package-lock.json') }}
-        
+
       - name: Install Node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm install
-        
+
       - name: Build Zotero
         run: npm run build
         # Currently necessary for document-worker Webpack: https://stackoverflow.com/a/69746937
         env:
           NODE_OPTIONS: --openssl-legacy-provider
-      
+
       # Create deployment ZIP from the build output, then replace build/ with the
       # unzipped contents so that tests run against the same artifact that gets
       # deployed. This catches problems that only manifest after a zip round-trip
@@ -74,18 +77,89 @@ jobs:
           cd build
           unzip ../build.zip
 
-      # Build deployment ZIPs from main, version branches (e.g., 9.0, 10.0), and *-hotfix branches
+      - name: Run tests
+        run: xvfb-run test/runtests.sh -f -r 3 -p ${{ matrix.shard }}/${{ strategy.job-total }}
+
+  utilities:
+    name: Utilities Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Cache utilities Node modules
+        id: utilities-node-cache
+        uses: actions/cache@v4
+        with:
+          path: chrome/content/zotero/xpcom/utilities/node_modules
+          key: utilities-node-modules-${{ hashFiles('chrome/content/zotero/xpcom/utilities/package-lock.json') }}
+
+      - name: Install utilities Node modules
+        if: steps.utilities-node-cache.outputs.cache-hit != 'true'
+        run: npm install --prefix chrome/content/zotero/xpcom/utilities
+
+      - name: Run utilities tests
+        run: |
+          npm test --prefix chrome/content/zotero/xpcom/utilities -- -j resource/schema/global/schema.json
+
+  # Build deployment ZIPs from main, version branches (e.g., 9.0, 10.0), and *-hotfix branches
+  deploy:
+    name: Build, Upload
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.repository == 'zotero/zotero'
+    steps:
       - name: Check if deployment branch
         id: check-deploy
-        if: |
-          env.ACT != 'true'
-          && github.repository == 'zotero/zotero'
-          && github.event_name == 'push'
+        if: env.ACT != 'true'
         run: |
           branch="${GITHUB_REF#refs/heads/}"
           if [[ "$branch" == "main" || "$branch" =~ ^[0-9]+\.[0-9]+$ || "$branch" == *-hotfix ]]; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - uses: actions/checkout@v4
+        if: steps.check-deploy.outputs.deploy == 'true'
+        with:
+          submodules: recursive
+          lfs: true
+
+      - name: Install Node
+        if: steps.check-deploy.outputs.deploy == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Cache Node modules
+        id: node-cache
+        if: steps.check-deploy.outputs.deploy == 'true'
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Node modules
+        if: steps.check-deploy.outputs.deploy == 'true' && steps.node-cache.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Build Zotero
+        if: steps.check-deploy.outputs.deploy == 'true'
+        run: npm run build
+        # Currently necessary for document-worker Webpack: https://stackoverflow.com/a/69746937
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
+
+      - name: Create deployment ZIP
+        if: steps.check-deploy.outputs.deploy == 'true'
+        run: |
+          cd build
+          zip -r ../build.zip *
+          cd ..
 
       - uses: ruby/setup-ruby@v1
         if: steps.check-deploy.outputs.deploy == 'true'
@@ -103,21 +177,3 @@ jobs:
           cp build.zip build-zip/$GITHUB_SHA.zip
           gem install --no-document dpl -v '>= 2.0'
           dpl s3 --bucket zotero-download --local_dir build-zip --upload_dir ci/client --acl public_read
-
-      - name: Run tests
-        run: xvfb-run test/runtests.sh -f -r 3
-
-      - name: Cache utilities Node modules
-        id: utilities-node-cache
-        uses: actions/cache@v4
-        with:
-          path: chrome/content/zotero/xpcom/utilities/node_modules
-          key: utilities-node-modules-${{ hashFiles('chrome/content/zotero/xpcom/utilities/package-lock.json') }}
-
-      - name: Install utilities Node modules
-        if: steps.utilities-node-cache.outputs.cache-hit != 'true'
-        run: npm install --prefix chrome/content/zotero/xpcom/utilities
-
-      - name: Run utilities tests
-        run: |
-          npm test --prefix chrome/content/zotero/xpcom/utilities -- -j resource/schema/global/schema.json
