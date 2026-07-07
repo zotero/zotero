@@ -1,0 +1,322 @@
+#!/bin/bash
+set -euo pipefail
+
+#
+# Incrementally update a staged build in staging/ by zipping changed files from
+# the client build/ directory directly into app/omni.ja, based on a manifest
+# saved by dir_build after the last full build.
+#
+# Only files that are copied into omni.ja unmodified by build.sh can be updated
+# this way. If any other file changed (or a file was removed), a full rebuild
+# is required.
+#
+# Exit codes:
+#   0 -- staged build was updated (or nothing changed)
+#   2 -- a full rebuild is required
+#
+# This is normally run automatically by dir_build, not directly.
+#
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+ROOT_DIR="$(dirname "$APP_ROOT_DIR")"
+. "$APP_ROOT_DIR/config.sh"
+. "$SCRIPT_DIR/utils.sh"
+
+function usage {
+	cat >&2 <<DONE
+Usage: $0 -p PLATFORM [-a ARCH] [-t]
+
+Options
+ -p PLATFORM        platform of the staged build to update (m=Mac, w=Windows, l=Linux)
+ -a ARCH            target architecture (Windows/Linux only)
+ -t                 devtools requested
+DONE
+	exit 1
+}
+
+platform=""
+arch=""
+devtools=0
+while getopts "p:a:t" opt; do
+	case $opt in
+		p)
+			platform="$OPTARG"
+			;;
+		a)
+			arch="$OPTARG"
+			;;
+		t)
+			devtools=1
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+
+if [ -z "$platform" ]; then
+	usage
+fi
+
+BUILD_SRC_DIR="$ROOT_DIR/build"
+MANIFEST_FILE="$STAGE_DIR/.build-manifest"
+
+function fall_back {
+	echo "$1 -- performing full build" >&2
+	exit 2
+}
+
+if [ ! -d "$BUILD_SRC_DIR" ]; then
+	fall_back "No build/ directory"
+fi
+if [ ! -f "$MANIFEST_FILE" ]; then
+	fall_back "No manifest from previous build"
+fi
+if [[ "$(sed -n 's/^#format=//p' "$MANIFEST_FILE")" != "2" ]]; then
+	fall_back "Unsupported manifest format"
+fi
+
+# Make sure a staged build exists for the requested platform
+case $platform in
+	m)
+		app_dir="$STAGE_DIR/Zotero.app/Contents/Resources"
+		;;
+	w)
+		app_dir="$STAGE_DIR/Zotero_$(get_canonical_arch w "$arch")"
+		;;
+	l)
+		app_dir="$STAGE_DIR/Zotero_linux-$(get_canonical_arch l "$arch")"
+		;;
+	*)
+		fall_back "Unknown platform '$platform'"
+		;;
+esac
+if [ ! -f "$app_dir/app/omni.ja" ]; then
+	fall_back "No staged build for requested platform"
+fi
+
+# If the previous build didn't include tests or devtools and they're requested
+# now, files are missing from the staged build
+manifest_tests=$(sed -n 's/^#include_tests=//p' "$MANIFEST_FILE")
+manifest_tests=${manifest_tests:-0}
+manifest_devtools=$(sed -n 's/^#devtools=//p' "$MANIFEST_FILE")
+manifest_devtools=${manifest_devtools:-0}
+if [[ -z "${ZOTERO_TEST:-}" ]] || [[ "${ZOTERO_TEST:-}" == "0" ]]; then
+	want_tests=0
+else
+	want_tests=1
+fi
+if [[ $want_tests -eq 1 ]] && [[ $manifest_tests != "1" ]]; then
+	fall_back "Tests requested but not included in staged build"
+fi
+if [[ $devtools -eq 1 ]] && [[ $manifest_devtools != "1" ]]; then
+	fall_back "Devtools requested but not included in staged build"
+fi
+
+# If anything changed in app/ (build scripts, assets, bundled modules, Firefox
+# runtime), a full rebuild is required
+manifest_app_hash=$(sed -n 's/^#app_hash=//p' "$MANIFEST_FILE")
+app_hash=$(generate_app_hash "$APP_ROOT_DIR")
+if [[ -z "$manifest_app_hash" ]] || [[ "$app_hash" != "$manifest_app_hash" ]]; then
+	fall_back "Files in app/ changed"
+fi
+
+file_list=$(mktemp)
+new_stats=$(mktemp)
+carried=$(mktemp)
+candidates=$(mktemp)
+removed=$(mktemp)
+cand_entries=$(mktemp)
+trap 'rm -f "$file_list" "$new_stats" "$carried" "$candidates" "$removed" "$cand_entries"' EXIT
+
+cd "$BUILD_SRC_DIR"
+
+# Quickly find files that may have changed based on size/mtime, so that only
+# those have to be hashed. Unmodified manifest entries are carried over,
+# new/modified files become candidates, and files no longer present are
+# considered removed.
+build_manifest_file_list > "$file_list"
+stat_file_list < "$file_list" > "$new_stats"
+awk -F'\t' -v carried="$carried" -v candidates="$candidates" -v removed="$removed" '
+	NR==FNR {
+		if (/^#/) next
+		hash[$3] = $1
+		stat[$3] = $2
+		next
+	}
+	{
+		if (!($2 in stat)) {
+			print > candidates
+		}
+		else {
+			if ($1 == stat[$2]) {
+				print hash[$2] "\t" $0 > carried
+			}
+			else {
+				print > candidates
+			}
+			delete stat[$2]
+		}
+	}
+	END {
+		for (path in stat) print path > removed
+	}
+' "$MANIFEST_FILE" "$new_stats"
+
+# Hash the candidates and compare to the previous hashes to find real changes
+# -- A = added, C = changed, R = removed
+if [ -s "$candidates" ]; then
+	paste \
+		<(cut -f2 "$candidates" | sed 's,^,./,' | tr '\n' '\0' | hash_file_list | cut -f1) \
+		"$candidates" \
+		> "$cand_entries"
+fi
+changes=$(
+	if [ -s "$cand_entries" ]; then
+		awk -F'\t' '
+			NR==FNR {
+				if (/^#/) next
+				old[$3] = $1
+				next
+			}
+			{
+				if (!($3 in old)) print "A\t" $3
+				else if (old[$3] != $1) print "C\t" $3
+			}
+		' "$MANIFEST_FILE" "$cand_entries"
+	fi
+	if [ -s "$removed" ]; then
+		awk '{print "R\t" $0}' "$removed"
+	fi
+)
+
+# Make sure all changed files can be zipped directly into omni.ja, and skip
+# ones that aren't included in the staged build
+zip_files=()
+ftl_files=()
+test_copy_files=()
+while IFS=$'\t' read -r status path; do
+	if [ -z "$status" ]; then
+		continue
+	fi
+	if [ "$status" == "R" ]; then
+		case "$path" in
+			test/*)
+				# Ignore removed test files if tests weren't included
+				if [[ $manifest_tests != "1" ]]; then
+					continue
+				fi
+				;;
+		esac
+		fall_back "$path was removed"
+	fi
+	case "$path" in
+		# Copied into localization/ subdirectories by build.sh
+		chrome/locale/*/zotero/mozilla/*)
+			fall_back "Can't update $path in place"
+			;;
+		# Pruned by prepare_build
+		chrome/content/zotero/locale/csl/*)
+			fall_back "Can't update $path in place"
+			;;
+		# Copied to localization/<locale>/ in addition to the chrome path
+		chrome/locale/*/zotero/*.ftl)
+			zip_files+=("$path")
+			ftl_files+=("$path")
+			;;
+		chrome/*|components/*|resource/*)
+			zip_files+=("$path")
+			;;
+		# Appended to the main chrome.manifest by build.sh
+		test/chrome.manifest)
+			fall_back "Can't update $path in place"
+			;;
+		test/*)
+			# If tests weren't included in the staged build, ignore changes
+			# to test files
+			if [[ $manifest_tests == "1" ]]; then
+				zip_files+=("$path")
+				case "$path" in
+					# Also copied to tests/ at the top level of the app
+					test/tests/*)
+						test_copy_files+=("$path")
+						;;
+				esac
+			fi
+			;;
+		*)
+			fall_back "Can't update $path in place"
+			;;
+	esac
+done <<< "$changes"
+
+# Find all staged omni.ja files to update (multiple can exist -- e.g., all
+# Windows architectures)
+omni_files=()
+while IFS= read -r file; do
+	omni_files+=("$file")
+done < <(find "$STAGE_DIR" -path '*/app/omni.ja')
+
+if [ ${#zip_files[@]} -gt 0 ]; then
+	echo "Changed files:"
+	for path in "${zip_files[@]}"; do
+		echo "  $path"
+	done
+	
+	cd "$BUILD_SRC_DIR"
+	for omni_file in "${omni_files[@]}"; do
+		echo "Updating ${omni_file#"$STAGE_DIR"/}"
+		zip -qX "$omni_file" "${zip_files[@]}"
+	done
+	
+	# Copy .ftl files to their localization/ paths
+	if [ ${#ftl_files[@]} -gt 0 ]; then
+		l10n_dir=$(mktemp -d)
+		for path in "${ftl_files[@]}"; do
+			locale=${path#chrome/locale/}
+			locale=${locale%%/*}
+			mkdir -p "$l10n_dir/localization/$locale"
+			cp -L "$path" "$l10n_dir/localization/$locale/$(basename "$path")"
+		done
+		pushd "$l10n_dir" > /dev/null
+		for omni_file in "${omni_files[@]}"; do
+			zip -qrX "$omni_file" localization
+		done
+		popd > /dev/null
+		rm -rf "$l10n_dir"
+	fi
+	
+	# Copy test files to tests/ directories
+	if [ ${#test_copy_files[@]} -gt 0 ]; then
+		for path in "${test_copy_files[@]}"; do
+			for omni_file in "${omni_files[@]}"; do
+				dest="${omni_file%/app/omni.ja}/tests/${path#test/tests/}"
+				mkdir -p "$(dirname "$dest")"
+				cp -L "$path" "$dest"
+			done
+		done
+	fi
+	
+	# Bump BuildID so that startup caches are invalidated even without
+	# -purgecaches
+	build_id=$(date +%Y%m%d%H%M%S)
+	for omni_file in "${omni_files[@]}"; do
+		perl -pi -e "s/^BuildID=.*/BuildID=$build_id/" "$(dirname "$omni_file")/application.ini"
+	done
+	
+	echo "Updated staged build with ${#zip_files[@]} changed file(s)"
+elif [ -n "$changes" ]; then
+	echo "No staged files changed"
+else
+	echo "No changes since last build"
+fi
+
+{
+	echo "#format=2"
+	echo "#include_tests=$manifest_tests"
+	echo "#devtools=$manifest_devtools"
+	echo "#app_hash=$app_hash"
+	LC_ALL=C sort -t$'\t' -k3 "$carried" "$cand_entries"
+} > "$MANIFEST_FILE.tmp"
+mv "$MANIFEST_FILE.tmp" "$MANIFEST_FILE"
