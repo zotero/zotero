@@ -987,6 +987,8 @@ describe("Item pane", function () {
 			await item.saveTx();
 
 			await ZoteroPane.selectItem(item.id);
+			// Scroll to the pane, since pinning doesn't reliably render it if it's out of view
+			await waitForScrollToPane(itemDetails, paneID);
 			// Pass the item id so we don't return early due to a previous item's completed render
 			assert.isTrue(await waitForPreviewBoxRender(attachmentsBox, item.id));
 			// No preview
@@ -1149,6 +1151,8 @@ describe("Item pane", function () {
 			let annotation = await createAnnotation('highlight', attachment1);
 
 			await itemDetails._renderPromise;
+			// Scroll to the pane, since pinning doesn't reliably render it if it's out of view
+			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxReader(attachmentsBox, attachment1.id);
 
 			assert.isFalse(attachmentsBox.hidden);
@@ -1175,6 +1179,7 @@ describe("Item pane", function () {
 
 			// Select item with attachment (no annotation)
 			await itemDetails._renderPromise;
+			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxReader(attachmentsBox, attachment2.id);
 
 			assert.isFalse(attachmentsBox.hidden);
@@ -1194,6 +1199,7 @@ describe("Item pane", function () {
 
 			// Select item without attachment
 			await itemDetails._renderPromise;
+			await waitForScrollToPane(itemDetails, paneID);
 
 			assert.isFalse(attachmentsBox.hidden);
 			assert.equal(attachmentsBox.querySelectorAll("attachment-row").length, 0);
@@ -1201,6 +1207,7 @@ describe("Item pane", function () {
 			// Again, select item with attachment (1 annotation)
 			await ZoteroPane.selectItem(item1.id);
 			await itemDetails._renderPromise;
+			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxReader(attachmentsBox, attachment1.id);
 
 			assert.isFalse(attachmentsBox.hidden);
@@ -1344,10 +1351,13 @@ describe("Item pane", function () {
 
 			// Should be able to render the correct preview
 			await ZoteroPane.selectItem(item1.id);
+			// Scroll to the pane, since pinning doesn't reliably render it if it's out of view
+			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxReader(attachmentsBox, attachment1.id);
 			assert.isTrue(await isPreviewDisplayed(attachmentsBox));
 
 			await ZoteroPane.selectItem(item2.id);
+			await waitForScrollToPane(itemDetails, paneID);
 			await waitForPreviewBoxReader(attachmentsBox, attachment2.id);
 			assert.isTrue(await isPreviewDisplayed(attachmentsBox));
 
