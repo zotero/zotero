@@ -19,6 +19,8 @@ describe("Citation Dialog", function () {
 	let dialog, win, doc, IOManager, CitationDataManager, SearchHandler;
 
 	before(async function () {
+		// Zotero.Cite.getLocatorString() requires styles to be initialized
+		await Zotero.Styles.init();
 		// one of helper functions of searchHandler uses zotero pane
 		win = await loadZoteroPane();
 		let dialogPromise = waitForWindow("chrome://zotero/content/integration/citationDialog.xhtml");
