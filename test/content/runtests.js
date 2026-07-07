@@ -121,7 +121,7 @@ function Reporter(runner) {
 		dump(msg+"\n");
 	});
 
-	runner.on('fail', function(test, err){
+	function cleanErrorStack(err) {
 		// Remove internal code references
 		err.stack = err.stack.replace(/.+(?:zotero-unit\/|\/Task\.jsm|zotero\/bluebird\/).+\n?/g, "");
 		
@@ -136,6 +136,21 @@ function Reporter(runner) {
 		
 		// Make sure there's a blank line after all stack traces
 		err.stack = err.stack.replace(/\s*$/, '\n\n');
+	}
+	
+	runner.on('retry', function (test, err) {
+		cleanErrorStack(err);
+		let indentStr = indent();
+		dump(indentStr
+			// Yellow X for failures that will be retried
+			+ "\x1B[33;40m" + Mocha.reporters.Base.symbols.err + " [FAIL -- retrying]\x1B[0m"
+			+ " " + test.title + "\n"
+			+ indentStr + "  " + err.message + " at\n"
+			+ err.stack.replace(/^/gm, indentStr + "    ").trim() + "\n\n");
+	});
+	
+	runner.on('fail', function(test, err){
+		cleanErrorStack(err);
 		
 		failed++;
 		let indentStr = indent();
