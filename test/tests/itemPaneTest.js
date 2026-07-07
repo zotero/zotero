@@ -984,7 +984,8 @@ describe("Item pane", function () {
 			await item.saveTx();
 
 			await ZoteroPane.selectItem(item.id);
-			assert.isTrue(await waitForPreviewBoxRender(attachmentsBox));
+			// Pass the item id so we don't return early due to a previous item's completed render
+			assert.isTrue(await waitForPreviewBoxRender(attachmentsBox, item.id));
 			// No preview
 			assert.isFalse(await isPreviewDisplayed(attachmentsBox));
 			// No row
