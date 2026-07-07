@@ -1889,6 +1889,7 @@ class ReaderTab extends ReaderInstance {
 		this._contextPaneOpen = options.contextPaneOpen;
 		this._bottomPlaceholderHeight = options.bottomPlaceholderHeight;
 		this._showContextPaneToggle = true;
+		this._readAloudPlaying = false;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let existingTabID = options.tabID;
 		let select = !options.background;
@@ -1922,6 +1923,10 @@ class ReaderTab extends ReaderInstance {
 		this._iframe.setAttribute('src', 'resource://zotero/reader/reader.html');
 		this._tabContainer.appendChild(this._iframe);
 		this._iframe.docShell.windowDraggingAllowed = true;
+		// Derive the initial docShell activity here, because tabs opened in
+		// the background, unlike deselected tabs, don't go through a tab
+		// 'select' notification
+		this._updateDocShellActivity();
 		
 		this._popupset = this._window.document.createXULElement('popupset');
 		this._tabContainer.appendChild(this._popupset);
@@ -2065,16 +2070,26 @@ class ReaderTab extends ReaderInstance {
 		}
 	}
 
+	// Keep the docShell active only while the tab has to stay responsive:
+	// when it's selected or playing Read Aloud. An inactive docShell throttles
+	// rAF and timers, and lets the reader see document.visibilityState
+	// 'hidden' and release rendered pages
+	_updateDocShellActivity() {
+		this._iframe.docShellIsActive = this._window.Zotero_Tabs.selectedID == this.tabID
+			|| this._readAloudPlaying;
+	}
+
 	_setReadAloudStatus(status) {
+		this._readAloudPlaying = status.active && !status.paused;
+		// Wake up the docShell even if this tab is in the background,
+		// so event-loop tasks run immediately. Without this, playing
+		// sometimes doesn't take effect immediately.
+		this._updateDocShellActivity();
 		if (status.active) {
 			this._hideReadAloudGuidance();
 		}
-		if (status.active && !status.paused) {
-			// Wake up the docShell even if this tab is in the background,
-			// so event-loop tasks run immediately. Without this, playing
-			// sometimes doesn't take effect immediately.
-			this._iframe.docShellIsActive = true;
-
+		this._window.Zotero_Tabs.setAudioStatus(this.tabID, status);
+		if (this._readAloudPlaying) {
 			// If this tab was unpaused, pause all others
 			for (let reader of Zotero.Reader._readers) {
 				if (reader === this) continue;
@@ -2090,7 +2105,6 @@ class ReaderTab extends ReaderInstance {
 				}
 			}
 		}
-		this._window.Zotero_Tabs.setAudioStatus(this.tabID, status);
 	}
 	
 	toggleReadAloudPaused(paused = undefined) {
@@ -2714,14 +2728,13 @@ class Reader {
 			}
 			else if (event === 'select') {
 				for (let reader of this._readers) {
-					if (reader instanceof ReaderTab && reader._window.Zotero_Tabs.canUnload(reader.tabID)) {
-						reader._iframe.docShellIsActive = false;
+					if (reader instanceof ReaderTab) {
+						reader._updateDocShellActivity();
 					}
 				}
 
 				let reader = Zotero.Reader.getByTabID(ids[0]);
 				if (reader) {
-					reader._iframe.docShellIsActive = true;
 					this.triggerAnnotationsImportCheck(reader.itemID);
 				}
 			}
