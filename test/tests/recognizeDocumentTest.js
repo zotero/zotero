@@ -39,6 +39,10 @@ describe("Document Recognition", function () {
 		
 		queue.cancel();
 		Zotero.RecognizeDocument._recognize.restore && Zotero.RecognizeDocument._recognize.restore();
+		// Restore stub if a test failed before restoring it, so that retries don't fail with
+		// "Attempted to wrap translate which is already wrapped"
+		Zotero.Translate.Search.prototype.translate.restore
+			&& Zotero.Translate.Search.prototype.translate.restore();
 		Zotero.Prefs.clear('autoRenameFiles.linked');
 	});
 	
