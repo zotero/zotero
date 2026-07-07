@@ -7,6 +7,10 @@ jobs:
   test:
     name: Test (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
+    # Same-repo PRs are covered by the push run, so run pull_request jobs only for forks
+    if: >
+      github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
         shard: [1, 2, 3, 4]
@@ -83,6 +87,9 @@ jobs:
   utilities:
     name: Utilities Tests
     runs-on: ubuntu-latest
+    if: >
+      github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name != github.repository
     steps:
       - uses: actions/checkout@v4
         with:
