@@ -16,6 +16,8 @@ describe("Document Recognition", function () {
 		
 		this.timeout(60000);
 		Zotero.Prefs.set('autoRenameFiles.onMetadataChange', false); // Prevent auto-rename triggering during recognition
+		// EPUB recognition translates the EPUB's RDF metadata
+		yield Zotero.Translators.init();
 		// Load Zotero pane and install PDF tools
 		yield Promise.all([
 			loadZoteroPane().then(w => win = w)
