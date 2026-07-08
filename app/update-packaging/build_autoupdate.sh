@@ -262,9 +262,14 @@ for version in "$FROM" "$TO"; do
 	# Unpack Windows zips
 	if [ $BUILD_WIN == 1 ]; then
 		if [[ -f "$WIN32_ARCHIVE" ]] && [[ -f "$WIN_X64_ARCHIVE" ]] && [[ -f "$WIN_ARM64_ARCHIVE" ]]; then
+			# Unpack architectures in parallel
+			UNPACK_PIDS=""
 			for build in "$WIN32_ARCHIVE" "$WIN_X64_ARCHIVE" "$WIN_ARM64_ARCHIVE"; do
-				unzip -q "$build"
-				rm "$build"
+				(unzip -q "$build" && rm "$build") &
+				UNPACK_PIDS="$UNPACK_PIDS $!"
+			done
+			for pid in $UNPACK_PIDS; do
+				wait $pid
 			done
 			INCREMENTALS_FOUND=1
 		else
@@ -289,9 +294,14 @@ for version in "$FROM" "$TO"; do
 		done
 		
 		if [ "$MISSING" -eq 0 ]; then
+			# Unpack architectures in parallel
+			UNPACK_PIDS=""
 			for build in "${LINUX_BUILDS_TO_UNPACK[@]}"; do
-				tar -xf "$build"
-				rm "$build"
+				(tar -xf "$build" && rm "$build") &
+				UNPACK_PIDS="$UNPACK_PIDS $!"
+			done
+			for pid in $UNPACK_PIDS; do
+				wait $pid
 			done
 			INCREMENTALS_FOUND=1
 		else
