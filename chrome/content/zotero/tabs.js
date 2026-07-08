@@ -697,7 +697,7 @@ var Zotero_Tabs = new function () {
 	};
 	
 	this.setAudioStatus = function (id, status) {
-		if (typeof title != 'object' || !('active' in status && 'paused' in status)) {
+		if (!status || typeof status != 'object' || !('active' in status && 'paused' in status)) {
 			throw new Error(`'status' should be an object with { active, paused } properties`);
 		}
 		var { tab } = this._getTab(id);
