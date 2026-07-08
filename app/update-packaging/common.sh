@@ -9,7 +9,9 @@
 #
 
 # -----------------------------------------------------------------------------
-QUIET=0
+# Preserve a value set by the parent so it survives in the child processes
+# spawned by run_parallel_tasks()
+QUIET=${QUIET:-0}
 
 # By default just assume that these tools exist on our path
 MAR=${MAR:-mar}
@@ -33,7 +35,9 @@ if [ $? -ne 0 ]; then
     fi
   fi
 fi
-# Ensure that we're always using the right compression settings
+# Ensure that we're always using the right compression settings.
+# -T1 (single-threaded) is required: multi-threaded xz produces non-deterministic
+# output, which would break the reproducibility of MARs.
 export XZ_OPT="-T1 -7e"
 
 # -----------------------------------------------------------------------------
@@ -172,6 +176,123 @@ append_remove_instructions() {
       fi
     done
     )
+  fi
+}
+
+# Return the number of parallel jobs to use for diffing/compression, from
+# UPDATE_PACKAGING_JOBS or the number of cores
+get_parallel_jobs() {
+  if [ -n "${UPDATE_PACKAGING_JOBS:-}" ]; then
+    echo "$UPDATE_PACKAGING_JOBS"
+    return 0
+  fi
+  nproc 2>/dev/null && return 0
+  sysctl -n hw.ncpu 2>/dev/null && return 0
+  echo 1
+}
+
+# Run per-file tasks from a task file in parallel by re-invoking the calling
+# script with --run-task for each line. Tasks are ordered largest-file-first so
+# that long-running jobs (e.g., diffing xul) start as early as possible.
+#
+#   $1 - task file, with one "<type><TAB><relative path>" task per line
+#   $2 - directory to measure file sizes against for job ordering
+#   $3 - script to re-invoke (callers pass "$0" and handle --run-task before
+#        option parsing by calling process_update_task)
+#
+# Callers must export the variables needed by process_update_task().
+run_parallel_tasks() {
+  local taskfile="$1"
+  local basedir="$2"
+  local script="$3"
+  local jobs
+
+  if [ ! -s "$taskfile" ]; then
+    return 0
+  fi
+
+  # xargs requires a resolvable command path
+  script="$(cd "$(dirname "$script")" && pwd)/$(basename "$script")"
+
+  jobs=$(get_parallel_jobs)
+  notice "Processing $(wc -l < "$taskfile" | tr -d ' ') files with $jobs parallel jobs"
+
+  (cd "$basedir" && du -ak .) > "$taskfile.sizes"
+  awk -F'\t' 'NR==FNR { sizes[substr($2, 3)] = $1; next } { print sizes[$2] "\t" $0 }' \
+      "$taskfile.sizes" "$taskfile" \
+    | sort -rn \
+    | cut -f 2- \
+    | tr '\n' '\000' \
+    | xargs -0 -n 1 -P "$jobs" "$script" --run-task
+}
+
+# xz-compress $1 to $2
+compress_full_file() {
+  local src="$1"
+  local dest="$2"
+
+  $XZ $XZ_OPT --compress $BCJ_OPTIONS --lzma2 --format=xz --check=crc64 --force --stdout "$src" > "$dest"
+}
+
+# Process a single task line from run_parallel_tasks():
+#
+#   full - compress the new file into the work directory
+#   diff - if the file changed, generate a binary diff and keep the smaller of
+#          the compressed patch ($f.patch) and the compressed file ($f)
+#
+# Expects newdir and workdir in the environment, plus olddir for diff tasks.
+# The results are assembled into the manifest serially by the caller based on
+# which files exist in the work directory.
+process_update_task() {
+  local task="$1"
+  local tab=$(printf '\t')
+  local type="${task%%"$tab"*}"
+  local f="${task#*"$tab"}"
+  local oldfile_path newfile_path patch_path patchsize fullsize full_pid
+
+  if [ "$type" = "diff" ]; then
+    if diff "$olddir/$f" "$newdir/$f" > /dev/null; then
+      # Unchanged
+      return 0
+    fi
+
+    mkdir -p "$(dirname "$workdir/$f")"
+    verbose_notice "diffing \"$f\""
+
+    # Compress the full new file in the background while diffing, since both
+    # are needed to decide which to package
+    compress_full_file "$newdir/$f" "$workdir/$f" &
+    full_pid=$!
+
+    # mbsdiff doesn't like POSIX paths on Windows
+    if [ ${WIN_NATIVE:-0} -eq 1 ]; then
+      oldfile_path=$(cygpath -m "$olddir/$f")
+      newfile_path=$(cygpath -m "$newdir/$f")
+      patch_path=$(cygpath -m "$workdir/$f.patch")
+    else
+      oldfile_path="$olddir/$f"
+      newfile_path="$newdir/$f"
+      patch_path="$workdir/$f.patch"
+    fi
+    $MBSDIFF "$oldfile_path" "$newfile_path" "$patch_path"
+    $XZ $XZ_OPT --compress --lzma2 --format=xz --check=crc64 --force "$workdir/$f.patch"
+
+    wait $full_pid
+    copy_perm "$newdir/$f" "$workdir/$f"
+
+    patchsize=$(get_file_size "$workdir/$f.patch.xz")
+    fullsize=$(get_file_size "$workdir/$f")
+
+    if [ $patchsize -lt $fullsize ]; then
+      mv -f "$workdir/$f.patch.xz" "$workdir/$f.patch"
+      rm -f "$workdir/$f"
+    else
+      rm -f "$workdir/$f.patch.xz"
+    fi
+  else
+    mkdir -p "$(dirname "$workdir/$f")"
+    compress_full_file "$newdir/$f" "$workdir/$f"
+    copy_perm "$newdir/$f" "$workdir/$f"
   fi
 }
 

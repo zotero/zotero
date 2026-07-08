@@ -13,6 +13,12 @@ set -eo pipefail
 
 . $(dirname "$0")/common.sh
 
+# Process a single file task when invoked from run_parallel_tasks()
+if [ "${1:-}" = "--run-task" ]; then
+  process_update_task "$2"
+  exit 0
+fi
+
 # -----------------------------------------------------------------------------
 
 print_usage() {
@@ -164,93 +170,67 @@ num_oldfiles=${#oldfiles[*]}
 remove_array=
 num_removes=0
 
+# The main file loop is split into three passes so that the
+# CPU-heavy work can run in parallel: classify each file into a task list, run
+# the diffing/compression tasks in parallel via run_parallel_tasks() in
+# common.sh, and then assemble the manifest and archive list serially in the
+# original order based on the files the tasks left in the work directory.
+#
+# (This also drops the unused MBSDIFF_HOOK/funsize path from the upstream
+# script -- the diff behavior itself is unchanged and now lives in
+# process_update_task() in common.sh.)
+tmpdir="$(mktemp -d)"
+taskfile="$tmpdir/tasks"
+TAB="$(printf '\t')"
+> "$taskfile"
+
 for ((i=0; $i<$num_oldfiles; i=$i+1)); do
   f="${oldfiles[$i]}"
 
   # If this file exists in the new directory as well, then check if it differs.
   if [ -f "$newdir/$f" ]; then
-
     if check_for_add_if_not_update "$f"; then
-      # The full workdir may not exist yet, so create it if necessary.
-      mkdir -p "$(dirname "$workdir/$f")"
-      $XZ $XZ_OPT --compress $BCJ_OPTIONS --lzma2 --format=xz --check=crc64 --force --stdout "$newdir/$f" > "$workdir/$f"
-      copy_perm "$newdir/$f" "$workdir/$f"
+      echo "full$TAB$f" >> "$taskfile"
+    elif check_for_forced_update "$requested_forced_updates" "$f"; then
+      echo "full$TAB$f" >> "$taskfile"
+    else
+      echo "diff$TAB$f" >> "$taskfile"
+    fi
+  fi
+done
+
+# Newly added files -- in the new directory but not the old one. (This replaces
+# the O(n^2) nested skip loop from the upstream script.)
+printf '%s\n' "${oldfiles[@]}" | sort > "$tmpdir/oldlist"
+printf '%s\n' "${newfiles[@]}" | sort > "$tmpdir/newlist"
+comm -13 "$tmpdir/oldlist" "$tmpdir/newlist" | sed '/^$/d' | sort -r > "$tmpdir/newonly"
+
+while IFS= read -r f; do
+  echo "full$TAB$f" >> "$taskfile"
+done < "$tmpdir/newonly"
+
+export olddir newdir workdir MBSDIFF BCJ_OPTIONS QUIET
+run_parallel_tasks "$taskfile" "$newdir" "$0"
+
+# Assemble the manifest and archive list in the original order. A diffed file
+# left $f.patch in the work directory if the patch was smaller, $f if the
+# compressed file was smaller, and neither if the file was unchanged.
+for ((i=0; $i<$num_oldfiles; i=$i+1)); do
+  f="${oldfiles[$i]}"
+
+  if [ -f "$newdir/$f" ]; then
+    if check_for_add_if_not_update "$f"; then
       make_add_if_not_instruction "$f" "$updatemanifestv3"
       archivefiles="$archivefiles \"$f\""
-      continue 1
-    fi
-
-    if check_for_forced_update "$requested_forced_updates" "$f"; then
-      # The full workdir may not exist yet, so create it if necessary.
-      mkdir -p "$(dirname "$workdir/$f")"
-      $XZ $XZ_OPT --compress $BCJ_OPTIONS --lzma2 --format=xz --check=crc64 --force --stdout "$newdir/$f" > "$workdir/$f"
-      copy_perm "$newdir/$f" "$workdir/$f"
+    elif check_for_forced_update "$requested_forced_updates" "$f"; then
       make_add_instruction "$f" "$updatemanifestv3" 1
       archivefiles="$archivefiles \"$f\""
-      continue 1
-    fi
-
-    if ! diff "$olddir/$f" "$newdir/$f" > /dev/null; then
-      # Compute both the compressed binary diff and the compressed file, and
-      # compare the sizes.  Then choose the smaller of the two to package.
-      dir=$(dirname "$workdir/$f")
-      mkdir -p "$dir"
-      verbose_notice "diffing \"$f\""
-      # MBSDIFF_HOOK represents the communication interface with funsize and,
-      # if enabled, caches the intermediate patches for future use and
-      # compute avoidance
-      #
-      # An example of MBSDIFF_HOOK env variable could look like this:
-      # export MBSDIFF_HOOK="myscript.sh -A https://funsize/api -c /home/user"
-      # where myscript.sh has the following usage:
-      # myscript.sh -A SERVER-URL [-c LOCAL-CACHE-DIR-PATH] [-g] [-u] \
-      #   PATH-FROM-URL PATH-TO-URL PATH-PATCH SERVER-URL
-      #
-      # Note: patches are bzipped or xz stashed in funsize to gain more speed
-
-      # if service is not enabled then default to old behavior
-      # Disabled for Zotero
-      #if [ -z "$MBSDIFF_HOOK" ]; then
-      if true; then
-        # mbsdiff doesn't like POSIX paths on Windows
-        if [ $WIN_NATIVE -eq 1 ]; then
-          oldfile_path=$(cygpath -m "$olddir/$f")
-          newfile_path=$(cygpath -m "$newdir/$f")
-          patch_path=$(cygpath -m "$workdir/$f.patch")
-        else
-          oldfile_path="$olddir/$f"
-          newfile_path="$newdir/$f"
-          patch_path="$workdir/$f.patch"
-        fi
-        $MBSDIFF "$oldfile_path" "$newfile_path" "$patch_path"
-        $XZ $XZ_OPT --compress --lzma2 --format=xz --check=crc64 --force "$workdir/$f.patch"
-      else
-        # if service enabled then check patch existence for retrieval
-        if $MBSDIFF_HOOK -g "$olddir/$f" "$newdir/$f" "$workdir/$f.patch.xz"; then
-          verbose_notice "file \"$f\" found in funsize, diffing skipped"
-        else
-          # if not found already - compute it and cache it for future use
-          $MBSDIFF "$olddir/$f" "$newdir/$f" "$workdir/$f.patch"
-          $XZ $XZ_OPT --compress --lzma2 --format=xz --check=crc64 --force "$workdir/$f.patch"
-          $MBSDIFF_HOOK -u "$olddir/$f" "$newdir/$f" "$workdir/$f.patch.xz"
-        fi
-      fi
-      $XZ $XZ_OPT --compress $BCJ_OPTIONS --lzma2 --format=xz --check=crc64 --force --stdout "$newdir/$f" > "$workdir/$f"
-      copy_perm "$newdir/$f" "$workdir/$f"
-      patchfile="$workdir/$f.patch.xz"
-      patchsize=$(get_file_size "$patchfile")
-      fullsize=$(get_file_size "$workdir/$f")
-
-      if [ $patchsize -lt $fullsize ]; then
-        make_patch_instruction "$f" "$updatemanifestv3"
-        mv -f "$patchfile" "$workdir/$f.patch"
-        rm -f "$workdir/$f"
-        archivefiles="$archivefiles \"$f.patch\""
-      else
-        make_add_instruction "$f" "$updatemanifestv3"
-        rm -f "$patchfile"
-        archivefiles="$archivefiles \"$f\""
-      fi
+    elif [ -f "$workdir/$f.patch" ]; then
+      make_patch_instruction "$f" "$updatemanifestv3"
+      archivefiles="$archivefiles \"$f.patch\""
+    elif [ -f "$workdir/$f" ]; then
+      make_add_instruction "$f" "$updatemanifestv3"
+      archivefiles="$archivefiles \"$f\""
     fi
   else
     # remove instructions are added after add / patch instructions for
@@ -265,33 +245,18 @@ done
 # Newly added files
 notice ""
 notice "Adding file add instructions to update manifests"
-num_newfiles=${#newfiles[*]}
 
-for ((i=0; $i<$num_newfiles; i=$i+1)); do
-  f="${newfiles[$i]}"
-
-  # If we've already tested this file, then skip it
-  for ((j=0; $j<$num_oldfiles; j=$j+1)); do
-    if [ "$f" = "${oldfiles[j]}" ]; then
-      continue 2
-    fi
-  done
-
-  dir=$(dirname "$workdir/$f")
-  mkdir -p "$dir"
-
-  $XZ $XZ_OPT --compress $BCJ_OPTIONS --lzma2 --format=xz --check=crc64 --force --stdout "$newdir/$f" > "$workdir/$f"
-  copy_perm "$newdir/$f" "$workdir/$f"
-
+while IFS= read -r f; do
   if check_for_add_if_not_update "$f"; then
     make_add_if_not_instruction "$f" "$updatemanifestv3"
   else
     make_add_instruction "$f" "$updatemanifestv3"
   fi
 
-
   archivefiles="$archivefiles \"$f\""
-done
+done < "$tmpdir/newonly"
+
+rm -rf "$tmpdir"
 
 notice ""
 notice "Adding file remove instructions to update manifests"

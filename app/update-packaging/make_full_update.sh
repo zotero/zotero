@@ -13,6 +13,12 @@ set -eo pipefail
 
 . $(dirname "$0")/common.sh
 
+# Process a single file task when invoked from run_parallel_tasks()
+if [ "${1:-}" = "--run-task" ]; then
+  process_update_task "$2"
+  exit 0
+fi
+
 # -----------------------------------------------------------------------------
 
 print_usage() {
@@ -88,6 +94,23 @@ notice ""
 notice "Adding file add instructions to update manifests"
 num_files=${#files[*]}
 
+# Compress the files in parallel via run_parallel_tasks() in
+# common.sh, and then assemble the manifest and archive list serially in the
+# original order
+tmpdir="$(mktemp -d)"
+taskfile="$tmpdir/tasks"
+TAB="$(printf '\t')"
+> "$taskfile"
+
+for ((i=0; $i<$num_files; i=$i+1)); do
+  echo "full$TAB${files[$i]}" >> "$taskfile"
+done
+
+newdir="$targetdir"
+export newdir workdir BCJ_OPTIONS QUIET
+run_parallel_tasks "$taskfile" "$targetdir" "$0"
+rm -rf "$tmpdir"
+
 for ((i=0; $i<$num_files; i=$i+1)); do
   f="${files[$i]}"
 
@@ -96,11 +119,6 @@ for ((i=0; $i<$num_files; i=$i+1)); do
   else
     make_add_instruction "$f" "$updatemanifestv3"
   fi
-
-  dir=$(dirname "$f")
-  mkdir -p "$workdir/$dir"
-  $XZ $XZ_OPT --compress $BCJ_OPTIONS --lzma2 --format=xz --check=crc64 --force --stdout "$targetdir/$f" > "$workdir/$f"
-  copy_perm "$targetdir/$f" "$workdir/$f"
 
   targetfiles="$targetfiles \"$f\""
 done
