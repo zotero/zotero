@@ -5,6 +5,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 . "$APP_ROOT_DIR/config.sh"
+. "$SCRIPT_DIR/utils.sh"
 
 function usage {
 	cat >&2 <<DONE
@@ -17,7 +18,7 @@ Options
  -p PLATFORM        Platform to build (m=Mac, w=Windows, l=Linux)
  -a ARCH            Target architecture (arm64, x64, i686, win32) — **Windows/Linux only**
  -t                 add devtools
- -q                 quick build (skip compression and other optional steps for faster restarts during development)
+ -f                 force a full rebuild instead of updating the staged build in place
 DONE
 	exit 1
 }
@@ -25,8 +26,8 @@ DONE
 platform=""
 arch=""
 devtools=0
-quick_build=0
-while getopts "tp:a:q" opt; do
+force_full=0
+while getopts "tp:a:f" opt; do
 	case $opt in
 		t)
 			devtools=1
@@ -47,12 +48,11 @@ while getopts "tp:a:q" opt; do
 		a)
 			arch="$OPTARG"
 			;;
-		q)
-			quick_build=1
+		f)
+			force_full=1
 			;;
 		\?)
-			echo "Invalid option: -$OPTARG" >&2
-			exit 1
+			usage
 			;;
 	esac
 done
@@ -86,19 +86,84 @@ fi
 
 CHANNEL="source"
 
+# Remove stale symlinks left behind in build/ when source files are deleted,
+# which would otherwise break the build
+if [ -d "$ROOT_DIR/build" ]; then
+	# With -L, -type l matches only broken symlinks
+	stale_links=$(find -L "$ROOT_DIR/build" -type l -print)
+	if [ -n "$stale_links" ]; then
+		echo "Removing stale symlinks from build/:" >&2
+		echo "$stale_links" >&2
+		while IFS= read -r link; do
+			rm "$link"
+		done <<< "$stale_links"
+	fi
+fi
+
+# Try to update the staged build in place instead of doing a full rebuild
+if [[ $force_full -eq 0 ]]; then
+	incr_cmd=("$SCRIPT_DIR/incremental_update" -p "$platform")
+	[[ -n $arch ]] && incr_cmd+=( -a "$arch" )
+	[[ $devtools -eq 1 ]] && incr_cmd+=( -t )
+	set +e
+	"${incr_cmd[@]}"
+	incr_status=$?
+	set -e
+	if [ $incr_status -ne 2 ]; then
+		exit $incr_status
+	fi
+fi
+
 hash=$(git -C "$ROOT_DIR" rev-parse --short HEAD)
 
 build_dir=$(mktemp -d)
-cleanup() { rm -rf "$build_dir"; }
+manifest_tmp=""
+cleanup() {
+	rm -rf "$build_dir"
+	if [ -n "$manifest_tmp" ]; then
+		rm -f "$manifest_tmp"
+	fi
+}
 trap cleanup EXIT
+
+# Snapshot the state of build/ and app/ before the build for later incremental
+# updates
+app_hash=""
+if [ -d "$ROOT_DIR/build" ]; then
+	manifest_tmp=$(mktemp)
+	generate_build_manifest "$ROOT_DIR/build" > "$manifest_tmp"
+	app_hash=$(generate_app_hash "$APP_ROOT_DIR")
+fi
 
 "$SCRIPT_DIR/prepare_build" -s "$ROOT_DIR/build" -o "$build_dir" -c "$CHANNEL" -m "$hash"
 
-build_cmd=("$APP_ROOT_DIR/build.sh" -d "$build_dir" -p "$platform" -c "$CHANNEL" -s)
+build_cmd=("$APP_ROOT_DIR/build.sh" -d "$build_dir" -p "$platform" -c "$CHANNEL" -s -q)
 [[ -n $arch ]] && build_cmd+=( -a "$arch" )
 [[ $devtools -eq 1 ]] && build_cmd+=( -t )
-[[ $quick_build -eq 1 ]] && build_cmd+=( -q )
 
 "${build_cmd[@]}"
+
+# Save manifest for future incremental updates
+if [ -n "$manifest_tmp" ]; then
+	if [[ -z "${ZOTERO_TEST:-}" ]] || [[ "${ZOTERO_TEST:-}" == "0" ]]; then
+		include_tests=0
+	else
+		include_tests=1
+	fi
+	{
+		echo "#format=2"
+		echo "#include_tests=$include_tests"
+		echo "#devtools=$devtools"
+		echo "#app_hash=$app_hash"
+		cat "$manifest_tmp"
+	} > "$STAGE_DIR/.build-manifest"
+fi
+
+# Ad-hoc-sign the Word dylib so it works on Apple Silicon. This only needs to
+# happen when the staged build is fully rebuilt -- incremental updates don't
+# touch the dylib.
+if [[ $platform = "m" ]] && [[ "$(uname -s)" = "Darwin" ]]; then
+	"$SCRIPT_DIR/codesign_local" "$STAGE_DIR/Zotero.app"
+fi
 
 echo Done
