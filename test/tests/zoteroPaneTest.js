@@ -1673,7 +1673,12 @@ describe("ZoteroPane", function () {
 			"zotero-tb-sync",
 			"zotero-tb-tabs-menu"
 		];
-		beforeEach(function () {
+		beforeEach(async function () {
+			// The focus traversal relies on focus/blur events, which only fire when
+			// the window is active. It opens in the background on macOS and Windows,
+			// and can lose activation on Linux, so make sure it's active first.
+			await activateZoteroPane();
+
 			// Reset collection search field state
 			let collectionSearchField = doc.getElementById("zotero-collections-search");
 			let collectionSearchButton = doc.getElementById("zotero-tb-collections-search");
@@ -1686,38 +1691,6 @@ describe("ZoteroPane", function () {
 		});
 
 		it("should shift-tab across the zotero pane", async function () {
-			// TEMP: List open windows to diagnose the intermittent timeout
-			let describeWindows = function () {
-				let lines = [];
-				for (let openWin of Services.wm.getEnumerator(null)) {
-					lines.push("type=" + (openWin.document.documentElement.getAttribute("windowtype") || "")
-						+ ", URL=" + openWin.location.href
-						+ ", title=" + JSON.stringify(openWin.document.title)
-						+ ", active=" + (openWin === Services.focus.activeWindow));
-				}
-				return lines.length ? "\n  " + lines.join("\n  ") : " (none)";
-			};
-			let windowsAtStart = describeWindows();
-			// Surface the open-window list in the failure message. On a plain
-			// hang Mocha just reports a context-free 15s timeout and none of our
-			// code runs, so wrap each await to reject with the window list instead.
-			// Done this way rather than logging at the start via Zotero.Debug.init(),
-			// which enables app-wide debug output that adds latency into the focus
-			// race and could keep the intermittent failure from reproducing.
-			let withTimeout = function (promise, label) {
-				let timer;
-				let timeout = new Promise(function (resolve, reject) {
-					timer = setTimeout(function () {
-						reject(new Error("Timed out waiting for " + label
-							+ "\nActive element: "
-							+ (doc.activeElement.id || [...doc.activeElement.classList].join("."))
-							+ "\nOpen windows at start:" + windowsAtStart
-							+ "\nOpen windows now:" + describeWindows()));
-					}, 5000);
-				});
-				return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
-			};
-
 			// Start from the Advanced Search button (the last focusable element in the
 			// search field) so the first shift-tab exercises advanced button -> search field
 			let advancedButton = doc.getElementById('zotero-tb-search-advanced-button');
@@ -1745,10 +1718,10 @@ describe("ZoteroPane", function () {
 				}
 				doc.activeElement.dispatchEvent(shiftTab);
 				if (focusPromise) {
-					await withTimeout(focusPromise, "focusin on " + id);
+					await focusPromise;
 				}
 				if (hidePromise) {
-					await withTimeout(hidePromise, "collections-search to hide before " + id);
+					await hidePromise;
 				}
 				// Some elements don't have id, so use classes to verify they're focused
 				if (doc.activeElement.id) {
