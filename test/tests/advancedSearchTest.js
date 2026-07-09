@@ -1075,8 +1075,7 @@ describe("Advanced Search", function () {
 				assert.isFalse(valueMenu.hidden);
 				// Only the collections, with the saved searches no longer mixed in
 				assert.equal(valueMenu.itemCount, 4);
-				// Subcollections are indented via their icons rather than in the label,
-				// which would break find-as-you-type in the menu
+				// Subcollections are indented via a margin on the icon
 				function getIndent(menuitem) {
 					return win.getComputedStyle(menuitem.querySelector('.menu-icon'))
 						.marginInlineStart;

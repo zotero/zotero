@@ -1354,8 +1354,7 @@
 					menuitem.className = 'menuitem-iconic';
 					menuitem.setAttribute('image', row.image);
 				}
-				// Indent nested rows (subcollections) via CSS rather than by prefixing
-				// the label, which would break find-as-you-type in the menu
+				// Indent nested rows (subcollections)
 				if (row.level) {
 					menuitem.style.setProperty('--nesting-level', row.level);
 				}
