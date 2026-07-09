@@ -1936,8 +1936,9 @@ var ZoteroPane = new function () {
 
 	/**
 	 * @param {'open' | 'collapsed' | 'closed'} state
+	 * @param {Boolean} [skipRefresh=false] - Don't refresh the items view
 	 */
-	this.setAdvancedSearchState = async function (state) {
+	this.setAdvancedSearchState = async function (state, { skipRefresh = false } = {}) {
 		let deck = document.getElementById('zotero-advanced-search-pane-deck');
 		let oldState = deck.state;
 		deck.selectedSearchType = 'temporary';
@@ -1947,7 +1948,7 @@ var ZoteroPane = new function () {
 
 		document.getElementById('zotero-tb-search').updateMode();
 		let refreshPromise;
-		if (!(state === 'open' && oldState === 'collapsed'
+		if (!skipRefresh && !(state === 'open' && oldState === 'collapsed'
 				|| state === 'collapsed' && oldState === 'open')) {
 			// State change changes displayed items - refresh the tree
 			refreshPromise = this._refreshAdvancedSearchPane();

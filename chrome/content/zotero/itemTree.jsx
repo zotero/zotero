@@ -1499,11 +1499,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 				await this.expandToItem(id);
 				if (!this._rowMap[id]) {
 					// The row is still not found
-					// Clear the quick search and tag selection and try again (once)
+					// Clear the quick search, tag selection, and advanced search
+					// and try again (once)
 					if (!noRecurse && window.ZoteroPane) {
 						let hasQuickSearch = !!this.collectionTreeRow.searchText;
 						let hasTagFilters = this.collectionTreeRow.tags?.size > 0;
-						if (hasQuickSearch || hasTagFilters) {
+						let hasAdvancedSearch = !!this.collectionTreeRow.advancedSearch;
+						if (hasQuickSearch || hasTagFilters || hasAdvancedSearch) {
 							// Clear all searches set on the collection tree rows directly on
 							// the rows (vs using ZoteroPane functions) to avoid
 							// refreshing the itemTree multiple times at the same time, which can lead
@@ -1511,13 +1513,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 							for (let collectionTreeRow of this.collectionTreeRows) {
 								collectionTreeRow.setTags(new Set());
 								collectionTreeRow.setSearch('');
+								collectionTreeRow.setAdvancedSearch(null);
 							}
-							// Clear quickSearch text field and tag selection without
-							// rerunning search
+							// Clear tag selection, quicksearch text field, and advanced search
+							// without rerunning search
 							if (window.ZoteroPane.tagSelector) {
 								window.ZoteroPane.tagSelector.clearTagSelection();
 							}
 							window.ZoteroPane.clearQuicksearch(true);
+							if (hasAdvancedSearch) {
+								await window.ZoteroPane.setAdvancedSearchState('closed', { skipRefresh: true });
+							}
 							// Rerun search and refresh the itemTree
 							await this.refreshAndMaintainSelection();
 							// Try to select the item(s) again
