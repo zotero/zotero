@@ -2091,8 +2091,9 @@ class CollectionViewItemTree extends ItemTree {
 			let doc = this._ownerDocument;
 			let div;
 
-			// My Library and no groups
-			if (this.collectionTreeRow.isLibrary() && !Zotero.Groups.getAll().length) {
+			// My Library with no groups and no items
+			if (this.collectionTreeRow.isLibrary() && !Zotero.Groups.getAll().length
+					&& !await this.collectionTreeRow.ref.hasItems()) {
 				div = doc.createElement('div');
 				let p = doc.createElement('p');
 				let html = Zotero.getString(

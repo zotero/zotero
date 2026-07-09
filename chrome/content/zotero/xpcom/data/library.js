@@ -754,11 +754,12 @@ Zotero.Library.prototype.hasItems = async function () {
 	if (!this.id) {
 		throw new Error("Library is not saved yet");
 	}
-	let sql = 'SELECT COUNT(*)>0 FROM items WHERE libraryID=?';
+	let sql = 'SELECT 1 FROM items WHERE libraryID=?';
 	// Don't count old <=4.0 Quick Start Guide items
 	if (this.libraryID == Zotero.Libraries.userLibraryID) {
-		sql += "AND key NOT IN ('ABCD2345', 'ABCD3456')";
+		sql += " AND key NOT IN ('ABCD2345', 'ABCD3456')";
 	}
+	sql += " LIMIT 1";
 	return !!((await Zotero.DB.valueQueryAsync(sql, this.libraryID)));
 };
 
