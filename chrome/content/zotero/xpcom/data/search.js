@@ -1641,11 +1641,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 								throw ("Invalid attachmentStorageType '" + condition.value
 									+ "' specified in search.js");
 						}
-						condSQL += 'linkMode ';
-						if (condition.operator == 'isNot') {
-							condSQL += 'NOT ';
-						}
-						condSQL += `IN (${linkModes.map(() => '?').join(', ')})`;
+						condSQL += `linkMode IN (${linkModes.map(() => '?').join(', ')})`;
 						condSQLParams.push(...linkModes);
 						skipOperators = true;
 						break;

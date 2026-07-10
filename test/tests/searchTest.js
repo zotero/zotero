@@ -969,19 +969,6 @@ describe("Zotero.Search", function () {
 					let matches = await s.search();
 					assert.sameMembers(matches, [linkedFileItem.id, linkedURLItem.id]);
 				});
-
-				it("should support isNot", async function () {
-					let s = new Zotero.Search();
-					s.libraryID = userLibraryID;
-					s.addCondition('attachmentStorageType', 'isNot', 'linked');
-					let matches = await s.search();
-					assert.sameMembers(matches, [
-						fooItem.id,
-						foobarItem.id,
-						bazItem.id,
-						importedURLItem.id
-					]);
-				});
 			});
 			
 			describe("lastRead", function () {
