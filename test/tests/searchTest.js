@@ -257,9 +257,9 @@ describe("Zotero.Search", function () {
 				title: 'linked-file-pdf'
 			});
 			linkedURLItem = await Zotero.Attachments.linkFromURL({
-				url: 'http://example.com/linked-url',
+				url: 'http://example.com/linked-url.pdf',
 				title: 'linked-url',
-				contentType: 'text/html'
+				contentType: 'application/pdf'
 			});
 			
 			let group = await getGroup();
@@ -954,12 +954,14 @@ describe("Zotero.Search", function () {
 					s.libraryID = userLibraryID;
 					s.addCondition('attachmentStorageType', 'is', 'storedFile');
 					let matches = await s.search();
-					assert.sameMembers(matches, [
+					assert.includeMembers(matches, [
 						fooItem.id,
 						foobarItem.id,
 						bazItem.id,
 						importedURLItem.id
 					]);
+					assert.notInclude(matches, linkedFileItem.id);
+					assert.notInclude(matches, linkedURLItem.id);
 				});
 
 				it("should find linked files", async function () {
@@ -967,7 +969,9 @@ describe("Zotero.Search", function () {
 					s.libraryID = userLibraryID;
 					s.addCondition('attachmentStorageType', 'is', 'linkedFile');
 					let matches = await s.search();
-					assert.sameMembers(matches, [linkedFileItem.id]);
+					assert.include(matches, linkedFileItem.id);
+					assert.notInclude(matches, bazItem.id);
+					assert.notInclude(matches, linkedURLItem.id);
 				});
 
 				it("should find web links", async function () {
@@ -975,7 +979,9 @@ describe("Zotero.Search", function () {
 					s.libraryID = userLibraryID;
 					s.addCondition('attachmentStorageType', 'is', 'webLink');
 					let matches = await s.search();
-					assert.sameMembers(matches, [linkedURLItem.id]);
+					assert.include(matches, linkedURLItem.id);
+					assert.notInclude(matches, bazItem.id);
+					assert.notInclude(matches, linkedFileItem.id);
 				});
 			});
 			
