@@ -390,7 +390,8 @@ Zotero.SearchConditions = new function () {
 					isNot: true
 				},
 				table: 'itemAttachments',
-				field: 'linkMode'
+				field: 'linkMode',
+				level: 'attachment'
 			},
 			
 			{

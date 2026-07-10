@@ -983,8 +983,23 @@ describe("Zotero.Search", function () {
 					assert.notInclude(matches, bazItem.id);
 					assert.notInclude(matches, linkedFileItem.id);
 				});
+
+				it("should match a top-level item via a child attachment", async function () {
+					let item = await createDataObject('item');
+					let attachment = await importPDFAttachment(item);
+
+					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('attachmentStorageType', 'is', 'storedFile');
+					let matches = await s.search();
+					assert.include(matches, item.id);
+					assert.notInclude(matches, attachment.id);
+
+					await item.eraseTx();
+				});
 			});
-			
+
 			describe("lastRead", function () {
 				it("should roll a child attachment's last-read date up to its top-level item", async function () {
 					var item = await createDataObject('item', { title: 'zlastread' });
