@@ -949,10 +949,10 @@ describe("Zotero.Search", function () {
 			});
 
 			describe("attachmentStorageType", function () {
-				it("should search by stored attachment storage type", async function () {
+				it("should find stored files", async function () {
 					let s = new Zotero.Search();
 					s.libraryID = userLibraryID;
-					s.addCondition('attachmentStorageType', 'is', 'stored');
+					s.addCondition('attachmentStorageType', 'is', 'storedFile');
 					let matches = await s.search();
 					assert.sameMembers(matches, [
 						fooItem.id,
@@ -962,12 +962,20 @@ describe("Zotero.Search", function () {
 					]);
 				});
 
-				it("should search by linked attachment storage type", async function () {
+				it("should find linked files", async function () {
 					let s = new Zotero.Search();
 					s.libraryID = userLibraryID;
-					s.addCondition('attachmentStorageType', 'is', 'linked');
+					s.addCondition('attachmentStorageType', 'is', 'linkedFile');
 					let matches = await s.search();
-					assert.sameMembers(matches, [linkedFileItem.id, linkedURLItem.id]);
+					assert.sameMembers(matches, [linkedFileItem.id]);
+				});
+
+				it("should find web links", async function () {
+					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('attachmentStorageType', 'is', 'webLink');
+					let matches = await s.search();
+					assert.sameMembers(matches, [linkedURLItem.id]);
 				});
 			});
 			

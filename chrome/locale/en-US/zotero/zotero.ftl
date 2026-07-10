@@ -1053,8 +1053,9 @@ file-type-presentation = Presentation
 file-type-document = Document
 file-type-ebook = Ebook
 
-attachment-storage-type-stored = Stored
-attachment-storage-type-linked = Linked
+attachment-storage-type-storedFile = Stored File
+attachment-storage-type-linkedFile = Linked File
+attachment-storage-type-webLink = Web Link
 
 post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =

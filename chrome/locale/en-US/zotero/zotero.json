@@ -1346,11 +1346,14 @@
 	"file-type-ebook": {
 		"string": "Ebook"
 	},
-	"attachment-storage-type-stored": {
-		"string": "Stored"
+	"attachment-storage-type-storedFile": {
+		"string": "Stored File"
 	},
-	"attachment-storage-type-linked": {
-		"string": "Linked"
+	"attachment-storage-type-linkedFile": {
+		"string": "Linked File"
+	},
+	"attachment-storage-type-webLink": {
+		"string": "Web Link"
 	},
 	"post-upgrade-message": {
 		"string": "You’ve been upgraded to <span data-l10n-name=\"post-upgrade-appver\">{ app-name } { version }</span>! Learn about <a data-l10n-name=\"new-features-link\">what’s new</a>."

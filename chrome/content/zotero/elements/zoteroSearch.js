@@ -1278,7 +1278,7 @@
 				}
 				case 'attachmentStorageType':
 				{
-					let rows = ['stored', 'linked'].map(type => ({
+					let rows = ['storedFile', 'linkedFile', 'webLink'].map(type => ({
 						name: Zotero.getString('attachment-storage-type-' + type),
 						value: type
 					}));

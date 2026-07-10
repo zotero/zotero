@@ -1623,16 +1623,21 @@ Zotero.Search.prototype._buildQuery = async function () {
 					case 'attachmentStorageType': {
 						let linkModes;
 						switch (condition.value) {
-							case 'stored':
+							case 'storedFile':
 								linkModes = [
 									Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 									Zotero.Attachments.LINK_MODE_IMPORTED_URL
 								];
 								break;
 
-							case 'linked':
+							case 'linkedFile':
 								linkModes = [
-									Zotero.Attachments.LINK_MODE_LINKED_FILE,
+									Zotero.Attachments.LINK_MODE_LINKED_FILE
+								];
+								break;
+
+							case 'webLink':
+								linkModes = [
 									Zotero.Attachments.LINK_MODE_LINKED_URL
 								];
 								break;
