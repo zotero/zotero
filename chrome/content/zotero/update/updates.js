@@ -1104,8 +1104,6 @@ var gDownloadingPage = {
 	 * When the data transfer begins
 	 * @param	 request
 	 *					The nsIRequest object for the transfer
-	 * @param	 context
-	 *					Additional data
 	 */
 	onStartRequest(request) {
 		this._downloadProgress.removeAttribute("value");
@@ -1116,14 +1114,12 @@ var gDownloadingPage = {
 	 * When new data has been downloaded
 	 * @param	 request
 	 *					The nsIRequest object for the transfer
-	 * @param	 context
-	 *					Additional data
 	 * @param	 progress
 	 *					The current number of bytes transferred
 	 * @param	 maxProgress
 	 *					The total number of bytes that must be transferred
 	 */
-	onProgress(request, context, progress, maxProgress) {
+	onProgress(request, progress, maxProgress) {
 		let status = this._updateDownloadStatus(progress, maxProgress);
 		var currentProgress = Math.round(100 * (progress / maxProgress));
 
@@ -1154,14 +1150,12 @@ var gDownloadingPage = {
 	 * When we have new status text
 	 * @param	 request
 	 *					The nsIRequest object for the transfer
-	 * @param	 context
-	 *					Additional data
 	 * @param	 status
 	 *					A status code
 	 * @param	 statusText
 	 *					Human readable version of |status|
 	 */
-	onStatus(request, context, status, statusText) {
+	onStatus(request, status, statusText) {
 		this._setStatus(statusText);
 	},
 
@@ -1169,8 +1163,6 @@ var gDownloadingPage = {
 	 * When data transfer ceases
 	 * @param	 request
 	 *					The nsIRequest object for the transfer
-	 * @param	 context
-	 *					Additional data
 	 * @param	 status
 	 *					Status code containing the reason for the cessation.
 	 */
