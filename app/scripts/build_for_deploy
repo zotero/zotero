@@ -121,7 +121,7 @@ do
 	fi
 
 	# Combine and deduplicate
-	INCREMENTALS="`echo -e "$INCREMENTALS\n$PINNED" | sort -u | grep -v '^$'`"
+	INCREMENTALS="`echo -e "$INCREMENTALS\n$PINNED" | sort -u | grep -v '^$' || true`"
 	echo "$INCREMENTALS"
 	echo
 
