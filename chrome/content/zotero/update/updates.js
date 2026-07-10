@@ -972,18 +972,15 @@ var gDownloadingPage = {
 			gUpdates.update.QueryInterface(Ci.nsIWritablePropertyBag);
 			gUpdates.update.setProperty("foregroundDownload", "true");
 
-			let state = gAUS.downloadUpdate(gUpdates.update, false);
-			if (state == "failed") {
-				// We've tried as hard as we could to download a valid update -
-				// we fell back from a partial patch to a complete patch and even
-				// then we couldn't validate. Show a validation error with instructions
-				// on how to manually update.
+			// Add this UI as a listener for active downloads
+			gAUS.addDownloadListener(this);
+
+			let result = await gAUS.downloadUpdate(gUpdates.update);
+			if (result != Ci.nsIApplicationUpdateService.DOWNLOAD_SUCCESS) {
 				this.cleanUp();
 				gUpdates.wiz.goTo("errors");
 				return;
 			}
-			// Add this UI as a listener for active downloads
-			gAUS.addDownloadListener(this);
 
 			if (activeUpdate) {
 				this._downloadProgress.removeAttribute("value");
@@ -1096,7 +1093,7 @@ var gDownloadingPage = {
 			"gDownloadingPage",
 			"onHide - continuing download in background at full speed"
 		);
-		gAUS.downloadUpdate(gUpdates.update, false);
+		gAUS.downloadUpdate(gUpdates.update);
 		gUpdates.wiz.cancel();
 	},
 
