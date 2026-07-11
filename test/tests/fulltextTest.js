@@ -242,6 +242,93 @@ describe("Zotero.FullText", function () {
 			);
 			assert.notInclude(await contentSearch(item, 'instancemismatch'), item.id);
 		});
+
+		describe("Note indexing", function () {
+			async function createNote(noteText) {
+				let item = new Zotero.Item('note');
+				item.setNote(noteText);
+				await item.saveTx();
+				return item;
+			}
+
+			function noteSearch(item, value) {
+				let s = new Zotero.Search();
+				s.libraryID = item.libraryID;
+				s.addCondition('note', 'contains', value);
+				return s.search();
+			}
+
+			it("should match note content case- and diacritic-insensitively via the index", async function () {
+				let item = await createNote("<p>zqnnThe Séance was held at dawn</p>");
+				await Zotero.FullText.processNoteIndexQueue();
+				assert.include(await noteSearch(item, 'zqnnthe seance'), item.id);
+			});
+
+			it("should match a just-edited note before it's re-indexed", async function () {
+				let item = await createNote("<p>zqnnoriginal content</p>");
+				await Zotero.FullText.processNoteIndexQueue();
+				item.setNote('<p style="color: red">zqnnréplacement content</p>');
+				await item.saveTx();
+				// The edit is matched right away, without waiting for background re-indexing, with
+				// the same accent-insensitive matching as the index (é folded)...
+				assert.include(await noteSearch(item, 'zqnnreplacement'), item.id);
+				// ...the old content no longer matches...
+				assert.notInclude(await noteSearch(item, 'zqnnoriginal'), item.id);
+				// ...and markup isn't matched
+				assert.notInclude(await noteSearch(item, 'color: red'), item.id);
+			});
+
+			it("should not match note markup", async function () {
+				let item = await createNote('<p style="color: red">zqnnstyled text</p>');
+				await Zotero.FullText.processNoteIndexQueue();
+				assert.include(await noteSearch(item, 'zqnnstyled'), item.id);
+				assert.notInclude(await noteSearch(item, 'color: red'), item.id);
+			});
+
+			it("should scan plain text but not markup for a term too short for the index", async function () {
+				// "ai" and "re" are too short to index, so they fall back to scanning the note's
+				// normalized plain text. "ai" is in the text and matches; "re" appears only in "red"
+				// in the style attribute, so scanning plain text (not raw HTML) doesn't match it.
+				let item = await createNote('<p style="color: red">zqnn ai content</p>');
+				await Zotero.FullText.processNoteIndexQueue();
+				assert.include(await noteSearch(item, 'ai'), item.id);
+				assert.notInclude(await noteSearch(item, 're'), item.id);
+			});
+
+			it("should match a mixed-script note term via the plain-text fallback", async function () {
+				// A mixed CJK/non-CJK term suits neither index, so it falls back to the plain-text scan
+				let item = await createNote("<p>zqnn研究ai</p>");
+				await Zotero.FullText.processNoteIndexQueue();
+				assert.include(await noteSearch(item, '究ai'), item.id);
+			});
+
+			it("should exclude a matching note with doesNotContain", async function () {
+				let item = await createNote("<p>zqnnexcludable content</p>");
+				await Zotero.FullText.processNoteIndexQueue();
+				let s = new Zotero.Search();
+				s.libraryID = item.libraryID;
+				s.addCondition('note', 'doesNotContain', 'zqnnexcludable');
+				assert.notInclude(await s.search(), item.id);
+			});
+
+			it("should fall back to scanning the HTML until the note backfill finishes", async function () {
+				let item = await createNote("<p>zqnnbackfill séance</p>");
+				// Rebuild the index (as after a delete-and-resync), leaving every note pending
+				// backfill
+				await Zotero.DB.queryAsync(
+					"UPDATE ftindex.fulltextIndexMeta SET value='xxxxxxxx' WHERE key='localUserKey'"
+				);
+				await Zotero.DB.vacuum({ force: true });
+				// The reconnect's index setup (which drops the mismatched tables) runs on the next
+				// query, as at startup before searches resume
+				await Zotero.DB.queryAsync("SELECT 1");
+				// The note isn't in the index yet, but an exact term still matches via the scan
+				assert.include(await noteSearch(item, 'zqnnbackfill'), item.id);
+				// Draining the queue enables diacritic-insensitive index matching
+				await Zotero.FullText.processNoteIndexQueue();
+				assert.include(await noteSearch(item, 'zqnnbackfill seance'), item.id);
+			});
+		});
 	});
 
 	describe("Indexing", function () {

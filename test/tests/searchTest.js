@@ -1906,6 +1906,27 @@ describe("Zotero.Search", function () {
 						s.addCondition('quicksearch-everything', 'contains', 'el');
 						assert.notInclude(await s.search(), item.id);
 					});
+
+					it("should skip note matching for a short term but honor a quoted one", async function () {
+						let note = new Zotero.Item('note');
+						note.libraryID = userLibraryID;
+						note.setNote('<p>zqsnote re content</p>');
+						await note.saveTx();
+						await Zotero.FullText.processNoteIndexQueue();
+						async function matches(term) {
+							let s = new Zotero.Search();
+							s.libraryID = userLibraryID;
+							s.addCondition('quicksearch-everything', 'contains', term);
+							return s.search();
+						}
+						// A long term matches the note's content
+						assert.include(await matches('zqsnote'), note.id);
+						// "re" is too short for the index, so an unquoted term doesn't scan note
+						// content (avoiding a per-keystroke scan) and nothing else matches it
+						assert.notInclude(await matches('re'), note.id);
+						// Quoting makes the quick search Enter-triggered, so the short term is matched
+						assert.include(await matches('"re"'), note.id);
+					});
 				});
 			});
 			
