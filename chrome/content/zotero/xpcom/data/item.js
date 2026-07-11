@@ -2148,7 +2148,12 @@ Zotero.Item.prototype._saveData = async function (env) {
 			params.unshift(itemID);
 		}
 		await Zotero.DB.queryAsync(sql, params);
-		
+
+		// Flag the note as edited since its last full-text index update rather than re-indexing it
+		// on every auto-save while typing. The background queue re-indexes it, and searches match
+		// the flagged note from its cached text in the meantime.
+		await Zotero.FullText.flagNoteStale(itemID, noteText);
+
 		if (parentItemID) {
 			reloadParentChildItems[parentItemID] = true;
 		}
@@ -5580,6 +5585,10 @@ Zotero.Item.prototype._eraseData = async function (env) {
 	if (this.isAttachment()) {
 		await Zotero.Fulltext.clearItemWords(this.id);
 		//Zotero.Fulltext.clearItemContent(this.id);
+	}
+	// Clear the note content index (notes and attachments can both have itemNotes rows)
+	if (this.isNote() || this.isAttachment()) {
+		await Zotero.FullText.clearNoteIndex(this.id);
 	}
 	
 	await Zotero.DB.queryAsync('DELETE FROM items WHERE itemID=?', this.id);

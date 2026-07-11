@@ -336,7 +336,12 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 			else {
 				this.addCondition('field', operator, part.text, false);
 				this.addCondition('tag', operator, part.text, false);
-				this.addCondition('note', operator, part.text, false);
+				// Match note content as a substring via the note index. Like
+				// full-text content below, skip unquoted terms too short for the
+				// index.
+				if (part.inQuotes || Zotero.FullText.canSearchNotes(part.text)) {
+					this.addCondition('note', operator, part.text, false);
+				}
 				this.addCondition('annotationText', operator, part.text, false);
 				this.addCondition('annotationComment', operator, part.text, false);
 			}
@@ -1678,7 +1683,23 @@ Zotero.Search.prototype._buildQuery = async function () {
 						condSQL += "itemID IN (SELECT itemID FROM groupItems WHERE ";
 						openParens++;
 						break;
-					
+
+					// Match note text content via the note FTS index (case- and
+					// diacritic-insensitive) when it can answer the term; otherwise fall
+					// through to the LIKE scan of the note HTML
+					case 'note': {
+						if (typeof condition.value == 'string'
+								&& ['contains', 'doesNotContain'].includes(condition.operator)) {
+							let noteMatch = await Zotero.FullText.getNoteContentSQL(condition.value);
+							if (noteMatch) {
+								condSQL += noteMatch.sql;
+								condSQLParams.push(...noteMatch.params);
+								skipOperators = true;
+							}
+						}
+						break;
+					}
+
 					case 'tempTable':
 						condSQL += "itemID IN (SELECT id FROM " + condition.value + ")";
 						skipOperators = true;

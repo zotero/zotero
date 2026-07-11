@@ -40,11 +40,14 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	
 	const _processorCacheFile = '.zotero-ft-unprocessed';
 
-	// Schema version of the attached content database (fulltext.sqlite)
-	const _contentDBVersion = 1;
-	// Version of the content index format. Bump to force a rebuild of the index from the cached
-	// text (e.g., after a tokenizer or normalization change) -- items recorded at a lower version
-	// in fulltextIndexState are re-indexed by the background queue processor.
+	// Schema version of the attached index database (fulltext.sqlite), covering the attachment
+	// content and note tables. Bump only for changes that can't be applied in place; adding a table
+	// is done idempotently in setUpContentDB() without a bump.
+	const _indexDBVersion = 1;
+	// Version of the index format. Bump to force a rebuild of the index from the cached text
+	// (e.g., after a tokenizer or normalization change) -- items recorded at a lower version in
+	// fulltextIndexState/fulltextNoteIndexState reenter the queue and are re-indexed at startup,
+	// like the initial migration.
 	const _contentIndexVersion = 1;
 
 	const kWbClassSpace =            0;
@@ -73,10 +76,17 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	// to 0 when a pass reaches the end, to pick up anything re-queued below the cursor.
 	var _attachmentIndexQueueCursor = 0;
 	var _attachmentExtractionQueueCursor = 0;
+	var _noteIndexQueueCursor = 0;
 	// Flush a content batch to the index once it reaches this many characters, so peak memory stays
 	// bounded by the budget rather than by item size (each up to fulltext.textMaxLength)
 	const _maxContentBatchChars = 2000000;
 	var _processingSyncedContent = false;
+	var _noteIndexReady = false;
+	// Normalized plain text of notes edited since their last index update (version 0), so a search
+	// run before the background queue re-indexes them matches with the same normalized, plain-text
+	// semantics as the index rather than a raw scan of the note HTML. Keyed by itemID; entries are
+	// added when a note is flagged stale and dropped once it's re-indexed or no longer stale.
+	var _staleNoteText = new Map();
 	var _reindexLimitTimeoutIDs = {};
 	var _syncContentBlacklist = {};
 	var _upgradeCheck = true;
@@ -87,7 +97,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		// attached database (fulltext.sqlite), used for content searching. It's a local,
 		// rebuildable index kept out of zotero.sqlite (so it doesn't bloat the main DB or its
 		// backups), versioned independently via PRAGMA user_version. The original extracted text
-		// still lives in the .zotero-ft-cache files; the index stores only normalized trigrams.
+		// still lives in the .zotero-ft-cache files, so the content tables store only normalized
+		// trigrams. Notes, which have no cache file, also store their normalized plain text (see
+		// noteText below), so short and mixed-script note searches have something to scan.
 		//
 		// FTS5 is a bundled SQLite extension. It's loaded once here; DBConnection re-loads it
 		// automatically after a reconnect (before this callback runs), so it's available for the
@@ -104,15 +116,19 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			// the .zotero-ft-cache files, so the background queue repopulates the index.
 			let localUserKey = Zotero.Users.getLocalUserKey();
 			let version = await Zotero.DB.valueQueryAsync("PRAGMA ftindex.user_version");
-			let indexedUserKey = version >= _contentDBVersion
+			let indexedUserKey = version >= _indexDBVersion
 				? await Zotero.DB.valueQueryAsync(
 					"SELECT value FROM ftindex.fulltextIndexMeta WHERE key='localUserKey'")
 				: false;
-			if (version < _contentDBVersion || indexedUserKey != localUserKey) {
+			if (version < _indexDBVersion || indexedUserKey != localUserKey) {
 				// Drop any existing tables so a stale or mismatched index is rebuilt from scratch
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextContent");
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextContentCJK");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextNotes");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextNotesCJK");
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextIndexState");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextNoteIndexState");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.noteText");
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextIndexMeta");
 				// Latin (and CJK runs of 3+ chars): trigram index over the normalized text
 				await Zotero.DB.queryAsync(
@@ -127,6 +143,17 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					"CREATE VIRTUAL TABLE ftindex.fulltextContentCJK USING fts5("
 					+ "text, tokenize='ascii', content='', contentless_delete=1)"
 				);
+				// Note content (text extracted from the note HTML), same scheme as above. Kept in
+				// separate tables because contentless FTS5 tables can't be filtered by an extra
+				// column, so attachment content and notes couldn't be told apart in one table.
+				await Zotero.DB.queryAsync(
+					"CREATE VIRTUAL TABLE ftindex.fulltextNotes USING fts5("
+					+ "text, tokenize='trigram', content='', contentless_delete=1)"
+				);
+				await Zotero.DB.queryAsync(
+					"CREATE VIRTUAL TABLE ftindex.fulltextNotesCJK USING fts5("
+					+ "text, tokenize='ascii', content='', contentless_delete=1)"
+				);
 				// Records which items are in the content index and at what format version. The
 				// contentless FTS5 tables can't be queried for this, so this side table makes the
 				// queue (items not yet indexed at the current version) a countable,
@@ -135,6 +162,32 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					"CREATE TABLE ftindex.fulltextIndexState (\n"
 					+ "    itemID INTEGER PRIMARY KEY,\n"
 					+ "    version INT NOT NULL\n"
+					+ ")"
+				);
+				// Same, for notes. version 0 marks a note edited since its last index update
+				// ("stale"): note saves just set this flag instead of re-indexing the whole note on
+				// every auto-save, and searches match stale notes in memory while the background
+				// queue catches up.
+				await Zotero.DB.queryAsync(
+					"CREATE TABLE ftindex.fulltextNoteIndexState (\n"
+					+ "    itemID INTEGER PRIMARY KEY,\n"
+					+ "    version INT NOT NULL\n"
+					+ ")"
+				);
+				// A search looks up the stale (version 0) notes on every query, so index them
+				// separately. The partial index stays tiny -- only the currently-stale notes --
+				// so the lookup doesn't scan the full table.
+				await Zotero.DB.queryAsync(
+					"CREATE INDEX ftindex.fulltextNoteIndexState_stale "
+					+ "ON fulltextNoteIndexState(itemID) WHERE version=0"
+				);
+				// Notes are small, so (unlike attachment content) their normalized plain text is also
+				// stored, so short and mixed-script note searches -- which the trigram/CJK indexes
+				// can't answer -- can scan it with a LIKE instead of matching nothing
+				await Zotero.DB.queryAsync(
+					"CREATE TABLE ftindex.noteText (\n"
+					+ "    itemID INTEGER PRIMARY KEY,\n"
+					+ "    text TEXT\n"
 					+ ")"
 				);
 				// Index metadata, including the localUserKey the index was built against (above)
@@ -148,7 +201,11 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					"REPLACE INTO ftindex.fulltextIndexMeta (key, value) VALUES ('localUserKey', ?)",
 					[localUserKey]
 				);
-				await Zotero.DB.queryAsync("PRAGMA ftindex.user_version = " + _contentDBVersion);
+				await Zotero.DB.queryAsync("PRAGMA ftindex.user_version = " + _indexDBVersion);
+				// The rebuilt note index has to be backfilled before searches can rely on it, and
+				// any in-memory stale-note text no longer applies to a freshly attached database
+				_noteIndexReady = false;
+				_staleNoteText.clear();
 			}
 		};
 		// Rebuild the index if its file is found corrupt. A malformed page can surface from any
@@ -1509,6 +1566,105 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	}
 
 
+	/**
+	 * Number of notes not yet in the note index at the current version, including notes marked
+	 * stale by an edit (version 0). Like the content index queue, this is countable and resumable.
+	 *
+	 * @return {Promise<Integer>}
+	 */
+	this.getNoteIndexQueueCount = async function () {
+		return Zotero.DB.valueQueryAsync(
+			"SELECT COUNT(*) FROM itemNotes N "
+			+ "LEFT JOIN ftindex.fulltextNoteIndexState S USING (itemID) "
+			+ "WHERE S.itemID IS NULL OR S.version<?",
+			[_contentIndexVersion]
+		);
+	};
+
+
+	/**
+	 * Process the note index queue, indexing the text content of notes that aren't in the note
+	 * index yet or were edited since their last index update. Note saves only mark the note stale
+	 * (so a note isn't re-indexed on every auto-save while typing); this does the actual indexing.
+	 *
+	 * @param {Object} [options]
+	 * @param {Integer} [options.maxTime] - Stop after roughly this many ms
+	 * @param {Boolean} [options.checkIdle] - Stop as soon as the user is no longer idle
+	 * @return {Promise<Integer>} The number of notes processed
+	 */
+	this.processNoteIndexQueue = async function ({ maxTime = null, checkIdle = false, onProgress = null } = {}) {
+		if (_indexingInProgress) {
+			return 0;
+		}
+		_indexingInProgress = true;
+		let start = Date.now();
+		let processed = 0;
+		try {
+			while (true) {
+				if (Zotero.Sync.Runner.syncInProgress) {
+					return processed;
+				}
+				if (checkIdle && !_canDrainIndex()) {
+					return processed;
+				}
+				let itemIDs = await Zotero.DB.columnQueryAsync(
+					"SELECT N.itemID FROM itemNotes N "
+					+ "LEFT JOIN ftindex.fulltextNoteIndexState S USING (itemID) "
+					+ "WHERE (S.itemID IS NULL OR S.version<?) AND N.itemID>? "
+					+ "ORDER BY N.itemID LIMIT 50",
+					[_contentIndexVersion, _noteIndexQueueCursor]
+				);
+				if (!itemIDs.length) {
+					// Nothing left above the cursor; restart from the beginning to catch anything
+					// re-queued below it (e.g., a note edited during the drain)
+					if (_noteIndexQueueCursor) {
+						_noteIndexQueueCursor = 0;
+						continue;
+					}
+					Zotero.debug("No queued notes to index");
+					return processed;
+				}
+				Zotero.debug("Indexing " + itemIDs.length + " "
+					+ Zotero.Utilities.pluralize(itemIDs.length, 'note'));
+				let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+				// Read and index each note in one transaction, so a note save can't land between
+				// reading its text and marking it indexed at the current version
+				await Zotero.DB.executeTransaction(async function () {
+					let rows = await Zotero.DB.queryAsync(
+						"SELECT itemID, note FROM itemNotes WHERE itemID IN (" + itemIDs.join(',') + ")"
+					);
+					let noteByID = new Map(rows.map(row => [row.itemID, row.note]));
+					for (let itemID of itemIDs) {
+						// Not in itemNotes anymore -- deleted since it was queued
+						if (!noteByID.has(itemID)) {
+							await Zotero.FullText.clearNoteIndex(itemID);
+							continue;
+						}
+						let note = noteByID.get(itemID);
+						// Index the text content, not the HTML, so markup doesn't match searches.
+						// Block boundaries become line breaks, so words don't join across paragraphs.
+						let text = note
+							? parserUtils.convertToPlainText(note, Ci.nsIDocumentEncoder.OutputRaw, 0)
+							: '';
+						await setNoteIndex(itemID, text);
+					}
+				});
+				processed += itemIDs.length;
+				_noteIndexQueueCursor = itemIDs[itemIDs.length - 1];
+				if (onProgress) {
+					onProgress(processed);
+				}
+				if (maxTime && (Date.now() - start) >= maxTime) {
+					return processed;
+				}
+			}
+		}
+		finally {
+			_indexingInProgress = false;
+		}
+	};
+
+
 	function _isUserIdle() {
 		let idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
 			.getService(Components.interfaces.nsIUserIdleService);
@@ -1540,7 +1696,8 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 
 	/**
 	 * Bring the content index up to date after an upgrade by draining the already-extracted text
-	 * into the search index, then hand any never-before-indexed attachments to the idle observer.
+	 * and note content into the search index, then hand any never-before-indexed attachments to the
+	 * idle observer.
 	 */
 	this.startQueueDrain = async function () {
 		if (Zotero.test) return;
@@ -1548,11 +1705,15 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		let itemProgress;
 		let startTime = Date.now();
 		try {
-			// Restore content search after an upgrade by draining the queue of already-extracted
-			// text into the search index. Run this to completion proactively -- not gated on idle
-			// like the background work below -- because until it finishes content search is
-			// incomplete. Pause for syncs so it doesn't compete with full-text content downloads.
-			let total = await this.getAttachmentIndexQueueCount();
+			// Restore content search after an upgrade by draining the queues of already-extracted
+			// text and note content into the search index. Run this to completion proactively --
+			// not gated on idle like the background work below -- because until it finishes content
+			// search is incomplete. Pause for syncs so it doesn't compete with full-text content
+			// downloads.
+			let queueCount = async () => {
+				return (await this.getAttachmentIndexQueueCount()) + (await this.getNoteIndexQueueCount());
+			};
+			let total = await queueCount();
 			// Items drained so far, tracked across processor calls so the bar can advance after each
 			// batch within a call rather than only once per loop iteration
 			let done = 0;
@@ -1566,7 +1727,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					await Zotero.Promise.delay(5000);
 					continue;
 				}
-				let remaining = await this.getAttachmentIndexQueueCount();
+				let remaining = await queueCount();
 				if (remaining == 0) {
 					break;
 				}
@@ -1592,6 +1753,10 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				done = base + await this.processAttachmentIndexQueue(
 					{ maxTime: 1000, onProgress: n => updateProgress(base + n) }
 				);
+				base = done;
+				done = base + await this.processNoteIndexQueue(
+					{ maxTime: 1000, onProgress: n => updateProgress(base + n) }
+				);
 			}
 			if (itemProgress) {
 				itemProgress.setProgress(100);
@@ -1607,7 +1772,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			// Index never-before-indexed attachments (e.g., added while indexing was off) gently in
 			// the background -- they were never searchable, so unlike the migration above they can
 			// wait for idle
-			if ((await this.getAttachmentIndexQueueCount()) > 0
+			if ((await queueCount()) > 0
 					|| (await this.getAttachmentExtractionQueueCount()) > 0) {
 				this.registerQueueDrainObserver();
 			}
@@ -1630,12 +1795,14 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 */
 	this.optimizeContentIndex = async function () {
 		try {
-			await Zotero.DB.queryAsync(
-				"INSERT INTO ftindex.fulltextContent(fulltextContent) VALUES('optimize')"
-			);
-			await Zotero.DB.queryAsync(
-				"INSERT INTO ftindex.fulltextContentCJK(fulltextContentCJK) VALUES('optimize')"
-			);
+			for (let tables of [_contentTables, _noteTables]) {
+				await Zotero.DB.queryAsync(
+					`INSERT INTO ftindex.${tables.trigram}(${tables.trigram}) VALUES('optimize')`
+				);
+				await Zotero.DB.queryAsync(
+					`INSERT INTO ftindex.${tables.cjk}(${tables.cjk}) VALUES('optimize')`
+				);
+			}
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -1698,9 +1865,10 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	};
 
 
-	// Drain the content and unindexed-item queues in the background on a self-rescheduling timer.
-	// Unlike an OS idle observer, this keeps making progress while Zotero is in the background and
-	// the user works in other apps, and it backs off the moment they return to Zotero.
+	// Drain the content, unindexed-item, and note queues in the background on a self-rescheduling
+	// timer. Unlike an OS idle observer, this keeps making progress while Zotero is in the
+	// background and the user works in other apps, and it backs off the moment they return to
+	// Zotero.
 	function _scheduleQueueDrain(delay) {
 		_queueDrainTimerID = setTimeout(async () => {
 			_queueDrainTimerID = null;
@@ -1711,7 +1879,8 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					return;
 				}
 				if ((await self.getAttachmentIndexQueueCount()) == 0
-						&& (await self.getAttachmentExtractionQueueCount()) == 0) {
+						&& (await self.getAttachmentExtractionQueueCount()) == 0
+						&& (await self.getNoteIndexQueueCount()) == 0) {
 					// Drained -- compact the index and stop
 					await self.optimizeContentIndex();
 					return;
@@ -1720,6 +1889,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					+ (_isZoteroActive() ? "focused but idle" : "not focused") + ")");
 				await self.processAttachmentIndexQueue({ maxTime: 1000, checkIdle: true });
 				await self.processAttachmentExtractionQueue({ maxTime: 1000, checkIdle: true });
+				await self.processNoteIndexQueue({ maxTime: 1000, checkIdle: true });
 				_scheduleQueueDrain(250);
 			}
 			catch (e) {
@@ -1888,50 +2058,144 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	}
 
 
+	// The FTS5 table sets, each a trigram table, a CJK 2-gram table, and an index-state side table
+	const _contentTables = {
+		trigram: 'fulltextContent',
+		cjk: 'fulltextContentCJK',
+		state: 'fulltextIndexState'
+	};
+	const _noteTables = {
+		trigram: 'fulltextNotes',
+		cjk: 'fulltextNotesCJK',
+		state: 'fulltextNoteIndexState',
+		// Notes also store their normalized plain text (see setUpContentDB), for the short- and
+		// mixed-script-term LIKE fallback; attachment content has no equivalent
+		text: 'noteText'
+	};
+
+
 	/**
-	 * Index an item's extracted text into the content FTS5 tables and record it in the index-state
-	 * table at the current version. Replaces any existing entries for the item. `text` may be empty
-	 * (e.g., no cache file), in which case the item is simply recorded as indexed with no content.
+	 * Index an item's text into the given FTS5 tables and record it in the corresponding
+	 * index-state table at the current version. Replaces any existing entries for the item. `text`
+	 * may be empty (e.g., no cache file), in which case the item is simply recorded as indexed
+	 * with no content.
 	 *
 	 * Must be called within a transaction.
 	 */
-	async function setContentIndex(itemID, text) {
-		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", itemID);
-		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK WHERE rowid=?", itemID);
+	async function setIndexEntries(itemID, text, tables) {
+		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.trigram} WHERE rowid=?`, itemID);
+		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.cjk} WHERE rowid=?`, itemID);
+		if (tables.text) {
+			await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.text} WHERE itemID=?`, itemID);
+		}
 		if (text) {
 			// Skip logging the params, which includes the full text
 			let normalized = Zotero.Utilities.Internal.normalizeForSearch(text) || '';
 			await Zotero.DB.queryAsync(
-				"INSERT INTO ftindex.fulltextContent (rowid, text) VALUES (?, ?)",
+				`INSERT INTO ftindex.${tables.trigram} (rowid, text) VALUES (?, ?)`,
 				[itemID, normalized],
 				{ debugParams: false }
 			);
 			let cjk = getCJKBigrams(normalized);
 			if (cjk) {
 				await Zotero.DB.queryAsync(
-					"INSERT INTO ftindex.fulltextContentCJK (rowid, text) VALUES (?, ?)",
+					`INSERT INTO ftindex.${tables.cjk} (rowid, text) VALUES (?, ?)`,
 					[itemID, cjk],
+					{ debugParams: false }
+				);
+			}
+			// Stored plain text for the LIKE fallback (notes only)
+			if (tables.text) {
+				await Zotero.DB.queryAsync(
+					`INSERT INTO ftindex.${tables.text} (itemID, text) VALUES (?, ?)`,
+					[itemID, normalized],
 					{ debugParams: false }
 				);
 			}
 		}
 		await Zotero.DB.queryAsync(
-			"REPLACE INTO ftindex.fulltextIndexState (itemID, version) VALUES (?, ?)",
+			`REPLACE INTO ftindex.${tables.state} (itemID, version) VALUES (?, ?)`,
 			[itemID, _contentIndexVersion]
 		);
 	}
 
+	function setContentIndex(itemID, text) {
+		return setIndexEntries(itemID, text, _contentTables);
+	}
+
+	async function setNoteIndex(itemID, text) {
+		await setIndexEntries(itemID, text, _noteTables);
+		// Now indexed at the current version, so it's no longer stale
+		_staleNoteText.delete(itemID);
+	}
+
 
 	/**
-	 * Remove an item's entries from the content FTS5 tables and the index-state table.
+	 * Flag a note as edited since its last index update, without re-indexing it. Called on every
+	 * note save, so it must stay cheap: it writes a one-row version-0 marker (instead of rebuilding
+	 * the note's FTS entries on each auto-save) and caches the note's normalized plain text in
+	 * memory, so a search before the background queue re-indexes the note matches it with the same
+	 * normalized, plain-text semantics as the index. Kicks the queue so the note is re-indexed once
+	 * Zotero is idle.
+	 *
+	 * Must be called within a transaction.
+	 *
+	 * @param {Number} itemID
+	 * @param {String} note - The note's HTML
+	 */
+	this.flagNoteStale = async function (itemID, note) {
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO ftindex.fulltextNoteIndexState (itemID, version) VALUES (?, 0)",
+			itemID
+		);
+		_staleNoteText.set(itemID, _normalizeNoteText(note));
+		this.registerQueueDrainObserver();
+	};
+
+
+	/**
+	 * Extract and normalize a note's searchable plain text from its HTML, matching what the index
+	 * stores: markup is stripped (so it isn't matched) and the text is normalized for case- and
+	 * diacritic-insensitive matching.
+	 */
+	function _normalizeNoteText(note) {
+		if (!note) {
+			return '';
+		}
+		let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+		let text = parserUtils.convertToPlainText(note, Ci.nsIDocumentEncoder.OutputRaw, 0);
+		return Zotero.Utilities.Internal.normalizeForSearch(text) || '';
+	}
+
+
+	/**
+	 * Remove an item's entries from the given FTS5 tables and index-state table.
 	 *
 	 * Must be called within a transaction.
 	 */
-	async function clearContentIndex(itemID) {
-		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", itemID);
-		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK WHERE rowid=?", itemID);
-		await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", itemID);
+	async function clearIndexEntries(itemID, tables) {
+		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.trigram} WHERE rowid=?`, itemID);
+		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.cjk} WHERE rowid=?`, itemID);
+		if (tables.text) {
+			await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.text} WHERE itemID=?`, itemID);
+		}
+		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.state} WHERE itemID=?`, itemID);
 	}
+
+	function clearContentIndex(itemID) {
+		return clearIndexEntries(itemID, _contentTables);
+	}
+
+	/**
+	 * Remove an item's entries from the note FTS5 tables and its note-index-state row, e.g., when
+	 * the item is erased (the content database can't FK-cascade to zotero.sqlite).
+	 *
+	 * Must be called within a transaction.
+	 */
+	this.clearNoteIndex = async function (itemID) {
+		await clearIndexEntries(itemID, _noteTables);
+		_staleNoteText.delete(itemID);
+	};
 
 
 	/**
@@ -1942,7 +2206,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 *
 	 * @return {Object|null} { table, match } or null
 	 */
-	function getContentMatchClause(searchText) {
+	function getMatchClause(searchText, tables) {
 		let normalized = Zotero.Utilities.Internal.normalizeForSearch(searchText);
 		if (!normalized) {
 			return null;
@@ -1956,14 +2220,18 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			if (!bigrams) {
 				return null;
 			}
-			return { table: 'fulltextContentCJK', match: '"' + bigrams + '"' };
+			return { table: tables.cjk, match: '"' + bigrams + '"' };
 		}
 		// Pure non-CJK: match the whole term as a contiguous phrase (substring) against the
 		// trigram index, which only indexes runs of 3+ characters
 		if (!hasCJK && normalized.length >= 3) {
-			return { table: 'fulltextContent', match: '"' + normalized.replace(/"/g, '""') + '"' };
+			return { table: tables.trigram, match: '"' + normalized.replace(/"/g, '""') + '"' };
 		}
 		return null;
+	}
+
+	function getContentMatchClause(searchText) {
+		return getMatchClause(searchText, _contentTables);
 	}
 
 
@@ -1977,6 +2245,117 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 */
 	this.canSearchContent = function (searchText) {
 		return getContentMatchClause(searchText) !== null;
+	};
+
+
+	/**
+	 * Whether a term can be matched against the note index rather than needing a fallback scan of
+	 * the stored note text. Quick search uses this to skip note matching for terms too short for the
+	 * index, avoiding a per-keystroke scan.
+	 *
+	 * @param {String} searchText
+	 * @return {Boolean}
+	 */
+	this.canSearchNotes = function (searchText) {
+		return getMatchClause(searchText, _noteTables) !== null;
+	};
+
+
+	/**
+	 * Resolve a search term to SQL matching it against note text content, for use inside an
+	 * itemNotes subquery by the 'note' search condition.
+	 *
+	 * Returns null only while the note backfill is still running, so the caller falls back to a raw
+	 * LIKE scan of the note HTML and notes stay searchable until the index is built. Once the index
+	 * is ready, a term too short or mixed-script for it (see getMatchClause) is matched by scanning
+	 * notes' normalized plain text instead, so those terms stay searchable without matching markup.
+	 *
+	 * Notes edited since their last index update (marked stale by the save) still hold their
+	 * pre-edit text in the FTS tables, so they're excluded from the index match and matched instead
+	 * against their current normalized plain text held in memory -- the same semantics as the index
+	 * -- so a just-edited note matches consistently before the background queue re-indexes it.
+	 *
+	 * @param {String} searchText
+	 * @return {Promise<Object|null>} { sql, params }, or null to fall back to a raw scan
+	 */
+	this.getNoteContentSQL = async function (searchText) {
+		if (!_noteIndexReady) {
+			// Until every note has an index-state row (indexed or marked stale), the index can't
+			// be relied on, so return null and let the caller fall back to a raw scan -- markup and
+			// all -- to keep notes searchable during the one-time post-upgrade backfill
+			let pending = await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM itemNotes N "
+				+ "LEFT JOIN ftindex.fulltextNoteIndexState S USING (itemID) "
+				+ "WHERE S.itemID IS NULL OR (S.version > 0 AND S.version < ?)",
+				[_contentIndexVersion]
+			);
+			if (pending) {
+				return null;
+			}
+			_noteIndexReady = true;
+		}
+
+		let normalizedTerm = Zotero.Utilities.Internal.normalizeForSearch(searchText);
+		if (!normalizedTerm) {
+			return { sql: '0', params: [] };
+		}
+
+		// Resolve the term to a predicate over the note index. A term the FTS index can answer uses
+		// its MATCH; a term too short (Western) or mixed-script for it -- the trigram index covers
+		// Latin runs of 3+ characters and the CJK index 2+ -- instead LIKEs the stored normalized
+		// plain text. Either way it matches the notes' stripped, normalized text, so markup isn't
+		// matched (e.g. "re" hitting "red" in a style attribute) and matching stays case- and
+		// diacritic-insensitive.
+		let clause = getMatchClause(searchText, _noteTables);
+		let indexMatch, indexParams;
+		if (clause) {
+			indexMatch = "itemID IN (SELECT rowid FROM ftindex." + clause.table
+				+ " WHERE " + clause.table + " MATCH ?)";
+			indexParams = [clause.match];
+		}
+		else {
+			indexMatch = "itemID IN (SELECT itemID FROM ftindex.noteText WHERE text LIKE ? ESCAPE '\\')";
+			indexParams = ['%' + normalizedTerm.replace(/[\\%_]/g, '\\$&') + '%'];
+		}
+
+		// Match stale notes in memory (see above). Their itemIDs are inlined below rather than
+		// re-queried in the search SQL.
+		let staleIDs = await Zotero.DB.columnQueryAsync(
+			"SELECT itemID FROM ftindex.fulltextNoteIndexState WHERE version=0"
+		);
+		let staleMatches = [];
+		if (staleIDs.length) {
+			let staleSet = new Set(staleIDs);
+			// Drop cached text for notes that are no longer stale
+			for (let id of _staleNoteText.keys()) {
+				if (!staleSet.has(id)) {
+					_staleNoteText.delete(id);
+				}
+			}
+			// Fill any cache misses (e.g., notes flagged stale in a previous session)
+			let missing = staleIDs.filter(id => !_staleNoteText.has(id));
+			if (missing.length) {
+				let rows = await Zotero.DB.queryAsync(
+					"SELECT itemID, note FROM itemNotes WHERE itemID IN (" + missing.join(',') + ")"
+				);
+				for (let row of rows) {
+					_staleNoteText.set(row.itemID, _normalizeNoteText(row.note));
+				}
+			}
+			for (let id of staleIDs) {
+				let text = _staleNoteText.get(id);
+				if (text && text.includes(normalizedTerm)) {
+					staleMatches.push(id);
+				}
+			}
+		}
+
+		let excludeStale = staleIDs.length ? "itemID NOT IN (" + staleIDs.join(',') + ") AND " : "";
+		let staleClause = staleMatches.length ? "itemID IN (" + staleMatches.join(',') + ")" : "0";
+		return {
+			sql: "((" + excludeStale + indexMatch + ") OR " + staleClause + ")",
+			params: indexParams
+		};
 	};
 
 
@@ -2326,12 +2705,21 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		var sql = "SELECT COUNT(*) FROM fulltextItems WHERE synced = ?";
 		var notAvailable = await Zotero.DB.valueQueryAsync(sql, this.SYNC_STATE_MISSING);
 
-		// Pending work, both auto-draining: items with extracted content not yet in the search index
-		// (remaining) and indexable attachments not yet extracted (unindexedQueue)
+		// Notes in the note index at the current version (excluding ones edited since their last
+		// index update, which are counted in noteQueue until they're re-indexed)
+		var sql = "SELECT COUNT(*) FROM itemNotes N "
+			+ "JOIN ftindex.fulltextNoteIndexState S USING (itemID) "
+			+ "WHERE S.version >= ?";
+		var notesIndexed = await Zotero.DB.valueQueryAsync(sql, _contentIndexVersion);
+
+		// Pending work, all auto-draining: items with extracted content not yet in the search index
+		// (remaining), indexable attachments not yet extracted (unindexedQueue), and notes not yet
+		// indexed or edited since their last index update (noteQueue)
 		var remaining = await this.getAttachmentIndexQueueCount();
 		var unindexedQueue = await this.getAttachmentExtractionQueueCount();
+		var noteQueue = await this.getNoteIndexQueueCount();
 
-		return { indexed, partial, notAvailable, remaining, unindexedQueue };
+		return { indexed, partial, notAvailable, notesIndexed, remaining, unindexedQueue, noteQueue };
 	};
 	
 	
@@ -2481,8 +2869,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 
 	/**
 	 * Remove content index entries for items that no longer exist. Normal deletion clears these
-	 * via clearItemWords(), but the content database can't FK-cascade to zotero.sqlite, so this is
-	 * a periodic safety net for items removed through a path that bypassed Item.erase().
+	 * via clearItemWords()/clearNoteIndex(), but the content database can't FK-cascade to
+	 * zotero.sqlite, so this is a periodic safety net for items removed through a path that
+	 * bypassed Item.erase().
 	 *
 	 * @return {Promise}
 	 */
@@ -2494,6 +2883,12 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				+ "WHERE rowid NOT IN (SELECT itemID FROM fulltextItems)");
 			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState "
 				+ "WHERE itemID NOT IN (SELECT itemID FROM fulltextItems)");
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextNotes "
+				+ "WHERE rowid NOT IN (SELECT itemID FROM itemNotes)");
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextNotesCJK "
+				+ "WHERE rowid NOT IN (SELECT itemID FROM itemNotes)");
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextNoteIndexState "
+				+ "WHERE itemID NOT IN (SELECT itemID FROM itemNotes)");
 		});
 	};
 
