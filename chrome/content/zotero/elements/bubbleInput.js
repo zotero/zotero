@@ -339,6 +339,9 @@
 				Utils.notifyDialog("handle-input", { query: input.value, eventType: "focus" });
 			});
 			input.addEventListener("blur", async (event) => {
+				// When the window itself loses focus (e.g., Cmd/Alt-Tab to another app),
+				// the input remains focused, so keep its state unchanged
+				if (!document.hasFocus()) return;
 				// record this input as last focused if it's not empty OR if the focus left bubbleInput altogether
 				if (!Utils.isInputEmpty(input) || !this.contains(event.relatedTarget)) {
 					this._lastFocusedInput = input;

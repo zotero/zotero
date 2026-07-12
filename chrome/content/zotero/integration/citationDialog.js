@@ -1888,6 +1888,10 @@ const IOManager = {
 		// the list selection while focus remains in the input, so locator entry
 		// stays active.
 		if (event && event.type == "keydown" && !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+		// On focusout, only proceed if focus moved elsewhere within the dialog. When
+		// the window itself loses focus (e.g., on Cmd-Tab to another app to check a
+		// page number), the input remains focused and locator entry stays active.
+		if (event && event.type == "focusout" && !doc.hasFocus()) return;
 		// clear just added bubbles and update bubble input to reflect that
 		this._justAddedBubbles = null;
 		_id("bubble-input").showJustAddedPlaceholder = false;
