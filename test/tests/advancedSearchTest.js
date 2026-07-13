@@ -194,6 +194,36 @@ describe("Advanced Search", function () {
 	});
 	
 
+	it("shouldn't match an image embedded in a note", async function () {
+		var item = await createDataObject('item');
+		item.addTag('a');
+		await item.saveTx();
+		var note = new Zotero.Item('note');
+		note.setNote('foo');
+		note.parentItemID = item.id;
+		note.addTag('a');
+		await note.saveTx();
+		await createEmbeddedImage(note);
+		
+		await zp.toggleAdvancedSearchState('open');
+		var pane = deck.pane;
+		
+		var s = new Zotero.Search();
+		s.libraryID = item.libraryID;
+		s.addCondition('numTags', 'is', '0');
+		pane.search = s;
+		
+		var iv = zp.itemsView;
+		await pane.submit();
+		await iv.waitForLoad();
+		
+		// The item and its note are tagged, so the only untagged row under the item is
+		// the embedded image, which is hidden and shouldn't pull the item into the results
+		assert.isFalse(iv.getRowIndexByID(item.id));
+		
+		await zp.setAdvancedSearchState('closed');
+	});
+	
 	it("shouldn't show trashed items outside the trash", async function () {
 		var item = await createDataObject('item', { setTitle: true });
 		item.deleted = true;

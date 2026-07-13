@@ -337,6 +337,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				}
 			}
 			let newSearchItems = [...newSearchItemSet];
+			// Embedded-image attachments (images pasted into notes) are never shown in the
+			// tree, so don't let one match a search and pull in its parents
+			newSearchItems = newSearchItems.filter(item => !item.isEmbeddedImageAttachment());
 			if (this.collectionTreeRow.isTrash()) {
 				// When in trash, also fetch trashed collections and searches
 				// so that they're displayed among the deleted items
