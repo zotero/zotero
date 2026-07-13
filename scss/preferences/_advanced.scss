@@ -81,12 +81,20 @@
 	margin-top: 0 !important;
 }
 
-#fulltext-stats > .form-grid > label:nth-child(odd)
-{
-	text-align: end;
+#fulltext-stats-grid label + label {
+	margin-inline-start: 0.35em;
 }
 
-#updateButton, #fulltext-clearIndex {
+#fulltext-stats-progress-label {
+	margin-inline-start: 12px;
+}
+
+#fulltext-stats-progress-box,
+#fulltext-stats-complete {
+	margin-bottom: 8px;
+}
+
+#updateButton {
 	margin-inline-start: 6px;
 }
 

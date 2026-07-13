@@ -52,13 +52,6 @@ Zotero_Preferences.Advanced = {
 		
 		this.onDataDirLoad();
 
-		document.getElementById('fulltext-rebuildIndex').setAttribute('label',
-			Zotero.getString('zotero.preferences.search.rebuildIndex')
-				+ Zotero.getString('punctuation.ellipsis'));
-		document.getElementById('fulltext-clearIndex').setAttribute('label',
-			Zotero.getString('zotero.preferences.search.clearIndex')
-				+ Zotero.getString('punctuation.ellipsis'));
-		
 		this.updateIndexStats();
 		this.updateLocalAPIUI();
 		document.getElementById('zotero-prefpane-advanced-enable-local-api').addEventListener('synctopreference', () => {
@@ -386,96 +379,55 @@ Zotero_Preferences.Advanced = {
 	},
 	
 	updateIndexStats: async function () {
-		var stats = await Zotero.Fulltext.getIndexStats();
-		document.getElementById('fulltext-stats-indexed')
-			.setAttribute('value', stats.indexed);
-		document.getElementById('fulltext-stats-partial')
-			.setAttribute('value', stats.partial);
-		document.getElementById('fulltext-stats-unindexed')
-			.setAttribute('value', stats.unindexed);
-		document.getElementById('fulltext-stats-words')
-			.setAttribute('value', stats.words);
-	},
-	
-	
-	rebuildIndexPrompt: async function () {
-		var buttons = [
-			document.getElementById('fulltext-rebuildIndex'),
-			document.getElementById('fulltext-clearIndex')
-		];
-		buttons.forEach(b => b.disabled = true);
-		
-		var ps = Services.prompt;
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
-			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-		
-		var index = ps.confirmEx(null,
-			Zotero.getString('zotero.preferences.search.rebuildIndex'),
-			Zotero.getString('zotero.preferences.search.rebuildWarning',
-				Zotero.getString('zotero.preferences.search.indexUnindexed')),
-			buttonFlags,
-			Zotero.getString('zotero.preferences.search.rebuildIndex'),
-			null,
-			// Position 2 because of https://bugzilla.mozilla.org/show_bug.cgi?id=345067
-			Zotero.getString('zotero.preferences.search.indexUnindexed'),
-			null, {});
-		
-		try {
-			if (index == 0) {
-				await Zotero.Fulltext.rebuildIndex();
-			}
-			else if (index == 2) {
-				await Zotero.Fulltext.rebuildIndex(true)
-			}
-			
-			await this.updateIndexStats();
+		// Stop any pending refresh; we'll reschedule below if indexing is still in progress
+		if (this._indexStatsTimeoutID) {
+			clearTimeout(this._indexStatsTimeoutID);
+			this._indexStatsTimeoutID = null;
 		}
-		catch (e) {
-			Zotero.alert(null, Zotero.getString('general.error'), e);
+		// Bail if the pane is no longer shown (e.g., a scheduled refresh fired after navigating away)
+		let progressBox = document.getElementById('fulltext-stats-progress-box');
+		if (!progressBox) {
+			return;
 		}
-		finally {
-			buttons.forEach(b => b.disabled = false);
-		}
-	},
 
-	clearIndexPrompt: async function () {
-		var buttons = [
-			document.getElementById('fulltext-rebuildIndex'),
-			document.getElementById('fulltext-clearIndex')
-		];
-		buttons.forEach(b => b.disabled = true);
-		
-		var ps = Services.prompt;
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
-			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-		
-		var index = ps.confirmEx(null,
-			Zotero.getString('zotero.preferences.search.clearIndex'),
-			Zotero.getString('zotero.preferences.search.clearWarning',
-				Zotero.getString('zotero.preferences.search.clearNonLinkedURLs')),
-			buttonFlags,
-			Zotero.getString('zotero.preferences.search.clearIndex'),
-			null,
-			// Position 2 because of https://bugzilla.mozilla.org/show_bug.cgi?id=345067
-			Zotero.getString('zotero.preferences.search.clearNonLinkedURLs'), null, {});
-		
-		try {
-			if (index == 0) {
-				await Zotero.Fulltext.clearIndex();
-			}
-			else if (index == 2) {
-				await Zotero.Fulltext.clearIndex(true);
-			}
-			
-			await this.updateIndexStats();
+		let stats = await Zotero.FullText.getIndexStats();
+		document.getElementById('fulltext-stats-indexed').setAttribute('value', stats.indexed.toLocaleString());
+		document.getElementById('fulltext-stats-partial').setAttribute('value', stats.partial.toLocaleString());
+		document.getElementById('fulltext-stats-notes').setAttribute('value', stats.notesIndexed.toLocaleString());
+		document.getElementById('fulltext-stats-not-available').setAttribute('value', stats.notAvailable.toLocaleString());
+
+		// Indexed + Partial + indexed notes are already what's in the search index, so they're the
+		// bar's numerator. Pending work across the auto-draining queues: extracted content not yet
+		// in the index (remaining), indexable attachments not yet extracted (unindexedQueue), and
+		// notes not yet indexed or edited since their last index update (noteQueue). Show the bar
+		// while anything's pending; otherwise "up to date". Items with no local file or content
+		// aren't counted here -- nothing local can index them -- so "up to date" can sit next to a
+		// nonzero "not available".
+		let inIndex = stats.indexed + stats.partial + stats.notesIndexed;
+		let pending = stats.remaining + stats.unindexedQueue + stats.noteQueue;
+		let total = inIndex + pending;
+		let complete = document.getElementById('fulltext-stats-complete');
+		if (pending > 0 && total > 0) {
+			let progress = document.getElementById('fulltext-stats-progress');
+			progress.max = total;
+			progress.value = inIndex;
+			document.l10n.setAttributes(
+				document.getElementById('fulltext-stats-progress-label'),
+				'fulltext-index-status-indexing',
+				{ indexed: inIndex, total }
+			);
+			progressBox.hidden = false;
+			complete.hidden = true;
+			// While this pane is open, drive the queues actively in small batches rather than
+			// waiting for idle, so they advance as the user watches, then refresh promptly
+			await Zotero.FullText.processAttachmentIndexQueue({ maxTime: 500 });
+			await Zotero.FullText.processAttachmentExtractionQueue({ maxTime: 500 });
+			await Zotero.FullText.processNoteIndexQueue({ maxTime: 500 });
+			this._indexStatsTimeoutID = setTimeout(() => this.updateIndexStats(), 250);
 		}
-		catch (e) {
-			Zotero.alert(null, Zotero.getString('general.error'), e);
-		}
-		finally {
-			buttons.forEach(b => b.disabled = false);
+		else {
+			progressBox.hidden = true;
+			complete.hidden = false;
 		}
 	},
 

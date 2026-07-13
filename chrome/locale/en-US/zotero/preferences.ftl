@@ -145,3 +145,8 @@ preferences-account-switch-text =
     Switching to a different account will remove all { -app-name } data on this computer. Before continuing, make sure all data and files you wish to keep have been synced with the “{ $username }” account or you have a backup of your { -app-name } data directory.
 preferences-account-switch-confirmation-text = remove local data
 preferences-account-switch-accept = Remove Data and Restart
+
+fulltext-index-status-indexing = Indexing { $indexed } of { $total }…
+fulltext-index-status-complete = Search index is up to date
+fulltext-stats-notes-indexed = Notes indexed:
+fulltext-stats-not-available = File or full-text content not available:

@@ -241,15 +241,6 @@
 		<groupbox aria-label="&zotero.preferences.search.fulltextCache;">
 			<label><html:h2>&zotero.preferences.search.fulltextCache;</html:h2></label>
 			
-			<hbox>
-				<button id="fulltext-rebuildIndex" flex="1" oncommand="Zotero_Preferences.Advanced.rebuildIndexPrompt()"
-					data-search-strings="zotero.preferences.search.rebuildWarning"/>
-				<button id="fulltext-clearIndex" flex="1" oncommand="Zotero_Preferences.Advanced.clearIndexPrompt()"
-					data-search-strings="zotero.preferences.search.clearWarning"/>
-			</hbox>
-			
-			<separator/>
-			
 			<hbox align="center">
 				<html:label for="fulltext-maxLength">&zotero.preferences.fulltext.textMaxLength;</html:label>
 				<html:input id="fulltext-maxLength" type="text" size="10" preference="extensions.zotero.fulltext.textMaxLength"/>
@@ -268,18 +259,31 @@
 		<groupbox id="fulltext-stats" tabindex="0" aria-label="&zotero.preferences.search.indexStats;" aria-describedby="fulltext-stats-grid">
 			<label><html:h2>&zotero.preferences.search.indexStats;</html:h2></label>
 			
-			<vbox class="form-grid" id="fulltext-stats-grid">
-				<label value="&zotero.preferences.search.indexStats.indexed;"/>
-				<label id="fulltext-stats-indexed"/>
-	
-				<label value="&zotero.preferences.search.indexStats.partial;"/>
-				<label id="fulltext-stats-partial"/>
-	
-				<label value="&zotero.preferences.search.indexStats.unindexed;"/>
-				<label id="fulltext-stats-unindexed"/>
-	
-				<label value="&zotero.preferences.search.indexStats.words;"/>
-				<label id="fulltext-stats-words"/>
+			<vbox id="fulltext-stats-status">
+				<hbox align="center" id="fulltext-stats-progress-box" hidden="true">
+					<html:progress id="fulltext-stats-progress" value="0" max="1"/>
+					<label id="fulltext-stats-progress-label"/>
+				</hbox>
+				<label id="fulltext-stats-complete" data-l10n-id="fulltext-index-status-complete" hidden="true"/>
+			</vbox>
+
+			<vbox id="fulltext-stats-grid">
+				<hbox>
+					<label value="&zotero.preferences.search.indexStats.indexed;"/>
+					<label id="fulltext-stats-indexed"/>
+				</hbox>
+				<hbox>
+					<label value="&zotero.preferences.search.indexStats.partial;"/>
+					<label id="fulltext-stats-partial"/>
+				</hbox>
+				<hbox>
+					<label data-l10n-id="fulltext-stats-notes-indexed"/>
+					<label id="fulltext-stats-notes"/>
+				</hbox>
+				<hbox>
+					<label data-l10n-id="fulltext-stats-not-available"/>
+					<label id="fulltext-stats-not-available"/>
+				</hbox>
 			</vbox>
 		</groupbox>	
 	</vbox>
