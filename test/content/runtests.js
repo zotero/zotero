@@ -214,8 +214,25 @@ function resetPrefs() {
 	});
 }
 
+// TEMP: Track when the main window loses focus-manager activation, to diagnose
+// intermittent focus-test timeouts (zoteroPaneTest #focus()). Surfaced in that
+// test's failure message.
+var focusDiag = { lastActive: null, firstInactive: null };
+
 afterEach(function () {
 	resetPrefs();
+
+	try {
+		let win = Zotero.getMainWindow();
+		let title = this.currentTest && this.currentTest.fullTitle();
+		if (win && Services.focus.activeWindow === win) {
+			focusDiag.lastActive = title;
+		}
+		else if (!focusDiag.firstInactive) {
+			focusDiag.firstInactive = title;
+		}
+	}
+	catch (e) {}
 });
 
 

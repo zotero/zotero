@@ -1712,7 +1712,9 @@ describe("ZoteroPane", function () {
 							+ "\nActive element: "
 							+ (doc.activeElement.id || [...doc.activeElement.classList].join("."))
 							+ "\nOpen windows at start:" + windowsAtStart
-							+ "\nOpen windows now:" + describeWindows()));
+							+ "\nOpen windows now:" + describeWindows()
+							+ "\nMain window last active after test: " + focusDiag.lastActive
+							+ "\nMain window first seen inactive after test: " + focusDiag.firstInactive));
 					}, 5000);
 				});
 				return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
