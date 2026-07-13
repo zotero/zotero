@@ -1715,10 +1715,17 @@
 		}
 
 		// The item level this condition matches at ('item' by default), used to decide
-		// cross-level binding in a group
+		// cross-level binding in a group. A condition can match natively at multiple
+		// levels (an array). A level set that includes the top level (e.g., numTags,
+		// which matches at every level) can map to any other level, so it combines
+		// with anything, like 'any'.
 		get conditionLevel() {
 			let data = this.selectedCondition && Zotero.SearchConditions.get(this.selectedCondition);
-			return (data && data.level) || 'item';
+			let level = (data && data.level) || 'item';
+			if (Array.isArray(level) && level.includes('item')) {
+				return 'any';
+			}
+			return level;
 		}
 
 		// Whether a value has been entered, used to decide whether the last

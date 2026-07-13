@@ -892,6 +892,44 @@ describe("Zotero.Search", function () {
 				});
 			});
 			
+			describe("numTags", function () {
+				it("should match by tag count", async function () {
+					var item1 = await createDataObject('item');
+					var item2 = await createDataObject('item');
+					item2.addTag(Zotero.Utilities.randomString());
+					item2.addTag(Zotero.Utilities.randomString());
+					await item2.saveTx();
+					
+					var s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('numTags', 'is', '0');
+					var matches = await s.search();
+					assert.include(matches, item1.id);
+					assert.notInclude(matches, item2.id);
+					
+					s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('numTags', 'is', '2');
+					matches = await s.search();
+					assert.include(matches, item2.id);
+					assert.notInclude(matches, item1.id);
+					
+					s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('numTags', 'isGreaterThan', '1');
+					matches = await s.search();
+					assert.include(matches, item2.id);
+					assert.notInclude(matches, item1.id);
+					
+					s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('numTags', 'isLessThan', '1');
+					matches = await s.search();
+					assert.include(matches, item1.id);
+					assert.notInclude(matches, item2.id);
+				});
+			});
+			
 			describe("isEmpty/isNotEmpty", function () {
 				it("should match items with an empty or non-empty text field", async function () {
 					var item1 = await createDataObject('item');

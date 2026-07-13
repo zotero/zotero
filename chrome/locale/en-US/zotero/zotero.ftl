@@ -980,6 +980,7 @@ search-conditions-collection = Collection
 search-conditions-savedSearch = Saved Search
 search-conditions-itemTypeID = Item Type
 search-conditions-tag = Tag
+search-conditions-numTags = # of Tags
 search-conditions-note = Note
 search-conditions-childNote = Child Note
 search-conditions-creator = Creator

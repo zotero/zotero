@@ -411,6 +411,24 @@ Zotero.SearchConditions = new function () {
 			},
 			
 			{
+				name: 'numTags',
+				operators: {
+					is: true,
+					isNot: true,
+					isLessThan: true,
+					isGreaterThan: true
+				},
+				table: 'items',
+				field: '(SELECT COUNT(*) FROM itemTags WHERE itemTags.itemID=items.itemID)',
+				// Every item level has its own tag count, so the condition matches natively
+				// at each level rather than rolling a match up to the result level
+				level: ['item', 'attachment', 'note', 'annotation'],
+				inlineFilter: function (val) {
+					return /^[0-9]+$/.test(val) ? val : false;
+				}
+			},
+			
+			{
 				name: 'note',
 				operators: {
 					contains: true,
