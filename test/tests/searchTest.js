@@ -225,6 +225,9 @@ describe("Zotero.Search", function () {
 		var fooItem;
 		var foobarItem;
 		var bazItem;
+		var importedURLItem;
+		var linkedFileItem;
+		var linkedURLItem;
 		var fooItemGroup;
 		var foobarItemGroup;
 		var bazItemGroup;
@@ -239,6 +242,25 @@ describe("Zotero.Search", function () {
 			foobarItem = await importFileAttachment("search/foobar.html");
 			bazItem = await importFileAttachment("search/baz.pdf");
 			userLibraryID = fooItem.libraryID;
+			let testPDF = getTestDataDirectory();
+			testPDF.append('test.pdf');
+			importedURLItem = await Zotero.Attachments.importSnapshotFromFile({
+				file: testPDF,
+				libraryID: userLibraryID,
+				title: 'imported-url-pdf',
+				url: 'http://example.com/imported-url.pdf',
+				contentType: 'application/pdf',
+				singleFile: true
+			});
+			linkedFileItem = await Zotero.Attachments.linkFromFile({
+				file: OS.Path.join(getTestDataDirectory().path, 'test.pdf'),
+				title: 'linked-file-pdf'
+			});
+			linkedURLItem = await Zotero.Attachments.linkFromURL({
+				url: 'http://example.com/linked-url.pdf',
+				title: 'linked-url',
+				contentType: 'application/pdf'
+			});
 			
 			let group = await getGroup();
 			fooItemGroup = await importFileAttachment("search/foo.html", { libraryID: group.libraryID });
@@ -250,6 +272,9 @@ describe("Zotero.Search", function () {
 			yield fooItem.eraseTx();
 			yield foobarItem.eraseTx();
 			yield bazItem.eraseTx();
+			yield importedURLItem.eraseTx();
+			yield linkedFileItem.eraseTx();
+			yield linkedURLItem.eraseTx();
 			yield fooItemGroup.eraseTx();
 			yield foobarItemGroup.eraseTx();
 			yield bazItemGroup.eraseTx();
@@ -1069,7 +1094,59 @@ describe("Zotero.Search", function () {
 					assert.sameMembers(matches, [fooItem.id, foobarItem.id]);
 				});
 			});
-			
+
+			describe("attachmentStorageType", function () {
+				it("should find stored files", async function () {
+					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('attachmentStorageType', 'is', 'storedFile');
+					let matches = await s.search();
+					assert.includeMembers(matches, [
+						fooItem.id,
+						foobarItem.id,
+						bazItem.id,
+						importedURLItem.id
+					]);
+					assert.notInclude(matches, linkedFileItem.id);
+					assert.notInclude(matches, linkedURLItem.id);
+				});
+
+				it("should find linked files", async function () {
+					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('attachmentStorageType', 'is', 'linkedFile');
+					let matches = await s.search();
+					assert.include(matches, linkedFileItem.id);
+					assert.notInclude(matches, bazItem.id);
+					assert.notInclude(matches, linkedURLItem.id);
+				});
+
+				it("should find web links", async function () {
+					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('attachmentStorageType', 'is', 'webLink');
+					let matches = await s.search();
+					assert.include(matches, linkedURLItem.id);
+					assert.notInclude(matches, bazItem.id);
+					assert.notInclude(matches, linkedFileItem.id);
+				});
+
+				it("should match a top-level item via a child attachment", async function () {
+					let item = await createDataObject('item');
+					let attachment = await importPDFAttachment(item);
+
+					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('attachmentStorageType', 'is', 'storedFile');
+					let matches = await s.search();
+					assert.include(matches, item.id);
+					assert.notInclude(matches, attachment.id);
+
+					await item.eraseTx();
+				});
+			});
+
 			describe("lastRead", function () {
 				it("should roll a child attachment's last-read date up to its top-level item", async function () {
 					var item = await createDataObject('item', { title: 'zlastread' });

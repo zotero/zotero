@@ -384,6 +384,17 @@ Zotero.SearchConditions = new function () {
 				// Matches attachment items; see 'level' handling in search.js
 				level: 'attachment'
 			},
+
+			{
+				name: 'attachmentStorageType',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAttachments',
+				field: 'linkMode',
+				level: 'attachment'
+			},
 			
 			{
 				name: 'tagID',

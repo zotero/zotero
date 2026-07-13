@@ -1002,6 +1002,7 @@ search-conditions-dateModified = Date Modified
 search-conditions-fulltextContent = Attachment Content
 search-conditions-programmingLanguage = Programming Language
 search-conditions-fileTypeID = Attachment File Type
+search-conditions-attachmentStorageType = Attachment Storage Type
 search-conditions-lastRead = Attachment Last Read
 search-conditions-annotationText = Annotation Text
 search-conditions-annotationComment = Annotation Comment
@@ -1020,6 +1021,7 @@ search-conditions-submenu-annotation = Annotation
 # context. The full names above are still shown once a condition is selected.
 search-conditions-short-fulltextContent = Content
 search-conditions-short-fileTypeID = File Type
+search-conditions-short-attachmentStorageType = Storage Type
 search-conditions-short-lastRead = Last Read
 search-conditions-short-annotationText = Text
 search-conditions-short-annotationComment = Comment
@@ -1057,6 +1059,10 @@ file-type-video = Video
 file-type-presentation = Presentation
 file-type-document = Document
 file-type-ebook = Ebook
+
+attachment-storage-type-storedFile = Stored File
+attachment-storage-type-linkedFile = Linked File
+attachment-storage-type-webLink = Web Link
 
 post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
