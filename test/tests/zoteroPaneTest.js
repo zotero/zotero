@@ -1685,6 +1685,43 @@ describe("ZoteroPane", function () {
 			collectionSearchButton.style.display = '';
 		});
 
+		// PROBE (ci-test only, do not merge): determine whether an intra-app
+		// win.focus() can restore Services.focus.activeWindow under CI's Xvfb (no
+		// window manager). Forces the inactive state deterministically rather than
+		// waiting for the intermittent natural occurrence. Throws its findings so
+		// they show in the CI log regardless of debug level.
+		it.only("PROBE win.focus reactivation under Xvfb", async function () {
+			let log = [];
+			let record = function (label) {
+				let aw = Services.focus.activeWindow;
+				log.push(label + ": paneActive=" + (aw === win)
+					+ " activeWindow=" + (aw ? aw.location.href : "null"));
+			};
+
+			record("initial");
+
+			// (1) Controlled: does focus() recover after an explicit blur?
+			win.blur();
+			await Zotero.Promise.delay(200);
+			record("after win.blur()");
+			win.focus();
+			await Zotero.Promise.delay(200);
+			record("after win.focus() post-blur");
+
+			// (2) Real trigger: open + dismiss a dialog (as the culprit test does),
+			// then try to recover with focus()
+			let dialogPromise = waitForDialog();
+			Services.prompt.confirmEx(win, "Probe", "Probe",
+				Services.prompt.STD_OK_CANCEL_BUTTONS, null, null, null, null, {});
+			await dialogPromise;
+			record("after dialog dismissed");
+			win.focus();
+			await Zotero.Promise.delay(200);
+			record("after win.focus() post-dialog");
+
+			throw new Error("PROBE RESULTS:\n" + log.join("\n"));
+		});
+
 		it("should shift-tab across the zotero pane", async function () {
 			// TEMP: List open windows to diagnose the intermittent timeout
 			let describeWindows = function () {
