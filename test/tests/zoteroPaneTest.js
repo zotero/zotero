@@ -1685,35 +1685,30 @@ describe("ZoteroPane", function () {
 			collectionSearchButton.style.display = '';
 		});
 
-		// PROBE (ci-test only, do not merge): the real failure is a rare race in the
-		// dialog-close activation handoff, so hammer dialog open/close until the pane
-		// goes inactive, then test whether win.focus() can recover it. Throws its
-		// findings so they show in the CI log regardless of debug level.
-		it.only("PROBE win.focus recovery via dialog loop under Xvfb", async function () {
-			this.timeout(120000);
+		// PROBE (ci-test only, do not merge): does focus() move Services.focus
+		// .activeWindow at all under Xvfb? Open a second window, win2.focus() it to
+		// force the pane inactive, then win.focus() the pane to see if it comes back.
+		// Throws its findings so they show in the CI log regardless of debug level.
+		it.only("PROBE whether focus() moves activeWindow under Xvfb", async function () {
+			this.timeout(60000);
 			let aw = () => Services.focus.activeWindow;
-			let href = () => (aw() ? aw().location.href : "null");
+			let name = (w) => (w ? (w === win ? "pane" : (w.location ? w.location.href : "other")) : "null");
 			let log = [];
-			let hitInactive = false;
+			log.push("initial: activeWindow=" + name(aw()) + " paneActive=" + (aw() === win));
 
-			for (let i = 0; i < 60 && !hitInactive; i++) {
-				let dialogPromise = waitForDialog();
-				Services.prompt.confirmEx(win, "Probe", "Probe",
-					Services.prompt.STD_OK_CANCEL_BUTTONS, null, null, null, null, {});
-				await dialogPromise;
-				await Zotero.Promise.delay(20);
-				if (aw() !== win) {
-					hitInactive = true;
-					log.push("iteration " + i + ": pane INACTIVE after dialog; activeWindow=" + href());
-					win.focus();
-					await Zotero.Promise.delay(150);
-					log.push("after win.focus(): paneActive=" + (aw() === win) + " activeWindow=" + href());
-				}
-			}
-			if (!hitInactive) {
-				log.push("pane stayed active through all 60 dialog cycles (could not reproduce)");
-			}
+			let win2 = win.open("about:blank", "_blank", "chrome,centerscreen,width=300,height=300");
+			await Zotero.Promise.delay(400);
+			log.push("after open win2: activeWindow=" + name(aw()) + " paneActive=" + (aw() === win));
 
+			win2.focus();
+			await Zotero.Promise.delay(400);
+			log.push("after win2.focus(): activeWindow=" + name(aw()) + " paneActive=" + (aw() === win));
+
+			win.focus();
+			await Zotero.Promise.delay(400);
+			log.push("after win.focus(): activeWindow=" + name(aw()) + " paneActive=" + (aw() === win));
+
+			try { win2.close(); } catch (e) {}
 			throw new Error("PROBE RESULTS:\n" + log.join("\n"));
 		});
 
