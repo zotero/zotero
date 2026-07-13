@@ -2846,28 +2846,6 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 
 
 	/**
-	 * Clears the full-text index and all full-text cache files
-	 *
-	 * @return {Promise}
-	 */
-	this.clearIndex = async function () {
-		await Zotero.DB.executeTransaction(async function () {
-			await Zotero.DB.queryAsync("DELETE FROM fulltextItems");
-
-			// Drop content index entries for items no longer in fulltextItems
-			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent "
-				+ "WHERE rowid NOT IN (SELECT itemID FROM fulltextItems)");
-			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK "
-				+ "WHERE rowid NOT IN (SELECT itemID FROM fulltextItems)");
-			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState "
-				+ "WHERE itemID NOT IN (SELECT itemID FROM fulltextItems)");
-		});
-
-		await clearCacheFiles();
-	}
-
-
-	/**
 	 * Remove content index entries for items that no longer exist. Normal deletion clears these
 	 * via clearItemWords()/clearNoteIndex(), but the content database can't FK-cascade to
 	 * zotero.sqlite, so this is a periodic safety net for items removed through a path that
@@ -2916,18 +2894,6 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			catch (e) {
 				Zotero.File.checkFileAccessError(e, cacheFile, 'delete');
 			}
-		}
-	};
-	
-	
-	/*
-	 * Clear cache files for all attachments
-	 */
-	var clearCacheFiles = async function () {
-		var sql = "SELECT itemID FROM itemAttachments";
-		var items = await Zotero.DB.columnQueryAsync(sql);
-		for (var i=0; i<items.length; i++) {
-			await clearCacheFile(items[i]);
 		}
 	};
 	
