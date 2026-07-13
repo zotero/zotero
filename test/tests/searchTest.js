@@ -930,6 +930,78 @@ describe("Zotero.Search", function () {
 				});
 			});
 			
+			describe("numNotes/numAttachments/numAnnotations", function () {
+				it("should match top-level items by child note and attachment counts", async function () {
+					var item1 = await createDataObject('item');
+					var item2 = await createDataObject('item');
+					var note = new Zotero.Item('note');
+					note.setNote('foo');
+					note.parentItemID = item2.id;
+					await note.saveTx();
+					var attachment = await importFileAttachment('test.png', { parentID: item2.id });
+					
+					var s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('numNotes', 'is', '0');
+					var matches = await s.search();
+					assert.include(matches, item1.id);
+					assert.notInclude(matches, item2.id);
+					// Rows that can't have child notes aren't matched
+					assert.notInclude(matches, note.id);
+					assert.notInclude(matches, attachment.id);
+					
+					s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('numNotes', 'is', '1');
+					matches = await s.search();
+					assert.include(matches, item2.id);
+					assert.notInclude(matches, item1.id);
+					
+					s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('numAttachments', 'is', '1');
+					matches = await s.search();
+					assert.include(matches, item2.id);
+					assert.notInclude(matches, item1.id);
+					assert.notInclude(matches, attachment.id);
+					
+					// A trashed note doesn't count
+					note.deleted = true;
+					await note.saveTx();
+					s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('numNotes', 'is', '0');
+					matches = await s.search();
+					assert.include(matches, item2.id);
+				});
+				
+				it("should count annotations on an attachment and under a top-level item", async function () {
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					var annotation = await createAnnotation('highlight', attachment);
+					var plainItem = await createDataObject('item');
+					
+					var s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.addCondition('numAnnotations', 'is', '1');
+					var matches = await s.search();
+					// The attachment's own count and the item's total both match
+					assert.include(matches, attachment.id);
+					assert.include(matches, item.id);
+					assert.notInclude(matches, plainItem.id);
+					assert.notInclude(matches, annotation.id);
+					
+					s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.addCondition('numAnnotations', 'is', '0');
+					matches = await s.search();
+					assert.include(matches, plainItem.id);
+					assert.notInclude(matches, item.id);
+					assert.notInclude(matches, attachment.id);
+					assert.notInclude(matches, annotation.id);
+				});
+			});
+			
 			describe("isEmpty/isNotEmpty", function () {
 				it("should match items with an empty or non-empty text field", async function () {
 					var item1 = await createDataObject('item');

@@ -428,6 +428,68 @@ Zotero.SearchConditions = new function () {
 				}
 			},
 			
+			// Non-trashed child notes of a regular item (restricted to regular items in
+			// search.js, since other rows can't have child notes)
+			{
+				name: 'numNotes',
+				operators: {
+					is: true,
+					isNot: true,
+					isLessThan: true,
+					isGreaterThan: true
+				},
+				table: 'items',
+				field: '(SELECT COUNT(*) FROM itemNotes WHERE parentItemID=items.itemID '
+					+ 'AND itemID NOT IN (SELECT itemID FROM deletedItems))',
+				level: 'item',
+				inlineFilter: function (val) {
+					return /^[0-9]+$/.test(val) ? val : false;
+				}
+			},
+			
+			// Non-trashed child attachments of a regular item (restricted to regular items
+			// in search.js)
+			{
+				name: 'numAttachments',
+				operators: {
+					is: true,
+					isNot: true,
+					isLessThan: true,
+					isGreaterThan: true
+				},
+				table: 'items',
+				field: '(SELECT COUNT(*) FROM itemAttachments WHERE parentItemID=items.itemID '
+					+ 'AND itemID NOT IN (SELECT itemID FROM deletedItems))',
+				level: 'item',
+				inlineFilter: function (val) {
+					return /^[0-9]+$/.test(val) ? val : false;
+				}
+			},
+			
+			// Non-trashed annotations on the row's own attachment or on a regular item's
+			// non-trashed attachments (restricted to those levels in search.js)
+			{
+				name: 'numAnnotations',
+				operators: {
+					is: true,
+					isNot: true,
+					isLessThan: true,
+					isGreaterThan: true
+				},
+				table: 'items',
+				field: '(SELECT COUNT(*) FROM itemAnnotations WHERE parentItemID IN '
+					+ '(SELECT itemID FROM itemAttachments WHERE '
+						+ '(itemID=items.itemID OR parentItemID=items.itemID) '
+						+ 'AND itemID NOT IN (SELECT itemID FROM deletedItems)) '
+					+ 'AND itemID NOT IN (SELECT itemID FROM deletedItems))',
+				// The count is native to attachments (their own annotations) and regular
+				// items (annotations on their attachments), so no cross-level mapping
+				level: ['item', 'attachment'],
+				inlineFilter: function (val) {
+					return /^[0-9]+$/.test(val) ? val : false;
+				}
+			},
+			
 			{
 				name: 'note',
 				operators: {

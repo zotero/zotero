@@ -1630,6 +1630,25 @@ Zotero.Search.prototype._buildQuery = async function () {
 						openParens++;
 						break;
 					
+					// Only regular items can have child notes/attachments, so don't match
+					// other rows, which would all have a count of 0
+					case 'numNotes':
+					case 'numAttachments':
+						condSQL += "itemTypeID NOT IN ("
+							+ ['note', 'attachment', 'annotation']
+								.map(t => Zotero.ItemTypes.getID(t)).join(', ')
+							+ ") AND ";
+						break;
+					
+					// Annotations belong to an attachment (the row itself) or to a regular
+					// item's attachments, so don't match rows that can't have them
+					case 'numAnnotations':
+						condSQL += "itemTypeID NOT IN ("
+							+ ['note', 'annotation']
+								.map(t => Zotero.ItemTypes.getID(t)).join(', ')
+							+ ") AND ";
+						break;
+					
 					case 'creator':
 					case 'lastName':
 						condSQL += "creatorID IN (SELECT creatorID FROM creators WHERE ";
