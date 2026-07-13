@@ -1685,38 +1685,34 @@ describe("ZoteroPane", function () {
 			collectionSearchButton.style.display = '';
 		});
 
-		// PROBE (ci-test only, do not merge): determine whether an intra-app
-		// win.focus() can restore Services.focus.activeWindow under CI's Xvfb (no
-		// window manager). Forces the inactive state deterministically rather than
-		// waiting for the intermittent natural occurrence. Throws its findings so
-		// they show in the CI log regardless of debug level.
-		it.only("PROBE win.focus reactivation under Xvfb", async function () {
+		// PROBE (ci-test only, do not merge): the real failure is a rare race in the
+		// dialog-close activation handoff, so hammer dialog open/close until the pane
+		// goes inactive, then test whether win.focus() can recover it. Throws its
+		// findings so they show in the CI log regardless of debug level.
+		it.only("PROBE win.focus recovery via dialog loop under Xvfb", async function () {
+			this.timeout(120000);
+			let aw = () => Services.focus.activeWindow;
+			let href = () => (aw() ? aw().location.href : "null");
 			let log = [];
-			let record = function (label) {
-				let aw = Services.focus.activeWindow;
-				log.push(label + ": paneActive=" + (aw === win)
-					+ " activeWindow=" + (aw ? aw.location.href : "null"));
-			};
+			let hitInactive = false;
 
-			record("initial");
-
-			// Open a persistent second window, which should make the pane inactive
-			// while it's up. Then test whether win.focus() can steal activation back.
-			let win2 = win.open("about:blank", "_blank", "chrome,width=300,height=300");
-			await Zotero.Promise.delay(500);
-			record("after opening win2");
-
-			win.focus();
-			await Zotero.Promise.delay(300);
-			record("after win.focus() with win2 open");
-
-			win2.close();
-			await Zotero.Promise.delay(300);
-			record("after closing win2");
-
-			win.focus();
-			await Zotero.Promise.delay(300);
-			record("after win.focus() with win2 closed");
+			for (let i = 0; i < 60 && !hitInactive; i++) {
+				let dialogPromise = waitForDialog();
+				Services.prompt.confirmEx(win, "Probe", "Probe",
+					Services.prompt.STD_OK_CANCEL_BUTTONS, null, null, null, null, {});
+				await dialogPromise;
+				await Zotero.Promise.delay(20);
+				if (aw() !== win) {
+					hitInactive = true;
+					log.push("iteration " + i + ": pane INACTIVE after dialog; activeWindow=" + href());
+					win.focus();
+					await Zotero.Promise.delay(150);
+					log.push("after win.focus(): paneActive=" + (aw() === win) + " activeWindow=" + href());
+				}
+			}
+			if (!hitInactive) {
+				log.push("pane stayed active through all 60 dialog cycles (could not reproduce)");
+			}
 
 			throw new Error("PROBE RESULTS:\n" + log.join("\n"));
 		});
