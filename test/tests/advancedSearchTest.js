@@ -853,6 +853,28 @@ describe("Advanced Search", function () {
 			assert.isFalse(row.querySelector('#valuemenu').hidden);
 		});
 		
+		it("should blank the value field for an isEmpty condition", async function () {
+			var s = new Zotero.Search();
+			s.libraryID = Zotero.Libraries.userLibraryID;
+			s.addCondition('place', 'isEmpty', '');
+			pane.search = s;
+			
+			// The value field keeps its space in the row but must not be visible, and the
+			// other value controls are hidden
+			var row = conditions.firstChild;
+			var valuefield = row.querySelector('#valuefield');
+			assert.isFalse(valuefield.hidden);
+			assert.equal(win.getComputedStyle(valuefield).visibility, 'hidden');
+			assert.isTrue(row.querySelector('#valuemenu').hidden);
+			assert.isTrue(row.querySelector('#value-date-age').hidden);
+			
+			// The row serializes with no value
+			var data = row.getConditionData();
+			assert.equal(data.condition, 'place');
+			assert.equal(data.operator, 'isEmpty');
+			assert.equal(data.value, '');
+		});
+		
 		it("should keep a loaded annotationAuthor value while its author menu is populating", async function () {
 			var deferred = Zotero.Promise.defer();
 			var stub = sinon.stub(Zotero.Annotations, 'getAllAuthors').returns(deferred.promise);

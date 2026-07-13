@@ -410,6 +410,11 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	let mode;
 	[condition, mode] = Zotero.SearchConditions.parseCondition(condition);
 	
+	// isEmpty/isNotEmpty take no value
+	if (operator == 'isEmpty' || operator == 'isNotEmpty') {
+		value = '';
+	}
+	
 	if (typeof value == 'string') value = value.normalize();
 	
 	this._conditions[searchConditionID] = {
@@ -1408,7 +1413,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 				// Special table handling
 				//
 				if (condition.table) {
-					let negationOperators = ['isNot', 'doesNotContain'];
+					let negationOperators = ['isNot', 'doesNotContain', 'isEmpty'];
 					let isNegationOperator = negationOperators.includes(condition.operator);
 					
 					condSelectSQL += 'itemID '
@@ -1660,11 +1665,18 @@ Zotero.Search.prototype._buildQuery = async function () {
 				}
 				
 				if (!skipOperators) {
+					// isEmpty/isNotEmpty match any row with a value -- the IN/NOT IN structure
+					// above does the real work -- so use an always-true predicate in place of a
+					// value comparison
+					if (condition.operator == 'isEmpty' || condition.operator == 'isNotEmpty') {
+						condSQL += '1';
+					}
+					
 					// Special handling for date fields
 					//
 					// Note: We assume full datetimes are already UTC and don't
 					// need to be handled specially
-					if ((condition.name == 'dateAdded'
+					else if ((condition.name == 'dateAdded'
 							|| condition.name == 'dateModified'
 							|| condition.name == 'lastRead'
 							|| condition.name == 'datefield')
@@ -1966,6 +1978,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 					params: condSQLParams,
 					level: condition.level || 'item',
 					negate: condition.operator == 'isNot' || condition.operator == 'doesNotContain'
+						|| condition.operator == 'isEmpty'
 				});
 		}
 
@@ -2238,7 +2251,7 @@ Zotero.Search._conditionLevel = function (name, conditionData) {
  * @param {String|String[]} fromLevel - The level(s) the predicate selects ('item'/'attachment'/
  *     'note'/'annotation'/'any'); an array for a field that exists at more than one level
  * @param {String} toLevel - The level to constrain instead
- * @param {Boolean} [negated] - Whether the predicate is a negation (isNot/doesNotContain); a
+ * @param {Boolean} [negated] - Whether the predicate is a negation (isNot/doesNotContain/isEmpty); a
  *     negated level-agnostic match is left at its own level rather than rolled up
  * @return {String} A predicate in terms of the `toLevel` itemID
  */

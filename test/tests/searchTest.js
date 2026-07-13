@@ -892,6 +892,43 @@ describe("Zotero.Search", function () {
 				});
 			});
 			
+			describe("isEmpty/isNotEmpty", function () {
+				it("should match items with an empty or non-empty text field", async function () {
+					var item1 = await createDataObject('item');
+					var item2 = await createDataObject('item');
+					item2.setField('place', 'Berlin');
+					await item2.saveTx();
+					
+					var s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('place', 'isEmpty');
+					var matches = await s.search();
+					assert.include(matches, item1.id);
+					assert.notInclude(matches, item2.id);
+					
+					s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('place', 'isNotEmpty');
+					matches = await s.search();
+					assert.include(matches, item2.id);
+					assert.notInclude(matches, item1.id);
+				});
+				
+				it("should match items with an empty date field", async function () {
+					var item1 = await createDataObject('item');
+					var item2 = await createDataObject('item');
+					item2.setField('date', '2020-01-01');
+					await item2.saveTx();
+					
+					var s = new Zotero.Search();
+					s.libraryID = item1.libraryID;
+					s.addCondition('date', 'isEmpty');
+					var matches = await s.search();
+					assert.include(matches, item1.id);
+					assert.notInclude(matches, item2.id);
+				});
+			});
+			
 			describe("dateAdded", function () {
 				it("should handle 'today'", async function () {
 					var item = await createDataObject('item');

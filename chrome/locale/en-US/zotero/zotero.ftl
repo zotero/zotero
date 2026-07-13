@@ -972,6 +972,9 @@ advanced-search-condition-input =
     .aria-label = Value
     .label = { $label }
 
+search-operator-isEmpty = is empty
+search-operator-isNotEmpty = is not empty
+
 search-conditions-tooltip-fields = Fields:
 search-conditions-collection = Collection
 search-conditions-savedSearch = Saved Search

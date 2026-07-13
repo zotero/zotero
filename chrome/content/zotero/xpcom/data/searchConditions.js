@@ -52,6 +52,8 @@ Zotero.SearchConditions = new function () {
 		isBefore: true,
 		isAfter: true,
 		isInTheLast: true,
+		isEmpty: true,
+		isNotEmpty: true,
 		
 		// Special
 		any: true,
@@ -427,7 +429,9 @@ Zotero.SearchConditions = new function () {
 					is: true,
 					isNot: true,
 					contains: true,
-					doesNotContain: true
+					doesNotContain: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemCreators',
 				field: "TRIM(firstName || ' ' || lastName)"
@@ -452,7 +456,9 @@ Zotero.SearchConditions = new function () {
 					is: true,
 					isNot: true,
 					contains: true,
-					doesNotContain: true
+					doesNotContain: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemCreators',
 				field: "TRIM(firstName || ' ' || lastName)"
@@ -464,7 +470,9 @@ Zotero.SearchConditions = new function () {
 					is: true,
 					isNot: true,
 					contains: true,
-					doesNotContain: true
+					doesNotContain: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemCreators',
 				field: "TRIM(firstName || ' ' || lastName)"
@@ -476,7 +484,9 @@ Zotero.SearchConditions = new function () {
 					is: true,
 					isNot: true,
 					contains: true,
-					doesNotContain: true
+					doesNotContain: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemCreators',
 				field: "TRIM(firstName || ' ' || lastName)"
@@ -489,7 +499,9 @@ Zotero.SearchConditions = new function () {
 					isNot: true,
 					contains: true,
 					doesNotContain: true,
-					beginsWith: true
+					beginsWith: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemData',
 				field: 'value',
@@ -530,7 +542,9 @@ Zotero.SearchConditions = new function () {
 					isNot: true,
 					isBefore: true,
 					isAfter: true,
-					isInTheLast: true
+					isInTheLast: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemData',
 				field: 'value',
@@ -559,7 +573,9 @@ Zotero.SearchConditions = new function () {
 					contains: true,
 					doesNotContain: true,
 					isLessThan: true,
-					isGreaterThan: true
+					isGreaterThan: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemData',
 				field: 'value',

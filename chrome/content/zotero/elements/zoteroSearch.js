@@ -925,16 +925,19 @@
 				'isGreaterThan',
 				'isBefore',
 				'isAfter',
-				'isInTheLast'
+				'isInTheLast',
+				'isEmpty',
+				'isNotEmpty'
 			];
 			var operatorsList = this.querySelector('#operatorsmenu');
 			
 			// Build operator menu
 			for (let operator of operators) {
-				operatorsList.appendItem(
-					Zotero.getString('searchOperator.' + operator),
-					operator
-				);
+				// isEmpty/isNotEmpty are localized in Fluent; the others in zotero.properties
+				let label = ['isEmpty', 'isNotEmpty'].includes(operator)
+					? Zotero.getString('search-operator-' + operator)
+					: Zotero.getString('searchOperator.' + operator);
+				operatorsList.appendItem(label, operator);
 			}
 			
 			// Build conditions menu
@@ -1306,6 +1309,9 @@
 		onOperatorSelected() {
 			var operatorsList = this.querySelector('#operatorsmenu');
 
+			// Restore a value field blanked for isEmpty/isNotEmpty (see below)
+			this.querySelector('#valuefield').style.visibility = '';
+
 			// Drop-down menu
 			if (this.selectedCondition == 'collection'
 					|| this.selectedCondition == 'savedSearch'
@@ -1316,6 +1322,15 @@
 					|| this.selectedCondition == 'annotationAuthor') {
 				this.querySelector('#valuefield').hidden = true;
 				this.querySelector('#valuemenu').hidden = false;
+				this.querySelector('#value-date-age').hidden = true;
+			}
+			
+			// isEmpty/isNotEmpty take no value, so blank the value field, keeping its space
+			// so the row's buttons stay aligned with other rows
+			else if (operatorsList.value == 'isEmpty' || operatorsList.value == 'isNotEmpty') {
+				this.querySelector('#valuefield').hidden = false;
+				this.querySelector('#valuefield').style.visibility = 'hidden';
+				this.querySelector('#valuemenu').hidden = true;
 				this.querySelector('#value-date-age').hidden = true;
 			}
 			
@@ -1476,6 +1491,11 @@
 			// swapped in yet, so serialize the stored value rather than reading the wrong control
 			if (this._valueMenuPending) {
 				return { condition, operator, value: this.value || '' };
+			}
+
+			// isEmpty/isNotEmpty have no value
+			if (operator == 'isEmpty' || operator == 'isNotEmpty') {
+				return { condition, operator, value: '' };
 			}
 
 			// Regular text field
