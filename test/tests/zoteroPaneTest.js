@@ -1700,24 +1700,23 @@ describe("ZoteroPane", function () {
 
 			record("initial");
 
-			// (1) Controlled: does focus() recover after an explicit blur?
-			win.blur();
-			await Zotero.Promise.delay(200);
-			record("after win.blur()");
-			win.focus();
-			await Zotero.Promise.delay(200);
-			record("after win.focus() post-blur");
+			// Open a persistent second window, which should make the pane inactive
+			// while it's up. Then test whether win.focus() can steal activation back.
+			let win2 = win.open("about:blank", "_blank", "chrome,width=300,height=300");
+			await Zotero.Promise.delay(500);
+			record("after opening win2");
 
-			// (2) Real trigger: open + dismiss a dialog (as the culprit test does),
-			// then try to recover with focus()
-			let dialogPromise = waitForDialog();
-			Services.prompt.confirmEx(win, "Probe", "Probe",
-				Services.prompt.STD_OK_CANCEL_BUTTONS, null, null, null, null, {});
-			await dialogPromise;
-			record("after dialog dismissed");
 			win.focus();
-			await Zotero.Promise.delay(200);
-			record("after win.focus() post-dialog");
+			await Zotero.Promise.delay(300);
+			record("after win.focus() with win2 open");
+
+			win2.close();
+			await Zotero.Promise.delay(300);
+			record("after closing win2");
+
+			win.focus();
+			await Zotero.Promise.delay(300);
+			record("after win.focus() with win2 closed");
 
 			throw new Error("PROBE RESULTS:\n" + log.join("\n"));
 		});
