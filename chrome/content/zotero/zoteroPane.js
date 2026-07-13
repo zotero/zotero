@@ -3486,8 +3486,17 @@ var ZoteroPane = new function () {
 	 * Return an array of Item objects for selected items
 	 *
 	 * If asIDs is true, return an array of itemIDs instead
+	 *
+	 * If libraryTabOnly is true, return the library tab's item tree selection even if
+	 * another tab is currently selected
 	 */
-	this.getSelectedItems = function (asIDs) {
+	this.getSelectedItems = function (asIDs, { libraryTabOnly = false } = {}) {
+		if (libraryTabOnly) {
+			if (!this.itemsView) {
+				return [];
+			}
+			return this.itemsView.getSelectedItems(asIDs);
+		}
 		switch (Zotero_Tabs.selectedType) {
 			case 'library':
 				if (!this.itemsView) {

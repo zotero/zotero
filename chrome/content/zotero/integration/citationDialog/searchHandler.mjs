@@ -155,7 +155,7 @@ export class CitationDialogSearchHandler {
 	// for the library search to complete to show these results.
 	async refreshSelectedAndOpenItems() {
 		if (this.openItems === null) {
-			this.openItems = await this._getReaderOpenItems();
+			this.openItems = await this._getOpenTabItems();
 		}
 		if (this.selectedItems === null) {
 			this.selectedItems = this._getSelectedLibraryItems();
@@ -291,15 +291,18 @@ export class CitationDialogSearchHandler {
 	}
 
 	// make sure that each item appears only in one group.
-	// Items that are selected are removed from opened.
-	// Items that are selected or opened are removed from cited.
-	// Items that are selected or opened or cited are removed from library results.
+	// Items that are opened are removed from selected.
+	// Items that are opened or selected are removed from cited.
+	// Items that are opened or selected or cited are removed from library results.
 	_deduplicate() {
 		let selectedIDs = new Set(this.results.selected.map(item => item.id));
 		let openIDs = new Set(this.results.open.map(item => item.id));
 		let citedIDs = new Set(this.results.cited.map(item => item.id));
 
-		this.results.open = this.results.open.filter(item => !selectedIDs.has(item.id));
+		this.results.selected = this.results.selected.filter(item => !openIDs.has(item.id));
+		if (this.results.selectedItems) {
+			this.results.selectedItems = this.results.selectedItems.filter(item => !openIDs.has(item.id));
+		}
 		this.results.cited = this.results.cited.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id));
 		this.results.found = this.results.found.filter(item => !selectedIDs.has(item.id) && !openIDs.has(item.id) && !citedIDs.has(item.id));
 	}
@@ -346,8 +349,10 @@ export class CitationDialogSearchHandler {
 		return citedItems;
 	}
 
-	async _getReaderOpenItems() {
-		if (this.dialogState.isAddingNote()) return [];
+	async _getOpenTabItems() {
+		// When adding a note, suggest notes open in note tabs. Otherwise, suggest
+		// items open in reader tabs.
+		let tabType = this.dialogState.isAddingNote() ? 'note' : 'reader';
 		let tabs = [];
 		let win = Zotero.getMainWindow();
 		// If the main window is open, use it to get open tabs
@@ -360,28 +365,48 @@ export class CitationDialogSearchHandler {
 			if (!mainWindowLastState) return [];
 			tabs = mainWindowLastState.tabs;
 		}
-		let itemIDs = tabs.filter(t => t.type === 'reader').sort((a, b) => {
-			// Sort selected tab first
-			if (a.selected) return -1;
-			else if (b.selected) return 1;
-			// Then in reverse chronological select order
-			else if (a.timeUnselected && b.timeUnselected) return b.timeUnselected - a.timeUnselected;
-			// Then in reverse order for tabs that never got loaded in this session
-			else if (a.timeUnselected) return -1;
-			return 1;
-		}).map(t => t.data.itemID);
-		if (!itemIDs.length) return [];
+		tabs = tabs.filter(t => t.type === tabType);
+		if (!tabs.length) return [];
 
-		// Fetch top-most items and load necessary data, in case tabs belong to an unloaded library
-		let items = [];
-		for (let itemID of itemIDs) {
-			let item = await Zotero.Items.getAsync(itemID);
-			if (item && item.parentItemID) {
+		// Fetch each tab's top-most item and load necessary data, in case tabs belong
+		// to an unloaded library
+		let tabItems = [];
+		for (let tab of tabs) {
+			let item = await Zotero.Items.getAsync(tab.data.itemID);
+			if (item && item.parentItemID && tabType === 'reader') {
 				item = await Zotero.Items.getAsync(item.parentItemID);
 			}
-			items.push(item);
+			if (item) {
+				tabItems.push({ tab, item });
+			}
 		}
-		if (this.dialogState.isAddingAnnotations()) {
+
+		if (this.selectedItems === null) {
+			this.selectedItems = this._getSelectedLibraryItems();
+		}
+		let selectedItemIDs = new Set(this.selectedItems.map(item => item.id));
+		tabItems.sort((a, b) => {
+			// Sort selected tab first
+			if (a.tab.selected) return -1;
+			else if (b.tab.selected) return 1;
+			// Then tabs whose items are selected in the item tree, since they get
+			// deduplicated out of the Selected Items group
+			let aItemSelected = selectedItemIDs.has(a.item.id);
+			let bItemSelected = selectedItemIDs.has(b.item.id);
+			if (aItemSelected !== bItemSelected) return aItemSelected ? -1 : 1;
+			// Then in reverse chronological select order
+			if (a.tab.timeUnselected && b.tab.timeUnselected) return b.tab.timeUnselected - a.tab.timeUnselected;
+			// Then in reverse order for tabs that never got loaded in this session
+			else if (a.tab.timeUnselected) return -1;
+			return 1;
+		});
+		let items = tabItems.map(tabItem => tabItem.item);
+
+		if (this.dialogState.isAddingNote()) {
+			await Zotero.Items.loadDataTypes(items);
+			items = items.filter(i => i.isNote());
+		}
+		else if (this.dialogState.isAddingAnnotations()) {
 			// Make sure annotations are loaded on unloaded tabs from unloaded libraries
 			await this._ensureRelevantItemsAreLoaded(items);
 			items = this.keepItemsWithAnnotations(items);
@@ -397,7 +422,7 @@ export class CitationDialogSearchHandler {
 	}
 
 	_getSelectedLibraryItems() {
-		let selected = Zotero.getActiveZoteroPane()?.getSelectedItems() || [];
+		let selected = Zotero.getActiveZoteroPane()?.getSelectedItems(false, { libraryTabOnly: true }) || [];
 		if (this.dialogState.isAddingNote()) {
 			return selected.filter(i => i.isNote()) || [];
 		}

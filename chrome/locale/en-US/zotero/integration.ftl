@@ -42,8 +42,8 @@ integration-citationDialog-lib-message-citation = { $search ->
    *[other] No selected or open items
 }
 integration-citationDialog-lib-message-add-note = { $search ->
-    [true] No selected notes match the current search
-   *[other] No notes are selected
+    [true] No selected or open notes match the current search
+   *[other] No selected or open notes
 }
 integration-citationDialog-lib-message-annotations = { $search ->
     [true] No items with annotations match the current search

@@ -552,12 +552,12 @@ describe("Citation Dialog", function () {
 			SearchHandler.citedItems = [citedOne, citedAndOpenOne];
 			// Search for "one"
 			await dialog.currentLayout.search("one", { skipDebounce: true });
-			// Selected items should have both "one_selected" and "one_selected_open"
+			// Selected items should have "one_selected" but not "one_selected_open", since it is open
 			let selectedIDs = SearchHandler.results.selected.map(item => item.id);
-			assert.sameMembers(selectedIDs, [selectedOne.id, selectedAndOpenOne.id]);
-			// Open items should have "one_open" and "one_open_cited" but not "one_selected_open", since it is selected
+			assert.sameMembers(selectedIDs, [selectedOne.id]);
+			// Open items should have "one_open", "one_selected_open", and "one_open_cited"
 			let openIDs = SearchHandler.results.open.map(item => item.id);
-			assert.sameMembers(openIDs, [openOne.id, citedAndOpenOne.id]);
+			assert.sameMembers(openIDs, [openOne.id, selectedAndOpenOne.id, citedAndOpenOne.id]);
 			// Cited items should have "one_cited"
 			let citedIDs = SearchHandler.results.cited.map(item => item.id);
 			assert.sameMembers(citedIDs, [citedOne.id]);
@@ -588,12 +588,12 @@ describe("Citation Dialog", function () {
 			SearchHandler.citedItems = [citedOne, citedAndOpenOne];
 			// Search for "one"
 			await dialog.currentLayout.search("one", { skipDebounce: true });
-			// Selected items should have both "one_selected" and "one_selected_open"
+			// Selected items should have "one_selected" but not "one_selected_open", since it is open
 			let selectedIDs = SearchHandler.results.selected.map(item => item.id);
-			assert.sameMembers(selectedIDs, [selectedOne.id, selectedAndOpenOne.id]);
-			// Open items should have "one_open" and "one_open_cited" but not "one_selected_open", since it is selected
+			assert.sameMembers(selectedIDs, [selectedOne.id]);
+			// Open items should have "one_open", "one_selected_open", and "one_open_cited"
 			let openIDs = SearchHandler.results.open.map(item => item.id);
-			assert.sameMembers(openIDs, [openOne.id, citedAndOpenOne.id]);
+			assert.sameMembers(openIDs, [openOne.id, selectedAndOpenOne.id, citedAndOpenOne.id]);
 			// Cited items should have "one_cited"
 			let citedIDs = SearchHandler.results.cited.map(item => item.id);
 			assert.sameMembers(citedIDs, [citedOne.id]);
@@ -816,6 +816,26 @@ describe("Citation Dialog", function () {
 
 			await parentItem.eraseTx();
 		});
+
+		it("should include notes open in tabs in open items", async function () {
+			await dialog.setDialogType("add-note");
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+
+			// Open the note in a tab in the main window
+			let win = Zotero.getMainWindow();
+			await Zotero.Notes.open(note.id, undefined, { openInBackground: true });
+			let tabID = win.Zotero_Tabs.getTabIDByItemID(note.id);
+
+			// Re-fetch open items
+			SearchHandler.setSearchValue("");
+			SearchHandler.clearNonLibraryItemsCache();
+			await SearchHandler.refreshSelectedAndOpenItems();
+			win.Zotero_Tabs.close(tabID);
+
+			assert.includeMembers(SearchHandler.results.open, [note]);
+		});
 	});
 
 
@@ -933,7 +953,7 @@ describe("Citation Dialog", function () {
 			let selectedStub = sinon.stub(SearchHandler, "_getSelectedLibraryItems");
 			let selectedWithAnnotations = SearchHandler.keepItemsWithAnnotations([itemNoAnnotations1, itemWithAnnotations1]);
 			selectedStub.returns(selectedWithAnnotations);
-			let openStub = sinon.stub(SearchHandler, "_getReaderOpenItems");
+			let openStub = sinon.stub(SearchHandler, "_getOpenTabItems");
 			let openWithAnnotations = SearchHandler.keepItemsWithAnnotations([itemNoAnnotations2, itemWithAnnotations2]);
 			openStub.resolves(openWithAnnotations);
 
