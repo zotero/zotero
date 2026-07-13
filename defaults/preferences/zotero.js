@@ -160,6 +160,7 @@ pref("extensions.zotero.integration.citationPreviewShown", true);
 // Connector settings
 pref("extensions.zotero.httpServer.enabled", true);
 pref("extensions.zotero.httpServer.port", 23119);	// ascii "ZO"
+pref("extensions.zotero.httpServer.actualPort", 0);	// populated at startup with the actually-bound port
 pref("extensions.zotero.httpServer.localAPI.enabled", false);
 
 // Zeroconf

@@ -395,4 +395,29 @@ describe("Zotero.Server", function () {
 			});
 		});
 	});
+
+	describe('#init()', function () {
+		it("should set httpServer.actualPort pref to the bound port", function () {
+			assert.equal(
+				Zotero.Prefs.get('httpServer.actualPort'),
+				Zotero.Server.port,
+				'httpServer.actualPort pref matches the bound port'
+			);
+		});
+
+		it("should preserve httpServer.port pref across startup", function () {
+			// The init() implementation must never overwrite the user's configured
+			// httpServer.port, even when the bound port differs from it.
+			// (See zotero/zotero#5999.)
+			let configured = Zotero.Prefs.get('httpServer.port');
+			assert.isAbove(configured, 0, 'httpServer.port is set');
+			// No matter what the actualPort ended up being, the configured
+			// value should be unchanged.
+			assert.equal(
+				Zotero.Prefs.get('httpServer.port'),
+				configured,
+				'httpServer.port pref unchanged after init'
+			);
+		});
+	});
 });

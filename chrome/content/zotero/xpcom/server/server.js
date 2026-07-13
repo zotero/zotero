@@ -62,15 +62,32 @@ Zotero.Server = new function () {
 			Zotero.debug("Already listening on port " + serv.port);
 			return;
 		}
-		
+
 		port = port || Zotero.Prefs.get('httpServer.port');
+		let requestedPort = port;
 		try {
 			serv = new HttpServer();
 			serv.registerPrefixHandler('/', this.handleRequest)
 			serv.start(port);
-			
-			Zotero.debug(`HTTP server listening on 127.0.0.1:${serv.identity.primaryPort}`);
-				
+
+			let actualPort = serv.identity.primaryPort;
+			// Always expose the actually-bound port for diagnostic purposes.
+			// This intentionally uses a separate pref so it never overwrites
+			// the user's configured httpServer.port on shutdown.
+			Zotero.Prefs.set('httpServer.actualPort', actualPort);
+
+			if (actualPort !== requestedPort) {
+				Zotero.debug(
+					`HTTP server: requested port ${requestedPort} was unavailable; `
+					+ `bound to ${actualPort} instead. The browser connector will not be able `
+					+ `to reach Zotero until port ${requestedPort} is freed and Zotero is restarted.`,
+					1
+				);
+			}
+			else {
+				Zotero.debug(`HTTP server listening on 127.0.0.1:${actualPort}`);
+			}
+
 			// Close port on Zotero shutdown (doesn't apply to translation-server)
 			if (Zotero.addShutdownListener) {
 				Zotero.addShutdownListener(this.close.bind(this));
