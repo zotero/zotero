@@ -369,7 +369,6 @@ CREATE TABLE savedSearchConditions (
     condition TEXT NOT NULL,
     operator TEXT,
     value TEXT,
-    required NONE,
     PRIMARY KEY (savedSearchID, searchConditionID),
     FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE
 );
