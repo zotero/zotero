@@ -5624,8 +5624,11 @@ var ZoteroPane = new function () {
 			
 			if (fileExists && !redownload) {
 				Zotero.debug("Opening " + path);
-				Zotero.Notifier.trigger('open', 'file', item.id);
 				await launchFile(path, item);
+				// Trigger after launchFile(), which may save a content-type fix
+				// to the item -- 'open' observers save changes to the item
+				// (e.g., lastRead), which could discard an in-flight change
+				Zotero.Notifier.trigger('open', 'file', item.id);
 				continue;
 			}
 			
@@ -5670,8 +5673,11 @@ var ZoteroPane = new function () {
 			Zotero.Notifier.trigger('redraw', 'item', []);
 			
 			Zotero.debug("Opening " + path);
-			Zotero.Notifier.trigger('open', 'file', item.id);
 			await launchFile(path, item);
+			// Trigger after launchFile(), which may save a content-type fix
+			// to the item -- 'open' observers save changes to the item
+			// (e.g., lastRead), which could discard an in-flight change
+			Zotero.Notifier.trigger('open', 'file', item.id);
 		}
 	});
 	
