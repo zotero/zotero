@@ -105,6 +105,9 @@ Zotero.DBConnection = function (dbNameOrPath) {
 		}
 	};
 	this._dbIsCorrupt = null
+	this._checkingCorruption = false;
+	this._corruptionHandlers = [];
+	this._idleCallbacks = [];
 	this._onlineBackupInProgress = false;
 	this._onConnectCallbacks = [];
 	this._loadedExtensions = new Set();
@@ -910,6 +913,16 @@ Zotero.DBConnection.prototype.observe = async function (subject, topic, data) {
 			try {
 				await this.backUpDatabase({ online: true });
 				await this.vacuum();
+				// The main vacuum covers only the main database, so let callers reclaim space in
+				// their own attached databases (e.g., the full-text index) here too
+				for (let callback of this._idleCallbacks) {
+					try {
+						await callback();
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -1092,6 +1105,26 @@ Zotero.DBConnection.prototype.loadExtension = async function (name) {
 
 Zotero.DBConnection.prototype.isCorruptionError = function (e) {
 	return this.DB_CORRUPTION_STRINGS.some(x => e.message.includes(x));
+};
+
+
+/**
+ * Register a callback to run when a corruption error occurs but the main database checks out,
+ * meaning an attached database (e.g., the rebuildable full-text index) is corrupt. The callback
+ * can rebuild it. Run deferred, after the failing operation unwinds.
+ */
+Zotero.DBConnection.prototype.addCorruptionHandler = function (handler) {
+	this._corruptionHandlers.push(handler);
+};
+
+
+/**
+ * Register a callback to run during the database's idle maintenance, after the periodic backup and
+ * vacuum. Lets code with its own attached database do maintenance (e.g., vacuuming) on the same
+ * idle trigger.
+ */
+Zotero.DBConnection.prototype.onIdle = function (callback) {
+	this._idleCallbacks.push(callback);
 };
 
 
@@ -1516,10 +1549,38 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 
 
 Zotero.DBConnection.prototype._checkException = async function (e) {
-	if (this._externalDB || !this.isCorruptionError(e)) {
+	if (this._externalDB || !this.isCorruptionError(e) || this._checkingCorruption) {
 		return true;
 	}
-	
+
+	// A "malformed" error can come from an attached database (e.g., the rebuildable full-text
+	// index) rather than the main file, so confirm the main database is actually corrupt before
+	// offering to restore it. That way a disposable attached DB's corruption doesn't trigger
+	// main-database recovery; the attaching code detects and rebuilds it instead.
+	var mainOK = false;
+	this._checkingCorruption = true;
+	try {
+		mainOK = (await this.valueQueryAsync("PRAGMA main.quick_check(1)")) == 'ok';
+	}
+	catch (checkError) {
+		Zotero.logError(checkError);
+	}
+	finally {
+		this._checkingCorruption = false;
+	}
+	if (mainOK) {
+		Zotero.logError(e);
+		Zotero.debug("Corruption error but the main database passed a check -- skipping "
+			+ "main-database recovery", 1);
+		// Let owners of attached databases (e.g., the full-text index) rebuild them. Deferred so it
+		// runs after the failing operation unwinds -- a rebuild may need to DETACH, which can't run
+		// inside the transaction the error may have come from.
+		for (let handler of this._corruptionHandlers) {
+			Zotero.Promise.delay(0).then(handler).catch(err => Zotero.logError(err));
+		}
+		return true;
+	}
+
 	const supportURL = 'https://zotero.org/support/kb/corrupted_database';
 	
 	var filename = PathUtils.filename(this._dbPath);
