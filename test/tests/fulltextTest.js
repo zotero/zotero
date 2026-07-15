@@ -234,7 +234,7 @@ describe("Zotero.FullText", function () {
 		it("should store data in .zotero-ft-unprocessed file", async function () {
 			var item = await importFileAttachment('test.pdf');
 			
-			var processorCacheFile = Zotero.Fulltext.getItemProcessorCacheFile(item).path;
+			var processorCacheFile = Zotero.Fulltext.getSyncedContentCacheFile(item).path;
 			
 			var version = 5;
 			await Zotero.Fulltext.setItemContent(
@@ -266,7 +266,7 @@ describe("Zotero.FullText", function () {
 				[item.id, Zotero.FullText.SYNC_STATE_UNSYNCED]
 			);
 			
-			var processorCacheFile = Zotero.FullText.getItemProcessorCacheFile(item).path;
+			var processorCacheFile = Zotero.FullText.getSyncedContentCacheFile(item).path;
 			var itemCacheFile = Zotero.FullText.getItemCacheFile(item).path;
 			await Zotero.File.putContentsAsync(itemCacheFile, "Test");
 			
@@ -317,7 +317,7 @@ describe("Zotero.FullText", function () {
 				version
 			);
 			
-			var processorCacheFile = Zotero.FullText.getItemProcessorCacheFile(item).path;
+			var processorCacheFile = Zotero.FullText.getSyncedContentCacheFile(item).path;
 			var itemCacheFile = Zotero.FullText.getItemCacheFile(item).path;
 			
 			assert.isTrue(await OS.File.exists(processorCacheFile));
@@ -356,7 +356,7 @@ describe("Zotero.FullText", function () {
 				version
 			);
 			
-			var processorCacheFile = Zotero.FullText.getItemProcessorCacheFile(item).path;
+			var processorCacheFile = Zotero.FullText.getSyncedContentCacheFile(item).path;
 			var itemCacheFile = Zotero.FullText.getItemCacheFile(item).path;
 			
 			assert.isTrue(await OS.File.exists(processorCacheFile));
