@@ -471,6 +471,11 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @return {Promise:Boolean}
 	 */
 	var _initFull = async function () {
+		// Tests exercise the blocklist update directly
+		if (!Zotero.test) {
+			Zotero.Plugins.prefetchBlocklist();
+		}
+		
 		if (!((await _initDB()))) return false;
 		
 		Zotero.VersionHeader.init();

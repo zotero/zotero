@@ -432,6 +432,11 @@ if [ $quick_build -eq 0 ]; then
 	"$CALLDIR/scripts/fetch_onecrl" defaults/settings/security-state/onecrl.json
 fi
 
+# Replace the built-in plugin blocklist with the published one
+if [ $quick_build -eq 0 ]; then
+	"$CALLDIR/scripts/fetch_plugin_blocklist" resource/schema/plugin-blocklist/blocked-plugins.json
+fi
+
 # Platform-specific prefs
 if [ $BUILD_MAC == 1 ]; then
 	perl -pi -e 's/pref\("browser\.preferences\.instantApply", false\);/pref\("browser\.preferences\.instantApply", true);/' $prefs_file

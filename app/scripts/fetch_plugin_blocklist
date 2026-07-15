@@ -1,0 +1,32 @@
+#!/bin/bash
+set -euo pipefail
+
+# Replace the built-in plugin blocklist with the published one
+#
+# Usage: fetch_plugin_blocklist FILE
+
+URL="https://plugins.zotero.org/blocked-plugins.json"
+
+file="$1"
+tmp_file="$file.tmp"
+
+curl -sSf --retry 3 "$URL" -o "$tmp_file"
+python3 -c '
+import json, sys
+with open(sys.argv[1]) as f:
+	data = json.load(f)
+version = data.get("version")
+if not isinstance(version, int) or isinstance(version, bool) or not isinstance(data.get("blockedPlugins"), list):
+	raise Exception("Invalid plugin blocklist")
+for plugin in data["blockedPlugins"]:
+	if not isinstance(plugin.get("id"), str) or not isinstance(plugin.get("versionRanges"), list):
+		raise Exception("Invalid plugin blocklist entry: " + json.dumps(plugin))
+	for r in plugin["versionRanges"]:
+		if not isinstance(r, dict) or any(k in r and not isinstance(r[k], str) for k in ("minVersion", "maxVersion")):
+			raise Exception("Invalid version range for blocked plugin " + plugin["id"])
+with open(sys.argv[2], "w") as f:
+	json.dump(data, f, indent="\t")
+	f.write("\n")
+print("Fetched plugin blocklist version {} with {} entries".format(version, len(data["blockedPlugins"])))
+' "$tmp_file" "$file"
+rm "$tmp_file"

@@ -52,6 +52,17 @@ Zotero.Plugins = new function () {
 	// addon.id -> Map<full_path, ftl_content>
 	var addonL10nContents = new Map();
 	
+	const BUILT_IN_BLOCKED_PLUGINS_URI = 'resource://zotero/schema/plugin-blocklist/blocked-plugins.json';
+	// How long to wait for the blocklist requested at launch before loading plugins
+	const BLOCKLIST_STARTUP_TIMEOUT = 1000; // 1 second
+	// Clients that aren't connected to the streaming server can't be notified of changes, so
+	// they poll for them
+	const BLOCKLIST_CHECK_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
+	const BLOCKLIST_RETRY_INTERVAL = 60 * 60 * 1000; // 1 hour
+	// A client that reconnects to the streaming server checks for a change it may have missed
+	// while disconnected, after a random delay of up to this long so that clients reconnecting
+	// after a server restart don't all check at once
+	const BLOCKLIST_RECONNECT_DELAY_MAX = 10 * 60 * 1000; // 10 minutes
 	var blocklistProvider = { getEntry: getPluginBlockEntry };
 	
 	const REASONS = {
@@ -71,7 +82,16 @@ Zotero.Plugins = new function () {
 	this.init = async function () {
 		this._addonObserver.init();
 		
+		await Promise.all([loadBuiltInBlockedPlugins(), loadBlockedPlugins()]);
 		lazy.Blocklist.setExtensionBlocklistProvider(blocklistProvider);
+		// Give the list requested at launch a moment to arrive, so that a newly
+		// blocked plugin isn't started. If it takes longer, it's applied when it arrives.
+		if (_blocklistPrefetch) {
+			let applied = _blocklistPrefetch
+				.then(data => data && Zotero.Plugins.setBlockedPlugins(data.version, data.blockedPlugins))
+				.catch(e => Zotero.logError(e));
+			await Promise.race([applied, Zotero.Promise.delay(BLOCKLIST_STARTUP_TIMEOUT)]);
+		}
 		
 		// In Fx102, getActiveAddons(["extension"]) doesn't always return fully loaded addon objects
 		// if getAllAddons() hasn't been called, so use getAllAddons() and do the checks ourselves
@@ -238,7 +258,9 @@ Zotero.Plugins = new function () {
 			Zotero.debug(`Calling bootstrap method '${method}' for plugin ${id} `
 				+ `version ${addon.version} with reason ${_getReasonName(reason)}`);
 
-			if (addon.softDisabled) {
+			// Skip disabled plugins, unless this plugin was started and the call is part of
+			// disabling it now (e.g., 'shutdown' after it was blocked while running)
+			if (addon.softDisabled && !scopes.has(id)) {
 				Zotero.debug(`Skipping bootstrap method '${method}' for disabled plugin ${id}`);
 				return;
 			}
@@ -770,24 +792,298 @@ Zotero.Plugins = new function () {
 	}
 	
 
-	// TODO: Get blocking list from server
-	const BLOCKED_PLUGINS = {
-		"better-bibtex@iris-advies.com": {
-			versionRanges: [{
-				maxVersion: "8.999"
-			}],
-			reason: "Versions of this plugin prior to version 9.0 prevent Zotero from closing properly and cannot be automatically updated.",
-		},
-		"zoterostyle@polygon.org": {
-			versionRanges: [{
-				maxVersion: "4.5.99"
-			}],
-			reason: "Versions of this plugin prior to version 4.6.0 break the Zotero user interface.",
+	// The blocklist comes from two sources, each a complete copy of the
+	// canonical list at a given version: a built-in copy, which the build fetches
+	// from the server (development builds have an empty one), and a copy
+	// downloaded from the server (cached in the profile directory). Whichever
+	// version is higher wins as a whole -- this lets the server unblock a plugin
+	// that an older built-in list blocks. The downloaded copy starts at version
+	// -1 so the built-in list is used until one has been downloaded.
+	var builtInBlockedPlugins = { version: 0, plugins: {} };
+	var remoteBlockedPlugins = { version: -1, plugins: {} };
+
+	// Convert the canonical [{ id, versionRanges, reason }] format into a map
+	// keyed by ID for lookups
+	function blockedPluginsToMap(blockedPlugins) {
+		let map = {};
+		for (let plugin of blockedPlugins || []) {
+			if (typeof plugin?.id != 'string' || !Array.isArray(plugin.versionRanges)) {
+				throw new Error("Invalid plugin blocklist entry: " + JSON.stringify(plugin));
+			}
+			for (let range of plugin.versionRanges) {
+				let valid = typeof range == 'object' && range !== null && !Array.isArray(range)
+					&& (range.minVersion === undefined || typeof range.minVersion == 'string')
+					&& (range.maxVersion === undefined || typeof range.maxVersion == 'string');
+				if (!valid) {
+					throw new Error(`Invalid version range for blocked plugin ${plugin.id}: `
+						+ JSON.stringify(range));
+				}
+			}
+			map[plugin.id] = {
+				versionRanges: plugin.versionRanges,
+				reason: typeof plugin.reason == 'string' && plugin.reason ? plugin.reason : null
+			};
+		}
+		return map;
+	}
+
+	async function loadBuiltInBlockedPlugins() {
+		try {
+			let data = JSON.parse(await Zotero.File.getResourceAsync(BUILT_IN_BLOCKED_PLUGINS_URI));
+			builtInBlockedPlugins = {
+				version: data.version || 0,
+				plugins: blockedPluginsToMap(data.blockedPlugins)
+			};
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	}
+
+	// Used by tests
+	this._setBuiltInBlockedPlugins = function (version, blockedPlugins) {
+		builtInBlockedPlugins = {
+			version,
+			plugins: blockedPluginsToMap(blockedPlugins)
+		};
+	};
+
+	function getBlockedPluginsCacheFile() {
+		return PathUtils.join(Zotero.Profile.dir, 'blocked-plugins.json');
+	}
+
+	async function loadBlockedPlugins() {
+		let path = getBlockedPluginsCacheFile();
+		try {
+			if (await IOUtils.exists(path)) {
+				let data = await IOUtils.readJSON(path);
+				remoteBlockedPlugins = {
+					version: data.version || 0,
+					plugins: data.plugins || {}
+				};
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	}
+
+	function getBlockedPlugins() {
+		return (remoteBlockedPlugins.version >= builtInBlockedPlugins.version
+			? remoteBlockedPlugins
+			: builtInBlockedPlugins).plugins;
+	}
+
+
+	/**
+	 * Store the downloaded copy of the blocklist and re-check installed plugins
+	 * against the effective list, disabling newly blocked ones and re-enabling
+	 * any that are no longer blocked
+	 *
+	 * @param {Number} version - Version of the canonical list this copy reflects
+	 * @param {Object[]} blockedPlugins - Array of { id, versionRanges, reason }
+	 * @return {Promise}
+	 */
+	this.setBlockedPlugins = async function (version, blockedPlugins) {
+		let data = {
+			version,
+			plugins: blockedPluginsToMap(blockedPlugins)
+		};
+		if (JSON.stringify(data) === JSON.stringify(remoteBlockedPlugins)) {
+			return;
+		}
+		remoteBlockedPlugins = data;
+		try {
+			await IOUtils.writeJSON(getBlockedPluginsCacheFile(), data);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
+		await checkInstalledPlugins();
+	};
+
+
+	async function checkInstalledPlugins() {
+		let addons = await AddonManager.getAllAddons();
+		for (let addon of addons) {
+			if (addon.type != 'extension') continue;
+			await shouldBlockPlugin(addon);
+		}
+	}
+
+
+	var _blocklistPrefetch = null;
+	var _blocklistUpdateTimeoutID = null;
+	var _nextBlocklistUpdate = null;
+	var _blocklistUpdateInProgress = false;
+	var _blocklistUpdateFailed = false;
+	var _streamerWasConnected = false;
+
+
+	/**
+	 * Start downloading the blocklist, to be applied in init() before plugins are loaded
+	 *
+	 * Called at the start of initialization so that the download overlaps with the rest of it.
+	 */
+	this.prefetchBlocklist = function () {
+		_blocklistPrefetch = fetchBlocklistFromServer().then((data) => {
+			scheduleNextBlocklistUpdate(!!data);
+			return data;
+		});
+	};
+
+
+	/**
+	 * @return {Promise<Object|false>} - The parsed and validated list, or false if it couldn't
+	 *     be retrieved
+	 */
+	async function fetchBlocklistFromServer() {
+		if (_blocklistUpdateInProgress) {
+			Zotero.debug("Plugin blocklist update already in progress");
+			return false;
+		}
+		_blocklistUpdateInProgress = true;
+		try {
+			let url = ZOTERO_CONFIG.PLUGIN_BLOCKLIST_URL;
+			Zotero.debug("Updating plugin blocklist from " + url);
+			// Server errors are retried on the next scheduled update
+			let xmlhttp = await Zotero.HTTP.request('GET', url, { errorDelayMax: 0 });
+			let data = JSON.parse(xmlhttp.responseText);
+			if (!Number.isInteger(data.version) || !Array.isArray(data.blockedPlugins)) {
+				throw new Error("Invalid plugin blocklist");
+			}
+			// Throws on an invalid entry
+			blockedPluginsToMap(data.blockedPlugins);
+			return data;
+		}
+		catch (e) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException
+					|| e instanceof Zotero.HTTP.TimeoutException
+					|| e instanceof Zotero.HTTP.BrowserOfflineException) {
+				Zotero.debug("Error updating plugin blocklist: " + e.message, 1);
+			}
+			else {
+				Zotero.logError(e);
+			}
+			return false;
+		}
+		finally {
+			_blocklistUpdateInProgress = false;
+		}
+	}
+
+
+	/**
+	 * @return {Promise<Boolean>} - Whether a list was received and applied
+	 */
+	this.updateBlocklistFromServer = async function () {
+		let data = await fetchBlocklistFromServer();
+		if (!data) {
+			return false;
+		}
+		try {
+			await Zotero.Plugins.setBlockedPlugins(data.version, data.blockedPlugins);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+		return true;
+	};
+
+
+	function scheduleBlocklistUpdate(delay) {
+		if (_blocklistUpdateTimeoutID) {
+			clearTimeout(_blocklistUpdateTimeoutID);
+		}
+		_nextBlocklistUpdate = Date.now() + delay;
+		Zotero.debug(`Updating plugin blocklist in ${Math.round(delay / 1000)} seconds`);
+		_blocklistUpdateTimeoutID = setTimeout(async () => {
+			_blocklistUpdateTimeoutID = null;
+			_nextBlocklistUpdate = null;
+			let success = await Zotero.Plugins.updateBlocklistFromServer();
+			scheduleNextBlocklistUpdate(success);
+		}, delay);
+	}
+
+
+	/**
+	 * Schedule an update if one isn't already scheduled sooner
+	 */
+	function scheduleBlocklistUpdateNoLaterThan(delay) {
+		if (!_nextBlocklistUpdate || _nextBlocklistUpdate > Date.now() + delay) {
+			scheduleBlocklistUpdate(delay);
+		}
+	}
+
+
+	function clearBlocklistUpdate() {
+		if (_blocklistUpdateTimeoutID) {
+			clearTimeout(_blocklistUpdateTimeoutID);
+			_blocklistUpdateTimeoutID = null;
+		}
+		_nextBlocklistUpdate = null;
+	}
+
+
+	/**
+	 * Schedule the update after one that just finished
+	 */
+	function scheduleNextBlocklistUpdate(success) {
+		_blocklistUpdateFailed = !success;
+		if (!success) {
+			scheduleBlocklistUpdate(BLOCKLIST_RETRY_INTERVAL);
+		}
+		else if (!Zotero.Streamer?.isConnected()) {
+			scheduleBlocklistUpdate(BLOCKLIST_CHECK_INTERVAL);
+		}
+		// A connected client is notified of changes
+		else {
+			Zotero.debug("Connected to streaming server -- not polling for plugin blocklist updates");
+			clearBlocklistUpdate();
+		}
+	}
+
+
+	this.onStreamerConnected = function () {
+		let reconnected = _streamerWasConnected;
+		_streamerWasConnected = true;
+		// A change may have been missed while disconnected, or the last update may have failed
+		// without a connection, so check once, with a random delay so that clients reconnecting
+		// after a server restart don't all check at once. Otherwise the connection makes polling
+		// unnecessary.
+		if (reconnected || _blocklistUpdateFailed) {
+			scheduleBlocklistUpdateNoLaterThan(Math.round(Math.random() * BLOCKLIST_RECONNECT_DELAY_MAX));
+		}
+		else if (_nextBlocklistUpdate) {
+			Zotero.debug("Connected to streaming server -- not polling for plugin blocklist updates");
+			clearBlocklistUpdate();
 		}
 	};
-	function getBlockedPlugins() {
-		return BLOCKED_PLUGINS;
-	}
+
+
+	this.onStreamerDisconnected = function () {
+		scheduleBlocklistUpdateNoLaterThan(BLOCKLIST_CHECK_INTERVAL);
+	};
+
+
+	/**
+	 * Handle a notification from the streaming server that the blocklist has changed
+	 *
+	 * @param {Number} delay - Milliseconds to wait before updating, so that clients don't
+	 *     all update at once
+	 */
+	this.onBlocklistUpdateNotification = function (delay) {
+		// If an update is already scheduled before the delay, just wait for that one
+		if (_nextBlocklistUpdate && _nextBlocklistUpdate <= Date.now() + delay) {
+			Zotero.debug("Next plugin blocklist update is in "
+				+ Math.round((_nextBlocklistUpdate - Date.now()) / 1000) + " seconds "
+				+ "-- ignoring notification");
+			return;
+		}
+		scheduleBlocklistUpdate(delay);
+	};
 
 
 	/**
@@ -803,14 +1099,7 @@ Zotero.Plugins = new function () {
 		if (!blockedPlugins[id]) {
 			return null;
 		}
-		for (let blockedVersion of blockedPlugins[id].versionRanges) {
-			if (typeof blockedVersion === "string") {
-				if (blockedVersion === "*" || blockedVersion === version) {
-					return blockedPlugins[id];
-				}
-				continue;
-			}
-			let { minVersion, maxVersion } = blockedVersion;
+		for (let { minVersion, maxVersion } of blockedPlugins[id].versionRanges) {
 			if ((!minVersion || Zotero.Utilities.semverCompare(version, minVersion) >= 0)
 				&& (!maxVersion || Zotero.Utilities.semverCompare(version, maxVersion) <= 0)) {
 				return blockedPlugins[id];
@@ -818,6 +1107,19 @@ Zotero.Plugins = new function () {
 		}
 		return null;
 	}
+
+
+	/**
+	 * Get the reason a given plugin version is blocked, if any
+	 *
+	 * @param {String} id - Plugin ID
+	 * @param {String} version - Plugin version
+	 * @return {String|false} The reason, or false if the version isn't blocked or the entry
+	 *     doesn't give one
+	 */
+	this.getBlockedPluginReason = function (id, version) {
+		return getBlockedPluginEntry(id, version)?.reason || false;
+	};
 
 
 	/**
@@ -862,7 +1164,7 @@ Zotero.Plugins = new function () {
 		if (addon.isActive) {
 			return false;
 		}
-		Zotero.warn(`Blocking plugin ${addon.id}: ${entry.reason}`);
+		Zotero.warn(`Blocking plugin ${addon.id}` + (entry.reason ? `: ${entry.reason}` : ''));
 		return true;
 	}
 

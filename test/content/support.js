@@ -1355,6 +1355,54 @@ async function getImageBlob() {
 
 
 /**
+ * Build a plugin XPI and install it via the addon manager
+ *
+ * @param {Object} [options]
+ * @param {String} [options.id]
+ * @param {String} [options.name]
+ * @param {String} [options.version]
+ * @param {String} [options.strictMaxVersion]
+ * @param {String} [options.bootstrap] - Contents of bootstrap.js
+ * @return {Promise<AddonWrapper>}
+ */
+async function installTestPlugin(options = {}) {
+	var { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+	/* eslint-disable camelcase */
+	var manifest = {
+		manifest_version: 2,
+		name: options.name || 'Test Plugin',
+		version: options.version || '1.0',
+		applications: {
+			zotero: {
+				id: options.id || 'test-' + Zotero.Utilities.randomString(6).toLowerCase() + '@zotero.org',
+				update_url: 'https://www.zotero.org/tests/update.json',
+				strict_min_version: '6.999',
+				strict_max_version: options.strictMaxVersion || '999.*'
+			}
+		}
+	};
+	/* eslint-enable camelcase */
+	var dir = await getTempDirectory();
+	await IOUtils.writeUTF8(PathUtils.join(dir, 'manifest.json'), JSON.stringify(manifest));
+	await IOUtils.writeUTF8(
+		PathUtils.join(dir, 'bootstrap.js'),
+		options.bootstrap
+			|| 'function install() {}\n'
+				+ 'function startup() {}\n'
+				+ 'function shutdown() {}\n'
+				+ 'function uninstall() {}\n'
+	);
+	var xpiPath = dir + '.xpi';
+	await Zotero.File.zipDirectory(dir, xpiPath);
+	var install = await AddonManager.getInstallForFile(
+		Zotero.File.pathToFile(xpiPath),
+		'application/x-xpinstall'
+	);
+	return install.install();
+}
+
+
+/**
  * Sets the fake XHR server to response to a given response
  *
  * @param {Object} server - Sinon FakeXMLHttpRequest server
