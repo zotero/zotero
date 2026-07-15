@@ -310,6 +310,13 @@ function modify_omni {
 		'targetApplications: \[appEntry\],
 		uninstall: getProperty(update, "uninstall", "boolean"),' modules/addons/AddonUpdateChecker.sys.mjs
 	
+	# Back the extension blocklist with a provider registered by Zotero.Plugins instead of the
+	# RemoteSettings blocklist, which isn't available in Zotero. Every toolkit blocklist check
+	# (install, update check, app-upgrade reconciliation) then computes an addon's state from
+	# Zotero's blocklist rather than resetting it to STATE_NOT_BLOCKED.
+	replace_line 'this.ExtensionBlocklist = ExtensionBlocklistMLBF;' 'this.ExtensionBlocklist = ZoteroExtensionBlocklist || ExtensionBlocklistMLBF;' modules/Blocklist.sys.mjs
+	cat "$APP_ROOT_DIR/assets/zoteroExtensionBlocklist.js" >> modules/Blocklist.sys.mjs
+	
 	# Prevent automatic installation of default theme
 	# (chrome/toolkit/content/mozapps/extensions/default-theme, removed above)
 	replace_line 'this.maybeInstallBuiltinAddon\(' 'if (false) this.maybeInstallBuiltinAddon(' modules/addons/XPIProvider.sys.mjs

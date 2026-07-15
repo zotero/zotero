@@ -28,7 +28,7 @@ Zotero.Plugins = new function () {
 	var { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 	var lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		XPIDatabase: "resource://gre/modules/addons/XPIDatabase.sys.mjs",
+		Blocklist: "resource://gre/modules/Blocklist.sys.mjs",
 	});
 	const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 	XPCOMUtils.defineLazyServiceGetters(lazy, {
@@ -52,6 +52,8 @@ Zotero.Plugins = new function () {
 	// addon.id -> Map<full_path, ftl_content>
 	var addonL10nContents = new Map();
 	
+	var blocklistProvider = { getEntry: getPluginBlockEntry };
+	
 	const REASONS = {
 		APP_STARTUP: 1,
 		APP_SHUTDOWN: 2,
@@ -69,13 +71,14 @@ Zotero.Plugins = new function () {
 	this.init = async function () {
 		this._addonObserver.init();
 		
+		lazy.Blocklist.setExtensionBlocklistProvider(blocklistProvider);
+		
 		// In Fx102, getActiveAddons(["extension"]) doesn't always return fully loaded addon objects
 		// if getAllAddons() hasn't been called, so use getAllAddons() and do the checks ourselves
 		var addons = await AddonManager.getAllAddons();
 		for (let addon of addons) {
 			if (addon.type != 'extension') continue;
-			let blockedReason = shouldBlockPlugin(addon);
-			if (blockedReason || !addon.isActive) {
+			if (await shouldBlockPlugin(addon) || !addon.isActive) {
 				continue;
 			}
 			addonVersions.set(addon.id, addon.version);
@@ -787,46 +790,80 @@ Zotero.Plugins = new function () {
 	}
 
 
-	function shouldBlockPlugin(addon) {
+	/**
+	 * Get the blocklist entry matching a given plugin version, if any
+	 *
+	 * @param {String} id - Plugin ID
+	 * @param {String} version - Plugin version
+	 * @return {Object|null} The { versionRanges, reason } entry, or null if the version isn't
+	 *     blocked
+	 */
+	function getBlockedPluginEntry(id, version) {
 		let blockedPlugins = getBlockedPlugins();
-		let id = addon.id;
-		let version = addon.version;
-		let blockedReason = false;
-		if (blockedPlugins[id]) {
-			for (let blockedVersion of blockedPlugins[id].versionRanges) {
-				if (typeof blockedVersion === "string") {
-					if (blockedVersion === "*" || blockedVersion === version) {
-						blockedReason = blockedPlugins[id].reason;
-						break;
-					}
-					continue;
+		if (!blockedPlugins[id]) {
+			return null;
+		}
+		for (let blockedVersion of blockedPlugins[id].versionRanges) {
+			if (typeof blockedVersion === "string") {
+				if (blockedVersion === "*" || blockedVersion === version) {
+					return blockedPlugins[id];
 				}
-				else {
-					let { minVersion, maxVersion } = blockedVersion;
-					if ((!minVersion || Zotero.Utilities.semverCompare(version, minVersion) >= 0)
-						&& (!maxVersion || Zotero.Utilities.semverCompare(version, maxVersion) <= 0)) {
-						blockedReason = blockedPlugins[id].reason;
-						break;
-					}
-				}
+				continue;
+			}
+			let { minVersion, maxVersion } = blockedVersion;
+			if ((!minVersion || Zotero.Utilities.semverCompare(version, minVersion) >= 0)
+				&& (!maxVersion || Zotero.Utilities.semverCompare(version, maxVersion) <= 0)) {
+				return blockedPlugins[id];
 			}
 		}
-		if (blockedReason) {
-			Zotero.warn(`Blocking plugin ${addon.id}: ${blockedReason}`);
-		}
-		setPluginBlocked(addon, !!blockedReason);
-		return blockedReason;
+		return null;
 	}
 
 
-	async function setPluginBlocked(addon, block = true) {
-		const addonInternal = addon.__AddonInternal__;
-		addonInternal.blocklistState = block
-			? Services.blocklist.STATE_BLOCKED
-			: Services.blocklist.STATE_NOT_BLOCKED;
-		await lazy.XPIDatabase.updateAddonDisabledState(addonInternal, {
-			softDisabled: block,
-		});
+	/**
+	 * Get the blocklist entry for a plugin, if any, in the { state, reason } form consumed
+	 * by the ZoteroExtensionBlocklist provider in the modified Blocklist.sys.mjs, which
+	 * backs all toolkit blocklist checks (install, update check, app-upgrade
+	 * reconciliation)
+	 *
+	 * @param {AddonWrapper|Object} addon - An addon, or an addon-like object with id and
+	 *     version (e.g., an update-check candidate)
+	 * @return {Object|null}
+	 */
+	function getPluginBlockEntry(addon) {
+		let entry = getBlockedPluginEntry(addon.id, addon.version);
+		if (entry) {
+			return { state: Ci.nsIBlocklistService.STATE_SOFTBLOCKED, reason: entry.reason };
+		}
+		return null;
+	}
+
+
+	/**
+	 * Apply a plugin's blocklist state and return whether the plugin is blocked from running
+	 *
+	 * @param {AddonWrapper} addon
+	 * @return {Promise<Boolean>}
+	 */
+	async function shouldBlockPlugin(addon) {
+		let entry = getPluginBlockEntry(addon);
+		try {
+			// Recompute the addon's blocklist state from the provider, which disables or
+			// re-enables it as appropriate
+			await addon.updateBlocklistState();
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		if (!entry) {
+			return false;
+		}
+		// A soft-blocked plugin that the user has re-enabled isn't blocked
+		if (addon.isActive) {
+			return false;
+		}
+		Zotero.warn(`Blocking plugin ${addon.id}: ${entry.reason}`);
+		return true;
 	}
 
 
@@ -893,8 +930,7 @@ Zotero.Plugins = new function () {
 				: REASONS.ADDON_INSTALL;
 			addonVersions.set(addon.id, addon.version);
 
-			let blockedReason = shouldBlockPlugin(addon);
-			if (blockedReason) {
+			if (await shouldBlockPlugin(addon)) {
 				return;
 			}
 			
@@ -953,8 +989,7 @@ Zotero.Plugins = new function () {
 			Zotero.debug("Cancelled uninstallation of plugin " + addon.id);
 			this.uninstalling.delete(addon.id);
 
-			let blockedReason = shouldBlockPlugin(addon);
-			if (blockedReason) {
+			if (await shouldBlockPlugin(addon)) {
 				return;
 			}
 			

@@ -79,6 +79,7 @@ esac
 xulrunner_content=$(< "$SCRIPT_DIR/fetch_xulrunner")
 xulrunner_content+=$(< "$SCRIPT_DIR/utils.sh")
 xulrunner_content+=$(< "$APP_ROOT_DIR/assets/multilocale.txt")
+xulrunner_content+=$(< "$APP_ROOT_DIR/assets/zoteroExtensionBlocklist.js")
 
 # Get custom components hash
 if [[ $platform = "m" ]]; then
