@@ -56,6 +56,8 @@ describe("Zotero.Plugins", function () {
 			await Zotero.Plugins.setBlockedPlugins(9999, [
 				{ id: addon.id, versionRanges: [{}], reason: "Test block" }
 			]);
+			assert.equal(addon.blocklistState, Ci.nsIBlocklistService.STATE_BLOCKED);
+			assert.isTrue(addon.appDisabled);
 			assert.isFalse(addon.isActive);
 			// The running plugin gets shut down
 			await waitForCallback(() => events.includes('shutdown'), 10, 3);
@@ -71,6 +73,7 @@ describe("Zotero.Plugins", function () {
 			await Zotero.Plugins.setBlockedPlugins(9999, [
 				{ id: addon.id, versionRanges: [{}] }
 			]);
+			assert.isTrue(addon.appDisabled);
 			assert.isFalse(addon.isActive);
 			assert.isFalse(Zotero.Plugins.getBlockedPluginReason(addon.id, addon.version));
 		});

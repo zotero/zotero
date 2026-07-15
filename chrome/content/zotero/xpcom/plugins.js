@@ -260,7 +260,7 @@ Zotero.Plugins = new function () {
 
 			// Skip disabled plugins, unless this plugin was started and the call is part of
 			// disabling it now (e.g., 'shutdown' after it was blocked while running)
-			if (addon.softDisabled && !scopes.has(id)) {
+			if ((addon.softDisabled || addon.appDisabled) && !scopes.has(id)) {
 				Zotero.debug(`Skipping bootstrap method '${method}' for disabled plugin ${id}`);
 				return;
 			}
@@ -1135,7 +1135,8 @@ Zotero.Plugins = new function () {
 	function getPluginBlockEntry(addon) {
 		let entry = getBlockedPluginEntry(addon.id, addon.version);
 		if (entry) {
-			return { state: Ci.nsIBlocklistService.STATE_SOFTBLOCKED, reason: entry.reason };
+			// Blocklist entries are hard blocks that the user can't override
+			return { state: Ci.nsIBlocklistService.STATE_BLOCKED, reason: entry.reason };
 		}
 		return null;
 	}
@@ -1158,10 +1159,6 @@ Zotero.Plugins = new function () {
 			Zotero.logError(e);
 		}
 		if (!entry) {
-			return false;
-		}
-		// A soft-blocked plugin that the user has re-enabled isn't blocked
-		if (addon.isActive) {
 			return false;
 		}
 		Zotero.warn(`Blocking plugin ${addon.id}` + (entry.reason ? `: ${entry.reason}` : ''));
