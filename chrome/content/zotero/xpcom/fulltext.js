@@ -55,8 +55,8 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	
 	var _idleObserverIsRegistered = false;
 	var _idleObserverDelay = 30;
-	var _processorTimeoutID = null;
-	var _processorBlacklist = {};
+	var _syncContentTimeoutID = null;
+	var _syncContentBlacklist = {};
 	var _upgradeCheck = true;
 	var _syncLibraryVersion = 0;
 	
@@ -102,16 +102,16 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		Zotero.uiReadyPromise.then(async () => {
 			await Zotero.Promise.delay(30000);
 			
-			this.registerContentProcessor();
-			Zotero.addShutdownListener(this.unregisterContentProcessor.bind(this));
+			this.registerSyncContentProcessor();
+			Zotero.addShutdownListener(this.unregisterSyncContentProcessor.bind(this));
 			
 			// Start/stop content processor with full-text content syncing pref
 			Zotero.Prefs.registerObserver('sync.fulltext.enabled', (enabled) => {
 				if (enabled) {
-					this.registerContentProcessor();
+					this.registerSyncContentProcessor();
 				}
 				else {
-					this.unregisterContentProcessor();
+					this.unregisterSyncContentProcessor();
 				}
 			});
 			
@@ -120,10 +120,10 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				{
 					notify: function (event, type, ids, extraData) {
 						if (event == 'start') {
-							this.unregisterContentProcessor();
+							this.unregisterSyncContentProcessor();
 						}
 						else if (event == 'stop') {
-							this.registerContentProcessor();
+							this.registerSyncContentProcessor();
 						}
 					}.bind(this)
 				},
@@ -305,7 +305,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		
 		// If there's a processor cache file, delete it (whether or not we just used it)
 		var item = await Zotero.Items.getAsync(itemID);
-		var cacheFile = this.getItemProcessorCacheFile(item);
+		var cacheFile = this.getSyncedContentCacheFile(item);
 		if (cacheFile.exists()) {
 			cacheFile.remove(false);
 		}
@@ -496,9 +496,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			let itemID = item.id;
 			
 			// If there's a processor cache file from syncing, use it
-			let processorCacheFile = this.getItemProcessorCacheFile(item).path;
+			let processorCacheFile = this.getSyncedContentCacheFile(item).path;
 			if (await OS.File.exists(processorCacheFile)) {
-				let indexed = await Zotero.Fulltext.indexFromProcessorCache(itemID);
+				let indexed = await Zotero.Fulltext.indexSyncedContent(itemID);
 				if (indexed) {
 					continue;
 				}
@@ -838,7 +838,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		var itemID = item.id;
 		var currentVersion = await this.getItemVersion(itemID)
 		
-		var processorCacheFile = this.getItemProcessorCacheFile(item).path; // .zotero-ft-unprocessed
+		var processorCacheFile = this.getSyncedContentCacheFile(item).path; // .zotero-ft-unprocessed
 		var itemCacheFile = this.getItemCacheFile(item).path; // .zotero-ft-cache
 		
 		// If a storage directory doesn't exist, create it
@@ -883,14 +883,14 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			);
 		}
 		
-		this.registerContentProcessor();
+		this.registerSyncContentProcessor();
 	};
 	
 	
 	/**
 	 * Start the idle observer for the background content processor
 	 */
-	this.registerContentProcessor = function () {
+	this.registerSyncContentProcessor = function () {
 		// Don't start idle observer during tests
 		if (Zotero.test) return;
 		if (!Zotero.Prefs.get('sync.fulltext.enabled')) return;
@@ -899,33 +899,33 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			Zotero.debug("Starting full-text content processor");
 			var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
 					.getService(Components.interfaces.nsIUserIdleService);
-			idleService.addIdleObserver(this.idleObserver, _idleObserverDelay);
+			idleService.addIdleObserver(this._syncContentIdleObserver, _idleObserverDelay);
 			_idleObserverIsRegistered = true;
 		}
 	}
 	
 	
-	this.unregisterContentProcessor = function () {
+	this.unregisterSyncContentProcessor = function () {
 		if (_idleObserverIsRegistered) {
 			Zotero.debug("Unregistering full-text content processor idle observer");
 			var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
 				.getService(Components.interfaces.nsIUserIdleService);
-			idleService.removeIdleObserver(this.idleObserver, _idleObserverDelay);
+			idleService.removeIdleObserver(this._syncContentIdleObserver, _idleObserverDelay);
 			_idleObserverIsRegistered = false;
 		}
 		
-		this.stopContentProcessor();
+		this.stopSyncContentProcessor();
 	}
 	
 	
 	/**
 	 * Stop the idle observer and a running timer, if there is one
 	 */
-	this.stopContentProcessor = function () {
+	this.stopSyncContentProcessor = function () {
 		Zotero.debug("Stopping full-text content processor");
-		if (_processorTimeoutID) {
-			clearTimeout(_processorTimeoutID);
-			_processorTimeoutID = null;
+		if (_syncContentTimeoutID) {
+			clearTimeout(_syncContentTimeoutID);
+			_syncContentTimeoutID = null;
 		}
 	}
 	
@@ -938,7 +938,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 *                                  to find unprocessed content
 	 * @return {Boolean}  TRUE if there's more content to process; FALSE otherwise
 	 */
-	this.processUnprocessedContent = async function (itemIDs) {
+	this.processSyncedContent = async function (itemIDs) {
 		// Idle observer can take a little while to trigger and may not cancel the setTimeout()
 		// in time, so check idle time directly
 		var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
@@ -955,7 +955,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		
 		var origLen = itemIDs.length;
 		itemIDs = itemIDs.filter(function (id) {
-			return !(id in _processorBlacklist);
+			return !(id in _syncContentBlacklist);
 		});
 		if (itemIDs.length < origLen) {
 			let skipped = (origLen - itemIDs.length);
@@ -966,7 +966,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		// If there's no more unprocessed content, stop the idle observer
 		if (!itemIDs.length) {
 			Zotero.debug("No unprocessed full-text content found");
-			this.unregisterContentProcessor();
+			this.unregisterSyncContentProcessor();
 			return;
 		}
 		
@@ -975,7 +975,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		
 		Zotero.debug("Processing full-text content for item " + item.libraryKey);
 		
-		await Zotero.Fulltext.indexFromProcessorCache(itemID);
+		await Zotero.Fulltext.indexSyncedContent(itemID);
 		
 		if (!itemIDs.length || idleService.idleTime < _idleObserverDelay * 1000) {
 			return;
@@ -984,18 +984,18 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		// If there are remaining items, call self again after a short delay. The delay allows
 		// for processing to be interrupted if the user returns from idle. At least on macOS,
 		// when Zotero is in the background this can be throttled to 10 seconds.
-		_processorTimeoutID = setTimeout(() => this.processUnprocessedContent(itemIDs), 200);
+		_syncContentTimeoutID = setTimeout(() => this.processSyncedContent(itemIDs), 200);
 	};
 	
-	this.idleObserver = {
+	this._syncContentIdleObserver = {
 		observe: function (subject, topic, data) {
 			// On idle, start the background processor
 			if (topic == 'idle') {
-				this.processUnprocessedContent();
+				this.processSyncedContent();
 			}
 			// When back from idle, stop the processor (but keep the idle observer registered)
 			else if (topic == 'active') {
-				this.stopContentProcessor();
+				this.stopSyncContentProcessor();
 			}
 		}.bind(this)
 	};
@@ -1005,10 +1005,10 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 * @param {Number} itemID
 	 * @return {Promise<Boolean>}
 	 */
-	this.indexFromProcessorCache = async function (itemID) {
+	this.indexSyncedContent = async function (itemID) {
 		try {
 			var item = await Zotero.Items.getAsync(itemID);
-			var cacheFile = this.getItemProcessorCacheFile(item).path;
+			var cacheFile = this.getSyncedContentCacheFile(item).path;
 			if (!((await OS.File.exists(cacheFile))))  {
 				Zotero.debug("Full-text content processor cache file doesn't exist for item " + itemID);
 				await Zotero.DB.queryAsync(
@@ -1378,7 +1378,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			if (!stats.total && !stats.indexed) {
 				let queued = false;
 				try {
-					queued = await OS.File.exists(this.getItemProcessorCacheFile(item).path);
+					queued = await OS.File.exists(this.getSyncedContentCacheFile(item).path);
 				}
 				catch (e) {
 					Zotero.logError(e);
@@ -1437,7 +1437,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	}
 	
 	
-	this.getItemProcessorCacheFile = function (item) {
+	this.getSyncedContentCacheFile = function (item) {
 		var cacheFile = Zotero.Attachments.getStorageDirectory(item);
 		cacheFile.append(_processorCacheFile);
 		return cacheFile;
@@ -1504,7 +1504,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		if (!unindexedOnly) {
 			for (let itemID of itemIDs) {
 				let item = await Zotero.Items.getAsync(itemID);
-				let cacheFile = this.getItemProcessorCacheFile(item).path;
+				let cacheFile = this.getSyncedContentCacheFile(item).path;
 				try {
 					await OS.File.remove(cacheFile, { ignoreAbsent: true });
 				}

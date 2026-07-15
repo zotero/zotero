@@ -4132,7 +4132,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 			let cacheFile = Zotero.Fulltext.getItemCacheFile(this);
 			if (!cacheFile.exists() || !(await Zotero.FullText.isFullyIndexed(this))) {
 				// Use processor cache file if it exists
-				let processorCacheFile = Zotero.FullText.getItemProcessorCacheFile(this).path;
+				let processorCacheFile = Zotero.FullText.getSyncedContentCacheFile(this).path;
 				if (await OS.File.exists(processorCacheFile)) {
 					let json = await Zotero.File.getContentsAsync(processorCacheFile);
 					let data = JSON.parse(json);
