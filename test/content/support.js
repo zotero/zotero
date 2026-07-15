@@ -721,9 +721,17 @@ var removeDir = async function (dir) {
  *
  * @param {Object} [options] - Initialization options, as passed to Zotero.init(), overriding
  *                             any that were set at startup
+ * @param {Object} [options.prefs] - Prefs to set for the reinitialization, overriding the
+ *     test-runner defaults. Cleared by the global afterEach().
  */
 async function resetDB(options = {}) {
 	resetPrefs();
+	
+	if (options.prefs) {
+		for (let key in options.prefs) {
+			Zotero.Prefs.set(key, options.prefs[key]);
+		}
+	}
 	
 	if (options.thisArg) {
 		options.thisArg.timeout(60000);

@@ -488,11 +488,18 @@ describe("Zotero.Schema", function () {
 			await resetDB({
 				thisArg: this,
 				skipBundledFiles: true,
-				dbFile: OS.Path.join(getTestDataDirectory().path, 'zotero-4.0.sqlite.zip')
+				dbFile: OS.Path.join(getTestDataDirectory().path, 'zotero-4.0.sqlite.zip'),
+				// Backups are disabled in the test profile
+				prefs: { 'backup.numBackups': 2 }
 			});
 			// Make sure we can open the Zotero pane without errors
 			win = await loadZoteroPane();
 			win.close();
+			
+			// A backup should have been made before the upgrade
+			assert.isTrue(
+				await IOUtils.exists(PathUtils.join(Zotero.DataDirectory.dir, 'zotero.sqlite.bak'))
+			);
 		});
 	});
 })

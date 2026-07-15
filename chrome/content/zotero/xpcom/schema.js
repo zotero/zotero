@@ -39,8 +39,8 @@ Zotero.Schema = new function () {
 	const REPOSITORY_CHECK_INTERVAL = 86400;
 	const REPOSITORY_RETRY_INTERVAL = 3600;
 	
-	// If updating from this userdata version or later, don't show "Upgrading database…" and don't make
-	// DB backup first. This should be set to false when breaking compatibility or making major changes.
+	// If updating from this userdata version or later, don't show "Upgrading database…". This
+	// should be set to false when adding a slow or otherwise major upgrade step.
 	const minorUpdateFrom = 112;
 	
 	var _dbVersions = [];
@@ -155,12 +155,10 @@ Zotero.Schema = new function () {
 		var userdataVersion = await _getSchemaSQLVersion('userdata');
 		options.minor = minorUpdateFrom && userdata >= minorUpdateFrom;
 		
-		// If non-minor userdata upgrade, make backup of database first
-		if (userdata < userdataVersion && !options.minor) {
-			await Zotero.DB.backUpDatabase({ force: true, suffix: userdata });
-		}
-		// Automatic backup
-		else if (integrityCheckRequired || bundledGlobalSchemaVersionCompare === 1) {
+		// Force a backup before a userdata upgrade, an integrity check, or a global schema update
+		if (userdata < userdataVersion
+				|| integrityCheckRequired
+				|| bundledGlobalSchemaVersionCompare === 1) {
 			await Zotero.DB.backUpDatabase({ force: true });
 		}
 		
@@ -264,8 +262,8 @@ Zotero.Schema = new function () {
 		}
 		
 		if (updated) {
-			// Upgrade seems to have been a success -- delete any previous backups
-			var maxPrevious = userdata - 1;
+			// Upgrade seems to have been a success -- delete any versioned backups
+			// (zotero.sqlite.<userdata version>.bak) from upgrades in previous versions
 			var file = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
 			var toDelete = [];
 			try {
@@ -276,11 +274,12 @@ Zotero.Schema = new function () {
 					if (file.isDirectory()) {
 						continue;
 					}
-					var matches = file.leafName.match(/zotero\.sqlite\.([0-9]{2,})\.bak/);
+					var matches = file.leafName.match(/^zotero\.sqlite\.([0-9]{2,})\.bak$/);
 					if (!matches) {
 						continue;
 					}
-					if (matches[1]>=28 && matches[1]<=maxPrevious) {
+					// Rotation backups (zotero.sqlite.<n>.bak) only go up to 24
+					if (matches[1] >= 28) {
 						toDelete.push(file);
 					}
 				}
@@ -3679,7 +3678,8 @@ Zotero.Schema = new function () {
 				await Zotero.DB.queryAsync("DROP TABLE savedSearchConditionsOld");
 			}
 
-			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
+			// If adding a slow or otherwise major upgrade step, clear minorUpdateFrom so that
+			// "Upgrading database…" is shown
 		}
 		
 		await _updateDBVersion('userdata', toVersion);
