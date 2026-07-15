@@ -225,10 +225,7 @@ Zotero.Streamer_Module.prototype = {
 	
 	
 	_isEnabled: function () {
-		return Zotero.Prefs.get('streaming.enabled')
-			// Only connect if either auto-sync or automatic style/translator updates are enabled
-			&& ((Zotero.Prefs.get('sync.autoSync') && Zotero.Sync.Runner.enabled)
-				|| Zotero.Prefs.get('automaticScraperUpdates'));
+		return Zotero.Prefs.get('streaming.enabled');
 	},
 	
 	
