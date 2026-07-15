@@ -597,18 +597,22 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				throw true;
 			}
 			
+			let upgradeMessageTimeoutID;
 			try {
-				var updated = await Zotero.Schema.updateSchema({
-					onBeforeUpdate: (options = {}) => {
-						if (options.minor) return;
-						try {
-							Zotero.showZoteroPaneProgressMeter(
-								Zotero.getString('upgrade.status')
-							)
-						}
-						catch (e) {
-							Zotero.logError(e);
-						}
+				await Zotero.Schema.updateSchema({
+					// Show "Upgrading database…" if the upgrade is still running after a short
+					// delay, so that the message doesn't flash during quick upgrades
+					onBeforeUpdate: () => {
+						upgradeMessageTimeoutID = setTimeout(() => {
+							try {
+								Zotero.showZoteroPaneProgressMeter(
+									Zotero.getString('upgrade.status')
+								)
+							}
+							catch (e) {
+								Zotero.logError(e);
+							}
+						}, 500);
 					}
 				});
 			}
@@ -667,6 +671,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					+ "\n\n"
 					+ (stack || e);
 				throw e;
+			}
+			finally {
+				clearTimeout(upgradeMessageTimeoutID);
 			}
 			
 			const { ZoteroProtocolHandler } = ChromeUtils.importESModule(

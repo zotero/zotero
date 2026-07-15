@@ -39,10 +39,6 @@ Zotero.Schema = new function () {
 	const REPOSITORY_CHECK_INTERVAL = 86400;
 	const REPOSITORY_RETRY_INTERVAL = 3600;
 	
-	// If updating from this userdata version or later, don't show "Upgrading database…". This
-	// should be set to false when adding a slow or otherwise major upgrade step.
-	const minorUpdateFrom = 112;
-	
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	// Update when adding _updateCompatibility() line to schema update step
@@ -153,7 +149,11 @@ Zotero.Schema = new function () {
 		
 		// Check whether bundled userdata schema has been updated
 		var userdataVersion = await _getSchemaSQLVersion('userdata');
-		options.minor = minorUpdateFrom && userdata >= minorUpdateFrom;
+		
+		// Notify the caller before the backup, which can also be slow for a large database
+		if (userdata < userdataVersion && options.onBeforeUpdate) {
+			await options.onBeforeUpdate();
+		}
 		
 		// Force a backup before a userdata upgrade, an integrity check, or a global schema update
 		if (userdata < userdataVersion
@@ -199,7 +199,7 @@ Zotero.Schema = new function () {
 					await _updateCustomTables();
 				}
 				
-				updated = await _migrateUserDataSchema(userdata, options);
+				updated = await _migrateUserDataSchema(userdata);
 				await _updateSchema('triggers');
 				
 				// Populate combined tables for custom types and fields -- this is likely temporary
@@ -2858,7 +2858,7 @@ Zotero.Schema = new function () {
 	//
 	// If libraryID set, make sure no relations still use a local user key, and then remove on-error code in sync.js
 	
-	var _migrateUserDataSchema = async function (fromVersion, options = {}) {
+	var _migrateUserDataSchema = async function (fromVersion) {
 		var toVersion = await _getSchemaSQLVersion('userdata');
 		
 		if (fromVersion >= toVersion) {
@@ -2866,13 +2866,6 @@ Zotero.Schema = new function () {
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
-		
-		if (options.onBeforeUpdate) {
-			let maybePromise = options.onBeforeUpdate({ minor: options.minor });
-			if (maybePromise && maybePromise.then) {
-				await maybePromise;
-			}
-		}
 		
 		Zotero.DB.requireTransaction();
 		
@@ -3677,9 +3670,6 @@ Zotero.Schema = new function () {
 				await Zotero.DB.queryAsync("INSERT INTO savedSearchConditions SELECT savedSearchID, searchConditionID, condition, operator, value FROM savedSearchConditionsOld");
 				await Zotero.DB.queryAsync("DROP TABLE savedSearchConditionsOld");
 			}
-
-			// If adding a slow or otherwise major upgrade step, clear minorUpdateFrom so that
-			// "Upgrading database…" is shown
 		}
 		
 		await _updateDBVersion('userdata', toVersion);
