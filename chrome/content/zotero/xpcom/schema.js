@@ -2885,7 +2885,7 @@ Zotero.Schema = new function () {
 			return false;
 		}
 		
-		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
+		Zotero.debug('Migrating user data tables from version ' + fromVersion + ' to ' + toVersion);
 		
 		Zotero.DB.requireTransaction();
 		
