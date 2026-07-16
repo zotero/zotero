@@ -1198,7 +1198,7 @@ Zotero.DBConnection.prototype.backupDatabase = async function (_suffix, _force) 
  *     for zotero.sqlite.123.bak)
  * @param {Boolean} [options.online] - Perform an online incremental backup without closing connection
  */
-Zotero.DBConnection.prototype.backUpDatabase = async function ({ force, suffix, online }) {
+Zotero.DBConnection.prototype.backUpDatabase = async function ({ force, suffix, online } = {}) {
 	if (this.skipBackup || this._externalDB || Zotero.skipLoading) {
 		this._debug("Skipping backup of database '" + this._dbName + "'", 1);
 		return false;
