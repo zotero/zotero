@@ -106,6 +106,7 @@ Zotero.DBConnection = function (dbNameOrPath) {
 	};
 	this._dbIsCorrupt = null
 	this._checkingCorruption = false;
+	this._handlingCorruption = false;
 	this._corruptionHandlers = [];
 	this._idleCallbacks = [];
 	this._onlineBackupInProgress = false;
@@ -923,6 +924,13 @@ Zotero.DBConnection.prototype.observe = async function (subject, topic, data) {
 						Zotero.logError(e);
 					}
 				}
+				// Truncate the WAL file so that a crash or force-quit leaves behind as
+				// little stale WAL data as possible. A leftover -wal file is replayed into
+				// whatever file next occupies the database path (e.g., a backup manually
+				// copied into place), corrupting it, and an empty one is harmless.
+				if (this._connection) {
+					await this.queryAsync("PRAGMA wal_checkpoint(TRUNCATE)");
+				}
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -1104,7 +1112,10 @@ Zotero.DBConnection.prototype.loadExtension = async function (name) {
 
 
 Zotero.DBConnection.prototype.isCorruptionError = function (e) {
-	return this.DB_CORRUPTION_STRINGS.some(x => e.message.includes(x));
+	return this.DB_CORRUPTION_STRINGS.some(x => e.message?.includes(x))
+		// Opening a corrupted or non-database file can throw with this nsresult and no
+		// matching message text
+		|| e.result == Cr.NS_ERROR_FILE_CORRUPTED;
 };
 
 
@@ -1151,14 +1162,20 @@ Zotero.DBConnection.prototype.closeDatabase = async function (permanent) {
 		// Checkpoint WAL before closing so all data is in the main file
 		// and -wal file is truncated. Use _connection.execute() directly
 		// to avoid deadlocking with _offlineBackupPromise in queryAsync.
-		try {
-			Zotero.debug("PRAGMA wal_checkpoint(TRUNCATE)");
-			await this._connection.execute("PRAGMA wal_checkpoint(TRUNCATE)");
+		//
+		// Skip this if the database is flagged as corrupt, since checkpointing would write
+		// potentially bad WAL data into the database file, which might be a valid file that a
+		// stale WAL file is being incorrectly replayed into.
+		if (!this._dbIsCorrupt) {
+			try {
+				Zotero.debug("PRAGMA wal_checkpoint(TRUNCATE)");
+				await this._connection.execute("PRAGMA wal_checkpoint(TRUNCATE)");
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
-		catch (e) {
-			Zotero.logError(e);
-		}
-
+		
 		this.closed = true;
 		await this._connection.close();
 		this._connection = undefined;
@@ -1468,6 +1485,26 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 	var file = this._dbPath;
 	var corruptMarker = this._dbPath + '.is.corrupt';
 	
+	var uncleanShutdown = false;
+	if (!this._externalDB) {
+		// If a verified copy of the database file was saved before a restart due to stale
+		// journal files, swap it in. A failure aborts startup, since opening the database
+		// with a pending repair still on disk could let the older copy overwrite newer data
+		// at a later startup.
+		await this._applyPendingRepair();
+		
+		// A non-empty WAL file means the last session didn't close cleanly, since the WAL
+		// is truncated at shutdown
+		try {
+			uncleanShutdown = (await IOUtils.stat(file + '-wal')).size > 0;
+		}
+		catch (e) {
+			if (e.name != 'NotFoundError') {
+				throw e;
+			}
+		}
+	}
+	
 	try {
 		if (await OS.File.exists(corruptMarker)) {
 			throw new Error(this.DB_CORRUPTION_STRINGS[0]);
@@ -1490,8 +1527,11 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 		
 		Zotero.logError(e);
 		
-		if (this.DB_CORRUPTION_STRINGS.some(x => e.message.includes(x))) {
+		if (this.isCorruptionError(e)) {
 			await this._handleCorruptionMarker();
+			// Recovery just verified or replaced the database file and removed any journal
+			// files, so the unclean-shutdown integrity check below would be redundant
+			uncleanShutdown = false;
 		}
 		else {
 			// Some other error that we don't yet know how to deal with
@@ -1522,6 +1562,37 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 		
 		// Enable foreign key checks
 		await this.queryAsync("PRAGMA foreign_keys=true");
+		
+		// If the last session didn't close cleanly, check database integrity, in case the WAL
+		// doesn't belong to the database file (e.g., a stale WAL from a force-quit left in
+		// place while the database file was manually replaced from a backup). A mismatched
+		// WAL can produce subtle data damage rather than outright errors, so use a full
+		// integrity check, which unlike quick_check verifies indexes against table contents.
+		if (uncleanShutdown) {
+			this._debug("Last session didn't close cleanly -- checking database integrity", 1);
+			this._showProgressText('db-checking-integrity');
+			let ok = false;
+			try {
+				ok = (await this.valueQueryAsync("PRAGMA integrity_check(1)")) == 'ok';
+			}
+			catch (e) {
+				// Only a corruption error confirms corruption -- operational errors propagate
+				if (!this.isCorruptionError(e)) {
+					throw e;
+				}
+				Zotero.logError(e);
+			}
+			if (ok) {
+				this._debug("Database integrity OK", 1);
+			}
+			else {
+				let error = new Error(this.DB_CORRUPTION_STRINGS[0]);
+				// The full check verifies index contents that quick_check skips, so don't let
+				// the attached-database quick check overrule it
+				await this._checkException(error, { mainConfirmedCorrupt: true });
+				throw error;
+			}
+		}
 		
 		// Register idle observer for DB backup
 		Zotero.Schema.schemaUpdatePromise.then(() => {
@@ -1557,44 +1628,82 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 };
 
 
-Zotero.DBConnection.prototype._checkException = async function (e) {
-	if (this._externalDB || !this.isCorruptionError(e) || this._checkingCorruption) {
+/**
+ * @param {Error} e
+ * @param {Object} [options]
+ * @param {Boolean} [options.mainConfirmedCorrupt] - Skip the attached-database check because
+ *     the caller already confirmed main-database corruption (e.g., with a full integrity
+ *     check, which detects index inconsistencies that quick_check misses)
+ */
+Zotero.DBConnection.prototype._checkException = async function (e, { mainConfirmedCorrupt } = {}) {
+	if (this._externalDB || !this.isCorruptionError(e) || this._checkingCorruption
+			|| this._handlingCorruption) {
 		return true;
 	}
 
+	var progressToken = this._showProgressText('db-checking-integrity');
+	
 	// A "malformed" error can come from an attached database (e.g., the rebuildable full-text
 	// index) rather than the main file, so confirm the main database is actually corrupt before
 	// offering to restore it. That way a disposable attached DB's corruption doesn't trigger
 	// main-database recovery; the attaching code detects and rebuilds it instead.
-	var mainOK = false;
-	this._checkingCorruption = true;
-	try {
-		mainOK = (await this.valueQueryAsync("PRAGMA main.quick_check(1)")) == 'ok';
-	}
-	catch (checkError) {
-		Zotero.logError(checkError);
-	}
-	finally {
-		this._checkingCorruption = false;
-	}
-	if (mainOK) {
-		Zotero.logError(e);
-		Zotero.debug("Corruption error but the main database passed a check -- skipping "
-			+ "main-database recovery", 1);
-		// Let owners of attached databases (e.g., the full-text index) rebuild them. Deferred so it
-		// runs after the failing operation unwinds -- a rebuild may need to DETACH, which can't run
-		// inside the transaction the error may have come from.
-		for (let handler of this._corruptionHandlers) {
-			Zotero.Promise.delay(0).then(handler).catch(err => Zotero.logError(err));
+	if (!mainConfirmedCorrupt) {
+		let mainOK = false;
+		this._checkingCorruption = true;
+		try {
+			mainOK = (await this.valueQueryAsync("PRAGMA main.quick_check(1)")) == 'ok';
 		}
-		return true;
+		catch (checkError) {
+			Zotero.logError(checkError);
+			// A check failure other than a corruption error leaves the state of the main
+			// database unknown, so don't start destructive recovery
+			if (!this.isCorruptionError(checkError)) {
+				this._clearProgressText(progressToken);
+				return true;
+			}
+		}
+		finally {
+			this._checkingCorruption = false;
+		}
+		if (mainOK) {
+			Zotero.logError(e);
+			Zotero.debug("Corruption error but the main database passed a check -- skipping "
+				+ "main-database recovery", 1);
+			// Let owners of attached databases (e.g., the full-text index) rebuild them. Deferred
+			// so it runs after the failing operation unwinds -- a rebuild may need to DETACH,
+			// which can't run inside the transaction the error may have come from.
+			for (let handler of this._corruptionHandlers) {
+				Zotero.Promise.delay(0).then(handler).catch(err => Zotero.logError(err));
+			}
+			this._clearProgressText(progressToken);
+			return true;
+		}
 	}
 
+	// Corruption errors from other queries can keep arriving while this runs, since a pending
+	// restart or quit is asynchronous and execution continues until shutdown
+	this._handlingCorruption = true;
+	
+	// Skip backups
+	this._dbIsCorrupt = true;
+	
+	// If the database file is valid and only stale journal files are causing the corruption,
+	// save the verified copy to be swapped in at the next startup and restart
+	try {
+		if (await this._journalFilesExist() && await this._checkValidWithoutJournalFiles(true)) {
+			this._debug("Restarting to recover database from stale journal files", 1);
+			Zotero.skipLoading = true;
+			Zotero.Utilities.Internal.quit(true);
+			return false;
+		}
+	}
+	catch (e2) {
+		Zotero.logError(e2);
+	}
+	
 	const supportURL = 'https://zotero.org/support/kb/corrupted_database';
 	
 	var filename = PathUtils.filename(this._dbPath);
-	// Skip backups
-	this._dbIsCorrupt = true;
 	
 	var backupDate = null;
 	var backupTime = null;
@@ -1635,6 +1744,8 @@ Zotero.DBConnection.prototype._checkException = async function (e) {
 		Zotero.Utilities.Internal.quit(true);
 	}
 	else if (index == 1) {
+		this._handlingCorruption = false;
+		this._clearProgressText(progressToken);
 	}
 	else {
 		Zotero.launchURL(supportURL);
@@ -1643,6 +1754,382 @@ Zotero.DBConnection.prototype._checkException = async function (e) {
 	}
 	
 	return false;
+};
+
+
+/**
+ * Move any -journal/-wal files along with a database file that's being moved
+ *
+ * SQLite associates journal files with a database by filename, so a stale journal left at the
+ * old path would be replayed into whatever file next occupies it (e.g., a restored backup),
+ * corrupting it. Moving the -wal file along with a .damaged file also keeps committed
+ * transactions that hadn't yet been checkpointed available for data recovery.
+ */
+Zotero.DBConnection.prototype._moveJournalFiles = async function (fromPath, toPath) {
+	for (let suffix of ['-journal', '-wal']) {
+		try {
+			if (await IOUtils.exists(fromPath + suffix)) {
+				this._debug(`Moving '${PathUtils.filename(fromPath + suffix)}' to `
+					+ `'${PathUtils.filename(toPath + suffix)}'`, 1);
+				await IOUtils.move(fromPath + suffix, toPath + suffix);
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	}
+	// A -shm file contains no recoverable data and is rebuilt by SQLite, so just remove it
+	try {
+		await IOUtils.remove(fromPath + '-shm', { ignoreAbsent: true });
+	}
+	catch (e) {
+		Zotero.logError(e);
+	}
+};
+
+
+/**
+ * Remove any journal files (-journal/-wal/-shm) at a database path so that they aren't
+ * replayed into a database file subsequently placed there
+ *
+ * @return {Boolean} - False if a -journal or -wal file couldn't be removed
+ */
+Zotero.DBConnection.prototype._removeJournalFiles = async function (dbPath) {
+	var success = true;
+	for (let suffix of ['-journal', '-wal', '-shm']) {
+		try {
+			if (await IOUtils.exists(dbPath + suffix)) {
+				this._debug(`Removing '${PathUtils.filename(dbPath + suffix)}'`, 1);
+				await IOUtils.remove(dbPath + suffix);
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+			// A leftover -shm file on its own is harmless, so a failure to remove it
+			// shouldn't invalidate successful -journal/-wal removal
+			if (suffix != '-shm') {
+				success = false;
+			}
+		}
+	}
+	return success;
+};
+
+
+/**
+ * Check whether the database file is valid without its journal files by copying it to a
+ * temporary path, which strips the journal association, and running an integrity check on
+ * the copy
+ *
+ * A database and WAL pair that belong together and are both intact don't produce corruption
+ * errors, so a database that's valid without its WAL while the combined view is corrupt means
+ * the WAL doesn't belong to it.
+ *
+ * @param {Boolean} [keepCopy] - Keep a verified copy at <database>.repair.tmp, to be swapped
+ *     in by _applyPendingRepair() at the next startup
+ * @return {Boolean}
+ */
+Zotero.DBConnection.prototype._checkValidWithoutJournalFiles = async function (keepCopy) {
+	var file = this._dbPath;
+
+	if (!(await IOUtils.exists(file))) {
+		return false;
+	}
+
+	this._debug(`Checking whether database file '${PathUtils.filename(file)}' is valid `
+		+ `without its journal files`, 1);
+	var tmpFile = file + (keepCopy ? '.repair.tmp' : '.check.tmp');
+	var valid = false;
+	try {
+		await IOUtils.remove(tmpFile, { ignoreAbsent: true });
+		await IOUtils.remove(tmpFile + '.verified', { ignoreAbsent: true });
+		// Remove journal files from an earlier interrupted check, which would otherwise be
+		// replayed into the new copy and invalidate the check
+		if (!(await this._removeJournalFiles(tmpFile))) {
+			throw new Error("Couldn't remove journal files of previous temporary copy");
+		}
+		await Zotero.File.copyFile(file, tmpFile);
+		valid = await this._integrityCheckFile(tmpFile);
+		// Record the verified copy's size and mtime so that _applyPendingRepair() can skip
+		// another integrity check after the restart. A crash before verification finishes
+		// leaves no record, so the copy gets checked again at startup.
+		if (valid && keepCopy) {
+			let { size, lastModified } = await IOUtils.stat(tmpFile);
+			await Zotero.File.putContentsAsync(
+				tmpFile + '.verified', JSON.stringify({ size, lastModified })
+			);
+		}
+	}
+	catch (e) {
+		// Only a corruption error marks the database file as invalid -- operational errors
+		// (I/O, permissions) propagate so that recovery is aborted rather than proceeding
+		// destructively
+		if (!this.isCorruptionError(e)) {
+			throw e;
+		}
+		Zotero.logError(e);
+	}
+	finally {
+		if (!valid || !keepCopy) {
+			try {
+				await IOUtils.remove(tmpFile, { ignoreAbsent: true });
+				await IOUtils.remove(tmpFile + '.verified', { ignoreAbsent: true });
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+	}
+	this._debug(valid
+		? "Database file is valid without its journal files"
+		: "Database file isn't valid on its own", 1);
+	return valid;
+};
+
+
+/**
+ * Show a message on the main-window progress meter for a potentially long-running check or
+ * repair, ignoring errors (e.g., if no window exists yet)
+ *
+ * @return {Object|null} - Token for _clearProgressText()
+ */
+Zotero.DBConnection.prototype._showProgressText = function (l10nID) {
+	try {
+		return Zotero.showZoteroPaneProgressMeter(Zotero.ftl.formatValueSync(l10nID));
+	}
+	catch (e) {
+		Zotero.logError(e);
+		return null;
+	}
+};
+
+
+/**
+ * Restore the progress display shown with _showProgressText() to its previous state, leaving
+ * it alone if another operation has changed it since
+ */
+Zotero.DBConnection.prototype._clearProgressText = function (token) {
+	try {
+		Zotero.restoreZoteroPaneProgressMeter(token);
+	}
+	catch (e) {
+		Zotero.logError(e);
+	}
+};
+
+
+/**
+ * Check whether journal files that can affect database contents (-journal/-wal) exist. A
+ * stale -shm file on its own is harmless, since the WAL index is just rebuilt from the
+ * -wal file.
+ */
+Zotero.DBConnection.prototype._journalFilesExist = async function () {
+	return await IOUtils.exists(this._dbPath + '-journal')
+		|| await IOUtils.exists(this._dbPath + '-wal');
+};
+
+
+/**
+ * Run an integrity check on a database file over a separate connection
+ *
+ * @param {String} path
+ * @param {Boolean} [quick] - Run quick_check instead of a full integrity_check, skipping
+ *     verification of index contents against tables
+ * @return {Boolean}
+ */
+Zotero.DBConnection.prototype._integrityCheckFile = async function (path, quick) {
+	var connection = await this.Sqlite.openConnection({ path });
+	var ok;
+	try {
+		try {
+			let rows = await connection.execute(
+				`PRAGMA ${quick ? 'quick_check' : 'integrity_check'}(1)`
+			);
+			ok = !!rows.length && rows[0].getResultByIndex(0) == 'ok';
+		}
+		finally {
+			await connection.close();
+		}
+	}
+	finally {
+		// Remove journal files that opening the database can leave behind, even if the check
+		// throws. Fail on a removal failure only if the check passed, so that an original
+		// corruption error isn't masked.
+		if (!(await this._removeJournalFiles(path)) && ok) {
+			throw new Error("Couldn't remove journal files left by integrity check");
+		}
+	}
+	return ok;
+};
+
+
+/**
+ * Copy a database file whose only damage is index inconsistencies -- one that fails a full
+ * integrity check but passes a quick check -- and rebuild its indexes with REINDEX, which
+ * recreates them from table contents
+ *
+ * @return {String|false} - Path of the repaired copy if it passes a full integrity check,
+ *     or false if the file can't be repaired this way (e.g., table data contains actual
+ *     UNIQUE violations, which cause REINDEX to fail)
+ */
+Zotero.DBConnection.prototype._reindexToCopy = async function (path) {
+	var tmpFile = path + '.reindex.tmp';
+	try {
+		await IOUtils.remove(tmpFile, { ignoreAbsent: true });
+		// A leftover journal file from an earlier interrupted repair would be replayed into
+		// the new copy, so fail on it as an operational error
+		if (!(await this._removeJournalFiles(tmpFile))) {
+			throw new Error("Couldn't remove journal files of previous reindex copy");
+		}
+		await Zotero.File.copyFile(path, tmpFile);
+		this._debug(`Rebuilding indexes of '${PathUtils.filename(tmpFile)}'`, 1);
+		this._showProgressText('db-repairing');
+		let connection = await this.Sqlite.openConnection({ path: tmpFile });
+		try {
+			try {
+				await connection.execute("REINDEX");
+			}
+			finally {
+				await connection.close();
+			}
+		}
+		finally {
+			await this._removeJournalFiles(tmpFile);
+		}
+		if (await this._integrityCheckFile(tmpFile)) {
+			return tmpFile;
+		}
+	}
+	catch (e) {
+		// Constraint and corruption errors mean the file can't be repaired this way --
+		// operational errors propagate so that recovery is aborted
+		if (!this.isCorruptionError(e) && !/constraint/i.test(e.message ?? '')) {
+			try {
+				await IOUtils.remove(tmpFile, { ignoreAbsent: true });
+			}
+			catch (e2) {
+				Zotero.logError(e2);
+			}
+			throw e;
+		}
+		Zotero.logError(e);
+	}
+	this._debug("Indexes couldn't be rebuilt", 1);
+	try {
+		await IOUtils.remove(tmpFile, { ignoreAbsent: true });
+	}
+	catch (e) {
+		Zotero.logError(e);
+	}
+	return false;
+};
+
+
+/**
+ * Replace the database file with a verified copy saved by _checkException() before a restart,
+ * and remove the stale journal files that caused the corruption
+ *
+ * The saved copy is swapped in at startup rather than the journal files being removed at
+ * detection time, since SQLite can checkpoint stale WAL data into the database file when the
+ * connection is closed.
+ *
+ * Also removes temporary files left behind by interrupted checks and repairs.
+ */
+Zotero.DBConnection.prototype._applyPendingRepair = async function () {
+	var file = this._dbPath;
+	var repairFile = file + '.repair.tmp';
+	var verifiedFile = repairFile + '.verified';
+	
+	// Clean up temporary files left behind by an interrupted check or repair
+	for (let tmpFile of [file + '.check.tmp', file + '.bak.reindex.tmp']) {
+		try {
+			await IOUtils.remove(tmpFile, { ignoreAbsent: true });
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		await this._removeJournalFiles(tmpFile);
+	}
+	
+	if (!(await IOUtils.exists(repairFile))) {
+		try {
+			await IOUtils.remove(verifiedFile, { ignoreAbsent: true });
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		await this._removeJournalFiles(repairFile);
+		return;
+	}
+	
+	// If the copy still matches the size and mtime recorded after verification, skip another
+	// integrity check
+	var valid = false;
+	try {
+		let { size, lastModified } = JSON.parse(
+			await Zotero.File.getContentsAsync(verifiedFile)
+		);
+		let info = await IOUtils.stat(repairFile);
+		valid = info.size === size && info.lastModified === lastModified;
+	}
+	catch (e) {}
+	// Otherwise verify the copy before replacing the database file with it
+	if (!valid) {
+		this._showProgressText('db-checking-integrity');
+		try {
+			valid = await this._integrityCheckFile(repairFile);
+		}
+		catch (e) {
+			// Only a corruption error marks the copy as invalid for removal -- operational
+			// errors (I/O, permissions) propagate so that startup is aborted and the repair
+			// file preserved
+			if (!this.isCorruptionError(e)) {
+				throw e;
+			}
+			Zotero.logError(e);
+		}
+	}
+	await IOUtils.remove(verifiedFile, { ignoreAbsent: true });
+	if (!valid) {
+		this._debug(`Removing invalid repair file '${PathUtils.filename(repairFile)}'`, 1);
+		await IOUtils.remove(repairFile, { ignoreAbsent: true });
+		return;
+	}
+	
+	this._debug(`Replacing '${PathUtils.filename(file)}' with verified copy saved before `
+		+ `restart`, 1);
+	// A journal file that can't be removed would be replayed into the repaired database, so
+	// fail instead
+	if (!(await this._removeJournalFiles(file))) {
+		throw new Error("Couldn't remove stale journal files -- not applying pending repair");
+	}
+	await IOUtils.move(repairFile, file);
+	await IOUtils.remove(file + '.is.corrupt', { ignoreAbsent: true });
+};
+
+
+/**
+ * If the database file is valid on its own and stale journal files are causing the corruption
+ * -- e.g., a -wal file left behind by a force-quit that no longer matches the database file
+ * because the latter was manually replaced from a backup -- remove the journal files so that
+ * the database file can be used as is.
+ *
+ * Also returns true for a valid database file with no journal files, which can result from an
+ * earlier recovery that was interrupted before the corruption marker was cleared, so that the
+ * file isn't needlessly replaced with an older backup.
+ *
+ * @return {Boolean} - True if the database file is valid and any journal files were removed
+ */
+Zotero.DBConnection.prototype._recoverFromStaleJournalFiles = async function () {
+	if (!(await this._checkValidWithoutJournalFiles())) {
+		return false;
+	}
+	// A journal file that can't be removed would be replayed into the database file as soon
+	// as it was opened, so fail instead
+	if (!(await this._removeJournalFiles(this._dbPath))) {
+		throw new Error("Couldn't remove stale journal files");
+	}
+	return true;
 };
 
 
@@ -1657,6 +2144,21 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 	
 	this._debug(`Database file '${fileName}' corrupted`, 1);
 	
+	this._showProgressText('db-checking-integrity');
+	
+	// If the database file is valid and only stale journal files are causing the corruption,
+	// keep it and skip the backup restore
+	if (await this._recoverFromStaleJournalFiles()) {
+		this._connection = await Promise.resolve(this.Sqlite.openConnection({
+			path: file
+		}));
+		this._debug('Database recovered from stale journal files', 1);
+		if (await OS.File.exists(corruptMarker)) {
+			await OS.File.remove(corruptMarker);
+		}
+		return;
+	}
+	
 	// No backup file! Eek!
 	if (!(await OS.File.exists(backupFile))) {
 		this._debug("No backup file for DB '" + this._dbName + "' exists", 1);
@@ -1668,10 +2170,17 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 			this._debug('Saving damaged DB file with .damaged extension', 1);
 			damagedFile = this._dbPath + '.damaged';
 			damagedFile = await Zotero.File.moveToUnique(file, damagedFile);
+			await this._moveJournalFiles(file, damagedFile);
 		}
 		// If it doesn't exist, assume we already showed a warning and moved it
 		else {
 			this._debug(`Database file '${fileName}' doesn't exist!`);
+		}
+		
+		// A journal file that can't be removed would be replayed into the new database, so
+		// fail instead
+		if (!(await this._removeJournalFiles(file))) {
+			throw new Error("Couldn't remove stale journal files");
 		}
 		
 		// Create new main database
@@ -1696,21 +2205,49 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 		return;
 	}
 	
-	// Save damaged file
-	this._debug('Saving damaged DB file with .damaged extension', 1);
+	// Save damaged file, unless it was already moved by an interrupted earlier recovery
 	var damagedFile = this._dbPath + '.damaged';
-	damagedFile = await Zotero.File.moveToUnique(file, damagedFile);
-	
-	// Test the backup file
-	try {
-		Zotero.debug("Asynchronously opening DB connection");
-		this._connection = await Promise.resolve(this.Sqlite.openConnection({
-			path: backupFile
-		}));
-		await this.closeDatabase();
+	if (await OS.File.exists(file)) {
+		this._debug('Saving damaged DB file with .damaged extension', 1);
+		damagedFile = await Zotero.File.moveToUnique(file, damagedFile);
+		await this._moveJournalFiles(file, damagedFile);
 	}
-	// Can't open backup either
+	
+	// Check the backup file
+	var backupValid = false;
+	var restoreFile = backupFile;
+	try {
+		// Remove any stale backup journal files so that they aren't replayed into the
+		// backup when it's opened
+		if (!(await this._removeJournalFiles(backupFile))) {
+			throw new Error("Couldn't remove backup journal files");
+		}
+		this._debug(`Checking integrity of '${PathUtils.filename(backupFile)}'`, 1);
+		backupValid = await this._integrityCheckFile(backupFile);
+		// If the backup fails only the index checks that a quick check skips, rebuild the
+		// indexes on a copy and restore that instead
+		if (!backupValid && (await this._integrityCheckFile(backupFile, true))) {
+			let repairedFile = await this._reindexToCopy(backupFile);
+			if (repairedFile) {
+				restoreFile = repairedFile;
+				backupValid = true;
+			}
+		}
+	}
 	catch (e) {
+		// Only a corruption error marks the backup as invalid -- operational errors
+		// propagate so that recovery can be retried
+		if (!this.isCorruptionError(e)) {
+			throw e;
+		}
+		Zotero.logError(e);
+	}
+	// Backup is corrupt too
+	if (!backupValid) {
+		if (!(await this._removeJournalFiles(file))) {
+			throw new Error("Couldn't remove stale journal files");
+		}
+		
 		// Create new main database
 		this._connection = await Promise.resolve(this.Sqlite.openConnection({
 			path: file
@@ -1731,17 +2268,30 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 		
 		return;
 	}
-	
-	this._connection = undefined;
-	
+
 	// Copy backup file to main DB file
 	this._debug("Restoring database '" + this._dbName + "' from backup file", 1);
 	try {
-		await Zotero.File.copyFile(backupFile, file);
+		// A journal file that can't be removed would be replayed into the restored database,
+		// so fail instead
+		if (!(await this._removeJournalFiles(file))) {
+			throw new Error("Couldn't remove stale journal files");
+		}
+		await Zotero.File.copyFile(restoreFile, file);
 	}
 	catch (e) {
 		// TODO: deal with low disk space
 		throw e;
+	}
+	finally {
+		if (restoreFile != backupFile) {
+			try {
+				await IOUtils.remove(restoreFile, { ignoreAbsent: true });
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
 	}
 	
 	// Open restored database

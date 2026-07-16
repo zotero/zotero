@@ -882,6 +882,11 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			}
 		}
 		catch (e) {
+			// If a database corruption handler already resolved the error and initiated a
+			// quit or restart, don't show a startup error
+			if (Zotero.skipLoading) {
+				return false;
+			}
 			if (_checkDataDirAccessError(e)) {}
 			else if (_checkDataDirStorageIOError(e)) {}
 			// Storage busy

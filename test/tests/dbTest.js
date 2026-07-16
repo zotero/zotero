@@ -431,7 +431,649 @@ describe("Zotero.DB", function () {
 		});
 		
 	});
+	
 
+	describe("#_checkException()", function () {
+		afterEach(function () {
+			// Unlock the pane locked by recovery progress messages
+			Zotero.hideZoteroPaneOverlays();
+		});
+		
+		it("should save a verified copy and restart on a corruption error with stale journal files", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			// Corruption handling is skipped for external databases. Set after the database
+			// is created and closed so that opening it doesn't register the idle observer.
+			db._externalDB = false;
+			
+			let quitStub = sinon.stub(Zotero.Utilities.Internal, 'quit');
+			let promptService = Services.prompt;
+			let promptStub = sinon.stub().throws(new Error("Prompt shouldn't be shown"));
+			Services.prompt = { confirmEx: promptStub };
+			// Simulate the live database failing the quick check, as with a genuinely
+			// mismatched WAL -- SQLite ignores the fake WAL file, which has invalid magic
+			let quickCheckStub = sinon.stub(db, 'valueQueryAsync').resolves('row 1 missing');
+			try {
+				await db._checkException(new Error("database disk image is malformed"));
+				// Further corruption errors while the restart is pending should be ignored
+				await db._checkException(new Error("database disk image is malformed"));
+			}
+			finally {
+				quitStub.restore();
+				Services.prompt = promptService;
+				quickCheckStub.restore();
+				Zotero.skipLoading = false;
+				await db.closeDatabase();
+			}
+			
+			assert.isTrue(await IOUtils.exists(dbPath + '.repair.tmp'));
+			assert.isTrue(await IOUtils.exists(dbPath + '.repair.tmp.verified'));
+			assert.isTrue(quickCheckStub.calledOnceWithExactly("PRAGMA main.quick_check(1)"));
+			assert.isTrue(quitStub.calledOnce);
+			assert.isTrue(promptStub.notCalled);
+		});
+		
+		it("shouldn't start recovery if the main database passes a quick check", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			// Flip with the connection open so that the real quick check below doesn't reopen
+			// the database via internal initialization, which registers the idle observer
+			db._externalDB = false;
+			
+			let quitStub = sinon.stub(Zotero.Utilities.Internal, 'quit');
+			let promptService = Services.prompt;
+			let promptStub = sinon.stub().throws(new Error("Prompt shouldn't be shown"));
+			Services.prompt = { confirmEx: promptStub };
+			let progressSpy = sinon.spy(Zotero, 'showZoteroPaneProgressMeter');
+			try {
+				// SQLite ignores the fake WAL file, which has invalid magic, so the real
+				// quick check passes and the error is treated as attached-database corruption
+				assert.isTrue(
+					await db._checkException(new Error("database disk image is malformed"))
+				);
+				assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp'));
+				assert.isTrue(await IOUtils.exists(dbPath + '-wal'));
+			}
+			finally {
+				quitStub.restore();
+				Services.prompt = promptService;
+				progressSpy.restore();
+				await db.closeDatabase();
+			}
+			assert.isTrue(quitStub.notCalled);
+			assert.isTrue(promptStub.notCalled);
+			// Progress text should have been shown during the check and the pane unlocked
+			// after the early return
+			assert.isTrue(progressSpy.called);
+			assert.isFalse(Zotero.locked);
+		});
+		
+		it("should restore another operation's progress display after an attached-database error", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			// Flip with the connection open so that the real quick check below doesn't reopen
+			// the database via internal initialization
+			db._externalDB = false;
+			
+			// Simulate another operation's determinate progress display, advanced partway
+			let outerToken = Zotero.showZoteroPaneProgressMeter("Other operation", true);
+			Zotero.updateZoteroPaneProgressMeter(30);
+			let progressSpy = sinon.spy(Zotero, 'showZoteroPaneProgressMeter');
+			try {
+				// The real quick check passes, so the error is treated as attached-database
+				// corruption, and the other operation's display should be restored
+				assert.isTrue(
+					await db._checkException(new Error("database disk image is malformed"))
+				);
+				assert.isTrue(progressSpy.calledWith("Other operation", true));
+				assert.isTrue(Zotero.locked);
+			}
+			finally {
+				progressSpy.restore();
+				await db.closeDatabase();
+			}
+			// Ownership should have been returned to the other operation, so its own token
+			// can still restore
+			Zotero.restoreZoteroPaneProgressMeter(outerToken);
+			assert.isFalse(Zotero.locked);
+		});
+		
+		it("should unlock the pane if recovery is declined", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await Zotero.File.putContentsAsync(dbPath, 'corrupted data');
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			db._externalDB = false;
+			
+			let quitStub = sinon.stub(Zotero.Utilities.Internal, 'quit');
+			let promptService = Services.prompt;
+			// Cancel the corruption dialog
+			let promptStub = sinon.stub().returns(1);
+			Services.prompt = { confirmEx: promptStub };
+			let quickCheckStub = sinon.stub(db, 'valueQueryAsync').resolves('row 1 missing');
+			try {
+				assert.isFalse(
+					await db._checkException(new Error("database disk image is malformed"))
+				);
+			}
+			finally {
+				quitStub.restore();
+				Services.prompt = promptService;
+				quickCheckStub.restore();
+				await db.closeDatabase();
+			}
+			assert.isTrue(promptStub.called);
+			assert.isTrue(quitStub.notCalled);
+			assert.isFalse(Zotero.locked);
+			assert.isFalse(await IOUtils.exists(dbPath + '.is.corrupt'));
+			// Later corruption errors can re-trigger handling
+			assert.isFalse(db._handlingCorruption);
+		});
+		
+		it("shouldn't start recovery if the quick check fails for a non-corruption reason", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			db._externalDB = false;
+			
+			let quitStub = sinon.stub(Zotero.Utilities.Internal, 'quit');
+			let promptService = Services.prompt;
+			let promptStub = sinon.stub().throws(new Error("Prompt shouldn't be shown"));
+			Services.prompt = { confirmEx: promptStub };
+			let quickCheckStub = sinon.stub(db, 'valueQueryAsync')
+				.rejects(new Error("disk I/O error"));
+			try {
+				assert.isTrue(
+					await db._checkException(new Error("database disk image is malformed"))
+				);
+			}
+			finally {
+				quitStub.restore();
+				Services.prompt = promptService;
+				quickCheckStub.restore();
+				await db.closeDatabase();
+			}
+			assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp'));
+			assert.isTrue(quitStub.notCalled);
+			assert.isTrue(promptStub.notCalled);
+			assert.isFalse(Zotero.locked);
+		});
+		
+		it("should skip the quick check if main-database corruption is already confirmed", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			db._externalDB = false;
+			
+			let quitStub = sinon.stub(Zotero.Utilities.Internal, 'quit');
+			let promptService = Services.prompt;
+			let promptStub = sinon.stub().throws(new Error("Prompt shouldn't be shown"));
+			Services.prompt = { confirmEx: promptStub };
+			try {
+				// The quick check would pass here, but a caller that has already confirmed
+				// corruption with a full integrity check overrides it
+				await db._checkException(
+					new Error("database disk image is malformed"),
+					{ mainConfirmedCorrupt: true }
+				);
+			}
+			finally {
+				quitStub.restore();
+				Services.prompt = promptService;
+				Zotero.skipLoading = false;
+				await db.closeDatabase();
+			}
+			assert.isTrue(await IOUtils.exists(dbPath + '.repair.tmp'));
+			assert.isTrue(quitStub.calledOnce);
+			assert.isTrue(promptStub.notCalled);
+		});
+	});
+	
+
+	describe("#_getConnectionAsync()", function () {
+		afterEach(function () {
+			// Unlock the pane locked by recovery progress messages
+			Zotero.hideZoteroPaneOverlays();
+		});
+		
+		it("shouldn't treat an operational integrity-check error after an unclean shutdown as corruption", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			// Open through internal initialization so that the unclean-shutdown check runs
+			db._externalDB = false;
+			
+			let stub = sinon.stub(db, 'valueQueryAsync');
+			stub.callThrough();
+			stub.withArgs("PRAGMA integrity_check(1)").rejects(new Error("disk I/O error"));
+			try {
+				let e = await getPromiseError(db.queryAsync("SELECT COUNT(*) FROM foo"));
+				assert.include(e.message, "disk I/O error");
+			}
+			finally {
+				stub.restore();
+				await db.closeDatabase();
+			}
+			assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp'));
+			assert.isFalse(await IOUtils.exists(dbPath + '.damaged'));
+		});
+	});
+	
+
+	describe("#_handleCorruptionMarker()", function () {
+		afterEach(function () {
+			// Unlock the pane locked by recovery progress messages
+			Zotero.hideZoteroPaneOverlays();
+		});
+		
+		// Create a database whose only damage is index inconsistencies -- an index built over
+		// different values transplanted onto another table with the same row count -- which
+		// fails a full integrity check but passes a quick check
+		async function createDBWithIndexDamage(db, path, { unique = false, values = "(1), (2), (3)", dummyValues = "(4), (5), (6)" } = {}) {
+			let connection = await db.Sqlite.openConnection({ path });
+			try {
+				await connection.execute("CREATE TABLE foo (a INTEGER)");
+				await connection.execute(`INSERT INTO foo VALUES ${values}`);
+				await connection.execute("CREATE TABLE dummy (a INTEGER)");
+				await connection.execute(`INSERT INTO dummy VALUES ${dummyValues}`);
+				await connection.execute(`CREATE ${unique ? 'UNIQUE ' : ''}INDEX idx ON dummy(a)`);
+				await connection.execute("PRAGMA writable_schema=ON");
+				await connection.execute("UPDATE sqlite_master SET tbl_name='foo', "
+					+ `sql='CREATE ${unique ? 'UNIQUE ' : ''}INDEX idx ON foo(a)' WHERE name='idx'`);
+				await connection.execute("PRAGMA writable_schema=OFF");
+			}
+			finally {
+				await connection.close();
+			}
+		}
+		
+		it("should repair a backup with index damage by rebuilding indexes on a copy", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await createDBWithIndexDamage(db, dbPath + '.bak');
+			assert.isFalse(await db._integrityCheckFile(dbPath + '.bak'));
+			assert.isTrue(await db._integrityCheckFile(dbPath + '.bak', true));
+			await Zotero.File.putContentsAsync(dbPath, 'corrupted data');
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			
+			let stub = sinon.stub(Zotero, 'alert');
+			try {
+				await db._handleCorruptionMarker();
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 3);
+			}
+			finally {
+				await db.closeDatabase();
+				stub.restore();
+			}
+			// Restored database should pass a full integrity check, with the backup and its
+			// index damage left as is
+			assert.isTrue(await db._integrityCheckFile(dbPath));
+			assert.isFalse(await db._integrityCheckFile(dbPath + '.bak'));
+			assert.isFalse(await IOUtils.exists(dbPath + '.bak.reindex.tmp'));
+		});
+		
+		it("should create a new database if the backup's indexes can't be rebuilt", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			// Duplicate values in the table make rebuilding the unique index impossible
+			await createDBWithIndexDamage(db, dbPath + '.bak', {
+				unique: true, values: "(1), (1)", dummyValues: "(4), (5)"
+			});
+			assert.isFalse(await db._integrityCheckFile(dbPath + '.bak'));
+			assert.isTrue(await db._integrityCheckFile(dbPath + '.bak', true));
+			await Zotero.File.putContentsAsync(dbPath, 'corrupted data');
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			
+			let stub = sinon.stub(Zotero, 'alert');
+			try {
+				await db._handleCorruptionMarker();
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM sqlite_master"), 0);
+			}
+			finally {
+				await db.closeDatabase();
+				stub.restore();
+			}
+			assert.isTrue(stub.called);
+			assert.isTrue(await IOUtils.exists(dbPath + '.damaged'));
+			assert.isFalse(await IOUtils.exists(dbPath + '.bak.reindex.tmp'));
+		});
+
+		it("should abort recovery on an operational error during index rebuilding", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await createDBWithIndexDamage(db, dbPath + '.bak');
+			await Zotero.File.putContentsAsync(dbPath, 'corrupted data');
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			await Zotero.File.putContentsAsync(dbPath + '.is.corrupt', '');
+			
+			// Simulate a journal file of the reindex copy that can't be removed
+			let stub = sinon.stub(db, '_removeJournalFiles');
+			stub.callThrough();
+			stub.withArgs(dbPath + '.bak.reindex.tmp').resolves(false);
+			let alertStub = sinon.stub(Zotero, 'alert');
+			try {
+				let e = await getPromiseError(db._handleCorruptionMarker());
+				assert.include(e.message, "reindex copy");
+			}
+			finally {
+				stub.restore();
+				alertStub.restore();
+				await db.closeDatabase();
+			}
+			// No new database should have been created, and the backup, damaged files, and
+			// corruption marker should remain for a retry
+			assert.isFalse(await IOUtils.exists(dbPath));
+			assert.isTrue(await IOUtils.exists(dbPath + '.bak'));
+			assert.isTrue(await IOUtils.exists(dbPath + '.damaged'));
+			assert.isTrue(await IOUtils.exists(dbPath + '.damaged-wal'));
+			assert.isTrue(await IOUtils.exists(dbPath + '.is.corrupt'));
+			assert.isTrue(alertStub.notCalled);
+		});
+		
+		it("should move a stale WAL file to .damaged-wal when restoring from backup", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await IOUtils.copy(dbPath, dbPath + '.bak');
+			
+			// Simulate a corrupted database and a stale WAL file left behind by a force-quit
+			await Zotero.File.putContentsAsync(dbPath, 'corrupted data');
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			
+			let stub = sinon.stub(Zotero, 'alert');
+			try {
+				await db._handleCorruptionMarker();
+				// Restored database should be usable
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 0);
+			}
+			finally {
+				await db.closeDatabase();
+				stub.restore();
+			}
+			
+			// Stale WAL file should have been moved alongside the .damaged file
+			assert.isTrue(await IOUtils.exists(dbPath + '.damaged'));
+			assert.equal(await Zotero.File.getContentsAsync(dbPath + '.damaged-wal'), 'stale wal data');
+			assert.isFalse(await IOUtils.exists(dbPath + '-wal'));
+		});
+		
+		it("should keep a valid database file and remove a stale WAL file", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await IOUtils.copy(dbPath, dbPath + '.bak');
+			
+			// Add a row not in the backup, and simulate a stale WAL file next to the valid
+			// database file
+			await db.queryAsync("INSERT INTO foo VALUES (1)");
+			await db.closeDatabase();
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			
+			try {
+				await db._handleCorruptionMarker();
+				// Database file should be kept as is, not restored from the backup
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 1);
+			}
+			finally {
+				await db.closeDatabase();
+			}
+			
+			// Stale WAL file should have been removed, and no .damaged file created
+			assert.isFalse(await IOUtils.exists(dbPath + '-wal'));
+			assert.isFalse(await IOUtils.exists(dbPath + '.damaged'));
+		});
+		
+		it("should keep a valid database file if an interrupted recovery already removed the journal files", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await IOUtils.copy(dbPath, dbPath + '.bak');
+			// Newer data not in the backup, with no journal files left
+			await db.queryAsync("INSERT INTO foo VALUES (1)");
+			await db.closeDatabase();
+			
+			await db._handleCorruptionMarker();
+			try {
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 1);
+			}
+			finally {
+				await db.closeDatabase();
+			}
+			assert.isFalse(await IOUtils.exists(dbPath + '.damaged'));
+		});
+		
+		it("should restore from backup if the database file was already moved by an interrupted recovery", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await IOUtils.copy(dbPath, dbPath + '.bak');
+			await IOUtils.move(dbPath, dbPath + '.damaged');
+			
+			let stub = sinon.stub(Zotero, 'alert');
+			try {
+				await db._handleCorruptionMarker();
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 0);
+			}
+			finally {
+				await db.closeDatabase();
+				stub.restore();
+			}
+			assert.isTrue(await IOUtils.exists(dbPath));
+		});
+		
+		it("should create a new database if the backup is also corrupt", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await Zotero.File.putContentsAsync(dbPath, 'corrupted data');
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			await Zotero.File.putContentsAsync(dbPath + '.bak', 'corrupted backup');
+			
+			let stub = sinon.stub(Zotero, 'alert');
+			try {
+				await db._handleCorruptionMarker();
+				// New empty database should have been created
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM sqlite_master"), 0);
+			}
+			finally {
+				await db.closeDatabase();
+				stub.restore();
+			}
+			assert.isTrue(stub.called);
+			assert.isTrue(await IOUtils.exists(dbPath + '.damaged'));
+			assert.isTrue(await IOUtils.exists(dbPath + '.damaged-wal'));
+			assert.isFalse(await IOUtils.exists(dbPath + '-wal'));
+		});
+		
+		it("should create a new database if no backup exists", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await Zotero.File.putContentsAsync(dbPath, 'corrupted data');
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			
+			let stub = sinon.stub(Zotero, 'alert');
+			try {
+				await db._handleCorruptionMarker();
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM sqlite_master"), 0);
+			}
+			finally {
+				await db.closeDatabase();
+				stub.restore();
+			}
+			assert.isTrue(stub.called);
+			assert.isTrue(await IOUtils.exists(dbPath + '.damaged'));
+			assert.isTrue(await IOUtils.exists(dbPath + '.damaged-wal'));
+			assert.isFalse(await IOUtils.exists(dbPath + '-wal'));
+		});
+	});
+	
+
+	describe("#_applyPendingRepair()", function () {
+		afterEach(function () {
+			// Unlock the pane locked by recovery progress messages
+			Zotero.hideZoteroPaneOverlays();
+		});
+		
+		it("should swap in a verified copy saved before a restart", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.queryAsync("INSERT INTO foo VALUES (1)");
+			await db.closeDatabase();
+			await Zotero.File.putContentsAsync(dbPath + '-wal', 'stale wal data');
+			
+			// Save a verified copy, as _checkException() does before restarting
+			assert.isTrue(await db._checkValidWithoutJournalFiles(true));
+			assert.isTrue(await IOUtils.exists(dbPath + '.repair.tmp'));
+			
+			// Simulate the stale WAL data being checkpointed into the database file when the
+			// connection is closed
+			await Zotero.File.putContentsAsync(dbPath, 'poisoned data');
+			
+			// The verified copy should be swapped in
+			await db._applyPendingRepair();
+			try {
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 1);
+			}
+			finally {
+				await db.closeDatabase();
+			}
+			assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp'));
+			assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp.verified'));
+			assert.isFalse(await IOUtils.exists(dbPath + '-wal'));
+		});
+		
+		it("should apply a valid repair file after rechecking if it doesn't match its verification record", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.queryAsync("INSERT INTO foo VALUES (1)");
+			await db.closeDatabase();
+			assert.isTrue(await db._checkValidWithoutJournalFiles(true));
+			await Zotero.File.putContentsAsync(
+				dbPath + '.repair.tmp.verified', JSON.stringify({ size: 1, lastModified: 1 })
+			);
+			await Zotero.File.putContentsAsync(dbPath, 'poisoned data');
+			
+			await db._applyPendingRepair();
+			
+			try {
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 1);
+			}
+			finally {
+				await db.closeDatabase();
+			}
+			assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp'));
+			assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp.verified'));
+		});
+		
+		it("should remove an invalid repair file that doesn't match its verification record", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await Zotero.File.putContentsAsync(dbPath + '.repair.tmp', 'corrupted repair data');
+			await Zotero.File.putContentsAsync(
+				dbPath + '.repair.tmp.verified', JSON.stringify({ size: 1, lastModified: 1 })
+			);
+			
+			await db._applyPendingRepair();
+			
+			// Repair file should have been rechecked, found invalid, and removed, with the
+			// database file left in place
+			assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp'));
+			assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp.verified'));
+			try {
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 0);
+			}
+			finally {
+				await db.closeDatabase();
+			}
+		});
+		
+		it("should clean up leftover temporary files from interrupted checks", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			let suffixes = [
+				'.check.tmp',
+				'.check.tmp-wal',
+				'.repair.tmp-wal',
+				'.repair.tmp.verified',
+				'.bak.reindex.tmp',
+				'.bak.reindex.tmp-wal',
+				'.bak.reindex.tmp-shm'
+			];
+			for (let suffix of suffixes) {
+				await Zotero.File.putContentsAsync(dbPath + suffix, 'leftover data');
+			}
+			
+			await db._applyPendingRepair();
+			
+			for (let suffix of suffixes) {
+				assert.isFalse(await IOUtils.exists(dbPath + suffix), suffix);
+			}
+		});
+
+		it("shouldn't apply a pending repair file for an external database", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			// Save a copy without the row added below
+			await IOUtils.copy(dbPath, dbPath + '.repair.tmp');
+			await db.queryAsync("INSERT INTO foo VALUES (1)");
+			await db.closeDatabase();
+			
+			// On reopen, the repair file should be ignored
+			try {
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 1);
+			}
+			finally {
+				await db.closeDatabase();
+			}
+			assert.isTrue(await IOUtils.exists(dbPath + '.repair.tmp'));
+		});
+	});
+	
 
 	describe("#vacuum()", function () {
 		it("should vacuum the database with force option", async function () {

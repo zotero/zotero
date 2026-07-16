@@ -91,6 +91,9 @@ general-black = Black
 
 general-loading = Loading…
 
+db-checking-integrity = Checking database integrity…
+db-repairing = Repairing database…
+
 citation-style-label = Citation Style:
 language-label = Language:
 
