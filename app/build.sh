@@ -773,14 +773,17 @@ if [ $BUILD_MAC == 1 ]; then
 		
 		# Sign .jnilib (Java native shared library) within LibreOffice extension, since notarization
 		# started failing without this. The .jnilib is within a .jar within the .oxt, so we have to
-		# extract both, sign the library, and then update each ZIP.
+		# extract both, sign the libraries, and then update each ZIP.
+		#
+		# TODO: Remove this block once the plugin ships a jna.jar without the macOS native
+		# libraries, which are never loaded (JNA is used only on Windows)
 		pushd "$BUILD_DIR"
 		mkdir libreoffice-repack
 		cd libreoffice-repack
 		unzip -q "$APPDIR/Contents/Resources/integration/libreoffice/Zotero_LibreOffice_Integration.oxt" external_jars/jna.jar
-		unzip -q external_jars/jna.jar com/sun/jna/darwin/libjnidispatch.jnilib
-		/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" com/sun/jna/darwin/libjnidispatch.jnilib
-		zip -u external_jars/jna.jar com/sun/jna/darwin/libjnidispatch.jnilib
+		unzip -q external_jars/jna.jar 'com/sun/jna/darwin*/libjnidispatch.jnilib'
+		/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" com/sun/jna/darwin*/libjnidispatch.jnilib
+		zip -u external_jars/jna.jar com/sun/jna/darwin*/libjnidispatch.jnilib
 		zip -u "$APPDIR/Contents/Resources/integration/libreoffice/Zotero_LibreOffice_Integration.oxt" external_jars/jna.jar
 		cd ..
 		rm -rf libreoffice-repack
