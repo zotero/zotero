@@ -156,6 +156,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	var _locked = false;
 	var _shutdownListeners = [];
 	var _progressMessage;
+	var _progressDeterminate;
+	var _progressGeneration = 0;
+	var _progressOwner;
 	var _progressMeters;
 	var _progressPopup;
 	var _lastPercentage;
@@ -1743,12 +1746,30 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @param {String} msg
 	 * @param {Boolean} [determinate=false]
 	 * @param {Boolean} [modalOnly=false] - Don't use popup if Zotero pane isn't showing
-	 * @return	void
+	 * @return {Object} - Token that can optionally be passed to
+	 *     restoreZoteroPaneProgressMeter() to restore the previous display state, for callers
+	 *     that might be interrupting another operation's progress display. Callers that own
+	 *     the display can ignore it and clear with hideZoteroPaneOverlays() as usual.
 	 */
 	this.showZoteroPaneProgressMeter = function (msg, determinate, icon, modalOnly) {
+		// Capture the previous display state and owner so that the caller can restore them
+		// with restoreZoteroPaneProgressMeter()
+		var token = {
+			owner: ++_progressGeneration,
+			previousOwner: _progressOwner,
+			locked: this.locked,
+			message: _progressMessage,
+			determinate: _progressDeterminate,
+			percentage: _lastPercentage
+		};
+		_progressOwner = token.owner;
 		// If msg is undefined, keep any existing message. If false/null/"", clear.
 		// The message is also cleared when the meters are hidden.
 		_progressMessage = msg = (msg === undefined ? _progressMessage : msg) || "";
+		_progressDeterminate = determinate;
+		// The new meter starts at 0 if determinate and empty otherwise, so a first update
+		// that matches the previous meter's state shouldn't be suppressed
+		_lastPercentage = determinate ? 0 : null;
 		var currentWindow = Services.wm.getMostRecentWindow("navigator:browser");
 		var enumerator = Services.wm.getEnumerator("navigator:browser");
 		var progressMeters = [];
@@ -1799,7 +1820,36 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}
 		this.locked = true;
 		_progressMeters = progressMeters;
+		return token;
 	}
+
+
+	/**
+	 * Restore the progress display to its state before a showZoteroPaneProgressMeter() call,
+	 * using the object returned by that call. Does nothing if the display has been changed
+	 * again since then, in which case the newer operation owns it. Restores ownership to the
+	 * previous owner, so nested tokens can be restored in reverse order.
+	 */
+	this.restoreZoteroPaneProgressMeter = function (token) {
+		if (!token || token.owner != _progressOwner) {
+			return;
+		}
+		if (!token.locked) {
+			this.hideZoteroPaneOverlays();
+			return;
+		}
+		this.showZoteroPaneProgressMeter(token.message || null, token.determinate);
+		// Hand the display back to the previous owner rather than keeping the owner id
+		// minted by the call above
+		_progressOwner = token.previousOwner;
+		// Restore the meter position, which showZoteroPaneProgressMeter() reset
+		_lastPercentage = token.percentage;
+		if (token.determinate && token.percentage !== null && token.percentage !== undefined) {
+			for (let pm of _progressMeters) {
+				pm.setAttribute('value', token.percentage);
+			}
+		}
+	};
 	
 	
 	/**
@@ -1828,6 +1878,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			}
 		}
 		_lastPercentage = percentage;
+		// Updating with or without a percentage switches the meter between determinate and
+		// indeterminate, so keep the recorded mode accurate for restoration
+		_progressDeterminate = percentage !== null;
 	}
 	
 	
@@ -1848,11 +1901,14 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		if (_progressPopup) {
 			_progressPopup.close();
 		}
-		
+
+		_progressGeneration++;
+		_progressOwner = null;
 		_progressMessage = null;
+		_progressDeterminate = null;
+		_lastPercentage = null;
 		_progressMeters = [];
 		_progressPopup = null;
-		_lastPercentage = null;
 	}
 	
 	
