@@ -1382,6 +1382,15 @@ Zotero.DBConnection.prototype.backUpDatabase = async function ({ force, suffix, 
 		}
 		
 		await OS.File.move(tmpFile, backupFile);
+		
+		// A copy preserves the database file's mtime, and the backup interval is measured from
+		// the backup file's mtime, so a forced backup of a long-idle database could be rotated
+		// out a day early. Date forced backups from the backup itself so that they last a full
+		// rotation period.
+		if (force && !suffix) {
+			await IOUtils.setModificationTime(backupFile);
+		}
+		
 		Zotero.debug("Backed up to " + PathUtils.filename(backupFile));
 		success = true;
 		return true;
