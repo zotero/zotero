@@ -16,12 +16,59 @@ describe("Zotero.Schema", function () {
 		it("should set last client version", async function () {
 			var sql = "REPLACE INTO settings (setting, key, value) VALUES ('client', 'lastVersion', ?)";
 			await Zotero.DB.queryAsync(sql, "5.0old");
-			
+
 			await Zotero.Schema.updateSchema();
-			
+
 			var sql = "SELECT value FROM settings WHERE setting='client' AND key='lastVersion'";
 			var lastVersion = await Zotero.DB.valueQueryAsync(sql);
 			assert.equal(await Zotero.DB.valueQueryAsync(sql), Zotero.version);
+		});
+
+		it("shouldn't repeat forced backup when retrying a failed update", async function () {
+			// Backups are disabled in the test profile
+			Zotero.Prefs.set('backup.numBackups', 2);
+			await Zotero.DB.queryAsync(
+				"DELETE FROM settings WHERE setting='backup' AND key='lastSchemaUpdateState'"
+			);
+
+			await Zotero.Schema.setIntegrityCheckRequired(true);
+
+			var backupSpy = sinon.spy(Zotero.DB, 'backUpDatabase');
+			var integrityCheckStub = sinon.stub(Zotero.Schema, 'integrityCheck')
+				.rejects(new Error("Simulated failure"));
+			try {
+				// First attempt makes a forced backup and fails
+				var e = await getPromiseError(Zotero.Schema.updateSchema());
+				assert.equal(e.message, "Simulated failure");
+				assert.equal(backupSpy.callCount, 1);
+
+				// Retrying with the same pending state doesn't make another backup
+				e = await getPromiseError(Zotero.Schema.updateSchema());
+				assert.equal(e.message, "Simulated failure");
+				assert.equal(backupSpy.callCount, 1);
+
+				// If the backup no longer exists, retrying makes a new one
+				await IOUtils.remove(Zotero.DB.path + '.bak');
+				e = await getPromiseError(Zotero.Schema.updateSchema());
+				assert.equal(e.message, "Simulated failure");
+				assert.equal(backupSpy.callCount, 2);
+
+				// A successful update clears the stored state
+				integrityCheckStub.restore();
+				await Zotero.Schema.updateSchema();
+				assert.isFalse(await Zotero.DB.valueQueryAsync(
+					"SELECT value FROM settings WHERE setting='backup' AND key='lastSchemaUpdateState'"
+				));
+
+				// A new pending state makes a fresh backup
+				await Zotero.Schema.setIntegrityCheckRequired(true);
+				await Zotero.Schema.updateSchema();
+				assert.equal(backupSpy.callCount, 3);
+			}
+			finally {
+				integrityCheckStub.restore();
+				backupSpy.restore();
+			}
 		});
 	});
 	

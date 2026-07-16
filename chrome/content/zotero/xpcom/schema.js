@@ -155,11 +155,26 @@ Zotero.Schema = new function () {
 			await options.onBeforeUpdate();
 		}
 		
-		// Force a backup before a userdata upgrade, an integrity check, or a global schema update
+		// Force a backup before a userdata upgrade, an integrity check, or a global schema
+		// update, unless one was already made for the same target versions on a previous startup
+		// (i.e., a previous attempt failed partway through), so that repeated attempts can't
+		// rotate out the pre-update backup
 		if (userdata < userdataVersion
 				|| integrityCheckRequired
 				|| bundledGlobalSchemaVersionCompare === 1) {
-			await Zotero.DB.backUpDatabase({ force: true });
+			let backupState = userdataVersion + '/' + bundledGlobalSchema.version;
+			let lastBackupState = await Zotero.DB.valueQueryAsync(
+				"SELECT value FROM settings WHERE setting='backup' AND key='lastSchemaUpdateState'"
+			);
+			if (backupState !== lastBackupState
+					|| !(await IOUtils.exists(Zotero.DB.path + '.bak'))) {
+				if (await Zotero.DB.backUpDatabase({ force: true })) {
+					await Zotero.DB.queryAsync(
+						"REPLACE INTO settings VALUES ('backup', 'lastSchemaUpdateState', ?)",
+						backupState
+					);
+				}
+			}
 		}
 		
 		var logLines = [];
@@ -260,6 +275,11 @@ Zotero.Schema = new function () {
 					});
 			}
 		}
+		
+		// The update succeeded, so any new pending state should make a fresh forced backup
+		await Zotero.DB.queryAsync(
+			"DELETE FROM settings WHERE setting='backup' AND key='lastSchemaUpdateState'"
+		);
 		
 		if (updated) {
 			// Upgrade seems to have been a success -- delete any versioned backups
