@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Nafn:">
 
-<!ENTITY zotero.search.searchInLibrary "Leita í færslusafni:">
-
 <!ENTITY zotero.search.joinMode.prefix "Leita að">
 <!ENTITY zotero.search.joinMode.any "einhverju">
 <!ENTITY zotero.search.joinMode.all "öllum">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dagar">
 <!ENTITY zotero.search.date.units.months "mánuðir">
 <!ENTITY zotero.search.date.units.years "ár">
-
-<!ENTITY zotero.search.search "Leita">
-<!ENTITY zotero.search.clear "Hreinsa">
-<!ENTITY zotero.search.saveSearch "Vista leit">

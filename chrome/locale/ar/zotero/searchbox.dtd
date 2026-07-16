@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "الاسم">
 
-<!ENTITY zotero.search.searchInLibrary "البحث في المكتبة:">
-
 <!ENTITY zotero.search.joinMode.prefix "طابق">
 <!ENTITY zotero.search.joinMode.any "أيّاً من">
 <!ENTITY zotero.search.joinMode.all "جميع">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "أيام">
 <!ENTITY zotero.search.date.units.months "شهور">
 <!ENTITY zotero.search.date.units.years "سنوات">
-
-<!ENTITY zotero.search.search "بحث">
-<!ENTITY zotero.search.clear "مسح">
-<!ENTITY zotero.search.saveSearch "حفظ البحث">

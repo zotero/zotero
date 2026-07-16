@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "نام:">
 
-<!ENTITY zotero.search.searchInLibrary "جستجو در کتابخانه:">
-
 <!ENTITY zotero.search.joinMode.prefix "مطابقت با">
 <!ENTITY zotero.search.joinMode.any "حداقل یکی از">
 <!ENTITY zotero.search.joinMode.all "همه">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "روز">
 <!ENTITY zotero.search.date.units.months "ماه">
 <!ENTITY zotero.search.date.units.years "سال">
-
-<!ENTITY zotero.search.search "جستجو">
-<!ENTITY zotero.search.clear "پاک کردن">
-<!ENTITY zotero.search.saveSearch "ذخیره جستجو">

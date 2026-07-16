@@ -32,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Суффикс
 integration-citationDialog-details-prefix = Префикс
 integration-citationDialog-details-suppressAuthor = Не выводить автора
+integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
 integration-citationDialog-details-includeComments = Добавить комментарии
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
@@ -53,6 +54,10 @@ integration-citationDialog-lib-message-annotations =
        *[true] Нет элементов с аннотациями, которые совпадают с текущим поиском
     }
 integration-citationDialog-settings-keepSorted = Удерживать источники отсортированными
+integration-citationDialog-preview-empty = Предпросмотр
+integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-btn-displayPreview =
+    .title = Display citation preview
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Библиотека
@@ -75,6 +80,11 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Нажмите Tab для выбора записей, которые будут добавлены к цитированию. Нажмите Escape, чтобы отменить изменения и закрыть диалог.
+integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+integration-citationDialog-just-added-input-citation =
+    .placeholder = { $placeholder }
+    .title = { $title }
+    .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
@@ -130,8 +140,6 @@ integration-warning-documentPreferences-changes-will-be-lost = Вы внесли
 integration-warning-discard-changes = Отменить изменения
 integration-warning-command-is-running = Команда интеграции Текстового Процессора уже запущена.
 first-run-guidance-citationDialog =
-    Введите название, автора и/или год для поиска отсылки.
+    Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
     
-    Чтобы выбрать запись, нажмите на неё или выберите с помощью клавиатуры и нажмите ↓/Space, чтобы показать опции цитирования, такие как номер страницы, префикс и суффикс.
-    
-    Также, вы можете добавить номер страницы или другой локатор, включив его в ваш поисковый запрос (напр., “история { $locator }”) или введя его после выбора записи, нажав { return-or-enter }.
+    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

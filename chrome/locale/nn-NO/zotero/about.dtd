@@ -2,12 +2,12 @@
 <!ENTITY zotero.whatsNew "Kva er nytt">
 <!ENTITY zotero.createdby "Laga av:">
 <!ENTITY zotero.director "Leiar:">
-<!ENTITY zotero.directors "Regissørar:">
+<!ENTITY zotero.directors "Leiarar:">
 <!ENTITY zotero.developers "Utviklarar:">
 <!ENTITY zotero.alumni "Tidlegare deltakarar:">
 <!ENTITY zotero.about.localizations "Omsetjingar:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
+<!ENTITY zotero.about.additionalSoftware "Programvare frå tredjepart:">
 <!ENTITY zotero.thanks "Særskild takk til:">
 <!ENTITY zotero.about.close "Lukk">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "Meir godskriving og takk">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Ytterlegare takk, heider og ære">
 <!ENTITY zotero.citationProcessing "Siterings- og bibliografihandsaming">

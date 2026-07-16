@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Naam:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
-
 <!ENTITY zotero.search.joinMode.prefix "Pas">
 <!ENTITY zotero.search.joinMode.any "enige">
 <!ENTITY zotero.search.joinMode.all "alles">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dae">
 <!ENTITY zotero.search.date.units.months "maande">
 <!ENTITY zotero.search.date.units.years "jare">
-
-<!ENTITY zotero.search.search "Soek">
-<!ENTITY zotero.search.clear "Skoon">
-<!ENTITY zotero.search.saveSearch "Stoor soektog">

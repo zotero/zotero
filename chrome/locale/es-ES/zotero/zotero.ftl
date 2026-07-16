@@ -24,6 +24,12 @@ delete-or-backspace =
         [macos] Suprimir
        *[other] Retroceso
     }
+-os-name =
+    { PLATFORM() ->
+        [macos] macOS
+        [windows] Windows
+       *[other] Linux
+    }
 general-print = Imprimir
 general-remove = Eliminar
 general-add = Añadir
@@ -40,11 +46,15 @@ general-view-troubleshooting-instructions = Ver las instrucciones de solución d
 general-go-back = Volver atrás
 general-accept = Aceptar
 general-cancel = Cancelar
+cancel-button =
+    .label = { general-cancel }
 general-show-in-library = Mostrar en la biblioteca
 general-restartApp = Reiniciar { -app-name }
 general-restartInTroubleshootingMode = Reiniciar en modo de solución de problemas
 general-save = Guardar
 general-clear = Limpiar
+clear-button =
+    .label = { general-clear }
 general-update = Actualizar
 general-back = Atrás
 general-edit = Editar
@@ -76,6 +86,8 @@ general-maroon = Granate
 general-gray = Gris
 general-black = Negro
 general-loading = Cargando...
+db-checking-integrity = Checking database integrity…
+db-repairing = Repairing database…
 citation-style-label = Estilo de cita:
 language-label = Idioma:
 menu-custom-group-submenu =
@@ -163,14 +175,126 @@ collections-menu-show-recently-read =
     .label = Mostrar { recently-read }
 item-menu-remove-from-recently-read =
     .label = Eliminar de { recently-read }…
-collections-menu-rename-collection =
-    .label = Renombrar colección
-collections-menu-edit-saved-search =
-    .label = Modificar la carpeta de búsqueda
+items-section-collections-selected =
+    { $count ->
+        [one] { $count } colección seleccionada
+        [many] { $count } colecciones seleccionadas
+       *[other] { $count } colecciones seleccionadas
+    }
+items-section-searches-selected =
+    { $count ->
+        [one] Se han seleccionado { $count } búsqueda guardada
+        [many] Se han seleccionado { $count } búsquedas guardadas
+       *[other] Se han seleccionado { $count } búsquedas guardadas
+    }
+items-section-sources-selected =
+    { $count ->
+        [one] { $count } fuente seleccionada
+        [many] { $count } fuentes seleccionadas
+       *[other] { $count } fuentes seleccionadas
+    }
+items-section-library-collections =
+    { $count ->
+        [one] { $library } ({ $count } colección seleccionada)
+        [many] { $library } ({ $count } colecciones seleccionadas)
+       *[other] { $library } ({ $count } colecciones seleccionadas)
+    }
+items-section-library-searches =
+    { $count ->
+        [one] { $library } (se ha seleccionado { $count } búsqueda guardada)
+        [many] { $library } (se han seleccionado { $count } búsquedas guardadas)
+       *[other] { $library } (se han seleccionado { $count } búsquedas guardadas)
+    }
+items-section-library-sources =
+    { $count ->
+        [one] { $library } ({ $count } fuente seleccionada)
+        [many] { $library } ({ $count } fuentes seleccionadas)
+       *[other] { $library } ({ $count } fuentes seleccionadas)
+    }
+items-section-library-recently-read = { $library } ({ recently-read })
+items-section-library = { $library }
+collections-menu-rename =
+    .label = Renombrar
+edit-saved-search = Editar búsqueda guardada
+collections-menu-edit-search =
+    .label = Editar búsqueda
+collections-menu-duplicate-search =
+    .label = Búsqueda de duplicados
 collections-menu-move-collection =
     .label = Mover a
 collections-menu-copy-collection =
     .label = Copiar a
+collections-menu-export =
+    .label = Exportar...
+collections-menu-generate-report =
+    .label = Generar informe...
+collections-menu-create-bibliography =
+    .label = Crear bibliografía
+collections-menu-unsubscribe =
+    .label = Darse de baja…
+collections-menu-delete =
+    .label =
+        { $count ->
+            [one] Eliminar colección...
+            [many] Eliminar colecciones…
+           *[other] Eliminar colecciones…
+        }
+collections-menu-delete-with-items =
+    .label =
+        { $count ->
+            [one] Eliminar colección y elementos…
+            [many] Eliminar colecciones y elementos…
+           *[other] Eliminar colecciones y elementos…
+        }
+collections-menu-delete-search =
+    .label =
+        { $count ->
+            [one] Eliminar búsqueda…
+            [many] Eliminar búsquedas…
+           *[other] Eliminar búsquedas…
+        }
+collections-delete-title =
+    { $count ->
+        [one] Eliminar colección
+        [many] Eliminar colecciones
+       *[other] Eliminar colecciones
+    }
+collections-delete-message =
+    { $count ->
+        [one] ¿Está seguro de que quiere eliminar esta colección?
+        [many] ¿Está seguro de que quiere eliminar { $count } colecciones?
+       *[other] ¿Está seguro de que quiere eliminar { $count } colecciones?
+    }
+collections-delete-keep-items =
+    { $count ->
+        [one] Los elementos de esta colección no se eliminarán.
+        [many] Los elementos de estas colecciones no se eliminarán.
+       *[other] Los elementos de estas colecciones no se eliminarán.
+    }
+collections-delete-with-items-title =
+    { $count ->
+        [one] Eliminar colección y elementos
+        [many] Eliminar colecciones y elementos
+       *[other] Eliminar colecciones y elementos
+    }
+collections-delete-with-items-message =
+    { $count ->
+        [one] ¿Está seguro de que quiere eliminar esta colección y mover todos los elementos que contienen a la papelera?
+        [many] ¿Está seguro de que quiere eliminar { $count } colecciones y mover todos los elementos que contienen a la papelera?
+       *[other] ¿Está seguro de que quiere eliminar { $count } colecciones y mover todos los elementos que contienen a la papelera?
+    }
+collections-delete-search-title =
+    { $count ->
+        [one] Eliminar búsqueda
+        [many] Eliminar búsquedas
+       *[other] Eliminar búsquedas
+    }
+collections-delete-search-message =
+    { $count ->
+        [one] ¿Está seguro de que quiere eliminar esta búsqueda?
+        [many] ¿Está seguro de que quiere eliminar { $count } búsquedas?
+       *[other] ¿Está seguro de que quiere eliminar { $count } búsquedas?
+    }
 item-creator-moveDown =
     .label = Bajar
 item-creator-moveToTop =
@@ -283,6 +407,7 @@ import-online-relink-only =
     .label = Volver a vincular las citas de Mendeley Desktop
 import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } no ha podido conectarse a { $targetApp }. Compruebe su conexión a Internet e inténtelo de nuevo.
+tab-title-multiple-collections = Múltiple
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -628,6 +753,18 @@ quicksearch-input =
     .aria-label = Búsqueda rápida
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
+advanced-search = Búsqueda avanzada
+menuitem-advanced-search =
+    .label = { advanced-search }
+quicksearch-advanced-search-button =
+    .tooltiptext = { advanced-search }
+    .aria-label = { advanced-search }
+advanced-search-close =
+    .tooltiptext = Cerrar búsqueda avanzada
+advanced-search-expand =
+    .tooltiptext = Ampliar la búsqueda avanzada
+advanced-search-collapse =
+    .tooltiptext = Ocultar la búsqueda avanzada
 item-pane-header-view-as =
     .label = Ver como
 item-pane-header-none =
@@ -691,9 +828,64 @@ architecture-x64-on-arm64-action = Descargar { -app-name } para ARM64
 first-run-guidance-authorMenu = { -app-name } le permite especificar también editores y traductores. Puede convertir un autor en editor o traductor seleccionándolo en este menú.
 first-run-guidance-readAloud = Ahora { -app-name } puede leerle sus documentos con voces que suenan muy naturales.
 advanced-search-remove-btn =
-    .tooltiptext = { general-remove }
+    .tooltiptext = Eliminar condición
 advanced-search-add-btn =
-    .tooltiptext = { general-add }
+    .tooltiptext = Añadir condición
+advanced-search-group-btn =
+    .tooltiptext = Añadir grupo de condiciones
+advanced-search-remove-group-btn =
+    .tooltiptext = Eliminar grupo
+advanced-search-ungroup-btn =
+    .tooltiptext = Desagrupar condiciones
+advanced-search-result-level-menu =
+    .aria-label = Tipo de resultado
+advanced-search-result-level-prefix-root =
+    .value = Buscar
+advanced-search-join-prefix-root =
+    .value = coincidente
+advanced-search-result-level-any =
+    .label = cualquier artículo
+advanced-search-result-level-item =
+    .label = elementos de primer nivel
+advanced-search-result-level-attachment =
+    .label = adjuntos
+advanced-search-result-level-note =
+    .label = notas
+advanced-search-result-level-annotation =
+    .label = anotaciones
+advanced-search-binding-menu =
+    .aria-label = Coincidir con el mismo artículo
+advanced-search-binding-separate =
+    .label = por separado
+advanced-search-binding-same-attachment =
+    .label = en el mismo archivo adjunto
+advanced-search-binding-same-note =
+    .label = en la misma nota
+advanced-search-binding-same-annotation =
+    .label = en la misma anotación
+advanced-search-of-the-following =
+    .value = de lo siguiente
+advanced-search-binding-hint-attachment =
+    .value = Estas condiciones pueden coincidir con archivos adjuntos independientes.
+advanced-search-binding-hint-note =
+    .value = Estas condiciones pueden corresponder a notas distintas.
+advanced-search-binding-hint-annotation =
+    .value = Estas condiciones pueden coincidir con anotaciones independientes.
+advanced-search-level-warning-mixed = No es posible que todas estas condiciones coincidan con el mismo elemento, por lo que esta búsqueda nunca arrojará resultados. Intente hacer coincidir «{ $matchAny }» de ellas o configure el tipo de resultado como «{ $topLevelItems }».
+advanced-search-level-warning-unreachable = Esta búsqueda tiene una condición que no se puede aplicar al tipo de resultado seleccionado. Establezca el tipo de resultado en «{ $topLevelItems }» o elimine la condición incompatible.
+advanced-search-group-warning-unreachable =
+    Una condición no puede aparecer aquí en el mismo { $entity ->
+        [adjunto] attachment
+        [nota] note
+       *[n] annotation
+    }. Combínelas por separado o elimine la condición incompatible.
+advanced-search-group-warning-mixed = No es posible que todas estas condiciones coincidan con el mismo elemento, por lo que este grupo nunca coincidirá. Intente buscar coincidencias con «{ $matchAny }» de ellas, o configure el tipo de resultado como «{ $topLevelItems }».
+advanced-search-bind-same-attachment =
+    .label = Empareja el mismo archivo adjunto
+advanced-search-bind-same-note =
+    .label = Empareja las notas iguales
+advanced-search-bind-same-annotation =
+    .label = Busca la misma anotación
 advanced-search-conditions-menu =
     .aria-label = Buscar condición
     .label = { $label }
@@ -703,11 +895,17 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Valor
     .label = { $label }
+search-operator-isEmpty = is empty
+search-operator-isNotEmpty = is not empty
 search-conditions-tooltip-fields = Campos:
 search-conditions-collection = Colección
 search-conditions-savedSearch = Búsqueda guardada
 search-conditions-itemTypeID = Tipo de elemento
 search-conditions-tag = Etiqueta
+search-conditions-numTags = # of Tags
+search-conditions-numNotes = # of Notes
+search-conditions-numAttachments = # of Attachments
+search-conditions-numAnnotations = # of Annotations
 search-conditions-note = Nota
 search-conditions-childNote = Nota subordinada
 search-conditions-creator = Creador
@@ -726,10 +924,26 @@ search-conditions-dateModified = Fecha de modificación
 search-conditions-fulltextContent = Contenido del adjunto
 search-conditions-programmingLanguage = Lenguage de programación
 search-conditions-fileTypeID = Tipo de fichero adjunto
+search-conditions-attachmentStorageType = Attachment Storage Type
 search-conditions-lastRead = Última lectura del archivo adjunto
 search-conditions-annotationText = Texto de la anotación
 search-conditions-annotationComment = Comentario de la anotación
+search-conditions-annotationType = Tipo de anotación
+search-conditions-annotationColor = Color de anotación
+search-conditions-annotationAuthor = Autor de anotación
 search-conditions-anyField = Cualquier campo
+search-conditions-titleCreatorYear = Título, Creador, Año
+search-conditions-submenu-attachment = Adjunto
+search-conditions-submenu-annotation = Anotación
+search-conditions-short-fulltextContent = Contenido
+search-conditions-short-fileTypeID = Tipo de archivo
+search-conditions-short-attachmentStorageType = Storage Type
+search-conditions-short-lastRead = Última lectura
+search-conditions-short-annotationText = Texto
+search-conditions-short-annotationComment = Comentario
+search-conditions-short-annotationType = Tipo
+search-conditions-short-annotationColor = Color
+search-conditions-short-annotationAuthor = Autor
 find-pdf-files-added =
     { $count ->
         [one] { $count } archivo añadido
@@ -764,6 +978,9 @@ file-type-video = Vídeo
 file-type-presentation = Presentación
 file-type-document = Documento
 file-type-ebook = Libro electrónico
+attachment-storage-type-storedFile = Stored File
+attachment-storage-type-linkedFile = Linked File
+attachment-storage-type-webLink = Web Link
 post-upgrade-message = ¡Se le ha actualizado a <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Descubra <a data-l10n-name="new-features-link">las novedades</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -772,18 +989,23 @@ post-upgrade-done =
 text-action-paste-and-search =
     .label = Pegar y buscar
 mac-word-plugin-install-message = Zotero necesita acceder a los datos de Word para instalar la extensión de Word
+mac-word-plugin-install-folder-message = { -app-name } necesita acceder a la carpeta de inicio de Word para instalar el complemento de Word.
 mac-word-plugin-install-action-button =
     .label = Instalar extensión de Word
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+mac-word-plugin-install-folder-dialog-title = Instala el complemento en la carpeta de inicio de Word
+mac-word-plugin-install-folder-dialog-button = Instalar
+mac-word-plugin-install-wrong-folder-selected = Debe seleccionarse la carpeta sugerida. Inténtelo de nuevo sin elegir otra carpeta.
 file-renaming-banner-message = { -app-name } ahora sincroniza automáticamente los nombres de los archivos adjuntos a medida que realizas cambios en los elementos.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = El conector { -app-name } debe actualizarse para funcionar con esta versión de { -app-name }.
 userjs-pref-warning = Algunos ajustes de { -app-name } se han sobrescrito usando un método no compatible. { -app-name } lo revertirá y se reiniciará.
 migrate-extra-fields-progress-message = Migración de nuevos campos desde el campo adicional
+search-normalization-progress-message = Indexing items for search
 long-tag-fixer-window-title =
     .title = Dividir etiquetas
 long-tag-fixer-button-dont-split =
@@ -796,4 +1018,159 @@ banner-close-button =
     .aria-label = Descartar notificación
 plugins-blocked-plugin =
     .message = Este complemento ha sido desactivado por { -app-name }.
-data-dir-unsupported-storage = This can happen if the { -app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share.
+data-dir-unsupported-storage = Esto puede ocurrir si el directorio de datos de { -app-name } se encuentra en una carpeta de almacenamiento en la nube (OneDrive, Dropbox, etc.) o en un recurso compartido de red.
+login-manager-reset = { -app-name } no ha podido leer sus datos de inicio de sesión guardados, por lo que se han restablecido. Inicie sesión de nuevo en el panel { preferences-pane-account } de los ajustes de { -app-name }.
+os-keystore-save-failed =
+    { PLATFORM() ->
+        [macOS] { -app-name } no ha podido acceder al llavero de { -os-name } para guardar sus credenciales de forma segura. Asegúrese de que el llavero esté accesible e inténtelo de nuevo.
+        [windows] { -app-name } no ha podido guardar sus credenciales de forma segura. Inténtelo de nuevo o reinicia { -app-name }.
+       *[other] { -app-name } no ha podido acceder a su llavero de { -os-name } para guardar sus credenciales de forma segura. Asegúrese de que el servicio de llavero esté en ejecución e inténtelo de nuevo.
+    }
+os-keystore-migrate-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } no ha podido acceder al llavero de { -os-name } para cifrar tus credenciales almacenadas. Sus credenciales permanecen almacenadas sin cifrar en el disco. Asegúrese de que se pueda acceder al llavero y reinicia { -app-name }.
+        [windows] { -app-name } no ha podido cifrar tus credenciales almacenadas. Sus credenciales permanecen almacenadas sin cifrar en el disco. Reinicie { -app-name } e inténtalo de nuevo.
+       *[other] { -app-name } no ha podido acceder a su llavero de { -os-name } para cifrar sus credenciales almacenadas. Sus credenciales permanecen almacenadas sin cifrar en el disco. Asegúrese de que el servicio de llavero esté en ejecución y reinicia { -app-name }.
+    }
+search-button =
+    .label = Buscar
+save-search-new-button =
+    .label = Guardar búsqueda…
+save-search-edit-button =
+    .label = Guardar
+save-search-name-title = Guardar búsqueda
+save-search-name-message = Introduce un nombre para la búsqueda guardada:
+saved-search-close-confirmation-title = Editar una búsqueda guardada
+saved-search-close-confirmation-body = ¿Quieres guardar los cambios que has realizado en esta búsqueda guardada?
+item-pane-batch-editing-prompt =
+    .aria-label = Edición por lotes
+item-pane-batch-editing-enable =
+    .label = Editar varios elementos…
+item-pane-batch-editing-multiple-values-placeholder = Múltiple
+item-pane-batch-editing-clear-values = Borrar todos los valores
+item-pane-batch-editing-header =
+    { $count ->
+        [one] Editando { $count } elemento
+        [many] Editando { $count } elementos
+       *[other] Editando { $count } elementos
+    }
+item-pane-batch-editing-done =
+    .label = { general-done }
+undo-action-edit-metadata =
+    { $count ->
+        [one] Editar metadatos
+        [many] Editar metadatos de { $count } elementos
+       *[other] Editar metadatos de { $count } elementos
+    }
+undo-action-edit-field =
+    { $count ->
+        [one] Edición de «{ $field }»
+        [many] Edición de «{ $field }» para { $count } elementos
+       *[other] Edición de «{ $field }» para { $count } elementos
+    }
+undo-action-normalize-attachment-titles = Normalizar el título del archivo adjunto
+undo-action-trash =
+    { $count ->
+        [one] Elemento de la papelera
+        [many] { $count } elementos de la papelera
+       *[other] { $count } elementos de la papelera
+    }
+undo-action-restore-items =
+    { $count ->
+        [one] Restaurar elemento
+        [many] Restaurar { $count } elementos
+       *[other] Restaurar { $count } elementos
+    }
+undo-action-trash-collection =
+    { $count ->
+        [one] Colección de la papelera
+        [many] { $count } colecciones de la papelera
+       *[other] { $count } colecciones de la papelera
+    }
+undo-action-trash-search =
+    { $count ->
+        [one] Búsqueda guardada de la papelera
+        [many] { $count } búsquedas guardadas de la papelera
+       *[other] { $count } búsquedas guardadas de la papelera
+    }
+undo-action-restore-collection =
+    { $count ->
+        [one] Restaurar colección
+        [many] Restaurar { $count } colecciones
+       *[other] Restaurar { $count } colecciones
+    }
+undo-action-restore-objects =
+    { $count ->
+        [one] Restaurar objeto
+        [many] Restaurar { $count } objetos
+       *[other] Restaurar { $count } objetos
+    }
+undo-action-add-to-collection =
+    { $count ->
+        [one] Añadir a la colección
+        [many] Añadir { $count } elementos a la colección
+       *[other] Añadir { $count } elementos a la colección
+    }
+undo-action-remove-from-collection =
+    { $count ->
+        [one] Eliminar de la colección
+        [many] Eliminar { $count } elementos de la colección
+       *[other] Eliminar { $count } elementos de la colección
+    }
+undo-action-move-to-collection =
+    { $count ->
+        [one] Mover a la colección
+        [many] Mover { $count } elementos a la colección
+       *[other] Mover { $count } elementos a la colección
+    }
+undo-action-rename-collection = Renombrar colección
+undo-action-move-collection = Mover colección
+undo-action-add-tag =
+    { $count ->
+        [one] Añadir etiqueta
+        [many] Añadir etiqueta a { $count } elementos
+       *[other] Añadir etiqueta a { $count } elementos
+    }
+undo-action-change-tag = Cambiar etiqueta
+undo-action-split-tag = Dividir etiqueta
+undo-action-remove-tag =
+    { $count ->
+        [one] Eliminar etiqueta
+        [many] Eliminar la etiqueta de { $count } elementos
+       *[other] Eliminar la etiqueta de { $count } elementos
+    }
+undo-action-remove-tags-from-item =
+    { $count ->
+        [one] Eliminar etiqueta
+        [many] Eliminar { $count } etiquetas
+       *[other] Eliminar { $count } etiquetas
+    }
+undo-action-remove-all-tags = Eliminar todas las etiquetas
+undo-action-edit-note = Editar nota
+undo-action-add-creator = Añadir creador
+undo-action-remove-creator = Eliminar creador
+undo-action-edit-creator = Editar creador
+undo-action-reorder-creator = Reordenar creador
+undo-action-change-type = Cambiar el tipo de elemento
+undo-action-change-parent-item =
+    { $count ->
+        [one] Cambiar elemento principal
+        [many] Cambiar el elemento principal de { $count } elementos
+       *[other] Cambiar el elemento principal de { $count } elementos
+    }
+undo-action-convert-to-standalone =
+    { $count ->
+        [one] Convertir en independientes
+        [many] Convertir { $count } elementos en independientes
+       *[other] Convertir { $count } elementos en independientes
+    }
+undo-action-add-related = Añadir elemento relacionado
+undo-action-remove-related = Eliminar elemento relacionado
+undo-action-merge-items =
+    { $count ->
+        [one] Combinar elemento
+        [many] Combinar { $count } elementos
+       *[other] Combinar { $count } elementos
+    }
+menu-edit-undo-action = Deshacer { $action }
+menu-edit-redo-action = Rehacer { $action }

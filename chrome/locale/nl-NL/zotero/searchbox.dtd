@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Naam:">
 
-<!ENTITY zotero.search.searchInLibrary "Zoek in bibliotheek:">
-
 <!ENTITY zotero.search.joinMode.prefix "Moet voldoen aan">
 <!ENTITY zotero.search.joinMode.any "één van de">
 <!ENTITY zotero.search.joinMode.all "alle">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dagen">
 <!ENTITY zotero.search.date.units.months "maanden">
 <!ENTITY zotero.search.date.units.years "jaren">
-
-<!ENTITY zotero.search.search "Zoeken">
-<!ENTITY zotero.search.clear "Wissen">
-<!ENTITY zotero.search.saveSearch "Zoekopdracht bewaren">

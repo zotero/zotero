@@ -219,8 +219,8 @@ reader-read-aloud-quota-exceeded-message =
        *[local] 本地语音
     } 朗读。
 reader-read-aloud-error = { general-error }
-reader-read-aloud-error-unknown = An unknown error occurred.
-reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
+reader-read-aloud-error-unknown = 发生一个未知错误。
+reader-read-aloud-error-network = 无法连接到朗读服务。请检查你的网络连接。
 reader-read-aloud-error-daily-limit-exceeded = 你已经超出 { -app-name } 语音的每日限额。
 reader-read-aloud-retry = 重试
 reader-read-aloud-first-run-title = 选择你喜欢的朗读声音：

@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Nama:">
 
-<!ENTITY zotero.search.searchInLibrary "Cari di perpustakaan:">
-
 <!ENTITY zotero.search.joinMode.prefix "Cocok">
 <!ENTITY zotero.search.joinMode.any "apapun">
 <!ENTITY zotero.search.joinMode.all "semua">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "hari">
 <!ENTITY zotero.search.date.units.months "bulan">
 <!ENTITY zotero.search.date.units.years "tahun">
-
-<!ENTITY zotero.search.search "Cari">
-<!ENTITY zotero.search.clear "Bersihkan">
-<!ENTITY zotero.search.saveSearch "Simpan pencarian">

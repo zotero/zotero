@@ -56,12 +56,12 @@
 <!ENTITY recursiveCollections.label "Amosar os elementos das subcolecións">
 <!ENTITY fontSize.label "Tamaño da tipografía:">
 <!ENTITY noteFontSize.label "Tamaño tipográfico das notas">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "Columnas">
+<!ENTITY sortBy.label "Ordenar por">
 
 <!ENTITY toolsMenu.label "Ferramentas">
 <!ENTITY toolsMenu.accesskey "F">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "Instalar Connector para o navegador...">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Engadidos">
 <!ENTITY developer.label "Desenvolvedor">

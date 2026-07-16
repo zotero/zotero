@@ -32,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Jälkiliite
 integration-citationDialog-details-prefix = Etuliite
 integration-citationDialog-details-suppressAuthor = Piilota tekijä
+integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
 integration-citationDialog-details-includeComments = Sisällytä kommentit
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
@@ -54,6 +55,10 @@ integration-citationDialog-lib-message-annotations =
        *[other] Ei valittuja eikä avoimia nimikkeitä joissa on huomautuksia
     }
 integration-citationDialog-settings-keepSorted = Pidä lähteet lajiteltuna
+integration-citationDialog-preview-empty = Esikatselu
+integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-btn-displayPreview =
+    .title = Display citation preview
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Kirjasto
@@ -76,6 +81,11 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Paina sarkainnäppäintä valitaksesi nimikkeitä tähän viittaukseen lisättävaäksi. Paina Esc hylätäksesi muutokset ja sulkeaksesi valintaikkunan.
+integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+integration-citationDialog-just-added-input-citation =
+    .placeholder = { $placeholder }
+    .title = { $title }
+    .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
@@ -131,8 +141,6 @@ integration-warning-documentPreferences-changes-will-be-lost = Asiakirjan ominai
 integration-warning-discard-changes = Hylkää muutokset
 integration-warning-command-is-running = Tekstinkäsittelyohjelman integrointikomento on jo käynnissä.
 first-run-guidance-citationDialog =
-    Hae lähdettä kirjoittamalla otsikko, tekijä tai vuosi.
+    Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
     
-    Kun olet tehnyt valintasi, klikkaa kuplaa tai valitse se näppäimistöllä ja paina ↓ tai välilyönti niin näet viittausvaihtoehdot kuten sivunumeron ja etu- tai jälkiliitteet.
-    
-    Voit myös lisätä sivunumeron tai toisen paikannuskriteerin lisäämällä sen hakutermeihin (esimerkiksi “historia { $locator }”) tai kirjoittamalla sen kuplan jälkeen ja painamalla { return-or-enter }.
+    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

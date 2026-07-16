@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Pavadinimas:">
 
-<!ENTITY zotero.search.searchInLibrary "Ieškoti bibliotekoje">
-
 <!ENTITY zotero.search.joinMode.prefix "Taikyti">
 <!ENTITY zotero.search.joinMode.any "bet kuriuos">
 <!ENTITY zotero.search.joinMode.all "visus">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "d.">
 <!ENTITY zotero.search.date.units.months "mėn.">
 <!ENTITY zotero.search.date.units.years "m.">
-
-<!ENTITY zotero.search.search "Ieškoti">
-<!ENTITY zotero.search.clear "Išvalyti">
-<!ENTITY zotero.search.saveSearch "Įsiminti paiešką">

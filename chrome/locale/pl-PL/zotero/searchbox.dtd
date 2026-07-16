@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Nazwa:">
 
-<!ENTITY zotero.search.searchInLibrary "Wyszukaj w bibliotece:">
-
 <!ENTITY zotero.search.joinMode.prefix "Zawiera">
 <!ENTITY zotero.search.joinMode.any "jakikolwiek">
 <!ENTITY zotero.search.joinMode.all "wszystkie">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dni">
 <!ENTITY zotero.search.date.units.months "miesiące(y)">
 <!ENTITY zotero.search.date.units.years "lat(a)">
-
-<!ENTITY zotero.search.search "Szukaj">
-<!ENTITY zotero.search.clear "Wyczyść">
-<!ENTITY zotero.search.saveSearch "Zapisz wyszukiwanie">

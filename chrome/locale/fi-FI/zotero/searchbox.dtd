@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Nimi:">
 
-<!ENTITY zotero.search.searchInLibrary "Etsi kirjastosta:">
-
 <!ENTITY zotero.search.joinMode.prefix "Vertaa">
 <!ENTITY zotero.search.joinMode.any "mikä tahansa">
 <!ENTITY zotero.search.joinMode.all "kaikki">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "päivää">
 <!ENTITY zotero.search.date.units.months "kuukautta">
 <!ENTITY zotero.search.date.units.years "vuotta">
-
-<!ENTITY zotero.search.search "Hae">
-<!ENTITY zotero.search.clear "Tyhjennä">
-<!ENTITY zotero.search.saveSearch "Tallenna haku">

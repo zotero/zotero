@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Nom:">
 
-<!ENTITY zotero.search.searchInLibrary "Cerca a la biblioteca:">
-
 <!ENTITY zotero.search.joinMode.prefix "Coincideix">
 <!ENTITY zotero.search.joinMode.any "qualsevol">
 <!ENTITY zotero.search.joinMode.all "totes">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dies">
 <!ENTITY zotero.search.date.units.months "mesos">
 <!ENTITY zotero.search.date.units.years "anys">
-
-<!ENTITY zotero.search.search "Cerca">
-<!ENTITY zotero.search.clear "Neteja">
-<!ENTITY zotero.search.saveSearch "Desa la cerca">

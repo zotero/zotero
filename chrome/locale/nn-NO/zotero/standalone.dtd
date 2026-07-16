@@ -22,8 +22,8 @@
 <!ENTITY closeCmd.label "Lukk">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "L">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Handsama vedlegg">
+<!ENTITY convertToStored.label "Gjer om lenkja filer til lagra filer...">
 <!ENTITY importCmd.label "Importer …">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importer frå utklippstavla">
@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopier sitering">
 <!ENTITY copyBibliographyCmd.label "Kopier bibliografi">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Kopier notat">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Byt sideretning">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Verktøy">
 <!ENTITY toolsMenu.accesskey "V">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "Install Browser Connector…">
 <!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Tillegg">
 <!ENTITY developer.label "Developer">

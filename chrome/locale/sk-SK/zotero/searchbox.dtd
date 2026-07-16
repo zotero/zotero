@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Meno:">
 
-<!ENTITY zotero.search.searchInLibrary "Hľadať v knižnici:">
-
 <!ENTITY zotero.search.joinMode.prefix "Zodpovedá">
 <!ENTITY zotero.search.joinMode.any "ktorémukoľvek">
 <!ENTITY zotero.search.joinMode.all "všetkým">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dni">
 <!ENTITY zotero.search.date.units.months "mesiace">
 <!ENTITY zotero.search.date.units.years "roky">
-
-<!ENTITY zotero.search.search "Hľadať">
-<!ENTITY zotero.search.clear "Vymazať">
-<!ENTITY zotero.search.saveSearch "Uložiť vyhľadávanie">

@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "名称:">
 
-<!ENTITY zotero.search.searchInLibrary "在文献库中搜索：">
-
 <!ENTITY zotero.search.joinMode.prefix "匹配">
 <!ENTITY zotero.search.joinMode.any "任意">
 <!ENTITY zotero.search.joinMode.all "全部">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "天">
 <!ENTITY zotero.search.date.units.months "月">
 <!ENTITY zotero.search.date.units.years "年">
-
-<!ENTITY zotero.search.search "搜索">
-<!ENTITY zotero.search.clear "清空">
-<!ENTITY zotero.search.saveSearch "保存搜索结果">

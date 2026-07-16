@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Nume:">
 
-<!ENTITY zotero.search.searchInLibrary "Caută în bibliotecă:">
-
 <!ENTITY zotero.search.joinMode.prefix "Potrivire">
 <!ENTITY zotero.search.joinMode.any "oricare">
 <!ENTITY zotero.search.joinMode.all "toate">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "zile">
 <!ENTITY zotero.search.date.units.months "luni">
 <!ENTITY zotero.search.date.units.years "ani">
-
-<!ENTITY zotero.search.search "Caută">
-<!ENTITY zotero.search.clear "Șterge">
-<!ENTITY zotero.search.saveSearch "Salvează căutarea">

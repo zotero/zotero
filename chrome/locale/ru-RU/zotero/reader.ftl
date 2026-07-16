@@ -229,7 +229,7 @@ reader-read-aloud-quota-exceeded-message =
     }.
 reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = Произошла неизвестная ошибка.
-reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
+reader-read-aloud-error-network = Не удаётся подключиться к сервису Read Aloud. Пожалуйста, проверьте своё интернет-соединение.
 reader-read-aloud-error-daily-limit-exceeded = Вы превысили свой дневной лимит для голосов { -app-name }.
 reader-read-aloud-retry = Пробовать снова
 reader-read-aloud-first-run-title = Выберите предпочитаемый голос для чтения вслух:

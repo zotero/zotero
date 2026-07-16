@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Radera källa...">
 <!ENTITY zotero.toolbar.newGroup "Ny grupp...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Ny sparad sökning...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Töm papperskorg">
 <!ENTITY zotero.toolbar.tagSelector.label "Visa/göm etikettväljare">
 <!ENTITY zotero.toolbar.actions.label "Åtgärder">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Inställningar...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Hjälp och dokumentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Avancerad sökning">
 <!ENTITY zotero.toolbar.openURL.label "Hitta">
 <!ENTITY zotero.toolbar.openURL.tooltip "Hitta på ditt lokala bibliotek">
 

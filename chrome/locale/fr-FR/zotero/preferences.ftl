@@ -70,6 +70,8 @@ preferences-advanced-server-enable-and-restart =
 preferences-advanced-language-and-region-title = Langue et zone géographique
 preferences-advanced-enable-bidi-ui =
     .label = Activer les utilitaires d'édition de texte bidirectionnel
+preferences-advanced-data-dir =
+    .value = Répertoire de données :
 preferences-advanced-reset-data-dir =
     .label = Revenir à l'emplacement par défaut...
 preferences-advanced-custom-data-dir =
@@ -77,18 +79,18 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Par défaut : { $directory })
     .aria-label = Emplacement par défaut
-preferences-pane-account = Account
+preferences-pane-account = Compte
 -preferences-sync-data-syncing = Synchronisation des données
 preferences-sync-data-syncing-groupbox =
     .aria-label = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-description = Connectez-vous avec votre compte { -app-name } pour synchroniser vos données entre vos appareils, collaborer avec d'autres personnes, et bien plus encore.
-preferences-sync-settings-heading = Sync
-preferences-sync-settings-intro = { -app-name } can sync your library data and files across devices. <label data-l10n-name="sync-link">Learn more</label>
-preferences-sync-reset-heading = Sync Reset
+preferences-sync-settings-heading = Synchronisation
+preferences-sync-settings-intro = { -app-name } peut synchroniser les données et les fichiers de votre bibliothèque entre plusieurs appareils. <label data-l10n-name="sync-link">En savoir plus</label>
+preferences-sync-reset-heading = Réinitialisation de la synchronisation
 preferences-sync-fileSyncing-groups =
-    .label = Sync attachment files in group libraries using { -app-name } Storage
-preferences-sync-fileSyncing-tos = By using { -app-name } Storage, you agree to become bound by its <label data-l10n-name="terms-link">terms and conditions</label>.
+    .label = Synchroniser les fichiers joints dans les bibliothèques de groupe en utilisant le stockage de { -app-name }
+preferences-sync-fileSyncing-tos = En utilisant le stockage de { -app-name }, vous acceptez d'être lié par ses <label data-l10n-name="terms-link">conditions générales</label>.
 preferences-account-log-out =
     .label = Se déconnecter...
 preferences-sync-reset-restore-to-server-body = { -app-name } remplacera “{ $libraryName }” sur { $domain } par les données de cet ordinateur.
@@ -126,3 +128,7 @@ preferences-account-switch-accounts =
 preferences-account-switch-text = Le passage à un autre compte entraînera la suppression de toutes les données de { -app-name } sur cet ordinateur. Avant de continuer, assurez-vous que toutes les données et tous les fichiers que vous souhaitez conserver ont été synchronisés avec le compte "{ $username }" ou que vous disposez d'une sauvegarde du répertoire de données de { -app-name }.
 preferences-account-switch-confirmation-text = supprimer les données locales
 preferences-account-switch-accept = Supprimer les données et redémarrer
+fulltext-index-status-indexing = Indexing { $indexed } of { $total }…
+fulltext-index-status-complete = Search index is up to date
+fulltext-stats-notes-indexed = Notes indexed:
+fulltext-stats-not-available = File or full-text content not available:

@@ -1,13 +1,13 @@
 preferences-window =
     .title = { -app-name } Axustes
-preferences-appearance-title = Appearance and Language
+preferences-appearance-title = Aparencia e idioma
 preferences-auto-recognize-files =
     .label = Automatically retrieve metadata for PDFs and ebooks
 preferences-file-renaming-title = Renomeamento de ficheiro
 preferences-file-renaming-intro = { -app-name } can automatically rename files based on the details of the parent item (title, author, etc.) and keep the filenames in sync as you make changes. Downloaded files are always initially named based on the parent item.
 preferences-file-renaming-configure-button =
     .label = Configure File Renaming…
-preferences-attachment-titles-title = Attachment Titles
+preferences-attachment-titles-title = Títulos dos anexos
 preferences-attachment-titles-intro = Attachment titles are <label data-l10n-name="wiki-link">different from filenames</label>. To support some workflows, { -app-name } can show filenames instead of attachment titles in the items list.
 preferences-attachment-titles-show-filenames =
     .label = Show attachment filenames in the items list
@@ -51,7 +51,7 @@ preferences-styleManager-restore-default =
     .label = Restore Default Styles…
 preferences-styleManager-add-from-file =
     .tooltiptext = Add a style from a file
-    .label = Add from File…
+    .label = Engadir desde un ficheiro...
 preferences-styleManager-remove = Press { delete-or-backspace } to remove this style.
 preferences-citation-dialog = Citation Dialog
 preferences-citation-dialog-mode = Citation Dialog Mode:
@@ -70,6 +70,8 @@ preferences-advanced-server-enable-and-restart =
 preferences-advanced-language-and-region-title = Lingua e rexión
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities
+preferences-advanced-data-dir =
+    .value = Data Directory:
 preferences-advanced-reset-data-dir =
     .label = Revert to Default Location…
 preferences-advanced-custom-data-dir =
@@ -77,20 +79,20 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Default: { $directory })
     .aria-label = Default location
-preferences-pane-account = Account
+preferences-pane-account = Conta
 -preferences-sync-data-syncing = Sincronización de datos
 preferences-sync-data-syncing-groupbox =
     .aria-label = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-description = Log in with your { -app-name } account to sync your data between devices, collaborate with others, and more.
-preferences-sync-settings-heading = Sync
+preferences-sync-settings-heading = Sincronizar
 preferences-sync-settings-intro = { -app-name } can sync your library data and files across devices. <label data-l10n-name="sync-link">Learn more</label>
 preferences-sync-reset-heading = Sync Reset
 preferences-sync-fileSyncing-groups =
     .label = Sync attachment files in group libraries using { -app-name } Storage
 preferences-sync-fileSyncing-tos = By using { -app-name } Storage, you agree to become bound by its <label data-l10n-name="terms-link">terms and conditions</label>.
 preferences-account-log-out =
-    .label = Log Out…
+    .label = Pechar sesión...
 preferences-sync-reset-restore-to-server-body = { -app-name } will replace “{ $libraryName }” on { $domain } with data from this computer.
 preferences-sync-reset-restore-to-server-deleted-items-text =
     { $remoteItemsDeletedCount } { $remoteItemsDeletedCount ->
@@ -105,13 +107,13 @@ preferences-sync-reset-restore-to-server-remaining-items-text =
     }
 preferences-sync-reset-restore-to-server-checkbox-label =
     { $remoteItemsDeletedCount ->
-        [one] Delete 1 item
-       *[other] Delete { $remoteItemsDeletedCount } items
+        [one] Eliminar 1 elemento
+       *[other] Eliminar { $remoteItemsDeletedCount } elementos
     }
 preferences-sync-reset-restore-to-server-confirmation-text = delete online library
 preferences-sync-reset-restore-to-server-yes = Substituír datos na biblioteca en liña
 preferences-account-log-in =
-    .label = Log In
+    .label = Iniciar sesión
 preferences-account-waiting-for-login =
     .value = Waiting for login…
 preferences-account-cancel-button =
@@ -119,9 +121,13 @@ preferences-account-cancel-button =
 preferences-account-logged-out-status =
     .value = (logged out)
 preferences-account-email-label =
-    .value = Email:
+    .value = Correo electrónico:
 preferences-account-switch-accounts =
-    .label = Switch Accounts…
+    .label = Trocar de conta...
 preferences-account-switch-text = Switching to a different account will remove all { -app-name } data on this computer. Before continuing, make sure all data and files you wish to keep have been synced with the “{ $username }” account or you have a backup of your { -app-name } data directory.
 preferences-account-switch-confirmation-text = remove local data
 preferences-account-switch-accept = Remove Data and Restart
+fulltext-index-status-indexing = Indexing { $indexed } of { $total }…
+fulltext-index-status-complete = Search index is up to date
+fulltext-stats-notes-indexed = Notes indexed:
+fulltext-stats-not-available = File or full-text content not available:

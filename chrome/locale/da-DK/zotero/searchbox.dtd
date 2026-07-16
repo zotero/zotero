@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Navn:">
 
-<!ENTITY zotero.search.searchInLibrary "Søg i bibliotek:">
-
 <!ENTITY zotero.search.joinMode.prefix "Match">
 <!ENTITY zotero.search.joinMode.any "enhver">
 <!ENTITY zotero.search.joinMode.all "alle">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dage">
 <!ENTITY zotero.search.date.units.months "måneder">
 <!ENTITY zotero.search.date.units.years "år">
-
-<!ENTITY zotero.search.search "Søg">
-<!ENTITY zotero.search.clear "Ryd">
-<!ENTITY zotero.search.saveSearch "Gem søgning">

@@ -41,8 +41,20 @@
   "general_copyToClipboard": {
     "message": "Copiar no portaretallos"
   },
+  "itemType_pdf": {
+    "message": "Anexo PDF"
+  },
+  "itemType_epub": {
+    "message": "Anexo EPUB"
+  },
+  "itemType_snapshot": {
+    "message": "Captura"
+  },
   "itemType_note": {
     "message": "Nota"
+  },
+  "itemType_link": {
+    "message": "Ligazón web"
   },
   "itemType_attachment": {
     "message": "Anexo"
@@ -50,8 +62,38 @@
   "progressWindow_savingTo": {
     "message": "Gardando en"
   },
+  "progressWindow_detailsBtnView": {
+    "message": "Ver detalles"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Agochar detalles"
+  },
+  "progressWindow_savingItems": {
+    "message": "Gardando $1 elementos. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Gardando o elemento $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Elemento $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Gardouse $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Gardouse $1 para o elemento $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Non se puido descargar $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Non se puido descargar $1 para o elemento $2"
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetas (separadas por comas)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filtrar coleccións"
   },
   "progressWindow_error_translation": {
     "message": "Ocorreu un erro gardando este elemento. Véxase$1 para ter máis información."
@@ -74,12 +116,6 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versión"
   },
-  "extensionIsDisabled": {
-    "message": "$1 está desactivado"
-  },
-  "extensionIsDisabled_extensionPage": {
-    "message": "$1 está desactivado para páxinas de extensión"
-  },
   "appConnector": {
     "message": "Conector $1"
   },
@@ -91,9 +127,6 @@
   },
   "firstRun_text1": {
     "message": "O Conector $1 permite que <a href=\"$2\">se garden elementos en $1</a> desde o navegador facendo un só clic."
-  },
-  "firstRun_text2": {
-    "message": "Se aínda non o fixo, coa <a href=\"$2\">descarga</a> da aplicación separada $1 obtense a mellor experiencia."
   },
   "firstRun_acceptButton": {
     "message": "Enténdoo."

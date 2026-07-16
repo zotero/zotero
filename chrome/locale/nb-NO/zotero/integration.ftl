@@ -32,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Suffiks
 integration-citationDialog-details-prefix = Prefiks
 integration-citationDialog-details-suppressAuthor = Utelat forfatter
+integration-citationDialog-details-locator-info = Tips: Du kan også skrive inn sidetall og andre referanser direkte i hovedfeltet. <a data-l10n-name="docs-link">Lær mer</a>
 integration-citationDialog-details-includeComments = Inkluderer merknader
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
@@ -54,6 +55,10 @@ integration-citationDialog-lib-message-annotations =
        *[other] Ingen valgte eller åpne elementer med merknader
     }
 integration-citationDialog-settings-keepSorted = Behold sortering av kildene
+integration-citationDialog-preview-empty = Forhåndsvisning
+integration-citationDialog-preview-error = Forhåndsvisning ikke tilgjengelig
+integration-citationDialog-btn-displayPreview =
+    .title = Vis forhåndsvisning av henvisning
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Bibliotek
@@ -76,6 +81,11 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Trykk på Tab for å velge elementer som skal legges til i denne henvisningen. Trykk på Escape for å forkaste endringene og lukke dialogboksen.
+integration-citationDialog-just-added-input-placeholder = Skriv «10-15» for å henvise til sider, eller søk etter elementer
+integration-citationDialog-just-added-input-citation =
+    .placeholder = { $placeholder }
+    .title = { $title }
+    .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
@@ -131,8 +141,6 @@ integration-warning-documentPreferences-changes-will-be-lost = Du har gjort endr
 integration-warning-discard-changes = Forkast endringer
 integration-warning-command-is-running = En kommando for tekstbehandlingsintegrasjon kjører allerede.
 first-run-guidance-citationDialog =
-    Skriv inn en tittel, forfatter og/eller år for å søke etter en referanse.
+    Klikk på boblen eller bruk tastene ← og ↓ for å se henvisningsdetaljene og tilpasse innstillinger som sidetall, prefiks og suffiks.
     
-    Når du har gjort ditt valg, klikker du på boblen eller velger den via tastaturet og trykker ↓/Mellomromstasten for å vise siteringsalternativer som sidetall, prefiks og suffiks.
-    
-    Du kan også legge til et sidetall eller en annen stedsreferanse ved å inkludere det i søkeordene dine (f.eks. «historikk { $locator }») eller ved å skrive det inn etter boblen og trykke på { return-or-enter }.
+    Du kan også legge til et sidetall eller en annen referanse ved å inkludere det i søkeordene dine (f.eks. «historie { $locator }») eller ved å skrive det etter boblen og trykke på { return-or-enter }.

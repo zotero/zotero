@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "名稱：">
 
-<!ENTITY zotero.search.searchInLibrary "於文獻庫搜尋：">
-
 <!ENTITY zotero.search.joinMode.prefix "比對">
 <!ENTITY zotero.search.joinMode.any "任一個">
 <!ENTITY zotero.search.joinMode.all "全部">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "日">
 <!ENTITY zotero.search.date.units.months "月">
 <!ENTITY zotero.search.date.units.years "年">
-
-<!ENTITY zotero.search.search "搜尋">
-<!ENTITY zotero.search.clear "清除">
-<!ENTITY zotero.search.saveSearch "儲存搜尋">

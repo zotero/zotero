@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Naziv:">
 
-<!ENTITY zotero.search.searchInLibrary "Traži u biblioteci:">
-
 <!ENTITY zotero.search.joinMode.prefix "Podudaraj">
 <!ENTITY zotero.search.joinMode.any "bilo koji">
 <!ENTITY zotero.search.joinMode.all "sve">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dana">
 <!ENTITY zotero.search.date.units.months "mjeseci">
 <!ENTITY zotero.search.date.units.years "godina">
-
-<!ENTITY zotero.search.search "Pretraživanje">
-<!ENTITY zotero.search.clear "Očisti">
-<!ENTITY zotero.search.saveSearch "Spremi pretraživanje">

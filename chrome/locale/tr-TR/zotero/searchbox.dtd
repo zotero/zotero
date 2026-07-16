@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "İsim:">
 
-<!ENTITY zotero.search.searchInLibrary "Kitaplıkta ara:">
-
 <!ENTITY zotero.search.joinMode.prefix "Aşağıdakilerden">
 <!ENTITY zotero.search.joinMode.any "herhangi birine">
 <!ENTITY zotero.search.joinMode.all "hepsine">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "gün">
 <!ENTITY zotero.search.date.units.months "ay">
 <!ENTITY zotero.search.date.units.years "yıl">
-
-<!ENTITY zotero.search.search "Arama">
-<!ENTITY zotero.search.clear "Temizle">
-<!ENTITY zotero.search.saveSearch "Aramayı Kaydet">

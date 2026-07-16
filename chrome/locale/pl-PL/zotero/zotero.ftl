@@ -24,6 +24,12 @@ delete-or-backspace =
         [macos] Delete
        *[other] Backspace
     }
+-os-name =
+    { PLATFORM() ->
+        [macos] macOS
+        [windows] Windows
+       *[other] Linux
+    }
 general-print = Drukuj
 general-remove = Usuń
 general-add = Dodaj
@@ -40,11 +46,15 @@ general-view-troubleshooting-instructions = Pokaż instrukcje dla rozwiązywania
 general-go-back = Wróć
 general-accept = Akceptuj
 general-cancel = Anuluj
+cancel-button =
+    .label = { general-cancel }
 general-show-in-library = Pokaż w Bibliotece
 general-restartApp = Uruchom ponownie { -app-name }
 general-restartInTroubleshootingMode = Uruchom ponownie w trybie rozwiązywania problemów
 general-save = Zapisz
 general-clear = Wyczyść
+clear-button =
+    .label = { general-clear }
 general-update = Zaktualizuj
 general-back = Wstecz
 general-edit = Edytuj
@@ -76,6 +86,8 @@ general-maroon = Kasztanowy
 general-gray = Szary
 general-black = Czarny
 general-loading = Wczytywanie...
+db-checking-integrity = Checking database integrity…
+db-repairing = Repairing database…
 citation-style-label = Styl cytowania:
 language-label = Język:
 menu-custom-group-submenu =
@@ -164,14 +176,112 @@ collections-menu-show-recently-read =
     .label = Pokaż { recently-read }
 item-menu-remove-from-recently-read =
     .label = Usuń z { recently-read }…
-collections-menu-rename-collection =
-    .label = Zmień nazwę kolekcji
-collections-menu-edit-saved-search =
-    .label = Edytuj wynik wyszukiwania
+items-section-collections-selected =
+    { $count ->
+        [one] { $count } wybrana kolekcja
+        [few] { $count } wybrane kolekcje
+        [many] { $count } wybranych kolekcji
+       *[other] { $count } wybranych kolekcji
+    }
+items-section-searches-selected =
+    { $count ->
+        [one] { $count } saved search selected
+       *[other] { $count } saved searches selected
+    }
+items-section-sources-selected =
+    { $count ->
+        [one] { $count } source selected
+       *[other] { $count } sources selected
+    }
+items-section-library-collections =
+    { $count ->
+        [one] { $library } ({ $count } collection selected)
+       *[other] { $library } ({ $count } collections selected)
+    }
+items-section-library-searches =
+    { $count ->
+        [one] { $library } ({ $count } saved search selected)
+       *[other] { $library } ({ $count } saved searches selected)
+    }
+items-section-library-sources =
+    { $count ->
+        [one] { $library } ({ $count } source selected)
+       *[other] { $library } ({ $count } sources selected)
+    }
+items-section-library-recently-read = { $library } ({ recently-read })
+items-section-library = { $library }
+collections-menu-rename =
+    .label = Zmień nazwę
+edit-saved-search = Edytuj wynik wyszukiwania
+collections-menu-edit-search =
+    .label = Edytuj wyszukiwanie
+collections-menu-duplicate-search =
+    .label = Duplikuj wyszukiwanie
 collections-menu-move-collection =
     .label = Przenieś do
 collections-menu-copy-collection =
     .label = Skopiuj do
+collections-menu-export =
+    .label = Eksportuj...
+collections-menu-generate-report =
+    .label = Generuj raport...
+collections-menu-create-bibliography =
+    .label = Stwórz bibliografię...
+collections-menu-unsubscribe =
+    .label = Unsubscribe…
+collections-menu-delete =
+    .label =
+        { $count ->
+            [one] Delete Collection…
+           *[other] Delete Collections…
+        }
+collections-menu-delete-with-items =
+    .label =
+        { $count ->
+            [one] Delete Collection and Items…
+           *[other] Delete Collections and Items…
+        }
+collections-menu-delete-search =
+    .label =
+        { $count ->
+            [one] Delete Search…
+           *[other] Delete Searches…
+        }
+collections-delete-title =
+    { $count ->
+        [one] Delete Collection
+       *[other] Delete Collections
+    }
+collections-delete-message =
+    { $count ->
+        [one] Are you sure you want to delete this collection?
+       *[other] Are you sure you want to delete { $count } collections?
+    }
+collections-delete-keep-items =
+    { $count ->
+        [one] Items within this collection will not be deleted.
+       *[other] Items within these collections will not be deleted.
+    }
+collections-delete-with-items-title =
+    { $count ->
+        [one] Delete Collection and Items
+       *[other] Delete Collections and Items
+    }
+collections-delete-with-items-message =
+    { $count ->
+        [one] Are you sure you want to delete this collection and move all items within it to the Trash?
+       *[other] Are you sure you want to delete { $count } collections and move all items within them to the Trash?
+    }
+collections-delete-search-title =
+    { $count ->
+        [one] Delete Search
+       *[other] Delete Searches
+    }
+collections-delete-search-message =
+    { $count ->
+        [one] Are you sure you want to delete this search?
+       *[other] Are you sure you want to delete { $count } searches?
+    }
 item-creator-moveDown =
     .label = Przenieś w dół
 item-creator-moveToTop =
@@ -284,6 +394,7 @@ import-online-relink-only =
     .label = Zlinkuj ponownie cytowania Mendeley Desktop
 import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } nie może się połączyć z  { $targetApp }. Proszę, sprawdź swoje połączenie internetowe i spróbuj ponownie.
+tab-title-multiple-collections = Multiple
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -635,6 +746,18 @@ quicksearch-input =
     .aria-label = Szybkie wyszukiwanie
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
+advanced-search = Wyszukiwanie zaawansowane
+menuitem-advanced-search =
+    .label = { advanced-search }
+quicksearch-advanced-search-button =
+    .tooltiptext = { advanced-search }
+    .aria-label = { advanced-search }
+advanced-search-close =
+    .tooltiptext = Zamknij zaawansowane wyszukiwanie
+advanced-search-expand =
+    .tooltiptext = Expand Advanced Search
+advanced-search-collapse =
+    .tooltiptext = Collapse Advanced Search
 item-pane-header-view-as =
     .label = Wyświetl jako
 item-pane-header-none =
@@ -702,9 +825,64 @@ architecture-x64-on-arm64-action = Pobierz { -app-name } dla ARM64
 first-run-guidance-authorMenu = { -app-name } pozwala ci także podać edytorów i tłumaczy. Możesz zmienić autora na edytora lub tłumacza, wybierając z tego menu.
 first-run-guidance-readAloud = { -app-name } can now read your documents to you using natural-sounding voices.
 advanced-search-remove-btn =
-    .tooltiptext = { general-remove }
+    .tooltiptext = Usuń warunek
 advanced-search-add-btn =
-    .tooltiptext = { general-add }
+    .tooltiptext = Dodaj warunek
+advanced-search-group-btn =
+    .tooltiptext = Dodaj grupę warunków
+advanced-search-remove-group-btn =
+    .tooltiptext = Usuń grupę
+advanced-search-ungroup-btn =
+    .tooltiptext = Ungroup Conditions
+advanced-search-result-level-menu =
+    .aria-label = Typ wyniku
+advanced-search-result-level-prefix-root =
+    .value = Znajdź
+advanced-search-join-prefix-root =
+    .value = matching
+advanced-search-result-level-any =
+    .label = any items
+advanced-search-result-level-item =
+    .label = top-level items
+advanced-search-result-level-attachment =
+    .label = attachments
+advanced-search-result-level-note =
+    .label = notes
+advanced-search-result-level-annotation =
+    .label = adnotacje
+advanced-search-binding-menu =
+    .aria-label = Match against the same item
+advanced-search-binding-separate =
+    .label = separately
+advanced-search-binding-same-attachment =
+    .label = in the same attachment
+advanced-search-binding-same-note =
+    .label = in the same note
+advanced-search-binding-same-annotation =
+    .label = in the same annotation
+advanced-search-of-the-following =
+    .value = of the following
+advanced-search-binding-hint-attachment =
+    .value = These conditions can match separate attachments.
+advanced-search-binding-hint-note =
+    .value = These conditions can match separate notes.
+advanced-search-binding-hint-annotation =
+    .value = These conditions can match separate annotations.
+advanced-search-level-warning-mixed = These conditions cannot all match the same item, so this search will never return results. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+advanced-search-level-warning-unreachable = This search has a condition that cannot apply to the chosen result type. Set the result type to “{ $topLevelItems }” or remove the incompatible condition.
+advanced-search-group-warning-unreachable =
+    A condition here cannot be in the same { $entity ->
+        [attachment] attachment
+        [note] note
+       *[annotation] annotation
+    }. Match these separately or remove the incompatible condition.
+advanced-search-group-warning-mixed = These conditions cannot all match the same item, so this group will never match. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+advanced-search-bind-same-attachment =
+    .label = Match the same attachment
+advanced-search-bind-same-note =
+    .label = Match the same note
+advanced-search-bind-same-annotation =
+    .label = Match the same annotation
 advanced-search-conditions-menu =
     .aria-label = Wyszukiwanie warunkowe
     .label = { $label }
@@ -714,11 +892,17 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Wartość
     .label = { $label }
+search-operator-isEmpty = is empty
+search-operator-isNotEmpty = is not empty
 search-conditions-tooltip-fields = Pola:
 search-conditions-collection = Kolekcja
 search-conditions-savedSearch = Zapisane wyszukiwanie
 search-conditions-itemTypeID = Typ elementu
 search-conditions-tag = Etykieta
+search-conditions-numTags = # of Tags
+search-conditions-numNotes = # of Notes
+search-conditions-numAttachments = # of Attachments
+search-conditions-numAnnotations = # of Annotations
 search-conditions-note = Notatka
 search-conditions-childNote = Notatka podrzędna
 search-conditions-creator = Twórca
@@ -737,10 +921,26 @@ search-conditions-dateModified = Data modyfikacji
 search-conditions-fulltextContent = Zawartość załącznika
 search-conditions-programmingLanguage = Język programowania
 search-conditions-fileTypeID = Typ pliku załącznika
+search-conditions-attachmentStorageType = Attachment Storage Type
 search-conditions-lastRead = Ostatnio czytany załącznik
 search-conditions-annotationText = Tekst adnotacji
 search-conditions-annotationComment = Komentarz adnotacji
+search-conditions-annotationType = Typ adnotacji
+search-conditions-annotationColor = Kolor adnotacji
+search-conditions-annotationAuthor = Autor adnotacji
 search-conditions-anyField = Dowolne pole
+search-conditions-titleCreatorYear = Tytuł, Twórca, Rok
+search-conditions-submenu-attachment = Załącznik
+search-conditions-submenu-annotation = Adnotacja
+search-conditions-short-fulltextContent = Zawartość
+search-conditions-short-fileTypeID = Typ pliku
+search-conditions-short-attachmentStorageType = Storage Type
+search-conditions-short-lastRead = Ostatnio czytany
+search-conditions-short-annotationText = Tekst
+search-conditions-short-annotationComment = Komentarz
+search-conditions-short-annotationType = Typ
+search-conditions-short-annotationColor = Kolor
+search-conditions-short-annotationAuthor = Autor
 find-pdf-files-added =
     { $count ->
         [one] { $count } plik dodany
@@ -778,6 +978,9 @@ file-type-video = Wideo
 file-type-presentation = Prezentacja
 file-type-document = Dokument
 file-type-ebook = Ebook
+attachment-storage-type-storedFile = Stored File
+attachment-storage-type-linkedFile = Linked File
+attachment-storage-type-webLink = Web Link
 post-upgrade-message = <span data-l10n-name="post-upgrade-appver">{ -app-name } został zaktualizowany do wersji { $version }</span>! Dowiedz się <a data-l10n-name="new-features-link">co nowego?</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -786,18 +989,23 @@ post-upgrade-done =
 text-action-paste-and-search =
     .label = Wklej i wyszukaj
 mac-word-plugin-install-message = Do instalacji wtyczki Word wymagany jest dostęp Zotero do danych Word.
+mac-word-plugin-install-folder-message = { -app-name } needs access to Word’s startup folder to install the Word plugin.
 mac-word-plugin-install-action-button =
     .label = Zainstaluj wtyczkę Word
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+mac-word-plugin-install-folder-dialog-title = Install the plugin in the Word startup folder
+mac-word-plugin-install-folder-dialog-button = Zainstaluj
+mac-word-plugin-install-wrong-folder-selected = The suggested folder must be selected. Please try again without choosing a different folder.
 file-renaming-banner-message = { -app-name } teraz automatycznie synchronizuje nazwy plików załączników podczas dokonywania zmian w elementach.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = Łącznik { -app-name } musi zostać zaktualizowany, aby działać z tą wersją { -app-name }.
 userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
 migrate-extra-fields-progress-message = Migracja nowych pól z pola Dodatkowe
+search-normalization-progress-message = Indexing items for search
 long-tag-fixer-window-title =
     .title = Podziel znaczniki
 long-tag-fixer-button-dont-split =
@@ -811,3 +1019,140 @@ banner-close-button =
 plugins-blocked-plugin =
     .message = Ta wtyczka została wyłączona przez { -app-name }.
 data-dir-unsupported-storage = This can happen if the { -app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share.
+login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
+os-keystore-save-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+    }
+os-keystore-migrate-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
+        [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+    }
+search-button =
+    .label = Wyszukiwanie
+save-search-new-button =
+    .label = Save Search…
+save-search-edit-button =
+    .label = Zapisz
+save-search-name-title = Zapisz wyszukiwanie
+save-search-name-message = Enter a name for the saved search:
+saved-search-close-confirmation-title = Editing Saved Search
+saved-search-close-confirmation-body = Do you want to save changes you made to this saved search?
+item-pane-batch-editing-prompt =
+    .aria-label = Edycja wsadowa
+item-pane-batch-editing-enable =
+    .label = Edytuj wiele elementów...
+item-pane-batch-editing-multiple-values-placeholder = Multiple
+item-pane-batch-editing-clear-values = Clear all values
+item-pane-batch-editing-header =
+    { $count ->
+        [one] Editing { $count } item
+       *[other] Editing { $count } items
+    }
+item-pane-batch-editing-done =
+    .label = { general-done }
+undo-action-edit-metadata =
+    { $count ->
+        [one] Edit Metadata
+       *[other] Edit Metadata for { $count } Items
+    }
+undo-action-edit-field =
+    { $count ->
+        [one] Edit of “{ $field }”
+       *[other] Edit of “{ $field }” for { $count } Items
+    }
+undo-action-normalize-attachment-titles = Normalize Attachment Title
+undo-action-trash =
+    { $count ->
+        [one] Trash Item
+       *[other] Trash { $count } Items
+    }
+undo-action-restore-items =
+    { $count ->
+        [one] Restore Item
+       *[other] Restore { $count } Items
+    }
+undo-action-trash-collection =
+    { $count ->
+        [one] Trash Collection
+       *[other] Trash { $count } Collections
+    }
+undo-action-trash-search =
+    { $count ->
+        [one] Trash Saved Search
+       *[other] Trash { $count } Saved Searches
+    }
+undo-action-restore-collection =
+    { $count ->
+        [one] Restore Collection
+       *[other] Restore { $count } Collections
+    }
+undo-action-restore-objects =
+    { $count ->
+        [one] Restore Object
+       *[other] Restore { $count } Objects
+    }
+undo-action-add-to-collection =
+    { $count ->
+        [one] Add to Collection
+       *[other] Add { $count } Items to Collection
+    }
+undo-action-remove-from-collection =
+    { $count ->
+        [one] Remove from Collection
+       *[other] Remove { $count } Items from Collection
+    }
+undo-action-move-to-collection =
+    { $count ->
+        [one] Move to Collection
+       *[other] Move { $count } Items to Collection
+    }
+undo-action-rename-collection = Zmień nazwę kolekcji
+undo-action-move-collection = Przenieś kolekcję
+undo-action-add-tag =
+    { $count ->
+        [one] Add Tag
+       *[other] Add Tag to { $count } Items
+    }
+undo-action-change-tag = Zmień etykietę
+undo-action-split-tag = Podziel etykietę
+undo-action-remove-tag =
+    { $count ->
+        [one] Remove Tag
+       *[other] Remove Tag from { $count } Items
+    }
+undo-action-remove-tags-from-item =
+    { $count ->
+        [one] Remove Tag
+       *[other] Remove { $count } Tags
+    }
+undo-action-remove-all-tags = Usuń wszystkie etykiety
+undo-action-edit-note = Edytowanie notatki
+undo-action-add-creator = Dodaj twórcę
+undo-action-remove-creator = Usuń twórcę
+undo-action-edit-creator = Edytuj twórcę
+undo-action-reorder-creator = Reorder Creator
+undo-action-change-type = Zmień typ elementu
+undo-action-change-parent-item =
+    { $count ->
+        [one] Change Parent Item
+       *[other] Change Parent for { $count } Items
+    }
+undo-action-convert-to-standalone =
+    { $count ->
+        [one] Convert to Standalone
+       *[other] Convert { $count } Items to Standalone
+    }
+undo-action-add-related = Dodaj powiązane
+undo-action-remove-related = Usuń powiązane
+undo-action-merge-items =
+    { $count ->
+        [one] Merge Item
+       *[other] Merge { $count } Items
+    }
+menu-edit-undo-action = Undo { $action }
+menu-edit-redo-action = Redo { $action }

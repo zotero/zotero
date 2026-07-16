@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Име:">
 
-<!ENTITY zotero.search.searchInLibrary "Потражи у библиотеци:">
-
 <!ENTITY zotero.search.joinMode.prefix "Поклопи">
 <!ENTITY zotero.search.joinMode.any "било шта">
 <!ENTITY zotero.search.joinMode.all "све">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "дани">
 <!ENTITY zotero.search.date.units.months "месеци">
 <!ENTITY zotero.search.date.units.years "године">
-
-<!ENTITY zotero.search.search "Претражи">
-<!ENTITY zotero.search.clear "Очисти">
-<!ENTITY zotero.search.saveSearch "Сачувај претрагу">

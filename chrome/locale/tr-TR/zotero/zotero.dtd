@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Eseri Kaldır...">
 <!ENTITY zotero.toolbar.newGroup "Yeni Grup...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Yeni Alt Derme...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Yeni Kaydedilen Arama...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Çöp Sepetini Boşalt">
 <!ENTITY zotero.toolbar.tagSelector.label "Etiket Seçiciyi Göster/Gizle">
 <!ENTITY zotero.toolbar.actions.label "Eylemler">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Tercihler...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Destek ve Belgeleme">
 <!ENTITY zotero.toolbar.about.label "Zotero Hakkında">
-<!ENTITY zotero.toolbar.advancedSearch "Gelişmiş Arama">
 <!ENTITY zotero.toolbar.openURL.label "Yerini Bul">
 <!ENTITY zotero.toolbar.openURL.tooltip "Yerel Kitaplığınızda Bul">
 

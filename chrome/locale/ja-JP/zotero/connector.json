@@ -6,7 +6,7 @@
     "message": "詳細情報..."
   },
   "general_needHelp": {
-    "message": "助けが必要？"
+    "message": "お困りですか？"
   },
   "general_done": {
     "message": "完了"
@@ -18,7 +18,7 @@
     "message": "いいえ"
   },
   "general_tryAgain": {
-    "message": "もう一度試す"
+    "message": "再試行"
   },
   "general_warning": {
     "message": "警告"
@@ -30,13 +30,13 @@
     "message": "キャンセル"
   },
   "general_selectAll": {
-    "message": "すべてを選択"
+    "message": "すべて選択"
   },
   "general_deselectAll": {
-    "message": "選択をすべて解除"
+    "message": "すべて選択解除"
   },
   "general_pleaseWait": {
-    "message": "しばらくお待ちください..."
+    "message": "お待ちください..."
   },
   "general_copyToClipboard": {
     "message": "クリップボードにコピー"
@@ -51,7 +51,7 @@
     "message": "スナップショット"
   },
   "itemType_note": {
-    "message": "ノート"
+    "message": "メモ"
   },
   "itemType_link": {
     "message": "ウェブリンク"
@@ -63,7 +63,7 @@
     "message": "保存先は"
   },
   "progressWindow_detailsBtnView": {
-    "message": "詳細を見る"
+    "message": "詳細を表示"
   },
   "progressWindow_detailsBtnHide": {
     "message": "詳細を隠す"
@@ -72,19 +72,43 @@
     "message": "対象コレクションセレクター"
   },
   "progressWindow_savingItems": {
-    "message": "アイテム $1 件を保存中 $2"
+    "message": "項目$1 件を保存中 $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "項目 $1 を保存中"
+  },
+  "progressWindow_saveItem": {
+    "message": "項目  $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "$1 を保存しました"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "$1 を保存しました / $2"
   },
   "progressWindow_downloadFailed": {
     "message": "$1のダウンロードに失敗しました。"
   },
+  "progressWindow_downloadFailedPlural": {
+    "message": "$1 のダウンロードに失敗しました / $2"
+  },
+  "progressWindow_allDone": {
+    "message": "保存が完了しました。ダイアログを閉じます。"
+  },
+  "progressWindow_alreadySaved": {
+    "message": "このWebページの項目は既に保存されています。"
+  },
   "progressWindow_tagPlaceholder": {
     "message": "タグ（コンマで区切り）"
   },
+  "progressWindow_filterPlaceholder": {
+    "message": "コレクションのフィルタリング"
+  },
   "progressWindow_error_translation": {
-    "message": "アイテムの保存中にエラーが発生しました。 さらに詳しくは $1 をご確認ください。"
+    "message": "項目の保存中にエラーが発生しました。 さらに詳しくは $1 をご確認ください。"
   },
   "progressWindow_error_siteAccessLimitsError": {
-    "message": "このアイテムの保存中にエラーが発生しました。 $1 は、一度に保存できるアイテムの数を制限する場合があります。 詳細については、$2 を参照してください。"
+    "message": "この項目の保存中にエラーが発生しました。 $1 は、一度に保存できる項目の数を制限する場合があります。 詳細については、$2 を参照してください。"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "トランスレータの不具合を解決"
@@ -101,29 +125,35 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "最新版"
   },
+  "itemSelector_title": {
+    "message": "ライブラリに追加する項目の選択 :"
+  },
   "extensionIsDisabled": {
-    "message": "$1は無効にします"
+    "message": "このページでは $1 コネクタは使用できません"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 コネクタはファイル URL では使用できません"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1は拡張機能ページに無効にします"
+    "message": "$1 コネクタは拡張ページでは使用できません"
   },
   "appConnector": {
     "message": "$1 コネクタ"
   },
   "upgradeApp": {
-    "message": "バージョン $1 にアップグレード"
+    "message": "$1 へアップグレード"
   },
   "firstRun_title": {
     "message": "$1 コネクタをインストールしました。"
   },
   "firstRun_text1": {
-    "message": "$1 コネクタを使用すると、ブラウザからワンクリックで<a href=\"$2\">アイテムを $1に保存</a>できます。"
+    "message": "$1 コネクタを使用すると、ブラウザからワンクリックで<a href=\"$2\">項目を $1に保存</a>できます。"
   },
   "firstRun_text2": {
     "message": "まだの方は、スタンドアロンの $1 アプリケーションを<a href=\"$2\">ダウンロードして</a>、最高の体験をお楽しみください。"
   },
   "firstRun_acceptButton": {
-    "message": "了解しました"
+    "message": "了解"
   },
   "error_connection_isAppRunning": {
     "message": " $1 が実行中ですか？"
@@ -138,7 +168,7 @@
     "message": "オンライン・ライブラリへの保存を有効にする"
   },
   "reports_report_submitted": {
-    "message": "エラーレポートが送信されました。\n\nレポート ID: $1\n\nこのレポート ID、問題の説明、再現に必要な手順を Zotero フォーラムに投稿してください。\n\nフォーラムで参照されない限り、エラーレポートはレビューされません。"
+    "message": "エラーレポートが送信されました。\n\nレポート ID : $1\n\nこのレポート ID、問題の説明、再現に必要な手順を Zotero フォーラムに投稿してください。\n\nフォーラムで参照されない限り、エラーレポートはレビューされません。"
   },
   "reports_debug_output_submitted": {
     "message": "デバッグ出力が送信されました。\n\nデバッグ ID は $1 です、"
@@ -174,10 +204,10 @@
     "message": "$1 は、複数のユーザーが同時に引用を編集できないように、文書をロックします。文書内で引用編集を同時に行うと、引用や文書の破損につながる可能性があります。ネットワーク障害など、予期せぬ事態により、文書が永久にロックされる場合があります。このようなことが起こったと思われる場合は、ロックを無効にすることができます。<br/><br/>文書のロックを無効にしますか？"
   },
   "integration_googleDocs_authScopeError": {
-    "message": "$1は引用を挿入するために、あなたの Google Docs 文書を編集する権限が必要です。 $1にあなたの Google Docs 文書の閲覧と編集と作成、削除が許可されていることを確認し、再度お試しください。"
+    "message": "$1は引用を挿入するために、あなたの Google Docs 文書を編集する権限が必要です。 $1にあなたの Google Docs 文書の閲覧と編集と作成、削除が許可されていることを確認し、再度試してください。"
   },
   "integration_googleDocs_documentPermissionError": {
-    "message": "選択した Google アカウントには、この文書を編集する権限がありません。編集権限のあるアカウントを選択し、再度お試しください。"
+    "message": "選択した Google アカウントには、この文書を編集する権限がありません。編集権限のあるアカウントを選択し、再度試してください。"
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "リンクされていない $1 の引用を表示する"
@@ -186,24 +216,24 @@
     "message": "編集しようとしている引用が $1 からリンク解除されました。"
   },
   "integration_googleDocs_orphanedCitations_alertButton": {
-    "message": "引用を再リンクする"
+    "message": "引用文献を再リンク"
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
-    "message": "これらの引用は <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">$1 からリンク解除</a>されました。更新したり、参考文献目録に表示したりする前に、再リンクする必要があります。"
+    "message": "これらの引用は <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">$1 からリンク解除</a>されました。更新したり、参考文献に表示したりする前に、再リンクする必要があります。"
   },
   "copyUnproxiedLink": {
-    "message": "プロキシを通じないリンクをコピーします"
+    "message": "プロキシ経由でないリンクをコピー"
   },
   "copyUnproxiedPageURL": {
-    "message": "プロキシを通じないページのURLをコピーします"
+    "message": "プロキシ経由でないページURLをコピー"
   },
   "reloadViaProxy": {
-    "message": "プロキシ経由でリロードします"
+    "message": "プロキシ経由で再読み込み"
   },
   "reloadVia": {
-    "message": "$1経由でリロードします"
+    "message": "$1 経由で再読み込み"
   },
   "general_saveTo": {
-    "message": "$1 に保存する"
+    "message": "$1 に保存"
   }
 }

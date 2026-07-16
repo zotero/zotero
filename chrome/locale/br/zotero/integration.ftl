@@ -3,7 +3,7 @@ integration-docPrefs-window =
 integration-addEditCitation-window =
     .title = { -app-name } - Add/Edit Citation
 integration-editBibliography-window =
-    .title = { -app-name } - Edit Bibliography
+    .title = { -app-name } - Aozañ al levrlennadur
 integration-editBibliography-add-button =
     .aria-label = { general-add }
 integration-editBibliography-remove-button =
@@ -19,7 +19,7 @@ integration-editBibliography-wrapper =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
         { -integration-editBibliography-edit-reference }
-integration-citationDialog = Citation Dialog
+integration-citationDialog = Prenestr arroudenn
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
 integration-citationDialog-section-selectedAnnotations = Selected Annotations
@@ -29,15 +29,16 @@ integration-citationDialog-section-cited =
         [0] Cited Items
        *[other] Cited Items ({ $count })
     }
-integration-citationDialog-details-suffix = Suffix
-integration-citationDialog-details-prefix = Prefix
+integration-citationDialog-details-suffix = Lostger
+integration-citationDialog-details-prefix = Rakger
 integration-citationDialog-details-suppressAuthor = Lezel a-gostez an Aozer
+integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
 integration-citationDialog-details-includeComments = Include Comments
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
-integration-citationDialog-settings-title = Citation Settings
+integration-citationDialog-settings-title = Arventennoù arroudenn
 integration-citationDialog-lib-message-citation =
     { $search ->
         [true] No selected, open, or cited items match the current search
@@ -54,16 +55,20 @@ integration-citationDialog-lib-message-annotations =
        *[other] No selected or open items with annotations
     }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-preview-empty = Rakwel
+integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-btn-displayPreview =
+    .title = Display citation preview
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Levraoueg
-integration-citationDialog-mode-list = List
+integration-citationDialog-mode-list = Listenn
 integration-citationDialog-btn-type-citation =
     .title = Ouzhpennañ/aozañ an arroudenn
 integration-citationDialog-btn-type-add-note =
     .title = Ouzhpennañ un notenn
 integration-citationDialog-btn-type-annotations =
-    .title = Add Annotations
+    .title = Ouzhpennañ ennotadurioù
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
@@ -76,6 +81,11 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Press Tab to select items to add to this citation. Press Escape to discard the changes and close the dialog.
+integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+integration-citationDialog-just-added-input-citation =
+    .placeholder = { $placeholder }
+    .title = { $title }
+    .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
@@ -94,13 +104,13 @@ integration-citationDialog-items-table =
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
     .aria-label = This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it.
-integration-citationDialog-add-all = Add all
+integration-citationDialog-add-all = Ouzhpennañ pep-tra
 integration-citationDialog-collapse-section =
-    .title = Collapse section
-integration-citationDialog-bubble-empty = (no title)
-integration-citationDialog-add-to-citation = Add to Citation
+    .title = Bihanañ ar gevrenn
+integration-citationDialog-bubble-empty = (titl ebet)
+integration-citationDialog-add-to-citation = Ouzhpennañ an arroudenn
 integration-citationDialog-annotations-filter =
-    .placeholder = Filter annotations
+    .placeholder = Silañ an ennotadurioù
 integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
 integration-prefs-displayAs-label = Diskouez an arroudennoù evel:
 integration-prefs-footnotes =
@@ -128,11 +138,9 @@ integration-error-unable-to-find-winword = { -app-name } could not find a runnin
 integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
 integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
 integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
-integration-warning-discard-changes = Discard Changes
+integration-warning-discard-changes = Dilezel ar cheñchamantoù
 integration-warning-command-is-running = A word processor integration command is already running.
 first-run-guidance-citationDialog =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
     
     You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

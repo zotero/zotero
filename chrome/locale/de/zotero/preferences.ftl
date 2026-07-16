@@ -70,6 +70,8 @@ preferences-advanced-server-enable-and-restart =
 preferences-advanced-language-and-region-title = Sprache und Region
 preferences-advanced-enable-bidi-ui =
     .label = Werkzeuge für das Arbeiten mit bidirektionalem Text aktivieren
+preferences-advanced-data-dir =
+    .value = Datenverzeichnis:
 preferences-advanced-reset-data-dir =
     .label = Auf Standardverzeichnis zurücksetzen…
 preferences-advanced-custom-data-dir =
@@ -77,18 +79,18 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (Standard: { $directory })
     .aria-label = Standardverzeichnis
-preferences-pane-account = Account
+preferences-pane-account = Benutzerkonto
 -preferences-sync-data-syncing = Daten-Synchronisierung
 preferences-sync-data-syncing-groupbox =
     .aria-label = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
-preferences-sync-data-syncing-description = Log in with your { -app-name } account to sync your data between devices, collaborate with others, and more.
+preferences-sync-data-syncing-description = Mit Ihrem { -app-name }-Account einloggen, um Ihre Daten zwischen verschiedenen Geräten zu synchronisieren, mit Anderen zusammenzuarbeiten und mehr.
 preferences-sync-settings-heading = Sync
-preferences-sync-settings-intro = { -app-name } can sync your library data and files across devices. <label data-l10n-name="sync-link">Learn more</label>
+preferences-sync-settings-intro = { -app-name } kann Ihre Bibliotheksdaten und Dateien zwischen Geräten synchronisieren. <label data-l10n-name="sync-link"> Mehr erfahren </label>
 preferences-sync-reset-heading = Sync Reset
 preferences-sync-fileSyncing-groups =
-    .label = Sync attachment files in group libraries using { -app-name } Storage
-preferences-sync-fileSyncing-tos = By using { -app-name } Storage, you agree to become bound by its <label data-l10n-name="terms-link">terms and conditions</label>.
+    .label = Dateianhänge in Gruppen-Bibliotheken mit { -app-name } Storage synchronisieren
+preferences-sync-fileSyncing-tos = Durch die Benutzung von { -app-name } Storage, stimmen Sie den <label data-l10n-name="terms-link">Nutzungsbedingungen zu</label>.
 preferences-account-log-out =
     .label = Abmelden…
 preferences-sync-reset-restore-to-server-body = { -app-name } wird “{ $libraryName }” auf { $domain } mit Daten von diesem Computer ersetzen.
@@ -125,3 +127,7 @@ preferences-account-switch-accounts =
 preferences-account-switch-text = Switching to a different account will remove all { -app-name } data on this computer. Before continuing, make sure all data and files you wish to keep have been synced with the “{ $username }” account or you have a backup of your { -app-name } data directory.
 preferences-account-switch-confirmation-text = Lokale Daten entfernen
 preferences-account-switch-accept = Daten entfernen und neu starten.
+fulltext-index-status-indexing = Indexing { $indexed } of { $total }…
+fulltext-index-status-complete = Search index is up to date
+fulltext-stats-notes-indexed = Notes indexed:
+fulltext-stats-not-available = File or full-text content not available:

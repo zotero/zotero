@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Fjern ...">
 <!ENTITY zotero.toolbar.newGroup "Ny Gruppe ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny delsamling">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Ny gemt Søgning ...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Tøm papirkurv">
 <!ENTITY zotero.toolbar.tagSelector.label "Vis/skjul søgning på mærker">
 <!ENTITY zotero.toolbar.actions.label "Handlinger">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Indstillinger...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support og dokumentation">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Avanceret søgning">
 <!ENTITY zotero.toolbar.openURL.label "Find">
 <!ENTITY zotero.toolbar.openURL.tooltip "Find gennem dit lokale bibliotek">
 

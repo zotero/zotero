@@ -70,6 +70,8 @@ preferences-advanced-server-enable-and-restart =
 preferences-advanced-language-and-region-title = 语言和区域
 preferences-advanced-enable-bidi-ui =
     .label = 启用双向文本编辑工具
+preferences-advanced-data-dir =
+    .value = 数据目录：
 preferences-advanced-reset-data-dir =
     .label = 恢复到默认位置...
 preferences-advanced-custom-data-dir =
@@ -77,18 +79,18 @@ preferences-advanced-custom-data-dir =
 preferences-advanced-default-data-dir =
     .value = (默认： { $directory })
     .aria-label = 默认位置
-preferences-pane-account = Account
+preferences-pane-account = 账户
 -preferences-sync-data-syncing = 数据同步
 preferences-sync-data-syncing-groupbox =
     .aria-label = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-description = 登录你的 { -app-name } 账户以跨设备同步你的数据、与他人协作等。
-preferences-sync-settings-heading = Sync
-preferences-sync-settings-intro = { -app-name } can sync your library data and files across devices. <label data-l10n-name="sync-link">Learn more</label>
-preferences-sync-reset-heading = Sync Reset
+preferences-sync-settings-heading = 同步
+preferences-sync-settings-intro = { -app-name } 可以跨设备同步文库数据和文件。<label data-l10n-name="sync-link">了解更多</label>
+preferences-sync-reset-heading = 同步重置
 preferences-sync-fileSyncing-groups =
-    .label = Sync attachment files in group libraries using { -app-name } Storage
-preferences-sync-fileSyncing-tos = By using { -app-name } Storage, you agree to become bound by its <label data-l10n-name="terms-link">terms and conditions</label>.
+    .label = 使用 { -app-name } 存储同步群组文库中的附件
+preferences-sync-fileSyncing-tos = 使用 { -app-name } 存储即代表您接受其 <label data-l10n-name="terms-link">条款和条件</label>.
 preferences-account-log-out =
     .label = 退出登录…
 preferences-sync-reset-restore-to-server-body = { -app-name } 将用此计算机中的数据替换 { $domain } 中 “{ $libraryName }” 中的数据。
@@ -124,3 +126,7 @@ preferences-account-switch-accounts =
 preferences-account-switch-text = 切换到其他账户将删除此计算机中所有的 { -app-name } 数据。在继续之前，请确保您想要保留的所有数据和文件都已与 “{ $username }” 账户同步，或者您已经备份 { -app-name } 数据目录。
 preferences-account-switch-confirmation-text = 删除本地数据
 preferences-account-switch-accept = 删除数据并重新启动
+fulltext-index-status-indexing = Indexing { $indexed } of { $total }…
+fulltext-index-status-complete = Search index is up to date
+fulltext-stats-notes-indexed = Notes indexed:
+fulltext-stats-not-available = File or full-text content not available:

@@ -1,11 +1,9 @@
 <!ENTITY zotero.search.name "Nome:">
 
-<!ENTITY zotero.search.searchInLibrary "Cerca nella biblioteca:">
-
 <!ENTITY zotero.search.joinMode.prefix "Trova">
-<!ENTITY zotero.search.joinMode.any "uno qualsiasi">
-<!ENTITY zotero.search.joinMode.all "tutti">
-<!ENTITY zotero.search.joinMode.suffix "dei seguenti:">
+<!ENTITY zotero.search.joinMode.any "una qualsiasi">
+<!ENTITY zotero.search.joinMode.all "tutte">
+<!ENTITY zotero.search.joinMode.suffix "tra le seguenti condizioni:">
 
 <!ENTITY zotero.search.recursive.label "Cerca nelle sottocollezioni">
 <!ENTITY zotero.search.noChildren "Mostra solo gli elementi di livello superiore">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "giorni">
 <!ENTITY zotero.search.date.units.months "mesi">
 <!ENTITY zotero.search.date.units.years "anni">
-
-<!ENTITY zotero.search.search "Cerca">
-<!ENTITY zotero.search.clear "Cancella">
-<!ENTITY zotero.search.saveSearch "Salva la ricerca">

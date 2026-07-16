@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "移除項目……">
 <!ENTITY zotero.toolbar.newGroup "新增群組……">
 <!ENTITY zotero.toolbar.newSubcollection.label "新增子文獻集……">
-<!ENTITY zotero.toolbar.newSavedSearch.label "新增搜尋結果……">
 <!ENTITY zotero.toolbar.emptyTrash.label "清除垃圾筒">
 <!ENTITY zotero.toolbar.tagSelector.label "顯示/隱藏標籤選擇器">
 <!ENTITY zotero.toolbar.actions.label "動作">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "偏好設定……">
 <!ENTITY zotero.toolbar.supportAndDocumentation "支援及說明文件">
 <!ENTITY zotero.toolbar.about.label "關於 Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "進階搜尋">
 <!ENTITY zotero.toolbar.openURL.label "查詢">
 <!ENTITY zotero.toolbar.openURL.tooltip "於本機文獻庫尋找">
 

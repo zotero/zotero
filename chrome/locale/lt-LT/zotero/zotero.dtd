@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Pašalinti įrašą...">
 <!ENTITY zotero.toolbar.newGroup "Nauja grupė...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Naujas poaplankis...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nauja įsiminta paieška...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Išvalyti šiukšlinę">
 <!ENTITY zotero.toolbar.tagSelector.label "Rodyti/slėpti gairių parinkiklį">
 <!ENTITY zotero.toolbar.actions.label "Veiksmai">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Nuostatos...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Palaikymas ir dokumentacija">
 <!ENTITY zotero.toolbar.about.label "Apie Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Išplėstinė paieška">
 <!ENTITY zotero.toolbar.openURL.label "Rasti vietą">
 <!ENTITY zotero.toolbar.openURL.tooltip "Ieškoti vietinėje bibliotekoje">
 

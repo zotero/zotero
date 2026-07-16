@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Όνομα:">
 
-<!ENTITY zotero.search.searchInLibrary "Αναζήτηση στην βιβλιοθήκη:">
-
 <!ENTITY zotero.search.joinMode.prefix "Ταίριασμα">
 <!ENTITY zotero.search.joinMode.any "οποιαδήποτε">
 <!ENTITY zotero.search.joinMode.all "όλες">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "ημέρες">
 <!ENTITY zotero.search.date.units.months "μήνες">
 <!ENTITY zotero.search.date.units.years "έτη">
-
-<!ENTITY zotero.search.search "Αναζήτηση">
-<!ENTITY zotero.search.clear "Καθαρισμός">
-<!ENTITY zotero.search.saveSearch "Αποθήκευση αναζήτησης">
