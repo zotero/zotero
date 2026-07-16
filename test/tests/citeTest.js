@@ -41,6 +41,22 @@ describe("Zotero.Cite", function () {
 			var output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
 			assert.include(output, 'izd');
 		});
+
+		it("should use closest available locale for locale without a CSL locale", async function () {
+			var item = new Zotero.Item;
+			item.fromJSON({
+				itemType: "book",
+				title: "Test Book",
+				edition: "2"
+			});
+			await item.saveTx();
+
+			var style = Zotero.Styles.get('http://www.zotero.org/styles/chicago-notes-bibliography');
+			var cslEngine = style.getCiteProc('sr-RS');
+
+			var output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
+			assert.include(output, 'изд');
+		});
 	});
 	
 	describe("#extraToCSL()", function () {

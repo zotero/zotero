@@ -695,7 +695,16 @@ Zotero.Cite.System.prototype = {
 				lang = 'sr-Latn-RS';
 				break;
 		}
-		return Zotero.Cite.Locale.get(lang);
+		var xml = Zotero.Cite.Locale.get(lang);
+		if (!xml) {
+			// Use the closest available locale (e.g., 'sr-Cyrl-RS' for 'sr-RS',
+			// which doesn't have its own CSL locale)
+			let fallback = Zotero.Styles.resolveLocale(lang);
+			if (fallback && fallback != lang) {
+				xml = Zotero.Cite.Locale.get(fallback);
+			}
+		}
+		return xml;
 	}
 };
 

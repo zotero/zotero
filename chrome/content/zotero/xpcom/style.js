@@ -533,8 +533,30 @@ Zotero.Styles = new function () {
 	};
 	
 	/**
+	 * Resolve a locale to one with an available CSL locale, using the primary
+	 * dialect of the language or the closest available locale (e.g.,
+	 * 'sr-Cyrl-RS' for 'sr-RS') if the exact locale isn't available
+	 *
+	 * @param {String} locale
+	 * @return {String} The resolved locale, or the passed locale if it can't
+	 *     be resolved
+	 */
+	this.resolveLocale = function (locale) {
+		if (!_initialized || !locale) {
+			return locale;
+		}
+		if (locale in Zotero.Styles.locales) {
+			return locale;
+		}
+		return Zotero.Styles.primaryDialects[locale]
+			|| Zotero.Utilities.Internal.resolveLocale(
+				locale, Object.keys(Zotero.Styles.locales), { silent: true })
+			|| locale;
+	};
+
+	/**
 	 * Populate menulist with locales
-	 * 
+	 *
 	 * @param {xul:menulist} menulist
 	 */
 	this.populateLocaleList = function (menulist) {
@@ -546,8 +568,7 @@ Zotero.Styles = new function () {
 		menulist.selectedItem = null;
 		menulist.removeAllItems();
 		
-		let fallbackLocale = Zotero.Styles.primaryDialects[Zotero.locale]
-			|| Zotero.locale;
+		let fallbackLocale = Zotero.Styles.resolveLocale(Zotero.locale);
 		
 		let menuLocales = Zotero.Utilities.deepCopy(Zotero.Styles.locales);
 		let menuLocalesKeys = Object.keys(menuLocales).sort();
@@ -618,7 +639,7 @@ Zotero.Styles = new function () {
 		if (menulist.labelElement) menulist.labelElement.disabled = false;
 		
 		let selectLocale = style.effectiveLocale || prefLocale || Zotero.locale;
-		selectLocale = Zotero.Styles.primaryDialects[selectLocale] || selectLocale;
+		selectLocale = Zotero.Styles.resolveLocale(selectLocale);
 		
 		// Make sure the locale we want to select is in the menulist
 		if (availableLocales.indexOf(selectLocale) == -1) {

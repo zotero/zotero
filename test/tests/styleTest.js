@@ -128,6 +128,20 @@ describe("Zotero.Styles", function () {
 		});
 	});
 
+	describe("Zotero.Styles.resolveLocale", function () {
+		it("should return available locale unchanged", function () {
+			assert.equal(Zotero.Styles.resolveLocale('de-AT'), 'de-AT');
+		});
+
+		it("should return primary dialect for a language code", function () {
+			assert.equal(Zotero.Styles.resolveLocale('fa'), 'fa-IR');
+		});
+
+		it("should return closest available locale for locale without a CSL locale", function () {
+			assert.equal(Zotero.Styles.resolveLocale('sr-RS'), 'sr-Cyrl-RS');
+		});
+	});
+
 	describe("Cached CSL.Engine instances", function () {
 		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
 			this.skip();
