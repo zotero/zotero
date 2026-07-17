@@ -669,9 +669,20 @@ Zotero.File = new function () {
 	this.removeIfExists = function (path) {
 		return Promise.resolve(OS.File.remove(path))
 		.then(() => true)
-		.catch(function (e) {
+		.catch(async function (e) {
 			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
 				return false;
+			}
+			// The read-only attribute on Windows prevents deletion, so clear it and try again
+			if (Zotero.isWin && e.name == 'NotAllowedError') {
+				try {
+					await IOUtils.setWindowsAttributes(path, { readOnly: false });
+					await OS.File.remove(path);
+					return true;
+				}
+				catch (e2) {
+					Zotero.debug(e2, 1);
+				}
 			}
 			Zotero.debug(path, 1);
 			throw e;
