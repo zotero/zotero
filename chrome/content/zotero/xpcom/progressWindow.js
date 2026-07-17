@@ -128,7 +128,7 @@ Zotero.ProgressWindow = function (options = {}) {
 		
 		if (_window) {
 			_progressWindow = _window.openDialog("chrome://zotero/content/progressWindow.xhtml",
-				"", "chrome,dialog=no,titlebar=no,alwaysontop=yes");
+				"", "chrome,dialog=no,titlebar=no,dependent=yes");
 			_window.addEventListener('close', () => {
 				this.close();
 			});
