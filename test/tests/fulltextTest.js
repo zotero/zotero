@@ -102,6 +102,16 @@ describe("Zotero.FullText", function () {
 			assert.notInclude(await contentSearch(item, 'かん'), item.id);
 		});
 
+		it("should match a mixed CJK and non-CJK term literally", async function () {
+			let mixed = await createTextAttachment("москва日本 report");
+			let cjkOnly = await createTextAttachment("日本語の研究");
+			// Neither index covers the term alone, so it falls back to a scan of the cached
+			// text; a document containing only the CJK part doesn't match
+			let results = await contentSearch(mixed, 'москва日本');
+			assert.include(results, mixed.id);
+			assert.notInclude(results, cjkOnly.id);
+		});
+
 		it("should not match an unrelated CJK document", async function () {
 			let item = await createTextAttachment("天气预报很准确");
 			let other = await createTextAttachment("中文搜索系统设计");
@@ -343,6 +353,17 @@ describe("Zotero.FullText", function () {
 				let item = await createNote("<p>zqnn研究ai</p>");
 				await Zotero.FullText.processNoteIndexQueue();
 				assert.include(await noteSearch(item, '究ai'), item.id);
+			});
+
+			it("should match a mixed CJK and non-ASCII note term literally", async function () {
+				let mixed = await createNote("<p>zqnnмосква日本 report</p>");
+				let cjkOnly = await createNote("<p>zqnn日本語の研究</p>");
+				await Zotero.FullText.processNoteIndexQueue();
+				// The term suits neither index, so it scans the notes' plain text; a note
+				// containing only the CJK part doesn't match
+				let results = await noteSearch(mixed, 'москва日本');
+				assert.include(results, mixed.id);
+				assert.notInclude(results, cjkOnly.id);
 			});
 
 			it("should exclude a matching note with doesNotContain", async function () {

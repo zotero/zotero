@@ -2085,6 +2085,16 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	}
 
 
+	/**
+	 * Whether a normalized term contains letters or digits outside its CJK runs. The clause
+	 * builders route such mixed-script terms identically: the CJK index would drop the non-CJK
+	 * words, so they return null and the term is matched by a literal scan instead.
+	 */
+	function hasNonCJKWordChars(normalized) {
+		return /[\p{L}\p{N}]/u.test(normalized.replace(_cjkRunRE, ''));
+	}
+
+
 	// The FTS5 table sets, each a main text table (a word index for attachment content, a trigram
 	// index for notes), a CJK 2-gram table, and an index-state side table
 	const _contentTables = {
@@ -2241,7 +2251,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			return null;
 		}
 		let hasCJK = _cjkCharRE.test(normalized);
-		let hasNonCJK = /[a-z0-9]/.test(normalized);
+		let hasNonCJK = hasNonCJKWordChars(normalized);
 		// Pure CJK: match the term's 2-grams as a contiguous phrase against the CJK index
 		if (hasCJK && !hasNonCJK) {
 			let bigrams = getCJKBigrams(normalized);
@@ -2283,7 +2293,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			return null;
 		}
 		let hasCJK = _cjkCharRE.test(normalized);
-		let hasNonCJK = /[a-z0-9]/.test(normalized);
+		let hasNonCJK = hasNonCJKWordChars(normalized);
 		// Pure CJK: match the term's 2-grams as a contiguous phrase against the CJK index
 		if (hasCJK && !hasNonCJK) {
 			let bigrams = getCJKBigrams(normalized);
