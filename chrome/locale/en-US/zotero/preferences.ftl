@@ -148,5 +148,7 @@ preferences-account-switch-accept = Remove Data and Restart
 
 fulltext-index-status-indexing = Indexing { $indexed } of { $total }…
 fulltext-index-status-complete = Search index is up to date
+fulltext-stats-attachments-indexed = Attachments indexed:
+fulltext-stats-partially-indexed = Partially indexed:
+fulltext-stats-not-available = Full-text content or file not available:
 fulltext-stats-notes-indexed = Notes indexed:
-fulltext-stats-not-available = File or full-text content not available:
