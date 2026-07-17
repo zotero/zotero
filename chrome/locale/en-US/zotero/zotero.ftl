@@ -1098,7 +1098,8 @@ userjs-pref-warning = Some { -app-name } settings have been overridden using an 
 
 migrate-extra-fields-progress-message = Migrating new fields from Extra field
 
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = Indexing
+fulltext-indexing-progress-message = Full-text search results may be incomplete until indexing finishes.
 
 long-tag-fixer-window-title =
     .title = Split Tags

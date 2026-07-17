@@ -1744,14 +1744,16 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				if (!_canDrainIndex()) {
 					await Zotero.Promise.delay(250);
 				}
-				// Show a progress window once it's clear this will take a moment (like the
-				// normalized-column backfill), tracking progress as the queue drains
+				// Show a progress window once it's clear this will take a moment, tracking
+				// progress as the queue drains
 				if (!progressWin && Date.now() - startTime > 1500) {
 					progressWin = new Zotero.ProgressWindow({ closeOnClick: false });
-					progressWin.changeHeadline(Zotero.getString('upgrade.status'));
+					progressWin.changeHeadline(
+						Zotero.getString('fulltext-indexing-progress-title')
+					);
 					itemProgress = new progressWin.ItemProgress(
 						'journalArticle',
-						Zotero.getString('search-normalization-progress-message')
+						Zotero.getString('fulltext-indexing-progress-message')
 					);
 					progressWin.show();
 				}
