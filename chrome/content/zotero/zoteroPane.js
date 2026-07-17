@@ -2784,6 +2784,25 @@ var ZoteroPane = new function () {
 		}
 	}
 
+	this.clearAllLastRead = async function () {
+		let collectionTreeRows = this.getCollectionTreeRows();
+		if (collectionTreeRows.length != 1 || !collectionTreeRows[0].isRecentlyRead()) {
+			return;
+		}
+
+		let result = Services.prompt.confirm(
+			window,
+			Zotero.getString('general.warning'),
+			Zotero.getString('recently-read-clear-all-confirm')
+		);
+		if (!result) {
+			return;
+		}
+
+		await Zotero.Items.clearAllLastRead(collectionTreeRows[0].ref.libraryID);
+	};
+
+
 	/**
 	 * Check whether every selected item can be restored from trash
 	 *
@@ -3726,6 +3745,10 @@ var ZoteroPane = new function () {
 			oncommand: () => this.deleteSelectedCollection()
 		},
 		{
+			id: "clearAllLastRead",
+			oncommand: () => this.clearAllLastRead()
+		},
+		{
 			id: "deleteCollectionAndItems",
 			oncommand: () => this.deleteSelectedCollection(true)
 		},
@@ -3947,6 +3970,9 @@ var ZoteroPane = new function () {
 		else if (collectionTreeRows[0].isDuplicates() || collectionTreeRows[0].isUnfiled() || collectionTreeRows[0].isRecentlyRead()
 				|| collectionTreeRows[0].isRetracted()) {
 			show = ['deleteCollection'];
+			if (collectionTreeRows.length == 1 && collectionTreeRows[0].isRecentlyRead()) {
+				show.push('clearAllLastRead');
+			}
 			
 			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
 			useHideOrDelete = "hide";
