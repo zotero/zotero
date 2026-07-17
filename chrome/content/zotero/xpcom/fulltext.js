@@ -41,11 +41,12 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	const _processorCacheFile = '.zotero-ft-unprocessed';
 
 	// Schema version of the attached index database (fulltext.sqlite), covering the attachment
-	// content and note tables. Bump only for changes that can't be applied in place; adding a table
-	// is done idempotently in setUpContentDB() without a bump.
-	const _indexDBVersion = 1;
+	// content and note tables. The tables are only created when this is bumped (setUpContentDB()
+	// drops and recreates everything), so any schema change -- a new table or a changed FTS5
+	// table definition, including its tokenizer -- needs a bump.
+	const _indexDBVersion = 2;
 	// Version of the index format. Bump to force a rebuild of the index from the cached text
-	// (e.g., after a tokenizer or normalization change) -- items recorded at a lower version in
+	// (e.g., after a normalization change) -- items recorded at a lower version in
 	// fulltextIndexState/fulltextNoteIndexState reenter the queue and are re-indexed at startup,
 	// like the initial migration.
 	const _contentIndexVersion = 1;
@@ -93,13 +94,14 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	var _syncLibraryVersion = 0;
 	
 	this.init = async function () {
-		// Set up the full-text content index: a contentless trigram FTS5 table in a separate
+		// Set up the full-text content index: contentless FTS5 tables in a separate
 		// attached database (fulltext.sqlite), used for content searching. It's a local,
 		// rebuildable index kept out of zotero.sqlite (so it doesn't bloat the main DB or its
 		// backups), versioned independently via PRAGMA user_version. The original extracted text
-		// still lives in the .zotero-ft-cache files, so the content tables store only normalized
-		// trigrams. Notes, which have no cache file, also store their normalized plain text (see
-		// noteText below), so short and mixed-script note searches have something to scan.
+		// still lives in the .zotero-ft-cache files, so the content tables store only the index
+		// built from the normalized text. Notes, which have no cache file, also store their
+		// normalized plain text (see noteText below), so short and mixed-script note searches have
+		// something to scan.
 		//
 		// FTS5 is a bundled SQLite extension. It's loaded once here; DBConnection re-loads it
 		// automatically after a reconnect (before this callback runs), so it's available for the
@@ -130,22 +132,27 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextNoteIndexState");
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.noteText");
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextIndexMeta");
-				// Latin (and CJK runs of 3+ chars): trigram index over the normalized text
+				// Non-CJK scripts: word index over the normalized text. Searches match words by
+				// prefix (see getWordMatchClause); multi-token terms match adjacent tokens as
+				// phrase candidates, which relies on the token positions the default detail=full
+				// setting stores.
 				await Zotero.DB.queryAsync(
 					"CREATE VIRTUAL TABLE ftindex.fulltextContent USING fts5("
-					+ "text, tokenize='trigram', content='', contentless_delete=1)"
+					+ "text, tokenize='unicode61', content='', contentless_delete=1)"
 				);
 				// CJK: overlapping 2-grams of CJK runs only, space-separated, indexed with the
 				// ascii tokenizer (which leaves multibyte characters intact and splits on the
-				// spaces). The trigram tokenizer can't match the 1-2-character queries common in
-				// CJK, so those go here instead.
+				// spaces). The word tokenizer treats a CJK run as a single token, so the
+				// 1-2-character queries common in CJK go here instead.
 				await Zotero.DB.queryAsync(
 					"CREATE VIRTUAL TABLE ftindex.fulltextContentCJK USING fts5("
 					+ "text, tokenize='ascii', content='', contentless_delete=1)"
 				);
-				// Note content (text extracted from the note HTML), same scheme as above. Kept in
-				// separate tables because contentless FTS5 tables can't be filtered by an extra
-				// column, so attachment content and notes couldn't be told apart in one table.
+				// Note content (text extracted from the note HTML). Kept in separate tables
+				// because contentless FTS5 tables can't be filtered by an extra column, so
+				// attachment content and notes couldn't be told apart in one table. Notes use a
+				// trigram index -- note searches match arbitrary substrings, and notes are small
+				// enough that the larger trigram index is cheap.
 				await Zotero.DB.queryAsync(
 					"CREATE VIRTUAL TABLE ftindex.fulltextNotes USING fts5("
 					+ "text, tokenize='trigram', content='', contentless_delete=1)"
@@ -518,7 +525,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			await this.clearItemWords(itemID, true);
 			await setFulltextItem(itemID, stats, version, synced);
 
-			// Index the extracted text for content searching (FTS5 trigram + CJK 2-gram tables,
+			// Index the extracted text for content searching (FTS5 word + CJK 2-gram tables,
 			// plus the index-state row). The original text stays in the .zotero-ft-cache file.
 			await setContentIndex(itemID, text);
 
@@ -1762,6 +1769,10 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				itemProgress.setProgress(100);
 			}
 			await this.optimizeContentIndex();
+			// Reclaim the space freed by a rebuild (e.g., an index-format change dropping the old
+			// tables), which can be most of the file; the freelist gate makes this a no-op on
+			// ordinary startups
+			await this.vacuumContentIndex();
 			if (total > 0) {
 				Zotero.debug("Indexed " + done + " " + Zotero.Utilities.pluralize(done, 'item')
 					+ " for search in " + (Date.now() - startTime) + " ms");
@@ -1797,7 +1808,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		try {
 			for (let tables of [_contentTables, _noteTables]) {
 				await Zotero.DB.queryAsync(
-					`INSERT INTO ftindex.${tables.trigram}(${tables.trigram}) VALUES('optimize')`
+					`INSERT INTO ftindex.${tables.main}(${tables.main}) VALUES('optimize')`
 				);
 				await Zotero.DB.queryAsync(
 					`INSERT INTO ftindex.${tables.cjk}(${tables.cjk}) VALUES('optimize')`
@@ -1816,8 +1827,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 * items) can leave fulltext.sqlite much bigger than its contents. The main database vacuum
 	 * covers only the main database, so the attached content index is vacuumed here. Like that
 	 * vacuum, this is gated on the freelist threshold, which makes it self-throttling: a vacuum
-	 * empties the freelist, so it won't run again until content drops substantially. Called from
-	 * the idle maintenance pass; pass force to skip the checks (e.g., from tests).
+	 * empties the freelist, so it won't run again until content drops substantially. Called after
+	 * the startup queue drain and from the idle maintenance pass; pass force to skip the checks
+	 * (e.g., from tests).
 	 *
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.force] - Skip the freelist and disk-space checks
@@ -2001,9 +2013,21 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				break;
 
 			default:
-				// Case- and diacritic-insensitive, to match the content index (findItemsWithContent)
-				searchText = Zotero.Utilities.Internal.normalizeForSearch(searchText);
-				content = Zotero.Utilities.Internal.normalizeForSearch(content);
+				// Case- and diacritic-insensitive, to match the content index
+				// (findItemsWithContent). Whitespace and hyphen runs are collapsed to single
+				// spaces on both sides (normalizeForSearch folds dash variants to '-'), so the
+				// separators between a phrase's words match flexibly -- extraction layout and
+				// compound styling ("decision-making" vs. "decision making") vary them -- while
+				// other punctuation has to match literally.
+				searchText = Zotero.Utilities.Internal.normalizeForSearch(searchText)
+					.replace(/[\s-]+/g, ' ');
+				// A query with nothing left after separator collapsing (e.g., "--") would match
+				// the whitespace in nearly every document, so it matches nothing instead
+				if (!searchText.trim()) {
+					return false;
+				}
+				content = Zotero.Utilities.Internal.normalizeForSearch(content)
+					.replace(/[\s-]+/g, ' ');
 				if (content.includes(searchText)){
 					Zotero.debug('Text found');
 					return true;
@@ -2030,15 +2054,18 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 * @return {Promise<Array<Object>>} A promise for an array of objects with an 'id' property
 	 *                                  containing the itemID of each matching item
 	 */
-	// CJK scripts (Han/Hiragana/Katakana/Hangul) -- indexed as 2-grams rather than 3-grams,
-	// since CJK queries are commonly 1-2 characters
+	// CJK scripts (Han/Hiragana/Katakana/Hangul) -- indexed as 2-grams, since CJK queries are
+	// commonly 1-2 characters and the word tokenizer treats a CJK run as a single token
 	const _cjkCharRE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
 	const _cjkRunRE = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]+/gu;
+	// Word tokens as the unicode61 tokenizer produces them from the normalized text: runs of
+	// letters and digits, with everything else a separator
+	const _wordTokenRE = /[\p{L}\p{N}]+/gu;
 
 	/**
 	 * Build a space-separated list of overlapping 2-grams of the CJK runs in `text`, for the
 	 * ascii-tokenized CJK index. Only CJK characters are bigrammed -- everything else is handled
-	 * by the trigram index -- so non-CJK text produces an empty string.
+	 * by the word index -- so non-CJK text produces an empty string.
 	 *
 	 * @param {String} text - Normalized text (via normalizeForSearch)
 	 * @return {String}
@@ -2058,14 +2085,15 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	}
 
 
-	// The FTS5 table sets, each a trigram table, a CJK 2-gram table, and an index-state side table
+	// The FTS5 table sets, each a main text table (a word index for attachment content, a trigram
+	// index for notes), a CJK 2-gram table, and an index-state side table
 	const _contentTables = {
-		trigram: 'fulltextContent',
+		main: 'fulltextContent',
 		cjk: 'fulltextContentCJK',
 		state: 'fulltextIndexState'
 	};
 	const _noteTables = {
-		trigram: 'fulltextNotes',
+		main: 'fulltextNotes',
 		cjk: 'fulltextNotesCJK',
 		state: 'fulltextNoteIndexState',
 		// Notes also store their normalized plain text (see setUpContentDB), for the short- and
@@ -2083,7 +2111,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 * Must be called within a transaction.
 	 */
 	async function setIndexEntries(itemID, text, tables) {
-		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.trigram} WHERE rowid=?`, itemID);
+		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.main} WHERE rowid=?`, itemID);
 		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.cjk} WHERE rowid=?`, itemID);
 		if (tables.text) {
 			await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.text} WHERE itemID=?`, itemID);
@@ -2092,7 +2120,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			// Skip logging the params, which includes the full text
 			let normalized = Zotero.Utilities.Internal.normalizeForSearch(text) || '';
 			await Zotero.DB.queryAsync(
-				`INSERT INTO ftindex.${tables.trigram} (rowid, text) VALUES (?, ?)`,
+				`INSERT INTO ftindex.${tables.main} (rowid, text) VALUES (?, ?)`,
 				[itemID, normalized],
 				{ debugParams: false }
 			);
@@ -2174,7 +2202,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 * Must be called within a transaction.
 	 */
 	async function clearIndexEntries(itemID, tables) {
-		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.trigram} WHERE rowid=?`, itemID);
+		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.main} WHERE rowid=?`, itemID);
 		await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.cjk} WHERE rowid=?`, itemID);
 		if (tables.text) {
 			await Zotero.DB.queryAsync(`DELETE FROM ftindex.${tables.text} WHERE itemID=?`, itemID);
@@ -2200,13 +2228,14 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 
 	/**
 	 * Resolve a search term to the FTS5 table and MATCH expression that find it as a substring
-	 * (case- and diacritic-insensitively, via normalizeForSearch): the trigram index for Latin,
-	 * the 2-gram index for pure CJK. Returns null when the index can't answer the term -- too short
-	 * for the trigram index, or a mix of CJK and non-CJK that neither index covers alone.
+	 * of note content (case- and diacritic-insensitively, via normalizeForSearch): the trigram
+	 * index for non-CJK text, the 2-gram index for pure CJK. Returns null when the index can't
+	 * answer the term -- too short for the trigram index, or a mix of CJK and non-CJK that
+	 * neither index covers alone.
 	 *
 	 * @return {Object|null} { table, match } or null
 	 */
-	function getMatchClause(searchText, tables) {
+	function getSubstringMatchClause(searchText) {
 		let normalized = Zotero.Utilities.Internal.normalizeForSearch(searchText);
 		if (!normalized) {
 			return null;
@@ -2220,31 +2249,87 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			if (!bigrams) {
 				return null;
 			}
-			return { table: tables.cjk, match: '"' + bigrams + '"' };
+			return { table: _noteTables.cjk, match: '"' + bigrams + '"' };
 		}
 		// Pure non-CJK: match the whole term as a contiguous phrase (substring) against the
 		// trigram index, which only indexes runs of 3+ characters
 		if (!hasCJK && normalized.length >= 3) {
-			return { table: tables.trigram, match: '"' + normalized.replace(/"/g, '""') + '"' };
+			return { table: _noteTables.main, match: '"' + normalized.replace(/"/g, '""') + '"' };
 		}
 		return null;
 	}
 
-	function getContentMatchClause(searchText) {
-		return getMatchClause(searchText, _contentTables);
+
+	/**
+	 * Resolve a search term to the FTS5 table and MATCH expression that find it in attachment
+	 * content (case- and diacritic-insensitively, via normalizeForSearch): the word index for
+	 * non-CJK terms, with the final token matched as a prefix (so "archive" matches "archives",
+	 * but "ion" doesn't match "condition"), or the 2-gram index for pure CJK. Returns null when
+	 * the index can't answer the term -- no word characters, a single CJK character, or a mix of
+	 * CJK and non-CJK that neither index covers alone.
+	 *
+	 * A term of multiple tokens matches them as an adjacent phrase, but FTS5 ignores what
+	 * separates adjacent tokens ("the climate. Change is" matches "climate chang"), so the
+	 * result is only a candidate set: `verify` tells the caller to confirm the phrase against
+	 * the cached text (see findItemsWithContent). The same goes for a single-token term
+	 * containing punctuation the tokenizer discards ("c++", ".net"), which has to match
+	 * literally.
+	 *
+	 * @return {Object|null} { table, match, tokens, verify } or null
+	 */
+	function getWordMatchClause(searchText) {
+		let normalized = Zotero.Utilities.Internal.normalizeForSearch(searchText);
+		if (!normalized) {
+			return null;
+		}
+		let hasCJK = _cjkCharRE.test(normalized);
+		let hasNonCJK = /[a-z0-9]/.test(normalized);
+		// Pure CJK: match the term's 2-grams as a contiguous phrase against the CJK index
+		if (hasCJK && !hasNonCJK) {
+			let bigrams = getCJKBigrams(normalized);
+			// A single CJK character has no 2-gram
+			if (!bigrams) {
+				return null;
+			}
+			return { table: _contentTables.cjk, match: '"' + bigrams + '"', verify: false };
+		}
+		if (hasCJK) {
+			return null;
+		}
+		// Non-CJK: match the term's tokens as an adjacent phrase against the word index, with
+		// the final token as a prefix
+		let tokens = normalized.match(_wordTokenRE);
+		if (!tokens) {
+			return null;
+		}
+		// Punctuation other than the interchangeable separators (whitespace/hyphens -- see
+		// findTextInString) isn't in the index but has to match literally, so its presence
+		// forces verification even for a single token (e.g., "c++", ".net")
+		let verify = tokens.length > 1 || /[^\p{L}\p{N}\s-]/u.test(normalized);
+		return {
+			table: _contentTables.main,
+			match: '"' + tokens.join(' ') + '"*',
+			tokens,
+			verify
+		};
 	}
 
 
 	/**
-	 * Whether a term can be matched against the content index rather than needing a fallback scan
-	 * of the cached text. Quick search uses this to skip content matching for terms too short for
-	 * the index, avoiding a per-keystroke scan.
+	 * Whether quick search should match a term against attachment content. False for terms the
+	 * content index can't answer at all and for single words of 1-2 characters, which would
+	 * prefix-match a huge share of the index on every keystroke; those are still matched against
+	 * titles, tags, etc.
 	 *
 	 * @param {String} searchText
 	 * @return {Boolean}
 	 */
 	this.canSearchContent = function (searchText) {
-		return getContentMatchClause(searchText) !== null;
+		let clause = getWordMatchClause(searchText);
+		if (!clause) {
+			return false;
+		}
+		return !clause.tokens || clause.tokens.length > 1 || clause.tokens[0].length >= 3;
 	};
 
 
@@ -2257,7 +2342,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 * @return {Boolean}
 	 */
 	this.canSearchNotes = function (searchText) {
-		return getMatchClause(searchText, _noteTables) !== null;
+		return getSubstringMatchClause(searchText) !== null;
 	};
 
 
@@ -2267,8 +2352,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 *
 	 * Returns null only while the note backfill is still running, so the caller falls back to a raw
 	 * LIKE scan of the note HTML and notes stay searchable until the index is built. Once the index
-	 * is ready, a term too short or mixed-script for it (see getMatchClause) is matched by scanning
-	 * notes' normalized plain text instead, so those terms stay searchable without matching markup.
+	 * is ready, a term too short or mixed-script for it (see getSubstringMatchClause) is matched
+	 * by scanning notes' normalized plain text instead, so those terms stay searchable without
+	 * matching markup.
 	 *
 	 * Notes edited since their last index update (marked stale by the save) still hold their
 	 * pre-edit text in the FTS tables, so they're excluded from the index match and matched instead
@@ -2301,12 +2387,12 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 		}
 
 		// Resolve the term to a predicate over the note index. A term the FTS index can answer uses
-		// its MATCH; a term too short (Western) or mixed-script for it -- the trigram index covers
-		// Latin runs of 3+ characters and the CJK index 2+ -- instead LIKEs the stored normalized
+		// its MATCH; a term too short or mixed-script for it -- the trigram index covers non-CJK
+		// runs of 3+ characters and the CJK index 2+ -- instead LIKEs the stored normalized
 		// plain text. Either way it matches the notes' stripped, normalized text, so markup isn't
 		// matched (e.g. "re" hitting "red" in a style attribute) and matching stays case- and
 		// diacritic-insensitive.
-		let clause = getMatchClause(searchText, _noteTables);
+		let clause = getSubstringMatchClause(searchText);
 		let indexMatch, indexParams;
 		if (clause) {
 			indexMatch = "itemID IN (SELECT rowid FROM ftindex." + clause.table
@@ -2360,19 +2446,30 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 
 
 	/**
-	 * Return the ids of attachment items in the given library whose full-text content contains
-	 * `searchText` as a substring. This is the non-regexp path for the 'fulltextContent' search
-	 * condition; callers intersect the result with their own scope/result sets.
+	 * Return the ids of attachment items in the given library whose full-text content matches
+	 * `searchText` (see getWordMatchClause for the matching semantics). This is the non-regexp
+	 * path for the 'fulltextContent' search condition; callers intersect the result with their
+	 * own scope/result sets.
 	 *
-	 * Returns null when the term can't be answered from the index (see getContentMatchClause), so
+	 * A term of multiple tokens is resolved in two stages: the index selects the candidates whose
+	 * tokens appear adjacent (with the final token as a prefix), and the phrase is then verified
+	 * against just those candidates' cached text, since FTS5 ignores what separates adjacent
+	 * tokens (e.g., "the climate. Change is" is an index match for "climate chang"). The
+	 * verification matches whitespace and hyphen runs in the phrase and the content against each
+	 * other (see findTextInString), while other punctuation has to match literally. Pass
+	 * `scopeIDs` when the caller already has a scope (e.g., a collection), so the verification
+	 * scan reads only in-scope candidates.
+	 *
+	 * Returns null when the term can't be answered from the index (see getWordMatchClause), so
 	 * the caller can fall back to scanning the cached text.
 	 *
 	 * @param {String} searchText
 	 * @param {Integer|null} [libraryID] - Restrict to this library, or null/undefined for all
+	 * @param {Integer[]|null} [scopeIDs] - Restrict to these items
 	 * @return {Promise<Integer[]|null>}
 	 */
-	this.findItemsWithContent = async function (searchText, libraryID) {
-		let clause = getContentMatchClause(searchText);
+	this.findItemsWithContent = async function (searchText, libraryID, scopeIDs) {
+		let clause = getWordMatchClause(searchText);
 		if (!clause) {
 			return null;
 		}
@@ -2383,25 +2480,36 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			sql += " AND I.libraryID=?";
 			params.push(libraryID);
 		}
-		return Zotero.DB.columnQueryAsync(sql, params);
+		let ids = await Zotero.DB.columnQueryAsync(sql, params);
+		if (scopeIDs) {
+			let scopeSet = scopeIDs instanceof Set ? scopeIDs : new Set(scopeIDs);
+			ids = ids.filter(id => scopeSet.has(id));
+		}
+		if (clause.verify && ids.length) {
+			let found = await this.findTextInItems(ids, searchText);
+			ids = found.map(x => x.id);
+		}
+		return ids;
 	};
 
 
 	/**
-	 * A subquery selecting the itemIDs whose full-text content matches `searchText` as a substring
-	 * via the content index, for embedding directly in a search's SQL (e.g. `itemID IN (<subquery>)`)
-	 * rather than materializing every match into an itemID list. The caller applies the surrounding
-	 * scope and the IN/NOT IN for the operator.
+	 * A subquery selecting the itemIDs whose full-text content matches `searchText` via the
+	 * content index, for embedding directly in a search's SQL (e.g. `itemID IN (<subquery>)`)
+	 * rather than materializing every match into an itemID list. The caller applies the
+	 * surrounding scope and the IN/NOT IN for the operator.
 	 *
-	 * Returns null when the term can't be answered from the index (see getContentMatchClause), so
-	 * the caller can fall back to scanning the cached text.
+	 * Returns null when the term can't be answered by the index alone -- either it can't be
+	 * answered from the index at all (see getWordMatchClause) or it's a multi-token phrase,
+	 * whose index matches are only candidates for a verification scan of the cached text (see
+	 * findItemsWithContent) -- so the caller falls back to materializing the matches.
 	 *
 	 * @param {String} searchText
 	 * @return {Object|null} { sql, params }
 	 */
 	this.getContentSearchSQL = function (searchText) {
-		let clause = getContentMatchClause(searchText);
-		if (!clause) {
+		let clause = getWordMatchClause(searchText);
+		if (!clause || clause.verify) {
 			return null;
 		}
 		return {

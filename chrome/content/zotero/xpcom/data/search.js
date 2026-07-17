@@ -347,13 +347,12 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 			}
 			this.addCondition('creator', operator, part.text, false);
 
-			// Match full-text content as a substring (case- and diacritic-insensitive)
-			// via the content index. Skip unquoted terms too short for the index (e.g.
-			// 1-2 characters), which would otherwise force a per-keystroke scan of the
-			// cached text; they're still matched against titles, tags, etc. above.
-			// Quoted term are matched regardless of length: quoting makes the quick
-			// search wait for Enter rather than run on each keystroke, so the scan
-			// isn't per-keystroke.
+			// Match full-text content by word prefix (case- and diacritic-insensitive)
+			// via the content index. Skip unquoted 1-2-character terms, which would
+			// prefix-match a huge share of the index on every keystroke; they're still
+			// matched against titles, tags, etc. above. Quoted terms are matched
+			// regardless of length: quoting makes the quick search wait for Enter
+			// rather than run on each keystroke.
 			if (condition == 'quicksearch-everything'
 					&& (part.inQuotes || Zotero.FullText.canSearchContent(part.text))) {
 				this.addCondition('fulltextContent', operator, part.text, false);
@@ -715,13 +714,17 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 				scopeIDs = ids;
 			}
 
-			// Find which of those items match the full-text content. Use the trigram index for
-			// ordinary terms; fall back to scanning the cached text for regexp searches and for
-			// terms too short for the trigram index (findItemsWithContent returns null).
+			// Find which of those items match the full-text content. Use the content index for
+			// ordinary terms, restricted to the scope up front so a multi-token term's
+			// verification scan (see findItemsWithContent) reads only in-scope candidates; fall
+			// back to scanning the cached text for regexp searches and for terms the index can't
+			// answer (findItemsWithContent returns null).
 			let contentMatches;
 			let indexMatches = (condition.mode && condition.mode.startsWith('regexp'))
 				? null
-				: await Zotero.FullText.findItemsWithContent(condition.value, this.libraryID);
+				: await Zotero.FullText.findItemsWithContent(
+					condition.value, this.libraryID, scopeIDs
+				);
 			if (indexMatches !== null) {
 				contentMatches = new Set(indexMatches);
 			}
@@ -962,35 +965,41 @@ Zotero.Search.idsToTempTable = async function (ids, { idColumn = 'itemID' } = {}
  * caller applies IN/NOT IN for the contains/doesNotContain operator.
  */
 Zotero.Search.prototype._fullTextContentMatches = async function (value, mode) {
-	// For ordinary terms, match as a substring (case- and diacritic-insensitive) via the trigram
-	// index, then restrict to the search scope (e.g. a collection), if any
-	let indexMatches = (mode && mode.startsWith('regexp'))
-		? null
-		: await Zotero.FullText.findItemsWithContent(value, this.libraryID);
-	if (indexMatches !== null) {
-		if (!this._scope) {
-			return indexMatches;
-		}
+	// The search scope's itemIDs (e.g., a collection), resolved before matching so both the
+	// index path (including a multi-token term's verification scan) and the fallback scan are
+	// restricted to in-scope items
+	let scopeIDs = null;
+	if (this._scope) {
 		let s = new Zotero.Search();
 		if (this.libraryID !== null) {
 			s.libraryID = this.libraryID;
 		}
 		s.setScope(this._scope, true);
-		let scopeSet = new Set(await s.search());
-		return indexMatches.filter(id => scopeSet.has(id));
+		scopeIDs = await s.search();
+		if (!scopeIDs.length) {
+			return [];
+		}
 	}
-	// Regexp, or a term too short for the trigram index -- scan the cached text of every item in
-	// the library/scope
-	let s = new Zotero.Search();
-	if (this.libraryID !== null) {
-		s.libraryID = this.libraryID;
+	// For ordinary terms, match via the content index
+	if (!mode || !mode.startsWith('regexp')) {
+		let indexMatches = await Zotero.FullText.findItemsWithContent(
+			value, this.libraryID, scopeIDs
+		);
+		if (indexMatches !== null) {
+			return indexMatches;
+		}
 	}
-	if (this._scope) {
-		s.setScope(this._scope, true);
-	}
-	let scopeIDs = await s.search();
-	if (!scopeIDs.length) {
-		return [];
+	// Regexp, or a term the index can't answer -- scan the cached text of every item in the
+	// library/scope
+	if (!scopeIDs) {
+		let s = new Zotero.Search();
+		if (this.libraryID !== null) {
+			s.libraryID = this.libraryID;
+		}
+		scopeIDs = await s.search();
+		if (!scopeIDs.length) {
+			return [];
+		}
 	}
 	let found = await Zotero.FullText.findTextInItems(scopeIDs, value, mode);
 	return found.map(x => x.id);
@@ -1144,13 +1153,14 @@ Zotero.Search.prototype._buildQuery = async function () {
 					// level is set -- becomes an itemID predicate so it joins the SQL AND/OR
 					// tree and can be mapped to that level (full-text is indexed per
 					// attachment). A plain top-level one with no result level is left for the
-					// post-filter in search() (unchanged behavior).
+					// post-filter in search().
 					if (loopDepth > 0 || resultLevel != 'any') {
 						this._eagerFullTextConditionIDs.add(condition.id);
 						this._hasEagerFullText = true;
 						// Match via the index as a subquery -- no per-match itemID list to
-						// build or parse. Regexp and too-short terms can't use the index, so
-						// scan the cached text and materialize the matches instead.
+						// build or parse. Regexp searches, multi-token phrases (whose index
+						// matches are only candidates for a verification scan), and terms the
+						// index can't answer are materialized into an itemID list instead.
 						let subquery = (condition.mode && condition.mode.startsWith('regexp'))
 							? null
 							: Zotero.FullText.getContentSearchSQL(condition.value);

@@ -1878,11 +1878,19 @@ describe("Zotero.Search", function () {
 						});
 					}
 
-					it("should match full-text content as a substring", async function () {
+					it("should match full-text content by word prefix", async function () {
 						let item = await importTextContent("zqs electrophoresis protocol");
 						let s = new Zotero.Search();
 						s.libraryID = userLibraryID;
-						s.addCondition('quicksearch-everything', 'contains', 'lectro');
+						s.addCondition('quicksearch-everything', 'contains', 'electro');
+						assert.include(await s.search(), item.id);
+					});
+
+					it("should match unquoted words as prefixes anywhere in the content", async function () {
+						let item = await importTextContent("the climate of the region has seen many changes");
+						let s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('quicksearch-everything', 'contains', 'clim chang');
 						assert.include(await s.search(), item.id);
 					});
 
@@ -1901,8 +1909,8 @@ describe("Zotero.Search", function () {
 						let item = await importTextContent("elephant");
 						let s = new Zotero.Search();
 						s.libraryID = userLibraryID;
-						// "el" is shorter than a trigram, so it isn't matched against content (which
-						// also avoids a per-keystroke scan); the title is "xxxx", so nothing matches
+						// A 1-2-character unquoted term isn't matched against content (avoiding
+						// per-keystroke churn); the title is "xxxx", so nothing matches
 						s.addCondition('quicksearch-everything', 'contains', 'el');
 						assert.notInclude(await s.search(), item.id);
 					});

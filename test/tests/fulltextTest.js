@@ -24,26 +24,69 @@ describe("Zotero.FullText", function () {
 			assert.include(await contentSearch(item, 'SÉANCE'), item.id);
 		});
 
-		it("should match a substring spanning a word boundary", async function () {
-			let item = await createTextAttachment("the quick brown fox");
-			// "ck bro" spans the space between two words, so the word index can't match it
-			assert.include(await contentSearch(item, 'ck bro'), item.id);
+		it("should match other forms of a word by prefix", async function () {
+			let item = await createTextAttachment("old archives were archived");
+			assert.include(await contentSearch(item, 'archive'), item.id);
 		});
 
-		it("should match a term too short for the trigram index via fallback", async function () {
+		it("should not match the middle or end of a word", async function () {
+			let suffix = await createTextAttachment("the condition holds");
+			assert.notInclude(await contentSearch(suffix, 'ion'), suffix.id);
+			let prefixed = await createTextAttachment("postcolonialism studies");
+			assert.notInclude(await contentSearch(prefixed, 'colonialism'), prefixed.id);
+		});
+
+		it("should prefix-match a short term used as an explicit condition", async function () {
 			let item = await createTextAttachment("the quick brown fox");
-			// "fo" is shorter than a trigram, so this exercises the cached-text scan fallback
+			// Short terms are only skipped by unquoted quick search (canSearchContent), so "fo"
+			// matches "fox" as a word prefix here
 			assert.include(await contentSearch(item, 'fo'), item.id);
 		});
 
-		it("should fold diacritics in the short-query fallback", async function () {
-			let item = await createTextAttachment("zzcafé latte");
-			// "fe" is too short for the trigram index, so it hits the cached-text scan; it should
-			// still match "café" (folding é -> e), consistent with the index path
-			assert.include(await contentSearch(item, 'fe'), item.id);
+		it("should prefix-match accent-insensitively", async function () {
+			let item = await createTextAttachment("zzcafés in paris");
+			assert.include(await contentSearch(item, 'zzcafé'), item.id);
 		});
 
-		it("should match a 2-character CJK query (trigram can't)", async function () {
+		it("should match a phrase with the final word as a prefix", async function () {
+			let item = await createTextAttachment("global climate changes are accelerating");
+			assert.include(await contentSearch(item, 'climate chang'), item.id);
+		});
+
+		it("should match a phrase across whitespace and hyphens", async function () {
+			// Word separators vary with extraction layout and compound styling, so whitespace
+			// and hyphen runs in the phrase and the content match each other
+			let newline = await createTextAttachment("the climate\nchange debate");
+			assert.include(await contentSearch(newline, 'climate change'), newline.id);
+			let hyphen = await createTextAttachment("climate-change research");
+			assert.include(await contentSearch(hyphen, 'climate change'), hyphen.id);
+			let spaced = await createTextAttachment("zzdecision making processes");
+			assert.include(await contentSearch(spaced, 'zzdecision-making'), spaced.id);
+		});
+
+		it("should not match a phrase across punctuation", async function () {
+			// These are index candidates -- FTS5 ignores what separates adjacent tokens -- so
+			// they exercise the verification scan of the cached text
+			let punct = await createTextAttachment("the climate. Change is coming");
+			assert.notInclude(await contentSearch(punct, 'climate change'), punct.id);
+			let slash = await createTextAttachment("climate/change models");
+			assert.notInclude(await contentSearch(slash, 'climate change'), slash.id);
+		});
+
+		it("should require punctuation in a single-word term to match literally", async function () {
+			let cpp = await createTextAttachment("the c++ standard library");
+			assert.include(await contentSearch(cpp, 'c++'), cpp.id);
+			// "code" is a candidate for the "c" token prefix, but "c++" doesn't appear
+			let plain = await createTextAttachment("zzcat code samples");
+			assert.notInclude(await contentSearch(plain, 'c++'), plain.id);
+		});
+
+		it("should not match anything for a separator-only term", async function () {
+			let item = await createTextAttachment("plain text with spaces");
+			assert.notInclude(await contentSearch(item, '--'), item.id);
+		});
+
+		it("should match a 2-character CJK query", async function () {
 			let item = await createTextAttachment("中文搜索系统设计");
 			assert.include(await contentSearch(item, '搜索'), item.id);
 		});
