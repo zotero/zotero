@@ -1367,7 +1367,16 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					batch = [];
 					batchChars = 0;
 				};
-				for (let itemID of itemIDs) {
+				for (let i = 0; i < itemIDs.length; i++) {
+					// Stop between items once the time budget is used up, so a chunk of large
+					// documents can't tie up the main thread for far longer than maxTime. The
+					// cursor doesn't advance, but items already flushed are excluded from the
+					// next queue query by their index-state version.
+					if (i > 0 && maxTime && (Date.now() - start) >= maxTime) {
+						await flushBatch();
+						return processed;
+					}
+					let itemID = itemIDs[i];
 					let text = await _readContentForIndex(itemID);
 					// null -> re-extracted from the file by indexItems(), which already wrote it
 					if (text === null) {
