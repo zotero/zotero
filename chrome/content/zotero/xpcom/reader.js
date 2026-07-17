@@ -62,9 +62,11 @@ class ReaderInstance {
 			this._rejectInitPromise = reject;
 		});
 		this._isUninitialized = false;
+		this._isTabClosed = false;
 		this._customEventHandler = null;
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
+		this._readAloudGuidancePanel = null;
 
 		this._type = this._item.attachmentReaderType;
 		if (!this._type) {
@@ -717,6 +719,7 @@ class ReaderInstance {
 
 	async updateTitle() {
 		this._title = await this._item.getTabTitle();
+		if (this._isTabClosed) return;
 		this._setTitleValue(this._title);
 		this._internalReader?.setTitle(this._title);
 	}
@@ -1890,6 +1893,7 @@ class ReaderTab extends ReaderInstance {
 		this._bottomPlaceholderHeight = options.bottomPlaceholderHeight;
 		this._showContextPaneToggle = true;
 		this._readAloudPlaying = false;
+		this._pointerDownWindow = null;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let existingTabID = options.tabID;
 		let select = !options.background;
@@ -1897,6 +1901,12 @@ class ReaderTab extends ReaderInstance {
 		// Otherwise, create a new tab
 		if (existingTabID) {
 			this.tabID = existingTabID;
+			let { tab } = this._window.Zotero_Tabs._getTab(existingTabID);
+			let onClose = tab.onClose;
+			tab.onClose = () => {
+				onClose?.call(tab);
+				this._handleTabClose();
+			};
 			this._tabContainer = this._window.document.getElementById(existingTabID);
 		}
 		else {
@@ -1908,6 +1918,7 @@ class ReaderTab extends ReaderInstance {
 				data: {
 					itemID: this._item.id
 				},
+				onClose: this._handleTabClose,
 				select,
 				preventJumpback: options.preventJumpback
 			});
@@ -1977,6 +1988,14 @@ class ReaderTab extends ReaderInstance {
 			}
 		});
 	}
+
+	_handleTabClose = () => {
+		this._isTabClosed = true;
+		if (this._blockingObserver) {
+			this._blockingObserver.dispose();
+			this._blockingObserver = null;
+		}
+	};
 
 	uninit() {
 		if (this._window) {
@@ -2839,7 +2858,9 @@ class Reader {
 		let reader;
 		// If duplicating is not allowed, and no reader instance is loaded for itemID,
 		// try to find an unloaded tab and select it. Zotero.Reader.open will then be called again
-		if (!allowDuplicate && !this._readers.find(r => r.itemID === itemID)) {
+		if (!allowDuplicate && !this._readers.find(
+			r => r.itemID === itemID && (openInWindow || !r._isTabClosed)
+		)) {
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
@@ -2853,7 +2874,7 @@ class Reader {
 			reader = this._readers.find(r => r.itemID === itemID && (r instanceof ReaderWindow));
 		}
 		else if (!allowDuplicate) {
-			reader = this._readers.find(r => r.itemID === itemID);
+			reader = this._readers.find(r => r.itemID === itemID && !r._isTabClosed);
 		}
 
 		if (reader) {
