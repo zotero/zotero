@@ -71,6 +71,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	var _drainIdleDelay = 3;
 	var _syncContentTimeoutID = null;
 	var _queueDrainTimerID = null;
+	// Combined queue count after the background drain's previous run, for detecting a stuck queue
+	var _queueDrainPreviousRemaining = Infinity;
+	var _queueDrainStalledRuns = 0;
 	var _indexingInProgress = false;
 	// Ordered itemID cursors for the queue processors, so each drain advances through the source
 	// tables once rather than rescanning already-indexed rows from the start on every batch. Reset
@@ -1745,6 +1748,11 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					itemProgress.setProgress(Math.min(100, Math.round(n / total * 100)));
 				}
 			};
+			// Queue count after the previous pass, for detecting a stuck queue (items that count
+			// as queued but that the processors can't index and remove)
+			let previousRemaining = Infinity;
+			let stalledPasses = 0;
+			let stalled = false;
 			while (true) {
 				if (Zotero.Sync.Runner.syncInProgress) {
 					await Zotero.Promise.delay(5000);
@@ -1754,6 +1762,24 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				if (remaining == 0) {
 					break;
 				}
+				if (remaining < previousRemaining) {
+					stalledPasses = 0;
+				}
+				// A pass can make no progress legitimately (e.g., if a sync started partway
+				// through it), so give up only after several stalled passes in a row
+				else if (++stalledPasses >= 3) {
+					Zotero.logError("Full-text index queues aren't draining -- stopping with "
+						+ remaining + " " + Zotero.Utilities.pluralize(remaining, 'item') + " queued");
+					stalled = true;
+					break;
+				}
+				else {
+					// If another caller holds _indexingInProgress, the processors return
+					// immediately, so wait before the next pass rather than burning through the
+					// stall limit in milliseconds
+					await Zotero.Promise.delay(1000);
+				}
+				previousRemaining = remaining;
 				// Run at full speed while the user isn't actively using Zotero (idle or in another
 				// app), but yield between slices when they are, so the migration doesn't tie up the
 				// shared connection and main thread. It still always runs to completion.
@@ -1784,7 +1810,12 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				);
 			}
 			if (itemProgress) {
-				itemProgress.setProgress(100);
+				if (stalled) {
+					itemProgress.setError();
+				}
+				else {
+					itemProgress.setProgress(100);
+				}
 			}
 			await this.optimizeContentIndex();
 			// Reclaim the space freed by a rebuild (e.g., an index-format change dropping the old
@@ -1800,9 +1831,11 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			}
 			// Index never-before-indexed attachments (e.g., added while indexing was off) gently in
 			// the background -- they were never searchable, so unlike the migration above they can
-			// wait for idle
-			if ((await queueCount()) > 0
-					|| (await this.getAttachmentExtractionQueueCount()) > 0) {
+			// wait for idle. If the queues stalled, don't start the background drain, which would
+			// spin on the same stuck items.
+			if (!stalled
+					&& ((await queueCount()) > 0
+						|| (await this.getAttachmentExtractionQueueCount()) > 0)) {
 				this.registerQueueDrainObserver();
 			}
 		}
@@ -1883,6 +1916,8 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			return;
 		}
 		Zotero.debug("Starting full-text content index queue processor");
+		_queueDrainPreviousRemaining = Infinity;
+		_queueDrainStalledRuns = 0;
 		_scheduleQueueDrain(_drainIdleDelay * 1000);
 	};
 
@@ -1908,19 +1943,35 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					_scheduleQueueDrain(_drainIdleDelay * 1000);
 					return;
 				}
-				if ((await self.getAttachmentIndexQueueCount()) == 0
-						&& (await self.getAttachmentExtractionQueueCount()) == 0
-						&& (await self.getNoteIndexQueueCount()) == 0) {
+				let remaining = (await self.getAttachmentIndexQueueCount())
+					+ (await self.getAttachmentExtractionQueueCount())
+					+ (await self.getNoteIndexQueueCount());
+				if (remaining == 0) {
 					// Drained -- compact the index and stop
 					await self.optimizeContentIndex();
 					return;
 				}
+				if (remaining < _queueDrainPreviousRemaining) {
+					_queueDrainStalledRuns = 0;
+				}
+				// Like an error below, stop if the queues aren't shrinking, so items the
+				// processors can't drain don't keep this running forever. The drain starts
+				// again on the next trigger.
+				else if (++_queueDrainStalledRuns >= 3) {
+					Zotero.logError("Full-text index queues aren't draining -- stopping background "
+						+ "processing with " + remaining + " "
+						+ Zotero.Utilities.pluralize(remaining, 'item') + " queued");
+					return;
+				}
+				_queueDrainPreviousRemaining = remaining;
 				Zotero.debug("Processing full-text index queues in the background ("
 					+ (_isZoteroActive() ? "focused but idle" : "not focused") + ")");
 				await self.processAttachmentIndexQueue({ maxTime: 1000, checkIdle: true });
 				await self.processAttachmentExtractionQueue({ maxTime: 1000, checkIdle: true });
 				await self.processNoteIndexQueue({ maxTime: 1000, checkIdle: true });
-				_scheduleQueueDrain(250);
+				// Back off after a run that made no progress, so contention (e.g., another
+				// caller holding _indexingInProgress) can clear before the next check
+				_scheduleQueueDrain(_queueDrainStalledRuns ? _drainIdleDelay * 1000 : 250);
 			}
 			catch (e) {
 				// Stop on error instead of retrying, so a persistent failure (e.g., a full disk)
