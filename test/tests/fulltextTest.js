@@ -168,6 +168,34 @@ describe("Zotero.FullText", function () {
 			assert.include(await contentSearch(item, word), item.id);
 		});
 
+		it("should not repeatedly re-extract a queued item with no extractable text", async function () {
+			let item = await importFileAttachment('test.pdf');
+			let cacheFile = Zotero.FullText.getItemCacheFile(item).path;
+			await OS.File.remove(cacheFile);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContent WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextContentCJK WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", item.id);
+
+			let getFullText = sinon.stub(Zotero.PDFWorker, 'getFullText').resolves({
+				text: '',
+				extractedPages: 0,
+				totalPages: 1
+			});
+			try {
+				await Zotero.FullText.processAttachmentIndexQueue({ maxTime: 100 });
+			}
+			finally {
+				getFullText.restore();
+			}
+
+			assert.isTrue(getFullText.calledOnce);
+			let version = await Zotero.DB.valueQueryAsync(
+				"SELECT version FROM ftindex.fulltextIndexState WHERE itemID=?", item.id
+			);
+			assert.equal(version, 1);
+			assert.equal(await Zotero.FullText.getAttachmentIndexQueueCount(), 0);
+		});
+
 		it("should not count unindexable attachments as not indexed", async function () {
 			let before = (await Zotero.FullText.getIndexStats()).unindexedQueue;
 			// A Word document can't be full-text indexed, so it shouldn't inflate "not indexed"

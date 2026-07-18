@@ -1564,7 +1564,14 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					else if (await item.getFilePathAsync()) {
 						// Re-extract from the file; indexItems() writes the cache and indexes it
 						await Zotero.FullText.indexItems([itemID]);
-						return null;
+						// indexItems() also resolves when extraction produces no text (e.g., a
+						// scanned PDF). Only report that it wrote the index if the state row
+						// confirms it; otherwise let the caller record an empty entry so the item
+						// leaves the queue instead of being re-extracted on every pass.
+						let version = await Zotero.DB.valueQueryAsync(
+							"SELECT version FROM ftindex.fulltextIndexState WHERE itemID=?", itemID
+						);
+						return version == _contentIndexVersion ? null : '';
 					}
 				}
 				else if (Zotero.MIME.isTextType(mimeType)) {
