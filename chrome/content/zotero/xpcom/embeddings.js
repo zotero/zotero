@@ -85,6 +85,11 @@ Zotero.Embeddings = new function () {
 	// that isDownloaded() doesn't have to re-check each file on every call.
 	const MARKER_FILE = '.download-complete.json';
 
+	// Written into the model directory before the first file is downloaded,
+	// so download() can tell a resumable partial download of the current
+	// revision from stale files that have to be replaced.
+	const REVISION_MARKER_FILE = '.download-revision.json';
+
 	const SUBDIR = 'embeddings';
 
 	/**
@@ -375,9 +380,10 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
-	 * Download the active model's files into its directory. Files that already
-	 * exist are skipped, so this can be safely called again to resume after a
-	 * failure. On success a completion marker is written.
+	 * Download the active model's files into its directory. Files already
+	 * downloaded for the same revision are skipped, so this can be safely
+	 * called again to resume after a failure. On success a completion marker
+	 * is written.
 	 *
 	 * @return {Promise<String>} - Path to the model directory
 	 */
@@ -392,7 +398,21 @@ Zotero.Embeddings = new function () {
 		}
 
 		Zotero.debug(`Embeddings: downloading model '${this.getModelName()}' from ${baseURL}`);
+		// A revision marker is written before the first file, so files from a
+		// partial download of the same revision can be kept for resuming while
+		// anything else -- e.g. a complete download of an older revision,
+		// whose files _downloadFile() would otherwise keep -- is replaced
+		let revisionPath = PathUtils.join(dir, REVISION_MARKER_FILE);
+		let downloadingRevision = null;
+		try {
+			downloadingRevision = JSON.parse(await Zotero.File.getContentsAsync(revisionPath)).revision;
+		}
+		catch {}
+		if (downloadingRevision !== model.revision) {
+			await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
+		}
 		await Zotero.File.createDirectoryIfMissingAsync(dir, { from: Zotero.DataDirectory.dir });
+		await Zotero.File.putContentsAsync(revisionPath, JSON.stringify({ revision: model.revision }));
 
 		for (let file of model.files) {
 			await _downloadFile(baseURL + file, dir, file);
