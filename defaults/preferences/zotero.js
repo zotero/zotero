@@ -108,8 +108,6 @@ pref("extensions.zotero.keys.toggleRead", "`");
 pref("extensions.zotero.keys.showTabsMenu", ";");
 
 pref("extensions.zotero.search.quicksearch-mode", "fields");
-// Number of results the "Similarity" (semantic) quick search mode keeps
-pref("extensions.zotero.search.quicksearch-semantic-topK", 25);
 
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);
