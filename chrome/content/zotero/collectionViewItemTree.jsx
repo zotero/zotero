@@ -153,7 +153,23 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 * @return {Promise<Zotero.Item[]>} - The scoreable items
 	 */
 	async _applyBestMatch(items) {
-		let query = this.collectionTreeRows.find(rowIsBestMatchSearch).searchText;
+		// With multiple selected rows carrying different best-match sources,
+		// the first in collections-list order supplies the query
+		let queryRow = this.collectionTreeRows.find(rowIsBestMatchSearch);
+		let query = queryRow.getBestMatchQuery();
+		let source = queryRow.getBestMatchSource();
+		// A top-K cutoff is reapplied to the merged candidates below only when
+		// the source is the transient Advanced Search, which applies uniformly
+		// to every selected row. A saved search's cutoff is part of that row's
+		// own membership and must not trim other selected rows' results.
+		let topK = queryRow.advancedSearch && source
+			? source.getBestMatchQuery().topK
+			: false;
+		// A best-match quick search shows only the items it can rank. With any
+		// search source, membership is defined by the selected rows' own
+		// searches, so keep unscoreable items -- they sort after the ranked
+		// ones. (A uniform top-K set contains no unscoreable items anyway.)
+		let keepUnscored = !!source;
 		// Map each item to the item whose embedding scores it
 		let sourceIDByItem = new Map();
 		for (let item of items) {
@@ -179,16 +195,29 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				throw e;
 			}
 			// Scoring can fail while the model is still downloading or the
-			// index is being rebuilt -- show no results rather than an
-			// unranked scope
+			// index is being rebuilt
 			if (e instanceof Zotero.Embeddings.IndexNotReadyError) {
-				Zotero.debug("Embeddings: index not ready for best-match search -- showing no results");
+				Zotero.debug("Embeddings: index not ready for best-match search");
 			}
 			else {
 				Zotero.logError(e);
 			}
 			this._bestMatchRanks = new Map();
-			return [];
+			// A rank-only search's membership doesn't depend on the index, so
+			// show its results unranked; anything else shows no results rather
+			// than an unranked scope
+			return keepUnscored ? items : [];
+		}
+		// Each selected row's search applies a top-K cutoff to its own scope,
+		// so trim the merged candidates to K again here, with the same
+		// deterministic order as search(), so a multi-row selection returns K
+		// members total rather than K per row
+		if (topK) {
+			scores = new Map(
+				[...scores.entries()]
+					.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))
+					.slice(0, topK)
+			);
 		}
 		let rankOfScore = new Map(
 			[...new Set(scores.values())].sort((a, b) => b - a).map((score, i) => [score, i + 1])
@@ -199,6 +228,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		for (let item of items) {
 			let sourceID = sourceIDByItem.get(item);
 			if (sourceID === undefined || !scores.has(sourceID)) {
+				if (keepUnscored) {
+					kept.push(item);
+				}
 				continue;
 			}
 			kept.push(item);
