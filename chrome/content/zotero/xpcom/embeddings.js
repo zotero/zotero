@@ -476,6 +476,17 @@ Zotero.Embeddings = new function () {
 		}
 	};
 
+	/**
+	 * Thrown when scoring is abandoned via the shouldCancel callback -- e.g.
+	 * because a newer query superseded the one being scored
+	 */
+	this.ScoringCancelledError = class extends Error {
+		constructor(message = 'Scoring cancelled') {
+			super(message);
+			this.name = 'EmbeddingsScoringCancelledError';
+		}
+	};
+
 	function _ensureWorker() {
 		if (_worker) {
 			return;
@@ -717,9 +728,13 @@ Zotero.Embeddings = new function () {
 	 *
 	 * @param {String} queryText
 	 * @param {Number[]} itemIDs - Candidate item IDs to score
+	 * @param {Object} [options]
+	 * @param {Function} [options.shouldCancel] - Checked between chunks;
+	 *     return true to abandon scoring with a ScoringCancelledError (e.g.
+	 *     because a newer query made this one obsolete)
 	 * @return {Promise<Map>} - itemID -> similarity score (higher is more similar)
 	 */
-	this.scoreItemIDs = async function (queryText, itemIDs) {
+	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel } = {}) {
 		let scores = new Map();
 		if (!itemIDs.length || !this.isEnabled()) {
 			return scores;
@@ -749,6 +764,9 @@ Zotero.Embeddings = new function () {
 		// parameter limit for large collections), scoring each as we go.
 		let chunkSize = 500;
 		for (let i = 0; i < itemIDs.length; i += chunkSize) {
+			if (shouldCancel && shouldCancel()) {
+				throw new this.ScoringCancelledError();
+			}
 			// If the model changed while we were scoring, the scores computed
 			// so far mix models -- discard them
 			if (generation !== _modelGeneration) {
