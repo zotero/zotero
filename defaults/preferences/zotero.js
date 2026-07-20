@@ -118,8 +118,6 @@ pref("extensions.zotero.search.useLeftBound", true);
 
 // Semantic search embeddings - disabled when "";
 pref("extensions.zotero.embeddings.model", "");
-// "<model>/<revision>" on mismatch with the active model, the index is wiped and rebuilt
-pref("extensions.zotero.embeddings.indexedModel", "");
 // Set when the user stops indexing; nothing is indexed until indexing is started again
 pref("extensions.zotero.embeddings.indexingPaused", false);
 

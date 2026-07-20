@@ -126,6 +126,208 @@ Zotero.Embeddings = new function () {
 		return PathUtils.join(Zotero.DataDirectory.dir, SUBDIR, this.getModelName());
 	};
 
+	//
+	// Embeddings database
+	//
+	// Stored vectors live in a separate attached database (embeddings.sqlite),
+	// like the full-text content index: they're a local, rebuildable,
+	// model-specific index derived from item metadata, kept out of
+	// zotero.sqlite so they don't bloat the main database or its backups, and
+	// versioned independently via PRAGMA user_version.
+	//
+
+	// Schema version of the attached embeddings database. The tables are only
+	// created when this is bumped (_setUpDB() drops and recreates everything),
+	// so any schema change needs a bump.
+	const _dbVersion = 1;
+
+	let _dbInitPromise = null;
+	let _dbHooksRegistered = false;
+	let _rebuildingDB = false;
+
+	/**
+	 * Attach the embeddings database, creating or rebuilding it as needed, and
+	 * hook it into the main connection's lifecycle. Called lazily by every
+	 * code path that touches the database, so the file isn't created until
+	 * semantic search is actually used.
+	 *
+	 * @return {Promise}
+	 */
+	this.initDB = function () {
+		if (!_dbInitPromise) {
+			_dbInitPromise = _initDB();
+			// Allow a later call to retry after a failed initialization (e.g.
+			// a transient I/O error)
+			_dbInitPromise.catch(() => {
+				_dbInitPromise = null;
+			});
+		}
+		return _dbInitPromise;
+	};
+
+	async function _initDB() {
+		// Rebuild the database if its file is found corrupt. A malformed page
+		// can surface from any query, so recovery is driven by the corruption
+		// handler: drop the file and recreate it (it's derived, so indexing
+		// repopulates it from item metadata). DBConnection confirms the main
+		// database is intact before calling this, so a disposable index
+		// failure never triggers main-database recovery.
+		if (!_dbHooksRegistered) {
+			_dbHooksRegistered = true;
+			Zotero.DB.addCorruptionHandler(_rebuildDB);
+			// An ATTACHed database doesn't survive a connection reopen (e.g.,
+			// after a vacuum), so re-run the setup on every reconnect
+			Zotero.DB.onConnect(_setUpDB);
+			// The main-database vacuum doesn't reach the attached database, so
+			// reclaim its space during the same idle maintenance
+			Zotero.DB.onIdle(() => Zotero.Embeddings.vacuumDB());
+		}
+		// A corrupt database throws when first read here. Rebuild it right
+		// away, so callers don't query a still-corrupt database until the
+		// connection-level handler gets to it. Any non-corruption error is
+		// unexpected.
+		try {
+			await _setUpDB();
+		}
+		catch (e) {
+			if (!Zotero.DB.isCorruptionError(e)) {
+				throw e;
+			}
+			Zotero.logError(e);
+			await _rebuildDB();
+		}
+	}
+
+	async function _setUpDB() {
+		// Idempotent, since it can run again for a retried initialization or
+		// after a connection reopen
+		let attached = (await Zotero.DB.queryAsync("PRAGMA database_list"))
+			.some(row => row.name == 'embeddings');
+		if (!attached) {
+			let path = Zotero.DataDirectory.getDatabase('embeddings');
+			await Zotero.DB.queryAsync("ATTACH DATABASE ? AS embeddings", [path]);
+		}
+		// The embeddings are keyed by local itemID, which is reassigned
+		// whenever zotero.sqlite is recreated (e.g., deleted and re-synced
+		// from the server). Vectors stored against a different database
+		// instance would map to the wrong items, so they have to be discarded
+		// rather than reused. Detect that by comparing the localUserKey the
+		// database was stamped with against the current one.
+		let localUserKey = Zotero.Users.getLocalUserKey();
+		let version = await Zotero.DB.valueQueryAsync("PRAGMA embeddings.user_version");
+		let storedUserKey = version >= _dbVersion
+			? await Zotero.DB.valueQueryAsync(
+				"SELECT value FROM embeddings.itemEmbeddingsMeta WHERE key='localUserKey'")
+			: false;
+		if (version < _dbVersion || storedUserKey != localUserKey) {
+			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddings");
+			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddingsMeta");
+			// No foreign key on itemID -- references across attached databases
+			// aren't possible, so item deletions are handled by the indexing
+			// notifier and eligibility pruning instead
+			await Zotero.DB.queryAsync(
+				"CREATE TABLE embeddings.itemEmbeddings (\n"
+				+ "    itemID INTEGER PRIMARY KEY,\n"
+				+ "    embedding BLOB NOT NULL,\n"
+				+ "    sourceHash TEXT NOT NULL\n"
+				+ ")"
+			);
+			// Database metadata: the localUserKey the vectors were built
+			// against (above) and the identity of the model that produced them
+			// (see Indexing._ensureIndexMatchesModel())
+			await Zotero.DB.queryAsync(
+				"CREATE TABLE embeddings.itemEmbeddingsMeta (\n"
+				+ "    key TEXT PRIMARY KEY,\n"
+				+ "    value NOT NULL\n"
+				+ ")"
+			);
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) VALUES ('localUserKey', ?)",
+				[localUserKey]
+			);
+			await Zotero.DB.queryAsync("PRAGMA embeddings.user_version = " + _dbVersion);
+		}
+	}
+
+	async function _rebuildDB() {
+		if (_rebuildingDB) {
+			return;
+		}
+		_rebuildingDB = true;
+		try {
+			Zotero.debug("Rebuilding corrupt embeddings database", 1);
+			let path = Zotero.DataDirectory.getDatabase('embeddings');
+			// Detach before touching the file. If this fails (e.g., a
+			// transaction is in progress), stop rather than delete a
+			// still-attached database or reattach under a name that's still in
+			// use -- the database stays as it was, and a later corruption
+			// error or the next startup retries. The attach itself can be what
+			// failed, in which case there's nothing to detach.
+			let attached = (await Zotero.DB.queryAsync("PRAGMA database_list"))
+				.some(row => row.name == 'embeddings');
+			if (attached) {
+				await Zotero.DB.queryAsync("DETACH DATABASE embeddings");
+			}
+			// Best-effort removal; if it fails, _setUpDB() reattaches the old
+			// file and a later corruption error retries, rather than leaving
+			// the database detached
+			try {
+				await IOUtils.remove(path, { ignoreAbsent: true });
+				await IOUtils.remove(path + "-wal", { ignoreAbsent: true });
+				await IOUtils.remove(path + "-shm", { ignoreAbsent: true });
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			await _setUpDB();
+			// The dropped vectors are re-derived from item metadata
+			if (Zotero.Embeddings.isEnabled() && !Zotero.Embeddings.Indexing.isPaused()) {
+				Zotero.Embeddings.Indexing.startIndexing();
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		finally {
+			_rebuildingDB = false;
+		}
+	}
+
+	/**
+	 * Vacuum the embeddings database. Model switches and pruning delete whole
+	 * swaths of vectors, which can leave embeddings.sqlite much bigger than
+	 * its contents, and the main-database vacuum covers only the main
+	 * database. Gated on the freelist threshold, which makes it
+	 * self-throttling: a vacuum empties the freelist, so it won't run again
+	 * until content drops substantially.
+	 *
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.force] - Skip the freelist and disk-space checks
+	 * @return {Promise<Boolean>} - Whether the database was vacuumed
+	 */
+	this.vacuumDB = async function ({ force = false } = {}) {
+		if (!force) {
+			let freelistCount = await Zotero.DB.valueQueryAsync("PRAGMA embeddings.freelist_count");
+			let pageCount = await Zotero.DB.valueQueryAsync("PRAGMA embeddings.page_count");
+			let threshold = Zotero.Prefs.get('vacuum.freelistThreshold') || 10;
+			if (!(pageCount > 0) || (freelistCount / pageCount * 100) < threshold) {
+				return false;
+			}
+			// In-place VACUUM needs temporary space roughly the size of the database
+			let path = Zotero.DataDirectory.getDatabase('embeddings');
+			let size = (await IOUtils.stat(path)).size;
+			if (Zotero.File.pathToFile(path).diskSpaceAvailable < size) {
+				Zotero.debug("Not enough disk space to vacuum embeddings database -- skipping");
+				return false;
+			}
+		}
+		Zotero.debug("Vacuuming embeddings database");
+		let t = new Date();
+		await Zotero.DB.queryAsync("VACUUM embeddings");
+		Zotero.debug("Vacuumed embeddings database in " + (new Date() - t) + " ms");
+		return true;
+	};
+
 	function _getModel() {
 		let name = Zotero.Embeddings.getModelName();
 		let model = MODELS[name];
@@ -469,6 +671,7 @@ Zotero.Embeddings = new function () {
 		if (!itemIDs.length || !this.isEnabled()) {
 			return [];
 		}
+		await this.initDB();
 		let query = await this.embedQuery(queryText);
 		let dim = query.length;
 
@@ -479,7 +682,7 @@ Zotero.Embeddings = new function () {
 		for (let i = 0; i < itemIDs.length; i += chunkSize) {
 			let chunk = itemIDs.slice(i, i + chunkSize);
 			let rows = await Zotero.DB.queryAsync(
-				"SELECT itemID, embedding FROM itemEmbeddings WHERE itemID IN ("
+				"SELECT itemID, embedding FROM embeddings.itemEmbeddings WHERE itemID IN ("
 					+ chunk.map(() => '?').join(',') + ")",
 				chunk
 			);
@@ -578,8 +781,18 @@ Zotero.Embeddings.Indexing = new function () {
 
 		Zotero.Notifier.registerObserver({
 			notify: (event, type, ids) => {
-				if (type !== 'item' || !Zotero.Embeddings.isEnabled()
-						|| Zotero.Embeddings.Indexing.isPaused()) {
+				if (type !== 'item' || !Zotero.Embeddings.isEnabled()) {
+					return;
+				}
+				// No foreign key removes an item's stored embedding when the
+				// item is deleted (references across attached databases aren't
+				// possible), so drop it here -- even while indexing is paused,
+				// since this is removal of stale data rather than indexing
+				if (event === 'delete') {
+					_deleteEmbeddings(ids).catch(e => Zotero.logError(e));
+					return;
+				}
+				if (Zotero.Embeddings.Indexing.isPaused()) {
 					return;
 				}
 				if (event === 'add' || event === 'modify') {
@@ -721,19 +934,26 @@ Zotero.Embeddings.Indexing = new function () {
 	// Drop stored embeddings for items that are no longer eligible (e.g. the
 	// title and abstract were cleared).
 	async function _pruneOrphanedEmbeddings(eligibleByLibrary) {
+		await Zotero.Embeddings.initDB();
 		let eligible = new Set();
 		for (let ids of eligibleByLibrary.values()) {
 			for (let id of ids) {
 				eligible.add(id);
 			}
 		}
-		let stored = await Zotero.DB.columnQueryAsync("SELECT itemID FROM itemEmbeddings");
-		let orphans = stored.filter(id => !eligible.has(id));
+		let stored = await Zotero.DB.columnQueryAsync("SELECT itemID FROM embeddings.itemEmbeddings");
+		await _deleteEmbeddings(stored.filter(id => !eligible.has(id)));
+	}
+
+	// Delete the stored embeddings for the given items, in chunks (avoids the
+	// SQLite bound-parameter limit)
+	async function _deleteEmbeddings(itemIDs) {
+		await Zotero.Embeddings.initDB();
 		let chunkSize = 500;
-		for (let i = 0; i < orphans.length; i += chunkSize) {
-			let chunk = orphans.slice(i, i + chunkSize);
+		for (let i = 0; i < itemIDs.length; i += chunkSize) {
+			let chunk = itemIDs.slice(i, i + chunkSize);
 			await Zotero.DB.queryAsync(
-				"DELETE FROM itemEmbeddings WHERE itemID IN ("
+				"DELETE FROM embeddings.itemEmbeddings WHERE itemID IN ("
 					+ chunk.map(() => '?').join(',') + ")",
 				chunk
 			);
@@ -742,15 +962,16 @@ Zotero.Embeddings.Indexing = new function () {
 
 	// Delete all stored item embeddings. This removes the computed vectors,
 	// not the downloaded model files.
-	function _clearEmbeddings() {
-		return Zotero.DB.queryAsync("DELETE FROM itemEmbeddings");
+	async function _clearEmbeddings() {
+		await Zotero.Embeddings.initDB();
+		await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddings");
 	}
 
 	// Number of items in a library that have a stored embedding -- the
 	// numerator for indexing progress
 	function _getIndexedCount(libraryID) {
 		return Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(*) FROM itemEmbeddings JOIN items USING (itemID) WHERE libraryID=?",
+			"SELECT COUNT(*) FROM embeddings.itemEmbeddings JOIN items USING (itemID) WHERE libraryID=?",
 			libraryID
 		);
 	}
@@ -787,12 +1008,14 @@ Zotero.Embeddings.Indexing = new function () {
 		for (let item of items) {
 			let text = _getItemText(item);
 			if (!text) {
-				await Zotero.DB.queryAsync("DELETE FROM itemEmbeddings WHERE itemID=?", item.id);
+				await Zotero.DB.queryAsync(
+					"DELETE FROM embeddings.itemEmbeddings WHERE itemID=?", item.id
+				);
 				continue;
 			}
 			let hash = Zotero.Utilities.Internal.md5(text);
 			let existing = await Zotero.DB.valueQueryAsync(
-				"SELECT sourceHash FROM itemEmbeddings WHERE itemID=?", item.id
+				"SELECT sourceHash FROM embeddings.itemEmbeddings WHERE itemID=?", item.id
 			);
 			if (existing !== hash) {
 				toEmbed.push({ item, text, hash });
@@ -815,7 +1038,8 @@ Zotero.Embeddings.Indexing = new function () {
 					let vector = vectors[j];
 					let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
 					await Zotero.DB.queryAsync(
-						"REPLACE INTO itemEmbeddings (itemID, embedding, sourceHash) VALUES (?, ?, ?)",
+						"REPLACE INTO embeddings.itemEmbeddings (itemID, embedding, sourceHash) "
+							+ "VALUES (?, ?, ?)",
 						[batch[j].item.id, blob, batch[j].hash]
 					);
 				}
@@ -877,6 +1101,13 @@ Zotero.Embeddings.Indexing = new function () {
 	 * @return {Promise<Object>} - The status object
 	 */
 	this.refreshStatus = async function () {
+		// Don't create and attach the embeddings database just to report a
+		// disabled state (e.g. when the Advanced preferences pane opens)
+		if (!Zotero.Embeddings.isEnabled()) {
+			_emitProgress();
+			return Zotero.Embeddings.Indexing.getStatus();
+		}
+		await Zotero.Embeddings.initDB();
 		let eligibleByLibrary = await _getEligibleItemIDs();
 		for (let library of _indexableLibraries()) {
 			_status.set(library.libraryID, {
@@ -925,13 +1156,15 @@ Zotero.Embeddings.Indexing = new function () {
 
 	// Make sure the stored embeddings were produced by the active model
 	// definition, comparing Zotero.Embeddings.getModelVersion() against the
-	// identity recorded (in the embeddings.indexedModel pref) when the table
-	// was filled. On mismatch -- a model switch, or a `revision` bump after a
+	// identity recorded (in the database's meta table) when the vectors were
+	// stored. On mismatch -- a model switch, or a `revision` bump after a
 	// dtype/weights change -- all stored vectors are cleared, and the indexing
 	// pass that follows rebuilds them.
 	async function _ensureIndexMatchesModel() {
 		let current = Zotero.Embeddings.getModelVersion();
-		let indexed = Zotero.Prefs.get('embeddings.indexedModel');
+		let indexed = await Zotero.DB.valueQueryAsync(
+			"SELECT value FROM embeddings.itemEmbeddingsMeta WHERE key='modelVersion'"
+		);
 		if (indexed === current) {
 			return;
 		}
@@ -939,14 +1172,17 @@ Zotero.Embeddings.Indexing = new function () {
 		// predate identity tracking, so their provenance can't be verified --
 		// treat them as stale too
 		let hasStale = indexed
-			|| await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM itemEmbeddings");
+			|| await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM embeddings.itemEmbeddings");
 		if (hasStale) {
 			Zotero.debug(`Embeddings: stored embeddings are from '${indexed || 'unknown'}' `
 				+ `but the active model is '${current}' -- clearing for reindexing`);
 			await _clearEmbeddings();
 			_status.clear();
 		}
-		Zotero.Prefs.set('embeddings.indexedModel', current);
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) VALUES ('modelVersion', ?)",
+			[current]
+		);
 	}
 
 	// The single consumer: drain the queue in chunks until it's empty or
@@ -958,6 +1194,7 @@ Zotero.Embeddings.Indexing = new function () {
 		_stopping = false;
 		_lastError = null;
 		try {
+			await Zotero.Embeddings.initDB();
 			await _ensureIndexMatchesModel();
 			_phase = 'downloading';
 			_emitProgress();
@@ -981,7 +1218,7 @@ Zotero.Embeddings.Indexing = new function () {
 					}
 				}
 				// Deleted items simply aren't returned; their embeddings are
-				// removed by ON DELETE CASCADE
+				// removed by the delete notifier
 				let items = (await Zotero.Items.getAsync(ids))
 					.filter(item => item.isRegularItem());
 				if (!items.length) {
