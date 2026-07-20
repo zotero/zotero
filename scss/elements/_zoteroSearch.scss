@@ -135,12 +135,12 @@ zoterosearch {
 	.level-warning {
 		// Each group's level warning: a light-red callout below its conditions (the root's at the
 		// bottom, a nested group's inside its box), mirroring the binding hint's light-blue one.
-		color: var(--accent-red);
+		color: var(--color-invalid);
 		font-size: 0.9em;
 		// 10px inline is a small visual nudge to bring the text slightly in (it doesn't line up
 		// with anything exactly); 8px block keeps the two-line message from cramping.
 		padding: 8px 10px;
-		background: var(--accent-red10);
+		background: var(--color-invalid-background);
 		border-radius: 6px;
 		// Fill the pane width but contribute no intrinsic (max-content) width of its own, so
 		// showing/hiding this notice can't widen the search pane and shrink the collections
