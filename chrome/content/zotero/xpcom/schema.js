@@ -3729,10 +3729,6 @@ Zotero.Schema = new function () {
 					await Zotero.DB.queryAsync(`ALTER TABLE ${table} ADD COLUMN clientVersion INT NOT NULL DEFAULT 0`);
 				}
 			}
-
-			else if (i == 130) {
-				await Zotero.DB.queryAsync("CREATE TABLE itemEmbeddings (\n    itemID INTEGER PRIMARY KEY,\n    embedding BLOB NOT NULL,\n    sourceHash TEXT NOT NULL,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n)");
-			}
 		}
 		
 		await _updateDBVersion('userdata', toVersion);
