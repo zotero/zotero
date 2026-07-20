@@ -2,10 +2,19 @@ describe("Zotero.SDT", function () {
 	const SDT_CACHE_FILE_NAME = '.zotero-sdt-cache';
 	const TEST_PDF_HASH = 'e54589353710950c4b7ff70829a60036';
 	const SDT_PACK_MAGIC = [0x89, 0x53, 0x44, 0x54, 0x0d, 0x0a, 0x1a, 0x0a];
-	const TEST_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAHQAAABEAAAAAAAAADAAAAAAAAAAAQAAAB2MOw7DIBQE7/JqJ1obA4Y2V0iVjvCR0wQETqQIcfc8WRptNTudSs0+tpYr2U7Hr0SyVEKiib6xtld+kxVjouCOeKuRN7CwYFEXzMwdsCdXAA9+tfypniOddtd2dqNc5WaEFHqGkfDrU6eksS3GKUAoGuMPq1YqSExPLVayiq5WykxRslIqMFTSUcpJTErNAXJA7OT8vJLUvJKgxLz0VKCyaINYnWjD2NjaWB2l/NKSnMw8kGhsLQBjAIJqpZLKglQlK6WCxKLE9KLEggwlHaWS1IoSoFBIanGJQrBLiEJyYnJGqp5SLQA=';
 	const STALE_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAGAAAABGAAAAAAAAADMAAAAAAAAAAQAAAIXMMQ6DMBBE0btMbaIxBcW2uQIVnYUXkSa2dk2kCPnuEVwgX6/+J6qVVd2LQU60b1UIat4Q8FHzV3lDYg/IqenTNDXNEIwcp4FxYJxJuT1ILgjwctiq12xPvkPAP6H3H6tWKkhMTy1WsoquVspMUbJSKjBU0lHKSUxKzVGyUgKxk/PzSlLzSoIS89JTlayiow1idaINY2NrY3WU8ktLcjLzQKKxtQBjYGBgqFYqqSxIVbJSKkgsSkwvSizIUNJRKkmtKFGyUgpJLS5RCHYJUUhOTM5I1VOqBQA=';
 	const STALE_PROCESSOR_VERSION_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAHMAAABGAAAAAAAAADMAAAAAAAAAAQAAAB3MsQ7CIBQF0H+5MzWXtpSW1V9wcsPySF2EQGtiGv7daHLmcyKXtEqtqcCd2D9Z4JBDhMJbSn2mF5xuCsHvci3idwlw6NlPHXVHfSPd34XkHQo1HWWVX7b5usFBzGjmZTCD1VwM1/FhY7Sc+8VP5DChtS+rVipITE8tVrKKrlbKTFGyUiowVNJRyklMSs1RslICsZPz80pS80qCEvPSU5WsoqMNYnWiDWNja2N1lPJLS3Iy80CisbUAY2BgYKhWKqksSFWyUipILEpML0osyFDSUSpJrShRslIKSS0uUQh2CVFITkzOSNVTqgUA';
 	const WRONG_PROCESSOR_TYPE_SDT_PACK_BASE64 = 'iVNEVA0KGgoBAQAAGAAAAHMAAABGAAAAAAAAADMAAAAAAAAAAQAAAB3MsQ6DIBQF0H+5szYXFRXW/kKnbojP2KUQwCaN4d8bm5z5nIgpeMk5JNgT5RsFFhKPBQ0+kvIrvGFVbbC6IvckrsgKi47d2FK1VA/S/t1IPtEghyN5ubbd5f3a9KBn0+t+UjSaflimbZs4d8aNZD+i1h+rVipITE8tVrKKrlbKTFGyUiowVNJRyklMSs1RslICsZPz80pS80qCEvPSU5WsoqMNYnWiDWNja2N1lPJLS3Iy80CisbUAY2BgYKhWKqksSFWyUipILEpML0osyFDSUSpJrShRslIKSS0uUQh2CVFITkzOSNVTqgUA';
+	let testSDTPackBytes;
+	let documentWorkerMetadata;
+
+	before(async function () {
+		let pako = getTestRequire()('pako');
+		documentWorkerMetadata = JSON.parse(await Zotero.File.getContentsFromURLAsync(
+			'resource://zotero/document-worker/metadata.json'
+		));
+		testSDTPackBytes = makeEmptyTestSDTPackV1(documentWorkerMetadata, pako);
+	});
 
 	it("should return a valid cached pack", async function () {
 		let item = await importFileAttachment('test.pdf');
@@ -16,8 +25,8 @@ describe("Zotero.SDT", function () {
 			onProgress: value => progress.push(value),
 		});
 
-		assert.equal(result.packVersion, 1);
-		assert.equal(result.schemaMajorVersion, 1);
+		assert.equal(result.packVersion, documentWorkerMetadata.SDT_PACK_VERSION);
+		assert.equal(result.schemaMajorVersion, parseInt(documentWorkerMetadata.SDT_SCHEMA_VERSION));
 		assertPackMagic(result);
 		assert.deepEqual(progress, []);
 	});
@@ -193,7 +202,8 @@ describe("Zotero.SDT", function () {
 		try {
 			let result = await getValidPack(item);
 			assert.isTrue(workerStub.calledOnce);
-			assert.equal(result.schemaMajorVersion, 1);
+			assert.equal(result.schemaMajorVersion,
+				parseInt(documentWorkerMetadata.SDT_SCHEMA_VERSION));
 		}
 		finally {
 			workerStub.restore();
@@ -386,12 +396,58 @@ describe("Zotero.SDT", function () {
 
 	function getIncompatibleSchemaMajorSDTPackBytes() {
 		let bytes = getTestSDTPackBytes();
-		bytes[9] = 2;
+		let currentMajor = parseInt(documentWorkerMetadata.SDT_SCHEMA_VERSION);
+		bytes[9] = currentMajor === 0xff ? currentMajor - 1 : currentMajor + 1;
 		return bytes;
 	}
 
 	function getTestSDTPackBytes() {
-		return decodeBase64Bytes(TEST_SDT_PACK_BASE64);
+		return testSDTPackBytes.slice();
+	}
+
+	function getTestRequire() {
+		let scope = {};
+		Services.scriptloader.loadSubScript('resource://zotero/require.js', scope);
+		return scope.require;
+	}
+
+	// Minimal empty SDT pack for cache tests. This intentionally implements
+	// only pack format v1; a pack-format change should require test review,
+	// while schema and processor version bumps should not.
+	function makeEmptyTestSDTPackV1(metadata, pako) {
+		if (metadata.SDT_PACK_VERSION !== 1) {
+			throw new Error('Unsupported test SDT pack version');
+		}
+		const HEADER_LENGTH = 16;
+		const INDEX_LENGTH = 16;
+		let schemaVersion = metadata.SDT_SCHEMA_VERSION.split('.').map(Number);
+		let metadataBytes = pako.deflateRaw(JSON.stringify({
+			processor: {
+				type: 'pdf',
+				version: metadata.SDT_PROCESSOR_VERSIONS.pdf,
+			},
+			dateCreated: '2026-01-01T00:00:00.000Z',
+			source: { hash: TEST_PDF_HASH },
+		}));
+		let catalogBytes = pako.deflateRaw(JSON.stringify({
+			pages: [],
+			outline: [],
+		}));
+		let payloadOffset = HEADER_LENGTH + INDEX_LENGTH;
+		let bytes = new Uint8Array(
+			payloadOffset + metadataBytes.byteLength + catalogBytes.byteLength
+		);
+		bytes.set(SDT_PACK_MAGIC, 0);
+		bytes.set([metadata.SDT_PACK_VERSION, ...schemaVersion], 8);
+		let view = new DataView(bytes.buffer);
+		view.setUint32(12, INDEX_LENGTH, true);
+		view.setUint32(HEADER_LENGTH, metadataBytes.byteLength, true);
+		view.setUint32(HEADER_LENGTH + 4, catalogBytes.byteLength, true);
+		// The final eight index bytes are zeroes: one empty content offset
+		// and one empty block-start entry.
+		bytes.set(metadataBytes, payloadOffset);
+		bytes.set(catalogBytes, payloadOffset + metadataBytes.byteLength);
+		return bytes;
 	}
 
 	function decodeBase64Bytes(base64) {
