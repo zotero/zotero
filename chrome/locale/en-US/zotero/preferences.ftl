@@ -29,13 +29,13 @@ preferences-reader-ebook-hyphenate =
     .label = Enable automatic hyphenation
 
 preferences-read-aloud-title = Read Aloud
-preferences-read-aloud-highlight-granularity = While reading, highlight:
+preferences-read-aloud-highlight-granularity = Highlight current
 preferences-read-aloud-highlight-granularity-paragraph =
-    .label = Paragraphs
+    .label = paragraph
 preferences-read-aloud-highlight-granularity-sentence =
-    .label = Sentences
+    .label = sentence
 preferences-read-aloud-highlight-granularity-word =
-    .label = Words
+    .label = word
 
 preferences-note-title = Notes
 preferences-note-open-in-new-window =
