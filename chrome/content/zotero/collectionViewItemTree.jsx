@@ -98,6 +98,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	constructor(itemTree) {
 		super(itemTree);
 		this.collectionTreeRows = [];
+		// Bumped when a filter changes, so an in-flight best-match scoring
+		// pass for a superseded query can stop (see _applyBestMatch())
+		this._bestMatchGeneration = 0;
 	}
 
 	/**
@@ -163,10 +166,18 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			}
 		}
 		let scores;
+		let generation = this._bestMatchGeneration;
 		try {
-			scores = await Zotero.Embeddings.scoreItemIDs(query, [...new Set(sourceIDByItem.values())]);
+			scores = await Zotero.Embeddings.scoreItemIDs(query, [...new Set(sourceIDByItem.values())], {
+				// A newer filter (e.g. more typed search text) makes this
+				// query obsolete -- stop scoring and let its refresh take over
+				shouldCancel: () => generation !== this._bestMatchGeneration
+			});
 		}
 		catch (e) {
+			if (e instanceof Zotero.Embeddings.ScoringCancelledError) {
+				throw e;
+			}
 			// Scoring can fail while the model is still downloading or the
 			// index is being rebuilt -- show no results rather than an
 			// unranked scope
@@ -332,6 +343,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			resetColumns = true;
 		}
 		this.collectionTreeRows = collectionTreeRows;
+		// Cancel any in-flight best-match scoring for the replaced selection
+		this._bestMatchGeneration++;
 
 		// When the selection spans multiple libraries, group items by library in
 		// collections-list order (the order of the selected rows), with a header
@@ -398,6 +411,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			changed = changed || rowChanged;
 		}
 		if (changed) {
+			this._bestMatchGeneration++;
 			this._filterRefreshPromise = this.refresh({ restoreSelection: true });
 		}
 		// An unchanged filter can arrive while a previous filter's refresh is still in
@@ -485,7 +499,19 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			}
 			// The semantic stage: one scoring pass over the merged results
 			if (bestMatchSearch) {
-				newSearchItems = await this._applyBestMatch(newSearchItems);
+				try {
+					newSearchItems = await this._applyBestMatch(newSearchItems);
+				}
+				catch (e) {
+					// A newer filter superseded this one mid-scoring -- leave the
+					// rows as they are and let the newer filter's refresh replace
+					// them
+					if (e instanceof Zotero.Embeddings.ScoringCancelledError) {
+						deferred.resolve();
+						return;
+					}
+					throw e;
+				}
 			}
 			let newSearchItemIDs = new Set(newSearchItems.map(item => item.treeViewID));
 			// In Recently Read, the search matches parent items, but the items that were
