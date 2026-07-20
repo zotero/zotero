@@ -456,6 +456,25 @@ Zotero.Embeddings = new function () {
 	let _workerReady = null;
 	let _requestID = 0;
 	let _pending = new Map();
+	// Model identity the current worker was initialized with
+	let _workerModelVersion = null;
+	// Bumped on every engine shutdown (e.g. a model switch), so long-running
+	// consumers can detect that the model changed under them and discard
+	// their results
+	let _modelGeneration = 0;
+
+	/**
+	 * Thrown when the stored embeddings can't be searched for the active
+	 * model -- during a model switch, or while the index is being rebuilt
+	 * after a revision bump. Callers should treat the index as still being
+	 * prepared rather than scoring mismatched data.
+	 */
+	this.IndexNotReadyError = class extends Error {
+		constructor(message) {
+			super(message);
+			this.name = 'EmbeddingsIndexNotReadyError';
+		}
+	};
 
 	function _ensureWorker() {
 		if (_worker) {
@@ -519,8 +538,15 @@ Zotero.Embeddings = new function () {
 	// from the data directory) and the bundled ORT wasm binary. The model must
 	// already be downloaded.
 	async function _getWorker() {
+		// A worker initialized for a different model or revision can't be
+		// reused -- its weights and prefixes wouldn't match the active model
+		if (_worker && _workerModelVersion
+				&& _workerModelVersion !== Zotero.Embeddings.getModelVersion()) {
+			Zotero.Embeddings.shutdownEngine();
+		}
 		_ensureWorker();
 		if (!_workerReady) {
+			let modelVersion = Zotero.Embeddings.getModelVersion();
 			_workerReady = (async () => {
 				let model = _getModel();
 				if (!(await Zotero.Embeddings.isDownloaded())) {
@@ -554,6 +580,7 @@ Zotero.Embeddings = new function () {
 					wasmPaths: RESOURCE_DIR,
 					wasmBinary: wasm.response
 				}, transfer);
+				_workerModelVersion = modelVersion;
 				Zotero.debug('Embeddings: worker initialized');
 			})();
 		}
@@ -588,6 +615,8 @@ Zotero.Embeddings = new function () {
 			_worker = null;
 		}
 		_workerReady = null;
+		_workerModelVersion = null;
+		_modelGeneration++;
 		_failPending(new Error('Embeddings worker shut down'));
 	};
 
@@ -695,7 +724,24 @@ Zotero.Embeddings = new function () {
 		if (!itemIDs.length || !this.isEnabled()) {
 			return scores;
 		}
+		// Wait out any in-progress model switch, so the query isn't embedded
+		// with one model and compared against another's vectors
+		await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 		await this.initDB();
+		// The stored vectors must have been produced by the active model.
+		// During a switch, or a reindex after a revision bump, the database
+		// isn't stamped for the new model until the indexer starts filling it.
+		let modelVersion = this.getModelVersion();
+		let indexedVersion = await Zotero.DB.valueQueryAsync(
+			"SELECT value FROM embeddings.itemEmbeddingsMeta WHERE key='modelVersion'"
+		);
+		if (indexedVersion !== modelVersion) {
+			throw new this.IndexNotReadyError(
+				`Embeddings index is for '${indexedVersion || 'no model'}', `
+					+ `but the active model is '${modelVersion}'`
+			);
+		}
+		let generation = _modelGeneration;
 		let query = await this.embedQuery(queryText);
 		let dim = query.length;
 
@@ -703,6 +749,11 @@ Zotero.Embeddings = new function () {
 		// parameter limit for large collections), scoring each as we go.
 		let chunkSize = 500;
 		for (let i = 0; i < itemIDs.length; i += chunkSize) {
+			// If the model changed while we were scoring, the scores computed
+			// so far mix models -- discard them
+			if (generation !== _modelGeneration) {
+				throw new this.IndexNotReadyError('Model changed during scoring');
+			}
 			let chunk = itemIDs.slice(i, i + chunkSize);
 			let rows = await Zotero.DB.queryAsync(
 				"SELECT itemID, embedding FROM embeddings.itemEmbeddings WHERE itemID IN ("
@@ -717,6 +768,9 @@ Zotero.Embeddings = new function () {
 				}
 				scores.set(row.itemID, dot);
 			}
+		}
+		if (generation !== _modelGeneration) {
+			throw new this.IndexNotReadyError('Model changed during scoring');
 		}
 		return scores;
 	};
@@ -847,6 +901,17 @@ Zotero.Embeddings.Indexing = new function () {
 		_switchChain = _switchChain.then(() => _doSwitchModel()).catch(e => Zotero.logError(e));
 		return _switchChain;
 	}
+
+	/**
+	 * Resolves once any in-progress model switch (stopping the indexer,
+	 * clearing the old vectors, starting reindexing) has finished, so that
+	 * callers don't operate across a switch
+	 *
+	 * @return {Promise}
+	 */
+	this.waitForPendingModelSwitch = function () {
+		return _switchChain;
+	};
 
 	async function _doSwitchModel() {
 		// Stop any in-progress indexing and wait for it to actually finish before
