@@ -764,7 +764,16 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			if (items.length == 0) return;
 		}
 
-		if (action == 'refresh') {
+		if (action == 'refresh' && type == 'item'
+				&& collectionTreeRows.some(rowIsBestMatchSearch)) {
+			// Under an active best-match search, a refresh event can mean new or
+			// changed embeddings (the background indexer notifies after committing
+			// batches), so rerun the search to update the scores and ranks
+			this.itemTree.invalidateRowCache(ids);
+			refresh = true;
+			madeChanges = true;
+		}
+		else if (action == 'refresh') {
 			// Clear row display cache and invalidate rows for refreshed items
 			let rowsToInvalidate = [];
 			for (let id of ids) {
@@ -819,7 +828,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// Under an active best-match quick search, handle removals with a full
 		// refresh too, so the remaining rows' relevance ranks are recomputed
 		else if (['remove', 'delete', 'trash'].includes(action)
-				&& collectionTreeRows.some(row => row.isBestMatchSearch())) {
+				&& collectionTreeRows.some(rowIsBestMatchSearch)) {
 			this.itemTree.invalidateRowCache(ids);
 			refresh = true;
 			madeChanges = true;
