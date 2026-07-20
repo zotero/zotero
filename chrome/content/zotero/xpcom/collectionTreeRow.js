@@ -495,7 +495,8 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function (options = {
 		if (this.searchText && !this.advancedSearch) {
 			let mode = this.searchMode || Zotero.Prefs.get('search.quicksearch-mode');
 			// The best-match mode isn't a SQL condition -- the base search returns
-			// the full scope and getSearchResults() re-ranks it semantically.
+			// the full scope and the items view's row provider ranks it
+			// semantically.
 			if (mode !== 'bestMatch') {
 				s2.addCondition('quicksearch-' + mode, 'contains', this.searchText);
 			}
@@ -702,14 +703,60 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 }
 
 /**
- * Whether an active quick search on this row is in the semantic similarity
- * mode -- i.e. the results are a scored set that the items list orders by
- * the Relevance column rather than a plain filter. The scoring itself is
- * applied to the merged results by the items view's row provider.
+ * The search whose root-level bestMatch condition drives semantic ranking on
+ * this row: the transient Advanced Search when one is set (it replaces the
+ * row's own filtering, so it takes precedence even on a saved-search row), or
+ * a selected saved search whose definition carries the marker. False when
+ * neither does -- including for a best-match quick search, which ranks by the
+ * quick search text instead.
+ *
+ * @return {Zotero.Search|false}
+ */
+Zotero.CollectionTreeRow.prototype.getBestMatchSource = function () {
+	if (this.advancedSearch) {
+		return this.advancedSearch.getBestMatchQuery() ? this.advancedSearch : false;
+	}
+	// An active best-match quick search overrides a selected saved search's
+	// own marker, so the user's typed query wins
+	if (this.searchText
+			&& (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode')) === 'bestMatch') {
+		return false;
+	}
+	if (this.isSearch() && this.ref.getBestMatchQuery()) {
+		return this.ref;
+	}
+	return false;
+};
+
+/**
+ * Whether an active search on this row ranks semantically -- a quick search
+ * in best-match mode, or an advanced or saved search with a root-level
+ * bestMatch condition. The results are a scored set that the items list
+ * orders by the Relevance column; the scoring itself is applied to the
+ * merged results by the items view's row provider.
  */
 Zotero.CollectionTreeRow.prototype.isBestMatchSearch = function () {
-	return !!this.searchText && !this.advancedSearch
+	if (this.advancedSearch) {
+		return !!this.advancedSearch.getBestMatchQuery();
+	}
+	if (this.getBestMatchSource()) {
+		return true;
+	}
+	return !!this.searchText
 		&& (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode')) === 'bestMatch';
+};
+
+/**
+ * Query text an active best-match search ranks by (see isBestMatchSearch())
+ *
+ * @return {String|false}
+ */
+Zotero.CollectionTreeRow.prototype.getBestMatchQuery = function () {
+	if (!this.isBestMatchSearch()) {
+		return false;
+	}
+	let source = this.getBestMatchSource();
+	return source ? source.getBestMatchQuery().query : this.searchText;
 };
 
 Zotero.CollectionTreeRow.prototype.isSortable = function () {
