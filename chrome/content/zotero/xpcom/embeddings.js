@@ -27,7 +27,7 @@
  *
  *   Zotero.Embeddings -- the embedding engine and its public face: model
  *   config + download, the inference worker (bundled transformers.js + ONNX
- *   Runtime, run off the main thread), embed*(), and rankItemIDs() for the
+ *   Runtime, run off the main thread), embed*(), and scoreItemIDs() for the
  *   search path.
  *
  *   Zotero.Embeddings.Indexing -- everything that decides what gets embedded
@@ -47,6 +47,12 @@ Zotero.Embeddings = new function () {
 			// bge prepends a retrieval instruction to queries; passages get none.
 			queryPrefix: 'Represent this sentence for searching relevant passages: ',
 			passagePrefix: '',
+			// Raw cosine scores cluster in a model-specific band; this maps that
+			// band onto the Relevance column's 0-1 bar (see getScoreFraction()).
+			// Display-only, so retuning it doesn't require a revision bump.
+			// Fitted to observed distributions: irrelevant mass ~0.44-0.50,
+			// strong matches ~0.65-0.75.
+			displayScoreRange: [0.5, 0.75],
 			l10nID: 'preferences-advanced-semantic-search-english',
 			files: [
 				'config.json',
@@ -63,6 +69,7 @@ Zotero.Embeddings = new function () {
 			pooling: 'mean',
 			queryPrefix: 'query: ',
 			passagePrefix: 'passage: ',
+			displayScoreRange: [0.78, 0.92],
 			l10nID: 'preferences-advanced-semantic-search-multilingual',
 			files: [
 				'config.json',
@@ -648,6 +655,24 @@ Zotero.Embeddings = new function () {
 	}
 
 
+	/**
+	 * Map a raw similarity score onto the active model's display range, for
+	 * the Relevance column's bar. The ranges are empirical per-model
+	 * constants (see displayScoreRange in MODELS): scores at or below the
+	 * floor render as an empty bar, at or above the ceiling as a full one.
+	 *
+	 * @param {Number} score
+	 * @return {Number} - 0-1
+	 */
+	this.getScoreFraction = function (score) {
+		let model = MODELS[this.getModelName()];
+		if (!model) {
+			return 0;
+		}
+		let [min, max] = model.displayScoreRange;
+		return Math.min(1, Math.max(0, (score - min) / (max - min)));
+	};
+
 	// mozStorage returns a BLOB as an array of byte values; reinterpret those
 	// bytes as the stored Float32 embedding vector.
 	function _blobToVector(blob) {
@@ -656,20 +681,19 @@ Zotero.Embeddings = new function () {
 	}
 
 	/**
-	 * Rank a given set of items by similarity to a query, returning the most
-	 * similar item IDs (highest first). Items without a stored embedding are
-	 * dropped. Used to apply semantic ranking within an existing result scope
-	 * (e.g. the current collection) rather than the whole library.
+	 * Score a given set of items by similarity to a query. Items without a
+	 * stored embedding aren't scored. Used to apply semantic ranking within an
+	 * existing result scope (e.g. the current collection) rather than the
+	 * whole library.
 	 *
 	 * @param {String} queryText
-	 * @param {Number[]} itemIDs - Candidate item IDs to rank
-	 * @param {Object} [options]
-	 * @param {Number} [options.limit] - Keep only this many top results
-	 * @return {Promise<Number[]>} - Ranked item IDs, most similar first
+	 * @param {Number[]} itemIDs - Candidate item IDs to score
+	 * @return {Promise<Map>} - itemID -> similarity score (higher is more similar)
 	 */
-	this.rankItemIDs = async function (queryText, itemIDs, { limit } = {}) {
+	this.scoreItemIDs = async function (queryText, itemIDs) {
+		let scores = new Map();
 		if (!itemIDs.length || !this.isEnabled()) {
-			return [];
+			return scores;
 		}
 		await this.initDB();
 		let query = await this.embedQuery(queryText);
@@ -677,7 +701,6 @@ Zotero.Embeddings = new function () {
 
 		// Load embeddings for the candidates in chunks (avoids the SQLite bound-
 		// parameter limit for large collections), scoring each as we go.
-		let scored = [];
 		let chunkSize = 500;
 		for (let i = 0; i < itemIDs.length; i += chunkSize) {
 			let chunk = itemIDs.slice(i, i + chunkSize);
@@ -692,15 +715,10 @@ Zotero.Embeddings = new function () {
 				for (let d = 0; d < dim; d++) {
 					dot += query[d] * vec[d];
 				}
-				scored.push({ itemID: row.itemID, score: dot });
+				scores.set(row.itemID, dot);
 			}
 		}
-
-		scored.sort((a, b) => b.score - a.score);
-		if (limit !== undefined) {
-			scored = scored.slice(0, limit);
-		}
-		return scored.map(s => s.itemID);
+		return scores;
 	};
 
 	/**

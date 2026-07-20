@@ -131,33 +131,6 @@
 				this._advancedButton = advancedButton;
 			}
 
-			// Dropdown selecting how many results the best-match mode keeps;
-			// shown in place of the Advanced Search button
-			let topKList = document.createXULElement('menulist');
-			topKList.id = 'zotero-tb-search-topk';
-			topKList.hidden = true;
-			document.l10n.setAttributes(topKList, 'quicksearch-semantic-topk');
-			let topKPopup = document.createXULElement('menupopup');
-			for (let n of [5, 10, 25, 50, 100]) {
-				let item = document.createXULElement('menuitem');
-				item.label = String(n);
-				item.value = String(n);
-				topKPopup.append(item);
-			}
-			topKList.append(topKPopup);
-			topKList.value = String(Zotero.Prefs.get('search.quicksearch-semantic-topK'));
-			topKList.addEventListener('command', (event) => {
-				// Don't trigger a quick search via the oncommand handler
-				event.stopPropagation();
-				Zotero.Prefs.set('search.quicksearch-semantic-topK', parseInt(topKList.value));
-				// Re-run the current search with the new top-K
-				if (this.value) {
-					this.dispatchEvent(new Event('command'));
-				}
-			});
-			wrapper.appendChild(topKList);
-			this._topKList = topKList;
-
 			this.deck = this.firstElementChild;
 			
 			this.querySelector('.advanced-collapse-button').addEventListener('command', (event) => {
@@ -254,13 +227,11 @@
 				.setAttribute('checked', 'true');
 			document.l10n.setAttributes(this.searchTextbox.inputField, "quicksearch-input", { placeholder: this._searchModes[mode] });
 
-			// Advanced Search doesn't apply to semantic search, so swap its
-			// button for the similarity result-count dropdown
-			let isSimilarity = mode === 'bestMatch';
+			// A best-match search can't be converted into Advanced Search
+			// conditions, so hide the button in best-match mode
 			if (this._advancedButton) {
-				this._advancedButton.hidden = isSimilarity;
+				this._advancedButton.hidden = mode === 'bestMatch';
 			}
-			this._topKList.hidden = !isSimilarity;
 
 			let advancedSearchDeck = document.getElementById('zotero-advanced-search-pane-deck');
 			if (advancedSearchDeck) {

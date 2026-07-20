@@ -85,3 +85,4 @@ module.exports.getCSSItemTypeIcon = function (itemType, key = 'item-type') {
 
 module.exports['IconAttachSmall'] = props => <CSSIcon name="attachment" className="icon-16" {...props} />;
 module.exports['IconTreeitemNoteSmall'] = props => <CSSIcon name="note" className="icon-16" {...props} />;
+module.exports['IconRelevanceSmall'] = props => <CSSIcon name="list-number" className="icon-16" {...props} />;

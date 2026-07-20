@@ -50,6 +50,7 @@
 			text-align: center;
 		}
 
+
 		.cell:first-child {
 			&::before {
 				content: "";
@@ -204,8 +205,47 @@
 					background: transparent;
 				}
 			}
+
+			// The similarity bar: the score's fraction of the model's display range
+			.cell.relevance {
+				align-items: center;
+
+				.relevance-bar {
+					display: block;
+					flex: 1;
+					height: 6px;
+					border-radius: 3px;
+					background: var(--fill-quarternary);
+					overflow: hidden;
+
+					.relevance-bar-fill {
+						display: block;
+						height: 100%;
+						background: var(--accent-blue);
+					}
+
+					// On a focused selected row the accent fill would vanish into
+					// the accent selection background, so switch to white like
+					// .attachment-progress
+					@include state(".row.selected") {
+						background: #ffffff33;
+
+						.relevance-bar-fill {
+							background: var(--accent-white);
+						}
+
+						@include state(".virtualized-table:not(:focus-within)") {
+							background: var(--fill-quinary);
+
+							.relevance-bar-fill {
+								background: var(--accent-blue);
+							}
+						}
+					}
+				}
+			}
 		}
-	
+
 		.cell.hasAttachment {
 			height: 100%;
 			// Don't show ellipsis
