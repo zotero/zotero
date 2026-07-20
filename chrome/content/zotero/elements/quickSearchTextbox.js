@@ -67,6 +67,13 @@
 			this.searchTextbox.value = val;
 		}
 
+		disconnectedCallback() {
+			if (this._modelPrefObserverID) {
+				Zotero.Prefs.unregisterObserver(this._modelPrefObserverID);
+				this._modelPrefObserverID = null;
+			}
+		}
+
 		connectedCallback() {
 			let content = document.importNode(this.content, true);
 			this.append(content);
@@ -131,8 +138,22 @@
 				this._advancedButton = advancedButton;
 			}
 
+			// Disabling semantic search in the preferences invalidates an active
+			// best-match mode: fall back to Fields & Tags and rerun any active
+			// search under the new mode
+			this._modelPrefObserverID = Zotero.Prefs.registerObserver('embeddings.model', () => {
+				if (Zotero.Prefs.get('search.quicksearch-mode') === 'bestMatch'
+						&& !Zotero.Embeddings.isEnabled()) {
+					Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+					this.updateMode();
+					if (this.value) {
+						this.dispatchEvent(new Event('command'));
+					}
+				}
+			});
+
 			this.deck = this.firstElementChild;
-			
+
 			this.querySelector('.advanced-collapse-button').addEventListener('command', (event) => {
 				event.stopPropagation();
 				ZoteroPane.toggleAdvancedSearchState('collapsed');
