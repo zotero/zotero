@@ -24,6 +24,26 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
+	describe("#getScoreFraction()", function () {
+		it("should clamp scores into the active model's display range", function () {
+			// bge-small-en-v1.5's displayScoreRange is [0.5, 0.75]
+			let stub = sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5');
+			try {
+				assert.equal(Zotero.Embeddings.getScoreFraction(0.4), 0);
+				assert.equal(Zotero.Embeddings.getScoreFraction(0.5), 0);
+				assert.approximately(Zotero.Embeddings.getScoreFraction(0.625), 0.5, 0.001);
+				assert.equal(Zotero.Embeddings.getScoreFraction(0.75), 1);
+				assert.equal(Zotero.Embeddings.getScoreFraction(0.99), 1);
+				// No known model -> empty bar
+				stub.returns('');
+				assert.equal(Zotero.Embeddings.getScoreFraction(0.9), 0);
+			}
+			finally {
+				stub.restore();
+			}
+		});
+	});
+
 	describe("Indexing", function () {
 		it("should remove a deleted item's embedding", async function () {
 			await Zotero.Embeddings.initDB();
