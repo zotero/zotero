@@ -170,7 +170,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			// Scoring can fail while the model is still downloading or the
 			// index is being rebuilt -- show no results rather than an
 			// unranked scope
-			Zotero.logError(e);
+			if (e instanceof Zotero.Embeddings.IndexNotReadyError) {
+				Zotero.debug("Embeddings: index not ready for best-match search -- showing no results");
+			}
+			else {
+				Zotero.logError(e);
+			}
 			this._bestMatchRanks = new Map();
 			return [];
 		}
