@@ -835,6 +835,12 @@ Zotero.Embeddings.Indexing = new function () {
 	// clear/prune/re-index steps concurrently.
 	let _switchChain = Promise.resolve();
 
+	// Items whose embeddings were written but not yet announced to views, and
+	// the coalescing timer for the announcement (see _notifyIndexed())
+	let _indexedNotifyIDs = new Set();
+	let _indexedNotifyTimer = null;
+	const INDEXED_NOTIFY_DELAY = 2000;
+
 	/**
 	 * Wire up the background indexer. Guarded so multiple windows don't
 	 * double-initialize.
@@ -852,7 +858,7 @@ Zotero.Embeddings.Indexing = new function () {
 		});
 
 		Zotero.Notifier.registerObserver({
-			notify: (event, type, ids) => {
+			notify: async (event, type, ids) => {
 				if (type !== 'item' || !Zotero.Embeddings.isEnabled()) {
 					return;
 				}
@@ -861,7 +867,7 @@ Zotero.Embeddings.Indexing = new function () {
 				// possible), so drop it here -- even while indexing is paused,
 				// since this is removal of stale data rather than indexing
 				if (event === 'delete') {
-					_deleteEmbeddings(ids).catch(e => Zotero.logError(e));
+					await _deleteEmbeddings(ids);
 					return;
 				}
 				if (Zotero.Embeddings.Indexing.isPaused()) {
@@ -1047,7 +1053,16 @@ Zotero.Embeddings.Indexing = new function () {
 	// not the downloaded model files.
 	async function _clearEmbeddings() {
 		await Zotero.Embeddings.initDB();
+		// Announce the removals, so active semantic views refresh after the
+		// notification's coalescing delay (e.g. after disabling or a model
+		// switch)
+		let cleared = await Zotero.DB.columnQueryAsync(
+			"SELECT itemID FROM embeddings.itemEmbeddings"
+		);
 		await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddings");
+		if (cleared.length) {
+			_notifyIndexed(cleared);
+		}
 	}
 
 	// Number of items in a library that have a stored embedding -- the
@@ -1118,6 +1133,12 @@ Zotero.Embeddings.Indexing = new function () {
 			let vectors = await Zotero.Embeddings.embedPassages(batch.map(b => b.text));
 			await Zotero.DB.executeTransaction(async function () {
 				for (let j = 0; j < batch.length; j++) {
+					// The item may have been deleted while the batch was
+					// embedding -- don't write its vector back after the
+					// delete notifier removed it
+					if (!Zotero.Items.get(batch[j].item.id)) {
+						continue;
+					}
 					let vector = vectors[j];
 					let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
 					await Zotero.DB.queryAsync(
@@ -1127,6 +1148,7 @@ Zotero.Embeddings.Indexing = new function () {
 					);
 				}
 			});
+			_notifyIndexed(batch.map(b => b.item.id));
 			done += batch.length;
 			if (onProgress) {
 				onProgress({ done, total: toEmbed.length });
@@ -1140,6 +1162,27 @@ Zotero.Embeddings.Indexing = new function () {
 	function _indexableLibraries() {
 		return Zotero.Libraries.getAll()
 			.filter(library => ['user', 'group'].includes(library.libraryType));
+	}
+
+	// Announce written or removed embeddings with a 'refresh' item event, so
+	// an active best-match search reranks as vectors change (e.g. during
+	// initial indexing, or after a clear). Coalesced, so a long indexing run
+	// produces an update every couple of seconds rather than one per
+	// committed batch.
+	function _notifyIndexed(itemIDs) {
+		for (let id of itemIDs) {
+			_indexedNotifyIDs.add(id);
+		}
+		if (_indexedNotifyTimer) {
+			return;
+		}
+		_indexedNotifyTimer = setTimeout(() => {
+			_indexedNotifyTimer = null;
+			let ids = [..._indexedNotifyIDs];
+			_indexedNotifyIDs.clear();
+			Zotero.Notifier.trigger('refresh', 'item', ids)
+				.catch(e => Zotero.logError(e));
+		}, INDEXED_NOTIFY_DELAY);
 	}
 
 	/**
