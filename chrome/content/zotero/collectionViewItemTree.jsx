@@ -88,6 +88,12 @@ const STUB_COLLECTION_TREE_ROW = {
 	clearCache: () => {}
 };
 
+// Collection tree rows can be duck-typed stand-ins (e.g. the citation
+// dialog's), which implement only part of the row API
+function rowIsBestMatchSearch(row) {
+	return typeof row.isBestMatchSearch == 'function' && row.isBestMatchSearch();
+}
+
 class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	constructor(itemTree) {
 		super(itemTree);
@@ -108,6 +114,87 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 */
 	hasQuickSearch() {
 		return this.collectionTreeRow?.searchText.length > 0;
+	}
+
+	/**
+	 * Best-match ranks for the Relevance column, computed over the merged
+	 * result set in _refresh() while a best-match search is active
+	 *
+	 * @returns {Map} - treeViewID -> 1-based rank (1 = most similar)
+	 */
+	getBestMatchRanks() {
+		return this._bestMatchRanks || new Map();
+	}
+
+	/**
+	 * Score fractions for the Relevance column's bars, computed alongside the
+	 * ranks (see Zotero.Embeddings.getScoreFraction())
+	 *
+	 * @returns {Map} - treeViewID -> 0-1 fraction of the model's display range
+	 */
+	getBestMatchBarFractions() {
+		return this._bestMatchBarFractions || new Map();
+	}
+
+	/**
+	 * The semantic stage of a best-match search: score the merged,
+	 * deduplicated results from all selected rows against the query in a
+	 * single call, and keep the scoreable items ranked globally across the
+	 * selection. Child items (attachments, notes, annotations) are scored via
+	 * their top-level item, so result sets at other levels (e.g. a saved
+	 * search returning annotations) rank by their parent item. Equal scores
+	 * get equal ranks, so tied rows (including a child and its parent) order
+	 * deterministically via the secondary sort fields.
+	 *
+	 * @param {Zotero.Item[]} items - Merged results from all selected rows
+	 * @return {Promise<Zotero.Item[]>} - The scoreable items
+	 */
+	async _applyBestMatch(items) {
+		let query = this.collectionTreeRows.find(rowIsBestMatchSearch).searchText;
+		// Map each item to the item whose embedding scores it
+		let sourceIDByItem = new Map();
+		for (let item of items) {
+			if (!(item instanceof Zotero.Item)) {
+				continue;
+			}
+			let source = item.isRegularItem() ? item : item.topLevelItem;
+			if (source) {
+				sourceIDByItem.set(item, source.id);
+			}
+		}
+		let scores;
+		try {
+			scores = await Zotero.Embeddings.scoreItemIDs(query, [...new Set(sourceIDByItem.values())]);
+		}
+		catch (e) {
+			// Scoring can fail while the model is still downloading or the
+			// index is being rebuilt -- show no results rather than an
+			// unranked scope
+			Zotero.logError(e);
+			this._bestMatchRanks = new Map();
+			return [];
+		}
+		let rankOfScore = new Map(
+			[...new Set(scores.values())].sort((a, b) => b - a).map((score, i) => [score, i + 1])
+		);
+		let kept = [];
+		let ranks = new Map();
+		let fractions = new Map();
+		for (let item of items) {
+			let sourceID = sourceIDByItem.get(item);
+			if (sourceID === undefined || !scores.has(sourceID)) {
+				continue;
+			}
+			kept.push(item);
+			ranks.set(item.treeViewID, rankOfScore.get(scores.get(sourceID)));
+			fractions.set(
+				item.treeViewID,
+				Zotero.Embeddings.getScoreFraction(scores.get(sourceID))
+			);
+		}
+		this._bestMatchRanks = ranks;
+		this._bestMatchBarFractions = fractions;
+		return kept;
 	}
 
 	/**
@@ -329,6 +416,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		
 		try {
 			this.collectionTreeRows.forEach(row => row.clearCache());
+			this._bestMatchRanks = null;
+			this._bestMatchBarFractions = null;
 			// Get the full set of items we want to show, merged across all selected rows
 			let newSearchItemSet = new Set();
 			for (let arr of await Promise.all(this.collectionTreeRows.map(row => row.getItems()))) {
@@ -336,6 +425,24 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					newSearchItemSet.add(item);
 				}
 			}
+			// A selected saved search's own conditions -- where a bestMatch
+			// marker lives -- aren't necessarily loaded yet, since its search
+			// runs on a clone
+			// isSearch() alone isn't enough: duck-typed rows (e.g. the citation
+			// dialog's) report it for rows whose refs aren't searches. The ref
+			// check alone isn't either: Unfiled-style rows hold transient,
+			// unsaved searches that can't load conditions.
+			await Promise.all(this.collectionTreeRows
+				.filter(row => typeof row.isSearch == 'function' && row.isSearch()
+					&& row.ref instanceof Zotero.Search)
+				.map(row => row.ref.loadDataType('conditions')));
+			// Entering, refreshing within, or leaving a best-match search
+			// changes the effective sort of rows already in the tree (the
+			// forced Relevance sort comes and goes, and ranks change with the
+			// query), so a partial sort of just the added rows isn't enough
+			let bestMatchSearch = this.collectionTreeRows.some(rowIsBestMatchSearch);
+			let forceSortAll = options.forceSortAll || bestMatchSearch || this._wasBestMatchSearch;
+			this._wasBestMatchSearch = bestMatchSearch;
 			let newSearchItems = [...newSearchItemSet];
 			// Embedded-image attachments (images pasted into notes) are never shown in the
 			// tree, so don't let one match a search and pull in its parents
@@ -370,6 +477,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						|| item instanceof Zotero.Search
 						|| item.isRegularItem();
 				});
+			}
+			// The semantic stage: one scoring pass over the merged results
+			if (bestMatchSearch) {
+				newSearchItems = await this._applyBestMatch(newSearchItems);
 			}
 			let newSearchItemIDs = new Set(newSearchItems.map(item => item.treeViewID));
 			// In Recently Read, the search matches parent items, but the items that were
@@ -488,7 +599,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			// In grouped mode, always sort everything: a partial sort doesn't compare
 			// pre-existing rows against each other, so library grouping wouldn't be
 			// applied to rows carried over from the previous view
-			this._sort(options.forceSortAll || this._groupedByLibrary ? null : [...addedItemIDs]);
+			this._sort(forceSortAll || this._groupedByLibrary ? null : [...addedItemIDs]);
 			
 			// Toggle all open containers closed and open to refresh child items
 			var t = new Date();
@@ -700,7 +811,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			refresh = true;
 			madeChanges = true;
 		}
-		// Under an active best-match quick search, handle removals with a full refresh too
+		// Under an active best-match quick search, handle removals with a full
+		// refresh too, so the remaining rows' relevance ranks are recomputed
 		else if (['remove', 'delete', 'trash'].includes(action)
 				&& collectionTreeRows.some(row => row.isBestMatchSearch())) {
 			this.itemTree.invalidateRowCache(ids);

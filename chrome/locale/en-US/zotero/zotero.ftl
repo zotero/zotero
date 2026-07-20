@@ -451,6 +451,8 @@ items-table-cell-notes =
 items-column-added-by = Added By
 items-column-modified-by = Modified By
 items-column-last-read = Last Read
+items-column-relevance = Relevance
+items-column-relevance-rank = Rank { $rank }
 
 report-error =
     .label = Report Error…
@@ -833,8 +835,6 @@ quicksearch-input =
     .aria-label = Quick Search
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
-quicksearch-semantic-topk =
-    .aria-label = Number of best-match search results
 quickSearch-mode-similarity = Similarity
 
 advanced-search = Advanced Search

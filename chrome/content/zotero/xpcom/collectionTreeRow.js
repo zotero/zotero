@@ -377,20 +377,7 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTabl
 	if (!this._cachedResults) {
 		let s = await this.getSearchObject();
 		try {
-			let results = await s.search();
-			// Similarity (semantic) quick search: re-rank the scoped results by
-			// similarity to the query and keep the top K (the
-			// search.quicksearch-semantic-topK pref). Assign the cache only once
-			// ranking succeeds, so a ranking failure (e.g. model not yet
-			// downloaded) doesn't leave the full unranked scope cached as the
-			// search result.
-			if (this.isBestMatchSearch()) {
-				results = await Zotero.Embeddings.rankItemIDs(
-					this.searchText, results,
-					{ limit: Zotero.Prefs.get('search.quicksearch-semantic-topK') }
-				);
-			}
-			this._cachedResults = results;
+			this._cachedResults = await s.search();
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -634,22 +621,16 @@ Zotero.CollectionTreeRow.prototype.clearCache = function () {
 Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null) {
 	// Callers usually pass no mode (the active mode lives in the pref), so compare
 	// the effective mode from the last call: switching modes with unchanged text
-	// has to trigger a re-run -- as does changing the similarity top-K, which
-	// lives in its own pref. With no search text, neither matters.
+	// has to trigger a re-run. With no search text, the mode doesn't matter.
 	let effectiveMode = mode || Zotero.Prefs.get('search.quicksearch-mode');
-	let topK = effectiveMode === 'bestMatch'
-		? Zotero.Prefs.get('search.quicksearch-semantic-topK')
-		: null;
 	if (this.searchText === searchText
-			&& (!searchText
-				|| (this._effectiveSearchMode === effectiveMode && this._searchTopK === topK))) {
+			&& (!searchText || this._effectiveSearchMode === effectiveMode)) {
 		return false;
 	}
 	this.clearCache();
 	this.searchText = searchText;
 	this.searchMode = mode;
 	this._effectiveSearchMode = effectiveMode;
-	this._searchTopK = topK;
 	return true;
 };
 
@@ -722,7 +703,9 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
 
 /**
  * Whether an active quick search on this row is in the semantic similarity
- * mode -- i.e. the results are a ranked top-K set rather than a plain filter
+ * mode -- i.e. the results are a scored set that the items list orders by
+ * the Relevance column rather than a plain filter. The scoring itself is
+ * applied to the merged results by the items view's row provider.
  */
 Zotero.CollectionTreeRow.prototype.isBestMatchSearch = function () {
 	return !!this.searchText && !this.advancedSearch

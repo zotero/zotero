@@ -169,17 +169,105 @@ describe("CollectionViewItemTree", function () {
 			let col = await createDataObject('collection');
 			let item = await createDataObject('item', { title: "test", collections: [col.id] });
 			await zp.collectionsView.selectCollection(col.id);
-			
+
 			quicksearch.value = "test";
 			quicksearch.doCommand();
 			await itemsView._refreshPromise;
-			
+
 			await zp.itemsView.selectItems([item.id]);
 			item.removeFromCollection(col.id);
 			await item.saveTx();
 
 			await itemsView._refreshPromise;
 			assert.equal(quicksearch.value, "test");
+		});
+
+		describe("in best-match mode", function () {
+			var stubs = [];
+
+			beforeEach(function () {
+				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+				Zotero.Prefs.set('search.quicksearch-mode', 'bestMatch');
+			});
+
+			afterEach(async function () {
+				stubs.forEach(stub => stub.restore());
+				stubs = [];
+				Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+				await zp.itemsView.setFilter('search', '');
+			});
+
+			it("should show scored items ordered by a forced Relevance sort and restore the sort when cleared", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "B", collections: [col.id] });
+				let itemC = await createDataObject('item', { title: "C", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(async (query, itemIDs) => {
+					let scores = new Map();
+					if (itemIDs.includes(itemA.id)) {
+						scores.set(itemA.id, 0.5);
+					}
+					if (itemIDs.includes(itemB.id)) {
+						scores.set(itemB.id, 0.9);
+					}
+					return scores;
+				}));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				let defaultSortField = itemsView.getSortField();
+
+				await itemsView.setFilter('search', 'some query');
+
+				// Only the scored items, most similar first, despite title order
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+				assert.equal(itemsView.getSortField(), 'relevance');
+				// The Relevance cells show the ranks
+				assert.equal(itemsView.getCellText(0, 'relevance'), 1);
+				assert.equal(itemsView.getCellText(1, 'relevance'), 2);
+				// Score fractions for the bars
+				assert.equal(itemsView.rowProvider.getBestMatchBarFractions().get(itemB.id), 0.9);
+				assert.equal(itemsView.rowProvider.getBestMatchBarFractions().get(itemA.id), 0.5);
+				assert.isFalse(itemsView._getColumns().find(c => c.dataKey == 'relevance').hidden);
+
+				// Clearing the search restores the previous sort and columns
+				await itemsView.setFilter('search', '');
+				assert.equal(itemsView.getSortField(), defaultSortField);
+				assert.isTrue(itemsView._getColumns().find(c => c.dataKey == 'relevance').hidden);
+				assert.deepEqual(
+					itemsView._rows.map(row => row.id),
+					[itemA.id, itemB.id, itemC.id]
+				);
+			});
+
+			it("should score once across a multi-collection selection", async function () {
+				let col1 = await createDataObject('collection');
+				let col2 = await createDataObject('collection');
+				let shared = await createDataObject('item', { collections: [col1.id, col2.id] });
+				let other = await createDataObject('item', { collections: [col2.id] });
+				let scoreStub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == shared.id ? 0.9 : 0.5]))
+				);
+				stubs.push(scoreStub);
+
+				await cv.selectByID("C" + col1.id);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID("C" + col2.id));
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+				itemsView = zp.itemsView;
+
+				await itemsView.setFilter('search', 'some query');
+
+				// One scoring call for the whole selection, with the shared item deduplicated
+				assert.equal(scoreStub.callCount, 1);
+				assert.sameMembers(scoreStub.firstCall.args[1], [shared.id, other.id]);
+				assert.deepEqual(
+					itemsView._rows.filter(row => row.type == 'item').map(row => row.id),
+					[shared.id, other.id]
+				);
+			});
 		});
 
 		it("should expand parent item and attachment for an annotation match", async function () {
