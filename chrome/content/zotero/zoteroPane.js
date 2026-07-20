@@ -2094,6 +2094,9 @@ var ZoteroPane = new function () {
 		if (mode === 'titleCreatorYear') {
 			search.addCondition('resultLevel', 'item');
 		}
+		if (mode === 'bestMatch') {
+			search.addCondition('bestMatch', 'contains', searchText.trim());
+		}
 		for (let part of parts) {
 			if (mode === 'everything') {
 				search.addCondition('groupStart', 'true', '');

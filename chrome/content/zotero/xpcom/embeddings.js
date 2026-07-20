@@ -681,6 +681,10 @@ Zotero.Embeddings = new function () {
 		return _toVectors(data, dims);
 	};
 
+	// The last embedded query, reused across the scoring passes a single
+	// search triggers (per-row membership cutoffs plus the merged ranking)
+	let _queryCache = null;
+
 	/**
 	 * Embed a search query string, applying the active model's query prefix.
 	 *
@@ -688,7 +692,22 @@ Zotero.Embeddings = new function () {
 	 * @return {Promise<Float32Array>}
 	 */
 	this.embedQuery = function (text) {
-		return this.embed(_getModel().queryPrefix + text);
+		let modelVersion = this.getModelVersion();
+		if (_queryCache && _queryCache.modelVersion === modelVersion
+				&& _queryCache.text === text) {
+			return _queryCache.promise;
+		}
+		// Cache the in-flight promise, so the concurrent per-row scoring
+		// passes of a multi-collection search share one embed
+		let promise = this.embed(_getModel().queryPrefix + text);
+		_queryCache = { modelVersion, text, promise };
+		// Don't cache a failed embed
+		promise.catch(() => {
+			if (_queryCache && _queryCache.promise === promise) {
+				_queryCache = null;
+			}
+		});
+		return promise;
 	};
 
 	/**

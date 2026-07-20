@@ -248,12 +248,6 @@
 				.setAttribute('checked', 'true');
 			document.l10n.setAttributes(this.searchTextbox.inputField, "quicksearch-input", { placeholder: this._searchModes[mode] });
 
-			// A best-match search can't be converted into Advanced Search
-			// conditions, so hide the button in best-match mode
-			if (this._advancedButton) {
-				this._advancedButton.hidden = mode === 'bestMatch';
-			}
-
 			let advancedSearchDeck = document.getElementById('zotero-advanced-search-pane-deck');
 			if (advancedSearchDeck) {
 				let state = advancedSearchDeck.state;

@@ -266,6 +266,17 @@ Zotero.SearchConditions = new function () {
 				}
 			},
 
+			// Root-level modifier rather than a regular condition: restricts the
+			// results to items with a stored embedding, and the items list ranks
+			// them by semantic similarity to the value (see
+			// CollectionViewItemTreeRowProvider._applyBestMatch())
+			{
+				name: 'bestMatch',
+				operators: {
+					contains: true
+				}
+			},
+
 			// Shortcuts for adding collections and searches by id
 			{
 				name: 'collectionID',
@@ -900,17 +911,17 @@ Zotero.SearchConditions = new function () {
 	 */
 	function hasOperator(condition, operator){
 		var [condition, mode] = this.parseCondition(condition);
-		
+
 		if (!_conditions) {
 			throw new Zotero.Exception.UnloadedDataException("Search conditions not yet loaded");
 		}
-		
+
 		if (!_conditions[condition]){
 			let e = new Error("Invalid condition '" + condition + "' in hasOperator()");
 			e.name = "ZoteroInvalidDataError";
 			throw e;
 		}
-		
+
 		if (!operator && typeof _conditions[condition]['operators'] == 'undefined'){
 			return true;
 		}
