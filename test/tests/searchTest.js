@@ -220,6 +220,39 @@ describe("Zotero.Search", function () {
 
 	});
 
+	describe("bestMatch condition", function () {
+		it("shouldn't affect membership without a cutoff and should return the top K with one", async function () {
+			let itemA = await createDataObject('item', { title: "bestmatchcondtest A" });
+			let itemB = await createDataObject('item', { title: "bestmatchcondtest B" });
+
+			// Rank-only (no cutoff): membership is unchanged
+			let s = new Zotero.Search();
+			s.libraryID = itemA.libraryID;
+			s.addCondition('resultLevel', 'item');
+			s.addCondition('title', 'contains', 'bestmatchcondtest');
+			s.addCondition('bestMatch', 'contains', 'some query');
+			assert.deepEqual(s.getBestMatchQuery(), { query: 'some query', topK: false });
+			assert.sameMembers(await s.search(), [itemA.id, itemB.id]);
+
+			// With a cutoff, membership is the K most similar
+			let stub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+				async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5]))
+			);
+			try {
+				let s2 = new Zotero.Search();
+				s2.libraryID = itemA.libraryID;
+				s2.addCondition('resultLevel', 'item');
+				s2.addCondition('title', 'contains', 'bestmatchcondtest');
+				s2.addCondition('bestMatch', '1', 'some query');
+				assert.deepEqual(s2.getBestMatchQuery(), { query: 'some query', topK: 1 });
+				assert.sameMembers(await s2.search(), [itemB.id]);
+			}
+			finally {
+				stub.restore();
+			}
+		});
+	});
+
 	describe("#search()", function () {
 		var userLibraryID;
 		var fooItem;

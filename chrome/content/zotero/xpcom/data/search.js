@@ -551,7 +551,12 @@ Zotero.Search.prototype.getConditions = function (){
 Zotero.Search.prototype.hasPostSearchFilter = function () {
 	this._requireData('conditions');
 	for (let i of Object.values(this._conditions)) {
-		if (i.condition == 'fulltextContent'){
+		// Applied in search() after the SQL runs, so uses of this search as a
+		// scope have to route through search() to include them. A rank-only
+		// bestMatch condition (no cutoff) doesn't affect membership, so it
+		// doesn't count.
+		if (i.condition == 'fulltextContent'
+				|| (i.condition == 'bestMatch' && this.getBestMatchQuery()?.topK)) {
 			return true;
 		}
 	}
@@ -819,15 +824,67 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 	
 	//Zotero.debug('Final result set');
 	//Zotero.debug(ids);
-	
+
+	// A root-level 'bestMatch' condition with a top-K cutoff makes membership
+	// semantic: only the K results most similar to the query match, so the
+	// saved search returns the same set when used as a source (scopes, counts,
+	// the API). Without a cutoff, best match is only a ranking in the items
+	// list and membership is untouched. If the index isn't usable (no model,
+	// or mid-switch), a cutoff search matches nothing rather than an arbitrary
+	// set.
+	let bestMatch = this.getBestMatchQuery();
+	if (ids && ids.length && bestMatch && bestMatch.topK) {
+		try {
+			let scores = await Zotero.Embeddings.scoreItemIDs(bestMatch.query, ids);
+			ids = [...scores.entries()]
+				// Deterministic order: by score, then by itemID for equal scores
+				.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))
+				.slice(0, bestMatch.topK)
+				.map(([itemID]) => itemID);
+		}
+		catch (e) {
+			if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
+				throw e;
+			}
+			Zotero.debug("Embeddings index not ready -- best-match cutoff search matches nothing");
+			ids = [];
+		}
+	}
+
 	if (!ids || !ids.length) {
 		return [];
 	}
-	
+
 	if (asTempTable) {
 		return Zotero.Search.idsToTempTable(ids);
 	}
 	return ids;
+};
+
+
+/**
+ * The root-level 'bestMatch' condition, or false if none
+ *
+ * @return {Object|false} - { query, topK }, with topK false when the
+ *     condition is rank-only (operator 'contains') rather than a cutoff
+ */
+Zotero.Search.prototype.getBestMatchQuery = function () {
+	let depth = 0;
+	for (let condition of Object.values(this._conditions)) {
+		if (condition.condition == 'groupStart') {
+			depth++;
+		}
+		else if (condition.condition == 'groupEnd') {
+			depth--;
+		}
+		else if (depth == 0 && condition.condition == 'bestMatch' && condition.value) {
+			return {
+				query: condition.value,
+				topK: parseInt(condition.operator) || false
+			};
+		}
+	}
+	return false;
 };
 
 
@@ -1194,6 +1251,11 @@ Zotero.Search.prototype._buildQuery = async function () {
 				case 'resultLevel':
 					lastCondition = null;
 					conditions.push({ name: 'resultLevel', operator: condition.operator });
+					continue;
+				// Applied as a filter at the end of search() and as a ranking by the
+				// items list, not as part of the condition tree
+				case 'bestMatch':
+					lastCondition = null;
 					continue;
 				case 'groupStart':
 					lastCondition = null;
