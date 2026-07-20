@@ -24,6 +24,22 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
+	describe("#scoreItemIDs()", function () {
+		it("should report the index as not ready when it wasn't built by the active model", async function () {
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1')
+			];
+			try {
+				let e = await getPromiseError(Zotero.Embeddings.scoreItemIDs('query', [1]));
+				assert.instanceOf(e, Zotero.Embeddings.IndexNotReadyError);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+	});
+
 	describe("#getScoreFraction()", function () {
 		it("should clamp scores into the active model's display range", function () {
 			// bge-small-en-v1.5's displayScoreRange is [0.5, 0.75]
