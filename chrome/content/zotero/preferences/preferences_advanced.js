@@ -140,8 +140,14 @@ Zotero_Preferences.Advanced = {
 			}
 		}
 		status.libraries.forEach((lib, i) => {
-			grid.children[i * 2].setAttribute('value', lib.name);
-			grid.children[i * 2 + 1].setAttribute('value', `${lib.indexed} / ${lib.eligible}`);
+			grid.children[i * 2].setAttribute(
+				'value',
+				Zotero.Utilities.Internal.stringWithColon(lib.name)
+			);
+			grid.children[i * 2 + 1].setAttribute(
+				'value',
+				`${lib.indexed.toLocaleString()} / ${lib.eligible.toLocaleString()}`
+			);
 		});
 	},
 	
