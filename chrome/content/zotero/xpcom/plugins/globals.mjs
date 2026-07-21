@@ -562,6 +562,26 @@ function setupPluginDB(scope) {
 		Zotero.DataDirectory.dir, "plugin-db", PluginUUID.getByID(pluginID)
 	);
 
+	// Reject statements that can escape the plugin's own database file:
+	// ATTACH/DETACH reach other databases (e.g. ../../zotero.sqlite), and
+	// VACUUM INTO writes a copy to an arbitrary path. mozStorage only ever
+	// executes the FIRST statement of a query, so validating the leading
+	// keyword is sufficient.
+	function assertSafeSQL(sql) {
+		if (typeof sql !== "string") return;
+		let s = sql, prev;
+		do {
+			prev = s;
+			s = s.replace(/^\s+/, "")
+				.replace(/^--[^\n]*\n?/, "")
+				.replace(/^\/\*[\s\S]*?\*\//, "");
+		}
+		while (s !== prev);
+		if (/^(ATTACH|DETACH|VACUUM)\b/i.test(s)) {
+			throw new Error("ATTACH/DETACH/VACUUM is not allowed in plugin databases");
+		}
+	}
+
 	let PluginDBConnection = function (dbName) {
 		if (!dbName || typeof dbName !== "string") {
 			throw new Error("DBConnection requires a database name");
@@ -576,16 +596,29 @@ function setupPluginDB(scope) {
 		let dbPath = PathUtils.join(pluginDir, dbName + ".sqlite");
 		let conn = new Zotero.DBConnection(dbPath);
 
+		// Check the SQL safety for the methods below.
+		// Everything else funnels through one of these three methods.
+
 		// Wrap queryAsync results with forwarding proxies so
 		// mozIStorageRow Proxies can cross compartments
 		let origQueryAsync = conn.queryAsync.bind(conn);
 		conn.queryAsync = async function (sql, params, options = {}) {
-			if (typeof sql === "string" && /^\s*(ATTACH|DETACH)\s/i.test(sql)) {
-				throw new Error("ATTACH/DETACH DATABASE is not allowed in plugin databases");
-			}
+			assertSafeSQL(sql);
 			let rows = await origQueryAsync(sql, params, options);
 			if (!Array.isArray(rows)) return rows;
 			return rows.map(row => ScopeUtils.ensureForwardingProxyInScope(row, scope));
+		};
+
+		let origValueQueryAsync = conn.valueQueryAsync.bind(conn);
+		conn.valueQueryAsync = function (sql, params, options = {}) {
+			assertSafeSQL(sql);
+			return origValueQueryAsync(sql, params, options);
+		};
+
+		let origColumnQueryAsync = conn.columnQueryAsync.bind(conn);
+		conn.columnQueryAsync = function (sql, params, options = {}) {
+			assertSafeSQL(sql);
+			return origColumnQueryAsync(sql, params, options);
 		};
 
 		conn.rowQueryAsync = async function (sql, params) {
