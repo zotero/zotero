@@ -834,7 +834,7 @@ quicksearch-input =
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
 quicksearch-semantic-topk =
-    .aria-label = Number of similarity search results
+    .aria-label = Number of best-match search results
 quickSearch-mode-similarity = Similarity
 
 advanced-search = Advanced Search
