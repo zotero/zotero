@@ -384,7 +384,7 @@ Zotero.CollectionTreeRow.prototype.getSearchResults = async function (asTempTabl
 			// ranking succeeds, so a ranking failure (e.g. model not yet
 			// downloaded) doesn't leave the full unranked scope cached as the
 			// search result.
-			if (this.isSimilaritySearch()) {
+			if (this.isBestMatchSearch()) {
 				results = await Zotero.Embeddings.rankItemIDs(
 					this.searchText, results,
 					{ limit: Zotero.Prefs.get('search.quicksearch-semantic-topK') }
@@ -507,9 +507,9 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = async function (options = {
 		// Add Quick Search unless advanced search is enabled
 		if (this.searchText && !this.advancedSearch) {
 			let mode = this.searchMode || Zotero.Prefs.get('search.quicksearch-mode');
-			// The similarity mode isn't a SQL condition -- the base search returns
+			// The best-match mode isn't a SQL condition -- the base search returns
 			// the full scope and getSearchResults() re-ranks it semantically.
-			if (mode !== 'similarity') {
+			if (mode !== 'bestMatch') {
 				s2.addCondition('quicksearch-' + mode, 'contains', this.searchText);
 			}
 		}
@@ -637,7 +637,7 @@ Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null
 	// has to trigger a re-run -- as does changing the similarity top-K, which
 	// lives in its own pref. With no search text, neither matters.
 	let effectiveMode = mode || Zotero.Prefs.get('search.quicksearch-mode');
-	let topK = effectiveMode === 'similarity'
+	let topK = effectiveMode === 'bestMatch'
 		? Zotero.Prefs.get('search.quicksearch-semantic-topK')
 		: null;
 	if (this.searchText === searchText
@@ -724,9 +724,9 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function () {
  * Whether an active quick search on this row is in the semantic similarity
  * mode -- i.e. the results are a ranked top-K set rather than a plain filter
  */
-Zotero.CollectionTreeRow.prototype.isSimilaritySearch = function () {
+Zotero.CollectionTreeRow.prototype.isBestMatchSearch = function () {
 	return !!this.searchText && !this.advancedSearch
-		&& (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode')) === 'similarity';
+		&& (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode')) === 'bestMatch';
 };
 
 Zotero.CollectionTreeRow.prototype.isSortable = function () {
