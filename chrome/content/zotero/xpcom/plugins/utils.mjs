@@ -481,6 +481,14 @@ const VarCheck = {
 const ScopeUtils = {
 
 	/**
+	 * Build a forwarding-Proxy facade in `scope` from a traps object (get / set /
+	 * has / ownKeys / getOwnPropertyDescriptor / deleteProperty / defineProperty).
+	 */
+	buildInstanceProxy(scope, traps) {
+		return scope[INSTANCE_PROXY_FACTORY](traps);
+	},
+
+	/**
 	 * Create a constructable function that runs in privileged realm and scopes returns.
 	 * The returned function can be called with `new` from the sandbox scope.
 	 * The constructed instance is wrapped via ensurePromiseVarInScope.
@@ -787,7 +795,7 @@ const ScopeUtils = {
 		// Properties cannot be added or redefined.
 		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
 
-		let facade = scope[INSTANCE_PROXY_FACTORY](traps);
+		let facade = ScopeUtils.buildInstanceProxy(scope, traps);
 
 		if (variantMap) {
 			variantMap[variantMode] = facade;
