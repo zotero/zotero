@@ -363,7 +363,7 @@ const ScopeVariables = {
 	 * @param {Boolean} options.mutable Whether objects returned from methods/getters are writable.
 	 *   Defaults to true -- returned objects (e.g. items from Zotero.Items.get()) should generally
 	 *   be operable by plugins, even if the namespace itself is frozen.
-	 * @param {Boolean} options.cache Whether to cache the mirrored object. Default false.
+	 * @param {Boolean} options.cache Whether to cache the mirrored object. Default false. Only for long-lived objects!
 	 * @param {Boolean} options.strong Whether to use a strong reference to the target. Default false (WeakRef).
 	 *   Use this for constructor-created objects that the caller owns, to prevent premature GC.
 	 * @returns {Object} The mirrored object in scope
@@ -1618,12 +1618,11 @@ const DataScopeVariables = {
 			return value;
 		}
 		// dataWrite implies dataRead
-		let hasRead = scope["PERMISSIONS"].includes("dataRead");
-		if (!hasRead) {
+		let flags = VarCheck.scopeFlags(scope);
+		if (!flags.dataRead) {
 			return undefined;
 		}
-		let hasWrite = scope["PERMISSIONS"].includes("dataWrite");
-		let instanceSchema = hasWrite ? null : DATA_OBJECT_READ_SCHEMA;
+		let instanceSchema = flags.dataWrite ? null : DATA_OBJECT_READ_SCHEMA;
 		return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true, instanceSchema });
 	}
 };
