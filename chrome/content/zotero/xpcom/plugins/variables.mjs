@@ -334,7 +334,7 @@ const ScopeVariables = {
 				// Wrap plugin-provided callbacks/objects so chrome can call
 				// them (no-op for strings/primitives).
 				let callArgs = args.map(arg => ScopeVariables.fromScope(arg, pluginID, { trace }));
-				if (actualThisArg && !VarCheck.isSameCompartment(actualThisArg, {})) {
+				if (actualThisArg && !VarCheck.isInChrome(actualThisArg)) {
 					callArgs = ScopeUtils.ensurePromiseVarInScope(callArgs, Cu.getGlobalForObject(actualThisArg), {});
 				}
 				return func.apply(actualThisArg, callArgs);
