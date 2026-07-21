@@ -31,6 +31,8 @@ const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
 
 const CUSTOM_PARSER_KEY = "__zoteroCustomParser__";
 
+const CHROME_GLOBAL = Cu.getGlobalForObject({});
+
 /**
  * Cache the facades per instance - scope - rule to avoid duplication
  * The GC of the instance or scope should clear the weak map entry
@@ -145,6 +147,16 @@ const VarCheck = {
 			return true;
 		}
 		return Cu.getGlobalForObject(obj1) === Cu.getGlobalForObject(obj2);
+	},
+
+	isInChrome(value) {
+		if (!this.isObjectLike(value)) return true;
+		return Cu.getGlobalForObject(value) === CHROME_GLOBAL;
+	},
+
+	isInScope(value, scopeGlobal) {
+		if (!this.isObjectLike(value)) return true;
+		return Cu.getGlobalForObject(value) === scopeGlobal;
 	},
 
 	hasOriginalRef(v) {
@@ -472,7 +484,7 @@ const ScopeUtils = {
 	 * The constructed instance is wrapped via ensurePromiseVarInScope.
 	 */
 	ensureConstructableInScope(Constructor, scope, { mutable = false, returnParser = null, instanceSchema = null, trace = null } = {}) {
-		if (VarCheck.isSameCompartment(Constructor, scope)) {
+		if (VarCheck.isInScope(Constructor, scope)) {
 			return Constructor;
 		}
 		let holder = Cu.createObjectIn(scope);
@@ -502,7 +514,7 @@ const ScopeUtils = {
 	 * Create a function that runs in privileged realm and scopes returns
 	 */
 	ensureCallableInScope(func, thisArg = undefined, scope, { mutable = false, argParser = null, returnParser = null, skipArgRescoping = false, instanceSchema = null, trace = null } = {}) {
-		if (VarCheck.isSameCompartment(func, scope)) {
+		if (VarCheck.isInScope(func, scope)) {
 			return func;
 		}
 		let holder = Cu.createObjectIn(scope);
@@ -521,7 +533,7 @@ const ScopeUtils = {
 				VarCheck.throwPropError("access", "this", "object has been garbage collected");
 			}
 			// Make sure the args are in the same scope if the thisArg is not in the current compartment
-			if (!skipArgRescoping && actualThisArg && !VarCheck.isSameCompartment(actualThisArg, {})) {
+			if (!skipArgRescoping && actualThisArg && !VarCheck.isInChrome(actualThisArg)) {
 				args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(actualThisArg), { mutable });
 			}
 			let res = func.apply(actualThisArg, args);
@@ -542,7 +554,7 @@ const ScopeUtils = {
 	 * Following https://github.com/mdn/content/issues/15059#issuecomment-1198017259
 	 */
 	ensurePromiseVarInScope(maybePromise, scope, { mutable = false, strong = false, instanceSchema = null } = {}) {
-		if (VarCheck.isSameCompartment(maybePromise, scope)) {
+		if (VarCheck.isInScope(maybePromise, scope)) {
 			return maybePromise;
 		}
 		if (VarCheck.isPromise(maybePromise)) {
@@ -675,7 +687,7 @@ const ScopeUtils = {
 						VarCheck.throwPropError("access", name, "object has been garbage collected");
 					}
 					// Make sure the args are in the same scope if the thisArg is not in the current compartment
-					if (!VarCheck.isSameCompartment(inst, {})) {
+					if (!VarCheck.isInChrome(inst)) {
 						args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(inst), { mutable });
 					}
 					let res = method.apply(inst, args);
@@ -826,7 +838,7 @@ const ScopeUtils = {
 	 * Carries ORIGINAL_REF_KEY so _ensureVarInScope passes it through.
 	 */
 	ensureForwardingProxyInScope(target, scope, { mutable = false } = {}) {
-		if (VarCheck.isSameCompartment(target, scope)) {
+		if (VarCheck.isInScope(target, scope)) {
 			return target;
 		}
 
