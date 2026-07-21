@@ -1178,6 +1178,12 @@ const WindowScopeVariables = {
 								Zotero.warn(`Setting ${attrName} attribute is not allowed for unprivileged plugins. Use addEventListener() instead.`);
 								return false;
 							}
+							// Block dangerous URL schemes
+							if (WindowScopeVariables.URL_ATTRS.has(WindowScopeVariables.urlAttrLocalName(attrName))
+									&& WindowScopeVariables.isUnsafeURLValue(args[nameArgIndex + 1])) {
+								Zotero.warn(`Setting ${attrName}="${args[nameArgIndex + 1]}" is not allowed: unsafe URL scheme.`);
+								return false;
+							}
 							return true;
 						},
 					});
@@ -1337,6 +1343,12 @@ const WindowScopeVariables = {
 			if (!allowed.has(prop)) {
 				VarCheck.throwPropError("set", prop);
 			}
+			// Block dangerous URL schemes on reflected URL properties
+			if (typeof prop === "string"
+					&& WindowScopeVariables.URL_ATTRS.has(prop.toLowerCase())
+					&& WindowScopeVariables.isUnsafeURLValue(value)) {
+				VarCheck.throwPropError("set", prop, "unsafe URL scheme");
+			}
 			Reflect.set(actual, prop, VarCheck.getOriginalOrSelf(value));
 			return true;
 		}, traps, { defineAs: "set" });
@@ -1484,7 +1496,34 @@ const WindowScopeVariables = {
 	// matching any namespace via `[*|attr]` (so xlink:href is covered).
 	URL_ATTRS_SELECTOR: "[*|href],[*|src],[*|action],[*|formaction],[*|data],[*|poster],[*|background],[*|ping],[*|srcdoc]",
 
-	UNSAFE_URL_SCHEMES: /^\s*javascript\s*:/i,
+	UNSAFE_URL_SCHEMES: /^javascript:/i,
+
+	UNSAFE_DATA_MIMES: new Set([
+		"text/html",
+		"application/xhtml+xml",
+		"text/xml",
+		"application/xml",
+	]),
+
+	isUnsafeURLValue(value) {
+		let raw = (value === null || value === undefined) ? "" : value;
+		// Strip all ASCII whitespace/control chars (the parser drops tab/newline
+		// anywhere and trims leading C0/space before reading the scheme).
+		let s = String(raw).replace(/[\u0000-\u0020]+/g, "");
+		if (this.UNSAFE_URL_SCHEMES.test(s)) {
+			return true;
+		}
+		if (/^data:/i.test(s)) {
+			let mime = s.slice(5).split(/[,;]/, 1)[0].toLowerCase();
+			return this.UNSAFE_DATA_MIMES.has(mime);
+		}
+		return false;
+	},
+
+	urlAttrLocalName(name) {
+		let n = String(name || "");
+		return (n.includes(":") ? n.split(":").pop() : n).toLowerCase();
+	},
 
 	// Pre-compiled CSS selector for all known on* event-handler attributes from
 	// Firefox nsGkAtomList.h. Used by sanitizeFragment to avoid querying
@@ -1536,13 +1575,13 @@ const WindowScopeVariables = {
 			}
 		}
 
-		// Strip javascript:/vbscript:/data:text/html URIs from URL attributes
+		// Strip javascript: and data: (HTML/XML/SVG) URIs from URL attributes
 		// so a click or submit can't execute script. The selector visits only
 		// elements that actually carry a URL attribute.
 		for (let node of fragment.querySelectorAll(this.URL_ATTRS_SELECTOR)) {
 			for (let attr of Array.from(node.attributes)) {
 				if (!this.URL_ATTRS.has(attr.localName.toLowerCase())) continue;
-				if (this.UNSAFE_URL_SCHEMES.test(attr.value)) {
+				if (this.isUnsafeURLValue(attr.value)) {
 					node.removeAttributeNode(attr);
 				}
 			}
