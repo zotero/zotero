@@ -63,7 +63,8 @@ function loadScope(addon, globalVars = {}) {
 	// Register moz-extension:// protocol with allowed origins from host_permissions
 	PluginProtocol.register(
 		addon.id, addon.getResourceURI(), uuid,
-		addon.installPermissions?.origins
+		addon.installPermissions?.origins,
+		addon.installPermissions?.content_security_policy
 	);
 
 	let scope;
