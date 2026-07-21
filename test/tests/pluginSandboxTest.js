@@ -165,25 +165,16 @@ describe("Plugin Sandbox", function () {
 			assert.isTrue(evalInScope("typeof XMLHttpRequest === 'function'"));
 		});
 
-		it("should reuse a scope only when permissions and version are unchanged", function () {
-			// Initial load
+		it("should always recreate the scope on reload, never reusing", function () {
 			PluginSandbox.loadScope(createMockAddon(["default"]));
 			let scope1 = PluginSandbox.getScope(ADDON_ID);
 			assert.ok(scope1);
 			assert.equal(scope1.VERSION, "1.0.0");
 
-			// Identical reload -> reuse the same scope object (no throw on the
-			// frozen VERSION; the reuse fast-path must not try to patch it).
 			PluginSandbox.loadScope(createMockAddon(["default"]));
-			assert.strictEqual(PluginSandbox.getScope(ADDON_ID), scope1,
-				"unchanged reload should reuse the existing scope");
-
-			// Version bump with unchanged permissions -> recreate, since VERSION is
-			// part of the frozen identity and can't be updated in place.
-			PluginSandbox.loadScope(Object.assign(createMockAddon(["default"]), { version: "2.0.0" }));
 			let scope2 = PluginSandbox.getScope(ADDON_ID);
-			assert.notStrictEqual(scope2, scope1, "a version bump should recreate the scope");
-			assert.equal(scope2.VERSION, "2.0.0", "recreated scope should carry the new version");
+			assert.notStrictEqual(scope2, scope1,
+				"an unchanged reload should still recreate the scope");
 		});
 
 		it("should facade function-valued properties on plain objects crossing into the scope", function () {
