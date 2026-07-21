@@ -24,7 +24,7 @@
 */
 
 
-import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY, INSTANCE_PROXY_FACTORY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { SchemaKey, DATA_OBJECT_READ_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
@@ -1073,8 +1073,9 @@ const WindowScopeVariables = {
 			}
 		}
 
-		// let elemRef = new WeakRef(elem);
-		let wrapper = Cu.createObjectIn(scope);
+		// Strong ref to the element as unwrapDOMNode may run later.
+		// Sandbox should not hold long-term references to DOM nodes anyway.
+		let getActual = () => elem;
 
 		const blockedWindowProps = new Set([
 			"window",
@@ -1089,232 +1090,242 @@ const WindowScopeVariables = {
 			"content",
 		]);
 
-		// We need the strong ref to prevent GC, as the `unwrapDOMNode` may be called later.
-		// For elements created in the sandbox, they can be GCed before getting consumed otherwise.
-		// Sandboxed code should not hold long-term references to DOM nodes anyway.
-		function getActual() {
-			return elem;
-		}
+		// Own + prototype chain, excluding Object.prototype
+		let allowed = new Set(VarCheck.getAllKeysIncludingPrototypes(elem));
 
-		let keys = VarCheck.getAllKeysIncludingPrototypes(elem);
-		for (let prop of keys) {
-			if (typeof prop === "symbol") continue;
-			let holder = Cu.createObjectIn(scope);
+		// For fromScope unwrapping callable by chrome via Cu.waiveXrays.
+		let origRef = () => getActual();
 
-			Cu.exportFunction(
-				() => {
-					if (prop === "ownerDocument") {
-						let actual = getActual();
-						return WindowScopeVariables.createSafeDocument(actual.ownerDocument, pluginID, { rootNode });
-					}
-					if (prop === "ownerGlobal" || prop === "defaultView") {
-						let actual = getActual();
-						let win = Reflect.get(actual, prop);
-						if (!win) return null;
-						return WindowScopeVariables.createSafeWindow(win, pluginID, { rootNode });
-					}
-					if (blockedWindowProps.has(prop)) {
-						VarCheck.throwPropError("access", prop);
-					}
+		let traps = Cu.createObjectIn(scope);
 
-					let actual = getActual();
-					let value = Reflect.get(actual, prop);
+		Cu.exportFunction((_facade, prop) => {
+			if (prop === ORIGINAL_REF_KEY) return origRef;
+			if (!allowed.has(prop)) return undefined;
+			if (prop === "ownerDocument") {
+				return WindowScopeVariables.createSafeDocument(getActual().ownerDocument, pluginID, { rootNode });
+			}
+			if (prop === "ownerGlobal" || prop === "defaultView") {
+				let win = Reflect.get(getActual(), prop);
+				if (!win) return null;
+				return WindowScopeVariables.createSafeWindow(win, pluginID, { rootNode });
+			}
+			if (blockedWindowProps.has(prop)) {
+				VarCheck.throwPropError("access", prop);
+			}
 
-					// Access to global window objects is not allowed
-					if (VarCheck.isWindowObject(value)) {
-						VarCheck.throwPropError("access", prop);
-					}
+			let actual = getActual();
+			let value = Reflect.get(actual, prop);
 
-					// Wrap the function to wrap DOM results
-					if (typeof value === "function") {
-						// Block setAttribute/setAttributeNS from setting on* event handlers
-						if (prop === "setAttribute" || prop === "setAttributeNS") {
-							let nameArgIndex = prop === "setAttributeNS" ? 1 : 0;
-							return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
-								rootNode,
-								argValidator(args) {
-									let attrName = String(args[nameArgIndex] || "");
-									if (/^on/i.test(attrName)) {
-										Zotero.warn(`Setting ${attrName} attribute is not allowed for unprivileged plugins. Use addEventListener() instead.`);
-										return false;
-									}
-									return true;
-								},
-							});
-						}
-						// Methods that mutate the element's parent (sibling
-						// insertion, self-removal). When actual IS the rootNode,
-						// its parent is outside the plugin's subtree.
-						if (WindowScopeVariables.PARENT_MUTATING_METHODS.has(prop)) {
-							return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
-								rootNode,
-								argValidator() {
-									let r = WindowScopeVariables.resolveRoot(rootNode);
-									if (r && actual === r) {
-										Zotero.warn(`${prop}() on a rootNode element is not allowed.`);
-										return false;
-									}
-									return true;
-								},
-							});
-						}
-						if (prop === "insertAdjacentHTML") {
-							let holderFn = Cu.createObjectIn(scope);
-							Cu.exportFunction(
-								(position, html) => {
-									let pos = String(position || "").toLowerCase();
-									if (!["beforebegin", "afterbegin", "beforeend", "afterend"].includes(pos)) {
-										throw new Error(`insertAdjacentHTML: invalid position "${position}"`);
-									}
-									// beforebegin/afterend write to the parent; refuse if
-									// actual is the rootNode (parent is out of subtree).
-									if (pos === "beforebegin" || pos === "afterend") {
-										let r = WindowScopeVariables.resolveRoot(rootNode);
-										if (r && actual === r) {
-											Zotero.warn(`insertAdjacentHTML '${pos}' on a rootNode element is not allowed.`);
-											return;
-										}
-									}
-									let { fragment } = WindowScopeVariables.parseSanitizedFragment(
-										String(html ?? ""), actual.ownerDocument, pluginID
-									);
-									switch (pos) {
-										case "beforebegin":
-											if (actual.parentNode) actual.parentNode.insertBefore(fragment, actual);
-											break;
-										case "afterbegin":
-											actual.insertBefore(fragment, actual.firstChild);
-											break;
-										case "beforeend":
-											actual.appendChild(fragment);
-											break;
-										case "afterend":
-											if (actual.parentNode) {
-												actual.parentNode.insertBefore(fragment, actual.nextSibling);
-											}
-											break;
-									}
-									WindowScopeVariables.activateWhenConnected(actual, pluginID);
-								},
-								holderFn,
-								{ defineAs: "f" }
+			// Access to global window objects is not allowed
+			if (VarCheck.isWindowObject(value)) {
+				VarCheck.throwPropError("access", prop);
+			}
+
+			// Wrap the function to wrap DOM results
+			if (typeof value === "function") {
+				// Block setAttribute/setAttributeNS from setting on* event handlers
+				if (prop === "setAttribute" || prop === "setAttributeNS") {
+					let nameArgIndex = prop === "setAttributeNS" ? 1 : 0;
+					return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
+						rootNode,
+						argValidator(args) {
+							let attrName = String(args[nameArgIndex] || "");
+							if (/^on/i.test(attrName)) {
+								Zotero.warn(`Setting ${attrName} attribute is not allowed for unprivileged plugins. Use addEventListener() instead.`);
+								return false;
+							}
+							return true;
+						},
+					});
+				}
+				// Methods that mutate the element's parent (sibling insertion,
+				// self-removal). When actual IS the rootNode, its parent is
+				// outside the plugin's subtree.
+				if (WindowScopeVariables.PARENT_MUTATING_METHODS.has(prop)) {
+					return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
+						rootNode,
+						argValidator() {
+							let r = WindowScopeVariables.resolveRoot(rootNode);
+							if (r && actual === r) {
+								Zotero.warn(`${prop}() on a rootNode element is not allowed.`);
+								return false;
+							}
+							return true;
+						},
+					});
+				}
+				if (prop === "insertAdjacentHTML") {
+					let holderFn = Cu.createObjectIn(scope);
+					Cu.exportFunction(
+						(position, html) => {
+							let pos = String(position || "").toLowerCase();
+							if (!["beforebegin", "afterbegin", "beforeend", "afterend"].includes(pos)) {
+								throw new Error(`insertAdjacentHTML: invalid position "${position}"`);
+							}
+							// beforebegin/afterend write to the parent; refuse if
+							// actual is the rootNode (parent is out of subtree).
+							if (pos === "beforebegin" || pos === "afterend") {
+								let r = WindowScopeVariables.resolveRoot(rootNode);
+								if (r && actual === r) {
+									Zotero.warn(`insertAdjacentHTML '${pos}' on a rootNode element is not allowed.`);
+									return;
+								}
+							}
+							let { fragment } = WindowScopeVariables.parseSanitizedFragment(
+								String(html ?? ""), actual.ownerDocument, pluginID
 							);
-							return holderFn.f;
-						}
-						if (prop === "setHTMLUnsafe" || prop === "setHTML") {
-							let holderFn = Cu.createObjectIn(scope);
-							Cu.exportFunction(
-								(html) => {
-									let { fragment } = WindowScopeVariables.parseSanitizedFragment(
-										String(html ?? ""), actual.ownerDocument, pluginID
-									);
-									while (actual.firstChild) actual.removeChild(actual.firstChild);
+							switch (pos) {
+								case "beforebegin":
+									if (actual.parentNode) actual.parentNode.insertBefore(fragment, actual);
+									break;
+								case "afterbegin":
+									actual.insertBefore(fragment, actual.firstChild);
+									break;
+								case "beforeend":
 									actual.appendChild(fragment);
-									WindowScopeVariables.activateWhenConnected(actual, pluginID);
-								},
-								holderFn,
-								{ defineAs: "f" }
+									break;
+								case "afterend":
+									if (actual.parentNode) {
+										actual.parentNode.insertBefore(fragment, actual.nextSibling);
+									}
+									break;
+							}
+							WindowScopeVariables.activateWhenConnected(actual, pluginID);
+						},
+						holderFn,
+						{ defineAs: "f" }
+					);
+					return holderFn.f;
+				}
+				if (prop === "setHTMLUnsafe" || prop === "setHTML") {
+					let holderFn = Cu.createObjectIn(scope);
+					Cu.exportFunction(
+						(html) => {
+							let { fragment } = WindowScopeVariables.parseSanitizedFragment(
+								String(html ?? ""), actual.ownerDocument, pluginID
 							);
-							return holderFn.f;
-						}
-						return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, { rootNode });
-					}
-
-					let wrapped = WindowScopeVariables.createSafeWindowObjectOrList(value, pluginID, { rootNode });
-					if (wrapped !== value) {
-						return wrapped;
-					}
-
-					if (VarCheck.isObjectLike(value)) {
-						// DOMStringMap (dataset) has arbitrary string keys that are unknown at
-						// wrap time, so a static allowlist wrapper cannot cover them.
-						// Use a minimal Proxy in the sandbox scope that forwards get/set directly.
-						if (prop === "dataset") {
-							let mapGet = Cu.exportFunction(k => value[String(k)], scope);
-							let mapSet = Cu.exportFunction((k, v) => value[String(k)] = String(v), scope);
-							let mapDel = Cu.exportFunction(k => delete value[String(k)], scope);
-							let makeDatasetProxy = Cu.evalInSandbox(`
-								(function(get, set, del) {
-									return new Proxy({}, {
-										get(target, key) { return get(key); },
-										set(target, key, value) { set(key, value); return true; },
-										deleteProperty(target, key) { del(key); return true; },
-									});
-								})
-							`, scope);
-							return makeDatasetProxy(mapGet, mapSet, mapDel);
-						}
-						return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true });
-					}
-
-					return value;
-				},
-				holder,
-				{ defineAs: "g" }
-			);
-
-			Cu.exportFunction(
-				(value) => {
-					let actual = getActual();
-					if (prop === "ownerDocument") {
-						VarCheck.throwPropError("set", prop);
-					}
-					if (blockedWindowProps.has(prop)) {
-						VarCheck.throwPropError("set", prop);
-					}
-					if (/^on/i.test(prop)) {
-						Zotero.warn(`Setting ${prop} directly is not allowed for unprivileged plugins. Use addEventListener() instead.`);
-						return false;
-					}
-					if (prop === "outerHTML") {
-						VarCheck.throwPropError("set", prop);
-					}
-					// Sanitize HTML strings to strip unsafe tags and on* event handlers.
-					if (prop === "innerHTML") {
-						let doc = actual.ownerDocument;
-						let { fragment, useXML } = WindowScopeVariables
-							.parseSanitizedFragment(value, doc, pluginID);
-						let result;
-						if (useXML) {
-							// Directly replace children to preserve namespace information.
-							// Re-serializing to string and setting innerHTML would re-parse
-							// through the HTML parser, stripping namespace metadata.
 							while (actual.firstChild) actual.removeChild(actual.firstChild);
 							actual.appendChild(fragment);
-							result = true;
-						}
-						else {
-							let tmp = doc.createElement("div");
-							tmp.appendChild(fragment);
-							result = Reflect.set(actual, prop, tmp.innerHTML);
-						}
-						WindowScopeVariables.activateWhenConnected(actual, pluginID);
-						return result;
-					}
-					return Reflect.set(actual, prop, VarCheck.getOriginalOrSelf(value));
-				},
-				holder,
-				{ defineAs: "s" }
-			);
+							WindowScopeVariables.activateWhenConnected(actual, pluginID);
+						},
+						holderFn,
+						{ defineAs: "f" }
+					);
+					return holderFn.f;
+				}
+				return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, { rootNode });
+			}
 
-			Object.defineProperty(wrapper, prop, {
-				enumerable: true,
-				configurable: false,
-				get: holder.g,
-				set: holder.s,
-			});
-		}
+			let wrapped = WindowScopeVariables.createSafeWindowObjectOrList(value, pluginID, { rootNode });
+			if (wrapped !== value) {
+				return wrapped;
+			}
 
-		// Define the ref to the actual element for internal use
-		Object.defineProperty(wrapper, ORIGINAL_REF_KEY, {
-			value: () => getActual(),
-			enumerable: false,
-			configurable: false,
-			writable: false,
-		});
+			if (VarCheck.isObjectLike(value)) {
+				// DOMStringMap (dataset) has arbitrary string keys unknown at wrap
+				// time, so forward get/set/delete to it through the proxy factory
+				if (prop === "dataset") {
+					let dsTraps = Cu.createObjectIn(scope);
+					Cu.exportFunction(
+						(_t, key) => (typeof key === "symbol" ? undefined : value[String(key)]),
+						dsTraps, { defineAs: "get" }
+					);
+					Cu.exportFunction(
+						(_t, key, v) => {
+							if (typeof key !== "symbol") {
+								value[String(key)] = String(v);
+							}
+							return true;
+						},
+						dsTraps, { defineAs: "set" }
+					);
+					Cu.exportFunction(
+						(_t, key) => {
+							if (typeof key !== "symbol") {
+								delete value[String(key)];
+							}
+							return true;
+						},
+						dsTraps, { defineAs: "deleteProperty" }
+					);
+					return scope[INSTANCE_PROXY_FACTORY](dsTraps);
+				}
+				return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true });
+			}
 
-		Object.preventExtensions(wrapper);
-		return wrapper;
+			return value;
+		}, traps, { defineAs: "get" });
+
+		Cu.exportFunction((_facade, prop, value) => {
+			let actual = getActual();
+			if (prop === "ownerDocument") {
+				VarCheck.throwPropError("set", prop);
+			}
+			if (blockedWindowProps.has(prop)) {
+				VarCheck.throwPropError("set", prop);
+			}
+			if (/^on/i.test(prop)) {
+				Zotero.warn(`Setting ${prop} directly is not allowed for unprivileged plugins. Use addEventListener() instead.`);
+				return true;
+			}
+			if (prop === "outerHTML") {
+				VarCheck.throwPropError("set", prop);
+			}
+			// Sanitize HTML strings to strip unsafe tags and on* event handlers.
+			if (prop === "innerHTML") {
+				let doc = actual.ownerDocument;
+				let { fragment, useXML } = WindowScopeVariables.parseSanitizedFragment(value, doc, pluginID);
+				if (useXML) {
+					// Directly replace children to preserve namespace information.
+					// Re-serializing to string and setting innerHTML would re-parse
+					// through the HTML parser, stripping namespace metadata.
+					while (actual.firstChild) actual.removeChild(actual.firstChild);
+					actual.appendChild(fragment);
+				}
+				else {
+					let tmp = doc.createElement("div");
+					tmp.appendChild(fragment);
+					Reflect.set(actual, prop, tmp.innerHTML);
+				}
+				WindowScopeVariables.activateWhenConnected(actual, pluginID);
+				return true;
+			}
+			if (!allowed.has(prop)) {
+				VarCheck.throwPropError("set", prop);
+			}
+			Reflect.set(actual, prop, VarCheck.getOriginalOrSelf(value));
+			return true;
+		}, traps, { defineAs: "set" });
+
+		Cu.exportFunction((_facade, prop) => {
+			return prop === ORIGINAL_REF_KEY || allowed.has(prop);
+		}, traps, { defineAs: "has" });
+
+		Cu.exportFunction(() => {
+			let keys = Array.from(allowed);
+			keys.push(ORIGINAL_REF_KEY);
+			return Cu.cloneInto(keys, scope);
+		}, traps, { defineAs: "ownKeys" });
+
+		Cu.exportFunction((_facade, prop) => {
+			if (prop === ORIGINAL_REF_KEY) {
+				let d = Cu.createObjectIn(scope);
+				d.enumerable = false; d.configurable = true; d.writable = false; d.value = origRef;
+				return d;
+			}
+			if (!allowed.has(prop)) return undefined;
+			let d = Cu.createObjectIn(scope);
+			d.enumerable = true; d.configurable = true; d.writable = true; d.value = undefined;
+			return d;
+		}, traps, { defineAs: "getOwnPropertyDescriptor" });
+
+		Cu.exportFunction((_facade, prop) => {
+			return !(allowed.has(prop) || prop === ORIGINAL_REF_KEY);
+		}, traps, { defineAs: "deleteProperty" });
+
+		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
+
+		return scope[INSTANCE_PROXY_FACTORY](traps);
 	},
 
 
