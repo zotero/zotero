@@ -422,6 +422,9 @@ const ScopeVariables = {
 				let propPath = prefix ? `${prefix}.${prop}` : prop;
 				let trace = prefix ? { pluginID: pluginID, path: propPath } : null;
 
+				let callableOrigin;
+				let callableWrapped;
+
 				let holder = Cu.createObjectIn(scope);
 				Cu.exportFunction(
 					() => {
@@ -482,6 +485,13 @@ const ScopeVariables = {
 							let nextSchema = VarCheck.nextSchema(schemaNode, prop);
 							if (nextSchema && typeof nextSchema === "object") {
 								return wrapAllowlist(value, nextSchema, { pathPrefix: propPath });
+							}
+							if (cache) {
+								if (value !== callableOrigin) {
+									callableOrigin = value;
+									callableWrapped = ScopeUtils.ensureCallableInScope(value, actualObj, scope, { mutable, trace });
+								}
+								return callableWrapped;
 							}
 							return ScopeUtils.ensureCallableInScope(value, actualObj, scope, { mutable, trace });
 						}
