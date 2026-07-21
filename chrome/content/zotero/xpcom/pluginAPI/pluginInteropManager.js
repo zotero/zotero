@@ -289,10 +289,9 @@
 		/**
 		 * Get a registered command from another plugin.
 		 * Pass `checkOnly: true` to verify availability without creating a wrapper
-		 * (returns `true` if available, or an error code if not).
 		 *
 		 * @param {PluginInteropGetOptions} options
-		 * @returns {function|number} - The callable command, or a status code.
+		 * @returns {function|CommandStatus} - The callable command, or a status code in `checkOnly`.
 		 */
 		getCommand(options) {
 			return this._registry.getCommand(options);
