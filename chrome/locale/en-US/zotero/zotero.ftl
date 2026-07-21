@@ -838,7 +838,7 @@ quicksearch-input =
     .aria-label = Quick Search
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
-quickSearch-mode-similarity = Similarity
+quickSearch-mode-best-match = Best Match
 
 advanced-search = Advanced Search
 menuitem-advanced-search =
