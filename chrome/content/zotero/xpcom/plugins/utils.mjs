@@ -31,6 +31,14 @@ const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
 
 const CUSTOM_PARSER_KEY = "__zoteroCustomParser__";
 
+/**
+ * Cache the facades per instance - scope - rule to avoid duplication
+ * The GC of the instance or scope should clear the weak map entry
+ * @type {WeakMap<Object, WeakMap<Object, Map<string, Array<Object>>>>}
+ */
+const instanceFacadeCache = new WeakMap();
+const NULL_INSTANCE_SCHEMA = Symbol("nullSchema");
+
 const VarCheck = {
 	isObject(v) {
 		return v !== null && typeof v === "object";
@@ -586,6 +594,34 @@ const ScopeUtils = {
 	_ensureInstanceInScope(instance, scope, { mutable = false, strong = false, instanceSchema = null } = {}) {
 		if (!VarCheck.isObjectLike(instance)) return instance;
 
+		let variantMap, variantMode;
+		// Reuse cached facade if exists
+		if (!strong) {
+			let perInstance = instanceFacadeCache.get(instance);
+			if (!perInstance) {
+				perInstance = new WeakMap();
+				instanceFacadeCache.set(instance, perInstance);
+			}
+			let perScope = perInstance.get(scope);
+			if (!perScope) {
+				// Two weak maps already guarantee the instance and scope are alive,
+				// thus the inner map stores strong ref to make sure the facade isn't GC'd.
+				perScope = new Map();
+				perInstance.set(scope, perScope);
+			}
+			let variantSchema = instanceSchema || NULL_INSTANCE_SCHEMA;
+			variantMode = mutable ? 1 : 0;
+			variantMap = perScope.get(variantSchema);
+			if (!variantMap) {
+				variantMap = [];
+				perScope.set(variantSchema, variantMap);
+			}
+			let cachedFacade = variantMap[variantMode];
+			if (cachedFacade && !Cu.isDeadWrapper(cachedFacade)) {
+				return cachedFacade;
+			}
+		}
+
 		function isPropertyAllowed(name) {
 			if (!instanceSchema) return true;
 			if (instanceSchema[SchemaKey.WILDCARD] === true) return instanceSchema[name] !== false;
@@ -755,6 +791,9 @@ const ScopeUtils = {
 		});
 
 		Object.preventExtensions(facade);
+		if (variantMap) {
+			variantMap[variantMode] = facade;
+		}
 		return facade;
 	},
 
