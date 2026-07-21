@@ -163,6 +163,27 @@ describe("Plugin Sandbox", function () {
 			assert.isTrue(evalInScope("typeof URLSearchParams === 'function'"));
 			assert.isTrue(evalInScope("typeof XMLHttpRequest === 'function'"));
 		});
+
+		it("should reuse a scope only when permissions and version are unchanged", function () {
+			// Initial load
+			PluginSandbox.loadScope(createMockAddon(["default"]));
+			let scope1 = PluginSandbox.getScope(ADDON_ID);
+			assert.ok(scope1);
+			assert.equal(scope1.VERSION, "1.0.0");
+
+			// Identical reload -> reuse the same scope object (no throw on the
+			// frozen VERSION; the reuse fast-path must not try to patch it).
+			PluginSandbox.loadScope(createMockAddon(["default"]));
+			assert.strictEqual(PluginSandbox.getScope(ADDON_ID), scope1,
+				"unchanged reload should reuse the existing scope");
+
+			// Version bump with unchanged permissions -> recreate, since VERSION is
+			// part of the frozen identity and can't be updated in place.
+			PluginSandbox.loadScope(Object.assign(createMockAddon(["default"]), { version: "2.0.0" }));
+			let scope2 = PluginSandbox.getScope(ADDON_ID);
+			assert.notStrictEqual(scope2, scope1, "a version bump should recreate the scope");
+			assert.equal(scope2.VERSION, "2.0.0", "recreated scope should carry the new version");
+		});
 	});
 
 	describe("Zotero Logging APIs", function () {
@@ -544,6 +565,34 @@ describe("Plugin Sandbox", function () {
 			assert.isTrue(evalInScope("typeof Zotero.Items.trashTx === 'undefined'"));
 		});
 
+		it("should hide methods that persist internally and the plural-manager accessor", async function () {
+			let item = new Zotero.Item('book');
+			item.setField('title', 'Gating Test');
+			await item.saveTx();
+			try {
+				// These exist on the chrome Item but persist via save()/erase()/
+				// SyncedSettings internally, so dataRead must not expose them.
+				assert.equal(typeof item.moveToLibrary, 'function');
+				assert.equal(typeof item.addLinkedItem, 'function');
+
+				evalInScope(`var _item = Zotero.Items.get(${item.id})`);
+				for (let m of ["moveToLibrary", "setAttachmentLastPageIndex",
+						"setAttachmentLastReadAloudPosition", "addLinkedItem"]) {
+					assert.isTrue(evalInScope(`typeof _item.${m} === 'undefined'`),
+						`${m} should be hidden under dataRead`);
+				}
+				// Plural-manager accessor must not leak the unrestricted singleton
+				assert.isTrue(evalInScope("typeof _item.ObjectsClass === 'undefined'"),
+					"ObjectsClass should be hidden");
+				// Underscore-prefixed internals are never exposed
+				assert.isTrue(evalInScope("typeof _item._saveData === 'undefined'"),
+					"_saveData should be hidden");
+			}
+			finally {
+				await item.eraseTx();
+			}
+		});
+
 		it("should block save/saveTx/erase/eraseTx on items returned from Zotero.Items.get()", async function () {
 			let item = new Zotero.Item('book');
 			item.setField('title', 'Read Only Test');
@@ -763,6 +812,29 @@ describe("Plugin Sandbox", function () {
 	describe("dataWrite permission", function () {
 		beforeEach(function () {
 			loadTestScope(["default", "dataRead", "dataWrite"]);
+		});
+
+		it("should gate attachment file methods behind fileSystemWrite", async function () {
+			let item = new Zotero.Item('book');
+			await item.saveTx();
+			try {
+				// beforeEach already loaded a dataWrite (no fileSystemWrite) scope:
+				// data writes ok, file ops hidden
+				evalInScope(`var _item = Zotero.Items.get(${item.id})`);
+				assert.isTrue(evalInScope("typeof _item.saveTx === 'function'"));
+				assert.isTrue(evalInScope("typeof _item.moveToLibrary === 'function'"));
+				assert.isTrue(evalInScope("typeof _item.deleteAttachmentFile === 'undefined'"),
+					"deleteAttachmentFile needs fileSystemWrite");
+				assert.isTrue(evalInScope("typeof _item.renameAttachmentFile === 'undefined'"));
+
+				// dataWrite + fileSystemWrite: file methods exposed
+				loadTestScope(["default", "dataWrite", "fileSystemWrite"]);
+				evalInScope(`var _item2 = Zotero.Items.get(${item.id})`);
+				assert.isTrue(evalInScope("typeof _item2.deleteAttachmentFile === 'function'"));
+			}
+			finally {
+				await item.eraseTx();
+			}
 		});
 
 		it("should allow save/saveTx on items returned from Zotero.Items.get()", async function () {
@@ -1130,6 +1202,33 @@ describe("Plugin Sandbox", function () {
 				"_getConnection should not be exposed");
 			assert.isFalse(evalInScope("typeof _db._getConnectionAsync === 'function'"),
 				"_getConnectionAsync should not be exposed");
+		});
+
+		it("should block ATTACH/DETACH/VACUUM on all query methods", async function () {
+			evalInScope("var _db = new Zotero.DBConnection('attacktest')");
+			let dangerous = [
+				"ATTACH DATABASE '/tmp/evil.sqlite' AS e",
+				"ATTACH'/tmp/evil.sqlite'AS e",
+				"  attach '/tmp/evil.sqlite' as e",
+				"VACUUM INTO '/tmp/evil.sqlite'",
+				"DETACH e",
+			];
+			for (let m of ["queryAsync", "valueQueryAsync", "columnQueryAsync"]) {
+				for (let sql of dangerous) {
+					let threw = false;
+					try {
+						await evalInScope(`_db.${m}(${JSON.stringify(sql)})`);
+					}
+					catch {
+						threw = true;
+					}
+					assert.isTrue(threw, `${m} should reject: ${sql}`);
+				}
+			}
+			// A normal statement still works on each method
+			await evalInScope("_db.queryAsync('CREATE TABLE t (a TEXT)')");
+			await evalInScope("_db.queryAsync(\"INSERT INTO t VALUES ('x')\")");
+			assert.equal(await evalInScope("_db.valueQueryAsync('SELECT a FROM t')"), 'x');
 		});
 	});
 
@@ -3359,6 +3458,51 @@ describe("Plugin Sandbox", function () {
 				}
 				assert.isTrue(threw, "registerObserver outside allowed scope should throw");
 			});
+
+			it("should deny reserved namespaces even when declared", function () {
+				loadTestScope(["default", "preferences"], [], [
+					"extensions.zotero.pluginFileAccess.",
+					"extensions.zotero.dataDir",
+				]);
+				let denied = (code) => {
+					try { evalInScope(code); return false; }
+					catch { return true; }
+				};
+				assert.isTrue(denied(`Zotero.Prefs.set('extensions.zotero.pluginFileAccess.${PLUGIN_UUID}', '[]', true)`),
+					"writing the file-access grant store must be denied");
+				assert.isTrue(denied("Zotero.Prefs.clear('extensions.zotero.pluginFileAccess.x', true)"),
+					"clearing a grant-store pref must be denied");
+				assert.isTrue(denied("Zotero.Prefs.get('extensions.zotero.dataDir', true)"),
+					"reading the data dir pref must be denied");
+			});
+
+			// Note: these are two separate tests so each gets a fresh scope. Calling
+			// loadTestScope twice with the same permissions in one test takes the
+			// loadScope reuse branch, which currently throws on the frozen VERSION.
+			it("should deny a wildcard prefix covering an exact-match-only namespace (sync)", function () {
+				// A wildcard prefix covering sync.* is dropped at setup -> denied
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.sync."]);
+				let threw = false;
+				try { evalInScope("Zotero.Prefs.get('extensions.zotero.sync.server.username', true)"); }
+				catch { threw = true; }
+				assert.isTrue(threw, "a wildcard prefix must not grant sync.*");
+			});
+
+			it("should allow an exact pref name in an exact-match-only namespace (sync)", function () {
+				// An exact pref name is allowed
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.sync.autoSync"]);
+				evalInScope("Zotero.Prefs.get('extensions.zotero.sync.autoSync', true)");
+			});
+
+			it("should deny resetBranch that would clear an exact-match-only namespace", function () {
+				// Declaring the exact parent passes the per-pref check, but resetBranch
+				// on it would wipe sync.* as a subtree -> blocked by the reset guard.
+				loadTestScope(["default", "preferences"], [], ["extensions.zotero.sync"]);
+				let threw = false;
+				try { evalInScope("Zotero.Prefs.resetBranch([], 'extensions.zotero.sync')"); }
+				catch { threw = true; }
+				assert.isTrue(threw, "resetBranch covering sync.* must be denied");
+			});
 		});
 	});
 
@@ -5491,6 +5635,47 @@ describe("Plugin Sandbox", function () {
 					evalInScope('_target.innerHTML = \'<script>evil()</script><b>safe</b>\'');
 					assert.isNull(target.querySelector("script"), "script should be stripped");
 					assert.ok(target.querySelector("b"), "safe content should remain");
+				}
+				finally {
+					container.remove();
+				}
+			});
+
+			it("should block javascript:/data:text/html URLs on setAttribute and property set", function () {
+				loadTestScope(["default"]);
+				let container = document.createElement("div");
+				document.documentElement.appendChild(container);
+				let anchor = document.createElement("a");
+				container.appendChild(anchor);
+				scope._a = WindowScopeVariables.createSafeHTMLElement(
+					anchor, ADDON_ID, { rootNode: new WeakRef(container) }
+				);
+				try {
+					// setAttribute with a dangerous scheme is a no-op (blocked by validator)
+					evalInScope('_a.setAttribute("href", "javascript:alert(1)")');
+					assert.isNull(anchor.getAttribute("href"), "javascript: via setAttribute must be blocked");
+					// obfuscation with an embedded control char is still caught
+					evalInScope('_a.setAttribute("href", "java\\tscript:alert(1)")');
+					assert.isNull(anchor.getAttribute("href"), "obfuscated javascript: must be blocked");
+					// data:text/html is active markup -> blocked
+					evalInScope('_a.setAttribute("href", "data:text/html,<b>x</b>")');
+					assert.isNull(anchor.getAttribute("href"), "data:text/html must be blocked");
+					// property set with javascript: throws
+					let threw = false;
+					try { evalInScope('_a.href = "javascript:alert(1)"'); }
+					catch { threw = true; }
+					assert.isTrue(threw, "javascript: via property set must throw");
+					assert.isNull(anchor.getAttribute("href"));
+
+					// Safe schemes are allowed (setAttribute and property set)
+					evalInScope('_a.setAttribute("href", "https://example.com/x")');
+					assert.equal(anchor.getAttribute("href"), "https://example.com/x");
+					evalInScope('_a.href = "https://example.com/y"');
+					assert.equal(anchor.getAttribute("href"), "https://example.com/y");
+					// Inline data: images are inert as images -> allowed
+					evalInScope('_a.setAttribute("src", "data:image/png;base64,iVBORw0KGgo=")');
+					assert.ok((anchor.getAttribute("src") || "").startsWith("data:image/png"),
+						"data:image/* must be allowed");
 				}
 				finally {
 					container.remove();

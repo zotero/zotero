@@ -20,6 +20,12 @@ describe("Plugin File Access", function () {
 		await Zotero.initializationPromise;
 		pluginUUID = PluginUUID.getByID(PLUGIN_ID);
 		tempDir = await getTempDirectory();
+		// Resolve symlinks (e.g. macOS /var -> /private/var) so test paths are in
+		// the same canonical (real) space the file-access layer stores/compares
+		// grants against (it resolves real paths for case/symlink consistency).
+		let tempDirFile = Zotero.File.pathToFile(tempDir);
+		tempDirFile.normalize();
+		tempDir = tempDirFile.path;
 		// The prompt opens with the main Zotero window as opener; make sure
 		// one exists so `Zotero.getMainWindow()` resolves.
 		mainWin = await loadZoteroPane();
