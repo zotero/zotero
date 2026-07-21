@@ -30,6 +30,7 @@
 		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
+		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		WindowScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
@@ -289,8 +290,8 @@
 		 * @param {string} resourceID
 		 * @returns {boolean}
 		 */
-		unregisterResource(resourceID) {
-			return this._manager.unregister(resourceID);
+		unregisterResource(resourceID, _callerPluginID) {
+			return this._manager.unregister(resourceID, _callerPluginID);
 		},
 
 		/**
@@ -303,4 +304,19 @@
 			this._manager.applyAllToWindow(win, target);
 		},
 	};
+
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.WindowResourceManager.registerResource,
+		({ pluginID, args }) => {
+			if (args[0] && typeof args[0] === "object") {
+				args[0].pluginID = pluginID;
+			}
+		}
+	);
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.WindowResourceManager.unregisterResource,
+		({ pluginID, args }) => {
+			args[1] = pluginID;
+		}
+	);
 }
