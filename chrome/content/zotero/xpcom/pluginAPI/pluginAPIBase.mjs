@@ -128,9 +128,16 @@ class PluginAPIBase {
 	/**
 	 * Unregister an option by mainKey
 	 * @param {string} mainKey - The mainKey of the option to unregister
+	 * @param {string} [callerPluginID] - Calling plugin's ID, injected for unprivileged callers
 	 * @returns {boolean} - True if the option was successfully unregistered
 	 */
-	unregister(mainKey) {
+	unregister(mainKey, callerPluginID) {
+		let option = this._optionsCache[mainKey];
+		if (callerPluginID && option
+				&& this._getOptionPluginID(option) !== callerPluginID) {
+			this._log(`Plugin '${callerPluginID}' cannot unregister '${mainKey}' owned by another plugin`, "warn");
+			return false;
+		}
 		const success = this._remove(mainKey);
 		if (!success) {
 			return false;
