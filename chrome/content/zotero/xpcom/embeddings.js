@@ -686,12 +686,32 @@ Zotero.Embeddings = new function () {
 	let _queryCache = null;
 
 	/**
+	 * Normalize a best-match query: trim whitespace and strip a single pair
+	 * of wrapping quotes, which carry no phrase semantics here -- the whole
+	 * query embeds as one string. A query that normalizes to an empty string
+	 * is no query at all, and callers treat it as no active search.
+	 *
+	 * @param {String} text
+	 * @return {String}
+	 */
+	this.normalizeQuery = function (text) {
+		return text.trim().replace(/^"(.*)"$/s, '$1').trim();
+	};
+
+	/**
 	 * Embed a search query string, applying the active model's query prefix.
 	 *
 	 * @param {String} text
 	 * @return {Promise<Float32Array>}
 	 */
 	this.embedQuery = function (text) {
+		text = this.normalizeQuery(text);
+		// Callers treat a query that normalizes to nothing as no search at
+		// all, so it should never get this far -- embedding just the model's
+		// query prefix would rank against noise
+		if (!text) {
+			throw new Error("Empty best-match query");
+		}
 		let modelVersion = this.getModelVersion();
 		if (_queryCache && _queryCache.modelVersion === modelVersion
 				&& _queryCache.text === text) {

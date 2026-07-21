@@ -87,6 +87,31 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 
+		it("should strip a single pair of wrapping quotes", async function () {
+			let embedStub = sinon.stub(Zotero.Embeddings, 'embed').resolves(new Float32Array([1]));
+			let stubs = [
+				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
+				sinon.stub(Zotero.Embeddings, 'pruneModels').resolves(),
+				embedStub
+			];
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			try {
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				// Whitespace around the quotes doesn't defeat the stripping
+				await Zotero.Embeddings.embedQuery(' "wrapped query" ');
+				assert.include(embedStub.firstCall.args[0], 'wrapped query');
+				assert.notInclude(embedStub.firstCall.args[0], '"');
+				// A query that normalizes to nothing is a caller bug
+				assert.throws(() => Zotero.Embeddings.embedQuery('""'));
+			}
+			finally {
+				Zotero.Prefs.set('embeddings.model', '');
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				Zotero.Prefs.clear('embeddings.indexingPaused');
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
 		it("should share one in-flight embed across concurrent calls", async function () {
 			let deferred = Zotero.Promise.defer();
 			let stubs = [

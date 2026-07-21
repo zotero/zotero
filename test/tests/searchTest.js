@@ -234,6 +234,14 @@ describe("Zotero.Search", function () {
 			assert.deepEqual(s.getBestMatchQuery(), { query: 'some query', topK: false });
 			assert.sameMembers(await s.search(), [itemA.id, itemB.id]);
 
+			// A query that normalizes to nothing (e.g., just quotes) is no
+			// query at all
+			let sEmpty = new Zotero.Search();
+			sEmpty.libraryID = itemA.libraryID;
+			sEmpty.addCondition('resultLevel', 'item');
+			sEmpty.addCondition('bestMatch', 'contains', '""');
+			assert.isFalse(sEmpty.getBestMatchQuery());
+
 			// With a cutoff, membership is the K most similar
 			let stub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
 				async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5]))

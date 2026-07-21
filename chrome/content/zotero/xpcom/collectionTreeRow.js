@@ -718,7 +718,7 @@ Zotero.CollectionTreeRow.prototype.getBestMatchSource = function () {
 	}
 	// An active best-match quick search overrides a selected saved search's
 	// own marker, so the user's typed query wins
-	if (this.searchText
+	if (this.searchText && Zotero.Embeddings.normalizeQuery(this.searchText)
 			&& (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode')) === 'bestMatch') {
 		return false;
 	}
@@ -742,7 +742,7 @@ Zotero.CollectionTreeRow.prototype.isBestMatchSearch = function () {
 	if (this.getBestMatchSource()) {
 		return true;
 	}
-	return !!this.searchText
+	return !!(this.searchText && Zotero.Embeddings.normalizeQuery(this.searchText))
 		&& (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode')) === 'bestMatch';
 };
 
