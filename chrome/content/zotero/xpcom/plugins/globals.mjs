@@ -25,7 +25,7 @@
 
 
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
-import { ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { ScopeUtils, INSTANCE_PROXY_FACTORY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables, WindowScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PLUGIN_DB_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
@@ -52,6 +52,28 @@ function setupConsole(scope, addon) {
 			prefix: `${addon.name} (${addon.id}):\n`,
 		});
 		return ScopeVariables.createAllowlistMirrorObject(console, true, pluginID, { cache: true, strong: true, pathPrefix: "console" });
+	});
+}
+
+/**
+ * Attach the instance-facade Proxy factory to the scope for `_ensureInstanceInScope`
+ *
+ * @param {Object} scope - The sandbox scope
+ */
+function setupInstanceProxy(scope) {
+	let makeProxy = Cu.evalInSandbox(
+		`(t) => new Proxy(Object.create(null), {
+			get: t.get, set: t.set, has: t.has, ownKeys: t.ownKeys,
+			getOwnPropertyDescriptor: t.getOwnPropertyDescriptor,
+			deleteProperty: t.deleteProperty, defineProperty: t.defineProperty,
+		})`,
+		scope
+	);
+	Object.defineProperty(scope, INSTANCE_PROXY_FACTORY, {
+		value: makeProxy,
+		enumerable: false,
+		configurable: false,
+		writable: false,
 	});
 }
 
@@ -625,4 +647,4 @@ function setupPluginDB(scope) {
 	});
 }
 
-export { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupFile, setupPluginDB };
+export { setupConsole, setupInstanceProxy, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupFile, setupPluginDB };
