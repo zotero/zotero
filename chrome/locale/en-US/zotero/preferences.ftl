@@ -89,7 +89,7 @@ preferences-advanced-local-api-available = Available at <code data-l10n-name="ur
 preferences-advanced-server-disabled = The { -app-name } HTTP server is disabled.
 preferences-advanced-server-enable-and-restart =
     .label = Enable and Restart
-preferences-advanced-semantic-search-title = Semantic Search
+preferences-advanced-semantic-search-title = Best-Match Search
 preferences-advanced-semantic-search-model = Model:
 preferences-advanced-semantic-search-status = Status:
 preferences-advanced-semantic-search-disabled =
