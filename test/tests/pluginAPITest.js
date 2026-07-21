@@ -1257,16 +1257,13 @@ describe("Plugin API", function () {
 		var providerScope, consumerScope;
 
 		function createMockAddon(id, syncGUID, { permissions = ["default", "pluginInterop"], interop_permissions = [] } = {}) {
-			return {
+			return createMockPlugin({
 				id,
 				name: "Test Plugin " + id,
-				version: "1.0.0",
 				syncGUID,
-				installPermissions: { permissions, origins: [], pref_permissions: [], interop_permissions },
-				getResourceURI() {
-					return Services.io.newURI("file:///nonexistent/");
-				}
-			};
+				permissions,
+				interopPermissions: interop_permissions,
+			});
 		}
 
 		function loadScopes({ consumerInterop } = {}) {
