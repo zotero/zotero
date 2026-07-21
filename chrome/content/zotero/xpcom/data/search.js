@@ -877,7 +877,8 @@ Zotero.Search.prototype.getBestMatchQuery = function () {
 		else if (condition.condition == 'groupEnd') {
 			depth--;
 		}
-		else if (depth == 0 && condition.condition == 'bestMatch' && condition.value) {
+		else if (depth == 0 && condition.condition == 'bestMatch' && condition.value
+				&& Zotero.Embeddings.normalizeQuery(condition.value)) {
 			return {
 				query: condition.value,
 				topK: parseInt(condition.operator) || false
