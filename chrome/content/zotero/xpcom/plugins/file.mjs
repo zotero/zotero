@@ -63,19 +63,47 @@ function getPluginDataDir() {
 }
 
 function isPersistBlocked(canonicalPath) {
+	let real = resolveRealPath(canonicalPath);
 	for (let p of persistBlockedPaths) {
-		if (Zotero.File.directoryContains(canonicalPath, p)) return true;
+		if (Zotero.File.directoryContains(real, resolveRealPath(p))) return true;
 	}
 	return false;
 }
 
-function isForbidden(canonicalPath) {
-	if (Zotero.File.directoryContains(PathUtils.profileDir, canonicalPath)) {
+/**
+ * Resolve symlinks in a path to the real target
+ */
+function resolveRealPath(rawPath) {
+	let canonical = rawPath;
+	try {
+		canonical = Zotero.File.normalizeToUnix(rawPath);
+		let f = Zotero.File.pathToFile(Zotero.isWin ? canonical.replace(/\//g, "\\") : canonical);
+		let leaves = [];
+		while (f && !f.exists()) {
+			leaves.unshift(f.leafName);
+			f = f.parent;
+		}
+		if (f) {
+			f.normalize();
+			for (let leaf of leaves) {
+				f.append(leaf);
+			}
+			return Zotero.File.normalizeToUnix(f.path);
+		}
+	}
+	catch (e) {
+		Zotero.logError(e);
+	}
+	return canonical;
+}
+
+function isForbidden(realPath) {
+	if (Zotero.File.directoryContains(resolveRealPath(PathUtils.profileDir), realPath)) {
 		return true;
 	}
-	if (Zotero.File.directoryContains(Zotero.DataDirectory.dir, canonicalPath)) {
-		let pluginDataDir = getPluginDataDir();
-		if (pluginDataDir && Zotero.File.directoryContains(pluginDataDir, canonicalPath)) {
+	if (Zotero.File.directoryContains(resolveRealPath(Zotero.DataDirectory.dir), realPath)) {
+		let pluginDataDir = resolveRealPath(getPluginDataDir());
+		if (pluginDataDir && Zotero.File.directoryContains(pluginDataDir, realPath)) {
 			return false;
 		}
 		return true;
@@ -354,7 +382,8 @@ class PersistedGrantLayer extends GrantLayer {
 				let [path, value] = entry;
 				if (typeof path !== "string" || !path) continue;
 				if (!value || typeof value !== "object" || !GrantLayer.VALID_MODES.includes(value.mode)) continue;
-				entries.push([path, { mode: value.mode }]);
+				// Resolve stored keys so matching is case/symlink-consistent
+				entries.push([resolveRealPath(path), { mode: value.mode }]);
 			}
 			this._cache = new Map(entries);
 			this._cacheKey = raw;
@@ -480,28 +509,30 @@ class FileAccessState {
 			throw new Error(`Invalid file access mode: ${mode}`);
 		}
 		let path = canonicalize(rawPath);
+		let realPath = resolveRealPath(path);
 
-		if (isForbidden(path)) {
+		if (isForbidden(realPath)) {
 			throw new Error(
 				`Permission denied: ${path} is not accessible to plugins`,
 			);
 		}
 
-		let prior = this._getDecision(path, mode);
+		let prior = this._getDecision(realPath, mode);
 		if (prior === "allow") return;
 		if (prior === "deny") {
 			throw new Error(`Permission denied: plugin cannot ${mode} "${path}"`);
 		}
 
-		let answer = await this._promptOrReuse(path, mode);
+		// Prompt for and store the grant against the resolved real path
+		let answer = await this._promptOrReuse(realPath, mode);
 		if (!answer) {
 			throw new Error(`Permission denied: plugin cannot ${mode} "${path}"`);
 		}
 
 		let isDeny = answer.decision === "deny";
 		let grantPath = answer.scope === "parent"
-			? (PathUtils.parent(path) || path)
-			: path;
+			? (PathUtils.parent(realPath) || realPath)
+			: realPath;
 		let grant = { path: grantPath, mode: isDeny ? "deny" : mode };
 
 		if (answer.persist === "always") {
@@ -577,7 +608,7 @@ class FileAccessState {
 		if (!this.activeSession) return;
 		let path;
 		try {
-			path = canonicalize(rawPath);
+			path = resolveRealPath(canonicalize(rawPath));
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -603,16 +634,16 @@ class FileAccessState {
 	/**
 	 * @returns {"allow"|"deny"|null}
 	 */
-	_getDecision(canonicalPath, mode) {
-		let pluginDir = this.getDir();
-		if (pluginDir && Zotero.File.directoryContains(pluginDir, canonicalPath)) {
+	_getDecision(realPath, mode) {
+		let pluginDir = resolveRealPath(this.getDir());
+		if (pluginDir && Zotero.File.directoryContains(pluginDir, realPath)) {
 			return "allow";
 		}
 		if (this.activeSession) {
-			let d = this.activeSession.getDecision({ path: canonicalPath, mode });
+			let d = this.activeSession.getDecision({ path: realPath, mode });
 			if (d) return d;
 		}
-		return this.persistedGrants.getDecision({ path: canonicalPath, mode });
+		return this.persistedGrants.getDecision({ path: realPath, mode });
 	}
 
 	_promptOrReuse(path, mode) {
