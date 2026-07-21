@@ -2838,7 +2838,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else {
 			if (this._sortedColumn) {
 				delete this._sortedColumn.sortDirection;
-				if (columnSettings[column.dataKey]) {
+				if (columnSettings[this._sortedColumn.dataKey]) {
 					delete columnSettings[this._sortedColumn.dataKey].sortDirection;
 				}
 			}
