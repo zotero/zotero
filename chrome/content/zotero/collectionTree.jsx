@@ -1283,9 +1283,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * @param libraryID {Number}
 	 * @param type {String}
 	 * @param show {Boolean}
+	 * @param select {Boolean} -- when showing, select the newly shown collection
+	 * @param recordUndo {Boolean} -- opt in to pushing an undo entry for the toggle
 	 * @returns {Promise}
 	 */
-	async toggleVirtualCollection(libraryID, type, show, select) {
+	async toggleVirtualCollection(libraryID, type, show, select, recordUndo) {
 		const types = {
 			duplicates: 'D',
 			unfiled: 'U',
@@ -1299,6 +1301,22 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let treeViewID = types[type] + libraryID;
 		
 		Zotero.Prefs.setVirtualCollectionStateForLibrary(libraryID, type, show);
+		
+		if (recordUndo) {
+			// Resolve the live collection tree at replay time rather than capturing
+			// `this`, so undo/redo still targets the active window's tree after the
+			// recording window has been closed and reopened (possible on macOS).
+			let replay = (nextShow, nextSelect) => Zotero.getActiveZoteroPane()
+				?.collectionsView?.toggleVirtualCollection(libraryID, type, nextShow, nextSelect);
+			Zotero.UndoHistory.pushCustomEntry({
+				action: show ? 'undo-action-show-collection' : 'undo-action-hide-collection',
+				libraryID,
+				undo: () => replay(!show, !show),
+				redo: () => replay(show, show),
+				state: { old: !show, new: show },
+				getState: () => Zotero.Prefs.getVirtualCollectionStateForLibrary(libraryID, type)
+			});
+		}
 		
 		var promise = this.waitForSelect();
 		var selectedRow = this.selection.focused;

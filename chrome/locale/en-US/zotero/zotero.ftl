@@ -1220,6 +1220,8 @@ undo-action-move-to-collection = { $count ->
 }
 undo-action-rename-collection = Rename Collection
 undo-action-move-collection = Move Collection
+undo-action-hide-collection = Hide Collection
+undo-action-show-collection = Show Collection
 undo-action-add-tag = { $count ->
     [one] Add Tag
    *[other] Add Tag to { $count } Items
