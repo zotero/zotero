@@ -72,6 +72,7 @@
 	 * @property {boolean} editable - Whether the section is in edit mode.
 	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
 	 * @property {SetEnabled} setEnabled - Set pane enabled state.
+	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
 	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
 	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
 	 */
@@ -86,6 +87,7 @@
 	 * @property {boolean} editable - Whether the section is in edit mode.
 	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
 	 * @property {SetEnabled} setEnabled - Set pane enabled state.
+	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
 	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
 	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
 	 */
@@ -100,6 +102,7 @@
 	 * @property {boolean} editable - Whether the section is in edit mode.
 	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
 	 * @property {SetEnabled} setEnabled - Set pane enabled state.
+	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
 	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
 	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
 	 * @property {SectionRefresh} refresh - Refresh the section.
@@ -118,6 +121,7 @@
 	 * @property {boolean} editable - Whether the section is in edit mode.
 	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
 	 * @property {SetEnabled} setEnabled - Set pane enabled state.
+	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
 	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
 	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
 	 * @property {Event} event - Event object.
@@ -173,6 +177,12 @@
 	/**
 	 * @callback SetEnabled
 	 * @param {boolean} enabled - Enabled state.
+	 * @returns {void}
+	 */
+
+	/**
+	 * @callback SetFullHeight
+	 * @param {boolean} fullHeight - Whether the section should fill the full available height of the item pane.
 	 * @returns {void}
 	 */
 
