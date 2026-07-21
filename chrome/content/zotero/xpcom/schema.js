@@ -3690,6 +3690,19 @@ Zotero.Schema = new function () {
 				await Zotero.DB.queryAsync("INSERT INTO savedSearchConditions SELECT savedSearchID, searchConditionID, condition, operator, value FROM savedSearchConditionsOld");
 				await Zotero.DB.queryAsync("DROP TABLE savedSearchConditionsOld");
 			}
+
+			else if (i == 128) {
+				// Strip full paths (e.g., from third-party tools) from stored-file attachment
+				// paths, which should contain only a filename after 'storage:'
+				let rows = await Zotero.DB.queryAsync("SELECT itemID, path FROM itemAttachments WHERE linkMode IN (0, 1) AND (path LIKE ? OR path LIKE ?)", ['storage:%/%', 'storage:%\\%']);
+				for (let row of rows) {
+					let filename = row.path.substr(8).split(/[/\\]/).pop();
+					if (!filename) {
+						continue;
+					}
+					await Zotero.DB.queryAsync("UPDATE itemAttachments SET path=? WHERE itemID=?", ['storage:' + filename, row.itemID]);
+				}
+			}
 		}
 		
 		await _updateDBVersion('userdata', toVersion);

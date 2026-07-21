@@ -3663,6 +3663,9 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 				}
 				val = 'storage:' + PathUtils.filename(val);
 			}
+			if (/^storage:.*[/\\]/.test(val)) {
+				throw new Error(`Stored file filename cannot contain a slash -- got '${val}'`);
+			}
 		}
 		
 		if (val == this.attachmentPath) {

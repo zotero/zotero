@@ -1158,7 +1158,17 @@ describe("Zotero.Item", function () {
 			
 			assert.equal(attachment.attachmentFilename, filename);
 		});
-		
+
+		it("should reject a filename containing a slash", async function () {
+			var item = await createDataObject('item');
+
+			var attachment = new Zotero.Item("attachment");
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			attachment.parentID = item.id;
+			assert.throws(() => attachment.attachmentFilename = "D:/Foo/Bar/test.pdf", /slash/);
+			assert.throws(() => attachment.attachmentFilename = "D:\\Foo\\Bar\\test.pdf", /slash/);
+		});
+
 		it("should get a filename for a base-dir-relative file", function () {
 			var dir = getTestDataDirectory().path;
 			Zotero.Prefs.set('saveRelativeAttachmentPath', true)
