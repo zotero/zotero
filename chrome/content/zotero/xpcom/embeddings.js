@@ -1381,7 +1381,7 @@ Zotero.Embeddings.Indexing = new function () {
 		try {
 			await Zotero.Embeddings.initDB();
 			await _ensureIndexMatchesModel();
-			_phase = 'downloading';
+			_phase = (await Zotero.Embeddings.isDownloaded()) ? 'indexing' : 'downloading';
 			_emitProgress();
 			await Zotero.Embeddings.Indexing.refreshStatus();
 			await Zotero.Embeddings.preloadModel();
