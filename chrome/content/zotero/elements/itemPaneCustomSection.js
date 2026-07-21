@@ -97,6 +97,14 @@
 			}
 		}
 
+		get fullHeight() {
+			return this.hasAttribute("data-full-height");
+		}
+
+		set fullHeight(val) {
+			this.toggleAttribute("data-full-height", !!val);
+		}
+
 		init() {
 			this._section = this.querySelector("collapsible-section");
 			this._body = this._section.querySelector('[data-type="body"]');
@@ -215,6 +223,7 @@
 				editable: this.editable,
 				setL10nArgs: l10nArgs => this.setL10nArgs(l10nArgs),
 				setEnabled: enabled => this.hidden = !enabled,
+				setFullHeight: fullHeight => this.fullHeight = fullHeight,
 				setSectionSummary: summary => this._section.summary = summary,
 				setSectionButtonStatus: (type, options) => {
 					let { disabled, hidden } = options;
