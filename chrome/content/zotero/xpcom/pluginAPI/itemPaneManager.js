@@ -608,8 +608,8 @@
 		 * @param {string} paneID - Pane ID to unregister. This is the value returned by `registerSection`.
 		 * @returns {boolean} - True if the section is successfully unregistered, false if the paneID is not found.
 		 */
-		unregisterSection(paneID) {
-			return this._sectionManager.unregister(paneID);
+		unregisterSection(paneID, _callerPluginID) {
+			return this._sectionManager.unregister(paneID, _callerPluginID);
 		},
 
 		get customSectionData() {
@@ -688,8 +688,8 @@
 		 * @param {string} rowID - Row ID to unregister. This is the value returned by `registerInfoRow`.
 		 * @returns {boolean} - True if the row is successfully unregistered, false if the rowID is not found.
 		 */
-		unregisterInfoRow(rowID) {
-			return this._infoRowManager.unregister(rowID);
+		unregisterInfoRow(rowID, _callerPluginID) {
+			return this._infoRowManager.unregister(rowID, _callerPluginID);
 		},
 
 		/**
@@ -713,4 +713,17 @@
 			return option[type];
 		},
 	};
+
+	let injectRegister = ({ pluginID, args }) => {
+		if (args[0] && typeof args[0] === "object") {
+			args[0].pluginID = pluginID;
+		}
+	};
+	let injectUnregister = ({ pluginID, args }) => {
+		args[1] = pluginID;
+	};
+	lazy.ScopeVariables.setCustomParser(Zotero.ItemPaneManager.registerSection, injectRegister);
+	lazy.ScopeVariables.setCustomParser(Zotero.ItemPaneManager.unregisterSection, injectUnregister);
+	lazy.ScopeVariables.setCustomParser(Zotero.ItemPaneManager.registerInfoRow, injectRegister);
+	lazy.ScopeVariables.setCustomParser(Zotero.ItemPaneManager.unregisterInfoRow, injectUnregister);
 }

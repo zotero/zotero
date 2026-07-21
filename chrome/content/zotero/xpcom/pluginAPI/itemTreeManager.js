@@ -298,32 +298,12 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		},
 
 		/**
-		 * @deprecated Use `registerColumn` instead.
-		 */
-		registerColumns(options) {
-			if (!Array.isArray(options)) {
-				options = [options];
-			}
-			return options.map(option => this.registerColumn(option));
-		},
-
-		/**
 		 * Unregister a custom column.
 		 * @param {string} dataKey - The dataKey of the column to unregister
 		 * @returns {boolean} - true if the column was unregistered, false if the column was not found
 		 */
-		unregisterColumn(dataKey) {
-			return this._columnManager.unregister(dataKey);
-		},
-
-		/**
-		 * @deprecated Use `unregisterColumn` instead.
-		 */
-		unregisterColumns(dataKeys) {
-			if (!Array.isArray(dataKeys)) {
-				dataKeys = [dataKeys];
-			}
-			return dataKeys.map(dataKey => this.unregisterColumn(dataKey));
+		unregisterColumn(dataKey, _callerPluginID) {
+			return this._columnManager.unregister(dataKey, _callerPluginID);
 		},
 
 		/**
@@ -384,4 +364,18 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			return "";
 		},
 	};
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.ItemTreeManager.registerColumn,
+		({ pluginID, args }) => {
+			if (args[0] && typeof args[0] === "object") {
+				args[0].pluginID = pluginID;
+			}
+		}
+	);
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.ItemTreeManager.unregisterColumn,
+		({ pluginID, args }) => {
+			args[1] = pluginID;
+		}
+	);
 }
