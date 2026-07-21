@@ -5,11 +5,30 @@ item-pane-custom-section {
 	&[hidden] {
 		display: none;
 	}
-	
+
 	.body {
 		display: flex;
 		flex-direction: column;
 		margin: 0;
+	}
+
+	// Section takes the full visible height of the scrollable pane
+	&[data-full-height]:has(> collapsible-section[open]:not([empty])) {
+		min-height: 100%;
+		flex: 1 0 auto;
+
+		> collapsible-section {
+			flex: 1 1 auto;
+			min-height: 0;
+
+			> [data-type="body"] {
+				flex: 1 1 auto;
+				min-height: 0;
+				max-height: none;
+				display: flex;
+				flex-direction: column;
+			}
+		}
 	}
 
 	collapsible-section {
