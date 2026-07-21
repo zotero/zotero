@@ -808,10 +808,9 @@ const PluginFileAccess = {
 	},
 
 	async clearDataDirByUUID(uuid) {
-		await this.deleteDataDirByUUID(uuid).then(() => {
-			let dir = this.getDataDirByUUID(uuid);
-			Zotero.File.createDirectoryIfMissing(dir);
-		});
+		await this.deleteDataDirByUUID(uuid);
+		let dir = this.getDataDirByUUID(uuid);
+		Zotero.File.createDirectoryIfMissing(dir);
 	},
 
 	async deleteDataDirByUUID(uuid) {
