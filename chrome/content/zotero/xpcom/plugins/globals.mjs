@@ -89,11 +89,28 @@ const ALLOWED_WINDOW_FEATURES = new Set([
 ]);
 
 function sanitizeFeatures(features) {
-	if (!features) return "";
-	return features.split(",")
-		.map(s => s.trim())
-		.filter(s => ALLOWED_WINDOW_FEATURES.has(s.split("=")[0].trim().toLowerCase()))
-		.join(",");
+	let values = {};
+	let parts = [];
+	for (let raw of String(features || "").split(",")) {
+		let s = raw.trim();
+		if (!s) continue;
+		let eq = s.indexOf("=");
+		let name = (eq === -1 ? s : s.slice(0, eq)).trim().toLowerCase();
+		if (!ALLOWED_WINDOW_FEATURES.has(name)) continue;
+		let value = eq === -1 ? "" : s.slice(eq + 1).trim();
+		let low = value.toLowerCase();
+		if (value === "" || low === "yes" || low === "1" || low === "true") {
+			values[name] = true;
+		}
+		else if (low === "no" || low === "0" || low === "false") {
+			values[name] = false;
+		}
+		else {
+			values[name] = value;
+		}
+		parts.push(value === "" ? name : `${name}=${value}`);
+	}
+	return { str: parts.join(","), values };
 }
 
 /**
@@ -129,11 +146,10 @@ function setupOpenWindow(scope) {
 				throw new Error(`Only .html files are allowed: ${url}`);
 			}
 
-			let safeFeatures = sanitizeFeatures(features ? String(features) : "");
+			let { str: safeFeatures, values: featureValues } = sanitizeFeatures(features);
 
-			// Open a chrome wrapper window with a <browser> element
-			// that loads the plugin's HTML content
-			let resizable = !safeFeatures || safeFeatures.includes("resizable");
+			// Open a chrome wrapper window with a <browser> element for the plugin's HTML content
+			let resizable = featureValues.resizable !== false;
 			let chromeFeatures = "chrome,dialog=no,"
 				+ (safeFeatures || "resizable");
 			// Use custom notitle style because the `titlebar=no` feature is ugly
