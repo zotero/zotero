@@ -197,6 +197,19 @@ describe("Plugin Sandbox", function () {
 			assert.equal(evalInScope("typeof console"), "object");
 		});
 
+		it("allows eval/Function/fetch/WebAssembly in the sandbox itself (no CSP applies)", function () {
+			// Plugin code runs in a Cu.Sandbox (not CSP-gated, unlike its HTML
+			// pages), so eval/Function/WebAssembly work and fetch/XHR are exposed.
+			loadTestScope(["default"]);
+			assert.equal(evalInScope("eval('1 + 1')"), 2, "eval works in the sandbox");
+			assert.equal(evalInScope("(new Function('return 2 + 3'))()"), 5, "new Function works in the sandbox");
+			assert.equal(evalInScope("typeof fetch"), "function");
+			assert.equal(evalInScope("typeof XMLHttpRequest"), "function");
+			assert.equal(
+				evalInScope("(function(){ new WebAssembly.Module(new Uint8Array([0,97,115,109,1,0,0,0])); return 'ok'; })()"),
+				"ok", "WebAssembly compiles in the sandbox");
+		});
+
 		it("should always recreate the scope on reload, never reusing", function () {
 			PluginSandbox.loadScope(createMockAddon(["default"]));
 			let scope1 = PluginSandbox.getScope(ADDON_ID);
@@ -4289,6 +4302,50 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("plugin resource web-accessibility", function () {
+		function canLoad(sourcePrincipal, targetURI) {
+			try {
+				Services.scriptSecurityManager.checkLoadURIWithPrincipal(
+					sourcePrincipal, targetURI, Ci.nsIScriptSecurityManager.STANDARD
+				);
+				return true;
+			}
+			catch {
+				return false;
+			}
+		}
+
+		it("blocks web content from loading plugin resources, allows self/chrome", function () {
+			loadTestScope(["default"]);
+			let policy = WebExtensionPolicy.getByID(ADDON_ID);
+			let resURI = Services.io.newURI(policy.getURL("resources.html"));
+			let secMan = Services.scriptSecurityManager;
+
+			let webPrincipal = secMan.createContentPrincipal(
+				Services.io.newURI("https://example.com/"), {}
+			);
+			let selfPrincipal = secMan.createContentPrincipal(resURI, {});
+
+			assert.isFalse(canLoad(webPrincipal, resURI),
+				"arbitrary web content must not load plugin resources");
+			assert.isTrue(canLoad(selfPrincipal, resURI),
+				"the plugin's own origin must load its resources");
+			assert.isTrue(canLoad(secMan.getSystemPrincipal(), resURI),
+				"chrome (system principal) must load plugin resources");
+		});
+	});
+
+	describe("plugin page CSP", function () {
+		it("defaults to the manifestVersion-3 page CSP when the plugin declares none", function () {
+			loadTestScope(["default"]);
+			let policy = WebExtensionPolicy.getByID(ADDON_ID);
+			// With no manifest content_security_policy the page gets the MV3
+			// default (script-src 'self'); a plugin can override it (see below).
+			assert.include(policy.extensionPageCSP, "script-src 'self'");
+			assert.notInclude(policy.extensionPageCSP, "unsafe-eval");
+		});
+	});
+
 	describe("openWindow API", function () {
 		it("should not be available without 'openWindow' permission", function () {
 			loadTestScope(["default"]);
@@ -4314,13 +4371,14 @@ describe("Plugin Sandbox", function () {
 			var tmpDir;
 			var mainWin;
 
-			function loadTestScopeWithURI(permissions) {
+			function loadTestScopeWithURI(permissions, contentSecurityPolicy = null) {
 				// Point the plugin root at the temp dir holding our test HTML file.
 				mockAddon = createMockPlugin({
 					id: ADDON_ID,
 					name: "Test Sandbox Plugin",
 					syncGUID: "{00000000-0000-0000-0000-000000000002}",
 					permissions,
+					contentSecurityPolicy,
 					resourceURI: PathUtils.toFileURI(tmpDir) + "/",
 				});
 				PluginSandbox.loadScope(mockAddon);
@@ -4370,6 +4428,44 @@ describe("Plugin Sandbox", function () {
 					+ "<body><div id='results'></div>"
 					+ '<script src="probe.js"></script></body></html>';
 				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "privileged.html"), privilegedProbeHtml);
+
+				// CSP probe: a same-origin external script that records whether
+				// eval() is permitted by the page's Content-Security-Policy.
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "csp-probe.js"),
+					"window._probeRan = true;\n"
+					+ "try {\n"
+					+ "  window._evalStatus = (window.eval('21 + 21') === 42) ? 'allowed' : 'blocked-silent';\n"
+					+ "} catch (e) {\n"
+					+ "  window._evalStatus = 'blocked';\n"
+					+ "}\n"
+					// Minimal valid empty wasm module ("\\0asm" + version 1). Its
+					// compilation is gated by 'wasm-unsafe-eval' in script-src.
+					+ "try {\n"
+					+ "  new WebAssembly.Module(new Uint8Array([0,97,115,109,1,0,0,0]));\n"
+					+ "  window._wasmStatus = 'allowed';\n"
+					+ "} catch (e) {\n"
+					+ "  window._wasmStatus = 'blocked';\n"
+					+ "}\n"
+				);
+				// Inline script (should be blocked by 'self'-only script-src) plus
+				// the external eval probe (external same-origin script is allowed).
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "csp-inline.html"),
+					"<!DOCTYPE html><html><head></head><body>"
+					+ "<script>window._inlineRan = true;</script>"
+					+ '<script src="csp-probe.js"></script></body></html>'
+				);
+				// A page trying to loosen its own CSP via <meta> to allow eval.
+				// meta can only tighten, so eval should still be blocked.
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "csp-meta.html"),
+					"<!DOCTYPE html><html><head>"
+					+ '<meta http-equiv="Content-Security-Policy" '
+					+ "content=\"script-src 'self' 'unsafe-eval'\">"
+					+ "</head><body>"
+					+ '<script src="csp-probe.js"></script></body></html>'
+				);
 			});
 
 			after(async function () {
@@ -4388,6 +4484,173 @@ describe("Plugin Sandbox", function () {
 					win.close();
 				}
 			});
+
+			it("blocks a cross-origin (remote) script via the page CSP script-src 'self'", async function () {
+				// Same-origin moz-extension resources are CSP-exempt, so only a
+				// CROSS-ORIGIN load reveals whether script-src 'self' is enforced.
+				let remoteURL = registerServerEndpoint("GET", function () {
+					return [200, "application/javascript", "window._remoteRan = true;"];
+				});
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "remote-script.html"),
+					"<!DOCTYPE html><html><head></head><body>"
+					+ `<script src="${remoteURL}"></script>`
+					+ "</body></html>"
+				);
+				loadTestScopeWithURI(["default", "openWindow"]);
+				let win = await evalInScope("openWindow('remote-script.html')");
+				try {
+					for (let i = 0; i < 100 && win.wrappedJSObject._remoteRan === undefined; i++) {
+						await Zotero.Promise.delay(20);
+					}
+					assert.notOk(win.wrappedJSObject._remoteRan,
+						"a cross-origin script must be blocked by the extension-page CSP");
+				}
+				finally {
+					win.close();
+				}
+			});
+
+			// Fresh-id plugin with a declared CSP; opens a page whose external
+			// (CSP-allowed) probe does a remote fetch, and returns the fetch status.
+			async function remoteFetchStatus(id, guid, csp, remoteURL) {
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "remote-fetch-probe.js"),
+					"window._fetchStatus = 'pending';\n"
+					// no-cors so a CORS rejection isn't mistaken for a CSP block;
+					// 127.0.0.1 is loopback, so no mixed-content block either.
+					+ `fetch(${JSON.stringify(remoteURL)}, { mode: 'no-cors' }).then(\n`
+					+ "  function () { window._fetchStatus = 'allowed'; },\n"
+					+ "  function () { window._fetchStatus = 'blocked'; }\n"
+					+ ");\n"
+				);
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "remote-fetch.html"),
+					"<!DOCTYPE html><html><head></head><body>"
+					+ '<script src="remote-fetch-probe.js"></script></body></html>'
+				);
+				let addon = createMockPlugin({
+					id,
+					name: "CSP Remote " + id,
+					syncGUID: guid,
+					permissions: ["default", "openWindow"],
+					contentSecurityPolicy: csp,
+					resourceURI: PathUtils.toFileURI(tmpDir) + "/",
+				});
+				PluginSandbox.loadScope(addon);
+				let s = PluginSandbox.getScope(id);
+				let win = await Cu.evalInSandbox("openWindow('remote-fetch.html')", s);
+				try {
+					for (let i = 0; i < 100 && win.wrappedJSObject._fetchStatus === "pending"; i++) {
+						await Zotero.Promise.delay(20);
+					}
+					return win.wrappedJSObject._fetchStatus;
+				}
+				finally {
+					win.close();
+					PluginSandbox.unloadScope(id);
+				}
+			}
+
+			it("lets a plugin-declared CSP restrict remote subresources (connect-src)", async function () {
+				// Cross-origin fetch target (the local test server is a different
+				// origin than moz-extension, so connect-src governs it).
+				let remoteURL = registerServerEndpoint("GET", function () {
+					return [200, "text/plain", "ok"];
+				});
+				// Both plugins declare a CSP (avoiding the default's
+				// upgrade-insecure-requests); they differ ONLY in connect-src.
+				let allowed = await remoteFetchStatus(
+					"csp-r1@zotero.org", "{00000000-0000-0000-0000-0000000000c6}",
+					"script-src 'self'", remoteURL);
+				let blocked = await remoteFetchStatus(
+					"csp-r2@zotero.org", "{00000000-0000-0000-0000-0000000000c7}",
+					"script-src 'self'; connect-src 'none';", remoteURL);
+				assert.equal(allowed, "allowed",
+					"without connect-src, the remote fetch is allowed");
+				assert.equal(blocked, "blocked",
+					"a plugin-declared connect-src 'none' blocks the remote fetch -- the "
+					+ "declared page CSP IS enforced for cross-origin subresources");
+			});
+
+			// Load a fresh-id plugin with a declared CSP, open the probe page, and
+			// return whether eval() and WebAssembly compilation are permitted.
+			async function evalWasmStatus(id, guid, csp) {
+				let addon = createMockPlugin({
+					id,
+					name: "CSP Probe " + id,
+					syncGUID: guid,
+					permissions: ["default", "openWindow"],
+					contentSecurityPolicy: csp,
+					resourceURI: PathUtils.toFileURI(tmpDir) + "/",
+				});
+				PluginSandbox.loadScope(addon);
+				let s = PluginSandbox.getScope(id);
+				let win = await Cu.evalInSandbox("openWindow('csp-inline.html')", s);
+				try {
+					let w = win.wrappedJSObject;
+					return { evalStatus: w._evalStatus, wasmStatus: w._wasmStatus };
+				}
+				finally {
+					win.close();
+					PluginSandbox.unloadScope(id);
+				}
+			}
+
+			it("cannot loosen the CSP to allow eval() -- the base CSP forbids 'unsafe-eval'", async function () {
+				// Even declaring 'unsafe-eval' can't re-enable eval: the fixed base
+				// CSP co-applies (AND-semantics) and omits 'unsafe-eval'.
+				let r = await evalWasmStatus(
+					"csp-eval@zotero.org", "{00000000-0000-0000-0000-0000000000c8}",
+					"script-src 'self' 'unsafe-eval'");
+				assert.equal(r.evalStatus, "blocked",
+					"a plugin cannot re-enable eval() -- the base CSP forbids 'unsafe-eval'");
+			});
+
+			it("can enable WebAssembly by declaring 'wasm-unsafe-eval' (default blocks it)", async function () {
+				// Default page CSP has no 'wasm-unsafe-eval', so wasm is blocked; the
+				// base CSP DOES allow it, so a plugin can opt in via its manifest CSP.
+				let def = await evalWasmStatus(
+					"csp-wasm1@zotero.org", "{00000000-0000-0000-0000-0000000000c9}", null);
+				let optIn = await evalWasmStatus(
+					"csp-wasm2@zotero.org", "{00000000-0000-0000-0000-0000000000ca}",
+					"script-src 'self' 'wasm-unsafe-eval'");
+				assert.equal(def.wasmStatus, "blocked",
+					"default page CSP (no 'wasm-unsafe-eval') blocks WebAssembly");
+				assert.equal(optIn.wasmStatus, "allowed",
+					"declaring 'wasm-unsafe-eval' enables WebAssembly (base CSP permits it)");
+			});
+
+			it("enforces the extension-page CSP: inline + eval blocked; same-origin scripts exempt", async function () {
+				// Inline + eval() are blocked, but the page's own same-origin script
+				// runs: moz-extension same-origin resources are CSP-exempt in Gecko.
+				loadTestScopeWithURI(["default", "openWindow"]);
+				let win = await evalInScope("openWindow('csp-inline.html')");
+				try {
+					let w = win.wrappedJSObject;
+					assert.isTrue(w._probeRan, "same-origin external script runs (CSP-exempt)");
+					assert.notOk(w._inlineRan, "inline script should be blocked by the extension-page CSP");
+					assert.equal(w._evalStatus, "blocked", "eval() should be blocked by the extension-page CSP");
+				}
+				finally {
+					win.close();
+				}
+			});
+
+			it("does not let a plugin loosen its CSP via a <meta> tag (eval stays blocked)", async function () {
+				loadTestScopeWithURI(["default", "openWindow"]);
+				let win = await evalInScope("openWindow('csp-meta.html')");
+				try {
+					let w = win.wrappedJSObject;
+					assert.isTrue(w._probeRan, "external script should still run");
+					assert.equal(w._evalStatus, "blocked",
+						"a meta CSP adding 'unsafe-eval' must not override the stricter policy CSP");
+				}
+				finally {
+					win.close();
+				}
+			});
+
 
 			it("should call onLoad callback with the content window", async function () {
 				loadTestScopeWithURI(["default", "openWindow"]);
@@ -5300,6 +5563,52 @@ describe("Plugin Sandbox", function () {
 				let line = findTrace("call", "console.log");
 				assert.ok(line, "Should have a [call] trace for console.log");
 			});
+		});
+	});
+
+	describe("plugin manifest content_security_policy (real install)", function () {
+		var { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+		const INSTALL_ID = "csp-install-test@zotero.org";
+
+		it("passes the manifest content_security_policy through to installPermissions and the policy", async function () {
+			let dir = await getTempDirectory();
+			await IOUtils.writeUTF8(
+				PathUtils.join(dir, "manifest.json"),
+				JSON.stringify({
+					manifest_version: 2,
+					name: "CSP Install Test",
+					version: "1.0.0",
+					applications: {
+						zotero: {
+							id: INSTALL_ID,
+							update_url: "https://example.com/updates.json",
+							strict_max_version: "9999.*",
+						},
+					},
+					content_security_policy: "script-src 'self'; object-src 'self'; connect-src 'none';",
+				})
+			);
+			await IOUtils.writeUTF8(
+				PathUtils.join(dir, "bootstrap.js"),
+				"function install() {}\nfunction startup() {}\nfunction shutdown() {}\nfunction uninstall() {}\n"
+			);
+			let expectedCSP = "script-src 'self'; object-src 'self'; connect-src 'none';";
+			let addon = await AddonManager.installTemporaryAddon(Zotero.File.pathToFile(dir));
+			try {
+				assert.equal(addon.installPermissions?.content_security_policy, expectedCSP,
+					"manifest content_security_policy should flow into installPermissions");
+				// If the plugin lifecycle registered a WebExtensionPolicy, it must
+				// carry the declared CSP (that's what makes it enforceable).
+				let policy = WebExtensionPolicy.getByID(INSTALL_ID);
+				if (policy) {
+					assert.equal(policy.extensionPageCSP, expectedCSP,
+						"the plugin's WebExtensionPolicy should use the declared CSP");
+				}
+			}
+			finally {
+				await addon.uninstall();
+				await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
+			}
 		});
 	});
 });
