@@ -24,7 +24,7 @@
 */
 
 
-import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY, INSTANCE_PROXY_FACTORY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { SchemaKey, DATA_OBJECT_READ_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
@@ -1095,7 +1095,7 @@ const WindowScopeVariables = {
 
 		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
 
-		return scope[INSTANCE_PROXY_FACTORY](traps);
+		return ScopeUtils.buildInstanceProxy(scope, traps);
 	},
 
 	createSafeHTMLElement(elem, pluginID, { rootNode } = {}) {
@@ -1292,7 +1292,7 @@ const WindowScopeVariables = {
 						},
 						dsTraps, { defineAs: "deleteProperty" }
 					);
-					return scope[INSTANCE_PROXY_FACTORY](dsTraps);
+					return ScopeUtils.buildInstanceProxy(scope, dsTraps);
 				}
 				return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true });
 			}
@@ -1369,7 +1369,7 @@ const WindowScopeVariables = {
 
 		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
 
-		return scope[INSTANCE_PROXY_FACTORY](traps);
+		return ScopeUtils.buildInstanceProxy(scope, traps);
 	},
 
 
