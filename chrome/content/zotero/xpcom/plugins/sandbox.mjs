@@ -35,7 +35,7 @@ import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.m
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
-import { setupConsole, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupFile, setupPluginDB } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
+import { setupConsole, setupInstanceProxy, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupFile, setupPluginDB } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
@@ -298,6 +298,8 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 	setupConsole(scope, addon);
 
 	scopes.set(addon.id, scope);
+
+	setupInstanceProxy(scope);
 
 	let schema = VarCheck.getPermissionSchema(permissions);
 
