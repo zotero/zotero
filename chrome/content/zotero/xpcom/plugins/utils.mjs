@@ -215,10 +215,12 @@ const VarCheck = {
 		let flags = this._scopeFlagsCache.get(scope);
 		if (flags) return flags;
 		let perms = scope.PERMISSIONS;
+		let permissions = new Set(perms ? Array.from(perms) : []);
 		flags = {
-			privileged: perms.includes("*"),
-			dataRead: perms.includes("dataRead"),
-			dataWrite: perms.includes("dataWrite"),
+			permissions,
+			privileged: permissions.has("*"),
+			dataRead: permissions.has("dataRead"),
+			dataWrite: permissions.has("dataWrite"),
 		};
 		this._scopeFlagsCache.set(scope, flags);
 		return flags;
@@ -228,6 +230,23 @@ const VarCheck = {
 		if (!scope) return true;
 		// If the scope is unprivileged, it will be xrayed and thus using its properties is safe
 		return this.scopeFlags(scope).privileged;
+	},
+
+	/**
+	 * @param {object} scope
+	 * @param {string|string[]} required
+	 * @return {boolean}
+	 */
+	hasPermissions(scope, required) {
+		if (!required) return true;
+		if (!scope) return false;
+		let { permissions, privileged } = this.scopeFlags(scope);
+		if (permissions.size === 0) return false;
+		if (privileged) return true;
+		if (typeof required === "string") {
+			return permissions.has(required);
+		}
+		return required.every(p => permissions.has(p));
 	},
 
 	PERMISSION_MATCH_MODES: {
@@ -665,9 +684,24 @@ const ScopeUtils = {
 		}
 
 		function isPropertyAllowed(name) {
+			let present = !!instanceSchema && typeof name === "string"
+				&& Object.prototype.hasOwnProperty.call(instanceSchema, name);
+			// Internal/underscore-prefixed members are never exposed unless a
+			// schema explicitly lists them (kills _saveData/_updateFeed/etc.).
+			if (!present && typeof name === "string" && name.startsWith("_")) {
+				return false;
+			}
 			if (!instanceSchema) return true;
-			if (instanceSchema[SchemaKey.WILDCARD] === true) return instanceSchema[name] !== false;
-			return name in instanceSchema && instanceSchema[name] !== false;
+			let node = instanceSchema[name];
+			if (node === false) return false;
+			// Allowlist schemas (no wildcard) only expose listed members.
+			if (instanceSchema[SchemaKey.WILDCARD] !== true && !present) return false;
+			// Additional permissions (SchemaKey.REQUIRE)
+			if (present && VarCheck.isObject(node) && node[SchemaKey.REQUIRE]
+					&& !VarCheck.hasPermissions(scope, node[SchemaKey.REQUIRE])) {
+				return false;
+			}
+			return true;
 		}
 
 		let nestedSchema = (instanceSchema && instanceSchema[SchemaKey.RECURSIVE]) ? instanceSchema : null;

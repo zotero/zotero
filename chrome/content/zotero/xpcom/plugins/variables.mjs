@@ -25,7 +25,7 @@
 
 
 import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
-import { SchemaKey, DATA_OBJECT_READ_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
+import { SchemaKey, DATA_OBJECT_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
@@ -1703,8 +1703,6 @@ const DataScopeVariables = {
 
 	/**
 	 * Wrap a Zotero DataObject or Library instance for safe use in the plugin scope.
-	 * Without dataRead permission, returns undefined.
-	 * Without dataWrite permission, write methods are blocked via DATA_OBJECT_READ_SCHEMA.
 	 */
 	createSafeDataObject(value, pluginID) {
 		let scope = PluginSandbox.getScope(pluginID);
@@ -1716,8 +1714,7 @@ const DataScopeVariables = {
 		if (!flags.dataRead) {
 			return undefined;
 		}
-		let instanceSchema = flags.dataWrite ? null : DATA_OBJECT_READ_SCHEMA;
-		return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true, instanceSchema });
+		return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true, instanceSchema: DATA_OBJECT_SCHEMA });
 	}
 };
 

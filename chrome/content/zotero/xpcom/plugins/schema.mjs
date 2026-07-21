@@ -29,6 +29,7 @@ const SchemaKey = Object.freeze({
 	HANDLER: Symbol("plugin.schema.handler"),
 	SCHEMA: Symbol("plugin.schema.schema"),
 	RECURSIVE: Symbol("plugin.schema.recursive"),
+	REQUIRE: Symbol("plugin.schema.require"),
 });
 
 const IMPLIED_PERMISSIONS = {
@@ -46,25 +47,42 @@ const IMPLIED_PERMISSIONS = {
 	],
 };
 
-const DATA_OBJECT_READ_SCHEMA = {
+const DATA_OBJECT_SCHEMA = {
 	[SchemaKey.WILDCARD]: true,
 	[SchemaKey.RECURSIVE]: true,
-	save: false,
-	saveTx: false,
-	erase: false,
-	eraseTx: false,
+
+	// DataObject
+	save: { [SchemaKey.REQUIRE]: "dataWrite" },
+	saveTx: { [SchemaKey.REQUIRE]: "dataWrite" },
+	erase: { [SchemaKey.REQUIRE]: "dataWrite" },
+	eraseTx: { [SchemaKey.REQUIRE]: "dataWrite" },
+	trash: { [SchemaKey.REQUIRE]: "dataWrite" },
+	trashTx: { [SchemaKey.REQUIRE]: "dataWrite" },
+	moveToLibrary: { [SchemaKey.REQUIRE]: "dataWrite" },
+	setAttachmentLastPageIndex: { [SchemaKey.REQUIRE]: "dataWrite" },
+	setAttachmentLastReadAloudPosition: { [SchemaKey.REQUIRE]: "dataWrite" },
+	addLinkedItem: { [SchemaKey.REQUIRE]: "dataWrite" },
+	addLinkedCollection: { [SchemaKey.REQUIRE]: "dataWrite" },
 	// Collection
-	addItem: false,
-	addItems: false,
-	removeItem: false,
-	removeItems: false,
+	addItem: { [SchemaKey.REQUIRE]: "dataWrite" },
+	addItems: { [SchemaKey.REQUIRE]: "dataWrite" },
+	removeItem: { [SchemaKey.REQUIRE]: "dataWrite" },
+	removeItems: { [SchemaKey.REQUIRE]: "dataWrite" },
 	// Search
-	addCondition: false,
-	removeCondition: false,
+	addCondition: { [SchemaKey.REQUIRE]: "dataWrite" },
+	removeCondition: { [SchemaKey.REQUIRE]: "dataWrite" },
 	// Feed
-	updateFeed: false,
-	clearExpiredItems: false,
-	storeSyncedSettings: false,
+	updateFeed: { [SchemaKey.REQUIRE]: "dataWrite" },
+	clearExpiredItems: { [SchemaKey.REQUIRE]: "dataWrite" },
+	storeSyncedSettings: { [SchemaKey.REQUIRE]: "dataWrite" },
+
+	// File access
+	deleteAttachmentFile: { [SchemaKey.REQUIRE]: ["dataWrite", "fileSystemWrite"] },
+	renameAttachmentFile: { [SchemaKey.REQUIRE]: ["dataWrite", "fileSystemWrite"] },
+	relinkAttachmentFile: { [SchemaKey.REQUIRE]: ["dataWrite", "fileSystemWrite"] },
+
+	ObjectsClass: false,
+	ContainerObjectsClass: false,
 };
 
 const PERMISSION_SCHEMAS = {
@@ -133,15 +151,15 @@ const PERMISSION_SCHEMAS = {
 	dataRead: {
 		Zotero: {
 			Items: {
-				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-				getAsync: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-				getByLibraryAndKey: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-				getTopLevel: { [SchemaKey.HANDLER]: "FromScopeCallable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-				keepTopLevel: { [SchemaKey.HANDLER]: "FromScopeCallable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+				getAsync: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+				getByLibraryAndKey: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+				getTopLevel: { [SchemaKey.HANDLER]: "FromScopeCallable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+				keepTopLevel: { [SchemaKey.HANDLER]: "FromScopeCallable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 			},
 			Libraries: {
-				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-				getAll: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+				getAll: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 				userLibraryID: true,
 				getName: true,
 				getType: true,
@@ -154,14 +172,14 @@ const PERMISSION_SCHEMAS = {
 				exists: true,
 			},
 			Collections: {
-				getByLibrary: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-				getByParent: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-				getCollectionsContainingItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				getByLibrary: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+				getByParent: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+				getCollectionsContainingItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 			},
 			Groups: {
-				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-				getAll: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-				getByLibraryID: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+				getAll: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+				getByLibraryID: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 				getGroupIDFromLibraryID: true,
 				getLibraryIDFromGroupID: true,
 				exists: true,
@@ -199,41 +217,24 @@ const PERMISSION_SCHEMAS = {
 			Translators: {
 				getAll: true,
 			},
-			Item: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-			Collection: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-			Search: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-			Duplicates: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-			Feed: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			Item: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			Collection: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			Search: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			Duplicates: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			Feed: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 		},
 	},
 	dataWrite: {
 		Zotero: {
 			Items: {
-				get: true,
-				getAsync: true,
-				getByLibraryAndKey: true,
-				getTopLevel: "FromScopeCallable",
-				keepTopLevel: "FromScopeCallable",
 				trash: true,
 				trashTx: true,
 			},
-			Libraries: {
-				get: true,
-				getAll: true,
-			},
 			Collections: {
-				getByLibrary: true,
-				getByParent: true,
-				getCollectionsContainingItems: true,
 				registerChildCollection: true,
 				unregisterChildCollection: true,
 				registerChildItem: true,
 				unregisterChildItem: true,
-			},
-			Groups: {
-				get: true,
-				getAll: true,
-				getByLibraryID: true,
 			},
 			Tags: {
 				rename: true,
@@ -245,11 +246,6 @@ const PERMISSION_SCHEMAS = {
 				Search: "Constructor",
 				Web: "Constructor",
 			},
-			Item: "Constructor",
-			Collection: "Constructor",
-			Search: "Constructor",
-			Duplicates: "Constructor",
-			Feed: "Constructor",
 			DB: {
 				executeTransaction: true,
 			},
@@ -445,11 +441,11 @@ const MAIN_WINDOW_SCHEMAS = {
 	"mainWindow,dataRead": {
 		ZoteroPane: {
 			getSelectedLibraryID: true,
-			getSelectedCollection: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-			getSelectedSavedSearch: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-			getSelectedGroup: true,
-			getSelectedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
-			getSortedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_READ_SCHEMA },
+			getSelectedCollection: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			getSelectedSavedSearch: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			getSelectedGroup: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			getSelectedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			getSortedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 			canEdit: true,
 			canEditLibrary: true,
 			canEditFiles: true,
@@ -460,11 +456,8 @@ const MAIN_WINDOW_SCHEMAS = {
 	},
 	"mainWindow,dataWrite": {
 		ZoteroPane: {
-			getSelectedCollection: true,
-			getSelectedSavedSearch: true,
-			getSelectedItems: true,
-			getSortedItems: true,
-			newItem: true,
+			// newItem resolves to an Item
+			newItem: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 			newCollection: true,
 			newNote: true,
 			newChildNote: true,
@@ -493,4 +486,4 @@ const PLUGIN_DB_SCHEMA = {
 	path: true,
 };
 
-export { SchemaKey, DATA_OBJECT_READ_SCHEMA, PLUGIN_DB_SCHEMA, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
+export { SchemaKey, DATA_OBJECT_SCHEMA, PLUGIN_DB_SCHEMA, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
