@@ -225,14 +225,14 @@ Zotero.Plugins = new function () {
 	}
 	
 	
-	this.getRootURI = function (id) {
+	this.getBaseURI = function (id) {
 		return lazy.PluginProtocol.getBaseURI(id);
 	};
 	
-	
+
 	/**
 	 * Resolve a URI in the context of a plugin. If the passed URI is relative, it will be resolved relative to the
-	 * plugin root URI. If it's absolute, it will be returned unchanged.
+	 * plugin base URI. If it's absolute, it will be returned unchanged.
 	 *
 	 * @param {String} id Plugin ID
 	 * @param {String | URL} uri
@@ -240,7 +240,7 @@ Zotero.Plugins = new function () {
 	 * @return {Promise<String>}
 	 */
 	this.resolveURI = function (id, uri) {
-		let baseURI = this.getRootURI(id);
+		let baseURI = this.getBaseURI(id);
 		return new URL(uri, baseURI).href;
 	};
 	
