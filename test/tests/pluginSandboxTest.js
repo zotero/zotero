@@ -1,6 +1,7 @@
 describe("Plugin Sandbox", function () {
 	var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 	var { PluginFileAccess } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/file.mjs");
+	var { ScopeUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
 	var { getByID } = ChromeUtils.importESModule(
 		"chrome://zotero/content/xpcom/plugins/uuid.mjs"
 	).PluginUUID;
@@ -183,6 +184,35 @@ describe("Plugin Sandbox", function () {
 			let scope2 = PluginSandbox.getScope(ADDON_ID);
 			assert.notStrictEqual(scope2, scope1, "a version bump should recreate the scope");
 			assert.equal(scope2.VERSION, "2.0.0", "recreated scope should carry the new version");
+		});
+
+		it("should facade function-valued properties on plain objects crossing into the scope", function () {
+			loadTestScope(["default"]);
+			let chromeMarker = { secret: "chrome-only" };
+			let chromeObject = {
+				data: 42,
+				nested: { label: "x" },
+				cb: () => chromeMarker,
+			};
+			scope.__h5test = ScopeUtils._ensureVarInScope(chromeObject, scope);
+
+			// Data round-trips through the per-property build (proves the in-scope
+			// object is actually populated and visible to sandbox code).
+			assert.equal(evalInScope("__h5test.data"), 42);
+			assert.equal(evalInScope("__h5test.nested.label"), "x");
+
+			// The function property is callable...
+			assert.equal(evalInScope("typeof __h5test.cb"), "function");
+			// ...and it went through ensureCallableInScope rather than being handed
+			// over as a raw cloneFunctions-wrapped chrome callable. The facade
+			// exports its wrapper as "f"; a raw clone would keep the name "myCb".
+			assert.equal(evalInScope("__h5test.cb.name"), "f",
+				"function property must be exposed via the controlled callable facade");
+			// The facade also facades the call's return value: a plain object comes
+			// back as a usable in-scope object, not the raw chrome reference.
+			assert.equal(evalInScope("__h5test.cb().secret"), "chrome-only");
+			assert.isTrue(evalInScope("__h5test.cb() instanceof Object"),
+				"the faceted return should be an in-scope object");
 		});
 	});
 

@@ -640,10 +640,16 @@ const ScopeUtils = {
 		}
 
 		if (VarCheck.isPlainObject(value)) {
-			return Cu.cloneInto(value, scope, {
-				wrapReflectors: true,
-				cloneFunctions: true,
-			});
+			let obj = Cu.createObjectIn(scope);
+			for (let key of Object.keys(value)) {
+				Object.defineProperty(obj, key, {
+					value: ScopeUtils.ensurePromiseVarInScope(value[key], scope, { mutable, instanceSchema }),
+					enumerable: true,
+					writable: true,
+					configurable: true,
+				});
+			}
+			return obj;
 		}
 
 		return ScopeUtils._ensureInstanceInScope(value, scope, { mutable, strong, instanceSchema });
