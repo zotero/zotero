@@ -317,7 +317,11 @@ const PERMISSION_SCHEMAS = {
 	},
 	itemTree: {
 		Zotero: {
-			ItemTreeManager: true,
+			ItemTreeManager: {
+				registerColumn: "CustomParserCallable",
+				unregisterColumn: "CustomParserCallable",
+				[SchemaKey.WILDCARD]: true,
+			},
 		},
 	},
 	ui: {
@@ -325,30 +329,49 @@ const PERMISSION_SCHEMAS = {
 	},
 	itemPane: {
 		Zotero: {
-			ItemPaneManager: true,
+			ItemPaneManager: {
+				registerSection: "CustomParserCallable",
+				unregisterSection: "CustomParserCallable",
+				registerInfoRow: "CustomParserCallable",
+				unregisterInfoRow: "CustomParserCallable",
+				[SchemaKey.WILDCARD]: true,
+			},
 		},
 	},
 	menu: {
 		Zotero: {
-			MenuManager: true,
+			MenuManager: {
+				registerMenu: "CustomParserCallable",
+				unregisterMenu: "CustomParserCallable",
+				[SchemaKey.WILDCARD]: true,
+			},
 		},
 	},
 	windowResource: {
 		Zotero: {
-			WindowResourceManager: true,
+			WindowResourceManager: {
+				registerResource: "CustomParserCallable",
+				unregisterResource: "CustomParserCallable",
+				[SchemaKey.WILDCARD]: true,
+			},
 		},
 	},
 	pluginInterop: {
 		Zotero: {
 			PluginInteropManager: {
-				OK: true,
-				NOT_FOUND: true,
-				VERSION_TOO_LOW: true,
-				VERSION_TOO_HIGH: true,
-				PERMISSION_DENIED: true,
-				register: true,
-				unregister: true,
+				register: "CustomParserCallable",
+				unregister: "CustomParserCallable",
 				getCommand: "CustomParserCallable",
+				[SchemaKey.WILDCARD]: true,
+			},
+		},
+	},
+	serverEndpoint: {
+		Zotero: {
+			ServerEndpointManager: {
+				registerEndpoint: "CustomParserCallable",
+				unregisterEndpoint: "CustomParserCallable",
+				[SchemaKey.WILDCARD]: true,
 			},
 		},
 	},
