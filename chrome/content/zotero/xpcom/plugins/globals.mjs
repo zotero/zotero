@@ -698,7 +698,9 @@ function setupPluginDB(scope) {
 		// getColumns reads row.name in chrome, so it must use the
 		// original queryAsync to avoid Xray-wrapped forwarding proxies
 		conn.getColumns = function (table) {
-			return origQueryAsync("PRAGMA table_info(" + table + ")")
+			// Quote the identifier so a table name can't inject into the PRAGMA.
+			let quoted = '"' + String(table).replace(/"/g, '""') + '"';
+			return origQueryAsync("PRAGMA table_info(" + quoted + ")")
 				.then(rows => rows.map(row => row.name));
 		};
 
