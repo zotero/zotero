@@ -48,21 +48,10 @@ var scopes = new Map();
  */
 function loadScope(addon, globalVars = {}) {
 	let currentPermissions = VarCheck.getPermissionsString(VarCheck.resolvePermissions(addon.installPermissions.permissions));
-	let existingScope = scopes.get(addon.id);
 	let uuid = PluginUUID.getByID(addon.id);
 
-	if (existingScope) {
-		let existingPermissions = VarCheck.getPermissionsString(existingScope?.PERMISSIONS);
-		if (existingPermissions === currentPermissions && existingScope.VERSION === addon.version) {
-			Zotero.debug(`Reusing existing scope for plugin ${addon.id}`);
-			// Ensure the moz-extension:// policy is still active
-			PluginProtocol.register(
-				addon.id, addon.getResourceURI(), uuid,
-				addon.installPermissions?.origins
-			);
-			return;
-		}
-		Zotero.debug(`Permissions or version changed for plugin ${addon.id}, recreating scope`);
+	if (scopes.has(addon.id)) {
+		Zotero.debug(`Recreating scope for plugin ${addon.id}`);
 		unloadScope(addon.id);
 	}
 
@@ -114,7 +103,6 @@ function unloadScope(id) {
 	PluginProtocol.unregister(id);
 	PluginFileAccess.unregister(id);
 	// Delay nuke to allow any pending operations to complete
-	// TODO: Throws error 0x80070057
 	setTimeout(() => {
 		Cu.nukeSandbox(scope);
 	}, SANDBOX_NUKE_DELAY_MS);
@@ -163,6 +151,9 @@ function loadPrivilegedScope(addon, uuid, globalVars = {}) {
 		Services.scriptSecurityManager.getSystemPrincipal(),
 		{
 			sandboxName: addon.id,
+			// Cu.nukeSandbox requires a wrapper with its own compartment,
+			// otherwise throws NS_ERROR_ILLEGAL_VALUE (0x80070057).
+			freshCompartment: true,
 			wantGlobalProperties: [
 				"atob",
 				"btoa",
