@@ -3663,8 +3663,16 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 				}
 				val = 'storage:' + PathUtils.filename(val);
 			}
-			if (/^storage:.*[/\\]/.test(val)) {
-				throw new Error(`Stored file filename cannot contain a slash -- got '${val}'`);
+			// A leaked directory path -- a forward slash (never valid in a filename) or
+			// a Windows absolute path (drive-letter or UNC prefix). Bare backslashes
+			// are technically valid on Linux/macOS and present in existing filenames
+			// (e.g., LaTeX in titles), so allow here for now to avoid breaking things,
+			// but getValidFileName() should be used elsewhere to strip them.
+			let filename = val.substr(8);
+			if (filename.includes('/')
+					|| /^[a-zA-Z]:[\\/]/.test(filename)
+					|| filename.startsWith('\\\\')) {
+				throw new Error(`Stored-file filename cannot contain a directory path -- got '${val}'`);
 			}
 		}
 		

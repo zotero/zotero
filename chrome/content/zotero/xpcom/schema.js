@@ -3692,11 +3692,13 @@ Zotero.Schema = new function () {
 			}
 
 			else if (i == 128) {
-				// Strip full paths (e.g., from third-party tools) from stored-file attachment
-				// paths, which should contain only a filename after 'storage:'
 				let rows = await Zotero.DB.queryAsync("SELECT itemID, path FROM itemAttachments WHERE linkMode IN (0, 1) AND (path LIKE ? OR path LIKE ?)", ['storage:%/%', 'storage:%\\%']);
 				for (let row of rows) {
-					let filename = row.path.substr(8).split(/[/\\]/).pop();
+					let rel = row.path.substr(8);
+					if (!(rel.includes('/') || /^[a-zA-Z]:[\\/]/.test(rel) || rel.startsWith('\\\\'))) {
+						continue;
+					}
+					let filename = rel.split(/[/\\]/).pop();
 					if (!filename) {
 						continue;
 					}

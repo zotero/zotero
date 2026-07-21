@@ -1159,14 +1159,25 @@ describe("Zotero.Item", function () {
 			assert.equal(attachment.attachmentFilename, filename);
 		});
 
-		it("should reject a filename containing a slash", async function () {
+		it("should reject a filename containing a directory path", async function () {
 			var item = await createDataObject('item');
 
 			var attachment = new Zotero.Item("attachment");
 			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
 			attachment.parentID = item.id;
-			assert.throws(() => attachment.attachmentFilename = "D:/Foo/Bar/test.pdf", /slash/);
-			assert.throws(() => attachment.attachmentFilename = "D:\\Foo\\Bar\\test.pdf", /slash/);
+			assert.throws(() => attachment.attachmentFilename = "D:/Foo/Bar/test.pdf", /directory path/);
+			assert.throws(() => attachment.attachmentFilename = "D:\\Foo\\Bar\\test.pdf", /directory path/);
+			assert.throws(() => attachment.attachmentFilename = "\\\\server\\share\\test.pdf", /directory path/);
+		});
+
+		it("should allow a filename containing a bare backslash", async function () {
+			var item = await createDataObject('item');
+
+			var attachment = new Zotero.Item("attachment");
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			attachment.parentID = item.id;
+			attachment.attachmentFilename = "foo\\bar.pdf";
+			assert.equal(attachment.attachmentFilename, "foo\\bar.pdf");
 		});
 
 		it("should get a filename for a base-dir-relative file", function () {
