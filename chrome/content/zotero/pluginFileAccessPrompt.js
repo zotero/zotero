@@ -120,11 +120,11 @@ var PluginFileAccessPrompt = {
 	},
 
 	_onKeydown(e) {
-		// Esc / Ctrl-W: dismiss as deny-once via cancel().
+		// Esc / Ctrl-W: cancel() resolves the promise and closes
 		let isClose = (Zotero.isMac ? e.metaKey : e.ctrlKey) && e.key === "w";
 		if (e.key === "Escape" || isClose) {
 			e.preventDefault();
-			window.close();
+			this.cancel();
 			return;
 		}
 		// Enter: activate focused button, else the default Deny.
