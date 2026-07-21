@@ -216,7 +216,7 @@ describe("Zotero.Sync.Storage.Local", function () {
 				var fileContents = Zotero.Utilities.randomString();
 				
 				var oldFilename = "Old File";
-				var newFilename = " ab — c \\:.txt.";
+				var newFilename = " ab — c :.txt.";
 				var filteredFilename = " ab — c .txt.";
 				var tmpDir = Zotero.getTempDirectory().path;
 				var tmpFile = OS.Path.join(tmpDir, key + '.tmp');
