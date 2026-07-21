@@ -544,6 +544,71 @@ describe("CollectionViewItemTree", function () {
 	});
 	
 	describe("#toggleOpenState()", function () {
+		it("should preserve selection and detached focus when toggling another container", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+			
+			var parentItem = await createDataObject('item', { collections: [collection.id] });
+			var attachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			var item1 = await createDataObject('item', { collections: [collection.id] });
+			var item2 = await createDataObject('item', { collections: [collection.id] });
+			await waitForItemsLoad(win);
+
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			if (itemsView.isContainerOpen(parentRow)) {
+				await itemsView.toggleOpenState(parentRow);
+				await itemsView.waitForLoad();
+			}
+			await itemsView.selectItem(item1.id);
+			itemsView.selection.toggleSelect(itemsView.getRowIndexByID(item2.id));
+			itemsView.selection.focused = parentRow;
+			itemsView.selection.pivot = parentRow;
+
+			itemsView.tree._onKeyDown({
+				key: Zotero.arrowNextKey,
+				preventDefault: () => {},
+				stopPropagation: () => {}
+			});
+			await itemsView.waitForLoad();
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(parentItem.id)));
+			assert.sameMembers(itemsView.getSelectedItems(true), [item1.id, item2.id]);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(parentItem.id));
+
+			itemsView.tree._onKeyDown({
+				key: Zotero.arrowPreviousKey,
+				preventDefault: () => {},
+				stopPropagation: () => {}
+			});
+			await itemsView.waitForLoad();
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(parentItem.id)));
+			assert.sameMembers(itemsView.getSelectedItems(true), [item1.id, item2.id]);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(parentItem.id));
+		})
+
+		it("should select the parent when collapsing a selected child", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+			
+			var parentItem = await createDataObject('item', { collections: [collection.id] });
+			var attachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			await waitForItemsLoad(win);
+
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			if (!itemsView.isContainerOpen(parentRow)) {
+				await itemsView.toggleOpenState(parentRow);
+				await itemsView.waitForLoad();
+			}
+			await itemsView.selectItem(attachment.id);
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			itemsView.selection.focused = parentRow;
+			itemsView.selection.pivot = parentRow;
+			await itemsView.toggleOpenState(parentRow);
+			await itemsView.waitForLoad();
+			assert.sameMembers(itemsView.getSelectedItems(true), [parentItem.id]);
+		})
+
 		it("shouldn't scroll back to selected row when opening another container", async function () {
 			var collection = await createDataObject('collection');
 			await select(win, collection);

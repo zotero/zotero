@@ -1265,9 +1265,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (treeRow.isLibrary(true) || treeRow.isCollection() || treeRow.isFeeds()) {
 			count = await this._expandRow(this._rows, index, true);
 		}
-		if (this.selection.focused > index) {
-			this.selection.select(this.selection.focused + count);
-		}
+		this.selection.adjustForRowInsertion(index, count);
 		this.selection.selectEventsSuppressed = false;
 		
 		this._rows[index].isOpen = true;
