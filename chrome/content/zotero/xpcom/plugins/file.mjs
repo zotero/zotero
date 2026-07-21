@@ -348,7 +348,15 @@ class PersistedGrantLayer extends GrantLayer {
 		if (!raw) return;
 		try {
 			let parsed = JSON.parse(raw);
-			this._cache = new Map(parsed);
+			let entries = [];
+			for (let entry of Array.isArray(parsed) ? parsed : []) {
+				if (!Array.isArray(entry) || entry.length < 2) continue;
+				let [path, value] = entry;
+				if (typeof path !== "string" || !path) continue;
+				if (!value || typeof value !== "object" || !GrantLayer.VALID_MODES.includes(value.mode)) continue;
+				entries.push([path, { mode: value.mode }]);
+			}
+			this._cache = new Map(entries);
 			this._cacheKey = raw;
 		}
 		catch (e) {
