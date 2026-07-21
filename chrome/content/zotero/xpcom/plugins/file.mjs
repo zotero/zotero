@@ -523,6 +523,8 @@ class FileAccessState {
 			throw new Error(`Permission denied: plugin cannot ${mode} "${path}"`);
 		}
 
+		let sessionAtPrompt = this.activeSession;
+
 		// Prompt for and store the grant against the resolved real path
 		let answer = await this._promptOrReuse(realPath, mode);
 		if (!answer) {
@@ -539,12 +541,10 @@ class FileAccessState {
 			this.persistedGrants.add(grant);
 		}
 		else if (answer.persist === "once") {
-			if (this.activeSession) {
-				this.activeSession.add(grant);
+			if (sessionAtPrompt) {
+				sessionAtPrompt.add(grant);
 			}
-			else if (!isDeny) {
-				throw new Error(`Permission granted but no active session to apply it to for plugin ${this.pluginID}`);
-			}
+			// With no session active when we prompted, allow only once
 		}
 
 		if (isDeny) {
