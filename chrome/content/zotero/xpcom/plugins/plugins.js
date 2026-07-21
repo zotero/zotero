@@ -1160,7 +1160,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			
-			lazy.PluginSandbox.loadScope(addon);
+			lazy.PluginSandbox.loadScope(addon, REASONS);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'install', reason);
@@ -1174,7 +1174,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Enabling plugin " + addon.id);
-			lazy.PluginSandbox.loadScope(addon);
+			lazy.PluginSandbox.loadScope(addon, REASONS);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
@@ -1188,6 +1188,7 @@ Zotero.Plugins = new function () {
 			await _callMethod(addon, 'shutdown', REASONS.ADDON_DISABLE);
 			unregisterLocales(addon);
 			clearDefaultPrefs(addon);
+			lazy.PluginSandbox.unloadScope(addon.id);
 		},
 		
 		async onUninstalling(addon) {
