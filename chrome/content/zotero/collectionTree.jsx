@@ -190,7 +190,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			if (this.props.multiSelect) {
 				this._handleSelectAll();
 			}
-			// Always own Cmd/Ctrl-A here so the table's unscoped Select All doesn't run
+			// Own Cmd/Ctrl-A here so that neither the table's unscoped Select All nor
+			// the cmd_selectAll key command runs
+			event.preventDefault();
 			return false;
 		}
 		else if (["ArrowDown", "ArrowUp"].includes(event.key)) {
@@ -2642,7 +2644,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	// Cmd/Ctrl-A on the collection tree. Expand the current selection to all rows of
-	// the same kind within their natural scope: all library roots, all collections
+	// the same kind within their natural scope: all library roots in the same
+	// visibility group (so feeds and regular libraries don't mix), all collections
 	// sharing a parent with a selected collection (so a multi-level or multi-parent
 	// selection expands each branch it touches), or Recently Read in every library.
 	// Anything else (saved searches, Unfiled, Trash, etc.) has no useful "select
@@ -2655,7 +2658,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let selectedRows = selectedIndexes.map(index => this.getRow(index));
 		let scope;
 		if (selectedRows.every(row => row.isLibrary(true))) {
-			scope = row => row.isLibrary(true);
+			// Stay within one visibility group so feeds aren't pulled into an
+			// all-libraries selection, which couldn't be shown together
+			let visibilityGroup = selectedRows[0].visibilityGroup;
+			scope = row => row.isLibrary(true) && row.visibilityGroup === visibilityGroup;
 		}
 		else if (selectedRows.every(row => row.isCollection())) {
 			let parentIndexes = new Set(

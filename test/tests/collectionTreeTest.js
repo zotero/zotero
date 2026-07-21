@@ -798,6 +798,43 @@ describe("Zotero.CollectionTree", function () {
 		});
 	});
 
+	describe("#_handleSelectAll()", function () {
+		beforeEach(async function () {
+			await clearFeeds();
+		});
+		after(async function () {
+			await clearFeeds();
+		});
+
+		it("should select all library roots without pulling in feeds", async function () {
+			var group = await createGroup();
+			await createFeed();
+
+			// Expand the Feeds container so its feed rows are in the tree, which is the
+			// state that triggered the bug
+			var feedsRow = cv._rows.findIndex(row => row.isFeeds());
+			assert.isAbove(feedsRow, -1);
+			if (!cv.isContainerOpen(feedsRow)) {
+				await cv.toggleOpenState(feedsRow);
+			}
+			assert.isTrue(cv._rows.some(row => row.isFeed()));
+
+			// Select My Library and do Cmd/Ctrl-A
+			await cv.selectByID("L" + userLibraryID);
+			await cv._handleSelectAll();
+			await zp.onCollectionSelected();
+
+			var selectedRows = cv.getSelectedRows();
+			// My Library and the group are both selected...
+			assert.isTrue(selectedRows.some(row => row.id == "L" + userLibraryID));
+			assert.isTrue(selectedRows.some(row => row.id == group.treeViewID));
+			// ...and no feeds were pulled in, so the selection wasn't collapsed to a
+			// single row for not being shown together
+			assert.isFalse(selectedRows.some(row => row.isFeed()));
+			assert.isAbove(cv.selection.count, 1);
+		});
+	});
+
 	describe("#deleteSelectedCollection()", function () {
 		it("shouldn't delete a mixed-type selection", async function () {
 			let collection = await createDataObject('collection');
