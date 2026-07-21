@@ -694,6 +694,52 @@ async function executeTransactionWithForcedRollback(fn, options) {
 }
 
 /**
+ * Build a mock AddonManager addon for plugin sandbox/API tests.
+ *
+ * Mirrors the shape PluginSandbox/PluginFileAccess read off a real addon:
+ * id, name, version, syncGUID, installPermissions, and getResourceURI().
+ *
+ * @param {Object} [options]
+ * @param {String} options.id - Addon ID (e.g. "test@zotero.org")
+ * @param {String} [options.name] - Display name
+ * @param {String} [options.version] - Version string
+ * @param {String} [options.syncGUID] - AddonManager sync identifier
+ * @param {String[]} [options.permissions] - Granted permissions
+ * @param {String[]} [options.origins] - Granted host_permissions origins
+ * @param {String[]} [options.prefPermissions] - Declared pref_permissions prefixes
+ * @param {String[]} [options.interopPermissions] - Declared interop_permissions
+ * @param {String} [options.resourceURI] - URI returned by getResourceURI()
+ * @return {Object} A mock addon
+ */
+function createMockPlugin({
+	id,
+	name = "Test Plugin",
+	version = "1.0.0",
+	syncGUID,
+	permissions = ["default"],
+	origins = [],
+	prefPermissions = [],
+	interopPermissions = [],
+	resourceURI = "file:///nonexistent/",
+} = {}) {
+	return {
+		id,
+		name,
+		version,
+		syncGUID,
+		installPermissions: {
+			permissions,
+			origins,
+			pref_permissions: prefPermissions,
+			interop_permissions: interopPermissions,
+		},
+		getResourceURI() {
+			return Services.io.newURI(resourceURI);
+		}
+	};
+}
+
+/**
  * Returns the nsIFile corresponding to the test data directory
  * (i.e., test/tests/data)
  */
