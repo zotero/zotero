@@ -1178,10 +1178,9 @@ const WindowScopeVariables = {
 								Zotero.warn(`Setting ${attrName} attribute is not allowed for unprivileged plugins. Use addEventListener() instead.`);
 								return false;
 							}
-							// Block dangerous URL schemes
-							if (WindowScopeVariables.URL_ATTRS.has(WindowScopeVariables.urlAttrLocalName(attrName))
-									&& WindowScopeVariables.isUnsafeURLValue(args[nameArgIndex + 1])) {
-								Zotero.warn(`Setting ${attrName}="${args[nameArgIndex + 1]}" is not allowed: unsafe URL scheme.`);
+							// Restrict URL/style attributes to declared resources.
+							if (WindowScopeVariables.attrAssignmentDisallowed(actual, attrName, args[nameArgIndex + 1], pluginID)) {
+								Zotero.warn(`Setting ${attrName}="${args[nameArgIndex + 1]}" is not allowed: it references an undeclared resource.`);
 								return false;
 							}
 							return true;
@@ -1263,6 +1262,27 @@ const WindowScopeVariables = {
 					);
 					return holderFn.f;
 				}
+				// A <style>'s text is CSS -- guard methods that insert raw text.
+				if (WindowScopeVariables.STYLE_TEXT_METHODS.has(prop)
+						&& String(actual.localName || "").toLowerCase() === "style") {
+					// insertAdjacentText's text is the 2nd arg; the rest are variadic.
+					let textOnlyAt = prop === "insertAdjacentText" ? 1 : null;
+					return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
+						rootNode,
+						argValidator(args) {
+							let base = WindowScopeVariables.nodeBaseURI(actual);
+							let toCheck = textOnlyAt === null ? args : [args[textOnlyAt]];
+							for (let a of toCheck) {
+								if (typeof a === "string"
+										&& WindowScopeVariables.cssTextHasDisallowedURL(a, pluginID, base)) {
+									Zotero.warn("Inserting CSS into <style> that references an undeclared resource is not allowed.");
+									return false;
+								}
+							}
+							return true;
+						},
+					});
+				}
 				return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, { rootNode });
 			}
 
@@ -1272,6 +1292,12 @@ const WindowScopeVariables = {
 			}
 
 			if (VarCheck.isObjectLike(value)) {
+				// Guard inline-style writes so they can't pull in undeclared url()/@import.
+				if (prop === "style") {
+					return WindowScopeVariables.createSafeStyleDeclaration(
+						value, pluginID, WindowScopeVariables.nodeBaseURI(actual), scope
+					);
+				}
 				// DOMStringMap (dataset) has arbitrary string keys unknown at wrap
 				// time, so forward get/set/delete to it through the proxy factory
 				if (prop === "dataset") {
@@ -1321,6 +1347,14 @@ const WindowScopeVariables = {
 			if (prop === "outerHTML") {
 				VarCheck.throwPropError("set", prop);
 			}
+			// A <style>'s text is CSS -- block undeclared url()/@import in it.
+			if ((prop === "innerHTML" || prop === "textContent"
+					|| prop === "innerText" || prop === "text")
+					&& String(actual.localName || "").toLowerCase() === "style"
+					&& WindowScopeVariables.cssTextHasDisallowedURL(value, pluginID, WindowScopeVariables.nodeBaseURI(actual))) {
+				Zotero.warn(`Setting <style> ${prop} is not allowed: it references an undeclared resource.`);
+				return true;
+			}
 			// Sanitize HTML strings to strip unsafe tags and on* event handlers.
 			if (prop === "innerHTML") {
 				let doc = actual.ownerDocument;
@@ -1343,11 +1377,10 @@ const WindowScopeVariables = {
 			if (!allowed.has(prop)) {
 				VarCheck.throwPropError("set", prop);
 			}
-			// Block dangerous URL schemes on reflected URL properties
+			// Restrict URL/style properties to declared resources.
 			if (typeof prop === "string"
-					&& WindowScopeVariables.URL_ATTRS.has(prop.toLowerCase())
-					&& WindowScopeVariables.isUnsafeURLValue(value)) {
-				VarCheck.throwPropError("set", prop, "unsafe URL scheme");
+					&& WindowScopeVariables.attrAssignmentDisallowed(actual, prop, value, pluginID)) {
+				VarCheck.throwPropError("set", prop, "references an undeclared resource");
 			}
 			Reflect.set(actual, prop, VarCheck.getOriginalOrSelf(value));
 			return true;
@@ -1473,9 +1506,12 @@ const WindowScopeVariables = {
 		"script",
 		"browser",
 		"iframe",
+		"frame",
 		"object",
 		"embed",
 		"meta",
+		// <base> can rewrite the document base URI and defeat our origin checks.
+		"base",
 	]),
 
 	PARENT_MUTATING_METHODS: new Set(["before", "after", "replaceWith", "remove"]),
@@ -1489,12 +1525,26 @@ const WindowScopeVariables = {
 		"poster",
 		"background",
 		"ping",
-		"srcdoc",
 	]),
 
-	// Selector visits only elements that carry one of the URL attributes,
-	// matching any namespace via `[*|attr]` (so xlink:href is covered).
-	URL_ATTRS_SELECTOR: "[*|href],[*|src],[*|action],[*|formaction],[*|data],[*|poster],[*|background],[*|ping],[*|srcdoc]",
+	// Attributes fetched as a subresource with no user interaction; restricted
+	// to declared resources. (`data` is for the blocked <object> tag.)
+	SILENT_URL_ATTRS: new Set(["src", "poster", "background", "data"]),
+
+	// Multi-URL attributes, origin-checked per URL.
+	URL_LIST_ATTRS: new Set(["srcset", "imagesrcset"]),
+
+	// Elements where href is navigation, not a silent load: scheme check only.
+	NAV_HREF_TAGS: new Set(["a", "area"]),
+
+	// Schemes that never reach an undeclared remote origin.
+	LOCAL_RESOURCE_SCHEMES: new Set(["chrome", "resource", "data", "blob"]),
+
+	// Text-inserting methods; a <style>'s inserted text is CSS.
+	STYLE_TEXT_METHODS: new Set(["append", "prepend", "replaceChildren", "insertAdjacentText"]),
+
+	// Elements carrying a URL/srcset/style attribute (any namespace for xlink:href).
+	SANITIZE_URL_SELECTOR: "[*|href],[*|src],[*|action],[*|formaction],[*|data],[*|poster],[*|background],[*|ping],[*|srcset],[*|imagesrcset],[style]",
 
 	UNSAFE_URL_SCHEMES: /^javascript:/i,
 
@@ -1523,6 +1573,200 @@ const WindowScopeVariables = {
 	urlAttrLocalName(name) {
 		let n = String(name || "");
 		return (n.includes(":") ? n.split(":").pop() : n).toLowerCase();
+	},
+
+	nodeBaseURI(node) {
+		try {
+			let doc = node && node.ownerDocument;
+			return doc ? doc.documentURI : null;
+		}
+		catch {
+			return null;
+		}
+	},
+
+	// Resolve a possibly-relative URL against a base (ASCII whitespace stripped
+	// first). Returns an nsIURI, or null if empty/unparseable.
+	resolveResourceURI(value, baseURISpec) {
+		let raw = (value === null || value === undefined) ? "" : String(value);
+		let s = raw.replace(/[\u0000-\u0020]+/g, "");
+		if (s === "") return null;
+		try {
+			let base = baseURISpec ? Services.io.newURI(baseURISpec) : null;
+			return Services.io.newURI(s, null, base);
+		}
+		catch {
+			return null;
+		}
+	},
+
+	// Whether a URL points at an *undeclared* resource -- enforces an origin
+	// allowlist (chrome:/resource:/data:/blob:, own moz-extension, host_permissions).
+	isDisallowedResourceURL(value, pluginID, baseURISpec) {
+		// javascript: and data:html/xml are unsafe regardless of origin.
+		if (WindowScopeVariables.isUnsafeURLValue(value)) {
+			return true;
+		}
+		let raw = (value === null || value === undefined) ? "" : String(value);
+		if (raw.replace(/[\u0000-\u0020]+/g, "") === "") {
+			// Empty value triggers no load.
+			return false;
+		}
+		let uri = WindowScopeVariables.resolveResourceURI(value, baseURISpec);
+		if (!uri) {
+			// Non-empty but unparseable -- reject to be safe.
+			return true;
+		}
+		let scheme = uri.scheme.toLowerCase();
+		if (WindowScopeVariables.LOCAL_RESOURCE_SCHEMES.has(scheme)) {
+			return false;
+		}
+		if (scheme === "moz-extension") {
+			let base = PluginProtocol.getBaseURI(pluginID);
+			return !(base && uri.spec.startsWith(base));
+		}
+		// Any other (remote) scheme is allowed only if the plugin declared it.
+		return !PluginProtocol.canAccessURI(pluginID, uri.spec);
+	},
+
+	// Whether a srcset value has a disallowed URL: checks every token that
+	// isn't a bare descriptor (e.g. "2x", "640w").
+	srcsetHasDisallowedURL(value, pluginID, baseURISpec) {
+		let str = (value === null || value === undefined) ? "" : String(value);
+		for (let chunk of str.split(",")) {
+			for (let tok of chunk.trim().split(/\s+/)) {
+				if (!tok || /^[0-9.]+[xw]$/i.test(tok)) continue;
+				if (WindowScopeVariables.isDisallowedResourceURL(tok, pluginID, baseURISpec)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	},
+
+	// Decode CSS escapes so a url() scheme can't hide behind them
+	// (e.g. url(htt\70s://evil)).
+	decodeCSSEscapes(str) {
+		return String(str).replace(/\\([0-9a-fA-F]{1,6}\s?|[\s\S])/g, (_m, esc) => {
+			if (/^[0-9a-fA-F]/.test(esc)) {
+				let code = parseInt(esc, 16);
+				if (!code || code > 0x10FFFF || (code >= 0xD800 && code <= 0xDFFF)) {
+					return "�";
+				}
+				try {
+					return String.fromCodePoint(code);
+				}
+				catch {
+					return "�";
+				}
+			}
+			// An escaped newline collapses to nothing; any other char is literal.
+			return esc === "\n" ? "" : esc;
+		});
+	},
+
+	// Whether a CSS text (inline style or <style> content) has a disallowed
+	// url()/@import. Comments stripped and escapes decoded to defeat obfuscation.
+	cssTextHasDisallowedURL(cssText, pluginID, baseURISpec) {
+		let css = WindowScopeVariables.decodeCSSEscapes(cssText === null || cssText === undefined ? "" : cssText)
+			.replace(/\/\*[\s\S]*?\*\//g, " ");
+		let m;
+		let urlRe = /url\(\s*(['"]?)([^'")]*)\1\s*\)/gi;
+		while ((m = urlRe.exec(css))) {
+			if (WindowScopeVariables.isDisallowedResourceURL(m[2], pluginID, baseURISpec)) {
+				return true;
+			}
+		}
+		let importRe = /@import\s+(?:url\(\s*(['"]?)([^'")]*)\1\s*\)|(['"])([^'"]*)\3)/gi;
+		while ((m = importRe.exec(css))) {
+			let target = m[2] !== undefined ? m[2] : m[4];
+			if (target !== undefined
+					&& WindowScopeVariables.isDisallowedResourceURL(target, pluginID, baseURISpec)) {
+				return true;
+			}
+		}
+		return false;
+	},
+
+	// Whether an attribute/property assignment must be blocked: scheme check for
+	// all URL attrs plus an origin allowlist for silent-load ones (not <a> href).
+	attrAssignmentDisallowed(elem, attrName, value, pluginID) {
+		let localName = WindowScopeVariables.urlAttrLocalName(attrName);
+		if (WindowScopeVariables.URL_ATTRS.has(localName)
+				&& WindowScopeVariables.isUnsafeURLValue(value)) {
+			return true;
+		}
+		let base = WindowScopeVariables.nodeBaseURI(elem);
+		if (WindowScopeVariables.SILENT_URL_ATTRS.has(localName)) {
+			return WindowScopeVariables.isDisallowedResourceURL(value, pluginID, base);
+		}
+		if (WindowScopeVariables.URL_LIST_ATTRS.has(localName)) {
+			return WindowScopeVariables.srcsetHasDisallowedURL(value, pluginID, base);
+		}
+		if (localName === "href"
+				&& !WindowScopeVariables.NAV_HREF_TAGS.has(String((elem && elem.localName) || "").toLowerCase())) {
+			return WindowScopeVariables.isDisallowedResourceURL(value, pluginID, base);
+		}
+		if (localName === "style") {
+			return WindowScopeVariables.cssTextHasDisallowedURL(value, pluginID, base);
+		}
+		return false;
+	},
+
+	// Guard an element's CSSStyleDeclaration: writes that pull in an undeclared
+	// url()/@import are refused; ordinary style writes pass through.
+	createSafeStyleDeclaration(styleRef, pluginID, baseURISpec, scope) {
+		let stTraps = Cu.createObjectIn(scope);
+		Cu.exportFunction((_t, key) => {
+			if (typeof key === "symbol") return undefined;
+			let k = String(key);
+			let v;
+			try {
+				v = styleRef[k];
+			}
+			catch {
+				return undefined;
+			}
+			if (typeof v === "function") {
+				let holder = Cu.createObjectIn(scope);
+				Cu.exportFunction((...args) => {
+					// setProperty(name, value, priority): value may carry url().
+					if (k === "setProperty"
+							&& WindowScopeVariables.cssTextHasDisallowedURL(args[1], pluginID, baseURISpec)) {
+						Zotero.warn(`style.setProperty(${args[0]}, ...) is not allowed: it references an undeclared resource.`);
+						return undefined;
+					}
+					let r = styleRef[k](...args);
+					return (r !== null && typeof r === "object") ? undefined : r;
+				}, holder, { defineAs: "f" });
+				return holder.f;
+			}
+			// CSS values are strings; never hand a chrome object to the sandbox.
+			return (v !== null && typeof v === "object") ? undefined : v;
+		}, stTraps, { defineAs: "get" });
+		Cu.exportFunction((_t, key, v) => {
+			if (typeof key === "symbol") return true;
+			let k = String(key);
+			if (WindowScopeVariables.cssTextHasDisallowedURL(v, pluginID, baseURISpec)) {
+				Zotero.warn(`Setting style.${k} is not allowed: it references an undeclared resource.`);
+				return true;
+			}
+			try {
+				styleRef[k] = v;
+			}
+			catch {}
+			return true;
+		}, stTraps, { defineAs: "set" });
+		Cu.exportFunction((_t, key) => {
+			if (typeof key === "symbol") return false;
+			try {
+				return String(key) in styleRef;
+			}
+			catch {
+				return false;
+			}
+		}, stTraps, { defineAs: "has" });
+		return ScopeUtils.buildInstanceProxy(scope, stTraps);
 	},
 
 	// Pre-compiled CSS selector for all known on* event-handler attributes from
@@ -1575,15 +1819,26 @@ const WindowScopeVariables = {
 			}
 		}
 
-		// Strip javascript: and data: (HTML/XML/SVG) URIs from URL attributes
-		// so a click or submit can't execute script. The selector visits only
-		// elements that actually carry a URL attribute.
-		for (let node of fragment.querySelectorAll(this.URL_ATTRS_SELECTOR)) {
+		// Restrict URL/srcset/style attributes to declared resources. The
+		// selector visits only elements that carry one.
+		for (let node of fragment.querySelectorAll(this.SANITIZE_URL_SELECTOR)) {
 			for (let attr of Array.from(node.attributes)) {
-				if (!this.URL_ATTRS.has(attr.localName.toLowerCase())) continue;
-				if (this.isUnsafeURLValue(attr.value)) {
+				let localName = attr.localName.toLowerCase();
+				if (!this.URL_ATTRS.has(localName)
+						&& !this.URL_LIST_ATTRS.has(localName)
+						&& localName !== "style") {
+					continue;
+				}
+				if (this.attrAssignmentDisallowed(node, attr.localName, attr.value, pluginID)) {
 					node.removeAttributeNode(attr);
 				}
+			}
+		}
+
+		// Drop <style> blocks that pull in undeclared url()/@import resources.
+		for (let styleEl of fragment.querySelectorAll("style")) {
+			if (this.cssTextHasDisallowedURL(styleEl.textContent, pluginID, this.nodeBaseURI(styleEl))) {
+				styleEl.remove();
 			}
 		}
 
