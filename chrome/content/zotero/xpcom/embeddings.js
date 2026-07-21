@@ -1250,6 +1250,8 @@ Zotero.Embeddings.Indexing = new function () {
 			enabled: Zotero.Embeddings.isEnabled(),
 			model: Zotero.Embeddings.getModelName(),
 			indexing: _indexing,
+			// A stop has been requested but the current batch is still finishing
+			stopping: _indexing && _stopping,
 			paused: this.isPaused(),
 			phase: _phase,
 			error: _lastError ? (_lastError.message || String(_lastError)) : null,
