@@ -43,6 +43,25 @@
 	};
 
 	/**
+	 * Build a rejection reason that lives in the caller's compartment
+	 */
+	function rejectionForCaller(err, callerScope) {
+		let message;
+		try {
+			message = String((err && err.message) || err || "Command failed");
+		}
+		catch {
+			message = "Command failed";
+		}
+		try {
+			return new callerScope.Error(message);
+		}
+		catch {
+			return Cu.cloneInto({ message }, callerScope);
+		}
+	}
+
+	/**
 	 * @typedef {object} PluginInteropRegistrationOptions
 	 * @property {string} pluginID - The plugin ID of the command provider
 	 * @property {string} commandName - A unique name for this command (unique per plugin)
@@ -189,8 +208,15 @@
 				if (lazy.VarCheck.isPromise(result)) {
 					return new callerScope.Promise((resolve, reject) => {
 						result.then(
-							v => resolve(Cu.cloneInto(v, callerScope)),
-							e => reject(e)
+							(v) => {
+								try {
+									resolve(Cu.cloneInto(v, callerScope));
+								}
+								catch (cloneErr) {
+									reject(rejectionForCaller(cloneErr, callerScope));
+								}
+							},
+							e => reject(rejectionForCaller(e, callerScope))
 						);
 					});
 				}
