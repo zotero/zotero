@@ -1013,45 +1013,89 @@ const WindowScopeVariables = {
 			rootNode = event.currentTarget;
 		}
 
-		// DOM-referencing properties that need special wrapping
 		let DOMProps = new Set(["target", "currentTarget", "relatedTarget"]);
-		let DOMPropMethods = new Set(["composedPath"]);
-		let DOMOverrides = new Set([...DOMProps, ...DOMPropMethods]);
+		let allowed = new Set(VarCheck.getAllKeysIncludingPrototypes(event));
 
-		// Build schema excluding DOM properties we'll handle separately
-		let schema = {};
-		for (let key of VarCheck.getAllKeysIncludingPrototypes(event)) {
-			if (!DOMOverrides.has(key)) {
-				schema[key] = true;
+		// WeakRef so the wrapper doesn't pin the event (which references the DOM).
+		let eventRef = new WeakRef(event);
+		function derefOrThrow(op, prop) {
+			let e = eventRef.deref();
+			if (!e) {
+				VarCheck.throwPropError(op, prop, "object has been garbage collected");
 			}
+			return e;
 		}
+		let origRef = () => eventRef.deref();
 
-		let wrappedEvent = ScopeVariables.createAllowlistMirrorObject(event, schema, pluginID, { frozen: false });
+		let traps = Cu.createObjectIn(scope);
 
-		// Wrap DOM-referencing properties
-		for (let prop of DOMProps) {
-			if (event[prop]) {
-				Object.defineProperty(wrappedEvent, prop, {
-					value: WindowScopeVariables.createSafeWindowObject(event[prop], pluginID, { rootNode }),
-					enumerable: true,
-					configurable: false,
-					writable: false,
-				});
+		Cu.exportFunction((_facade, prop) => {
+			if (prop === ORIGINAL_REF_KEY) return origRef;
+			if (!allowed.has(prop)) return undefined;
+			let ev = derefOrThrow("access", prop);
+			if (DOMProps.has(prop)) {
+				let node = Reflect.get(ev, prop);
+				return node ? WindowScopeVariables.createSafeWindowObject(node, pluginID, { rootNode }) : undefined;
 			}
-		}
-
-		for (let method of DOMPropMethods) {
-			if (typeof event[method] === "function") {
-				Object.defineProperty(wrappedEvent, method, {
-					value: WindowScopeVariables.createSafeWindowCallable(event[method], event, pluginID, { rootNode }),
-					enumerable: true,
-					configurable: false,
-					writable: false,
-				});
+			if (prop === "composedPath") {
+				let fn = Reflect.get(ev, prop);
+				return typeof fn === "function"
+					? WindowScopeVariables.createSafeWindowCallable(fn, ev, pluginID, { rootNode })
+					: undefined;
 			}
-		}
-		Object.preventExtensions(wrappedEvent);
-		return wrappedEvent;
+			let value = Reflect.get(ev, prop);
+			if (typeof value === "function") {
+				return ScopeUtils.ensureCallableInScope(value, ev, scope, { mutable: true });
+			}
+			if (VarCheck.isObjectLike(value)) {
+				if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
+					return WindowScopeVariables.createSafeWindowObject(value, pluginID);
+				}
+				return ScopeVariables.createAllowlistMirrorObject(value, true, pluginID, { frozen: false });
+			}
+			return value;
+		}, traps, { defineAs: "get" });
+
+		Cu.exportFunction((_facade, prop, value) => {
+			if (DOMProps.has(prop) || prop === "composedPath" || !allowed.has(prop)) {
+				return false;
+			}
+			Reflect.set(derefOrThrow("set", prop), prop, value);
+			return true;
+		}, traps, { defineAs: "set" });
+
+		Cu.exportFunction((_facade, prop) => {
+			return prop === ORIGINAL_REF_KEY || allowed.has(prop);
+		}, traps, { defineAs: "has" });
+
+		Cu.exportFunction(() => {
+			let keys = Array.from(allowed);
+			keys.push(ORIGINAL_REF_KEY);
+			return Cu.cloneInto(keys, scope);
+		}, traps, { defineAs: "ownKeys" });
+
+		Cu.exportFunction((_facade, prop) => {
+			if (prop === ORIGINAL_REF_KEY) {
+				let d = Cu.createObjectIn(scope);
+				d.enumerable = false; d.configurable = true; d.writable = false; d.value = origRef;
+				return d;
+			}
+			if (!allowed.has(prop)) return undefined;
+			let d = Cu.createObjectIn(scope);
+			d.enumerable = true;
+			d.configurable = true;
+			d.writable = !(DOMProps.has(prop) || prop === "composedPath");
+			d.value = undefined;
+			return d;
+		}, traps, { defineAs: "getOwnPropertyDescriptor" });
+
+		Cu.exportFunction((_facade, prop) => {
+			return !(allowed.has(prop) || prop === ORIGINAL_REF_KEY);
+		}, traps, { defineAs: "deleteProperty" });
+
+		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
+
+		return scope[INSTANCE_PROXY_FACTORY](traps);
 	},
 
 	createSafeHTMLElement(elem, pluginID, { rootNode } = {}) {
