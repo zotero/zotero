@@ -30,6 +30,7 @@ Zotero.Plugins = new function () {
 	ChromeUtils.defineESModuleGetters(lazy, {
 		XPIDatabase: "resource://gre/modules/addons/XPIDatabase.sys.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		WindowScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
@@ -174,7 +175,7 @@ Zotero.Plugins = new function () {
 			let result;
 			try {
 				if (!isPrivileged) {
-					params = Cu.cloneInto(params, scope);
+					params = lazy.ScopeUtils.ensurePromiseVarInScope(params, scope);
 					reason = Cu.cloneInto(reason, scope);
 				}
 				result = func.call(scope, params, reason);
