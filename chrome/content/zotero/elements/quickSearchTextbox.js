@@ -52,7 +52,7 @@
 				everything: Zotero.getString('quickSearch.mode.everything')
 			};
 			if (Zotero.Embeddings.isEnabled()) {
-				modes.bestMatch = Zotero.getString('quickSearch-mode-similarity');
+				modes.bestMatch = Zotero.getString('quickSearch-mode-best-match');
 			}
 			return modes;
 		}
