@@ -109,6 +109,9 @@ Zotero_Preferences.Advanced = {
 		if (status.error) {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-error', { error: status.error });
 		}
+		else if (status.stopping) {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-stopping');
+		}
 		else if (status.phase === 'downloading') {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-downloading');
 		}
@@ -128,8 +131,12 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('semantic-search-resume').hidden
 			= status.indexing || !(status.error || status.paused || hasRemaining);
 
-		// Offer to stop indexing while it's running
-		document.getElementById('semantic-search-stop').hidden = !status.indexing;
+		// Offer to stop indexing while it's running; a requested stop takes
+		// effect once the current batch finishes, so disable the button in
+		// the meantime
+		let stopButton = document.getElementById('semantic-search-stop');
+		stopButton.hidden = !status.indexing;
+		stopButton.disabled = !!status.stopping;
 
 		// Per-library "indexed / total" counts
 		let grid = document.getElementById('semantic-search-libraries');
