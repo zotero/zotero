@@ -52,7 +52,7 @@
 				everything: Zotero.getString('quickSearch.mode.everything')
 			};
 			if (Zotero.Embeddings.isEnabled()) {
-				modes.similarity = Zotero.getString('quickSearch-mode-similarity');
+				modes.bestMatch = Zotero.getString('quickSearch-mode-similarity');
 			}
 			return modes;
 		}
@@ -131,7 +131,7 @@
 				this._advancedButton = advancedButton;
 			}
 
-			// Dropdown selecting how many results the similarity mode keeps;
+			// Dropdown selecting how many results the best-match mode keeps;
 			// shown in place of the Advanced Search button
 			let topKList = document.createXULElement('menulist');
 			topKList.id = 'zotero-tb-search-topk';
@@ -256,7 +256,7 @@
 
 			// Advanced Search doesn't apply to semantic search, so swap its
 			// button for the similarity result-count dropdown
-			let isSimilarity = mode === 'similarity';
+			let isSimilarity = mode === 'bestMatch';
 			if (this._advancedButton) {
 				this._advancedButton.hidden = isSimilarity;
 			}
