@@ -341,6 +341,12 @@ function modify_omni {
 		XPI_PERMS_LINES="${XPI_PERMS_LINES}
       ${perm}: [...(required?.${perm} ?? []), ...(requested?.${perm} ?? [])],"
 	done
+	# Pass the manifest content_security_policy (extension_pages) through.
+	# handle the MV3 object form and the MV2 string form.
+	EXTENSION_PERMS_LINES="${EXTENSION_PERMS_LINES}
+      content_security_policy: (this.manifest.content_security_policy && typeof this.manifest.content_security_policy === \"object\" ? this.manifest.content_security_policy.extension_pages : this.manifest.content_security_policy) || null,"
+	XPI_PERMS_LINES="${XPI_PERMS_LINES}
+      content_security_policy: required?.content_security_policy ?? null,"
 	replace_line 'origins: this.originControls \? \[\] : this.getManifestOrigins\(\),' \
 		"origins: this.originControls ? [] : this.getManifestOrigins(),${EXTENSION_PERMS_LINES}" modules/Extension.sys.mjs
 	# https://searchfox.org/firefox-esr140/source/toolkit/mozapps/extensions/internal/XPIDatabase.sys.mjs#1412

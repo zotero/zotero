@@ -720,6 +720,7 @@ function createMockPlugin({
 	origins = [],
 	prefPermissions = [],
 	interopPermissions = [],
+	contentSecurityPolicy = null,
 	resourceURI = "file:///nonexistent/",
 } = {}) {
 	return {
@@ -732,6 +733,7 @@ function createMockPlugin({
 			origins,
 			pref_permissions: prefPermissions,
 			interop_permissions: interopPermissions,
+			content_security_policy: contentSecurityPolicy,
 		},
 		getResourceURI() {
 			return Services.io.newURI(resourceURI);
