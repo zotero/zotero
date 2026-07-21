@@ -308,8 +308,11 @@ const VarCheck = {
 		if (a === false) return b;
 		if (b === false) return a;
 
-		// String value with the same handler wins
-		if (typeof a === "string" && typeof b === "string") return a === b ? a : a;
+		// String value with the same handler wins; conflicting handlers are an error
+		if (typeof a === "string" && typeof b === "string") {
+			if (a === b) return a;
+			throw new Error(`Conflicting handlers: "${a}" vs "${b}"`);
+		}
 		if (typeof a === "string" && this.isObject(b) && b[SchemaKey.HANDLER] === a) return a;
 		if (typeof b === "string" && this.isObject(a) && a[SchemaKey.HANDLER] === b) return b;
 
