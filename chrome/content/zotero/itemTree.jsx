@@ -1296,14 +1296,18 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		// A refresh can change the derived column set (e.g. the forced
-		// Relevance column while a best-match search is active), and the
-		// header only picks that up through a render
+		// Relevance column while a best-match search is active) or the table
+		// prologue, and the header and prologue only pick those up through a
+		// render
 		this._getColumns();
-		if (this.tree && this._renderedColumnsId !== this._columnsId) {
+		let columnsChanged = this._renderedColumnsId !== this._columnsId;
+		if (this.tree && (columnsChanged || this._renderedPrologueId !== this._getPrologueId())) {
 			await new Promise(resolve => this.forceUpdate(resolve));
-			// The rows above were painted with the previous column set, and the
-			// render only rebuilds the header
-			this.tree.invalidate();
+			if (columnsChanged) {
+				// The rows above were painted with the previous column set, and
+				// the render only rebuilds the header
+				this.tree.invalidate();
+			}
 		}
 
 		const itemsViewInActiveWindow = Zotero.getActiveZoteroPane()?.itemsView == this;
@@ -1448,13 +1452,37 @@ var ItemTree = class ItemTree extends LibraryTree {
 		</div>);
 	}
 
+	/**
+	 * An element to render above the table's column header (e.g. a status
+	 * banner). Subclasses override this; the base tree renders nothing.
+	 *
+	 * @return {React.Element|null}
+	 */
+	_renderTablePrologue() {
+		return null;
+	}
+
+	/**
+	 * Identity of the current prologue's content, for handleRowModelUpdate()
+	 * to detect when a refresh changed the prologue and a render is needed
+	 *
+	 * @return {String|null}
+	 */
+	_getPrologueId() {
+		let prologue = this._renderTablePrologue();
+		return prologue ? JSON.stringify(prologue.props) : null;
+	}
+
 	render() {
 		const showMessage = !!this._itemsPaneMessage;
 		const itemsPaneMessage = this._renderItemsPaneMessage(showMessage);
 
 		let columns = this._getColumns();
-		// The columns the header currently shows, for handleRowModelUpdate()
+		// The columns and prologue the table currently shows, for
+		// handleRowModelUpdate()
 		this._renderedColumnsId = this._columnsId;
+		let prologue = this._renderTablePrologue();
+		this._renderedPrologueId = prologue ? JSON.stringify(prologue.props) : null;
 		let virtualizedTable = React.createElement(VirtualizedTree,
 			{
 				getRowCount: () => this.rowProvider.getRowCount(),
@@ -1462,6 +1490,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				ref: ref => this.tree = ref,
 				treeboxRef: ref => this._treebox = ref,
 				renderItem: this._renderItem.bind(this),
+				prologue,
 				hide: showMessage,
 				key: "virtualized-table",
 

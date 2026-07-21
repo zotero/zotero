@@ -12,6 +12,17 @@
 	min-width: $min-width-items-pane;
 }
 
+// Indexing-progress banner above the column header while a best-match search
+// runs against a partially built embeddings index
+.virtualized-table .best-match-index-banner {
+	flex-shrink: 0;
+	padding: 4px 8px;
+	background: var(--material-sidepane);
+	border-bottom: var(--material-panedivider);
+	color: var(--fill-secondary);
+	text-align: center;
+}
+
 #zotero-items-tree {
 	.virtualized-table-body, .drag-image-container {
 		padding: 4px 8px 8px;

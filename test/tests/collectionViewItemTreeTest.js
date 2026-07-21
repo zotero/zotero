@@ -188,6 +188,13 @@ describe("CollectionViewItemTree", function () {
 			beforeEach(function () {
 				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+				// A fully built index by default, so no indexing banner appears
+				stubs.push(sinon.stub(Zotero.Embeddings.Indexing, 'getStatus').returns({
+					enabled: true,
+					indexing: false,
+					paused: false,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 0, eligible: 0 }]
+				}));
 				Zotero.Prefs.set('search.quicksearch-mode', 'bestMatch');
 			});
 
@@ -308,6 +315,63 @@ describe("CollectionViewItemTree", function () {
 					itemsView._columnsId = null;
 					itemsView._sortedColumn = null;
 				}
+			});
+
+			it("should show an indexing-progress banner while the index is incomplete", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "A", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.resolves(new Map([[item.id, 0.7]])));
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: true,
+					paused: false,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 752, eligible: 9553 }]
+				});
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				// Localization is async, so poll for the translated counts (the
+				// test times out on failure)
+				let banner = win.document.querySelector('.best-match-index-banner');
+				assert.ok(banner);
+				while (!/752 of 9,553/.test(banner.textContent)) {
+					await Zotero.Promise.delay(10);
+				}
+
+				// The paused wording requires the explicit paused flag -- the
+				// indexer merely not running at the moment (startup, the pre-run
+				// debounce) still reports indexing
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: false,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 752, eligible: 9553 }]
+				});
+				await itemsView.setFilter('search', 'between runs query');
+				banner = win.document.querySelector('.best-match-index-banner');
+				assert.equal(banner.getAttribute('data-l10n-id'), 'items-best-match-indexing');
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: true,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 752, eligible: 9553 }]
+				});
+				await itemsView.setFilter('search', 'paused query');
+				banner = win.document.querySelector('.best-match-index-banner');
+				assert.equal(banner.getAttribute('data-l10n-id'), 'items-best-match-indexing-paused');
+
+				// A complete index shows no banner
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: false,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 9553, eligible: 9553 }]
+				});
+				await itemsView.setFilter('search', 'another query');
+				assert.notOk(win.document.querySelector('.best-match-index-banner'));
 			});
 
 			it("should score once across a multi-collection selection", async function () {
