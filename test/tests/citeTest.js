@@ -25,6 +25,19 @@ describe("Zotero.Cite", function () {
 		});
 	});
 	
+	describe("#getAbbreviation()", function () {
+		it("should drop accented stop-words when auto-abbreviating", function () {
+			var obj = { default: { 'container-title': {} } };
+			Zotero.Cite.getAbbreviation(
+				"default", obj, "default", "container-title", "Jahrbuch für Heimatkunde"
+			);
+			assert.equal(
+				obj.default['container-title']['Jahrbuch für Heimatkunde'],
+				"Jahrb. Heimatkunde"
+			);
+		});
+	});
+	
 	describe("#retrieveLocale()", function () {
 		it("should handle locale with script code", async function () {
 			var item = new Zotero.Item;
