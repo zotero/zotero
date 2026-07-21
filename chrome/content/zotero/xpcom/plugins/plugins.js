@@ -122,7 +122,7 @@ Zotero.Plugins = new function () {
 				}
 				let { addons } = await AddonManager.getActiveAddons(["extension"]);
 				for (let addon of addons) {
-					await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_LOAD, { window: lazy.WindowScopeVariables.createSafeWindow(domWindow, addon.id, { rootNode: null }) });
+					await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_UNLOAD, { window: lazy.WindowScopeVariables.createSafeWindow(domWindow, addon.id, { rootNode: null }) });
 				}
 			},
 		};
