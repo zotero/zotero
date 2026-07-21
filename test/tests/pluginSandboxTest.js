@@ -5323,6 +5323,189 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("chrome-window resource origin allowlist", function () {
+		// Build a container > <tag> pair, expose the rootNode-scoped child as
+		// `sandboxName`, and return the real nodes for assertions/cleanup.
+		function setupSafeEl(tagName, sandboxName) {
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			let el = document.createElement(tagName);
+			container.appendChild(el);
+			scope[sandboxName] = WindowScopeVariables.createSafeHTMLElement(
+				el, ADDON_ID, { rootNode: new WeakRef(container) }
+			);
+			return { container, el };
+		}
+
+		it("isDisallowedResourceURL enforces the declared-resource allowlist", function () {
+			loadTestScope(["default"], ["https://declared.example.com/*"]);
+			let base = "chrome://zotero/content/zoteroPane.xhtml";
+			let check = url => WindowScopeVariables.isDisallowedResourceURL(url, ADDON_ID, base);
+			assert.isFalse(check("chrome://zotero/skin/x.png"), "chrome: allowed");
+			assert.isFalse(check("resource://gre/x.png"), "resource: allowed");
+			assert.isFalse(check("data:image/png;base64,iVBORw0KGgo="), "data:image allowed");
+			assert.isFalse(check("https://declared.example.com/pic.png"), "declared host_permissions origin allowed");
+			assert.isFalse(check("foo/bar.png"), "relative URL resolves to chrome and is allowed");
+			assert.isFalse(check(""), "empty value triggers no load");
+			assert.isTrue(check("https://evil.example.com/x.png"), "undeclared remote origin blocked");
+			assert.isTrue(check("https://other.example.com/x.png"), "other undeclared origin blocked");
+			assert.isTrue(check("javascript:alert(1)"), "javascript: blocked");
+			assert.isTrue(check("data:text/html,<b>x</b>"), "data:text/html blocked");
+		});
+
+		it("blocks <img src> to an undeclared remote origin, allows local/declared", function () {
+			loadTestScope(["default"]);
+			let { container, el } = setupSafeEl("img", "_img");
+			let own = WebExtensionPolicy.getByID(ADDON_ID).getURL("icon.png");
+			try {
+				// setAttribute with a remote origin is a no-op (blocked by validator).
+				evalInScope('_img.setAttribute("src", "https://evil.example.com/beacon.png")');
+				assert.isNull(el.getAttribute("src"), "remote src via setAttribute must be blocked");
+				// Property set with a remote origin throws.
+				assert.throws(() => evalInScope('_img.src = "https://evil.example.com/beacon.png"'),
+					undefined, undefined, "remote src via property set must throw");
+				assert.isNull(el.getAttribute("src"), "no remote src should be set");
+
+				// Declared resources are allowed.
+				evalInScope('_img.setAttribute("src", "chrome://zotero/skin/zotero-new-z-16px.png")');
+				assert.ok((el.getAttribute("src") || "").startsWith("chrome://"), "chrome: src must be allowed");
+				evalInScope(`_img.src = ${JSON.stringify(own)}`);
+				assert.equal(el.getAttribute("src"), own, "plugin's own moz-extension resource must be allowed");
+				evalInScope('_img.setAttribute("src", "data:image/png;base64,iVBORw0KGgo=")');
+				assert.ok((el.getAttribute("src") || "").startsWith("data:image/png"), "data:image must be allowed");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("blocks a remote <img srcset> candidate, allows an all-local one", function () {
+			loadTestScope(["default"]);
+			let { container, el } = setupSafeEl("img", "_img");
+			try {
+				evalInScope('_img.setAttribute("srcset", "https://evil.example.com/x.png 2x, chrome://zotero/skin/a.png 1x")');
+				assert.isNull(el.getAttribute("srcset"), "a srcset with any remote candidate must be blocked");
+				evalInScope('_img.setAttribute("srcset", "chrome://zotero/skin/a.png 1x, chrome://zotero/skin/b.png 2x")');
+				assert.ok(el.getAttribute("srcset"), "an all-chrome srcset must be allowed");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("blocks remote url() in an inline style attribute, including CSS-escape obfuscation", function () {
+			loadTestScope(["default"]);
+			let { container, el } = setupSafeEl("div", "_div");
+			try {
+				evalInScope('_div.setAttribute("style", "background: url(https://evil.example.com/x.png)")');
+				assert.isNull(el.getAttribute("style"), "remote url() in style attr must be blocked");
+				// "\\70" is the CSS escape for "p" -- htt\70s:// decodes to https://.
+				scope._obf = "background: url(htt\\70s://evil.example.com/x.png)";
+				evalInScope('_div.setAttribute("style", _obf)');
+				assert.isNull(el.getAttribute("style"), "CSS-escape-obfuscated remote url() must be blocked");
+				evalInScope('_div.setAttribute("style", "background: url(chrome://zotero/skin/x.png)")');
+				assert.ok((el.getAttribute("style") || "").includes("chrome://"), "chrome: url() must be allowed");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("blocks el.style writes that pull in a remote url(), allows ordinary writes", function () {
+			loadTestScope(["default"]);
+			let { container, el } = setupSafeEl("div", "_div");
+			try {
+				evalInScope('_div.style.backgroundImage = "url(https://evil.example.com/x.png)"');
+				assert.equal(el.style.backgroundImage, "", "remote url() via style object must be dropped");
+				evalInScope('_div.style.setProperty("background-image", "url(https://evil.example.com/x.png)")');
+				assert.equal(el.style.backgroundImage, "", "remote url() via setProperty must be dropped");
+				evalInScope('_div.style.color = "red"');
+				assert.equal(el.style.color, "red", "ordinary style writes must still work");
+				evalInScope('_div.style.backgroundImage = "url(chrome://zotero/skin/x.png)"');
+				assert.include(el.style.backgroundImage, "chrome://", "chrome: url() via style object must be allowed");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("drops a <style> block that @imports a remote sheet from innerHTML", function () {
+			loadTestScope(["default"]);
+			let { container, target } = setupSafeDiv();
+			try {
+				evalInScope('_target.innerHTML = \'<style>@import url(https://evil.example.com/e.css); body{color:red}</style>\'');
+				assert.isNull(target.querySelector("style"), "a <style> with a remote @import must be dropped");
+				evalInScope('_target.innerHTML = \'<style>.x{color:blue}</style>\'');
+				assert.ok(target.querySelector("style"), "a local-only <style> must be kept");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("blocks setting a <style> element's textContent to a remote @import", function () {
+			loadTestScope(["default"]);
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			let styleEl = document.createElement("style");
+			container.appendChild(styleEl);
+			scope._style = WindowScopeVariables.createSafeHTMLElement(
+				styleEl, ADDON_ID, { rootNode: new WeakRef(container) }
+			);
+			try {
+				evalInScope('_style.textContent = "@import url(https://evil.example.com/e.css)"');
+				assert.equal(styleEl.textContent, "", "remote @import via <style> textContent must be blocked");
+				evalInScope('_style.textContent = ".ok{color:green}"');
+				assert.equal(styleEl.textContent, ".ok{color:green}", "local <style> textContent must be allowed");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("blocks feeding a <style> a remote @import via append/insertAdjacentText", function () {
+			loadTestScope(["default"]);
+			let container = document.createElement("div");
+			document.documentElement.appendChild(container);
+			let styleEl = document.createElement("style");
+			container.appendChild(styleEl);
+			scope._style = WindowScopeVariables.createSafeHTMLElement(
+				styleEl, ADDON_ID, { rootNode: new WeakRef(container) }
+			);
+			try {
+				evalInScope('_style.append("@import url(https://evil.example.com/e.css)")');
+				assert.equal(styleEl.textContent, "", "append() of remote CSS into <style> must be blocked");
+				evalInScope('_style.insertAdjacentText("beforeend", "@import url(https://evil.example.com/e.css)")');
+				assert.equal(styleEl.textContent, "", "insertAdjacentText of remote CSS into <style> must be blocked");
+				evalInScope('_style.append(".ok{color:green}")');
+				assert.equal(styleEl.textContent, ".ok{color:green}", "local CSS via append() must be allowed");
+			}
+			finally {
+				container.remove();
+			}
+		});
+
+		it("blocks a remote stylesheet <link>, but keeps navigational <a href>", function () {
+			loadTestScope(["default"]);
+			let link = setupSafeEl("link", "_link");
+			let anchor = setupSafeEl("a", "_a");
+			try {
+				// <link href> is a silent subresource fetch -> origin-restricted.
+				evalInScope('_link.setAttribute("href", "https://evil.example.com/e.css")');
+				assert.isNull(link.el.getAttribute("href"), "remote <link href> must be blocked");
+				evalInScope('_link.setAttribute("href", "chrome://zotero/skin/x.css")');
+				assert.equal(link.el.getAttribute("href"), "chrome://zotero/skin/x.css", "chrome: <link href> must be allowed");
+				// <a href> is user-initiated navigation, not a silent load -> allowed.
+				evalInScope('_a.setAttribute("href", "https://example.com/page")');
+				assert.equal(anchor.el.getAttribute("href"), "https://example.com/page", "external <a href> navigation must stay allowed");
+			}
+			finally {
+				link.container.remove();
+				anchor.container.remove();
+			}
+		});
+	});
+
 	describe("element.dataset", function () {
 		it("should read and write arbitrary dataset keys", function () {
 			loadTestScope(["default"]);
