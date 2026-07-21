@@ -53,18 +53,16 @@ function loadScope(addon, globalVars = {}) {
 
 	if (existingScope) {
 		let existingPermissions = VarCheck.getPermissionsString(existingScope?.PERMISSIONS);
-		if (existingPermissions === currentPermissions) {
+		if (existingPermissions === currentPermissions && existingScope.VERSION === addon.version) {
 			Zotero.debug(`Reusing existing scope for plugin ${addon.id}`);
 			// Ensure the moz-extension:// policy is still active
 			PluginProtocol.register(
 				addon.id, addon.getResourceURI(), uuid,
 				addon.installPermissions?.origins
 			);
-			// Update version
-			existingScope.VERSION = addon.version;
 			return;
 		}
-		Zotero.debug(`Permissions changed for plugin ${addon.id}, recreating scope`);
+		Zotero.debug(`Permissions or version changed for plugin ${addon.id}, recreating scope`);
 		unloadScope(addon.id);
 	}
 
