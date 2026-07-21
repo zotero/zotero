@@ -31,6 +31,8 @@ const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
 
 const CUSTOM_PARSER_KEY = "__zoteroCustomParser__";
 
+const INSTANCE_PROXY_FACTORY = "__zoteroInstanceProxyFactory__";
+
 const CHROME_GLOBAL = Cu.getGlobalForObject({});
 
 /**
@@ -661,170 +663,132 @@ const ScopeUtils = {
 		}
 
 		let nestedSchema = (instanceSchema && instanceSchema[SchemaKey.RECURSIVE]) ? instanceSchema : null;
-
-		let facade = Cu.createObjectIn(scope);
 		let instanceRef = strong ? { deref: () => instance } : new WeakRef(instance);
-
 		let pluginID = scope.PLUGIN_ID;
 		let instanceName = instance.constructor?.name || "Object";
 
+		// The closed set of exposed members by category, priority
+		// method > getter > value > own, `constructor` excluded, schema-filtered.
 		let protoMembers = VarCheck.getPrototypeMembers(instance);
-
-		// Expose prototype-chain methods as privileged wrapper that calls the real method on the real instance
-		let methodNames = protoMembers.methods;
-		for (let name of methodNames) {
+		let categories = new Map();
+		for (let name of protoMembers.methods) {
 			if (name === "constructor") continue;
-			if (!isPropertyAllowed(name)) continue;
-
-			let method = instance[name];
-			if (typeof method !== "function") continue;
-
-			Cu.exportFunction(
-				(...args) => {
-					let t = PluginTrace.start();
-					let inst = instanceRef.deref();
-					if (!inst) {
-						VarCheck.throwPropError("access", name, "object has been garbage collected");
-					}
-					// Make sure the args are in the same scope if the thisArg is not in the current compartment
-					if (!VarCheck.isInChrome(inst)) {
-						args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(inst), { mutable });
-					}
-					let res = method.apply(inst, args);
-					let result = ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema: nestedSchema });
-					PluginTrace.end(t, pluginID, "call", `${instanceName}.${name}`);
-					return result;
-				},
-				facade,
-				{ defineAs: name }
-			);
+			if (isPropertyAllowed(name)) categories.set(name, "method");
+		}
+		for (let name of protoMembers.getters) {
+			if (!categories.has(name) && isPropertyAllowed(name)) categories.set(name, "getter");
+		}
+		for (let name of protoMembers.values) {
+			if (!categories.has(name) && isPropertyAllowed(name)) categories.set(name, "value");
+		}
+		for (let name of Object.getOwnPropertyNames(instance)) {
+			if (!categories.has(name) && isPropertyAllowed(name)) categories.set(name, "own");
 		}
 
-		// Expose prototype-chain getters as readonly accessors
-		let getterNames = protoMembers.getters;
-		for (let name of getterNames) {
-			if (!isPropertyAllowed(name)) continue;
-			if (Object.prototype.hasOwnProperty.call(facade, name)) continue;
+		function derefOrThrow(op, prop) {
+			let inst = instanceRef.deref();
+			if (!inst) {
+				VarCheck.throwPropError(op, prop, "object has been garbage collected");
+			}
+			return inst;
+		}
+
+		// Lazy build and cache callable wrapper that runs the real method on the live instance.
+		// Arguments rescoped into the instance's compartment.
+		// Result wrapped under the nested schema.
+		let methodCache = new Map();
+		function methodWrapper(name) {
+			let inst = derefOrThrow("access", name);
+			let method = inst[name];
+			if (typeof method !== "function") return undefined;
+			let cached = methodCache.get(name);
+			if (cached && cached.method === method) return cached.wrapped;
 			let holder = Cu.createObjectIn(scope);
-			Cu.exportFunction(() => {
-				let inst = instanceRef.deref();
-				if (!inst) {
-					VarCheck.throwPropError("access", name, "object has been garbage collected");
+			Cu.exportFunction((...args) => {
+				let t = PluginTrace.start();
+				let obj = derefOrThrow("access", name);
+				if (!VarCheck.isInChrome(obj)) {
+					args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(obj), { mutable });
 				}
-				PluginTrace.record(pluginID, "get", `${instanceName}.${name}`);
-				return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, name), scope, { mutable, instanceSchema: nestedSchema });
-			}, holder, { defineAs: "g" });
-
-			Cu.exportFunction(
-				(value) => {
-					if (!mutable) {
-						VarCheck.throwPropError("set", name);
-					}
-					let inst = instanceRef.deref();
-					if (!inst) {
-						VarCheck.throwPropError("set", name, "object has been garbage collected");
-					}
-					PluginTrace.record(pluginID, "set", `${instanceName}.${name}`);
-					return Reflect.set(inst, name, value);
-				},
-				holder,
-				{ defineAs: "s" }
-			);
-
-			Object.defineProperty(facade, name, {
-				enumerable: true,
-				configurable: false,
-				get: holder.g,
-				set: holder.s,
-			});
+				let res = method.apply(obj, args);
+				let result = ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema: nestedSchema });
+				PluginTrace.end(t, pluginID, "call", `${instanceName}.${name}`);
+				return result;
+			}, holder, { defineAs: "f" });
+			methodCache.set(name, { method, wrapped: holder.f });
+			return holder.f;
 		}
 
-		// Expose prototype-chain value properties (non-function) as readonly
-		let valueNames = protoMembers.values;
-		for (let name of valueNames) {
-			if (!isPropertyAllowed(name)) continue;
-			if (Object.prototype.hasOwnProperty.call(facade, name)) continue;
-			let val = instance[name];
-			let holder = Cu.createObjectIn(scope);
-			Cu.exportFunction(() => {
-				PluginTrace.record(pluginID, "get", `${instanceName}.${name}`);
-				return ScopeUtils.ensurePromiseVarInScope(val, scope, { mutable, instanceSchema: nestedSchema });
-			}, holder, { defineAs: "g" });
+		let origRef = () => instanceRef.deref();
 
-			Cu.exportFunction(
-				() => {
-					VarCheck.throwPropError("set", name);
-				},
-				holder,
-				{ defineAs: "s" }
-			);
+		let traps = Cu.createObjectIn(scope);
 
-			Object.defineProperty(facade, name, {
-				enumerable: true,
-				configurable: false,
-				get: holder.g,
-				set: holder.s,
-			});
-		}
+		Cu.exportFunction((_facade, prop) => {
+			if (prop === ORIGINAL_REF_KEY) return origRef;
+			// Never expose symbols or `then` (so the facade isn't taken for a thenable).
+			if (typeof prop === "symbol" || prop === "then") return undefined;
+			let category = categories.get(prop);
+			if (!category) return undefined;
+			if (category === "method") return methodWrapper(prop);
+			let inst = derefOrThrow("access", prop);
+			PluginTrace.record(pluginID, "get", `${instanceName}.${prop}`);
+			return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, prop), scope, { mutable, instanceSchema: nestedSchema });
+		}, traps, { defineAs: "get" });
 
-		// Expose own enumerable data properties and getters as readonly
-		let ownDescriptors = Object.getOwnPropertyDescriptors(instance);
-		for (let key of Object.keys(ownDescriptors)) {
-			if (!isPropertyAllowed(key)) continue;
-			if (Object.prototype.hasOwnProperty.call(facade, key)) continue;
-			let desc = ownDescriptors[key];
-			let holder = Cu.createObjectIn(scope);
-			if (typeof desc.get === "function") {
-				Cu.exportFunction(() => {
-					let inst = instanceRef.deref();
-					if (!inst) {
-						VarCheck.throwPropError("access", key, "object has been garbage collected");
-					}
-					PluginTrace.record(pluginID, "get", `${instanceName}.${key}`);
-					return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, key), scope, { mutable, instanceSchema: nestedSchema });
-				}, holder, { defineAs: "g" });
+		Cu.exportFunction((_facade, prop, value) => {
+			let category = categories.get(prop);
+			// Own properties are writable; prototype getters only when `mutable`;
+			// value props, methods and unknown names are read-only.
+			if (category === "own" || (category === "getter" && mutable)) {
+				let inst = derefOrThrow("set", prop);
+				PluginTrace.record(pluginID, "set", `${instanceName}.${prop}`);
+				Reflect.set(inst, prop, value);
+				return true;
 			}
-			else {
-				Cu.exportFunction(() => {
-					let inst = instanceRef.deref();
-					if (!inst) {
-						VarCheck.throwPropError("access", key, "object has been garbage collected");
-					}
-					PluginTrace.record(pluginID, "get", `${instanceName}.${key}`);
-					return ScopeUtils.ensurePromiseVarInScope(inst[key], scope, { mutable, instanceSchema: nestedSchema });
-				}, holder, { defineAs: "g" });
+			VarCheck.throwPropError("set", typeof prop === "symbol" ? undefined : prop);
+			return false;
+		}, traps, { defineAs: "set" });
+
+		Cu.exportFunction((_facade, prop) => {
+			return prop === ORIGINAL_REF_KEY || categories.has(prop);
+		}, traps, { defineAs: "has" });
+
+		Cu.exportFunction(() => {
+			let keys = Array.from(categories.keys());
+			keys.push(ORIGINAL_REF_KEY);
+			return Cu.cloneInto(keys, scope);
+		}, traps, { defineAs: "ownKeys" });
+
+		Cu.exportFunction((_facade, prop) => {
+			// configurable:true is required by the Proxy invariant because the
+			// target has no such key; deletion and redefinition are still blocked
+			// by the deleteProperty/defineProperty traps. Reads go through the get
+			// trap, so the descriptor carries no value.
+			if (prop === ORIGINAL_REF_KEY) {
+				let d = Cu.createObjectIn(scope);
+				d.enumerable = false; d.configurable = true; d.writable = false; d.value = origRef;
+				return d;
 			}
+			let category = categories.get(prop);
+			if (!category) return undefined;
+			let d = Cu.createObjectIn(scope);
+			d.enumerable = true;
+			d.configurable = true;
+			d.writable = category === "own" || (category === "getter" && mutable);
+			d.value = undefined;
+			return d;
+		}, traps, { defineAs: "getOwnPropertyDescriptor" });
 
-			Cu.exportFunction(
-				(value) => {
-					let inst = instanceRef.deref();
-					if (!inst) {
-						VarCheck.throwPropError("set", key, "object has been garbage collected");
-					}
-					PluginTrace.record(pluginID, "set", `${instanceName}.${key}`);
-					return Reflect.set(inst, key, value);
-				},
-				holder,
-				{ defineAs: "s" }
-			);
+		Cu.exportFunction((_facade, prop) => {
+			// Exposed members and the original-ref key cannot be deleted.
+			return !(categories.has(prop) || prop === ORIGINAL_REF_KEY);
+		}, traps, { defineAs: "deleteProperty" });
 
-			Object.defineProperty(facade, key, {
-				enumerable: true,
-				configurable: false,
-				get: holder.g,
-				set: holder.s,
-			});
-		}
+		// Properties cannot be added or redefined.
+		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
 
-		// Store a reference to the original instance for unwrapping in fromScope
-		Object.defineProperty(facade, ORIGINAL_REF_KEY, {
-			value: () => instanceRef.deref(),
-			enumerable: false,
-			configurable: false,
-			writable: false,
-		});
+		let facade = scope[INSTANCE_PROXY_FACTORY](traps);
 
-		Object.preventExtensions(facade);
 		if (variantMap) {
 			variantMap[variantMode] = facade;
 		}
@@ -901,4 +865,4 @@ const ScopeUtils = {
 	},
 };
 
-export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY };
+export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY, INSTANCE_PROXY_FACTORY };
