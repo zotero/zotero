@@ -289,10 +289,21 @@ Zotero_Preferences.PluginPermissions = {
 
 		let editAriaLabel = this._labels["preferences-plugin-permissions-edit-row"];
 		let legacyLabel = this._labels["preferences-plugin-permissions-legacy-badge"];
+
+		let sizeByUUID = new Map(await Promise.all(
+			[...byUUID].map(async ([uuid, info]) => {
+				if (info.legacy) return [uuid, { dataSize: 0, dbSize: 0 }];
+				let [dataSize, dbSize] = await Promise.all([
+					PluginFileAccess.getDataDirSizeByUUID(uuid),
+					PluginFileAccess.getDbDirSizeByUUID(uuid),
+				]);
+				return [uuid, { dataSize, dbSize }];
+			})
+		));
+
 		let rows = [];
 		for (let [uuid, info] of byUUID) {
-			let dataSize = info.legacy ? 0 : await PluginFileAccess.getDataDirSizeByUUID(uuid);
-			let dbSize = info.legacy ? 0 : await PluginFileAccess.getDbDirSizeByUUID(uuid);
+			let { dataSize, dbSize } = sizeByUUID.get(uuid);
 			let permissionsText;
 			if (info.legacy || !info.pluginID) permissionsText = "—";
 			else permissionsText = String(info.permissions?.length ?? 0);
