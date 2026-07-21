@@ -2228,12 +2228,11 @@ function makeRowRenderer(getRowData) {
 				else {
 					div.appendChild(renderCell(index, rowData[column.dataKey], column));
 				}
-				let columnName = column.label;
-				if (column.label in Zotero.Intl.strings) {
-					columnName = Zotero.getString(column.label);
-				}
-				if (typeof rowData[column.dataKey] === "string") {
-					ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
+				let columnName = formatColumnName(column);
+				let value = rowData[column.dataKey];
+				if (typeof value === "string"
+						|| (typeof value === "number" && Number.isFinite(value))) {
+					ariaLabel += `${columnName}: ${value} `;
 				}
 				else {
 					ariaLabel += `${columnName} `;
