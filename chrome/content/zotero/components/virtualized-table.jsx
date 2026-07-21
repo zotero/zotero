@@ -509,6 +509,9 @@ class VirtualizedTable extends React.Component {
 		// Render with display: none
 		hide: PropTypes.bool,
 
+		// An element rendered above the column header (e.g. a status banner)
+		prologue: PropTypes.element,
+
 		multiSelect: PropTypes.bool,
 
 		requireSelection: PropTypes.bool,
@@ -1420,6 +1423,7 @@ class VirtualizedTable extends React.Component {
 		return (
 			<div {...props}>
 				{columnDragMarker}
+				{this.props.prologue}
 				{header}
 				<div {...jsWindowProps}>
 					{/* Pinned copy of the current section's header. Lives inside the scrolling
