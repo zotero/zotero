@@ -195,10 +195,25 @@ const VarCheck = {
 		return false;
 	},
 
+	_scopeFlagsCache: new WeakMap(),
+
+	scopeFlags(scope) {
+		let flags = this._scopeFlagsCache.get(scope);
+		if (flags) return flags;
+		let perms = scope.PERMISSIONS;
+		flags = {
+			privileged: perms.includes("*"),
+			dataRead: perms.includes("dataRead"),
+			dataWrite: perms.includes("dataWrite"),
+		};
+		this._scopeFlagsCache.set(scope, flags);
+		return flags;
+	},
+
 	isPrivilegedScope(scope) {
 		if (!scope) return true;
 		// If the scope is unprivileged, it will be xrayed and thus using its properties is safe
-		return scope.PERMISSIONS.includes("*");
+		return this.scopeFlags(scope).privileged;
 	},
 
 	PERMISSION_MATCH_MODES: {
@@ -386,8 +401,23 @@ const VarCheck = {
 		return keys;
 	},
 
-	getPrototypeMethodNames(obj, { allowSymbols = false } = {}) {
-		let seen = new Set();
+	_prototypeMemberCache: new WeakMap(),
+
+	/**
+	 * Walk obj's prototype chain once and categorize each member into
+	 * { methods, getters, values }. Caches for subsequent calls on the same prototype.
+	 */
+	getPrototypeMembers(obj, { allowSymbols = false } = {}) {
+		let firstProto = this.isObjectLike(obj) ? Object.getPrototypeOf(obj) : null;
+		let canCache = !allowSymbols && firstProto !== null && typeof firstProto === "object";
+		if (canCache) {
+			let cached = this._prototypeMemberCache.get(firstProto);
+			if (cached) return cached;
+		}
+
+		let methods = new Set();
+		let getters = new Set();
+		let values = new Set();
 		let cur = obj;
 		while (cur && !VarCheck._isObjectPrototype(cur)) {
 			let proto = Object.getPrototypeOf(cur);
@@ -396,51 +426,41 @@ const VarCheck = {
 			for (let k of Reflect.ownKeys(proto)) {
 				if (!allowSymbols && typeof k === "symbol") continue;
 				let desc = Object.getOwnPropertyDescriptor(proto, k);
-				if (desc && typeof desc.value === "function") {
-					seen.add(k);
+				if (!desc) continue;
+				if (typeof desc.value === "function") {
+					methods.add(k);
+				}
+				else if (typeof desc.get === "function") {
+					getters.add(k);
+				}
+				else if ("value" in desc) {
+					values.add(k);
 				}
 			}
 			cur = proto;
 		}
-		return Array.from(seen);
+
+		let result = {
+			methods: Array.from(methods),
+			getters: Array.from(getters),
+			values: Array.from(values),
+		};
+		if (canCache) {
+			this._prototypeMemberCache.set(firstProto, result);
+		}
+		return result;
 	},
 
-	getPrototypeGetterNames(obj, { allowSymbols = false } = {}) {
-		let seen = new Set();
-		let cur = obj;
-		while (cur && !VarCheck._isObjectPrototype(cur)) {
-			let proto = Object.getPrototypeOf(cur);
-			if (!proto || VarCheck._isObjectPrototype(proto)) break;
-
-			for (let k of Reflect.ownKeys(proto)) {
-				if (!allowSymbols && typeof k === "symbol") continue;
-				let desc = Object.getOwnPropertyDescriptor(proto, k);
-				if (desc && typeof desc.get === "function") {
-					seen.add(k);
-				}
-			}
-			cur = proto;
-		}
-		return Array.from(seen);
+	getPrototypeMethodNames(obj, opts) {
+		return this.getPrototypeMembers(obj, opts).methods;
 	},
 
-	getPrototypeValueNames(obj, { allowSymbols = false } = {}) {
-		let seen = new Set();
-		let cur = obj;
-		while (cur && !VarCheck._isObjectPrototype(cur)) {
-			let proto = Object.getPrototypeOf(cur);
-			if (!proto || VarCheck._isObjectPrototype(proto)) break;
+	getPrototypeGetterNames(obj, opts) {
+		return this.getPrototypeMembers(obj, opts).getters;
+	},
 
-			for (let k of Reflect.ownKeys(proto)) {
-				if (!allowSymbols && typeof k === "symbol") continue;
-				let desc = Object.getOwnPropertyDescriptor(proto, k);
-				if (desc && "value" in desc && typeof desc.value !== "function") {
-					seen.add(k);
-				}
-			}
-			cur = proto;
-		}
-		return Array.from(seen);
+	getPrototypeValueNames(obj, opts) {
+		return this.getPrototypeMembers(obj, opts).values;
 	}
 };
 
@@ -636,8 +656,10 @@ const ScopeUtils = {
 		let pluginID = scope.PLUGIN_ID;
 		let instanceName = instance.constructor?.name || "Object";
 
+		let protoMembers = VarCheck.getPrototypeMembers(instance);
+
 		// Expose prototype-chain methods as privileged wrapper that calls the real method on the real instance
-		let methodNames = VarCheck.getPrototypeMethodNames(instance);
+		let methodNames = protoMembers.methods;
 		for (let name of methodNames) {
 			if (name === "constructor") continue;
 			if (!isPropertyAllowed(name)) continue;
@@ -667,7 +689,7 @@ const ScopeUtils = {
 		}
 
 		// Expose prototype-chain getters as readonly accessors
-		let getterNames = VarCheck.getPrototypeGetterNames(instance);
+		let getterNames = protoMembers.getters;
 		for (let name of getterNames) {
 			if (!isPropertyAllowed(name)) continue;
 			if (Object.prototype.hasOwnProperty.call(facade, name)) continue;
@@ -706,7 +728,7 @@ const ScopeUtils = {
 		}
 
 		// Expose prototype-chain value properties (non-function) as readonly
-		let valueNames = VarCheck.getPrototypeValueNames(instance);
+		let valueNames = protoMembers.values;
 		for (let name of valueNames) {
 			if (!isPropertyAllowed(name)) continue;
 			if (Object.prototype.hasOwnProperty.call(facade, name)) continue;
