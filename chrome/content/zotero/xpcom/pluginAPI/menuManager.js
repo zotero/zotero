@@ -887,8 +887,8 @@
 		 * @param {string} paneID
 		 * @returns {boolean}
 		 */
-		unregisterMenu(paneID) {
-			return this._menuManager.unregister(paneID);
+		unregisterMenu(paneID, _callerPluginID) {
+			return this._menuManager.unregister(paneID, _callerPluginID);
 		},
 
 		/**
@@ -915,4 +915,19 @@
 			this._menuManager.updateMenuPopup(popupElem, menus, targetType, args);
 		},
 	};
+
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.MenuManager.registerMenu,
+		({ pluginID, args }) => {
+			if (args[0] && typeof args[0] === "object") {
+				args[0].pluginID = pluginID;
+			}
+		}
+	);
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.MenuManager.unregisterMenu,
+		({ pluginID, args }) => {
+			args[1] = pluginID;
+		}
+	);
 }

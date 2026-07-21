@@ -132,6 +132,8 @@ const xpcomFilesLocal = [
 	'schema',
 	'searchQuery',
 	'server/server',
+	// Depends on Zotero.Server for its discovery endpoint
+	'pluginAPI/serverEndpointManager',
 	'server/server_integration',
 	'server/server_connector',
 	'server/server_connectorIntegration',

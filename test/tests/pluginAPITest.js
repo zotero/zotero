@@ -1803,4 +1803,416 @@ describe("Plugin API", function () {
 			assert.equal(result, CONSUMER_ID);
 		});
 	});
+
+	describe("ServerEndpointManager", function () {
+		var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
+		var { PluginUUID } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/uuid.mjs");
+
+		const PLUGIN_ID = "test-server-endpoint@zotero.org";
+		const OTHER_ID = "test-server-endpoint-other@zotero.org";
+		const PLUGIN_GUID = "{00000000-0000-0000-0000-000000000021}";
+		const OTHER_GUID = "{00000000-0000-0000-0000-000000000022}";
+
+		var pluginScope, otherScope, serverPath, pluginPathPrefix;
+
+		function loadPluginScope(id, syncGUID) {
+			let addon = createMockPlugin({
+				id,
+				name: "Test Plugin " + id,
+				syncGUID,
+				permissions: ["default", "serverEndpoint"],
+			});
+			PluginSandbox.loadScope(addon);
+			return PluginSandbox.getScope(id);
+		}
+
+		function evalInPlugin(code) {
+			return Cu.evalInSandbox(code, pluginScope);
+		}
+
+		function request(method, path, options = {}) {
+			return Zotero.HTTP.request(method, serverPath + path, {
+				headers: Object.assign(
+					{ "Zotero-Allowed-Request": "1" },
+					options.headers || {}
+				),
+				responseType: "text",
+				successCodes: false,
+				body: options.body,
+			});
+		}
+
+		before(function () {
+			serverPath = "http://127.0.0.1:" + Zotero.Server.port;
+			pluginPathPrefix = "/plugins/" + PluginUUID.getByID(PLUGIN_ID);
+		});
+
+		beforeEach(function () {
+			pluginScope = loadPluginScope(PLUGIN_ID, PLUGIN_GUID);
+		});
+
+		afterEach(function () {
+			// Clean up all registered endpoints
+			for (let opt of Zotero.ServerEndpointManager._manager.options) {
+				Zotero.ServerEndpointManager.unregisterEndpoint(
+					Zotero.ServerEndpointManager._manager._getOptionMainKey(opt)
+				);
+			}
+			try {
+				PluginSandbox.unloadScope(PLUGIN_ID);
+			}
+			catch {}
+			try {
+				PluginSandbox.unloadScope(OTHER_ID);
+			}
+			catch {}
+		});
+
+		it("should serve a GET request with a handler registered from the sandbox", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/hello",
+					supportedMethods: ["GET"],
+					handler: (request) => [200, "text/plain", "hello " + request.searchParams.name],
+				});
+			`);
+			assert.equal(key, pluginPathPrefix + "/hello");
+
+			let req = await request("GET", key + "?name=world");
+			assert.equal(req.status, 200);
+			assert.equal(req.getResponseHeader("Content-Type"), "text/plain");
+			assert.equal(req.responseText, "hello world");
+		});
+
+		it("should pass parsed JSON data to an async handler on POST", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/echo",
+					supportedMethods: ["POST"],
+					supportedDataTypes: ["application/json"],
+					handler: async (request) => {
+						return [201, "application/json", JSON.stringify({
+							method: request.method,
+							foo: request.data.foo,
+						})];
+					},
+				});
+			`);
+
+			let req = await request("POST", key, {
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ foo: "bar" }),
+			});
+			assert.equal(req.status, 201);
+			assert.deepEqual(JSON.parse(req.responseText), { method: "POST", foo: "bar" });
+		});
+
+		it("should support a status-only integer response", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/no-content",
+					handler: () => 204,
+				});
+			`);
+
+			let req = await request("GET", key);
+			assert.equal(req.status, 204);
+		});
+
+		it("should pass path template parameters to the handler", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/items/:key",
+					handler: request => [200, "text/plain", request.pathParams.key],
+				});
+			`);
+			assert.equal(key, pluginPathPrefix + "/items/:key");
+
+			let req = await request("GET", pluginPathPrefix + "/items/ABCD2345");
+			assert.equal(req.status, 200);
+			assert.equal(req.responseText, "ABCD2345");
+		});
+
+		it("should return 500 if the handler throws", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/throws",
+					handler: () => {
+						throw new Error("boom");
+					},
+				});
+			`);
+
+			let req = await request("GET", key);
+			assert.equal(req.status, 500);
+		});
+
+		it("should return 500 on an invalid response shape", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/invalid",
+					handler: () => ({ body: "not a valid response" }),
+				});
+			`);
+
+			let req = await request("GET", key);
+			assert.equal(req.status, 500);
+		});
+
+		it("should reject unsupported methods", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/post-only",
+					supportedMethods: ["POST"],
+					handler: () => 204,
+				});
+			`);
+
+			let req = await request("GET", key);
+			assert.equal(req.status, 400);
+		});
+
+		it("should return 404 after unregistering", async function () {
+			let key = evalInPlugin(`
+				var key = Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/transient",
+					handler: () => 204,
+				});
+				key;
+			`);
+
+			let req = await request("GET", key);
+			assert.equal(req.status, 204);
+
+			let success = evalInPlugin(`Zotero.ServerEndpointManager.unregisterEndpoint(key);`);
+			assert.isTrue(success);
+			assert.notProperty(Zotero.Server.Endpoints, key);
+
+			req = await request("GET", key);
+			assert.equal(req.status, 404);
+		});
+
+		it("should reject invalid paths", function () {
+			let results = evalInPlugin(`
+				[
+					// Missing leading slash
+					Zotero.ServerEndpointManager.registerEndpoint({
+						pluginID: "${PLUGIN_ID}",
+						path: "hello",
+						handler: () => 204,
+					}),
+					// Path traversal
+					Zotero.ServerEndpointManager.registerEndpoint({
+						pluginID: "${PLUGIN_ID}",
+						path: "/../connector/ping",
+						handler: () => 204,
+					}),
+					// Empty segment
+					Zotero.ServerEndpointManager.registerEndpoint({
+						pluginID: "${PLUGIN_ID}",
+						path: "//hello",
+						handler: () => 204,
+					}),
+				];
+			`);
+			assert.isFalse(results[0]);
+			assert.isFalse(results[1]);
+			assert.isFalse(results[2]);
+		});
+
+		it("should reject a duplicate path from the same plugin", function () {
+			let results = evalInPlugin(`
+				[
+					Zotero.ServerEndpointManager.registerEndpoint({
+						pluginID: "${PLUGIN_ID}",
+						path: "/dupe",
+						handler: () => 204,
+					}),
+					Zotero.ServerEndpointManager.registerEndpoint({
+						pluginID: "${PLUGIN_ID}",
+						path: "/dupe",
+						handler: () => 200,
+					}),
+				];
+			`);
+			assert.equal(results[0], pluginPathPrefix + "/dupe");
+			assert.isFalse(results[1]);
+		});
+
+		it("should prevent unprivileged plugin from registering in another plugin's namespace", function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${OTHER_ID}",
+					path: "/spoof",
+					handler: () => 204,
+				});
+			`);
+			// CustomParserCallable forces the real addon ID
+			assert.equal(key, pluginPathPrefix + "/spoof");
+		});
+
+		it("should prevent unprivileged plugin from unregistering another plugin's endpoint", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/protected",
+					handler: () => 204,
+				});
+			`);
+
+			otherScope = loadPluginScope(OTHER_ID, OTHER_GUID);
+			let success = Cu.evalInSandbox(
+				`Zotero.ServerEndpointManager.unregisterEndpoint("${key}");`,
+				otherScope
+			);
+			assert.isFalse(success);
+
+			let req = await request("GET", key);
+			assert.equal(req.status, 204);
+		});
+
+		it("should return the endpoint URL for a registered endpoint only", function () {
+			let result = evalInPlugin(`
+				var key = Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/url",
+					handler: () => 204,
+				});
+				[
+					Zotero.ServerEndpointManager.getEndpointURL(key),
+					Zotero.ServerEndpointManager.getEndpointURL("${pluginPathPrefix}/unknown"),
+				];
+			`);
+			assert.equal(result[0], serverPath + pluginPathPrefix + "/url");
+			assert.isNull(result[1]);
+		});
+
+		it("should reject requests that look like unsafe web content by default", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/guarded",
+					handler: () => 204,
+				});
+			`);
+
+			// Without Zotero-Allowed-Request, a Mozilla/ user agent gets its
+			// connection cancelled without a response
+			let e = await getPromiseError(Zotero.HTTP.request("GET", serverPath + key, {
+				responseType: "text",
+			}));
+			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+			assert.equal(e.status, 0);
+		});
+
+		it("should not expose ServerEndpointManager without the serverEndpoint permission", function () {
+			let addon = createMockPlugin({
+				id: OTHER_ID,
+				name: "Test Plugin " + OTHER_ID,
+				syncGUID: OTHER_GUID,
+				permissions: ["default"],
+			});
+			PluginSandbox.loadScope(addon);
+			otherScope = PluginSandbox.getScope(OTHER_ID);
+			let result = Cu.evalInSandbox(
+				`typeof Zotero.ServerEndpointManager;`,
+				otherScope
+			);
+			assert.equal(result, "undefined");
+		});
+
+		it("should list registered endpoints with plugin-provided info at /plugins", async function () {
+			evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/with-info",
+					supportedMethods: ["GET"],
+					supportedDataTypes: ["application/json"],
+					info: {
+						description: "Test API",
+						version: "1.2.0",
+						params: { name: "string" },
+					},
+					handler: () => 204,
+				});
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/without-info",
+					handler: () => 204,
+				});
+			`);
+
+			let req = await request("GET", "/plugins");
+			assert.equal(req.status, 200);
+			assert.equal(req.getResponseHeader("Content-Type"), "application/json");
+			let { endpoints } = JSON.parse(req.responseText);
+			let withInfo = endpoints.find(e => e.path == pluginPathPrefix + "/with-info");
+			let withoutInfo = endpoints.find(e => e.path == pluginPathPrefix + "/without-info");
+			assert.ok(withInfo);
+			assert.equal(withInfo.pluginID, PLUGIN_ID);
+			assert.deepEqual(withInfo.supportedMethods, ["GET"]);
+			assert.deepEqual(withInfo.supportedDataTypes, ["application/json"]);
+			assert.deepEqual(withInfo.info, {
+				description: "Test API",
+				version: "1.2.0",
+				params: { name: "string" },
+			});
+			assert.ok(withoutInfo);
+			assert.deepEqual(withoutInfo.supportedMethods, ["GET", "POST"]);
+			assert.notProperty(withoutInfo, "supportedDataTypes");
+			assert.notProperty(withoutInfo, "info");
+
+			// Unregistered endpoints disappear from the list
+			Zotero.ServerEndpointManager.unregisterEndpoint(pluginPathPrefix + "/with-info");
+			req = await request("GET", "/plugins");
+			let remaining = JSON.parse(req.responseText).endpoints;
+			assert.notOk(remaining.find(e => e.path == pluginPathPrefix + "/with-info"));
+			assert.ok(remaining.find(e => e.path == pluginPathPrefix + "/without-info"));
+		});
+
+		it("should serve an empty endpoint list when none are registered", async function () {
+			let req = await request("GET", "/plugins");
+			assert.equal(req.status, 200);
+			assert.deepEqual(JSON.parse(req.responseText), { endpoints: [] });
+		});
+
+		it("should reject non-JSON-serializable info", function () {
+			let result = evalInPlugin(`
+				var cyclic = {};
+				cyclic.self = cyclic;
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/cyclic-info",
+					info: cyclic,
+					handler: () => 204,
+				});
+			`);
+			assert.isFalse(result);
+		});
+
+		it("should unregister endpoints when the plugin shuts down", async function () {
+			let key = evalInPlugin(`
+				Zotero.ServerEndpointManager.registerEndpoint({
+					pluginID: "${PLUGIN_ID}",
+					path: "/shutdown",
+					handler: () => 204,
+				});
+			`);
+			assert.property(Zotero.Server.Endpoints, key);
+
+			await Zotero.ServerEndpointManager._manager._unregisterByPluginID(PLUGIN_ID);
+			assert.notProperty(Zotero.Server.Endpoints, key);
+
+			let req = await request("GET", key);
+			assert.equal(req.status, 404);
+		});
+	});
 });
