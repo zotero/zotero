@@ -282,8 +282,8 @@
 		 * @param {string} registrationKey - The key returned by register()
 		 * @returns {boolean}
 		 */
-		unregister(registrationKey) {
-			return this._registry.unregister(registrationKey);
+		unregister(registrationKey, _callerPluginID) {
+			return this._registry.unregister(registrationKey, _callerPluginID);
 		},
 
 		/**
@@ -306,6 +306,20 @@
 			if (args[0] && typeof args[0] === "object") {
 				args[0].callerPluginID = pluginID;
 			}
+		}
+	);
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.PluginInteropManager.register,
+		({ pluginID, args }) => {
+			if (args[0] && typeof args[0] === "object") {
+				args[0].pluginID = pluginID;
+			}
+		}
+	);
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.PluginInteropManager.unregister,
+		({ pluginID, args }) => {
+			args[1] = pluginID;
 		}
 	);
 }
