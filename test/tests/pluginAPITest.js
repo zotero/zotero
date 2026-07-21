@@ -1244,6 +1244,107 @@ describe("Plugin API", function () {
 			let link = doc.querySelector(`link[href="preferences.ftl"]`);
 			assert.notExists(link, "FTL link should be removed after unregister");
 		});
+
+		describe("unprivileged plugin restrictions", function () {
+			var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
+			const UNPRIV_ID = "test-wrm-unpriv@zotero.org";
+			const UNPRIV_GUID = "{00000000-0000-0000-0000-000000000021}";
+			var tmpDir;
+
+			function linkFor(resourceID) {
+				return doc.querySelector(`link[data-resource-id="${CSS.escape(resourceID)}"]`);
+			}
+
+			function ownURL(fileName) {
+				return WebExtensionPolicy.getByID(UNPRIV_ID).getURL(fileName);
+			}
+
+			async function waitUntil(fn, timeout = 2000) {
+				let start = Date.now();
+				while (!fn()) {
+					if (Date.now() - start > timeout) return false;
+					await Zotero.Promise.delay(20);
+				}
+				return true;
+			}
+
+			before(async function () {
+				tmpDir = PathUtils.join(Zotero.getTempDirectory().path, "wrm-" + Zotero.Utilities.randomString());
+				await IOUtils.makeDirectory(tmpDir);
+				// clean.css references the plugin's OWN resource via a relative
+				// url() (resolves to moz-extension://<plugin>/icon.svg) -- allowed.
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "icon.svg"),
+					"<svg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/>"
+				);
+				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "clean.css"), "body { background: url(icon.svg) }");
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "dirty.css"),
+					"body { background: url(https://evil.example.com/beacon.png) }"
+				);
+			});
+
+			after(async function () {
+				await IOUtils.remove(tmpDir, { recursive: true, ignoreAbsent: true });
+			});
+
+			beforeEach(function () {
+				PluginSandbox.loadScope(createMockPlugin({
+					id: UNPRIV_ID,
+					name: "WRM Unpriv",
+					syncGUID: UNPRIV_GUID,
+					permissions: ["default", "ui"],
+					resourceURI: PathUtils.toFileURI(tmpDir) + "/",
+				}));
+			});
+
+			afterEach(function () {
+				try {
+					PluginSandbox.unloadScope(UNPRIV_ID);
+				}
+				catch {}
+			});
+
+			it("does not apply CSS loaded from an undeclared (external) URL", async function () {
+				let resourceID = Zotero.WindowResourceManager.registerResource({
+					resourceID: "ext-href",
+					pluginID: UNPRIV_ID,
+					target: "mainWindow",
+					type: "css",
+					url: "https://evil.example.com/x.css",
+				});
+				assert.isString(resourceID);
+				let applied = await waitUntil(() => !!linkFor(resourceID), 300);
+				assert.isFalse(applied, "an external stylesheet must never be injected");
+			});
+
+			it("does not apply CSS whose content references an undeclared url()", async function () {
+				let resourceID = Zotero.WindowResourceManager.registerResource({
+					resourceID: "ext-content",
+					pluginID: UNPRIV_ID,
+					target: "mainWindow",
+					type: "css",
+					url: ownURL("dirty.css"),
+				});
+				assert.isString(resourceID);
+				let applied = await waitUntil(() => !!linkFor(resourceID), 300);
+				assert.isFalse(applied, "a sheet with a remote url() must never be injected");
+			});
+
+			it("applies CSS that references only local resources", async function () {
+				let resourceID = Zotero.WindowResourceManager.registerResource({
+					resourceID: "clean",
+					pluginID: UNPRIV_ID,
+					target: "mainWindow",
+					type: "css",
+					url: ownURL("clean.css"),
+				});
+				assert.isString(resourceID);
+				let applied = await waitUntil(() => !!linkFor(resourceID), 2000);
+				assert.isTrue(applied, "a clean sheet must be applied");
+				Zotero.WindowResourceManager.unregisterResource(resourceID);
+			});
+		});
 	});
 
 	describe("PluginInteropManager", function () {
