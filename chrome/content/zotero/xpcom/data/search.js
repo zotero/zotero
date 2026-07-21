@@ -1212,14 +1212,17 @@ Zotero.Search.prototype._buildQuery = async function () {
 					// addCondition() so the expansion isn't saved in the search object.
 					// Splice it in right after this condition so it's processed at the same
 					// nesting depth -- "Any Field" inside a group stays in that group.
-					// Always an OR-group: "Any Field" means "matches in any one of these
-					// fields", correct whether the surrounding join mode is 'all' or 'any'
-					// (an OR-group nested in an 'any' group flattens out).
+					// For positive operators this is an OR-group ("matches in any one of
+					// these fields"). For negative operators it must be an AND-group: "the
+					// value appears in none of these fields" holds only when every field
+					// fails to match (De Morgan), and an OR-group would match trivially for
+					// any item missing one of the fields.
 					let op = condition.operator;
 					let val = condition.value;
+					let joinMode = op == 'isNot' || op == 'doesNotContain' ? 'all' : 'any';
 					conditionsToProcess.splice(conditionIndex + 1, 0,
 						{ condition: 'groupStart', operator: 'true', value: '' },
-						{ condition: 'joinMode', operator: 'any' },
+						{ condition: 'joinMode', operator: joinMode },
 						{ condition: 'field', operator: op, value: val },
 						{ condition: 'tag', operator: op, value: val },
 						{ condition: 'note', operator: op, value: val },
@@ -1234,13 +1237,16 @@ Zotero.Search.prototype._buildQuery = async function () {
 				case 'titleCreatorYear': {
 					// Expand to the same field set as 'quicksearch-titleCreatorYear' (without
 					// key detection or the top-level-only restriction, which the result level
-					// now handles). Spliced in after this condition like 'anyField' above, as
-					// an OR-group so it matches in any one of these fields.
+					// now handles). Spliced in after this condition like 'anyField' above.
+					// An OR-group for positive operators; an AND-group for negative ones, so
+					// "does not contain"/"is not" matches only when the value is absent from
+					// every field (see 'anyField' above).
 					let op = condition.operator;
 					let val = condition.value;
+					let joinMode = op == 'isNot' || op == 'doesNotContain' ? 'all' : 'any';
 					conditionsToProcess.splice(conditionIndex + 1, 0,
 						{ condition: 'groupStart', operator: 'true', value: '' },
-						{ condition: 'joinMode', operator: 'any' },
+						{ condition: 'joinMode', operator: joinMode },
 						{ condition: 'title', operator: op, value: val },
 						{ condition: 'publicationTitle', operator: op, value: val },
 						{ condition: 'shortTitle', operator: op, value: val },

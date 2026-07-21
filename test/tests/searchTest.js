@@ -1539,8 +1539,24 @@ describe("Zotero.Search", function () {
 					s.libraryID = userLibraryID;
 					s.addCondition('titleCreatorYear', 'contains', word);
 					assert.sameMembers(await s.search(), [byTitle.id, byCreator.id]);
-					
+
 					await Zotero.Items.erase([byTitle.id, byCreator.id, byOther.id]);
+				});
+				it("should exclude items whose title contains the value for doesNotContain", async function () {
+					var word = 'ztcy' + Zotero.Utilities.randomString();
+					// Title contains the word -- must be excluded
+					var withWord = await createDataObject('item', { title: 'a ' + word + ' b' });
+					// Title lacks the word and has no publicationTitle/year/etc. -- must match
+					var withoutWord = await createDataObject('item', { title: 'nothing here' });
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('titleCreatorYear', 'doesNotContain', word);
+					var matches = await s.search();
+					assert.include(matches, withoutWord.id);
+					assert.notInclude(matches, withWord.id);
+
+					await Zotero.Items.erase([withWord.id, withoutWord.id]);
 				});
 			});
 			
