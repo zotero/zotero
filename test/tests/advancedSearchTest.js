@@ -575,7 +575,67 @@ describe("Advanced Search", function () {
 		await collection.eraseTx();
 		await selectLibrary(win);
 	});
-	
+
+	it("should step the best-match cutoff from 'all' to 1 and back", async function () {
+		await zp.toggleAdvancedSearchState('open');
+		let pane = deck.pane;
+		let input = pane.querySelector('.best-match-topk-input');
+		assert.equal(input.value, '');
+
+		// The browser floors a step at min=0 in both directions; the direction
+		// is inferred from the previous value
+		input.value = '0';
+		input.dispatchEvent(new win.Event('input', { bubbles: true }));
+		assert.equal(input.value, '1');
+
+		input.value = '0';
+		input.dispatchEvent(new win.Event('input', { bubbles: true }));
+		assert.equal(input.value, '');
+
+		await zp.setAdvancedSearchState('closed');
+	});
+
+	it("should keep the bestMatch marker at the root when scoping a 'Match any' search", async function () {
+		var collection = await createDataObject('collection');
+		await selectCollection(win, collection.id);
+		await zp.toggleAdvancedSearchState('open');
+		var pane = deck.pane;
+
+		var s = new Zotero.Search();
+		s.libraryID = Zotero.Libraries.userLibraryID;
+		s.addCondition('resultLevel', 'item');
+		s.addCondition('joinMode', 'any');
+		s.addCondition('title', 'contains', 'flagfoo');
+		s.addCondition('creator', 'contains', 'flagbar');
+		s.addCondition('bestMatch', '5', 'some query');
+		pane.search = s;
+
+		var promptService = Services.prompt;
+		Services.prompt = {
+			prompt: (parent, title, message, nameObj) => {
+				nameObj.value = 'Scoped Semantic';
+				return true;
+			}
+		};
+		try {
+			await pane.save();
+		}
+		finally {
+			Services.prompt = promptService;
+		}
+
+		var saved = (await Zotero.Searches.getAll(Zotero.Libraries.userLibraryID))
+			.find(x => x.name == 'Scoped Semantic');
+		assert.ok(saved);
+		// The 'any' conditions were wrapped in a group, but the bestMatch marker
+		// stayed at the root, where getBestMatchQuery() finds it
+		assert.deepEqual(saved.getBestMatchQuery(), { query: 'some query', topK: 5 });
+
+		await saved.eraseTx();
+		await collection.eraseTx();
+		await selectLibrary(win);
+	});
+
 	it("should group the scope and the existing conditions when saving an 'any' search with a collection and a saved search selected", async function () {
 		var scopeSearch = new Zotero.Search();
 		scopeSearch.libraryID = Zotero.Libraries.userLibraryID;

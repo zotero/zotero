@@ -251,6 +251,28 @@ describe("Zotero.Search", function () {
 				stub.restore();
 			}
 		});
+
+		it("should round-trip a numeric operator through JSON and the database", async function () {
+			let s = new Zotero.Search();
+			s.name = "bestMatch operator round trip";
+			s.libraryID = Zotero.Libraries.userLibraryID;
+			s.addCondition('resultLevel', 'item');
+			s.addCondition('title', 'contains', 'roundtriptest');
+			s.addCondition('bestMatch', '25', 'some query');
+
+			// The strict JSON path used for synced data
+			let s2 = new Zotero.Search();
+			s2.libraryID = s.libraryID;
+			s2.fromJSON(s.toJSON(), { strict: true });
+			assert.deepEqual(s2.getBestMatchQuery(), { query: 'some query', topK: 25 });
+
+			// Database persistence
+			let id = await s.saveTx();
+			await Zotero.Searches.getAsync(id);
+			let loaded = Zotero.Searches.get(id);
+			assert.deepEqual(loaded.getBestMatchQuery(), { query: 'some query', topK: 25 });
+			await loaded.eraseTx();
+		});
 	});
 
 	describe("#search()", function () {

@@ -60,7 +60,95 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
+	describe("#embedQuery()", function () {
+		it("should retry after a failed embed rather than caching the rejection", async function () {
+			let embedStub = sinon.stub(Zotero.Embeddings, 'embed');
+			embedStub.onFirstCall().rejects(new Error('embed failed'));
+			embedStub.onSecondCall().resolves(new Float32Array([1]));
+			let stubs = [
+				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
+				sinon.stub(Zotero.Embeddings, 'pruneModels').resolves(),
+				embedStub
+			];
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			try {
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				assert.ok(await getPromiseError(Zotero.Embeddings.embedQuery('retry query')));
+				// The eviction runs from a rejection handler
+				await Zotero.Promise.delay(0);
+				await Zotero.Embeddings.embedQuery('retry query');
+				assert.equal(embedStub.callCount, 2);
+			}
+			finally {
+				Zotero.Prefs.set('embeddings.model', '');
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				Zotero.Prefs.clear('embeddings.indexingPaused');
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
+		it("should share one in-flight embed across concurrent calls", async function () {
+			let deferred = Zotero.Promise.defer();
+			let stubs = [
+				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
+				sinon.stub(Zotero.Embeddings, 'pruneModels').resolves(),
+				sinon.stub(Zotero.Embeddings, 'embed').callsFake(() => deferred.promise)
+			];
+			// Select a model so the query prefix and model version resolve; the
+			// switch's indexing side effects are stubbed out above
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			try {
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				let promise1 = Zotero.Embeddings.embedQuery('concurrent query');
+				let promise2 = Zotero.Embeddings.embedQuery('concurrent query');
+				deferred.resolve(new Float32Array([1]));
+				assert.equal(await promise1, await promise2);
+				assert.equal(Zotero.Embeddings.embed.callCount, 1);
+			}
+			finally {
+				Zotero.Prefs.set('embeddings.model', '');
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				Zotero.Prefs.clear('embeddings.indexingPaused');
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+	});
+
 	describe("Indexing", function () {
+		it("should announce cleared embeddings when the model changes", async function () {
+			let stubs = [
+				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
+				sinon.stub(Zotero.Embeddings, 'pruneModels').resolves()
+			];
+			let item = await createDataObject('item');
+			try {
+				await Zotero.Embeddings.initDB();
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings VALUES (?, ?, ?)",
+					[item.id, new Uint8Array([0, 0, 0, 0]), 'hash']
+				);
+				// The model switch clears the old vectors and announces the
+				// removals (after the coalescing delay), so active semantic
+				// views refresh
+				let promise = waitForNotifierEvent('refresh', 'item');
+				Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+				let event = await promise;
+				assert.include(event.ids, item.id);
+				assert.equal(
+					await Zotero.DB.valueQueryAsync(
+						"SELECT COUNT(*) FROM embeddings.itemEmbeddings"
+					),
+					0
+				);
+			}
+			finally {
+				Zotero.Prefs.set('embeddings.model', '');
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				Zotero.Prefs.clear('embeddings.indexingPaused');
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
 		it("should remove a deleted item's embedding", async function () {
 			await Zotero.Embeddings.initDB();
 			let stub = sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true);
