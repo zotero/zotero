@@ -28,6 +28,10 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
+		WindowScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
 	const VALID_TARGETS = [
@@ -97,6 +101,26 @@
 			return mainKey;
 		}
 
+		async _verifyCSS(option) {
+			let base = lazy.PluginProtocol.getBaseURI(option.pluginID);
+			if (lazy.WindowScopeVariables.isDisallowedResourceURL(option.url, option.pluginID, base)) {
+				this._log(`Refusing CSS from an undeclared URL: ${option.url}`, "warn");
+				return false;
+			}
+			try {
+				let css = await Zotero.File.getContentsFromURLAsync(option.url);
+				if (lazy.WindowScopeVariables.cssTextHasDisallowedURL(css, option.pluginID, option.url)) {
+					this._log(`Refusing CSS that references an undeclared resource: ${option.url}`, "warn");
+					return false;
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+				return false;
+			}
+			return true;
+		}
+
 		/**
 		 * Get all open windows matching the target type
 		 * @param {string} target
@@ -145,13 +169,32 @@
 				if (doc.querySelector(`link[data-resource-id="${CSS.escape(mainKey)}"]`)) {
 					return;
 				}
-				let link = doc.createElement("link");
-				link.type = "text/css";
-				link.rel = "stylesheet";
-				link.href = option.url;
-				link.setAttribute("data-resource-id", mainKey);
-				doc.documentElement.appendChild(link);
+				let scope = lazy.PluginSandbox.getScope(option.pluginID);
+				if (scope && !lazy.VarCheck.isPrivilegedScope(scope)) {
+					this._verifyCSS(option).then((ok) => {
+						// Skip if it failed, the window closed, or it was
+						// unregistered while we were verifying.
+						if (ok && !win.closed && this._optionsCache[mainKey]) {
+							this._appendCSSLink(doc, option, mainKey);
+						}
+					});
+					return;
+				}
+				this._appendCSSLink(doc, option, mainKey);
 			}
+		}
+
+		_appendCSSLink(doc, option, mainKey) {
+			// Re-check: a concurrent apply may have added it while verifying.
+			if (doc.querySelector(`link[data-resource-id="${CSS.escape(mainKey)}"]`)) {
+				return;
+			}
+			let link = doc.createElement("link");
+			link.type = "text/css";
+			link.rel = "stylesheet";
+			link.href = option.url;
+			link.setAttribute("data-resource-id", mainKey);
+			doc.documentElement.appendChild(link);
 		}
 
 		/**
@@ -232,7 +275,8 @@
 		_manager: new WindowResourceManagerInternal(),
 
 		/**
-		 * Register a window resource (FTL or CSS)
+		 * Register a window resource (FTL or CSS). For an unprivileged plugin a
+		 * CSS resource is applied only after its URL and content are verified.
 		 * @param {WindowResourceOptions} options
 		 * @returns {string | false}
 		 */
