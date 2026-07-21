@@ -140,6 +140,62 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	}
 
 	/**
+	 * Embedding-index coverage while a best-match search is active, for the
+	 * banner above the items list. Null when there's no active best-match
+	 * search or every eligible item is indexed.
+	 *
+	 * @returns {Object|null} - { type: 'indexing'|'paused', indexed, total }
+	 */
+	getBestMatchIndexState() {
+		return this._bestMatchIndexState || null;
+	}
+
+	/**
+	 * Compute the current index coverage across the selected rows' libraries.
+	 * Never throws -- the banner is informational and shouldn't break a
+	 * refresh.
+	 *
+	 * @return {Promise<Object|null>}
+	 */
+	async _getBestMatchIndexState() {
+		try {
+			let status = Zotero.Embeddings.Indexing.getStatus();
+			if (!status.enabled) {
+				return null;
+			}
+			// Counts aren't populated until the indexer runs in this session
+			if (!status.libraries.length) {
+				status = await Zotero.Embeddings.Indexing.refreshStatus();
+			}
+			let libraryIDs = new Set(
+				this.collectionTreeRows
+					.map(row => row.ref?.libraryID)
+					.filter(id => id !== undefined)
+			);
+			let libraries = status.libraries
+				.filter(lib => !libraryIDs.size || libraryIDs.has(lib.libraryID));
+			let indexed = libraries.reduce((sum, lib) => sum + lib.indexed, 0);
+			let total = libraries.reduce((sum, lib) => sum + lib.eligible, 0);
+			if (indexed >= total) {
+				return null;
+			}
+			// Only an explicit pause reports as paused. Anything else --
+			// between runs (startup, the pre-run debounce) or after an error
+			// (detailed in the preferences) -- reports as indexing, since the
+			// banner explains the incomplete coverage, not the indexer state
+			return {
+				type: status.paused ? 'paused' : 'indexing',
+				indexed,
+				total
+			};
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
+	}
+
+	/**
 	 * The semantic stage of a best-match search: score the merged,
 	 * deduplicated results from all selected rows against the query in a
 	 * single call, and keep the scoreable items ranked globally across the
@@ -203,6 +259,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				Zotero.logError(e);
 			}
 			this._bestMatchRanks = new Map();
+			this._bestMatchIndexState = await this._getBestMatchIndexState();
 			// A rank-only search's membership doesn't depend on the index, so
 			// show its results unranked; anything else shows no results rather
 			// than an unranked scope
@@ -242,6 +299,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		}
 		this._bestMatchRanks = ranks;
 		this._bestMatchBarFractions = fractions;
+		this._bestMatchIndexState = await this._getBestMatchIndexState();
 		return kept;
 	}
 
@@ -469,6 +527,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			this.collectionTreeRows.forEach(row => row.clearCache());
 			this._bestMatchRanks = null;
 			this._bestMatchBarFractions = null;
+			this._bestMatchIndexState = null;
 			// Get the full set of items we want to show, merged across all selected rows
 			let newSearchItemSet = new Set();
 			for (let arr of await Promise.all(this.collectionTreeRows.map(row => row.getItems()))) {
@@ -1301,6 +1360,30 @@ class CollectionViewItemTree extends ItemTree {
 	async sort(itemIDs, awaitRefresh = true) {
 		awaitRefresh && await this._refreshPromise;
 		return super.sort(itemIDs);
+	}
+
+	/**
+	 * While a best-match search runs against a partially built embeddings
+	 * index, show a banner above the items list with the indexing progress,
+	 * so incomplete results aren't mistaken for a complete ranking. Updates
+	 * arrive with the periodic refreshes the indexer triggers as it fills
+	 * the index.
+	 */
+	_renderTablePrologue() {
+		let state = this.rowProvider.getBestMatchIndexState();
+		if (!state) {
+			return null;
+		}
+		return (
+			<div
+				className="best-match-index-banner"
+				key="best-match-index-banner"
+				data-l10n-id={state.type == 'paused'
+					? 'items-best-match-indexing-paused'
+					: 'items-best-match-indexing'}
+				data-l10n-args={JSON.stringify({ indexed: state.indexed, total: state.total })}
+			/>
+		);
 	}
 
 	render() {

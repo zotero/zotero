@@ -454,6 +454,9 @@ items-column-last-read = Last Read
 items-column-relevance = Relevance
 items-column-relevance-rank = Rank { $rank }
 
+items-best-match-indexing = Indexing in progress — { $indexed } of { $total } items indexed
+items-best-match-indexing-paused = Indexing is paused — { $indexed } of { $total } items indexed
+
 report-error =
     .label = Report Error…
 
