@@ -33,6 +33,19 @@ import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs
 
 const CALLBACK_WRAPPERS_KEY = "__zoteroCallbackWrappers__";
 
+const BLOCKED_WINDOW_PROPS = new Set([
+	"window",
+	"global",
+	"globalThis",
+	"top",
+	"parent",
+	"frames",
+	"frameElement",
+	"self",
+	"opener",
+	"content",
+]);
+
 const ScopeVariables = {
 
 	/**
@@ -1121,19 +1134,6 @@ const WindowScopeVariables = {
 		// Sandbox should not hold long-term references to DOM nodes anyway.
 		let getActual = () => elem;
 
-		const blockedWindowProps = new Set([
-			"window",
-			"global",
-			"globalThis",
-			"top",
-			"parent",
-			"frames",
-			"frameElement",
-			"self",
-			"opener",
-			"content",
-		]);
-
 		// Own + prototype chain, excluding Object.prototype
 		let allowed = new Set(VarCheck.getAllKeysIncludingPrototypes(elem));
 
@@ -1153,7 +1153,7 @@ const WindowScopeVariables = {
 				if (!win) return null;
 				return WindowScopeVariables.createSafeWindow(win, pluginID, { rootNode });
 			}
-			if (blockedWindowProps.has(prop)) {
+			if (BLOCKED_WINDOW_PROPS.has(prop)) {
 				VarCheck.throwPropError("access", prop);
 			}
 
@@ -1311,7 +1311,7 @@ const WindowScopeVariables = {
 			if (prop === "ownerDocument") {
 				VarCheck.throwPropError("set", prop);
 			}
-			if (blockedWindowProps.has(prop)) {
+			if (BLOCKED_WINDOW_PROPS.has(prop)) {
 				VarCheck.throwPropError("set", prop);
 			}
 			if (/^on/i.test(prop)) {
