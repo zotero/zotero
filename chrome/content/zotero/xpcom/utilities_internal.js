@@ -221,8 +221,7 @@ Zotero.Utilities.Internal = {
 				transferData = value;
 			}
 			else if (flavor === "application/x-moz-nativeimage"
-				|| flavor.startsWith("image/")
-				|| (typeof value === "string" && value.startsWith("data:image/"))) {
+				|| flavor.startsWith("image/")) {
 				// Image: accept ArrayBuffer, base64 string, or data URI.
 				// For data URIs, the MIME type is extracted from the URI itself.
 				let mimeType = flavor.startsWith("image/") ? flavor : "image/png";
