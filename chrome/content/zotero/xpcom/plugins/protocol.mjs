@@ -42,7 +42,7 @@ var policies = new Map(); // pluginID -> WebExtensionPolicy
  *   caller is responsible for stripping them from `syncUUID`)
  * @returns {string} The moz-extension:// base URI for this plugin
  */
-function register(pluginID, rootURI, pluginUUID, origins = []) {
+function register(pluginID, rootURI, pluginUUID, origins = [], contentSecurityPolicy = null) {
 	// Always recreate with fresh origins and re-activate,
 	// since origins may have changed or the policy may have
 	// been deactivated externally (e.g. by AddonManager on disable)
@@ -70,12 +70,21 @@ function register(pluginID, rootURI, pluginUUID, origins = []) {
 		id: pluginID,
 		mozExtensionHostname: hostname,
 		baseURL,
+		// MV3 is required for the per-resource `matches` allowlist to be enforced.
+		manifestVersion: 3,
+		extensionPageCSP: contentSecurityPolicy || undefined,
 		localizeCallback: str => str,
 		allowedOrigins: new MatchPatternSet(origins, { restrictSchemes: false }),
-		// Mark all resources as web-accessible so GetFlagsForURI returns
-		// URI_LOADABLE_BY_ANYONE instead of URI_DANGEROUS_TO_LOAD.
+		// Resources are only accessible to chrome/resource and the plugin itself.
 		webAccessibleResources: [
-			{ resources: ["*"], matches: ["<all_urls>"] },
+			{
+				resources: ["*"],
+				matches: [
+					"chrome://*/*",
+					"resource://*/*",
+					`moz-extension://${hostname}/*`,
+				],
+			},
 		],
 	});
 	policy.active = true;
