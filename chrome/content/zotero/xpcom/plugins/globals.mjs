@@ -275,6 +275,43 @@ const PREFS_METHODS = {
 	clear: ["key", "global"],
 };
 
+const FORBIDDEN_PREF_PREFIXES = [
+	"extensions.zotero.pluginFileAccess.",
+	"extensions.zotero.pluginNames.",
+	"extensions.zotero.dataDir",
+	"extensions.update.",
+	"extensions.blocklist.",
+	"security.",
+	"network.",
+	"services.",
+	"signon.",
+	"app.update.",
+	"datareporting.",
+	"toolkit.telemetry.",
+	"privacy.",
+	"devtools.",
+];
+
+const EXACT_MATCH_ONLY_PREF_PREFIXES = [
+	"extensions.zotero.sync.",
+];
+
+function isAllowedPrefPrefix(prefix) {
+	for (let p of FORBIDDEN_PREF_PREFIXES) {
+		if (prefix.startsWith(p) || p.startsWith(prefix)) {
+			return false;
+		}
+	}
+	if (prefix.endsWith(".")) {
+		for (let p of EXACT_MATCH_ONLY_PREF_PREFIXES) {
+			if (prefix.startsWith(p) || p.startsWith(prefix)) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 /**
  * Set up Zotero.Prefs on the plugin scope with access control.
  *
@@ -297,6 +334,15 @@ function setupPreferences(scope) {
 	let declaredPrefixes = Array.from(prefPrefixes || []).filter(
 		p => typeof p === "string" && p.length > 0
 	);
+	declaredPrefixes = declaredPrefixes.filter((p) => {
+		if (!isAllowedPrefPrefix(p)) {
+			Zotero.warn(
+				`Plugin ${pluginID}: ignoring reserved pref in pref_permission "${p}"`
+			);
+			return false;
+		}
+		return true;
+	});
 	let allPrefixes = [ownPrefix, ...declaredPrefixes];
 
 	// Require a trailing "." for prefix matches so "extensions.zo" can't
@@ -312,8 +358,7 @@ function setupPreferences(scope) {
 			return;
 		}
 		throw new Error(
-			`Permission denied: cannot access preference "${pref}".`
-			+ ' Declare it in "pref_permissions".'
+			`Permission denied: cannot access preference "${pref}". Declare it in "pref_permissions".`
 		);
 	}
 
@@ -348,12 +393,20 @@ function setupPreferences(scope) {
 	Prefs.resetBranch = ScopeUtils.ensureCallableInScope(
 		Zotero.Prefs.resetBranch, Zotero.Prefs, scope, {
 			argParser: (args) => {
-				if (!args[1]) {
+				let branch = args[1];
+				if (!branch) {
 					throw new Error(
 						'Permission denied: cannot reset entire preference branch.'
 					);
 				}
-				checkPrefPermission(args[1]);
+				checkPrefPermission(branch);
+				if (EXACT_MATCH_ONLY_PREF_PREFIXES.some(
+					p => p.startsWith(branch) || branch.startsWith(p)
+				)) {
+					throw new Error(
+						`Permission denied: cannot reset reserved branch "${branch}".`
+					);
+				}
 				return args;
 			},
 			trace: { pluginID, path: "Zotero.Prefs.resetBranch" },
