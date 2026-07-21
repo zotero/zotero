@@ -79,17 +79,6 @@ describe("Plugin File Access", function () {
 		Zotero.Prefs.set(PREF_PREFIX + pluginUUID, JSON.stringify(entries), true);
 	}
 
-	async function assertRejects(fnOrPromise, label) {
-		let threw = false;
-		try {
-			await (typeof fnOrPromise === "function" ? fnOrPromise() : fnOrPromise);
-		}
-		catch {
-			threw = true;
-		}
-		assert.isTrue(threw, label || "expected the promise to reject");
-	}
-
 	// Open the prompt by triggering a check, returning both the prompt window
 	// and a handle to the in-flight session promise so the caller can await it
 	// after dismissing the prompt.
@@ -103,32 +92,22 @@ describe("Plugin File Access", function () {
 
 
 	describe("Registration", function () {
-		it("exposes the plugin data dir after register", function () {
+		it("exposes and creates the plugin data dir on register", async function () {
 			let dir = PluginFileAccess.getDir(PLUGIN_ID);
 			assert.isString(dir);
 			assert.include(dir, pluginUUID);
-		});
-
-		it("creates the plugin data dir on disk on register", async function () {
-			let dir = PluginFileAccess.getDir(PLUGIN_ID);
-			let exists = await IOUtils.exists(dir);
-			assert.isTrue(exists, `expected ${dir} to exist after register`);
+			assert.isTrue(await IOUtils.exists(dir), `expected ${dir} to exist after register`);
 			let stat = await IOUtils.stat(dir);
 			assert.equal(stat.type, "directory");
 		});
 
-		it("returns null for an unregistered plugin", function () {
+		it("getDir is null and check() rejects for an unregistered plugin", async function () {
 			PluginFileAccess.unregister(PLUGIN_ID);
 			assert.isNull(PluginFileAccess.getDir(PLUGIN_ID));
-		});
-
-		it("check() rejects for an unregistered plugin", async function () {
-			PluginFileAccess.unregister(PLUGIN_ID);
 			let path = PathUtils.join(tempDir, "x.txt");
-			await assertRejects(
-				() => PluginFileAccess.check(PLUGIN_ID, path, "read"),
-				"check should reject without a registered plugin"
-			);
+			// check() throws synchronously on the unregistered guard, so wrap it
+			let e = await getPromiseError((async () => PluginFileAccess.check(PLUGIN_ID, path, "read"))());
+			assert.ok(e, "check should reject without a registered plugin");
 		});
 	});
 
@@ -145,18 +124,14 @@ describe("Plugin File Access", function () {
 	describe("Forbidden paths", function () {
 		it("denies access to Zotero data dir outside plugin-data", async function () {
 			let target = PathUtils.join(Zotero.DataDirectory.dir, "zotero.sqlite");
-			await assertRejects(
-				PluginFileAccess.check(PLUGIN_ID, target, "read"),
-				"data-dir access should be forbidden"
-			);
+			let e = await getPromiseError(PluginFileAccess.check(PLUGIN_ID, target, "read"));
+			assert.ok(e, "data-dir access should be forbidden");
 		});
 
 		it("denies access to profile directory", async function () {
 			let target = PathUtils.join(PathUtils.profileDir, "prefs.js");
-			await assertRejects(
-				PluginFileAccess.check(PLUGIN_ID, target, "read"),
-				"profile-dir access should be forbidden"
-			);
+			let e = await getPromiseError(PluginFileAccess.check(PLUGIN_ID, target, "read"));
+			assert.ok(e, "profile-dir access should be forbidden");
 		});
 	});
 
@@ -255,19 +230,15 @@ describe("Plugin File Access", function () {
 		it("denies when a persisted deny covers the path", async function () {
 			let path = PathUtils.join(tempDir, "deny-here.txt");
 			setPersistedGrants([{ path, mode: "deny" }]);
-			await assertRejects(
-				PluginFileAccess.check(PLUGIN_ID, path, "read"),
-				"persisted deny should reject without prompting"
-			);
+			let e = await getPromiseError(PluginFileAccess.check(PLUGIN_ID, path, "read"));
+			assert.ok(e, "persisted deny should reject without prompting");
 		});
 
 		it("denies a child when a persisted deny covers parent", async function () {
 			setPersistedGrants([{ path: tempDir, mode: "deny" }]);
 			let nested = PathUtils.join(tempDir, "child.txt");
-			await assertRejects(
-				PluginFileAccess.check(PLUGIN_ID, nested, "read"),
-				"parent deny should cover child"
-			);
+			let e = await getPromiseError(PluginFileAccess.check(PLUGIN_ID, nested, "read"));
+			assert.ok(e, "parent deny should cover child");
 		});
 
 		it("more-specific allow overrides a higher deny", async function () {
@@ -308,12 +279,12 @@ describe("Plugin File Access", function () {
 		});
 
 		it("times out a long-running session", async function () {
-			await assertRejects(
+			let e = await getPromiseError(
 				PluginFileAccess.withSession(PLUGIN_ID, async () => {
 					await Zotero.Promise.delay(500);
-				}, { timeout: 50 }),
-				"long session should time out"
+				}, { timeout: 50 })
 			);
+			assert.ok(e, "long session should time out");
 		});
 
 		it("clears activeSession even when fn throws", async function () {
@@ -479,20 +450,22 @@ describe("Plugin File Access", function () {
 				grants.some(g => g.path === path && g.mode === "deny"),
 				"expected a persisted deny grant"
 			);
-			await assertRejects(
-				PluginFileAccess.check(PLUGIN_ID, path, "read"),
-				"persisted deny should reject"
-			);
+			let e = await getPromiseError(PluginFileAccess.check(PLUGIN_ID, path, "read"));
+			assert.ok(e, "persisted deny should reject");
 		});
 
-		it("hides the Remember checkbox when no scope can be persisted", async function () {
+		it("collapses the prompt when nothing can be persisted", async function () {
+			// Root path: neither the file nor any parent can be persisted, so the
+			// Remember checkbox and the split Allow (with its parent option) are
+			// hidden, leaving only the plain Allow button.
 			let path = Zotero.isWin ? "C:\\" : "/";
 			let { promptPromise, sessionPromise } = triggerPrompt(path);
 			let win = await promptPromise;
-			assert.isTrue(
-				win.document.getElementById("opt-dont-ask").hidden,
-				"Remember checkbox should be hidden when persist is unavailable"
-			);
+			assert.isTrue(win.document.getElementById("opt-dont-ask").hidden,
+				"Remember checkbox hidden when persist is unavailable");
+			assert.isTrue(win.document.getElementById("allow-parent").hidden);
+			assert.isTrue(win.document.getElementById("btn-allow").hidden);
+			assert.isFalse(win.document.getElementById("btn-allow-plain").hidden);
 			win.PluginFileAccessPrompt._choose("deny", "file");
 			await sessionPromise;
 		});
@@ -525,46 +498,21 @@ describe("Plugin File Access", function () {
 			await sessionPromise;
 		});
 
-		it("Allow label swaps to 'Always allow' when Remember is checked", async function () {
+		it("Allow and Allow-folder labels swap to 'Always allow' when Remember is checked", async function () {
 			let path = PathUtils.join(tempDir, "label-toggle.txt");
 			let { promptPromise, sessionPromise } = triggerPrompt(path);
 			let win = await promptPromise;
 			let allow = win.document.getElementById("btn-allow");
+			let parent = win.document.getElementById("allow-parent");
 			assert.equal(allow.getAttribute("data-l10n-id"), "plugin-file-access-allow");
+			assert.equal(parent.getAttribute("data-l10n-id"), "plugin-file-access-allow-folder");
 
 			win.document.getElementById("opt-dont-ask").checked = true;
 			win.PluginFileAccessPrompt._updateAllowLabel();
-			assert.equal(allow.getAttribute("data-l10n-id"), "plugin-file-access-allow-always");
-
-			win.PluginFileAccessPrompt._choose("deny", "file");
-			await sessionPromise;
-		});
-
-		it("Allow-folder label swaps to 'Always allow ...' when Remember is checked", async function () {
-			let path = PathUtils.join(tempDir, "parent-label-toggle.txt");
-			let { promptPromise, sessionPromise } = triggerPrompt(path);
-			let win = await promptPromise;
-			let item = win.document.getElementById("allow-parent");
-			assert.equal(item.getAttribute("data-l10n-id"), "plugin-file-access-allow-folder");
-
-			win.document.getElementById("opt-dont-ask").checked = true;
 			win.PluginFileAccessPrompt._updateParentLabel();
-			assert.equal(
-				item.getAttribute("data-l10n-id"),
-				"plugin-file-access-allow-folder-always"
-			);
+			assert.equal(allow.getAttribute("data-l10n-id"), "plugin-file-access-allow-always");
+			assert.equal(parent.getAttribute("data-l10n-id"), "plugin-file-access-allow-folder-always");
 
-			win.PluginFileAccessPrompt._choose("deny", "file");
-			await sessionPromise;
-		});
-
-		it("collapses Allow to the plain button when nothing on the prompt can be persisted", async function () {
-			let path = Zotero.isWin ? "C:\\" : "/";
-			let { promptPromise, sessionPromise } = triggerPrompt(path);
-			let win = await promptPromise;
-			assert.isTrue(win.document.getElementById("allow-parent").hidden);
-			assert.isTrue(win.document.getElementById("btn-allow").hidden);
-			assert.isFalse(win.document.getElementById("btn-allow-plain").hidden);
 			win.PluginFileAccessPrompt._choose("deny", "file");
 			await sessionPromise;
 		});
