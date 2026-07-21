@@ -63,23 +63,33 @@ Zotero_Preferences.Advanced = {
 
 
 	initSemanticSearch: function () {
-		// Populate the model menu from the model registry. The preferences
-		// code watches bound menulists for added items and selects the one
-		// matching the current pref value.
-		let modelPopup = document.querySelector('#semantic-search-model > menupopup');
+		// Populate the model menu from the model registry. The menu isn't
+		// bound to the pref, since a mode change needs a confirmation prompt
+		// before the pref -- and with it the stored index -- is touched.
+		let modelMenu = document.getElementById('semantic-search-model');
+		let modelPopup = modelMenu.querySelector('menupopup');
 		for (let { name, l10nID } of Zotero.Embeddings.getAvailableModels()) {
 			let menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('value', name);
 			document.l10n.setAttributes(menuitem, l10nID);
 			modelPopup.append(menuitem);
 		}
+		modelMenu.value = Zotero.Embeddings.getModelName();
+		modelMenu.addEventListener('command', () => this.handleSemanticSearchModeChange());
 
 		// Live progress updates from the background indexer
 		this._semanticSearchListener = status => this.updateSemanticSearchUI(status);
 		Zotero.Embeddings.Indexing.addProgressListener(this._semanticSearchListener);
+		let modelPrefObserverID = Zotero.Prefs.registerObserver(
+			'embeddings.model',
+			() => {
+				modelMenu.value = Zotero.Embeddings.getModelName();
+			}
+		);
 
 		document.getElementById('zotero-prefpane-advanced').addEventListener('unload', () => {
 			Zotero.Embeddings.Indexing.removeProgressListener(this._semanticSearchListener);
+			Zotero.Prefs.unregisterObserver(modelPrefObserverID);
 		});
 
 		document.getElementById('semantic-search-resume').addEventListener('command', () => {
@@ -93,6 +103,42 @@ Zotero_Preferences.Advanced = {
 		// Render current state, then compute up-to-date per-library counts
 		this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
 		Zotero.Embeddings.Indexing.refreshStatus();
+	},
+
+
+	handleSemanticSearchModeChange: async function () {
+		let modelMenu = document.getElementById('semantic-search-model');
+		let oldValue = Zotero.Embeddings.getModelName();
+		let newValue = modelMenu.value;
+		if (newValue === oldValue) {
+			return;
+		}
+		// Leaving an enabled mode wipes the stored index (and, when disabling,
+		// the downloaded data), so confirm first. Enabling from Disabled just
+		// starts indexing.
+		if (Zotero.Embeddings.isEnabled()) {
+			let [title, text, button] = await document.l10n.formatValues(
+				(newValue
+					? ['switch-title', 'switch-text', 'switch-button']
+					: ['disable-title', 'disable-text', 'disable-button'])
+					.map(id => ({ id: `preferences-advanced-semantic-search-${id}` }))
+			);
+			let ps = Services.prompt;
+			let index = ps.confirmEx(
+				window,
+				title,
+				text,
+				ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+					+ ps.BUTTON_POS_1_DEFAULT,
+				button, null, null, null, {}
+			);
+			if (index !== 0) {
+				modelMenu.value = oldValue;
+				return;
+			}
+		}
+		Zotero.Prefs.set('embeddings.model', newValue);
 	},
 
 
