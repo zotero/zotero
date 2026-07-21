@@ -126,6 +126,13 @@ async function showPrompt(pluginID, path, mode, promptArgs, options = {}) {
 	let { onWindowOpen } = options;
 	let pluginName = await Zotero.Plugins.getName(pluginID) || pluginID;
 	return new Promise((resolve) => {
+		// Idempotent so a force-close settles as a deny instead of leaving the prompt worker hung.
+		let settled = false;
+		let settle = (answer) => {
+			if (settled) return;
+			settled = true;
+			resolve(answer);
+		};
 		let args = {
 			pluginID,
 			pluginName,
@@ -135,7 +142,7 @@ async function showPrompt(pluginID, path, mode, promptArgs, options = {}) {
 			canPersistParent,
 			parentPath,
 			isDirectory,
-			resolve,
+			resolve: settle,
 		};
 		let win = Services.ww.openWindow(
 			null,
@@ -144,6 +151,11 @@ async function showPrompt(pluginID, path, mode, promptArgs, options = {}) {
 			"chrome,resizable=no,alwaysontop=yes",
 			args,
 		);
+		win.addEventListener("load", () => {
+			win.addEventListener("unload", () => {
+				settle({ decision: "deny", persist: "once", scope: "file", reason: "closed" });
+			}, { once: true });
+		}, { once: true });
 		if (onWindowOpen) onWindowOpen(win);
 	});
 }
