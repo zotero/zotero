@@ -124,8 +124,16 @@ function getScope(id) {
 	return scopes.get(id);
 }
 
-function defineFrozenIdentity(scope, addon, uuid, perms) {
-	let freezeInSandbox = Cu.evalInSandbox("arr => Object.freeze(arr)", scope);
+function defineFrozenIdentity(scope, addon, uuid, privileged, perms) {
+	let freezeInSandbox;
+	if (privileged) {
+		// evalInSandbox in privileged scopes will run the code as a file with the same name
+		// and thus the debugger only sees the function instead of the full file.
+		freezeInSandbox = arr => Object.freeze(arr);
+	}
+	else {
+		freezeInSandbox = Cu.evalInSandbox("arr => Object.freeze(arr)", scope);
+	}
 	let toFrozenSandboxArray = arr => freezeInSandbox(Cu.cloneInto(arr, scope));
 	let vars = {
 		PLUGIN_ID: addon.id,
@@ -198,7 +206,7 @@ function loadPrivilegedScope(addon, uuid, globalVars = {}) {
 		}
 	);
 
-	defineFrozenIdentity(scope, addon, uuid, {
+	defineFrozenIdentity(scope, addon, uuid, true, {
 		permissions: ["*"],
 		hostPermissions: ["*"],
 		prefPermissions: ["*"],
@@ -286,7 +294,7 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 		defineFunction(scope, key, funcToExport[key]);
 	}
 
-	defineFrozenIdentity(scope, addon, uuid, {
+	defineFrozenIdentity(scope, addon, uuid, false, {
 		permissions,
 		hostPermissions: addon.installPermissions?.host_permissions || [],
 		prefPermissions: addon.installPermissions?.pref_permissions || [],
