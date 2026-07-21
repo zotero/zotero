@@ -1198,10 +1198,12 @@ Zotero.Embeddings.Indexing = new function () {
 					}
 					let vector = vectors[j];
 					let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+					// Keep the embedding blobs out of debug output
 					await Zotero.DB.queryAsync(
 						"REPLACE INTO embeddings.itemEmbeddings (itemID, embedding, sourceHash) "
 							+ "VALUES (?, ?, ?)",
-						[batch[j].item.id, blob, batch[j].hash]
+						[batch[j].item.id, blob, batch[j].hash],
+						{ debugParams: false }
 					);
 				}
 			});
