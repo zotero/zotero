@@ -230,7 +230,11 @@
 				this._renderPreview(DEFAULT_ATTACHMENT_RENAME_TEMPLATE);
 				return;
 			}
-			this.updatePreview();
+			// Keep showing the previous preview while the user types through an invalid state.
+			// If the template is still invalid on blur, handleTemplateBlur() will show the error.
+			if (this.templateValid) {
+				this.updatePreview();
+			}
 			this.handleChange();
 		};
 
@@ -240,6 +244,9 @@
 				this.formatTemplateTextarea.value = DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 				this.updatePreview();
 				this.handleChange();
+			}
+			else {
+				this.updatePreview();
 			}
 		};
 
