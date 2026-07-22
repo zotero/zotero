@@ -228,7 +228,7 @@ describe("FileRenamingDialog", function () {
 			}
 		});
 
-		it("should keep the window open when Done is clicked and the user cancels", async function () {
+		it("should prompt when an invalid template blurs directly to Done", async function () {
 			let sandbox = sinon.createSandbox();
 			let stubs = setupStubs(sandbox, 1);
 			let origClose = win.close;
@@ -237,6 +237,7 @@ describe("FileRenamingDialog", function () {
 			try {
 				let dialog = makeDirty(group.libraryID, INVALID_TEMPLATE);
 				resetStubHistory(stubs);
+				dialog.settingsEl.handleTemplateBlur();
 				await dialog._handleDoneClick();
 				assert.isFalse(closeSpy.called, 'window must stay open on cancel');
 				assert.equal(stubs.confirm.callCount, 1, 'only the invalid-template prompt is shown');
@@ -313,6 +314,44 @@ describe("FileRenamingDialog", function () {
 	});
 
 	describe("template preview", function () {
+		it("should keep the last valid preview while typing and show an error on blur", function () {
+			let dialog = win.FileRenamingDialog;
+			let settingsEl = dialog.settingsEl;
+			let preview = settingsEl.querySelector('#file-renaming-format-preview');
+			let libraryID = dialog._currentLibraryID;
+			let sandbox = sinon.createSandbox();
+			sandbox.stub(Zotero.SyncedSettings, 'set').resolves();
+			sandbox.stub(Zotero.SyncedSettings, 'clear').resolves();
+			sandbox.stub(Zotero.Prefs, 'set');
+			try {
+				settingsEl.formatTemplate = '{{ title }}';
+				settingsEl.updatePreview();
+				let firstValidPreview = preview.innerText;
+
+				settingsEl.formatTemplate = '{{ title';
+				settingsEl.handleTemplateInput();
+				assert.equal(preview.innerText, firstValidPreview, 'last valid preview retained');
+				assert.isFalse(settingsEl.previewSection.classList.contains('is-hidden'), 'preview remains visible');
+				assert.isTrue(settingsEl.invalidMessage.classList.contains('is-hidden'), 'error remains hidden');
+
+				settingsEl.formatTemplate = '{{ title }}-updated';
+				settingsEl.handleTemplateInput();
+				let secondValidPreview = preview.innerText;
+				assert.notEqual(secondValidPreview, firstValidPreview, 'preview updates when valid again');
+
+				settingsEl.formatTemplate = '{{ title';
+				settingsEl.handleTemplateInput();
+				assert.equal(preview.innerText, secondValidPreview, 'latest valid preview retained');
+				settingsEl.handleTemplateBlur();
+				assert.isTrue(settingsEl.previewSection.classList.contains('is-hidden'), 'preview hidden on blur');
+				assert.isFalse(settingsEl.invalidMessage.classList.contains('is-hidden'), 'error shown on blur');
+			}
+			finally {
+				sandbox.restore();
+				dialog.loadSettingsForLibrary(libraryID);
+			}
+		});
+
 		it("should clear a stale syntax-error message when the template is cleared to whitespace", function () {
 			let settingsEl = win.FileRenamingDialog.settingsEl;
 			// Show the invalid state (updatePreview has no change side effects)
