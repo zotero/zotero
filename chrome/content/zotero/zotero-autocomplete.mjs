@@ -76,11 +76,14 @@ ZoteroAutoComplete.prototype.startSearch = async function (searchString, searchP
 		case 'tag':
 			var sql = "SELECT DISTINCT name AS val, NULL AS id FROM tags WHERE name LIKE ? ESCAPE '\\'";
 			var sqlParams = [Zotero.DB.escapeSQLExpression(searchString) + '%'];
+			// Suggest only tags on items that aren't in the trash, optionally scoped by library
+			sql += " AND tagID IN (SELECT tagID FROM itemTags JOIN items USING (itemID) "
+				+ "WHERE itemID NOT IN (SELECT itemID FROM deletedItems)";
 			if (libraryIDs.length) {
-				sql += " AND tagID IN (SELECT tagID FROM itemTags JOIN items USING (itemID) "
-					+ `WHERE libraryID IN (${libraryPlaceholders}))`;
+				sql += ` AND libraryID IN (${libraryPlaceholders})`;
 				sqlParams.push(...libraryIDs);
 			}
+			sql += ")";
 			if (searchParams.itemID) {
 				sql += " AND name NOT IN (SELECT name FROM tags WHERE tagID IN ("
 					+ "SELECT tagID FROM itemTags WHERE itemID = ?))";
