@@ -28,6 +28,7 @@ Zotero.Attachments = new function () {
 	let lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		generateHTMLFromTemplate: "chrome://zotero/content/modules/templates.mjs",
+		isTemplateValid: "chrome://zotero/content/modules/templates.mjs",
 	});
 	
 	// Keep in sync with Zotero.Schema.integrityCheck() and this.linkModeToName()
@@ -2290,15 +2291,45 @@ Zotero.Attachments = new function () {
 	}
 	
 	
+	// Shared so validation, rendering and the settings dialog all judge the same string
+	this.normalizeRenameTemplate = function (formatString) {
+		return formatString.replace(/\r?\n|\r/g, "").trim();
+	};
+
+	/**
+	 * Resolve a library's rename template from synced settings, validating it and falling back to
+	 * the default so an invalid (e.g. synced) template never reaches the engine. Callers that rename
+	 * many items should resolve once and pass the result as `formatString` to getFileBaseNameFromItem().
+	 *
+	 * @param {Number} libraryID
+	 * @returns {String} A valid rename template
+	 */
+	this.getAttachmentRenameTemplate = function (libraryID) {
+		const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+		let formatString = Zotero.SyncedSettings.get(libraryID, 'attachmentRenameTemplate') ?? DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
+		let normalized = typeof formatString === 'string' ? this.normalizeRenameTemplate(formatString) : '';
+		if (!normalized) {
+			formatString = DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
+		}
+		else if (!lazy.isTemplateValid(normalized)) {
+			Zotero.warn(`Attachment rename template "${formatString}" is invalid; falling back to the default template`);
+			formatString = DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
+		}
+		return formatString;
+	};
+
 	/*
 	 * Returns a formatted string to use as the basename of an attachment
 	 * based on the metadata of the specified item and a format string
 	 *
-	 * (Optional) |formatString| specifies the format string -- otherwise
-	 * the 'attachmentRenameTemplate' synced setting for the user's library is used
+	 * Without a formatString, the 'attachmentRenameTemplate' synced setting
+	 * for the item's library is used, falling back to the default template
 	 *
 	 * @param {Zotero.Item} item
-	 * @param {String} formatString
+	 * @param {Object} [options]
+	 * @param {String} [options.formatString] - Format string, assumed valid; if omitted, the library's rename template is resolved and validated
+	 * @param {String} [options.attachmentTitle] - Value for the {{ attachmentTitle }} placeholder
+	 * @returns {String}
 	 */
 	this.getFileBaseNameFromItem = function (item, options = {}) {
 		if (!(item instanceof Zotero.Item)) {
@@ -2313,16 +2344,14 @@ Zotero.Attachments = new function () {
 		}
 
 		let { formatString = null, attachmentTitle = '' } = options;
-
 		if (!formatString) {
-			const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
-			formatString = Zotero.SyncedSettings.get(item.libraryID, 'attachmentRenameTemplate') ?? DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
+			formatString = this.getAttachmentRenameTemplate(item.libraryID);
 		}
 
 		let chunks = [];
 		let protectedLiterals = new Set();
 
-		formatString = formatString.replace(/\r?\n|\r/g, "").trim();
+		formatString = this.normalizeRenameTemplate(formatString);
 
 		const getSlicedCreatorsOfType = (creatorType, slice) => {
 			let creatorTypeIDs;
