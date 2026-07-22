@@ -3583,6 +3583,13 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentFilename', {
 		if (prefixedPath) {
 			return prefixedPath[1].split('/').pop();
 		}
+		// Some ancient libraries have relative paths ('../.../foo.pdf') with no 'storage:' prefix,
+		// which fall through to PathUtils.filename() and throw NS_ERROR_FILE_UNRECOGNIZED_PATH, so
+		// resolve stored-file leaves as strings regardless of prefix. PathUtils.filename() below is
+		// for linked files, whose paths are genuine absolute paths.
+		if (this.isStoredFileAttachment()) {
+			return path.split(/[/\\]/).pop();
+		}
 		return PathUtils.filename(path);
 	},
 	set: function (val) {

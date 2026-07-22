@@ -1180,6 +1180,15 @@ describe("Zotero.Item", function () {
 			assert.equal(attachment.attachmentFilename, "foo\\bar.pdf");
 		});
 
+		it("should return the basename for a stored file with a corrupt non-'storage:' path", function () {
+			var attachment = new Zotero.Item("attachment");
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			// Legacy corrupt data that bypassed the setter (an old relative descriptor with no
+			// 'storage:' prefix); the getter must not throw via PathUtils
+			attachment._attachmentPath = "../../Foo Bar/Documents/~STUFF/paper .pdf";
+			assert.equal(attachment.attachmentFilename, "paper .pdf");
+		});
+
 		it("should get a filename for a base-dir-relative file", function () {
 			var dir = getTestDataDirectory().path;
 			Zotero.Prefs.set('saveRelativeAttachmentPath', true)
