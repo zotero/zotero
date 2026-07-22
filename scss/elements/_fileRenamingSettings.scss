@@ -15,8 +15,17 @@ file-renaming-settings {
 		padding: 0.4em;
 	}
 
-	#file-rename-settings-section-instructions {
+	#file-rename-settings-section-instructions,
+	#file-renaming-template-invalid {
 		margin-top: .5em;
+	}
+
+	#file-renaming-template-invalid {
+		color: var(--color-invalid);
+		font-size: 0.9em;
+		padding: 8px 10px;
+		background: var(--color-invalid-background);
+		border-radius: 6px;
 	}
 
 	#file-renaming-format-template-label h2 {
@@ -25,5 +34,9 @@ file-renaming-settings {
 
 	.indented-pref {
 		margin-inline-start: 2em;
+	}
+
+	.is-hidden {
+		display: none;
 	}
 }
