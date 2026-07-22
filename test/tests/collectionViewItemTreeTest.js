@@ -165,6 +165,26 @@ describe("CollectionViewItemTree", function () {
 			});
 		});
 		
+		it("should re-run the search when the quick-search mode changes", async function () {
+			// Term appears only in a field excluded by "Title, Creator, Year" mode
+			let item = createUnsavedDataObject('item', { itemType: 'journalArticle', title: 'Untitled' });
+			item.setField('abstractNote', 'zqsmodeterm');
+			await item.saveTx();
+
+			Zotero.Prefs.set('search.quicksearch-mode', 'titleCreatorYear');
+			quicksearch.value = 'zqsmodeterm';
+			await zp.search();
+			assert.isFalse(itemsView.getRowIndexByID(item.id));
+
+			// Changing only the mode, with the same search text, should re-run the search
+			Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+			await zp.search();
+			assert.isNumber(itemsView.getRowIndexByID(item.id));
+
+			Zotero.Prefs.clear('search.quicksearch-mode');
+			await item.eraseTx();
+		});
+
 		it("should not clear quick search after deleting item from collection", async function () {
 			let col = await createDataObject('collection');
 			let item = await createDataObject('item', { title: "test", collections: [col.id] });
@@ -2929,7 +2949,8 @@ describe("CollectionViewItemTree", function () {
 			
 			try {
 				await rowProvider.setFilter('search', 'changed-search');
-				assert.isTrue(setSearchStub.calledOnceWithExactly('changed-search'));
+				assert.isTrue(setSearchStub.calledOnceWithExactly('changed-search',
+					Zotero.Prefs.get('search.quicksearch-mode')));
 				assert.isTrue(refreshSpy.calledOnceWithExactly({ restoreSelection: true }));
 			}
 			finally {
