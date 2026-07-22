@@ -32,9 +32,9 @@ export const DEFAULT_AUTO_RENAME_FILE_TYPES = "application/pdf,application/epub+
 
 const getExtension = filename => filename.match(/\.([^.]+)$/)?.[1] ?? '';
 
-const getNewFileNameData = async (attachmentItem, parentItem) => {
+const getNewFileNameData = async (attachmentItem, parentItem, formatString) => {
 	const newFileBaseName = Zotero.Attachments.getFileBaseNameFromItem(
-		parentItem, { attachmentTitle: attachmentItem.getField('title') }
+		parentItem, { formatString, attachmentTitle: attachmentItem.getField('title') }
 	);
 
 	const path = await attachmentItem.getFilePathAsync();
@@ -67,6 +67,8 @@ export async function renameFilesFromParent({ libraryID = null, pretend = false,
 	};
 	
 	libraryID = libraryID ?? Zotero.Libraries.userLibraryID;
+	// Resolve (and validate) the library's template once for the whole batch
+	let formatString = Zotero.Attachments.getAttachmentRenameTemplate(libraryID);
 	let items = await Zotero.Items.getAll(libraryID, false, true);
 	adjustProgressBy(0.01); // move the progress bar slightly while we load required data
 
@@ -93,7 +95,7 @@ export async function renameFilesFromParent({ libraryID = null, pretend = false,
 			continue;
 		}
 
-		const { newName, isFilePresent } = await getNewFileNameData(attachmentItem, parentItem);
+		const { newName, isFilePresent } = await getNewFileNameData(attachmentItem, parentItem, formatString);
 		Zotero.debug(`Renaming attachment ${attachmentItem.id} on parent item ${parentItem.id} to ${newName}`);
 
 		if (newName !== attachmentItem.attachmentFilename) {
