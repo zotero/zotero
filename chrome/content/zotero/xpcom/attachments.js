@@ -25,6 +25,10 @@
 
 Zotero.Attachments = new function () {
 	const { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
+	let lazy = {};
+	ChromeUtils.defineESModuleGetters(lazy, {
+		generateHTMLFromTemplate: "chrome://zotero/content/modules/templates.mjs",
+	});
 	
 	// Keep in sync with Zotero.Schema.integrityCheck() and this.linkModeToName()
 	this.LINK_MODE_IMPORTED_FILE = 0;
@@ -2548,7 +2552,7 @@ Zotero.Attachments = new function () {
 		// Final name is generated twice. In the first pass we collect all affixed values and determine protected literals.
 		// This is done in order to remove repeated suffixes, except if these appear in the value or the format string itself.
 		// See "should suppress suffixes where they would create a repeat character" test for edge cases.
-		let formatted = Zotero.Utilities.Internal.generateHTMLFromTemplate(formatString, vars);
+		let formatted = lazy.generateHTMLFromTemplate(formatString, vars);
 		
 		let replacePairs = new Map();
 		for (let chunk of chunks) {
@@ -2571,7 +2575,7 @@ Zotero.Attachments = new function () {
 			);
 		}
 
-		formatted = Zotero.Utilities.Internal.generateHTMLFromTemplate(formatString, vars);
+		formatted = lazy.generateHTMLFromTemplate(formatString, vars);
 		if (replacePairs.size > 0) {
 			formatted = formatted.replace(
 				new RegExp(`(${Array.from(replacePairs.keys()).map(replace => `(?<!\\\\)${replace}(?!//)`).join('|')})`, 'g'),
