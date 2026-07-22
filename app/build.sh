@@ -732,12 +732,34 @@ if [ $BUILD_MAC == 1 ]; then
 	find "$CONTENTSDIR" -depth -type d -name .git -exec rm -rf {} \;
 	find "$CONTENTSDIR" \( -name .DS_Store -or -name update.rdf \) -exec rm -f {} \;
 	
-	# Add Safari App Extension -- this depends on signing but needs to be done before generating
+	# Add Safari web extension -- this depends on signing but needs to be done before generating
 	# the precomplete file
+	#
+	# $SAFARI_APPEX is a stub appex built from the safari-web-extension wrapper project. The web
+	# extension itself comes from $SAFARI_EXT_RESOURCES (a zotero-connectors build/safari
+	# directory), which replaces the stub's placeholder resources here before signing.
 	if [[ $SIGN == 1 ]] && [[ -n "$SAFARI_APPEX" ]] && [[ -d "$SAFARI_APPEX" ]]; then
+		if [[ -z "${SAFARI_EXT_RESOURCES:-}" ]] || [[ ! -f "$SAFARI_EXT_RESOURCES/manifest.json" ]]; then
+			echo "SAFARI_EXT_RESOURCES doesn't contain a web extension -- aborting" 2>&1
+			exit 1
+		fi
 		mkdir "$APPDIR/Contents/PlugIns"
-		cp -R $SAFARI_APPEX "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
-		rm -rf "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Resources/safari/test/"
+		cp -R "$SAFARI_APPEX" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
+		appex_resources="$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Resources"
+		rm -rf "$appex_resources"
+		mkdir "$appex_resources"
+		cp -R "$SAFARI_EXT_RESOURCES/." "$appex_resources/"
+		
+		# Show the connector version in Safari
+		connector_version=$(python3 -c "import json, sys; print(json.load(open(sys.argv[1]))['version'])" "$appex_resources/manifest.json")
+		if [[ $connector_version == *999* ]] && [ "$UPDATE_CHANNEL" != "test" ]; then
+			echo "Placeholder connector version $connector_version not allowed for '$UPDATE_CHANNEL' channel -- aborting" 2>&1
+			exit 1
+		fi
+		/usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString $connector_version" \
+			"$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
+		/usr/libexec/PlistBuddy -c "Set CFBundleVersion $connector_version" \
+			"$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
 	fi
 	
 	# Copy over removed-files and make a precomplete file
@@ -789,7 +811,7 @@ if [ $BUILD_MAC == 1 ]; then
 		rm -rf libreoffice-repack
 		popd
 		
-		# Sign Safari App Extension
+		# Sign Safari web extension
 		#
 		# Even though it's signed by Xcode, we sign it again to make sure it matches the parent app signature
 		if [ -d "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex" ]; then
@@ -799,8 +821,8 @@ if [ $BUILD_MAC == 1 ]; then
 			
 			# Change appex bundle identifier to have same prefix as parent app
 			bundle_identifier=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APPDIR/Contents/Info.plist")
-			perl -pi -e "s/org\.zotero\.SafariExtensionApp\.SafariExtension/$bundle_identifier.SafariExtension/" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
-
+			perl -pi -e "s/org\.zotero\.SafariWebExtensionApp\.SafariExtension/$bundle_identifier.SafariExtension/" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
+			
 			find "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
 			/usr/bin/codesign --force --options runtime --entitlements "$BUILD_DIR/safari-entitlements.plist" --sign "$DEVELOPER_ID" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
 		fi
@@ -811,7 +833,7 @@ if [ $BUILD_MAC == 1 ]; then
 		
 		# Verify app
 		/usr/bin/codesign --verify -vvvv "$APPDIR"
-		# Verify Safari App Extension
+		# Verify Safari web extension
 		if [[ -n "$SAFARI_APPEX" ]] && [[ -d "$SAFARI_APPEX" ]]; then
 			echo
 			/usr/bin/codesign --verify -vvvv "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"

@@ -8,7 +8,18 @@ ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
 CHANNEL="test"
 BRANCH="main"
-export SAFARI_APPEX="$ROOT_DIR/../safari-app-extension-builds/test/ZoteroSafariExtension.appex"
+if [ "`uname`" = "Darwin" ]; then
+	export SAFARI_APPEX="$ROOT_DIR/../safari-web-extension-builds/ZoteroSafariExtension.appex"
+	export SAFARI_EXT_RESOURCES="$ROOT_DIR/../safari-web-extension-builds/test/safari"
+	if [ ! -d "$SAFARI_APPEX" ]; then
+		echo "Safari extension stub not found at $SAFARI_APPEX -- aborting" >&2
+		exit 1
+	fi
+	if [ ! -f "$SAFARI_EXT_RESOURCES/manifest.json" ]; then
+		echo "Safari web extension not found in $SAFARI_EXT_RESOURCES -- aborting" >&2
+		exit 1
+	fi
+fi
 
 cd "$SCRIPT_DIR"
 ./check_requirements
