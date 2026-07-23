@@ -114,12 +114,12 @@ describe("Local API Server", function () {
 	before(async function () {
 		apiRoot = 'http://127.0.0.1:' + Zotero.Server.port + '/api';
 
-		// Pref pinned in runtests.sh so it survives resets
-		serverID = Zotero.Prefs.get('httpServer.localAPI.serverID');
-
 		await resetDB({
 			thisArg: this
 		});
+
+		// Regenerated in the settings table on reset, so read it back afterward
+		serverID = Zotero.Server.LocalAPI.getServerID();
 
 		collection = await createDataObject('collection', { setTitle: true });
 		subcollection = await createDataObject('collection', { setTitle: true, parentID: collection.id });
