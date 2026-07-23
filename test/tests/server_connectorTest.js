@@ -320,6 +320,505 @@ describe("Connector Server", function () {
 		});
 	});
 
+	describe("/connector/findExistingItems", function () {
+		it("should return matching top-level items for DOI and URL in the selected target library", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing Article");
+			item.setField("DOI", "10.1234/Example.1");
+			item.setField("url", "https://example.com/article");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: {
+							doi: ["10.1234/example.1"],
+							url: ["https://example.com/article"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].libraryID, Zotero.Libraries.userLibraryID);
+			assert.sameMembers(data.matches[0].matchedFields, ["DOI", "url"]);
+		});
+
+		it("should use the requested target library for duplicate lookup", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let userItem = new Zotero.Item("journalArticle");
+			userItem.setField("title", "Existing User Article");
+			userItem.setField("DOI", "10.1234/targeted");
+			await userItem.saveTx();
+
+			let group = await createGroup({ editable: true });
+			let groupItem = new Zotero.Item("journalArticle");
+			groupItem.libraryID = group.libraryID;
+			groupItem.setField("title", "Existing Group Article");
+			groupItem.setField("DOI", "10.1234/targeted");
+			await groupItem.saveTx();
+			Zotero.Items.unload([userItem.id, groupItem.id]);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						target: group.treeViewID,
+						identifiers: {
+							doi: ["10.1234/targeted"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, groupItem.id);
+			assert.equal(data.matches[0].libraryID, group.libraryID);
+		});
+
+		it("should deproxify item URLs before duplicate lookup", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("webpage");
+			item.setField("title", "Existing Proxied Page");
+			item.setField("url", "https://duplicate.example.com/path");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						proxy: {
+							scheme: "https://%h.proxy.example.com/%p"
+						},
+						items: [{
+							itemType: "webpage",
+							title: "New Proxied Page",
+							url: "https://duplicate-example-com.proxy.example.com/path"
+						}]
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].matchedIdentifiers.url, "https://duplicate.example.com/path");
+		});
+
+		it("should chunk large URL duplicate lookups", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("webpage");
+			item.setField("title", "Existing Large Lookup Page");
+			item.setField("url", "https://example.com/target-large-lookup");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let urls = [];
+			for (let i = 0; i < Zotero.DB.MAX_BOUND_PARAMETERS + 5; i++) {
+				urls.push(`https://example.com/not-${i}`);
+			}
+			urls.push("https://example.com/target-large-lookup");
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: { url: urls }
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+		});
+
+		it("should chunk large DOI duplicate lookups", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing Large DOI Lookup Article");
+			item.setField("DOI", "10.1234/target-large-doi-lookup");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let dois = [];
+			for (let i = 0; i < Zotero.DB.MAX_BOUND_PARAMETERS + 5; i++) {
+				dois.push(`10.1234/not-large-doi-${i}`);
+			}
+			dois.push("10.1234/target-large-doi-lookup");
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: { doi: dois }
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+		});
+
+		it("should extract DOI from translated item Extra before duplicate lookup", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing Extra DOI Article");
+			item.setField("DOI", "10.1234/extra-doi");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						items: [{
+							itemType: "journalArticle",
+							title: "New Extra DOI Article",
+							extra: "DOI: 10.1234/extra-doi"
+						}]
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].matchedItemIndex, 0);
+			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/extra-doi");
+		});
+
+		it("should match saved DOI values with resolver prefixes", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing Prefixed DOI Article");
+			item.setField("DOI", "https://doi.org/10.1234/prefixed-doi");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: {
+							doi: ["10.1234/prefixed-doi"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/prefixed-doi");
+		});
+
+		it("should match existing item DOI values stored in Extra", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("webpage");
+			item.setField("title", "Existing Extra DOI Page");
+			item.setField("extra", "DOI: 10.1234/existing-extra-doi");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: {
+							doi: ["10.1234/existing-extra-doi"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/existing-extra-doi");
+		});
+
+		it("should filter DOI lookup candidates before parsing values", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let unrelatedDOIItem = new Zotero.Item("journalArticle");
+			unrelatedDOIItem.setField("title", "Unrelated DOI Article");
+			unrelatedDOIItem.setField("DOI", "10.9999/unrelated-doi-candidate");
+			await unrelatedDOIItem.saveTx();
+
+			let unrelatedExtraItem = new Zotero.Item("webpage");
+			unrelatedExtraItem.setField("title", "Unrelated Extra Page");
+			unrelatedExtraItem.setField("extra", "UNRELATED_EXTRA_SHOULD_NOT_PARSE");
+			await unrelatedExtraItem.saveTx();
+
+			let doiItem = new Zotero.Item("journalArticle");
+			doiItem.setField("title", "Existing Filtered DOI Article");
+			doiItem.setField("DOI", "https://doi.org/10.1234/filtered-doi-candidate");
+			await doiItem.saveTx();
+
+			let extraItem = new Zotero.Item("webpage");
+			extraItem.setField("title", "Existing Filtered Extra Page");
+			extraItem.setField("extra", "DOI: 10.1234/filtered-extra-candidate");
+			await extraItem.saveTx();
+			Zotero.Items.unload([unrelatedDOIItem.id, unrelatedExtraItem.id, doiItem.id, extraItem.id]);
+
+			let originalCleanDOI = Zotero.Utilities.cleanDOI;
+			let originalExtractExtraFields = Zotero.Utilities.Internal.extractExtraFields;
+			let cleanedUnrelatedDOI = false;
+			let parsedUnrelatedExtra = false;
+			sinon.stub(Zotero.Utilities, "cleanDOI").callsFake(function (doi) {
+				if (doi && doi.includes("unrelated-doi-candidate")) {
+					cleanedUnrelatedDOI = true;
+				}
+				return originalCleanDOI.apply(this, arguments);
+			});
+			sinon.stub(Zotero.Utilities.Internal, "extractExtraFields").callsFake(function (extra) {
+				if (extra && extra.includes("UNRELATED_EXTRA_SHOULD_NOT_PARSE")) {
+					parsedUnrelatedExtra = true;
+				}
+				return originalExtractExtraFields.apply(this, arguments);
+			});
+
+			try {
+				let response = await httpRequest(
+					"POST",
+					connectorServerPath + "/connector/findExistingItems",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({
+							identifiers: {
+								doi: [
+									"10.1234/filtered-doi-candidate",
+									"10.1234/filtered-extra-candidate"
+								]
+							}
+						})
+					}
+				);
+
+				let data = JSON.parse(response.response);
+				assert.sameMembers(data.matches.map(match => match.id), [doiItem.id, extraItem.id]);
+				assert.isFalse(cleanedUnrelatedDOI);
+				assert.isFalse(parsedUnrelatedExtra);
+			}
+			finally {
+				Zotero.Utilities.cleanDOI.restore();
+				Zotero.Utilities.Internal.extractExtraFields.restore();
+			}
+		});
+
+		it("should ignore free-text Extra DOI candidates without failing the lookup", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let freeTextExtraItem = new Zotero.Item("webpage");
+			freeTextExtraItem.setField("title", "Free Text Extra Page");
+			freeTextExtraItem.setField("extra", "See https://doi.org/10.1234/free-text-extra for related work");
+			await freeTextExtraItem.saveTx();
+
+			let doiItem = new Zotero.Item("journalArticle");
+			doiItem.setField("title", "Existing DOI Article");
+			doiItem.setField("DOI", "10.1234/free-text-extra");
+			await doiItem.saveTx();
+			Zotero.Items.unload([freeTextExtraItem.id, doiItem.id]);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: {
+							doi: ["10.1234/free-text-extra"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.sameMembers(data.matches.map(match => match.id), [doiItem.id]);
+		});
+
+		it("should keep DOI lookup working when proxied item URL normalization fails", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing DOI With Bad URL Payload");
+			item.setField("DOI", "10.1234/bad-proxy-url");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						proxy: {
+							scheme: "https://%h.proxy.example.com/%p"
+						},
+						items: [{
+							itemType: "journalArticle",
+							title: "New DOI With Bad URL Payload",
+							DOI: "10.1234/bad-proxy-url",
+							url: "/relative/path"
+						}]
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+		});
+
+		it("should fall back to the current save target when requested collection no longer exists", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let collection = await createDataObject('collection');
+			let targetID = collection.treeViewID;
+			await collection.eraseTx();
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing User Library Article");
+			item.setField("DOI", "10.1234/deleted-target");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						target: targetID,
+						identifiers: {
+							doi: ["10.1234/deleted-target"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].libraryID, Zotero.Libraries.userLibraryID);
+		});
+
+		it("should return display titles for base-mapped title fields", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("case");
+			item.setField("caseName", "Existing Case Name");
+			item.setField("url", "https://example.com/case");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						identifiers: {
+							url: ["https://example.com/case"]
+						}
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].title, "Existing Case Name");
+		});
+
+		it("should reject requests without identifiers", async function () {
+			let error = await getPromiseError(httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({})
+				}
+			));
+			assert.instanceOf(error, Zotero.HTTP.UnexpectedStatusException);
+			assert.include(error.message, "400");
+		});
+	});
+
 	describe("/connector/saveSingleFile", function () {
 		it("should save a webpage item with /saveSnapshot", async function () {
 			var collection = await createDataObject('collection');

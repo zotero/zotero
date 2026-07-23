@@ -287,6 +287,261 @@ Zotero.Server.Connector.Detect.prototype = {
 	},
 }
 
+Zotero.Server.Connector.FindExistingItems = function () {};
+Zotero.Server.Endpoints["/connector/findExistingItems"] = Zotero.Server.Connector.FindExistingItems;
+Zotero.Server.Connector.FindExistingItems.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+
+	init: async function (requestData) {
+		let data = requestData.data || {};
+		let identifiers = Zotero.Server.Connector._getItemIdentifiers(data);
+		if (!identifiers.doi.length && !identifiers.url.length) {
+			return [400, "application/json", JSON.stringify({ error: "IDENTIFIERS_NOT_PROVIDED" })];
+		}
+
+		let target;
+		if (data.target) {
+			try {
+				target = Zotero.Server.Connector.resolveTarget(data.target);
+			}
+			catch (e) {
+				Zotero.debug(`Could not resolve duplicate lookup target '${data.target}': ${e.message}`);
+			}
+		}
+		let { library } = target && target.library
+			? target
+			: Zotero.Server.Connector.getSaveTarget();
+		let matches = await Zotero.Server.Connector.findExistingItemsByIdentifiers(
+			identifiers,
+			library.libraryID
+		);
+		return [200, "application/json", JSON.stringify({ matches })];
+	}
+};
+
+Zotero.Server.Connector._getItemIdentifiers = function (data) {
+	let identifiers = {
+		doi: new Set(),
+		url: new Set()
+	};
+	let itemIdentifiers = [];
+	let proxy = data.proxy && new Zotero.Proxy(data.proxy);
+
+	let addDOI = (doi) => {
+		doi = doi && Zotero.Utilities.cleanDOI(doi);
+		if (doi) {
+			doi = doi.toLowerCase();
+			identifiers.doi.add(doi);
+			return doi;
+		}
+	};
+	let addURL = (url) => {
+		if (proxy && url) {
+			try {
+				// Only deproxify when the proxy regexp actually matches.
+				// toProper() normalizes non-matching URLs through new URL().href,
+				// which can break exact-match lookups against values stored from
+				// the translator (e.g. https://example.com vs https://example.com/).
+				let normalized = new URL(url).href;
+				if (proxy.regexp.test(normalized)) {
+					url = proxy.toProper(normalized);
+				}
+			}
+			catch (e) {
+				Zotero.debug(`Could not deproxify item URL for duplicate lookup: ${e.message}`);
+				return;
+			}
+		}
+		if (url && typeof url == 'string') {
+			identifiers.url.add(url);
+			return url;
+		}
+	};
+
+	if (data.identifiers) {
+		for (let doi of data.identifiers.doi || []) {
+			addDOI(doi);
+		}
+		for (let url of data.identifiers.url || []) {
+			addURL(url);
+		}
+	}
+
+	for (let item of data.items || []) {
+		let itemIdentifier = {
+			doi: new Set(),
+			url: new Set()
+		};
+		let addItemDOI = (doi) => {
+			doi = addDOI(doi);
+			if (doi) {
+				itemIdentifier.doi.add(doi);
+			}
+		};
+		let addItemURL = (url) => {
+			url = addURL(url);
+			if (url) {
+				itemIdentifier.url.add(url);
+			}
+		};
+		addItemDOI(item.DOI);
+		if (item.extra) {
+			let { fields } = Zotero.Utilities.Internal.extractExtraFields(item.extra);
+			addItemDOI(fields.get('DOI'));
+		}
+		addItemURL(item.url);
+		itemIdentifiers.push({
+			doi: Array.from(itemIdentifier.doi),
+			url: Array.from(itemIdentifier.url)
+		});
+	}
+
+	return {
+		doi: Array.from(identifiers.doi),
+		url: Array.from(identifiers.url),
+		itemIdentifiers
+	};
+};
+
+Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identifiers, libraryID) {
+	let itemIDs = new Set();
+	let doiSet = new Set(identifiers.doi);
+	let urlSet = new Set(identifiers.url);
+	let requestItemIdentifiers = identifiers.itemIdentifiers || [];
+	let matches = [];
+	let getMatchedItemIndex = function (matchedIdentifiers) {
+		if (!requestItemIdentifiers.length) {
+			return undefined;
+		}
+		let doi = matchedIdentifiers.doi && Zotero.Utilities.cleanDOI(matchedIdentifiers.doi);
+		doi = doi && doi.toLowerCase();
+		for (let i = 0; i < requestItemIdentifiers.length; i++) {
+			let itemIdentifiers = requestItemIdentifiers[i];
+			if (doi && itemIdentifiers.doi.includes(doi)) {
+				return i;
+			}
+			if (matchedIdentifiers.url && itemIdentifiers.url.includes(matchedIdentifiers.url)) {
+				return i;
+			}
+		}
+		return undefined;
+	};
+
+	if (doiSet.size) {
+		let doiCandidateChunkSize = Math.min(100, Zotero.DB.MAX_BOUND_PARAMETERS - 2);
+		let getDOICandidateRows = async function (fieldID) {
+			let allRows = [];
+			await Zotero.Utilities.Internal.forEachChunkAsync(
+				identifiers.doi,
+				doiCandidateChunkSize,
+				async function (chunk) {
+					let rows = await Zotero.DB.queryAsync(
+						"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+							+ "JOIN itemDataValues USING (valueID) "
+							+ "WHERE libraryID=? AND fieldID=? "
+							+ "AND (" + chunk.map(() => "LOWER(value) LIKE ?").join(" OR ") + ") "
+							+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
+						[
+							libraryID,
+							fieldID,
+							...chunk.map(doi => `%${doi}%`)
+						]
+					);
+					allRows.push(...rows);
+				}
+			);
+			return allRows;
+		};
+
+		let doiRows = await getDOICandidateRows(Zotero.ItemFields.getID('DOI'));
+		for (let row of doiRows) {
+			let doi = Zotero.Utilities.cleanDOI(row.value);
+			if (doi && doiSet.has(doi.toLowerCase())) {
+				itemIDs.add(row.itemID);
+			}
+		}
+		let extraRows = await getDOICandidateRows(Zotero.ItemFields.getID('extra'));
+		for (let row of extraRows) {
+			let { fields } = Zotero.Utilities.Internal.extractExtraFields(row.value);
+			let extraDOI = fields.get('DOI');
+			let doi = extraDOI && Zotero.Utilities.cleanDOI(extraDOI);
+			if (doi && doiSet.has(doi.toLowerCase())) {
+				itemIDs.add(row.itemID);
+			}
+		}
+	}
+	if (urlSet.size) {
+		await Zotero.Utilities.Internal.forEachChunkAsync(
+			identifiers.url,
+			Zotero.DB.MAX_BOUND_PARAMETERS - 2,
+			async function (chunk) {
+				let rows = await Zotero.DB.queryAsync(
+					"SELECT itemID, value FROM items JOIN itemData USING (itemID) "
+						+ "JOIN itemDataValues USING (valueID) "
+						+ "WHERE libraryID=? AND fieldID=? "
+						+ "AND value IN (" + chunk.map(() => '?').join(',') + ") "
+						+ "AND itemID NOT IN (SELECT itemID FROM deletedItems)",
+					[
+						libraryID,
+						Zotero.ItemFields.getID('url'),
+						...chunk
+					]
+				);
+				for (let row of rows) {
+					if (urlSet.has(row.value)) {
+						itemIDs.add(row.itemID);
+					}
+				}
+			}
+		);
+	}
+
+	for (let itemID of itemIDs) {
+		let item = await Zotero.Items.getAsync(itemID);
+		if (!item || !item.isTopLevelItem()) {
+			continue;
+		}
+		await item.loadDataType('itemData');
+
+		let matchedFields = [];
+		let matchedIdentifiers = {};
+		let itemDOI = [
+			item.getField('DOI'),
+			item.getExtraField('DOI')
+		].map(doi => Zotero.Utilities.cleanDOI(doi)).find(doi => doi && doiSet.has(doi.toLowerCase()));
+		if (itemDOI) {
+			matchedFields.push('DOI');
+			matchedIdentifiers.doi = itemDOI;
+		}
+		let itemURL = item.getField('url');
+		if (itemURL && urlSet.has(itemURL)) {
+			matchedFields.push('url');
+			matchedIdentifiers.url = itemURL;
+		}
+		if (!matchedFields.length) {
+			continue;
+		}
+
+		let match = {
+			id: item.id,
+			key: item.key,
+			libraryID: item.libraryID,
+			title: item.getDisplayTitle(),
+			matchedFields,
+			matchedIdentifiers
+		};
+		let matchedItemIndex = getMatchedItemIndex(matchedIdentifiers);
+		if (matchedItemIndex !== undefined) {
+			match.matchedItemIndex = matchedItemIndex;
+		}
+		matches.push(match);
+	}
+
+	return matches;
+};
+
 /**
  * Saves items to DB
  *
