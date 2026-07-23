@@ -452,7 +452,7 @@ describe("Reader", function () {
 					false,
 				);
 				zipWriter.close();
-				
+
 				let attachment = await Zotero.Attachments.linkFromFile({ file: tempBookEpubPath });
 				let reader = await Zotero.Reader.open(attachment.id);
 				await waitForReader(reader);
@@ -462,6 +462,171 @@ describe("Reader", function () {
 				await donePromise;
 
 				assert.equal(attachment.getAnnotations().length, 2);
+			});
+		});
+	});
+
+	describe('Find', function () {
+		// Set the find state like the find popup does and wait for the view
+		// to report a result
+		async function find(reader, params) {
+			let internalReader = reader._internalReader;
+			internalReader._handleFindStateChange(true, Components.utils.cloneInto({
+				popupOpen: true,
+				active: true,
+				query: '',
+				highlightAll: true,
+				caseSensitive: false,
+				entireWord: false,
+				useRegex: false,
+				index: null,
+				result: null,
+				...params
+			}, reader._iframeWindow));
+			let stop = Date.now() + 10000;
+			// Wait for the previous result to be cleared and a new one to arrive
+			while (internalReader._state.primaryViewFindState.result !== null && Date.now() < stop) {
+				await Zotero.Promise.delay(10);
+			}
+			while (internalReader._state.primaryViewFindState.result === null && Date.now() < stop) {
+				await Zotero.Promise.delay(10);
+			}
+			let result = internalReader._state.primaryViewFindState.result;
+			if (!result) {
+				throw new Error('Timed out waiting for find result');
+			}
+			return result;
+		}
+
+		describe('PDF', function () {
+			// test.pdf: "Zotero [zoh-TAIR-oh] is a free, easy-to-use tool to help
+			// you collect, organize, cite, and share your research sources."
+			var reader;
+
+			before(async function () {
+				let attachment = await importFileAttachment('test.pdf');
+				reader = await Zotero.Reader.open(attachment.itemID);
+				await reader._initPromise;
+				await reader._internalReader._primaryView.initializedPromise;
+			});
+
+			after(function () {
+				reader.close();
+			});
+
+			it("should find matches for a regular expression", async function () {
+				let result = await find(reader, { query: 'organi[sz]e', useRegex: true });
+				assert.equal(result.total, 1);
+			});
+
+			it("should treat a pattern literally when regular expressions are disabled", async function () {
+				let result = await find(reader, { query: 'organi[sz]e', useRegex: false });
+				assert.equal(result.total, 0);
+			});
+
+			it("should find no matches for an invalid pattern", async function () {
+				let result = await find(reader, { query: '(', useRegex: true });
+				assert.equal(result.total, 0);
+			});
+
+			it("should terminate on a pattern that can match an empty string", async function () {
+				let result = await find(reader, { query: 'x*', useRegex: true });
+				assert.equal(result.total, 0);
+			});
+		});
+
+		describe('Snapshot', function () {
+			// test.html: "This is a test."
+			var reader;
+
+			before(async function () {
+				let attachment = await importFileAttachment('test.html');
+				reader = await Zotero.Reader.open(attachment.itemID);
+				await reader._initPromise;
+				await reader._internalReader._primaryView.initializedPromise;
+			});
+
+			after(function () {
+				reader.close();
+			});
+
+			it("should find matches for a regular expression", async function () {
+				let result = await find(reader, { query: '\\bis\\b', useRegex: true });
+				assert.equal(result.total, 1);
+			});
+
+			it("should treat a pattern literally when regular expressions are disabled", async function () {
+				let result = await find(reader, { query: '\\bis\\b', useRegex: false });
+				assert.equal(result.total, 0);
+			});
+
+			it("should respect 'Match case' in regex mode", async function () {
+				let result = await find(reader, { query: 't\\w+', useRegex: true, caseSensitive: true });
+				assert.equal(result.total, 1);
+				result = await find(reader, { query: 't\\w+', useRegex: true, caseSensitive: false });
+				assert.equal(result.total, 2);
+			});
+
+			it("should respect 'Whole words' in regex mode", async function () {
+				let result = await find(reader, { query: 'is', useRegex: true, entireWord: true });
+				assert.equal(result.total, 1);
+			});
+
+			it("should find no matches for an invalid pattern", async function () {
+				let result = await find(reader, { query: '(', useRegex: true });
+				assert.equal(result.total, 0);
+			});
+
+			it("should enforce the strict (Unicode-mode) pattern grammar", async function () {
+				// '\i' is a legacy identity escape -- the lenient grammar would
+				// parse '\is' as literal "is" and find matches
+				let result = await find(reader, { query: '\\is', useRegex: true });
+				assert.equal(result.total, 0);
+			});
+
+			it("should terminate on a pattern that can match an empty string", async function () {
+				let result = await find(reader, { query: 'x*', useRegex: true });
+				assert.equal(result.total, 0);
+			});
+		});
+
+		describe('EPUB', function () {
+			var reader;
+
+			before(async function () {
+				let file = getTestDataDirectory();
+				file.append('moby_dick');
+				file.append('book.epub');
+				let attachment = await Zotero.Attachments.linkFromFile({ file: file.path });
+				reader = await Zotero.Reader.open(attachment.id);
+				await reader._initPromise;
+				await reader._internalReader._primaryView.initializedPromise;
+			});
+
+			after(function () {
+				reader.close();
+			});
+
+			it("should find matches for a regular expression", async function () {
+				// The EPUB view searches sections progressively, so wait for
+				// the total to become nonzero instead of checking exact counts
+				await find(reader, { query: 'Ishm\\w+l', useRegex: true });
+				let stop = Date.now() + 10000;
+				let findState;
+				do {
+					await Zotero.Promise.delay(10);
+					findState = reader._internalReader._state.primaryViewFindState;
+				}
+				while (!findState.result?.total && Date.now() < stop);
+				assert.isAbove(findState.result.total, 0);
+			});
+
+			it("should treat a pattern literally when regular expressions are disabled", async function () {
+				let result = await find(reader, { query: 'Ishm\\w+l', useRegex: false });
+				// Give the progressive section search time to settle
+				await Zotero.Promise.delay(1000);
+				result = reader._internalReader._state.primaryViewFindState.result;
+				assert.equal(result.total, 0);
 			});
 		});
 	});

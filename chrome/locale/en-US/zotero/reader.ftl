@@ -88,6 +88,7 @@ reader-toggle-context-pane = Toggle Context Pane
 reader-highlight-all = Highlight all
 reader-match-case = Match case
 reader-whole-words = Whole words
+reader-use-regex = Use regular expressions
 reader-appearance = Appearance
 reader-epub-appearance-line-height = Line height
 reader-epub-appearance-word-spacing = Word spacing
