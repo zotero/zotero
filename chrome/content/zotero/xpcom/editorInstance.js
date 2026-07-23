@@ -26,6 +26,11 @@
 var { InlineSpellChecker } = ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
+let lazy = {};
+ChromeUtils.defineESModuleGetters(lazy, {
+	generateHTMLFromTemplate: "chrome://zotero/content/modules/templates.mjs",
+});
+
 // Note: TinyMCE is automatically doing some meaningless corrections to
 // note-editor produced HTML. Which might result to more
 // conflicts, especially in group libraries
@@ -1495,7 +1500,7 @@ class EditorInstance {
 				title: Zotero.getString('reader-annotations'),
 				date: new Date().toLocaleString()
 			};
-			html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
+			html = lazy.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
 			// New line is needed for note title parser
 			html += '\n';
 		}
@@ -1730,7 +1735,7 @@ class EditorInstanceUtilities {
 				tags: (attrs) => (annotation.tags && annotation.tags.map(tag => tag.name) || []).join(attrs.join || ' ')
 			};
 
-			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			let templateHTML = lazy.generateHTMLFromTemplate(template, vars);
 			// Remove some spaces at the end of paragraph
 			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
 			// Remove multiple spaces
