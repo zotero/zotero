@@ -151,6 +151,11 @@
 						stack[stack.length - 1].resultLevel = condition.operator;
 						continue;
 
+					case 'bestMatch':
+						stack[stack.length - 1].bestMatch = condition.value;
+						stack[stack.length - 1].bestMatchTopK = parseInt(condition.operator) || false;
+						continue;
+
 					case 'groupStart': {
 						let group = document.createXULElement('search-condition-group');
 						stack[stack.length - 1].conditionsContainer.appendChild(group);
@@ -304,6 +309,16 @@
 			// (the default) is omitted
 			if (group.resultLevel && group.resultLevel != 'any') {
 				flat.push({ condition: 'resultLevel', operator: group.resultLevel, value: null });
+			}
+			// The best-match query is a root-level modifier, offered only for
+			// top-level item results. The operator carries the optional top-K
+			// cutoff; 'contains' means rank-only.
+			if (isRoot && group.bestMatch && group.resultLevel == 'item') {
+				flat.push({
+					condition: 'bestMatch',
+					operator: group.bestMatchTopK ? String(group.bestMatchTopK) : 'contains',
+					value: group.bestMatch
+				});
 			}
 			for (let child of group.conditionsContainer.children) {
 				if (child.localName == 'zoterosearchcondition') {
@@ -478,6 +493,12 @@
 					</hbox>
 				</caption>
 				<vbox class="conditions"/>
+				<hbox class="best-match-row" align="center" hidden="true">
+					<label class="best-match-prefix" data-l10n-id="advanced-search-best-match-prefix"/>
+					<html:input class="best-match-input" type="text" data-l10n-id="advanced-search-best-match-input"/>
+					<label class="best-match-topk-prefix" data-l10n-id="advanced-search-best-match-topk-prefix"/>
+					<html:input class="best-match-topk-input" type="number" min="0" data-l10n-id="advanced-search-best-match-topk-input"/>
+				</hbox>
 				<hbox class="level-warning" hidden="true">
 					<description/>
 				</hbox>
@@ -491,6 +512,19 @@
 			this.conditionsContainer = this.querySelector('.conditions');
 			// The group's own warning element, stashed at init to avoid re-querying.
 			this.levelWarning = this.querySelector('.level-warning');
+			this.bestMatchRow = this.querySelector('.best-match-row');
+			this.bestMatchInput = this.querySelector('.best-match-input');
+			this.bestMatchTopKInput = this.querySelector('.best-match-topk-input');
+			// The cutoff has no zero -- empty means "all" -- so route 0 by
+			// direction: stepping down from 1 goes back to empty, and stepping
+			// up from empty (which the browser floors at min) goes to 1
+			this._lastTopKValue = this.bestMatchTopKInput.value;
+			this.bestMatchTopKInput.addEventListener('input', () => {
+				if (this.bestMatchTopKInput.value === '0') {
+					this.bestMatchTopKInput.value = this._lastTopKValue === '' ? '1' : '';
+				}
+				this._lastTopKValue = this.bestMatchTopKInput.value;
+			});
 
 			// The result level is tracked here and reflected to whichever control is active: the root's
 			// result-level menu ("Find ..."), or a nested group's binding menu ("... in the
@@ -523,8 +557,10 @@
 			this.addEventListener('command', (event) => {
 				if (this.resultLevelControl && this.resultLevelControl.contains(event.target)) {
 					this._resultLevel = this.resultLevelControl.value || 'any';
+					this.updateBestMatchRow();
 				}
 			});
+			this.updateBestMatchRow();
 			// At init the group has no nested groups yet, so these resolve to its own
 			// caption buttons
 			this.addConditionButton = this.querySelector('.add-condition');
@@ -576,6 +612,42 @@
 			return this._resultLevel;
 		}
 
+		/**
+		 * The root group's best-match query, from the "Sort results by
+		 * best match for" field
+		 */
+		get bestMatch() {
+			return this.bestMatchInput.value.trim();
+		}
+
+		set bestMatch(val) {
+			this.bestMatchInput.value = val || '';
+			this.updateBestMatchRow();
+		}
+
+		/**
+		 * Optional top-K cutoff for the best-match query: with a value, only
+		 * the K most similar results match; empty means rank-only
+		 */
+		get bestMatchTopK() {
+			let val = parseInt(this.bestMatchTopKInput.value);
+			return val > 0 ? val : false;
+		}
+
+		set bestMatchTopK(val) {
+			this.bestMatchTopKInput.value = val || '';
+			this._lastTopKValue = this.bestMatchTopKInput.value;
+		}
+
+		// The best-match field is a root-level modifier, offered only for
+		// top-level item results and only when semantic search is enabled (or
+		// the search already carries a query, so it stays editable)
+		updateBestMatchRow() {
+			this.bestMatchRow.hidden = !this.isRoot
+				|| this.resultLevel != 'item'
+				|| !(Zotero.Embeddings.isEnabled() || this.bestMatchInput.value);
+		}
+
 		set resultLevel(val) {
 			this._resultLevel = val || 'any';
 			// Reflect to the active control if it currently offers a matching option; the
@@ -584,6 +656,7 @@
 			if (popup && [...popup.children].some(item => item.value == this._resultLevel)) {
 				this.resultLevelControl.value = this._resultLevel;
 			}
+			this.updateBestMatchRow();
 		}
 
 		// Build the nested-group binding menu ("... in the same attachment"), shown when
@@ -784,6 +857,8 @@
 		clear() {
 			this.joinMode = 'all';
 			this.resultLevel = 'any';
+			this.bestMatch = '';
+			this.bestMatchTopK = false;
 			while (this.conditionsContainer.firstChild) {
 				this.conditionsContainer.removeChild(this.conditionsContainer.firstChild);
 			}

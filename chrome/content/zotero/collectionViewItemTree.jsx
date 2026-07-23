@@ -88,10 +88,19 @@ const STUB_COLLECTION_TREE_ROW = {
 	clearCache: () => {}
 };
 
+// Collection tree rows can be duck-typed stand-ins (e.g. the citation
+// dialog's), which implement only part of the row API
+function rowIsBestMatchSearch(row) {
+	return typeof row.isBestMatchSearch == 'function' && row.isBestMatchSearch();
+}
+
 class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	constructor(itemTree) {
 		super(itemTree);
 		this.collectionTreeRows = [];
+		// Bumped when a filter changes, so an in-flight best-match scoring
+		// pass for a superseded query can stop (see _applyBestMatch())
+		this._bestMatchGeneration = 0;
 	}
 
 	/**
@@ -108,6 +117,190 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 */
 	hasQuickSearch() {
 		return this.collectionTreeRow?.searchText.length > 0;
+	}
+
+	/**
+	 * Best-match ranks for the Relevance column, computed over the merged
+	 * result set in _refresh() while a best-match search is active
+	 *
+	 * @returns {Map} - treeViewID -> 1-based rank (1 = most similar)
+	 */
+	getBestMatchRanks() {
+		return this._bestMatchRanks || new Map();
+	}
+
+	/**
+	 * Score fractions for the Relevance column's bars, computed alongside the
+	 * ranks (see Zotero.Embeddings.getScoreFraction())
+	 *
+	 * @returns {Map} - treeViewID -> 0-1 fraction of the model's display range
+	 */
+	getBestMatchBarFractions() {
+		return this._bestMatchBarFractions || new Map();
+	}
+
+	/**
+	 * Embedding-index coverage while a best-match search is active, for the
+	 * banner above the items list. Null when there's no active best-match
+	 * search or every eligible item is indexed.
+	 *
+	 * @returns {Object|null} - { type: 'indexing'|'paused', indexed, total }
+	 */
+	getBestMatchIndexState() {
+		return this._bestMatchIndexState || null;
+	}
+
+	/**
+	 * Compute the current index coverage across the selected rows' libraries.
+	 * Never throws -- the banner is informational and shouldn't break a
+	 * refresh.
+	 *
+	 * @return {Promise<Object|null>}
+	 */
+	async _getBestMatchIndexState() {
+		try {
+			let status = Zotero.Embeddings.Indexing.getStatus();
+			if (!status.enabled) {
+				return null;
+			}
+			// Counts aren't populated until the indexer runs in this session
+			if (!status.libraries.length) {
+				status = await Zotero.Embeddings.Indexing.refreshStatus();
+			}
+			let libraryIDs = new Set(
+				this.collectionTreeRows
+					.map(row => row.ref?.libraryID)
+					.filter(id => id !== undefined)
+			);
+			let libraries = status.libraries
+				.filter(lib => !libraryIDs.size || libraryIDs.has(lib.libraryID));
+			let indexed = libraries.reduce((sum, lib) => sum + lib.indexed, 0);
+			let total = libraries.reduce((sum, lib) => sum + lib.eligible, 0);
+			if (indexed >= total) {
+				return null;
+			}
+			// Only an explicit pause reports as paused. Anything else --
+			// between runs (startup, the pre-run debounce) or after an error
+			// (detailed in the preferences) -- reports as indexing, since the
+			// banner explains the incomplete coverage, not the indexer state
+			return {
+				type: status.paused ? 'paused' : 'indexing',
+				indexed,
+				total
+			};
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
+	}
+
+	/**
+	 * The semantic stage of a best-match search: score the merged,
+	 * deduplicated results from all selected rows against the query in a
+	 * single call, and keep the scoreable items ranked globally across the
+	 * selection. Child items (attachments, notes, annotations) are scored via
+	 * their top-level item, so result sets at other levels (e.g. a saved
+	 * search returning annotations) rank by their parent item. Equal scores
+	 * get equal ranks, so tied rows (including a child and its parent) order
+	 * deterministically via the secondary sort fields.
+	 *
+	 * @param {Zotero.Item[]} items - Merged results from all selected rows
+	 * @return {Promise<Zotero.Item[]>} - The scoreable items
+	 */
+	async _applyBestMatch(items) {
+		// With multiple selected rows carrying different best-match sources,
+		// the first in collections-list order supplies the query
+		let queryRow = this.collectionTreeRows.find(rowIsBestMatchSearch);
+		let query = queryRow.getBestMatchQuery();
+		let source = queryRow.getBestMatchSource();
+		// A top-K cutoff is reapplied to the merged candidates below only when
+		// the source is the transient Advanced Search, which applies uniformly
+		// to every selected row. A saved search's cutoff is part of that row's
+		// own membership and must not trim other selected rows' results.
+		let topK = queryRow.advancedSearch && source
+			? source.getBestMatchQuery().topK
+			: false;
+		// A best-match quick search shows only the items it can rank. With any
+		// search source, membership is defined by the selected rows' own
+		// searches, so keep unscoreable items -- they sort after the ranked
+		// ones. (A uniform top-K set contains no unscoreable items anyway.)
+		let keepUnscored = !!source;
+		// Map each item to the item whose embedding scores it
+		let sourceIDByItem = new Map();
+		for (let item of items) {
+			if (!(item instanceof Zotero.Item)) {
+				continue;
+			}
+			let source = item.isRegularItem() ? item : item.topLevelItem;
+			if (source) {
+				sourceIDByItem.set(item, source.id);
+			}
+		}
+		let scores;
+		let generation = this._bestMatchGeneration;
+		try {
+			scores = await Zotero.Embeddings.scoreItemIDs(query, [...new Set(sourceIDByItem.values())], {
+				// A newer filter (e.g. more typed search text) makes this
+				// query obsolete -- stop scoring and let its refresh take over
+				shouldCancel: () => generation !== this._bestMatchGeneration
+			});
+		}
+		catch (e) {
+			if (e instanceof Zotero.Embeddings.ScoringCancelledError) {
+				throw e;
+			}
+			// Scoring can fail while the model is still downloading or the
+			// index is being rebuilt
+			if (e instanceof Zotero.Embeddings.IndexNotReadyError) {
+				Zotero.debug("Embeddings: index not ready for best-match search");
+			}
+			else {
+				Zotero.logError(e);
+			}
+			this._bestMatchRanks = new Map();
+			this._bestMatchIndexState = await this._getBestMatchIndexState();
+			// A rank-only search's membership doesn't depend on the index, so
+			// show its results unranked; anything else shows no results rather
+			// than an unranked scope
+			return keepUnscored ? items : [];
+		}
+		// Each selected row's search applies a top-K cutoff to its own scope,
+		// so trim the merged candidates to K again here, with the same
+		// deterministic order as search(), so a multi-row selection returns K
+		// members total rather than K per row
+		if (topK) {
+			scores = new Map(
+				[...scores.entries()]
+					.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))
+					.slice(0, topK)
+			);
+		}
+		let rankOfScore = new Map(
+			[...new Set(scores.values())].sort((a, b) => b - a).map((score, i) => [score, i + 1])
+		);
+		let kept = [];
+		let ranks = new Map();
+		let fractions = new Map();
+		for (let item of items) {
+			let sourceID = sourceIDByItem.get(item);
+			if (sourceID === undefined || !scores.has(sourceID)) {
+				if (keepUnscored) {
+					kept.push(item);
+				}
+				continue;
+			}
+			kept.push(item);
+			ranks.set(item.treeViewID, rankOfScore.get(scores.get(sourceID)));
+			fractions.set(
+				item.treeViewID,
+				Zotero.Embeddings.getScoreFraction(scores.get(sourceID))
+			);
+		}
+		this._bestMatchRanks = ranks;
+		this._bestMatchBarFractions = fractions;
+		this._bestMatchIndexState = await this._getBestMatchIndexState();
+		return kept;
 	}
 
 	/**
@@ -240,6 +433,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			resetColumns = true;
 		}
 		this.collectionTreeRows = collectionTreeRows;
+		// Cancel any in-flight best-match scoring for the replaced selection
+		this._bestMatchGeneration++;
 
 		// When the selection spans multiple libraries, group items by library in
 		// collections-list order (the order of the selected rows), with a header
@@ -306,6 +501,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			changed = changed || rowChanged;
 		}
 		if (changed) {
+			this._bestMatchGeneration++;
 			this._filterRefreshPromise = this.refresh({ restoreSelection: true });
 		}
 		// An unchanged filter can arrive while a previous filter's refresh is still in
@@ -329,6 +525,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		
 		try {
 			this.collectionTreeRows.forEach(row => row.clearCache());
+			this._bestMatchRanks = null;
+			this._bestMatchBarFractions = null;
+			this._bestMatchIndexState = null;
 			// Get the full set of items we want to show, merged across all selected rows
 			let newSearchItemSet = new Set();
 			for (let arr of await Promise.all(this.collectionTreeRows.map(row => row.getItems()))) {
@@ -336,6 +535,24 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					newSearchItemSet.add(item);
 				}
 			}
+			// A selected saved search's own conditions -- where a bestMatch
+			// marker lives -- aren't necessarily loaded yet, since its search
+			// runs on a clone
+			// isSearch() alone isn't enough: duck-typed rows (e.g. the citation
+			// dialog's) report it for rows whose refs aren't searches. The ref
+			// check alone isn't either: Unfiled-style rows hold transient,
+			// unsaved searches that can't load conditions.
+			await Promise.all(this.collectionTreeRows
+				.filter(row => typeof row.isSearch == 'function' && row.isSearch()
+					&& row.ref instanceof Zotero.Search)
+				.map(row => row.ref.loadDataType('conditions')));
+			// Entering, refreshing within, or leaving a best-match search
+			// changes the effective sort of rows already in the tree (the
+			// forced Relevance sort comes and goes, and ranks change with the
+			// query), so a partial sort of just the added rows isn't enough
+			let bestMatchSearch = this.collectionTreeRows.some(rowIsBestMatchSearch);
+			let forceSortAll = options.forceSortAll || bestMatchSearch || this._wasBestMatchSearch;
+			this._wasBestMatchSearch = bestMatchSearch;
 			let newSearchItems = [...newSearchItemSet];
 			// Embedded-image attachments (images pasted into notes) are never shown in the
 			// tree, so don't let one match a search and pull in its parents
@@ -370,6 +587,22 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						|| item instanceof Zotero.Search
 						|| item.isRegularItem();
 				});
+			}
+			// The semantic stage: one scoring pass over the merged results
+			if (bestMatchSearch) {
+				try {
+					newSearchItems = await this._applyBestMatch(newSearchItems);
+				}
+				catch (e) {
+					// A newer filter superseded this one mid-scoring -- leave the
+					// rows as they are and let the newer filter's refresh replace
+					// them
+					if (e instanceof Zotero.Embeddings.ScoringCancelledError) {
+						deferred.resolve();
+						return;
+					}
+					throw e;
+				}
 			}
 			let newSearchItemIDs = new Set(newSearchItems.map(item => item.treeViewID));
 			// In Recently Read, the search matches parent items, but the items that were
@@ -488,7 +721,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			// In grouped mode, always sort everything: a partial sort doesn't compare
 			// pre-existing rows against each other, so library grouping wouldn't be
 			// applied to rows carried over from the previous view
-			this._sort(options.forceSortAll || this._groupedByLibrary ? null : [...addedItemIDs]);
+			this._sort(forceSortAll || this._groupedByLibrary ? null : [...addedItemIDs]);
 			
 			// Toggle all open containers closed and open to refresh child items
 			var t = new Date();
@@ -648,7 +881,16 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			if (items.length == 0) return;
 		}
 
-		if (action == 'refresh') {
+		if (action == 'refresh' && type == 'item'
+				&& collectionTreeRows.some(rowIsBestMatchSearch)) {
+			// Under an active best-match search, a refresh event can mean new or
+			// changed embeddings (the background indexer notifies after committing
+			// batches), so rerun the search to update the scores and ranks
+			this.itemTree.invalidateRowCache(ids);
+			refresh = true;
+			madeChanges = true;
+		}
+		else if (action == 'refresh') {
 			// Clear row display cache and invalidate rows for refreshed items
 			let rowsToInvalidate = [];
 			for (let id of ids) {
@@ -696,6 +938,14 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// In grouped (multi-library) mode, handle removals with a full refresh, since
 		// incremental row removal would leave the header row of an emptied library group
 		if (this._groupedByLibrary && ['remove', 'delete', 'trash'].includes(action)) {
+			this.itemTree.invalidateRowCache(ids);
+			refresh = true;
+			madeChanges = true;
+		}
+		// Under an active best-match quick search, handle removals with a full
+		// refresh too, so the remaining rows' relevance ranks are recomputed
+		else if (['remove', 'delete', 'trash'].includes(action)
+				&& collectionTreeRows.some(rowIsBestMatchSearch)) {
 			this.itemTree.invalidateRowCache(ids);
 			refresh = true;
 			madeChanges = true;
@@ -1110,6 +1360,30 @@ class CollectionViewItemTree extends ItemTree {
 	async sort(itemIDs, awaitRefresh = true) {
 		awaitRefresh && await this._refreshPromise;
 		return super.sort(itemIDs);
+	}
+
+	/**
+	 * While a best-match search runs against a partially built embeddings
+	 * index, show a banner above the items list with the indexing progress,
+	 * so incomplete results aren't mistaken for a complete ranking. Updates
+	 * arrive with the periodic refreshes the indexer triggers as it fills
+	 * the index.
+	 */
+	_renderTablePrologue() {
+		let state = this.rowProvider.getBestMatchIndexState();
+		if (!state) {
+			return null;
+		}
+		return (
+			<div
+				className="best-match-index-banner"
+				key="best-match-index-banner"
+				data-l10n-id={state.type == 'paused'
+					? 'items-best-match-indexing-paused'
+					: 'items-best-match-indexing'}
+				data-l10n-args={JSON.stringify({ indexed: state.indexed, total: state.total })}
+			/>
+		);
 	}
 
 	render() {

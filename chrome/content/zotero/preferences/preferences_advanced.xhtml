@@ -285,7 +285,35 @@
 					<label id="fulltext-stats-notes"/>
 				</hbox>
 			</vbox>
-		</groupbox>	
+		</groupbox>
+
+		<groupbox id="semantic-search">
+			<label><html:h2 data-l10n-id="preferences-advanced-semantic-search-title"/></label>
+			<hbox align="center">
+				<label data-l10n-id="preferences-advanced-semantic-search-model" control="semantic-search-model"/>
+				<menulist id="semantic-search-model" native="true">
+					<menupopup>
+						<menuitem value="" data-l10n-id="preferences-advanced-semantic-search-disabled"/>
+						<!-- Model items are populated from Zotero.Embeddings.getAvailableModels() -->
+					</menupopup>
+				</menulist>
+			</hbox>
+			<description id="semantic-search-model-description"
+				data-l10n-id="preferences-advanced-semantic-search-model-description"/>
+			<vbox id="semantic-search-status" hidden="true">
+				<hbox align="center">
+					<label data-l10n-id="preferences-advanced-semantic-search-status"/>
+					<label id="semantic-search-phase"/>
+					<button id="semantic-search-resume"
+						data-l10n-id="preferences-advanced-semantic-search-resume"
+						hidden="true"/>
+					<button id="semantic-search-stop"
+						data-l10n-id="preferences-advanced-semantic-search-stop"
+						hidden="true"/>
+				</hbox>
+				<vbox class="form-grid" id="semantic-search-libraries"/>
+			</vbox>
+		</groupbox>
 	</vbox>
 	
 	<vbox>

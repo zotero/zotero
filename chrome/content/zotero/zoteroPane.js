@@ -573,6 +573,7 @@ var ZoteroPane = new function () {
 			
 		Zotero_Tabs.init();
 		ZoteroContextPane.init();
+		Zotero.Embeddings.Indexing.init();
 		await ZoteroPane.initCollectionsTree();
 		await ZoteroPane.initItemsTree();
 		ZoteroPane.initCollectionTreeSearch();
@@ -2027,9 +2028,13 @@ var ZoteroPane = new function () {
 	 * @param {String} [mode='fields'] - The quick search mode to reproduce
 	 */
 	this.openAdvancedSearchFromQuickSearch = async function (searchText, mode = 'fields') {
-		// Split into words (keeping quoted phrases intact), as the quick search does
-		let parts = Zotero.SearchConditions.parseSearchString(searchText);
-		if (!parts.length) {
+		// A best-match search converts to the root-level best-match modifier,
+		// keeping the whole query as one semantic string; other modes split
+		// into words (keeping quoted phrases intact), as the quick search does
+		let parts = mode === 'bestMatch'
+			? []
+			: Zotero.SearchConditions.parseSearchString(searchText);
+		if (!parts.length && !(mode === 'bestMatch' && searchText.trim())) {
 			await this.toggleAdvancedSearchState('open');
 			return;
 		}
@@ -2044,9 +2049,13 @@ var ZoteroPane = new function () {
 		// Reproduce the quick search mode as editable conditions, one per word joined
 		// with "all": Title/Creator/Year and All Fields & Tags each map to a single
 		// condition, Everything to an "any" group of Any Field plus full-text.
-		// Title/Creator/Year matches only top-level items, so set the result level to item.
-		if (mode === 'titleCreatorYear') {
+		// Title/Creator/Year and Best Match match only top-level items, so set the
+		// result level to item.
+		if (mode === 'titleCreatorYear' || mode === 'bestMatch') {
 			search.addCondition('resultLevel', 'item');
+		}
+		if (mode === 'bestMatch') {
+			search.addCondition('bestMatch', 'contains', searchText.trim());
 		}
 		for (let part of parts) {
 			if (mode === 'everything') {

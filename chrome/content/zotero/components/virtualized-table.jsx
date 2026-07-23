@@ -452,6 +452,9 @@ class VirtualizedTable extends React.Component {
 		// Render with display: none
 		hide: PropTypes.bool,
 
+		// An element rendered above the column header (e.g. a status banner)
+		prologue: PropTypes.element,
+
 		multiSelect: PropTypes.bool,
 
 		requireSelection: PropTypes.bool,
@@ -1344,6 +1347,7 @@ class VirtualizedTable extends React.Component {
 		return (
 			<div {...props}>
 				{columnDragMarker}
+				{this.props.prologue}
 				{header}
 				<div {...jsWindowProps}>
 					{/* Pinned copy of the current section's header. Lives inside the scrolling
@@ -1838,14 +1842,27 @@ var Columns = class {
 		let columnsSettings = this._getPrefs();
 
 		let columns = this._columns = [];
+		// If the passed columns already carry a sort direction, the parent has
+		// resolved the sorted column (e.g. the forced Relevance sort), so a
+		// persisted direction on another column is stale and would show a
+		// second sort indicator
+		const propsHaveSort = virtualizedTable.props.columns.some(c => c.sortDirection);
 		for (let column of virtualizedTable.props.columns) {
 			// Fixed width columns can sometimes somehow obtain a width property
 			// this fixes it for users that may have run into the bug
 			if (column.fixedWidth && typeof columnsSettings[column.dataKey] == "object") {
 				delete columnsSettings[column.dataKey].width;
 			}
-			// Don't load column settings for disabled columns (they are overriden to be hidden)
-			column = Object.assign({}, column, column.disabled ? {} : columnsSettings[column.dataKey]);
+			// Don't load column settings for disabled columns (they are overriden
+			// to be hidden) or transient ones, whose state the parent derives
+			let settings = (column.disabled || column.transient)
+				? {}
+				: columnsSettings[column.dataKey] || {};
+			if (propsHaveSort && !column.sortDirection && settings.sortDirection) {
+				settings = Object.assign({}, settings);
+				delete settings.sortDirection;
+			}
+			column = Object.assign({}, column, settings);
 			column.className = cx(column.className, column.dataKey, column.dataKey + this._cssSuffix,
 				{ 'fixed-width': column.fixedWidth });
 			if (column.type) {
@@ -2090,7 +2107,11 @@ var Columns = class {
 			else {
 				sortedColumn = column;
 				if (column.sortDirection) {
-					column.sortDirection *= -1;
+					// A fixed-direction column (e.g. Relevance) can be selected
+					// as the sort but not reversed
+					if (!column.fixedSortDirection) {
+						column.sortDirection *= -1;
+					}
 				}
 				else {
 					column.sortDirection = column.sortReverse ? -1 : 1;
@@ -2211,12 +2232,11 @@ function makeRowRenderer(getRowData) {
 				else {
 					div.appendChild(renderCell(index, rowData[column.dataKey], column));
 				}
-				let columnName = column.label;
-				if (column.label in Zotero.Intl.strings) {
-					columnName = Zotero.getString(column.label);
-				}
-				if (typeof rowData[column.dataKey] === "string") {
-					ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
+				let columnName = formatColumnName(column);
+				let value = rowData[column.dataKey];
+				if (typeof value === "string"
+						|| (typeof value === "number" && Number.isFinite(value))) {
+					ariaLabel += `${columnName}: ${value} `;
 				}
 				else {
 					ariaLabel += `${columnName} `;

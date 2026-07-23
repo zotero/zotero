@@ -12,6 +12,17 @@
 	min-width: $min-width-items-pane;
 }
 
+// Indexing-progress banner above the column header while a best-match search
+// runs against a partially built embeddings index
+.virtualized-table .best-match-index-banner {
+	flex-shrink: 0;
+	padding: 4px 8px;
+	background: var(--material-sidepane);
+	border-bottom: var(--material-panedivider);
+	color: var(--fill-secondary);
+	text-align: center;
+}
+
 #zotero-items-tree {
 	.virtualized-table-body, .drag-image-container {
 		padding: 4px 8px 8px;
@@ -49,6 +60,7 @@
 			padding: 0;
 			text-align: center;
 		}
+
 
 		.cell:first-child {
 			&::before {
@@ -204,8 +216,47 @@
 					background: transparent;
 				}
 			}
+
+			// The similarity bar: the score's fraction of the model's display range
+			.cell.relevance {
+				align-items: center;
+
+				.relevance-bar {
+					display: block;
+					flex: 1;
+					height: 6px;
+					border-radius: 3px;
+					background: var(--fill-quarternary);
+					overflow: hidden;
+
+					.relevance-bar-fill {
+						display: block;
+						height: 100%;
+						background: var(--accent-blue);
+					}
+
+					// On a focused selected row the accent fill would vanish into
+					// the accent selection background, so switch to white like
+					// .attachment-progress
+					@include state(".row.selected") {
+						background: #ffffff33;
+
+						.relevance-bar-fill {
+							background: var(--accent-white);
+						}
+
+						@include state(".virtualized-table:not(:focus-within)") {
+							background: var(--fill-quinary);
+
+							.relevance-bar-fill {
+								background: var(--accent-blue);
+							}
+						}
+					}
+				}
+			}
 		}
-	
+
 		.cell.hasAttachment {
 			height: 100%;
 			// Don't show ellipsis

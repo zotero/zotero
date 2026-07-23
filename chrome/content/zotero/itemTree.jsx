@@ -137,6 +137,17 @@ class ItemTreeRowProvider {
 		return !!row.sortChildren;
 	}
 
+	/**
+	 * Best-match ranks for the Relevance column while a best-match quick
+	 * search is active. Overridden by row providers that support best-match
+	 * searches.
+	 *
+	 * @returns {Map} - treeViewID -> 1-based rank (1 = most similar)
+	 */
+	getBestMatchRanks() {
+		return new Map();
+	}
+
 	get includeTrashed() {
 		return this._includeTrashed;
 	}
@@ -620,6 +631,13 @@ class ItemTreeRowProvider {
 				val = row.ref.getItemLastRead() || '';
 				break;
 
+			case 'relevance':
+				// Negated rank under a descending sort, so the most similar items
+				// (the fullest bars) come first and rows without a rank (e.g.
+				// child rows) sort last
+				val = -(this.getBestMatchRanks().get(row.id) ?? Number.MAX_SAFE_INTEGER);
+				break;
+
 			case 'addedBy':
 				val = row.ref.createdByUserID
 					? Zotero.Users.getName(row.ref.createdByUserID) : '';
@@ -701,6 +719,11 @@ class ItemTreeRowProvider {
 
 				if (sortField == 'callNumber') {
 					return Zotero.Utilities.Item.compareCallNumbers(fieldA, fieldB);
+				}
+
+				// Ranks are numbers, so a string comparison would misorder them
+				if (sortField == 'relevance') {
+					return fieldA - fieldB;
 				}
 
 				return this._sortCollation.compareString(1, String(fieldA), String(fieldB));
@@ -1053,6 +1076,18 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return true;
 	}
 
+	/**
+	 * Whether a best-match quick search is active in any selected collection
+	 * tree row, meaning the Relevance column is shown and sorted on
+	 */
+	_isBestMatchSearchActive() {
+		// Collection tree rows can be duck-typed stand-ins (e.g. the citation
+		// dialog's) that implement only part of the row API
+		return !!this.collectionTreeRows?.some(
+			row => typeof row.isBestMatchSearch == 'function' && row.isBestMatchSearch()
+		);
+	}
+
 	get hasDependOnChildrenColumn() {
 		return this._hasDependOnChildrenColumn;
 	}
@@ -1260,6 +1295,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 			rows.forEach(row => this.tree.invalidateRow(row));
 		}
 
+		// A refresh can change the derived column set (e.g. the forced
+		// Relevance column while a best-match search is active) or the table
+		// prologue, and the header and prologue only pick those up through a
+		// render
+		this._getColumns();
+		let columnsChanged = this._renderedColumnsId !== this._columnsId;
+		if (this.tree && (columnsChanged || this._renderedPrologueId !== this._getPrologueId())) {
+			await new Promise(resolve => this.forceUpdate(resolve));
+			if (columnsChanged) {
+				// The rows above were painted with the previous column set, and
+				// the render only rebuilds the header
+				this.tree.invalidate();
+			}
+		}
+
 		const itemsViewInActiveWindow = Zotero.getActiveZoteroPane()?.itemsView == this;
 		const prioritizeRestore = !(options.selectInActiveWindow && itemsViewInActiveWindow);
 		const ensureVisible = options.restoreScroll ? false : options.ensureRowsAreVisible;
@@ -1402,10 +1452,37 @@ var ItemTree = class ItemTree extends LibraryTree {
 		</div>);
 	}
 
+	/**
+	 * An element to render above the table's column header (e.g. a status
+	 * banner). Subclasses override this; the base tree renders nothing.
+	 *
+	 * @return {React.Element|null}
+	 */
+	_renderTablePrologue() {
+		return null;
+	}
+
+	/**
+	 * Identity of the current prologue's content, for handleRowModelUpdate()
+	 * to detect when a refresh changed the prologue and a render is needed
+	 *
+	 * @return {String|null}
+	 */
+	_getPrologueId() {
+		let prologue = this._renderTablePrologue();
+		return prologue ? JSON.stringify(prologue.props) : null;
+	}
+
 	render() {
 		const showMessage = !!this._itemsPaneMessage;
 		const itemsPaneMessage = this._renderItemsPaneMessage(showMessage);
 
+		let columns = this._getColumns();
+		// The columns and prologue the table currently shows, for
+		// handleRowModelUpdate()
+		this._renderedColumnsId = this._columnsId;
+		let prologue = this._renderTablePrologue();
+		this._renderedPrologueId = prologue ? JSON.stringify(prologue.props) : null;
 		let virtualizedTable = React.createElement(VirtualizedTree,
 			{
 				getRowCount: () => this.rowProvider.getRowCount(),
@@ -1413,11 +1490,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 				ref: ref => this.tree = ref,
 				treeboxRef: ref => this._treebox = ref,
 				renderItem: this._renderItem.bind(this),
+				prologue,
 				hide: showMessage,
 				key: "virtualized-table",
 
 				showHeader: true,
-				columns: this._getColumns(),
+				columns,
 				onColumnPickerMenu: this._displayColumnPickerMenu.bind(this),
 				onColumnSort: this.isSortable ? this._handleColumnSort : null,
 				getColumnPrefs: this._getColumnPrefs.bind(this),
@@ -1764,7 +1842,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (row.ref.isFeedItem) {
 			return this.getCellText(index, 'title');
 		}
-		return this.getCellText(index, this.getSortField());
+		let field = this.getSortField();
+		// Rank numbers aren't useful for find-as-you-type
+		if (field == 'relevance') {
+			field = 'title';
+		}
+		return this.getCellText(index, field);
 	}
 
 	/**
@@ -1818,6 +1901,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	getSortField() {
+		// Re-derive the columns first, since a state change (e.g. a best-match
+		// search starting or clearing) can move the sorted column
+		this._getColumns();
 		var column = this._sortedColumn;
 		if (!column) {
 			column = this._getColumns().find(col => !col.hidden);
@@ -2359,6 +2445,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		row.numNotes = treeRow.numNotes() || "";
+		row.relevance = this.rowProvider.getBestMatchRanks().get(itemID) || "";
 		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
 		row.lastRead = row.isItem ? treeRow.ref.getItemLastRead() : "";
 		row.addedBy = row.isItem && treeRow.getAddedBy();
@@ -2533,9 +2620,20 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_getColumns() {
-		const prefKey = this.id + '-' + this.viewType;
+		// Include the best-match-search state in the cache key, so a search
+		// starting or clearing rebuilds the columns with or without the forced
+		// Relevance column below
+		const bestMatchSearch = this._isBestMatchSearchActive();
+		const prefKey = this.id + '-' + this.viewType
+			+ (bestMatchSearch ? '-bestMatchSearch' : '');
 		if (this._columnsId == prefKey) {
 			return this._columns;
+		}
+
+		// The Relevance sort is forced only while a best-match search is
+		// active, so don't carry it into a rebuild without one
+		if (!bestMatchSearch && this._sortedColumn?.dataKey == 'relevance') {
+			this._sortedColumn = null;
 		}
 
 		this._columnsId = prefKey;
@@ -2556,10 +2654,18 @@ var ItemTree = class ItemTree extends LibraryTree {
 				else if (column.disabledIn && this._matchesViewType(column.disabledIn)) {
 					columnDisabled = true;
 				}
-				const columnSettings = columnsSettings[column.dataKey];
+				// The Relevance column is derived entirely from the
+				// best-match-search state below, so ignore anything persisted
+				// for it (e.g. from a column resize while a search was active)
+				const columnSettings = column.dataKey == 'relevance'
+					? null
+					: columnsSettings[column.dataKey];
 
 				// Also includes a `hidden` pref and overrides the above if available
 				column = Object.assign({}, column, columnSettings || {});
+				if (column.dataKey == 'relevance') {
+					column.hidden = true;
+				}
 				// If column does not have an "ordinal" field it means it
 				// is newly added
 				if (!("ordinal" in column)) {
@@ -2605,6 +2711,26 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (this.collectionTreeRow?.isRecentlyRead()) {
 			let col = this._columns.find(c => c.dataKey === 'lastRead');
 			if (col) {
+				col.sortDirection = -1;
+				this._sortedColumn = col;
+			}
+		}
+
+		// While a best-match search is active, show the Relevance column and
+		// sort by it, most similar first. The forced state lives only on this
+		// rebuilt column set, so the regular columns and sort come back when
+		// the search clears.
+		if (bestMatchSearch) {
+			let col = this._columns.find(c => c.dataKey === 'relevance');
+			if (col) {
+				// The forced sort replaces the persisted one, whose column
+				// would otherwise keep showing its sort indicator
+				for (let other of this._columns) {
+					if (other !== col) {
+						delete other.sortDirection;
+					}
+				}
+				col.hidden = false;
 				col.sortDirection = -1;
 				this._sortedColumn = col;
 			}
@@ -2796,7 +2922,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else {
 			if (this._sortedColumn) {
 				delete this._sortedColumn.sortDirection;
-				if (columnSettings[column.dataKey]) {
+				if (columnSettings[this._sortedColumn.dataKey]) {
 					delete columnSettings[this._sortedColumn.dataKey].sortDirection;
 				}
 			}

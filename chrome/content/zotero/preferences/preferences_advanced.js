@@ -57,6 +57,151 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('zotero-prefpane-advanced-enable-local-api').addEventListener('synctopreference', () => {
 			this.updateLocalAPIUI();
 		});
+
+		this.initSemanticSearch();
+	},
+
+
+	initSemanticSearch: function () {
+		// Populate the model menu from the model registry. The menu isn't
+		// bound to the pref, since a mode change needs a confirmation prompt
+		// before the pref -- and with it the stored index -- is touched.
+		let modelMenu = document.getElementById('semantic-search-model');
+		let modelPopup = modelMenu.querySelector('menupopup');
+		for (let { name, l10nID } of Zotero.Embeddings.getAvailableModels()) {
+			let menuitem = document.createXULElement('menuitem');
+			menuitem.setAttribute('value', name);
+			document.l10n.setAttributes(menuitem, l10nID);
+			modelPopup.append(menuitem);
+		}
+		modelMenu.value = Zotero.Embeddings.getModelName();
+		modelMenu.addEventListener('command', () => this.handleSemanticSearchModeChange());
+
+		// Live progress updates from the background indexer
+		this._semanticSearchListener = status => this.updateSemanticSearchUI(status);
+		Zotero.Embeddings.Indexing.addProgressListener(this._semanticSearchListener);
+		let modelPrefObserverID = Zotero.Prefs.registerObserver(
+			'embeddings.model',
+			() => {
+				modelMenu.value = Zotero.Embeddings.getModelName();
+			}
+		);
+
+		document.getElementById('zotero-prefpane-advanced').addEventListener('unload', () => {
+			Zotero.Embeddings.Indexing.removeProgressListener(this._semanticSearchListener);
+			Zotero.Prefs.unregisterObserver(modelPrefObserverID);
+		});
+
+		document.getElementById('semantic-search-resume').addEventListener('command', () => {
+			Zotero.Embeddings.Indexing.startIndexing();
+		});
+
+		document.getElementById('semantic-search-stop').addEventListener('command', () => {
+			Zotero.Embeddings.Indexing.stopIndexing();
+		});
+
+		// Render current state, then compute up-to-date per-library counts
+		this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
+		Zotero.Embeddings.Indexing.refreshStatus();
+	},
+
+
+	handleSemanticSearchModeChange: async function () {
+		let modelMenu = document.getElementById('semantic-search-model');
+		let oldValue = Zotero.Embeddings.getModelName();
+		let newValue = modelMenu.value;
+		if (newValue === oldValue) {
+			return;
+		}
+		// Leaving an enabled mode wipes the stored index (and, when disabling,
+		// the downloaded data), so confirm first. Enabling from Disabled just
+		// starts indexing.
+		if (Zotero.Embeddings.isEnabled()) {
+			let [title, text, button] = await document.l10n.formatValues(
+				(newValue
+					? ['switch-title', 'switch-text', 'switch-button']
+					: ['disable-title', 'disable-text', 'disable-button'])
+					.map(id => ({ id: `preferences-advanced-semantic-search-${id}` }))
+			);
+			let ps = Services.prompt;
+			let index = ps.confirmEx(
+				window,
+				title,
+				text,
+				ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+					+ ps.BUTTON_POS_1_DEFAULT,
+				button, null, null, null, {}
+			);
+			if (index !== 0) {
+				modelMenu.value = oldValue;
+				return;
+			}
+		}
+		Zotero.Prefs.set('embeddings.model', newValue);
+	},
+
+
+	updateSemanticSearchUI: function (status) {
+		let statusBox = document.getElementById('semantic-search-status');
+		statusBox.hidden = !status.enabled;
+		if (!status.enabled) {
+			return;
+		}
+
+		// Phase / status message
+		let phaseLabel = document.getElementById('semantic-search-phase');
+		let hasRemaining = status.libraries.some(lib => lib.indexed < lib.eligible);
+		if (status.error) {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-error', { error: status.error });
+		}
+		else if (status.stopping) {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-stopping');
+		}
+		else if (status.phase === 'downloading') {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-downloading');
+		}
+		else if (status.phase === 'indexing') {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing');
+		}
+		else {
+			document.l10n.setAttributes(phaseLabel,
+				(status.paused || hasRemaining)
+					? 'preferences-advanced-semantic-search-paused'
+					: 'preferences-advanced-semantic-search-idle');
+		}
+
+		// Offer a manual restart when enabled but not currently indexing and
+		// indexing is stopped or there's outstanding work (or the last run
+		// errored out)
+		document.getElementById('semantic-search-resume').hidden
+			= status.indexing || !(status.error || status.paused || hasRemaining);
+
+		// Offer to stop indexing while it's running; a requested stop takes
+		// effect once the current batch finishes, so disable the button in
+		// the meantime
+		let stopButton = document.getElementById('semantic-search-stop');
+		stopButton.hidden = !status.indexing;
+		stopButton.disabled = !!status.stopping;
+
+		// Per-library "indexed / total" counts
+		let grid = document.getElementById('semantic-search-libraries');
+		if (grid.childElementCount !== status.libraries.length * 2) {
+			grid.textContent = '';
+			for (let i = 0; i < status.libraries.length; i++) {
+				grid.append(document.createXULElement('label'), document.createXULElement('label'));
+			}
+		}
+		status.libraries.forEach((lib, i) => {
+			grid.children[i * 2].setAttribute(
+				'value',
+				Zotero.Utilities.Internal.stringWithColon(lib.name)
+			);
+			grid.children[i * 2 + 1].setAttribute(
+				'value',
+				`${lib.indexed.toLocaleString()} / ${lib.eligible.toLocaleString()}`
+			);
+		});
 	},
 	
 	

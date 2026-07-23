@@ -189,17 +189,351 @@ describe("CollectionViewItemTree", function () {
 			let col = await createDataObject('collection');
 			let item = await createDataObject('item', { title: "test", collections: [col.id] });
 			await zp.collectionsView.selectCollection(col.id);
-			
+
 			quicksearch.value = "test";
 			quicksearch.doCommand();
 			await itemsView._refreshPromise;
-			
+
 			await zp.itemsView.selectItems([item.id]);
 			item.removeFromCollection(col.id);
 			await item.saveTx();
 
 			await itemsView._refreshPromise;
 			assert.equal(quicksearch.value, "test");
+		});
+
+		describe("in best-match mode", function () {
+			var stubs = [];
+
+			beforeEach(function () {
+				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+				// A fully built index by default, so no indexing banner appears
+				stubs.push(sinon.stub(Zotero.Embeddings.Indexing, 'getStatus').returns({
+					enabled: true,
+					indexing: false,
+					paused: false,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 0, eligible: 0 }]
+				}));
+				Zotero.Prefs.set('search.quicksearch-mode', 'bestMatch');
+			});
+
+			afterEach(async function () {
+				Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+				await zp.itemsView.setFilter('search', '');
+				// Deselect any semantic saved search created by the test before
+				// its scoring stubs are restored
+				await selectLibrary(win);
+				stubs.forEach(stub => stub.restore());
+				stubs = [];
+			});
+
+			it("should show scored items ordered by a forced Relevance sort and restore the sort when cleared", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "B", collections: [col.id] });
+				let itemC = await createDataObject('item', { title: "C", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(async (query, itemIDs) => {
+					let scores = new Map();
+					if (itemIDs.includes(itemA.id)) {
+						scores.set(itemA.id, 0.5);
+					}
+					if (itemIDs.includes(itemB.id)) {
+						scores.set(itemB.id, 0.9);
+					}
+					return scores;
+				}));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				let defaultSortField = itemsView.getSortField();
+
+				await itemsView.setFilter('search', 'some query');
+
+				// Only the scored items, most similar first, despite title order
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+				assert.equal(itemsView.getSortField(), 'relevance');
+				// Descending, so the fullest bars read as first
+				assert.equal(itemsView.getSortDirection(), -1);
+				// The Relevance cells show the ranks
+				assert.equal(itemsView.getCellText(0, 'relevance'), 1);
+				assert.equal(itemsView.getCellText(1, 'relevance'), 2);
+				// Score fractions for the bars
+				assert.equal(itemsView.rowProvider.getBestMatchBarFractions().get(itemB.id), 0.9);
+				assert.equal(itemsView.rowProvider.getBestMatchBarFractions().get(itemA.id), 0.5);
+				assert.isFalse(itemsView._getColumns().find(c => c.dataKey == 'relevance').hidden);
+				// The rendered header shows the column
+				assert.ok(win.document.querySelector('.virtualized-table-header .cell.relevance'));
+				// The rows' bars are styled (a selector regression would leave
+				// collapsed inline spans) and filled. Row painting is async, so poll
+				// (the test times out on failure).
+				let bar;
+				for (let i = 0; i < 50 && !bar; i++) {
+					bar = itemsView.tree._jsWindow.getElementByIndex(0)
+						?.querySelector('.cell.relevance .relevance-bar');
+					if (!bar) {
+						await Zotero.Promise.delay(10);
+					}
+				}
+				if (!bar) {
+					let row0 = itemsView.tree._jsWindow.getElementByIndex(0);
+					dump('\nDIAG-BAR cells=' + [...row0.querySelectorAll('.cell')].map(c => c.className.split(' ')[1]).join(',')
+						+ ' visibleCols=' + itemsView.tree._columns.getAsArray().filter(c => !c.hidden).map(c => c.dataKey).join(',')
+						+ '\n');
+				}
+				assert.equal(win.getComputedStyle(bar).height, '6px');
+				assert.notEqual(bar.firstChild.style.width, '0%');
+
+				// Clearing the search restores the previous sort and columns
+				await itemsView.setFilter('search', '');
+				assert.equal(itemsView.getSortField(), defaultSortField);
+				assert.isTrue(itemsView._getColumns().find(c => c.dataKey == 'relevance').hidden);
+				assert.notOk(win.document.querySelector('.virtualized-table-header .cell.relevance'));
+				assert.deepEqual(
+					itemsView._rows.map(row => row.id),
+					[itemA.id, itemB.id, itemC.id]
+				);
+			});
+
+			it("should override a persisted column sort while a best-match search is active", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "persistsort A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "persistsort B", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5]))
+				));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				// Sort by Date Modified via the header, as a real profile would have
+				let cols = itemsView._getColumns();
+				let dmIndex = cols.findIndex(c => c.dataKey == 'dateModified');
+				if (cols[dmIndex].hidden) {
+					itemsView.tree._columns.toggleHidden(dmIndex);
+				}
+				itemsView.tree._columns.toggleSort(dmIndex);
+				await itemsView.waitForLoad();
+				assert.equal(itemsView.getSortField(), 'dateModified');
+
+				try {
+					await itemsView.setFilter('search', 'some query');
+
+					assert.equal(itemsView.getSortField(), 'relevance');
+					assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+					assert.ok(win.document.querySelector('.virtualized-table-header .cell.relevance'));
+					// The replaced sort's column doesn't keep its indicator
+					assert.notOk(win.document.querySelector('.virtualized-table-header .cell.dateModified .sort-indicator'));
+
+					// Clearing restores the persisted sort
+					await itemsView.setFilter('search', '');
+					assert.equal(itemsView.getSortField(), 'dateModified');
+					assert.notOk(win.document.querySelector('.virtualized-table-header .cell.relevance'));
+				}
+				finally {
+					// Restore the profile's column state
+					delete itemsView._columnPrefs.dateModified;
+					itemsView._columnsId = null;
+					itemsView._sortedColumn = null;
+				}
+			});
+
+			it("should show an indexing-progress banner while the index is incomplete", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "A", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.resolves(new Map([[item.id, 0.7]])));
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: true,
+					paused: false,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 752, eligible: 9553 }]
+				});
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				// Localization is async, so poll for the translated counts (the
+				// test times out on failure)
+				let banner = win.document.querySelector('.best-match-index-banner');
+				assert.ok(banner);
+				while (!/752 of 9,553/.test(banner.textContent)) {
+					await Zotero.Promise.delay(10);
+				}
+
+				// The paused wording requires the explicit paused flag -- the
+				// indexer merely not running at the moment (startup, the pre-run
+				// debounce) still reports indexing
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: false,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 752, eligible: 9553 }]
+				});
+				await itemsView.setFilter('search', 'between runs query');
+				banner = win.document.querySelector('.best-match-index-banner');
+				assert.equal(banner.getAttribute('data-l10n-id'), 'items-best-match-indexing');
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: true,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 752, eligible: 9553 }]
+				});
+				await itemsView.setFilter('search', 'paused query');
+				banner = win.document.querySelector('.best-match-index-banner');
+				assert.equal(banner.getAttribute('data-l10n-id'), 'items-best-match-indexing-paused');
+
+				// A complete index shows no banner
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: false,
+					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 9553, eligible: 9553 }]
+				});
+				await itemsView.setFilter('search', 'another query');
+				assert.notOk(win.document.querySelector('.best-match-index-banner'));
+			});
+
+			it("should score once across a multi-collection selection", async function () {
+				let col1 = await createDataObject('collection');
+				let col2 = await createDataObject('collection');
+				let shared = await createDataObject('item', { collections: [col1.id, col2.id] });
+				let other = await createDataObject('item', { collections: [col2.id] });
+				let scoreStub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == shared.id ? 0.9 : 0.5]))
+				);
+				stubs.push(scoreStub);
+
+				await cv.selectByID("C" + col1.id);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID("C" + col2.id));
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+				itemsView = zp.itemsView;
+
+				await itemsView.setFilter('search', 'some query');
+
+				// One scoring call for the whole selection, with the shared item deduplicated
+				assert.equal(scoreStub.callCount, 1);
+				assert.sameMembers(scoreStub.firstCall.args[1], [shared.id, other.id]);
+				assert.deepEqual(
+					itemsView._rows.filter(row => row.type == 'item').map(row => row.id),
+					[shared.id, other.id]
+				);
+			});
+
+			it("should rank a saved search with a bestMatch condition and let a quick search override it", async function () {
+				let itemA = await createDataObject('item', { title: "savedsimtest A" });
+				let itemB = await createDataObject('item', { title: "savedsimtest B" });
+				// Install the stub first: creating the saved search auto-selects
+				// it, which already runs a best-match refresh
+				let stub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => new Map(itemIDs.map((id) => {
+						let best = query == 'saved query' ? itemA.id : itemB.id;
+						return [id, id == best ? 0.9 : 0.5];
+					}))
+				);
+				stubs.push(stub);
+				let search = new Zotero.Search();
+				search.name = "Saved best-match test";
+				search.libraryID = itemA.libraryID;
+				search.addCondition('resultLevel', 'item');
+				search.addCondition('title', 'contains', 'savedsimtest');
+				search.addCondition('bestMatch', 'contains', 'saved query');
+				await search.saveTx();
+
+				// Selecting the saved search activates ranking from its own marker
+				await select(win, search);
+				itemsView = zp.itemsView;
+				assert.equal(itemsView.getSortField(), 'relevance');
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
+
+				// An active best-match quick search overrides the saved marker
+				await itemsView.setFilter('search', 'typed query');
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+			});
+
+			it("shouldn't let a top-K saved search's cutoff trim other selected rows", async function () {
+				let col = await createDataObject('collection');
+				// No embeddings for colItem1, so it can only survive via keepUnscored
+				let colItem1 = await createDataObject('item', { title: "mixedsel C1", collections: [col.id] });
+				let colItem2 = await createDataObject('item', { title: "mixedsel C2", collections: [col.id] });
+				let kItem1 = await createDataObject('item', { title: "mixedselk K1" });
+				let kItem2 = await createDataObject('item', { title: "mixedselk K2" });
+				// Install the stub first: creating the saved search auto-selects
+				// it, which already runs its top-K search
+				let scores = new Map([[kItem1.id, 0.9], [kItem2.id, 0.5], [colItem2.id, 0.7]]);
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => new Map(
+						itemIDs.filter(id => scores.has(id)).map(id => [id, scores.get(id)])
+					)
+				));
+				let search = new Zotero.Search();
+				search.name = "Top-K best-match test";
+				search.libraryID = col.libraryID;
+				search.addCondition('resultLevel', 'item');
+				search.addCondition('title', 'contains', 'mixedselk');
+				search.addCondition('bestMatch', '1', 'some query');
+				await search.saveTx();
+
+				await cv.selectByID("S" + search.id);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID("C" + col.id));
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+				itemsView = zp.itemsView;
+
+				// The saved search returns its own top 1; the collection keeps both of
+				// its items, including the unscoreable one
+				assert.sameMembers(
+					itemsView._rows.filter(row => row.type == 'item').map(row => row.id),
+					[kItem1.id, colItem1.id, colItem2.id]
+				);
+			});
+
+			it("should keep a rank-only advanced search's results when the index isn't ready", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "notready A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "notready B", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(async () => {
+					throw new Zotero.Embeddings.IndexNotReadyError('test');
+				}));
+				let s = new Zotero.Search();
+				s.libraryID = col.libraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('title', 'contains', 'notready');
+				s.addCondition('bestMatch', 'contains', 'some query');
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('advanced-search', s);
+
+				// Membership is untouched; the rows just aren't ranked
+				assert.sameMembers(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
+				assert.equal(itemsView.getCellText(0, 'relevance'), '');
+				await itemsView.setFilter('advanced-search', null);
+			});
+
+			it("should rerank when the indexer announces changed embeddings", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "rerank A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "rerank B", collections: [col.id] });
+				let best = itemA.id;
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == best ? 0.9 : 0.5]))
+				));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
+
+				// The indexer's coalesced notification after new/removed vectors
+				best = itemB.id;
+				await Zotero.Notifier.trigger('refresh', 'item', [itemA.id, itemB.id]);
+				await itemsView._refreshPromise;
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+			});
 		});
 
 		it("should expand parent item and attachment for an annotation match", async function () {
