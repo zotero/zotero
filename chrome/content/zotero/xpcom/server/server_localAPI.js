@@ -219,19 +219,6 @@ function checkAuthorizeRateLimit() {
 	return 0;
 }
 
-/**
- * Get this server's persistent ID, generating and storing it on first use.
- * @returns {string} A 12-character server ID
- */
-function getLocalAPIServerID() {
-	let id = Zotero.Prefs.get('httpServer.localAPI.serverID');
-	if (!id) {
-		id = Zotero.Utilities.randomString(12);
-		Zotero.Prefs.set('httpServer.localAPI.serverID', id);
-	}
-	return id;
-}
-
 const exportFormats = new Map([
 	['bibtex', '9cb70025-a888-4a29-a210-93ec52da40d4'],
 	['biblatex', 'b6e39b57-8942-4d11-8259-342c46ce395f'],
@@ -574,7 +561,7 @@ class LocalAPIEndpoint {
 		}
 		contentTypeOrHeaders['Zotero-API-Version'] = LOCAL_API_VERSION;
 		contentTypeOrHeaders['Zotero-Schema-Version'] = Zotero.Schema.globalSchemaVersion;
-		contentTypeOrHeaders['Zotero-Server-ID'] = getLocalAPIServerID();
+		contentTypeOrHeaders['Zotero-Server-ID'] = Zotero.Server.LocalAPI.getServerID();
 		return [status, contentTypeOrHeaders, body];
 	}
 
@@ -613,7 +600,7 @@ class LocalAPIEndpoint {
 			}
 			return null;
 		}
-		if (provided !== getLocalAPIServerID()) {
+		if (provided !== Zotero.Server.LocalAPI.getServerID()) {
 			return this.makeResponse(412, 'text/plain', 'Zotero-Server-ID does not match this server');
 		}
 		return null;
@@ -744,6 +731,44 @@ class LocalAPIEndpoint {
 const _404 = [404, 'text/plain', 'Not found'];
 
 Zotero.Server.LocalAPI = {};
+
+Zotero.Server.LocalAPI._serverID = null;
+
+/**
+ * Load this server's persistent ID from the database, generating and storing it
+ * on first use, and cache it in memory.
+ *
+ * This value is stored in the settings table (not a pref) because it identifies
+ * the data in the local database, not the profile; a database restored from a
+ * backup or copied to another profile should keep the same ID, and a new
+ * database in the same profile should get a new one.
+ *
+ * @returns {Promise<string>} A 12-character server ID
+ */
+Zotero.Server.LocalAPI.init = async function () {
+	let sql = "SELECT value FROM settings WHERE setting='localAPI' AND key='serverID'";
+	let id = await Zotero.DB.valueQueryAsync(sql);
+	if (!id) {
+		id = Zotero.Utilities.randomString(12);
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO settings VALUES ('localAPI', 'serverID', ?)", id
+		);
+	}
+	this._serverID = id;
+	return id;
+};
+
+/**
+ * Get this server's persistent ID. Must have been loaded via init() first.
+ *
+ * @returns {string} A 12-character server ID
+ */
+Zotero.Server.LocalAPI.getServerID = function () {
+	if (!this._serverID) {
+		throw new Error("Local API server ID has not been loaded");
+	}
+	return this._serverID;
+};
 
 Zotero.Server.LocalAPI.Root = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];

@@ -57,12 +57,15 @@ Zotero.Server = new function () {
 	/**
 	 * initializes a very rudimentary web server
 	 */
-	this.init = function (port) {
+	this.init = async function (port) {
 		if (serv) {
 			Zotero.debug("Already listening on port " + serv.port);
 			return;
 		}
 		
+		// Do any necessary pre-listen initialization first
+		await Zotero.Server.LocalAPI.init();
+
 		port = port || Zotero.Prefs.get('httpServer.port');
 		try {
 			serv = new HttpServer();

@@ -702,8 +702,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			Zotero.locked = false;
 			
 			// Initialize various services
-			if(Zotero.Prefs.get("httpServer.enabled")) {
-				Zotero.Server.init();
+			if (Zotero.Prefs.get("httpServer.enabled")) {
+				await Zotero.Server.init();
 			}
 			
 			await Zotero.Fulltext.init();
