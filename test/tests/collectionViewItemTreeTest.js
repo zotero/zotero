@@ -530,9 +530,30 @@ describe("CollectionViewItemTree", function () {
 
 				// The indexer's coalesced notification after new/removed vectors
 				best = itemB.id;
-				await Zotero.Notifier.trigger('refresh', 'item', [itemA.id, itemB.id]);
+				await Zotero.Notifier.trigger('refresh', 'item', [itemA.id, itemB.id], { embeddingsUpdate: true });
 				await itemsView._refreshPromise;
 				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+			});
+
+			it("shouldn't rerank on a refresh that isn't an embeddings update", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "norerank A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "norerank B", collections: [col.id] });
+				let best = itemA.id;
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == best ? 0.9 : 0.5]))
+				));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
+
+				// An unrelated refresh (e.g. a field change) leaves the ranking alone
+				best = itemB.id;
+				await Zotero.Notifier.trigger('refresh', 'item', [itemA.id, itemB.id]);
+				await itemsView._refreshPromise;
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
 			});
 		});
 

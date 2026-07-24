@@ -1245,9 +1245,10 @@ Zotero.Embeddings.Indexing = new function () {
 
 	// Announce written or removed embeddings with a 'refresh' item event, so
 	// an active best-match search reranks as vectors change (e.g. during
-	// initial indexing, or after a clear). Coalesced, so a long indexing run
-	// produces an update every couple of seconds rather than one per
-	// committed batch.
+	// initial indexing, or after a clear). The embeddingsUpdate flag lets the
+	// item tree rerank only for these events, not for every refresh. Coalesced,
+	// so a long indexing run produces an update every couple of seconds rather
+	// than one per committed batch.
 	function _notifyIndexed(itemIDs) {
 		for (let id of itemIDs) {
 			_indexedNotifyIDs.add(id);
@@ -1259,7 +1260,7 @@ Zotero.Embeddings.Indexing = new function () {
 			_indexedNotifyTimer = null;
 			let ids = [..._indexedNotifyIDs];
 			_indexedNotifyIDs.clear();
-			Zotero.Notifier.trigger('refresh', 'item', ids)
+			Zotero.Notifier.trigger('refresh', 'item', ids, { embeddingsUpdate: true })
 				.catch(e => Zotero.logError(e));
 		}, INDEXED_NOTIFY_DELAY);
 	}
