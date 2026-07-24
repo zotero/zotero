@@ -115,6 +115,7 @@ const WRITE_TOKEN_CACHE_SECONDS = 12 * 60 * 60;
  *     contentType: string;
  *     charset: string | null;
  *     uploaded: boolean;
+ *     stagedPath: string | null;
  *     expires: number;
  * }>}
  */
@@ -1244,8 +1245,9 @@ Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/file/view/url"] = Z
 
 /**
  * Local-only endpoint that receives the raw bytes for a previously authorized
- * upload (the URL returned in the authorize phase). Writes the file directly
- * into the attachment's storage directory.
+ * upload (the URL returned in the authorize phase). Stages the file in the
+ * temp directory; it's moved into the attachment's storage directory when the
+ * upload is registered.
  */
 Zotero.Server.LocalAPI.UploadReceiver = class extends LocalAPIEndpoint {
 	supportedMethods = ['POST'];
@@ -1295,24 +1297,26 @@ Zotero.Server.LocalAPI.UploadReceiver = class extends LocalAPIEndpoint {
 
 			let item = await Zotero.Items.getByLibraryAndKeyAsync(upload.libraryID, upload.itemKey);
 			if (!item || !item.isFileAttachment()) {
-				PENDING_UPLOADS.delete(uploadKey);
+				await discardPendingUpload(uploadKey);
 				return this.makeResponse(404, 'text/plain', 'Attachment item no longer exists');
 			}
 
-			let dir = Zotero.Attachments.getStorageDirectory(item);
-			await IOUtils.makeDirectory(dir.path, { ignoreExisting: true });
-			let destPath = PathUtils.join(dir.path, upload.filename);
-			await IOUtils.write(destPath, bytes);
+			// Stage the file in the temp directory, so that the attachment's existing file
+			// isn't touched unless registration preconditions pass
+			let stagedPath = PathUtils.join(
+				Zotero.getTempDirectory().path, 'localAPIUpload-' + uploadKey);
+			await IOUtils.write(stagedPath, bytes);
 
 			// Verify the actual md5 matches what was claimed in the authorize phase.
-			let actualMD5 = await Zotero.Utilities.Internal.md5Async(destPath);
+			let actualMD5 = await Zotero.Utilities.Internal.md5Async(stagedPath);
 			if (actualMD5 !== upload.md5) {
-				await IOUtils.remove(destPath, { ignoreAbsent: true });
+				await IOUtils.remove(stagedPath, { ignoreAbsent: true });
 				PENDING_UPLOADS.delete(uploadKey);
 				return this.makeResponse(400, 'text/plain',
 					`File MD5 does not match expected (got ${actualMD5}, expected ${upload.md5})`);
 			}
 
+			upload.stagedPath = stagedPath;
 			upload.uploaded = true;
 			return this.makeResponse(201, 'text/plain', '');
 		}
@@ -2437,6 +2441,7 @@ async function authorizeUpload(item, params, headers, requestData) {
 		contentType,
 		charset: params.charset || item.attachmentCharset || null,
 		uploaded: false,
+		stagedPath: null,
 		expires: Date.now() + UPLOAD_KEY_TTL_SECONDS * 1000,
 	});
 
@@ -2476,8 +2481,9 @@ async function authorizeUpload(item, params, headers, requestData) {
 
 /**
  * Register a previously-uploaded file (phase 3 of the upload flow).
- * Updates the attachment item with the new filename, md5, and mtime, then
- * returns 204 with the new library version.
+ * Moves the staged file into the attachment's storage directory and updates
+ * the attachment item with the new filename, md5, and mtime, then returns 204
+ * with the new library version.
  */
 async function registerUpload(item, params, headers) {
 	pruneExpired(PENDING_UPLOADS);
@@ -2500,14 +2506,20 @@ async function registerUpload(item, params, headers) {
 	if (ifMatch) {
 		let m = /^"?([a-f0-9]{32})"?$/.exec(ifMatch);
 		if (!m || !currentSyncedMD5 || currentSyncedMD5 !== m[1]) {
-			PENDING_UPLOADS.delete(uploadKey);
+			await discardPendingUpload(uploadKey);
 			return [412, 'text/plain', 'ETag does not match current version of file'];
 		}
 	}
 	if (ifNoneMatch === '*' && currentSyncedMD5) {
-		PENDING_UPLOADS.delete(uploadKey);
+		await discardPendingUpload(uploadKey);
 		return [412, 'text/plain', 'If-None-Match: * set but file exists'];
 	}
+
+	// Preconditions passed, so move the staged file into the storage directory
+	let dir = Zotero.Attachments.getStorageDirectory(item);
+	await IOUtils.makeDirectory(dir.path, { ignoreExisting: true });
+	let destPath = PathUtils.join(dir.path, upload.filename);
+	await IOUtils.move(upload.stagedPath, destPath);
 
 	item.attachmentFilename = upload.filename;
 	item.attachmentSyncedHash = upload.md5;
@@ -2566,7 +2578,23 @@ function pruneExpired(map) {
 		let expiry = typeof v === 'number' ? v : v.expires;
 		if (expiry && expiry < now) {
 			map.delete(k);
+			if (v.stagedPath) {
+				IOUtils.remove(v.stagedPath, { ignoreAbsent: true })
+					.catch(e => Zotero.logError(e));
+			}
 		}
+	}
+}
+
+/**
+ * Delete a pending upload, along with its staged file if the bytes were
+ * already received.
+ */
+async function discardPendingUpload(uploadKey) {
+	let upload = PENDING_UPLOADS.get(uploadKey);
+	PENDING_UPLOADS.delete(uploadKey);
+	if (upload && upload.stagedPath) {
+		await IOUtils.remove(upload.stagedPath, { ignoreAbsent: true });
 	}
 }
 

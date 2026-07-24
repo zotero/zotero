@@ -1849,6 +1849,115 @@ describe("Local API Server", function () {
 				assert.equal(reloaded.attachmentFilename, 'uploaded.bin');
 			});
 
+			it("shouldn't modify the existing file until registration succeeds", async function () {
+				let path = await attachment.getFilePathAsync();
+				let originalContents = await IOUtils.read(path);
+
+				let content = "Replacement content for staged upload test";
+				let bytes = new TextEncoder().encode(content);
+				let tmpPath = PathUtils.join(Zotero.getTempDirectory().path, 'localapi-staged-test.bin');
+				await IOUtils.write(tmpPath, bytes);
+				let md5 = await Zotero.Utilities.Internal.md5Async(tmpPath);
+				await IOUtils.remove(tmpPath);
+
+				// Authorize and upload with the existing filename
+				let { response: authResp } = await apiPost(
+					`/users/0/items/${attachment.key}/file`,
+					{
+						body: `md5=${md5}&filename=${encodeURIComponent(attachment.attachmentFilename)}`
+							+ `&filesize=${bytes.length}&mtime=${Date.now()}`,
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'If-None-Match': '*',
+						}
+					}
+				);
+				await Zotero.HTTP.request('POST', authResp.url, {
+					headers: {
+						'Zotero-Allowed-Request': '1',
+						'Content-Type': 'application/octet-stream',
+						'Zotero-Server-ID': serverID,
+					},
+					body: content,
+					successCodes: [201],
+					responseType: 'text'
+				});
+
+				// The bytes have been received but not registered, so the existing file
+				// must be untouched
+				assert.deepEqual(await IOUtils.read(path), originalContents);
+
+				// Register, after which the file is replaced
+				await apiPost(
+					`/users/0/items/${attachment.key}/file`,
+					{
+						body: `upload=${authResp.uploadKey}`,
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'If-None-Match': '*',
+						},
+						successCodes: [204]
+					}
+				);
+				assert.equal(
+					await Zotero.Utilities.Internal.md5Async(await attachment.getFilePathAsync()),
+					md5
+				);
+			});
+
+			it("shouldn't modify the existing file when registration fails with 412", async function () {
+				let path = await attachment.getFilePathAsync();
+				let originalContents = await IOUtils.read(path);
+
+				let content = "Content that must never be registered";
+				let bytes = new TextEncoder().encode(content);
+				let tmpPath = PathUtils.join(Zotero.getTempDirectory().path, 'localapi-staged-412-test.bin');
+				await IOUtils.write(tmpPath, bytes);
+				let md5 = await Zotero.Utilities.Internal.md5Async(tmpPath);
+				await IOUtils.remove(tmpPath);
+
+				let { response: authResp } = await apiPost(
+					`/users/0/items/${attachment.key}/file`,
+					{
+						body: `md5=${md5}&filename=${encodeURIComponent(attachment.attachmentFilename)}`
+							+ `&filesize=${bytes.length}&mtime=${Date.now()}`,
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'If-None-Match': '*',
+						}
+					}
+				);
+				await Zotero.HTTP.request('POST', authResp.url, {
+					headers: {
+						'Zotero-Allowed-Request': '1',
+						'Content-Type': 'application/octet-stream',
+						'Zotero-Server-ID': serverID,
+					},
+					body: content,
+					successCodes: [201],
+					responseType: 'text'
+				});
+
+				// Another client registers a file for this attachment in the meantime
+				attachment.attachmentSyncedHash = 'f'.repeat(32);
+				await attachment.saveTx();
+
+				let { status } = await apiPost(
+					`/users/0/items/${attachment.key}/file`,
+					{
+						body: `upload=${authResp.uploadKey}`,
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'If-None-Match': '*',
+						},
+						successCodes: [412],
+						responseType: 'text'
+					}
+				);
+				assert.equal(status, 412);
+				assert.deepEqual(await IOUtils.read(path), originalContents);
+			});
+
 			// Exercises the params=1 multipart upload form: each returned param as a form
 			// field, then the file bytes in a final `file` field. Uses real binary content
 			// to confirm it survives the multipart path.
