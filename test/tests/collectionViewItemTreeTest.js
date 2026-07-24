@@ -555,6 +555,32 @@ describe("CollectionViewItemTree", function () {
 				await itemsView._refreshPromise;
 				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
 			});
+
+			it("should rerank without re-running the search when embeddings change", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "reuse A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "reuse B", collections: [col.id] });
+				let best = itemA.id;
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == best ? 0.9 : 0.5]))
+				));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
+
+				// The underlying search is dropped and re-run by clearing the row cache
+				let clearCacheSpy = sinon.spy(Zotero.CollectionTreeRow.prototype, 'clearCache');
+				stubs.push(clearCacheSpy);
+
+				best = itemB.id;
+				await Zotero.Notifier.trigger('refresh', 'item', [itemA.id, itemB.id], { embeddingsUpdate: true });
+				await itemsView._refreshPromise;
+
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+				assert.isFalse(clearCacheSpy.called);
+			});
 		});
 
 		it("should expand parent item and attachment for an annotation match", async function () {
