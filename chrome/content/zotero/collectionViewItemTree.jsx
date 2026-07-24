@@ -930,11 +930,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			if (items.length == 0) return;
 		}
 
-		if (action == 'refresh' && type == 'item'
+		if (action == 'refresh' && type == 'item' && extraData && extraData.embeddingsUpdate
 				&& collectionTreeRows.some(rowIsBestMatchSearch)) {
-			// Under an active best-match search, a refresh event can mean new or
-			// changed embeddings (the background indexer notifies after committing
-			// batches), so rerun the search to update the scores and ranks
+			// The background indexer committed new or changed embeddings, so
+			// rerun the active best-match search to update the scores and ranks
 			this.itemTree.invalidateRowCache(ids);
 			refresh = true;
 			madeChanges = true;
