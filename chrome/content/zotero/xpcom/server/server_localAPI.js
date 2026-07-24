@@ -527,7 +527,7 @@ class LocalAPIEndpoint {
 					return this.makeResponse(400, 'text/plain', 'Only multi-object requests can output versions');
 				}
 				contentType = 'application/json';
-				body = JSON.stringify(Object.fromEntries(dataObjectOrObjects.map(o => [o.key, o.version])), null, 4);
+				body = JSON.stringify(Object.fromEntries(dataObjectOrObjects.map(o => [o.key, o.clientVersion])), null, 4);
 				break;
 			case 'json':
 			case null:

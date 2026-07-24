@@ -435,9 +435,10 @@ describe("Local API Server", function () {
 			});
 
 			describe("=versions", function () {
-				it("should output a JSON object mapping keys to versions", async function () {
+				it("should output a JSON object mapping keys to local versions", async function () {
 					let { response } = await apiGet('/users/0/items?format=versions');
-					assert.propertyVal(response, collectionItem1.key, collectionItem1.version);
+					assert.isAbove(collectionItem1.clientVersion, 0);
+					assert.propertyVal(response, collectionItem1.key, collectionItem1.clientVersion);
 				});
 			});
 		});
