@@ -738,10 +738,8 @@ Zotero.Server.LocalAPI._serverID = null;
  * Load this server's persistent ID from the database, generating and storing it
  * on first use, and cache it in memory.
  *
- * This value is stored in the settings table (not a pref) because it identifies
- * the data in the local database, not the profile; a database restored from a
- * backup or copied to another profile should keep the same ID, and a new
- * database in the same profile should get a new one.
+ * We store this value in the settings table so it follows the database, not the
+ * profile (as it would if it were stored as a pref).
  *
  * @returns {Promise<string>} A 12-character server ID
  */
