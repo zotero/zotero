@@ -721,11 +721,28 @@ Zotero.Schema = new function () {
 		
 		var items = await Zotero.Items.getAsync(itemIDs);
 		
-		Zotero.debug(`${items.length} items to migrate`);
-		
 		if (items.length) {
 			await Zotero.Items.loadDataTypes(items);
 			
+			// Skip items that the migration won't actually change (e.g., items whose extracted
+			// fields aren't valid for the item type or already have values) -- keep the
+			// extractExtraFields() call in sync with Zotero.Item::migrateExtraFields()
+			items = items.filter((item) => {
+				if (!item.isEditable()) {
+					return false;
+				}
+				let originalExtra = item.getField('extra');
+				let { itemType, fields, creators, extra }
+					= Zotero.Utilities.Internal.extractExtraFields(
+						originalExtra, item, ['place', 'date']
+					);
+				return itemType || fields.size || creators.length || extra != originalExtra;
+			});
+		}
+		
+		Zotero.debug(`${items.length} items to migrate`);
+		
+		if (items.length) {
 			let progress = 0;
 			let progressMax = items.length;
 			if (onProgress) {

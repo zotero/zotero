@@ -785,15 +785,22 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				// Feed updates (e.g., deleting old items) can interfere with this, so pause them
 				// until we're done
 				let feedPauser = await Zotero.Feeds.pause();
+				let started = new Date();
 				try {
 					await Zotero.Schema.migrateExtraFields({
 						onProgress: ({ progress, progressMax }) => {
+							// Only show the progress window if the migration is still running
+							// after a short delay, so that it doesn't flash for a few items
 							if (!progressWin) {
+								if (new Date() - started < 500) {
+									return;
+								}
 								progressWin = new Zotero.ProgressWindow({
 									closeOnClick: false
 								});
-								let title = Zotero.getString('upgrade.status');
-								progressWin.changeHeadline(title);
+								progressWin.changeHeadline(
+									Zotero.getString('migrate-extra-fields-progress-headline')
+								);
 								itemProgress = new progressWin.ItemProgress(
 									'journalArticle',
 									Zotero.getString('migrate-extra-fields-progress-message')
@@ -807,7 +814,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				}
 				catch (e) {
 					Zotero.logError(e);
-					itemProgress.setError();
+					if (itemProgress) {
+						itemProgress.setError();
+					}
 				}
 				finally {
 					feedPauser.resume();

@@ -95,7 +95,7 @@ describe("Zotero.Schema", function () {
 		});
 		
 		describe("#migrateExtraFields()", function () {
-			async function migrate() {
+			async function migrate(options) {
 				schema.version++;
 				schema.itemTypes.find(x => x.itemType == 'book').fields.splice(0, 1, { field: 'fooBar' })
 				var newLocales = {};
@@ -105,7 +105,7 @@ describe("Zotero.Schema", function () {
 					newLocales[locale] = o;
 				});
 				await Zotero.Schema._updateGlobalSchemaForTest(schema);
-				await Zotero.Schema.migrateExtraFields();
+				await Zotero.Schema.migrateExtraFields(options);
 			}
 			
 			it("should add a new field and migrate values from Extra", async function () {
@@ -193,6 +193,21 @@ describe("Zotero.Schema", function () {
 				assert.isNumber(Zotero.ItemFields.getID('fooBar'));
 				assert.equal(item.getField('fooBar'), '');
 				assert.equal(item.getField('extra'), 'Foo Bar: This is a value.');
+				assert.isTrue(item.synced);
+			});
+			
+			it("shouldn't report progress if Extra fields can't be migrated", async function () {
+				var item = await createDataObject('item', { itemType: 'book' });
+				item.setField('numPages', "10");
+				item.setField('extra', 'number-of-pages: 11');
+				item.synced = true;
+				await item.saveTx();
+				
+				var onProgress = sinon.spy();
+				await migrate({ onProgress });
+				
+				assert.isFalse(onProgress.called);
+				assert.equal(item.getField('extra'), 'number-of-pages: 11');
 				assert.isTrue(item.synced);
 			});
 			

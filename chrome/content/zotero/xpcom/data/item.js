@@ -6234,6 +6234,7 @@ Zotero.Item.prototype.migrateExtraFields = function () {
 	};
 	
 	try {
+		// Keep in sync with the pre-migration check in Zotero.Schema.migrateExtraFields()
 		var { itemType, fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(
 			originalExtra,
 			this,
