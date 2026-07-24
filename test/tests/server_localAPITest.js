@@ -1208,16 +1208,22 @@ describe("Local API Server", function () {
 		describe("DELETE <userOrGroupPrefix>/items/<key>", function () {
 			it("should delete a single item", async function () {
 				let item = await createDataObject('item');
-				let { status } = await apiDelete(`/users/0/items/${item.key}`, {
+				let versionBefore = Zotero.Libraries.userLibrary.clientVersion;
+				let xhr = await apiDelete(`/users/0/items/${item.key}`, {
 					headers: {
 						'If-Unmodified-Since-Version': String(item.clientVersion),
 					},
 					successCodes: [204]
 				});
-				assert.equal(status, 204);
+				assert.equal(xhr.status, 204);
 				let reloaded = await Zotero.Items.getByLibraryAndKeyAsync(
 					Zotero.Libraries.userLibraryID, item.key);
 				assert.isFalse(!!reloaded);
+				// The deletion advances the library version
+				assert.isAbove(
+					parseInt(xhr.getResponseHeader('Last-Modified-Version')),
+					versionBefore
+				);
 			});
 
 			it("should require If-Unmodified-Since-Version (428)", async function () {
@@ -1423,19 +1429,26 @@ describe("Local API Server", function () {
 				item.setTags(['tagToDelete', 'tagToKeep']);
 				await item.saveTx();
 				assert.isAtLeast(Zotero.Tags.getID('tagToDelete'), 1);
+				let itemVersionBefore = item.clientVersion;
 
-				let { status } = await apiDelete('/users/0/tags?tag=tagToDelete', {
+				let xhr = await apiDelete('/users/0/tags?tag=tagToDelete', {
 					headers: {
 						'If-Unmodified-Since-Version':
 							String(Zotero.Libraries.userLibrary.clientVersion),
 					},
 					successCodes: [204]
 				});
-				assert.equal(status, 204);
+				assert.equal(xhr.status, 204);
 				let reloaded = await Zotero.Items.getByLibraryAndKeyAsync(
 					Zotero.Libraries.userLibraryID, item.key);
 				assert.notInclude(reloaded.getTags().map(t => t.tag), 'tagToDelete');
 				assert.include(reloaded.getTags().map(t => t.tag), 'tagToKeep');
+				// The tag deletion advances the modified items' versions
+				assert.isAbove(reloaded.clientVersion, itemVersionBefore);
+				assert.equal(
+					parseInt(xhr.getResponseHeader('Last-Modified-Version')),
+					reloaded.clientVersion
+				);
 				await item.eraseTx();
 			});
 

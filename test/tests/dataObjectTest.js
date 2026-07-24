@@ -105,6 +105,15 @@ describe("Zotero.DataObject", function () {
 				assert.notEqual(obj3.clientVersion, groupVersionBefore);
 			}
 		});
+
+		it("should increment library clientVersion when object is deleted", async function () {
+			for (let type of types) {
+				let obj = await createDataObject(type);
+				let libraryVersion = obj.library.clientVersion;
+				await obj.eraseTx();
+				assert.equal(obj.library.clientVersion, libraryVersion + 1);
+			}
+		});
 	});
 	
 	describe("#synced", function () {
