@@ -550,6 +550,13 @@ describe("Local API Server", function () {
 			assert.include(xhr.response.map(g => g.id), group.id);
 		});
 
+		it("should ignore ?since", async function () {
+			let group = await getGroup();
+			let { response: all } = await apiGet('/users/0/groups');
+			let { response: since } = await apiGet(`/users/0/groups?since=${group.version + 1}`);
+			assert.sameDeepMembers(since, all);
+		});
+
 		it("should map group IDs to metadata versions with ?format=versions", async function () {
 			let group = await getGroup();
 			let { response } = await apiGet('/users/0/groups?format=versions');

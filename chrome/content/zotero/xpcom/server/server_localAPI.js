@@ -323,7 +323,10 @@ class LocalAPIEndpoint {
 		let response = await this.run(requestData);
 		if (response.data) {
 			let dataIsArray = Array.isArray(response.data);
-			if (dataIsArray && requestData.searchParams.has('since')) {
+			// 'since' is ignored for group lists, as in the dataserver -- per-group metadata
+			// versions don't form a valid aggregate cursor
+			if (dataIsArray && requestData.searchParams.has('since')
+					&& !(this instanceof Zotero.Server.LocalAPI.Groups)) {
 				let since = parseInt(requestData.searchParams.get('since'));
 				if (Number.isNaN(since)) {
 					return this.makeResponse(400, 'text/plain', `Invalid 'since' value '${requestData.searchParams.get('since')}'`);
