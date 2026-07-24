@@ -1004,6 +1004,46 @@ describe("Local API Server", function () {
 				await item.eraseTx();
 			});
 
+			it("should fail a keyed object without version or If-Unmodified-Since-Version with 428", async function () {
+				let item = await createDataObject('item', { itemType: 'book', setTitle: true });
+				let title = item.getField('title');
+				let { response } = await apiPost('/users/0/items', {
+					body: [{
+						key: item.key,
+						itemType: 'book',
+						title: 'No Precondition',
+					}],
+					headers: { 'Zotero-Write-Token': newWriteToken() }
+				});
+				assert.lengthOf(Object.keys(response.failed), 1);
+				assert.equal(response.failed['0'].code, 428);
+				let reloaded = await Zotero.Items.getByLibraryAndKeyAsync(
+					Zotero.Libraries.userLibraryID, item.key);
+				assert.equal(reloaded.getField('title'), title);
+				await item.eraseTx();
+			});
+
+			it("should allow a keyed object without version when If-Unmodified-Since-Version is provided", async function () {
+				let item = await createDataObject('item', { itemType: 'book', setTitle: true });
+				let { response } = await apiPost('/users/0/items', {
+					body: [{
+						key: item.key,
+						itemType: 'book',
+						title: 'Updated Via Header',
+					}],
+					headers: {
+						'Zotero-Write-Token': newWriteToken(),
+						'If-Unmodified-Since-Version':
+							String(Zotero.Libraries.userLibrary.clientVersion),
+					}
+				});
+				assert.lengthOf(Object.keys(response.successful), 1);
+				let reloaded = await Zotero.Items.getByLibraryAndKeyAsync(
+					Zotero.Libraries.userLibraryID, item.key);
+				assert.equal(reloaded.getField('title'), 'Updated Via Header');
+				await item.eraseTx();
+			});
+
 			it("should return 412 on stale If-Unmodified-Since-Version", async function () {
 				let staleVersion = Zotero.Libraries.userLibrary.clientVersion;
 				// Bump the library by creating a sentinel item

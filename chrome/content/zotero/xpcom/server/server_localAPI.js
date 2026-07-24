@@ -685,6 +685,7 @@ class LocalAPIEndpoint {
 	 * @param {Object} requestData
 	 * @param {Object} options
 	 * @param {Boolean} [options.required] If true and the header is missing, throw 428
+	 * @returns {Boolean} Whether the header was provided (and validated)
 	 * @throws HTTPError on missing/invalid/out-of-date version
 	 */
 	_checkLibraryIfUnmodifiedSinceVersion(requestData, { required = false } = {}) {
@@ -693,7 +694,7 @@ class LocalAPIEndpoint {
 			if (required) {
 				throw new HTTPError(428, "If-Unmodified-Since-Version not provided");
 			}
-			return;
+			return false;
 		}
 		let value = parseInt(header);
 		if (Number.isNaN(value) || value < 0) {
@@ -703,6 +704,7 @@ class LocalAPIEndpoint {
 		if (library.clientVersion > value) {
 			throw new HTTPError(412, `Library has been modified since specified version (expected ${value}, found ${library.clientVersion})`);
 		}
+		return true;
 	}
 
 	/**
@@ -1968,10 +1970,11 @@ async function writeMultipleObjects(endpoint, requestData, kind) {
 	let { libraryID, data } = requestData;
 
 	let token;
+	let libraryVersionValidated;
 	let body;
 	try {
 		token = endpoint._checkWriteToken(requestData);
-		endpoint._checkLibraryIfUnmodifiedSinceVersion(requestData);
+		libraryVersionValidated = endpoint._checkLibraryIfUnmodifiedSinceVersion(requestData);
 		body = endpoint._parseJSONBody(data);
 	}
 	catch (e) {
@@ -2010,6 +2013,13 @@ async function writeMultipleObjects(endpoint, requestData, kind) {
 			let isUpdate = false;
 			if (providedKey) {
 				validateObjectKey(providedKey);
+				// Keyed writes require a concurrency precondition, either request-level or
+				// per-object (mirroring dataserver's checkJSONObjectVersion())
+				if (!libraryVersionValidated
+						&& (entry.version === undefined || entry.version === null)) {
+					throw new HTTPError(428, "Either If-Unmodified-Since-Version or "
+						+ "'version' property must be provided for 'key'-based writes");
+				}
 				obj = await getExistingObjectByKey(libraryID, providedKey, kind);
 				if (obj) {
 					isUpdate = true;
@@ -2027,6 +2037,11 @@ async function writeMultipleObjects(endpoint, requestData, kind) {
 					entry = mergePatchJSON(existingJSON, entry);
 				}
 				else {
+					if (entry.version !== undefined && entry.version !== null
+							&& parseInt(entry.version) > 0) {
+						throw new HTTPError(404, `${kind} doesn't exist `
+							+ `(expected version ${parseInt(entry.version)}; use 0 instead)`);
+					}
 					obj = makeNewObject(libraryID, kind, entry.itemType);
 					obj.key = providedKey;
 				}
