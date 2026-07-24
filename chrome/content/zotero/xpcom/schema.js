@@ -3724,7 +3724,7 @@ Zotero.Schema = new function () {
 			}
 
 			else if (i == 129) {
-				let clientVersionTables = ['items', 'collections', 'savedSearches', 'libraries', 'groups'];
+				let clientVersionTables = ['items', 'collections', 'savedSearches', 'libraries'];
 				for (let table of clientVersionTables) {
 					await Zotero.DB.queryAsync(`ALTER TABLE ${table} ADD COLUMN clientVersion INT NOT NULL DEFAULT 0`);
 				}

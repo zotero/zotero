@@ -244,7 +244,10 @@ Zotero.Group.prototype.toResponseJSON = function (options = {}) {
 		let uri = Zotero.URI.getGroupURI(this);
 		return {
 			id: this.id,
-			version: options.syncedVersionProperty ? this.version : this.clientVersion,
+			// Group metadata isn't locally writable, so group responses always report the
+			// synced group version -- unlike group.clientVersion, which is inherited from
+			// Zotero.Library and tracks the group library's contents
+			version: this.version,
 			links: {
 				self: {
 					href: Zotero.URI.toAPIURL(uri, options.apiURL),

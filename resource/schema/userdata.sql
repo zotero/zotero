@@ -421,7 +421,6 @@ CREATE TABLE groups (
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     version INT NOT NULL,
-    clientVersion INT NOT NULL DEFAULT 0,
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
 

@@ -400,9 +400,25 @@ class LocalAPIEndpoint {
 				'Total-Results': totalResults,
 				Link: Object.entries(links).map(([rel, url]) => `<${url}>; rel="${rel}"`).join(', ')
 			};
-			let lastModifiedVersion = dataIsArray
-				? Zotero.Libraries.get(requestData.libraryID).clientVersion
-				: response.data.clientVersion;
+			let lastModifiedVersion;
+			// Unlike other multi-object responses, a group list has no meaningful
+			// Last-Modified-Version: each group has its own synced metadata version, and the
+			// user library version that array responses otherwise report says nothing about
+			// group metadata
+			if (this instanceof Zotero.Server.LocalAPI.Groups) {
+				lastModifiedVersion = undefined;
+			}
+			else if (dataIsArray) {
+				lastModifiedVersion = Zotero.Libraries.get(requestData.libraryID).clientVersion;
+			}
+			// Group metadata isn't locally writable, so single-group responses report the
+			// synced group version, matching the version fields in the response body
+			else if (response.data instanceof Zotero.Group) {
+				lastModifiedVersion = response.data.version;
+			}
+			else {
+				lastModifiedVersion = response.data.clientVersion;
+			}
 			if (lastModifiedVersion !== undefined) {
 				headers['Last-Modified-Version'] = lastModifiedVersion;
 			}
@@ -527,7 +543,13 @@ class LocalAPIEndpoint {
 					return this.makeResponse(400, 'text/plain', 'Only multi-object requests can output versions');
 				}
 				contentType = 'application/json';
-				body = JSON.stringify(Object.fromEntries(dataObjectOrObjects.map(o => [o.key, o.clientVersion])), null, 4);
+				// Groups are keyed by id and report their synced metadata version, which is
+				// independent of the local content versions used for other object types
+				body = JSON.stringify(Object.fromEntries(dataObjectOrObjects.map(
+					o => (o instanceof Zotero.Group
+						? [o.id, o.version]
+						: [o.key, o.clientVersion])
+				)), null, 4);
 				break;
 			case 'json':
 			case null:

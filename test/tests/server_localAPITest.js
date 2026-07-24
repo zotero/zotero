@@ -542,7 +542,38 @@ describe("Local API Server", function () {
 		});
 	});
 
+	describe("/users/<userID>/groups", function () {
+		it("should omit Last-Modified-Version", async function () {
+			let group = await getGroup();
+			let xhr = await apiGet('/users/0/groups');
+			assert.isNull(xhr.getResponseHeader('Last-Modified-Version'));
+			assert.include(xhr.response.map(g => g.id), group.id);
+		});
+
+		it("should map group IDs to metadata versions with ?format=versions", async function () {
+			let group = await getGroup();
+			let { response } = await apiGet('/users/0/groups?format=versions');
+			assert.propertyVal(response, String(group.id), group.version);
+		});
+	});
+
 	describe("/groups/<groupID>", function () {
+		it("should report the synced group version at the top level, in data, and in Last-Modified-Version", async function () {
+			let group = await getGroup();
+			// Changing the group library's contents doesn't affect the group metadata version
+			let item = await createDataObject('item', { libraryID: group.libraryID });
+			let xhr = await apiGet(`/groups/${group.groupID}`);
+			let response = xhr.response;
+			assert.notEqual(group.version, group.clientVersion);
+			assert.equal(response.version, group.version);
+			assert.equal(response.data.version, group.version);
+			assert.equal(
+				parseInt(xhr.getResponseHeader('Last-Modified-Version')),
+				group.version
+			);
+			await item.eraseTx();
+		});
+
 		it("should return 404 for unknown group", async function () {
 			let { response } = await apiGet(
 				'/groups/99999999999',
