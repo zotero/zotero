@@ -883,6 +883,43 @@ Zotero.Server.Endpoints["/api/groups/:groupID/tags/:tag"] = Zotero.Server.LocalA
 
 
 /**
+ * Returns the top-level items whose attachments are currently open in the reader,
+ * deduplicated by parent item. Used by external tools (e.g. editor plugins) to
+ * cite papers the user is actively reading without requiring clipboard interaction.
+ */
+Zotero.Server.LocalAPI.OpenReaderItems = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	run(_) {
+		let seen = new Set();
+		let items = [];
+
+		for (let reader of Zotero.Reader._readers) {
+			let attachment = Zotero.Items.get(reader.itemID);
+			if (!attachment) continue;
+
+			let parentID = attachment.parentID;
+			if (!parentID || seen.has(parentID)) continue;
+			seen.add(parentID);
+
+			let parent = Zotero.Items.get(parentID);
+			if (!parent) continue;
+
+			items.push({
+				key: parent.key,
+				title: parent.getField('title') || '',
+				date: parent.getField('date') || '',
+				creators: parent.getCreatorsJSON(),
+			});
+		}
+
+		return [200, 'application/json', JSON.stringify(items, null, 4)];
+	}
+};
+Zotero.Server.Endpoints["/api/reader/openItems"] = Zotero.Server.LocalAPI.OpenReaderItems;
+
+
+/**
  * Convert a {@link Zotero.DataObject}, or an array of DataObjects, to response JSON
  * 		with appropriate included data based on the 'include' query parameter.
  *
