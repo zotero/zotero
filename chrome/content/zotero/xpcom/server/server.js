@@ -260,7 +260,7 @@ Zotero.Server.RequestHandler.prototype._bodyData = function () {
 		}
 	}
 	// handle envelope
-	this._processEndpoint("POST", data); // async
+	this._processEndpoint(this.requestMethod || "POST", data); // async
 }
 
 
@@ -367,16 +367,23 @@ Zotero.Server.RequestHandler.prototype.handleRequest = async function () {
 	else if (request.method == "GET") {
 		this._processEndpoint("GET", null); // async
 	}
-	else if (request.method == "POST") {
+	else if (request.method == "POST" || request.method == "PUT"
+			|| request.method == "PATCH" || request.method == "DELETE") {
 		const contentLengthRe = /^([0-9]+)$/;
-		
+		this.requestMethod = request.method;
+
 		// parse content length
 		var m = contentLengthRe.exec(this.headers['content-length']);
-		if(!m) {
+		if (!m) {
+			// DELETE is allowed to have no body
+			if (request.method == "DELETE") {
+				this._processEndpoint("DELETE", null); // async
+				return;
+			}
 			this._requestFinished(this._generateResponse(400, "text/plain", "Content-length not provided\n"));
 			return;
 		}
-		
+
 		this.bodyLength = parseInt(m[1]);
 		this._bodyData();
 	} else {
@@ -420,7 +427,8 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 		}
 		
 		var data = null;
-		if (method === 'POST' && this.contentType) {
+		if ((method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE')
+				&& this.contentType) {
 			// check that endpoint supports contentType
 			var supportedDataTypes = endpoint.supportedDataTypes;
 			if (supportedDataTypes && supportedDataTypes != '*'
