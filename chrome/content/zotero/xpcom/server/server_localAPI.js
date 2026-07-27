@@ -51,6 +51,17 @@ Limitations compared to api.zotero.org:
       When the user picks "Allow" rather than "Always Allow", the key is single-use: the first
       write that successfully validates it consumes it. Local API consumers should always be
       prepared to handle a 401 response by reauthenticating.
+- Every response includes a Zotero-Server-ID header: a stable ID identifying this Zotero
+  instance. Clients should cache it and pass it back via the Zotero-Server-ID request
+  header to confirm they're still talking to the same instance. Providing the request is
+  optional on read requests but **required** for writes - write requests without a
+  Zotero-Server-ID will be rejected with 428 Precondition Required. When provided, it
+  must match the current server or the request is rejected with 412 Precondition Failed.
+  
+  Clients should use Zotero-Server-ID to partition cached data, especially data object
+  versions, returned from the API. Local API versions have no relation to Web API
+  versions, nor do they have any relation to local API versions returned by other
+  Zotero instances.
 - Minimal access to metadata about groups.
 - Atom is not supported.
 - Item type/field endpoints (https://www.zotero.org/support/dev/web_api/v3/types_and_fields) will
@@ -235,6 +246,12 @@ class LocalAPIEndpoint {
 			return this.makeResponse(403, 'text/plain', 'Local API is not enabled');
 		}
 		requestData.headers = new Headers(requestData.headers);
+		
+		let serverIDResponse = this._validateServerID(requestData);
+		if (serverIDResponse) {
+			return serverIDResponse;
+		}
+		
 		try {
 			return await this._initInternal(requestData);
 		}
@@ -570,6 +587,7 @@ class LocalAPIEndpoint {
 		}
 		contentTypeOrHeaders['Zotero-API-Version'] = LOCAL_API_VERSION;
 		contentTypeOrHeaders['Zotero-Schema-Version'] = Zotero.Schema.globalSchemaVersion;
+		contentTypeOrHeaders['Zotero-Server-ID'] = Zotero.Server.LocalAPI.getServerID();
 		return [status, contentTypeOrHeaders, body];
 	}
 
@@ -584,6 +602,34 @@ class LocalAPIEndpoint {
 	// eslint-disable-next-line no-unused-vars
 	run(requestData) {
 		throw new Error("run() must be implemented");
+	}
+
+	/**
+	 * Validate the caller's Zotero-Server-ID header against this server's ID.
+	 *
+	 * - When the client provides the header, it must match this server's ID, or
+	 *   the request is rejected with 412 (Precondition Failed).
+	 * - Write requests (POST, PUT, PATCH, DELETE) must provide the header, or
+	 *   they're rejected with 428 (Precondition Required). Read requests may
+	 *   omit it.
+	 *
+	 * Returns null when the request may proceed, or an HTTP response array when
+	 * it should be rejected.
+	 *
+	 * @param {Object} requestData
+	 */
+	_validateServerID(requestData) {
+		let provided = requestData.headers.get('Zotero-Server-ID');
+		if (!provided) {
+			if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(requestData.method)) {
+				return this.makeResponse(428, 'text/plain', 'Zotero-Server-ID not provided');
+			}
+			return null;
+		}
+		if (provided !== Zotero.Server.LocalAPI.getServerID()) {
+			return this.makeResponse(412, 'text/plain', 'Zotero-Server-ID does not match this server');
+		}
+		return null;
 	}
 
 	/**
@@ -713,6 +759,42 @@ class LocalAPIEndpoint {
 const _404 = [404, 'text/plain', 'Not found'];
 
 Zotero.Server.LocalAPI = {};
+
+Zotero.Server.LocalAPI._serverID = null;
+
+/**
+ * Load this server's persistent ID from the database, generating and storing it
+ * on first use, and cache it in memory.
+ *
+ * We store this value in the settings table so it follows the database, not the
+ * profile (as it would if it were stored as a pref).
+ *
+ * @returns {Promise<string>} A 12-character server ID
+ */
+Zotero.Server.LocalAPI.init = async function () {
+	let sql = "SELECT value FROM settings WHERE setting='localAPI' AND key='serverID'";
+	let id = await Zotero.DB.valueQueryAsync(sql);
+	if (!id) {
+		id = Zotero.Utilities.randomString(12);
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO settings VALUES ('localAPI', 'serverID', ?)", id
+		);
+	}
+	this._serverID = id;
+	return id;
+};
+
+/**
+ * Get this server's persistent ID. Must have been loaded via init() first.
+ *
+ * @returns {string} A 12-character server ID
+ */
+Zotero.Server.LocalAPI.getServerID = function () {
+	if (!this._serverID) {
+		throw new Error("Local API server ID has not been loaded");
+	}
+	return this._serverID;
+};
 
 Zotero.Server.LocalAPI.Root = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
