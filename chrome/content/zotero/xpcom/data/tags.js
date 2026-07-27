@@ -439,15 +439,19 @@ Zotero.Tags = new function () {
 					
 					await this.purge(chunk);
 					
-					// Update internal timestamps on all items that had these tags
+					// Update internal timestamps and versions on all items that had these tags
+					var clientVersion;
+					if (itemIDs.length) {
+						clientVersion = await Zotero.Libraries.get(libraryID).incrementClientVersion();
+					}
 					await Zotero.Utilities.Internal.forEachChunkAsync(
 						Zotero.Utilities.arrayUnique(itemIDs),
-						Zotero.DB.MAX_BOUND_PARAMETERS - 1,
+						Zotero.DB.MAX_BOUND_PARAMETERS - 2,
 						async function (chunk) {
-							var sql = 'UPDATE items SET synced=0, clientDateModified=? '
+							var sql = 'UPDATE items SET synced=0, clientDateModified=?, clientVersion=? '
 								+ 'WHERE itemID IN (' + Array(chunk.length).fill('?').join(',') + ')';
 							await Zotero.DB.queryAsync(
-								sql, [Zotero.DB.transactionDateTime].concat(chunk), { noCache: true }
+								sql, [Zotero.DB.transactionDateTime, clientVersion].concat(chunk), { noCache: true }
 							);
 							
 							await Zotero.Items.reload(itemIDs, ['primaryData', 'tags'], true);

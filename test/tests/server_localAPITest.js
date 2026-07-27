@@ -272,9 +272,10 @@ describe("Local API Server", function () {
 			});
 
 			describe("=versions", function () {
-				it("should output a JSON object mapping keys to versions", async function () {
+				it("should output a JSON object mapping keys to local versions", async function () {
 					let { response } = await apiGet('/users/0/items?format=versions');
-					assert.propertyVal(response, collectionItem1.key, collectionItem1.version);
+					assert.isAbove(collectionItem1.clientVersion, 0);
+					assert.propertyVal(response, collectionItem1.key, collectionItem1.clientVersion);
 				});
 			});
 		});
@@ -325,11 +326,25 @@ describe("Local API Server", function () {
 		
 		describe("?since", function () {
 			it("should filter the results", async function () {
-				let { response: response1 } = await apiGet('/users/0/items?since=' + (Zotero.Libraries.userLibrary.libraryVersion + 1));
+				let version = Zotero.Libraries.userLibrary.clientVersion;
+				
+				let { response: response1 } = await apiGet('/users/0/items?since=' + version);
 				assert.isEmpty(response1);
 
 				let { response: response2 } = await apiGet('/users/0/items?since=0');
 				assert.lengthOf(response2, allItems.length);
+
+				let tempItem = await createDataObject('item');
+				let { response: response3 } = await apiGet('/users/0/items?since=' + version);
+				assert.lengthOf(response3, 1);
+				assert.equal(response3[0].key, tempItem.key);
+				assert.equal(response3[0].version, tempItem.clientVersion);
+				assert.equal(tempItem.clientVersion, version + 1);
+				
+				await tempItem.eraseTx();
+
+				let { response: response4 } = await apiGet('/users/0/items?since=' + version);
+				assert.lengthOf(response4, 0);
 			});
 		});
 
@@ -364,7 +379,45 @@ describe("Local API Server", function () {
 		});
 	});
 
+	describe("/users/<userID>/groups", function () {
+		it("should omit Last-Modified-Version", async function () {
+			let group = await getGroup();
+			let xhr = await apiGet('/users/0/groups');
+			assert.isNull(xhr.getResponseHeader('Last-Modified-Version'));
+			assert.include(xhr.response.map(g => g.id), group.id);
+		});
+
+		it("should ignore ?since", async function () {
+			let group = await getGroup();
+			let { response: all } = await apiGet('/users/0/groups');
+			let { response: since } = await apiGet(`/users/0/groups?since=${group.version + 1}`);
+			assert.sameDeepMembers(since, all);
+		});
+
+		it("should map group IDs to metadata versions with ?format=versions", async function () {
+			let group = await getGroup();
+			let { response } = await apiGet('/users/0/groups?format=versions');
+			assert.propertyVal(response, String(group.id), group.version);
+		});
+	});
+
 	describe("/groups/<groupID>", function () {
+		it("should report the synced group version at the top level, in data, and in Last-Modified-Version", async function () {
+			let group = await getGroup();
+			// Changing the group library's contents doesn't affect the group metadata version
+			let item = await createDataObject('item', { libraryID: group.libraryID });
+			let xhr = await apiGet(`/groups/${group.groupID}`);
+			let response = xhr.response;
+			assert.notEqual(group.version, group.clientVersion);
+			assert.equal(response.version, group.version);
+			assert.equal(response.data.version, group.version);
+			assert.equal(
+				parseInt(xhr.getResponseHeader('Last-Modified-Version')),
+				group.version
+			);
+			await item.eraseTx();
+		});
+
 		it("should return 404 for unknown group", async function () {
 			let { response } = await apiGet(
 				'/groups/99999999999',

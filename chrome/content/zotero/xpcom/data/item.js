@@ -128,8 +128,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	enumerable: false
 });
 
-for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'synced',
-		'createdByUserID', 'lastModifiedByUserID']) {
+for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'clientVersion',
+		'synced', 'createdByUserID', 'lastModifiedByUserID']) {
 	let prop = '_' + name;
 	Zotero.defineProperty(Zotero.Item.prototype, name, {
 		get: function () { return this[prop]; },
@@ -6128,12 +6128,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 
 
 Zotero.Item.prototype.toResponseJSON = function (options = {}) {
-	// Default to showing synced storage properties, since that's what the API does, and this function
-	// is generally used to emulate the API
-	if (options.syncedStorageProperties === undefined) {
-		options.syncedStorageProperties = true;
-	}
-	
 	var json = this.constructor._super.prototype.toResponseJSON.call(this, options);
 	
 	// creatorSummary
@@ -6162,6 +6156,15 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 			type: this.attachmentContentType,
 			title: this.attachmentFilename
 		};
+	}
+	
+	// When the caller wants the current storage properties from the file on disk
+	// (syncedStorageProperties: false), they're only available asynchronously, so add null
+	// placeholders here to keep their place in the JSON and let toResponseJSONAsync() fill
+	// them in
+	if (this.isStoredFileAttachment() && !options.skipStorageProperties && !options.syncedStorageProperties) {
+		json.data.mtime = null;
+		json.data.md5 = null;
 	}
 	
 	return json;
@@ -6200,6 +6203,12 @@ Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
 	else if (this.isImportedAttachment()) {
 		json.links.enclosure.length = await getFileSize(this);
 	}
+	
+	if (this.isStoredFileAttachment() && !options.skipStorageProperties) {
+		json.data.mtime = await this.attachmentModificationTime ?? null;
+		json.data.md5 = await this.attachmentHash ?? null;
+	}
+	
 	return json;
 };
 

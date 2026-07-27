@@ -148,13 +148,16 @@ class LocalAPIEndpoint {
 		let response = await this.run(requestData);
 		if (response.data) {
 			let dataIsArray = Array.isArray(response.data);
-			if (dataIsArray && requestData.searchParams.has('since')) {
+			// 'since' is ignored for group lists, as in the dataserver -- per-group metadata
+			// versions don't form a valid aggregate cursor
+			if (dataIsArray && requestData.searchParams.has('since')
+					&& !(this instanceof Zotero.Server.LocalAPI.Groups)) {
 				let since = parseInt(requestData.searchParams.get('since'));
 				if (Number.isNaN(since)) {
 					return this.makeResponse(400, 'text/plain', `Invalid 'since' value '${requestData.searchParams.get('since')}'`);
 				}
 				if (since !== 0) {
-					response.data = response.data.filter(dataObject => dataObject.version > since);
+					response.data = response.data.filter(dataObject => dataObject.clientVersion > since);
 				}
 			}
 			
@@ -225,9 +228,25 @@ class LocalAPIEndpoint {
 				'Total-Results': totalResults,
 				'Link': Object.entries(links).map(([rel, url]) => `<${url}>; rel="${rel}"`).join(', ')
 			};
-			let lastModifiedVersion = dataIsArray
-				? Zotero.Libraries.get(requestData.libraryID).libraryVersion
-				: response.data.version;
+			let lastModifiedVersion;
+			// Unlike other multi-object responses, a group list has no meaningful
+			// Last-Modified-Version: each group has its own synced metadata version, and the
+			// user library version that would otherwise be returned says nothing about
+			// group metadata
+			if (this instanceof Zotero.Server.LocalAPI.Groups) {
+				lastModifiedVersion = undefined;
+			}
+			else if (dataIsArray) {
+				lastModifiedVersion = Zotero.Libraries.get(requestData.libraryID).clientVersion;
+			}
+			// Group metadata isn't locally writable, so single-group responses report the
+			// synced group version, matching the version fields in the response body
+			else if (response.data instanceof Zotero.Group) {
+				lastModifiedVersion = response.data.version;
+			}
+			else {
+				lastModifiedVersion = response.data.clientVersion;
+			}
 			if (lastModifiedVersion !== undefined) {
 				headers['Last-Modified-Version'] = lastModifiedVersion;
 			}
@@ -352,7 +371,13 @@ class LocalAPIEndpoint {
 					return this.makeResponse(400, 'text/plain', 'Only multi-object requests can output versions');
 				}
 				contentType = 'application/json';
-				body = JSON.stringify(Object.fromEntries(dataObjectOrObjects.map(o => [o.key, o.version])), null, 4);
+				// Groups are keyed by id and report their synced metadata version, which is
+				// independent of the local content versions used for other object types
+				body = JSON.stringify(Object.fromEntries(dataObjectOrObjects.map(
+					o => (o instanceof Zotero.Group
+						? [o.id, o.version]
+						: [o.key, o.clientVersion])
+				)), null, 4);
 				break;
 			case 'json':
 			case null:
@@ -900,7 +925,9 @@ async function toResponseJSON(dataObjectOrObjects, searchParams) {
 	let responseJSON = dataObject.toResponseJSONAsync
 		? await dataObject.toResponseJSONAsync({
 			apiURL: `http://localhost:${Zotero.Server.port}/api/`,
-			includeGroupDetails: true
+			includeGroupDetails: true,
+			syncedStorageProperties: false,
+			syncedVersionProperty: false,
 		})
 		: dataObject;
 	
