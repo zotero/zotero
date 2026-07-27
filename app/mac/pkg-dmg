@@ -303,6 +303,7 @@ my(@gCleanup, %gConfig, $gDarwinMajor, $gDryRun, $gVerbosity);
             'cmd_chmod'          => 'chmod',
             'cmd_diskutil'       => 'diskutil',
             'cmd_du'             => 'du',
+            'cmd_find'           => 'find',
             'cmd_hdid'           => 'hdid',
             'cmd_hdiutil'        => 'hdiutil',
             'cmd_mkdir'          => 'mkdir',
@@ -311,6 +312,7 @@ my(@gCleanup, %gConfig, $gDarwinMajor, $gDryRun, $gVerbosity);
             'cmd_rm'             => 'rm',
             'cmd_rsync'          => 'rsync',
             'cmd_SetFile'        => '/Developer/Tools/SetFile',
+            'cmd_xattr'          => 'xattr',
 
             # create_directly indicates whether hdiutil create supports
             # -srcfolder and -srcdevice.  It does on >= 10.3 (Panther).
@@ -995,6 +997,65 @@ sub diskImageMaker($$$$$$$$) {
         if(commandInternal('unlink', $hybridImage) != 1) {
           cleanupDie('unlink hybridImage failed: '.$!);
         }
+      }
+
+      # hdiutil makehybrid gives every file on the image non-empty
+      # Finder info (it sets an icon location), which appears as a
+      # com.apple.FinderInfo extended attribute that "codesign
+      # --verify --strict" rejects as detritus and that can cause
+      # Safari to silently ignore a bundled web extension (observed
+      # with Safari 17.6 on macOS 12; the exact trigger conditions
+      # are unknown). Mount a read-write copy of the image and strip
+      # the attributes before compressing. Note that Finder flags set
+      # with --attribute are stored in the same Finder info, so if
+      # --attribute is ever used, the affected files would need to be
+      # excluded from the strip.
+      if($uncompressedImage eq $hybridImage) {
+        my($udrwImage);
+        $udrwImage = giveExtension($tempDir.'/udrw', '.dmg');
+
+        if(command($gConfig{'cmd_hdiutil'}, 'convert', '-format', 'UDRW',
+         '-ov', $hybridImage, '-o', $udrwImage) != 0) {
+          cleanupDie('hdiutil convert to UDRW failed');
+        }
+
+        push(@gCleanup,
+         sub {commandInternalVerbosity(0, 'unlink', $udrwImage);});
+
+        $uncompressedImage = $udrwImage;
+
+        # $hybridImage is no longer needed.  Remove it and its cleanup
+        # entry, which is below the entry for $udrwImage.
+        my(@tempCleanup) = splice(@gCleanup, -2);
+        push(@gCleanup, $tempCleanup[1]);
+
+        if(commandInternal('unlink', $hybridImage) != 1) {
+          cleanupDie('unlink hybridImage failed: '.$!);
+        }
+      }
+
+      my($rootDevice, $partitionDevice, $partitionMountPoint);
+      if(!(($rootDevice, $partitionDevice, $partitionMountPoint) =
+       hdidMountImage($tempMount, $uncompressedImage))) {
+        cleanupDie('hdid mount failed');
+      }
+
+      push(@gCleanup, sub {commandVerbosity(0,
+       $gConfig{'cmd_diskutil'}, 'eject', $rootDevice);});
+
+      if(command($gConfig{'cmd_find'}, $partitionMountPoint,
+       '-mindepth', '1', '-not', '-type', 'l',
+       '-xattrname', 'com.apple.FinderInfo',
+       '-exec', $gConfig{'cmd_xattr'}, '-d', 'com.apple.FinderInfo',
+       '{}', '+') != 0) {
+        cleanupDie('stripping com.apple.FinderInfo failed');
+      }
+
+      # Pop diskutil eject
+      pop(@gCleanup);
+
+      if(command($gConfig{'cmd_diskutil'}, 'eject', $rootDevice) != 0) {
+        cleanupDie('diskutil eject failed');
       }
     }
     else {
