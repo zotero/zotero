@@ -104,6 +104,35 @@ preferences-advanced-default-data-dir =
 
 preferences-pane-account = Account
 
+preferences-spotlight-title = Spotlight Search
+preferences-spotlight-enable =
+    .label = Show { -app-name } items in Spotlight
+preferences-spotlight-result-action =
+    .value = When opening a result:
+preferences-spotlight-result-action-show =
+    .label = Show in Library
+preferences-spotlight-result-action-open =
+    .label = Open File
+preferences-spotlight-index-fulltext =
+    .label = Index attachment full text
+preferences-spotlight-owner-other = Another { -app-name } installation or profile is currently providing Spotlight results (database at { $path }).
+preferences-spotlight-take-ownership =
+    .label = Use This Profile Instead
+preferences-spotlight-libraries-title = Indexed Libraries
+preferences-spotlight-privacy-title = Avoiding Duplicate Indexing
+preferences-spotlight-privacy-description = macOS may also index the attachment files in your { -app-name } data directory, showing them in Spotlight alongside your library items. To prevent this, add the data directory to the list under Spotlight’s Privacy settings.
+preferences-spotlight-exclude-data-dir =
+    .label = Reveal Data Directory and Open Spotlight Settings…
+preferences-spotlight-format-title = Display Format
+preferences-spotlight-format-description = Customize how items appear in Spotlight. See the <label data-l10n-name="spotlight-format-help-link">documentation</label> for the full list.
+preferences-spotlight-title-template =
+    .value = Title:
+preferences-spotlight-description-template =
+    .value = Subtitle:
+preferences-spotlight-rebuild =
+    .label = Rebuild Index
+preferences-spotlight-reindex-notice = Your changes will be indexed the next time { -app-name } starts, or click Rebuild Index to apply them now.
+
 -preferences-sync-data-syncing = Data Syncing
 preferences-sync-data-syncing-groupbox =
     .aria-label = { -preferences-sync-data-syncing }

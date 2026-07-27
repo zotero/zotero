@@ -111,6 +111,13 @@ var ZoteroCommandLineHandler = {
 		// Only open main window if we aren't handling an integration command
 		else if (!Zotero.getMainWindow()) {
 			Zotero.openMainWindow();
+			for (let i = 0; i < 600; i++) {
+				let win = Zotero.getMainWindow();
+				if (win?.ZoteroPane?.collectionsView) {
+					break;
+				}
+				await Zotero.Promise.delay(50);
+			}
 		}
 		
 		await Zotero.CommandLineIngester.ingest();

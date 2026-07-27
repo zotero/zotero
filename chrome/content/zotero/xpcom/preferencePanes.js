@@ -77,7 +77,10 @@ Zotero.PreferencePanes = {
 			label: 'zotero.preferences.prefpane.advanced',
 			image: 'chrome://zotero/skin/20/universal/wrench-screwdriver.svg',
 			src: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_advanced.js'],
+			scripts: [
+				'chrome://zotero/content/preferences/preferences_advanced.js',
+				'chrome://zotero/content/preferences/preferences_spotlight.js'
+			],
 			defaultXUL: true,
 			helpURL: 'https://www.zotero.org/support/preferences/advanced',
 		},

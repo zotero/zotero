@@ -2286,39 +2286,18 @@ Zotero.Attachments = new function () {
 	}
 	
 	
-	/*
-	 * Returns a formatted string to use as the basename of an attachment
-	 * based on the metadata of the specified item and a format string
-	 *
-	 * (Optional) |formatString| specifies the format string -- otherwise
-	 * the 'attachmentRenameTemplate' synced setting for the user's library is used
+	/**
+	 * Build the {{ variable }} template variables for an item, shared by file
+	 * renaming (getFileBaseNameFromItem) and display rendering
+	 * (getStringFromItemTemplate).
 	 *
 	 * @param {Zotero.Item} item
-	 * @param {String} formatString
+	 * @param {String} attachmentTitle
+	 * @return {{ vars: Object, chunks: Array, protectedLiterals: Set }}
 	 */
-	this.getFileBaseNameFromItem = function (item, options = {}) {
-		if (!(item instanceof Zotero.Item)) {
-			throw new Error("'item' must be a Zotero.Item");
-		}
-		if (!item.libraryID) {
-			throw new Error("Item must have a libraryID");
-		}
-		if (typeof options === 'string') {
-			Zotero.warn("Zotero.Attachments.getFileBaseNameFromItem(item, formatString) is deprecated -- use Zotero.Attachments.getFileBaseNameFromItem(item, options)");
-			options = { formatString: options };
-		}
-
-		let { formatString = null, attachmentTitle = '' } = options;
-
-		if (!formatString) {
-			const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
-			formatString = Zotero.SyncedSettings.get(item.libraryID, 'attachmentRenameTemplate') ?? DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
-		}
-
+	function _buildItemTemplateVars(item, attachmentTitle) {
 		let chunks = [];
 		let protectedLiterals = new Set();
-
-		formatString = formatString.replace(/\r?\n|\r/g, "").trim();
 
 		const getSlicedCreatorsOfType = (creatorType, slice) => {
 			let creatorTypeIDs;
@@ -2544,6 +2523,40 @@ Zotero.Attachments = new function () {
 		};
 
 		const vars = { ...fields, ...creatorFields, attachmentTitle: attachmentTitleFn, firstCreator, itemType, year, accessDate };
+		return { vars, chunks, protectedLiterals };
+	}
+
+	/**
+	 * Returns a formatted string to use as the basename of an attachment
+	 * based on the metadata of the specified item and a format string
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Object} [options]
+	 * @param {String} options.formatString - specifies the format string -- otherwise
+	 * the 'attachmentRenameTemplate' synced setting for the user's library is used
+	 */
+	this.getFileBaseNameFromItem = function (item, options = {}) {
+		if (!(item instanceof Zotero.Item)) {
+			throw new Error("'item' must be a Zotero.Item");
+		}
+		if (!item.libraryID) {
+			throw new Error("Item must have a libraryID");
+		}
+		if (typeof options === 'string') {
+			Zotero.warn("Zotero.Attachments.getFileBaseNameFromItem(item, formatString) is deprecated -- use Zotero.Attachments.getFileBaseNameFromItem(item, options)");
+			options = { formatString: options };
+		}
+
+		let { formatString = null, attachmentTitle = '' } = options;
+
+		if (!formatString) {
+			const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+			formatString = Zotero.SyncedSettings.get(item.libraryID, 'attachmentRenameTemplate') ?? DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
+		}
+
+		formatString = formatString.replace(/\r?\n|\r/g, "").trim();
+
+		let { vars, chunks, protectedLiterals } = _buildItemTemplateVars(item, attachmentTitle);
 
 		// Final name is generated twice. In the first pass we collect all affixed values and determine protected literals.
 		// This is done in order to remove repeated suffixes, except if these appear in the value or the format string itself.
@@ -2582,6 +2595,26 @@ Zotero.Attachments = new function () {
 		formatted = Zotero.Utilities.cleanTags(formatted);
 		formatted = Zotero.File.getValidFileName(formatted);
 		return formatted;
+	};
+
+	/**
+	 * Render an item-metadata template to a display string, using the same
+	 * {{ variable }} syntax and variables as file renaming.
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Object} [options]
+	 * @param {String} options.formatString
+	 * @return {String}
+	 */
+	this.getStringFromItemTemplate = function (item, options = {}) {
+		if (!(item instanceof Zotero.Item)) {
+			throw new Error("'item' must be a Zotero.Item");
+		}
+		let { formatString = '', attachmentTitle = '' } = options;
+		formatString = String(formatString ?? '').replace(/\r?\n|\r/g, "").trim();
+		let { vars } = _buildItemTemplateVars(item, attachmentTitle);
+		let formatted = Zotero.Utilities.Internal.generateHTMLFromTemplate(formatString, vars);
+		return Zotero.Utilities.cleanTags(formatted).trim();
 	};
 
 	/**

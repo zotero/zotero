@@ -162,6 +162,16 @@ pref("extensions.zotero.httpServer.enabled", true);
 pref("extensions.zotero.httpServer.port", 23119);	// ascii "ZO"
 pref("extensions.zotero.httpServer.localAPI.enabled", false);
 
+// macOS Spotlight integration
+pref("extensions.zotero.spotlight.enabled", true);
+pref("extensions.zotero.spotlight.openOnConfirm", true);	// true = open the item's attachment, false = show in library
+pref("extensions.zotero.spotlight.indexFullText", true);
+pref("extensions.zotero.spotlight.titleTemplate", "{{ title }}");
+pref("extensions.zotero.spotlight.descriptionTemplate", "{{ firstCreator }}{{ year prefix=\" (\" suffix=\")\" }}");
+pref("extensions.zotero.spotlight.excludedLibraries", "[]");	// JSON array of libraryIDs to skip
+pref("extensions.zotero.spotlight.indexSchemaVersion", 0);
+pref("extensions.zotero.spotlight.lastSignature", "");
+
 // Zeroconf
 pref("extensions.zotero.zeroconf.server.enabled", false);
 

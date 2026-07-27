@@ -200,5 +200,9 @@
 	<true/>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.9.0</string>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>com.apple.corespotlightitem</string>
+	</array>
 </dict>
 </plist>

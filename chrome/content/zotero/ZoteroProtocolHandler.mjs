@@ -681,7 +681,78 @@ export function ZoteroProtocolHandler() {
 			this.doAction(uri);
 		}
 	};
-	
+
+
+	/**
+	 * zotero://spotlight/library/items/[itemKey]
+	 * zotero://spotlight/groups/[groupID]/items/[itemKey]
+	 *
+	 * Target of a clicked macOS Core Spotlight result.
+	 */
+	var SpotlightExtension = {
+		noContent: true,
+
+		// Resolve the item for the two path formats spotlight.js indexes
+		// (library/items/KEY and groups/GROUPID/items/KEY).
+		_getItem: async function (uri) {
+			var path = uri.pathQueryRef;
+			if (!path) {
+				return null;
+			}
+			path = path.substring(1);
+
+			var params = { objectType: 'item' };
+			var router = new Zotero.Router(params);
+			router.add('library/items/:objectKey', function () {
+				params.libraryID = Zotero.Libraries.userLibraryID;
+			});
+			router.add('groups/:groupID/items/:objectKey');
+			router.run(path);
+
+			Zotero.API.parseParams(params);
+			if (!params.objectKey && !params.objectID && !params.itemKey) {
+				return null;
+			}
+			var results = await Zotero.API.getResultsFromParams(params);
+			return results.length ? results[0] : null;
+		},
+
+		doAction: async function (uri) {
+			if (Zotero.Prefs.get('spotlight.openOnConfirm')) {
+				let item = await this._getItem(uri);
+				let attachment = null;
+				if (item) {
+					if (item.isFileAttachment()) {
+						attachment = item;
+					}
+					else if (item.isRegularItem()) {
+						attachment = await item.getBestAttachment();
+					}
+				}
+				if (attachment && attachment.isFileAttachment()) {
+					try {
+						await Zotero.FileHandlers.open(attachment, {
+							openInWindow: Zotero.Prefs.get('openReaderInNewWindow'),
+						});
+						Zotero.Notifier.trigger('open', 'file', attachment.id);
+						return;
+					}
+					catch (e) {
+						Zotero.logError(e);
+						// Fall through to selecting the item
+					}
+				}
+			}
+
+			// Default, and fallback when there's nothing to open
+			await SelectExtension.doAction(uri);
+		},
+
+		newChannel: function (uri) {
+			this.doAction(uri);
+		}
+	};
+
 	/*
 		zotero://debug/
 	*/
@@ -888,6 +959,7 @@ export function ZoteroProtocolHandler() {
 	this._extensions[ZOTERO_SCHEME + "://data"] = DataExtension;
 	this._extensions[ZOTERO_SCHEME + "://report"] = ReportExtension;
 	this._extensions[ZOTERO_SCHEME + "://select"] = SelectExtension;
+	this._extensions[ZOTERO_SCHEME + "://spotlight"] = SpotlightExtension;
 	this._extensions[ZOTERO_SCHEME + "://debug"] = DebugExtension;
 	this._extensions[ZOTERO_SCHEME + "://pdf.js"] = PDFJSExtension;
 	this._extensions[ZOTERO_SCHEME + "://open"] = OpenExtension;
