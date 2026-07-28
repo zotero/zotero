@@ -681,13 +681,19 @@ class LibraryLayout extends Layout {
 				let icon = getCSSIcon('plus-circle');
 				iconWrapper.append(icon);
 				// add aria-label for screen readers to announce if this item is added
+				let count = this._getItemsViewIconClickItems(index).length;
 				if (inCitation) {
-					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added");
+					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added", { count });
 				}
 				else {
-					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table");
+					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table", { count });
 				}
 				iconWrapper.append(icon);
+				// refresh the tooltip's item count, since the selection can change
+				// without this row re-rendering
+				cell.addEventListener("mouseenter", () => {
+					doc.l10n.setArgs(cell, { count: this._getItemsViewIconClickItems(index).length });
+				});
 				iconWrapper.addEventListener("click", () => {
 					this._handleItemsViewIconClick(index);
 				});
