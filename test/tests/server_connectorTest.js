@@ -593,14 +593,14 @@ describe("Connector Server", function () {
 					body: JSON.stringify({
 						items: [
 							{
-								itemType: "journalArticle",
-								title: "Translated Primary DOI Article",
-								DOI: "10.1234/primary-doi"
-							},
-							{
 								itemType: "webpage",
 								title: "Translated Extra DOI Page",
 								extra: "DOI: 10.1234/extra-doi"
+							},
+							{
+								itemType: "journalArticle",
+								title: "Translated Primary DOI Article",
+								DOI: "10.1234/primary-doi"
 							}
 						]
 					})
@@ -610,7 +610,8 @@ describe("Connector Server", function () {
 			let data = JSON.parse(response.response);
 			assert.lengthOf(data.matches, 1);
 			assert.equal(data.matches[0].id, item.id);
-			assert.equal(data.matches[0].matchedItemIndex, 0);
+			assert.equal(data.matches[0].matchedIdentifiers.doi, "10.1234/primary-doi");
+			assert.equal(data.matches[0].matchedItemIndex, 1);
 			assert.deepEqual(data.matches[0].matchedItemIndexes, [0, 1]);
 		});
 

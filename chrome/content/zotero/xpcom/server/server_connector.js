@@ -537,8 +537,18 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 		};
 		let matchedItemIndexes = getMatchedItemIndexes(matchedDOIs, matchedIdentifiers.url);
 		if (matchedItemIndexes.length) {
-			// Keep the singular field for older Connector versions.
-			match.matchedItemIndex = matchedItemIndexes[0];
+			// Keep the singular field aligned with the identifiers older
+			// Connector versions receive.
+			let compatibilityDOIs = matchedIdentifiers.doi
+				? [matchedIdentifiers.doi.toLowerCase()]
+				: [];
+			let matchedItemIndex = getMatchedItemIndexes(
+				compatibilityDOIs,
+				matchedIdentifiers.url
+			)[0];
+			if (matchedItemIndex !== undefined) {
+				match.matchedItemIndex = matchedItemIndex;
+			}
 			match.matchedItemIndexes = matchedItemIndexes;
 		}
 		matches.push(match);
