@@ -38,8 +38,6 @@ Contents/MacOS/updater.app/Contents/MacOS/updater-bin
 Contents/MacOS/updates.xml
 Contents/MacOS/updates/*
 Contents/MacOS/zotero-bin
-Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Resources/Base.lproj/*
-Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Resources/safari/*
 Contents/Resources/CONTRIBUTING.md
 Contents/Resources/COPYING
 Contents/Resources/README.md

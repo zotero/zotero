@@ -732,20 +732,29 @@ if [ $BUILD_MAC == 1 ]; then
 	find "$CONTENTSDIR" -depth -type d -name .git -exec rm -rf {} \;
 	find "$CONTENTSDIR" \( -name .DS_Store -or -name update.rdf \) -exec rm -f {} \;
 	
-	# Add Safari web extension -- this depends on signing but needs to be done before generating
+	# Add Safari extensions -- this depends on signing but needs to be done before generating
 	# the precomplete file
 	#
 	# $SAFARI_APPEX is a stub appex built from the safari-web-extension wrapper project. The web
 	# extension itself comes from $SAFARI_EXT_RESOURCES (a zotero-connectors build/safari
 	# directory), which replaces the stub's placeholder resources here before signing.
+	#
+	# $SAFARI_APP_EXTENSION is an optional prebuilt legacy Safari App Extension, embedded
+	# alongside the web extension for Safari versions that can't load Developer ID web
+	# extensions (supported in Safari 18.4 and later). On Safari versions that can load the
+	# web extension, the SFSafariAppExtensionBundleIdentifiersToReplace key causes it to
+	# replace the App Extension.
 	if [[ $SIGN == 1 ]] && [[ -n "$SAFARI_APPEX" ]] && [[ -d "$SAFARI_APPEX" ]]; then
 		if [[ -z "${SAFARI_EXT_RESOURCES:-}" ]] || [[ ! -f "$SAFARI_EXT_RESOURCES/manifest.json" ]]; then
 			echo "SAFARI_EXT_RESOURCES doesn't contain a web extension -- aborting" 2>&1
 			exit 1
 		fi
+		bundle_identifier=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APPDIR/Contents/Info.plist")
 		mkdir "$APPDIR/Contents/PlugIns"
-		cp -R "$SAFARI_APPEX" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
-		appex_resources="$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Resources"
+		
+		webext_appex="$APPDIR/Contents/PlugIns/ZoteroSafariWebExtension.appex"
+		cp -R "$SAFARI_APPEX" "$webext_appex"
+		appex_resources="$webext_appex/Contents/Resources"
 		rm -rf "$appex_resources"
 		mkdir "$appex_resources"
 		cp -R "$SAFARI_EXT_RESOURCES/." "$appex_resources/"
@@ -757,9 +766,32 @@ if [ $BUILD_MAC == 1 ]; then
 			exit 1
 		fi
 		/usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString $connector_version" \
-			"$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
+			"$webext_appex/Contents/Info.plist"
 		/usr/libexec/PlistBuddy -c "Set CFBundleVersion $connector_version" \
-			"$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
+			"$webext_appex/Contents/Info.plist"
+		
+		# Give the appex the same bundle identifier prefix as the parent app
+		/usr/libexec/PlistBuddy -c "Set CFBundleIdentifier $bundle_identifier.SafariWebExtension" \
+			"$webext_appex/Contents/Info.plist"
+		
+		# Replace the legacy App Extension on Safari versions that can load the web extension
+		/usr/libexec/PlistBuddy -c "Add :NSExtension:SFSafariAppExtensionBundleIdentifiersToReplace array" \
+			"$webext_appex/Contents/Info.plist"
+		/usr/libexec/PlistBuddy -c "Add :NSExtension:SFSafariAppExtensionBundleIdentifiersToReplace:0 string $bundle_identifier.SafariExtension" \
+			"$webext_appex/Contents/Info.plist"
+		
+		# Add legacy Safari App Extension
+		if [[ -n "${SAFARI_APP_EXTENSION:-}" ]]; then
+			if [[ ! -d "$SAFARI_APP_EXTENSION" ]]; then
+				echo "SAFARI_APP_EXTENSION not found at $SAFARI_APP_EXTENSION -- aborting" 2>&1
+				exit 1
+			fi
+			appext_appex="$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
+			cp -R "$SAFARI_APP_EXTENSION" "$appext_appex"
+			rm -rf "$appext_appex/Contents/Resources/safari/test"
+			/usr/libexec/PlistBuddy -c "Set CFBundleIdentifier $bundle_identifier.SafariExtension" \
+				"$appext_appex/Contents/Info.plist"
+		fi
 	fi
 	
 	# Copy over removed-files and make a precomplete file
@@ -811,21 +843,20 @@ if [ $BUILD_MAC == 1 ]; then
 		rm -rf libreoffice-repack
 		popd
 		
-		# Sign Safari web extension
+		# Sign Safari extensions
 		#
-		# Even though it's signed by Xcode, we sign it again to make sure it matches the parent app signature
-		if [ -d "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex" ]; then
+		# Even though they're signed by Xcode, we sign them again to make sure they match the parent app signature
+		for appex in "$APPDIR"/Contents/PlugIns/*.appex; do
+			if [ ! -d "$appex" ]; then
+				continue
+			fi
 			echo
 			# Extract entitlements, which differ from parent app
-			/usr/bin/codesign -d --entitlements "$BUILD_DIR/safari-entitlements.plist" --xml "$SAFARI_APPEX"
+			/usr/bin/codesign -d --entitlements "$BUILD_DIR/safari-entitlements.plist" --xml "$appex"
 			
-			# Change appex bundle identifier to have same prefix as parent app
-			bundle_identifier=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APPDIR/Contents/Info.plist")
-			perl -pi -e "s/org\.zotero\.SafariWebExtensionApp\.SafariExtension/$bundle_identifier.SafariExtension/" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
-			
-			find "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
-			/usr/bin/codesign --force --options runtime --entitlements "$BUILD_DIR/safari-entitlements.plist" --sign "$DEVELOPER_ID" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
-		fi
+			find "$appex/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
+			/usr/bin/codesign --force --options runtime --entitlements "$BUILD_DIR/safari-entitlements.plist" --sign "$DEVELOPER_ID" "$appex"
+		done
 		
 		# Sign final app package
 		echo
@@ -833,11 +864,14 @@ if [ $BUILD_MAC == 1 ]; then
 		
 		# Verify app
 		/usr/bin/codesign --verify -vvvv "$APPDIR"
-		# Verify Safari web extension
-		if [[ -n "$SAFARI_APPEX" ]] && [[ -d "$SAFARI_APPEX" ]]; then
+		# Verify Safari extensions
+		for appex in "$APPDIR"/Contents/PlugIns/*.appex; do
+			if [ ! -d "$appex" ]; then
+				continue
+			fi
 			echo
-			/usr/bin/codesign --verify -vvvv "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
-		fi
+			/usr/bin/codesign --verify -vvvv "$appex"
+		done
 	fi
 	
 	# Build and notarize disk image
