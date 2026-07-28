@@ -263,3 +263,7 @@ pref("security.chrome_baseline_csp.enabled", false);
 
 // Allow chrome: DTDs to be loaded, which we still use for localized strings in XUL markup
 pref("dom.fetch.allow_force_allowed_dtd", true);
+
+// Translators are evaluated in the parent process with the system principal
+pref("security.allow_eval_with_system_principal", true);
+pref("security.allow_eval_in_parent_process", true);
