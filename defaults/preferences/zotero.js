@@ -256,3 +256,7 @@ pref("browser.theme.toolbar-theme", 2);
 
 // Need to enable -moz-context-properties for SVG context properties to work
 pref("svg.context-properties.content.enabled", true);
+
+// Firefox applies a baseline "script-src chrome: resource: moz-src:" CSP to every chrome:
+// document, which blocks inline <script>s and inline event handlers
+pref("security.chrome_baseline_csp.enabled", false);
