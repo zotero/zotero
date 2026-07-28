@@ -572,6 +572,48 @@ describe("Connector Server", function () {
 			assert.deepEqual(data.matches[0].matchedItemIndexes, [0, 1]);
 		});
 
+		it("should return item indexes for every matching DOI stored on one item", async function () {
+			await selectLibrary(win, Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+
+			let item = new Zotero.Item("journalArticle");
+			item.setField("title", "Existing Article with Two DOI Values");
+			item.setField("DOI", "10.1234/primary-doi");
+			item.setField("extra", "DOI: 10.1234/extra-doi");
+			await item.saveTx();
+			Zotero.Items.unload(item.id);
+
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/findExistingItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						items: [
+							{
+								itemType: "journalArticle",
+								title: "Translated Primary DOI Article",
+								DOI: "10.1234/primary-doi"
+							},
+							{
+								itemType: "webpage",
+								title: "Translated Extra DOI Page",
+								extra: "DOI: 10.1234/extra-doi"
+							}
+						]
+					})
+				}
+			);
+
+			let data = JSON.parse(response.response);
+			assert.lengthOf(data.matches, 1);
+			assert.equal(data.matches[0].id, item.id);
+			assert.equal(data.matches[0].matchedItemIndex, 0);
+			assert.deepEqual(data.matches[0].matchedItemIndexes, [0, 1]);
+		});
+
 		it("should match saved DOI values with resolver prefixes", async function () {
 			await selectLibrary(win, Zotero.Libraries.userLibraryID);
 			await waitForItemsLoad(win);

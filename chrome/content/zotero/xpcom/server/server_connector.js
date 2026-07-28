@@ -411,20 +411,18 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 	let urlSet = new Set(identifiers.url);
 	let requestItemIdentifiers = identifiers.itemIdentifiers || [];
 	let matches = [];
-	let getMatchedItemIndexes = function (matchedIdentifiers) {
+	let getMatchedItemIndexes = function (matchedDOIs, matchedURL) {
 		if (!requestItemIdentifiers.length) {
 			return [];
 		}
-		let doi = matchedIdentifiers.doi && Zotero.Utilities.cleanDOI(matchedIdentifiers.doi);
-		doi = doi && doi.toLowerCase();
 		let indexes = [];
 		for (let i = 0; i < requestItemIdentifiers.length; i++) {
 			let itemIdentifiers = requestItemIdentifiers[i];
-			if (doi && itemIdentifiers.doi.includes(doi)) {
+			if (matchedDOIs.some(doi => itemIdentifiers.doi.includes(doi))) {
 				indexes.push(i);
 				continue;
 			}
-			if (matchedIdentifiers.url && itemIdentifiers.url.includes(matchedIdentifiers.url)) {
+			if (matchedURL && itemIdentifiers.url.includes(matchedURL)) {
 				indexes.push(i);
 			}
 		}
@@ -509,13 +507,16 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 
 		let matchedFields = [];
 		let matchedIdentifiers = {};
-		let itemDOI = [
+		let itemDOIs = [
 			item.getField('DOI'),
 			item.getExtraField('DOI')
-		].map(doi => Zotero.Utilities.cleanDOI(doi)).find(doi => doi && doiSet.has(doi.toLowerCase()));
-		if (itemDOI) {
+		]
+			.map(doi => Zotero.Utilities.cleanDOI(doi))
+			.filter(doi => doi && doiSet.has(doi.toLowerCase()));
+		let matchedDOIs = Array.from(new Set(itemDOIs.map(doi => doi.toLowerCase())));
+		if (itemDOIs.length) {
 			matchedFields.push('DOI');
-			matchedIdentifiers.doi = itemDOI;
+			matchedIdentifiers.doi = itemDOIs[0];
 		}
 		let itemURL = item.getField('url');
 		if (itemURL && urlSet.has(itemURL)) {
@@ -534,7 +535,7 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 			matchedFields,
 			matchedIdentifiers
 		};
-		let matchedItemIndexes = getMatchedItemIndexes(matchedIdentifiers);
+		let matchedItemIndexes = getMatchedItemIndexes(matchedDOIs, matchedIdentifiers.url);
 		if (matchedItemIndexes.length) {
 			// Keep the singular field for older Connector versions.
 			match.matchedItemIndex = matchedItemIndexes[0];
