@@ -77,7 +77,7 @@ describe("Account Preferences", function () {
 				await performLogin("Username");
 
 				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
-				assert.equal(doc.getElementById('sync-unauthorized').getAttribute('hidden'), 'true');
+				assert.isTrue(doc.getElementById('sync-unauthorized').hidden);
 				assert.isTrue(launchURLStub.calledOnce);
 			});
 
@@ -154,7 +154,7 @@ describe("Account Preferences", function () {
 
 				await win.Zotero_Preferences.Sync.unlinkAccount();
 				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
-				assert.equal(doc.getElementById('sync-unauthorized').getAttribute('hidden'), 'true');
+				assert.isTrue(doc.getElementById('sync-unauthorized').hidden);
 			});
 
 			it("should clear sync errors from the toolbar after logging in", async function () {

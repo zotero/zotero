@@ -1159,7 +1159,7 @@
 			for (var i = 0, len = operatorsList.firstChild.childNodes.length; i < len; i++) {
 				var val = operatorsList.firstChild.childNodes[i].getAttribute('value');
 				var hidden = !operators[val];
-				operatorsList.firstChild.childNodes[i].setAttribute('hidden', hidden);
+				operatorsList.firstChild.childNodes[i].toggleAttribute('hidden', hidden);
 				if (!hidden && (selectThis === null || this.selectedOperator == val)) {
 					selectThis = i;
 				}

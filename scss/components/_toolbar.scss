@@ -81,12 +81,12 @@ $toolbar-padding-inline: 8px;
 }
 
 /* Hide collection search on pane collapse, otherwise it still shows when focused */
-#zotero-collections-pane[collapsed=true] #zotero-collections-search.visible {
+#zotero-collections-pane[collapsed] #zotero-collections-search.visible {
 	display: none;
 }
 
 /* Hide the add button on pane collapse. Otherwise, it may show on top of 'New Item' */
-#zotero-collections-pane[collapsed=true] #zotero-tb-collection-add {
+#zotero-collections-pane[collapsed] #zotero-tb-collection-add {
 	visibility: hidden;
 }
 

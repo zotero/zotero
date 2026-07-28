@@ -123,7 +123,7 @@ var Zotero_Tabs = new function () {
 		focusFirst: {
 			library: async () => {
 				let collectionsPane = document.getElementById("zotero-collections-pane");
-				if (collectionsPane.getAttribute("collapsed")) {
+				if (collectionsPane.hasAttribute("collapsed")) {
 					document.getElementById('zotero-tb-add').focus();
 					return;
 				}
@@ -441,7 +441,7 @@ var Zotero_Tabs = new function () {
 		if (width) {
 			let sidebarWidth = `${width}px`;
 			let placeholder = document.getElementById('zotero-reader-sidebar-pane');
-			placeholder.setAttribute('collapsed', sidebarWidth ? 'false' : 'true');
+			placeholder.toggleAttribute('collapsed', !sidebarWidth);
 			placeholder.setAttribute('width', sidebarWidth);
 		}
 

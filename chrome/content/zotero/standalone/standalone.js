@@ -508,15 +508,15 @@ const ZoteroStandalone = new function () {
 		// Panes
 		this.updateMenuItemCheckmark(
 			'view-menuitem-collections-pane',
-			document.getElementById('zotero-collections-pane').getAttribute('collapsed') != 'true'
+			!document.getElementById('zotero-collections-pane').hasAttribute('collapsed')
 		);
 		this.updateMenuItemCheckmark(
 			'view-menuitem-item-pane',
-			document.getElementById('zotero-item-pane').getAttribute('collapsed') != 'true'
+			!document.getElementById('zotero-item-pane').hasAttribute('collapsed')
 		);
 		this.updateMenuItemCheckmark(
 			'view-menuitem-tag-selector',
-			document.getElementById('zotero-tag-selector-container').getAttribute('collapsed') != 'true'
+			!document.getElementById('zotero-tag-selector-container').hasAttribute('collapsed')
 		);
 		
 		// Font size
@@ -636,9 +636,9 @@ const ZoteroStandalone = new function () {
 			case 'collections-pane':
 				var collectionsPane = document.getElementById('zotero-collections-pane');
 				// Show
-				if (collectionsPane.getAttribute('collapsed') == 'true') {
+				if (collectionsPane.hasAttribute('collapsed')) {
 					document.getElementById('zotero-collections-splitter').setAttribute('state', 'open');
-					collectionsPane.setAttribute('collapsed', false);
+					collectionsPane.removeAttribute('collapsed');
 				}
 				// Hide
 				else {
@@ -651,9 +651,9 @@ const ZoteroStandalone = new function () {
 			case 'item-pane':
 				var itemPane = document.getElementById('zotero-item-pane');
 				// Show
-				if (itemPane.getAttribute('collapsed') == 'true') {
+				if (itemPane.hasAttribute('collapsed')) {
 					document.getElementById('zotero-items-splitter').setAttribute('state', 'open');
-					itemPane.setAttribute('collapsed', false);
+					itemPane.removeAttribute('collapsed');
 				}
 				// Hide
 				else {

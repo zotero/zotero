@@ -593,7 +593,7 @@
 				}
 				
 				if (show) {
-					reindexButton.setAttribute('hidden', false);
+					reindexButton.removeAttribute('hidden');
 				}
 				else {
 					reindexButton.setAttribute('hidden', true);

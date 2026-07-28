@@ -53,8 +53,8 @@ var ZoteroContextPane = new function () {
 			return this.splitter.getAttribute('state') === 'collapsed';
 		},
 		set: (collapsed) => {
-			_contextPane.setAttribute('collapsed', !!collapsed);
-			_contextPaneInner.setAttribute('collapsed', !!collapsed);
+			_contextPane.toggleAttribute('collapsed', !!collapsed);
+			_contextPaneInner.toggleAttribute('collapsed', !!collapsed);
 			_contextPaneSplitter.setAttribute('state', collapsed ? 'collapsed' : 'open');
 			_contextPaneSplitterStacked.setAttribute('state', collapsed ? 'collapsed' : 'open');
 			this.update();
@@ -141,7 +141,7 @@ var ZoteroContextPane = new function () {
 			return;
 		}
 		if (_isStacked()) {
-			_contextPaneSplitterStacked.setAttribute('hidden', false);
+			_contextPaneSplitterStacked.removeAttribute('hidden');
 			_contextPaneSplitter.setAttribute('hidden', true);
 			_contextPane.classList.add('stacked');
 			_contextPane.classList.remove('standard');
@@ -159,7 +159,7 @@ var ZoteroContextPane = new function () {
 			_contextPaneSplitter.setAttribute('state', this.collapsed ? 'collapsed' : 'open');
 		}
 		else {
-			_contextPaneSplitter.setAttribute('hidden', false);
+			_contextPaneSplitter.removeAttribute('hidden');
 			_contextPaneSplitterStacked.setAttribute('hidden', true);
 			_contextPane.classList.add('standard');
 			_contextPane.classList.remove('stacked');
@@ -180,12 +180,12 @@ var ZoteroContextPane = new function () {
 		var height = null;
 		if (_isStacked()) {
 			height = 0;
-			if (_contextPane.getAttribute('collapsed') != 'true') {
+			if (!_contextPane.hasAttribute('collapsed')) {
 				height = _contextPaneInner.getBoundingClientRect().height;
 			}
 		}
 
-		_contextPaneInner.setAttribute('collapsed', this.collapsed ? 'true' : 'false');
+		_contextPaneInner.toggleAttribute('collapsed', this.collapsed);
 
 		let tabContent = _getTabContent();
 		if (tabContent) {

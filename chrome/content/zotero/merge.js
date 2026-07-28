@@ -298,7 +298,7 @@ var Zotero_Merge_Window = new function () {
 		var nextButton = _wizard.getButton("next");
 		
 		if (Zotero.isMac) {
-			nextButton.setAttribute("hidden", "false");
+			nextButton.removeAttribute("hidden");
 			_wizard.getButton("finish").setAttribute("hidden", "true");
 		}
 		else {
@@ -315,7 +315,7 @@ var Zotero_Merge_Window = new function () {
 		
 		if (Zotero.isMac) {
 			_wizard.getButton("next").setAttribute("hidden", "true");
-			finishButton.setAttribute("hidden", "false");
+			finishButton.removeAttribute("hidden");
 		}
 		// Windows and Linux use a deck to switch between the Next and Finish buttons
 		else {

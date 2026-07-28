@@ -369,10 +369,10 @@ var ZoteroPane = new function () {
 					ArrowPrevious: () => null,
 					Tab: () => document.getElementById("zotero-tb-search").focus(),
 					ShiftTab: () => {
-						if (collectionsPane.getAttribute("collapsed")) {
+						if (collectionsPane.hasAttribute("collapsed")) {
 							return document.getElementById('zotero-tb-sync');
 						}
-						if (tagContainer.getAttribute('collapsed') == "true") {
+						if (tagContainer.hasAttribute('collapsed')) {
 							return focusCollectionTree();
 						}
 						return document.querySelector("#zotero-tag-selector button");
@@ -428,7 +428,7 @@ var ZoteroPane = new function () {
 				'collection-tree': {
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click(),
 					Tab: () => {
-						if (tagContainer.getAttribute('collapsed') == "true") {
+						if (tagContainer.hasAttribute('collapsed')) {
 							return document.getElementById('zotero-tb-add');
 						}
 						// If tag selector is collapsed, go to "New item" button, otherwise focus tag selector
@@ -1460,8 +1460,8 @@ var ZoteroPane = new function () {
 		});
 		
 		// Expand the item pane if it's closed
-		if (this.itemPane.getAttribute("collapsed") == "true") {
-			this.itemPane.setAttribute("collapsed", false);
+		if (this.itemPane.hasAttribute("collapsed")) {
+			this.itemPane.removeAttribute("collapsed");
 		}
 		
 		//set to Info tab
@@ -1644,7 +1644,7 @@ var ZoteroPane = new function () {
 	this.initTagSelector = async function () {
 		try {
 			var container = document.getElementById('zotero-tag-selector-container');
-			if (!container.hasAttribute('collapsed') || container.getAttribute('collapsed') == 'false') {
+			if (!container.hasAttribute('collapsed')) {
 				this.tagSelector = await Zotero.TagSelector.init(
 					document.getElementById('zotero-tag-selector'),
 					{
@@ -1691,8 +1691,8 @@ var ZoteroPane = new function () {
 	// Keep in sync with ZoteroStandalone.updateViewOption()
 	this.toggleTagSelector = async function () {
 		var container = document.getElementById('zotero-tag-selector-container');
-		var showing = container.getAttribute('collapsed') == 'true';
-		container.setAttribute('collapsed', !showing);
+		var showing = container.hasAttribute('collapsed');
+		container.toggleAttribute('collapsed', !showing);
 		
 		// If showing, set scope to items in current view
 		// and focus filter textbox
@@ -1712,8 +1712,7 @@ var ZoteroPane = new function () {
 		var collectionTreeRows = this.getCollectionTreeRows();
 		if (!collectionTreeRows.length) return;
 		var tagSelector = document.getElementById('zotero-tag-selector-container');
-		return !tagSelector.hasAttribute('collapsed')
-			|| tagSelector.getAttribute('collapsed') == 'false';
+		return !tagSelector.hasAttribute('collapsed');
 	};
 
 
@@ -4101,7 +4100,7 @@ var ZoteroPane = new function () {
 		}
 		
 		for (let id of show) {
-			m[id].setAttribute('hidden', false);
+			m[id].removeAttribute('hidden');
 		}
 		
 		for (let id of disable) {
@@ -4645,7 +4644,7 @@ var ZoteroPane = new function () {
 		}
 		
 		for (let x of show) {
-			menu.childNodes[x].setAttribute('hidden', false);
+			menu.childNodes[x].removeAttribute('hidden');
 		}
 
 		// No locate menu options if annotations are selected

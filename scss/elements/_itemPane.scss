@@ -4,7 +4,7 @@ item-pane {
 	min-width: var(--width-available-item-pane, $min-width-item-pane + $width-sidenav);
 	min-height: $min-width-item-pane + $width-sidenav;
 
-	&[collapsed="true"] {
+	&[collapsed] {
 		min-width: $width-sidenav;
 		min-height: $width-sidenav;
 		max-width: $width-sidenav;

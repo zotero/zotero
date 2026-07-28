@@ -88,7 +88,7 @@ describe("Retractions", function () {
 	
 	function bannerShown() {
 		var container = win.document.getElementById('retracted-items-container');
-		if (container.getAttribute('collapsed') == 'true') {
+		if (container.hasAttribute('collapsed')) {
 			return false;
 		}
 		if (!container.hasAttribute('collapsed')) {

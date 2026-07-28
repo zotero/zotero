@@ -1382,11 +1382,11 @@ var gFinishedPage = {
 			let moreElevated = document.getElementById(
 				"finishedBackgroundMoreElevated"
 			);
-			moreElevated.setAttribute("hidden", "false");
+			moreElevated.removeAttribute("hidden");
 			let moreElevatedLink = document.getElementById(
 				"finishedBackgroundMoreElevatedLink"
 			);
-			moreElevatedLink.setAttribute("hidden", "false");
+			moreElevatedLink.removeAttribute("hidden");
 			let moreElevatedLinkLabel = document.getElementById(
 				"finishedBackgroundMoreElevatedLinkLabel"
 			);
@@ -1395,7 +1395,7 @@ var gFinishedPage = {
 			);
 			moreElevatedLinkLabel.value = manualURL;
 			moreElevatedLinkLabel.setAttribute("url", manualURL);
-			moreElevatedLinkLabel.setAttribute("hidden", "false");
+			moreElevatedLinkLabel.removeAttribute("hidden");
 		}
 	},
 

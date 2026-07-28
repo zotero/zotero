@@ -3273,10 +3273,10 @@
 			
 			this._id('creator-transform-swap-names').hidden = hideNameSwap;
 			this._id('creator-transform-capitalize').disabled = !this.canCapitalizeCreatorName(row);
-			this._id('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
-			this._id('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
-			this._id('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
-			this._id('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);
+			this._id('zotero-creator-move-sep').toggleAttribute('hidden', hideMoveSep);
+			this._id('zotero-creator-move-to-top').toggleAttribute('hidden', hideMoveToTop);
+			this._id('zotero-creator-move-up').toggleAttribute('hidden', hideMoveUp);
+			this._id('zotero-creator-move-down').toggleAttribute('hidden', hideMoveDown);
 		};
 
 		_handleCreatorTransformMenuCommand = async (event) => {

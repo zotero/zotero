@@ -34,7 +34,7 @@ export function isPaneCollapsed(pane) {
 	if (!collapsibleParent) {
 		return false;
 	}
-	return collapsibleParent.getAttribute('collapsed') === 'true';
+	return collapsibleParent.hasAttribute('collapsed');
 }
 
 /**

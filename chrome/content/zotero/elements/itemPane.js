@@ -228,7 +228,7 @@
 
 			this._itemDetails.render();
 
-			if (this.getAttribute("collapsed") == "true") {
+			if (this.hasAttribute("collapsed")) {
 				return true;
 			}
 
@@ -684,7 +684,7 @@
 		}
 
 		handleResize() {
-			if (this.getAttribute("collapsed")) {
+			if (this.hasAttribute("collapsed")) {
 				this.removeAttribute("width");
 				this.removeAttribute("height");
 			}

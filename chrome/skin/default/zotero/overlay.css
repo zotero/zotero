@@ -37,7 +37,7 @@
 /* 
 	Fix to odd fx115 behavior that gives an un-collapsed pane the initial width of min-width + last width
 */
-#zotero-collections-pane[collapsed=true] {
+#zotero-collections-pane[collapsed] {
 	min-width: 0px !important;
 	width: 0px !important;
 }
