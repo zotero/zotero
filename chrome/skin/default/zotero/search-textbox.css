@@ -1,0 +1,116 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+:host {
+  appearance: auto;
+  -moz-default-appearance: textfield;
+  cursor: text;
+  margin: 2px 4px; /* matches <input> global.css margin */
+  padding: 2px 2px 3px;
+  padding-inline-start: 4px;
+  background-color: Field;
+  color: FieldText;
+  min-width: 0;
+}
+
+@media (-moz-platform: macos) {
+  :host {
+    -moz-default-appearance: searchfield;
+    /* TODO: These are a bit dubious, see bug 1815264 */
+    font-size: 12px;
+    margin: 4px; /* matches <input> global.css margin */
+    padding: 1px;
+  }
+}
+
+input {
+  border: none;
+  padding: 0 1px;
+  background-color: transparent;
+  outline: none;
+  color: inherit;
+  font: inherit;
+  text-shadow: inherit;
+  box-sizing: border-box;
+  flex: 1;
+  text-align: inherit;
+  min-width: 0;
+}
+
+:host([readonly="true"]) {
+  background-color: -moz-Dialog;
+  color: -moz-DialogText;
+}
+
+:host([disabled="true"]) {
+  cursor: default;
+  background-color: -moz-Dialog;
+  color: GrayText;
+}
+
+:host(:focus-within) {
+  outline: auto;
+}
+
+.textbox-search-icons {
+  align-items: center;
+  justify-items: center;
+}
+
+.textbox-search-icon,
+.textbox-search-sign,
+.textbox-search-clear {
+  /* Search icon is 12px, but we expand to the clear button size so they
+   * overlap. That doesn't make the icon noticeably less crisp */
+  width: 14px;
+}
+
+.textbox-search-sign,
+.textbox-search-icon {
+  list-style-image: url(chrome://global/skin/icons/search-textbox.svg);
+}
+
+.textbox-search-sign:-moz-locale-dir(rtl),
+.textbox-search-icon:-moz-locale-dir(rtl) {
+  transform: scaleX(-1);
+}
+
+.textbox-search-sign {
+  margin-inline-end: 5px;
+}
+
+.textbox-search-clear {
+  list-style-image: url(resource://content-accessible/close-12.svg);
+  -moz-context-properties: fill;
+  fill: currentColor;
+}
+
+.textbox-search-icon:not([disabled]) {
+  cursor: pointer;
+}
+
+.textbox-search-clear:not([disabled]) {
+  cursor: default;
+}
+
+/* searchbutton disables the icon to the left.
+ * Otherwise we don't show the search icon, only the clear icon, see
+ * bug 1385902 */
+:host([searchbutton]) .textbox-search-sign,
+:host(:not([searchbutton])) .textbox-search-icons:not([selectedIndex="1"]) {
+  display: none;
+}
+
+/* On macOS -moz-default-appearance: searchbox provides the search icon too, so
+ * disable those there unconditionally */
+@media (-moz-platform: macos) {
+  .textbox-search-sign,
+  .textbox-search-icons:not([selectedIndex="1"]) {
+    display: none;
+  }
+
+  .textbox-search-clear {
+    margin-bottom: 1px;
+  }
+}

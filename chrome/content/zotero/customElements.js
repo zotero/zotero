@@ -53,6 +53,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['notes-box', 'chrome://zotero/content/elements/notesBox.js'],
 		['quick-search-textbox', 'chrome://zotero/content/elements/quickSearchTextbox.js'],
 		['related-box', 'chrome://zotero/content/elements/relatedBox.js'],
+		['search-textbox', 'chrome://zotero/content/elements/searchTextbox.js'],
 		['shadow-autocomplete-input', 'chrome://zotero/content/elements/shadowAutocompleteInput.js'],
 		['split-menu-button', 'chrome://zotero/content/elements/splitMenuButton.js'],
 		['tabs-menu-panel', 'chrome://zotero/content/elements/tabsMenuPanel.js'],

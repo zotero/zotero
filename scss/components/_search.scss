@@ -48,6 +48,10 @@ search-textbox {
 	color: var(--fill-primary);
 	padding: 0;
 	padding-inline-end: 6px;
+	text-shadow: none;
+	// Allow text selection in the field instead of dragging the window when the
+	// field is in a draggable toolbar
+	-moz-window-dragging: no-drag;
 
 	&::placeholder {
 		color: var(--fill-tertiary);
