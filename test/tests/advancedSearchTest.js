@@ -852,7 +852,7 @@ describe("Advanced Search", function () {
 			var row = conditions.firstChild;
 
 			// With a value entered, the last condition can be removed
-			assert.notEqual(row.querySelector('#remove').getAttribute('disabled'), 'true');
+			assert.isFalse(row.querySelector('#remove').hasAttribute('disabled'));
 
 			row.onRemoveClicked();
 
@@ -861,7 +861,7 @@ describe("Advanced Search", function () {
 			var newRow = conditions.firstChild;
 			assert.equal(newRow.selectedCondition, 'title');
 			assert.equal(newRow.querySelector('#valuefield').value, '');
-			assert.equal(newRow.querySelector('#remove').getAttribute('disabled'), 'true');
+			assert.isTrue(newRow.querySelector('#remove').hasAttribute('disabled'));
 
 			// Focus moves to the new condition's drop-down
 			assert.equal(win.document.activeElement, newRow.querySelector('#conditionsmenu'));

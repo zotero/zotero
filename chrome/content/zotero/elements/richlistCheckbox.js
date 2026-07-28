@@ -37,7 +37,7 @@
 		connectedCallback() {
 			this._checkbox = document.createXULElement('checkbox');
 			this._checkbox.setAttribute('native', 'true');
-			this._checkbox.setAttribute('checked', this.checked);
+			this._checkbox.toggleAttribute('checked', this.checked);
 			this._checkbox.addEventListener('focus', () => this.control.focus());
 			this._label = document.createElement('label');
 			this._label.textContent = this.label;
@@ -75,12 +75,12 @@
 		}
 		
 		get checked() {
-			return JSON.parse(this.getAttribute('checked'));
+			return this.hasAttribute('checked');
 		}
 
 		set checked(val) {
-			this._checkbox.setAttribute('checked', !!val);
-			this.setAttribute('checked', !!val);
+			this._checkbox.toggleAttribute('checked', !!val);
+			this.toggleAttribute('checked', !!val);
 		}
 	}
 	

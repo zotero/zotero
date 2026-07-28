@@ -542,13 +542,13 @@ describe("Zotero.CollectionTree", function () {
 			
 			assert.isFalse(zp.getCollectionTreeRows()[0].editable);
 			var cmd = win.document.getElementById('cmd_zotero_newStandaloneNote');
-			assert.isTrue(cmd.getAttribute('disabled') == 'true');
+			assert.isTrue(cmd.hasAttribute('disabled'));
 			
 			group.editable = true;
 			await group.saveTx();
 			
 			assert.isTrue(zp.getCollectionTreeRows()[0].editable);
-			assert.isFalse(cmd.getAttribute('disabled') == 'true');
+			assert.isFalse(cmd.hasAttribute('disabled'));
 		});
 		
 		it("should re-sort a modified collection", async function () {

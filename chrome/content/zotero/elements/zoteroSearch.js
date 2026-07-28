@@ -390,7 +390,7 @@
 				if (next) {
 					let button = next.querySelector('#remove');
 					// A disabled remove button can't take focus, so fall back to the drop-down
-					let target = button.getAttribute('disabled') == 'true'
+					let target = button.hasAttribute('disabled')
 						? next.querySelector('#conditionsmenu')
 						: button;
 					setTimeout(() => target.focus({ focusVisible: true }));
@@ -1763,7 +1763,7 @@
 
 		enableRemoveButton() {
 			var button = this.querySelector("#remove");
-			button.setAttribute('disabled', false);
+			button.removeAttribute('disabled');
 			button.setAttribute('onclick', "this.closest('zoterosearchcondition').onRemoveClicked(event)");
 		}
 	}
@@ -1815,7 +1815,7 @@
 			
 			var selectedIndex = -1;
 			for (var i = 0; i < menu.childNodes.length; i++) {
-				if (menu.childNodes[i].getAttribute('checked') == 'true') {
+				if (menu.childNodes[i].hasAttribute('checked')) {
 					selectedIndex = i;
 					break;
 				}

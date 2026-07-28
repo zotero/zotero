@@ -1342,14 +1342,14 @@ class ReaderInstance {
 					else {
 						let menuitem = parentNode.ownerDocument.createXULElement('menuitem');
 						menuitem.setAttribute('label', item.label);
-						menuitem.setAttribute('disabled', item.disabled);
+						menuitem.toggleAttribute('disabled', item.disabled);
 						if (item.color) {
 							menuitem.className = 'menuitem-iconic';
 							menuitem.setAttribute('image', this._getColorIcon(item.color, item.checked));
 						}
 						else if (item.checked) {
 							menuitem.setAttribute('type', 'checkbox');
-							menuitem.setAttribute('checked', item.checked);
+							menuitem.toggleAttribute('checked', item.checked);
 						}
 						menuitem.addEventListener('command', () => item.onCommand());
 						parentNode.appendChild(menuitem);
@@ -1443,7 +1443,7 @@ class ReaderInstance {
 			// Check Spelling
 			var menuitem = popup.ownerDocument.createXULElement('menuitem');
 			menuitem.setAttribute('data-l10n-id', 'text-action-spell-check-toggle');
-			menuitem.setAttribute('checked', !!Zotero.Prefs.get('layout.spellcheckDefault', true));
+			menuitem.toggleAttribute('checked', !!Zotero.Prefs.get('layout.spellcheckDefault', true));
 			menuitem.setAttribute('type', 'checkbox');
 			menuitem.addEventListener('command', () => {
 				spellChecker.toggleEnabled();
@@ -2245,8 +2245,8 @@ class ReaderWindow extends ReaderInstance {
 			&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 			let annotations = item.getAnnotations();
 			let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);
-			transferFromPDFMenuitem.setAttribute('disabled', !canTransferFromPDF);
-			importFromEPUBMenuitem.setAttribute('disabled', false);
+			transferFromPDFMenuitem.toggleAttribute('disabled', !canTransferFromPDF);
+			importFromEPUBMenuitem.removeAttribute('disabled');
 		}
 		else {
 			transferFromPDFMenuitem.setAttribute('disabled', true);
@@ -2270,25 +2270,25 @@ class ReaderWindow extends ReaderInstance {
 			return;
 		}
 		if (this._type === 'pdf' || this._type === 'epub') {
-			this._window.document.getElementById('view-menuitem-no-spreads').setAttribute('checked', this._internalReader.spreadMode === 0);
-			this._window.document.getElementById('view-menuitem-odd-spreads').setAttribute('checked', this._internalReader.spreadMode === 1);
-			this._window.document.getElementById('view-menuitem-even-spreads').setAttribute('checked', this._internalReader.spreadMode === 2);
+			this._window.document.getElementById('view-menuitem-no-spreads').toggleAttribute('checked', this._internalReader.spreadMode === 0);
+			this._window.document.getElementById('view-menuitem-odd-spreads').toggleAttribute('checked', this._internalReader.spreadMode === 1);
+			this._window.document.getElementById('view-menuitem-even-spreads').toggleAttribute('checked', this._internalReader.spreadMode === 2);
 		}
 		if (this._type === 'pdf') {
-			this._window.document.getElementById('view-menuitem-vertical-scrolling').setAttribute('checked', this._internalReader.scrollMode === 0);
-			this._window.document.getElementById('view-menuitem-horizontal-scrolling').setAttribute('checked', this._internalReader.scrollMode === 1);
-			this._window.document.getElementById('view-menuitem-wrapped-scrolling').setAttribute('checked', this._internalReader.scrollMode === 2);
-			this._window.document.getElementById('view-menuitem-hand-tool').setAttribute('checked', this._internalReader.toolType === 'hand');
-			this._window.document.getElementById('view-menuitem-zoom-auto').setAttribute('checked', this._internalReader.zoomAutoEnabled);
-			this._window.document.getElementById('view-menuitem-zoom-page-width').setAttribute('checked', this._internalReader.zoomPageWidthEnabled);
-			this._window.document.getElementById('view-menuitem-zoom-page-height').setAttribute('checked', this._internalReader.zoomPageHeightEnabled);
+			this._window.document.getElementById('view-menuitem-vertical-scrolling').toggleAttribute('checked', this._internalReader.scrollMode === 0);
+			this._window.document.getElementById('view-menuitem-horizontal-scrolling').toggleAttribute('checked', this._internalReader.scrollMode === 1);
+			this._window.document.getElementById('view-menuitem-wrapped-scrolling').toggleAttribute('checked', this._internalReader.scrollMode === 2);
+			this._window.document.getElementById('view-menuitem-hand-tool').toggleAttribute('checked', this._internalReader.toolType === 'hand');
+			this._window.document.getElementById('view-menuitem-zoom-auto').toggleAttribute('checked', this._internalReader.zoomAutoEnabled);
+			this._window.document.getElementById('view-menuitem-zoom-page-width').toggleAttribute('checked', this._internalReader.zoomPageWidthEnabled);
+			this._window.document.getElementById('view-menuitem-zoom-page-height').toggleAttribute('checked', this._internalReader.zoomPageHeightEnabled);
 		}
 		else if (this._type === 'epub') {
-			this._window.document.getElementById('view-menuitem-scrolled').setAttribute('checked', this._internalReader.flowMode === 'scrolled');
-			this._window.document.getElementById('view-menuitem-paginated').setAttribute('checked', this._internalReader.flowMode === 'paginated');
+			this._window.document.getElementById('view-menuitem-scrolled').toggleAttribute('checked', this._internalReader.flowMode === 'scrolled');
+			this._window.document.getElementById('view-menuitem-paginated').toggleAttribute('checked', this._internalReader.flowMode === 'paginated');
 		}
-		this._window.document.getElementById('view-menuitem-split-vertically').setAttribute('checked', this._internalReader.splitType === 'vertical');
-		this._window.document.getElementById('view-menuitem-split-horizontally').setAttribute('checked', this._internalReader.splitType === 'horizontal');
+		this._window.document.getElementById('view-menuitem-split-vertically').toggleAttribute('checked', this._internalReader.splitType === 'vertical');
+		this._window.document.getElementById('view-menuitem-split-horizontally').toggleAttribute('checked', this._internalReader.splitType === 'horizontal');
 
 		this.onUpdateCustomMenus(event, 'view', popup);
 	}
@@ -2319,11 +2319,11 @@ class ReaderWindow extends ReaderInstance {
 		menuItemForward.setAttribute('key', 'key_forward');
 
 		if (['pdf', 'epub'].includes(this._type)) {
-			this._window.document.getElementById('go-menuitem-first-page').setAttribute('disabled', !this._internalReader.canNavigateToFirstPage);
-			this._window.document.getElementById('go-menuitem-last-page').setAttribute('disabled', !this._internalReader.canNavigateToLastPage);
+			this._window.document.getElementById('go-menuitem-first-page').toggleAttribute('disabled', !this._internalReader.canNavigateToFirstPage);
+			this._window.document.getElementById('go-menuitem-last-page').toggleAttribute('disabled', !this._internalReader.canNavigateToLastPage);
 		}
-		this._window.document.getElementById('go-menuitem-back').setAttribute('disabled', !this._internalReader.canNavigateBack);
-		this._window.document.getElementById('go-menuitem-forward').setAttribute('disabled', !this._internalReader.canNavigateForward);
+		this._window.document.getElementById('go-menuitem-back').toggleAttribute('disabled', !this._internalReader.canNavigateBack);
+		this._window.document.getElementById('go-menuitem-forward').toggleAttribute('disabled', !this._internalReader.canNavigateForward);
 
 		this.onUpdateCustomMenus(event, 'go', popup);
 	}

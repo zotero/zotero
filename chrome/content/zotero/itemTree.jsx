@@ -2188,7 +2188,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			.forEach((column, i) => {
 				let menuItem = document.createXULElement('menuitem');
 				menuItem.setAttribute('type', 'checkbox');
-				menuItem.setAttribute('checked', this.getSortField() == column.dataKey);
+				menuItem.toggleAttribute('checked', this.getSortField() == column.dataKey);
 				menuItem.setAttribute('label', formatColumnName(column));
 				menuItem.addEventListener('command', () => {
 					this.toggleSort(i, true);

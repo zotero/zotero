@@ -977,11 +977,11 @@ class EditorInstance {
 						let menuitem = parentNode.ownerDocument.createXULElement('menuitem');
 						menuitem.setAttribute('value', item.name);
 						menuitem.setAttribute('label', item.label);
-						menuitem.setAttribute('disabled', !item.enabled);
+						menuitem.toggleAttribute('disabled', !item.enabled);
 						if (item.checked) {
 							menuitem.setAttribute('type', 'checkbox');
 						}
-						menuitem.setAttribute('checked', item.checked);
+						menuitem.toggleAttribute('checked', item.checked);
 						menuitem.addEventListener('command', () => {
 							if (item.name === 'insertImage') {
 								return this._iframeWindow.eval('openImageFilePicker()');
@@ -1037,7 +1037,7 @@ class EditorInstance {
 		// Check Spelling
 		var menuitem = this._popup.ownerDocument.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('spellCheck.checkSpelling'));
-		menuitem.setAttribute('checked', spellChecker.enabled);
+		menuitem.toggleAttribute('checked', spellChecker.enabled);
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.addEventListener('command', () => {
 			// Possible values: 0 - off, 1 - only multi-line, 2 - multi and single line input boxes

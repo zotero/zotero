@@ -1718,8 +1718,8 @@ var ZoteroPane = new function () {
 
 
 	this.updateTagSelectorViewSettingsMenu = async function () {
-		document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
-		document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
+		document.getElementById('show-automatic').toggleAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
+		document.getElementById('display-all-tags').toggleAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
 		document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
 		var libraryID = ZoteroPane.tagSelector.libraryID;
 		var library = Zotero.Libraries.get(libraryID);
@@ -2278,7 +2278,7 @@ var ZoteroPane = new function () {
 			['cmd_zotero_newChildURLAttachment', oneItemSelected],
 		];
 		for (let command of commandsEnabled) {
-			document.getElementById(command[0]).setAttribute('disabled', !command[1]);
+			document.getElementById(command[0]).toggleAttribute('disabled', !command[1]);
 		}
 
 		Zotero.MenuManager.updateMenuPopup(
@@ -2347,9 +2347,9 @@ var ZoteroPane = new function () {
 			}
 		}
 		
-		document.getElementById('cmd_zotero_copyCitation').setAttribute('disabled', !canCopy);
-		document.getElementById('cmd_zotero_copyBibliography').setAttribute('disabled', !canCopy);
-		document.getElementById('cmd_zotero_copyAnnotation').setAttribute('disabled', !canCopy);
+		document.getElementById('cmd_zotero_copyCitation').toggleAttribute('disabled', !canCopy);
+		document.getElementById('cmd_zotero_copyBibliography').toggleAttribute('disabled', !canCopy);
+		document.getElementById('cmd_zotero_copyAnnotation').toggleAttribute('disabled', !canCopy);
 	};
 	
 	
@@ -4097,7 +4097,7 @@ var ZoteroPane = new function () {
 		// Hide and enable all actions by default (so if they're shown they're enabled)
 		for (let i in m) {
 			m[i].setAttribute('hidden', true);
-			m[i].setAttribute('disabled', false);
+			m[i].removeAttribute('disabled');
 		}
 		
 		for (let id of show) {
@@ -4637,7 +4637,7 @@ var ZoteroPane = new function () {
 		for (let i in m) {
 			let pos = m[i];
 			menu.childNodes[pos].setAttribute('hidden', true);
-			menu.childNodes[pos].setAttribute('disabled', false);
+			menu.childNodes[pos].removeAttribute('disabled');
 		}
 		
 		for (let x of disable) {
@@ -7429,7 +7429,7 @@ var ZoteroPane = new function () {
 		const windowAutoStackMinWidth = 930;
 		if (window.innerWidth < windowAutoStackMinWidth) {
 			// Disable layout mode menus because the standard mode is not available
-			layoutModeMenus.forEach(menu => menu.setAttribute("disabled", "true"));
+			layoutModeMenus.forEach(menu => menu.toggleAttribute("disabled", "true"));
 			// If the window is too small in standard mode, enter stack mode temporarily
 			if (!isStackedMode && !isTempStackedMode) {
 				Zotero.Prefs.set('tempStackedMode', true);

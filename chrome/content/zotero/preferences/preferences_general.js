@@ -438,7 +438,7 @@ Zotero_Preferences.General = {
 			menuitem.setAttribute('type', 'checkbox');
 			currentMenuPopup.appendChild(menuitem);
 			var checked = r.url == Zotero.Prefs.get('openURL.resolver');
-			menuitem.setAttribute('checked', checked);
+			menuitem.toggleAttribute('checked', checked);
 			if (checked) {
 				selectedName = r.name;
 			}
@@ -449,7 +449,7 @@ Zotero_Preferences.General = {
 			openURLMenu.setAttribute('label', selectedName);
 			// If we found a match, update stored name
 			Zotero.Prefs.set('openURL.name', selectedName);
-			firstItem.setAttribute('checked', false);
+			firstItem.removeAttribute('checked');
 		}
 		// Custom
 		else {

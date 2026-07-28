@@ -239,7 +239,7 @@
 
 			// "-" button
 			if (this.editable) {
-				remove.setAttribute('disabled', false);
+				remove.removeAttribute('disabled');
 				remove.addEventListener('click', async (_event) => {
 					if (tagData) {
 						let item = this.item;

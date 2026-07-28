@@ -438,7 +438,7 @@
 				let menuitem = document.createXULElement('menuitem');
 				menuitem.setAttribute('data-l10n-id', 'item-pane-header-' + headerMode);
 				menuitem.setAttribute('type', 'radio');
-				menuitem.setAttribute('checked', headerMode === selectedMode);
+				menuitem.toggleAttribute('checked', headerMode === selectedMode);
 				menuitem.addEventListener('command', () => {
 					Zotero.Prefs.set(PREF_HEADER_MODE, headerMode);
 				});

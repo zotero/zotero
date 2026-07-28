@@ -404,7 +404,7 @@ var Zotero_Tabs = new function () {
 		}));
 		// Disable File > Close menuitem if multiple tabs are open
 		const multipleTabsOpen = this._tabs.length > 1;
-		document.getElementById('cmd_close').setAttribute('disabled', multipleTabsOpen);
+		document.getElementById('cmd_close').toggleAttribute('disabled', multipleTabsOpen);
 		var { tab } = this._getTab(this._selectedID);
 		if (!tab) {
 			return;
@@ -1197,7 +1197,7 @@ var Zotero_Tabs = new function () {
 			// Move to start
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToStart'));
-			menuitem.setAttribute('disabled', tabIndex == 1);
+			menuitem.toggleAttribute('disabled', tabIndex == 1);
 			menuitem.addEventListener('command', () => {
 				this.move(id, 1);
 			});
@@ -1205,7 +1205,7 @@ var Zotero_Tabs = new function () {
 			// Move to end
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToEnd'));
-			menuitem.setAttribute('disabled', tabIndex == this._tabs.length - 1);
+			menuitem.toggleAttribute('disabled', tabIndex == this._tabs.length - 1);
 			menuitem.addEventListener('command', () => {
 				this.move(id, this._tabs.length);
 			});
@@ -1214,7 +1214,7 @@ var Zotero_Tabs = new function () {
 			if (this._hasHook(tabContentType, 'moveToNewWindow')) {
 				menuitem = document.createXULElement('menuitem');
 				menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
-				menuitem.setAttribute('disabled', false);
+				menuitem.removeAttribute('disabled');
 				menuitem.addEventListener('command', () => {
 					let { tabContentType } = this.parseTabType(tab.type);
 					let moveHook = this._getHook(tabContentType, 'moveToNewWindow');
@@ -1266,7 +1266,7 @@ var Zotero_Tabs = new function () {
 					this._history.length ? this._history[this._history.length - 1].length : 1
 				)
 			);
-			menuitem.setAttribute('disabled', !this._history.length);
+			menuitem.toggleAttribute('disabled', !this._history.length);
 			menuitem.addEventListener('command', () => {
 				this.undoClose();
 			});
