@@ -201,15 +201,17 @@ function modify_omni {
 	
 	file="modules/ActorManagerParent.sys.mjs"
 	# Remove deleted actors
-	remove_between 'AboutTranslations: \{' '^  },' $file
-	remove_between 'CookieBanner: \{' '^  },' $file
-	remove_between 'PictureInPictureLauncher: \{' '^  },' $file
-	remove_between 'PictureInPictureToggle: \{' '^  },' $file
-	remove_between 'PictureInPicture: \{' '^  },' $file
-	remove_between 'Thumbnails: \{' '^  },' $file
-	remove_between 'Translations: \{' '^  },' $file
-	remove_between 'TranslationsEngine: \{' '^  },' $file
-	remove_between 'AudioPlayback: \{' '^  },' $file
+	# Entries in the JSWINDOWACTORS/JSPROCESSACTORS literals:
+	remove_between '^  AudioPlayback: \{' '^  },' $file
+	remove_between '^  CookieBanner: \{' '^  },' $file
+	remove_between '^  Thumbnails: \{' '^  },' $file
+	remove_between '^  Translations: \{' '^  },' $file
+	remove_between '^  TranslationsEngine: \{' '^  },' $file
+	# Entries added conditionally after the literals:
+	remove_between '^  JSWINDOWACTORS\.AboutTranslations = \{' '^  \};' $file
+	remove_between '^  JSWINDOWACTORS\.PictureInPictureLauncher = \{' '^  \};' $file
+	remove_between '^  JSWINDOWACTORS\.PictureInPictureToggle = \{' '^  \};' $file
+	remove_between '^  JSWINDOWACTORS\.PictureInPicture = \{' '^  \};' $file
 	# Do not trigger LoginManager event that logs an error on autocomplete submission
 	remove_line 'DOMInputPasswordAdded: \{\},' $file
 	
