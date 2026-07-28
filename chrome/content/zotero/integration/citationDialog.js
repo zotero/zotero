@@ -1417,14 +1417,19 @@ const IOManager = {
 			// Do not record just-added bubbles if locator is already provided
 			this._clearJustAddedBubbles();
 		}
-		else {
-			// If no locator is provided, record which bubbles were just added.
-			// If a locator is typed next, these bubbles will receive it.
+		else if (bubbleItems.length == 1) {
+			// If no locator is provided, record the just-added bubble.
+			// If a locator is typed next, that bubble will receive it.
 			this._justAddedBubbles = bubbleItems;
 			// Only show the placeholder guidance on the first add -- after
 			// that, the user presumably knows about the shortcut
 			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems()
 				&& this._timesItemsAdded < 1;
+		}
+		else {
+			// A multi-item add doesn't enter locator-typing mode, so typed text
+			// starts a new search instead of setting a page number on every added item
+			this._clearJustAddedBubbles();
 		}
 		this._timesItemsAdded++;
 		await CitationDataManager.addItems({ bubbleItems, index });

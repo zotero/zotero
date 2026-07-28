@@ -376,11 +376,8 @@ describe("Citation Dialog", function () {
 			let itemTwo = await createDataObject('item');
 			await IOManager.addItemsToCitation([itemOne, itemTwo]);
 
-			// Both items should be counted as just-added
-			assert.sameMembers(CitationDataManager.items.map(i => i.dialogReferenceID), IOManager._justAddedBubbles.map(b => b.dialogReferenceID));
-
-			// Clear just-added bubbles, as if the user did it themselves
-			IOManager._clearJustAddedBubbles();
+			// A multi-item add does not record just-added bubbles
+			assert.notOk(IOManager._justAddedBubbles);
 
 			// Type a locator and press Enter
 			let currentInput = dialog.document.getElementById("bubble-input").getCurrentInput();
