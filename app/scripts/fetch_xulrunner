@@ -412,36 +412,39 @@ function modify_omni {
 	echo '.addon-detail-row-homepage .text-link { cursor: pointer; color: LinkText; }' >> $file
 	echo '.addon-detail-row-homepage .text-link:hover { text-decoration: underline; }' >> $file
 	
-	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.js"
+	file="chrome/toolkit/content/mozapps/extensions/aboutaddons-utils.mjs"
 	# Hide unsigned-addon warning
-	replace_line 'if \(!isCorrectlySigned\(addon\)\) \{' 'if (!isCorrectlySigned(addon)) {return {};' $file
+	replace_line 'export function isUnsignedWarningMessageDisabled\(\) \{' \
+		'export function isUnsignedWarningMessageDisabled() {if (true) return true;' $file
+	# Use our own localized string for blocked plugin notification
+	replace_line 'details-notification-hard-blocked-\$\{typeSuffix\}' 'plugins-blocked-plugin' $file
+	# Hide Recommendations tab in sidebar and recommendations in main pane
+	replace_line 'function isDiscoverEnabled\(\) \{' 'function isDiscoverEnabled() {return false;' $file
+
+	file="chrome/toolkit/content/mozapps/extensions/components/addon-details.mjs"
 	# Hide Private Browsing setting in addon details
 	replace_line 'pbRow\.' '\/\/pbRow.' $file
 	replace_line 'let isAllowed = await isAllowedInPrivateBrowsing' '\/\/let isAllowed = await isAllowedInPrivateBrowsing' $file
-	# Use our own strings for the removal prompt
-	replace_line 'let \{ BrowserAddonUI \} = windowRoot.ownerGlobal;' '' $file
-	replace_line 'await BrowserAddonUI.promptRemoveExtension' 'promptRemoveExtension' $file
-	
-	# Customize empty-list message
-	replace_line 'createEmptyListMessage\(\) {' 'createEmptyListMessage() {
-        var p = document.createElement("p");
-        p.id = "empty-list-message";
-        return p;' $file
-	# Swap in include.js, which we need for Zotero.getString(), for abuse-reports.js, which we don't need
-	
 	# Open plugin links in external browser
 	replace_line 'let homepageURL = homepageRow.querySelector\(\"a\"\);' 'let homepageURL = homepageRow.querySelector(\"\.text-link\");' $file
 	replace_line 'homepageURL.href = addon.homepageURL;' 'homepageURL.setAttribute("href", addon.homepageURL);' $file
 	replace_line '<a target="_blank" dir="ltr"><\/a>' \
-		'<label target="_blank" class="text-link" dir="ltr"><\/label>' \
-		chrome/toolkit/content/mozapps/extensions/aboutaddons.html
-	
+		'<label target="_blank" class="text-link" dir="ltr"><\/label>' $file
+
+	file="chrome/toolkit/content/mozapps/extensions/components/addon-card.mjs"
+	# Use our own strings for the removal prompt
+	replace_line 'let \{ BrowserAddonUI \} = windowRoot.window;' '' $file
+	replace_line 'await BrowserAddonUI.promptRemoveExtension' 'promptRemoveExtension' $file
+
+	# Customize empty-list message
+	replace_line 'createEmptyListMessage\(\) {' 'createEmptyListMessage() {
+        var p = document.createElement("p");
+        p.id = "empty-list-message";
+        return p;' chrome/toolkit/content/mozapps/extensions/components/addon-list.mjs
+
 	# Add zotero.ftl to the addons page for our own localized strings
 	replace_line 'href="toolkit\/about\/aboutAddons.ftl"' 'href="toolkit\/about\/aboutAddons.ftl" \/>\n    <link rel="localization" href="zotero.ftl"' \
 		chrome/toolkit/content/mozapps/extensions/aboutaddons.html
-	# Use our own localized string for blocked plugin notification
-	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.js"
-	replace_line 'details-notification-hard-blocked-\$\{typeSuffix\}' 'plugins-blocked-plugin' $file
 
 	# TODO: Use our own strings, but for now fix the bundled English ones
 	replace_line 'Manage Your Extensions' 'Manage Your Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
@@ -450,8 +453,6 @@ function modify_omni {
 	replace_line 'add-ons' 'plugins' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'Select add-on to install' 'Select plugin to install' localization/en-US/toolkit/about/aboutAddons.ftl
 	
-	# Hide Recommendations tab in sidebar and recommendations in main pane
-	replace_line 'function isDiscoverEnabled\(\) \{' 'function isDiscoverEnabled() {return false;' chrome/toolkit/content/mozapps/extensions/aboutaddonsCommon.js
 	replace_line 'pref\("extensions.htmlaboutaddons.recommendations.enabled".+' 'pref("extensions.htmlaboutaddons.recommendations.enabled", false);' greprefs.js
 	
 	# Hide Report option
