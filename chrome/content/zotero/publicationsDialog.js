@@ -66,9 +66,9 @@ const Zotero_Publications_Dialog = { // eslint-disable-line no-unused-vars, came
 		this.wizard = id('publications-dialog-wizard');
 
 		id('include-files')
-			.addEventListener('CheckboxStateChange', this.onIntroPageCheckboxChange.bind(this));
+			.addEventListener('command', this.onIntroPageCheckboxChange.bind(this));
 		id('confirm-authorship-checkbox')
-			.addEventListener('CheckboxStateChange', this.onIntroPageCheckboxChange.bind(this));
+			.addEventListener('command', this.onIntroPageCheckboxChange.bind(this));
 		id('sharing-radiogroup')
 			.addEventListener('select', this.onLicenseAspectRadioChange.bind(this));
 		id('choose-adaptations')
@@ -76,7 +76,7 @@ const Zotero_Publications_Dialog = { // eslint-disable-line no-unused-vars, came
 		id('choose-commercial')
 			.addEventListener('select', this.onLicenseAspectRadioChange.bind(this));
 		id('keep-rights-checkbox')
-			.addEventListener('CheckboxStateChange', this.onKeepRightsCheckboxChange.bind(this));
+			.addEventListener('command', this.onKeepRightsCheckboxChange.bind(this));
 		this.wizard.getPageById('intro')
 			.addEventListener('pageshow', this.onIntroPageShow.bind(this));
 		this.wizard.getPageById('choose-sharing')

@@ -1283,7 +1283,7 @@ describe("Zotero.CollectionTree", function () {
 				
 				function acceptItemsWithoutFiles(win) {
 					var doc = win.document;
-					doc.getElementById('confirm-authorship-checkbox').checked = true;
+					doc.getElementById('confirm-authorship-checkbox').click();
 					var wizard = doc.getElementById('publications-dialog-wizard');
 					if (!doc.getElementById('include-files').disabled) {
 						throw new Error("Include Files checkbox isn't disabled");
@@ -1293,8 +1293,8 @@ describe("Zotero.CollectionTree", function () {
 				
 				function acceptItemsWithFiles(win) {
 					var doc = win.document;
-					doc.getElementById('include-files').checked = true;
-					doc.getElementById('confirm-authorship-checkbox').checked = true;
+					doc.getElementById('include-files').click();
+					doc.getElementById('confirm-authorship-checkbox').click();
 					var wizard = doc.getElementById('publications-dialog-wizard');
 					if (doc.getElementById('include-files').disabled) {
 						throw new Error("Include Files checkbox shouldn't be disabled");
