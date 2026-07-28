@@ -349,6 +349,9 @@ browser_keep=(
 	content/browser/parent/ext-browser.js
 	# For spellchecking
 	content/browser/built_in_addons.json
+	# Statically imported by BackupService, which SelectableProfileService pulls in when it's
+	# instantiated as a command-line handler at startup
+	content/browser/backup/backup-constants.mjs
 )
 if [ $BUILD_WIN == 1 ]; then
 	# Windows window controls
