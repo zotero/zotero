@@ -395,8 +395,12 @@ function modify_omni {
 	
 	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.css"
 	echo >> $file
-	# Hide search bar, Themes and Plugins tabs, and sidebar footer
-	echo '.main-search, button[name="theme"], button[name="plugin"], sidebar-footer { display: none; }' >> $file
+	# Hide the search bar and the whole sidebar, since we only ever show plugins and the main pane
+	# is already headed "Manage Your Plugins"
+	echo '.main-search, #sidebar { display: none; }' >> $file
+	# Center the content in the window now that it isn't offset by the sidebar
+	echo '#full { grid-template-columns: 1fr; }' >> $file
+	echo '#content { max-width: calc(var(--page-main-content-width) + var(--main-margin-start)); margin-inline: auto; }' >> $file
 	echo '.main-heading { margin-top: 2em; }' >> $file
 	# Hide Details/Permissions tabs in addon details so we only show details
 	echo 'addon-details > button-group { display: none !important; }' >> $file
@@ -448,7 +452,6 @@ function modify_omni {
 
 	# TODO: Use our own strings, but for now fix the bundled English ones
 	replace_line 'Manage Your Extensions' 'Manage Your Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
-	replace_line '= Extensions' '= Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'Add-on' 'Plugin' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'add-ons' 'plugins' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'Select add-on to install' 'Select plugin to install' localization/en-US/toolkit/about/aboutAddons.ftl
