@@ -549,6 +549,11 @@
 			}
 		}
 		&.empty {
+			// the bottom area's divider immediately follows, so hide this
+			// layout's divider to avoid a doubled line
+			> .divider {
+				display: none;
+			}
 			#list-layout-wrapper {
 				padding: 0;
 			}
