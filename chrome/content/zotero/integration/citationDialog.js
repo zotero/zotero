@@ -952,16 +952,33 @@ class LibraryLayout extends Layout {
 		}
 	}
 
-	// click on + icon will add the item to the citation
+	// click on + icon will add the item(s) to the citation
 	_handleItemsViewIconClick(index) {
 		let rowNode = doc.getElementById(`${this.itemsView.id}-row-${index}`);
 		let rowTopBeforeRefresh = rowNode.getBoundingClientRect().top;
+		let items = this._getItemsViewIconClickItems(index);
 		this.itemsView.selection.clearSelection();
-		let row = this.itemsView.getRow(index);
-		// after adding the item, try to keep the mouse over it even if the bubble-input gets taller
-		IOManager.addItemsToCitation([row.ref]).then(() => {
+		// after adding the items, try to keep the mouse over the clicked row
+		// even if the bubble-input gets taller
+		IOManager.addItemsToCitation(items).then(() => {
 			this._scrollItemTreeToRow(rowNode.id, rowTopBeforeRefresh);
 		});
+	}
+
+	// items that a click on the + icon of the given row will add: all selected
+	// items if the row is part of the current selection, otherwise just this row's item
+	_getItemsViewIconClickItems(index) {
+		let items;
+		if (this.itemsView.selection.isSelected(index)) {
+			items = this.itemsView.getSelectedItems();
+		}
+		else {
+			items = [this.itemsView.getRow(index).ref];
+		}
+		if (DIALOG_STATE.isAddingAnnotations()) {
+			items = items.filter(item => item.isAnnotation());
+		}
+		return items;
 	}
 
 	_handleSelectionChangeWithAnnotation() {
