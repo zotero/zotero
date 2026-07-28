@@ -864,8 +864,10 @@ Zotero.Tags = new function () {
 	
 	// Return the first sequence of emojis from a string
 	this.extractEmojiForItemsList = function (str) {
-		// Either match RGI_Emoji (which includes country flags) or any character followed by the Variation Selector-16
-		let re = /(?:(?:\p{RGI_Emoji}|[\p{Extended_Pictographic}--[©®™]])(?!\uFE0F)|.\uFE0F)+/gv;
+		// Either match RGI_Emoji (which includes country flags), a pictographic symbol (see
+		// Zotero.Utilities.Internal.containsEmoji()), or any character followed by the Variation
+		// Selector-16
+		let re = /(?:(?:\p{RGI_Emoji}|[[\p{Extended_Pictographic}[\p{So}&&[☀-➿\u{1F000}-\u{1FAFF}]]]--[©®™\u{1F1E6}-\u{1F1FF}]])(?!\uFE0F)|.\uFE0F)+/gv;
 		return str.match(re)?.[0] || null;
 	};
 

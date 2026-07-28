@@ -482,13 +482,13 @@ Zotero.Utilities.Internal = {
 	},
 	
 	containsEmoji: function (str) {
-		let re = /\p{RGI_Emoji}|[\p{Extended_Pictographic}--[©®™]]/gv;
+		let re = /\p{RGI_Emoji}|[[\p{Extended_Pictographic}[\p{So}&&[☀-➿\u{1F000}-\u{1FAFF}]]]--[©®™\u{1F1E6}-\u{1F1FF}]]/gv;
 		return !!str.match(re);
 	},
 
 	includesEmoji: function (str) {
 		// Remove emoji, Zero Width Joiner, and Variation Selector-16 and compare lengths
-		const re = /(?:(?:\p{RGI_Emoji}|[\p{Extended_Pictographic}--[©®™]])(?!\uFE0F)|.\uFE0F)+/gv;
+		const re = /(?:(?:\p{RGI_Emoji}|[[\p{Extended_Pictographic}[\p{So}&&[☀-➿\u{1F000}-\u{1FAFF}]]]--[©®™\u{1F1E6}-\u{1F1FF}]])(?!\uFE0F)|.\uFE0F)+/gv;
 		return str.replace(re, '').length !== str.length;
 	},
 	
