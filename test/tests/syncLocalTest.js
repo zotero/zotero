@@ -28,7 +28,7 @@ describe("Zotero.Sync.Data.Local", function () {
 				.getInternalKeyToken();
 
 			// No-op if no primary password is set
-			assert.isFalse(Zotero.Sync.Data.Local.repairLoginManager());
+			assert.isFalse(await Zotero.Sync.Data.Local.repairLoginManager());
 
 			if (token.needsUserInit) {
 				token.initPassword("repair-test");
@@ -38,7 +38,7 @@ describe("Zotero.Sync.Data.Local", function () {
 			}
 			try {
 				assert.isTrue(token.hasPassword);
-				assert.isTrue(Zotero.Sync.Data.Local.repairLoginManager());
+				assert.isTrue(await Zotero.Sync.Data.Local.repairLoginManager());
 				assert.isFalse(token.hasPassword);
 
 				// Credentials should be saveable and readable again

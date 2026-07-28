@@ -34,6 +34,8 @@ Zotero.Sync.Data.Local = {
 	_loginManagerRealmLegacy: 'Zotero Web API',
 	_lastSyncTime: null,
 	_lastClassicSyncTime: null,
+	// Cached hasCredentials() result, for the synchronous Zotero.Sync.Runner.enabled getter
+	_hasCredentials: false,
 	// Item/Collection-only -- synced settings can't affect the undo stack
 	_remoteChangesApplied: false,
 
@@ -54,6 +56,7 @@ Zotero.Sync.Data.Local = {
 		if (!_lastSyncTime) {
 			await this._loadLastClassicSyncTime();
 		}
+		await this.hasCredentials();
 	},
 	
 	
@@ -67,7 +70,7 @@ Zotero.Sync.Data.Local = {
 		// keep the legacy entry so a downgrade can still read it. The legacy
 		// realm will be cleared in a future version once downgrades are
 		// unlikely.
-		var legacyLogin = this._getLegacyAPIKeyLoginInfo();
+		var legacyLogin = await this._getLegacyAPIKeyLoginInfo();
 		if (legacyLogin) {
 			let apiKey = legacyLogin.password;
 			if (!this._mirroredAPIKey) {
@@ -83,7 +86,7 @@ Zotero.Sync.Data.Local = {
 			}
 			return apiKey;
 		}
-		var login = this._getAPIKeyLoginInfo();
+		var login = await this._getAPIKeyLoginInfo();
 		if (login) {
 			return Zotero.OSKeyStore.decrypt(login.password);
 		}
@@ -104,30 +107,49 @@ Zotero.Sync.Data.Local = {
 	
 	/**
 	 * Check for an API key or a legacy username/password (which may or may not be valid)
+	 *
+	 * @return {Promise<Boolean>}
 	 */
-	hasCredentials: function () {
-		if (this._getAPIKeyLoginInfo() || this._getLegacyAPIKeyLoginInfo()) {
+	hasCredentials: async function () {
+		this._hasCredentials = await this._checkCredentials();
+		return this._hasCredentials;
+	},
+	
+	
+	/**
+	 * The result of the last hasCredentials() call, for callers that can't await
+	 *
+	 * @return {Boolean}
+	 */
+	get hasCachedCredentials() {
+		return this._hasCredentials;
+	},
+	
+	
+	_checkCredentials: async function () {
+		if ((await this._getAPIKeyLoginInfo()) || (await this._getLegacyAPIKeyLoginInfo())) {
 			return true;
 		}
 		// If no API key, check for legacy login
 		var username = Zotero.Prefs.get('sync.server.username');
-		return username && !!this.getLegacyPassword(username)
+		return !!username && !!(await this.getLegacyPassword(username));
 	},
 	
 	
 	setAPIKey: async function (apiKey) {
-		var oldLoginInfo = this._getAPIKeyLoginInfo();
-		var legacyLoginInfo = this._getLegacyAPIKeyLoginInfo();
+		var oldLoginInfo = await this._getAPIKeyLoginInfo();
+		var legacyLoginInfo = await this._getLegacyAPIKeyLoginInfo();
 		
 		// Clear old login
 		if ((!apiKey || apiKey === "")) {
 			if (oldLoginInfo) {
 				Zotero.debug("Clearing old API key");
-				Services.logins.removeLogin(oldLoginInfo);
+				await Services.logins.removeLoginAsync(oldLoginInfo);
 			}
 			if (legacyLoginInfo) {
-				Services.logins.removeLogin(legacyLoginInfo);
+				await Services.logins.removeLoginAsync(legacyLoginInfo);
 			}
+			this._hasCredentials = false;
 			Zotero.Notifier.trigger('delete', 'api-key', []);
 			return;
 		}
@@ -138,7 +160,7 @@ Zotero.Sync.Data.Local = {
 		catch (e) {
 			// If the write failed because the key database was unusable, reset the login
 			// manager and retry, so that logging in works without a manual fix
-			if (!this.repairLoginManager()) {
+			if (!(await this.repairLoginManager())) {
 				Zotero.OSKeyStore.alertSaveFailed();
 				throw e;
 			}
@@ -152,14 +174,15 @@ Zotero.Sync.Data.Local = {
 		}
 		// Drop any leftover plaintext entry from the legacy realm
 		if (legacyLoginInfo) {
-			Services.logins.removeLogin(legacyLoginInfo);
+			await Services.logins.removeLoginAsync(legacyLoginInfo);
 		}
+		this._hasCredentials = true;
 		Zotero.Notifier.trigger('modify', 'api-key', []);
 	},
 	
 	
 	_writeEncryptedAPIKey: async function (apiKey) {
-		var oldLoginInfo = this._getAPIKeyLoginInfo();
+		var oldLoginInfo = await this._getAPIKeyLoginInfo();
 		var storedValue = await Zotero.OSKeyStore.encrypt(apiKey);
 		var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
 				Components.interfaces.nsILoginInfo, "init");
@@ -178,7 +201,7 @@ Zotero.Sync.Data.Local = {
 		}
 		else {
 			Zotero.debug("Replacing API key");
-			Services.logins.modifyLogin(oldLoginInfo, loginInfo);
+			await Services.logins.modifyLoginAsync(oldLoginInfo, loginInfo);
 		}
 	},
 	
@@ -489,9 +512,9 @@ Zotero.Sync.Data.Local = {
 	 * since there's no primary-password prompt. Clear stored logins and reset the key database
 	 * so that credentials can be saved again.
 	 *
-	 * @return {Boolean} - True if the login manager was reset
+	 * @return {Promise<Boolean>} - True if the login manager was reset
 	 */
-	repairLoginManager: function () {
+	repairLoginManager: async function () {
 		try {
 			let token = Cc["@mozilla.org/security/pk11tokendb;1"]
 				.getService(Ci.nsIPK11TokenDB)
@@ -500,7 +523,8 @@ Zotero.Sync.Data.Local = {
 				return false;
 			}
 			Zotero.debug("Primary password set on NSS key database -- resetting login manager", 1);
-			Services.logins.removeAllLogins();
+			await Services.logins.removeAllLoginsAsync();
+			this._hasCredentials = false;
 			token.reset();
 			if (token.needsUserInit) {
 				token.initPassword("");
@@ -516,21 +540,20 @@ Zotero.Sync.Data.Local = {
 
 
 	/**
-	 * @return {nsILoginInfo|false}
+	 * @return {Promise<nsILoginInfo|false>}
 	 */
-	_getAPIKeyLoginInfo: function () {
+	_getAPIKeyLoginInfo: async function () {
 		try {
-			var logins = Services.logins.findLogins(
-				this._loginManagerHost,
-				null,
-				this._loginManagerRealm
-			);
+			var logins = await Services.logins.searchLoginsAsync({
+				origin: this._loginManagerHost,
+				httpRealm: this._loginManagerRealm
+			});
 		}
 		catch (e) {
 			Zotero.logError(e);
 			// If the key database was unusable, reset the login manager so that credentials
 			// can be saved again
-			if (this.repairLoginManager()) {
+			if (await this.repairLoginManager()) {
 				return false;
 			}
 			if (!this._lastLoginManagerErrorTime
@@ -549,15 +572,14 @@ Zotero.Sync.Data.Local = {
 	
 	
 	/**
-	 * @return {nsILoginInfo|false}
+	 * @return {Promise<nsILoginInfo|false>}
 	 */
-	_getLegacyAPIKeyLoginInfo: function () {
+	_getLegacyAPIKeyLoginInfo: async function () {
 		try {
-			var logins = Services.logins.findLogins(
-				this._loginManagerHost,
-				null,
-				this._loginManagerRealmLegacy
-			);
+			var logins = await Services.logins.searchLoginsAsync({
+				origin: this._loginManagerHost,
+				httpRealm: this._loginManagerRealmLegacy
+			});
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -572,20 +594,20 @@ Zotero.Sync.Data.Local = {
 		if (username) {
 			// Check for legacy password if no password set in current session
 			// and no API keys stored yet
-			let password = this.getLegacyPassword(username);
+			let password = await this.getLegacyPassword(username);
 			if (!password) {
 				return "";
 			}
 			
 			let json = await Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
-			this.removeLegacyLogins();
+			await this.removeLegacyLogins();
 			return json.key;
 		}
 		return "";
 	},
 	
 	
-	getLegacyPassword: function (username) {
+	getLegacyPassword: async function (username) {
 		var loginManagerHost = 'chrome://zotero';
 		var loginManagerRealm = 'Zotero Sync Server';
 		
@@ -594,7 +616,10 @@ Zotero.Sync.Data.Local = {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 			.getService(Components.interfaces.nsILoginManager);
 		try {
-			var logins = loginManager.findLogins(loginManagerHost, null, loginManagerRealm);
+			var logins = await loginManager.searchLoginsAsync({
+				origin: loginManagerHost,
+				httpRealm: loginManagerRealm
+			});
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -609,7 +634,7 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41,
-		var logins = loginManager.findLogins(loginManagerHost, "", null);
+		var logins = await loginManager.searchLoginsAsync({ origin: loginManagerHost });
 		for (let i = 0; i < logins.length; i++) {
 			if (logins[i].username == username
 					&& logins[i].formSubmitURL == "Zotero Sync Server") {
@@ -620,7 +645,7 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	removeLegacyLogins: function () {
+	removeLegacyLogins: async function () {
 		var loginManagerHost = 'chrome://zotero';
 		var loginManagerRealm = 'Zotero Sync Server';
 		
@@ -629,7 +654,10 @@ Zotero.Sync.Data.Local = {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 			.getService(Components.interfaces.nsILoginManager);
 		try {
-			var logins = loginManager.findLogins(loginManagerHost, null, loginManagerRealm);
+			var logins = await loginManager.searchLoginsAsync({
+				origin: loginManagerHost,
+				httpRealm: loginManagerRealm
+			});
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -638,7 +666,7 @@ Zotero.Sync.Data.Local = {
 		
 		// Remove all legacy users
 		for (let login of logins) {
-			loginManager.removeLogin(login);
+			await loginManager.removeLoginAsync(login);
 		}
 		// Remove the legacy pref
 		Zotero.Prefs.clear('sync.server.username');
