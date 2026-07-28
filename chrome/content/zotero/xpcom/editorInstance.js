@@ -851,7 +851,7 @@ class EditorInstance {
 						// Forget the previously focused element within the iframe to avoid
 						// it receiving focus for a moment if you later tab back into the editor
 						iframe.ownerDocument.activeElement.blur();
-						Services.focus.moveFocus(iframe.ownerGlobal, iframe, Services.focus.MOVEFOCUS_BACKWARD, Services.focus.FLAG_SHOWRING);
+						Services.focus.moveFocus(iframe.documentGlobal, iframe, Services.focus.MOVEFOCUS_BACKWARD, Services.focus.FLAG_SHOWRING);
 					};
 					return;
 				}

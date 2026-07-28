@@ -1877,7 +1877,7 @@ Zotero.Utilities.Internal = {
 		
 		// Pull window to foreground
 		Zotero.Utilities.Internal.activate(pane.document.defaultView);
-		pane.document.ownerGlobal.focus();
+		pane.document.documentGlobal.focus();
 	},
 	
 	

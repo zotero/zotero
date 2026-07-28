@@ -362,7 +362,7 @@
 				return;
 			}
 			
-			// let win = popupElem.ownerGlobal;
+			// let win = popupElem.documentGlobal;
 			// let doc = popupElem.ownerDocument;
 
 			// TODO: maybe we can let plugins to load their own l10n files in onShowing,
@@ -769,7 +769,7 @@
 		 */
 		_computeAvailableMenuNum(popupElem) {
 			// Compute the height of current screen
-			let screenHeight = popupElem.ownerGlobal.screen.availHeight;
+			let screenHeight = popupElem.documentGlobal.screen.availHeight;
 			let maxMenuHeight = screenHeight * 0.8;
 
 			let menuCount = popupElem.querySelectorAll(`& > :is(menuitem, menu):not(.${CUSTOM_MENU_CLASS}):not([hidden=true])`).length;

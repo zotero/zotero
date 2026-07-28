@@ -177,7 +177,7 @@ function waitForWindow(uri, callback) {
 		}
 		
 		Services.ww.unregisterNotification(winobserver);
-		var win = ev.target.ownerGlobal;
+		var win = ev.target.documentGlobal;
 		// Give window code time to run on load
 		win.setTimeout(function () {
 			if (callback) {

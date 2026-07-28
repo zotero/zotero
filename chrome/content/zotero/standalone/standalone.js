@@ -836,13 +836,13 @@ const ZoteroStandalone = new function () {
 		
 		// Make our own removal prompt instead of using BrowserAddonUI.promptRemoveExtension() from
 		// browser-addons.js
-		doc.ownerGlobal.promptRemoveExtension = function (addon) {
+		doc.documentGlobal.promptRemoveExtension = function (addon) {
 			var { name } = addon;
 			var ps = Services.prompt;
 			var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 			var result = ps.confirmEx(
-				doc.ownerGlobal,
+				doc.documentGlobal,
 				Zotero.getString('addons.remove.title', name),
 				Zotero.getString('addons.remove.text', [name, Zotero.appName]),
 				buttonFlags,

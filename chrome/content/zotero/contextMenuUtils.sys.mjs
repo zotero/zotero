@@ -124,7 +124,7 @@ function getContextMenuPosition(targetElement) {
  */
 export function createContextMenuEvent(targetElement) {
 	let { clientX, clientY } = getContextMenuPosition(targetElement);
-	let win = targetElement.ownerGlobal;
+	let win = targetElement.documentGlobal;
 	let screenX = win.mozInnerScreenX + clientX;
 	let screenY = win.mozInnerScreenY + clientY;
 	// Need to use initNSMouseEvent() to set inputSource, so just construct a

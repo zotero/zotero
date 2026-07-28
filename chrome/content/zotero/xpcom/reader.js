@@ -1387,7 +1387,7 @@ class ReaderInstance {
 			return;
 		}
 
-		let iframeWindow = event.target.ownerGlobal;
+		let iframeWindow = event.target.documentGlobal;
 
 		this._window.MozXULElement.insertFTLIfNeeded("toolkit/global/textActions.ftl");
 		this._window.MozXULElement.insertFTLIfNeeded("browser/menubar.ftl");
@@ -1422,7 +1422,7 @@ class ReaderInstance {
 		menuitemSwitchTextDirection.hidden = !showSwitchTextDirection;
 		menuitemSwitchTextDirection.previousElementSibling.hidden = !showSwitchTextDirection;
 
-		let selection = event.target.ownerGlobal.getSelection();
+		let selection = event.target.documentGlobal.getSelection();
 		if (!selection || !selection.anchorNode) {
 			return;
 		}
