@@ -411,22 +411,24 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 	let urlSet = new Set(identifiers.url);
 	let requestItemIdentifiers = identifiers.itemIdentifiers || [];
 	let matches = [];
-	let getMatchedItemIndex = function (matchedIdentifiers) {
+	let getMatchedItemIndexes = function (matchedIdentifiers) {
 		if (!requestItemIdentifiers.length) {
-			return undefined;
+			return [];
 		}
 		let doi = matchedIdentifiers.doi && Zotero.Utilities.cleanDOI(matchedIdentifiers.doi);
 		doi = doi && doi.toLowerCase();
+		let indexes = [];
 		for (let i = 0; i < requestItemIdentifiers.length; i++) {
 			let itemIdentifiers = requestItemIdentifiers[i];
 			if (doi && itemIdentifiers.doi.includes(doi)) {
-				return i;
+				indexes.push(i);
+				continue;
 			}
 			if (matchedIdentifiers.url && itemIdentifiers.url.includes(matchedIdentifiers.url)) {
-				return i;
+				indexes.push(i);
 			}
 		}
-		return undefined;
+		return indexes;
 	};
 
 	if (doiSet.size) {
@@ -532,9 +534,11 @@ Zotero.Server.Connector.findExistingItemsByIdentifiers = async function (identif
 			matchedFields,
 			matchedIdentifiers
 		};
-		let matchedItemIndex = getMatchedItemIndex(matchedIdentifiers);
-		if (matchedItemIndex !== undefined) {
-			match.matchedItemIndex = matchedItemIndex;
+		let matchedItemIndexes = getMatchedItemIndexes(matchedIdentifiers);
+		if (matchedItemIndexes.length) {
+			// Keep the singular field for older Connector versions.
+			match.matchedItemIndex = matchedItemIndexes[0];
+			match.matchedItemIndexes = matchedItemIndexes;
 		}
 		matches.push(match);
 	}
