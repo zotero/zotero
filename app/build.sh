@@ -408,6 +408,8 @@ echo "" >> $prefs_file
 echo "# Zotero extension prefs" >> $prefs_file
 echo "" >> $prefs_file
 cat defaults-z/preferences/zotero.js >> $prefs_file
+# Babel strips the trailing newline, so anything appended below would share a line
+echo "" >> $prefs_file
 
 rm -rf defaults-z
 
