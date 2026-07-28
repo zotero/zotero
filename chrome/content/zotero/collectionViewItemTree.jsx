@@ -140,7 +140,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		let lastLibraryID = null;
 		let seenFirstHeader = false;
 		for (let row of this._rows) {
-			if (row.type == 'library-header' || row.type == 'spacer') {
+			if (!row.isObjectRow) {
 				continue;
 			}
 			if (row.level == 0 && row.ref.libraryID !== lastLibraryID) {
@@ -405,7 +405,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			for (let i = 0; i < this._rows.length; i++) {
 				let row = this._rows[i];
 				// Don't copy library header or spacer rows -- they're reinserted after sorting
-				if (row.type == 'library-header' || row.type == 'spacer') {
+				if (!row.isObjectRow) {
 					continue;
 				}
 				// Top-level items
@@ -1187,8 +1187,8 @@ class CollectionViewItemTree extends ItemTree {
 	 */
 	isSelectable(index, selectAll=false) {
 		// Library header and spacer rows are never selectable
-		let type = this.getRow(index)?.type;
-		if (type == 'library-header' || type == 'spacer') {
+		let row = this.getRow(index);
+		if (row && !row.isObjectRow) {
 			return false;
 		}
 		// Every listed item is selectable individually. There are exceptions
@@ -1199,7 +1199,6 @@ class CollectionViewItemTree extends ItemTree {
 		// or when the tree is not in search mode
 		if (!this._searchMode || this.collectionTreeRow.isPublications()) return true;
 		
-		let row = this.getRow(index);
 		if (!row) return false;
 
 		// Only deleted items are selectable in trash
@@ -1257,8 +1256,8 @@ class CollectionViewItemTree extends ItemTree {
 	 * Start a drag using HTML 5 Drag and Drop
 	 */
 	onDragStart(event, index) {
-		let type = this.getRow(index)?.type;
-		if (type == 'library-header' || type == 'spacer') {
+		let row = this.getRow(index);
+		if (row && !row.isObjectRow) {
 			event.preventDefault();
 			return false;
 		}

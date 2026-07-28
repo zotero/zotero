@@ -277,7 +277,7 @@
 					
 					// On a Select All of more than a few items, display a row
 					// count instead of the usual item type mismatch error
-					let displayNumItemsOnTypeError = count > 5 && count == this.itemsView.rowCount;
+					let displayNumItemsOnTypeError = count > 5 && count == this.itemsView.objectRowCount;
 					
 					// Initialize the merge pane with the selected items
 					this._duplicatesPane.setItems(this.data, displayNumItemsOnTypeError);
@@ -312,7 +312,7 @@
 					msg = { l10nId: key, l10nArgs: { count } };
 				}
 				else {
-					let count = this.itemsView.rowCount;
+					let count = this.itemsView.objectRowCount;
 					if (this.collectionTreeRows[0].isTrash()
 							&& this.itemsView._rows?.some(
 								x => x.ref instanceof Zotero.Collection || x.ref instanceof Zotero.Search

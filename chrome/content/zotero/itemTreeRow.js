@@ -33,6 +33,16 @@ class ItemTreeRow {
 		return 'item';
 	}
 
+	/**
+	 * Whether the row represents an object in the view, as opposed to a
+	 * library header or spacer. Callers that operate on the view's contents
+	 * (counting rows, collecting items, walking top-level rows) should skip
+	 * rows where this is false.
+	 */
+	get isObjectRow() {
+		return true;
+	}
+
 	get isDraggable() {
 		return false;
 	}
@@ -653,6 +663,10 @@ class LibraryHeaderItemTreeRow extends ItemTreeRow {
 		return 'library-header';
 	}
 
+	get isObjectRow() {
+		return false;
+	}
+
 	getDisplayTitle() {
 		return this._label ?? Zotero.Libraries.getName(this.ref.libraryID);
 	}
@@ -710,6 +724,10 @@ class SpacerItemTreeRow extends ItemTreeRow {
 
 	get type() {
 		return 'spacer';
+	}
+
+	get isObjectRow() {
+		return false;
 	}
 
 	getField() {

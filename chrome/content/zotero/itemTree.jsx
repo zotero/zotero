@@ -1797,7 +1797,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @return {Zotero.Item[]|Integer[]} - An array of Zotero.Item objects or itemIDs
 	 */
 	getSortedItems(asIDs) {
-		return this._rows.map(row => asIDs ? row.ref.id : row.ref);
+		return this._rows
+			.filter(row => row.isObjectRow)
+			.map(row => asIDs ? row.ref.id : row.ref);
+	}
+
+	/**
+	 * Number of visible rows representing objects, excluding library headers
+	 * and spacers
+	 *
+	 * @return {Integer}
+	 */
+	get objectRowCount() {
+		return this._rows.reduce((count, row) => count + (row.isObjectRow ? 1 : 0), 0);
 	}
 
 	/**

@@ -2915,6 +2915,32 @@ describe("CollectionViewItemTree", function () {
 			await selectLibrary(win);
 		});
 
+		it("shouldn't include header and spacer rows in the view's items", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			let item1 = await createDataObject('item', { collections: [collection1.id] });
+			let item2 = await createDataObject(
+				'item', { libraryID: group.libraryID, collections: [collection2.id] }
+			);
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			// Two headers and a spacer sit among the rows
+			assert.equal(view.rowCount, 5);
+
+			let items = view.getSortedItems();
+			assert.sameMembers(items.map(o => o.id), [item1.id, item2.id]);
+			assert.isTrue(items.every(o => o instanceof Zotero.Item));
+			assert.sameMembers(view.getSortedItems(true), [item1.id, item2.id]);
+			assert.equal(view.objectRowCount, 2);
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
 		it("shouldn't group feeds by library, even across feed libraries", async function () {
 			let feed1 = await createFeed();
 			let feed2 = await createFeed();

@@ -2843,7 +2843,8 @@ var ZoteroPane = new function () {
 
 			for (let row = 0; row < this.itemsView.rowCount; row++) {
 				// Only look at top-level items
-				if (this.itemsView.getLevel(row) !== 0) {
+				if (this.itemsView.getLevel(row) !== 0
+						|| !this.itemsView.getRow(row).isObjectRow) {
 					continue;
 				}
 

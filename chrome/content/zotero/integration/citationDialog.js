@@ -1041,7 +1041,9 @@ class LibraryLayout extends Layout {
 		// If the itemTree is still loading, wait for it to finish
 		await this.itemsView.waitForLoad();
 		// Scroll to the first cited item
-		let firstCitedRow = this.itemsView._rows.findIndex(row => CitationDataManager.itemAddedCache.has(row.ref.id));
+		let firstCitedRow = this.itemsView._rows.findIndex(
+			row => row.isObjectRow && CitationDataManager.itemAddedCache.has(row.ref.id)
+		);
 		if (firstCitedRow == -1) return;
 		this.itemsView.ensureRowsAreVisible([firstCitedRow]);
 	}
