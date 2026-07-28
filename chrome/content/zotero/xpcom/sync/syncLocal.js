@@ -516,9 +516,8 @@ Zotero.Sync.Data.Local = {
 	 */
 	repairLoginManager: async function () {
 		try {
-			let token = Cc["@mozilla.org/security/pk11tokendb;1"]
-				.getService(Ci.nsIPK11TokenDB)
-				.getInternalKeyToken();
+			let token = Cc["@mozilla.org/security/internalkeytoken;1"]
+				.createInstance(Ci.nsIPKCS11Token);
 			if (!token.hasPassword) {
 				return false;
 			}
@@ -526,9 +525,7 @@ Zotero.Sync.Data.Local = {
 			await Services.logins.removeAllLoginsAsync();
 			this._hasCredentials = false;
 			token.reset();
-			if (token.needsUserInit) {
-				token.initPassword("");
-			}
+			token.changePassword("", "");
 		}
 		catch (e) {
 			Zotero.logError(e);

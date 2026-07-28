@@ -23,19 +23,13 @@ describe("Zotero.Sync.Data.Local", function () {
 
 	describe("#repairLoginManager()", function () {
 		it("should reset a key database with a primary password set", async function () {
-			var token = Components.classes["@mozilla.org/security/pk11tokendb;1"]
-				.getService(Components.interfaces.nsIPK11TokenDB)
-				.getInternalKeyToken();
+			var token = Components.classes["@mozilla.org/security/internalkeytoken;1"]
+				.createInstance(Components.interfaces.nsIPKCS11Token);
 
 			// No-op if no primary password is set
 			assert.isFalse(await Zotero.Sync.Data.Local.repairLoginManager());
 
-			if (token.needsUserInit) {
-				token.initPassword("repair-test");
-			}
-			else {
-				token.changePassword("", "repair-test");
-			}
+			token.changePassword("", "repair-test");
 			try {
 				assert.isTrue(token.hasPassword);
 				assert.isTrue(await Zotero.Sync.Data.Local.repairLoginManager());
