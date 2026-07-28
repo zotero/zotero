@@ -448,6 +448,24 @@ describe("Citation Dialog", function () {
 			assert.isTrue(dialog.document.getElementById("list-layout").hidden);
 		});
 
+		it("should show the citation preview only when the citation has items", async function () {
+			let prefWas = Zotero.Prefs.get("integration.citationPreviewShown");
+			Zotero.Prefs.set("integration.citationPreviewShown", true);
+			try {
+				IOManager.updateBubbleInput();
+				assert.isTrue(dialog.document.getElementById("citation-preview").hidden);
+				assert.isTrue(dialog.document.getElementById("display-preview-button").hidden);
+
+				let item = await createDataObject('item');
+				await IOManager.addItemsToCitation([item]);
+				assert.isFalse(dialog.document.getElementById("citation-preview").hidden);
+				assert.isFalse(dialog.document.getElementById("display-preview-button").hidden);
+			}
+			finally {
+				Zotero.Prefs.set("integration.citationPreviewShown", prefWas);
+			}
+		});
+
 		it("should highlight bubbles whose items are selected", async function () {
 			let itemOne = await createDataObject('item');
 			let itemTwo = await createDataObject('item');

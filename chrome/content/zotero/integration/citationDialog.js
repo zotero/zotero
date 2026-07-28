@@ -2079,19 +2079,19 @@ const CitationPreview = {
 		let prefShown = Zotero.Prefs.get("integration.citationPreviewShown");
 		let isCitingItems = DIALOG_STATE.isCitingItems();
 		let hasPreview = !!io.preview;
-		let shouldShow = isCitingItems && prefShown && hasPreview;
-		_id("citation-preview").hidden = !shouldShow;
 		let isEmpty = !CitationDataManager.items.length;
-		_id("citation-preview-empty").hidden = !isEmpty;
-		_id("citation-preview-content").hidden = isEmpty;
+		// The preview pane appears when citing at least one item and the caller has
+		// provided a preview function
+		let isRelevant = isCitingItems && hasPreview && !isEmpty;
+		_id("citation-preview").hidden = !(isRelevant && prefShown);
 		if (isEmpty) {
 			_id("citation-preview-content").innerHTML = "";
 			_id("citation-preview-error").hidden = true;
 		}
-		// The toggle button only makes sense while citing items with a backing
-		// preview function. It reflects the pref directly.
+		// The toggle button is hidden when there's no preview and is restored to its last
+		// state when the preview pane appears
 		let toggleBtn = _id("display-preview-button");
-		toggleBtn.hidden = !(isCitingItems && hasPreview);
+		toggleBtn.hidden = !isRelevant;
 		toggleBtn.setAttribute("aria-pressed", prefShown ? "true" : "false");
 		if (!isEmpty) {
 			CitationPreview._renderDebounced();
