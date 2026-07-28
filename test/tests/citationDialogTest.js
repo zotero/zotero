@@ -485,6 +485,29 @@ describe("Citation Dialog", function () {
 			assert.isTrue(rowNode.classList.contains("highlighted"));
 		});
 
+		it("should focus the input after adding an item with Enter in the items list", async function () {
+			let collection = await createDataObject('collection');
+			let item = await createDataObject('item', { collections: [collection.id] });
+
+			await IOManager.toggleDialogMode("library");
+			let cv = dialog.libraryLayout.collectionsView;
+			let itemsView = dialog.libraryLayout.itemsView;
+			await cv.selectByID("C" + collection.id);
+			await itemsView.waitForLoad();
+
+			await itemsView.selectItem(item.id);
+			IOManager.focusItemTree();
+			let treeElem = dialog.document.querySelector("#zotero-items-tree [tabindex]");
+			treeElem.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+			// the post-add handling returns focus to the input
+			while (!dialog.document.activeElement.closest("bubble-input")) {
+				await Zotero.Promise.delay(10);
+			}
+
+			await cv.selectByID("L" + Zotero.Libraries.userLibraryID);
+			await itemsView.waitForLoad();
+		});
+
 		it("should show the union of items from multiple selected collections", async function () {
 			let collectionOne = await createDataObject('collection');
 			let collectionTwo = await createDataObject('collection');

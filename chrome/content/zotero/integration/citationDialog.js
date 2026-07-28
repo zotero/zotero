@@ -1027,10 +1027,11 @@ class LibraryLayout extends Layout {
 	// scroll it back up so that the mouse remains over the same row as before click
 	// do not do it on click of the first row, since then the mouse will be on a header
 	_scrollItemTreeToRow(rowID, rowTopBeforeRefresh) {
-		let rowIndex = rowID.split("-")[4];
+		let rowIndex = parseInt(rowID.split("-").at(-1));
 		if (rowIndex === 0) return;
 		this.itemsView.ensureRowIsVisible(rowIndex);
 		let rowAfterRefresh = doc.querySelector(`#zotero-items-tree #${rowID}`);
+		if (!rowAfterRefresh) return;
 		let rowTopAfterRefresh = rowAfterRefresh.getBoundingClientRect().top;
 		let delta = rowTopAfterRefresh - rowTopBeforeRefresh;
 		if (delta > 0.1) {
