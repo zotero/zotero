@@ -311,7 +311,6 @@ cd $omni_dir
 rm actors/AboutLogins{Parent,Child}.sys.mjs
 rm actors/AboutMessagePreview{Parent,Child}.sys.mjs
 rm actors/AboutNewTab{Parent,Child}.sys.mjs
-rm actors/AboutPocket{Parent,Child}.sys.mjs
 rm actors/AboutPrivateBrowsing{Parent,Child}.sys.mjs
 rm actors/AboutProtections{Parent,Child}.sys.mjs
 rm actors/AboutReader{Parent,Child}.sys.mjs
