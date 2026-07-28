@@ -158,15 +158,11 @@ export class HiddenBrowser {
 			// Figure out whether the browser should be remote. We actually
 			// perform the load in PageDataChild, but remoteness changes
 			// need to happen here.
-			let oa = E10SUtils.predictOriginAttributes({ browser: this });
-			let remoteType = E10SUtils.getRemoteTypeForURI(
-				uri,
-				true,
-				false,
-				E10SUtils.DEFAULT_REMOTE_TYPE,
-				null,
-				oa
-			);
+			let remoteType = ChromeUtils.predictRemoteTypeForURI(uri, {
+				preferredRemoteType: E10SUtils.DEFAULT_REMOTE_TYPE,
+				useRemoteTabs: true,
+				useRemoteSubframes: false
+			});
 			if (this.remoteType !== remoteType) {
 				// The following functions need to be called on the <browser> directly,
 				// not through our proxy (aka 'this')
