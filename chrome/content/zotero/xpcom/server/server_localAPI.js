@@ -241,6 +241,10 @@ const exportFormats = new Map([
  * Base class for all local API endpoints. Implements pre- and post-processing steps.
  */
 class LocalAPIEndpoint {
+	// Whether write-method requests to this endpoint must provide a Zotero-Server-ID
+	// header. Endpoints that validate a different secret can set this to false.
+	requireServerIDOnWrite = true;
+
 	async init(requestData) {
 		if (!Zotero.Prefs.get('httpServer.localAPI.enabled')) {
 			return this.makeResponse(403, 'text/plain', 'Local API is not enabled');
@@ -611,7 +615,7 @@ class LocalAPIEndpoint {
 	 *   the request is rejected with 412 (Precondition Failed).
 	 * - Write requests (POST, PUT, PATCH, DELETE) must provide the header, or
 	 *   they're rejected with 428 (Precondition Required). Read requests may
-	 *   omit it.
+	 *   omit it, as may endpoints that set requireServerIDOnWrite to false.
 	 *
 	 * Returns null when the request may proceed, or an HTTP response array when
 	 * it should be rejected.
@@ -621,7 +625,8 @@ class LocalAPIEndpoint {
 	_validateServerID(requestData) {
 		let provided = requestData.headers.get('Zotero-Server-ID');
 		if (!provided) {
-			if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(requestData.method)) {
+			if (this.requireServerIDOnWrite
+					&& ['POST', 'PUT', 'PATCH', 'DELETE'].includes(requestData.method)) {
 				return this.makeResponse(428, 'text/plain', 'Zotero-Server-ID not provided');
 			}
 			return null;
@@ -1279,7 +1284,8 @@ Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/file/view/url"] = Z
 Zotero.Server.LocalAPI.UploadReceiver = class extends LocalAPIEndpoint {
 	supportedMethods = ['POST'];
 
-	// Required so the post-write block doesn't insist on a library write check
+	// Overridden so the write block doesn't run: no API key or library write check
+	// applies here, and the response isn't a data object
 	async _initInternal(requestData) {
 		try {
 			if (!Zotero.Prefs.get('httpServer.localAPI.enabled')) {

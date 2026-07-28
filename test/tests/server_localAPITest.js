@@ -2198,6 +2198,75 @@ describe("Local API Server", function () {
 				assert.equal(status, 404);
 			});
 
+			it("shouldn't require a server ID on the upload request", async function () {
+				// Web API clients post the bytes to S3, not to Zotero, so they strip
+				// Zotero-specific headers from this request -- it has to work without one
+				let content = "Upload sent without a Zotero-Server-ID header";
+				let bytes = new TextEncoder().encode(content);
+				let tmpPath = PathUtils.join(Zotero.getTempDirectory().path, 'localapi-no-server-id.bin');
+				await IOUtils.write(tmpPath, bytes);
+				let md5 = await Zotero.Utilities.Internal.md5Async(tmpPath);
+				await IOUtils.remove(tmpPath);
+
+				let { response: authResp } = await apiPost(
+					`/users/0/items/${attachment.key}/file`,
+					{
+						body: `md5=${md5}&filename=no-server-id.bin`
+							+ `&filesize=${bytes.length}&mtime=${Date.now()}`,
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'If-None-Match': '*',
+						}
+					}
+				);
+
+				let uploadXhr = await Zotero.HTTP.request('POST', authResp.url, {
+					headers: {
+						'Zotero-Allowed-Request': '1',
+						'Content-Type': 'application/octet-stream',
+					},
+					body: content,
+					successCodes: [201],
+					responseType: 'text'
+				});
+				assert.equal(uploadXhr.status, 201);
+
+				// And the upload is usable, so the flow completes as normal
+				let { status } = await apiPost(
+					`/users/0/items/${attachment.key}/file`,
+					{
+						body: `upload=${authResp.uploadKey}`,
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'If-None-Match': '*',
+						},
+						successCodes: [204]
+					}
+				);
+				assert.equal(status, 204);
+				assert.equal(
+					await Zotero.Utilities.Internal.md5Async(await attachment.getFilePathAsync()),
+					md5
+				);
+			});
+
+			it("should reject an upload with a mismatched server ID with 412", async function () {
+				let { status } = await Zotero.HTTP.request(
+					'POST', apiRoot + '/local/uploads/badkey999',
+					{
+						headers: {
+							'Zotero-Allowed-Request': '1',
+							'Content-Type': 'application/octet-stream',
+							'Zotero-Server-ID': 'wrongServerID',
+						},
+						body: 'whatever',
+						successCodes: [412],
+						responseType: 'text'
+					}
+				);
+				assert.equal(status, 412);
+			});
+
 			it("should reject PATCH partial upload with 405", async function () {
 				let { status } = await apiPatch(
 					`/users/0/items/${attachment.key}/file?algorithm=xdelta&upload=foo`,
