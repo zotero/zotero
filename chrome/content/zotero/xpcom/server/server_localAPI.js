@@ -1651,9 +1651,9 @@ Zotero.Server.Endpoints["/api/groups/:groupID/tags/:tag"] = Zotero.Server.LocalA
 Zotero.Server.LocalAPI._promptForAuthorization = async function (appName) {
 	let title = Zotero.ftl.formatValueSync('local-api-authorize-title');
 	let text = Zotero.ftl.formatValueSync('local-api-authorize-text', { appName });
-	let allowLabel = Zotero.ftl.formatValueSync('local-api-authorize-allow');
-	let alwaysAllowLabel = Zotero.ftl.formatValueSync('local-api-authorize-always-allow');
-	let denyLabel = Zotero.ftl.formatValueSync('local-api-authorize-deny');
+	let allowLabel = Zotero.ftl.formatValueSync('general-allow');
+	let alwaysAllowLabel = Zotero.ftl.formatValueSync('general-always-allow');
+	let denyLabel = Zotero.ftl.formatValueSync('general-deny');
 
 	let index = Zotero.Prompt.confirm({
 		title,
