@@ -72,6 +72,7 @@ const xpcomFilesLocal = [
 	'attachments',
 	'attachmentReadObserver',
 	'browserRequest',
+	'documentResolver',
 	'cite',
 	'citeprocRsBridge',
 	'data/library',
