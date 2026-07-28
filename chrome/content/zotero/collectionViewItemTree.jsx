@@ -112,8 +112,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 
 	/**
 	 * When showing multiple libraries, group rows by library in collections-list
-	 * order -- independent of the active sort direction -- with each library's
-	 * header row pinned above its items
+	 * order -- independent of the active sort direction
 	 */
 	_compareRows(a, b) {
 		if (this._groupedByLibrary) {
@@ -122,13 +121,25 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			if (rankA != rankB) {
 				return rankA - rankB;
 			}
-			let aHeader = a.type == 'library-header';
-			let bHeader = b.type == 'library-header';
-			if (aHeader || bHeader) {
-				return aHeader == bHeader ? 0 : (aHeader ? -1 : 1);
-			}
 		}
 		return super._compareRows(a, b);
+	}
+
+	/**
+	 * Sorting compares rows as items, so remove the header and spacer rows first
+	 * and rebuild them afterward, keeping each header attached to the top of its
+	 * library's block
+	 */
+	_sort(itemIDs) {
+		if (this._showSectionHeaders) {
+			this._rows = this._rows.filter(row => row.isObjectRow);
+			this.refreshRowMap();
+		}
+		super._sort(itemIDs);
+		if (this._showSectionHeaders) {
+			this._insertLibraryHeaders();
+			this.refreshRowMap();
+		}
 	}
 
 	/**

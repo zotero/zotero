@@ -2941,6 +2941,43 @@ describe("CollectionViewItemTree", function () {
 			await group.eraseTx();
 		});
 
+		it("should keep headers above their items after a column sort", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			await createDataObject('item', { title: "AAA", collections: [collection1.id] });
+			await createDataObject('item', { title: "ZZZ", collections: [collection1.id] });
+			await createDataObject(
+				'item', { libraryID: group.libraryID, title: "MMM", collections: [collection2.id] }
+			);
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			await view.sort();
+
+			let userHeaderRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
+			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
+			assert.equal(userHeaderRow, 0, "First header stays at the top");
+			assert.equal(view.getRow(groupHeaderRow - 1).type, 'spacer',
+				"Spacer stays directly above the later header");
+			// Every item still sits within its own library's section
+			for (let i = 0; i < view.rowCount; i++) {
+				let row = view.getRow(i);
+				if (!row.isObjectRow) continue;
+				if (row.ref.libraryID == group.libraryID) {
+					assert.isAbove(i, groupHeaderRow, `Group item at row ${i}`);
+				}
+				else {
+					assert.isBelow(i, groupHeaderRow - 1, `User library item at row ${i}`);
+				}
+			}
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
 		it("shouldn't group feeds by library, even across feed libraries", async function () {
 			let feed1 = await createFeed();
 			let feed2 = await createFeed();
