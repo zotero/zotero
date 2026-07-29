@@ -169,6 +169,7 @@ describe("FileRenamingDialog", function () {
 				await dialog.handleWindowClose(event);
 				assert.isString(stubs.confirm.firstCall.args[0].title, 'prompt title must resolve to a string');
 				assert.isString(stubs.confirm.firstCall.args[0].text, 'prompt body must resolve to a string');
+				assert.equal(stubs.confirm.callCount, 1, 'no rename prompt when the reset lands back on the baseline');
 				let { sets, clears } = templateWrites(stubs);
 				assert.lengthOf(sets, 0, 'template must not be synced on reset');
 				assert.lengthOf(clears, 1, 'template setting must be cleared');
@@ -206,6 +207,7 @@ describe("FileRenamingDialog", function () {
 				await dialog.handleWindowClose(event);
 				assert.isString(stubs.confirm.firstCall.args[0].title, 'prompt title must resolve to a string');
 				assert.isString(stubs.confirm.firstCall.args[0].text, 'prompt body must resolve to a string');
+				assert.equal(stubs.confirm.callCount, 1, 'no rename prompt when the reset lands back on the baseline');
 				let { sets, clears } = templateWrites(stubs);
 				assert.lengthOf(sets, 0, 'template must not be synced on reset');
 				assert.lengthOf(clears, 1, 'template setting must be cleared');
@@ -288,6 +290,57 @@ describe("FileRenamingDialog", function () {
 			}
 			finally {
 				sandbox.restore();
+				restoreDialog();
+			}
+		});
+
+		it("should prompt to rename files after resetting the template on Done and skip the preview when declined", async function () {
+			await Zotero.SyncedSettings.set(group.libraryID, 'attachmentRenameTemplate', '{{ title }}-baseline');
+			let sandbox = sinon.createSandbox();
+			let stubs = setupStubs(sandbox, 0);
+			stubs.confirm.onSecondCall().returns(1);
+			let dialog = win.FileRenamingDialog;
+			let previewStub = sandbox.stub(dialog, '_openRenameFilesPreview').returns(true);
+			let origClose = win.close;
+			let closeSpy = sinon.spy();
+			win.close = closeSpy;
+			try {
+				makeDirty(group.libraryID, INVALID_TEMPLATE);
+				resetStubHistory(stubs);
+				await dialog._handleDoneClick();
+				assert.equal(stubs.confirm.callCount, 2, 'reset prompt and rename prompt must both be shown');
+				let { clears } = templateWrites(stubs);
+				assert.lengthOf(clears, 1, 'template setting must be cleared');
+				assert.isFalse(previewStub.called, 'declining the rename must not open the preview');
+				assert.isTrue(closeSpy.called, 'window must close after the prompts');
+			}
+			finally {
+				win.close = origClose;
+				sandbox.restore();
+				await Zotero.SyncedSettings.clear(group.libraryID, 'attachmentRenameTemplate');
+				restoreDialog();
+			}
+		});
+
+		it("should prompt to rename files after resetting the template when switching libraries", async function () {
+			await Zotero.SyncedSettings.set(group.libraryID, 'attachmentRenameTemplate', '{{ title }}-baseline');
+			let sandbox = sinon.createSandbox();
+			let stubs = setupStubs(sandbox, 0);
+			let dialog = win.FileRenamingDialog;
+			let previewStub = sandbox.stub(dialog, '_openRenameFilesPreview').returns(true);
+			try {
+				makeDirty(group.libraryID, INVALID_TEMPLATE);
+				resetStubHistory(stubs);
+				dialog.libraryPicker.value = String(Zotero.Libraries.userLibraryID);
+				await dialog.handleLibraryChange();
+				assert.equal(stubs.confirm.callCount, 2, 'reset prompt and rename prompt must both be shown');
+				assert.isTrue(previewStub.calledOnceWith(group.libraryID), 'rename preview must open for the previous library');
+				assert.equal(dialog._currentLibraryID, Zotero.Libraries.userLibraryID, 'switch must proceed after the prompts');
+				assert.equal(dialog.libraryPicker.value, String(Zotero.Libraries.userLibraryID));
+			}
+			finally {
+				sandbox.restore();
+				await Zotero.SyncedSettings.clear(group.libraryID, 'attachmentRenameTemplate');
 				restoreDialog();
 			}
 		});

@@ -103,7 +103,6 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 	},
 
 	_handleDoneClick: async function () {
-		// "Done" button -- prompt if dirty, then close
 		if (this._shouldPromptInvalidTemplate()) {
 			let wantsReset = await this._promptInvalidTemplate(this._currentLibraryID);
 			if (!wantsReset) {
@@ -112,7 +111,7 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 			}
 			await this._resetTemplateToDefault(this._currentLibraryID);
 		}
-		else if (this._shouldPromptRename(this._currentLibraryID)) {
+		if (this._shouldPromptRename(this._currentLibraryID)) {
 			let wantsRename = await this._promptRename(this._currentLibraryID);
 			if (wantsRename) {
 				this._openRenameFilesPreview(this._currentLibraryID);
@@ -188,18 +187,18 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 				return;
 			}
 			await this._resetTemplateToDefault(previousLibraryID);
-			this.libraryPicker.value = String(newLibraryID);
 		}
-		else if (this._shouldPromptRename(previousLibraryID)) {
+		if (this._shouldPromptRename(previousLibraryID)) {
 			// Revert picker so the previous library is visible behind the prompt
 			this.libraryPicker.value = String(previousLibraryID);
 			let wantsRename = await this._promptRename(previousLibraryID);
 			if (wantsRename && !this._openRenameFilesPreview(previousLibraryID)) {
 				// User cancelled the preview -- stay on the current library
+				this._updateButtons();
 				return;
 			}
-			this.libraryPicker.value = String(newLibraryID);
 		}
+		this.libraryPicker.value = String(newLibraryID);
 		this._currentLibraryID = newLibraryID;
 		this.loadSettingsForLibrary(newLibraryID);
 		this._updateButtons();
@@ -260,29 +259,27 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 		if (this._forceClose) {
 			return true;
 		}
+		if (!this._shouldPromptInvalidTemplate() && !this._shouldPromptRename(this._currentLibraryID)) {
+			return true;
+		}
+		event.preventDefault();
 		if (this._shouldPromptInvalidTemplate()) {
-			event.preventDefault();
 			let wantsReset = await this._promptInvalidTemplate(this._currentLibraryID);
 			if (!wantsReset) {
 				this.settingsEl.formatTemplateTextarea.focus();
 				return false;
 			}
 			await this._resetTemplateToDefault(this._currentLibraryID);
-			this._forceClose = true;
-			window.close();
-			return false;
 		}
 		if (this._shouldPromptRename(this._currentLibraryID)) {
-			event.preventDefault();
 			let wantsRename = await this._promptRename(this._currentLibraryID);
 			if (wantsRename) {
 				this._openRenameFilesPreview(this._currentLibraryID);
 			}
-			this._forceClose = true;
-			window.close();
-			return false;
 		}
-		return true;
+		this._forceClose = true;
+		window.close();
+		return false;
 	},
 
 	_handleDonePrefChange: function () {
@@ -333,17 +330,20 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 
 	_resetTemplateToDefault: async function (libraryID) {
 		await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
-		if (libraryID === Zotero.Libraries.userLibraryID) {
-			// Recompute the pending-rename state against the baseline, since handleSettingsChange()
-			// skips the update while the template is invalid
-			let base = this._baselineSettings;
-			let settingsMatch = this.settingsEl.autoRenameEnabled === base.autoRenameEnabled
-				&& this.settingsEl.enabledFileTypes === base.fileTypes
-				&& this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE === base.formatTemplate
-				&& this.settingsEl.renameLinkedEnabled === base.renameLinked;
+		// Recompute the pending-changes state against the baseline, since handleSettingsChange()
+		// skips the update while the template is invalid
+		let isUserLib = libraryID === Zotero.Libraries.userLibraryID;
+		let base = this._baselineSettings;
+		let settingsMatch = this.settingsEl.autoRenameEnabled === base.autoRenameEnabled
+			&& this.settingsEl.enabledFileTypes === base.fileTypes
+			&& this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE === base.formatTemplate
+			&& (!isUserLib || this.settingsEl.renameLinkedEnabled === base.renameLinked);
+		if (isUserLib) {
 			Zotero.Prefs.set('autoRenameFiles.done', settingsMatch && this._baselineDone);
 		}
-		this._settingsChanged = false;
+		// Show the default template in place of the invalid one
+		this.settingsEl.setAttribute('format-template', this.DEFAULT_ATTACHMENT_RENAME_TEMPLATE);
+		this._settingsChanged = !settingsMatch;
 	},
 
 	_promptRename: async function (libraryID) {
