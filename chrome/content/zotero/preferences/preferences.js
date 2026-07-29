@@ -608,12 +608,6 @@ ${str}
 			attributeFilter: ['preference']
 		});
 
-		// parseXULToFragment() doesn't convert oncommand attributes into actual
-		// listeners, so we'll do it here
-		for (let elem of container.querySelectorAll('[oncommand]')) {
-			elem.oncommand = elem.getAttribute('oncommand');
-		}
-
 		for (let child of container.children) {
 			let event = new Event('load');
 			event.waitUntil = (promise) => {
