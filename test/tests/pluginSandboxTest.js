@@ -297,6 +297,16 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("Wildcard schema internals", function () {
+		it("should not expose underscore-prefixed members of wildcard namespaces", function () {
+			loadTestScope(["ui"]);
+			// The public API is exposed
+			assert.equal(evalInScope("typeof Zotero.MenuManager.registerMenu"), "function");
+			// The internals are not
+			assert.equal(evalInScope("typeof Zotero.MenuManager._menuManager"), "undefined");
+		});
+	});
+
 	describe("Zotero Locks", function () {
 		beforeEach(function () {
 			loadTestScope(["default"]);
