@@ -22,6 +22,11 @@
 		@media not (-moz-platform: windows) {
 			@include focus-ring;
 		}
+
+		// We draw our own clear button below
+		&::-moz-search-clear-button {
+			display: none;
+		}
 	}
 
 	.search-cancel-button {
