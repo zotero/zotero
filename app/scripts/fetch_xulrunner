@@ -502,6 +502,17 @@ function modify_omni {
        }
        popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.mjs
 	
+	# Add the dropmarker for toolbarbuttons with wantdropmarker, which Firefox no longer creates
+	replace_line 'this.appendChild\(this.constructor.fragment.cloneNode\(true\)\);' \
+		'this.appendChild(this.constructor.fragment.cloneNode(true));
+
+        if (this.hasAttribute("wantdropmarker")) {
+          let dropmarker = document.createXULElement("dropmarker");
+          dropmarker.setAttribute("type", "menu");
+          dropmarker.className = "toolbarbutton-menu-dropmarker";
+          this.appendChild(dropmarker);
+        }' chrome/toolkit/content/global/elements/toolbarbutton.js
+
 	# Remove non-native text input styles
 	remove_between 'html\|input\:where\(' '^}' chrome/toolkit/skin/classic/global/global-shared.css
 	
