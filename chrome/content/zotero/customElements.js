@@ -441,7 +441,6 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 			}
 		],
 		mac: [
-			"wizard",
 			{
 				element: "dialog",
 				// The `attachShadow` are cleared in <dialog>, we need to monkey-patch after `connectedCallback`.
