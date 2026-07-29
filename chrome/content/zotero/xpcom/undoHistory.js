@@ -69,11 +69,12 @@ Zotero.UndoHistory = {
 	},
 
 	/**
-	 * Discard both stacks if any entry references an object in the given library.
+	 * Discard both stacks if any entry references the given library
 	 * @param {Integer} libraryID
 	 */
 	clearForLibrary(libraryID) {
-		let affectsLibrary = entry => entry.changes.some(change => change.libraryID === libraryID);
+		let affectsLibrary = entry => entry.libraryID === libraryID
+			|| entry.changes.some(change => change.libraryID === libraryID);
 		if (this._undoStack.some(affectsLibrary) || this._redoStack.some(affectsLibrary)) {
 			this.clear();
 		}
@@ -217,16 +218,35 @@ Zotero.UndoHistory = {
 	},
 
 	/**
-	 * Pop the top entry off one stack, write back the recorded snapshot for the
-	 * given side, and -- on success -- push the entry onto the opposite stack.
-	 * Shared implementation behind _undo() (applySide 'old') and _redo()
-	 * (applySide 'new').
+	 * Check a custom entry's current state against the recorded value for the
+	 * given side, using the entry's comparator or strict equality.
 	 *
-	 * The staleness check and the apply share one transaction so they're atomic.
-	 * If any object no longer holds its recorded `staleSide` value, an outside
-	 * writer changed it and replaying would clobber that change, so we decline
-	 * and discard history. A mid-apply failure is likewise untrustworthy, so we
-	 * realign memory with the rolled-back DB and discard.
+	 * @param {Object} entry
+	 * @param {String} side -- 'old' or 'new'
+	 * @return {Promise<Boolean>}
+	 */
+	async _customStateMatches(entry, side) {
+		let current = await entry.getState();
+		let expected = entry.state[side];
+		return entry.isEqual ? entry.isEqual(current, expected) : current === expected;
+	},
+
+
+	/**
+	 * Pop the top entry off one stack, write back the recorded snapshot for the
+	 * given side, and -- on success -- push it onto the opposite stack. Shared by
+	 * _undo() (applySide 'old') and _redo() (applySide 'new').
+	 *
+	 * Staleness check and apply share one transaction. If an object no longer
+	 * holds its `staleSide` value, an outside writer changed it, so we decline and
+	 * discard history rather than clobber it; a mid-apply failure is likewise
+	 * untrustworthy, so we realign memory with the rolled-back DB and discard.
+	 *
+	 * Custom entries (entry.custom) have no snapshot and run outside a DB
+	 * transaction. Entries that declare state/getState get an equivalent
+	 * staleness check: the current state must match the recorded `staleSide`
+	 * value before the callback runs and the `applySide` value after it, or
+	 * the entry is declined and history discarded.
 	 *
 	 * @param {Object} opts
 	 * @param {String} opts.fromStack -- name of the stack to pop the entry from
@@ -239,6 +259,29 @@ Zotero.UndoHistory = {
 	async _apply({ fromStack, toStack, staleSide, applySide, label }) {
 		let entry = this[fromStack].pop();
 		if (!entry) return false;
+		// Custom entries carry their own callbacks and run outside a DB transaction
+		if (entry.custom) {
+			try {
+				if (entry.getState && !(await this._customStateMatches(entry, staleSide))) {
+					Zotero.debug(`UndoHistory: declining stale ${label} entry`);
+					this.clear();
+					return false;
+				}
+				await (applySide === 'old' ? entry.undo() : entry.redo());
+				if (entry.getState && !(await this._customStateMatches(entry, applySide))) {
+					Zotero.debug(`UndoHistory: ${label} did not produce the recorded state`);
+					this.clear();
+					return false;
+				}
+				this[toStack].push(entry);
+				return true;
+			}
+			catch (e) {
+				Zotero.debug(`UndoHistory: ${label} failed: ` + e);
+				this.clear();
+				return false;
+			}
+		}
 		let stale = false;
 		try {
 			await Zotero.DB.executeTransaction(async () => {
@@ -280,7 +323,6 @@ Zotero.UndoHistory = {
 			return false;
 		}
 	},
-
 	// -- Transaction lifecycle callbacks --
 
 	_onTransactionBegin(_id) {
@@ -302,6 +344,59 @@ Zotero.UndoHistory = {
 
 	_onTransactionRollback(_id) {
 		this._pendingEntry = null;
+	},
+
+	/**
+	 * Push a custom entry directly onto the undo stack. A custom entry carries
+	 * its own undo/redo callbacks, which are responsible for the revert/replay
+	 * themselves and may be async.
+	 *
+	 * An entry that also declares state/getState opts in to the same staleness
+	 * protection snapshot entries get: undo/redo is declined (and history
+	 * discarded) when the current state no longer matches the recorded value
+	 * for the side being left, or when the replay fails to produce the
+	 * recorded value for the side being applied.
+	 *
+	 * @param {Object} entry
+	 * @param {Function} entry.undo -- reverts the action; awaited on undo
+	 * @param {Function} entry.redo -- reapplies the action; awaited on redo
+	 * @param {String} entry.action -- Fluent message ID for the action label
+	 *        (e.g. 'undo-action-hide-collection')
+	 * @param {Object} [entry.actionArgs] -- Fluent message arguments
+	 * @param {Integer} [entry.libraryID] -- library the action affects, so
+	 *        clearForLibrary() can discard the entry when that library is erased
+	 * @param {Object} [entry.state] -- recorded state values, { old, new };
+	 *        optional, but if provided, getState must be too
+	 * @param {Function} [entry.getState] -- returns the current state; may be
+	 *        async; optional, but if provided, state must be too
+	 * @param {Function} [entry.isEqual] -- compares two state values, returning
+	 *        true when they match; strict equality is used when omitted
+	 */
+	pushCustomEntry({ undo, redo, action, actionArgs, libraryID, state, getState, isEqual }) {
+		if (!!state !== !!getState) {
+			throw new Error("UndoHistory: custom entry must provide state and getState together");
+		}
+		if (!this.isEnabled()) {
+			return;
+		}
+
+		let entry = {
+			custom: true,
+			changes: [],
+			undo,
+			redo,
+			action,
+			actionArgs: actionArgs || null,
+			libraryID: libraryID ?? null,
+			state: state ?? null,
+			getState: getState ?? null,
+			isEqual: isEqual ?? null
+		};
+		this._undoStack.push(entry);
+		this._redoStack = [];
+		if (this._undoStack.length > this._maxSteps) {
+			this._undoStack.splice(0, this._undoStack.length - this._maxSteps);
+		}
 	},
 
 	/**
