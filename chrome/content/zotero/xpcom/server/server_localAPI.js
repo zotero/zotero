@@ -1284,6 +1284,10 @@ Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/file/view/url"] = Z
 Zotero.Server.LocalAPI.UploadReceiver = class extends LocalAPIEndpoint {
 	supportedMethods = ['POST'];
 
+	// Web API clients post the bytes to S3 rather than to Zotero, so they don't
+	// include Zotero-specific headers on this request
+	requireServerIDOnWrite = false;
+
 	// Overridden so the write block doesn't run: no API key or library write check
 	// applies here, and the response isn't a data object
 	async _initInternal(requestData) {
