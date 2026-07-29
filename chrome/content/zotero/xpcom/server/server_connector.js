@@ -37,10 +37,12 @@ Zotero.Server.Connector = {
 			if (allowReadOnly || zp.collectionsView.editable && allowFilesReadOnly || zp.collectionsView.filesEditable) {
 				// The Connector saves to a single target, so derive both the library and the
 				// collection from the focused row. A multiple-collection selection in the pane
-				// isn't expressible here yet, and getSelectedCollection() could otherwise return
-				// a collection from a different library than the focused row.
+				// isn't expressible here yet, and the other selected rows could otherwise
+				// contribute a collection from a different library than the focused row.
 				let treeRow = zp.collectionsView.selectedTreeRow;
-				library = Zotero.Libraries.get(zp.getSelectedLibraryID());
+				library = treeRow?.ref?.libraryID !== undefined
+					? Zotero.Libraries.get(treeRow.ref.libraryID)
+					: null;
 				collection = treeRow && treeRow.isCollection() ? treeRow.ref : null;
 				editable = zp.collectionsView.editable;
 			}

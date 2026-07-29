@@ -1364,8 +1364,8 @@ var ZoteroPane = new function () {
 					Zotero.Sync.Runner.sync();
 					break;
 				case 'saveToZotero':
-					var collectionTreeRow = this.getCollectionTreeRow();
-					if (collectionTreeRow.isFeedsOrFeed()) {
+					var collectionTreeRows = this.getCollectionTreeRows();
+					if (collectionTreeRows[0].isFeedsOrFeed()) {
 						this.itemPane.translateSelectedItems();
 					} else {
 						Zotero.debug(command + ' does not do anything in non-feed views')
@@ -1422,7 +1422,7 @@ var ZoteroPane = new function () {
 			return;
 		}
 
-		if ((row === undefined || row === null) && this.getCollectionTreeRow()) {
+		if ((row === undefined || row === null) && rows.length) {
 			row = this.collectionsView.selection.focused;
 			
 			// Make sure currently selected view is editable
@@ -1510,7 +1510,7 @@ var ZoteroPane = new function () {
 			return null;
 		}
 		
-		var libraryID = this.getSelectedLibraryID();
+		var libraryID = this.getSelectedLibraryIDs()[0];
 		
 		// Get a unique "Untitled" name for this level in the collection hierarchy
 		var collections;
@@ -2036,7 +2036,7 @@ var ZoteroPane = new function () {
 
 		let deck = document.getElementById('zotero-advanced-search-pane-deck');
 		let search = new Zotero.Search();
-		let libraryID = this.getSelectedLibraryID();
+		let libraryID = this.getSelectedLibraryIDs()[0];
 		if (libraryID) {
 			search.libraryID = libraryID;
 		}
@@ -2092,7 +2092,7 @@ var ZoteroPane = new function () {
 	 * @param {'open' | 'closed'} state
 	 */
 	this.setSavedSearchEditorState = async function (state) {
-		let collectionTreeRow = this.getCollectionTreeRow();
+		let collectionTreeRow = this.getCollectionTreeRows()[0];
 		if (state === 'open' && !collectionTreeRow.isSearch()) {
 			throw new Error('Cannot show saved search editor outside search row');
 		}
@@ -2183,9 +2183,8 @@ var ZoteroPane = new function () {
 	
 	
 	this.getCollectionTreeRow = function () {
-		Zotero.debug("ZoteroPane.getCollectionTreeRow() is deprecated -- use ZoteroPane.getCollectionTreeRows()");
-		return this.collectionsView && this.collectionsView.selection.count
-			&& this.collectionsView.getRow(this.collectionsView.selection.focused);
+		throw new Error("ZoteroPane.getCollectionTreeRow() was removed "
+			+ "-- use ZoteroPane.getCollectionTreeRows()");
 	}
 	
 	
@@ -2898,7 +2897,7 @@ var ZoteroPane = new function () {
 	 * @return {Promise}
 	 */
 	this.emptyTrash = async function () {
-		var libraryID = this.getSelectedLibraryID();
+		var libraryID = this.getSelectedLibraryIDs()[0];
 		
 		var result = Services.prompt.confirm(
 			null,
@@ -2939,7 +2938,7 @@ var ZoteroPane = new function () {
 			return;
 		}
 
-		var row = this.getCollectionTreeRow();
+		var row = this.getCollectionTreeRows()[0];
 		if (!row) {
 			return;
 		}
@@ -2956,7 +2955,7 @@ var ZoteroPane = new function () {
 			return;
 		}
 
-		var row = this.getCollectionTreeRow();
+		var row = this.getCollectionTreeRows()[0];
 		if (row) {
 			if (row.isCollection()) {
 				this.collectionsView.startEditing(row);
@@ -2970,7 +2969,7 @@ var ZoteroPane = new function () {
 	// Move selected collection to specified target collection or library.
 	// Target has to be in the same library as the currently selected collection.
 	this.moveCollection = async (target) => {
-		let selected = this.getSelectedCollection();
+		let selected = this.getSelectedCollections()[0];
 		if (!selected) return;
 
 		if (target.libraryID !== selected.libraryID) {
@@ -2989,7 +2988,7 @@ var ZoteroPane = new function () {
 	// Copy selected collection into another collection or library.
 	// Partially, a replication of drag-drop mechanism from CollectionTree.onDrop.
 	this.copyCollection = async (target) => {
-		let selected = this.getSelectedCollection();
+		let selected = this.getSelectedCollections()[0];
 		if (!selected) return;
 
 		let targetTreeRowID = `L${target.libraryID}`;
@@ -3059,7 +3058,7 @@ var ZoteroPane = new function () {
 	};
 	
 	this.refreshFeed = function () {
-		var row = this.getCollectionTreeRow();
+		var row = this.getCollectionTreeRows()[0];
 		if (!row) return;
 		
 		let feed = row.ref;
@@ -3471,28 +3470,47 @@ var ZoteroPane = new function () {
 	};
 	
 	this.getSelectedLibraryID = function () {
-		return this.collectionsView.getSelectedLibraryID();
+		throw new Error("ZoteroPane.getSelectedLibraryID() was removed "
+			+ "-- use ZoteroPane.getSelectedLibraryIDs()");
 	}
-	
-	
-	this.getSelectedCollection = function (asID) {
-		Zotero.debug("ZoteroPane.getSelectedCollection() is deprecated -- use getSelectedCollections()");
-		return this.getSelectedCollections(asID)[0];
+
+
+	/**
+	 * @return {Integer[]} - libraryIDs of the selected rows, in collections-list order
+	 */
+	this.getSelectedLibraryIDs = function () {
+		if (!this.collectionsView) {
+			return [];
+		}
+		return this.collectionsView.getSelectedLibraryIDs();
 	}
-	
-	
+
+
+	this.getSelectedCollection = function () {
+		throw new Error("ZoteroPane.getSelectedCollection() was removed "
+			+ "-- use ZoteroPane.getSelectedCollections()");
+	}
+
+
 	this.getSelectedCollections = function (asID) {
 		return this.collectionsView.getSelectedCollections(asID);
 	}
-	
-	
-	function getSelectedSavedSearch(asID) {
-		return this.collectionsView.getSelectedSearch(asID);
+
+
+	function getSelectedSavedSearch() {
+		throw new Error("ZoteroPane.getSelectedSavedSearch() was removed "
+			+ "-- use ZoteroPane.getSelectedSavedSearches()");
 	}
-	
-	
-	this.getSelectedGroup = function (asID) {
-		return this.collectionsView.getSelectedGroup(asID);
+
+
+	this.getSelectedSavedSearches = function (asID) {
+		return this.collectionsView.getSelectedSearches(asID);
+	}
+
+
+	this.getSelectedGroup = function () {
+		throw new Error("ZoteroPane.getSelectedGroup() was removed -- filter "
+			+ "ZoteroPane.getCollectionTreeRows() by isGroup()");
 	}
 	
 	
@@ -3662,7 +3680,7 @@ var ZoteroPane = new function () {
 			label: Zotero.getString('sync.sync'),
 			oncommand: () => {
 				Zotero.Sync.Runner.sync({
-					libraries: [this.getSelectedLibraryID()],
+					libraries: [this.getSelectedLibraryIDs()[0]],
 				});
 			}
 		},
@@ -3676,7 +3694,7 @@ var ZoteroPane = new function () {
 		{
 			id: "newSubcollection",
 			oncommand: () => {
-				this.newCollection(this.getSelectedCollection().key);
+				this.newCollection(this.getSelectedCollections()[0].key);
 			}
 		},
 		{
@@ -3689,31 +3707,31 @@ var ZoteroPane = new function () {
 		{
 			id: "showDuplicates",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'duplicates', true, true);
+				this.setVirtual(this.getSelectedLibraryIDs()[0], 'duplicates', true, true);
 			}
 		},
 		{
 			id: "showUnfiled",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'unfiled', true, true);
+				this.setVirtual(this.getSelectedLibraryIDs()[0], 'unfiled', true, true);
 			}
 		},
 		{
 			id: "showRecentlyRead",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'recentlyRead', true, true);
+				this.setVirtual(this.getSelectedLibraryIDs()[0], 'recentlyRead', true, true);
 			}
 		},
 		{
 			id: "showRetracted",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'retracted', true, true);
+				this.setVirtual(this.getSelectedLibraryIDs()[0], 'retracted', true, true);
 			}
 		},
 		{
 			id: "showPublications",
 			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryID(), 'publications', true, true);
+				this.setVirtual(this.getSelectedLibraryIDs()[0], 'publications', true, true);
 			}
 		},
 		{
@@ -3780,7 +3798,7 @@ var ZoteroPane = new function () {
 			id: "removeLibrary",
 			label: Zotero.getString('pane.collections.menu.remove.library'),
 			oncommand: () => {
-				let library = Zotero.Libraries.get(this.getSelectedLibraryID());
+				let library = Zotero.Libraries.get(this.getSelectedLibraryIDs()[0]);
 				let ps = Services.prompt;
 				let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
@@ -3801,7 +3819,7 @@ var ZoteroPane = new function () {
 	];
 	
 	this.buildCollectionContextMenu = async function () {
-		var libraryID = this.getSelectedLibraryID();
+		var libraryID = this.getSelectedLibraryIDs()[0];
 		var options = _collectionContextMenuOptions;
 		
 		var collectionTreeRows = this.getCollectionTreeRows();
@@ -4095,7 +4113,7 @@ var ZoteroPane = new function () {
 			"main/library/collection",
 			{
 				getContext: () => ({
-					// collectionTreeRow is the primary (first) selected row, kept for
+					// collectionTreeRow is the first selected row, kept for
 					// backward compatibility; collectionTreeRows is the full selection
 					collectionTreeRow: collectionTreeRows[0],
 					collectionTreeRows,
@@ -4638,7 +4656,7 @@ var ZoteroPane = new function () {
 			"main/library/item",
 			{
 				getContext: () => ({
-					// collectionTreeRow is the primary (first) selected row, kept for
+					// collectionTreeRow is the first selected row, kept for
 					// backward compatibility; collectionTreeRows is the full selection
 					collectionTreeRow: collectionTreeRows[0],
 					collectionTreeRows,
@@ -4662,7 +4680,7 @@ var ZoteroPane = new function () {
 		let selected = this.getSelectedCollections();
 
 		// Add current library at the top to be able to move collections into it
-		let library = Zotero.Libraries.get(ZoteroPane.getSelectedLibraryID());
+		let library = Zotero.Libraries.get(ZoteroPane.getSelectedLibraryIDs()[0]);
 		let libraryMenuItem = document.createXULElement("menuitem");
 		libraryMenuItem.setAttribute("label", library.name);
 		libraryMenuItem.setAttribute("image", library.treeViewImage);
@@ -4680,7 +4698,7 @@ var ZoteroPane = new function () {
 		popup.appendChild(document.createXULElement("menuseparator"));
 		
 		// Build menus for each top-level collection of this library
-		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
+		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryIDs()[0]);
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
@@ -4711,7 +4729,7 @@ var ZoteroPane = new function () {
 		if (event.target !== event.currentTarget) return;
 		let popup = document.getElementById("zotero-copy-collection-popup");
 		popup.replaceChildren();
-		let selected = this.getSelectedCollection();
+		let selected = this.getSelectedCollections()[0];
 
 		// Fetch all libraries
 		let topLevelEntries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
@@ -4842,7 +4860,7 @@ var ZoteroPane = new function () {
 			}
 			// Only allow targets within the current library for now
 			// TODO: Come back to this once we support copying items between libraries from the Add to Collection menu
-			let id = await this.newCollection(this.getSelectedCollection()?.key);
+			let id = await this.newCollection(this.getSelectedCollections()[0]?.key);
 			if (!id) {
 				return;
 			}
@@ -5012,7 +5030,7 @@ var ZoteroPane = new function () {
 		}
 		
 		var item = new Zotero.Item('note');
-		item.libraryID = this.getSelectedLibraryID();
+		item.libraryID = this.getSelectedLibraryIDs()[0];
 		item.setNote(text);
 		if (parentKey) {
 			item.parentKey = parentKey;
@@ -5723,7 +5741,7 @@ var ZoteroPane = new function () {
 		// Only applies when selected items are not top level items
 		if (selectedItems.some(item => item.isRegularItem())) return;
 
-		let libraryID = this.getSelectedLibraryID();
+		let libraryID = this.getSelectedLibraryIDs()[0];
 		let shouldConvertToStandaloneAttachment = false;
 		let extraButtons = [];
 		// Keep in sync with Zotero.RecognizeDocument.canRecognize()
@@ -6482,7 +6500,7 @@ var ZoteroPane = new function () {
 		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
 			annotations,
 			{
-				collectionID: this.getSelectedCollection(true)
+				collectionID: this.getSelectedCollections(true)[0]
 			}
 		);
 		await this.selectItem(note.id);
@@ -7014,7 +7032,7 @@ var ZoteroPane = new function () {
 			}
 			// Otherwise select Retracted Items collection
 			else {
-				let libraryID = this.getSelectedLibraryID();
+				let libraryID = this.getSelectedLibraryIDs()[0];
 				await this.collectionsView.selectByID("R" + libraryID);
 			}
 		}.bind(this);

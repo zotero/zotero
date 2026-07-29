@@ -96,7 +96,7 @@ describe("ZoteroPane", function () {
 			var collection = await createDataObject('collection');
 			await select(win, collection);
 			var noteID = await zp.newNote(false, false, "Test");
-			assert.equal(zp.collectionsView.getSelectedCollection(), collection);
+			assert.equal(zp.collectionsView.getSelectedCollections()[0], collection);
 			var selected = zp.itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
 			assert.equal(selected, noteID);
@@ -939,7 +939,7 @@ describe("ZoteroPane", function () {
 			assert.isFalse(cv.getRowIndexByID(id));
 			await zp.setVirtual(userLibraryID, 'duplicates', true, true);
 			// Duplicate Items should be selected
-			assert.equal(zp.getCollectionTreeRow().id, id);
+			assert.equal(zp.getCollectionTreeRows()[0].id, id);
 			// Should be missing from pref
 			assert.isUndefined(JSON.parse(Zotero.Prefs.get('duplicateLibraries'))[userLibraryID])
 			
@@ -961,7 +961,7 @@ describe("ZoteroPane", function () {
 			assert.isFalse(cv.getRowIndexByID(id));
 			await zp.setVirtual(userLibraryID, 'unfiled', true, true);
 			// Unfiled Items should be selected
-			assert.equal(zp.getCollectionTreeRow().id, id);
+			assert.equal(zp.getCollectionTreeRows()[0].id, id);
 			// Should be missing from pref
 			assert.isUndefined(JSON.parse(Zotero.Prefs.get('unfiledLibraries'))[userLibraryID])
 		});
@@ -983,7 +983,7 @@ describe("ZoteroPane", function () {
 			
 			// Library should have been expanded and Duplicate Items selected
 			assert.ok(cv.getRowIndexByID(id));
-			assert.equal(zp.getCollectionTreeRow().id, id);
+			assert.equal(zp.getCollectionTreeRows()[0].id, id);
 		});
 		
 		it("should hide a virtual collection in My Library", async function () {

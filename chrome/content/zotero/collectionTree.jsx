@@ -166,10 +166,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			return false; // In-line editing active
 		}
 		
-		var libraryID = this.getSelectedLibraryID();
-		if (!libraryID) return true;
 		let treeRow = this.getRow(this.selection.focused);
-		
+		var libraryID = treeRow?.ref?.libraryID;
+		if (!libraryID) return true;
+
 		if (event.key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
 			this.expandLibrary(libraryID, true);
 		}
@@ -752,10 +752,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			return 0;
 		}
 		
-		var currentLibraryID = this.getSelectedLibraryID();
 		var libraryID = items[0].libraryID;
-		// If in a different library
-		if (libraryID != currentLibraryID) {
+		// If not in one of the selected libraries
+		if (!this.getSelectedLibraryIDs().includes(libraryID)) {
 			Zotero.debug("Library ID differs; switching library");
 			await this.selectLibrary(libraryID);
 		}
@@ -1410,20 +1409,33 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return this.getRow(index).getName();
 	}
 	
-	/**
-	 * Return libraryID of selected row (which could be a collection, etc.)
-	 */
 	getSelectedLibraryID() {
-		var treeRow = this.getRow(this.selection.focused);
-		return treeRow && treeRow.ref && treeRow.ref.libraryID !== undefined
-			&& treeRow.ref.libraryID;
+		throw new Error("CollectionTree#getSelectedLibraryID() was removed "
+			+ "-- use getSelectedLibraryIDs()");
 	}
-	
-	getSelectedCollection(asID) {
-		Zotero.debug("CollectionTree#getSelectedCollection() is deprecated -- use getSelectedCollections()");
-		return this.getSelectedCollections(asID)[0] || false;
+
+	/**
+	 * Return the libraryID of every selected row, in tree order
+	 *
+	 * @return {Integer[]}
+	 */
+	getSelectedLibraryIDs() {
+		var libraryIDs = [];
+		for (let index of [...this.selection.selected].sort((a, b) => a - b)) {
+			let row = this.getRow(index);
+			if (row && row.ref && row.ref.libraryID !== undefined
+					&& !libraryIDs.includes(row.ref.libraryID)) {
+				libraryIDs.push(row.ref.libraryID);
+			}
+		}
+		return libraryIDs;
 	}
-	
+
+	getSelectedCollection() {
+		throw new Error("CollectionTree#getSelectedCollection() was removed "
+			+ "-- use getSelectedCollections()");
+	}
+
 	getSelectedCollections(asID) {
 		var collections = [];
 		for (let index of this.selection.selected) {
@@ -1435,11 +1447,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return collections;
 	}
 	
-	getSelectedSearch(asID) {
-		Zotero.debug("CollectionTree#getSelectedSearch() is deprecated -- use getSelectedSearches()");
-		return this.getSelectedSearches(asID)[0] || false;
+	getSelectedSearch() {
+		throw new Error("CollectionTree#getSelectedSearch() was removed "
+			+ "-- use getSelectedSearches()");
 	}
-	
+
 	getSelectedSearches(asID) {
 		var searches = [];
 		for (let index of this.selection.selected) {
@@ -1451,14 +1463,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return searches;
 	}
 	
-	getSelectedGroup(asID) {
-		if (this.getRow(this.selection.focused)) {
-			var group = this.getRow(this.selection.focused);
-			if (group && group.isGroup()) {
-				return asID ? group.ref.id : group.ref;
-			}
-		}
-		return false;
+	getSelectedGroup() {
+		throw new Error("CollectionTree#getSelectedGroup() was removed "
+			+ "-- filter getSelectedRows() by isGroup()");
 	}
 
 	getIconName(index) {

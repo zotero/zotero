@@ -28,7 +28,7 @@ describe("CollectionTreeRow", function () {
 		}
 
 		beforeEach(function () {
-			collectionTreeRow = zp.getCollectionTreeRow();
+			collectionTreeRow = zp.getCollectionTreeRows()[0];
 			collectionTreeRow.clearCache();
 		});
 

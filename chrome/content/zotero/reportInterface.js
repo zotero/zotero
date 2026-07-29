@@ -29,7 +29,7 @@ var Zotero_Report_Interface = new function() {
 	 * Load a report for the selected collections/searches
 	 */
 	this.loadCollectionReport = function () {
-		var libraryID = ZoteroPane_Local.getSelectedLibraryID();
+		var libraryID = ZoteroPane_Local.getSelectedLibraryIDs()[0];
 		var collections = ZoteroPane_Local.getSelectedCollections();
 		var items = collections.length
 			? _getCollectionItems(collections)

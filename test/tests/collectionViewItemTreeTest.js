@@ -327,7 +327,7 @@ describe("CollectionViewItemTree", function () {
 			await zp.itemsView.selectItem(itemTwo.id);
 
 			// tag selector should be cleared and itemTwo - selected
-			assert.equal(zp.getCollectionTreeRow().tags.size, 0);
+			assert.equal(zp.getCollectionTreeRows()[0].tags.size, 0);
 			assert.equal(zp.tagSelector.selectedTags.size, 0);
 			assert.equal(zp.itemsView.getSelectedItems()[0].id, itemTwo.id);
 		});
@@ -1191,7 +1191,7 @@ describe("CollectionViewItemTree", function () {
 			var item = await createDataObject('item', { title: "Unfiled Item" });
 			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
 			await zp.setVirtual(userLibraryID, 'unfiled', true, true);
-			assert.equal(zp.getCollectionTreeRow().id, 'U' + userLibraryID);
+			assert.equal(zp.getCollectionTreeRows()[0].id, 'U' + userLibraryID);
 			await waitForItemsLoad(win);
 			let rowIndex = zp.itemsView.getRowIndexByID(item.id);
 			assert.isNumber(rowIndex);
@@ -1413,7 +1413,7 @@ describe("CollectionViewItemTree", function () {
 				await attachment2.saveTx();
 
 				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-				assert.equal(zp.getCollectionTreeRow().id, 'Y' + userLibraryID);
+				assert.equal(zp.getCollectionTreeRows()[0].id, 'Y' + userLibraryID);
 				await waitForItemsLoad(win);
 				assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 
@@ -1443,7 +1443,7 @@ describe("CollectionViewItemTree", function () {
 				await attachment2.saveTx();
 
 				await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
-				assert.equal(zp.getCollectionTreeRow().id, 'Y' + groupLibraryID);
+				assert.equal(zp.getCollectionTreeRows()[0].id, 'Y' + groupLibraryID);
 				await waitForItemsLoad(win);
 				assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 

@@ -827,7 +827,7 @@ describe("Tag Selector", function () {
 			await win.ZoteroPane.itemsView.waitForLoad();
 			tagSelector.onItemViewChanged({
 				collectionTreeRows: win.ZoteroPane.getCollectionTreeRows(),
-				libraryID: win.ZoteroPane.getSelectedLibraryID()
+				libraryID: win.ZoteroPane.getSelectedLibraryIDs()[0]
 			});
 			await waitForTagSelector(win);
 		}
@@ -932,7 +932,7 @@ describe("Tag Selector", function () {
 			// _safeGetTags wraps collectionTreeRow.getTags(), which calls getSearchResults().
 			// If the underlying search query fails, getSearchResults() throws SearchError.
 			// The tag selector should catch this and return [] rather than throwing upwards and breaking the UI.
-			var collectionTreeRow = win.ZoteroPane.getCollectionTreeRow();
+			var collectionTreeRow = win.ZoteroPane.getCollectionTreeRows()[0];
 			collectionTreeRow.clearCache();
 			var stub = sinon.stub(collectionTreeRow, 'getSearchObject').resolves({
 				search: () => { throw new Error('simulated search failure'); }

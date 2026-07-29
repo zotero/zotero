@@ -72,7 +72,7 @@ var Zotero_Lookup = new function () {
 		}
 		else {
 			try {
-				libraryID = ZoteroPane.getSelectedLibraryID();
+				libraryID = ZoteroPane.getSelectedLibraryIDs()[0];
 				let selectedCollections = ZoteroPane.getSelectedCollections();
 				collections = selectedCollections.length ? selectedCollections.map(c => c.id) : false;
 			}
