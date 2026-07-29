@@ -2794,7 +2794,7 @@ describe("CollectionViewItemTree", function () {
 	describe("#setCollectionTreeRows()", function () {
 		it("should no-op when setting the same rows", async function () {
 			let rowProvider = itemsView.rowProvider;
-			let currentRow = rowProvider.collectionTreeRow;
+			let currentRow = rowProvider.collectionTreeRows[0];
 			assert.ok(currentRow);
 
 			let refreshSpy = sinon.spy(rowProvider, 'refresh');
@@ -2806,6 +2806,46 @@ describe("CollectionViewItemTree", function () {
 			finally {
 				refreshSpy.restore();
 			}
+		});
+
+		it("should treat collections, saved searches, and library roots as one kind of view", async function () {
+			let collection = await createDataObject('collection');
+			let search = await createDataObject('search');
+
+			await selectLibrary(win);
+			assert.equal(zp.itemsView.viewMode, 'default');
+
+			await cv.selectByID("C" + collection.id);
+			await waitForItemsLoad(win);
+			assert.equal(zp.itemsView.viewMode, 'default');
+
+			// A collection and a saved search together are still an ordinary view
+			cv.selection.toggleSelect(cv.getRowIndexByID("S" + search.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			assert.equal(zp.itemsView.viewMode, 'default');
+
+			await cv.selectByID("T" + Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+			assert.equal(zp.itemsView.viewMode, 'trash');
+
+			await selectLibrary(win);
+		});
+
+		it("should reject rows that don't form a single view", async function () {
+			let collection = await createDataObject('collection');
+			await cv.selectByID("C" + collection.id);
+			await waitForItemsLoad(win);
+
+			let collectionRow = cv.getRow(cv.getRowIndexByID("C" + collection.id));
+			let trashRow = cv.getRow(cv.getRowIndexByID("T" + Zotero.Libraries.userLibraryID));
+
+			let error = await getPromiseError(
+				zp.itemsView.rowProvider.setCollectionTreeRows([collectionRow, trashRow])
+			);
+			assert.match(error.message, /don't form a single view/);
+
+			await selectLibrary(win);
 		});
 	});
 
@@ -3079,7 +3119,7 @@ describe("CollectionViewItemTree", function () {
 		it("should refresh when search filter value changes", async function () {
 			let rowProvider = itemsView.rowProvider;
 			let refreshSpy = sinon.spy(rowProvider, 'refresh');
-			let setSearchStub = sinon.stub(rowProvider.collectionTreeRow, 'setSearch').returns(true);
+			let setSearchStub = sinon.stub(rowProvider.collectionTreeRows[0], 'setSearch').returns(true);
 			
 			try {
 				await rowProvider.setFilter('search', 'changed-search');
@@ -3096,7 +3136,7 @@ describe("CollectionViewItemTree", function () {
 		it("should not refresh when filter value is unchanged", async function () {
 			let rowProvider = itemsView.rowProvider;
 			let refreshSpy = sinon.spy(rowProvider, 'refresh');
-			let setSearchStub = sinon.stub(rowProvider.collectionTreeRow, 'setSearch').returns(false);
+			let setSearchStub = sinon.stub(rowProvider.collectionTreeRows[0], 'setSearch').returns(false);
 			
 			try {
 				await rowProvider.setFilter('search', 'unchanged-search');
@@ -3412,7 +3452,7 @@ describe("CollectionViewItemTree", function () {
 		});
 
 		it("should show load error message on search failure", async function () {
-			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRows[0]);
 			var setMessageSpy = sinon.spy(itemsView, 'setItemsPaneMessage');
 			try {
 				await rowProvider.refresh();
@@ -3427,7 +3467,7 @@ describe("CollectionViewItemTree", function () {
 		});
 
 		it("should recover after switching to a working collection", async function () {
-			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRows[0]);
 			await rowProvider.refresh();
 			stub.restore();
 
@@ -3438,7 +3478,7 @@ describe("CollectionViewItemTree", function () {
 		});
 
 		it("should not re-throw SearchError from refresh()", async function () {
-			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRows[0]);
 			try {
 				// refresh() should resolve, not reject
 				await rowProvider.refresh();

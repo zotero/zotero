@@ -1044,9 +1044,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 	get visibilityGroup() {
 		return 'default';
 	}
-	
+
 	get viewType() {
 		return 'library';
+	}
+
+	/**
+	 * Trees not backed by a collection tree selection (e.g. the citation
+	 * explorer's) have no rows and no special view behavior
+	 */
+	get collectionTreeRows() {
+		return [];
+	}
+
+	get viewMode() {
+		return 'default';
 	}
 
 	get isSortable() {
@@ -1502,9 +1514,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 					// Clear the quick search, tag selection, and advanced search
 					// and try again (once)
 					if (!noRecurse && window.ZoteroPane) {
-						let hasQuickSearch = !!this.collectionTreeRow.searchText;
-						let hasTagFilters = this.collectionTreeRow.tags?.size > 0;
-						let hasAdvancedSearch = !!this.collectionTreeRow.advancedSearch;
+						let hasQuickSearch = !!this.collectionTreeRows[0].searchText;
+						let hasTagFilters = this.collectionTreeRows[0].tags?.size > 0;
+						let hasAdvancedSearch = !!this.collectionTreeRows[0].advancedSearch;
 						if (hasQuickSearch || hasTagFilters || hasAdvancedSearch) {
 							// Clear all searches set on the collection tree rows directly on
 							// the rows (vs using ZoteroPane functions) to avoid
@@ -2588,7 +2600,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			// Initial hidden value
 			else if (!("hidden" in column)) {
-				if (hasDefaultIn && this.collectionTreeRow) {
+				if (hasDefaultIn && this.collectionTreeRows.length) {
 					column.hidden = !(column.defaultIn && this._matchesViewType(column.defaultIn));
 				}
 				else {
@@ -2614,7 +2626,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		// Force sort indicator for views with a fixed sort order
-		if (this.collectionTreeRow?.isRecentlyRead()) {
+		if (this.viewMode == 'recentlyRead') {
 			let col = this._columns.find(c => c.dataKey === 'lastRead');
 			if (col) {
 				col.sortDirection = -1;

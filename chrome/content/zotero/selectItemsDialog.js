@@ -139,7 +139,7 @@ var onCollectionSelected = async function () {
 	var collectionTreeRow = collectionsView.getRow(collectionsView.selection.focused);
 	if (!collectionsView.selection.count) return;
 	// Collection not changed
-	if (itemsView && itemsView.collectionTreeRow && itemsView.collectionTreeRow.id == collectionTreeRow.id) {
+	if (itemsView && itemsView.collectionTreeRows[0]?.id == collectionTreeRow.id) {
 		return;
 	}
 	collectionTreeRow.setSearch('');

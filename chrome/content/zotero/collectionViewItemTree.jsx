@@ -95,19 +95,51 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	}
 
 	/**
-	 * The first selected collection tree row, for behaviors where the first row
-	 * determines view-wide semantics (view type, trash mode, etc.)
+	 * The kind of view the selected rows add up to, for the behaviors that
+	 * belong to the view rather than to any one row (trash restoring,
+	 * duplicate sets, feed dates). Set in setCollectionTreeRows().
+	 *
+	 * Anything that varies between rows -- ref, libraryID, collection vs.
+	 * saved search -- has to be read from collectionTreeRows instead.
+	 *
+	 * @return {String}
 	 */
-	get collectionTreeRow() {
-		return this.collectionTreeRows[0] || null;
+	get viewMode() {
+		return this._viewMode ?? 'default';
 	}
 
 	/**
-	 * Check if the quick search box has a search term.
+	 * The view mode a set of rows adds up to, or throw if they don't agree.
+	 * ZoteroPane.onCollectionSelected() keeps incompatible rows from being
+	 * selected together; this is the backstop for anything setting rows
+	 * directly.
+	 *
+	 * @param {CollectionTreeRow[]} rows
+	 * @return {String} - 'default', 'trash', 'duplicates', 'unfiled', 'retracted',
+	 *     'recentlyRead', 'publications', 'bucket', 'feed', or 'feeds'
+	 */
+	_computeViewMode(rows) {
+		let modes = new Set(rows.map((row) => {
+			// Library roots, collections, and saved searches are ordinary item
+			// lists -- they differ in what they contain, not in how the view behaves
+			if (row.isLibrary(true) && !row.isFeed()) return 'default';
+			if (row.isCollection() || row.isSearch()) return 'default';
+			return row.type;
+		}));
+		if (modes.size > 1) {
+			throw new Error("Selected collection tree rows don't form a single view: "
+				+ [...modes].join(', '));
+		}
+		return [...modes][0] ?? 'default';
+	}
+
+	/**
+	 * Check if the quick search box has a search term. Filters are set on every
+	 * selected row, so any row's search text describes the view.
 	 * @returns {boolean}
 	 */
 	hasQuickSearch() {
-		return this.collectionTreeRow?.searchText.length > 0;
+		return this.collectionTreeRows[0]?.searchText.length > 0;
 	}
 
 	/**
@@ -246,10 +278,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		if (!collectionTreeRows.slice(1).every(row => row.visibilityGroup == collectionTreeRows[0].visibilityGroup)) {
 			throw new Error("Selected collection tree rows belong to different visibility groups");
 		}
-		let resetColumns = false;
-		if (this.collectionTreeRow?.type != collectionTreeRows[0].type) {
-			resetColumns = true;
-		}
+		let viewMode = this._computeViewMode(collectionTreeRows);
+		let resetColumns = viewMode != this._viewMode;
+		this._viewMode = viewMode;
 		this.collectionTreeRows = collectionTreeRows;
 
 		// When the selection spans multiple libraries, group items by library in
@@ -351,15 +382,17 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			// Embedded-image attachments (images pasted into notes) are never shown in the
 			// tree, so don't let one match a search and pull in its parents
 			newSearchItems = newSearchItems.filter(item => !item.isEmbeddedImageAttachment());
-			if (this.collectionTreeRow.isTrash()) {
+			if (this.viewMode == 'trash') {
 				// When in trash, also fetch trashed collections and searches
 				// so that they're displayed among the deleted items
-				let trashedCollections = await this.collectionTreeRow.getTrashedCollections();
-				let trashedSearches = await Zotero.Searches.getDeleted(this.collectionTreeRow.ref.libraryID);
+				let trashedCollections = await this.collectionTreeRows[0].getTrashedCollections();
+				let trashedSearches = await Zotero.Searches.getDeleted(
+					this.collectionTreeRows[0].ref.libraryID
+				);
 				// Collections and searches can't match item-level conditions or tags, so when
 				// an advanced search or tag filter is active, don't show them. With a quick
 				// search, match against their names.
-				let { searchText, advancedSearch, tags } = this.collectionTreeRow;
+				let { searchText, advancedSearch, tags } = this.collectionTreeRows[0];
 				if (advancedSearch || (tags && tags.size)) {
 					trashedCollections = [];
 					trashedSearches = [];
@@ -406,7 +439,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			);
 			this._searchParentIDs = newSearchParentIDs;
 			
-			var newSearchMode = this.collectionTreeRow.isSearchMode();
+			var newSearchMode = this.collectionTreeRows.some(row => row.isSearchMode());
 			var newRows = [];
 			var allItemIDs = new Set();
 			var addedItemIDs = new Set();
@@ -523,7 +556,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			this._searchItemIDs = newSearchItemIDs; // items matching the search
 			this.itemTree.invalidateRowCache(true);
 				
-			if (!this.collectionTreeRow.isPublications()) {
+			if (this.viewMode != 'publications') {
 				this._expandMatchParents(newSearchParentIDs);
 			}
 			
@@ -610,8 +643,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		await this.itemTree._refreshPromise;
 
 		const cachedSelection = this.itemTree._cachedSelection;
-		const collectionTreeRow = this.collectionTreeRow;
-		const collectionTreeRows = this.collectionTreeRows;
+				const collectionTreeRows = this.collectionTreeRows;
 
 		var madeChanges = false;
 		var refresh = false;
@@ -675,7 +707,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			}
 
 			// For a refresh on an item in the trash, check if the item hadn't been restored
-			if (type == 'item' && collectionTreeRow.isTrash()) {
+			if (type == 'item' && this.viewMode == 'trash') {
 				let rows = [];
 				for (let id of ids) {
 					let row = this.getRowIndexByID(id);
@@ -719,7 +751,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		}
 		else if ((action == 'remove' && !collectionTreeRows.some(row => row.isLibrary(true)))
 			|| action == 'delete' || action == 'trash'
-			|| (action == 'removeDuplicatesMaster' && collectionTreeRow.isDuplicates())) {
+			|| (action == 'removeDuplicatesMaster' && this.viewMode == 'duplicates')) {
 			// Since a remove involves shifting of rows, we have to do it in order,
 			// so sort the ids by row
 			var rows = [];
@@ -753,7 +785,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				madeChanges = true;
 			}
 		}
-		else if ((collectionTreeRows.length > 1 || collectionTreeRow.isSearchMode())
+		else if ((collectionTreeRows.length > 1 || collectionTreeRows.some(row => row.isSearchMode()))
 				&& ['item', 'collection', 'search'].includes(type) && ['add', 'modify'].includes(action)) {
 			// If search mode, just re-run search
 			if (action == 'add' && this.hasQuickSearch()) {
@@ -827,7 +859,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						}
 					}
 					// If Unfiled Items and item was added to a collection, remove from view
-					else if (this.itemTree.isContainer(row) && collectionTreeRow.isUnfiled() && item.getCollections().length) {
+					else if (this.itemTree.isContainer(row) && this.viewMode == 'unfiled' && item.getCollections().length) {
 						this._closeContainer(row);
 						this._removeRow(row);
 					}
@@ -913,7 +945,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				}
 				// In Recently Read, remove parent items that no longer have any lastRead attachments
 				// But only if a refresh isn't scheduled already anyway
-				if (!refresh && collectionTreeRow.isRecentlyRead()) {
+				if (!refresh && this.viewMode == 'recentlyRead') {
 					let rowsToRemove = [];
 					for (let parentID of parentItemIDs) {
 						let parentRow = this._rowMap[parentID];
@@ -1010,10 +1042,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						|| action == 'removeDuplicatesMaster')
 					&& cachedSelection.some(o => this.getRowIndexByID(o.id) === false)) {
 					// In duplicates view, select the next set on delete
-					if (collectionTreeRow.isDuplicates()) {
+					if (this.viewMode == 'duplicates') {
 						if (this._rows[firstAffectedRowIdx]) {
 							var itemID = this._rows[firstAffectedRowIdx].ref.id;
-							var setItemIDs = collectionTreeRow.ref.getSetItemsByItemID(itemID);
+							var setItemIDs = this.collectionTreeRows[0].ref.getSetItemsByItemID(itemID);
 							rowsToSelect = setItemIDs;
 							restoreSelection = false;
 						}
@@ -1074,16 +1106,18 @@ class CollectionViewItemTree extends ItemTree {
 		this.onRefresh = this.createEventBinding('refresh');
 	}
 
-	get collectionTreeRow() { return this.rowProvider.collectionTreeRow; }
+	get viewMode() { return this.rowProvider.viewMode; }
+
+	isFeedsOrFeed() { return ['feed', 'feeds'].includes(this.viewMode); }
 
 	get collectionTreeRows() { return this.rowProvider.collectionTreeRows; }
 
 	get visibilityGroup() {
-		return this.collectionTreeRow?.visibilityGroup ?? 'default';
+		return this.collectionTreeRows[0]?.visibilityGroup ?? 'default';
 	}
 
 	get viewType() {
-		let ctr = this.collectionTreeRow;
+		let ctr = this.collectionTreeRows[0];
 		if (!ctr) return 'default';
 		let type = ctr.type;
 		if (ctr.isWithinGroup?.()) return type + '-group';
@@ -1091,11 +1125,11 @@ class CollectionViewItemTree extends ItemTree {
 	}
 
 	get isSortable() {
-		return this.collectionTreeRow.isSortable();
+		return this.collectionTreeRows.every(row => row.isSortable());
 	}
 
 	_getColumns() {
-		if (!this.collectionTreeRow) {
+		if (!this.collectionTreeRows.length) {
 			this._columns = [];
 			return this._columns;
 		}
@@ -1130,11 +1164,11 @@ class CollectionViewItemTree extends ItemTree {
 	}
 
 	render() {
-		const showMessage = !this.collectionTreeRow || this._itemsPaneMessage;
+		const showMessage = !this.collectionTreeRows.length || this._itemsPaneMessage;
 
-		// If no collectionTreeRow yet, render stub div instead of VirtualizedTable.
+		// If no rows are selected yet, render stub div instead of VirtualizedTable.
 		// This prevents VirtualizedTable from trying to use undefined ID.
-		if (!this.collectionTreeRow) {
+		if (!this.collectionTreeRows.length) {
 			return [
 				this._renderItemsPaneMessage(showMessage),
 				<div
@@ -1184,14 +1218,14 @@ class CollectionViewItemTree extends ItemTree {
 	async selectItems(ids, noRecurse, noScroll) {
 		if (!ids.length) return 0;
 		// If no row map, we're probably in the process of switching collections,
-		// so store the items to select on the collectionTreeRow for later
-		if (!this._rowMap && this.collectionTreeRow) {
-			this.collectionTreeRow.itemsToSelect = ids;
+		// so store the items to select on the first selected row for later
+		if (!this._rowMap && this.collectionTreeRows.length) {
+			this.collectionTreeRows[0].itemsToSelect = ids;
 			Zotero.debug("_rowMap not yet set; not selecting items");
 			return 0;
 		}
 		// Filter out deleted items if not in trash
-		if (!this.collectionTreeRow.isTrash()) {
+		if (this.viewMode != 'trash') {
 			ids = ids.filter(id => !Zotero.Items.get(id).deleted);
 		}
 		return super.selectItems(ids, noRecurse, noScroll);
@@ -1214,12 +1248,12 @@ class CollectionViewItemTree extends ItemTree {
 
 		// Every item is selectable in publications (even when not in a search)
 		// or when the tree is not in search mode
-		if (!this._searchMode || this.collectionTreeRow.isPublications()) return true;
+		if (!this._searchMode || this.viewMode == 'publications') return true;
 		
 		if (!row) return false;
 
 		// Only deleted items are selectable in trash
-		if (this.collectionTreeRow.isTrash()) {
+		if (this.viewMode == 'trash') {
 			return row.ref.deleted;
 		}
 		else {
@@ -1241,7 +1275,7 @@ class CollectionViewItemTree extends ItemTree {
 		
 		let row = super._getRowData(index);
 		// Don't change the format of date in feeds
-		if (this.collectionTreeRow.isFeedsOrFeed() && row.date) {
+		if (this.isFeedsOrFeed() && row.date) {
 			let val;
 			let customRowValue = this.props.getExtraField(treeRow.ref, 'date');
 			if (customRowValue !== undefined) {
@@ -1278,7 +1312,7 @@ class CollectionViewItemTree extends ItemTree {
 			event.preventDefault();
 			return false;
 		}
-		Zotero.DragDrop.currentDragSource = this.collectionTreeRow;
+		Zotero.DragDrop.currentDragSource = this.collectionTreeRows[0];
 		return super.onDragStart(event, index);
 	};
 
@@ -1316,7 +1350,7 @@ class CollectionViewItemTree extends ItemTree {
 			if (event.dataTransfer.getData("zotero/item")) {
 				var sourceCollectionTreeRow = Zotero.DragDrop.getDragSource();
 				if (sourceCollectionTreeRow) {
-					var targetCollectionTreeRow = this.collectionTreeRow;
+					var targetCollectionTreeRow = this.collectionTreeRows[0];
 
 					if (!targetCollectionTreeRow) {
 						this.setDropEffect(event, "none");
@@ -1405,7 +1439,7 @@ class CollectionViewItemTree extends ItemTree {
 		var dataType = dragData.dataType;
 		var data = dragData.data;
 
-		var collectionTreeRow = this.collectionTreeRow;
+		var collectionTreeRow = this.collectionTreeRows[0];
 
 		var rowItem = null;
 		if (row != -1 && orient == 0) {
@@ -1555,7 +1589,7 @@ class CollectionViewItemTree extends ItemTree {
 		var dataType = dragData.dataType;
 		var data = dragData.data;
 		var sourceCollectionTreeRow = Zotero.DragDrop.getDragSource(dataTransfer);
-		var collectionTreeRow = this.collectionTreeRow;
+		var collectionTreeRow = this.collectionTreeRows[0];
 		var targetLibraryID = collectionTreeRow.ref.libraryID;
 
 		if (dataType == 'zotero/item') {
@@ -1814,7 +1848,7 @@ class CollectionViewItemTree extends ItemTree {
 	handleActivate(event, indices) {
 		let items = indices.map(index => this.getRow(index).ref);
 		// Ignore double-clicks in duplicates view on everything except attachments
-		if (event.button == 0 && this.collectionTreeRow?.isDuplicates()) {
+		if (event.button == 0 && this.viewMode == 'duplicates') {
 			if (items.length != 1 || !items[0].isAttachment()) {
 				return false;
 			}
@@ -1824,15 +1858,15 @@ class CollectionViewItemTree extends ItemTree {
 
 	_handleRowMouseUpDown(event) {
 		const modifierIsPressed = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'].some(key => event[key]);
-		if (this.collectionTreeRow?.isDuplicates() && !modifierIsPressed) {
+		if (this.viewMode == 'duplicates' && !modifierIsPressed) {
 			this.duplicateMouseSelection = true;
 		}
 	};
 
 	_handleSelectionChange = (selection, shouldDebounce) => {
-		if (this.collectionTreeRow?.isDuplicates() && selection.count == 1 && this.duplicateMouseSelection) {
+		if (this.viewMode == 'duplicates' && selection.count == 1 && this.duplicateMouseSelection) {
 			var itemID = this.getRow(selection.focused).ref.id;
-			var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(itemID);
+			var setItemIDs = this.collectionTreeRows[0].ref.getSetItemsByItemID(itemID);
 			
 			// We are modifying the selection object directly here
 			// which won't trigger item updates
@@ -1852,20 +1886,20 @@ class CollectionViewItemTree extends ItemTree {
 	// ///////////////////////////////////////////////////////////////////////////
 
 	getSortDirection(sortFields) {
-		if (this.collectionTreeRow?.isFeedsOrFeed()) {
+		if (this.isFeedsOrFeed()) {
 			return Zotero.Prefs.get('feeds.sortAscending') ? 1 : -1;
 		}
-		if (this.collectionTreeRow.isRecentlyRead()) {
+		if (this.viewMode == 'recentlyRead') {
 			return -1;
 		}
 		return super.getSortDirection(sortFields);
 	}
 
 	getSortField() {
-		if (this.collectionTreeRow?.isFeedsOrFeed()) {
+		if (this.isFeedsOrFeed()) {
 			return 'id';
 		}
-		if (this.collectionTreeRow.isRecentlyRead()) {
+		if (this.viewMode == 'recentlyRead') {
 			return 'lastRead';
 		}
 		return super.getSortField();
@@ -1889,7 +1923,7 @@ class CollectionViewItemTree extends ItemTree {
 				&& !event.altKey
 				&& !event.shiftKey
 				&& (Zotero.isMac ? (event.metaKey && !event.ctrlKey) : event.ctrlKey)
-				&& !this.collectionTreeRow.isPublications()) {
+				&& this.viewMode != 'publications') {
 			this.rowProvider.expandMatchParents();
 			return true;
 		}
@@ -1902,7 +1936,7 @@ class CollectionViewItemTree extends ItemTree {
 			if (new Set(this.collectionTreeRows.map(r => r.ref?.libraryID)).size > 1) {
 				return true;
 			}
-			let libraryID = this.collectionTreeRow?.ref?.libraryID;
+			let libraryID = this.collectionTreeRows[0]?.ref?.libraryID;
 			if (!libraryID) {
 				return true;
 			}
@@ -1952,13 +1986,13 @@ class CollectionViewItemTree extends ItemTree {
 		}
 
 		// Duplicates view arrow key handling
-		if (this.collectionTreeRow?.isDuplicates() && ["ArrowUp", "ArrowDown"].includes(event.key)
+		if (this.viewMode == 'duplicates' && ["ArrowUp", "ArrowDown"].includes(event.key)
 				&& !event.ctrlKey && !event.metaKey && !event.shiftKey
 				&& this.selection.count > 1) {
 			let focused = this.selection.focused;
 			let nextItem = this.getRow(focused + (event.key == "ArrowUp" ? -1 : 1));
 			if (nextItem) {
-				var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(nextItem.id);
+				var setItemIDs = this.collectionTreeRows[0].ref.getSetItemsByItemID(nextItem.id);
 				// If next item is part of the set, we skip the whole set
 				if (this.selection.isSelected(this._rowMap[nextItem.id])) {
 					let newIndex;
@@ -2006,17 +2040,16 @@ class CollectionViewItemTree extends ItemTree {
 			let selectedItems = selectedObjects.filter(o => o instanceof Zotero.Item);
 			let selectedItemIDs = selectedItems.map(o => o.id);
 
-			let collectionTreeRow = this.collectionTreeRow;
 			let collectionTreeRows = this.collectionTreeRows;
 
 			// If all selected items are annotations, for now erase them skipping trash
 			if (selectedItems.length && selectedItems.every(item => item.isAnnotation())) {
 				await Zotero.Items.erase(selectedItemIDs);
 			}
-			else if (collectionTreeRow.isBucket()) {
-				collectionTreeRow.ref.deleteItems(ids);
+			else if (this.viewMode == 'bucket') {
+				collectionTreeRows[0].ref.deleteItems(ids);
 			}
-			else if (collectionTreeRow.isTrash()) {
+			else if (this.viewMode == 'trash') {
 				let [trashedCollectionIDs, trashedSearches] = [[], []];
 				for (let obj of selectedObjects) {
 					if (obj instanceof Zotero.Collection) {
@@ -2036,7 +2069,7 @@ class CollectionViewItemTree extends ItemTree {
 					await Zotero.Items.erase(selectedItemIDs);
 				}
 			}
-			else if (collectionTreeRow.isRecentlyRead() && !force) {
+			else if (this.viewMode == 'recentlyRead' && !force) {
 				await Zotero.DB.executeTransaction(async () => {
 					for (let item of selectedItems) {
 						let attachments;
@@ -2064,10 +2097,7 @@ class CollectionViewItemTree extends ItemTree {
 			}	
 			else if (collectionTreeRows.some(row => row.isLibrary(true))
 					|| collectionTreeRows.some(row => row.isSearch())
-					|| collectionTreeRow.isUnfiled()
-					|| collectionTreeRow.isRecentlyRead()
-					|| collectionTreeRow.isRetracted()
-					|| collectionTreeRow.isDuplicates()
+					|| ['unfiled', 'recentlyRead', 'retracted', 'duplicates'].includes(this.viewMode)
 					|| force) {
 				await Zotero.Items.trashTx(selectedItemIDs);
 			}
@@ -2094,7 +2124,7 @@ class CollectionViewItemTree extends ItemTree {
 					}
 				});
 			}
-			else if (collectionTreeRow.isPublications()) {
+			else if (this.viewMode == 'publications') {
 				await Zotero.Items.removeFromPublications(selectedItems);
 			}
 		}
@@ -2110,13 +2140,14 @@ class CollectionViewItemTree extends ItemTree {
 	// ///////////////////////////////////////////////////////////////////////////
 
 	async _updateIntroText() {
-		if (this.collectionTreeRow && !this.rowCount) {
+		if (this.collectionTreeRows.length && !this.rowCount) {
 			let doc = this._ownerDocument;
 			let div;
 
 			// My Library with no groups and no items
-			if (this.collectionTreeRow.isLibrary() && !Zotero.Groups.getAll().length
-					&& !await this.collectionTreeRow.ref.hasItems()) {
+			if (this.collectionTreeRows.every(row => row.isLibrary())
+					&& !Zotero.Groups.getAll().length
+					&& !await this.collectionTreeRows[0].ref.hasItems()) {
 				div = doc.createElement('div');
 				let p = doc.createElement('p');
 				let html = Zotero.getString(
@@ -2183,7 +2214,7 @@ class CollectionViewItemTree extends ItemTree {
 				div.dataset.allowdrop = true;
 			}
 			// My Publications
-			else if (this.collectionTreeRow.isPublications()) {
+			else if (this.viewMode == 'publications') {
 				div = doc.createElement('div');
 				div.className = 'publications';
 				let p = doc.createElement('p');

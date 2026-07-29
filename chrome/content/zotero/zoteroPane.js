@@ -1813,7 +1813,7 @@ var ZoteroPane = new function () {
 		}
 		
 		let advancedSearchDeck = document.getElementById('zotero-advanced-search-pane-deck');
-		if (this.itemsView.collectionTreeRow?.isSearch()
+		if (this.itemsView.collectionTreeRows[0]?.isSearch()
 				&& advancedSearchDeck.state === 'open'
 				&& advancedSearchDeck.selectedSearchType === 'saved'
 				&& !(await this._confirmCloseSavedSearchEditor())) {
@@ -1821,7 +1821,7 @@ var ZoteroPane = new function () {
 			// selection event so that this handler doesn't re-run and re-prompt
 			this.collectionsView.selection.selectEventsSuppressed = true;
 			try {
-				let index = this.collectionsView.getRowIndexByID(this.itemsView.collectionTreeRow.id);
+				let index = this.collectionsView.getRowIndexByID(this.itemsView.collectionTreeRows[0].id);
 				if (index !== false) {
 					this.collectionsView.selection.select(index);
 				}
