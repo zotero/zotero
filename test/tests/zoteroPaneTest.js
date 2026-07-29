@@ -1185,6 +1185,35 @@ describe("ZoteroPane", function () {
 			await group.eraseTx();
 		});
 
+		it("shouldn't offer Remove from Collection when a saved search is also selected", async function () {
+			let collection = await createDataObject('collection');
+			let search = await createDataObject('search');
+			let item = await createDataObject('item', { collections: [collection.id] });
+
+			let cv = zp.collectionsView;
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let removeItems = menu.querySelector('.zotero-menuitem-remove-items');
+			let moveToTrash = menu.querySelector('.zotero-menuitem-move-to-trash');
+
+			await cv.selectByID("C" + collection.id);
+			await waitForItemsLoad(win);
+			await zp.itemsView.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+			assert.isFalse(removeItems.hidden, "Offered for a collection on its own");
+
+			// Items in the saved search needn't be in the collection, so removing
+			// from the collection isn't meaningful
+			cv.selection.toggleSelect(cv.getRowIndexByID("S" + search.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			await zp.itemsView.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+			assert.isTrue(removeItems.hidden, "Not offered alongside a saved search");
+			assert.isFalse(moveToTrash.hidden, "Move to Trash is still offered");
+
+			await selectLibrary(win);
+		});
+
 		it("shouldn't open the item context menu on a library header row", async function () {
 			let group = await createGroup();
 			let c1 = await createDataObject('collection');

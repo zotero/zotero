@@ -2590,14 +2590,14 @@ var ZoteroPane = new function () {
 			prompt = force ? toTrash : toRemove;
 		}
 		else if (collectionTreeRows[0].isLibrary(true)
-				|| collectionTreeRows[0].isSearch()
+				|| collectionTreeRows.some(row => row.isSearch())
 				|| collectionTreeRows[0].isUnfiled()
 				|| collectionTreeRows[0].isRetracted()
 				|| collectionTreeRows[0].isDuplicates()) {
 			// In library, don't prompt if meta key was pressed
 			prompt = (force && !fromMenu) ? false : toTrash;
 		}
-		else if (collectionTreeRows[0].isCollection()) {
+		else if (collectionTreeRows.every(row => row.isCollection())) {
 			if (force) {
 				prompt = toTrash;
 			}
@@ -4563,7 +4563,10 @@ var ZoteroPane = new function () {
 		
 		// Remove from collection / Recently Read
 		menu.childNodes[m.removeItems].removeAttribute('data-l10n-id');
-		if (collectionTreeRows[0].isCollection() && items.every(item => item.isTopLevelItem())) {
+		// Removing from a collection isn't meaningful when a saved search is also
+		// selected, since its items needn't be in any of the collections
+		if (collectionTreeRows.every(row => row.isCollection())
+				&& items.every(item => item.isTopLevelItem())) {
 			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
 			show.add(m.removeItems);
 		}
