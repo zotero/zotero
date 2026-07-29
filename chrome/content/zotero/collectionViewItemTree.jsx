@@ -387,8 +387,11 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			// actually read are their child attachments. Mark those as matched too, so they
 			// display as full results rather than grayed-out context rows.
 			// Keep them out of newSearchParentIDs below so we don't auto-expand the parents.
-			if (this.collectionTreeRow.isRecentlyRead()) {
-				let lastReadAttachmentIDs = await Zotero.Items.getLastReadAttachmentIDs(this.collectionTreeRow.ref.libraryID);
+			for (let row of this.collectionTreeRows) {
+				if (!row.isRecentlyRead()) {
+					continue;
+				}
+				let lastReadAttachmentIDs = await Zotero.Items.getLastReadAttachmentIDs(row.ref.libraryID);
 				for (let id of lastReadAttachmentIDs) {
 					newSearchItemIDs.add(id);
 				}

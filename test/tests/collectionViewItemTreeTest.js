@@ -1642,6 +1642,50 @@ describe("CollectionViewItemTree", function () {
 					assert.isNumber(zp.itemsView.getRowIndexByID(matchItem.id));
 					assert.isFalse(zp.itemsView.getRowIndexByID(otherItem.id));
 				});
+
+				it("should show read attachments as matches in every selected library", async function () {
+					let group = await createGroup();
+					let title = 'Cross Library Read QQQ';
+					let userItem = await createDataObject('item', { title });
+					let userAttachment = await importPDFAttachment(userItem);
+					let groupItem = await createDataObject(
+						'item', { libraryID: group.libraryID, title }
+					);
+					let groupAttachment = await importPDFAttachment(groupItem);
+					for (let attachment of [userAttachment, groupAttachment]) {
+						attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+						await attachment.saveTx();
+					}
+
+					await zp.setVirtual(Zotero.Libraries.userLibraryID, 'recentlyRead', true, true);
+					await zp.setVirtual(group.libraryID, 'recentlyRead', true, true);
+					await cv.expandLibrary(group.libraryID);
+					await cv.selectByID("Y" + Zotero.Libraries.userLibraryID);
+					await waitForItemsLoad(win);
+					cv.selection.toggleSelect(cv.getRowIndexByID("Y" + group.libraryID));
+					await zp.onCollectionSelected();
+					await zp.itemsView.waitForLoad();
+
+					quicksearch.value = title;
+					quicksearch.doCommand();
+					await zp.itemsView._refreshPromise;
+
+					// The attachments are what was actually read, so they display as
+					// results rather than grayed-out context rows
+					let view = zp.itemsView;
+					for (let attachment of [userAttachment, groupAttachment]) {
+						await view.expandToItem(attachment.id);
+						let row = view.getRowIndexByID(attachment.id);
+						assert.isNumber(row, `Attachment ${attachment.id} should be shown`);
+						assert.isFalse(
+							view.tree._jsWindow.getElementByIndex(row).classList.contains('context-row'),
+							`Attachment in library ${attachment.libraryID} should be a match`
+						);
+					}
+
+					await selectLibrary(win);
+					await group.eraseTx();
+				});
 			});
 
 			describe("After Remove from Recently Read", function () {
