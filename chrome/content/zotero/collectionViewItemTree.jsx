@@ -632,18 +632,21 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 
 		// 'collection-item' ids are in the form collectionID-itemID
 		if (type == 'collection-item') {
-			if (!collectionTreeRow.isCollection()) {
+			// Collections can be selected alongside saved searches, which have no
+			// subcollections of their own
+			let selectedCollections = collectionTreeRows.filter(row => row.isCollection());
+			if (!selectedCollections.length) {
 				return;
 			}
 
 			var visibleSubcollections = Zotero.Prefs.get('recursiveCollections')
-				? collectionTreeRows.map(row => row.ref.getDescendents(false, 'collection')).flat()
+				? selectedCollections.map(row => row.ref.getDescendents(false, 'collection')).flat()
 				: [];
 			var splitIDs = [];
 			for (let id of ids) {
 				let [collectionID, itemID] = id.split('-');
 				// Include if an item in one of the selected collections or a visible subcollection
-				if (collectionTreeRows.some(row => row.ref.id == collectionID)
+				if (selectedCollections.some(row => row.ref.id == collectionID)
 						|| visibleSubcollections.some(c => collectionID == c.id)) {
 					splitIDs.push(itemID);
 				}

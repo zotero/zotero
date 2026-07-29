@@ -1233,6 +1233,33 @@ describe("CollectionViewItemTree", function () {
 			assert.equal(quickSearch.value, "item");
 		});
 
+		it("should add an item to a collection when a saved search is also selected", async function () {
+			Zotero.Prefs.set('recursiveCollections', true);
+			let logError = sinon.spy(Zotero, 'logError');
+			try {
+				let collection = await createDataObject('collection');
+				let subcollection = await createDataObject('collection', { parentID: collection.id });
+				let search = await createDataObject('search');
+
+				await cv.selectByID("C" + collection.id);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID("S" + search.id));
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+
+				// With recursiveCollections, an item added to a subcollection shows in
+				// the parent collection's view
+				let item = await createDataObject('item', { collections: [subcollection.id] });
+				assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+				assert.deepEqual(logError.getCalls().map(call => String(call.args[0])), []);
+			}
+			finally {
+				logError.restore();
+				Zotero.Prefs.clear('recursiveCollections');
+				await selectLibrary(win);
+			}
+		});
+
 		describe("Change parent item", function () {
 			let item1, item2, attachment1, highlight1;
 			
