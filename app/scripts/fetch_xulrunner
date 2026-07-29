@@ -567,7 +567,7 @@ if [ $BUILD_MAC == 1 ]; then
 		echo "Using Firefox $GECKO_VERSION.app.zip"
 		unzip "Firefox $GECKO_VERSION.app.zip"
 	else
-		curl -o Firefox.dmg "$DOWNLOAD_URL/mac/en-US/Firefox%20$GECKO_VERSION.dmg"
+		curl -fo Firefox.dmg "$DOWNLOAD_URL/mac/en-US/Firefox%20$GECKO_VERSION.dmg"
 		set +e
 		hdiutil detach -quiet /Volumes/Firefox 2>/dev/null
 		set -e
@@ -653,7 +653,7 @@ if [ $BUILD_WIN == 1 ]; then
 			else
 				moz_arch=$arch
 			fi
-			curl -O "$DOWNLOAD_URL/$moz_arch/en-US/Firefox%20Setup%20$GECKO_VERSION.exe"
+			curl -fO "$DOWNLOAD_URL/$moz_arch/en-US/Firefox%20Setup%20$GECKO_VERSION.exe"
 			# Store local copy of unmodified app
 			cp "Firefox%20Setup%20$GECKO_VERSION.exe" "$archived_file"
 		fi
@@ -785,7 +785,7 @@ if [ $BUILD_LINUX == 1 ]; then
 			else
 				moz_arch=$arch
 			fi
-			curl -O "$DOWNLOAD_URL/linux-$moz_arch/en-US/firefox-$GECKO_VERSION.tar.xz"
+			curl -fO "$DOWNLOAD_URL/linux-$moz_arch/en-US/firefox-$GECKO_VERSION.tar.xz"
 			# Store local copy of unmodified app
 			cp "firefox-$GECKO_VERSION.tar.xz" "$archived_file"
 		fi
