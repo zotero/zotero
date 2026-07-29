@@ -4113,9 +4113,9 @@ var ZoteroPane = new function () {
 			"main/library/collection",
 			{
 				getContext: () => ({
-					// collectionTreeRow is the first selected row, kept for
-					// backward compatibility; collectionTreeRows is the full selection
-					collectionTreeRow: collectionTreeRows[0],
+					get collectionTreeRow() {
+						throw new Error("collectionTreeRow was removed -- use collectionTreeRows");
+					},
 					collectionTreeRows,
 					tabType: "library",
 					tabSubType: undefined,
@@ -4659,9 +4659,9 @@ var ZoteroPane = new function () {
 			"main/library/item",
 			{
 				getContext: () => ({
-					// collectionTreeRow is the first selected row, kept for
-					// backward compatibility; collectionTreeRows is the full selection
-					collectionTreeRow: collectionTreeRows[0],
+					get collectionTreeRow() {
+						throw new Error("collectionTreeRow was removed -- use collectionTreeRows");
+					},
 					collectionTreeRows,
 					items,
 					tabType: "library",

@@ -943,7 +943,6 @@ describe("Plugin API", function () {
 					contextKeys: [
 						...defaultContextKeys,
 						"items",
-						"collectionTreeRow",
 						"collectionTreeRows",
 					]
 				},
@@ -954,7 +953,6 @@ describe("Plugin API", function () {
 					},
 					contextKeys: [
 						...defaultContextKeys,
-						"collectionTreeRow",
 						"collectionTreeRows",
 					]
 				},
