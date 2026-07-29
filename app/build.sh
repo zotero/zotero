@@ -681,7 +681,7 @@ if [ $BUILD_MAC == 1 ]; then
 	# Merge relevant assets from Firefox
 	mkdir "$CONTENTSDIR/MacOS"
 	cp -r "$MAC_RUNTIME_PATH/Contents/MacOS/"!(firefox|firefox-bin|crashreporter.app|minidump-analyzer|nmhproxy|pingsender|updater.app) "$CONTENTSDIR/MacOS"
-	cp -r "$MAC_RUNTIME_PATH/Contents/Resources/"!(application.ini|browser|defaults|precomplete|removed-files|updater.ini|update-settings.ini|webapprt*|*.icns|*.lproj) "$CONTENTSDIR/Resources"
+	cp -r "$MAC_RUNTIME_PATH/Contents/Resources/"!(application.ini|Assets.car|browser|defaults|precomplete|removed-files|updater.ini|update-settings.ini|webapprt*|*.icns|*.lproj) "$CONTENTSDIR/Resources"
 	
 	# Add our custom ChannelPrefs.framework and change channel if not a source build
 	mkdir "$CONTENTSDIR/Frameworks"
