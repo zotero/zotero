@@ -390,7 +390,9 @@ const VarCheck = {
 		if (Object.prototype.hasOwnProperty.call(schemaNode, prop)) {
 			return schemaNode[prop] !== false;
 		}
-		if (schemaNode[SchemaKey.WILDCARD] === true) return true;
+		if (schemaNode[SchemaKey.WILDCARD] === true) {
+			return !this._isInternalProp(prop);
+		}
 		return false;
 	},
 
@@ -400,9 +402,15 @@ const VarCheck = {
 			if (Object.prototype.hasOwnProperty.call(schemaNode, prop)) {
 				return schemaNode[prop];
 			}
-			if (schemaNode[SchemaKey.WILDCARD] === true) return true;
+			if (schemaNode[SchemaKey.WILDCARD] === true && !this._isInternalProp(prop)) {
+				return true;
+			}
 		}
 		return undefined;
+	},
+
+	_isInternalProp(prop) {
+		return typeof prop === "string" && prop.startsWith("_");
 	},
 
 	schemaKey(schemaNode) {
@@ -428,7 +436,11 @@ const VarCheck = {
 				Object.keys(schemaNode).filter(k => schemaNode[k] === false)
 			);
 			return this.getAllKeysIncludingPrototypes(obj, { allowSymbols })
-				.filter(k => !excluded.has(k));
+				.filter(k => !excluded.has(k)
+					// Internal/underscore-prefixed members are never exposed by
+					// a wildcard unless the schema explicitly lists them
+					&& (Object.prototype.hasOwnProperty.call(schemaNode, k)
+						|| !this._isInternalProp(k)));
 		}
 		let keys = Object.keys(schemaNode).filter(k => schemaNode[k] !== false);
 		if (allowSymbols) {
