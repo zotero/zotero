@@ -39,7 +39,7 @@ attachment-box {
 			padding: 4px;
 			margin-left: 4px;
 			@include svgicon-menu("sync", "universal", "16");
-			&:not([disabled='true']) {
+			&:not([disabled]) {
 				color: var(--fill-secondary);
 			}
 		}
@@ -50,7 +50,7 @@ attachment-box {
 			padding: 4px;
 			margin-left: 4px;
 			@include svgicon-menu("rename-from-parent", "universal", "16");
-			&:not([disabled='true']) {
+			&:not([disabled]) {
 				color: var(--fill-secondary);
 			}
 		}

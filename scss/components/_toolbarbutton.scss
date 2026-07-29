@@ -29,7 +29,7 @@ toolbarbutton {
 	@include focus-ring;
 	
 	&:disabled,
-	&[disabled="true"] {
+	&[disabled] {
 		background-color: transparent;
 		color: var(--fill-tertiary);
 

@@ -2958,7 +2958,7 @@
 				return;
 			}
 			
-			let refocusField = this.querySelector(`#${CSS.escape(this._selectField)}:not([disabled="true"])`);
+			let refocusField = this.querySelector(`#${CSS.escape(this._selectField)}:not([disabled])`);
 			// For creator rows, if a focusable node with desired id does not exist, try to focus
 			// the same component from the last available creator row
 			if (!refocusField && this._selectField.startsWith("creator-")) {

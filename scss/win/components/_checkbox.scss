@@ -3,7 +3,7 @@
 		@include focus-states using ($color) {
 			background-image: url('chrome://zotero/skin/win/#{$color}/checkbox-#{$state}.svg');
 	
-			&[checked=true] {
+			&[checked] {
 				background-image: url('chrome://zotero/skin/win/#{$color}/checkbox-selected-#{$state}.svg');
 			}
 		}

@@ -34,11 +34,11 @@ color-picker {
 		padding: 0;
 	}
 
-	.grid-tile[selected="true"] {
+	.grid-tile[selected] {
 		border: 1px outset #C0C0C0;
 	}
 
-	.grid-tile:hover:not([selected="true"]) {
+	.grid-tile:hover:not([selected]) {
 		border: 1px dotted #A7A7A7;
 	}
 }

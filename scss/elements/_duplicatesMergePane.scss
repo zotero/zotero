@@ -41,7 +41,7 @@ duplicates-merge-pane {
 
 	/* Show duplicates date list item as selected even when not focused
 	(default behavior on other platforms) */
-	#zotero-duplicates-merge-original-date:not(:focus) > richlistitem[selected="true"] {
+	#zotero-duplicates-merge-original-date:not(:focus) > richlistitem[selected] {
 		background-color: -moz-cellhighlight;
 		color: -moz-cellhighlighttext;
 	}

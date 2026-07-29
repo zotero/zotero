@@ -90,7 +90,7 @@ attachment-preview {
 			}
 
 			&:disabled,
-			&[disabled="true"] {
+			&[disabled] {
 				opacity: 0.4;
 			}
 		}

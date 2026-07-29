@@ -124,7 +124,7 @@
 		fill: currentColor;
 		@include inactive-opacity;
 
-		&:is([selected="true"], [data-parent-selected="true"]) {
+		&:is([selected], [data-parent-selected="true"]) {
 			@media (-moz-platform: macos) {
 				background-color: color-mix(in srgb, var(--color-accent) 80%, transparent);
 			}
@@ -134,7 +134,7 @@
 			color: #fff;;
 		}
 
-		&:not([selected="true"], [data-parent-selected="true"]):hover {
+		&:not([selected], [data-parent-selected="true"]):hover {
 			background-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
 		}
 	}
@@ -266,11 +266,11 @@ description, label, checkbox {
 	max-width: 630px;
 }
 
-checkbox[disabled="true"] {
+checkbox[disabled] {
 	color: gray !important;
 }
 
-menulist[disabled="true"] {
+menulist[disabled] {
 	opacity: 75%;
 	/* Disable default hover styling */
 	pointer-events: none;

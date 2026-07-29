@@ -31,11 +31,11 @@
                 margin-bottom: 0;
             }
 
-            button:nth-child(1 of :not([hidden=true])) {
+            button:nth-child(1 of :not([hidden])) {
                 margin-left: 0;
             }
 
-            button:nth-last-child(1 of :not([hidden=true])) {
+            button:nth-last-child(1 of :not([hidden])) {
                 margin-right: 0;
             }
         }

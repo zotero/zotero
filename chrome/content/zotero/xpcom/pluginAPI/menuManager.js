@@ -772,9 +772,9 @@
 			let screenHeight = popupElem.documentGlobal.screen.availHeight;
 			let maxMenuHeight = screenHeight * 0.8;
 
-			let menuCount = popupElem.querySelectorAll(`& > :is(menuitem, menu):not(.${CUSTOM_MENU_CLASS}):not([hidden=true])`).length;
+			let menuCount = popupElem.querySelectorAll(`& > :is(menuitem, menu):not(.${CUSTOM_MENU_CLASS}):not([hidden])`).length;
 			// An additional separator is added before the group
-			let separatorCount = popupElem.querySelectorAll(`& > menuseparator:not(.${CUSTOM_MENU_CLASS}):not([hidden=true])`).length + 1;
+			let separatorCount = popupElem.querySelectorAll(`& > menuseparator:not(.${CUSTOM_MENU_CLASS}):not([hidden])`).length + 1;
 
 			let menuHeight, separatorHeight, popupPadding;
 

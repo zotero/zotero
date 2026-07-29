@@ -43,7 +43,7 @@ input {
   color: -moz-DialogText;
 }
 
-:host([disabled="true"]) {
+:host([disabled]) {
   cursor: default;
   background-color: -moz-Dialog;
   color: GrayText;

@@ -2,7 +2,7 @@
 	border-radius: 6px;
 	padding: 2px;
 
-	&:not([disabled=true]) {
+	&:not([disabled]) {
 		&:hover {
 			background: var(--fill-quinary) !important;
 		}
@@ -81,6 +81,6 @@
 	border: 0px !important;
 }
 
-.zotero-clicky-minus[disabled=true], .zotero-clicky-plus[disabled=true] {
+.zotero-clicky-minus[disabled], .zotero-clicky-plus[disabled] {
 	opacity: .5;
 }
