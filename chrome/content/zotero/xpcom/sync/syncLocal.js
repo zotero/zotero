@@ -1933,6 +1933,7 @@ Zotero.Sync.Data.Local = {
 		
 		var changes = [];
 		var conflicts = [];
+		var localChanged = false;
 		
 		for (let i = 0; i < changeset.length; i++) {
 			let c2 = changeset[i];
@@ -1952,6 +1953,19 @@ Zotero.Sync.Data.Local = {
 			if ((objectType == 'item' && currentJSON.deleted && newJSON.deleted)
 						|| objectType != 'item') {
 				changes.push(c2);
+				continue;
+			}
+			
+			// Auto-resolve lastRead by keeping the most recent value
+			if (c2.field == 'lastRead') {
+				if ((currentJSON.lastRead || 0) > (c2.value || 0)) {
+					// Local is more recent -- keep it and upload
+					localChanged = true;
+				}
+				else {
+					// Remote is more recent -- apply it
+					changes.push(c2);
+				}
 				continue;
 			}
 			
@@ -1975,7 +1989,6 @@ Zotero.Sync.Data.Local = {
 			conflicts.push([c1, c2]);
 		}
 		
-		var localChanged = false;
 		var normalizeHTML = (str) => {
 			let parser = new DOMParser();
 			str = parser.parseFromString(str, 'text/html');
