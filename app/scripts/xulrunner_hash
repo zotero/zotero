@@ -8,7 +8,7 @@
 #   * **Windows (w)** ‑a is **required**. Accepted values:
 #         win32 | x64 | arm64
 #   * **Linux (l)**   ‑a is **required**. Accepted values:
-#         x86_64 | i686 | arm64 (alias x64 → x86_64)
+#         x86_64 | arm64 (alias x64 → x86_64)
 
 set -euo pipefail
 
@@ -26,7 +26,7 @@ Usage: xulrunner_hash.sh -p <m|w|l> [-a ARCH]
  -p PLATFORM   m (mac), w (windows), l (linux)        [required]
  -a ARCH       *required* for Windows & Linux builds
                Windows:  x64 | arm64 | win32
-               Linux:    x64 (or x86_64) | arm64 | i686
+               Linux:    x64 (or x86_64) | arm64
                Mac:      disallowed – always universal
 DONE
 	exit 1
@@ -65,7 +65,7 @@ case $platform in
 		[[ -z $arch ]] && { echo "-a is required for Linux builds" >&2; echo; usage; }
 		[[ $arch == x64 ]] && arch="x86_64"
 		case $arch in
-			x86_64|i686|arm64) ;;
+			x86_64|arm64) ;;
 			*) echo "Invalid Linux arch: $arch" >&2; echo; usage;;
 		esac
 		GECKO_VERSION="$GECKO_VERSION_LINUX"

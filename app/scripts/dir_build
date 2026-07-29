@@ -16,7 +16,7 @@ Architecture is ignored for Mac builds, which are always shipped as universal bi
 
 Options
  -p PLATFORM        Platform to build (m=Mac, w=Windows, l=Linux)
- -a ARCH            Target architecture (arm64, x64, i686, win32) — **Windows/Linux only**
+ -a ARCH            Target architecture (arm64, x64, win32) — **Windows/Linux only**
  -t                 add devtools
  -f                 force a full rebuild instead of updating the staged build in place
 DONE
@@ -79,7 +79,6 @@ else
 		case "$(uname -m)" in
 			arm64|aarch64) arch="arm64" ;;
 			x86_64)         arch="x64"   ;;
-			i?86)           arch="i686"  ;;
 		esac
 	fi
 fi

@@ -42,7 +42,7 @@ Options
  -f FILE             ZIP file to build from (cannot be used with -d)
  -t                  add devtools
  -p PLATFORMS        build for platforms PLATFORMS (m=Mac, w=Windows, l=Linux)
- -a ARCH             architecture to build (arm64, x64, i686, win32)
+ -a ARCH             architecture to build (arm64, x64, win32)
                      * Ignored for Mac (always universal)
                      * If omitted on Windows/Linux, all standard archs are built
  -c CHANNEL          use update channel CHANNEL
@@ -210,7 +210,7 @@ if [ $BUILD_LINUX == 1 ]; then
 	if [[ -n $arch ]]; then
 		check_xulrunner_hash l $(get_canonical_arch l $arch)
 	else
-		for _a in x64 arm64 i686; do
+		for _a in x64 arm64; do
 			check_xulrunner_hash l "$_a"
 		done
 	fi
@@ -296,7 +296,7 @@ elif [[ $BUILD_LINUX == 1 ]]; then
 	if [[ -n $arch ]]; then
 		omni_arch=$(get_canonical_arch l $arch)
 	else
-		for cand in x86_64 arm64 i686; do
+		for cand in x86_64 arm64; do
 			[[ -d "${LINUX_RUNTIME_PATH_PREFIX}${cand}" ]] && { omni_arch="$cand"; break; }
 		done
 	fi
@@ -1119,7 +1119,7 @@ if [ $BUILD_LINUX == 1 ]; then
 	if [[ -n $arch ]]; then
 		archs=("$(get_canonical_arch l $arch)")
 	else
-		archs=(x64 arm64 i686)
+		archs=(x64 arm64)
 	fi
 	for arch in "${archs[@]}"; do
 		[[ $arch == x64 ]] && arch="x86_64"
