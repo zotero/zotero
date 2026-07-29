@@ -45,6 +45,15 @@
 	}
 }
 
+// Firefox gives the native clear button a hover background that runs into the field's focus ring,
+// and we don't use hover effects on comparable buttons
+input::-moz-search-clear-button {
+	&:hover,
+	&:active {
+		background-color: transparent;
+	}
+}
+
 search-textbox {
 	appearance: none;
 	background: var(--material-background);
