@@ -38,6 +38,7 @@
 	const VALID_TARGETS = [
 		"mainWindow",
 		"preferencePane",
+		"readerWindow",
 	];
 
 	const VALID_TYPES = [
@@ -50,7 +51,7 @@
 	 * @type {object}
 	 * @property {string} resourceID - The unique ID of the resource registration
 	 * @property {string} pluginID - The ID of the plugin registering the resource
-	 * @property {string} target - The target window type: "mainWindow" or "preferencePane"
+	 * @property {string} target - The target window type, see `VALID_TARGETS`
 	 * @property {string} type - The resource type: "ftl" or "css"
 	 * @property {string} url - The URL of the resource to load
 	 */
@@ -131,15 +132,22 @@
 			if (target === "mainWindow") {
 				return Zotero.getMainWindows();
 			}
+			let windowType;
 			if (target === "preferencePane") {
-				let windows = [];
-				let enumerator = Services.wm.getEnumerator("zotero:pref");
-				while (enumerator.hasMoreElements()) {
-					windows.push(enumerator.getNext());
-				}
-				return windows;
+				windowType = "zotero:pref";
 			}
-			return [];
+			else if (target === "readerWindow") {
+				windowType = "zotero:reader";
+			}
+			else {
+				return [];
+			}
+			let windows = [];
+			let enumerator = Services.wm.getEnumerator(windowType);
+			while (enumerator.hasMoreElements()) {
+				windows.push(enumerator.getNext());
+			}
+			return windows;
 		}
 
 		/**
@@ -296,9 +304,9 @@
 
 		/**
 		 * Apply all registered resources to a newly opened window.
-		 * Should be called when a main window or preference window opens.
+		 * Should be called when a the corresponding window type is opened.
 		 * @param {ChromeWindow} win
-		 * @param {string} target - "mainWindow" or "preferencePane"
+		 * @param {string} target - see `VALID_TARGETS`
 		 */
 		applyAllToWindow(win, target) {
 			this._manager.applyAllToWindow(win, target);

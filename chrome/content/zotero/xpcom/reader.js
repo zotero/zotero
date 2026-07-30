@@ -2237,6 +2237,7 @@ class ReaderWindow extends ReaderInstance {
 				this._window.reader = this;
 				this._iframe = this._window.document.getElementById('reader');
 				this._iframe.docShell.windowDraggingAllowed = true;
+				Zotero.WindowResourceManager.applyAllToWindow(this._window, "readerWindow");
 			}
 
 			if (this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
