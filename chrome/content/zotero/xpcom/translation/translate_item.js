@@ -301,6 +301,25 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 
 	/**
+	 * Expand a resolver list into URL objects, running any function resolvers
+	 *
+	 * @param {(Object|Function)[]} resolvers - See downloadFirstAvailableFile()
+	 * @return {Promise<Object[]>}
+	 */
+	async _getURLObjectsFromResolvers(resolvers) {
+		let urlObjects = [];
+		for (let resolver of resolvers) {
+			if (typeof resolver == 'function') {
+				urlObjects.push(...await resolver());
+			}
+			else {
+				urlObjects.push(resolver);
+			}
+		}
+		return urlObjects;
+	},
+
+	/**
 	 * Gets a list of OA PDF URLs for items that did not receive a PDF attachment
 	 * from the translator
 	 *
@@ -326,7 +345,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if (!resolvers.length) {
 				return urlObjects;
 			}
-			urlObjects = await resolvers[0]();
+			urlObjects = await this._getURLObjectsFromResolvers(resolvers);
 			// If there are possible URLs, create a status line for the PDF
 			if (urlObjects.length) {
 				let title = Zotero.getString('findPDF.openAccessPDF');
@@ -384,10 +403,9 @@ Zotero.Translate.ItemSaver.prototype = {
 			// Translated attachment failed, so we didn't check for OA PDFs yet and didn't
 			// update the status line
 			// Look for OA PDFs now
-			resolvers = Zotero.Attachments.getPDFResolvers(item, ['oa']);
-			if (resolvers.length) {
-				resolvers = await resolvers[0]();
-			}
+			resolvers = await this._getURLObjectsFromResolvers(
+				Zotero.Attachments.getPDFResolvers(item, ['oa'])
+			);
 
 			// Add custom resolvers
 			resolvers.push(...Zotero.Attachments.getPDFResolvers(item, ['custom'], true));

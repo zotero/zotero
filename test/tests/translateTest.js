@@ -1590,6 +1590,26 @@ describe("Zotero.Translate", function () {
 			});
 
 		});
+		describe("#_getURLObjectsFromResolvers()", function () {
+			it("should run function resolvers and pass through plain objects", async function () {
+				var itemSaver = new Zotero.Translate.ItemSaver({
+					libraryID: Zotero.Libraries.userLibraryID,
+					attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE
+				});
+				var fromFunction = { url: 'https://example.com/a.pdf', accessMethod: 'oa' };
+				var fromObject = {
+					pageURL: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC1234/',
+					accessMethod: 'oa'
+				};
+
+				var urlObjects = await itemSaver._getURLObjectsFromResolvers([
+					async () => [fromFunction],
+					fromObject
+				]);
+
+				assert.deepEqual(urlObjects, [fromFunction, fromObject]);
+			});
+		});
 		describe('#saveItems', function () {
 			it("should deproxify item and attachment urls when proxy provided", async function () {
 				var itemID;
