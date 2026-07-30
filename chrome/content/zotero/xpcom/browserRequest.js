@@ -50,6 +50,11 @@ Zotero.BrowserRequest = {
 			successCookie: { host: 'search.worldcat.org', name: 'turnstile_passed' },
 			detectBlock: (status, body) => status === 403 && /turnstile_required/.test(body)
 		},
+		{
+			// Proof-of-work challenge, so nothing for the user to solve
+			match: '://pmc.ncbi.nlm.nih.gov',
+			captchaLocator: null
+		},
 	],
 	
 	PLAIN_UA_HOSTS: [
