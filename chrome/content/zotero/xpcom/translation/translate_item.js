@@ -403,9 +403,15 @@ Zotero.Translate.ItemSaver.prototype = {
 			// Translated attachment failed, so we didn't check for OA PDFs yet and didn't
 			// update the status line
 			// Look for OA PDFs now
-			resolvers = await this._getURLObjectsFromResolvers(
-				Zotero.Attachments.getPDFResolvers(item, ['oa'])
-			);
+			try {
+				resolvers = await this._getURLObjectsFromResolvers(
+					Zotero.Attachments.getPDFResolvers(item, ['oa'])
+				);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				resolvers = [];
+			}
 
 			// Add custom resolvers
 			resolvers.push(...Zotero.Attachments.getPDFResolvers(item, ['custom'], true));
