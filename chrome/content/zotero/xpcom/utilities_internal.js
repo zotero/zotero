@@ -926,12 +926,6 @@ Zotero.Utilities.Internal = {
 	},
 	
 	blobToText: async function (blob, charset = null) {
-		if (!charset) {
-			var matches = blob.type && blob.type.match(/charset=([a-z0-9\-_+])/i);
-			if (matches) {
-				charset = matches[1];
-			}
-		}
 		return new Promise(function (resolve) {
 			let fr = new FileReader();
 			fr.addEventListener("loadend", function () {
