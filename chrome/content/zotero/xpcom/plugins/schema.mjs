@@ -320,7 +320,7 @@ const PERMISSION_SCHEMAS = {
 			ItemTreeManager: {
 				registerColumn: "CustomParserCallable",
 				unregisterColumn: "CustomParserCallable",
-				[SchemaKey.WILDCARD]: true,
+				refreshColumns: true,
 			},
 		},
 	},
@@ -334,7 +334,7 @@ const PERMISSION_SCHEMAS = {
 				unregisterSection: "CustomParserCallable",
 				registerInfoRow: "CustomParserCallable",
 				unregisterInfoRow: "CustomParserCallable",
-				[SchemaKey.WILDCARD]: true,
+				refreshInfoRow: true,
 			},
 		},
 	},
@@ -343,7 +343,6 @@ const PERMISSION_SCHEMAS = {
 			MenuManager: {
 				registerMenu: "CustomParserCallable",
 				unregisterMenu: "CustomParserCallable",
-				[SchemaKey.WILDCARD]: true,
 			},
 		},
 	},
@@ -352,7 +351,6 @@ const PERMISSION_SCHEMAS = {
 			WindowResourceManager: {
 				registerResource: "CustomParserCallable",
 				unregisterResource: "CustomParserCallable",
-				[SchemaKey.WILDCARD]: true,
 			},
 		},
 	},
@@ -362,7 +360,6 @@ const PERMISSION_SCHEMAS = {
 				register: "CustomParserCallable",
 				unregister: "CustomParserCallable",
 				getCommand: "CustomParserCallable",
-				[SchemaKey.WILDCARD]: true,
 			},
 		},
 	},
@@ -371,7 +368,7 @@ const PERMISSION_SCHEMAS = {
 			ServerEndpointManager: {
 				registerEndpoint: "CustomParserCallable",
 				unregisterEndpoint: "CustomParserCallable",
-				[SchemaKey.WILDCARD]: true,
+				getEndpointURL: true,
 			},
 		},
 	},
