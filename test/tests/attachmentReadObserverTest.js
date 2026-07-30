@@ -42,6 +42,13 @@ describe("Zotero.AttachmentReadObserver", function () {
 			stub.restore();
 		});
 
+		it("should not update an attachment's attachmentLastRead when it is revealed in the filesystem", async function () {
+			let attachment = await importPDFAttachment(null);
+
+			await Zotero.Notifier.trigger('reveal', 'file', [attachment.id]);
+			assert.isNull(attachment.attachmentLastRead);
+		});
+
 		it("should not mark a group attachment as unsynced when opened", async function () {
 			let group = await createGroup();
 			let item = await createDataObject('item', { libraryID: group.libraryID });

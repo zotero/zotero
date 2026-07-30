@@ -5951,7 +5951,7 @@ var ZoteroPane = new function () {
 			// launch the parent directory
 			Zotero.launchFile(file.parent);
 		}
-		Zotero.Notifier.trigger('open', 'file', attachment.id);
+		Zotero.Notifier.trigger('reveal', 'file', attachment.id);
 	};
 	
 	
