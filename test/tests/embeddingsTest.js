@@ -197,4 +197,86 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 	});
+	// Downloads the active model (~130 MB), so run explicitly:
+	// ZOTERO_TEST_EMBEDDINGS_INFERENCE=1 test/runtests.sh -g "real vectors" embeddings
+	describe("#embed() with a real model", function () {
+		before(function () {
+			if (!Services.env.get("ZOTERO_TEST_EMBEDDINGS_INFERENCE")) {
+				this.skip();
+			}
+		});
+
+		after(async function () {
+			await Zotero.Embeddings.shutdownEngine();
+			Zotero.Prefs.clear('embeddings.model');
+		});
+
+		it("should produce real vectors that rank a related passage above an unrelated one", async function () {
+			this.timeout(600000);
+			// The runtime's model cache resolves navigator.storage via the most
+			// recent browser window
+			await loadZoteroPane();
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			await Zotero.Embeddings.preloadModel();
+
+			let [related, unrelated] = await Zotero.Embeddings.embedPassages([
+				"Gut bacteria produce short-chain fatty acids that affect host metabolism",
+				"A history of eighteenth-century French opera and its patrons"
+			]);
+			let query = await Zotero.Embeddings.embedQuery("intestinal microbiome and metabolism");
+
+			assert.isAbove(related.length, 100);
+			assert.equal(related.length, query.length);
+			// Vectors are normalized, so a dot product is the cosine similarity
+			let dot = (a, b) => a.reduce((sum, val, i) => sum + val * b[i], 0);
+			assert.approximately(dot(related, related), 1, 0.01);
+			assert.isAbove(dot(query, related), dot(query, unrelated));
+		});
+		it("should report a cached model as downloaded and keep it when pruning", async function () {
+			this.timeout(1800000);
+			await loadZoteroPane();
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			await Zotero.Embeddings.preloadModel();
+
+			assert.isTrue(await Zotero.Embeddings.isDownloaded());
+			// Pruning with the model still selected has to keep it
+			await Zotero.Embeddings.pruneModels();
+			assert.isTrue(await Zotero.Embeddings.isDownloaded());
+		});
+	});
+	describe("memory pressure", function () {
+		afterEach(function () {
+			Services.obs.notifyObservers(null, 'memory-pressure-stop');
+		});
+
+		it("should release the engine under pressure", async function () {
+			let stub = sinon.stub(Zotero.Embeddings, 'shutdownEngine').resolves();
+			try {
+				Services.obs.notifyObservers(null, 'memory-pressure', 'low-memory');
+				assert.isTrue(stub.called);
+				// Releasing to free memory doesn't invalidate stored vectors,
+				// so scoring in flight isn't discarded
+				assert.isFalse(stub.firstCall.args[0].modelChanged);
+			}
+			finally {
+				stub.restore();
+			}
+		});
+
+		it("should stop shrinking at the floor", async function () {
+			let stub = sinon.stub(Zotero.Embeddings, 'shutdownEngine').resolves();
+			try {
+				// Enough rounds to reach the floor from any starting point
+				for (let i = 0; i < 6; i++) {
+					Services.obs.notifyObservers(null, 'memory-pressure', 'low-memory');
+				}
+				let callsAtFloor = stub.callCount;
+				Services.obs.notifyObservers(null, 'memory-pressure', 'low-memory');
+				assert.equal(stub.callCount, callsAtFloor);
+			}
+			finally {
+				stub.restore();
+			}
+		});
+	});
 });
