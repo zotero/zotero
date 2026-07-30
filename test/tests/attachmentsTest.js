@@ -1052,7 +1052,7 @@ describe("Zotero.Attachments", function () {
 			]);
 		});
 
-		it("should include a PubMed Central resolver before DOI OA resolvers", async function () {
+		it("should include a PubMed Central resolver after DOI OA resolvers", async function () {
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
 			item.setField('DOI', '10.1093/nar/gkac173');
@@ -1062,11 +1062,11 @@ describe("Zotero.Attachments", function () {
 			var resolvers = Zotero.Attachments.getFileResolvers(item, ['oa']);
 
 			assert.lengthOf(resolvers, 2);
-			assert.deepEqual(resolvers[0], {
+			assert.isFunction(resolvers[0]);
+			assert.deepEqual(resolvers[1], {
 				pageURL: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9262588/',
 				accessMethod: 'oa'
 			});
-			assert.isFunction(resolvers[1]);
 		});
 
 		it("should allow finding files for an item with a PMCID", async function () {

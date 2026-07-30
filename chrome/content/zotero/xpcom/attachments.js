@@ -1310,13 +1310,6 @@ Zotero.Attachments = new function () {
 			}
 		}
 		
-		if (useOA && pmcid) {
-			resolvers.push({
-				pageURL: `https://pmc.ncbi.nlm.nih.gov/articles/${pmcid}/`,
-				accessMethod: 'oa'
-			});
-		}
-		
 		if (useOA && doi) {
 			resolvers.push(async function () {
 				let urls = await Zotero.Utilities.Internal.getOpenAccessPDFURLs(doi);
@@ -1330,7 +1323,16 @@ Zotero.Attachments = new function () {
 				});
 			});
 		}
-		
+
+		// The open-access lookup often supplies a PMC URL of its own, in which
+		// case this one is skipped as an already-tried redirect target
+		if (useOA && pmcid) {
+			resolvers.push({
+				pageURL: `https://pmc.ncbi.nlm.nih.gov/articles/${pmcid}/`,
+				accessMethod: 'oa'
+			});
+		}
+
 		if (useCustom && doi) {
 			let customResolvers;
 			try {
