@@ -4079,8 +4079,11 @@ CSL.Engine.prototype.setStyleAttributes = function () {
     attributes = this.cslXml.attributes(this.cslXml.dataObj);
     for (attrname in attributes) {
         if (attributes.hasOwnProperty(attrname)) {
-            // attr = attributes[key];
-            CSL.Attributes[attrname].call(dummy, this, attributes[attrname]);
+            if (CSL.Attributes[attrname]) {
+                CSL.Attributes[attrname].call(dummy, this, attributes[attrname]);
+            } else {
+                CSL.debug("warning: undefined attribute \"" + attrname + "\" in style");
+            }
         }
     }
 };
