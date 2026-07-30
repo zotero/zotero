@@ -159,7 +159,17 @@ Zotero_Preferences.Advanced = {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-stopping');
 		}
 		else if (status.phase === 'downloading') {
-			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-downloading');
+			let progress = status.downloadProgress;
+			if (progress) {
+				document.l10n.setAttributes(
+					phaseLabel,
+					'preferences-advanced-semantic-search-downloading-progress',
+					{ percent: Math.round(progress.fraction * 100) }
+				);
+			}
+			else {
+				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-downloading');
+			}
 		}
 		else if (status.phase === 'indexing') {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing');

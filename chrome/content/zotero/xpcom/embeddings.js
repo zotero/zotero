@@ -26,9 +26,9 @@
 /**
  *
  *   Zotero.Embeddings -- the embedding engine and its public face: model
- *   config + download, the inference worker (bundled transformers.js + ONNX
- *   Runtime, run off the main thread), embed*(), and scoreItemIDs() for the
- *   search path.
+ *   config + download, the inference engine (see Zotero.ML, which runs it in
+ *   Firefox's inference process), embed*(), and scoreItemIDs() for the search
+ *   path.
  *
  *   Zotero.Embeddings.Indexing -- everything that decides what gets embedded
  *   and keeps the itemEmbeddings table filled.
@@ -81,16 +81,10 @@ Zotero.Embeddings = new function () {
 		}
 	};
 
-	// Written into the model directory once every file has been downloaded, so
-	// that isDownloaded() doesn't have to re-check each file on every call.
-	const MARKER_FILE = '.download-complete.json';
+	const TASK_NAME = 'feature-extraction';
 
-	// Written into the model directory before the first file is downloaded,
-	// so download() can tell a resumable partial download of the current
-	// revision from stale files that have to be replaced.
-	const REVISION_MARKER_FILE = '.download-revision.json';
-
-	const SUBDIR = 'embeddings';
+	const MODEL_HUB_ROOT_URL = 'https://huggingface.co';
+	const MODEL_HUB_URL_TEMPLATE = '{model}/resolve/{revision}';
 
 	/**
 	 * Name of the active model, from the global preference. Empty string means
@@ -128,14 +122,6 @@ Zotero.Embeddings = new function () {
 	 */
 	this.getModelVersion = function () {
 		return this.getModelName() + '/' + _getModel().revision;
-	};
-
-	/**
-	 * Absolute path to the directory where the active model's files live.
-	 * @return {String}
-	 */
-	this.getModelDirectory = function () {
-		return PathUtils.join(Zotero.DataDirectory.dir, SUBDIR, this.getModelName());
 	};
 
 	//
@@ -355,129 +341,63 @@ Zotero.Embeddings = new function () {
 	 * @return {Promise<Boolean>}
 	 */
 	this.isDownloaded = async function () {
-		let model = _getModel();
-		let dir = this.getModelDirectory();
-		let markerPath = PathUtils.join(dir, MARKER_FILE);
-
-		let marker;
-		try {
-			marker = JSON.parse(await Zotero.File.getContentsAsync(markerPath));
-		}
-		catch {
-			return false;
-		}
-		// A revision bump invalidates a previously downloaded model
-		if (!marker || marker.revision !== model.revision) {
-			return false;
-		}
-		// Make sure the files are actually still there
-		for (let file of model.files) {
-			if (!(await IOUtils.exists(PathUtils.join(dir, ...file.split('/'))))) {
-				return false;
-			}
-		}
-		return true;
+		let modelId = _getModel().modelId;
+		let cached = await Zotero.ML.listModels({ taskName: TASK_NAME });
+		return cached.some(model => model.modelId === modelId);
 	};
 
-	/**
-	 * Download the active model's files into its directory. Files already
-	 * downloaded for the same revision are skipped, so this can be safely
-	 * called again to resume after a failure. On success a completion marker
-	 * is written.
-	 *
-	 * @return {Promise<String>} - Path to the model directory
-	 */
-	this.download = async function () {
-		let model = _getModel();
-		let baseURL = `https://huggingface.co/${model.modelId}/resolve/main/`;
-		let dir = this.getModelDirectory();
 
+	/**
+	 * Make the active model available to the inference runtime, downloading it
+	 * if the runtime doesn't have it cached. Interrupted downloads resume, so
+	 * this can be called again after a failure.
+	 *
+	 * @param {Function} [onProgress] - Called with the runtime's download
+	 *     progress
+	 * @return {Promise}
+	 */
+	this.download = async function (onProgress) {
 		if (await this.isDownloaded()) {
 			Zotero.debug(`Embeddings: model '${this.getModelName()}' already downloaded`);
-			return dir;
+			return;
 		}
-
-		Zotero.debug(`Embeddings: downloading model '${this.getModelName()}' from ${baseURL}`);
-		// A revision marker is written before the first file, so files from a
-		// partial download of the same revision can be kept for resuming while
-		// anything else -- e.g. a complete download of an older revision,
-		// whose files _downloadFile() would otherwise keep -- is replaced
-		let revisionPath = PathUtils.join(dir, REVISION_MARKER_FILE);
-		let downloadingRevision = null;
-		try {
-			downloadingRevision = JSON.parse(await Zotero.File.getContentsAsync(revisionPath)).revision;
-		}
-		catch {}
-		if (downloadingRevision !== model.revision) {
-			await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
-		}
-		await Zotero.File.createDirectoryIfMissingAsync(dir, { from: Zotero.DataDirectory.dir });
-		await Zotero.File.putContentsAsync(revisionPath, JSON.stringify({ revision: model.revision }));
-
-		for (let file of model.files) {
-			await _downloadFile(baseURL + file, dir, file);
-		}
-
-		// TODO: verify file integrity against sha256 hashes from a signed
-		// manifest once the model is mirrored on Zotero infrastructure
-
-		await Zotero.File.putContentsAsync(
-			PathUtils.join(dir, MARKER_FILE),
-			JSON.stringify({
-				model: this.getModelName(),
-				revision: model.revision,
-				files: model.files
-			})
-		);
-
-		Zotero.debug(`Embeddings: model '${this.getModelName()}' downloaded to ${dir}`);
-		return dir;
+		Zotero.debug(`Embeddings: downloading model '${this.getModelName()}'`);
+		// Creating the engine downloads whatever the runtime is missing
+		await _getEngine(onProgress);
+		Zotero.debug(`Embeddings: model '${this.getModelName()}' downloaded`);
 	};
 
+
 	/**
-	 * Delete downloaded model directories other than the active one (all of them
-	 * when disabled), freeing disk space after a model switch.
+	 * Delete cached model files other than the active model's (all of them when
+	 * disabled), freeing disk space after a model switch.
 	 *
 	 * @return {Promise}
 	 */
 	this.pruneModels = async function () {
-		let root = PathUtils.join(Zotero.DataDirectory.dir, SUBDIR);
-		let keep = this.isEnabled() ? this.getModelName() : null;
-		let children;
-		try {
-			children = await IOUtils.getChildren(root);
-		}
-		catch {
-			return; // directory doesn't exist yet
-		}
-		for (let path of children) {
-			if (PathUtils.filename(path) === keep) {
-				continue;
-			}
-			let stat = await IOUtils.stat(path);
-			if (stat.type === 'directory') {
-				await IOUtils.remove(path, { recursive: true, ignoreAbsent: true });
+		let keep = this.isEnabled() ? _getModel().modelId : null;
+		for (let model of await Zotero.ML.listModels({ taskName: TASK_NAME })) {
+			if (model.modelId !== keep) {
+				await Zotero.ML.deleteModels({
+					taskName: TASK_NAME,
+					model: model.name,
+					revision: model.revision
+				});
 			}
 		}
 	};
 
+
 	//
-	// Embedding generation, via a bundled transformers.js + ONNX Runtime
-	// (resource://zotero/embeddings/) running in a worker. The model files are
-	// read from the data directory (see download()) and handed to the worker,
-	// which serves them to transformers.js through an in-memory custom cache.
+	// Embedding generation, in Firefox's inference process via Zotero.ML. The
+	// runtime downloads the model files and caches them in the profile
+	// directory, so they aren't part of the data directory or its backups.
 	//
 
-	const WORKER_URL = 'resource://zotero/embeddings/worker.js';
-	const RESOURCE_DIR = 'resource://zotero/embeddings/';
-	const WASM_FILE = 'ort-wasm-simd-threaded.jsep.wasm';
-
-	let _worker = null;
-	let _workerReady = null;
-	let _requestID = 0;
-	let _pending = new Map();
-	// Model identity the current worker was initialized with
-	let _workerModelVersion = null;
+	let _engine = null;
+	let _engineReady = null;
+	// Model identity the current engine was created for
+	let _engineModelVersion = null;
 	// Bumped on every engine shutdown (e.g. a model switch), so long-running
 	// consumers can detect that the model changed under them and discard
 	// their results
@@ -507,148 +427,78 @@ Zotero.Embeddings = new function () {
 		}
 	};
 
-	function _ensureWorker() {
-		if (_worker) {
-			return;
+	// Create the inference engine if needed. The engine reads the model files
+	// from the model directory, so the model must already be downloaded.
+	async function _getEngine(onProgress) {
+		// An engine created for a different model or revision can't be reused
+		// -- its weights and prefixes wouldn't match the active model
+		if (_engine && _engineModelVersion
+				&& _engineModelVersion !== Zotero.Embeddings.getModelVersion()) {
+			await Zotero.Embeddings.shutdownEngine();
 		}
-		_worker = new Worker(WORKER_URL, { type: 'module' });
-		_worker.addEventListener('message', (event) => {
-			let { id, result, error } = event.data;
-			let promise = _pending.get(id);
-			if (!promise) {
-				return;
-			}
-			_pending.delete(id);
-			if (error) {
-				let err = new Error(error.message || error);
-				if (error.name) {
-					err.name = error.name;
-				}
-				if (error.stack) {
-					// Preserve the worker-side stack for debugging
-					err.stack = error.stack;
-				}
-				promise.reject(err);
-			}
-			else {
-				promise.resolve(result);
-			}
-		});
-		// A worker-level error (e.g. a crash or OOM while loading the model) won't
-		// produce a per-request reply, so fail any in-flight requests instead of
-		// letting them hang forever, and drop the dead worker so the next call
-		// rebuilds it.
-		_worker.addEventListener('error', (event) => {
-			let err = new Error(`Embeddings worker error: ${event.message || 'unknown (worker may have crashed)'}`);
-			Zotero.logError(err);
-			_failPending(err);
-			_worker = null;
-			_workerReady = null;
-		});
-		_worker.addEventListener('messageerror', () => {
-			_failPending(new Error('Embeddings worker message could not be deserialized'));
-		});
-	}
-
-	function _failPending(err) {
-		for (let { reject } of _pending.values()) {
-			reject(err);
-		}
-		_pending.clear();
-	}
-
-	function _post(action, data, transfer = []) {
-		let id = ++_requestID;
-		return new Promise((resolve, reject) => {
-			_pending.set(id, { resolve, reject });
-			_worker.postMessage({ id, action, data }, transfer);
-		});
-	}
-
-	// Create the worker if needed and initialize it with the model files (read
-	// from the data directory) and the bundled ORT wasm binary. The model must
-	// already be downloaded.
-	async function _getWorker() {
-		// A worker initialized for a different model or revision can't be
-		// reused -- its weights and prefixes wouldn't match the active model
-		if (_worker && _workerModelVersion
-				&& _workerModelVersion !== Zotero.Embeddings.getModelVersion()) {
-			Zotero.Embeddings.shutdownEngine();
-		}
-		_ensureWorker();
-		if (!_workerReady) {
+		if (!_engineReady) {
 			let modelVersion = Zotero.Embeddings.getModelVersion();
-			_workerReady = (async () => {
+			_engineReady = (async () => {
 				let model = _getModel();
-				if (!(await Zotero.Embeddings.isDownloaded())) {
-					throw new Error(`Embeddings model '${Zotero.Embeddings.getModelName()}' is not downloaded`);
-				}
-				let dir = Zotero.Embeddings.getModelDirectory();
-
-				// Read the model files from the data directory, transferring the
-				// buffers to the worker to avoid copies
-				let files = [];
-				let transfer = [];
-				for (let rel of model.files) {
-					let path = PathUtils.join(dir, ...rel.split('/'));
-					let bytes = await IOUtils.read(path);
-					files.push([rel, bytes.buffer]);
-					transfer.push(bytes.buffer);
-				}
-
-				// Read the bundled ONNX runtime wasm binary
-				let wasm = await Zotero.HTTP.request('GET', RESOURCE_DIR + WASM_FILE, {
-					responseType: 'arraybuffer'
-				});
-				transfer.push(wasm.response);
-
-				Zotero.debug(`Embeddings: initializing worker for '${model.modelId}' (dtype ${model.dtype}, pooling ${model.pooling})`);
-				await _post('init', {
+				Zotero.debug(`Embeddings: creating engine for '${model.modelId}' `
+					+ `(dtype ${model.dtype}, pooling ${model.pooling})`);
+				_engine = await Zotero.ML.createEngine({
+					engineId: 'zotero-embeddings',
+					taskName: TASK_NAME,
+					backend: 'onnx-native',
 					modelId: model.modelId,
+					modelRevision: 'main',
+					modelHubRootUrl: MODEL_HUB_ROOT_URL,
+					modelHubUrlTemplate: MODEL_HUB_URL_TEMPLATE,
 					dtype: model.dtype,
-					pooling: model.pooling,
-					files,
-					wasmPaths: RESOURCE_DIR,
-					wasmBinary: wasm.response
-				}, transfer);
-				_workerModelVersion = modelVersion;
-				Zotero.debug('Embeddings: worker initialized');
+					numThreads: Zotero.ML.getOptimalConcurrency()
+				}, onProgress);
+				_engineModelVersion = modelVersion;
+				Zotero.debug('Embeddings: engine ready');
 			})();
 		}
 		try {
-			await _workerReady;
+			await _engineReady;
 		}
 		catch (e) {
 			// Allow a later retry after a failed initialization
-			_workerReady = null;
+			_engineReady = null;
 			throw e;
 		}
-		return _worker;
+		return _engine;
 	}
 
 	/**
-	 * Prepare embeddings ahead of time: download the model if needed, then spin
-	 * up and initialize the worker so the first embed() is fast.
+	 * Prepare embeddings ahead of time: download the model if needed, then
+	 * create the inference engine so the first embed() is fast.
 	 *
-	 * @return {Promise} Resolves when the worker is ready to embed
+	 * @return {Promise} Resolves when the engine is ready to embed
 	 */
-	this.preloadModel = async function () {
-		await this.download();
-		await _getWorker();
+	this.preloadModel = async function (onProgress) {
+		await this.download(onProgress);
+		await _getEngine();
 	};
 
 	/**
-	 * Shut down the embeddings worker, rejecting any in-flight requests.
+	 * Shut down the inference engine and the process running it, releasing the
+	 * memory held by the loaded model
+	 *
+	 * @return {Promise}
 	 */
-	this.shutdownEngine = function () {
-		if (_worker) {
-			_worker.terminate();
-			_worker = null;
+	this.shutdownEngine = async function ({ modelChanged = true } = {}) {
+		let engine = _engine;
+		_engine = null;
+		_engineReady = null;
+		_engineModelVersion = null;
+		// Only a model change makes vectors computed by the old engine
+		// unusable, so a shutdown to release memory leaves scoring alone
+		if (modelChanged) {
+			_modelGeneration++;
 		}
-		_workerReady = null;
-		_workerModelVersion = null;
-		_modelGeneration++;
-		_failPending(new Error('Embeddings worker shut down'));
+		if (engine) {
+			await engine.terminate();
+			await Zotero.ML.shutdown();
+		}
 	};
 
 	/**
@@ -659,6 +509,21 @@ Zotero.Embeddings = new function () {
 	 * @param {String} text
 	 * @return {Promise<Float32Array>}
 	 */
+	function _normalize(vector) {
+		let sum = 0;
+		for (let val of vector) {
+			sum += val * val;
+		}
+		let magnitude = Math.sqrt(sum);
+		if (magnitude) {
+			for (let i = 0; i < vector.length; i++) {
+				vector[i] /= magnitude;
+			}
+		}
+		return vector;
+	}
+
+
 	this.embed = async function (text) {
 		let vectors = await this.embedMany([text]);
 		return vectors[0];
@@ -674,11 +539,20 @@ Zotero.Embeddings = new function () {
 		if (!texts.length) {
 			return [];
 		}
-		await _getWorker();
+		let engine = await _getEngine();
+		let model = _getModel();
 		Zotero.debug(`Embeddings: embedding batch of ${texts.length}`);
-		let { data, dims } = await _post('embed', { texts });
+		// The runtime spreads `args` into the pipeline call, so the batch of
+		// texts is a single argument
+		let vectors = await engine.run({
+			args: [texts],
+			options: { pooling: model.pooling }
+		});
 		Zotero.debug(`Embeddings: batch of ${texts.length} done`);
-		return _toVectors(data, dims);
+		// Scoring compares vectors with a plain dot product, which only
+		// measures how closely two of them point in the same direction when
+		// both have a length of 1
+		return vectors.map(vector => _normalize(new Float32Array(vector)));
 	};
 
 	// The last embedded query, reused across the scoring passes a single
@@ -740,19 +614,6 @@ Zotero.Embeddings = new function () {
 		let passagePrefix = _getModel().passagePrefix;
 		return this.embedMany(texts.map(text => passagePrefix + text));
 	};
-
-	// Reshape the worker's flat Float32 output (a tensor of shape
-	// [count, dimensions]) into one Float32Array per input text.
-	function _toVectors(data, dims) {
-		let dim = dims[dims.length - 1];
-		let count = data.length / dim;
-		let vectors = [];
-		for (let i = 0; i < count; i++) {
-			vectors.push(data.slice(i * dim, (i + 1) * dim));
-		}
-		return vectors;
-	}
-
 
 	/**
 	 * Map a raw similarity score onto the active model's display range, for
@@ -852,36 +713,13 @@ Zotero.Embeddings = new function () {
 		return scores;
 	};
 
-	/**
-	 * Download a single model file to a temp path and move it into place
-	 * atomically, so an interrupted download never looks like a complete file.
-	 * Files that already exist are skipped.
-	 */
-	async function _downloadFile(url, dir, file) {
-		let parts = file.split('/');
-		let destPath = PathUtils.join(dir, ...parts);
-
-		// Already have it from a previous (interrupted) run
-		if (await IOUtils.exists(destPath)) {
-			return;
-		}
-
-		// Create the file's parent directory (e.g. onnx/) if needed
-		if (parts.length > 1) {
-			await Zotero.File.createDirectoryIfMissingAsync(PathUtils.parent(destPath), { from: dir });
-		}
-
-		let tmpPath = destPath + '.tmp';
-		await Zotero.HTTP.download(url, tmpPath);
-		await IOUtils.move(tmpPath, destPath);
-	}
 };
 
 
 /**
  * Background indexing flow for semantic search: a single queue of itemIDs
  * drained by one consumer loop.
- * Inference runs in the worker; batches yield between DB writes.
+ * Inference runs out of process; batches yield between DB writes.
  * Also switches models when the extensions.zotero.embeddings.model preference
  * changes. Progress is reported per library via listeners.
  */
@@ -891,6 +729,8 @@ Zotero.Embeddings.Indexing = new function () {
 	let _indexingPromise = null;
 	let _stopping = false;
 	let _phase = 'idle'; // 'idle' | 'downloading' | 'indexing'
+	// Bytes of the model downloaded so far, while _phase is 'downloading'
+	let _downloadProgress = null;
 	let _lastError = null;
 	let _status = new Map(); // libraryID -> { name, indexed, eligible }
 	let _progressListeners = new Set();
@@ -900,6 +740,22 @@ Zotero.Embeddings.Indexing = new function () {
 	// add itemIDs here; _run() is the single consumer that embeds them.
 	let _queue = new Set();
 	let _kickTimer = null;
+
+	// Characters of text per engine call (see _indexItems()). Under memory
+	// pressure this is halved, down to DEGRADED_CHAR_BUDGET_FLOOR, and the
+	// engine is shut down so the next one's memory arena grows only to the
+	// smaller peak. Restored when the pressure lifts.
+	const DEFAULT_CHAR_BUDGET = 12000;
+	const DEGRADED_CHAR_BUDGET_FLOOR = 1500;
+	let _charBudget = DEFAULT_CHAR_BUDGET;
+
+	// Don't start a run that would load the model with less than this much
+	// memory available, since inference needs room well beyond the model files
+	const MIN_AVAILABLE_MEMORY = 1.5 * 1024 * 1024 * 1024;
+
+	// Wait longer than the usual debounce before retrying a run that was held
+	// off for memory
+	const LOW_MEMORY_RETRY_DELAY = 5 * 60 * 1000;
 	// Debounce before starting the consumer, so a burst of changes (e.g. an
 	// import) is picked up in one pass
 	const KICK_DELAY = 3000;
@@ -1008,7 +864,7 @@ Zotero.Embeddings.Indexing = new function () {
 				Zotero.logError(e);
 			}
 		}
-		Zotero.Embeddings.shutdownEngine();
+		await Zotero.Embeddings.shutdownEngine();
 
 		// Different models produce different-dimension vectors, so all stored
 		// embeddings are wiped on any switch -- including disabling, which drops
@@ -1029,14 +885,68 @@ Zotero.Embeddings.Indexing = new function () {
 	// Debounce before starting the consumer, so a burst of changes (e.g. an
 	// import) is picked up in one pass. Enqueued ids just sit in the queue
 	// until the consumer runs.
-	function _scheduleKick() {
+	// Inference memory is dominated by the padded text in each batch, so
+	// respond to system memory pressure by shrinking the batches rather than
+	// stopping: indexing keeps making progress, just more slowly. The engine is
+	// shut down at the same time, both to release its memory immediately and
+	// because its memory arena never shrinks -- only a new engine picks up the
+	// smaller budget.
+	let _memoryPressureObserver = {
+		observe: (subject, topic) => {
+			if (topic === 'memory-pressure-stop') {
+				if (_charBudget !== DEFAULT_CHAR_BUDGET) {
+					Zotero.debug("Embeddings: memory pressure over -- restoring batch size");
+					_charBudget = DEFAULT_CHAR_BUDGET;
+				}
+				return;
+			}
+			if (_charBudget <= DEGRADED_CHAR_BUDGET_FLOOR) {
+				return;
+			}
+			_charBudget = Math.max(
+				DEGRADED_CHAR_BUDGET_FLOOR, Math.floor(_charBudget / 2)
+			);
+			Zotero.debug(`Embeddings: memory pressure -- batch size reduced to `
+				+ `${_charBudget} characters`);
+			Zotero.Embeddings.shutdownEngine({ modelChanged: false })
+				.catch(e => Zotero.logError(e));
+		},
+	};
+	Services.obs.addObserver(_memoryPressureObserver, 'memory-pressure');
+	Services.obs.addObserver(_memoryPressureObserver, 'memory-pressure-stop');
+
+	/**
+	 * Whether there's enough memory available to load the model and run
+	 * inference. The runtime's own check is against total system memory, which
+	 * says nothing about what's free right now.
+	 *
+	 * @return {Boolean}
+	 */
+	function _hasMemoryToIndex() {
+		try {
+			let available = Cc["@mozilla.org/ml-utils;1"]
+				.getService(Ci.nsIMLUtils)
+				.availablePhysicalMemory;
+			if (available && available < MIN_AVAILABLE_MEMORY) {
+				Zotero.debug(`Embeddings: only ${Math.round(available / 1024 / 1024)} MB `
+					+ "available -- not indexing yet");
+				return false;
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		return true;
+	}
+
+	function _scheduleKick(delay = KICK_DELAY) {
 		if (_kickTimer) {
 			clearTimeout(_kickTimer);
 		}
 		_kickTimer = setTimeout(() => {
 			_kickTimer = null;
 			_startConsumer();
-		}, KICK_DELAY);
+		}, delay);
 	}
 
 	// Start the consumer loop if there's work and it isn't already running
@@ -1172,11 +1082,21 @@ Zotero.Embeddings.Indexing = new function () {
 	// @param {Zotero.Item[]} items
 	// @param {Object} [options]
 	// @param {Function} [options.onProgress] - Called as { done, total }
-	// @param {Number} [options.batchSize=16] - Items per engine call
+	// @param {Number} [options.maxBatchItems=20] - Most items per engine call
+	// @param {Number} [options.batchCharBudget=12000] - Most characters per
+	//     engine call, counting every text in the batch as long as its longest
+	//     one, since they're padded to that length. Attention memory grows with
+	//     the square of the padded length, so a batch of long abstracts uses
+	//     far more memory than the same number of short ones.
 	// @param {Function} [options.shouldStop] - Called before each batch;
 	//     return true to stop early
 	// @return {Promise<Number>} - Number of embeddings stored
-	async function _indexItems(items, { onProgress, batchSize = 16, shouldStop } = {}) {
+	async function _indexItems(items, {
+		onProgress,
+		maxBatchItems = 20,
+		batchCharBudget = 12000,
+		shouldStop
+	} = {}) {
 		await Zotero.Items.loadDataTypes(items, ['itemData']);
 
 		let toEmbed = [];
@@ -1202,11 +1122,24 @@ Zotero.Embeddings.Indexing = new function () {
 			|| (a.text.length - b.text.length));
 
 		let done = 0;
-		for (let i = 0; i < toEmbed.length; i += batchSize) {
+		for (let i = 0; i < toEmbed.length; ) {
 			if (shouldStop && shouldStop()) {
 				break;
 			}
-			let batch = toEmbed.slice(i, i + batchSize);
+			// Take as many of the next (length-sorted) texts as fit the budget,
+			// always at least one
+			let longest = 0;
+			let count = 0;
+			while (i + count < toEmbed.length && count < maxBatchItems) {
+				let length = Math.max(longest, toEmbed[i + count].text.length);
+				if (count && length * (count + 1) > batchCharBudget) {
+					break;
+				}
+				longest = length;
+				count++;
+			}
+			let batch = toEmbed.slice(i, i + count);
+			i += count;
 			let vectors = await Zotero.Embeddings.embedPassages(batch.map(b => b.text));
 			await Zotero.DB.executeTransaction(async function () {
 				for (let j = 0; j < batch.length; j++) {
@@ -1277,6 +1210,7 @@ Zotero.Embeddings.Indexing = new function () {
 			stopping: _indexing && _stopping,
 			paused: this.isPaused(),
 			phase: _phase,
+			downloadProgress: _downloadProgress,
 			error: _lastError ? (_lastError.message || String(_lastError)) : null,
 			libraries: [..._status.entries()].map(([libraryID, s]) => ({ libraryID, ...s }))
 		};
@@ -1397,7 +1331,37 @@ Zotero.Embeddings.Indexing = new function () {
 	// stopIndexing() is called. Every indexing pass -- library-wide or
 	// notifier-driven -- runs through here, so there's never more than one
 	// indexing process and all of them can be stopped.
+	// The runtime's progress is a percentage of the files it has discovered so
+	// far, so it jumps while the small config and tokenizer files are fetched
+	// and then climbs steadily through the weights, which dominate the
+	// download. Reports arrive frequently, so only emit on a change of at
+	// least a percentage point.
+	function _onDownloadProgress({ type, progress, totalLoaded, total, units }) {
+		if (type !== 'downloading' || units !== 'bytes' || !total) {
+			return;
+		}
+		let previous = _downloadProgress;
+		let fraction = Math.min(progress / 100, 1);
+		// The first file is fetched and completed before the rest are known,
+		// which reads as a complete download -- stay indeterminate until
+		// there's something left to report
+		if (!previous && fraction >= 1) {
+			return;
+		}
+		_downloadProgress = { loaded: totalLoaded, total, fraction };
+		if (!previous || Math.abs(fraction - previous.fraction) >= 0.01) {
+			_emitProgress();
+		}
+	}
+
+
 	async function _run() {
+		// Wait for memory rather than starting a run that would make things
+		// worse. The queue is untouched, so a later kick picks it up.
+		if (!_hasMemoryToIndex()) {
+			_scheduleKick(LOW_MEMORY_RETRY_DELAY);
+			return;
+		}
 		_indexing = true;
 		_stopping = false;
 		_lastError = null;
@@ -1407,9 +1371,10 @@ Zotero.Embeddings.Indexing = new function () {
 			_phase = (await Zotero.Embeddings.isDownloaded()) ? 'indexing' : 'downloading';
 			_emitProgress();
 			await Zotero.Embeddings.Indexing.refreshStatus();
-			await Zotero.Embeddings.preloadModel();
+			await Zotero.Embeddings.preloadModel(_onDownloadProgress);
 
 			_phase = 'indexing';
+			_downloadProgress = null;
 			_emitProgress();
 			let shouldStop = () => _stopping;
 			while (_queue.size) {
@@ -1434,6 +1399,7 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 				await _indexItems(items, {
 					shouldStop,
+					batchCharBudget: _charBudget,
 					onProgress: () => _refreshStatusThrottled()
 				});
 			}
@@ -1446,10 +1412,22 @@ Zotero.Embeddings.Indexing = new function () {
 		finally {
 			_indexing = false;
 			_phase = 'idle';
+			_downloadProgress = null;
 			_emitProgress();
 			// Pick up anything enqueued while we were finishing up
 			if (_queue.size && !_stopping) {
 				_scheduleKick();
+			}
+			// Inference memory is held by the process running the model, and
+			// the runtime's own idle timeout is long, so release it as soon as
+			// there's nothing left to index
+			else {
+				try {
+					await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 		}
 	}

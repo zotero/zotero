@@ -33,11 +33,10 @@
  * configuration Zotero's build requires. Callers pass the model and task.
  */
 Zotero.ML = new function () {
-	// Hosts models may be loaded from, in the runtime's allow-list format.
-	// Local files cover models Zotero downloads itself; the runtime always
-	// allows chrome://, resource://, and localhost.
+	// Hosts models may be downloaded from, in the runtime's allow-list format.
+	// The runtime additionally always allows chrome://, resource://, and
+	// localhost.
 	const ALLOWED_MODEL_HOSTS = [
-		{ filter: 'ALLOW', urlPrefix: 'file://' },
 		{ filter: 'ALLOW', urlPrefix: 'https://huggingface.co/' }
 	];
 
@@ -46,6 +45,11 @@ Zotero.ML = new function () {
 	// ('onnx' and 'wllama', plus the 'best-*' backends that fall back to them)
 	// or aren't local at all ('openai').
 	const NATIVE_BACKENDS = ['onnx-native', 'llama.cpp'];
+
+	// Default host and URL layout for models, for operations that address the
+	// model cache without creating an engine
+	const MODEL_HUB_ROOT_URL = 'https://huggingface.co';
+	const MODEL_HUB_URL_TEMPLATE = '{model}/resolve/{revision}';
 
 	var _configured = false;
 
@@ -99,9 +103,8 @@ Zotero.ML = new function () {
 	/**
 	 * Create an inference engine.
 	 *
-	 * The model is downloaded on first use and cached by the runtime. Model
-	 * hosts other than Mozilla's and localhost are rejected unless the
-	 * MOZ_ALLOW_EXTERNAL_ML_HUB environment variable is set.
+	 * The model is downloaded on first use and cached by the runtime. Its host
+	 * has to be one of ALLOWED_MODEL_HOSTS.
 	 *
 	 * @param {Object} options - Pipeline options for the runtime, including
 	 *     `taskName`, `modelId`, and `backend` (see NATIVE_BACKENDS)
@@ -125,6 +128,66 @@ Zotero.ML = new function () {
 			+ `${options.modelId} on ${options.backend}`);
 		return createEngine(options, onProgress);
 	};
+
+	/**
+	 * Thread count the runtime recommends for CPU inference on this machine.
+	 * Throughput scales with threads up to a point and then drops off, so
+	 * running more is slower, not just less polite.
+	 *
+	 * @return {Number}
+	 */
+	this.getOptimalConcurrency = function () {
+		return Cc["@mozilla.org/ml-utils;1"]
+			.getService(Ci.nsIMLUtils)
+			.getOptimalCPUConcurrency();
+	};
+
+	/**
+	 * Models the runtime has cached.
+	 *
+	 * The runtime stores each model under a name qualified by the host it came
+	 * from, so entries also carry the `modelId` that was passed to
+	 * createEngine(). Deletions address a model by its stored `name`.
+	 *
+	 * @param {Object} [options]
+	 * @param {String} [options.taskName] - Limit to models cached for a task
+	 * @return {Promise<Object[]>} - [{ taskName, name, modelId, revision }]
+	 */
+	this.listModels = async function ({ taskName } = {}) {
+		let host = new URL(MODEL_HUB_ROOT_URL).host + '/';
+		let models = await _getModelHub().listModels();
+		if (taskName) {
+			models = models.filter(model => model.taskName === taskName);
+		}
+		return models.map(model => ({
+			...model,
+			modelId: model.name.startsWith(host) ? model.name.slice(host.length) : model.name
+		}));
+	};
+
+	/**
+	 * Delete cached model files, freeing the disk space they use.
+	 *
+	 * @param {Object} options
+	 * @param {String} [options.taskName] - Limit to models cached for a task
+	 * @param {String} [options.model] - Limit to one model, by the stored
+	 *     `name` from listModels()
+	 * @param {String} [options.revision] - Limit to one revision
+	 * @return {Promise}
+	 */
+	this.deleteModels = async function ({ taskName, model, revision } = {}) {
+		await _getModelHub().deleteModels({ taskName, model, revision, deletedBy: 'zotero' });
+	};
+
+	function _getModelHub() {
+		let { ModelHub } = ChromeUtils.importESModule(
+			"chrome://global/content/ml/ModelHub.sys.mjs"
+		);
+		return new ModelHub({
+			rootUrl: MODEL_HUB_ROOT_URL,
+			urlTemplate: MODEL_HUB_URL_TEMPLATE
+		});
+	}
 
 	/**
 	 * Shut down the inference process, releasing the memory held by any
