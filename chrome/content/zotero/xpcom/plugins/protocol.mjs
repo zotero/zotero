@@ -79,11 +79,14 @@ function register(pluginID, rootURI, pluginUUID, origins = [], contentSecurityPo
 		webAccessibleResources: [
 			{
 				resources: ["*"],
-				matches: [
-					"chrome://*/*",
-					"resource://*/*",
-					`moz-extension://${hostname}/*`,
-				],
+				matches: new MatchPatternSet(
+					[
+						"chrome://*/*",
+						"resource://*/*",
+						`moz-extension://${hostname}/*`,
+					],
+					{ restrictSchemes: false }
+				),
 			},
 		],
 	});
