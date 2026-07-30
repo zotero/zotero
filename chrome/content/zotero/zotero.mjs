@@ -112,6 +112,7 @@ const xpcomFilesLocal = [
 	'locale',
 	'locateManager',
 	'mime',
+	'ml',
 	'notifier',
 	'undoHistory',
 	'fileHandlers',
