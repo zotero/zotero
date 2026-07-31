@@ -292,8 +292,10 @@ class ItemTreeRowProvider {
 	}
 
 	toggleOpenState(index, skipRowMapRefresh = false) {
-		let preserveDetachedFocus = !this.itemTree.selection.isSelected(this.itemTree.selection.focused);
+		let selection = this.itemTree.selection;
+		let preserveDetachedFocus = !selection.isSelected(selection.focused);
 		this.itemTree._cacheState();
+		let selectedBefore = this.itemTree._cachedSelection;
 		this._toggleOpenState(index, skipRowMapRefresh);
 		// Preserve viewport when toggling a container instead of jumping to the current selection.
 		this.runListeners('update', true, {
@@ -301,6 +303,15 @@ class ItemTreeRowProvider {
 			expandCollapsedParents: false,
 			restoreScroll: true,
 		});
+		if (preserveDetachedFocus) {
+			// Collapsing a container with selected descendants moves their selection to the
+			// container row, and listeners have to be notified of the new selection
+			let selectedAfter = this.itemTree.getSelectedObjects();
+			if (selectedAfter.length != selectedBefore.length
+					|| selectedAfter.some(ref => !selectedBefore.includes(ref))) {
+				selection._updateTree();
+			}
+		}
 	}
 
 	/**

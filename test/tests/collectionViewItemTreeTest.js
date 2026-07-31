@@ -624,9 +624,42 @@ describe("CollectionViewItemTree", function () {
 			parentRow = itemsView.getRowIndexByID(parentItem.id);
 			itemsView.selection.focused = parentRow;
 			itemsView.selection.pivot = parentRow;
+			// The selection changes to the parent, so a select event has to fire
+			var selectPromise = itemsView.waitForSelect();
 			await itemsView.toggleOpenState(parentRow);
 			await itemsView.waitForLoad();
+			await selectPromise;
 			assert.sameMembers(itemsView.getSelectedItems(true), [parentItem.id]);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(parentItem.id));
+		})
+
+		it("should keep detached focus when collapsing a selected child alongside another selected item", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+
+			var parentItem = await createDataObject('item', { collections: [collection.id] });
+			var attachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			var item1 = await createDataObject('item', { collections: [collection.id] });
+			await waitForItemsLoad(win);
+
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			if (!itemsView.isContainerOpen(parentRow)) {
+				await itemsView.toggleOpenState(parentRow);
+				await itemsView.waitForLoad();
+			}
+			await itemsView.selectItem(item1.id);
+			itemsView.selection.toggleSelect(itemsView.getRowIndexByID(attachment.id));
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			itemsView.selection.focused = parentRow;
+			itemsView.selection.pivot = parentRow;
+
+			var selectPromise = itemsView.waitForSelect();
+			await itemsView.toggleOpenState(parentRow);
+			await itemsView.waitForLoad();
+			await selectPromise;
+			assert.sameMembers(itemsView.getSelectedItems(true), [item1.id, parentItem.id]);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(parentItem.id));
 		})
 
 		it("shouldn't scroll back to selected row when opening another container", async function () {
