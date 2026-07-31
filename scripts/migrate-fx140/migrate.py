@@ -799,11 +799,14 @@ def rename_jsms(command_context, vcs_utils, jsms, summary):
 
 
 def run_jscodeshift(script, env, stdin):
+    script_path = (npm_prefix / script).resolve()
+    if not str(script_path).startswith(str(npm_prefix.resolve())):
+        raise ValueError(f"Script path escapes npm_prefix: {script}")
     cmd = [
         "npx",
         "jscodeshift",
         "-t",
-        str(npm_prefix / script),
+        str(script_path),
         "--stdin",
         "--verbose=2",
         '--extensions=js,jsx,mjs,jsm'
