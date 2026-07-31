@@ -51,8 +51,8 @@ quick-search-textbox {
 		font-size: 11px;
 	}
 
-	:is(search-textbox)::part(search-sign),
-	:is(search-textbox)::part(search-icon) {
+	:is(search-textbox, query-textbox)::part(search-sign),
+	:is(search-textbox, query-textbox)::part(search-icon) {
 		@include svgicon-menu("magnifier", "universal", "16");
 		color: var(--fill-secondary);
 		// right: 4px gap + 2px padding + 8px dropmarker width + 4px padding
@@ -62,7 +62,7 @@ quick-search-textbox {
 		margin: 0;
 	}
 
-	:is(search-textbox)::part(search-input) {
+	:is(search-textbox, query-textbox)::part(search-input) {
 		padding: 0;
 	}
 }

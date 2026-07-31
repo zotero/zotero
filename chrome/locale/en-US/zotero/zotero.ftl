@@ -989,6 +989,24 @@ search-conditions-tooltip-fields = Fields:
 search-conditions-collection = Collection
 search-conditions-savedSearch = Saved Search
 search-conditions-itemTypeID = Item Type
+
+# Words that can be typed before a colon in the search box to search a
+# particular field, as in "by:smith" or "year:2020". Comma-separated; keep them
+# short and lowercase, and don't reuse a word that means something else here.
+search-query-keyword-creator = by
+search-query-keyword-publication = in, publication, journal
+search-query-keyword-item-type = type
+search-query-keyword-language = lang
+search-query-keyword-abstract = abstract
+search-query-keyword-fulltext = fulltext, text
+search-query-keyword-date = year
+# Typed as "before:2020", meaning items dated before 2020
+search-query-keyword-date-before = before
+# Typed as "after:2020" or "since:2020", meaning items dated after 2020
+search-query-keyword-date-after = after, since
+# Typed as "added:", meaning when the item was saved to the library
+search-query-keyword-date-added = added
+search-query-keyword-date-modified = modified
 search-conditions-tag = Tag
 search-conditions-numTags = # of Tags
 search-conditions-numNotes = # of Notes
