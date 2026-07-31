@@ -256,6 +256,7 @@ class ItemTreeRowProvider {
 			let level = this.getLevel(index);
 			// Remove child rows
 			while ((index + 1 < this._rows.length) && (this.getLevel(index + 1) > level)) {
+				this.itemTree.selection.adjustForRowRemoval(index + 1, true);
 				this._removeRow(index + 1, true);
 				count++;
 			}
@@ -281,6 +282,7 @@ class ItemTreeRowProvider {
 				count++;
 				this._addRow(childRows[i], index + i + 1, true);
 			}
+			this.itemTree.selection.adjustForRowInsertion(index, count);
 
 			this._rows[index].isOpen = true;
 		}
@@ -290,14 +292,26 @@ class ItemTreeRowProvider {
 	}
 
 	toggleOpenState(index, skipRowMapRefresh = false) {
+		let selection = this.itemTree.selection;
+		let preserveDetachedFocus = !selection.isSelected(selection.focused);
 		this.itemTree._cacheState();
+		let selectedBefore = this.itemTree._cachedSelection;
 		this._toggleOpenState(index, skipRowMapRefresh);
 		// Preserve viewport when toggling a container instead of jumping to the current selection.
 		this.runListeners('update', true, {
-			restoreSelection: true,
+			restoreSelection: !preserveDetachedFocus,
 			expandCollapsedParents: false,
 			restoreScroll: true,
 		});
+		if (preserveDetachedFocus) {
+			// Collapsing a container with selected descendants moves their selection to the
+			// container row, and listeners have to be notified of the new selection
+			let selectedAfter = this.itemTree.getSelectedObjects();
+			if (selectedAfter.length != selectedBefore.length
+					|| selectedAfter.some(ref => !selectedBefore.includes(ref))) {
+				selection._updateTree();
+			}
+		}
 	}
 
 	/**
@@ -1362,9 +1376,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return false;
 		}
 		
-		// Handle arrow keys specially on multiple selection, since
-		// otherwise the tree just applies it to the last-selected row
-		if (this.selection.count > 1 && ["ArrowLeft", "ArrowRight"].includes(event.key)) {
+		// If selection count is greater than 1 and the focused row wasn't
+		// moved out of the selection - toggle open/closed all rows in that selection
+		// Otherwise if the focused row has moved out of the selection, toggle state
+		// of the focused row (handled in virtualized-table and this conditional should match that)
+		if (this.selection.count > 1
+				&& this.selection.isSelected(this.selection.focused)
+				&& [Zotero.arrowPreviousKey, Zotero.arrowNextKey].includes(event.key)) {
 			if (event.key == Zotero.arrowNextKey) {
 				this.expandSelectedRows();
 			}

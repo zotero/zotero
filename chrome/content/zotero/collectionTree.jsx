@@ -1266,9 +1266,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (treeRow.isLibrary(true) || treeRow.isCollection() || treeRow.isFeeds()) {
 			count = await this._expandRow(this._rows, index, true);
 		}
-		if (this.selection.focused > index) {
-			this.selection.select(this.selection.focused + count);
-		}
+		this.selection.adjustForRowInsertion(index, count);
 		this.selection.selectEventsSuppressed = false;
 		
 		this._rows[index].isOpen = true;
@@ -2726,9 +2724,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var level = this.getLevel(row);
 		var nextRow = row + 1;
 		
-		// Remove child rows
+		// Remove child rows, remapping any selected ones to the collapsed container
 		while ((nextRow < this._rows.length) && (this.getLevel(nextRow) > level)) {
-			this._removeRow(nextRow, true);
+			this.selection.adjustForRowRemoval(nextRow, true);
+			this._removeRow(nextRow, true, true);
 		}
 		this.selection.selectEventsSuppressed = false;
 		
