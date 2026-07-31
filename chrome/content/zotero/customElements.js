@@ -51,6 +51,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['note-box', 'chrome://zotero/content/elements/noteBox.js'],
 		['note-editor', 'chrome://zotero/content/elements/noteEditor.js'],
 		['notes-box', 'chrome://zotero/content/elements/notesBox.js'],
+		['query-textbox', 'chrome://zotero/content/elements/queryTextbox.js'],
 		['quick-search-textbox', 'chrome://zotero/content/elements/quickSearchTextbox.js'],
 		['related-box', 'chrome://zotero/content/elements/relatedBox.js'],
 		['search-textbox', 'chrome://zotero/content/elements/searchTextbox.js'],

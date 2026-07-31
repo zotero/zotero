@@ -93,7 +93,7 @@
 
 			dropmarkerShadow.append(s1, s2, dropmarker);
 
-			let searchBox = document.createXULElement("search-textbox");
+			let searchBox = document.createXULElement("query-textbox");
 			searchBox.id = "zotero-tb-search-textbox";
 			// Enable applying styles to the input field
 			searchBox.inputField.setAttribute("part", "search-input");

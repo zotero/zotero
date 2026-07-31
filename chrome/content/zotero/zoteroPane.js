@@ -2040,9 +2040,12 @@ var ZoteroPane = new function () {
 	 * @param {String} [mode='fields'] - The quick search mode to reproduce
 	 */
 	this.openAdvancedSearchFromQuickSearch = async function (searchText, mode = 'fields') {
-		// Split into words (keeping quoted phrases intact), as the quick search does
-		let parts = Zotero.SearchConditions.parseSearchString(searchText);
-		if (!parts.length) {
+		// Conditions written in the query ("tag:foo") become conditions in the
+		// search; what's left is split into words (keeping quoted phrases
+		// intact), as the quick search does
+		let { tree, text } = Zotero.SearchQuery.parse(searchText);
+		let parts = Zotero.SearchConditions.parseSearchString(text);
+		if (!parts.length && !tree) {
 			await this.toggleAdvancedSearchState('open');
 			return;
 		}
@@ -2058,6 +2061,13 @@ var ZoteroPane = new function () {
 		// with "all": Title/Creator/Year and All Fields & Tags each map to a single
 		// condition, Everything to an "any" group of Any Field plus full-text.
 		// Title/Creator/Year matches only top-level items, so set the result level to item.
+		if (tree) {
+			// The words are joined to the conditions with "all", so an "any"
+			// query becomes a group rather than something they're OR'd into
+			Zotero.SearchQuery.addToSearch(search, parts.length && tree.joinMode === 'any'
+				? { joinMode: 'all', children: [tree] }
+				: tree);
+		}
 		if (mode === 'titleCreatorYear') {
 			search.addCondition('resultLevel', 'item');
 		}
@@ -3194,15 +3204,38 @@ var ZoteroPane = new function () {
 		}
 		var search = document.getElementById('zotero-tb-search');
 		var searchVal = search.searchTextbox.value;
-		// An unclosed quotation mark means a phrase is still being typed, so
-		// wait for the closing quote, or an explicit Enter, to search
-		if (!runAdvanced && (searchVal.match(/"/g) || []).length % 2) {
+		if (!runAdvanced && Zotero.SearchQuery.hasOpenQuote(searchVal)) {
 			return;
 		}
 		var spinner = document.getElementById('zotero-tb-search-spinner');
 		spinner.setAttribute("status", "animate");
 		spinner.style.visibility = 'visible';
-		await this.itemsView.setFilter('search', searchVal);
+		// A query with conditions in it ("by:smith crispr") filters by those
+		// and matches whatever text is left over the way the current mode
+		// does; anything else is text to search for, as typed
+		// Each selected row scopes the query to its own library, so the query
+		// carries none of its own -- with one, a multi-library selection would
+		// match only in that library
+		let query = Zotero.SearchQuery.getSearch(searchVal, {
+			mode: Zotero.Prefs.get('search.quicksearch-mode')
+		});
+		if (query) {
+			this._quickSearchIsQuery = true;
+			await this.itemsView.setFilter('search', '');
+			await this.itemsView.setFilter('advanced-search', query);
+		}
+		else {
+			// Only clear a search this set, so an open Advanced Search keeps
+			// its own
+			if (this._quickSearchIsQuery) {
+				this._quickSearchIsQuery = false;
+				await this.itemsView.setFilter('advanced-search', null);
+			}
+			// A condition whose value hasn't been typed yet is left out of the
+			// text, so completing a condition name doesn't search for it
+			await this.itemsView.setFilter('search',
+				Zotero.SearchQuery.parse(searchVal).text);
+		}
 		spinner.style.removeProperty("visibility");
 		spinner.removeAttribute("status");
 	};

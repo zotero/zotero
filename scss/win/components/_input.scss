@@ -59,6 +59,7 @@
 	),
 	textbox,
 	search-textbox,
+	query-textbox,
 	textarea
 ):where(:not([no-native])) {
 	appearance: none;
