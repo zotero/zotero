@@ -304,6 +304,9 @@ Zotero.Embeddings = new function () {
 	 * @return {Promise<Boolean>} - Whether the database was vacuumed
 	 */
 	this.vacuumDB = async function ({ force = false } = {}) {
+		if (Zotero.DB.inTransaction()) {
+			await Zotero.DB.waitForTransaction();
+		}
 		if (!force) {
 			let freelistCount = await Zotero.DB.valueQueryAsync("PRAGMA embeddings.freelist_count");
 			let pageCount = await Zotero.DB.valueQueryAsync("PRAGMA embeddings.page_count");
