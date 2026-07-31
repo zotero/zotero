@@ -486,18 +486,35 @@ describe("Zotero.CollectionTree", function () {
 				
 				it(`should maintain selection on trash when ${objectType} is restored`, async function () {
 					var o = await createDataObject(objectType, { deleted: true });
-					
+
 					await cv.selectByID("T1");
-					
+
 					o.deleted = false;
 					await o.saveTx();
-					
+
 					assert.isTrue(zp.getCollectionTreeRows()[0].isTrash());
-					
+
 					// Row should have been added back
 					assert.isAbove(cv.getRowIndexByID(o.treeViewID), 0);
 				});
 			}
+
+			it("should drop a collection from a multi-selection when it's moved to trash", async function () {
+				var ran = Zotero.Utilities.randomString();
+				var o1 = await createDataObject('collection', { name: ran + "AAA" });
+				var o2 = await createDataObject('collection', { name: ran + "BBB" });
+				var o3 = await createDataObject('collection', { name: ran + "CCC" });
+
+				await cv.selectByID(o1.treeViewID);
+				cv.selection.toggleSelect(cv.getRowIndexByID(o3.treeViewID));
+				cv.selection.focused = cv.getRowIndexByID(o1.treeViewID);
+				cv.selection.pivot = cv.selection.focused;
+
+				o3.deleted = true;
+				await o3.saveTx();
+
+				assert.sameMembers(cv.getSelectedRows().map(row => row.id), [o1.treeViewID]);
+			});
 		});
 		
 		for (let objectType of ['collection', 'search']) {

@@ -256,7 +256,7 @@ class ItemTreeRowProvider {
 			let level = this.getLevel(index);
 			// Remove child rows
 			while ((index + 1 < this._rows.length) && (this.getLevel(index + 1) > level)) {
-				this.itemTree.selection.adjustForRowRemoval(index + 1);
+				this.itemTree.selection.adjustForRowRemoval(index + 1, true);
 				this._removeRow(index + 1, true);
 				count++;
 			}

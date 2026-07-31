@@ -259,22 +259,32 @@ class TreeSelection {
 	}
 
 	/**
-	 * Adjusts selection indexes after a row is removed. If a selected, focused, or
-	 * pivot row is removed, it moves to the previous row, which is generally the
-	 * collapsed parent when removing descendants from top to bottom.
+	 * Adjusts selection indexes after a row is removed. A removed selected row is
+	 * dropped from the selection, or remapped to the previous row when remapToPrevious
+	 * is true (e.g., when collapsing a container remaps removed descendants to the
+	 * container row, which precedes them). If the removal leaves nothing selected, the
+	 * previous row is selected. If the focused or pivot row is removed, it moves to
+	 * the previous row.
 	 *
 	 * @param {Number} index Removed row index
+	 * @param {Boolean} [remapToPrevious=false] Select the previous row in place of a
+	 * 		removed selected row instead of dropping it from the selection
 	 */
-	adjustForRowRemoval(index) {
+	adjustForRowRemoval(index, remapToPrevious = false) {
 		let previousIndex = Math.max(index - 1, 0);
 		let selected = new Set();
 		for (let selectedIndex of this.selected) {
 			if (selectedIndex == index) {
-				selected.add(previousIndex);
+				if (remapToPrevious) {
+					selected.add(previousIndex);
+				}
 			}
 			else {
 				selected.add(selectedIndex > index ? selectedIndex - 1 : selectedIndex);
 			}
+		}
+		if (this.selected.size && !selected.size) {
+			selected.add(previousIndex);
 		}
 		this.selected = selected;
 		this.focused = this.focused == index

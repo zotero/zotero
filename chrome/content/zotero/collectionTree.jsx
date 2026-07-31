@@ -2724,9 +2724,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var level = this.getLevel(row);
 		var nextRow = row + 1;
 		
-		// Remove child rows
+		// Remove child rows, remapping any selected ones to the collapsed container
 		while ((nextRow < this._rows.length) && (this.getLevel(nextRow) > level)) {
-			this._removeRow(nextRow, true);
+			this.selection.adjustForRowRemoval(nextRow, true);
+			this._removeRow(nextRow, true, true);
 		}
 		this.selection.selectEventsSuppressed = false;
 		
