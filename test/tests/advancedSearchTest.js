@@ -68,6 +68,36 @@ describe("Advanced Search", function () {
 		assert.isFalse(row.setAdvancedSearch(null));
 	});
 	
+	it("should seed conditions written in the quick search query", async function () {
+		var match = await createDataObject('item', { title: "alpha beta" });
+		match.addTag('zztag');
+		await match.saveTx();
+		var wrongTag = await createDataObject('item', { title: "alpha beta" });
+		await wrongTag.saveTx();
+
+		await zp.openAdvancedSearchFromQuickSearch('tag:zztag alpha', 'fields');
+		var iv = zp.itemsView;
+		await iv.waitForLoad();
+
+		var conditions = Object.values(deck.pane.search.getConditions());
+		var tag = conditions.find(c => c.condition === 'tag');
+		assert.isDefined(tag);
+		assert.equal(tag.value, 'zztag');
+		assert.equal(tag.operator, 'is');
+		// The rest of the query is still words to match
+		assert.sameMembers(
+			conditions.filter(c => c.condition === 'anyField').map(c => c.value),
+			['alpha']
+		);
+
+		assert.equal(iv.rowCount, 1);
+		assert.isNumber(iv.getRowIndexByID(match.id));
+
+		await zp.setAdvancedSearchState('closed');
+		await iv.waitForLoad();
+		await Zotero.Items.erase([match.id, wrongTag.id]);
+	});
+
 	it("should seed from the quick search text and reset on close", async function () {
 		var match = await createDataObject('item', { title: "alpha beta" });
 		var partial = await createDataObject('item', { title: "alpha gamma" });

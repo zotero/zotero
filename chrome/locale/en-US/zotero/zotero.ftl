@@ -993,6 +993,35 @@ search-conditions-tooltip-fields = Fields:
 search-conditions-collection = Collection
 search-conditions-savedSearch = Saved Search
 search-conditions-itemTypeID = Item Type
+
+# Words that can be typed before a colon in the search box to search a
+# particular field, as in "by:smith" or "year:2020". Comma-separated; keep them
+# short and lowercase, and don't reuse a word that means something else here.
+search-query-keyword-creator = by
+search-query-keyword-publication = in, publication, journal
+search-query-keyword-item-type = type
+search-query-keyword-language = lang
+search-query-keyword-abstract = abstract
+search-query-keyword-fulltext = fulltext, text
+search-query-keyword-date = year
+# Typed as "before:2020", meaning items dated before 2020
+search-query-keyword-date-before = before
+# Typed as "after:2020" or "since:2020", meaning items dated after 2020
+search-query-keyword-date-after = after, since
+# Typed as "added:", meaning when the item was saved to the library
+search-query-keyword-date-added = added
+search-query-keyword-date-modified = modified
+# Whole phrases that can be typed to find items that have none or some of
+# something. Each is a comma-separated list, and the phrases are matched
+# exactly as written, so include every form someone would type.
+search-query-keyword-no-annotations = no annotations
+search-query-keyword-has-annotations = has annotations
+search-query-keyword-no-notes = no notes
+search-query-keyword-has-notes = has notes
+search-query-keyword-no-tags = no tags
+search-query-keyword-has-tags = has tags
+search-query-keyword-no-attachments = no attachments
+search-query-keyword-has-attachments = has attachments
 search-conditions-tag = Tag
 search-conditions-numTags = # of Tags
 search-conditions-numNotes = # of Notes

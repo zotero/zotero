@@ -54,7 +54,87 @@ input::-moz-search-clear-button {
 	}
 }
 
-search-textbox {
+// The list of completions for what's being typed in a query (see
+// queryTextbox.js)
+.query-completions {
+	--panel-padding: 4px 0;
+
+	richlistbox {
+		appearance: none;
+		background: transparent;
+		border: none;
+		margin: 0;
+		padding: 0;
+		min-width: 16em;
+		// Long lists scroll rather than being cut off
+		max-height: 20em;
+	}
+
+	richlistitem {
+		// A row is the name and, at the far end, what it searches, each as wide
+		// as its text, so the popup is as wide as its widest row
+		display: grid;
+		grid-template-columns: auto auto;
+		justify-content: space-between;
+		gap: 24px;
+		padding: 3px 8px;
+
+		> * {
+			overflow: visible;
+			text-overflow: clip;
+			white-space: nowrap;
+			width: auto;
+		}
+
+		&:hover {
+			background-color: var(--fill-quinary);
+		}
+
+		// Focus stays in the search field while the list is open, so the
+		// selected row is the active one
+		&[selected] {
+			background-color: var(--color-accent);
+			color: var(--color-accent-text);
+
+			.completion-description {
+				color: inherit;
+				opacity: 0.8;
+			}
+
+			// A ring in the text color, so the swatch reads on the accent
+			// background whatever colors the two are
+			.completion-swatch {
+				box-shadow: 0 0 0 1px var(--color-accent-text);
+			}
+		}
+	}
+
+	.completion-label {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+
+		// Colored values read as they do in the tag selector
+		&.colored {
+			font-weight: 600;
+		}
+	}
+
+	.completion-swatch {
+		flex: 0 0 auto;
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+	}
+
+	.completion-description {
+		color: var(--fill-secondary);
+	}
+}
+
+search-textbox,
+query-textbox {
 	appearance: none;
 	background: var(--material-background);
 	border-radius: 5px;
@@ -77,8 +157,8 @@ search-textbox {
 	}
 }
 
-:is(search-textbox)::part(search-sign),
-:is(search-textbox)::part(search-icon) {
+:is(search-textbox, query-textbox)::part(search-sign),
+:is(search-textbox, query-textbox)::part(search-icon) {
 	@include svgicon-menu("magnifier", "universal", "16");
 	color: var(--fill-secondary);
 	// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
@@ -89,7 +169,7 @@ search-textbox {
 	display: block; // override fx115 display:none on macOS
 }
 
-:is(search-textbox):-moz-locale-dir(rtl)::part(search-sign),
-:is(search-textbox):-moz-locale-dir(rtl)::part(search-icon) {
+:is(search-textbox, query-textbox):-moz-locale-dir(rtl)::part(search-sign),
+:is(search-textbox, query-textbox):-moz-locale-dir(rtl)::part(search-icon) {
 	transform: scaleX(-1);
 }
