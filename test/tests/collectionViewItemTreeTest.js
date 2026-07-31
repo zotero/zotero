@@ -662,6 +662,40 @@ describe("CollectionViewItemTree", function () {
 			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(parentItem.id));
 		})
 
+		it("should adjust focus with an empty selection when toggling a container above it", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+
+			var ran = Zotero.Utilities.randomString();
+			var parentItem = await createDataObject('item', { title: ran + " AAA", collections: [collection.id] });
+			var attachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			var item1 = await createDataObject('item', { title: ran + " ZZZ", collections: [collection.id] });
+			await waitForItemsLoad(win);
+
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			if (!itemsView.isContainerOpen(parentRow)) {
+				await itemsView.toggleOpenState(parentRow);
+				await itemsView.waitForLoad();
+			}
+			var item1Row = itemsView.getRowIndexByID(item1.id);
+			assert.isAbove(item1Row, itemsView.getRowIndexByID(attachment.id));
+			// Empty the selection, leaving focus on the item
+			await itemsView.selectItem(item1.id);
+			itemsView.selection.toggleSelect(item1Row);
+			assert.equal(itemsView.selection.count, 0);
+
+			await itemsView.toggleOpenState(itemsView.getRowIndexByID(parentItem.id));
+			await itemsView.waitForLoad();
+			assert.equal(itemsView.selection.count, 0);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(item1.id));
+
+			await itemsView.toggleOpenState(itemsView.getRowIndexByID(parentItem.id));
+			await itemsView.waitForLoad();
+			assert.equal(itemsView.selection.count, 0);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(item1.id));
+		})
+
 		it("shouldn't scroll back to selected row when opening another container", async function () {
 			var collection = await createDataObject('collection');
 			await select(win, collection);

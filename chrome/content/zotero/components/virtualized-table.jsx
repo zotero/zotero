@@ -266,7 +266,6 @@ class TreeSelection {
 	 * @param {Number} index Removed row index
 	 */
 	adjustForRowRemoval(index) {
-		if (!this.count) return;
 		let previousIndex = Math.max(index - 1, 0);
 		let selected = new Set();
 		for (let selectedIndex of this.selected) {
@@ -293,7 +292,6 @@ class TreeSelection {
 	 * @param {Number} count Number of inserted rows
 	 */
 	adjustForRowInsertion(index, count) {
-		if (!this.count) return;
 		let selected = new Set();
 		for (let selectedIndex of this.selected) {
 			selected.add(selectedIndex > index ? selectedIndex + count : selectedIndex);
