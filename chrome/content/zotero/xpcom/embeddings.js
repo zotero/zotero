@@ -1099,22 +1099,41 @@ Zotero.Embeddings.Indexing = new function () {
 	} = {}) {
 		await Zotero.Items.loadDataTypes(items, ['itemData']);
 
+		// Every start re-enqueues the whole library to find what changed, so
+		// read the stored hashes in one query per chunk rather than one per
+		// item
+		let storedHashes = new Map();
+		let itemIDs = items.map(item => item.id);
+		let chunkSize = 500;
+		for (let i = 0; i < itemIDs.length; i += chunkSize) {
+			let chunk = itemIDs.slice(i, i + chunkSize);
+			let rows = await Zotero.DB.queryAsync(
+				"SELECT itemID, sourceHash FROM embeddings.itemEmbeddings WHERE itemID IN ("
+					+ chunk.map(() => '?').join(',') + ")",
+				chunk
+			);
+			for (let row of rows) {
+				storedHashes.set(row.itemID, row.sourceHash);
+			}
+		}
+
 		let toEmbed = [];
+		let toDelete = [];
 		for (let item of items) {
 			let text = _getItemText(item);
 			if (!text) {
-				await Zotero.DB.queryAsync(
-					"DELETE FROM embeddings.itemEmbeddings WHERE itemID=?", item.id
-				);
+				if (storedHashes.has(item.id)) {
+					toDelete.push(item.id);
+				}
 				continue;
 			}
 			let hash = Zotero.Utilities.Internal.md5(text);
-			let existing = await Zotero.DB.valueQueryAsync(
-				"SELECT sourceHash FROM embeddings.itemEmbeddings WHERE itemID=?", item.id
-			);
-			if (existing !== hash) {
+			if (storedHashes.get(item.id) !== hash) {
 				toEmbed.push({ item, text, hash });
 			}
+		}
+		if (toDelete.length) {
+			await _deleteEmbeddings(toDelete);
 		}
 
 		// Process one library at a time

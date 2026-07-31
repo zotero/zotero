@@ -196,9 +196,45 @@ describe("Zotero.Embeddings", function () {
 				stub.restore();
 			}
 		});
+
+		it("should look up stored hashes without a query per item", async function () {
+			this.timeout(60000);
+			for (let i = 0; i < 5; i++) {
+				await createDataObject('item', { title: "Batched lookup " + i });
+			}
+
+			let vector = new Float32Array(4).fill(0.5);
+			let embedStub = sinon.stub(Zotero.Embeddings, 'embedPassages')
+				.callsFake(async texts => texts.map(() => vector));
+			let stubs = [
+				embedStub,
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves()
+			];
+			let queries = [];
+			let queryStub = sinon.stub(Zotero.DB, 'queryAsync')
+				.callsFake(function (sql, ...rest) {
+					queries.push(sql);
+					return queryStub.wrappedMethod.call(this, sql, ...rest);
+				});
+			try {
+				await Zotero.Embeddings.Indexing.startIndexing();
+			}
+			finally {
+				queryStub.restore();
+				stubs.forEach(stub => stub.restore());
+			}
+
+			// The run has to have indexed something for this to mean anything
+			assert.isTrue(embedStub.called);
+			assert.isEmpty(queries.filter(sql => sql.includes('sourceHash')
+				&& sql.includes('itemID=?')));
+			assert.isNotEmpty(queries.filter(sql => sql.includes('itemID, sourceHash')));
+		});
 	});
-	// Downloads the active model (~130 MB), so run explicitly:
-	// ZOTERO_TEST_EMBEDDINGS_INFERENCE=1 test/runtests.sh -g "real vectors" embeddings
+
 	describe("#embed() with a real model", function () {
 		before(function () {
 			if (!Services.env.get("ZOTERO_TEST_EMBEDDINGS_INFERENCE")) {
@@ -244,6 +280,7 @@ describe("Zotero.Embeddings", function () {
 			assert.isTrue(await Zotero.Embeddings.isDownloaded());
 		});
 	});
+
 	describe("memory pressure", function () {
 		afterEach(function () {
 			Services.obs.notifyObservers(null, 'memory-pressure-stop');
